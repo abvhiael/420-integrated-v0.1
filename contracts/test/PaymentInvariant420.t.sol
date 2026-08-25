@@ -5,10 +5,7 @@ import "../src/pay/RefundManager420.sol";
 import "../src/pay/SettlementRouter420.sol";
 import "../src/pay/PaymentRouter420.sol";
 import "./helpers/GenesisMocks420.sol";
-
-interface Vm420Invariant {
-    function targetContract(address target) external;
-}
+import "./helpers/InvariantTarget420.sol";
 
 contract PayInvariantHandler420 {
     RefundManager420 public refunds;
@@ -52,9 +49,7 @@ contract PayInvariantHandler420 {
     }
 }
 
-contract PaymentInvariant420Test {
-    Vm420Invariant internal constant vm = Vm420Invariant(address(uint160(uint256(keccak256("hevm cheat code")))));
-
+contract PaymentInvariant420Test is InvariantTarget420 {
     GenesisMockEnvironment420 internal env;
     RefundManager420 internal refunds;
     SettlementRouter420 internal splits;
@@ -79,7 +74,7 @@ contract PaymentInvariant420Test {
         );
         env.registerResident(address(handlerRefunds), handlerRefunds.componentId());
         handler.configure(handlerRefunds, splits, settlementAsset);
-        vm.targetContract(address(handler));
+        targetContract(address(handler));
     }
 
     function invariant_ProtocolFeeRemainsZero() public view {

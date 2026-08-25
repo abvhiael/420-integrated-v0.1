@@ -151,7 +151,12 @@ func main() {
 	fmt.Printf("ENGINE_PAYLOAD block=%s hash=%s txs=%d\n",
 		payload.ExecutionPayload.BlockNumber, payload.ExecutionPayload.BlockHash, len(payload.ExecutionPayload.Transactions))
 
-	status, err := client.NewPayloadV3(ctx, payload.ExecutionPayload, nil, parentBeacon)
+	status, err := client.NewPayloadV3(
+	ctx,
+	payload.ExecutionPayload,
+	[]string{},
+	parentBeacon,
+)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "newPayloadV3:", err)
 		os.Exit(7)

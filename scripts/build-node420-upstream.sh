@@ -7,9 +7,15 @@ DEST="${1:-.cache/go-ethereum}"
 if [ ! -d "$DEST/.git" ]; then
     mkdir -p "$(dirname "$DEST")"
     git clone https://github.com/ethereum/go-ethereum.git "$DEST"
-else
-    echo "Refreshing existing go-ethereum checkout..."
-    git -C "$DEST" fetch --all --tags --force
+fi
+
+git -C "$DEST" fetch origin \
+    '+refs/heads/*:refs/remotes/origin/*' \
+    '+refs/tags/*:refs/tags/*' \
+    --force
+
+if git -C "$DEST" rev-parse --is-shallow-repository | grep -q true; then
+    git -C "$DEST" fetch --unshallow --tags --force
 fi
 
 git -C "$DEST" checkout --detach "$TAG"

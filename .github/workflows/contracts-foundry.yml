@@ -40,4 +40,4 @@ jobs:
 
       - name: Coverage
         working-directory: contracts
-        run: forge coverage --ir-minimum --report summary
+        run: FOUNDRY_PROFILE=coverage forge coverage --ir-minimum --report summary

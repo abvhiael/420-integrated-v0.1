@@ -54,7 +54,12 @@ func TestPayloadFlow(t *testing.T) {
 		t.Fatalf("block number=%s", payload.ExecutionPayload.BlockNumber)
 	}
 
-	status, err := c.NewPayloadV3(ctx, payload.ExecutionPayload, nil, attrs.ParentBeaconBlockRoot)
+	status, err := c.NewPayloadV3(
+	ctx,
+	payload.ExecutionPayload,
+	[]string{},
+	attrs.ParentBeaconBlockRoot,
+)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -23,7 +23,7 @@ jobs:
 
       - name: Production dependencies
         run: |
-          ./scripts/install-production-deps.sh
+          bash ./scripts/install-production-deps.sh
           python3 scripts/write-evidence.py --gate production_blst --status PASS \
             --command "./scripts/install-production-deps.sh" \
             --summary "production BLS adapter compiled and tests passed"
@@ -33,19 +33,19 @@ jobs:
 
       - name: Build pinned Geth and 420 binaries
         run: |
-          ./scripts/build-node420-upstream.sh
+          bash ./scripts/build-node420-upstream.sh
           make build
 
       - name: Live Engine payload qualification
         run: |
-          ./scripts/live-engine-smoke.sh
+          bash ./scripts/live-engine-smoke.sh
           python3 scripts/write-evidence.py --gate live_engine_payload --status PASS \
             --command "./scripts/live-engine-smoke.sh" \
             --summary "Engine V3 payload path passed"
 
       - name: Prepare and run 15 real execution pairs
         run: |
-          ./scripts/prepare-real-devnet15.sh
+          bash ./scripts/prepare-real-devnet15.sh
           python3 scripts/run-real-devnet15.py --seconds 90 --consensus-transport devnet-tcp
           python3 scripts/write-evidence.py --gate real_devnet15 --status PASS \
             --command "python3 scripts/run-real-devnet15.py --seconds 90 --consensus-transport devnet-tcp" \

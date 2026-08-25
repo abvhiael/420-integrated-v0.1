@@ -154,7 +154,7 @@ func main() {
 	status, err := client.NewPayloadV3(
 	ctx,
 	payload.ExecutionPayload,
-	[]string{},
+	[]eng.Hash32{},
 	parentBeacon,
 )
 	if err != nil {

@@ -19,7 +19,7 @@ contract CanonicalPool420 {
 
     function applyReserves(uint112 r0,uint112 r1) external {
         // Step 6.1 source scaffold only: authority must be replaced by canonical pool accounting.
-        require(msg.sender==address(0x000000000000000000000000000000000000042b),"factory only");
+        require(msg.sender==address(0x000000000000000000000000000000000000042B),"factory only");
         reserve0=r0;reserve1=r1;
         emit Sync(r0,r1);
     }

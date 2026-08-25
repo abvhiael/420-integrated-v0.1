@@ -40,10 +40,10 @@ jobs:
           go-version-file: "go.mod"
 
       - name: Bootstrap
-        run: ./scripts/contracts-bootstrap.sh
+        run: bash ./scripts/contracts-bootstrap.sh
 
       - name: Full contract verification
-        run: ./scripts/contracts-ci.sh
+        run: bash ./scripts/contracts-ci.sh
 
       - name: Upload verification artifacts
         if: always()

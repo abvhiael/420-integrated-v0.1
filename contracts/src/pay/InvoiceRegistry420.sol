@@ -60,26 +60,36 @@ contract InvoiceRegistry420 is GenesisResidentAccess420 {
         return PayIds420.INVOICE_REGISTRY;
     }
 
-    function invoiceSigningRoot(bytes32 invoiceId, Invoice memory i) public pure returns (bytes32) {
-        return keccak256(
-            abi.encode(
-                INVOICE_DOMAIN,
-                PROTOCOL_VERSION,
-                invoiceId,
-                i.merchantId,
-                i.merchant,
-                i.amount,
-                i.currency,
-                i.acceptedAssetsHash,
-                i.settlementPlanHash,
-                i.expiresAt,
-                i.refundUntil,
-                i.tipPolicyHash,
-                i.quoteMaxSlippageBps,
-                i.mode,
-                i.acceptance
-            )
+    function _invoiceSigningPrefix(bytes32 invoiceId, Invoice memory i) internal pure returns (bytes memory) {
+        return abi.encode(
+            INVOICE_DOMAIN,
+            PROTOCOL_VERSION,
+            invoiceId,
+            i.merchantId,
+            i.merchant,
+            i.amount,
+            i.currency
         );
+    }
+
+    function _invoiceSigningSuffix(Invoice memory i) internal pure returns (bytes memory) {
+        return abi.encode(
+            i.acceptedAssetsHash,
+            i.settlementPlanHash,
+            i.expiresAt,
+            i.refundUntil,
+            i.tipPolicyHash,
+            i.quoteMaxSlippageBps,
+            i.mode,
+            i.acceptance
+        );
+    }
+
+    function invoiceSigningRoot(bytes32 invoiceId, Invoice memory i) public pure returns (bytes32) {
+        // Every encoded value is a static ABI type, so concatenating these two
+        // ABI-encoded chunks preserves the exact byte sequence of one 15-value
+        // abi.encode call while avoiding legacy-codegen stack exhaustion.
+        return keccak256(bytes.concat(_invoiceSigningPrefix(invoiceId, i), _invoiceSigningSuffix(i)));
     }
 
     function createInvoice(bytes32 invoiceId, Invoice calldata i) external {

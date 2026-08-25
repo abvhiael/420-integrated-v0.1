@@ -22,6 +22,4 @@ type Verifier interface {
 // non-cryptographic consensus signatures.
 type ProductionVerifier struct{}
 
-func (ProductionVerifier) VerifyAggregate(pubkeys []ctypes.BLSPubkey, message []byte, signature ctypes.BLSSignature) bool {
-	return false
 }

@@ -36,9 +36,12 @@ jobs:
         with:
           go-version: '1.23.x'
       - run: make build
-      - run: bash ./scripts/build-node420-upstream.sh
+      - name: Build pinned Geth
+        run: |
+          rm -rf .cache/go-ethereum
+          bash ./scripts/build-node420-upstream.sh
       - run: go build -o bin/engine-live-smoke ./integration/cmd/engine-live-smoke
-      - run: ./scripts/live-engine-smoke.sh
+      - run: bash ./scripts/live-engine-smoke.sh
 
   fault-matrix:
     runs-on: ubuntu-latest

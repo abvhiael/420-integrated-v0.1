@@ -7,7 +7,7 @@ JWT="${NODE420_JWT:-$ROOT/devnet-data/live-engine/jwt.hex}"
 GENESIS="$ROOT/execution/genesis/execution-genesis.json"
 mkdir -p "$(dirname "$JWT")" "$DATADIR"
 "$ROOT/bin/node420" --geth "$GETH" --verify-geth
-[ -f "$JWT" ] || "$ROOT/scripts/generate-jwt.sh" "$JWT"
+[ -f "$JWT" ] || bash "$ROOT/scripts/generate-jwt.sh" "$JWT"
 "$ROOT/bin/node420" --geth "$GETH" --datadir "$DATADIR" --init-genesis "$GENESIS"
 "$ROOT/bin/node420" --geth "$GETH" --datadir "$DATADIR" --jwt-secret "$JWT" \
   --authrpc.addr 127.0.0.1 --authrpc.port 8551 \

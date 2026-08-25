@@ -40,4 +40,4 @@ jobs:
 
       - name: Coverage
         working-directory: contracts
-        run: forge coverage --report summary
+        run: forge coverage --ir-minimum --report summary

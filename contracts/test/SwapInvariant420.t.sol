@@ -2,8 +2,7 @@
 pragma solidity ^0.8.24;
 
 import "./SwapGenesisIntegration420.t.sol";
-
-interface VmSwap420 { function targetContract(address) external; }
+import "./helpers/InvariantTarget420.sol";
 
 contract SwapInvariantHandler420 {
     CanonicalSwapExecutor420 public immutable executor;
@@ -40,8 +39,7 @@ contract SwapInvariantHandler420 {
     }
 }
 
-contract SwapInvariant420Test {
-    VmSwap420 constant vm = VmSwap420(address(uint160(uint256(keccak256("hevm cheat code")))));
+contract SwapInvariant420Test is InvariantTarget420 {
     SwapInvariantHandler420 internal handler;
 
     function setUp() public {
@@ -59,7 +57,7 @@ contract SwapInvariant420Test {
         markets.setMarket(marketId, address(pool), input, settlement, CanonicalMarketRegistry.Role.CANONICAL_CAD, bytes32(0), true);
         handler = new SwapInvariantHandler420(executor, pool, marketId, input, settlement);
         executor.setTrustedCaller(address(handler), true);
-        vm.targetContract(address(handler));
+        targetContract(address(handler));
     }
 
     function invariant_NoAcceptedOverspend() public view {

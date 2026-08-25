@@ -1,0 +1,10 @@
+{
+  "go_test": 0,
+  "build_fourtwentyd": 0,
+  "build_node420": 0,
+  "public_state": "S5-PUBLIC_PREP",
+  "public_launch_authorized": false,
+  "public_testnet_live": false,
+  "real_public_endpoints_configured": false,
+  "synthetic_launch_data_created": false
+}

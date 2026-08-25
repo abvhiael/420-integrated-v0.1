@@ -1,0 +1,9 @@
+{
+  "pass": false,
+  "errors": [
+    "expected 20 assignments, got 28",
+    "range end wrong"
+  ],
+  "system_address_count": 28,
+  "application_domain_count": 9
+}

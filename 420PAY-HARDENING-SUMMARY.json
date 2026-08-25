@@ -1,0 +1,14 @@
+{
+  "hardening_static_verification": true,
+  "go_test": 0,
+  "fuzz_property_test_suites": 6,
+  "canonical_health_adapter_source": true,
+  "canonical_settlement_adapter_source": true,
+  "atomic_settlement_guard_source": true,
+  "foundry_available": false,
+  "solc_available": false,
+  "foundry_tests_executed": false,
+  "foundry_tests_pass": false,
+  "production_swap_executor_wired": false,
+  "security_audited": false
+}

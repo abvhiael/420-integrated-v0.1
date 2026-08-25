@@ -1,0 +1,189 @@
+{
+  "all_pass": true,
+  "cases": [
+    {
+      "name": "normal15",
+      "returncode": 0,
+      "seconds": 2.355,
+      "summary": {
+        "max_finalized": 6,
+        "nodes": 15,
+        "partition": "none",
+        "phases": [
+          {
+            "label": "phase1",
+            "max_finalized": 6,
+            "nodes": 15,
+            "partition": "none",
+            "proposals": 8,
+            "qc_events": 105
+          }
+        ],
+        "total_qc_events": 105
+      },
+      "stderr": ""
+    },
+    {
+      "name": "quorum11",
+      "returncode": 0,
+      "seconds": 2.26,
+      "summary": {
+        "max_finalized": 6,
+        "nodes": 11,
+        "partition": "none",
+        "phases": [
+          {
+            "label": "phase1",
+            "max_finalized": 6,
+            "nodes": 11,
+            "partition": "none",
+            "proposals": 6,
+            "qc_events": 55
+          }
+        ],
+        "total_qc_events": 55
+      },
+      "stderr": ""
+    },
+    {
+      "name": "quorum10",
+      "returncode": 0,
+      "seconds": 2.225,
+      "summary": {
+        "max_finalized": 0,
+        "nodes": 10,
+        "partition": "none",
+        "phases": [
+          {
+            "label": "phase1",
+            "max_finalized": 0,
+            "nodes": 10,
+            "partition": "none",
+            "proposals": 5,
+            "qc_events": 0
+          }
+        ],
+        "total_qc_events": 0
+      },
+      "stderr": ""
+    },
+    {
+      "name": "fallback1",
+      "returncode": 0,
+      "seconds": 3.86,
+      "summary": {
+        "max_finalized": 7,
+        "nodes": 15,
+        "partition": "none",
+        "phases": [
+          {
+            "label": "phase1",
+            "max_finalized": 7,
+            "nodes": 15,
+            "partition": "none",
+            "proposals": 8,
+            "qc_events": 117
+          }
+        ],
+        "total_qc_events": 117
+      },
+      "stderr": ""
+    },
+    {
+      "name": "fallback2",
+      "returncode": 0,
+      "seconds": 2.451,
+      "summary": {
+        "max_finalized": 6,
+        "nodes": 15,
+        "partition": "none",
+        "phases": [
+          {
+            "label": "phase1",
+            "max_finalized": 6,
+            "nodes": 15,
+            "partition": "none",
+            "proposals": 8,
+            "qc_events": 105
+          }
+        ],
+        "total_qc_events": 105
+      },
+      "stderr": ""
+    },
+    {
+      "name": "partition8_7",
+      "returncode": 0,
+      "seconds": 2.336,
+      "summary": {
+        "max_finalized": 0,
+        "nodes": 15,
+        "partition": "8-7",
+        "phases": [
+          {
+            "label": "phase1",
+            "max_finalized": 0,
+            "nodes": 15,
+            "partition": "8-7",
+            "proposals": 8,
+            "qc_events": 0
+          }
+        ],
+        "total_qc_events": 0
+      },
+      "stderr": ""
+    },
+    {
+      "name": "partition11_4",
+      "returncode": 0,
+      "seconds": 2.29,
+      "summary": {
+        "max_finalized": 6,
+        "nodes": 15,
+        "partition": "11-4",
+        "phases": [
+          {
+            "label": "phase1",
+            "max_finalized": 6,
+            "nodes": 15,
+            "partition": "11-4",
+            "proposals": 8,
+            "qc_events": 53
+          }
+        ],
+        "total_qc_events": 53
+      },
+      "stderr": ""
+    },
+    {
+      "name": "restart",
+      "returncode": 0,
+      "seconds": 3.039,
+      "summary": {
+        "max_finalized": 8,
+        "nodes": 15,
+        "partition": "none",
+        "phases": [
+          {
+            "label": "phase1",
+            "max_finalized": 3,
+            "nodes": 15,
+            "partition": "none",
+            "proposals": 5,
+            "qc_events": 60
+          },
+          {
+            "label": "restart",
+            "max_finalized": 8,
+            "nodes": 15,
+            "partition": "none",
+            "proposals": 5,
+            "qc_events": 60
+          }
+        ],
+        "total_qc_events": 120
+      },
+      "stderr": ""
+    }
+  ]
+}

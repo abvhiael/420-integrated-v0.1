@@ -1,0 +1,36 @@
+{
+  "schema": "420-canary-evaluation-v1",
+  "all_acceptance_criteria_pass": false,
+  "checks": [
+    {
+      "name": "health snapshots",
+      "status": "BLOCKED",
+      "detail": "no real canary snapshots present"
+    },
+    {
+      "name": "unresolved critical incidents",
+      "status": "PASS",
+      "detail": "count=0"
+    },
+    {
+      "name": "11/15 quorum edge",
+      "status": "BLOCKED",
+      "detail": "report missing"
+    },
+    {
+      "name": "10/15 quorum loss",
+      "status": "BLOCKED",
+      "detail": "report missing"
+    },
+    {
+      "name": "restart recovery",
+      "status": "BLOCKED",
+      "detail": "report missing"
+    },
+    {
+      "name": "AI absence liveness",
+      "status": "BLOCKED",
+      "detail": "report missing"
+    }
+  ]
+}

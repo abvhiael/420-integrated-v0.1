@@ -1,0 +1,25 @@
+{
+  "schema": "420-testnet-external-validator-onboarding-v1",
+  "phase": "S5-OBSERVATION",
+  "mode": "INVITE_ONLY",
+  "requirements": [
+    "generate own BLS key and proof of possession",
+    "generate owner and separate withdrawal addresses",
+    "run compatible fourtwentyd/node420 versions",
+    "meet 42,000 420 effective testnet bond requirement",
+    "complete probation/readiness process",
+    "pass 40 of 42 readiness epochs",
+    "publish public validator record",
+    "accept slashing and inactivity rules"
+  ],
+  "operator_security": [
+    "never submit private keys",
+    "use remote or encrypted signer where possible",
+    "keep withdrawal key cold",
+    "separate consensus and execution processes",
+    "backup slashing-protection database",
+    "monitor client version and finalized checkpoint"
+  ],
+  "target_external_validators_minimum": 5,
+  "status": "PENDING"
+}

@@ -1,0 +1,21 @@
+{
+  "schema": "420-asset-semantics-v1",
+  "status": "FROZEN_WITH_INTERFACE_LAYER_V1",
+  "native_420": {
+    "asset_id_rule": "keccak256('420/NATIVE')",
+    "token_address": "0x0000000000000000000000000000000000000000",
+    "asset_type": "NATIVE",
+    "decimals": 18,
+    "display_symbol": "420"
+  },
+  "canonical_settlement_default_eligibility": {
+    "rebasing": false,
+    "fee_on_transfer": false,
+    "transfer_exact_required": true
+  },
+  "rounding": {
+    "payer_authorization": "MUST_NOT_EXCEED_SIGNED_MAXIMUM",
+    "merchant_settlement": "MUST_NOT_FALL_BELOW_SIGNED_MINIMUM",
+    "dust": "MUST_BE_EXPLICITLY_ACCOUNTED_FOR_OR_REFUNDED; NEVER SILENTLY_DISCARDED"
+  }
+}

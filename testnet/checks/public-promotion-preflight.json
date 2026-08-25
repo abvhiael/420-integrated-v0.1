@@ -1,0 +1,21 @@
+{
+  "schema": "420-public-promotion-preflight-v1",
+  "public_promotion_authorized": false,
+  "checks": [
+    {
+      "name": "observation complete",
+      "status": "BLOCKED",
+      "detail": "S5-OBSERVATION_PREP"
+    },
+    {
+      "name": "observation evaluation",
+      "status": "BLOCKED",
+      "detail": "all criteria must pass"
+    },
+    {
+      "name": "global public-testnet preflight",
+      "status": "BLOCKED",
+      "detail": "Step 5 global launch gate"
+    }
+  ]
+}

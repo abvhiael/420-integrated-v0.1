@@ -1,0 +1,11 @@
+{
+  "go_test": 0,
+  "build_fourtwentyd": 0,
+  "build_node420": 0,
+  "canary_state": "S5-CANARY_PREP",
+  "canary_start_authorized": false,
+  "minimum_canary_hours": 24,
+  "observation_minimum_hours": 72,
+  "evaluation_pass": false,
+  "synthetic_canary_data_created": false
+}

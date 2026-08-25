@@ -1,0 +1,100 @@
+{
+  "public_testnet_ready": false,
+  "checks": [
+    {
+      "name": "config/protocol.json",
+      "status": "PASS",
+      "detail": "present"
+    },
+    {
+      "name": "config/genesis-allocations.json",
+      "status": "PASS",
+      "detail": "present"
+    },
+    {
+      "name": "config/ai-genesis.json",
+      "status": "PASS",
+      "detail": "present"
+    },
+    {
+      "name": "execution/genesis/execution-genesis.json",
+      "status": "PASS",
+      "detail": "present"
+    },
+    {
+      "name": "devnet/config/nodes15.json",
+      "status": "PASS",
+      "detail": "present"
+    },
+    {
+      "name": "devnet/compose/docker-compose.devnet15.yml",
+      "status": "PASS",
+      "detail": "present"
+    },
+    {
+      "name": "consensus/p2p/libp2p/transport.go",
+      "status": "PASS",
+      "detail": "present"
+    },
+    {
+      "name": "consensus/crypto/bls/backend_blst.go",
+      "status": "PASS",
+      "detail": "present"
+    },
+    {
+      "name": "integration/cmd/engine-live-smoke/main.go",
+      "status": "PASS",
+      "detail": "present"
+    },
+    {
+      "name": "go test ./...",
+      "status": "PASS",
+      "detail": "default/offline build"
+    },
+    {
+      "name": "local fault matrix",
+      "status": "PASS",
+      "detail": "deterministic TCP devnet"
+    },
+    {
+      "name": "local accelerated soak",
+      "status": "PASS",
+      "detail": "deterministic TCP devnet"
+    },
+    {
+      "name": "pinned geth v1.17.5 binary",
+      "status": "BLOCKED",
+      "detail": "build/fetch on networked host"
+    },
+    {
+      "name": "production blst compiled",
+      "status": "BLOCKED",
+      "detail": "no signed/CI evidence marker"
+    },
+    {
+      "name": "production libp2p compiled",
+      "status": "BLOCKED",
+      "detail": "no signed/CI evidence marker"
+    },
+    {
+      "name": "live Engine payload smoke",
+      "status": "BLOCKED",
+      "detail": "no signed/CI evidence marker"
+    },
+    {
+      "name": "15 real node420/fourtwentyd pairs",
+      "status": "BLOCKED",
+      "detail": "no signed/CI evidence marker"
+    },
+    {
+      "name": "production partition/restart matrix",
+      "status": "BLOCKED",
+      "detail": "no signed/CI evidence marker"
+    },
+    {
+      "name": "production soak",
+      "status": "BLOCKED",
+      "detail": "no signed/CI evidence marker"
+    }
+  ]
+}

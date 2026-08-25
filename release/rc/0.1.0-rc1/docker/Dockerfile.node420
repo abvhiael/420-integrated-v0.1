@@ -1,0 +1,10 @@
+
+FROM golang:1.23 AS wrapper
+WORKDIR /src
+COPY . .
+RUN go build -o /out/node420 ./execution/cmd/node420
+FROM debian:bookworm-slim
+COPY --from=wrapper /out/node420 /usr/local/bin/node420
+COPY bin/upstream/geth-v1.17.5 /usr/local/bin/geth
+ENV NODE420_GETH=/usr/local/bin/geth
+ENTRYPOINT ["node420"]

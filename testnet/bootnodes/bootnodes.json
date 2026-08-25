@@ -1,0 +1,21 @@
+{
+  "schema": "420-integrated-testnet-bootnodes-v1",
+  "minimum_required": 3,
+  "bootnodes": [
+    {
+      "name": "bootnode-1",
+      "multiaddr": "REPLACE_WITH_LIBP2P_MULTIADDR_1",
+      "status": "PLACEHOLDER"
+    },
+    {
+      "name": "bootnode-2",
+      "multiaddr": "REPLACE_WITH_LIBP2P_MULTIADDR_2",
+      "status": "PLACEHOLDER"
+    },
+    {
+      "name": "bootnode-3",
+      "multiaddr": "REPLACE_WITH_LIBP2P_MULTIADDR_3",
+      "status": "PLACEHOLDER"
+    }
+  ]
+}

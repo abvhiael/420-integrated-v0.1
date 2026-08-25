@@ -1,0 +1,39 @@
+{
+  "schema": "420-testnet-explorer-readiness-v1",
+  "backend": {
+    "url": "REPLACE",
+    "status": "PENDING",
+    "required_checks": [
+      "indexes blocks",
+      "indexes transactions",
+      "indexes receipts/logs",
+      "tracks finalized block",
+      "survives restart",
+      "reorg handling limited to non-finalized history"
+    ]
+  },
+  "frontend": {
+    "url": "REPLACE",
+    "status": "PENDING",
+    "required_views": [
+      "block",
+      "transaction",
+      "address",
+      "contract",
+      "validator",
+      "epoch/rotation",
+      "network status"
+    ]
+  },
+  "consensus_fields": [
+    "slot",
+    "epoch",
+    "rotation",
+    "head",
+    "safe",
+    "finalized",
+    "proposer seat",
+    "proposer rank",
+    "QC signer count"
+  ]
+}

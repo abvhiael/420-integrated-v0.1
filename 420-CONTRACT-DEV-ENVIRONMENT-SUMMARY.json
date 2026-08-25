@@ -1,0 +1,20 @@
+{
+  "shared_contract_environment": true,
+  "dockerfile": true,
+  "devcontainer": true,
+  "github_actions": true,
+  "one_command_local_verify": "make contracts-verify",
+  "one_command_ci_verify": "make contracts-ci",
+  "solidity": "0.8.24",
+  "evm": "cancun",
+  "development_fuzz_runs": 10000,
+  "ci_fuzz_runs": 50000,
+  "development_invariant_runs": 512,
+  "ci_invariant_runs": 2048,
+  "reusable_for_all_genesis_suites": true,
+  "current_suite": "420Pay",
+  "next_suites": [
+    "420Swap",
+    "420Bridge"
+  ]
+}

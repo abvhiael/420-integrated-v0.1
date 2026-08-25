@@ -1,0 +1,88 @@
+{
+  "schema": "420-genesis-contract-interface-layer-v1",
+  "status": "FROZEN_V1_0",
+  "principles": [
+    "Shared lifecycle, health, governance, finality and direction semantics are canonical.",
+    "Cross-dApp dependencies resolve through shared interfaces and registries where practical.",
+    "Names and identity are presentation/credential layers, not ownership truth.",
+    "Canonical asset identity never relies on ticker symbol alone.",
+    "Security-sensitive integrations fail closed on inactive, paused, stale, unsupported or unhealthy dependencies.",
+    "Application signing domains remain under 420/APP/*.",
+    "Historical object identity remains immutable across upgrades.",
+    "Major version changes require explicit migration/review."
+  ],
+  "shared_interfaces": [
+    "IGenesisResident420",
+    "IProtocolRegistry420",
+    "ICanonicalAssetRegistry420",
+    "IGovernanceAuthority420",
+    "IPauseRegistry420",
+    "IHealthRegistry420",
+    "IOracle420",
+    "IIdentityCredential420",
+    "INames420",
+    "ISettlementHealth420",
+    "IFeeQuote420",
+    "ISigningDomain420",
+    "IAccounting420",
+    "ICapabilityRegistry420",
+    "ICustodyVault420",
+    "IGenesisInitializable420",
+    "IMigration420",
+    "ISystemSafety420",
+    "ISignedEnvelope420",
+    "IReplayProtection420",
+    "IExternalDependencyRegistry420",
+    "IRiskLimits420",
+    "IAssetCapabilities420",
+    "IMetadataCommitment420",
+    "IChainContext420"
+  ],
+  "compatibility_rules": {
+    "major_change": "new version + migration/review",
+    "minor_change": "backward-compatible extension only",
+    "patch_change": "bugfix/no semantic expansion",
+    "unknown_major_version": "fail_closed",
+    "registry_code_hash_mismatch": "fail_closed",
+    "inactive_dependency": "fail_closed"
+  },
+  "core_security_semantics": {
+    "capabilities": "bounded operational authority distinct from governance and ownership",
+    "custody": "accounting authority and release authority are separate; custody positions expose deposited/committed/released/available amounts",
+    "genesis_initialization": "predeploys expose initialization state and genesis configuration hash because constructor execution cannot be assumed for genesis-inserted runtime code",
+    "migration": "historical implementation identity is preserved; registry pointer changes do not rewrite provenance",
+    "system_safety": "NORMAL/DEGRADED/HALTED/RECOVERY are distinct from local component pause; actions declare safe-operation class"
+  },
+  "version": "1.0.0",
+  "freeze_rules": {
+    "major": "semantic change requires new major interface version, migration plan and at least G3 review; G4 if constitutional invariant changes",
+    "minor": "backward-compatible extension only",
+    "patch": "non-semantic bugfix/documentation/clarification only"
+  },
+  "shared_libraries": [
+    "AssetMath420",
+    "ObjectId420",
+    "EventStandard420",
+    "GenesisInterfaceIds420",
+    "CapabilityIds420"
+  ],
+  "frozen_policies": [
+    "system-safety-semantics.json",
+    "oracle-semantics.json",
+    "asset-semantics.json",
+    "time-semantics.json",
+    "event-standard.json"
+  ],
+  "security_invariants": [
+    "Delegated authority never implies ownership or unrestricted custody.",
+    "Accounting authority and custody/release authority are distinct.",
+    "Genesis configuration must be introspectable and hash-verifiable.",
+    "Historical implementation provenance survives migration.",
+    "System safety state is distinct from local pause state.",
+    "Security-sensitive dependencies fail closed when inactive, unhealthy, stale, unsupported or code-hash mismatched.",
+    "Application signatures are domain-separated and replay-resistant.",
+    "Canonical asset identity never relies on ticker symbol alone.",
+    "Dust and rounding effects are explicit and never silently discarded.",
+    "External dependencies are registry-addressed and lifecycle-controlled."
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "schema": "420-canary-health-snapshot-v1",
+  "required_fields": [
+    "timestamp_utc",
+    "slot",
+    "epoch",
+    "rotation",
+    "head_slot",
+    "safe_slot",
+    "finalized_slot",
+    "active_seats",
+    "eligible_validators",
+    "attestation_participation_pct",
+    "primary_proposals",
+    "fallback1_proposals",
+    "fallback2_proposals",
+    "engine_errors_total",
+    "peer_count_min",
+    "conflicting_qc_detected",
+    "safety_halt",
+    "randomness_degraded",
+    "node420_version",
+    "fourtwentyd_version"
+  ],
+  "critical_conditions": {
+    "conflicting_qc_detected": false,
+    "safety_halt": false,
+    "active_seats_minimum": 15,
+    "eligible_validators_minimum": 60,
+    "finality_degraded_slots_threshold": 42,
+    "minimum_peer_count": 3
+  }
+}

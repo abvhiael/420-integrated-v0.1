@@ -1,0 +1,12 @@
+{
+  "420pay_parameters_frozen": true,
+  "default_acceptance": "FINALIZED",
+  "default_invoice_mode": "SINGLE_USE",
+  "partial_payments_default": false,
+  "split_settlement": true,
+  "quote_lifetime_seconds": 42,
+  "atomic_or_revert": true,
+  "centralized_price_fallback": false,
+  "silent_substitution": false,
+  "go_test": 0
+}

@@ -1,0 +1,36 @@
+{
+  "schema": "420-integrated-testnet-rc-v1",
+  "release_channel": "TESTNET_RC",
+  "version": "0.1.0-rc1",
+  "chain_id": 420,
+  "currency": {
+    "name": "420",
+    "symbol": "420",
+    "decimals": 18,
+    "base_unit": "kief"
+  },
+  "binaries": {
+    "consensus": "fourtwentyd",
+    "execution_wrapper": "node420",
+    "genesis": "420-genesis",
+    "engine_smoke": "engine-live-smoke"
+  },
+  "pinned_dependencies": {
+    "go_ethereum": "v1.17.5",
+    "blst": "v0.3.16",
+    "go_libp2p": "v0.49.0",
+    "go_libp2p_pubsub": "v0.17.0"
+  },
+  "required_evidence": [
+    "production_blst",
+    "production_libp2p",
+    "live_engine_payload",
+    "real_devnet15",
+    "production_fault_matrix",
+    "production_restart_recovery",
+    "production_soak",
+    "release_checksum_verification"
+  ],
+  "public_testnet_ready": false,
+  "rule": "TESTNET_RC packaging is allowed before public readiness; public launch is forbidden until every required evidence gate is PASS."
+}

@@ -1,0 +1,31 @@
+{
+  "schema": "420-validator-identity-record-v1",
+  "required_fields": [
+    "validator_index",
+    "validator_id",
+    "consensus_bls_pubkey",
+    "bls_proof_of_possession",
+    "owner_address",
+    "withdrawal_address",
+    "operator_name",
+    "operator_contact",
+    "consensus_client_version",
+    "execution_client_version",
+    "readiness_endpoint",
+    "bond_source",
+    "bond_kief",
+    "signed_record_hash"
+  ],
+  "private_material_forbidden": [
+    "BLS secret key",
+    "owner private key",
+    "withdrawal private key",
+    "seed phrase",
+    "JWT secret"
+  ],
+  "notes": [
+    "This repository stores only public identity/attestation material.",
+    "Private key generation must occur on operator-controlled secure systems.",
+    "Withdrawal keys should remain cold and separate from consensus keys."
+  ]
+}

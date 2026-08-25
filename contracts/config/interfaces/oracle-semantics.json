@@ -1,0 +1,23 @@
+{
+  "schema": "420-oracle-semantics-v1",
+  "status": "FROZEN_WITH_INTERFACE_LAYER_V1",
+  "requirements": [
+    "freshness alone is insufficient for security-sensitive use",
+    "security-sensitive consumers must evaluate oracle health",
+    "TWAP/observation window is explicit",
+    "confidence or deviation state is explicit",
+    "source provenance is committed by sourceHash"
+  ],
+  "minimum_observation_fields": [
+    "baseAssetId",
+    "quoteAssetId",
+    "value",
+    "decimals",
+    "observedAt",
+    "validUntil",
+    "sourceHash",
+    "observationWindowSeconds",
+    "confidenceBps",
+    "health"
+  ]
+}

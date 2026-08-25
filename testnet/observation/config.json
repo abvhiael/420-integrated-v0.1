@@ -1,0 +1,22 @@
+{
+  "schema": "420-testnet-observation-v1",
+  "phase": "S5-OBSERVATION",
+  "minimum_duration_hours": 72,
+  "admission": {
+    "public_rpc": "CONTROLLED",
+    "explorer": "ENABLED",
+    "faucet": "ENABLED_RATE_LIMITED",
+    "validator_onboarding": "INVITE_ONLY",
+    "general_public_launch": false
+  },
+  "promotion_requirements": [
+    "completed 24h canary PASS",
+    "72h observation period complete",
+    "public RPC health stable",
+    "explorer indexing stable",
+    "faucet abuse controls stable",
+    "external validator onboarding successful",
+    "no unresolved critical/major consensus issue",
+    "public testnet preflight PASS"
+  ]
+}

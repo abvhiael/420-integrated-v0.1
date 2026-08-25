@@ -1,0 +1,25 @@
+{
+  "schema": "420-genesis-seed-ceremony-v1",
+  "domain": "420/GENESIS_SEED",
+  "minimum_contributors": 7,
+  "recommended_contributors": 15,
+  "single_founder_control_forbidden": true,
+  "inputs": [
+    "chain_id",
+    "genesis_allocation_root",
+    "consensus_config_root",
+    "final_testnet_checkpoint_root",
+    "external_public_randomness",
+    "contributor_ceremony_root"
+  ],
+  "process": [
+    "Each contributor independently generates a 32-byte secret.",
+    "Contributor publishes SHA-256 commitment before reveal window closes.",
+    "After all commitments are frozen, contributors reveal their 32-byte secret.",
+    "Missing reveals are replaced by SHA-256('missing'||commitment) as specified by bootstrap randomness rules.",
+    "Contributor records are canonicalized by contributor_id.",
+    "The ceremony tool computes contributor_ceremony_root and final genesis seed.",
+    "All source inputs and outputs are published with checksums."
+  ],
+  "status": "PENDING"
+}

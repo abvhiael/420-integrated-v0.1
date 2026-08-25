@@ -1,0 +1,41 @@
+{
+  "step": 1,
+  "title": "Recover and preserve historical source",
+  "created": "2026-08-23",
+  "sources": [
+    {
+      "name": "PUFFScoin GitHub",
+      "url": "https://github.com/puffscoin/go-Puffscoin",
+      "verified": true
+    },
+    {
+      "name": "PUFFScoin Launchpad",
+      "url": "https://code.launchpad.net/puffscoin",
+      "clone_url": "https://git.launchpad.net/puffscoin",
+      "verified": true
+    },
+    {
+      "name": "PUFFScoin July 2019 commit",
+      "url": "https://github.com/puffscoin/go-Puffscoin/commit/e48ad5c90fa171affe779852bc12353282e730b2",
+      "sha": "e48ad5c90fa171affe779852bc12353282e730b2",
+      "verified": true
+    },
+    {
+      "name": "WhaleCoin Go package archive",
+      "url": "https://pkg.go.dev/github.com/whalecoinorg/whalecoin",
+      "version": "v1.6.9",
+      "verified": true
+    },
+    {
+      "name": "420coin public chain registry record",
+      "chain_id": 2020,
+      "network_id": 2020,
+      "verified": true
+    }
+  ],
+  "known_discrepancies": [
+    "2019 PUFFScoin genesis uses chainId 420; 2020 public registry uses chain/network ID 2020."
+  ],
+  "full_git_mirror_embedded": false,
+  "full_git_mirror_note": "Runtime could verify sources via web but could not resolve remote git hosts for clone. Included reproducible fetch script."
+}

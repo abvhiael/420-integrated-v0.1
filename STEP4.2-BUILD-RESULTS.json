@@ -1,0 +1,22 @@
+{
+  "go_test": {
+    "returncode": 0,
+    "stdout": "ok  \tgithub.com/420integrated/420-integrated/consensus/clock\t(cached)\n?   \tgithub.com/420integrated/420-integrated/consensus/cmd/fourtwentyd\t[no test files]\nok  \tgithub.com/420integrated/420-integrated/consensus/engine\t(cached)\n?   \tgithub.com/420integrated/420-integrated/consensus/types\t[no test files]\n?   \tgithub.com/420integrated/420-integrated/execution/cmd/node420\t[no test files]\n?   \tgithub.com/420integrated/420-integrated/genesis/cmd/420-genesis\t[no test files]\nok  \tgithub.com/420integrated/420-integrated/integration/engineapi\t0.006s\n",
+    "stderr": ""
+  },
+  "build_fourtwentyd": {
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "build_node420": {
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "build_genesis": {
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  }
+}

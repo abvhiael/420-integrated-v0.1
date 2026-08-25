@@ -1,0 +1,59 @@
+{
+  "schema": "420-genesis-contract-suite-registry-v1",
+  "status": "ACTIVE_ROADMAP",
+  "shared_environment": "docs/development/420-CONTRACT-DEV-ENVIRONMENT.md",
+  "verification_command": "make contracts-verify",
+  "suites": [
+    {
+      "name": "420Pay",
+      "status": "PRE_GENESIS_EXECUTABLE_VERIFICATION",
+      "order": 1
+    },
+    {
+      "name": "420Swap",
+      "status": "NEXT_AFTER_420PAY",
+      "order": 2
+    },
+    {
+      "name": "420Bridge",
+      "status": "NEXT_AFTER_420SWAP",
+      "order": 3
+    },
+    {
+      "name": "Validator_Stake",
+      "status": "PENDING_HARDENING",
+      "order": 4
+    },
+    {
+      "name": "Rewards_Treasuries",
+      "status": "PENDING_HARDENING",
+      "order": 5
+    },
+    {
+      "name": "Governance",
+      "status": "PENDING_HARDENING",
+      "order": 6
+    },
+    {
+      "name": "PublicDistribution_DEX_Oracle",
+      "status": "PENDING_HARDENING",
+      "order": 7
+    },
+    {
+      "name": "FounderVesting",
+      "status": "PENDING_HARDENING",
+      "order": 8
+    },
+    {
+      "name": "Registry_Names_Identity",
+      "status": "PENDING_HARDENING",
+      "order": 9
+    },
+    {
+      "name": "AI_Escrow_Registry",
+      "status": "PENDING_HARDENING",
+      "order": 10
+    }
+  ],
+  "mainnet_rule": "ALL_SECURITY_RELEVANT_GENESIS_SUITES_MUST_PASS_SHARED_VERIFICATION_AND_EXTERNAL_AUDIT_GATES"
+}

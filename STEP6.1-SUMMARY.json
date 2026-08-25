@@ -1,0 +1,12 @@
+{
+  "decision_locked": true,
+  "system_addresses_frozen": 28,
+  "frozen_through": "0x043B",
+  "remaining_reserved_contract_sources_complete": true,
+  "go_test": 0,
+  "forge_available": false,
+  "solc_available": false,
+  "genesis_predeploy_ready": false,
+  "compiled_bytecode_ready": false,
+  "genesis_storage_ready": false
+}

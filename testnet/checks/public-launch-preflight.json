@@ -1,0 +1,31 @@
+{
+  "schema": "420-public-launch-preflight-v1",
+  "public_launch_authorized": false,
+  "checks": [
+    {
+      "name": "public promotion preflight",
+      "status": "BLOCKED",
+      "detail": "Step 5.3 promotion gate"
+    },
+    {
+      "name": "public chain metadata",
+      "status": "BLOCKED",
+      "detail": "CANDIDATE_UNTIL_FINAL_PREFLIGHT_FREEZE"
+    },
+    {
+      "name": "wallet network config",
+      "status": "BLOCKED",
+      "detail": "PLACEHOLDER_ENDPOINTS"
+    },
+    {
+      "name": "release publication/signature",
+      "status": "BLOCKED",
+      "detail": "all artifacts and signature required"
+    },
+    {
+      "name": "publication checklist",
+      "status": "BLOCKED",
+      "detail": "0/15 READY"
+    }
+  ]
+}

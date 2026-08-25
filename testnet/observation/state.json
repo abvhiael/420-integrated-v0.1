@@ -1,0 +1,26 @@
+{
+  "schema": "420-testnet-observation-state-v1",
+  "phase": "S5-OBSERVATION_PREP",
+  "allowed_transitions": {
+    "S5-OBSERVATION_PREP": [
+      "S5-OBSERVATION_RUNNING"
+    ],
+    "S5-OBSERVATION_RUNNING": [
+      "S5-OBSERVATION_HOLD",
+      "S5-OBSERVATION_FAILED",
+      "S5-OBSERVATION_COMPLETE"
+    ],
+    "S5-OBSERVATION_HOLD": [
+      "S5-OBSERVATION_RUNNING",
+      "S5-OBSERVATION_FAILED"
+    ],
+    "S5-OBSERVATION_COMPLETE": [
+      "S5-PUBLIC"
+    ],
+    "S5-OBSERVATION_FAILED": []
+  },
+  "started_at_utc": null,
+  "minimum_end_at_utc": null,
+  "completed_at_utc": null,
+  "public_promotion_authorized": false
+}

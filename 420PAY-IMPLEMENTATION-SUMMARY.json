@@ -1,0 +1,16 @@
+{
+  "genesis_decisions_frozen": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "source_contracts_implemented": 8,
+  "static_verification_pass": true,
+  "go_test": 0,
+  "foundry_available": false,
+  "solc_available": false,
+  "foundry_tests_pass": false,
+  "solidity_compile_claimed": false,
+  "security_audited": false
+}

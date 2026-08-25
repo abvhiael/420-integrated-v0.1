@@ -11,18 +11,36 @@
     "block_target_seconds": 12
   },
   "monetary_policy": {
-    "initial_block_issuance_420": 1.7507002801120448,
+    "initial_block_issuance_420": 4.2,
     "reduction_interval_blocks": 420000,
     "reduction_rate_ppm": 4200,
     "reduction_rate_display": "0.420%",
     "floor_block_issuance_420": 0.42,
     "top_level_split_percent": {
-      "security": 34,
-      "attention": 33,
-      "development": 33
+      "security": "dynamic 28.3446712018% -> 50%",
+      "attention": "dynamic equal half of remainder",
+      "development": "dynamic equal half of remainder"
     },
     "governance_may_change_top_level_split": false,
-    "governance_may_increase_issuance": false
+    "governance_may_increase_issuance": false,
+    "modeled_floor_era": 340,
+    "modeled_floor_activation_block": 142800000,
+    "modeled_floor_activation_years_at_target": 54.30070727812001,
+    "dynamic_allocation": {
+      "basis": "active validator count",
+      "minimum_active_validators": 15,
+      "maximum_active_validators": 30,
+      "security_percent_at_15_active": 28.34467120181406,
+      "security_percent_at_30_active": 50.0,
+      "formula": "securityPct = minSecurity + (active-15)*(50-minSecurity)/15, clamped to [minSecurity,50]",
+      "attention_formula": "(100-securityPct)/2",
+      "development_formula": "(100-securityPct)/2",
+      "mature_split": {
+        "security": 50,
+        "attention": 25,
+        "development": 25
+      }
+    }
   },
   "consensus": {
     "architecture": "separate consensus client + EVM execution client",
@@ -37,23 +55,220 @@
     "cooldown_rotations": 3,
     "cooldown_days_at_target": 7.35,
     "minimum_validator_bond_420": 42000,
-    "minimum_candidate_pool_for_permissionless_rotation": 42,
+    "minimum_candidate_pool_for_permissionless_rotation": 60,
     "selection": "verifiable cryptographic random selection",
     "raw_wallet_count_affects_selection": false,
     "founder_bootstrap": {
       "end_block": 4200,
       "duration_hours_at_target": 14,
       "handoff": "bonded validator system"
+    },
+    "active_validator_scaling": {
+      "eligible_pool_ratio": 0.25,
+      "minimum_active_validators": 15,
+      "maximum_active_validators": 30,
+      "minimum_eligible_pool_for_bonded_handoff": 60,
+      "full_capacity_eligible_pool": 120,
+      "active_count_rule": "Use the largest allowed committee tier whose eligible-pool threshold has been satisfied for 3 consecutive rotation-boundary snapshots, subject to safety fallback.",
+      "rotation_swap_rule": "swap approximately one-third of active validators each rotation; 5 at 15 active, scaling to 10 at 30 active",
+      "full_capacity_swap_count": 10,
+      "anti_flapping": {
+        "measurement_point": "eligible validator pool snapshot at each rotation boundary",
+        "increase_persistence_rotations": 3,
+        "decrease_persistence_rotations": 3,
+        "rule": "A higher or lower active-validator target becomes effective only after the corresponding eligible-pool threshold has been satisfied for 3 consecutive rotation-boundary snapshots.",
+        "safety_exception": "If the currently scheduled active committee cannot be filled with eligible validators, the protocol may reduce the active target immediately to the largest safe committee allowed by the eligibility rules.",
+        "mid_rotation_changes": false
+      },
+      "decision_1_status": "FROZEN_FOR_TESTNET_AMENDED",
+      "mode": "quantized_committee_sizes",
+      "allowed_active_committee_sizes": [
+        15,
+        18,
+        21,
+        24,
+        27,
+        30
+      ],
+      "eligible_pool_thresholds": {
+        "60": 15,
+        "72": 18,
+        "84": 21,
+        "96": 24,
+        "108": 27,
+        "120": 30
+      },
+      "cohort_rule": "Each active committee consists of exactly 3 equal-sized age cohorts; one entire oldest cohort rotates out at each rotation.",
+      "rotation_swap_by_active_count": {
+        "15": 5,
+        "18": 6,
+        "21": 7,
+        "24": 8,
+        "27": 9,
+        "30": 10
+      },
+      "stable_active_committee_sizes": [
+        15,
+        18,
+        21,
+        24,
+        27,
+        30
+      ],
+      "migration_rule": {
+        "adjacent_tier_only": true,
+        "migration_duration_rotations": 3,
+        "validator_tenure_rotations": 3,
+        "rule": "Committee resizing never shortens or lengthens an already-active validator's tenure. When moving between adjacent stable tiers, the size of each newly admitted cohort changes by exactly one validator. Existing cohorts age out naturally after 3 rotations.",
+        "expansion_examples": {
+          "15_to_18": [
+            15,
+            16,
+            17,
+            18
+          ],
+          "18_to_21": [
+            18,
+            19,
+            20,
+            21
+          ],
+          "21_to_24": [
+            21,
+            22,
+            23,
+            24
+          ],
+          "24_to_27": [
+            24,
+            25,
+            26,
+            27
+          ],
+          "27_to_30": [
+            27,
+            28,
+            29,
+            30
+          ]
+        },
+        "contraction_examples": {
+          "30_to_27": [
+            30,
+            29,
+            28,
+            27
+          ],
+          "27_to_24": [
+            27,
+            26,
+            25,
+            24
+          ],
+          "24_to_21": [
+            24,
+            23,
+            22,
+            21
+          ],
+          "21_to_18": [
+            21,
+            20,
+            19,
+            18
+          ],
+          "18_to_15": [
+            18,
+            17,
+            16,
+            15
+          ]
+        },
+        "mid_migration_reversal": "not permitted under normal anti-flapping behavior; safety fallback may override",
+        "reward_split_basis_during_migration": "actual active validator count"
+      },
+      "validator_tenure_rule": "scheduled_exit_rotation = activation_rotation + 3; cohort labels are descriptive only"
+    },
+    "slot_timing": {
+      "decision_02_status": "FROZEN_FOR_TESTNET",
+      "slot_seconds": 12,
+      "max_authorized_proposers_per_slot": 3,
+      "proposal_windows_seconds": {
+        "primary": [
+          0,
+          3
+        ],
+        "fallback_1": [
+          4,
+          7
+        ],
+        "fallback_2": [
+          8,
+          11
+        ]
+      },
+      "propagation_intervals_seconds": [
+        [
+          3,
+          4
+        ],
+        [
+          7,
+          8
+        ],
+        [
+          11,
+          12
+        ]
+      ],
+      "receive_clock_tolerance_milliseconds": 500,
+      "missed_slot_creates_block": false,
+      "missed_slot_increments_block_height": false,
+      "fallback_receives_full_proposer_reward": true,
+      "isolated_missed_primary_is_slashable": false,
+      "block_timestamp_rule": "genesis_time + slot_number * 12 seconds",
+      "late_proposal_rule": "proposal is invalid if proposer rank is not authorized for the block's slot/window",
+      "fallback_order": "deterministic and derived from finalized consensus randomness"
+    },
+    "proposer_selection": {
+      "decision_03_status": "FROZEN_FOR_TESTNET",
+      "weighting": "equal_per_active_validator",
+      "stake_weighted": false,
+      "schedule_scope": "one rotation",
+      "schedule_slots": 17640,
+      "seed_source": "finalized rotationSeed supplied by Decision 5 randomness mechanism",
+      "active_set_snapshot": "finalized active committee at rotation boundary",
+      "domains": {
+        "primary": "420/primary",
+        "fallback_1": "420/fallback1",
+        "fallback_2": "420/fallback2"
+      },
+      "permutation_method": "deterministic cryptographic shuffle from domain-separated seed and canonical validator list",
+      "distinct_proposers_per_slot": true,
+      "duplicate_resolution": "advance deterministically through the relevant fallback permutation until a distinct eligible validator is found",
+      "mid_rotation_reshuffle": false,
+      "ejected_validator_handling": "skip scheduled identity; do not regenerate schedule",
+      "fallback_success_changes_future_primary_schedule": false,
+      "fairness": {
+        "goal": "scheduled primary/fallback assignments as equal as mathematically possible",
+        "primary_remainder_carry": true,
+        "fallback_remainder_carry": true,
+        "metric": "scheduled opportunities, not successful proposals",
+        "carry_state": "deterministic fairness debt persisted across rotations for validators that remain active"
+      },
+      "committee_resize_behavior": "A new proposer schedule is generated only at a rotation boundary after the active committee for that rotation is finalized. Transitional committee sizes during a 3-rotation resize are valid."
     }
   },
   "security_reward": {
-    "share_of_total_issuance_percent": 34,
+    "share_of_total_issuance_percent": 50,
     "proposer_share_of_security_percent": 50,
     "participant_share_of_security_percent": 50,
     "participant_share_policy": "the successful proposer receives 50% of the Security allocation; the other 14 active validators are each eligible for 1/14 of the remaining 50%; missed participation shares are not redistributed and are not issued",
     "transaction_fee_policy": "TBD",
-    "genesis_active_term_target_return_percent_of_bond": 5,
-    "genesis_active_term_target_reward_420": 2100
+    "genesis_active_term_target_return_percent_of_bond": null,
+    "genesis_active_term_target_reward_420": 7408.799999999999,
+    "modeled_genesis_active_term_return_percent_of_bond": 17.639999999999997,
+    "note": "Initial block reward is 4.2 420. Top-level issuance split is 50% Security, 25% Attention, 25% Development. Within Security, 50% goes to the proposer and 50% is divided equally among the other 14 participating validators. Expected reward per 52,920-block active term is 7408.800000 420 (17.640000% of a 42,000-420 bond), excluding fees."
   },
   "system_contracts": {
     "RewardController": "planned",
@@ -68,6 +283,665 @@
     "presale_or_distribution_supply_420": null,
     "attention_bootstrap_420": null,
     "development_bootstrap_420": null,
-    "validator_bootstrap_bond_policy": "TBD"
-  }
+    "validator_bootstrap_bond_policy": "TBD",
+    "modeled_total_genesis_supply_420": 42000000,
+    "founders_core_contributors": {
+      "wallet_count": 10,
+      "allocation_per_wallet_420": 100000,
+      "total_allocation_420": 1000000,
+      "percent_of_genesis_supply": 2.380952380952381,
+      "purpose": "compensation/allocation for people actively working on the project",
+      "liquidity_at_genesis": "TBD",
+      "vesting_schedule": "TBD \u2014 recommended time-lock/vesting rather than fully liquid at block 0"
+    },
+    "community_testnet_distribution_420": 8400000,
+    "testnet_validator_bond_credit": {
+      "testnet_duration_days": 42,
+      "credit_per_qualified_validator_420": 21000,
+      "participant_owned_bond_required_420": 21000,
+      "effective_validator_bond_420": 42000,
+      "credit_transferable": false,
+      "credit_spendable": false,
+      "credit_voting_power": false,
+      "credit_protocol_owned": true,
+      "credit_recycles_on_normal_exit": true,
+      "maximum_concurrent_credits_if_full_8_4m_reserved": 400,
+      "general_liquid_testnet_rewards": "supported as separate contribution track; exact schedule/allocation TBD"
+    },
+    "historical_draft_testnet_validator_match": {
+      "testnet_duration_days": 42,
+      "reward_per_qualified_participant_420": 21000,
+      "participant_self_bond_required_420": 21000,
+      "resulting_validator_bond_420": 42000,
+      "maximum_full_match_awards": 400,
+      "reward_liquidity": "non-liquid at launch; deposited directly into validator bond",
+      "purpose": "reward meaningful 42-day public testnet participation and broaden genesis validator ownership",
+      "qualification_model": {
+        "minimum_participation_days": 35,
+        "minimum_validator_uptime_percent": 95,
+        "minimum_successful_duty_percent": 95,
+        "must_complete_genesis_readiness_check": true,
+        "must_run_independent_validator_node": true,
+        "serious_consensus_faults_allowed": 0,
+        "duplicate_identity_policy": "economic and technical anti-Sybil checks; one matching award per qualified validator identity under launch policy"
+      },
+      "unawarded_balance_destination": "Community/Testnet Treasury for later contribution rewards; not reallocated automatically"
+    }
+  },
+  "step3": {
+    "status": "in_progress",
+    "highest_priority_open_variables": [
+      "finality_model",
+      "fork_choice",
+      "randomness",
+      "validator_activation_delay",
+      "exit_and_withdrawal_delay",
+      "slashing_schedule",
+      "bond_credit_slashing_and_replacement",
+      "transaction_fee_policy",
+      "integer_reward_arithmetic"
+    ],
+    "decision_01_active_set_quantization": "FROZEN_FOR_TESTNET_AMENDED",
+    "decision_02_slot_and_fallback_timing": "FROZEN_FOR_TESTNET",
+    "decision_03_proposer_selection": "FROZEN_FOR_TESTNET",
+    "decision_18_implementation_architecture": "FROZEN_FOR_TESTNET",
+    "next_step": "Step 4 \u2014 executable protocol construction"
+  },
+  "implementation_architecture": {
+    "decision_18_status": "FROZEN_FOR_TESTNET",
+    "consensus_daemon": "fourtwentyd",
+    "consensus_language": "Go",
+    "execution_client": "node420",
+    "execution_lineage": "maintained minimal Geth derivative/configuration",
+    "process_model": "separate consensus and execution processes",
+    "boundary": "Engine API",
+    "engine_api": {
+      "public": false,
+      "auth": "JWT",
+      "custom_namespace_if_needed": "engine420_*"
+    },
+    "consensus_p2p": "libp2p",
+    "contracts": {
+      "language": "Solidity",
+      "tooling": "Foundry"
+    },
+    "remote_signer_required": true,
+    "slashing_protection_required": true,
+    "genesis_generator": "420-genesis",
+    "cannaseur": {
+      "replaces_historical_term": "Whale/Publisher",
+      "consensus_privilege": false,
+      "wallet_native_advertising": true,
+      "advertising_opt_in": true,
+      "rewarded_promotions_opt_in": true,
+      "naive_pay_per_click_forbidden": true,
+      "anti_sybil_required": true,
+      "executable_ad_code_forbidden": true,
+      "automatic_signatures_or_transactions_forbidden": true
+    },
+    "cross_chain_gateway": {
+      "420_side_live_at_genesis": true,
+      "source_side_must_be_deployed_and_verified_before_genesis": true,
+      "purpose": "canonical stablecoin ingress/egress for the 420 market",
+      "approved_quote_asset_registry": true,
+      "unbacked_admin_mint_forbidden": true,
+      "admin_confiscation_forbidden": true,
+      "emergency_pause_allowed": true,
+      "single_operator_dependency_forbidden": true,
+      "mint_requires_verified_source_deposit": true,
+      "source_release_requires_verified_420_burn": true,
+      "rate_limits_required": [
+        "per transaction",
+        "hourly",
+        "daily",
+        "per asset",
+        "TVL"
+      ],
+      "architecture": "multi-chain adapters",
+      "420_validators_automatically_bridge_committee": false,
+      "verification_primitive_status": "DEFERRED_SECURITY_DECISION",
+      "acceptable_verification_families": [
+        "threshold attestations",
+        "light client",
+        "zk light client",
+        "hybrid"
+      ],
+      "long_term_preference": "proof-verifying whenever technically practical"
+    },
+    "dex_boundary": {
+      "dex_twamm_auction_oracle_on_execution_layer": true,
+      "consensus_amm_pricing_logic": false,
+      "twap_from_canonical_420_approved_quote_pool": true
+    },
+    "testnet_milestones": {
+      "M1": "bounded consensus skeleton + fourtwentyd/node420 + explorer/faucet",
+      "M2": "governance, bond credit, gateway, DEX, auction, TWAP, treasuries, founder vesting",
+      "M3": "Attention economy, Cannaseur advertising, 420ID, social/marketplace apps"
+    }
+  },
+  "step4": {
+    "milestone_4_1": {
+      "status": "IMPLEMENTED_SCAFFOLD",
+      "go_module": "github.com/420integrated/420-integrated",
+      "consensus_binary": "fourtwentyd",
+      "execution_binary": "node420",
+      "geth_baseline": "v1.17.5",
+      "next": "Step 4.2 \u2014 integrate pinned Geth execution and Engine API payload flow"
+    },
+    "milestone_4_2": {
+      "status": "IMPLEMENTED_ENGINE_API_CLIENT_AND_MOCK_PAYLOAD_FLOW",
+      "geth_baseline": "v1.17.5",
+      "node420_integration": "pinned external Geth binary launcher",
+      "engine_api_auth": "JWT HS256",
+      "engine_api_default": "http://127.0.0.1:8551",
+      "implemented_methods": [
+        "engine_exchangeCapabilities",
+        "engine_forkchoiceUpdatedV3",
+        "engine_getPayloadV3",
+        "engine_newPayloadV3"
+      ],
+      "next": "Step 4.3 \u2014 canonical consensus SSZ types, BLS signing, QCs and chained finality"
+    },
+    "milestone_4_2a": {
+      "status": "ENCODED_NATIVE_AI_GENESIS_PREPARATION",
+      "node_role": "420ai",
+      "system_addresses": {
+        "AIProviderRegistry": "0x000000000000000000000000000000000000042F",
+        "AIModelRegistry": "0x0000000000000000000000000000000000000430",
+        "AIJobManager": "0x0000000000000000000000000000000000000431",
+        "AIJobEscrow": "0x0000000000000000000000000000000000000432",
+        "AIReputationRegistry": "0x0000000000000000000000000000000000000433"
+      },
+      "next": "Step 4.3 \u2014 canonical consensus SSZ types, BLS signing, QCs and chained finality"
+    },
+    "milestone_4_3": {
+      "status": "IMPLEMENTED_CONSENSUS_CORE_BLS_ADAPTER_ENCODED",
+      "bls_backend": "github.com/supranational/blst/bindings/go",
+      "bls_mode": "minimal public key: 48-byte pubkey / 96-byte signature",
+      "committee_test_size": 15,
+      "qc_threshold": 11,
+      "implemented": [
+        "fixed-size SSZ-style roots",
+        "domain-separated signing roots",
+        "BLS PoP/sign/verify/aggregate",
+        "QC signer bitmap",
+        "QC verification",
+        "one-block chained finality",
+        "head/safe/finalized mapping",
+        "ConsensusBlock binds execution payload hash"
+      ],
+      "next": "Step 4.4 \u2014 validator committee, proposer scheduling, attestation collection and 15-validator simulation",
+      "production_bls_validation_in_current_runtime": false,
+      "production_bls_validation_blocker": "runtime cannot resolve proxy.golang.org; external dependency unavailable",
+      "default_offline_tests_use": "deterministic AggregateVerifier test double only"
+    },
+    "milestone_4_4": {
+      "status": "IMPLEMENTED_VALIDATOR_COMMITTEE_SCHEDULING_ATTESTATION_QC_SIMULATION",
+      "committee_size": 15,
+      "qc_threshold": 11,
+      "implemented": [
+        "validator/seat records and term invariant",
+        "deterministic primary/fallback schedules",
+        "SHA-256 counter stream",
+        "rejection sampling",
+        "attestation collector",
+        "QC assembler",
+        "local slashing protection",
+        "15-validator in-process simulation",
+        "primary and fallback fault scenarios"
+      ],
+      "next": "Step 4.5 \u2014 multi-process local devnet and libp2p consensus transport"
+    },
+    "milestone_4_5": {
+      "status": "EXECUTABLE_MULTIPROCESS_DEVNET_LIBP2P_ADAPTER_ENCODED",
+      "local_processes": 15,
+      "devnet_transport": "deterministic TCP broker; test only",
+      "production_transport": "go-libp2p v0.49.0 + pubsub v0.17.0 GossipSub",
+      "production_libp2p_compiled_here": false,
+      "reason": "current runtime cannot fetch external Go modules",
+      "topics": [
+        "/420/consensus/1/block",
+        "/420/consensus/1/attestation",
+        "/420/consensus/1/qc",
+        "/420/consensus/1/heartbeat",
+        "/420/consensus/1/status",
+        "/420/consensus/1/randomness",
+        "/420/consensus/1/evidence",
+        "/420/consensus/1/recovery"
+      ],
+      "next": "Step 4.6 \u2014 devnet hardening: real node420 execution instances, persistent consensus DB, live BLS/libp2p build, fault/partition harness"
+    },
+    "milestone_4_6": {
+      "status": "IMPLEMENTED_DEVNET_HARDENING_HARNESS",
+      "implemented": [
+        "QC publish/process deduplication",
+        "atomic persistent consensus state",
+        "restart slot/state recovery",
+        "Engine forkchoice sink boundary",
+        "11-of-15 live quorum test",
+        "10-of-15 quorum-loss test",
+        "node restart test"
+      ],
+      "production_external_modules_compiled_here": false,
+      "remaining_before_public_testnet": [
+        "compiled libp2p/GossipSub",
+        "compiled blst",
+        "real node420/Geth per validator",
+        "live Engine payload flow",
+        "partition matrix",
+        "persistent validator keys/remote signer",
+        "soak testing"
+      ],
+      "next": "Step 4.7 \u2014 real execution devnet packaging and public-testnet readiness checklist"
+    },
+    "milestone_4_7": {
+      "status": "PACKAGED_REAL_EXECUTION_DEVNET_PUBLIC_TESTNET_NOT_READY",
+      "execution_genesis": "execution/genesis/execution-genesis.json",
+      "geth_baseline": "v1.17.5",
+      "engine_api_version_path": "V3 (Cancun active; Prague deferred)",
+      "node420_can_init_genesis": true,
+      "node420_verifies_geth_version": true,
+      "fourtwentyd_live_engine_sink": true,
+      "devnet_pairs": 15,
+      "readiness_gate": "release/readiness.json",
+      "public_testnet_ready": false,
+      "next": "Step 4.8 \u2014 networked dependency build + live node420/Engine/libp2p/blst integration and soak/fault matrix"
+    },
+    "milestone_4_8": {
+      "status": "LOCAL_QUALIFICATION_IMPLEMENTED_PRODUCTION_EVIDENCE_PENDING",
+      "implemented": [
+        "live Engine V3 payload smoke command",
+        "partition-aware devnet broker",
+        "8/7 no-quorum qualification",
+        "11/4 majority-partition qualification",
+        "fault matrix runner",
+        "accelerated soak runner",
+        "networked blst/libp2p dependency build script",
+        "networked Geth/Engine qualification script",
+        "GitHub Actions qualification workflow",
+        "evidence-based public-testnet readiness gate"
+      ],
+      "production_versions": {
+        "geth": "v1.17.5",
+        "blst": "v0.3.16",
+        "go-libp2p": "v0.49.0",
+        "go-libp2p-pubsub": "v0.17.0"
+      },
+      "public_testnet_ready": false,
+      "next": "Step 4.9 \u2014 real production-transport 15-node harness, signed CI evidence, and release-candidate testnet package"
+    },
+    "milestone_4_9": {
+      "status": "TESTNET_RC_PACKAGING_IMPLEMENTED_PUBLIC_LAUNCH_EVIDENCE_GATED",
+      "release_channel": "TESTNET_RC",
+      "release_version": "0.1.0-rc1",
+      "formal_evidence_schema": "release/evidence/schema.json",
+      "release_manifest": "release/rc/manifest.json",
+      "real_devnet_pairs": 15,
+      "rc_builder": "scripts/build-testnet-rc.py",
+      "networked_qualification": "scripts/qualify-testnet-rc.sh",
+      "ci_workflow": ".github/workflows/testnet-rc.yml",
+      "public_testnet_ready": false,
+      "next": "Step 5 \u2014 public testnet launch preparation after Step 4.9 evidence gates pass"
+    }
+  },
+  "native_ai": {
+    "status": "FROZEN_GENESIS_PREPARATION",
+    "protocol_name": "420AI",
+    "node_role": "420ai",
+    "available_from_genesis": true,
+    "inference_execution_location": "off-chain distributed GPU/accelerator nodes",
+    "consensus_executes_model_inference": false,
+    "execution_layer_runs_model_inference": false,
+    "blockchain_responsibilities": [
+      "AI provider/node registry",
+      "AI model registry",
+      "job publication and deterministic job identifiers",
+      "job escrow",
+      "payments in native 420",
+      "provider staking/bonding",
+      "usage/accounting commitments",
+      "model/version hashes",
+      "result commitments",
+      "reputation state",
+      "dispute hooks",
+      "governance-controlled protocol parameters"
+    ],
+    "off_chain_420ai_responsibilities": [
+      "model loading",
+      "GPU/accelerator execution",
+      "inference",
+      "large model artifact storage/access",
+      "large input/output payload transfer",
+      "optional training/fine-tuning workloads when later enabled"
+    ],
+    "genesis_interfaces": {
+      "AIProviderRegistry": "0x000000000000000000000000000000000000042F",
+      "AIModelRegistry": "0x0000000000000000000000000000000000000430",
+      "AIJobManager": "0x0000000000000000000000000000000000000431",
+      "AIJobEscrow": "0x0000000000000000000000000000000000000432",
+      "AIReputationRegistry": "0x0000000000000000000000000000000000000433"
+    },
+    "domains": [
+      "420/AI_PROVIDER",
+      "420/AI_MODEL",
+      "420/AI_JOB",
+      "420/AI_RESULT",
+      "420/AI_ATTESTATION",
+      "420/AI_PAYMENT",
+      "420/AI_DISPUTE"
+    ],
+    "economic_requirements": {
+      "native_payment_asset": "420",
+      "escrow_required_for_paid_jobs": true,
+      "provider_stake_or_bond_supported": true,
+      "protocol_credit_not_automatically_available_to_ai_providers": true,
+      "AI_jobs_may_not_mint_420": true
+    },
+    "data_boundaries": {
+      "large_models_on_chain": false,
+      "large_prompt_or_media_payloads_on_chain": false,
+      "on_chain_commitments": [
+        "content/model hashes",
+        "job parameters hash",
+        "provider assignment/acceptance",
+        "escrow/payment state",
+        "result hash/commitment",
+        "attestation/dispute state"
+      ]
+    },
+    "security_boundaries": {
+      "AI_provider_has_consensus_vote_by_role": false,
+      "AI provider role automatically_validator": false,
+      "model_output_automatically_consensus_truth": false,
+      "AI result_can_move_user_funds_without_normal_authorization": false,
+      "AI result_can_change_finality": false
+    },
+    "implementation_phase": {
+      "genesis_surface_reserved_now": true,
+      "full_distributed_ai_runtime": "later application/protocol milestone",
+      "genesis_must_not_require_live_gpu_provider_for_chain_liveness": true
+    }
+  },
+  "node_roles": {
+    "fourtwentyd": {
+      "role": "consensus",
+      "required_for_consensus_participation": true
+    },
+    "node420": {
+      "role": "execution",
+      "required_for_execution": true
+    },
+    "420ai": {
+      "role": "distributed_ai_compute",
+      "required_for_chain_liveness": false,
+      "available_from_genesis": true
+    }
+  },
+  "cryptography": {
+    "domains": []
+  },
+  "step5": {
+    "status": "TESTNET_LAUNCH_PACKAGE_IMPLEMENTED_NOT_AUTHORIZED",
+    "phase": "S5-CANARY_PREPARATION",
+    "candidate_chain_id": 420,
+    "chain_id_status": "PENDING_NETWORKED_COLLISION_PREFLIGHT_AND_FINAL_FREEZE",
+    "eligible_validators_required": 60,
+    "initial_active_seats": 15,
+    "standby_eligible": 45,
+    "launch_config": "testnet/config/launch.json",
+    "validator_registry": "testnet/validators/registry60.json",
+    "consensus_genesis": "testnet/genesis/consensus-genesis.json",
+    "execution_genesis": "testnet/genesis/execution-genesis.json",
+    "preflight": "scripts/testnet-preflight.py",
+    "public_testnet_authorized": false,
+    "next": "Complete networked Step 4.9 evidence, validator/genesis ceremonies, infrastructure endpoints, then run S5-CANARY.",
+    "substep_5_1": {
+      "status": "CANARY_CEREMONY_INFRASTRUCTURE_PACKAGE_IMPLEMENTED_NOT_AUTHORIZED",
+      "validator_identity_records": 60,
+      "minimum_genesis_seed_contributors": 7,
+      "recommended_genesis_seed_contributors": 15,
+      "private_keys_in_repository": false,
+      "genesis_freeze_tool": "scripts/freeze-testnet-genesis.py",
+      "validator_finalizer": "scripts/finalize-validator-registry.py",
+      "seed_finalizer": "scripts/finalize-genesis-seed.py",
+      "canary_preflight": "scripts/canary-preflight.py",
+      "canary_minimum_hours": 24,
+      "canary_start_authorized": false,
+      "next": "Complete real validator identity ceremony, genesis seed ceremony, production evidence, and bootnode provisioning; then start S5-CANARY."
+    },
+    "substep_5_2": {
+      "status": "CANARY_OPERATIONS_CONTROLLER_IMPLEMENTED_NO_CANARY_RUN_CLAIMED",
+      "canary_state": "testnet/canary/state.json",
+      "health_schema": "testnet/canary/metrics/schema.json",
+      "validator_readiness": "testnet/canary/validator-readiness.json",
+      "incident_schema": "testnet/canary/incidents/schema.json",
+      "evaluation": "scripts/evaluate-canary.py",
+      "controller": "scripts/canary-controller.py",
+      "minimum_canary_hours": 24,
+      "observation_minimum_hours": 72,
+      "observation_config": "testnet/observation/config.json",
+      "promotion_to_observation_authorized": false,
+      "next": "Run the real 24-hour canary after Step 5.1 gates pass; promote only if Step 5.2 evaluation passes."
+    },
+    "substep_5_3": {
+      "status": "OBSERVATION_PUBLIC_SERVICE_CONTROLLER_IMPLEMENTED_NO_RUN_CLAIMED",
+      "observation_state": "testnet/observation/state.json",
+      "minimum_observation_hours": 72,
+      "rpc_policy": "testnet/public-services/rpc/policy.json",
+      "explorer_readiness": "testnet/public-services/explorer/readiness.json",
+      "faucet_operations": "testnet/public-services/faucet/operations.json",
+      "external_validator_onboarding": "testnet/public-services/validator-onboarding/policy.json",
+      "slo": "testnet/observation/slo.json",
+      "evaluation": "scripts/evaluate-observation.py",
+      "controller": "scripts/observation-controller.py",
+      "public_promotion_preflight": "scripts/public-promotion-preflight.py",
+      "public_promotion_authorized": false,
+      "next": "Run a real 72-hour S5-OBSERVATION after canary promotion; then advance to S5-PUBLIC only if all Step 5.3 and global Step 5 gates pass."
+    },
+    "substep_5_4": {
+      "status": "PUBLIC_TESTNET_LAUNCH_PACKAGE_IMPLEMENTED_NOT_LIVE",
+      "public_state": "testnet/public/state.json",
+      "chain_metadata": "testnet/public/metadata/chain.json",
+      "wallet_config": "testnet/public/metadata/wallet-network.json",
+      "publication_checklist": "testnet/public/publication-checklist.json",
+      "user_onboarding": "testnet/public/onboarding/USER-GUIDE.md",
+      "validator_onboarding": "testnet/public/onboarding/VALIDATOR-GUIDE.md",
+      "status_model": "testnet/public/status/status.json",
+      "monitoring_policy": "testnet/public/monitoring/policy.json",
+      "upgrade_policy": "testnet/public/upgrades/policy.json",
+      "controller": "scripts/public-testnet-controller.py",
+      "public_launch_preflight": "scripts/public-launch-preflight.py",
+      "public_testnet_live": false,
+      "next": "Complete real S5-CANARY and S5-OBSERVATION, finalize endpoints/hashes/signatures, then run S5.4 public launch preflight."
+    }
+  },
+  "application": {
+    "signing_domains": "config/application-domains.json"
+  },
+  "step6": {
+    "status": "SYSTEM_CONTRACT_FOUNDATION_IMPLEMENTED_DEPLOYMENT_PLACEMENT_PENDING",
+    "system_address_registry": "config/system-addresses.json",
+    "application_signing_domains": "config/application-domains.json",
+    "solidity_version": "0.8.24",
+    "evm_target": "cancun",
+    "implemented_contracts": [
+      "ValidatorRegistry",
+      "RewardController",
+      "AttentionTreasury",
+      "DevelopmentTreasury",
+      "CommunityValidatorReserve",
+      "FounderVestingRegistry",
+      "AIProviderRegistry",
+      "AIModelRegistry",
+      "AIJobManager",
+      "AIJobEscrow",
+      "AIReputationRegistry",
+      "CannaseurCampaignRegistry"
+    ],
+    "reserved_contracts_pending": [
+      "ProtocolReserve",
+      "CommunityRewardReserve",
+      "RandomnessRegistry",
+      "GovernanceTimelock",
+      "PublicDistributionVault",
+      "GenesisDEXFactory",
+      "PublicBatchAuction",
+      "TWAPOracle",
+      "ValidatorBootstrapReserve"
+    ],
+    "genesis_code_placement_frozen": false,
+    "next": "Step 6.1 \u2014 freeze extended system addresses, complete remaining reserve/distribution contracts, compile/audit Solidity, and generate deterministic genesis bytecode/storage allocation.",
+    "genesis_application_decision": "GENESIS_APPLICATION_DECISION_1_FROZEN",
+    "genesis_dapp_contract_map": "contracts/config/genesis-dapp-contract-map.json",
+    "extended_candidate_system_addresses": "config/extended-system-addresses.json",
+    "genesis_protocol_dapp_contract_sources_ready": true,
+    "substep_6_1": {
+      "status": "FROZEN_ADDRESSES_COMPLETE_SOURCES_PREDEPLOY_PIPELINE_BYTECODE_PENDING",
+      "frozen_system_addresses": 28,
+      "frozen_through": "0x000000000000000000000000000000000000043b",
+      "remaining_reserved_contract_sources_complete": true,
+      "deterministic_predeploy_plan": "contracts/config/predeploy/predeploy-plan.json",
+      "storage_initialization_spec": "contracts/config/predeploy/storage-init.json",
+      "genesis_predeploy_generator": "scripts/generate-genesis-predeploys.py",
+      "compiler_pipeline": "scripts/compile-system-contracts.sh",
+      "compiled_bytecode_ready": false,
+      "genesis_storage_ready": false,
+      "blocking_inputs": [
+        "founder beneficiaries",
+        "bridge verifier",
+        "Foundry/solc compilation"
+      ],
+      "next": "Step 6.2 \u2014 compile/test/audit the Solidity suite on a networked Foundry runner, materialize constructor storage, and generate the first executable predeployed genesis."
+    },
+    "cadc_integration": {
+      "status": "CONFIGURED_PENDING_ISSUER_LAYERZERO_420_DEPLOYMENT",
+      "config": "contracts/config/bridge/cadc.json",
+      "canonical_cad_quote": "CADC",
+      "420_protocol_mint_authority": false
+    },
+    "swap_market_tiers": {
+      "status": "FROZEN_DESIGN",
+      "canonical_tier": true,
+      "permissionless_tier": true,
+      "config": "contracts/config/swap/market-tiers.json"
+    },
+    "bridge_verification_policy": "contracts/config/bridge/verification-policy.json",
+    "bridge_hardening": {
+      "status": "PROTOCOL_COMPONENTS_AND_GENESIS_LIMITS_IMPLEMENTED",
+      "route_registry": true,
+      "risk_manager": true,
+      "transfer_registry": true,
+      "gateway_router": true,
+      "asset_adapters": true,
+      "accounting_reconciliation": true,
+      "risk_limits": "contracts/config/bridge/risk-limits.json",
+      "new_addresses_frozen": false,
+      "production_adapter_verifiers_wired": false
+    },
+    "420pay": {
+      "status": "GENESIS_DECISIONS_1_AND_2_FROZEN",
+      "parameters": "contracts/config/pay/420pay-parameters.json",
+      "contracts": [
+        "InvoiceRegistry420",
+        "MerchantRegistry420",
+        "PaymentRegistry420",
+        "PaymentRouter420",
+        "GasSponsor420"
+      ],
+      "default_acceptance": "FINALIZED",
+      "default_invoice_mode": "SINGLE_USE",
+      "quote_lifetime_seconds": 42,
+      "default_max_slippage_bps": 42,
+      "atomic_swap_settlement": true,
+      "centralized_price_fallback": false,
+      "silent_settlement_substitution": false,
+      "decision_4": "FROZEN",
+      "implementation_status": "SOURCE_IMPLEMENTED_STATIC_TESTS_READY_SOLIDITY_COMPILE_PENDING",
+      "implementation_contracts": [
+        "InvoiceRegistry420",
+        "PaymentRegistry420",
+        "MerchantRegistry420",
+        "PaymentRouter420",
+        "SettlementRouter420",
+        "RefundManager420",
+        "GasSponsor420",
+        "AccountingCommitment420"
+      ],
+      "foundry_test_sources": true,
+      "solidity_compiled": false,
+      "security_audited": false,
+      "hardening": {
+        "status": "FUZZ_INVARIANT_TEST_SOURCES_AND_CANONICAL_ADAPTERS_IMPLEMENTED",
+        "test_plan": "contracts/config/pay/hardening-test-plan.json",
+        "canonical_health_adapter": "CanonicalSwapHealthAdapter420",
+        "canonical_settlement_adapter": "CanonicalSettlementAdapter420",
+        "production_swap_executor_wired": false,
+        "foundry_execution_required": true
+      }
+    },
+    "security_toolchain": {
+      "foundry_required": true,
+      "setup_script": "scripts/setup-foundry.sh",
+      "ci_workflow": ".github/workflows/contracts-foundry.yml",
+      "solidity_version": "0.8.24",
+      "evm_version": "cancun"
+    },
+    "security_audit": {
+      "mainnet_release_gate": true,
+      "policy": "contracts/config/security/audit-policy.json",
+      "release_gates": "contracts/config/security/release-gates.json",
+      "audit_plan": "docs/security/SECURITY-AUDIT-PLAN.md",
+      "external_audit_complete": false
+    },
+    "contract_dev_environment": {
+      "status": "IMPLEMENTED",
+      "shared_across_genesis_suites": true,
+      "dockerfile": "Dockerfile.contracts",
+      "devcontainer": ".devcontainer/devcontainer.json",
+      "github_actions": ".github/workflows/contracts-genesis.yml",
+      "verify_command": "make contracts-verify",
+      "ci_command": "make contracts-ci",
+      "suite_registry": "contracts/config/security/genesis-suite-registry.json"
+    },
+    "roadmap_bookmark": {
+      "phase": "Step 6 smart-contract/genesis-dApp hardening",
+      "architecture_checkpoint": "Genesis Contract Interface Layer v1.0 frozen",
+      "current_suite": "420Pay",
+      "suite_sequence": [
+        "420Pay",
+        "420Swap",
+        "420Bridge",
+        "Validator_Stake",
+        "Rewards_Treasuries",
+        "Governance",
+        "PublicDistribution_DEX_Oracle",
+        "FounderVesting",
+        "Registry_Names_Identity",
+        "AI_Escrow_Registry"
+      ],
+      "testing_rule": "cumulative compile/unit/fuzz/invariant/integration testing after each suite",
+      "audit_rule": "external audit after suite logic stabilizes and before mainnet genesis"
+    },
+    "genesis_interface_layer": {
+      "status": "FROZEN_V1_0",
+      "policy": "contracts/config/interfaces/genesis-interface-layer.json",
+      "dependency_matrix": "contracts/config/interfaces/dependency-matrix.json",
+      "next_action": "start new implementation thread with 420Pay adaptation/executable verification",
+      "added_security_concepts": [
+        "capabilities",
+        "custody",
+        "genesis initialization",
+        "migration",
+        "system safety"
+      ],
+      "version": "1.0.0",
+      "freeze_manifest": "contracts/config/interfaces/interface-layer-v1-freeze.json"
+    },
+    "genesis_account_decision_1": {
+      "status": "FROZEN_REQUIREMENTS_IMPLEMENTATION_ABI_PENDING",
+      "architecture": "EVM-compatible smart accounts with protocol-supported plumbing",
+      "config": "contracts/config/accounts/genesis-account-decision-1.json"
+    }
+  },
+  "genesis_applications": "config/genesis-applications.json"
 }

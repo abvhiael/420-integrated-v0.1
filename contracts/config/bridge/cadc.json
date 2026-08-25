@@ -1,0 +1,57 @@
+{
+  "schema": "420-cadc-genesis-integration-v1",
+  "status": "CANONICAL_CAD_PENDING_ISSUER_INTEGRATION",
+  "issuer": "Loon Technology Inc.",
+  "symbol": "CADC",
+  "reference_currency": "CAD",
+  "architecture": "ISSUER_CANONICAL_LAYERZERO_OFT_PATH",
+  "destination_420": {
+    "token_address": "PENDING_LOON_ISSUER_DEPLOYMENT",
+    "layerzero_endpoint": "PENDING_LAYERZERO_420_DEPLOYMENT",
+    "oft_or_adapter": "PENDING_LOON_ISSUER_DEPLOYMENT",
+    "mint_authority_420_protocol": false
+  },
+  "known_source_deployments": [
+    {
+      "chain": "Ethereum",
+      "token": "0xcadc0acd4b445166f12d2c07eac6e2544fbe2eef",
+      "status": "LOON_PUBLISHED"
+    },
+    {
+      "chain": "Arbitrum",
+      "token": "0x2b28E826b55e399F4d4699b85f68666AC51e6f70",
+      "status": "LOON_PUBLISHED"
+    },
+    {
+      "chain": "Polygon",
+      "token": "0x9de41aff9f55219d5bf4359f167d1d0c772a396d",
+      "status": "LOON_PUBLISHED"
+    },
+    {
+      "chain": "Base",
+      "token": "0x043eb4b75d0805c43d7c834902e335621983cf03",
+      "status": "LOON_PUBLISHED"
+    },
+    {
+      "chain": "Solana",
+      "token": "9ewjJpmD1ES83RDRFnHs7V2hUdH76WAVjdvu6UV6WNo7",
+      "status": "LOON_PUBLISHED"
+    }
+  ],
+  "qualification": [
+    "Loon/issuer approval of 420 destination deployment",
+    "LayerZero Endpoint V2 available on 420",
+    "Issuer-owned OFT/OFTAdapter deployed and peered",
+    "Production multi-DVN security configuration",
+    "Independent pathway configuration verification",
+    "Canonical destination token address frozen",
+    "Bridge pause/emergency controls disclosed",
+    "Canadian regulatory qualification remains satisfied"
+  ],
+  "rules": [
+    "420 does not deploy an unofficial wrapped CADC and call it canonical.",
+    "420 protocol has no unilateral CADC mint authority.",
+    "Only issuer-approved CADC representation may receive CANONICAL_CAD status.",
+    "If qualification is lost, canonical quote status can be removed without confiscating balances."
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "schema": "420-testnet-faucet-operations-v1",
+  "testnet_only": true,
+  "status": "PENDING",
+  "distribution": {
+    "amount_per_successful_request_420": "42",
+    "per_address_cooldown_hours": 24,
+    "per_ip_requests_per_hour": 5,
+    "daily_operator_cap_420": "42000"
+  },
+  "abuse_controls": [
+    "captcha or equivalent",
+    "IP and address rate limit",
+    "deny obvious automated spraying",
+    "operator emergency pause",
+    "separate faucet hot wallet",
+    "no mainnet keys",
+    "public notice that testnet 420 has no monetary value"
+  ],
+  "telemetry": [
+    "requests_total",
+    "success_total",
+    "denied_total",
+    "unique_addresses_24h",
+    "distributed_420_24h",
+    "hot_wallet_balance_420"
+  ]
+}

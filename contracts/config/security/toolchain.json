@@ -1,0 +1,24 @@
+{
+  "schema": "420-contract-toolchain-v1",
+  "status": "PINNED_PROJECT_CONFIGURATION",
+  "foundry_install": "official foundryup",
+  "solidity_version": "0.8.24",
+  "evm_version": "cancun",
+  "optimizer": true,
+  "optimizer_runs": 200,
+  "required_tools": [
+    "forge",
+    "cast",
+    "anvil"
+  ],
+  "release_requirements": [
+    "record forge version",
+    "record actual solc version resolved by forge",
+    "forge build succeeds from clean checkout",
+    "forge test succeeds",
+    "fuzz/invariant suite succeeds",
+    "forge coverage report generated",
+    "runtime bytecode/storage layouts exported",
+    "artifact/code hashes committed"
+  ]
+}

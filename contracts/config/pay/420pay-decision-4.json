@@ -1,0 +1,68 @@
+{
+  "schema": "420pay-genesis-decision-4-v1",
+  "status": "FROZEN",
+  "split_settlement": {
+    "max_recipients": 8,
+    "percent_total_bps": 10000,
+    "rounding_remainder": "PRIMARY_RECIPIENT",
+    "tips_separate_default": true
+  },
+  "invoice_signing": {
+    "domain": "420/APP/420PAY_INVOICE",
+    "raw_json_signing": false,
+    "bound_fields": [
+      "invoice_id",
+      "merchant_id",
+      "merchant",
+      "amount",
+      "currency",
+      "accepted_assets",
+      "settlement_plan_hash",
+      "expires_at",
+      "refund_until",
+      "tip_policy_hash",
+      "quote_max_slippage_bps",
+      "invoice_mode",
+      "acceptance",
+      "protocol_version"
+    ]
+  },
+  "payment_id": {
+    "domain": "420/APP/420PAY_PAYMENT_ID",
+    "fields": [
+      "invoice_id",
+      "payer",
+      "merchant",
+      "input_asset",
+      "input_amount",
+      "settlement_asset",
+      "settlement_amount",
+      "quote_id",
+      "payer_nonce"
+    ]
+  },
+  "offline_invoice_creation": true,
+  "online_acceptance_required": true,
+  "merchant_payouts": {
+    "versioned": true,
+    "historical_receipts_immutable": true,
+    "delayed_activation_for": [
+      "CREDENTIALED",
+      "REGULATED"
+    ]
+  },
+  "settlement_asset_health": "FAIL_CLOSED",
+  "high_value": {
+    "protocol_max": null,
+    "requires": [
+      "FINALIZED",
+      "HEALTHY_CANONICAL_PRICING",
+      "HEALTHY_SETTLEMENT_PATH"
+    ]
+  },
+  "registry_discovery_required": true,
+  "security_invariants": [
+    "merchant settlement cannot be reduced by undisclosed fees, price movement, routing, or partial execution",
+    "payer spend cannot exceed explicitly signed amount, gas, slippage, tip, conversion, and fee limits"
+  ]
+}

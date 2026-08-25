@@ -1,0 +1,9 @@
+{
+  "go_test": 0,
+  "build_fourtwentyd": 0,
+  "build_node420": 0,
+  "system_addresses": 20,
+  "step6_static_verification": true,
+  "forge_available": false,
+  "genesis_code_placement_frozen": false
+}

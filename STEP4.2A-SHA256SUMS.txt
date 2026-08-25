@@ -1,0 +1,5 @@
+28c2c9f0d31f9b35b50e56108b607de47ba1430f1ab765f709ef7d5ed6e67d73  config/protocol.json
+375080976dc1f2e50fd68a7f9f088e188cfb04d0a56a6ce3a238439ddb18a522  config/system-addresses.json
+50d6f4cdeee6e7777d1d352601566f750caa237a667cabd34adeb64aceb77acc  config/ai-genesis.json
+952dc127b5f0fe9ce99537b91b4a0552f0e4587cf5ab3b79477b7c10b903dd7e  docs/STEP-4.2A-NATIVE-AI-GENESIS.md
+bbccc18f2aa1b44a7317a9f5cb3403dda892c03b0d517e499c69035bd39f1390  genesis/cmd/420-genesis/main.go

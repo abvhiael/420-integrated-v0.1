@@ -1,0 +1,12 @@
+{
+  "go_test": 0,
+  "build_fourtwentyd": 0,
+  "build_node420": 0,
+  "observation_state": "S5-OBSERVATION_PREP",
+  "minimum_observation_hours": 72,
+  "rpc_endpoints_required": 3,
+  "external_validators_target": 5,
+  "observation_evaluation_pass": false,
+  "public_promotion_authorized": false,
+  "synthetic_observation_data_created": false
+}

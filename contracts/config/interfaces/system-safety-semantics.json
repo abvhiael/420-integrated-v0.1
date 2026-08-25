@@ -1,0 +1,31 @@
+{
+  "schema": "420-system-safety-semantics-v1",
+  "status": "DEFINED_FOR_INTERFACE_LAYER_V1",
+  "states": {
+    "NORMAL": "normal protocol operation",
+    "DEGRADED": "new risk-increasing operations may be restricted; safe exits/refunds should remain available",
+    "HALTED": "new value-risking operations fail closed; withdrawals/refunds/recovery may remain available only when explicitly classified safe",
+    "RECOVERY": "only explicitly authorized recovery and safe-exit operations may proceed"
+  },
+  "action_classes": {
+    "NORMAL_ONLY": "must not run outside NORMAL",
+    "SAFE_WHEN_PAUSED": "may run when component is paused if system safety allows",
+    "WITHDRAWAL_ONLY": "value-reducing/user-exit action designed to remain available when safe",
+    "RECOVERY_ONLY": "may run only as part of authorized recovery"
+  },
+  "examples": {
+    "420Pay": {
+      "new_swap_payment": "NORMAL_ONLY",
+      "refund": "SAFE_WHEN_PAUSED"
+    },
+    "420Bridge": {
+      "new_inbound": "NORMAL_ONLY",
+      "new_outbound": "NORMAL_ONLY",
+      "approved_withdrawal_recovery": "WITHDRAWAL_ONLY"
+    },
+    "420Stake": {
+      "new_activation": "NORMAL_ONLY",
+      "mature_withdrawal": "WITHDRAWAL_ONLY"
+    }
+  }
+}

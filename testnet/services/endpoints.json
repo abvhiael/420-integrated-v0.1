@@ -1,0 +1,39 @@
+{
+  "schema": "420-integrated-testnet-public-services-v1",
+  "rpc": [
+    {
+      "name": "rpc-1",
+      "url": "REPLACE_WITH_HTTPS_RPC_1",
+      "status": "PLACEHOLDER"
+    },
+    {
+      "name": "rpc-2",
+      "url": "REPLACE_WITH_HTTPS_RPC_2",
+      "status": "PLACEHOLDER"
+    },
+    {
+      "name": "rpc-3",
+      "url": "REPLACE_WITH_HTTPS_RPC_3",
+      "status": "PLACEHOLDER"
+    }
+  ],
+  "websocket": [
+    {
+      "name": "ws-1",
+      "url": "REPLACE_WITH_WSS_RPC_1",
+      "status": "PLACEHOLDER"
+    }
+  ],
+  "explorer": {
+    "url": "REPLACE_WITH_EXPLORER_URL",
+    "status": "PLACEHOLDER"
+  },
+  "faucet": {
+    "url": "REPLACE_WITH_FAUCET_URL",
+    "status": "PLACEHOLDER"
+  },
+  "chain_metadata": {
+    "url": "REPLACE_WITH_CHAIN_METADATA_URL",
+    "status": "PLACEHOLDER"
+  }
+}

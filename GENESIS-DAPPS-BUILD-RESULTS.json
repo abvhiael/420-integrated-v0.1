@@ -1,0 +1,29 @@
+{
+  "go_test": {
+    "returncode": 0,
+    "stdout": "?   \tgithub.com/420integrated/420-integrated/consensus/cmd/fourtwentyd\t[no test files]\n?   \tgithub.com/420integrated/420-integrated/consensus/crypto\t[no test files]\n?   \tgithub.com/420integrated/420-integrated/consensus/crypto/bls\t[no test files]\nok  \tgithub.com/420integrated/420-integrated/consensus/attestation\t0.047s\nok  \tgithub.com/420integrated/420-integrated/consensus/clock\t0.017s\nok  \tgithub.com/420integrated/420-integrated/consensus/devnet\t0.049s\n?   \tgithub.com/420integrated/420-integrated/consensus/p2p\t[no test files]\nok  \tgithub.com/420integrated/420-integrated/consensus/engine\t0.071s\nok  \tgithub.com/420integrated/420-integrated/consensus/finality\t0.088s\nok  \tgithub.com/420integrated/420-integrated/consensus/proposer\t0.045s\nok  \tgithub.com/420integrated/420-integrated/consensus/slashing\t0.029s\nok  \tgithub.com/420integrated/420-integrated/consensus/ssz\t0.017s\n?   \tgithub.com/420integrated/420-integrated/consensus/types\t[no test files]\nok  \tgithub.com/420integrated/420-integrated/consensus/storage\t0.030s\n?   \tgithub.com/420integrated/420-integrated/devnet/cmd/devnet-bus\t[no test files]\n?   \tgithub.com/420integrated/420-integrated/execution/cmd/node420\t[no test files]\n?   \tgithub.com/420integrated/420-integrated/genesis/cmd/420-genesis\t[no test files]\nok  \tgithub.com/420integrated/420-integrated/consensus/validator\t0.016s\n?   \tgithub.com/420integrated/420-integrated/integration/cmd/engine-live-smoke\t[no test files]\n?   \tgithub.com/420integrated/420-integrated/simulations/committee15/main\t[no test files]\nok  \tgithub.com/420integrated/420-integrated/integration/engineapi\t0.039s\nok  \tgithub.com/420integrated/420-integrated/simulations/committee15\t0.036s\n",
+    "stderr": ""
+  },
+  "build_fourtwentyd": {
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "build_node420": {
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "step6_static": {
+    "returncode": 0,
+    "stdout": "{\n  \"pass\": true,\n  \"errors\": [],\n  \"system_address_count\": 20,\n  \"application_domain_count\": 9\n}\n",
+    "stderr": "Spreadsheet runtime warmup failed during python startup\nTraceback (most recent call last):\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/patches/warm_spreadsheet_runtime_on_startup.py\", line 26, in warm_spreadsheet_runtime_on_startup\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/spreadsheet_warmup.py\", line 772, in warm_spreadsheet_runtime\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/rpc/connection.py\", line 37, in get_or_create_client\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/rpc/daemon.py\", line 124, in start_daemon\nTimeoutError: Timed out waiting for artifact tool daemon socket. Set ARTIFACT_TOOL_RPC_DAEMON_STARTUP_TIMEOUT_S=<seconds> to increase the limit.\n"
+  },
+  "genesis_dapps": {
+    "returncode": 0,
+    "stdout": "{\n  \"pass\": true,\n  \"errors\": [],\n  \"genesis_apps\": 12,\n  \"testnet_only_apps\": 1\n}\n",
+    "stderr": "Spreadsheet runtime warmup failed during python startup\nTraceback (most recent call last):\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/patches/warm_spreadsheet_runtime_on_startup.py\", line 26, in warm_spreadsheet_runtime_on_startup\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/spreadsheet_warmup.py\", line 772, in warm_spreadsheet_runtime\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/rpc/connection.py\", line 37, in get_or_create_client\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/rpc/daemon.py\", line 124, in start_daemon\nTimeoutError: Timed out waiting for artifact tool daemon socket. Set ARTIFACT_TOOL_RPC_DAEMON_STARTUP_TIMEOUT_S=<seconds> to increase the limit.\n"
+  },
+  "forge_available": false,
+  "solc_available": false
+}

@@ -1,0 +1,34 @@
+{
+  "schema": "420-bridge-risk-limits-v1",
+  "status": "FROZEN_GENESIS_LIMITS",
+  "governance": {
+    "decrease_limits": "EMERGENCY_OR_GOVERNANCE_IMMEDIATE",
+    "increase_limits": "G2_MINIMUM",
+    "verification_mechanism_change": "G3",
+    "asset_activation": "G2_PLUS_SECURITY_QUALIFICATION"
+  },
+  "asset_aggregate_limits": [
+    {"asset":"CADC","status":"PENDING_ISSUER_INTEGRATION","max_single":25000,"max_hourly_in":100000,"max_hourly_out":100000,"max_daily_in":250000,"max_daily_out":250000,"max_tvl":2000000,"unit":"CADC"},
+    {"asset":"USDC","status":"PENDING_CCTP_420_SUPPORT","max_single":25000,"max_hourly_in":100000,"max_hourly_out":100000,"max_daily_in":250000,"max_daily_out":250000,"max_tvl":2000000,"unit":"USDC"},
+    {"asset":"ETH","status":"PENDING_PROOF_BRIDGE","max_single":5,"max_hourly_in":20,"max_hourly_out":20,"max_daily_in":50,"max_daily_out":50,"max_tvl":250,"unit":"ETH"},
+    {"asset":"BTC","status":"APPROVED_INACTIVE","max_single":0,"max_hourly_in":0,"max_hourly_out":0,"max_daily_in":0,"max_daily_out":0,"max_tvl":0,"unit":"BTC"}
+  ],
+  "route_limits": [
+    {"asset":"CADC","route":"Ethereum<->420","single":25000,"hourly_each_direction":75000,"daily_each_direction":150000,"route_tvl":750000},
+    {"asset":"CADC","route":"Base<->420","single":15000,"hourly_each_direction":50000,"daily_each_direction":100000,"route_tvl":500000},
+    {"asset":"CADC","route":"Arbitrum<->420","single":15000,"hourly_each_direction":50000,"daily_each_direction":100000,"route_tvl":500000},
+    {"asset":"CADC","route":"Polygon<->420","single":10000,"hourly_each_direction":25000,"daily_each_direction":50000,"route_tvl":250000},
+    {"asset":"CADC","route":"Solana<->420","single":10000,"hourly_each_direction":25000,"daily_each_direction":50000,"route_tvl":250000},
+    {"asset":"USDC","route":"Ethereum<->420","single":25000,"hourly_each_direction":75000,"daily_each_direction":150000,"route_tvl":750000},
+    {"asset":"USDC","route":"Base<->420","single":15000,"hourly_each_direction":50000,"daily_each_direction":100000,"route_tvl":500000},
+    {"asset":"USDC","route":"Arbitrum<->420","single":15000,"hourly_each_direction":50000,"daily_each_direction":100000,"route_tvl":500000},
+    {"asset":"ETH","route":"Ethereum<->420","single":5,"hourly_each_direction":20,"daily_each_direction":50,"route_tvl":250},
+    {"asset":"BTC","route":"Bitcoin<->420","single":0,"hourly_each_direction":0,"daily_each_direction":0,"route_tvl":0}
+  ],
+  "rules": [
+    "Both route and asset aggregate limits apply; the stricter remaining allowance wins.",
+    "Inbound and outbound directions may be paused independently.",
+    "Canonical bridged supply may never exceed the asset aggregate max_tvl.",
+    "BTC limits remain zero until withdrawal custody is separately approved."
+  ]
+}

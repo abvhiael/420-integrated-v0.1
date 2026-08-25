@@ -1,0 +1,8 @@
+{
+  "schema": "420-genesis-seed-contributor-v1",
+  "contributor_id": "contributor-02",
+  "commitment": "REPLACE_SHA256_HEX",
+  "reveal": "REPLACE_32_BYTE_HEX_AFTER_COMMIT_PHASE",
+  "signature": "OPTIONAL_PUBLIC_ATTESTATION",
+  "status": "PENDING"
+}

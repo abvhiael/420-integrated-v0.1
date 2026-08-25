@@ -1,0 +1,28 @@
+{
+  "schema": "420-testnet-observation-slo-v1",
+  "minimum_observation_hours": 72,
+  "rpc": {
+    "availability_pct_min": 99.0,
+    "p95_latency_ms_max": 1000,
+    "error_rate_pct_max": 1.0,
+    "minimum_healthy_endpoints": 3
+  },
+  "explorer": {
+    "availability_pct_min": 99.0,
+    "indexing_lag_blocks_max": 3
+  },
+  "faucet": {
+    "availability_pct_min": 95.0,
+    "abuse_incidents_unresolved_max": 0
+  },
+  "consensus": {
+    "conflicting_qc_max": 0,
+    "unexplained_safety_halt_max": 0,
+    "active_seats_min": 15,
+    "eligible_validators_min": 60,
+    "finality_stall_over_42_slots_unexplained_max": 0
+  },
+  "onboarding": {
+    "external_validators_successfully_onboarded_min": 5
+  }
+}

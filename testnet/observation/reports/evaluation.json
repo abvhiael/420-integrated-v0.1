@@ -1,0 +1,31 @@
+{
+  "schema": "420-observation-evaluation-v1",
+  "all_observation_criteria_pass": false,
+  "checks": [
+    {
+      "name": "observation snapshots",
+      "status": "BLOCKED",
+      "detail": "no real observation snapshots"
+    },
+    {
+      "name": "RPC endpoint config",
+      "status": "BLOCKED",
+      "detail": "ready=0/3"
+    },
+    {
+      "name": "explorer config",
+      "status": "BLOCKED",
+      "detail": "backend=PENDING frontend=PENDING"
+    },
+    {
+      "name": "faucet config",
+      "status": "BLOCKED",
+      "detail": "PENDING"
+    },
+    {
+      "name": "unresolved major/critical incidents",
+      "status": "PASS",
+      "detail": "count=0"
+    }
+  ]
+}

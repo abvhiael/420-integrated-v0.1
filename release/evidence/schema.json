@@ -1,0 +1,27 @@
+{
+  "schema": "420-integrated-qualification-evidence-v1",
+  "required_fields": [
+    "gate",
+    "status",
+    "timestamp_utc",
+    "git_commit",
+    "artifact_sha256",
+    "runner",
+    "command",
+    "result_summary"
+  ],
+  "allowed_status": [
+    "PASS",
+    "FAIL"
+  ],
+  "gates": [
+    "production_blst",
+    "production_libp2p",
+    "live_engine_payload",
+    "real_devnet15",
+    "production_fault_matrix",
+    "production_restart_recovery",
+    "production_soak",
+    "release_checksum_verification"
+  ]
+}

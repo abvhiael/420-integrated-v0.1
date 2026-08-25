@@ -1,0 +1,27 @@
+{
+  "schema": "420-testnet-observation-rpc-v1",
+  "minimum_ready": 3,
+  "endpoints": [
+    {
+      "name": "rpc-1",
+      "http_url": "REPLACE",
+      "ws_url": "REPLACE",
+      "failure_domain": "A",
+      "status": "PENDING"
+    },
+    {
+      "name": "rpc-2",
+      "http_url": "REPLACE",
+      "ws_url": "REPLACE",
+      "failure_domain": "B",
+      "status": "PENDING"
+    },
+    {
+      "name": "rpc-3",
+      "http_url": "REPLACE",
+      "ws_url": "REPLACE",
+      "failure_domain": "C",
+      "status": "PENDING"
+    }
+  ]
+}

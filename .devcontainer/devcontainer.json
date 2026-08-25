@@ -1,0 +1,20 @@
+{
+  "name": "420 Integrated Contract Dev",
+  "build": {
+    "dockerfile": "../Dockerfile.contracts",
+    "context": ".."
+  },
+  "workspaceFolder": "/workspace",
+  "mounts": [
+    "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached"
+  ],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "NomicFoundation.hardhat-solidity",
+        "tintinweb.solidity-visual-auditor"
+      ]
+    }
+  },
+  "postCreateCommand": "./scripts/contracts-bootstrap.sh || true"
+}

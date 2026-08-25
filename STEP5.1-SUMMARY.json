@@ -1,0 +1,16 @@
+{
+  "go_test": 0,
+  "build_fourtwentyd": 0,
+  "build_node420": 0,
+  "validator_records": 60,
+  "genesis_seed_contributor_templates": 15,
+  "private_keys_generated": false,
+  "canary_start_authorized": false,
+  "expected_blockers": [
+    "production evidence",
+    "validator ceremony",
+    "genesis seed ceremony",
+    "genesis freeze",
+    "bootnode infrastructure"
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "schema": "420-integrated-consensus-genesis-v1",
+  "chain_id": 420,
+  "protocol_version": 1,
+  "genesis_time": "SET_BY_LAUNCH_CEREMONY",
+  "slot_seconds": 12,
+  "slots_per_epoch": 420,
+  "epochs_per_rotation": 42,
+  "eligible_validator_count": 60,
+  "active_committee_size": 15,
+  "active_seat_ids": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14
+  ],
+  "validator_registry": "../validators/registry60.json",
+  "rotation_seed": {
+    "status": "SET_BY_GENESIS_SEED_CEREMONY",
+    "domain": "420/GENESIS_SEED",
+    "value": "REPLACE_WITH_32_BYTE_HEX"
+  },
+  "bootstrap_handoff": {
+    "earliest_slot": 4200,
+    "minimum_eligible": 60,
+    "minimum_active_fill": 15
+  },
+  "native_ai": {
+    "node_role": "420ai",
+    "required_for_chain_liveness": false,
+    "config": "ai-genesis.json"
+  }
+}

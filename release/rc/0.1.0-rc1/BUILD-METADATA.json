@@ -1,0 +1,8 @@
+{
+  "schema": "420-integrated-testnet-rc-build-v1",
+  "version": "0.1.0-rc1",
+  "release_channel": "TESTNET_RC",
+  "built_utc": "2026-08-24T18:25:08.709659+00:00",
+  "public_testnet_ready": false,
+  "note": "RC packaging is not public-launch authorization. Check release/evidence-status.json."
+}

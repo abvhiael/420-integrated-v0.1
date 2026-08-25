@@ -1,0 +1,14 @@
+{
+  "project": "node420",
+  "upstream": "https://github.com/ethereum/go-ethereum",
+  "pinned_release": "v1.17.5",
+  "pin_policy": "exact release tag, then record resolved git commit",
+  "integration_model": "external pinned Geth binary launched by node420 wrapper; no full source vendoring",
+  "engine_api": "authenticated JSON-RPC over local/private port 8551",
+  "required_capabilities": [
+    "engine_forkchoiceUpdatedV3",
+    "engine_getPayloadV3",
+    "engine_newPayloadV3"
+  ],
+  "custom_engine_namespace": "engine420_* only if standard API proves insufficient"
+}

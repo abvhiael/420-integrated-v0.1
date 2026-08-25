@@ -1,0 +1,42 @@
+{
+  "schema": "420-swap-bridge-extension-addresses-v1",
+  "status": "CANDIDATE_PENDING_FREEZE",
+  "assignments": [
+    {
+      "address": "0x000000000000000000000000000000000000043c",
+      "name": "BridgeAssetRegistry"
+    },
+    {
+      "address": "0x000000000000000000000000000000000000043d",
+      "name": "CADCBridgeIntegration"
+    },
+    {
+      "address": "0x000000000000000000000000000000000000043e",
+      "name": "CanonicalMarketRegistry"
+    },
+    {
+      "address": "0x000000000000000000000000000000000000043f",
+      "name": "PermissionlessDEXFactory"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000440",
+      "name": "BridgeRouteRegistry"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000441",
+      "name": "BridgeRiskManager"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000442",
+      "name": "BridgeTransferRegistry"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000443",
+      "name": "GatewayRouter420"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000444",
+      "name": "BridgeAccountingRegistry"
+    }
+  ]
+}

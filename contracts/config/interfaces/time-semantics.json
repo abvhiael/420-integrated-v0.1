@@ -1,0 +1,8 @@
+{
+  "schema": "420-application-time-semantics-v1",
+  "status": "FROZEN_WITH_INTERFACE_LAYER_V1",
+  "unix_time": "block.timestamp seconds for application expiry/quote validity unless a protocol object explicitly uses consensus slot/epoch",
+  "expiry_rule": "valid while block.timestamp <= expiresAt unless the object specification explicitly states otherwise",
+  "consensus_time": "validator/governance/consensus lifecycle may use protocol slot or epoch where defined",
+  "no_implicit_substitution": "applications must not substitute wall-clock timestamps for consensus slots/epochs where protocol rules require slot/epoch"
+}

@@ -1,0 +1,56 @@
+{
+  "schema": "420pay-test-vectors-v1",
+  "note": "Normative semantic vectors; exact Solidity ABI hashes should be regenerated and compared in Foundry/ethers once compiler tooling is available.",
+  "invoice": [
+    {
+      "invoice_id": "0x1111111111111111111111111111111111111111111111111111111111111111",
+      "merchant_id": "0x2222222222222222222222222222222222222222222222222222222222222222",
+      "amount": "84200000",
+      "currency": "CAD",
+      "quote_max_slippage_bps": 42,
+      "mode": "SINGLE_USE",
+      "acceptance": "FINALIZED"
+    }
+  ],
+  "payment": [
+    {
+      "invoice_id": "0x1111111111111111111111111111111111111111111111111111111111111111",
+      "payer": "0x3333333333333333333333333333333333333333",
+      "merchant": "0x4444444444444444444444444444444444444444",
+      "input_asset": "0x5555555555555555555555555555555555555555",
+      "input_amount": "1000000000000000000",
+      "settlement_asset": "0x6666666666666666666666666666666666666666",
+      "settlement_amount": "84200000",
+      "quote_id": "0x7777777777777777777777777777777777777777777777777777777777777777",
+      "payer_nonce": 1
+    }
+  ],
+  "split": [
+    {
+      "amount": 100,
+      "bps": [
+        3333,
+        3333,
+        3334
+      ],
+      "primary_index": 0,
+      "expected": [
+        34,
+        33,
+        33
+      ]
+    },
+    {
+      "amount": 8420,
+      "bps": [
+        8000,
+        2000
+      ],
+      "primary_index": 0,
+      "expected": [
+        6736,
+        1684
+      ]
+    }
+  ]
+}

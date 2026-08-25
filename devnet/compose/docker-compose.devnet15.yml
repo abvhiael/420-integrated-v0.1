@@ -1,0 +1,152 @@
+version: '3.9'
+services:
+  node420-0:
+    image: 420integrated/node420:dev
+    command: ["--datadir","/data","--jwt-secret","/secrets/jwt.hex","--authrpc.addr","0.0.0.0","--authrpc.port","8551","--http.addr","0.0.0.0","--http.port","8545","--port","30303"]
+    volumes: ["./node-0/execution:/data","./node-0/jwt.hex:/secrets/jwt.hex:ro"]
+    ports: ["8545:8545","30303:30303"]
+  fourtwentyd-0:
+    image: 420integrated/fourtwentyd:dev
+    command: ["--devnet-validator","--node-id=1000","--seat=0","--state=/data/consensus.json","--engine=http://node420-0:8551","--jwt-secret=/secrets/jwt.hex"]
+    depends_on: ["node420-0"]
+    volumes: ["./node-0/consensus:/data","./node-0/jwt.hex:/secrets/jwt.hex:ro"]
+  node420-1:
+    image: 420integrated/node420:dev
+    command: ["--datadir","/data","--jwt-secret","/secrets/jwt.hex","--authrpc.addr","0.0.0.0","--authrpc.port","8551","--http.addr","0.0.0.0","--http.port","8545","--port","30303"]
+    volumes: ["./node-1/execution:/data","./node-1/jwt.hex:/secrets/jwt.hex:ro"]
+    ports: ["8546:8545","30304:30303"]
+  fourtwentyd-1:
+    image: 420integrated/fourtwentyd:dev
+    command: ["--devnet-validator","--node-id=1001","--seat=1","--state=/data/consensus.json","--engine=http://node420-1:8551","--jwt-secret=/secrets/jwt.hex"]
+    depends_on: ["node420-1"]
+    volumes: ["./node-1/consensus:/data","./node-1/jwt.hex:/secrets/jwt.hex:ro"]
+  node420-2:
+    image: 420integrated/node420:dev
+    command: ["--datadir","/data","--jwt-secret","/secrets/jwt.hex","--authrpc.addr","0.0.0.0","--authrpc.port","8551","--http.addr","0.0.0.0","--http.port","8545","--port","30303"]
+    volumes: ["./node-2/execution:/data","./node-2/jwt.hex:/secrets/jwt.hex:ro"]
+    ports: ["8547:8545","30305:30303"]
+  fourtwentyd-2:
+    image: 420integrated/fourtwentyd:dev
+    command: ["--devnet-validator","--node-id=1002","--seat=2","--state=/data/consensus.json","--engine=http://node420-2:8551","--jwt-secret=/secrets/jwt.hex"]
+    depends_on: ["node420-2"]
+    volumes: ["./node-2/consensus:/data","./node-2/jwt.hex:/secrets/jwt.hex:ro"]
+  node420-3:
+    image: 420integrated/node420:dev
+    command: ["--datadir","/data","--jwt-secret","/secrets/jwt.hex","--authrpc.addr","0.0.0.0","--authrpc.port","8551","--http.addr","0.0.0.0","--http.port","8545","--port","30303"]
+    volumes: ["./node-3/execution:/data","./node-3/jwt.hex:/secrets/jwt.hex:ro"]
+    ports: ["8548:8545","30306:30303"]
+  fourtwentyd-3:
+    image: 420integrated/fourtwentyd:dev
+    command: ["--devnet-validator","--node-id=1003","--seat=3","--state=/data/consensus.json","--engine=http://node420-3:8551","--jwt-secret=/secrets/jwt.hex"]
+    depends_on: ["node420-3"]
+    volumes: ["./node-3/consensus:/data","./node-3/jwt.hex:/secrets/jwt.hex:ro"]
+  node420-4:
+    image: 420integrated/node420:dev
+    command: ["--datadir","/data","--jwt-secret","/secrets/jwt.hex","--authrpc.addr","0.0.0.0","--authrpc.port","8551","--http.addr","0.0.0.0","--http.port","8545","--port","30303"]
+    volumes: ["./node-4/execution:/data","./node-4/jwt.hex:/secrets/jwt.hex:ro"]
+    ports: ["8549:8545","30307:30303"]
+  fourtwentyd-4:
+    image: 420integrated/fourtwentyd:dev
+    command: ["--devnet-validator","--node-id=1004","--seat=4","--state=/data/consensus.json","--engine=http://node420-4:8551","--jwt-secret=/secrets/jwt.hex"]
+    depends_on: ["node420-4"]
+    volumes: ["./node-4/consensus:/data","./node-4/jwt.hex:/secrets/jwt.hex:ro"]
+  node420-5:
+    image: 420integrated/node420:dev
+    command: ["--datadir","/data","--jwt-secret","/secrets/jwt.hex","--authrpc.addr","0.0.0.0","--authrpc.port","8551","--http.addr","0.0.0.0","--http.port","8545","--port","30303"]
+    volumes: ["./node-5/execution:/data","./node-5/jwt.hex:/secrets/jwt.hex:ro"]
+    ports: ["8550:8545","30308:30303"]
+  fourtwentyd-5:
+    image: 420integrated/fourtwentyd:dev
+    command: ["--devnet-validator","--node-id=1005","--seat=5","--state=/data/consensus.json","--engine=http://node420-5:8551","--jwt-secret=/secrets/jwt.hex"]
+    depends_on: ["node420-5"]
+    volumes: ["./node-5/consensus:/data","./node-5/jwt.hex:/secrets/jwt.hex:ro"]
+  node420-6:
+    image: 420integrated/node420:dev
+    command: ["--datadir","/data","--jwt-secret","/secrets/jwt.hex","--authrpc.addr","0.0.0.0","--authrpc.port","8551","--http.addr","0.0.0.0","--http.port","8545","--port","30303"]
+    volumes: ["./node-6/execution:/data","./node-6/jwt.hex:/secrets/jwt.hex:ro"]
+    ports: ["8551:8545","30309:30303"]
+  fourtwentyd-6:
+    image: 420integrated/fourtwentyd:dev
+    command: ["--devnet-validator","--node-id=1006","--seat=6","--state=/data/consensus.json","--engine=http://node420-6:8551","--jwt-secret=/secrets/jwt.hex"]
+    depends_on: ["node420-6"]
+    volumes: ["./node-6/consensus:/data","./node-6/jwt.hex:/secrets/jwt.hex:ro"]
+  node420-7:
+    image: 420integrated/node420:dev
+    command: ["--datadir","/data","--jwt-secret","/secrets/jwt.hex","--authrpc.addr","0.0.0.0","--authrpc.port","8551","--http.addr","0.0.0.0","--http.port","8545","--port","30303"]
+    volumes: ["./node-7/execution:/data","./node-7/jwt.hex:/secrets/jwt.hex:ro"]
+    ports: ["8552:8545","30310:30303"]
+  fourtwentyd-7:
+    image: 420integrated/fourtwentyd:dev
+    command: ["--devnet-validator","--node-id=1007","--seat=7","--state=/data/consensus.json","--engine=http://node420-7:8551","--jwt-secret=/secrets/jwt.hex"]
+    depends_on: ["node420-7"]
+    volumes: ["./node-7/consensus:/data","./node-7/jwt.hex:/secrets/jwt.hex:ro"]
+  node420-8:
+    image: 420integrated/node420:dev
+    command: ["--datadir","/data","--jwt-secret","/secrets/jwt.hex","--authrpc.addr","0.0.0.0","--authrpc.port","8551","--http.addr","0.0.0.0","--http.port","8545","--port","30303"]
+    volumes: ["./node-8/execution:/data","./node-8/jwt.hex:/secrets/jwt.hex:ro"]
+    ports: ["8553:8545","30311:30303"]
+  fourtwentyd-8:
+    image: 420integrated/fourtwentyd:dev
+    command: ["--devnet-validator","--node-id=1008","--seat=8","--state=/data/consensus.json","--engine=http://node420-8:8551","--jwt-secret=/secrets/jwt.hex"]
+    depends_on: ["node420-8"]
+    volumes: ["./node-8/consensus:/data","./node-8/jwt.hex:/secrets/jwt.hex:ro"]
+  node420-9:
+    image: 420integrated/node420:dev
+    command: ["--datadir","/data","--jwt-secret","/secrets/jwt.hex","--authrpc.addr","0.0.0.0","--authrpc.port","8551","--http.addr","0.0.0.0","--http.port","8545","--port","30303"]
+    volumes: ["./node-9/execution:/data","./node-9/jwt.hex:/secrets/jwt.hex:ro"]
+    ports: ["8554:8545","30312:30303"]
+  fourtwentyd-9:
+    image: 420integrated/fourtwentyd:dev
+    command: ["--devnet-validator","--node-id=1009","--seat=9","--state=/data/consensus.json","--engine=http://node420-9:8551","--jwt-secret=/secrets/jwt.hex"]
+    depends_on: ["node420-9"]
+    volumes: ["./node-9/consensus:/data","./node-9/jwt.hex:/secrets/jwt.hex:ro"]
+  node420-10:
+    image: 420integrated/node420:dev
+    command: ["--datadir","/data","--jwt-secret","/secrets/jwt.hex","--authrpc.addr","0.0.0.0","--authrpc.port","8551","--http.addr","0.0.0.0","--http.port","8545","--port","30303"]
+    volumes: ["./node-10/execution:/data","./node-10/jwt.hex:/secrets/jwt.hex:ro"]
+    ports: ["8555:8545","30313:30303"]
+  fourtwentyd-10:
+    image: 420integrated/fourtwentyd:dev
+    command: ["--devnet-validator","--node-id=1010","--seat=10","--state=/data/consensus.json","--engine=http://node420-10:8551","--jwt-secret=/secrets/jwt.hex"]
+    depends_on: ["node420-10"]
+    volumes: ["./node-10/consensus:/data","./node-10/jwt.hex:/secrets/jwt.hex:ro"]
+  node420-11:
+    image: 420integrated/node420:dev
+    command: ["--datadir","/data","--jwt-secret","/secrets/jwt.hex","--authrpc.addr","0.0.0.0","--authrpc.port","8551","--http.addr","0.0.0.0","--http.port","8545","--port","30303"]
+    volumes: ["./node-11/execution:/data","./node-11/jwt.hex:/secrets/jwt.hex:ro"]
+    ports: ["8556:8545","30314:30303"]
+  fourtwentyd-11:
+    image: 420integrated/fourtwentyd:dev
+    command: ["--devnet-validator","--node-id=1011","--seat=11","--state=/data/consensus.json","--engine=http://node420-11:8551","--jwt-secret=/secrets/jwt.hex"]
+    depends_on: ["node420-11"]
+    volumes: ["./node-11/consensus:/data","./node-11/jwt.hex:/secrets/jwt.hex:ro"]
+  node420-12:
+    image: 420integrated/node420:dev
+    command: ["--datadir","/data","--jwt-secret","/secrets/jwt.hex","--authrpc.addr","0.0.0.0","--authrpc.port","8551","--http.addr","0.0.0.0","--http.port","8545","--port","30303"]
+    volumes: ["./node-12/execution:/data","./node-12/jwt.hex:/secrets/jwt.hex:ro"]
+    ports: ["8557:8545","30315:30303"]
+  fourtwentyd-12:
+    image: 420integrated/fourtwentyd:dev
+    command: ["--devnet-validator","--node-id=1012","--seat=12","--state=/data/consensus.json","--engine=http://node420-12:8551","--jwt-secret=/secrets/jwt.hex"]
+    depends_on: ["node420-12"]
+    volumes: ["./node-12/consensus:/data","./node-12/jwt.hex:/secrets/jwt.hex:ro"]
+  node420-13:
+    image: 420integrated/node420:dev
+    command: ["--datadir","/data","--jwt-secret","/secrets/jwt.hex","--authrpc.addr","0.0.0.0","--authrpc.port","8551","--http.addr","0.0.0.0","--http.port","8545","--port","30303"]
+    volumes: ["./node-13/execution:/data","./node-13/jwt.hex:/secrets/jwt.hex:ro"]
+    ports: ["8558:8545","30316:30303"]
+  fourtwentyd-13:
+    image: 420integrated/fourtwentyd:dev
+    command: ["--devnet-validator","--node-id=1013","--seat=13","--state=/data/consensus.json","--engine=http://node420-13:8551","--jwt-secret=/secrets/jwt.hex"]
+    depends_on: ["node420-13"]
+    volumes: ["./node-13/consensus:/data","./node-13/jwt.hex:/secrets/jwt.hex:ro"]
+  node420-14:
+    image: 420integrated/node420:dev
+    command: ["--datadir","/data","--jwt-secret","/secrets/jwt.hex","--authrpc.addr","0.0.0.0","--authrpc.port","8551","--http.addr","0.0.0.0","--http.port","8545","--port","30303"]
+    volumes: ["./node-14/execution:/data","./node-14/jwt.hex:/secrets/jwt.hex:ro"]
+    ports: ["8559:8545","30317:30303"]
+  fourtwentyd-14:
+    image: 420integrated/fourtwentyd:dev
+    command: ["--devnet-validator","--node-id=1014","--seat=14","--state=/data/consensus.json","--engine=http://node420-14:8551","--jwt-secret=/secrets/jwt.hex"]
+    depends_on: ["node420-14"]
+    volumes: ["./node-14/consensus:/data","./node-14/jwt.hex:/secrets/jwt.hex:ro"]

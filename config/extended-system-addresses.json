@@ -1,0 +1,39 @@
+{
+  "schema": "420-extended-system-addresses-v1",
+  "note": "Candidate application-system assignments within the already reserved 0x0420-0x04FF range. Existing 0x0420-0x0433 assignments remain unchanged. These new assignments are Step 6 application-layer additions and should be frozen before genesis code placement.",
+  "assignments": [
+    {
+      "address": "0x0000000000000000000000000000000000000434",
+      "name": "ProtocolRegistry"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000435",
+      "name": "Names420"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000436",
+      "name": "Identity420"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000437",
+      "name": "Governance420"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000438",
+      "name": "VerifiedGateway420"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000439",
+      "name": "ApprovedQuoteAssetRegistry"
+    },
+    {
+      "address": "0x000000000000000000000000000000000000043a",
+      "name": "Stake420"
+    },
+    {
+      "address": "0x000000000000000000000000000000000000043b",
+      "name": "CannaseurCampaignRegistry"
+    }
+  ],
+  "status": "CANDIDATE_STEP6_FREEZE_PENDING"
+}

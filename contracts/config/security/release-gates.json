@@ -1,0 +1,54 @@
+{
+  "schema": "420-smart-contract-release-gates-v1",
+  "mainnet_authorized": false,
+  "gates": [
+    {
+      "name": "foundry_build",
+      "status": "PENDING"
+    },
+    {
+      "name": "unit_tests",
+      "status": "PENDING"
+    },
+    {
+      "name": "fuzz_tests",
+      "status": "PENDING"
+    },
+    {
+      "name": "stateful_invariants",
+      "status": "PENDING"
+    },
+    {
+      "name": "coverage_review",
+      "status": "PENDING"
+    },
+    {
+      "name": "static_analysis",
+      "status": "PENDING"
+    },
+    {
+      "name": "testnet_soak",
+      "status": "PENDING"
+    },
+    {
+      "name": "external_audit",
+      "status": "PENDING"
+    },
+    {
+      "name": "audit_remediation",
+      "status": "PENDING"
+    },
+    {
+      "name": "auditor_rereview",
+      "status": "PENDING"
+    },
+    {
+      "name": "reproducible_bytecode",
+      "status": "PENDING"
+    },
+    {
+      "name": "genesis_code_hash_match",
+      "status": "PENDING"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "schema": "420-step4.3-v1",
+  "constants": {
+    "chain_id": 420,
+    "committee_size": 15,
+    "qc_threshold": 11
+  },
+  "note": "Runtime tests generate deterministic IKM-derived BLS keys and verify PoP, signatures, aggregate QC, and chained finality."
+}

@@ -1,0 +1,39 @@
+{
+  "schema": "420-public-status-v1",
+  "components": [
+    {
+      "name": "Consensus Finality",
+      "status": "NOT_LAUNCHED"
+    },
+    {
+      "name": "Execution RPC",
+      "status": "NOT_LAUNCHED"
+    },
+    {
+      "name": "WebSocket RPC",
+      "status": "NOT_LAUNCHED"
+    },
+    {
+      "name": "Explorer",
+      "status": "NOT_LAUNCHED"
+    },
+    {
+      "name": "Faucet",
+      "status": "NOT_LAUNCHED"
+    },
+    {
+      "name": "Bootnodes",
+      "status": "NOT_LAUNCHED"
+    },
+    {
+      "name": "Validator Network",
+      "status": "NOT_LAUNCHED"
+    },
+    {
+      "name": "420AI Registry/Jobs",
+      "status": "NOT_LAUNCHED"
+    }
+  ],
+  "overall": "NOT_LAUNCHED",
+  "updated_at_utc": null
+}

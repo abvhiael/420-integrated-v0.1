@@ -1,0 +1,27 @@
+{
+  "go_test": {
+    "returncode": 0,
+    "stdout": "?   \tgithub.com/420integrated/420-integrated/consensus/cmd/fourtwentyd\t[no test files]\n?   \tgithub.com/420integrated/420-integrated/consensus/crypto\t[no test files]\n?   \tgithub.com/420integrated/420-integrated/consensus/crypto/bls\t[no test files]\nok  \tgithub.com/420integrated/420-integrated/consensus/attestation\t0.034s\nok  \tgithub.com/420integrated/420-integrated/consensus/clock\t0.020s\nok  \tgithub.com/420integrated/420-integrated/consensus/devnet\t0.025s\n?   \tgithub.com/420integrated/420-integrated/consensus/p2p\t[no test files]\nok  \tgithub.com/420integrated/420-integrated/consensus/engine\t0.066s\nok  \tgithub.com/420integrated/420-integrated/consensus/finality\t0.039s\nok  \tgithub.com/420integrated/420-integrated/consensus/proposer\t0.034s\nok  \tgithub.com/420integrated/420-integrated/consensus/slashing\t0.028s\n?   \tgithub.com/420integrated/420-integrated/consensus/types\t[no test files]\nok  \tgithub.com/420integrated/420-integrated/consensus/ssz\t0.019s\n?   \tgithub.com/420integrated/420-integrated/devnet/cmd/devnet-bus\t[no test files]\n?   \tgithub.com/420integrated/420-integrated/execution/cmd/node420\t[no test files]\n?   \tgithub.com/420integrated/420-integrated/genesis/cmd/420-genesis\t[no test files]\n?   \tgithub.com/420integrated/420-integrated/integration/cmd/engine-live-smoke\t[no test files]\nok  \tgithub.com/420integrated/420-integrated/consensus/storage\t1.063s\nok  \tgithub.com/420integrated/420-integrated/consensus/validator\t0.034s\n?   \tgithub.com/420integrated/420-integrated/simulations/committee15/main\t[no test files]\nok  \tgithub.com/420integrated/420-integrated/integration/engineapi\t0.039s\nok  \tgithub.com/420integrated/420-integrated/simulations/committee15\t0.033s\n",
+    "stderr": ""
+  },
+  "build_fourtwentyd": {
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "build_node420": {
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "canary_start_expected_blocked": {
+    "returncode": 1,
+    "stdout": "",
+    "stderr": "Spreadsheet runtime warmup failed during python startup\nTraceback (most recent call last):\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/patches/warm_spreadsheet_runtime_on_startup.py\", line 26, in warm_spreadsheet_runtime_on_startup\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/spreadsheet_warmup.py\", line 772, in warm_spreadsheet_runtime\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/rpc/connection.py\", line 37, in get_or_create_client\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/rpc/daemon.py\", line 124, in start_daemon\nTimeoutError: Timed out waiting for artifact tool daemon socket. Set ARTIFACT_TOOL_RPC_DAEMON_STARTUP_TIMEOUT_S=<seconds> to increase the limit.\ncanary preflight is not authorized\n"
+  },
+  "canary_evaluation_expected_blocked": {
+    "returncode": 10,
+    "stdout": "{\n  \"schema\": \"420-canary-evaluation-v1\",\n  \"all_acceptance_criteria_pass\": false,\n  \"checks\": [\n    {\n      \"name\": \"health snapshots\",\n      \"status\": \"BLOCKED\",\n      \"detail\": \"no real canary snapshots present\"\n    },\n    {\n      \"name\": \"unresolved critical incidents\",\n      \"status\": \"PASS\",\n      \"detail\": \"count=0\"\n    },\n    {\n      \"name\": \"11/15 quorum edge\",\n      \"status\": \"BLOCKED\",\n      \"detail\": \"report missing\"\n    },\n    {\n      \"name\": \"10/15 quorum loss\",\n      \"status\": \"BLOCKED\",\n      \"detail\": \"report missing\"\n    },\n    {\n      \"name\": \"restart recovery\",\n      \"status\": \"BLOCKED\",\n      \"detail\": \"report missing\"\n    },\n    {\n      \"name\": \"AI absence liveness\",\n      \"status\": \"BLOCKED\",\n      \"detail\": \"report missing\"\n    }\n  ]\n}\n",
+    "stderr": "Spreadsheet runtime warmup failed during python startup\nTraceback (most recent call last):\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/patches/warm_spreadsheet_runtime_on_startup.py\", line 26, in warm_spreadsheet_runtime_on_startup\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/spreadsheet_warmup.py\", line 772, in warm_spreadsheet_runtime\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/rpc/connection.py\", line 37, in get_or_create_client\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/rpc/daemon.py\", line 124, in start_daemon\nTimeoutError: Timed out waiting for artifact tool daemon socket. Set ARTIFACT_TOOL_RPC_DAEMON_STARTUP_TIMEOUT_S=<seconds> to increase the limit.\n"
+  }
+}

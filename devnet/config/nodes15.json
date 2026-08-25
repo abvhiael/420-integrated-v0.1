@@ -1,0 +1,140 @@
+{
+  "schema": "420-devnet15-v1",
+  "nodes": [
+    {
+      "seat": 0,
+      "validator_id": 1000,
+      "execution_http_port": 8545,
+      "execution_engine_port": 8551,
+      "execution_p2p_port": 30303,
+      "datadir": "devnet-data/node-0",
+      "jwt": "devnet-data/node-0/jwt.hex"
+    },
+    {
+      "seat": 1,
+      "validator_id": 1001,
+      "execution_http_port": 8546,
+      "execution_engine_port": 8552,
+      "execution_p2p_port": 30304,
+      "datadir": "devnet-data/node-1",
+      "jwt": "devnet-data/node-1/jwt.hex"
+    },
+    {
+      "seat": 2,
+      "validator_id": 1002,
+      "execution_http_port": 8547,
+      "execution_engine_port": 8553,
+      "execution_p2p_port": 30305,
+      "datadir": "devnet-data/node-2",
+      "jwt": "devnet-data/node-2/jwt.hex"
+    },
+    {
+      "seat": 3,
+      "validator_id": 1003,
+      "execution_http_port": 8548,
+      "execution_engine_port": 8554,
+      "execution_p2p_port": 30306,
+      "datadir": "devnet-data/node-3",
+      "jwt": "devnet-data/node-3/jwt.hex"
+    },
+    {
+      "seat": 4,
+      "validator_id": 1004,
+      "execution_http_port": 8549,
+      "execution_engine_port": 8555,
+      "execution_p2p_port": 30307,
+      "datadir": "devnet-data/node-4",
+      "jwt": "devnet-data/node-4/jwt.hex"
+    },
+    {
+      "seat": 5,
+      "validator_id": 1005,
+      "execution_http_port": 8550,
+      "execution_engine_port": 8556,
+      "execution_p2p_port": 30308,
+      "datadir": "devnet-data/node-5",
+      "jwt": "devnet-data/node-5/jwt.hex"
+    },
+    {
+      "seat": 6,
+      "validator_id": 1006,
+      "execution_http_port": 8551,
+      "execution_engine_port": 8557,
+      "execution_p2p_port": 30309,
+      "datadir": "devnet-data/node-6",
+      "jwt": "devnet-data/node-6/jwt.hex"
+    },
+    {
+      "seat": 7,
+      "validator_id": 1007,
+      "execution_http_port": 8552,
+      "execution_engine_port": 8558,
+      "execution_p2p_port": 30310,
+      "datadir": "devnet-data/node-7",
+      "jwt": "devnet-data/node-7/jwt.hex"
+    },
+    {
+      "seat": 8,
+      "validator_id": 1008,
+      "execution_http_port": 8553,
+      "execution_engine_port": 8559,
+      "execution_p2p_port": 30311,
+      "datadir": "devnet-data/node-8",
+      "jwt": "devnet-data/node-8/jwt.hex"
+    },
+    {
+      "seat": 9,
+      "validator_id": 1009,
+      "execution_http_port": 8554,
+      "execution_engine_port": 8560,
+      "execution_p2p_port": 30312,
+      "datadir": "devnet-data/node-9",
+      "jwt": "devnet-data/node-9/jwt.hex"
+    },
+    {
+      "seat": 10,
+      "validator_id": 1010,
+      "execution_http_port": 8555,
+      "execution_engine_port": 8561,
+      "execution_p2p_port": 30313,
+      "datadir": "devnet-data/node-10",
+      "jwt": "devnet-data/node-10/jwt.hex"
+    },
+    {
+      "seat": 11,
+      "validator_id": 1011,
+      "execution_http_port": 8556,
+      "execution_engine_port": 8562,
+      "execution_p2p_port": 30314,
+      "datadir": "devnet-data/node-11",
+      "jwt": "devnet-data/node-11/jwt.hex"
+    },
+    {
+      "seat": 12,
+      "validator_id": 1012,
+      "execution_http_port": 8557,
+      "execution_engine_port": 8563,
+      "execution_p2p_port": 30315,
+      "datadir": "devnet-data/node-12",
+      "jwt": "devnet-data/node-12/jwt.hex"
+    },
+    {
+      "seat": 13,
+      "validator_id": 1013,
+      "execution_http_port": 8558,
+      "execution_engine_port": 8564,
+      "execution_p2p_port": 30316,
+      "datadir": "devnet-data/node-13",
+      "jwt": "devnet-data/node-13/jwt.hex"
+    },
+    {
+      "seat": 14,
+      "validator_id": 1014,
+      "execution_http_port": 8559,
+      "execution_engine_port": 8565,
+      "execution_p2p_port": 30317,
+      "datadir": "devnet-data/node-14",
+      "jwt": "devnet-data/node-14/jwt.hex"
+    }
+  ]
+}

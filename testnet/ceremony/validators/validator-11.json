@@ -1,0 +1,18 @@
+{
+  "schema": "420-validator-identity-record-v1",
+  "validator_index": 11,
+  "validator_id": "REPLACE",
+  "consensus_bls_pubkey": "REPLACE_48_BYTE_COMPRESSED_HEX",
+  "bls_proof_of_possession": "REPLACE_96_BYTE_COMPRESSED_HEX",
+  "owner_address": "REPLACE_0x_ADDRESS",
+  "withdrawal_address": "REPLACE_0x_ADDRESS",
+  "operator_name": "REPLACE",
+  "operator_contact": "REPLACE",
+  "consensus_client_version": "fourtwentyd 0.1.0-rc1",
+  "execution_client_version": "node420 0.1.0-rc1 / geth v1.17.5",
+  "readiness_endpoint": "REPLACE",
+  "bond_source": "OWNED_OR_CREDIT_DECLARATION",
+  "bond_kief": "42000000000000000000000",
+  "signed_record_hash": "REPLACE_OWNER_SIGNATURE_OR_ATTESTATION",
+  "status": "PENDING_CEREMONY"
+}

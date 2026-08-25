@@ -1,0 +1,65 @@
+{
+  "schema": "420-public-monitoring-v1",
+  "alerts": [
+    {
+      "name": "finality_degraded",
+      "trigger": "42 consecutive slots without certification",
+      "severity": "MAJOR"
+    },
+    {
+      "name": "safety_halt",
+      "trigger": "SAFETY_HALT active",
+      "severity": "CRITICAL"
+    },
+    {
+      "name": "conflicting_qc",
+      "trigger": "any conflicting valid QC",
+      "severity": "CRITICAL"
+    },
+    {
+      "name": "eligible_pool_low",
+      "trigger": "eligible validators < 60",
+      "severity": "MAJOR"
+    },
+    {
+      "name": "active_seats_low",
+      "trigger": "active seats < 15",
+      "severity": "CRITICAL"
+    },
+    {
+      "name": "engine_errors",
+      "trigger": "persistent Engine API errors",
+      "severity": "MAJOR"
+    },
+    {
+      "name": "rpc_availability",
+      "trigger": "availability < 99% rolling 1h",
+      "severity": "WARN"
+    },
+    {
+      "name": "rpc_error_rate",
+      "trigger": "error rate > 1% rolling 15m",
+      "severity": "WARN"
+    },
+    {
+      "name": "explorer_lag",
+      "trigger": "indexing lag > 3 blocks",
+      "severity": "WARN"
+    },
+    {
+      "name": "faucet_abuse",
+      "trigger": "abuse control exhausted or hot-wallet anomaly",
+      "severity": "WARN"
+    },
+    {
+      "name": "randomness_degraded",
+      "trigger": "RANDOMNESS_DEGRADED",
+      "severity": "MAJOR"
+    }
+  ],
+  "retention": {
+    "metrics_days": 90,
+    "logs_days": 30,
+    "security_incidents_days": 365
+  }
+}

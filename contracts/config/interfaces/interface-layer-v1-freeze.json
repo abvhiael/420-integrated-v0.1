@@ -1,0 +1,56 @@
+{
+  "schema": "420-genesis-interface-layer-freeze-v1",
+  "status": "FROZEN",
+  "version": "1.0.0",
+  "shared_interface_count": 25,
+  "shared_interfaces": [
+    "IGenesisResident420",
+    "IProtocolRegistry420",
+    "ICanonicalAssetRegistry420",
+    "IGovernanceAuthority420",
+    "IPauseRegistry420",
+    "IHealthRegistry420",
+    "IOracle420",
+    "IIdentityCredential420",
+    "INames420",
+    "ISettlementHealth420",
+    "IFeeQuote420",
+    "ISigningDomain420",
+    "IAccounting420",
+    "ICapabilityRegistry420",
+    "ICustodyVault420",
+    "IGenesisInitializable420",
+    "IMigration420",
+    "ISystemSafety420",
+    "ISignedEnvelope420",
+    "IReplayProtection420",
+    "IExternalDependencyRegistry420",
+    "IRiskLimits420",
+    "IAssetCapabilities420",
+    "IMetadataCommitment420",
+    "IChainContext420"
+  ],
+  "shared_libraries": [
+    "AssetMath420",
+    "ObjectId420",
+    "EventStandard420",
+    "GenesisInterfaceIds420",
+    "CapabilityIds420"
+  ],
+  "policies": [
+    "system-safety-semantics.json",
+    "oracle-semantics.json",
+    "asset-semantics.json",
+    "time-semantics.json",
+    "event-standard.json"
+  ],
+  "next_implementation_sequence": [
+    "adapt 420Pay",
+    "implement/test 420Pay against v1.0",
+    "adapt/implement 420Swap",
+    "cross-test 420Pay + 420Swap",
+    "adapt/implement 420Bridge",
+    "cross-test 420Pay + 420Swap + 420Bridge",
+    "continue remaining genesis suites"
+  ]
+}

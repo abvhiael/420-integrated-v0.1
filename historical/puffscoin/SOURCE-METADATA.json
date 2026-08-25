@@ -1,0 +1,14 @@
+{
+  "repository": "https://github.com/puffscoin/go-Puffscoin",
+  "launchpad_mirror": "https://code.launchpad.net/puffscoin",
+  "launchpad_clone": "https://git.launchpad.net/puffscoin",
+  "description": "Official Golang implementation of the PUFFScoin protocol.",
+  "historical_commit": "e48ad5c90fa171affe779852bc12353282e730b2",
+  "historical_commit_message": "Update genesis.json",
+  "historical_commit_parent_short": "eff9c48",
+  "historical_commit_change": "genesis gasLimit changed from 0xC350 to 0x989680",
+  "repo_observed_commit_count": 11764,
+  "build_binary": "gpuffs",
+  "historical_go_requirement": "Go 1.10 or later",
+  "status": "public repository verified reachable by web retrieval on 2026-08-23"
+}

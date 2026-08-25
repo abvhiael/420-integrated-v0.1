@@ -1,0 +1,95 @@
+{
+  "schema": "420-interface-v1-dapp-adaptation-verification-v1",
+  "generated_at_utc": "2026-08-25T00:45:13.288895+00:00",
+  "scope": [
+    "420Pay",
+    "420Swap",
+    "420Bridge"
+  ],
+  "frozen_interface_v1": {
+    "status": "PASS",
+    "files_checked": 35,
+    "byte_identical_to_input_baseline": true,
+    "sha256_manifest_status": "PASS"
+  },
+  "static_verification": {
+    "status": "PASS",
+    "checks": [
+      "genesis-interface-v1-freeze",
+      "genesis-interface-v1-security",
+      "420pay-implementation",
+      "420pay-hardening",
+      "420swap-interface-v1",
+      "cadc-swap",
+      "bridge-hardening",
+      "genesis-dapps",
+      "Solidity import/brace structural scan"
+    ]
+  },
+  "go_regression_suite": {
+    "status": "PASS",
+    "log": "artifacts/interface-v1-adaptation/go-test.log"
+  },
+  "solidity_execution": {
+    "compile": "BLOCKED_NOT_EXECUTED",
+    "unit": "BLOCKED_NOT_EXECUTED",
+    "fuzz": "BLOCKED_NOT_EXECUTED",
+    "invariant": "BLOCKED_NOT_EXECUTED",
+    "integration": "BLOCKED_NOT_EXECUTED",
+    "reason": "forge and solc are not installed in the execution environment; outbound shell DNS is unavailable, so the pinned toolchain could not be installed.",
+    "verification_script_exit_code": 127,
+    "required_toolchain": {
+      "solc": "0.8.24",
+      "evm": "cancun",
+      "fuzz_runs_default": 10000,
+      "invariant_runs_default": 512,
+      "invariant_depth_default": 128
+    }
+  },
+  "prepared_solidity_test_files": {
+    "pay": [
+      "InvoiceRegistry420Fuzz.t.sol",
+      "GasSponsor420.t.sol",
+      "SettlementRouter420Fuzz.t.sol",
+      "PaymentGenesisIntegration420.t.sol",
+      "PaymentAtomicSettlement420.t.sol",
+      "RefundManager420Fuzz.t.sol",
+      "GasSponsor420Limits.t.sol",
+      "PaymentRouter420.t.sol",
+      "PaymentRouter420Limits.t.sol",
+      "PaymentInvariant420.t.sol",
+      "SettlementRouter420.t.sol"
+    ],
+    "swap": [
+      "SwapInvariant420.t.sol",
+      "SwapFuzz420.t.sol",
+      "SwapGenesisIntegration420.t.sol"
+    ],
+    "bridge": [
+      "BridgeGenesisIntegration420.t.sol",
+      "BridgeRiskFuzz420.t.sol",
+      "BridgeInvariant420.t.sol"
+    ],
+    "cross": [
+      "PaySwapGenesisIntegration420.t.sol",
+      "PaySwapBridgeGenesisIntegration420.t.sol"
+    ]
+  },
+  "key_adaptations": [
+    "Shared GenesisResidentAccess420 fail-closed resident/dependency guard",
+    "dApp-side AppDependencyIds420 without modifying frozen GenesisInterfaceIds420",
+    "420Pay shared asset/capability/health/fee/replay/safety integration",
+    "420Swap shared resident adaptation and CanonicalSwapExecutor420 boundary",
+    "420Pay -> 420Swap atomic integration tests",
+    "420Bridge registered-router authority replacing unreachable onlyGovernance router calls",
+    "420Bridge shared risk/replay/safety/route health plus local route-direction checks",
+    "Cross Pay/Swap/Bridge single-registry integration test"
+  ],
+  "known_production_blockers": [
+    "CanonicalPool420 remains a reference scaffold and does not implement production token movement/economics.",
+    "CADCLayerZeroAdapter, USDCCCTPAdapter, ETHProofAdapter and BTCLightClientAdapter intentionally revert because production verification/outbound wiring is absent.",
+    "CADC issuer integration remains pending in existing frozen/configured project status.",
+    "New application resident components require deterministic deployment/predeploy address and storage-layout decisions before genesis allocation; no addresses were invented.",
+    "Repository-wide Python compileall also exposes a pre-existing syntax error in scripts/readiness.py; it was left untouched as unrelated to this adaptation."
+  ]
+}

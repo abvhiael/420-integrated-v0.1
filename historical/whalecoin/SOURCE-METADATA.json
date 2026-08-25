@@ -1,0 +1,11 @@
+{
+  "historical_repository": "https://github.com/WhaleCoinOrg/WhaleCoin",
+  "go_package_archive": "https://pkg.go.dev/github.com/whalecoinorg/whalecoin",
+  "archived_version": "v1.6.9",
+  "published": "2018-05-31",
+  "license": "GPL-3.0",
+  "description": "Official golang implementation of the WhaleCoin protocol.",
+  "build_binary": "gwhale",
+  "historical_go_requirement": "Go 1.7 or later",
+  "status": "original repository not reliably retrievable through current web view; pkg.go.dev archive verified"
+}

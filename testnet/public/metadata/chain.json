@@ -1,0 +1,48 @@
+{
+  "schema": "420-public-testnet-chain-metadata-v1",
+  "network_name": "420 Integrated Testnet",
+  "short_name": "420 Testnet",
+  "chain_id": 420,
+  "chain_id_status": "CANDIDATE_UNTIL_FINAL_PREFLIGHT_FREEZE",
+  "network_id": 420,
+  "currency": {
+    "name": "420",
+    "symbol": "420",
+    "decimals": 18
+  },
+  "native_unit_aliases": {
+    "kief": "1e-18 420",
+    "trichome": "1e-15 420",
+    "pollen": "1e-12 420",
+    "dab": "1e-9 420",
+    "hash": "1e-6 420",
+    "bud": "1e-3 420"
+  },
+  "rpc_urls": [
+    "REPLACE_WITH_HTTPS_RPC_1",
+    "REPLACE_WITH_HTTPS_RPC_2",
+    "REPLACE_WITH_HTTPS_RPC_3"
+  ],
+  "ws_urls": [
+    "REPLACE_WITH_WSS_RPC_1"
+  ],
+  "explorer_url": "REPLACE_WITH_EXPLORER_URL",
+  "faucet_url": "REPLACE_WITH_FAUCET_URL",
+  "status_url": "REPLACE_WITH_STATUS_URL",
+  "bootnodes": [
+    "REPLACE_WITH_LIBP2P_MULTIADDR_1",
+    "REPLACE_WITH_LIBP2P_MULTIADDR_2",
+    "REPLACE_WITH_LIBP2P_MULTIADDR_3"
+  ],
+  "genesis": {
+    "execution_sha256": "REPLACE_FROM_FROZEN_GENESIS",
+    "consensus_sha256": "REPLACE_FROM_FROZEN_GENESIS",
+    "validator_registry_sha256": "REPLACE_FROM_FROZEN_GENESIS"
+  },
+  "release": {
+    "version": "0.1.0-rc1",
+    "channel": "TESTNET_RC",
+    "checksum": "REPLACE_WITH_RELEASE_CHECKSUM"
+  },
+  "testnet_notice": "Testnet 420 has no monetary value and may be reset, halted, or retired."
+}

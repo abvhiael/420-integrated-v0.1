@@ -1,0 +1,22 @@
+{
+  "schema": "420-canary-incident-v1",
+  "severity_levels": {
+    "INFO": "No protocol impact; record only.",
+    "WARN": "Degradation without safety impact.",
+    "MAJOR": "Liveness/service impact; may hold canary.",
+    "CRITICAL": "Consensus safety failure; canary must halt."
+  },
+  "required_fields": [
+    "incident_id",
+    "opened_at_utc",
+    "severity",
+    "category",
+    "summary",
+    "first_observed_slot",
+    "affected_nodes",
+    "evidence",
+    "state",
+    "resolution",
+    "closed_at_utc"
+  ]
+}

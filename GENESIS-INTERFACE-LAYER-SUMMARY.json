@@ -1,0 +1,13 @@
+{
+  "interface_layer_defined": true,
+  "shared_interfaces": 13,
+  "dependency_suites": 11,
+  "status": "CANDIDATE_FOR_FREEZE",
+  "go_test": "NOT_RERUN_IN_THIS_PASS",
+  "next": [
+    "adapt 420Pay",
+    "adapt 420Swap",
+    "adapt 420Bridge",
+    "cross-dApp integration tests"
+  ]
+}

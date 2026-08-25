@@ -1,0 +1,15 @@
+layer,component,historical_evidence,decision,modern_destination,confidence
+Ethereum,EVM/account/transaction model,PUFFS repository retains Geth architecture,KEEP,modern execution client,high
+WhaleCoin,AccumulateNewRewards,archived v1.6.9 Ethash API,REIMPLEMENT,consensus issuance + RewardController,high
+WhaleCoin,Developer Fund,whitepaper reward split,KEEP_CONCEPT,DevelopmentTreasury,high
+WhaleCoin,Follower/upvote rewards,whitepaper reward split,KEEP_CONCEPT,AttentionTreasury + RewardDistributor,high
+WhaleCoin,Ethash PoW,archived consensus package,DISCARD,420 bonded validator consensus,high
+WhaleCoin,network ID 30373,archived eth.DefaultConfig,DISCARD,new network IDs TBD,high
+PUFFScoin,Chain ID 420,2019 params/config.go + genesis,HISTORICAL_ONLY,new chain ID TBD,high
+PUFFScoin,5 PUFFS flat PoW reward,2019 consensus/ethash/consensus.go,DISCARD,declining 420 issuance,high
+PUFFScoin,uncle rewards,2019 accumulateRewards,DISCARD,validator participation rewards,high
+PUFFScoin,genesis allocation,2019 genesis.json,HISTORICAL_ONLY,new reproducible genesis,high
+PUFFScoin,Ethereum fork activation heights 1-4,2019 params/config.go,HISTORICAL_ONLY,modern fork schedule,high
+PUFFScoin,2017 masternode/PoS design,historical announcement,DISCARD_AS_PROTOCOL,historical documentation only,medium
+420coin,chain/network ID 2020,later public registry,HISTORICAL_ONLY,resolve history; new ID TBD,high
+420 Integrated,public symbol 420,historical registry + current design,KEEP,native currency metadata,high

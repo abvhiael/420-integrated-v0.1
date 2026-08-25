@@ -1,0 +1,42 @@
+{
+  "go_test": {
+    "returncode": 0,
+    "stdout": "?   \tgithub.com/420integrated/420-integrated/consensus/cmd/fourtwentyd\t[no test files]\n?   \tgithub.com/420integrated/420-integrated/consensus/crypto\t[no test files]\n?   \tgithub.com/420integrated/420-integrated/consensus/crypto/bls\t[no test files]\nok  \tgithub.com/420integrated/420-integrated/consensus/attestation\t0.041s\nok  \tgithub.com/420integrated/420-integrated/consensus/clock\t0.017s\nok  \tgithub.com/420integrated/420-integrated/consensus/devnet\t0.045s\n?   \tgithub.com/420integrated/420-integrated/consensus/p2p\t[no test files]\nok  \tgithub.com/420integrated/420-integrated/consensus/engine\t0.069s\nok  \tgithub.com/420integrated/420-integrated/consensus/finality\t0.047s\nok  \tgithub.com/420integrated/420-integrated/consensus/proposer\t0.024s\nok  \tgithub.com/420integrated/420-integrated/consensus/slashing\t0.022s\nok  \tgithub.com/420integrated/420-integrated/consensus/ssz\t0.019s\n?   \tgithub.com/420integrated/420-integrated/consensus/types\t[no test files]\nok  \tgithub.com/420integrated/420-integrated/consensus/storage\t0.043s\n?   \tgithub.com/420integrated/420-integrated/devnet/cmd/devnet-bus\t[no test files]\n?   \tgithub.com/420integrated/420-integrated/execution/cmd/node420\t[no test files]\n?   \tgithub.com/420integrated/420-integrated/genesis/cmd/420-genesis\t[no test files]\nok  \tgithub.com/420integrated/420-integrated/consensus/validator\t0.021s\n?   \tgithub.com/420integrated/420-integrated/integration/cmd/engine-live-smoke\t[no test files]\n?   \tgithub.com/420integrated/420-integrated/simulations/committee15/main\t[no test files]\nok  \tgithub.com/420integrated/420-integrated/integration/engineapi\t0.053s\nok  \tgithub.com/420integrated/420-integrated/simulations/committee15\t0.032s\n",
+    "stderr": ""
+  },
+  "build_fourtwentyd": {
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "build_node420": {
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "verify_step6": {
+    "returncode": 2,
+    "stdout": "{\n  \"pass\": false,\n  \"errors\": [\n    \"expected 20 assignments, got 28\",\n    \"range end wrong\"\n  ],\n  \"system_address_count\": 28,\n  \"application_domain_count\": 9\n}\n",
+    "stderr": "Spreadsheet runtime warmup failed during python startup\nTraceback (most recent call last):\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/patches/warm_spreadsheet_runtime_on_startup.py\", line 26, in warm_spreadsheet_runtime_on_startup\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/spreadsheet_warmup.py\", line 772, in warm_spreadsheet_runtime\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/rpc/connection.py\", line 37, in get_or_create_client\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/rpc/daemon.py\", line 124, in start_daemon\nTimeoutError: Timed out waiting for artifact tool daemon socket. Set ARTIFACT_TOOL_RPC_DAEMON_STARTUP_TIMEOUT_S=<seconds> to increase the limit.\n"
+  },
+  "verify_dapps": {
+    "returncode": 0,
+    "stdout": "{\n  \"pass\": true,\n  \"errors\": [],\n  \"genesis_apps\": 12,\n  \"testnet_only_apps\": 1\n}\n",
+    "stderr": "Spreadsheet runtime warmup failed during python startup\nTraceback (most recent call last):\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/patches/warm_spreadsheet_runtime_on_startup.py\", line 26, in warm_spreadsheet_runtime_on_startup\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/spreadsheet_warmup.py\", line 772, in warm_spreadsheet_runtime\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/rpc/connection.py\", line 37, in get_or_create_client\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/rpc/daemon.py\", line 124, in start_daemon\nTimeoutError: Timed out waiting for artifact tool daemon socket. Set ARTIFACT_TOOL_RPC_DAEMON_STARTUP_TIMEOUT_S=<seconds> to increase the limit.\n"
+  },
+  "verify_step6_1": {
+    "returncode": 0,
+    "stdout": "{\n  \"pass\": true,\n  \"errors\": [],\n  \"frozen_system_addresses\": 28\n}\n",
+    "stderr": "Spreadsheet runtime warmup failed during python startup\nTraceback (most recent call last):\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/patches/warm_spreadsheet_runtime_on_startup.py\", line 26, in warm_spreadsheet_runtime_on_startup\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/spreadsheet_warmup.py\", line 772, in warm_spreadsheet_runtime\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/rpc/connection.py\", line 37, in get_or_create_client\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/rpc/daemon.py\", line 124, in start_daemon\nTimeoutError: Timed out waiting for artifact tool daemon socket. Set ARTIFACT_TOOL_RPC_DAEMON_STARTUP_TIMEOUT_S=<seconds> to increase the limit.\n"
+  },
+  "predeploy_readiness": {
+    "returncode": 0,
+    "stdout": "{\n  \"schema\": \"420-predeploy-readiness-v1\",\n  \"genesis_predeploy_ready\": false,\n  \"checks\": [\n    {\n      \"name\": \"address uniqueness\",\n      \"status\": \"PASS\",\n      \"detail\": \"28 entries\"\n    },\n    {\n      \"name\": \"frozen address map\",\n      \"status\": \"PASS\",\n      \"detail\": \"system-addresses v3\"\n    },\n    {\n      \"name\": \"source coverage\",\n      \"status\": \"PASS\",\n      \"detail\": \"all mapped\"\n    },\n    {\n      \"name\": \"Foundry compiler\",\n      \"status\": \"BLOCKED\",\n      \"detail\": \"forge absent in runtime\"\n    },\n    {\n      \"name\": \"compiled artifacts\",\n      \"status\": \"BLOCKED\",\n      \"detail\": \"missing=28\"\n    },\n    {\n      \"name\": \"constructor storage materialized\",\n      \"status\": \"BLOCKED\",\n      \"detail\": \"generated-storage.json required\"\n    },\n    {\n      \"name\": \"founder_beneficiaries\",\n      \"status\": \"BLOCKED\",\n      \"detail\": \"UNRESOLVED_DO_NOT_INVENT\"\n    },\n    {\n      \"name\": \"bridge_verifier\",\n      \"status\": \"BLOCKED\",\n      \"detail\": \"FROM_FROZEN_GATEWAY_VERIFICATION_DECISION\"\n    }\n  ]\n}\n",
+    "stderr": "Spreadsheet runtime warmup failed during python startup\nTraceback (most recent call last):\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/patches/warm_spreadsheet_runtime_on_startup.py\", line 26, in warm_spreadsheet_runtime_on_startup\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/spreadsheet_warmup.py\", line 772, in warm_spreadsheet_runtime\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/rpc/connection.py\", line 37, in get_or_create_client\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/rpc/daemon.py\", line 124, in start_daemon\nTimeoutError: Timed out waiting for artifact tool daemon socket. Set ARTIFACT_TOOL_RPC_DAEMON_STARTUP_TIMEOUT_S=<seconds> to increase the limit.\n"
+  },
+  "predeploy_generator_expected_blocked": {
+    "returncode": 1,
+    "stdout": "",
+    "stderr": "Spreadsheet runtime warmup failed during python startup\nTraceback (most recent call last):\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/patches/warm_spreadsheet_runtime_on_startup.py\", line 26, in warm_spreadsheet_runtime_on_startup\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/spreadsheet_warmup.py\", line 772, in warm_spreadsheet_runtime\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/rpc/connection.py\", line 37, in get_or_create_client\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/rpc/daemon.py\", line 124, in start_daemon\nTimeoutError: Timed out waiting for artifact tool daemon socket. Set ARTIFACT_TOOL_RPC_DAEMON_STARTUP_TIMEOUT_S=<seconds> to increase the limit.\ngenerated storage map missing; constructors must be compiled/simulated into explicit storage first\n"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "schema": "420-canary-dashboard-v1",
+  "panels": [
+    "current slot / epoch / rotation",
+    "head / safe / finalized slots",
+    "finality lag slots",
+    "active seats / eligible validators",
+    "attestation participation %",
+    "primary / FB1 / FB2 proposal counts",
+    "QC count and signer count",
+    "Engine API error rate",
+    "node420 execution head lag",
+    "consensus peer counts",
+    "randomness status",
+    "SAFETY_HALT state",
+    "base fee",
+    "gross issuance / burns / net supply change",
+    "validator client-version distribution"
+  ]
+}

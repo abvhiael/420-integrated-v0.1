@@ -1,0 +1,6 @@
+{
+  "solidity_files_scanned": 121,
+  "pass": true,
+  "issues": [],
+  "note": "Structural/import scan only; not a Solidity compile."
+}

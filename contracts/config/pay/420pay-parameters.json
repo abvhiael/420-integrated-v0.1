@@ -1,0 +1,81 @@
+{
+  "schema": "420pay-genesis-parameters-v2",
+  "status": "FROZEN",
+  "acceptance": {
+    "default": "FINALIZED",
+    "supported": [
+      "FAST",
+      "FINALIZED",
+      "HIGH_VALUE"
+    ]
+  },
+  "invoice": {
+    "default_mode": "SINGLE_USE",
+    "supported_modes": [
+      "SINGLE_USE",
+      "MULTI_USE",
+      "PARTIAL_PAYMENT"
+    ],
+    "partial_payment_default": false,
+    "invoice_lifetime": "MERCHANT_DEFINED_AND_DISCLOSED",
+    "quote_lifetime_seconds": 42,
+    "duplicate_payment_protection": true
+  },
+  "settlement": {
+    "split_settlement_supported": true,
+    "swap_assisted_execution": "ATOMIC_OR_REVERT",
+    "pricing_failure": "FAIL_CLOSED",
+    "centralized_price_fallback": false,
+    "settlement_asset_unavailable": "NO_SILENT_SUBSTITUTION"
+  },
+  "refunds": {
+    "window": "MERCHANT_DEFINED_AND_DISCLOSED",
+    "full_refunds": true,
+    "partial_refunds": true,
+    "unilateral_chargeback": false,
+    "escrow_dispute_only_when_explicit": true
+  },
+  "tips": {
+    "supported": true,
+    "separate_destination_supported": true,
+    "must_be_disclosed": true
+  },
+  "merchant_status": [
+    "UNVERIFIED",
+    "REGISTERED",
+    "CREDENTIALED",
+    "REGULATED"
+  ],
+  "privacy": {
+    "public_payer_identity_required": false,
+    "sensitive_purchase_data_onchain": false,
+    "receipt_registry_minimize_identity": true
+  },
+  "gas_sponsor": {
+    "whitelisted_operations_only": true,
+    "per_wallet_limit_required": true,
+    "per_merchant_limit_required": true,
+    "daily_global_cap_required": true,
+    "arbitrary_transaction_authority": false
+  },
+  "accounting_exports": {
+    "genesis_required": true,
+    "fields": [
+      "payment_id",
+      "invoice_id",
+      "invoice_currency",
+      "invoice_amount",
+      "input_asset",
+      "input_amount",
+      "settlement_asset",
+      "settlement_amount",
+      "swap_fee",
+      "slippage",
+      "network_fee",
+      "tip",
+      "refund_total",
+      "tax_summary_hash",
+      "finality_status"
+    ]
+  }
+}

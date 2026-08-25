@@ -1,0 +1,156 @@
+{
+  "schema": "420-system-addresses-v3",
+  "status": "FROZEN_STEP6_1",
+  "reserved_range": {
+    "start": "0x0000000000000000000000000000000000000420",
+    "end": "0x00000000000000000000000000000000000004ff"
+  },
+  "assignments": [
+    {
+      "address": "0x0000000000000000000000000000000000000420",
+      "name": "RewardController",
+      "purpose": "consensus economics"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000421",
+      "name": "AttentionTreasury",
+      "purpose": "Cannaseur / Attention issuance and escrow"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000422",
+      "name": "DevelopmentTreasury",
+      "purpose": "Development allocation"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000423",
+      "name": "ValidatorRegistry",
+      "purpose": "validator lifecycle execution mirror"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000424",
+      "name": "ProtocolReserve",
+      "purpose": "protocol-owned reserve"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000425",
+      "name": "CommunityValidatorReserve",
+      "purpose": "validator bond-credit reserve"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000426",
+      "name": "CommunityRewardReserve",
+      "purpose": "community/testnet reward reserve"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000427",
+      "name": "FounderVestingRegistry",
+      "purpose": "founder vesting"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000428",
+      "name": "RandomnessRegistry",
+      "purpose": "randomness commitments/results"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000429",
+      "name": "GovernanceTimelock",
+      "purpose": "governance execution"
+    },
+    {
+      "address": "0x000000000000000000000000000000000000042a",
+      "name": "PublicDistributionVault",
+      "purpose": "public distribution inventory"
+    },
+    {
+      "address": "0x000000000000000000000000000000000000042b",
+      "name": "GenesisDEXFactory",
+      "purpose": "canonical genesis DEX factory"
+    },
+    {
+      "address": "0x000000000000000000000000000000000000042c",
+      "name": "PublicBatchAuction",
+      "purpose": "daily batch auction"
+    },
+    {
+      "address": "0x000000000000000000000000000000000000042d",
+      "name": "TWAPOracle",
+      "purpose": "canonical 420/approved-stable TWAP"
+    },
+    {
+      "address": "0x000000000000000000000000000000000000042e",
+      "name": "ValidatorBootstrapReserve",
+      "purpose": "bootstrap validator allocation"
+    },
+    {
+      "address": "0x000000000000000000000000000000000000042f",
+      "name": "AIProviderRegistry",
+      "purpose": "420ai provider registry"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000430",
+      "name": "AIModelRegistry",
+      "purpose": "AI model/version registry"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000431",
+      "name": "AIJobManager",
+      "purpose": "AI job lifecycle"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000432",
+      "name": "AIJobEscrow",
+      "purpose": "AI job payment escrow"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000433",
+      "name": "AIReputationRegistry",
+      "purpose": "AI provider reputation"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000434",
+      "name": "ProtocolRegistry",
+      "purpose": "Genesis application system contract"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000435",
+      "name": "Names420",
+      "purpose": "Genesis application system contract"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000436",
+      "name": "Identity420",
+      "purpose": "Genesis application system contract"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000437",
+      "name": "Governance420",
+      "purpose": "Genesis application system contract"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000438",
+      "name": "VerifiedGateway420",
+      "purpose": "Genesis application system contract"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000439",
+      "name": "ApprovedQuoteAssetRegistry",
+      "purpose": "Genesis application system contract"
+    },
+    {
+      "address": "0x000000000000000000000000000000000000043a",
+      "name": "Stake420",
+      "purpose": "Genesis application system contract"
+    },
+    {
+      "address": "0x000000000000000000000000000000000000043b",
+      "name": "CannaseurCampaignRegistry",
+      "purpose": "Genesis application system contract"
+    }
+  ],
+  "frozen_through": "0x000000000000000000000000000000000000043b",
+  "rules": [
+    "Assignments 0x0420-0x0433 are unchanged.",
+    "Assignments 0x0434-0x043B are frozen by Genesis Application Decision #1.",
+    "Reserved addresses are populated by deterministic genesis predeploy placement, not ordinary CREATE deployment."
+  ]
+}

@@ -1,0 +1,81 @@
+{
+  "schema": "420-integrated-testnet-launch-v1",
+  "network_name": "420 Integrated Testnet",
+  "network_slug": "420-testnet",
+  "release_channel": "TESTNET_RC",
+  "release_version": "0.1.0-rc1",
+  "chain_id": {
+    "value": 420,
+    "status": "CANDIDATE_PENDING_COLLISION_PREFLIGHT",
+    "historical_note": "Historical PUFFS used chainId 420; later registry material referenced 2020. Public testnet launch requires explicit collision check and final freeze."
+  },
+  "network_id": {
+    "value": 420,
+    "status": "TESTNET_DEFAULT_NOT_CONSTITUTIONAL"
+  },
+  "currency": {
+    "name": "420",
+    "symbol": "420",
+    "decimals": 18,
+    "base_unit": "kief"
+  },
+  "consensus": {
+    "slot_seconds": 12,
+    "slots_per_epoch": 420,
+    "epochs_per_rotation": 42,
+    "slots_per_rotation": 17640,
+    "initial_active_seats": 15,
+    "initial_eligible_validators": 60,
+    "qc_threshold": 11,
+    "minimum_eligible_ratio": "4:1"
+  },
+  "launch_topology": {
+    "eligible_validators": 60,
+    "active_seats": 15,
+    "standby_eligible": 45,
+    "public_rpc_nodes_minimum": 3,
+    "bootnodes_minimum": 3,
+    "explorer_instances_minimum": 1,
+    "faucet_instances_minimum": 1,
+    "ai_provider_nodes_required_for_liveness": 0
+  },
+  "phases": [
+    {
+      "id": "S5-CANARY",
+      "description": "Private production-binary canary using full 60-validator registry; 15 active seats.",
+      "minimum_duration_hours": 24,
+      "public_access": false
+    },
+    {
+      "id": "S5-OBSERVATION",
+      "description": "Invite-only testnet with external RPC/explorer and controlled validator participation.",
+      "minimum_duration_hours": 72,
+      "public_access": false
+    },
+    {
+      "id": "S5-PUBLIC",
+      "description": "Public testnet opening after every launch gate passes.",
+      "minimum_duration_hours": 0,
+      "public_access": true
+    }
+  ],
+  "hard_launch_gates": [
+    "Step 4.9 formal evidence status is all PASS",
+    "production blst PASS",
+    "production libp2p PASS",
+    "live Engine payload PASS",
+    "real 15-pair execution/consensus PASS",
+    "production fault matrix PASS",
+    "production restart recovery PASS",
+    "production soak PASS",
+    "release checksum PASS",
+    "execution genesis checksum verified",
+    "consensus genesis checksum verified",
+    "60 eligible validators registered",
+    "15 active seats fillable",
+    "minimum 3 bootnodes reachable",
+    "minimum 3 public RPC nodes healthy before public phase",
+    "chain ID collision preflight PASS",
+    "no unresolved safety-critical issue"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "foundry_setup_script_added": true,
+  "foundry_ci_added": true,
+  "solidity_version": "0.8.24",
+  "evm_target": "cancun",
+  "external_audit_required_for_mainnet": true,
+  "audit_stages": 5,
+  "mainnet_contract_release_authorized": false,
+  "note": "This runtime could not download Foundry; installation must run on a networked host/CI."
+}

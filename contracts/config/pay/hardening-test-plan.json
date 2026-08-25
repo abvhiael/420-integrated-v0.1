@@ -1,0 +1,45 @@
+{
+  "schema": "420pay-hardening-test-plan-v1",
+  "status": "IMPLEMENTED_SOURCE_PENDING_FOUNDRY_EXECUTION",
+  "suites": [
+    {
+      "name": "split_conservation",
+      "type": "fuzz",
+      "file": "contracts/test/SettlementRouter420Fuzz.t.sol"
+    },
+    {
+      "name": "duplicate_invoice",
+      "type": "fuzz/property",
+      "file": "contracts/test/InvoiceRegistry420Fuzz.t.sol"
+    },
+    {
+      "name": "refund_bounds",
+      "type": "fuzz/property",
+      "file": "contracts/test/RefundManager420Fuzz.t.sol"
+    },
+    {
+      "name": "payer_spend_ceiling",
+      "type": "fuzz/property",
+      "file": "contracts/test/PaymentRouter420Limits.t.sol"
+    },
+    {
+      "name": "gas_sponsor_exhaustion",
+      "type": "limit/property",
+      "file": "contracts/test/GasSponsor420Limits.t.sol"
+    },
+    {
+      "name": "atomic_settlement",
+      "type": "failure/postcondition",
+      "file": "contracts/test/PaymentAtomicSettlement420.t.sol"
+    }
+  ],
+  "required_invariants": [
+    "split output sum equals input amount",
+    "single-use invoice cannot settle twice",
+    "cumulative refunds never exceed refundable maximum",
+    "payer input/gas/slippage/tip/conversion/protocol fee bounds cannot be exceeded",
+    "failed atomic settlement leaves payment authorization unconsumed due EVM revert",
+    "merchant receives at least exact invoice settlement amount",
+    "GasSponsor wallet/merchant/global/gas/cost/reserve limits fail closed"
+  ]
+}

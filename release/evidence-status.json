@@ -1,0 +1,41 @@
+{
+  "schema": "420-integrated-release-evidence-status-v1",
+  "release_channel": "TESTNET_RC",
+  "version": "0.1.0-rc1",
+  "all_required_evidence_pass": false,
+  "public_testnet_ready": false,
+  "gates": [
+    {
+      "gate": "production_blst",
+      "status": "MISSING"
+    },
+    {
+      "gate": "production_libp2p",
+      "status": "MISSING"
+    },
+    {
+      "gate": "live_engine_payload",
+      "status": "MISSING"
+    },
+    {
+      "gate": "real_devnet15",
+      "status": "MISSING"
+    },
+    {
+      "gate": "production_fault_matrix",
+      "status": "MISSING"
+    },
+    {
+      "gate": "production_restart_recovery",
+      "status": "MISSING"
+    },
+    {
+      "gate": "production_soak",
+      "status": "MISSING"
+    },
+    {
+      "gate": "release_checksum_verification",
+      "status": "MISSING"
+    }
+  ]
+}

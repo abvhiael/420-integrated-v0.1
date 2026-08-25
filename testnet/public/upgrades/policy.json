@@ -1,0 +1,22 @@
+{
+  "schema": "420-public-testnet-upgrade-policy-v1",
+  "principles": [
+    "No silent consensus upgrades.",
+    "Every upgrade publishes exact execution/consensus/config hashes.",
+    "Activation occurs at a declared epoch boundary.",
+    "Protocol upgrades require frozen governance/readiness rules.",
+    "Testnet emergency patches must preserve finalized history.",
+    "Client version compatibility windows are published before activation."
+  ],
+  "normal_upgrade": {
+    "proposal_class": "G3",
+    "validator_readiness_min_pct": 80,
+    "minimum_notice_rotations": 2,
+    "timelock_days": 14
+  },
+  "emergency_upgrade": {
+    "authority": "Decision 14 Emergency Council + >=2/3 Validator House as applicable",
+    "community_ratification_days": 14,
+    "cannot": "rewrite finalized history, mint arbitrary funds, reduce historical slashing evidence"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "go_test_default": {
+    "returncode": 0,
+    "stdout": "?   \tgithub.com/420integrated/420-integrated/consensus/cmd/fourtwentyd\t[no test files]\n?   \tgithub.com/420integrated/420-integrated/consensus/crypto\t[no test files]\n?   \tgithub.com/420integrated/420-integrated/consensus/crypto/bls\t[no test files]\nok  \tgithub.com/420integrated/420-integrated/consensus/clock\t0.036s\nok  \tgithub.com/420integrated/420-integrated/consensus/engine\t0.038s\n?   \tgithub.com/420integrated/420-integrated/consensus/types\t[no test files]\n?   \tgithub.com/420integrated/420-integrated/execution/cmd/node420\t[no test files]\n?   \tgithub.com/420integrated/420-integrated/genesis/cmd/420-genesis\t[no test files]\nok  \tgithub.com/420integrated/420-integrated/consensus/finality\t0.046s\nok  \tgithub.com/420integrated/420-integrated/consensus/ssz\t0.023s\nok  \tgithub.com/420integrated/420-integrated/integration/engineapi\t0.046s\n",
+    "stderr": ""
+  },
+  "build_fourtwentyd": {
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "build_node420": {
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "build_genesis": {
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "blst_tag_note": "Not executed: external blst module cannot be downloaded in this runtime; see consensus/crypto/bls/README.md"
+}

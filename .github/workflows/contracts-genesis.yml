@@ -1,25 +1,28 @@
 name: 420 Genesis Contract Verification
 
 on:
-  workflow_dispatch:
   push:
+    paths:
+      - "contracts/**"
+      - "scripts/contracts-*.sh"
+      - "scripts/export-contract-manifest.py"
+      - ".github/workflows/contracts-genesis.yml"
+      - "Dockerfile.contracts"
   pull_request:
+    paths:
+      - "contracts/**"
+      - "scripts/**"
+      - "Dockerfile.contracts"
+  workflow_dispatch:
 
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
-
-    defaults:
-      run:
-        working-directory: 420-integrated-v0.1-interface-adapted
-
     permissions:
       contents: read
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
@@ -36,24 +39,16 @@ jobs:
         with:
           go-version-file: "go.mod"
 
-      - name: Tool versions
-        run: |
-          forge --version
-          cast --version
-          anvil --version
-          python3 --version
-          go version
+      - name: Bootstrap
+        run: ./scripts/contracts-bootstrap.sh
 
-      - name: Bootstrap contract environment
-        run: bash ./scripts/contracts-bootstrap.sh
-
-      - name: Full Pay / Swap / Bridge verification
-        run: bash ./scripts/contracts-ci.sh
+      - name: Full contract verification
+        run: ./scripts/contracts-ci.sh
 
       - name: Upload verification artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: 420-contract-verification
-          path: 420-integrated-v0.1-interface-adapted/artifacts/contracts/
+          path: artifacts/contracts/
           if-no-files-found: warn

@@ -1,0 +1,271 @@
+{
+  "schema": "420-genesis-predeploy-plan-v1",
+  "status": "FROZEN_ADDRESS_MAP_ARTIFACTS_PENDING",
+  "solidity": {
+    "version": "0.8.24",
+    "optimizer": true,
+    "optimizer_runs": 200,
+    "evm_version": "cancun"
+  },
+  "predeploys": [
+    {
+      "name": "RewardController",
+      "address": "0x0000000000000000000000000000000000000420",
+      "source": "system/RewardController.sol",
+      "artifact": "contracts/artifacts/RewardController.json",
+      "status": "SOURCE_READY",
+      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
+      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
+    },
+    {
+      "name": "AttentionTreasury",
+      "address": "0x0000000000000000000000000000000000000421",
+      "source": "system/AttentionTreasury.sol",
+      "artifact": "contracts/artifacts/AttentionTreasury.json",
+      "status": "SOURCE_READY",
+      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
+      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
+    },
+    {
+      "name": "DevelopmentTreasury",
+      "address": "0x0000000000000000000000000000000000000422",
+      "source": "system/DevelopmentTreasury.sol",
+      "artifact": "contracts/artifacts/DevelopmentTreasury.json",
+      "status": "SOURCE_READY",
+      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
+      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
+    },
+    {
+      "name": "ValidatorRegistry",
+      "address": "0x0000000000000000000000000000000000000423",
+      "source": "system/ValidatorRegistry.sol",
+      "artifact": "contracts/artifacts/ValidatorRegistry.json",
+      "status": "SOURCE_READY",
+      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
+      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
+    },
+    {
+      "name": "ProtocolReserve",
+      "address": "0x0000000000000000000000000000000000000424",
+      "source": "system/ProtocolReserve.sol",
+      "artifact": "contracts/artifacts/ProtocolReserve.json",
+      "status": "SOURCE_READY",
+      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
+      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
+    },
+    {
+      "name": "CommunityValidatorReserve",
+      "address": "0x0000000000000000000000000000000000000425",
+      "source": "system/CommunityValidatorReserve.sol",
+      "artifact": "contracts/artifacts/CommunityValidatorReserve.json",
+      "status": "SOURCE_READY",
+      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
+      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
+    },
+    {
+      "name": "CommunityRewardReserve",
+      "address": "0x0000000000000000000000000000000000000426",
+      "source": "system/CommunityRewardReserve.sol",
+      "artifact": "contracts/artifacts/CommunityRewardReserve.json",
+      "status": "SOURCE_READY",
+      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
+      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
+    },
+    {
+      "name": "FounderVestingRegistry",
+      "address": "0x0000000000000000000000000000000000000427",
+      "source": "system/FounderVestingRegistry.sol",
+      "artifact": "contracts/artifacts/FounderVestingRegistry.json",
+      "status": "SOURCE_READY",
+      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
+      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
+    },
+    {
+      "name": "RandomnessRegistry",
+      "address": "0x0000000000000000000000000000000000000428",
+      "source": "system/RandomnessRegistry.sol",
+      "artifact": "contracts/artifacts/RandomnessRegistry.json",
+      "status": "SOURCE_READY",
+      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
+      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
+    },
+    {
+      "name": "GovernanceTimelock",
+      "address": "0x0000000000000000000000000000000000000429",
+      "source": "governance/GovernanceTimelock.sol",
+      "artifact": "contracts/artifacts/GovernanceTimelock.json",
+      "status": "SOURCE_READY",
+      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
+      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
+    },
+    {
+      "name": "PublicDistributionVault",
+      "address": "0x000000000000000000000000000000000000042a",
+      "source": "system/PublicDistributionVault.sol",
+      "artifact": "contracts/artifacts/PublicDistributionVault.json",
+      "status": "SOURCE_READY",
+      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
+      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
+    },
+    {
+      "name": "GenesisDEXFactory",
+      "address": "0x000000000000000000000000000000000000042b",
+      "source": "swap/GenesisDEXFactory.sol",
+      "artifact": "contracts/artifacts/GenesisDEXFactory.json",
+      "status": "SOURCE_READY",
+      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
+      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
+    },
+    {
+      "name": "PublicBatchAuction",
+      "address": "0x000000000000000000000000000000000000042c",
+      "source": "swap/PublicBatchAuction.sol",
+      "artifact": "contracts/artifacts/PublicBatchAuction.json",
+      "status": "SOURCE_READY",
+      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
+      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
+    },
+    {
+      "name": "TWAPOracle",
+      "address": "0x000000000000000000000000000000000000042d",
+      "source": "swap/TWAPOracle.sol",
+      "artifact": "contracts/artifacts/TWAPOracle.json",
+      "status": "SOURCE_READY",
+      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
+      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
+    },
+    {
+      "name": "ValidatorBootstrapReserve",
+      "address": "0x000000000000000000000000000000000000042e",
+      "source": "system/ValidatorBootstrapReserve.sol",
+      "artifact": "contracts/artifacts/ValidatorBootstrapReserve.json",
+      "status": "SOURCE_READY",
+      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
+      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
+    },
+    {
+      "name": "AIProviderRegistry",
+      "address": "0x000000000000000000000000000000000000042f",
+      "source": "ai/AIProviderRegistry.sol",
+      "artifact": "contracts/artifacts/AIProviderRegistry.json",
+      "status": "SOURCE_READY",
+      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
+      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
+    },
+    {
+      "name": "AIModelRegistry",
+      "address": "0x0000000000000000000000000000000000000430",
+      "source": "ai/AIModelRegistry.sol",
+      "artifact": "contracts/artifacts/AIModelRegistry.json",
+      "status": "SOURCE_READY",
+      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
+      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
+    },
+    {
+      "name": "AIJobManager",
+      "address": "0x0000000000000000000000000000000000000431",
+      "source": "ai/AIJobManager.sol",
+      "artifact": "contracts/artifacts/AIJobManager.json",
+      "status": "SOURCE_READY",
+      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
+      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
+    },
+    {
+      "name": "AIJobEscrow",
+      "address": "0x0000000000000000000000000000000000000432",
+      "source": "ai/AIJobEscrow.sol",
+      "artifact": "contracts/artifacts/AIJobEscrow.json",
+      "status": "SOURCE_READY",
+      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
+      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
+    },
+    {
+      "name": "AIReputationRegistry",
+      "address": "0x0000000000000000000000000000000000000433",
+      "source": "ai/AIReputationRegistry.sol",
+      "artifact": "contracts/artifacts/AIReputationRegistry.json",
+      "status": "SOURCE_READY",
+      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
+      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
+    },
+    {
+      "name": "ProtocolRegistry",
+      "address": "0x0000000000000000000000000000000000000434",
+      "source": "apps/ProtocolRegistry.sol",
+      "artifact": "contracts/artifacts/ProtocolRegistry.json",
+      "status": "SOURCE_READY",
+      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
+      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
+    },
+    {
+      "name": "Names420",
+      "address": "0x0000000000000000000000000000000000000435",
+      "source": "apps/Names420.sol",
+      "artifact": "contracts/artifacts/Names420.json",
+      "status": "SOURCE_READY",
+      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
+      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
+    },
+    {
+      "name": "Identity420",
+      "address": "0x0000000000000000000000000000000000000436",
+      "source": "apps/Identity420.sol",
+      "artifact": "contracts/artifacts/Identity420.json",
+      "status": "SOURCE_READY",
+      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
+      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
+    },
+    {
+      "name": "Governance420",
+      "address": "0x0000000000000000000000000000000000000437",
+      "source": "governance/Governance420.sol",
+      "artifact": "contracts/artifacts/Governance420.json",
+      "status": "SOURCE_READY",
+      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
+      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
+    },
+    {
+      "name": "VerifiedGateway420",
+      "address": "0x0000000000000000000000000000000000000438",
+      "source": "bridge/VerifiedGateway420.sol",
+      "artifact": "contracts/artifacts/VerifiedGateway420.json",
+      "status": "SOURCE_READY",
+      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
+      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
+    },
+    {
+      "name": "ApprovedQuoteAssetRegistry",
+      "address": "0x0000000000000000000000000000000000000439",
+      "source": "swap/ApprovedQuoteAssetRegistry.sol",
+      "artifact": "contracts/artifacts/ApprovedQuoteAssetRegistry.json",
+      "status": "SOURCE_READY",
+      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
+      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
+    },
+    {
+      "name": "Stake420",
+      "address": "0x000000000000000000000000000000000000043a",
+      "source": "apps/Stake420.sol",
+      "artifact": "contracts/artifacts/Stake420.json",
+      "status": "SOURCE_READY",
+      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
+      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
+    },
+    {
+      "name": "CannaseurCampaignRegistry",
+      "address": "0x000000000000000000000000000000000000043b",
+      "source": "system/CannaseurCampaignRegistry.sol",
+      "artifact": "contracts/artifacts/CannaseurCampaignRegistry.json",
+      "status": "SOURCE_READY",
+      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
+      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
+    }
+  ],
+  "rules": [
+    "Runtime bytecode, not creation bytecode, is written to genesis alloc.code.",
+    "Constructor effects must be represented explicitly in genesis storage because constructors do not execute for direct predeploy placement.",
+    "Every predeploy must have a compiled runtime code hash and storage root manifest before launch.",
+    "Address collisions or missing artifacts are fatal.",
+    "Genesis generator must never infer storage layouts from source text."
+  ]
+}

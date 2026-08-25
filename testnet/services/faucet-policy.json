@@ -1,0 +1,11 @@
+{
+  "schema": "420-integrated-testnet-faucet-policy-v1",
+  "testnet_only": true,
+  "not_protocol_monetary_policy": true,
+  "default_request_amount_420": "42",
+  "per_address_cooldown_hours": 24,
+  "per_ip_rate_limit_per_hour": 5,
+  "captcha_or_equivalent_abuse_control_required": true,
+  "faucet_source": "dedicated testnet faucet allocation or operator-funded test account",
+  "mainnet_enabled": false
+}

@@ -1,0 +1,41 @@
+{
+  "schema": "420-testnet-rpc-policy-v1",
+  "phase": "S5-OBSERVATION",
+  "public_http": true,
+  "public_ws": true,
+  "allowed_modules": [
+    "eth",
+    "net",
+    "web3"
+  ],
+  "forbidden_modules": [
+    "admin",
+    "debug",
+    "personal",
+    "miner",
+    "txpool"
+  ],
+  "rate_limits": {
+    "per_ip_requests_per_second": 20,
+    "burst": 40,
+    "ws_connections_per_ip": 5,
+    "max_request_body_kb": 256,
+    "max_batch_size": 20
+  },
+  "cors": {
+    "default": "deny",
+    "allowed_origins": [
+      "REPLACE_WITH_EXPLORER_ORIGIN",
+      "REPLACE_WITH_FAUCET_ORIGIN"
+    ]
+  },
+  "security": [
+    "TLS required",
+    "reverse proxy in front of node420",
+    "Engine API never exposed publicly",
+    "JWT secret never shared with RPC tier",
+    "WAF/rate limiting enabled",
+    "request/latency/error logs retained"
+  ],
+  "status": "PLACEHOLDER_ENDPOINTS"
+}

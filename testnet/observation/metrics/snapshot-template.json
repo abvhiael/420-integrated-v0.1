@@ -1,0 +1,21 @@
+{
+  "schema": "420-observation-health-snapshot-v1",
+  "timestamp_utc": "REPLACE",
+  "rpc_healthy": 0,
+  "rpc_total": 3,
+  "rpc_availability_pct": 0.0,
+  "rpc_p95_latency_ms": 0,
+  "rpc_error_rate_pct": 0.0,
+  "explorer_available": false,
+  "explorer_indexing_lag_blocks": 0,
+  "faucet_available": false,
+  "faucet_abuse_incidents_unresolved": 0,
+  "active_seats": 0,
+  "eligible_validators": 0,
+  "finalized_slot": 0,
+  "finality_stall_over_42_slots": false,
+  "conflicting_qc_detected": false,
+  "safety_halt": false,
+  "external_validators_onboarded": 0,
+  "status": "TEMPLATE"
+}

@@ -1,0 +1,21 @@
+{
+  "schema": "420-event-standard-v1",
+  "status": "FROZEN_WITH_INTERFACE_LAYER_V1",
+  "common_indexing_fields_where_applicable": [
+    "objectId",
+    "componentId",
+    "version",
+    "actor",
+    "assetId",
+    "amount",
+    "stateBefore",
+    "stateAfter",
+    "referenceHash"
+  ],
+  "requirements": [
+    "state-changing security-sensitive actions emit auditable events",
+    "historical events remain meaningful after upgrades",
+    "object IDs are canonical and namespaced",
+    "events never substitute for authoritative contract state"
+  ]
+}

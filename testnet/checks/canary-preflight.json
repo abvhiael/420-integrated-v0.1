@@ -1,0 +1,31 @@
+{
+  "schema": "420-testnet-canary-preflight-v1",
+  "canary_start_authorized": false,
+  "checks": [
+    {
+      "name": "production evidence",
+      "status": "BLOCKED",
+      "detail": "Step 4.9 evidence gate"
+    },
+    {
+      "name": "validator ceremony",
+      "status": "BLOCKED",
+      "detail": "0/60 READY"
+    },
+    {
+      "name": "genesis seed ceremony",
+      "status": "BLOCKED",
+      "detail": "result.json"
+    },
+    {
+      "name": "genesis freeze",
+      "status": "BLOCKED",
+      "detail": "freeze-record.json"
+    },
+    {
+      "name": "bootnode infrastructure",
+      "status": "BLOCKED",
+      "detail": "ready=0, failure_domains=0"
+    }
+  ]
+}

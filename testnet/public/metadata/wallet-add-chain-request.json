@@ -1,0 +1,26 @@
+{
+  "method": "wallet_addEthereumChain",
+  "params": [
+    {
+      "schema": "420-wallet-network-config-v1",
+      "name": "420 Integrated Testnet",
+      "chainId": "0x1a4",
+      "chainIdDecimal": 420,
+      "nativeCurrency": {
+        "name": "420",
+        "symbol": "420",
+        "decimals": 18
+      },
+      "rpcUrls": [
+        "REPLACE_WITH_HTTPS_RPC_1",
+        "REPLACE_WITH_HTTPS_RPC_2",
+        "REPLACE_WITH_HTTPS_RPC_3"
+      ],
+      "blockExplorerUrls": [
+        "REPLACE_WITH_EXPLORER_URL"
+      ],
+      "iconUrls": [],
+      "status": "PLACEHOLDER_ENDPOINTS"
+    }
+  ]
+}

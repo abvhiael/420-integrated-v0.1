@@ -1,0 +1,41 @@
+{
+  "schema": "420-genesis-account-decision-1-v1",
+  "status": "FROZEN_REQUIREMENTS_IMPLEMENTATION_ABI_PENDING",
+  "title": "Programmable Smart Accounts",
+  "architecture": "EVM_COMPATIBLE_SMART_ACCOUNTS_WITH_PROTOCOL_SUPPORTED_PLUMBING",
+  "required_capabilities": [
+    "OWNER_AUTHORITY",
+    "RECOVERY_AUTHORITY",
+    "SESSION_KEYS",
+    "DELEGATED_OPERATORS",
+    "CAPABILITY_SCOPES",
+    "SPENDING_POLICIES",
+    "GAS_SPONSORSHIP_AUTHORIZATION",
+    "BATCHED_ACTIONS",
+    "NONCE_REPLAY_PROTECTION",
+    "EMERGENCY_REVOCATION",
+    "VERSIONED_AUTHORIZATION_POLICIES"
+  ],
+  "policy": [
+    "Delegation is minimum-authority and explicitly scoped.",
+    "Session keys are temporary and bounded.",
+    "Recovery is optional and configurable.",
+    "Recovery/session/operator authority never automatically implies custody transfer, governance authority, bridge authority, validator authority, or unrestricted execution.",
+    "Spending policies may constrain amount, asset, recipient, target contract, function selector, time window, gas, and route.",
+    "Gas sponsorship may pay execution cost but may not alter the user's signed economic action.",
+    "Batched execution may be atomic when the application requires it.",
+    "The account layer is reusable by every dApp and surfaced through 420 Wallet.",
+    "Implementation must preserve EVM compatibility; final ABI/plumbing must be checked against then-current EVM account-abstraction standards before freeze."
+  ],
+  "primary_consumers": [
+    "420 Wallet",
+    "420Pay",
+    "420Swap",
+    "420Bridge",
+    "420Game",
+    "420AI",
+    "merchant POS",
+    "organization treasuries",
+    "future marketplace"
+  ]
+}

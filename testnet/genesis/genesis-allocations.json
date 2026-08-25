@@ -1,0 +1,86 @@
+{
+  "schema": "420-integrated-genesis-allocations-v1",
+  "genesis_supply_420": 42000000,
+  "genesis_supply_kief": "42000000000000000000000000",
+  "allocations": [
+    {
+      "id": "founder-vesting",
+      "amount_420": 1000000,
+      "amount_kief": "1000000000000000000000000",
+      "destination": "0x0000000000000000000000000000000000000427",
+      "lock_type": "founder-vesting-registry"
+    },
+    {
+      "id": "validator-bootstrap-reserve",
+      "amount_420": 3000000,
+      "amount_kief": "3000000000000000000000000",
+      "destination": "0x000000000000000000000000000000000000042E",
+      "lock_type": "system-reserve"
+    },
+    {
+      "id": "attention-bootstrap",
+      "amount_420": 4200000,
+      "amount_kief": "4200000000000000000000000",
+      "destination": "0x0000000000000000000000000000000000000421",
+      "lock_type": "system-treasury"
+    },
+    {
+      "id": "development-bootstrap",
+      "amount_420": 4200000,
+      "amount_kief": "4200000000000000000000000",
+      "destination": "0x0000000000000000000000000000000000000422",
+      "lock_type": "system-treasury"
+    },
+    {
+      "id": "community-validator-credit-reserve",
+      "amount_420": 6300000,
+      "amount_kief": "6300000000000000000000000",
+      "destination": "0x0000000000000000000000000000000000000425",
+      "lock_type": "system-reserve"
+    },
+    {
+      "id": "community-testnet-reward-reserve",
+      "amount_420": 2100000,
+      "amount_kief": "2100000000000000000000000",
+      "destination": "0x0000000000000000000000000000000000000426",
+      "lock_type": "system-reserve"
+    },
+    {
+      "id": "public-distribution-genesis-tranche",
+      "amount_420": 4200000,
+      "amount_kief": "4200000000000000000000000",
+      "destination": "0x000000000000000000000000000000000000042A",
+      "lock_type": "public-distribution-vault",
+      "start": "genesis_time",
+      "duration_days": 42,
+      "daily_release_cap_420": 100000
+    },
+    {
+      "id": "public-distribution-day180-tranche",
+      "amount_420": 4200000,
+      "amount_kief": "4200000000000000000000000",
+      "destination": "0x000000000000000000000000000000000000042A",
+      "lock_type": "public-distribution-vault",
+      "start": "genesis_time + 180 days",
+      "duration_days": 42,
+      "daily_release_cap_420": 100000
+    },
+    {
+      "id": "public-distribution-day365-tranche",
+      "amount_420": 4200000,
+      "amount_kief": "4200000000000000000000000",
+      "destination": "0x000000000000000000000000000000000000042A",
+      "lock_type": "public-distribution-vault",
+      "start": "genesis_time + 365 days",
+      "duration_days": 42,
+      "daily_release_cap_420": 100000
+    },
+    {
+      "id": "protocol-reserve",
+      "amount_420": 8600000,
+      "amount_kief": "8600000000000000000000000",
+      "destination": "0x0000000000000000000000000000000000000424",
+      "lock_type": "protocol-reserve"
+    }
+  ]
+}

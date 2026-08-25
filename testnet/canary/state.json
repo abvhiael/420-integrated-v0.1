@@ -1,0 +1,27 @@
+{
+  "schema": "420-testnet-canary-state-v1",
+  "phase": "S5-CANARY_PREP",
+  "allowed_transitions": {
+    "S5-CANARY_PREP": [
+      "S5-CANARY_RUNNING"
+    ],
+    "S5-CANARY_RUNNING": [
+      "S5-CANARY_HOLD",
+      "S5-CANARY_FAILED",
+      "S5-CANARY_COMPLETE"
+    ],
+    "S5-CANARY_HOLD": [
+      "S5-CANARY_RUNNING",
+      "S5-CANARY_FAILED"
+    ],
+    "S5-CANARY_COMPLETE": [
+      "S5-OBSERVATION"
+    ],
+    "S5-CANARY_FAILED": []
+  },
+  "started_at_utc": null,
+  "minimum_end_at_utc": null,
+  "completed_at_utc": null,
+  "promotion_authorized": false,
+  "notes": "State changes require controller validation and evidence."
+}

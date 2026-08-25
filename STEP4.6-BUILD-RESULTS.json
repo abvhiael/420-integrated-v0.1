@@ -1,0 +1,47 @@
+{
+  "go_test": {
+    "returncode": 0,
+    "stdout": "ok  \tgithub.com/420integrated/420-integrated/consensus/attestation\t(cached)\nok  \tgithub.com/420integrated/420-integrated/consensus/clock\t(cached)\n?   \tgithub.com/420integrated/420-integrated/consensus/cmd/fourtwentyd\t[no test files]\n?   \tgithub.com/420integrated/420-integrated/consensus/crypto\t[no test files]\n?   \tgithub.com/420integrated/420-integrated/consensus/crypto/bls\t[no test files]\nok  \tgithub.com/420integrated/420-integrated/consensus/devnet\t(cached)\nok  \tgithub.com/420integrated/420-integrated/consensus/engine\t(cached)\n?   \tgithub.com/420integrated/420-integrated/consensus/p2p\t[no test files]\nok  \tgithub.com/420integrated/420-integrated/consensus/finality\t(cached)\nok  \tgithub.com/420integrated/420-integrated/consensus/proposer\t(cached)\nok  \tgithub.com/420integrated/420-integrated/consensus/slashing\t(cached)\nok  \tgithub.com/420integrated/420-integrated/consensus/ssz\t(cached)\n?   \tgithub.com/420integrated/420-integrated/consensus/types\t[no test files]\nok  \tgithub.com/420integrated/420-integrated/consensus/storage\t(cached)\nok  \tgithub.com/420integrated/420-integrated/consensus/validator\t(cached)\n?   \tgithub.com/420integrated/420-integrated/devnet/cmd/devnet-bus\t[no test files]\n?   \tgithub.com/420integrated/420-integrated/execution/cmd/node420\t[no test files]\n?   \tgithub.com/420integrated/420-integrated/genesis/cmd/420-genesis\t[no test files]\nok  \tgithub.com/420integrated/420-integrated/integration/engineapi\t(cached)\n?   \tgithub.com/420integrated/420-integrated/simulations/committee15/main\t[no test files]\nok  \tgithub.com/420integrated/420-integrated/simulations/committee15\t(cached)\n",
+    "stderr": ""
+  },
+  "build_fourtwentyd": {
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "build_node420": {
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "build_genesis": {
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "build_bus": {
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "devnet_15": {
+    "returncode": 0,
+    "stdout": "DEVNET_PHASE label=phase1 nodes=15 proposals=5 qc_events=60 max_finalized=3\nDEVNET_SUMMARY {\"max_finalized\": 3, \"nodes\": 15, \"phases\": [{\"label\": \"phase1\", \"max_finalized\": 3, \"nodes\": 15, \"proposals\": 5, \"qc_events\": 60}], \"total_qc_events\": 60}\n",
+    "stderr": "Spreadsheet runtime warmup failed during python startup\nTraceback (most recent call last):\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/patches/warm_spreadsheet_runtime_on_startup.py\", line 26, in warm_spreadsheet_runtime_on_startup\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/spreadsheet_warmup.py\", line 772, in warm_spreadsheet_runtime\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/rpc/connection.py\", line 37, in get_or_create_client\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/rpc/daemon.py\", line 124, in start_daemon\nTimeoutError: Timed out waiting for artifact tool daemon socket. Set ARTIFACT_TOOL_RPC_DAEMON_STARTUP_TIMEOUT_S=<seconds> to increase the limit.\n"
+  },
+  "devnet_11": {
+    "returncode": 0,
+    "stdout": "DEVNET_PHASE label=phase1 nodes=11 proposals=3 qc_events=22 max_finalized=1\nDEVNET_SUMMARY {\"max_finalized\": 1, \"nodes\": 11, \"phases\": [{\"label\": \"phase1\", \"max_finalized\": 1, \"nodes\": 11, \"proposals\": 3, \"qc_events\": 22}], \"total_qc_events\": 22}\n",
+    "stderr": "Spreadsheet runtime warmup failed during python startup\nTraceback (most recent call last):\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/patches/warm_spreadsheet_runtime_on_startup.py\", line 26, in warm_spreadsheet_runtime_on_startup\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/spreadsheet_warmup.py\", line 772, in warm_spreadsheet_runtime\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/rpc/connection.py\", line 37, in get_or_create_client\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/rpc/daemon.py\", line 124, in start_daemon\nTimeoutError: Timed out waiting for artifact tool daemon socket. Set ARTIFACT_TOOL_RPC_DAEMON_STARTUP_TIMEOUT_S=<seconds> to increase the limit.\n"
+  },
+  "devnet_10": {
+    "returncode": 0,
+    "stdout": "DEVNET_PHASE label=phase1 nodes=10 proposals=3 qc_events=0 max_finalized=0\nDEVNET_SUMMARY {\"max_finalized\": 0, \"nodes\": 10, \"phases\": [{\"label\": \"phase1\", \"max_finalized\": 0, \"nodes\": 10, \"proposals\": 3, \"qc_events\": 0}], \"total_qc_events\": 0}\n",
+    "stderr": "Spreadsheet runtime warmup failed during python startup\nTraceback (most recent call last):\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/patches/warm_spreadsheet_runtime_on_startup.py\", line 26, in warm_spreadsheet_runtime_on_startup\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/spreadsheet_warmup.py\", line 772, in warm_spreadsheet_runtime\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/rpc/connection.py\", line 37, in get_or_create_client\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/rpc/daemon.py\", line 124, in start_daemon\nTimeoutError: Timed out waiting for artifact tool daemon socket. Set ARTIFACT_TOOL_RPC_DAEMON_STARTUP_TIMEOUT_S=<seconds> to increase the limit.\n"
+  },
+  "devnet_restart": {
+    "returncode": 0,
+    "stdout": "DEVNET_PHASE label=phase1 nodes=15 proposals=3 qc_events=30 max_finalized=1\nDEVNET_PHASE label=restart nodes=15 proposals=3 qc_events=37 max_finalized=5\nDEVNET_SUMMARY {\"max_finalized\": 5, \"nodes\": 15, \"phases\": [{\"label\": \"phase1\", \"max_finalized\": 1, \"nodes\": 15, \"proposals\": 3, \"qc_events\": 30}, {\"label\": \"restart\", \"max_finalized\": 5, \"nodes\": 15, \"proposals\": 3, \"qc_events\": 37}], \"total_qc_events\": 67}\n",
+    "stderr": "Spreadsheet runtime warmup failed during python startup\nTraceback (most recent call last):\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/patches/warm_spreadsheet_runtime_on_startup.py\", line 26, in warm_spreadsheet_runtime_on_startup\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/spreadsheet_warmup.py\", line 772, in warm_spreadsheet_runtime\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/rpc/connection.py\", line 37, in get_or_create_client\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/rpc/daemon.py\", line 124, in start_daemon\nTimeoutError: Timed out waiting for artifact tool daemon socket. Set ARTIFACT_TOOL_RPC_DAEMON_STARTUP_TIMEOUT_S=<seconds> to increase the limit.\n"
+  }
+}

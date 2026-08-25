@@ -1,0 +1,15 @@
+{
+  "schema": "420-application-domains-v1",
+  "note": "These are execution/application-level signature domains. They do not modify Decision 16 frozen consensus domains.",
+  "domains": [
+    "420/APP/AI_PROVIDER_REGISTRATION",
+    "420/APP/AI_MODEL_REGISTRATION",
+    "420/APP/AI_JOB_REQUEST",
+    "420/APP/AI_JOB_RESULT",
+    "420/APP/AI_JOB_DISPUTE",
+    "420/APP/CANNASEUR_CAMPAIGN",
+    "420/APP/CANNASEUR_CLAIM",
+    "420/APP/VALIDATOR_OWNER_AUTH",
+    "420/APP/GOVERNANCE_METADATA"
+  ]
+}

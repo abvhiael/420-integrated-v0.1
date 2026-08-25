@@ -1,0 +1,23 @@
+{
+  "schema": "420-public-testnet-state-v1",
+  "phase": "S5-PUBLIC_PREP",
+  "allowed_transitions": {
+    "S5-PUBLIC_PREP": [
+      "S5-PUBLIC_LIVE"
+    ],
+    "S5-PUBLIC_LIVE": [
+      "S5-PUBLIC_DEGRADED",
+      "S5-PUBLIC_MAINTENANCE"
+    ],
+    "S5-PUBLIC_DEGRADED": [
+      "S5-PUBLIC_LIVE",
+      "S5-PUBLIC_MAINTENANCE"
+    ],
+    "S5-PUBLIC_MAINTENANCE": [
+      "S5-PUBLIC_LIVE"
+    ]
+  },
+  "launched_at_utc": null,
+  "public_launch_authorized": false,
+  "public_launch_record": null
+}

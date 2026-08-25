@@ -1,0 +1,31 @@
+{
+  "devnet_15": {
+    "returncode": 0,
+    "lines": [
+      "DEVNET_PHASE label=phase1 nodes=15 proposals=5 qc_events=60 max_finalized=3",
+      "DEVNET_SUMMARY {\"max_finalized\": 3, \"nodes\": 15, \"phases\": [{\"label\": \"phase1\", \"max_finalized\": 3, \"nodes\": 15, \"proposals\": 5, \"qc_events\": 60}], \"total_qc_events\": 60}"
+    ]
+  },
+  "devnet_11": {
+    "returncode": 0,
+    "lines": [
+      "DEVNET_PHASE label=phase1 nodes=11 proposals=3 qc_events=22 max_finalized=1",
+      "DEVNET_SUMMARY {\"max_finalized\": 1, \"nodes\": 11, \"phases\": [{\"label\": \"phase1\", \"max_finalized\": 1, \"nodes\": 11, \"proposals\": 3, \"qc_events\": 22}], \"total_qc_events\": 22}"
+    ]
+  },
+  "devnet_10": {
+    "returncode": 0,
+    "lines": [
+      "DEVNET_PHASE label=phase1 nodes=10 proposals=3 qc_events=0 max_finalized=0",
+      "DEVNET_SUMMARY {\"max_finalized\": 0, \"nodes\": 10, \"phases\": [{\"label\": \"phase1\", \"max_finalized\": 0, \"nodes\": 10, \"proposals\": 3, \"qc_events\": 0}], \"total_qc_events\": 0}"
+    ]
+  },
+  "devnet_restart": {
+    "returncode": 0,
+    "lines": [
+      "DEVNET_PHASE label=phase1 nodes=15 proposals=3 qc_events=30 max_finalized=1",
+      "DEVNET_PHASE label=restart nodes=15 proposals=3 qc_events=37 max_finalized=5",
+      "DEVNET_SUMMARY {\"max_finalized\": 5, \"nodes\": 15, \"phases\": [{\"label\": \"phase1\", \"max_finalized\": 1, \"nodes\": 15, \"proposals\": 3, \"qc_events\": 30}, {\"label\": \"restart\", \"max_finalized\": 5, \"nodes\": 15, \"proposals\": 3, \"qc_events\": 37}], \"total_qc_events\": 67}"
+    ]
+  }
+}

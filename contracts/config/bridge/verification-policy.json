@@ -1,0 +1,53 @@
+{
+  "schema": "420-bridge-verification-policy-v1",
+  "status": "LOCKED_WITH_GENESIS_RISK_LIMITS",
+  "principle": "Asset-specific verification; no universal bridge committee and no single operator.",
+  "mechanisms": {
+    "CADC": {
+      "preferred": "ISSUER_CANONICAL_LAYERZERO_V2_OFT",
+      "verification": "LayerZero Endpoint V2 + issuer-peered OFT/OFTAdapter + multi-DVN security stack",
+      "minimum": "At least 2 required independent DVNs; higher-value path should consider 2-of-3 or 3-of-N.",
+      "420_validator_committee_used": false
+    },
+    "USDC": {
+      "preferred": "CIRCLE_CCTP_V2_WHEN_420_SUPPORTED",
+      "verification": "Circle MessageTransmitterV2 validates Iris-signed attestation; TokenMessengerV2 burn/mint",
+      "fallback": "If 420 is not CCTP-supported at genesis, keep USDC route inactive rather than deploy an unofficial canonical USDC bridge.",
+      "420_validator_committee_used": false
+    },
+    "ETH": {
+      "preferred": "SOURCE_CHAIN_LIGHT_CLIENT_OR_ZK_PROOF",
+      "verification": "Verify finalized source-chain state/event inclusion on 420; avoid wrapped ETH backed solely by multisig.",
+      "fallback": "Diverse threshold verifier/DVN path with strict caps only for testnet/early limited value.",
+      "420_validator_committee_used": false
+    },
+    "BTC": {
+      "preferred": "BITCOIN_HEADER_LIGHT_CLIENT_PLUS_MERKLE_INCLUSION_AND_CONFIRMATION_POLICY",
+      "verification": "Verify PoW header chain and deposit inclusion; withdrawal custody remains a separate hard problem.",
+      "activation": "APPROVED_INACTIVE until custody/withdrawal mechanism passes dedicated review.",
+      "420_validator_committee_used": false
+    }
+  },
+  "global_controls": [
+    "replay protection",
+    "source contract/domain allowlist",
+    "destination token allowlist",
+    "per-transaction cap",
+    "rolling hourly/daily cap",
+    "per-asset TVL cap",
+    "governance/emergency pause",
+    "delayed configuration changes",
+    "independent config-hash monitoring",
+    "no bridge verifier controlled by the 420 validator committee solely by virtue of validator status"
+  ],
+  "risk_limits": "contracts/config/bridge/risk-limits.json",
+  "protocol_components": [
+    "BridgeAssetRegistry",
+    "BridgeRouteRegistry",
+    "BridgeRiskManager",
+    "BridgeTransferRegistry",
+    "GatewayRouter420",
+    "BridgeAccountingRegistry",
+    "asset-specific adapters"
+  ]
+}

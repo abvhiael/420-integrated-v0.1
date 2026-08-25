@@ -1,0 +1,10 @@
+{
+  "go_test": 0,
+  "build_fourtwentyd": 0,
+  "build_node420": 0,
+  "build_engine_live_smoke": 0,
+  "rc_build": 0,
+  "rc_sha256": "2be5a96544effb74f537f289a81c3d0a9275fa779aa23095dead78e38f39b038",
+  "public_testnet_ready": false,
+  "expected_missing_evidence": true
+}

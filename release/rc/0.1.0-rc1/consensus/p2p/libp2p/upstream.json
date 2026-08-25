@@ -1,0 +1,7 @@
+{
+  "go-libp2p": "v0.49.0",
+  "go-libp2p-pubsub": "v0.17.0",
+  "transport": "GossipSub",
+  "status": "source adapter encoded; dependency fetch unavailable in current runtime",
+  "production_only": true
+}

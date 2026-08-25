@@ -7,8 +7,8 @@ A clean-room resurrection of the original 420 Integrated / PUFFScoin idea as a m
 420 Integrated is designed as one programmable economy with three permanent issuance purposes:
 
 - 34% Network Security
-- 33% Attention Economy
-- 33% Development Ecosystem
+- 25% Attention Economy
+- 25% Development Ecosystem
 
 The execution layer is intended to remain compatible with modern Go-Ethereum/EVM tooling. Consensus is a separate 420-specific component with rotating bonded validators and a path toward permissionless Proof of Stake.
 

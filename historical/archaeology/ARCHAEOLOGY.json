@@ -1,0 +1,16 @@
+{
+  "step": 2,
+  "status": "provisional_complete",
+  "date": "2026-08-23",
+  "findings": {
+    "whalecoin_custom_reward_hook": "AccumulateNewRewards(state, header, uncles, genesisHeader)",
+    "puffscoin_2019_reward_hook": "accumulateRewards(config, state, header, uncles)",
+    "puffscoin_2019_flat_reward_wei": "5000000000000000000",
+    "puffscoin_chain_id_2019": 420,
+    "later_registry_chain_id": 2020,
+    "whalecoin_network_id": 30373,
+    "whalecoin_attention_mechanism_visible_in_puffscoin_2019_ethash": false,
+    "direct_source_lineage_whalecoin_to_puffscoin_proven": false
+  },
+  "modernization_decision": "preserve WhaleCoin attention/development concepts; reimplement on modern execution+consensus architecture; do not port Ethash reward code"
+}

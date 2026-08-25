@@ -1,0 +1,94 @@
+{
+  "schema": "420-testnet-infrastructure-v1",
+  "status": "PLANNED",
+  "requirements": {
+    "failure_domains_minimum": 3,
+    "bootnodes": 3,
+    "public_rpc": 3,
+    "archive_rpc": 1,
+    "explorer_backend": 1,
+    "explorer_frontend": 1,
+    "faucet": 1,
+    "monitoring_stack": 1
+  },
+  "nodes": [
+    {
+      "role": "bootnode",
+      "name": "bootnode-1",
+      "failure_domain": "A",
+      "status": "UNPROVISIONED"
+    },
+    {
+      "role": "bootnode",
+      "name": "bootnode-2",
+      "failure_domain": "B",
+      "status": "UNPROVISIONED"
+    },
+    {
+      "role": "bootnode",
+      "name": "bootnode-3",
+      "failure_domain": "C",
+      "status": "UNPROVISIONED"
+    },
+    {
+      "role": "rpc",
+      "name": "rpc-1",
+      "failure_domain": "A",
+      "status": "UNPROVISIONED"
+    },
+    {
+      "role": "rpc",
+      "name": "rpc-2",
+      "failure_domain": "B",
+      "status": "UNPROVISIONED"
+    },
+    {
+      "role": "rpc",
+      "name": "rpc-3",
+      "failure_domain": "C",
+      "status": "UNPROVISIONED"
+    },
+    {
+      "role": "archive_rpc",
+      "name": "archive-1",
+      "failure_domain": "B",
+      "status": "UNPROVISIONED"
+    },
+    {
+      "role": "explorer_backend",
+      "name": "explorer-indexer-1",
+      "failure_domain": "A",
+      "status": "UNPROVISIONED"
+    },
+    {
+      "role": "explorer_frontend",
+      "name": "explorer-web-1",
+      "failure_domain": "C",
+      "status": "UNPROVISIONED"
+    },
+    {
+      "role": "faucet",
+      "name": "faucet-1",
+      "failure_domain": "B",
+      "status": "UNPROVISIONED"
+    },
+    {
+      "role": "monitoring",
+      "name": "monitoring-1",
+      "failure_domain": "C",
+      "status": "UNPROVISIONED"
+    }
+  ],
+  "security_baseline": [
+    "Engine API bound to private/local interface only",
+    "JWT secret unique per consensus/execution pair",
+    "public JSON-RPC excludes admin/debug/personal APIs",
+    "SSH key auth only",
+    "host firewall default deny",
+    "separate monitoring credentials",
+    "no validator withdrawal keys on servers",
+    "consensus signer secrets encrypted or remote-signed",
+    "daily configuration backups",
+    "centralized logs with immutable retention"
+  ]
+}

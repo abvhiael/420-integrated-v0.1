@@ -1,0 +1,56 @@
+{
+  "schema": "420-integrated-testnet-preflight-v1",
+  "public_testnet_launch_authorized": false,
+  "checks": [
+    {
+      "name": "step4.9 formal evidence",
+      "status": "BLOCKED",
+      "detail": "all required production evidence must pass"
+    },
+    {
+      "name": "60 eligible validators",
+      "status": "PASS",
+      "detail": "configured=60"
+    },
+    {
+      "name": "15 active seats",
+      "status": "PASS",
+      "detail": "configured=15"
+    },
+    {
+      "name": "validator identity ceremony",
+      "status": "BLOCKED",
+      "detail": "placeholder_or_not_ready=60"
+    },
+    {
+      "name": "genesis bundle checksums",
+      "status": "PASS",
+      "detail": "execution-genesis.json:ok, consensus-genesis.json:ok, ai-genesis.json:ok, genesis-allocations.json:ok"
+    },
+    {
+      "name": "chain ID collision preflight",
+      "status": "BLOCKED",
+      "detail": "run scripts/check-chain-id.py on networked runner"
+    },
+    {
+      "name": "bootnodes",
+      "status": "BLOCKED",
+      "detail": "ready=0/3"
+    },
+    {
+      "name": "public RPC nodes",
+      "status": "BLOCKED",
+      "detail": "ready=0/3"
+    },
+    {
+      "name": "explorer",
+      "status": "BLOCKED",
+      "detail": "PLACEHOLDER"
+    },
+    {
+      "name": "faucet",
+      "status": "BLOCKED",
+      "detail": "PLACEHOLDER"
+    }
+  ]
+}

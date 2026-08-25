@@ -1,0 +1,43 @@
+
+name: Solidity Contracts
+
+on:
+  push:
+    paths:
+      - "contracts/**"
+      - "scripts/setup-foundry.sh"
+      - ".github/workflows/contracts-foundry.yml"
+  pull_request:
+    paths:
+      - "contracts/**"
+
+jobs:
+  foundry:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: Tool versions
+        run: |
+          forge --version
+          cast --version
+          forge config
+
+      - name: Build
+        working-directory: contracts
+        run: forge build --force
+
+      - name: Tests
+        working-directory: contracts
+        run: forge test -vvv
+
+      - name: Coverage
+        working-directory: contracts
+        run: forge coverage --report summary

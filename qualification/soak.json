@@ -1,0 +1,25 @@
+{
+  "pass": true,
+  "returncode": 0,
+  "slots": 120,
+  "slot_ms": 35,
+  "required_finalized": 96,
+  "summary": {
+    "max_finalized": 118,
+    "nodes": 15,
+    "partition": "none",
+    "phases": [
+      {
+        "label": "phase1",
+        "max_finalized": 118,
+        "nodes": 15,
+        "partition": "none",
+        "proposals": 120,
+        "qc_events": 1761
+      }
+    ],
+    "total_qc_events": 1761
+  },
+  "seconds": 6.979,
+  "stderr": ""
+}

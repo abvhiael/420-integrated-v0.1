@@ -1,0 +1,66 @@
+{
+  "schema": "420-public-launch-publication-v1",
+  "required": [
+    {
+      "item": "final chain ID decision",
+      "status": "PENDING"
+    },
+    {
+      "item": "frozen execution genesis hash",
+      "status": "PENDING"
+    },
+    {
+      "item": "frozen consensus genesis hash",
+      "status": "PENDING"
+    },
+    {
+      "item": "validator registry hash",
+      "status": "PENDING"
+    },
+    {
+      "item": "release archive checksum",
+      "status": "PENDING"
+    },
+    {
+      "item": "minimum 3 bootnode multiaddrs",
+      "status": "PENDING"
+    },
+    {
+      "item": "minimum 3 HTTPS RPC endpoints",
+      "status": "PENDING"
+    },
+    {
+      "item": "minimum 1 WSS endpoint",
+      "status": "PENDING"
+    },
+    {
+      "item": "explorer URL",
+      "status": "PENDING"
+    },
+    {
+      "item": "faucet URL",
+      "status": "PENDING"
+    },
+    {
+      "item": "status page URL",
+      "status": "PENDING"
+    },
+    {
+      "item": "wallet network config",
+      "status": "PENDING"
+    },
+    {
+      "item": "validator onboarding guide",
+      "status": "PENDING"
+    },
+    {
+      "item": "testnet terms/notice",
+      "status": "PENDING"
+    },
+    {
+      "item": "incident communication channels",
+      "status": "PENDING"
+    }
+  ],
+  "public_testnet_live": false
+}

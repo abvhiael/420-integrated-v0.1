@@ -1,0 +1,59 @@
+{
+  "schema": "420-testnet-canary-acceptance-v1",
+  "minimum_runtime_hours": 24,
+  "required": [
+    {
+      "metric": "formal Step 4.9 production evidence",
+      "condition": "PASS"
+    },
+    {
+      "metric": "validator identities",
+      "condition": "60/60 READY"
+    },
+    {
+      "metric": "active seats",
+      "condition": "15/15 fillable"
+    },
+    {
+      "metric": "bootnodes",
+      "condition": ">=3 READY across >=3 failure domains"
+    },
+    {
+      "metric": "consensus finality",
+      "condition": "no unexplained halt"
+    },
+    {
+      "metric": "conflicting QC",
+      "condition": "0"
+    },
+    {
+      "metric": "Engine API",
+      "condition": "no persistent error condition"
+    },
+    {
+      "metric": "restart recovery",
+      "condition": "PASS during canary"
+    },
+    {
+      "metric": "primary fallback",
+      "condition": "FB1 and FB2 exercised successfully"
+    },
+    {
+      "metric": "10/15 quorum loss",
+      "condition": "no certification"
+    },
+    {
+      "metric": "11/15 quorum edge",
+      "condition": "certification possible"
+    },
+    {
+      "metric": "AI node absence",
+      "condition": "does not affect chain liveness"
+    },
+    {
+      "metric": "safety critical findings",
+      "condition": "0 unresolved"
+    }
+  ],
+  "promotion": "All requirements PASS for full canary window before S5-OBSERVATION."
+}

@@ -1,0 +1,12 @@
+{
+  "schema": "420-testnet-external-validator-record-v1",
+  "candidate_id": "external-05",
+  "validator_id": "REPLACE",
+  "bls_pubkey": "REPLACE",
+  "proof_of_possession": "REPLACE",
+  "owner_address": "REPLACE",
+  "withdrawal_address": "REPLACE",
+  "client_versions": "REPLACE",
+  "readiness_passed_epochs": 0,
+  "status": "PENDING"
+}

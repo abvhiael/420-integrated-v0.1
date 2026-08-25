@@ -1,0 +1,10 @@
+{
+  "go_test": 0,
+  "bridge_hardening_verification": true,
+  "rate_limits_frozen": true,
+  "route_limits": 10,
+  "asset_limits": 4,
+  "btc_active": false,
+  "new_bridge_addresses_frozen": false,
+  "production_verifier_adapters_wired": false
+}

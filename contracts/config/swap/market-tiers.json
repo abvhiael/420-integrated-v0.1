@@ -1,0 +1,53 @@
+{
+  "schema": "420-swap-market-tiers-v1",
+  "status": "FROZEN_DESIGN",
+  "tiers": {
+    "CANONICAL": {
+      "creation": "GOVERNANCE_OR_GENESIS_ONLY",
+      "protocol_oracle_eligible": true,
+      "wallet_default_eligible": true,
+      "public_distribution_eligible": true,
+      "asset_qualification_required": true,
+      "markets": [
+        {
+          "pair": "420/USDC",
+          "role": "CANONICAL_USD",
+          "status": "GENESIS"
+        },
+        {
+          "pair": "420/CADC",
+          "role": "CANONICAL_CAD",
+          "status": "PENDING_CADC_420_INTEGRATION"
+        },
+        {
+          "pair": "CADC/USDC",
+          "role": "CANONICAL_FX_REFERENCE",
+          "status": "PENDING_CADC_420_INTEGRATION"
+        },
+        {
+          "pair": "WETH/USDC",
+          "role": "APPROVED_SECONDARY",
+          "status": "GENESIS_TARGET"
+        }
+      ]
+    },
+    "PERMISSIONLESS": {
+      "creation": "ANYONE",
+      "protocol_oracle_eligible": false,
+      "wallet_default_eligible": false,
+      "public_distribution_eligible": false,
+      "asset_qualification_required": false,
+      "warning": "Permissionless pools are user-created and are not protocol endorsements."
+    }
+  },
+  "canonical_quote_assets": {
+    "USD": {
+      "asset": "USDC",
+      "status": "ACTIVE_TARGET"
+    },
+    "CAD": {
+      "asset": "CADC",
+      "status": "PENDING_ISSUER_INTEGRATION"
+    }
+  }
+}

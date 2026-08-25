@@ -1,0 +1,12 @@
+{
+  "decision_locked": true,
+  "genesis_apps": 12,
+  "testnet_only_apps": 1,
+  "protocol_dapps_with_contract_sources_ready": true,
+  "wallet_explorer_status_contract_required": false,
+  "stake_weighted_delegation_at_genesis": false,
+  "go_test": 0,
+  "forge_available": false,
+  "solc_available": false,
+  "genesis_code_placement_frozen": false
+}

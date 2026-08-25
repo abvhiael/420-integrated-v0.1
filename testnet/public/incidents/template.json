@@ -1,0 +1,13 @@
+{
+  "schema": "420-public-incident-v1",
+  "incident_id": "REPLACE",
+  "title": "REPLACE",
+  "severity": "REPLACE",
+  "opened_at_utc": "REPLACE",
+  "status": "INVESTIGATING",
+  "affected_components": [],
+  "summary": "REPLACE",
+  "updates": [],
+  "resolved_at_utc": null,
+  "postmortem_required": false
+}

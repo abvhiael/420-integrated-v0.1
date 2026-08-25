@@ -1,0 +1,87 @@
+{
+  "schema": "420-security-audit-policy-v1",
+  "status": "MAINNET_RELEASE_GATE",
+  "principle": "Internal testing is necessary but does not replace independent external review.",
+  "audit_stages": [
+    {
+      "stage": "A_INTERNAL_HARDENING",
+      "requirements": [
+        "clean pinned Foundry build",
+        "unit tests",
+        "fuzz/property tests",
+        "stateful invariant tests",
+        "coverage",
+        "static analysis",
+        "manual threat modeling",
+        "testnet soak"
+      ]
+    },
+    {
+      "stage": "B_EXTERNAL_AUDIT",
+      "requirements": [
+        "audit exact frozen git commit",
+        "full source and build instructions",
+        "architecture/specification package",
+        "privilege and governance map",
+        "asset-flow diagrams",
+        "bridge trust assumptions",
+        "known issues supplied to auditors"
+      ]
+    },
+    {
+      "stage": "C_REMEDIATION",
+      "requirements": [
+        "every finding tracked",
+        "critical/high fixed before release",
+        "medium findings fixed or explicitly accepted with rationale",
+        "regression tests for fixes",
+        "code freeze after remediation"
+      ]
+    },
+    {
+      "stage": "D_REVIEW",
+      "requirements": [
+        "auditor verifies remediation",
+        "new code diff reviewed",
+        "final report published or disclosure plan approved",
+        "deployment bytecode/code hashes matched to audited commit"
+      ]
+    },
+    {
+      "stage": "E_POST_LAUNCH",
+      "requirements": [
+        "bug bounty or responsible disclosure program",
+        "monitoring/incident response",
+        "upgrade audits for security-sensitive changes",
+        "bridge verifier changes require dedicated review"
+      ]
+    }
+  ],
+  "mandatory_mainnet_scopes": [
+    "RewardController and native issuance application path",
+    "ValidatorRegistry and bond-credit accounting",
+    "GovernanceTimelock and governance execution",
+    "PublicDistributionVault and auction/DEX/oracle interactions",
+    "420 Swap canonical-market contracts",
+    "420 Bridge registries/router/risk manager/adapters",
+    "CADC LayerZero configuration and adapter integration",
+    "USDC CCTP integration if active",
+    "420Pay routers, settlement, refunds, invoices, merchant payouts and GasSponsor",
+    "FounderVestingRegistry",
+    "AI escrow/job settlement where value is held"
+  ],
+  "separate_specialist_review": [
+    "bridge/light-client/zk verifier implementations",
+    "BTC custody/withdrawal mechanism",
+    "threshold cryptography or new consensus cryptography",
+    "any custom AMM math or oracle math"
+  ],
+  "release_blockers": [
+    "unresolved critical/high finding",
+    "audited commit differs materially from deployment commit",
+    "runtime bytecode hash mismatch",
+    "unreviewed privileged path",
+    "missing invariant/fuzz execution evidence",
+    "unreviewed bridge verifier configuration"
+  ]
+}

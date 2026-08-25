@@ -1,0 +1,11 @@
+{
+  "go_test": 0,
+  "build_fourtwentyd": 0,
+  "build_node420": 0,
+  "build_devnet_bus": 0,
+  "build_engine_live_smoke": 0,
+  "fault_matrix_pass": true,
+  "soak_pass": true,
+  "soak_max_finalized": 118,
+  "public_testnet_ready": false
+}

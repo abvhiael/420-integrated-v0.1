@@ -1,0 +1,10 @@
+{
+  "go_test": 0,
+  "build_fourtwentyd": 0,
+  "build_node420": 0,
+  "validator_registry_count": 60,
+  "active_seats": 15,
+  "standby_eligible": 45,
+  "public_testnet_launch_authorized": false,
+  "preflight_expected_to_block": true
+}

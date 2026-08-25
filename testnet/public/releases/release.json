@@ -1,0 +1,33 @@
+{
+  "schema": "420-public-release-publication-v1",
+  "version": "0.1.0-rc1",
+  "channel": "TESTNET_RC",
+  "artifacts": [
+    {
+      "name": "420-integrated-0.1.0-rc1.zip",
+      "sha256": "REPLACE",
+      "status": "PENDING"
+    },
+    {
+      "name": "execution-genesis.json",
+      "sha256": "REPLACE",
+      "status": "PENDING"
+    },
+    {
+      "name": "consensus-genesis.json",
+      "sha256": "REPLACE",
+      "status": "PENDING"
+    },
+    {
+      "name": "registry60.json",
+      "sha256": "REPLACE",
+      "status": "PENDING"
+    }
+  ],
+  "signature_policy": {
+    "required": true,
+    "method": "detached release signature or CI provenance attestation",
+    "signing_key_storage": "offline or protected release environment",
+    "status": "PENDING"
+  }
+}

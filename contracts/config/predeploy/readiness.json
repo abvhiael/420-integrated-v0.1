@@ -1,0 +1,46 @@
+{
+  "schema": "420-predeploy-readiness-v1",
+  "genesis_predeploy_ready": false,
+  "checks": [
+    {
+      "name": "address uniqueness",
+      "status": "PASS",
+      "detail": "28 entries"
+    },
+    {
+      "name": "frozen address map",
+      "status": "PASS",
+      "detail": "system-addresses v3"
+    },
+    {
+      "name": "source coverage",
+      "status": "PASS",
+      "detail": "all mapped"
+    },
+    {
+      "name": "Foundry compiler",
+      "status": "BLOCKED",
+      "detail": "forge absent in runtime"
+    },
+    {
+      "name": "compiled artifacts",
+      "status": "BLOCKED",
+      "detail": "missing=28"
+    },
+    {
+      "name": "constructor storage materialized",
+      "status": "BLOCKED",
+      "detail": "generated-storage.json required"
+    },
+    {
+      "name": "founder_beneficiaries",
+      "status": "BLOCKED",
+      "detail": "UNRESOLVED_DO_NOT_INVENT"
+    },
+    {
+      "name": "bridge_verifier",
+      "status": "BLOCKED",
+      "detail": "FROM_FROZEN_GATEWAY_VERIFICATION_DECISION"
+    }
+  ]
+}

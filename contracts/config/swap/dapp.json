@@ -1,0 +1,23 @@
+{
+  "schema": "420-bridge-swap-dapp-v1",
+  "cadc": {
+    "display_name": "CADC",
+    "canonical_cad_status": "PENDING_INTEGRATION",
+    "bridge_provider": "LayerZero via issuer-approved CADC deployment",
+    "warning_if_inactive": "CADC bridging to 420 is not active until the issuer-approved 420 pathway is verified."
+  },
+  "swap": {
+    "tiers": [
+      "CANONICAL",
+      "PERMISSIONLESS"
+    ],
+    "canonical_badge": "Protocol-qualified market",
+    "permissionless_warning": "User-created market. Token and liquidity are not endorsed by 420 Integrated.",
+    "default_market_order": [
+      "420/USDC",
+      "420/CADC",
+      "CADC/USDC",
+      "WETH/USDC"
+    ]
+  }
+}

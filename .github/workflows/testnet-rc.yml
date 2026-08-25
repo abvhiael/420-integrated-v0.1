@@ -1,0 +1,87 @@
+
+name: 420 Integrated Testnet RC
+
+on:
+  workflow_dispatch:
+
+jobs:
+  qualify-rc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+          cache: true
+
+      - name: Install build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential python3
+
+      - name: Production dependencies
+        run: |
+          ./scripts/install-production-deps.sh
+          python3 scripts/write-evidence.py --gate production_blst --status PASS \
+            --command "./scripts/install-production-deps.sh" \
+            --summary "production BLS adapter compiled and tests passed"
+          python3 scripts/write-evidence.py --gate production_libp2p --status PASS \
+            --command "./scripts/install-production-deps.sh" \
+            --summary "production libp2p adapter compiled and tests passed"
+
+      - name: Build pinned Geth and 420 binaries
+        run: |
+          ./scripts/build-node420-upstream.sh
+          make build
+
+      - name: Live Engine payload qualification
+        run: |
+          ./scripts/live-engine-smoke.sh
+          python3 scripts/write-evidence.py --gate live_engine_payload --status PASS \
+            --command "./scripts/live-engine-smoke.sh" \
+            --summary "Engine V3 payload path passed"
+
+      - name: Prepare and run 15 real execution pairs
+        run: |
+          ./scripts/prepare-real-devnet15.sh
+          python3 scripts/run-real-devnet15.py --seconds 90 --consensus-transport devnet-tcp
+          python3 scripts/write-evidence.py --gate real_devnet15 --status PASS \
+            --command "python3 scripts/run-real-devnet15.py --seconds 90 --consensus-transport devnet-tcp" \
+            --summary "15 execution/consensus pairs remained healthy" \
+            --artifact qualification/real-devnet15.json
+
+      - name: Fault, restart and soak qualification
+        run: |
+          python3 scripts/run-fault-matrix.py
+          python3 scripts/write-evidence.py --gate production_fault_matrix --status PASS \
+            --command "python3 scripts/run-fault-matrix.py" \
+            --summary "fault matrix passed" --artifact qualification/fault-matrix.json
+          python3 scripts/write-evidence.py --gate production_restart_recovery --status PASS \
+            --command "python3 scripts/run-fault-matrix.py" \
+            --summary "restart recovery passed" --artifact qualification/fault-matrix.json
+          python3 scripts/run-soak.py --slots 420 --slot-ms 35
+          python3 scripts/write-evidence.py --gate production_soak --status PASS \
+            --command "python3 scripts/run-soak.py --slots 420 --slot-ms 35" \
+            --summary "420-slot soak passed" --artifact qualification/soak.json
+
+      - name: Build release candidate
+        run: |
+          python3 scripts/build-testnet-rc.py
+          RC=release/rc/420-integrated-0.1.0-rc1.zip
+          sha256sum -c "$RC.sha256"
+          python3 scripts/write-evidence.py --gate release_checksum_verification --status PASS \
+            --command "sha256sum -c release/rc/420-integrated-0.1.0-rc1.zip.sha256" \
+            --summary "RC checksum verified" --artifact "$RC"
+          python3 scripts/check-release-evidence.py
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: 420-integrated-testnet-rc1
+          path: |
+            release/rc/420-integrated-0.1.0-rc1.zip
+            release/rc/420-integrated-0.1.0-rc1.zip.sha256
+            release/evidence/*.json
+            release/evidence-status.json
+            qualification/*.json

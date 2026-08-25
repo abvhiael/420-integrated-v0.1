@@ -1,0 +1,12 @@
+{
+  "go_test": 0,
+  "cadc_swap_verification": true,
+  "cadc_status": "CANONICAL_CAD_PENDING_ISSUER_INTEGRATION",
+  "420_controls_cadc_mint": false,
+  "swap_tiers": [
+    "CANONICAL",
+    "PERMISSIONLESS"
+  ],
+  "verification_policy_status": "PROPOSED_FOR_DECISION",
+  "new_address_assignments_frozen": false
+}

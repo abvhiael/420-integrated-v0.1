@@ -1,0 +1,9 @@
+{
+  "genesis_interface_layer": "FROZEN_V1_0",
+  "shared_interfaces": 25,
+  "shared_libraries": 5,
+  "frozen_policies": 5,
+  "static_verification_pass": true,
+  "roadmap_bookmark": "420Pay -> 420Swap -> 420Bridge -> remaining genesis suites",
+  "recommended_conversation_split": "new conversation for contract-suite implementation/testing"
+}

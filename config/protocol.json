@@ -1,0 +1,73 @@
+{
+  "version": "0.1-draft",
+  "network": {
+    "name": "420 Integrated",
+    "native_currency": {
+      "name": "420",
+      "symbol": "420",
+      "decimals": 18
+    },
+    "chain_id": null,
+    "block_target_seconds": 12
+  },
+  "monetary_policy": {
+    "initial_block_issuance_420": 1.7507002801120448,
+    "reduction_interval_blocks": 420000,
+    "reduction_rate_ppm": 4200,
+    "reduction_rate_display": "0.420%",
+    "floor_block_issuance_420": 0.42,
+    "top_level_split_percent": {
+      "security": 34,
+      "attention": 33,
+      "development": 33
+    },
+    "governance_may_change_top_level_split": false,
+    "governance_may_increase_issuance": false
+  },
+  "consensus": {
+    "architecture": "separate consensus client + EVM execution client",
+    "active_validators": 15,
+    "validators_rotated_each_rotation": 5,
+    "consensus_epoch_blocks": 420,
+    "rotation_interval_epochs": 42,
+    "rotation_interval_blocks": 17640,
+    "active_rotations_per_validator": 3,
+    "active_term_blocks": 52920,
+    "active_term_days_at_target": 7.35,
+    "cooldown_rotations": 3,
+    "cooldown_days_at_target": 7.35,
+    "minimum_validator_bond_420": 42000,
+    "minimum_candidate_pool_for_permissionless_rotation": 42,
+    "selection": "verifiable cryptographic random selection",
+    "raw_wallet_count_affects_selection": false,
+    "founder_bootstrap": {
+      "end_block": 4200,
+      "duration_hours_at_target": 14,
+      "handoff": "bonded validator system"
+    }
+  },
+  "security_reward": {
+    "share_of_total_issuance_percent": 34,
+    "proposer_share_of_security_percent": 50,
+    "participant_share_of_security_percent": 50,
+    "participant_share_policy": "the successful proposer receives 50% of the Security allocation; the other 14 active validators are each eligible for 1/14 of the remaining 50%; missed participation shares are not redistributed and are not issued",
+    "transaction_fee_policy": "TBD",
+    "genesis_active_term_target_return_percent_of_bond": 5,
+    "genesis_active_term_target_reward_420": 2100
+  },
+  "system_contracts": {
+    "RewardController": "planned",
+    "AttentionTreasury": "planned",
+    "DevelopmentTreasury": "planned",
+    "ValidatorRegistry": "planned",
+    "Randomness": "planned",
+    "Governance": "planned"
+  },
+  "genesis": {
+    "total_genesis_supply_420": null,
+    "presale_or_distribution_supply_420": null,
+    "attention_bootstrap_420": null,
+    "development_bootstrap_420": null,
+    "validator_bootstrap_bond_policy": "TBD"
+  }
+}

@@ -57,7 +57,7 @@ func TestPayloadFlow(t *testing.T) {
 	status, err := c.NewPayloadV3(
 	ctx,
 	payload.ExecutionPayload,
-	[]string{},
+	[]eng.Hash32{},
 	attrs.ParentBeaconBlockRoot,
 )
 	if err != nil {

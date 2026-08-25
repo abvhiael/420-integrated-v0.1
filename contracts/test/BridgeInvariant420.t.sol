@@ -3,8 +3,7 @@ pragma solidity ^0.8.24;
 
 import "../src/bridge/BridgeRiskManager.sol";
 import "./helpers/GenesisMocks420.sol";
-
-interface VmBridge420 { function targetContract(address) external; }
+import "./helpers/InvariantTarget420.sol";
 
 contract BridgeRiskInvariantHandler420 {
     BridgeRiskManager public immutable risk;
@@ -33,8 +32,7 @@ contract BridgeRiskInvariantHandler420 {
     }
 }
 
-contract BridgeInvariant420Test {
-    VmBridge420 constant vm = VmBridge420(address(uint160(uint256(keccak256("hevm cheat code")))));
+contract BridgeInvariant420Test is InvariantTarget420 {
     bytes32 constant ROUTE_ID = keccak256("route");
     bytes32 constant ASSET_ID = keccak256("asset");
     uint256 constant CAP = 1_000_000 ether;
@@ -50,7 +48,7 @@ contract BridgeInvariant420Test {
         risk.setAssetLimits(ASSET_ID, limits);
         handler = new BridgeRiskInvariantHandler420(risk, ROUTE_ID, ASSET_ID, CAP);
         risk.setRouter(address(handler), true);
-        vm.targetContract(address(handler));
+        targetContract(address(handler));
     }
 
     function invariant_RouteAndAssetTVLAgreeWithModel() public view {

@@ -21,6 +21,15 @@ interface ICanonicalMarketRegistryExecutorView420 {
 /// @dev Pool economics remain in the registered pool implementation; this contract enforces
 /// canonical-market identity, shared health, asset eligibility, caller policy, and postconditions.
 contract CanonicalSwapExecutor420 is GenesisResidentAccess420 {
+    struct PoolExecution {
+        address payer;
+        address recipient;
+        address inputAsset;
+        address settlementAsset;
+        uint256 inputAmount;
+        uint256 exactSettlementAmount;
+    }
+
     mapping(address => bool) public trustedCaller;
 
     event TrustedCallerSet(address indexed caller, bool trusted);
@@ -45,6 +54,41 @@ contract CanonicalSwapExecutor420 is GenesisResidentAccess420 {
         emit TrustedCallerSet(caller, trusted);
     }
 
+    function _canonicalPoolFor(bytes32 marketId, address inputAsset, address settlementAsset)
+        internal
+        view
+        returns (address pool)
+    {
+        address marketRegistry = _resolveRequired(SwapIds420.CANONICAL_MARKET_REGISTRY);
+        address asset0;
+        address asset1;
+        bool active;
+        (pool, asset0, asset1,,, active) = ICanonicalMarketRegistryExecutorView420(marketRegistry).markets(marketId);
+        require(active && pool != address(0) && pool.code.length != 0, "market");
+        bool pairMatches =
+            (asset0 == inputAsset && asset1 == settlementAsset) || (asset1 == inputAsset && asset0 == settlementAsset);
+        require(pairMatches, "pair mismatch");
+    }
+
+    function _executePool(address pool, PoolExecution memory request)
+        internal
+        returns (uint256 inputSpent, uint256 settlementDelivered)
+    {
+        (bool ok, bytes memory data) = pool.call{ value: msg.value }(
+            abi.encodeWithSignature(
+                "executeCanonicalSwap(address,address,address,address,uint256,uint256)",
+                request.payer,
+                request.recipient,
+                request.inputAsset,
+                request.settlementAsset,
+                request.inputAmount,
+                request.exactSettlementAmount
+            )
+        );
+        require(ok && data.length == 64, "pool execution");
+        (inputSpent, settlementDelivered) = abi.decode(data, (uint256, uint256));
+    }
+
     function executeCanonicalSwap(
         bytes32 marketId,
         address payer,
@@ -65,27 +109,17 @@ contract CanonicalSwapExecutor420 is GenesisResidentAccess420 {
         _canonicalSettlementAsset(settlementAsset);
         _requireHealthyMarket(marketId);
 
-        address marketRegistry = _resolveRequired(SwapIds420.CANONICAL_MARKET_REGISTRY);
-        (address pool, address asset0, address asset1,,, bool active) =
-            ICanonicalMarketRegistryExecutorView420(marketRegistry).markets(marketId);
-        require(active && pool != address(0) && pool.code.length != 0, "market");
-        bool pairMatches =
-            (asset0 == inputAsset && asset1 == settlementAsset) || (asset1 == inputAsset && asset0 == settlementAsset);
-        require(pairMatches, "pair mismatch");
+        address pool = _canonicalPoolFor(marketId, inputAsset, settlementAsset);
+        PoolExecution memory request = PoolExecution({
+            payer: payer,
+            recipient: recipient,
+            inputAsset: inputAsset,
+            settlementAsset: settlementAsset,
+            inputAmount: inputAmount,
+            exactSettlementAmount: exactSettlementAmount
+        });
+        (inputSpent, settlementDelivered) = _executePool(pool, request);
 
-        (bool ok, bytes memory data) = pool.call{ value: msg.value }(
-            abi.encodeWithSignature(
-                "executeCanonicalSwap(address,address,address,address,uint256,uint256)",
-                payer,
-                recipient,
-                inputAsset,
-                settlementAsset,
-                inputAmount,
-                exactSettlementAmount
-            )
-        );
-        require(ok && data.length == 64, "pool execution");
-        (inputSpent, settlementDelivered) = abi.decode(data, (uint256, uint256));
         require(inputSpent <= inputAmount, "input overspend");
         require(settlementDelivered >= exactSettlementAmount, "under settlement");
         emit CanonicalSwapExecuted(marketId, payer, recipient, inputSpent, settlementDelivered);

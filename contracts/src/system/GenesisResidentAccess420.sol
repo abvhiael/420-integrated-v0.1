@@ -33,6 +33,8 @@ abstract contract GenesisResidentAccess420 is SystemAccess, IGenesisResident420,
         genesisConfigHash = genesisConfigHash_;
     }
 
+    function componentId() public pure virtual override returns (bytes32);
+
     function protocolVersion() public pure virtual override returns (Types420.Version memory) {
         return Types420.Version({ major: 1, minor: 0, patch: 0 });
     }

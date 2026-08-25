@@ -3,22 +3,16 @@ name: 420 Genesis Contract Verification
 on:
   workflow_dispatch:
   push:
-    paths:
-      - "contracts/**"
-      - "scripts/contracts-*.sh"
-      - "scripts/export-contract-manifest.py"
-      - ".github/workflows/contracts-genesis.yml"
-      - "Dockerfile.contracts"
   pull_request:
-    paths:
-      - "contracts/**"
-      - "scripts/**"
-      - "Dockerfile.contracts"
 
 jobs:
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 120
+
+    defaults:
+      run:
+        working-directory: 420-integrated-v0.1-interface-adapted
 
     permissions:
       contents: read
@@ -38,9 +32,9 @@ jobs:
           python-version: "3.12"
 
       - name: Install Go
-  uses: actions/setup-go@v5
-  with:
-    go-version-file: "420-integrated-v0.1-interface-adapted/go.mod"
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: "420-integrated-v0.1-interface-adapted/go.mod"
 
       - name: Tool versions
         run: |
@@ -61,5 +55,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: 420-contract-verification
-          path: artifacts/contracts/
+          path: 420-integrated-v0.1-interface-adapted/artifacts/contracts/
           if-no-files-found: warn

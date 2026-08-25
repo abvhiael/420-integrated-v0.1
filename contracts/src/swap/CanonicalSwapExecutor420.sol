@@ -89,6 +89,29 @@ contract CanonicalSwapExecutor420 is GenesisResidentAccess420 {
         (inputSpent, settlementDelivered) = abi.decode(data, (uint256, uint256));
     }
 
+    function _executeCanonicalSwap(bytes32 marketId, PoolExecution memory request)
+        internal
+        returns (uint256 inputSpent, uint256 settlementDelivered)
+    {
+        _requireOperational(
+            SwapIds420.ACTION_EXECUTE_SWAP,
+            ISystemSafety420.ActionClass.NORMAL_ONLY,
+            Types420.Direction.OUTBOUND
+        );
+        require(trustedCaller[msg.sender], "untrusted caller");
+        require(request.payer != address(0) && request.recipient != address(0), "party");
+        require(request.inputAmount > 0 && request.exactSettlementAmount > 0, "amount");
+        _canonicalSettlementAsset(request.settlementAsset);
+        _requireHealthyMarket(marketId);
+
+        address pool = _canonicalPoolFor(marketId, request.inputAsset, request.settlementAsset);
+        (inputSpent, settlementDelivered) = _executePool(pool, request);
+
+        require(inputSpent <= request.inputAmount, "input overspend");
+        require(settlementDelivered >= request.exactSettlementAmount, "under settlement");
+        emit CanonicalSwapExecuted(marketId, request.payer, request.recipient, inputSpent, settlementDelivered);
+    }
+
     function executeCanonicalSwap(
         bytes32 marketId,
         address payer,
@@ -98,18 +121,6 @@ contract CanonicalSwapExecutor420 is GenesisResidentAccess420 {
         uint256 inputAmount,
         uint256 exactSettlementAmount
     ) external payable returns (uint256 inputSpent, uint256 settlementDelivered) {
-        _requireOperational(
-            SwapIds420.ACTION_EXECUTE_SWAP,
-            ISystemSafety420.ActionClass.NORMAL_ONLY,
-            Types420.Direction.OUTBOUND
-        );
-        require(trustedCaller[msg.sender], "untrusted caller");
-        require(payer != address(0) && recipient != address(0), "party");
-        require(inputAmount > 0 && exactSettlementAmount > 0, "amount");
-        _canonicalSettlementAsset(settlementAsset);
-        _requireHealthyMarket(marketId);
-
-        address pool = _canonicalPoolFor(marketId, inputAsset, settlementAsset);
         PoolExecution memory request = PoolExecution({
             payer: payer,
             recipient: recipient,
@@ -118,10 +129,6 @@ contract CanonicalSwapExecutor420 is GenesisResidentAccess420 {
             inputAmount: inputAmount,
             exactSettlementAmount: exactSettlementAmount
         });
-        (inputSpent, settlementDelivered) = _executePool(pool, request);
-
-        require(inputSpent <= inputAmount, "input overspend");
-        require(settlementDelivered >= exactSettlementAmount, "under settlement");
-        emit CanonicalSwapExecuted(marketId, payer, recipient, inputSpent, settlementDelivered);
+        return _executeCanonicalSwap(marketId, request);
     }
 }

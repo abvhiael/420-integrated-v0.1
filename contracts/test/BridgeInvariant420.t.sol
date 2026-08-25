@@ -11,23 +11,35 @@ contract BridgeRiskInvariantHandler420 {
     bytes32 public immutable assetId;
     uint256 public immutable cap;
     uint256 public modelTVL;
+    uint256 public modelInbound;
+    uint256 public modelOutbound;
 
     constructor(BridgeRiskManager risk_, bytes32 routeId_, bytes32 assetId_, uint256 cap_) {
         risk = risk_; routeId = routeId_; assetId = assetId_; cap = cap_;
     }
 
+    function _min(uint256 a, uint256 b) internal pure returns (uint256) {
+        return a < b ? a : b;
+    }
+
     function step(bool inbound, uint96 rawAmount) external {
         if (inbound) {
-            uint256 room = cap - modelTVL;
+            uint256 tvlRoom = cap - modelTVL;
+            uint256 directionalRoom = cap - modelInbound;
+            uint256 room = _min(tvlRoom, directionalRoom);
             if (room == 0) return;
             uint256 amount = (uint256(rawAmount) % room) + 1;
             risk.consume(routeId, assetId, true, amount);
             modelTVL += amount;
+            modelInbound += amount;
         } else {
-            if (modelTVL == 0) return;
-            uint256 amount = (uint256(rawAmount) % modelTVL) + 1;
+            uint256 directionalRoom = cap - modelOutbound;
+            uint256 room = _min(modelTVL, directionalRoom);
+            if (room == 0) return;
+            uint256 amount = (uint256(rawAmount) % room) + 1;
             risk.consume(routeId, assetId, false, amount);
             modelTVL -= amount;
+            modelOutbound += amount;
         }
     }
 }
@@ -52,10 +64,20 @@ contract BridgeInvariant420Test is InvariantTarget420 {
     }
 
     function invariant_RouteAndAssetTVLAgreeWithModel() public view {
-        (,,,,,,uint256 routeTVL) = risk.routeUsage(ROUTE_ID);
-        (,,,,,,uint256 assetTVL) = risk.assetUsage(ASSET_ID);
+        (,,uint256 routeHourlyIn,uint256 routeHourlyOut,uint256 routeDailyIn,uint256 routeDailyOut,uint256 routeTVL) =
+            risk.routeUsage(ROUTE_ID);
+        (,,uint256 assetHourlyIn,uint256 assetHourlyOut,uint256 assetDailyIn,uint256 assetDailyOut,uint256 assetTVL) =
+            risk.assetUsage(ASSET_ID);
         require(routeTVL == handler.modelTVL(), "route model");
         require(assetTVL == handler.modelTVL(), "asset model");
+        require(routeHourlyIn == handler.modelInbound(), "route hourly in model");
+        require(assetHourlyIn == handler.modelInbound(), "asset hourly in model");
+        require(routeDailyIn == handler.modelInbound(), "route daily in model");
+        require(assetDailyIn == handler.modelInbound(), "asset daily in model");
+        require(routeHourlyOut == handler.modelOutbound(), "route hourly out model");
+        require(assetHourlyOut == handler.modelOutbound(), "asset hourly out model");
+        require(routeDailyOut == handler.modelOutbound(), "route daily out model");
+        require(assetDailyOut == handler.modelOutbound(), "asset daily out model");
         require(routeTVL <= CAP, "cap");
     }
 }

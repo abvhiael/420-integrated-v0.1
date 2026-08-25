@@ -24,7 +24,8 @@ COMMIT="$(git -C "$DEST" rev-list -n 1 "$TAG")"
 
 echo "building go-ethereum $TAG at $COMMIT"
 
-make -C "$DEST" geth
+env -u GITHUB_SHA -u GITHUB_REF -u GITHUB_HEAD_REF -u GITHUB_BASE_REF \
+    make -C "$DEST" geth
 
 mkdir -p bin/upstream
 cp "$DEST/build/bin/geth" "bin/upstream/geth-$TAG"

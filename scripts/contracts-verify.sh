@@ -66,7 +66,7 @@ echo "== forge unit/fuzz/invariant tests =="
 FOUNDRY_PROFILE="${FOUNDRY_PROFILE:-default}" forge test -vvv | tee "$ART/forge-test.txt"
 
 echo "== coverage =="
-forge coverage --ir-minimum --report summary | tee "$ART/forge-coverage.txt"
+FOUNDRY_PROFILE=coverage forge coverage --ir-minimum --report summary | tee "$ART/forge-coverage.txt"
 
 echo "== contract artifacts =="
 find out -type f -name '*.json' -print0 | sort -z | \

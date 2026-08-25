@@ -32,7 +32,35 @@ done
 echo "== forge clean/build =="
 cd "$ROOT/contracts"
 forge clean
-forge build --force --sizes | tee "$ART/forge-build.txt"
+if ! forge build --force --sizes 2>&1 | tee "$ART/forge-build.txt"; then
+  echo "== forge build isolation ==" | tee "$ART/forge-build-isolation.txt"
+  isolation_failed=0
+
+  for target in src/* test/*; do
+    [[ -e "$target" ]] || continue
+    echo "-- target: $target" | tee -a "$ART/forge-build-isolation.txt"
+    if forge build "$target" --force --sizes >>"$ART/forge-build-isolation.txt" 2>&1; then
+      echo "PASS $target" | tee -a "$ART/forge-build-isolation.txt"
+      continue
+    fi
+
+    echo "FAIL $target" | tee -a "$ART/forge-build-isolation.txt"
+    isolation_failed=1
+    if [[ -d "$target" ]]; then
+      while IFS= read -r file; do
+        echo "---- file: $file" | tee -a "$ART/forge-build-isolation.txt"
+        if forge build "$file" --force --sizes >>"$ART/forge-build-isolation.txt" 2>&1; then
+          echo "PASS $file" | tee -a "$ART/forge-build-isolation.txt"
+        else
+          echo "FAIL $file" | tee -a "$ART/forge-build-isolation.txt"
+        fi
+      done < <(find "$target" -type f -name '*.sol' | sort)
+    fi
+  done
+
+  cat "$ART/forge-build-isolation.txt"
+  exit "$(( isolation_failed == 0 ? 1 : isolation_failed ))"
+fi
 
 echo "== forge unit/fuzz/invariant tests =="
 FOUNDRY_PROFILE="${FOUNDRY_PROFILE:-default}" forge test -vvv | tee "$ART/forge-test.txt"

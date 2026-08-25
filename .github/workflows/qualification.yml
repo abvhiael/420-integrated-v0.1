@@ -26,7 +26,7 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: '1.23.x'
-      - run: ./scripts/install-production-deps.sh
+      - run: bash ./scripts/install-production-deps.sh
 
   geth-engine:
     runs-on: ubuntu-latest

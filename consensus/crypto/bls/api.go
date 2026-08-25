@@ -21,4 +21,3 @@ type Verifier interface {
 // The default offline build deliberately returns unavailable rather than substituting
 // non-cryptographic consensus signatures.
 type ProductionVerifier struct{}
-}

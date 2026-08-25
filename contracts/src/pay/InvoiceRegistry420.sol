@@ -35,7 +35,11 @@ contract InvoiceRegistry420 is GenesisResidentAccess420 {
         bool active;
     }
 
-    mapping(bytes32 => Invoice) public invoices;
+    // Deliberately non-public: Solidity 0.8.24 cannot code-generate the implicit
+    // 15-field tuple getter for Invoice without exceeding the EVM stack limit.
+    // Stable, purpose-specific read methods below expose the fields needed by
+    // runtime consumers without widening the generated ABI surface.
+    mapping(bytes32 => Invoice) private _invoices;
     mapping(bytes32 => uint256) public paidAmount;
     mapping(bytes32 => bool) public closed;
 
@@ -84,7 +88,7 @@ contract InvoiceRegistry420 is GenesisResidentAccess420 {
             ISystemSafety420.ActionClass.NORMAL_ONLY,
             Types420.Direction.INBOUND
         );
-        require(invoiceId != bytes32(0) && invoices[invoiceId].merchant == address(0), "invalid/exists");
+        require(invoiceId != bytes32(0) && _invoices[invoiceId].merchant == address(0), "invalid/exists");
         require(i.merchant == msg.sender, "merchant");
         require(i.amount > 0 && i.expiresAt > block.timestamp, "amount/expiry");
         require(i.refundUntil >= i.expiresAt, "refund window");
@@ -98,14 +102,14 @@ contract InvoiceRegistry420 is GenesisResidentAccess420 {
             require(metadata.contentHash == i.metadataHash, "metadata commitment");
         }
 
-        invoices[invoiceId] = i;
-        invoices[invoiceId].active = true;
+        _invoices[invoiceId] = i;
+        _invoices[invoiceId].active = true;
         emit InvoiceCreated(invoiceId, i.merchantId, msg.sender, i.amount, i.mode);
     }
 
-    function merchantOf(bytes32 invoiceId) external view returns (address) { return invoices[invoiceId].merchant; }
-    function amountOf(bytes32 invoiceId) external view returns (uint256) { return invoices[invoiceId].amount; }
-    function expiresAtOf(bytes32 invoiceId) external view returns (uint64) { return invoices[invoiceId].expiresAt; }
+    function merchantOf(bytes32 invoiceId) external view returns (address) { return _invoices[invoiceId].merchant; }
+    function amountOf(bytes32 invoiceId) external view returns (uint256) { return _invoices[invoiceId].amount; }
+    function expiresAtOf(bytes32 invoiceId) external view returns (uint64) { return _invoices[invoiceId].expiresAt; }
     function isClosed(bytes32 invoiceId) external view returns (bool) { return closed[invoiceId]; }
 
     function markPaid(bytes32 invoiceId, uint256 amount) external {
@@ -115,7 +119,7 @@ contract InvoiceRegistry420 is GenesisResidentAccess420 {
             ISystemSafety420.ActionClass.SAFE_WHEN_PAUSED,
             Types420.Direction.NONE
         );
-        Invoice storage i = invoices[invoiceId];
+        Invoice storage i = _invoices[invoiceId];
         require(i.active && !closed[invoiceId], "inactive");
         require(block.timestamp <= i.expiresAt, "expired");
         require(amount > 0, "amount");
@@ -138,7 +142,7 @@ contract InvoiceRegistry420 is GenesisResidentAccess420 {
             ISystemSafety420.ActionClass.SAFE_WHEN_PAUSED,
             Types420.Direction.NONE
         );
-        require(invoices[invoiceId].merchant == msg.sender, "merchant");
+        require(_invoices[invoiceId].merchant == msg.sender, "merchant");
         closed[invoiceId] = true;
         emit InvoiceClosed(invoiceId);
     }

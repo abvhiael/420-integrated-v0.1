@@ -13,7 +13,7 @@ contract AIReputationRegistry is SystemAccess, I420System {
     function systemName() external pure returns (string memory) { return "AIReputationRegistry"; }
     function protocolVersion() external pure returns (uint32) { return 1; }
 
-    function apply(bytes32 providerId, uint64 completed, uint64 disputed, uint64 upheld)
+    function setReputation(bytes32 providerId, uint64 completed, uint64 disputed, uint64 upheld)
         external
         onlyGovernance
     {

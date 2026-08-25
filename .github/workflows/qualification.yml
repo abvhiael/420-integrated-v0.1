@@ -36,7 +36,7 @@ jobs:
         with:
           go-version: '1.23.x'
       - run: make build
-      - run: ./scripts/build-node420-upstream.sh
+      - run: bash ./scripts/build-node420-upstream.sh
       - run: go build -o bin/engine-live-smoke ./integration/cmd/engine-live-smoke
       - run: ./scripts/live-engine-smoke.sh
 

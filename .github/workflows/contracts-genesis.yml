@@ -38,9 +38,9 @@ jobs:
           python-version: "3.12"
 
       - name: Install Go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: "go.mod"
+  uses: actions/setup-go@v5
+  with:
+    go-version-file: "420-integrated-v0.1-interface-adapted/go.mod"
 
       - name: Tool versions
         run: |

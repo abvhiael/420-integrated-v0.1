@@ -186,7 +186,7 @@ func clone(b Batch) Batch {
     return out
 }
 
-var gatewayABI = mustABI(`[{"type":"function","name":"apply","inputs":[{"name":"sequence","type":"uint64"},{"name":"executionBlock","type":"uint64"},{"name":"parentHash","type":"bytes32"},{"name":"chainId","type":"uint256"},{"name":"action","type":"bytes32"},{"name":"target","type":"address"},{"name":"payload","type":"bytes"}],"outputs":[{"name":"callHash","type":"bytes32"}]}]`)
+var gatewayABI = mustABI(`[{"type":"function","name":"execute","inputs":[{"name":"sequence","type":"uint64"},{"name":"executionBlock","type":"uint64"},{"name":"parentHash","type":"bytes32"},{"name":"chainId","type":"uint256"},{"name":"action","type":"bytes32"},{"name":"target","type":"address"},{"name":"payload","type":"bytes"}],"outputs":[{"name":"callHash","type":"bytes32"}]}]`)
 
 func mustABI(s string) abi.ABI {
     a, err := abi.JSON(bytes.NewBufferString(s))
@@ -198,5 +198,5 @@ func mustABI(s string) abi.ABI {
 
 func GatewayInput(c Call) ([]byte, error) {
     action := crypto.Keccak256Hash([]byte(c.Action))
-    return gatewayABI.Pack("apply", uint64(c.Sequence), uint64(c.ExecutionBlock), c.ParentHash, new(big.Int).SetUint64(uint64(c.ChainID)), action, c.Target, []byte(c.Payload))
+    return gatewayABI.Pack("execute", uint64(c.Sequence), uint64(c.ExecutionBlock), c.ParentHash, new(big.Int).SetUint64(uint64(c.ChainID)), action, c.Target, []byte(c.Payload))
 }

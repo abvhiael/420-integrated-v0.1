@@ -77,4 +77,10 @@ contract ConsensusSystemCall420Test {
         );
         require(!ok, "unknown action accepted");
     }
+
+    function testRemovedAccountingOnlyBondActionFailsClosed() public {
+        bytes32 removedBondAction = keccak256("420/SYSCALL/VALIDATOR_BOND/V1");
+        (bool ok,) = address(gateway).staticcall(abi.encodeWithSelector(gateway.route.selector, removedBondAction));
+        require(!ok, "removed bond action remains routable");
+    }
 }

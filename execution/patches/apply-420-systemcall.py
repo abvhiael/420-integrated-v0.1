@@ -72,13 +72,12 @@ def main() -> None:
     replace_once(
         catalyst,
         '\treturn nil\n}\n\nconst (\n',
-        '\treturn nil\n}\n\n// SystemCallAPI stages committed consensus data but never executes EVM state from RPC context.\ntype SystemCallAPI struct{}\nfunc (api *SystemCallAPI) SubmitSystemCallsV1(batch systemcall420.Batch) systemcall420.Status {\n\tif err := systemcall420.Stage(batch); err != nil { s:=err.Error(); return systemcall420.Status{Status:"INVALID",BatchRoot:batch.BatchRoot,ValidationError:&s} }\n\treturn systemcall420.Status{Status:"ACCEPTED",BatchRoot:batch.BatchRoot}\n}\n\nconst (\n',
+        '\treturn nil\n}\n\n// SystemCallAPI stages committed consensus data but never executes EVM state from RPC context.\ntype SystemCallAPI struct{}\n\nfunc (api *SystemCallAPI) SubmitSystemCallsV1(batch systemcall420.Batch) systemcall420.Status {\n\tif err := systemcall420.Stage(batch); err != nil {\n\t\ts := err.Error()\n\t\treturn systemcall420.Status{Status: "INVALID", BatchRoot: batch.BatchRoot, ValidationError: &s}\n\t}\n\treturn systemcall420.Status{Status: "ACCEPTED", BatchRoot: batch.BatchRoot}\n}\n\nconst (\n',
     )
-    replace_once(
-        catalyst,
-        '\treturn caps\n}\n\n// GetClientVersionV1',
-        '\tcaps = append(caps, "engine420_submitSystemCallsV1")\n\treturn caps\n}\n\n// GetClientVersionV1',
-    )
+
+    upstream_exchange_capabilities = '''// ExchangeCapabilities returns the current methods provided by this node.\nfunc (api *ConsensusAPI) ExchangeCapabilities([]string) []string {\n\tvalueT := reflect.TypeOf(api)\n\tcaps := make([]string, 0, valueT.NumMethod())\n\tfor i := 0; i < valueT.NumMethod(); i++ {\n\t\tname := []rune(valueT.Method(i).Name)\n\t\tif string(name) == "ExchangeCapabilities" {\n\t\t\tcontinue\n\t\t}\n\t\tcaps = append(caps, "engine_"+string(unicode.ToLower(name[0]))+string(name[1:]))\n\t}\n\treturn caps\n}\n'''
+    patched_exchange_capabilities = '''// ExchangeCapabilities returns the current methods provided by this node.\nfunc (api *ConsensusAPI) ExchangeCapabilities([]string) []string {\n\tvalueT := reflect.TypeOf(api)\n\tcaps := make([]string, 0, valueT.NumMethod()+1)\n\tfor i := 0; i < valueT.NumMethod(); i++ {\n\t\tname := []rune(valueT.Method(i).Name)\n\t\tif string(name) == "ExchangeCapabilities" {\n\t\t\tcontinue\n\t\t}\n\t\tcaps = append(caps, "engine_"+string(unicode.ToLower(name[0]))+string(name[1:]))\n\t}\n\tcaps = append(caps, "engine420_submitSystemCallsV1")\n\treturn caps\n}\n'''
+    replace_once(catalyst, upstream_exchange_capabilities, patched_exchange_capabilities)
 
     # Geth's JWT-authenticated endpoint filters namespaces through DefaultAuthModules.
     # Merely registering an Authenticated rpc.API is insufficient for a new namespace.

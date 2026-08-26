@@ -1,6 +1,90 @@
 /bin/
 /data/
+/devnet-data/
+/artifacts/
+/coverage/
+/cache/
+/out/
+/dist/
+/build/
+
+# Logs and runtime state
 *.log
+*.pid
+*.pid.lock
+*.sock
+
+# Environment and local configuration
+.env
+.env.*
+!.env.example
+!.env.sample
+*.local
+
+# Secrets, credentials, signing material, and JWTs
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.jwt
+jwt.hex
+jwtsecret
+jwt-secret
+/secrets/
+/.secrets/
+/keystore/
+**/keystore/
+**/validator-secrets/
+**/validator_keys/
+**/validator-keys/
+**/private-keys/
+**/private_keys/
+**/mnemonic*
+**/seed-phrase*
+**/seed_phrase*
+
+# Go build/test artifacts
+*.test
+*.prof
+coverage.out
+vendor/
+
+# Solidity / Foundry artifacts
+/contracts/cache/
+/contracts/out/
+/contracts/broadcast/
+/contracts/coverage/
+
+# Node / frontend artifacts
+node_modules/
+.npm/
+.pnpm-store/
+.yarn/
+.next/
+.nuxt/
+.svelte-kit/
+.vite/
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# OS / editor metadata
 .DS_Store
+Thumbs.db
 .idea/
 .vscode/

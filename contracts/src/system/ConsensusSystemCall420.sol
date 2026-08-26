@@ -40,7 +40,7 @@ contract ConsensusSystemCall420 is SystemAccess, I420System {
     function systemName() external pure returns (string memory) { return "ConsensusSystemCall420"; }
     function protocolVersion() external pure returns (uint32) { return 1; }
 
-    function apply(uint64 sequence,uint64 executionBlock,bytes32 parentHash,uint256 chainId,bytes32 action,address target,bytes calldata payload)
+    function execute(uint64 sequence,uint64 executionBlock,bytes32 parentHash,uint256 chainId,bytes32 action,address target,bytes calldata payload)
         external returns (bytes32 callHash)
     {
         if (msg.sender != NATIVE_SYSTEM_ORIGIN) revert NotNativeSystemOrigin();

@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 set -eu
 ROOT="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
-GETH="${NODE420_GETH:-$ROOT/bin/upstream/geth-v1.17.5}"
+GETH="${NODE420_GETH:-$ROOT/bin/upstream/geth-v1.17.5-420}"
 DATADIR="${NODE420_DATADIR:-$ROOT/devnet-data/live-engine/node420}"
 JWT="${NODE420_JWT:-$ROOT/devnet-data/live-engine/jwt.hex}"
 GENESIS="$ROOT/execution/genesis/execution-genesis.json"

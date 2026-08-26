@@ -99,24 +99,26 @@ func normalizeAddress(s string) string {
 	return s
 }
 
-// CommitmentBytes is the canonical byte sequence to hash with legacy Keccak-256.
-// It intentionally excludes transport framing. The execution patch and fourtwentyd must
-// hash exactly these fields in this order when comparing system-call commitments.
-func (e Envelope) CommitmentBytes(actionHash [32]byte, payloadHash [32]byte) []byte {
-	out := make([]byte, 0, 32+8+8+32+8+32+20+32)
-	out = append(out, []byte("420/CONSENSUS_SYSTEM_CALL/V1")...)
-	out = appendU64(out, e.ChainID)
-	out = appendU64(out, e.Sequence)
-	out = appendU64(out, e.ExecutionBlock)
-	out = append(out, e.ParentHash[:]...)
-	out = append(out, actionHash[:]...)
+// SolidityCallHashPreimage returns the exact abi.encode(...) preimage used by
+// ConsensusSystemCall420 when computing callHash:
+// abi.encode(DOMAIN, chainId, sequence, executionBlock, parentHash, action, target, payloadHash).
+// The caller supplies legacy-Keccak hashes for DOMAIN, Action and Payload so this package
+// has no external crypto dependency. Hash the returned 256 bytes with legacy Keccak-256.
+func (e Envelope) SolidityCallHashPreimage(domainHash, actionHash, payloadHash [32]byte) ([]byte, error) {
 	target, err := addressBytes(e.Target)
 	if err != nil {
-		return nil
+		return nil, err
 	}
-	out = append(out, target...)
-	out = append(out, payloadHash[:]...)
-	return out
+	out := make([]byte, 32*8)
+	copy(out[0:32], domainHash[:])
+	putU256U64(out[32:64], e.ChainID)
+	putU256U64(out[64:96], e.Sequence)
+	putU256U64(out[96:128], e.ExecutionBlock)
+	copy(out[128:160], e.ParentHash[:])
+	copy(out[160:192], actionHash[:])
+	copy(out[192+12:224], target)
+	copy(out[224:256], payloadHash[:])
+	return out, nil
 }
 
 func addressBytes(s string) ([]byte, error) {
@@ -130,9 +132,16 @@ func addressBytes(s string) ([]byte, error) {
 	return b, nil
 }
 
-func appendU64(dst []byte, v uint64) []byte {
-	return append(dst,
-		byte(v>>56), byte(v>>48), byte(v>>40), byte(v>>32),
-		byte(v>>24), byte(v>>16), byte(v>>8), byte(v),
-	)
+func putU256U64(dst []byte, v uint64) {
+	if len(dst) != 32 {
+		panic("putU256U64 requires 32-byte destination")
+	}
+	dst[24] = byte(v >> 56)
+	dst[25] = byte(v >> 48)
+	dst[26] = byte(v >> 40)
+	dst[27] = byte(v >> 32)
+	dst[28] = byte(v >> 24)
+	dst[29] = byte(v >> 16)
+	dst[30] = byte(v >> 8)
+	dst[31] = byte(v)
 }

@@ -18,7 +18,7 @@ contract StakeValidatorGenesis420Test {
     RewardController internal rewards;
     CommunityValidatorReserve internal reserve;
     Stake420 internal stake;
-    address internal constant SYSTEM_CALLER = 0x000000000000000000000000000000000000043c;
+    address internal constant SYSTEM_CALLER = 0x000000000000000000000000000000000000043C;
 
     function setUp() public {
         registry = new ValidatorRegistry(address(this));

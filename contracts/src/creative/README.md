@@ -33,6 +33,37 @@ This package implements the first Decision #10 kernel for the 420 Creative Proto
 - Settlement IDs are replay protected.
 - Native 420 is the V1 settlement asset; payment-asset generalization is deliberately deferred behind the existing 420Pay/canonical-asset layer.
 
+## Decision #10 deterministic deployment / seed fixture
+
+`script/Decision10DeploySeed420.s.sol` deploys the complete kernel in the dependency order above and produces a deterministic reference history for indexer and client integration.
+
+The fixture uses intentionally public, test-only private keys for a deployer plus Alice, Bob, Carol, Producer and Remixer. These accounts must never hold production value. The script:
+
+1. deploys and wires every kernel contract;
+2. registers every kernel module in `CreativeProtocolRegistry420` at version 1;
+3. creates deterministic CreatorProfiles;
+4. registers the V1 ORIGINAL direct-sale, ORIGINAL remix-license and REMIX direct-sale schedules;
+5. publishes a Work split Alice 60% / Bob 40%;
+6. publishes an original Recording split Alice 70% / Producer 30%;
+7. records accepted contributor credits;
+8. settles a 100-420-unit-equivalent original sale;
+9. issues a paid 20-unit remix license to Remixer;
+10. publishes a Remix split Remixer 80% / Carol 20%;
+11. settles a 100-unit remix sale with the one-hop 15% immediate-source bucket;
+12. transfers 1,000 bps of the original Recording from Alice to Carol, preserving pre-transfer accrual through checkpointing;
+13. settles another 40-unit original sale under the new rights version;
+14. asserts exact pools, holder balances, rights versions and gross conservation; and
+15. writes `artifacts/contracts/creative-kernel-v1.fixture.json` using schema `config/creative-kernel-v1.fixture.schema.json`.
+
+Run from `contracts/`:
+
+```sh
+mkdir -p ../artifacts/contracts
+forge script script/Decision10DeploySeed420.s.sol:Decision10DeploySeed420 --sig "run()" -vvv
+```
+
+The generated manifest contains public accounts, deployed contract addresses, Creator/Work/Recording/License/transfer IDs, contributor-credit IDs, settlement IDs, version numbers and expected economic state. It deliberately excludes all private keys. CI executes the same harness, validates the critical fixture fields and uploads the JSON as the `creative-kernel-v1-fixture` artifact.
+
 ## Deliberately deferred from the kernel
 
 The package does not yet implement the later production layers for disputes, streaming Merkle settlement, AI provider execution, Awards, creator economy, DDEX/interop adapters, archival operators, or full governance migration. Those modules attach to these stable kernel boundaries after the Decision #10 acceptance harness passes.

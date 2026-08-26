@@ -5,21 +5,29 @@ import { ICapabilityRegistry420 } from "../../../src/interfaces/genesis/ICapabil
 
 contract MockCapabilityRegistry is ICapabilityRegistry420 {
     mapping(bytes32 => CapabilityGrant) private _grants;
-    mapping(bytes32 => bool) public authorized;
+    mapping(bytes32 => bytes32) private _grantIdsByAuthorizationKey;
 
     function grant(bytes32 grantId) external view returns (CapabilityGrant memory) {
         return _grants[grantId];
     }
 
-    function setAuthorized(
-        address principal,
-        bytes32 componentId,
-        bytes32 capabilityId,
-        bytes32 scopeHash,
-        uint256 amount,
-        bool value
-    ) external {
-        authorized[keccak256(abi.encode(principal, componentId, capabilityId, scopeHash, amount))] = value;
+    function setGrant(bytes32 grantId, CapabilityGrant calldata capabilityGrant, uint256 amount) external {
+        _grants[grantId] = capabilityGrant;
+        _grantIdsByAuthorizationKey[
+            keccak256(
+                abi.encode(
+                    capabilityGrant.principal,
+                    capabilityGrant.componentId,
+                    capabilityGrant.capabilityId,
+                    capabilityGrant.scopeHash,
+                    amount
+                )
+            )
+        ] = grantId;
+    }
+
+    function setRevoked(bytes32 grantId, bool revoked) external {
+        _grants[grantId].revoked = revoked;
     }
 
     function isAuthorized(
@@ -29,6 +37,17 @@ contract MockCapabilityRegistry is ICapabilityRegistry420 {
         bytes32 scopeHash,
         uint256 amount
     ) external view returns (bool) {
-        return authorized[keccak256(abi.encode(principal, componentId, capabilityId, scopeHash, amount))];
+        bytes32 grantId = _grantIdsByAuthorizationKey[
+            keccak256(abi.encode(principal, componentId, capabilityId, scopeHash, amount))
+        ];
+        if (grantId == bytes32(0)) return false;
+
+        CapabilityGrant memory capabilityGrant = _grants[grantId];
+        if (capabilityGrant.revoked) return false;
+        if (block.timestamp < capabilityGrant.validFrom) return false;
+        if (capabilityGrant.validUntil != 0 && block.timestamp > capabilityGrant.validUntil) return false;
+        if (amount > capabilityGrant.perCallLimit && capabilityGrant.perCallLimit != 0) return false;
+
+        return true;
     }
 }

@@ -2,7 +2,7 @@
 
 Status: **FROZEN FOR TESTNET**
 
-This specification defines the privileged deterministic state-transition path used by `fourtwentyd` consensus to apply finalized validator, reward, rotation, bond and slashing outcomes inside `node420` execution.
+This specification defines the privileged deterministic state-transition path used by `fourtwentyd` consensus to apply finalized validator, reward, rotation and slashing outcomes inside `node420` execution.
 
 ## 1. Security model
 
@@ -54,10 +54,11 @@ The gateway validates `executionBlock == block.number`, `parentHash == blockhash
 |---|---|---|
 | `420/SYSCALL/VALIDATOR_STATE/V1` | ValidatorRegistry `0x0423` | `applyConsensusState` |
 | `420/SYSCALL/VALIDATOR_EXIT_NOTICE/V1` | ValidatorRegistry `0x0423` | `applyExitNotice` |
-| `420/SYSCALL/VALIDATOR_BOND/V1` | ValidatorRegistry `0x0423` | `applyBondComposition` |
 | `420/SYSCALL/VALIDATOR_SLASH/V1` | ValidatorRegistry `0x0423` | `applySlash` |
 | `420/SYSCALL/ROTATION_SNAPSHOT/V1` | ValidatorRegistry `0x0423` | `applyRotationSnapshot` |
 | `420/SYSCALL/REWARD/V1` | RewardController `0x0420` | `applyConsensusReward` |
+
+Bond composition is deliberately **not** a consensus-system-call action. Native 420 collateral composition changes only through real-value execution paths (`register`, `topUpOwnedBond`, `replaceProtocolCredit`, slashing value movement, and withdrawal/recycling). Consensus may determine validator lifecycle and slash outcomes, but it cannot fabricate an accounting-only bond balance.
 
 The gateway checks both target and function selector. A valid action cannot be redirected to another system contract or another method on the same contract.
 
@@ -141,7 +142,7 @@ Consensus is additionally responsible for preventing a slash evidence object fro
 
 ## 10. node420 implementation
 
-The repository pins go-ethereum v1.17.5 plus a maintained 420 patchset. `execution/patches/apply-420-systemcall.py` is the authoritative anchor-checked patch generator.
+The repository pins go-ethereum v1.17.5 at immutable commit `9621c6ad10934a01b5514886fb6fbd87640b6c05` plus a maintained 420 patchset. `execution/patches/apply-420-systemcall.py` is the authoritative anchor-checked patch generator.
 
 It modifies the exact pinned Geth tree to:
 
@@ -154,7 +155,7 @@ It modifies the exact pinned Geth tree to:
 7. reject the payload atomically if any call fails;
 8. apply the same transition in builder and validator/import paths.
 
-The patch generator refuses any source tree not exactly tagged `v1.17.5` and fails on source-anchor drift instead of guessing.
+The release gate `scripts/build-node420-upstream.sh` verifies the immutable upstream commit, resets to a clean tree, applies the patcher, compiles every directly modified Geth package, builds the patched `geth` binary, and emits SHA-256 evidence for the patch and resulting binary under `artifacts/node420-release-gate/`.
 
 ## 11. Genesis initialization
 

@@ -52,6 +52,27 @@ func TestValidateRejectsSequenceGap(t *testing.T) {
     }
 }
 
+func TestValidateRejectsOversizedBatch(t *testing.T) {
+    b := testBatch()
+    b.Calls = nil
+    for i := 0; i < MaxCallsPerBatch+1; i++ {
+        c := testBatch().Calls[0]
+        c.Sequence = hexutil.Uint64(i + 1)
+        b.Calls = append(b.Calls, c)
+    }
+    if err := Validate(b); err != ErrSize {
+        t.Fatalf("got %v want ErrSize", err)
+    }
+}
+
+func TestValidateRejectsPayloadBudgetOverflow(t *testing.T) {
+    b := testBatch()
+    b.Calls[0].Payload = make(hexutil.Bytes, MaxPayloadBytes+1)
+    if err := Validate(b); err != ErrSize {
+        t.Fatalf("got %v want ErrSize", err)
+    }
+}
+
 func TestStageRejectsWrongRoot(t *testing.T) {
     b := testBatch()
     b.BatchRoot = common.HexToHash("0xdeadbeef")

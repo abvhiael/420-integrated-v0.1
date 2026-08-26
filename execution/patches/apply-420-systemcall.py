@@ -74,6 +74,20 @@ def main() -> None:
         '\treturn nil\n}\n\nconst (\n',
         '\treturn nil\n}\n\n// SystemCallAPI stages committed consensus data but never executes EVM state from RPC context.\ntype SystemCallAPI struct{}\nfunc (api *SystemCallAPI) SubmitSystemCallsV1(batch systemcall420.Batch) systemcall420.Status {\n\tif err := systemcall420.Stage(batch); err != nil { s:=err.Error(); return systemcall420.Status{Status:"INVALID",BatchRoot:batch.BatchRoot,ValidationError:&s} }\n\treturn systemcall420.Status{Status:"ACCEPTED",BatchRoot:batch.BatchRoot}\n}\n\nconst (\n',
     )
+    replace_once(
+        catalyst,
+        '\treturn caps\n}\n\n// GetClientVersionV1',
+        '\tcaps = append(caps, "engine420_submitSystemCallsV1")\n\treturn caps\n}\n\n// GetClientVersionV1',
+    )
+
+    # Geth's JWT-authenticated endpoint filters namespaces through DefaultAuthModules.
+    # Merely registering an Authenticated rpc.API is insufficient for a new namespace.
+    defaults = root / "node" / "defaults.go"
+    replace_once(
+        defaults,
+        '\tDefaultAuthModules = []string{"eth", "engine"}\n',
+        '\tDefaultAuthModules = []string{"eth", "engine", "engine420"}\n',
+    )
 
     state_processor = root / "core" / "state_processor.go"
     replace_once(state_processor, 'import (\n\t"context"\n', 'import (\n\t"bytes"\n\t"context"\n')
@@ -144,7 +158,7 @@ func Process420SystemCalls(number uint64, parent common.Hash, extra []byte, evm 
         '\tif len(miner.config.ExtraData) != 0 {\n\t\theader.Extra = miner.config.ExtraData\n\t}\n\troot420, ok420 := systemcall420.RootFor(number.Uint64(), parent.Hash())\n\tif !ok420 {\n\t\treturn nil, systemcall420.ErrNotStaged\n\t}\n\theader.Extra = root420[:]\n\tif genParams.forceOverrides {\n\t\tif len(genParams.overrideExtraData) != 0 && !bytes.Equal(genParams.overrideExtraData, root420[:]) {\n\t\t\treturn nil, systemcall420.ErrRoot\n\t\t}\n\t\theader.Extra = root420[:]\n\t}\n',
     )
 
-    subprocess.check_call(["gofmt", "-w", str(target), str(catalyst), str(state_processor), str(worker)])
+    subprocess.check_call(["gofmt", "-w", str(target), str(catalyst), str(defaults), str(state_processor), str(worker)])
     print("420 system-call patch applied to", root)
 
 

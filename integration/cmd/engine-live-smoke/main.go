@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -14,6 +15,7 @@ import (
 	"time"
 
 	eng "github.com/420integrated/420-integrated/consensus/engine"
+	consys "github.com/420integrated/420-integrated/consensus/systemcall"
 )
 
 type rpcReq struct {
@@ -72,6 +74,20 @@ func hexUint64(s string) (uint64, error) {
 	return strconv.ParseUint(s, 16, 64)
 }
 
+func parseHash32(s string) ([32]byte, error) {
+	var out [32]byte
+	s = strings.TrimPrefix(s, "0x")
+	if len(s) != 64 {
+		return out, fmt.Errorf("expected 32-byte hash, got %d hex chars", len(s))
+	}
+	b, err := hex.DecodeString(s)
+	if err != nil {
+		return out, err
+	}
+	copy(out[:], b)
+	return out, nil
+}
+
 func main() {
 	engineEndpoint := flag.String("engine", "http://127.0.0.1:8551", "Engine API endpoint")
 	rpcEndpoint := flag.String("rpc", "http://127.0.0.1:8545", "execution JSON-RPC endpoint")
@@ -93,7 +109,7 @@ func main() {
 		os.Exit(2)
 	}
 
-	required := []string{"engine_forkchoiceUpdatedV3", "engine_getPayloadV3", "engine_newPayloadV3"}
+	required := []string{"engine_forkchoiceUpdatedV3", "engine_getPayloadV3", "engine_newPayloadV3", "engine420_submitSystemCallsV1"}
 	caps, err := client.ExchangeCapabilities(ctx, required)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "capabilities:", err)
@@ -115,6 +131,42 @@ func main() {
 		fmt.Fprintln(os.Stderr, "genesis timestamp:", err)
 		os.Exit(4)
 	}
+	parentArray, err := parseHash32(genesis.Hash)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "genesis hash:", err)
+		os.Exit(4)
+	}
+
+	// 420 protocol rule: consensus data must be staged before payload construction,
+	// including blocks with zero system calls. The empty batch still has a canonical root.
+	batch := consys.Batch{
+		ExecutionBlock: 1,
+		ParentHash:     parentArray,
+		ChainID:        420,
+		Calls:          []consys.Call{},
+	}
+	if err := batch.Validate(0); err != nil {
+		fmt.Fprintln(os.Stderr, "empty system-call batch:", err)
+		os.Exit(4)
+	}
+	root := batch.Root()
+	stage := eng.SystemCallBatchV1{
+		ExecutionBlock: "0x1",
+		ParentHash:     eng.Hash32(genesis.Hash),
+		ChainID:        "0x1a4",
+		BatchRoot:      eng.Hash32(fmt.Sprintf("0x%x", root[:])),
+		Calls:          []eng.SystemCallV1{},
+	}
+	staged, err := client.SubmitSystemCallsV1(ctx, stage)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "submitSystemCallsV1:", err)
+		os.Exit(5)
+	}
+	if staged.Status == "" {
+		fmt.Fprintln(os.Stderr, "submitSystemCallsV1: empty status")
+		os.Exit(5)
+	}
+	fmt.Printf("SYSTEM_CALL_BATCH status=%s root=%s\n", staged.Status, staged.BatchRoot)
 
 	head := eng.Hash32(genesis.Hash)
 	state := eng.ForkchoiceStateV1{
@@ -152,11 +204,11 @@ func main() {
 		payload.ExecutionPayload.BlockNumber, payload.ExecutionPayload.BlockHash, len(payload.ExecutionPayload.Transactions))
 
 	status, err := client.NewPayloadV3(
-	ctx,
-	payload.ExecutionPayload,
-	[]eng.Hash32{},
-	parentBeacon,
-)
+		ctx,
+		payload.ExecutionPayload,
+		[]eng.Hash32{},
+		parentBeacon,
+	)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "newPayloadV3:", err)
 		os.Exit(7)

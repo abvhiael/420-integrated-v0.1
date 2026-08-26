@@ -1,0 +1,202 @@
+package systemcall420
+
+import (
+    "bytes"
+    "crypto/sha256"
+    "encoding/binary"
+    "errors"
+    "fmt"
+    "math/big"
+    "sync"
+
+    "github.com/ethereum/go-ethereum/accounts/abi"
+    "github.com/ethereum/go-ethereum/common"
+    "github.com/ethereum/go-ethereum/common/hexutil"
+    "github.com/ethereum/go-ethereum/crypto"
+)
+
+const (
+    BatchDomain      = "420/CONSENSUS_SYSTEM_CALL_BATCH/V1"
+    MaxCallsPerBatch = 64
+    MaxPayloadBytes  = 256 * 1024
+    MaxActionBytes   = 96
+    StagingRetention = 4096
+)
+
+var GatewayAddress = common.HexToAddress("0x000000000000000000000000000000000000043c")
+
+var (
+    ErrRoot      = errors.New("420 system-call batch root mismatch")
+    ErrSequence  = errors.New("420 system-call sequence invalid")
+    ErrContext   = errors.New("420 system-call context mismatch")
+    ErrSize      = errors.New("420 system-call batch exceeds protocol limits")
+    ErrNotStaged = errors.New("420 system-call batch not staged")
+    ErrDuplicate = errors.New("420 system-call batch already staged with different root")
+)
+
+type Call struct {
+    Sequence       hexutil.Uint64 `json:"sequence"`
+    ExecutionBlock hexutil.Uint64 `json:"executionBlock"`
+    ParentHash     common.Hash    `json:"parentHash"`
+    ChainID        hexutil.Uint64 `json:"chainId"`
+    Action         string         `json:"action"`
+    Target         common.Address `json:"target"`
+    Payload        hexutil.Bytes  `json:"payload"`
+}
+
+type Batch struct {
+    ExecutionBlock hexutil.Uint64 `json:"executionBlock"`
+    ParentHash     common.Hash    `json:"parentHash"`
+    ChainID        hexutil.Uint64 `json:"chainId"`
+    BatchRoot      common.Hash    `json:"batchRoot"`
+    Calls          []Call         `json:"calls"`
+}
+
+type Status struct {
+    Status          string      `json:"status"`
+    BatchRoot       common.Hash `json:"batchRoot"`
+    ValidationError *string     `json:"validationError,omitempty"`
+}
+
+type key struct {
+    Number uint64
+    Parent common.Hash
+}
+
+var staged = struct {
+    sync.RWMutex
+    m map[key]Batch
+}{m: make(map[key]Batch)}
+
+func Stage(batch Batch) error {
+    if err := Validate(batch); err != nil {
+        return err
+    }
+    want := Root(batch)
+    if batch.BatchRoot != want {
+        return fmt.Errorf("%w: supplied=%s computed=%s", ErrRoot, batch.BatchRoot, want)
+    }
+    k := key{Number: uint64(batch.ExecutionBlock), Parent: batch.ParentHash}
+    staged.Lock()
+    defer staged.Unlock()
+    if old, ok := staged.m[k]; ok && old.BatchRoot != batch.BatchRoot {
+        return ErrDuplicate
+    }
+    current := uint64(batch.ExecutionBlock)
+    for oldKey := range staged.m {
+        if oldKey.Number < current && current-oldKey.Number > StagingRetention {
+            delete(staged.m, oldKey)
+        }
+    }
+    staged.m[k] = clone(batch)
+    return nil
+}
+
+func Get(number uint64, parent common.Hash) (Batch, bool) {
+    staged.RLock()
+    defer staged.RUnlock()
+    b, ok := staged.m[key{Number: number, Parent: parent}]
+    return clone(b), ok
+}
+
+func RootFor(number uint64, parent common.Hash) (common.Hash, bool) {
+    b, ok := Get(number, parent)
+    if !ok {
+        return common.Hash{}, false
+    }
+    return b.BatchRoot, true
+}
+
+func Validate(batch Batch) error {
+    if batch.ParentHash == (common.Hash{}) || uint64(batch.ChainID) == 0 {
+        return ErrContext
+    }
+    if len(batch.Calls) > MaxCallsPerBatch {
+        return ErrSize
+    }
+    var payloadBytes int
+    var want uint64
+    if len(batch.Calls) != 0 {
+        want = uint64(batch.Calls[0].Sequence)
+        if want == 0 {
+            return ErrSequence
+        }
+    }
+    for i := range batch.Calls {
+        c := batch.Calls[i]
+        if uint64(c.Sequence) != want {
+            return ErrSequence
+        }
+        if c.ExecutionBlock != batch.ExecutionBlock || c.ParentHash != batch.ParentHash || c.ChainID != batch.ChainID {
+            return ErrContext
+        }
+        if len(c.Action) == 0 || len(c.Action) > MaxActionBytes || len(c.Payload) < 4 {
+            return ErrSize
+        }
+        payloadBytes += len(c.Payload)
+        if payloadBytes > MaxPayloadBytes {
+            return ErrSize
+        }
+        want++
+    }
+    return nil
+}
+
+func Root(batch Batch) common.Hash {
+    h := sha256.New()
+    writeBytes(h, []byte(BatchDomain))
+    writeU64(h, uint64(batch.ChainID))
+    writeU64(h, uint64(batch.ExecutionBlock))
+    h.Write(batch.ParentHash[:])
+    writeU64(h, uint64(len(batch.Calls)))
+    for i := range batch.Calls {
+        writeCall(h, batch.Calls[i])
+    }
+    return common.BytesToHash(h.Sum(nil))
+}
+
+func writeCall(w interface{ Write([]byte) (int, error) }, c Call) {
+    writeU64(w, uint64(c.Sequence))
+    writeU64(w, uint64(c.ExecutionBlock))
+    w.Write(c.ParentHash[:])
+    writeU64(w, uint64(c.ChainID))
+    writeBytes(w, []byte(c.Action))
+    w.Write(c.Target[:])
+    writeBytes(w, c.Payload)
+}
+
+func writeBytes(w interface{ Write([]byte) (int, error) }, b []byte) {
+    writeU64(w, uint64(len(b)))
+    w.Write(b)
+}
+
+func writeU64(w interface{ Write([]byte) (int, error) }, v uint64) {
+    var b [8]byte
+    binary.BigEndian.PutUint64(b[:], v)
+    w.Write(b[:])
+}
+
+func clone(b Batch) Batch {
+    out := b
+    out.Calls = make([]Call, len(b.Calls))
+    copy(out.Calls, b.Calls)
+    for i := range out.Calls {
+        out.Calls[i].Payload = bytes.Clone(b.Calls[i].Payload)
+    }
+    return out
+}
+
+var gatewayABI = mustABI(`[{"type":"function","name":"apply","inputs":[{"name":"sequence","type":"uint64"},{"name":"executionBlock","type":"uint64"},{"name":"parentHash","type":"bytes32"},{"name":"chainId","type":"uint256"},{"name":"action","type":"bytes32"},{"name":"target","type":"address"},{"name":"payload","type":"bytes"}],"outputs":[{"name":"callHash","type":"bytes32"}]}]`)
+
+func mustABI(s string) abi.ABI {
+    a, err := abi.JSON(bytes.NewBufferString(s))
+    if err != nil {
+        panic(err)
+    }
+    return a
+}
+
+func GatewayInput(c Call) ([]byte, error) {
+    action := crypto.Keccak256Hash([]byte(c.Action))
+    return gatewayABI.Pack("apply", uint64(c.Sequence), uint64(c.ExecutionBlock), c.ParentHash, new(big.Int).SetUint64(uint64(c.ChainID)), action, c.Target, []byte(c.Payload))
+}

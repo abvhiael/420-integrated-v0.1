@@ -26,6 +26,11 @@
     "min_payload_bytes_per_call": 4,
     "execution_staging_retention_blocks": 4096
   },
+  "validator_pool_semantics": {
+    "counts_toward_dynamic_active_target": ["ELIGIBLE", "ACTIVE"],
+    "excluded_while_bonded": ["NORMAL_COOLDOWN"],
+    "rule": "Cooldown validators remain bonded and slashable but are not currently selection-eligible."
+  },
   "envelope_binding": ["chainId","executionBlock","parentHash","sequence","action","target","payloadHash"],
   "batch_commitment": {
     "hash": "SHA-256",

@@ -6,6 +6,7 @@ import "../interfaces/I420System.sol";
 
 interface IValidatorCreditReceiver420 {
     function receiveProtocolCredit(bytes32 validatorId, address beneficiary) external payable;
+    function returnPendingProtocolCredit(bytes32 validatorId) external;
 }
 
 contract CommunityValidatorReserve is ProtocolTreasury, I420System {
@@ -49,12 +50,9 @@ contract CommunityValidatorReserve is ProtocolTreasury, I420System {
     }
 
     function assignCredit(bytes32 validatorId, address beneficiary, uint256 amount) external onlyGovernance {
-        if (validatorId == bytes32(0) || beneficiary == address(0) || amount == 0 || amount > MAX_CREDIT_PER_VALIDATOR) {
-            revert InvalidCredit();
-        }
+        if (validatorId == bytes32(0) || beneficiary == address(0) || amount == 0 || amount > MAX_CREDIT_PER_VALIDATOR) revert InvalidCredit();
         if (assignedCredit[validatorId] != 0 || fundedCredit[validatorId] != 0) revert InvalidCredit();
         if (amount > unencumberedBalance()) revert ReservedCollateral();
-
         assignedCredit[validatorId] = amount;
         creditBeneficiary[validatorId] = beneficiary;
         totalAssigned += amount;
@@ -68,19 +66,24 @@ contract CommunityValidatorReserve is ProtocolTreasury, I420System {
         if (amount == 0 || beneficiary == address(0)) revert CreditNotAssigned();
         if (fundedCredit[validatorId] != 0) revert CreditAlreadyFunded();
         if (amount > address(this).balance) revert ReservedCollateral();
-
         fundedCredit[validatorId] = amount;
         totalFunded += amount;
         IValidatorCreditReceiver420(validatorRegistry).receiveProtocolCredit{value: amount}(validatorId, beneficiary);
         emit CreditFunded(validatorId, beneficiary, amount);
     }
 
-    /// @notice Receives protocol-owned collateral returned by ValidatorRegistry after replacement, slash, or exit.
+    /// @notice Reclaims funded credit only while it is still pending an operator registration.
+    function reclaimUnregisteredCredit(bytes32 validatorId) external onlyGovernance {
+        if (!validatorRegistryBound) revert NotValidatorRegistry();
+        if (fundedCredit[validatorId] == 0) revert CreditNotAssigned();
+        IValidatorCreditReceiver420(validatorRegistry).returnPendingProtocolCredit(validatorId);
+    }
+
+    /// @notice Receives protocol-owned collateral returned by ValidatorRegistry after reclaim, replacement, slash, or exit.
     function returnCredit(bytes32 validatorId) external payable {
         if (msg.sender != validatorRegistry || !validatorRegistryBound) revert NotValidatorRegistry();
         uint256 funded = fundedCredit[validatorId];
         if (msg.value == 0 || msg.value > funded) revert InvalidCredit();
-
         fundedCredit[validatorId] = funded - msg.value;
         totalFunded -= msg.value;
         assignedCredit[validatorId] -= msg.value;
@@ -105,11 +108,7 @@ contract CommunityValidatorReserve is ProtocolTreasury, I420System {
         return bal > reservedUnfunded ? bal - reservedUnfunded : 0;
     }
 
-    function treasuryTransfer(address payable to, uint256 amount, bytes32 reason)
-        external
-        override
-        onlyGovernance
-    {
+    function treasuryTransfer(address payable to, uint256 amount, bytes32 reason) external override onlyGovernance {
         if (to == address(0)) revert ZeroAddress();
         if (amount > unencumberedBalance()) revert ReservedCollateral();
         (bool ok,) = to.call{value: amount}("");

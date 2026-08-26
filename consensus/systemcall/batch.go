@@ -6,12 +6,18 @@ import (
 	"errors"
 )
 
-const BatchDomain = "420/CONSENSUS_SYSTEM_CALL_BATCH/V1"
+const (
+	BatchDomain      = "420/CONSENSUS_SYSTEM_CALL_BATCH/V1"
+	MaxCallsPerBatch = 64
+	MaxPayloadBytes  = 256 * 1024
+	MaxActionBytes   = 96
+)
 
 var (
-	ErrEmptyParent = errors.New("system-call batch parent hash is zero")
-	ErrSequence    = errors.New("system-call batch sequence invalid")
-	ErrCallContext = errors.New("system-call batch call context mismatch")
+	ErrEmptyParent   = errors.New("system-call batch parent hash is zero")
+	ErrSequence      = errors.New("system-call batch sequence invalid")
+	ErrCallContext   = errors.New("system-call batch call context mismatch")
+	ErrBatchTooLarge = errors.New("system-call batch exceeds protocol limits")
 )
 
 // Call is the consensus-owned representation of one execution-system instruction.
@@ -38,7 +44,11 @@ func (b Batch) Validate(previousSequence uint64) error {
 	if b.ParentHash == ([32]byte{}) {
 		return ErrEmptyParent
 	}
+	if b.ChainID == 0 || len(b.Calls) > MaxCallsPerBatch {
+		return ErrBatchTooLarge
+	}
 	want := previousSequence + 1
+	payloadBytes := 0
 	for i := range b.Calls {
 		c := b.Calls[i]
 		if c.Sequence != want || c.Sequence == 0 {
@@ -46,6 +56,13 @@ func (b Batch) Validate(previousSequence uint64) error {
 		}
 		if c.ExecutionBlock != b.ExecutionBlock || c.ParentHash != b.ParentHash || c.ChainID != b.ChainID {
 			return ErrCallContext
+		}
+		if len(c.Action) == 0 || len(c.Action) > MaxActionBytes || len(c.Payload) < 4 {
+			return ErrBatchTooLarge
+		}
+		payloadBytes += len(c.Payload)
+		if payloadBytes > MaxPayloadBytes {
+			return ErrBatchTooLarge
 		}
 		want++
 	}

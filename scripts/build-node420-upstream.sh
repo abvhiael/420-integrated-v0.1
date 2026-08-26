@@ -40,19 +40,22 @@ fi
 
 python3 "$PATCHER" "$DEST"
 
-# Record a deterministic digest of the exact 420 source modifications before build products appear.
-PATCH_DIFF="$ARTIFACT_DIR/geth-$TAG-420.patch"
 mkdir -p "$ARTIFACT_DIR" "$ROOT/bin/upstream"
+PATCH_DIFF="$ARTIFACT_DIR/geth-$TAG-420.patch"
 git -C "$DEST" diff --binary -- . > "$PATCH_DIFF"
+if [ ! -s "$PATCH_DIFF" ]; then
+    echo "fatal: 420 patch produced no tracked source diff" >&2
+    exit 5
+fi
 PATCH_SHA256="$(sha256sum "$PATCH_DIFF" | awk '{print $1}')"
 
-# Compile the changed package and the execution paths it touches before the full binary.
+# Compile every directly modified package. -run '^$' compiles package + tests without executing the full upstream suites.
 (
     cd "$DEST"
     go test ./core/systemcall420
-    go test ./core -run 'TestNonExistent420ReleaseGateSentinel' -count=0
-    go test ./eth/catalyst -run 'TestNonExistent420ReleaseGateSentinel' -count=0
-    go test ./miner -run 'TestNonExistent420ReleaseGateSentinel' -count=0
+    go test ./core -run '^$' -count=1
+    go test ./eth/catalyst -run '^$' -count=1
+    go test ./miner -run '^$' -count=1
 )
 
 env -u GITHUB_SHA -u GITHUB_REF -u GITHUB_HEAD_REF -u GITHUB_BASE_REF \

@@ -2,22 +2,24 @@
 
 Baseline: **go-ethereum v1.17.5**
 
-The files in this directory are maintained protocol patches applied to the exact pinned upstream release before building the `node420` execution binary.
+The files in this directory define the maintained protocol modifications applied to the exact pinned upstream release before building the `node420` execution binary.
 
 ## 420 consensus system-call patch
 
-`geth-v1.17.5-420-systemcall.patch` adds the native consensus-to-execution path defined by `docs/CONSENSUS-SYSTEM-CALL-v1.md`.
+`apply-420-systemcall.py` is the authoritative patch generator for the native consensus-to-execution path defined by `docs/CONSENSUS-SYSTEM-CALL-v1.md`.
 
-It is intentionally implemented inside Geth block processing. Do not replace it with an RPC-submitted transaction or a funded privileged key.
+The generator:
 
-Key behavior:
+- refuses to run unless the source tree is exactly tagged `v1.17.5`;
+- checks every expected upstream source anchor exactly once before modifying it;
+- creates `core/systemcall420` in the Geth tree;
+- registers authenticated `engine420_submitSystemCallsV1` staging;
+- fixes the SHA-256 system-call batch root into execution-header `extraData`;
+- executes native EVM calls from `params.SystemAddress` to `0x043c`;
+- inserts the hook after user transactions/existing post-execution queues and before consensus-engine finalization/state-root assembly;
+- applies the same state transition in payload building and imported-block validation;
+- runs `gofmt` on every modified Go source file.
 
-- authenticated `engine420_submitSystemCallsV1` staging endpoint;
-- canonical SHA-256 batch-root verification;
-- batch root fixed into the execution header `extraData` field;
-- native EVM execution from `params.SystemAddress` to `0x043c`;
-- execution after user transactions / existing post-execution queues and before engine finalization/state-root assembly;
-- atomic block rejection on any 420 system-call failure;
-- same hook in payload building and imported-block execution.
+This must remain an in-process block-state transition. Do not replace it with an RPC-submitted transaction or a funded privileged key.
 
-The patch must be applied cleanly to the recorded upstream commit and its resulting tree hash must be recorded in the release manifest before testnet/mainnet qualification.
+Release qualification must apply the generator to the pinned upstream commit, run the upstream plus 420 execution tests, record the resulting Git tree/diff hash, and build the `node420` binary from that patched tree.

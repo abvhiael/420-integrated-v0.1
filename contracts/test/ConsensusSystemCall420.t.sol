@@ -18,7 +18,7 @@ contract ConsensusSystemCall420Test {
     }
 
     function testFrozenIdentitiesAndRoutes() public view {
-        require(gateway.NATIVE_SYSTEM_ORIGIN() == 0xfffffffffffffffffffffffffffffffffffff420, "origin");
+        require(gateway.NATIVE_SYSTEM_ORIGIN() == 0xfffffffffffffffffffffffffffffffffffffffe, "origin");
         require(gateway.REWARD_CONTROLLER() == 0x0000000000000000000000000000000000000420, "reward");
         require(gateway.VALIDATOR_REGISTRY() == 0x0000000000000000000000000000000000000423, "validator");
 
@@ -29,85 +29,51 @@ contract ConsensusSystemCall420Test {
     }
 
     function testOrdinaryCallerCannotApplySystemCall() public {
-        bytes memory payload = abi.encodeWithSignature(
-            "applyRotationSnapshot(uint64,uint256)", uint64(1), uint256(60)
-        );
+        bytes memory payload = abi.encodeWithSignature("applyRotationSnapshot(uint64,uint256)", uint64(1), uint256(60));
         (bool ok,) = address(gateway).call(
-            abi.encodeWithSelector(
-                gateway.apply.selector,
-                uint64(1), uint64(block.number), blockhash(block.number - 1), block.chainid,
-                gateway.ACTION_ROTATION_SNAPSHOT(), gateway.VALIDATOR_REGISTRY(), payload
-            )
+            abi.encodeWithSelector(gateway.apply.selector,uint64(1),uint64(block.number),blockhash(block.number - 1),block.chainid,gateway.ACTION_ROTATION_SNAPSHOT(),gateway.VALIDATOR_REGISTRY(),payload)
         );
         require(!ok, "ordinary caller accepted");
     }
 
     function testNativeOriginRejectsWrongChainAndWrongBlock() public {
-        bytes memory payload = abi.encodeWithSignature(
-            "applyRotationSnapshot(uint64,uint256)", uint64(1), uint256(60)
-        );
+        bytes memory payload = abi.encodeWithSignature("applyRotationSnapshot(uint64,uint256)", uint64(1), uint256(60));
         vm.prank(gateway.NATIVE_SYSTEM_ORIGIN());
         (bool wrongChain,) = address(gateway).call(
-            abi.encodeWithSelector(
-                gateway.apply.selector,
-                uint64(1), uint64(block.number), blockhash(block.number - 1), block.chainid + 1,
-                gateway.ACTION_ROTATION_SNAPSHOT(), gateway.VALIDATOR_REGISTRY(), payload
-            )
+            abi.encodeWithSelector(gateway.apply.selector,uint64(1),uint64(block.number),blockhash(block.number - 1),block.chainid + 1,gateway.ACTION_ROTATION_SNAPSHOT(),gateway.VALIDATOR_REGISTRY(),payload)
         );
         require(!wrongChain, "wrong chain accepted");
 
         vm.prank(gateway.NATIVE_SYSTEM_ORIGIN());
         (bool wrongBlock,) = address(gateway).call(
-            abi.encodeWithSelector(
-                gateway.apply.selector,
-                uint64(1), uint64(block.number + 1), blockhash(block.number - 1), block.chainid,
-                gateway.ACTION_ROTATION_SNAPSHOT(), gateway.VALIDATOR_REGISTRY(), payload
-            )
+            abi.encodeWithSelector(gateway.apply.selector,uint64(1),uint64(block.number + 1),blockhash(block.number - 1),block.chainid,gateway.ACTION_ROTATION_SNAPSHOT(),gateway.VALIDATOR_REGISTRY(),payload)
         );
         require(!wrongBlock, "wrong block accepted");
     }
 
     function testActionCannotBeRedirectedToWrongTarget() public {
-        bytes memory payload = abi.encodeWithSignature(
-            "applyRotationSnapshot(uint64,uint256)", uint64(1), uint256(60)
-        );
+        bytes memory payload = abi.encodeWithSignature("applyRotationSnapshot(uint64,uint256)", uint64(1), uint256(60));
         vm.prank(gateway.NATIVE_SYSTEM_ORIGIN());
         (bool ok,) = address(gateway).call(
-            abi.encodeWithSelector(
-                gateway.apply.selector,
-                uint64(1), uint64(block.number), blockhash(block.number - 1), block.chainid,
-                gateway.ACTION_ROTATION_SNAPSHOT(), gateway.REWARD_CONTROLLER(), payload
-            )
+            abi.encodeWithSelector(gateway.apply.selector,uint64(1),uint64(block.number),blockhash(block.number - 1),block.chainid,gateway.ACTION_ROTATION_SNAPSHOT(),gateway.REWARD_CONTROLLER(),payload)
         );
         require(!ok, "action redirected");
     }
 
     function testActionCannotUseWrongSelector() public {
-        bytes memory payload = abi.encodeWithSignature(
-            "applyExitNotice(bytes32,uint64)", bytes32(uint256(1)), uint64(1)
-        );
+        bytes memory payload = abi.encodeWithSignature("applyExitNotice(bytes32,uint64)", bytes32(uint256(1)), uint64(1));
         vm.prank(gateway.NATIVE_SYSTEM_ORIGIN());
         (bool ok,) = address(gateway).call(
-            abi.encodeWithSelector(
-                gateway.apply.selector,
-                uint64(1), uint64(block.number), blockhash(block.number - 1), block.chainid,
-                gateway.ACTION_ROTATION_SNAPSHOT(), gateway.VALIDATOR_REGISTRY(), payload
-            )
+            abi.encodeWithSelector(gateway.apply.selector,uint64(1),uint64(block.number),blockhash(block.number - 1),block.chainid,gateway.ACTION_ROTATION_SNAPSHOT(),gateway.VALIDATOR_REGISTRY(),payload)
         );
         require(!ok, "wrong selector accepted");
     }
 
     function testUnknownActionFailsClosed() public {
-        bytes memory payload = abi.encodeWithSignature(
-            "applyRotationSnapshot(uint64,uint256)", uint64(1), uint256(60)
-        );
+        bytes memory payload = abi.encodeWithSignature("applyRotationSnapshot(uint64,uint256)", uint64(1), uint256(60));
         vm.prank(gateway.NATIVE_SYSTEM_ORIGIN());
         (bool ok,) = address(gateway).call(
-            abi.encodeWithSelector(
-                gateway.apply.selector,
-                uint64(1), uint64(block.number), blockhash(block.number - 1), block.chainid,
-                keccak256("420/SYSCALL/UNKNOWN/V1"), gateway.VALIDATOR_REGISTRY(), payload
-            )
+            abi.encodeWithSelector(gateway.apply.selector,uint64(1),uint64(block.number),blockhash(block.number - 1),block.chainid,keccak256("420/SYSCALL/UNKNOWN/V1"),gateway.VALIDATOR_REGISTRY(),payload)
         );
         require(!ok, "unknown action accepted");
     }

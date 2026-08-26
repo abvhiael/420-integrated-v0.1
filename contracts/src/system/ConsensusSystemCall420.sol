@@ -9,7 +9,7 @@ import "../interfaces/I420System.sol";
 /// Downstream system contracts bind their consensusSystemCaller to this gateway, never to an EOA.
 contract ConsensusSystemCall420 is SystemAccess, I420System {
     // go-ethereum params.SystemAddress (also used by EIP-4788/EIP-2935 system calls).
-    address public constant NATIVE_SYSTEM_ORIGIN = 0xfffffffffffffffffffffffffffffffffffffffe;
+    address public constant NATIVE_SYSTEM_ORIGIN = 0xffffFFFfFFffffffffffffffFfFFFfffFFFfFFfE;
     address public constant REWARD_CONTROLLER = 0x0000000000000000000000000000000000000420;
     address public constant VALIDATOR_REGISTRY = 0x0000000000000000000000000000000000000423;
 

@@ -53,82 +53,64 @@ contract RecordingRegistry420 is CreativeEvents420 {
         authorizationRegistry = authorizationRegistry_;
     }
 
-    function registerRecording(
-        CreatorId registrantProfileId,
-        WorkId workId,
-        RecordingId parentRecordingId,
-        RecordingId supersedesRecordingId,
-        RecordingClass recordingClass,
-        bytes32 masterHash,
-        bytes32 metadataHash,
-        bytes32 provenanceHash,
-        bytes32 mediaManifestHash,
-        bytes32 authorizationManifestHash,
-        ProvenanceClass provenanceClass,
-        RightsStatus rightsStatus,
-        uint32 royaltyScheduleVersion,
-        uint32 authorizationPolicyVersion
-    ) external returns (RecordingId recordingId) {
-        if (!creatorProfiles.isAuthorized(registrantProfileId, msg.sender)) revert CreativeErrors420.Unauthorized();
-        if (works.statusOf(workId) != AssetStatus.ACTIVE) revert CreativeErrors420.InvalidState();
-        if (masterHash == bytes32(0) || provenanceHash == bytes32(0) || mediaManifestHash == bytes32(0)) {
-            revert CreativeErrors420.InvalidId();
-        }
-        if (recordingClass == RecordingClass.ORIGINAL && RecordingId.unwrap(parentRecordingId) != 0) {
-            revert CreativeErrors420.InvalidSource();
-        }
-        if (_isDerivative(recordingClass) && RecordingId.unwrap(parentRecordingId) == 0) {
-            revert CreativeErrors420.InvalidSource();
-        }
-        if (royaltyScheduleVersion == 0) revert CreativeErrors420.InvalidSchedule();
-
+    function registerRecording(RecordingRegistration420 calldata request) external returns (RecordingId recordingId) {
+        _validateRegistration(request);
         uint256 id = _nextRecordingId++;
         _recordings[id] = Recording420({
-            workId: workId,
-            parentRecordingId: parentRecordingId,
-            supersedesRecordingId: supersedesRecordingId,
-            masterHash: masterHash,
-            metadataHash: metadataHash,
-            provenanceHash: provenanceHash,
-            mediaManifestHash: mediaManifestHash,
-            authorizationManifestHash: authorizationManifestHash,
+            workId: request.workId,
+            parentRecordingId: request.parentRecordingId,
+            supersedesRecordingId: request.supersedesRecordingId,
+            masterHash: request.masterHash,
+            metadataHash: request.metadataHash,
+            provenanceHash: request.provenanceHash,
+            mediaManifestHash: request.mediaManifestHash,
+            authorizationManifestHash: request.authorizationManifestHash,
             registeredAt: uint64(block.timestamp),
             updatedAt: uint64(block.timestamp),
-            recordingClass: recordingClass,
-            provenanceClass: provenanceClass,
-            rightsStatus: rightsStatus,
+            recordingClass: request.recordingClass,
+            provenanceClass: request.provenanceClass,
+            rightsStatus: request.rightsStatus,
             status: AssetStatus.PROVISIONAL,
-            royaltyScheduleVersion: royaltyScheduleVersion,
-            authorizationPolicyVersion: authorizationPolicyVersion,
-            registrantProfileId: registrantProfileId
+            royaltyScheduleVersion: request.royaltyScheduleVersion,
+            authorizationPolicyVersion: request.authorizationPolicyVersion,
+            registrantProfileId: request.registrantProfileId
         });
-        emit RecordingRegistered(id, WorkId.unwrap(workId), uint8(recordingClass), CreatorId.unwrap(registrantProfileId));
+        emit RecordingRegistered(
+            id,
+            WorkId.unwrap(request.workId),
+            uint8(request.recordingClass),
+            CreatorId.unwrap(request.registrantProfileId)
+        );
         return RecordingId.wrap(id);
     }
 
     function activateRecording(RecordingId recordingId, LicenseId sourceLicenseId) external {
         uint256 id = RecordingId.unwrap(recordingId);
-        Recording420 storage recording = _requireRecording(id);
-        if (!creatorProfiles.isAuthorized(recording.registrantProfileId, msg.sender)) revert CreativeErrors420.Unauthorized();
-        if (recording.status != AssetStatus.PROVISIONAL) revert CreativeErrors420.InvalidTransition();
-        if (rightsRegistry == address(0) || authorizationRegistry == address(0)) revert CreativeErrors420.AccountingNotConfigured();
+        Recording420 storage recording_ = _requireRecording(id);
+        if (!creatorProfiles.isAuthorized(recording_.registrantProfileId, msg.sender)) {
+            revert CreativeErrors420.Unauthorized();
+        }
+        if (recording_.status != AssetStatus.PROVISIONAL) revert CreativeErrors420.InvalidTransition();
+        if (rightsRegistry == address(0) || authorizationRegistry == address(0)) {
+            revert CreativeErrors420.AccountingNotConfigured();
+        }
         bytes32 key = CreativeAssetKeys420.key(CreativeAssetType.RECORDING, id);
         if (!IRecordingRights420(rightsRegistry).isFinalized(key)) revert CreativeErrors420.InvalidState();
 
-        if (_isDerivative(recording.recordingClass)) {
+        if (_requiresAuthorization(recording_.recordingClass)) {
             bool allowed = IAuthorizationResolver420(authorizationRegistry).canCreateDerivative(
-                recording.registrantProfileId,
-                recording.workId,
-                recording.parentRecordingId,
-                recording.recordingClass,
+                recording_.registrantProfileId,
+                recording_.workId,
+                recording_.parentRecordingId,
+                recording_.recordingClass,
                 sourceLicenseId
             );
             if (!allowed) revert CreativeErrors420.MissingAuthorization();
         }
 
-        recording.status = AssetStatus.ACTIVE;
-        recording.updatedAt = uint64(block.timestamp);
-        emit RecordingActivated(id, recording.royaltyScheduleVersion, recording.authorizationPolicyVersion);
+        recording_.status = AssetStatus.ACTIVE;
+        recording_.updatedAt = uint64(block.timestamp);
+        emit RecordingActivated(id, recording_.royaltyScheduleVersion, recording_.authorizationPolicyVersion);
     }
 
     function registrantProfileOf(RecordingId recordingId) external view returns (CreatorId) {
@@ -153,8 +135,28 @@ contract RecordingRegistry420 is CreativeEvents420 {
         return (r.workId, r.parentRecordingId, r.recordingClass, r.royaltyScheduleVersion);
     }
 
-    function _isDerivative(RecordingClass class_) internal pure returns (bool) {
-        return class_ == RecordingClass.COVER || class_ == RecordingClass.REMIX || class_ == RecordingClass.STEM_REMIX
+    function _validateRegistration(RecordingRegistration420 calldata request) internal view {
+        if (!creatorProfiles.isAuthorized(request.registrantProfileId, msg.sender)) {
+            revert CreativeErrors420.Unauthorized();
+        }
+        if (works.statusOf(request.workId) != AssetStatus.ACTIVE) revert CreativeErrors420.InvalidState();
+        if (request.masterHash == bytes32(0) || request.provenanceHash == bytes32(0) || request.mediaManifestHash == bytes32(0)) {
+            revert CreativeErrors420.InvalidId();
+        }
+        if (request.royaltyScheduleVersion == 0) revert CreativeErrors420.InvalidSchedule();
+
+        uint256 parentId = RecordingId.unwrap(request.parentRecordingId);
+        if (request.recordingClass == RecordingClass.ORIGINAL && parentId != 0) revert CreativeErrors420.InvalidSource();
+        if (_requiresSourceRecording(request.recordingClass) && parentId == 0) revert CreativeErrors420.InvalidSource();
+        if (parentId != 0) _requireRecording(parentId);
+    }
+
+    function _requiresAuthorization(RecordingClass class_) internal pure returns (bool) {
+        return class_ == RecordingClass.COVER || _requiresSourceRecording(class_);
+    }
+
+    function _requiresSourceRecording(RecordingClass class_) internal pure returns (bool) {
+        return class_ == RecordingClass.REMIX || class_ == RecordingClass.STEM_REMIX
             || class_ == RecordingClass.SAMPLE_DERIVATIVE || class_ == RecordingClass.AI_DERIVATIVE;
     }
 

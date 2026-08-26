@@ -33,11 +33,11 @@
   "routes": [
     {"domain":"420/SYSCALL/VALIDATOR_STATE/V1","target":"0x0000000000000000000000000000000000000423","method":"applyConsensusState"},
     {"domain":"420/SYSCALL/VALIDATOR_EXIT_NOTICE/V1","target":"0x0000000000000000000000000000000000000423","method":"applyExitNotice"},
-    {"domain":"420/SYSCALL/VALIDATOR_BOND/V1","target":"0x0000000000000000000000000000000000000423","method":"applyBondComposition"},
     {"domain":"420/SYSCALL/VALIDATOR_SLASH/V1","target":"0x0000000000000000000000000000000000000423","method":"applySlash"},
     {"domain":"420/SYSCALL/ROTATION_SNAPSHOT/V1","target":"0x0000000000000000000000000000000000000423","method":"applyRotationSnapshot"},
     {"domain":"420/SYSCALL/REWARD/V1","target":"0x0000000000000000000000000000000000000420","method":"applyConsensusReward"}
   ],
+  "bond_authority": "Bond composition changes are custody-driven by register/topUpOwnedBond/replaceProtocolCredit and slash/withdrawal value flows; consensus has no accounting-only bond setter.",
   "execution_client_requirements": [
     "Reuse go-ethereum SystemAddress only through native block-processing system-call machinery.",
     "System calls must execute as EVM messages inside block state transition.",

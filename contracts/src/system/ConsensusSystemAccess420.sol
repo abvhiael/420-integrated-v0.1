@@ -7,7 +7,7 @@ import "./SystemAccess.sol";
 /// @dev The only valid caller is the frozen ConsensusSystemCall420 predeploy at 0x043C.
 abstract contract ConsensusSystemAccess420 is SystemAccess {
     address public constant CANONICAL_CONSENSUS_SYSTEM_CALL =
-        0x000000000000000000000000000000000000043c;
+        0x000000000000000000000000000000000000043C;
 
     address public consensusSystemCaller;
     bool public consensusSystemCallerBound;

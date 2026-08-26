@@ -18,14 +18,24 @@ interface VmDecision10Seed420 {
     function deal(address who, uint256 newBalance) external;
     function startPrank(address msgSender) external;
     function stopPrank() external;
-    function toString(address value) external pure returns (string memory);
+    function serializeAddress(string calldata objectKey, string calldata valueKey, address value)
+        external
+        returns (string memory json);
+    function serializeBytes32(string calldata objectKey, string calldata valueKey, bytes32 value)
+        external
+        returns (string memory json);
+    function serializeString(string calldata objectKey, string calldata valueKey, string calldata value)
+        external
+        returns (string memory json);
+    function serializeUint(string calldata objectKey, string calldata valueKey, uint256 value)
+        external
+        returns (string memory json);
     function toString(uint256 value) external pure returns (string memory);
-    function toString(bytes32 value) external pure returns (string memory);
-    function writeFile(string calldata path, string calldata data) external;
+    function writeJson(string calldata json, string calldata path) external;
 }
 
 /// @notice Deterministic Decision #10 reference deployment and seeded chain-history harness.
-/// @dev TEST/DEV ONLY. The fixture private keys below are public constants and MUST NEVER hold real value.
+/// @dev TEST/DEV ONLY. Fixture private keys are public constants and MUST NEVER hold real value.
 contract Decision10DeploySeed420 {
     VmDecision10Seed420 private constant vm =
         VmDecision10Seed420(address(uint160(uint256(keccak256("hevm cheat code")))));
@@ -39,6 +49,7 @@ contract Decision10DeploySeed420 {
 
     string public constant MANIFEST_PATH = "../artifacts/contracts/creative-kernel-v1.fixture.json";
     string public constant MANIFEST_SCHEMA = "420.creative.kernel.fixture.v1";
+    bytes32 public constant RELEASE_MANIFEST_HASH = keccak256("420.creative.kernel.v1");
 
     struct Accounts {
         address deployer;
@@ -88,7 +99,10 @@ contract Decision10DeploySeed420 {
         bytes32 originalPostTransferSettlementId;
     }
 
-    function run() external returns (Kernel memory kernel, Accounts memory accounts, Creators memory creators, Fixture memory fixture) {
+    function run()
+        external
+        returns (Kernel memory kernel, Accounts memory accounts, Creators memory creators, Fixture memory fixture)
+    {
         accounts = _accounts();
         _fund(accounts);
         kernel = _deploy(accounts.deployer);
@@ -96,8 +110,8 @@ contract Decision10DeploySeed420 {
         creators = _createProfiles(kernel, accounts);
         _registerSchedules(kernel, accounts.deployer);
         fixture = _seed(kernel, accounts, creators);
-        _writeManifest(kernel, accounts, creators, fixture);
         _assertSeed(kernel, creators, fixture);
+        _writeManifest(kernel, accounts, creators, fixture);
     }
 
     function _accounts() internal returns (Accounts memory accounts) {
@@ -126,13 +140,18 @@ contract Decision10DeploySeed420 {
         kernel.profiles = new CreatorProfileRegistry420(deployer);
         kernel.works = new WorkRegistry420(deployer, address(kernel.profiles));
         kernel.recordings = new RecordingRegistry420(deployer, address(kernel.profiles), address(kernel.works));
-        kernel.contributors = new ContributorRegistry420(address(kernel.profiles), address(kernel.works), address(kernel.recordings));
-        kernel.rights = new RightsRegistry420(deployer, address(kernel.profiles), address(kernel.works), address(kernel.recordings));
-        kernel.authorization = new AuthorizationRegistry420(deployer, address(kernel.profiles), address(kernel.works), address(kernel.recordings));
+        kernel.contributors =
+            new ContributorRegistry420(address(kernel.profiles), address(kernel.works), address(kernel.recordings));
+        kernel.rights =
+            new RightsRegistry420(deployer, address(kernel.profiles), address(kernel.works), address(kernel.recordings));
+        kernel.authorization = new AuthorizationRegistry420(
+            deployer, address(kernel.profiles), address(kernel.works), address(kernel.recordings)
+        );
         kernel.licenses = new LicenseRegistry420(deployer, address(kernel.profiles), address(kernel.recordings));
         kernel.schedules = new RoyaltyScheduleRegistry420(deployer);
         kernel.vault = new RoyaltyVault420(deployer, address(kernel.rights), address(kernel.profiles), deployer);
-        kernel.router = new RoyaltyRouter420(deployer, address(kernel.recordings), address(kernel.schedules), address(kernel.vault));
+        kernel.router =
+            new RoyaltyRouter420(deployer, address(kernel.recordings), address(kernel.schedules), address(kernel.vault));
         vm.stopPrank();
     }
 
@@ -147,19 +166,22 @@ contract Decision10DeploySeed420 {
         kernel.router.setSettlementSource(deployer, true);
         kernel.router.setSettlementSource(address(kernel.licenses), true);
 
-        bytes32 releaseManifest = keccak256("420.creative.kernel.v1");
-        kernel.protocol.registerModule(keccak256("CREATIVE_PROTOCOL_REGISTRY"), address(kernel.protocol), 1, releaseManifest);
-        kernel.protocol.registerModule(keccak256("CREATOR_PROFILE_REGISTRY"), address(kernel.profiles), 1, releaseManifest);
-        kernel.protocol.registerModule(keccak256("WORK_REGISTRY"), address(kernel.works), 1, releaseManifest);
-        kernel.protocol.registerModule(keccak256("RECORDING_REGISTRY"), address(kernel.recordings), 1, releaseManifest);
-        kernel.protocol.registerModule(keccak256("CONTRIBUTOR_REGISTRY"), address(kernel.contributors), 1, releaseManifest);
-        kernel.protocol.registerModule(keccak256("RIGHTS_REGISTRY"), address(kernel.rights), 1, releaseManifest);
-        kernel.protocol.registerModule(keccak256("AUTHORIZATION_REGISTRY"), address(kernel.authorization), 1, releaseManifest);
-        kernel.protocol.registerModule(keccak256("LICENSE_REGISTRY"), address(kernel.licenses), 1, releaseManifest);
-        kernel.protocol.registerModule(keccak256("ROYALTY_SCHEDULE_REGISTRY"), address(kernel.schedules), 1, releaseManifest);
-        kernel.protocol.registerModule(keccak256("ROYALTY_VAULT"), address(kernel.vault), 1, releaseManifest);
-        kernel.protocol.registerModule(keccak256("ROYALTY_ROUTER"), address(kernel.router), 1, releaseManifest);
+        _registerModule(kernel.protocol, "CREATIVE_PROTOCOL_REGISTRY", address(kernel.protocol));
+        _registerModule(kernel.protocol, "CREATOR_PROFILE_REGISTRY", address(kernel.profiles));
+        _registerModule(kernel.protocol, "WORK_REGISTRY", address(kernel.works));
+        _registerModule(kernel.protocol, "RECORDING_REGISTRY", address(kernel.recordings));
+        _registerModule(kernel.protocol, "CONTRIBUTOR_REGISTRY", address(kernel.contributors));
+        _registerModule(kernel.protocol, "RIGHTS_REGISTRY", address(kernel.rights));
+        _registerModule(kernel.protocol, "AUTHORIZATION_REGISTRY", address(kernel.authorization));
+        _registerModule(kernel.protocol, "LICENSE_REGISTRY", address(kernel.licenses));
+        _registerModule(kernel.protocol, "ROYALTY_SCHEDULE_REGISTRY", address(kernel.schedules));
+        _registerModule(kernel.protocol, "ROYALTY_VAULT", address(kernel.vault));
+        _registerModule(kernel.protocol, "ROYALTY_ROUTER", address(kernel.router));
         vm.stopPrank();
+    }
+
+    function _registerModule(CreativeProtocolRegistry420 protocol, string memory label, address implementation) internal {
+        protocol.registerModule(keccak256(bytes(label)), implementation, 1, RELEASE_MANIFEST_HASH);
     }
 
     function _createProfiles(Kernel memory kernel, Accounts memory accounts) internal returns (Creators memory creators) {
@@ -216,19 +238,30 @@ contract Decision10DeploySeed420 {
         internal
         returns (Fixture memory fixture)
     {
-        fixture.workId = _seedWork(kernel, accounts, creators, fixture);
-        fixture.originalId = _seedOriginal(kernel, accounts, creators, fixture.workId, fixture);
+        (fixture.workId, fixture.aliceWorkCreditId, fixture.bobWorkCreditId) = _seedWork(kernel, accounts, creators);
+        (fixture.originalId, fixture.aliceRecordingCreditId, fixture.producerRecordingCreditId) =
+            _seedOriginal(kernel, accounts, creators, fixture.workId);
 
         fixture.originalInitialSettlementId = keccak256("fixture/original/direct-sale/1");
         vm.startPrank(accounts.deployer);
-        kernel.router.route{value: 100 ether}(fixture.originalId, RevenueType.DIRECT_SALE, fixture.originalInitialSettlementId);
+        kernel.router.route{value: 100 ether}(
+            fixture.originalId, RevenueType.DIRECT_SALE, fixture.originalInitialSettlementId
+        );
         vm.stopPrank();
 
-        (fixture.remixOfferId, fixture.remixLicenseId) = _seedLicense(kernel, accounts, creators, fixture.originalId);
+        (fixture.remixOfferId, fixture.remixLicenseId) =
+            _seedLicense(kernel, accounts, creators, fixture.originalId);
         fixture.remixLicenseSettlementId = keccak256(
-            abi.encode("420/LICENSE", block.chainid, address(kernel.licenses), LicenseId.unwrap(fixture.remixLicenseId), fixture.remixOfferId)
+            abi.encode(
+                "420/LICENSE",
+                block.chainid,
+                address(kernel.licenses),
+                LicenseId.unwrap(fixture.remixLicenseId),
+                fixture.remixOfferId
+            )
         );
-        fixture.remixId = _seedRemix(kernel, accounts, creators, fixture.workId, fixture.originalId, fixture.remixLicenseId);
+        fixture.remixId =
+            _seedRemix(kernel, accounts, creators, fixture.workId, fixture.originalId, fixture.remixLicenseId);
 
         fixture.remixSettlementId = keccak256("fixture/remix/direct-sale/1");
         vm.startPrank(accounts.deployer);
@@ -257,9 +290,9 @@ contract Decision10DeploySeed420 {
         vm.stopPrank();
     }
 
-    function _seedWork(Kernel memory kernel, Accounts memory accounts, Creators memory creators, Fixture memory fixture)
+    function _seedWork(Kernel memory kernel, Accounts memory accounts, Creators memory creators)
         internal
-        returns (WorkId workId)
+        returns (WorkId workId, bytes32 aliceCreditId, bytes32 bobCreditId)
     {
         vm.startPrank(accounts.alice);
         workId = kernel.works.registerWork(
@@ -301,33 +334,21 @@ contract Decision10DeploySeed420 {
             0,
             keccak256("fixture/work/open-remix")
         );
-        vm.stopPrank();
-
-        vm.startPrank(accounts.alice);
-        fixture.aliceWorkCreditId = kernel.contributors.proposeCredit(
-            CreativeAssetType.WORK, WorkId.unwrap(workId), creators.alice, 1, 1
-        );
-        vm.stopPrank();
-        vm.startPrank(accounts.alice);
-        kernel.contributors.acceptCredit(fixture.aliceWorkCreditId);
-        vm.stopPrank();
-        vm.startPrank(accounts.alice);
-        fixture.bobWorkCreditId = kernel.contributors.proposeCredit(
-            CreativeAssetType.WORK, WorkId.unwrap(workId), creators.bob, 1, 2
-        );
+        aliceCreditId =
+            kernel.contributors.proposeCredit(CreativeAssetType.WORK, WorkId.unwrap(workId), creators.alice, 1, 1);
+        kernel.contributors.acceptCredit(aliceCreditId);
+        bobCreditId =
+            kernel.contributors.proposeCredit(CreativeAssetType.WORK, WorkId.unwrap(workId), creators.bob, 1, 2);
         vm.stopPrank();
         vm.startPrank(accounts.bob);
-        kernel.contributors.acceptCredit(fixture.bobWorkCreditId);
+        kernel.contributors.acceptCredit(bobCreditId);
         vm.stopPrank();
     }
 
-    function _seedOriginal(
-        Kernel memory kernel,
-        Accounts memory accounts,
-        Creators memory creators,
-        WorkId workId,
-        Fixture memory fixture
-    ) internal returns (RecordingId originalId) {
+    function _seedOriginal(Kernel memory kernel, Accounts memory accounts, Creators memory creators, WorkId workId)
+        internal
+        returns (RecordingId originalId, bytes32 aliceCreditId, bytes32 producerCreditId)
+    {
         RecordingRegistration420 memory request = RecordingRegistration420({
             registrantProfileId: creators.alice,
             workId: workId,
@@ -376,23 +397,16 @@ contract Decision10DeploySeed420 {
             keccak256("fixture/original/approval-required")
         );
         kernel.recordings.activateRecording(originalId, LicenseId.wrap(0));
-        vm.stopPrank();
-
-        vm.startPrank(accounts.alice);
-        fixture.aliceRecordingCreditId = kernel.contributors.proposeCredit(
+        aliceCreditId = kernel.contributors.proposeCredit(
             CreativeAssetType.RECORDING, RecordingId.unwrap(originalId), creators.alice, 1, 101
         );
-        vm.stopPrank();
-        vm.startPrank(accounts.alice);
-        kernel.contributors.acceptCredit(fixture.aliceRecordingCreditId);
-        vm.stopPrank();
-        vm.startPrank(accounts.alice);
-        fixture.producerRecordingCreditId = kernel.contributors.proposeCredit(
+        kernel.contributors.acceptCredit(aliceCreditId);
+        producerCreditId = kernel.contributors.proposeCredit(
             CreativeAssetType.RECORDING, RecordingId.unwrap(originalId), creators.producer, 1, 105
         );
         vm.stopPrank();
         vm.startPrank(accounts.producer);
-        kernel.contributors.acceptCredit(fixture.producerRecordingCreditId);
+        kernel.contributors.acceptCredit(producerCreditId);
         vm.stopPrank();
     }
 
@@ -468,14 +482,18 @@ contract Decision10DeploySeed420 {
 
     function _assertSeed(Kernel memory kernel, Creators memory creators, Fixture memory fixture) internal view {
         bytes32 workKey = CreativeAssetKeys420.key(CreativeAssetType.WORK, WorkId.unwrap(fixture.workId));
-        bytes32 originalKey = CreativeAssetKeys420.key(CreativeAssetType.RECORDING, RecordingId.unwrap(fixture.originalId));
+        bytes32 originalKey =
+            CreativeAssetKeys420.key(CreativeAssetType.RECORDING, RecordingId.unwrap(fixture.originalId));
         bytes32 remixKey = CreativeAssetKeys420.key(CreativeAssetType.RECORDING, RecordingId.unwrap(fixture.remixId));
 
         require(kernel.rights.rightsVersion(workKey) == 1, "work rightsVersion");
         require(kernel.rights.rightsVersion(originalKey) == 2, "original rightsVersion");
         require(kernel.rights.rightsVersion(remixKey) == 1, "remix rightsVersion");
         require(kernel.rights.currentShare(originalKey, CreatorId.unwrap(creators.alice)) == 6000, "alice current original");
-        require(kernel.rights.currentShare(originalKey, CreatorId.unwrap(creators.producer)) == 3000, "producer current original");
+        require(
+            kernel.rights.currentShare(originalKey, CreatorId.unwrap(creators.producer)) == 3000,
+            "producer current original"
+        );
         require(kernel.rights.currentShare(originalKey, CreatorId.unwrap(creators.carol)) == 1000, "carol current original");
 
         require(kernel.vault.pool(workKey).totalReceived == 30 ether, "work pool total");
@@ -487,7 +505,10 @@ contract Decision10DeploySeed420 {
         require(kernel.vault.pending(workKey, CreatorId.unwrap(creators.alice)) == 18 ether, "alice work");
         require(kernel.vault.pending(workKey, CreatorId.unwrap(creators.bob)) == 12 ether, "bob work");
         require(kernel.vault.pending(originalKey, CreatorId.unwrap(creators.alice)) == 102.3 ether, "alice original");
-        require(kernel.vault.pending(originalKey, CreatorId.unwrap(creators.producer)) == 45.3 ether, "producer original");
+        require(
+            kernel.vault.pending(originalKey, CreatorId.unwrap(creators.producer)) == 45.3 ether,
+            "producer original"
+        );
         require(kernel.vault.pending(originalKey, CreatorId.unwrap(creators.carol)) == 3.4 ether, "carol original");
         require(kernel.vault.pending(remixKey, CreatorId.unwrap(creators.remixer)) == 58 ether, "remixer remix");
         require(kernel.vault.pending(remixKey, CreatorId.unwrap(creators.carol)) == 14.5 ether, "carol remix");
@@ -496,76 +517,83 @@ contract Decision10DeploySeed420 {
     function _writeManifest(Kernel memory kernel, Accounts memory accounts, Creators memory creators, Fixture memory fixture)
         internal
     {
-        string memory json = string.concat(
-            "{\n",
-            '  "schema":"', MANIFEST_SCHEMA, '",\n',
-            '  "chainId":', vm.toString(block.chainid), ',\n',
-            '  "deployer":"', vm.toString(accounts.deployer), '",\n',
-            '  "aliceAccount":"', vm.toString(accounts.alice), '",\n',
-            '  "bobAccount":"', vm.toString(accounts.bob), '",\n',
-            '  "carolAccount":"', vm.toString(accounts.carol), '",\n',
-            '  "producerAccount":"', vm.toString(accounts.producer), '",\n',
-            '  "remixerAccount":"', vm.toString(accounts.remixer), '",\n'
-        );
-        json = string.concat(
-            json,
-            '  "creativeProtocolRegistry":"', vm.toString(address(kernel.protocol)), '",\n',
-            '  "creatorProfileRegistry":"', vm.toString(address(kernel.profiles)), '",\n',
-            '  "workRegistry":"', vm.toString(address(kernel.works)), '",\n',
-            '  "recordingRegistry":"', vm.toString(address(kernel.recordings)), '",\n',
-            '  "contributorRegistry":"', vm.toString(address(kernel.contributors)), '",\n',
-            '  "rightsRegistry":"', vm.toString(address(kernel.rights)), '",\n',
-            '  "authorizationRegistry":"', vm.toString(address(kernel.authorization)), '",\n',
-            '  "licenseRegistry":"', vm.toString(address(kernel.licenses)), '",\n',
-            '  "royaltyScheduleRegistry":"', vm.toString(address(kernel.schedules)), '",\n',
-            '  "royaltyVault":"', vm.toString(address(kernel.vault)), '",\n',
-            '  "royaltyRouter":"', vm.toString(address(kernel.router)), '",\n'
-        );
-        json = string.concat(
-            json,
-            '  "aliceCreatorId":', vm.toString(CreatorId.unwrap(creators.alice)), ',\n',
-            '  "bobCreatorId":', vm.toString(CreatorId.unwrap(creators.bob)), ',\n',
-            '  "carolCreatorId":', vm.toString(CreatorId.unwrap(creators.carol)), ',\n',
-            '  "producerCreatorId":', vm.toString(CreatorId.unwrap(creators.producer)), ',\n',
-            '  "remixerCreatorId":', vm.toString(CreatorId.unwrap(creators.remixer)), ',\n',
-            '  "workId":', vm.toString(WorkId.unwrap(fixture.workId)), ',\n',
-            '  "originalRecordingId":', vm.toString(RecordingId.unwrap(fixture.originalId)), ',\n',
-            '  "remixOfferId":', vm.toString(fixture.remixOfferId), ',\n',
-            '  "remixLicenseId":', vm.toString(LicenseId.unwrap(fixture.remixLicenseId)), ',\n',
-            '  "remixRecordingId":', vm.toString(RecordingId.unwrap(fixture.remixId)), ',\n',
-            '  "rightsTransferId":', vm.toString(fixture.rightsTransferId), ',\n'
-        );
-        json = string.concat(
-            json,
-            '  "workRightsVersion":1,\n',
-            '  "originalRightsVersion":2,\n',
-            '  "remixRightsVersion":1,\n',
-            '  "originalInitialSettlementId":"', vm.toString(fixture.originalInitialSettlementId), '",\n',
-            '  "remixLicenseSettlementId":"', vm.toString(fixture.remixLicenseSettlementId), '",\n',
-            '  "remixSettlementId":"', vm.toString(fixture.remixSettlementId), '",\n',
-            '  "originalPostTransferSettlementId":"', vm.toString(fixture.originalPostTransferSettlementId), '",\n',
-            '  "aliceWorkCreditId":"', vm.toString(fixture.aliceWorkCreditId), '",\n',
-            '  "bobWorkCreditId":"', vm.toString(fixture.bobWorkCreditId), '",\n',
-            '  "aliceRecordingCreditId":"', vm.toString(fixture.aliceRecordingCreditId), '",\n',
-            '  "producerRecordingCreditId":"', vm.toString(fixture.producerRecordingCreditId), '",\n'
-        );
-        json = string.concat(
-            json,
-            '  "expectedWorkPoolWei":', vm.toString(30 ether), ',\n',
-            '  "expectedOriginalPoolWei":', vm.toString(151 ether), ',\n',
-            '  "expectedRemixPoolWei":', vm.toString(72.5 ether), ',\n',
-            '  "expectedTreasuryWei":', vm.toString(6.5 ether), ',\n',
-            '  "expectedVaultBalanceWei":', vm.toString(260 ether), ',\n',
-            '  "expectedAliceWorkWei":', vm.toString(18 ether), ',\n',
-            '  "expectedBobWorkWei":', vm.toString(12 ether), ',\n',
-            '  "expectedAliceOriginalWei":', vm.toString(102.3 ether), ',\n',
-            '  "expectedProducerOriginalWei":', vm.toString(45.3 ether), ',\n',
-            '  "expectedCarolOriginalWei":', vm.toString(3.4 ether), ',\n',
-            '  "expectedRemixerRemixWei":', vm.toString(58 ether), ',\n',
-            '  "expectedCarolRemixWei":', vm.toString(14.5 ether), '\n',
-            "}\n"
-        );
-        vm.writeFile(MANIFEST_PATH, json);
+        string memory key = "decision10Fixture";
+        vm.serializeString(key, "schema", MANIFEST_SCHEMA);
+        vm.serializeUint(key, "chainId", block.chainid);
+        vm.serializeBytes32(key, "releaseManifestHash", RELEASE_MANIFEST_HASH);
+        _serializeAccounts(key, accounts);
+        _serializeContracts(key, kernel);
+        _serializeCreators(key, creators);
+        _serializeFixture(key, fixture);
+        string memory json = _serializeExpected(key);
+        vm.writeJson(json, MANIFEST_PATH);
+    }
+
+    function _serializeAccounts(string memory key, Accounts memory accounts) internal {
+        vm.serializeAddress(key, "deployer", accounts.deployer);
+        vm.serializeAddress(key, "aliceAccount", accounts.alice);
+        vm.serializeAddress(key, "bobAccount", accounts.bob);
+        vm.serializeAddress(key, "carolAccount", accounts.carol);
+        vm.serializeAddress(key, "producerAccount", accounts.producer);
+        vm.serializeAddress(key, "remixerAccount", accounts.remixer);
+    }
+
+    function _serializeContracts(string memory key, Kernel memory kernel) internal {
+        vm.serializeAddress(key, "creativeProtocolRegistry", address(kernel.protocol));
+        vm.serializeAddress(key, "creatorProfileRegistry", address(kernel.profiles));
+        vm.serializeAddress(key, "workRegistry", address(kernel.works));
+        vm.serializeAddress(key, "recordingRegistry", address(kernel.recordings));
+        vm.serializeAddress(key, "contributorRegistry", address(kernel.contributors));
+        vm.serializeAddress(key, "rightsRegistry", address(kernel.rights));
+        vm.serializeAddress(key, "authorizationRegistry", address(kernel.authorization));
+        vm.serializeAddress(key, "licenseRegistry", address(kernel.licenses));
+        vm.serializeAddress(key, "royaltyScheduleRegistry", address(kernel.schedules));
+        vm.serializeAddress(key, "royaltyVault", address(kernel.vault));
+        vm.serializeAddress(key, "royaltyRouter", address(kernel.router));
+    }
+
+    function _serializeCreators(string memory key, Creators memory creators) internal {
+        vm.serializeUint(key, "aliceCreatorId", CreatorId.unwrap(creators.alice));
+        vm.serializeUint(key, "bobCreatorId", CreatorId.unwrap(creators.bob));
+        vm.serializeUint(key, "carolCreatorId", CreatorId.unwrap(creators.carol));
+        vm.serializeUint(key, "producerCreatorId", CreatorId.unwrap(creators.producer));
+        vm.serializeUint(key, "remixerCreatorId", CreatorId.unwrap(creators.remixer));
+    }
+
+    function _serializeFixture(string memory key, Fixture memory fixture) internal {
+        vm.serializeUint(key, "workId", WorkId.unwrap(fixture.workId));
+        vm.serializeUint(key, "originalRecordingId", RecordingId.unwrap(fixture.originalId));
+        vm.serializeUint(key, "remixOfferId", fixture.remixOfferId);
+        vm.serializeUint(key, "remixLicenseId", LicenseId.unwrap(fixture.remixLicenseId));
+        vm.serializeUint(key, "remixRecordingId", RecordingId.unwrap(fixture.remixId));
+        vm.serializeUint(key, "rightsTransferId", fixture.rightsTransferId);
+        vm.serializeUint(key, "scheduleVersion", 1);
+        vm.serializeUint(key, "workRightsVersion", 1);
+        vm.serializeUint(key, "originalRightsVersion", 2);
+        vm.serializeUint(key, "remixRightsVersion", 1);
+        vm.serializeBytes32(key, "originalInitialSettlementId", fixture.originalInitialSettlementId);
+        vm.serializeBytes32(key, "remixLicenseSettlementId", fixture.remixLicenseSettlementId);
+        vm.serializeBytes32(key, "remixSettlementId", fixture.remixSettlementId);
+        vm.serializeBytes32(key, "originalPostTransferSettlementId", fixture.originalPostTransferSettlementId);
+        vm.serializeBytes32(key, "aliceWorkCreditId", fixture.aliceWorkCreditId);
+        vm.serializeBytes32(key, "bobWorkCreditId", fixture.bobWorkCreditId);
+        vm.serializeBytes32(key, "aliceRecordingCreditId", fixture.aliceRecordingCreditId);
+        vm.serializeBytes32(key, "producerRecordingCreditId", fixture.producerRecordingCreditId);
+    }
+
+    function _serializeExpected(string memory key) internal returns (string memory json) {
+        vm.serializeString(key, "expectedWorkPoolWei", vm.toString(30 ether));
+        vm.serializeString(key, "expectedOriginalPoolWei", vm.toString(151 ether));
+        vm.serializeString(key, "expectedRemixPoolWei", vm.toString(72.5 ether));
+        vm.serializeString(key, "expectedTreasuryWei", vm.toString(6.5 ether));
+        vm.serializeString(key, "expectedVaultBalanceWei", vm.toString(260 ether));
+        vm.serializeString(key, "expectedAliceWorkWei", vm.toString(18 ether));
+        vm.serializeString(key, "expectedBobWorkWei", vm.toString(12 ether));
+        vm.serializeString(key, "expectedAliceOriginalWei", vm.toString(102.3 ether));
+        vm.serializeString(key, "expectedProducerOriginalWei", vm.toString(45.3 ether));
+        vm.serializeString(key, "expectedCarolOriginalWei", vm.toString(3.4 ether));
+        vm.serializeString(key, "expectedRemixerRemixWei", vm.toString(58 ether));
+        json = vm.serializeString(key, "expectedCarolRemixWei", vm.toString(14.5 ether));
     }
 
     receive() external payable {}

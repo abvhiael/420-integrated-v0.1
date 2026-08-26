@@ -72,7 +72,7 @@ with `DOMAIN = keccak256("420/CONSENSUS_SYSTEM_CALL/V1")`.
 
 The resulting call hash is emitted and the most recent hash/sequence are retained in gateway state.
 
-## 6. Consensus batch commitment
+## 6. Consensus batch commitment and limits
 
 The ordered system-call list is consensus data and is committed separately using the canonical implementation in `consensus/systemcall`.
 
@@ -84,6 +84,16 @@ Batch root:
 - committed fields: chain ID, execution block, parent hash, call count and every ordered call field/payload.
 
 Order is consensus-critical. Reordering two otherwise valid calls changes the batch root.
+
+The testnet protocol applies identical pre-EVM limits in `fourtwentyd` and patched Geth:
+
+- maximum 64 system calls per execution block;
+- maximum 262,144 aggregate payload bytes per batch;
+- maximum 96 bytes for an action-domain string;
+- minimum 4 payload bytes per call, sufficient for an ABI selector;
+- node420 staging retention of 4,096 execution blocks.
+
+An oversized or malformed batch is invalid before privileged EVM execution. These limits prevent protocol-owned gas and authenticated staging memory from becoming an unbounded block-processing resource.
 
 ## 7. Execution-header commitment
 
@@ -147,7 +157,7 @@ The repository pins go-ethereum v1.17.5 at immutable commit `9621c6ad10934a01b55
 It modifies the exact pinned Geth tree to:
 
 1. add an authenticated `engine420` batch-staging service;
-2. maintain staged batches keyed by execution block + parent hash;
+2. maintain bounded staged batches keyed by execution block + parent hash;
 3. set builder `extraData` to the staged batch root;
 4. verify `extraData` on imported blocks;
 5. execute each gateway call using `params.SystemAddress` and Geth's native system-call gas machinery;
@@ -155,7 +165,7 @@ It modifies the exact pinned Geth tree to:
 7. reject the payload atomically if any call fails;
 8. apply the same transition in builder and validator/import paths.
 
-The release gate `scripts/build-node420-upstream.sh` verifies the immutable upstream commit, resets to a clean tree, applies the patcher, compiles every directly modified Geth package, builds the patched `geth` binary, and emits SHA-256 evidence for the patch and resulting binary under `artifacts/node420-release-gate/`.
+The release gate `scripts/build-node420-upstream.sh` verifies the immutable upstream commit, resets to a clean tree, applies the patcher, installs generated `systemcall420` unit tests, records a complete patch including new files, compiles every directly modified Geth package, builds the patched `geth` binary, and emits SHA-256 evidence for the patch and resulting binary under `artifacts/node420-release-gate/`.
 
 ## 11. Genesis initialization
 

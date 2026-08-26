@@ -42,10 +42,16 @@ python3 "$PATCHER" "$DEST"
 
 mkdir -p "$ARTIFACT_DIR" "$ROOT/bin/upstream"
 PATCH_DIFF="$ARTIFACT_DIR/geth-$TAG-420.patch"
+# Intent-to-add makes newly generated source files appear in the canonical diff without staging their contents.
+git -C "$DEST" add -N core/systemcall420/systemcall.go
 git -C "$DEST" diff --binary -- . > "$PATCH_DIFF"
 if [ ! -s "$PATCH_DIFF" ]; then
-    echo "fatal: 420 patch produced no tracked source diff" >&2
+    echo "fatal: 420 patch produced no source diff" >&2
     exit 5
+fi
+if ! grep -q 'core/systemcall420/systemcall.go' "$PATCH_DIFF"; then
+    echo "fatal: release patch evidence omitted core/systemcall420/systemcall.go" >&2
+    exit 6
 fi
 PATCH_SHA256="$(sha256sum "$PATCH_DIFF" | awk '{print $1}')"
 

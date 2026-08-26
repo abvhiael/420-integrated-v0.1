@@ -121,6 +121,19 @@ contract StakeValidatorGenesis420Test {
         require(registry.eligibleValidatorCount() == 1, "eligible");
     }
 
+    function testCooldownIsBondedButNotSelectionEligible() public {
+        (bytes32 id,) = _registerSelfFunded("cooldown", 12);
+        _state(id, ValidatorRegistry.Status.PROBATION, 1, 0, 0, 0);
+        _rollPastActivation(id);
+        _state(id, ValidatorRegistry.Status.ELIGIBLE, 2, 1, 0, 0);
+        _state(id, ValidatorRegistry.Status.ACTIVE, 3, 1, 4, 0);
+        for (uint64 rotation = 1; rotation <= 4; ++rotation) _snapshot(rotation, 1);
+        _state(id, ValidatorRegistry.Status.NORMAL_COOLDOWN, 4, 1, 4, 7);
+        require(registry.eligibleValidatorCount() == 0, "cooldown selection eligibility");
+        ValidatorRegistry.Validator memory v = registry.getValidator(id);
+        require(v.ownedBond + v.protocolCredit == 42_000 ether, "cooldown bond custody");
+    }
+
     function testProportionalSlashMovesOwnedValueAndRecyclesCredit() public {
         (bytes32 id,) = _registerMatched("slash", 8);
         _state(id, ValidatorRegistry.Status.PROBATION, 1, 0, 0, 0);

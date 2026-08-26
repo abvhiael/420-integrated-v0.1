@@ -4,8 +4,11 @@ pragma solidity ^0.8.24;
 import "./SystemAccess.sol";
 
 /// @notice Separates native finalized-consensus writes from ordinary governance authority.
-/// @dev The caller is bound once during genesis/predeploy initialization and cannot be changed.
+/// @dev The only valid caller is the frozen ConsensusSystemCall420 predeploy at 0x043C.
 abstract contract ConsensusSystemAccess420 is SystemAccess {
+    address public constant CANONICAL_CONSENSUS_SYSTEM_CALL =
+        0x000000000000000000000000000000000000043c;
+
     address public consensusSystemCaller;
     bool public consensusSystemCallerBound;
 
@@ -13,13 +16,15 @@ abstract contract ConsensusSystemAccess420 is SystemAccess {
 
     error ConsensusSystemCallerAlreadyBound();
     error ConsensusSystemCallerNotBound();
+    error InvalidConsensusSystemCaller();
     error NotConsensusSystemCaller();
 
     constructor(address timelock_) SystemAccess(timelock_) {}
 
+    /// @notice One-time genesis initialization. The caller is not configurable: only 0x043C is valid.
     function bindConsensusSystemCaller(address caller) external onlyGovernance {
         if (consensusSystemCallerBound) revert ConsensusSystemCallerAlreadyBound();
-        if (caller == address(0)) revert ZeroAddress();
+        if (caller != CANONICAL_CONSENSUS_SYSTEM_CALL) revert InvalidConsensusSystemCaller();
         consensusSystemCaller = caller;
         consensusSystemCallerBound = true;
         emit ConsensusSystemCallerBound(caller);
@@ -27,7 +32,9 @@ abstract contract ConsensusSystemAccess420 is SystemAccess {
 
     modifier onlyConsensusSystem() {
         if (!consensusSystemCallerBound) revert ConsensusSystemCallerNotBound();
-        if (msg.sender != consensusSystemCaller) revert NotConsensusSystemCaller();
+        if (msg.sender != CANONICAL_CONSENSUS_SYSTEM_CALL || msg.sender != consensusSystemCaller) {
+            revert NotConsensusSystemCaller();
+        }
         _;
     }
 }

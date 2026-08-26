@@ -1,0 +1,258 @@
+diff --git a/core/systemcall420/systemcall.go b/core/systemcall420/systemcall.go
+new file mode 100644
+index 000000000..420000001
+--- /dev/null
++++ b/core/systemcall420/systemcall.go
+@@ -0,0 +1,277 @@
++package systemcall420
++
++import (
++	"bytes"
++	"crypto/sha256"
++	"encoding/binary"
++	"errors"
++	"fmt"
++	"math/big"
++	"sync"
++
++	"github.com/ethereum/go-ethereum/accounts/abi"
++	"github.com/ethereum/go-ethereum/common"
++	"github.com/ethereum/go-ethereum/common/hexutil"
++	"github.com/ethereum/go-ethereum/crypto"
++)
++
++const BatchDomain = "420/CONSENSUS_SYSTEM_CALL_BATCH/V1"
++
++var GatewayAddress = common.HexToAddress("0x000000000000000000000000000000000000043c")
++
++var (
++	ErrRoot       = errors.New("420 system-call batch root mismatch")
++	ErrSequence   = errors.New("420 system-call sequence invalid")
++	ErrContext    = errors.New("420 system-call context mismatch")
++	ErrNotStaged  = errors.New("420 system-call batch not staged")
++	ErrDuplicate  = errors.New("420 system-call batch already staged with different root")
++)
++
++type Call struct {
++	Sequence       hexutil.Uint64 `json:"sequence"`
++	ExecutionBlock hexutil.Uint64 `json:"executionBlock"`
++	ParentHash     common.Hash    `json:"parentHash"`
++	ChainID        hexutil.Uint64 `json:"chainId"`
++	Action         string         `json:"action"`
++	Target         common.Address `json:"target"`
++	Payload        hexutil.Bytes  `json:"payload"`
++}
++
++type Batch struct {
++	ExecutionBlock hexutil.Uint64 `json:"executionBlock"`
++	ParentHash     common.Hash    `json:"parentHash"`
++	ChainID        hexutil.Uint64 `json:"chainId"`
++	BatchRoot      common.Hash    `json:"batchRoot"`
++	Calls          []Call         `json:"calls"`
++}
++
++type Status struct {
++	Status          string      `json:"status"`
++	BatchRoot       common.Hash `json:"batchRoot"`
++	ValidationError *string     `json:"validationError,omitempty"`
++}
++
++type key struct {
++	Number uint64
++	Parent common.Hash
++}
++
++var staged = struct {
++	sync.RWMutex
++	m map[key]Batch
++}{m: make(map[key]Batch)}
++
++func Stage(batch Batch) error {
++	if err := Validate(batch); err != nil {
++		return err
++	}
++	want := Root(batch)
++	if batch.BatchRoot != want {
++		return fmt.Errorf("%w: supplied=%s computed=%s", ErrRoot, batch.BatchRoot, want)
++	}
++	k := key{Number: uint64(batch.ExecutionBlock), Parent: batch.ParentHash}
++	staged.Lock()
++	defer staged.Unlock()
++	if old, ok := staged.m[k]; ok && old.BatchRoot != batch.BatchRoot {
++		return ErrDuplicate
++	}
++	staged.m[k] = clone(batch)
++	return nil
++}
++
++func Get(number uint64, parent common.Hash) (Batch, bool) {
++	staged.RLock()
++	defer staged.RUnlock()
++	b, ok := staged.m[key{Number:number, Parent:parent}]
++	return clone(b), ok
++}
++
++func RootFor(number uint64, parent common.Hash) (common.Hash, bool) {
++	b, ok := Get(number, parent)
++	if !ok { return common.Hash{}, false }
++	return b.BatchRoot, true
++}
++
++func Validate(batch Batch) error {
++	if batch.ParentHash == (common.Hash{}) || uint64(batch.ChainID) == 0 { return ErrContext }
++	var want uint64
++	if len(batch.Calls) != 0 { want = uint64(batch.Calls[0].Sequence) }
++	for i := range batch.Calls {
++		c := batch.Calls[i]
++		if uint64(c.Sequence) != want || uint64(c.Sequence) == 0 { return ErrSequence }
++		if c.ExecutionBlock != batch.ExecutionBlock || c.ParentHash != batch.ParentHash || c.ChainID != batch.ChainID { return ErrContext }
++		want++
++	}
++	return nil
++}
++
++func Root(batch Batch) common.Hash {
++	h := sha256.New()
++	writeBytes(h, []byte(BatchDomain))
++	writeU64(h, uint64(batch.ChainID))
++	writeU64(h, uint64(batch.ExecutionBlock))
++	h.Write(batch.ParentHash[:])
++	writeU64(h, uint64(len(batch.Calls)))
++	for i := range batch.Calls { writeCall(h, batch.Calls[i]) }
++	return common.BytesToHash(h.Sum(nil))
++}
++
++func writeCall(w interface{Write([]byte)(int,error)}, c Call) {
++	writeU64(w, uint64(c.Sequence)); writeU64(w, uint64(c.ExecutionBlock)); w.Write(c.ParentHash[:]); writeU64(w, uint64(c.ChainID))
++	writeBytes(w, []byte(c.Action)); w.Write(c.Target[:]); writeBytes(w, c.Payload)
++}
++func writeBytes(w interface{Write([]byte)(int,error)}, b []byte) { writeU64(w,uint64(len(b))); w.Write(b) }
++func writeU64(w interface{Write([]byte)(int,error)}, v uint64) { var b [8]byte; binary.BigEndian.PutUint64(b[:],v); w.Write(b[:]) }
++
++func clone(b Batch) Batch {
++	out := b
++	out.Calls = make([]Call,len(b.Calls))
++	copy(out.Calls,b.Calls)
++	for i := range out.Calls { out.Calls[i].Payload = bytes.Clone(b.Calls[i].Payload) }
++	return out
++}
++
++var gatewayABI = mustABI(`[{"type":"function","name":"apply","inputs":[{"name":"sequence","type":"uint64"},{"name":"executionBlock","type":"uint64"},{"name":"parentHash","type":"bytes32"},{"name":"chainId","type":"uint256"},{"name":"action","type":"bytes32"},{"name":"target","type":"address"},{"name":"payload","type":"bytes"}],"outputs":[{"name":"callHash","type":"bytes32"}]}]`)
++
++func mustABI(s string) abi.ABI { a,err:=abi.JSON(bytes.NewBufferString(s)); if err!=nil { panic(err) }; return a }
++
++func GatewayInput(c Call) ([]byte,error) {
++	action := crypto.Keccak256Hash([]byte(c.Action))
++	return gatewayABI.Pack("apply",uint64(c.Sequence),uint64(c.ExecutionBlock),c.ParentHash,new(big.Int).SetUint64(uint64(c.ChainID)),action,c.Target,[]byte(c.Payload))
++}
++
+diff --git a/eth/catalyst/api.go b/eth/catalyst/api.go
++index 15a111111..420000002 100644
++--- a/eth/catalyst/api.go
+++++ b/eth/catalyst/api.go
++@@ -31,6 +31,7 @@ import (
++ 	"github.com/ethereum/go-ethereum/common/hexutil"
++ 	"github.com/ethereum/go-ethereum/core"
+++	"github.com/ethereum/go-ethereum/core/systemcall420"
++ 	"github.com/ethereum/go-ethereum/core/rawdb"
++@@ -48,6 +49,11 @@ func Register(stack *node.Node, backend *eth.Ethereum) error {
++ 	stack.RegisterAPIs([]rpc.API{
++ 		newTestingAPI(backend),
+++		{
+++			Namespace: "engine420",
+++			Service: &SystemCallAPI{},
+++			Authenticated: true,
+++		},
++ 		{
++ 			Namespace:     "engine",
++@@ -58,6 +64,25 @@ func Register(stack *node.Node, backend *eth.Ethereum) error {
++ 	return nil
++ }
+++
+++// SystemCallAPI is intentionally registered only on the authenticated Engine endpoint.
+++// It stages consensus data; it does not execute an EVM call from RPC context.
+++type SystemCallAPI struct{}
+++
+++func (api *SystemCallAPI) SubmitSystemCallsV1(batch systemcall420.Batch) systemcall420.Status {
+++	if err := systemcall420.Stage(batch); err != nil {
+++		s := err.Error()
+++		return systemcall420.Status{Status:"INVALID",BatchRoot:batch.BatchRoot,ValidationError:&s}
+++	}
+++	return systemcall420.Status{Status:"ACCEPTED",BatchRoot:batch.BatchRoot}
+++}
++
++diff --git a/core/state_processor.go b/core/state_processor.go
++index 15a222222..420000003 100644
++--- a/core/state_processor.go
+++++ b/core/state_processor.go
++@@ -24,6 +24,7 @@ import (
++ 	"github.com/ethereum/go-ethereum/consensus/misc"
++ 	"github.com/ethereum/go-ethereum/core/state"
+++	"github.com/ethereum/go-ethereum/core/systemcall420"
++ 	"github.com/ethereum/go-ethereum/core/tracing"
++@@ -120,6 +121,11 @@ func (p *StateProcessor) Process(ctx context.Context, block *types.Block, statedb
++ 	if err != nil {
++ 		return nil, err
++ 	}
++ 	blockAccessList.Merge(bal)
+++	if err := Process420SystemCalls(block.NumberU64(), block.ParentHash(), header.Extra, evm, uint32(len(block.Transactions())+2), blockAccessList); err != nil {
+++		return nil, fmt.Errorf("420 consensus system calls: %w", err)
+++	}
++ 	// Finalize the block, applying any consensus engine specific extras
++@@ -410,6 +416,45 @@ func processRequestsSystemCall(requests *[][]byte, rules params.Rules, evm *vm.E
++ 	return nil
++ }
+++
+++// Process420SystemCalls applies the consensus-staged batch committed by header.extraData.
+++func Process420SystemCalls(number uint64, parent common.Hash, extra []byte, evm *vm.EVM, blockAccessIndex uint32, blockAccessList *bal.ConstructionBlockAccessList) error {
+++	batch, ok := systemcall420.Get(number,parent)
+++	if !ok { return systemcall420.ErrNotStaged }
+++	root := systemcall420.Root(batch)
+++	if len(extra)!=32 || !bytes.Equal(extra,root[:]) { return systemcall420.ErrRoot }
+++	for i,c := range batch.Calls {
+++		input,err := systemcall420.GatewayInput(c); if err!=nil { return err }
+++		gasLimit,gasBudget := systemCallGasBudget(evm)
+++		to := systemcall420.GatewayAddress
+++		msg := &Message{From:params.SystemAddress,GasLimit:gasLimit,GasPrice:uint256.NewInt(0),GasFeeCap:uint256.NewInt(0),GasTipCap:uint256.NewInt(0),To:&to,Data:input}
+++		evm.SetTxContext(NewEVMTxContext(msg))
+++		evm.StateDB.Prepare(evm.GetRules(),common.Address{},common.Address{},nil,nil,nil)
+++		evm.StateDB.SetTxContext(common.Hash{},0,blockAccessIndex+uint32(i))
+++		evm.StateDB.AddAddressToAccessList(to)
+++		_,_,err = evm.Call(msg.From,*msg.To,msg.Data,gasBudget,common.U2560)
+++		if evm.StateDB.AccessEvents()!=nil { evm.StateDB.AccessEvents().Merge(evm.AccessEvents) }
+++		local := evm.StateDB.Finalise(true)
+++		if err!=nil { return fmt.Errorf("sequence %d: %w",uint64(c.Sequence),err) }
+++		blockAccessList.Merge(local)
+++	}
+++	return nil
+++}
++
++diff --git a/miner/worker.go b/miner/worker.go
++index 15a333333..420000004 100644
++--- a/miner/worker.go
+++++ b/miner/worker.go
++@@ -27,6 +27,7 @@ import (
++ 	"github.com/ethereum/go-ethereum/core"
++ 	"github.com/ethereum/go-ethereum/core/state"
+++	"github.com/ethereum/go-ethereum/core/systemcall420"
++ 	"github.com/ethereum/go-ethereum/core/stateless"
++@@ -203,6 +204,10 @@ func (miner *Miner) generateWork(ctx context.Context, genParam *generateParams, w
++ 	}
++ 	work.bal.Merge(bal)
+++	if err := core.Process420SystemCalls(work.header.Number.Uint64(),work.header.ParentHash,work.header.Extra,work.evm,uint32(work.tcount+2),work.bal); err != nil {
+++		return &newPayloadResult{err:err}
+++	}
++ 	// Apply the consensus-specific post-transaction changes
++@@ -264,6 +269,12 @@ func (miner *Miner) prepareWork(ctx context.Context, genParams *generateParams, w
++ 	if len(miner.config.ExtraData) != 0 {
++ 		header.Extra = miner.config.ExtraData
++ 	}
+++	// 420 reserves the complete 32-byte extraData field for the consensus system-call batch root.
+++	root,ok := systemcall420.RootFor(number.Uint64(),parent.Hash())
+++	if !ok { return nil, systemcall420.ErrNotStaged }
+++	header.Extra = root[:]
++ 	if genParams.forceOverrides {
++-		header.Extra = genParams.overrideExtraData
+++		if len(genParams.overrideExtraData)!=0 && !bytes.Equal(genParams.overrideExtraData,root[:]) { return nil,systemcall420.ErrRoot }
+++		header.Extra = root[:]
++ 	}

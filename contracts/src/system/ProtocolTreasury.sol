@@ -1,4 +1,3 @@
-
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
 
@@ -9,10 +8,11 @@ abstract contract ProtocolTreasury is SystemAccess {
 
     constructor(address timelock_) SystemAccess(timelock_) {}
 
-    receive() external payable {}
+    receive() external payable virtual {}
 
     function treasuryTransfer(address payable to, uint256 amount, bytes32 reason)
         external
+        virtual
         onlyGovernance
     {
         require(to != address(0), "zero destination");

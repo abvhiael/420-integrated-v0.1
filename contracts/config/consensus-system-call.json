@@ -2,7 +2,8 @@
   "schema": "420-consensus-system-call-v1",
   "status": "FROZEN_TESTNET",
   "gateway": "0x000000000000000000000000000000000000043c",
-  "native_system_origin": "0xfffffffffffffffffffffffffffffffffffff420",
+  "native_system_origin": "0xfffffffffffffffffffffffffffffffffffffffe",
+  "native_origin_source": "go-ethereum params.SystemAddress",
   "execution_order": "AFTER_USER_TRANSACTIONS_BEFORE_POST_STATE_ROOT",
   "ordinary_transaction_visibility": false,
   "user_gas_accounting": false,
@@ -12,15 +13,7 @@
     "initial": 1,
     "rule": "STRICT_INCREMENT_NO_GAPS_NO_REPLAY"
   },
-  "envelope_binding": [
-    "chainId",
-    "executionBlock",
-    "parentHash",
-    "sequence",
-    "action",
-    "target",
-    "payloadHash"
-  ],
+  "envelope_binding": ["chainId","executionBlock","parentHash","sequence","action","target","payloadHash"],
   "routes": [
     {"domain":"420/SYSCALL/VALIDATOR_STATE/V1","target":"0x0000000000000000000000000000000000000423","method":"applyConsensusState"},
     {"domain":"420/SYSCALL/VALIDATOR_EXIT_NOTICE/V1","target":"0x0000000000000000000000000000000000000423","method":"applyExitNotice"},
@@ -30,11 +23,11 @@
     {"domain":"420/SYSCALL/REWARD/V1","target":"0x0000000000000000000000000000000000000420","method":"applyConsensusReward"}
   ],
   "execution_client_requirements": [
-    "Reject ordinary transactions recovered from native_system_origin.",
+    "Reuse go-ethereum SystemAddress only through native block-processing system-call machinery.",
     "System calls must execute as EVM messages inside block state transition.",
     "System calls must not appear in the user transaction trie.",
     "System-call failure invalidates the candidate payload atomically.",
-    "No public JSON-RPC method may synthesize native_system_origin calls.",
+    "No public JSON-RPC method may synthesize the privileged gateway call.",
     "Gateway and downstream state changes must be included in the execution state root."
   ]
 }

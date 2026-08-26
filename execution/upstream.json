@@ -2,13 +2,22 @@
   "project": "node420",
   "upstream": "https://github.com/ethereum/go-ethereum",
   "pinned_release": "v1.17.5",
-  "pin_policy": "exact release tag, then record resolved git commit",
-  "integration_model": "external pinned Geth binary launched by node420 wrapper; no full source vendoring",
+  "pin_policy": "exact release tag, then record resolved git commit and patchset hash",
+  "integration_model": "pinned Geth v1.17.5 plus maintained node420 protocol patchset; wrapper launches the patched binary",
   "engine_api": "authenticated JSON-RPC over local/private port 8551",
   "required_capabilities": [
     "engine_forkchoiceUpdatedV3",
     "engine_getPayloadV3",
-    "engine_newPayloadV3"
+    "engine_newPayloadV3",
+    "420 consensus-system-call batch transport/verification"
   ],
-  "custom_engine_namespace": "engine420_* only if standard API proves insufficient"
+  "native_system_origin": "go-ethereum params.SystemAddress 0xfffffffffffffffffffffffffffffffffffffffe",
+  "required_patch_points": [
+    "post-user-transaction pre-post-state consensus system-call execution",
+    "consensus system-call batch commitment verification",
+    "atomic payload invalidation on system-call failure",
+    "authenticated engine420 system-call batch transport",
+    "no public RPC surface for native 420 system-call synthesis"
+  ],
+  "custom_engine_namespace": "engine420_* required for consensus-system-call batch transport unless an equivalent authenticated standard Engine API field is adopted before freeze"
 }

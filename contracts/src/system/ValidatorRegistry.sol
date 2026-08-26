@@ -4,13 +4,18 @@ pragma solidity ^0.8.24;
 import "./ConsensusSystemAccess420.sol";
 import "../interfaces/I420System.sol";
 
-/// @notice Execution-layer mirror for finalized validator state.
+interface ICommunityValidatorReserve420 {
+    function returnCredit(bytes32 validatorId) external payable;
+}
+
+/// @notice Canonical execution-layer validator registry and native 420 bond vault.
 /// @dev fourtwentyd remains authoritative for committee selection, proposer scheduling,
-/// finality, randomness and slash adjudication. This contract validates and records finalized outcomes.
+/// finality, randomness and slash adjudication. Economic balances here are backed by native 420 custody.
 contract ValidatorRegistry is ConsensusSystemAccess420, I420System {
     uint256 public constant EFFECTIVE_BOND = 42_000 ether;
     uint256 public constant MAX_PROTOCOL_CREDIT = 21_000 ether;
     uint256 public constant MIN_OWNED_BOND = 21_000 ether;
+    address public constant PROTOCOL_RESERVE = 0x0000000000000000000000000000000000000424;
 
     uint64 public constant EPOCH_BLOCKS = 420;
     uint64 public constant ROTATION_EPOCHS = 42;
@@ -80,16 +85,34 @@ contract ValidatorRegistry is ConsensusSystemAccess420, I420System {
     mapping(address => bytes32) public ownerValidatorId;
     mapping(bytes32 => bool) public blsPubkeyHashUsed;
 
+    mapping(bytes32 => uint256) public pendingProtocolCredit;
+    mapping(bytes32 => address) public pendingCreditBeneficiary;
+
+    address public communityValidatorReserve;
+    bool public communityValidatorReserveBound;
+
+    uint256 public totalOwnedCustody;
+    uint256 public totalProtocolCreditCustody;
+    uint256 public totalPendingProtocolCredit;
+    uint256 public totalOwnedSlashed;
+    uint256 public totalProtocolCreditRecycled;
+    uint256 public totalOwnedWithdrawn;
+
     uint256 public eligibleValidatorCount;
     uint16 public activeTarget;
     uint16 public pendingActiveTarget;
     uint8 public pendingTargetSnapshots;
     uint64 public lastRotationSnapshot;
 
-    event ValidatorRegistered(bytes32 indexed validatorId, address indexed owner, address indexed withdrawal);
+    event CommunityValidatorReserveBound(address indexed reserve);
+    event ProtocolCreditReceived(bytes32 indexed validatorId, address indexed beneficiary, uint256 amount);
+    event PendingProtocolCreditReturned(bytes32 indexed validatorId, uint256 amount);
+    event ValidatorRegistered(bytes32 indexed validatorId, address indexed owner, address indexed withdrawal, uint256 ownedBond, uint256 protocolCredit);
+    event OwnedBondToppedUp(bytes32 indexed validatorId, uint256 amount, uint256 ownedBond);
+    event ProtocolCreditReplaced(bytes32 indexed validatorId, uint256 amount, uint256 ownedBond, uint256 protocolCredit);
+    event ValidatorBondWithdrawn(bytes32 indexed validatorId, address indexed withdrawal, uint256 ownedAmount, uint256 recycledCredit);
     event ConsensusStateApplied(bytes32 indexed validatorId, Status previousStatus, Status newStatus, uint64 effectiveSlot, uint64 activationRotation, uint64 scheduledExitRotation, uint64 cooldownUntilRotation);
     event ExitNoticeApplied(bytes32 indexed validatorId, uint64 noticeRotation, uint64 exitEligibleRotation);
-    event BondCompositionApplied(bytes32 indexed validatorId, uint256 ownedBond, uint256 protocolCredit);
     event SlashApplied(bytes32 indexed validatorId, SlashOffense offense, uint8 correlationTier, uint256 ownedSlashed, uint256 creditSlashed, bytes32 evidenceHash);
     event RotationSnapshotApplied(uint64 indexed rotation, uint256 eligibleCount, uint16 candidateTarget, uint16 activeTarget);
     event ActiveTargetChanged(uint16 previousTarget, uint16 newTarget, uint64 indexed rotation, bool safetyOverride);
@@ -113,37 +136,84 @@ contract ValidatorRegistry is ConsensusSystemAccess420, I420System {
     error WithdrawalDelayActive();
     error InvalidSlash();
     error InvalidCorrelationTier();
+    error NotCommunityValidatorReserve();
+    error AlreadyBound();
+    error InvalidCreditBeneficiary();
+    error TransferFailed();
+    error NotValidatorOwner();
+    error NotWithdrawalAddress();
+    error BondAlreadyFull();
 
     constructor(address timelock_) ConsensusSystemAccess420(timelock_) {}
 
     function systemName() external pure returns (string memory) { return "ValidatorRegistry"; }
-    function protocolVersion() external pure returns (uint32) { return 2; }
+    function protocolVersion() external pure returns (uint32) { return 3; }
 
-    /// @notice Registration is an administrative/genesis onboarding action, not a committee-selection action.
-    function register(
-        bytes32 validatorId,
-        bytes calldata blsPubkey,
-        address owner,
-        address withdrawal,
-        uint256 ownedBond,
-        uint256 protocolCredit
-    ) external onlyGovernance {
+    receive() external payable {}
+
+    function bindCommunityValidatorReserve(address reserve) external onlyGovernance {
+        if (communityValidatorReserveBound) revert AlreadyBound();
+        if (reserve == address(0)) revert InvalidAddress();
+        communityValidatorReserve = reserve;
+        communityValidatorReserveBound = true;
+        emit CommunityValidatorReserveBound(reserve);
+    }
+
+    /// @notice Receives real protocol-owned 420 from CommunityValidatorReserve before matched registration.
+    function receiveProtocolCredit(bytes32 validatorId, address beneficiary) external payable {
+        if (!communityValidatorReserveBound || msg.sender != communityValidatorReserve) revert NotCommunityValidatorReserve();
+        if (validatorId == bytes32(0) || beneficiary == address(0) || msg.value == 0) revert InvalidBondComposition();
+        if (_validators[validatorId].status != Status.NONE) revert ValidatorExists();
+        if (pendingProtocolCredit[validatorId] != 0) revert InvalidBondComposition();
+        if (msg.value > MAX_PROTOCOL_CREDIT) revert InvalidBondComposition();
+
+        pendingProtocolCredit[validatorId] = msg.value;
+        pendingCreditBeneficiary[validatorId] = beneficiary;
+        totalProtocolCreditCustody += msg.value;
+        totalPendingProtocolCredit += msg.value;
+        emit ProtocolCreditReceived(validatorId, beneficiary, msg.value);
+    }
+
+    /// @notice Lets the reserve recover funded credit if the qualified beneficiary never registers.
+    function returnPendingProtocolCredit(bytes32 validatorId) external {
+        if (!communityValidatorReserveBound || msg.sender != communityValidatorReserve) revert NotCommunityValidatorReserve();
+        if (_validators[validatorId].status != Status.NONE) revert ValidatorExists();
+        uint256 amount = pendingProtocolCredit[validatorId];
+        if (amount == 0) revert InvalidBondComposition();
+
+        pendingProtocolCredit[validatorId] = 0;
+        pendingCreditBeneficiary[validatorId] = address(0);
+        totalProtocolCreditCustody -= amount;
+        totalPendingProtocolCredit -= amount;
+        _returnProtocolCredit(validatorId, amount);
+        emit PendingProtocolCreditReturned(validatorId, amount);
+    }
+
+    /// @notice Operator-funded registration. Matched protocol credit, if any, must already be physically deposited.
+    function register(bytes32 validatorId, bytes calldata blsPubkey, address withdrawal, bytes32 metadataCommitment)
+        external
+        payable
+    {
         if (validatorId == bytes32(0)) revert InvalidValidatorId();
         if (_validators[validatorId].status != Status.NONE) revert ValidatorExists();
-        if (owner == address(0) || withdrawal == address(0)) revert InvalidAddress();
+        if (withdrawal == address(0)) revert InvalidAddress();
         if (blsPubkey.length != 48) revert InvalidBLSPubkey();
-        if (ownerValidatorId[owner] != bytes32(0)) revert DuplicateOwner();
+        if (ownerValidatorId[msg.sender] != bytes32(0)) revert DuplicateOwner();
+
         bytes32 pubkeyHash = keccak256(blsPubkey);
         if (blsPubkeyHashUsed[pubkeyHash]) revert DuplicateBLSPubkey();
-        _validateBondComposition(ownedBond, protocolCredit, true);
+
+        uint256 credit = pendingProtocolCredit[validatorId];
+        if (credit != 0 && pendingCreditBeneficiary[validatorId] != msg.sender) revert InvalidCreditBeneficiary();
+        _validateBondComposition(msg.value, credit, true);
 
         _validators[validatorId] = Validator({
             validatorId: validatorId,
             blsPubkey: blsPubkey,
-            owner: owner,
+            owner: msg.sender,
             withdrawal: withdrawal,
-            ownedBond: ownedBond,
-            protocolCredit: protocolCredit,
+            ownedBond: msg.value,
+            protocolCredit: credit,
             status: Status.REGISTERED,
             registrationBlock: uint64(block.number),
             effectiveSlot: 0,
@@ -155,11 +225,49 @@ contract ValidatorRegistry is ConsensusSystemAccess420, I420System {
             withdrawalHoldStartBlock: 0,
             withdrawableBlock: 0,
             totalSlashed: 0,
-            metadataCommitment: bytes32(0)
+            metadataCommitment: metadataCommitment
         });
-        ownerValidatorId[owner] = validatorId;
+        ownerValidatorId[msg.sender] = validatorId;
         blsPubkeyHashUsed[pubkeyHash] = true;
-        emit ValidatorRegistered(validatorId, owner, withdrawal);
+        totalOwnedCustody += msg.value;
+
+        if (credit != 0) {
+            pendingProtocolCredit[validatorId] = 0;
+            pendingCreditBeneficiary[validatorId] = address(0);
+            totalPendingProtocolCredit -= credit;
+        }
+
+        emit ValidatorRegistered(validatorId, msg.sender, withdrawal, msg.value, credit);
+    }
+
+    /// @notice Restores owned collateral after a slash without increasing effective bond above 42,000 420.
+    function topUpOwnedBond(bytes32 validatorId) external payable {
+        Validator storage v = _requireValidator(validatorId);
+        if (msg.sender != v.owner) revert NotValidatorOwner();
+        if (v.status == Status.EXITED || v.status == Status.WITHDRAWABLE) revert InvalidTransition();
+        if (msg.value == 0) revert InvalidBondComposition();
+        if (v.ownedBond + v.protocolCredit >= EFFECTIVE_BOND) revert BondAlreadyFull();
+        if (v.ownedBond + v.protocolCredit + msg.value > EFFECTIVE_BOND) revert InvalidBondComposition();
+
+        v.ownedBond += msg.value;
+        totalOwnedCustody += msg.value;
+        emit OwnedBondToppedUp(validatorId, msg.value, v.ownedBond);
+    }
+
+    /// @notice Replaces protocol-owned credit with operator-owned 420; effective bond is unchanged.
+    function replaceProtocolCredit(bytes32 validatorId) external payable {
+        Validator storage v = _requireValidator(validatorId);
+        if (msg.sender != v.owner) revert NotValidatorOwner();
+        if (v.status == Status.EXITED || v.status == Status.WITHDRAWABLE) revert InvalidTransition();
+        if (msg.value == 0 || msg.value > v.protocolCredit) revert InvalidBondComposition();
+
+        v.ownedBond += msg.value;
+        v.protocolCredit -= msg.value;
+        totalOwnedCustody += msg.value;
+        totalProtocolCreditCustody -= msg.value;
+        totalProtocolCreditRecycled += msg.value;
+        _returnProtocolCredit(validatorId, msg.value);
+        emit ProtocolCreditReplaced(validatorId, msg.value, v.ownedBond, v.protocolCredit);
     }
 
     /// @notice Records a finalized voluntary-exit notice. Active validators still finish their scheduled term.
@@ -183,7 +291,6 @@ contract ValidatorRegistry is ConsensusSystemAccess420, I420System {
         Validator storage v = _requireValidator(validatorId);
         Status previous = v.status;
         if (!_validTransition(previous, newStatus)) revert InvalidTransition();
-
         _validateLifecycleTransition(v, previous, newStatus, activationRotation, scheduledExitRotation, cooldownUntilRotation);
 
         bool wasEligible = _countsAsEligible(previous);
@@ -204,28 +311,10 @@ contract ValidatorRegistry is ConsensusSystemAccess420, I420System {
             v.withdrawableBlock = uint64(block.number) + WITHDRAWAL_DELAY_BLOCKS;
         }
 
-        emit ConsensusStateApplied(
-            validatorId,
-            previous,
-            newStatus,
-            effectiveSlot,
-            activationRotation,
-            scheduledExitRotation,
-            cooldownUntilRotation
-        );
+        emit ConsensusStateApplied(validatorId, previous, newStatus, effectiveSlot, activationRotation, scheduledExitRotation, cooldownUntilRotation);
     }
 
-    /// @notice Mirrors finalized bond composition after deposits, credit replacement, slash or withdrawal.
-    function applyBondComposition(bytes32 validatorId, uint256 ownedBond, uint256 protocolCredit) external onlyConsensusSystem {
-        Validator storage v = _requireValidator(validatorId);
-        _validateBondComposition(ownedBond, protocolCredit, false);
-        v.ownedBond = ownedBond;
-        v.protocolCredit = protocolCredit;
-        emit BondCompositionApplied(validatorId, ownedBond, protocolCredit);
-    }
-
-    /// @notice Records a consensus-adjudicated slash within constitutional offense caps.
-    /// Ordinary slash is proportional across owned stake and protocol credit. Finality equivocation confiscates both fully.
+    /// @notice Records a consensus-adjudicated slash and moves the actual collateral.
     function applySlash(
         bytes32 validatorId,
         SlashOffense offense,
@@ -249,7 +338,7 @@ contract ValidatorRegistry is ConsensusSystemAccess420, I420System {
             if (ownedSlashed != v.ownedBond || creditSlashed != v.protocolCredit) revert InvalidSlash();
             if (resultingStatus != Status.SUSPENDED && resultingStatus != Status.WITHDRAWAL_HOLD) revert InvalidSlash();
         } else {
-            if (totalPenalty == 0 || totalPenalty > (effectiveBefore * maxBps) / BPS_SCALE) revert InvalidSlash();
+            if (effectiveBefore == 0 || totalPenalty == 0 || totalPenalty > (effectiveBefore * maxBps) / BPS_SCALE) revert InvalidSlash();
             if (ownedSlashed > v.ownedBond || creditSlashed > v.protocolCredit) revert InvalidBondComposition();
             uint256 expectedOwned = (totalPenalty * v.ownedBond) / effectiveBefore;
             uint256 expectedCredit = totalPenalty - expectedOwned;
@@ -267,7 +356,53 @@ contract ValidatorRegistry is ConsensusSystemAccess420, I420System {
             if (nowEligible) ++eligibleValidatorCount;
             else --eligibleValidatorCount;
         }
+
+        if (ownedSlashed != 0) {
+            totalOwnedCustody -= ownedSlashed;
+            totalOwnedSlashed += ownedSlashed;
+            (bool ok,) = payable(PROTOCOL_RESERVE).call{value: ownedSlashed}("");
+            if (!ok) revert TransferFailed();
+        }
+        if (creditSlashed != 0) {
+            totalProtocolCreditCustody -= creditSlashed;
+            totalProtocolCreditRecycled += creditSlashed;
+            _returnProtocolCredit(validatorId, creditSlashed);
+        }
+
         emit SlashApplied(validatorId, offense, correlationTier, ownedSlashed, creditSlashed, evidenceHash);
+    }
+
+    /// @notice Withdraws operator-owned collateral and recycles all remaining protocol credit after consensus hold expires.
+    function withdrawBond(bytes32 validatorId) external returns (uint256 ownedAmount, uint256 recycledCredit) {
+        Validator storage v = _requireValidator(validatorId);
+        if (msg.sender != v.withdrawal) revert NotWithdrawalAddress();
+        if (v.status != Status.WITHDRAWABLE) revert InvalidTransition();
+
+        ownedAmount = v.ownedBond;
+        recycledCredit = v.protocolCredit;
+        address withdrawal = v.withdrawal;
+        address owner = v.owner;
+
+        v.ownedBond = 0;
+        v.protocolCredit = 0;
+        v.status = Status.EXITED;
+        ownerValidatorId[owner] = bytes32(0);
+
+        if (ownedAmount != 0) {
+            totalOwnedCustody -= ownedAmount;
+            totalOwnedWithdrawn += ownedAmount;
+        }
+        if (recycledCredit != 0) {
+            totalProtocolCreditCustody -= recycledCredit;
+            totalProtocolCreditRecycled += recycledCredit;
+            _returnProtocolCredit(validatorId, recycledCredit);
+        }
+        if (ownedAmount != 0) {
+            (bool ok,) = payable(withdrawal).call{value: ownedAmount}("");
+            if (!ok) revert TransferFailed();
+        }
+
+        emit ValidatorBondWithdrawn(validatorId, withdrawal, ownedAmount, recycledCredit);
     }
 
     function applyRotationSnapshot(uint64 rotation, uint256 eligibleSnapshot) external onlyConsensusSystem {
@@ -305,6 +440,10 @@ contract ValidatorRegistry is ConsensusSystemAccess420, I420System {
     }
 
     function getValidator(bytes32 validatorId) external view returns (Validator memory) { return _validators[validatorId]; }
+
+    function custodyInvariant() external view returns (bool) {
+        return address(this).balance >= totalOwnedCustody + totalProtocolCreditCustody;
+    }
 
     function maxSlashBps(SlashOffense offense, uint8 correlationTier) public pure returns (uint16) {
         if (correlationTier > 2) revert InvalidCorrelationTier();
@@ -363,10 +502,15 @@ contract ValidatorRegistry is ConsensusSystemAccess420, I420System {
         uint64 scheduledExitRotation,
         uint64 cooldownUntilRotation
     ) private view {
+        if (previous == Status.REGISTERED && next == Status.PROBATION) {
+            if (v.ownedBond + v.protocolCredit != EFFECTIVE_BOND) revert InvalidBondComposition();
+        }
         if (previous == Status.PROBATION && next == Status.ELIGIBLE) {
             if (block.number < uint256(v.registrationBlock) + ACTIVATION_DELAY_BLOCKS) revert ActivationDelayActive();
+            if (v.ownedBond + v.protocolCredit != EFFECTIVE_BOND) revert InvalidBondComposition();
         }
         if (next == Status.ACTIVE) {
+            if (v.ownedBond + v.protocolCredit != EFFECTIVE_BOND) revert InvalidBondComposition();
             if (scheduledExitRotation != activationRotation + ACTIVE_TERM_ROTATIONS) revert InvalidRotation();
         }
         if (previous == Status.ACTIVE && next == Status.NORMAL_COOLDOWN) {
@@ -375,6 +519,7 @@ contract ValidatorRegistry is ConsensusSystemAccess420, I420System {
         }
         if (previous == Status.NORMAL_COOLDOWN && next == Status.ELIGIBLE) {
             if (lastRotationSnapshot < v.cooldownUntilRotation) revert InvalidRotation();
+            if (v.ownedBond + v.protocolCredit != EFFECTIVE_BOND) revert InvalidBondComposition();
         }
         if (next == Status.WITHDRAWAL_HOLD) {
             if (v.exitNoticeRotation == 0) revert ExitNoticeMissing();
@@ -384,6 +529,11 @@ contract ValidatorRegistry is ConsensusSystemAccess420, I420System {
         if (previous == Status.WITHDRAWAL_HOLD && next == Status.WITHDRAWABLE) {
             if (v.withdrawableBlock == 0 || block.number < v.withdrawableBlock) revert WithdrawalDelayActive();
         }
+    }
+
+    function _returnProtocolCredit(bytes32 validatorId, uint256 amount) private {
+        if (!communityValidatorReserveBound) revert NotCommunityValidatorReserve();
+        ICommunityValidatorReserve420(communityValidatorReserve).returnCredit{value: amount}(validatorId);
     }
 
     function _requireValidator(bytes32 id) private view returns (Validator storage v) {
@@ -410,7 +560,6 @@ contract ValidatorRegistry is ConsensusSystemAccess420, I420System {
         if (a == Status.NORMAL_COOLDOWN) return b == Status.ELIGIBLE || b == Status.SUSPENDED || b == Status.WITHDRAWAL_HOLD;
         if (a == Status.SUSPENDED) return b == Status.PROBATION || b == Status.WITHDRAWAL_HOLD;
         if (a == Status.WITHDRAWAL_HOLD) return b == Status.WITHDRAWABLE || b == Status.SUSPENDED;
-        if (a == Status.WITHDRAWABLE) return b == Status.EXITED;
         return false;
     }
 

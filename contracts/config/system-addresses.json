@@ -37,12 +37,12 @@
     {"address":"0x000000000000000000000000000000000000043c","name":"ConsensusSystemCall420","purpose":"native consensus-to-execution system-call gateway"}
   ],
   "native_system_origin": {
-    "address": "0xfffffffffffffffffffffffffffffffffffff420",
-    "purpose": "execution-client-only caller identity for ConsensusSystemCall420",
+    "address": "0xfffffffffffffffffffffffffffffffffffffffe",
+    "purpose": "go-ethereum params.SystemAddress used for native EVM system calls",
     "rules": [
-      "MUST NOT be accepted as a sender of ordinary signed transactions.",
-      "MUST NOT require or possess a private key.",
-      "MUST be synthesized only by the deterministic node420 block-processing system-call hook."
+      "MUST NOT be used as a user-controlled signing key.",
+      "MUST be synthesized only by execution-client system-call machinery.",
+      "420 consensus instructions may target only ConsensusSystemCall420 at 0x043C through the dedicated hook."
     ]
   },
   "frozen_through": "0x000000000000000000000000000000000000043c",
@@ -50,6 +50,6 @@
     "Assignments 0x0420-0x043B are unchanged.",
     "ConsensusSystemCall420 is frozen at 0x043C by validator system-call Decision v1.",
     "Reserved addresses are populated by deterministic genesis predeploy placement, not ordinary CREATE deployment.",
-    "The native system origin is an execution context identity, not a funded account or deployable contract."
+    "420 reuses go-ethereum's native SystemAddress rather than defining a second pseudo-origin."
   ]
 }

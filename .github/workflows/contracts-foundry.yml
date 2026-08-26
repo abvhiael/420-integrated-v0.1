@@ -38,6 +38,38 @@ jobs:
         working-directory: contracts
         run: forge test -vvv
 
+      - name: Decision #10 deploy/seed harness
+        working-directory: contracts
+        run: |
+          mkdir -p ../artifacts/contracts
+          forge script script/Decision10DeploySeed420.s.sol:Decision10DeploySeed420 --sig "run()" -vvv
+          test -s ../artifacts/contracts/creative-kernel-v1.fixture.json
+          jq -e '
+            .schema == "420.creative.kernel.fixture.v1"
+            and .workId == 1
+            and .originalRecordingId == 1
+            and .remixRecordingId == 2
+            and .remixOfferId == 1
+            and .remixLicenseId == 1
+            and .rightsTransferId == 1
+            and .scheduleVersion == 1
+            and .workRightsVersion == 1
+            and .originalRightsVersion == 2
+            and .remixRightsVersion == 1
+            and .expectedWorkPoolWei == "30000000000000000000"
+            and .expectedOriginalPoolWei == "151000000000000000000"
+            and .expectedRemixPoolWei == "72500000000000000000"
+            and .expectedTreasuryWei == "6500000000000000000"
+            and .expectedVaultBalanceWei == "260000000000000000000"
+          ' ../artifacts/contracts/creative-kernel-v1.fixture.json
+
+      - name: Upload Decision #10 fixture manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: creative-kernel-v1-fixture
+          path: artifacts/contracts/creative-kernel-v1.fixture.json
+          if-no-files-found: error
+
       - name: Coverage
         working-directory: contracts
         run: FOUNDRY_PROFILE=coverage forge coverage --ir-minimum --report summary

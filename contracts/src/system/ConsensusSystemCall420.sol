@@ -5,10 +5,11 @@ import "./SystemAccess.sol";
 import "../interfaces/I420System.sol";
 
 /// @notice Single execution-layer gateway for consensus-authored state transitions.
-/// @dev node420 invokes this predeploy from NATIVE_SYSTEM_ORIGIN outside the ordinary tx pool.
+/// @dev node420 invokes this predeploy from Geth's native SystemAddress outside the ordinary tx pool.
 /// Downstream system contracts bind their consensusSystemCaller to this gateway, never to an EOA.
 contract ConsensusSystemCall420 is SystemAccess, I420System {
-    address public constant NATIVE_SYSTEM_ORIGIN = 0xfffffffffffffffffffffffffffffffffffff420;
+    // go-ethereum params.SystemAddress (also used by EIP-4788/EIP-2935 system calls).
+    address public constant NATIVE_SYSTEM_ORIGIN = 0xfffffffffffffffffffffffffffffffffffffffe;
     address public constant REWARD_CONTROLLER = 0x0000000000000000000000000000000000000420;
     address public constant VALIDATOR_REGISTRY = 0x0000000000000000000000000000000000000423;
 
@@ -20,7 +21,6 @@ contract ConsensusSystemCall420 is SystemAccess, I420System {
     bytes32 public constant ACTION_ROTATION_SNAPSHOT = keccak256("420/SYSCALL/ROTATION_SNAPSHOT/V1");
     bytes32 public constant ACTION_REWARD = keccak256("420/SYSCALL/REWARD/V1");
 
-    // selectors are frozen so an action domain cannot be redirected to another function.
     bytes4 private constant SEL_VALIDATOR_STATE = bytes4(keccak256("applyConsensusState(bytes32,uint8,uint64,uint64,uint64,uint64)"));
     bytes4 private constant SEL_EXIT_NOTICE = bytes4(keccak256("applyExitNotice(bytes32,uint64)"));
     bytes4 private constant SEL_BOND = bytes4(keccak256("applyBondComposition(bytes32,uint256,uint256)"));
@@ -31,24 +31,10 @@ contract ConsensusSystemCall420 is SystemAccess, I420System {
     uint64 public lastSequence;
     bytes32 public lastCallHash;
 
-    event ConsensusSystemCallApplied(
-        uint64 indexed sequence,
-        uint64 indexed executionBlock,
-        bytes32 indexed action,
-        address target,
-        bytes32 payloadHash,
-        bytes32 callHash
-    );
+    event ConsensusSystemCallApplied(uint64 indexed sequence,uint64 indexed executionBlock,bytes32 indexed action,address target,bytes32 payloadHash,bytes32 callHash);
 
-    error NotNativeSystemOrigin();
-    error InvalidChainId();
-    error InvalidExecutionBlock();
-    error InvalidParentHash();
-    error InvalidSequence();
-    error InvalidAction();
-    error InvalidTarget();
-    error InvalidSelector();
-    error EmptyPayload();
+    error NotNativeSystemOrigin(); error InvalidChainId(); error InvalidExecutionBlock(); error InvalidParentHash();
+    error InvalidSequence(); error InvalidAction(); error InvalidTarget(); error InvalidSelector(); error EmptyPayload();
     error DownstreamCallFailed(bytes revertData);
 
     constructor(address timelock_) SystemAccess(timelock_) {}
@@ -56,23 +42,9 @@ contract ConsensusSystemCall420 is SystemAccess, I420System {
     function systemName() external pure returns (string memory) { return "ConsensusSystemCall420"; }
     function protocolVersion() external pure returns (uint32) { return 1; }
 
-    /// @notice Apply exactly one finalized consensus instruction to a frozen system target.
-    /// @param sequence Monotonic chain-global system-call sequence, beginning at 1.
-    /// @param executionBlock Block in which node420 injects this call. Must equal block.number.
-    /// @param parentHash Expected parent execution block hash. Binds the call to one canonical ancestry.
-    /// @param chainId Expected EVM chain id.
-    /// @param action Domain-separated action identifier.
-    /// @param target Frozen destination for the action.
-    /// @param payload Exact ABI calldata for the frozen selector.
-    function apply(
-        uint64 sequence,
-        uint64 executionBlock,
-        bytes32 parentHash,
-        uint256 chainId,
-        bytes32 action,
-        address target,
-        bytes calldata payload
-    ) external returns (bytes32 callHash) {
+    function apply(uint64 sequence,uint64 executionBlock,bytes32 parentHash,uint256 chainId,bytes32 action,address target,bytes calldata payload)
+        external returns (bytes32 callHash)
+    {
         if (msg.sender != NATIVE_SYSTEM_ORIGIN) revert NotNativeSystemOrigin();
         if (chainId != block.chainid) revert InvalidChainId();
         if (executionBlock != block.number) revert InvalidExecutionBlock();
@@ -85,35 +57,22 @@ contract ConsensusSystemCall420 is SystemAccess, I420System {
         _validateRoute(action, target, selector);
 
         bytes32 payloadHash = keccak256(payload);
-        callHash = keccak256(
-            abi.encode(DOMAIN, block.chainid, sequence, executionBlock, parentHash, action, target, payloadHash)
-        );
-
-        // Update before external call; downstream revert rolls the update back atomically.
+        callHash = keccak256(abi.encode(DOMAIN, block.chainid, sequence, executionBlock, parentHash, action, target, payloadHash));
         lastSequence = sequence;
         lastCallHash = callHash;
 
         (bool ok, bytes memory returndata) = target.call(payload);
         if (!ok) revert DownstreamCallFailed(returndata);
-
         emit ConsensusSystemCallApplied(sequence, executionBlock, action, target, payloadHash, callHash);
     }
 
-    function computeCallHash(
-        uint64 sequence,
-        uint64 executionBlock,
-        bytes32 parentHash,
-        uint256 chainId,
-        bytes32 action,
-        address target,
-        bytes32 payloadHash
-    ) external pure returns (bytes32) {
+    function computeCallHash(uint64 sequence,uint64 executionBlock,bytes32 parentHash,uint256 chainId,bytes32 action,address target,bytes32 payloadHash)
+        external pure returns (bytes32)
+    {
         return keccak256(abi.encode(DOMAIN, chainId, sequence, executionBlock, parentHash, action, target, payloadHash));
     }
 
-    function route(bytes32 action) external pure returns (address target, bytes4 selector) {
-        return _route(action);
-    }
+    function route(bytes32 action) external pure returns (address target, bytes4 selector) { return _route(action); }
 
     function _validateRoute(bytes32 action, address target, bytes4 selector) private pure {
         (address expectedTarget, bytes4 expectedSelector) = _route(action);

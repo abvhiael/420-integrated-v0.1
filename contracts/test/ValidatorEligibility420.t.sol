@@ -13,7 +13,7 @@ contract ValidatorEligibility420Test {
     VmValidatorEligibility420 internal constant vm =
         VmValidatorEligibility420(address(uint160(uint256(keccak256("hevm cheat code")))));
 
-    address internal constant SYSTEM_CALLER = 0x000000000000000000000000000000000000043c;
+    address internal constant SYSTEM_CALLER = 0x000000000000000000000000000000000000043C;
 
     function testCooldownValidatorIsBondedButNotSelectionEligible() public {
         ValidatorRegistry registry = new ValidatorRegistry(address(this));

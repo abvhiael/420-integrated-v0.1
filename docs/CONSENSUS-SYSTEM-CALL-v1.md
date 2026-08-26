@@ -10,35 +10,35 @@ Consensus state MUST NOT be applied through an ordinary user transaction, govern
 
 The protocol uses:
 
-- `NATIVE_SYSTEM_ORIGIN = 0xfffffffffffffffffffffffffffffffffffffffe`, the existing go-ethereum `params.SystemAddress` used by native EVM system-call machinery;
+- `NATIVE_SYSTEM_ORIGIN = 0xfffffffffffffffffffffffffffffffffffffffe`, go-ethereum `params.SystemAddress`;
 - `ConsensusSystemCall420 = 0x000000000000000000000000000000000000043c`, the 420 gateway predeploy.
 
-420 deliberately reuses Geth's established native system-call origin instead of defining another pseudo-address. The address is execution-client context, not validator/governance authority and not a key that the protocol distributes. `node420` MUST expose no public RPC path that lets a remote user synthesize the 420 gateway call with this context.
+420 reuses Geth's established native system-call origin instead of defining another pseudo-address. `node420` exposes no public RPC path that lets a remote user synthesize the 420 gateway call with this context.
 
 `ValidatorRegistry` and `RewardController` accept consensus writes only from `ConsensusSystemCall420`; they do not trust the native origin directly.
 
 ## 2. Execution placement
 
-For block N, ordinary EVM transactions execute first in canonical transaction order. After the final ordinary transaction and before the block post-state root is committed, `node420` executes the ordered consensus-system-call list for block N.
+For block N, ordinary EVM transactions execute first in canonical transaction order. Geth's existing post-execution protocol queues run next. The ordered 420 consensus-system-call batch then executes **before consensus-engine finalization and before the post-state root is assembled**.
 
-Each 420 call is executed using the same class of native zero-fee EVM system-call plumbing that pinned Geth uses for protocol system calls:
+Each 420 call uses the same class of native zero-fee EVM system-call plumbing used by pinned Geth v1.17.5 protocol calls:
 
-- caller = go-ethereum `params.SystemAddress`;
+- caller = `params.SystemAddress`;
 - destination = `ConsensusSystemCall420`;
 - value = 0;
 - no user gas purchase or priority fee;
 - deterministic protocol gas ceiling;
-- state changes included in the block state root.
+- resulting state included in the block state root.
 
 System calls are not inserted into the user transaction trie and do not have user transaction hashes.
 
-A system-call failure invalidates the candidate execution payload. It MUST NOT be skipped, retried with changed parameters, reordered, or converted into an ordinary transaction.
+A system-call failure invalidates the candidate execution payload. It MUST NOT be skipped, reordered, retried with changed parameters, or converted into an ordinary transaction.
 
 ## 3. Ordered envelope
 
 Every instruction contains:
 
-- `sequence`: strictly monotonic global system-call sequence beginning at 1;
+- `sequence`: strictly monotonic chain-global system-call sequence beginning at 1;
 - `executionBlock`: block in which the instruction executes;
 - `parentHash`: canonical execution parent hash;
 - `chainId`: EVM chain ID;
@@ -48,11 +48,7 @@ Every instruction contains:
 
 The gateway validates `executionBlock == block.number`, `parentHash == blockhash(block.number - 1)`, `chainId == block.chainid`, and `sequence == lastSequence + 1`.
 
-This makes replay on another block, fork ancestry or chain fail closed.
-
 ## 4. Frozen action routes
-
-V1 exposes only these routes:
 
 | Action domain | Target | Function |
 |---|---|---|
@@ -65,69 +61,111 @@ V1 exposes only these routes:
 
 The gateway checks both target and function selector. A valid action cannot be redirected to another system contract or another method on the same contract.
 
-Adding an action requires a versioned protocol upgrade and corresponding execution/consensus compatibility rule.
-
-## 5. Call commitment
+## 5. Individual EVM-call commitment
 
 `ConsensusSystemCall420` commits each applied instruction as:
 
 `keccak256(abi.encode(DOMAIN, chainId, sequence, executionBlock, parentHash, action, target, keccak256(payload)))`
 
-where:
+with `DOMAIN = keccak256("420/CONSENSUS_SYSTEM_CALL/V1")`.
 
-`DOMAIN = keccak256("420/CONSENSUS_SYSTEM_CALL/V1")`.
+The resulting call hash is emitted and the most recent hash/sequence are retained in gateway state.
 
-The resulting call hash is emitted and the most recent hash/sequence are retained in gateway state. `fourtwentyd` and `node420` expose/reconstruct the same commitment so cross-layer divergence is deterministic.
+## 6. Consensus batch commitment
 
-## 6. Consensus commitment and transport
+The ordered system-call list is consensus data and is committed separately using the canonical implementation in `consensus/systemcall`.
 
-The ordered system-call list for an execution block is consensus data. It is derived solely from committed/finalized 420 consensus state under protocol rules. The execution payload builder MUST NOT invent validator or reward calls.
+Batch root:
 
-`fourtwentyd` stores the ordered list, or a canonical representation from which the list is exactly reconstructable, in the consensus block. It commits a deterministic 32-byte batch root over the ordered instruction commitments. The paired execution client receives the exact list over the authenticated consensus/execution boundary and verifies that root before applying it.
+- hash: SHA-256;
+- domain: `420/CONSENSUS_SYSTEM_CALL_BATCH/V1`;
+- encoding: length-prefixed, big-endian canonical fields;
+- committed fields: chain ID, execution block, parent hash, call count and every ordered call field/payload.
 
-The execution block carries the agreed 32-byte batch commitment through the 420 execution-header commitment mechanism defined by the node420 patch. This commitment is not a user transaction and is independent of the transaction trie.
+Order is consensus-critical. Reordering two otherwise valid calls changes the batch root.
 
-A mismatch in count, ordering, envelope fields, action route, payload, batch root or execution result rejects the payload.
+## 7. Execution-header commitment
 
-## 7. Replay and duplication
+During the bonded-validator protocol, the complete 32-byte execution-header `extraData` field is reserved for the 420 system-call batch root.
 
-V1 uses a single global monotonically increasing sequence rather than one nonce per action. This gives a total ordering across reward, validator and slashing operations.
+Before payload construction, `fourtwentyd` stages the canonical batch at `node420`. The patched Geth builder sets:
+
+`header.extraData = systemCallBatchRoot`
+
+and rejects a conflicting override.
+
+During block import/`NewPayload`, `node420` recomputes the staged batch root and requires exact equality with `header.extraData` before applying the batch. The root therefore participates in the execution block hash and cannot be changed without changing the block itself.
+
+Even an empty call batch has its canonical non-zero SHA-256 root and MUST be staged. This removes ambiguity between “no calls” and “consensus batch unavailable.”
+
+## 8. Authenticated Engine transport
+
+The paired clients use:
+
+`engine420_submitSystemCallsV1`
+
+on the same JWT-authenticated private Engine endpoint used by the standard Engine API.
+
+The call stages consensus data only. The RPC handler MUST NOT execute EVM state directly.
+
+Required order for block building:
+
+1. `fourtwentyd` derives and commits the batch;
+2. `fourtwentyd` calls `engine420_submitSystemCallsV1`;
+3. `node420` validates and echoes the batch root;
+4. `fourtwentyd` requests payload construction through `engine_forkchoiceUpdatedV3`;
+5. `node420` fixes `extraData` to that root and executes the staged calls during payload construction;
+6. `fourtwentyd` verifies the returned payload `extraData` before accepting it.
+
+Required order for received payload validation:
+
+1. `fourtwentyd` reconstructs the canonical batch for the received block;
+2. it verifies the payload parent/root expectation;
+3. it stages the batch through `engine420_submitSystemCallsV1`;
+4. it calls `engine_newPayloadV3`;
+5. patched `node420` recomputes the root and executes the identical batch during block processing.
+
+## 9. Replay and reorg rules
+
+V1 uses one chain-global monotonically increasing sequence.
 
 - duplicate sequence: invalid;
 - skipped sequence: invalid;
 - sequence reordering: invalid;
 - valid call replayed on another block: invalid;
-- valid call replayed on another chain: invalid;
-- same payload with a new sequence is a distinct instruction and must still be valid under downstream protocol rules.
+- valid call replayed on another chain: invalid.
 
-Consensus is additionally responsible for ensuring slash evidence is not charged twice.
+If an unfinalized block is reorged, its gateway state disappears with that branch. The replacement branch begins from the parent gateway sequence and its own parent-bound batch root.
 
-## 8. Reorg behavior
+Consensus is additionally responsible for preventing a slash evidence object from being charged twice.
 
-System-call effects are ordinary EVM state changes for state-root purposes. If an unfinalized execution block is reorged, its system-call state changes disappear with that block. The replacement branch starts from the parent gateway sequence and applies the replacement branch's committed system-call list.
+## 10. node420 implementation
 
-A finalized consensus instruction must not be rewritten except under the protocol's catastrophic recovery/finality rules.
+The repository pins go-ethereum v1.17.5 plus a maintained 420 patchset. `execution/patches/apply-420-systemcall.py` is the authoritative anchor-checked patch generator.
 
-## 9. node420 implementation requirement
+It modifies the exact pinned Geth tree to:
 
-The repository currently wraps pinned go-ethereum v1.17.5. Production 420 execution therefore uses that pinned baseline plus a maintained node420 patchset. The patch extends Geth's existing native system-call machinery rather than simulating consensus through JSON-RPC.
+1. add an authenticated `engine420` batch-staging service;
+2. maintain staged batches keyed by execution block + parent hash;
+3. set builder `extraData` to the staged batch root;
+4. verify `extraData` on imported blocks;
+5. execute each gateway call using `params.SystemAddress` and Geth's native system-call gas machinery;
+6. run the hook after existing post-execution queues and before consensus-engine finalization/state-root assembly;
+7. reject the payload atomically if any call fails;
+8. apply the same transition in builder and validator/import paths.
 
-The hook MUST:
+The patch generator refuses any source tree not exactly tagged `v1.17.5` and fails on source-anchor drift instead of guessing.
 
-1. receive/reconstruct the consensus system-call list through the authenticated consensus boundary;
-2. verify the committed batch root and envelope context before execution;
-3. execute the gateway after ordinary transactions and before post-state finalization;
-4. use `params.SystemAddress`, zero value and protocol-owned gas accounting;
-5. fail the execution payload atomically if any system call fails;
-6. expose deterministic call/batch commitments for diagnostics and test vectors;
-7. never expose a public RPC method that lets an ordinary remote caller invoke this native 420 path.
+## 11. Genesis initialization
 
-The `execution/systemcall` package contains the envelope validation and batch hook abstraction used by the patch.
+Genesis places `ConsensusSystemCall420` runtime bytecode at `0x043c`.
 
-## 10. Genesis initialization
+Genesis storage materializes:
 
-Genesis places `ConsensusSystemCall420` runtime bytecode at `0x043c`. `ValidatorRegistry` and `RewardController` genesis storage binds their consensus-system caller to exactly `0x043c`; the binding API rejects any other address.
+- `RewardController.consensusSystemCaller = 0x043c` and bound=true;
+- `ValidatorRegistry.consensusSystemCaller = 0x043c` and bound=true;
+- `ValidatorRegistry` ↔ `CommunityValidatorReserve` canonical binding.
 
-The gateway itself accepts its top-level call only from go-ethereum `params.SystemAddress`.
+The binding API itself rejects any consensus caller other than `0x043c`.
 
-No validator key, governance key, deployer key, smart-account key, session key, or recovery key receives this authority.
+No validator key, governance key, deployer key, smart-account key, session key, recovery key, or RPC credential receives EVM authority equivalent to the native system-call path.

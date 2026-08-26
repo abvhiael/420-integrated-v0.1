@@ -1,0 +1,87 @@
+package systemcall420
+
+import (
+    "testing"
+
+    "github.com/ethereum/go-ethereum/common"
+    "github.com/ethereum/go-ethereum/common/hexutil"
+)
+
+func testBatch() Batch {
+    parent := common.HexToHash("0x4201")
+    call := Call{
+        Sequence:       hexutil.Uint64(1),
+        ExecutionBlock: hexutil.Uint64(4200),
+        ParentHash:     parent,
+        ChainID:        hexutil.Uint64(420),
+        Action:         "420/SYSCALL/ROTATION_SNAPSHOT/V1",
+        Target:         common.HexToAddress("0x0000000000000000000000000000000000000423"),
+        Payload:        hexutil.Bytes{0x12, 0x34, 0x56, 0x78},
+    }
+    b := Batch{
+        ExecutionBlock: hexutil.Uint64(4200),
+        ParentHash:     parent,
+        ChainID:        hexutil.Uint64(420),
+        Calls:          []Call{call},
+    }
+    b.BatchRoot = Root(b)
+    return b
+}
+
+func TestBatchRootChangesWithOrder(t *testing.T) {
+    b := testBatch()
+    second := b.Calls[0]
+    second.Sequence = hexutil.Uint64(2)
+    second.Action = "420/SYSCALL/REWARD/V1"
+    second.Target = common.HexToAddress("0x0000000000000000000000000000000000000420")
+    b.Calls = append(b.Calls, second)
+    forward := Root(b)
+    b.Calls[0], b.Calls[1] = b.Calls[1], b.Calls[0]
+    if Root(b) == forward {
+        t.Fatal("batch root must commit call ordering")
+    }
+}
+
+func TestValidateRejectsSequenceGap(t *testing.T) {
+    b := testBatch()
+    second := b.Calls[0]
+    second.Sequence = hexutil.Uint64(3)
+    b.Calls = append(b.Calls, second)
+    if err := Validate(b); err != ErrSequence {
+        t.Fatalf("got %v want ErrSequence", err)
+    }
+}
+
+func TestStageRejectsWrongRoot(t *testing.T) {
+    b := testBatch()
+    b.BatchRoot = common.HexToHash("0xdeadbeef")
+    if err := Stage(b); err == nil {
+        t.Fatal("wrong batch root accepted")
+    }
+}
+
+func TestStageRejectsConflictingBatchForSameBlockParent(t *testing.T) {
+    b := testBatch()
+    if err := Stage(b); err != nil {
+        t.Fatal(err)
+    }
+    conflicting := b
+    conflicting.Calls = append([]Call(nil), b.Calls...)
+    conflicting.Calls[0].Payload = hexutil.Bytes{0xde, 0xad, 0xbe, 0xef}
+    conflicting.BatchRoot = Root(conflicting)
+    if err := Stage(conflicting); err != ErrDuplicate {
+        t.Fatalf("got %v want ErrDuplicate", err)
+    }
+}
+
+func TestGatewayInputUsesApplySelector(t *testing.T) {
+    b := testBatch()
+    input, err := GatewayInput(b.Calls[0])
+    if err != nil {
+        t.Fatal(err)
+    }
+    want := gatewayABI.Methods["apply"].ID
+    if len(input) < 4 || string(input[:4]) != string(want) {
+        t.Fatalf("gateway selector mismatch: got %x want %x", input[:4], want)
+    }
+}

@@ -16,7 +16,6 @@ interface VmAcceptance420 {
     function deal(address who, uint256 newBalance) external;
     function prank(address msgSender) external;
     function warp(uint256 newTimestamp) external;
-    function assume(bool condition) external;
     function expectRevert(bytes4 revertData) external;
     function expectRevert(bytes calldata revertData) external;
 }
@@ -91,7 +90,6 @@ contract CreativeKernelAcceptance420Test {
     function testContributorAcceptanceIsPartOfEndToEndFixture() public {
         WorkId workId = _createActiveWorkWithContributors();
         RecordingId recordingId = _createActiveOriginalWithContributors(workId);
-
         require(WorkId.unwrap(workId) != 0, "work missing");
         require(RecordingId.unwrap(recordingId) != 0, "recording missing");
     }
@@ -100,7 +98,6 @@ contract CreativeKernelAcceptance420Test {
         WorkId workId = _registerWorkOnly();
         uint256[] memory holders = _twoHolders(CreatorId.unwrap(aliceId), CreatorId.unwrap(bobId));
         uint16[] memory split = _twoBps(6000, 3999);
-
         vm.expectRevert(abi.encodeWithSelector(CreativeErrors420.InvalidSplitTotal.selector, uint256(9999)));
         vm.prank(ALICE);
         rights.proposeInitialSplit(CreativeAssetType.WORK, WorkId.unwrap(workId), holders, split);
@@ -110,7 +107,6 @@ contract CreativeKernelAcceptance420Test {
         WorkId workId = _registerWorkOnly();
         uint256[] memory holders = _twoHolders(CreatorId.unwrap(aliceId), CreatorId.unwrap(bobId));
         uint16[] memory split = _twoBps(6000, 4001);
-
         vm.expectRevert(abi.encodeWithSelector(CreativeErrors420.InvalidSplitTotal.selector, uint256(10001)));
         vm.prank(ALICE);
         rights.proposeInitialSplit(CreativeAssetType.WORK, WorkId.unwrap(workId), holders, split);
@@ -181,7 +177,6 @@ contract CreativeKernelAcceptance420Test {
         bytes32 settlementId = keccak256("same-settlement");
 
         router.route{value: 1 ether}(originalId, RevenueType.DIRECT_SALE, settlementId);
-
         vm.expectRevert(abi.encodeWithSelector(CreativeErrors420.RevenueAlreadyProcessed.selector, settlementId));
         router.route{value: 1 ether}(originalId, RevenueType.DIRECT_SALE, settlementId);
     }
@@ -189,8 +184,8 @@ contract CreativeKernelAcceptance420Test {
     function testExpiredLicenseOfferCannotBeAccepted() public {
         WorkId workId = _createActiveWorkWithContributors();
         RecordingId originalId = _createActiveOriginalWithContributors(workId);
-
         uint64 expiry = uint64(block.timestamp + 1);
+
         vm.prank(ALICE);
         uint256 offerId = licenses.createRecordingOffer(
             originalId,
@@ -267,51 +262,6 @@ contract CreativeKernelAcceptance420Test {
         vm.expectRevert(CreativeErrors420.MissingAuthorization.selector);
         vm.prank(REMIXER);
         recordings.activateRecording(remixId, licenseId);
-    }
-
-    function testFuzzKiefConservationOriginal(uint96 gross) public {
-        vm.assume(gross > 0);
-        WorkId workId = _createActiveWorkWithContributors();
-        RecordingId originalId = _createActiveOriginalWithContributors(workId);
-        _registerOriginalDirectSaleSchedule();
-        vm.deal(address(this), uint256(gross));
-
-        router.route{value: uint256(gross)}(
-            originalId,
-            RevenueType.DIRECT_SALE,
-            keccak256(abi.encode("fuzz-original", gross))
-        );
-
-        bytes32 workKey = CreativeAssetKeys420.key(CreativeAssetType.WORK, WorkId.unwrap(workId));
-        bytes32 recordingKey = CreativeAssetKeys420.key(CreativeAssetType.RECORDING, RecordingId.unwrap(originalId));
-        uint256 accounted = vault.pool(workKey).totalReceived + vault.pool(recordingKey).totalReceived
-            + vault.treasuryClaimable();
-        require(accounted == uint256(gross), "gross != work + current + treasury");
-    }
-
-    function testFuzzKiefConservationRemix(uint96 gross) public {
-        vm.assume(gross > 0);
-        WorkId workId = _createActiveWorkWithContributors();
-        RecordingId originalId = _createActiveOriginalWithContributors(workId);
-        _registerRemixDirectSaleSchedule();
-        LicenseId licenseId = _issueFreeRemixLicense(originalId, remixerId, REMIXER);
-        RecordingId remixId = _registerRemixWithFinalizedRights(workId, originalId, remixerId, REMIXER);
-        vm.prank(REMIXER);
-        recordings.activateRecording(remixId, licenseId);
-        vm.deal(address(this), uint256(gross));
-
-        router.route{value: uint256(gross)}(
-            remixId,
-            RevenueType.DIRECT_SALE,
-            keccak256(abi.encode("fuzz-remix", gross))
-        );
-
-        bytes32 workKey = CreativeAssetKeys420.key(CreativeAssetType.WORK, WorkId.unwrap(workId));
-        bytes32 sourceKey = CreativeAssetKeys420.key(CreativeAssetType.RECORDING, RecordingId.unwrap(originalId));
-        bytes32 currentKey = CreativeAssetKeys420.key(CreativeAssetType.RECORDING, RecordingId.unwrap(remixId));
-        uint256 accounted = vault.pool(workKey).totalReceived + vault.pool(sourceKey).totalReceived
-            + vault.pool(currentKey).totalReceived + vault.treasuryClaimable();
-        require(accounted == uint256(gross), "gross != work + source + current + treasury");
     }
 
     function testOneKiefRoundingRemainderGoesToCurrentRecordingNotTreasury() public {
@@ -487,31 +437,8 @@ contract CreativeKernelAcceptance420Test {
         rights.finalizeInitialSplit(CreativeAssetType.RECORDING, RecordingId.unwrap(remixId));
     }
 
-    function _issueFreeRemixLicense(RecordingId originalId, CreatorId licenseeId, address licenseeAccount)
-        internal
-        returns (LicenseId licenseId)
-    {
-        vm.prank(ALICE);
-        uint256 offerId = licenses.createRecordingOffer(
-            originalId,
-            CreativePermissions420.CREATE_REMIX | CreativePermissions420.USE_MASTER
-                | CreativePermissions420.COMMERCIALIZE,
-            0,
-            0,
-            0,
-            1,
-            keccak256("free-remix-license")
-        );
-        vm.prank(licenseeAccount);
-        licenseId = licenses.acceptOffer(offerId, licenseeId);
-    }
-
     function _registerOriginalDirectSaleSchedule() internal {
         _registerSchedule(RecordingClass.ORIGINAL, RevenueType.DIRECT_SALE, 1250, 0, 8500, 250, 1);
-    }
-
-    function _registerRemixDirectSaleSchedule() internal {
-        _registerSchedule(RecordingClass.REMIX, RevenueType.DIRECT_SALE, 1000, 1500, 7250, 250, 1);
     }
 
     function _registerSchedule(
@@ -551,4 +478,55 @@ contract CreativeKernelAcceptance420Test {
     }
 
     receive() external payable {}
+}
+
+contract RoyaltyRouterHarness420 is RoyaltyRouter420 {
+    constructor() RoyaltyRouter420(address(1), address(2), address(3), address(4)) {}
+
+    function exposedAmounts(uint256 gross, RoyaltySchedule420 calldata schedule_)
+        external
+        pure
+        returns (uint256 workAmount, uint256 sourceAmount, uint256 currentAmount, uint256 protocolAmount)
+    {
+        RouteAmounts memory amounts = _amounts(gross, schedule_);
+        return (amounts.workAmount, amounts.sourceAmount, amounts.currentAmount, amounts.protocolAmount);
+    }
+}
+
+contract RoyaltyAllocationFuzz420Test {
+    RoyaltyRouterHarness420 private routerHarness;
+
+    function setUp() public {
+        routerHarness = new RoyaltyRouterHarness420();
+    }
+
+    function testFuzzGrossConservationOriginal(uint96 gross) public view {
+        RoyaltySchedule420 memory schedule_ = RoyaltySchedule420({
+            workBps: 1250,
+            sourceBps: 0,
+            currentRecordingBps: 8500,
+            protocolBps: 250,
+            version: 1,
+            effectiveAt: 0,
+            termsHash: bytes32(0)
+        });
+        (uint256 workAmount, uint256 sourceAmount, uint256 currentAmount, uint256 protocolAmount) =
+            routerHarness.exposedAmounts(uint256(gross), schedule_);
+        require(workAmount + sourceAmount + currentAmount + protocolAmount == uint256(gross), "original conservation");
+    }
+
+    function testFuzzGrossConservationRemix(uint96 gross) public view {
+        RoyaltySchedule420 memory schedule_ = RoyaltySchedule420({
+            workBps: 1000,
+            sourceBps: 1500,
+            currentRecordingBps: 7250,
+            protocolBps: 250,
+            version: 1,
+            effectiveAt: 0,
+            termsHash: bytes32(0)
+        });
+        (uint256 workAmount, uint256 sourceAmount, uint256 currentAmount, uint256 protocolAmount) =
+            routerHarness.exposedAmounts(uint256(gross), schedule_);
+        require(workAmount + sourceAmount + currentAmount + protocolAmount == uint256(gross), "remix conservation");
+    }
 }

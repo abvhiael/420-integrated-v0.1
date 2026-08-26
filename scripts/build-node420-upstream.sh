@@ -6,6 +6,7 @@ EXPECTED_COMMIT="9621c6ad10934a01b5514886fb6fbd87640b6c05"
 DEST="${1:-.cache/go-ethereum}"
 ROOT="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
 PATCHER="$ROOT/execution/patches/apply-420-systemcall.py"
+PATCH_TEST="$ROOT/execution/patches/systemcall420_test.go.in"
 ARTIFACT_DIR="$ROOT/artifacts/node420-release-gate"
 
 if [ ! -d "$DEST/.git" ]; then
@@ -39,26 +40,30 @@ if [ "$ACTUAL_TAG" != "$TAG" ]; then
 fi
 
 python3 "$PATCHER" "$DEST"
+cp "$PATCH_TEST" "$DEST/core/systemcall420/systemcall_test.go"
+gofmt -w "$DEST/core/systemcall420/systemcall_test.go"
 
 mkdir -p "$ARTIFACT_DIR" "$ROOT/bin/upstream"
 PATCH_DIFF="$ARTIFACT_DIR/geth-$TAG-420.patch"
-# Intent-to-add makes newly generated source files appear in the canonical diff without staging their contents.
-git -C "$DEST" add -N core/systemcall420/systemcall.go
+# Intent-to-add makes newly generated source/test files appear in the canonical diff without staging their contents.
+git -C "$DEST" add -N core/systemcall420/systemcall.go core/systemcall420/systemcall_test.go
 git -C "$DEST" diff --binary -- . > "$PATCH_DIFF"
 if [ ! -s "$PATCH_DIFF" ]; then
     echo "fatal: 420 patch produced no source diff" >&2
     exit 5
 fi
-if ! grep -q 'core/systemcall420/systemcall.go' "$PATCH_DIFF"; then
-    echo "fatal: release patch evidence omitted core/systemcall420/systemcall.go" >&2
-    exit 6
-fi
+for required in core/systemcall420/systemcall.go core/systemcall420/systemcall_test.go; do
+    if ! grep -q "$required" "$PATCH_DIFF"; then
+        echo "fatal: release patch evidence omitted $required" >&2
+        exit 6
+    fi
+done
 PATCH_SHA256="$(sha256sum "$PATCH_DIFF" | awk '{print $1}')"
 
-# Compile every directly modified package. -run '^$' compiles package + tests without executing the full upstream suites.
+# Execute 420 package tests, then compile every directly modified upstream package.
 (
     cd "$DEST"
-    go test ./core/systemcall420
+    go test ./core/systemcall420 -count=1
     go test ./core -run '^$' -count=1
     go test ./eth/catalyst -run '^$' -count=1
     go test ./miner -run '^$' -count=1
@@ -78,6 +83,7 @@ cat > "$ARTIFACT_DIR/manifest.json" <<EOF
   "patch_sha256": "$PATCH_SHA256",
   "binary_sha256": "$BINARY_SHA256",
   "patcher": "execution/patches/apply-420-systemcall.py",
+  "patch_test_template": "execution/patches/systemcall420_test.go.in",
   "binary": "bin/upstream/geth-$TAG-420",
   "status": "QUALIFIED_BY_BUILD_SCRIPT"
 }

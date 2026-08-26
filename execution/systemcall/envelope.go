@@ -14,7 +14,6 @@ const (
 
 	ActionValidatorState      = "420/SYSCALL/VALIDATOR_STATE/V1"
 	ActionValidatorExitNotice = "420/SYSCALL/VALIDATOR_EXIT_NOTICE/V1"
-	ActionValidatorBond       = "420/SYSCALL/VALIDATOR_BOND/V1"
 	ActionValidatorSlash      = "420/SYSCALL/VALIDATOR_SLASH/V1"
 	ActionRotationSnapshot    = "420/SYSCALL/ROTATION_SNAPSHOT/V1"
 	ActionReward              = "420/SYSCALL/REWARD/V1"
@@ -61,7 +60,7 @@ func (e Envelope) Validate(ctx Context) error {
 
 func TargetForAction(action string) (string, bool) {
 	switch action {
-	case ActionValidatorState, ActionValidatorExitNotice, ActionValidatorBond, ActionValidatorSlash, ActionRotationSnapshot:
+	case ActionValidatorState, ActionValidatorExitNotice, ActionValidatorSlash, ActionRotationSnapshot:
 		return ValidatorRegistry, true
 	case ActionReward:
 		return RewardController, true

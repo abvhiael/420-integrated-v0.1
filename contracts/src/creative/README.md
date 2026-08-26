@@ -46,12 +46,12 @@ The fixture uses intentionally public, test-only private keys for a deployer plu
 5. publishes a Work split Alice 60% / Bob 40%;
 6. publishes an original Recording split Alice 70% / Producer 30%;
 7. records accepted contributor credits;
-8. settles a 100-420-unit-equivalent original sale;
-9. issues a paid 20-unit remix license to Remixer;
+8. settles a 100-native-420 original sale (`100 ether` at 18 decimals);
+9. issues a paid 20-native-420 remix license to Remixer;
 10. publishes a Remix split Remixer 80% / Carol 20%;
-11. settles a 100-unit remix sale with the one-hop 15% immediate-source bucket;
+11. settles a 100-native-420 remix sale with the one-hop 15% immediate-source bucket;
 12. transfers 1,000 bps of the original Recording from Alice to Carol, preserving pre-transfer accrual through checkpointing;
-13. settles another 40-unit original sale under the new rights version;
+13. settles another 40-native-420 original sale under the new rights version;
 14. asserts exact pools, holder balances, rights versions and gross conservation; and
 15. writes `artifacts/contracts/creative-kernel-v1.fixture.json` using schema `config/creative-kernel-v1.fixture.schema.json`.
 

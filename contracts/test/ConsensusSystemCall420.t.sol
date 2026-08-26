@@ -18,7 +18,7 @@ contract ConsensusSystemCall420Test {
     }
 
     function testFrozenIdentitiesAndRoutes() public view {
-        require(gateway.NATIVE_SYSTEM_ORIGIN() == 0xfffffffffffffffffffffffffffffffffffffffe, "origin");
+        require(gateway.NATIVE_SYSTEM_ORIGIN() == 0xffffFFFfFFffffffffffffffFfFFFfffFFFfFFfE, "origin");
         require(gateway.REWARD_CONTROLLER() == 0x0000000000000000000000000000000000000420, "reward");
         require(gateway.VALIDATOR_REGISTRY() == 0x0000000000000000000000000000000000000423, "validator");
 

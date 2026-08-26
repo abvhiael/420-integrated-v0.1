@@ -5,6 +5,12 @@
   "native_system_origin": "0xfffffffffffffffffffffffffffffffffffffffe",
   "native_origin_source": "go-ethereum params.SystemAddress",
   "execution_order": "AFTER_USER_TRANSACTIONS_BEFORE_POST_STATE_ROOT",
+  "execution_header_commitment": {
+    "field": "extraData",
+    "length_bytes": 32,
+    "value": "SHA256_CANONICAL_SYSTEM_CALL_BATCH",
+    "empty_batch": "SHA256_CANONICAL_EMPTY_BATCH"
+  },
   "ordinary_transaction_visibility": false,
   "user_gas_accounting": false,
   "failure_policy": "INVALIDATE_EXECUTION_PAYLOAD",
@@ -14,6 +20,16 @@
     "rule": "STRICT_INCREMENT_NO_GAPS_NO_REPLAY"
   },
   "envelope_binding": ["chainId","executionBlock","parentHash","sequence","action","target","payloadHash"],
+  "batch_commitment": {
+    "hash": "SHA-256",
+    "domain": "420/CONSENSUS_SYSTEM_CALL_BATCH/V1",
+    "encoding": "canonical length-prefixed big-endian encoding defined by consensus/systemcall"
+  },
+  "transport": {
+    "rpc": "engine420_submitSystemCallsV1",
+    "authentication": "same JWT-authenticated private Engine API boundary",
+    "required_order": "stage batch before payload construction and before NewPayload validation"
+  },
   "routes": [
     {"domain":"420/SYSCALL/VALIDATOR_STATE/V1","target":"0x0000000000000000000000000000000000000423","method":"applyConsensusState"},
     {"domain":"420/SYSCALL/VALIDATOR_EXIT_NOTICE/V1","target":"0x0000000000000000000000000000000000000423","method":"applyExitNotice"},
@@ -26,6 +42,7 @@
     "Reuse go-ethereum SystemAddress only through native block-processing system-call machinery.",
     "System calls must execute as EVM messages inside block state transition.",
     "System calls must not appear in the user transaction trie.",
+    "Execution header extraData must equal the committed system-call batch root.",
     "System-call failure invalidates the candidate payload atomically.",
     "No public JSON-RPC method may synthesize the privileged gateway call.",
     "Gateway and downstream state changes must be included in the execution state root."

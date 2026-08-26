@@ -95,13 +95,13 @@ func TestStageRejectsConflictingBatchForSameBlockParent(t *testing.T) {
     }
 }
 
-func TestGatewayInputUsesApplySelector(t *testing.T) {
+func TestGatewayInputUsesExecuteSelector(t *testing.T) {
     b := testBatch()
     input, err := GatewayInput(b.Calls[0])
     if err != nil {
         t.Fatal(err)
     }
-    want := gatewayABI.Methods["apply"].ID
+    want := gatewayABI.Methods["execute"].ID
     if len(input) < 4 || string(input[:4]) != string(want) {
         t.Fatalf("gateway selector mismatch: got %x want %x", input[:4], want)
     }

@@ -547,8 +547,10 @@ contract ValidatorRegistry is ConsensusSystemAccess420, I420System {
         if (effective > EFFECTIVE_BOND || (requireEffective && effective != EFFECTIVE_BOND)) revert InvalidBondComposition();
     }
 
+    /// @dev Eligible pool means currently selectable/serving validator population.
+    /// Cooldown validators remain bonded and slashable but are intentionally not selection-eligible.
     function _countsAsEligible(Status s) private pure returns (bool) {
-        return s == Status.ELIGIBLE || s == Status.ACTIVE || s == Status.NORMAL_COOLDOWN;
+        return s == Status.ELIGIBLE || s == Status.ACTIVE;
     }
 
     function _validTransition(Status a, Status b) private pure returns (bool) {

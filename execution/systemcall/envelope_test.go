@@ -71,7 +71,7 @@ func TestSolidityCallHashPreimageLayout(t *testing.T) {
 	if preimage[63] != 9 || preimage[95] != 7 || preimage[127] != 8 {
 		t.Fatal("uint ABI slots not encoded as expected")
 	}
-	if preimage[204] != 0x04 || preimage[205] != 0x23 {
+	if preimage[222] != 0x04 || preimage[223] != 0x23 {
 		t.Fatal("target address not right-aligned in ABI slot")
 	}
 }

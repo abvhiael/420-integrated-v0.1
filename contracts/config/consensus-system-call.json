@@ -19,6 +19,13 @@
     "initial": 1,
     "rule": "STRICT_INCREMENT_NO_GAPS_NO_REPLAY"
   },
+  "batch_limits": {
+    "max_calls": 64,
+    "max_total_payload_bytes": 262144,
+    "max_action_bytes": 96,
+    "min_payload_bytes_per_call": 4,
+    "execution_staging_retention_blocks": 4096
+  },
   "envelope_binding": ["chainId","executionBlock","parentHash","sequence","action","target","payloadHash"],
   "batch_commitment": {
     "hash": "SHA-256",
@@ -43,6 +50,7 @@
     "System calls must execute as EVM messages inside block state transition.",
     "System calls must not appear in the user transaction trie.",
     "Execution header extraData must equal the committed system-call batch root.",
+    "Consensus and execution must enforce identical batch-size limits before EVM execution.",
     "System-call failure invalidates the candidate payload atomically.",
     "No public JSON-RPC method may synthesize the privileged gateway call.",
     "Gateway and downstream state changes must be included in the execution state root."

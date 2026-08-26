@@ -16,14 +16,12 @@ contract ConsensusSystemCall420 is SystemAccess, I420System {
     bytes32 public constant DOMAIN = keccak256("420/CONSENSUS_SYSTEM_CALL/V1");
     bytes32 public constant ACTION_VALIDATOR_STATE = keccak256("420/SYSCALL/VALIDATOR_STATE/V1");
     bytes32 public constant ACTION_VALIDATOR_EXIT_NOTICE = keccak256("420/SYSCALL/VALIDATOR_EXIT_NOTICE/V1");
-    bytes32 public constant ACTION_VALIDATOR_BOND = keccak256("420/SYSCALL/VALIDATOR_BOND/V1");
     bytes32 public constant ACTION_VALIDATOR_SLASH = keccak256("420/SYSCALL/VALIDATOR_SLASH/V1");
     bytes32 public constant ACTION_ROTATION_SNAPSHOT = keccak256("420/SYSCALL/ROTATION_SNAPSHOT/V1");
     bytes32 public constant ACTION_REWARD = keccak256("420/SYSCALL/REWARD/V1");
 
     bytes4 private constant SEL_VALIDATOR_STATE = bytes4(keccak256("applyConsensusState(bytes32,uint8,uint64,uint64,uint64,uint64)"));
     bytes4 private constant SEL_EXIT_NOTICE = bytes4(keccak256("applyExitNotice(bytes32,uint64)"));
-    bytes4 private constant SEL_BOND = bytes4(keccak256("applyBondComposition(bytes32,uint256,uint256)"));
     bytes4 private constant SEL_SLASH = bytes4(keccak256("applySlash(bytes32,uint8,uint8,uint256,uint256,bytes32,uint8)"));
     bytes4 private constant SEL_ROTATION = bytes4(keccak256("applyRotationSnapshot(uint64,uint256)"));
     bytes4 private constant SEL_REWARD = bytes4(keccak256("applyConsensusReward(uint64,address,address[],uint256,uint256,uint256,uint256)"));
@@ -83,7 +81,6 @@ contract ConsensusSystemCall420 is SystemAccess, I420System {
     function _route(bytes32 action) private pure returns (address target, bytes4 selector) {
         if (action == ACTION_VALIDATOR_STATE) return (VALIDATOR_REGISTRY, SEL_VALIDATOR_STATE);
         if (action == ACTION_VALIDATOR_EXIT_NOTICE) return (VALIDATOR_REGISTRY, SEL_EXIT_NOTICE);
-        if (action == ACTION_VALIDATOR_BOND) return (VALIDATOR_REGISTRY, SEL_BOND);
         if (action == ACTION_VALIDATOR_SLASH) return (VALIDATOR_REGISTRY, SEL_SLASH);
         if (action == ACTION_ROTATION_SNAPSHOT) return (VALIDATOR_REGISTRY, SEL_ROTATION);
         if (action == ACTION_REWARD) return (REWARD_CONTROLLER, SEL_REWARD);

@@ -11,10 +11,15 @@ interface IValidatorRegistry420 {
         uint256 ownedBond;
         uint256 protocolCredit;
         Status status;
+        uint64 registrationBlock;
         uint64 effectiveSlot;
         uint64 activationRotation;
         uint64 scheduledExitRotation;
         uint64 cooldownUntilRotation;
+        uint64 exitNoticeRotation;
+        uint64 exitEligibleRotation;
+        uint64 withdrawalHoldStartBlock;
+        uint64 withdrawableBlock;
         uint256 totalSlashed;
         bytes32 metadataCommitment;
     }
@@ -37,6 +42,10 @@ contract Stake420 {
     uint256 public constant EFFECTIVE_BOND = 42_000 ether;
     uint256 public constant MAX_PROTOCOL_CREDIT = 21_000 ether;
     uint256 public constant MIN_OWNED_BOND = 21_000 ether;
+    uint64 public constant ACTIVATION_DELAY_BLOCKS = 17_640;
+    uint64 public constant EXIT_NOTICE_ROTATIONS = 1;
+    uint64 public constant WITHDRAWAL_DELAY_BLOCKS = 105_840;
+    uint64 public constant COOLDOWN_ROTATIONS = 3;
 
     address public immutable validatorRegistry;
     address public immutable rewardController;
@@ -69,6 +78,29 @@ contract Stake420 {
         protocolCredit = v.protocolCredit;
         effective = ownedBond + protocolCredit;
         totalSlashed = v.totalSlashed;
+    }
+
+    function validatorLifecycle(bytes32 validatorId)
+        external
+        view
+        returns (
+            uint64 registrationBlock,
+            uint64 activationRotation,
+            uint64 scheduledExitRotation,
+            uint64 cooldownUntilRotation,
+            uint64 exitEligibleRotation,
+            uint64 withdrawableBlock
+        )
+    {
+        IValidatorRegistry420.Validator memory v = IValidatorRegistry420(validatorRegistry).getValidator(validatorId);
+        return (
+            v.registrationBlock,
+            v.activationRotation,
+            v.scheduledExitRotation,
+            v.cooldownUntilRotation,
+            v.exitEligibleRotation,
+            v.withdrawableBlock
+        );
     }
 
     function validatorRewardAccrued(bytes32 validatorId) external view returns (uint256) {

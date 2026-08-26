@@ -64,6 +64,23 @@ struct Recording420 {
     CreatorId registrantProfileId;
 }
 
+struct RecordingRegistration420 {
+    CreatorId registrantProfileId;
+    WorkId workId;
+    RecordingId parentRecordingId;
+    RecordingId supersedesRecordingId;
+    RecordingClass recordingClass;
+    bytes32 masterHash;
+    bytes32 metadataHash;
+    bytes32 provenanceHash;
+    bytes32 mediaManifestHash;
+    bytes32 authorizationManifestHash;
+    ProvenanceClass provenanceClass;
+    RightsStatus rightsStatus;
+    uint32 royaltyScheduleVersion;
+    uint32 authorizationPolicyVersion;
+}
+
 struct RoyaltySchedule420 {
     uint16 workBps;
     uint16 sourceBps;

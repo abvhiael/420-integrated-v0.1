@@ -72,14 +72,12 @@ contract CommunityValidatorReserve is ProtocolTreasury, I420System {
         emit CreditFunded(validatorId, beneficiary, amount);
     }
 
-    /// @notice Reclaims funded credit only while it is still pending an operator registration.
     function reclaimUnregisteredCredit(bytes32 validatorId) external onlyGovernance {
         if (!validatorRegistryBound) revert NotValidatorRegistry();
         if (fundedCredit[validatorId] == 0) revert CreditNotAssigned();
         IValidatorCreditReceiver420(validatorRegistry).returnPendingProtocolCredit(validatorId);
     }
 
-    /// @notice Receives protocol-owned collateral returned by ValidatorRegistry after reclaim, replacement, slash, or exit.
     function returnCredit(bytes32 validatorId) external payable {
         if (msg.sender != validatorRegistry || !validatorRegistryBound) revert NotValidatorRegistry();
         uint256 funded = fundedCredit[validatorId];
@@ -106,6 +104,10 @@ contract CommunityValidatorReserve is ProtocolTreasury, I420System {
         uint256 reservedUnfunded = totalAssigned - totalFunded;
         uint256 bal = address(this).balance;
         return bal > reservedUnfunded ? bal - reservedUnfunded : 0;
+    }
+
+    function reserveInvariant() external view returns (bool) {
+        return totalFunded <= totalAssigned && address(this).balance >= totalAssigned - totalFunded;
     }
 
     function treasuryTransfer(address payable to, uint256 amount, bytes32 reason) external override onlyGovernance {

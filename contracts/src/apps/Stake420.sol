@@ -29,15 +29,19 @@ interface IValidatorRegistry420 {
     function targetActiveCount(uint256 eligibleCount) external pure returns (uint16);
     function rotationTurnover(uint16 activeCount) external pure returns (uint16);
     function rewardAllocation(uint16 activeCount) external pure returns (uint256,uint256,uint256);
+    function totalOwnedCustody() external view returns (uint256);
+    function totalProtocolCreditCustody() external view returns (uint256);
+    function totalPendingProtocolCredit() external view returns (uint256);
+    function custodyInvariant() external view returns (bool);
 }
 
 interface IRewardController420 {
     function validatorAccrued(address validator) external view returns (uint256);
 }
 
-/// @notice Read-oriented genesis facade for validator staking and rewards.
-/// @dev Genesis has no public delegation and no stake-weighted governance. Validator economic
-/// authority remains in the canonical ValidatorRegistry + RewardController system contracts.
+/// @notice Read-oriented genesis facade for validator staking, collateral and rewards.
+/// @dev Genesis has no public delegation and no stake-weighted governance. Economic authority remains
+/// in canonical ValidatorRegistry + CommunityValidatorReserve + RewardController system contracts.
 contract Stake420 {
     uint256 public constant EFFECTIVE_BOND = 42_000 ether;
     uint256 public constant MAX_PROTOCOL_CREDIT = 21_000 ether;
@@ -93,14 +97,7 @@ contract Stake420 {
         )
     {
         IValidatorRegistry420.Validator memory v = IValidatorRegistry420(validatorRegistry).getValidator(validatorId);
-        return (
-            v.registrationBlock,
-            v.activationRotation,
-            v.scheduledExitRotation,
-            v.cooldownUntilRotation,
-            v.exitEligibleRotation,
-            v.withdrawableBlock
-        );
+        return (v.registrationBlock, v.activationRotation, v.scheduledExitRotation, v.cooldownUntilRotation, v.exitEligibleRotation, v.withdrawableBlock);
     }
 
     function validatorRewardAccrued(bytes32 validatorId) external view returns (uint256) {
@@ -108,27 +105,16 @@ contract Stake420 {
         return IRewardController420(rewardController).validatorAccrued(v.owner);
     }
 
-    function eligibleValidatorCount() external view returns (uint256) {
-        return IValidatorRegistry420(validatorRegistry).eligibleValidatorCount();
+    function collateralTotals() external view returns (uint256 owned, uint256 protocolCredit, uint256 pendingCredit, bool solvent) {
+        IValidatorRegistry420 r = IValidatorRegistry420(validatorRegistry);
+        return (r.totalOwnedCustody(), r.totalProtocolCreditCustody(), r.totalPendingProtocolCredit(), r.custodyInvariant());
     }
 
-    function activeValidatorTarget() external view returns (uint16) {
-        return IValidatorRegistry420(validatorRegistry).activeTarget();
-    }
-
-    function targetActiveCount(uint256 eligibleCount) external view returns (uint16) {
-        return IValidatorRegistry420(validatorRegistry).targetActiveCount(eligibleCount);
-    }
-
-    function rotationTurnover(uint16 activeCount) external view returns (uint16) {
-        return IValidatorRegistry420(validatorRegistry).rotationTurnover(activeCount);
-    }
-
-    function rewardAllocation(uint16 activeCount)
-        external
-        view
-        returns (uint256 security, uint256 attention, uint256 development)
-    {
+    function eligibleValidatorCount() external view returns (uint256) { return IValidatorRegistry420(validatorRegistry).eligibleValidatorCount(); }
+    function activeValidatorTarget() external view returns (uint16) { return IValidatorRegistry420(validatorRegistry).activeTarget(); }
+    function targetActiveCount(uint256 eligibleCount) external view returns (uint16) { return IValidatorRegistry420(validatorRegistry).targetActiveCount(eligibleCount); }
+    function rotationTurnover(uint16 activeCount) external view returns (uint16) { return IValidatorRegistry420(validatorRegistry).rotationTurnover(activeCount); }
+    function rewardAllocation(uint16 activeCount) external view returns (uint256 security, uint256 attention, uint256 development) {
         return IValidatorRegistry420(validatorRegistry).rewardAllocation(activeCount);
     }
 }

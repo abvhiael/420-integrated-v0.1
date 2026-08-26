@@ -22,6 +22,20 @@ interface IRouterRoyaltyVault420 {
 }
 
 contract RoyaltyRouter420 is CreativeEvents420 {
+    struct RouteContext {
+        WorkId workId;
+        RecordingId parentId;
+        RecordingClass recordingClass;
+        uint32 scheduleVersion;
+    }
+
+    struct RouteAmounts {
+        uint256 workAmount;
+        uint256 sourceAmount;
+        uint256 currentAmount;
+        uint256 protocolAmount;
+    }
+
     address public immutable governanceTimelock;
     IRouterRecordingRegistry420 public immutable recordings;
     IRouterScheduleRegistry420 public immutable schedules;
@@ -31,7 +45,10 @@ contract RoyaltyRouter420 is CreativeEvents420 {
     mapping(bytes32 => bool) public processedSettlement;
 
     constructor(address governanceTimelock_, address recordingRegistry_, address scheduleRegistry_, address royaltyVault_) {
-        if (governanceTimelock_ == address(0) || recordingRegistry_ == address(0) || scheduleRegistry_ == address(0) || royaltyVault_ == address(0)) revert CreativeErrors420.ZeroAddress();
+        if (
+            governanceTimelock_ == address(0) || recordingRegistry_ == address(0) || scheduleRegistry_ == address(0)
+                || royaltyVault_ == address(0)
+        ) revert CreativeErrors420.ZeroAddress();
         governanceTimelock = governanceTimelock_;
         recordings = IRouterRecordingRegistry420(recordingRegistry_);
         schedules = IRouterScheduleRegistry420(scheduleRegistry_);
@@ -45,30 +62,63 @@ contract RoyaltyRouter420 is CreativeEvents420 {
     }
 
     function route(RecordingId recordingId, RevenueType revenueType, bytes32 settlementId) external payable {
+        _validateRoute(recordingId, revenueType, settlementId);
+        RouteContext memory context = _context(recordingId);
+        RoyaltySchedule420 memory schedule_ = schedules.schedule(context.recordingClass, revenueType, context.scheduleVersion);
+        if (block.timestamp < schedule_.effectiveAt) revert CreativeErrors420.InvalidSchedule();
+
+        RouteAmounts memory amounts = _amounts(msg.value, schedule_);
+        if (amounts.sourceAmount != 0 && RecordingId.unwrap(context.parentId) == 0) {
+            revert CreativeErrors420.InvalidSource();
+        }
+
+        processedSettlement[settlementId] = true;
+        _deposit(context, recordingId, amounts);
+        emit RoyaltyRouted(settlementId, RecordingId.unwrap(recordingId), uint8(revenueType), msg.value);
+    }
+
+    function _validateRoute(RecordingId recordingId, RevenueType revenueType, bytes32 settlementId) internal view {
         if (!settlementSource[msg.sender]) revert CreativeErrors420.Unauthorized();
         if (settlementId == bytes32(0) || RecordingId.unwrap(recordingId) == 0) revert CreativeErrors420.InvalidId();
         if (processedSettlement[settlementId]) revert CreativeErrors420.RevenueAlreadyProcessed(settlementId);
-        if (revenueType == RevenueType.TIP || revenueType == RevenueType.AI_TRAINING) revert CreativeErrors420.InvalidState();
+        if (revenueType == RevenueType.TIP || revenueType == RevenueType.AI_TRAINING) {
+            revert CreativeErrors420.InvalidState();
+        }
         if (recordings.statusOf(recordingId) != AssetStatus.ACTIVE) revert CreativeErrors420.InvalidState();
+    }
 
-        (WorkId workId, RecordingId parentId, RecordingClass class_, uint32 version) = recordings.royaltyContext(recordingId);
-        RoyaltySchedule420 memory schedule_ = schedules.schedule(class_, revenueType, version);
-        if (block.timestamp < schedule_.effectiveAt) revert CreativeErrors420.InvalidSchedule();
+    function _context(RecordingId recordingId) internal view returns (RouteContext memory context) {
+        (context.workId, context.parentId, context.recordingClass, context.scheduleVersion) =
+            recordings.royaltyContext(recordingId);
+    }
 
-        processedSettlement[settlementId] = true;
-        uint256 gross = msg.value;
-        uint256 workAmount = (gross * schedule_.workBps) / CreativeConstants420.BPS_DENOMINATOR;
-        uint256 sourceAmount = (gross * schedule_.sourceBps) / CreativeConstants420.BPS_DENOMINATOR;
-        uint256 protocolAmount = (gross * schedule_.protocolBps) / CreativeConstants420.BPS_DENOMINATOR;
-        uint256 currentAmount = gross - workAmount - sourceAmount - protocolAmount;
+    function _amounts(uint256 gross, RoyaltySchedule420 memory schedule_)
+        internal
+        pure
+        returns (RouteAmounts memory amounts)
+    {
+        amounts.workAmount = (gross * schedule_.workBps) / CreativeConstants420.BPS_DENOMINATOR;
+        amounts.sourceAmount = (gross * schedule_.sourceBps) / CreativeConstants420.BPS_DENOMINATOR;
+        amounts.protocolAmount = (gross * schedule_.protocolBps) / CreativeConstants420.BPS_DENOMINATOR;
+        amounts.currentAmount = gross - amounts.workAmount - amounts.sourceAmount - amounts.protocolAmount;
+    }
 
-        if (sourceAmount != 0 && RecordingId.unwrap(parentId) == 0) revert CreativeErrors420.InvalidSource();
-
-        if (workAmount != 0) vault.depositPool{value: workAmount}(CreativeAssetKeys420.key(CreativeAssetType.WORK, WorkId.unwrap(workId)));
-        if (sourceAmount != 0) vault.depositPool{value: sourceAmount}(CreativeAssetKeys420.key(CreativeAssetType.RECORDING, RecordingId.unwrap(parentId)));
-        if (currentAmount != 0) vault.depositPool{value: currentAmount}(CreativeAssetKeys420.key(CreativeAssetType.RECORDING, RecordingId.unwrap(recordingId)));
-        if (protocolAmount != 0) vault.depositTreasury{value: protocolAmount}();
-
-        emit RoyaltyRouted(settlementId, RecordingId.unwrap(recordingId), uint8(revenueType), gross);
+    function _deposit(RouteContext memory context, RecordingId recordingId, RouteAmounts memory amounts) internal {
+        if (amounts.workAmount != 0) {
+            vault.depositPool{value: amounts.workAmount}(
+                CreativeAssetKeys420.key(CreativeAssetType.WORK, WorkId.unwrap(context.workId))
+            );
+        }
+        if (amounts.sourceAmount != 0) {
+            vault.depositPool{value: amounts.sourceAmount}(
+                CreativeAssetKeys420.key(CreativeAssetType.RECORDING, RecordingId.unwrap(context.parentId))
+            );
+        }
+        if (amounts.currentAmount != 0) {
+            vault.depositPool{value: amounts.currentAmount}(
+                CreativeAssetKeys420.key(CreativeAssetType.RECORDING, RecordingId.unwrap(recordingId))
+            );
+        }
+        if (amounts.protocolAmount != 0) vault.depositTreasury{value: amounts.protocolAmount}();
     }
 }

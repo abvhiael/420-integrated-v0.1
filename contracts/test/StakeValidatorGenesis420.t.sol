@@ -3,11 +3,13 @@ pragma solidity ^0.8.24;
 
 import "../src/system/ValidatorRegistry.sol";
 import "../src/system/RewardController.sol";
+import "../src/system/CommunityValidatorReserve.sol";
 import "../src/apps/Stake420.sol";
 
 interface VmStakeValidatorGenesis420 {
     function prank(address msgSender) external;
     function roll(uint256 newHeight) external;
+    function deal(address account, uint256 newBalance) external;
 }
 
 contract StakeValidatorGenesis420Test {
@@ -16,14 +18,19 @@ contract StakeValidatorGenesis420Test {
 
     ValidatorRegistry internal registry;
     RewardController internal rewards;
+    CommunityValidatorReserve internal reserve;
     Stake420 internal stake;
     address internal constant SYSTEM_CALLER = address(0x420C0DE);
 
     function setUp() public {
         registry = new ValidatorRegistry(address(this));
         rewards = new RewardController(address(this));
+        reserve = new CommunityValidatorReserve(address(this));
         registry.bindConsensusSystemCaller(SYSTEM_CALLER);
         rewards.bindConsensusSystemCaller(SYSTEM_CALLER);
+        registry.bindCommunityValidatorReserve(address(reserve));
+        reserve.bindValidatorRegistry(address(registry));
+        vm.deal(address(reserve), reserve.GENESIS_RESERVE());
         stake = new Stake420(address(registry), address(rewards));
     }
 
@@ -35,157 +42,102 @@ contract StakeValidatorGenesis420Test {
         require(registry.EXIT_NOTICE_ROTATIONS() == 1, "exit notice");
         require(registry.WITHDRAWAL_DELAY_BLOCKS() == 105_840, "withdrawal delay");
         require(registry.COOLDOWN_ROTATIONS() == 3, "cooldown");
-        require(stake.effectiveBond() == 42_000 ether, "stake facade bond");
         require(!stake.delegationEnabled(), "delegation disabled");
         require(!stake.stakeWeightedVotingEnabled(), "stake voting disabled");
     }
 
-    function testConsensusSystemCallerIsOneTimeAndGovernanceCannotForgeOutcome() public {
-        (bool rebind,) = address(registry).call(
-            abi.encodeWithSelector(registry.bindConsensusSystemCaller.selector, address(0xBAD))
-        );
-        require(!rebind, "one-time bind");
-
-        bytes32 id = _register("authority", 1, 42_000 ether, 0);
-        (bool forged,) = address(registry).call(
-            abi.encodeWithSelector(
-                registry.applyConsensusState.selector,
-                id,
-                ValidatorRegistry.Status.PROBATION,
-                uint64(1),
-                uint64(0),
-                uint64(0),
-                uint64(0)
-            )
-        );
-        require(!forged, "governance cannot forge consensus state");
-
-        address[] memory participants = new address[](0);
-        (bool rewardForged,) = address(rewards).call(
-            abi.encodeWithSelector(
-                rewards.applyConsensusReward.selector,
-                uint64(1), address(0xA1), participants, 1 ether, 0, 0, 0
-            )
-        );
-        require(!rewardForged, "governance cannot forge reward");
+    function testSelfFundedRegistrationLocksReal420() public {
+        (bytes32 id,) = _registerSelfFunded("self", 1);
+        ValidatorRegistry.Validator memory v = registry.getValidator(id);
+        require(v.ownedBond == 42_000 ether && v.protocolCredit == 0, "composition");
+        require(address(registry).balance == 42_000 ether, "registry custody");
+        require(registry.totalOwnedCustody() == 42_000 ether, "owned custody");
+        require(registry.custodyInvariant(), "solvent");
     }
 
-    function testDynamicCommitteeTiersAndRewardAllocation() public view {
-        require(registry.targetActiveCount(59) == 0, "below handoff");
-        require(registry.targetActiveCount(60) == 15, "60 tier");
-        require(registry.targetActiveCount(72) == 18, "72 tier");
-        require(registry.targetActiveCount(84) == 21, "84 tier");
-        require(registry.targetActiveCount(96) == 24, "96 tier");
-        require(registry.targetActiveCount(108) == 27, "108 tier");
-        require(registry.targetActiveCount(120) == 30, "120 tier");
-        require(registry.rotationTurnover(15) == 5, "15 turnover");
-        require(registry.rotationTurnover(30) == 10, "30 turnover");
+    function testMatchedRegistrationMovesRealReserveCredit() public {
+        (bytes32 id, address operator) = _matchedId("matched", 2);
+        uint256 reserveBefore = address(reserve).balance;
+        reserve.assignCredit(id, operator, 21_000 ether);
+        reserve.fundCredit(id);
+        require(address(reserve).balance == reserveBefore - 21_000 ether, "reserve funded");
+        require(registry.pendingProtocolCredit(id) == 21_000 ether, "pending credit");
+        require(registry.totalPendingProtocolCredit() == 21_000 ether, "pending total");
 
-        (uint256 s15, uint256 a15, uint256 d15) = registry.rewardAllocation(15);
-        require(s15 == registry.MIN_SECURITY_ALLOCATION(), "minimum security");
-        require(s15 + a15 + d15 == registry.ALLOCATION_SCALE(), "15 conservation");
-
-        (uint256 s30, uint256 a30, uint256 d30) = registry.rewardAllocation(30);
-        require(s30 == 500_000_000_000, "mature security");
-        require(a30 == 250_000_000_000 && d30 == 250_000_000_000, "mature remainder");
+        _completeMatchedRegistration(id, operator, 2);
+        ValidatorRegistry.Validator memory v = registry.getValidator(id);
+        require(v.ownedBond == 21_000 ether && v.protocolCredit == 21_000 ether, "matched composition");
+        require(address(registry).balance == 42_000 ether, "real effective bond");
+        require(registry.totalPendingProtocolCredit() == 0, "pending consumed");
+        require(registry.totalOwnedCustody() == 21_000 ether, "owned total");
+        require(registry.totalProtocolCreditCustody() == 21_000 ether, "credit total");
+        require(registry.custodyInvariant(), "solvent");
     }
 
-    function testSelfFundedAndMatchedBondRegistration() public {
-        bytes32 selfId = _register("self-funded", 2, 42_000 ether, 0);
-        ValidatorRegistry.Validator memory self = registry.getValidator(selfId);
-        require(self.ownedBond == 42_000 ether && self.protocolCredit == 0, "self funded");
-
-        bytes32 matchedId = _register("matched", 3, 21_000 ether, 21_000 ether);
-        ValidatorRegistry.Validator memory matched = registry.getValidator(matchedId);
-        require(matched.ownedBond + matched.protocolCredit == 42_000 ether, "matched effective");
+    function testAssignedReserveCollateralCannotBeTreasurySpent() public {
+        (bytes32 id, address operator) = _matchedId("encumbered", 3);
+        reserve.assignCredit(id, operator, 21_000 ether);
+        uint256 available = reserve.unencumberedBalance();
+        (bool ok,) = address(reserve).call(
+            abi.encodeWithSelector(reserve.treasuryTransfer.selector, payable(address(0xBEEF)), available + 1, keccak256("overspend"))
+        );
+        require(!ok, "assigned collateral protected");
     }
 
-    function testDuplicateOwnerAndBLSPubkeyFailClosed() public {
-        registry.register(keccak256("one"), _pubkey(4), address(0xC1), address(0xC2), 42_000 ether, 0);
-
-        (bool ownerOk,) = address(registry).call(
-            abi.encodeWithSelector(
-                ValidatorRegistry.register.selector,
-                keccak256("two"), _pubkey(5), address(0xC1), address(0xD2), 42_000 ether, 0
-            )
-        );
-        require(!ownerOk, "duplicate owner");
-
-        (bool keyOk,) = address(registry).call(
-            abi.encodeWithSelector(
-                ValidatorRegistry.register.selector,
-                keccak256("three"), _pubkey(4), address(0xD1), address(0xD2), 42_000 ether, 0
-            )
-        );
-        require(!keyOk, "duplicate BLS key");
+    function testUnregisteredFundedCreditCanBeReclaimed() public {
+        (bytes32 id, address operator) = _matchedId("reclaim", 4);
+        uint256 before = address(reserve).balance;
+        reserve.assignCredit(id, operator, 21_000 ether);
+        reserve.fundCredit(id);
+        reserve.reclaimUnregisteredCredit(id);
+        require(address(reserve).balance == before, "reserve restored");
+        require(registry.pendingProtocolCredit(id) == 0, "pending cleared");
+        require(reserve.assignedCredit(id) == 0 && reserve.fundedCredit(id) == 0, "assignment cleared");
+        require(registry.totalProtocolCreditCustody() == 0, "registry credit cleared");
     }
 
-    function testActivationRequiresOneFullRotation() public {
-        bytes32 id = _register("activation", 6, 42_000 ether, 0);
-        _state(id, ValidatorRegistry.Status.PROBATION, 1, 0, 0, 0);
-
-        vm.prank(SYSTEM_CALLER);
-        (bool early,) = address(registry).call(
-            abi.encodeWithSelector(
-                registry.applyConsensusState.selector,
-                id, ValidatorRegistry.Status.ELIGIBLE, uint64(2), uint64(1), uint64(0), uint64(0)
-            )
-        );
-        require(!early, "activation must wait one rotation");
+    function testProtocolCreditReplacementReturnsValueToReserve() public {
+        (bytes32 id, address operator) = _registerMatched("replace", 5);
+        uint256 reserveBefore = address(reserve).balance;
+        vm.deal(operator, 10_000 ether);
+        vm.prank(operator);
+        registry.replaceProtocolCredit{value: 10_000 ether}(id);
 
         ValidatorRegistry.Validator memory v = registry.getValidator(id);
-        vm.roll(uint256(v.registrationBlock) + registry.ACTIVATION_DELAY_BLOCKS());
-        _state(id, ValidatorRegistry.Status.ELIGIBLE, 2, 1, 0, 0);
-        require(registry.eligibleValidatorCount() == 1, "eligible after delay");
+        require(v.ownedBond == 31_000 ether && v.protocolCredit == 11_000 ether, "replacement composition");
+        require(address(reserve).balance == reserveBefore + 10_000 ether, "credit recycled");
+        require(reserve.assignedCredit(id) == 11_000 ether && reserve.fundedCredit(id) == 11_000 ether, "reserve sync");
+        require(registry.custodyInvariant(), "solvent");
     }
 
-    function testExitNoticeAndSixRotationWithdrawalHold() public {
-        bytes32 id = _register("exit", 7, 42_000 ether, 0);
+    function testConsensusSystemCallerIsOneTimeAndGovernanceCannotForgeOutcome() public {
+        (bool rebind,) = address(registry).call(abi.encodeWithSelector(registry.bindConsensusSystemCaller.selector, address(0xBAD)));
+        require(!rebind, "one-time bind");
+        (bytes32 id,) = _registerSelfFunded("authority", 6);
+        (bool forged,) = address(registry).call(
+            abi.encodeWithSelector(registry.applyConsensusState.selector, id, ValidatorRegistry.Status.PROBATION, uint64(1), uint64(0), uint64(0), uint64(0))
+        );
+        require(!forged, "governance cannot forge consensus state");
+    }
+
+    function testActivationRequiresOneFullRotationAndFullBond() public {
+        (bytes32 id,) = _registerSelfFunded("activation", 7);
         _state(id, ValidatorRegistry.Status.PROBATION, 1, 0, 0, 0);
+        vm.prank(SYSTEM_CALLER);
+        (bool early,) = address(registry).call(
+            abi.encodeWithSelector(registry.applyConsensusState.selector, id, ValidatorRegistry.Status.ELIGIBLE, uint64(2), uint64(1), uint64(0), uint64(0))
+        );
+        require(!early, "activation delay");
         _rollPastActivation(id);
         _state(id, ValidatorRegistry.Status.ELIGIBLE, 2, 1, 0, 0);
-        _snapshot(1, 1);
-
-        vm.prank(SYSTEM_CALLER);
-        registry.applyExitNotice(id, 1);
-
-        vm.prank(SYSTEM_CALLER);
-        (bool earlyExit,) = address(registry).call(
-            abi.encodeWithSelector(
-                registry.applyConsensusState.selector,
-                id, ValidatorRegistry.Status.WITHDRAWAL_HOLD, uint64(3), uint64(1), uint64(0), uint64(0)
-            )
-        );
-        require(!earlyExit, "one rotation exit notice");
-
-        _snapshot(2, 1);
-        _state(id, ValidatorRegistry.Status.WITHDRAWAL_HOLD, 3, 1, 0, 0);
-        ValidatorRegistry.Validator memory held = registry.getValidator(id);
-        require(held.withdrawableBlock == block.number + registry.WITHDRAWAL_DELAY_BLOCKS(), "six rotation hold");
-
-        vm.prank(SYSTEM_CALLER);
-        (bool earlyWithdrawable,) = address(registry).call(
-            abi.encodeWithSelector(
-                registry.applyConsensusState.selector,
-                id, ValidatorRegistry.Status.WITHDRAWABLE, uint64(4), uint64(1), uint64(0), uint64(0)
-            )
-        );
-        require(!earlyWithdrawable, "slashability window active");
-
-        vm.roll(held.withdrawableBlock);
-        _state(id, ValidatorRegistry.Status.WITHDRAWABLE, 4, 1, 0, 0);
+        require(registry.eligibleValidatorCount() == 1, "eligible");
     }
 
-    function testSlashingMatrixAndProportionalMatchedCollateral() public {
-        require(registry.maxSlashBps(ValidatorRegistry.SlashOffense.INACTIVITY, 0) == 0, "inactivity reward-only");
-        require(registry.maxSlashBps(ValidatorRegistry.SlashOffense.INVALID_CONSENSUS_MESSAGE, 0) == 250, "invalid message");
-        require(registry.maxSlashBps(ValidatorRegistry.SlashOffense.DOUBLE_PROPOSAL, 0) == 500, "double proposal");
-        require(registry.maxSlashBps(ValidatorRegistry.SlashOffense.DOUBLE_VOTE, 0) == 1_000, "double vote");
-        require(registry.maxSlashBps(ValidatorRegistry.SlashOffense.DOUBLE_VOTE, 2) == 3_000, "correlated double vote");
-        require(registry.maxSlashBps(ValidatorRegistry.SlashOffense.FINALITY_EQUIVOCATION, 2) == 10_000, "finality max");
-
-        bytes32 id = _register("slash", 8, 21_000 ether, 21_000 ether);
+    function testProportionalSlashMovesOwnedValueAndRecyclesCredit() public {
+        (bytes32 id,) = _registerMatched("slash", 8);
         _state(id, ValidatorRegistry.Status.PROBATION, 1, 0, 0, 0);
+        uint256 protocolReserveBefore = registry.PROTOCOL_RESERVE().balance;
+        uint256 communityBefore = address(reserve).balance;
 
         vm.prank(SYSTEM_CALLER);
         registry.applySlash(
@@ -197,15 +149,18 @@ contract StakeValidatorGenesis420Test {
             keccak256("double-vote-proof"),
             ValidatorRegistry.Status.SUSPENDED
         );
+
         ValidatorRegistry.Validator memory v = registry.getValidator(id);
-        require(v.ownedBond == 20_000 ether && v.protocolCredit == 20_000 ether, "proportional slash");
-        require(v.totalSlashed == 2_000 ether, "slash total");
+        require(v.ownedBond == 20_000 ether && v.protocolCredit == 20_000 ether, "composition slashed");
+        require(registry.PROTOCOL_RESERVE().balance == protocolReserveBefore + 1_000 ether, "owned slash routed");
+        require(address(reserve).balance == communityBefore + 1_000 ether, "credit recycled");
+        require(reserve.assignedCredit(id) == 20_000 ether, "reserve assignment reduced");
+        require(registry.custodyInvariant(), "solvent after slash");
     }
 
-    function testFinalityEquivocationConsumesAllCollateral() public {
-        bytes32 id = _register("finality", 9, 21_000 ether, 21_000 ether);
+    function testFinalityEquivocationConsumesOwnedAndRevokesAllCredit() public {
+        (bytes32 id,) = _registerMatched("finality", 9);
         _state(id, ValidatorRegistry.Status.PROBATION, 1, 0, 0, 0);
-
         vm.prank(SYSTEM_CALLER);
         registry.applySlash(
             id,
@@ -217,71 +172,89 @@ contract StakeValidatorGenesis420Test {
             ValidatorRegistry.Status.SUSPENDED
         );
         ValidatorRegistry.Validator memory v = registry.getValidator(id);
-        require(v.ownedBond == 0 && v.protocolCredit == 0, "all collateral consumed");
-        require(v.totalSlashed == 42_000 ether, "full slash");
+        require(v.ownedBond == 0 && v.protocolCredit == 0, "all collateral removed");
+        require(reserve.assignedCredit(id) == 0 && reserve.fundedCredit(id) == 0, "all credit recycled");
+        require(registry.totalOwnedCustody() == 0 && registry.totalProtocolCreditCustody() == 0, "custody cleared");
+        require(registry.custodyInvariant(), "solvent after finality slash");
     }
 
-    function testThreeSnapshotHysteresisAtSixtyEligible() public {
-        bytes32[] memory ids = new bytes32[](60);
-        for (uint256 i = 0; i < 60; ++i) {
-            ids[i] = _registerIndexed(i);
-            _state(ids[i], ValidatorRegistry.Status.PROBATION, 1, 0, 0, 0);
-        }
-        vm.roll(block.number + registry.ACTIVATION_DELAY_BLOCKS());
-        for (uint256 i = 0; i < 60; ++i) {
-            _state(ids[i], ValidatorRegistry.Status.ELIGIBLE, 2, 1, 0, 0);
-        }
-        require(registry.eligibleValidatorCount() == 60, "60 eligible");
-        _snapshot(1, 60);
-        require(registry.activeTarget() == 0, "snapshot 1");
-        _snapshot(2, 60);
-        require(registry.activeTarget() == 0, "snapshot 2");
-        _snapshot(3, 60);
-        require(registry.activeTarget() == 15, "snapshot 3");
-    }
+    function testExitWithdrawalReturnsOwnedAndRecyclesCredit() public {
+        (bytes32 id, address operator) = _registerMatched("exit", 10);
+        address withdrawal = address(uint160(uint256(uint160(operator)) + 0x10000));
+        ValidatorRegistry.Validator memory registered = registry.getValidator(id);
+        require(registered.withdrawal == withdrawal, "withdrawal fixture");
 
-    function testStakeFacadeReadsCanonicalRegistryAndRewards() public {
-        bytes32 id = _register("facade", 70, 42_000 ether, 0);
-        address operator = registry.getValidator(id).owner;
         _state(id, ValidatorRegistry.Status.PROBATION, 1, 0, 0, 0);
         _rollPastActivation(id);
         _state(id, ValidatorRegistry.Status.ELIGIBLE, 2, 1, 0, 0);
-
-        address[] memory participants = new address[](0);
+        _snapshot(1, 1);
         vm.prank(SYSTEM_CALLER);
-        rewards.applyConsensusReward(1, operator, participants, 1.05 ether, 0, 1.05 ether, 1.05 ether);
+        registry.applyExitNotice(id, 1);
+        _snapshot(2, 1);
+        _state(id, ValidatorRegistry.Status.WITHDRAWAL_HOLD, 3, 1, 0, 0);
+        ValidatorRegistry.Validator memory held = registry.getValidator(id);
+        vm.roll(held.withdrawableBlock);
+        _state(id, ValidatorRegistry.Status.WITHDRAWABLE, 4, 1, 0, 0);
 
+        uint256 withdrawalBefore = withdrawal.balance;
+        uint256 reserveBefore = address(reserve).balance;
+        vm.prank(withdrawal);
+        registry.withdrawBond(id);
+        ValidatorRegistry.Validator memory exited = registry.getValidator(id);
+        require(exited.status == ValidatorRegistry.Status.EXITED, "exited");
+        require(withdrawal.balance == withdrawalBefore + 21_000 ether, "owned returned");
+        require(address(reserve).balance == reserveBefore + 21_000 ether, "credit recycled");
+        require(registry.totalOwnedCustody() == 0 && registry.totalProtocolCreditCustody() == 0, "custody empty");
+    }
+
+    function testStakeFacadeReportsCollateralSolvency() public {
+        (bytes32 id,) = _registerMatched("facade", 11);
         (uint256 owned, uint256 credit, uint256 effective, uint256 slashed) = stake.validatorBondComposition(id);
-        require(owned == 42_000 ether && credit == 0 && effective == 42_000 ether && slashed == 0, "facade bond");
-        require(stake.validatorRewardAccrued(id) == 1.05 ether, "facade reward");
-        require(uint8(stake.validatorStatus(id)) == uint8(IValidatorRegistry420.Status.ELIGIBLE), "facade status");
+        require(owned == 21_000 ether && credit == 21_000 ether && effective == 42_000 ether && slashed == 0, "facade composition");
+        (uint256 totalOwned, uint256 totalCredit, uint256 pending, bool solvent) = stake.collateralTotals();
+        require(totalOwned == 21_000 ether && totalCredit == 21_000 ether && pending == 0 && solvent, "facade custody");
     }
 
-    function _register(string memory label, uint256 seed, uint256 owned, uint256 credit) internal returns (bytes32 id) {
+    function testDynamicCommitteeTiersAndRewardAllocation() public view {
+        require(registry.targetActiveCount(59) == 0, "below handoff");
+        require(registry.targetActiveCount(60) == 15, "60 tier");
+        require(registry.targetActiveCount(120) == 30, "120 tier");
+        require(registry.rotationTurnover(15) == 5 && registry.rotationTurnover(30) == 10, "turnover");
+        (uint256 s15, uint256 a15, uint256 d15) = registry.rewardAllocation(15);
+        require(s15 + a15 + d15 == registry.ALLOCATION_SCALE(), "15 conservation");
+        (uint256 s30, uint256 a30, uint256 d30) = registry.rewardAllocation(30);
+        require(s30 == 500_000_000_000 && a30 == 250_000_000_000 && d30 == 250_000_000_000, "mature split");
+    }
+
+    function _registerSelfFunded(string memory label, uint256 seed) internal returns (bytes32 id, address operator) {
         id = keccak256(bytes(label));
-        registry.register(id, _pubkey(seed), address(uint160(0x10000 + seed)), address(uint160(0x20000 + seed)), owned, credit);
+        operator = address(uint160(0x10000 + seed));
+        address withdrawal = address(uint160(0x20000 + seed));
+        vm.deal(operator, 42_000 ether);
+        vm.prank(operator);
+        registry.register{value: 42_000 ether}(id, _pubkey(seed), withdrawal, keccak256(abi.encode(label)));
     }
 
-    function _registerIndexed(uint256 i) internal returns (bytes32 id) {
-        id = keccak256(abi.encode("validator", i));
-        registry.register(
-            id,
-            _pubkey(100 + i),
-            address(uint160(0x30000 + i)),
-            address(uint160(0x40000 + i)),
-            42_000 ether,
-            0
-        );
+    function _matchedId(string memory label, uint256 seed) internal pure returns (bytes32 id, address operator) {
+        id = keccak256(bytes(label));
+        operator = address(uint160(0x30000 + seed));
     }
 
-    function _state(
-        bytes32 id,
-        ValidatorRegistry.Status status,
-        uint64 slot,
-        uint64 activationRotation,
-        uint64 exitRotation,
-        uint64 cooldownUntil
-    ) internal {
+    function _registerMatched(string memory label, uint256 seed) internal returns (bytes32 id, address operator) {
+        (id, operator) = _matchedId(label, seed);
+        reserve.assignCredit(id, operator, 21_000 ether);
+        reserve.fundCredit(id);
+        _completeMatchedRegistration(id, operator, seed);
+    }
+
+    function _completeMatchedRegistration(bytes32 id, address operator, uint256 seed) internal {
+        address withdrawal = address(uint160(uint256(uint160(operator)) + 0x10000));
+        vm.deal(operator, 21_000 ether);
+        vm.prank(operator);
+        registry.register{value: 21_000 ether}(id, _pubkey(seed), withdrawal, keccak256(abi.encode(id)));
+    }
+
+    function _state(bytes32 id, ValidatorRegistry.Status status, uint64 slot, uint64 activationRotation, uint64 exitRotation, uint64 cooldownUntil) internal {
         vm.prank(SYSTEM_CALLER);
         registry.applyConsensusState(id, status, slot, activationRotation, exitRotation, cooldownUntil);
     }

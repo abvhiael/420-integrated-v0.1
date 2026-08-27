@@ -30,6 +30,15 @@
       ]
     },
     {
+      "dapp": "420 Market",
+      "contracts": [
+        "MarketPolicyRegistry420.sol",
+        "ListingRegistry420.sol",
+        "OrderRegistry420.sol"
+      ],
+      "note": "universal marketplace protocol; references canonical asset/right registries and approved settlement adapters instead of taking custody"
+    },
+    {
       "dapp": "420 Swap",
       "contracts": [
         "GenesisDEXFactory.sol",

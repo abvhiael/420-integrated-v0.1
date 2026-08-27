@@ -22,6 +22,7 @@ contract TrustPolicyRegistry420 is SystemAccess, I420System {
     error InvalidUnitId();
     error MetricNotFound();
     error InvalidIssuerId();
+    error MetricSemanticChange();
 
     event MetricConfigured(
         bytes32 indexed metricId,
@@ -50,6 +51,10 @@ contract TrustPolicyRegistry420 is SystemAccess, I420System {
         if (unitId == bytes32(0)) revert InvalidUnitId();
 
         Metric storage metric = _metrics[metricId];
+        if (metric.exists && (metric.domainId != domainId || metric.unitId != unitId)) {
+            revert MetricSemanticChange();
+        }
+
         uint32 nextRevision = metric.exists ? metric.revision + 1 : 1;
         metric.domainId = domainId;
         metric.unitId = unitId;

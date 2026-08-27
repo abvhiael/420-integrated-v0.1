@@ -24,6 +24,16 @@
       "contracts": ["Identity420.sol"]
     },
     {
+      "dapp": "420 Trust",
+      "contracts": [
+        "TrustIssuerRegistry420.sol",
+        "TrustPolicyRegistry420.sol",
+        "TrustSignalRegistry420.sol",
+        "TrustAggregator420.sol"
+      ],
+      "note": "portable domain-specific evidence and reputation-signal protocol; exposes authenticated per-metric history and aggregates without creating a universal social or credit score"
+    },
+    {
       "dapp": "420 Market",
       "contracts": [
         "MarketPolicyRegistry420.sol",

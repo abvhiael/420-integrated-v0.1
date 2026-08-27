@@ -84,6 +84,11 @@ contract OrderRegistry420 is I420System {
     function systemName() external pure returns (string memory) { return "OrderRegistry420"; }
     function protocolVersion() external pure returns (uint32) { return 2; }
 
+    function orderStatus(bytes32 orderId) external view returns (Status) {
+        Order storage order = _order(orderId);
+        return order.status;
+    }
+
     function createOrder(bytes32 orderId, bytes32 listingId, uint32 listingRevision, uint256 quantity, address paymentAsset, uint256 totalAmount) external {
         if (orderId == bytes32(0)) revert InvalidOrderId();
         if (orders[orderId].buyer != address(0)) revert OrderExists();

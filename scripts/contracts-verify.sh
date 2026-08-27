@@ -20,6 +20,7 @@ go test ./... | tee "$ART/go-test.txt"
 
 echo "== static verification =="
 for s in \
+  scripts/verify-step6-contracts.py \
   scripts/verify-420pay-parameters.py \
   scripts/verify-420pay-implementation.py \
   scripts/verify-420pay-hardening.py
@@ -28,6 +29,9 @@ do
     python3 "$s" | tee -a "$ART/static-verification.txt"
   fi
 done
+
+echo "== verifier regression tests =="
+python3 -m unittest discover -s scripts/tests -p 'test_verify_*.py' -v |& tee "$ART/verifier-tests.txt"
 
 echo "== forge clean/build =="
 cd "$ROOT/contracts"

@@ -34,8 +34,7 @@ contract HighCountryAuthorizationTest {
     }
 
     function testExpiredCapabilityDenied() public {
-        uint64 expiredAt = block.timestamp == 0 ? 0 : uint64(block.timestamp - 1);
-        _setGrant(0, expiredAt, false);
+        _setGrant(0, uint64(block.timestamp), false);
         AuthorizationRequest memory request = _request();
         require(!authorization.isAuthorized(request), "expired capability accepted");
         require(_requireAuthorizedReverts(request), "expired capability did not revert");

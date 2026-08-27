@@ -29,12 +29,7 @@ interface IInventoryListingRegistry420 {
 /// @notice Canonical finite-inventory accounting for 420 Market listings.
 /// @dev Tracks reservations only; it never takes custody of the underlying item or asset.
 contract InventoryReservation420 is SystemAccess, I420System {
-    enum ReservationStatus {
-        NONE,
-        RESERVED,
-        RELEASED,
-        CONSUMED
-    }
+    enum ReservationStatus { NONE, RESERVED, RELEASED, CONSUMED }
 
     struct Inventory {
         uint256 originalOffered;
@@ -71,12 +66,7 @@ contract InventoryReservation420 is SystemAccess, I420System {
 
     event OrderRegistryBound(address indexed orderRegistry);
     event InventoryInitialized(bytes32 indexed listingId, uint256 originalOffered);
-    event InventoryReserved(
-        bytes32 indexed orderId,
-        bytes32 indexed listingId,
-        uint32 indexed listingRevision,
-        uint256 quantity
-    );
+    event InventoryReserved(bytes32 indexed orderId, bytes32 indexed listingId, uint32 indexed listingRevision, uint256 quantity);
     event InventoryReleased(bytes32 indexed orderId, bytes32 indexed listingId, uint256 quantity);
     event InventoryConsumed(bytes32 indexed orderId, bytes32 indexed listingId, uint256 quantity);
 
@@ -93,7 +83,6 @@ contract InventoryReservation420 is SystemAccess, I420System {
     function systemName() external pure returns (string memory) { return "InventoryReservation420"; }
     function protocolVersion() external pure returns (uint32) { return 1; }
 
-    /// @notice One-time binding to the canonical OrderRegistry420 instance.
     function bindOrderRegistry(address orderRegistry_) external onlyGovernance {
         if (orderRegistry_ == address(0)) revert InvalidRegistry();
         if (orderRegistry != address(0)) revert AlreadyBound();
@@ -124,8 +113,8 @@ contract InventoryReservation420 is SystemAccess, I420System {
             revert InventoryInvariantViolation();
         }
 
-        uint256 available = state.originalOffered - state.reserved - state.sold;
-        if (quantity > available) revert InsufficientAvailableInventory();
+        uint256 availableQuantity = state.originalOffered - state.reserved - state.sold;
+        if (quantity > availableQuantity) revert InsufficientAvailableInventory();
 
         state.reserved += quantity;
         reservations[orderId] = Reservation({
@@ -135,7 +124,6 @@ contract InventoryReservation420 is SystemAccess, I420System {
             status: ReservationStatus.RESERVED
         });
         _assertInvariant(state);
-
         emit InventoryReserved(orderId, listingId, listingRevision, quantity);
     }
 
@@ -149,7 +137,6 @@ contract InventoryReservation420 is SystemAccess, I420System {
         state.released += reservation.quantity;
         reservation.status = ReservationStatus.RELEASED;
         _assertInvariant(state);
-
         emit InventoryReleased(orderId, reservation.listingId, reservation.quantity);
     }
 
@@ -163,7 +150,6 @@ contract InventoryReservation420 is SystemAccess, I420System {
         state.sold += reservation.quantity;
         reservation.status = ReservationStatus.CONSUMED;
         _assertInvariant(state);
-
         emit InventoryConsumed(orderId, reservation.listingId, reservation.quantity);
     }
 
@@ -179,8 +165,7 @@ contract InventoryReservation420 is SystemAccess, I420System {
     function conserved(bytes32 listingId) external view returns (bool) {
         Inventory memory state = inventory[listingId];
         if (!state.initialized) return true;
-        return state.originalOffered == (state.originalOffered - state.reserved - state.sold)
-            + state.reserved + state.sold;
+        return state.originalOffered == (state.originalOffered - state.reserved - state.sold) + state.reserved + state.sold;
     }
 
     function _assertInvariant(Inventory storage state) private view {

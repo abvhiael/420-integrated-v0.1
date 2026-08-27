@@ -32,11 +32,14 @@ done
 echo "== forge clean/build =="
 cd "$ROOT/contracts"
 forge clean
-if ! forge build --force --sizes 2>&1 | tee "$ART/forge-build.txt"; then
+# EIP-170/EIP-3860 size enforcement applies to production contracts under src/.
+# Forge scripts and test harnesses may intentionally exceed deployable bytecode limits
+# because they are executed by Foundry and are never protocol deployments.
+if ! forge build src --force --sizes 2>&1 | tee "$ART/forge-build.txt"; then
   echo "== forge build isolation ==" | tee "$ART/forge-build-isolation.txt"
   isolation_failed=0
 
-  for target in src/* test/*; do
+  for target in src/*; do
     [[ -e "$target" ]] || continue
     echo "-- target: $target" | tee -a "$ART/forge-build-isolation.txt"
     if forge build "$target" --force --sizes >>"$ART/forge-build-isolation.txt" 2>&1; then

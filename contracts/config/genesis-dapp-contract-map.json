@@ -38,6 +38,17 @@
       "contracts": ["GenesisDEXFactory.sol","CanonicalMarketRegistry.sol","PermissionlessDEXFactory.sol","TWAPOracle.sol","PublicBatchAuction.sol","ApprovedQuoteAssetRegistry.sol","CanonicalSwapExecutor420.sol"]
     },
     {
+      "dapp": "420 Oracle",
+      "contracts": [
+        "OracleProviderRegistry420.sol",
+        "OracleFeedRegistry420.sol",
+        "OracleRiskPolicy420.sol",
+        "OracleRouter420.sol",
+        "TWAPOracleSourceAdapter420.sol"
+      ],
+      "note": "provider-neutral external-data protocol with freshness, quorum, confidence, deviation, replay and circuit-breaker controls; randomness remains a separately routed service"
+    },
+    {
       "dapp": "420 Bridge",
       "contracts": ["VerifiedGateway420.sol","BridgeAssetRegistry.sol","CADCBridgeIntegration.sol","BridgeRouteRegistry.sol","BridgeRiskManager.sol","BridgeTransferRegistry.sol","GatewayRouter420.sol","BridgeAccountingRegistry.sol","CADCLayerZeroAdapter.sol","USDCCCTPAdapter.sol","ETHProofAdapter.sol","BTCLightClientAdapter.sol"]
     },

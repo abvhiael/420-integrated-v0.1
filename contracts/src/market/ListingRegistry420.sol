@@ -90,22 +90,24 @@ contract ListingRegistry420 is I420System {
     ) external {
         if (listingId == bytes32(0)) revert InvalidListingId();
         if (_listings[listingId].seller != address(0)) revert ListingExists();
-        _publish(
-            listingId,
-            msg.sender,
-            sellerProfileId,
-            itemClass,
-            assetRef,
-            metadataHash,
-            policyId,
-            saleMechanism,
-            settlementAdapterId,
-            quoteAsset,
-            unitPrice,
-            quantity,
-            expiresAt,
-            1
-        );
+
+        Listing memory next = Listing({
+            seller: msg.sender,
+            sellerProfileId: sellerProfileId,
+            itemClass: itemClass,
+            assetRef: assetRef,
+            metadataHash: metadataHash,
+            policyId: policyId,
+            saleMechanism: saleMechanism,
+            settlementAdapterId: settlementAdapterId,
+            quoteAsset: quoteAsset,
+            unitPrice: unitPrice,
+            quantity: quantity,
+            expiresAt: expiresAt,
+            revision: 1,
+            active: true
+        });
+        _publish(listingId, next);
     }
 
     function reviseListing(
@@ -122,24 +124,19 @@ contract ListingRegistry420 is I420System {
         Listing memory current = _listings[listingId];
         if (current.seller == address(0)) revert UnknownListing();
         if (current.seller != msg.sender) revert NotSeller();
-        // MARKET-INV-001: a commercial revision cannot manufacture a fresh finite inventory pool.
         if (quantity != current.quantity) revert QuantityImmutable();
-        _publish(
-            listingId,
-            current.seller,
-            current.sellerProfileId,
-            current.itemClass,
-            current.assetRef,
-            metadataHash,
-            policyId,
-            saleMechanism,
-            settlementAdapterId,
-            quoteAsset,
-            unitPrice,
-            quantity,
-            expiresAt,
-            current.revision + 1
-        );
+
+        Listing memory next = current;
+        next.metadataHash = metadataHash;
+        next.policyId = policyId;
+        next.saleMechanism = saleMechanism;
+        next.settlementAdapterId = settlementAdapterId;
+        next.quoteAsset = quoteAsset;
+        next.unitPrice = unitPrice;
+        next.expiresAt = expiresAt;
+        next.revision = current.revision + 1;
+        next.active = true;
+        _publish(listingId, next);
     }
 
     function cancelListing(bytes32 listingId) external {
@@ -167,63 +164,36 @@ contract ListingRegistry420 is I420System {
             && (listing.expiresAt == 0 || block.timestamp < listing.expiresAt);
     }
 
-    function _publish(
-        bytes32 listingId,
-        address seller,
-        bytes32 sellerProfileId,
-        bytes32 itemClass,
-        bytes32 assetRef,
-        bytes32 metadataHash,
-        bytes32 policyId,
-        bytes32 saleMechanism,
-        bytes32 settlementAdapterId,
-        address quoteAsset,
-        uint256 unitPrice,
-        uint256 quantity,
-        uint64 expiresAt,
-        uint32 revision
-    ) private {
-        if (!MarketIds420.isCanonicalItemClass(itemClass)) revert InvalidItemClass();
-        if (!MarketIds420.isCanonicalSaleMechanism(saleMechanism)) revert InvalidSaleMechanism();
-        if (assetRef == bytes32(0)) revert InvalidAssetRef();
-        if (quantity == 0) revert InvalidQuantity();
-        if (expiresAt != 0 && expiresAt <= block.timestamp) revert InvalidExpiry();
-        if (!policyRegistry.policyActive(policyId)) revert InactivePolicy();
-        if (!policyRegistry.settlementAdapterActive(settlementAdapterId)) revert InactiveSettlementAdapter();
+    function _publish(bytes32 listingId, Listing memory next) private {
+        if (!MarketIds420.isCanonicalItemClass(next.itemClass)) revert InvalidItemClass();
+        if (!MarketIds420.isCanonicalSaleMechanism(next.saleMechanism)) revert InvalidSaleMechanism();
+        if (next.assetRef == bytes32(0)) revert InvalidAssetRef();
+        if (next.quantity == 0) revert InvalidQuantity();
+        if (next.expiresAt != 0 && next.expiresAt <= block.timestamp) revert InvalidExpiry();
+        if (!policyRegistry.policyActive(next.policyId)) revert InactivePolicy();
+        if (!policyRegistry.settlementAdapterActive(next.settlementAdapterId)) revert InactiveSettlementAdapter();
 
-        Listing memory next = Listing({
-            seller: seller,
-            sellerProfileId: sellerProfileId,
-            itemClass: itemClass,
-            assetRef: assetRef,
-            metadataHash: metadataHash,
-            policyId: policyId,
-            saleMechanism: saleMechanism,
-            settlementAdapterId: settlementAdapterId,
-            quoteAsset: quoteAsset,
-            unitPrice: unitPrice,
-            quantity: quantity,
-            expiresAt: expiresAt,
-            revision: revision,
-            active: true
-        });
         _listings[listingId] = next;
-        _history[listingId][revision] = next;
+        _history[listingId][next.revision] = next;
+        _emitListingPublished(listingId, next);
+    }
+
+    function _emitListingPublished(bytes32 listingId, Listing memory listing) private {
         emit ListingPublished(
             listingId,
-            revision,
-            seller,
-            itemClass,
-            assetRef,
-            metadataHash,
-            policyId,
-            saleMechanism,
-            settlementAdapterId,
-            quoteAsset,
-            unitPrice,
-            quantity,
-            expiresAt,
-            true
+            listing.revision,
+            listing.seller,
+            listing.itemClass,
+            listing.assetRef,
+            listing.metadataHash,
+            listing.policyId,
+            listing.saleMechanism,
+            listing.settlementAdapterId,
+            listing.quoteAsset,
+            listing.unitPrice,
+            listing.quantity,
+            listing.expiresAt,
+            listing.active
         );
     }
 }

@@ -20,12 +20,14 @@ contract OracleFeedRegistry420 is SystemAccess, I420System {
         bytes32 aggregationMode;
         bytes32 metadataHash;
         uint32 heartbeat;
+        uint32 revision;
         uint8 decimals;
         uint8 minSources;
         bool active;
     }
 
     struct Source {
+        uint32 epoch;
         bool configured;
         bool active;
     }
@@ -50,12 +52,13 @@ contract OracleFeedRegistry420 is SystemAccess, I420System {
         bytes32 indexed feedType,
         bytes32 indexed aggregationMode,
         uint32 heartbeat,
+        uint32 revision,
         uint8 decimals,
         uint8 minSources,
         bytes32 metadataHash,
         bool active
     );
-    event FeedSourceSet(bytes32 indexed feedId, bytes32 indexed providerId, bool active);
+    event FeedSourceSet(bytes32 indexed feedId, bytes32 indexed providerId, uint32 epoch, bool active);
 
     constructor(address timelock_, address providerRegistry_) SystemAccess(timelock_) {
         if (providerRegistry_ == address(0)) revert ZeroAddress();
@@ -82,21 +85,23 @@ contract OracleFeedRegistry420 is SystemAccess, I420System {
         if (decimals > 36) revert InvalidDecimals();
         if (minSources == 0 || minSources > MAX_SOURCES) revert InvalidMinSources();
 
+        uint32 revision = feeds[feedId].revision + 1;
         feeds[feedId] = Feed({
             feedType: feedType,
             aggregationMode: aggregationMode,
             metadataHash: metadataHash,
             heartbeat: heartbeat,
+            revision: revision,
             decimals: decimals,
             minSources: minSources,
             active: active
         });
-        emit FeedSet(feedId, feedType, aggregationMode, heartbeat, decimals, minSources, metadataHash, active);
+        emit FeedSet(feedId, feedType, aggregationMode, heartbeat, revision, decimals, minSources, metadataHash, active);
     }
 
     function setSource(bytes32 feedId, bytes32 providerId, bool active) external onlyGovernance {
         if (feeds[feedId].feedType == bytes32(0)) revert InvalidFeedId();
-        if (!providerRegistry.providerActive(providerId)) revert InvalidProvider();
+        if (active && !providerRegistry.providerActive(providerId)) revert InvalidProvider();
 
         Source storage source = sources[feedId][providerId];
         if (!source.configured) {
@@ -104,8 +109,13 @@ contract OracleFeedRegistry420 is SystemAccess, I420System {
             source.configured = true;
             _sourceIds[feedId].push(providerId);
         }
+        if (active && !source.active) ++source.epoch;
         source.active = active;
-        emit FeedSourceSet(feedId, providerId, active);
+        emit FeedSourceSet(feedId, providerId, source.epoch, active);
+    }
+
+    function feedRevision(bytes32 feedId) external view returns (uint32) {
+        return feeds[feedId].revision;
     }
 
     function sourceCount(bytes32 feedId) external view returns (uint256) {
@@ -114,6 +124,10 @@ contract OracleFeedRegistry420 is SystemAccess, I420System {
 
     function sourceAt(bytes32 feedId, uint256 index) external view returns (bytes32) {
         return _sourceIds[feedId][index];
+    }
+
+    function sourceEpoch(bytes32 feedId, bytes32 providerId) external view returns (uint32) {
+        return sources[feedId][providerId].epoch;
     }
 
     function sourceActive(bytes32 feedId, bytes32 providerId) external view returns (bool) {

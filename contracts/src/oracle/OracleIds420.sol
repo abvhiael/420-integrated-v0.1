@@ -5,7 +5,11 @@ library OracleIds420 {
     bytes32 internal constant SERVICE_PROVIDER_REGISTRY = keccak256("420/ORACLE/SERVICE/PROVIDER_REGISTRY/V1");
     bytes32 internal constant SERVICE_FEED_REGISTRY = keccak256("420/ORACLE/SERVICE/FEED_REGISTRY/V1");
     bytes32 internal constant SERVICE_ROUTER = keccak256("420/ORACLE/SERVICE/ROUTER/V1");
+    bytes32 internal constant SERVICE_RISK_POLICY = keccak256("420/ORACLE/SERVICE/RISK_POLICY/V1");
     bytes32 internal constant SERVICE_RANDOMNESS = keccak256("420/ORACLE/SERVICE/RANDOMNESS_ROUTER/V1");
+
+    bytes32 internal constant SOURCE_KIND_TWAP = keccak256("420/ORACLE/SOURCE/TWAP/V1");
+    bytes32 internal constant SOURCE_KIND_EXTERNAL = keccak256("420/ORACLE/SOURCE/EXTERNAL_PROVIDER/V1");
 
     bytes32 internal constant FEED_PRICE = keccak256("420/ORACLE/FEED/PRICE/V1");
     bytes32 internal constant FEED_PROOF_OF_RESERVE = keccak256("420/ORACLE/FEED/PROOF_OF_RESERVE/V1");

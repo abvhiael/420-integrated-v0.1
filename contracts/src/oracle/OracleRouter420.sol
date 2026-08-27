@@ -47,6 +47,26 @@ contract OracleRouter420 is SystemAccess, I420System, IOracle420 {
         uint16 confidenceBps;
     }
 
+    struct RiskConfig {
+        uint16 minConfidenceBps;
+        uint16 maxDeviationBps;
+        bool configured;
+    }
+
+    struct NumericCollection {
+        int256[16] values;
+        uint256 count;
+        uint64 oldest;
+        uint16 conservativeConfidence;
+    }
+
+    struct ResultCollection {
+        bytes32[16] results;
+        uint64[16] times;
+        uint16[16] confidences;
+        uint256 count;
+    }
+
     IOracleProviderRegistry420Router public immutable providerRegistry;
     IOracleFeedRegistry420Router public immutable feedRegistry;
     IOracleRiskPolicy420Router public immutable riskPolicy;
@@ -84,7 +104,9 @@ contract OracleRouter420 is SystemAccess, I420System, IOracle420 {
     constructor(address timelock_, address providerRegistry_, address feedRegistry_, address riskPolicy_)
         SystemAccess(timelock_)
     {
-        if (providerRegistry_ == address(0) || feedRegistry_ == address(0) || riskPolicy_ == address(0)) revert ZeroAddress();
+        if (providerRegistry_ == address(0) || feedRegistry_ == address(0) || riskPolicy_ == address(0)) {
+            revert ZeroAddress();
+        }
         providerRegistry = IOracleProviderRegistry420Router(providerRegistry_);
         feedRegistry = IOracleFeedRegistry420Router(feedRegistry_);
         riskPolicy = IOracleRiskPolicy420Router(riskPolicy_);
@@ -138,19 +160,92 @@ contract OracleRouter420 is SystemAccess, I420System, IOracle420 {
     }
 
     function readNumeric(bytes32 feedId) external view returns (NumericRead memory out) {
-        if (!feedRegistry.feedActive(feedId)) revert InactiveFeed();
-        if (feedRegistry.aggregationModeOf(feedId) != OracleIds420.AGGREGATION_MEDIAN_NUMERIC) revert WrongAggregationMode();
+        _requireMode(feedId, OracleIds420.AGGREGATION_MEDIAN_NUMERIC);
+        RiskConfig memory risk = _risk(feedId);
+        NumericCollection memory collected = _collectNumeric(feedId, risk);
 
+        if (collected.count < feedRegistry.minSourcesOf(feedId)) revert InsufficientFreshSources();
+        _sort(collected.values, collected.count);
+
+        int256 median = collected.values[collected.count / 2];
+        uint16 spreadBps = _spreadBps(collected.values[0], collected.values[collected.count - 1], median);
+        _enforceNumericRisk(risk, collected.conservativeConfidence, spreadBps);
+
+        out = NumericRead({
+            value: median,
+            updatedAt: collected.oldest,
+            decimals: feedRegistry.decimalsOf(feedId),
+            confidenceBps: collected.conservativeConfidence,
+            spreadBps: spreadBps,
+            sourceCount: uint16(collected.count)
+        });
+    }
+
+    function readResult(bytes32 feedId) external view returns (ResultRead memory out) {
+        _requireMode(feedId, OracleIds420.AGGREGATION_QUORUM_EQUAL);
+        RiskConfig memory risk = _risk(feedId);
+        ResultCollection memory collected = _collectResults(feedId, risk);
+        uint8 minSources = feedRegistry.minSourcesOf(feedId);
+        if (collected.count < minSources) revert InsufficientFreshSources();
+
+        (bytes32 winner, uint64 winnerOldest, uint16 winnerConfidence, uint256 winnerCount) =
+            _selectResultQuorum(collected, minSources);
+        if (winner == bytes32(0)) revert InsufficientFreshSources();
+        if (risk.configured && winnerConfidence < risk.minConfidenceBps) revert ConfidenceTooLow();
+
+        out = ResultRead({
+            resultHash: winner,
+            updatedAt: winnerOldest,
+            agreeingSources: uint16(winnerCount),
+            confidenceBps: winnerConfidence
+        });
+    }
+
+    function _requireMode(bytes32 feedId, bytes32 requiredMode) private view {
+        if (!feedRegistry.feedActive(feedId)) revert InactiveFeed();
+        if (feedRegistry.aggregationModeOf(feedId) != requiredMode) revert WrongAggregationMode();
+    }
+
+    function _risk(bytes32 feedId) private view returns (RiskConfig memory risk) {
         (uint16 minConfidenceBps, uint16 maxDeviationBps, bool halted, bool configured) = riskPolicy.policy(feedId);
         if (halted) revert CircuitBreakerActive();
+        risk = RiskConfig({
+            minConfidenceBps: minConfidenceBps,
+            maxDeviationBps: maxDeviationBps,
+            configured: configured
+        });
+    }
 
+    function _collectNumeric(bytes32 feedId, RiskConfig memory risk)
+        private view returns (NumericCollection memory collected)
+    {
         uint32 heartbeat = feedRegistry.heartbeatOf(feedId);
-        uint8 minSources = feedRegistry.minSourcesOf(feedId);
         uint32 currentFeedRevision = feedRegistry.feedRevision(feedId);
-        int256[16] memory values;
-        uint64 oldest = type(uint64).max;
-        uint16 conservativeConfidence = 10_000;
-        uint256 freshSources;
+        uint256 totalSources = feedRegistry.sourceCount(feedId);
+        collected.oldest = type(uint64).max;
+        collected.conservativeConfidence = 10_000;
+
+        for (uint256 i = 0; i < totalSources; ++i) {
+            bytes32 providerId = feedRegistry.sourceAt(feedId, i);
+            if (!feedRegistry.sourceActive(feedId, providerId)) continue;
+            Observation memory obs = latest[feedId][providerId];
+            if (!_eligible(feedId, providerId, obs, heartbeat, currentFeedRevision)) continue;
+            if (risk.configured && obs.confidenceBps < risk.minConfidenceBps) continue;
+
+            collected.values[collected.count] = obs.numericValue;
+            ++collected.count;
+            if (obs.observedAt < collected.oldest) collected.oldest = obs.observedAt;
+            if (obs.confidenceBps < collected.conservativeConfidence) {
+                collected.conservativeConfidence = obs.confidenceBps;
+            }
+        }
+    }
+
+    function _collectResults(bytes32 feedId, RiskConfig memory risk)
+        private view returns (ResultCollection memory collected)
+    {
+        uint32 heartbeat = feedRegistry.heartbeatOf(feedId);
+        uint32 currentFeedRevision = feedRegistry.feedRevision(feedId);
         uint256 totalSources = feedRegistry.sourceCount(feedId);
 
         for (uint256 i = 0; i < totalSources; ++i) {
@@ -158,94 +253,54 @@ contract OracleRouter420 is SystemAccess, I420System, IOracle420 {
             if (!feedRegistry.sourceActive(feedId, providerId)) continue;
             Observation memory obs = latest[feedId][providerId];
             if (!_eligible(feedId, providerId, obs, heartbeat, currentFeedRevision)) continue;
-            if (configured && obs.confidenceBps < minConfidenceBps) continue;
-            values[freshSources] = obs.numericValue;
-            ++freshSources;
-            if (obs.observedAt < oldest) oldest = obs.observedAt;
-            if (obs.confidenceBps < conservativeConfidence) conservativeConfidence = obs.confidenceBps;
+            if (obs.resultHash == bytes32(0)) continue;
+            if (risk.configured && obs.confidenceBps < risk.minConfidenceBps) continue;
+
+            collected.results[collected.count] = obs.resultHash;
+            collected.times[collected.count] = obs.observedAt;
+            collected.confidences[collected.count] = obs.confidenceBps;
+            ++collected.count;
         }
-
-        if (freshSources < minSources) revert InsufficientFreshSources();
-        _sort(values, freshSources);
-        int256 median = values[freshSources / 2];
-        uint16 spreadBps = _spreadBps(values[0], values[freshSources - 1], median);
-        if (configured && maxDeviationBps != 0 && spreadBps > maxDeviationBps) revert ExcessiveDeviation();
-        if (configured && conservativeConfidence < minConfidenceBps) revert ConfidenceTooLow();
-
-        out = NumericRead({
-            value: median,
-            updatedAt: oldest,
-            decimals: feedRegistry.decimalsOf(feedId),
-            confidenceBps: conservativeConfidence,
-            spreadBps: spreadBps,
-            sourceCount: uint16(freshSources)
-        });
     }
 
-    function readResult(bytes32 feedId) external view returns (ResultRead memory out) {
-        if (!feedRegistry.feedActive(feedId)) revert InactiveFeed();
-        if (feedRegistry.aggregationModeOf(feedId) != OracleIds420.AGGREGATION_QUORUM_EQUAL) revert WrongAggregationMode();
+    function _selectResultQuorum(ResultCollection memory collected, uint8 minSources)
+        private pure returns (bytes32 winner, uint64 winnerOldest, uint16 winnerConfidence, uint256 winnerCount)
+    {
+        winnerConfidence = 10_000;
+        for (uint256 i = 0; i < collected.count; ++i) {
+            (uint256 count, uint64 oldest, uint16 confidence) = _countResult(collected, collected.results[i]);
+            if (count < minSources) continue;
 
-        (uint16 minConfidenceBps,, bool halted, bool configured) = riskPolicy.policy(feedId);
-        if (halted) revert CircuitBreakerActive();
-
-        uint32 heartbeat = feedRegistry.heartbeatOf(feedId);
-        uint8 minSources = feedRegistry.minSourcesOf(feedId);
-        uint32 currentFeedRevision = feedRegistry.feedRevision(feedId);
-        bytes32[16] memory results;
-        uint64[16] memory times;
-        uint16[16] memory confidences;
-        uint256 freshCount;
-        uint256 totalSources = feedRegistry.sourceCount(feedId);
-
-        for (uint256 i = 0; i < totalSources; ++i) {
-            bytes32 providerId = feedRegistry.sourceAt(feedId, i);
-            if (!feedRegistry.sourceActive(feedId, providerId)) continue;
-            Observation memory obs = latest[feedId][providerId];
-            if (!_eligible(feedId, providerId, obs, heartbeat, currentFeedRevision) || obs.resultHash == bytes32(0)) continue;
-            if (configured && obs.confidenceBps < minConfidenceBps) continue;
-            results[freshCount] = obs.resultHash;
-            times[freshCount] = obs.observedAt;
-            confidences[freshCount] = obs.confidenceBps;
-            ++freshCount;
-        }
-        if (freshCount < minSources) revert InsufficientFreshSources();
-
-        bytes32 winner;
-        uint256 winnerCount;
-        uint64 winnerOldest;
-        uint16 winnerConfidence = 10_000;
-        for (uint256 i = 0; i < freshCount; ++i) {
-            uint256 count;
-            uint64 oldest = type(uint64).max;
-            uint16 conservativeConfidence = 10_000;
-            for (uint256 j = 0; j < freshCount; ++j) {
-                if (results[j] == results[i]) {
-                    ++count;
-                    if (times[j] < oldest) oldest = times[j];
-                    if (confidences[j] < conservativeConfidence) conservativeConfidence = confidences[j];
-                }
-            }
-            if (count >= minSources) {
-                if (winner == bytes32(0)) {
-                    winner = results[i];
-                    winnerCount = count;
-                    winnerOldest = oldest;
-                    winnerConfidence = conservativeConfidence;
-                } else if (winner != results[i]) {
-                    revert AmbiguousQuorum();
-                }
+            if (winner == bytes32(0)) {
+                winner = collected.results[i];
+                winnerCount = count;
+                winnerOldest = oldest;
+                winnerConfidence = confidence;
+            } else if (winner != collected.results[i]) {
+                revert AmbiguousQuorum();
             }
         }
+    }
 
-        if (winner == bytes32(0)) revert InsufficientFreshSources();
-        if (configured && winnerConfidence < minConfidenceBps) revert ConfidenceTooLow();
-        out = ResultRead({
-            resultHash: winner,
-            updatedAt: winnerOldest,
-            agreeingSources: uint16(winnerCount),
-            confidenceBps: winnerConfidence
-        });
+    function _countResult(ResultCollection memory collected, bytes32 candidate)
+        private pure returns (uint256 count, uint64 oldest, uint16 conservativeConfidence)
+    {
+        oldest = type(uint64).max;
+        conservativeConfidence = 10_000;
+        for (uint256 j = 0; j < collected.count; ++j) {
+            if (collected.results[j] != candidate) continue;
+            ++count;
+            if (collected.times[j] < oldest) oldest = collected.times[j];
+            if (collected.confidences[j] < conservativeConfidence) {
+                conservativeConfidence = collected.confidences[j];
+            }
+        }
+    }
+
+    function _enforceNumericRisk(RiskConfig memory risk, uint16 confidenceBps, uint16 spreadBps) private pure {
+        if (!risk.configured) return;
+        if (risk.maxDeviationBps != 0 && spreadBps > risk.maxDeviationBps) revert ExcessiveDeviation();
+        if (confidenceBps < risk.minConfidenceBps) revert ConfidenceTooLow();
     }
 
     function _eligible(bytes32 feedId, bytes32 providerId, Observation memory obs, uint32 heartbeat, uint32 currentFeedRevision)

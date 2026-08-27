@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import json
 import pathlib
+import re
 import sys
 
 
@@ -48,6 +49,19 @@ def format_difference(label, diff):
     )
 
 
+def solidity_address_literals(source):
+    """Return all 20-byte Solidity address literals normalized to lowercase."""
+    return {
+        match.group(0).lower()
+        for match in re.finditer(r"0x[0-9a-fA-F]{40}(?![0-9a-fA-F])", source)
+    }
+
+
+def source_contains_address(source, expected_address):
+    """Checksum-insensitive comparison for a canonical 20-byte address literal."""
+    return expected_address.lower() in solidity_address_literals(source)
+
+
 def frozen_manifest_projection(assignments, manifest, frozen_through):
     frozen_address = frozen_through.lower()
     frozen_addresses = {item["address"].lower() for item in assignments}
@@ -81,8 +95,6 @@ def frozen_manifest_projection(assignments, manifest, frozen_through):
         "contracts": projected_contracts,
     }
 
-    # Keep the frozen range explicit in this projection helper so a caller cannot
-    # accidentally validate a different range while reusing the same assignments.
     if not assignments or assignments[-1]["address"].lower() != frozen_address:
         return expected, actual, (
             "$.contracts",
@@ -115,10 +127,10 @@ def verify(root):
     frozen_through = sysaddr.get("frozen_through", "").lower()
     if frozen_through != expected[-1]:
         errors.append("frozen_through mismatch")
-    if (
+    native_system_origin = (
         sysaddr.get("native_system_origin", {}).get("address", "").lower()
-        != "0xfffffffffffffffffffffffffffffffffffffffe"
-    ):
+    )
+    if native_system_origin != "0xfffffffffffffffffffffffffffffffffffffffe":
         errors.append("native system origin must equal go-ethereum params.SystemAddress")
 
     deployment_manifest_path = root / "contracts/config/deployment-manifest.json"
@@ -177,14 +189,15 @@ def verify(root):
             errors.append("founder vesting invariant missing: " + token)
 
     sc = (root / "contracts/src/system/ConsensusSystemCall420.sol").read_text()
-    for token in [
-        "0xfffffffffffffffffffffffffffffffffffffffe",
+    for address in [
+        native_system_origin,
         "0x0000000000000000000000000000000000000420",
         "0x0000000000000000000000000000000000000423",
-        "420/CONSENSUS_SYSTEM_CALL/V1",
     ]:
-        if token not in sc:
-            errors.append("consensus system-call invariant missing: " + token)
+        if not source_contains_address(sc, address):
+            errors.append("consensus system-call invariant missing address: " + address)
+    if "420/CONSENSUS_SYSTEM_CALL/V1" not in sc:
+        errors.append("consensus system-call invariant missing domain: 420/CONSENSUS_SYSTEM_CALL/V1")
 
     return {
         "pass": not errors,

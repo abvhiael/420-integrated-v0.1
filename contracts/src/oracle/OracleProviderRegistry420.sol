@@ -14,6 +14,7 @@ contract OracleProviderRegistry420 is SystemAccess, I420System {
         bytes32 stakeRef;
         uint64 activatedAt;
         uint64 deactivatedAt;
+        uint32 epoch;
         bool active;
     }
 
@@ -29,6 +30,7 @@ contract OracleProviderRegistry420 is SystemAccess, I420System {
         address indexed operator,
         bytes32 metadataHash,
         bytes32 stakeRef,
+        uint32 epoch,
         bool active
     );
 
@@ -51,17 +53,21 @@ contract OracleProviderRegistry420 is SystemAccess, I420System {
         bytes32 occupied = providerOfOperator[operator];
         if (occupied != bytes32(0) && occupied != providerId) revert OperatorAlreadyBound();
 
-        if (previous.operator != address(0) && previous.operator != operator) {
-            delete providerOfOperator[previous.operator];
-        }
+        bool operatorChanged = previous.operator != address(0) && previous.operator != operator;
+        if (operatorChanged) delete providerOfOperator[previous.operator];
 
         uint64 activatedAt = previous.activatedAt;
         uint64 deactivatedAt = previous.deactivatedAt;
-        if (active && !previous.active) {
+        uint32 epoch = previous.epoch;
+
+        if (active && (!previous.active || operatorChanged || epoch == 0)) {
             activatedAt = uint64(block.timestamp);
             deactivatedAt = 0;
+            ++epoch;
         } else if (!active && previous.active) {
             deactivatedAt = uint64(block.timestamp);
+        } else if (operatorChanged) {
+            ++epoch;
         }
 
         providers[providerId] = Provider({
@@ -70,15 +76,20 @@ contract OracleProviderRegistry420 is SystemAccess, I420System {
             stakeRef: stakeRef,
             activatedAt: activatedAt,
             deactivatedAt: deactivatedAt,
+            epoch: epoch,
             active: active
         });
         providerOfOperator[operator] = providerId;
 
-        emit ProviderSet(providerId, operator, metadataHash, stakeRef, active);
+        emit ProviderSet(providerId, operator, metadataHash, stakeRef, epoch, active);
     }
 
     function providerActive(bytes32 providerId) external view returns (bool) {
         return providers[providerId].active;
+    }
+
+    function providerEpoch(bytes32 providerId) external view returns (uint32) {
+        return providers[providerId].epoch;
     }
 
     function isAuthorizedOperator(bytes32 providerId, address operator) external view returns (bool) {

@@ -83,4 +83,9 @@ contract MarketPolicyRegistry420 is SystemAccess, I420System {
     function settlementAdapterActive(bytes32 adapterId) external view returns (bool) {
         return settlementAdapters[adapterId].active;
     }
+
+    function isSettlementReporter(bytes32 adapterId, address reporter) external view returns (bool) {
+        SettlementAdapter memory adapter = settlementAdapters[adapterId];
+        return adapter.active && adapter.adapter == reporter;
+    }
 }

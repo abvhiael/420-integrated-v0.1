@@ -3,6 +3,7 @@ pragma solidity ^0.8.24;
 
 import "../src/oracle/OracleProviderRegistry420.sol";
 import "../src/oracle/OracleFeedRegistry420.sol";
+import "../src/oracle/OracleRiskPolicy420.sol";
 import "../src/oracle/OracleRouter420.sol";
 import "../src/oracle/OracleIds420.sol";
 
@@ -27,7 +28,8 @@ contract Oracle420EpochTest {
         feeds = new OracleFeedRegistry420(address(this), address(providers));
         feeds.setFeed(FEED, OracleIds420.FEED_PRICE, OracleIds420.AGGREGATION_MEDIAN_NUMERIC, 600, 8, 1, bytes32(0), true);
         feeds.setSource(FEED, PROVIDER, true);
-        router = new OracleRouter420(address(this), address(providers), address(feeds));
+        OracleRiskPolicy420 risk = new OracleRiskPolicy420(address(this));
+        router = new OracleRouter420(address(this), address(providers), address(feeds), address(risk));
     }
 
     function _submit(OracleRouter420 router, bytes32 id, uint64 observedAt) private {

@@ -3,8 +3,10 @@ pragma solidity ^0.8.24;
 
 import "../src/oracle/OracleProviderRegistry420.sol";
 import "../src/oracle/OracleFeedRegistry420.sol";
+import "../src/oracle/OracleRiskPolicy420.sol";
 import "../src/oracle/OracleRouter420.sol";
 import "../src/oracle/OracleIds420.sol";
+import "../src/interfaces/IOracle420.sol";
 
 interface VmOracle420 {
     function prank(address) external;
@@ -38,44 +40,20 @@ contract Oracle420Test {
         providers.setProvider(PROVIDER_D, OP_D, keccak256("d-meta"), bytes32(0), true);
 
         feeds = new OracleFeedRegistry420(address(this), address(providers));
-        router = new OracleRouter420(address(this), address(providers), address(feeds));
+        OracleRiskPolicy420 risk = new OracleRiskPolicy420(address(this));
+        router = new OracleRouter420(address(this), address(providers), address(feeds), address(risk));
     }
 
     function _configurePrice(OracleFeedRegistry420 feeds, uint8 minSources) private {
-        feeds.setFeed(
-            PRICE_FEED,
-            OracleIds420.FEED_PRICE,
-            OracleIds420.AGGREGATION_MEDIAN_NUMERIC,
-            60,
-            8,
-            minSources,
-            keccak256("price-meta"),
-            true
-        );
+        feeds.setFeed(PRICE_FEED, OracleIds420.FEED_PRICE, OracleIds420.AGGREGATION_MEDIAN_NUMERIC, 60, 8, minSources, keccak256("price-meta"), true);
         feeds.setSource(PRICE_FEED, PROVIDER_A, true);
         feeds.setSource(PRICE_FEED, PROVIDER_B, true);
         feeds.setSource(PRICE_FEED, PROVIDER_C, true);
     }
 
-    function _submitNumeric(
-        OracleRouter420 router,
-        address operator,
-        bytes32 providerId,
-        bytes32 observationId,
-        int256 value,
-        uint64 observedAt
-    ) private {
+    function _submitNumeric(OracleRouter420 router, address operator, bytes32 providerId, bytes32 observationId, int256 value, uint64 observedAt) private {
         vm.prank(operator);
-        router.submitObservation(
-            PRICE_FEED,
-            providerId,
-            observationId,
-            value,
-            bytes32(0),
-            keccak256(abi.encode(providerId, value, observedAt)),
-            observedAt,
-            9_900
-        );
+        router.submitObservation(PRICE_FEED, providerId, observationId, value, bytes32(0), keccak256(abi.encode(providerId, value, observedAt)), observedAt, 9_900);
     }
 
     function testMedianNumericRequiresFreshQuorum() public {
@@ -86,11 +64,12 @@ contract Oracle420Test {
         _submitNumeric(router, OP_B, PROVIDER_B, keccak256("obs-b"), 300, 991);
         _submitNumeric(router, OP_C, PROVIDER_C, keccak256("obs-c"), 200, 992);
 
-        (int256 value, uint64 updatedAt, uint8 decimals, uint256 sources) = router.readNumeric(PRICE_FEED);
-        require(value == 200, "median");
-        require(updatedAt == 990, "conservative timestamp");
-        require(decimals == 8, "decimals");
-        require(sources == 3, "source count");
+        IOracle420.NumericRead memory read = router.readNumeric(PRICE_FEED);
+        require(read.value == 200, "median");
+        require(read.updatedAt == 990, "conservative timestamp");
+        require(read.decimals == 8, "decimals");
+        require(read.sourceCount == 3, "source count");
+        require(read.confidenceBps == 9_900, "confidence");
 
         vm.warp(1_100);
         vm.expectRevert(OracleRouter420.InsufficientFreshSources.selector);
@@ -141,16 +120,7 @@ contract Oracle420Test {
 
     function testExactResultQuorum() public {
         (, OracleFeedRegistry420 feeds, OracleRouter420 router) = _deploy();
-        feeds.setFeed(
-            OUTCOME_FEED,
-            OracleIds420.FEED_OUTCOME,
-            OracleIds420.AGGREGATION_QUORUM_EQUAL,
-            60,
-            0,
-            2,
-            keccak256("outcome-meta"),
-            true
-        );
+        feeds.setFeed(OUTCOME_FEED, OracleIds420.FEED_OUTCOME, OracleIds420.AGGREGATION_QUORUM_EQUAL, 60, 0, 2, keccak256("outcome-meta"), true);
         feeds.setSource(OUTCOME_FEED, PROVIDER_A, true);
         feeds.setSource(OUTCOME_FEED, PROVIDER_B, true);
         feeds.setSource(OUTCOME_FEED, PROVIDER_C, true);
@@ -158,31 +128,20 @@ contract Oracle420Test {
         bytes32 winner = keccak256("HOME_WIN");
         bytes32 other = keccak256("AWAY_WIN");
 
-        vm.prank(OP_A);
-        router.submitObservation(OUTCOME_FEED, PROVIDER_A, keccak256("oa"), 0, winner, bytes32(0), 990, 9_000);
-        vm.prank(OP_B);
-        router.submitObservation(OUTCOME_FEED, PROVIDER_B, keccak256("ob"), 0, winner, bytes32(0), 991, 9_100);
-        vm.prank(OP_C);
-        router.submitObservation(OUTCOME_FEED, PROVIDER_C, keccak256("oc"), 0, other, bytes32(0), 992, 9_200);
+        vm.prank(OP_A); router.submitObservation(OUTCOME_FEED, PROVIDER_A, keccak256("oa"), 0, winner, bytes32(0), 990, 9_000);
+        vm.prank(OP_B); router.submitObservation(OUTCOME_FEED, PROVIDER_B, keccak256("ob"), 0, winner, bytes32(0), 991, 9_100);
+        vm.prank(OP_C); router.submitObservation(OUTCOME_FEED, PROVIDER_C, keccak256("oc"), 0, other, bytes32(0), 992, 9_200);
 
-        (bytes32 resultHash, uint64 updatedAt, uint256 agreeing) = router.readResult(OUTCOME_FEED);
-        require(resultHash == winner, "wrong result");
-        require(updatedAt == 990, "wrong timestamp");
-        require(agreeing == 2, "wrong quorum");
+        IOracle420.ResultRead memory read = router.readResult(OUTCOME_FEED);
+        require(read.resultHash == winner, "wrong result");
+        require(read.updatedAt == 990, "wrong timestamp");
+        require(read.agreeingSources == 2, "wrong quorum");
+        require(read.confidenceBps == 9_000, "wrong confidence");
     }
 
     function testConflictingExactQuorumsFailClosed() public {
         (, OracleFeedRegistry420 feeds, OracleRouter420 router) = _deploy();
-        feeds.setFeed(
-            OUTCOME_FEED,
-            OracleIds420.FEED_OUTCOME,
-            OracleIds420.AGGREGATION_QUORUM_EQUAL,
-            60,
-            0,
-            2,
-            bytes32(0),
-            true
-        );
+        feeds.setFeed(OUTCOME_FEED, OracleIds420.FEED_OUTCOME, OracleIds420.AGGREGATION_QUORUM_EQUAL, 60, 0, 2, bytes32(0), true);
         feeds.setSource(OUTCOME_FEED, PROVIDER_A, true);
         feeds.setSource(OUTCOME_FEED, PROVIDER_B, true);
         feeds.setSource(OUTCOME_FEED, PROVIDER_C, true);

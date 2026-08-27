@@ -43,6 +43,7 @@ contract ListingRegistry420 is I420System {
     error InvalidSaleMechanism();
     error InvalidAssetRef();
     error InvalidQuantity();
+    error QuantityImmutable();
     error InvalidExpiry();
     error InactivePolicy();
     error InactiveSettlementAdapter();
@@ -71,7 +72,7 @@ contract ListingRegistry420 is I420System {
     }
 
     function systemName() external pure returns (string memory) { return "ListingRegistry420"; }
-    function protocolVersion() external pure returns (uint32) { return 1; }
+    function protocolVersion() external pure returns (uint32) { return 2; }
 
     function createListing(
         bytes32 listingId,
@@ -121,6 +122,8 @@ contract ListingRegistry420 is I420System {
         Listing memory current = _listings[listingId];
         if (current.seller == address(0)) revert UnknownListing();
         if (current.seller != msg.sender) revert NotSeller();
+        // MARKET-INV-001: a commercial revision cannot manufacture a fresh finite inventory pool.
+        if (quantity != current.quantity) revert QuantityImmutable();
         _publish(
             listingId,
             current.seller,

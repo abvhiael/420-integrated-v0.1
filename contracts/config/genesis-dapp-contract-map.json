@@ -39,8 +39,14 @@
     },
     {
       "dapp": "420 Oracle",
-      "contracts": ["OracleProviderRegistry420.sol","OracleFeedRegistry420.sol","OracleRouter420.sol"],
-      "note": "provider-neutral external-data protocol; freshness/quorum/replay controls fail closed; randomness remains a separately routed oracle service"
+      "contracts": [
+        "OracleProviderRegistry420.sol",
+        "OracleFeedRegistry420.sol",
+        "OracleRiskPolicy420.sol",
+        "OracleRouter420.sol",
+        "TWAPOracleSourceAdapter420.sol"
+      ],
+      "note": "provider-neutral external-data protocol with freshness, quorum, confidence, deviation, replay and circuit-breaker controls; randomness remains a separately routed service"
     },
     {
       "dapp": "420 Bridge",

@@ -45,7 +45,7 @@ contract MockCapabilityRegistry is ICapabilityRegistry420 {
         CapabilityGrant memory capabilityGrant = _grants[grantId];
         if (capabilityGrant.revoked) return false;
         if (block.timestamp < capabilityGrant.validFrom) return false;
-        if (capabilityGrant.validUntil != 0 && block.timestamp > capabilityGrant.validUntil) return false;
+        if (capabilityGrant.validUntil != 0 && block.timestamp >= capabilityGrant.validUntil) return false;
         if (amount > capabilityGrant.perCallLimit && capabilityGrant.perCallLimit != 0) return false;
 
         return true;

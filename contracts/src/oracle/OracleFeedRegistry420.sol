@@ -114,9 +114,13 @@ contract OracleFeedRegistry420 is SystemAccess, I420System {
         emit FeedSourceSet(feedId, providerId, source.epoch, active);
     }
 
-    function feedRevision(bytes32 feedId) external view returns (uint32) {
-        return feeds[feedId].revision;
-    }
+    function feedTypeOf(bytes32 feedId) external view returns (bytes32) { return feeds[feedId].feedType; }
+    function aggregationModeOf(bytes32 feedId) external view returns (bytes32) { return feeds[feedId].aggregationMode; }
+    function heartbeatOf(bytes32 feedId) external view returns (uint32) { return feeds[feedId].heartbeat; }
+    function decimalsOf(bytes32 feedId) external view returns (uint8) { return feeds[feedId].decimals; }
+    function minSourcesOf(bytes32 feedId) external view returns (uint8) { return feeds[feedId].minSources; }
+    function feedActive(bytes32 feedId) external view returns (bool) { return feeds[feedId].active; }
+    function feedRevision(bytes32 feedId) external view returns (uint32) { return feeds[feedId].revision; }
 
     function sourceCount(bytes32 feedId) external view returns (uint256) {
         return _sourceIds[feedId].length;

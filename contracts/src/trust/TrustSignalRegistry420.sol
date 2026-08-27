@@ -62,23 +62,25 @@ contract TrustSignalRegistry420 is I420System {
     error UnauthorizedMetricIssuer();
     error InactiveMetric();
     error EvidenceReplay();
-    error IssuerMismatch();
     error InvalidReason();
 
     event TrustSignalRecorded(
         bytes32 indexed signalId,
         bytes32 indexed subjectId,
         bytes32 indexed metricId,
-        bytes32 subjectType,
-        bytes32 domainId,
         bytes32 issuerId,
         int256 value,
         bytes32 evidenceRef,
+        bytes32 correctionOf
+    );
+    event TrustSignalContext(
+        bytes32 indexed signalId,
+        bytes32 subjectType,
+        bytes32 domainId,
         uint64 occurredAt,
         uint64 recordedAt,
         uint32 metricRevision,
-        uint32 issuerEpoch,
-        bytes32 correctionOf
+        uint32 issuerEpoch
     );
     event TrustSignalSuperseded(bytes32 indexed oldSignalId, bytes32 indexed newSignalId);
     event TrustSignalRevoked(bytes32 indexed signalId, bytes32 indexed issuerId, bytes32 reasonHash);
@@ -215,20 +217,28 @@ contract TrustSignalRegistry420 is I420System {
         aggregate.total += input.value;
         aggregate.activeSignals += 1;
 
+        _emitSignalEvents(input.signalId);
+    }
+
+    function _emitSignalEvents(bytes32 signalId) private {
+        Signal storage signal = _signals[signalId];
         emit TrustSignalRecorded(
-            input.signalId,
-            input.subjectId,
-            input.metricId,
-            input.subjectType,
-            metric.domainId,
-            input.issuerId,
-            input.value,
-            input.evidenceRef,
-            input.occurredAt,
-            recordedAt,
-            metric.revision,
-            issuerEpoch,
-            correctionOf
+            signalId,
+            signal.subjectId,
+            signal.metricId,
+            signal.issuerId,
+            signal.value,
+            signal.evidenceRef,
+            signal.correctionOf
+        );
+        emit TrustSignalContext(
+            signalId,
+            signal.subjectType,
+            signal.domainId,
+            signal.occurredAt,
+            signal.recordedAt,
+            signal.metricRevision,
+            signal.issuerEpoch
         );
     }
 

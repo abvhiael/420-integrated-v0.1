@@ -1,14 +1,12 @@
-
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
 
-import "./SystemAccess.sol";
+import "./ConsensusSystemAccess420.sol";
 import "../interfaces/I420System.sol";
 
 /// @notice Execution receiver/accounting contract for native consensus issuance.
-/// Reward arithmetic is computed by fourtwentyd under frozen Decision 12.
-/// This contract records and routes amounts supplied by the privileged system-call path.
-contract RewardController is SystemAccess, I420System {
+/// @dev Reward arithmetic is computed by fourtwentyd. Only the bound native system-call path may apply it.
+contract RewardController is ConsensusSystemAccess420, I420System {
     address public constant ATTENTION_TREASURY = 0x0000000000000000000000000000000000000421;
     address public constant DEVELOPMENT_TREASURY = 0x0000000000000000000000000000000000000422;
 
@@ -27,13 +25,11 @@ contract RewardController is SystemAccess, I420System {
         uint256 developmentAmount
     );
 
-    constructor(address timelock_) SystemAccess(timelock_) {}
+    constructor(address timelock_) ConsensusSystemAccess420(timelock_) {}
 
     function systemName() external pure returns (string memory) { return "RewardController"; }
-    function protocolVersion() external pure returns (uint32) { return 1; }
+    function protocolVersion() external pure returns (uint32) { return 2; }
 
-    /// @notice Test/deployment scaffold for consensus-system application.
-    /// Production must restrict caller to the native system-call origin/path, not ordinary governance.
     function applyConsensusReward(
         uint64 blockNumber,
         address proposer,
@@ -42,7 +38,7 @@ contract RewardController is SystemAccess, I420System {
         uint256 perParticipantAmount,
         uint256 attentionAmount,
         uint256 developmentAmount
-    ) external onlyGovernance {
+    ) external onlyConsensusSystem {
         validatorAccrued[proposer] += proposerAmount;
         uint256 participantsIssued;
         for (uint256 i; i < participants.length; ++i) {
@@ -54,7 +50,12 @@ contract RewardController is SystemAccess, I420System {
         grossDevelopmentIssued += developmentAmount;
 
         emit RewardApplied(
-            blockNumber, proposer, proposerAmount, participantsIssued, attentionAmount, developmentAmount
+            blockNumber,
+            proposer,
+            proposerAmount,
+            participantsIssued,
+            attentionAmount,
+            developmentAmount
         );
     }
 }

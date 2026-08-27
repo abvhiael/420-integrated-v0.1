@@ -105,8 +105,7 @@ contract Market420Test {
         vm.prank(SETTLEMENT); orders.recordPayment(orderId, keccak256("420pay-payment"));
         vm.prank(SELLER); orders.recordFulfillment(orderId, keccak256("carrier-or-delivery-proof"));
         vm.prank(BUYER); orders.completeOrder(orderId);
-        (,,,,,,,,,, OrderRegistry420.Status status,,) = orders.orders(orderId);
-        require(status == OrderRegistry420.Status.COMPLETED, "not completed");
+        require(orders.orderStatus(orderId) == OrderRegistry420.Status.COMPLETED, "not completed");
     }
 
     function testDisputeCanOnlyRefundThroughSettlementAdapter() public {
@@ -118,7 +117,6 @@ contract Market420Test {
         vm.prank(SELLER); vm.expectRevert(OrderRegistry420.UnauthorizedSettlementReporter.selector); orders.recordRefund(orderId, keccak256("fake-refund"));
         vm.prank(SETTLEMENT); orders.recordRefund(orderId, keccak256("420pay-refund"));
         require(inventory.available(listingId) == 5, "refund did not release");
-        (,,,,,,,,,, OrderRegistry420.Status status,,) = orders.orders(orderId);
-        require(status == OrderRegistry420.Status.REFUNDED, "not refunded");
+        require(orders.orderStatus(orderId) == OrderRegistry420.Status.REFUNDED, "not refunded");
     }
 }

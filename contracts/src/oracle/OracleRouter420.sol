@@ -7,20 +7,20 @@ import "./OracleIds420.sol";
 
 interface IOracleProviderRegistry420Router {
     function isAuthorizedOperator(bytes32 providerId, address operator) external view returns (bool);
+    function providerEpoch(bytes32 providerId) external view returns (uint32);
 }
 
 interface IOracleFeedRegistry420Router {
-    function feeds(bytes32 feedId) external view returns (
-        bytes32 feedType,
-        bytes32 aggregationMode,
-        bytes32 metadataHash,
-        uint32 heartbeat,
-        uint8 decimals,
-        uint8 minSources,
-        bool active
-    );
+    function feedTypeOf(bytes32 feedId) external view returns (bytes32);
+    function aggregationModeOf(bytes32 feedId) external view returns (bytes32);
+    function heartbeatOf(bytes32 feedId) external view returns (uint32);
+    function decimalsOf(bytes32 feedId) external view returns (uint8);
+    function minSourcesOf(bytes32 feedId) external view returns (uint8);
+    function feedActive(bytes32 feedId) external view returns (bool);
+    function feedRevision(bytes32 feedId) external view returns (uint32);
     function sourceCount(bytes32 feedId) external view returns (uint256);
     function sourceAt(bytes32 feedId, uint256 index) external view returns (bytes32);
+    function sourceEpoch(bytes32 feedId, bytes32 providerId) external view returns (uint32);
     function sourceActive(bytes32 feedId, bytes32 providerId) external view returns (bool);
 }
 
@@ -34,6 +34,9 @@ contract OracleRouter420 is SystemAccess, I420System {
         bytes32 dataHash;
         bytes32 observationId;
         uint64 observedAt;
+        uint32 feedRevision;
+        uint32 providerEpoch;
+        uint32 sourceEpoch;
         uint16 confidenceBps;
     }
 
@@ -61,6 +64,9 @@ contract OracleRouter420 is SystemAccess, I420System {
         bytes32 resultHash,
         bytes32 dataHash,
         uint64 observedAt,
+        uint32 feedRevision,
+        uint32 providerEpoch,
+        uint32 sourceEpoch,
         uint16 confidenceBps
     );
 
@@ -83,9 +89,8 @@ contract OracleRouter420 is SystemAccess, I420System {
         uint64 observedAt,
         uint16 confidenceBps
     ) external {
-        (bytes32 feedType,,,,,, bool active) = feedRegistry.feeds(feedId);
-        if (feedType == bytes32(0)) revert InvalidFeed();
-        if (!active) revert InactiveFeed();
+        if (feedRegistry.feedTypeOf(feedId) == bytes32(0)) revert InvalidFeed();
+        if (!feedRegistry.feedActive(feedId)) revert InactiveFeed();
         if (!providerRegistry.isAuthorizedOperator(providerId, msg.sender)) revert UnauthorizedProvider();
         if (!feedRegistry.sourceActive(feedId, providerId)) revert UnauthorizedProvider();
         if (observationId == bytes32(0) || observedAt == 0 || observedAt > block.timestamp || confidenceBps > 10_000) {
@@ -94,6 +99,10 @@ contract OracleRouter420 is SystemAccess, I420System {
         if (observationUsed[observationId]) revert ObservationReplay();
         if (observedAt <= latest[feedId][providerId].observedAt) revert ObservationNotNewer();
 
+        uint32 currentFeedRevision = feedRegistry.feedRevision(feedId);
+        uint32 currentProviderEpoch = providerRegistry.providerEpoch(providerId);
+        uint32 currentSourceEpoch = feedRegistry.sourceEpoch(feedId, providerId);
+
         observationUsed[observationId] = true;
         latest[feedId][providerId] = Observation({
             numericValue: numericValue,
@@ -101,6 +110,9 @@ contract OracleRouter420 is SystemAccess, I420System {
             dataHash: dataHash,
             observationId: observationId,
             observedAt: observedAt,
+            feedRevision: currentFeedRevision,
+            providerEpoch: currentProviderEpoch,
+            sourceEpoch: currentSourceEpoch,
             confidenceBps: confidenceBps
         });
 
@@ -112,6 +124,9 @@ contract OracleRouter420 is SystemAccess, I420System {
             resultHash,
             dataHash,
             observedAt,
+            currentFeedRevision,
+            currentProviderEpoch,
+            currentSourceEpoch,
             confidenceBps
         );
     }
@@ -121,11 +136,14 @@ contract OracleRouter420 is SystemAccess, I420System {
         view
         returns (int256 value, uint64 updatedAt, uint8 decimals, uint256 freshSources)
     {
-        (, bytes32 aggregationMode,, uint32 heartbeat, uint8 feedDecimals, uint8 minSources, bool active) =
-            feedRegistry.feeds(feedId);
-        if (!active) revert InactiveFeed();
-        if (aggregationMode != OracleIds420.AGGREGATION_MEDIAN_NUMERIC) revert WrongAggregationMode();
+        if (!feedRegistry.feedActive(feedId)) revert InactiveFeed();
+        if (feedRegistry.aggregationModeOf(feedId) != OracleIds420.AGGREGATION_MEDIAN_NUMERIC) {
+            revert WrongAggregationMode();
+        }
 
+        uint32 heartbeat = feedRegistry.heartbeatOf(feedId);
+        uint8 minSources = feedRegistry.minSourcesOf(feedId);
+        uint32 currentFeedRevision = feedRegistry.feedRevision(feedId);
         int256[16] memory values;
         uint64 oldest = type(uint64).max;
         uint256 totalSources = feedRegistry.sourceCount(feedId);
@@ -134,7 +152,7 @@ contract OracleRouter420 is SystemAccess, I420System {
             bytes32 providerId = feedRegistry.sourceAt(feedId, i);
             if (!feedRegistry.sourceActive(feedId, providerId)) continue;
             Observation memory obs = latest[feedId][providerId];
-            if (!_fresh(obs.observedAt, heartbeat)) continue;
+            if (!_eligible(feedId, providerId, obs, heartbeat, currentFeedRevision)) continue;
             values[freshSources] = obs.numericValue;
             ++freshSources;
             if (obs.observedAt < oldest) oldest = obs.observedAt;
@@ -144,7 +162,7 @@ contract OracleRouter420 is SystemAccess, I420System {
         _sort(values, freshSources);
         value = values[freshSources / 2];
         updatedAt = oldest;
-        decimals = feedDecimals;
+        decimals = feedRegistry.decimalsOf(feedId);
     }
 
     function readResult(bytes32 feedId)
@@ -152,19 +170,24 @@ contract OracleRouter420 is SystemAccess, I420System {
         view
         returns (bytes32 resultHash, uint64 updatedAt, uint256 agreeingSources)
     {
-        (, bytes32 aggregationMode,, uint32 heartbeat,, uint8 minSources, bool active) = feedRegistry.feeds(feedId);
-        if (!active) revert InactiveFeed();
-        if (aggregationMode != OracleIds420.AGGREGATION_QUORUM_EQUAL) revert WrongAggregationMode();
+        if (!feedRegistry.feedActive(feedId)) revert InactiveFeed();
+        if (feedRegistry.aggregationModeOf(feedId) != OracleIds420.AGGREGATION_QUORUM_EQUAL) {
+            revert WrongAggregationMode();
+        }
 
+        uint32 heartbeat = feedRegistry.heartbeatOf(feedId);
+        uint8 minSources = feedRegistry.minSourcesOf(feedId);
+        uint32 currentFeedRevision = feedRegistry.feedRevision(feedId);
         bytes32[16] memory results;
         uint64[16] memory times;
         uint256 freshCount;
         uint256 totalSources = feedRegistry.sourceCount(feedId);
+
         for (uint256 i = 0; i < totalSources; ++i) {
             bytes32 providerId = feedRegistry.sourceAt(feedId, i);
             if (!feedRegistry.sourceActive(feedId, providerId)) continue;
             Observation memory obs = latest[feedId][providerId];
-            if (!_fresh(obs.observedAt, heartbeat) || obs.resultHash == bytes32(0)) continue;
+            if (!_eligible(feedId, providerId, obs, heartbeat, currentFeedRevision) || obs.resultHash == bytes32(0)) continue;
             results[freshCount] = obs.resultHash;
             times[freshCount] = obs.observedAt;
             ++freshCount;
@@ -196,6 +219,20 @@ contract OracleRouter420 is SystemAccess, I420System {
 
         if (winner == bytes32(0)) revert InsufficientFreshSources();
         return (winner, winnerOldest, winnerCount);
+    }
+
+    function _eligible(
+        bytes32 feedId,
+        bytes32 providerId,
+        Observation memory obs,
+        uint32 heartbeat,
+        uint32 currentFeedRevision
+    ) private view returns (bool) {
+        if (!_fresh(obs.observedAt, heartbeat)) return false;
+        if (obs.feedRevision != currentFeedRevision) return false;
+        if (obs.providerEpoch != providerRegistry.providerEpoch(providerId)) return false;
+        if (obs.sourceEpoch != feedRegistry.sourceEpoch(feedId, providerId)) return false;
+        return true;
     }
 
     function _fresh(uint64 observedAt, uint32 heartbeat) private view returns (bool) {

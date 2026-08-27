@@ -70,5 +70,31 @@ class FrozenManifestProjectionTests(unittest.TestCase):
         self.assertIn('expected="Names420"', message)
 
 
+class SolidityAddressNormalizationTests(unittest.TestCase):
+    def test_checksum_case_is_ignored(self):
+        source = "address constant X = 0xffffFFFfFFffffffffffffffFfFFFfffFFFfFFfE;"
+        self.assertTrue(
+            verifier.source_contains_address(
+                source, "0xfffffffffffffffffffffffffffffffffffffffe"
+            )
+        )
+
+    def test_wrong_address_is_rejected(self):
+        source = "address constant X = 0xffffFFFfFFffffffffffffffFfFFFfffFFFfFFfE;"
+        self.assertFalse(
+            verifier.source_contains_address(
+                source, "0xfffffffffffffffffffffffffffffffffffffffd"
+            )
+        )
+
+    def test_non_address_hex_does_not_false_match(self):
+        source = "bytes32 X = 0xfffffffffffffffffffffffffffffffffffffffe00;"
+        self.assertFalse(
+            verifier.source_contains_address(
+                source, "0xfffffffffffffffffffffffffffffffffffffffe"
+            )
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

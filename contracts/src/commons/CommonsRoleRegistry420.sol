@@ -4,6 +4,7 @@ pragma solidity ^0.8.24;
 import "../interfaces/I420System.sol";
 import "./CommonsAuthorization420.sol";
 import "./CommonsSpaceRegistry420.sol";
+import "./CommonsMembershipRegistry420.sol";
 import "./CommonsIds420.sol";
 
 contract CommonsRoleRegistry420 is I420System {
@@ -18,15 +19,17 @@ contract CommonsRoleRegistry420 is I420System {
 
     CommonsAuthorization420 public immutable authorization;
     CommonsSpaceRegistry420 public immutable spaceRegistry;
+    CommonsMembershipRegistry420 public immutable membershipRegistry;
 
     mapping(bytes32 => mapping(bytes32 => Role)) private _roles;
     mapping(bytes32 => mapping(bytes32 => bytes32[])) private _roleCapabilities;
     mapping(bytes32 => mapping(address => mapping(bytes32 => bool))) public memberRole;
 
     error ZeroAddress();
-    error SpaceNotFound();
+    error SpaceInactive();
     error InvalidRoleId();
     error RoleNotFound();
+    error MemberNotActive();
     error TooManyCapabilities();
     error InvalidCapabilityId();
     error Unauthorized();
@@ -35,17 +38,18 @@ contract CommonsRoleRegistry420 is I420System {
     event RoleCapabilitiesConfigured(bytes32 indexed spaceId, bytes32 indexed roleId, bytes32 capabilitiesHash, uint32 revision);
     event MemberRoleSet(bytes32 indexed spaceId, address indexed memberAccount, bytes32 indexed roleId, bool assigned);
 
-    constructor(address authorization_, address spaceRegistry_) {
-        if (authorization_ == address(0) || spaceRegistry_ == address(0)) revert ZeroAddress();
+    constructor(address authorization_, address spaceRegistry_, address membershipRegistry_) {
+        if (authorization_ == address(0) || spaceRegistry_ == address(0) || membershipRegistry_ == address(0)) revert ZeroAddress();
         authorization = CommonsAuthorization420(authorization_);
         spaceRegistry = CommonsSpaceRegistry420(spaceRegistry_);
+        membershipRegistry = CommonsMembershipRegistry420(membershipRegistry_);
     }
 
     function systemName() external pure returns (string memory) { return "CommonsRoleRegistry420"; }
     function protocolVersion() external pure returns (uint32) { return 1; }
 
     function configureRole(bytes32 spaceId, bytes32 roleId, bytes32 metadataHash, bytes32[] calldata capabilities, bool active) external {
-        if (!spaceRegistry.spaceExists(spaceId)) revert SpaceNotFound();
+        if (!spaceRegistry.spaceActive(spaceId)) revert SpaceInactive();
         if (!authorization.isAuthorized(spaceId, msg.sender, CommonsIds420.ACTION_ASSIGN_ROLE)) revert Unauthorized();
         if (roleId == bytes32(0)) revert InvalidRoleId();
         if (capabilities.length > MAX_CAPABILITIES_PER_ROLE) revert TooManyCapabilities();
@@ -66,9 +70,11 @@ contract CommonsRoleRegistry420 is I420System {
     }
 
     function setMemberRole(bytes32 spaceId, address memberAccount, bytes32 roleId, bool assigned) external {
+        if (!spaceRegistry.spaceActive(spaceId)) revert SpaceInactive();
         if (!authorization.isAuthorized(spaceId, msg.sender, CommonsIds420.ACTION_ASSIGN_ROLE)) revert Unauthorized();
         Role storage role = _roles[spaceId][roleId];
         if (!role.exists || !role.active) revert RoleNotFound();
+        if (assigned && !membershipRegistry.isActiveMember(spaceId, memberAccount)) revert MemberNotActive();
         memberRole[spaceId][memberAccount][roleId] = assigned;
         emit MemberRoleSet(spaceId, memberAccount, roleId, assigned);
     }

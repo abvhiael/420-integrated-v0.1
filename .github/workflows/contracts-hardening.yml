@@ -11,6 +11,10 @@ on:
       - ".github/workflows/contracts-hardening.yml"
   workflow_dispatch:
 
+concurrency:
+  group: contract-hardening-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   hardening:
     runs-on: ubuntu-latest
@@ -80,13 +84,17 @@ jobs:
         working-directory: contracts
         run: forge clean && forge build --force --sizes 2>&1 | tee ../artifacts/hardening/build.txt
 
-      - name: Hardening fuzz and invariant campaign
+      - name: AI package fuzz campaign
         working-directory: contracts
-        run: forge test -vvv 2>&1 | tee ../artifacts/hardening/tests.txt
+        run: forge test --match-path 'test/AI*.t.sol' -vvv 2>&1 | tee ../artifacts/hardening/ai-tests.txt
 
-      - name: Gas and denial-of-service review evidence
+      - name: Genesis invariant campaign
         working-directory: contracts
-        run: forge test --gas-report 2>&1 | tee ../artifacts/hardening/gas-report.txt
+        run: forge test --match-path 'test/*Invariant*.t.sol' -vv 2>&1 | tee ../artifacts/hardening/invariants.txt
+
+      - name: AI gas and denial-of-service review evidence
+        working-directory: contracts
+        run: forge test --match-path 'test/AI*.t.sol' --gas-report 2>&1 | tee ../artifacts/hardening/gas-report.txt
 
       - name: Slither high-severity gate
         working-directory: contracts

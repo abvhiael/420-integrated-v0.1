@@ -51,6 +51,7 @@ contract Commons420Test {
     bytes32 internal constant OPEN_POLICY = keccak256("commons-open-policy");
     bytes32 internal constant APPROVAL_POLICY = keccak256("commons-approval-policy");
     bytes32 internal constant ROLE_MOD = keccak256("moderator-role");
+    bytes32 internal constant CHANNEL = keccak256("channel-1");
 
     struct Suite {
         MockCapabilityRegistry420 capabilities;
@@ -70,9 +71,9 @@ contract Commons420Test {
         suite.policy = new CommonsPolicyRegistry420(address(this));
         suite.spaces = new CommonsSpaceRegistry420(address(suite.authorization), address(suite.policy));
         suite.memberships = new CommonsMembershipRegistry420(address(suite.authorization), address(suite.policy), address(suite.spaces));
-        suite.roles = new CommonsRoleRegistry420(address(suite.authorization), address(suite.spaces));
+        suite.roles = new CommonsRoleRegistry420(address(suite.authorization), address(suite.spaces), address(suite.memberships));
         suite.channels = new CommonsChannelRegistry420(address(suite.authorization), address(suite.policy), address(suite.spaces));
-        suite.invites = new CommonsInviteRegistry420(address(suite.authorization), address(suite.spaces));
+        suite.invites = new CommonsInviteRegistry420(address(suite.authorization), address(suite.policy), address(suite.spaces));
         suite.router = new CommonsRouter420(address(suite.authorization), address(suite.spaces), address(suite.memberships));
 
         suite.policy.setPolicy(OPEN_POLICY, CommonsIds420.ADMISSION_OPEN, keccak256("open-v1"), bytes32(0), true);
@@ -95,6 +96,11 @@ contract Commons420Test {
 
     function _grant(Suite memory suite, bytes32 spaceId, address principal, bytes32 actionId) private {
         suite.capabilities.setAuthorized(principal, actionId, suite.authorization.scopeForSpace(spaceId), true);
+    }
+
+    function _joinOpen(Suite memory suite, address member) private {
+        vm.prank(member);
+        suite.memberships.requestMembership(SPACE, keccak256("member"));
     }
 
     function testSpaceIdCannotBeReassigned() public {
@@ -130,8 +136,7 @@ contract Commons420Test {
     function testOpenMembershipActivatesWithoutAdmin() public {
         Suite memory suite = _deploy();
         _createSpace(suite, SPACE, OPEN_POLICY);
-        vm.prank(MEMBER);
-        suite.memberships.requestMembership(SPACE, keccak256("member"));
+        _joinOpen(suite, MEMBER);
         require(suite.memberships.isActiveMember(SPACE, MEMBER), "open member inactive");
     }
 
@@ -152,9 +157,25 @@ contract Commons420Test {
         require(suite.memberships.isActiveMember(SPACE, MEMBER), "approved member inactive");
     }
 
+    function testExpiredMembershipTransitionsExplicitly() public {
+        Suite memory suite = _deploy();
+        _createSpace(suite, SPACE, APPROVAL_POLICY);
+        vm.prank(MEMBER);
+        suite.memberships.requestMembership(SPACE, keccak256("member"));
+        _grant(suite, SPACE, ADMIN, CommonsIds420.ACTION_APPROVE_MEMBER);
+        vm.prank(ADMIN);
+        suite.memberships.approveMember(SPACE, MEMBER, 1_050);
+        vm.warp(1_051);
+        require(!suite.memberships.isActiveMember(SPACE, MEMBER), "expired member active");
+        suite.memberships.expireMembership(SPACE, MEMBER);
+        CommonsMembershipRegistry420.Membership memory membership = suite.memberships.getMembership(SPACE, MEMBER);
+        require(membership.state == CommonsMembershipRegistry420.MembershipState.EXPIRED, "expiry not canonicalized");
+    }
+
     function testRoleLabelDoesNotCreateAuthority() public {
         Suite memory suite = _deploy();
         _createSpace(suite, SPACE, OPEN_POLICY);
+        _joinOpen(suite, MEMBER);
         _grant(suite, SPACE, ADMIN, CommonsIds420.ACTION_ASSIGN_ROLE);
         bytes32[] memory caps = new bytes32[](1);
         caps[0] = CommonsIds420.ACTION_UPDATE_SPACE;
@@ -166,6 +187,19 @@ contract Commons420Test {
         vm.prank(MEMBER);
         vm.expectRevert(CommonsSpaceRegistry420.Unauthorized.selector);
         suite.spaces.updateSpace(SPACE, CommonsIds420.VISIBILITY_HIDDEN, OPEN_POLICY, address(0), bytes32(0), bytes32(0), true);
+    }
+
+    function testRoleCannotBeAssignedToNonMember() public {
+        Suite memory suite = _deploy();
+        _createSpace(suite, SPACE, OPEN_POLICY);
+        _grant(suite, SPACE, ADMIN, CommonsIds420.ACTION_ASSIGN_ROLE);
+        bytes32[] memory caps = new bytes32[](1);
+        caps[0] = CommonsIds420.ACTION_UPDATE_SPACE;
+        vm.prank(ADMIN);
+        suite.roles.configureRole(SPACE, ROLE_MOD, keccak256("moderator"), caps, true);
+        vm.prank(ADMIN);
+        vm.expectRevert(CommonsRoleRegistry420.MemberNotActive.selector);
+        suite.roles.setMemberRole(SPACE, MEMBER, ROLE_MOD, true);
     }
 
     function testInviteUseAndRecipientAreBounded() public {
@@ -182,16 +216,70 @@ contract Commons420Test {
 
         vm.prank(MEMBER);
         suite.invites.redeemInvite(inviteId);
+        require(!suite.memberships.isActiveMember(SPACE, MEMBER), "invite bypassed membership adapter");
         vm.prank(MEMBER);
         vm.expectRevert(CommonsInviteRegistry420.InviteUnavailable.selector);
         suite.invites.redeemInvite(inviteId);
     }
 
+    function testInactiveSpaceFreezesPrivilegedSubordinateMutations() public {
+        Suite memory suite = _deploy();
+        _createSpace(suite, SPACE, OPEN_POLICY);
+        _joinOpen(suite, MEMBER);
+        _grant(suite, SPACE, ADMIN, CommonsIds420.ACTION_UPDATE_SPACE);
+        _grant(suite, SPACE, ADMIN, CommonsIds420.ACTION_ASSIGN_ROLE);
+        _grant(suite, SPACE, ADMIN, CommonsIds420.ACTION_CREATE_CHANNEL);
+        _grant(suite, SPACE, ADMIN, CommonsIds420.ACTION_MODIFY_CHANNEL);
+        _grant(suite, SPACE, ADMIN, CommonsIds420.ACTION_CREATE_INVITE);
+        _grant(suite, SPACE, ADMIN, CommonsIds420.ACTION_REVOKE_INVITE);
+        _grant(suite, SPACE, ADMIN, CommonsIds420.ACTION_SUSPEND_MEMBER);
+
+        bytes32[] memory caps = new bytes32[](1);
+        caps[0] = CommonsIds420.ACTION_UPDATE_SPACE;
+        vm.prank(ADMIN);
+        suite.roles.configureRole(SPACE, ROLE_MOD, keccak256("moderator"), caps, true);
+        vm.prank(ADMIN);
+        suite.channels.createChannel(CHANNEL, SPACE, CommonsIds420.CHANNEL_CHAT, bytes32(0), bytes32(0), bytes32(0), bytes32(0), bytes32(0));
+        bytes32 inviteId = keccak256("freeze-invite");
+        vm.prank(ADMIN);
+        suite.invites.createInvite(inviteId, SPACE, MEMBER, keccak256("member"), OPEN_POLICY, 1_100, 1);
+
+        vm.prank(ADMIN);
+        suite.spaces.updateSpace(SPACE, CommonsIds420.VISIBILITY_PUBLIC, OPEN_POLICY, address(0x420), keccak256("meta"), keccak256("manifest"), false);
+
+        vm.prank(ADMIN);
+        vm.expectRevert(CommonsRoleRegistry420.SpaceInactive.selector);
+        suite.roles.setMemberRole(SPACE, MEMBER, ROLE_MOD, true);
+        vm.prank(ADMIN);
+        vm.expectRevert(CommonsChannelRegistry420.SpaceInactive.selector);
+        suite.channels.updateChannel(CHANNEL, bytes32(0), bytes32(0), bytes32(0), bytes32(0), bytes32(0), true);
+        vm.prank(ADMIN);
+        vm.expectRevert(CommonsMembershipRegistry420.SpaceInactive.selector);
+        suite.memberships.suspendMember(SPACE, MEMBER);
+        vm.prank(ADMIN);
+        vm.expectRevert(CommonsInviteRegistry420.InviteUnavailable.selector);
+        suite.invites.revokeInvite(inviteId);
+        vm.prank(MEMBER);
+        vm.expectRevert(CommonsInviteRegistry420.InviteUnavailable.selector);
+        suite.invites.redeemInvite(inviteId);
+    }
+
+    function testSpaceUpdateCapabilityCanReactivateFrozenSpace() public {
+        Suite memory suite = _deploy();
+        _createSpace(suite, SPACE, OPEN_POLICY);
+        _grant(suite, SPACE, ADMIN, CommonsIds420.ACTION_UPDATE_SPACE);
+        vm.prank(ADMIN);
+        suite.spaces.updateSpace(SPACE, CommonsIds420.VISIBILITY_PUBLIC, OPEN_POLICY, address(0x420), keccak256("meta"), keccak256("manifest"), false);
+        require(!suite.spaces.spaceActive(SPACE), "space still active");
+        vm.prank(ADMIN);
+        suite.spaces.updateSpace(SPACE, CommonsIds420.VISIBILITY_PUBLIC, OPEN_POLICY, address(0x420), keccak256("meta2"), keccak256("manifest2"), true);
+        require(suite.spaces.spaceActive(SPACE), "space not reactivated");
+    }
+
     function testCanonicalRouterReadsSpaceAndMembership() public {
         Suite memory suite = _deploy();
         _createSpace(suite, SPACE, OPEN_POLICY);
-        vm.prank(MEMBER);
-        suite.memberships.requestMembership(SPACE, keccak256("member"));
+        _joinOpen(suite, MEMBER);
 
         ICommons420.SpaceRead memory space = suite.router.readSpace(SPACE);
         ICommons420.MembershipRead memory membership = suite.router.readMembership(SPACE, MEMBER);

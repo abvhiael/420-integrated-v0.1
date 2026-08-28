@@ -56,6 +56,11 @@ contract VaultPolicyRegistry420 is SystemAccess, I420System {
         return policy.exists && policy.active;
     }
 
+    function isActiveOfType(bytes32 policyId, bytes32 policyType) external view returns (bool) {
+        Policy storage policy = _policies[policyId];
+        return policy.exists && policy.active && policy.policyType == policyType;
+    }
+
     function _validPolicyType(bytes32 x) private pure returns (bool) {
         return x == VaultIds420.POLICY_AUTHORIZATION || x == VaultIds420.POLICY_ASSET
             || x == VaultIds420.POLICY_RELEASE || x == VaultIds420.POLICY_ACCOUNTING;

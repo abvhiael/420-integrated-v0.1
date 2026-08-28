@@ -29,6 +29,7 @@ contract VPNNodeRegistry420 is I420System {
     error ZeroAddress();
     error InvalidNodeId();
     error InvalidCapabilityClass();
+    error InvalidEndpointManifest();
     error NodeAlreadyExists();
     error NodeNotFound();
     error ProviderInactive();
@@ -61,6 +62,7 @@ contract VPNNodeRegistry420 is I420System {
         if (nodeId == bytes32(0)) revert InvalidNodeId();
         if (operatorAccount == address(0)) revert ZeroAddress();
         if (!_validCapabilityClass(capabilityClass)) revert InvalidCapabilityClass();
+        _requireLiveEndpoint(endpointManifestHash, endpointExpiresAt);
         if (_nodes[nodeId].exists) revert NodeAlreadyExists();
         VPNProviderRegistry420.ProviderState providerState = providers.providerState(providerId);
         if (providerState != VPNProviderRegistry420.ProviderState.ACTIVE) revert ProviderInactive();
@@ -83,6 +85,7 @@ contract VPNNodeRegistry420 is I420System {
     function updateNode(bytes32 nodeId, bytes32 endpointManifestHash, uint64 endpointExpiresAt, bytes32 metadataHash) external {
         Node storage node = _get(nodeId);
         if (node.state == NodeState.RETIRED) revert InvalidStateTransition();
+        _requireLiveEndpoint(endpointManifestHash, endpointExpiresAt);
         if (!authorization.isNodeAuthorized(msg.sender, node.providerId, nodeId, VPNIds420.ACTION_UPDATE_NODE, 0)) revert Unauthorized();
         node.endpointManifestHash = endpointManifestHash;
         node.endpointExpiresAt = endpointExpiresAt;
@@ -102,7 +105,10 @@ contract VPNNodeRegistry420 is I420System {
             (oldState == NodeState.DRAINING && (newState == NodeState.OFFLINE || newState == NodeState.RETIRED)) ||
             (oldState == NodeState.OFFLINE && (newState == NodeState.ACTIVE || newState == NodeState.RETIRED));
         if (!valid) revert InvalidStateTransition();
-        if (newState == NodeState.ACTIVE && providers.providerState(node.providerId) != VPNProviderRegistry420.ProviderState.ACTIVE) revert ProviderInactive();
+        if (newState == NodeState.ACTIVE) {
+            if (providers.providerState(node.providerId) != VPNProviderRegistry420.ProviderState.ACTIVE) revert ProviderInactive();
+            _requireLiveEndpoint(node.endpointManifestHash, node.endpointExpiresAt);
+        }
         node.state = newState;
         node.revision += 1;
         emit NodeStateChanged(nodeId, oldState, newState, node.revision);
@@ -111,9 +117,20 @@ contract VPNNodeRegistry420 is I420System {
     function getNode(bytes32 nodeId) external view returns (Node memory) { return _get(nodeId); }
     function nodeState(bytes32 nodeId) external view returns (NodeState) { return _get(nodeId).state; }
 
+    function isOperational(bytes32 nodeId) external view returns (bool) {
+        Node storage node = _get(nodeId);
+        if (node.state != NodeState.ACTIVE) return false;
+        if (node.endpointManifestHash == bytes32(0) || node.endpointExpiresAt <= block.timestamp) return false;
+        return providers.providerState(node.providerId) == VPNProviderRegistry420.ProviderState.ACTIVE;
+    }
+
     function _get(bytes32 nodeId) private view returns (Node storage node) {
         node = _nodes[nodeId];
         if (!node.exists) revert NodeNotFound();
+    }
+
+    function _requireLiveEndpoint(bytes32 endpointManifestHash, uint64 endpointExpiresAt) private view {
+        if (endpointManifestHash == bytes32(0) || endpointExpiresAt <= block.timestamp) revert InvalidEndpointManifest();
     }
 
     function _validCapabilityClass(bytes32 x) private pure returns (bool) {

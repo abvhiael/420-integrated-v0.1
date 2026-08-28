@@ -6,6 +6,13 @@ import "./VaultAuthorization420.sol";
 import "./VaultPolicyRegistry420.sol";
 import "./VaultIds420.sol";
 
+interface IVaultRegistration420 {
+    function vaultId() external view returns (bytes32);
+    function registry() external view returns (address);
+    function registrationCreator() external view returns (address);
+    function canClose() external view returns (bool);
+}
+
 contract VaultRegistry420 is I420System {
     enum VaultState { NONE, ACTIVE, FROZEN, WINDING_DOWN, CLOSED }
 
@@ -40,6 +47,8 @@ contract VaultRegistry420 is I420System {
     error Unauthorized();
     error InvalidPolicy();
     error InvalidStateTransition();
+    error InvalidVaultRegistration();
+    error OutstandingAssetsOrObligations();
     error NoChange();
 
     event VaultRegistered(bytes32 indexed vaultId, address indexed vaultAddress, address indexed creatorAccount, bytes32 vaultType);
@@ -72,10 +81,16 @@ contract VaultRegistry420 is I420System {
         if (_vaults[vaultId].exists) revert VaultAlreadyExists();
         if (vaultIdForAddress[vaultAddress] != bytes32(0)) revert AddressAlreadyRegistered();
         if (!_validVaultType(vaultType)) revert InvalidVaultType();
-        _requirePolicy(authorizationPolicyId);
-        _requirePolicy(assetPolicyId);
-        _requirePolicy(releasePolicyId);
-        _requirePolicy(accountingPolicyId);
+        _requirePolicyType(authorizationPolicyId, VaultIds420.POLICY_AUTHORIZATION);
+        _requirePolicyType(assetPolicyId, VaultIds420.POLICY_ASSET);
+        _requirePolicyType(releasePolicyId, VaultIds420.POLICY_RELEASE);
+        _requirePolicyType(accountingPolicyId, VaultIds420.POLICY_ACCOUNTING);
+
+        IVaultRegistration420 candidate = IVaultRegistration420(vaultAddress);
+        if (candidate.vaultId() != vaultId || candidate.registry() != address(this) || candidate.registrationCreator() != msg.sender) {
+            revert InvalidVaultRegistration();
+        }
+
         _vaults[vaultId] = Vault({
             vaultAddress: vaultAddress,
             creatorAccount: msg.sender,
@@ -110,12 +125,21 @@ contract VaultRegistry420 is I420System {
         Vault storage vault = _get(vaultId);
         VaultState oldState = vault.state;
         if (newState == oldState) revert NoChange();
+
         bytes32 actionId;
-        if (newState == VaultState.FROZEN) actionId = VaultIds420.ACTION_FREEZE;
-        else if (oldState == VaultState.FROZEN && newState == VaultState.ACTIVE) actionId = VaultIds420.ACTION_UNFREEZE;
-        else if (newState == VaultState.WINDING_DOWN && oldState != VaultState.CLOSED) actionId = VaultIds420.ACTION_BEGIN_WIND_DOWN;
-        else if (newState == VaultState.CLOSED && oldState == VaultState.WINDING_DOWN) actionId = VaultIds420.ACTION_CLOSE;
-        else revert InvalidStateTransition();
+        if (oldState == VaultState.ACTIVE && newState == VaultState.FROZEN) {
+            actionId = VaultIds420.ACTION_FREEZE;
+        } else if (oldState == VaultState.FROZEN && newState == VaultState.ACTIVE) {
+            actionId = VaultIds420.ACTION_UNFREEZE;
+        } else if ((oldState == VaultState.ACTIVE || oldState == VaultState.FROZEN) && newState == VaultState.WINDING_DOWN) {
+            actionId = VaultIds420.ACTION_BEGIN_WIND_DOWN;
+        } else if (oldState == VaultState.WINDING_DOWN && newState == VaultState.CLOSED) {
+            actionId = VaultIds420.ACTION_CLOSE;
+            if (!IVaultRegistration420(vault.vaultAddress).canClose()) revert OutstandingAssetsOrObligations();
+        } else {
+            revert InvalidStateTransition();
+        }
+
         _requireAuth(vaultId, actionId, 0);
         vault.state = newState;
         vault.revision += 1;
@@ -138,8 +162,8 @@ contract VaultRegistry420 is I420System {
         if (!authorization.isAuthorized(msg.sender, vaultId, actionId, amount)) revert Unauthorized();
     }
 
-    function _requirePolicy(bytes32 policyId) private view {
-        if (policyId == bytes32(0) || !policies.isActive(policyId)) revert InvalidPolicy();
+    function _requirePolicyType(bytes32 policyId, bytes32 policyType) private view {
+        if (policyId == bytes32(0) || !policies.isActiveOfType(policyId, policyType)) revert InvalidPolicy();
     }
 
     function _validVaultType(bytes32 x) private pure returns (bool) {

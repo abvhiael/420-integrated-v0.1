@@ -6,6 +6,7 @@ import "../src/trust/TrustIssuerRegistry420.sol";
 import "../src/trust/TrustPolicyRegistry420.sol";
 import "../src/trust/TrustSignalRegistry420.sol";
 import "../src/trust/TrustAggregator420.sol";
+import "../src/interfaces/ITrust420.sol";
 
 interface VmTrust420 {
     function prank(address) external;
@@ -82,10 +83,10 @@ contract Trust420Test {
         vm.prank(MARKET_OPERATOR);
         suite.signals.submitSignal(_input(keccak256("s1"), FULFILLED_COUNT, keccak256("order-1"), 1));
 
-        TrustAggregator420.MetricRead memory fulfilled = suite.aggregator.readMetric(
+        ITrust420.MetricRead memory fulfilled = suite.aggregator.readMetric(
             TrustIds420.SUBJECT_PROTOCOL_ENTITY, SUBJECT, FULFILLED_COUNT
         );
-        TrustAggregator420.MetricRead memory disputes = suite.aggregator.readMetric(
+        ITrust420.MetricRead memory disputes = suite.aggregator.readMetric(
             TrustIds420.SUBJECT_PROTOCOL_ENTITY, SUBJECT, DISPUTE_COUNT
         );
         require(fulfilled.total == 1 && fulfilled.activeSignals == 1, "fulfilled aggregate");
@@ -170,21 +171,32 @@ contract Trust420Test {
         suite.signals.revokeSignal(signalId, keccak256("again"));
     }
 
-    function testDisabledIssuerCannotIssueButCanRevokeOwnHistory() public {
+    function testDisabledIssuerCannotIssueCorrectOrRevoke() public {
         Suite memory suite = _deploy();
         bytes32 signalId = keccak256("before-disable");
         vm.prank(MARKET_OPERATOR);
         suite.signals.submitSignal(_input(signalId, FULFILLED_COUNT, keccak256("before-disable-evidence"), 1));
 
         suite.issuers.setIssuer(MARKET_ISSUER, MARKET_OPERATOR, keccak256("market-meta"), false);
+
         vm.prank(MARKET_OPERATOR);
         vm.expectRevert(TrustSignalRegistry420.UnauthorizedIssuer.selector);
         suite.signals.submitSignal(_input(keccak256("after-disable"), FULFILLED_COUNT, keccak256("after-disable-evidence"), 1));
 
         vm.prank(MARKET_OPERATOR);
-        suite.signals.revokeSignal(signalId, keccak256("issuer-correction"));
+        vm.expectRevert(TrustSignalRegistry420.UnauthorizedIssuer.selector);
+        suite.signals.correctSignal(signalId, keccak256("disabled-correction"), 2, keccak256("disabled-correction-evidence"), 995);
+
+        vm.prank(MARKET_OPERATOR);
+        vm.expectRevert(TrustSignalRegistry420.UnauthorizedIssuer.selector);
+        suite.signals.revokeSignal(signalId, keccak256("disabled-revoke"));
+
         TrustSignalRegistry420.Signal memory signal = suite.signals.getSignal(signalId);
-        require(signal.state == TrustSignalRegistry420.SignalState.REVOKED, "revoke while inactive");
+        TrustSignalRegistry420.Aggregate memory aggregate = suite.signals.getAggregate(
+            TrustIds420.SUBJECT_PROTOCOL_ENTITY, SUBJECT, FULFILLED_COUNT
+        );
+        require(signal.state == TrustSignalRegistry420.SignalState.ACTIVE, "history mutated while disabled");
+        require(aggregate.total == 1 && aggregate.activeSignals == 1, "aggregate mutated while disabled");
     }
 
     function testOperatorRotationInvalidatesOldOperatorForMutations() public {

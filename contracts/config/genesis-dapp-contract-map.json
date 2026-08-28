@@ -25,49 +25,27 @@
     },
     {
       "dapp": "420 Trust",
-      "contracts": [
-        "TrustIssuerRegistry420.sol",
-        "TrustPolicyRegistry420.sol",
-        "TrustSignalRegistry420.sol",
-        "TrustAggregator420.sol"
-      ],
+      "contracts": ["TrustIssuerRegistry420.sol","TrustPolicyRegistry420.sol","TrustSignalRegistry420.sol","TrustAggregator420.sol"],
       "note": "portable domain-specific evidence and reputation-signal protocol; exposes authenticated per-metric history and aggregates without creating a universal social or credit score"
     },
     {
       "dapp": "420 Commons",
-      "contracts": [
-        "CommonsAuthorization420.sol",
-        "CommonsPolicyRegistry420.sol",
-        "CommonsSpaceRegistry420.sol",
-        "CommonsMembershipRegistry420.sol",
-        "CommonsRoleRegistry420.sol",
-        "CommonsChannelRegistry420.sol",
-        "CommonsInviteRegistry420.sol",
-        "CommonsRouter420.sol"
-      ],
+      "contracts": ["CommonsAuthorization420.sol","CommonsPolicyRegistry420.sol","CommonsSpaceRegistry420.sol","CommonsMembershipRegistry420.sol","CommonsRoleRegistry420.sol","CommonsChannelRegistry420.sol","CommonsInviteRegistry420.sol","CommonsRouter420.sol"],
       "note": "community and organization coordination protocol; canonicalizes Spaces, membership, capability-scoped authority, roles, channels, invites and policies while keeping message/media payloads off-chain"
     },
     {
       "dapp": "420 Pulse",
-      "contracts": [
-        "PulsePolicyRegistry420.sol",
-        "PulseProfileRegistry420.sol",
-        "PulseGraph420.sol",
-        "PulsePublicationRegistry420.sol",
-        "PulseInteractionRegistry420.sol",
-        "PulseTopicRegistry420.sol",
-        "PulseRouter420.sol"
-      ],
+      "contracts": ["PulsePolicyRegistry420.sol","PulseProfileRegistry420.sol","PulseGraph420.sol","PulsePublicationRegistry420.sol","PulseInteractionRegistry420.sol","PulseTopicRegistry420.sol","PulseRouter420.sol"],
       "note": "public social graph, publishing and discovery-reference protocol; canonicalizes portable profiles, follows/blocks, publication provenance, append-only revisions, topics and lightweight interactions while keeping feed ranking, recommendation and media payloads non-canonical"
     },
     {
+      "dapp": "420 Vault",
+      "contracts": ["VaultAuthorization420.sol","VaultPolicyRegistry420.sol","VaultRegistry420.sol","VaultAccounting420.sol","AssetVault420.sol","VaultFactory420.sol","VaultRouter420.sol"],
+      "note": "programmable custody, escrow, reserve and beneficiary protocol with capability-scoped authority, obligation-aware collateral accounting, replay-safe release paths and non-confiscatory lifecycle controls; user products such as 420Stash, 420Cure and 420Legacy are policy profiles over the shared primitive"
+    },
+    {
       "dapp": "420 Market",
-      "contracts": [
-        "MarketPolicyRegistry420.sol",
-        "ListingRegistry420.sol",
-        "InventoryReservation420.sol",
-        "OrderRegistry420.sol"
-      ],
+      "contracts": ["MarketPolicyRegistry420.sol","ListingRegistry420.sol","InventoryReservation420.sol","OrderRegistry420.sol"],
       "note": "universal marketplace protocol; references canonical asset/right registries and approved settlement adapters instead of taking custody"
     },
     {
@@ -76,13 +54,7 @@
     },
     {
       "dapp": "420 Oracle",
-      "contracts": [
-        "OracleProviderRegistry420.sol",
-        "OracleFeedRegistry420.sol",
-        "OracleRiskPolicy420.sol",
-        "OracleRouter420.sol",
-        "TWAPOracleSourceAdapter420.sol"
-      ],
+      "contracts": ["OracleProviderRegistry420.sol","OracleFeedRegistry420.sol","OracleRiskPolicy420.sol","OracleRouter420.sol","TWAPOracleSourceAdapter420.sol"],
       "note": "provider-neutral external-data protocol with freshness, quorum, confidence, deviation, replay and circuit-breaker controls; randomness remains a separately routed service"
     },
     {

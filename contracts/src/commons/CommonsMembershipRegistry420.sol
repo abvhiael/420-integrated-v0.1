@@ -33,6 +33,7 @@ contract CommonsMembershipRegistry420 is I420System {
     error MembershipExists();
     error MembershipNotFound();
     error InvalidMembershipState();
+    error InvalidExpiry();
     error Unauthorized();
     error AdmissionRequiresExternalProof();
 
@@ -68,9 +69,7 @@ contract CommonsMembershipRegistry420 is I420System {
 
         CommonsSpaceRegistry420.Space memory space = spaceRegistry.getSpace(spaceId);
         MembershipState nextState = MembershipState.PENDING;
-        if (space.membershipPolicyId == bytes32(0)) {
-            nextState = MembershipState.PENDING;
-        } else {
+        if (space.membershipPolicyId != bytes32(0)) {
             CommonsPolicyRegistry420.Policy memory policy = policyRegistry.getPolicy(space.membershipPolicyId);
             if (policy.policyType == CommonsIds420.ADMISSION_OPEN) nextState = MembershipState.ACTIVE;
             else if (policy.policyType == CommonsIds420.ADMISSION_APPROVAL_REQUIRED) nextState = MembershipState.PENDING;
@@ -98,7 +97,9 @@ contract CommonsMembershipRegistry420 is I420System {
     }
 
     function approveMember(bytes32 spaceId, address memberAccount, uint64 expiresAt) external {
+        if (!spaceRegistry.spaceActive(spaceId)) revert SpaceInactive();
         if (!authorization.isAuthorized(spaceId, msg.sender, CommonsIds420.ACTION_APPROVE_MEMBER)) revert Unauthorized();
+        if (expiresAt != 0 && expiresAt <= block.timestamp) revert InvalidExpiry();
         Membership storage membership = _memberships[spaceId][memberAccount];
         if (!membership.exists) revert MembershipNotFound();
         if (membership.state != MembershipState.PENDING && membership.state != MembershipState.SUSPENDED) {
@@ -109,6 +110,7 @@ contract CommonsMembershipRegistry420 is I420System {
     }
 
     function suspendMember(bytes32 spaceId, address memberAccount) external {
+        if (!spaceRegistry.spaceActive(spaceId)) revert SpaceInactive();
         if (!authorization.isAuthorized(spaceId, msg.sender, CommonsIds420.ACTION_SUSPEND_MEMBER)) revert Unauthorized();
         Membership storage membership = _memberships[spaceId][memberAccount];
         if (!membership.exists) revert MembershipNotFound();
@@ -117,6 +119,7 @@ contract CommonsMembershipRegistry420 is I420System {
     }
 
     function banMember(bytes32 spaceId, address memberAccount) external {
+        if (!spaceRegistry.spaceActive(spaceId)) revert SpaceInactive();
         if (!authorization.isAuthorized(spaceId, msg.sender, CommonsIds420.ACTION_BAN_MEMBER)) revert Unauthorized();
         Membership storage membership = _memberships[spaceId][memberAccount];
         if (!membership.exists) revert MembershipNotFound();
@@ -131,6 +134,15 @@ contract CommonsMembershipRegistry420 is I420System {
             revert InvalidMembershipState();
         }
         _transition(membership, MembershipState.LEFT, 0);
+    }
+
+    function expireMembership(bytes32 spaceId, address memberAccount) external {
+        Membership storage membership = _memberships[spaceId][memberAccount];
+        if (!membership.exists) revert MembershipNotFound();
+        if (membership.state != MembershipState.ACTIVE || membership.expiresAt == 0 || block.timestamp <= membership.expiresAt) {
+            revert InvalidMembershipState();
+        }
+        _transition(membership, MembershipState.EXPIRED, membership.expiresAt);
     }
 
     function getMembership(bytes32 spaceId, address memberAccount) external view returns (Membership memory membership) {

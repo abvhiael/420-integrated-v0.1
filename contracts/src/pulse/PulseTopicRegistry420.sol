@@ -15,10 +15,12 @@ contract PulseTopicRegistry420 is SystemAccess, I420System {
     }
 
     mapping(bytes32 => Topic) private _topics;
+    mapping(bytes32 => bytes32) public topicIdByNormalizedNameHash;
 
     error InvalidTopicId();
     error InvalidNameHash();
     error TopicAlreadyExists();
+    error TopicNameAlreadyRegistered();
     error TopicNotFound();
 
     event TopicCreated(bytes32 indexed topicId, bytes32 indexed normalizedNameHash, bytes32 metadataHash, uint64 createdAt);
@@ -33,7 +35,9 @@ contract PulseTopicRegistry420 is SystemAccess, I420System {
         if (topicId == bytes32(0)) revert InvalidTopicId();
         if (normalizedNameHash == bytes32(0)) revert InvalidNameHash();
         if (_topics[topicId].exists) revert TopicAlreadyExists();
+        if (topicIdByNormalizedNameHash[normalizedNameHash] != bytes32(0)) revert TopicNameAlreadyRegistered();
         _topics[topicId] = Topic(normalizedNameHash, metadataHash, uint64(block.timestamp), 1, true, true);
+        topicIdByNormalizedNameHash[normalizedNameHash] = topicId;
         emit TopicCreated(topicId, normalizedNameHash, metadataHash, uint64(block.timestamp));
     }
 

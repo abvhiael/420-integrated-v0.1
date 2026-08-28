@@ -14,25 +14,25 @@ Pulse canonicalizes the public graph and provenance. It does not canonicalize an
 ## Canonical V1 objects
 
 ### Profile
-A stable public social identity bound to an account or organization controller. Profile types are descriptive only and never confer protocol authority.
+A stable public social identity bound to an account or organization controller. Profile types are descriptive only and never confer protocol authority. A controller may be a 420 programmable smart account so delegation, recovery, session policy, and account security remain in the shared account layer rather than Pulse.
 
 ### Follow
-A reconstructable profile-to-profile social graph edge. Follow state does not grant payment, custody, governance, validator, bridge, or arbitrary execution authority.
+A reconstructable profile-to-profile social graph edge. Follow state does not grant payment, custody, governance, validator, bridge, or arbitrary execution authority. Creating a follow requires both profiles to be active; removing an existing follow remains possible if the target profile later becomes inactive.
 
 ### Block
-A profile-scoped social restriction. Blocks affect Pulse interaction eligibility only and do not revoke unrelated protocol rights.
+A profile-scoped social restriction. Blocks affect Pulse interaction eligibility only and do not revoke unrelated protocol rights. Creating a block requires an active target; removing a previously recorded block remains possible if the target later becomes inactive.
 
 ### Publication
-A stable publication identity permanently bound to its original author profile, publication type, content-manifest commitment, parent/root relationships, policy references, creation time, and revision.
+A stable publication identity permanently bound to its original author profile, publication type, content-manifest commitment, parent/root relationships, policy references, creation time, and revision. New publications and revisions require an active author profile. A deactivated author may tombstone an existing publication but may not revise or reactivate it until the profile is active again.
 
 ### Revision
 Publication edits are append-only. Historical revisions are not overwritten or reassigned.
 
 ### Interaction
-Lightweight social relationships such as likes and repost references. Interaction state must not become hidden economic or execution authority.
+Lightweight social relationships such as likes and repost references. Interaction state must not become hidden economic or execution authority. Creating an interaction requires an active target and an interaction-eligible relationship, while removing a previously recorded interaction remains possible after the target is deactivated or the social relationship later becomes blocked.
 
 ### Topic
-A stable topic identity used for portable public classification and discovery references. Ranking or trend computation remains non-canonical.
+A stable topic identity used for portable public classification and discovery references. A normalized topic name maps to only one canonical `topicId`; ranking or trend computation remains non-canonical.
 
 ## Profile classifications
 
@@ -63,6 +63,10 @@ Canonical V1 publication types:
 - COMMONS_REFERENCE
 
 Large content/media bytes are referenced through content manifests and decentralized storage rather than stored in Pulse contracts.
+
+Typed reference publications (`PRODUCT_REFERENCE`, `RELEASE_REFERENCE`, `EVENT_REFERENCE`, `COMMONS_REFERENCE`) require a nonzero canonical external reference ID. Pulse preserves that ID but does not assume ownership or authority over the referenced object.
+
+A child publication may only be created against an existing active parent whose author profile is active. Root identity is derived from the immutable parent chain and cannot be supplied by the caller.
 
 ## Feed boundary
 
@@ -99,6 +103,11 @@ Pulse does not custody funds, settle payments, mint Identity420 credentials, cre
 - **PULSE-INV-014:** profiles, graph state, publications, revisions, topics, and canonical interactions are reconstructable from chain history plus published specs/manifests.
 - **PULSE-INV-015:** official frontend, indexer, recommendation engine, and feed service are non-canonical and replaceable.
 - **PULSE-INV-016:** ActionId and policy semantics are stable and versioned when materially broadened.
+- **PULSE-INV-017:** deactivation or blocking cannot trap a user in an existing follow, block, or reaction state; removal of the caller's recorded relationship remains possible.
+- **PULSE-INV-018:** an inactive author profile cannot create, revise, or reactivate publications; historical/tombstone state remains readable.
+- **PULSE-INV-019:** each normalized topic name maps to one canonical `topicId` and cannot be reassigned.
+- **PULSE-INV-020:** typed cross-dApp reference publications require a nonzero referenced canonical object ID and preserve that ID unchanged.
+- **PULSE-INV-021:** new child publications cannot attach to inactive/tombstoned parent publications or to publications whose author profile is inactive.
 
 ## Foundational implementation sequence
 

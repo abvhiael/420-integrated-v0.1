@@ -31,7 +31,7 @@ contract CommonsChannelRegistry420 is I420System {
     error InvalidChannelType();
     error ChannelAlreadyExists();
     error ChannelNotFound();
-    error SpaceNotFound();
+    error SpaceInactive();
     error InactivePolicy();
     error Unauthorized();
 
@@ -58,8 +58,8 @@ contract CommonsChannelRegistry420 is I420System {
         bytes32 metadataHash,
         bytes32 contentManifestRef
     ) external {
+        if (!spaceRegistry.spaceActive(spaceId)) revert SpaceInactive();
         if (!authorization.isAuthorized(spaceId, msg.sender, CommonsIds420.ACTION_CREATE_CHANNEL)) revert Unauthorized();
-        if (!spaceRegistry.spaceExists(spaceId)) revert SpaceNotFound();
         if (channelId == bytes32(0)) revert InvalidChannelId();
         if (_channels[channelId].exists) revert ChannelAlreadyExists();
         if (!_validChannelType(channelType)) revert InvalidChannelType();
@@ -93,6 +93,7 @@ contract CommonsChannelRegistry420 is I420System {
     ) external {
         Channel storage channel = _channels[channelId];
         if (!channel.exists) revert ChannelNotFound();
+        if (!spaceRegistry.spaceActive(channel.spaceId)) revert SpaceInactive();
         if (!authorization.isAuthorized(channel.spaceId, msg.sender, CommonsIds420.ACTION_MODIFY_CHANNEL)) revert Unauthorized();
         _requirePolicy(readPolicyId);
         _requirePolicy(publishPolicyId);

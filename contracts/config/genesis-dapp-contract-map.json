@@ -48,6 +48,19 @@
       "note": "community and organization coordination protocol; canonicalizes Spaces, membership, capability-scoped authority, roles, channels, invites and policies while keeping message/media payloads off-chain"
     },
     {
+      "dapp": "420 Pulse",
+      "contracts": [
+        "PulsePolicyRegistry420.sol",
+        "PulseProfileRegistry420.sol",
+        "PulseGraph420.sol",
+        "PulsePublicationRegistry420.sol",
+        "PulseInteractionRegistry420.sol",
+        "PulseTopicRegistry420.sol",
+        "PulseRouter420.sol"
+      ],
+      "note": "public social graph, publishing and discovery-reference protocol; canonicalizes portable profiles, follows/blocks, publication provenance, append-only revisions, topics and lightweight interactions while keeping feed ranking, recommendation and media payloads non-canonical"
+    },
+    {
       "dapp": "420 Market",
       "contracts": [
         "MarketPolicyRegistry420.sol",

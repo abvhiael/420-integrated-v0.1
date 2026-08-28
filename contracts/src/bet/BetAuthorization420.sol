@@ -23,31 +23,31 @@ contract BetAuthorization420 is I420System {
     }
 
     function scopeForGame(bytes32 gameId, bytes32 gameVersionId) public pure returns (bytes32) {
-        return keccak256(abi.encode(gameId, gameVersionId));
+        return keccak256(abi.encode("420.BET.SCOPE.GAME", gameId, gameVersionId));
     }
 
     function scopeForVault(bytes32 vaultId) public pure returns (bytes32) {
-        return keccak256(abi.encode(vaultId));
+        return keccak256(abi.encode("420.BET.SCOPE.VAULT", vaultId));
     }
 
     function scopeForWager(bytes32 wagerId) public pure returns (bytes32) {
-        return keccak256(abi.encode(wagerId));
+        return keccak256(abi.encode("420.BET.SCOPE.WAGER", wagerId));
     }
 
     function scopeForMarket(bytes32 marketId) public pure returns (bytes32) {
-        return keccak256(abi.encode(marketId));
+        return keccak256(abi.encode("420.BET.SCOPE.MARKET", marketId));
     }
 
     function scopeForContest(bytes32 contestId) public pure returns (bytes32) {
-        return keccak256(abi.encode(contestId));
+        return keccak256(abi.encode("420.BET.SCOPE.CONTEST", contestId));
     }
 
     function scopeForTable(bytes32 tableId) public pure returns (bytes32) {
-        return keccak256(abi.encode(tableId));
+        return keccak256(abi.encode("420.BET.SCOPE.TABLE", tableId));
     }
 
     function scopeForAsset(address asset) public pure returns (bytes32) {
-        return keccak256(abi.encode(asset));
+        return keccak256(abi.encode("420.BET.SCOPE.ASSET", asset));
     }
 
     function isAuthorized(address principal, bytes32 actionId, bytes32 scopeHash, uint256 amount)

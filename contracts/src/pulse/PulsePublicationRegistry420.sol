@@ -40,11 +40,14 @@ contract PulsePublicationRegistry420 is I420System {
     error PublicationAlreadyExists();
     error PublicationNotFound();
     error ParentNotFound();
+    error ParentInactive();
     error AuthorInactive();
     error Unauthorized();
     error InactivePolicy();
     error InvalidContentManifest();
+    error InvalidExternalReference();
     error PublicationInactive();
+    error NoChange();
 
     event PublicationCreated(
         bytes32 indexed publicationId,
@@ -86,6 +89,7 @@ contract PulsePublicationRegistry420 is I420System {
         if (profiles.controllerOf(authorProfileId) != msg.sender) revert Unauthorized();
         if (!_validPublicationType(publicationType)) revert InvalidPublicationType();
         if (contentManifestHash == bytes32(0)) revert InvalidContentManifest();
+        if (_requiresExternalReference(publicationType) && externalReferenceId == bytes32(0)) revert InvalidExternalReference();
         _requirePolicy(visibilityPolicyId);
         _requirePolicy(monetizationPolicyId);
 
@@ -93,6 +97,7 @@ contract PulsePublicationRegistry420 is I420System {
         if (parentPublicationId != bytes32(0)) {
             Publication storage parent = _publications[parentPublicationId];
             if (!parent.exists) revert ParentNotFound();
+            if (!parent.active || !profiles.profileActive(parent.authorProfileId)) revert ParentInactive();
             rootPublicationId = parent.rootPublicationId == bytes32(0) ? parentPublicationId : parent.rootPublicationId;
         }
 
@@ -118,6 +123,7 @@ contract PulsePublicationRegistry420 is I420System {
         Publication storage publication = _publications[publicationId];
         if (!publication.exists) revert PublicationNotFound();
         if (!publication.active) revert PublicationInactive();
+        if (!profiles.profileActive(publication.authorProfileId)) revert AuthorInactive();
         if (profiles.controllerOf(publication.authorProfileId) != msg.sender) revert Unauthorized();
         if (contentManifestHash == bytes32(0)) revert InvalidContentManifest();
         uint32 revision = publication.currentRevision + 1;
@@ -130,6 +136,8 @@ contract PulsePublicationRegistry420 is I420System {
         Publication storage publication = _publications[publicationId];
         if (!publication.exists) revert PublicationNotFound();
         if (profiles.controllerOf(publication.authorProfileId) != msg.sender) revert Unauthorized();
+        if (publication.active == active) revert NoChange();
+        if (active && !profiles.profileActive(publication.authorProfileId)) revert AuthorInactive();
         publication.active = active;
         emit PublicationActiveSet(publicationId, active, publication.currentRevision);
     }
@@ -152,6 +160,13 @@ contract PulsePublicationRegistry420 is I420System {
 
     function _requirePolicy(bytes32 policyId) private view {
         if (policyId != bytes32(0) && !policies.isActive(policyId)) revert InactivePolicy();
+    }
+
+    function _requiresExternalReference(bytes32 x) private pure returns (bool) {
+        return x == PulseIds420.PUBLICATION_PRODUCT_REFERENCE
+            || x == PulseIds420.PUBLICATION_RELEASE_REFERENCE
+            || x == PulseIds420.PUBLICATION_EVENT_REFERENCE
+            || x == PulseIds420.PUBLICATION_COMMONS_REFERENCE;
     }
 
     function _validPublicationType(bytes32 x) private pure returns (bool) {

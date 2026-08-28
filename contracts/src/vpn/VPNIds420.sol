@@ -17,6 +17,7 @@ library VPNIds420 {
 
     bytes32 internal constant ACTION_REGISTER_PROVIDER = keccak256("420/VPN/ACTION/REGISTER_PROVIDER/V1");
     bytes32 internal constant ACTION_UPDATE_PROVIDER = keccak256("420/VPN/ACTION/UPDATE_PROVIDER/V1");
+    bytes32 internal constant ACTION_UPDATE_STAKE_REF = keccak256("420/VPN/ACTION/UPDATE_STAKE_REF/V1");
     bytes32 internal constant ACTION_SET_PROVIDER_STATUS = keccak256("420/VPN/ACTION/SET_PROVIDER_STATUS/V1");
     bytes32 internal constant ACTION_REGISTER_NODE = keccak256("420/VPN/ACTION/REGISTER_NODE/V1");
     bytes32 internal constant ACTION_UPDATE_NODE = keccak256("420/VPN/ACTION/UPDATE_NODE/V1");

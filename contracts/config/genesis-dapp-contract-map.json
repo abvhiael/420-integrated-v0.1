@@ -44,6 +44,11 @@
       "note": "programmable custody, escrow, reserve and beneficiary protocol with capability-scoped authority, obligation-aware collateral accounting, replay-safe release paths and non-confiscatory lifecycle controls; user products such as 420Stash, 420Cure and 420Legacy are policy profiles over the shared primitive"
     },
     {
+      "dapp": "420 VPN",
+      "contracts": ["VPNAuthorization420.sol","VPNProviderRegistry420.sol","VPNNodeRegistry420.sol","VPNPolicyRegistry420.sol","VPNSessionRegistry420.sol","VPNReceiptRegistry420.sol","VPNSettlement420.sol","VPNRouter420.sol"],
+      "note": "decentralized encrypted-routing and bandwidth protocol; chain state governs provider/node identity, bounded session authorization, route/pricing commitments, receipt settlement and staking/trust references while encrypted packet transport, endpoint discovery and traffic contents remain off-chain"
+    },
+    {
       "dapp": "420 Market",
       "contracts": ["MarketPolicyRegistry420.sol","ListingRegistry420.sol","InventoryReservation420.sol","OrderRegistry420.sol"],
       "note": "universal marketplace protocol; references canonical asset/right registries and approved settlement adapters instead of taking custody"

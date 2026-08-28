@@ -2,6 +2,8 @@
 pragma solidity ^0.8.24;
 
 library CommonsIds420 {
+    bytes32 internal constant COMPONENT_COMMONS = keccak256("420/COMMONS/COMPONENT/V1");
+
     bytes32 internal constant SERVICE_POLICY_REGISTRY = keccak256("420/COMMONS/SERVICE/POLICY_REGISTRY/V1");
     bytes32 internal constant SERVICE_SPACE_REGISTRY = keccak256("420/COMMONS/SERVICE/SPACE_REGISTRY/V1");
     bytes32 internal constant SERVICE_MEMBERSHIP_REGISTRY = keccak256("420/COMMONS/SERVICE/MEMBERSHIP_REGISTRY/V1");

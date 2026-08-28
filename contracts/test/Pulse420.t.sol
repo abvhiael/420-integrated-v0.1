@@ -26,6 +26,7 @@ contract Pulse420Test {
     bytes32 internal constant ALICE_PROFILE = keccak256("pulse/alice");
     bytes32 internal constant BOB_PROFILE = keccak256("pulse/bob");
     bytes32 internal constant POST = keccak256("pulse/post/1");
+    bytes32 internal constant CHILD = keccak256("pulse/post/child");
     bytes32 internal constant VISIBILITY_POLICY = keccak256("pulse/policy/public");
 
     struct Suite {
@@ -55,6 +56,11 @@ contract Pulse420Test {
     function _createProfile(PulseProfileRegistry420 profiles, address controller, bytes32 profileId) private {
         vm.prank(controller);
         profiles.createProfile(profileId, controller, PulseIds420.PROFILE_PERSON, bytes32(0), bytes32(0), keccak256("meta"), bytes32(0), bytes32(0));
+    }
+
+    function _setProfileActive(PulseProfileRegistry420 profiles, address controller, bytes32 profileId, bool active) private {
+        vm.prank(controller);
+        profiles.updateProfile(profileId, keccak256("meta"), bytes32(0), bytes32(0), active);
     }
 
     function _publish(Suite memory suite) private {
@@ -102,6 +108,26 @@ contract Pulse420Test {
         require(suite.graph.blocked(ALICE_PROFILE, BOB_PROFILE), "block missing");
     }
 
+    function testCanRemoveFollowAfterTargetDeactivation() public {
+        Suite memory suite = _deploy();
+        vm.prank(ALICE);
+        suite.graph.setFollow(ALICE_PROFILE, BOB_PROFILE, true);
+        _setProfileActive(suite.profiles, BOB, BOB_PROFILE, false);
+        vm.prank(ALICE);
+        suite.graph.setFollow(ALICE_PROFILE, BOB_PROFILE, false);
+        require(!suite.graph.following(ALICE_PROFILE, BOB_PROFILE), "stale follow trapped");
+    }
+
+    function testCanRemoveBlockAfterTargetDeactivation() public {
+        Suite memory suite = _deploy();
+        vm.prank(ALICE);
+        suite.graph.setBlock(ALICE_PROFILE, BOB_PROFILE, true);
+        _setProfileActive(suite.profiles, BOB, BOB_PROFILE, false);
+        vm.prank(ALICE);
+        suite.graph.setBlock(ALICE_PROFILE, BOB_PROFILE, false);
+        require(!suite.graph.blocked(ALICE_PROFILE, BOB_PROFILE), "stale block trapped");
+    }
+
     function testPublicationBindsAuthorAndPreservesRevisionHistory() public {
         Suite memory suite = _deploy();
         _publish(suite);
@@ -125,6 +151,60 @@ contract Pulse420Test {
         suite.publications.revisePublication(POST, keccak256("bad"), keccak256("bad"));
     }
 
+    function testInactiveAuthorCannotReviseOrReactivatePublication() public {
+        Suite memory suite = _deploy();
+        _publish(suite);
+        _setProfileActive(suite.profiles, ALICE, ALICE_PROFILE, false);
+
+        vm.prank(ALICE);
+        vm.expectRevert(PulsePublicationRegistry420.AuthorInactive.selector);
+        suite.publications.revisePublication(POST, keccak256("manifest-v2"), keccak256("content-v2"));
+
+        vm.prank(ALICE);
+        suite.publications.setPublicationActive(POST, false);
+        vm.prank(ALICE);
+        vm.expectRevert(PulsePublicationRegistry420.AuthorInactive.selector);
+        suite.publications.setPublicationActive(POST, true);
+    }
+
+    function testCannotReplyToInactiveParent() public {
+        Suite memory suite = _deploy();
+        _publish(suite);
+        vm.prank(ALICE);
+        suite.publications.setPublicationActive(POST, false);
+
+        vm.prank(BOB);
+        vm.expectRevert(PulsePublicationRegistry420.ParentInactive.selector);
+        suite.publications.createPublication(
+            CHILD,
+            BOB_PROFILE,
+            PulseIds420.PUBLICATION_POST,
+            keccak256("child-manifest"),
+            keccak256("child-content"),
+            POST,
+            bytes32(0),
+            VISIBILITY_POLICY,
+            bytes32(0)
+        );
+    }
+
+    function testReferencePublicationRequiresCanonicalReferenceId() public {
+        Suite memory suite = _deploy();
+        vm.prank(ALICE);
+        vm.expectRevert(PulsePublicationRegistry420.InvalidExternalReference.selector);
+        suite.publications.createPublication(
+            POST,
+            ALICE_PROFILE,
+            PulseIds420.PUBLICATION_COMMONS_REFERENCE,
+            keccak256("manifest"),
+            keccak256("content"),
+            bytes32(0),
+            bytes32(0),
+            VISIBILITY_POLICY,
+            bytes32(0)
+        );
+    }
+
     function testBlockedProfileCannotLikePublication() public {
         Suite memory suite = _deploy();
         _publish(suite);
@@ -133,6 +213,26 @@ contract Pulse420Test {
         vm.prank(BOB);
         vm.expectRevert(PulseInteractionRegistry420.InteractionBlocked.selector);
         suite.interactions.setLike(BOB_PROFILE, POST, true);
+    }
+
+    function testCanUnlikeAfterPublicationDeactivation() public {
+        Suite memory suite = _deploy();
+        _publish(suite);
+        vm.prank(BOB);
+        suite.interactions.setLike(BOB_PROFILE, POST, true);
+        vm.prank(ALICE);
+        suite.publications.setPublicationActive(POST, false);
+        vm.prank(BOB);
+        suite.interactions.setLike(BOB_PROFILE, POST, false);
+        require(!suite.interactions.liked(BOB_PROFILE, POST), "stale like trapped");
+    }
+
+    function testNormalizedTopicNameCannotBeReassigned() public {
+        Suite memory suite = _deploy();
+        bytes32 nameHash = keccak256("cannabis");
+        suite.topics.createTopic(keccak256("topic/cannabis"), nameHash, keccak256("meta-1"));
+        vm.expectRevert(PulseTopicRegistry420.TopicNameAlreadyRegistered.selector);
+        suite.topics.createTopic(keccak256("topic/cannabis-duplicate"), nameHash, keccak256("meta-2"));
     }
 
     function testRouterReadsCanonicalState() public {

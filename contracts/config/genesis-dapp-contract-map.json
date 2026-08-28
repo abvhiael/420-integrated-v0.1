@@ -76,7 +76,13 @@
     },
     {
       "dapp": "420 AI",
-      "contracts": ["AIProviderRegistry.sol","AIModelRegistry.sol","AIJobManager.sol","AIJobEscrow.sol","AIReputationRegistry.sol"]
+      "contracts": ["AIProviderRegistry.sol","AIModelRegistry.sol","AIJobManager.sol","AIJobEscrow.sol","AIReputationRegistry.sol","AIIds420.sol","AIAuthorization420.sol","AIPolicyRegistry420.sol","AIModelVersionRegistry420.sol","AIModelDeploymentRegistry420.sol","AIRequestRegistry420.sol","AIResultRegistry420.sol","AIComputeAdapter420.sol","AIRouter420.sol"],
+      "note": "distributed AI application/protocol layer for canonical model identity, immutable model versions, provider deployments, AI request/result commitments and AI-specific verification/privacy semantics; actual accelerator execution is off-chain and general compute procurement/settlement is delegated to the shared 420 ComputeMarket. Existing 0x042f-0x0433 AI predeploy identities remain frozen compatibility/discovery surfaces and must be hardened rather than deleted or silently repurposed."
+    },
+    {
+      "dapp": "420 ComputeMarket",
+      "contracts": ["ComputeIds420.sol","ComputeAuthorization420.sol","ComputePolicyRegistry420.sol","ComputeProviderRegistry420.sol","ComputeNodeRegistry420.sol","ComputeResourceRegistry420.sol","ComputeOfferRegistry420.sol","ComputeRequestRegistry420.sol","ComputeMatch420.sol","ComputeJobRegistry420.sol","ComputeReceiptRegistry420.sol","ComputeVerificationRouter420.sol","ComputeSettlement420.sol","ComputeDispute420.sol","ComputeRouter420.sol"],
+      "note": "shared general-purpose decentralized market for off-chain CPU/GPU/accelerator/proving/rendering/simulation/batch compute; canonicalizes resource capability, offers, bounded requests, immutable accepted matches, strict job lifecycles, receipts, verification profiles and Vault-backed settlement. It is consumed by 420AI but remains usable by non-AI workloads. No new frozen predeploy address is allocated by this architecture."
     },
     {
       "dapp": "420 Attention",

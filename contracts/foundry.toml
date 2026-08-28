@@ -7,6 +7,7 @@ solc_version = "0.8.24"
 evm_version = "cancun"
 optimizer = true
 optimizer_runs = 200
+via_ir = true
 ffi = false
 fs_permissions = [
   { access = "read-write", path = "./out" },
@@ -40,6 +41,18 @@ runs = 2048
 depth = 256
 fail_on_revert = true
 dictionary_weight = 80
+include_storage = true
+include_push_bytes = true
+
+[profile.hardening]
+fuzz = { runs = 100000, max_test_rejects = 262144, seed = "0x420420" }
+
+[profile.hardening.invariant]
+runs = 4096
+depth = 384
+fail_on_revert = true
+call_override = false
+dictionary_weight = 90
 include_storage = true
 include_push_bytes = true
 

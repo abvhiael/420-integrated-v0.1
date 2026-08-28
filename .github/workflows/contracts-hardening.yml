@@ -1,0 +1,116 @@
+name: 420 Genesis Contract Hardening
+
+on:
+  push:
+    paths:
+      - "contracts/**"
+      - ".github/workflows/contracts-hardening.yml"
+  pull_request:
+    paths:
+      - "contracts/**"
+      - ".github/workflows/contracts-hardening.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: contract-hardening-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  hardening:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: read
+    env:
+      FOUNDRY_PROFILE: hardening
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Slither
+        run: python -m pip install --disable-pip-version-check slither-analyzer
+
+      - name: Capture toolchain
+        working-directory: contracts
+        run: |
+          mkdir -p ../artifacts/hardening
+          {
+            echo "commit=${GITHUB_SHA}"
+            forge --version
+            cast --version
+            python --version
+            slither --version
+            forge config
+          } | tee ../artifacts/hardening/toolchain.txt
+
+      - name: Frozen compiler profile check
+        working-directory: contracts
+        run: |
+          CONFIG="$(forge config)"
+          grep -q 'solc = "0.8.24"' <<<"$CONFIG" || grep -q 'solc_version = "0.8.24"' <<<"$CONFIG"
+          grep -q 'evm_version = "cancun"' <<<"$CONFIG"
+          grep -q 'optimizer = true' <<<"$CONFIG"
+          grep -q 'optimizer_runs = 200' <<<"$CONFIG"
+          grep -q 'via_ir = true' <<<"$CONFIG"
+
+      - name: Dangerous authority and opcode scan
+        working-directory: contracts
+        run: |
+          mkdir -p ../artifacts/hardening
+          set +e
+          grep -RInE --include='*.sol' '\btx\.origin\b|\bselfdestruct\s*\(|\.delegatecall\s*\(' src \
+            | tee ../artifacts/hardening/dangerous-opcodes.txt
+          STATUS=${PIPESTATUS[0]}
+          set -e
+          if [ "$STATUS" -eq 0 ]; then
+            echo "Forbidden authority/opcode primitive found in production Solidity." >&2
+            exit 1
+          fi
+          if [ "$STATUS" -gt 1 ]; then
+            exit "$STATUS"
+          fi
+          : > ../artifacts/hardening/dangerous-opcodes.txt
+
+      - name: Clean hardening build
+        working-directory: contracts
+        run: forge clean && forge build --force --sizes 2>&1 | tee ../artifacts/hardening/build.txt
+
+      - name: AI package fuzz campaign
+        working-directory: contracts
+        run: forge test --match-path 'test/AI*.t.sol' -vvv 2>&1 | tee ../artifacts/hardening/ai-tests.txt
+
+      - name: Genesis invariant campaign
+        working-directory: contracts
+        run: forge test --match-path 'test/*Invariant*.t.sol' -vv 2>&1 | tee ../artifacts/hardening/invariants.txt
+
+      - name: AI gas and denial-of-service review evidence
+        working-directory: contracts
+        run: forge test --match-path 'test/AI*.t.sol' --gas-report 2>&1 | tee ../artifacts/hardening/gas-report.txt
+
+      - name: Slither high-severity gate
+        working-directory: contracts
+        run: |
+          set +e
+          slither . --exclude-dependencies --json ../artifacts/hardening/slither.json --fail-high \
+            2>&1 | tee ../artifacts/hardening/slither.txt
+          STATUS=${PIPESTATUS[0]}
+          set -e
+          exit "$STATUS"
+
+      - name: Upload hardening evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: contract-hardening-${{ github.sha }}
+          path: artifacts/hardening
+          if-no-files-found: warn
+          retention-days: 30

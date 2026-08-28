@@ -133,7 +133,7 @@ contract TrustSignalRegistry420 is I420System {
         Signal storage signal = _signals[signalId];
         if (!signal.exists) revert SignalNotFound();
         if (signal.state != SignalState.ACTIVE) revert SignalNotActive();
-        if (!issuerRegistry.isOperator(signal.issuerId, msg.sender)) revert UnauthorizedIssuer();
+        if (!issuerRegistry.isAuthorized(signal.issuerId, msg.sender)) revert UnauthorizedIssuer();
 
         _removeFromAggregate(signal);
         signal.state = SignalState.REVOKED;

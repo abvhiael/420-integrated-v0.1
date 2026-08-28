@@ -117,9 +117,10 @@ contract BetRegistries420Test {
 
     function testModuleRegistrationDefaultDeny() public {
         Suite memory s = _deploy();
+        address implementation = address(new DummyBetModule420());
         vm.prank(ADMIN);
         vm.expectRevert(BetModuleRegistry420.Unauthorized.selector);
-        s.modules.registerModule(MODULE, MODULE_V1, address(new DummyBetModule420()), bytes32(0), bytes32(0));
+        s.modules.registerModule(MODULE, MODULE_V1, implementation, bytes32(0), bytes32(0));
     }
 
     function testModuleApprovalDoesNotSkipRegistrationOrActivateGame() public {
@@ -134,12 +135,14 @@ contract BetRegistries420Test {
         Suite memory s = _deploy();
         address impl = _registerModule(s, MODULE_V1);
         _allow(s, BetIds420.ACTION_MODULE_REGISTER, s.auth.scopeForModule(MODULE, MODULE_V2));
+        address implV2 = address(new DummyBetModule420());
         vm.prank(ADMIN);
-        s.modules.registerModule(MODULE, MODULE_V2, address(new DummyBetModule420()), bytes32(0), bytes32(0));
+        s.modules.registerModule(MODULE, MODULE_V2, implV2, bytes32(0), bytes32(0));
 
+        address replacement = address(new DummyBetModule420());
         vm.prank(ADMIN);
         vm.expectRevert(BetModuleRegistry420.AlreadyExists.selector);
-        s.modules.registerModule(MODULE, MODULE_V1, address(new DummyBetModule420()), bytes32(0), bytes32(0));
+        s.modules.registerModule(MODULE, MODULE_V1, replacement, bytes32(0), bytes32(0));
         require(s.modules.getModule(MODULE_V1).implementation == impl, "module rebound");
     }
 

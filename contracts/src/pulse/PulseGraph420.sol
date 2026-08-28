@@ -31,8 +31,10 @@ contract PulseGraph420 is I420System {
     function setFollow(bytes32 followerProfileId, bytes32 followedProfileId, bool active) external {
         _requireController(followerProfileId);
         if (followerProfileId == followedProfileId) revert SelfRelation();
-        if (!profiles.profileActive(followedProfileId)) revert ProfileInactive();
-        if (blocked[followerProfileId][followedProfileId] || blocked[followedProfileId][followerProfileId]) revert BlockedRelation();
+        if (active) {
+            if (!profiles.profileActive(followedProfileId)) revert ProfileInactive();
+            if (blocked[followerProfileId][followedProfileId] || blocked[followedProfileId][followerProfileId]) revert BlockedRelation();
+        }
         if (following[followerProfileId][followedProfileId] == active) revert NoChange();
         following[followerProfileId][followedProfileId] = active;
         emit FollowSet(followerProfileId, followedProfileId, active);
@@ -41,7 +43,7 @@ contract PulseGraph420 is I420System {
     function setBlock(bytes32 blockerProfileId, bytes32 blockedProfileId, bool active) external {
         _requireController(blockerProfileId);
         if (blockerProfileId == blockedProfileId) revert SelfRelation();
-        if (!profiles.profileActive(blockedProfileId)) revert ProfileInactive();
+        if (active && !profiles.profileActive(blockedProfileId)) revert ProfileInactive();
         if (blocked[blockerProfileId][blockedProfileId] == active) revert NoChange();
         blocked[blockerProfileId][blockedProfileId] = active;
         if (active && following[blockerProfileId][blockedProfileId]) {

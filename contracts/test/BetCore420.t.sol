@@ -109,7 +109,9 @@ contract BetCore420Test {
         (, BetAuthorization420 auth) = _deploy();
         bytes32 value = keccak256("same-id");
         require(auth.scopeForGame(value, GAME_V1) != auth.scopeForVault(value), "game/vault scope collision");
-        require(auth.scopeForVault(value) == auth.scopeForMarket(value), "expected raw-id scope encoding changed");
+        require(auth.scopeForVault(value) != auth.scopeForMarket(value), "vault/market scope collision");
+        require(auth.scopeForMarket(value) != auth.scopeForContest(value), "market/contest scope collision");
+        require(auth.scopeForContest(value) != auth.scopeForTable(value), "contest/table scope collision");
     }
 
     function testCoreConstants() public pure {

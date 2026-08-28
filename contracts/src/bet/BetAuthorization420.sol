@@ -18,50 +18,42 @@ contract BetAuthorization420 is I420System {
     function systemName() external pure returns (string memory) { return "BetAuthorization420"; }
     function protocolVersion() external pure returns (uint32) { return 1; }
 
-    function scopeGlobal() public pure returns (bytes32) {
-        return keccak256("420.BET.SCOPE.GLOBAL");
+    function scopeGlobal() public pure returns (bytes32) { return keccak256("420.BET.SCOPE.GLOBAL"); }
+    function scopeForModule(bytes32 moduleId, bytes32 moduleVersionId) public pure returns (bytes32) {
+        return keccak256(abi.encode("420.BET.SCOPE.MODULE", moduleId, moduleVersionId));
     }
-
     function scopeForGame(bytes32 gameId, bytes32 gameVersionId) public pure returns (bytes32) {
         return keccak256(abi.encode("420.BET.SCOPE.GAME", gameId, gameVersionId));
     }
-
+    function scopeForProfile(bytes32 profileId) public pure returns (bytes32) {
+        return keccak256(abi.encode("420.BET.SCOPE.PROFILE", profileId));
+    }
+    function scopeForOperator(bytes32 operatorId) public pure returns (bytes32) {
+        return keccak256(abi.encode("420.BET.SCOPE.OPERATOR", operatorId));
+    }
     function scopeForVault(bytes32 vaultId) public pure returns (bytes32) {
         return keccak256(abi.encode("420.BET.SCOPE.VAULT", vaultId));
     }
-
     function scopeForWager(bytes32 wagerId) public pure returns (bytes32) {
         return keccak256(abi.encode("420.BET.SCOPE.WAGER", wagerId));
     }
-
     function scopeForMarket(bytes32 marketId) public pure returns (bytes32) {
         return keccak256(abi.encode("420.BET.SCOPE.MARKET", marketId));
     }
-
     function scopeForContest(bytes32 contestId) public pure returns (bytes32) {
         return keccak256(abi.encode("420.BET.SCOPE.CONTEST", contestId));
     }
-
     function scopeForTable(bytes32 tableId) public pure returns (bytes32) {
         return keccak256(abi.encode("420.BET.SCOPE.TABLE", tableId));
     }
-
     function scopeForAsset(address asset) public pure returns (bytes32) {
         return keccak256(abi.encode("420.BET.SCOPE.ASSET", asset));
     }
 
     function isAuthorized(address principal, bytes32 actionId, bytes32 scopeHash, uint256 amount)
-        external
-        view
-        returns (bool)
+        external view returns (bool)
     {
-        return capabilityRegistry.isAuthorized(
-            principal,
-            BetIds420.COMPONENT_BET,
-            actionId,
-            scopeHash,
-            amount
-        );
+        return capabilityRegistry.isAuthorized(principal, BetIds420.COMPONENT_BET, actionId, scopeHash, amount);
     }
 
     function isGameAuthorized(

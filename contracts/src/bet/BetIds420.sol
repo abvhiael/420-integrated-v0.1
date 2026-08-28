@@ -1,0 +1,63 @@
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.24;
+
+library BetIds420 {
+    bytes32 internal constant COMPONENT_BET = keccak256("420.BET.CORE");
+
+    // Player economic actions.
+    bytes32 internal constant ACTION_PLACE = keccak256("BET_PLACE");
+    bytes32 internal constant ACTION_GAME_ACTION = keccak256("BET_GAME_ACTION");
+    bytes32 internal constant ACTION_GAME_ADD_STAKE = keccak256("BET_GAME_ADD_STAKE");
+    bytes32 internal constant ACTION_ACCEPT_CASHOUT = keccak256("BET_ACCEPT_CASHOUT");
+    bytes32 internal constant ACTION_CLAIM_REWARD = keccak256("BET_CLAIM_REWARD");
+    bytes32 internal constant ACTION_CLAIM_JACKPOT = keccak256("BET_CLAIM_JACKPOT");
+
+    // Poker actions.
+    bytes32 internal constant ACTION_POKER_BUY_IN = keccak256("BET_POKER_BUY_IN");
+    bytes32 internal constant ACTION_POKER_TOP_UP = keccak256("BET_POKER_TOP_UP");
+    bytes32 internal constant ACTION_POKER_ACTION = keccak256("BET_POKER_ACTION");
+    bytes32 internal constant ACTION_POKER_SIT_OUT = keccak256("BET_POKER_SIT_OUT");
+    bytes32 internal constant ACTION_POKER_LEAVE = keccak256("BET_POKER_LEAVE");
+    bytes32 internal constant ACTION_POKER_WITHDRAW = keccak256("BET_POKER_WITHDRAW");
+    bytes32 internal constant ACTION_POKER_TOURNAMENT_ENTER = keccak256("BET_POKER_TOURNAMENT_ENTER");
+
+    // Fantasy actions.
+    bytes32 internal constant ACTION_FANTASY_ENTER = keccak256("BET_FANTASY_ENTER");
+
+    // Prediction-market player actions.
+    bytes32 internal constant ACTION_PREDICTION_SPLIT = keccak256("BET_PREDICTION_SPLIT");
+    bytes32 internal constant ACTION_PREDICTION_MERGE = keccak256("BET_PREDICTION_MERGE");
+    bytes32 internal constant ACTION_PREDICTION_TRADE = keccak256("BET_PREDICTION_TRADE");
+    bytes32 internal constant ACTION_PREDICTION_ADD_LIQUIDITY = keccak256("BET_PREDICTION_ADD_LIQUIDITY");
+    bytes32 internal constant ACTION_PREDICTION_REMOVE_LIQUIDITY = keccak256("BET_PREDICTION_REMOVE_LIQUIDITY");
+    bytes32 internal constant ACTION_PREDICTION_REDEEM = keccak256("BET_PREDICTION_REDEEM");
+
+    // LP / responsible-gaming actions.
+    bytes32 internal constant ACTION_LP_DEPOSIT = keccak256("BET_LP_DEPOSIT");
+    bytes32 internal constant ACTION_LP_REQUEST_WITHDRAWAL = keccak256("BET_LP_REQUEST_WITHDRAWAL");
+    bytes32 internal constant ACTION_LP_CLAIM_WITHDRAWAL = keccak256("BET_LP_CLAIM_WITHDRAWAL");
+    bytes32 internal constant ACTION_RG_SET_LIMIT = keccak256("BET_RG_SET_LIMIT");
+    bytes32 internal constant ACTION_RG_SELF_EXCLUDE = keccak256("BET_RG_SELF_EXCLUDE");
+    bytes32 internal constant ACTION_RG_COOL_OFF = keccak256("BET_RG_COOL_OFF");
+
+    // Administrative / lifecycle actions. These remain capability-scoped and prospective.
+    bytes32 internal constant ACTION_MODULE_REGISTER = keccak256("BET_MODULE_REGISTER");
+    bytes32 internal constant ACTION_MODULE_APPROVE = keccak256("BET_MODULE_APPROVE");
+    bytes32 internal constant ACTION_MODULE_PAUSE = keccak256("BET_MODULE_PAUSE");
+    bytes32 internal constant ACTION_GAME_REGISTER = keccak256("BET_GAME_REGISTER");
+    bytes32 internal constant ACTION_GAME_ACTIVATE = keccak256("BET_GAME_ACTIVATE");
+    bytes32 internal constant ACTION_GAME_PAUSE = keccak256("BET_GAME_PAUSE");
+    bytes32 internal constant ACTION_PROFILE_REGISTER = keccak256("BET_PROFILE_REGISTER");
+    bytes32 internal constant ACTION_OPERATOR_REGISTER = keccak256("BET_OPERATOR_REGISTER");
+    bytes32 internal constant ACTION_EMERGENCY_SET = keccak256("BET_EMERGENCY_SET");
+
+    // Prediction-market lifecycle / resolution actions. Deliberately no SET_WINNER action exists.
+    bytes32 internal constant ACTION_PREDICTION_MARKET_REGISTER = keccak256("BET_PREDICTION_MARKET_REGISTER");
+    bytes32 internal constant ACTION_PREDICTION_MARKET_APPROVE = keccak256("BET_PREDICTION_MARKET_APPROVE");
+    bytes32 internal constant ACTION_PREDICTION_MARKET_OPEN = keccak256("BET_PREDICTION_MARKET_OPEN");
+    bytes32 internal constant ACTION_PREDICTION_MARKET_SUSPEND = keccak256("BET_PREDICTION_MARKET_SUSPEND");
+    bytes32 internal constant ACTION_PREDICTION_MARKET_CLOSE = keccak256("BET_PREDICTION_MARKET_CLOSE");
+    bytes32 internal constant ACTION_PREDICTION_FACT_REPORT = keccak256("BET_PREDICTION_FACT_REPORT");
+    bytes32 internal constant ACTION_PREDICTION_CHALLENGE = keccak256("BET_PREDICTION_CHALLENGE");
+    bytes32 internal constant ACTION_PREDICTION_FINALIZE = keccak256("BET_PREDICTION_FINALIZE");
+}

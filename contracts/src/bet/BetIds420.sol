@@ -40,6 +40,19 @@ library BetIds420 {
     bytes32 internal constant ACTION_RG_SELF_EXCLUDE = keccak256("BET_RG_SELF_EXCLUDE");
     bytes32 internal constant ACTION_RG_COOL_OFF = keccak256("BET_RG_COOL_OFF");
 
+    // Bankroll-vault and risk-kernel actions. These are capability scoped; no super-admin exists.
+    bytes32 internal constant ACTION_VAULT_REGISTER = keccak256("BET_VAULT_REGISTER");
+    bytes32 internal constant ACTION_VAULT_RECORD_DEPOSIT = keccak256("BET_VAULT_RECORD_DEPOSIT");
+    bytes32 internal constant ACTION_VAULT_QUEUE_WITHDRAWAL = keccak256("BET_VAULT_QUEUE_WITHDRAWAL");
+    bytes32 internal constant ACTION_VAULT_CLAIM_WITHDRAWAL = keccak256("BET_VAULT_CLAIM_WITHDRAWAL");
+    bytes32 internal constant ACTION_VAULT_SET_SAFETY_RESERVE = keccak256("BET_VAULT_SET_SAFETY_RESERVE");
+    bytes32 internal constant ACTION_VAULT_RESERVE_LIABILITY = keccak256("BET_VAULT_RESERVE_LIABILITY");
+    bytes32 internal constant ACTION_VAULT_RELEASE_LIABILITY = keccak256("BET_VAULT_RELEASE_LIABILITY");
+    bytes32 internal constant ACTION_VAULT_RECORD_PNL = keccak256("BET_VAULT_RECORD_PNL");
+    bytes32 internal constant ACTION_RISK_CONFIGURE = keccak256("BET_RISK_CONFIGURE");
+    bytes32 internal constant ACTION_RISK_RESERVE = keccak256("BET_RISK_RESERVE");
+    bytes32 internal constant ACTION_RISK_RELEASE = keccak256("BET_RISK_RELEASE");
+
     // Administrative / lifecycle actions. These remain capability-scoped and prospective.
     bytes32 internal constant ACTION_MODULE_REGISTER = keccak256("BET_MODULE_REGISTER");
     bytes32 internal constant ACTION_MODULE_APPROVE = keccak256("BET_MODULE_APPROVE");

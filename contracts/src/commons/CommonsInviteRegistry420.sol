@@ -3,6 +3,7 @@ pragma solidity ^0.8.24;
 
 import "../interfaces/I420System.sol";
 import "./CommonsAuthorization420.sol";
+import "./CommonsPolicyRegistry420.sol";
 import "./CommonsSpaceRegistry420.sol";
 import "./CommonsIds420.sol";
 
@@ -21,6 +22,7 @@ contract CommonsInviteRegistry420 is I420System {
     }
 
     CommonsAuthorization420 public immutable authorization;
+    CommonsPolicyRegistry420 public immutable policyRegistry;
     CommonsSpaceRegistry420 public immutable spaceRegistry;
 
     mapping(bytes32 => Invite) private _invites;
@@ -30,6 +32,7 @@ contract CommonsInviteRegistry420 is I420System {
     error InvalidInviteId();
     error InvalidMaxUses();
     error InvalidExpiry();
+    error InactivePolicy();
     error InviteAlreadyExists();
     error InviteNotFound();
     error InviteUnavailable();
@@ -49,9 +52,10 @@ contract CommonsInviteRegistry420 is I420System {
     event InviteRedeemed(bytes32 indexed inviteId, address indexed account, uint32 uses, uint32 maxUses);
     event InviteRevoked(bytes32 indexed inviteId, bytes32 indexed spaceId);
 
-    constructor(address authorization_, address spaceRegistry_) {
-        if (authorization_ == address(0) || spaceRegistry_ == address(0)) revert ZeroAddress();
+    constructor(address authorization_, address policyRegistry_, address spaceRegistry_) {
+        if (authorization_ == address(0) || policyRegistry_ == address(0) || spaceRegistry_ == address(0)) revert ZeroAddress();
         authorization = CommonsAuthorization420(authorization_);
+        policyRegistry = CommonsPolicyRegistry420(policyRegistry_);
         spaceRegistry = CommonsSpaceRegistry420(spaceRegistry_);
     }
 
@@ -67,12 +71,13 @@ contract CommonsInviteRegistry420 is I420System {
         uint64 expiresAt,
         uint32 maxUses
     ) external {
-        if (!authorization.isAuthorized(spaceId, msg.sender, CommonsIds420.ACTION_CREATE_INVITE)) revert Unauthorized();
         if (!spaceRegistry.spaceActive(spaceId)) revert InviteUnavailable();
+        if (!authorization.isAuthorized(spaceId, msg.sender, CommonsIds420.ACTION_CREATE_INVITE)) revert Unauthorized();
         if (inviteId == bytes32(0)) revert InvalidInviteId();
         if (_invites[inviteId].exists) revert InviteAlreadyExists();
         if (maxUses == 0) revert InvalidMaxUses();
         if (expiresAt != 0 && expiresAt <= block.timestamp) revert InvalidExpiry();
+        if (policyId != bytes32(0) && !policyRegistry.isActive(policyId)) revert InactivePolicy();
 
         _invites[inviteId] = Invite({
             spaceId: spaceId,
@@ -92,6 +97,7 @@ contract CommonsInviteRegistry420 is I420System {
     function redeemInvite(bytes32 inviteId) external {
         Invite storage invite = _invites[inviteId];
         if (!invite.exists) revert InviteNotFound();
+        if (!spaceRegistry.spaceActive(invite.spaceId)) revert InviteUnavailable();
         if (invite.revoked || invite.uses >= invite.maxUses) revert InviteUnavailable();
         if (invite.expiresAt != 0 && block.timestamp > invite.expiresAt) revert InviteUnavailable();
         if (invite.intendedAccount != address(0) && invite.intendedAccount != msg.sender) revert WrongRecipient();
@@ -105,6 +111,7 @@ contract CommonsInviteRegistry420 is I420System {
     function revokeInvite(bytes32 inviteId) external {
         Invite storage invite = _invites[inviteId];
         if (!invite.exists) revert InviteNotFound();
+        if (!spaceRegistry.spaceActive(invite.spaceId)) revert InviteUnavailable();
         if (!authorization.isAuthorized(invite.spaceId, msg.sender, CommonsIds420.ACTION_REVOKE_INVITE)) revert Unauthorized();
         if (invite.revoked) revert InviteUnavailable();
         invite.revoked = true;

@@ -34,6 +34,20 @@
       "note": "portable domain-specific evidence and reputation-signal protocol; exposes authenticated per-metric history and aggregates without creating a universal social or credit score"
     },
     {
+      "dapp": "420 Commons",
+      "contracts": [
+        "CommonsAuthorization420.sol",
+        "CommonsPolicyRegistry420.sol",
+        "CommonsSpaceRegistry420.sol",
+        "CommonsMembershipRegistry420.sol",
+        "CommonsRoleRegistry420.sol",
+        "CommonsChannelRegistry420.sol",
+        "CommonsInviteRegistry420.sol",
+        "CommonsRouter420.sol"
+      ],
+      "note": "community and organization coordination protocol; canonicalizes Spaces, membership, capability-scoped authority, roles, channels, invites and policies while keeping message/media payloads off-chain"
+    },
+    {
       "dapp": "420 Market",
       "contracts": [
         "MarketPolicyRegistry420.sol",

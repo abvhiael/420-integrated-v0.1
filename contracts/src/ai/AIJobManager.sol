@@ -45,7 +45,7 @@ contract AIJobManager is SystemAccess, I420System {
         Status status;
     }
 
-    mapping(bytes32 => Job) public jobs;
+    mapping(bytes32 => Job) private _jobs;
     address public computeAdapter;
     bool public computeAdapterBound;
 
@@ -64,7 +64,14 @@ contract AIJobManager is SystemAccess, I420System {
     error FundingExceedsMaximum();
 
     event ComputeAdapterBound(address indexed adapter);
-    event JobCreated(bytes32 indexed jobId, address indexed requester, bytes32 indexed modelVersionId, bytes32 workloadClass, uint256 maxSpend, uint64 deadline);
+    event JobCreated(
+        bytes32 indexed jobId,
+        address indexed requester,
+        bytes32 indexed modelVersionId,
+        bytes32 workloadClass,
+        uint256 maxSpend,
+        uint64 deadline
+    );
     event FundingConfirmed(bytes32 indexed jobId, bytes32 fundingRef, uint256 amount);
     event ComputeMatched(bytes32 indexed jobId, bytes32 computeRequestId, bytes32 computeJobId, bytes32 providerId);
     event JobStatus(bytes32 indexed jobId, Status previousStatus, Status newStatus);
@@ -74,8 +81,65 @@ contract AIJobManager is SystemAccess, I420System {
 
     constructor(address timelock_) SystemAccess(timelock_) {}
 
-    function systemName() external pure returns (string memory) { return "AIJobManager"; }
-    function protocolVersion() external pure returns (uint32) { return 2; }
+    function systemName() external pure returns (string memory) {
+        return "AIJobManager";
+    }
+
+    function protocolVersion() external pure returns (uint32) {
+        return 2;
+    }
+
+    /// @notice ABI-compatible replacement for the compiler-generated public mapping getter.
+    /// @dev Returning directly from assembly avoids legacy codegen stack pressure from a 17-field struct getter.
+    function jobs(bytes32 jobId)
+        external
+        view
+        returns (
+            address,
+            bytes32,
+            bytes32,
+            bytes32,
+            bytes32,
+            bytes32,
+            uint256,
+            uint64,
+            bytes32,
+            uint256,
+            bytes32,
+            bytes32,
+            bytes32,
+            bytes32,
+            bytes32,
+            bytes32,
+            Status
+        )
+    {
+        assembly ("memory-safe") {
+            mstore(0x00, jobId)
+            mstore(0x20, _jobs.slot)
+            let slot := keccak256(0x00, 0x40)
+            let ptr := mload(0x40)
+
+            mstore(ptr, sload(slot))
+            mstore(add(ptr, 0x20), sload(add(slot, 1)))
+            mstore(add(ptr, 0x40), sload(add(slot, 2)))
+            mstore(add(ptr, 0x60), sload(add(slot, 3)))
+            mstore(add(ptr, 0x80), sload(add(slot, 4)))
+            mstore(add(ptr, 0xa0), sload(add(slot, 5)))
+            mstore(add(ptr, 0xc0), sload(add(slot, 6)))
+            mstore(add(ptr, 0xe0), sload(add(slot, 7)))
+            mstore(add(ptr, 0x100), sload(add(slot, 8)))
+            mstore(add(ptr, 0x120), sload(add(slot, 9)))
+            mstore(add(ptr, 0x140), sload(add(slot, 10)))
+            mstore(add(ptr, 0x160), sload(add(slot, 11)))
+            mstore(add(ptr, 0x180), sload(add(slot, 12)))
+            mstore(add(ptr, 0x1a0), sload(add(slot, 13)))
+            mstore(add(ptr, 0x1c0), sload(add(slot, 14)))
+            mstore(add(ptr, 0x1e0), sload(add(slot, 15)))
+            mstore(add(ptr, 0x200), sload(add(slot, 16)))
+            return(ptr, 0x220)
+        }
+    }
 
     function bindComputeAdapter(address adapter) external onlyGovernance {
         if (computeAdapterBound) revert AdapterAlreadyBound();
@@ -87,7 +151,16 @@ contract AIJobManager is SystemAccess, I420System {
 
     /// @notice Legacy create shape retained. It creates a bounded CREATED request rather than falsely marking it FUNDED.
     function create(bytes32 jobId, bytes32, bytes32 modelId, bytes32 requestHash) external {
-        _create(jobId, modelId, AIIds420.WORKLOAD_TEXT, requestHash, bytes32(0), bytes32(0), type(uint256).max, uint64(block.timestamp + 1 days));
+        _create(
+            jobId,
+            modelId,
+            AIIds420.WORKLOAD_TEXT,
+            requestHash,
+            bytes32(0),
+            bytes32(0),
+            type(uint256).max,
+            uint64(block.timestamp + 1 days)
+        );
     }
 
     function createRequest(
@@ -100,7 +173,16 @@ contract AIJobManager is SystemAccess, I420System {
         uint256 maxSpend,
         uint64 deadline
     ) external {
-        _create(jobId, modelVersionId, workloadClass, requestHash, privacyPolicyId, verificationProfileId, maxSpend, deadline);
+        _create(
+            jobId,
+            modelVersionId,
+            workloadClass,
+            requestHash,
+            privacyPolicyId,
+            verificationProfileId,
+            maxSpend,
+            deadline
+        );
     }
 
     function confirmFunding(bytes32 jobId, bytes32 fundingRef, uint256 amount) external {
@@ -115,10 +197,15 @@ contract AIJobManager is SystemAccess, I420System {
         emit FundingConfirmed(jobId, fundingRef, amount);
     }
 
-    function matchCompute(bytes32 jobId, bytes32 computeRequestId, bytes32 computeJobId, bytes32 providerId) external onlyComputeAdapter {
+    function matchCompute(bytes32 jobId, bytes32 computeRequestId, bytes32 computeJobId, bytes32 providerId)
+        external
+        onlyComputeAdapter
+    {
         Job storage j = _get(jobId);
         if (j.status != Status.FUNDED) revert InvalidTransition();
-        if (computeRequestId == bytes32(0) || computeJobId == bytes32(0) || providerId == bytes32(0)) revert InvalidReference();
+        if (computeRequestId == bytes32(0) || computeJobId == bytes32(0) || providerId == bytes32(0)) {
+            revert InvalidReference();
+        }
         j.computeRequestId = computeRequestId;
         j.computeJobId = computeJobId;
         j.providerId = providerId;
@@ -126,8 +213,13 @@ contract AIJobManager is SystemAccess, I420System {
         emit ComputeMatched(jobId, computeRequestId, computeJobId, providerId);
     }
 
-    function acceptCompute(bytes32 jobId) external onlyComputeAdapter { _advance(jobId, Status.MATCHED, Status.ACCEPTED); }
-    function markRunning(bytes32 jobId) external onlyComputeAdapter { _advance(jobId, Status.ACCEPTED, Status.RUNNING); }
+    function acceptCompute(bytes32 jobId) external onlyComputeAdapter {
+        _advance(jobId, Status.MATCHED, Status.ACCEPTED);
+    }
+
+    function markRunning(bytes32 jobId) external onlyComputeAdapter {
+        _advance(jobId, Status.ACCEPTED, Status.RUNNING);
+    }
 
     function commitResult(bytes32 jobId, bytes32 resultHash, bytes32 resultManifestHash) external onlyComputeAdapter {
         Job storage j = _get(jobId);
@@ -139,7 +231,9 @@ contract AIJobManager is SystemAccess, I420System {
         emit ResultCommitted(jobId, resultHash, resultManifestHash);
     }
 
-    function verifyResult(bytes32 jobId) external onlyComputeAdapter { _advance(jobId, Status.RESULT_COMMITTED, Status.VERIFIED); }
+    function verifyResult(bytes32 jobId) external onlyComputeAdapter {
+        _advance(jobId, Status.RESULT_COMMITTED, Status.VERIFIED);
+    }
 
     function confirmSettlement(bytes32 jobId) external {
         if (msg.sender != AI_JOB_ESCROW) revert NotEscrow();
@@ -149,7 +243,10 @@ contract AIJobManager is SystemAccess, I420System {
     function confirmRefund(bytes32 jobId) external {
         if (msg.sender != AI_JOB_ESCROW) revert NotEscrow();
         Job storage j = _get(jobId);
-        if (j.status != Status.FUNDED && j.status != Status.EXPIRED && j.status != Status.FAILED && j.status != Status.DISPUTED) revert InvalidTransition();
+        if (
+            j.status != Status.FUNDED && j.status != Status.EXPIRED && j.status != Status.FAILED
+                && j.status != Status.DISPUTED
+        ) revert InvalidTransition();
         _setStatus(jobId, j, Status.REFUNDED);
     }
 
@@ -162,13 +259,18 @@ contract AIJobManager is SystemAccess, I420System {
     function expire(bytes32 jobId) external {
         Job storage j = _get(jobId);
         if (block.timestamp <= j.deadline) revert InvalidDeadline();
-        if (j.status != Status.CREATED && j.status != Status.FUNDED && j.status != Status.MATCHED && j.status != Status.ACCEPTED) revert InvalidTransition();
+        if (
+            j.status != Status.CREATED && j.status != Status.FUNDED && j.status != Status.MATCHED
+                && j.status != Status.ACCEPTED
+        ) revert InvalidTransition();
         _setStatus(jobId, j, Status.EXPIRED);
     }
 
     function markFailed(bytes32 jobId) external onlyComputeAdapter {
         Job storage j = _get(jobId);
-        if (j.status != Status.MATCHED && j.status != Status.ACCEPTED && j.status != Status.RUNNING) revert InvalidTransition();
+        if (j.status != Status.MATCHED && j.status != Status.ACCEPTED && j.status != Status.RUNNING) {
+            revert InvalidTransition();
+        }
         _setStatus(jobId, j, Status.FAILED);
     }
 
@@ -201,29 +303,22 @@ contract AIJobManager is SystemAccess, I420System {
         uint64 deadline
     ) private {
         if (jobId == bytes32(0) || modelVersionId == bytes32(0) || requestHash == bytes32(0)) revert InvalidJobId();
-        if (jobs[jobId].status != Status.NONE) revert JobExists();
+        if (_jobs[jobId].status != Status.NONE) revert JobExists();
         if (!_validWorkload(workloadClass)) revert InvalidWorkloadClass();
         if (maxSpend == 0) revert InvalidSpend();
         if (deadline <= block.timestamp) revert InvalidDeadline();
-        jobs[jobId] = Job({
-            requester: msg.sender,
-            modelVersionId: modelVersionId,
-            workloadClass: workloadClass,
-            requestHash: requestHash,
-            privacyPolicyId: privacyPolicyId,
-            verificationProfileId: verificationProfileId,
-            maxSpend: maxSpend,
-            deadline: deadline,
-            fundingRef: bytes32(0),
-            fundedAmount: 0,
-            computeRequestId: bytes32(0),
-            computeJobId: bytes32(0),
-            providerId: bytes32(0),
-            resultHash: bytes32(0),
-            resultManifestHash: bytes32(0),
-            disputeRef: bytes32(0),
-            status: Status.CREATED
-        });
+
+        Job storage j = _jobs[jobId];
+        j.requester = msg.sender;
+        j.modelVersionId = modelVersionId;
+        j.workloadClass = workloadClass;
+        j.requestHash = requestHash;
+        j.privacyPolicyId = privacyPolicyId;
+        j.verificationProfileId = verificationProfileId;
+        j.maxSpend = maxSpend;
+        j.deadline = deadline;
+        j.status = Status.CREATED;
+
         emit JobCreated(jobId, msg.sender, modelVersionId, workloadClass, maxSpend, deadline);
     }
 
@@ -245,7 +340,7 @@ contract AIJobManager is SystemAccess, I420System {
     }
 
     function _get(bytes32 jobId) private view returns (Job storage j) {
-        j = jobs[jobId];
+        j = _jobs[jobId];
         if (j.status == Status.NONE) revert JobNotFound();
     }
 

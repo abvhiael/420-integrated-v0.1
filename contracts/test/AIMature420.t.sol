@@ -110,7 +110,7 @@ contract AIMature420Test {
             100,
             uint64(block.timestamp + 1 hours)
         );
-        (,,,,,,,,,,,,,,, AIJobManager.Status status) = jobs.jobs(JOB_ID);
+        (,,,,,,,,,,,,,,,, AIJobManager.Status status) = jobs.jobs(JOB_ID);
         require(status == AIJobManager.Status.CREATED, "created not funded");
 
         vm.prank(COMPUTE);
@@ -129,7 +129,7 @@ contract AIMature420Test {
         jobs.commitResult(JOB_ID, keccak256("output"), keccak256("result-manifest"));
         vm.prank(COMPUTE);
         jobs.verifyResult(JOB_ID);
-        (,,,,,,,,,,,,,,, status) = jobs.jobs(JOB_ID);
+        (,,,,,,,,,,,,,,,, status) = jobs.jobs(JOB_ID);
         require(status == AIJobManager.Status.VERIFIED, "verified");
     }
 

@@ -23,14 +23,17 @@ contract VPNProviderRegistry420 is I420System {
 
     error ZeroAddress();
     error InvalidProviderId();
+    error InvalidStakeRef();
     error ProviderAlreadyExists();
     error ProviderNotFound();
     error Unauthorized();
     error InvalidStateTransition();
+    error StakeRefLockedWhileActive();
     error NoChange();
 
     event ProviderRegistered(bytes32 indexed providerId, address indexed operatorAccount, bytes32 stakeRef);
-    event ProviderUpdated(bytes32 indexed providerId, bytes32 metadataHash, bytes32 stakeRef, uint32 revision);
+    event ProviderUpdated(bytes32 indexed providerId, bytes32 metadataHash, uint32 revision);
+    event ProviderStakeRefUpdated(bytes32 indexed providerId, bytes32 previousStakeRef, bytes32 newStakeRef, uint32 revision);
     event ProviderStateChanged(bytes32 indexed providerId, ProviderState previousState, ProviderState newState, uint32 revision);
 
     constructor(address authorization_) {
@@ -58,14 +61,26 @@ contract VPNProviderRegistry420 is I420System {
         emit ProviderRegistered(providerId, operatorAccount, stakeRef);
     }
 
-    function updateProvider(bytes32 providerId, bytes32 metadataHash, bytes32 stakeRef) external {
+    function updateProvider(bytes32 providerId, bytes32 metadataHash) external {
         Provider storage provider = _get(providerId);
         if (provider.state == ProviderState.RETIRED) revert InvalidStateTransition();
         if (!authorization.isProviderAuthorized(msg.sender, providerId, VPNIds420.ACTION_UPDATE_PROVIDER, 0)) revert Unauthorized();
         provider.metadataHash = metadataHash;
-        provider.stakeRef = stakeRef;
         provider.revision += 1;
-        emit ProviderUpdated(providerId, metadataHash, stakeRef, provider.revision);
+        emit ProviderUpdated(providerId, metadataHash, provider.revision);
+    }
+
+    function updateStakeRef(bytes32 providerId, bytes32 newStakeRef) external {
+        Provider storage provider = _get(providerId);
+        if (provider.state == ProviderState.RETIRED) revert InvalidStateTransition();
+        if (provider.state == ProviderState.ACTIVE) revert StakeRefLockedWhileActive();
+        if (newStakeRef == bytes32(0)) revert InvalidStakeRef();
+        if (!authorization.isProviderAuthorized(msg.sender, providerId, VPNIds420.ACTION_UPDATE_STAKE_REF, 0)) revert Unauthorized();
+        bytes32 oldStakeRef = provider.stakeRef;
+        if (oldStakeRef == newStakeRef) revert NoChange();
+        provider.stakeRef = newStakeRef;
+        provider.revision += 1;
+        emit ProviderStakeRefUpdated(providerId, oldStakeRef, newStakeRef, provider.revision);
     }
 
     function setState(bytes32 providerId, ProviderState newState) external {
@@ -78,6 +93,7 @@ contract VPNProviderRegistry420 is I420System {
             (oldState == ProviderState.ACTIVE && (newState == ProviderState.SUSPENDED || newState == ProviderState.RETIRED)) ||
             (oldState == ProviderState.SUSPENDED && (newState == ProviderState.ACTIVE || newState == ProviderState.RETIRED));
         if (!valid) revert InvalidStateTransition();
+        if (newState == ProviderState.ACTIVE && provider.stakeRef == bytes32(0)) revert InvalidStakeRef();
         provider.state = newState;
         provider.revision += 1;
         emit ProviderStateChanged(providerId, oldState, newState, provider.revision);

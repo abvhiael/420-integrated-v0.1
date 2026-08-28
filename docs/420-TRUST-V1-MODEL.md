@@ -63,11 +63,17 @@ Issuer authority is reporting-only. It conveys no custody, transfer, governance,
 
 Corrections are append-only. A corrected signal remains historically readable and points to its replacement through `supersededBy`. A replacement signal records `correctionOf`. The active aggregate removes the superseded value and adds the replacement value atomically.
 
-Only the same stable issuer may correct its signal, using its current authorized operator. A correction must carry a new evidence reference.
+Only the same stable issuer may correct its signal, using its current **active authorized operator**. A correction must carry a new evidence reference.
 
 ## Revocation
 
-An issuer's current operator may revoke an unsuperseded signal issued by that stable issuer, including after the issuer is deactivated. Revocation removes the signal from the active aggregate but never deletes or rewrites the historical signal. A nonzero reason commitment is recorded in the revocation event/state.
+An unsuperseded signal may be revoked only by the stable issuer's current **active authorized operator**. Revocation removes the signal from the active aggregate but never deletes or rewrites the historical signal. A nonzero reason commitment is recorded in the revocation event/state.
+
+Deactivation freezes issuer mutation authority. A deactivated or compromised operator cannot publish, correct, or revoke Trust evidence. Governance may rotate/reactivate the stable issuer to a replacement operator when legitimate remediation is required; issuer epochs make that authority transition reconstructable.
+
+## Canonical read interface
+
+Consumers should bind to `ITrust420.readMetric(subjectType, subjectId, metricId)`. The canonical read returns one metric's domain, unit, current policy revision/active state, active aggregate total, and active signal count. V1 deliberately exposes no protocol-wide score endpoint.
 
 ## Privacy
 
@@ -90,7 +96,7 @@ Sensitive personal information, review text, KYC documents, delivery addresses, 
 ## Invariants
 
 - **TRUST-INV-001 — No universal score:** canonical state exposes only domain/metric evidence and per-metric aggregates.
-- **TRUST-INV-002 — Issuer authorization:** only the current operator of an active issuer may create new signals.
+- **TRUST-INV-002 — Issuer authorization:** only the current operator of an active issuer may create, correct, or revoke signals.
 - **TRUST-INV-003 — Metric authorization:** an issuer must be explicitly approved for the exact metric it reports.
 - **TRUST-INV-004 — Revision pinning:** every signal binds the metric revision and issuer epoch applicable at issuance.
 - **TRUST-INV-005 — Signal replay protection:** a `signalId` is globally single-use.
@@ -104,7 +110,8 @@ Sensitive personal information, review text, KYC documents, delivery addresses, 
 - **TRUST-INV-013 — Authority minimization:** Trust issuers receive reporting authority only.
 - **TRUST-INV-014 — Private-data minimization:** canonical state contains commitments/references rather than sensitive plaintext payloads.
 - **TRUST-INV-015 — Historical reconstructability:** signals, corrections, revocations, policy revisions, issuer changes, and aggregates can be reconstructed from chain state/events plus published specs.
-- **TRUST-INV-016 — Prospective issuer disable:** disabling an issuer blocks new evidence but does not erase previously valid history.
+- **TRUST-INV-016 — Prospective issuer disable:** disabling an issuer blocks all issuer mutations without erasing previously valid history.
+- **TRUST-INV-017 — Canonical consumer boundary:** protocol consumers can read metric state through `ITrust420` without depending on concrete aggregator implementation details.
 
 ## Genesis implementation sequence
 
@@ -112,9 +119,10 @@ Sensitive personal information, review text, KYC documents, delivery addresses, 
 2. `TrustIssuerRegistry420`
 3. `TrustPolicyRegistry420`
 4. `TrustSignalRegistry420`
-5. `TrustAggregator420`
-6. invariant/unit tests
-7. Genesis service-map integration
-8. Solidity, Genesis verification, and full 420 Integrated qualification
+5. `ITrust420`
+6. `TrustAggregator420`
+7. invariant/unit tests
+8. Genesis service-map integration
+9. Solidity, Genesis verification, and full 420 Integrated qualification
 
 No new frozen system/predeploy address is allocated by this suite. Discovery remains through the protocol/application registry layer.

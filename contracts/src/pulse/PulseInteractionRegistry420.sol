@@ -35,10 +35,16 @@ contract PulseInteractionRegistry420 is I420System {
     function setLike(bytes32 profileId, bytes32 publicationId, bool active) external {
         if (!profiles.profileActive(profileId)) revert ProfileInactive();
         if (profiles.controllerOf(profileId) != msg.sender) revert Unauthorized();
-        if (!publications.publicationActive(publicationId)) revert PublicationInactive();
-        PulsePublicationRegistry420.Publication memory publication = publications.getPublication(publicationId);
-        if (!graph.canInteract(profileId, publication.authorProfileId)) revert InteractionBlocked();
         if (liked[profileId][publicationId] == active) revert NoChange();
+
+        if (active) {
+            if (!publications.publicationActive(publicationId)) revert PublicationInactive();
+            PulsePublicationRegistry420.Publication memory publication = publications.getPublication(publicationId);
+            if (!graph.canInteract(profileId, publication.authorProfileId)) revert InteractionBlocked();
+        } else {
+            publications.getPublication(publicationId);
+        }
+
         liked[profileId][publicationId] = active;
         emit LikeSet(profileId, publicationId, active);
     }

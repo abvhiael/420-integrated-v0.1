@@ -12,6 +12,13 @@ interface VmAI420 {
     function prank(address) external;
     function warp(uint256) external;
     function expectRevert(bytes4) external;
+    function etch(address target, bytes calldata code) external;
+}
+
+contract MockAIJobManagerEscrow420 {
+    function confirmFunding(bytes32, bytes32, uint256) external {}
+    function confirmSettlement(bytes32) external {}
+    function confirmRefund(bytes32) external {}
 }
 
 contract AIMature420Test {
@@ -91,7 +98,11 @@ contract AIMature420Test {
             1,
             keccak256("manifest-2"),
             keccak256("weights-2"),
-            bytes32(0), bytes32(0), bytes32(0), bytes32(0), bytes32(0)
+            bytes32(0),
+            bytes32(0),
+            bytes32(0),
+            bytes32(0),
+            bytes32(0)
         );
         require(models.isVersionOperational(VERSION_ID), "version operational");
     }
@@ -135,6 +146,9 @@ contract AIMature420Test {
 
     function testEscrowRejectsCustodyAndCannotRedirectBeneficiary() public {
         AIJobEscrow escrow = new AIJobEscrow(address(this));
+        MockAIJobManagerEscrow420 manager = new MockAIJobManagerEscrow420();
+        vm.etch(escrow.AI_JOB_MANAGER(), address(manager).code);
+
         escrow.bindVaultAdapter(VAULT);
         escrow.bindSettlementAdapter(SETTLEMENT);
 

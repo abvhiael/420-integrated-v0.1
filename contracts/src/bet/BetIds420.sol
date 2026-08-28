@@ -44,11 +44,24 @@ library BetIds420 {
     bytes32 internal constant ACTION_MODULE_REGISTER = keccak256("BET_MODULE_REGISTER");
     bytes32 internal constant ACTION_MODULE_APPROVE = keccak256("BET_MODULE_APPROVE");
     bytes32 internal constant ACTION_MODULE_PAUSE = keccak256("BET_MODULE_PAUSE");
+    bytes32 internal constant ACTION_MODULE_RESUME = keccak256("BET_MODULE_RESUME");
+    bytes32 internal constant ACTION_MODULE_DEPRECATE = keccak256("BET_MODULE_DEPRECATE");
+
     bytes32 internal constant ACTION_GAME_REGISTER = keccak256("BET_GAME_REGISTER");
     bytes32 internal constant ACTION_GAME_ACTIVATE = keccak256("BET_GAME_ACTIVATE");
     bytes32 internal constant ACTION_GAME_PAUSE = keccak256("BET_GAME_PAUSE");
+    bytes32 internal constant ACTION_GAME_RESUME = keccak256("BET_GAME_RESUME");
+    bytes32 internal constant ACTION_GAME_DEPRECATE = keccak256("BET_GAME_DEPRECATE");
+
     bytes32 internal constant ACTION_PROFILE_REGISTER = keccak256("BET_PROFILE_REGISTER");
+    bytes32 internal constant ACTION_PROFILE_DEPRECATE = keccak256("BET_PROFILE_DEPRECATE");
+
     bytes32 internal constant ACTION_OPERATOR_REGISTER = keccak256("BET_OPERATOR_REGISTER");
+    bytes32 internal constant ACTION_OPERATOR_ACTIVATE = keccak256("BET_OPERATOR_ACTIVATE");
+    bytes32 internal constant ACTION_OPERATOR_PAUSE = keccak256("BET_OPERATOR_PAUSE");
+    bytes32 internal constant ACTION_OPERATOR_RESUME = keccak256("BET_OPERATOR_RESUME");
+    bytes32 internal constant ACTION_OPERATOR_REVOKE = keccak256("BET_OPERATOR_REVOKE");
+
     bytes32 internal constant ACTION_EMERGENCY_SET = keccak256("BET_EMERGENCY_SET");
 
     // Prediction-market lifecycle / resolution actions. Deliberately no SET_WINNER action exists.

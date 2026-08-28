@@ -71,6 +71,11 @@ contract AssetVault420 is I420System {
 
     function depositNative() external payable nonReentrant { _recordNativeDeposit(); }
 
+    // Exact pre/post token balance checks are intentional. Every external vault entry point is
+    // protected by the same nonReentrant lock, so a token callback cannot consume stale vault
+    // state. The post-call delta check instead rejects fee-on-transfer or otherwise non-exact
+    // token behavior and reverts the entire transfer atomically on mismatch.
+    // slither-disable-next-line reentrancy-balance
     function depositToken(address token, uint256 amount) external nonReentrant {
         if (token == address(0) || amount == 0) revert InvalidAmount();
         _requireActive();
@@ -86,10 +91,18 @@ contract AssetVault420 is I420System {
         _requireActive();
         if (recipient == address(0) || recipient == address(this)) revert InvalidRecipient();
         if (amount == 0) revert InvalidAmount();
-        if (
-            !authorization.isRouteAuthorized(msg.sender, vaultId, VaultIds420.ACTION_WITHDRAW, asset, recipient, amount)
-                && !authorization.isAuthorized(msg.sender, vaultId, VaultIds420.ACTION_WITHDRAW, amount)
-        ) revert Unauthorized();
+
+        // A vault-scoped withdrawal capability may only withdraw to its own principal. Sending
+        // value to any third party requires a route-scoped capability bound to vault, asset,
+        // recipient and action class. This keeps generic delegated withdrawal authority from
+        // becoming arbitrary-recipient transfer authority.
+        bool routeAuthorized = authorization.isRouteAuthorized(
+            msg.sender, vaultId, VaultIds420.ACTION_WITHDRAW, asset, recipient, amount
+        );
+        bool selfAuthorized = recipient == msg.sender
+            && authorization.isAuthorized(msg.sender, vaultId, VaultIds420.ACTION_WITHDRAW, amount);
+        if (!routeAuthorized && !selfAuthorized) revert Unauthorized();
+
         _consume(operationId);
         accounting.recordWithdrawal(vaultId, asset, amount);
         _sendExact(asset, recipient, amount);
@@ -178,6 +191,12 @@ contract AssetVault420 is I420System {
         if (registry.vaultState(vaultId) == VaultRegistry420.VaultState.CLOSED) revert InvalidState();
     }
 
+    // The balance-delta reads deliberately straddle the token call so non-exact token semantics
+    // fail closed. The shared nonReentrant lock prevents callbacks into all vault entry points.
+    // Native recipients are not arbitrary: withdraw() requires either self-withdrawal authority
+    // or a recipient-bound route capability, while claim() uses the immutable obligation
+    // beneficiary recorded by VaultAccounting420.
+    // slither-disable-next-line reentrancy-balance,arbitrary-send-eth
     function _sendExact(address asset, address recipient, uint256 amount) private {
         if (asset == address(0)) {
             (bool ok,) = payable(recipient).call{value: amount}("");

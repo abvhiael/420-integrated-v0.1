@@ -1,8 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
 
-/// @notice Canonical namespaces and proposal classes for the 420Civic protocol.
+/// @notice Canonical namespaces, houses and proposal classes for the 420Civic protocol.
 library CivicIds420 {
+    enum House {
+        COMMUNITY,
+        VALIDATOR
+    }
+
     enum ProposalClass {
         G1,
         G2,
@@ -31,6 +36,7 @@ library CivicIds420 {
     bytes32 internal constant ACTION_CANCEL = keccak256("420CIVIC_ACTION_CANCEL_V1");
     bytes32 internal constant ACTION_CONSTITUTION_UPDATE = keccak256("420CIVIC_ACTION_CONSTITUTION_UPDATE_V1");
     bytes32 internal constant ACTION_ELECTORATE_UPDATE = keccak256("420CIVIC_ACTION_ELECTORATE_UPDATE_V1");
+    bytes32 internal constant ACTION_ELECTORATE_SNAPSHOT = keccak256("420CIVIC_ACTION_ELECTORATE_SNAPSHOT_V1");
     bytes32 internal constant ACTION_EMERGENCY = keccak256("420CIVIC_ACTION_EMERGENCY_V1");
 
     function proposalId(

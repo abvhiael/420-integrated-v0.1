@@ -393,7 +393,9 @@ contract AIModelRegistry is SystemAccess, I420System {
         if (expiresAt != 0 && expiresAt <= block.timestamp) revert InvalidGrant();
 
         grantId = trainingGrantId(modelVersionId, grantee, scopeHash);
-        if (trainingGrants[grantId].exists && !trainingGrants[grantId].revoked) revert AlreadyExists();
+        // Grant IDs are permanent authorization identities. Once created, including after revocation,
+        // the same version/grantee/scope tuple cannot be silently resurrected by overwriting history.
+        if (trainingGrants[grantId].exists) revert AlreadyExists();
         trainingGrants[grantId] = TrainingGrant({
             modelVersionId: modelVersionId,
             grantee: grantee,

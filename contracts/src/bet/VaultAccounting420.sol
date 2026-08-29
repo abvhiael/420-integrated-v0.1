@@ -115,10 +115,11 @@ contract VaultAccounting420 is I420System {
 
     function recordRealizedPnl(bytes32 vaultId, int256 delta) external {
         VaultState storage v = _get(vaultId);
-        _requireAuth(vaultId, BetIds420.ACTION_VAULT_RECORD_PNL, _abs(delta));
-        if (delta < 0 && uint256(-delta) > v.totalAssets) revert Insolvent();
-        if (delta >= 0) v.totalAssets += uint256(delta);
-        else v.totalAssets -= uint256(-delta);
+        uint256 magnitude = _abs(delta);
+        _requireAuth(vaultId, BetIds420.ACTION_VAULT_RECORD_PNL, magnitude);
+        if (delta < 0 && magnitude > v.totalAssets) revert Insolvent();
+        if (delta >= 0) v.totalAssets += magnitude;
+        else v.totalAssets -= magnitude;
         if (v.safetyReserve + v.pendingWithdrawals + v.activeReservedLiability > v.totalAssets) revert Insolvent();
         v.realizedPnl += delta;
         emit RealizedPnlRecorded(vaultId, delta, v.realizedPnl);

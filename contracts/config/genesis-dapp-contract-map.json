@@ -71,8 +71,9 @@
       "contracts": ["ValidatorRegistry.sol","RewardController.sol","CommunityValidatorReserve.sol","Stake420.sol"]
     },
     {
-      "dapp": "420 Governance",
-      "contracts": ["GovernanceTimelock.sol","Governance420.sol"]
+      "dapp": "420 Civic",
+      "contracts": ["GovernanceTimelock.sol","Governance420.sol","CivicIds420.sol","CivicConstitution420.sol","CivicProposalRegistry420.sol"],
+      "note": "constitutional decision and collective-action protocol for 420 Integrated. GovernanceTimelock at 0x0429 and Governance420 at 0x0437 remain frozen Genesis compatibility/predeploy identities while Civic modules provide explicit proposal classes, immutable action commitments, constitutional thresholds, lifecycle rules and future electorate/voting adapters."
     },
     {
       "dapp": "420 AI",

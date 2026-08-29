@@ -5,7 +5,7 @@ pragma solidity ^0.8.24;
 /// @dev A source exposes historical electorate commitments. The returned root commits the electorate
 /// and weighting policy at snapshotBlock; totalWeight is the denominator used for quorum math.
 interface ICivicElectorateSource420 {
-    function sourceType() external pure returns (bytes32);
+    function sourceType() external view returns (bytes32);
 
     function snapshotAt(uint64 snapshotBlock) external view returns (bytes32 electorateRoot, uint256 totalWeight);
 

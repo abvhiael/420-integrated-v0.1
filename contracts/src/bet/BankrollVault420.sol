@@ -130,10 +130,9 @@ contract BankrollVault420 is I420System {
         // The caller must hold the vault-scoped ACTION_VAULT_ESCROW_STAKE capability. The canonical
         // WagerRouter passes its authenticated msg.sender as player, so `player` cannot be selected
         // by an untrusted external caller even though transferFrom necessarily names that account.
-        // slither-disable-next-line arbitrary-send-erc20
         // The nonReentrant guard protects the escrow state while this exact-delta check rejects
         // fee-on-transfer/rebasing transfer semantics for canonical wager stakes.
-        // slither-disable-next-line reentrancy-balance
+        // slither-disable-next-line arbitrary-send-erc20,reentrancy-balance
         if (!token.transferFrom(player, address(this), amount)) revert TransferFailed();
         uint256 afterBalance = token.balanceOf(address(this));
         if (afterBalance < beforeBalance || afterBalance - beforeBalance != amount) revert UnexpectedTokenDelta();

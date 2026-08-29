@@ -22,8 +22,8 @@ contract MockElectorateSource420 is ICivicElectorateSource420 {
         _type = type_;
     }
 
-    function sourceType() external view returns (bytes32) {
-        return _type;
+    function sourceType() external pure returns (bytes32) {
+        return keccak256("MOCK_ELECTORATE_SOURCE_V1");
     }
 
     function setSnapshot(bytes32 root_, uint256 totalWeight_) external {
@@ -59,8 +59,8 @@ contract CivicElectorateRegistry420Test {
     bytes32 constant ROOT_A = keccak256("ROOT_A");
     bytes32 constant ROOT_B = keccak256("ROOT_B");
 
-    function _source(bytes32 type_, bytes32 root_, uint256 totalWeight_) private returns (MockElectorateSource420 s) {
-        s = new MockElectorateSource420(type_);
+    function _source(bytes32, bytes32 root_, uint256 totalWeight_) private returns (MockElectorateSource420 s) {
+        s = new MockElectorateSource420(keccak256("MOCK_ELECTORATE_SOURCE_V1"));
         s.setSnapshot(root_, totalWeight_);
     }
 

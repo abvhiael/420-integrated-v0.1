@@ -9,11 +9,14 @@ import "./BetTypes420.sol";
 contract BetRegistry420 is I420System {
     BetAuthorization420 public immutable authorization;
     mapping(bytes32 => BetTypes420.Wager) private _wagers;
+    mapping(bytes32 => BetTypes420.Settlement) private _settlements;
 
     error ZeroAddress();
     error InvalidId();
     error InvalidWager();
+    error InvalidSettlement();
     error AlreadyExists();
+    error AlreadySettled();
     error NotFound();
     error Unauthorized();
 
@@ -30,6 +33,7 @@ contract BetRegistry420 is I420System {
         uint64 acceptedAt,
         uint64 deadline
     );
+    event WagerSettled(bytes32 indexed wagerId, BetTypes420.TerminalOutcome outcome, uint256 grossPayout, uint64 settledAt);
 
     constructor(address authorization_) {
         if (authorization_ == address(0)) revert ZeroAddress();
@@ -80,9 +84,48 @@ contract BetRegistry420 is I420System {
         );
     }
 
+    function recordSettlement(bytes32 wagerId, BetTypes420.TerminalOutcome outcome, uint256 grossPayout)
+        external
+        returns (bool created)
+    {
+        BetTypes420.Wager storage wager = _wagers[wagerId];
+        if (wager.wagerId == bytes32(0)) revert NotFound();
+        if (outcome == BetTypes420.TerminalOutcome.NONE || grossPayout > wager.maxGrossPayout) revert InvalidSettlement();
+        BetTypes420.Settlement storage prior = _settlements[wagerId];
+        if (prior.wagerId != bytes32(0)) {
+            if (prior.outcome == outcome && prior.grossPayout == grossPayout) return false;
+            revert AlreadySettled();
+        }
+        if (
+            !authorization.isAuthorized(
+                msg.sender,
+                BetIds420.ACTION_WAGER_SETTLE_RECORD,
+                authorization.scopeForWager(wagerId),
+                grossPayout
+            )
+        ) revert Unauthorized();
+
+        uint64 settledAt = uint64(block.timestamp);
+        _settlements[wagerId] = BetTypes420.Settlement(wagerId, outcome, grossPayout, settledAt);
+        wager.status = outcome == BetTypes420.TerminalOutcome.VOID
+            ? BetTypes420.WagerStatus.VOID
+            : BetTypes420.WagerStatus.SETTLED;
+        emit WagerSettled(wagerId, outcome, grossPayout, settledAt);
+        return true;
+    }
+
     function getWager(bytes32 wagerId) external view returns (BetTypes420.Wager memory wager) {
         wager = _wagers[wagerId];
         if (wager.wagerId == bytes32(0)) revert NotFound();
+    }
+
+    function getSettlement(bytes32 wagerId) external view returns (BetTypes420.Settlement memory settlement) {
+        settlement = _settlements[wagerId];
+        if (settlement.wagerId == bytes32(0)) revert NotFound();
+    }
+
+    function settlementExists(bytes32 wagerId) external view returns (bool) {
+        return _settlements[wagerId].wagerId != bytes32(0);
     }
 
     function exists(bytes32 wagerId) external view returns (bool) {

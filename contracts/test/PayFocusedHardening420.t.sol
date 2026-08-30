@@ -98,8 +98,8 @@ contract PayFocusedHardening420Test {
             inputAsset: address(0x420),
             settlementAsset: SETTLEMENT,
             inputAmount: inputAmount,
-            expectedSettlementAmount: minimumSettlementAmount,
             minimumSettlementAmount: minimumSettlementAmount,
+            quotedSettlementAmount: minimumSettlementAmount,
             conversionFee: 0,
             slippageBps: 0,
             quotedAt: uint64(block.timestamp)
@@ -167,7 +167,7 @@ contract PayFocusedHardening420Test {
         require(rootA != rootB, "invoice id not bound");
         i.amount = 101;
         require(rootA != invoices.invoiceSigningRoot(keccak256("invoice-a"), i), "amount not bound");
-        require(InvoiceRegistry420.INVOICE_DOMAIN() != PaymentRegistry420.PAYMENT_DOMAIN(), "cross-domain collision");
+        require(invoices.INVOICE_DOMAIN() != keccak256("420/APP/420PAY_PAYMENT_ID"), "cross-domain collision");
     }
 
     function testPaymentAssetLifecycleAndAccountingConservation() public {

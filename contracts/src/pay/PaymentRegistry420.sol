@@ -78,12 +78,14 @@ contract PaymentRegistry420 is GenesisResidentAccess420 {
             Types420.Direction.NONE
         );
         Payment storage p = payments[paymentId];
-        require(p.status != Status.NONE, "payment metadata first");
+        require(
+            p.status == Status.SUBMITTED || p.status == Status.INCLUDED || p.status == Status.CERTIFIED,
+            "invalid finalization state"
+        );
         require(
             p.invoiceId == invoiceId && p.settlementAsset == settlementAsset && p.settlementAmount == settlementAmount,
             "mismatch"
         );
-        require(p.status != Status.REFUNDED && p.status != Status.PARTIALLY_REFUNDED, "refund terminal");
         p.receiptHash = receiptHash;
         p.tipAmount = tipAmount;
         p.status = Status.FINALIZED;
@@ -109,6 +111,7 @@ contract PaymentRegistry420 is GenesisResidentAccess420 {
         );
         require(invoiceId != bytes32(0) && payer != address(0) && merchant != address(0), "party");
         require(inputAmount > 0 && settlementAmount > 0, "amount");
+        _canonicalSettlementAsset(settlementAsset);
         paymentId = derivePaymentId(
             invoiceId,
             payer,
@@ -147,7 +150,10 @@ contract PaymentRegistry420 is GenesisResidentAccess420 {
             Types420.Direction.NONE
         );
         Payment storage p = payments[paymentId];
-        require(p.status != Status.NONE, "unknown");
+        require(
+            p.status == Status.FINALIZED || p.status == Status.SETTLED || p.status == Status.PARTIALLY_REFUNDED,
+            "not refundable"
+        );
         require(amount > 0 && p.refundedAmount + amount <= p.settlementAmount + p.tipAmount, "excess");
         p.refundedAmount += amount;
         bool fullyRefunded = p.refundedAmount == p.settlementAmount + p.tipAmount;

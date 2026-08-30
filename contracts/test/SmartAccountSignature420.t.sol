@@ -55,7 +55,7 @@ contract SmartAccountSignature420Test {
 
     function testSessionRealSignatureRequiresRegistryGrant() public {
         vm.prank(owner); account.enableSessionKey(session);
-        bytes memory callData = abi.encodeWithSelector(SmartAccount420.execute.selector, address(target), 0, abi.encodeWithSelector(SignatureTarget420.set.selector, 42));
+        bytes memory callData = _sessionCall(session, address(target), abi.encodeWithSelector(SignatureTarget420.set.selector, 42));
         uint256 nonceValue = uint256(uint192(uint160(session))) << 64;
         bytes32 deniedHash = keccak256("session-denied");
         require(entryPoint.validate(account, _op(nonceValue, callData, _sign(SESSION_PK, deniedHash)), deniedHash) == 1, "grant required");
@@ -65,10 +65,28 @@ contract SmartAccountSignature420Test {
         require(entryPoint.validate(account, _op(nonceValue, callData, _sign(SESSION_PK, allowedHash)), allowedHash) == 0, "registry grant");
     }
 
-    function testSessionCannotUseOwnerNonceLane() public {
+    function testSessionEnvelopeSignerMustMatchRecoveredSigner() public {
+        vm.prank(owner); account.enableSessionKey(session);
+        vm.prank(owner); account.createSessionGrant(session, address(target), SignatureTarget420.set.selector, 0, 0, 0, 0, 0);
+        bytes memory callData = _sessionCall(address(0xCAFE), address(target), abi.encodeWithSelector(SignatureTarget420.set.selector, 42));
+        uint256 nonceValue = uint256(uint192(uint160(session))) << 64;
+        bytes32 hash = keccak256("session-envelope-signer-mismatch");
+        require(entryPoint.validate(account, _op(nonceValue, callData, _sign(SESSION_PK, hash)), hash) == 1, "embedded signer mismatch");
+    }
+
+    function testSessionCannotUseOwnerExecutionSelector() public {
         vm.prank(owner); account.enableSessionKey(session);
         vm.prank(owner); account.createSessionGrant(session, address(target), SignatureTarget420.set.selector, 0, 0, 0, 0, 0);
         bytes memory callData = abi.encodeWithSelector(SmartAccount420.execute.selector, address(target), 0, abi.encodeWithSelector(SignatureTarget420.set.selector, 7));
+        uint256 nonceValue = uint256(uint192(uint160(session))) << 64;
+        bytes32 userOpHash = keccak256("session-owner-selector");
+        require(entryPoint.validate(account, _op(nonceValue, callData, _sign(SESSION_PK, userOpHash)), userOpHash) == 1, "session must use dedicated envelope");
+    }
+
+    function testSessionCannotUseOwnerNonceLane() public {
+        vm.prank(owner); account.enableSessionKey(session);
+        vm.prank(owner); account.createSessionGrant(session, address(target), SignatureTarget420.set.selector, 0, 0, 0, 0, 0);
+        bytes memory callData = _sessionCall(session, address(target), abi.encodeWithSelector(SignatureTarget420.set.selector, 7));
         bytes32 userOpHash = keccak256("bad-lane");
         require(entryPoint.validate(account, _op(0, callData, _sign(SESSION_PK, userOpHash)), userOpHash) == 1, "nonce lane isolation");
     }
@@ -76,6 +94,12 @@ contract SmartAccountSignature420Test {
     function testERC1271OwnerSignature() public {
         bytes32 hash = keccak256("420-contract-signature");
         require(account.isValidSignature(hash, _sign(OWNER_PK, hash)) == account.ERC1271_MAGICVALUE(), "1271 owner");
+    }
+
+    function _sessionCall(address signer_, address target_, bytes memory data_) internal pure returns (bytes memory) {
+        SmartAccount420.Call[] memory calls = new SmartAccount420.Call[](1);
+        calls[0] = SmartAccount420.Call({target: target_, value: 0, data: data_});
+        return abi.encodeWithSelector(SmartAccount420.executeSession.selector, signer_, calls);
     }
 
     function _op(uint256 nonceValue, bytes memory callData, bytes memory signature) internal view returns (PackedUserOperation420 memory) {

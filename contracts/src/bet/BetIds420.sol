@@ -50,12 +50,15 @@ library BetIds420 {
     bytes32 internal constant ACTION_VAULT_RELEASE_LIABILITY = keccak256("BET_VAULT_RELEASE_LIABILITY");
     bytes32 internal constant ACTION_VAULT_RECORD_PNL = keccak256("BET_VAULT_RECORD_PNL");
     bytes32 internal constant ACTION_VAULT_ESCROW_STAKE = keccak256("BET_VAULT_ESCROW_STAKE");
+    bytes32 internal constant ACTION_VAULT_SETTLE_WAGER = keccak256("BET_VAULT_SETTLE_WAGER");
     bytes32 internal constant ACTION_RISK_CONFIGURE = keccak256("BET_RISK_CONFIGURE");
     bytes32 internal constant ACTION_RISK_RESERVE = keccak256("BET_RISK_RESERVE");
     bytes32 internal constant ACTION_RISK_RELEASE = keccak256("BET_RISK_RELEASE");
 
-    // Canonical wager-record actions. Acceptance is separate from later outcome/settlement authority.
+    // Canonical wager actions. Acceptance, settlement initiation, and registry mutation are separated.
     bytes32 internal constant ACTION_WAGER_RECORD = keccak256("BET_WAGER_RECORD");
+    bytes32 internal constant ACTION_SETTLE = keccak256("BET_SETTLE");
+    bytes32 internal constant ACTION_WAGER_SETTLE_RECORD = keccak256("BET_WAGER_SETTLE_RECORD");
 
     // Administrative / lifecycle actions. These remain capability-scoped and prospective.
     bytes32 internal constant ACTION_MODULE_REGISTER = keccak256("BET_MODULE_REGISTER");

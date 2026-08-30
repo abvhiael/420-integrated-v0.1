@@ -38,6 +38,14 @@ contract VaultAccounting420 is I420System {
     event WithdrawalQueued(bytes32 indexed vaultId, uint256 amount, uint256 pendingWithdrawals);
     event WithdrawalCompleted(bytes32 indexed vaultId, uint256 amount, uint256 totalAssets);
     event RealizedPnlRecorded(bytes32 indexed vaultId, int256 delta, int256 cumulative);
+    event WagerSettlementAccountingRecorded(
+        bytes32 indexed vaultId,
+        uint256 stakeAbsorbed,
+        uint256 bankrollOutflow,
+        int256 pnlDelta,
+        uint256 totalAssets,
+        int256 cumulativePnl
+    );
 
     constructor(address authorization_) {
         if (authorization_ == address(0)) revert ZeroAddress();
@@ -123,6 +131,39 @@ contract VaultAccounting420 is I420System {
         if (v.safetyReserve + v.pendingWithdrawals + v.activeReservedLiability > v.totalAssets) revert Insolvent();
         v.realizedPnl += delta;
         emit RealizedPnlRecorded(vaultId, delta, v.realizedPnl);
+    }
+
+    function recordWagerSettlement(bytes32 vaultId, uint256 stakeAbsorbed, uint256 bankrollOutflow)
+        external
+        returns (int256 pnlDelta)
+    {
+        VaultState storage v = _get(vaultId);
+        uint256 authorizationAmount = stakeAbsorbed + bankrollOutflow;
+        _requireAuth(vaultId, BetIds420.ACTION_VAULT_SETTLE_WAGER, authorizationAmount);
+
+        if (stakeAbsorbed != 0) v.totalAssets += stakeAbsorbed;
+        if (bankrollOutflow > v.totalAssets) revert Insolvent();
+        if (bankrollOutflow != 0) v.totalAssets -= bankrollOutflow;
+        if (v.safetyReserve + v.pendingWithdrawals + v.activeReservedLiability > v.totalAssets) revert Insolvent();
+
+        if (stakeAbsorbed >= bankrollOutflow) {
+            uint256 gain = stakeAbsorbed - bankrollOutflow;
+            if (gain > uint256(type(int256).max)) revert InvalidAmount();
+            pnlDelta = int256(gain);
+        } else {
+            uint256 loss = bankrollOutflow - stakeAbsorbed;
+            if (loss > uint256(type(int256).max)) revert InvalidAmount();
+            pnlDelta = -int256(loss);
+        }
+        v.realizedPnl += pnlDelta;
+        emit WagerSettlementAccountingRecorded(
+            vaultId,
+            stakeAbsorbed,
+            bankrollOutflow,
+            pnlDelta,
+            v.totalAssets,
+            v.realizedPnl
+        );
     }
 
     function getVault(bytes32 vaultId) external view returns (VaultState memory) { return _get(vaultId); }

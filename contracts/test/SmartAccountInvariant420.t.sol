@@ -15,6 +15,9 @@ contract InvariantEntryPoint420 {
     function validate(SmartAccount420 account, PackedUserOperation420 calldata op, bytes32 userOpHash) external returns (uint256) {
         return account.validateUserOp(op, userOpHash, 0);
     }
+    function execute(SmartAccount420 account, bytes calldata callData) external returns (bool ok) {
+        (ok,) = address(account).call(callData);
+    }
 }
 contract InvariantSink420 { function sink() external payable {} }
 
@@ -30,6 +33,7 @@ contract SmartAccountInvariantHandler420 {
     bytes32 public grantId;
     uint256 public attempts;
     uint256 public accepted;
+    uint256 public executed;
 
     constructor() {
         session = vm.addr(SESSION_PK);
@@ -43,14 +47,19 @@ contract SmartAccountInvariantHandler420 {
 
     function step(uint96 rawAmount) external {
         uint256 amount = uint256(rawAmount) % 2 ether;
-        bytes memory callData = abi.encodeWithSelector(SmartAccount420.execute.selector, address(sink), amount, abi.encodeWithSelector(InvariantSink420.sink.selector));
+        SmartAccount420.Call[] memory calls = new SmartAccount420.Call[](1);
+        calls[0] = SmartAccount420.Call({target: address(sink), value: amount, data: abi.encodeWithSelector(InvariantSink420.sink.selector)});
+        bytes memory callData = abi.encodeWithSelector(SmartAccount420.executeSession.selector, session, calls);
         bytes32 hash = keccak256(abi.encode(attempts, amount, block.number));
         PackedUserOperation420 memory op = PackedUserOperation420({
             sender: address(account), nonce: uint256(uint192(uint160(session))) << 64, initCode: bytes(""), callData: callData,
             accountGasLimits: bytes32(0), preVerificationGas: 0, gasFees: bytes32(0), paymasterAndData: bytes(""), signature: _sign(hash)
         });
         ++attempts;
-        if (entryPoint.validate(account, op, hash) == 0) ++accepted;
+        if (entryPoint.validate(account, op, hash) == 0) {
+            ++accepted;
+            if (entryPoint.execute(account, callData)) ++executed;
+        }
     }
 
     function rotateEpoch() external { account.revokeAllAuthorizations(); }
@@ -78,5 +87,9 @@ contract SmartAccountInvariant420Test is InvariantTarget420 {
 
     function invariant_AcceptedNeverExceedsAttempts() public view {
         require(handler.accepted() <= handler.attempts(), "accept accounting");
+    }
+
+    function invariant_ExecutedNeverExceedsAccepted() public view {
+        require(handler.executed() <= handler.accepted(), "execution accounting");
     }
 }

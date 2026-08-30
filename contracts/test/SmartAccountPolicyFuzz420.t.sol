@@ -15,6 +15,9 @@ contract PolicyEntryPointMock420 {
     function validate(SmartAccount420 account, PackedUserOperation420 calldata op, bytes32 userOpHash) external returns (uint256) {
         return account.validateUserOp(op, userOpHash, 0);
     }
+    function execute(SmartAccount420 account, bytes calldata callData) external returns (bool ok) {
+        (ok,) = address(account).call(callData);
+    }
 }
 contract PolicyTarget420 { function sink() external payable {} }
 contract MockERC20Policy420 { function transfer(address, uint256) external pure returns (bool) { return true; } }
@@ -51,18 +54,28 @@ contract SmartAccountPolicyFuzz420Test {
         require((result == 0) == (amount <= 0.5 ether), "per-call boundary");
     }
 
-    function testPeriodLimitRejectDoesNotConsumeExtraAllowance() public {
+    function testValidationDoesNotConsumeAllowance() public {
+        _enable();
+        bytes32 grantId = _grant(address(target), PolicyTarget420.sink.selector, 1 ether, 1 ether, 1 days);
+        bytes32 hash = keccak256("validation-read-only");
+        PackedUserOperation420 memory op = _nativeOp(0.6 ether, hash);
+        require(entryPoint.validate(account, op, hash) == 0, "validation");
+        require(capabilities.usage(grantId).used == 0, "validation consumed allowance");
+    }
+
+    function testPeriodLimitUsesExecutionConsumption() public {
         _enable();
         bytes32 grantId = _grant(address(target), PolicyTarget420.sink.selector, 1 ether, 1 ether, 1 days);
         bytes32 firstHash = keccak256("period-first");
-        require(entryPoint.validate(account, _nativeOp(0.6 ether, firstHash), firstHash) == 0, "first");
-        ICapabilityRegistryExtended420.UsageView memory first = capabilities.usage(grantId);
-        require(first.used == 0.6 ether, "first usage");
+        PackedUserOperation420 memory firstOp = _nativeOp(0.6 ether, firstHash);
+        require(entryPoint.validate(account, firstOp, firstHash) == 0, "first validation");
+        require(capabilities.usage(grantId).used == 0, "validation must be read-only");
+        require(entryPoint.execute(account, firstOp.callData), "first execution");
+        require(capabilities.usage(grantId).used == 0.6 ether, "execution usage");
 
         bytes32 secondHash = keccak256("period-second");
         require(entryPoint.validate(account, _nativeOp(0.5 ether, secondHash), secondHash) == 1, "second reject");
-        ICapabilityRegistryExtended420.UsageView memory afterReject = capabilities.usage(grantId);
-        require(afterReject.used == first.used, "reject must not consume");
+        require(capabilities.usage(grantId).used == 0.6 ether, "reject must not consume");
     }
 
     function testRejectedBatchDoesNotPartiallyConsumeAllowance() public {
@@ -71,7 +84,7 @@ contract SmartAccountPolicyFuzz420Test {
         SmartAccount420.Call[] memory calls = new SmartAccount420.Call[](2);
         calls[0] = SmartAccount420.Call({target: address(target), value: 0.4 ether, data: abi.encodeWithSelector(PolicyTarget420.sink.selector)});
         calls[1] = SmartAccount420.Call({target: address(0xBAD), value: 0.1 ether, data: abi.encodeWithSelector(PolicyTarget420.sink.selector)});
-        bytes memory callData = abi.encodeWithSelector(SmartAccount420.executeBatch.selector, calls);
+        bytes memory callData = abi.encodeWithSelector(SmartAccount420.executeSession.selector, session, calls);
         bytes32 hash = keccak256("batch-partial-consumption");
         require(entryPoint.validate(account, _op(callData, hash), hash) == 1, "batch reject");
         require(capabilities.usage(grantId).used == 0, "no partial consumption");
@@ -83,7 +96,7 @@ contract SmartAccountPolicyFuzz420Test {
         SmartAccount420.Call[] memory calls = new SmartAccount420.Call[](2);
         calls[0] = SmartAccount420.Call({target: address(token), value: 0, data: abi.encodeWithSelector(MockERC20Policy420.transfer.selector, address(1), 60)});
         calls[1] = SmartAccount420.Call({target: address(token), value: 0, data: abi.encodeWithSelector(MockERC20Policy420.transfer.selector, address(2), 50)});
-        bytes memory callData = abi.encodeWithSelector(SmartAccount420.executeBatch.selector, calls);
+        bytes memory callData = abi.encodeWithSelector(SmartAccount420.executeSession.selector, session, calls);
         bytes32 hash = keccak256("token-aggregate");
         require(entryPoint.validate(account, _op(callData, hash), hash) == 1, "aggregate limit");
         require(capabilities.usage(grantId).used == 0, "token reject must not consume");
@@ -93,12 +106,13 @@ contract SmartAccountPolicyFuzz420Test {
         uint256 amount = uint256(rawAmount) % 200;
         _enable();
         _grant(address(token), MockERC20Policy420.transfer.selector, 100, 100, 1 days);
-        bytes memory callData = abi.encodeWithSelector(
-            SmartAccount420.execute.selector,
-            address(token),
-            0,
-            abi.encodeWithSelector(MockERC20Policy420.transfer.selector, address(0x420), amount)
-        );
+        SmartAccount420.Call[] memory calls = new SmartAccount420.Call[](1);
+        calls[0] = SmartAccount420.Call({
+            target: address(token),
+            value: 0,
+            data: abi.encodeWithSelector(MockERC20Policy420.transfer.selector, address(0x420), amount)
+        });
+        bytes memory callData = abi.encodeWithSelector(SmartAccount420.executeSession.selector, session, calls);
         bytes32 hash = keccak256(abi.encode("token-limit", amount));
         uint256 result = entryPoint.validate(account, _op(callData, hash), hash);
         require((result == 0) == (amount <= 100), "token boundary");
@@ -114,7 +128,9 @@ contract SmartAccountPolicyFuzz420Test {
     }
 
     function _nativeOp(uint256 amount, bytes32 hash) internal returns (PackedUserOperation420 memory) {
-        return _op(abi.encodeWithSelector(SmartAccount420.execute.selector, address(target), amount, abi.encodeWithSelector(PolicyTarget420.sink.selector)), hash);
+        SmartAccount420.Call[] memory calls = new SmartAccount420.Call[](1);
+        calls[0] = SmartAccount420.Call({target: address(target), value: amount, data: abi.encodeWithSelector(PolicyTarget420.sink.selector)});
+        return _op(abi.encodeWithSelector(SmartAccount420.executeSession.selector, session, calls), hash);
     }
 
     function _op(bytes memory callData, bytes32 hash) internal returns (PackedUserOperation420 memory) {

@@ -23,8 +23,20 @@ contract EntryPointHarness420 {
         require(ok, "execution");
         return returnData;
     }
+    function handleOpAllowFailure(SmartAccount420 account, PackedUserOperation420 calldata op, bytes32 userOpHash) external returns (bool ok) {
+        uint192 key = uint192(op.nonce >> 64);
+        uint64 seq = uint64(op.nonce);
+        require(seq == sequence[address(account)][key], "nonce sequence");
+        require(account.validateUserOp(op, userOpHash, 0) == 0, "validation");
+        sequence[address(account)][key] = seq + 1;
+        (ok,) = address(account).call(op.callData);
+    }
 }
-contract EntryPointExecutionTarget420 { uint256 public stored; function set(uint256 value) external { stored = value; } }
+contract EntryPointExecutionTarget420 {
+    uint256 public stored;
+    function set(uint256 value) external { stored = value; }
+    function fail() external pure { revert("target failure"); }
+}
 
 contract SmartAccountEntryPointIntegration420Test {
     VmEntryPoint420 internal constant vm = VmEntryPoint420(address(uint160(uint256(keccak256("hevm cheat code")))));
@@ -55,17 +67,37 @@ contract SmartAccountEntryPointIntegration420Test {
         require(entryPoint.getNonce(address(account), 0) == 1, "owner nonce");
     }
 
-    function testSessionUserOpUsesIndependentNonceLane() public {
+    function testSessionUserOpUsesIndependentNonceLaneAndConsumesOnExecution() public {
         vm.prank(owner); account.enableSessionKey(session);
-        vm.prank(owner); account.createSessionGrant(session, address(target), EntryPointExecutionTarget420.set.selector, 0, 0, 0, 0, 0);
+        vm.prank(owner); bytes32 grantId = account.createSessionGrant(session, address(target), EntryPointExecutionTarget420.set.selector, 0, 10, 1 days, 0, 0);
         uint192 key = uint192(uint160(session));
         uint256 nonceValue = uint256(key) << 64;
-        bytes memory callData = abi.encodeWithSelector(SmartAccount420.execute.selector, address(target), 0, abi.encodeWithSelector(EntryPointExecutionTarget420.set.selector, 421));
+        bytes memory callData = _sessionCall(address(target), 0, abi.encodeWithSelector(EntryPointExecutionTarget420.set.selector, 421));
         bytes32 hash = keccak256("session-handle-op");
-        entryPoint.handleOp(account, _signedOp(SESSION_PK, nonceValue, callData, hash), hash);
+        PackedUserOperation420 memory op = _signedOp(SESSION_PK, nonceValue, callData, hash);
+
+        vm.prank(address(entryPoint));
+        require(account.validateUserOp(op, hash, 0) == 0, "session validates");
+        require(capabilities.usage(grantId).used == 0, "validation must not consume");
+
+        entryPoint.handleOp(account, op, hash);
         require(target.stored() == 421, "session executed");
+        require(capabilities.usage(grantId).used == 0, "zero-value call consumes zero");
         require(entryPoint.getNonce(address(account), key) == nonceValue + 1, "session nonce");
         require(entryPoint.getNonce(address(account), 0) == 0, "owner lane untouched");
+    }
+
+    function testFailedSessionExecutionDoesNotBurnAllowance() public {
+        vm.prank(owner); account.enableSessionKey(session);
+        vm.prank(owner); bytes32 grantId = account.createSessionGrant(session, address(target), EntryPointExecutionTarget420.fail.selector, 1 ether, 1 ether, 1 days, 0, 0);
+        uint192 key = uint192(uint160(session));
+        uint256 nonceValue = uint256(key) << 64;
+        bytes memory callData = _sessionCall(address(target), 0.4 ether, abi.encodeWithSelector(EntryPointExecutionTarget420.fail.selector));
+        bytes32 hash = keccak256("session-execution-failure");
+        bool ok = entryPoint.handleOpAllowFailure(account, _signedOp(SESSION_PK, nonceValue, callData, hash), hash);
+        require(!ok, "target must fail");
+        require(capabilities.usage(grantId).used == 0, "failed execution burned allowance");
+        require(entryPoint.getNonce(address(account), key) == nonceValue + 1, "validated op nonce advances");
     }
 
     function testReplayIsRejectedByEntryPointNonce() public {
@@ -75,6 +107,12 @@ contract SmartAccountEntryPointIntegration420Test {
         entryPoint.handleOp(account, op, hash);
         (bool ok,) = address(entryPoint).call(abi.encodeWithSelector(EntryPointHarness420.handleOp.selector, account, op, hash));
         require(!ok, "replay must fail");
+    }
+
+    function _sessionCall(address target_, uint256 value_, bytes memory data_) internal view returns (bytes memory) {
+        SmartAccount420.Call[] memory calls = new SmartAccount420.Call[](1);
+        calls[0] = SmartAccount420.Call({target: target_, value: value_, data: data_});
+        return abi.encodeWithSelector(SmartAccount420.executeSession.selector, session, calls);
     }
 
     function _signedOp(uint256 privateKey, uint256 nonceValue, bytes memory callData, bytes32 hash) internal returns (PackedUserOperation420 memory) {

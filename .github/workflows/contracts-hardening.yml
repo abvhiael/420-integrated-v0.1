@@ -104,9 +104,7 @@ jobs:
             2>&1 | tee ../artifacts/hardening/slither.txt
           STATUS=${PIPESTATUS[0]}
           set -e
-          if [ "$STATUS" -ne 0 ]; then
-            exit "$STATUS"
-          fi
+          echo "slither_exit_status=$STATUS" >> ../artifacts/hardening/slither.txt
 
           python - <<'PY'
           import json
@@ -115,6 +113,16 @@ jobs:
           path = "../artifacts/hardening/slither.json"
           with open(path, encoding="utf-8") as handle:
               report = json.load(handle)
+
+          # Slither may return non-zero when detector findings exist. Treat the JSON
+          # report's success flag as the analysis-health signal, then enforce our own
+          # explicit High-severity policy below. Compilation/analysis errors remain fatal.
+          if report.get("success") is not True:
+              print(
+                  f"Slither analysis failed: {report.get('error') or 'unknown error'}",
+                  file=sys.stderr,
+              )
+              sys.exit(1)
 
           high = []
           for detector in report.get("results", {}).get("detectors", []):
@@ -131,10 +139,11 @@ jobs:
                   for element in detector.get("elements", []):
                       source = element.get("source_mapping", {})
                       parent = element.get("type_specific_fields", {}).get("parent", {})
+                      parent_name = parent.get("name") if isinstance(parent, dict) else parent
                       if (
                           element.get("name") == "_call"
                           and source.get("filename_relative") == "src/accounts/SmartAccount420.sol"
-                          and parent.get("name") == "SmartAccount420"
+                          and parent_name == "SmartAccount420"
                       ):
                           allowed = True
                           break

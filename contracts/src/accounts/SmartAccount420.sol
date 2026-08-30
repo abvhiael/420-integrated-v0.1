@@ -69,10 +69,12 @@ contract SmartAccount420 {
 
     error NotOwner();
     error NotRecoveryAuthority();
+    error NotEntryPoint();
     error NotEntryPointOrOwner();
     error InvalidAddress();
     error InvalidPolicyVersion();
     error InvalidSessionKey();
+    error SessionAuthorizationFailed();
     error RecoveryNotReady();
     error CallFailed(bytes returnData);
 
@@ -101,6 +103,11 @@ contract SmartAccount420 {
         _;
     }
 
+    modifier onlyEntryPoint() {
+        if (msg.sender != entryPoint) revert NotEntryPoint();
+        _;
+    }
+
     modifier onlyEntryPointOrOwner() {
         if (msg.sender != entryPoint && msg.sender != owner) revert NotEntryPointOrOwner();
         _;
@@ -124,6 +131,35 @@ contract SmartAccount420 {
         results = new bytes[](calls.length);
         for (uint256 i = 0; i < calls.length; ++i) {
             results[i] = _call(calls[i].target, calls[i].value, calls[i].data);
+        }
+    }
+
+    /// @notice EntryPoint-only execution envelope for session-key UserOperations.
+    /// @dev Validation is intentionally read-only with respect to capability usage.
+    ///      Grant consumption occurs here and therefore rolls back atomically if any
+    ///      target call reverts. The signer is part of the signed UserOperation calldata
+    ///      and is checked against the recovered signer during validateUserOp().
+    function executeSession(address signer, Call[] calldata calls)
+        external
+        payable
+        onlyEntryPoint
+        returns (bytes[] memory results)
+    {
+        if (sessionEpoch[signer] != authorizationEpoch) revert InvalidSessionKey();
+
+        Call[] memory callSet = calls;
+        (bool ok,,) = _authorizeCallSet(signer, callSet);
+        if (!ok) revert SessionAuthorizationFailed();
+
+        for (uint256 i = 0; i < callSet.length; ++i) {
+            (bool callOk, CallAuthorization memory authorization) = _resolveCallAuthorization(signer, callSet[i]);
+            if (!callOk) revert SessionAuthorizationFailed();
+            capabilityRegistry.consume(authorization.grantId, authorization.amount);
+        }
+
+        results = new bytes[](callSet.length);
+        for (uint256 i = 0; i < callSet.length; ++i) {
+            results[i] = _call(callSet[i].target, callSet[i].value, callSet[i].data);
         }
     }
 
@@ -303,33 +339,25 @@ contract SmartAccount420 {
 
     function _authorizeSessionCalls(address signer, bytes calldata callData)
         internal
+        view
         returns (bool ok, uint48 validAfter, uint48 validUntil)
     {
         if (callData.length < 4) return (false, 0, 0);
         bytes4 selector = bytes4(callData[:4]);
+        if (selector != this.executeSession.selector) return (false, 0, 0);
 
-        if (selector == this.execute.selector) {
-            (address target, uint256 value, bytes memory data) = abi.decode(callData[4:], (address, uint256, bytes));
-            Call[] memory calls = new Call[](1);
-            calls[0] = Call({ target: target, value: value, data: data });
-            return _authorizeCallSet(signer, calls);
-        }
-
-        if (selector == this.executeBatch.selector) {
-            Call[] memory calls = abi.decode(callData[4:], (Call[]));
-            return _authorizeCallSet(signer, calls);
-        }
-        return (false, 0, 0);
+        (address encodedSigner, Call[] memory calls) = abi.decode(callData[4:], (address, Call[]));
+        if (encodedSigner != signer) return (false, 0, 0);
+        return _authorizeCallSet(signer, calls);
     }
 
     function _authorizeCallSet(address signer, Call[] memory calls)
         internal
+        view
         returns (bool ok, uint48 validAfter, uint48 validUntil)
     {
         if (calls.length == 0) return (false, 0, 0);
 
-        bytes32[] memory grantIds = new bytes32[](calls.length);
-        uint256[] memory amounts = new uint256[](calls.length);
         bytes32[] memory uniqueGrantIds = new bytes32[](calls.length);
         uint256[] memory totals = new uint256[](calls.length);
         uint256 uniqueCount;
@@ -343,8 +371,6 @@ contract SmartAccount420 {
                 validUntil = authorization.validUntil;
             }
 
-            grantIds[i] = authorization.grantId;
-            amounts[i] = authorization.amount;
             uniqueCount = _accumulateGrant(
                 uniqueGrantIds,
                 totals,
@@ -358,9 +384,6 @@ contract SmartAccount420 {
             if (!_aggregateWithinPeriodLimit(uniqueGrantIds[i], totals[i])) return (false, 0, 0);
         }
 
-        for (uint256 i = 0; i < calls.length; ++i) {
-            capabilityRegistry.consume(grantIds[i], amounts[i]);
-        }
         return (true, validAfter, validUntil);
     }
 

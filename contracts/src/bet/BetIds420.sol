@@ -55,8 +55,11 @@ library BetIds420 {
     bytes32 internal constant ACTION_RISK_RESERVE = keccak256("BET_RISK_RESERVE");
     bytes32 internal constant ACTION_RISK_RELEASE = keccak256("BET_RISK_RELEASE");
 
-    // Canonical wager actions. Acceptance, settlement initiation, and registry mutation are separated.
+    // Canonical wager actions. Acceptance, randomness, settlement initiation, and registry mutation are separated.
     bytes32 internal constant ACTION_WAGER_RECORD = keccak256("BET_WAGER_RECORD");
+    bytes32 internal constant ACTION_RANDOMNESS_CONFIGURE = keccak256("BET_RANDOMNESS_CONFIGURE");
+    bytes32 internal constant ACTION_RANDOMNESS_REQUEST = keccak256("BET_RANDOMNESS_REQUEST");
+    bytes32 internal constant ACTION_RANDOMNESS_FULFILL = keccak256("BET_RANDOMNESS_FULFILL");
     bytes32 internal constant ACTION_SETTLE = keccak256("BET_SETTLE");
     bytes32 internal constant ACTION_WAGER_SETTLE_RECORD = keccak256("BET_WAGER_SETTLE_RECORD");
 

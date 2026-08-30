@@ -7,11 +7,9 @@ import "./CivicConstitution420.sol";
 import "./CivicProposalRegistry420.sol";
 import "./CivicElectorateRegistry420.sol";
 import "./CivicVoting420.sol";
+import "./GovernanceTimelock.sol";
 
-/// @notice Canonical proposal coordinator and deterministic result finalizer for 420Civic.
-/// @dev Constitutional rules are frozen per proposal at creation. This contract never accepts injected
-/// vote weights or externally supplied pass/fail results; it derives outcomes from CivicVoting420 and
-/// the immutable electorate snapshots captured for the proposal.
+/// @notice Canonical proposal coordinator, result finalizer and timelocked batch executor for 420Civic.
 contract CivicGovernor420 is I420System {
     uint256 private constant BPS = 10_000;
 
@@ -37,13 +35,21 @@ contract CivicGovernor420 is I420System {
         bool passed;
     }
 
+    struct Action {
+        address target;
+        uint256 value;
+        bytes data;
+    }
+
     CivicConstitution420 public immutable constitution;
     CivicProposalRegistry420 public immutable proposalRegistry;
     CivicElectorateRegistry420 public immutable electorateRegistry;
     CivicVoting420 public immutable voting;
+    GovernanceTimelock public immutable timelock;
 
     mapping(address => uint256) public proposerNonces;
     mapping(bytes32 => FrozenRule) private _frozenRules;
+    mapping(bytes32 => bytes32) public queuedActionHashes;
 
     error InvalidModule();
     error InvalidCommitment();
@@ -51,8 +57,17 @@ contract CivicGovernor420 is I420System {
     error BlockNumberOverflow();
     error ProposalNotFound();
     error ProposalNotActive();
+    error ProposalNotPassed();
+    error ProposalNotQueued();
     error VotingStillActive();
     error FrozenRuleMissing();
+    error ActionHashMismatch();
+    error EmptyActionBatch();
+    error InvalidAction();
+    error TimelockAuthorityInactive();
+    error UnauthorizedTimelock();
+    error ActionExecutionFailed(uint256 index);
+    error ValueMismatch();
 
     event CivicProposalCreated(
         bytes32 indexed proposalId,
@@ -65,7 +80,6 @@ contract CivicGovernor420 is I420System {
         uint64 voteEnd,
         uint32 constitutionRevision
     );
-
     event CivicProposalFinalized(
         bytes32 indexed proposalId,
         bool passed,
@@ -73,18 +87,33 @@ contract CivicGovernor420 is I420System {
         bool validatorPassed,
         uint32 constitutionRevision
     );
+    event CivicProposalQueued(
+        bytes32 indexed proposalId,
+        bytes32 indexed actionsHash,
+        uint64 timelockDelay,
+        uint256 totalValue
+    );
+    event CivicProposalExecuted(bytes32 indexed proposalId, bytes32 indexed actionsHash);
 
-    constructor(address constitution_, address proposalRegistry_, address electorateRegistry_, address voting_) {
+    constructor(
+        address constitution_,
+        address proposalRegistry_,
+        address electorateRegistry_,
+        address voting_,
+        address timelock_
+    ) {
         if (
             constitution_ == address(0) || proposalRegistry_ == address(0) || electorateRegistry_ == address(0)
-                || voting_ == address(0) || constitution_.code.length == 0 || proposalRegistry_.code.length == 0
-                || electorateRegistry_.code.length == 0 || voting_.code.length == 0
+                || voting_ == address(0) || timelock_ == address(0) || constitution_.code.length == 0
+                || proposalRegistry_.code.length == 0 || electorateRegistry_.code.length == 0
+                || voting_.code.length == 0 || timelock_.code.length == 0
         ) revert InvalidModule();
 
         constitution = CivicConstitution420(constitution_);
         proposalRegistry = CivicProposalRegistry420(proposalRegistry_);
         electorateRegistry = CivicElectorateRegistry420(electorateRegistry_);
         voting = CivicVoting420(voting_);
+        timelock = GovernanceTimelock(payable(timelock_));
     }
 
     function systemName() external pure returns (string memory) {
@@ -101,9 +130,10 @@ contract CivicGovernor420 is I420System {
         return rule;
     }
 
-    /// @notice Create a proposal using the currently effective constitutional rule for its class.
-    /// @dev The proposal electorate is snapshotted at the immediately preceding block and the voting
-    /// window starts on the next block. Governance cannot later rewrite this proposal's thresholds.
+    function hashActions(Action[] calldata actions) public pure returns (bytes32) {
+        return keccak256(abi.encode(actions));
+    }
+
     function createProposal(CivicIds420.ProposalClass class_, bytes32 metadataHash, bytes32 actionsHash)
         external
         returns (bytes32 proposalId)
@@ -156,19 +186,9 @@ contract CivicGovernor420 is I420System {
         );
     }
 
-    /// @notice Deterministically finalize an expired proposal from its frozen rule, electorate and tallies.
     function finalize(bytes32 proposalId) external returns (bool passed) {
-        (
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            uint64 voteEnd,
-            CivicIds420.ProposalState state,
-            bool exists
-        ) = proposalRegistry.proposals(proposalId);
+        (,,,,,,, CivicIds420.ProposalState state, bool exists) = proposalRegistry.proposals(proposalId);
+        (,,,,,, uint64 voteEnd,,) = proposalRegistry.proposals(proposalId);
 
         if (!exists) revert ProposalNotFound();
         if (state != CivicIds420.ProposalState.ACTIVE) revert ProposalNotActive();
@@ -186,10 +206,9 @@ contract CivicGovernor420 is I420System {
             rule.communityApprovalBps
         );
 
-        HouseResult memory validator;
         bool validatorPassed = true;
         if (rule.dualHouseRequired) {
-            validator = _houseResult(
+            HouseResult memory validator = _houseResult(
                 proposalId,
                 CivicIds420.House.VALIDATOR,
                 snap.validator.totalWeight,
@@ -203,10 +222,66 @@ contract CivicGovernor420 is I420System {
         proposalRegistry.transition(
             proposalId, passed ? CivicIds420.ProposalState.PASSED : CivicIds420.ProposalState.FAILED
         );
+        emit CivicProposalFinalized(proposalId, passed, community.passed, validatorPassed, rule.constitutionRevision);
+    }
 
-        emit CivicProposalFinalized(
-            proposalId, passed, community.passed, validatorPassed, rule.constitutionRevision
+    /// @notice Bind the exact committed action batch to one timelock operation and move PASSED -> QUEUED.
+    function queue(bytes32 proposalId, Action[] calldata actions) external returns (uint256 totalValue) {
+        if (actions.length == 0) revert EmptyActionBatch();
+        if (!timelock.civicAuthorityActivated() || timelock.scheduler() != address(this)) {
+            revert TimelockAuthorityInactive();
+        }
+
+        (, CivicIds420.ProposalClass class_,, bytes32 actionsHash,,,, CivicIds420.ProposalState state, bool exists) =
+            proposalRegistry.proposals(proposalId);
+        if (!exists) revert ProposalNotFound();
+        if (state != CivicIds420.ProposalState.PASSED) revert ProposalNotPassed();
+
+        bytes32 computedHash = hashActions(actions);
+        if (computedHash != actionsHash) revert ActionHashMismatch();
+        for (uint256 i = 0; i < actions.length; ++i) {
+            if (actions[i].target == address(0)) revert InvalidAction();
+            totalValue += actions[i].value;
+        }
+
+        FrozenRule memory rule = _frozenRules[proposalId];
+        if (!rule.exists) revert FrozenRuleMissing();
+        queuedActionHashes[proposalId] = computedHash;
+
+        bytes memory data = abi.encodeCall(this.executeQueuedBatch, (proposalId, actions));
+        timelock.scheduleWithDelay(
+            proposalId,
+            address(this),
+            totalValue,
+            data,
+            GovernanceTimelock.Class(uint8(class_)),
+            rule.timelockDelay
         );
+        proposalRegistry.transition(proposalId, CivicIds420.ProposalState.QUEUED);
+        emit CivicProposalQueued(proposalId, computedHash, rule.timelockDelay, totalValue);
+    }
+
+    /// @notice Execute the entire committed action batch atomically. Callable only by the frozen timelock.
+    function executeQueuedBatch(bytes32 proposalId, Action[] calldata actions) external payable {
+        if (msg.sender != address(timelock)) revert UnauthorizedTimelock();
+        (,,, bytes32 actionsHash,,,, CivicIds420.ProposalState state, bool exists) = proposalRegistry.proposals(proposalId);
+        if (!exists) revert ProposalNotFound();
+        if (state != CivicIds420.ProposalState.QUEUED) revert ProposalNotQueued();
+
+        bytes32 computedHash = hashActions(actions);
+        if (computedHash != actionsHash || computedHash != queuedActionHashes[proposalId]) revert ActionHashMismatch();
+
+        uint256 expectedValue;
+        for (uint256 i = 0; i < actions.length; ++i) expectedValue += actions[i].value;
+        if (msg.value != expectedValue) revert ValueMismatch();
+
+        for (uint256 i = 0; i < actions.length; ++i) {
+            (bool ok,) = actions[i].target.call{value: actions[i].value}(actions[i].data);
+            if (!ok) revert ActionExecutionFailed(i);
+        }
+
+        proposalRegistry.transition(proposalId, CivicIds420.ProposalState.EXECUTED);
+        emit CivicProposalExecuted(proposalId, computedHash);
     }
 
     function resultFor(bytes32 proposalId, CivicIds420.House house) external view returns (HouseResult memory) {
@@ -216,20 +291,11 @@ contract CivicGovernor420 is I420System {
 
         if (house == CivicIds420.House.COMMUNITY) {
             return _houseResult(
-                proposalId,
-                house,
-                snap.community.totalWeight,
-                rule.communityQuorumBps,
-                rule.communityApprovalBps
+                proposalId, house, snap.community.totalWeight, rule.communityQuorumBps, rule.communityApprovalBps
             );
         }
-
         return _houseResult(
-            proposalId,
-            house,
-            snap.validator.totalWeight,
-            rule.validatorQuorumBps,
-            rule.validatorApprovalBps
+            proposalId, house, snap.validator.totalWeight, rule.validatorQuorumBps, rule.validatorApprovalBps
         );
     }
 
@@ -258,10 +324,11 @@ contract CivicGovernor420 is I420System {
         });
     }
 
-    /// @dev Overflow-safe ceil(total * bps / 10_000), with bps <= 10_000 by constitution invariant.
     function _ceilBps(uint256 total, uint16 bps) private pure returns (uint256) {
         uint256 whole = (total / BPS) * uint256(bps);
         uint256 remainderProduct = (total % BPS) * uint256(bps);
         return whole + (remainderProduct / BPS) + (remainderProduct % BPS == 0 ? 0 : 1);
     }
+
+    receive() external payable {}
 }

@@ -76,8 +76,9 @@
       "contracts": ["ValidatorRegistry.sol","RewardController.sol","CommunityValidatorReserve.sol","Stake420.sol"]
     },
     {
-      "dapp": "420 Governance",
-      "contracts": ["GovernanceTimelock.sol","Governance420.sol"]
+      "dapp": "420 Civic",
+      "contracts": ["GovernanceTimelock.sol","Governance420.sol","CivicIds420.sol","CivicConstitution420.sol","CivicProposalRegistry420.sol","ICivicElectorateSource420.sol","CivicElectorateRegistry420.sol","CivicVoting420.sol","CivicGovernor420.sol"],
+      "note": "constitutional decision and collective-action protocol for 420 Integrated. GovernanceTimelock at 0x0429 and Governance420 at 0x0437 remain frozen Genesis compatibility/predeploy identities. Civic modules provide explicit proposal classes, immutable action commitments, frozen per-proposal constitutional revisions and thresholds, two-house electorate snapshots, snapshot-bound FOR/AGAINST/ABSTAIN voting, independent house tallies, deterministic governor finalization, irreversible bootstrap-to-Civic timelock scheduler activation, exact committed action-batch queueing, constitutional delays that cannot fall below legacy class floors, atomic timelocked execution, and QUEUED-to-EXECUTED lifecycle binding. Governance420 at 0x0437 is now a compatibility-only facade: its legacy createProposal/applyVote/applyResult selectors permanently revert, its old proposal storage is unwritable, and it may only bind once via 0x0429 to the canonical CivicGovernor420 discovery pointer. No parallel governance authority path remains."
     },
     {
       "dapp": "420 AI",

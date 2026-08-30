@@ -73,7 +73,7 @@
     {
       "dapp": "420 Civic",
       "contracts": ["GovernanceTimelock.sol","Governance420.sol","CivicIds420.sol","CivicConstitution420.sol","CivicProposalRegistry420.sol","ICivicElectorateSource420.sol","CivicElectorateRegistry420.sol","CivicVoting420.sol","CivicGovernor420.sol"],
-      "note": "constitutional decision and collective-action protocol for 420 Integrated. GovernanceTimelock at 0x0429 and Governance420 at 0x0437 remain frozen Genesis compatibility/predeploy identities. Civic modules provide explicit proposal classes, immutable action commitments, frozen per-proposal constitutional revisions and thresholds, two-house electorate snapshots, snapshot-bound FOR/AGAINST/ABSTAIN voting, independent house tallies, and deterministic governor finalization. Legacy timelock authority migration remains a separate hardening step."
+      "note": "constitutional decision and collective-action protocol for 420 Integrated. GovernanceTimelock at 0x0429 and Governance420 at 0x0437 remain frozen Genesis compatibility/predeploy identities. Civic modules provide explicit proposal classes, immutable action commitments, frozen per-proposal constitutional revisions and thresholds, two-house electorate snapshots, snapshot-bound FOR/AGAINST/ABSTAIN voting, independent house tallies, deterministic governor finalization, irreversible bootstrap-to-Civic timelock scheduler activation, exact committed action-batch queueing, constitutional delays that cannot fall below legacy class floors, atomic timelocked execution, and QUEUED-to-EXECUTED lifecycle binding."
     },
     {
       "dapp": "420 AI",

@@ -24,6 +24,7 @@ contract BankrollVault420 is I420System {
     uint256 public totalShares;
     mapping(address => uint256) public shareBalance;
     mapping(bytes32 => uint256) public wagerStakeEscrow;
+    mapping(bytes32 => address) public wagerPlayer;
     uint256 public activeWagerStakeEscrow;
     uint256 private _entered;
 
@@ -39,9 +40,18 @@ contract BankrollVault420 is I420System {
     error UnexpectedTokenDelta();
     error Reentrancy();
     error StakeAlreadyEscrowed();
+    error StakeNotEscrowed();
 
     event Deposited(address indexed provider, uint256 assets, uint256 shares);
     event WagerStakeEscrowed(bytes32 indexed wagerId, address indexed player, uint256 amount);
+    event WagerStakeResolved(
+        bytes32 indexed wagerId,
+        address indexed player,
+        uint256 stake,
+        uint256 grossPayout,
+        uint256 stakeAbsorbed,
+        uint256 bankrollOutflow
+    );
     event WithdrawalRequested(
         bytes32 indexed requestId,
         address indexed provider,
@@ -123,6 +133,7 @@ contract BankrollVault420 is I420System {
         _requireSystemAuth(BetIds420.ACTION_VAULT_ESCROW_STAKE, amount);
 
         wagerStakeEscrow[wagerId] = amount;
+        wagerPlayer[wagerId] = player;
         activeWagerStakeEscrow += amount;
 
         IERC20Bankroll420 token = IERC20Bankroll420(asset);
@@ -148,8 +159,34 @@ contract BankrollVault420 is I420System {
         _requireRegisteredAsset();
         _requireSystemAuth(BetIds420.ACTION_VAULT_ESCROW_STAKE, msg.value);
         wagerStakeEscrow[wagerId] = msg.value;
+        wagerPlayer[wagerId] = player;
         activeWagerStakeEscrow += msg.value;
         emit WagerStakeEscrowed(wagerId, player, msg.value);
+    }
+
+    function resolveWager(bytes32 wagerId, uint256 grossPayout)
+        external
+        nonReentrant
+        returns (uint256 stake, uint256 stakeAbsorbed, uint256 bankrollOutflow)
+    {
+        if (wagerId == bytes32(0)) revert InvalidId();
+        stake = wagerStakeEscrow[wagerId];
+        address player = wagerPlayer[wagerId];
+        if (stake == 0 || player == address(0)) revert StakeNotEscrowed();
+        _requireRegisteredAsset();
+        _requireSystemAuth(BetIds420.ACTION_VAULT_SETTLE_WAGER, grossPayout);
+
+        uint256 stakeReturned = grossPayout < stake ? grossPayout : stake;
+        stakeAbsorbed = stake - stakeReturned;
+        bankrollOutflow = grossPayout > stake ? grossPayout - stake : 0;
+
+        wagerStakeEscrow[wagerId] = 0;
+        wagerPlayer[wagerId] = address(0);
+        activeWagerStakeEscrow -= stake;
+        accounting.recordWagerSettlement(vaultId, stakeAbsorbed, bankrollOutflow);
+        if (grossPayout != 0) _sendExact(player, grossPayout);
+
+        emit WagerStakeResolved(wagerId, player, stake, grossPayout, stakeAbsorbed, bankrollOutflow);
     }
 
     function requestWithdrawal(uint256 shares) external nonReentrant returns (bytes32 requestId, uint256 assets) {
@@ -219,8 +256,8 @@ contract BankrollVault420 is I420System {
 
     function _sendExact(address recipient, uint256 amount) private {
         if (asset == address(0)) {
-            // recipient is never caller-selected calldata here: claimWithdrawal derives it from the
-            // authenticated claimant and WithdrawalQueue.consume enforces request ownership.
+            // recipient is derived from authenticated withdrawal ownership or the player bound when
+            // the wager stake entered escrow; no settlement caller supplies an arbitrary recipient.
             // slither-disable-next-line arbitrary-send-eth
             (bool ok,) = payable(recipient).call{value: amount}("");
             if (!ok) revert TransferFailed();
@@ -229,9 +266,9 @@ contract BankrollVault420 is I420System {
         IERC20Bankroll420 token = IERC20Bankroll420(asset);
         uint256 beforeVault = token.balanceOf(address(this));
         uint256 beforeRecipient = token.balanceOf(recipient);
-        // The only caller is nonReentrant claimWithdrawal; spanning balances are intentional so
-        // canonical vaults reject tokens that do not transfer the exact requested amount.
-        // slither-disable-next-line reentrancy-balance
+        // recipient is derived from authenticated withdrawal ownership or canonical wager escrow.
+        // Exact before/after deltas intentionally reject non-canonical transfer semantics.
+        // slither-disable-next-line arbitrary-send-erc20,reentrancy-balance
         if (!token.transfer(recipient, amount)) revert TransferFailed();
         uint256 afterVault = token.balanceOf(address(this));
         uint256 afterRecipient = token.balanceOf(recipient);

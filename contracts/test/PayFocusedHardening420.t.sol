@@ -194,9 +194,9 @@ contract PayFocusedHardening420Test {
 
         payments.applyRefund(paymentId, 40, false);
         payments.applyRefund(paymentId, 50, true);
-        PaymentRegistry420.Payment memory p = payments.payments(paymentId);
-        require(p.refundedAmount == 90, "refund accounting mismatch");
-        require(p.status == PaymentRegistry420.Status.REFUNDED, "refund terminal state");
+        (,,,,,,,,,,, uint256 refunded, PaymentRegistry420.Status status) = payments.payments(paymentId);
+        require(refunded == 90, "refund accounting mismatch");
+        require(status == PaymentRegistry420.Status.REFUNDED, "refund terminal state");
         (bool excessOk,) = address(payments).call(abi.encodeWithSelector(payments.applyRefund.selector, paymentId, 1, false));
         require(!excessOk, "refund exceeded settlement plus tip");
 

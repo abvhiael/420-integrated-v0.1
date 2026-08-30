@@ -95,24 +95,68 @@ contract RandomnessRouter420 is I420System {
 
     function _fulfill(bytes32 wagerId, bytes32 entropy, bytes32 proofHash, Source source) private returns (bytes32 root) {
         if (entropy == bytes32(0) || proofHash == bytes32(0)) revert InvalidEntropy();
-        RandomnessRequest storage request = _requests[wagerId]; if (request.wagerId == bytes32(0)) revert NotRequested();
+        RandomnessRequest storage request = _requests[wagerId];
+        if (request.wagerId == bytes32(0)) revert NotRequested();
+
         bytes32 entropyHash = keccak256(abi.encode(entropy));
-        if (request.fulfilled) { if (request.source == source && request.proofHash == proofHash && request.entropyHash == entropyHash) return request.root; revert AlreadyFulfilled(); }
+        if (request.fulfilled) {
+            if (request.source == source && request.proofHash == proofHash && request.entropyHash == entropyHash) return request.root;
+            revert AlreadyFulfilled();
+        }
+
         RandomnessProfile storage profile = _getProfile(request.profileId);
-        address expected;
-        if (source == Source.PRIMARY) {
-            if (profile.fallbackProvider != address(0) && block.timestamp >= request.fallbackAt) revert PrimaryExpired();
-            expected = profile.primaryProvider;
-        } else if (source == Source.FALLBACK) {
-            if (profile.fallbackProvider == address(0)) revert WrongProvider();
-            if (block.timestamp < request.fallbackAt) revert FallbackNotReady();
-            expected = profile.fallbackProvider;
-        } else revert WrongProvider();
-        if (msg.sender != expected) revert WrongProvider();
+        if (msg.sender != _expectedProvider(profile, request.fallbackAt, source)) revert WrongProvider();
         if (!authorization.isAuthorized(msg.sender, BetIds420.ACTION_RANDOMNESS_FULFILL, authorization.scopeForWager(wagerId), 0)) revert Unauthorized();
-        root = keccak256(abi.encode(ROOT_DOMAIN, block.chainid, address(this), wagerId, request.gameVersionId, request.paramsHash, request.contextHash, request.profileId, profile.method, profile.securityLevelHash, profile.domainSeparator, profile.primaryProvider, profile.fallbackProvider, profile.fallbackDelay, source, entropy, proofHash));
-        request.root = root; request.proofHash = proofHash; request.entropyHash = entropyHash; request.source = source; request.fulfilled = true;
+
+        root = _deriveRoot(wagerId, request, profile, source, entropy, proofHash);
+        request.root = root;
+        request.proofHash = proofHash;
+        request.entropyHash = entropyHash;
+        request.source = source;
+        request.fulfilled = true;
         emit RandomnessFulfilled(wagerId, request.profileId, source, root, proofHash, entropyHash);
+    }
+
+    function _expectedProvider(RandomnessProfile storage profile, uint64 fallbackAt, Source source) private view returns (address expected) {
+        if (source == Source.PRIMARY) {
+            if (profile.fallbackProvider != address(0) && block.timestamp >= fallbackAt) revert PrimaryExpired();
+            return profile.primaryProvider;
+        }
+        if (source == Source.FALLBACK) {
+            if (profile.fallbackProvider == address(0)) revert WrongProvider();
+            if (block.timestamp < fallbackAt) revert FallbackNotReady();
+            return profile.fallbackProvider;
+        }
+        revert WrongProvider();
+    }
+
+    function _deriveRoot(
+        bytes32 wagerId,
+        RandomnessRequest storage request,
+        RandomnessProfile storage profile,
+        Source source,
+        bytes32 entropy,
+        bytes32 proofHash
+    ) private view returns (bytes32) {
+        return keccak256(abi.encode(
+            ROOT_DOMAIN,
+            block.chainid,
+            address(this),
+            wagerId,
+            request.gameVersionId,
+            request.paramsHash,
+            request.contextHash,
+            request.profileId,
+            profile.method,
+            profile.securityLevelHash,
+            profile.domainSeparator,
+            profile.primaryProvider,
+            profile.fallbackProvider,
+            profile.fallbackDelay,
+            source,
+            entropy,
+            proofHash
+        ));
     }
 
     function _getProfile(bytes32 profileId) private view returns (RandomnessProfile storage p) { p = _profiles[profileId]; if (!p.exists) revert NotFound(); }

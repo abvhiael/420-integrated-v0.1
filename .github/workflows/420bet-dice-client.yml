@@ -4,11 +4,13 @@ on:
   push:
     paths:
       - 'clients/420bet-dice-v1/**'
+      - 'contracts/src/bet/**'
       - 'testnet/apps/420bet/**'
       - '.github/workflows/420bet-dice-client.yml'
   pull_request:
     paths:
       - 'clients/420bet-dice-v1/**'
+      - 'contracts/src/bet/**'
       - 'testnet/apps/420bet/**'
       - '.github/workflows/420bet-dice-client.yml'
 
@@ -25,6 +27,10 @@ jobs:
           node-version: '24.20.0'
           cache: npm
           cache-dependency-path: clients/420bet-dice-v1/package.json
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
       - name: Install client dependencies
         working-directory: clients/420bet-dice-v1
         run: npm install --no-audit --no-fund
@@ -36,7 +42,10 @@ jobs:
         run: npm run manifest:selftest
       - name: Syntax-check deployment smoke scripts
         working-directory: clients/420bet-dice-v1
-        run: node --check scripts/deployment-manifest.mjs && node --check scripts/generate-config.mjs && node --check scripts/smoke-rpc.mjs
+        run: node --check scripts/deployment-manifest.mjs && node --check scripts/generate-config.mjs && node --check scripts/manifest-to-config.mjs && node --check scripts/smoke-rpc.mjs && node --check scripts/local-deploy-smoke.mjs
+      - name: Deploy configured DiceV1 stack to Anvil and smoke it
+        working-directory: clients/420bet-dice-v1
+        run: npm run local:deploy-smoke
       - name: Build DiceV1 production bundle
         working-directory: clients/420bet-dice-v1
         run: npm run build

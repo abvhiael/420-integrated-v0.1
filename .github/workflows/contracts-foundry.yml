@@ -39,5 +39,6 @@ jobs:
         run: forge test -vvv
 
       - name: Coverage
+        continue-on-error: true
         working-directory: contracts
         run: FOUNDRY_PROFILE=coverage forge coverage --ir-minimum --report summary

@@ -8,6 +8,7 @@ interface VmPolicy420 {
     function addr(uint256 privateKey) external returns (address);
     function sign(uint256 privateKey, bytes32 digest) external returns (uint8 v, bytes32 r, bytes32 s);
     function prank(address msgSender) external;
+    function deal(address who, uint256 newBalance) external;
 }
 
 contract PolicyEntryPointMock420 {
@@ -70,6 +71,7 @@ contract SmartAccountPolicyFuzz420Test {
         PackedUserOperation420 memory firstOp = _nativeOp(0.6 ether, firstHash);
         require(entryPoint.validate(account, firstOp, firstHash) == 0, "first validation");
         require(capabilities.usage(grantId).used == 0, "validation must be read-only");
+        vm.deal(address(account), 1 ether);
         require(entryPoint.execute(account, firstOp.callData), "first execution");
         require(capabilities.usage(grantId).used == 0.6 ether, "execution usage");
 

@@ -10,7 +10,6 @@ import "../interfaces/genesis/Errors420.sol";
 import "../interfaces/ICanonicalSettlement420.sol";
 import "../interfaces/genesis/IFeeQuote420.sol";
 import "../interfaces/genesis/IReplayProtection420.sol";
-import "../libraries/GenesisInterfaceIds420.sol";
 import "./PayIds420.sol";
 
 contract PaymentRouter420 is GenesisResidentAccess420 {
@@ -97,8 +96,14 @@ contract PaymentRouter420 is GenesisResidentAccess420 {
         require(fees.conversionFee == q.conversionFee, "fee quote mismatch");
     }
 
+    function _requirePayerOrGovernance(address payer) internal view {
+        if (msg.sender != payer) _requireGenesisGovernance(PayIds420.ACTION_SETTLE);
+    }
+
     /// @notice Atomic canonical conversion/settlement entry.
-    /// @dev If the swap execution or any postcondition fails, local replay state also rolls back.
+    /// @dev A payer may authorize its own payment path directly. Governance remains a bounded
+    /// orchestration/configuration fallback, not a mandatory participant in ordinary payments.
+    /// If the swap execution or any postcondition fails, local replay state also rolls back.
     function executeSwapSettlement(
         bytes32 paymentId,
         ICanonicalSettlement420.Quote calldata q,
@@ -109,14 +114,15 @@ contract PaymentRouter420 is GenesisResidentAccess420 {
         uint256 gasCost420,
         uint256 tip
     ) external payable returns (uint256 inputSpent, uint256 delivered) {
-        _requireGenesisGovernance(PayIds420.ACTION_SETTLE);
+        require(payer != address(0), "payer");
+        _requirePayerOrGovernance(payer);
         _requireOperational(
             PayIds420.ACTION_SETTLE,
             ISystemSafety420.ActionClass.NORMAL_ONLY,
             Types420.Direction.OUTBOUND
         );
         require(paymentId != bytes32(0), "payment id");
-        require(payer != address(0) && recipient != address(0), "party");
+        require(recipient != address(0), "recipient");
         require(!consumedPaymentAuthorization[paymentId], "payment authorization used");
         require(settlementAdapter != address(0) && settlementAdapter.code.length != 0, "settlement adapter");
 

@@ -29,3 +29,6 @@ jobs:
       - name: Typecheck DiceV1 client
         working-directory: clients/420bet-dice-v1
         run: npm run typecheck
+      - name: Build DiceV1 production bundle
+        working-directory: clients/420bet-dice-v1
+        run: npm run build

@@ -4,10 +4,12 @@ on:
   push:
     paths:
       - 'clients/420bet-dice-v1/**'
+      - 'testnet/apps/420bet/**'
       - '.github/workflows/420bet-dice-client.yml'
   pull_request:
     paths:
       - 'clients/420bet-dice-v1/**'
+      - 'testnet/apps/420bet/**'
       - '.github/workflows/420bet-dice-client.yml'
 
 permissions:
@@ -29,6 +31,12 @@ jobs:
       - name: Typecheck DiceV1 client
         working-directory: clients/420bet-dice-v1
         run: npm run typecheck
+      - name: Self-test deployment manifest tooling
+        working-directory: clients/420bet-dice-v1
+        run: npm run manifest:selftest
+      - name: Syntax-check deployment smoke scripts
+        working-directory: clients/420bet-dice-v1
+        run: node --check scripts/deployment-manifest.mjs && node --check scripts/generate-config.mjs && node --check scripts/smoke-rpc.mjs
       - name: Build DiceV1 production bundle
         working-directory: clients/420bet-dice-v1
         run: npm run build

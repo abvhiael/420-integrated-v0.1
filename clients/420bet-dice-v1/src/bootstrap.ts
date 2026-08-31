@@ -57,6 +57,12 @@ export type DiceBootstrapConfig420 = {
   rootSelector?: string;
 };
 
+export type DiceBootstrapResult420 = {
+  client: DiceV1Client420;
+  controller: DicePlayerController420;
+  shell: DicePlayerShell420;
+};
+
 type EthereumProvider = {
   request(args: { method: string; params?: unknown[] | object }): Promise<unknown>;
 };
@@ -76,7 +82,9 @@ function assertConfig(config: DiceBootstrapConfig420 | undefined): asserts confi
   if (!config.ids.gameId || !config.ids.gameVersionId || !config.ids.operatorId) throw new Error('Dice IDs are required');
 }
 
-export async function bootstrapDiceV1420(config = window.__420_DICE_CONFIG__) {
+export async function bootstrapDiceV1420(
+  config = window.__420_DICE_CONFIG__,
+): Promise<DiceBootstrapResult420> {
   assertConfig(config);
   if (!window.ethereum) throw new Error('No EIP-1193 wallet provider detected');
 
@@ -139,7 +147,7 @@ export async function bootstrapDiceV1420(config = window.__420_DICE_CONFIG__) {
   await controller.connect();
   shell.render();
 
-  return { chain, publicClient, walletClient, client, controller, shell };
+  return { client, controller, shell };
 }
 
 if (typeof window !== 'undefined' && window.__420_DICE_CONFIG__) {

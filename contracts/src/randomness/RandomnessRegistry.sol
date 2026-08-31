@@ -84,9 +84,8 @@ contract RandomnessRegistry is SystemAccess, I420System {
         Record storage record_ = _records[requestId];
         if (!record_.exists) revert UnknownRequest();
         if (record_.fulfilled) revert AlreadyFulfilled();
-        if (routeId == bytes32(0) || randomness == bytes32(0) || proofHash == bytes32(0) || fulfilledAt == 0) {
-            revert InvalidResult();
-        }
+        // randomness and proofHash intentionally span the full bytes32 domain, including zero.
+        if (routeId == bytes32(0) || fulfilledAt == 0) revert InvalidResult();
         record_.routeId = routeId;
         record_.randomness = randomness;
         record_.proofHash = proofHash;

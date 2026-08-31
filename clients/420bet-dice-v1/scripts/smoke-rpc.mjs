@@ -28,7 +28,7 @@ if (manifest.contracts.asset !== '0x0000000000000000000000000000000000000000') {
 const systemAbi = [
   { type: 'function', name: 'systemName', stateMutability: 'view', inputs: [], outputs: [{ name: '', type: 'string' }] },
   { type: 'function', name: 'protocolVersion', stateMutability: 'view', inputs: [], outputs: [{ name: '', type: 'uint32' }] },
-] as const;
+];
 
 const expectedSystems = {
   dice: 'DiceV1420',
@@ -50,7 +50,7 @@ for (const [key, expected] of Object.entries(expectedSystems)) {
 const diceAbi = [
   { type: 'function', name: 'gameId', stateMutability: 'view', inputs: [], outputs: [{ name: '', type: 'bytes32' }] },
   { type: 'function', name: 'gameVersionId', stateMutability: 'view', inputs: [], outputs: [{ name: '', type: 'bytes32' }] },
-] as const;
+];
 const diceAddress = getAddress(manifest.contracts.dice);
 const [gameId, gameVersionId] = await Promise.all([
   client.readContract({ address: diceAddress, abi: diceAbi, functionName: 'gameId' }),

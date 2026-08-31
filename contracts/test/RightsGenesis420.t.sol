@@ -40,15 +40,17 @@ contract RightsGenesis420Test {
         (, , , RightsAssetRegistry420 assets, RightsClaimRegistry420 claims, RightsLicenseRegistry420 licenses, RightsRouter420 router) = _setup();
         bytes32 subjectId = keccak256("work-1");
         bytes32 rightId = keccak256("right-1");
-        bytes32 licenseId = keccak256("license-1");
         bytes32 scope = keccak256("streaming-canada");
+        bytes32 terms = keccak256("terms");
+        uint64 nowTs = uint64(block.timestamp);
+        bytes32 licenseId = licenses.deriveLicenseId(rightId, BOB, scope, terms, nowTs, 0, true);
 
         vm.prank(ALICE);
         assets.registerSubject(subjectId, keccak256("recording"), ALICE, keccak256("metadata"), keccak256("provenance"));
         vm.prank(ALICE);
-        claims.declareClaim(rightId, subjectId, RightsIds420.RIGHT_COPYRIGHT, ALICE, keccak256("CA"), keccak256("evidence"), uint64(block.timestamp), 0);
+        claims.declareClaim(rightId, subjectId, RightsIds420.RIGHT_COPYRIGHT, ALICE, keccak256("CA"), keccak256("evidence"), nowTs, 0);
         vm.prank(ALICE);
-        licenses.grantLicense(licenseId, rightId, BOB, scope, keccak256("terms"), uint64(block.timestamp), 0, true);
+        licenses.grantLicense(licenseId, rightId, BOB, scope, terms, nowTs, 0, true);
 
         require(router.isRightEffective(rightId), "right inactive");
         require(router.canUse(licenseId, BOB, scope), "license unusable");
@@ -63,13 +65,17 @@ contract RightsGenesis420Test {
         (, , , RightsAssetRegistry420 assets, RightsClaimRegistry420 claims, RightsLicenseRegistry420 licenses,) = _setup();
         bytes32 subjectId = keccak256("work-2");
         bytes32 rightId = keccak256("right-2");
+        bytes32 scope = keccak256("scope");
+        bytes32 terms = keccak256("terms");
+        uint64 nowTs = uint64(block.timestamp);
         vm.prank(ALICE);
         assets.registerSubject(subjectId, keccak256("genetic-line"), ALICE, bytes32(0), keccak256("provenance"));
         vm.prank(ALICE);
-        claims.declareClaim(rightId, subjectId, RightsIds420.RIGHT_GENETIC, ALICE, keccak256("CA"), keccak256("evidence"), uint64(block.timestamp), 0);
+        claims.declareClaim(rightId, subjectId, RightsIds420.RIGHT_GENETIC, ALICE, keccak256("CA"), keccak256("evidence"), nowTs, 0);
+        bytes32 licenseId = licenses.deriveLicenseId(rightId, BOB, scope, terms, nowTs, 0, true);
 
         vm.prank(BOB);
-        (bool ok,) = address(licenses).call(abi.encodeWithSelector(licenses.grantLicense.selector, keccak256("bad-license"), rightId, BOB, keccak256("scope"), keccak256("terms"), uint64(block.timestamp), uint64(0), true));
+        (bool ok,) = address(licenses).call(abi.encodeWithSelector(licenses.grantLicense.selector, licenseId, rightId, BOB, scope, terms, nowTs, uint64(0), true));
         require(!ok, "unrelated actor granted license");
     }
 

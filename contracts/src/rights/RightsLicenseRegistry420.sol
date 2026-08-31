@@ -7,6 +7,8 @@ import "./RightsClaimRegistry420.sol";
 import "./RightsIds420.sol";
 
 contract RightsLicenseRegistry420 is I420System {
+    bytes32 public constant LICENSE_DOMAIN = keccak256("420/RIGHTS/LICENSE/V1");
+
     struct License {
         bytes32 rightId;
         address licensor;
@@ -44,8 +46,13 @@ contract RightsLicenseRegistry420 is I420System {
     function systemName() external pure returns (string memory) { return "RightsLicenseRegistry420"; }
     function protocolVersion() external pure returns (uint32) { return 1; }
 
+    function deriveLicenseId(bytes32 rightId, address licensee, bytes32 scopeHash, bytes32 termsHash, uint64 validFrom, uint64 validUntil, bool revocable) public pure returns (bytes32) {
+        return keccak256(abi.encode(LICENSE_DOMAIN, rightId, licensee, scopeHash, termsHash, validFrom, validUntil, revocable));
+    }
+
     function grantLicense(bytes32 licenseId, bytes32 rightId, address licensee, bytes32 scopeHash, bytes32 termsHash, uint64 validFrom, uint64 validUntil, bool revocable) external {
         if (licenseId == bytes32(0) || rightId == bytes32(0) || licensee == address(0) || scopeHash == bytes32(0) || termsHash == bytes32(0)) revert InvalidLicense();
+        if (licenseId != deriveLicenseId(rightId, licensee, scopeHash, termsHash, validFrom, validUntil, revocable)) revert InvalidLicense();
         if (_licenses[licenseId].exists) revert LicenseExists();
         if (!claims.isEffective(rightId)) revert RightNotEffective();
         RightsClaimRegistry420.Claim memory c = claims.claim(rightId);
@@ -61,14 +68,16 @@ contract RightsLicenseRegistry420 is I420System {
         License storage l = _licenses[licenseId];
         if (!l.exists) revert LicenseNotFound();
         if (!l.revocable) revert NotRevocable();
-        if (msg.sender != l.licensor && !authorization.isRightAuthorized(msg.sender, l.rightId, RightsIds420.ACTION_REVOKE_LICENSE)) revert Unauthorized();
+        RightsClaimRegistry420.Claim memory c = claims.claim(l.rightId);
+        if (msg.sender != l.licensor && msg.sender != c.holder && !authorization.isRightAuthorized(msg.sender, l.rightId, RightsIds420.ACTION_REVOKE_LICENSE)) revert Unauthorized();
+        if (l.revoked) revert LicenseNotFound();
         l.revoked = true;
         emit LicenseRevoked(licenseId, msg.sender);
     }
 
     function renounceLicense(bytes32 licenseId) external {
         License storage l = _licenses[licenseId];
-        if (!l.exists) revert LicenseNotFound();
+        if (!l.exists || l.revoked) revert LicenseNotFound();
         if (msg.sender != l.licensee) revert Unauthorized();
         l.revoked = true;
         emit LicenseRenounced(licenseId, msg.sender);

@@ -103,13 +103,14 @@ contract PaymentRegistry420 is GenesisResidentAccess420 {
         bytes32 quoteId,
         uint256 payerNonce
     ) external returns (bytes32 paymentId) {
-        _requireGenesisGovernance(PayIds420.ACTION_SETTLE);
+        require(payer != address(0), "payer");
+        if (msg.sender != payer) _requireGenesisGovernance(PayIds420.ACTION_SETTLE);
         _requireOperational(
             PayIds420.ACTION_SETTLE,
             ISystemSafety420.ActionClass.NORMAL_ONLY,
             Types420.Direction.INBOUND
         );
-        require(invoiceId != bytes32(0) && payer != address(0) && merchant != address(0), "party");
+        require(invoiceId != bytes32(0) && merchant != address(0), "party");
         require(inputAmount > 0 && settlementAmount > 0, "amount");
         _canonicalSettlementAsset(settlementAsset);
         paymentId = derivePaymentId(

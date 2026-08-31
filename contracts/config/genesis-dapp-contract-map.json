@@ -7,6 +7,11 @@
       "note": "client application; discovers services through ProtocolRegistry"
     },
     {
+      "dapp": "420 Smart Accounts",
+      "contracts": ["SmartAccount420.sol","SmartAccountFactory420.sol","SmartAccountScopes420.sol","ECDSA420.sol","CapabilityRegistry420.sol"],
+      "note": "Genesis account-layer infrastructure exposed through 420 Wallet and reusable by all dApps. Provides ERC-4337-compatible programmable accounts, ERC-1271 owner validation, deterministic account creation, capability-scoped session execution, independent nonce lanes, recovery and epoch revocation, bounded spending policy enforcement, gas-sponsorship authorization and shared registry-backed capability metering. Session capability usage is validation-read-only and is consumed atomically during EntryPoint execution so failed execution cannot burn allowance."
+    },
+    {
       "dapp": "420 Explorer",
       "contracts": [],
       "note": "indexer/UI; reads chain and protocol registries"

@@ -5,6 +5,14 @@ library RandomnessIds420 {
     bytes32 internal constant METHOD_NATIVE_THRESHOLD_VRF = keccak256("420.RANDOM.METHOD.NATIVE_THRESHOLD_VRF.V1");
     bytes32 internal constant METHOD_COMMIT_REVEAL = keccak256("420.RANDOM.METHOD.COMMIT_REVEAL.V1");
     bytes32 internal constant METHOD_EXTERNAL_VRF = keccak256("420.RANDOM.METHOD.EXTERNAL_VRF.V1");
+    bytes32 internal constant METHOD_MULTI_PROVIDER = keccak256("420.RANDOM.METHOD.MULTI_PROVIDER.V1");
+
+    uint8 internal constant SECURITY_STANDARD = 1;
+    uint8 internal constant SECURITY_HIGH = 2;
+    uint8 internal constant SECURITY_CRITICAL = 3;
+
+    uint8 internal constant FALLBACK_VOID = 0;
+    uint8 internal constant FALLBACK_ONCE_THEN_VOID = 1;
 
     bytes32 internal constant DOMAIN_BET = keccak256("420.RANDOM.DOMAIN.BET.V1");
     bytes32 internal constant DOMAIN_GAME = keccak256("420.RANDOM.DOMAIN.GAME.V1");

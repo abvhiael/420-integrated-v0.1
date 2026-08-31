@@ -1,0 +1,31 @@
+name: 420Bet Dice Client
+
+on:
+  push:
+    paths:
+      - 'clients/420bet-dice-v1/**'
+      - '.github/workflows/420bet-dice-client.yml'
+  pull_request:
+    paths:
+      - 'clients/420bet-dice-v1/**'
+      - '.github/workflows/420bet-dice-client.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+          cache-dependency-path: clients/420bet-dice-v1/package.json
+      - name: Install client dependencies
+        working-directory: clients/420bet-dice-v1
+        run: npm install --no-audit --no-fund
+      - name: Typecheck DiceV1 client
+        working-directory: clients/420bet-dice-v1
+        run: npm run typecheck

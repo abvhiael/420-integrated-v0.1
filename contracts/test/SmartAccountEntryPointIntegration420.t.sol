@@ -8,6 +8,7 @@ interface VmEntryPoint420 {
     function addr(uint256 privateKey) external returns (address);
     function sign(uint256 privateKey, bytes32 digest) external returns (uint8 v, bytes32 r, bytes32 s);
     function prank(address msgSender) external;
+    function deal(address who, uint256 newBalance) external;
 }
 
 contract EntryPointHarness420 {
@@ -87,13 +88,14 @@ contract SmartAccountEntryPointIntegration420Test {
         require(entryPoint.getNonce(address(account), 0) == 0, "owner lane untouched");
     }
 
-    function testFailedSessionExecutionDoesNotBurnAllowance() public {
+    function testSessionExecutionFailureDoesNotBurnAllowance() public {
         vm.prank(owner); account.enableSessionKey(session);
         vm.prank(owner); bytes32 grantId = account.createSessionGrant(session, address(target), EntryPointExecutionTarget420.fail.selector, 1 ether, 1 ether, 1 days, 0, 0);
         uint192 key = uint192(uint160(session));
         uint256 nonceValue = uint256(key) << 64;
         bytes memory callData = _sessionCall(address(target), 0.4 ether, abi.encodeWithSelector(EntryPointExecutionTarget420.fail.selector));
         bytes32 hash = keccak256("session-execution-failure");
+        vm.deal(address(account), 0.4 ether);
         bool ok = entryPoint.handleOpAllowFailure(account, _signedOp(SESSION_PK, nonceValue, callData, hash), hash);
         require(!ok, "target must fail");
         require(capabilities.usage(grantId).used == 0, "failed execution burned allowance");

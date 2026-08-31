@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "manifest:config": "node scripts/generate-config.mjs",
     "manifest:selftest": "node scripts/selftest-manifest.mjs",
-    "smoke:rpc": "node scripts/smoke-rpc.mjs"
+    "smoke:rpc": "node scripts/smoke-rpc.mjs",
+    "local:deploy-smoke": "node scripts/local-deploy-smoke.mjs"
   },
   "dependencies": {
     "viem": "2.56.0"

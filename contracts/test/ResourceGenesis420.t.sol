@@ -1,0 +1,34 @@
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.24;
+
+import "../src/interfaces/genesis/ICapabilityRegistry420.sol";
+import "../src/resource/ResourceIds420.sol";
+import "../src/resource/ResourceAuthorization420.sol";
+import "../src/resource/ResourcePolicyRegistry420.sol";
+import "../src/resource/ResourceProviderRegistry420.sol";
+import "../src/resource/ResourceNodeRegistry420.sol";
+import "../src/resource/ResourceOfferRegistry420.sol";
+import "../src/resource/ResourceSessionRegistry420.sol";
+import "../src/resource/ResourceReceiptRegistry420.sol";
+import "../src/resource/ResourceRouter420.sol";
+
+interface VmResource420 { function prank(address) external; function warp(uint256) external; }
+contract MockResourceCaps420 is ICapabilityRegistry420 {
+    mapping(bytes32=>bool) internal ok;
+    function key(address p,bytes32 c,bytes32 a,bytes32 s) public pure returns(bytes32){return keccak256(abi.encode(p,c,a,s));}
+    function set(address p,bytes32 c,bytes32 a,bytes32 s,bool v) external {ok[key(p,c,a,s)]=v;}
+    function grant(bytes32) external pure returns(CapabilityGrant memory g){return g;}
+    function isAuthorized(address p,bytes32 c,bytes32 a,bytes32 s,uint256) external view returns(bool){return ok[key(p,c,a,s)];}
+}
+contract ResourceGenesis420Test {
+    VmResource420 constant vm=VmResource420(address(uint160(uint256(keccak256("hevm cheat code")))));
+    address constant ALICE=address(0xA11CE); address constant BOB=address(0xB0B); address constant SETTLER=address(0x420);
+    struct Env { MockResourceCaps420 caps; ResourceAuthorization420 auth; ResourcePolicyRegistry420 policy; ResourceProviderRegistry420 providers; ResourceNodeRegistry420 nodes; ResourceOfferRegistry420 offers; ResourceSessionRegistry420 sessions; ResourceReceiptRegistry420 receipts; ResourceRouter420 router; }
+    function setup() internal returns(Env memory e){e.caps=new MockResourceCaps420();e.auth=new ResourceAuthorization420(address(e.caps));e.policy=new ResourcePolicyRegistry420(address(this));e.providers=new ResourceProviderRegistry420(address(e.auth));e.nodes=new ResourceNodeRegistry420(address(e.auth),address(e.providers));e.offers=new ResourceOfferRegistry420(address(e.nodes),address(e.providers),address(e.policy),address(e.auth));e.sessions=new ResourceSessionRegistry420(address(e.offers),address(e.auth));e.receipts=new ResourceReceiptRegistry420(address(e.sessions),address(e.offers),address(e.nodes));e.router=new ResourceRouter420(address(e.policy),address(e.nodes),address(e.offers));e.policy.setPolicy(ResourceIds420.SERVICE_RELAY,keccak256("relay-policy"),3600,1_000_000,true);e.policy.setPolicy(ResourceIds420.SERVICE_STORE,keccak256("store-policy"),86400,1_000_000,true);}
+    function activateRelay(Env memory e) internal returns(bytes32 providerId,bytes32 nodeId,bytes32 offerId){providerId=keccak256("provider");nodeId=keccak256("node");offerId=keccak256("offer");vm.prank(ALICE);e.providers.registerProvider(providerId,ALICE,keccak256("meta"),keccak256("stake"));vm.prank(ALICE);e.providers.setState(providerId,ResourceProviderRegistry420.State.ACTIVE);vm.prank(ALICE);e.nodes.registerNode(nodeId,providerId,ResourceIds420.SERVICE_RELAY,ALICE,keccak256("endpoint"),keccak256("capacity"));vm.prank(ALICE);e.nodes.setState(nodeId,ResourceNodeRegistry420.State.ACTIVE);vm.prank(ALICE);e.offers.publishOffer(offerId,nodeId,2,1000,keccak256("terms"),uint64(block.timestamp+1000));}
+    function testProviderNeedsStakeAndDefaultDeny() public {Env memory e=setup();bytes32 p=keccak256("p");vm.prank(BOB);(bool bad,)=address(e.providers).call(abi.encodeWithSelector(e.providers.registerProvider.selector,p,ALICE,bytes32(0),bytes32(0)));require(!bad,"third party register");vm.prank(ALICE);e.providers.registerProvider(p,ALICE,bytes32(0),bytes32(0));vm.prank(ALICE);(bool active,)=address(e.providers).call(abi.encodeWithSelector(e.providers.setState.selector,p,ResourceProviderRegistry420.State.ACTIVE));require(!active,"stake bypass");}
+    function testFourServiceClassesAreDistinct() public {require(ResourceIds420.SERVICE_RELAY!=ResourceIds420.SERVICE_STORE&&ResourceIds420.SERVICE_STORE!=ResourceIds420.SERVICE_CACHE&&ResourceIds420.SERVICE_CACHE!=ResourceIds420.SERVICE_GATEWAY,"service collision");}
+    function testOfferSessionReceiptReplayAndBounds() public {Env memory e=setup();(,bytes32 nodeId,bytes32 offerId)=activateRelay(e);require(e.router.canRoute(nodeId,ResourceIds420.SERVICE_RELAY),"relay route");require(!e.router.canRoute(nodeId,ResourceIds420.SERVICE_STORE),"service confusion");bytes32 sessionId=e.sessions.canonicalSessionId(BOB,offerId,1);vm.prank(BOB);e.sessions.openSession(sessionId,offerId,100,uint64(block.timestamp+500));vm.prank(BOB);(bool replay,)=address(e.sessions).call(abi.encodeWithSelector(e.sessions.openSession.selector,sessionId,offerId,uint128(100),uint64(block.timestamp+500)));require(!replay,"session replay");bytes32 receiptId=e.receipts.canonicalReceiptId(sessionId,50,keccak256("usage"));vm.prank(ALICE);e.receipts.submitReceipt(receiptId,sessionId,50,keccak256("usage"));vm.prank(ALICE);(bool rr,)=address(e.receipts).call(abi.encodeWithSelector(e.receipts.submitReceipt.selector,receiptId,sessionId,uint128(50),keccak256("usage")));require(!rr,"receipt replay");vm.prank(ALICE);(bool over,)=address(e.receipts).call(abi.encodeWithSelector(e.receipts.submitReceipt.selector,e.receipts.canonicalReceiptId(sessionId,101,keccak256("over")),sessionId,uint128(101),keccak256("over")));require(!over,"unit cap bypass");}
+    function testSettlementIsCapabilityScoped() public {Env memory e=setup();(,,bytes32 offerId)=activateRelay(e);bytes32 sessionId=e.sessions.canonicalSessionId(BOB,offerId,2);vm.prank(BOB);e.sessions.openSession(sessionId,offerId,10,uint64(block.timestamp+100));vm.prank(BOB);e.sessions.closeSession(sessionId);vm.prank(ALICE);(bool bad,)=address(e.sessions).call(abi.encodeWithSelector(e.sessions.markSettled.selector,sessionId,uint256(20)));require(!bad,"arbitrary settlement");e.caps.set(SETTLER,ResourceIds420.COMPONENT_RESOURCE,ResourceIds420.ACTION_SETTLE,e.auth.scopeSession(sessionId),true);vm.prank(SETTLER);e.sessions.markSettled(sessionId,20);require(e.sessions.getSession(sessionId).state==ResourceSessionRegistry420.State.SETTLED,"not settled");}
+    function testExpiredSessionCannotReceiveUsage() public {Env memory e=setup();(,,bytes32 offerId)=activateRelay(e);bytes32 sessionId=e.sessions.canonicalSessionId(BOB,offerId,3);vm.prank(BOB);e.sessions.openSession(sessionId,offerId,10,uint64(block.timestamp+10));vm.warp(block.timestamp+11);vm.prank(ALICE);(bool ok,)=address(e.receipts).call(abi.encodeWithSelector(e.receipts.submitReceipt.selector,e.receipts.canonicalReceiptId(sessionId,1,keccak256("late")),sessionId,uint128(1),keccak256("late")));require(!ok,"expired receipt");}
+}

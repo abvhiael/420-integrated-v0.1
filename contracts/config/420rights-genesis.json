@@ -1,0 +1,42 @@
+{
+  "schema": "420rights-genesis-v1",
+  "status": "IMPLEMENTATION_QUALIFICATION",
+  "suite": "420 Rights",
+  "contracts": [
+    "RightsIds420.sol",
+    "RightsAuthorization420.sol",
+    "RightsPolicyRegistry420.sol",
+    "RightsAssetRegistry420.sol",
+    "RightsClaimRegistry420.sol",
+    "RightsLicenseRegistry420.sol",
+    "RightsRouter420.sol"
+  ],
+  "canonical_right_classes": [
+    "COPYRIGHT",
+    "TRADEMARK",
+    "PATENT",
+    "PERSONALITY",
+    "GENETIC",
+    "DATA",
+    "MODEL",
+    "CONTRACTUAL"
+  ],
+  "genesis_invariants": [
+    "RIGHTS-INV-001: a subject id is immutable after first registration; metadata may only revise through its controller or a scoped capability",
+    "RIGHTS-INV-002: a right claim can only reference an existing subject and an active governance-configured right class",
+    "RIGHTS-INV-003: ordinary rights claims are holder-originated or capability-scoped; governance is not a universal rights-holder backdoor",
+    "RIGHTS-INV-004: a license cannot outlive the underlying right claim and cannot be created against an ineffective right",
+    "RIGHTS-INV-005: only the right holder or a scoped capability may grant/revoke a revocable license; the licensee may renounce its own license",
+    "RIGHTS-INV-006: effective use requires the exact licensee and exact committed scope hash",
+    "RIGHTS-INV-007: on-chain claims commit jurisdiction and evidence but do not self-assert legal adjudicative finality",
+    "RIGHTS-INV-008: 420 Market may reference/list canonical license ids but has no authority to create or mutate 420Rights state"
+  ],
+  "integrations": {
+    "capability_registry": "required",
+    "420_market_item_class": "ITEM_LICENSE",
+    "420_identity": "optional holder/profile reference",
+    "420_vault": "future royalty/escrow settlement profile",
+    "420_pay": "future invoice/payment settlement for licenses"
+  },
+  "new_frozen_predeploy_required": false
+}

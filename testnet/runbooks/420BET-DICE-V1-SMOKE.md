@@ -2,37 +2,62 @@
 
 This runbook promotes a real DiceV1 deployment into the browser client and verifies the live path without giving the frontend outcome authority.
 
-## 1. Deploy and configure the protocol stack
+## 1. One-command local deployment harness
 
-Deploy the already-qualified 420Bet stack to a local Anvil/dev chain or a 420 Integrated testnet environment. The deployment must include the configured `BetAuthorization420`, `WagerRouter420`, bankroll vault, `RandomnessRouter420`, `DiceV1420`, and `DiceV1View420`, with the Dice game/module/operator/profile registrations and capabilities required by the vertical slice.
+For a real local deployment, install Node dependencies and Foundry, then run from `clients/420bet-dice-v1`:
 
-Do not copy addresses from a unit-test deployment. Record the addresses emitted by the actual target-chain deployment.
+```bash
+npm install
+npm run local:deploy-smoke
+```
 
-## 2. Create a promoted deployment manifest
+That command:
+
+1. builds the Foundry contracts;
+2. starts a deterministic local Anvil chain on `http://127.0.0.1:8545` with chain ID `31337`;
+3. deploys the real 420Bet authorization, registries, bankroll/risk, wager, randomness, DiceV1, settlement and DiceV1 view contracts;
+4. deploys only two clearly local-only helpers: `DiceLocalCapabilityRegistry420` and `DiceLocalToken420`;
+5. configures the same Dice module/game/operator/profile/risk/randomness relationships exercised by the qualified vertical slice;
+6. seeds 1,000 L420 of bankroll liquidity;
+7. grants the second deterministic Anvil account only the scoped Dice `BET_PLACE` capability and funds it with 100 L420;
+8. writes a promoted manifest to `testnet/apps/420bet/local/dice-v1.deployment.json`;
+9. runs the live RPC/code/identity/game-ID smoke against that manifest;
+10. generates `clients/420bet-dice-v1/public/config.js` from the promoted manifest;
+11. shuts Anvil down after the smoke passes.
+
+Use:
+
+```bash
+npm run local:deploy-smoke -- --keep-alive
+```
+
+to leave the local Anvil process running for browser/manual wager testing. Generated local deployment manifests are intentionally gitignored.
+
+## 2. Deploy and configure a shared/testnet protocol stack
+
+For a shared testnet deployment, deploy the already-qualified 420Bet stack using the target environment's production deployment process. The deployment must include the configured `BetAuthorization420`, `WagerRouter420`, bankroll vault, `RandomnessRouter420`, `DiceV1420`, `SettlementEngine420`, and `DiceV1View420`, with the Dice game/module/operator/profile registrations and capabilities required by the vertical slice.
+
+Do not copy addresses from a unit-test or local deployment. Record the addresses emitted by the actual target-chain deployment.
+
+## 3. Create a promoted shared/testnet deployment manifest
 
 Copy:
 
 `testnet/apps/420bet/dice-v1.deployment.example.json`
 
-to an environment-specific file, for example:
-
-- `testnet/apps/420bet/dice-v1.local.json`
-- `testnet/apps/420bet/dice-v1.testnet.json`
+to an environment-specific file such as `testnet/apps/420bet/dice-v1.testnet.json`.
 
 Populate the target RPC URL, contract addresses, Dice game/version/operator IDs, deployment commit, deployer, and deployment timestamp. Set `status` to `PROMOTED` only after those values have been checked against the target chain.
 
 The public 420 testnet metadata currently contains placeholder RPC URLs and a candidate chain ID. Do not promote a public-testnet Dice manifest until those network values themselves are frozen.
 
-## 3. Run the live RPC smoke
+## 4. Run the live RPC smoke
 
 From `clients/420bet-dice-v1`:
 
 ```bash
-npm install
-DICE_DEPLOYMENT_MANIFEST=../../testnet/apps/420bet/dice-v1.local.json npm run smoke:rpc
+DICE_DEPLOYMENT_MANIFEST=../../testnet/apps/420bet/dice-v1.testnet.json npm run smoke:rpc
 ```
-
-For testnet, point `DICE_DEPLOYMENT_MANIFEST` at the promoted testnet manifest.
 
 The smoke fails unless:
 
@@ -42,17 +67,17 @@ The smoke fails unless:
 - `DiceV1420`, `DiceV1View420`, and `BetAuthorization420` report the expected system identity and protocol version;
 - the deployed Dice contract's `gameId` and `gameVersionId` exactly match the promoted manifest.
 
-## 4. Generate the browser runtime config
+## 5. Generate the browser runtime config
 
 ```bash
-DICE_DEPLOYMENT_MANIFEST=../../testnet/apps/420bet/dice-v1.local.json npm run manifest:config
+DICE_DEPLOYMENT_MANIFEST=../../testnet/apps/420bet/dice-v1.testnet.json npm run manifest:config
 npm run build
 npm run dev
 ```
 
 `manifest:config` refuses unpromoted manifests, placeholder RPC URLs, zero required contract addresses, zero canonical IDs, or incomplete promotion evidence.
 
-## 5. Execute a real wager smoke
+## 6. Execute a real wager smoke
 
 Use a funded test wallet/smart account on the selected network.
 
@@ -66,14 +91,9 @@ Use a funded test wallet/smart account on the selected network.
 8. Confirm the UI enters `waiting-randomness`; it must not display a fabricated roll.
 9. Allow the configured target-chain randomness provider/operator path to fulfill the request and the configured settlement authority to settle it.
 10. Refresh until the controller reaches `result-ready` and then `settled`.
-11. Open **Verify this roll** and confirm:
-    - params match the accepted wager commitment;
-    - randomness is fulfilled;
-    - the canonical randomness root is shown;
-    - the Dice result is reproducible;
-    - settlement outcome and gross payout exactly match the reproduced result.
+11. Open **Verify this roll** and confirm params, canonical randomness root, reproduced result, settlement outcome and gross payout all agree.
 
-## 6. Pass criteria
+## 7. Pass criteria
 
 The smoke is PASS only when the live RPC smoke succeeds and a real target-chain wager completes through:
 

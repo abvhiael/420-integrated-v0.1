@@ -10,7 +10,7 @@ import "./RandomnessRouteRegistry420.sol";
 import "./RandomnessRegistry.sol";
 
 /// @notice Canonical application-facing router for generalized 420Random.
-/// @dev Requests bind profile, domain, purpose, route revisions and fallback policy before entropy exists.
+/// @dev Requests bind profile, domain, purpose, exact route implementations and fallback policy before entropy exists.
 contract RandomnessRouter420 is I420System, IRandomnessRouter420 {
     RandomnessProfileRegistry420 public immutable profileRegistry;
     RandomnessRouteRegistry420 public immutable routeRegistry;
@@ -26,7 +26,6 @@ contract RandomnessRouter420 is I420System, IRandomnessRouter420 {
     error UnknownRequest();
     error WrongStatus();
     error UnauthorizedOperator();
-    error RouteRevisionChanged();
     error InvalidProof();
     error PrimaryWindowElapsed();
     error FallbackUnavailable();
@@ -45,10 +44,11 @@ contract RandomnessRouter420 is I420System, IRandomnessRouter420 {
         bytes32 fallbackRoute,
         uint64 primaryDeadline,
         uint64 deadline,
-        uint8 securityTier
+        uint8 securityTier,
+        uint8 fallbackPolicy
     );
     event RandomnessFallbackActivated(bytes32 indexed requestId, bytes32 indexed fallbackRoute);
-    event RandomnessRequestExpired(bytes32 indexed requestId);
+    event RandomnessRequestVoided(bytes32 indexed requestId);
     event RandomnessResolved(
         bytes32 indexed requestId,
         bytes32 indexed routeId,
@@ -76,18 +76,28 @@ contract RandomnessRouter420 is I420System, IRandomnessRouter420 {
 
         RandomnessProfileRegistry420.Profile memory profile_ = profileRegistry.profile(profileId);
         if (!profile_.active || profile_.revision == 0) revert InvalidProfile();
+        if (uint256(deadline) > block.timestamp + profile_.maxTimeoutSeconds) revert InvalidDeadline();
 
         RandomnessRouteRegistry420.Route memory primary = routeRegistry.route(profile_.primaryRoute);
-        if (!primary.active || primary.revision == 0) revert InvalidRoute();
+        if (!primary.active || primary.revision == 0 || primary.operator == address(0) || primary.verifier == address(0)) {
+            revert InvalidRoute();
+        }
 
         RandomnessRouteRegistry420.Route memory fallback_;
-        if (profile_.fallbackRoute != bytes32(0)) {
+        if (profile_.fallbackPolicy == RandomnessIds420.FALLBACK_VOID) {
+            if (profile_.fallbackRoute != bytes32(0)) revert InvalidProfile();
+        } else if (profile_.fallbackPolicy == RandomnessIds420.FALLBACK_ONCE_THEN_VOID) {
+            if (profile_.fallbackRoute == bytes32(0)) revert InvalidProfile();
             fallback_ = routeRegistry.route(profile_.fallbackRoute);
-            if (!fallback_.active || fallback_.revision == 0) revert InvalidRoute();
+            if (!fallback_.active || fallback_.revision == 0 || fallback_.operator == address(0) || fallback_.verifier == address(0)) {
+                revert InvalidRoute();
+            }
+        } else {
+            revert InvalidProfile();
         }
 
         uint64 primaryDeadline = deadline;
-        if (profile_.fallbackRoute != bytes32(0)) {
+        if (profile_.fallbackPolicy == RandomnessIds420.FALLBACK_ONCE_THEN_VOID) {
             uint256 configuredPrimaryDeadline = block.timestamp + profile_.primaryTimeoutSeconds;
             if (configuredPrimaryDeadline < deadline) primaryDeadline = uint64(configuredPrimaryDeadline);
         }
@@ -104,32 +114,35 @@ contract RandomnessRouter420 is I420System, IRandomnessRouter420 {
                 profile_.revision,
                 domain,
                 purpose,
-                primary.revision,
-                fallback_.revision,
                 deadline
             )
         );
         if (_requests[requestId].status != Status.NONE) revert InvalidRequest();
 
-        Request memory request_ = Request({
-            requester: msg.sender,
-            profileId: profileId,
-            profileRevision: profile_.revision,
-            domain: domain,
-            purpose: purpose,
-            primaryRoute: profile_.primaryRoute,
-            fallbackRoute: profile_.fallbackRoute,
-            primaryRouteRevision: primary.revision,
-            fallbackRouteRevision: fallback_.revision,
-            requestedAt: uint64(block.timestamp),
-            primaryDeadline: primaryDeadline,
-            deadline: deadline,
-            securityTier: profile_.securityTier,
-            status: Status.REQUESTED
-        });
-        _requests[requestId] = request_;
+        Request storage request_ = _requests[requestId];
+        request_.requester = msg.sender;
+        request_.profileId = profileId;
+        request_.profileRevision = profile_.revision;
+        request_.domain = domain;
+        request_.purpose = purpose;
+        request_.primaryRoute = profile_.primaryRoute;
+        request_.fallbackRoute = profile_.fallbackRoute;
+        request_.primaryRouteRevision = primary.revision;
+        request_.fallbackRouteRevision = fallback_.revision;
+        request_.primaryOperator = primary.operator;
+        request_.fallbackOperator = fallback_.operator;
+        request_.primaryVerifier = primary.verifier;
+        request_.fallbackVerifier = fallback_.verifier;
+        request_.primaryMethod = primary.methodId;
+        request_.fallbackMethod = fallback_.methodId;
+        request_.requestedAt = uint64(block.timestamp);
+        request_.primaryDeadline = primaryDeadline;
+        request_.deadline = deadline;
+        request_.securityTier = profile_.securityTier;
+        request_.fallbackPolicy = profile_.fallbackPolicy;
+        request_.status = Status.REQUESTED;
 
-        bytes32 bindingHash = _bindingHash(requestId, request_);
+        bytes32 bindingHash = keccak256(abi.encode(requestId, request_));
         randomnessRegistry.recordRequest(requestId, bindingHash, uint64(block.timestamp));
 
         emit RandomnessRequestCreated(
@@ -143,7 +156,8 @@ contract RandomnessRouter420 is I420System, IRandomnessRouter420 {
             profile_.fallbackRoute,
             primaryDeadline,
             deadline,
-            profile_.securityTier
+            profile_.securityTier,
+            profile_.fallbackPolicy
         );
     }
 
@@ -151,26 +165,31 @@ contract RandomnessRouter420 is I420System, IRandomnessRouter420 {
         Request storage request_ = _requests[requestId];
         if (request_.status == Status.NONE) revert UnknownRequest();
         if (request_.status != Status.REQUESTED && request_.status != Status.FALLBACK_ACTIVE) revert WrongStatus();
-        if (providerRandomness == bytes32(0)) revert InvalidRequest();
         if (block.timestamp > request_.deadline) revert RequestExpired();
 
         bytes32 routeId;
         uint32 routeRevision;
+        address operator;
+        address verifier;
+        bytes32 methodId;
+
         if (request_.status == Status.REQUESTED) {
             if (block.timestamp > request_.primaryDeadline) revert PrimaryWindowElapsed();
             routeId = request_.primaryRoute;
             routeRevision = request_.primaryRouteRevision;
+            operator = request_.primaryOperator;
+            verifier = request_.primaryVerifier;
+            methodId = request_.primaryMethod;
         } else {
             routeId = request_.fallbackRoute;
             routeRevision = request_.fallbackRouteRevision;
+            operator = request_.fallbackOperator;
+            verifier = request_.fallbackVerifier;
+            methodId = request_.fallbackMethod;
         }
 
-        RandomnessRouteRegistry420.Route memory route_ = routeRegistry.route(routeId);
-        if (!route_.active) revert InvalidRoute();
-        if (route_.revision != routeRevision) revert RouteRevisionChanged();
-        if (route_.operator != msg.sender) revert UnauthorizedOperator();
-
-        bool valid = IRandomnessVerifier420(route_.verifier).verifyRandomness(
+        if (msg.sender != operator) revert UnauthorizedOperator();
+        bool valid = IRandomnessVerifier420(verifier).verifyRandomness(
             requestId,
             request_.domain,
             request_.purpose,
@@ -187,10 +206,9 @@ contract RandomnessRouter420 is I420System, IRandomnessRouter420 {
                 requestId,
                 request_.profileId,
                 request_.profileRevision,
-                request_.domain,
-                request_.purpose,
                 routeId,
                 routeRevision,
+                methodId,
                 providerRandomness
             )
         );
@@ -205,20 +223,23 @@ contract RandomnessRouter420 is I420System, IRandomnessRouter420 {
         Request storage request_ = _requests[requestId];
         if (request_.status == Status.NONE) revert UnknownRequest();
         if (request_.status != Status.REQUESTED) revert WrongStatus();
-        if (request_.fallbackRoute == bytes32(0)) revert FallbackUnavailable();
+        if (
+            request_.fallbackPolicy != RandomnessIds420.FALLBACK_ONCE_THEN_VOID ||
+            request_.fallbackRoute == bytes32(0)
+        ) revert FallbackUnavailable();
         if (block.timestamp <= request_.primaryDeadline) revert FallbackTooEarly();
         if (block.timestamp > request_.deadline) revert RequestExpired();
         request_.status = Status.FALLBACK_ACTIVE;
         emit RandomnessFallbackActivated(requestId, request_.fallbackRoute);
     }
 
-    function expire(bytes32 requestId) external {
+    function voidExpired(bytes32 requestId) external {
         Request storage request_ = _requests[requestId];
         if (request_.status == Status.NONE) revert UnknownRequest();
         if (request_.status != Status.REQUESTED && request_.status != Status.FALLBACK_ACTIVE) revert WrongStatus();
         if (block.timestamp <= request_.deadline) revert DeadlineNotReached();
-        request_.status = Status.EXPIRED;
-        emit RandomnessRequestExpired(requestId);
+        request_.status = Status.VOIDED;
+        emit RandomnessRequestVoided(requestId);
     }
 
     function status(bytes32 requestId) external view returns (Status) {
@@ -233,26 +254,5 @@ contract RandomnessRouter420 is I420System, IRandomnessRouter420 {
     function result(bytes32 requestId) external view returns (bytes32 randomness, bytes32 proofHash) {
         if (_requests[requestId].status == Status.NONE) revert UnknownRequest();
         return randomnessRegistry.result(requestId);
-    }
-
-    function _bindingHash(bytes32 requestId, Request memory request_) private pure returns (bytes32) {
-        return keccak256(
-            abi.encode(
-                requestId,
-                request_.requester,
-                request_.profileId,
-                request_.profileRevision,
-                request_.domain,
-                request_.purpose,
-                request_.primaryRoute,
-                request_.fallbackRoute,
-                request_.primaryRouteRevision,
-                request_.fallbackRouteRevision,
-                request_.requestedAt,
-                request_.primaryDeadline,
-                request_.deadline,
-                request_.securityTier
-            )
-        );
     }
 }

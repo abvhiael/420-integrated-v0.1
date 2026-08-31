@@ -69,9 +69,11 @@ contract DiceV1420 is I420System {
         BetTypes420.Wager memory wager = wagerRegistry.getWager(wagerId);
         if (wager.gameId != gameId || wager.gameVersionId != gameVersionId) revert WrongGame();
         if (wager.rulesetId != rulesetId) revert WrongRuleset();
-        if (wager.status != BetTypes420.WagerStatus.ACCEPTED && wager.status != BetTypes420.WagerStatus.OUTCOME_READY) {
-            revert InvalidWagerStatus();
-        }
+        if (
+            wager.status != BetTypes420.WagerStatus.ACCEPTED
+                && wager.status != BetTypes420.WagerStatus.OUTCOME_READY
+                && wager.status != BetTypes420.WagerStatus.SETTLED
+        ) revert InvalidWagerStatus();
 
         bytes32 paramsHash = hashParams(params);
         if (paramsHash != wager.paramsHash) revert ParamsMismatch();

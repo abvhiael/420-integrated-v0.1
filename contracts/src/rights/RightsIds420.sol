@@ -11,6 +11,8 @@ library RightsIds420 {
     bytes32 internal constant ACTION_REGISTER_ASSET = keccak256("420/RIGHTS/ACTION/REGISTER_ASSET/V1");
     bytes32 internal constant ACTION_UPDATE_ASSET = keccak256("420/RIGHTS/ACTION/UPDATE_ASSET/V1");
     bytes32 internal constant ACTION_DECLARE_CLAIM = keccak256("420/RIGHTS/ACTION/DECLARE_CLAIM/V1");
+    bytes32 internal constant ACTION_SUPERSEDE_CLAIM = keccak256("420/RIGHTS/ACTION/SUPERSEDE_CLAIM/V1");
+    bytes32 internal constant ACTION_TRANSFER_RIGHT = keccak256("420/RIGHTS/ACTION/TRANSFER_RIGHT/V1");
     bytes32 internal constant ACTION_GRANT_LICENSE = keccak256("420/RIGHTS/ACTION/GRANT_LICENSE/V1");
     bytes32 internal constant ACTION_REVOKE_LICENSE = keccak256("420/RIGHTS/ACTION/REVOKE_LICENSE/V1");
 

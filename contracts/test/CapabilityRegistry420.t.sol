@@ -7,6 +7,7 @@ import "../src/accounts/SmartAccount420.sol";
 interface VmCapability420 {
     function prank(address msgSender) external;
     function warp(uint256 newTimestamp) external;
+    function deal(address who, uint256 newBalance) external;
     function addr(uint256 privateKey) external returns (address);
     function sign(uint256 privateKey, bytes32 digest) external returns (uint8 v, bytes32 r, bytes32 s);
 }
@@ -15,6 +16,9 @@ contract CapabilityEntryPoint420 {
     function getNonce(address, uint192) external pure returns (uint256) { return 0; }
     function validate(SmartAccount420 account, PackedUserOperation420 calldata op, bytes32 hash) external returns (uint256) {
         return account.validateUserOp(op, hash, 0);
+    }
+    function execute(SmartAccount420 account, bytes calldata callData) external returns (bool ok) {
+        (ok,) = address(account).call(callData);
     }
 }
 contract CapabilityTarget420 { function act() external payable {} }
@@ -80,13 +84,23 @@ contract CapabilityRegistry420Test {
     }
 
     function testPeriodUsageResetsAtNextWindow() public {
-        bytes32 grantId = account.createSessionGrant(session, address(target), CapabilityTarget420.act.selector, 1 ether, 1 ether, 1 days, 0, 0);
+        uint64 periodSeconds = 1 days;
+        bytes32 grantId = account.createSessionGrant(session, address(target), CapabilityTarget420.act.selector, 1 ether, 1 ether, periodSeconds, 0, 0);
         bytes32 hash = keccak256("period-one");
-        require(entryPoint.validate(account, _op(0.75 ether, hash), hash) == 0, "first period");
+        PackedUserOperation420 memory op = _op(0.75 ether, hash);
+
+        require(entryPoint.validate(account, op, hash) == 0, "first period validation");
+        require(registry.usage(grantId).used == 0, "validation must not consume");
+
+        vm.deal(address(account), 1 ether);
+        require(entryPoint.execute(account, op.callData), "first period execution");
         ICapabilityRegistryExtended420.UsageView memory first = registry.usage(grantId);
         require(first.used == 0.75 ether, "usage first");
-        vm.warp(block.timestamp + 1 days);
+
+        uint256 nextWindow = (uint256(first.periodIndex) + 1) * uint256(periodSeconds);
+        vm.warp(nextWindow);
         ICapabilityRegistryExtended420.UsageView memory rolled = registry.usage(grantId);
+        require(rolled.periodIndex == first.periodIndex + 1, "period index");
         require(rolled.used == 0, "rolled usage");
     }
 
@@ -103,7 +117,13 @@ contract CapabilityRegistry420Test {
     }
 
     function _op(uint256 amount, bytes32 hash) internal returns (PackedUserOperation420 memory) {
-        bytes memory callData = abi.encodeWithSelector(SmartAccount420.execute.selector, address(target), amount, abi.encodeWithSelector(CapabilityTarget420.act.selector));
+        SmartAccount420.Call[] memory calls = new SmartAccount420.Call[](1);
+        calls[0] = SmartAccount420.Call({
+            target: address(target),
+            value: amount,
+            data: abi.encodeWithSelector(CapabilityTarget420.act.selector)
+        });
+        bytes memory callData = abi.encodeWithSelector(SmartAccount420.executeSession.selector, session, calls);
         bytes32 digest = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hash));
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(SESSION_PK, digest);
         return PackedUserOperation420({

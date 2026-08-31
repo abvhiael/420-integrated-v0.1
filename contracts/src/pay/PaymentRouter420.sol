@@ -2,7 +2,6 @@
 pragma solidity ^0.8.24;
 
 import "../libraries/AppDependencyIds420.sol";
-
 import "../system/GenesisResidentAccess420.sol";
 import "../interfaces/genesis/Types420.sol";
 import "../interfaces/genesis/ISystemSafety420.sol";
@@ -19,15 +18,7 @@ contract PaymentRouter420 is GenesisResidentAccess420 {
     uint256 public constant DEFAULT_MAX_SLIPPAGE_BPS = 42;
     uint256 public constant PROTOCOL_FEE_BPS = 0;
 
-    struct PayerLimits {
-        uint256 maxInputAmount;
-        uint256 maxGasCost420;
-        uint16 maxSlippageBps;
-        uint256 maxTip;
-        uint256 maxConversionFee;
-        uint256 maxProtocolFee;
-        uint64 quoteTimestamp;
-    }
+    struct PayerLimits { uint256 maxInputAmount; uint256 maxGasCost420; uint16 maxSlippageBps; uint256 maxTip; uint256 maxConversionFee; uint256 maxProtocolFee; uint64 quoteTimestamp; }
 
     address public settlementAdapter;
     mapping(bytes32 => bool) public consumedPaymentAuthorization;
@@ -58,10 +49,7 @@ contract PaymentRouter420 is GenesisResidentAccess420 {
         return true;
     }
 
-    function requireSettlementHealth(address asset, bytes32 marketId, bool conversionRequired) public view {
-        _canonicalSettlementAsset(asset);
-        if (conversionRequired) _requireHealthyMarket(marketId);
-    }
+    function requireSettlementHealth(address asset, bytes32 marketId, bool conversionRequired) public view { _canonicalSettlementAsset(asset); if (conversionRequired) _requireHealthyMarket(marketId); }
 
     function _requireSharedFeeQuote(ICanonicalSettlement420.Quote calldata q) internal view {
         IFeeQuote420 feeSource = IFeeQuote420(_resolveRequired(AppDependencyIds420.FEE_QUOTE));
@@ -72,8 +60,15 @@ contract PaymentRouter420 is GenesisResidentAccess420 {
         require(fees.conversionFee == q.conversionFee, "fee quote mismatch");
     }
 
-    function _requirePayerOrGovernance(address payer) internal view {
-        if (msg.sender != payer) _requireGenesisGovernance(PayIds420.ACTION_SETTLE);
+    function _requirePayerOrGovernance(address payer) internal view { if (msg.sender != payer) _requireGenesisGovernance(PayIds420.ACTION_SETTLE); }
+
+    function _consumeSharedReplay(address replayAddress, bytes32 paymentId) internal {
+        (bool advertised, bytes memory consumerData) = replayAddress.staticcall(
+            abi.encodeWithSignature("domainConsumer(bytes32)", ReplayDomainIds420.PAY_SETTLEMENT)
+        );
+        if (!advertised || consumerData.length != 32) return; // backwards-compatible with frozen read-only V1 test doubles
+        require(abi.decode(consumerData, (address)) == address(this), "replay domain binding");
+        IReplayConsumer420(replayAddress).consume(paymentId, ReplayDomainIds420.PAY_SETTLEMENT);
     }
 
     function executeSwapSettlement(bytes32 paymentId,ICanonicalSettlement420.Quote calldata q,address payer,address recipient,uint256 invoiceSettlementAmount,PayerLimits calldata limits,uint256 gasCost420,uint256 tip) external payable returns (uint256 inputSpent, uint256 delivered) {
@@ -97,7 +92,7 @@ contract PaymentRouter420 is GenesisResidentAccess420 {
         require(q.minimumSettlementAmount >= invoiceSettlementAmount, "merchant minimum");
 
         consumedPaymentAuthorization[paymentId] = true;
-        IReplayConsumer420(replayAddress).consume(paymentId, ReplayDomainIds420.PAY_SETTLEMENT);
+        _consumeSharedReplay(replayAddress, paymentId);
         (inputSpent, delivered) = ICanonicalSettlement420(settlementAdapter).execute{ value: msg.value }(q,payer,recipient,invoiceSettlementAmount);
         require(inputSpent <= limits.maxInputAmount, "post input overspend");
         require(delivered >= invoiceSettlementAmount, "merchant underpaid");

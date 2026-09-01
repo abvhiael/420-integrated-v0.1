@@ -13,6 +13,7 @@ library ServiceIds420 {
     bytes32 internal constant SEARCH = keccak256("420/service/search/v1");
     bytes32 internal constant NAMES = keccak256("420/service/names/v1");
     bytes32 internal constant IDENTITY = keccak256("420/service/identity/v1");
+    bytes32 internal constant ARBITRATION = keccak256("420/service/arbitration/v1");
     bytes32 internal constant TRUST = keccak256("420/service/trust/v1");
     bytes32 internal constant COMMONS = keccak256("420/service/commons/v1");
     bytes32 internal constant PULSE = keccak256("420/service/pulse/v1");
@@ -42,41 +43,6 @@ library ServiceIds420 {
     bytes32 internal constant STATUS = keccak256("420/service/status/v1");
 
     function isGenesisCanonical(bytes32 serviceId) internal pure returns (bool) {
-        return serviceId == PROTOCOL_REGISTRY
-            || serviceId == WALLET
-            || serviceId == SMART_ACCOUNTS
-            || serviceId == INTEROP
-            || serviceId == RANDOMNESS
-            || serviceId == EXPLORER
-            || serviceId == SEARCH
-            || serviceId == NAMES
-            || serviceId == IDENTITY
-            || serviceId == TRUST
-            || serviceId == COMMONS
-            || serviceId == PULSE
-            || serviceId == MESSENGER
-            || serviceId == VAULT
-            || serviceId == TREASURY
-            || serviceId == GRANTS
-            || serviceId == LAUNCHPAD
-            || serviceId == RESOURCE_PROTOCOL
-            || serviceId == RELAY
-            || serviceId == STORE
-            || serviceId == CACHE
-            || serviceId == GATEWAY
-            || serviceId == MARKET
-            || serviceId == RIGHTS
-            || serviceId == SWAP
-            || serviceId == PAY
-            || serviceId == ORACLE
-            || serviceId == BRIDGE
-            || serviceId == STAKE
-            || serviceId == CIVIC
-            || serviceId == GOVERNANCE
-            || serviceId == AI
-            || serviceId == COMPUTE_MARKET
-            || serviceId == ATTENTION
-            || serviceId == CANNASEUR
-            || serviceId == STATUS;
+        return serviceId == PROTOCOL_REGISTRY || serviceId == WALLET || serviceId == SMART_ACCOUNTS || serviceId == INTEROP || serviceId == RANDOMNESS || serviceId == EXPLORER || serviceId == SEARCH || serviceId == NAMES || serviceId == IDENTITY || serviceId == ARBITRATION || serviceId == TRUST || serviceId == COMMONS || serviceId == PULSE || serviceId == MESSENGER || serviceId == VAULT || serviceId == TREASURY || serviceId == GRANTS || serviceId == LAUNCHPAD || serviceId == RESOURCE_PROTOCOL || serviceId == RELAY || serviceId == STORE || serviceId == CACHE || serviceId == GATEWAY || serviceId == MARKET || serviceId == RIGHTS || serviceId == SWAP || serviceId == PAY || serviceId == ORACLE || serviceId == BRIDGE || serviceId == STAKE || serviceId == CIVIC || serviceId == GOVERNANCE || serviceId == AI || serviceId == COMPUTE_MARKET || serviceId == ATTENTION || serviceId == CANNASEUR || serviceId == STATUS;
     }
 }

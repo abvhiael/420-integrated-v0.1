@@ -1,0 +1,37 @@
+{
+  "schema": "420-arbitration-genesis-v1",
+  "name": "420Arbitration",
+  "class": "GENESIS_PROTOCOL_AND_USER_APP",
+  "serviceId": "420/service/arbitration/v1",
+  "contracts": [
+    "ArbitrationIds420.sol",
+    "ArbitrationPolicyRegistry420.sol",
+    "ArbitrationCaseRegistry420.sol",
+    "ArbitrationRulingRegistry420.sol"
+  ],
+  "purpose": "Shared dispute case, evidence, resolver, ruling, appeal and finality coordination for 420 Integrated protocols without acquiring custody or blanket remedy execution authority.",
+  "domains": ["420 Market", "420 Rights", "420 Grants", "420 ComputeMarket", "420 Pay", "420 Resource Protocol", "future registered protocols"],
+  "model": {
+    "policyIsDomainScoped": true,
+    "policySnapshotAtCaseOpen": true,
+    "evidenceIsCommitmentBased": true,
+    "resolverIsExplicitlyBound": true,
+    "appealsAreBounded": true,
+    "finalRulingIsCommitmentNotExecution": true,
+    "originProtocolExecutesRemedyUnderOwnAuthority": true
+  },
+  "invariants": [
+    "ARB-INV-001: Every case binds a claimant, respondent, arbitration domain, originating component, originating object, claim commitment and requested-remedy commitment.",
+    "ARB-INV-002: Arbitration policy is snapshotted when a case opens so later governance changes cannot retroactively replace that case's resolver, appeal path or deadlines.",
+    "ARB-INV-003: Only the case parties may commit evidence or initiate an available appeal; evidence commitments do not make private evidence payloads public or canonical.",
+    "ARB-INV-004: Only the resolver explicitly bound to the current case round may submit a ruling.",
+    "ARB-INV-005: Each case round accepts at most one ruling and appeals are bounded by the snapshotted maximum.",
+    "ARB-INV-006: A ruling records outcome, reasoning/ruling hash, remedy commitment and optional panel commitment without directly executing custody or state changes in another protocol.",
+    "ARB-INV-007: Finalization occurs only after the appeal window closes and preserves every earlier round for auditability.",
+    "ARB-INV-008: 420Arbitration cannot directly seize funds, transfer tokens, slash validators, reverse bridge transfers, rewrite rights or override governance.",
+    "ARB-INV-009: Originating protocols may consume finalized rulings only through their own explicit authorization, accounting and state-transition rules.",
+    "ARB-INV-010: Domain policies are GovernanceTimelock-controlled, default inactive unless explicitly enabled, and may not specify an unbounded appeal count.",
+    "ARB-INV-011: Arbitration records are reconstructable from chain state/events; frontends, evidence storage providers and indexers are non-canonical.",
+    "ARB-INV-012: A finalized arbitration ruling is authoritative only for the registered dispute process it represents and is not general legal authority outside the protocol." 
+  ]
+}

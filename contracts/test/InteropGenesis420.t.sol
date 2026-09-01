@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
 
+import "../src/system/SystemAccess.sol";
 import "../src/interop/InteropIds420.sol";
 import "../src/interfaces/I420IS.sol";
 import "../src/interop/InteropProviderRegistry420.sol";

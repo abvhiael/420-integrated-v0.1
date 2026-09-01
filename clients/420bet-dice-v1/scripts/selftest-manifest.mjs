@@ -14,6 +14,7 @@ const promoted = {
     dice: '0x1000000000000000000000000000000000000001',
     diceView: '0x1000000000000000000000000000000000000002',
     wagerRouter: '0x1000000000000000000000000000000000000003',
+    accessPolicy: '0x1000000000000000000000000000000000000007',
     vault: '0x1000000000000000000000000000000000000004',
     asset: '0x0000000000000000000000000000000000000000',
     betAuthorization: '0x1000000000000000000000000000000000000005',
@@ -34,12 +35,14 @@ validateDeploymentManifest(promoted);
 const config = toBrowserConfig(promoted);
 if (config.chainId !== 31337) throw new Error('chainId projection failed');
 if (config.contracts.dice !== promoted.contracts.dice) throw new Error('contract projection failed');
+if (config.contracts.accessPolicy !== promoted.contracts.accessPolicy) throw new Error('access policy projection failed');
 if (config.ids.gameVersionId !== promoted.ids.gameVersionId) throw new Error('ID projection failed');
 
 for (const mutation of [
   (m) => { m.status = 'UNPROMOTED'; },
   (m) => { m.chain.rpcUrl = 'REPLACE_WITH_LIVE_RPC'; },
   (m) => { m.contracts.dice = '0x0000000000000000000000000000000000000000'; },
+  (m) => { m.contracts.accessPolicy = '0x0000000000000000000000000000000000000000'; },
   (m) => { m.ids.gameId = `0x${'00'.repeat(32)}`; },
 ]) {
   const candidate = structuredClone(promoted);

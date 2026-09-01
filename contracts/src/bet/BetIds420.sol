@@ -10,6 +10,8 @@ library BetIds420 {
     bytes32 internal constant ACTION_GAME_ADD_STAKE = keccak256("BET_GAME_ADD_STAKE");
     bytes32 internal constant ACTION_ACCEPT_CASHOUT = keccak256("BET_ACCEPT_CASHOUT");
     bytes32 internal constant ACTION_CLAIM_REWARD = keccak256("BET_CLAIM_REWARD");
+    bytes32 internal constant ACTION_CLAIM_PROMOTION = keccak256("BET_CLAIM_PROMOTION");
+    bytes32 internal constant ACTION_CLAIM_FEE = keccak256("BET_CLAIM_FEE");
     bytes32 internal constant ACTION_CLAIM_JACKPOT = keccak256("BET_CLAIM_JACKPOT");
 
     // Poker actions.
@@ -39,10 +41,16 @@ library BetIds420 {
     bytes32 internal constant ACTION_RG_SET_LIMIT = keccak256("BET_RG_SET_LIMIT");
     bytes32 internal constant ACTION_RG_SELF_EXCLUDE = keccak256("BET_RG_SELF_EXCLUDE");
     bytes32 internal constant ACTION_RG_COOL_OFF = keccak256("BET_RG_COOL_OFF");
-
-    // Access-policy configuration and wager-consumption accounting.
     bytes32 internal constant ACTION_ACCESS_CONFIGURE = keccak256("BET_ACCESS_CONFIGURE");
     bytes32 internal constant ACTION_ACCESS_RECORD = keccak256("BET_ACCESS_RECORD");
+
+    // Economics / fee / reward / promotion actions.
+    bytes32 internal constant ACTION_ECONOMICS_CONFIGURE = keccak256("BET_ECONOMICS_CONFIGURE");
+    bytes32 internal constant ACTION_ECONOMICS_BIND = keccak256("BET_ECONOMICS_BIND");
+    bytes32 internal constant ACTION_ECONOMICS_FINALIZE = keccak256("BET_ECONOMICS_FINALIZE");
+    bytes32 internal constant ACTION_ECONOMICS_FUND = keccak256("BET_ECONOMICS_FUND");
+    bytes32 internal constant ACTION_REWARD_ACCRUE = keccak256("BET_REWARD_ACCRUE");
+    bytes32 internal constant ACTION_PROMOTION_GRANT = keccak256("BET_PROMOTION_GRANT");
 
     // Bankroll-vault and risk-kernel actions. These are capability scoped; no super-admin exists.
     bytes32 internal constant ACTION_VAULT_REGISTER = keccak256("BET_VAULT_REGISTER");

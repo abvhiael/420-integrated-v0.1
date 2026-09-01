@@ -274,6 +274,10 @@ contract BetEconomics420 is I420System {
 
     function _pay(address to, uint256 amount) private {
         if (asset == address(0)) {
+            // Recipient and amount are fixed by previously funded accounting state before
+            // this helper is reached; claim entry points consume that state before transfer
+            // and are nonReentrant. This is the intentional native-asset payout primitive.
+            // slither-disable-next-line arbitrary-send-eth
             (bool ok,) = payable(to).call{value: amount}("");
             if (!ok) revert TransferFailed();
         } else if (!IERC20BetEconomics420(asset).transfer(to, amount)) {

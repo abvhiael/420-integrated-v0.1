@@ -33,21 +33,54 @@ npm run local:deploy-smoke -- --keep-alive
 
 to leave the local Anvil process running for browser/manual wager testing. Generated local deployment manifests are intentionally gitignored.
 
-## 2. Deploy and configure a shared/testnet protocol stack
+## 2. Stage a shared/testnet protocol deployment
 
-For a shared testnet deployment, deploy the already-qualified 420Bet stack using the target environment's production deployment process. The deployment must include the configured `BetAuthorization420`, `WagerRouter420`, bankroll vault, `RandomnessRouter420`, `DiceV1420`, `SettlementEngine420`, and `DiceV1View420`, with the Dice game/module/operator/profile registrations and capabilities required by the vertical slice.
+Shared networks use the real target-chain Capability Registry and a real ERC-20 stake asset. No local capability or token mocks are deployed.
 
-Do not copy addresses from a unit-test or local deployment. Record the addresses emitted by the actual target-chain deployment.
+Set:
 
-## 3. Create a promoted shared/testnet deployment manifest
+- `DICE_RPC_URL`
+- `DICE_CHAIN_ID`
+- `DICE_DEPLOYER_PRIVATE_KEY`
+- `DICE_CAPABILITY_REGISTRY`
+- `DICE_STAKE_ASSET`
+- `DICE_RANDOMNESS_PROVIDER`
+- optional `DICE_TARGET_NAME`, risk-limit overrides, seed-liquidity override and withdrawal-cooldown override
 
-Copy:
+Then run from `clients/420bet-dice-v1`:
 
-`testnet/apps/420bet/dice-v1.deployment.example.json`
+```bash
+npm run shared:deploy -- ../../testnet/apps/420bet/dice-v1.testnet.json
+```
 
-to an environment-specific file such as `testnet/apps/420bet/dice-v1.testnet.json`.
+The deploy stage verifies the target chain ID and bytecode at the shared Capability Registry and stake asset, builds the qualified contracts, deploys the real DiceV1 stack, derives canonical 420Bet scopes from the deployed authorization adapter and writes a manifest with status `DEPLOYED_AWAITING_CAPABILITIES`.
 
-Populate the target RPC URL, contract addresses, Dice game/version/operator IDs, deployment commit, deployer, and deployment timestamp. Set `status` to `PROMOTED` only after those values have been checked against the target chain.
+It deliberately does **not** register, approve, activate, configure or seed the protocol. Instead the manifest includes the exact `requiredCapabilities` matrix for the deployer and newly deployed protocol contracts. Those grants must be issued through the shared Capability Registry by the target environment's normal authority process. This preserves default-deny and prevents a deployment script from acquiring an implicit super-admin path.
+
+## 3. Verify capabilities and promote
+
+After the required static capabilities are granted on-chain, rerun with the same deployer key and manifest:
+
+```bash
+npm run shared:promote -- ../../testnet/apps/420bet/dice-v1.testnet.json
+```
+
+Promotion fails closed unless every required capability is currently authorized for the exact component, action, scope and required amount recorded by stage 1. It also rechecks bytecode at the deployed/shared addresses and verifies that the deployer key matches the staged manifest.
+
+Only after those checks pass does promotion:
+
+1. register the vault asset in canonical accounting;
+2. register randomness, risk, settlement and access profiles;
+3. register and approve the Dice module;
+4. register and activate the operator;
+5. register and activate DiceV1;
+6. configure the bounded risk profile;
+7. configure the chosen shared randomness provider;
+8. seed the bankroll from the deployer's real stake-asset balance;
+9. mark the manifest `PROMOTED`;
+10. run the live RPC smoke and generate browser runtime config.
+
+Runtime/player capabilities such as scoped `BET_PLACE` and per-wager settlement authority remain separate from this static deployment grant set.
 
 The public 420 testnet metadata currently contains placeholder RPC URLs and a candidate chain ID. Do not promote a public-testnet Dice manifest until those network values themselves are frozen.
 

@@ -49,7 +49,7 @@ const RULESET = id('ruleset/dice/v1');
 const ACTION = Object.fromEntries([
   'VAULT_REGISTER','VAULT_RECORD_DEPOSIT','VAULT_SETTLE_WAGER','VAULT_RESERVE_LIABILITY','VAULT_RELEASE_LIABILITY',
   'PROFILE_REGISTER','MODULE_REGISTER','MODULE_APPROVE','OPERATOR_REGISTER','OPERATOR_ACTIVATE','GAME_REGISTER','GAME_ACTIVATE',
-  'RISK_CONFIGURE','RANDOMNESS_CONFIGURE','LP_DEPOSIT','VAULT_ESCROW_STAKE','RISK_RESERVE','WAGER_RECORD','RISK_RELEASE',
+  'ACCESS_CONFIGURE','ACCESS_RECORD','RISK_CONFIGURE','RANDOMNESS_CONFIGURE','LP_DEPOSIT','VAULT_ESCROW_STAKE','RISK_RESERVE','WAGER_RECORD','RISK_RELEASE',
   'WAGER_SETTLE_RECORD','PLACE','RANDOMNESS_REQUEST','RANDOMNESS_FULFILL','SETTLE'
 ].map((name) => [name, id(`BET_${name}`)]));
 
@@ -111,6 +111,7 @@ try {
   const auth = await deploy('BetAuthorization420', 'BetAuthorization420', [caps.address]);
   const modules = await deploy('BetModuleRegistry420', 'BetModuleRegistry420', [auth.address]);
   const profiles = await deploy('BetProfileRegistry420', 'BetProfileRegistry420', [auth.address]);
+  const access = await deploy('BetAccessPolicy420', 'BetAccessPolicy420', [auth.address, profiles.address]);
   const operators = await deploy('BetOperatorRegistry420', 'BetOperatorRegistry420', [auth.address]);
   const games = await deploy('BetGameRegistry420', 'BetGameRegistry420', [auth.address, modules.address, profiles.address]);
   const accounting = await deploy('VaultAccounting420', 'VaultAccounting420', [auth.address]);
@@ -121,7 +122,7 @@ try {
   const registry = await deploy('BetRegistry420', 'BetRegistry420', [auth.address]);
   const wagerRouter = await deploy('WagerRouter420', 'WagerRouter420', [
     auth.address, games.address, modules.address, operators.address, profiles.address,
-    risk.address, registry.address, vault.address,
+    access.address, risk.address, registry.address, vault.address,
   ]);
   const randomness = await deploy('RandomnessRouter420', 'RandomnessRouter420', [auth.address, profiles.address, registry.address]);
   const dice = await deploy('DiceV1420', 'DiceV1420', [registry.address, randomness.address, GAME, GAME_V1, RULESET]);
@@ -155,6 +156,9 @@ try {
     await allow(deployer.address, ACTION.PROFILE_REGISTER, scope);
     await write(profiles, 'registerProfile', [profileId, profileType, id(`manifest:${profileId}`), id(`artifact:${profileId}`)]);
   }
+
+  await allow(deployer.address, ACTION.ACCESS_CONFIGURE, scopeAccess);
+  await write(access, 'configurePolicy', [ACCESS, token.address, zeroAddress, [], 0n, 0n, 0n, id('access-policy')]);
 
   await allow(deployer.address, ACTION.MODULE_REGISTER, scopeModule);
   await allow(deployer.address, ACTION.MODULE_APPROVE, scopeModule);
@@ -217,6 +221,7 @@ try {
   await write(token, 'approve', [vault.address, parseEther('1000')]);
   await write(vault, 'depositToken', [parseEther('1000')]);
 
+  await allow(wagerRouter.address, ACTION.ACCESS_RECORD, scopeAccess);
   await allow(wagerRouter.address, ACTION.VAULT_ESCROW_STAKE, scopeVault);
   await allow(wagerRouter.address, ACTION.RISK_RESERVE, scopeVault);
   await allow(wagerRouter.address, ACTION.WAGER_RECORD, scopeVault);
@@ -242,6 +247,7 @@ try {
       dice: dice.address,
       diceView: diceView.address,
       wagerRouter: wagerRouter.address,
+      accessPolicy: access.address,
       vault: vault.address,
       asset: token.address,
       betAuthorization: auth.address,

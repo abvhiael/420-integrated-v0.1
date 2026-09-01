@@ -33,6 +33,8 @@ contract SettlementEngine420 is I420System {
     error SettlementConflict();
     error Reentrancy();
     error EmergencyAlreadyBound();
+    error WagerExpired();
+    error WagerNotExpired();
     error EmergencyHalted(BetTypes420.EmergencyDomain domain, bytes32 subject);
 
     event SettlementCompleted(
@@ -41,6 +43,7 @@ contract SettlementEngine420 is I420System {
         uint256 grossPayout,
         uint256 releasedLiability
     );
+    event ExpiredWagerVoided(bytes32 indexed wagerId, address indexed caller);
     event EmergencyStateBound(address indexed emergencyState);
 
     constructor(address authorization_, address registry_, address riskManager_, address vault_, address economics_) {
@@ -83,6 +86,31 @@ contract SettlementEngine420 is I420System {
         returns (BetTypes420.Settlement memory settlement)
     {
         BetTypes420.Wager memory wager = registry.getWager(wagerId);
+        settlement = _settle(wager, outcome, grossPayout, true);
+    }
+
+    /// @notice Permissionless terminal rescue after the wager deadline.
+    /// @dev The caller cannot choose an economic result: expiry deterministically means VOID
+    ///      with an exact stake refund. All custody, liability, registry, and fee transitions
+    ///      remain atomic in this engine transaction.
+    function voidExpired(bytes32 wagerId)
+        external
+        nonReentrant
+        returns (BetTypes420.Settlement memory settlement)
+    {
+        BetTypes420.Wager memory wager = registry.getWager(wagerId);
+        if (block.timestamp < wager.deadline) revert WagerNotExpired();
+        settlement = _settle(wager, BetTypes420.TerminalOutcome.VOID, wager.stake, false);
+        emit ExpiredWagerVoided(wagerId, msg.sender);
+    }
+
+    function _settle(
+        BetTypes420.Wager memory wager,
+        BetTypes420.TerminalOutcome outcome,
+        uint256 grossPayout,
+        bool requireSettlerAuthorization
+    ) private returns (BetTypes420.Settlement memory settlement) {
+        bytes32 wagerId = wager.wagerId;
         if (wager.vaultId != vaultId) revert WrongVault();
         if (wager.asset != asset) revert WrongAsset();
 
@@ -96,14 +124,16 @@ contract SettlementEngine420 is I420System {
             revert InvalidStatus();
         }
         _validateTerminalEconomics(wager, outcome, grossPayout);
+        if (block.timestamp >= wager.deadline && outcome != BetTypes420.TerminalOutcome.VOID) revert WagerExpired();
         _requireSettlementOpenOrRefund(wager, outcome);
         if (
-            !authorization.isAuthorized(
-                msg.sender,
-                BetIds420.ACTION_SETTLE,
-                authorization.scopeForWager(wagerId),
-                grossPayout
-            )
+            requireSettlerAuthorization
+                && !authorization.isAuthorized(
+                    msg.sender,
+                    BetIds420.ACTION_SETTLE,
+                    authorization.scopeForWager(wagerId),
+                    grossPayout
+                )
         ) revert Unauthorized();
 
         uint256 releasedLiability = riskManager.releaseExposure(wagerId);

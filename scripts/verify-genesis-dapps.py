@@ -26,6 +26,8 @@ files=[
  "contracts/src/swap/TWAPOracle.sol",
  "contracts/src/swap/PublicBatchAuction.sol",
  "contracts/src/testnet/TestnetFaucet420.sol",
+ "contracts/config/420explorer-genesis.json",
+ "docs/420EXPLORER.md",
 ]
 for f in files:
     if not (root/f).exists(): errors.append("missing "+f)
@@ -33,6 +35,21 @@ for f in files:
 # Wallet/explorer/status must remain contract-free in map.
 for n in ["420 Wallet","420 Explorer","420 Status"]:
     if mapped[n].get("contracts"): errors.append(n+" should not have required protocol state contract")
+
+explorer_path=root/"contracts/config/420explorer-genesis.json"
+if explorer_path.exists():
+    explorer=json.loads(explorer_path.read_text())
+    if explorer.get("contractsRequired") is not False: errors.append("explorer must remain contract-free")
+    if explorer.get("canonicalStateAuthority") is not False: errors.append("explorer must remain non-canonical")
+    indexing=explorer.get("indexing",{})
+    if not indexing.get("tracksHeadSafeFinalizedSeparately"): errors.append("explorer finality distinction missing")
+    if not indexing.get("rebuildableFromChain"): errors.append("explorer rebuildability invariant missing")
+    if not indexing.get("databaseIsNonCanonical"): errors.append("explorer database authority invariant missing")
+    sources=explorer.get("sources",{})
+    if sources.get("protocolDiscovery")!="420Registry / ProtocolRegistry": errors.append("explorer registry discovery binding missing")
+    inv="\n".join(explorer.get("invariants",[]))
+    for required in ["EXP-INV-001", "EXP-INV-004", "EXP-INV-005", "EXP-INV-008", "EXP-INV-009"]:
+        if required not in inv: errors.append("missing explorer invariant "+required)
 
 stake=(root/"contracts/src/apps/Stake420.sol").read_text()
 if "delegationEnabled() external pure returns (bool) { return false; }" not in stake:
@@ -50,7 +67,7 @@ reg=(root/"contracts/src/apps/ProtocolRegistry.sol").read_text()
 if "codeHash" not in reg or "metadataHash" not in reg or "version" not in reg:
     errors.append("protocol registry canonical metadata fields missing")
 
-out={"pass":not errors,"errors":errors,"genesis_apps":12,"testnet_only_apps":1}
+out={"pass":not errors,"errors":errors,"genesis_apps":12,"testnet_only_apps":1,"explorer_profile":"420-explorer-genesis-v1"}
 (root/"contracts/config/genesis-dapp-verification.json").write_text(json.dumps(out,indent=2)+"\n")
 print(json.dumps(out,indent=2))
 sys.exit(0 if not errors else 2)

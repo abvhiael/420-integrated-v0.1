@@ -38,6 +38,9 @@ contract BetAuthorization420 is I420System {
     function scopeForWager(bytes32 wagerId) public pure returns (bytes32) {
         return keccak256(abi.encode("420.BET.SCOPE.WAGER", wagerId));
     }
+    function scopeForPlayer(address player) public pure returns (bytes32) {
+        return keccak256(abi.encode("420.BET.SCOPE.PLAYER", player));
+    }
     function scopeForMarket(bytes32 marketId) public pure returns (bytes32) {
         return keccak256(abi.encode("420.BET.SCOPE.MARKET", marketId));
     }

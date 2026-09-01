@@ -4,6 +4,7 @@ pragma solidity ^0.8.24;
 import "../interfaces/I420System.sol";
 import "./BankrollVault420.sol";
 import "./BetAuthorization420.sol";
+import "./BetEmergencyState420.sol";
 import "./BetIds420.sol";
 import "./BetRegistry420.sol";
 import "./BetTypes420.sol";
@@ -16,6 +17,7 @@ contract SettlementEngine420 is I420System {
     BankrollVault420 public immutable vault;
     bytes32 public immutable vaultId;
     address public immutable asset;
+    BetEmergencyState420 public emergencyState;
 
     uint256 private _entered;
 
@@ -28,6 +30,8 @@ contract SettlementEngine420 is I420System {
     error InvalidPayout();
     error SettlementConflict();
     error Reentrancy();
+    error EmergencyAlreadyBound();
+    error EmergencyHalted(BetTypes420.EmergencyDomain domain, bytes32 subject);
 
     event SettlementCompleted(
         bytes32 indexed wagerId,
@@ -35,6 +39,7 @@ contract SettlementEngine420 is I420System {
         uint256 grossPayout,
         uint256 releasedLiability
     );
+    event EmergencyStateBound(address indexed emergencyState);
 
     constructor(address authorization_, address registry_, address riskManager_, address vault_) {
         if (authorization_ == address(0) || registry_ == address(0) || riskManager_ == address(0) || vault_ == address(0)) {
@@ -58,6 +63,16 @@ contract SettlementEngine420 is I420System {
     function systemName() external pure returns (string memory) { return "SettlementEngine420"; }
     function protocolVersion() external pure returns (uint32) { return 1; }
 
+    function bindEmergencyState(address emergencyState_) external {
+        if (emergencyState_ == address(0)) revert ZeroAddress();
+        if (address(emergencyState) != address(0)) revert EmergencyAlreadyBound();
+        if (!authorization.isAuthorized(msg.sender, BetIds420.ACTION_EMERGENCY_SET, authorization.scopeGlobal(), 0)) {
+            revert Unauthorized();
+        }
+        emergencyState = BetEmergencyState420(emergencyState_);
+        emit EmergencyStateBound(emergencyState_);
+    }
+
     function settle(bytes32 wagerId, BetTypes420.TerminalOutcome outcome, uint256 grossPayout)
         external
         nonReentrant
@@ -77,6 +92,7 @@ contract SettlementEngine420 is I420System {
             revert InvalidStatus();
         }
         _validateTerminalEconomics(wager, outcome, grossPayout);
+        _requireSettlementOpenOrRefund(wager, outcome);
         if (
             !authorization.isAuthorized(
                 msg.sender,
@@ -92,6 +108,21 @@ contract SettlementEngine420 is I420System {
         settlement = registry.getSettlement(wagerId);
 
         emit SettlementCompleted(wagerId, outcome, grossPayout, releasedLiability);
+    }
+
+    function _requireSettlementOpenOrRefund(
+        BetTypes420.Wager memory wager,
+        BetTypes420.TerminalOutcome outcome
+    ) private view {
+        BetEmergencyState420 e = emergencyState;
+        if (address(e) == address(0)) return;
+        if (!e.isHalted(BetTypes420.EmergencyDomain.SETTLEMENT_HOLD, wager.settlementProfileId)) return;
+
+        // A settlement hold may stop disputed WIN/LOSS/PUSH finalization, but it may never
+        // block the canonical VOID path that releases liability and returns the player's stake.
+        if (outcome != BetTypes420.TerminalOutcome.VOID) {
+            revert EmergencyHalted(BetTypes420.EmergencyDomain.SETTLEMENT_HOLD, wager.settlementProfileId);
+        }
     }
 
     function _validateTerminalEconomics(

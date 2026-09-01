@@ -2,6 +2,7 @@
 pragma solidity ^0.8.24;
 
 import "../src/apps/ProtocolRegistry.sol";
+import "../src/system/SystemAccess.sol";
 
 interface VmRegistry420 {
     function prank(address) external;
@@ -75,7 +76,7 @@ contract RegistryGenesis420Test {
     function testRegistryIsGovernanceBound() public {
         ProtocolRegistry registry = new ProtocolRegistry(address(this));
         RegistryImplementation420 implementation = new RegistryImplementation420();
-        vm.expectRevert(ProtocolRegistry.Unauthorized.selector);
+        vm.expectRevert(SystemAccess.Unauthorized.selector);
         vm.prank(OUTSIDER);
         registry.publishRegisteredService(
             keccak256("420/service/pay/v1"),

@@ -3,6 +3,7 @@ pragma solidity ^0.8.24;
 
 import "../interfaces/I420System.sol";
 import "./BetAuthorization420.sol";
+import "./BetEmergencyState420.sol";
 import "./BetIds420.sol";
 import "./BetProfileRegistry420.sol";
 import "./BetRegistry420.sol";
@@ -45,16 +46,20 @@ contract RandomnessRouter420 is I420System {
     BetAuthorization420 public immutable authorization;
     BetProfileRegistry420 public immutable profileRegistry;
     BetRegistry420 public immutable wagerRegistry;
+    BetEmergencyState420 public emergencyState;
     mapping(bytes32 => RandomnessProfile) private _profiles;
     mapping(bytes32 => RandomnessRequest) private _requests;
 
     error ZeroAddress(); error InvalidId(); error InvalidConfiguration(); error AlreadyExists(); error NotFound();
     error Unauthorized(); error ProfileInactive(); error WagerNotEligible(); error AlreadyRequested(); error NotRequested();
     error AlreadyFulfilled(); error WrongProvider(); error FallbackNotReady(); error PrimaryExpired(); error InvalidEntropy();
+    error EmergencyAlreadyBound();
+    error EmergencyHalted(BetTypes420.EmergencyDomain domain, bytes32 subject);
 
     event RandomnessProfileConfigured(bytes32 indexed profileId, Method method, address indexed primaryProvider, address indexed fallbackProvider, uint64 fallbackDelay, bytes32 securityLevelHash, bytes32 domainSeparator, bytes32 manifestHash);
     event RandomnessRequested(bytes32 indexed wagerId, bytes32 indexed profileId, bytes32 indexed gameVersionId, bytes32 contextHash, uint64 requestedAt, uint64 fallbackAt);
     event RandomnessFulfilled(bytes32 indexed wagerId, bytes32 indexed profileId, Source source, bytes32 root, bytes32 proofHash, bytes32 entropyHash);
+    event EmergencyStateBound(address indexed emergencyState);
 
     constructor(address authorization_, address profileRegistry_, address wagerRegistry_) {
         if (authorization_ == address(0) || profileRegistry_ == address(0) || wagerRegistry_ == address(0)) revert ZeroAddress();
@@ -62,6 +67,14 @@ contract RandomnessRouter420 is I420System {
     }
     function systemName() external pure returns (string memory) { return "RandomnessRouter420"; }
     function protocolVersion() external pure returns (uint32) { return 1; }
+
+    function bindEmergencyState(address emergencyState_) external {
+        if (emergencyState_ == address(0)) revert ZeroAddress();
+        if (address(emergencyState) != address(0)) revert EmergencyAlreadyBound();
+        if (!authorization.isAuthorized(msg.sender, BetIds420.ACTION_EMERGENCY_SET, authorization.scopeGlobal(), 0)) revert Unauthorized();
+        emergencyState = BetEmergencyState420(emergencyState_);
+        emit EmergencyStateBound(emergencyState_);
+    }
 
     function configureProfile(RandomnessProfile calldata input) external {
         if (input.profileId == bytes32(0)) revert InvalidId();
@@ -81,6 +94,10 @@ contract RandomnessRouter420 is I420System {
         if (wager.status != BetTypes420.WagerStatus.ACCEPTED) revert WagerNotEligible();
         RandomnessProfile storage profile = _getProfile(wager.randomnessProfileId);
         if (!profileRegistry.isActiveOfType(profile.profileId, RANDOMNESS_PROFILE_TYPE)) revert ProfileInactive();
+        BetEmergencyState420 e = emergencyState;
+        if (address(e) != address(0) && e.isHalted(BetTypes420.EmergencyDomain.RANDOMNESS_PROFILE, profile.profileId)) {
+            revert EmergencyHalted(BetTypes420.EmergencyDomain.RANDOMNESS_PROFILE, profile.profileId);
+        }
         if (!authorization.isAuthorized(msg.sender, BetIds420.ACTION_RANDOMNESS_REQUEST, authorization.scopeForWager(wagerId), 0)) revert Unauthorized();
         uint64 requestedAt = uint64(block.timestamp); fallbackAt = requestedAt + profile.fallbackDelay;
         _requests[wagerId] = RandomnessRequest(wagerId, profile.profileId, wager.gameVersionId, wager.paramsHash, contextHash, requestedAt, fallbackAt, bytes32(0), bytes32(0), bytes32(0), Source.NONE, false);
@@ -108,6 +125,8 @@ contract RandomnessRouter420 is I420System {
         if (msg.sender != _expectedProvider(profile, request.fallbackAt, source)) revert WrongProvider();
         if (!authorization.isAuthorized(msg.sender, BetIds420.ACTION_RANDOMNESS_FULFILL, authorization.scopeForWager(wagerId), 0)) revert Unauthorized();
 
+        // Fulfilment deliberately remains available while RANDOMNESS_PROFILE is halted.
+        // A halt stops new requests; it must not strand a request that was already committed.
         root = _deriveRoot(wagerId, request, profile, source, entropy, proofHash);
         request.root = root;
         request.proofHash = proofHash;

@@ -18,10 +18,29 @@ interface VmAttention420 {
 
 contract MockAttentionCapabilities420 is ICapabilityRegistry420 {
     mapping(bytes32 => bool) private _allowed;
-    function set(address principal, bytes32 componentId, bytes32 capabilityId, bytes32 scopeHash, uint256 amount, bool value) external {
+
+    function set(
+        address principal,
+        bytes32 componentId,
+        bytes32 capabilityId,
+        bytes32 scopeHash,
+        uint256 amount,
+        bool value
+    ) external {
         _allowed[keccak256(abi.encode(principal, componentId, capabilityId, scopeHash, amount))] = value;
     }
-    function isAuthorized(address principal, bytes32 componentId, bytes32 capabilityId, bytes32 scopeHash, uint256 amount) external view override returns (bool) {
+
+    function grant(bytes32) external pure override returns (CapabilityGrant memory capabilityGrant) {
+        return capabilityGrant;
+    }
+
+    function isAuthorized(
+        address principal,
+        bytes32 componentId,
+        bytes32 capabilityId,
+        bytes32 scopeHash,
+        uint256 amount
+    ) external view override returns (bool) {
         return _allowed[keccak256(abi.encode(principal, componentId, capabilityId, scopeHash, amount))];
     }
 }
@@ -56,14 +75,32 @@ contract AttentionGenesis420Test {
 
     function _campaign() internal returns (bytes32 id) {
         vm.prank(SPONSOR);
-        id = campaigns.createCampaign(keccak256("meta"), keccak256("audience"), VERIFIER, 10 ether, 1 ether, 3 ether, 1, type(uint64).max);
+        id = campaigns.createCampaign(
+            keccak256("meta"),
+            keccak256("audience"),
+            VERIFIER,
+            10 ether,
+            1 ether,
+            3 ether,
+            1,
+            type(uint64).max
+        );
         vm.prank(SPONSOR);
         treasury.fundCampaign{value: 10 ether}(id);
     }
 
     function testCampaignCannotActivateBeforeFunding() public {
         vm.prank(SPONSOR);
-        bytes32 id = campaigns.createCampaign(keccak256("meta2"), keccak256("audience"), VERIFIER, 10 ether, 1 ether, 3 ether, 1, type(uint64).max);
+        bytes32 id = campaigns.createCampaign(
+            keccak256("meta2"),
+            keccak256("audience"),
+            VERIFIER,
+            10 ether,
+            1 ether,
+            3 ether,
+            1,
+            type(uint64).max
+        );
         vm.expectRevert(CannaseurCampaignRegistry.InsufficientFunding.selector);
         vm.prank(SPONSOR);
         campaigns.activate(id);

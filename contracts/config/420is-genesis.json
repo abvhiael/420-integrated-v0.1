@@ -1,0 +1,21 @@
+{
+  "schema":"420-is-genesis-v1",
+  "name":"420-IS",
+  "standardVersion":1,
+  "purpose":"Shared provider-neutral interoperability standard for 420 Integrated applications and external adapters.",
+  "domains":["IDENTITY","ENTITLEMENT","CAPABILITY","PAYMENT","ENCRYPTION","SESSION","CHECKPOINT","PRIVACY_PROOF","APP_STATE"],
+  "invariants":[
+    "420IS-INV-001: External identifiers map to native canonical IDs; imports never silently replace canonical identity.",
+    "420IS-INV-002: A provider adapter must be governance-registered, version-compatible and active before it can publish canonical interoperability state.",
+    "420IS-INV-003: Provider revisions preserve provider identity and adapter type; replacement cannot silently change the provider semantic domain.",
+    "420IS-INV-004: External-ID mappings are append-only revisions; an active mapping cannot be overwritten in place.",
+    "420IS-INV-005: Supersession preserves the canonical native ID and leaves the prior mapping readable.",
+    "420IS-INV-006: Revoked or inactive providers fail closed for new mappings and checkpoints.",
+    "420IS-INV-007: Checkpoints are strictly sequenced and hash-chain to the previous checkpoint after genesis.",
+    "420IS-INV-008: 420-IS interfaces do not grant custody, token transfer, governance, bridge, validator or unrestricted smart-account authority.",
+    "420IS-INV-009: Payment interoperability references canonical payment state; it does not create a parallel settlement truth.",
+    "420IS-INV-010: Encryption interoperability exposes public endpoint/key-package commitments only; private keys, plaintext and decryption secrets are non-canonical.",
+    "420IS-INV-011: Privacy-proof interoperability exposes verification results/commitments rather than requiring private witness data on-chain.",
+    "420IS-INV-012: Application adapters and external representations cannot manufacture competing ownership, rights, provenance or custody truths."
+  ]
+}

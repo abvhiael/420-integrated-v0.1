@@ -13,7 +13,8 @@
     "smoke:rpc": "node scripts/smoke-rpc.mjs",
     "local:deploy-smoke": "node scripts/local-deploy-smoke.mjs",
     "shared:deploy": "node scripts/shared-deploy.mjs deploy",
-    "shared:promote": "node scripts/shared-deploy.mjs promote"
+    "shared:promote": "node scripts/shared-deploy.mjs promote",
+    "shared:install-emergency": "node scripts/install-emergency.mjs"
   },
   "dependencies": {
     "viem": "2.56.0"

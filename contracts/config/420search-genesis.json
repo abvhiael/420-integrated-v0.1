@@ -1,0 +1,73 @@
+{
+  "schema": "420-search-genesis-v1",
+  "name": "420Search",
+  "class": "GENESIS_USER_APP",
+  "contractsRequired": false,
+  "canonicalStateAuthority": false,
+  "serviceId": "420/service/search/v1",
+  "purpose": "Unified discovery across public 420 Integrated chain state, registered protocol services, application-owned records and explicitly indexable ecosystem content.",
+  "canonicalSources": {
+    "chain": ["blocks", "transactions", "receipts", "logs", "runtime bytecode"],
+    "registry": "420Registry / ProtocolRegistry",
+    "names": "420 Names",
+    "identity": "420 Identity public records only",
+    "trust": "420 Trust public signals/policies only",
+    "commons": "420 Commons public/indexable spaces and metadata only",
+    "pulse": "420 Pulse public/indexable publications and topics only",
+    "market": "420 Market canonical listings/order references",
+    "rights": "420 Rights canonical public rights/license records",
+    "explorer": "420Explorer-compatible chain index projections",
+    "otherProtocols": "protocol-owned public events and reads discovered through 420Registry"
+  },
+  "indexing": {
+    "databaseIsNonCanonical": true,
+    "rebuildableFromCanonicalSources": true,
+    "recordsCarrySourceAuthority": true,
+    "recordsCarryChainIdAndBlockReferenceWhenOnchain": true,
+    "tracksIndexedAndFinalizedHeights": true,
+    "reorgRepairOnlyForNonFinalizedData": true,
+    "deterministicPagination": true,
+    "stableResultIds": true
+  },
+  "ranking": {
+    "rankingIsNonCanonical": true,
+    "defaultRankingMustBeDocumented": true,
+    "sponsoredResultsMustBeExplicitlyLabeled": true,
+    "sponsorshipCannotChangeCanonicalRecordFields": true,
+    "clientsMayUseAlternativeRankers": true
+  },
+  "privacy": {
+    "privateMessengerContentIndexed": false,
+    "privateCommonsContentIndexed": false,
+    "rawAttentionTelemetryIndexed": false,
+    "encryptedResourcePayloadsIndexed": false,
+    "privateIdentityDataIndexed": false,
+    "commitmentVisibilityDoesNotAuthorizePayloadRecovery": true
+  },
+  "requiredSearchDomains": [
+    "block/transaction/address/contract",
+    "registered service/application/version",
+    "420 name",
+    "public identity/profile",
+    "token/asset",
+    "validator",
+    "public market listing",
+    "public rights/license record",
+    "public Commons space",
+    "public Pulse publication/topic"
+  ],
+  "invariants": [
+    "SRCH-INV-001: 420Search owns no canonical protocol state and requires no Search-specific Genesis contract.",
+    "SRCH-INV-002: Every result identifies or preserves the authority of its underlying source; a search index cannot overwrite canonical chain or protocol state.",
+    "SRCH-INV-003: Search ranking, relevance scores, snippets, labels, categories and recommendations are non-canonical presentation metadata.",
+    "SRCH-INV-004: Sponsored placement is explicitly labeled and cannot alter canonical ownership, identity, rights, listing, payment, trust or protocol fields.",
+    "SRCH-INV-005: On-chain results remain traceable to chain ID and canonical block/transaction/log references; finalized history is not silently rewritten.",
+    "SRCH-INV-006: The complete public search index can be rebuilt from supported canonical sources without trusting a hosted Search database.",
+    "SRCH-INV-007: Private or encrypted Messenger, Commons and Resource Protocol payloads, private Identity data and raw Attention telemetry are excluded from the index.",
+    "SRCH-INV-008: A visible hash, commitment or ciphertext reference does not grant Search operators permission to retrieve, decrypt or infer protected payloads.",
+    "SRCH-INV-009: Search operators gain no custody, smart-account execution, governance, validator, bridge or token-transfer authority.",
+    "SRCH-INV-010: Search unavailability cannot block direct wallet, Explorer, RPC, contract or protocol interaction.",
+    "SRCH-INV-011: Public Search APIs expose index freshness, chain/network identity and source provenance so clients can detect stale or wrong-network results.",
+    "SRCH-INV-012: Pagination and result identifiers are stable for a fixed index snapshot, enabling reproducible clients and auditable result retrieval."
+  ]
+}

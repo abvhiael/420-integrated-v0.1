@@ -7,6 +7,7 @@
     {"dapp":"420 Random","contracts":["RandomnessRegistry.sol","RandomnessIds420.sol","RandomnessRouteRegistry420.sol","RandomnessProfileRegistry420.sol","RandomnessRouter420.sol","RandomnessDraw420.sol","IRandomnessRouter420.sol","IRandomnessVerifier420.sol"],"note":"shared Genesis randomness protocol"},
     {"dapp":"420 Explorer","contracts":[],"note":"indexer/UI; reads chain and protocol registries"},
     {"dapp":"420 Search","contracts":[],"note":"contract-free discovery/indexing layer over canonical chain and protocol-owned state"},
+    {"dapp":"420 Analytics","contracts":[],"note":"contract-free analytics/BI layer over canonical public chain and protocol-owned state; derived metrics, dashboards and forecasts are replaceable and non-authoritative"},
     {"dapp":"420 Registry","contracts":["ProtocolRegistry.sol"]},
     {"dapp":"420 Names","contracts":["Names420.sol"]},
     {"dapp":"420 Identity","contracts":["Identity420.sol"]},

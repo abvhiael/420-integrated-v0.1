@@ -1,11 +1,12 @@
 {
-  "schema": "420-genesis-application-decision-v3",
+  "schema": "420-genesis-application-decision-v4",
   "decision_id": "GENESIS_APPLICATION_DECISION_1",
   "status": "FROZEN",
   "apps": [
     {"name":"420 Wallet","class":"GENESIS_USER_APP","contracts_required":false,"purpose":"Native wallet, accounts, assets, validator controls, dApp access, notifications"},
     {"name":"420 Explorer","class":"GENESIS_USER_APP","contracts_required":false,"purpose":"Blocks, transactions, contracts, validators, assets, governance, finality"},
     {"name":"420 Search","class":"GENESIS_USER_APP","contracts_required":false,"purpose":"Unified discovery across canonical chain state, registered services, public ecosystem content and protocol-owned records"},
+    {"name":"420 Analytics","class":"GENESIS_USER_APP","contracts_required":false,"purpose":"Rebuildable analytics, metrics, trends and dashboards derived from canonical public chain and protocol state"},
     {"name":"420 Registry","class":"GENESIS_PROTOCOL_AND_USER_APP","contracts_required":true,"purpose":"Canonical registry of contracts, tokens, applications and protocol services"},
     {"name":"420 Names","class":"GENESIS_PROTOCOL_AND_USER_APP","contracts_required":true,"purpose":"Human-readable names such as crowley.420 layered over canonical identities"},
     {"name":"420 Identity","class":"GENESIS_PROTOCOL_AND_USER_APP","contracts_required":true,"purpose":"Optional decentralized identity, profiles, credentials and reputation"},
@@ -23,6 +24,7 @@
     "Front ends are not consensus-critical and may be upgraded independently.",
     "420 Registry is the canonical discovery backbone.",
     "420 Search is a replaceable discovery projection and never becomes authority for indexed records, ranking, ownership, identity, rights, listings, payments or protocol state.",
+    "420 Analytics is a replaceable derived-data projection; metrics, KPIs, charts, cohorts, rankings and forecasts never override canonical chain, accounting, identity, rights, governance or settlement state.",
     "420 Arbitration records dispute process and final rulings but cannot directly execute custody, token transfer, slashing, bridge reversal, rights mutation or governance actions.",
     "420 Names never replaces canonical protocol/service identity.",
     "420 Identity is optional and pseudonymous.",

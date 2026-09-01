@@ -1,0 +1,7 @@
+{
+  "schema":"420-testnet-analytics-readiness-v1",
+  "profile":"contracts/config/420analytics-genesis.json",
+  "requiredChecks":["index canonical chain id and block references","track indexed and finalized heights","rebuild metrics from canonical sources","repair only nonfinalized reorg data","expose metric window and methodology","preserve source provenance","detect wrong-chain endpoints","exclude protected private/encrypted data"],
+  "requiredDashboards":["network","validators/staking","assets/transfers","swap","pay","bridge","market","governance/treasury","AI/compute","resources","attention","arbitration"],
+  "authority":{"canonicalState":false,"custody":false,"governance":false,"bridge":false,"validator":false,"smartAccountExecution":false,"arbitration":false,"tokenTransfer":false}
+}

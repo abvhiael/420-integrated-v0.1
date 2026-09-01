@@ -28,7 +28,6 @@ contract CannaseurCampaignRegistry is SystemAccess, I420System {
     mapping(address => uint64) public sponsorNonce;
 
     error InvalidInput();
-    error Unauthorized();
     error InvalidState();
     error InvalidWindow();
     error TreasuryNotBound();
@@ -98,7 +97,7 @@ contract CannaseurCampaignRegistry is SystemAccess, I420System {
 
     function pause(bytes32 campaignId) external {
         Campaign storage c = _campaigns[campaignId];
-        if (c.sponsor != msg.sender && msg.sender != timelock) revert Unauthorized();
+        if (c.sponsor != msg.sender && msg.sender != governanceTimelock) revert Unauthorized();
         if (c.state != CampaignState.ACTIVE) revert InvalidState();
         c.state = CampaignState.PAUSED;
         emit CampaignPaused(campaignId);
@@ -106,9 +105,9 @@ contract CannaseurCampaignRegistry is SystemAccess, I420System {
 
     function close(bytes32 campaignId) external {
         Campaign storage c = _campaigns[campaignId];
-        if (c.sponsor != msg.sender && msg.sender != timelock) revert Unauthorized();
+        if (c.sponsor != msg.sender && msg.sender != governanceTimelock) revert Unauthorized();
         if (c.state != CampaignState.ACTIVE && c.state != CampaignState.PAUSED) revert InvalidState();
-        if (block.timestamp < c.endsAt && msg.sender != timelock) revert InvalidWindow();
+        if (block.timestamp < c.endsAt && msg.sender != governanceTimelock) revert InvalidWindow();
         c.state = CampaignState.CLOSED;
         attentionTreasury.closeCampaign(campaignId);
         emit CampaignClosed(campaignId);
@@ -116,7 +115,7 @@ contract CannaseurCampaignRegistry is SystemAccess, I420System {
 
     function cancel(bytes32 campaignId) external {
         Campaign storage c = _campaigns[campaignId];
-        if (c.sponsor != msg.sender && msg.sender != timelock) revert Unauthorized();
+        if (c.sponsor != msg.sender && msg.sender != governanceTimelock) revert Unauthorized();
         if (c.state != CampaignState.DRAFT && c.state != CampaignState.PAUSED) revert InvalidState();
         c.state = CampaignState.CANCELLED;
         attentionTreasury.closeCampaign(campaignId);

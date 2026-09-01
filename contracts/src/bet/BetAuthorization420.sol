@@ -4,6 +4,7 @@ pragma solidity ^0.8.24;
 import "../interfaces/I420System.sol";
 import "../interfaces/genesis/ICapabilityRegistry420.sol";
 import "./BetIds420.sol";
+import "./BetTypes420.sol";
 
 contract BetAuthorization420 is I420System {
     ICapabilityRegistry420 public immutable capabilityRegistry;
@@ -48,6 +49,9 @@ contract BetAuthorization420 is I420System {
     }
     function scopeForAsset(address asset) public pure returns (bytes32) {
         return keccak256(abi.encode("420.BET.SCOPE.ASSET", asset));
+    }
+    function scopeForEmergency(BetTypes420.EmergencyDomain domain, bytes32 subject) public pure returns (bytes32) {
+        return keccak256(abi.encode("420.BET.SCOPE.EMERGENCY", domain, subject));
     }
 
     function isAuthorized(address principal, bytes32 actionId, bytes32 scopeHash, uint256 amount)

@@ -11,7 +11,9 @@
     "manifest:config": "node scripts/generate-config.mjs",
     "manifest:selftest": "node scripts/selftest-manifest.mjs",
     "smoke:rpc": "node scripts/smoke-rpc.mjs",
-    "local:deploy-smoke": "node scripts/local-deploy-smoke.mjs"
+    "local:deploy-smoke": "node scripts/local-deploy-smoke.mjs",
+    "shared:deploy": "node scripts/shared-deploy.mjs deploy",
+    "shared:promote": "node scripts/shared-deploy.mjs promote"
   },
   "dependencies": {
     "viem": "2.56.0"

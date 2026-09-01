@@ -4,6 +4,7 @@ pragma solidity ^0.8.24;
 import "../interfaces/I420System.sol";
 import "./BankrollVault420.sol";
 import "./BetAuthorization420.sol";
+import "./BetEmergencyState420.sol";
 import "./BetGameRegistry420.sol";
 import "./BetIds420.sol";
 import "./BetModuleRegistry420.sol";
@@ -34,6 +35,7 @@ contract WagerRouter420 is I420System {
     BankrollVault420 public immutable vault;
     bytes32 public immutable vaultId;
     address public immutable asset;
+    BetEmergencyState420 public emergencyState;
 
     mapping(address => uint256) public nextNonce;
     uint256 private _entered;
@@ -48,6 +50,8 @@ contract WagerRouter420 is I420System {
     error WrongValue();
     error InvalidLiability();
     error Reentrancy();
+    error EmergencyAlreadyBound();
+    error EmergencyHalted(BetTypes420.EmergencyDomain domain, bytes32 subject);
 
     event WagerAcceptanceCompleted(
         bytes32 indexed wagerId,
@@ -59,6 +63,7 @@ contract WagerRouter420 is I420System {
         uint256 reservedLiability,
         uint256 nonce
     );
+    event EmergencyStateBound(address indexed emergencyState);
 
     constructor(
         address authorization_,
@@ -97,6 +102,18 @@ contract WagerRouter420 is I420System {
     function systemName() external pure returns (string memory) { return "WagerRouter420"; }
     function protocolVersion() external pure returns (uint32) { return 1; }
 
+    /// @notice One-time binding of the canonical emergency-state contract.
+    /// @dev Binding itself is capability-scoped. Once installed it cannot be replaced or removed.
+    function bindEmergencyState(address emergencyState_) external {
+        if (emergencyState_ == address(0)) revert ZeroAddress();
+        if (address(emergencyState) != address(0)) revert EmergencyAlreadyBound();
+        if (!authorization.isAuthorized(msg.sender, BetIds420.ACTION_EMERGENCY_SET, authorization.scopeGlobal(), 0)) {
+            revert Unauthorized();
+        }
+        emergencyState = BetEmergencyState420(emergencyState_);
+        emit EmergencyStateBound(emergencyState_);
+    }
+
     function placeWager(AcceptanceRequest calldata request)
         external
         payable
@@ -116,6 +133,7 @@ contract WagerRouter420 is I420System {
         _requireProfileActive(game.riskProfileId);
         _requireProfileActive(game.settlementProfileId);
         _requireProfileActive(game.accessPolicyId);
+        _requireAcceptanceOpen(game.gameId, game.gameVersionId);
 
         if (
             !authorization.isAuthorized(
@@ -197,5 +215,18 @@ contract WagerRouter420 is I420System {
 
     function _requireProfileActive(bytes32 profileId) private view {
         if (!profiles.isActive(profileId)) revert InactiveProfile();
+    }
+
+    function _requireAcceptanceOpen(bytes32 gameId, bytes32 gameVersionId) private view {
+        BetEmergencyState420 e = emergencyState;
+        if (address(e) == address(0)) return;
+        _requireNotHalted(e, BetTypes420.EmergencyDomain.NEW_WAGERS, bytes32(0));
+        _requireNotHalted(e, BetTypes420.EmergencyDomain.GAME, gameId);
+        _requireNotHalted(e, BetTypes420.EmergencyDomain.GAME_VERSION, gameVersionId);
+        _requireNotHalted(e, BetTypes420.EmergencyDomain.VAULT_NEW_RISK, vaultId);
+    }
+
+    function _requireNotHalted(BetEmergencyState420 e, BetTypes420.EmergencyDomain domain, bytes32 subject) private view {
+        if (e.isHalted(domain, subject)) revert EmergencyHalted(domain, subject);
     }
 }

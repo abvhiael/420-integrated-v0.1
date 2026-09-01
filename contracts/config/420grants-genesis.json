@@ -1,0 +1,20 @@
+{
+  "schema":"420-grants-genesis-v1",
+  "status":"IMPLEMENTED_PENDING_EXACT_HEAD_QUALIFICATION",
+  "contracts":["GrantIds420.sol","GrantAuthorization420.sol","GrantProgramRegistry420.sol","GrantApplicationRegistry420.sol","GrantAwardRegistry420.sol","GrantMilestoneRegistry420.sol","GrantRouter420.sol"],
+  "integrations":["420 Civic / GovernanceTimelock","420 Treasury","420 Vault","CapabilityRegistry420"],
+  "invariants":[
+    "grant programs bind to one Treasury budget and one Civic action commitment",
+    "program total cap and per-award cap are immutable for each program instance",
+    "applications use canonical domain-separated IDs and are immutable after submission",
+    "application submission is applicant-owned or narrowly capability-scoped and default-deny",
+    "awards can only target the applicant recorded by the accepted application",
+    "aggregate awards cannot exceed the program cap",
+    "aggregate milestone face value cannot exceed the award amount",
+    "milestone claims are recipient-owned or narrowly capability-scoped and default-deny",
+    "milestone approval requires an existing SCHEDULED Treasury disbursement with exact budget recipient amount Civic action and purpose matches",
+    "a milestone is PAID only after the bound Treasury disbursement is EXECUTED with a nonzero Vault release commitment",
+    "420Grants never holds or transfers treasury assets and cannot bypass Treasury caps or Vault custody",
+    "cancelling an unpaid grant object does not claw back already paid funds; recovery requires a separately authorized Treasury/Civic action"
+  ]
+}

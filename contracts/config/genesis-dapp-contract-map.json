@@ -6,6 +6,7 @@
     {"dapp":"420-IS","contracts":["I420IS.sol","InteropIds420.sol","InteropProviderRegistry420.sol","InteropNamespaceRegistry420.sol","InteropCheckpointRegistry420.sol","InteropRouter420.sol"],"note":"Genesis interoperability standard and registry layer. Defines reusable versioned interfaces for canonical identity, entitlements, capability checks, payment references, encryption endpoints, sessions, checkpoints and privacy proofs; registers provider-neutral adapters and namespaces; preserves append-only external-ID mappings and hash-chained checkpoints. External systems may map into native 420 Integrated state but cannot silently overwrite canonical identity, rights, provenance, custody, governance or settlement truth."},
     {"dapp":"420 Random","contracts":["RandomnessRegistry.sol","RandomnessIds420.sol","RandomnessRouteRegistry420.sol","RandomnessProfileRegistry420.sol","RandomnessRouter420.sol","RandomnessDraw420.sol","IRandomnessRouter420.sol","IRandomnessVerifier420.sol"],"note":"shared Genesis randomness protocol"},
     {"dapp":"420 Explorer","contracts":[],"note":"indexer/UI; reads chain and protocol registries"},
+    {"dapp":"420 Search","contracts":[],"note":"contract-free discovery/indexing layer over canonical chain and protocol-owned state; ranking, indexes, caches and APIs are replaceable and non-authoritative"},
     {"dapp":"420 Registry","contracts":["ProtocolRegistry.sol"]},
     {"dapp":"420 Names","contracts":["Names420.sol"]},
     {"dapp":"420 Identity","contracts":["Identity420.sol"]},

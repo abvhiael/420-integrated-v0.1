@@ -1,0 +1,46 @@
+{
+  "schema": "420-testnet-search-readiness-v1",
+  "backend": {
+    "url": "REPLACE",
+    "status": "PENDING",
+    "required_checks": [
+      "indexes canonical public chain data",
+      "resolves registered service/version metadata through 420Registry",
+      "indexes only explicitly public/indexable protocol records",
+      "reports chain ID, indexed height and finalized height",
+      "repairs non-finalized reorgs without rewriting finalized history",
+      "survives restart",
+      "supports full rebuild from canonical sources",
+      "provides deterministic pagination for a fixed snapshot",
+      "preserves source provenance per result"
+    ]
+  },
+  "frontend": {
+    "url": "REPLACE",
+    "status": "PENDING",
+    "required_views": [
+      "global search",
+      "chain results",
+      "service/application results",
+      "name/address results",
+      "public identity results",
+      "asset/validator results",
+      "public market/rights results",
+      "public Commons/Pulse results",
+      "source/finality/freshness labels"
+    ]
+  },
+  "privacy_checks": [
+    "no private Messenger payload indexing",
+    "no private Commons payload indexing",
+    "no raw Attention telemetry indexing",
+    "no encrypted Resource payload indexing",
+    "no private Identity field indexing"
+  ],
+  "ranking_checks": [
+    "ranking policy documented",
+    "sponsored placement explicitly labeled",
+    "sponsored placement cannot mutate canonical fields",
+    "alternative clients/rankers remain possible"
+  ]
+}

@@ -10,6 +10,7 @@ library ServiceIds420 {
     bytes32 internal constant INTEROP = keccak256("420/service/420-is/v1");
     bytes32 internal constant RANDOMNESS = keccak256("420/service/randomness/v1");
     bytes32 internal constant EXPLORER = keccak256("420/service/explorer/v1");
+    bytes32 internal constant SEARCH = keccak256("420/service/search/v1");
     bytes32 internal constant NAMES = keccak256("420/service/names/v1");
     bytes32 internal constant IDENTITY = keccak256("420/service/identity/v1");
     bytes32 internal constant TRUST = keccak256("420/service/trust/v1");
@@ -47,6 +48,7 @@ library ServiceIds420 {
             || serviceId == INTEROP
             || serviceId == RANDOMNESS
             || serviceId == EXPLORER
+            || serviceId == SEARCH
             || serviceId == NAMES
             || serviceId == IDENTITY
             || serviceId == TRUST

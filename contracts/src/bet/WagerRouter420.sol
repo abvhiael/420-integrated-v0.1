@@ -3,6 +3,7 @@ pragma solidity ^0.8.24;
 
 import "../interfaces/I420System.sol";
 import "./BankrollVault420.sol";
+import "./BetAccessPolicy420.sol";
 import "./BetAuthorization420.sol";
 import "./BetEmergencyState420.sol";
 import "./BetGameRegistry420.sol";
@@ -30,6 +31,7 @@ contract WagerRouter420 is I420System {
     BetModuleRegistry420 public immutable modules;
     BetOperatorRegistry420 public immutable operators;
     BetProfileRegistry420 public immutable profiles;
+    BetAccessPolicy420 public immutable accessPolicy;
     RiskManager420 public immutable riskManager;
     BetRegistry420 public immutable betRegistry;
     BankrollVault420 public immutable vault;
@@ -71,20 +73,22 @@ contract WagerRouter420 is I420System {
         address modules_,
         address operators_,
         address profiles_,
+        address accessPolicy_,
         address riskManager_,
         address betRegistry_,
         address vault_
     ) {
         if (
             authorization_ == address(0) || games_ == address(0) || modules_ == address(0)
-                || operators_ == address(0) || profiles_ == address(0) || riskManager_ == address(0)
-                || betRegistry_ == address(0) || vault_ == address(0)
+                || operators_ == address(0) || profiles_ == address(0) || accessPolicy_ == address(0)
+                || riskManager_ == address(0) || betRegistry_ == address(0) || vault_ == address(0)
         ) revert ZeroAddress();
         authorization = BetAuthorization420(authorization_);
         games = BetGameRegistry420(games_);
         modules = BetModuleRegistry420(modules_);
         operators = BetOperatorRegistry420(operators_);
         profiles = BetProfileRegistry420(profiles_);
+        accessPolicy = BetAccessPolicy420(accessPolicy_);
         riskManager = RiskManager420(riskManager_);
         betRegistry = BetRegistry420(betRegistry_);
         vault = BankrollVault420(payable(vault_));
@@ -143,6 +147,10 @@ contract WagerRouter420 is I420System {
                 request.stake
             )
         ) revert Unauthorized();
+
+        // Access/RG consumption is deliberately before nonce use, escrow, and risk reservation.
+        // Any downstream revert rolls this accounting back atomically with the wager attempt.
+        accessPolicy.validateAndRecord(game.accessPolicyId, msg.sender, asset, request.stake);
 
         uint256 nonce = nextNonce[msg.sender];
         nextNonce[msg.sender] = nonce + 1;

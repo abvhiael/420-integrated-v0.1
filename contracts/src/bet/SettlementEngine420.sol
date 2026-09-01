@@ -4,6 +4,7 @@ pragma solidity ^0.8.24;
 import "../interfaces/I420System.sol";
 import "./BankrollVault420.sol";
 import "./BetAuthorization420.sol";
+import "./BetEconomics420.sol";
 import "./BetEmergencyState420.sol";
 import "./BetIds420.sol";
 import "./BetRegistry420.sol";
@@ -15,6 +16,7 @@ contract SettlementEngine420 is I420System {
     BetRegistry420 public immutable registry;
     RiskManager420 public immutable riskManager;
     BankrollVault420 public immutable vault;
+    BetEconomics420 public immutable economics;
     bytes32 public immutable vaultId;
     address public immutable asset;
     BetEmergencyState420 public emergencyState;
@@ -41,14 +43,16 @@ contract SettlementEngine420 is I420System {
     );
     event EmergencyStateBound(address indexed emergencyState);
 
-    constructor(address authorization_, address registry_, address riskManager_, address vault_) {
-        if (authorization_ == address(0) || registry_ == address(0) || riskManager_ == address(0) || vault_ == address(0)) {
-            revert ZeroAddress();
-        }
+    constructor(address authorization_, address registry_, address riskManager_, address vault_, address economics_) {
+        if (
+            authorization_ == address(0) || registry_ == address(0) || riskManager_ == address(0)
+                || vault_ == address(0) || economics_ == address(0)
+        ) revert ZeroAddress();
         authorization = BetAuthorization420(authorization_);
         registry = BetRegistry420(registry_);
         riskManager = RiskManager420(riskManager_);
         vault = BankrollVault420(vault_);
+        economics = BetEconomics420(payable(economics_));
         vaultId = vault.vaultId();
         asset = vault.asset();
     }
@@ -105,6 +109,7 @@ contract SettlementEngine420 is I420System {
         uint256 releasedLiability = riskManager.releaseExposure(wagerId);
         vault.resolveWager(wagerId, grossPayout);
         registry.recordSettlement(wagerId, outcome, grossPayout);
+        economics.finalizeWagerFees(wagerId, outcome);
         settlement = registry.getSettlement(wagerId);
 
         emit SettlementCompleted(wagerId, outcome, grossPayout, releasedLiability);
@@ -117,9 +122,6 @@ contract SettlementEngine420 is I420System {
         BetEmergencyState420 e = emergencyState;
         if (address(e) == address(0)) return;
         if (!e.isHalted(BetTypes420.EmergencyDomain.SETTLEMENT_HOLD, wager.settlementProfileId)) return;
-
-        // A settlement hold may stop disputed WIN/LOSS/PUSH finalization, but it may never
-        // block the canonical VOID path that releases liability and returns the player's stake.
         if (outcome != BetTypes420.TerminalOutcome.VOID) {
             revert EmergencyHalted(BetTypes420.EmergencyDomain.SETTLEMENT_HOLD, wager.settlementProfileId);
         }

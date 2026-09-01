@@ -26,6 +26,9 @@ contract BetAuthorization420 is I420System {
     function scopeForGame(bytes32 gameId, bytes32 gameVersionId) public pure returns (bytes32) {
         return keccak256(abi.encode("420.BET.SCOPE.GAME", gameId, gameVersionId));
     }
+    function scopeForGameVersion(bytes32 gameVersionId) public pure returns (bytes32) {
+        return keccak256(abi.encode("420.BET.SCOPE.GAME_VERSION", gameVersionId));
+    }
     function scopeForProfile(bytes32 profileId) public pure returns (bytes32) {
         return keccak256(abi.encode("420.BET.SCOPE.PROFILE", profileId));
     }

@@ -1,0 +1,18 @@
+{
+  "schema":"420-launchpad-genesis-v1",
+  "status":"IMPLEMENTATION_QUALIFICATION",
+  "boundary":{"custody":false,"minting":false,"dex":false,"payment_execution":false},
+  "invariants":[
+    "LAUNCHPAD-INV-001: project and sale identities are canonical and replay-safe",
+    "LAUNCHPAD-INV-002: sale economics are immutable after creation",
+    "LAUNCHPAD-INV-003: hard cap and per-wallet cap cannot be exceeded",
+    "LAUNCHPAD-INV-004: success cannot finalize below soft cap",
+    "LAUNCHPAD-INV-005: failed or cancelled sales are refundable, successful sales are not",
+    "LAUNCHPAD-INV-006: allocations cannot be claimed before successful finalization and claim start",
+    "LAUNCHPAD-INV-007: contribution, claim and refund actions are default-deny through CapabilityRegistry420",
+    "LAUNCHPAD-INV-008: Launchpad never mints arbitrary tokens or directly custodies sale proceeds",
+    "LAUNCHPAD-INV-009: sale payment and token delivery are represented by nonzero audit commitments",
+    "LAUNCHPAD-INV-010: liquidity commitments do not grant Launchpad unilateral 420Swap authority"
+  ],
+  "new_frozen_predeploy_required":false
+}

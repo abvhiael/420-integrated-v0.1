@@ -1,0 +1,41 @@
+{
+  "schema": "420-registry-genesis-v1",
+  "name": "420Registry",
+  "protocolVersion": 4,
+  "canonicalContract": "ProtocolRegistry.sol",
+  "purpose": "Canonical discovery, version history and compatibility commitments for 420 Integrated Genesis services.",
+  "authority": {
+    "publisher": "GovernanceTimelock",
+    "defaultDeny": true,
+    "registeredServicesGainAuthority": false
+  },
+  "registration": {
+    "canonicalGenesisIds": "ServiceIds420.sol",
+    "extensionIdsRequireApproval": true,
+    "versionsAreStrictlySequential": true,
+    "historyIsReadable": true,
+    "strictPublicationRequiresRuntimeCode": true,
+    "strictPublicationCommits": [
+      "runtimeCodeHash",
+      "metadataHash",
+      "manifestHash",
+      "dependencyRoot",
+      "interfaceHash",
+      "componentType"
+    ]
+  },
+  "invariants": [
+    "REG-INV-001: A service identifier is canonical only if it is in the frozen Genesis catalog or explicitly approved as an extension.",
+    "REG-INV-002: Service versions advance exactly by one and prior version records remain readable.",
+    "REG-INV-003: Genesis-grade registration rejects implementations with no deployed runtime code.",
+    "REG-INV-004: Genesis-grade registration records the implementation runtime code hash rather than trusting a caller-supplied hash.",
+    "REG-INV-005: Every Genesis-grade registration commits a nonzero manifest hash and interface hash.",
+    "REG-INV-006: Component type, manifest, dependency root and interface commitment are immutable for a published version.",
+    "REG-INV-007: Only GovernanceTimelock may approve extension IDs, publish versions or deprecate a current version.",
+    "REG-INV-008: Deprecation fails closed for active discovery while preserving historical records.",
+    "REG-INV-009: Registry publication never grants custody, token transfer, smart-account execution, governance, bridge or validator authority to a registered implementation.",
+    "REG-INV-010: Indexers, explorers and frontends are non-canonical projections and can reconstruct registry state from chain events and reads.",
+    "REG-INV-011: Registry metadata cannot overwrite canonical state owned by Identity, Names, Rights, Pay, Bridge, Civic or other domain protocols.",
+    "REG-INV-012: Extension approval cannot alter the stable identity of any canonical Genesis service ID."
+  ]
+}

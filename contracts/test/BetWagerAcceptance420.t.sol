@@ -3,6 +3,7 @@ pragma solidity ^0.8.24;
 
 import "../src/interfaces/genesis/ICapabilityRegistry420.sol";
 import "../src/bet/BankrollVault420.sol";
+import "../src/bet/BetAccessPolicy420.sol";
 import "../src/bet/BetAuthorization420.sol";
 import "../src/bet/BetGameRegistry420.sol";
 import "../src/bet/BetIds420.sol";
@@ -87,6 +88,7 @@ contract BetWagerAcceptance420Test {
         BetAuthorization420 auth;
         BetModuleRegistry420 modules;
         BetProfileRegistry420 profiles;
+        BetAccessPolicy420 access;
         BetOperatorRegistry420 operators;
         BetGameRegistry420 games;
         VaultAccounting420 accounting;
@@ -107,6 +109,7 @@ contract BetWagerAcceptance420Test {
         s.auth = new BetAuthorization420(address(s.caps));
         s.modules = new BetModuleRegistry420(address(s.auth));
         s.profiles = new BetProfileRegistry420(address(s.auth));
+        s.access = new BetAccessPolicy420(address(s.auth), address(s.profiles));
         s.operators = new BetOperatorRegistry420(address(s.auth));
         s.games = new BetGameRegistry420(address(s.auth), address(s.modules), address(s.profiles));
         s.accounting = new VaultAccounting420(address(s.auth));
@@ -121,6 +124,7 @@ contract BetWagerAcceptance420Test {
             address(s.modules),
             address(s.operators),
             address(s.profiles),
+            address(s.access),
             address(s.risk),
             address(s.registry),
             address(s.vault)
@@ -134,10 +138,12 @@ contract BetWagerAcceptance420Test {
         _allow(s, address(s.risk), BetIds420.ACTION_VAULT_RELEASE_LIABILITY, s.auth.scopeForVault(VAULT));
 
         _seedProfiles(s);
+        _seedAccess(s);
         _seedModuleGameOperator(s);
         _seedRisk(s);
         _seedLiquidity(s, 1_000 ether);
 
+        _allow(s, address(s.router), BetIds420.ACTION_ACCESS_RECORD, s.auth.scopeForProfile(ACCESS));
         _allow(s, address(s.router), BetIds420.ACTION_VAULT_ESCROW_STAKE, s.auth.scopeForVault(VAULT));
         _allow(s, address(s.router), BetIds420.ACTION_RISK_RESERVE, s.auth.scopeForVault(VAULT));
         _allow(s, address(s.router), BetIds420.ACTION_WAGER_RECORD, s.auth.scopeForVault(VAULT));
@@ -148,6 +154,13 @@ contract BetWagerAcceptance420Test {
         _registerProfile(s, RISK, keccak256("RISK"));
         _registerProfile(s, SETTLEMENT, keccak256("SETTLEMENT"));
         _registerProfile(s, ACCESS, keccak256("ACCESS"));
+    }
+
+    function _seedAccess(Suite memory s) private {
+        _allow(s, ADMIN, BetIds420.ACTION_ACCESS_CONFIGURE, s.auth.scopeForProfile(ACCESS));
+        bytes32[] memory requirements = new bytes32[](0);
+        vm.prank(ADMIN);
+        s.access.configurePolicy(ACCESS, address(s.token), address(0), requirements, 0, 0, 0, keccak256("access-policy"));
     }
 
     function _registerProfile(Suite memory s, bytes32 id, bytes32 profileType) private {
@@ -278,7 +291,7 @@ contract BetWagerAcceptance420Test {
         require(wager.status == BetTypes420.WagerStatus.ACCEPTED, "not accepted");
     }
 
-    function testRiskFailureRollsBackStakeEscrowAndNonce() public {
+    function testRiskFailureRollsBackStakeEscrowNonceAndAccessUsage() public {
         Suite memory s = _deploy();
         _approvePlayer(s, 100 ether);
         uint256 playerBefore = s.token.balanceOf(PLAYER);
@@ -293,6 +306,7 @@ contract BetWagerAcceptance420Test {
         require(s.vault.activeWagerStakeEscrow() == 0, "failed acceptance left escrow");
         require(s.accounting.getVault(VAULT).activeReservedLiability == 0, "failed acceptance left liability");
         require(s.router.nextNonce(PLAYER) == 0, "failed acceptance consumed nonce");
+        require(s.access.policyUsage(ACCESS, PLAYER).stakeUsed == 0, "failed acceptance consumed access limit");
     }
 
     function testDeprecatedBoundProfileStopsNewWagersBeforeStakeMoves() public {

@@ -114,7 +114,7 @@ contract BetEconomics420 is I420System {
         if (_feeSchedules[input.scheduleId].exists || feeScheduleForGameVersion[input.gameVersionId] != bytes32(0)) revert AlreadyExists();
         if (uint256(input.protocolFeeBps) + uint256(input.operatorFeeBps) > BetTypes420.BPS) revert InvalidConfiguration();
         if (input.protocolFeeBps != 0 && input.protocolRecipient == address(0)) revert ZeroAddress();
-        if (!authorization.isAuthorized(msg.sender, BetIds420.ACTION_ECONOMICS_CONFIGURE, _gameScope(input.gameVersionId), 0)) revert Unauthorized();
+        if (!authorization.isAuthorized(msg.sender, BetIds420.ACTION_ECONOMICS_CONFIGURE, authorization.scopeForGameVersion(input.gameVersionId), 0)) revert Unauthorized();
         FeeSchedule memory copy = input;
         copy.exists = true;
         _feeSchedules[input.scheduleId] = copy;
@@ -135,7 +135,7 @@ contract BetEconomics420 is I420System {
         uint256 protocolFee = stake * schedule.protocolFeeBps / BetTypes420.BPS;
         uint256 operatorFee = stake * schedule.operatorFeeBps / BetTypes420.BPS;
         uint256 total = protocolFee + operatorFee;
-        if (!authorization.isAuthorized(msg.sender, BetIds420.ACTION_ECONOMICS_BIND, _gameScope(gameVersionId), total)) revert Unauthorized();
+        if (!authorization.isAuthorized(msg.sender, BetIds420.ACTION_ECONOMICS_BIND, authorization.scopeForGameVersion(gameVersionId), total)) revert Unauthorized();
         if (feeAvailable < total) revert InsufficientFunding();
         BetOperatorRegistry420.Operator memory operator = operators.getOperator(operatorId);
         feeAvailable -= total;
@@ -160,14 +160,14 @@ contract BetEconomics420 is I420System {
         if (binding.wagerId == bytes32(0)) revert NotFound();
         if (binding.finalized) revert InvalidState();
         uint256 total = binding.protocolFee + binding.operatorFee;
-        if (!authorization.isAuthorized(msg.sender, BetIds420.ACTION_ECONOMICS_FINALIZE, _gameScope(binding.gameVersionId), total)) revert Unauthorized();
+        if (!authorization.isAuthorized(msg.sender, BetIds420.ACTION_ECONOMICS_FINALIZE, authorization.scopeForGameVersion(binding.gameVersionId), total)) revert Unauthorized();
         binding.finalized = true;
         feeReserved -= total;
         bool charge = outcome == BetTypes420.TerminalOutcome.WIN || outcome == BetTypes420.TerminalOutcome.LOSS;
         binding.charged = charge;
         if (charge) {
-            feeClaimable[binding.protocolRecipient] += binding.protocolFee;
-            feeClaimable[binding.operatorRecipient] += binding.operatorFee;
+            if (binding.protocolFee != 0) feeClaimable[binding.protocolRecipient] += binding.protocolFee;
+            if (binding.operatorFee != 0) feeClaimable[binding.operatorRecipient] += binding.operatorFee;
             feeClaimableTotal += total;
         } else {
             feeAvailable += total;
@@ -279,10 +279,6 @@ contract BetEconomics420 is I420System {
         } else if (!IERC20BetEconomics420(asset).transfer(to, amount)) {
             revert TransferFailed();
         }
-    }
-
-    function _gameScope(bytes32 gameVersionId) private pure returns (bytes32) {
-        return keccak256(abi.encode("420.BET.SCOPE.GAME_VERSION", gameVersionId));
     }
 
     receive() external payable { revert InvalidValue(); }

@@ -3,6 +3,7 @@ pragma solidity ^0.8.24;
 
 import "../src/interfaces/genesis/ICapabilityRegistry420.sol";
 import "../src/bet/BankrollVault420.sol";
+import "../src/bet/BetAccessPolicy420.sol";
 import "../src/bet/BetAuthorization420.sol";
 import "../src/bet/BetGameRegistry420.sol";
 import "../src/bet/BetIds420.sol";
@@ -92,6 +93,7 @@ contract BetDiceVerticalSlice420Test {
         BetAuthorization420 auth;
         BetModuleRegistry420 modules;
         BetProfileRegistry420 profiles;
+        BetAccessPolicy420 access;
         BetOperatorRegistry420 operators;
         BetGameRegistry420 games;
         VaultAccounting420 accounting;
@@ -115,6 +117,7 @@ contract BetDiceVerticalSlice420Test {
         s.auth = new BetAuthorization420(address(s.caps));
         s.modules = new BetModuleRegistry420(address(s.auth));
         s.profiles = new BetProfileRegistry420(address(s.auth));
+        s.access = new BetAccessPolicy420(address(s.auth), address(s.profiles));
         s.operators = new BetOperatorRegistry420(address(s.auth));
         s.games = new BetGameRegistry420(address(s.auth), address(s.modules), address(s.profiles));
         s.accounting = new VaultAccounting420(address(s.auth));
@@ -125,7 +128,7 @@ contract BetDiceVerticalSlice420Test {
         s.registry = new BetRegistry420(address(s.auth));
         s.wagerRouter = new WagerRouter420(
             address(s.auth), address(s.games), address(s.modules), address(s.operators), address(s.profiles),
-            address(s.risk), address(s.registry), address(s.vault)
+            address(s.access), address(s.risk), address(s.registry), address(s.vault)
         );
         s.randomness = new RandomnessRouter420(address(s.auth), address(s.profiles), address(s.registry));
         s.dice = new DiceV1420(address(s.registry), address(s.randomness), GAME, GAME_V1, RULESET);
@@ -140,11 +143,13 @@ contract BetDiceVerticalSlice420Test {
         _allow(s, address(s.risk), BetIds420.ACTION_VAULT_RELEASE_LIABILITY, s.auth.scopeForVault(VAULT));
 
         _seedProfiles(s);
+        _seedAccess(s);
         _seedModuleGameOperator(s);
         _seedRisk(s);
         _seedRandomness(s);
         _seedLiquidity(s, 1_000 ether);
 
+        _allow(s, address(s.wagerRouter), BetIds420.ACTION_ACCESS_RECORD, s.auth.scopeForProfile(ACCESS));
         _allow(s, address(s.wagerRouter), BetIds420.ACTION_VAULT_ESCROW_STAKE, s.auth.scopeForVault(VAULT));
         _allow(s, address(s.wagerRouter), BetIds420.ACTION_RISK_RESERVE, s.auth.scopeForVault(VAULT));
         _allow(s, address(s.wagerRouter), BetIds420.ACTION_WAGER_RECORD, s.auth.scopeForVault(VAULT));
@@ -157,6 +162,13 @@ contract BetDiceVerticalSlice420Test {
         _registerProfile(s, RISK, keccak256("RISK"));
         _registerProfile(s, SETTLEMENT, keccak256("SETTLEMENT"));
         _registerProfile(s, ACCESS, keccak256("ACCESS"));
+    }
+
+    function _seedAccess(Suite memory s) private {
+        _allow(s, ADMIN, BetIds420.ACTION_ACCESS_CONFIGURE, s.auth.scopeForProfile(ACCESS));
+        bytes32[] memory requirements = new bytes32[](0);
+        vm.prank(ADMIN);
+        s.access.configurePolicy(ACCESS, address(s.token), address(0), requirements, 0, 0, 0, keccak256("access-policy"));
     }
 
     function _registerProfile(Suite memory s, bytes32 id, bytes32 profileType) private {
@@ -277,6 +289,7 @@ contract BetDiceVerticalSlice420Test {
         require(s.vault.wagerStakeEscrow(wagerId) == stake, "stake not escrowed");
         require(s.accounting.getVault(VAULT).activeReservedLiability == reservedLiability, "liability not reserved");
         require(s.registry.getWager(wagerId).status == BetTypes420.WagerStatus.ACCEPTED, "wager not accepted");
+        require(s.access.policyUsage(ACCESS, PLAYER).stakeUsed == 0, "unbounded profile unexpectedly tracked period");
 
         _allow(s, REQUESTER, BetIds420.ACTION_RANDOMNESS_REQUEST, s.auth.scopeForWager(wagerId));
         vm.prank(REQUESTER);

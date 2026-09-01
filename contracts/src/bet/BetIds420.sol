@@ -40,6 +40,10 @@ library BetIds420 {
     bytes32 internal constant ACTION_RG_SELF_EXCLUDE = keccak256("BET_RG_SELF_EXCLUDE");
     bytes32 internal constant ACTION_RG_COOL_OFF = keccak256("BET_RG_COOL_OFF");
 
+    // Access-policy configuration and wager-consumption accounting.
+    bytes32 internal constant ACTION_ACCESS_CONFIGURE = keccak256("BET_ACCESS_CONFIGURE");
+    bytes32 internal constant ACTION_ACCESS_RECORD = keccak256("BET_ACCESS_RECORD");
+
     // Bankroll-vault and risk-kernel actions. These are capability scoped; no super-admin exists.
     bytes32 internal constant ACTION_VAULT_REGISTER = keccak256("BET_VAULT_REGISTER");
     bytes32 internal constant ACTION_VAULT_RECORD_DEPOSIT = keccak256("BET_VAULT_RECORD_DEPOSIT");

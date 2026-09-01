@@ -51,7 +51,7 @@ contract RandomnessRouter420 is I420System {
     mapping(bytes32 => RandomnessRequest) private _requests;
 
     error ZeroAddress(); error InvalidId(); error InvalidConfiguration(); error AlreadyExists(); error NotFound();
-    error Unauthorized(); error ProfileInactive(); error WagerNotEligible(); error AlreadyRequested(); error NotRequested();
+    error Unauthorized(); error ProfileInactive(); error WagerNotEligible(); error WagerExpired(); error AlreadyRequested(); error NotRequested();
     error AlreadyFulfilled(); error WrongProvider(); error FallbackNotReady(); error PrimaryExpired(); error InvalidEntropy();
     error EmergencyAlreadyBound();
     error EmergencyHalted(BetTypes420.EmergencyDomain domain, bytes32 subject);
@@ -92,6 +92,7 @@ contract RandomnessRouter420 is I420System {
         if (_requests[wagerId].wagerId != bytes32(0)) revert AlreadyRequested();
         BetTypes420.Wager memory wager = wagerRegistry.getWager(wagerId);
         if (wager.status != BetTypes420.WagerStatus.ACCEPTED) revert WagerNotEligible();
+        if (block.timestamp >= wager.deadline) revert WagerExpired();
         RandomnessProfile storage profile = _getProfile(wager.randomnessProfileId);
         if (!profileRegistry.isActiveOfType(profile.profileId, RANDOMNESS_PROFILE_TYPE)) revert ProfileInactive();
         BetEmergencyState420 e = emergencyState;
@@ -127,6 +128,8 @@ contract RandomnessRouter420 is I420System {
 
         // Fulfilment deliberately remains available while RANDOMNESS_PROFILE is halted.
         // A halt stops new requests; it must not strand a request that was already committed.
+        // If fulfilment arrives after the wager deadline, the root remains auditable but
+        // SettlementEngine420 only permits the deterministic VOID terminal path.
         root = _deriveRoot(wagerId, request, profile, source, entropy, proofHash);
         request.root = root;
         request.proofHash = proofHash;

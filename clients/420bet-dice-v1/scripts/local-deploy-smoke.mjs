@@ -45,11 +45,13 @@ const RISK = id('profile/risk/v1');
 const SETTLEMENT = id('profile/settlement/v1');
 const ACCESS = id('profile/access/v1');
 const RULESET = id('ruleset/dice/v1');
+const FEE_SCHEDULE = id('420BET.FEES.DICE.V1.ZERO');
 
 const ACTION = Object.fromEntries([
   'VAULT_REGISTER','VAULT_RECORD_DEPOSIT','VAULT_SETTLE_WAGER','VAULT_RESERVE_LIABILITY','VAULT_RELEASE_LIABILITY',
   'PROFILE_REGISTER','MODULE_REGISTER','MODULE_APPROVE','OPERATOR_REGISTER','OPERATOR_ACTIVATE','GAME_REGISTER','GAME_ACTIVATE',
-  'ACCESS_CONFIGURE','ACCESS_RECORD','RISK_CONFIGURE','RANDOMNESS_CONFIGURE','LP_DEPOSIT','VAULT_ESCROW_STAKE','RISK_RESERVE','WAGER_RECORD','RISK_RELEASE',
+  'ACCESS_CONFIGURE','ACCESS_RECORD','ECONOMICS_CONFIGURE','ECONOMICS_BIND','ECONOMICS_FINALIZE','ECONOMICS_FUND',
+  'RISK_CONFIGURE','RANDOMNESS_CONFIGURE','LP_DEPOSIT','VAULT_ESCROW_STAKE','RISK_RESERVE','WAGER_RECORD','RISK_RELEASE',
   'WAGER_SETTLE_RECORD','PLACE','RANDOMNESS_REQUEST','RANDOMNESS_FULFILL','SETTLE'
 ].map((name) => [name, id(`BET_${name}`)]));
 
@@ -67,9 +69,7 @@ function artifact(file, contract) {
 
 async function waitForRpc() {
   for (let attempt = 0; attempt < 100; attempt += 1) {
-    try {
-      if (await publicClient.getChainId()) return;
-    } catch {}
+    try { if (await publicClient.getChainId()) return; } catch {}
     await new Promise((resolve) => setTimeout(resolve, 100));
   }
   throw new Error(`Anvil did not become ready at ${rpcUrl}`);
@@ -117,16 +117,17 @@ try {
   const accounting = await deploy('VaultAccounting420', 'VaultAccounting420', [auth.address]);
   const queue = await deploy('WithdrawalQueue420', 'WithdrawalQueue420', [auth.address]);
   const token = await deploy('DiceLocalMocks420', 'DiceLocalToken420');
+  const economics = await deploy('BetEconomics420', 'BetEconomics420', [auth.address, operators.address, token.address]);
   const vault = await deploy('BankrollVault420', 'BankrollVault420', [VAULT, token.address, auth.address, accounting.address, queue.address, 86400n]);
   const risk = await deploy('RiskManager420', 'RiskManager420', [auth.address, profiles.address, accounting.address]);
   const registry = await deploy('BetRegistry420', 'BetRegistry420', [auth.address]);
   const wagerRouter = await deploy('WagerRouter420', 'WagerRouter420', [
     auth.address, games.address, modules.address, operators.address, profiles.address,
-    access.address, risk.address, registry.address, vault.address,
+    access.address, economics.address, risk.address, registry.address, vault.address,
   ]);
   const randomness = await deploy('RandomnessRouter420', 'RandomnessRouter420', [auth.address, profiles.address, registry.address]);
   const dice = await deploy('DiceV1420', 'DiceV1420', [registry.address, randomness.address, GAME, GAME_V1, RULESET]);
-  const settlement = await deploy('SettlementEngine420', 'SettlementEngine420', [auth.address, registry.address, risk.address, vault.address]);
+  const settlement = await deploy('SettlementEngine420', 'SettlementEngine420', [auth.address, registry.address, risk.address, vault.address, economics.address]);
   const diceView = await deploy('DiceV1View420', 'DiceV1View420', [registry.address, randomness.address, dice.address]);
 
   const scopeVault = await read(auth, 'scopeForVault', [VAULT]);
@@ -137,6 +138,7 @@ try {
   const scopeModule = await read(auth, 'scopeForModule', [MODULE, MODULE_V1]);
   const scopeOperator = await read(auth, 'scopeForOperator', [OPERATOR]);
   const scopeGame = await read(auth, 'scopeForGame', [GAME, GAME_V1]);
+  const scopeGameVersion = await read(auth, 'scopeForGameVersion', [GAME_V1]);
 
   const allow = async (principal, action, scope) => write(caps, 'setAllowed', [principal, COMPONENT_BET, action, scope, true]);
 
@@ -190,6 +192,17 @@ try {
   }]);
   await write(games, 'activate', [GAME_V1]);
 
+  await allow(deployer.address, ACTION.ECONOMICS_CONFIGURE, scopeGameVersion);
+  await write(economics, 'configureFeeSchedule', [{
+    scheduleId: FEE_SCHEDULE,
+    gameVersionId: GAME_V1,
+    protocolFeeBps: 0,
+    operatorFeeBps: 0,
+    protocolRecipient: zeroAddress,
+    manifestHash: id('dice-zero-fee-v1'),
+    exists: false,
+  }]);
+
   await allow(deployer.address, ACTION.RISK_CONFIGURE, scopeRisk);
   await write(risk, 'configureProfile', [{
     profileId: RISK,
@@ -222,9 +235,11 @@ try {
   await write(vault, 'depositToken', [parseEther('1000')]);
 
   await allow(wagerRouter.address, ACTION.ACCESS_RECORD, scopeAccess);
+  await allow(wagerRouter.address, ACTION.ECONOMICS_BIND, scopeGameVersion);
   await allow(wagerRouter.address, ACTION.VAULT_ESCROW_STAKE, scopeVault);
   await allow(wagerRouter.address, ACTION.RISK_RESERVE, scopeVault);
   await allow(wagerRouter.address, ACTION.WAGER_RECORD, scopeVault);
+  await allow(settlement.address, ACTION.ECONOMICS_FINALIZE, scopeGameVersion);
   await allow(settlement.address, ACTION.RISK_RELEASE, scopeVault);
   await allow(settlement.address, ACTION.VAULT_SETTLE_WAGER, scopeVault);
 
@@ -248,11 +263,13 @@ try {
       diceView: diceView.address,
       wagerRouter: wagerRouter.address,
       accessPolicy: access.address,
+      economics: economics.address,
       vault: vault.address,
       asset: token.address,
       betAuthorization: auth.address,
     },
     ids: { gameId: GAME, gameVersionId: GAME_V1, operatorId: OPERATOR },
+    economics: { feeScheduleId: FEE_SCHEDULE, protocolFeeBps: 0, operatorFeeBps: 0 },
     promotion: {
       deployer: deployer.address,
       sourceCommit,

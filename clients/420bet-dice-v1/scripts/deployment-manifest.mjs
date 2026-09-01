@@ -27,7 +27,7 @@ export function validateDeploymentManifest(manifest) {
   if (!manifest.chain?.nativeCurrency?.name || !manifest.chain?.nativeCurrency?.symbol) fail('native currency metadata is required');
   if (!Number.isInteger(manifest.chain?.nativeCurrency?.decimals)) fail('native currency decimals are required');
 
-  for (const key of ['dice', 'diceView', 'wagerRouter', 'vault', 'betAuthorization']) {
+  for (const key of ['dice', 'diceView', 'wagerRouter', 'accessPolicy', 'vault', 'betAuthorization']) {
     const value = manifest.contracts?.[key];
     if (!/^0x[0-9a-fA-F]{40}$/.test(value ?? '') || value.toLowerCase() === ZERO_ADDRESS) {
       fail(`contracts.${key} must be a nonzero address`);

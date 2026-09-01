@@ -36,6 +36,12 @@ const parsePositive = (name, fallback) => {
   if (value <= 0n) throw new Error(`${name} must be positive`);
   return value;
 };
+const parseNonnegative = (name, fallback = '0') => {
+  const raw = process.env[name] ?? fallback;
+  const value = BigInt(raw);
+  if (value < 0n) throw new Error(`${name} must be nonnegative`);
+  return value;
+};
 
 const rpcUrl = requiredEnv('DICE_RPC_URL');
 const privateKey = requiredEnv('DICE_DEPLOYER_PRIVATE_KEY');
@@ -65,7 +71,7 @@ const RULESET = id('ruleset/dice/v1');
 const ACTION = Object.fromEntries([
   'VAULT_REGISTER','VAULT_RECORD_DEPOSIT','VAULT_SETTLE_WAGER','VAULT_RESERVE_LIABILITY','VAULT_RELEASE_LIABILITY',
   'PROFILE_REGISTER','MODULE_REGISTER','MODULE_APPROVE','OPERATOR_REGISTER','OPERATOR_ACTIVATE','GAME_REGISTER','GAME_ACTIVATE',
-  'RISK_CONFIGURE','RANDOMNESS_CONFIGURE','LP_DEPOSIT','VAULT_ESCROW_STAKE','RISK_RESERVE','WAGER_RECORD','RISK_RELEASE',
+  'ACCESS_CONFIGURE','ACCESS_RECORD','RISK_CONFIGURE','RANDOMNESS_CONFIGURE','LP_DEPOSIT','VAULT_ESCROW_STAKE','RISK_RESERVE','WAGER_RECORD','RISK_RELEASE',
 ].map((name) => [name, id(`BET_${name}`)]));
 
 const riskTerms = {
@@ -79,6 +85,24 @@ const riskTerms = {
 if (riskTerms.maxGrossPayoutPerWager < riskTerms.maxStakePerWager) throw new Error('max gross payout must be >= max stake');
 const seedLiquidity = parsePositive('DICE_SEED_LIQUIDITY_WEI', parseEther('1000').toString());
 const withdrawalCooldown = parsePositive('DICE_WITHDRAWAL_COOLDOWN_SECONDS', '86400');
+const accessCredentialLabels = (process.env.DICE_ACCESS_CREDENTIAL_IDS || '').split(',').map((v) => v.trim()).filter(Boolean);
+const accessCredentialIds = accessCredentialLabels.map(id);
+const accessCredentialVerifier = process.env.DICE_ACCESS_CREDENTIAL_VERIFIER?.trim()
+  ? getAddress(process.env.DICE_ACCESS_CREDENTIAL_VERIFIER.trim())
+  : zeroAddress;
+const accessMaxStakePerWager = parseNonnegative('DICE_ACCESS_MAX_STAKE_WEI');
+const accessMaxStakePerPeriod = parseNonnegative('DICE_ACCESS_MAX_PERIOD_STAKE_WEI');
+const accessPeriodSeconds = parseNonnegative('DICE_ACCESS_PERIOD_SECONDS');
+if ((accessMaxStakePerPeriod === 0n) !== (accessPeriodSeconds === 0n)) {
+  throw new Error('DICE_ACCESS_MAX_PERIOD_STAKE_WEI and DICE_ACCESS_PERIOD_SECONDS must both be zero or both non-zero');
+}
+if (accessCredentialIds.length > 8) throw new Error('DICE_ACCESS_CREDENTIAL_IDS supports at most 8 requirements');
+if (accessCredentialIds.length && accessCredentialVerifier === zeroAddress) {
+  throw new Error('DICE_ACCESS_CREDENTIAL_VERIFIER is required when credential IDs are configured');
+}
+if (!accessCredentialIds.length && accessCredentialVerifier !== zeroAddress) {
+  throw new Error('DICE_ACCESS_CREDENTIAL_IDS is required when a credential verifier is configured');
+}
 
 function run(commandName, args, options = {}) {
   const result = spawnSync(commandName, args, { cwd: repoRoot, stdio: 'inherit', ...options });
@@ -144,11 +168,13 @@ async function deployStage() {
   if (chainId !== configuredChainId) throw new Error(`RPC chain id ${chainId} does not match DICE_CHAIN_ID ${configuredChainId}`);
   await requireCode(capabilityRegistry, 'capability registry');
   await requireCode(asset, 'stake asset');
+  if (accessCredentialVerifier !== zeroAddress) await requireCode(accessCredentialVerifier, 'access credential verifier');
   run('forge', ['build'], { cwd: contractsDir });
 
   const auth = await deploy('BetAuthorization420', 'BetAuthorization420', [capabilityRegistry]);
   const modules = await deploy('BetModuleRegistry420', 'BetModuleRegistry420', [auth.address]);
   const profiles = await deploy('BetProfileRegistry420', 'BetProfileRegistry420', [auth.address]);
+  const access = await deploy('BetAccessPolicy420', 'BetAccessPolicy420', [auth.address, profiles.address]);
   const operators = await deploy('BetOperatorRegistry420', 'BetOperatorRegistry420', [auth.address]);
   const games = await deploy('BetGameRegistry420', 'BetGameRegistry420', [auth.address, modules.address, profiles.address]);
   const accounting = await deploy('VaultAccounting420', 'VaultAccounting420', [auth.address]);
@@ -158,7 +184,7 @@ async function deployStage() {
   const registry = await deploy('BetRegistry420', 'BetRegistry420', [auth.address]);
   const wagerRouter = await deploy('WagerRouter420', 'WagerRouter420', [
     auth.address, games.address, modules.address, operators.address, profiles.address,
-    risk.address, registry.address, vault.address,
+    access.address, risk.address, registry.address, vault.address,
   ]);
   const randomness = await deploy('RandomnessRouter420', 'RandomnessRouter420', [auth.address, profiles.address, registry.address]);
   const dice = await deploy('DiceV1420', 'DiceV1420', [registry.address, randomness.address, GAME, GAME_V1, RULESET]);
@@ -189,6 +215,7 @@ async function deployStage() {
     grant(account.address, ACTION.PROFILE_REGISTER, scopes.risk, 0n, 'register risk profile'),
     grant(account.address, ACTION.PROFILE_REGISTER, scopes.settlement, 0n, 'register settlement profile'),
     grant(account.address, ACTION.PROFILE_REGISTER, scopes.access, 0n, 'register access profile'),
+    grant(account.address, ACTION.ACCESS_CONFIGURE, scopes.access, 0n, 'configure access and responsible-gaming profile'),
     grant(account.address, ACTION.MODULE_REGISTER, scopes.module, 0n, 'register Dice module'),
     grant(account.address, ACTION.MODULE_APPROVE, scopes.module, 0n, 'approve Dice module'),
     grant(account.address, ACTION.OPERATOR_REGISTER, scopes.operator, 0n, 'register Dice operator'),
@@ -198,6 +225,7 @@ async function deployStage() {
     grant(account.address, ACTION.RISK_CONFIGURE, scopes.risk, 0n, 'configure bounded risk profile'),
     grant(account.address, ACTION.RANDOMNESS_CONFIGURE, scopes.randomness, 0n, 'configure randomness provider'),
     grant(account.address, ACTION.LP_DEPOSIT, scopes.vault, seedLiquidity, 'seed bankroll liquidity'),
+    grant(wagerRouter.address, ACTION.ACCESS_RECORD, scopes.access, riskTerms.maxStakePerWager, 'consume access and responsible-gaming limits'),
     grant(wagerRouter.address, ACTION.VAULT_ESCROW_STAKE, scopes.vault, riskTerms.maxStakePerWager, 'escrow accepted player stakes'),
     grant(wagerRouter.address, ACTION.RISK_RESERVE, scopes.vault, riskTerms.maxReservedLiabilityPerWager, 'reserve accepted wager exposure'),
     grant(wagerRouter.address, ACTION.WAGER_RECORD, scopes.vault, riskTerms.maxStakePerWager, 'record accepted wagers'),
@@ -215,6 +243,7 @@ async function deployStage() {
       dice: dice.address,
       diceView: diceView.address,
       wagerRouter: wagerRouter.address,
+      accessPolicy: access.address,
       vault: vault.address,
       asset,
       betAuthorization: auth.address,
@@ -230,6 +259,7 @@ async function deployStage() {
       capabilityRegistry,
       modules: modules.address,
       profiles: profiles.address,
+      accessPolicy: access.address,
       operators: operators.address,
       games: games.address,
       accounting: accounting.address,
@@ -239,6 +269,7 @@ async function deployStage() {
       randomnessRouter: randomness.address,
       settlementEngine: settlement.address,
       randomnessProvider,
+      accessCredentialVerifier,
     },
     parameters: {
       vaultId: VAULT,
@@ -248,6 +279,11 @@ async function deployStage() {
       riskProfileId: RISK,
       settlementProfileId: SETTLEMENT,
       accessProfileId: ACCESS,
+      accessCredentialLabels,
+      accessCredentialIds,
+      accessMaxStakePerWager,
+      accessMaxStakePerPeriod,
+      accessPeriodSeconds,
       rulesetId: RULESET,
       withdrawalCooldownSeconds: withdrawalCooldown,
       seedLiquidity,
@@ -260,7 +296,7 @@ async function deployStage() {
   fs.writeFileSync(outputPath, serialize(manifest));
   console.log(`shared Dice deployment staged: ${outputPath}`);
   console.log(`required capability grants: ${grants.length}`);
-  console.log('No registry/module/game/risk/randomness state was configured before capability approval.');
+  console.log('No registry/module/game/access/risk/randomness state was configured before capability approval.');
 }
 
 async function promoteStage() {
@@ -274,8 +310,11 @@ async function promoteStage() {
 
   run('forge', ['build'], { cwd: contractsDir });
   for (const [label, address] of Object.entries({ ...manifest.contracts, ...manifest.deployment })) {
-    if (label === 'randomnessProvider') continue;
+    if (label === 'randomnessProvider' || label === 'accessCredentialVerifier') continue;
     if (typeof address === 'string' && /^0x[0-9a-fA-F]{40}$/.test(address)) await requireCode(address, label);
+  }
+  if (manifest.deployment.accessCredentialVerifier && getAddress(manifest.deployment.accessCredentialVerifier) !== zeroAddress) {
+    await requireCode(manifest.deployment.accessCredentialVerifier, 'access credential verifier');
   }
 
   const capabilityRegistry = {
@@ -300,6 +339,7 @@ async function promoteStage() {
 
   const modules = targetFromManifest(manifest, 'modules', 'BetModuleRegistry420', 'BetModuleRegistry420');
   const profiles = targetFromManifest(manifest, 'profiles', 'BetProfileRegistry420', 'BetProfileRegistry420');
+  const access = targetFromManifest(manifest, 'accessPolicy', 'BetAccessPolicy420', 'BetAccessPolicy420');
   const operators = targetFromManifest(manifest, 'operators', 'BetOperatorRegistry420', 'BetOperatorRegistry420');
   const games = targetFromManifest(manifest, 'games', 'BetGameRegistry420', 'BetGameRegistry420');
   const accounting = targetFromManifest(manifest, 'accounting', 'VaultAccounting420', 'VaultAccounting420');
@@ -318,6 +358,16 @@ async function promoteStage() {
   ]) {
     await write(profiles, 'registerProfile', [profileId, profileType, id(`manifest:${profileId}`), id(`artifact:${profileId}`)]);
   }
+  await write(access, 'configurePolicy', [
+    ACCESS,
+    token.address,
+    getAddress(manifest.deployment.accessCredentialVerifier || zeroAddress),
+    manifest.parameters.accessCredentialIds || [],
+    BigInt(manifest.parameters.accessMaxStakePerWager || 0),
+    BigInt(manifest.parameters.accessMaxStakePerPeriod || 0),
+    BigInt(manifest.parameters.accessPeriodSeconds || 0),
+    id('access-policy'),
+  ]);
   await write(modules, 'registerModule', [MODULE, MODULE_V1, dice.address, id('module-manifest'), id('module-code')]);
   await write(modules, 'approve', [MODULE_V1]);
   await write(operators, 'registerOperator', [OPERATOR, account.address, id('operator-manifest')]);
@@ -362,7 +412,7 @@ async function promoteStage() {
     promotion: {
       ...manifest.promotion,
       promotedAt: new Date().toISOString(),
-      notes: 'Shared capability prerequisites verified on-chain; protocol relationships configured; bankroll seeded.',
+      notes: 'Shared capability prerequisites verified on-chain; access/risk/randomness relationships configured; bankroll seeded.',
     },
   };
   fs.writeFileSync(outputPath, serialize(promoted));

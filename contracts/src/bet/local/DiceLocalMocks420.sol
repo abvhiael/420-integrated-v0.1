@@ -6,7 +6,6 @@ import "../../interfaces/genesis/ICapabilityRegistry420.sol";
 /// @dev Local-development capability registry only. Never deploy to a promoted shared network.
 contract DiceLocalCapabilityRegistry420 is ICapabilityRegistry420 {
     address public immutable owner;
-    mapping(bytes32 => CapabilityGrant) private _grants;
     mapping(bytes32 => bool) private _allowed;
 
     error NotOwner();
@@ -20,8 +19,9 @@ contract DiceLocalCapabilityRegistry420 is ICapabilityRegistry420 {
         _allowed[keccak256(abi.encode(principal, componentId, capabilityId, scopeHash))] = value;
     }
 
-    function grant(bytes32 grantId) external view returns (CapabilityGrant memory) {
-        return _grants[grantId];
+    function grant(bytes32) external view returns (CapabilityGrant memory) {
+        CapabilityGrant memory emptyGrant;
+        return emptyGrant;
     }
 
     function isAuthorized(address principal, bytes32 componentId, bytes32 capabilityId, bytes32 scopeHash, uint256)

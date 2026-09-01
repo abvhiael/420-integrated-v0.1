@@ -5,6 +5,7 @@ import "../src/interfaces/genesis/ICapabilityRegistry420.sol";
 import "../src/bet/BankrollVault420.sol";
 import "../src/bet/BetAccessPolicy420.sol";
 import "../src/bet/BetAuthorization420.sol";
+import "../src/bet/BetEconomics420.sol";
 import "../src/bet/BetGameRegistry420.sol";
 import "../src/bet/BetIds420.sol";
 import "../src/bet/BetModuleRegistry420.sol";
@@ -87,6 +88,7 @@ contract BetDiceVerticalSlice420Test {
     bytes32 constant SETTLEMENT = keccak256("profile/settlement/v1");
     bytes32 constant ACCESS = keccak256("profile/access/v1");
     bytes32 constant RULESET = keccak256("ruleset/dice/v1");
+    bytes32 constant FEE_SCHEDULE = keccak256("fees/dice/v1");
 
     struct Suite {
         MockCapabilityRegistryBetDiceVerticalSlice420 caps;
@@ -100,6 +102,7 @@ contract BetDiceVerticalSlice420Test {
         WithdrawalQueue420 queue;
         MockBetDiceVerticalSliceToken420 token;
         BankrollVault420 vault;
+        BetEconomics420 economics;
         RiskManager420 risk;
         BetRegistry420 registry;
         WagerRouter420 wagerRouter;
@@ -124,15 +127,18 @@ contract BetDiceVerticalSlice420Test {
         s.queue = new WithdrawalQueue420(address(s.auth));
         s.token = new MockBetDiceVerticalSliceToken420();
         s.vault = new BankrollVault420(VAULT, address(s.token), address(s.auth), address(s.accounting), address(s.queue), 1 days);
+        s.economics = new BetEconomics420(address(s.auth), address(s.operators), address(s.token));
         s.risk = new RiskManager420(address(s.auth), address(s.profiles), address(s.accounting));
         s.registry = new BetRegistry420(address(s.auth));
         s.wagerRouter = new WagerRouter420(
             address(s.auth), address(s.games), address(s.modules), address(s.operators), address(s.profiles),
-            address(s.access), address(s.risk), address(s.registry), address(s.vault)
+            address(s.access), address(s.economics), address(s.risk), address(s.registry), address(s.vault)
         );
         s.randomness = new RandomnessRouter420(address(s.auth), address(s.profiles), address(s.registry));
         s.dice = new DiceV1420(address(s.registry), address(s.randomness), GAME, GAME_V1, RULESET);
-        s.settlement = new SettlementEngine420(address(s.auth), address(s.registry), address(s.risk), address(s.vault));
+        s.settlement = new SettlementEngine420(
+            address(s.auth), address(s.registry), address(s.risk), address(s.vault), address(s.economics)
+        );
 
         _allow(s, ADMIN, BetIds420.ACTION_VAULT_REGISTER, s.auth.scopeForVault(VAULT));
         vm.prank(ADMIN);
@@ -145,16 +151,19 @@ contract BetDiceVerticalSlice420Test {
         _seedProfiles(s);
         _seedAccess(s);
         _seedModuleGameOperator(s);
+        _seedEconomics(s);
         _seedRisk(s);
         _seedRandomness(s);
         _seedLiquidity(s, 1_000 ether);
 
         _allow(s, address(s.wagerRouter), BetIds420.ACTION_ACCESS_RECORD, s.auth.scopeForProfile(ACCESS));
+        _allow(s, address(s.wagerRouter), BetIds420.ACTION_ECONOMICS_BIND, s.auth.scopeForGameVersion(GAME_V1));
         _allow(s, address(s.wagerRouter), BetIds420.ACTION_VAULT_ESCROW_STAKE, s.auth.scopeForVault(VAULT));
         _allow(s, address(s.wagerRouter), BetIds420.ACTION_RISK_RESERVE, s.auth.scopeForVault(VAULT));
         _allow(s, address(s.wagerRouter), BetIds420.ACTION_WAGER_RECORD, s.auth.scopeForVault(VAULT));
         _allow(s, address(s.settlement), BetIds420.ACTION_RISK_RELEASE, s.auth.scopeForVault(VAULT));
         _allow(s, address(s.settlement), BetIds420.ACTION_VAULT_SETTLE_WAGER, s.auth.scopeForVault(VAULT));
+        _allow(s, address(s.settlement), BetIds420.ACTION_ECONOMICS_FINALIZE, s.auth.scopeForGameVersion(GAME_V1));
     }
 
     function _seedProfiles(Suite memory s) private {
@@ -169,6 +178,20 @@ contract BetDiceVerticalSlice420Test {
         bytes32[] memory requirements = new bytes32[](0);
         vm.prank(ADMIN);
         s.access.configurePolicy(ACCESS, address(s.token), address(0), requirements, 0, 0, 0, keccak256("access-policy"));
+    }
+
+    function _seedEconomics(Suite memory s) private {
+        _allow(s, ADMIN, BetIds420.ACTION_ECONOMICS_CONFIGURE, s.auth.scopeForGameVersion(GAME_V1));
+        vm.prank(ADMIN);
+        s.economics.configureFeeSchedule(BetEconomics420.FeeSchedule({
+            scheduleId: FEE_SCHEDULE,
+            gameVersionId: GAME_V1,
+            protocolFeeBps: 0,
+            operatorFeeBps: 0,
+            protocolRecipient: address(0),
+            manifestHash: keccak256("fees/dice/v1"),
+            exists: false
+        }));
     }
 
     function _registerProfile(Suite memory s, bytes32 id, bytes32 profileType) private {
@@ -290,6 +313,8 @@ contract BetDiceVerticalSlice420Test {
         require(s.accounting.getVault(VAULT).activeReservedLiability == reservedLiability, "liability not reserved");
         require(s.registry.getWager(wagerId).status == BetTypes420.WagerStatus.ACCEPTED, "wager not accepted");
         require(s.access.policyUsage(ACCESS, PLAYER).stakeUsed == 0, "unbounded profile unexpectedly tracked period");
+        BetEconomics420.WagerFeeBinding memory fees = s.economics.getWagerFee(wagerId);
+        require(fees.scheduleId == FEE_SCHEDULE && fees.protocolFee == 0 && fees.operatorFee == 0, "fee terms not bound");
 
         _allow(s, REQUESTER, BetIds420.ACTION_RANDOMNESS_REQUEST, s.auth.scopeForWager(wagerId));
         vm.prank(REQUESTER);
@@ -318,6 +343,7 @@ contract BetDiceVerticalSlice420Test {
         require(s.vault.activeWagerStakeEscrow() == 0, "aggregate escrow not cleared");
         require(s.registry.settlementExists(wagerId), "settlement transcript missing");
         require(s.registry.getWager(wagerId).status == BetTypes420.WagerStatus.SETTLED, "wager not terminal");
+        require(s.economics.getWagerFee(wagerId).finalized, "fee binding not finalized");
 
         VaultAccounting420.VaultState memory vaultState = s.accounting.getVault(VAULT);
         if (result.outcome == BetTypes420.TerminalOutcome.WIN) {

@@ -17,8 +17,8 @@ interface VmLaunchpad420 {
 contract MockLaunchpadCapabilities420 is ICapabilityRegistry420 {
     bool public allowed;
     function setAllowed(bool allowed_) external { allowed = allowed_; }
-    function grant(bytes32) external pure returns (CapabilityGrant memory g) { return g; }
-    function isAuthorized(address, bytes32, bytes32, bytes32, uint256) external view returns (bool) { return allowed; }
+    function grant(bytes32) external pure override returns (CapabilityGrant memory g) { return g; }
+    function isAuthorized(address, bytes32, bytes32, bytes32, uint256) external view override returns (bool) { return allowed; }
 }
 
 contract LaunchpadGenesis420Test {

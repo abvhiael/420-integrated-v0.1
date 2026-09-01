@@ -1,0 +1,21 @@
+{
+  "schema":"420-attention-genesis-v1",
+  "name":"420 Cannaseur / Attention",
+  "purpose":"Opt-in attention economy for sponsor-funded campaigns and participant rewards denominated in native 420.",
+  "invariants":[
+    "ATTN-INV-001: Participation is opt-in; no proof is accepted without active account or campaign consent.",
+    "ATTN-INV-002: Campaign media, raw behavioral telemetry and private audience data are not canonical on-chain state.",
+    "ATTN-INV-003: Campaign economics and audience-policy commitments are immutable after campaign creation.",
+    "ATTN-INV-004: Only the campaign-bound verifier may commit attention proofs for that campaign.",
+    "ATTN-INV-005: Proof nullifiers are single-use and fail closed on replay.",
+    "ATTN-INV-006: Proof observation time must fall inside an active campaign window.",
+    "ATTN-INV-007: Each proof can create at most one reward entitlement.",
+    "ATTN-INV-008: Per-account campaign rewards cannot exceed the immutable campaign cap.",
+    "ATTN-INV-009: Sponsor campaign funds are segregated liabilities inside AttentionTreasury and cannot be spent by generic governance treasury transfers.",
+    "ATTN-INV-010: A reward must be reserved against funded campaign balance before it can be claimed.",
+    "ATTN-INV-011: Reward release is single-use and can only pay the canonical participant account.",
+    "ATTN-INV-012: Unused sponsor funds can only be refunded after campaign close and after all reserved rewards are cleared.",
+    "ATTN-INV-013: Capability delegation is limited to consent management and reward claiming; it grants no custody, governance, bridge, validator or unrestricted smart-account authority.",
+    "ATTN-INV-014: Advertisers and verifiers never receive wallet keys or arbitrary transaction authority through the Attention protocol."
+  ]
+}

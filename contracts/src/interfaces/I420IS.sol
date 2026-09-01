@@ -44,7 +44,7 @@ interface I420ISPrivacyProof {
 
 interface I420ISAdapter {
     function standardVersion() external pure returns (uint32);
-    function adapterType() external pure returns (bytes32);
+    function adapterType() external view returns (bytes32);
     function supportsDomain(bytes32 domainId) external view returns (bool);
     function adapterManifestHash() external view returns (bytes32);
 }

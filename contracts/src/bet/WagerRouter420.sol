@@ -5,6 +5,7 @@ import "../interfaces/I420System.sol";
 import "./BankrollVault420.sol";
 import "./BetAccessPolicy420.sol";
 import "./BetAuthorization420.sol";
+import "./BetEconomics420.sol";
 import "./BetEmergencyState420.sol";
 import "./BetGameRegistry420.sol";
 import "./BetIds420.sol";
@@ -32,6 +33,7 @@ contract WagerRouter420 is I420System {
     BetOperatorRegistry420 public immutable operators;
     BetProfileRegistry420 public immutable profiles;
     BetAccessPolicy420 public immutable accessPolicy;
+    BetEconomics420 public immutable economics;
     RiskManager420 public immutable riskManager;
     BetRegistry420 public immutable betRegistry;
     BankrollVault420 public immutable vault;
@@ -74,6 +76,7 @@ contract WagerRouter420 is I420System {
         address operators_,
         address profiles_,
         address accessPolicy_,
+        address economics_,
         address riskManager_,
         address betRegistry_,
         address vault_
@@ -81,7 +84,8 @@ contract WagerRouter420 is I420System {
         if (
             authorization_ == address(0) || games_ == address(0) || modules_ == address(0)
                 || operators_ == address(0) || profiles_ == address(0) || accessPolicy_ == address(0)
-                || riskManager_ == address(0) || betRegistry_ == address(0) || vault_ == address(0)
+                || economics_ == address(0) || riskManager_ == address(0) || betRegistry_ == address(0)
+                || vault_ == address(0)
         ) revert ZeroAddress();
         authorization = BetAuthorization420(authorization_);
         games = BetGameRegistry420(games_);
@@ -89,6 +93,7 @@ contract WagerRouter420 is I420System {
         operators = BetOperatorRegistry420(operators_);
         profiles = BetProfileRegistry420(profiles_);
         accessPolicy = BetAccessPolicy420(accessPolicy_);
+        economics = BetEconomics420(payable(economics_));
         riskManager = RiskManager420(riskManager_);
         betRegistry = BetRegistry420(betRegistry_);
         vault = BankrollVault420(payable(vault_));
@@ -106,8 +111,6 @@ contract WagerRouter420 is I420System {
     function systemName() external pure returns (string memory) { return "WagerRouter420"; }
     function protocolVersion() external pure returns (uint32) { return 1; }
 
-    /// @notice One-time binding of the canonical emergency-state contract.
-    /// @dev Binding itself is capability-scoped. Once installed it cannot be replaced or removed.
     function bindEmergencyState(address emergencyState_) external {
         if (emergencyState_ == address(0)) revert ZeroAddress();
         if (address(emergencyState) != address(0)) revert EmergencyAlreadyBound();
@@ -148,8 +151,6 @@ contract WagerRouter420 is I420System {
             )
         ) revert Unauthorized();
 
-        // Access/RG consumption is deliberately before nonce use, escrow, and risk reservation.
-        // Any downstream revert rolls this accounting back atomically with the wager attempt.
         accessPolicy.validateAndRecord(game.accessPolicyId, msg.sender, asset, request.stake);
 
         uint256 nonce = nextNonce[msg.sender];
@@ -166,6 +167,10 @@ contract WagerRouter420 is I420System {
                 request.paramsHash
             )
         );
+
+        // Fee terms are copied/reserved before stake custody or bankroll liability changes.
+        // Any later revert rolls the fee reservation back atomically with the wager attempt.
+        economics.bindWager(wagerId, game.gameVersionId, request.operatorId, request.stake);
 
         if (asset == address(0)) {
             if (msg.value != request.stake) revert WrongValue();

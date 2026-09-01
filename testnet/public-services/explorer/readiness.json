@@ -1,15 +1,29 @@
 {
-  "schema": "420-testnet-explorer-readiness-v1",
+  "schema": "420-testnet-explorer-readiness-v2",
+  "genesis_profile": "contracts/config/420explorer-genesis.json",
   "backend": {
     "url": "REPLACE",
     "status": "PENDING",
     "required_checks": [
-      "indexes blocks",
+      "indexes blocks by canonical hash and chain id",
       "indexes transactions",
       "indexes receipts/logs",
-      "tracks finalized block",
-      "survives restart",
-      "reorg handling limited to non-finalized history"
+      "tracks head safe and finalized independently",
+      "survives restart and resumes deterministically",
+      "reorg handling limited to non-finalized history",
+      "can rebuild the complete index from supported node/RPC data",
+      "reports indexed height and finalized height",
+      "detects wrong-chain RPC endpoints"
+    ]
+  },
+  "protocol_discovery": {
+    "registry": "420Registry / ProtocolRegistry",
+    "required_checks": [
+      "resolves active registered services",
+      "preserves historical service/version decoding",
+      "shows runtime code hash",
+      "shows manifest/interface commitments when registered",
+      "fails closed on inactive registry resolution"
     ]
   },
   "frontend": {
@@ -18,11 +32,22 @@
     "required_views": [
       "block",
       "transaction",
+      "receipt/logs",
       "address",
       "contract",
+      "token/asset activity",
       "validator",
       "epoch/rotation",
+      "protocol service/version",
       "network status"
+    ],
+    "required_labels": [
+      "chain id",
+      "head",
+      "safe",
+      "finalized",
+      "indexed height",
+      "finalized height"
     ]
   },
   "consensus_fields": [
@@ -35,5 +60,13 @@
     "proposer seat",
     "proposer rank",
     "QC signer count"
-  ]
+  ],
+  "authority": {
+    "canonical_state": false,
+    "custody": false,
+    "governance": false,
+    "bridge": false,
+    "validator": false,
+    "smart_account_execution": false
+  }
 }

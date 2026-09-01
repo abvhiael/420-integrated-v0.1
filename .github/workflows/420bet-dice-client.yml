@@ -42,7 +42,7 @@ jobs:
         run: npm run manifest:selftest
       - name: Syntax-check deployment smoke scripts
         working-directory: clients/420bet-dice-v1
-        run: node --check scripts/deployment-manifest.mjs && node --check scripts/generate-config.mjs && node --check scripts/manifest-to-config.mjs && node --check scripts/smoke-rpc.mjs && node --check scripts/local-deploy-smoke.mjs
+        run: node --check scripts/deployment-manifest.mjs && node --check scripts/generate-config.mjs && node --check scripts/manifest-to-config.mjs && node --check scripts/smoke-rpc.mjs && node --check scripts/local-deploy-smoke.mjs && node --check scripts/shared-deploy.mjs
       - name: Deploy configured DiceV1 stack to Anvil and smoke it
         working-directory: clients/420bet-dice-v1
         run: npm run local:deploy-smoke

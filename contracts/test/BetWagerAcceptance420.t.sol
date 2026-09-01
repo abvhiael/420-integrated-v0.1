@@ -5,6 +5,7 @@ import "../src/interfaces/genesis/ICapabilityRegistry420.sol";
 import "../src/bet/BankrollVault420.sol";
 import "../src/bet/BetAccessPolicy420.sol";
 import "../src/bet/BetAuthorization420.sol";
+import "../src/bet/BetEconomics420.sol";
 import "../src/bet/BetGameRegistry420.sol";
 import "../src/bet/BetIds420.sol";
 import "../src/bet/BetModuleRegistry420.sol";
@@ -82,6 +83,7 @@ contract BetWagerAcceptance420Test {
     bytes32 constant SETTLEMENT = keccak256("profile/settlement/v1");
     bytes32 constant ACCESS = keccak256("profile/access/v1");
     bytes32 constant RULESET = keccak256("ruleset/dice/v1");
+    bytes32 constant FEE_SCHEDULE = keccak256("fees/dice/v1");
 
     struct Suite {
         MockCapabilityRegistryBetWager420 caps;
@@ -95,6 +97,7 @@ contract BetWagerAcceptance420Test {
         WithdrawalQueue420 queue;
         MockBetWagerToken420 token;
         BankrollVault420 vault;
+        BetEconomics420 economics;
         RiskManager420 risk;
         BetRegistry420 registry;
         WagerRouter420 router;
@@ -116,6 +119,7 @@ contract BetWagerAcceptance420Test {
         s.queue = new WithdrawalQueue420(address(s.auth));
         s.token = new MockBetWagerToken420();
         s.vault = new BankrollVault420(VAULT, address(s.token), address(s.auth), address(s.accounting), address(s.queue), 1 days);
+        s.economics = new BetEconomics420(address(s.auth), address(s.operators), address(s.token));
         s.risk = new RiskManager420(address(s.auth), address(s.profiles), address(s.accounting));
         s.registry = new BetRegistry420(address(s.auth));
         s.router = new WagerRouter420(
@@ -125,6 +129,7 @@ contract BetWagerAcceptance420Test {
             address(s.operators),
             address(s.profiles),
             address(s.access),
+            address(s.economics),
             address(s.risk),
             address(s.registry),
             address(s.vault)
@@ -140,10 +145,12 @@ contract BetWagerAcceptance420Test {
         _seedProfiles(s);
         _seedAccess(s);
         _seedModuleGameOperator(s);
+        _seedEconomics(s);
         _seedRisk(s);
         _seedLiquidity(s, 1_000 ether);
 
         _allow(s, address(s.router), BetIds420.ACTION_ACCESS_RECORD, s.auth.scopeForProfile(ACCESS));
+        _allow(s, address(s.router), BetIds420.ACTION_ECONOMICS_BIND, s.auth.scopeForGameVersion(GAME_V1));
         _allow(s, address(s.router), BetIds420.ACTION_VAULT_ESCROW_STAKE, s.auth.scopeForVault(VAULT));
         _allow(s, address(s.router), BetIds420.ACTION_RISK_RESERVE, s.auth.scopeForVault(VAULT));
         _allow(s, address(s.router), BetIds420.ACTION_WAGER_RECORD, s.auth.scopeForVault(VAULT));
@@ -161,6 +168,20 @@ contract BetWagerAcceptance420Test {
         bytes32[] memory requirements = new bytes32[](0);
         vm.prank(ADMIN);
         s.access.configurePolicy(ACCESS, address(s.token), address(0), requirements, 0, 0, 0, keccak256("access-policy"));
+    }
+
+    function _seedEconomics(Suite memory s) private {
+        _allow(s, ADMIN, BetIds420.ACTION_ECONOMICS_CONFIGURE, s.auth.scopeForGameVersion(GAME_V1));
+        vm.prank(ADMIN);
+        s.economics.configureFeeSchedule(BetEconomics420.FeeSchedule({
+            scheduleId: FEE_SCHEDULE,
+            gameVersionId: GAME_V1,
+            protocolFeeBps: 0,
+            operatorFeeBps: 0,
+            protocolRecipient: address(0),
+            manifestHash: keccak256("fees/dice/v1"),
+            exists: false
+        }));
     }
 
     function _registerProfile(Suite memory s, bytes32 id, bytes32 profileType) private {
@@ -289,6 +310,8 @@ contract BetWagerAcceptance420Test {
         require(wager.stake == 100 ether && wager.maxGrossPayout == 500 ether, "economic terms changed");
         require(wager.riskProfileId == RISK && wager.rulesetId == RULESET, "profile/ruleset not bound");
         require(wager.status == BetTypes420.WagerStatus.ACCEPTED, "not accepted");
+        BetEconomics420.WagerFeeBinding memory fees = s.economics.getWagerFee(wagerId);
+        require(fees.scheduleId == FEE_SCHEDULE && fees.protocolFee == 0 && fees.operatorFee == 0, "fee terms not bound");
     }
 
     function testRiskFailureRollsBackStakeEscrowNonceAndAccessUsage() public {

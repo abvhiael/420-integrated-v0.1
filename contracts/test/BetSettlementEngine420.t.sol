@@ -4,7 +4,9 @@ pragma solidity ^0.8.24;
 import "../src/interfaces/genesis/ICapabilityRegistry420.sol";
 import "../src/bet/BankrollVault420.sol";
 import "../src/bet/BetAuthorization420.sol";
+import "../src/bet/BetEconomics420.sol";
 import "../src/bet/BetIds420.sol";
+import "../src/bet/BetOperatorRegistry420.sol";
 import "../src/bet/BetProfileRegistry420.sol";
 import "../src/bet/BetRegistry420.sol";
 import "../src/bet/BetTypes420.sol";
@@ -64,6 +66,7 @@ contract BetSettlementEngine420Test {
     address constant LP = address(0xB0B);
     address constant PLAYER = address(0xC0FFEE);
     address constant SETTLER = address(0x5151);
+    address constant OPERATOR_ACCOUNT = address(0x0B0B);
 
     bytes32 constant VAULT = keccak256("420BET.VAULT.CADC.1");
     bytes32 constant GAME = keccak256("420BET.GAME.DICE");
@@ -74,15 +77,18 @@ contract BetSettlementEngine420Test {
     bytes32 constant SETTLEMENT = keccak256("profile/settlement/v1");
     bytes32 constant ACCESS = keccak256("profile/access/v1");
     bytes32 constant RULESET = keccak256("ruleset/dice/v1");
+    bytes32 constant FEE_SCHEDULE = keccak256("fees/dice/v1");
 
     struct Suite {
         MockCapabilityRegistryBetSettlement420 caps;
         BetAuthorization420 auth;
         BetProfileRegistry420 profiles;
+        BetOperatorRegistry420 operators;
         VaultAccounting420 accounting;
         WithdrawalQueue420 queue;
         MockBetSettlementToken420 token;
         BankrollVault420 vault;
+        BetEconomics420 economics;
         RiskManager420 risk;
         BetRegistry420 registry;
         SettlementEngine420 engine;
@@ -96,13 +102,17 @@ contract BetSettlementEngine420Test {
         s.caps = new MockCapabilityRegistryBetSettlement420();
         s.auth = new BetAuthorization420(address(s.caps));
         s.profiles = new BetProfileRegistry420(address(s.auth));
+        s.operators = new BetOperatorRegistry420(address(s.auth));
         s.accounting = new VaultAccounting420(address(s.auth));
         s.queue = new WithdrawalQueue420(address(s.auth));
         s.token = new MockBetSettlementToken420();
         s.vault = new BankrollVault420(VAULT, address(s.token), address(s.auth), address(s.accounting), address(s.queue), 1 days);
+        s.economics = new BetEconomics420(address(s.auth), address(s.operators), address(s.token));
         s.risk = new RiskManager420(address(s.auth), address(s.profiles), address(s.accounting));
         s.registry = new BetRegistry420(address(s.auth));
-        s.engine = new SettlementEngine420(address(s.auth), address(s.registry), address(s.risk), address(s.vault));
+        s.engine = new SettlementEngine420(
+            address(s.auth), address(s.registry), address(s.risk), address(s.vault), address(s.economics)
+        );
 
         _allow(s, ADMIN, BetIds420.ACTION_VAULT_REGISTER, s.auth.scopeForVault(VAULT));
         vm.prank(ADMIN);
@@ -131,6 +141,26 @@ contract BetSettlementEngine420Test {
         vm.prank(ADMIN);
         s.risk.configureProfile(p);
 
+        bytes32 operatorScope = s.auth.scopeForOperator(OPERATOR);
+        _allow(s, ADMIN, BetIds420.ACTION_OPERATOR_REGISTER, operatorScope);
+        _allow(s, ADMIN, BetIds420.ACTION_OPERATOR_ACTIVATE, operatorScope);
+        vm.prank(ADMIN);
+        s.operators.registerOperator(OPERATOR, OPERATOR_ACCOUNT, keccak256("operator-manifest"));
+        vm.prank(ADMIN);
+        s.operators.activate(OPERATOR);
+
+        _allow(s, ADMIN, BetIds420.ACTION_ECONOMICS_CONFIGURE, s.auth.scopeForGameVersion(GAME_V1));
+        vm.prank(ADMIN);
+        s.economics.configureFeeSchedule(BetEconomics420.FeeSchedule({
+            scheduleId: FEE_SCHEDULE,
+            gameVersionId: GAME_V1,
+            protocolFeeBps: 0,
+            operatorFeeBps: 0,
+            protocolRecipient: address(0),
+            manifestHash: keccak256("fees/dice/v1"),
+            exists: false
+        }));
+
         _allow(s, LP, BetIds420.ACTION_LP_DEPOSIT, s.auth.scopeForVault(VAULT));
         s.token.mint(LP, 1_000 ether);
         vm.prank(LP);
@@ -141,14 +171,17 @@ contract BetSettlementEngine420Test {
         _allow(s, address(this), BetIds420.ACTION_VAULT_ESCROW_STAKE, s.auth.scopeForVault(VAULT));
         _allow(s, address(this), BetIds420.ACTION_RISK_RESERVE, s.auth.scopeForVault(VAULT));
         _allow(s, address(this), BetIds420.ACTION_WAGER_RECORD, s.auth.scopeForVault(VAULT));
+        _allow(s, address(this), BetIds420.ACTION_ECONOMICS_BIND, s.auth.scopeForGameVersion(GAME_V1));
         _allow(s, address(s.engine), BetIds420.ACTION_RISK_RELEASE, s.auth.scopeForVault(VAULT));
         _allow(s, address(s.engine), BetIds420.ACTION_VAULT_SETTLE_WAGER, s.auth.scopeForVault(VAULT));
+        _allow(s, address(s.engine), BetIds420.ACTION_ECONOMICS_FINALIZE, s.auth.scopeForGameVersion(GAME_V1));
     }
 
     function _accept(Suite memory s, bytes32 wagerId, uint256 stake, uint256 maxGross) private {
         s.token.mint(PLAYER, stake);
         vm.prank(PLAYER);
         s.token.approve(address(s.vault), stake);
+        s.economics.bindWager(wagerId, GAME_V1, OPERATOR, stake);
         s.vault.escrowWagerStakeToken(wagerId, PLAYER, stake);
         s.risk.reserveExposure(wagerId, VAULT, GAME_V1, RISK, stake, maxGross, keccak256("dice"));
 
@@ -190,6 +223,7 @@ contract BetSettlementEngine420Test {
         require(s.vault.wagerStakeEscrow(wagerId) == 100 ether, "escrow changed");
         require(s.accounting.getVault(VAULT).activeReservedLiability == 400 ether, "liability changed");
         require(!s.registry.settlementExists(wagerId), "settlement recorded");
+        require(!s.economics.getWagerFee(wagerId).finalized, "fee finalized on denied settlement");
     }
 
     function testPartialReturnLossAbsorbsOnlyUnreturnedStake() public {
@@ -207,6 +241,7 @@ contract BetSettlementEngine420Test {
         require(s.token.balanceOf(PLAYER) == 40 ether, "partial return missing");
         require(s.token.balanceOf(address(s.vault)) == 1_060 ether, "custody mismatch");
         require(s.vault.activeWagerStakeEscrow() == 0, "escrow not cleared");
+        require(s.economics.getWagerFee(wagerId).finalized, "fee not finalized");
     }
 
     function testWinPaysEscrowPlusProfitWithoutDoubleCounting() public {
@@ -223,6 +258,7 @@ contract BetSettlementEngine420Test {
         require(v.activeReservedLiability == 0, "liability not released");
         require(s.token.balanceOf(PLAYER) == 500 ether, "winner not paid");
         require(s.token.balanceOf(address(s.vault)) == 600 ether, "custody mismatch");
+        require(s.economics.getWagerFee(wagerId).finalized, "fee not finalized");
     }
 
     function testPushAndVoidReturnStakeWithoutPnl() public {
@@ -234,6 +270,8 @@ contract BetSettlementEngine420Test {
         require(pushSuite.accounting.getVault(VAULT).totalAssets == 1_000 ether, "push assets changed");
         require(pushSuite.accounting.getVault(VAULT).realizedPnl == 0, "push pnl changed");
         require(pushSuite.token.balanceOf(PLAYER) == 100 ether, "push stake not returned");
+        require(pushSuite.economics.getWagerFee(pushId).finalized, "push fee not finalized");
+        require(!pushSuite.economics.getWagerFee(pushId).charged, "push charged fee");
 
         Suite memory voidSuite = _deploy();
         bytes32 voidId = keccak256("wager/void");
@@ -243,6 +281,8 @@ contract BetSettlementEngine420Test {
         require(voidSuite.accounting.getVault(VAULT).totalAssets == 1_000 ether, "void assets changed");
         require(voidSuite.accounting.getVault(VAULT).realizedPnl == 0, "void pnl changed");
         require(voidSuite.registry.getWager(voidId).status == BetTypes420.WagerStatus.VOID, "void status wrong");
+        require(voidSuite.economics.getWagerFee(voidId).finalized, "void fee not finalized");
+        require(!voidSuite.economics.getWagerFee(voidId).charged, "void charged fee");
     }
 
     function testIdenticalSettlementRetryIsIdempotentAndConflictFails() public {
@@ -275,5 +315,6 @@ contract BetSettlementEngine420Test {
         s.engine.settle(wagerId, BetTypes420.TerminalOutcome.WIN, 100 ether);
         require(s.vault.wagerStakeEscrow(wagerId) == 100 ether, "invalid settlement consumed escrow");
         require(s.accounting.getVault(VAULT).activeReservedLiability == 400 ether, "invalid settlement released risk");
+        require(!s.economics.getWagerFee(wagerId).finalized, "invalid settlement finalized fee");
     }
 }

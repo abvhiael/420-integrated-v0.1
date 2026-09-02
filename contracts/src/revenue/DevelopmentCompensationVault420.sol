@@ -93,6 +93,10 @@ contract DevelopmentCompensationVault420 is I420System {
         _requireAuthorized(msg.sender, sourceApplicationId, amount);
 
         bytes32 id = _consume(msg.sender, sourceApplicationId, revenueRef);
+        // The destination is the immutable deployment-configured 420 Integrated Labs beneficiary,
+        // never caller-selected. Source authorization, exact fee math, replay protection and the
+        // shared nonReentrant lock execute before this fixed-destination atomic forward.
+        // slither-disable-next-line arbitrary-send-eth
         (bool ok,) = payable(beneficiary).call{value: amount}("");
         if (!ok) revert TransferFailed();
 

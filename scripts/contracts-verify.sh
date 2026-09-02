@@ -23,7 +23,8 @@ for s in \
   scripts/verify-step6-contracts.py \
   scripts/verify-420pay-parameters.py \
   scripts/verify-420pay-implementation.py \
-  scripts/verify-420pay-hardening.py
+  scripts/verify-420pay-hardening.py \
+  scripts/verify-420bet-roulette-release.py
 do
   if [[ -f "$s" ]]; then
     python3 "$s" | tee -a "$ART/static-verification.txt"

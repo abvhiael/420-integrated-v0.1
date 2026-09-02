@@ -1,0 +1,44 @@
+{
+  "schema": "420-storage-proof-protocol-v1",
+  "status": "IMPLEMENTATION_QUALIFICATION",
+  "service": "420Store",
+  "parentProtocol": "420 Resource Protocol",
+  "design": {
+    "proofComputation": "off-chain or specialized verifier",
+    "onChainRole": "commitments, verifier policy, challenge replay protection, proof receipts and eligibility state",
+    "payloadStorage": "off-chain encrypted data only",
+    "proofClasses": [
+      "REPLICA_COMMITMENT",
+      "AVAILABILITY_WINDOW",
+      "AUDIT_RESPONSE"
+    ]
+  },
+  "contracts": [
+    "StorageProofIds420.sol",
+    "IStorageProofVerifier420.sol",
+    "StorageProofSchemeRegistry420.sol",
+    "StorageCommitmentRegistry420.sol",
+    "StorageProofRegistry420.sol"
+  ],
+  "invariants": [
+    "STORAGE-PROOF-INV-001: only active 420Store nodes belonging to active staked Resource Protocol providers may originate storage commitments",
+    "STORAGE-PROOF-INV-002: storage commitment identity is single-use and its provider, node, proof scheme, roots, byte size and time bounds are immutable after registration",
+    "STORAGE-PROOF-INV-003: proof schemes are versioned by immutable ids and require default-deny capability authorization to register or deactivate",
+    "STORAGE-PROOF-INV-004: a proof challenge must fall within the referenced storage commitment time interval",
+    "STORAGE-PROOF-INV-005: a commitment/challenge pair may produce at most one accepted proof receipt",
+    "STORAGE-PROOF-INV-006: proof acceptance fails closed when the store node or proof scheme is inactive, the verifier reverts, verification returns false, or the proof deadline is exceeded",
+    "STORAGE-PROOF-INV-007: accepted proof bytes are not retained on-chain; only a proof digest and canonical receipt metadata are stored",
+    "STORAGE-PROOF-INV-008: proof verification does not itself release payment; settlement modules consume verified proof state under separate accounting rules",
+    "STORAGE-PROOF-INV-009: encrypted user payloads, erasure-coded shards and private metadata remain off-chain",
+    "STORAGE-PROOF-INV-010: proof scheme verifiers are replaceable only by registering a new scheme id, preserving historical proof reproducibility"
+  ],
+  "futureExtensions": [
+    "storage lease/deal economics",
+    "provider collateral and storage-specific slashing",
+    "random challenge scheduling through 420 Random",
+    "erasure-set and redundancy manifests",
+    "repair attestations",
+    "retrieval proofs and bandwidth accounting",
+    "proof aggregation and succinct verifier adapters"
+  ]
+}

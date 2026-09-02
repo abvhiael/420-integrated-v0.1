@@ -11,7 +11,7 @@ contract MockCapabilityRegistryDevelopmentComp420 is ICapabilityRegistry420 {
     function setAllowedPrincipal(address principal) external { allowedPrincipal = principal; }
     function setEnabled(bool enabled_) external { enabled = enabled_; }
 
-    function grant(bytes32) external pure returns (CapabilityGrant memory g) { return g; }
+    function grant(bytes32) external pure override returns (CapabilityGrant memory g) { return g; }
 
     function isAuthorized(
         address principal,
@@ -19,7 +19,7 @@ contract MockCapabilityRegistryDevelopmentComp420 is ICapabilityRegistry420 {
         bytes32 capabilityId,
         bytes32,
         uint256
-    ) external view returns (bool) {
+    ) external view override returns (bool) {
         return enabled && principal == allowedPrincipal
             && componentId == DevelopmentCompensationIds420.COMPONENT_DEVELOPMENT_COMPENSATION
             && capabilityId == DevelopmentCompensationIds420.ACTION_CONTRIBUTE_REVENUE;

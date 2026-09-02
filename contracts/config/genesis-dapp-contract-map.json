@@ -1,7 +1,7 @@
 {
   "schema":"420-genesis-dapp-contract-map-v1",
   "apps":[
-    {"dapp":"420 Wallet","contracts":[],"note":"client application; discovers services through ProtocolRegistry"},
+    {"dapp":"420 Wallet","contracts":[],"note":"Genesis web client + Wallet Core profile. Client remains contract-free and non-canonical; account authority reuses SmartAccount420, SmartAccountFactory420 and CapabilityRegistry420 from 420 Smart Accounts, discovers ecosystem services through ProtocolRegistry, and exposes verified links to 420 Search, 420 AppStore, 420 AI, 420 Token and Developer Hub resources. Final production domain is configuration-driven and may be assigned after implementation."},
     {"dapp":"420 Smart Accounts","contracts":["SmartAccount420.sol","SmartAccountFactory420.sol","SmartAccountScopes420.sol","ECDSA420.sol","CapabilityRegistry420.sol"]},
     {"dapp":"420-IS","contracts":["I420IS.sol","InteropIds420.sol","InteropProviderRegistry420.sol","InteropNamespaceRegistry420.sol","InteropCheckpointRegistry420.sol","InteropRouter420.sol"]},
     {"dapp":"420 Random","contracts":["RandomnessRegistry.sol","RandomnessIds420.sol","RandomnessRouteRegistry420.sol","RandomnessProfileRegistry420.sol","RandomnessRouter420.sol","RandomnessDraw420.sol","IRandomnessRouter420.sol","IRandomnessVerifier420.sol"]},

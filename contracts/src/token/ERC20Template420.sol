@@ -19,6 +19,11 @@ contract ERC20Template420 {
     mapping(address => uint256) public nonces;
     mapping(address => address) public delegates;
     struct Checkpoint { uint48 fromBlock; uint208 votes; }
+    // Mapping values and their dynamic arrays are EVM-zero-initialized. An account's
+    // checkpoint array intentionally starts empty and is initialized by push() in
+    // _writeCheckpoint on its first vote-power change; there is no constructor-time
+    // address set that could or should be pre-populated.
+    // slither-disable-next-line uninitialized-state
     mapping(address => Checkpoint[]) private _checkpoints;
     bytes32 private constant PERMIT_TYPEHASH = keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
     error Unauthorized(); error ZeroAddress(); error InsufficientBalance(); error InsufficientAllowance(); error CapExceeded(); error FeatureDisabled(); error Expired(); error InvalidSignature(); error VoteOverflow();

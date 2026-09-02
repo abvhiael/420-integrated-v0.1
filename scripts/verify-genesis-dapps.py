@@ -59,16 +59,18 @@ tok=profile("contracts/config/420token-genesis.json")
 if tok:
     model=tok.get("model",{}); inv="\n".join(tok.get("invariants",[]))
     if tok.get("serviceId")!="420/service/token/v1" or tok.get("creationFeeNative420")!="42": errors.append("token service/fee invariant missing")
+    if tok.get("communityTreasuryVaultId")!="420/treasury/vault/token-creation-community-revenue/v1": errors.append("token community treasury vault binding missing")
     if len(tok.get("templates",[]))!=8: errors.append("token template catalog must contain eight frozen V1 templates")
-    for key in ["onlyFrozenTemplateIds","templateVersionRecorded","creatorRecorded","configHashRecorded","factoryDeploymentRecorded","exact42Native420Fee","feeForwardedAtomically","noFactoryCustody","noFactoryMintAuthorityAfterDeployment","creatorOwnsConfiguredAdminRights","templateDisableGovernanceOnly","newTemplateRequiresNewProtocolVersion"]:
+    for key in ["onlyFrozenTemplateIds","templateVersionRecorded","creatorRecorded","configHashRecorded","factoryDeploymentRecorded","exact42Native420Fee","feeDepositedToCanonicalCommunityTreasuryVault","feeDestinationImmutableAfterFactoryDeployment","feeForwardedThroughVaultAccounting","noFactoryCustody","noFactoryMintAuthorityAfterDeployment","creatorOwnsConfiguredAdminRights","templateDisableGovernanceOnly","newTemplateRequiresNewProtocolVersion"]:
         if model.get(key) is not True: errors.append("token model invariant missing: "+key)
-    for required in ["TOK-INV-001","TOK-INV-002","TOK-INV-003","TOK-INV-004","TOK-INV-005","TOK-INV-006","TOK-INV-007","TOK-INV-008","TOK-INV-009","TOK-INV-010"]:
+    for required in ["TOK-INV-001","TOK-INV-FEE","TOK-INV-002","TOK-INV-003","TOK-INV-004","TOK-INV-005","TOK-INV-006","TOK-INV-007","TOK-INV-008","TOK-INV-009","TOK-INV-010"]:
         if required not in inv: errors.append("missing token invariant "+required)
 service_ids=(root/"contracts/src/libraries/ServiceIds420.sol").read_text()
 for label,value in [("search","SEARCH = keccak256(\"420/service/search/v1\")"),("analytics","ANALYTICS = keccak256(\"420/service/analytics/v1\")"),("arbitration","ARBITRATION = keccak256(\"420/service/arbitration/v1\")"),("token","TOKEN = keccak256(\"420/service/token/v1\")")]:
     if value not in service_ids: errors.append(label+" canonical ServiceIds420 entry missing")
 factory=(root/"contracts/src/token/TokenFactory420.sol").read_text() if (root/"contracts/src/token/TokenFactory420.sol").exists() else ""
-if "CREATION_FEE = 42 ether" not in factory or "msg.value!=CREATION_FEE" not in factory or "feeReceiver.call{value:CREATION_FEE}" not in factory: errors.append("token exact-fee forwarding invariant missing")
+if "CREATION_FEE = 42 ether" not in factory or "msg.value!=CREATION_FEE" not in factory: errors.append("token exact-fee invariant missing")
+if "COMMUNITY_TOKEN_REVENUE_VAULT" not in factory or "communityTreasuryVault.depositNative{value:CREATION_FEE}" not in factory: errors.append("token community treasury deposit invariant missing")
 if "new ERC20Template420" not in factory or "new ERC721Template420" not in factory or "new ERC1155Template420" not in factory: errors.append("token frozen factory deployment paths missing")
 stake=(root/"contracts/src/apps/Stake420.sol").read_text()
 if "delegationEnabled() external pure returns (bool) { return false; }" not in stake: errors.append("stake delegation invariant missing")

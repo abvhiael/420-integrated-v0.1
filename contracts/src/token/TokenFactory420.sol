@@ -34,7 +34,7 @@ contract TokenFactory420 is I420System {
     }
     modifier nonReentrant(){if(_entered) revert Reentrancy();_entered=true;_;_entered=false;}
     modifier exactFee(){if(msg.value!=CREATION_FEE) revert IncorrectFee();_;}
-    function createERC20(bytes32 templateId,string calldata name,string calldata symbol,uint256 initialSupply,uint256 cap_,bytes32 userSalt) external payable nonReentrant exactFee returns(address token){if(!templates.enabled(templateId)) revert TemplateDisabled();bool mintable;bool burnable;bool permit_;bool votes_;uint256 effectiveCap;
+    function createERC20(bytes32 templateId,string calldata name,string calldata symbol,uint256 initialSupply,uint256 cap_,bytes32 userSalt) external payable nonReentrant exactFee returns(address token){if(!templates.enabled(templateId)) revert TemplateDisabled();bool mintable=false;bool burnable=false;bool permit_=false;bool votes_=false;uint256 effectiveCap=0;
         if(templateId==TokenIds420.ERC20_FIXED){}
         else if(templateId==TokenIds420.ERC20_MINTABLE){mintable=true;}
         else if(templateId==TokenIds420.ERC20_CAPPED){if(cap_==0||initialSupply>cap_) revert InvalidConfig();mintable=true;effectiveCap=cap_;}

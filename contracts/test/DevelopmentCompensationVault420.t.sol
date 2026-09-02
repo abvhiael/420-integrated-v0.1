@@ -4,6 +4,10 @@ pragma solidity ^0.8.24;
 import "../src/revenue/DevelopmentCompensationVault420.sol";
 import "../src/revenue/DevelopmentCompensationIds420.sol";
 
+interface VmDevelopmentCompensation420 {
+    function deal(address account, uint256 newBalance) external;
+}
+
 contract MockCapabilityRegistryDevelopmentComp420 is ICapabilityRegistry420 {
     address public allowedPrincipal;
     bool public enabled = true;
@@ -65,6 +69,7 @@ contract RevenueSourceHarness420 {
 }
 
 contract DevelopmentCompensationVault420Test {
+    VmDevelopmentCompensation420 private constant vm = VmDevelopmentCompensation420(address(uint160(uint256(keccak256("hevm cheat code")))));
     bytes32 private constant APP_ID = keccak256("420/app/test-revenue-source/v1");
     bytes32 private constant POLICY_REF = keccak256("policy/ref/v1");
 
@@ -136,6 +141,7 @@ contract DevelopmentCompensationVault420Test {
     }
 
     function testDirectNativeDepositDisabled() public {
+        vm.deal(address(this), 1);
         (bool ok,) = address(vault).call{value: 1}("");
         require(!ok, "direct deposit accepted");
     }
@@ -143,6 +149,7 @@ contract DevelopmentCompensationVault420Test {
     function testNativeContributionForwardsWithoutCustody() public {
         uint256 gross = 100 ether;
         uint256 share = 10 ether;
+        vm.deal(address(this), share);
         uint256 beforeBeneficiary = beneficiary.balance;
         source.sendNative{value: share}(APP_ID, keccak256("native-revenue-1"), POLICY_REF, gross, 1_000);
         require(beneficiary.balance == beforeBeneficiary + share, "beneficiary native amount");

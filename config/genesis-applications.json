@@ -1,5 +1,5 @@
 {
-  "schema": "420-genesis-application-decision-v6",
+  "schema": "420-genesis-application-decision-v7",
   "decision_id": "GENESIS_APPLICATION_DECISION_1",
   "status": "FROZEN",
   "apps": [
@@ -8,6 +8,7 @@
     {"name":"420 Search","class":"GENESIS_USER_APP","contracts_required":false,"purpose":"Unified discovery across canonical chain state, registered services, public ecosystem content and protocol-owned records"},
     {"name":"420 Analytics","class":"GENESIS_USER_APP","contracts_required":false,"purpose":"Rebuildable analytics, metrics, trends and dashboards derived from canonical public chain and protocol state"},
     {"name":"420 AppStore","class":"GENESIS_USER_APP","contracts_required":false,"purpose":"Curated but non-authoritative catalogue for discovering, evaluating and launching registered 420 applications with provenance, permissions and security context"},
+    {"name":"420 Verify","class":"GENESIS_USER_APP","contracts_required":false,"purpose":"Reproducible deployed-contract source verification with compiler, bytecode, proxy and provenance evidence; verification is not an audit or endorsement"},
     {"name":"420 Registry","class":"GENESIS_PROTOCOL_AND_USER_APP","contracts_required":true,"purpose":"Canonical registry of contracts, tokens, applications and protocol services"},
     {"name":"420 Names","class":"GENESIS_PROTOCOL_AND_USER_APP","contracts_required":true,"purpose":"Human-readable names such as crowley.420 layered over canonical identities"},
     {"name":"420 Identity","class":"GENESIS_PROTOCOL_AND_USER_APP","contracts_required":true,"purpose":"Optional decentralized identity, profiles, credentials and reputation"},
@@ -28,6 +29,7 @@
     "420 Search is a replaceable discovery projection and never becomes authority for indexed records, ranking, ownership, identity, rights, listings, payments or protocol state.",
     "420 Analytics is a replaceable derived-data projection; metrics, KPIs, charts, cohorts, rankings and forecasts never override canonical chain, accounting, identity, rights, governance or settlement state.",
     "420 AppStore is a replaceable catalogue and curation layer; listing, delisting, featuring, ranking, reviews and sponsorship never create or revoke canonical Registry legitimacy or bypass Wallet authorization.",
+    "420 Verify is a replaceable reproducible-build verifier; a verified source match never means audited, safe, official, immutable or endorsed, and proxy implementations must be verified independently after upgrades.",
     "420 Arbitration records dispute process and final rulings but cannot directly execute custody, token transfer, slashing, bridge reversal, rights mutation or governance actions.",
     "420 Token accepts only frozen qualified template IDs, charges exactly 42 native 420 per successful deployment, records provenance, and retains no post-deployment token custody or mint authority.",
     "420 Names never replaces canonical protocol/service identity.",

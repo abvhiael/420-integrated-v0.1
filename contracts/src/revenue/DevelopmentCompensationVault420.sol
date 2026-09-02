@@ -130,6 +130,12 @@ contract DevelopmentCompensationVault420 is I420System {
 
         bytes32 id = _consume(msg.sender, sourceApplicationId, revenueRef);
         IERC20DevelopmentCompensation420 asset = IERC20DevelopmentCompensation420(token);
+
+        // Exact-transfer validation intentionally compares token balances before and after transferFrom.
+        // The function-wide nonReentrant lock is already held across the complete sequence, the replay
+        // marker is consumed before the token call, and any failed delta check reverts the whole transaction.
+        // This is therefore a deliberate balance-conservation check, not an unguarded reentrancy pattern.
+        // slither-disable-start reentrancy-balance
         uint256 beforeSource = asset.balanceOf(msg.sender);
         uint256 beforeBeneficiary = asset.balanceOf(beneficiary);
         if (!asset.transferFrom(msg.sender, beneficiary, amount)) revert TransferFailed();
@@ -139,6 +145,7 @@ contract DevelopmentCompensationVault420 is I420System {
             beforeSource < afterSource || beforeSource - afterSource != amount
                 || afterBeneficiary < beforeBeneficiary || afterBeneficiary - beforeBeneficiary != amount
         ) revert UnexpectedTokenDelta();
+        // slither-disable-end reentrancy-balance
 
         emit DevelopmentCompensationForwarded(
             id,

@@ -90,6 +90,24 @@ contract BetRandomness420Test {
         s.router.fulfillPrimary(WAGER, keccak256("other-entropy"), proof);
     }
 
+    function testFallbackCannotOverwritePrimaryRoot() public {
+        Suite memory s = _deploy(); _request(s);
+        _allow(s, PRIMARY, BetIds420.ACTION_RANDOMNESS_FULFILL, s.auth.scopeForWager(WAGER));
+        _allow(s, FALLBACK, BetIds420.ACTION_RANDOMNESS_FULFILL, s.auth.scopeForWager(WAGER));
+
+        bytes32 primaryRoot;
+        vm.prank(PRIMARY);
+        primaryRoot = s.router.fulfillPrimary(WAGER, keccak256("entropy-primary"), keccak256("proof-primary"));
+
+        vm.prank(FALLBACK);
+        vm.expectRevert(RandomnessRouter420.AlreadyFulfilled.selector);
+        s.router.fulfillFallback(WAGER, keccak256("entropy-fallback"), keccak256("proof-fallback"));
+
+        require(s.router.rootOf(WAGER) == primaryRoot, "fallback overwrote root");
+        RandomnessRouter420.RandomnessRequest memory request = s.router.getRequest(WAGER);
+        require(request.source == RandomnessRouter420.Source.PRIMARY, "source changed");
+    }
+
     function testFallbackCannotRacePrimary() public {
         Suite memory s = _deploy(); uint64 fallbackAt = _request(s);
         _allow(s, PRIMARY, BetIds420.ACTION_RANDOMNESS_FULFILL, s.auth.scopeForWager(WAGER));

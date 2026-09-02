@@ -1,0 +1,51 @@
+{
+  "schema": "420-testnet-verify-readiness-v1",
+  "backend": {
+    "url": "REPLACE",
+    "status": "PENDING",
+    "required_checks": [
+      "reads deployed runtime bytecode from configured 420 network RPC",
+      "binds every result to chain ID, address and runtime code hash",
+      "accepts Solidity Standard JSON Input and multi-file bundles",
+      "records exact compiler version and settings",
+      "checks runtime bytecode and creation bytecode when recoverable",
+      "handles linked libraries, metadata and immutable references explicitly",
+      "reports FULL_MATCH, PARTIAL_MATCH, MISMATCH or UNVERIFIABLE with reasons",
+      "detects proxy relationships and verifies proxy/implementation separately",
+      "does not inherit verification across implementation upgrades",
+      "survives restart without losing published verification evidence",
+      "allows independent reproduction from published evidence"
+    ]
+  },
+  "frontend": {
+    "url": "REPLACE",
+    "status": "PENDING",
+    "required_views": [
+      "address/network verification lookup",
+      "source and compiler submission",
+      "verification status and mismatch diagnostics",
+      "published source bundle",
+      "compiler and optimizer settings",
+      "runtime/creation code hashes",
+      "constructor arguments and libraries",
+      "proxy and implementation status",
+      "verification history",
+      "open in 420Explorer",
+      "verification-is-not-an-audit warning"
+    ]
+  },
+  "security_checks": [
+    "never accepts wallet private keys or signing secrets",
+    "verification cannot grant Registry legitimacy",
+    "verification cannot authorize wallet or Smart Account capabilities",
+    "verified badge never implies audit, safety, official status or immutability",
+    "source/result provenance preserved when consumed by Explorer or AppStore"
+  ],
+  "reproducibility_checks": [
+    "same source/compiler/settings reproduce same reported code hash",
+    "different chain ID or deployed code hash cannot reuse prior result",
+    "metadata mismatch cannot be silently promoted to FULL_MATCH",
+    "new proxy implementation requires independent verification",
+    "alternative verifier can reproduce a published FULL_MATCH"
+  ]
+}

@@ -1,0 +1,94 @@
+{
+  "schema": "420-notifications-genesis-v1",
+  "name": "420Notifications",
+  "class": "GENESIS_USER_APP",
+  "contractsRequired": false,
+  "canonicalStateAuthority": false,
+  "serviceId": "420/service/notifications/v1",
+  "purpose": "Opt-in notification and alert delivery for public 420 Integrated chain, protocol, application and wallet-relevant events without becoming authority for the underlying event or gaining wallet execution rights.",
+  "sources": {
+    "chainAndProtocolEvents": true,
+    "registry": "420Registry / ProtocolRegistry",
+    "wallet": "420Wallet local account/watch context",
+    "explorer": "420Explorer-compatible chain/index projections",
+    "status": "420Status health and incident signals",
+    "appstore": "420AppStore release/deprecation/security presentation",
+    "messenger": "delivery transport may integrate with 420Messenger, but private message payloads are not notification index input",
+    "otherApps": "registered public application events and explicit publisher notification feeds"
+  },
+  "subscriptionModel": {
+    "optInByDefault": true,
+    "userCanMutePerSource": true,
+    "userCanMutePerTopic": true,
+    "userCanSetSeverityThreshold": true,
+    "userCanSetDeliveryChannels": true,
+    "userCanUnsubscribe": true,
+    "subscriptionStateMayRemainClientLocal": true,
+    "promotionalNotificationsRequireSeparateConsent": true
+  },
+  "delivery": {
+    "supportedClasses": [
+      "transaction and account activity",
+      "payment and invoice state",
+      "bridge and swap state",
+      "staking and validator events",
+      "governance proposals and deadlines",
+      "security, deprecation and contract verification changes",
+      "AppStore releases and updates",
+      "network and service health incidents",
+      "registered dApp events",
+      "user-configured watch conditions"
+    ],
+    "deduplicationRequired": true,
+    "rateLimitsRequired": true,
+    "priorityAndSeveritySupported": true,
+    "retryMustNotDuplicateUserVisibleEvent": true,
+    "deliveryFailureDoesNotChangeCanonicalState": true,
+    "deepLinksMustPreserveCanonicalSource": true,
+    "timestampsAndNetworkIdentityRequired": true
+  },
+  "authority": {
+    "canSignTransactions": false,
+    "canGrantCapabilities": false,
+    "canApproveSpending": false,
+    "canMutateProtocolState": false,
+    "canCreateCanonicalEvents": false,
+    "canOverrideWalletConfirmation": false,
+    "actionButtonsRequireWalletOrOriginAppAuthorization": true
+  },
+  "privacy": {
+    "privateMessengerPayloadsIndexed": false,
+    "privateCommonsPayloadsIndexed": false,
+    "encryptedResourcePayloadsIndexed": false,
+    "privateIdentityFieldsIndexed": false,
+    "rawAttentionTelemetryIndexed": false,
+    "walletWatchlistsPublicByDefault": false,
+    "notificationHistoryPublicByDefault": false,
+    "deliveryTokensOrEndpointsPublic": false,
+    "minimizeAddressToEndpointCorrelation": true
+  },
+  "integrity": {
+    "notificationIsNonCanonical": true,
+    "canonicalSourceReferenceRequired": true,
+    "sourceProvenanceRequired": true,
+    "networkAndChainIdRequiredForOnchainEvents": true,
+    "finalityOrConfirmationContextShownWhereRelevant": true,
+    "staleOrReorgedNotificationsCanBeMarkedSuperseded": true,
+    "clientsMayUseAlternativeNotificationProviders": true
+  },
+  "invariants": [
+    "NOTIF-INV-001: 420Notifications owns no canonical protocol state and requires no Notifications-specific Genesis contract.",
+    "NOTIF-INV-002: A notification never becomes authority for the event it describes; underlying chain or protocol state remains canonical.",
+    "NOTIF-INV-003: Every actionable notification preserves source provenance and links back to the canonical or registered origin.",
+    "NOTIF-INV-004: 420Notifications cannot sign transactions, approve spending, grant Smart Account capabilities, transfer assets or bypass Wallet confirmation.",
+    "NOTIF-INV-005: User subscriptions are opt-in, reversible and independently controllable by source/topic/severity; promotional notifications require separate consent.",
+    "NOTIF-INV-006: Delivery retry, fan-out and provider failover cannot create duplicate canonical events or mutate the underlying protocol state.",
+    "NOTIF-INV-007: Private Messenger/Commons payloads, encrypted Resource payloads, private Identity fields and raw Attention telemetry are not indexed as notification source data.",
+    "NOTIF-INV-008: Wallet watchlists, notification history and delivery endpoints are private by default and are not published as protocol state.",
+    "NOTIF-INV-009: On-chain notifications identify chain/network and preserve relevant block/transaction/log references plus confirmation/finality context when available.",
+    "NOTIF-INV-010: Reorged, reverted, expired or superseded events can invalidate presentation state without rewriting finalized canonical history.",
+    "NOTIF-INV-011: Rate limiting, deduplication and abuse controls cannot silently suppress mandatory protocol state; users retain direct Wallet/Explorer/RPC access to truth.",
+    "NOTIF-INV-012: Notification service unavailability cannot block payments, swaps, bridges, governance, staking, contract interaction or any other protocol operation.",
+    "NOTIF-INV-013: Alternative notification clients and providers may independently derive and deliver alerts from the same canonical sources."
+  ]
+}

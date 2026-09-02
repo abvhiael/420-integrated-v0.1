@@ -1,0 +1,49 @@
+{
+  "schema": "420-testnet-notifications-readiness-v1",
+  "backend": {
+    "url": "REPLACE",
+    "status": "PENDING",
+    "required_checks": [
+      "derives alerts only from configured canonical or registered sources",
+      "preserves source provenance and chain/network identity",
+      "supports per-source and per-topic subscriptions",
+      "supports severity thresholds and delivery-channel selection",
+      "implements deduplication and retry safety",
+      "implements rate limits and abuse controls",
+      "marks reorged/reverted/superseded presentation events without rewriting finalized history",
+      "survives restart without duplicate user-visible delivery",
+      "notification delivery failure does not affect underlying protocol state"
+    ]
+  },
+  "frontend": {
+    "url": "REPLACE",
+    "status": "PENDING",
+    "required_views": [
+      "notification inbox",
+      "subscription manager",
+      "source/topic/severity controls",
+      "security and critical alerts",
+      "transaction/payment/bridge/swap alerts",
+      "staking/governance alerts",
+      "AppStore/Verify/Status alerts",
+      "canonical source and finality context",
+      "mute/unsubscribe controls"
+    ]
+  },
+  "privacy_checks": [
+    "wallet watchlists private by default",
+    "notification history private by default",
+    "delivery endpoints/tokens not public",
+    "no private Messenger or Commons payload indexing",
+    "no encrypted Resource payload indexing",
+    "no private Identity field indexing",
+    "no raw Attention telemetry indexing"
+  ],
+  "authority_checks": [
+    "cannot sign transactions",
+    "cannot grant capabilities",
+    "cannot approve spending",
+    "cannot bypass Wallet confirmation",
+    "notification action buttons only hand off to Wallet/origin app authorization"
+  ]
+}

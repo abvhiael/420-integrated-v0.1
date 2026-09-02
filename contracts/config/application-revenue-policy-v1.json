@@ -1,0 +1,65 @@
+{
+  "schema": "420-application-revenue-policy-v1",
+  "status": "FROZEN_FOR_V1_IMPLEMENTATION",
+  "policyId": "420/REVENUE/POLICY/APPLICATION_REVENUE/V1",
+  "basis": "NET_PROTOCOL_REVENUE",
+  "defaultCommercialSplitBps": {
+    "protocolTreasury": 3000,
+    "developmentFund": 2500,
+    "communityFund": 2000,
+    "applicationGrowthAndLiquidity": 1500,
+    "leadDeveloperCompensation": 1000
+  },
+  "developmentCompensation": {
+    "beneficiaryId": "420/REVENUE/BENEFICIARY/420_INTEGRATED_LABS/V1",
+    "beneficiaryDisplayName": "420 Integrated Labs",
+    "beneficiaryWallet": "DEPLOYMENT_CONFIG_REQUIRED",
+    "maxBpsV1": 1000,
+    "vaultContract": "DevelopmentCompensationVault420.sol",
+    "routing": "ATOMIC_FORWARD_NO_CUSTODY",
+    "sourceAuthorization": "CapabilityRegistry420 default-deny source-scoped grant",
+    "replayProtection": "source + applicationId + revenueRef",
+    "directDepositsAllowed": false,
+    "genericWithdrawFunction": false
+  },
+  "creatorTreasuryFramework": {
+    "registryContract": "ApplicationRevenueRegistry420.sol",
+    "serviceId": "420/service/application-revenue/v1",
+    "availableToFirstPartyApps": true,
+    "availableToThirdPartyApps": true,
+    "creatorTreasuryTypes": ["SMART_ACCOUNT", "VAULT", "CONTRACT"],
+    "profileFields": ["applicationId", "creatorTreasury", "creatorAccount", "revenuePolicyId", "treasuryKind", "creatorShareBps", "metadataHash", "revision", "active"],
+    "managementAuthorization": "CapabilityRegistry420 application-scoped grants",
+    "registryHasCustody": false,
+    "registryExecutesRevenueSplit": false,
+    "applicationExecutesItsOwnSplit": true,
+    "maxCreatorShareBps": 10000,
+    "developmentCompensationIsSeparateFromCreatorShare": true
+  },
+  "excludedFromRevenue": [
+    "validator rewards",
+    "block rewards",
+    "staking principal",
+    "bridged backing assets",
+    "user deposits",
+    "escrowed funds",
+    "liquidity-provider principal",
+    "provider obligations",
+    "refundable balances",
+    "unclaimed user rewards"
+  ],
+  "rules": [
+    "Developer compensation is calculated only from net protocol revenue retained by an eligible application after provider, network, refund and user obligations.",
+    "The V1 DevelopmentCompensationVault420 rejects any declared developer allocation above 10 percent of declared net protocol revenue.",
+    "Every contribution carries source application identity, an application revenue reference and a policy reference.",
+    "Only source contracts explicitly authorized through CapabilityRegistry420 may contribute to DevelopmentCompensationVault420.",
+    "The vault atomically forwards accepted native or exact-transfer ERC-20 compensation to the configured 420 Integrated Labs beneficiary and does not retain routed funds.",
+    "The beneficiary wallet is public deployment configuration and is not hidden or duplicated across fee-bearing applications.",
+    "Changing the beneficiary requires deployment/governance migration to a new authorized vault version rather than an arbitrary owner redirect.",
+    "Application-specific economic policies such as the existing 420Token community-vault allocation remain valid exceptions where explicitly documented.",
+    "ApplicationRevenueRegistry420 provides protocol-recognized creatorTreasury metadata for first-party and third-party applications without taking custody or executing their revenue splits.",
+    "A creatorTreasury profile may be changed or deactivated only by a principal holding the application-scoped revenue-profile capability.",
+    "Third-party creators may define their own creator revenue share up to 100 percent of revenue remaining after mandatory external, user and protocol obligations; this is independent of the 10 percent first-party lead-developer compensation ceiling.",
+    "Fee-bearing applications remain responsible for implementing and auditing their own revenue accounting and split execution against the registered policy."
+  ]
+}

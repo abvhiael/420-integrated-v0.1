@@ -24,6 +24,8 @@ library ServiceIds420 {
     bytes32 internal constant MESSENGER = keccak256("420/service/messenger/v1");
     bytes32 internal constant VAULT = keccak256("420/service/vault/v1");
     bytes32 internal constant TREASURY = keccak256("420/service/treasury/v1");
+    bytes32 internal constant DEVELOPMENT_COMPENSATION = keccak256("420/service/development-compensation/v1");
+    bytes32 internal constant APPLICATION_REVENUE = keccak256("420/service/application-revenue/v1");
     bytes32 internal constant GRANTS = keccak256("420/service/grants/v1");
     bytes32 internal constant LAUNCHPAD = keccak256("420/service/launchpad/v1");
     bytes32 internal constant TOKEN = keccak256("420/service/token/v1");
@@ -48,6 +50,6 @@ library ServiceIds420 {
     bytes32 internal constant STATUS = keccak256("420/service/status/v1");
 
     function isGenesisCanonical(bytes32 serviceId) internal pure returns (bool) {
-        return serviceId == PROTOCOL_REGISTRY || serviceId == WALLET || serviceId == SMART_ACCOUNTS || serviceId == INTEROP || serviceId == RANDOMNESS || serviceId == EXPLORER || serviceId == SEARCH || serviceId == ANALYTICS || serviceId == APPSTORE || serviceId == VERIFY || serviceId == NOTIFICATIONS || serviceId == NAMES || serviceId == IDENTITY || serviceId == ARBITRATION || serviceId == TRUST || serviceId == COMMONS || serviceId == PULSE || serviceId == MESSENGER || serviceId == VAULT || serviceId == TREASURY || serviceId == GRANTS || serviceId == LAUNCHPAD || serviceId == TOKEN || serviceId == RESOURCE_PROTOCOL || serviceId == RELAY || serviceId == STORE || serviceId == CACHE || serviceId == GATEWAY || serviceId == MARKET || serviceId == RIGHTS || serviceId == SWAP || serviceId == PAY || serviceId == ORACLE || serviceId == BRIDGE || serviceId == STAKE || serviceId == CIVIC || serviceId == GOVERNANCE || serviceId == AI || serviceId == COMPUTE_MARKET || serviceId == ATTENTION || serviceId == CANNASEUR || serviceId == STATUS;
+        return serviceId == PROTOCOL_REGISTRY || serviceId == WALLET || serviceId == SMART_ACCOUNTS || serviceId == INTEROP || serviceId == RANDOMNESS || serviceId == EXPLORER || serviceId == SEARCH || serviceId == ANALYTICS || serviceId == APPSTORE || serviceId == VERIFY || serviceId == NOTIFICATIONS || serviceId == NAMES || serviceId == IDENTITY || serviceId == ARBITRATION || serviceId == TRUST || serviceId == COMMONS || serviceId == PULSE || serviceId == MESSENGER || serviceId == VAULT || serviceId == TREASURY || serviceId == DEVELOPMENT_COMPENSATION || serviceId == APPLICATION_REVENUE || serviceId == GRANTS || serviceId == LAUNCHPAD || serviceId == TOKEN || serviceId == RESOURCE_PROTOCOL || serviceId == RELAY || serviceId == STORE || serviceId == CACHE || serviceId == GATEWAY || serviceId == MARKET || serviceId == RIGHTS || serviceId == SWAP || serviceId == PAY || serviceId == ORACLE || serviceId == BRIDGE || serviceId == STAKE || serviceId == CIVIC || serviceId == GOVERNANCE || serviceId == AI || serviceId == COMPUTE_MARKET || serviceId == ATTENTION || serviceId == CANNASEUR || serviceId == STATUS;
     }
 }

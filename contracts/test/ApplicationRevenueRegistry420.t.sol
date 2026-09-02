@@ -145,7 +145,7 @@ contract ApplicationRevenueRegistry420Test {
         require(!ok, "inactive profile resolved");
     }
 
-    function testFailClosedWhenCapabilityRevoked() public {
+    function testCapabilityRevocationFailsClosed() public {
         caps.setEnabled(false);
         (bool ok,) = address(registry).call(
             abi.encodeWithSelector(

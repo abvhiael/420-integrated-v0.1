@@ -3,7 +3,7 @@
   "decision_id": "GENESIS_APPLICATION_DECISION_1",
   "status": "FROZEN",
   "apps": [
-    {"name":"420 Wallet","class":"GENESIS_USER_APP","contracts_required":false,"purpose":"Native wallet, accounts, assets, validator controls, dApp access, notifications"},
+    {"name":"420 Wallet","class":"GENESIS_USER_APP","contracts_required":false,"purpose":"Genesis web wallet and Wallet Core client binding for canonical Smart Accounts, capabilities, recovery, assets, validator controls, dApp access, verified ecosystem navigation and developer resources"},
     {"name":"420 Explorer","class":"GENESIS_USER_APP","contracts_required":false,"purpose":"Blocks, transactions, contracts, validators, assets, governance, finality"},
     {"name":"420 Search","class":"GENESIS_USER_APP","contracts_required":false,"purpose":"Unified discovery across canonical chain state, registered services, public ecosystem content and protocol-owned records"},
     {"name":"420 Analytics","class":"GENESIS_USER_APP","contracts_required":false,"purpose":"Rebuildable analytics, metrics, trends and dashboards derived from canonical public chain and protocol state"},
@@ -27,6 +27,9 @@
   "rules": [
     "Front ends are not consensus-critical and may be upgraded independently.",
     "420 Registry is the canonical discovery backbone.",
+    "420 Wallet Web is the Genesis management client for Wallet Core; Wallet Core reuses 420 Smart Accounts and Capability Registry as the authoritative ownership, recovery, session, capability, revocation and execution layer and creates no parallel wallet authority.",
+    "420 Wallet must expose verified Registry/signed-manifest navigation to core ecosystem services including 420 Search, 420 AppStore, 420 AI and 420 Token plus a Developer Hub with user guides, developer guides, protocol specifications, white papers, SDK/API documentation, network/RPC configuration, contract references, source repositories and security documentation.",
+    "420 Wallet implementation does not require a final production domain; production URLs remain configuration-driven and WebAuthn/passkey relying-party binding is finalized only after the canonical production domain is selected.",
     "420 Search is a replaceable discovery projection and never becomes authority for indexed records, ranking, ownership, identity, rights, listings, payments or protocol state.",
     "420 Analytics is a replaceable derived-data projection; metrics, KPIs, charts, cohorts, rankings and forecasts never override canonical chain, accounting, identity, rights, governance or settlement state.",
     "420 AppStore is a replaceable catalogue and curation layer; listing, delisting, featuring, ranking, reviews and sponsorship never create or revoke canonical Registry legitimacy or bypass Wallet authorization.",

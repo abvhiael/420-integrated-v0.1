@@ -1,0 +1,21 @@
+{
+  "schema": "420-public-service-readiness-v1",
+  "serviceId": "420/service/wallet/v1",
+  "status": "IMPLEMENTATION_PROFILE_ESTABLISHED",
+  "genesisRequired": true,
+  "productionDomainAssigned": false,
+  "domainAssignmentBlocksImplementation": false,
+  "walletCoreBoundToGenesisSmartAccounts": true,
+  "capabilityRegistryBound": true,
+  "registryDiscoveryRequired": true,
+  "serverSideSigningKeysForbidden": true,
+  "ecosystemGatewayRequired": true,
+  "developerHubRequired": true,
+  "qualification": {
+    "configurationValidated": true,
+    "architectureDocumented": true,
+    "clientImplementationComplete": false,
+    "securityHardeningComplete": false,
+    "productionDeploymentComplete": false
+  }
+}

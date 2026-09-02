@@ -5,16 +5,16 @@ errors=[]
 decision=json.loads((root/"config/genesis-applications.json").read_text())
 mapping=json.loads((root/"contracts/config/genesis-dapp-contract-map.json").read_text())
 if decision.get("status")!="FROZEN": errors.append("genesis application decision not frozen")
-if len(decision.get("apps",[]))!=17: errors.append("expected 17 entries including testnet faucet")
+if len(decision.get("apps",[]))!=18: errors.append("expected 18 entries including testnet faucet")
 mapped={x["dapp"]:x for x in mapping["apps"]}
 for app in decision["apps"]:
     n=app["name"]
     if n not in mapped: errors.append("missing dapp map: "+n)
     elif app.get("contracts_required") and not mapped[n].get("contracts"): errors.append("missing contracts for "+n)
-files=["contracts/src/apps/ProtocolRegistry.sol","contracts/src/apps/Names420.sol","contracts/src/apps/Identity420.sol","contracts/src/apps/Stake420.sol","contracts/src/governance/GovernanceTimelock.sol","contracts/src/governance/Governance420.sol","contracts/src/bridge/VerifiedGateway420.sol","contracts/src/swap/ApprovedQuoteAssetRegistry.sol","contracts/src/swap/GenesisDEXFactory.sol","contracts/src/swap/TWAPOracle.sol","contracts/src/swap/PublicBatchAuction.sol","contracts/src/testnet/TestnetFaucet420.sol","contracts/config/420explorer-genesis.json","docs/420EXPLORER.md","contracts/config/420search-genesis.json","docs/420SEARCH.md","testnet/public-services/search/readiness.json","contracts/config/420analytics-genesis.json","docs/420ANALYTICS.md","testnet/public-services/analytics/readiness.json","contracts/config/420arbitration-genesis.json","docs/420ARBITRATION.md","contracts/src/arbitration/ArbitrationIds420.sol","contracts/src/arbitration/ArbitrationPolicyRegistry420.sol","contracts/src/arbitration/ArbitrationCaseRegistry420.sol","contracts/src/arbitration/ArbitrationRulingRegistry420.sol","contracts/config/420token-genesis.json","docs/420TOKEN.md","testnet/public-services/token/readiness.json","contracts/src/token/TokenIds420.sol","contracts/src/token/TokenTemplateRegistry420.sol","contracts/src/token/TokenFactory420.sol","contracts/src/token/ERC20Template420.sol","contracts/src/token/ERC721Template420.sol","contracts/src/token/ERC1155Template420.sol"]
+files=["contracts/src/apps/ProtocolRegistry.sol","contracts/src/apps/Names420.sol","contracts/src/apps/Identity420.sol","contracts/src/apps/Stake420.sol","contracts/src/governance/GovernanceTimelock.sol","contracts/src/governance/Governance420.sol","contracts/src/bridge/VerifiedGateway420.sol","contracts/src/swap/ApprovedQuoteAssetRegistry.sol","contracts/src/swap/GenesisDEXFactory.sol","contracts/src/swap/TWAPOracle.sol","contracts/src/swap/PublicBatchAuction.sol","contracts/src/testnet/TestnetFaucet420.sol","contracts/config/420explorer-genesis.json","docs/420EXPLORER.md","contracts/config/420search-genesis.json","docs/420SEARCH.md","testnet/public-services/search/readiness.json","contracts/config/420analytics-genesis.json","docs/420ANALYTICS.md","testnet/public-services/analytics/readiness.json","contracts/config/420appstore-genesis.json","docs/420APPSTORE.md","testnet/public-services/appstore/readiness.json","contracts/test/AppStoreGenesis420.t.sol","contracts/config/420arbitration-genesis.json","docs/420ARBITRATION.md","contracts/src/arbitration/ArbitrationIds420.sol","contracts/src/arbitration/ArbitrationPolicyRegistry420.sol","contracts/src/arbitration/ArbitrationCaseRegistry420.sol","contracts/src/arbitration/ArbitrationRulingRegistry420.sol","contracts/config/420token-genesis.json","docs/420TOKEN.md","testnet/public-services/token/readiness.json","contracts/src/token/TokenIds420.sol","contracts/src/token/TokenTemplateRegistry420.sol","contracts/src/token/TokenFactory420.sol","contracts/src/token/ERC20Template420.sol","contracts/src/token/ERC721Template420.sol","contracts/src/token/ERC1155Template420.sol"]
 for f in files:
     if not (root/f).exists(): errors.append("missing "+f)
-for n in ["420 Wallet","420 Explorer","420 Search","420 Analytics","420 Status"]:
+for n in ["420 Wallet","420 Explorer","420 Search","420 Analytics","420 AppStore","420 Status"]:
     if mapped[n].get("contracts"): errors.append(n+" should not have required protocol state contract")
 
 def profile(path): return json.loads((root/path).read_text()) if (root/path).exists() else {}
@@ -47,6 +47,23 @@ if ana:
     if presentation.get("methodologiesMustBeDocumented") is not True or presentation.get("alternativeAnalyticsProvidersAllowed") is not True: errors.append("analytics methodology invariant missing")
     for required in ["ANL-INV-001","ANL-INV-002","ANL-INV-003","ANL-INV-005","ANL-INV-007","ANL-INV-008","ANL-INV-009","ANL-INV-010"]:
         if required not in inv: errors.append("missing analytics invariant "+required)
+appstore=profile("contracts/config/420appstore-genesis.json")
+if appstore:
+    catalogue=appstore.get("catalogue",{}); listing=appstore.get("listingMetadata",{}); security=appstore.get("securityPresentation",{}); wallet=appstore.get("walletIntegration",{}); privacy=appstore.get("privacy",{}); inv="\n".join(appstore.get("invariants",[]))
+    if appstore.get("contractsRequired") is not False or appstore.get("canonicalStateAuthority") is not False or appstore.get("serviceId")!="420/service/appstore/v1": errors.append("appstore authority/service invariant missing")
+    for key in ["databaseIsNonCanonical","rebuildableFromCanonicalSources","canonicalIdentifiersPreserved","serviceAndVersionProvenanceRequired","chainIdAndNetworkRequired","contractReferencesTraceable","deprecationAndSecurityWarningsSupported","alternativeClientsAndCataloguesAllowed"]:
+        if catalogue.get(key) is not True: errors.append("appstore catalogue invariant missing: "+key)
+    for key in ["categoriesAreNonCanonical","rankingIsNonCanonical","featuredPlacementIsNonCanonical","ratingsAndReviewsAreNonCanonical","screenshotsAndDescriptionsAreNonCanonical","sponsoredPlacementMustBeExplicitlyLabeled","curationCannotRewriteCanonicalFields","listingDoesNotConstituteEndorsement"]:
+        if listing.get(key) is not True: errors.append("appstore listing invariant missing: "+key)
+    for key in ["showRegisteredServiceAndVersion","showContractAndVerificationReferences","showRequestedWalletPermissions","showCapabilityScopesAndHighRiskActions","showDeprecationAndMaliciousWarnings","warningsMustPreserveSourceProvenance"]:
+        if security.get(key) is not True: errors.append("appstore security presentation missing: "+key)
+    if wallet.get("openInWalletSupported") is not True or wallet.get("walletRemainsAuthorizationBoundary") is not True: errors.append("appstore wallet integration invariant missing")
+    for key in ["appStoreCannotSignTransactions","appStoreCannotGrantCapabilities","appStoreCannotBypassWalletConfirmation"]:
+        if wallet.get(key) is not True: errors.append("appstore wallet authority invariant missing: "+key)
+    for key in ["privateMessengerContentIndexed","privateCommonsContentIndexed","encryptedResourcePayloadsIndexed","privateIdentityFieldsIndexed","rawAttentionTelemetryIndexed","installationHistoryPublicByDefault"]:
+        if privacy.get(key) is not False: errors.append("appstore privacy exclusion missing: "+key)
+    for required in ["APP-INV-001","APP-INV-002","APP-INV-003","APP-INV-006","APP-INV-007","APP-INV-008","APP-INV-009","APP-INV-010","APP-INV-011","APP-INV-012","APP-INV-013"]:
+        if required not in inv: errors.append("missing appstore invariant "+required)
 arb=profile("contracts/config/420arbitration-genesis.json")
 if arb:
     model=arb.get("model",{}); inv="\n".join(arb.get("invariants",[]))
@@ -66,7 +83,7 @@ if tok:
     for required in ["TOK-INV-001","TOK-INV-FEE","TOK-INV-002","TOK-INV-003","TOK-INV-004","TOK-INV-005","TOK-INV-006","TOK-INV-007","TOK-INV-008","TOK-INV-009","TOK-INV-010"]:
         if required not in inv: errors.append("missing token invariant "+required)
 service_ids=(root/"contracts/src/libraries/ServiceIds420.sol").read_text()
-for label,value in [("search","SEARCH = keccak256(\"420/service/search/v1\")"),("analytics","ANALYTICS = keccak256(\"420/service/analytics/v1\")"),("arbitration","ARBITRATION = keccak256(\"420/service/arbitration/v1\")"),("token","TOKEN = keccak256(\"420/service/token/v1\")")]:
+for label,value in [("search","SEARCH = keccak256(\"420/service/search/v1\")"),("analytics","ANALYTICS = keccak256(\"420/service/analytics/v1\")"),("appstore","APPSTORE = keccak256(\"420/service/appstore/v1\")"),("arbitration","ARBITRATION = keccak256(\"420/service/arbitration/v1\")"),("token","TOKEN = keccak256(\"420/service/token/v1\")")]:
     if value not in service_ids: errors.append(label+" canonical ServiceIds420 entry missing")
 factory=(root/"contracts/src/token/TokenFactory420.sol").read_text() if (root/"contracts/src/token/TokenFactory420.sol").exists() else ""
 if "CREATION_FEE = 42 ether" not in factory or "msg.value!=CREATION_FEE" not in factory: errors.append("token exact-fee invariant missing")
@@ -80,7 +97,7 @@ bridge=(root/"contracts/src/bridge/VerifiedGateway420.sol").read_text()
 if "consumedDeposits" not in bridge or "_requireOperational" not in bridge or "IVerifiedGatewayVerifier420" not in bridge or "IReplayProtection420" not in bridge: errors.append("bridge verification/replay/shared-safety invariant missing")
 reg=(root/"contracts/src/apps/ProtocolRegistry.sol").read_text()
 if "codeHash" not in reg or "metadataHash" not in reg or "version" not in reg: errors.append("protocol registry canonical metadata fields missing")
-out={"pass":not errors,"errors":errors,"genesis_apps":16,"testnet_only_apps":1,"explorer_profile":"420-explorer-genesis-v1","search_profile":"420-search-genesis-v1","analytics_profile":"420-analytics-genesis-v1","arbitration_profile":"420-arbitration-genesis-v1","token_profile":"420-token-genesis-v1"}
+out={"pass":not errors,"errors":errors,"genesis_apps":17,"testnet_only_apps":1,"explorer_profile":"420-explorer-genesis-v1","search_profile":"420-search-genesis-v1","analytics_profile":"420-analytics-genesis-v1","appstore_profile":"420-appstore-genesis-v1","arbitration_profile":"420-arbitration-genesis-v1","token_profile":"420-token-genesis-v1"}
 (root/"contracts/config/genesis-dapp-verification.json").write_text(json.dumps(out,indent=2)+"\n")
 print(json.dumps(out,indent=2))
 sys.exit(0 if not errors else 2)

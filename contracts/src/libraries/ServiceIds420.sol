@@ -14,6 +14,7 @@ library ServiceIds420 {
     bytes32 internal constant ANALYTICS = keccak256("420/service/analytics/v1");
     bytes32 internal constant APPSTORE = keccak256("420/service/appstore/v1");
     bytes32 internal constant VERIFY = keccak256("420/service/verify/v1");
+    bytes32 internal constant NOTIFICATIONS = keccak256("420/service/notifications/v1");
     bytes32 internal constant NAMES = keccak256("420/service/names/v1");
     bytes32 internal constant IDENTITY = keccak256("420/service/identity/v1");
     bytes32 internal constant ARBITRATION = keccak256("420/service/arbitration/v1");
@@ -47,6 +48,6 @@ library ServiceIds420 {
     bytes32 internal constant STATUS = keccak256("420/service/status/v1");
 
     function isGenesisCanonical(bytes32 serviceId) internal pure returns (bool) {
-        return serviceId == PROTOCOL_REGISTRY || serviceId == WALLET || serviceId == SMART_ACCOUNTS || serviceId == INTEROP || serviceId == RANDOMNESS || serviceId == EXPLORER || serviceId == SEARCH || serviceId == ANALYTICS || serviceId == APPSTORE || serviceId == VERIFY || serviceId == NAMES || serviceId == IDENTITY || serviceId == ARBITRATION || serviceId == TRUST || serviceId == COMMONS || serviceId == PULSE || serviceId == MESSENGER || serviceId == VAULT || serviceId == TREASURY || serviceId == GRANTS || serviceId == LAUNCHPAD || serviceId == TOKEN || serviceId == RESOURCE_PROTOCOL || serviceId == RELAY || serviceId == STORE || serviceId == CACHE || serviceId == GATEWAY || serviceId == MARKET || serviceId == RIGHTS || serviceId == SWAP || serviceId == PAY || serviceId == ORACLE || serviceId == BRIDGE || serviceId == STAKE || serviceId == CIVIC || serviceId == GOVERNANCE || serviceId == AI || serviceId == COMPUTE_MARKET || serviceId == ATTENTION || serviceId == CANNASEUR || serviceId == STATUS;
+        return serviceId == PROTOCOL_REGISTRY || serviceId == WALLET || serviceId == SMART_ACCOUNTS || serviceId == INTEROP || serviceId == RANDOMNESS || serviceId == EXPLORER || serviceId == SEARCH || serviceId == ANALYTICS || serviceId == APPSTORE || serviceId == VERIFY || serviceId == NOTIFICATIONS || serviceId == NAMES || serviceId == IDENTITY || serviceId == ARBITRATION || serviceId == TRUST || serviceId == COMMONS || serviceId == PULSE || serviceId == MESSENGER || serviceId == VAULT || serviceId == TREASURY || serviceId == GRANTS || serviceId == LAUNCHPAD || serviceId == TOKEN || serviceId == RESOURCE_PROTOCOL || serviceId == RELAY || serviceId == STORE || serviceId == CACHE || serviceId == GATEWAY || serviceId == MARKET || serviceId == RIGHTS || serviceId == SWAP || serviceId == PAY || serviceId == ORACLE || serviceId == BRIDGE || serviceId == STAKE || serviceId == CIVIC || serviceId == GOVERNANCE || serviceId == AI || serviceId == COMPUTE_MARKET || serviceId == ATTENTION || serviceId == CANNASEUR || serviceId == STATUS;
     }
 }

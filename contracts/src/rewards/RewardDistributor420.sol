@@ -26,7 +26,7 @@ contract RewardDistributor420 is I420System {
     RewardAuthorization420 public immutable authorization;
 
     mapping(bytes32 => Reward) private _rewards;
-    mapping(bytes32 => bool) public contributionConsumed;
+    mapping(bytes32 => mapping(bytes32 => bool)) public contributionConsumed;
     mapping(bytes32 => mapping(address => uint256)) public earnedByCampaign;
     mapping(bytes32 => uint256) public accruedByCampaign;
 
@@ -52,7 +52,7 @@ contract RewardDistributor420 is I420System {
     function protocolVersion() external pure returns (uint32) { return 1; }
 
     function accrue(bytes32 campaignId, bytes32 contributionId) external returns (bytes32 rewardId) {
-        if (contributionConsumed[contributionId]) revert InvalidState();
+        if (contributionConsumed[campaignId][contributionId]) revert InvalidState();
         RewardCampaignRegistry420.Campaign memory c = campaigns.campaign(campaignId);
         ContributionRegistry420.Contribution memory contribution_ = contributions.contribution(contributionId);
         if (!c.exists || !c.active || !contribution_.exists) revert InvalidState();
@@ -69,7 +69,7 @@ contract RewardDistributor420 is I420System {
         if (c.policy != address(0) && !IRewardPolicy420(c.policy).isEligible(campaignId, contributionId, contribution_.beneficiary, amount)) revert Ineligible();
 
         rewardId = keccak256(abi.encode("420/REWARDS/REWARD/V1", block.chainid, campaignId, contributionId, contribution_.beneficiary, amount));
-        contributionConsumed[contributionId] = true;
+        contributionConsumed[campaignId][contributionId] = true;
         earnedByCampaign[campaignId][contribution_.beneficiary] = previous + amount;
         accruedByCampaign[campaignId] += amount;
         _rewards[rewardId] = Reward(campaignId, contributionId, contribution_.beneficiary, amount, RewardState.RESERVED);

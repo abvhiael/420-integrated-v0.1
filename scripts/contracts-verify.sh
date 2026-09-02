@@ -21,6 +21,7 @@ go test ./... | tee "$ART/go-test.txt"
 echo "== static verification =="
 for s in \
   scripts/verify-step6-contracts.py \
+  scripts/verify-420wallet-genesis.py \
   scripts/verify-420pay-parameters.py \
   scripts/verify-420pay-implementation.py \
   scripts/verify-420pay-hardening.py

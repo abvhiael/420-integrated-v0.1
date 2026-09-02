@@ -1,0 +1,21 @@
+{
+  "schema": "420-wallet-runtime-config-v1",
+  "network": {
+    "name": "420 Integrated",
+    "chainId": null,
+    "rpcUrl": null,
+    "explorerUrl": null
+  },
+  "manifest": {
+    "url": null,
+    "verificationMode": "registry-or-signed-manifest"
+  },
+  "services": [],
+  "features": {
+    "readOnlyPortfolio": true,
+    "injectedWalletConnection": true,
+    "smartAccountExecution": false,
+    "passkeys": false,
+    "sessionKeys": false
+  }
+}

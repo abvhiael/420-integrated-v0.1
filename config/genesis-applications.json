@@ -1,5 +1,5 @@
 {
-  "schema": "420-genesis-application-decision-v4",
+  "schema": "420-genesis-application-decision-v5",
   "decision_id": "GENESIS_APPLICATION_DECISION_1",
   "status": "FROZEN",
   "apps": [
@@ -17,6 +17,7 @@
     {"name":"420 Governance","class":"GENESIS_PROTOCOL_AND_USER_APP","contracts_required":true,"purpose":"Community House, Validator House, proposals, voting, treasury and timelock"},
     {"name":"420 AI","class":"GENESIS_PROTOCOL_AND_USER_APP","contracts_required":true,"purpose":"AI providers, models, jobs, escrow, payments and reputation; no consensus privilege"},
     {"name":"420 Attention","class":"GENESIS_PROTOCOL_AND_USER_APP","contracts_required":true,"purpose":"Opt-in Cannaseur campaigns and attention rewards"},
+    {"name":"420 Token","class":"GENESIS_PROTOCOL_AND_USER_APP","contracts_required":true,"purpose":"Self-service deployment of frozen qualified ERC-20, ERC-721 and ERC-1155 templates for an exact 42 native 420 creation fee"},
     {"name":"420 Status","class":"GENESIS_USER_APP","contracts_required":false,"purpose":"Network, finality, validator, RPC, bridge, swap and AI service health"},
     {"name":"420 Faucet","class":"TESTNET_ONLY","contracts_required":true,"purpose":"Testnet distribution and developer onboarding; no monetary value"}
   ],
@@ -26,6 +27,7 @@
     "420 Search is a replaceable discovery projection and never becomes authority for indexed records, ranking, ownership, identity, rights, listings, payments or protocol state.",
     "420 Analytics is a replaceable derived-data projection; metrics, KPIs, charts, cohorts, rankings and forecasts never override canonical chain, accounting, identity, rights, governance or settlement state.",
     "420 Arbitration records dispute process and final rulings but cannot directly execute custody, token transfer, slashing, bridge reversal, rights mutation or governance actions.",
+    "420 Token accepts only frozen qualified template IDs, charges exactly 42 native 420 per successful deployment, records provenance, and retains no post-deployment token custody or mint authority.",
     "420 Names never replaces canonical protocol/service identity.",
     "420 Identity is optional and pseudonymous.",
     "420 Stake does not include stake-weighted delegation at genesis.",

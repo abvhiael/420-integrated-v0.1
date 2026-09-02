@@ -3,6 +3,7 @@ pragma solidity ^0.8.24;
 
 import "../src/interfaces/genesis/ICapabilityRegistry420.sol";
 import "../src/bet/BetAuthorization420.sol";
+import "../src/bet/BetEmergencyState420.sol";
 import "../src/bet/BetIds420.sol";
 import "../src/bet/BetTypes420.sol";
 import "../src/bet/SettlementEngine420.sol";
@@ -99,6 +100,7 @@ contract MockTerminalEconomics420 {
 
     function finalizeWagerFees(bytes32, BetTypes420.TerminalOutcome outcome_) external {
         if (shouldRevert) revert("economics");
+        require(!finalized, "finalized");
         finalized = true;
         outcome = outcome_;
     }
@@ -107,6 +109,7 @@ contract MockTerminalEconomics420 {
 contract BetTerminalPathInvariant420Test {
     VmBetTerminalPath420 constant vm = VmBetTerminalPath420(address(uint160(uint256(keccak256("hevm cheat code")))));
 
+    address constant ADMIN = address(0xA11CE);
     address constant SETTLER = address(0x5151);
     address constant RESCUER = address(0xBEEF);
     address constant PLAYER = address(0xC0FFEE);
@@ -115,6 +118,7 @@ contract BetTerminalPathInvariant420Test {
     bytes32 constant WAGER = keccak256("terminal/wager");
     bytes32 constant GAME = keccak256("terminal/game");
     bytes32 constant GAME_V1 = keccak256("terminal/game/v1");
+    bytes32 constant SETTLEMENT_PROFILE = keccak256("terminal/settlement");
 
     struct Suite {
         MockCapabilityRegistryTerminal420 caps;
@@ -123,8 +127,13 @@ contract BetTerminalPathInvariant420Test {
         MockTerminalRisk420 risk;
         MockTerminalVault420 vault;
         MockTerminalEconomics420 economics;
+        BetEmergencyState420 emergency;
         SettlementEngine420 engine;
         uint64 deadline;
+    }
+
+    function _allow(Suite memory s, address principal, bytes32 action, bytes32 scope) private {
+        s.caps.setAllowed(principal, BetIds420.COMPONENT_BET, action, scope, true);
     }
 
     function _deploy() private returns (Suite memory s) {
@@ -134,6 +143,7 @@ contract BetTerminalPathInvariant420Test {
         s.risk = new MockTerminalRisk420();
         s.vault = new MockTerminalVault420(VAULT, ASSET);
         s.economics = new MockTerminalEconomics420();
+        s.emergency = new BetEmergencyState420(address(s.auth));
         s.engine = new SettlementEngine420(
             address(s.auth), address(s.registry), address(s.risk), address(s.vault), address(s.economics)
         );
@@ -152,7 +162,7 @@ contract BetTerminalPathInvariant420Test {
             vaultId: VAULT,
             randomnessProfileId: keccak256("randomness"),
             riskProfileId: keccak256("risk"),
-            settlementProfileId: keccak256("settlement"),
+            settlementProfileId: SETTLEMENT_PROFILE,
             accessPolicyId: keccak256("access"),
             rulesetId: keccak256("ruleset"),
             acceptedAt: uint64(block.timestamp),
@@ -160,13 +170,21 @@ contract BetTerminalPathInvariant420Test {
             status: BetTypes420.WagerStatus.ACCEPTED
         }));
 
-        s.caps.setAllowed(
-            SETTLER,
-            BetIds420.COMPONENT_BET,
-            BetIds420.ACTION_SETTLE,
-            s.auth.scopeForWager(WAGER),
-            true
+        _allow(s, SETTLER, BetIds420.ACTION_SETTLE, s.auth.scopeForWager(WAGER));
+        _allow(s, ADMIN, BetIds420.ACTION_EMERGENCY_SET, s.auth.scopeGlobal());
+        vm.prank(ADMIN);
+        s.engine.bindEmergencyState(address(s.emergency));
+    }
+
+    function _haltSettlement(Suite memory s) private {
+        _allow(
+            s,
+            ADMIN,
+            BetIds420.ACTION_EMERGENCY_SET,
+            s.auth.scopeForEmergency(BetTypes420.EmergencyDomain.SETTLEMENT_HOLD, SETTLEMENT_PROFILE)
         );
+        vm.prank(ADMIN);
+        s.emergency.setEmergency(BetTypes420.EmergencyDomain.SETTLEMENT_HOLD, SETTLEMENT_PROFILE, true);
     }
 
     function testAuthorizedTerminalSettlementBeforeDeadline() public {
@@ -180,6 +198,23 @@ contract BetTerminalPathInvariant420Test {
         require(s.vault.resolved(), "vault");
         require(s.vault.payout() == 500 ether, "payout");
         require(s.economics.finalized(), "economics");
+    }
+
+    function testSuccessfulSettlementRetryIsSideEffectFree() public {
+        Suite memory s = _deploy();
+        vm.prank(SETTLER);
+        BetTypes420.Settlement memory first = s.engine.settle(WAGER, BetTypes420.TerminalOutcome.WIN, 500 ether);
+
+        vm.prank(SETTLER);
+        BetTypes420.Settlement memory retry = s.engine.settle(WAGER, BetTypes420.TerminalOutcome.WIN, 500 ether);
+
+        require(retry.wagerId == first.wagerId, "retry wager");
+        require(retry.outcome == first.outcome, "retry outcome");
+        require(retry.grossPayout == first.grossPayout, "retry payout");
+        require(s.risk.released(), "risk lost");
+        require(s.vault.resolved(), "vault lost");
+        require(s.vault.payout() == 500 ether, "payout changed");
+        require(s.economics.finalized(), "economics lost");
     }
 
     function testNonVoidSettlementCannotCrossDeadline() public {
@@ -211,6 +246,27 @@ contract BetTerminalPathInvariant420Test {
         require(s.vault.payout() == 100 ether, "refund wrong");
         require(s.economics.finalized(), "fees remain reserved");
         require(s.economics.outcome() == BetTypes420.TerminalOutcome.VOID, "fee outcome");
+    }
+
+    function testSettlementHoldBlocksEconomicOutcomeButNeverExpiredVoid() public {
+        Suite memory s = _deploy();
+        _haltSettlement(s);
+
+        vm.prank(SETTLER);
+        vm.expectRevert(SettlementEngine420.EmergencyHalted.selector);
+        s.engine.settle(WAGER, BetTypes420.TerminalOutcome.WIN, 500 ether);
+        require(!s.registry.settlementExists(WAGER), "hold settled wager");
+
+        vm.warp(s.deadline);
+        vm.prank(RESCUER);
+        s.engine.voidExpired(WAGER);
+
+        BetTypes420.Settlement memory settlement = s.registry.getSettlement(WAGER);
+        require(settlement.outcome == BetTypes420.TerminalOutcome.VOID, "hold blocked void");
+        require(settlement.grossPayout == 100 ether, "hold refund wrong");
+        require(s.risk.released(), "hold stranded risk");
+        require(s.vault.resolved(), "hold stranded escrow");
+        require(s.economics.finalized(), "hold stranded fees");
     }
 
     function testExpiredVoidCannotBeTriggeredEarly() public {

@@ -39,10 +39,26 @@ The vault recomputes the expected compensation amount and rejects a contribution
 
 Native $420 is forwarded atomically to the beneficiary. ERC-20 contributions are transferred directly from the authorized source to the beneficiary using exact pre/post balance checks. Fee-on-transfer or otherwise non-exact token behavior fails closed.
 
+## Generic creator treasuries
+
+`ApplicationRevenueRegistry420` complements the Development Compensation Vault by providing a generic protocol-recognized `creatorTreasury` profile for both first-party and third-party applications.
+
+Each application profile records its creator treasury address, creator account, revenue-policy ID, treasury kind, creator-share basis points, metadata commitment, revision and active status. Supported treasury kinds are smart accounts, 420Vault-compatible vaults, and application contracts.
+
+The registry is declarative. It does not hold application revenue and does not execute fee splits. A fee-bearing dApp remains responsible for calculating its own revenue base and routing the amounts specified by its economic policy. Wallet, Explorer, AppStore, Analytics and other clients can use the registry to display where creator revenue is intended to go and which policy applies.
+
+Profile management uses application-scoped Capability Registry grants. A developer authorized for Application A cannot change Application B's creator treasury. Revoking the capability fails closed for future profile changes. Profiles are revisioned and may be deactivated.
+
+Third-party creator revenue is separate from 420 Integrated Labs compensation. A third-party application may configure a creator share from 0 to 10,000 basis points of revenue remaining after mandatory user, provider and protocol obligations. The Development Compensation Vault's 1,000-basis-point ceiling applies only to the 420 Integrated Labs lead-developer allocation under the first-party Application Revenue Policy.
+
 ## Non-custody
 
-The vault has no generic withdrawal function. Direct native deposits revert. Accepted revenue contributions are immediately forwarded, so the contract is not intended to maintain a working balance. It cannot spend from user wallets, alter application accounting, mint tokens, change fees, redirect block rewards, or seize funds from another protocol component.
+The Development Compensation Vault has no generic withdrawal function. Direct native deposits revert. Accepted revenue contributions are immediately forwarded, so the contract is not intended to maintain a working balance. It cannot spend from user wallets, alter application accounting, mint tokens, change fees, redirect block rewards, or seize funds from another protocol component.
+
+`ApplicationRevenueRegistry420` likewise has no custody or transfer functions.
 
 ## Auditability
 
-Every successful contribution emits `DevelopmentCompensationForwarded`, recording the source, application ID, revenue reference, asset, beneficiary, declared net protocol revenue, compensation basis points, compensation amount, and policy reference. Explorer and Analytics can therefore reconstruct compensation flows without relying on an off-chain accounting statement.
+Every successful Development Compensation contribution emits `DevelopmentCompensationForwarded`, recording the source, application ID, revenue reference, asset, beneficiary, declared net protocol revenue, compensation basis points, compensation amount, and policy reference.
+
+Every creator-treasury profile change emits a revisioned `ApplicationRevenueProfileSet` or `ApplicationRevenueProfileDeactivated` event. Explorer and Analytics can therefore reconstruct both the declared revenue destination and actual 420 Integrated Labs compensation flows without relying on an off-chain accounting statement.

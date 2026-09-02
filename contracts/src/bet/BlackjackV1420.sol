@@ -109,8 +109,10 @@ contract BlackjackV1420 is I420System {
     }
 
     function requiredMaxGrossPayout(uint256 stake) public pure returns (uint256) {
-        if (stake == 0) revert InvalidPayout();
-        return (stake * 5) / 2; // stake + 3:2 natural-blackjack profit
+        // V1 pays an exact 3:2 natural-blackjack profit. Odd base units cannot represent
+        // stake + 3/2 profit without silently rounding, so they are not valid V1 stakes.
+        if (stake == 0 || stake % 2 != 0) revert InvalidPayout();
+        return (stake * 5) / 2;
     }
 
     /// @notice Commit a future-card hash chain before canonical randomness fulfillment.

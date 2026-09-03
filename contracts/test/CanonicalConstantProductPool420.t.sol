@@ -31,6 +31,49 @@ contract MockERC20CanonicalPool420 {
     }
 }
 
+contract CanonicalPoolExecutorMock420 {
+    function execute(
+        address pool,
+        address payer,
+        address recipient,
+        address tokenIn,
+        address tokenOut,
+        uint256 amountIn,
+        uint256 minAmountOut
+    ) external returns (uint256 inputSpent, uint256 settlementDelivered) {
+        return CanonicalConstantProductPool420(pool).executeCanonicalSwap(
+            payer,
+            recipient,
+            tokenIn,
+            tokenOut,
+            amountIn,
+            minAmountOut
+        );
+    }
+
+    function tryExecute(
+        address pool,
+        address payer,
+        address recipient,
+        address tokenIn,
+        address tokenOut,
+        uint256 amountIn,
+        uint256 minAmountOut
+    ) external returns (bool ok) {
+        (ok,) = pool.call(
+            abi.encodeWithSignature(
+                "executeCanonicalSwap(address,address,address,address,uint256,uint256)",
+                payer,
+                recipient,
+                tokenIn,
+                tokenOut,
+                amountIn,
+                minAmountOut
+            )
+        );
+    }
+}
+
 contract UnauthorizedPoolCaller420 {
     function execute(address pool, address payer, address recipient, address tokenIn, address tokenOut)
         external
@@ -53,12 +96,14 @@ contract UnauthorizedPoolCaller420 {
 contract CanonicalConstantProductPool420Test {
     MockERC20CanonicalPool420 private token0;
     MockERC20CanonicalPool420 private token1;
+    CanonicalPoolExecutorMock420 private executor;
     CanonicalConstantProductPool420 private pool;
 
     constructor() {
         token0 = new MockERC20CanonicalPool420();
         token1 = new MockERC20CanonicalPool420();
-        pool = new CanonicalConstantProductPool420(address(token0), address(token1), address(this), 30);
+        executor = new CanonicalPoolExecutorMock420();
+        pool = new CanonicalConstantProductPool420(address(token0), address(token1), address(executor), 30);
 
         token0.mint(address(this), 2_000_000 ether);
         token1.mint(address(this), 2_000_000 ether);
@@ -85,7 +130,8 @@ contract CanonicalConstantProductPool420Test {
         require(quoted > 0 && quoted < 10_000 ether, "quote");
 
         uint256 recipientBefore = token1.balanceOf(address(this));
-        (uint256 spent, uint256 delivered) = pool.executeCanonicalSwap(
+        (uint256 spent, uint256 delivered) = executor.execute(
+            address(pool),
             address(this),
             address(this),
             address(token0),
@@ -102,16 +148,14 @@ contract CanonicalConstantProductPool420Test {
     function testSlippageMinimumFailsClosed() public {
         _seed();
         (uint256 quoted,) = pool.quoteCanonicalSwap(address(token0), address(token1), 1_000 ether);
-        (bool ok,) = address(pool).call(
-            abi.encodeWithSignature(
-                "executeCanonicalSwap(address,address,address,address,uint256,uint256)",
-                address(this),
-                address(this),
-                address(token0),
-                address(token1),
-                1_000 ether,
-                quoted + 1
-            )
+        bool ok = executor.tryExecute(
+            address(pool),
+            address(this),
+            address(this),
+            address(token0),
+            address(token1),
+            1_000 ether,
+            quoted + 1
         );
         require(!ok, "slippage accepted");
     }

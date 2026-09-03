@@ -17,7 +17,12 @@ const app = fs.readFileSync(path.join(root, 'app.js'), 'utf8');
 for (const forbidden of ['privateKey', 'mnemonic', 'seedPhrase', 'localStorage.setItem("private']) {
   if (app.includes(forbidden)) errors.push(`forbidden signing secret pattern in app.js: ${forbidden}`);
 }
-for (const requiredBinding of ['discoverSmartAccount', 'readNetwork', 'readPortfolio', 'sendSmartAccountCreation', 'confirmSmartAccountCreation', 'prepareSmartAccountExecution', 'sendSmartAccountExecution', 'confirmSmartAccountExecution', 'inspectCapabilityGrant', 'sendGasSponsorGrantCreation', 'sendCapabilityGrantRevocation', 'confirmCapabilityManagementTransaction']) {
+for (const requiredBinding of [
+  'discoverSmartAccount', 'readNetwork', 'readPortfolio', 'sendSmartAccountCreation', 'confirmSmartAccountCreation',
+  'prepareSmartAccountExecution', 'sendSmartAccountExecution', 'confirmSmartAccountExecution', 'inspectCapabilityGrant',
+  'sendGasSponsorGrantCreation', 'sendCapabilityGrantRevocation', 'confirmCapabilityManagementTransaction',
+  'sendSessionKeyEnablement', 'sendSessionKeyRevocation', 'sendSessionGrantCreation', 'confirmSessionManagementTransaction'
+]) {
   if (!app.includes(requiredBinding)) errors.push(`missing UI Wallet Core binding: ${requiredBinding}`);
 }
 

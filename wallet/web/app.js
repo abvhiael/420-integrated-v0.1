@@ -1,6 +1,7 @@
 import { CORE_SERVICES, validateRuntimeConfig } from './core/config.js';
 import { InjectedProvider420 } from './core/provider.js';
 import { discoverSmartAccount } from './core/accounts.js';
+import { inspectCapabilityGrant } from './core/capabilities.js';
 import { confirmSmartAccountCreation, sendSmartAccountCreation } from './core/deployment.js';
 import { confirmSmartAccountExecution, prepareSmartAccountExecution, sendSmartAccountExecution } from './core/execution.js';
 import { formatUnits, readNetwork, readPortfolio } from './core/portfolio.js';
@@ -17,10 +18,12 @@ const state = {
   creatingAccount: false,
   executing: false,
   lastSimulation: null,
+  capabilityInspection: null,
 };
 
 const $ = (selector) => document.querySelector(selector);
 const shortAddress = (address) => address ? `${address.slice(0, 6)}…${address.slice(-4)}` : '—';
+const shortBytes32 = (value) => value ? `${value.slice(0, 10)}…${value.slice(-8)}` : '—';
 
 function executionRequest() {
   return {
@@ -48,6 +51,28 @@ function renderPortfolio() {
   if (!list.children.length) list.textContent = 'Connect a wallet to load read-only balances.';
 }
 
+function renderCapabilityInspection() {
+  const inspection = state.capabilityInspection;
+  $('#capability-registry').textContent = state.smartAccount?.capabilityRegistry ? shortAddress(state.smartAccount.capabilityRegistry) : '—';
+  if (!inspection) {
+    $('#capability-state').textContent = 'Not inspected';
+    $('#capability-principal').textContent = '—';
+    $('#capability-id').textContent = '—';
+    $('#capability-scope').textContent = '—';
+    $('#capability-limits').textContent = '—';
+    return;
+  }
+  $('#capability-state').textContent = inspection.exists
+    ? `${inspection.belongsToAccount ? 'Account grant' : 'Foreign grant'} · ${inspection.grant.revoked ? 'revoked' : 'not revoked'}`
+    : 'Unknown grant';
+  $('#capability-principal').textContent = inspection.exists ? shortAddress(inspection.grant.principal) : '—';
+  $('#capability-id').textContent = inspection.exists ? shortBytes32(inspection.grant.capabilityId) : '—';
+  $('#capability-scope').textContent = inspection.exists ? shortBytes32(inspection.grant.scopeHash) : '—';
+  $('#capability-limits').textContent = inspection.exists
+    ? `call ${inspection.grant.perCallLimit} · period ${inspection.grant.periodLimit}/${inspection.grant.periodSeconds}s · used ${inspection.usage.used}`
+    : '—';
+}
+
 function render() {
   $('#account').textContent = shortAddress(state.controller);
   $('#smart-account').textContent = state.smartAccount ? `${shortAddress(state.smartAccount.smartAccount)} (${state.smartAccount.deployed ? 'deployed' : 'counterfactual'})` : '—';
@@ -70,6 +95,13 @@ function render() {
   $('#simulate-execution').disabled = !canUseExecution;
   $('#send-execution').disabled = !canUseExecution || !state.lastSimulation;
   $('#send-execution').textContent = state.executing ? 'Executing…' : 'Execute';
+  $('#execution-authority').textContent = canUseExecution ? 'Verified on-chain owner' : 'Unavailable';
+
+  const capabilityEnabled = state.config?.features?.capabilityInspection === true;
+  const canInspect = capabilityEnabled && state.smartAccount?.deployed;
+  $('#capability-panel').hidden = !capabilityEnabled;
+  $('#inspect-capability').disabled = !canInspect;
+  renderCapabilityInspection();
   renderPortfolio();
 
   const list = $('#services');
@@ -106,6 +138,7 @@ async function refreshConnectedState() {
   state.smartAccount = await discoverSmartAccount(state.provider, state.controller, state.config.smartAccount);
   state.portfolio = await readPortfolio(state.provider, [state.controller, state.smartAccount.smartAccount], state.config.trackedAssets);
   state.lastSimulation = null;
+  state.capabilityInspection = null;
   render();
 }
 
@@ -123,7 +156,7 @@ $('#connect').addEventListener('click', async () => {
   try {
     await connectInjectedWallet();
     $('#status').textContent = state.smartAccount.deployed
-      ? 'Canonical Smart Account loaded. Owner execution requires successful simulation and explicit wallet approval.'
+      ? 'Canonical Smart Account loaded. Owner execution and read-only capability inspection are available.'
       : 'Counterfactual Smart Account discovered. Creation is available with explicit wallet approval.';
   } catch (error) {
     $('#status').textContent = error.message;
@@ -161,11 +194,11 @@ for (const selector of ['#execute-target', '#execute-value', '#execute-data']) {
 
 $('#simulate-execution').addEventListener('click', async () => {
   if (!state.provider || !state.smartAccount?.deployed) return;
-  $('#status').textContent = 'Simulating SmartAccount420 execution…';
+  $('#status').textContent = 'Simulating SmartAccount420 owner execution…';
   try {
     state.lastSimulation = await prepareSmartAccountExecution(state.provider, state.controller, state.smartAccount, executionRequest());
     $('#execute-simulation').textContent = `Passed · gas ${state.lastSimulation.simulation.gas}`;
-    $('#status').textContent = 'Simulation passed. Execution may now be explicitly approved.';
+    $('#status').textContent = 'Owner-authorized simulation passed. Execution may now be explicitly approved.';
   } catch (error) {
     state.lastSimulation = null;
     $('#execute-simulation').textContent = 'Failed';
@@ -196,6 +229,25 @@ $('#send-execution').addEventListener('click', async () => {
     state.executing = false;
     render();
   }
+});
+
+$('#inspect-capability').addEventListener('click', async () => {
+  if (!state.provider || !state.smartAccount?.deployed) return;
+  $('#status').textContent = 'Reading canonical capability grant…';
+  try {
+    state.capabilityInspection = await inspectCapabilityGrant(
+      state.provider,
+      state.smartAccount,
+      $('#capability-grant-id').value.trim(),
+    );
+    $('#status').textContent = state.capabilityInspection.exists
+      ? 'Capability grant loaded from canonical CapabilityRegistry420.'
+      : 'No capability grant exists for that grant ID.';
+  } catch (error) {
+    state.capabilityInspection = null;
+    $('#status').textContent = error.message;
+  }
+  render();
 });
 
 loadConfig().catch((error) => { $('#status').textContent = `Configuration warning: ${error.message}`; }).finally(render);

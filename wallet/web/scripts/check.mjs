@@ -4,10 +4,10 @@ import process from 'node:process';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const required = [
-  'index.html', 'app.js', 'ui-v1.js', 'styles.css', 'runtime-config.json',
-  'core/abi.js', 'core/accounts.js', 'core/capabilities.js', 'core/capability-management.js', 'core/session-management.js', 'core/session-execution.js',
+  'index.html', 'app.js', 'ui-v1.js', 'apps-page.js', 'styles.css', 'apps.css', 'runtime-config.json',
+  'core/abi.js', 'core/accounts.js', 'core/apps.js', 'core/capabilities.js', 'core/capability-management.js', 'core/session-management.js', 'core/session-execution.js',
   'core/config.js', 'core/deployment.js', 'core/execution.js', 'core/portfolio.js', 'core/provider.js', 'core/provider-lifecycle.js', 'core/services.js', 'core/send.js',
-  'test/core.test.js', 'test/execution.test.js', 'test/capabilities.test.js', 'test/capability-management.test.js', 'test/session-management.test.js', 'test/session-execution.test.js', 'test/ui-v1.test.js', 'test/send.test.js', 'test/provider-lifecycle.test.js',
+  'test/core.test.js', 'test/apps.test.js', 'test/execution.test.js', 'test/capabilities.test.js', 'test/capability-management.test.js', 'test/session-management.test.js', 'test/session-execution.test.js', 'test/ui-v1.test.js', 'test/send.test.js', 'test/provider-lifecycle.test.js',
 ];
 
 const errors = [];
@@ -27,8 +27,19 @@ for (const requiredBinding of [
 }
 
 const ui = fs.readFileSync(path.join(root, 'ui-v1.js'), 'utf8');
-for (const requiredBinding of ['buildSendExecution', 'send-asset', 'send-recipient', 'send-amount', 'prepare-send', 'execute-target', 'execute-value', 'execute-data', 'installFailClosedBrowserLifecycle']) {
+for (const requiredBinding of ['apps-page.js', 'buildSendExecution', 'send-asset', 'send-recipient', 'send-amount', 'prepare-send', 'execute-target', 'execute-value', 'execute-data', 'installFailClosedBrowserLifecycle']) {
   if (!ui.includes(requiredBinding)) errors.push(`missing Wallet Web UI V1 binding: ${requiredBinding}`);
+}
+
+const appsPage = fs.readFileSync(path.join(root, 'apps-page.js'), 'utf8');
+for (const requiredGuard of ['resolveServices', 'Verified manifest', 'Awaiting manifest', 'noopener noreferrer', 'apps-search', 'app-filter', 'Not published']) {
+  if (!appsPage.includes(requiredGuard)) errors.push(`missing verified 420 Apps page guard: ${requiredGuard}`);
+}
+if (appsPage.includes('javascript:')) errors.push('420 Apps page must not contain javascript service URLs');
+
+const apps = fs.readFileSync(path.join(root, 'core/apps.js'), 'utf8');
+for (const requiredService of ['420/service/swap/v1', '420/service/explorer/v1', '420/service/ai/v1', '420/service/registry/v1', '420/service/identity/v1', '420/service/governance/v1']) {
+  if (!apps.includes(requiredService)) errors.push(`missing 420 Apps catalog service: ${requiredService}`);
 }
 
 const lifecycle = fs.readFileSync(path.join(root, 'core/provider-lifecycle.js'), 'utf8');
@@ -116,6 +127,8 @@ console.log(JSON.stringify({
   pass: true,
   walletWebFoundation: true,
   walletWebUiV1: true,
+  verifiedAppsPage: true,
+  appsLaunchFailClosed: true,
   guidedNativeSend: true,
   guidedErc20Send: true,
   guidedSendBroadcastsDirectly: false,

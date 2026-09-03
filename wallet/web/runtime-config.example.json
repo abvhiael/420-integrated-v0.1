@@ -25,6 +25,8 @@
     "injectedWalletConnection": true,
     "smartAccountExecution": true,
     "executionSimulationRequired": true,
+    "capabilityInspection": true,
+    "capabilityMutation": false,
     "batchExecution": false,
     "passkeys": false,
     "sessionKeys": false,

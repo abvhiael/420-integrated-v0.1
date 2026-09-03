@@ -29,6 +29,9 @@ library BongGogglesIds420 {
     bytes32 internal constant ACTION_POST_EDIT = keccak256("BG/ACTION/POST_EDIT/V1");
     bytes32 internal constant ACTION_POST_DELETE = keccak256("BG/ACTION/POST_DELETE/V1");
     bytes32 internal constant ACTION_POST_HIDE = keccak256("BG/ACTION/POST_HIDE/V1");
+    bytes32 internal constant ACTION_REPOST_CREATE = keccak256("BG/ACTION/REPOST_CREATE/V1");
+    bytes32 internal constant ACTION_QUOTE_POST_CREATE = keccak256("BG/ACTION/QUOTE_POST_CREATE/V1");
+    bytes32 internal constant ACTION_SHARE = keccak256("BG/ACTION/SHARE/V1");
 
     bytes32 internal constant ACTION_MEDIA_REGISTER = keccak256("BG/ACTION/MEDIA_REGISTER/V1");
     bytes32 internal constant ACTION_REACTION_SET = keccak256("BG/ACTION/REACTION_SET/V1");
@@ -41,10 +44,11 @@ library BongGogglesTypes420 {
     enum FollowPolicy { OPEN, APPROVAL_REQUIRED, DISABLED }
     enum AccessPolicy { EVERYONE, FOLLOWERS, FRIENDS, FRIENDS_OF_FRIENDS, NOBODY }
     enum AudienceType { PUBLIC, FOLLOWERS, FRIENDS, GROUP, PRIVATE }
-    enum SocialObjectType { STATUS, PHOTO_POST, STORY, COMMENT, REVIEW, DISCOVERY, EVENT_POST, COLLECTION }
+    enum SocialObjectType { STATUS, PHOTO_POST, STORY, COMMENT, REVIEW, DISCOVERY, EVENT_POST, COLLECTION, REPOST, QUOTE_POST }
     enum SocialObjectStatus { ACTIVE, HIDDEN, DELETED, REMOVED }
     enum MediaType { IMAGE, VIDEO, AUDIO, DOCUMENT }
     enum ReactionType { NONE, LIKE, LOVE, LAUGH, WOW, SUPPORT }
+    enum ProvenanceType { NONE, REPOST, QUOTE_POST }
 
     uint32 internal constant MUTE_FEED = 1 << 0;
     uint32 internal constant MUTE_STORIES = 1 << 1;

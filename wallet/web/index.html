@@ -24,6 +24,14 @@
     </section>
 
     <section>
+      <div class="section-heading">
+        <div><p class="eyebrow">Canonical account</p><h2>Smart Account deployment</h2></div>
+        <button id="create-account" type="button" hidden disabled>Create Smart Account</button>
+      </div>
+      <p>Creation is the only enabled write path in this stage. The connected controller must explicitly approve the canonical SmartAccountFactory420 transaction.</p>
+    </section>
+
+    <section>
       <div class="section-heading"><div><p class="eyebrow">Read-only portfolio</p><h2>Assets</h2></div></div>
       <div id="portfolio" class="service-grid" aria-live="polite">Connect a wallet to load read-only balances.</div>
     </section>
@@ -35,7 +43,7 @@
 
     <section class="security-note">
       <h2>Wallet Core security boundary</h2>
-      <p>Account discovery is derived from SmartAccountFactory420 and confirmed against chain code. Ownership and recovery state are read from SmartAccount420. This stage is read-only: the web client cannot execute Smart Account calls, grant capabilities, or mutate recovery policy.</p>
+      <p>Account discovery is derived from SmartAccountFactory420 and confirmed against chain code. Creation is allowed only through the canonical factory with explicit controller approval, followed by on-chain owner verification. General Smart Account execution, capability grants, session keys, and recovery mutation remain disabled.</p>
     </section>
 
     <p id="status" class="status" role="status">Ready.</p>

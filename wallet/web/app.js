@@ -7,6 +7,12 @@ import {
   sendCapabilityGrantRevocation,
   sendGasSponsorGrantCreation,
 } from './core/capability-management.js';
+import {
+  confirmSessionManagementTransaction,
+  sendSessionGrantCreation,
+  sendSessionKeyEnablement,
+  sendSessionKeyRevocation,
+} from './core/session-management.js';
 import { confirmSmartAccountCreation, sendSmartAccountCreation } from './core/deployment.js';
 import { confirmSmartAccountExecution, prepareSmartAccountExecution, sendSmartAccountExecution } from './core/execution.js';
 import { formatUnits, readNetwork, readPortfolio } from './core/portfolio.js';
@@ -23,6 +29,7 @@ const state = {
   creatingAccount: false,
   executing: false,
   managingCapability: false,
+  managingSession: false,
   lastSimulation: null,
   capabilityInspection: null,
 };
@@ -47,6 +54,18 @@ function gasSponsorRequest() {
     periodSeconds: $('#sponsor-period-seconds').value.trim() || '0',
     validFrom: $('#sponsor-valid-from').value.trim() || '0',
     validUntil: $('#sponsor-valid-until').value.trim() || '0',
+  };
+}
+function sessionGrantRequest() {
+  return {
+    key: $('#session-key').value.trim(),
+    target: $('#session-target').value.trim(),
+    selector: $('#session-selector').value.trim(),
+    perCallLimit: $('#session-per-call').value.trim() || '0',
+    periodLimit: $('#session-period-limit').value.trim() || '0',
+    periodSeconds: $('#session-period-seconds').value.trim() || '0',
+    validFrom: $('#session-valid-from').value.trim() || '0',
+    validUntil: $('#session-valid-until').value.trim() || '0',
   };
 }
 function invalidateSimulation() {
@@ -124,6 +143,15 @@ function render() {
   $('#gas-sponsor-panel').hidden = !(mutationEnabled && sponsorEnabled);
   $('#create-sponsor-grant').disabled = !canManage;
   $('#create-sponsor-grant').textContent = state.managingCapability ? 'Managing…' : 'Create gas sponsor grant';
+
+  const sessionAdminEnabled = state.config?.features?.sessionKeyAdministration === true;
+  const sessionGrantEnabled = state.config?.features?.sessionGrantManagement === true;
+  const canManageSession = sessionAdminEnabled && state.smartAccount?.deployed && state.smartAccount?.controllerIsOwner && !state.managingSession;
+  $('#session-panel').hidden = !sessionAdminEnabled;
+  $('#enable-session-key').disabled = !canManageSession;
+  $('#revoke-session-key').disabled = !canManageSession;
+  $('#create-session-grant').disabled = !(canManageSession && sessionGrantEnabled);
+
   renderCapabilityInspection();
   renderPortfolio();
 
@@ -179,7 +207,7 @@ $('#connect').addEventListener('click', async () => {
   try {
     await connectInjectedWallet();
     $('#status').textContent = state.smartAccount.deployed
-      ? 'Canonical Smart Account loaded. Guarded owner execution and capability management are available.'
+      ? 'Canonical Smart Account loaded. Guarded owner execution, capability management, and session-key administration are available.'
       : 'Counterfactual Smart Account discovered. Creation is available with explicit wallet approval.';
   } catch (error) { $('#status').textContent = error.message; }
 });
@@ -271,6 +299,53 @@ $('#revoke-capability').addEventListener('click', async () => {
     $('#status').textContent = `Capability grant revoked and verified: ${inspection.grantId}`;
   } catch (error) { $('#status').textContent = error.message; }
   finally { state.managingCapability = false; render(); }
+});
+
+$('#enable-session-key').addEventListener('click', async () => {
+  if (!state.provider || !state.smartAccount?.controllerIsOwner || state.managingSession) return;
+  const key = $('#session-key').value.trim();
+  if (globalThis.confirm && !globalThis.confirm(`Enable ${key} as a session key for the current authorization epoch?`)) return;
+  state.managingSession = true; render();
+  $('#status').textContent = 'Simulating session key enablement…';
+  try {
+    const submitted = await sendSessionKeyEnablement(state.provider, state.controller, state.smartAccount, key);
+    $('#status').textContent = `Session key enablement submitted: ${submitted.txHash}. Waiting for confirmation…`;
+    const confirmed = await confirmSessionManagementTransaction(state.provider, submitted.txHash, state.smartAccount, { enabledKey: submitted.sessionKey });
+    $('#status').textContent = `Session key enabled for authorization epoch ${confirmed.epoch}.`;
+  } catch (error) { $('#status').textContent = error.message; }
+  finally { state.managingSession = false; render(); }
+});
+
+$('#revoke-session-key').addEventListener('click', async () => {
+  if (!state.provider || !state.smartAccount?.controllerIsOwner || state.managingSession) return;
+  const key = $('#session-key').value.trim();
+  if (globalThis.confirm && !globalThis.confirm(`Revoke session key ${key}? Existing grants remain recorded but can no longer authorize this key.`)) return;
+  state.managingSession = true; render();
+  $('#status').textContent = 'Simulating session key revocation…';
+  try {
+    const submitted = await sendSessionKeyRevocation(state.provider, state.controller, state.smartAccount, key);
+    $('#status').textContent = `Session key revocation submitted: ${submitted.txHash}. Waiting for confirmation…`;
+    await confirmSessionManagementTransaction(state.provider, submitted.txHash, state.smartAccount, { revokedKey: submitted.sessionKey });
+    $('#status').textContent = `Session key revoked and verified: ${submitted.sessionKey}`;
+  } catch (error) { $('#status').textContent = error.message; }
+  finally { state.managingSession = false; render(); }
+});
+
+$('#create-session-grant').addEventListener('click', async () => {
+  if (!state.provider || !state.smartAccount?.controllerIsOwner || state.managingSession) return;
+  const request = sessionGrantRequest();
+  if (globalThis.confirm && !globalThis.confirm(`Create a session grant for ${request.key} scoped to ${request.target} ${request.selector}? Session execution remains disabled in this stage.`)) return;
+  state.managingSession = true; render();
+  $('#status').textContent = 'Simulating scoped session grant creation…';
+  try {
+    const submitted = await sendSessionGrantCreation(state.provider, state.controller, state.smartAccount, request);
+    $('#status').textContent = `Session grant creation submitted: ${submitted.txHash}. Waiting for confirmation…`;
+    const confirmed = await confirmSessionManagementTransaction(state.provider, submitted.txHash, state.smartAccount, { createdGrantId: submitted.expectedGrantId, key: submitted.key, scopeHash: submitted.expectedScope });
+    state.capabilityInspection = confirmed.inspection;
+    $('#capability-grant-id').value = submitted.expectedGrantId;
+    $('#status').textContent = `Session grant created and verified: ${submitted.expectedGrantId}`;
+  } catch (error) { $('#status').textContent = error.message; }
+  finally { state.managingSession = false; render(); }
 });
 
 loadConfig().catch((error) => { $('#status').textContent = `Configuration warning: ${error.message}`; }).finally(render);

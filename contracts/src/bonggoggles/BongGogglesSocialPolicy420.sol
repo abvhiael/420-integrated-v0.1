@@ -43,7 +43,10 @@ contract BongGogglesSocialPolicy420 {
         if (!canInteract(requester, recipient) || relationships.areFriends(requester, recipient)) return false;
         BongGogglesProfileRegistry420.Preferences memory p = profiles.preferences(recipient);
         if (p.friendRequestPolicy == BongGogglesTypes420.AccessPolicy.EVERYONE) return true;
-        return false;
+        if (p.friendRequestPolicy == BongGogglesTypes420.AccessPolicy.FOLLOWERS) {
+            return relationships.isFollowing(requester, recipient);
+        }
+        return false; // FRIENDS, FRIENDS_OF_FRIENDS and NOBODY fail closed in V1.
     }
 
     function canMessage(address sender, address recipient) external view returns (bool) {

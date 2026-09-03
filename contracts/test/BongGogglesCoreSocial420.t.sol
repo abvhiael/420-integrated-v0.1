@@ -59,6 +59,14 @@ contract BongGogglesCoreSocial420Test {
         vm.prank(b); graph.acceptFriend(b, requestId);
     }
 
+    function _setBobPolicies(BongGogglesTypes420.FollowPolicy followPolicy, BongGogglesTypes420.AccessPolicy friendPolicy) internal {
+        BongGogglesProfileRegistry420.Preferences memory p = profiles.preferences(BOB);
+        p.followPolicy = followPolicy;
+        p.friendRequestPolicy = friendPolicy;
+        vm.prank(BOB);
+        profiles.updatePreferences(BOB, p);
+    }
+
     function testProfileIdIsDeterministicAndUniquePerAccount() public view {
         require(profiles.profileIdFor(ALICE) == profiles.profile(ALICE).profileId, "alice profile id");
         require(profiles.profileIdFor(ALICE) != profiles.profileIdFor(BOB), "profile collision");
@@ -81,6 +89,24 @@ contract BongGogglesCoreSocial420Test {
         require(graph.areFriends(ALICE, BOB) && graph.areFriends(BOB, ALICE), "friendship not symmetric");
     }
 
+    function testDuplicatePendingFriendRequestFailsAcrossDirections() public {
+        vm.prank(ALICE); graph.requestFriend(ALICE, BOB);
+        vm.expectRevert(BongGogglesRelationshipGraph420.RequestPending.selector);
+        vm.prank(ALICE); graph.requestFriend(ALICE, BOB);
+        vm.expectRevert(BongGogglesRelationshipGraph420.RequestPending.selector);
+        vm.prank(BOB); graph.requestFriend(BOB, ALICE);
+    }
+
+    function testFriendRequestPolicyIsEnforcedAtWriteTime() public {
+        _setBobPolicies(BongGogglesTypes420.FollowPolicy.OPEN, BongGogglesTypes420.AccessPolicy.FOLLOWERS);
+        require(!policy.canSendFriendRequest(ALICE, BOB), "policy resolver widened request");
+        vm.expectRevert(BongGogglesRelationshipGraph420.FriendRequestDisabled.selector);
+        vm.prank(ALICE); graph.requestFriend(ALICE, BOB);
+        vm.prank(ALICE); graph.follow(ALICE, BOB);
+        require(policy.canSendFriendRequest(ALICE, BOB), "follower request denied");
+        vm.prank(ALICE); graph.requestFriend(ALICE, BOB);
+    }
+
     function testFollowIsDirectionalAndIndependentOfFriendship() public {
         vm.prank(ALICE); graph.follow(ALICE, BOB);
         require(graph.isFollowing(ALICE, BOB), "missing follow");
@@ -88,6 +114,17 @@ contract BongGogglesCoreSocial420Test {
         _friend(ALICE, BOB);
         vm.prank(ALICE); graph.removeFriend(ALICE, BOB);
         require(graph.isFollowing(ALICE, BOB), "friend removal killed follow");
+    }
+
+    function testApprovalRequiredFollowHasExplicitLifecycle() public {
+        _setBobPolicies(BongGogglesTypes420.FollowPolicy.APPROVAL_REQUIRED, BongGogglesTypes420.AccessPolicy.EVERYONE);
+        vm.prank(ALICE); bytes32 requestId = graph.follow(ALICE, BOB);
+        require(requestId != bytes32(0), "follow request id missing");
+        require(!graph.isFollowing(ALICE, BOB), "approval bypassed");
+        vm.expectRevert(BongGogglesRelationshipGraph420.FollowRequestPending.selector);
+        vm.prank(ALICE); graph.follow(ALICE, BOB);
+        vm.prank(BOB); graph.acceptFollow(BOB, requestId);
+        require(graph.isFollowing(ALICE, BOB), "accepted follow missing");
     }
 
     function testBlockTerminatesFriendshipAndBothFollowDirections() public {
@@ -98,6 +135,17 @@ contract BongGogglesCoreSocial420Test {
         require(graph.isBlockedEither(ALICE, BOB), "block absent");
         require(!graph.areFriends(ALICE, BOB), "friendship survived block");
         require(!graph.isFollowing(ALICE, BOB) && !graph.isFollowing(BOB, ALICE), "follow survived block");
+    }
+
+    function testBlockCancelsPendingRequestsAndWorksAgainstInactiveTarget() public {
+        _setBobPolicies(BongGogglesTypes420.FollowPolicy.APPROVAL_REQUIRED, BongGogglesTypes420.AccessPolicy.EVERYONE);
+        vm.prank(ALICE); bytes32 friendId = graph.requestFriend(ALICE, BOB);
+        vm.prank(ALICE); bytes32 followId = graph.follow(ALICE, BOB);
+        vm.prank(BOB); profiles.setStatus(BOB, BongGogglesTypes420.ProfileStatus.DEACTIVATED);
+        vm.prank(ALICE); graph.blockUser(ALICE, BOB);
+        require(graph.friendRequest(friendId).state == BongGogglesRelationshipGraph420.FriendRequestState.CANCELLED, "friend request survived block");
+        require(graph.followRequest(followId).state == BongGogglesRelationshipGraph420.FollowRequestState.CANCELLED, "follow request survived block");
+        require(graph.isBlockedEither(ALICE, BOB), "inactive target not blocked");
     }
 
     function testUnblockDoesNotRestoreRelationships() public {
@@ -116,6 +164,19 @@ contract BongGogglesCoreSocial420Test {
         require(graph.isMuted(ALICE, BOB, BongGogglesTypes420.MUTE_GAME_INVITES), "mute absent");
         vm.warp(block.timestamp + 2 days);
         require(!graph.isMuted(ALICE, BOB, BongGogglesTypes420.MUTE_GAME_INVITES), "mute did not expire");
+    }
+
+    function testMuteAndUnmuteWorkAgainstInactiveTarget() public {
+        vm.prank(BOB); profiles.setStatus(BOB, BongGogglesTypes420.ProfileStatus.DEACTIVATED);
+        vm.prank(ALICE); graph.muteUser(ALICE, BOB, BongGogglesTypes420.MUTE_FEED, 0);
+        require(graph.isMuted(ALICE, BOB, BongGogglesTypes420.MUTE_FEED), "inactive target not muted");
+        vm.prank(ALICE); graph.unmuteUser(ALICE, BOB);
+        require(!graph.isMuted(ALICE, BOB, BongGogglesTypes420.MUTE_FEED), "inactive target not unmuted");
+    }
+
+    function testRestrictedStatusCannotBeSelfAssigned() public {
+        vm.expectRevert(BongGogglesProfileRegistry420.InvalidStatusTransition.selector);
+        vm.prank(ALICE); profiles.setStatus(ALICE, BongGogglesTypes420.ProfileStatus.RESTRICTED);
     }
 
     function testBlockOverridesPublicAudienceAndGamePolicy() public {

@@ -15,4 +15,8 @@ struct PackedUserOperation420 {
 
 interface IEntryPoint420 {
     function getNonce(address sender, uint192 key) external view returns (uint256);
+    function getUserOpHash(PackedUserOperation420 calldata userOp) external view returns (bytes32);
+    function handleOp(PackedUserOperation420 calldata userOp)
+        external
+        returns (bool success, bytes memory returnData);
 }

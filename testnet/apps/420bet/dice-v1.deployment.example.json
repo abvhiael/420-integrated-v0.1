@@ -1,0 +1,34 @@
+{
+  "schema": "420bet-dice-v1-deployment-v1",
+  "environment": "LOCAL_OR_TESTNET",
+  "status": "UNPROMOTED",
+  "chain": {
+    "id": 420,
+    "name": "420 Integrated Testnet",
+    "rpcUrl": "REPLACE_WITH_LIVE_RPC",
+    "nativeCurrency": {
+      "name": "420",
+      "symbol": "420",
+      "decimals": 18
+    }
+  },
+  "contracts": {
+    "dice": "0x0000000000000000000000000000000000000000",
+    "diceView": "0x0000000000000000000000000000000000000000",
+    "wagerRouter": "0x0000000000000000000000000000000000000000",
+    "vault": "0x0000000000000000000000000000000000000000",
+    "asset": "0x0000000000000000000000000000000000000000",
+    "betAuthorization": "0x0000000000000000000000000000000000000000"
+  },
+  "ids": {
+    "gameId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "gameVersionId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "operatorId": "0x0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "promotion": {
+    "sourceCommit": "REPLACE_WITH_DEPLOYED_COMMIT_SHA",
+    "deployedAt": "REPLACE_WITH_ISO8601",
+    "deployer": "REPLACE_WITH_DEPLOYER_ADDRESS",
+    "notes": "Promote only after addresses and IDs are verified against the target chain."
+  }
+}

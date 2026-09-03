@@ -25,8 +25,8 @@ contract MediaJobMarket420 is SystemAccess, I420System {
     enum Status {
         NONE,
         CREATED,
-        FUNDED,
         ACCEPTED,
+        FUNDED,
         RUNNING,
         RESULT_COMMITTED,
         VERIFIED,
@@ -108,10 +108,7 @@ contract MediaJobMarket420 is SystemAccess, I420System {
         uint64 deadline
     ) external {
         if (!dependenciesBound) revert InvalidJob();
-        if (
-            jobId == bytes32(0) || jobKind == bytes32(0) || capabilityId == bytes32(0) || inputRef == bytes32(0)
-                || maxSpend == 0
-        ) revert InvalidJob();
+        if (jobId == bytes32(0) || jobKind == bytes32(0) || capabilityId == bytes32(0) || inputRef == bytes32(0) || maxSpend == 0) revert InvalidJob();
         if (jobs[jobId].status != Status.NONE) revert JobExists();
         if (deadline <= block.timestamp) revert InvalidDeadline();
         if (slaPolicyId != bytes32(0) && !IMediaSLAJobs420(slaRegistry).isActive(slaPolicyId)) revert InvalidSLA();
@@ -134,20 +131,9 @@ contract MediaJobMarket420 is SystemAccess, I420System {
         emit JobCreated(jobId, msg.sender, capabilityId, streamId, jobKind, slaPolicyId, maxSpend, deadline);
     }
 
-    function confirmFunding(bytes32 jobId, bytes32 fundingRef, uint256 amount) external {
-        if (!dependenciesBound || msg.sender != settlement) revert NotSettlement();
-        Job storage j = _get(jobId);
-        if (j.status != Status.CREATED) revert InvalidTransition();
-        if (fundingRef == bytes32(0) || amount == 0 || amount > j.maxSpend) revert InvalidAmount();
-        j.fundingRef = fundingRef;
-        j.fundedAmount = amount;
-        _setStatus(jobId, j, Status.FUNDED);
-        emit JobFunded(jobId, fundingRef, amount);
-    }
-
     function acceptJob(bytes32 jobId, bytes32 operatorId) external {
         Job storage j = _get(jobId);
-        if (j.status != Status.FUNDED) revert InvalidTransition();
+        if (j.status != Status.CREATED) revert InvalidTransition();
         if (block.timestamp > j.deadline) revert InvalidDeadline();
         IMediaOperatorJobs420 registry = IMediaOperatorJobs420(operatorRegistry);
         if (!registry.isOperationalFor(operatorId, j.capabilityId)) revert InvalidOperator();
@@ -158,9 +144,29 @@ contract MediaJobMarket420 is SystemAccess, I420System {
         emit JobAccepted(jobId, operatorId, operatorAccount);
     }
 
+    function settlementTerms(bytes32 jobId) external view returns (address payer, bytes32 operatorId, address beneficiary, uint256 maxSpend, Status status) {
+        Job storage j = _get(jobId);
+        payer = j.requester;
+        operatorId = j.operatorId;
+        maxSpend = j.maxSpend;
+        status = j.status;
+        if (operatorId != bytes32(0)) beneficiary = IMediaOperatorJobs420(operatorRegistry).settlementAccountOf(operatorId);
+    }
+
+    function confirmFunding(bytes32 jobId, bytes32 fundingRef, uint256 amount) external {
+        if (!dependenciesBound || msg.sender != settlement) revert NotSettlement();
+        Job storage j = _get(jobId);
+        if (j.status != Status.ACCEPTED) revert InvalidTransition();
+        if (fundingRef == bytes32(0) || amount == 0 || amount > j.maxSpend) revert InvalidAmount();
+        j.fundingRef = fundingRef;
+        j.fundedAmount = amount;
+        _setStatus(jobId, j, Status.FUNDED);
+        emit JobFunded(jobId, fundingRef, amount);
+    }
+
     function markRunning(bytes32 jobId) external {
         Job storage j = _operator(jobId);
-        if (j.status != Status.ACCEPTED) revert InvalidTransition();
+        if (j.status != Status.FUNDED) revert InvalidTransition();
         if (block.timestamp > j.deadline) revert InvalidDeadline();
         _setStatus(jobId, j, Status.RUNNING);
     }
@@ -205,11 +211,9 @@ contract MediaJobMarket420 is SystemAccess, I420System {
     function expire(bytes32 jobId) external {
         Job storage j = _get(jobId);
         if (block.timestamp <= j.deadline) revert InvalidDeadline();
-        if (j.status != Status.CREATED && j.status != Status.FUNDED && j.status != Status.ACCEPTED) revert InvalidTransition();
+        if (j.status != Status.CREATED && j.status != Status.ACCEPTED && j.status != Status.FUNDED) revert InvalidTransition();
         _setStatus(jobId, j, Status.EXPIRED);
-        if (j.fundedAmount != 0) {
-            IMediaSettlementJobs420(settlement).resolve(jobId, false, keccak256(abi.encode("MEDIA_EXPIRED", jobId, j.deadline)));
-        }
+        if (j.fundedAmount != 0) IMediaSettlementJobs420(settlement).resolve(jobId, false, keccak256(abi.encode("MEDIA_EXPIRED", jobId, j.deadline)));
     }
 
     function confirmSettlement(bytes32 jobId) external {

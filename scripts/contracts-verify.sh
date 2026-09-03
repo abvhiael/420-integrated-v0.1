@@ -24,7 +24,8 @@ for s in \
   scripts/verify-420wallet-genesis.py \
   scripts/verify-420pay-parameters.py \
   scripts/verify-420pay-implementation.py \
-  scripts/verify-420pay-hardening.py
+  scripts/verify-420pay-hardening.py \
+  scripts/verify-420bet-roulette-release.py
 do
   if [[ -f "$s" ]]; then
     python3 "$s" | tee -a "$ART/static-verification.txt"
@@ -71,7 +72,7 @@ echo "== forge unit/fuzz/invariant tests =="
 FOUNDRY_PROFILE="${FOUNDRY_PROFILE:-default}" forge test -vvv | tee "$ART/forge-test.txt"
 
 echo "== coverage =="
-FOUNDRY_PROFILE=coverage forge coverage --ir-minimum --report summary | tee "$ART/forge-coverage.txt"
+FOUNDRY_PROFILE=coverage forge coverage --ir-minimum --report summary |& tee "$ART/forge-coverage.txt"
 
 echo "== contract artifacts =="
 find out -type f -name '*.json' -print0 | sort -z | \

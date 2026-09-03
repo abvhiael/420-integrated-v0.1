@@ -1,0 +1,45 @@
+{
+  "schema": "420-genesis-canonical-addresses-v1",
+  "status": "FROZEN_FOR_GENESIS",
+  "namespace": "0x00000000000000000000000000000000000004xx",
+  "policy": {
+    "freezeOnlyDiscoveryAuthorityAnchors": true,
+    "frontendsReceiveNoCanonicalContractAddress": true,
+    "implementationsAdaptersTemplatesRemainRegistryResolved": true,
+    "addressReuseForbidden": true,
+    "codeAtFrozenAddressMustMatchGenesisManifest": true
+  },
+  "anchors": [
+    {"id":"smart-account-factory","contract":"SmartAccountFactory420.sol","address":"0x0000000000000000000000000000000000000420","role":"canonical smart-account factory"},
+    {"id":"capability-registry","contract":"CapabilityRegistry420.sol","address":"0x0000000000000000000000000000000000000421","role":"canonical wallet capability authority"},
+    {"id":"protocol-registry","contract":"ProtocolRegistry.sol","address":"0x0000000000000000000000000000000000000422","role":"canonical protocol and service discovery root"},
+    {"id":"names","contract":"Names420.sol","address":"0x0000000000000000000000000000000000000423","role":"canonical 420 Names registry"},
+    {"id":"identity","contract":"Identity420.sol","address":"0x0000000000000000000000000000000000000424","role":"canonical identity registry"},
+    {"id":"interop-router","contract":"InteropRouter420.sol","address":"0x0000000000000000000000000000000000000425","role":"canonical interoperability router"},
+    {"id":"randomness-router","contract":"RandomnessRouter420.sol","address":"0x0000000000000000000000000000000000000426","role":"canonical randomness routing root"},
+    {"id":"oracle-router","contract":"OracleRouter420.sol","address":"0x0000000000000000000000000000000000000427","role":"canonical oracle routing root"},
+    {"id":"swap-executor","contract":"CanonicalSwapExecutor420.sol","address":"0x0000000000000000000000000000000000000428","role":"canonical swap execution entry point"},
+    {"id":"bridge-gateway","contract":"VerifiedGateway420.sol","address":"0x0000000000000000000000000000000000000429","role":"canonical verified bridge gateway"},
+    {"id":"bridge-router","contract":"GatewayRouter420.sol","address":"0x000000000000000000000000000000000000042a","role":"canonical bridge route entry point"},
+    {"id":"stake","contract":"Stake420.sol","address":"0x000000000000000000000000000000000000042b","role":"canonical staking entry point"},
+    {"id":"governance","contract":"Governance420.sol","address":"0x000000000000000000000000000000000000042c","role":"canonical governance root"},
+    {"id":"payment-router","contract":"PaymentRouter420.sol","address":"0x000000000000000000000000000000000000042d","role":"canonical 420 Pay payment entry point"},
+    {"id":"settlement-router","contract":"SettlementRouter420.sol","address":"0x000000000000000000000000000000000000042e","role":"canonical settlement entry point"},
+    {"id":"token-factory","contract":"TokenFactory420.sol","address":"0x000000000000000000000000000000000000042f","role":"canonical token creation factory"},
+    {"id":"ai-router","contract":"AIRouter420.sol","address":"0x0000000000000000000000000000000000000430","role":"canonical AI request routing root"},
+    {"id":"resource-router","contract":"ResourceRouter420.sol","address":"0x0000000000000000000000000000000000000431","role":"canonical resource protocol router"},
+    {"id":"compute-router","contract":"ComputeRouter420.sol","address":"0x0000000000000000000000000000000000000432","role":"canonical compute market router"},
+    {"id":"treasury-router","contract":"TreasuryRouter420.sol","address":"0x0000000000000000000000000000000000000433","role":"canonical treasury routing root"},
+    {"id":"vault-router","contract":"VaultRouter420.sol","address":"0x0000000000000000000000000000000000000434","role":"canonical vault routing root"},
+    {"id":"rights-router","contract":"RightsRouter420.sol","address":"0x0000000000000000000000000000000000000435","role":"canonical rights routing root"},
+    {"id":"launchpad-router","contract":"LaunchpadRouter420.sol","address":"0x0000000000000000000000000000000000000436","role":"canonical launchpad routing root"},
+    {"id":"grants-router","contract":"GrantRouter420.sol","address":"0x0000000000000000000000000000000000000437","role":"canonical grants routing root"},
+    {"id":"attention-router","contract":"AttentionRouter420.sol","address":"0x0000000000000000000000000000000000000438","role":"canonical attention protocol router"},
+    {"id":"pulse-router","contract":"PulseRouter420.sol","address":"0x0000000000000000000000000000000000000439","role":"canonical social graph routing root"},
+    {"id":"messenger-router","contract":"MessengerRouter420.sol","address":"0x000000000000000000000000000000000000043a","role":"canonical messenger routing root"},
+    {"id":"commons-router","contract":"CommonsRouter420.sol","address":"0x000000000000000000000000000000000000043b","role":"canonical commons routing root"}
+  ],
+  "reserved": [
+    {"id":"entry-point","address":"0x000000000000000000000000000000000000041f","status":"RESERVED_PENDING_PRODUCTION_IMPLEMENTATION","note":"SmartAccountFactory420 constructor dependency; bytecode binding must be finalized before Genesis predeploy generation."}
+  ]
+}

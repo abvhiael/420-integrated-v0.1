@@ -1,0 +1,26 @@
+{
+  "name": "@420integrated/bet-dice-v1-client",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "manifest:config": "node scripts/generate-config.mjs",
+    "manifest:selftest": "node scripts/selftest-manifest.mjs",
+    "smoke:rpc": "node scripts/smoke-rpc.mjs",
+    "local:deploy-smoke": "node scripts/local-deploy-smoke.mjs",
+    "shared:deploy": "node scripts/shared-deploy.mjs deploy",
+    "shared:promote": "node scripts/shared-deploy.mjs promote",
+    "shared:install-emergency": "node scripts/install-emergency.mjs"
+  },
+  "dependencies": {
+    "viem": "2.56.0"
+  },
+  "devDependencies": {
+    "typescript": "7.0.2",
+    "vite": "8.2.2"
+  }
+}

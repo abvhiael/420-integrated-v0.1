@@ -1,0 +1,29 @@
+name: 420 Wallet Web Verification
+
+on:
+  push:
+    paths:
+      - "wallet/web/**"
+      - ".github/workflows/wallet-web.yml"
+  pull_request:
+    paths:
+      - "wallet/web/**"
+      - ".github/workflows/wallet-web.yml"
+  workflow_dispatch:
+
+jobs:
+  verify-wallet-web:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Static wallet checks
+        working-directory: wallet/web
+        run: npm run check
+      - name: Wallet Core tests
+        working-directory: wallet/web
+        run: npm test

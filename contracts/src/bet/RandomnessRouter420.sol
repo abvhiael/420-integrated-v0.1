@@ -160,7 +160,7 @@ contract RandomnessRouter420 is I420System {
         bytes32 entropy,
         bytes32 proofHash
     ) private view returns (bytes32) {
-        return keccak256(abi.encode(
+        bytes memory prefix = abi.encode(
             ROOT_DOMAIN,
             block.chainid,
             address(this),
@@ -168,7 +168,9 @@ contract RandomnessRouter420 is I420System {
             request.gameVersionId,
             request.paramsHash,
             request.contextHash,
-            request.profileId,
+            request.profileId
+        );
+        bytes memory suffix = abi.encode(
             profile.method,
             profile.securityLevelHash,
             profile.domainSeparator,
@@ -178,7 +180,8 @@ contract RandomnessRouter420 is I420System {
             source,
             entropy,
             proofHash
-        ));
+        );
+        return keccak256(bytes.concat(prefix, suffix));
     }
 
     function _getProfile(bytes32 profileId) private view returns (RandomnessProfile storage p) { p = _profiles[profileId]; if (!p.exists) revert NotFound(); }

@@ -72,6 +72,7 @@ contract CanonicalConstantProductPool420 {
     {
         if (amount0Desired == 0 || amount1Desired == 0 || recipient == address(0)) revert InvalidAmount();
 
+        _sync();
         uint256 r0 = reserve0;
         uint256 r1 = reserve1;
         _pullExact(token0, msg.sender, amount0Desired);
@@ -104,6 +105,7 @@ contract CanonicalConstantProductPool420 {
         returns (uint256 amount0, uint256 amount1)
     {
         if (sharesBurned == 0 || recipient == address(0) || shares[msg.sender] < sharesBurned) revert InvalidAmount();
+        _sync();
         uint256 supply = totalShares;
         amount0 = reserve0 * sharesBurned / supply;
         amount1 = reserve1 * sharesBurned / supply;
@@ -146,6 +148,7 @@ contract CanonicalConstantProductPool420 {
             revert InvalidAmount();
         }
 
+        _sync();
         (uint256 reserveIn, uint256 reserveOut) = _reservesFor(inputAsset, settlementAsset);
         settlementDelivered = _quote(reserveIn, reserveOut, inputAmount);
         if (settlementDelivered < exactSettlementAmount) revert SlippageExceeded();
@@ -166,6 +169,12 @@ contract CanonicalConstantProductPool420 {
         revert InvalidPair();
     }
 
+    function _reserveFor(address token) private view returns (uint256 reserve) {
+        if (token == token0) return reserve0;
+        if (token == token1) return reserve1;
+        revert InvalidPair();
+    }
+
     function _quote(uint256 reserveIn, uint256 reserveOut, uint256 amountIn) private view returns (uint256 amountOut) {
         if (amountIn == 0 || reserveIn == 0 || reserveOut == 0) revert InsufficientLiquidity();
         uint256 amountInAfterFee = amountIn * (BPS_DENOMINATOR - feeBps);
@@ -174,17 +183,17 @@ contract CanonicalConstantProductPool420 {
     }
 
     function _pullExact(address token, address from, uint256 amount) private {
-        uint256 beforeBalance = IERC20CanonicalPool420(token).balanceOf(address(this));
+        uint256 expectedBalance = _reserveFor(token) + amount;
         if (!IERC20CanonicalPool420(token).transferFrom(from, address(this), amount)) revert TransferFailed();
-        uint256 afterBalance = IERC20CanonicalPool420(token).balanceOf(address(this));
-        if (afterBalance - beforeBalance != amount) revert UnsupportedTokenBehavior();
+        if (IERC20CanonicalPool420(token).balanceOf(address(this)) != expectedBalance) revert UnsupportedTokenBehavior();
     }
 
     function _pushExact(address token, address to, uint256 amount) private {
-        uint256 beforeBalance = IERC20CanonicalPool420(token).balanceOf(address(this));
+        uint256 reserve = _reserveFor(token);
+        if (amount > reserve) revert InsufficientLiquidity();
+        uint256 expectedBalance = reserve - amount;
         if (!IERC20CanonicalPool420(token).transfer(to, amount)) revert TransferFailed();
-        uint256 afterBalance = IERC20CanonicalPool420(token).balanceOf(address(this));
-        if (beforeBalance - afterBalance != amount) revert UnsupportedTokenBehavior();
+        if (IERC20CanonicalPool420(token).balanceOf(address(this)) != expectedBalance) revert UnsupportedTokenBehavior();
     }
 
     function _sync() private {

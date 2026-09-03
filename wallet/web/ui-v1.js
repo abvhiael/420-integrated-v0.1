@@ -1,4 +1,5 @@
 import { buildSendExecution } from './core/send.js';
+import { installFailClosedBrowserLifecycle } from './core/provider-lifecycle.js';
 
 const MAX_ACTIVITY = 12;
 
@@ -175,6 +176,10 @@ async function initGuidedSend() {
   });
 }
 
+function initProviderLifecycle() {
+  installFailClosedBrowserLifecycle(globalThis.ethereum, globalThis.location);
+}
+
 function initCopyButtons() {
   for (const button of document.querySelectorAll('[data-copy-source]')) {
     button.addEventListener('click', async () => {
@@ -194,6 +199,7 @@ export function initWalletUiV1() {
   initActivityFeed();
   initExecutionReview();
   initGuidedSend();
+  initProviderLifecycle();
   initCopyButtons();
 }
 

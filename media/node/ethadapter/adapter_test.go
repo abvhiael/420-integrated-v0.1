@@ -10,7 +10,7 @@ import (
 
 type fakeBackend struct {
 	pending   []ContractJob
-	job       ContractJob
+	refreshed ContractJob
 	acceptErr error
 	runErr    error
 	commitErr error
@@ -21,7 +21,7 @@ type fakeBackend struct {
 }
 
 func (f *fakeBackend) ListPendingJobs(context.Context) ([]ContractJob, error) { return f.pending, nil }
-func (f *fakeBackend) Job(context.Context, [32]byte) (ContractJob, error)      { return f.job, nil }
+func (f *fakeBackend) Job(context.Context, [32]byte) (ContractJob, error)      { return f.refreshed, nil }
 func (f *fakeBackend) AcceptJob(_ context.Context, id [32]byte) error {
 	f.accepted = id
 	return f.acceptErr

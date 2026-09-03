@@ -104,10 +104,10 @@ contract BetKenoHardening420Test {
         Suite memory s = _deploy();
         require(s.keno.requiredMaxGrossPayout(STAKE, s.params) == 5_000 ether, "wrong max gross");
 
-        KenoV1420.Params memory partial = s.params;
-        partial.grossPayoutByHits[1] = STAKE - 1;
+        KenoV1420.Params memory belowStake = s.params;
+        belowStake.grossPayoutByHits[1] = STAKE - 1;
         vm.expectRevert(KenoV1420.InvalidPayout.selector);
-        s.keno.requiredMaxGrossPayout(STAKE, partial);
+        s.keno.requiredMaxGrossPayout(STAKE, belowStake);
 
         KenoV1420.Params memory zero = s.params;
         for (uint8 i = 0; i <= 5; ++i) zero.grossPayoutByHits[i] = 0;

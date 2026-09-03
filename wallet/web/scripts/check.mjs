@@ -12,10 +12,12 @@ const required = [
   'core/accounts.js',
   'core/config.js',
   'core/deployment.js',
+  'core/execution.js',
   'core/portfolio.js',
   'core/provider.js',
   'core/services.js',
   'test/core.test.js',
+  'test/execution.test.js',
 ];
 
 const errors = [];
@@ -27,7 +29,7 @@ const app = fs.readFileSync(path.join(root, 'app.js'), 'utf8');
 for (const forbidden of ['privateKey', 'mnemonic', 'seedPhrase', 'localStorage.setItem("private']) {
   if (app.includes(forbidden)) errors.push(`forbidden signing secret pattern in app.js: ${forbidden}`);
 }
-for (const requiredBinding of ['discoverSmartAccount', 'readNetwork', 'readPortfolio', 'sendSmartAccountCreation', 'confirmSmartAccountCreation']) {
+for (const requiredBinding of ['discoverSmartAccount', 'readNetwork', 'readPortfolio', 'sendSmartAccountCreation', 'confirmSmartAccountCreation', 'prepareSmartAccountExecution', 'sendSmartAccountExecution', 'confirmSmartAccountExecution']) {
   if (!app.includes(requiredBinding)) errors.push(`missing UI Wallet Core binding: ${requiredBinding}`);
 }
 
@@ -41,16 +43,22 @@ for (const requiredGuard of ['SmartAccountFactory420', 'eth_sendTransaction', 'e
   if (!deployment.includes(requiredGuard)) errors.push(`missing account creation guard: ${requiredGuard}`);
 }
 
+const execution = fs.readFileSync(path.join(root, 'core/execution.js'), 'utf8');
+for (const requiredGuard of ['eth_call', 'eth_estimateGas', 'eth_sendTransaction', 'controllerIsOwner', 'authority contract', 'confirmSmartAccountExecution']) {
+  if (!execution.includes(requiredGuard)) errors.push(`missing Smart Account execution guard: ${requiredGuard}`);
+}
+
 const abi = fs.readFileSync(path.join(root, 'core/abi.js'), 'utf8');
 if (!abi.includes("createAccount: '4003f6ba'")) errors.push('canonical SmartAccountFactory420 createAccount selector missing');
+if (!abi.includes("execute: 'b61d27f6'")) errors.push('canonical SmartAccount420 execute selector missing');
 
 const config = JSON.parse(fs.readFileSync(path.join(root, 'runtime-config.json'), 'utf8'));
 if (config.manifest?.verificationMode !== 'registry-or-signed-manifest') errors.push('manifest verification mode must fail closed to registry-or-signed-manifest');
-if (config.features?.smartAccountExecution !== false) errors.push('general smartAccountExecution must remain disabled until execution implementation is qualified');
-if (config.features?.smartAccountCreation !== true) errors.push('smartAccountCreation must be enabled for this qualification stage');
-if (config.features?.smartAccountDiscovery !== true) errors.push('smartAccountDiscovery must remain enabled');
+if (config.features?.smartAccountExecution !== true) errors.push('guarded smartAccountExecution must be enabled for this qualification stage');
+if (config.features?.executionSimulationRequired !== true) errors.push('execution simulation must remain mandatory');
+if (config.features?.smartAccountCreation !== true || config.features?.smartAccountDiscovery !== true) errors.push('smart account discovery and creation must remain enabled');
 if (config.features?.networkReads !== true || config.features?.readOnlyPortfolio !== true) errors.push('network and portfolio reads must remain enabled');
-if (config.features?.sessionKeys !== false || config.features?.passkeys !== false) errors.push('session keys and passkeys must remain disabled in account creation stage');
+if (config.features?.sessionKeys !== false || config.features?.passkeys !== false || config.features?.delegatedCapabilities !== false || config.features?.batchExecution !== false || config.features?.recoveryManagement !== false) errors.push('advanced authorization, batching, passkeys, and recovery management must remain disabled in owner execution stage');
 if (!config.smartAccount || !Array.isArray(config.trackedAssets)) errors.push('smart account and tracked asset runtime config required');
 if (config.smartAccount?.factoryAddress !== '0x0000000000000000000000000000000000000420') errors.push('wallet must use frozen canonical SmartAccountFactory420 address');
 
@@ -63,10 +71,15 @@ console.log(JSON.stringify({
   walletWebFoundation: true,
   smartAccountDiscovery: true,
   smartAccountCreation: true,
+  simulatedOwnerExecution: true,
+  executionSimulationRequired: true,
+  authorityTargetsBlocked: true,
   portfolioReads: true,
   networkReads: true,
   serverSideKeyCustody: false,
-  generalSmartAccountExecutionEnabled: false,
+  batchExecutionEnabled: false,
   sessionKeysEnabled: false,
-  passkeysEnabled: false,
+  delegatedCapabilitiesEnabled: false,
+  recoveryManagementEnabled: false,
+  passkeysEnabled: false
 }, null, 2));

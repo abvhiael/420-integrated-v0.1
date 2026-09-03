@@ -1,4 +1,5 @@
 const SELECTORS = Object.freeze({
+  createAccount: '4003f6ba',
   getAddress: '49d27e27',
   owner: '8da5cb5b',
   recoveryAuthority: '8a957938',
@@ -30,8 +31,16 @@ function word(hex) {
   return hex.replace(/^0x/, '').padStart(64, '0');
 }
 
+function encodeFactoryArgs(owner, recoveryAuthority, salt) {
+  return `${word(normalizeAddress(owner))}${word(normalizeAddress(recoveryAuthority))}${normalizeBytes32(salt).slice(2)}`;
+}
+
+export function encodeCreateAccount(owner, recoveryAuthority, salt) {
+  return `0x${SELECTORS.createAccount}${encodeFactoryArgs(owner, recoveryAuthority, salt)}`;
+}
+
 export function encodeGetAddress(owner, recoveryAuthority, salt) {
-  return `0x${SELECTORS.getAddress}${word(normalizeAddress(owner))}${word(normalizeAddress(recoveryAuthority))}${normalizeBytes32(salt).slice(2)}`;
+  return `0x${SELECTORS.getAddress}${encodeFactoryArgs(owner, recoveryAuthority, salt)}`;
 }
 
 export function encodeAddressGetter(name) {

@@ -44,7 +44,22 @@ The processor:
 - bounds runtime by both operator `MaxRuntime` and the canonical job deadline;
 - aborts partially produced output when execution, commit or validation fails.
 
-The GStreamer graph is deliberately constrained in this increment. Multi-branch audio/video pipelines, live tees and ingress/egress transport elements are deferred to the gateway step rather than exposed as arbitrary requester-controlled pipelines.
+## Live gateway
+
+`media/node/livegateway` adds the first live ingress/egress control plane for WHIP, WHEP, WebRTC, SRT and RTMP.
+
+The gateway:
+- validates protocol/direction/endpoint combinations before a session starts;
+- rejects credentials embedded in endpoint URLs;
+- keeps credentials as opaque operator-local references;
+- tracks session lifecycle as `STARTING -> ACTIVE -> STOPPING -> CLOSED`, with failures recorded explicitly;
+- rejects duplicate session IDs and invalid state transitions;
+- provides a WHIP/WHEP HTTP negotiation driver using SDP offer/answer exchange;
+- applies bearer credentials only after resolving them through a local credential resolver;
+- provides direct-process SRT/RTMP launchers using argv without shell interpolation;
+- leaves RTP/media bytes inside protocol drivers rather than exposing them to the chain-facing control plane.
+
+The initial generic `webrtc://` protocol registration represents a future direct peer/gateway implementation; WHIP/WHEP are the concrete HTTP-negotiated WebRTC paths in this increment.
 
 ## Execution sequence
 
@@ -60,11 +75,12 @@ The GStreamer graph is deliberately constrained in this increment. Multi-branch 
 10. require `FUNDED` state and non-zero funded amount;
 11. mark the job running;
 12. resolve the opaque media input reference locally;
-13. select the static capability profile;
-14. execute FFmpeg or GStreamer under the bounded runtime context;
-15. commit the completed media artifact to an opaque output reference;
-16. fail closed if the lease is lost, deadline passes, processing fails or the output reference is empty;
-17. commit the output reference on-chain.
+13. select either a bounded media processor or live transport driver;
+14. for file/transcode work, execute FFmpeg or GStreamer under the bounded runtime context;
+15. for live work, validate and start a WHIP/WHEP/WebRTC/SRT/RTMP session without exposing credentials on-chain;
+16. commit completed media artifacts or live-session result references through the appropriate sink/control path;
+17. fail closed on lease loss, deadline expiry, invalid transport state, failed negotiation, processing failure or empty result references;
+18. commit only opaque output references on-chain.
 
 ## Node invariants
 
@@ -86,11 +102,15 @@ The GStreamer graph is deliberately constrained in this increment. Multi-branch 
 - `MEDIA-NODE-INV-016`: only operator-configured capability profiles may select codecs, containers, scale bounds or media engines.
 - `MEDIA-NODE-INV-017`: partial or failed media outputs are aborted and never committed as canonical result references.
 - `MEDIA-NODE-INV-018`: media execution time cannot exceed the lesser of the operator runtime cap and the canonical job deadline.
+- `MEDIA-NODE-INV-019`: live transport credentials are never embedded in canonical endpoint URLs or chain-facing session state.
+- `MEDIA-NODE-INV-020`: live session identifiers are single-use within a running gateway registry and duplicate starts fail closed.
+- `MEDIA-NODE-INV-021`: invalid live-session state transitions fail closed.
+- `MEDIA-NODE-INV-022`: WHIP/WHEP negotiation accepts only successful HTTP responses with non-empty SDP answers.
+- `MEDIA-NODE-INV-023`: SRT/RTMP endpoint strings are passed as direct argv elements and are never shell-expanded.
 
 ## Next Phase 2 increments
 
-1. WHIP/WHEP/WebRTC and SRT/RTMP ingress/egress gateway adapter.
-2. persistent/distributed lease backend and crash recovery.
-3. health, telemetry and SLA evidence generation.
-4. operator CLI/configuration and secure signer implementation.
-5. node integration tests against a local Anvil deployment of the 420Media contracts.
+1. persistent/distributed lease backend and crash recovery.
+2. health, telemetry and SLA evidence generation.
+3. operator CLI/configuration and secure signer implementation.
+4. node integration tests against a local Anvil deployment of the 420Media contracts.

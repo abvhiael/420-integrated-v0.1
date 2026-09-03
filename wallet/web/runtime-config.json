@@ -7,7 +7,7 @@
     "explorerUrl": null
   },
   "smartAccount": {
-    "factoryAddress": null,
+    "factoryAddress": "0x0000000000000000000000000000000000000420",
     "recoveryAuthority": null,
     "salt": "0x0000000000000000000000000000000000000000000000000000000000000000"
   },

@@ -22,6 +22,7 @@ echo "== static verification =="
 for s in \
   scripts/verify-step6-contracts.py \
   scripts/verify-420wallet-genesis.py \
+  scripts/verify-genesis-canonical-addresses.py \
   scripts/verify-420pay-parameters.py \
   scripts/verify-420pay-implementation.py \
   scripts/verify-420pay-hardening.py \

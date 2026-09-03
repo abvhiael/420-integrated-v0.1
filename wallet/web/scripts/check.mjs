@@ -4,10 +4,10 @@ import process from 'node:process';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const required = [
-  'index.html', 'app.js', 'styles.css', 'runtime-config.json',
+  'index.html', 'app.js', 'ui-v1.js', 'styles.css', 'runtime-config.json',
   'core/abi.js', 'core/accounts.js', 'core/capabilities.js', 'core/capability-management.js', 'core/session-management.js', 'core/session-execution.js',
-  'core/config.js', 'core/deployment.js', 'core/execution.js', 'core/portfolio.js', 'core/provider.js', 'core/services.js',
-  'test/core.test.js', 'test/execution.test.js', 'test/capabilities.test.js', 'test/capability-management.test.js', 'test/session-management.test.js', 'test/session-execution.test.js',
+  'core/config.js', 'core/deployment.js', 'core/execution.js', 'core/portfolio.js', 'core/provider.js', 'core/services.js', 'core/send.js',
+  'test/core.test.js', 'test/execution.test.js', 'test/capabilities.test.js', 'test/capability-management.test.js', 'test/session-management.test.js', 'test/session-execution.test.js', 'test/ui-v1.test.js', 'test/send.test.js',
 ];
 
 const errors = [];
@@ -25,6 +25,17 @@ for (const requiredBinding of [
 ]) {
   if (!app.includes(requiredBinding)) errors.push(`missing UI Wallet Core binding: ${requiredBinding}`);
 }
+
+const ui = fs.readFileSync(path.join(root, 'ui-v1.js'), 'utf8');
+for (const requiredBinding of ['buildSendExecution', 'send-asset', 'send-recipient', 'send-amount', 'prepare-send', 'execute-target', 'execute-value', 'execute-data']) {
+  if (!ui.includes(requiredBinding)) errors.push(`missing Wallet Web UI V1 binding: ${requiredBinding}`);
+}
+
+const send = fs.readFileSync(path.join(root, 'core/send.js'), 'utf8');
+for (const requiredGuard of ['a9059cbb', 'parseUnits', 'normalizeAddress', "kind === 'native'", "kind !== 'erc20'"]) {
+  if (!send.includes(requiredGuard)) errors.push(`missing guided send guard: ${requiredGuard}`);
+}
+if (send.includes('eth_sendTransaction') || send.includes('eth_sendUserOperation')) errors.push('guided send builder must not broadcast transactions directly');
 
 const accounts = fs.readFileSync(path.join(root, 'core/accounts.js'), 'utf8');
 for (const requiredBinding of ['SmartAccount', 'eth_getCode', 'owner', 'recoveryAuthority', 'authorizationEpoch', 'capabilityRegistry']) {
@@ -99,6 +110,10 @@ if (errors.length) {
 console.log(JSON.stringify({
   pass: true,
   walletWebFoundation: true,
+  walletWebUiV1: true,
+  guidedNativeSend: true,
+  guidedErc20Send: true,
+  guidedSendBroadcastsDirectly: false,
   smartAccountDiscovery: true,
   smartAccountCreation: true,
   simulatedOwnerExecution: true,

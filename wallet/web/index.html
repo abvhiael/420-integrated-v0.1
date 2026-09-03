@@ -46,8 +46,20 @@
 
       <section id="execution-panel" class="panel" hidden>
         <div class="section-heading"><div><p class="eyebrow">Owner authority · simulation required</p><h2>Send / Execute</h2></div><span id="review-state" class="status-pill" data-state="idle">Awaiting simulation</span></div>
+
+        <div class="account-card">
+          <div class="section-heading"><div><p class="eyebrow">Guided send</p><h3>Send an asset</h3></div><span class="section-kicker">Builds a guarded execution request</span></div>
+          <div class="form-grid">
+            <label><span class="label">Asset</span><select id="send-asset"><option>420 · native</option></select></label>
+            <label><span class="label">Recipient</span><input id="send-recipient" type="text" autocomplete="off" placeholder="0x…" /></label>
+            <label><span class="label">Amount</span><input id="send-amount" type="text" inputmode="decimal" autocomplete="off" placeholder="4.20" /></label>
+          </div>
+          <div class="section-heading"><p id="send-preview" class="muted">Enter a recipient and amount, then prepare the guarded transaction.</p><button id="prepare-send" type="button">Prepare send</button></div>
+        </div>
+
         <div class="split-panel">
           <div class="form-card">
+            <p class="eyebrow">Advanced transaction details</p>
             <label><span class="label">Target address</span><input id="execute-target" type="text" autocomplete="off" placeholder="0x…" /></label>
             <label><span class="label">Native value (wei)</span><input id="execute-value" type="text" inputmode="numeric" autocomplete="off" value="0" /></label>
             <label><span class="label">Calldata</span><textarea id="execute-data" autocomplete="off" rows="5">0x</textarea></label>
@@ -115,7 +127,7 @@
         <div id="services" class="service-grid" aria-live="polite"></div>
       </section>
 
-      <section class="security-note"><h2>Wallet Core security boundary</h2><p>Account creation is routed only through canonical SmartAccountFactory420. Owner execution must simulate successfully before approval, direct calls to wallet authority contracts are blocked, and confirmed transactions are re-verified against canonical account state. Session execution, batching, passkeys, recovery mutation, and delegated execution remain disabled until their respective hardening stages.</p></section>
+      <section class="security-note"><h2>Wallet Core security boundary</h2><p>Account creation is routed only through canonical SmartAccountFactory420. Guided sends are compiled into the same guarded SmartAccount420 execution path as advanced calls. Owner execution must simulate successfully before approval, direct calls to wallet authority contracts are blocked, and confirmed transactions are re-verified against canonical account state. Session execution, batching, passkeys, recovery mutation, and delegated execution remain disabled until their respective hardening stages.</p></section>
 
       <p id="status" class="status" role="status">Ready.</p>
     </main>

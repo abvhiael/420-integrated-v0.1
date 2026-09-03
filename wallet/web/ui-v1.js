@@ -1,3 +1,4 @@
+import './apps-page.js';
 import { buildSendExecution } from './core/send.js';
 import { installFailClosedBrowserLifecycle } from './core/provider-lifecycle.js';
 

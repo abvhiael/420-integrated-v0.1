@@ -15,6 +15,9 @@ library BongGogglesIds420 {
     bytes32 internal constant ACTION_FRIEND_REMOVE = keccak256("BG/ACTION/FRIEND_REMOVE/V1");
 
     bytes32 internal constant ACTION_FOLLOW = keccak256("BG/ACTION/FOLLOW/V1");
+    bytes32 internal constant ACTION_FOLLOW_ACCEPT = keccak256("BG/ACTION/FOLLOW_ACCEPT/V1");
+    bytes32 internal constant ACTION_FOLLOW_DECLINE = keccak256("BG/ACTION/FOLLOW_DECLINE/V1");
+    bytes32 internal constant ACTION_FOLLOW_CANCEL = keccak256("BG/ACTION/FOLLOW_CANCEL/V1");
     bytes32 internal constant ACTION_UNFOLLOW = keccak256("BG/ACTION/UNFOLLOW/V1");
     bytes32 internal constant ACTION_BLOCK = keccak256("BG/ACTION/BLOCK/V1");
     bytes32 internal constant ACTION_UNBLOCK = keccak256("BG/ACTION/UNBLOCK/V1");

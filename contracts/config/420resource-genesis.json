@@ -4,24 +4,27 @@
   "suite": "420 Resource Protocol",
   "products": {
     "420Relay": "encrypted routing and pay-as-you-go bandwidth",
-    "420Store": "persistent encrypted decentralized storage",
+    "420Store": "persistent encrypted decentralized storage with verifiable storage commitments and proof receipts",
     "420Cache": "decentralized cache/CDN/retrieval bandwidth",
     "420Gateway": "public/private gateways into decentralized services"
   },
-  "contracts": ["ResourceIds420.sol","ResourceAuthorization420.sol","ResourcePolicyRegistry420.sol","ResourceProviderRegistry420.sol","ResourceNodeRegistry420.sol","ResourceOfferRegistry420.sol","ResourceSessionRegistry420.sol","ResourceReceiptRegistry420.sol","ResourceRouter420.sol"],
+  "contracts": ["ResourceIds420.sol","ResourceAuthorization420.sol","ResourcePolicyRegistry420.sol","ResourceProviderRegistry420.sol","ResourceNodeRegistry420.sol","ResourceOfferRegistry420.sol","ResourceSessionRegistry420.sol","ResourceReceiptRegistry420.sol","ResourceRouter420.sol","StorageProofIds420.sol","IStorageProofVerifier420.sol","StorageProofSchemeRegistry420.sol","StorageCommitmentRegistry420.sol","StorageProofRegistry420.sol"],
   "genesis_invariants": [
     "RESOURCE-INV-001: provider activation requires a nonzero staking reference",
     "RESOURCE-INV-002: nodes are bound to exactly one canonical service class and active provider",
-    "RESOURCE-INV-003: provider/node/session authority is capability-scoped and default-deny for unrelated actors",
+    "RESOURCE-INV-003: provider/node/session/proof-scheme authority is capability-scoped and default-deny for unrelated actors",
     "RESOURCE-INV-004: offers snapshot service, price, unit cap, terms and expiry before consumption",
     "RESOURCE-INV-005: sessions have replay-safe identities, explicit maximum units and maximum native-420 spend",
     "RESOURCE-INV-006: metering receipts use canonical replay-safe ids, monotonic cumulative units and cannot exceed session caps",
     "RESOURCE-INV-007: expired sessions cannot accept new metering receipts",
     "RESOURCE-INV-008: settlement finalization requires a session-scoped ACTION_SETTLE capability and cannot exceed maxSpend420",
     "RESOURCE-INV-009: encrypted traffic, stored payloads and cache contents remain off-chain; chain state contains commitments and economic/control state only",
-    "RESOURCE-INV-010: 420Relay, 420Store, 420Cache and 420Gateway share the protocol without cross-service capability confusion"
+    "RESOURCE-INV-010: 420Relay, 420Store, 420Cache and 420Gateway share the protocol without cross-service capability confusion",
+    "RESOURCE-INV-011: 420Store storage commitments require active STORE nodes and immutable content/proof parameters",
+    "RESOURCE-INV-012: storage proof challenges are replay-safe, deadline-bounded and fail closed through versioned verifier schemes"
   ],
   "payment_unit": "native $420",
   "provider_staking": "required reference for ACTIVE provider state",
+  "storage_proof_profile": "contracts/config/420storage-proof-v1.json",
   "new_frozen_predeploy_required": false
 }

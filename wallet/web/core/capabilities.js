@@ -2,11 +2,16 @@ import { normalizeAddress, normalizeBytes32 } from './abi.js';
 import { hasCode } from './accounts.js';
 
 export const CANONICAL_CAPABILITY_REGISTRY_420 = '0x0000000000000000000000000000000000000421';
+export const SESSION_EXECUTE_CAPABILITY_420 = '0x9d4b56157e30269b50ea6c6e4f268e8360bf5565165cd55c66ad0c4d007c9f92';
 const SELECTOR_GRANT = '918e9de3';
 const SELECTOR_USAGE = '4a8f2a54';
 const SELECTOR_ACCOUNT_COMPONENT_ID = '2b081d1d';
+const SELECTOR_ACTIVE_GRANT_ID = 'fabe3409';
+const SELECTOR_IS_AUTHORIZED = '1e4129c9';
 
 function word(value) { return value.replace(/^0x/, '').padStart(64, '0'); }
+function addressWord(value) { return normalizeAddress(value).slice(2).padStart(64, '0'); }
+function uintWord(value) { return BigInt(value).toString(16).padStart(64, '0'); }
 function wordAt(result, index) {
   if (typeof result !== 'string' || !/^0x[0-9a-fA-F]*$/.test(result)) throw new Error('invalid capability ABI response');
   const hex = result.slice(2);
@@ -59,4 +64,22 @@ export async function inspectCapabilityGrant(provider, smartAccountState, grantI
   const exists = grant.principal !== '0x0000000000000000000000000000000000000000';
   const belongsToAccount = exists && grant.componentId === componentId;
   return { registry, grantId: normalizedGrantId, accountComponentId: componentId, exists, belongsToAccount, grant, usage };
+}
+
+export async function readActiveGrantId(provider, smartAccountState, principal, capabilityId, scopeHash) {
+  if (!smartAccountState?.deployed) throw new Error('SmartAccount420 must be deployed before authorization inspection');
+  const registry = normalizeAddress(smartAccountState.capabilityRegistry);
+  if (registry !== CANONICAL_CAPABILITY_REGISTRY_420) throw new Error('SmartAccount420 is not bound to the canonical CapabilityRegistry420');
+  const componentId = await readAccountComponentId(provider, smartAccountState.smartAccount);
+  const data = `0x${SELECTOR_ACTIVE_GRANT_ID}${addressWord(principal)}${componentId.slice(2)}${normalizeBytes32(capabilityId).slice(2)}${normalizeBytes32(scopeHash).slice(2)}`;
+  return decodeBytes32Word(wordAt(await call(provider, registry, data), 0));
+}
+
+export async function readCapabilityAuthorization(provider, smartAccountState, principal, capabilityId, scopeHash, amount) {
+  if (!smartAccountState?.deployed) throw new Error('SmartAccount420 must be deployed before authorization inspection');
+  const registry = normalizeAddress(smartAccountState.capabilityRegistry);
+  if (registry !== CANONICAL_CAPABILITY_REGISTRY_420) throw new Error('SmartAccount420 is not bound to the canonical CapabilityRegistry420');
+  const componentId = await readAccountComponentId(provider, smartAccountState.smartAccount);
+  const data = `0x${SELECTOR_IS_AUTHORIZED}${addressWord(principal)}${componentId.slice(2)}${normalizeBytes32(capabilityId).slice(2)}${normalizeBytes32(scopeHash).slice(2)}${uintWord(amount)}`;
+  return decodeBoolWord(wordAt(await call(provider, registry, data), 0));
 }

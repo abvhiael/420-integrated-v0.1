@@ -66,6 +66,20 @@ contract MockAtomicCapabilityRegistry420 is ICapabilityRegistry420 {
     }
 }
 
+contract MockAtomicReferenceOracle420 is IExchangeReferenceOracle420 {
+    struct Observation { uint256 priceE18; uint256 updatedAt; }
+    mapping(bytes32 => Observation) public observations;
+
+    function set(bytes32 marketId, uint256 priceE18, uint256 updatedAt) external {
+        observations[marketId] = Observation(priceE18, updatedAt);
+    }
+
+    function referencePrice(bytes32 marketId) external view returns (uint256 priceE18, uint256 updatedAt) {
+        Observation memory observation = observations[marketId];
+        return (observation.priceE18, observation.updatedAt);
+    }
+}
+
 contract MockAtomicExecutionAdapter420 is IExchangeQuoteAdapter420, IExchangeExecutionAdapter420 {
     address public immutable sink = address(0xdead);
 
@@ -105,8 +119,10 @@ contract ExchangeAtomicRouter420Test {
     bytes32 private constant ROUTE_ID = keccak256("420/exchange/atomic/route");
 
     MockAtomicCapabilityRegistry420 private caps;
+    MockAtomicReferenceOracle420 private referenceOracle;
     ExchangeAuthorization420 private authorization;
     ExchangeEmergencyControl420 private emergency;
+    ExchangeOracleGuard420 private oracleGuard;
     ExchangeAssetRegistry420 private assets;
     ExchangeMarketRegistry420 private markets;
     ExchangeRouteRegistry420 private routes;
@@ -118,8 +134,10 @@ contract ExchangeAtomicRouter420Test {
 
     constructor() {
         caps = new MockAtomicCapabilityRegistry420();
+        referenceOracle = new MockAtomicReferenceOracle420();
         authorization = new ExchangeAuthorization420(address(caps));
         emergency = new ExchangeEmergencyControl420(address(this));
+        oracleGuard = new ExchangeOracleGuard420(address(this));
         assets = new ExchangeAssetRegistry420(address(this));
         markets = new ExchangeMarketRegistry420(address(this), address(assets), C_ID);
         routes = new ExchangeRouteRegistry420(address(this));
@@ -159,12 +177,19 @@ contract ExchangeAtomicRouter420Test {
             true
         );
 
+        uint256 nowTs = block.timestamp;
+        referenceOracle.set(AB_MARKET, 1e18, nowTs);
+        referenceOracle.set(BC_MARKET, 1e18, nowTs);
+        oracleGuard.configureGuard(AB_MARKET, address(referenceOracle), 1 days, 500, true);
+        oracleGuard.configureGuard(BC_MARKET, address(referenceOracle), 1 days, 500, true);
+
         router = new ExchangeAtomicRouter420(
             address(markets),
             address(assets),
             address(routes),
             address(authorization),
-            address(emergency)
+            address(emergency),
+            address(oracleGuard)
         );
         caps.setPrincipal(address(this));
 
@@ -265,6 +290,30 @@ contract ExchangeAtomicRouter420Test {
             )
         );
         require(!ok, "cycle accepted");
+    }
+
+    function testOracleDeviationFailsClosedAndRollsBack() public {
+        ExchangeAtomicRouter420.Hop[] memory hops = _twoHopPath();
+        bytes32 pathHash = router.hashPath(address(tokenA), 100 ether, address(this), hops);
+        uint256 beforeA = tokenA.balanceOf(address(this));
+        uint256 beforeC = tokenC.balanceOf(address(this));
+
+        referenceOracle.set(AB_MARKET, 2e18, block.timestamp);
+        (bool ok,) = address(router).call(
+            abi.encodeWithSelector(
+                router.swapExactInputPath.selector,
+                address(tokenA),
+                100 ether,
+                95 ether,
+                address(this),
+                pathHash,
+                hops
+            )
+        );
+        require(!ok, "deviating execution accepted");
+        require(tokenA.balanceOf(address(this)) == beforeA, "input not rolled back");
+        require(tokenC.balanceOf(address(this)) == beforeC, "output not rolled back");
+        referenceOracle.set(AB_MARKET, 1e18, block.timestamp);
     }
 
     function _twoHopPath() private view returns (ExchangeAtomicRouter420.Hop[] memory hops) {

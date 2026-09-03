@@ -63,7 +63,7 @@ contract EntryPoint420Test {
         require(!ok, "replay accepted");
     }
 
-    function testFailedExecutionStillConsumesValidatedNonce() public {
+    function testExecutionFailureStillConsumesValidatedNonce() public {
         PackedUserOperation420 memory op = _sign(
             _unsignedOp(0, abi.encodeWithSelector(SmartAccount420.execute.selector, address(target), 0, abi.encodeWithSelector(EntryPointTarget420.fail.selector))),
             OWNER_PK

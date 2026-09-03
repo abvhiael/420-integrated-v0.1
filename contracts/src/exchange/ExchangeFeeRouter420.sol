@@ -96,7 +96,7 @@ contract ExchangeFeeRouter420 is SystemAccess {
         if (developerAmount != 0) {
             if (!asset.approve(developmentVault, 0)) revert TransferFailed();
             if (!asset.approve(developmentVault, developerAmount)) revert TransferFailed();
-            DevelopmentCompensationVault420(developmentVault).contributeToken(
+            DevelopmentCompensationVault420(payable(developmentVault)).contributeToken(
                 token,
                 SOURCE_APPLICATION_ID,
                 tradeRef,

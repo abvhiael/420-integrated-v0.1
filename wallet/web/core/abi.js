@@ -1,6 +1,7 @@
 const SELECTORS = Object.freeze({
   createAccount: '4003f6ba',
   getAddress: '49d27e27',
+  execute: 'b61d27f6',
   owner: '8da5cb5b',
   recoveryAuthority: '8a957938',
   authorizationEpoch: '6d5f87be',
@@ -31,6 +32,12 @@ function word(hex) {
   return hex.replace(/^0x/, '').padStart(64, '0');
 }
 
+function uintWord(value) {
+  const amount = BigInt(value);
+  if (amount < 0n || amount >= (1n << 256n)) throw new Error('uint256 out of range');
+  return amount.toString(16).padStart(64, '0');
+}
+
 function encodeFactoryArgs(owner, recoveryAuthority, salt) {
   return `${word(normalizeAddress(owner))}${word(normalizeAddress(recoveryAuthority))}${normalizeBytes32(salt).slice(2)}`;
 }
@@ -41,6 +48,16 @@ export function encodeCreateAccount(owner, recoveryAuthority, salt) {
 
 export function encodeGetAddress(owner, recoveryAuthority, salt) {
   return `0x${SELECTORS.getAddress}${encodeFactoryArgs(owner, recoveryAuthority, salt)}`;
+}
+
+export function encodeExecute(target, value, data = '0x') {
+  const normalizedTarget = normalizeAddress(target);
+  if (typeof data !== 'string' || !/^0x(?:[0-9a-fA-F]{2})*$/.test(data)) throw new Error('execute data must be even-length hex');
+  const payload = data.slice(2).toLowerCase();
+  const byteLength = payload.length / 2;
+  const paddedBytes = Math.ceil(byteLength / 32) * 64;
+  const paddedPayload = payload.padEnd(paddedBytes, '0');
+  return `0x${SELECTORS.execute}${word(normalizedTarget)}${uintWord(value)}${uintWord(96)}${uintWord(byteLength)}${paddedPayload}`;
 }
 
 export function encodeAddressGetter(name) {

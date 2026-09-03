@@ -75,8 +75,27 @@
         <label><span class="label">Valid until (0 = no expiry)</span><input id="sponsor-valid-until" type="text" inputmode="numeric" value="0" /></label>
       </div>
       <div class="section-heading">
-        <p>Creation is simulated before wallet approval and verified against CapabilityRegistry420 after confirmation. This does not enable session-key execution.</p>
+        <p>Creation is simulated before wallet approval and verified against CapabilityRegistry420 after confirmation.</p>
         <button id="create-sponsor-grant" type="button" disabled>Create gas sponsor grant</button>
+      </div>
+    </section>
+
+    <section id="session-panel" hidden>
+      <div class="section-heading"><div><p class="eyebrow">Owner-controlled delegation</p><h2>Session key administration</h2></div></div>
+      <div class="account-card">
+        <label><span class="label">Session key address</span><input id="session-key" type="text" autocomplete="off" placeholder="0x…" /></label>
+        <label><span class="label">Scoped target</span><input id="session-target" type="text" autocomplete="off" placeholder="0x…" /></label>
+        <label><span class="label">Target selector (bytes4)</span><input id="session-selector" type="text" autocomplete="off" placeholder="0xa9059cbb" /></label>
+        <label><span class="label">Per-call limit</span><input id="session-per-call" type="text" inputmode="numeric" value="0" /></label>
+        <label><span class="label">Period limit</span><input id="session-period-limit" type="text" inputmode="numeric" value="0" /></label>
+        <label><span class="label">Period seconds</span><input id="session-period-seconds" type="text" inputmode="numeric" value="0" /></label>
+        <label><span class="label">Valid from</span><input id="session-valid-from" type="text" inputmode="numeric" value="0" /></label>
+        <label><span class="label">Valid until (0 = no expiry)</span><input id="session-valid-until" type="text" inputmode="numeric" value="0" /></label>
+        <div><p class="label">Session execution</p><strong>Disabled in this stage</strong></div>
+      </div>
+      <div class="section-heading">
+        <p>Enable or revoke a session key, then create a target+selector-scoped grant. All writes are simulated and verified against the account authorization epoch and canonical registry.</p>
+        <div><button id="enable-session-key" type="button" disabled>Enable key</button> <button id="revoke-session-key" type="button" disabled>Revoke key</button> <button id="create-session-grant" type="button" disabled>Create session grant</button></div>
       </div>
     </section>
 
@@ -92,7 +111,7 @@
 
     <section class="security-note">
       <h2>Wallet Core security boundary</h2>
-      <p>Capability writes go through SmartAccount420 owner-only methods, never directly through CapabilityRegistry420. Gas-sponsor grant creation and account-owned grant revocation require simulation, explicit owner approval, and post-confirmation registry verification. Session keys, delegated execution, batching, passkeys, and recovery mutation remain disabled.</p>
+      <p>Session administration uses SmartAccount420 owner-only methods and is bound to the current authorization epoch. Session grants are target+selector scoped, authority-contract targets are blocked, and post-confirmation state is checked against SmartAccount420 and canonical CapabilityRegistry420. Actual session-key execution, batching, passkeys, and recovery mutation remain disabled.</p>
     </section>
 
     <p id="status" class="status" role="status">Ready.</p>

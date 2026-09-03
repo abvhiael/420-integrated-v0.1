@@ -23,8 +23,12 @@
     "smartAccountCreation": true,
     "networkReads": true,
     "injectedWalletConnection": true,
-    "smartAccountExecution": false,
+    "smartAccountExecution": true,
+    "executionSimulationRequired": true,
+    "batchExecution": false,
     "passkeys": false,
-    "sessionKeys": false
+    "sessionKeys": false,
+    "delegatedCapabilities": false,
+    "recoveryManagement": false
   }
 }

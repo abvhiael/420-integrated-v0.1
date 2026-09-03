@@ -37,7 +37,7 @@ contract BongGogglesRelationshipGraph420 {
     error ZeroAddress();
     error SelfRelationship();
     error ProfileInactive();
-    error Blocked();
+    error RelationshipBlocked();
     error AlreadyFriends();
     error NotFriends();
     error RequestPending();
@@ -102,7 +102,7 @@ contract BongGogglesRelationshipGraph420 {
         _validatePair(requester, recipient);
         if (!authorization.canActFor(msg.sender, requester, BongGogglesIds420.ACTION_FRIEND_REQUEST)) revert Unauthorized();
         if (areFriends(requester, recipient)) revert AlreadyFriends();
-        if (isBlockedEither(requester, recipient)) revert Blocked();
+        if (isBlockedEither(requester, recipient)) revert RelationshipBlocked();
         uint256 nonce = ++friendRequestNonce[requester];
         requestId = keccak256(abi.encode("420/BONG_GOGGLES/FRIEND_REQUEST/V1", block.chainid, requester, recipient, nonce));
         _friendRequests[requestId] = FriendRequest(requestId, requester, recipient, uint64(block.timestamp), 0, FriendRequestState.PENDING);
@@ -113,7 +113,7 @@ contract BongGogglesRelationshipGraph420 {
         if (!authorization.canActFor(msg.sender, recipient, BongGogglesIds420.ACTION_FRIEND_ACCEPT)) revert Unauthorized();
         FriendRequest storage r = _pending(requestId);
         if (r.recipient != recipient) revert WrongRecipient();
-        if (isBlockedEither(r.requester, r.recipient)) revert Blocked();
+        if (isBlockedEither(r.requester, r.recipient)) revert RelationshipBlocked();
         bytes32 fid = friendshipId(r.requester, r.recipient);
         if (_friends[fid]) revert AlreadyFriends();
         r.state = FriendRequestState.ACCEPTED;
@@ -152,7 +152,7 @@ contract BongGogglesRelationshipGraph420 {
     function follow(address follower, address subject) external {
         _validatePair(follower, subject);
         if (!authorization.canActFor(msg.sender, follower, BongGogglesIds420.ACTION_FOLLOW)) revert Unauthorized();
-        if (isBlockedEither(follower, subject)) revert Blocked();
+        if (isBlockedEither(follower, subject)) revert RelationshipBlocked();
         if (_following[follower][subject]) revert AlreadyFollowing();
         BongGogglesProfileRegistry420.Preferences memory p = profiles.preferences(subject);
         if (p.followPolicy != BongGogglesTypes420.FollowPolicy.OPEN) revert FollowDisabled();

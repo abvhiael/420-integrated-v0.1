@@ -147,6 +147,10 @@ contract MediaOperatorRegistry420 is SystemAccess, I420System {
         return IMediaCapabilityRegistry420(capabilityRegistry).isActive(capabilityId);
     }
 
+    function operatorAccountOf(bytes32 operatorId) external view returns (address) {
+        return _get(operatorId).operatorAccount;
+    }
+
     function settlementAccountOf(bytes32 operatorId) external view returns (address) {
         return _get(operatorId).settlementAccount;
     }

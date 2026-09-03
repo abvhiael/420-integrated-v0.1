@@ -10,37 +10,32 @@
 <body>
   <main class="shell">
     <header class="topbar">
-      <div>
-        <p class="eyebrow">420 Integrated</p>
-        <h1>420 Wallet</h1>
-      </div>
+      <div><p class="eyebrow">420 Integrated</p><h1>420 Wallet</h1></div>
       <button id="connect" type="button">Connect wallet</button>
     </header>
 
     <section class="account-card" aria-labelledby="account-heading">
-      <div>
-        <p class="label" id="account-heading">Account</p>
-        <strong id="account">Not connected</strong>
-      </div>
-      <div>
-        <p class="label">Network</p>
-        <strong id="network">420 Integrated</strong>
-      </div>
+      <div><p class="label" id="account-heading">Controller</p><strong id="account">Not connected</strong></div>
+      <div><p class="label">Smart Account</p><strong id="smart-account">—</strong></div>
+      <div><p class="label">On-chain owner</p><strong id="owner">—</strong></div>
+      <div><p class="label">Network</p><strong id="network">420 Integrated</strong></div>
+      <div><p class="label">Latest block</p><strong id="block">—</strong></div>
+      <div><p class="label">RPC</p><strong id="rpc-status">Not checked</strong></div>
     </section>
 
     <section>
-      <div class="section-heading">
-        <div>
-          <p class="eyebrow">Verified ecosystem gateway</p>
-          <h2>Explore 420</h2>
-        </div>
-      </div>
+      <div class="section-heading"><div><p class="eyebrow">Read-only portfolio</p><h2>Assets</h2></div></div>
+      <div id="portfolio" class="service-grid" aria-live="polite">Connect a wallet to load read-only balances.</div>
+    </section>
+
+    <section>
+      <div class="section-heading"><div><p class="eyebrow">Verified ecosystem gateway</p><h2>Explore 420</h2></div></div>
       <div id="services" class="service-grid" aria-live="polite"></div>
     </section>
 
     <section class="security-note">
       <h2>Wallet Core security boundary</h2>
-      <p>This web client requests authorization from an account provider. It does not create or store user signing keys on a 420-operated server and cannot bypass Smart Account or Capability Registry policy.</p>
+      <p>Account discovery is derived from SmartAccountFactory420 and confirmed against chain code. Ownership and recovery state are read from SmartAccount420. This stage is read-only: the web client cannot execute Smart Account calls, grant capabilities, or mutate recovery policy.</p>
     </section>
 
     <p id="status" class="status" role="status">Ready.</p>

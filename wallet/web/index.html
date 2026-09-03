@@ -47,7 +47,7 @@
     </section>
 
     <section id="capability-panel" hidden>
-      <div class="section-heading"><div><p class="eyebrow">Canonical permissions · read only</p><h2>Capability inspector</h2></div></div>
+      <div class="section-heading"><div><p class="eyebrow">Canonical permissions</p><h2>Capability inspector</h2></div></div>
       <div class="account-card">
         <label><span class="label">Grant ID (bytes32)</span><input id="capability-grant-id" type="text" autocomplete="off" placeholder="0x…64 hex chars" /></label>
         <div><p class="label">Capability Registry</p><strong id="capability-registry">—</strong></div>
@@ -58,8 +58,25 @@
         <div><p class="label">Limits / usage</p><strong id="capability-limits">—</strong></div>
       </div>
       <div class="section-heading">
-        <p>This stage can inspect grants and usage only. It cannot create, revoke, or modify capabilities.</p>
-        <button id="inspect-capability" type="button" disabled>Inspect permission</button>
+        <p>Inspection reads directly from canonical CapabilityRegistry420. Revocation is available only for a verified grant belonging to this Smart Account.</p>
+        <div><button id="inspect-capability" type="button" disabled>Inspect permission</button> <button id="revoke-capability" type="button" disabled>Revoke grant</button></div>
+      </div>
+    </section>
+
+    <section id="gas-sponsor-panel" hidden>
+      <div class="section-heading"><div><p class="eyebrow">Owner-controlled capability</p><h2>Gas sponsor grant</h2></div></div>
+      <div class="account-card">
+        <label><span class="label">Sponsor address</span><input id="sponsor-address" type="text" autocomplete="off" placeholder="0x…" /></label>
+        <label><span class="label">Operation ID (bytes32)</span><input id="sponsor-operation" type="text" autocomplete="off" placeholder="0x…64 hex chars" /></label>
+        <label><span class="label">Per-call limit</span><input id="sponsor-per-call" type="text" inputmode="numeric" value="0" /></label>
+        <label><span class="label">Period limit</span><input id="sponsor-period-limit" type="text" inputmode="numeric" value="0" /></label>
+        <label><span class="label">Period seconds</span><input id="sponsor-period-seconds" type="text" inputmode="numeric" value="0" /></label>
+        <label><span class="label">Valid from (unix seconds)</span><input id="sponsor-valid-from" type="text" inputmode="numeric" value="0" /></label>
+        <label><span class="label">Valid until (0 = no expiry)</span><input id="sponsor-valid-until" type="text" inputmode="numeric" value="0" /></label>
+      </div>
+      <div class="section-heading">
+        <p>Creation is simulated before wallet approval and verified against CapabilityRegistry420 after confirmation. This does not enable session-key execution.</p>
+        <button id="create-sponsor-grant" type="button" disabled>Create gas sponsor grant</button>
       </div>
     </section>
 
@@ -75,7 +92,7 @@
 
     <section class="security-note">
       <h2>Wallet Core security boundary</h2>
-      <p>Owner execution remains tied to the verified on-chain owner and mandatory simulation. Capability state is read directly from the canonical CapabilityRegistry420 at 0x…0421 and matched to this Smart Account's component ID. Capability mutation, session keys, batching, passkeys, and recovery mutation remain disabled.</p>
+      <p>Capability writes go through SmartAccount420 owner-only methods, never directly through CapabilityRegistry420. Gas-sponsor grant creation and account-owned grant revocation require simulation, explicit owner approval, and post-confirmation registry verification. Session keys, delegated execution, batching, passkeys, and recovery mutation remain disabled.</p>
     </section>
 
     <p id="status" class="status" role="status">Ready.</p>

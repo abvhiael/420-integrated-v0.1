@@ -8,7 +8,7 @@ Phase 2 introduces the off-chain operator runtime that consumes the Phase 1 medi
 
 ## Runtime boundary
 
-The `media/node` package intentionally uses only Go standard-library dependencies. Ethereum RPC bindings, FFmpeg/GStreamer/WebRTC adapters and production storage are isolated behind interfaces.
+The `media/node` package intentionally uses only Go standard-library dependencies. Ethereum RPC, media engines, transport gateways and production storage are isolated behind interfaces.
 
 Interfaces:
 - `ChainAdapter`: pending-job discovery plus accept/refresh/running/result lifecycle calls.
@@ -19,16 +19,32 @@ Interfaces:
 
 `media/node/ethadapter` is the protocol-facing translation boundary. It translates raw `MediaJobMarket420.Status` ordinals into stable node statuses, rejects unknown/malformed jobs, and keeps Solidity representation details outside the worker state machine.
 
-The concrete RPC backend now adds:
+The concrete RPC backend provides:
 - standard-library JSON-RPC transport with request/response ID validation and bounded response reads;
 - `eth_getLogs` discovery of `JobCreated` events;
 - `eth_call` reads of the canonical public `jobs(bytes32)` getter;
 - fail-closed static ABI decoding with explicit uint256-to-uint64 overflow rejection;
 - a separate `Signer` interface for state-changing transactions so RPC reads never imply access to operator keys;
-- ABI selector/topic configuration so generated deployment artifacts can supply canonical selectors without coupling the worker to an ABI library;
+- ABI selector/topic configuration so deployment artifacts can supply canonical selectors without coupling the worker to an ABI library;
 - an atomic file-backed block cursor that advances only after a successful discovery/read pass.
 
 The backend re-reads current job state after event discovery and only returns jobs still in `CREATED`, so historical creation events cannot cause execution of cancelled, accepted, expired, or otherwise transitioned work.
+
+## FFmpeg/GStreamer processor
+
+`media/node/mediaprocessor` provides the first production-oriented implementation of the node `Processor` interface.
+
+The processor:
+- maps exact capability IDs to operator-controlled static profiles rather than accepting requester-provided command fragments;
+- supports bounded FFmpeg profiles for H.264, H.265, AV1 and VP9 plus AAC/Opus/copy audio and MP4/Matroska/MPEG-TS/WebM containers;
+- includes an intentionally narrower GStreamer video pipeline for the same initial video codecs and containers;
+- resolves opaque `inputRef` values through a `Resolver`, keeping raw paths, URLs, credentials and stream secrets out of chain-facing state;
+- allocates and commits outputs through a `Sink`, returning only an opaque 32-byte result reference to the protocol;
+- executes binaries directly through argv with no shell interpolation;
+- bounds runtime by both operator `MaxRuntime` and the canonical job deadline;
+- aborts partially produced output when execution, commit or validation fails.
+
+The GStreamer graph is deliberately constrained in this increment. Multi-branch audio/video pipelines, live tees and ingress/egress transport elements are deferred to the gateway step rather than exposed as arbitrary requester-controlled pipelines.
 
 ## Execution sequence
 
@@ -43,9 +59,12 @@ The backend re-reads current job state after event discovery and only returns jo
 9. verify bound operator identity;
 10. require `FUNDED` state and non-zero funded amount;
 11. mark the job running;
-12. execute the processor off-chain;
-13. fail closed if the lease is lost, the deadline passes, or output is empty;
-14. commit the output reference.
+12. resolve the opaque media input reference locally;
+13. select the static capability profile;
+14. execute FFmpeg or GStreamer under the bounded runtime context;
+15. commit the completed media artifact to an opaque output reference;
+16. fail closed if the lease is lost, deadline passes, processing fails or the output reference is empty;
+17. commit the output reference on-chain.
 
 ## Node invariants
 
@@ -63,12 +82,15 @@ The backend re-reads current job state after event discovery and only returns jo
 - `MEDIA-NODE-INV-012`: an event cursor advances only after the corresponding log scan and canonical job reads succeed.
 - `MEDIA-NODE-INV-013`: historical `JobCreated` logs never bypass current canonical job status.
 - `MEDIA-NODE-INV-014`: oversized contract monetary values fail closed rather than truncating into node runtime amounts.
+- `MEDIA-NODE-INV-015`: requester-controlled media references never become shell command text or executable pipeline fragments.
+- `MEDIA-NODE-INV-016`: only operator-configured capability profiles may select codecs, containers, scale bounds or media engines.
+- `MEDIA-NODE-INV-017`: partial or failed media outputs are aborted and never committed as canonical result references.
+- `MEDIA-NODE-INV-018`: media execution time cannot exceed the lesser of the operator runtime cap and the canonical job deadline.
 
 ## Next Phase 2 increments
 
-1. FFmpeg/GStreamer worker adapter for H.264/H.265/AV1 transcoding and recording.
-2. WHIP/WHEP/WebRTC and SRT/RTMP ingress/egress gateway adapter.
-3. persistent/distributed lease backend and crash recovery.
-4. health, telemetry and SLA evidence generation.
-5. operator CLI/configuration and secure signer implementation.
-6. node integration tests against a local Anvil deployment of the 420Media contracts.
+1. WHIP/WHEP/WebRTC and SRT/RTMP ingress/egress gateway adapter.
+2. persistent/distributed lease backend and crash recovery.
+3. health, telemetry and SLA evidence generation.
+4. operator CLI/configuration and secure signer implementation.
+5. node integration tests against a local Anvil deployment of the 420Media contracts.

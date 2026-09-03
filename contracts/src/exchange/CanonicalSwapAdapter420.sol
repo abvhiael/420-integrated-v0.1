@@ -46,6 +46,12 @@ contract CanonicalSwapAdapter420 is IExchangeQuoteAdapter420, IExchangeExecution
         canonicalMarketRegistry = ICanonicalMarketRegistryExchange420(canonicalMarketRegistry_);
     }
 
+    /// @notice Contract that pulls ERC20 input during canonical settlement.
+    /// @dev Atomic multi-hop routers use this to grant an exact, transaction-local intermediate-token allowance.
+    function allowanceTarget() external view returns (address) {
+        return address(executor);
+    }
+
     function quote(address tokenIn, address tokenOut, uint256 amountIn, bytes calldata routeData)
         external
         view

@@ -87,6 +87,7 @@ library BetIds420 {
     bytes32 internal constant ACTION_GAME_PAUSE = keccak256("BET_GAME_PAUSE");
     bytes32 internal constant ACTION_GAME_RESUME = keccak256("BET_GAME_RESUME");
     bytes32 internal constant ACTION_GAME_DEPRECATE = keccak256("BET_GAME_DEPRECATE");
+    bytes32 internal constant ACTION_SLOT_ARTIFACT_REGISTER = keccak256("BET_SLOT_ARTIFACT_REGISTER");
 
     bytes32 internal constant ACTION_PROFILE_REGISTER = keccak256("BET_PROFILE_REGISTER");
     bytes32 internal constant ACTION_PROFILE_DEPRECATE = keccak256("BET_PROFILE_DEPRECATE");

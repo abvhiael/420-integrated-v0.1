@@ -28,7 +28,21 @@
         <div><p class="eyebrow">Canonical account</p><h2>Smart Account deployment</h2></div>
         <button id="create-account" type="button" hidden disabled>Create Smart Account</button>
       </div>
-      <p>Creation is the only enabled write path in this stage. The connected controller must explicitly approve the canonical SmartAccountFactory420 transaction.</p>
+      <p>Creation uses only the canonical SmartAccountFactory420 and requires explicit approval from the connected controller.</p>
+    </section>
+
+    <section id="execution-panel" hidden>
+      <div class="section-heading"><div><p class="eyebrow">Simulate before send</p><h2>Smart Account execution</h2></div></div>
+      <div class="account-card">
+        <label><span class="label">Target address</span><input id="execute-target" type="text" autocomplete="off" placeholder="0x…" /></label>
+        <label><span class="label">Native value (wei)</span><input id="execute-value" type="text" inputmode="numeric" autocomplete="off" value="0" /></label>
+        <label><span class="label">Calldata</span><input id="execute-data" type="text" autocomplete="off" value="0x" /></label>
+        <div><p class="label">Simulation</p><strong id="execute-simulation">Not simulated</strong></div>
+      </div>
+      <div class="section-heading">
+        <p>Direct calls to wallet authority contracts are blocked. Any input change invalidates the prior simulation.</p>
+        <div><button id="simulate-execution" type="button" disabled>Simulate</button> <button id="send-execution" type="button" disabled>Execute</button></div>
+      </div>
     </section>
 
     <section>
@@ -43,7 +57,7 @@
 
     <section class="security-note">
       <h2>Wallet Core security boundary</h2>
-      <p>Account discovery is derived from SmartAccountFactory420 and confirmed against chain code. Creation is allowed only through the canonical factory with explicit controller approval, followed by on-chain owner verification. General Smart Account execution, capability grants, session keys, and recovery mutation remain disabled.</p>
+      <p>Owner execution is available only for a deployed SmartAccount420 whose on-chain owner matches the connected controller. Every call is simulated with eth_call and gas estimation before eth_sendTransaction, then re-simulated immediately before wallet approval. Session keys, delegated capabilities, batching, passkeys, and recovery mutation remain disabled.</p>
     </section>
 
     <p id="status" class="status" role="status">Ready.</p>

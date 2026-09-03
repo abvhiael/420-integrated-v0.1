@@ -2,6 +2,11 @@ import { CORE_SERVICES, validateRuntimeConfig } from './core/config.js';
 import { InjectedProvider420 } from './core/provider.js';
 import { discoverSmartAccount } from './core/accounts.js';
 import { inspectCapabilityGrant } from './core/capabilities.js';
+import {
+  confirmCapabilityManagementTransaction,
+  sendCapabilityGrantRevocation,
+  sendGasSponsorGrantCreation,
+} from './core/capability-management.js';
 import { confirmSmartAccountCreation, sendSmartAccountCreation } from './core/deployment.js';
 import { confirmSmartAccountExecution, prepareSmartAccountExecution, sendSmartAccountExecution } from './core/execution.js';
 import { formatUnits, readNetwork, readPortfolio } from './core/portfolio.js';
@@ -17,6 +22,7 @@ const state = {
   config: null,
   creatingAccount: false,
   executing: false,
+  managingCapability: false,
   lastSimulation: null,
   capabilityInspection: null,
 };
@@ -32,7 +38,17 @@ function executionRequest() {
     data: $('#execute-data').value.trim() || '0x',
   };
 }
-
+function gasSponsorRequest() {
+  return {
+    sponsor: $('#sponsor-address').value.trim(),
+    operation: $('#sponsor-operation').value.trim(),
+    perCallLimit: $('#sponsor-per-call').value.trim() || '0',
+    periodLimit: $('#sponsor-period-limit').value.trim() || '0',
+    periodSeconds: $('#sponsor-period-seconds').value.trim() || '0',
+    validFrom: $('#sponsor-valid-from').value.trim() || '0',
+    validUntil: $('#sponsor-valid-until').value.trim() || '0',
+  };
+}
 function invalidateSimulation() {
   state.lastSimulation = null;
   $('#execute-simulation').textContent = 'Not simulated';
@@ -98,9 +114,16 @@ function render() {
   $('#execution-authority').textContent = canUseExecution ? 'Verified on-chain owner' : 'Unavailable';
 
   const capabilityEnabled = state.config?.features?.capabilityInspection === true;
+  const mutationEnabled = state.config?.features?.capabilityMutation === true;
+  const sponsorEnabled = state.config?.features?.gasSponsorGrantManagement === true;
   const canInspect = capabilityEnabled && state.smartAccount?.deployed;
+  const canManage = mutationEnabled && sponsorEnabled && state.smartAccount?.deployed && state.smartAccount?.controllerIsOwner && !state.managingCapability;
   $('#capability-panel').hidden = !capabilityEnabled;
   $('#inspect-capability').disabled = !canInspect;
+  $('#revoke-capability').disabled = !canManage || !state.capabilityInspection?.exists || !state.capabilityInspection?.belongsToAccount || state.capabilityInspection?.grant.revoked;
+  $('#gas-sponsor-panel').hidden = !(mutationEnabled && sponsorEnabled);
+  $('#create-sponsor-grant').disabled = !canManage;
+  $('#create-sponsor-grant').textContent = state.managingCapability ? 'Managing…' : 'Create gas sponsor grant';
   renderCapabilityInspection();
   renderPortfolio();
 
@@ -156,41 +179,28 @@ $('#connect').addEventListener('click', async () => {
   try {
     await connectInjectedWallet();
     $('#status').textContent = state.smartAccount.deployed
-      ? 'Canonical Smart Account loaded. Owner execution and read-only capability inspection are available.'
+      ? 'Canonical Smart Account loaded. Guarded owner execution and capability management are available.'
       : 'Counterfactual Smart Account discovered. Creation is available with explicit wallet approval.';
-  } catch (error) {
-    $('#status').textContent = error.message;
-  }
+  } catch (error) { $('#status').textContent = error.message; }
 });
 
 $('#create-account').addEventListener('click', async () => {
   if (!state.provider || !state.controller || state.smartAccount?.deployed) return;
   if (globalThis.confirm && !globalThis.confirm(`Create SmartAccount420 at ${state.smartAccount.smartAccount}? Your connected wallet must approve the factory transaction.`)) return;
-  state.creatingAccount = true;
-  render();
+  state.creatingAccount = true; render();
   $('#status').textContent = 'Requesting explicit approval for SmartAccountFactory420 creation…';
   try {
     const submitted = await sendSmartAccountCreation(state.provider, state.controller, state.config.smartAccount);
-    if (!submitted.submitted) {
-      await refreshConnectedState();
-      $('#status').textContent = 'Smart Account was already deployed; canonical state refreshed.';
-      return;
-    }
+    if (!submitted.submitted) { await refreshConnectedState(); $('#status').textContent = 'Smart Account was already deployed; canonical state refreshed.'; return; }
     $('#status').textContent = `Creation submitted: ${submitted.txHash}. Waiting for confirmation…`;
     await confirmSmartAccountCreation(state.provider, submitted.txHash, state.controller, state.config.smartAccount);
     await refreshConnectedState();
     $('#status').textContent = `SmartAccount420 created and owner verified: ${state.smartAccount.smartAccount}`;
-  } catch (error) {
-    $('#status').textContent = error.message;
-  } finally {
-    state.creatingAccount = false;
-    render();
-  }
+  } catch (error) { $('#status').textContent = error.message; }
+  finally { state.creatingAccount = false; render(); }
 });
 
-for (const selector of ['#execute-target', '#execute-value', '#execute-data']) {
-  $(selector).addEventListener('input', invalidateSimulation);
-}
+for (const selector of ['#execute-target', '#execute-value', '#execute-data']) $(selector).addEventListener('input', invalidateSimulation);
 
 $('#simulate-execution').addEventListener('click', async () => {
   if (!state.provider || !state.smartAccount?.deployed) return;
@@ -199,11 +209,7 @@ $('#simulate-execution').addEventListener('click', async () => {
     state.lastSimulation = await prepareSmartAccountExecution(state.provider, state.controller, state.smartAccount, executionRequest());
     $('#execute-simulation').textContent = `Passed · gas ${state.lastSimulation.simulation.gas}`;
     $('#status').textContent = 'Owner-authorized simulation passed. Execution may now be explicitly approved.';
-  } catch (error) {
-    state.lastSimulation = null;
-    $('#execute-simulation').textContent = 'Failed';
-    $('#status').textContent = error.message;
-  }
+  } catch (error) { state.lastSimulation = null; $('#execute-simulation').textContent = 'Failed'; $('#status').textContent = error.message; }
   render();
 });
 
@@ -211,8 +217,7 @@ $('#send-execution').addEventListener('click', async () => {
   if (!state.provider || !state.lastSimulation || state.executing) return;
   const request = executionRequest();
   if (globalThis.confirm && !globalThis.confirm(`Execute through SmartAccount420 to ${request.target}? The call will be re-simulated before your wallet is asked to approve it.`)) return;
-  state.executing = true;
-  render();
+  state.executing = true; render();
   $('#status').textContent = 'Re-simulating and requesting explicit owner approval…';
   try {
     const submitted = await sendSmartAccountExecution(state.provider, state.controller, state.smartAccount, request);
@@ -221,33 +226,51 @@ $('#send-execution').addEventListener('click', async () => {
     await refreshConnectedState();
     $('#execute-simulation').textContent = 'Not simulated';
     $('#status').textContent = `SmartAccount420 execution confirmed: ${submitted.txHash}`;
-  } catch (error) {
-    state.lastSimulation = null;
-    $('#execute-simulation').textContent = 'Failed';
-    $('#status').textContent = error.message;
-  } finally {
-    state.executing = false;
-    render();
-  }
+  } catch (error) { state.lastSimulation = null; $('#execute-simulation').textContent = 'Failed'; $('#status').textContent = error.message; }
+  finally { state.executing = false; render(); }
 });
 
 $('#inspect-capability').addEventListener('click', async () => {
   if (!state.provider || !state.smartAccount?.deployed) return;
   $('#status').textContent = 'Reading canonical capability grant…';
   try {
-    state.capabilityInspection = await inspectCapabilityGrant(
-      state.provider,
-      state.smartAccount,
-      $('#capability-grant-id').value.trim(),
-    );
-    $('#status').textContent = state.capabilityInspection.exists
-      ? 'Capability grant loaded from canonical CapabilityRegistry420.'
-      : 'No capability grant exists for that grant ID.';
-  } catch (error) {
-    state.capabilityInspection = null;
-    $('#status').textContent = error.message;
-  }
+    state.capabilityInspection = await inspectCapabilityGrant(state.provider, state.smartAccount, $('#capability-grant-id').value.trim());
+    $('#status').textContent = state.capabilityInspection.exists ? 'Capability grant loaded from canonical CapabilityRegistry420.' : 'No capability grant exists for that grant ID.';
+  } catch (error) { state.capabilityInspection = null; $('#status').textContent = error.message; }
   render();
+});
+
+$('#create-sponsor-grant').addEventListener('click', async () => {
+  if (!state.provider || !state.smartAccount?.controllerIsOwner || state.managingCapability) return;
+  const request = gasSponsorRequest();
+  if (globalThis.confirm && !globalThis.confirm(`Create a gas-sponsor capability for ${request.sponsor}? The Smart Account call will be simulated before wallet approval.`)) return;
+  state.managingCapability = true; render();
+  $('#status').textContent = 'Simulating gas sponsor grant creation…';
+  try {
+    const submitted = await sendGasSponsorGrantCreation(state.provider, state.controller, state.smartAccount, request);
+    $('#status').textContent = `Grant creation submitted: ${submitted.txHash}. Waiting for confirmation…`;
+    const confirmed = await confirmCapabilityManagementTransaction(state.provider, submitted.txHash, state.smartAccount, { createdGrantId: submitted.expectedGrantId, principal: submitted.sponsor });
+    state.capabilityInspection = confirmed.inspection;
+    $('#capability-grant-id').value = submitted.expectedGrantId;
+    $('#status').textContent = `Gas sponsor grant created and verified: ${submitted.expectedGrantId}`;
+  } catch (error) { $('#status').textContent = error.message; }
+  finally { state.managingCapability = false; render(); }
+});
+
+$('#revoke-capability').addEventListener('click', async () => {
+  const inspection = state.capabilityInspection;
+  if (!state.provider || !inspection?.exists || !inspection.belongsToAccount || inspection.grant.revoked || state.managingCapability) return;
+  if (globalThis.confirm && !globalThis.confirm(`Revoke capability grant ${inspection.grantId}? This action is irreversible for that grant ID.`)) return;
+  state.managingCapability = true; render();
+  $('#status').textContent = 'Simulating capability revocation…';
+  try {
+    const submitted = await sendCapabilityGrantRevocation(state.provider, state.controller, state.smartAccount, inspection.grantId);
+    $('#status').textContent = `Revocation submitted: ${submitted.txHash}. Waiting for confirmation…`;
+    const confirmed = await confirmCapabilityManagementTransaction(state.provider, submitted.txHash, state.smartAccount, { revokedGrantId: inspection.grantId });
+    state.capabilityInspection = confirmed.inspection;
+    $('#status').textContent = `Capability grant revoked and verified: ${inspection.grantId}`;
+  } catch (error) { $('#status').textContent = error.message; }
+  finally { state.managingCapability = false; render(); }
 });
 
 loadConfig().catch((error) => { $('#status').textContent = `Configuration warning: ${error.message}`; }).finally(render);

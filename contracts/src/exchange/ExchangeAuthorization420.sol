@@ -24,7 +24,7 @@ contract ExchangeAuthorization420 {
     function canSwap(address principal, bytes32 marketId, uint256 amount) external view returns (bool) {
         return capabilityRegistry.isAuthorized(
             principal,
-            ExchangeIds420.ROUTE_REGISTRY,
+            ExchangeIds420.EXCHANGE_ROUTER,
             ExchangeIds420.ACTION_SWAP,
             scopeMarket(marketId),
             amount

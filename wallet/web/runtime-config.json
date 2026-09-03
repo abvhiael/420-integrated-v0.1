@@ -28,9 +28,12 @@
     "capabilityInspection": true,
     "capabilityMutation": true,
     "gasSponsorGrantManagement": true,
+    "sessionKeyAdministration": true,
+    "sessionGrantManagement": true,
+    "sessionExecution": false,
     "batchExecution": false,
     "passkeys": false,
-    "sessionKeys": false,
+    "sessionKeys": true,
     "delegatedCapabilities": false,
     "recoveryManagement": false
   }

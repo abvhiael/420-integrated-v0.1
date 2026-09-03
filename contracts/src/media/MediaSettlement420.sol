@@ -8,10 +8,15 @@ interface IMediaJobSettlement420 {
     function confirmFunding(bytes32 jobId, bytes32 fundingRef, uint256 amount) external;
     function confirmSettlement(bytes32 jobId) external;
     function confirmRefund(bytes32 jobId) external;
+    function settlementTerms(bytes32 jobId)
+        external
+        view
+        returns (address payer, bytes32 operatorId, address beneficiary, uint256 maxSpend, uint8 status);
 }
 
 contract MediaSettlement420 is SystemAccess, I420System {
     enum SettlementState { NONE, FUNDED, CLAIMABLE, REFUNDABLE, CLOSED }
+    uint8 private constant JOB_STATUS_ACCEPTED = 2;
 
     struct Settlement {
         address payer;
@@ -41,6 +46,7 @@ contract MediaSettlement420 is SystemAccess, I420System {
     error InvalidSettlement();
     error InvalidStateTransition();
     error InvalidRecipient();
+    error SettlementTermsMismatch();
 
     event JobMarketBound(address indexed jobMarket);
     event VaultAdapterBound(address indexed adapter);
@@ -91,11 +97,19 @@ contract MediaSettlement420 is SystemAccess, I420System {
         bytes32 fundingRef,
         uint256 amount
     ) external onlyVaultAdapter {
+        if (!jobMarketBound) revert InvalidSettlement();
         if (
             jobId == bytes32(0) || payer == address(0) || operatorId == bytes32(0) || beneficiary == address(0)
                 || vaultRef == bytes32(0) || fundingRef == bytes32(0) || amount == 0
                 || settlements[jobId].state != SettlementState.NONE
         ) revert InvalidSettlement();
+
+        (address expectedPayer, bytes32 expectedOperator, address expectedBeneficiary, uint256 maxSpend, uint8 status) =
+            IMediaJobSettlement420(jobMarket).settlementTerms(jobId);
+        if (
+            status != JOB_STATUS_ACCEPTED || payer != expectedPayer || operatorId != expectedOperator
+                || beneficiary != expectedBeneficiary || amount > maxSpend
+        ) revert SettlementTermsMismatch();
 
         settlements[jobId] = Settlement({
             payer: payer,

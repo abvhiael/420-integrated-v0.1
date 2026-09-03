@@ -12,7 +12,7 @@ import (
 type Engine string
 
 const (
-	EngineFFmpeg   Engine = "ffmpeg"
+	EngineFFmpeg     Engine = "ffmpeg"
 	EngineGStreamer Engine = "gstreamer"
 )
 
@@ -125,10 +125,7 @@ func (p *Processor) Process(ctx context.Context, job medianode.Job) (medianode.R
 
 	runFor := p.cfg.MaxRuntime
 	if !job.Deadline.IsZero() {
-		remaining := time.Until(job.Deadline)
-		if p.now != nil {
-			remaining = job.Deadline.Sub(p.now())
-		}
+		remaining := job.Deadline.Sub(p.now())
 		if remaining <= 0 {
 			return medianode.Result{}, medianode.ErrDeadlineExceeded
 		}
@@ -139,12 +136,12 @@ func (p *Processor) Process(ctx context.Context, job medianode.Job) (medianode.R
 	runCtx, cancel := context.WithTimeout(ctx, runFor)
 	defer cancel()
 
-	binary, args, err := command(profile, source, destination)
+	engine, args, err := command(profile, source, destination)
 	if err != nil {
 		return medianode.Result{}, err
 	}
 	started := p.now()
-	if err := p.exec.Run(runCtx, binaryFor(p.cfg, binary), args); err != nil {
+	if err := p.exec.Run(runCtx, binaryFor(p.cfg, engine), args); err != nil {
 		return medianode.Result{}, fmt.Errorf("%w: %v", ErrExecutionFailed, err)
 	}
 	finished := p.now()
@@ -171,6 +168,9 @@ func validProfile(p Profile) bool {
 		return false
 	}
 	if p.Width < 0 || p.Height < 0 || p.Width > 7680 || p.Height > 4320 {
+		return false
+	}
+	if (p.Width == 0) != (p.Height == 0) {
 		return false
 	}
 	return allowedVideo(p.VideoCodec) && allowedAudio(p.AudioCodec) && allowedContainer(p.Container)
@@ -215,7 +215,7 @@ func command(p Profile, source, destination string) (Engine, []string, error) {
 		if p.AudioCodec != "" {
 			args = append(args, "-c:a", ffmpegAudio(p.AudioCodec))
 		}
-		if p.Width > 0 && p.Height > 0 {
+		if p.Width > 0 {
 			args = append(args, "-vf", fmt.Sprintf("scale=%d:%d", p.Width, p.Height))
 		}
 		if p.VideoBitrate != "" {
@@ -228,26 +228,71 @@ func command(p Profile, source, destination string) (Engine, []string, error) {
 		return EngineFFmpeg, args, nil
 	}
 
-	// gst-launch receives argv directly; no shell interpolation is used. The initial
-	// production profiles use URI decodebin plus encoded mux output. More specialized
-	// live pipelines will be added with the gateway increment.
-	args := []string{"uridecodebin", "uri=" + source, "name=src", "!", "videoconvert"}
-	if p.Width > 0 && p.Height > 0 {
-		args = append(args, "!", fmt.Sprintf("videoscale",), "!", fmt.Sprintf("video/x-raw,width=%d,height=%d", p.Width, p.Height))
+	// Initial GStreamer support is intentionally video-only and profile-driven. Audio
+	// graph composition and live tees are introduced with the gateway increment.
+	if p.AudioCodec != "" && p.AudioCodec != "copy" {
+		return "", nil, ErrUnsupportedProfile
+	}
+	args := []string{"uridecodebin", "uri=" + source, "!", "videoconvert"}
+	if p.Width > 0 {
+		args = append(args, "!", "videoscale", "!", fmt.Sprintf("video/x-raw,width=%d,height=%d", p.Width, p.Height))
 	}
 	args = append(args, "!", gstVideo(p.VideoCodec), "!", gstMux(p.Container), "!", "filesink", "location="+destination)
 	return EngineGStreamer, args, nil
 }
 
 func ffmpegVideo(v string) string {
-	switch v { case "h264": return "libx264"; case "h265": return "libx265"; case "av1": return "libaom-av1"; case "vp9": return "libvpx-vp9"; default: return v }
+	switch v {
+	case "h264":
+		return "libx264"
+	case "h265":
+		return "libx265"
+	case "av1":
+		return "libaom-av1"
+	case "vp9":
+		return "libvpx-vp9"
+	default:
+		return v
+	}
 }
-func ffmpegAudio(v string) string { if v == "opus" { return "libopus" }; return v }
+
+func ffmpegAudio(v string) string {
+	if v == "opus" {
+		return "libopus"
+	}
+	return v
+}
+
 func gstVideo(v string) string {
-	switch v { case "h264": return "x264enc"; case "h265": return "x265enc"; case "av1": return "av1enc"; case "vp9": return "vp9enc"; case "copy", "": return "identity"; default: return "identity" }
+	switch v {
+	case "h264":
+		return "x264enc"
+	case "h265":
+		return "x265enc"
+	case "av1":
+		return "av1enc"
+	case "vp9":
+		return "vp9enc"
+	case "copy", "":
+		return "identity"
+	default:
+		return "identity"
+	}
 }
+
 func gstMux(v string) string {
-	switch v { case "mp4": return "mp4mux"; case "matroska": return "matroskamux"; case "mpegts": return "mpegtsmux"; case "webm": return "webmmux"; default: return "identity" }
+	switch v {
+	case "mp4":
+		return "mp4mux"
+	case "matroska":
+		return "matroskamux"
+	case "mpegts":
+		return "mpegtsmux"
+	case "webm":
+		return "webmmux"
+	default:
+		return "identity"
+	}
 }
 
 var _ medianode.Processor = (*Processor)(nil)

@@ -1,3 +1,5 @@
+import { buildSendExecution } from './core/send.js';
+
 const MAX_ACTIVITY = 12;
 
 export function summarizeExecutionReview(request = {}, simulation = null) {
@@ -115,6 +117,64 @@ function initExecutionReview() {
   renderExecutionReview();
 }
 
+async function initGuidedSend() {
+  const assetSelect = document.querySelector('#send-asset');
+  const recipient = document.querySelector('#send-recipient');
+  const amount = document.querySelector('#send-amount');
+  const prepare = document.querySelector('#prepare-send');
+  const preview = document.querySelector('#send-preview');
+  if (!assetSelect || !recipient || !amount || !prepare) return;
+
+  let assets = [{ kind: 'native', symbol: '420', decimals: 18 }];
+  try {
+    const response = await fetch('./runtime-config.json', { cache: 'no-store' });
+    if (response.ok) {
+      const config = await response.json();
+      assets = assets.concat((config.trackedAssets || []).map((asset) => ({
+        kind: 'erc20',
+        address: asset.address,
+        symbol: asset.symbol || 'TOKEN',
+        decimals: Number(asset.decimals ?? 18),
+      })));
+    }
+  } catch {
+    // Native 420 send remains available even if optional token metadata cannot be loaded.
+  }
+
+  assetSelect.replaceChildren();
+  assets.forEach((asset, index) => {
+    const option = document.createElement('option');
+    option.value = String(index);
+    option.textContent = asset.kind === 'native' ? `${asset.symbol} · native` : `${asset.symbol} · ERC-20`;
+    assetSelect.append(option);
+  });
+
+  const resetPreview = () => {
+    if (preview) preview.textContent = 'Enter a recipient and amount, then prepare the guarded transaction.';
+  };
+  recipient.addEventListener('input', resetPreview);
+  amount.addEventListener('input', resetPreview);
+  assetSelect.addEventListener('change', resetPreview);
+
+  prepare.addEventListener('click', () => {
+    try {
+      const asset = assets[Number(assetSelect.value) || 0];
+      const built = buildSendExecution({ recipient: recipient.value, amount: amount.value, asset });
+      const target = document.querySelector('#execute-target');
+      const value = document.querySelector('#execute-value');
+      const data = document.querySelector('#execute-data');
+      target.value = built.request.target;
+      value.value = built.request.value;
+      data.value = built.request.data;
+      for (const input of [target, value, data]) input.dispatchEvent(new Event('input', { bubbles: true }));
+      if (preview) preview.textContent = `${built.summary.amount} ${built.summary.symbol} → ${short(built.summary.recipient)}. Simulation is required before execution.`;
+      document.querySelector('#simulate-execution')?.focus();
+    } catch (error) {
+      if (preview) preview.textContent = error.message;
+    }
+  });
+}
+
 function initCopyButtons() {
   for (const button of document.querySelectorAll('[data-copy-source]')) {
     button.addEventListener('click', async () => {
@@ -133,6 +193,7 @@ export function initWalletUiV1() {
   initNavigation();
   initActivityFeed();
   initExecutionReview();
+  initGuidedSend();
   initCopyButtons();
 }
 

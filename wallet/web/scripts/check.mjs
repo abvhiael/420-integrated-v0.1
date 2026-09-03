@@ -5,9 +5,9 @@ import process from 'node:process';
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const required = [
   'index.html', 'app.js', 'styles.css', 'runtime-config.json',
-  'core/abi.js', 'core/accounts.js', 'core/capabilities.js', 'core/capability-management.js', 'core/session-management.js',
+  'core/abi.js', 'core/accounts.js', 'core/capabilities.js', 'core/capability-management.js', 'core/session-management.js', 'core/session-execution.js',
   'core/config.js', 'core/deployment.js', 'core/execution.js', 'core/portfolio.js', 'core/provider.js', 'core/services.js',
-  'test/core.test.js', 'test/execution.test.js', 'test/capabilities.test.js', 'test/capability-management.test.js', 'test/session-management.test.js',
+  'test/core.test.js', 'test/execution.test.js', 'test/capabilities.test.js', 'test/capability-management.test.js', 'test/session-management.test.js', 'test/session-execution.test.js',
 ];
 
 const errors = [];
@@ -42,7 +42,10 @@ for (const requiredGuard of ['eth_call', 'eth_estimateGas', 'eth_sendTransaction
 }
 
 const capabilities = fs.readFileSync(path.join(root, 'core/capabilities.js'), 'utf8');
-for (const requiredGuard of ['0x0000000000000000000000000000000000000421', 'CapabilityRegistry420', 'grantResult', 'usageResult', 'belongsToAccount']) {
+for (const requiredGuard of [
+  '0x0000000000000000000000000000000000000421', 'CapabilityRegistry420', 'grantResult', 'usageResult', 'belongsToAccount',
+  'SESSION_EXECUTE_CAPABILITY_420', 'readActiveGrantId', 'readCapabilityAuthorization'
+]) {
   if (!capabilities.includes(requiredGuard)) errors.push(`missing capability inspection guard: ${requiredGuard}`);
 }
 for (const forbiddenMutation of ['createGrant(', 'revokeGrant(', '.consume(']) {
@@ -59,7 +62,17 @@ const sessions = fs.readFileSync(path.join(root, 'core/session-management.js'), 
 for (const requiredGuard of ['8d08b1a4', '5ae7ab32', '388c930c', 'd557e335', 'fdb3c749', 'eth_call', 'eth_estimateGas', 'eth_sendTransaction', 'authorizationEpoch', 'wallet authority contract', 'post-confirmation verification']) {
   if (!sessions.includes(requiredGuard)) errors.push(`missing session administration guard: ${requiredGuard}`);
 }
-if (sessions.includes('executeSession(')) errors.push('session execution must remain absent from session administration stage');
+
+const sessionExecution = fs.readFileSync(path.join(root, 'core/session-execution.js'), 'utf8');
+for (const requiredGuard of [
+  'efff7e19', 'd86f2b3c', 'SESSION_EXECUTE_CAPABILITY_420', 'readActiveGrantId', 'readCapabilityAuthorization',
+  'authorizationEpoch', 'nonce lane', 'wallet authority contract', 'broadcastReady: false', 'EntryPoint420'
+]) {
+  if (!sessionExecution.includes(requiredGuard)) errors.push(`missing session execution preflight guard: ${requiredGuard}`);
+}
+if (sessionExecution.includes('eth_sendUserOperation') || sessionExecution.includes('eth_sendTransaction')) {
+  errors.push('session execution preflight must not broadcast until production EntryPoint420 transport is frozen');
+}
 
 const abi = fs.readFileSync(path.join(root, 'core/abi.js'), 'utf8');
 if (!abi.includes("createAccount: '4003f6ba'")) errors.push('canonical SmartAccountFactory420 createAccount selector missing');
@@ -70,8 +83,9 @@ if (config.manifest?.verificationMode !== 'registry-or-signed-manifest') errors.
 if (config.features?.smartAccountExecution !== true || config.features?.executionSimulationRequired !== true) errors.push('guarded owner execution with mandatory simulation must remain enabled');
 if (config.features?.capabilityInspection !== true) errors.push('capabilityInspection must remain enabled');
 if (config.features?.capabilityMutation !== true || config.features?.gasSponsorGrantManagement !== true) errors.push('guarded capability management must remain enabled');
-if (config.features?.sessionKeyAdministration !== true || config.features?.sessionGrantManagement !== true || config.features?.sessionKeys !== true) errors.push('session-key administration and scoped session grants must be enabled');
-if (config.features?.sessionExecution !== false || config.features?.delegatedCapabilities !== false) errors.push('session/delegated execution must remain disabled');
+if (config.features?.sessionKeyAdministration !== true || config.features?.sessionGrantManagement !== true || config.features?.sessionKeys !== true) errors.push('session-key administration and scoped session grants must remain enabled');
+if (config.features?.sessionExecutionPreflight !== true) errors.push('session execution preflight must be enabled');
+if (config.features?.sessionExecution !== false || config.features?.entryPointUserOpSubmission !== false || config.features?.delegatedCapabilities !== false) errors.push('session broadcast/delegated execution must remain disabled until EntryPoint420 transport is frozen');
 if (config.features?.batchExecution !== false || config.features?.passkeys !== false || config.features?.recoveryManagement !== false) errors.push('batching, passkeys, and recovery management must remain disabled');
 if (config.features?.smartAccountCreation !== true || config.features?.smartAccountDiscovery !== true) errors.push('smart account discovery and creation must remain enabled');
 if (config.features?.networkReads !== true || config.features?.readOnlyPortfolio !== true) errors.push('network and portfolio reads must remain enabled');
@@ -93,7 +107,9 @@ console.log(JSON.stringify({
   gasSponsorGrantManagement: true,
   sessionKeyAdministration: true,
   sessionGrantManagement: true,
+  sessionExecutionPreflight: true,
   sessionExecutionEnabled: false,
+  entryPointUserOpSubmission: false,
   canonicalCapabilityRegistry: '0x0000000000000000000000000000000000000421',
   serverSideKeyCustody: false,
   batchExecutionEnabled: false,

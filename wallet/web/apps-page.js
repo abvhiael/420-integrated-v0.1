@@ -1,6 +1,15 @@
 import { APP_CATEGORIES, APP_SERVICES, buildAppCatalog, filterAppCatalog } from './core/apps.js';
 import { resolveServices } from './core/services.js';
 
+function installAppsStylesheet() {
+  if (document.querySelector('link[data-wallet-apps-styles]')) return;
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = './apps.css';
+  link.dataset.walletAppsStyles = 'true';
+  document.head.append(link);
+}
+
 function el(tag, className, text) {
   const node = document.createElement(tag);
   if (className) node.className = className;
@@ -112,6 +121,7 @@ export function renderApps(section, apps, { query = '', category = 'all', trust 
 export async function initAppsPage() {
   const section = document.querySelector('#services-section');
   if (!section) return;
+  installAppsStylesheet();
   ensurePage(section);
 
   let apps;

@@ -7,7 +7,7 @@ const required = [
   'index.html', 'app.js', 'ui-v1.js', 'apps-page.js', 'styles.css', 'apps.css', 'runtime-config.json',
   'core/abi.js', 'core/accounts.js', 'core/apps.js', 'core/capabilities.js', 'core/capability-management.js', 'core/session-management.js', 'core/session-execution.js',
   'core/config.js', 'core/deployment.js', 'core/execution.js', 'core/portfolio.js', 'core/provider.js', 'core/provider-lifecycle.js', 'core/services.js', 'core/send.js',
-  'test/core.test.js', 'test/apps.test.js', 'test/execution.test.js', 'test/capabilities.test.js', 'test/capability-management.test.js', 'test/session-management.test.js', 'test/session-execution.test.js', 'test/ui-v1.test.js', 'test/send.test.js', 'test/provider-lifecycle.test.js',
+  'test/core.test.js', 'test/apps.test.js', 'test/execution.test.js', 'test/capabilities.test.js', 'test/capability-management.test.js', 'test/session-management.test.js', 'test/session-execution.test.js', 'test/ui-v1.test.js', 'test/send.test.js', 'test/provider-lifecycle.test.js', 'test/ui-hardening.test.js',
 ];
 
 const errors = [];
@@ -48,10 +48,20 @@ for (const requiredGuard of ['accountsChanged', 'chainChanged', 'disconnect', 'r
 }
 
 const send = fs.readFileSync(path.join(root, 'core/send.js'), 'utf8');
-for (const requiredGuard of ['a9059cbb', 'parseUnits', 'normalizeAddress', "kind === 'native'", "kind !== 'erc20'"]) {
+for (const requiredGuard of ['a9059cbb', 'parseUnits', 'normalizeAddress', "kind === 'native'", "kind !== 'erc20'", 'zero address', 'MAX_AMOUNT_TEXT_LENGTH', 'token contract cannot be used as the transfer recipient']) {
   if (!send.includes(requiredGuard)) errors.push(`missing guided send guard: ${requiredGuard}`);
 }
 if (send.includes('eth_sendTransaction') || send.includes('eth_sendUserOperation')) errors.push('guided send builder must not broadcast transactions directly');
+
+const portfolio = fs.readFileSync(path.join(root, 'core/portfolio.js'), 'utf8');
+for (const requiredGuard of ['invalid chain id', 'invalid token decimals', 'invalid token symbol', 'MAX_TOKEN_SYMBOL_LENGTH']) {
+  if (!portfolio.includes(requiredGuard)) errors.push(`missing portfolio hardening guard: ${requiredGuard}`);
+}
+
+const services = fs.readFileSync(path.join(root, 'core/services.js'), 'utf8');
+for (const requiredGuard of ['duplicate ecosystem service id', 'service URL credentials are not permitted', 'Preserve canonical wallet metadata']) {
+  if (!services.includes(requiredGuard)) errors.push(`missing service discovery hardening guard: ${requiredGuard}`);
+}
 
 const accounts = fs.readFileSync(path.join(root, 'core/accounts.js'), 'utf8');
 for (const requiredBinding of ['SmartAccount', 'eth_getCode', 'owner', 'recoveryAuthority', 'authorizationEpoch', 'capabilityRegistry']) {
@@ -64,7 +74,7 @@ for (const requiredGuard of ['SmartAccountFactory420', 'eth_sendTransaction', 'e
 }
 
 const execution = fs.readFileSync(path.join(root, 'core/execution.js'), 'utf8');
-for (const requiredGuard of ['eth_call', 'eth_estimateGas', 'eth_sendTransaction', 'controllerIsOwner', 'authority contract', 'confirmSmartAccountExecution']) {
+for (const requiredGuard of ['eth_call', 'eth_estimateGas', 'eth_sendTransaction', 'controllerIsOwner', 'authority contract', 'confirmSmartAccountExecution', 'owner changed after simulation', 'authorization epoch changed after simulation']) {
   if (!execution.includes(requiredGuard)) errors.push(`missing Smart Account execution guard: ${requiredGuard}`);
 }
 
@@ -127,15 +137,20 @@ console.log(JSON.stringify({
   pass: true,
   walletWebFoundation: true,
   walletWebUiV1: true,
+  walletWebUiHardening: true,
   verifiedAppsPage: true,
   appsLaunchFailClosed: true,
+  manifestIdentitySpoofingBlocked: true,
   guidedNativeSend: true,
   guidedErc20Send: true,
+  guidedSendInputHardening: true,
   guidedSendBroadcastsDirectly: false,
+  hostileTokenMetadataFailClosed: true,
   injectedProviderLifecycleFailClosed: true,
   smartAccountDiscovery: true,
   smartAccountCreation: true,
   simulatedOwnerExecution: true,
+  preBroadcastOwnerReverification: true,
   capabilityInspection: true,
   capabilityMutationEnabled: true,
   gasSponsorGrantManagement: true,

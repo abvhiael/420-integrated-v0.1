@@ -6,8 +6,8 @@ const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..')
 const required = [
   'index.html', 'app.js', 'ui-v1.js', 'styles.css', 'runtime-config.json',
   'core/abi.js', 'core/accounts.js', 'core/capabilities.js', 'core/capability-management.js', 'core/session-management.js', 'core/session-execution.js',
-  'core/config.js', 'core/deployment.js', 'core/execution.js', 'core/portfolio.js', 'core/provider.js', 'core/services.js', 'core/send.js',
-  'test/core.test.js', 'test/execution.test.js', 'test/capabilities.test.js', 'test/capability-management.test.js', 'test/session-management.test.js', 'test/session-execution.test.js', 'test/ui-v1.test.js', 'test/send.test.js',
+  'core/config.js', 'core/deployment.js', 'core/execution.js', 'core/portfolio.js', 'core/provider.js', 'core/provider-lifecycle.js', 'core/services.js', 'core/send.js',
+  'test/core.test.js', 'test/execution.test.js', 'test/capabilities.test.js', 'test/capability-management.test.js', 'test/session-management.test.js', 'test/session-execution.test.js', 'test/ui-v1.test.js', 'test/send.test.js', 'test/provider-lifecycle.test.js',
 ];
 
 const errors = [];
@@ -27,8 +27,13 @@ for (const requiredBinding of [
 }
 
 const ui = fs.readFileSync(path.join(root, 'ui-v1.js'), 'utf8');
-for (const requiredBinding of ['buildSendExecution', 'send-asset', 'send-recipient', 'send-amount', 'prepare-send', 'execute-target', 'execute-value', 'execute-data']) {
+for (const requiredBinding of ['buildSendExecution', 'send-asset', 'send-recipient', 'send-amount', 'prepare-send', 'execute-target', 'execute-value', 'execute-data', 'installFailClosedBrowserLifecycle']) {
   if (!ui.includes(requiredBinding)) errors.push(`missing Wallet Web UI V1 binding: ${requiredBinding}`);
+}
+
+const lifecycle = fs.readFileSync(path.join(root, 'core/provider-lifecycle.js'), 'utf8');
+for (const requiredGuard of ['accountsChanged', 'chainChanged', 'disconnect', 'removeListener', 'reload']) {
+  if (!lifecycle.includes(requiredGuard)) errors.push(`missing injected provider lifecycle guard: ${requiredGuard}`);
 }
 
 const send = fs.readFileSync(path.join(root, 'core/send.js'), 'utf8');
@@ -114,6 +119,7 @@ console.log(JSON.stringify({
   guidedNativeSend: true,
   guidedErc20Send: true,
   guidedSendBroadcastsDirectly: false,
+  injectedProviderLifecycleFailClosed: true,
   smartAccountDiscovery: true,
   smartAccountCreation: true,
   simulatedOwnerExecution: true,

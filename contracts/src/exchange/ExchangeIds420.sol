@@ -7,6 +7,7 @@ library ExchangeIds420 {
     bytes32 internal constant FEE_POLICY = keccak256("420.EXCHANGE.FEE_POLICY.V1");
     bytes32 internal constant FEE_ROUTER = keccak256("420.EXCHANGE.FEE_ROUTER.V1");
     bytes32 internal constant ROUTE_REGISTRY = keccak256("420.EXCHANGE.ROUTE_REGISTRY.V1");
+    bytes32 internal constant EXCHANGE_ROUTER = keccak256("420.EXCHANGE.ROUTER.V1");
     bytes32 internal constant EMERGENCY_CONTROL = keccak256("420.EXCHANGE.EMERGENCY_CONTROL.V1");
 
     bytes32 internal constant ACTION_CONFIGURE_ASSET = keccak256("420.EXCHANGE.CONFIGURE_ASSET");

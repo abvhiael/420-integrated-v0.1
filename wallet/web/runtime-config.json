@@ -20,6 +20,7 @@
   "features": {
     "readOnlyPortfolio": true,
     "smartAccountDiscovery": true,
+    "smartAccountCreation": true,
     "networkReads": true,
     "injectedWalletConnection": true,
     "smartAccountExecution": false,

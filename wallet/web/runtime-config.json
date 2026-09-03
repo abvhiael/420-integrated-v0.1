@@ -6,6 +6,12 @@
     "rpcUrl": null,
     "explorerUrl": null
   },
+  "smartAccount": {
+    "factoryAddress": null,
+    "recoveryAuthority": null,
+    "salt": "0x0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "trackedAssets": [],
   "manifest": {
     "url": null,
     "verificationMode": "registry-or-signed-manifest"
@@ -13,6 +19,8 @@
   "services": [],
   "features": {
     "readOnlyPortfolio": true,
+    "smartAccountDiscovery": true,
+    "networkReads": true,
     "injectedWalletConnection": true,
     "smartAccountExecution": false,
     "passkeys": false,

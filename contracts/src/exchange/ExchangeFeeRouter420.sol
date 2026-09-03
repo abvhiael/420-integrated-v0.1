@@ -55,16 +55,18 @@ contract ExchangeFeeRouter420 is SystemAccess {
         emit CollectorAuthorizationSet(collector, authorized);
     }
 
-    function routeTokenFee(bytes32 tradeRef, address token, address payer, uint256 amount)
+    /// @notice Pull retained protocol revenue only from the authorized collector invoking this call.
+    /// @dev Binding the token source to msg.sender prevents a collector from spending arbitrary third-party allowances.
+    function routeTokenFee(bytes32 tradeRef, address token, uint256 amount)
         external
         onlyCollector
         nonReentrant
     {
-        if (tradeRef == bytes32(0) || token == address(0) || payer == address(0) || amount == 0) revert InvalidAmount();
+        if (tradeRef == bytes32(0) || token == address(0) || amount == 0) revert InvalidAmount();
         _consume(tradeRef);
 
         IERC20ExchangeFee420 asset = IERC20ExchangeFee420(token);
-        if (!asset.transferFrom(payer, address(this), amount)) revert TransferFailed();
+        if (!asset.transferFrom(msg.sender, address(this), amount)) revert TransferFailed();
 
         (
             uint16 protocolBps,

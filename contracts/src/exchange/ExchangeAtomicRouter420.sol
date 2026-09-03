@@ -5,6 +5,7 @@ import "./ExchangeAssetRegistry420.sol";
 import "./ExchangeAuthorization420.sol";
 import "./ExchangeEmergencyControl420.sol";
 import "./ExchangeMarketRegistry420.sol";
+import "./ExchangeOracleGuard420.sol";
 import "./ExchangeRouteRegistry420.sol";
 
 interface IERC20AtomicRouter420 {
@@ -28,6 +29,7 @@ contract ExchangeAtomicRouter420 {
     ExchangeRouteRegistry420 public immutable routeRegistry;
     ExchangeAuthorization420 public immutable authorization;
     ExchangeEmergencyControl420 public immutable emergencyControl;
+    ExchangeOracleGuard420 public immutable oracleGuard;
 
     uint256 private _entered;
 
@@ -69,13 +71,14 @@ contract ExchangeAtomicRouter420 {
         address assetRegistry_,
         address routeRegistry_,
         address authorization_,
-        address emergencyControl_
+        address emergencyControl_,
+        address oracleGuard_
     ) {
         if (
             marketRegistry_ == address(0) || marketRegistry_.code.length == 0 || assetRegistry_ == address(0)
                 || assetRegistry_.code.length == 0 || routeRegistry_ == address(0) || routeRegistry_.code.length == 0
                 || authorization_ == address(0) || authorization_.code.length == 0 || emergencyControl_ == address(0)
-                || emergencyControl_.code.length == 0
+                || emergencyControl_.code.length == 0 || oracleGuard_ == address(0) || oracleGuard_.code.length == 0
         ) revert InvalidAddress();
 
         marketRegistry = ExchangeMarketRegistry420(marketRegistry_);
@@ -83,6 +86,7 @@ contract ExchangeAtomicRouter420 {
         routeRegistry = ExchangeRouteRegistry420(routeRegistry_);
         authorization = ExchangeAuthorization420(authorization_);
         emergencyControl = ExchangeEmergencyControl420(emergencyControl_);
+        oracleGuard = ExchangeOracleGuard420(oracleGuard_);
     }
 
     modifier nonReentrant() {
@@ -135,7 +139,8 @@ contract ExchangeAtomicRouter420 {
             }
             visitedTokens[i + 1] = hop.tokenOut;
 
-            _requireActiveMarketPair(hop.marketId, currentToken, hop.tokenOut);
+            (address baseToken, address quoteToken, bool inputIsBase) =
+                _requireActiveMarketPair(hop.marketId, currentToken, hop.tokenOut);
             if (!authorization.canSwap(msg.sender, hop.marketId, currentAmount)) revert UnauthorizedSwap();
 
             ExchangeRouteRegistry420.RouteAdapter memory route = routeRegistry.requireActive(hop.routeId);
@@ -165,6 +170,10 @@ contract ExchangeAtomicRouter420 {
                 hop.routeData
             );
             if (nextAmount < hop.minAmountOut) revert SlippageExceeded();
+
+            uint256 baseAmount = inputIsBase ? currentAmount : nextAmount;
+            uint256 quoteAmount = inputIsBase ? nextAmount : currentAmount;
+            oracleGuard.requireHealthyAmounts(hop.marketId, baseToken, quoteToken, baseAmount, quoteAmount);
 
             if (i != 0) {
                 _forceApprove(currentToken, allowanceTarget, 0);
@@ -196,16 +205,21 @@ contract ExchangeAtomicRouter420 {
         );
     }
 
-    function _requireActiveMarketPair(bytes32 marketId, address tokenIn, address tokenOut) private view {
+    function _requireActiveMarketPair(bytes32 marketId, address tokenIn, address tokenOut)
+        private
+        view
+        returns (address baseToken, address quoteToken, bool inputIsBase)
+    {
         if (!marketRegistry.isActive(marketId)) revert InactiveMarket();
 
         (bytes32 baseAssetId, bytes32 quoteAssetId,,,,) = marketRegistry.markets(marketId);
-        (,,, address baseToken,,,,,) = assetRegistry.assets(baseAssetId);
-        (,,, address quoteToken,,,,,) = assetRegistry.assets(quoteAssetId);
+        (,,, baseToken,,,,,) = assetRegistry.assets(baseAssetId);
+        (,,, quoteToken,,,,,) = assetRegistry.assets(quoteAssetId);
         if (baseToken == address(0) || quoteToken == address(0) || baseToken == quoteToken) revert InvalidPair();
 
-        bool matches = (baseToken == tokenIn && quoteToken == tokenOut) || (baseToken == tokenOut && quoteToken == tokenIn);
-        if (!matches) revert InvalidPair();
+        inputIsBase = baseToken == tokenIn && quoteToken == tokenOut;
+        bool inputIsQuote = baseToken == tokenOut && quoteToken == tokenIn;
+        if (!inputIsBase && !inputIsQuote) revert InvalidPair();
     }
 
     function _allowanceTarget(address executionAdapter) private view returns (address target) {

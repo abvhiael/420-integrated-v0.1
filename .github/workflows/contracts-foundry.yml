@@ -33,7 +33,10 @@ jobs:
 
       - name: Build
         working-directory: contracts
-        run: forge build --force
+        run: |
+          mkdir -p ../artifacts/contracts
+          set -o pipefail
+          forge build --force 2>&1 | tee ../artifacts/contracts/foundry-build.txt
 
       - name: Tests
         working-directory: contracts
@@ -42,12 +45,14 @@ jobs:
           set -o pipefail
           forge test -vvv 2>&1 | tee ../artifacts/contracts/foundry-tests.txt
 
-      - name: Upload Foundry test log
+      - name: Upload Foundry diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: foundry-tests-${{ github.sha }}
-          path: artifacts/contracts/foundry-tests.txt
+          name: foundry-diagnostics-${{ github.sha }}
+          path: |
+            artifacts/contracts/foundry-build.txt
+            artifacts/contracts/foundry-tests.txt
           if-no-files-found: warn
           retention-days: 30
 

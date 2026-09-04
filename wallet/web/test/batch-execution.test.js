@@ -7,6 +7,7 @@ import {
   encodeExecuteBatch,
   normalizeBatchCalls,
   prepareSmartAccountBatch,
+  sendPreparedSmartAccountBatch,
   sendSmartAccountBatch,
 } from '../core/batch-execution.js';
 
@@ -59,6 +60,12 @@ test('batch normalization enforces non-empty bounded batches and aggregate accou
   assert.equal(normalized.totalCalldataBytes, 5);
 });
 
+test('malformed batch call objects fail closed before simulation', () => {
+  assert.throws(() => normalizeBatchCalls(state, [null]), /must be an object/i);
+  assert.throws(() => normalizeBatchCalls(state, [{}]), /target is required/i);
+  assert.throws(() => normalizeBatchCalls(state, [{ target: targetA, data: '0x123' }]), /even-length hex/i);
+});
+
 test('batch normalization blocks wallet authority targets in any position', () => {
   for (const denied of [account, factory, entryPoint, registry]) {
     assert.throws(() => normalizeBatchCalls(state, [
@@ -66,6 +73,16 @@ test('batch normalization blocks wallet authority targets in any position', () =
       { target: denied, value: 0, data: '0x' },
     ]), /wallet authority contract/i);
   }
+});
+
+test('repeated identical calls are surfaced for review without changing call order', () => {
+  const normalized = normalizeBatchCalls(state, [
+    { target: targetA, value: 4, data: '0x1234' },
+    { target: targetB, value: 0, data: '0x' },
+    { target: targetA, value: 4, data: '0x1234' },
+  ]);
+  assert.deepEqual(normalized.duplicateCallIndexes, [[0, 2]]);
+  assert.deepEqual(normalized.calls.map((call) => call.target), [targetA, targetB, targetA]);
 });
 
 test('aggregate calldata limit fails closed', () => {
@@ -101,6 +118,33 @@ test('prepare batch requires owner boundary and simulates before readiness', asy
   assert.deepEqual(calls.map(([method]) => method), ['eth_call', 'eth_estimateGas']);
 });
 
+test('prepared batch calldata mutation is rejected before broadcast', async () => {
+  let sends = 0;
+  const provider = { request: async (method) => {
+    if (method === 'eth_call') return '0x';
+    if (method === 'eth_estimateGas') return '0x12345';
+    if (method === 'eth_sendTransaction') { sends += 1; return txHash; }
+    throw new Error(method);
+  } };
+  const prepared = await prepareSmartAccountBatch(provider, controller, state, [{ target: targetA, value: 1, data: '0x1234' }]);
+  prepared.transaction.data = `${prepared.transaction.data.slice(0, -2)}00`;
+  await assert.rejects(sendPreparedSmartAccountBatch(provider, prepared, state), /calldata changed after simulation/i);
+  assert.equal(sends, 0);
+});
+
+test('prepared batch authorization snapshot drift blocks broadcast', async () => {
+  let sends = 0;
+  const provider = { request: async (method) => {
+    if (method === 'eth_call') return '0x';
+    if (method === 'eth_estimateGas') return '0x12345';
+    if (method === 'eth_sendTransaction') { sends += 1; return txHash; }
+    throw new Error(method);
+  } };
+  const prepared = await prepareSmartAccountBatch(provider, controller, state, [{ target: targetA, value: 1, data: '0x' }]);
+  await assert.rejects(sendPreparedSmartAccountBatch(provider, prepared, { ...state, authorizationEpoch: 8n }), /prepared batch authorization epoch changed/i);
+  assert.equal(sends, 0);
+});
+
 test('owner or authorization epoch drift after batch simulation blocks broadcast', async () => {
   let sends = 0;
   const provider = { request: async (method, params) => {
@@ -120,7 +164,7 @@ test('owner or authorization epoch drift after batch simulation blocks broadcast
   assert.equal(sends, 0);
 });
 
-test('qualified batch requests explicit provider transaction approval only after simulation and revalidation', async () => {
+test('qualified prepared batch revalidates and re-simulates exact snapshot before provider approval', async () => {
   const methods = [];
   const provider = { request: async (method, params) => {
     methods.push(method);
@@ -133,10 +177,12 @@ test('qualified batch requests explicit provider transaction approval only after
     if (method === 'eth_sendTransaction') return txHash;
     throw new Error(method);
   } };
-  const submitted = await sendSmartAccountBatch(provider, controller, state, [
+  const prepared = await prepareSmartAccountBatch(provider, controller, state, [
     { target: targetA, value: 4, data: '0x1234' },
     { target: targetB, value: 20, data: '0xabcd' },
   ]);
+  methods.length = 0;
+  const submitted = await sendPreparedSmartAccountBatch(provider, prepared, state);
   assert.equal(submitted.txHash, txHash);
-  assert.deepEqual(methods, ['eth_call', 'eth_estimateGas', 'eth_call', 'eth_call', 'eth_sendTransaction']);
+  assert.deepEqual(methods, ['eth_call', 'eth_call', 'eth_call', 'eth_estimateGas', 'eth_sendTransaction']);
 });

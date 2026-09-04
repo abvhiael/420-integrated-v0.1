@@ -37,6 +37,6 @@
     "passkeys": false,
     "sessionKeys": true,
     "delegatedCapabilities": false,
-    "recoveryManagement": false
+    "recoveryManagement": true
   }
 }

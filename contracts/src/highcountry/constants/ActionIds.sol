@@ -4,6 +4,8 @@ pragma solidity ^0.8.24;
 library ActionIds {
     bytes32 internal constant GROWER_PROFILE_CREATE = keccak256("HC.ACTION.GROWER_PROFILE_REGISTRY.CREATE");
 
+    bytes32 internal constant REGION_REGISTER = keccak256("HC.ACTION.REGION_REGISTRY.REGISTER");
+
     bytes32 internal constant GENESIS_SET_ROOTS = keccak256("HC.ACTION.GENESIS_REGISTRY.SET_ROOTS");
     bytes32 internal constant GENESIS_FINALIZE = keccak256("HC.ACTION.GENESIS_REGISTRY.FINALIZE");
 

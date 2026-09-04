@@ -46,7 +46,7 @@ contract BongGogglesDiscoveryRegistry420 {
         address verifier;
         bytes32 propositionHash;
         uint32 subjectVersion;
-        bool supports;
+        bool supportsProposition;
         bytes32 evidenceHash;
         uint64 createdAt;
     }
@@ -75,7 +75,7 @@ contract BongGogglesDiscoveryRegistry420 {
     event ReviewPublished(bytes32 indexed reviewId, bytes32 indexed subjectId, address indexed author, uint32 version, uint16 ratingBps, bytes32 contentHash);
     event ReviewWithdrawn(bytes32 indexed reviewId, bytes32 indexed subjectId, address indexed author);
     event CorrectionSubmitted(bytes32 indexed correctionId, bytes32 indexed subjectId, address indexed author, bytes32 fieldId, bytes32 proposedValueHash);
-    event VerificationAttested(bytes32 indexed verificationId, bytes32 indexed subjectId, address indexed verifier, bytes32 propositionHash, uint32 subjectVersion, bool supports);
+    event VerificationAttested(bytes32 indexed verificationId, bytes32 indexed subjectId, address indexed verifier, bytes32 propositionHash, uint32 subjectVersion, bool supportsProposition);
 
     constructor(address authorization_, address profiles_) {
         if (authorization_ == address(0) || profiles_ == address(0)) revert ZeroAddress();
@@ -163,7 +163,7 @@ contract BongGogglesDiscoveryRegistry420 {
         bytes32 subjectId,
         bytes32 propositionHash,
         uint32 subjectVersion,
-        bool supports,
+        bool supportsProposition,
         bytes32 evidenceHash
     ) external returns (bytes32 verificationId) {
         if (!authorization.canActFor(msg.sender, verifier, BongGogglesIds420.ACTION_VERIFICATION_ATTEST)) revert Unauthorized();
@@ -171,8 +171,8 @@ contract BongGogglesDiscoveryRegistry420 {
         if (!_subjects[subjectId].exists) revert SubjectMissing();
         if (propositionHash == bytes32(0) || subjectVersion == 0) revert InvalidVerification();
         verificationId = keccak256(abi.encode("420/BONG_GOGGLES/VERIFICATION/V1", block.chainid, subjectId, verifier, propositionHash, subjectVersion));
-        _verifications[verificationId] = Verification(verificationId, subjectId, verifier, propositionHash, subjectVersion, supports, evidenceHash, uint64(block.timestamp));
-        emit VerificationAttested(verificationId, subjectId, verifier, propositionHash, subjectVersion, supports);
+        _verifications[verificationId] = Verification(verificationId, subjectId, verifier, propositionHash, subjectVersion, supportsProposition, evidenceHash, uint64(block.timestamp));
+        emit VerificationAttested(verificationId, subjectId, verifier, propositionHash, subjectVersion, supportsProposition);
     }
 
     function subject(bytes32 subjectId) external view returns (Subject memory) { return _subjects[subjectId]; }

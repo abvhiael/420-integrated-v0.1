@@ -4,10 +4,10 @@ import process from 'node:process';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const required = [
-  'index.html', 'app.js', 'ui-v1.js', 'apps-page.js', 'styles.css', 'apps.css', 'runtime-config.json',
-  'core/abi.js', 'core/accounts.js', 'core/apps.js', 'core/capabilities.js', 'core/capability-management.js', 'core/session-management.js', 'core/session-execution.js', 'core/recovery.js', 'core/recovery-management.js',
+  'index.html', 'app.js', 'ui-v1.js', 'apps-page.js', 'recovery-ui.js', 'styles.css', 'apps.css', 'runtime-config.json',
+  'core/abi.js', 'core/accounts.js', 'core/apps.js', 'core/capabilities.js', 'core/capability-management.js', 'core/session-management.js', 'core/session-execution.js', 'core/entrypoint-transport.js', 'core/recovery.js', 'core/recovery-management.js',
   'core/config.js', 'core/deployment.js', 'core/execution.js', 'core/portfolio.js', 'core/provider.js', 'core/provider-lifecycle.js', 'core/services.js', 'core/send.js',
-  'test/core.test.js', 'test/apps.test.js', 'test/execution.test.js', 'test/capabilities.test.js', 'test/capability-management.test.js', 'test/session-management.test.js', 'test/session-execution.test.js', 'test/recovery.test.js', 'test/recovery-management.test.js', 'test/ui-v1.test.js', 'test/send.test.js', 'test/provider-lifecycle.test.js', 'test/ui-hardening.test.js',
+  'test/core.test.js', 'test/apps.test.js', 'test/execution.test.js', 'test/capabilities.test.js', 'test/capability-management.test.js', 'test/session-management.test.js', 'test/session-execution.test.js', 'test/entrypoint-transport.test.js', 'test/recovery.test.js', 'test/recovery-management.test.js', 'test/recovery-ui.test.js', 'test/ui-v1.test.js', 'test/send.test.js', 'test/provider-lifecycle.test.js', 'test/ui-hardening.test.js',
 ];
 
 const errors = [];
@@ -27,8 +27,16 @@ for (const requiredBinding of [
 }
 
 const ui = fs.readFileSync(path.join(root, 'ui-v1.js'), 'utf8');
-for (const requiredBinding of ['apps-page.js', 'buildSendExecution', 'send-asset', 'send-recipient', 'send-amount', 'prepare-send', 'execute-target', 'execute-value', 'execute-data', 'installFailClosedBrowserLifecycle']) {
+for (const requiredBinding of ['recovery-ui.js', 'apps-page.js', 'buildSendExecution', 'send-asset', 'send-recipient', 'send-amount', 'prepare-send', 'execute-target', 'execute-value', 'execute-data', 'installFailClosedBrowserLifecycle']) {
   if (!ui.includes(requiredBinding)) errors.push(`missing Wallet Web UI V1 binding: ${requiredBinding}`);
+}
+
+const recoveryUi = fs.readFileSync(path.join(root, 'recovery-ui.js'), 'utf8');
+for (const requiredGuard of [
+  'Recovery management', 'Two-day safety delay', 'recovery-countdown', 'recovery-set-authority', 'recovery-propose',
+  'recovery-cancel', 'recovery-finalize', 'readDeployedSmartAccountState', 'sendFinalizeRecovery', 'confirmFinalizeRecovery'
+]) {
+  if (!recoveryUi.includes(requiredGuard)) errors.push(`missing recovery UI/timelock control: ${requiredGuard}`);
 }
 
 const appsPage = fs.readFileSync(path.join(root, 'apps-page.js'), 'utf8');
@@ -123,8 +131,18 @@ for (const requiredGuard of [
   if (!sessionExecution.includes(requiredGuard)) errors.push(`missing session execution preflight guard: ${requiredGuard}`);
 }
 if (sessionExecution.includes('eth_sendUserOperation') || sessionExecution.includes('eth_sendTransaction')) {
-  errors.push('session execution preflight must not broadcast until production EntryPoint420 transport is frozen');
+  errors.push('session execution preflight must remain transport-free; broadcast belongs only to EntryPoint420 transport');
 }
+
+const entryPointTransport = fs.readFileSync(path.join(root, 'core/entrypoint-transport.js'), 'utf8');
+for (const requiredGuard of [
+  '22cdde4c', '9eec012b', 'USER_OPERATION_HANDLED_TOPIC', 'personal_sign', 'eth_accounts', 'eth_call', 'eth_estimateGas',
+  'eth_sendTransaction', 'session nonce changed after user operation preparation', 'simulation completed but the SmartAccount420 session call would fail',
+  'session nonce did not advance exactly once', 'consumed the session nonce to prevent replay'
+]) {
+  if (!entryPointTransport.includes(requiredGuard)) errors.push(`missing EntryPoint420 user-op transport control: ${requiredGuard}`);
+}
+if (entryPointTransport.includes('eth_sendUserOperation')) errors.push('420Wallet V1 uses canonical on-chain EntryPoint420.handleOp transport, not an unfrozen bundler RPC');
 
 const abi = fs.readFileSync(path.join(root, 'core/abi.js'), 'utf8');
 if (!abi.includes("createAccount: '4003f6ba'")) errors.push('canonical SmartAccountFactory420 createAccount selector missing');
@@ -137,8 +155,9 @@ if (config.features?.capabilityInspection !== true) errors.push('capabilityInspe
 if (config.features?.capabilityMutation !== true || config.features?.gasSponsorGrantManagement !== true) errors.push('guarded capability management must remain enabled');
 if (config.features?.sessionKeyAdministration !== true || config.features?.sessionGrantManagement !== true || config.features?.sessionKeys !== true) errors.push('session-key administration and scoped session grants must remain enabled');
 if (config.features?.sessionExecutionPreflight !== true) errors.push('session execution preflight must be enabled');
-if (config.features?.sessionExecution !== false || config.features?.entryPointUserOpSubmission !== false || config.features?.delegatedCapabilities !== false) errors.push('session broadcast/delegated execution must remain disabled until EntryPoint420 transport is frozen');
-if (config.features?.batchExecution !== false || config.features?.passkeys !== false || config.features?.recoveryManagement !== false) errors.push('batching, passkeys, and recovery UI mutation must remain disabled until UI wiring is qualified');
+if (config.features?.sessionExecution !== false || config.features?.entryPointUserOpSubmission !== false || config.features?.delegatedCapabilities !== false) errors.push('session broadcast/delegated execution must remain disabled until transport UI wiring and final hardening are qualified');
+if (config.features?.recoveryManagement !== true) errors.push('qualified recovery management UI must be enabled');
+if (config.features?.batchExecution !== false || config.features?.passkeys !== false) errors.push('batching and passkeys must remain disabled');
 if (config.features?.smartAccountCreation !== true || config.features?.smartAccountDiscovery !== true) errors.push('smart account discovery and creation must remain enabled');
 if (config.features?.networkReads !== true || config.features?.readOnlyPortfolio !== true) errors.push('network and portfolio reads must remain enabled');
 if (!config.smartAccount || !Array.isArray(config.trackedAssets)) errors.push('smart account and tracked asset runtime config required');
@@ -166,7 +185,8 @@ console.log(JSON.stringify({
   smartAccountCreation: true,
   recoveryStateInspection: true,
   guardedRecoveryMutationCore: true,
-  recoveryManagementUiEnabled: false,
+  recoveryManagementUiEnabled: true,
+  recoveryTimelockPresentation: true,
   simulatedOwnerExecution: true,
   preBroadcastOwnerReverification: true,
   capabilityInspection: true,
@@ -175,6 +195,7 @@ console.log(JSON.stringify({
   sessionKeyAdministration: true,
   sessionGrantManagement: true,
   sessionExecutionPreflight: true,
+  entryPoint420TransportQualified: true,
   sessionExecutionEnabled: false,
   entryPointUserOpSubmission: false,
   canonicalCapabilityRegistry: '0x0000000000000000000000000000000000000421',

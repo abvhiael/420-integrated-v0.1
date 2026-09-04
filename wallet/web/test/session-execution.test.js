@@ -107,6 +107,7 @@ test('session execution preflight verifies current epoch, active canonical grant
   assert.equal(prepared.activeGrantId, grantId);
   assert.equal(prepared.scopeHash, scope);
   assert.equal(prepared.spendAmount, 420n);
+  assert.equal(prepared.authorizationEpoch, 7n);
   assert.equal(prepared.nonce >> 64n, BigInt(key));
   assert.equal(prepared.callData.slice(0, 10), '0xefff7e19');
   assert.equal(prepared.broadcastReady, false);

@@ -6,6 +6,7 @@ export function normalizeService(service) {
   if (!service.url) return { ...service, available: false, url: null };
   const parsed = new URL(service.url);
   if (!SAFE_PROTOCOLS.has(parsed.protocol)) throw new Error(`unsupported service protocol: ${parsed.protocol}`);
+  if (parsed.username || parsed.password) throw new Error('service URL credentials are not permitted');
   return { ...service, available: true, url: parsed.toString() };
 }
 
@@ -15,9 +16,23 @@ export function resolveServices(manifest, requiredServices) {
   }
   if (manifest.verified !== true) throw new Error('ecosystem manifest is not verified');
 
-  const entries = new Map((manifest.services || []).map((service) => [service.serviceId, normalizeService(service)]));
+  const entries = new Map();
+  for (const service of manifest.services || []) {
+    const normalized = normalizeService(service);
+    if (entries.has(normalized.serviceId)) throw new Error(`duplicate ecosystem service id: ${normalized.serviceId}`);
+    entries.set(normalized.serviceId, normalized);
+  }
+
   return requiredServices.map((required) => {
     const resolved = entries.get(required.serviceId);
-    return resolved ? { ...required, ...resolved } : { ...required, available: false, url: null };
+    if (!resolved) return { ...required, available: false, url: null };
+    // Preserve canonical wallet metadata. A verified manifest may publish availability and URL,
+    // but it cannot rename or re-identify a required wallet service.
+    return {
+      ...resolved,
+      ...required,
+      available: resolved.available === true,
+      url: resolved.url,
+    };
   });
 }

@@ -25,7 +25,7 @@ contract BongGogglesReactionRegistry420 {
     error ProfileInactive();
     error ObjectMissing();
     error ObjectUnavailable();
-    error InteractionDenied();
+    error AudienceDenied();
     error InvalidReaction();
     error ReactionMissing();
 
@@ -60,11 +60,11 @@ contract BongGogglesReactionRegistry420 {
 
         BongGogglesSocialObjectRegistry420.SocialObject memory object_ = objects.socialObject(objectId);
         if (!object_.exists) revert ObjectMissing();
-        if (
-            object_.status == BongGogglesTypes420.SocialObjectStatus.DELETED
-                || object_.status == BongGogglesTypes420.SocialObjectStatus.REMOVED
-        ) revert ObjectUnavailable();
-        if (reactor != object_.author && !policy.canInteract(reactor, object_.author)) revert InteractionDenied();
+        if (object_.status != BongGogglesTypes420.SocialObjectStatus.ACTIVE) revert ObjectUnavailable();
+
+        BongGogglesTypes420.AudiencePolicy memory audience =
+            BongGogglesTypes420.AudiencePolicy(object_.audienceType, object_.audienceRef);
+        if (!policy.canView(reactor, object_.author, audience)) revert AudienceDenied();
 
         ReactionState storage current = _reactions[objectId][reactor];
         BongGogglesTypes420.ReactionType oldReaction = current.reactionType;

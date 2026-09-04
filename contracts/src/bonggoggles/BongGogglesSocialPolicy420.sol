@@ -26,20 +26,27 @@ contract BongGogglesSocialPolicy420 {
     function canView(address viewer, address author, BongGogglesTypes420.AudiencePolicy calldata audience)
         external view returns (bool)
     {
-        if (viewer == author) return profiles.isActive(author);
+        if (!profiles.isActive(author)) return false;
+        if (viewer == author) return true;
+        if (audience.audienceType == BongGogglesTypes420.AudienceType.PUBLIC) {
+            if (viewer == address(0)) return true;
+            if (!profiles.profile(viewer).exists) return true;
+            return !relationships.isBlockedEither(viewer, author);
+        }
         if (!canInteract(viewer, author)) return false;
-        if (audience.audienceType == BongGogglesTypes420.AudienceType.PUBLIC) return true;
         if (audience.audienceType == BongGogglesTypes420.AudienceType.FOLLOWERS) return relationships.isFollowing(viewer, author);
         if (audience.audienceType == BongGogglesTypes420.AudienceType.FRIENDS) return relationships.areFriends(viewer, author);
-        return false; // GROUP and PRIVATE require context-specific resolvers.
+        return false;
     }
 
     function canSendFriendRequest(address requester, address recipient) external view returns (bool) {
         if (!canInteract(requester, recipient) || relationships.areFriends(requester, recipient)) return false;
         BongGogglesProfileRegistry420.Preferences memory p = profiles.preferences(recipient);
         if (p.friendRequestPolicy == BongGogglesTypes420.AccessPolicy.EVERYONE) return true;
-        if (p.friendRequestPolicy == BongGogglesTypes420.AccessPolicy.FRIENDS) return relationships.areFriends(requester, recipient);
-        return false; // FRIENDS_OF_FRIENDS is indexer-assisted until canonical mutual lookup exists.
+        if (p.friendRequestPolicy == BongGogglesTypes420.AccessPolicy.FOLLOWERS) {
+            return relationships.isFollowing(requester, recipient);
+        }
+        return false;
     }
 
     function canMessage(address sender, address recipient) external view returns (bool) {
@@ -53,6 +60,13 @@ contract BongGogglesSocialPolicy420 {
         if (relationships.isMuted(recipient, inviter, BongGogglesTypes420.MUTE_GAME_INVITES)) return false;
         BongGogglesProfileRegistry420.Preferences memory p = profiles.preferences(recipient);
         return _meetsPolicy(inviter, recipient, p.gameInvitePolicy);
+    }
+
+    function canMention(address actor, address target) external view returns (bool) {
+        if (actor == target) return profiles.isActive(actor);
+        if (!canInteract(actor, target)) return false;
+        BongGogglesProfileRegistry420.Preferences memory p = profiles.preferences(target);
+        return _meetsPolicy(actor, target, p.mentionPolicy);
     }
 
     function _meetsPolicy(address actor, address target, BongGogglesTypes420.AccessPolicy policy) internal view returns (bool) {

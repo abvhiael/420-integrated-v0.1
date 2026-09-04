@@ -40,6 +40,7 @@ contract BongGogglesProfileRegistry420 {
     error ProfileExists();
     error ProfileMissing();
     error ClosedProfile();
+    error InvalidStatusTransition();
 
     event ProfileCreated(address indexed account, bytes32 indexed profileId, BongGogglesTypes420.ProfileType profileType, address indexed operator);
     event ProfileUpdated(address indexed account, bytes32 indexed profileId, uint64 updatedAt, address indexed operator);
@@ -113,13 +114,24 @@ contract BongGogglesProfileRegistry420 {
     }
 
     function setStatus(address account, BongGogglesTypes420.ProfileStatus status) external {
-        bytes32 actionId = status == BongGogglesTypes420.ProfileStatus.DEACTIVATED || status == BongGogglesTypes420.ProfileStatus.CLOSED
-            ? BongGogglesIds420.ACTION_PROFILE_DEACTIVATE
-            : BongGogglesIds420.ACTION_PROFILE_UPDATE;
-        if (!authorization.canActFor(msg.sender, account, actionId)) revert Unauthorized();
         Profile storage p = _profiles[account];
         if (!p.exists) revert ProfileMissing();
         if (p.status == BongGogglesTypes420.ProfileStatus.CLOSED) revert ClosedProfile();
+        // RESTRICTED is reserved for the Phase 8 safety/moderation authority and is not a user/delegate status.
+        if (status == BongGogglesTypes420.ProfileStatus.RESTRICTED) revert InvalidStatusTransition();
+        if (status == p.status) revert InvalidStatusTransition();
+        if (p.status == BongGogglesTypes420.ProfileStatus.RESTRICTED) revert InvalidStatusTransition();
+
+        bytes32 actionId;
+        if (status == BongGogglesTypes420.ProfileStatus.DEACTIVATED || status == BongGogglesTypes420.ProfileStatus.CLOSED) {
+            actionId = BongGogglesIds420.ACTION_PROFILE_DEACTIVATE;
+        } else if (status == BongGogglesTypes420.ProfileStatus.ACTIVE && p.status == BongGogglesTypes420.ProfileStatus.DEACTIVATED) {
+            actionId = BongGogglesIds420.ACTION_PROFILE_UPDATE;
+        } else {
+            revert InvalidStatusTransition();
+        }
+        if (!authorization.canActFor(msg.sender, account, actionId)) revert Unauthorized();
+
         p.status = status;
         p.updatedAt = uint64(block.timestamp);
         emit ProfileStatusChanged(account, p.profileId, status, msg.sender);

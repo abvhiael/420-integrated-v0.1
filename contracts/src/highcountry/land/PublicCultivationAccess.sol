@@ -8,22 +8,8 @@ import { IHighCountryAuthorization } from "../interfaces/IHighCountryAuthorizati
 import { AuthorizationRequest } from "../types/HighCountryTypes.sol";
 
 interface ILandRegistryHC3 {
-    struct LandParcelView {
-        uint64 id;
-        uint16 regionId;
-        address owner;
-        address occupant;
-        uint32 growCapacity;
-        bytes32 parcelType;
-        bytes32 metadataHash;
-        bytes32 occupancyRef;
-        uint8 occupancyKind;
-        bool genesisParcel;
-        bool exists;
-    }
-
     function exists(uint64 parcelId) external view returns (bool);
-    function getParcel(uint64 parcelId) external view returns (LandParcelView memory);
+    function growCapacityOf(uint64 parcelId) external view returns (uint32);
 }
 
 contract PublicCultivationAccess {
@@ -58,10 +44,10 @@ contract PublicCultivationAccess {
         if (!landRegistry.exists(parcelId)) revert HCNotFound();
         if (_plots[plotId].exists) revert HCAlreadyExists();
 
-        ILandRegistryHC3.LandParcelView memory parcel = landRegistry.getParcel(parcelId);
+        uint32 parcelCapacity = landRegistry.growCapacityOf(parcelId);
         uint256 nextPublicCapacity = uint256(publicCapacityOnParcel[parcelId]) + growCapacity;
-        if (nextPublicCapacity > parcel.growCapacity) {
-            revert HCCapacityExceeded(nextPublicCapacity, parcel.growCapacity);
+        if (nextPublicCapacity > parcelCapacity) {
+            revert HCCapacityExceeded(nextPublicCapacity, parcelCapacity);
         }
 
         _requireAuthorized(ActionIds.PUBLIC_PLOT_REGISTER, plotId, growCapacity);

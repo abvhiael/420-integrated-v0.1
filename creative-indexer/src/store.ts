@@ -174,13 +174,24 @@ export class CreativeIndexerStore {
   }
 
   async digest(): Promise<string> {
-    const tables = [
-      'protocol_modules','creator_profiles','works','recordings','rights_versions','rights_shares',
-      'contributor_credits','licenses','rights_transfers','royalty_pools','royalty_balances','settlements','projection_meta',
+    const tables: Array<[string, string]> = [
+      ['protocol_modules', 'module_key'],
+      ['creator_profiles', 'creator_id'],
+      ['works', 'work_id'],
+      ['recordings', 'recording_id'],
+      ['rights_versions', 'asset_type, asset_id, rights_version'],
+      ['rights_shares', 'asset_type, asset_id, rights_version, creator_id'],
+      ['contributor_credits', 'credit_id'],
+      ['licenses', 'license_id'],
+      ['rights_transfers', 'transfer_id'],
+      ['royalty_pools', 'asset_type, asset_id'],
+      ['royalty_balances', 'asset_type, asset_id, creator_id'],
+      ['settlements', 'settlement_id'],
+      ['projection_meta', 'key'],
     ];
     const canonical: Record<string, unknown[]> = {};
-    for (const table of tables) {
-      const result = await this.pool.query(`SELECT * FROM ${table} ORDER BY 1,2,3,4`);
+    for (const [table, orderBy] of tables) {
+      const result = await this.pool.query(`SELECT * FROM ${table} ORDER BY ${orderBy}`);
       canonical[table] = result.rows;
     }
     const json = JSON.stringify(canonical, (_key, value) => typeof value === 'bigint' ? value.toString() : value);

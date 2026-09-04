@@ -37,7 +37,19 @@ jobs:
 
       - name: Tests
         working-directory: contracts
-        run: forge test -vvv
+        run: |
+          mkdir -p ../artifacts/contracts
+          set -o pipefail
+          forge test -vvv 2>&1 | tee ../artifacts/contracts/foundry-tests.txt
+
+      - name: Upload Foundry test log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: foundry-tests-${{ github.sha }}
+          path: artifacts/contracts/foundry-tests.txt
+          if-no-files-found: warn
+          retention-days: 30
 
       - name: Decision #10 deploy/seed harness
         working-directory: contracts

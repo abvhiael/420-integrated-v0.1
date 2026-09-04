@@ -1,0 +1,51 @@
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.24;
+
+library ModuleIds {
+    bytes32 internal constant GROWER_PROFILE_REGISTRY = keccak256("HC.MODULE.GROWER_PROFILE_REGISTRY");
+    bytes32 internal constant AUTHORIZATION = keccak256("HC.MODULE.HIGH_COUNTRY_AUTHORIZATION");
+    bytes32 internal constant REGION_REGISTRY = keccak256("HC.MODULE.REGION_REGISTRY");
+    bytes32 internal constant GENESIS_REGISTRY = keccak256("HC.MODULE.GENESIS_REGISTRY");
+    bytes32 internal constant RULESET_REGISTRY = keccak256("HC.MODULE.RULESET_REGISTRY");
+    bytes32 internal constant RULESET_ROUTER = keccak256("HC.MODULE.RULESET_ROUTER");
+    bytes32 internal constant LAND_REGISTRY = keccak256("HC.MODULE.LAND_REGISTRY");
+    bytes32 internal constant PUBLIC_CULTIVATION_ACCESS = keccak256("HC.MODULE.PUBLIC_CULTIVATION_ACCESS");
+    bytes32 internal constant GENOME_REGISTRY = keccak256("HC.MODULE.GENOME_REGISTRY");
+    bytes32 internal constant BREEDING_ENGINE = keccak256("HC.MODULE.BREEDING_ENGINE");
+    bytes32 internal constant SEED_REGISTRY = keccak256("HC.MODULE.SEED_REGISTRY");
+    bytes32 internal constant CLONE_REGISTRY = keccak256("HC.MODULE.CLONE_REGISTRY");
+    bytes32 internal constant MOTHER_REGISTRY = keccak256("HC.MODULE.MOTHER_REGISTRY");
+    bytes32 internal constant PHENOTYPE_REGISTRY = keccak256("HC.MODULE.PHENOTYPE_REGISTRY");
+    bytes32 internal constant PLANT_REGISTRY = keccak256("HC.MODULE.PLANT_REGISTRY");
+    bytes32 internal constant CULTIVATION_ENGINE = keccak256("HC.MODULE.CULTIVATION_ENGINE");
+    bytes32 internal constant HARVEST_ENGINE = keccak256("HC.MODULE.HARVEST_ENGINE");
+    bytes32 internal constant EQUIPMENT_REGISTRY = keccak256("HC.MODULE.EQUIPMENT_REGISTRY");
+    bytes32 internal constant MANUFACTURING_ENGINE = keccak256("HC.MODULE.MANUFACTURING_ENGINE");
+    bytes32 internal constant EQUIPMENT_LIFECYCLE_ENGINE = keccak256("HC.MODULE.EQUIPMENT_LIFECYCLE_ENGINE");
+    bytes32 internal constant BUDS_LEDGER = keccak256("HC.MODULE.BUDS_LEDGER");
+    bytes32 internal constant ECONOMIC_SETTLEMENT = keccak256("HC.MODULE.ECONOMIC_SETTLEMENT");
+    bytes32 internal constant SKILL_REGISTRY = keccak256("HC.MODULE.SKILL_REGISTRY");
+    bytes32 internal constant RESEARCH_REGISTRY = keccak256("HC.MODULE.RESEARCH_REGISTRY");
+    bytes32 internal constant DISCOVERY_REGISTRY = keccak256("HC.MODULE.DISCOVERY_REGISTRY");
+    bytes32 internal constant MISSION_ENGINE = keccak256("HC.MODULE.MISSION_ENGINE");
+    bytes32 internal constant ORGANIZATION_REGISTRY = keccak256("HC.MODULE.ORGANIZATION_REGISTRY");
+    bytes32 internal constant ORGANIZATION_AUTHORITY = keccak256("HC.MODULE.ORGANIZATION_AUTHORITY");
+    bytes32 internal constant COOPERATIVE_REGISTRY = keccak256("HC.MODULE.COOPERATIVE_REGISTRY");
+    bytes32 internal constant COOPERATIVE_GOVERNANCE = keccak256("HC.MODULE.COOPERATIVE_GOVERNANCE");
+    bytes32 internal constant GOVERNANCE_EXECUTOR = keccak256("HC.MODULE.GOVERNANCE_EXECUTOR");
+    bytes32 internal constant MARKET = keccak256("HC.MODULE.MARKET");
+    bytes32 internal constant LICENSE_REGISTRY = keccak256("HC.MODULE.LICENSE_REGISTRY");
+    bytes32 internal constant LEASE_REGISTRY = keccak256("HC.MODULE.LEASE_REGISTRY");
+    bytes32 internal constant RIGHTS_REGISTRY = keccak256("HC.MODULE.RIGHTS_REGISTRY");
+    bytes32 internal constant SEASON_REGISTRY = keccak256("HC.MODULE.SEASON_REGISTRY");
+    bytes32 internal constant COMPETITION_TEMPLATE_REGISTRY = keccak256("HC.MODULE.COMPETITION_TEMPLATE_REGISTRY");
+    bytes32 internal constant COMPETITION_ENGINE = keccak256("HC.MODULE.COMPETITION_ENGINE");
+    bytes32 internal constant GLOBAL_420_CUP = keccak256("HC.MODULE.GLOBAL_420_CUP");
+    bytes32 internal constant RANDOMNESS_COORDINATOR = keccak256("HC.MODULE.RANDOMNESS_COORDINATOR");
+    bytes32 internal constant MODULE_REGISTRY = keccak256("HC.MODULE.MODULE_REGISTRY");
+    bytes32 internal constant UPGRADE_COORDINATOR = keccak256("HC.MODULE.UPGRADE_COORDINATOR");
+    bytes32 internal constant SECURITY_COUNCIL_CONTROLLER = keccak256("HC.MODULE.SECURITY_COUNCIL_CONTROLLER");
+    bytes32 internal constant EMERGENCY_STATE = keccak256("HC.MODULE.EMERGENCY_STATE");
+    bytes32 internal constant INVENTORY_REGISTRY = keccak256("HC.MODULE.INVENTORY_REGISTRY");
+    bytes32 internal constant RESOURCE_LEDGER = keccak256("HC.MODULE.RESOURCE_LEDGER");
+}

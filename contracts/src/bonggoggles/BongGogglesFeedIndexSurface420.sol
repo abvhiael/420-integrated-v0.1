@@ -44,9 +44,9 @@ contract BongGogglesFeedIndexSurface420 {
     bytes32 public constant EVENT_REACTION_SET = keccak256("ReactionSet(bytes32,address,uint8,uint8,address)");
     bytes32 public constant EVENT_REACTION_CLEARED = keccak256("ReactionCleared(bytes32,address,uint8,address)");
     bytes32 public constant EVENT_TAG_CREATED = keccak256("TagCreated(bytes32,bytes32,address,address,uint8,uint8,address)");
-    bytes32 public constant EVENT_TAG_APPROVED = keccak256("TagApproved(bytes32,address,address)");
-    bytes32 public constant EVENT_TAG_REJECTED = keccak256("TagRejected(bytes32,address,address)");
-    bytes32 public constant EVENT_TAG_REMOVED = keccak256("TagRemoved(bytes32,address,address)");
+    bytes32 public constant EVENT_TAG_APPROVED = keccak256("TagApproved(bytes32,bytes32,address,address)");
+    bytes32 public constant EVENT_TAG_REJECTED = keccak256("TagRejected(bytes32,bytes32,address,address)");
+    bytes32 public constant EVENT_TAG_REMOVED = keccak256("TagRemoved(bytes32,bytes32,address,address)");
 
     error ZeroAddress();
     error RankedModeForbidden();

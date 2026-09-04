@@ -116,21 +116,27 @@ func (r *Runner) handle(ctx context.Context, job Job) error {
 		return err
 	}
 
+	// Lease loss is a hard execution boundary. A failed renewal cancels the processor
+	// context immediately and that same context is used for result commitment so a
+	// worker cannot intentionally continue the job after losing ownership.
 	procCtx, cancel := context.WithCancel(ctx)
-	defer cancel()
 	leaseErr := make(chan error, 1)
-	go r.renewLease(procCtx, lease, leaseErr)
+	leaseDone := make(chan struct{})
+	go func() {
+		defer close(leaseDone)
+		r.renewLease(procCtx, lease, leaseErr, cancel)
+	}()
+	defer func() {
+		cancel()
+		<-leaseDone
+	}()
 
 	result, err := r.processor.Process(procCtx, job)
+	if leaseLost(leaseErr) {
+		return ErrLeaseLost
+	}
 	if err != nil {
 		return err
-	}
-	select {
-	case err := <-leaseErr:
-		if err != nil {
-			return ErrLeaseLost
-		}
-	default:
 	}
 	if result.OutputRef == ([32]byte{}) {
 		return ErrInvalidResult
@@ -138,10 +144,28 @@ func (r *Runner) handle(ctx context.Context, job Job) error {
 	if !job.Deadline.IsZero() && !r.now().Before(job.Deadline) {
 		return ErrDeadlineExceeded
 	}
-	return r.chain.CommitResult(ctx, job.ID, result.OutputRef)
+	if leaseLost(leaseErr) {
+		return ErrLeaseLost
+	}
+	if err := r.chain.CommitResult(procCtx, job.ID, result.OutputRef); err != nil {
+		if leaseLost(leaseErr) || errors.Is(procCtx.Err(), context.Canceled) && ctx.Err() == nil {
+			return ErrLeaseLost
+		}
+		return err
+	}
+	return nil
 }
 
-func (r *Runner) renewLease(ctx context.Context, lease Lease, errCh chan<- error) {
+func leaseLost(errCh <-chan error) bool {
+	select {
+	case err := <-errCh:
+		return err != nil
+	default:
+		return false
+	}
+}
+
+func (r *Runner) renewLease(ctx context.Context, lease Lease, errCh chan<- error, cancel context.CancelFunc) {
 	interval := r.cfg.LeaseTTL / 3
 	if interval <= 0 {
 		interval = time.Second
@@ -158,6 +182,7 @@ func (r *Runner) renewLease(ctx context.Context, lease Lease, errCh chan<- error
 				case errCh <- err:
 				default:
 				}
+				cancel()
 				return
 			}
 		}

@@ -42,20 +42,27 @@ export function normalizeBatchCalls(smartAccountState, calls) {
   if (calls.length > MAX_BATCH_CALLS) throw new Error(`batch execution exceeds ${MAX_BATCH_CALLS} call wallet limit`);
 
   const denied = deniedTargets(smartAccountState);
+  const seen = new Map();
+  const duplicateCallIndexes = [];
   let totalValue = 0n;
   let totalCalldataBytes = 0;
   const normalized = calls.map((call, index) => {
-    const target = normalizeAddress(call?.target);
+    if (!call || typeof call !== 'object' || Array.isArray(call)) throw new Error(`batch call ${index + 1} must be an object`);
+    if (typeof call.target !== 'string' || call.target.length === 0) throw new Error(`batch call ${index + 1} target is required`);
+    const target = normalizeAddress(call.target);
     if (denied.has(target)) throw new Error(`batch call ${index + 1} targets a wallet authority contract`);
-    const value = normalizeNativeValue(call?.value ?? 0n);
-    const data = normalizeCallData(call?.data ?? '0x');
+    const value = normalizeNativeValue(call.value ?? 0n);
+    const data = normalizeCallData(call.data ?? '0x');
     totalValue += value;
     if (totalValue >= (1n << 256n)) throw new Error('aggregate batch native value exceeds uint256 range');
     totalCalldataBytes += (data.length - 2) / 2;
     if (totalCalldataBytes > MAX_BATCH_CALLDATA_BYTES) throw new Error(`aggregate batch calldata exceeds ${MAX_BATCH_CALLDATA_BYTES} byte wallet limit`);
+    const key = `${target}:${value}:${data}`;
+    if (seen.has(key)) duplicateCallIndexes.push([seen.get(key), index]);
+    else seen.set(key, index);
     return { target, value, data };
   });
-  return { calls: normalized, totalValue, totalCalldataBytes };
+  return { calls: normalized, totalValue, totalCalldataBytes, duplicateCallIndexes };
 }
 
 export function encodeExecuteBatch(calls) {
@@ -87,15 +94,7 @@ async function assertOwnerBoundaryStillCurrent(provider, controller, smartAccoun
   }
 }
 
-export async function prepareSmartAccountBatch(provider, controller, smartAccountState, calls) {
-  const owner = normalizeAddress(controller);
-  if (!smartAccountState?.controllerIsOwner || normalizeAddress(smartAccountState.owner) !== owner) {
-    throw new Error('connected controller is not the on-chain SmartAccount420 owner');
-  }
-  const normalized = normalizeBatchCalls(smartAccountState, calls);
-  const account = normalizeAddress(smartAccountState.smartAccount);
-  const transaction = { from: owner, to: account, value: '0x0', data: encodeExecuteBatch(normalized.calls) };
-
+async function simulateBatchTransaction(provider, transaction) {
   let result;
   try {
     result = await provider.request('eth_call', [transaction, 'latest']);
@@ -109,23 +108,57 @@ export async function prepareSmartAccountBatch(provider, controller, smartAccoun
     throw new Error(`SmartAccount420 batch gas estimation failed: ${error?.message || 'eth_estimateGas failed'}`);
   }
   if (typeof gas !== 'string' || !/^0x[0-9a-fA-F]+$/.test(gas)) throw new Error('invalid batch gas estimate');
+  return { passed: true, result, gas: gas.toLowerCase() };
+}
+
+export async function prepareSmartAccountBatch(provider, controller, smartAccountState, calls) {
+  const owner = normalizeAddress(controller);
+  if (!smartAccountState?.controllerIsOwner || normalizeAddress(smartAccountState.owner) !== owner) {
+    throw new Error('connected controller is not the on-chain SmartAccount420 owner');
+  }
+  const normalized = normalizeBatchCalls(smartAccountState, calls);
+  const account = normalizeAddress(smartAccountState.smartAccount);
+  const transaction = { from: owner, to: account, value: '0x0', data: encodeExecuteBatch(normalized.calls) };
+  const simulation = await simulateBatchTransaction(provider, transaction);
 
   return {
     controller: owner,
     smartAccount: account,
-    calls: normalized.calls,
+    authorizationEpoch: smartAccountState.authorizationEpoch == null ? null : BigInt(smartAccountState.authorizationEpoch),
+    calls: normalized.calls.map((call) => ({ ...call })),
     totalValue: normalized.totalValue,
     totalCalldataBytes: normalized.totalCalldataBytes,
-    transaction,
-    simulation: { passed: true, result, gas: gas.toLowerCase() },
+    duplicateCallIndexes: normalized.duplicateCallIndexes.map((pair) => pair.slice()),
+    transaction: { ...transaction },
+    simulation,
   };
+}
+
+export async function sendPreparedSmartAccountBatch(provider, prepared, smartAccountState) {
+  if (!prepared?.simulation?.passed) throw new Error('prepared SmartAccount420 batch has not passed simulation');
+  const controller = normalizeAddress(prepared.controller);
+  const account = normalizeAddress(prepared.smartAccount);
+  if (!smartAccountState?.deployed || normalizeAddress(smartAccountState.smartAccount) !== account) throw new Error('prepared batch SmartAccount420 binding changed');
+  if (!smartAccountState.controllerIsOwner || normalizeAddress(smartAccountState.owner) !== controller) throw new Error('prepared batch owner boundary changed');
+  if (prepared.authorizationEpoch != null && BigInt(smartAccountState.authorizationEpoch) !== BigInt(prepared.authorizationEpoch)) {
+    throw new Error('prepared batch authorization epoch changed');
+  }
+
+  const canonicalData = encodeExecuteBatch(prepared.calls);
+  if (canonicalData !== prepared.transaction?.data) throw new Error('prepared batch calldata changed after simulation');
+  if (normalizeAddress(prepared.transaction?.from) !== controller || normalizeAddress(prepared.transaction?.to) !== account || prepared.transaction?.value !== '0x0') {
+    throw new Error('prepared batch transaction envelope changed after simulation');
+  }
+
+  await assertOwnerBoundaryStillCurrent(provider, controller, smartAccountState);
+  const resimulation = await simulateBatchTransaction(provider, prepared.transaction);
+  const txHash = normalizeTxHash(await provider.request('eth_sendTransaction', [{ ...prepared.transaction }]));
+  return { ...prepared, simulation: resimulation, submitted: true, txHash };
 }
 
 export async function sendSmartAccountBatch(provider, controller, smartAccountState, calls) {
   const prepared = await prepareSmartAccountBatch(provider, controller, smartAccountState, calls);
-  await assertOwnerBoundaryStillCurrent(provider, controller, smartAccountState);
-  const txHash = normalizeTxHash(await provider.request('eth_sendTransaction', [prepared.transaction]));
-  return { ...prepared, submitted: true, txHash };
+  return sendPreparedSmartAccountBatch(provider, prepared, smartAccountState);
 }
 
 export async function confirmSmartAccountBatch(provider, txHash, controller, config = {}, options = {}) {
@@ -140,7 +173,7 @@ export async function confirmSmartAccountBatch(provider, txHash, controller, con
     if (i + 1 < attempts) await sleep(delayMs);
   }
   if (!receipt) throw new Error('SmartAccount420 batch transaction was not confirmed');
-  if (receipt.status !== '0x1') throw new Error('SmartAccount420 batch transaction reverted');
+  if (receipt.status !== '0x1') throw new Error('SmartAccount420 batch transaction reverted atomically; no batch call was committed');
   const discovered = await discoverSmartAccount(provider, controller, config);
   if (!discovered.deployed || !discovered.controllerIsOwner) throw new Error('SmartAccount420 owner boundary changed after batch execution');
   return { txHash: normalizedHash, receipt, smartAccount: discovered };

@@ -1,6 +1,14 @@
 import { normalizeAddress, normalizeBytes32 } from './abi.js';
 import { normalizeCallData } from './execution.js';
 import { prepareSessionExecution, readSessionNonce } from './session-execution.js';
+import { readDeployedSmartAccountState } from './accounts.js';
+import {
+  SESSION_EXECUTE_CAPABILITY_420,
+  inspectCapabilityGrant,
+  readActiveGrantId,
+  readCapabilityAuthorization,
+} from './capabilities.js';
+import { readSessionEpoch, readSessionScope } from './session-management.js';
 
 const SELECTOR_GET_USER_OP_HASH = '22cdde4c';
 const SELECTOR_HANDLE_OP = '9eec012b';
@@ -123,6 +131,35 @@ async function simulateSignedUserOperation(provider, signer, entryPoint, userOpe
   return { transaction, gas: gas.toLowerCase(), simulationPassed: true };
 }
 
+async function revalidatePreparedSession(provider, prepared) {
+  const live = await readDeployedSmartAccountState(provider, prepared.userOperation.sender);
+  if (normalizeAddress(live.entryPoint) !== normalizeAddress(prepared.entryPoint)) throw new Error('SmartAccount420 EntryPoint changed after user operation preparation');
+  if (BigInt(live.authorizationEpoch) !== BigInt(prepared.authorizationEpoch)) throw new Error('authorization epoch changed after user operation preparation');
+
+  const keyEpoch = await readSessionEpoch(provider, live.smartAccount, prepared.signer);
+  if (keyEpoch !== BigInt(prepared.authorizationEpoch)) throw new Error('session key was revoked or invalidated after user operation preparation');
+
+  const scopeHash = await readSessionScope(provider, live.smartAccount, prepared.target, prepared.selector);
+  if (normalizeBytes32(scopeHash) !== normalizeBytes32(prepared.scopeHash)) throw new Error('session scope changed after user operation preparation');
+
+  const activeGrantId = await readActiveGrantId(provider, live, prepared.signer, SESSION_EXECUTE_CAPABILITY_420, prepared.scopeHash);
+  if (normalizeBytes32(activeGrantId) !== normalizeBytes32(prepared.activeGrantId)) throw new Error('active session grant changed after user operation preparation');
+
+  const inspection = await inspectCapabilityGrant(provider, live, prepared.activeGrantId);
+  if (!inspection.exists || !inspection.belongsToAccount || inspection.grant.revoked) throw new Error('session grant was revoked after user operation preparation');
+  if (normalizeAddress(inspection.grant.principal) !== normalizeAddress(prepared.signer)) throw new Error('session grant principal changed after user operation preparation');
+  if (normalizeBytes32(inspection.grant.capabilityId) !== normalizeBytes32(SESSION_EXECUTE_CAPABILITY_420)) throw new Error('session grant capability changed after user operation preparation');
+  if (normalizeBytes32(inspection.grant.scopeHash) !== normalizeBytes32(prepared.scopeHash)) throw new Error('session grant scope changed after user operation preparation');
+
+  const authorized = await readCapabilityAuthorization(provider, live, prepared.signer, SESSION_EXECUTE_CAPABILITY_420, prepared.scopeHash, prepared.spendAmount);
+  if (!authorized) throw new Error('session grant limits or validity changed after user operation preparation');
+
+  const currentNonce = await readSessionNonce(provider, live.smartAccount, prepared.signer);
+  if (currentNonce !== BigInt(prepared.userOperation.nonce)) throw new Error('session nonce changed after user operation preparation');
+  if ((currentNonce >> 64n) !== BigInt(prepared.nonceKey)) throw new Error('session nonce lane changed after user operation preparation');
+  return { live, inspection, currentNonce };
+}
+
 export async function prepareEntryPointTransport(provider, smartAccountState, sessionKey, sessionPreflight) {
   if (!sessionPreflight || sessionPreflight.broadcastReady !== false) throw new Error('qualified session execution preflight required before EntryPoint420 transport');
   const signer = normalizeAddress(sessionKey);
@@ -156,8 +193,11 @@ export async function prepareSessionUserOperationTransport(provider, smartAccoun
 
 export async function sendPreparedEntryPointUserOperation(provider, prepared) {
   if (!prepared?.broadcastReady || !prepared?.entryPointSimulation?.simulationPassed) throw new Error('EntryPoint420 transport is not ready for broadcast');
-  const currentNonce = await readSessionNonce(provider, prepared.smartAccount || prepared.userOperation.sender, prepared.signer);
-  if (currentNonce !== BigInt(prepared.userOperation.nonce)) throw new Error('session nonce changed after user operation preparation');
+  await assertSignerAvailable(provider, prepared.signer);
+  await revalidatePreparedSession(provider, prepared);
+
+  const canonicalHash = await readEntryPointUserOpHash(provider, prepared.entryPoint, { ...prepared.userOperation, signature: '0x' });
+  if (canonicalHash !== normalizeHash(prepared.userOpHash)) throw new Error('canonical user operation hash changed after signing');
 
   const resimulation = await simulateSignedUserOperation(provider, prepared.signer, prepared.entryPoint, prepared.userOperation);
   const txHash = normalizeTxHash(await provider.request('eth_sendTransaction', [resimulation.transaction]));
@@ -177,21 +217,31 @@ function eventTopicUint(value) {
   return `0x${uintWord(value)}`.toLowerCase();
 }
 
+function decodeHandledEvent(log) {
+  if (typeof log?.data !== 'string' || !/^0x[0-9a-fA-F]{128}$/.test(log.data)) throw new Error('malformed EntryPoint420 UserOperationHandled event');
+  const sequence = BigInt(`0x${log.data.slice(2, 66)}`);
+  const successWord = log.data.slice(66, 130);
+  if (!/^0{63}[01]$/i.test(successWord)) throw new Error('malformed EntryPoint420 UserOperationHandled success value');
+  return { sequence, success: successWord.endsWith('1') };
+}
+
 function findHandledEvent(receipt, prepared) {
   const expectedHash = normalizeHash(prepared.userOpHash);
   const expectedSender = eventTopicAddress(prepared.userOperation.sender);
   const expectedKey = eventTopicUint(prepared.nonceKey);
   const expectedEntryPoint = normalizeAddress(prepared.entryPoint);
+  const matches = [];
   for (const log of receipt?.logs || []) {
-    if (normalizeAddress(log.address) !== expectedEntryPoint) continue;
+    let address;
+    try { address = normalizeAddress(log?.address); } catch { continue; }
+    if (address !== expectedEntryPoint) continue;
     const topics = Array.isArray(log.topics) ? log.topics.map((topic) => String(topic).toLowerCase()) : [];
     if (topics[0] !== USER_OPERATION_HANDLED_TOPIC || topics[1] !== expectedHash || topics[2] !== expectedSender || topics[3] !== expectedKey) continue;
-    if (typeof log.data !== 'string' || !/^0x[0-9a-fA-F]{128}$/.test(log.data)) throw new Error('malformed EntryPoint420 UserOperationHandled event');
-    const sequence = BigInt(`0x${log.data.slice(2, 66)}`);
-    const success = BigInt(`0x${log.data.slice(66, 130)}`) === 1n;
-    return { sequence, success };
+    matches.push(decodeHandledEvent(log));
   }
-  throw new Error('EntryPoint420 UserOperationHandled confirmation event not found');
+  if (matches.length === 0) throw new Error('EntryPoint420 UserOperationHandled confirmation event not found');
+  if (matches.length !== 1) throw new Error('ambiguous duplicate EntryPoint420 UserOperationHandled confirmation events');
+  return matches[0];
 }
 
 export async function confirmEntryPointUserOperation(provider, submitted, options = {}) {

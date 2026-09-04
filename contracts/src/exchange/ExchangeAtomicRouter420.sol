@@ -43,6 +43,7 @@ contract ExchangeAtomicRouter420 {
     ExchangeFeePolicy420 public immutable feePolicy;
     address public immutable wrappedNative420;
 
+    mapping(address => bool) public delegatedExecutor;
     uint256 public tradeNonce;
     uint256 private _entered;
 
@@ -60,12 +61,15 @@ contract ExchangeAtomicRouter420 {
     error InactiveMarket();
     error InvalidPair();
     error UnauthorizedSwap();
+    error UnauthorizedDelegatedExecutor();
+    error UnauthorizedGovernance();
     error SlippageExceeded();
     error InvalidAllowanceTarget();
     error TokenCallFailed();
     error IntermediateInputMismatch();
     error IntermediateOutputMismatch();
     error FinalOutputMismatch();
+    error DelegatedInputMismatch();
     error RepeatedToken();
     error InvalidNativeValue();
     error NativeTransferFailed();
@@ -100,6 +104,7 @@ contract ExchangeAtomicRouter420 {
         uint256 feeAmount,
         uint256 netAmountOut
     );
+    event DelegatedExecutorSet(address indexed executor, bool allowed);
 
     constructor(
         address marketRegistry_,
@@ -143,6 +148,13 @@ contract ExchangeAtomicRouter420 {
         _entered = 0;
     }
 
+    function setDelegatedExecutor(address executor, bool allowed) external {
+        if (msg.sender != feePolicy.governanceTimelock()) revert UnauthorizedGovernance();
+        if (executor == address(0) || (allowed && executor.code.length == 0)) revert InvalidAddress();
+        delegatedExecutor[executor] = allowed;
+        emit DelegatedExecutorSet(executor, allowed);
+    }
+
     function hashPath(address tokenIn, uint256 amountIn, address recipient, Hop[] calldata hops)
         public
         pure
@@ -170,6 +182,40 @@ contract ExchangeAtomicRouter420 {
             hops,
             false
         );
+    }
+
+    /// @notice Executes an exact-input ERC20 path for a separately authenticated principal.
+    /// @dev Only governance-approved settlement executors may call this path. The executor, never the principal,
+    ///      is the transferFrom source; signed-order settlement therefore has to take transient custody first.
+    function swapExactInputPathDelegated(
+        address principal,
+        address tokenIn,
+        uint256 amountIn,
+        uint256 minFinalAmountOut,
+        address recipient,
+        bytes32 expectedPathHash,
+        Hop[] calldata hops
+    ) external nonReentrant returns (uint256 amountOut) {
+        if (!delegatedExecutor[msg.sender]) revert UnauthorizedDelegatedExecutor();
+        if (principal == address(0) || tokenIn == address(0) || amountIn == 0) revert InvalidPath();
+
+        uint256 balanceBefore = _balanceOf(tokenIn, address(this));
+        _safeTransferFrom(tokenIn, msg.sender, address(this), amountIn);
+        uint256 balanceAfter = _balanceOf(tokenIn, address(this));
+        if (balanceAfter - balanceBefore != amountIn) revert DelegatedInputMismatch();
+
+        amountOut = _swapExactInputPath(
+            principal,
+            address(this),
+            tokenIn,
+            amountIn,
+            minFinalAmountOut,
+            recipient,
+            expectedPathHash,
+            hops,
+            false
+        );
+        if (_balanceOf(tokenIn, address(this)) != balanceBefore) revert DelegatedInputMismatch();
     }
 
     /// @notice Executes an exact-input path beginning with native $420.
@@ -419,6 +465,12 @@ contract ExchangeAtomicRouter420 {
 
     function _safeTransfer(address token, address recipient, uint256 amount) private {
         (bool ok, bytes memory data) = token.call(abi.encodeWithSignature("transfer(address,uint256)", recipient, amount));
+        if (!ok || (data.length != 0 && (data.length != 32 || !abi.decode(data, (bool))))) revert TokenCallFailed();
+    }
+
+    function _safeTransferFrom(address token, address from, address recipient, uint256 amount) private {
+        (bool ok, bytes memory data) =
+            token.call(abi.encodeWithSignature("transferFrom(address,address,uint256)", from, recipient, amount));
         if (!ok || (data.length != 0 && (data.length != 32 || !abi.decode(data, (bool))))) revert TokenCallFailed();
     }
 }

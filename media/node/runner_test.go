@@ -32,6 +32,33 @@ func (p *fakeProcessor) Process(context.Context, Job) (Result, error) {
 	return p.result, p.err
 }
 
+type cancelAwareProcessor struct {
+	called   bool
+	canceled bool
+}
+
+func (p *cancelAwareProcessor) Process(ctx context.Context, _ Job) (Result, error) {
+	p.called = true
+	<-ctx.Done()
+	p.canceled = true
+	return Result{}, ctx.Err()
+}
+
+type failingLease struct {
+	released bool
+}
+
+func (l *failingLease) Renew(context.Context) error { return errors.New("lease backend unavailable") }
+func (l *failingLease) Release() error { l.released = true; return nil }
+
+type fixedLeaseStore struct {
+	lease Lease
+}
+
+func (s fixedLeaseStore) Acquire(context.Context, [32]byte) (Lease, bool, error) {
+	return s.lease, true, nil
+}
+
 func id(b byte) [32]byte { var v [32]byte; v[0] = b; return v }
 
 func TestHandleHappyPath(t *testing.T) {
@@ -77,6 +104,75 @@ func TestHandleRejectsOperatorMismatch(t *testing.T) {
 
 	if err := r.handle(context.Background(), Job{ID: id(3)}); !errors.Is(err, ErrOperatorMismatch) {
 		t.Fatalf("expected ErrOperatorMismatch, got %v", err)
+	}
+}
+
+func TestHandleLeaseLossCancelsProcessorAndPreventsCommit(t *testing.T) {
+	op := id(1)
+	cap := id(2)
+	jobID := id(3)
+	chain := &fakeChain{refreshed: Job{
+		ID: jobID, OperatorID: op, CapabilityID: cap, Status: JobFunded,
+		FundedAmount: 100, Deadline: time.Now().Add(time.Hour),
+	}}
+	processor := &cancelAwareProcessor{}
+	lease := &failingLease{}
+	r := NewRunner(OperatorConfig{
+		OperatorID: op, Capabilities: map[[32]byte]struct{}{cap: {}}, LeaseTTL: 15 * time.Millisecond,
+	}, chain, processor, fixedLeaseStore{lease: lease})
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	err := r.handle(ctx, Job{ID: jobID})
+	if !errors.Is(err, ErrLeaseLost) {
+		t.Fatalf("expected ErrLeaseLost, got %v", err)
+	}
+	if !processor.called || !processor.canceled {
+		t.Fatal("lease loss must cancel an active processor")
+	}
+	if chain.committed {
+		t.Fatal("lease-lost job must never commit a result")
+	}
+	if !lease.released {
+		t.Fatal("lost lease must still be released during cleanup")
+	}
+}
+
+func TestHandleRejectsEmptyResult(t *testing.T) {
+	op := id(1)
+	cap := id(2)
+	jobID := id(3)
+	chain := &fakeChain{refreshed: Job{
+		ID: jobID, OperatorID: op, CapabilityID: cap, Status: JobFunded,
+		FundedAmount: 100, Deadline: time.Now().Add(time.Hour),
+	}}
+	processor := &fakeProcessor{result: Result{}}
+	r := NewRunner(OperatorConfig{OperatorID: op, Capabilities: map[[32]byte]struct{}{cap: {}}}, chain, processor, NewMemoryLeaseStore(time.Minute))
+
+	if err := r.handle(context.Background(), Job{ID: jobID}); !errors.Is(err, ErrInvalidResult) {
+		t.Fatalf("expected ErrInvalidResult, got %v", err)
+	}
+	if chain.committed {
+		t.Fatal("empty output reference must never be committed")
+	}
+}
+
+func TestHandleRejectsExpiredJobBeforeProcessing(t *testing.T) {
+	op := id(1)
+	cap := id(2)
+	jobID := id(3)
+	chain := &fakeChain{refreshed: Job{
+		ID: jobID, OperatorID: op, CapabilityID: cap, Status: JobFunded,
+		FundedAmount: 100, Deadline: time.Now().Add(-time.Second),
+	}}
+	processor := &fakeProcessor{result: Result{OutputRef: id(9)}}
+	r := NewRunner(OperatorConfig{OperatorID: op, Capabilities: map[[32]byte]struct{}{cap: {}}}, chain, processor, NewMemoryLeaseStore(time.Minute))
+
+	if err := r.handle(context.Background(), Job{ID: jobID}); !errors.Is(err, ErrDeadlineExceeded) {
+		t.Fatalf("expected ErrDeadlineExceeded, got %v", err)
+	}
+	if processor.called || chain.running || chain.committed {
+		t.Fatal("expired job must never enter processing")
 	}
 }
 

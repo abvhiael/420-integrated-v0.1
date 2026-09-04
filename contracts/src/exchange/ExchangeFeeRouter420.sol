@@ -6,6 +6,7 @@ import "../revenue/DevelopmentCompensationVault420.sol";
 import "./ExchangeFeePolicy420.sol";
 
 interface IERC20ExchangeFee420 {
+    function balanceOf(address account) external view returns (uint256);
     function transferFrom(address from, address to, uint256 amount) external returns (bool);
     function transfer(address to, uint256 amount) external returns (bool);
     function approve(address spender, uint256 amount) external returns (bool);
@@ -28,6 +29,7 @@ contract ExchangeFeeRouter420 is SystemAccess {
     error TransferFailed();
     error Reentrancy();
     error InvalidAmount();
+    error AccountingMismatch();
 
     event CollectorAuthorizationSet(address indexed collector, bool authorized);
     event ExchangeFeeRouted(bytes32 indexed tradeRef, address indexed asset, uint256 grossRevenue, uint256 developerPayment);
@@ -66,7 +68,9 @@ contract ExchangeFeeRouter420 is SystemAccess {
         _consume(tradeRef);
 
         IERC20ExchangeFee420 asset = IERC20ExchangeFee420(token);
+        uint256 balanceBefore = asset.balanceOf(address(this));
         if (!asset.transferFrom(msg.sender, address(this), amount)) revert TransferFailed();
+        if (asset.balanceOf(address(this)) - balanceBefore != amount) revert AccountingMismatch();
 
         (
             uint16 protocolBps,
@@ -106,8 +110,10 @@ contract ExchangeFeeRouter420 is SystemAccess {
                 amount,
                 developerBps
             );
+            if (!asset.approve(developmentVault, 0)) revert TransferFailed();
         }
 
+        if (asset.balanceOf(address(this)) != balanceBefore) revert AccountingMismatch();
         emit ExchangeFeeRouted(tradeRef, token, amount, developerAmount);
     }
 

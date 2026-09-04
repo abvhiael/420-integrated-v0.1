@@ -80,18 +80,28 @@ func Redacted(c RuntimeConfig) map[string]any {
 	return map[string]any{
 		"operator_id": "0x" + hex.EncodeToString(c.Node.OperatorID[:]),
 		"capability_count": len(c.Node.Capabilities),
-		"rpc_url": c.RPCURL,
+		"rpc_url": redactedURL(c.RPCURL),
 		"market_address": c.MarketAddress,
 		"cursor_path": c.CursorPath,
 		"lease_path": c.LeasePath,
 		"lease_owner_id": c.LeaseOwnerID,
-		"signer_url": c.SignerURL,
+		"signer_url": redactedURL(c.SignerURL),
 		"signer_token_env": c.SignerTokenEnv,
 		"poll_interval": c.Node.PollInterval.String(),
 		"lease_ttl": c.Node.LeaseTTL.String(),
 		"max_parallel": c.Node.MaxParallel,
 		"start_block": c.StartBlock,
 	}
+}
+
+func redactedURL(raw string) string {
+	u, err := url.Parse(raw)
+	if err != nil || u.Scheme == "" || u.Host == "" {
+		return "<invalid-url>"
+	}
+	// Operator diagnostics only need the transport endpoint. Paths, query values,
+	// fragments and userinfo can carry API keys or signer-routing secrets.
+	return u.Scheme + "://" + u.Host
 }
 
 func parseBytes32(v string) ([32]byte, error) {

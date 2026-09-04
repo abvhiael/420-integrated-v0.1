@@ -52,6 +52,12 @@ library BongGogglesIds420 {
     bytes32 internal constant ACTION_EVENT_CREATE = keccak256("BG/ACTION/EVENT_CREATE/V1");
     bytes32 internal constant ACTION_EVENT_UPDATE = keccak256("BG/ACTION/EVENT_UPDATE/V1");
     bytes32 internal constant ACTION_EVENT_RSVP = keccak256("BG/ACTION/EVENT_RSVP/V1");
+
+    bytes32 internal constant ACTION_PRIVATE_DEVICE_SET = keccak256("BG/ACTION/PRIVATE_DEVICE_SET/V1");
+    bytes32 internal constant ACTION_PRIVATE_DEVICE_REVOKE = keccak256("BG/ACTION/PRIVATE_DEVICE_REVOKE/V1");
+    bytes32 internal constant ACTION_PRIVATE_CONTEXT_BIND = keccak256("BG/ACTION/PRIVATE_CONTEXT_BIND/V1");
+    bytes32 internal constant ACTION_PRIVATE_EPOCH_ROTATE = keccak256("BG/ACTION/PRIVATE_EPOCH_ROTATE/V1");
+    bytes32 internal constant ACTION_PRIVATE_CONTEXT_CLOSE = keccak256("BG/ACTION/PRIVATE_CONTEXT_CLOSE/V1");
 }
 
 library BongGogglesTypes420 {
@@ -74,6 +80,7 @@ library BongGogglesTypes420 {
     enum EventHostType { PROFILE, PAGE, GROUP }
     enum EventVisibility { PUBLIC, GROUP_ONLY, INVITE_ONLY }
     enum RSVPState { NONE, INTERESTED, GOING, DECLINED }
+    enum PrivateConversationType { DIRECT, GROUP, GAME, EVENT }
 
     uint32 internal constant MUTE_FEED = 1 << 0;
     uint32 internal constant MUTE_STORIES = 1 << 1;

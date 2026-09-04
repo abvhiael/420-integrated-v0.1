@@ -130,6 +130,7 @@ export async function prepareSessionExecution(provider, smartAccountState, sessi
     scopeHash,
     activeGrantId: normalizeBytes32(activeGrantId),
     grant: inspection,
+    authorizationEpoch: currentEpoch,
     nonce,
     nonceKey: expectedKey,
     callData,

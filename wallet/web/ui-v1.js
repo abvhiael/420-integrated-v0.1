@@ -1,3 +1,4 @@
+import './recovery-ui.js';
 import './apps-page.js';
 import { buildSendExecution } from './core/send.js';
 import { installFailClosedBrowserLifecycle } from './core/provider-lifecycle.js';
@@ -30,6 +31,8 @@ export function classifyWalletActivity(message = '') {
   if (/grant created and verified:/i.test(text)) return { kind: 'permission', state: 'confirmed', label: 'Permission created' };
   if (/grant revoked/i.test(text)) return { kind: 'permission', state: 'confirmed', label: 'Permission revoked' };
   if (/session key .*verified/i.test(text)) return { kind: 'session', state: 'confirmed', label: 'Session key updated' };
+  if (/recovery .*submitted:/i.test(text)) return { kind: 'recovery', state: 'pending', label: 'Recovery action submitted' };
+  if (/recovery .*confirmed and canonical recovery state verified/i.test(text)) return { kind: 'recovery', state: 'confirmed', label: 'Recovery state updated' };
   return null;
 }
 

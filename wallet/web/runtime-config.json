@@ -31,12 +31,13 @@
     "sessionKeyAdministration": true,
     "sessionGrantManagement": true,
     "sessionExecutionPreflight": true,
-    "sessionExecution": false,
-    "entryPointUserOpSubmission": false,
+    "sessionExecutionUi": true,
+    "sessionExecution": true,
+    "entryPointUserOpSubmission": true,
     "batchExecution": false,
     "passkeys": false,
     "sessionKeys": true,
     "delegatedCapabilities": false,
-    "recoveryManagement": false
+    "recoveryManagement": true
   }
 }

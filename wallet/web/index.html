@@ -127,12 +127,13 @@
         <div id="services" class="service-grid" aria-live="polite"></div>
       </section>
 
-      <section class="security-note"><h2>Wallet Core security boundary</h2><p>Account creation is routed only through canonical SmartAccountFactory420. Guided sends are compiled into the same guarded SmartAccount420 execution path as advanced calls. Owner execution must simulate successfully before approval, direct calls to wallet authority contracts are blocked, and confirmed transactions are re-verified against canonical account state. Session execution, batching, passkeys, recovery mutation, and delegated execution remain disabled until their respective hardening stages.</p></section>
+      <section class="security-note"><h2>Wallet Core security boundary</h2><p>Account creation is routed only through canonical SmartAccountFactory420. Guided sends are compiled into the same guarded SmartAccount420 execution path as advanced calls. Owner execution must simulate successfully before approval, direct calls to wallet authority contracts are blocked, and confirmed transactions are re-verified against canonical account state. Recovery mutation is guarded and timelocked. Session execution review is available, but delegated broadcast remains disabled until the final recovery/session hardening campaign qualifies the EntryPoint420 transport.</p></section>
 
       <p id="status" class="status" role="status">Ready.</p>
     </main>
   </div>
   <script type="module" src="./app.js"></script>
   <script type="module" src="./ui-v1.js"></script>
+  <script type="module" src="./session-execution-ui.js"></script>
 </body>
 </html>

@@ -5,9 +5,9 @@ import process from 'node:process';
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const required = [
   'index.html', 'app.js', 'ui-v1.js', 'apps-page.js', 'styles.css', 'apps.css', 'runtime-config.json',
-  'core/abi.js', 'core/accounts.js', 'core/apps.js', 'core/capabilities.js', 'core/capability-management.js', 'core/session-management.js', 'core/session-execution.js',
+  'core/abi.js', 'core/accounts.js', 'core/apps.js', 'core/capabilities.js', 'core/capability-management.js', 'core/session-management.js', 'core/session-execution.js', 'core/recovery.js',
   'core/config.js', 'core/deployment.js', 'core/execution.js', 'core/portfolio.js', 'core/provider.js', 'core/provider-lifecycle.js', 'core/services.js', 'core/send.js',
-  'test/core.test.js', 'test/apps.test.js', 'test/execution.test.js', 'test/capabilities.test.js', 'test/capability-management.test.js', 'test/session-management.test.js', 'test/session-execution.test.js', 'test/ui-v1.test.js', 'test/send.test.js', 'test/provider-lifecycle.test.js', 'test/ui-hardening.test.js',
+  'test/core.test.js', 'test/apps.test.js', 'test/execution.test.js', 'test/capabilities.test.js', 'test/capability-management.test.js', 'test/session-management.test.js', 'test/session-execution.test.js', 'test/recovery.test.js', 'test/ui-v1.test.js', 'test/send.test.js', 'test/provider-lifecycle.test.js', 'test/ui-hardening.test.js',
 ];
 
 const errors = [];
@@ -66,6 +66,11 @@ for (const requiredGuard of ['duplicate ecosystem service id', 'service URL cred
 const accounts = fs.readFileSync(path.join(root, 'core/accounts.js'), 'utf8');
 for (const requiredBinding of ['SmartAccount', 'eth_getCode', 'owner', 'recoveryAuthority', 'authorizationEpoch', 'capabilityRegistry']) {
   if (!accounts.includes(requiredBinding)) errors.push(`missing canonical account read binding: ${requiredBinding}`);
+}
+
+const recovery = fs.readFileSync(path.join(root, 'core/recovery.js'), 'utf8');
+for (const requiredGuard of ['RECOVERY_DELAY_SECONDS', 'pending recovery owner exists without executable timestamp', 'canSetAuthority', 'canPropose', 'canCancel', 'canFinalize']) {
+  if (!recovery.includes(requiredGuard)) errors.push(`missing recovery state policy guard: ${requiredGuard}`);
 }
 
 const deployment = fs.readFileSync(path.join(root, 'core/deployment.js'), 'utf8');
@@ -149,6 +154,8 @@ console.log(JSON.stringify({
   injectedProviderLifecycleFailClosed: true,
   smartAccountDiscovery: true,
   smartAccountCreation: true,
+  recoveryStateInspection: true,
+  recoveryManagementEnabled: false,
   simulatedOwnerExecution: true,
   preBroadcastOwnerReverification: true,
   capabilityInspection: true,
@@ -163,6 +170,5 @@ console.log(JSON.stringify({
   serverSideKeyCustody: false,
   batchExecutionEnabled: false,
   delegatedCapabilitiesEnabled: false,
-  recoveryManagementEnabled: false,
   passkeysEnabled: false
 }, null, 2));

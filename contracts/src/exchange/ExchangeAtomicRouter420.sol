@@ -12,6 +12,11 @@ interface IERC20AtomicRouter420 {
     function balanceOf(address account) external view returns (uint256);
 }
 
+interface IWrapped420AtomicRouter420 {
+    function deposit() external payable;
+    function withdraw(uint256 amount) external;
+}
+
 /// @notice Optional execution-adapter extension required for atomic multi-hop settlement.
 /// @dev The allowance target is the contract that actually pulls an intermediate ERC20 from this router.
 interface IExchangeAtomicExecutionAdapter420 {
@@ -19,8 +24,9 @@ interface IExchangeAtomicExecutionAdapter420 {
 }
 
 /// @notice Bounded atomic multi-hop execution for 420Exchange.
-/// @dev First-hop funds remain with msg.sender until an approved venue pulls them. Intermediate tokens may
-///      exist on this router only during the transaction and must be consumed exactly by the following hop.
+/// @dev ERC20 first-hop funds remain with the caller until an approved venue pulls them. Native $420 is wrapped
+///      into the canonical wrapped token and held only for the duration of the transaction. Intermediate tokens
+///      may exist on this router only during the transaction and must be consumed exactly by the following hop.
 contract ExchangeAtomicRouter420 {
     uint256 public constant MAX_HOPS = 4;
 
@@ -30,6 +36,7 @@ contract ExchangeAtomicRouter420 {
     ExchangeAuthorization420 public immutable authorization;
     ExchangeEmergencyControl420 public immutable emergencyControl;
     ExchangeOracleGuard420 public immutable oracleGuard;
+    address public immutable wrappedNative420;
 
     uint256 private _entered;
 
@@ -53,6 +60,9 @@ contract ExchangeAtomicRouter420 {
     error IntermediateInputMismatch();
     error IntermediateOutputMismatch();
     error RepeatedToken();
+    error InvalidNativeValue();
+    error NativeTransferFailed();
+    error UnexpectedNativeSender();
     error Reentrancy();
 
     event AtomicPathExecuted(
@@ -65,6 +75,15 @@ contract ExchangeAtomicRouter420 {
         uint256 amountOut,
         uint256 hops
     );
+    event NativePathExecuted(
+        bytes32 indexed pathHash,
+        address indexed payer,
+        address indexed recipient,
+        bool nativeIn,
+        bool nativeOut,
+        uint256 amountIn,
+        uint256 amountOut
+    );
 
     constructor(
         address marketRegistry_,
@@ -72,13 +91,15 @@ contract ExchangeAtomicRouter420 {
         address routeRegistry_,
         address authorization_,
         address emergencyControl_,
-        address oracleGuard_
+        address oracleGuard_,
+        address wrappedNative420_
     ) {
         if (
             marketRegistry_ == address(0) || marketRegistry_.code.length == 0 || assetRegistry_ == address(0)
                 || assetRegistry_.code.length == 0 || routeRegistry_ == address(0) || routeRegistry_.code.length == 0
                 || authorization_ == address(0) || authorization_.code.length == 0 || emergencyControl_ == address(0)
                 || emergencyControl_.code.length == 0 || oracleGuard_ == address(0) || oracleGuard_.code.length == 0
+                || wrappedNative420_ == address(0) || wrappedNative420_.code.length == 0
         ) revert InvalidAddress();
 
         marketRegistry = ExchangeMarketRegistry420(marketRegistry_);
@@ -87,6 +108,11 @@ contract ExchangeAtomicRouter420 {
         authorization = ExchangeAuthorization420(authorization_);
         emergencyControl = ExchangeEmergencyControl420(emergencyControl_);
         oracleGuard = ExchangeOracleGuard420(oracleGuard_);
+        wrappedNative420 = wrappedNative420_;
+    }
+
+    receive() external payable {
+        if (msg.sender != wrappedNative420) revert UnexpectedNativeSender();
     }
 
     modifier nonReentrant() {
@@ -112,9 +138,87 @@ contract ExchangeAtomicRouter420 {
         bytes32 expectedPathHash,
         Hop[] calldata hops
     ) external nonReentrant returns (uint256 amountOut) {
+        amountOut = _swapExactInputPath(
+            msg.sender,
+            msg.sender,
+            tokenIn,
+            amountIn,
+            minFinalAmountOut,
+            recipient,
+            expectedPathHash,
+            hops,
+            false
+        );
+    }
+
+    /// @notice Executes an exact-input path beginning with native $420.
+    /// @dev `msg.value` is the exact input amount and is wrapped atomically before the first hop.
+    function swapExactInputNativePath(
+        uint256 minFinalAmountOut,
+        address recipient,
+        bytes32 expectedPathHash,
+        Hop[] calldata hops
+    ) external payable nonReentrant returns (uint256 amountOut) {
+        if (msg.value == 0) revert InvalidNativeValue();
+        IWrapped420AtomicRouter420(wrappedNative420).deposit{value: msg.value}();
+
+        amountOut = _swapExactInputPath(
+            msg.sender,
+            address(this),
+            wrappedNative420,
+            msg.value,
+            minFinalAmountOut,
+            recipient,
+            expectedPathHash,
+            hops,
+            false
+        );
+        emit NativePathExecuted(expectedPathHash, msg.sender, recipient, true, false, msg.value, amountOut);
+    }
+
+    /// @notice Executes an ERC20 exact-input path whose final asset is canonical wrapped $420, then unwraps it.
+    function swapExactInputPathForNative(
+        address tokenIn,
+        uint256 amountIn,
+        uint256 minNativeOut,
+        address recipient,
+        bytes32 expectedPathHash,
+        Hop[] calldata hops
+    ) external nonReentrant returns (uint256 amountOut) {
+        if (hops.length == 0 || hops[hops.length - 1].tokenOut != wrappedNative420) revert InvalidPath();
+
+        amountOut = _swapExactInputPath(
+            msg.sender,
+            msg.sender,
+            tokenIn,
+            amountIn,
+            minNativeOut,
+            recipient,
+            expectedPathHash,
+            hops,
+            true
+        );
+
+        IWrapped420AtomicRouter420(wrappedNative420).withdraw(amountOut);
+        (bool ok,) = recipient.call{value: amountOut}("");
+        if (!ok) revert NativeTransferFailed();
+        emit NativePathExecuted(expectedPathHash, msg.sender, recipient, false, true, amountIn, amountOut);
+    }
+
+    function _swapExactInputPath(
+        address principal,
+        address initialPayer,
+        address tokenIn,
+        uint256 amountIn,
+        uint256 minFinalAmountOut,
+        address recipient,
+        bytes32 expectedPathHash,
+        Hop[] calldata hops,
+        bool unwrapFinal
+    ) private returns (uint256 amountOut) {
         if (
-            tokenIn == address(0) || amountIn == 0 || minFinalAmountOut == 0 || recipient == address(0)
-                || hops.length == 0 || hops.length > MAX_HOPS
+            principal == address(0) || initialPayer == address(0) || tokenIn == address(0) || amountIn == 0
+                || minFinalAmountOut == 0 || recipient == address(0) || hops.length == 0 || hops.length > MAX_HOPS
         ) revert InvalidPath();
 
         bytes32 pathHash = hashPath(tokenIn, amountIn, recipient, hops);
@@ -141,16 +245,17 @@ contract ExchangeAtomicRouter420 {
 
             (address baseToken, address quoteToken, bool inputIsBase) =
                 _requireActiveMarketPair(hop.marketId, currentToken, hop.tokenOut);
-            if (!authorization.canSwap(msg.sender, hop.marketId, currentAmount)) revert UnauthorizedSwap();
+            if (!authorization.canSwap(principal, hop.marketId, currentAmount)) revert UnauthorizedSwap();
 
             ExchangeRouteRegistry420.RouteAdapter memory route = routeRegistry.requireActive(hop.routeId);
             bool finalHop = i + 1 == hops.length;
-            address hopRecipient = finalHop ? recipient : address(this);
-            address payer = i == 0 ? msg.sender : address(this);
+            bool routerReceivesOutput = !finalHop || unwrapFinal;
+            address hopRecipient = routerReceivesOutput ? address(this) : recipient;
+            address payer = i == 0 ? initialPayer : address(this);
 
             uint256 inputBalanceBefore;
             address allowanceTarget;
-            if (i != 0) {
+            if (payer == address(this)) {
                 inputBalanceBefore = _balanceOf(currentToken, address(this));
                 if (inputBalanceBefore < currentAmount) revert IntermediateInputMismatch();
                 allowanceTarget = _allowanceTarget(route.executionAdapter);
@@ -158,7 +263,7 @@ contract ExchangeAtomicRouter420 {
             }
 
             uint256 outputBalanceBefore;
-            if (!finalHop) outputBalanceBefore = _balanceOf(hop.tokenOut, address(this));
+            if (routerReceivesOutput) outputBalanceBefore = _balanceOf(hop.tokenOut, address(this));
 
             uint256 nextAmount = IExchangeExecutionAdapter420(route.executionAdapter).executeSwap(
                 payer,
@@ -175,13 +280,13 @@ contract ExchangeAtomicRouter420 {
             uint256 quoteAmount = inputIsBase ? nextAmount : currentAmount;
             oracleGuard.requireHealthyAmounts(hop.marketId, baseToken, quoteToken, baseAmount, quoteAmount);
 
-            if (i != 0) {
+            if (payer == address(this)) {
                 _forceApprove(currentToken, allowanceTarget, 0);
                 uint256 inputBalanceAfter = _balanceOf(currentToken, address(this));
                 if (inputBalanceBefore - inputBalanceAfter != currentAmount) revert IntermediateInputMismatch();
             }
 
-            if (!finalHop) {
+            if (routerReceivesOutput) {
                 uint256 outputBalanceAfter = _balanceOf(hop.tokenOut, address(this));
                 if (outputBalanceAfter - outputBalanceBefore != nextAmount) revert IntermediateOutputMismatch();
             }
@@ -190,12 +295,13 @@ contract ExchangeAtomicRouter420 {
             currentAmount = nextAmount;
         }
 
+        if (unwrapFinal && currentToken != wrappedNative420) revert InvalidPath();
         if (currentAmount < minFinalAmountOut) revert SlippageExceeded();
         amountOut = currentAmount;
 
         emit AtomicPathExecuted(
             pathHash,
-            msg.sender,
+            principal,
             recipient,
             tokenIn,
             currentToken,

@@ -6,7 +6,7 @@ import {
   MAX_BATCH_CALLDATA_BYTES,
   confirmSmartAccountBatch,
   prepareSmartAccountBatch,
-  sendSmartAccountBatch,
+  sendPreparedSmartAccountBatch,
 } from './core/batch-execution.js';
 
 function short(value) {
@@ -15,6 +15,16 @@ function short(value) {
 
 function selectorFor(data = '0x') {
   return /^0x[0-9a-fA-F]{8}/.test(data) ? data.slice(0, 10).toLowerCase() : '0x';
+}
+
+export function escapeBatchHtml(value = '') {
+  return String(value).replace(/[&<>'"]/g, (character) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;',
+  })[character]);
+}
+
+function duplicateCount(prepared) {
+  return Array.isArray(prepared?.duplicateCallIndexes) ? prepared.duplicateCallIndexes.length : 0;
 }
 
 export function buildBatchExecutionReview(prepared, calls = []) {
@@ -32,6 +42,7 @@ export function buildBatchExecutionReview(prepared, calls = []) {
       callCount: calls.length,
       totalValue: totalValue.toString(),
       totalCalldataBytes,
+      duplicateCalls: 0,
       gas: null,
       transactionTarget: null,
       ready: false,
@@ -43,6 +54,7 @@ export function buildBatchExecutionReview(prepared, calls = []) {
     callCount: prepared.calls.length,
     totalValue: prepared.totalValue.toString(),
     totalCalldataBytes: prepared.totalCalldataBytes,
+    duplicateCalls: duplicateCount(prepared),
     gas: prepared.simulation?.gas || null,
     transactionTarget: prepared.smartAccount,
     ready: prepared.simulation?.passed === true,
@@ -78,7 +90,7 @@ function createPanel() {
     <div class="split-panel">
       <div class="form-card">
         <p class="eyebrow">Guarded execution</p>
-        <p class="muted">The wallet blocks authority-contract targets, enforces per-call and aggregate calldata limits, simulates the complete executeBatch call, estimates gas and revalidates owner + authorization epoch before any transaction approval.</p>
+        <p class="muted">The wallet blocks authority-contract targets, enforces per-call and aggregate calldata limits, simulates the complete executeBatch call, estimates gas and revalidates owner + authorization epoch before any transaction approval. The exact simulated batch snapshot is what gets submitted.</p>
         <div class="button-row"><button id="batch-prepare" type="button">Review + simulate batch</button><button id="batch-submit" class="primary-action" type="button" disabled>Submit batch</button></div>
       </div>
       <aside class="review-card" aria-label="Batch transaction review">
@@ -87,9 +99,11 @@ function createPanel() {
           <div><dt>Calls</dt><dd id="batch-review-count">0 / ${MAX_BATCH_CALLS}</dd></div>
           <div><dt>Total native value</dt><dd id="batch-review-value">0 wei</dd></div>
           <div><dt>Total calldata</dt><dd id="batch-review-bytes">0 / ${MAX_BATCH_CALLDATA_BYTES} bytes</dd></div>
+          <div><dt>Identical repeats</dt><dd id="batch-review-duplicates">0</dd></div>
           <div><dt>Estimated gas</dt><dd id="batch-review-gas">—</dd></div>
           <div><dt>SmartAccount</dt><dd id="batch-review-account">—</dd></div>
         </dl>
+        <p class="muted">Call order is meaningful. Repeated identical calls are highlighted for review but are not automatically rejected because some contracts intentionally support repeated actions.</p>
       </aside>
     </div>
     <p id="batch-status" class="muted" role="status">Compose one or more calls, then simulate the complete atomic batch.</p>
@@ -142,9 +156,9 @@ export async function initBatchExecutionUi() {
           <div class="button-row"><button type="button" data-action="up" ${index === 0 ? 'disabled' : ''}>↑</button><button type="button" data-action="down" ${index === local.calls.length - 1 ? 'disabled' : ''}>↓</button><button type="button" data-action="remove" ${local.calls.length === 1 ? 'disabled' : ''}>Remove</button></div>
         </div>
         <div class="form-grid">
-          <label><span class="label">Target</span><input data-field="target" type="text" autocomplete="off" placeholder="0x…" value="${call.target}" /></label>
-          <label><span class="label">Native value (wei)</span><input data-field="value" type="text" inputmode="numeric" value="${call.value}" /></label>
-          <label class="full-width"><span class="label">Calldata</span><textarea data-field="data" rows="3" autocomplete="off">${call.data}</textarea></label>
+          <label><span class="label">Target</span><input data-field="target" type="text" autocomplete="off" placeholder="0x…" value="${escapeBatchHtml(call.target)}" /></label>
+          <label><span class="label">Native value (wei)</span><input data-field="value" type="text" inputmode="numeric" value="${escapeBatchHtml(call.value)}" /></label>
+          <label class="full-width"><span class="label">Calldata</span><textarea data-field="data" rows="3" autocomplete="off">${escapeBatchHtml(call.data)}</textarea></label>
         </div>`;
       for (const field of ['target', 'value', 'data']) {
         card.querySelector(`[data-field="${field}"]`).addEventListener('input', (event) => {
@@ -177,6 +191,7 @@ export async function initBatchExecutionUi() {
     $('#batch-review-count').textContent = `${review.callCount} / ${MAX_BATCH_CALLS}`;
     $('#batch-review-value').textContent = `${review.totalValue} wei`;
     $('#batch-review-bytes').textContent = `${review.totalCalldataBytes} / ${MAX_BATCH_CALLDATA_BYTES} bytes`;
+    $('#batch-review-duplicates').textContent = String(review.duplicateCalls);
     $('#batch-review-gas').textContent = review.gas || '—';
     $('#batch-review-account').textContent = short(review.transactionTarget);
     $('#batch-prepare').disabled = local.busy;
@@ -202,7 +217,8 @@ export async function initBatchExecutionUi() {
       if (!local.account.deployed || !local.account.controllerIsOwner) throw new Error('Connected wallet does not control a deployed canonical SmartAccount420');
       setStatus('Validating calls and simulating the complete atomic SmartAccount420 batch…');
       local.prepared = await prepareSmartAccountBatch(local.provider, controller, local.account, local.calls);
-      setStatus(`Batch simulation passed for ${local.prepared.calls.length} calls. Estimated gas ${local.prepared.simulation.gas}.`);
+      const repeats = duplicateCount(local.prepared);
+      setStatus(`Batch simulation passed for ${local.prepared.calls.length} calls. Estimated gas ${local.prepared.simulation.gas}.${repeats ? ` Review ${repeats} repeated identical call pair${repeats === 1 ? '' : 's'} before submission.` : ''}`);
     } catch (error) {
       local.prepared = null;
       setStatus(error.message);
@@ -213,12 +229,12 @@ export async function initBatchExecutionUi() {
 
   $('#batch-submit').addEventListener('click', async () => {
     if (local.busy || !local.prepared || local.config?.features?.batchExecution !== true) return;
-    if (globalThis.confirm && !globalThis.confirm(`Submit ${local.prepared.calls.length} atomic calls with total native value ${local.prepared.totalValue} wei?`)) return;
+    if (globalThis.confirm && !globalThis.confirm(`Submit the exact simulated snapshot: ${local.prepared.calls.length} atomic calls with total native value ${local.prepared.totalValue} wei?`)) return;
     local.busy = true; renderReview();
     try {
       const controller = local.prepared.controller;
-      setStatus('Re-simulating batch, revalidating owner and authorization epoch, then requesting transaction approval…');
-      const submitted = await sendSmartAccountBatch(local.provider, controller, local.account, local.calls);
+      setStatus('Revalidating owner and authorization epoch, re-simulating the exact prepared batch snapshot, then requesting transaction approval…');
+      const submitted = await sendPreparedSmartAccountBatch(local.provider, local.prepared, local.account);
       setStatus(`Batch submitted: ${submitted.txHash}. Waiting for confirmation…`);
       await confirmSmartAccountBatch(local.provider, submitted.txHash, controller, local.config.smartAccount);
       setStatus(`Batch confirmed atomically with ${submitted.calls.length} calls.`);

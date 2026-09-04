@@ -68,6 +68,9 @@ func (q QuorumCertificate) SigningDataRoot() Root {
 	)
 }
 
+// ConsensusBlock commits the execution payload and every consensus-owned execution
+// instruction. SystemCallBatchRoot is the canonical SHA-256 root produced by
+// consensus/systemcall.Batch.Root and must equal the paired execution header extraData.
 type ConsensusBlock struct {
 	Slot                 uint64
 	ProposerSeat         uint16
@@ -79,6 +82,7 @@ type ConsensusBlock struct {
 	Rotation             uint64
 	LatestQC             QuorumCertificate
 	RandomnessContext    Root
+	SystemCallBatchRoot  Root
 }
 
 func (b ConsensusBlock) HashTreeRoot() Root {
@@ -93,21 +97,16 @@ func (b ConsensusBlock) HashTreeRoot() Root {
 		ssz.Uint64Root(b.Rotation),
 		b.LatestQC.SigningDataRoot(),
 		ssz.Bytes32Root(b.RandomnessContext),
+		ssz.Bytes32Root(b.SystemCallBatchRoot),
 	)
 }
 
 func ParseRoot(s string) (Root, error) {
 	var r Root
-	if len(s) >= 2 && s[:2] == "0x" {
-		s = s[2:]
-	}
+	if len(s) >= 2 && s[:2] == "0x" { s = s[2:] }
 	b, err := hex.DecodeString(s)
-	if err != nil {
-		return r, err
-	}
-	if len(b) != 32 {
-		return r, fmt.Errorf("root must be 32 bytes, got %d", len(b))
-	}
+	if err != nil { return r, err }
+	if len(b) != 32 { return r, fmt.Errorf("root must be 32 bytes, got %d", len(b)) }
 	copy(r[:], b)
 	return r, nil
 }

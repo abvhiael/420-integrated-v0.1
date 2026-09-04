@@ -1,0 +1,43 @@
+{
+  "schema": "420-wallet-runtime-config-v1",
+  "network": {
+    "name": "420 Integrated",
+    "chainId": null,
+    "rpcUrl": null,
+    "explorerUrl": null
+  },
+  "smartAccount": {
+    "factoryAddress": "0x0000000000000000000000000000000000000420",
+    "recoveryAuthority": null,
+    "salt": "0x0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "trackedAssets": [],
+  "manifest": {
+    "url": null,
+    "verificationMode": "registry-or-signed-manifest"
+  },
+  "services": [],
+  "features": {
+    "readOnlyPortfolio": true,
+    "smartAccountDiscovery": true,
+    "smartAccountCreation": true,
+    "networkReads": true,
+    "injectedWalletConnection": true,
+    "smartAccountExecution": true,
+    "executionSimulationRequired": true,
+    "capabilityInspection": true,
+    "capabilityMutation": true,
+    "gasSponsorGrantManagement": true,
+    "sessionKeyAdministration": true,
+    "sessionGrantManagement": true,
+    "sessionExecutionPreflight": true,
+    "sessionExecutionUi": true,
+    "sessionExecution": true,
+    "entryPointUserOpSubmission": true,
+    "batchExecution": false,
+    "passkeys": false,
+    "sessionKeys": true,
+    "delegatedCapabilities": false,
+    "recoveryManagement": true
+  }
+}

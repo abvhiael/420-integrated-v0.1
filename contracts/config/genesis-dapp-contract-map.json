@@ -1,107 +1,34 @@
 {
-  "schema": "420-genesis-dapp-contract-map-v1",
-  "apps": [
-    {
-      "dapp": "420 Wallet",
-      "contracts": [],
-      "note": "client application; discovers services through ProtocolRegistry"
-    },
-    {
-      "dapp": "420 Explorer",
-      "contracts": [],
-      "note": "indexer/UI; reads chain and protocol registries"
-    },
-    {
-      "dapp": "420 Registry",
-      "contracts": [
-        "ProtocolRegistry.sol"
-      ]
-    },
-    {
-      "dapp": "420 Names",
-      "contracts": [
-        "Names420.sol"
-      ]
-    },
-    {
-      "dapp": "420 Identity",
-      "contracts": [
-        "Identity420.sol"
-      ]
-    },
-    {
-      "dapp": "420 Swap",
-      "contracts": [
-        "GenesisDEXFactory.sol",
-        "CanonicalMarketRegistry.sol",
-        "PermissionlessDEXFactory.sol",
-        "TWAPOracle.sol",
-        "PublicBatchAuction.sol",
-        "ApprovedQuoteAssetRegistry.sol",
-        "CanonicalSwapExecutor420.sol"
-      ]
-    },
-    {
-      "dapp": "420 Bridge",
-      "contracts": [
-        "VerifiedGateway420.sol",
-        "BridgeAssetRegistry.sol",
-        "CADCBridgeIntegration.sol",
-        "BridgeRouteRegistry.sol",
-        "BridgeRiskManager.sol",
-        "BridgeTransferRegistry.sol",
-        "GatewayRouter420.sol",
-        "BridgeAccountingRegistry.sol",
-        "CADCLayerZeroAdapter.sol",
-        "USDCCCTPAdapter.sol",
-        "ETHProofAdapter.sol",
-        "BTCLightClientAdapter.sol"
-      ]
-    },
-    {
-      "dapp": "420 Stake",
-      "contracts": [
-        "ValidatorRegistry.sol",
-        "RewardController.sol",
-        "CommunityValidatorReserve.sol",
-        "Stake420.sol"
-      ]
-    },
-    {
-      "dapp": "420 Governance",
-      "contracts": [
-        "GovernanceTimelock.sol",
-        "Governance420.sol"
-      ]
-    },
-    {
-      "dapp": "420 AI",
-      "contracts": [
-        "AIProviderRegistry.sol",
-        "AIModelRegistry.sol",
-        "AIJobManager.sol",
-        "AIJobEscrow.sol",
-        "AIReputationRegistry.sol"
-      ]
-    },
-    {
-      "dapp": "420 Attention",
-      "contracts": [
-        "AttentionTreasury.sol",
-        "CannaseurCampaignRegistry.sol"
-      ]
-    },
-    {
-      "dapp": "420 Status",
-      "contracts": [],
-      "note": "monitoring/indexer/UI; no state authority"
-    },
-    {
-      "dapp": "420 Faucet",
-      "contracts": [
-        "TestnetFaucet420.sol"
-      ],
-      "testnet_only": true
-    }
+  "schema":"420-genesis-dapp-contract-map-v1",
+  "apps":[
+    {"dapp":"420 Wallet","contracts":[],"note":"Genesis web client + Wallet Core profile. Client remains contract-free and non-canonical; account authority reuses SmartAccount420, SmartAccountFactory420 and CapabilityRegistry420 from 420 Smart Accounts, discovers ecosystem services through ProtocolRegistry, and exposes verified links to 420 Search, 420 AppStore, 420 AI, 420 Token and Developer Hub resources. Final production domain is configuration-driven and may be assigned after implementation."},
+    {"dapp":"420 Smart Accounts","contracts":["SmartAccount420.sol","SmartAccountFactory420.sol","SmartAccountScopes420.sol","ECDSA420.sol","CapabilityRegistry420.sol"]},
+    {"dapp":"420-IS","contracts":["I420IS.sol","InteropIds420.sol","InteropProviderRegistry420.sol","InteropNamespaceRegistry420.sol","InteropCheckpointRegistry420.sol","InteropRouter420.sol"]},
+    {"dapp":"420 Random","contracts":["RandomnessRegistry.sol","RandomnessIds420.sol","RandomnessRouteRegistry420.sol","RandomnessProfileRegistry420.sol","RandomnessRouter420.sol","RandomnessDraw420.sol","IRandomnessRouter420.sol","IRandomnessVerifier420.sol"]},
+    {"dapp":"420 Explorer","contracts":[]},{"dapp":"420 Search","contracts":[]},{"dapp":"420 Analytics","contracts":[]},{"dapp":"420 AppStore","contracts":[],"note":"contract-free curated catalogue; canonical identity/version/provenance come from 420Registry and chain state; listing and ranking are non-authoritative"},{"dapp":"420 Verify","contracts":[],"note":"contract-free reproducible source/build verification service; canonical deployed code comes from chain state; verification is evidence of source/bytecode correspondence, not audit or endorsement"},{"dapp":"420 Notifications","contracts":[],"note":"contract-free opt-in alert delivery layer; derives messages from canonical/registered sources, preserves provenance, and has no wallet execution or canonical-state authority"},
+    {"dapp":"420 Registry","contracts":["ProtocolRegistry.sol"]},{"dapp":"420 Names","contracts":["Names420.sol"]},{"dapp":"420 Identity","contracts":["Identity420.sol"]},
+    {"dapp":"420 Arbitration","contracts":["ArbitrationIds420.sol","ArbitrationPolicyRegistry420.sol","ArbitrationCaseRegistry420.sol","ArbitrationRulingRegistry420.sol"]},
+    {"dapp":"420 Trust","contracts":["TrustIssuerRegistry420.sol","TrustPolicyRegistry420.sol","TrustSignalRegistry420.sol","TrustAggregator420.sol"]},
+    {"dapp":"420 Commons","contracts":["CommonsAuthorization420.sol","CommonsPolicyRegistry420.sol","CommonsSpaceRegistry420.sol","CommonsMembershipRegistry420.sol","CommonsRoleRegistry420.sol","CommonsChannelRegistry420.sol","CommonsInviteRegistry420.sol","CommonsRouter420.sol"]},
+    {"dapp":"420 Pulse","contracts":["PulsePolicyRegistry420.sol","PulseProfileRegistry420.sol","PulseGraph420.sol","PulsePublicationRegistry420.sol","PulseInteractionRegistry420.sol","PulseTopicRegistry420.sol","PulseRouter420.sol"]},
+    {"dapp":"420 Messenger","contracts":["MessengerIds420.sol","MessengerAuthorization420.sol","MessengerEndpointRegistry420.sol","MessengerBlockRegistry420.sol","MessengerConversationRegistry420.sol","MessengerEnvelopeRegistry420.sol","MessengerReceiptRegistry420.sol","MessengerRouter420.sol"]},
+    {"dapp":"420 Vault","contracts":["VaultAuthorization420.sol","VaultPolicyRegistry420.sol","VaultRegistry420.sol","VaultAccounting420.sol","AssetVault420.sol","VaultFactory420.sol","VaultRouter420.sol"]},
+    {"dapp":"420 Treasury","contracts":["TreasuryIds420.sol","TreasuryAuthorization420.sol","TreasuryPolicyRegistry420.sol","TreasuryBudgetRegistry420.sol","TreasuryDisbursementRegistry420.sol","TreasuryRouter420.sol","DevelopmentCompensationIds420.sol","DevelopmentCompensationVault420.sol","ApplicationRevenueIds420.sol","ApplicationRevenueRegistry420.sol"],"note":"Application Revenue Policy V1 routes the authorized lead-developer share of eligible first-party net protocol revenue through DevelopmentCompensationVault420 to the immutable deployment-configured 420 Integrated Labs beneficiary. ApplicationRevenueRegistry420 separately records protocol-recognized creatorTreasury profiles for first-party and third-party applications without custody or split-execution authority; no block rewards, validator rewards, user principal, bridge backing, escrow or LP principal are eligible revenue."},
+    {"dapp":"420 Grants","contracts":["GrantIds420.sol","GrantAuthorization420.sol","GrantProgramRegistry420.sol","GrantApplicationRegistry420.sol","GrantAwardRegistry420.sol","GrantMilestoneRegistry420.sol","GrantRouter420.sol"]},
+    {"dapp":"420 Launchpad","contracts":["LaunchpadIds420.sol","LaunchpadAuthorization420.sol","LaunchpadProjectRegistry420.sol","LaunchpadSaleRegistry420.sol","LaunchpadAllocationRegistry420.sol","LaunchpadRouter420.sol"]},
+    {"dapp":"420 Token","contracts":["TokenIds420.sol","TokenTemplateRegistry420.sol","TokenFactory420.sol","ERC20Template420.sol","ERC721Template420.sol","ERC1155Template420.sol"],"note":"Frozen self-service ERC token templates. Exact 42 native 420 creation fee is atomically forwarded; deployments record creator/template/version/config provenance; factory retains no token custody or post-deployment mint authority."},
+    {"dapp":"420 Resource Protocol","contracts":["ResourceIds420.sol","ResourceAuthorization420.sol","ResourcePolicyRegistry420.sol","ResourceProviderRegistry420.sol","ResourceNodeRegistry420.sol","ResourceOfferRegistry420.sol","ResourceSessionRegistry420.sol","ResourceReceiptRegistry420.sol","ResourceRouter420.sol"],"products":["420Relay","420Store","420Cache","420Gateway"]},
+    {"dapp":"420 Market","contracts":["MarketPolicyRegistry420.sol","ListingRegistry420.sol","InventoryReservation420.sol","OrderRegistry420.sol"]},
+    {"dapp":"420 Rights","contracts":["RightsIds420.sol","RightsAuthorization420.sol","RightsPolicyRegistry420.sol","RightsAssetRegistry420.sol","RightsClaimRegistry420.sol","RightsLicenseRegistry420.sol","RightsRouter420.sol"]},
+    {"dapp":"420 Swap","contracts":["GenesisDEXFactory.sol","CanonicalMarketRegistry.sol","PermissionlessDEXFactory.sol","TWAPOracle.sol","PublicBatchAuction.sol","ApprovedQuoteAssetRegistry.sol","CanonicalSwapExecutor420.sol"]},
+    {"dapp":"420 Pay","contracts":["PayIds420.sol","MerchantRegistry420.sol","InvoiceRegistry420.sol","PaymentRegistry420.sol","PaymentRouter420.sol","SettlementRouter420.sol","RefundManager420.sol","GasSponsor420.sol","AccountingCommitment420.sol","CanonicalSettlementAdapter420.sol","CanonicalSwapHealthAdapter420.sol"]},
+    {"dapp":"420 Oracle","contracts":["OracleProviderRegistry420.sol","OracleFeedRegistry420.sol","OracleRiskPolicy420.sol","OracleRouter420.sol","TWAPOracleSourceAdapter420.sol"]},
+    {"dapp":"420 Bridge","contracts":["VerifiedGateway420.sol","BridgeAssetRegistry.sol","CADCBridgeIntegration.sol","BridgeRouteRegistry.sol","BridgeRiskManager.sol","BridgeTransferRegistry.sol","GatewayRouter420.sol","BridgeAccountingRegistry.sol","CADCLayerZeroAdapter.sol","USDCCCTPAdapter.sol","ETHProofAdapter.sol","BTCLightClientAdapter.sol"]},
+    {"dapp":"420 Stake","contracts":["ValidatorRegistry.sol","RewardController.sol","CommunityValidatorReserve.sol","Stake420.sol"]},
+    {"dapp":"420 Civic","contracts":["GovernanceTimelock.sol","Governance420.sol","CivicIds420.sol","CivicConstitution420.sol","CivicProposalRegistry420.sol","ICivicElectorateSource420.sol","CivicElectorateRegistry420.sol","CivicVoting420.sol","CivicGovernor420.sol"]},
+    {"dapp":"420 AI","contracts":["AIProviderRegistry.sol","AIModelRegistry.sol","AIJobManager.sol","AIJobEscrow.sol","AIReputationRegistry.sol","AIIds420.sol","AIAuthorization420.sol","AIPolicyRegistry420.sol","AIModelVersionRegistry420.sol","AIModelDeploymentRegistry420.sol","AIRequestRegistry420.sol","AIResultRegistry420.sol","AIComputeAdapter420.sol","AIRouter420.sol"]},
+    {"dapp":"420 ComputeMarket","contracts":["ComputeIds420.sol","ComputeAuthorization420.sol","ComputePolicyRegistry420.sol","ComputeProviderRegistry420.sol","ComputeNodeRegistry420.sol","ComputeResourceRegistry420.sol","ComputeOfferRegistry420.sol","ComputeRequestRegistry420.sol","ComputeMatch420.sol","ComputeJobRegistry420.sol","ComputeReceiptRegistry420.sol","ComputeVerificationRouter420.sol","ComputeSettlement420.sol","ComputeDispute420.sol","ComputeRouter420.sol"]},
+    {"dapp":"420 Attention","contracts":["AttentionTreasury.sol","CannaseurCampaignRegistry.sol","AttentionIds420.sol","AttentionAuthorization420.sol","AttentionConsentRegistry420.sol","AttentionProofRegistry420.sol","AttentionRewardRegistry420.sol","AttentionRouter420.sol"],"products":["420 Cannaseur"]},
+    {"dapp":"420 Status","contracts":[]},{"dapp":"420 Faucet","contracts":["TestnetFaucet420.sol"],"testnet_only":true}
   ]
 }

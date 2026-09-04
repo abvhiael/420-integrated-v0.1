@@ -1,0 +1,38 @@
+{
+  "schema": "420rights-genesis-v1",
+  "status": "IMPLEMENTED_PENDING_EXACT_HEAD_QUALIFICATION",
+  "suite": "420 Rights",
+  "contracts": [
+    "RightsIds420.sol",
+    "RightsAuthorization420.sol",
+    "RightsPolicyRegistry420.sol",
+    "RightsAssetRegistry420.sol",
+    "RightsClaimRegistry420.sol",
+    "RightsLicenseRegistry420.sol",
+    "RightsRouter420.sol"
+  ],
+  "canonical_right_classes": ["COPYRIGHT","TRADEMARK","PATENT","PERSONALITY","GENETIC","DATA","MODEL","CONTRACTUAL"],
+  "genesis_invariants": [
+    "RIGHTS-INV-001: subject identity/provenance is canonical; metadata changes remain controller/capability scoped",
+    "RIGHTS-INV-002: a rights claim references an existing subject and active configured right class and commits nonzero jurisdiction/evidence",
+    "RIGHTS-INV-003: exact semantic claim replay is rejected while non-identical competing claims may coexist because 420Rights does not adjudicate legal ownership",
+    "RIGHTS-INV-004: claim supersession is explicit, links oldRightId to newRightId, and terminalizes the old claim",
+    "RIGHTS-INV-005: holder succession/transfer requires the current holder or an exact-right scoped live capability and commits succession evidence",
+    "RIGHTS-INV-006: expired or revoked delegated capabilities fail closed for rights administration",
+    "RIGHTS-INV-007: license IDs are canonical domain-separated hashes of right, licensee, scope, terms, validity, and revocability; arbitrary IDs/replay fail",
+    "RIGHTS-INV-008: a license cannot begin before its right or outlive a finite right and cannot be created against an ineffective right",
+    "RIGHTS-INV-009: right/license validity is inclusive at validFrom and validUntil and ineffective after validUntil",
+    "RIGHTS-INV-010: existing licenses survive holder succession unless independently expired, renounced, underlying claim superseded, or validly revoked",
+    "RIGHTS-INV-011: successor holders may administer inherited revocable licenses while former holders lose direct authority to issue new licenses",
+    "RIGHTS-INV-012: 420 Market may reference/list canonical license IDs but has no authority to create or mutate 420Rights state"
+  ],
+  "integrations": {
+    "capability_registry": "required",
+    "420_market_item_class": "ITEM_LICENSE",
+    "420_identity": "optional holder/profile reference",
+    "420_vault": "future royalty/escrow settlement profile",
+    "420_pay": "future invoice/payment settlement for licenses"
+  },
+  "new_frozen_predeploy_required": false,
+  "external_legal_adjudication": true
+}

@@ -1,122 +1,45 @@
 {
-  "schema": "420-system-contract-deployment-v1",
-  "version": 1,
+  "schema": "420-system-contract-deployment-v2",
+  "version": 2,
   "governance_timelock": "0x0000000000000000000000000000000000000429",
   "contracts": [
-    {
-      "name": "RewardController",
-      "address": "0x0000000000000000000000000000000000000420",
-      "deployment": "GENESIS_SYSTEM_ADDRESS"
-    },
-    {
-      "name": "AttentionTreasury",
-      "address": "0x0000000000000000000000000000000000000421",
-      "deployment": "GENESIS_SYSTEM_ADDRESS"
-    },
-    {
-      "name": "DevelopmentTreasury",
-      "address": "0x0000000000000000000000000000000000000422",
-      "deployment": "GENESIS_SYSTEM_ADDRESS"
-    },
-    {
-      "name": "ValidatorRegistry",
-      "address": "0x0000000000000000000000000000000000000423",
-      "deployment": "GENESIS_SYSTEM_ADDRESS"
-    },
-    {
-      "name": "ProtocolReserve",
-      "address": "0x0000000000000000000000000000000000000424",
-      "deployment": "GENESIS_SYSTEM_ADDRESS"
-    },
-    {
-      "name": "CommunityValidatorReserve",
-      "address": "0x0000000000000000000000000000000000000425",
-      "deployment": "GENESIS_SYSTEM_ADDRESS"
-    },
-    {
-      "name": "CommunityRewardReserve",
-      "address": "0x0000000000000000000000000000000000000426",
-      "deployment": "GENESIS_SYSTEM_ADDRESS"
-    },
-    {
-      "name": "FounderVestingRegistry",
-      "address": "0x0000000000000000000000000000000000000427",
-      "deployment": "GENESIS_SYSTEM_ADDRESS"
-    },
-    {
-      "name": "RandomnessRegistry",
-      "address": "0x0000000000000000000000000000000000000428",
-      "deployment": "GENESIS_SYSTEM_ADDRESS"
-    },
-    {
-      "name": "GovernanceTimelock",
-      "address": "0x0000000000000000000000000000000000000429",
-      "deployment": "GENESIS_SYSTEM_ADDRESS"
-    },
-    {
-      "name": "PublicDistributionVault",
-      "address": "0x000000000000000000000000000000000000042a",
-      "deployment": "GENESIS_SYSTEM_ADDRESS"
-    },
-    {
-      "name": "GenesisDEXFactory",
-      "address": "0x000000000000000000000000000000000000042b",
-      "deployment": "GENESIS_SYSTEM_ADDRESS"
-    },
-    {
-      "name": "PublicBatchAuction",
-      "address": "0x000000000000000000000000000000000000042c",
-      "deployment": "GENESIS_SYSTEM_ADDRESS"
-    },
-    {
-      "name": "TWAPOracle",
-      "address": "0x000000000000000000000000000000000000042d",
-      "deployment": "GENESIS_SYSTEM_ADDRESS"
-    },
-    {
-      "name": "ValidatorBootstrapReserve",
-      "address": "0x000000000000000000000000000000000000042e",
-      "deployment": "GENESIS_SYSTEM_ADDRESS"
-    },
-    {
-      "name": "AIProviderRegistry",
-      "address": "0x000000000000000000000000000000000000042f",
-      "deployment": "GENESIS_SYSTEM_ADDRESS"
-    },
-    {
-      "name": "AIModelRegistry",
-      "address": "0x0000000000000000000000000000000000000430",
-      "deployment": "GENESIS_SYSTEM_ADDRESS"
-    },
-    {
-      "name": "AIJobManager",
-      "address": "0x0000000000000000000000000000000000000431",
-      "deployment": "GENESIS_SYSTEM_ADDRESS"
-    },
-    {
-      "name": "AIJobEscrow",
-      "address": "0x0000000000000000000000000000000000000432",
-      "deployment": "GENESIS_SYSTEM_ADDRESS"
-    },
-    {
-      "name": "AIReputationRegistry",
-      "address": "0x0000000000000000000000000000000000000433",
-      "deployment": "GENESIS_SYSTEM_ADDRESS"
-    }
-  ],
-  "additional_step6_contracts": [
-    {
-      "name": "CannaseurCampaignRegistry",
-      "address": "TBD_WITHIN_RESERVED_RANGE_OR_GOVERNANCE_DEPLOYMENT",
-      "deployment": "POST_GENESIS_OR_ASSIGNMENT_DECISION"
-    }
+    {"name":"RewardController","address":"0x0000000000000000000000000000000000000420","deployment":"GENESIS_SYSTEM_ADDRESS"},
+    {"name":"AttentionTreasury","address":"0x0000000000000000000000000000000000000421","deployment":"GENESIS_SYSTEM_ADDRESS"},
+    {"name":"DevelopmentTreasury","address":"0x0000000000000000000000000000000000000422","deployment":"GENESIS_SYSTEM_ADDRESS"},
+    {"name":"ValidatorRegistry","address":"0x0000000000000000000000000000000000000423","deployment":"GENESIS_SYSTEM_ADDRESS"},
+    {"name":"ProtocolReserve","address":"0x0000000000000000000000000000000000000424","deployment":"GENESIS_SYSTEM_ADDRESS"},
+    {"name":"CommunityValidatorReserve","address":"0x0000000000000000000000000000000000000425","deployment":"GENESIS_SYSTEM_ADDRESS"},
+    {"name":"CommunityRewardReserve","address":"0x0000000000000000000000000000000000000426","deployment":"GENESIS_SYSTEM_ADDRESS"},
+    {"name":"FounderVestingRegistry","address":"0x0000000000000000000000000000000000000427","deployment":"GENESIS_SYSTEM_ADDRESS"},
+    {"name":"RandomnessRegistry","address":"0x0000000000000000000000000000000000000428","deployment":"GENESIS_SYSTEM_ADDRESS"},
+    {"name":"GovernanceTimelock","address":"0x0000000000000000000000000000000000000429","deployment":"GENESIS_SYSTEM_ADDRESS"},
+    {"name":"PublicDistributionVault","address":"0x000000000000000000000000000000000000042a","deployment":"GENESIS_SYSTEM_ADDRESS"},
+    {"name":"GenesisDEXFactory","address":"0x000000000000000000000000000000000000042b","deployment":"GENESIS_SYSTEM_ADDRESS"},
+    {"name":"PublicBatchAuction","address":"0x000000000000000000000000000000000000042c","deployment":"GENESIS_SYSTEM_ADDRESS"},
+    {"name":"TWAPOracle","address":"0x000000000000000000000000000000000000042d","deployment":"GENESIS_SYSTEM_ADDRESS"},
+    {"name":"ValidatorBootstrapReserve","address":"0x000000000000000000000000000000000000042e","deployment":"GENESIS_SYSTEM_ADDRESS"},
+    {"name":"AIProviderRegistry","address":"0x000000000000000000000000000000000000042f","deployment":"GENESIS_SYSTEM_ADDRESS"},
+    {"name":"AIModelRegistry","address":"0x0000000000000000000000000000000000000430","deployment":"GENESIS_SYSTEM_ADDRESS"},
+    {"name":"AIJobManager","address":"0x0000000000000000000000000000000000000431","deployment":"GENESIS_SYSTEM_ADDRESS"},
+    {"name":"AIJobEscrow","address":"0x0000000000000000000000000000000000000432","deployment":"GENESIS_SYSTEM_ADDRESS"},
+    {"name":"AIReputationRegistry","address":"0x0000000000000000000000000000000000000433","deployment":"GENESIS_SYSTEM_ADDRESS"},
+    {"name":"ProtocolRegistry","address":"0x0000000000000000000000000000000000000434","deployment":"GENESIS_SYSTEM_ADDRESS"},
+    {"name":"Names420","address":"0x0000000000000000000000000000000000000435","deployment":"GENESIS_SYSTEM_ADDRESS"},
+    {"name":"Identity420","address":"0x0000000000000000000000000000000000000436","deployment":"GENESIS_SYSTEM_ADDRESS"},
+    {"name":"Governance420","address":"0x0000000000000000000000000000000000000437","deployment":"GENESIS_SYSTEM_ADDRESS"},
+    {"name":"VerifiedGateway420","address":"0x0000000000000000000000000000000000000438","deployment":"GENESIS_SYSTEM_ADDRESS"},
+    {"name":"ApprovedQuoteAssetRegistry","address":"0x0000000000000000000000000000000000000439","deployment":"GENESIS_SYSTEM_ADDRESS"},
+    {"name":"Stake420","address":"0x000000000000000000000000000000000000043a","deployment":"GENESIS_SYSTEM_ADDRESS"},
+    {"name":"CannaseurCampaignRegistry","address":"0x000000000000000000000000000000000000043b","deployment":"GENESIS_SYSTEM_ADDRESS"},
+    {"name":"ConsensusSystemCall420","address":"0x000000000000000000000000000000000000043c","deployment":"GENESIS_SYSTEM_ADDRESS"}
   ],
   "notes": [
-    "Code at reserved system addresses requires genesis code allocation or deterministic state-transition deployment.",
-    "Do not deploy these with CREATE and assume the resulting addresses equal the reserved addresses.",
-    "Step 6.1 must define the exact genesis code-placement/deployment mechanism and storage initialization roots."
+    "Code at 0x0420-0x043c is placed directly in genesis alloc from pinned runtime artifacts.",
+    "Constructor and post-init effects are materialized through contracts/config/predeploy/storage-init.json.",
+    "ValidatorRegistry and RewardController are bound to ConsensusSystemCall420 at 0x043c before the first non-genesis consensus write.",
+    "ConsensusSystemCall420 is invoked only through the patched node420 native EVM system-call path from go-ethereum params.SystemAddress."
   ],
   "genesis_dapps": "contracts/config/genesis-dapp-contract-map.json",
   "extended_candidate_addresses": "config/extended-system-addresses.json",
-  "readiness_note": "All genesis protocol dApps now have contract sources or are explicitly client/indexer-only. Reserved genesis bytecode/storage placement remains the deployment gate."
+  "readiness_note": "Genesis system-contract identity is frozen through 0x043c; bytecode/storage roots and patched node420 tree hash remain release-artifact gates."
 }

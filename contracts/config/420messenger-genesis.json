@@ -1,0 +1,19 @@
+{
+  "schema":"420-messenger-genesis-v1",
+  "version":1,
+  "privacy_boundary":"Plaintext, ciphertext blobs, attachments, media, voice/video payloads, private keys and message decryption keys are never canonical chain state.",
+  "invariants":[
+    "MSG-INV-001 endpoint updates require the wallet/account itself or an exact Messenger capability",
+    "MSG-INV-002 endpoint records contain only cryptographic and transport commitments, never plaintext or private key material",
+    "MSG-INV-003 conversations require active endpoints and explicit peer acceptance before becoming active",
+    "MSG-INV-004 either participant may close a conversation and closed conversations never reopen",
+    "MSG-INV-005 a unilateral block prevents new conversation establishment and subsequent envelope commits in either direction",
+    "MSG-INV-006 message commits are sender-authorized, conversation-bound and strictly monotonically sequenced per sender",
+    "MSG-INV-007 canonical message IDs bind conversation, sender, sequence and encrypted-envelope commitment to prevent replay ambiguity",
+    "MSG-INV-008 receipts may only be recorded by the opposite conversation participant or their exact delegated capability",
+    "MSG-INV-009 read acknowledgement implies delivery acknowledgement",
+    "MSG-INV-010 420Messenger grants no custody, token-transfer, governance, bridge, validator or unrestricted smart-account authority",
+    "MSG-INV-011 420Commons remains authoritative for community spaces/channels; Messenger is the private wallet-to-wallet layer",
+    "MSG-INV-012 off-chain transport/storage may use 420ResourceProtocol but no resource provider becomes message-content authority"
+  ]
+}

@@ -1,0 +1,26 @@
+.apps-heading { margin-bottom: 18px; }
+.apps-controls { display: grid; grid-template-columns: minmax(220px, 1fr) auto; gap: 18px; align-items: center; margin-top: 0; }
+.apps-controls input { min-width: 0; }
+.apps-filters { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+.app-filter { padding: 8px 11px; background: transparent; color: #cbd5ce; border-color: #334039; font-size: .78rem; }
+.app-filter.active { background: rgba(184,255,79,.12); color: var(--accent); border-color: #59743d; }
+.compact-heading { margin: 24px 0 12px; }
+.compact-heading h3 { margin: 0; }
+.featured-app-grid, .app-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.app-card { min-height: 176px; display: flex; flex-direction: column; gap: 14px; padding: 18px; border: 1px solid #303a33; border-radius: 16px; background: linear-gradient(145deg,#151c17,#101511); color: inherit; text-decoration: none; transition: transform .15s ease,border-color .15s ease; }
+.app-card:hover { transform: translateY(-2px); border-color: #62766a; }
+.featured-app-grid .app-card { min-height: 205px; border-color: #3b513e; background: linear-gradient(145deg,rgba(31,47,34,.96),rgba(14,20,16,.96)); }
+.app-card.unavailable { opacity: .48; cursor: not-allowed; }
+.app-card-top, .app-card-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.app-card-top { justify-content: flex-start; }
+.app-mark { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; background: rgba(184,255,79,.11); color: var(--accent); border: 1px solid #41543f; font-weight: 900; }
+.app-identity { display: grid; gap: 4px; }
+.app-category { color: var(--muted); font-size: .72rem; text-transform: uppercase; letter-spacing: .1em; }
+.app-description { color: #bac6be; line-height: 1.5; flex: 1; margin: 0; }
+.verification-badge { font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; }
+.verification-badge.verified { color: var(--accent); }
+.verification-badge.unavailable { color: var(--muted); }
+.app-open-label { font-size: .78rem; color: #e7eee9; }
+.apps-verification-note { margin-top: 18px; display: grid; gap: 4px; padding: 16px 18px; border: 1px solid #2e4934; border-radius: 14px; background: #101c14; }
+.apps-verification-note span { color: var(--muted); line-height: 1.45; font-size: .84rem; }
+@media (max-width: 900px) { .apps-controls { grid-template-columns: 1fr; } .apps-filters { justify-content: flex-start; } }

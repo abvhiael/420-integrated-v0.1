@@ -1,0 +1,91 @@
+{
+  "schema": "420-appstore-genesis-v1",
+  "name": "420AppStore",
+  "class": "GENESIS_USER_APP",
+  "contractsRequired": false,
+  "canonicalStateAuthority": false,
+  "serviceId": "420/service/appstore/v1",
+  "purpose": "Discover, evaluate and launch registered 420 Integrated applications through a curated but non-authoritative catalogue grounded in canonical Registry and chain provenance.",
+  "canonicalSources": {
+    "registry": "420Registry / ProtocolRegistry",
+    "search": "420Search public discovery projection",
+    "explorer": "420Explorer chain and contract verification projection",
+    "identity": "420 Identity public publisher records only",
+    "trust": "420 Trust public signals/policies only",
+    "chain": ["runtime bytecode", "transactions", "receipts", "logs"],
+    "appProtocols": "application/service manifests and public protocol records discovered through 420Registry"
+  },
+  "catalogue": {
+    "databaseIsNonCanonical": true,
+    "rebuildableFromCanonicalSources": true,
+    "canonicalIdentifiersPreserved": true,
+    "serviceAndVersionProvenanceRequired": true,
+    "publisherProvenanceRequiredWhenAvailable": true,
+    "chainIdAndNetworkRequired": true,
+    "contractReferencesTraceable": true,
+    "deprecationAndSecurityWarningsSupported": true,
+    "alternativeClientsAndCataloguesAllowed": true
+  },
+  "listingMetadata": {
+    "categoriesAreNonCanonical": true,
+    "rankingIsNonCanonical": true,
+    "featuredPlacementIsNonCanonical": true,
+    "ratingsAndReviewsAreNonCanonical": true,
+    "screenshotsAndDescriptionsAreNonCanonical": true,
+    "sponsoredPlacementMustBeExplicitlyLabeled": true,
+    "curationCannotRewriteCanonicalFields": true,
+    "listingDoesNotConstituteEndorsement": true
+  },
+  "securityPresentation": {
+    "showPublisherIdentityWhenAvailable": true,
+    "showRegisteredServiceAndVersion": true,
+    "showContractAndVerificationReferences": true,
+    "showRequestedWalletPermissions": true,
+    "showCapabilityScopesAndHighRiskActions": true,
+    "showAuditOrSecurityEvidenceWhenPublished": true,
+    "showDeprecationAndMaliciousWarnings": true,
+    "warningsMustPreserveSourceProvenance": true
+  },
+  "walletIntegration": {
+    "openInWalletSupported": true,
+    "deepLinksMayCarryAppAndNetworkIdentity": true,
+    "appStoreCannotSignTransactions": true,
+    "appStoreCannotGrantCapabilities": true,
+    "appStoreCannotBypassWalletConfirmation": true,
+    "walletRemainsAuthorizationBoundary": true
+  },
+  "privacy": {
+    "privateMessengerContentIndexed": false,
+    "privateCommonsContentIndexed": false,
+    "encryptedResourcePayloadsIndexed": false,
+    "privateIdentityFieldsIndexed": false,
+    "rawAttentionTelemetryIndexed": false,
+    "installationHistoryPublicByDefault": false
+  },
+  "requiredViews": [
+    "browse/categories",
+    "search",
+    "application detail",
+    "publisher/provenance",
+    "contracts and versions",
+    "permissions and capability scopes",
+    "security/audit/verification evidence",
+    "deprecation/security warnings",
+    "open in 420Wallet"
+  ],
+  "invariants": [
+    "APP-INV-001: 420AppStore owns no canonical protocol state and requires no AppStore-specific Genesis contract.",
+    "APP-INV-002: Listing, delisting, featuring, ranking or reviewing an application cannot create, revoke or rewrite canonical 420Registry registration or chain state.",
+    "APP-INV-003: Every listed canonical service/application preserves its Registry service identity, version and implementation provenance rather than replacing those fields with catalogue authority.",
+    "APP-INV-004: Categories, rankings, featured placement, reviews, ratings, descriptions and screenshots are non-canonical presentation metadata.",
+    "APP-INV-005: Sponsored placement is explicitly labeled and cannot alter canonical publisher, ownership, contract, version, rights, payment, trust or protocol fields.",
+    "APP-INV-006: A listing is discovery/curation, not protocol endorsement, investment approval, audit certification or proof of safety.",
+    "APP-INV-007: 420AppStore displays requested wallet permissions, capability scopes and high-risk actions before handoff where such metadata is available, but cannot itself grant capabilities or sign transactions.",
+    "APP-INV-008: Wallet authorization and transaction confirmation remain controlled by 420Wallet/Smart Accounts; AppStore links and launch actions cannot bypass those boundaries.",
+    "APP-INV-009: Published audit, source-verification, trust, deprecation and security-warning evidence remains traceable to its source and is not silently rewritten by the catalogue.",
+    "APP-INV-010: Private or encrypted Messenger, Commons and Resource payloads, private Identity fields and raw Attention telemetry are excluded from AppStore indexing.",
+    "APP-INV-011: Installation or launch history is not public by default and catalogue operators gain no custody, account-execution, governance, validator, bridge or token-transfer authority.",
+    "APP-INV-012: AppStore failure, delisting or censorship cannot block direct Wallet, Registry, Explorer, RPC or contract interaction with an otherwise reachable application.",
+    "APP-INV-013: Alternative AppStore clients and catalogues may coexist while deriving canonical identity and version truth from 420Registry and chain state."
+  ]
+}

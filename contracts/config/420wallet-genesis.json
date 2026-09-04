@@ -1,0 +1,91 @@
+{
+  "schema": "420-wallet-genesis-v1",
+  "serviceId": "420/service/wallet/v1",
+  "name": "420 Wallet",
+  "class": "GENESIS_USER_APP",
+  "contractsRequired": false,
+  "canonicalStateAuthority": false,
+  "walletCore": {
+    "accountImplementation": "SmartAccount420.sol",
+    "accountFactory": "SmartAccountFactory420.sol",
+    "scopeLibrary": "SmartAccountScopes420.sol",
+    "signatureLibrary": "ECDSA420.sol",
+    "capabilityRegistry": "CapabilityRegistry420.sol",
+    "protocolDiscovery": "420Registry / ProtocolRegistry",
+    "names": "Names420.sol",
+    "identity": "Identity420.sol",
+    "reusesGenesisSmartAccounts": true,
+    "createsIndependentWalletAuthority": false,
+    "accountStateIsPortableAcrossClients": true,
+    "capabilityStateIsPortableAcrossClients": true,
+    "recoveryStateIsPortableAcrossClients": true,
+    "sessionStateIsBoundToCanonicalAccountPolicy": true
+  },
+  "webClient": {
+    "includedAtGenesis": true,
+    "finalProductionDomainRequiredForBuild": false,
+    "canonicalDomainMayBeAssignedLater": true,
+    "configurationMustNotHardCodeFinalDomain": true,
+    "httpsRequiredForProduction": true,
+    "passkeyProductionRelyingPartyBoundAfterCanonicalDomainAssignment": true,
+    "mayUseLocalhostOrStagingBeforeProductionDomain": true
+  },
+  "ecosystemNavigation": {
+    "usesRegistryOrSignedManifest": true,
+    "hardCodedUnverifiedServiceUrlsForbidden": true,
+    "coreDestinations": [
+      "420 Search",
+      "420 AppStore",
+      "420 AI",
+      "420 Token",
+      "420 Explorer",
+      "420 Swap",
+      "420 Bridge",
+      "420 Stake",
+      "420 Governance",
+      "Developer Hub"
+    ],
+    "developerResources": [
+      "Developer Hub",
+      "User Guides",
+      "Developer Guides",
+      "Protocol Specifications",
+      "White Papers",
+      "SDK and API Documentation",
+      "RPC and Network Configuration",
+      "Contract Addresses and ABIs",
+      "Testnet Faucet",
+      "Source Repositories",
+      "Security and Audit Documentation"
+    ]
+  },
+  "authorizationBoundary": {
+    "webUiMayRequestAuthorization": true,
+    "webUiMayConstructTransactions": true,
+    "webUiMayDisplaySimulation": true,
+    "webUiMayNotPossessServerSideUserSigningKeys": true,
+    "webUiMayNotAutoSign": true,
+    "webUiMayNotGrantCapabilitiesWithoutAccountAuthorization": true,
+    "webUiMayNotBypassSmartAccountPolicy": true,
+    "webUiMayNotOverrideCapabilityRegistry": true,
+    "webUiMayNotBecomeCanonicalIdentityOrOwnershipAuthority": true
+  },
+  "clientRoadmap": {
+    "web": "GENESIS",
+    "browserExtension": "GENESIS_PLUS",
+    "mobile": "POST_GENESIS",
+    "desktop": "POST_GENESIS_POWER_USER"
+  },
+  "invariants": [
+    "WALLET-INV-001: 420 Wallet Web is a replaceable client and never becomes consensus or canonical protocol state authority.",
+    "WALLET-INV-002: Wallet Core reuses the canonical Genesis SmartAccount420, SmartAccountFactory420 and CapabilityRegistry420 primitives rather than introducing parallel account authority.",
+    "WALLET-INV-003: Account ownership, recovery, capabilities, session policy and revocation remain authoritative at the smart-account/protocol layer and are portable across wallet clients.",
+    "WALLET-INV-004: The web client never stores or controls user signing keys on a 420-operated server and never auto-signs transactions.",
+    "WALLET-INV-005: Every capability grant, spend approval, high-risk action and transaction execution must pass the canonical wallet/smart-account authorization boundary.",
+    "WALLET-INV-006: 420 Search, 420 AppStore, 420 AI, 420 Token and other ecosystem destinations are discovered from canonical Registry data or a signed/versioned ecosystem manifest, not trusted solely because of a URL.",
+    "WALLET-INV-007: The final production web-wallet domain may be assigned after implementation; production passkey/WebAuthn relying-party configuration is bound only after that canonical domain is selected.",
+    "WALLET-INV-008: Developer Hub, guides, specifications, white papers, SDK/API documentation, contract references and security documentation are first-class wallet navigation targets.",
+    "WALLET-INV-009: A compromised, deprecated or revoked ecosystem destination can be marked unsafe without changing the underlying wallet account or protocol authority.",
+    "WALLET-INV-010: Browser extension, mobile and desktop clients may later reuse the same Wallet Core account, capability, recovery and session semantics without creating separate identities."
+  ]
+}

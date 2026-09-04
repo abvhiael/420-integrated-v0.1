@@ -1,90 +1,42 @@
 {
-  "schema": "420-genesis-application-decision-v1",
+  "schema": "420-genesis-application-decision-v8",
   "decision_id": "GENESIS_APPLICATION_DECISION_1",
   "status": "FROZEN",
   "apps": [
-    {
-      "name": "420 Wallet",
-      "class": "GENESIS_USER_APP",
-      "contracts_required": false,
-      "purpose": "Native wallet, accounts, assets, validator controls, dApp access, notifications"
-    },
-    {
-      "name": "420 Explorer",
-      "class": "GENESIS_USER_APP",
-      "contracts_required": false,
-      "purpose": "Blocks, transactions, contracts, validators, assets, governance, finality"
-    },
-    {
-      "name": "420 Registry",
-      "class": "GENESIS_PROTOCOL_AND_USER_APP",
-      "contracts_required": true,
-      "purpose": "Canonical registry of contracts, tokens, applications and protocol services"
-    },
-    {
-      "name": "420 Names",
-      "class": "GENESIS_PROTOCOL_AND_USER_APP",
-      "contracts_required": true,
-      "purpose": "Human-readable names such as crowley.420 layered over canonical identities"
-    },
-    {
-      "name": "420 Identity",
-      "class": "GENESIS_PROTOCOL_AND_USER_APP",
-      "contracts_required": true,
-      "purpose": "Optional decentralized identity, profiles, credentials and reputation"
-    },
-    {
-      "name": "420 Swap",
-      "class": "GENESIS_PROTOCOL_AND_USER_APP",
-      "contracts_required": true,
-      "purpose": "Canonical native DEX and 420/approved-stable market"
-    },
-    {
-      "name": "420 Bridge",
-      "class": "GENESIS_PROTOCOL_AND_USER_APP",
-      "contracts_required": true,
-      "purpose": "Restricted verified cross-chain gateway"
-    },
-    {
-      "name": "420 Stake",
-      "class": "GENESIS_PROTOCOL_AND_USER_APP",
-      "contracts_required": true,
-      "purpose": "Validator registration, 42,000 420 bond, credit, readiness, lifecycle, rewards and withdrawals; no stake-weighted delegation at genesis"
-    },
-    {
-      "name": "420 Governance",
-      "class": "GENESIS_PROTOCOL_AND_USER_APP",
-      "contracts_required": true,
-      "purpose": "Community House, Validator House, proposals, voting, treasury and timelock"
-    },
-    {
-      "name": "420 AI",
-      "class": "GENESIS_PROTOCOL_AND_USER_APP",
-      "contracts_required": true,
-      "purpose": "AI providers, models, jobs, escrow, payments and reputation; no consensus privilege"
-    },
-    {
-      "name": "420 Attention",
-      "class": "GENESIS_PROTOCOL_AND_USER_APP",
-      "contracts_required": true,
-      "purpose": "Opt-in Cannaseur campaigns and attention rewards"
-    },
-    {
-      "name": "420 Status",
-      "class": "GENESIS_USER_APP",
-      "contracts_required": false,
-      "purpose": "Network, finality, validator, RPC, bridge, swap and AI service health"
-    },
-    {
-      "name": "420 Faucet",
-      "class": "TESTNET_ONLY",
-      "contracts_required": true,
-      "purpose": "Testnet distribution and developer onboarding; no monetary value"
-    }
+    {"name":"420 Wallet","class":"GENESIS_USER_APP","contracts_required":false,"purpose":"Genesis web wallet and Wallet Core client binding for canonical Smart Accounts, capabilities, recovery, assets, validator controls, dApp access, verified ecosystem navigation and developer resources"},
+    {"name":"420 Explorer","class":"GENESIS_USER_APP","contracts_required":false,"purpose":"Blocks, transactions, contracts, validators, assets, governance, finality"},
+    {"name":"420 Search","class":"GENESIS_USER_APP","contracts_required":false,"purpose":"Unified discovery across canonical chain state, registered services, public ecosystem content and protocol-owned records"},
+    {"name":"420 Analytics","class":"GENESIS_USER_APP","contracts_required":false,"purpose":"Rebuildable analytics, metrics, trends and dashboards derived from canonical public chain and protocol state"},
+    {"name":"420 AppStore","class":"GENESIS_USER_APP","contracts_required":false,"purpose":"Curated but non-authoritative catalogue for discovering, evaluating and launching registered 420 applications with provenance, permissions and security context"},
+    {"name":"420 Verify","class":"GENESIS_USER_APP","contracts_required":false,"purpose":"Reproducible deployed-contract source verification with compiler, bytecode, proxy and provenance evidence; verification is not an audit or endorsement"},
+    {"name":"420 Notifications","class":"GENESIS_USER_APP","contracts_required":false,"purpose":"Opt-in alerts for wallet, protocol, governance, payment, bridge, staking, security, application and network events with source provenance and no execution authority"},
+    {"name":"420 Registry","class":"GENESIS_PROTOCOL_AND_USER_APP","contracts_required":true,"purpose":"Canonical registry of contracts, tokens, applications and protocol services"},
+    {"name":"420 Names","class":"GENESIS_PROTOCOL_AND_USER_APP","contracts_required":true,"purpose":"Human-readable names such as crowley.420 layered over canonical identities"},
+    {"name":"420 Identity","class":"GENESIS_PROTOCOL_AND_USER_APP","contracts_required":true,"purpose":"Optional decentralized identity, profiles, credentials and reputation"},
+    {"name":"420 Arbitration","class":"GENESIS_PROTOCOL_AND_USER_APP","contracts_required":true,"purpose":"Domain-scoped dispute cases, evidence commitments, rulings, bounded appeals and finality without blanket custody or remedy authority"},
+    {"name":"420 Swap","class":"GENESIS_PROTOCOL_AND_USER_APP","contracts_required":true,"purpose":"Canonical native DEX and 420/approved-stable market"},
+    {"name":"420 Bridge","class":"GENESIS_PROTOCOL_AND_USER_APP","contracts_required":true,"purpose":"Restricted verified cross-chain gateway"},
+    {"name":"420 Stake","class":"GENESIS_PROTOCOL_AND_USER_APP","contracts_required":true,"purpose":"Validator registration, 42,000 420 bond, credit, readiness, lifecycle, rewards and withdrawals; no stake-weighted delegation at genesis"},
+    {"name":"420 Governance","class":"GENESIS_PROTOCOL_AND_USER_APP","contracts_required":true,"purpose":"Community House, Validator House, proposals, voting, treasury and timelock"},
+    {"name":"420 AI","class":"GENESIS_PROTOCOL_AND_USER_APP","contracts_required":true,"purpose":"AI providers, models, jobs, escrow, payments and reputation; no consensus privilege"},
+    {"name":"420 Attention","class":"GENESIS_PROTOCOL_AND_USER_APP","contracts_required":true,"purpose":"Opt-in Cannaseur campaigns and attention rewards"},
+    {"name":"420 Token","class":"GENESIS_PROTOCOL_AND_USER_APP","contracts_required":true,"purpose":"Self-service deployment of frozen qualified ERC-20, ERC-721 and ERC-1155 templates for an exact 42 native 420 creation fee"},
+    {"name":"420 Status","class":"GENESIS_USER_APP","contracts_required":false,"purpose":"Network, finality, validator, RPC, bridge, swap and AI service health"},
+    {"name":"420 Faucet","class":"TESTNET_ONLY","contracts_required":true,"purpose":"Testnet distribution and developer onboarding; no monetary value"}
   ],
   "rules": [
     "Front ends are not consensus-critical and may be upgraded independently.",
     "420 Registry is the canonical discovery backbone.",
+    "420 Wallet Web is the Genesis management client for Wallet Core; Wallet Core reuses 420 Smart Accounts and Capability Registry as the authoritative ownership, recovery, session, capability, revocation and execution layer and creates no parallel wallet authority.",
+    "420 Wallet must expose verified Registry/signed-manifest navigation to core ecosystem services including 420 Search, 420 AppStore, 420 AI and 420 Token plus a Developer Hub with user guides, developer guides, protocol specifications, white papers, SDK/API documentation, network/RPC configuration, contract references, source repositories and security documentation.",
+    "420 Wallet implementation does not require a final production domain; production URLs remain configuration-driven and WebAuthn/passkey relying-party binding is finalized only after the canonical production domain is selected.",
+    "420 Search is a replaceable discovery projection and never becomes authority for indexed records, ranking, ownership, identity, rights, listings, payments or protocol state.",
+    "420 Analytics is a replaceable derived-data projection; metrics, KPIs, charts, cohorts, rankings and forecasts never override canonical chain, accounting, identity, rights, governance or settlement state.",
+    "420 AppStore is a replaceable catalogue and curation layer; listing, delisting, featuring, ranking, reviews and sponsorship never create or revoke canonical Registry legitimacy or bypass Wallet authorization.",
+    "420 Verify is a replaceable reproducible-build verifier; a verified source match never means audited, safe, official, immutable or endorsed, and proxy implementations must be verified independently after upgrades.",
+    "420 Notifications is a replaceable opt-in delivery layer; alerts never become authority for underlying events, private delivery/watch data stays private by default, and notification actions cannot bypass Wallet or origin-application authorization.",
+    "420 Arbitration records dispute process and final rulings but cannot directly execute custody, token transfer, slashing, bridge reversal, rights mutation or governance actions.",
+    "420 Token accepts only frozen qualified template IDs, charges exactly 42 native 420 per successful deployment, records provenance, and retains no post-deployment token custody or mint authority.",
     "420 Names never replaces canonical protocol/service identity.",
     "420 Identity is optional and pseudonymous.",
     "420 Stake does not include stake-weighted delegation at genesis.",

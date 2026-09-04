@@ -30,7 +30,10 @@ requireStrings('ui-v1.js', ['recovery-ui.js','apps-page.js','buildSendExecution'
 requireStrings('index.html', ['./session-execution-ui.js','./batch-execution-ui.js'], 'Wallet execution UI script binding');
 requireStrings('recovery-ui.js', ['Recovery management','Two-day safety delay','recovery-countdown','recovery-set-authority','recovery-propose','recovery-cancel','recovery-finalize','readDeployedSmartAccountState','sendFinalizeRecovery','confirmFinalizeRecovery'], 'recovery UI/timelock control');
 requireStrings('session-execution-ui.js', ['Session execution','Prepare + sign + simulate','Submit to EntryPoint420','prepareSessionUserOperationTransport','sendPreparedEntryPointUserOperation','confirmEntryPointUserOperation','sessionExecution','entryPointUserOpSubmission'], 'controlled session execution UI');
-requireStrings('batch-execution-ui.js', ['Batch transaction','Compose calls','Review + simulate batch','Submit batch','moveBatchCall','prepareSmartAccountBatch','sendSmartAccountBatch','confirmSmartAccountBatch','batchExecutionUi','batchExecution'], 'guarded batch execution UI');
+requireStrings('batch-execution-ui.js', [
+  'Batch transaction','Compose calls','Review + simulate batch','Submit batch','moveBatchCall','escapeBatchHtml','prepareSmartAccountBatch','sendPreparedSmartAccountBatch','confirmSmartAccountBatch',
+  'exact simulated batch snapshot','Identical repeats','batchExecutionUi','batchExecution'
+], 'guarded batch execution UI');
 
 const appsPage = requireStrings('apps-page.js', ['resolveServices','Verified manifest','Awaiting manifest','noopener noreferrer','apps-search','app-filter','Not published'], 'verified 420 Apps page guard');
 if (appsPage.includes('javascript:')) errors.push('420 Apps page must not contain javascript service URLs');
@@ -44,9 +47,10 @@ requireStrings('core/recovery.js', ['RECOVERY_DELAY_SECONDS','pending recovery o
 requireStrings('core/recovery-management.js', ['67bdcc3f','7ee76082','0ba234d6','e2ccb305','eth_call','eth_estimateGas','eth_sendTransaction','recovery finalization did not advance authorization epoch'], 'guarded recovery management control');
 requireStrings('core/execution.js', ['eth_call','eth_estimateGas','eth_sendTransaction','owner changed after simulation','authorization epoch changed after simulation'], 'Smart Account execution guard');
 requireStrings('core/batch-execution.js', [
-  '34fcd5be','MAX_BATCH_CALLS','MAX_BATCH_CALLDATA_BYTES','wallet authority contract','aggregate batch native value','aggregate batch calldata',
-  'eth_call','eth_estimateGas','eth_sendTransaction','owner changed after batch simulation','authorization epoch changed after batch simulation'
-], 'guarded batch execution control');
+  '34fcd5be','MAX_BATCH_CALLS','MAX_BATCH_CALLDATA_BYTES','wallet authority contract','aggregate batch native value','aggregate batch calldata','duplicateCallIndexes',
+  'sendPreparedSmartAccountBatch','prepared batch calldata changed after simulation','prepared batch transaction envelope changed after simulation','prepared batch authorization epoch changed',
+  'eth_call','eth_estimateGas','eth_sendTransaction','owner changed after batch simulation','authorization epoch changed after batch simulation','reverted atomically; no batch call was committed'
+], 'guarded batch execution/hardening control');
 requireStrings('core/capabilities.js', ['0x0000000000000000000000000000000000000421','SESSION_EXECUTE_CAPABILITY_420','readActiveGrantId','readCapabilityAuthorization'], 'capability inspection guard');
 requireStrings('core/session-management.js', ['8d08b1a4','5ae7ab32','388c930c','d557e335','fdb3c749','authorizationEpoch','post-confirmation verification'], 'session administration guard');
 
@@ -74,7 +78,7 @@ if (config.features?.sessionExecutionPreflight !== true || config.features?.sess
 if (config.features?.sessionExecution !== true || config.features?.entryPointUserOpSubmission !== true) errors.push('qualified controlled session broadcast must be enabled');
 if (config.features?.delegatedCapabilities !== false) errors.push('general delegated capabilities must remain disabled beyond scoped session execution');
 if (config.features?.recoveryManagement !== true) errors.push('qualified recovery management UI must remain enabled');
-if (config.features?.batchExecutionUi !== true || config.features?.batchExecution !== false || config.features?.passkeys !== false) errors.push('batch review UI must be enabled while batch broadcast and passkeys remain disabled until hardening qualifies');
+if (config.features?.batchExecutionUi !== true || config.features?.batchExecution !== false || config.features?.passkeys !== false) errors.push('batch review UI must be enabled while batch broadcast and passkeys remain disabled until final hardening CI qualifies');
 if (config.smartAccount?.factoryAddress !== '0x0000000000000000000000000000000000000420') errors.push('wallet must use frozen canonical SmartAccountFactory420 address');
 
 if (errors.length) {
@@ -94,6 +98,7 @@ console.log(JSON.stringify({
   entryPointUserOpSubmission: true,
   guardedBatchExecutionCore: true,
   batchExecutionUiEnabled: true,
+  finalBatchHardeningQualified: true,
   batchExecutionEnabled: false,
   delegatedCapabilitiesEnabled: false,
   serverSideKeyCustody: false,

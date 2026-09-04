@@ -61,20 +61,25 @@ The gateway:
 
 The initial generic `webrtc://` protocol registration represents a future direct peer/gateway implementation; WHIP/WHEP are the concrete HTTP-negotiated WebRTC paths in this increment.
 
-## Persistent lease and crash recovery
+## Persistent leases and crash recovery
 
-`media/node/lease_file.go` adds a restart-safe lease implementation for a single host. Lease ownership and expiry are persisted atomically so a process crash does not immediately make an in-flight job executable by a second process.
+The file-backed lease store persists `jobId -> ownerId + expiry` records with atomic replacement and restart-safe ownership semantics. Active leases survive process restarts, expired leases may be reclaimed, stale owners cannot renew or delete a newer owner's lease, and corrupt persistent state fails closed rather than being silently reset.
 
-The lease backend:
-- persists `jobId -> ownerId + expiry` state with `0600` file permissions;
-- rejects acquisition while an unexpired lease exists, even after process restart;
-- allows takeover only after expiry;
-- requires exact owner identity for renew and release;
-- prevents a stale owner from renewing or deleting a lease after another node has recovered it;
-- treats corrupt persisted state as an infrastructure fault and fails closed rather than silently resetting ownership;
-- uses the existing `LeaseStore` abstraction, so multi-host deployments can replace the file store with a Redis/etcd/Consul or database compare-and-swap implementation without changing worker logic.
+Distributed implementations backed by Redis, etcd, Consul or a database must preserve the same compare-and-swap contract for acquire, renew and release.
 
-For distributed deployments the required semantic contract is atomic compare-and-swap on `(jobId, ownerId, expiry)`: acquire only when absent/expired, renew only when owner matches and lease is live, and release only when owner matches. The local file implementation is the crash-recovery reference model, not a claim of cross-host filesystem locking.
+## Health, telemetry and SLA evidence
+
+`media/node/telemetry` keeps operational detail off-chain while producing deterministic commitments for `MediaSLA420.report()`.
+
+The telemetry layer:
+- tracks secret-free health snapshots for chain connectivity, active/completed/failed jobs and lease-loss counts;
+- wraps media processors without exposing command lines, URLs, credentials, SDP, or raw media;
+- mirrors SLA timing/availability thresholds in a local evaluator;
+- emits a versioned fixed-width evidence record containing only IDs, output references, timestamps, availability basis points and pass/fail outcome;
+- hashes the canonical evidence record with SHA-256 into an opaque non-zero `bytes32` commitment accepted by `MediaSLA420`;
+- separates evidence generation from reporting authority through an `SLAReporter` interface so telemetry code never receives private keys.
+
+Detailed evidence remains an off-chain audit artifact. Only the outcome and evidence hash are intended for the Phase 1 SLA contract.
 
 ## Execution sequence
 
@@ -83,7 +88,7 @@ For distributed deployments the required semantic contract is atomic compare-and
 3. retain only `CREATED` jobs;
 4. filter by locally configured capability;
 5. reject expired work;
-6. acquire a renewable execution lease from the configured persistent/distributed backend;
+6. acquire an execution lease;
 7. submit operator acceptance through the signer boundary;
 8. re-read canonical chain state;
 9. verify bound operator identity;
@@ -91,11 +96,12 @@ For distributed deployments the required semantic contract is atomic compare-and
 11. mark the job running;
 12. resolve the opaque media input reference locally;
 13. select either a bounded media processor or live transport driver;
-14. for file/transcode work, execute FFmpeg or GStreamer under the bounded runtime context;
-15. for live work, validate and start a WHIP/WHEP/WebRTC/SRT/RTMP session without exposing credentials on-chain;
-16. renew the execution lease while work is active and fail closed if ownership is lost;
-17. commit completed media artifacts or live-session result references through the appropriate sink/control path;
-18. commit only opaque output references on-chain.
+14. execute the workload under the bounded runtime context;
+15. collect secret-free timing/availability telemetry;
+16. evaluate the applicable SLA policy and generate a deterministic evidence commitment;
+17. submit only the SLA outcome/evidence hash through an authorized reporter boundary;
+18. fail closed on lease loss, deadline expiry, invalid transport state, failed negotiation, processing failure or empty result references;
+19. commit only opaque output references on-chain.
 
 ## Node invariants
 
@@ -122,13 +128,17 @@ For distributed deployments the required semantic contract is atomic compare-and
 - `MEDIA-NODE-INV-021`: invalid live-session state transitions fail closed.
 - `MEDIA-NODE-INV-022`: WHIP/WHEP negotiation accepts only successful HTTP responses with non-empty SDP answers.
 - `MEDIA-NODE-INV-023`: SRT/RTMP endpoint strings are passed as direct argv elements and are never shell-expanded.
-- `MEDIA-NODE-INV-024`: persisted lease ownership survives process restart until expiry or explicit owner release.
-- `MEDIA-NODE-INV-025`: only the current lease owner may renew or release a persistent lease.
-- `MEDIA-NODE-INV-026`: an expired lease may be recovered exactly once by the next successful atomic acquisition.
-- `MEDIA-NODE-INV-027`: corrupt persistent lease state fails closed and is never silently treated as an empty lease set.
+- `MEDIA-NODE-INV-024`: active persistent leases survive process restart until released or expired.
+- `MEDIA-NODE-INV-025`: an expired lease may be reclaimed, but a stale owner can no longer renew it.
+- `MEDIA-NODE-INV-026`: a stale owner cannot delete a replacement owner's lease during release.
+- `MEDIA-NODE-INV-027`: corrupt persistent lease state fails closed and is never silently treated as an empty store.
+- `MEDIA-NODE-INV-028`: raw telemetry, media paths, transport credentials and SDP never enter SLA evidence commitments.
+- `MEDIA-NODE-INV-029`: identical canonical SLA evidence produces an identical non-zero evidence hash.
+- `MEDIA-NODE-INV-030`: invalid timestamps, availability values or unknown outcomes fail closed before evidence reporting.
+- `MEDIA-NODE-INV-031`: SLA telemetry code never directly owns or receives reporter signing keys.
 
 ## Next Phase 2 increments
 
-1. health, telemetry and SLA evidence generation.
-2. operator CLI/configuration and secure signer implementation.
-3. node integration tests against a local Anvil deployment of the 420Media contracts.
+1. operator CLI/configuration and secure signer implementation.
+2. node integration tests against a local Anvil deployment of the 420Media contracts.
+3. final Phase 2 hardening: lease-loss cancellation, runner error surfacing, health probes and failure-injection coverage.

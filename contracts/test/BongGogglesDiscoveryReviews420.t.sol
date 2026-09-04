@@ -94,7 +94,7 @@ contract BongGogglesDiscoveryReviews420Test {
         BongGogglesDiscoveryRegistry420.Verification memory v = discovery.verification(verificationId);
         require(v.propositionHash == keccak256("is-open"), "proposition bound");
         require(v.subjectVersion == 1, "version bound");
-        require(v.supports, "attestation retained");
+        require(v.supportsProposition, "attestation retained");
     }
 
     function testWithdrawClearsActiveReviewOnly() public {

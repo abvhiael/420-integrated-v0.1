@@ -41,6 +41,17 @@ library BongGogglesIds420 {
     bytes32 internal constant ACTION_TAG_APPROVE = keccak256("BG/ACTION/TAG_APPROVE/V1");
     bytes32 internal constant ACTION_TAG_REJECT = keccak256("BG/ACTION/TAG_REJECT/V1");
     bytes32 internal constant ACTION_TAG_REMOVE = keccak256("BG/ACTION/TAG_REMOVE/V1");
+
+    bytes32 internal constant ACTION_PAGE_CREATE = keccak256("BG/ACTION/PAGE_CREATE/V1");
+    bytes32 internal constant ACTION_PAGE_UPDATE = keccak256("BG/ACTION/PAGE_UPDATE/V1");
+    bytes32 internal constant ACTION_GROUP_CREATE = keccak256("BG/ACTION/GROUP_CREATE/V1");
+    bytes32 internal constant ACTION_GROUP_UPDATE = keccak256("BG/ACTION/GROUP_UPDATE/V1");
+    bytes32 internal constant ACTION_GROUP_JOIN = keccak256("BG/ACTION/GROUP_JOIN/V1");
+    bytes32 internal constant ACTION_GROUP_MEMBER_APPROVE = keccak256("BG/ACTION/GROUP_MEMBER_APPROVE/V1");
+    bytes32 internal constant ACTION_GROUP_MEMBER_REMOVE = keccak256("BG/ACTION/GROUP_MEMBER_REMOVE/V1");
+    bytes32 internal constant ACTION_EVENT_CREATE = keccak256("BG/ACTION/EVENT_CREATE/V1");
+    bytes32 internal constant ACTION_EVENT_UPDATE = keccak256("BG/ACTION/EVENT_UPDATE/V1");
+    bytes32 internal constant ACTION_EVENT_RSVP = keccak256("BG/ACTION/EVENT_RSVP/V1");
 }
 
 library BongGogglesTypes420 {
@@ -56,6 +67,13 @@ library BongGogglesTypes420 {
     enum ProvenanceType { NONE, REPOST, QUOTE_POST }
     enum TagTargetType { PROFILE, PAGE, COMMUNITY }
     enum TagState { NONE, PENDING, ACTIVE, REJECTED, REMOVED }
+    enum GroupPrivacy { PUBLIC, PRIVATE, HIDDEN }
+    enum GroupJoinPolicy { OPEN, APPROVAL_REQUIRED, INVITE_ONLY, CLOSED }
+    enum GroupMemberState { NONE, PENDING, ACTIVE, REMOVED }
+    enum GroupRole { NONE, MEMBER, MODERATOR, ADMIN, OWNER }
+    enum EventHostType { PROFILE, PAGE, GROUP }
+    enum EventVisibility { PUBLIC, GROUP_ONLY, INVITE_ONLY }
+    enum RSVPState { NONE, INTERESTED, GOING, DECLINED }
 
     uint32 internal constant MUTE_FEED = 1 << 0;
     uint32 internal constant MUTE_STORIES = 1 << 1;

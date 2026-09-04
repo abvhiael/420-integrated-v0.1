@@ -131,7 +131,7 @@ async function simulateSignedUserOperation(provider, signer, entryPoint, userOpe
   return { transaction, gas: gas.toLowerCase(), simulationPassed: true };
 }
 
-async function revalidatePreparedSession(provider, prepared) {
+export async function revalidatePreparedSession(provider, prepared) {
   const live = await readDeployedSmartAccountState(provider, prepared.userOperation.sender);
   if (normalizeAddress(live.entryPoint) !== normalizeAddress(prepared.entryPoint)) throw new Error('SmartAccount420 EntryPoint changed after user operation preparation');
   if (BigInt(live.authorizationEpoch) !== BigInt(prepared.authorizationEpoch)) throw new Error('authorization epoch changed after user operation preparation');

@@ -46,7 +46,7 @@ contract BongGogglesSocialPolicy420 {
         if (p.friendRequestPolicy == BongGogglesTypes420.AccessPolicy.FOLLOWERS) {
             return relationships.isFollowing(requester, recipient);
         }
-        return false; // FRIENDS, FRIENDS_OF_FRIENDS and NOBODY fail closed in V1.
+        return false;
     }
 
     function canMessage(address sender, address recipient) external view returns (bool) {
@@ -60,6 +60,13 @@ contract BongGogglesSocialPolicy420 {
         if (relationships.isMuted(recipient, inviter, BongGogglesTypes420.MUTE_GAME_INVITES)) return false;
         BongGogglesProfileRegistry420.Preferences memory p = profiles.preferences(recipient);
         return _meetsPolicy(inviter, recipient, p.gameInvitePolicy);
+    }
+
+    function canMention(address actor, address target) external view returns (bool) {
+        if (actor == target) return profiles.isActive(actor);
+        if (!canInteract(actor, target)) return false;
+        BongGogglesProfileRegistry420.Preferences memory p = profiles.preferences(target);
+        return _meetsPolicy(actor, target, p.mentionPolicy);
     }
 
     function _meetsPolicy(address actor, address target, BongGogglesTypes420.AccessPolicy policy) internal view returns (bool) {

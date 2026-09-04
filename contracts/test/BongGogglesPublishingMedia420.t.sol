@@ -23,6 +23,7 @@ contract BongGogglesPublishingMedia420Test {
     VmBongGogglesPublishing420 constant vm = VmBongGogglesPublishing420(address(uint160(uint256(keccak256("hevm cheat code")))));
     address constant ALICE = address(0xA11CE);
     address constant BOB = address(0xB0B);
+    address constant CAROL = address(0xCA401);
 
     BongGogglesAuthorization420 auth;
     BongGogglesProfileRegistry420 profiles;
@@ -41,7 +42,7 @@ contract BongGogglesPublishingMedia420Test {
         media = new BongGogglesMediaRegistry420(address(auth), address(profiles));
         objects = new BongGogglesSocialObjectRegistry420(address(auth), address(profiles), address(policy), address(media));
         reactions = new BongGogglesReactionRegistry420(address(auth), address(profiles), address(objects), address(policy));
-        _create(ALICE); _create(BOB);
+        _create(ALICE); _create(BOB); _create(CAROL);
     }
 
     function _create(address user) internal {
@@ -50,9 +51,20 @@ contract BongGogglesPublishingMedia420Test {
     }
 
     function _post(address author) internal returns (bytes32) {
-        BongGogglesTypes420.AudiencePolicy memory audience = BongGogglesTypes420.AudiencePolicy(BongGogglesTypes420.AudienceType.PUBLIC, bytes32(0));
+        return _postWithAudience(author, BongGogglesTypes420.AudienceType.PUBLIC);
+    }
+
+    function _postWithAudience(address author, BongGogglesTypes420.AudienceType audienceType) internal returns (bytes32) {
+        BongGogglesTypes420.AudiencePolicy memory audience = BongGogglesTypes420.AudiencePolicy(audienceType, bytes32(0));
         vm.prank(author);
         return objects.publish(author, BongGogglesTypes420.SocialObjectType.STATUS, bytes32(0), bytes32(0), bytes32(0), keccak256("post"), bytes32(0), audience);
+    }
+
+    function _friend(address a, address b) internal {
+        vm.prank(a);
+        bytes32 requestId = graph.requestFriend(a, b);
+        vm.prank(b);
+        graph.acceptFriend(b, requestId);
     }
 
     function testMediaManifestBindsOwnerAndContent() public {
@@ -107,7 +119,7 @@ contract BongGogglesPublishingMedia420Test {
     function testBlockDeniesReaction() public {
         bytes32 objectId = _post(ALICE);
         vm.prank(ALICE); graph.blockUser(ALICE, BOB);
-        vm.expectRevert(BongGogglesReactionRegistry420.InteractionDenied.selector);
+        vm.expectRevert(BongGogglesReactionRegistry420.AudienceDenied.selector);
         vm.prank(BOB); reactions.setReaction(BOB, objectId, BongGogglesTypes420.ReactionType.LIKE);
     }
 
@@ -116,5 +128,44 @@ contract BongGogglesPublishingMedia420Test {
         vm.prank(ALICE); objects.deleteObject(ALICE, objectId);
         vm.expectRevert(BongGogglesReactionRegistry420.ObjectUnavailable.selector);
         vm.prank(BOB); reactions.setReaction(BOB, objectId, BongGogglesTypes420.ReactionType.LIKE);
+    }
+
+    function testHiddenObjectDeniesNewReaction() public {
+        bytes32 objectId = _post(ALICE);
+        vm.prank(ALICE); objects.hide(ALICE, objectId);
+        vm.expectRevert(BongGogglesReactionRegistry420.ObjectUnavailable.selector);
+        vm.prank(BOB); reactions.setReaction(BOB, objectId, BongGogglesTypes420.ReactionType.LIKE);
+    }
+
+    function testFriendsOnlyReactionRequiresFriendAudienceEligibility() public {
+        bytes32 objectId = _postWithAudience(ALICE, BongGogglesTypes420.AudienceType.FRIENDS);
+        vm.expectRevert(BongGogglesReactionRegistry420.AudienceDenied.selector);
+        vm.prank(BOB); reactions.setReaction(BOB, objectId, BongGogglesTypes420.ReactionType.LIKE);
+
+        _friend(ALICE, BOB);
+        vm.prank(BOB); reactions.setReaction(BOB, objectId, BongGogglesTypes420.ReactionType.LIKE);
+        require(reactions.reaction(objectId, BOB).reactionType == BongGogglesTypes420.ReactionType.LIKE, "friend reaction denied");
+    }
+
+    function testFollowersOnlyReactionRequiresFollowAudienceEligibility() public {
+        bytes32 objectId = _postWithAudience(ALICE, BongGogglesTypes420.AudienceType.FOLLOWERS);
+        vm.expectRevert(BongGogglesReactionRegistry420.AudienceDenied.selector);
+        vm.prank(CAROL); reactions.setReaction(CAROL, objectId, BongGogglesTypes420.ReactionType.LIKE);
+
+        vm.prank(BOB); graph.follow(BOB, ALICE);
+        vm.prank(BOB); reactions.setReaction(BOB, objectId, BongGogglesTypes420.ReactionType.LOVE);
+        require(reactions.reaction(objectId, BOB).reactionType == BongGogglesTypes420.ReactionType.LOVE, "follower reaction denied");
+    }
+
+    function testUnresolvedGroupAudienceFailsClosedForReaction() public {
+        bytes32 objectId = _postWithAudience(ALICE, BongGogglesTypes420.AudienceType.GROUP);
+        vm.expectRevert(BongGogglesReactionRegistry420.AudienceDenied.selector);
+        vm.prank(BOB); reactions.setReaction(BOB, objectId, BongGogglesTypes420.ReactionType.LIKE);
+    }
+
+    function testAuthorCanReactToOwnProtectedObject() public {
+        bytes32 objectId = _postWithAudience(ALICE, BongGogglesTypes420.AudienceType.PRIVATE);
+        vm.prank(ALICE); reactions.setReaction(ALICE, objectId, BongGogglesTypes420.ReactionType.SUPPORT);
+        require(reactions.reaction(objectId, ALICE).reactionType == BongGogglesTypes420.ReactionType.SUPPORT, "author self reaction denied");
     }
 }

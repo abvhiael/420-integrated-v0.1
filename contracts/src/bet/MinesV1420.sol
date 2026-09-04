@@ -6,11 +6,10 @@ import "./BetRegistry420.sol";
 import "./BetTypes420.sol";
 import "./RandomnessRouter420.sol";
 
-/// @notice First-party Mines V1 session and hidden-board verifier for 420Bet.
-/// @dev A randomness provider commits a secret seed before canonical randomness is fulfilled.
-///      After fulfillment, that same source binds a Merkle root for the hidden 25-cell board.
-///      Each player reveal proves one cell against the bound root without exposing the master seed.
-///      The module never moves funds or settles wagers.
+/// @notice First-party Mines V1 session, hidden-board verifier, and progressive cash-out engine for 420Bet.
+/// @dev The wager reserves its maximum possible gross payout before play. Safe reveals only increase
+///      the player's currently claimable gross payout inside that pre-reserved ceiling. This module
+///      never moves funds, changes vault reservations, or records canonical settlement.
 contract MinesV1420 is I420System {
     bytes32 public constant PARAMS_DOMAIN = keccak256("420.BET.MINES.V1.PARAMS");
     bytes32 public constant SEED_COMMIT_DOMAIN = keccak256("420.BET.MINES.V1.SEED.COMMIT");
@@ -19,6 +18,8 @@ contract MinesV1420 is I420System {
     uint8 public constant MERKLE_DEPTH = 5; // 32-leaf canonical tree; leaves 25-31 are padding.
     uint8 public constant MIN_MINES = 1;
     uint8 public constant MAX_MINES = 24;
+    uint16 public constant BPS = 10_000;
+    uint16 public constant RETURN_BPS = 9_900; // V1 99.00% theoretical return before integer truncation.
 
     enum Phase { NONE, ACTIVE, TERMINAL }
 
@@ -41,6 +42,8 @@ contract MinesV1420 is I420System {
         uint8 mineCount;
         uint8 safeReveals;
         uint32 revealedMask;
+        uint256 currentGrossPayout;
+        uint256 cashoutGrossPayout;
         bool mineHit;
         bool cashedOut;
         bool exists;
@@ -62,6 +65,9 @@ contract MinesV1420 is I420System {
     error WrongRuleset();
     error InvalidWagerStatus();
     error ParamsMismatch();
+    error InvalidPayout();
+    error PayoutExceedsReservedMaximum();
+    error NothingToCashOut();
     error SessionAlreadyStarted();
     error SessionMissing();
     error InvalidPhase();
@@ -81,9 +87,10 @@ contract MinesV1420 is I420System {
 
     event SeedCommitted(bytes32 indexed wagerId, RandomnessRouter420.Source indexed source, bytes32 indexed seedCommitment);
     event BoardBound(bytes32 indexed wagerId, RandomnessRouter420.Source indexed source, bytes32 indexed boardRoot, bytes32 randomnessRoot);
-    event SessionStarted(bytes32 indexed wagerId, address indexed player, uint8 mineCount);
+    event SessionStarted(bytes32 indexed wagerId, address indexed player, uint8 mineCount, uint256 reservedMaximumGrossPayout);
     event CellRevealed(bytes32 indexed wagerId, uint8 indexed cell, bool mine, uint8 safeReveals, uint32 revealedMask);
-    event SessionTerminal(bytes32 indexed wagerId, bool mineHit, bool cashedOut, uint8 safeReveals);
+    event CashoutValueAdvanced(bytes32 indexed wagerId, uint8 safeReveals, uint256 grossPayout, uint256 reservedMaximumGrossPayout);
+    event SessionTerminal(bytes32 indexed wagerId, bool mineHit, bool cashedOut, uint8 safeReveals, uint256 grossPayout);
 
     constructor(address wagerRegistry_, address randomnessRouter_, bytes32 gameId_, bytes32 gameVersionId_, bytes32 rulesetId_) {
         if (wagerRegistry_ == address(0) || randomnessRouter_ == address(0)) revert ZeroAddress();
@@ -101,6 +108,30 @@ contract MinesV1420 is I420System {
     function hashParams(Params memory params) public view returns (bytes32) {
         if (params.mineCount < MIN_MINES || params.mineCount > MAX_MINES) revert InvalidParams();
         return keccak256(abi.encode(PARAMS_DOMAIN, gameVersionId, rulesetId, BOARD_CELLS, params.mineCount));
+    }
+
+    /// @notice Maximum V1 gross payout reached by revealing every non-mine cell.
+    /// @dev Wager acceptance must reserve at least this amount. The progressive claim never exceeds it.
+    function requiredMaxGrossPayout(uint256 stake, uint8 mineCount) public pure returns (uint256) {
+        if (stake == 0 || mineCount < MIN_MINES || mineCount > MAX_MINES) revert InvalidPayout();
+        return quoteGrossPayout(stake, mineCount, BOARD_CELLS - mineCount);
+    }
+
+    /// @notice Deterministic V1 gross cash-out quote after `safeReveals` verified safe cells.
+    /// @dev Uses inverse survival probability: product((25-i)/(25-mineCount-i)), then RETURN_BPS.
+    function quoteGrossPayout(uint256 stake, uint8 mineCount, uint8 safeReveals) public pure returns (uint256 grossPayout) {
+        if (stake == 0 || mineCount < MIN_MINES || mineCount > MAX_MINES) revert InvalidPayout();
+        uint8 safeCells = BOARD_CELLS - mineCount;
+        if (safeReveals == 0 || safeReveals > safeCells) revert InvalidPayout();
+
+        uint256 numerator = 1;
+        uint256 denominator = 1;
+        for (uint8 i = 0; i < safeReveals; ++i) {
+            numerator *= uint256(BOARD_CELLS - i);
+            denominator *= uint256(safeCells - i);
+        }
+        grossPayout = (stake * numerator * RETURN_BPS) / (denominator * BPS);
+        if (grossPayout < stake) grossPayout = stake;
     }
 
     function seedCommitmentFor(bytes32 wagerId, RandomnessRouter420.Source source, bytes32 seed) public view returns (bytes32) {
@@ -144,6 +175,8 @@ contract MinesV1420 is I420System {
         BetTypes420.Wager memory wager = wagerRegistry.getWager(wagerId);
         _validateWager(wager, params);
         if (msg.sender != wager.player) revert NotPlayer();
+        uint256 requiredMaximum = requiredMaxGrossPayout(wager.stake, params.mineCount);
+        if (wager.maxGrossPayout < requiredMaximum) revert PayoutExceedsReservedMaximum();
         RandomnessRouter420.RandomnessRequest memory request = randomnessRouter.getRequest(wagerId);
         if (!request.fulfilled) revert RandomnessNotReady();
         BoardCommitment storage board = _boards[wagerId][uint8(request.source)];
@@ -152,7 +185,7 @@ contract MinesV1420 is I420System {
         session.player = wager.player;
         session.mineCount = params.mineCount;
         session.exists = true;
-        emit SessionStarted(wagerId, wager.player, params.mineCount);
+        emit SessionStarted(wagerId, wager.player, params.mineCount, wager.maxGrossPayout);
     }
 
     function revealCell(bytes32 wagerId, uint8 cell, bool mine, bytes32 salt, bytes32[] calldata proof) external {
@@ -171,27 +204,38 @@ contract MinesV1420 is I420System {
         if (mine) {
             session.phase = Phase.TERMINAL;
             session.mineHit = true;
+            session.currentGrossPayout = 0;
         } else {
             session.safeReveals += 1;
+            BetTypes420.Wager memory wager = wagerRegistry.getWager(wagerId);
+            uint256 quote = quoteGrossPayout(wager.stake, session.mineCount, session.safeReveals);
+            if (quote > wager.maxGrossPayout) revert PayoutExceedsReservedMaximum();
+            session.currentGrossPayout = quote;
+            emit CashoutValueAdvanced(wagerId, session.safeReveals, quote, wager.maxGrossPayout);
         }
         emit CellRevealed(wagerId, cell, mine, session.safeReveals, session.revealedMask);
-        if (mine) emit SessionTerminal(wagerId, true, false, session.safeReveals);
+        if (mine) emit SessionTerminal(wagerId, true, false, session.safeReveals, 0);
+    }
+
+    /// @notice Lock the current verified progressive claim for later canonical settlement.
+    /// @dev E1.3 records no payout and moves no funds; E1.4 will route this terminal claim to SettlementEngine420.
+    function cashOut(bytes32 wagerId) external returns (uint256 grossPayout) {
+        SessionState storage session = _getActiveSession(wagerId);
+        if (msg.sender != session.player) revert NotPlayer();
+        if (session.safeReveals == 0 || session.currentGrossPayout == 0) revert NothingToCashOut();
+        BetTypes420.Wager memory wager = wagerRegistry.getWager(wagerId);
+        grossPayout = session.currentGrossPayout;
+        if (grossPayout > wager.maxGrossPayout) revert PayoutExceedsReservedMaximum();
+        session.phase = Phase.TERMINAL;
+        session.cashedOut = true;
+        session.cashoutGrossPayout = grossPayout;
+        emit SessionTerminal(wagerId, false, true, session.safeReveals, grossPayout);
     }
 
     function cellLeaf(bytes32 wagerId, bytes32 randomnessRoot, uint8 cell, bool mine, bytes32 salt) public view returns (bytes32) {
         if (cell >= BOARD_CELLS) revert InvalidCell();
         if (salt == bytes32(0)) revert InvalidProof();
         return keccak256(abi.encode(LEAF_DOMAIN, wagerId, gameVersionId, rulesetId, randomnessRoot, cell, mine, salt));
-    }
-
-    function markTerminal(bytes32 wagerId, bool mineHit, bool cashedOut) external {
-        SessionState storage session = _getActiveSession(wagerId);
-        if (msg.sender != session.player) revert NotPlayer();
-        if (mineHit == cashedOut) revert InvalidPhase();
-        session.phase = Phase.TERMINAL;
-        session.mineHit = mineHit;
-        session.cashedOut = cashedOut;
-        emit SessionTerminal(wagerId, mineHit, cashedOut, session.safeReveals);
     }
 
     function getSession(bytes32 wagerId) external view returns (SessionState memory session) {

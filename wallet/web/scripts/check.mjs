@@ -6,7 +6,7 @@ const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..')
 const required = [
   'index.html','app.js','ui-v1.js','apps-page.js','recovery-ui.js','session-execution-ui.js','styles.css','apps.css','runtime-config.json',
   'core/abi.js','core/accounts.js','core/apps.js','core/capabilities.js','core/capability-management.js','core/session-management.js','core/session-execution.js','core/entrypoint-transport.js','core/recovery.js','core/recovery-management.js','core/config.js','core/deployment.js','core/execution.js','core/portfolio.js','core/provider.js','core/provider-lifecycle.js','core/services.js','core/send.js',
-  'test/core.test.js','test/apps.test.js','test/execution.test.js','test/capabilities.test.js','test/capability-management.test.js','test/session-management.test.js','test/session-execution.test.js','test/entrypoint-transport.test.js','test/recovery.test.js','test/recovery-management.test.js','test/recovery-ui.test.js','test/session-execution-ui.test.js','test/ui-v1.test.js','test/send.test.js','test/provider-lifecycle.test.js','test/ui-hardening.test.js','test/recovery-session-hardening.test.js',
+  'test/core.test.js','test/apps.test.js','test/execution.test.js','test/capabilities.test.js','test/capability-management.test.js','test/session-management.test.js','test/session-execution.test.js','test/entrypoint-transport.test.js','test/recovery.test.js','test/recovery-management.test.js','test/recovery-ui.test.js','test/session-execution-ui.test.js','test/ui-v1.test.js','test/send.test.js','test/provider-lifecycle.test.js','test/ui-hardening.test.js','test/session-hardening.test.js',
 ];
 
 const errors = [];
@@ -26,14 +26,14 @@ const app = requireStrings('app.js', [
 ], 'UI Wallet Core binding');
 for (const forbidden of ['privateKey','mnemonic','seedPhrase','localStorage.setItem("private']) if (app.includes(forbidden)) errors.push(`forbidden signing secret pattern in app.js: ${forbidden}`);
 
-requireStrings('ui-v1.js', ['recovery-ui.js','session-execution-ui.js','apps-page.js','buildSendExecution','installFailClosedBrowserLifecycle'], 'Wallet Web UI binding');
+requireStrings('ui-v1.js', ['recovery-ui.js','apps-page.js','buildSendExecution','installFailClosedBrowserLifecycle'], 'Wallet Web UI binding');
+requireStrings('index.html', ['./session-execution-ui.js'], 'Session Execution UI script binding');
 requireStrings('recovery-ui.js', ['Recovery management','Two-day safety delay','recovery-countdown','recovery-set-authority','recovery-propose','recovery-cancel','recovery-finalize','readDeployedSmartAccountState','sendFinalizeRecovery','confirmFinalizeRecovery'], 'recovery UI/timelock control');
 requireStrings('session-execution-ui.js', ['Session execution','Prepare + sign + simulate','Submit to EntryPoint420','prepareSessionUserOperationTransport','sendPreparedEntryPointUserOperation','confirmEntryPointUserOperation','sessionExecution','entryPointUserOpSubmission'], 'controlled session execution UI');
 
-const services = requireStrings('core/services.js', ['duplicate ecosystem service id','service URL credentials are not permitted','Preserve canonical wallet metadata'], 'service discovery hardening guard');
 const appsPage = requireStrings('apps-page.js', ['resolveServices','Verified manifest','Awaiting manifest','noopener noreferrer','apps-search','app-filter','Not published'], 'verified 420 Apps page guard');
 if (appsPage.includes('javascript:')) errors.push('420 Apps page must not contain javascript service URLs');
-
+requireStrings('core/services.js', ['duplicate ecosystem service id','service URL credentials are not permitted','Preserve canonical wallet metadata'], 'service discovery hardening guard');
 requireStrings('core/provider-lifecycle.js', ['accountsChanged','chainChanged','disconnect','removeListener','reload'], 'provider lifecycle guard');
 const send = requireStrings('core/send.js', ['a9059cbb','parseUnits','normalizeAddress',"kind === 'native'","kind !== 'erc20'",'zero address','MAX_AMOUNT_TEXT_LENGTH','token contract cannot be used as the transfer recipient'], 'guided send guard');
 if (send.includes('eth_sendTransaction') || send.includes('eth_sendUserOperation')) errors.push('guided send builder must not broadcast directly');
@@ -50,9 +50,9 @@ if (sessionExecution.includes('eth_sendUserOperation') || sessionExecution.inclu
 
 const transport = requireStrings('core/entrypoint-transport.js', [
   '22cdde4c','9eec012b','USER_OPERATION_HANDLED_TOPIC','personal_sign','eth_accounts','eth_call','eth_estimateGas','eth_sendTransaction',
-  'authorization epoch changed after session operation signing','session key was revoked or replaced after operation signing','active session grant changed after operation signing',
-  'session nonce changed after user operation preparation','canonical user operation hash changed after signing','ambiguous duplicate UserOperationHandled confirmation events',
-  'malformed EntryPoint420 UserOperationHandled event','session nonce did not advance exactly once','consumed the session nonce to prevent replay'
+  'authorization epoch changed after user operation preparation','session key was revoked or invalidated after user operation preparation','active session grant changed after user operation preparation',
+  'session nonce changed after user operation preparation','canonical user operation hash changed after signing','ambiguous duplicate EntryPoint420 UserOperationHandled confirmation events',
+  'malformed EntryPoint420 UserOperationHandled event','malformed EntryPoint420 UserOperationHandled success value','session nonce did not advance exactly once','consumed the session nonce to prevent replay'
 ], 'EntryPoint420 transport/hardening control');
 if (transport.includes('eth_sendUserOperation')) errors.push('Wallet V1 must use canonical EntryPoint420.handleOp transport, not unfrozen bundler RPC');
 

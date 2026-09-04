@@ -6,6 +6,9 @@ library ActionIds {
 
     bytes32 internal constant REGION_REGISTER = keccak256("HC.ACTION.REGION_REGISTRY.REGISTER");
 
+    bytes32 internal constant LAND_REGISTER = keccak256("HC.ACTION.LAND_REGISTRY.REGISTER");
+    bytes32 internal constant PUBLIC_PLOT_REGISTER = keccak256("HC.ACTION.PUBLIC_CULTIVATION_ACCESS.REGISTER");
+
     bytes32 internal constant GENESIS_SET_ROOTS = keccak256("HC.ACTION.GENESIS_REGISTRY.SET_ROOTS");
     bytes32 internal constant GENESIS_FINALIZE = keccak256("HC.ACTION.GENESIS_REGISTRY.FINALIZE");
 

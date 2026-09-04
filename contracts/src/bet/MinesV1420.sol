@@ -14,9 +14,9 @@ import "./RandomnessRouter420.sol";
 contract MinesV1420 is I420System {
     bytes32 public constant PARAMS_DOMAIN = keccak256("420.BET.MINES.V1.PARAMS");
     bytes32 public constant SEED_COMMIT_DOMAIN = keccak256("420.BET.MINES.V1.SEED.COMMIT");
-    bytes32 public constant BOARD_DOMAIN = keccak256("420.BET.MINES.V1.BOARD");
     bytes32 public constant LEAF_DOMAIN = keccak256("420.BET.MINES.V1.LEAF");
     uint8 public constant BOARD_CELLS = 25;
+    uint8 public constant MERKLE_DEPTH = 5; // 32-leaf canonical tree; leaves 25-31 are padding.
     uint8 public constant MIN_MINES = 1;
     uint8 public constant MAX_MINES = 24;
 
@@ -79,28 +79,13 @@ contract MinesV1420 is I420System {
     error InvalidCommitment();
     error InvalidProof();
 
-    event SeedCommitted(
-        bytes32 indexed wagerId,
-        RandomnessRouter420.Source indexed source,
-        bytes32 indexed seedCommitment
-    );
-    event BoardBound(
-        bytes32 indexed wagerId,
-        RandomnessRouter420.Source indexed source,
-        bytes32 indexed boardRoot,
-        bytes32 randomnessRoot
-    );
+    event SeedCommitted(bytes32 indexed wagerId, RandomnessRouter420.Source indexed source, bytes32 indexed seedCommitment);
+    event BoardBound(bytes32 indexed wagerId, RandomnessRouter420.Source indexed source, bytes32 indexed boardRoot, bytes32 randomnessRoot);
     event SessionStarted(bytes32 indexed wagerId, address indexed player, uint8 mineCount);
     event CellRevealed(bytes32 indexed wagerId, uint8 indexed cell, bool mine, uint8 safeReveals, uint32 revealedMask);
     event SessionTerminal(bytes32 indexed wagerId, bool mineHit, bool cashedOut, uint8 safeReveals);
 
-    constructor(
-        address wagerRegistry_,
-        address randomnessRouter_,
-        bytes32 gameId_,
-        bytes32 gameVersionId_,
-        bytes32 rulesetId_
-    ) {
+    constructor(address wagerRegistry_, address randomnessRouter_, bytes32 gameId_, bytes32 gameVersionId_, bytes32 rulesetId_) {
         if (wagerRegistry_ == address(0) || randomnessRouter_ == address(0)) revert ZeroAddress();
         if (gameId_ == bytes32(0) || gameVersionId_ == bytes32(0) || rulesetId_ == bytes32(0)) revert InvalidId();
         wagerRegistry = BetRegistry420(wagerRegistry_);
@@ -118,28 +103,18 @@ contract MinesV1420 is I420System {
         return keccak256(abi.encode(PARAMS_DOMAIN, gameVersionId, rulesetId, BOARD_CELLS, params.mineCount));
     }
 
-    function seedCommitmentFor(bytes32 wagerId, RandomnessRouter420.Source source, bytes32 seed)
-        public
-        view
-        returns (bytes32)
-    {
-        if (source != RandomnessRouter420.Source.PRIMARY && source != RandomnessRouter420.Source.FALLBACK) {
-            revert InvalidSource();
-        }
+    function seedCommitmentFor(bytes32 wagerId, RandomnessRouter420.Source source, bytes32 seed) public view returns (bytes32) {
+        if (source != RandomnessRouter420.Source.PRIMARY && source != RandomnessRouter420.Source.FALLBACK) revert InvalidSource();
         if (seed == bytes32(0)) revert InvalidCommitment();
         return keccak256(abi.encode(SEED_COMMIT_DOMAIN, wagerId, gameVersionId, rulesetId, source, seed));
     }
 
-    /// @notice Provider commits a master board seed before canonical randomness is known.
     function commitSeed(bytes32 wagerId, RandomnessRouter420.Source source, bytes32 seedCommitment) external {
-        if (source != RandomnessRouter420.Source.PRIMARY && source != RandomnessRouter420.Source.FALLBACK) {
-            revert InvalidSource();
-        }
+        if (source != RandomnessRouter420.Source.PRIMARY && source != RandomnessRouter420.Source.FALLBACK) revert InvalidSource();
         if (seedCommitment == bytes32(0)) revert InvalidCommitment();
         RandomnessRouter420.RandomnessRequest memory request = randomnessRouter.getRequest(wagerId);
         if (request.fulfilled) revert RandomnessAlreadyReady();
         _requireProvider(request.profileId, source);
-
         BoardCommitment storage board = _boards[wagerId][uint8(source)];
         if (board.seedCommitted) revert SeedAlreadyCommitted();
         board.source = source;
@@ -148,17 +123,12 @@ contract MinesV1420 is I420System {
         emit SeedCommitted(wagerId, source, seedCommitment);
     }
 
-    /// @notice Bind the hidden Merkle board after canonical randomness fulfillment.
-    /// @dev The selected randomness source must have precommitted its master seed.
     function bindBoard(bytes32 wagerId, bytes32 boardRoot) external {
         if (boardRoot == bytes32(0)) revert InvalidCommitment();
         RandomnessRouter420.RandomnessRequest memory request = randomnessRouter.getRequest(wagerId);
         if (!request.fulfilled) revert RandomnessNotReady();
-        if (request.source != RandomnessRouter420.Source.PRIMARY && request.source != RandomnessRouter420.Source.FALLBACK) {
-            revert InvalidSource();
-        }
+        if (request.source != RandomnessRouter420.Source.PRIMARY && request.source != RandomnessRouter420.Source.FALLBACK) revert InvalidSource();
         _requireProvider(request.profileId, request.source);
-
         BoardCommitment storage board = _boards[wagerId][uint8(request.source)];
         if (!board.seedCommitted) revert SeedCommitmentMissing();
         if (board.boardBound) revert BoardAlreadyBound();
@@ -171,42 +141,32 @@ contract MinesV1420 is I420System {
     function startSession(bytes32 wagerId, Params calldata params) external {
         SessionState storage session = _sessions[wagerId];
         if (session.exists) revert SessionAlreadyStarted();
-
         BetTypes420.Wager memory wager = wagerRegistry.getWager(wagerId);
         _validateWager(wager, params);
         if (msg.sender != wager.player) revert NotPlayer();
-
         RandomnessRouter420.RandomnessRequest memory request = randomnessRouter.getRequest(wagerId);
         if (!request.fulfilled) revert RandomnessNotReady();
         BoardCommitment storage board = _boards[wagerId][uint8(request.source)];
         if (!board.boardBound || board.randomnessRoot != request.root) revert BoardNotReady();
-
         session.phase = Phase.ACTIVE;
         session.player = wager.player;
         session.mineCount = params.mineCount;
         session.exists = true;
-
         emit SessionStarted(wagerId, wager.player, params.mineCount);
     }
 
-    /// @notice Reveal one hidden cell with a Merkle proof against the committed board.
-    /// @dev Cell salt is independent per cell, so one reveal does not expose unrevealed cells.
     function revealCell(bytes32 wagerId, uint8 cell, bool mine, bytes32 salt, bytes32[] calldata proof) external {
         SessionState storage session = _getActiveSession(wagerId);
         if (msg.sender != session.player) revert NotPlayer();
         if (cell >= BOARD_CELLS) revert InvalidCell();
-        if (salt == bytes32(0)) revert InvalidProof();
-
+        if (salt == bytes32(0) || proof.length != MERKLE_DEPTH) revert InvalidProof();
         uint32 bit = uint32(1) << cell;
         if (session.revealedMask & bit != 0) revert CellAlreadyRevealed();
-
         RandomnessRouter420.RandomnessRequest memory request = randomnessRouter.getRequest(wagerId);
         BoardCommitment storage board = _boards[wagerId][uint8(request.source)];
         if (!request.fulfilled || !board.boardBound || board.randomnessRoot != request.root) revert BoardNotReady();
-
         bytes32 leaf = cellLeaf(wagerId, request.root, cell, mine, salt);
         if (!_verifyMerkle(leaf, proof, board.boardRoot)) revert InvalidProof();
-
         session.revealedMask |= bit;
         if (mine) {
             session.phase = Phase.TERMINAL;
@@ -218,16 +178,12 @@ contract MinesV1420 is I420System {
         if (mine) emit SessionTerminal(wagerId, true, false, session.safeReveals);
     }
 
-    function cellLeaf(bytes32 wagerId, bytes32 randomnessRoot, uint8 cell, bool mine, bytes32 salt)
-        public
-        view
-        returns (bytes32)
-    {
-        if (cell >= BOARD_CELLS || salt == bytes32(0)) revert InvalidCell();
+    function cellLeaf(bytes32 wagerId, bytes32 randomnessRoot, uint8 cell, bool mine, bytes32 salt) public view returns (bytes32) {
+        if (cell >= BOARD_CELLS) revert InvalidCell();
+        if (salt == bytes32(0)) revert InvalidProof();
         return keccak256(abi.encode(LEAF_DOMAIN, wagerId, gameVersionId, rulesetId, randomnessRoot, cell, mine, salt));
     }
 
-    /// @notice E1.1 terminal primitive retained for later economic cash-out integration.
     function markTerminal(bytes32 wagerId, bool mineHit, bool cashedOut) external {
         SessionState storage session = _getActiveSession(wagerId);
         if (msg.sender != session.player) revert NotPlayer();
@@ -243,11 +199,7 @@ contract MinesV1420 is I420System {
         if (!session.exists) revert SessionMissing();
     }
 
-    function getBoard(bytes32 wagerId, RandomnessRouter420.Source source)
-        external
-        view
-        returns (BoardCommitment memory board)
-    {
+    function getBoard(bytes32 wagerId, RandomnessRouter420.Source source) external view returns (BoardCommitment memory board) {
         board = _boards[wagerId][uint8(source)];
         if (!board.seedCommitted) revert SeedCommitmentMissing();
     }
@@ -268,9 +220,7 @@ contract MinesV1420 is I420System {
     function _validateWager(BetTypes420.Wager memory wager, Params memory params) private view {
         if (wager.gameId != gameId || wager.gameVersionId != gameVersionId) revert WrongGame();
         if (wager.rulesetId != rulesetId) revert WrongRuleset();
-        if (wager.status != BetTypes420.WagerStatus.ACCEPTED && wager.status != BetTypes420.WagerStatus.OUTCOME_READY) {
-            revert InvalidWagerStatus();
-        }
+        if (wager.status != BetTypes420.WagerStatus.ACCEPTED && wager.status != BetTypes420.WagerStatus.OUTCOME_READY) revert InvalidWagerStatus();
         if (hashParams(params) != wager.paramsHash) revert ParamsMismatch();
     }
 
@@ -284,9 +234,7 @@ contract MinesV1420 is I420System {
         bytes32 computed = leaf;
         for (uint256 i = 0; i < proof.length; ++i) {
             bytes32 sibling = proof[i];
-            computed = computed <= sibling
-                ? keccak256(abi.encodePacked(computed, sibling))
-                : keccak256(abi.encodePacked(sibling, computed));
+            computed = computed <= sibling ? keccak256(abi.encodePacked(computed, sibling)) : keccak256(abi.encodePacked(sibling, computed));
         }
         return computed == root;
     }

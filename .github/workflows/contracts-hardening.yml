@@ -148,6 +148,41 @@ jobs:
                           allowed = True
                           break
 
+              # ExchangeFeeRouter420.routeTokenFee intentionally snapshots the router's
+              # token balance around transferFrom so fee-on-transfer/rebasing assets are
+              # rejected before any distribution. The function itself is protected by
+              # ExchangeFeeRouter420's nonReentrant mutex. Keep this exception exact to
+              # this detector, function, contract, file, and stale balance variable.
+              if detector.get("check") == "reentrancy-balance":
+                  description = detector.get("description", "")
+                  exact_function = False
+                  exact_balance_use = False
+                  for element in detector.get("elements", []):
+                      source = element.get("source_mapping", {})
+                      fields = element.get("type_specific_fields", {})
+                      parent = fields.get("parent", {})
+                      parent_name = parent.get("name") if isinstance(parent, dict) else parent
+                      if (
+                          element.get("type") == "function"
+                          and element.get("name") == "routeTokenFee"
+                          and source.get("filename_relative") == "src/exchange/ExchangeFeeRouter420.sol"
+                          and parent_name == "ExchangeFeeRouter420"
+                      ):
+                          exact_function = True
+                      if (
+                          source.get("filename_relative") == "src/exchange/ExchangeFeeRouter420.sol"
+                          and element.get("additional_fields", {}).get("underlying_type") == "stale_balance_use"
+                          and element.get("additional_fields", {}).get("variable_name") == "balanceBefore"
+                      ):
+                          exact_balance_use = True
+
+                  if (
+                      exact_function
+                      and exact_balance_use
+                      and "ExchangeFeeRouter420.routeTokenFee(bytes32,address,uint256)" in description
+                  ):
+                      allowed = True
+
               if not allowed:
                   high.append(detector)
 

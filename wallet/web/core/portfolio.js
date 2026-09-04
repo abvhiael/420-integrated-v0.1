@@ -14,10 +14,10 @@ function normalizeDecimals(value) {
 }
 
 function normalizeSymbol(value) {
-  const symbol = String(value ?? '').trim();
-  if (!symbol || symbol.length > MAX_TOKEN_SYMBOL_LENGTH || /[\u0000-\u001f\u007f]/.test(symbol)) {
-    throw new Error('invalid token symbol');
-  }
+  const raw = String(value ?? '');
+  if (/[/\u0000-\u001f\u007f]/.test(raw)) throw new Error('invalid token symbol');
+  const symbol = raw.trim();
+  if (!symbol || symbol.length > MAX_TOKEN_SYMBOL_LENGTH) throw new Error('invalid token symbol');
   return symbol;
 }
 

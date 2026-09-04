@@ -50,6 +50,7 @@ contract BetMinesV1420Test {
     bytes32 constant RANDOMNESS_PROFILE = keccak256("randomness");
     bytes32 constant RANDOMNESS_ROOT = keccak256("mines/root");
     bytes32 constant SEED = keccak256("mines/provider/seed");
+    uint256 constant STAKE = 100 ether;
 
     struct Suite {
         MockMinesRegistry420 registry;
@@ -63,6 +64,7 @@ contract BetMinesV1420Test {
         s.randomness = new MockMinesRandomness420();
         s.mines = new MinesV1420(address(s.registry), address(s.randomness), GAME, GAME_V1, RULESET);
         s.params = MinesV1420.Params({mineCount: mineCount});
+        uint256 maxGross = s.mines.requiredMaxGrossPayout(STAKE, mineCount);
 
         s.registry.setWager(BetTypes420.Wager({
             wagerId: WAGER,
@@ -71,8 +73,8 @@ contract BetMinesV1420Test {
             gameId: GAME,
             gameVersionId: GAME_V1,
             asset: address(0),
-            stake: 100 ether,
-            maxGrossPayout: 1000 ether,
+            stake: STAKE,
+            maxGrossPayout: maxGross,
             paramsHash: s.mines.hashParams(s.params),
             vaultId: keccak256("vault"),
             randomnessProfileId: RANDOMNESS_PROFILE,
@@ -116,6 +118,12 @@ contract BetMinesV1420Test {
         }));
     }
 
+    function _setMaxGross(Suite memory s, uint256 maxGross) private {
+        BetTypes420.Wager memory wager = s.registry.getWager(WAGER);
+        wager.maxGrossPayout = maxGross;
+        s.registry.setWager(wager);
+    }
+
     function _salt(uint8 cell) private pure returns (bytes32) {
         return keccak256(abi.encode("420.MINES.TEST.SALT", cell));
     }
@@ -123,9 +131,7 @@ contract BetMinesV1420Test {
     function _isMine(uint8 cell) private pure returns (bool) { return cell < 5; }
 
     function _leaves(MinesV1420 mines) private view returns (bytes32[32] memory leaves) {
-        for (uint8 i = 0; i < 25; ++i) {
-            leaves[i] = mines.cellLeaf(WAGER, RANDOMNESS_ROOT, i, _isMine(i), _salt(i));
-        }
+        for (uint8 i = 0; i < 25; ++i) leaves[i] = mines.cellLeaf(WAGER, RANDOMNESS_ROOT, i, _isMine(i), _salt(i));
         for (uint8 i = 25; i < 32; ++i) leaves[i] = keccak256(abi.encode("420.MINES.TEST.PAD", i));
     }
 
@@ -172,6 +178,11 @@ contract BetMinesV1420Test {
         s.mines.startSession(WAGER, s.params);
     }
 
+    function _revealSafe(Suite memory s, bytes32[32] memory leaves, uint8 cell) private {
+        vm.prank(PLAYER);
+        s.mines.revealCell(WAGER, cell, false, _salt(cell), _proof(leaves, cell));
+    }
+
     function testCanonicalBindingSurface() public {
         Suite memory s = _deploy(5);
         require(keccak256(bytes(s.mines.systemName())) == keccak256(bytes("MinesV1420")), "system");
@@ -181,6 +192,81 @@ contract BetMinesV1420Test {
         require(s.mines.rulesetId() == RULESET, "ruleset");
         require(s.mines.BOARD_CELLS() == 25, "board");
         require(s.mines.MERKLE_DEPTH() == 5, "depth");
+        require(s.mines.RETURN_BPS() == 9900, "rtp");
+    }
+
+    function testProgressiveQuoteIncreasesWithVerifiedSafeReveals() public {
+        Suite memory s = _deploy(5);
+        bytes32[32] memory leaves = _startPrepared(s);
+        _revealSafe(s, leaves, 7);
+        MinesV1420.SessionState memory afterOne = s.mines.getSession(WAGER);
+        require(afterOne.currentGrossPayout == s.mines.quoteGrossPayout(STAKE, 5, 1), "quote one");
+        require(afterOne.currentGrossPayout >= STAKE, "below stake");
+
+        _revealSafe(s, leaves, 8);
+        MinesV1420.SessionState memory afterTwo = s.mines.getSession(WAGER);
+        require(afterTwo.currentGrossPayout == s.mines.quoteGrossPayout(STAKE, 5, 2), "quote two");
+        require(afterTwo.currentGrossPayout > afterOne.currentGrossPayout, "not progressive");
+    }
+
+    function testCashOutLocksCurrentClaimAndClosesSession() public {
+        Suite memory s = _deploy(5);
+        bytes32[32] memory leaves = _startPrepared(s);
+        _revealSafe(s, leaves, 9);
+        _revealSafe(s, leaves, 10);
+        uint256 quote = s.mines.quoteGrossPayout(STAKE, 5, 2);
+
+        vm.prank(PLAYER);
+        uint256 locked = s.mines.cashOut(WAGER);
+        require(locked == quote, "locked quote");
+        MinesV1420.SessionState memory session = s.mines.getSession(WAGER);
+        require(session.phase == MinesV1420.Phase.TERMINAL, "terminal");
+        require(session.cashedOut && !session.mineHit, "flags");
+        require(session.cashoutGrossPayout == quote, "terminal quote");
+
+        vm.prank(PLAYER);
+        vm.expectRevert(MinesV1420.InvalidPhase.selector);
+        s.mines.cashOut(WAGER);
+    }
+
+    function testCannotCashOutBeforeAnySafeReveal() public {
+        Suite memory s = _deploy(5);
+        _startPrepared(s);
+        vm.prank(PLAYER);
+        vm.expectRevert(MinesV1420.NothingToCashOut.selector);
+        s.mines.cashOut(WAGER);
+    }
+
+    function testMineHitDestroysProgressiveClaim() public {
+        Suite memory s = _deploy(5);
+        bytes32[32] memory leaves = _startPrepared(s);
+        _revealSafe(s, leaves, 7);
+        require(s.mines.getSession(WAGER).currentGrossPayout > 0, "no claim");
+        uint8 mineCell = 2;
+        vm.prank(PLAYER);
+        s.mines.revealCell(WAGER, mineCell, true, _salt(mineCell), _proof(leaves, mineCell));
+        MinesV1420.SessionState memory session = s.mines.getSession(WAGER);
+        require(session.phase == MinesV1420.Phase.TERMINAL, "terminal");
+        require(session.mineHit && !session.cashedOut, "mine flags");
+        require(session.currentGrossPayout == 0 && session.cashoutGrossPayout == 0, "claim survived mine");
+    }
+
+    function testSessionRejectsUnderReservedMaximum() public {
+        Suite memory s = _deploy(5);
+        _prepareBoard(s);
+        uint256 requiredMaximum = s.mines.requiredMaxGrossPayout(STAKE, 5);
+        _setMaxGross(s, requiredMaximum - 1);
+        vm.prank(PLAYER);
+        vm.expectRevert(MinesV1420.PayoutExceedsReservedMaximum.selector);
+        s.mines.startSession(WAGER, s.params);
+    }
+
+    function testMaximumQuoteExactlyMatchesRequiredReservation() public {
+        Suite memory s = _deploy(5);
+        uint8 safeCells = 20;
+        uint256 maximum = s.mines.requiredMaxGrossPayout(STAKE, 5);
+        require(maximum == s.mines.quoteGrossPayout(STAKE, 5, safeCells), "maximum mismatch");
+        require(maximum > s.mines.quoteGrossPayout(STAKE, 5, safeCells - 1), "maximum not increasing");
     }
 
     function testProviderMustCommitSeedBeforeRandomnessFulfillment() public {
@@ -190,7 +276,6 @@ contract BetMinesV1420Test {
         s.mines.commitSeed(WAGER, RandomnessRouter420.Source.PRIMARY, commitment);
         MinesV1420.BoardCommitment memory board = s.mines.getBoard(WAGER, RandomnessRouter420.Source.PRIMARY);
         require(board.seedCommitted && !board.boardBound, "commit state");
-
         _setRequest(s, true, RandomnessRouter420.Source.PRIMARY, RANDOMNESS_ROOT);
         vm.prank(PROVIDER);
         vm.expectRevert(MinesV1420.RandomnessAlreadyReady.selector);
@@ -224,23 +309,11 @@ contract BetMinesV1420Test {
         Suite memory s = _deploy(5);
         bytes32[32] memory leaves = _startPrepared(s);
         uint8 cell = 7;
-        vm.prank(PLAYER);
-        s.mines.revealCell(WAGER, cell, false, _salt(cell), _proof(leaves, cell));
+        _revealSafe(s, leaves, cell);
         MinesV1420.SessionState memory session = s.mines.getSession(WAGER);
         require(session.phase == MinesV1420.Phase.ACTIVE, "phase");
         require(session.safeReveals == 1, "safe count");
         require(s.mines.isCellRevealed(WAGER, cell), "revealed");
-    }
-
-    function testMineRevealTerminatesSessionDeterministically() public {
-        Suite memory s = _deploy(5);
-        bytes32[32] memory leaves = _startPrepared(s);
-        uint8 cell = 2;
-        vm.prank(PLAYER);
-        s.mines.revealCell(WAGER, cell, true, _salt(cell), _proof(leaves, cell));
-        MinesV1420.SessionState memory session = s.mines.getSession(WAGER);
-        require(session.phase == MinesV1420.Phase.TERMINAL, "terminal");
-        require(session.mineHit && !session.cashedOut, "mine flags");
     }
 
     function testPlayerCannotRewriteCommittedCellOutcome() public {

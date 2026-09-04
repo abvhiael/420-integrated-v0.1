@@ -1,0 +1,56 @@
+{
+  "schema": "420-explorer-genesis-v1",
+  "name": "420Explorer",
+  "class": "GENESIS_USER_APP",
+  "contractsRequired": false,
+  "canonicalStateAuthority": false,
+  "purpose": "Canonical-state observability, transaction and contract discovery, protocol decoding, verification metadata and network transparency for 420 Integrated.",
+  "sources": {
+    "execution": ["420 Integrated JSON-RPC", "receipts", "logs", "runtime bytecode"],
+    "consensus": ["head", "safe", "finalized", "slot", "epoch", "rotation", "proposer", "QC metadata"],
+    "protocolDiscovery": "420Registry / ProtocolRegistry",
+    "optionalNaming": "420 Names",
+    "optionalIdentity": "420 Identity"
+  },
+  "indexing": {
+    "canonicalKey": "chainId:blockHash",
+    "tracksHeadSafeFinalizedSeparately": true,
+    "reorgsAllowedOnlyAboveFinality": true,
+    "finalizedHistoryImmutable": true,
+    "rebuildableFromChain": true,
+    "databaseIsNonCanonical": true
+  },
+  "requiredViews": [
+    "block",
+    "transaction",
+    "receipt/logs",
+    "address",
+    "contract",
+    "token/asset activity",
+    "validator",
+    "epoch/rotation",
+    "protocol service/version",
+    "network status"
+  ],
+  "contractVerification": {
+    "showRuntimeCodeHash": true,
+    "showRegistryServiceAndVersion": true,
+    "showManifestCommitmentWhenRegistered": true,
+    "verifiedSourceIsPresentationMetadata": true,
+    "sourceVerificationCannotOverrideRuntimeBytecode": true
+  },
+  "invariants": [
+    "EXP-INV-001: 420Explorer owns no canonical protocol state and requires no Explorer-specific Genesis contract.",
+    "EXP-INV-002: Explorer records are projections of chain, consensus and registered protocol state; conflicts resolve in favor of canonical chain data.",
+    "EXP-INV-003: Head, safe and finalized states are displayed distinctly and are never collapsed into one confirmation status.",
+    "EXP-INV-004: Reorg repair may rewrite only non-finalized indexed history; finalized history is immutable absent an explicit chain-level finality failure procedure.",
+    "EXP-INV-005: The complete Explorer index can be rebuilt from supported nodes/RPC, receipts, logs, consensus metadata and registry reads without trusting the hosted Explorer database.",
+    "EXP-INV-006: Contract decoding uses runtime bytecode and versioned 420Registry commitments; labels and verified-source metadata cannot change execution truth.",
+    "EXP-INV-007: 420 Names and 420 Identity labels are display enrichments only and never replace the underlying address or canonical identity record.",
+    "EXP-INV-008: Explorer failure or unavailability cannot prevent direct wallet, RPC, contract or protocol interaction.",
+    "EXP-INV-009: Explorer operators gain no custody, smart-account execution, governance, bridge, validator or token-transfer authority.",
+    "EXP-INV-010: Public APIs/indexers are replaceable and must expose chain identifiers and indexed/finalized heights so clients can detect stale or wrong-network data.",
+    "EXP-INV-011: Transaction, receipt, event and balance presentation must remain traceable to canonical block hashes and chain ID.",
+    "EXP-INV-012: Privacy-sensitive off-chain payloads are not made canonical merely because a hash, commitment or transaction reference is visible in Explorer."
+  ]
+}

@@ -43,7 +43,7 @@ contract InvoiceRegistry420FuzzTest {
             merchantId: bytes32(uint256(1)), merchant: address(this), metadataHash: bytes32(0), currency: bytes3("CAD"),
             amount: total, expiresAt: uint64(block.timestamp + 1000), refundUntil: uint64(block.timestamp + 2000),
             mode: InvoiceRegistry420.Mode.PARTIAL_PAYMENT, acceptance: InvoiceRegistry420.Acceptance.FINALIZED,
-            partialPayments: true, quoteMaxSlippageBps: 42, acceptedAssetsHash: bytes32(0), settlementPlanHash: bytes32(0),
+            partialPayments: true, quoteMaxSlippageBps: 42, acceptedAssetsHash: bytes32(uint256(2)), settlementPlanHash: bytes32(0),
             tipPolicyHash: bytes32(0), active: true
         });
         bytes32 id = keccak256(abi.encode(total, first, second));

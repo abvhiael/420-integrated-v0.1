@@ -1,16 +1,22 @@
 {
-  "genesis_decisions_frozen": [
-    1,
-    2,
-    3,
-    4
-  ],
-  "source_contracts_implemented": 8,
+  "status_schema": "420pay-implementation-status-v2",
+  "genesis_decisions_frozen": [1, 2, 3, 4],
+  "source_contracts_implemented": 11,
   "static_verification_pass": true,
   "go_test": 0,
-  "foundry_available": false,
-  "solc_available": false,
-  "foundry_tests_pass": false,
-  "solidity_compile_claimed": false,
-  "security_audited": false
+  "foundry_available": true,
+  "solc_available": true,
+  "foundry_tests_pass": true,
+  "solidity_compile_pass": true,
+  "integrated_qualification_pass": true,
+  "genesis_verification_pass": true,
+  "genesis_hardening_pass": true,
+  "payer_originated_payment_path_supported": true,
+  "governance_not_required_for_payer_originated_settlement": true,
+  "canonical_swap_executor_present": true,
+  "canonical_settlement_adapter_present": true,
+  "genesis_swap_executor_trust_wiring_verified": false,
+  "shared_replay_consumption_supported_by_frozen_interface": false,
+  "external_security_audit_complete": false,
+  "note": "420Pay is implemented and CI-qualified. Remaining remediation is narrowly scoped to explicit Genesis adapter/executor trust wiring and a mutable shared replay-consumption interface; external third-party audit is not claimed."
 }

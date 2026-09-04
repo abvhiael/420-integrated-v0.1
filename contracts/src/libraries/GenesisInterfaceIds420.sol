@@ -10,4 +10,5 @@ library GenesisInterfaceIds420 {
     bytes32 internal constant IDENTITY_CREDENTIALS = keccak256("420/APP/IDENTITY_CREDENTIALS");
     bytes32 internal constant NAMES = keccak256("420/APP/NAMES");
     bytes32 internal constant SETTLEMENT_HEALTH = keccak256("420/APP/SETTLEMENT_HEALTH");
+    bytes32 internal constant CAPABILITY_REGISTRY = keccak256("420/APP/CAPABILITY_REGISTRY");
 }

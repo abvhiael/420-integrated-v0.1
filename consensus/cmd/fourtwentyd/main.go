@@ -62,12 +62,13 @@ func main() {
 		}
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
-		caps, err := c.ExchangeCapabilities(ctx, []string{"engine_forkchoiceUpdatedV3", "engine_getPayloadV3", "engine_newPayloadV3"})
+		wanted := []string{"engine_forkchoiceUpdatedV3", "engine_getPayloadV3", "engine_newPayloadV3", "engine420_submitSystemCallsV1"}
+		caps, err := c.ExchangeCapabilities(ctx, wanted)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(3)
 		}
-		fmt.Printf("fourtwentyd: Engine API reachable; capabilities=%v\n", caps)
+		fmt.Printf("fourtwentyd: Engine API reachable; capabilities=%v; required_420=%s\n", caps, "engine420_submitSystemCallsV1")
 		return
 	}
 	if *devnet {

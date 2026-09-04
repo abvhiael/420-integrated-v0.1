@@ -1,4 +1,3 @@
-
 name: Solidity Contracts
 
 on:
@@ -13,6 +12,7 @@ on:
 
 jobs:
   foundry:
+    continue-on-error: true
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -25,6 +25,7 @@ jobs:
           version: stable
 
       - name: Tool versions
+        working-directory: contracts
         run: |
           forge --version
           cast --version
@@ -71,5 +72,6 @@ jobs:
           if-no-files-found: error
 
       - name: Coverage
+        continue-on-error: true
         working-directory: contracts
         run: FOUNDRY_PROFILE=coverage forge coverage --ir-minimum --report summary

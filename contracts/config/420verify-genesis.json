@@ -1,0 +1,100 @@
+{
+  "schema": "420-verify-genesis-v1",
+  "name": "420Verify",
+  "class": "GENESIS_USER_APP",
+  "contractsRequired": false,
+  "canonicalStateAuthority": false,
+  "serviceId": "420/service/verify/v1",
+  "purpose": "Reproducible deployed-contract source verification for the 420 Integrated blockchain without treating verification as an audit, endorsement or safety guarantee.",
+  "canonicalSources": {
+    "deployedCode": "canonical chain state / RPC",
+    "deploymentContext": "transaction, receipt, creation bytecode and block context where available",
+    "registry": "420Registry / ProtocolRegistry for registered service and implementation references",
+    "explorer": "420Explorer for chain navigation and presentation only",
+    "appstore": "420AppStore consumes verification status as sourced security context only"
+  },
+  "verification": {
+    "statuses": ["FULL_MATCH", "PARTIAL_MATCH", "MISMATCH", "UNVERIFIABLE"],
+    "fullMatchRequiresRuntimeBytecodeMatch": true,
+    "creationBytecodeCheckedWhenRecoverable": true,
+    "compilerVersionRequired": true,
+    "compilerSettingsRequired": true,
+    "sourceBundleHashRequired": true,
+    "deployedRuntimeCodeHashRequired": true,
+    "chainIdAndAddressRequired": true,
+    "optimizerAndRunsRecorded": true,
+    "evmVersionRecorded": true,
+    "viaIRRecorded": true,
+    "metadataHashModeRecorded": true,
+    "libraryLinksRecorded": true,
+    "constructorArgumentsRecordedOrMarkedUnknown": true,
+    "immutableReferencesHandled": true,
+    "metadataDifferencesCannotBeSilentlyIgnored": true,
+    "verificationEvidenceIsReproducible": true,
+    "databaseIsNonCanonical": true,
+    "alternativeVerifiersAllowed": true
+  },
+  "proxyHandling": {
+    "proxyShellAndImplementationVerifiedSeparately": true,
+    "implementationAddressResolvedFromCanonicalStateWhenPossible": true,
+    "implementationUpgradeInvalidatesInheritedImplementationStatus": true,
+    "proxyVerificationCannotImplyImplementationVerification": true,
+    "implementationVerificationCannotImplyProxyAdminSafety": true
+  },
+  "submission": {
+    "supportsStandardJsonInput": true,
+    "supportsMultiFileSourceBundles": true,
+    "supportsFlattenedSourceAsCompatibilityInput": true,
+    "supportsConstructorArguments": true,
+    "supportsLibraryAddresses": true,
+    "supportsCompilerVersionSelection": true,
+    "supportsCompilerSettings": true,
+    "sourceNormalizationMustNotChangeSemanticInput": true,
+    "submittedSourceMayBePubliclyRedistributedWhenPublisherRequestsPublication": true
+  },
+  "securityMeaning": {
+    "verifiedMeansSourceBuildCorrespondsToDeployedCode": true,
+    "verifiedDoesNotMeanAudited": true,
+    "verifiedDoesNotMeanSafe": true,
+    "verifiedDoesNotMeanOfficial": true,
+    "verifiedDoesNotMeanImmutable": true,
+    "verifiedDoesNotMeanNonMalicious": true,
+    "verificationCannotCreateRegistryLegitimacy": true,
+    "verificationCannotGrantWalletPermissions": true
+  },
+  "privacy": {
+    "privateSourceSubmissionRequired": false,
+    "walletPrivateKeysAccepted": false,
+    "signingSecretsAccepted": false,
+    "encryptedApplicationPayloadsIndexed": false,
+    "privateMessengerContentIndexed": false,
+    "rawAttentionTelemetryIndexed": false
+  },
+  "requiredViews": [
+    "verify contract by address/network",
+    "submit source bundle and compiler configuration",
+    "verification result with exact mismatch reason",
+    "source files and compiler settings for published matches",
+    "runtime and creation bytecode hashes",
+    "constructor arguments and linked libraries",
+    "proxy and implementation relationship",
+    "verification history by address/code hash",
+    "open in 420Explorer",
+    "security disclaimer distinguishing verification from audit"
+  ],
+  "invariants": [
+    "VER-INV-001: 420Verify owns no canonical protocol state and requires no Verify-specific Genesis contract.",
+    "VER-INV-002: A FULL_MATCH result means the submitted build reproduces the deployed runtime bytecode under the recorded compiler inputs; it does not mean the contract is audited, safe, official or non-malicious.",
+    "VER-INV-003: Every result is bound to chain ID, contract address and deployed runtime code hash so a verification result cannot be silently reused for different code or a different network.",
+    "VER-INV-004: Compiler version and relevant settings, source bundle commitment, metadata mode, library links and constructor context are preserved as verification evidence.",
+    "VER-INV-005: Metadata, immutable and linked-library differences are explicitly handled and cannot be silently discarded to manufacture a full match.",
+    "VER-INV-006: Proxy shell and implementation contracts are verified separately; verification of either one cannot imply verification or safety of the other.",
+    "VER-INV-007: A proxy implementation upgrade cannot retain a prior implementation verification result unless the new implementation code is independently verified.",
+    "VER-INV-008: Verification records and hosted source databases are non-canonical and reproducible from the recorded inputs plus canonical deployed bytecode.",
+    "VER-INV-009: 420Verify cannot register an application, grant Registry legitimacy, sign transactions, authorize Smart Account capabilities, transfer assets or exercise governance authority.",
+    "VER-INV-010: MISMATCH and UNVERIFIABLE results preserve diagnostic reasons rather than presenting ambiguous verified/unverified labels.",
+    "VER-INV-011: Alternative verification services and local reproducible builds remain possible; 420Verify availability cannot block contract interaction through Wallet, RPC or Explorer.",
+    "VER-INV-012: Published verification evidence exposes enough compiler/build information for an independent verifier to reproduce the result.",
+    "VER-INV-013: Verification status consumed by 420Explorer, 420AppStore or 420Registry must retain source provenance and must not be transformed into an audit or endorsement claim."
+  ]
+}

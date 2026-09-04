@@ -16,6 +16,9 @@ contract InvoiceRegistry420 is GenesisResidentAccess420 {
 
     bytes32 public constant INVOICE_DOMAIN = keccak256("420/APP/420PAY_INVOICE");
     uint32 public constant PROTOCOL_VERSION = 1;
+    bytes3 public constant CURRENCY_CAD = bytes3("CAD");
+    bytes3 public constant CURRENCY_USD = bytes3("USD");
+    bytes3 public constant CURRENCY_420 = bytes3("420");
 
     struct Invoice {
         bytes32 merchantId;
@@ -35,10 +38,6 @@ contract InvoiceRegistry420 is GenesisResidentAccess420 {
         bool active;
     }
 
-    // Deliberately non-public: Solidity 0.8.24 cannot code-generate the implicit
-    // 15-field tuple getter for Invoice without exceeding the EVM stack limit.
-    // Stable, purpose-specific read methods below expose the fields needed by
-    // runtime consumers without widening the generated ABI surface.
     mapping(bytes32 => Invoice) private _invoices;
     mapping(bytes32 => uint256) public paidAmount;
     mapping(bytes32 => bool) public closed;
@@ -58,6 +57,10 @@ contract InvoiceRegistry420 is GenesisResidentAccess420 {
 
     function componentId() public pure override returns (bytes32) {
         return PayIds420.INVOICE_REGISTRY;
+    }
+
+    function supportedCurrency(bytes3 currency) public pure returns (bool) {
+        return currency == CURRENCY_CAD || currency == CURRENCY_USD || currency == CURRENCY_420;
     }
 
     function _invoiceSigningPrefix(bytes32 invoiceId, Invoice memory i) internal pure returns (bytes memory) {
@@ -86,9 +89,6 @@ contract InvoiceRegistry420 is GenesisResidentAccess420 {
     }
 
     function invoiceSigningRoot(bytes32 invoiceId, Invoice memory i) public pure returns (bytes32) {
-        // Every encoded value is a static ABI type, so concatenating these two
-        // ABI-encoded chunks preserves the exact byte sequence of one 15-value
-        // abi.encode call while avoiding legacy-codegen stack exhaustion.
         return keccak256(bytes.concat(_invoiceSigningPrefix(invoiceId, i), _invoiceSigningSuffix(i)));
     }
 
@@ -103,7 +103,10 @@ contract InvoiceRegistry420 is GenesisResidentAccess420 {
         require(i.amount > 0 && i.expiresAt > block.timestamp, "amount/expiry");
         require(i.refundUntil >= i.expiresAt, "refund window");
         require(i.quoteMaxSlippageBps <= 42, "slippage cap");
+        require(supportedCurrency(i.currency), "currency");
+        require(i.acceptedAssetsHash != bytes32(0), "accepted assets");
         if (i.mode == Mode.SINGLE_USE) require(!i.partialPayments, "single use");
+        if (i.mode == Mode.PARTIAL_PAYMENT) require(i.partialPayments, "partial mode");
 
         if (i.metadataHash != bytes32(0)) {
             IMetadataCommitment420.MetadataCommitment memory metadata = IMetadataCommitment420(
@@ -142,6 +145,9 @@ contract InvoiceRegistry420 is GenesisResidentAccess420 {
             paidAmount[invoiceId] += amount;
             if (paidAmount[invoiceId] == i.amount) closed[invoiceId] = true;
         } else {
+            // MULTI_USE without explicit partial-payment permission means each use
+            // must settle the full invoice amount; arbitrary fragments are denied.
+            require(amount == i.amount, "partial disabled");
             paidAmount[invoiceId] += amount;
         }
     }

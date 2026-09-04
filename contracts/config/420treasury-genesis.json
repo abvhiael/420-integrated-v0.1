@@ -1,0 +1,21 @@
+{
+  "schema":"420treasury-genesis-v1",
+  "status":"IMPLEMENTATION_QUALIFICATION",
+  "suite":"420 Treasury",
+  "custody_model":"420Vault VAULT_TREASURY; Treasury contracts are budget/disbursement control plane, not independent custody",
+  "governance_model":"budget creation, scheduling and cancellation are GovernanceTimelock/Civic-controlled; execution is narrowly capability-scoped per disbursement",
+  "contracts":["TreasuryIds420.sol","TreasuryAuthorization420.sol","TreasuryPolicyRegistry420.sol","TreasuryBudgetRegistry420.sol","TreasuryDisbursementRegistry420.sol","TreasuryRouter420.sol"],
+  "invariants":[
+    "TREASURY-INV-001: no Treasury contract creates a parallel asset-custody path around 420Vault",
+    "TREASURY-INV-002: budgets require an explicit Civic action commitment and bounded validity window",
+    "TREASURY-INV-003: scheduled disbursements must bind exactly to the parent budget Civic action hash",
+    "TREASURY-INV-004: disbursement IDs are canonical and replay-safe",
+    "TREASURY-INV-005: committed plus executed amounts cannot exceed the budget ceiling",
+    "TREASURY-INV-006: asset policy enforces single-disbursement and epoch caps",
+    "TREASURY-INV-007: execution is default-deny and capability-scoped to the exact disbursement",
+    "TREASURY-INV-008: execution is impossible before notBefore or after expiry",
+    "TREASURY-INV-009: cancellation releases unexecuted budget commitment and cannot revive terminal disbursements",
+    "TREASURY-INV-010: execution records a nonzero Vault release commitment for public auditability"
+  ],
+  "new_frozen_predeploy_required":false
+}

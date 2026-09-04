@@ -1,0 +1,31 @@
+{
+  "schema": "420pay-genesis-wiring-v1",
+  "status": "REMEDIATION_REQUIRED",
+  "payment_router": {
+    "contract": "PaymentRouter420.sol",
+    "settlement_adapter": "CanonicalSettlementAdapter420.sol",
+    "binding": "PaymentRouter420.setSettlementAdapter(CanonicalSettlementAdapter420)"
+  },
+  "settlement_adapter": {
+    "contract": "CanonicalSettlementAdapter420.sol",
+    "swap_executor": "CanonicalSwapExecutor420.sol",
+    "constructor_or_config_binding_required": true,
+    "abi_verified": "executeCanonicalSwap(bytes32,address,address,address,address,uint256,uint256)"
+  },
+  "swap_executor": {
+    "contract": "CanonicalSwapExecutor420.sol",
+    "trusted_caller_required": "CanonicalSettlementAdapter420",
+    "binding": "CanonicalSwapExecutor420.setTrustedCaller(CanonicalSettlementAdapter420,true)"
+  },
+  "invariants": [
+    "PaymentRouter420 settlementAdapter MUST resolve to CanonicalSettlementAdapter420 before payment service activation.",
+    "CanonicalSettlementAdapter420 swapExecutor MUST resolve to CanonicalSwapExecutor420 before payment service activation.",
+    "CanonicalSwapExecutor420 MUST mark the exact CanonicalSettlementAdapter420 instance as trusted before payment service activation.",
+    "No user, merchant, smart account, or unrelated dApp receives trusted-caller authority on CanonicalSwapExecutor420 merely by using 420Pay.",
+    "Genesis verification MUST fail closed if any of the three bindings above are absent or point to code with an unexpected runtime identity."
+  ],
+  "source_contracts_present": true,
+  "adapter_executor_abi_match_verified": true,
+  "deployment_binding_verified": false,
+  "note": "This manifest makes the previously implicit 420Pay -> 420Swap production wiring requirement explicit. Deployment binding remains false until Genesis deployment/verification proves the exact configured instances and trusted-caller relation."
+}

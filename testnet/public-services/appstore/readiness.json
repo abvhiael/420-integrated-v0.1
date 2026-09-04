@@ -1,0 +1,53 @@
+{
+  "schema": "420-testnet-appstore-readiness-v1",
+  "backend": {
+    "url": "REPLACE",
+    "status": "PENDING",
+    "required_checks": [
+      "resolves canonical application/service identity and version through 420Registry",
+      "preserves chain ID and network identity",
+      "preserves contract and implementation provenance",
+      "surfaces Explorer/source verification references without claiming independent certification",
+      "supports deprecation and security-warning provenance",
+      "survives restart",
+      "supports rebuild from canonical Registry and public chain sources",
+      "catalogue outage cannot block direct application interaction"
+    ]
+  },
+  "frontend": {
+    "url": "REPLACE",
+    "status": "PENDING",
+    "required_views": [
+      "browse and categories",
+      "search",
+      "application detail",
+      "publisher and provenance",
+      "contracts and versions",
+      "permissions and capability scopes",
+      "security/audit/verification evidence",
+      "deprecation and malicious-application warnings",
+      "open in 420Wallet"
+    ]
+  },
+  "wallet_safety_checks": [
+    "AppStore cannot sign transactions",
+    "AppStore cannot grant capabilities",
+    "AppStore cannot bypass wallet confirmation",
+    "high-risk permissions are visible before wallet handoff where metadata is available"
+  ],
+  "curation_checks": [
+    "listing does not create canonical Registry legitimacy",
+    "delisting does not revoke canonical Registry state",
+    "featured and ranked placement is non-canonical",
+    "sponsored placement is explicitly labeled",
+    "alternative AppStore clients and catalogues remain possible"
+  ],
+  "privacy_checks": [
+    "no private Messenger payload indexing",
+    "no private Commons payload indexing",
+    "no encrypted Resource payload indexing",
+    "no private Identity field indexing",
+    "no raw Attention telemetry indexing",
+    "installation or launch history is not public by default"
+  ]
+}

@@ -1,0 +1,208 @@
+name: 420 Genesis Contract Hardening
+
+on:
+  push:
+    paths:
+      - "contracts/**"
+      - ".github/workflows/contracts-hardening.yml"
+  pull_request:
+    paths:
+      - "contracts/**"
+      - ".github/workflows/contracts-hardening.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: contract-hardening-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  hardening:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: read
+    env:
+      FOUNDRY_PROFILE: hardening
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Slither
+        run: python -m pip install --disable-pip-version-check slither-analyzer
+
+      - name: Capture toolchain
+        working-directory: contracts
+        run: |
+          mkdir -p ../artifacts/hardening
+          {
+            echo "commit=${GITHUB_SHA}"
+            forge --version
+            cast --version
+            python --version
+            slither --version
+            forge config
+          } | tee ../artifacts/hardening/toolchain.txt
+
+      - name: Frozen compiler profile check
+        working-directory: contracts
+        run: |
+          CONFIG="$(forge config)"
+          grep -q 'solc = "0.8.24"' <<<"$CONFIG" || grep -q 'solc_version = "0.8.24"' <<<"$CONFIG"
+          grep -q 'evm_version = "cancun"' <<<"$CONFIG"
+          grep -q 'optimizer = true' <<<"$CONFIG"
+          grep -q 'optimizer_runs = 200' <<<"$CONFIG"
+          grep -q 'via_ir = true' <<<"$CONFIG"
+
+      - name: Dangerous authority and opcode scan
+        working-directory: contracts
+        run: |
+          mkdir -p ../artifacts/hardening
+          set +e
+          grep -RInE --include='*.sol' '\btx\.origin\b|\bselfdestruct\s*\(|\.delegatecall\s*\(' src \
+            | tee ../artifacts/hardening/dangerous-opcodes.txt
+          STATUS=${PIPESTATUS[0]}
+          set -e
+          if [ "$STATUS" -eq 0 ]; then
+            echo "Forbidden authority/opcode primitive found in production Solidity." >&2
+            exit 1
+          fi
+          if [ "$STATUS" -gt 1 ]; then
+            exit "$STATUS"
+          fi
+          : > ../artifacts/hardening/dangerous-opcodes.txt
+
+      - name: Clean hardening build
+        working-directory: contracts
+        run: forge clean && forge build --force --sizes 2>&1 | tee ../artifacts/hardening/build.txt
+
+      - name: AI package fuzz campaign
+        working-directory: contracts
+        run: forge test --match-path 'test/AI*.t.sol' -vvv 2>&1 | tee ../artifacts/hardening/ai-tests.txt
+
+      - name: Genesis invariant campaign
+        working-directory: contracts
+        run: forge test --match-path 'test/*Invariant*.t.sol' -vv 2>&1 | tee ../artifacts/hardening/invariants.txt
+
+      - name: AI gas and denial-of-service review evidence
+        working-directory: contracts
+        run: forge test --match-path 'test/AI*.t.sol' --gas-report 2>&1 | tee ../artifacts/hardening/gas-report.txt
+
+      - name: Slither high-severity gate
+        working-directory: contracts
+        run: |
+          set +e
+          slither . --exclude-dependencies --json ../artifacts/hardening/slither.json \
+            2>&1 | tee ../artifacts/hardening/slither.txt
+          STATUS=${PIPESTATUS[0]}
+          set -e
+          echo "slither_exit_status=$STATUS" >> ../artifacts/hardening/slither.txt
+
+          python - <<'PY'
+          import json
+          import sys
+
+          path = "../artifacts/hardening/slither.json"
+          with open(path, encoding="utf-8") as handle:
+              report = json.load(handle)
+
+          # Slither may return non-zero when detector findings exist. Treat the JSON
+          # report's success flag as the analysis-health signal, then enforce our own
+          # explicit High-severity policy below. Compilation/analysis errors remain fatal.
+          if report.get("success") is not True:
+              print(
+                  f"Slither analysis failed: {report.get('error') or 'unknown error'}",
+                  file=sys.stderr,
+              )
+              sys.exit(1)
+
+          high = []
+          for detector in report.get("results", {}).get("detectors", []):
+              if detector.get("impact") != "High":
+                  continue
+
+              # SmartAccount420 is intentionally a programmable account executor. Its
+              # arbitrary ETH send is not authority-less: execute/executeBatch are gated
+              # by owner or the immutable EntryPoint, while session operations are
+              # capability-checked during UserOperation validation. Keep the exception
+              # exact so every other high-severity arbitrary-send finding still fails CI.
+              allowed = False
+              if detector.get("check") == "arbitrary-send-eth":
+                  for element in detector.get("elements", []):
+                      source = element.get("source_mapping", {})
+                      parent = element.get("type_specific_fields", {}).get("parent", {})
+                      parent_name = parent.get("name") if isinstance(parent, dict) else parent
+                      if (
+                          element.get("name") == "_call"
+                          and source.get("filename_relative") == "src/accounts/SmartAccount420.sol"
+                          and parent_name == "SmartAccount420"
+                      ):
+                          allowed = True
+                          break
+
+              # ExchangeFeeRouter420.routeTokenFee intentionally snapshots the router's
+              # token balance around transferFrom so fee-on-transfer/rebasing assets are
+              # rejected before any distribution. The function itself is protected by
+              # ExchangeFeeRouter420's nonReentrant mutex. Keep this exception exact to
+              # this detector, function, contract, file, and stale balance variable.
+              if detector.get("check") == "reentrancy-balance":
+                  description = detector.get("description", "")
+                  exact_function = False
+                  exact_balance_use = False
+                  for element in detector.get("elements", []):
+                      source = element.get("source_mapping", {})
+                      fields = element.get("type_specific_fields", {})
+                      parent = fields.get("parent", {})
+                      parent_name = parent.get("name") if isinstance(parent, dict) else parent
+                      if (
+                          element.get("type") == "function"
+                          and element.get("name") == "routeTokenFee"
+                          and source.get("filename_relative") == "src/exchange/ExchangeFeeRouter420.sol"
+                          and parent_name == "ExchangeFeeRouter420"
+                      ):
+                          exact_function = True
+                      if (
+                          source.get("filename_relative") == "src/exchange/ExchangeFeeRouter420.sol"
+                          and element.get("additional_fields", {}).get("underlying_type") == "stale_balance_use"
+                          and element.get("additional_fields", {}).get("variable_name") == "balanceBefore"
+                      ):
+                          exact_balance_use = True
+
+                  if (
+                      exact_function
+                      and exact_balance_use
+                      and "ExchangeFeeRouter420.routeTokenFee(bytes32,address,uint256)" in description
+                  ):
+                      allowed = True
+
+              if not allowed:
+                  high.append(detector)
+
+          if high:
+              print("Unallowlisted high-severity Slither findings:", file=sys.stderr)
+              for detector in high:
+                  print(
+                      f"- {detector.get('check')}: {detector.get('description', '').splitlines()[0]}",
+                      file=sys.stderr,
+                  )
+              sys.exit(1)
+
+          print("No unallowlisted high-severity Slither findings.")
+          PY
+
+      - name: Upload hardening evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: contract-hardening-${{ github.sha }}
+          path: artifacts/hardening
+          if-no-files-found: warn
+          retention-days: 30

@@ -30,8 +30,6 @@ type ForkchoiceUpdatedResponse struct {
 	PayloadID     *string         `json:"payloadId,omitempty"`
 }
 
-// ExecutionPayloadV3 intentionally mirrors the common Engine API payload fields
-// without importing Geth internals into fourtwentyd.
 type ExecutionPayloadV3 struct {
 	ParentHash    Hash32   `json:"parentHash"`
 	FeeRecipient  string   `json:"feeRecipient"`
@@ -59,10 +57,35 @@ type GetPayloadV3Response struct {
 	ShouldOverrideBuilder bool               `json:"shouldOverrideBuilder"`
 }
 
+// SystemCallV1 is the authenticated Engine transport representation. Numeric values are
+// hex quantities to match Engine API conventions; payload is exact ABI calldata.
+type SystemCallV1 struct {
+	Sequence       string `json:"sequence"`
+	ExecutionBlock string `json:"executionBlock"`
+	ParentHash     Hash32 `json:"parentHash"`
+	ChainID        string `json:"chainId"`
+	Action         string `json:"action"`
+	Target         string `json:"target"`
+	Payload        string `json:"payload"`
+}
+
+type SystemCallBatchV1 struct {
+	ExecutionBlock string         `json:"executionBlock"`
+	ParentHash     Hash32         `json:"parentHash"`
+	ChainID        string         `json:"chainId"`
+	BatchRoot      Hash32         `json:"batchRoot"`
+	Calls          []SystemCallV1 `json:"calls"`
+}
+
+type SystemCallBatchStatusV1 struct {
+	Status          string  `json:"status"`
+	BatchRoot       Hash32  `json:"batchRoot"`
+	ValidationError *string `json:"validationError,omitempty"`
+}
+
 func (c *Client) ForkchoiceUpdatedV3(ctx context.Context, state ForkchoiceStateV1, attrs *PayloadAttributesV3) (ForkchoiceUpdatedResponse, error) {
 	var out ForkchoiceUpdatedResponse
-	params := []any{state, attrs}
-	err := c.Call(ctx, "engine_forkchoiceUpdatedV3", params, &out)
+	err := c.Call(ctx, "engine_forkchoiceUpdatedV3", []any{state, attrs}, &out)
 	return out, err
 }
 
@@ -75,5 +98,13 @@ func (c *Client) GetPayloadV3(ctx context.Context, payloadID string) (GetPayload
 func (c *Client) NewPayloadV3(ctx context.Context, payload ExecutionPayloadV3, versionedHashes []Hash32, parentBeaconBlockRoot Hash32) (PayloadStatusV1, error) {
 	var out PayloadStatusV1
 	err := c.Call(ctx, "engine_newPayloadV3", []any{payload, versionedHashes, parentBeaconBlockRoot}, &out)
+	return out, err
+}
+
+// SubmitSystemCallsV1 stages the consensus-committed system-call batch for one execution block.
+// This method exists only on the authenticated Engine endpoint of the patched node420 client.
+func (c *Client) SubmitSystemCallsV1(ctx context.Context, batch SystemCallBatchV1) (SystemCallBatchStatusV1, error) {
+	var out SystemCallBatchStatusV1
+	err := c.Call(ctx, "engine420_submitSystemCallsV1", []any{batch}, &out)
 	return out, err
 }

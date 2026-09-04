@@ -1,0 +1,27 @@
+name: 420Media Anvil Integration
+
+on:
+  pull_request:
+    paths:
+      - "media/node/**"
+      - "contracts/src/media/**"
+      - "scripts/420media-anvil-integration.sh"
+      - ".github/workflows/420media-anvil.yml"
+  workflow_dispatch:
+
+jobs:
+  anvil-media:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Run 420Media live Anvil integration
+        run: bash ./scripts/420media-anvil-integration.sh

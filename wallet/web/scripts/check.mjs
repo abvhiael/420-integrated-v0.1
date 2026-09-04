@@ -78,7 +78,8 @@ if (config.features?.sessionExecutionPreflight !== true || config.features?.sess
 if (config.features?.sessionExecution !== true || config.features?.entryPointUserOpSubmission !== true) errors.push('qualified controlled session broadcast must be enabled');
 if (config.features?.delegatedCapabilities !== false) errors.push('general delegated capabilities must remain disabled beyond scoped session execution');
 if (config.features?.recoveryManagement !== true) errors.push('qualified recovery management UI must remain enabled');
-if (config.features?.batchExecutionUi !== true || config.features?.batchExecution !== false || config.features?.passkeys !== false) errors.push('batch review UI must be enabled while batch broadcast and passkeys remain disabled until final hardening CI qualifies');
+if (config.features?.batchExecutionUi !== true || config.features?.batchExecution !== true) errors.push('qualified guarded batch execution UI and broadcast must remain enabled');
+if (config.features?.passkeys !== false) errors.push('passkeys must remain disabled until their dedicated milestone qualifies');
 if (config.smartAccount?.factoryAddress !== '0x0000000000000000000000000000000000000420') errors.push('wallet must use frozen canonical SmartAccountFactory420 address');
 
 if (errors.length) {
@@ -99,7 +100,7 @@ console.log(JSON.stringify({
   guardedBatchExecutionCore: true,
   batchExecutionUiEnabled: true,
   finalBatchHardeningQualified: true,
-  batchExecutionEnabled: false,
+  batchExecutionEnabled: true,
   delegatedCapabilitiesEnabled: false,
   serverSideKeyCustody: false,
   passkeysEnabled: false

@@ -58,6 +58,12 @@ library BongGogglesIds420 {
     bytes32 internal constant ACTION_PRIVATE_CONTEXT_BIND = keccak256("BG/ACTION/PRIVATE_CONTEXT_BIND/V1");
     bytes32 internal constant ACTION_PRIVATE_EPOCH_ROTATE = keccak256("BG/ACTION/PRIVATE_EPOCH_ROTATE/V1");
     bytes32 internal constant ACTION_PRIVATE_CONTEXT_CLOSE = keccak256("BG/ACTION/PRIVATE_CONTEXT_CLOSE/V1");
+
+    bytes32 internal constant ACTION_DISCOVERY_SUBMIT = keccak256("BG/ACTION/DISCOVERY_SUBMIT/V1");
+    bytes32 internal constant ACTION_REVIEW_PUBLISH = keccak256("BG/ACTION/REVIEW_PUBLISH/V1");
+    bytes32 internal constant ACTION_REVIEW_WITHDRAW = keccak256("BG/ACTION/REVIEW_WITHDRAW/V1");
+    bytes32 internal constant ACTION_CORRECTION_SUBMIT = keccak256("BG/ACTION/CORRECTION_SUBMIT/V1");
+    bytes32 internal constant ACTION_VERIFICATION_ATTEST = keccak256("BG/ACTION/VERIFICATION_ATTEST/V1");
 }
 
 library BongGogglesTypes420 {
@@ -81,6 +87,9 @@ library BongGogglesTypes420 {
     enum EventVisibility { PUBLIC, GROUP_ONLY, INVITE_ONLY }
     enum RSVPState { NONE, INTERESTED, GOING, DECLINED }
     enum PrivateConversationType { DIRECT, GROUP, GAME, EVENT }
+    enum DiscoverySubjectType { PLACE, PRODUCT, BRAND, EVENT, RESOURCE }
+    enum DiscoveryStatus { SUBMITTED, ACTIVE, STALE, DISPUTED, CLOSED, INVALID, MERGED }
+    enum LocationPrecision { EXACT, APPROX, REGION_ONLY, PRIVATE }
 
     uint32 internal constant MUTE_FEED = 1 << 0;
     uint32 internal constant MUTE_STORIES = 1 << 1;

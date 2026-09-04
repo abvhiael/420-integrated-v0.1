@@ -93,6 +93,9 @@ contract ExchangeFeeRouter420 is SystemAccess {
         uint256 developerAmount = amount * developerBps / BPS_DENOMINATOR;
         uint256 protocolAmount = amount - developmentAmount - communityAmount - liquidityAmount - developerAmount;
         require(protocolBps + developmentBps + communityBps + liquidityBps + developerBps == BPS_DENOMINATOR, "policy");
+        if (protocolAmount + developmentAmount + communityAmount + liquidityAmount + developerAmount != amount) {
+            revert AccountingMismatch();
+        }
 
         _transfer(asset, protocolTreasury, protocolAmount);
         _transfer(asset, developmentFund, developmentAmount);
@@ -113,7 +116,6 @@ contract ExchangeFeeRouter420 is SystemAccess {
             if (!asset.approve(developmentVault, 0)) revert TransferFailed();
         }
 
-        if (asset.balanceOf(address(this)) != balanceBefore) revert AccountingMismatch();
         emit ExchangeFeeRouted(tradeRef, token, amount, developerAmount);
     }
 

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -50,6 +51,28 @@ func TestLoadFileAndRedactedNeverContainTokenValue(t *testing.T) {
 	redacted := Redacted(r)
 	if redacted["signer_token_env"] != "MEDIA_SIGNER_TOKEN" { t.Fatalf("redacted=%v", redacted) }
 	for _, v := range redacted { if v == "super-secret" { t.Fatal("secret leaked") } }
+}
+
+func TestRedactedURLsStripPathsQueriesAndFragments(t *testing.T) {
+	c := validConfig()
+	c.RPCURL = "https://rpc.example.com/private-path?api_key=rpc-secret#fragment"
+	c.SignerURL = "https://signer.example.com/tenant/secret-route?token=signer-secret#fragment"
+	r, err := c.Runtime()
+	if err != nil { t.Fatal(err) }
+	redacted := Redacted(r)
+	if redacted["rpc_url"] != "https://rpc.example.com" {
+		t.Fatalf("rpc_url=%v", redacted["rpc_url"])
+	}
+	if redacted["signer_url"] != "https://signer.example.com" {
+		t.Fatalf("signer_url=%v", redacted["signer_url"])
+	}
+	serialized, err := json.Marshal(redacted)
+	if err != nil { t.Fatal(err) }
+	for _, secret := range []string{"rpc-secret", "signer-secret", "private-path", "secret-route", "fragment"} {
+		if strings.Contains(string(serialized), secret) {
+			t.Fatalf("redacted output leaked %q: %s", secret, serialized)
+		}
+	}
 }
 
 func TestZeroCapabilityRejected(t *testing.T) {

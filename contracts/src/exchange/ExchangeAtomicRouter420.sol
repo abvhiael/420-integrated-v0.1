@@ -4,6 +4,8 @@ pragma solidity ^0.8.24;
 import "./ExchangeAssetRegistry420.sol";
 import "./ExchangeAuthorization420.sol";
 import "./ExchangeEmergencyControl420.sol";
+import "./ExchangeFeePolicy420.sol";
+import "./ExchangeFeeRouter420.sol";
 import "./ExchangeMarketRegistry420.sol";
 import "./ExchangeOracleGuard420.sol";
 import "./ExchangeRouteRegistry420.sol";
@@ -23,12 +25,13 @@ interface IExchangeAtomicExecutionAdapter420 {
     function allowanceTarget() external view returns (address);
 }
 
-/// @notice Bounded atomic multi-hop execution for 420Exchange.
+/// @notice Bounded atomic multi-hop execution for 420Exchange with retained protocol-fee settlement.
 /// @dev ERC20 first-hop funds remain with the caller until an approved venue pulls them. Native $420 is wrapped
-///      into the canonical wrapped token and held only for the duration of the transaction. Intermediate tokens
-///      may exist on this router only during the transaction and must be consumed exactly by the following hop.
+///      into the canonical wrapped token and held only for the duration of the transaction. Every final hop settles
+///      to this router so one retained Exchange fee can be extracted from realized output before net delivery.
 contract ExchangeAtomicRouter420 {
     uint256 public constant MAX_HOPS = 4;
+    uint256 public constant BPS_DENOMINATOR = 10_000;
 
     ExchangeMarketRegistry420 public immutable marketRegistry;
     ExchangeAssetRegistry420 public immutable assetRegistry;
@@ -36,8 +39,11 @@ contract ExchangeAtomicRouter420 {
     ExchangeAuthorization420 public immutable authorization;
     ExchangeEmergencyControl420 public immutable emergencyControl;
     ExchangeOracleGuard420 public immutable oracleGuard;
+    ExchangeFeeRouter420 public immutable feeRouter;
+    ExchangeFeePolicy420 public immutable feePolicy;
     address public immutable wrappedNative420;
 
+    uint256 public tradeNonce;
     uint256 private _entered;
 
     struct Hop {
@@ -59,10 +65,12 @@ contract ExchangeAtomicRouter420 {
     error TokenCallFailed();
     error IntermediateInputMismatch();
     error IntermediateOutputMismatch();
+    error FinalOutputMismatch();
     error RepeatedToken();
     error InvalidNativeValue();
     error NativeTransferFailed();
     error UnexpectedNativeSender();
+    error FeePolicyUnavailable();
     error Reentrancy();
 
     event AtomicPathExecuted(
@@ -84,6 +92,14 @@ contract ExchangeAtomicRouter420 {
         uint256 amountIn,
         uint256 amountOut
     );
+    event ExchangeFeeSettled(
+        bytes32 indexed tradeRef,
+        bytes32 indexed pathHash,
+        address indexed asset,
+        uint256 grossAmountOut,
+        uint256 feeAmount,
+        uint256 netAmountOut
+    );
 
     constructor(
         address marketRegistry_,
@@ -92,14 +108,16 @@ contract ExchangeAtomicRouter420 {
         address authorization_,
         address emergencyControl_,
         address oracleGuard_,
-        address wrappedNative420_
+        address wrappedNative420_,
+        address feeRouter_
     ) {
         if (
             marketRegistry_ == address(0) || marketRegistry_.code.length == 0 || assetRegistry_ == address(0)
                 || assetRegistry_.code.length == 0 || routeRegistry_ == address(0) || routeRegistry_.code.length == 0
                 || authorization_ == address(0) || authorization_.code.length == 0 || emergencyControl_ == address(0)
                 || emergencyControl_.code.length == 0 || oracleGuard_ == address(0) || oracleGuard_.code.length == 0
-                || wrappedNative420_ == address(0) || wrappedNative420_.code.length == 0
+                || wrappedNative420_ == address(0) || wrappedNative420_.code.length == 0 || feeRouter_ == address(0)
+                || feeRouter_.code.length == 0
         ) revert InvalidAddress();
 
         marketRegistry = ExchangeMarketRegistry420(marketRegistry_);
@@ -109,6 +127,9 @@ contract ExchangeAtomicRouter420 {
         emergencyControl = ExchangeEmergencyControl420(emergencyControl_);
         oracleGuard = ExchangeOracleGuard420(oracleGuard_);
         wrappedNative420 = wrappedNative420_;
+        feeRouter = ExchangeFeeRouter420(feeRouter_);
+        feePolicy = feeRouter.feePolicy();
+        if (address(feePolicy) == address(0) || address(feePolicy).code.length == 0) revert FeePolicyUnavailable();
     }
 
     receive() external payable {
@@ -176,7 +197,7 @@ contract ExchangeAtomicRouter420 {
         emit NativePathExecuted(expectedPathHash, msg.sender, recipient, true, false, msg.value, amountOut);
     }
 
-    /// @notice Executes an ERC20 exact-input path whose final asset is canonical wrapped $420, then unwraps it.
+    /// @notice Executes an ERC20 exact-input path whose final asset is canonical wrapped $420, then unwraps net output.
     function swapExactInputPathForNative(
         address tokenIn,
         uint256 amountIn,
@@ -198,10 +219,6 @@ contract ExchangeAtomicRouter420 {
             hops,
             true
         );
-
-        IWrapped420AtomicRouter420(wrappedNative420).withdraw(amountOut);
-        (bool ok,) = recipient.call{value: amountOut}("");
-        if (!ok) revert NativeTransferFailed();
         emit NativePathExecuted(expectedPathHash, msg.sender, recipient, false, true, amountIn, amountOut);
     }
 
@@ -228,6 +245,7 @@ contract ExchangeAtomicRouter420 {
 
         address currentToken = tokenIn;
         uint256 currentAmount = amountIn;
+        uint256 finalOutputBalanceBefore;
         address[MAX_HOPS + 1] memory visitedTokens;
         visitedTokens[0] = tokenIn;
 
@@ -249,8 +267,7 @@ contract ExchangeAtomicRouter420 {
 
             ExchangeRouteRegistry420.RouteAdapter memory route = routeRegistry.requireActive(hop.routeId);
             bool finalHop = i + 1 == hops.length;
-            bool routerReceivesOutput = !finalHop || unwrapFinal;
-            address hopRecipient = routerReceivesOutput ? address(this) : recipient;
+            address hopRecipient = address(this);
             address payer = i == 0 ? initialPayer : address(this);
 
             uint256 inputBalanceBefore;
@@ -262,8 +279,8 @@ contract ExchangeAtomicRouter420 {
                 _forceApprove(currentToken, allowanceTarget, currentAmount);
             }
 
-            uint256 outputBalanceBefore;
-            if (routerReceivesOutput) outputBalanceBefore = _balanceOf(hop.tokenOut, address(this));
+            uint256 outputBalanceBefore = _balanceOf(hop.tokenOut, address(this));
+            if (finalHop) finalOutputBalanceBefore = outputBalanceBefore;
 
             uint256 nextAmount = IExchangeExecutionAdapter420(route.executionAdapter).executeSwap(
                 payer,
@@ -286,18 +303,24 @@ contract ExchangeAtomicRouter420 {
                 if (inputBalanceBefore - inputBalanceAfter != currentAmount) revert IntermediateInputMismatch();
             }
 
-            if (routerReceivesOutput) {
-                uint256 outputBalanceAfter = _balanceOf(hop.tokenOut, address(this));
-                if (outputBalanceAfter - outputBalanceBefore != nextAmount) revert IntermediateOutputMismatch();
-            }
+            uint256 outputBalanceAfter = _balanceOf(hop.tokenOut, address(this));
+            if (outputBalanceAfter - outputBalanceBefore != nextAmount) revert IntermediateOutputMismatch();
 
             currentToken = hop.tokenOut;
             currentAmount = nextAmount;
         }
 
         if (unwrapFinal && currentToken != wrappedNative420) revert InvalidPath();
-        if (currentAmount < minFinalAmountOut) revert SlippageExceeded();
-        amountOut = currentAmount;
+        amountOut = _settleFinalOutput(
+            principal,
+            recipient,
+            pathHash,
+            currentToken,
+            currentAmount,
+            minFinalAmountOut,
+            finalOutputBalanceBefore,
+            unwrapFinal
+        );
 
         emit AtomicPathExecuted(
             pathHash,
@@ -309,6 +332,47 @@ contract ExchangeAtomicRouter420 {
             amountOut,
             hops.length
         );
+    }
+
+    function _settleFinalOutput(
+        address principal,
+        address recipient,
+        bytes32 pathHash,
+        address outputToken,
+        uint256 grossAmountOut,
+        uint256 minNetAmountOut,
+        uint256 balanceBaseline,
+        bool unwrapFinal
+    ) private returns (uint256 netAmountOut) {
+        uint16 feeBps = feePolicy.exchangeFeeBps();
+        uint256 feeAmount = grossAmountOut * feeBps / BPS_DENOMINATOR;
+        netAmountOut = grossAmountOut - feeAmount;
+        if (netAmountOut < minNetAmountOut) revert SlippageExceeded();
+
+        uint256 nonce = ++tradeNonce;
+        bytes32 tradeRef = keccak256(
+            abi.encode(block.chainid, address(this), principal, nonce, pathHash, outputToken, grossAmountOut)
+        );
+
+        if (feeAmount != 0) {
+            if (!feePolicy.isOperational()) revert FeePolicyUnavailable();
+            _forceApprove(outputToken, address(feeRouter), feeAmount);
+            feeRouter.routeTokenFee(tradeRef, outputToken, feeAmount);
+            _forceApprove(outputToken, address(feeRouter), 0);
+        }
+
+        if (unwrapFinal) {
+            uint256 nativeBalanceBefore = address(this).balance;
+            IWrapped420AtomicRouter420(wrappedNative420).withdraw(netAmountOut);
+            (bool ok,) = recipient.call{value: netAmountOut}("");
+            if (!ok) revert NativeTransferFailed();
+            if (address(this).balance != nativeBalanceBefore) revert FinalOutputMismatch();
+        } else {
+            _safeTransfer(outputToken, recipient, netAmountOut);
+        }
+
+        if (_balanceOf(outputToken, address(this)) != balanceBaseline) revert FinalOutputMismatch();
+        emit ExchangeFeeSettled(tradeRef, pathHash, outputToken, grossAmountOut, feeAmount, netAmountOut);
     }
 
     function _requireActiveMarketPair(bytes32 marketId, address tokenIn, address tokenOut)
@@ -350,6 +414,11 @@ contract ExchangeAtomicRouter420 {
 
     function _safeApprove(address token, address spender, uint256 amount) private {
         (bool ok, bytes memory data) = token.call(abi.encodeWithSignature("approve(address,uint256)", spender, amount));
+        if (!ok || (data.length != 0 && (data.length != 32 || !abi.decode(data, (bool))))) revert TokenCallFailed();
+    }
+
+    function _safeTransfer(address token, address recipient, uint256 amount) private {
+        (bool ok, bytes memory data) = token.call(abi.encodeWithSignature("transfer(address,uint256)", recipient, amount));
         if (!ok || (data.length != 0 && (data.length != 32 || !abi.decode(data, (bool))))) revert TokenCallFailed();
     }
 }

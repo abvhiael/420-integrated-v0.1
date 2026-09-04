@@ -126,6 +126,8 @@ contract ExchangeAtomicRouter420Test {
     ExchangeAssetRegistry420 private assets;
     ExchangeMarketRegistry420 private markets;
     ExchangeRouteRegistry420 private routes;
+    ExchangeFeePolicy420 private feePolicy;
+    ExchangeFeeRouter420 private feeRouter;
     ExchangeAtomicRouter420 private router;
     MockAtomicExecutionAdapter420 private adapter;
     MockAtomicToken420 private tokenA;
@@ -141,6 +143,8 @@ contract ExchangeAtomicRouter420Test {
         assets = new ExchangeAssetRegistry420(address(this));
         markets = new ExchangeMarketRegistry420(address(this), address(assets), C_ID);
         routes = new ExchangeRouteRegistry420(address(this));
+        feePolicy = new ExchangeFeePolicy420(address(this));
+        feeRouter = new ExchangeFeeRouter420(address(this), address(feePolicy));
         adapter = new MockAtomicExecutionAdapter420();
         tokenA = new MockAtomicToken420("A", "A");
         tokenB = new MockAtomicToken420("B", "B");
@@ -190,7 +194,8 @@ contract ExchangeAtomicRouter420Test {
             address(authorization),
             address(emergency),
             address(oracleGuard),
-            address(tokenA)
+            address(tokenA),
+            address(feeRouter)
         );
         caps.setPrincipal(address(this));
 

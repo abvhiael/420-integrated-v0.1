@@ -75,6 +75,8 @@ contract ExchangeNativeValue420Test {
     ExchangeAssetRegistry420 private assets;
     ExchangeMarketRegistry420 private markets;
     ExchangeRouteRegistry420 private routes;
+    ExchangeFeePolicy420 private feePolicy;
+    ExchangeFeeRouter420 private feeRouter;
     ExchangeAtomicRouter420 private router;
 
     receive() external payable {}
@@ -91,13 +93,15 @@ contract ExchangeNativeValue420Test {
         assets=new ExchangeAssetRegistry420(address(this));
         markets=new ExchangeMarketRegistry420(address(this),address(assets),T_ID);
         routes=new ExchangeRouteRegistry420(address(this));
+        feePolicy=new ExchangeFeePolicy420(address(this));
+        feeRouter=new ExchangeFeeRouter420(address(this),address(feePolicy));
 
         _asset(W_ID,address(wrapped),bytes16("W420"));
         _asset(T_ID,address(token),bytes16("TEST"));
         markets.configureMarket(MARKET,W_ID,T_ID,keccak256("native-market"),address(adapter),ExchangeTypes420.MarketStatus.ACTIVE,keccak256("native-metadata"));
         routes.configureRoute(ROUTE,keccak256("420SWAP"),address(adapter),address(adapter),keccak256("native-route"),true);
         oracleGuard.configureGuard(MARKET,address(referenceOracle),1 days,500,true);
-        router=new ExchangeAtomicRouter420(address(markets),address(assets),address(routes),address(authorization),address(emergency),address(oracleGuard),address(wrapped));
+        router=new ExchangeAtomicRouter420(address(markets),address(assets),address(routes),address(authorization),address(emergency),address(oracleGuard),address(wrapped),address(feeRouter));
         caps.setPrincipal(address(this));
 
         token.mint(address(adapter),100 ether);

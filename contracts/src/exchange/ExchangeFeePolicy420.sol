@@ -36,6 +36,7 @@ contract ExchangeFeePolicy420 is SystemAccess {
 
     function setExchangeFee(uint16 newFeeBps) external onlyGovernance {
         require(newFeeBps <= MAX_EXCHANGE_FEE_BPS, "fee cap");
+        if (newFeeBps != 0) require(isOperational(), "fee policy incomplete");
         exchangeFeeBps = newFeeBps;
         emit ExchangeFeeSet(newFeeBps);
     }
@@ -72,5 +73,19 @@ contract ExchangeFeePolicy420 is SystemAccess {
             next.liquidityIncentives,
             next.developmentCompensationVault
         );
+    }
+
+    function isOperational() public view returns (bool) {
+        FeeSplit memory split = feeSplit;
+        Recipients memory next = recipients;
+        uint256 total = uint256(split.protocolTreasuryBps)
+            + split.developmentBps
+            + split.communityBps
+            + split.liquidityIncentivesBps
+            + split.developerPaymentBps;
+        return total == BPS_DENOMINATOR && split.developerPaymentBps <= MAX_DEVELOPER_SHARE_BPS
+            && next.protocolTreasury != address(0) && next.developmentFund != address(0)
+            && next.communityFund != address(0) && next.liquidityIncentives != address(0)
+            && next.developmentCompensationVault != address(0);
     }
 }

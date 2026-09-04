@@ -179,8 +179,7 @@ contract ExchangeAtomicRouter420 {
             minFinalAmountOut,
             recipient,
             expectedPathHash,
-            hops,
-            false
+            hops
         );
     }
 
@@ -212,8 +211,7 @@ contract ExchangeAtomicRouter420 {
             minFinalAmountOut,
             recipient,
             expectedPathHash,
-            hops,
-            false
+            hops
         );
         if (_balanceOf(tokenIn, address(this)) != balanceBefore) revert DelegatedInputMismatch();
     }
@@ -237,8 +235,7 @@ contract ExchangeAtomicRouter420 {
             minFinalAmountOut,
             recipient,
             expectedPathHash,
-            hops,
-            false
+            hops
         );
         emit NativePathExecuted(expectedPathHash, msg.sender, recipient, true, false, msg.value, amountOut);
     }
@@ -262,8 +259,7 @@ contract ExchangeAtomicRouter420 {
             minNativeOut,
             recipient,
             expectedPathHash,
-            hops,
-            true
+            hops
         );
         emit NativePathExecuted(expectedPathHash, msg.sender, recipient, false, true, amountIn, amountOut);
     }
@@ -276,8 +272,7 @@ contract ExchangeAtomicRouter420 {
         uint256 minFinalAmountOut,
         address recipient,
         bytes32 expectedPathHash,
-        Hop[] calldata hops,
-        bool unwrapFinal
+        Hop[] calldata hops
     ) private returns (uint256 amountOut) {
         if (
             principal == address(0) || initialPayer == address(0) || tokenIn == address(0) || amountIn == 0
@@ -313,7 +308,6 @@ contract ExchangeAtomicRouter420 {
 
             ExchangeRouteRegistry420.RouteAdapter memory route = routeRegistry.requireActive(hop.routeId);
             bool finalHop = i + 1 == hops.length;
-            address hopRecipient = address(this);
             address payer = i == 0 ? initialPayer : address(this);
 
             uint256 inputBalanceBefore;
@@ -330,7 +324,7 @@ contract ExchangeAtomicRouter420 {
 
             uint256 nextAmount = IExchangeExecutionAdapter420(route.executionAdapter).executeSwap(
                 payer,
-                hopRecipient,
+                address(this),
                 currentToken,
                 hop.tokenOut,
                 currentAmount,
@@ -356,6 +350,7 @@ contract ExchangeAtomicRouter420 {
             currentAmount = nextAmount;
         }
 
+        bool unwrapFinal = msg.sig == this.swapExactInputPathForNative.selector;
         if (unwrapFinal && currentToken != wrappedNative420) revert InvalidPath();
         amountOut = _settleFinalOutput(
             principal,

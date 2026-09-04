@@ -5,9 +5,9 @@ import process from 'node:process';
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const required = [
   'index.html', 'app.js', 'ui-v1.js', 'apps-page.js', 'styles.css', 'apps.css', 'runtime-config.json',
-  'core/abi.js', 'core/accounts.js', 'core/apps.js', 'core/capabilities.js', 'core/capability-management.js', 'core/session-management.js', 'core/session-execution.js', 'core/recovery.js',
+  'core/abi.js', 'core/accounts.js', 'core/apps.js', 'core/capabilities.js', 'core/capability-management.js', 'core/session-management.js', 'core/session-execution.js', 'core/recovery.js', 'core/recovery-management.js',
   'core/config.js', 'core/deployment.js', 'core/execution.js', 'core/portfolio.js', 'core/provider.js', 'core/provider-lifecycle.js', 'core/services.js', 'core/send.js',
-  'test/core.test.js', 'test/apps.test.js', 'test/execution.test.js', 'test/capabilities.test.js', 'test/capability-management.test.js', 'test/session-management.test.js', 'test/session-execution.test.js', 'test/recovery.test.js', 'test/ui-v1.test.js', 'test/send.test.js', 'test/provider-lifecycle.test.js', 'test/ui-hardening.test.js',
+  'test/core.test.js', 'test/apps.test.js', 'test/execution.test.js', 'test/capabilities.test.js', 'test/capability-management.test.js', 'test/session-management.test.js', 'test/session-execution.test.js', 'test/recovery.test.js', 'test/recovery-management.test.js', 'test/ui-v1.test.js', 'test/send.test.js', 'test/provider-lifecycle.test.js', 'test/ui-hardening.test.js',
 ];
 
 const errors = [];
@@ -64,13 +64,23 @@ for (const requiredGuard of ['duplicate ecosystem service id', 'service URL cred
 }
 
 const accounts = fs.readFileSync(path.join(root, 'core/accounts.js'), 'utf8');
-for (const requiredBinding of ['SmartAccount', 'eth_getCode', 'owner', 'recoveryAuthority', 'authorizationEpoch', 'capabilityRegistry']) {
+for (const requiredBinding of ['SmartAccount', 'eth_getCode', 'owner', 'recoveryAuthority', 'authorizationEpoch', 'capabilityRegistry', 'readDeployedSmartAccountState']) {
   if (!accounts.includes(requiredBinding)) errors.push(`missing canonical account read binding: ${requiredBinding}`);
 }
 
 const recovery = fs.readFileSync(path.join(root, 'core/recovery.js'), 'utf8');
 for (const requiredGuard of ['RECOVERY_DELAY_SECONDS', 'pending recovery owner exists without executable timestamp', 'canSetAuthority', 'canPropose', 'canCancel', 'canFinalize']) {
   if (!recovery.includes(requiredGuard)) errors.push(`missing recovery state policy guard: ${requiredGuard}`);
+}
+
+const recoveryManagement = fs.readFileSync(path.join(root, 'core/recovery-management.js'), 'utf8');
+for (const requiredGuard of [
+  '67bdcc3f', '7ee76082', '0ba234d6', 'e2ccb305', 'eth_call', 'eth_estimateGas', 'eth_sendTransaction',
+  'connected account is not the on-chain SmartAccount420 owner', 'connected account is not the configured recovery authority',
+  'recovery authority post-confirmation verification failed', 'recovery proposal post-confirmation verification failed',
+  'recovery cancellation post-confirmation verification failed', 'recovery finalization did not advance authorization epoch'
+]) {
+  if (!recoveryManagement.includes(requiredGuard)) errors.push(`missing guarded recovery management control: ${requiredGuard}`);
 }
 
 const deployment = fs.readFileSync(path.join(root, 'core/deployment.js'), 'utf8');
@@ -128,7 +138,7 @@ if (config.features?.capabilityMutation !== true || config.features?.gasSponsorG
 if (config.features?.sessionKeyAdministration !== true || config.features?.sessionGrantManagement !== true || config.features?.sessionKeys !== true) errors.push('session-key administration and scoped session grants must remain enabled');
 if (config.features?.sessionExecutionPreflight !== true) errors.push('session execution preflight must be enabled');
 if (config.features?.sessionExecution !== false || config.features?.entryPointUserOpSubmission !== false || config.features?.delegatedCapabilities !== false) errors.push('session broadcast/delegated execution must remain disabled until EntryPoint420 transport is frozen');
-if (config.features?.batchExecution !== false || config.features?.passkeys !== false || config.features?.recoveryManagement !== false) errors.push('batching, passkeys, and recovery management must remain disabled');
+if (config.features?.batchExecution !== false || config.features?.passkeys !== false || config.features?.recoveryManagement !== false) errors.push('batching, passkeys, and recovery UI mutation must remain disabled until UI wiring is qualified');
 if (config.features?.smartAccountCreation !== true || config.features?.smartAccountDiscovery !== true) errors.push('smart account discovery and creation must remain enabled');
 if (config.features?.networkReads !== true || config.features?.readOnlyPortfolio !== true) errors.push('network and portfolio reads must remain enabled');
 if (!config.smartAccount || !Array.isArray(config.trackedAssets)) errors.push('smart account and tracked asset runtime config required');
@@ -155,7 +165,8 @@ console.log(JSON.stringify({
   smartAccountDiscovery: true,
   smartAccountCreation: true,
   recoveryStateInspection: true,
-  recoveryManagementEnabled: false,
+  guardedRecoveryMutationCore: true,
+  recoveryManagementUiEnabled: false,
   simulatedOwnerExecution: true,
   preBroadcastOwnerReverification: true,
   capabilityInspection: true,

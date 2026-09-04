@@ -85,7 +85,7 @@ func TestAnvilMediaJobAdapterLifecycle(t *testing.T) {
 	}
 	if !found { t.Fatal("created job was not discovered from JobCreated logs") }
 
-	if err := adapter.AcceptJob(ctx, createdJob, operatorID); err != nil { t.Fatal(err) }
+	if err := adapter.AcceptJob(ctx, createdJob); err != nil { t.Fatal(err) }
 	accepted, err := adapter.RefreshJob(ctx, createdJob)
 	if err != nil { t.Fatal(err) }
 	if accepted.Status != medianode.JobAccepted || accepted.OperatorID != operatorID {

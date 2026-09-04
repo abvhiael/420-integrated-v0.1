@@ -131,7 +131,9 @@ test('prepared batch calldata mutation is rejected before broadcast', async () =
     throw new Error(method);
   } };
   const prepared = await prepareSmartAccountBatch(provider, controller, state, [{ target: targetA, value: 1, data: '0x1234' }]);
-  prepared.transaction.data = `${prepared.transaction.data.slice(0, -2)}00`;
+  const payloadIndex = prepared.transaction.data.indexOf('1234');
+  assert.notEqual(payloadIndex, -1);
+  prepared.transaction.data = `${prepared.transaction.data.slice(0, payloadIndex)}1334${prepared.transaction.data.slice(payloadIndex + 4)}`;
   await assert.rejects(sendPreparedSmartAccountBatch(provider, prepared, state), /calldata changed after simulation/i);
   assert.equal(sends, 0);
 });

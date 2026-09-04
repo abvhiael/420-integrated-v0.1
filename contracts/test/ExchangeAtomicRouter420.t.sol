@@ -189,7 +189,8 @@ contract ExchangeAtomicRouter420Test {
             address(routes),
             address(authorization),
             address(emergency),
-            address(oracleGuard)
+            address(oracleGuard),
+            address(tokenA)
         );
         caps.setPrincipal(address(this));
 

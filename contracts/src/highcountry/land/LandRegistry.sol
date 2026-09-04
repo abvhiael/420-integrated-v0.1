@@ -159,6 +159,12 @@ contract LandRegistry {
         return parcel.occupant == address(0) ? parcel.owner : parcel.occupant;
     }
 
+    function growCapacityOf(uint64 parcelId) external view returns (uint32) {
+        LandParcel memory parcel = _parcels[parcelId];
+        if (!parcel.exists) revert HCNotFound();
+        return parcel.growCapacity;
+    }
+
     function exists(uint64 parcelId) external view returns (bool) {
         return _parcels[parcelId].exists;
     }

@@ -1,8 +1,24 @@
 import { decodeString, decodeUint, encodeBalanceOf, encodeDecimals, encodeSymbol, normalizeAddress } from './abi.js';
 
+const MAX_TOKEN_SYMBOL_LENGTH = 32;
+
 function hexToBigInt(value, label) {
   if (typeof value !== 'string' || !/^0x[0-9a-fA-F]+$/.test(value)) throw new Error(`invalid ${label}`);
   return BigInt(value);
+}
+
+function normalizeDecimals(value) {
+  const decimals = Number(value);
+  if (!Number.isInteger(decimals) || decimals < 0 || decimals > 255) throw new Error('invalid token decimals');
+  return decimals;
+}
+
+function normalizeSymbol(value) {
+  const raw = String(value ?? '');
+  if (/[\u0000-\u001f\u007f]/.test(raw)) throw new Error('invalid token symbol');
+  const symbol = raw.trim();
+  if (!symbol || symbol.length > MAX_TOKEN_SYMBOL_LENGTH) throw new Error('invalid token symbol');
+  return symbol;
 }
 
 export async function readNetwork(provider, expectedChainId = null) {
@@ -10,7 +26,8 @@ export async function readNetwork(provider, expectedChainId = null) {
     provider.request('eth_chainId'),
     provider.request('eth_blockNumber'),
   ]);
-  const normalizedChainId = chainId?.toLowerCase();
+  if (typeof chainId !== 'string' || !/^0x[0-9a-fA-F]+$/.test(chainId)) throw new Error('invalid chain id');
+  const normalizedChainId = chainId.toLowerCase();
   const expected = expectedChainId?.toLowerCase() || null;
   return {
     healthy: true,
@@ -40,12 +57,14 @@ export async function readErc20Balance(provider, asset, address) {
     asset.decimals == null ? call(provider, token, encodeDecimals()) : null,
     asset.symbol ? null : call(provider, token, encodeSymbol()),
   ]);
+  const decimals = normalizeDecimals(asset.decimals == null ? decodeUint(decimalsRaw) : asset.decimals);
+  const symbol = normalizeSymbol(asset.symbol || decodeString(symbolRaw));
   return {
     address: token,
     account,
     raw: decodeUint(balanceRaw),
-    decimals: asset.decimals == null ? Number(decodeUint(decimalsRaw)) : Number(asset.decimals),
-    symbol: asset.symbol || decodeString(symbolRaw),
+    decimals,
+    symbol,
   };
 }
 
@@ -63,6 +82,8 @@ export async function readPortfolio(provider, addresses, trackedAssets = []) {
 
 export function formatUnits(raw, decimals = 18, precision = 6) {
   raw = BigInt(raw);
+  decimals = normalizeDecimals(decimals);
+  if (!Number.isInteger(precision) || precision < 0 || precision > 255) throw new Error('invalid display precision');
   const base = 10n ** BigInt(decimals);
   const whole = raw / base;
   const fraction = (raw % base).toString().padStart(decimals, '0').slice(0, precision).replace(/0+$/, '');

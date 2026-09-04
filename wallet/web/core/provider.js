@@ -38,4 +38,16 @@ export class InjectedProvider420 {
   async chainId() {
     return this.request('eth_chainId');
   }
+
+  on(eventName, listener) {
+    if (typeof this.provider.on !== 'function') return false;
+    this.provider.on(eventName, listener);
+    return true;
+  }
+
+  removeListener(eventName, listener) {
+    if (typeof this.provider.removeListener !== 'function') return false;
+    this.provider.removeListener(eventName, listener);
+    return true;
+  }
 }

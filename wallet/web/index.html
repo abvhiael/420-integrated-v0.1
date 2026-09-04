@@ -3,119 +3,136 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="color-scheme" content="dark light" />
+  <meta name="color-scheme" content="dark" />
   <title>420 Wallet</title>
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
-  <main class="shell">
-    <header class="topbar">
-      <div><p class="eyebrow">420 Integrated</p><h1>420 Wallet</h1></div>
-      <button id="connect" type="button">Connect wallet</button>
-    </header>
+  <div class="wallet-layout">
+    <aside class="sidebar" aria-label="Wallet navigation">
+      <div class="brand"><span class="brand-mark">420</span><div><strong>Wallet</strong><small>Integrated</small></div></div>
+      <nav>
+        <button class="nav-item active" data-scroll-target="#overview">Overview</button>
+        <button class="nav-item" data-scroll-target="#execution-panel">Send / Execute</button>
+        <button class="nav-item" data-scroll-target="#capability-panel">Permissions</button>
+        <button class="nav-item" data-scroll-target="#session-panel">Sessions</button>
+        <button class="nav-item" data-scroll-target="#services-section">420 Apps</button>
+      </nav>
+      <div class="sidebar-note"><span class="status-dot"></span><span>Wallet Core security boundary active</span></div>
+    </aside>
 
-    <section class="account-card" aria-labelledby="account-heading">
-      <div><p class="label" id="account-heading">Controller</p><strong id="account">Not connected</strong></div>
-      <div><p class="label">Smart Account</p><strong id="smart-account">—</strong></div>
-      <div><p class="label">On-chain owner</p><strong id="owner">—</strong></div>
-      <div><p class="label">Network</p><strong id="network">420 Integrated</strong></div>
-      <div><p class="label">Latest block</p><strong id="block">—</strong></div>
-      <div><p class="label">RPC</p><strong id="rpc-status">Not checked</strong></div>
-    </section>
+    <main class="shell">
+      <header class="topbar">
+        <div><p class="eyebrow">420 Integrated</p><h1>420 Wallet</h1><p class="subtitle">Your account, assets, permissions & verified 420 ecosystem access.</p></div>
+        <button id="connect" class="primary-action" type="button">Connect wallet</button>
+      </header>
 
-    <section>
-      <div class="section-heading">
-        <div><p class="eyebrow">Canonical account</p><h2>Smart Account deployment</h2></div>
-        <button id="create-account" type="button" hidden disabled>Create Smart Account</button>
-      </div>
-      <p>Creation uses only the canonical SmartAccountFactory420 and requires explicit approval from the connected controller.</p>
-    </section>
+      <section id="overview" class="hero-card">
+        <div class="hero-copy"><p class="eyebrow">Smart account</p><h2 id="smart-account">—</h2><p id="owner-line" class="muted">Connect a controller to discover your canonical SmartAccount420.</p><div class="hero-actions"><button id="create-account" type="button" hidden disabled>Create Smart Account</button><button class="ghost-button" data-copy-source="#smart-account" type="button">Copy address</button></div></div>
+        <div class="network-card"><span class="status-dot"></span><div><span class="label">Network</span><strong id="network">420 Integrated</strong><small id="rpc-status">Not checked</small></div></div>
+      </section>
 
-    <section id="execution-panel" hidden>
-      <div class="section-heading"><div><p class="eyebrow">Owner authority · simulate before send</p><h2>Smart Account execution</h2></div></div>
-      <div class="account-card">
-        <label><span class="label">Target address</span><input id="execute-target" type="text" autocomplete="off" placeholder="0x…" /></label>
-        <label><span class="label">Native value (wei)</span><input id="execute-value" type="text" inputmode="numeric" autocomplete="off" value="0" /></label>
-        <label><span class="label">Calldata</span><input id="execute-data" type="text" autocomplete="off" value="0x" /></label>
-        <div><p class="label">Execution authority</p><strong id="execution-authority">On-chain owner</strong></div>
-        <div><p class="label">Simulation</p><strong id="execute-simulation">Not simulated</strong></div>
-      </div>
-      <div class="section-heading">
-        <p>Direct calls to wallet authority contracts are blocked. Any input change invalidates the prior simulation.</p>
-        <div><button id="simulate-execution" type="button" disabled>Simulate</button> <button id="send-execution" type="button" disabled>Execute</button></div>
-      </div>
-    </section>
+      <section class="metric-grid account-card" aria-labelledby="account-heading">
+        <div><p class="label" id="account-heading">Controller</p><strong id="account">Not connected</strong></div>
+        <div><p class="label">On-chain owner</p><strong id="owner">—</strong></div>
+        <div><p class="label">Latest block</p><strong id="block">—</strong></div>
+        <div><p class="label">Account state</p><strong>Canonical factory discovery</strong></div>
+      </section>
 
-    <section id="capability-panel" hidden>
-      <div class="section-heading"><div><p class="eyebrow">Canonical permissions</p><h2>Capability inspector</h2></div></div>
-      <div class="account-card">
-        <label><span class="label">Grant ID (bytes32)</span><input id="capability-grant-id" type="text" autocomplete="off" placeholder="0x…64 hex chars" /></label>
-        <div><p class="label">Capability Registry</p><strong id="capability-registry">—</strong></div>
-        <div><p class="label">Grant state</p><strong id="capability-state">Not inspected</strong></div>
-        <div><p class="label">Principal</p><strong id="capability-principal">—</strong></div>
-        <div><p class="label">Capability ID</p><strong id="capability-id">—</strong></div>
-        <div><p class="label">Scope hash</p><strong id="capability-scope">—</strong></div>
-        <div><p class="label">Limits / usage</p><strong id="capability-limits">—</strong></div>
-      </div>
-      <div class="section-heading">
-        <p>Inspection reads directly from canonical CapabilityRegistry420. Revocation is available only for a verified grant belonging to this Smart Account.</p>
-        <div><button id="inspect-capability" type="button" disabled>Inspect permission</button> <button id="revoke-capability" type="button" disabled>Revoke grant</button></div>
-      </div>
-    </section>
+      <section>
+        <div class="section-heading"><div><p class="eyebrow">Portfolio</p><h2>Assets</h2></div><span class="section-kicker">Read-only chain state</span></div>
+        <div id="portfolio" class="service-grid asset-grid" aria-live="polite">Connect a wallet to load read-only balances.</div>
+      </section>
 
-    <section id="gas-sponsor-panel" hidden>
-      <div class="section-heading"><div><p class="eyebrow">Owner-controlled capability</p><h2>Gas sponsor grant</h2></div></div>
-      <div class="account-card">
-        <label><span class="label">Sponsor address</span><input id="sponsor-address" type="text" autocomplete="off" placeholder="0x…" /></label>
-        <label><span class="label">Operation ID (bytes32)</span><input id="sponsor-operation" type="text" autocomplete="off" placeholder="0x…64 hex chars" /></label>
-        <label><span class="label">Per-call limit</span><input id="sponsor-per-call" type="text" inputmode="numeric" value="0" /></label>
-        <label><span class="label">Period limit</span><input id="sponsor-period-limit" type="text" inputmode="numeric" value="0" /></label>
-        <label><span class="label">Period seconds</span><input id="sponsor-period-seconds" type="text" inputmode="numeric" value="0" /></label>
-        <label><span class="label">Valid from (unix seconds)</span><input id="sponsor-valid-from" type="text" inputmode="numeric" value="0" /></label>
-        <label><span class="label">Valid until (0 = no expiry)</span><input id="sponsor-valid-until" type="text" inputmode="numeric" value="0" /></label>
-      </div>
-      <div class="section-heading">
-        <p>Creation is simulated before wallet approval and verified against CapabilityRegistry420 after confirmation.</p>
+      <section id="execution-panel" class="panel" hidden>
+        <div class="section-heading"><div><p class="eyebrow">Owner authority · simulation required</p><h2>Send / Execute</h2></div><span id="review-state" class="status-pill" data-state="idle">Awaiting simulation</span></div>
+
+        <div class="account-card">
+          <div class="section-heading"><div><p class="eyebrow">Guided send</p><h3>Send an asset</h3></div><span class="section-kicker">Builds a guarded execution request</span></div>
+          <div class="form-grid">
+            <label><span class="label">Asset</span><select id="send-asset"><option>420 · native</option></select></label>
+            <label><span class="label">Recipient</span><input id="send-recipient" type="text" autocomplete="off" placeholder="0x…" /></label>
+            <label><span class="label">Amount</span><input id="send-amount" type="text" inputmode="decimal" autocomplete="off" placeholder="4.20" /></label>
+          </div>
+          <div class="section-heading"><p id="send-preview" class="muted">Enter a recipient and amount, then prepare the guarded transaction.</p><button id="prepare-send" type="button">Prepare send</button></div>
+        </div>
+
+        <div class="split-panel">
+          <div class="form-card">
+            <p class="eyebrow">Advanced transaction details</p>
+            <label><span class="label">Target address</span><input id="execute-target" type="text" autocomplete="off" placeholder="0x…" /></label>
+            <label><span class="label">Native value (wei)</span><input id="execute-value" type="text" inputmode="numeric" autocomplete="off" value="0" /></label>
+            <label><span class="label">Calldata</span><textarea id="execute-data" autocomplete="off" rows="5">0x</textarea></label>
+            <div class="button-row"><button id="simulate-execution" type="button" disabled>Simulate</button><button id="send-execution" class="primary-action" type="button" disabled>Execute</button></div>
+          </div>
+          <aside class="review-card" aria-label="Transaction review">
+            <p class="eyebrow">Transaction review</p>
+            <dl><div><dt>Target</dt><dd id="review-target">—</dd></div><div><dt>Value</dt><dd id="review-value">0 wei</dd></div><div><dt>Selector</dt><dd id="review-selector">none</dd></div><div><dt>Calldata</dt><dd id="review-calldata">0 bytes</dd></div><div><dt>Estimated gas</dt><dd id="review-gas">Simulate first</dd></div></dl>
+            <div class="security-check"><span>✓</span><p><strong id="execution-authority">On-chain owner</strong><small>Wallet authority contracts are blocked as direct targets.</small></p></div>
+            <p class="simulation-line"><span class="label">Simulation</span><strong id="execute-simulation">Not simulated</strong></p>
+          </aside>
+        </div>
+      </section>
+
+      <section id="capability-panel" class="panel" hidden>
+        <div class="section-heading"><div><p class="eyebrow">Canonical permissions</p><h2>Capability inspector</h2></div></div>
+        <div class="account-card permission-grid">
+          <label><span class="label">Grant ID (bytes32)</span><input id="capability-grant-id" type="text" autocomplete="off" placeholder="0x…64 hex chars" /></label>
+          <div><p class="label">Capability Registry</p><strong id="capability-registry">—</strong></div>
+          <div><p class="label">Grant state</p><strong id="capability-state">Not inspected</strong></div>
+          <div><p class="label">Principal</p><strong id="capability-principal">—</strong></div>
+          <div><p class="label">Capability ID</p><strong id="capability-id">—</strong></div>
+          <div><p class="label">Scope hash</p><strong id="capability-scope">—</strong></div>
+          <div><p class="label">Limits / usage</p><strong id="capability-limits">—</strong></div>
+        </div>
+        <div class="button-row"><button id="inspect-capability" type="button" disabled>Inspect permission</button><button id="revoke-capability" class="danger-button" type="button" disabled>Revoke grant</button></div>
+      </section>
+
+      <section id="gas-sponsor-panel" class="panel" hidden>
+        <div class="section-heading"><div><p class="eyebrow">Owner-controlled capability</p><h2>Gas sponsor grant</h2></div></div>
+        <div class="form-grid account-card">
+          <label><span class="label">Sponsor address</span><input id="sponsor-address" type="text" autocomplete="off" placeholder="0x…" /></label>
+          <label><span class="label">Operation ID (bytes32)</span><input id="sponsor-operation" type="text" autocomplete="off" placeholder="0x…64 hex chars" /></label>
+          <label><span class="label">Per-call limit</span><input id="sponsor-per-call" type="text" inputmode="numeric" value="0" /></label>
+          <label><span class="label">Period limit</span><input id="sponsor-period-limit" type="text" inputmode="numeric" value="0" /></label>
+          <label><span class="label">Period seconds</span><input id="sponsor-period-seconds" type="text" inputmode="numeric" value="0" /></label>
+          <label><span class="label">Valid from</span><input id="sponsor-valid-from" type="text" inputmode="numeric" value="0" /></label>
+          <label><span class="label">Valid until</span><input id="sponsor-valid-until" type="text" inputmode="numeric" value="0" /></label>
+        </div>
         <button id="create-sponsor-grant" type="button" disabled>Create gas sponsor grant</button>
-      </div>
-    </section>
+      </section>
 
-    <section id="session-panel" hidden>
-      <div class="section-heading"><div><p class="eyebrow">Owner-controlled delegation</p><h2>Session key administration</h2></div></div>
-      <div class="account-card">
-        <label><span class="label">Session key address</span><input id="session-key" type="text" autocomplete="off" placeholder="0x…" /></label>
-        <label><span class="label">Scoped target</span><input id="session-target" type="text" autocomplete="off" placeholder="0x…" /></label>
-        <label><span class="label">Target selector (bytes4)</span><input id="session-selector" type="text" autocomplete="off" placeholder="0xa9059cbb" /></label>
-        <label><span class="label">Per-call limit</span><input id="session-per-call" type="text" inputmode="numeric" value="0" /></label>
-        <label><span class="label">Period limit</span><input id="session-period-limit" type="text" inputmode="numeric" value="0" /></label>
-        <label><span class="label">Period seconds</span><input id="session-period-seconds" type="text" inputmode="numeric" value="0" /></label>
-        <label><span class="label">Valid from</span><input id="session-valid-from" type="text" inputmode="numeric" value="0" /></label>
-        <label><span class="label">Valid until (0 = no expiry)</span><input id="session-valid-until" type="text" inputmode="numeric" value="0" /></label>
-        <div><p class="label">Session execution</p><strong>Disabled in this stage</strong></div>
-      </div>
-      <div class="section-heading">
-        <p>Enable or revoke a session key, then create a target+selector-scoped grant. All writes are simulated and verified against the account authorization epoch and canonical registry.</p>
-        <div><button id="enable-session-key" type="button" disabled>Enable key</button> <button id="revoke-session-key" type="button" disabled>Revoke key</button> <button id="create-session-grant" type="button" disabled>Create session grant</button></div>
-      </div>
-    </section>
+      <section id="session-panel" class="panel" hidden>
+        <div class="section-heading"><div><p class="eyebrow">Owner-controlled delegation</p><h2>Session key administration</h2></div><span class="status-pill">Execution disabled</span></div>
+        <div class="form-grid account-card">
+          <label><span class="label">Session key address</span><input id="session-key" type="text" autocomplete="off" placeholder="0x…" /></label>
+          <label><span class="label">Scoped target</span><input id="session-target" type="text" autocomplete="off" placeholder="0x…" /></label>
+          <label><span class="label">Target selector</span><input id="session-selector" type="text" autocomplete="off" placeholder="0xa9059cbb" /></label>
+          <label><span class="label">Per-call limit</span><input id="session-per-call" type="text" inputmode="numeric" value="0" /></label>
+          <label><span class="label">Period limit</span><input id="session-period-limit" type="text" inputmode="numeric" value="0" /></label>
+          <label><span class="label">Period seconds</span><input id="session-period-seconds" type="text" inputmode="numeric" value="0" /></label>
+          <label><span class="label">Valid from</span><input id="session-valid-from" type="text" inputmode="numeric" value="0" /></label>
+          <label><span class="label">Valid until</span><input id="session-valid-until" type="text" inputmode="numeric" value="0" /></label>
+        </div>
+        <div class="button-row"><button id="enable-session-key" type="button" disabled>Enable key</button><button id="revoke-session-key" type="button" disabled>Revoke key</button><button id="create-session-grant" type="button" disabled>Create session grant</button></div>
+      </section>
 
-    <section>
-      <div class="section-heading"><div><p class="eyebrow">Read-only portfolio</p><h2>Assets</h2></div></div>
-      <div id="portfolio" class="service-grid" aria-live="polite">Connect a wallet to load read-only balances.</div>
-    </section>
+      <section class="panel">
+        <div class="section-heading"><div><p class="eyebrow">This browser session</p><h2>Activity</h2></div><span class="section-kicker">No private history storage</span></div>
+        <div id="activity-list" class="activity-list" aria-live="polite"></div>
+      </section>
 
-    <section>
-      <div class="section-heading"><div><p class="eyebrow">Verified ecosystem gateway</p><h2>Explore 420</h2></div></div>
-      <div id="services" class="service-grid" aria-live="polite"></div>
-    </section>
+      <section id="services-section">
+        <div class="section-heading"><div><p class="eyebrow">Verified ecosystem gateway</p><h2>Explore 420</h2></div></div>
+        <div id="services" class="service-grid" aria-live="polite"></div>
+      </section>
 
-    <section class="security-note">
-      <h2>Wallet Core security boundary</h2>
-      <p>Session administration uses SmartAccount420 owner-only methods and is bound to the current authorization epoch. Session grants are target+selector scoped, authority-contract targets are blocked, and post-confirmation state is checked against SmartAccount420 and canonical CapabilityRegistry420. Actual session-key execution, batching, passkeys, and recovery mutation remain disabled.</p>
-    </section>
+      <section class="security-note"><h2>Wallet Core security boundary</h2><p>Account creation is routed only through canonical SmartAccountFactory420. Guided sends are compiled into the same guarded SmartAccount420 execution path as advanced calls. Owner execution must simulate successfully before approval, direct calls to wallet authority contracts are blocked, and confirmed transactions are re-verified against canonical account state. Session execution, batching, passkeys, recovery mutation, and delegated execution remain disabled until their respective hardening stages.</p></section>
 
-    <p id="status" class="status" role="status">Ready.</p>
-  </main>
+      <p id="status" class="status" role="status">Ready.</p>
+    </main>
+  </div>
   <script type="module" src="./app.js"></script>
+  <script type="module" src="./ui-v1.js"></script>
 </body>
 </html>

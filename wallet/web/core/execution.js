@@ -1,6 +1,5 @@
-import { normalizeAddress } from './abi.js';
+import { decodeAddress, decodeUint, encodeAddressGetter, encodeExecute, encodeUintGetter, normalizeAddress } from './abi.js';
 import { discoverSmartAccount } from './accounts.js';
-import { encodeExecute } from './abi.js';
 
 const MAX_CALLDATA_BYTES = 4096;
 
@@ -40,6 +39,20 @@ function assertOwnerExecutionBoundary(controller, smartAccountState, target) {
     smartAccountState.capabilityRegistry,
   ].filter(Boolean).map(normalizeAddress));
   if (denied.has(target)) throw new Error('direct execution to a wallet authority contract is not permitted');
+}
+
+async function assertOwnerBoundaryStillCurrent(provider, controller, smartAccountState) {
+  const owner = normalizeAddress(controller);
+  const account = normalizeAddress(smartAccountState.smartAccount);
+  const ownerResult = await provider.request('eth_call', [{ to: account, data: encodeAddressGetter('owner') }, 'latest']);
+  if (decodeAddress(ownerResult) !== owner) throw new Error('SmartAccount420 owner changed after simulation');
+
+  if (smartAccountState.authorizationEpoch != null) {
+    const epochResult = await provider.request('eth_call', [{ to: account, data: encodeUintGetter('authorizationEpoch') }, 'latest']);
+    if (decodeUint(epochResult) !== BigInt(smartAccountState.authorizationEpoch)) {
+      throw new Error('SmartAccount420 authorization epoch changed after simulation');
+    }
+  }
 }
 
 export async function prepareSmartAccountExecution(provider, controller, smartAccountState, request = {}) {
@@ -86,6 +99,7 @@ export async function prepareSmartAccountExecution(provider, controller, smartAc
 
 export async function sendSmartAccountExecution(provider, controller, smartAccountState, request = {}) {
   const prepared = await prepareSmartAccountExecution(provider, controller, smartAccountState, request);
+  await assertOwnerBoundaryStillCurrent(provider, controller, smartAccountState);
   const txHash = normalizeTxHash(await provider.request('eth_sendTransaction', [prepared.transaction]));
   return { ...prepared, submitted: true, txHash };
 }

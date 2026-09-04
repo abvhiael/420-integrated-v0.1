@@ -98,12 +98,15 @@ test('simulation failure prevents transaction submission', async () => {
   assert.equal(sends, 0);
 });
 
-test('send execution re-simulates then requests explicit provider transaction approval', async () => {
+test('send execution re-simulates, re-verifies owner, then requests explicit provider transaction approval', async () => {
   const calls = [];
   let sent;
   const provider = { request: async (method, params) => {
     calls.push(method);
-    if (method === 'eth_call') return '0x';
+    if (method === 'eth_call') {
+      if (params[0]?.to === account && params[0]?.data === '0x8da5cb5b') return wordAddress(controller);
+      return '0x';
+    }
     if (method === 'eth_estimateGas') return '0x10000';
     if (method === 'eth_sendTransaction') { sent = params[0]; return txHash; }
     throw new Error(method);
@@ -112,7 +115,39 @@ test('send execution re-simulates then requests explicit provider transaction ap
   assert.equal(submitted.txHash, txHash);
   assert.equal(sent.to, account);
   assert.equal(sent.from, controller);
-  assert.deepEqual(calls, ['eth_call', 'eth_estimateGas', 'eth_sendTransaction']);
+  assert.deepEqual(calls, ['eth_call', 'eth_estimateGas', 'eth_call', 'eth_sendTransaction']);
+});
+
+test('owner drift after simulation blocks broadcast', async () => {
+  const otherOwner = '0x7777777777777777777777777777777777777777';
+  let sends = 0;
+  const provider = { request: async (method, params) => {
+    if (method === 'eth_call') {
+      if (params[0]?.to === account && params[0]?.data === '0x8da5cb5b') return wordAddress(otherOwner);
+      return '0x';
+    }
+    if (method === 'eth_estimateGas') return '0x10000';
+    if (method === 'eth_sendTransaction') { sends += 1; return txHash; }
+    throw new Error(method);
+  } };
+  await assert.rejects(sendSmartAccountExecution(provider, controller, accountState, { target, value: 1, data: '0x' }), /owner changed after simulation/i);
+  assert.equal(sends, 0);
+});
+
+test('authorization epoch drift after simulation blocks broadcast', async () => {
+  let sends = 0;
+  const provider = { request: async (method, params) => {
+    if (method === 'eth_call') {
+      if (params[0]?.to === account && params[0]?.data === '0x8da5cb5b') return wordAddress(controller);
+      if (params[0]?.to === account && params[0]?.data === '0x6d5f87be') return wordUint(8);
+      return '0x';
+    }
+    if (method === 'eth_estimateGas') return '0x10000';
+    if (method === 'eth_sendTransaction') { sends += 1; return txHash; }
+    throw new Error(method);
+  } };
+  await assert.rejects(sendSmartAccountExecution(provider, controller, { ...accountState, authorizationEpoch: 7n }, { target, value: 1, data: '0x' }), /authorization epoch changed/i);
+  assert.equal(sends, 0);
 });
 
 test('confirmed execution re-reads owner boundary after successful receipt', async () => {

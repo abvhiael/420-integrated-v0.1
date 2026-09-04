@@ -3,7 +3,8 @@ pragma solidity ^0.8.24;
 
 import { ActionIds } from "../constants/ActionIds.sol";
 import { ModuleIds } from "../constants/ModuleIds.sol";
-import { HCAlreadyExists, HCInvalidRegion, HCNotFound, HCZeroAddress } from "../errors/HighCountryErrors.sol";
+import { HCAlreadyExists, HCGenesisNotFinalized, HCInvalidRegion, HCNotFound, HCZeroAddress } from "../errors/HighCountryErrors.sol";
+import { IGenesisRegistry } from "../interfaces/IGenesisRegistry.sol";
 import { IHighCountryAuthorization } from "../interfaces/IHighCountryAuthorization.sol";
 import { AuthorizationRequest } from "../types/HighCountryTypes.sol";
 
@@ -22,6 +23,7 @@ contract GrowerProfileRegistry {
 
     IHighCountryAuthorization public immutable authorization;
     IRegionRegistryHC2 public immutable regionRegistry;
+    IGenesisRegistry public immutable genesisRegistry;
 
     uint64 public nextProfileId = 1;
     mapping(uint64 => GrowerProfile) private _profiles;
@@ -29,10 +31,13 @@ contract GrowerProfileRegistry {
 
     event GrowerProfileCreated(uint64 indexed profileId, address indexed account, uint16 indexed homeRegionId);
 
-    constructor(address authorization_, address regionRegistry_) {
-        if (authorization_ == address(0) || regionRegistry_ == address(0)) revert HCZeroAddress();
+    constructor(address authorization_, address regionRegistry_, address genesisRegistry_) {
+        if (authorization_ == address(0) || regionRegistry_ == address(0) || genesisRegistry_ == address(0)) {
+            revert HCZeroAddress();
+        }
         authorization = IHighCountryAuthorization(authorization_);
         regionRegistry = IRegionRegistryHC2(regionRegistry_);
+        genesisRegistry = IGenesisRegistry(genesisRegistry_);
     }
 
     function getProfile(uint64 profileId) external view returns (GrowerProfile memory) {
@@ -42,6 +47,7 @@ contract GrowerProfileRegistry {
     }
 
     function createProfile(uint16 homeRegionId) external returns (uint64 profileId) {
+        if (!genesisRegistry.finalized()) revert HCGenesisNotFinalized();
         if (profileIdOf[msg.sender] != 0) revert HCAlreadyExists();
         if (!regionRegistry.exists(homeRegionId)) revert HCInvalidRegion(homeRegionId);
 

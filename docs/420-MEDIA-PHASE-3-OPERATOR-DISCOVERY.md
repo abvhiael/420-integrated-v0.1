@@ -17,6 +17,7 @@ Phase 3.1 turns the Phase 1 operator registry and Phase 2 operator runtime into 
 7. Apply hard request bounds: price, latency, geography, available capacity and reliability.
 8. Rank the remaining providers deterministically using explicit local weights.
 9. Break exact score ties by price, latency and finally operator ID so all callers receive a stable ordering from the same input snapshot.
+10. Expose the bounded provider set through the service-network control plane.
 
 ## Ethereum adapter
 
@@ -35,13 +36,19 @@ The adapter performs:
 
 The event index can contain stale IDs after a reorg or historical state transition without creating a safety issue because every candidate is still revalidated against current canonical registry state. Malformed chain data or RPC failures fail the discovery pass closed.
 
+## Service-network control plane
+
+`media/controlplane/discovery.go` is the Phase 3.1 service boundary consumed by later orchestration code. Callers submit capability, budget, latency, geography, capacity, reliability and result-limit constraints; the control plane delegates selection to the deterministic discovery selector and returns a bounded `ProviderView`.
+
+The control-plane response exposes only canonical operator identity, revision and non-secret selection metrics. It intentionally omits metadata commitments, capability maps, raw endpoints, signer material, media references and credentials. Canonical discovery errors are propagated rather than converted into partial provider sets.
+
 ## Trust boundaries
 
 The event index is a discovery accelerator only. It is never authoritative for whether an operator is currently active or operational for a capability.
 
 Service profiles are operator-published off-chain metadata. They may advertise price, latency, geography and current capacity, but they cannot override canonical activation or capability state. Missing or malformed service metadata excludes that provider from the current selection pass.
 
-Raw stream URLs, ingress credentials, signer credentials, playback secrets and media bytes must never enter the registry or discovery index.
+Raw stream URLs, ingress credentials, signer credentials, playback secrets and media bytes must never enter the registry, discovery index or provider-selection response.
 
 ## Initial ranking inputs
 
@@ -69,7 +76,10 @@ The default score emphasizes reliability first, then price, latency and capacity
 - **MEDIA-DISCOVERY-INV-012:** Removed or malformed Ethereum logs fail the index read closed.
 - **MEDIA-DISCOVERY-INV-013:** ABI decoding rejects malformed lengths, invalid booleans and numeric overflow.
 - **MEDIA-DISCOVERY-INV-014:** An operator is exposed as active only when the canonical operator record exists, is in ACTIVE state and `isOperationalFor` returns true for the requested capability.
+- **MEDIA-DISCOVERY-INV-015:** The service-network control plane cannot broaden eligibility beyond the selector constraints supplied by the caller.
+- **MEDIA-DISCOVERY-INV-016:** Control-plane provider responses exclude metadata payloads, endpoints, credentials and raw media references.
+- **MEDIA-DISCOVERY-INV-017:** Canonical discovery failures propagate through the control plane; partial provider responses are never synthesized after a failed discovery pass.
 
-## Next increment
+## Phase 3.1 completion boundary
 
-Expose the qualified discovery source through the 420Media service-network control plane, then begin Phase 3.2 stream orchestration on top of the deterministic provider set.
+Phase 3.1 is complete when the Ethereum index/registry adapter, deterministic selector and service-network discovery boundary pass qualification together. Phase 3.2 then consumes this stable provider set to build stream orchestration: ingress selection, transcoder/relay assignment, job graph construction and lifecycle coordination.

@@ -36,6 +36,11 @@ library BongGogglesIds420 {
     bytes32 internal constant ACTION_MEDIA_REGISTER = keccak256("BG/ACTION/MEDIA_REGISTER/V1");
     bytes32 internal constant ACTION_REACTION_SET = keccak256("BG/ACTION/REACTION_SET/V1");
     bytes32 internal constant ACTION_REACTION_CLEAR = keccak256("BG/ACTION/REACTION_CLEAR/V1");
+
+    bytes32 internal constant ACTION_TAG_CREATE = keccak256("BG/ACTION/TAG_CREATE/V1");
+    bytes32 internal constant ACTION_TAG_APPROVE = keccak256("BG/ACTION/TAG_APPROVE/V1");
+    bytes32 internal constant ACTION_TAG_REJECT = keccak256("BG/ACTION/TAG_REJECT/V1");
+    bytes32 internal constant ACTION_TAG_REMOVE = keccak256("BG/ACTION/TAG_REMOVE/V1");
 }
 
 library BongGogglesTypes420 {
@@ -49,6 +54,8 @@ library BongGogglesTypes420 {
     enum MediaType { IMAGE, VIDEO, AUDIO, DOCUMENT }
     enum ReactionType { NONE, LIKE, LOVE, LAUGH, WOW, SUPPORT }
     enum ProvenanceType { NONE, REPOST, QUOTE_POST }
+    enum TagTargetType { PROFILE, PAGE, COMMUNITY }
+    enum TagState { NONE, PENDING, ACTIVE, REJECTED, REMOVED }
 
     uint32 internal constant MUTE_FEED = 1 << 0;
     uint32 internal constant MUTE_STORIES = 1 << 1;

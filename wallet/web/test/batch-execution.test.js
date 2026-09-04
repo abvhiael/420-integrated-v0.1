@@ -120,8 +120,12 @@ test('prepare batch requires owner boundary and simulates before readiness', asy
 
 test('prepared batch calldata mutation is rejected before broadcast', async () => {
   let sends = 0;
-  const provider = { request: async (method) => {
-    if (method === 'eth_call') return '0x';
+  const provider = { request: async (method, params) => {
+    if (method === 'eth_call') {
+      if (params[0]?.data === '0x8da5cb5b') return wordAddress(controller);
+      if (params[0]?.data === '0x6d5f87be') return wordUint(7);
+      return '0x';
+    }
     if (method === 'eth_estimateGas') return '0x12345';
     if (method === 'eth_sendTransaction') { sends += 1; return txHash; }
     throw new Error(method);

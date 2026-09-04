@@ -69,12 +69,14 @@ test('batch normalization blocks wallet authority targets in any position', () =
 });
 
 test('aggregate calldata limit fails closed', () => {
-  const bytesPerCall = Math.ceil(MAX_BATCH_CALLDATA_BYTES / 2) + 1;
-  const payload = `0x${'11'.repeat(bytesPerCall)}`;
-  assert.throws(() => normalizeBatchCalls(state, [
-    { target: targetA, data: payload },
-    { target: targetB, data: payload },
-  ]), /aggregate batch calldata/i);
+  const perCallBytes = 4096;
+  const payload = `0x${'11'.repeat(perCallBytes)}`;
+  const callCount = Math.floor(MAX_BATCH_CALLDATA_BYTES / perCallBytes) + 1;
+  assert.ok(callCount <= MAX_BATCH_CALLS);
+  assert.throws(() => normalizeBatchCalls(state, Array.from({ length: callCount }, (_, index) => ({
+    target: index % 2 === 0 ? targetA : targetB,
+    data: payload,
+  }))), /aggregate batch calldata/i);
 });
 
 test('prepare batch requires owner boundary and simulates before readiness', async () => {

@@ -52,6 +52,49 @@ function bytesEqual(a, b) {
   return difference === 0;
 }
 
+function validateTimeout(timeout) {
+  if (!Number.isInteger(timeout) || timeout < 1000 || timeout > 300000) throw new Error('invalid passkey timeout');
+  return timeout;
+}
+
+function assertCredentialsApi(navigatorLike) {
+  if (!navigatorLike?.credentials || typeof navigatorLike.credentials.create !== 'function' || typeof navigatorLike.credentials.get !== 'function') {
+    throw new Error('WebAuthn credentials API unavailable');
+  }
+  return navigatorLike.credentials;
+}
+
+function parseClientData(clientDataJSON, { expectedType, expectedChallenge, expectedOrigin }) {
+  const clientBytes = toBytes(clientDataJSON, 'clientDataJSON');
+  let clientData;
+  try { clientData = JSON.parse(new TextDecoder().decode(clientBytes)); } catch { throw new Error('invalid clientDataJSON'); }
+  if (clientData.type !== expectedType) throw new Error('unexpected WebAuthn ceremony type');
+  if (clientData.challenge !== expectedChallenge) throw new Error('WebAuthn challenge mismatch');
+  const origin = normalizeOrigin(expectedOrigin);
+  if (clientData.origin !== origin) throw new Error('WebAuthn origin mismatch');
+  if (clientData.crossOrigin === true) throw new Error('cross-origin WebAuthn ceremony rejected');
+  return { clientBytes, clientData, origin };
+}
+
+function normalizeCredentialId(credential) {
+  if (!credential || credential.type !== 'public-key' || typeof credential.id !== 'string' || !credential.id) throw new Error('invalid public-key credential');
+  const rawId = toBytes(credential.rawId, 'raw credential ID');
+  const encodedRawId = base64urlEncode(rawId);
+  if (credential.id !== encodedRawId) throw new Error('WebAuthn credential ID mismatch');
+  return { credentialId: credential.id, rawId, encodedRawId };
+}
+
+function ceremonyError(error, operation) {
+  if (error?.name === 'NotAllowedError' || error?.name === 'AbortError') {
+    const wrapped = new Error(`Passkey ${operation} was cancelled or denied`);
+    wrapped.cause = error;
+    return wrapped;
+  }
+  const wrapped = new Error(`Passkey ${operation} failed: ${error?.message || 'WebAuthn error'}`);
+  wrapped.cause = error;
+  return wrapped;
+}
+
 export function base64urlEncode(bytes) {
   if (!(bytes instanceof Uint8Array)) bytes = new Uint8Array(bytes);
   let binary = '';
@@ -77,14 +120,106 @@ export function buildPasskeyChallenge(userOpHash) {
 export function buildPasskeyRequestOptions({ userOpHash, rpId, credentialId, timeout = 60000 }) {
   const normalizedRpId = normalizeRpId(rpId);
   if (typeof credentialId !== 'string' || !credentialId) throw new Error('credential ID required');
-  if (!Number.isInteger(timeout) || timeout < 1000 || timeout > 300000) throw new Error('invalid passkey timeout');
   return {
     challenge: buildPasskeyChallenge(userOpHash),
     rpId: normalizedRpId,
     allowCredentials: [{ id: base64urlDecode(credentialId), type: 'public-key' }],
     userVerification: 'required',
-    timeout,
+    timeout: validateTimeout(timeout),
   };
+}
+
+export function buildPasskeyCreationOptions({
+  challenge,
+  rpId,
+  rpName = '420 Wallet',
+  userId,
+  userName,
+  userDisplayName = userName,
+  excludeCredentialIds = [],
+  timeout = 60000,
+}) {
+  const normalizedRpId = normalizeRpId(rpId);
+  if (typeof rpName !== 'string' || !rpName.trim() || rpName.length > 64) throw new Error('invalid RP name');
+  const normalizedUserId = toBytes(userId, 'passkey user ID');
+  if (normalizedUserId.length < 1 || normalizedUserId.length > 64) throw new Error('passkey user ID must be 1-64 bytes');
+  if (typeof userName !== 'string' || !userName.trim() || userName.length > 128) throw new Error('invalid passkey user name');
+  if (typeof userDisplayName !== 'string' || !userDisplayName.trim() || userDisplayName.length > 128) throw new Error('invalid passkey user display name');
+  if (!Array.isArray(excludeCredentialIds)) throw new Error('excludeCredentialIds must be an array');
+  const excludeCredentials = excludeCredentialIds.map((id) => ({ id: base64urlDecode(id), type: 'public-key' }));
+  return {
+    challenge: hexToBytes(challenge),
+    rp: { id: normalizedRpId, name: rpName.trim() },
+    user: { id: normalizedUserId, name: userName.trim(), displayName: userDisplayName.trim() },
+    pubKeyCredParams: [{ type: 'public-key', alg: -7 }],
+    timeout: validateTimeout(timeout),
+    attestation: 'none',
+    authenticatorSelection: {
+      residentKey: 'required',
+      requireResidentKey: true,
+      userVerification: 'required',
+    },
+    excludeCredentials,
+  };
+}
+
+export async function registerPasskey(navigatorLike, options, { expectedOrigin } = {}) {
+  const credentials = assertCredentialsApi(navigatorLike);
+  const publicKey = buildPasskeyCreationOptions(options);
+  let credential;
+  try {
+    credential = await credentials.create({ publicKey });
+  } catch (error) {
+    throw ceremonyError(error, 'registration');
+  }
+  const { credentialId, rawId } = normalizeCredentialId(credential);
+  if (!credential.response) throw new Error('missing passkey registration response');
+  const expectedChallenge = base64urlEncode(publicKey.challenge);
+  const { clientBytes, origin } = parseClientData(credential.response.clientDataJSON, {
+    expectedType: 'webauthn.create',
+    expectedChallenge,
+    expectedOrigin,
+  });
+  const attestationObject = toBytes(credential.response.attestationObject, 'attestationObject');
+  let transports = [];
+  if (typeof credential.response.getTransports === 'function') {
+    const reported = credential.response.getTransports();
+    if (Array.isArray(reported)) transports = reported.filter((value) => typeof value === 'string').slice(0, 16);
+  }
+  return {
+    credentialId,
+    rawId: base64urlEncode(rawId),
+    clientDataJSON: base64urlEncode(clientBytes),
+    attestationObject: base64urlEncode(attestationObject),
+    transports,
+    origin,
+    challenge: expectedChallenge,
+  };
+}
+
+export async function authenticatePasskey(navigatorLike, options, {
+  expectedOrigin,
+  previousSignCount = null,
+} = {}) {
+  const credentials = assertCredentialsApi(navigatorLike);
+  const publicKey = buildPasskeyRequestOptions(options);
+  let credential;
+  try {
+    credential = await credentials.get({ publicKey });
+  } catch (error) {
+    throw ceremonyError(error, 'authentication');
+  }
+  normalizeCredentialId(credential);
+  const assertion = parsePasskeyAssertion(credential, {
+    expectedUserOpHash: options.userOpHash,
+    expectedOrigin,
+  });
+  const authenticator = await validateAuthenticatorData(credential.response.authenticatorData, {
+    expectedRpId: publicKey.rpId,
+    requireUserVerification: true,
+    previousSignCount,
+  });
+  return { ...assertion, authenticator };
 }
 
 export async function validateAuthenticatorData(authenticatorData, {
@@ -129,25 +264,19 @@ export async function validateAuthenticatorData(authenticatorData, {
 
 export function parsePasskeyAssertion(credential, { expectedUserOpHash, expectedOrigin }) {
   if (!credential || credential.type !== 'public-key' || !credential.response) throw new Error('invalid public-key credential');
-  const response = credential.response;
-  for (const field of ['clientDataJSON', 'authenticatorData', 'signature']) {
-    if (!(response[field] instanceof ArrayBuffer) && !ArrayBuffer.isView(response[field])) throw new Error(`missing ${field}`);
-  }
-  const clientBytes = toBytes(response.clientDataJSON, 'clientDataJSON');
-  let clientData;
-  try { clientData = JSON.parse(new TextDecoder().decode(clientBytes)); } catch { throw new Error('invalid clientDataJSON'); }
-  if (clientData.type !== 'webauthn.get') throw new Error('unexpected WebAuthn ceremony type');
   const expectedChallenge = base64urlEncode(buildPasskeyChallenge(expectedUserOpHash));
-  if (clientData.challenge !== expectedChallenge) throw new Error('WebAuthn challenge mismatch');
-  const origin = normalizeOrigin(expectedOrigin);
-  if (clientData.origin !== origin) throw new Error('WebAuthn origin mismatch');
-
+  const { clientBytes, origin } = parseClientData(credential.response.clientDataJSON, {
+    expectedType: 'webauthn.get',
+    expectedChallenge,
+    expectedOrigin,
+  });
+  for (const field of ['authenticatorData', 'signature']) toBytes(credential.response[field], field);
   return {
     credentialId: credential.id,
     clientDataJSON: base64urlEncode(clientBytes),
-    authenticatorData: base64urlEncode(toBytes(response.authenticatorData, 'authenticatorData')),
-    signature: base64urlEncode(toBytes(response.signature, 'signature')),
-    userHandle: response.userHandle ? base64urlEncode(toBytes(response.userHandle, 'userHandle')) : null,
+    authenticatorData: base64urlEncode(toBytes(credential.response.authenticatorData, 'authenticatorData')),
+    signature: base64urlEncode(toBytes(credential.response.signature, 'signature')),
+    userHandle: credential.response.userHandle ? base64urlEncode(toBytes(credential.response.userHandle, 'userHandle')) : null,
     origin,
     challenge: expectedChallenge,
   };

@@ -14,5 +14,3 @@ HC-4 introduces the immutable genome substrate and typed genetics assets used by
 - Capability-scoped actions isolate registration, transfer, and mother-cutting authority.
 
 This layer intentionally stops short of recombination and mutation logic; those enter in HC-5 through the Breeding Engine and 420 Randomness boundary.
-
-Current HC-4 focus: typed asset invariants and qualification.

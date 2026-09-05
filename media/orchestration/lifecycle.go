@@ -10,8 +10,9 @@ import (
 )
 
 var (
-	ErrInvalidLifecycle = errors.New("420media orchestration: invalid lifecycle state")
-	ErrDependencyFailed = errors.New("420media orchestration: dependency failed")
+	ErrInvalidLifecycle     = errors.New("420media orchestration: invalid lifecycle state")
+	ErrDependencyFailed     = errors.New("420media orchestration: dependency failed")
+	ErrLifecycleJobNotFound = errors.New("420media orchestration: lifecycle job not found")
 )
 
 type LifecycleStatus string
@@ -89,8 +90,9 @@ func NewLifecycleCoordinator(market LifecycleMarket) *LifecycleCoordinator {
 	return &LifecycleCoordinator{market: market}
 }
 
-// Ready returns the graph nodes that may be created now. A dependency must have
-// reached VERIFIED or SETTLED. Any terminal dependency failure fails the pass closed.
+// Ready returns graph nodes that may be created now. Only an explicit
+// ErrLifecycleJobNotFound means a node does not yet exist. All other snapshot errors
+// fail closed so an RPC outage cannot be mistaken for job absence.
 func (c *LifecycleCoordinator) Ready(ctx context.Context, plan Plan) ([]JobNode, error) {
 	if c == nil || c.market == nil {
 		return nil, ErrInvalidLifecycle
@@ -110,10 +112,12 @@ func (c *LifecycleCoordinator) Ready(ctx context.Context, plan Plan) ([]JobNode,
 			if snap.JobID != jobID || snap.OperatorID != n.OperatorID {
 				return nil, ErrInvalidLifecycle
 			}
-			if snap.Status != LifecyclePlanned {
-				continue
-			}
+			continue
 		}
+		if !errors.Is(err, ErrLifecycleJobNotFound) {
+			return nil, err
+		}
+
 		depsReady := true
 		for _, depID := range n.DependsOn {
 			dep, ok := byID[depID]
@@ -123,8 +127,11 @@ func (c *LifecycleCoordinator) Ready(ctx context.Context, plan Plan) ([]JobNode,
 			depJobID := CanonicalJobID(plan.StreamID, dep.ID)
 			depSnap, err := c.market.Snapshot(ctx, depJobID)
 			if err != nil {
-				depsReady = false
-				break
+				if errors.Is(err, ErrLifecycleJobNotFound) {
+					depsReady = false
+					break
+				}
+				return nil, err
 			}
 			if depSnap.JobID != depJobID || depSnap.OperatorID != dep.OperatorID {
 				return nil, ErrInvalidLifecycle
@@ -224,7 +231,10 @@ func inputRefFor(ctx context.Context, market LifecycleMarket, plan Plan, node Jo
 	}
 	if len(node.DependsOn) == 1 {
 		snap, err := market.Snapshot(ctx, CanonicalJobID(plan.StreamID, node.DependsOn[0]))
-		if err != nil || !snap.Status.terminalSuccess() || snap.OutputRef == ([32]byte{}) {
+		if err != nil {
+			return [32]byte{}, err
+		}
+		if !snap.Status.terminalSuccess() || snap.OutputRef == ([32]byte{}) {
 			return [32]byte{}, ErrInvalidLifecycle
 		}
 		return snap.OutputRef, nil
@@ -237,7 +247,10 @@ func inputRefFor(ctx context.Context, market LifecycleMarket, plan Plan, node Jo
 	h.Write([]byte("420MEDIA_INPUT_MANIFEST_V1"))
 	for _, depID := range parents {
 		snap, err := market.Snapshot(ctx, CanonicalJobID(plan.StreamID, depID))
-		if err != nil || !snap.Status.terminalSuccess() || snap.OutputRef == ([32]byte{}) {
+		if err != nil {
+			return [32]byte{}, err
+		}
+		if !snap.Status.terminalSuccess() || snap.OutputRef == ([32]byte{}) {
 			return [32]byte{}, ErrInvalidLifecycle
 		}
 		h.Write([]byte(fmt.Sprintf("%s:", depID)))

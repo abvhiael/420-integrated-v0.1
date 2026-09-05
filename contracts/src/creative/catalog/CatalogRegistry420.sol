@@ -149,6 +149,10 @@ contract CatalogRegistry420 {
         return _requireRelease(releaseId);
     }
 
+    function creatorOf(uint256 releaseId) external view returns (CreatorId) {
+        return _requireRelease(releaseId).creatorId;
+    }
+
     function trackCount(uint256 releaseId) external view returns (uint256) {
         _requireRelease(releaseId);
         return _tracks[releaseId].length;

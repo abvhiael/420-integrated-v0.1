@@ -113,7 +113,7 @@ contract WebAuthnP256Verifier420 {
         bytes memory challengeText = _extractJsonString(clientDataJSON, CHALLENGE_KEY);
         if (keccak256(challengeText) != keccak256(_base64Url32(expectedChallenge))) return false;
         bytes memory originText = _extractJsonString(clientDataJSON, ORIGIN_KEY);
-        if (originText.length == 0 || keccak256(originText) != c.originHash) return false;
+        if (originText.length == 0 || sha256(originText) != c.originHash) return false;
 
         bytes32 clientDataHash = sha256(clientDataJSON);
         bytes32 messageHash = sha256(abi.encodePacked(authenticatorData, clientDataHash));
@@ -173,7 +173,6 @@ contract WebAuthnP256Verifier420 {
 
     function _base64Url32(bytes32 input) private pure returns (bytes memory out) {
         bytes memory source = abi.encodePacked(input);
-        // 32 bytes encode to 43 base64url characters without padding.
         out = new bytes(43);
         uint256 o;
         for (uint256 i = 0; i < 30; i += 3) {

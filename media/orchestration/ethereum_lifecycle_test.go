@@ -36,14 +36,15 @@ func TestEthereumLifecycleCreateAssignedJob(t *testing.T) {
 
 func TestEthereumLifecycleSnapshotUsesReservationBeforeAcceptance(t *testing.T) {
 	job := make([]byte, 13*32)
-	copy(job[6*32:7*32], b32(9)[:])
+	output := b32(9)
+	copy(job[6*32:7*32], output[:])
 	copy(job[12*32:13*32], uintWord(1))
 	reserved := b32(7)
 	rpc := &lifecycleRPC{responses: []string{"0x"+hex.EncodeToString(job), "0x"+hex.EncodeToString(reserved[:])}}
 	m, err := NewEthereumLifecycleMarket(EthereumLifecycleConfig{RPC: rpc, Signer: &lifecycleSigner{}, MarketAddress: "0x1111111111111111111111111111111111111111", JobsSelector: [4]byte{1}, ReservedOperatorSelector: [4]byte{2}, CreateAssignedSelector: [4]byte{3}})
 	if err != nil { t.Fatal(err) }
 	snap, err := m.Snapshot(context.Background(), b32(1)); if err != nil { t.Fatal(err) }
-	if snap.Status != LifecycleCreated || snap.OperatorID != reserved || snap.OutputRef != b32(9) { t.Fatalf("snapshot=%+v", snap) }
+	if snap.Status != LifecycleCreated || snap.OperatorID != reserved || snap.OutputRef != output { t.Fatalf("snapshot=%+v", snap) }
 }
 
 func TestEthereumLifecycleSnapshotUsesAcceptedOperator(t *testing.T) {

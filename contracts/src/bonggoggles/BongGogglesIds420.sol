@@ -64,6 +64,13 @@ library BongGogglesIds420 {
     bytes32 internal constant ACTION_REVIEW_WITHDRAW = keccak256("BG/ACTION/REVIEW_WITHDRAW/V1");
     bytes32 internal constant ACTION_CORRECTION_SUBMIT = keccak256("BG/ACTION/CORRECTION_SUBMIT/V1");
     bytes32 internal constant ACTION_VERIFICATION_ATTEST = keccak256("BG/ACTION/VERIFICATION_ATTEST/V1");
+
+    bytes32 internal constant ACTION_SAFETY_CASE_OPEN = keccak256("BG/ACTION/SAFETY_CASE_OPEN/V1");
+    bytes32 internal constant ACTION_SAFETY_ACTION_APPLY = keccak256("BG/ACTION/SAFETY_ACTION_APPLY/V1");
+    bytes32 internal constant ACTION_SAFETY_ACTION_REVOKE = keccak256("BG/ACTION/SAFETY_ACTION_REVOKE/V1");
+    bytes32 internal constant ACTION_SAFETY_CASE_CLOSE = keccak256("BG/ACTION/SAFETY_CASE_CLOSE/V1");
+    bytes32 internal constant ACTION_SAFETY_APPEAL_RESOLVE = keccak256("BG/ACTION/SAFETY_APPEAL_RESOLVE/V1");
+    bytes32 internal constant ACTION_SAFETY_EMERGENCY_HIDE = keccak256("BG/ACTION/SAFETY_EMERGENCY_HIDE/V1");
 }
 
 library BongGogglesTypes420 {
@@ -90,6 +97,10 @@ library BongGogglesTypes420 {
     enum DiscoverySubjectType { PLACE, PRODUCT, BRAND, EVENT, RESOURCE }
     enum DiscoveryStatus { SUBMITTED, ACTIVE, STALE, DISPUTED, CLOSED, INVALID, MERGED }
     enum LocationPrecision { EXACT, APPROX, REGION_ONLY, PRIVATE }
+    enum SafetyTargetType { PROFILE, OBJECT, PAGE, GROUP, EVENT, DISCOVERY }
+    enum SafetyCaseState { OPEN, RESOLVED, CLOSED }
+    enum SafetyActionType { LABEL, LIMIT_DISTRIBUTION, REMOVE_CONTENT, RESTRICT_INTERACTION, TEMP_ACCOUNT_RESTRICTION, ACCOUNT_SUSPENSION }
+    enum AppealState { NONE, PENDING, UPHELD, OVERTURNED }
 
     uint32 internal constant MUTE_FEED = 1 << 0;
     uint32 internal constant MUTE_STORIES = 1 << 1;

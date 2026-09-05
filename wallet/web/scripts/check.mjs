@@ -5,8 +5,8 @@ import process from 'node:process';
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const required = [
   'index.html','app.js','ui-v1.js','apps-page.js','recovery-ui.js','session-execution-ui.js','batch-execution-ui.js','styles.css','apps.css','runtime-config.json',
-  'core/abi.js','core/accounts.js','core/apps.js','core/batch-execution.js','core/capabilities.js','core/capability-management.js','core/session-management.js','core/session-execution.js','core/entrypoint-transport.js','core/recovery.js','core/recovery-management.js','core/config.js','core/deployment.js','core/execution.js','core/portfolio.js','core/provider.js','core/provider-lifecycle.js','core/services.js','core/send.js',
-  'test/core.test.js','test/apps.test.js','test/execution.test.js','test/batch-execution.test.js','test/batch-execution-ui.test.js','test/capabilities.test.js','test/capability-management.test.js','test/session-management.test.js','test/session-execution.test.js','test/entrypoint-transport.test.js','test/recovery.test.js','test/recovery-management.test.js','test/recovery-ui.test.js','test/session-execution-ui.test.js','test/ui-v1.test.js','test/send.test.js','test/provider-lifecycle.test.js','test/ui-hardening.test.js','test/session-hardening.test.js',
+  'core/abi.js','core/accounts.js','core/apps.js','core/batch-execution.js','core/capabilities.js','core/capability-management.js','core/session-management.js','core/session-execution.js','core/entrypoint-transport.js','core/recovery.js','core/recovery-management.js','core/config.js','core/deployment.js','core/execution.js','core/portfolio.js','core/provider.js','core/provider-lifecycle.js','core/services.js','core/send.js','core/passkeys.js','core/passkey-metadata.js',
+  'test/core.test.js','test/apps.test.js','test/execution.test.js','test/batch-execution.test.js','test/batch-execution-ui.test.js','test/capabilities.test.js','test/capability-management.test.js','test/session-management.test.js','test/session-execution.test.js','test/entrypoint-transport.test.js','test/recovery.test.js','test/recovery-management.test.js','test/recovery-ui.test.js','test/session-execution-ui.test.js','test/ui-v1.test.js','test/send.test.js','test/provider-lifecycle.test.js','test/ui-hardening.test.js','test/session-hardening.test.js','test/passkeys.test.js','test/passkey-metadata.test.js',
 ];
 
 const errors = [];
@@ -65,6 +65,15 @@ const transport = requireStrings('core/entrypoint-transport.js', [
 ], 'EntryPoint420 transport/hardening control');
 if (transport.includes('eth_sendUserOperation')) errors.push('Wallet V1 must use canonical EntryPoint420.handleOp transport, not unfrozen bundler RPC');
 
+requireStrings('core/passkeys.js', [
+  'navigatorLike.credentials.create','navigatorLike.credentials.get','webauthn.create','webauthn.get','cross-origin WebAuthn ceremony rejected',
+  'WebAuthn RP ID hash mismatch','WebAuthn user presence flag missing','WebAuthn user verification flag missing','WebAuthn sign counter did not advance'
+], 'passkey/WebAuthn foundation guard');
+requireStrings('core/passkey-metadata.js', [
+  '420-wallet-passkey-binding-v1','passkey binding requires a deployed SmartAccount420','passkey SmartAccount420 binding changed','passkey authorization epoch changed',
+  'passkey RP ID binding changed','passkey origin binding changed','authenticated WebAuthn sign counter did not advance'
+], 'passkey credential/account binding guard');
+
 const abi = read('core/abi.js');
 if (!abi.includes("createAccount: '4003f6ba'")) errors.push('canonical SmartAccountFactory420 createAccount selector missing');
 if (!abi.includes("execute: 'b61d27f6'")) errors.push('canonical SmartAccount420 execute selector missing');
@@ -101,7 +110,9 @@ console.log(JSON.stringify({
   batchExecutionUiEnabled: true,
   finalBatchHardeningQualified: true,
   batchExecutionEnabled: true,
+  passkeyWebAuthnFoundationQualified: true,
+  passkeyCredentialBindingQualified: true,
+  passkeysEnabled: false,
   delegatedCapabilitiesEnabled: false,
-  serverSideKeyCustody: false,
-  passkeysEnabled: false
+  serverSideKeyCustody: false
 }, null, 2));

@@ -37,7 +37,14 @@ contract CatalogRegistry420 {
     mapping(uint256 => RecordingId[]) private _tracks;
     mapping(uint256 => mapping(uint256 => bool)) private _trackPresent;
 
-    event ReleaseCreated(uint256 indexed releaseId, uint256 indexed creatorId, ReleaseType releaseType, bytes32 metadataHash);
+    event ReleaseCreated(
+        uint256 indexed releaseId,
+        uint256 indexed creatorId,
+        ReleaseType releaseType,
+        bytes32 metadataHash,
+        bytes32 artworkHash,
+        uint64 createdAt
+    );
     event ReleaseMetadataUpdated(uint256 indexed releaseId, bytes32 metadataHash, bytes32 artworkHash);
     event ReleaseTrackAdded(uint256 indexed releaseId, uint256 indexed recordingId, uint256 position);
     event ReleaseTrackRemoved(uint256 indexed releaseId, uint256 indexed recordingId);
@@ -59,18 +66,26 @@ contract CatalogRegistry420 {
         _requireAuthorized(creatorId);
         if (metadataHash == bytes32(0) || artworkHash == bytes32(0)) revert CreativeErrors420.InvalidId();
 
+        uint64 createdAt = uint64(block.timestamp);
         releaseId = _nextReleaseId++;
         _releases[releaseId] = Release420({
             creatorId: creatorId,
             metadataHash: metadataHash,
             artworkHash: artworkHash,
-            createdAt: uint64(block.timestamp),
-            updatedAt: uint64(block.timestamp),
+            createdAt: createdAt,
+            updatedAt: createdAt,
             publishedAt: 0,
             releaseType: releaseType,
             status: ReleaseStatus.DRAFT
         });
-        emit ReleaseCreated(releaseId, CreatorId.unwrap(creatorId), releaseType, metadataHash);
+        emit ReleaseCreated(
+            releaseId,
+            CreatorId.unwrap(creatorId),
+            releaseType,
+            metadataHash,
+            artworkHash,
+            createdAt
+        );
     }
 
     function updateMetadata(uint256 releaseId, bytes32 metadataHash, bytes32 artworkHash) external {

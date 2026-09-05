@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Phase 3.2 converts the qualified Phase 3.1 provider set into a deterministic execution graph for a live stream. The orchestration planner is an off-chain control-plane component: it does not process media itself and it does not bypass canonical provider discovery.
+Phase 3.2 converts the qualified Phase 3.1 provider set into a deterministic execution graph for a live stream and then binds that graph to canonical `MediaJobMarket420` lifecycle coordination. The orchestration layer is an off-chain control-plane component: it does not process media itself, bypass canonical provider discovery, impersonate operator accounts, or assume settlement authority.
 
 ## Initial orchestration profile
 
@@ -41,6 +41,27 @@ Every emitted plan is validated before it leaves the planner. Validation rejects
 
 A Kahn traversal verifies acyclicity. Discovery/RPC failures propagate directly and no partial plan is returned.
 
+## Lifecycle coordination
+
+`media/orchestration/lifecycle.go` binds the qualified DAG to canonical media jobs without collapsing requester, operator and settlement authority.
+
+The coordinator:
+
+- derives a deterministic bytes32 canonical job ID from stream ID + orchestration node ID;
+- creates only jobs whose dependencies have reached canonical successful terminal states (`VERIFIED` or `SETTLED`);
+- never accepts a job on behalf of the assigned operator;
+- never confirms funding on behalf of settlement;
+- never marks a job running or commits a result on behalf of the worker;
+- treats only an explicit `ErrLifecycleJobNotFound` as proof that a job has not yet been created;
+- fails closed on all other snapshot/RPC errors;
+- verifies canonical job ID and assigned operator identity before trusting lifecycle state;
+- stops downstream creation if any dependency reaches failed/cancelled/expired/refunded state;
+- passes the ingress root input reference directly to the ingress job;
+- passes the verified upstream output reference to single-parent transcoder jobs;
+- derives a deterministic manifest reference from all verified transcoder outputs for multi-parent relay jobs.
+
+The manifest is a commitment/reference only. Raw media, URLs and credentials remain outside orchestration state.
+
 ## Phase 3.2 invariants
 
 - **MEDIA-ORCH-INV-001:** No orchestration plan may be created without a non-zero stream ID and explicit ingress/transcoder capabilities.
@@ -53,9 +74,15 @@ A Kahn traversal verifies acyclicity. Discovery/RPC failures propagate directly 
 - **MEDIA-ORCH-INV-008:** Job IDs and dependency ordering are deterministic for a fixed request/provider snapshot.
 - **MEDIA-ORCH-INV-009:** Missing dependencies, self-dependencies and cycles invalidate the entire plan.
 - **MEDIA-ORCH-INV-010:** Orchestration plans contain operator references and dependency structure only; no raw media, ingress credentials, playback secrets or signer secrets.
+- **MEDIA-ORCH-INV-011:** A downstream canonical job may be created only after every dependency is canonically `VERIFIED` or `SETTLED`.
+- **MEDIA-ORCH-INV-012:** Any failed, cancelled, expired or refunded dependency blocks downstream creation.
+- **MEDIA-ORCH-INV-013:** Lifecycle snapshot/RPC errors fail closed; only explicit canonical not-found state may be interpreted as an uncreated job.
+- **MEDIA-ORCH-INV-014:** Canonical lifecycle snapshots must match both the deterministic job ID and the operator assigned by the orchestration plan.
+- **MEDIA-ORCH-INV-015:** The orchestration requester cannot assume operator acceptance/execution authority or settlement funding authority.
+- **MEDIA-ORCH-INV-016:** Single-parent downstream jobs consume only a verified upstream output reference; multi-parent relay jobs consume a deterministic manifest commitment over all verified parent outputs.
 
-## Completion boundary
+## Current completion boundary
 
-This increment establishes deterministic provider assignment and job-graph construction. The next Phase 3.2 increments should bind this plan to job creation/lifecycle coordination and enforce state transitions from planned → accepted/funded → running → completed/failed.
+Phase 3.2 now has both deterministic provider/DAG planning and requester-side canonical job lifecycle coordination. The next increment is the concrete Ethereum `MediaJobMarket420` lifecycle adapter plus end-to-end orchestration qualification against Anvil.
 
-Cross-node failover and geographic rerouting remain later Phase 3 work and are intentionally outside this initial planner.
+Cross-node failover and geographic rerouting remain later Phase 3 work and are intentionally outside this lifecycle increment.

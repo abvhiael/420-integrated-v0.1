@@ -22,7 +22,6 @@ contract CrashV1420 is ICasinoGame420 {
     enum TerminalReason { NONE, MANUAL_CASHOUT, AUTO_CASHOUT, CRASHED }
 
     struct Params {
-        /// @notice Optional automatic cash-out multiplier in basis points. Zero means manual-only.
         uint64 autoCashoutBps;
     }
 
@@ -61,29 +60,10 @@ contract CrashV1420 is ICasinoGame420 {
     error RandomnessNotReady();
     error RandomnessMismatch();
 
-    event SessionStarted(
-        bytes32 indexed wagerId,
-        address indexed player,
-        uint64 autoCashoutBps,
-        uint64 crashPointBps,
-        uint64 startedAt,
-        bytes32 randomnessRoot,
-        RandomnessRouter420.Source randomnessSource
-    );
-    event SessionTerminal(
-        bytes32 indexed wagerId,
-        TerminalReason indexed reason,
-        uint64 cashoutMultiplierBps,
-        uint64 crashPointBps
-    );
+    event SessionStarted(bytes32 indexed wagerId,address indexed player,uint64 autoCashoutBps,uint64 crashPointBps,uint64 startedAt,bytes32 randomnessRoot,RandomnessRouter420.Source randomnessSource);
+    event SessionTerminal(bytes32 indexed wagerId,TerminalReason indexed reason,uint64 cashoutMultiplierBps,uint64 crashPointBps);
 
-    constructor(
-        address wagerRegistry_,
-        address randomnessRouter_,
-        bytes32 gameId_,
-        bytes32 gameVersionId_,
-        bytes32 rulesetId_
-    ) {
+    constructor(address wagerRegistry_,address randomnessRouter_,bytes32 gameId_,bytes32 gameVersionId_,bytes32 rulesetId_) {
         if (wagerRegistry_ == address(0) || randomnessRouter_ == address(0)) revert ZeroAddress();
         if (gameId_ == bytes32(0) || gameVersionId_ == bytes32(0) || rulesetId_ == bytes32(0)) revert InvalidId();
         wagerRegistry = BetRegistry420(wagerRegistry_);
@@ -102,18 +82,9 @@ contract CrashV1420 is ICasinoGame420 {
         return keccak256(abi.encode(PARAMS_DOMAIN, gameVersionId, rulesetId, params.autoCashoutBps));
     }
 
-    /// @notice Pure, reproducible Crash V1 crash-point derivation from canonical randomness.
-    /// @dev Uses 52 bits of entropy and a 99% return factor. The result is clamped to [1x, 100,000x].
     function deriveCrashPoint(bytes32 wagerId, bytes32 randomnessRoot) public view returns (uint64 crashPointBps) {
         if (wagerId == bytes32(0) || randomnessRoot == bytes32(0)) revert RandomnessNotReady();
-        uint256 entropy = uint256(keccak256(abi.encode(
-            CRASH_POINT_DOMAIN,
-            wagerId,
-            gameVersionId,
-            rulesetId,
-            randomnessRoot
-        ))) >> 204;
-
+        uint256 entropy = uint256(keccak256(abi.encode(CRASH_POINT_DOMAIN,wagerId,gameVersionId,rulesetId,randomnessRoot))) >> 204;
         uint256 denominator = ENTROPY_SPACE - entropy;
         uint256 quoted = (uint256(RETURN_BPS) * ENTROPY_SPACE) / denominator;
         if (quoted < BPS) quoted = BPS;
@@ -121,23 +92,11 @@ contract CrashV1420 is ICasinoGame420 {
         crashPointBps = uint64(quoted);
     }
 
-    function resolveCrashPoint(bytes32 wagerId) public view returns (
-        uint64 crashPointBps,
-        bytes32 randomnessRoot,
-        RandomnessRouter420.Source randomnessSource
-    ) {
+    function resolveCrashPoint(bytes32 wagerId) public view returns (uint64 crashPointBps,bytes32 randomnessRoot,RandomnessRouter420.Source randomnessSource) {
         BetTypes420.Wager memory wager = wagerRegistry.getWager(wagerId);
         RandomnessRouter420.RandomnessRequest memory request = randomnessRouter.getRequest(wagerId);
-        if (!request.fulfilled || request.root == bytes32(0) || request.source == RandomnessRouter420.Source.NONE) {
-            revert RandomnessNotReady();
-        }
-        if (
-            request.wagerId != wagerId ||
-            request.gameVersionId != wager.gameVersionId ||
-            request.gameVersionId != gameVersionId ||
-            request.paramsHash != wager.paramsHash
-        ) revert RandomnessMismatch();
-
+        if (!request.fulfilled || request.root == bytes32(0) || request.source == RandomnessRouter420.Source.NONE) revert RandomnessNotReady();
+        if (request.wagerId != wagerId || request.gameVersionId != wager.gameVersionId || request.gameVersionId != gameVersionId || request.paramsHash != wager.paramsHash) revert RandomnessMismatch();
         crashPointBps = deriveCrashPoint(wagerId, request.root);
         randomnessRoot = request.root;
         randomnessSource = request.source;
@@ -146,18 +105,13 @@ contract CrashV1420 is ICasinoGame420 {
     function startSession(bytes32 wagerId, Params calldata params) external {
         SessionState storage session = _sessions[wagerId];
         if (session.exists) revert SessionAlreadyStarted();
-
         BetTypes420.Wager memory wager = wagerRegistry.getWager(wagerId);
         if (wager.gameId != gameId || wager.gameVersionId != gameVersionId) revert WrongGame();
         if (wager.rulesetId != rulesetId) revert WrongRuleset();
-        if (wager.status != BetTypes420.WagerStatus.ACCEPTED && wager.status != BetTypes420.WagerStatus.OUTCOME_READY) {
-            revert InvalidWagerStatus();
-        }
+        if (wager.status != BetTypes420.WagerStatus.ACCEPTED && wager.status != BetTypes420.WagerStatus.OUTCOME_READY) revert InvalidWagerStatus();
         if (hashParams(params) != wager.paramsHash) revert ParamsMismatch();
         if (msg.sender != wager.player) revert NotPlayer();
-
         (uint64 crashPointBps, bytes32 randomnessRoot, RandomnessRouter420.Source randomnessSource) = resolveCrashPoint(wagerId);
-
         session.phase = Phase.ACTIVE;
         session.player = wager.player;
         session.autoCashoutBps = params.autoCashoutBps;
@@ -166,20 +120,9 @@ contract CrashV1420 is ICasinoGame420 {
         session.randomnessRoot = randomnessRoot;
         session.randomnessSource = randomnessSource;
         session.exists = true;
-
-        emit SessionStarted(
-            wagerId,
-            wager.player,
-            params.autoCashoutBps,
-            crashPointBps,
-            session.startedAt,
-            randomnessRoot,
-            randomnessSource
-        );
+        emit SessionStarted(wagerId,wager.player,params.autoCashoutBps,crashPointBps,session.startedAt,randomnessRoot,randomnessSource);
     }
 
-    /// @notice Deterministic V1 live multiplier derived from session start time.
-    /// @dev Returns the raw progression value capped by the global safety ceiling, not by crashPointBps.
     function currentMultiplierBps(bytes32 wagerId) public view returns (uint64 multiplierBps) {
         SessionState storage session = _sessions[wagerId];
         if (!session.exists) revert SessionMissing();
@@ -193,17 +136,10 @@ contract CrashV1420 is ICasinoGame420 {
         multiplierBps = uint64(raw);
     }
 
-    /// @notice Materialize whichever deterministic terminal boundary has already been crossed.
-    /// @dev Auto-cashout wins only when its committed threshold is strictly below the crash point. Exact ties crash.
     function advance(bytes32 wagerId) public returns (TerminalReason reason) {
         SessionState storage session = _active(wagerId);
         uint64 live = currentMultiplierBps(wagerId);
-
-        if (
-            session.autoCashoutBps != 0 &&
-            session.autoCashoutBps < session.crashPointBps &&
-            live >= session.autoCashoutBps
-        ) {
+        if (session.autoCashoutBps != 0 && session.autoCashoutBps < session.crashPointBps && live >= session.autoCashoutBps) {
             _terminalize(session, wagerId, TerminalReason.AUTO_CASHOUT, session.autoCashoutBps);
             return TerminalReason.AUTO_CASHOUT;
         }
@@ -214,15 +150,11 @@ contract CrashV1420 is ICasinoGame420 {
         return TerminalReason.NONE;
     }
 
-    /// @notice Player manual cash-out at the deterministic live multiplier.
-    /// @dev If an auto threshold or crash boundary was already mathematically crossed, that earlier boundary wins.
     function cashOut(bytes32 wagerId) external returns (uint64 multiplierBps) {
         SessionState storage session = _active(wagerId);
         if (msg.sender != session.player) revert NotPlayer();
-
         TerminalReason resolved = advance(wagerId);
         if (resolved != TerminalReason.NONE) return _sessions[wagerId].cashoutMultiplierBps;
-
         multiplierBps = currentMultiplierBps(wagerId);
         _terminalize(session, wagerId, TerminalReason.MANUAL_CASHOUT, multiplierBps);
     }
@@ -238,12 +170,7 @@ contract CrashV1420 is ICasinoGame420 {
         if (session.phase != Phase.ACTIVE) revert InvalidPhase();
     }
 
-    function _terminalize(
-        SessionState storage session,
-        bytes32 wagerId,
-        TerminalReason reason,
-        uint64 cashoutMultiplierBps
-    ) private {
+    function _terminalize(SessionState storage session,bytes32 wagerId,TerminalReason reason,uint64 cashoutMultiplierBps) private {
         session.phase = Phase.TERMINAL;
         session.terminalReason = reason;
         session.cashoutMultiplierBps = cashoutMultiplierBps;

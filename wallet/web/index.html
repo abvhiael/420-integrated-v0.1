@@ -103,7 +103,7 @@
       </section>
 
       <section id="session-panel" class="panel" hidden>
-        <div class="section-heading"><div><p class="eyebrow">Owner-controlled delegation</p><h2>Session key administration</h2></div><span class="status-pill">Execution disabled</span></div>
+        <div class="section-heading"><div><p class="eyebrow">Owner-controlled delegation</p><h2>Session key administration</h2></div><span class="status-pill">Execution enabled through scoped EntryPoint420 transport</span></div>
         <div class="form-grid account-card">
           <label><span class="label">Session key address</span><input id="session-key" type="text" autocomplete="off" placeholder="0x…" /></label>
           <label><span class="label">Scoped target</span><input id="session-target" type="text" autocomplete="off" placeholder="0x…" /></label>
@@ -127,7 +127,7 @@
         <div id="services" class="service-grid" aria-live="polite"></div>
       </section>
 
-      <section class="security-note"><h2>Wallet Core security boundary</h2><p>Account creation is routed only through canonical SmartAccountFactory420. Guided sends are compiled into the same guarded SmartAccount420 execution path as advanced calls. Owner execution must simulate successfully before approval, direct calls to wallet authority contracts are blocked, and confirmed transactions are re-verified against canonical account state. Recovery mutation is guarded and timelocked. Session execution review is available, but delegated broadcast remains disabled until the final recovery/session hardening campaign qualifies the EntryPoint420 transport.</p></section>
+      <section class="security-note"><h2>Wallet Core security boundary</h2><p>Account creation is routed only through canonical SmartAccountFactory420. Guided sends and guarded owner batches compile into SmartAccount420 execution paths with mandatory simulation, authority-contract target blocking and canonical owner-state re-verification. Recovery mutation is guarded and timelocked. Scoped session execution is transported through EntryPoint420 with nonce, grant and authorization-epoch hardening.</p></section>
 
       <p id="status" class="status" role="status">Ready.</p>
     </main>
@@ -135,5 +135,6 @@
   <script type="module" src="./app.js"></script>
   <script type="module" src="./ui-v1.js"></script>
   <script type="module" src="./session-execution-ui.js"></script>
+  <script type="module" src="./batch-execution-ui.js"></script>
 </body>
 </html>

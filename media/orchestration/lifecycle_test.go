@@ -8,13 +8,14 @@ import (
 )
 
 type memoryLifecycleMarket struct {
-	jobs    map[[32]byte]JobSnapshot
-	created []JobSpec
-	fail    error
+	jobs         map[[32]byte]JobSnapshot
+	created      []JobSpec
+	createErr    error
+	snapshotErr  error
 }
 
 func (m *memoryLifecycleMarket) CreateJob(_ context.Context, spec JobSpec) error {
-	if m.fail != nil { return m.fail }
+	if m.createErr != nil { return m.createErr }
 	if m.jobs == nil { m.jobs = map[[32]byte]JobSnapshot{} }
 	if _, exists := m.jobs[spec.JobID]; exists { return errors.New("exists") }
 	m.created = append(m.created, spec)
@@ -23,9 +24,10 @@ func (m *memoryLifecycleMarket) CreateJob(_ context.Context, spec JobSpec) error
 }
 
 func (m *memoryLifecycleMarket) Snapshot(_ context.Context, id [32]byte) (JobSnapshot, error) {
-	if m.jobs == nil { return JobSnapshot{}, errors.New("not found") }
+	if m.snapshotErr != nil { return JobSnapshot{}, m.snapshotErr }
+	if m.jobs == nil { return JobSnapshot{}, ErrLifecycleJobNotFound }
 	j, ok := m.jobs[id]
-	if !ok { return JobSnapshot{}, errors.New("not found") }
+	if !ok { return JobSnapshot{}, ErrLifecycleJobNotFound }
 	return j, nil
 }
 
@@ -89,9 +91,9 @@ func TestLifecycleRelayWaitsForAllTranscodersAndUsesManifest(t *testing.T) {
 
 	ingressID := CanonicalJobID(plan.StreamID, "ingress")
 	market.jobs[ingressID] = JobSnapshot{JobID: ingressID, OperatorID: b32(11), Status: LifecycleSettled, OutputRef: b32(51)}
-	for _, n := range plan.Jobs[1:3] {
+	for i, n := range plan.Jobs[1:3] {
 		id := CanonicalJobID(plan.StreamID, n.ID)
-		market.jobs[id] = JobSnapshot{JobID: id, OperatorID: n.OperatorID, Status: LifecycleVerified, OutputRef: b32(byte(60 + len(n.ID)))}
+		market.jobs[id] = JobSnapshot{JobID: id, OperatorID: n.OperatorID, Status: LifecycleVerified, OutputRef: b32(byte(61 + i))}
 	}
 
 	created, err := coord.CreateReady(ctx, plan, lifecycleConfig())
@@ -110,6 +112,13 @@ func TestLifecycleFailsClosedOnDependencyFailure(t *testing.T) {
 	market.jobs[ingressID] = JobSnapshot{JobID: ingressID, OperatorID: b32(11), Status: LifecycleFailed}
 	_, err := NewLifecycleCoordinator(market).Ready(ctx, plan)
 	if !errors.Is(err, ErrDependencyFailed) { t.Fatalf("err=%v", err) }
+}
+
+func TestLifecycleFailsClosedOnSnapshotRPCError(t *testing.T) {
+	boom := errors.New("rpc unavailable")
+	market := &memoryLifecycleMarket{snapshotErr: boom}
+	_, err := NewLifecycleCoordinator(market).Ready(context.Background(), lifecyclePlan())
+	if !errors.Is(err, boom) { t.Fatalf("err=%v", err) }
 }
 
 func TestLifecycleRejectsCanonicalIdentityMismatch(t *testing.T) {

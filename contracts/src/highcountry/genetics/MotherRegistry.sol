@@ -71,6 +71,7 @@ contract MotherRegistry {
     }
 
     function remainingCuttings(uint64 motherId) external view returns (uint32) { MotherRecord memory m = getMother(motherId); return m.maxCuttings - m.cuttingsTaken; }
+    function genomeOf(uint64 motherId) external view returns (bytes32) { return getMother(motherId).genomeId; }
     function exists(uint64 motherId) external view returns (bool) { return _mothers[motherId].exists; }
     function getMother(uint64 motherId) public view returns (MotherRecord memory) { MotherRecord memory m = _mothers[motherId]; if (!m.exists) revert HCNotFound(); return m; }
     function _require(uint64 id) private view returns (MotherRecord storage m) { m = _mothers[id]; if (!m.exists) revert HCNotFound(); }

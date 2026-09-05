@@ -27,6 +27,31 @@ function hexToBytes(hex) {
   return Uint8Array.from(clean.match(/../g), (byte) => Number.parseInt(byte, 16));
 }
 
+function toBytes(value, label = 'binary value') {
+  if (value instanceof ArrayBuffer) return new Uint8Array(value);
+  if (ArrayBuffer.isView(value)) return new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
+  throw new Error(`${label} must be binary`);
+}
+
+async function sha256(bytes) {
+  const input = toBytes(bytes, 'SHA-256 input');
+  if (globalThis.crypto?.subtle?.digest) {
+    return new Uint8Array(await globalThis.crypto.subtle.digest('SHA-256', input));
+  }
+  if (typeof process !== 'undefined' && process.versions?.node) {
+    const { createHash } = await import('node:crypto');
+    return new Uint8Array(createHash('sha256').update(input).digest());
+  }
+  throw new Error('SHA-256 unavailable');
+}
+
+function bytesEqual(a, b) {
+  if (a.length !== b.length) return false;
+  let difference = 0;
+  for (let i = 0; i < a.length; i += 1) difference |= a[i] ^ b[i];
+  return difference === 0;
+}
+
 export function base64urlEncode(bytes) {
   if (!(bytes instanceof Uint8Array)) bytes = new Uint8Array(bytes);
   let binary = '';
@@ -62,15 +87,53 @@ export function buildPasskeyRequestOptions({ userOpHash, rpId, credentialId, tim
   };
 }
 
+export async function validateAuthenticatorData(authenticatorData, {
+  expectedRpId,
+  requireUserVerification = true,
+  previousSignCount = null,
+} = {}) {
+  const bytes = toBytes(authenticatorData, 'authenticatorData');
+  if (bytes.length < 37) throw new Error('authenticatorData must be at least 37 bytes');
+  const rpId = normalizeRpId(expectedRpId);
+  const expectedRpIdHash = await sha256(new TextEncoder().encode(rpId));
+  const rpIdHash = bytes.slice(0, 32);
+  if (!bytesEqual(rpIdHash, expectedRpIdHash)) throw new Error('WebAuthn RP ID hash mismatch');
+
+  const flags = bytes[32];
+  const userPresent = (flags & 0x01) !== 0;
+  const userVerified = (flags & 0x04) !== 0;
+  if (!userPresent) throw new Error('WebAuthn user presence flag missing');
+  if (requireUserVerification && !userVerified) throw new Error('WebAuthn user verification flag missing');
+
+  const signCount = (((bytes[33] << 24) >>> 0) + (bytes[34] << 16) + (bytes[35] << 8) + bytes[36]) >>> 0;
+  if (previousSignCount != null) {
+    if (!Number.isInteger(previousSignCount) || previousSignCount < 0 || previousSignCount > 0xffffffff) throw new Error('invalid previous WebAuthn sign counter');
+    if (previousSignCount !== 0 || signCount !== 0) {
+      if (signCount <= previousSignCount) throw new Error('WebAuthn sign counter did not advance');
+    }
+  }
+
+  return {
+    rpId,
+    rpIdHash: base64urlEncode(rpIdHash),
+    flags,
+    userPresent,
+    userVerified,
+    signCount,
+    backupEligible: (flags & 0x08) !== 0,
+    backupState: (flags & 0x10) !== 0,
+    attestedCredentialData: (flags & 0x40) !== 0,
+    extensionData: (flags & 0x80) !== 0,
+  };
+}
+
 export function parsePasskeyAssertion(credential, { expectedUserOpHash, expectedOrigin }) {
   if (!credential || credential.type !== 'public-key' || !credential.response) throw new Error('invalid public-key credential');
   const response = credential.response;
   for (const field of ['clientDataJSON', 'authenticatorData', 'signature']) {
     if (!(response[field] instanceof ArrayBuffer) && !ArrayBuffer.isView(response[field])) throw new Error(`missing ${field}`);
   }
-  const clientBytes = response.clientDataJSON instanceof ArrayBuffer
-    ? new Uint8Array(response.clientDataJSON)
-    : new Uint8Array(response.clientDataJSON.buffer, response.clientDataJSON.byteOffset, response.clientDataJSON.byteLength);
+  const clientBytes = toBytes(response.clientDataJSON, 'clientDataJSON');
   let clientData;
   try { clientData = JSON.parse(new TextDecoder().decode(clientBytes)); } catch { throw new Error('invalid clientDataJSON'); }
   if (clientData.type !== 'webauthn.get') throw new Error('unexpected WebAuthn ceremony type');
@@ -79,15 +142,12 @@ export function parsePasskeyAssertion(credential, { expectedUserOpHash, expected
   const origin = normalizeOrigin(expectedOrigin);
   if (clientData.origin !== origin) throw new Error('WebAuthn origin mismatch');
 
-  const toBytes = (value) => value instanceof ArrayBuffer
-    ? new Uint8Array(value)
-    : new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
   return {
     credentialId: credential.id,
     clientDataJSON: base64urlEncode(clientBytes),
-    authenticatorData: base64urlEncode(toBytes(response.authenticatorData)),
-    signature: base64urlEncode(toBytes(response.signature)),
-    userHandle: response.userHandle ? base64urlEncode(toBytes(response.userHandle)) : null,
+    authenticatorData: base64urlEncode(toBytes(response.authenticatorData, 'authenticatorData')),
+    signature: base64urlEncode(toBytes(response.signature, 'signature')),
+    userHandle: response.userHandle ? base64urlEncode(toBytes(response.userHandle, 'userHandle')) : null,
     origin,
     challenge: expectedChallenge,
   };

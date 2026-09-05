@@ -137,14 +137,17 @@ export class CatalogProjectionStore420 {
         );
         if (removed.rowCount !== 1) throw new Error('release track removal references unknown track');
         const position = removed.rows[0].position;
+        // Move affected rows into a disjoint positive range before compacting them.
+        // This avoids transient collisions on UNIQUE(release_id, position) without
+        // violating the schema's position >= 0 check constraint.
         await c.query(
-          `UPDATE catalog_release_tracks SET position=-(position+1)
+          `UPDATE catalog_release_tracks SET position=position+1000
            WHERE release_id=$1 AND position>$2`,
           [p.releaseId, position],
         );
         await c.query(
-          `UPDATE catalog_release_tracks SET position=(-position)-2
-           WHERE release_id=$1 AND position<0`,
+          `UPDATE catalog_release_tracks SET position=position-1001
+           WHERE release_id=$1 AND position>=1000`,
           [p.releaseId],
         );
         break;

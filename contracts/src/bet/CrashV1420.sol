@@ -6,18 +6,20 @@ import "./BetTypes420.sol";
 import "./ICasinoGame420.sol";
 import "./RandomnessRouter420.sol";
 
-/// @notice First-party Crash V1 wager-scoped session and deterministic crash-point engine for 420Bet.
-/// @dev E2.2 consumes fulfilled canonical randomness and derives a replayable crash point. This module
-///      still owns no bankroll funds, randomness fulfillment authority, multiplier clock, or settlement authority.
+/// @notice First-party Crash V1 wager-scoped session, deterministic crash-point, and cash-out state engine for 420Bet.
+/// @dev E2.3 adds deterministic multiplier progression and terminal race semantics. This module still owns no bankroll
+///      funds, randomness fulfillment authority, or canonical settlement authority.
 contract CrashV1420 is ICasinoGame420 {
     bytes32 public constant PARAMS_DOMAIN = keccak256("420.BET.CRASH.V1.PARAMS");
     bytes32 public constant CRASH_POINT_DOMAIN = keccak256("420.BET.CRASH.V1.CRASH.POINT");
     uint64 public constant BPS = 10_000;
     uint64 public constant RETURN_BPS = 9_900;
+    uint64 public constant GROWTH_BPS_PER_SECOND = 1_000; // +0.10x per second in V1.
     uint64 public constant MAX_CRASH_BPS = 1_000_000_000; // 100,000x hard safety ceiling.
     uint256 private constant ENTROPY_SPACE = uint256(1) << 52;
 
     enum Phase { NONE, ACTIVE, TERMINAL }
+    enum TerminalReason { NONE, MANUAL_CASHOUT, AUTO_CASHOUT, CRASHED }
 
     struct Params {
         /// @notice Optional automatic cash-out multiplier in basis points. Zero means manual-only.
@@ -29,8 +31,11 @@ contract CrashV1420 is ICasinoGame420 {
         address player;
         uint64 autoCashoutBps;
         uint64 crashPointBps;
+        uint64 startedAt;
+        uint64 cashoutMultiplierBps;
         bytes32 randomnessRoot;
         RandomnessRouter420.Source randomnessSource;
+        TerminalReason terminalReason;
         bool exists;
     }
 
@@ -52,6 +57,7 @@ contract CrashV1420 is ICasinoGame420 {
     error NotPlayer();
     error SessionAlreadyStarted();
     error SessionMissing();
+    error InvalidPhase();
     error RandomnessNotReady();
     error RandomnessMismatch();
 
@@ -60,8 +66,15 @@ contract CrashV1420 is ICasinoGame420 {
         address indexed player,
         uint64 autoCashoutBps,
         uint64 crashPointBps,
+        uint64 startedAt,
         bytes32 randomnessRoot,
         RandomnessRouter420.Source randomnessSource
+    );
+    event SessionTerminal(
+        bytes32 indexed wagerId,
+        TerminalReason indexed reason,
+        uint64 cashoutMultiplierBps,
+        uint64 crashPointBps
     );
 
     constructor(
@@ -108,7 +121,6 @@ contract CrashV1420 is ICasinoGame420 {
         crashPointBps = uint64(quoted);
     }
 
-    /// @notice Read the canonical fulfilled request and derive the exact V1 crash point without mutating state.
     function resolveCrashPoint(bytes32 wagerId) public view returns (
         uint64 crashPointBps,
         bytes32 randomnessRoot,
@@ -150,15 +162,91 @@ contract CrashV1420 is ICasinoGame420 {
         session.player = wager.player;
         session.autoCashoutBps = params.autoCashoutBps;
         session.crashPointBps = crashPointBps;
+        session.startedAt = uint64(block.timestamp);
         session.randomnessRoot = randomnessRoot;
         session.randomnessSource = randomnessSource;
         session.exists = true;
 
-        emit SessionStarted(wagerId, wager.player, params.autoCashoutBps, crashPointBps, randomnessRoot, randomnessSource);
+        emit SessionStarted(
+            wagerId,
+            wager.player,
+            params.autoCashoutBps,
+            crashPointBps,
+            session.startedAt,
+            randomnessRoot,
+            randomnessSource
+        );
+    }
+
+    /// @notice Deterministic V1 live multiplier derived from session start time.
+    /// @dev Returns the raw progression value capped by the global safety ceiling, not by crashPointBps.
+    function currentMultiplierBps(bytes32 wagerId) public view returns (uint64 multiplierBps) {
+        SessionState storage session = _sessions[wagerId];
+        if (!session.exists) revert SessionMissing();
+        if (session.phase == Phase.TERMINAL) {
+            if (session.terminalReason == TerminalReason.CRASHED) return session.crashPointBps;
+            return session.cashoutMultiplierBps;
+        }
+        uint256 elapsed = block.timestamp - uint256(session.startedAt);
+        uint256 raw = uint256(BPS) + elapsed * uint256(GROWTH_BPS_PER_SECOND);
+        if (raw > MAX_CRASH_BPS) raw = MAX_CRASH_BPS;
+        multiplierBps = uint64(raw);
+    }
+
+    /// @notice Materialize whichever deterministic terminal boundary has already been crossed.
+    /// @dev Auto-cashout wins only when its committed threshold is strictly below the crash point. Exact ties crash.
+    function advance(bytes32 wagerId) public returns (TerminalReason reason) {
+        SessionState storage session = _active(wagerId);
+        uint64 live = currentMultiplierBps(wagerId);
+
+        if (
+            session.autoCashoutBps != 0 &&
+            session.autoCashoutBps < session.crashPointBps &&
+            live >= session.autoCashoutBps
+        ) {
+            _terminalize(session, wagerId, TerminalReason.AUTO_CASHOUT, session.autoCashoutBps);
+            return TerminalReason.AUTO_CASHOUT;
+        }
+        if (live >= session.crashPointBps) {
+            _terminalize(session, wagerId, TerminalReason.CRASHED, 0);
+            return TerminalReason.CRASHED;
+        }
+        return TerminalReason.NONE;
+    }
+
+    /// @notice Player manual cash-out at the deterministic live multiplier.
+    /// @dev If an auto threshold or crash boundary was already mathematically crossed, that earlier boundary wins.
+    function cashOut(bytes32 wagerId) external returns (uint64 multiplierBps) {
+        SessionState storage session = _active(wagerId);
+        if (msg.sender != session.player) revert NotPlayer();
+
+        TerminalReason resolved = advance(wagerId);
+        if (resolved != TerminalReason.NONE) return _sessions[wagerId].cashoutMultiplierBps;
+
+        multiplierBps = currentMultiplierBps(wagerId);
+        _terminalize(session, wagerId, TerminalReason.MANUAL_CASHOUT, multiplierBps);
     }
 
     function getSession(bytes32 wagerId) external view returns (SessionState memory session) {
         session = _sessions[wagerId];
         if (!session.exists) revert SessionMissing();
+    }
+
+    function _active(bytes32 wagerId) private view returns (SessionState storage session) {
+        session = _sessions[wagerId];
+        if (!session.exists) revert SessionMissing();
+        if (session.phase != Phase.ACTIVE) revert InvalidPhase();
+    }
+
+    function _terminalize(
+        SessionState storage session,
+        bytes32 wagerId,
+        TerminalReason reason,
+        uint64 cashoutMultiplierBps
+    ) private {
+        session.phase = Phase.TERMINAL;
+        session.terminalReason = reason;
+        session.cashoutMultiplierBps = cashoutMultiplierBps;
+        emit SessionTerminal(wagerId, reason, cashoutMultiplierBps, session.crashPointBps);
     }
 }

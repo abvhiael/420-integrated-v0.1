@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import {
   base64urlDecode,
   base64urlEncode,
@@ -7,6 +8,7 @@ import {
   buildPasskeyRequestOptions,
   parsePasskeyAssertion,
   passkeyPolicy,
+  validateAuthenticatorData,
 } from '../core/passkeys.js';
 
 const hash = `0x${'11'.repeat(32)}`;
@@ -26,6 +28,15 @@ function assertion({ challenge = base64urlEncode(buildPasskeyChallenge(hash)), o
       userHandle: null,
     },
   };
+}
+
+function authenticatorData({ rpId = 'wallet.420.example', flags = 0x05, signCount = 1 } = {}) {
+  const rpIdHash = createHash('sha256').update(rpId).digest();
+  const bytes = new Uint8Array(37);
+  bytes.set(rpIdHash, 0);
+  bytes[32] = flags;
+  new DataView(bytes.buffer).setUint32(33, signCount, false);
+  return bytes;
 }
 
 test('base64url helpers round-trip credential bytes without padding', () => {
@@ -76,6 +87,57 @@ test('assertion parsing fails closed on replay or origin drift', () => {
     expectedUserOpHash: hash,
     expectedOrigin: 'https://wallet.420.example',
   }), /origin mismatch/i);
+});
+
+test('authenticatorData validates exact RP ID hash plus UP and UV flags', async () => {
+  const parsed = await validateAuthenticatorData(authenticatorData({ flags: 0x05, signCount: 9 }), {
+    expectedRpId: 'wallet.420.example',
+    previousSignCount: 8,
+  });
+  assert.equal(parsed.rpId, 'wallet.420.example');
+  assert.equal(parsed.userPresent, true);
+  assert.equal(parsed.userVerified, true);
+  assert.equal(parsed.signCount, 9);
+  assert.equal(parsed.backupEligible, false);
+  assert.equal(parsed.backupState, false);
+});
+
+test('authenticatorData fails closed on RP ID mismatch or missing presence/verification flags', async () => {
+  await assert.rejects(validateAuthenticatorData(authenticatorData({ rpId: 'evil.example' }), {
+    expectedRpId: 'wallet.420.example',
+  }), /RP ID hash mismatch/i);
+  await assert.rejects(validateAuthenticatorData(authenticatorData({ flags: 0x04 }), {
+    expectedRpId: 'wallet.420.example',
+  }), /user presence flag missing/i);
+  await assert.rejects(validateAuthenticatorData(authenticatorData({ flags: 0x01 }), {
+    expectedRpId: 'wallet.420.example',
+  }), /user verification flag missing/i);
+});
+
+test('authenticatorData sign counter rejects rollback/replay while allowing authenticators that always report zero', async () => {
+  await assert.rejects(validateAuthenticatorData(authenticatorData({ signCount: 7 }), {
+    expectedRpId: 'wallet.420.example',
+    previousSignCount: 7,
+  }), /sign counter did not advance/i);
+  await assert.rejects(validateAuthenticatorData(authenticatorData({ signCount: 6 }), {
+    expectedRpId: 'wallet.420.example',
+    previousSignCount: 7,
+  }), /sign counter did not advance/i);
+  const zeroCounter = await validateAuthenticatorData(authenticatorData({ signCount: 0 }), {
+    expectedRpId: 'wallet.420.example',
+    previousSignCount: 0,
+  });
+  assert.equal(zeroCounter.signCount, 0);
+});
+
+test('authenticatorData rejects malformed length and invalid prior counter state', async () => {
+  await assert.rejects(validateAuthenticatorData(Uint8Array.from([1, 2, 3]), {
+    expectedRpId: 'wallet.420.example',
+  }), /at least 37 bytes/i);
+  await assert.rejects(validateAuthenticatorData(authenticatorData(), {
+    expectedRpId: 'wallet.420.example',
+    previousSignCount: -1,
+  }), /invalid previous WebAuthn sign counter/i);
 });
 
 test('passkey policy rejects insecure non-local origins and malformed RP IDs', () => {

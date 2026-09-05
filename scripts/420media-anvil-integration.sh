@@ -14,16 +14,10 @@ cleanup() {
 }
 trap cleanup EXIT
 
-stage() {
-  printf '\n==> 420Media Anvil: %s\n' "$1"
-}
-
+stage() { printf '\n==> 420Media Anvil: %s\n' "$1"; }
 fail() {
   echo "420Media Anvil integration failed: $*" >&2
-  if [[ -f "$ANVIL_LOG" ]]; then
-    echo "--- anvil log tail ---" >&2
-    tail -n 80 "$ANVIL_LOG" >&2 || true
-  fi
+  if [[ -f "$ANVIL_LOG" ]]; then tail -n 80 "$ANVIL_LOG" >&2 || true; fi
   exit 1
 }
 
@@ -32,13 +26,8 @@ anvil --silent --host 127.0.0.1 --port 8545 >"$ANVIL_LOG" 2>&1 &
 ANVIL_PID=$!
 READY=0
 for _ in $(seq 1 100); do
-  if cast block-number --rpc-url "$RPC_URL" >/dev/null 2>&1; then
-    READY=1
-    break
-  fi
-  if ! kill -0 "$ANVIL_PID" >/dev/null 2>&1; then
-    fail "Anvil exited before becoming ready"
-  fi
+  if cast block-number --rpc-url "$RPC_URL" >/dev/null 2>&1; then READY=1; break; fi
+  if ! kill -0 "$ANVIL_PID" >/dev/null 2>&1; then fail "Anvil exited before becoming ready"; fi
   sleep 0.05
 done
 [[ "$READY" == "1" ]] || fail "Anvil did not become ready"
@@ -53,8 +42,7 @@ forge build --force \
   src/media/MediaJobMarket420.sol
 
 deploy() {
-  local target="$1"
-  local out
+  local target="$1" out
   echo "deploying $target" >&2
   out=$(forge create "$target" --broadcast --unlocked --from "$GOV_ADDR" --rpc-url "$RPC_URL" --constructor-args "$GOV_ADDR")
   awk '/Deployed to:/ {print $3}' <<<"$out"
@@ -68,12 +56,11 @@ SETTLEMENT=$(deploy "src/media/MediaSettlement420.sol:MediaSettlement420")
 MARKET=$(deploy "src/media/MediaJobMarket420.sol:MediaJobMarket420")
 popd >/dev/null
 
-for v in CAP_REG OP_REG SLA_REG SETTLEMENT MARKET; do
-  [[ -n "${!v}" ]] || fail "failed to deploy $v"
-done
+for v in CAP_REG OP_REG SLA_REG SETTLEMENT MARKET; do [[ -n "${!v}" ]] || fail "failed to deploy $v"; done
 
 CAP_ID=$(cast keccak "420MEDIA_ANVIL_CAP")
 OP_ID=$(cast keccak "420MEDIA_ANVIL_OPERATOR")
+SECOND_OP_ID=$(cast keccak "420MEDIA_ANVIL_SECOND_OPERATOR")
 STAKE_REF=$(cast keccak "420MEDIA_ANVIL_STAKE")
 JOB_KIND=$(cast keccak "420MEDIA_ANVIL_TRANSCODE")
 INPUT_REF=$(cast keccak "420MEDIA_ANVIL_INPUT")
@@ -82,6 +69,10 @@ FUNDED_JOB=$(cast keccak "420MEDIA_ANVIL_FUNDED_JOB")
 VAULT_REF=$(cast keccak "420MEDIA_ANVIL_VAULT")
 FUNDING_REF=$(cast keccak "420MEDIA_ANVIL_FUNDING")
 OUTPUT_REF=$(cast keccak "420MEDIA_ANVIL_OUTPUT")
+ORCH_STREAM_ID=$(cast keccak "420MEDIA_ANVIL_ORCH_STREAM")
+ORCH_INGRESS_KIND=$(cast keccak "420MEDIA_ANVIL_ORCH_INGRESS")
+ORCH_TRANSCODE_KIND=$(cast keccak "420MEDIA_ANVIL_ORCH_TRANSCODE")
+ORCH_INPUT_REF=$(cast keccak "420MEDIA_ANVIL_ORCH_INPUT")
 DEADLINE=$(( $(date +%s) + 900 ))
 
 send_gov() { cast send --rpc-url "$RPC_URL" --from "$GOV_ADDR" --unlocked "$@" >/dev/null; }
@@ -109,19 +100,31 @@ send_gov "$SETTLEMENT" "confirmVaultFunding(bytes32,address,bytes32,address,byte
 export MEDIA420_ANVIL=1
 export MEDIA420_RPC_URL="$RPC_URL"
 export MEDIA420_MARKET="$MARKET"
+export MEDIA420_GOV_ACCOUNT="$GOV_ADDR"
 export MEDIA420_OPERATOR_ACCOUNT="$OP_ADDR"
 export MEDIA420_OPERATOR_ID="$OP_ID"
+export MEDIA420_CAP_ID="$CAP_ID"
 export MEDIA420_CREATED_JOB="$CREATED_JOB"
 export MEDIA420_FUNDED_JOB="$FUNDED_JOB"
 export MEDIA420_OUTPUT_REF="$OUTPUT_REF"
 export MEDIA420_JOBS_SELECTOR="$(cast sig 'jobs(bytes32)')"
+export MEDIA420_RESERVED_OPERATOR_SELECTOR="$(cast sig 'reservedOperatorId(bytes32)')"
+export MEDIA420_CREATE_ASSIGNED_SELECTOR="$(cast sig 'createAssignedJob(bytes32,bytes32,bytes32,bytes32,bytes32,bytes32,uint256,uint64,bytes32)')"
 export MEDIA420_ACCEPT_SELECTOR="$(cast sig 'acceptJob(bytes32,bytes32)')"
 export MEDIA420_MARK_RUNNING_SELECTOR="$(cast sig 'markRunning(bytes32)')"
 export MEDIA420_COMMIT_RESULT_SELECTOR="$(cast sig 'commitResult(bytes32,bytes32)')"
 export MEDIA420_JOB_CREATED_TOPIC="$(cast keccak 'JobCreated(bytes32,address,bytes32,bytes32,bytes32,bytes32,uint256,uint64)')"
+export MEDIA420_ORCH_STREAM_ID="$ORCH_STREAM_ID"
+export MEDIA420_ORCH_SECOND_OPERATOR_ID="$SECOND_OP_ID"
+export MEDIA420_ORCH_INGRESS_KIND="$ORCH_INGRESS_KIND"
+export MEDIA420_ORCH_TRANSCODE_KIND="$ORCH_TRANSCODE_KIND"
+export MEDIA420_ORCH_INPUT_REF="$ORCH_INPUT_REF"
 
-stage "running live Go adapter lifecycle test"
+stage "running live node adapter lifecycle test"
 cd "$ROOT"
 go test ./media/node/ethadapter -run TestAnvilMediaJobAdapterLifecycle -count=1 -v
+
+stage "running live orchestration lifecycle test"
+go test ./media/orchestration -run TestAnvilOrchestrationCreatesReservedRootJob -count=1 -v
 
 stage "completed successfully"

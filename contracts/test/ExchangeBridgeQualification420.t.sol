@@ -4,9 +4,13 @@ pragma solidity ^0.8.24;
 import "../src/exchange/ExchangeBridgeQualification420.sol";
 
 contract BridgeQualificationAdapter420 is IBridgeAdapter420 {
-    bytes32 private immutable _id;
-    constructor(bytes32 id_) { _id = id_; }
-    function adapterId() external view returns (bytes32) { return _id; }
+    function adapterId() external pure returns (bytes32) { return keccak256("bridge/POT/adapter"); }
+    function verifyInbound(bytes calldata) external pure returns (VerifiedTransfer memory) { revert("unused"); }
+    function initiateOutbound(bytes32,bytes32,address,bytes calldata,uint256,bytes calldata) external payable returns(bytes32) { revert("unused"); }
+}
+
+contract BridgeQualificationWrongAdapter420 is IBridgeAdapter420 {
+    function adapterId() external pure returns (bytes32) { return keccak256("wrong"); }
     function verifyInbound(bytes calldata) external pure returns (VerifiedTransfer memory) { revert("unused"); }
     function initiateOutbound(bytes32,bytes32,address,bytes calldata,uint256,bytes calldata) external payable returns(bytes32) { revert("unused"); }
 }
@@ -112,7 +116,7 @@ contract ExchangeBridgeQualification420Test {
         chains = new BridgeQualificationChains420();
         routes = new BridgeQualificationRoutes420();
         gateway = new BridgeQualificationGateway420();
-        adapter = new BridgeQualificationAdapter420(ADAPTER);
+        adapter = new BridgeQualificationAdapter420();
         token = new BridgeQualificationToken420();
 
         qualification = new ExchangeBridgeQualification420(
@@ -175,7 +179,7 @@ contract ExchangeBridgeQualification420Test {
 
     function testQualificationFailsWhenGatewayAdapterChanges() public {
         qualification.setQualification(EXCHANGE_ASSET, BRIDGE_ASSET, ROUTE, ADAPTER, PROVENANCE, true, true, true);
-        BridgeQualificationAdapter420 wrong = new BridgeQualificationAdapter420(keccak256("wrong"));
+        BridgeQualificationWrongAdapter420 wrong = new BridgeQualificationWrongAdapter420();
         gateway.set(ADAPTER, address(wrong));
         require(!qualification.isQualified(EXCHANGE_ASSET), "wrong adapter accepted");
     }

@@ -1,0 +1,68 @@
+export interface Decision10Fixture {
+  schema: string;
+  chainId: number;
+  releaseManifestHash: string;
+  deployer: string;
+  aliceAccount: string;
+  bobAccount: string;
+  carolAccount: string;
+  producerAccount: string;
+  remixerAccount: string;
+  creativeProtocolRegistry: string;
+  creatorProfileRegistry: string;
+  workRegistry: string;
+  recordingRegistry: string;
+  contributorRegistry: string;
+  rightsRegistry: string;
+  authorizationRegistry: string;
+  licenseRegistry: string;
+  royaltyScheduleRegistry: string;
+  royaltyVault: string;
+  royaltyRouter: string;
+  aliceCreatorId: number;
+  bobCreatorId: number;
+  carolCreatorId: number;
+  producerCreatorId: number;
+  remixerCreatorId: number;
+  workId: number;
+  originalRecordingId: number;
+  remixOfferId: number;
+  remixLicenseId: number;
+  remixRecordingId: number;
+  rightsTransferId: number;
+  scheduleVersion: number;
+  workRightsVersion: number;
+  originalRightsVersion: number;
+  remixRightsVersion: number;
+  originalInitialSettlementId: string;
+  remixLicenseSettlementId: string;
+  remixSettlementId: string;
+  originalPostTransferSettlementId: string;
+  aliceWorkCreditId: string;
+  bobWorkCreditId: string;
+  aliceRecordingCreditId: string;
+  producerRecordingCreditId: string;
+  expectedWorkPoolWei: string;
+  expectedOriginalPoolWei: string;
+  expectedRemixPoolWei: string;
+  expectedTreasuryWei: string;
+  expectedVaultBalanceWei: string;
+  expectedAliceWorkWei: string;
+  expectedBobWorkWei: string;
+  expectedAliceOriginalWei: string;
+  expectedProducerOriginalWei: string;
+  expectedCarolOriginalWei: string;
+  expectedRemixerRemixWei: string;
+  expectedCarolRemixWei: string;
+}
+
+export interface CanonicalEvent {
+  eventKey: string;
+  blockNumber: number;
+  blockHash: string;
+  txHash: string;
+  logIndex: number;
+  moduleKey: string;
+  eventType: string;
+  payload: Record<string, string | number | null>;
+}

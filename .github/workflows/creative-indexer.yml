@@ -1,0 +1,59 @@
+name: Creative Reference Indexer
+
+on:
+  push:
+    branches: [creative-kernel-v1]
+    paths:
+      - 'creative-indexer/**'
+      - 'contracts/src/creative/**'
+      - 'contracts/script/Decision10DeploySeed420.s.sol'
+      - '.github/workflows/creative-indexer.yml'
+  pull_request:
+    paths:
+      - 'creative-indexer/**'
+      - 'contracts/src/creative/**'
+      - 'contracts/script/Decision10DeploySeed420.s.sol'
+      - '.github/workflows/creative-indexer.yml'
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: creative_indexer
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d creative_indexer"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
+    env:
+      DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/creative_indexer
+      CREATIVE_FIXTURE_PATH: ../artifacts/contracts/creative-kernel-v1.fixture.json
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+      - name: Generate Decision #10 fixture
+        working-directory: contracts
+        run: |
+          mkdir -p ../artifacts/contracts
+          forge script script/Decision10DeploySeed420.s.sol:Decision10DeploySeed420 --sig "run()" -vvv
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install indexer dependencies
+        working-directory: creative-indexer
+        run: npm install
+      - name: Build indexer
+        working-directory: creative-indexer
+        run: npm run build
+      - name: Rebuild/reference projection tests
+        working-directory: creative-indexer
+        run: npm test

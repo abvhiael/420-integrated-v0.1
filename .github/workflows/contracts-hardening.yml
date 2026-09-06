@@ -124,29 +124,74 @@ jobs:
               )
               sys.exit(1)
 
+          def exact_arbitrary_send(detector, *, contract, function, signature, filename, call_fragment):
+              if detector.get("check") != "arbitrary-send-eth":
+                  return False
+              description = detector.get("description", "")
+              if f"{contract}.{signature}" not in description:
+                  return False
+
+              exact_function = False
+              exact_send = False
+              for element in detector.get("elements", []):
+                  source = element.get("source_mapping", {})
+                  fields = element.get("type_specific_fields", {})
+                  parent = fields.get("parent", {})
+                  parent_name = parent.get("name") if isinstance(parent, dict) else parent
+
+                  if (
+                      element.get("type") == "function"
+                      and element.get("name") == function
+                      and source.get("filename_relative") == filename
+                      and parent_name == contract
+                      and fields.get("signature") == signature
+                  ):
+                      exact_function = True
+
+                  if (
+                      element.get("type") == "node"
+                      and source.get("filename_relative") == filename
+                      and call_fragment in element.get("name", "")
+                  ):
+                      node_parent = fields.get("parent", {})
+                      node_parent_name = node_parent.get("name") if isinstance(node_parent, dict) else node_parent
+                      if node_parent_name == function:
+                          exact_send = True
+
+              return exact_function and exact_send
+
           high = []
           for detector in report.get("results", {}).get("detectors", []):
               if detector.get("impact") != "High":
                   continue
 
-              # SmartAccount420 is intentionally a programmable account executor. Its
-              # arbitrary ETH send is not authority-less: execute/executeBatch are gated
-              # by owner or the immutable EntryPoint, while session operations are
-              # capability-checked during UserOperation validation. Keep the exception
-              # exact so every other high-severity arbitrary-send finding still fails CI.
-              allowed = False
-              if detector.get("check") == "arbitrary-send-eth":
-                  for element in detector.get("elements", []):
-                      source = element.get("source_mapping", {})
-                      parent = element.get("type_specific_fields", {}).get("parent", {})
-                      parent_name = parent.get("name") if isinstance(parent, dict) else parent
-                      if (
-                          element.get("name") == "_call"
-                          and source.get("filename_relative") == "src/accounts/SmartAccount420.sol"
-                          and parent_name == "SmartAccount420"
-                      ):
-                          allowed = True
-                          break
+              # SmartAccount420 is intentionally a programmable account executor. The
+              # exception is deliberately exact: only _call(address,uint256,bytes) and
+              # its target.call{value:value}(data) node are accepted. This replaces the
+              # older looser allowance, which could become stale as Slither's element
+              # shape or the account implementation evolved.
+              allowed = exact_arbitrary_send(
+                  detector,
+                  contract="SmartAccount420",
+                  function="_call",
+                  signature="_call(address,uint256,bytes)",
+                  filename="src/accounts/SmartAccount420.sol",
+                  call_fragment="target.call{value: value}(data)",
+              )
+
+              # RoyaltyVault420.claim lets an authenticated creator choose the payout
+              # recipient for funds already accrued to that creator. Effects are applied
+              # before the external call. Allow only this exact claim function/send node;
+              # any other arbitrary ETH send in RoyaltyVault420 remains a hard failure.
+              if not allowed:
+                  allowed = exact_arbitrary_send(
+                      detector,
+                      contract="RoyaltyVault420",
+                      function="claim",
+                      signature="claim(bytes32,CreatorId,address)",
+                      filename="src/creative/economics/RoyaltyVault420.sol",
+                      call_fragment="recipient.call{value: amount}()",
+                  )
 
               # ExchangeFeeRouter420.routeTokenFee intentionally snapshots the router's
               # token balance around transferFrom so fee-on-transfer/rebasing assets are

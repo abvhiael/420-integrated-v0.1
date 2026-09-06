@@ -5,6 +5,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 RPC_URL="${MEDIA420_RPC_URL:-http://127.0.0.1:8545}"
 GOV_ADDR="0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
 OP_ADDR="0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
+SECOND_OP_ADDR="0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"
 ZERO="0x0000000000000000000000000000000000000000000000000000000000000000"
 ANVIL_LOG="${TMPDIR:-/tmp}/420media-anvil.log"
 
@@ -62,6 +63,7 @@ CAP_ID=$(cast keccak "420MEDIA_ANVIL_CAP")
 OP_ID=$(cast keccak "420MEDIA_ANVIL_OPERATOR")
 SECOND_OP_ID=$(cast keccak "420MEDIA_ANVIL_SECOND_OPERATOR")
 STAKE_REF=$(cast keccak "420MEDIA_ANVIL_STAKE")
+SECOND_STAKE_REF=$(cast keccak "420MEDIA_ANVIL_SECOND_STAKE")
 JOB_KIND=$(cast keccak "420MEDIA_ANVIL_TRANSCODE")
 INPUT_REF=$(cast keccak "420MEDIA_ANVIL_INPUT")
 CREATED_JOB=$(cast keccak "420MEDIA_ANVIL_CREATED_JOB")
@@ -73,10 +75,15 @@ ORCH_STREAM_ID=$(cast keccak "420MEDIA_ANVIL_ORCH_STREAM")
 ORCH_INGRESS_KIND=$(cast keccak "420MEDIA_ANVIL_ORCH_INGRESS")
 ORCH_TRANSCODE_KIND=$(cast keccak "420MEDIA_ANVIL_ORCH_TRANSCODE")
 ORCH_INPUT_REF=$(cast keccak "420MEDIA_ANVIL_ORCH_INPUT")
+ORCH_OUTPUT_REF=$(cast keccak "420MEDIA_ANVIL_ORCH_OUTPUT")
+ORCH_VAULT_REF=$(cast keccak "420MEDIA_ANVIL_ORCH_VAULT")
+ORCH_FUNDING_REF=$(cast keccak "420MEDIA_ANVIL_ORCH_FUNDING")
+ORCH_RESOLUTION_REF=$(cast keccak "420MEDIA_ANVIL_ORCH_RESOLUTION")
 DEADLINE=$(( $(date +%s) + 900 ))
 
 send_gov() { cast send --rpc-url "$RPC_URL" --from "$GOV_ADDR" --unlocked "$@" >/dev/null; }
 send_op() { cast send --rpc-url "$RPC_URL" --from "$OP_ADDR" --unlocked "$@" >/dev/null; }
+send_op2() { cast send --rpc-url "$RPC_URL" --from "$SECOND_OP_ADDR" --unlocked "$@" >/dev/null; }
 
 stage "binding protocol dependencies"
 send_gov "$OP_REG" "bindCapabilityRegistry(address)" "$CAP_REG"
@@ -86,10 +93,13 @@ send_gov "$SETTLEMENT" "bindPayoutAdapter(address)" "$GOV_ADDR"
 send_gov "$MARKET" "bindDependencies(address,address,address)" "$OP_REG" "$SLA_REG" "$SETTLEMENT"
 send_gov "$CAP_REG" "registerCapability(bytes32,bytes32)" "$CAP_ID" "$ZERO"
 
-stage "registering operator fixture"
+stage "registering operator fixtures"
 send_op "$OP_REG" "registerOperator(bytes32,address,address,bytes32,bytes32,bytes32)" "$OP_ID" "$OP_ADDR" "$OP_ADDR" "$ZERO" "$ZERO" "$STAKE_REF"
 send_op "$OP_REG" "setCapability(bytes32,bytes32,bool)" "$OP_ID" "$CAP_ID" true
 send_op "$OP_REG" "activate(bytes32)" "$OP_ID"
+send_op2 "$OP_REG" "registerOperator(bytes32,address,address,bytes32,bytes32,bytes32)" "$SECOND_OP_ID" "$SECOND_OP_ADDR" "$SECOND_OP_ADDR" "$ZERO" "$ZERO" "$SECOND_STAKE_REF"
+send_op2 "$OP_REG" "setCapability(bytes32,bytes32,bool)" "$SECOND_OP_ID" "$CAP_ID" true
+send_op2 "$OP_REG" "activate(bytes32)" "$SECOND_OP_ID"
 
 stage "creating CREATED and FUNDED job fixtures"
 send_gov "$MARKET" "createJob(bytes32,bytes32,bytes32,bytes32,bytes32,bytes32,uint256,uint64)" "$CREATED_JOB" "$ZERO" "$JOB_KIND" "$CAP_ID" "$ZERO" "$INPUT_REF" 420000000 "$DEADLINE"
@@ -100,8 +110,10 @@ send_gov "$SETTLEMENT" "confirmVaultFunding(bytes32,address,bytes32,address,byte
 export MEDIA420_ANVIL=1
 export MEDIA420_RPC_URL="$RPC_URL"
 export MEDIA420_MARKET="$MARKET"
+export MEDIA420_SETTLEMENT="$SETTLEMENT"
 export MEDIA420_GOV_ACCOUNT="$GOV_ADDR"
 export MEDIA420_OPERATOR_ACCOUNT="$OP_ADDR"
+export MEDIA420_SECOND_OPERATOR_ACCOUNT="$SECOND_OP_ADDR"
 export MEDIA420_OPERATOR_ID="$OP_ID"
 export MEDIA420_CAP_ID="$CAP_ID"
 export MEDIA420_CREATED_JOB="$CREATED_JOB"
@@ -113,18 +125,24 @@ export MEDIA420_CREATE_ASSIGNED_SELECTOR="$(cast sig 'createAssignedJob(bytes32,
 export MEDIA420_ACCEPT_SELECTOR="$(cast sig 'acceptJob(bytes32,bytes32)')"
 export MEDIA420_MARK_RUNNING_SELECTOR="$(cast sig 'markRunning(bytes32)')"
 export MEDIA420_COMMIT_RESULT_SELECTOR="$(cast sig 'commitResult(bytes32,bytes32)')"
+export MEDIA420_FINALIZE_SELECTOR="$(cast sig 'finalize(bytes32,bytes32)')"
+export MEDIA420_CONFIRM_VAULT_FUNDING_SELECTOR="$(cast sig 'confirmVaultFunding(bytes32,address,bytes32,address,bytes32,bytes32,uint256)')"
 export MEDIA420_JOB_CREATED_TOPIC="$(cast keccak 'JobCreated(bytes32,address,bytes32,bytes32,bytes32,bytes32,uint256,uint64)')"
 export MEDIA420_ORCH_STREAM_ID="$ORCH_STREAM_ID"
 export MEDIA420_ORCH_SECOND_OPERATOR_ID="$SECOND_OP_ID"
 export MEDIA420_ORCH_INGRESS_KIND="$ORCH_INGRESS_KIND"
 export MEDIA420_ORCH_TRANSCODE_KIND="$ORCH_TRANSCODE_KIND"
 export MEDIA420_ORCH_INPUT_REF="$ORCH_INPUT_REF"
+export MEDIA420_ORCH_OUTPUT_REF="$ORCH_OUTPUT_REF"
+export MEDIA420_ORCH_VAULT_REF="$ORCH_VAULT_REF"
+export MEDIA420_ORCH_FUNDING_REF="$ORCH_FUNDING_REF"
+export MEDIA420_ORCH_RESOLUTION_REF="$ORCH_RESOLUTION_REF"
 
 stage "running live node adapter lifecycle test"
 cd "$ROOT"
 go test ./media/node/ethadapter -run TestAnvilMediaJobAdapterLifecycle -count=1 -v
 
-stage "running live orchestration lifecycle test"
-go test ./media/orchestration -run TestAnvilOrchestrationCreatesReservedRootJob -count=1 -v
+stage "running live multi-stage orchestration lifecycle test"
+go test ./media/orchestration -run TestAnvilOrchestrationUnlocksTranscoderAfterIngressSuccess -count=1 -v
 
 stage "completed successfully"

@@ -41,6 +41,27 @@ contract BridgeQualificationBridgeAssets420 {
     function set(bytes32 id, Asset calldata a) external { assets[id] = a; }
 }
 
+contract BridgeQualificationChains420 {
+    struct Chain {
+        uint64 routeChainId;
+        bytes32 networkId;
+        bytes32 nativeAssetId;
+        bytes32 verifierFamily;
+        BridgeChainRegistry420.ChainFamily family;
+        bool active;
+    }
+    mapping(bytes32 => Chain) public chains;
+    mapping(uint64 => bytes32) public chainKeyByRouteId;
+    function set(bytes32 id, Chain calldata c) external {
+        chains[id] = c;
+        chainKeyByRouteId[c.routeChainId] = id;
+    }
+    function isActiveRoute(bytes32 chainKey, uint64 routeChainId) external view returns (bool) {
+        Chain memory c = chains[chainKey];
+        return c.active && c.routeChainId == routeChainId && chainKeyByRouteId[routeChainId] == chainKey;
+    }
+}
+
 contract BridgeQualificationRoutes420 {
     struct Route {
         bytes32 assetId;
@@ -74,9 +95,11 @@ contract ExchangeBridgeQualification420Test {
     bytes32 private constant CANONICAL_CHAIN = keccak256("potcoin/canonical");
     bytes32 private constant CANONICAL_ASSET = keccak256("potcoin/native/POT");
     bytes32 private constant PROVENANCE = keccak256("potcoin/canonical/provenance/v1");
+    uint64 private constant CANONICAL_ROUTE_CHAIN_ID = 42001;
 
     BridgeQualificationExchangeAssets420 private exchangeAssets;
     BridgeQualificationBridgeAssets420 private bridgeAssets;
+    BridgeQualificationChains420 private chains;
     BridgeQualificationRoutes420 private routes;
     BridgeQualificationGateway420 private gateway;
     BridgeQualificationAdapter420 private adapter;
@@ -86,13 +109,14 @@ contract ExchangeBridgeQualification420Test {
     constructor() {
         exchangeAssets = new BridgeQualificationExchangeAssets420();
         bridgeAssets = new BridgeQualificationBridgeAssets420();
+        chains = new BridgeQualificationChains420();
         routes = new BridgeQualificationRoutes420();
         gateway = new BridgeQualificationGateway420();
         adapter = new BridgeQualificationAdapter420(ADAPTER);
         token = new BridgeQualificationToken420();
 
         qualification = new ExchangeBridgeQualification420(
-            address(this), address(exchangeAssets), address(bridgeAssets), address(routes), address(gateway)
+            address(this), address(exchangeAssets), address(bridgeAssets), address(chains), address(routes), address(gateway)
         );
         _configureHealthy();
     }
@@ -110,8 +134,31 @@ contract ExchangeBridgeQualification420Test {
 
     function testQualificationFailsWhenExchangeVerificationChanges() public {
         qualification.setQualification(EXCHANGE_ASSET, BRIDGE_ASSET, ROUTE, ADAPTER, PROVENANCE, true, true, true);
-        _setExchangeAsset(keccak256("changed verification"), 0);
+        _setExchangeAsset(PROVENANCE ^ bytes32(uint256(1)), 0);
         require(!qualification.isQualified(EXCHANGE_ASSET), "stale verification accepted");
+    }
+
+    function testQualificationFailsWhenCanonicalChainInactive() public {
+        qualification.setQualification(EXCHANGE_ASSET, BRIDGE_ASSET, ROUTE, ADAPTER, PROVENANCE, true, true, true);
+        _setChain(false, CANONICAL_ROUTE_CHAIN_ID);
+        require(!qualification.isQualified(EXCHANGE_ASSET), "inactive chain accepted");
+    }
+
+    function testQualificationFailsWhenCanonicalChainUnregistered() public {
+        _setExchangeAssetWithChain(keccak256("unknown-chain"), PROVENANCE, 0);
+        (bool ok,) = address(qualification).call(
+            abi.encodeWithSelector(
+                qualification.setQualification.selector,
+                EXCHANGE_ASSET, BRIDGE_ASSET, ROUTE, ADAPTER, PROVENANCE, true, true, true
+            )
+        );
+        require(!ok, "unregistered chain qualified");
+    }
+
+    function testQualificationFailsWhenRouteUsesWrongExternalChainId() public {
+        qualification.setQualification(EXCHANGE_ASSET, BRIDGE_ASSET, ROUTE, ADAPTER, PROVENANCE, true, true, true);
+        _setRouteWithChainIds(true, true, ADAPTER, address(token), CANONICAL_ROUTE_CHAIN_ID + 1, uint64(block.chainid));
+        require(!qualification.isQualified(EXCHANGE_ASSET), "wrong external chain accepted");
     }
 
     function testQualificationFailsWhenRouteDirectionCloses() public {
@@ -153,6 +200,7 @@ contract ExchangeBridgeQualification420Test {
 
     function _configureHealthy() private {
         _setExchangeAsset(PROVENANCE, 0);
+        _setChain(true, CANONICAL_ROUTE_CHAIN_ID);
         bridgeAssets.set(
             BRIDGE_ASSET,
             BridgeQualificationBridgeAssets420.Asset({
@@ -169,12 +217,30 @@ contract ExchangeBridgeQualification420Test {
         gateway.set(ADAPTER, address(adapter));
     }
 
+    function _setChain(bool active, uint64 routeChainId) private {
+        chains.set(
+            CANONICAL_CHAIN,
+            BridgeQualificationChains420.Chain({
+                routeChainId: routeChainId,
+                networkId: keccak256("potcoin/mainnet/genesis"),
+                nativeAssetId: CANONICAL_ASSET,
+                verifierFamily: keccak256("utxo-spv"),
+                family: BridgeChainRegistry420.ChainFamily.UTXO,
+                active: active
+            })
+        );
+    }
+
     function _setExchangeAsset(bytes32 verificationHash, uint256 flags) private {
+        _setExchangeAssetWithChain(CANONICAL_CHAIN, verificationHash, flags);
+    }
+
+    function _setExchangeAssetWithChain(bytes32 chainKey, bytes32 verificationHash, uint256 flags) private {
         exchangeAssets.set(
             EXCHANGE_ASSET,
             BridgeQualificationExchangeAssets420.Asset({
                 symbol: bytes16("ePOT"),
-                canonicalChain: CANONICAL_CHAIN,
+                canonicalChain: chainKey,
                 canonicalAsset: CANONICAL_ASSET,
                 exchangeToken: address(token),
                 category: ExchangeTypes420.AssetCategory.CANNABIS,
@@ -187,12 +253,25 @@ contract ExchangeBridgeQualification420Test {
     }
 
     function _setRoute(bool inbound, bool outbound, bytes32 adapterId, address localRepresentation) private {
+        _setRouteWithChainIds(
+            inbound, outbound, adapterId, localRepresentation, CANONICAL_ROUTE_CHAIN_ID, uint64(block.chainid)
+        );
+    }
+
+    function _setRouteWithChainIds(
+        bool inbound,
+        bool outbound,
+        bytes32 adapterId,
+        address localRepresentation,
+        uint64 sourceChainId,
+        uint64 destinationChainId
+    ) private {
         routes.set(
             ROUTE,
             BridgeQualificationRoutes420.Route({
                 assetId: BRIDGE_ASSET,
-                sourceChainId: 42001,
-                destinationChainId: uint64(block.chainid),
+                sourceChainId: sourceChainId,
+                destinationChainId: destinationChainId,
                 sourceAsset: CANONICAL_ASSET,
                 destinationAsset: bytes32(uint256(uint160(localRepresentation))),
                 adapterId: adapterId,

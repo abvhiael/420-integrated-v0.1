@@ -24,7 +24,7 @@ interface IGenomeRegistryBreeding {
 
 interface IRandomnessCoordinatorBreeding {
     function request(bytes32 requestId, bytes32 domain, bytes32 contextHash) external;
-    function result(bytes32 requestId) external view returns (bytes32 entropy, bool fulfilled);
+    function consume(bytes32 requestId, bytes32 expectedDomain, bytes32 expectedContextHash) external returns (bytes32 entropy);
 }
 
 contract BreedingEngine {
@@ -35,6 +35,7 @@ contract BreedingEngine {
         bytes32 childGenomeId;
         bytes32 childLineId;
         bytes32 metadataHash;
+        bytes32 contextHash;
         bytes32 requestId;
         bytes32 entropy;
         bool finalized;
@@ -65,7 +66,7 @@ contract BreedingEngine {
         _auth(ActionIds.BREEDING_REQUEST, breedingEventId);
         bytes32 contextHash = keccak256(abi.encode(breedingEventId, parentA, parentB, childGenomeId, childLineId, metadataHash));
         bytes32 requestId = keccak256(abi.encode(RandomDomains.BREEDING, contextHash));
-        _events[breedingEventId] = BreedingEvent(breedingEventId, parentA, parentB, childGenomeId, childLineId, metadataHash, requestId, bytes32(0), false, true);
+        _events[breedingEventId] = BreedingEvent(breedingEventId, parentA, parentB, childGenomeId, childLineId, metadataHash, contextHash, requestId, bytes32(0), false, true);
         randomness.request(requestId, RandomDomains.BREEDING, contextHash);
         emit BreedingRequested(breedingEventId, parentA, parentB, childGenomeId, requestId);
     }
@@ -76,8 +77,8 @@ contract BreedingEngine {
         if (e.finalized) revert HCInvalidState();
         _auth(ActionIds.BREEDING_FINALIZE, breedingEventId);
 
-        (bytes32 entropy, bool fulfilled) = randomness.result(e.requestId);
-        if (!fulfilled || entropy == bytes32(0)) revert HCInvalidState();
+        bytes32 entropy = randomness.consume(e.requestId, RandomDomains.BREEDING, e.contextHash);
+        if (entropy == bytes32(0)) revert HCInvalidState();
 
         IGenomeRegistryBreeding.GenomeRecord memory a = genomeRegistry.getGenome(e.parentA);
         IGenomeRegistryBreeding.GenomeRecord memory b = genomeRegistry.getGenome(e.parentB);

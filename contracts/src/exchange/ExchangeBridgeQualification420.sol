@@ -2,6 +2,7 @@
 pragma solidity ^0.8.24;
 
 import "../bridge/BridgeAssetRegistry.sol";
+import "../bridge/BridgeChainRegistry420.sol";
 import "../bridge/BridgeRouteRegistry.sol";
 import "../bridge/GatewayRouter420.sol";
 import "../interfaces/IBridgeAdapter420.sol";
@@ -11,10 +12,11 @@ import "./ExchangeTypes420.sol";
 
 /// @notice Binds 420Exchange external-asset listings to canonical 420Bridge provenance.
 /// @dev This contract does not execute bridging. It qualifies an Exchange representation only when the
-///      Exchange asset, canonical bridge asset, active route, gateway adapter, and canonical identifiers agree.
+///      Exchange asset, canonical chain, canonical bridge asset, active route, gateway adapter, and identifiers agree.
 contract ExchangeBridgeQualification420 is SystemAccess {
     ExchangeAssetRegistry420 public immutable exchangeAssets;
     BridgeAssetRegistry public immutable bridgeAssets;
+    BridgeChainRegistry420 public immutable bridgeChains;
     BridgeRouteRegistry public immutable bridgeRoutes;
     GatewayRouter420 public immutable gatewayRouter;
 
@@ -34,6 +36,7 @@ contract ExchangeBridgeQualification420 is SystemAccess {
     error InvalidQualification();
     error ExchangeAssetIneligible();
     error BridgeAssetIneligible();
+    error ChainIneligible();
     error RouteIneligible();
     error AdapterMismatch();
     error ProvenanceMismatch();
@@ -53,16 +56,19 @@ contract ExchangeBridgeQualification420 is SystemAccess {
         address governanceTimelock_,
         address exchangeAssets_,
         address bridgeAssets_,
+        address bridgeChains_,
         address bridgeRoutes_,
         address gatewayRouter_
     ) SystemAccess(governanceTimelock_) {
         if (
             exchangeAssets_ == address(0) || exchangeAssets_.code.length == 0 || bridgeAssets_ == address(0)
-                || bridgeAssets_.code.length == 0 || bridgeRoutes_ == address(0) || bridgeRoutes_.code.length == 0
-                || gatewayRouter_ == address(0) || gatewayRouter_.code.length == 0
+                || bridgeAssets_.code.length == 0 || bridgeChains_ == address(0) || bridgeChains_.code.length == 0
+                || bridgeRoutes_ == address(0) || bridgeRoutes_.code.length == 0 || gatewayRouter_ == address(0)
+                || gatewayRouter_.code.length == 0
         ) revert InvalidAddress();
         exchangeAssets = ExchangeAssetRegistry420(exchangeAssets_);
         bridgeAssets = BridgeAssetRegistry(bridgeAssets_);
+        bridgeChains = BridgeChainRegistry420(bridgeChains_);
         bridgeRoutes = BridgeRouteRegistry(bridgeRoutes_);
         gatewayRouter = GatewayRouter420(gatewayRouter_);
     }
@@ -169,6 +175,20 @@ contract ExchangeBridgeQualification420 is SystemAccess {
         ) revert ExchangeAssetIneligible();
 
         (
+            uint64 canonicalRouteChainId,
+            bytes32 networkId,
+            bytes32 nativeAssetId,
+            bytes32 verifierFamily,
+            BridgeChainRegistry420.ChainFamily family,
+            bool chainActive
+        ) = bridgeChains.chains(canonicalChain);
+        if (
+            !chainActive || canonicalRouteChainId == 0 || networkId == bytes32(0) || nativeAssetId == bytes32(0)
+                || verifierFamily == bytes32(0) || family == BridgeChainRegistry420.ChainFamily.NONE
+                || !bridgeChains.isActiveRoute(canonicalChain, canonicalRouteChainId)
+        ) revert ChainIneligible();
+
+        (
             address localToken,
             bytes32 configuredBridgeAssetId,
             ,
@@ -204,8 +224,11 @@ contract ExchangeBridgeQualification420 is SystemAccess {
         ) revert RouteIneligible();
 
         bytes32 localAsset = bytes32(uint256(uint160(exchangeToken)));
-        bool canonicalToLocal = sourceAsset == canonicalAsset && destinationAsset == localAsset;
-        bool localToCanonical = sourceAsset == localAsset && destinationAsset == canonicalAsset;
+        uint64 localChainId = uint64(block.chainid);
+        bool canonicalToLocal = sourceChainId == canonicalRouteChainId && destinationChainId == localChainId
+            && sourceAsset == canonicalAsset && destinationAsset == localAsset;
+        bool localToCanonical = sourceChainId == localChainId && destinationChainId == canonicalRouteChainId
+            && sourceAsset == localAsset && destinationAsset == canonicalAsset;
         if (!canonicalToLocal && !localToCanonical) revert ProvenanceMismatch();
 
         address adapter = gatewayRouter.adapters(adapterId);

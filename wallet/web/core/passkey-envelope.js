@@ -100,6 +100,8 @@ export function buildPk42Signature(assertion, binding) {
 
   const assertionEnvelope = buildPasskeyAssertionEnvelope(assertion);
   const inner = assertionEnvelope.slice(2);
-  const outer = `${expectedCredentialHash.slice(2)}${word(64)}${word(inner.length / 2)}${inner.padEnd(Math.ceil((inner.length / 2) / 32) * 64, '0')}`;
+  const innerBytes = inner.length / 2;
+  const paddedInner = inner.padEnd(Math.ceil(innerBytes / 32) * 64, '0');
+  const outer = `${expectedCredentialHash.slice(2)}${word(64)}${word(innerBytes)}${paddedInner}`;
   return `${PK42_SIGNATURE_MAGIC}${outer}`;
 }

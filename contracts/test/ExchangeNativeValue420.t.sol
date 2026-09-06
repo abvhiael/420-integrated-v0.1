@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
 
+import "forge-std/Test.sol";
 import "../src/exchange/ExchangeAtomicRouter420.sol";
 import "../src/exchange/ExchangeIds420.sol";
 import "../src/exchange/Wrapped420.sol";
@@ -58,7 +59,16 @@ contract NativeValueAdapter420 is IExchangeQuoteAdapter420, IExchangeExecutionAd
     }
 }
 
-contract ExchangeNativeValue420Test {
+contract RejectNativeRecipient420 {
+    receive() external payable { revert("reject native"); }
+}
+
+contract ForceNative420 {
+    constructor() payable {}
+    function force(address payable target) external { selfdestruct(target); }
+}
+
+contract ExchangeNativeValue420Test is Test {
     bytes32 private constant W_ID=keccak256("420/exchange/native/W420");
     bytes32 private constant T_ID=keccak256("420/exchange/native/TEST");
     bytes32 private constant MARKET=keccak256("420/exchange/native/W420-TEST");
@@ -82,6 +92,7 @@ contract ExchangeNativeValue420Test {
     receive() external payable {}
 
     constructor() payable {
+        vm.deal(address(this),100 ether);
         wrapped=new Wrapped420();
         token=new NativeValueToken420();
         caps=new NativeValueCaps420();
@@ -108,14 +119,11 @@ contract ExchangeNativeValue420Test {
         token.mint(address(this),100 ether);
         token.approve(address(adapter),type(uint256).max);
 
-        if (address(this).balance >= 20 ether) {
-            wrapped.deposit{value:10 ether}();
-            wrapped.transfer(address(adapter),10 ether);
-        }
+        wrapped.deposit{value:20 ether}();
+        wrapped.transfer(address(adapter),20 ether);
     }
 
     function testNativeInputWrapsExecutesAndLeavesNoResidue() public {
-        if (address(this).balance < 1 ether) return;
         ExchangeAtomicRouter420.Hop[] memory hops=_toToken();
         bytes32 pathHash=router.hashPath(address(wrapped),1 ether,address(this),hops);
         uint256 beforeToken=token.balanceOf(address(this));
@@ -128,7 +136,6 @@ contract ExchangeNativeValue420Test {
     }
 
     function testTokenInputUnwrapsFinalOutputAndLeavesNoResidue() public {
-        if (wrapped.balanceOf(address(adapter)) < 1 ether) return;
         ExchangeAtomicRouter420.Hop[] memory hops=_toNative();
         bytes32 pathHash=router.hashPath(address(token),1 ether,address(this),hops);
         uint256 beforeNative=address(this).balance;
@@ -140,13 +147,11 @@ contract ExchangeNativeValue420Test {
     }
 
     function testDirectNativeTransferIsRejected() public {
-        if (address(this).balance == 0) return;
         (bool ok,)=address(router).call{value:1}("");
         require(!ok,"direct native accepted");
     }
 
     function testNativeInputOracleFailureRollsBackWrapAndValue() public {
-        if (address(this).balance < 1 ether) return;
         ExchangeAtomicRouter420.Hop[] memory hops=_toToken();
         bytes32 pathHash=router.hashPath(address(wrapped),1 ether,address(this),hops);
         uint256 beforeNative=address(this).balance;
@@ -159,6 +164,101 @@ contract ExchangeNativeValue420Test {
         require(wrapped.balanceOf(address(router))==0,"router wrapped residue");
         require(address(router).balance==0,"router native residue");
         referenceOracle.set(1e18);
+    }
+
+    function testForcedNativeBalanceIsPreservedAcrossUnwrap() public {
+        ForceNative420 force=new ForceNative420{value:2 ether}();
+        force.force(payable(address(router)));
+        require(address(router).balance==2 ether,"force failed");
+
+        ExchangeAtomicRouter420.Hop[] memory hops=_toNative();
+        bytes32 pathHash=router.hashPath(address(token),1 ether,address(this),hops);
+        uint256 beforeRecipient=address(this).balance;
+        uint256 out=router.swapExactInputPathForNative(address(token),1 ether,95e16,address(this),pathHash,hops);
+
+        require(out==1 ether,"output");
+        require(address(this).balance==beforeRecipient+1 ether,"recipient output");
+        require(address(router).balance==2 ether,"forced balance changed");
+        require(wrapped.balanceOf(address(router))==0,"wrapped residue");
+    }
+
+    function testRejectingNativeRecipientRollsBackInputAndOutput() public {
+        RejectNativeRecipient420 rejecting=new RejectNativeRecipient420();
+        ExchangeAtomicRouter420.Hop[] memory hops=_toNative();
+        bytes32 pathHash=router.hashPath(address(token),1 ether,address(rejecting),hops);
+        uint256 beforeInput=token.balanceOf(address(this));
+        uint256 beforeAdapterWrapped=wrapped.balanceOf(address(adapter));
+        uint256 beforeNonce=router.tradeNonce();
+
+        (bool ok,)=address(router).call(
+            abi.encodeWithSelector(
+                router.swapExactInputPathForNative.selector,
+                address(token),1 ether,95e16,address(rejecting),pathHash,hops
+            )
+        );
+        require(!ok,"rejecting recipient accepted");
+        require(token.balanceOf(address(this))==beforeInput,"input not rolled back");
+        require(wrapped.balanceOf(address(adapter))==beforeAdapterWrapped,"venue output not rolled back");
+        require(router.tradeNonce()==beforeNonce,"trade nonce not rolled back");
+        require(wrapped.balanceOf(address(router))==0,"wrapped residue");
+        require(wrapped.allowance(address(router),address(feeRouter))==0,"fee allowance residue");
+    }
+
+    function testFakeWrappedNativeFinalAssetIsRejected() public {
+        Wrapped420 fakeWrapped=new Wrapped420();
+        ExchangeAtomicRouter420.Hop[] memory hops=new ExchangeAtomicRouter420.Hop[](1);
+        hops[0]=ExchangeAtomicRouter420.Hop(MARKET,ROUTE,address(fakeWrapped),1,"");
+        bytes32 pathHash=router.hashPath(address(token),1 ether,address(this),hops);
+        uint256 beforeInput=token.balanceOf(address(this));
+
+        (bool ok,)=address(router).call(
+            abi.encodeWithSelector(
+                router.swapExactInputPathForNative.selector,
+                address(token),1 ether,1,address(this),pathHash,hops
+            )
+        );
+        require(!ok,"fake wrapped native accepted");
+        require(token.balanceOf(address(this))==beforeInput,"input moved on fake wrapper");
+    }
+
+    function testFeeDistributionRollsBackWhenNativeRecipientRejects() public {
+        address protocol=address(0x1201);
+        address development=address(0x1202);
+        address community=address(0x1203);
+        address liquidity=address(0x1204);
+        address devVault=address(0x1205);
+        feePolicy.setFeeSplit(ExchangeFeePolicy420.FeeSplit(4000,2000,2000,2000,0));
+        feePolicy.setRecipients(ExchangeFeePolicy420.Recipients(protocol,development,community,liquidity,devVault));
+        feeRouter.setCollector(address(router),true);
+        feePolicy.setExchangeFee(100);
+
+        RejectNativeRecipient420 rejecting=new RejectNativeRecipient420();
+        ExchangeAtomicRouter420.Hop[] memory hops=_toNative();
+        bytes32 pathHash=router.hashPath(address(token),1 ether,address(rejecting),hops);
+        uint256 beforeInput=token.balanceOf(address(this));
+        uint256 beforeProtocol=wrapped.balanceOf(protocol);
+        uint256 beforeDevelopment=wrapped.balanceOf(development);
+        uint256 beforeCommunity=wrapped.balanceOf(community);
+        uint256 beforeLiquidity=wrapped.balanceOf(liquidity);
+        uint256 beforeNonce=router.tradeNonce();
+
+        (bool ok,)=address(router).call(
+            abi.encodeWithSelector(
+                router.swapExactInputPathForNative.selector,
+                address(token),1 ether,98e16,address(rejecting),pathHash,hops
+            )
+        );
+        require(!ok,"fee+reject path accepted");
+        require(token.balanceOf(address(this))==beforeInput,"fee path input not rolled back");
+        require(wrapped.balanceOf(protocol)==beforeProtocol,"protocol fee leaked");
+        require(wrapped.balanceOf(development)==beforeDevelopment,"development fee leaked");
+        require(wrapped.balanceOf(community)==beforeCommunity,"community fee leaked");
+        require(wrapped.balanceOf(liquidity)==beforeLiquidity,"liquidity fee leaked");
+        require(wrapped.balanceOf(address(feeRouter))==0,"fee router residue");
+        require(wrapped.allowance(address(router),address(feeRouter))==0,"fee allowance residue");
+        require(router.tradeNonce()==beforeNonce,"trade nonce consumed on rollback");
+
+        feePolicy.setExchangeFee(0);
     }
 
     function _toToken() private view returns(ExchangeAtomicRouter420.Hop[] memory h){ h=new ExchangeAtomicRouter420.Hop[](1); h[0]=ExchangeAtomicRouter420.Hop(MARKET,ROUTE,address(token),95e16,""); }

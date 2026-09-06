@@ -66,6 +66,7 @@ contract ExchangeAtomicRouter420 {
     error SlippageExceeded();
     error InvalidAllowanceTarget();
     error TokenCallFailed();
+    error InitialInputMismatch();
     error IntermediateInputMismatch();
     error IntermediateOutputMismatch();
     error FinalOutputMismatch();
@@ -310,13 +311,14 @@ contract ExchangeAtomicRouter420 {
             bool finalHop = i + 1 == hops.length;
             address payer = i == 0 ? initialPayer : address(this);
 
-            uint256 inputBalanceBefore;
+            uint256 inputBalanceBefore = _balanceOf(currentToken, payer);
             address allowanceTarget;
             if (payer == address(this)) {
-                inputBalanceBefore = _balanceOf(currentToken, address(this));
                 if (inputBalanceBefore < currentAmount) revert IntermediateInputMismatch();
                 allowanceTarget = _allowanceTarget(route.executionAdapter);
                 _forceApprove(currentToken, allowanceTarget, currentAmount);
+            } else if (inputBalanceBefore < currentAmount) {
+                revert InitialInputMismatch();
             }
 
             uint256 outputBalanceBefore = _balanceOf(hop.tokenOut, address(this));
@@ -333,14 +335,18 @@ contract ExchangeAtomicRouter420 {
             );
             if (nextAmount < hop.minAmountOut) revert SlippageExceeded();
 
+            uint256 inputBalanceAfter = _balanceOf(currentToken, payer);
+            if (inputBalanceAfter > inputBalanceBefore || inputBalanceBefore - inputBalanceAfter != currentAmount) {
+                if (payer == address(this)) revert IntermediateInputMismatch();
+                revert InitialInputMismatch();
+            }
+
             uint256 baseAmount = inputIsBase ? currentAmount : nextAmount;
             uint256 quoteAmount = inputIsBase ? nextAmount : currentAmount;
             oracleGuard.requireHealthyAmounts(hop.marketId, baseToken, quoteToken, baseAmount, quoteAmount);
 
             if (payer == address(this)) {
                 _forceApprove(currentToken, allowanceTarget, 0);
-                uint256 inputBalanceAfter = _balanceOf(currentToken, address(this));
-                if (inputBalanceBefore - inputBalanceAfter != currentAmount) revert IntermediateInputMismatch();
             }
 
             uint256 outputBalanceAfter = _balanceOf(hop.tokenOut, address(this));

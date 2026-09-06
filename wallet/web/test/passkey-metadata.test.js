@@ -6,17 +6,22 @@ import {
   createPasskeyCredentialBinding,
   validatePasskeyCredentialBinding,
 } from '../core/passkey-metadata.js';
+import { credentialIdHash } from '../core/passkey-envelope.js';
 import { base64urlEncode } from '../core/passkeys.js';
 
 const smartAccount = '0x2222222222222222222222222222222222222222';
 const otherAccount = '0x3333333333333333333333333333333333333333';
 const credentialId = base64urlEncode(Uint8Array.from([1, 2, 3, 4]));
+const publicKeyX = `0x${'11'.repeat(32)}`;
+const publicKeyY = `0x${'22'.repeat(32)}`;
 const state = { deployed: true, smartAccount, authorizationEpoch: 7n };
 const registration = {
   credentialId,
   rawId: credentialId,
   origin: 'https://wallet.420.example',
   transports: ['internal', 'hybrid', 'internal'],
+  publicKeyX,
+  publicKeyY,
 };
 
 function binding() {
@@ -28,10 +33,13 @@ function binding() {
   });
 }
 
-test('credential metadata binds canonical public identifier to SmartAccount420, epoch, RP ID and origin', () => {
+test('credential metadata binds public credential and P-256 material to SmartAccount420, epoch, RP ID and origin', () => {
   const created = binding();
   assert.equal(created.schema, PASSKEY_BINDING_SCHEMA);
   assert.equal(created.credentialId, credentialId);
+  assert.equal(created.credentialIdHash, credentialIdHash(credentialId));
+  assert.equal(created.publicKeyX, publicKeyX);
+  assert.equal(created.publicKeyY, publicKeyY);
   assert.equal(created.smartAccount, smartAccount);
   assert.equal(created.authorizationEpoch, '7');
   assert.equal(created.rpId, '420.example');
@@ -55,7 +63,7 @@ test('binding validation fails closed on SmartAccount420 or authorization epoch 
   }), /authorization epoch changed/i);
 });
 
-test('binding validation fails closed on RP ID, origin or credential drift', () => {
+test('binding validation fails closed on RP ID, origin, credential hash or credential drift', () => {
   const created = binding();
   assert.throws(() => validatePasskeyCredentialBinding(created, {
     smartAccountState: state,
@@ -67,6 +75,11 @@ test('binding validation fails closed on RP ID, origin or credential drift', () 
     rpId: '420.example',
     origin: 'https://auth.420.example',
   }), /origin binding changed/i);
+  assert.throws(() => validatePasskeyCredentialBinding({ ...created, credentialIdHash: `0x${'99'.repeat(32)}` }, {
+    smartAccountState: state,
+    rpId: '420.example',
+    origin: 'https://wallet.420.example',
+  }), /credential ID hash binding changed/i);
   const otherCredential = base64urlEncode(Uint8Array.from([9, 9, 9]));
   assert.throws(() => validatePasskeyCredentialBinding(created, {
     smartAccountState: state,
@@ -95,6 +108,30 @@ test('binding rejects undeployed accounts, origin outside RP ID boundary and mal
     rpId: '420.example',
     origin: 'https://wallet.420.example',
   }), /invalid passkey transport/i);
+  assert.throws(() => createPasskeyCredentialBinding({
+    registration: { ...registration, publicKeyX: `0x${'00'.repeat(32)}` },
+    smartAccountState: state,
+    rpId: '420.example',
+    origin: 'https://wallet.420.example',
+  }), /public key x cannot be zero/i);
+  assert.throws(() => createPasskeyCredentialBinding({
+    registration: { ...registration, publicKeyY: '0x1234' },
+    smartAccountState: state,
+    rpId: '420.example',
+    origin: 'https://wallet.420.example',
+  }), /public key y must be 32-byte hex/i);
+});
+
+test('validated binding exposes exact on-chain enrollment material', () => {
+  const validated = validatePasskeyCredentialBinding(binding(), {
+    smartAccountState: state,
+    rpId: '420.example',
+    origin: 'https://wallet.420.example',
+  });
+  assert.equal(validated.credentialIdHash, credentialIdHash(credentialId));
+  assert.equal(validated.publicKeyX, publicKeyX);
+  assert.equal(validated.publicKeyY, publicKeyY);
+  assert.equal(validated.authorizationEpoch, 7n);
 });
 
 test('validated authentication advances only the bound credential counter', () => {

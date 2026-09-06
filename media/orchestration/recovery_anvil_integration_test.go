@@ -2,6 +2,7 @@ package orchestration
 
 import (
 	"context"
+	"os"
 	"testing"
 	"time"
 
@@ -10,12 +11,11 @@ import (
 )
 
 func TestAnvilRecoveryPreservesOriginalAndExecutesReplacement(t *testing.T) {
-	if requireEnv(t, "MEDIA420_ANVIL") != "1" { t.Skip("set MEDIA420_ANVIL=1 to run live recovery integration") }
+	if os.Getenv("MEDIA420_ANVIL") != "1" { t.Skip("set MEDIA420_ANVIL=1 to run live recovery integration") }
 	rpc, err := ethadapter.NewHTTPRPC(requireEnv(t, "MEDIA420_RPC_URL"), nil); if err != nil { t.Fatal(err) }
 	marketAddr := requireEnv(t, "MEDIA420_MARKET")
 	settlementAddr := requireEnv(t, "MEDIA420_SETTLEMENT")
 	gov := requireEnv(t, "MEDIA420_GOV_ACCOUNT")
-	failedAccount := requireEnv(t, "MEDIA420_OPERATOR_ACCOUNT")
 	replacementAccount := requireEnv(t, "MEDIA420_SECOND_OPERATOR_ACCOUNT")
 	failedOperator := parseEnvBytes32(t, "MEDIA420_OPERATOR_ID")
 	replacementOperator := parseEnvBytes32(t, "MEDIA420_ORCH_SECOND_OPERATOR_ID")
@@ -81,5 +81,4 @@ func TestAnvilRecoveryPreservesOriginalAndExecutesReplacement(t *testing.T) {
 	if recoverySnap.Status != LifecycleVerified || recoverySnap.OutputRef != recoveryOutput { t.Fatalf("completed recovery=%+v", recoverySnap) }
 	failedSnap, err = market.Snapshot(ctx, canonicalID); if err != nil { t.Fatal(err) }
 	if failedSnap.Status != LifecycleExpired || failedSnap.OperatorID != failedOperator { t.Fatalf("original mutated=%+v", failedSnap) }
-	_ = failedAccount
 }

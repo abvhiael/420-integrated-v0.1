@@ -7,6 +7,7 @@ library BridgeIds420 {
     bytes32 internal constant RISK_MANAGER = keccak256("420/APP/420BRIDGE/RISK_MANAGER");
     bytes32 internal constant TRANSFER_REGISTRY = keccak256("420/APP/420BRIDGE/TRANSFER_REGISTRY");
     bytes32 internal constant ASSET_REGISTRY = keccak256("420/APP/420BRIDGE/ASSET_REGISTRY");
+    bytes32 internal constant CHAIN_REGISTRY = keccak256("420/APP/420BRIDGE/CHAIN_REGISTRY");
     bytes32 internal constant ROUTE_REGISTRY = keccak256("420/APP/420BRIDGE/ROUTE_REGISTRY");
     bytes32 internal constant ACCOUNTING_REGISTRY = keccak256("420/APP/420BRIDGE/ACCOUNTING_REGISTRY");
     bytes32 internal constant CADC_INTEGRATION = keccak256("420/APP/420BRIDGE/CADC_INTEGRATION");

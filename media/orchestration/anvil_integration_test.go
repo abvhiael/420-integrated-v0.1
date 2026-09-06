@@ -81,10 +81,12 @@ func TestAnvilOrchestrationUnlocksTranscoderAfterIngressSuccess(t *testing.T) {
 	acceptData := abiStatic(parseEnvSelector(t, "MEDIA420_ACCEPT_SELECTOR"), ingressID[:], operatorID[:])
 	if _, err := sendAnvilTransaction(ctx, rpc, operatorAccount, marketAddr, acceptData); err != nil { t.Fatal(err) }
 
+	vaultRef := parseEnvBytes32(t, "MEDIA420_ORCH_VAULT_REF")
+	fundingRef := parseEnvBytes32(t, "MEDIA420_ORCH_FUNDING_REF")
 	fundData := abiStatic(
 		parseEnvSelector(t, "MEDIA420_CONFIRM_VAULT_FUNDING_SELECTOR"),
 		ingressID[:], addressWord(t, gov), operatorID[:], addressWord(t, operatorAccount),
-		parseEnvBytes32(t, "MEDIA420_ORCH_VAULT_REF")[:], parseEnvBytes32(t, "MEDIA420_ORCH_FUNDING_REF")[:], uintWord32(420000000),
+		vaultRef[:], fundingRef[:], uintWord32(420000000),
 	)
 	if _, err := sendAnvilTransaction(ctx, rpc, gov, settlementAddr, fundData); err != nil { t.Fatal(err) }
 	if _, err := sendAnvilTransaction(ctx, rpc, operatorAccount, marketAddr, abiStatic(parseEnvSelector(t, "MEDIA420_MARK_RUNNING_SELECTOR"), ingressID[:])); err != nil { t.Fatal(err) }

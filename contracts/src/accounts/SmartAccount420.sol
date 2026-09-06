@@ -64,6 +64,7 @@ contract SmartAccount420 {
     event AuthorizationPolicyVersionChanged(uint32 indexed previousVersion, uint32 indexed newVersion);
     event PasskeyVerifierChanged(address indexed previousVerifier, address indexed newVerifier);
     event PasskeyEnrolled(bytes32 indexed credentialIdHash, uint64 indexed epoch, bytes32 rpIdHash, bytes32 originHash);
+    event PasskeyReenrolled(bytes32 indexed credentialIdHash, uint64 indexed previousEpoch, uint64 indexed newEpoch);
     event PasskeyRevoked(bytes32 indexed credentialIdHash);
     event SessionKeyEnabled(address indexed key, uint64 indexed epoch);
     event SessionKeyRevoked(address indexed key);
@@ -91,6 +92,9 @@ contract SmartAccount420 {
     error InvalidSessionKey();
     error InvalidPasskeyVerifier();
     error InvalidPasskeyCredential();
+    error PasskeyAlreadyEnrolled();
+    error PasskeyNotStale();
+    error RecoveryInProgress();
     error SessionAuthorizationFailed();
     error RecoveryNotReady();
     error CallFailed(bytes returnData);
@@ -198,11 +202,13 @@ contract SmartAccount420 {
         uint256 publicKeyX,
         uint256 publicKeyY
     ) external onlyOwner {
+        if (pendingRecoveryOwner != address(0)) revert RecoveryInProgress();
         if (address(passkeyVerifier) == address(0)) revert InvalidPasskeyVerifier();
         if (
             credentialIdHash == bytes32(0) || rpIdHash == bytes32(0) || originHash == bytes32(0)
                 || publicKeyX == 0 || publicKeyY == 0
         ) revert InvalidPasskeyCredential();
+        if (passkeyCredential[credentialIdHash].epoch != 0) revert PasskeyAlreadyEnrolled();
 
         passkeyCredential[credentialIdHash] = PasskeyCredential({
             epoch: authorizationEpoch,
@@ -214,6 +220,20 @@ contract SmartAccount420 {
         emit PasskeyEnrolled(credentialIdHash, authorizationEpoch, rpIdHash, originHash);
     }
 
+    /// @notice Explicitly reactivate an already-known credential after an authorization-epoch change.
+    /// @dev Re-enrollment cannot change the stored credential identity, RP/origin binding, or public key.
+    ///      A credential with new public material must use a new credentialIdHash through enrollPasskey().
+    function reenrollPasskey(bytes32 credentialIdHash) external onlyOwner {
+        if (pendingRecoveryOwner != address(0)) revert RecoveryInProgress();
+        if (address(passkeyVerifier) == address(0)) revert InvalidPasskeyVerifier();
+        PasskeyCredential storage credential = passkeyCredential[credentialIdHash];
+        uint64 previousEpoch = credential.epoch;
+        if (previousEpoch == 0) revert InvalidPasskeyCredential();
+        if (previousEpoch == authorizationEpoch) revert PasskeyNotStale();
+        credential.epoch = authorizationEpoch;
+        emit PasskeyReenrolled(credentialIdHash, previousEpoch, authorizationEpoch);
+    }
+
     function revokePasskey(bytes32 credentialIdHash) external onlyOwner {
         if (passkeyCredential[credentialIdHash].epoch == 0) revert InvalidPasskeyCredential();
         delete passkeyCredential[credentialIdHash];
@@ -223,6 +243,11 @@ contract SmartAccount420 {
     function isPasskeyActive(bytes32 credentialIdHash) external view returns (bool) {
         uint64 epoch = passkeyCredential[credentialIdHash].epoch;
         return epoch != 0 && epoch == authorizationEpoch && address(passkeyVerifier) != address(0);
+    }
+
+    function isPasskeyStale(bytes32 credentialIdHash) external view returns (bool) {
+        uint64 epoch = passkeyCredential[credentialIdHash].epoch;
+        return epoch != 0 && epoch != authorizationEpoch;
     }
 
     function enableSessionKey(address key) external onlyOwner {

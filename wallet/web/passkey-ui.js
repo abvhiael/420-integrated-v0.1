@@ -18,7 +18,54 @@ let binding = null;
 let busy = false;
 
 const $ = (selector) => document.querySelector(selector);
-const ZERO_BYTES32 = `0x${'00'.repeat(32)}`;
+
+function ensurePanel() {
+  let panel = $('#passkey-panel');
+  if (panel) return panel;
+  const anchor = $('#session-panel') || $('#execution-panel');
+  if (!anchor) return null;
+  panel = document.createElement('section');
+  panel.id = 'passkey-panel';
+  panel.className = 'panel';
+  panel.hidden = true;
+  panel.innerHTML = `
+    <div class="section-heading">
+      <div><p class="eyebrow">WebAuthn · PK42 · owner nonce lane</p><h2>Passkey security</h2></div>
+      <span class="status-pill">No private-key export</span>
+    </div>
+    <div class="split-panel">
+      <div class="form-card">
+        <p class="muted">Register a device passkey, bind its public P-256 credential to this SmartAccount420, and use the existing Send / Execute form with PK42 EntryPoint420 transport. Public binding metadata is kept only in memory for this browser session.</p>
+        <div class="button-row">
+          <button id="passkey-enroll" type="button" disabled>Register + enroll passkey</button>
+          <button id="passkey-reenroll" type="button" disabled>Re-enroll stale passkey</button>
+          <button id="passkey-execute" class="primary-action" type="button" disabled>Execute prepared call with passkey</button>
+        </div>
+      </div>
+      <aside class="review-card" aria-label="Passkey state">
+        <p class="eyebrow">Passkey state</p>
+        <dl>
+          <div><dt>Credential</dt><dd id="passkey-credential">Not enrolled in this session</dd></div>
+          <div><dt>Binding / account epoch</dt><dd id="passkey-epoch">—</dd></div>
+          <div><dt>Signing path</dt><dd>WebAuthn ES256 → PK42 → EntryPoint420</dd></div>
+          <div><dt>Persistence</dt><dd>Session memory only</dd></div>
+        </dl>
+      </aside>
+    </div>
+    <p id="passkey-status" class="muted" role="status">Checking passkey runtime policy…</p>
+  `;
+  anchor.after(panel);
+  const nav = document.querySelector('.sidebar nav');
+  if (nav && !nav.querySelector('[data-scroll-target="#passkey-panel"]')) {
+    const button = document.createElement('button');
+    button.className = 'nav-item';
+    button.dataset.scrollTarget = '#passkey-panel';
+    button.textContent = 'Passkeys';
+    button.addEventListener('click', () => panel.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+    nav.append(button);
+  }
+  return panel;
+}
 
 function randomChallenge() {
   if (!globalThis.crypto?.getRandomValues) throw new Error('secure browser randomness is unavailable');
@@ -55,10 +102,12 @@ function requestFromExecutionForm() {
 function setStatus(text) {
   const node = $('#passkey-status');
   if (node) node.textContent = text;
+  const globalStatus = $('#status');
+  if (globalStatus && /submitted|enrolled|re-enrolled|error|blocked|stale/i.test(String(text))) globalStatus.textContent = text;
 }
 
 async function refresh() {
-  const panel = $('#passkey-panel');
+  const panel = ensurePanel();
   if (!panel) return;
   try {
     const { config, smartAccount } = await context();
@@ -68,10 +117,8 @@ async function refresh() {
     $('#passkey-reenroll').disabled = busy || !runtime.canReenroll;
     $('#passkey-execute').disabled = busy || !runtime.canExecute;
     setStatus(runtime.reason);
-    const epoch = $('#passkey-epoch');
-    if (epoch) epoch.textContent = binding ? `${binding.authorizationEpoch} / ${smartAccount.authorizationEpoch}` : `— / ${smartAccount.authorizationEpoch}`;
-    const credential = $('#passkey-credential');
-    if (credential) credential.textContent = binding ? `${binding.credentialId.slice(0, 12)}…` : 'Not enrolled in this session';
+    $('#passkey-epoch').textContent = binding ? `${binding.authorizationEpoch} / ${smartAccount.authorizationEpoch}` : `— / ${smartAccount.authorizationEpoch}`;
+    $('#passkey-credential').textContent = binding ? `${binding.credentialId.slice(0, 12)}…` : 'Not enrolled in this session';
   } catch (error) {
     panel.hidden = false;
     for (const id of ['#passkey-enroll', '#passkey-reenroll', '#passkey-execute']) if ($(id)) $(id).disabled = true;
@@ -156,6 +203,8 @@ async function executeWithPasskey() {
 }
 
 export function initPasskeyUi() {
+  const panel = ensurePanel();
+  if (!panel) return;
   $('#passkey-enroll')?.addEventListener('click', enroll);
   $('#passkey-reenroll')?.addEventListener('click', reenroll);
   $('#passkey-execute')?.addEventListener('click', executeWithPasskey);

@@ -1,7 +1,7 @@
 {
   "profile": "local-dev",
-  "rpcUrl": "http://127.0.0.1:8545",
   "chainId": 420,
+  "rpcUrl": "http://127.0.0.1:8545",
   "entryPoint": "0x000000000000000000000000000000000000041f",
   "smartAccountFactory": "0x0000000000000000000000000000000000000000",
   "capabilityRegistry": "0x0000000000000000000000000000000000000000",

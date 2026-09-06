@@ -5,8 +5,10 @@ TAG="v1.17.5"
 EXPECTED_COMMIT="9621c6ad10934a01b5514886fb6fbd87640b6c05"
 DEST="${1:-.cache/go-ethereum}"
 ROOT="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
-PATCHER="$ROOT/execution/patches/apply-420-systemcall.py"
-PATCH_TEST="$ROOT/execution/patches/systemcall420_test.go.in"
+SYSTEMCALL_PATCHER="$ROOT/execution/patches/apply-420-systemcall.py"
+SYSTEMCALL_TEST="$ROOT/execution/patches/systemcall420_test.go.in"
+P256_PATCHER="$ROOT/execution/patches/apply-420-p256.py"
+P256_TEST="$ROOT/execution/patches/p256_420_test.go.in"
 ARTIFACT_DIR="$ROOT/artifacts/node420-release-gate"
 
 if [ ! -d "$DEST/.git" ]; then
@@ -39,20 +41,34 @@ if [ "$ACTUAL_TAG" != "$TAG" ]; then
     exit 4
 fi
 
-python3 "$PATCHER" "$DEST"
-cp "$PATCH_TEST" "$DEST/core/systemcall420/systemcall_test.go"
+python3 "$SYSTEMCALL_PATCHER" "$DEST"
+cp "$SYSTEMCALL_TEST" "$DEST/core/systemcall420/systemcall_test.go"
 gofmt -w "$DEST/core/systemcall420/systemcall_test.go"
+
+# 420 launches with Cancun active and Prague deferred. Upstream v1.17.5 contains
+# p256Verify but does not activate it until Osaka, so node420 explicitly enables
+# the same implementation at 0x0100 for Cancun and Prague.
+python3 "$P256_PATCHER" "$DEST"
+cp "$P256_TEST" "$DEST/core/vm/p256_420_test.go"
+gofmt -w "$DEST/core/vm/p256_420_test.go"
 
 mkdir -p "$ARTIFACT_DIR" "$ROOT/bin/upstream"
 PATCH_DIFF="$ARTIFACT_DIR/geth-$TAG-420.patch"
 # Intent-to-add makes newly generated source/test files appear in the canonical diff without staging their contents.
-git -C "$DEST" add -N core/systemcall420/systemcall.go core/systemcall420/systemcall_test.go
+git -C "$DEST" add -N \
+    core/systemcall420/systemcall.go \
+    core/systemcall420/systemcall_test.go \
+    core/vm/p256_420_test.go
 git -C "$DEST" diff --binary -- . > "$PATCH_DIFF"
 if [ ! -s "$PATCH_DIFF" ]; then
     echo "fatal: 420 patch produced no source diff" >&2
     exit 5
 fi
-for required in core/systemcall420/systemcall.go core/systemcall420/systemcall_test.go; do
+for required in \
+    core/systemcall420/systemcall.go \
+    core/systemcall420/systemcall_test.go \
+    core/vm/contracts.go \
+    core/vm/p256_420_test.go; do
     if ! grep -q "$required" "$PATCH_DIFF"; then
         echo "fatal: release patch evidence omitted $required" >&2
         exit 6
@@ -60,10 +76,12 @@ for required in core/systemcall420/systemcall.go core/systemcall420/systemcall_t
 done
 PATCH_SHA256="$(sha256sum "$PATCH_DIFF" | awk '{print $1}')"
 
-# Execute 420 package tests, then compile every directly modified upstream package.
+# Execute 420 package tests, including the consensus-visible P-256 activation,
+# then compile every directly modified upstream package.
 (
     cd "$DEST"
     go test ./core/systemcall420 -count=1
+    go test ./core/vm -run '^Test420P256PrecompileEnabledBeforeOsaka$' -count=1
     go test ./core -run '^$' -count=1
     go test ./eth/catalyst -run '^$' -count=1
     go test ./miner -run '^$' -count=1
@@ -77,13 +95,21 @@ BINARY_SHA256="$(sha256sum "$ROOT/bin/upstream/geth-$TAG-420" | awk '{print $1}'
 
 cat > "$ARTIFACT_DIR/manifest.json" <<EOF
 {
-  "schema": "420-node420-release-gate-v1",
+  "schema": "420-node420-release-gate-v2",
   "upstream_tag": "$TAG",
   "upstream_commit": "$COMMIT",
   "patch_sha256": "$PATCH_SHA256",
   "binary_sha256": "$BINARY_SHA256",
-  "patcher": "execution/patches/apply-420-systemcall.py",
-  "patch_test_template": "execution/patches/systemcall420_test.go.in",
+  "patchers": [
+    "execution/patches/apply-420-systemcall.py",
+    "execution/patches/apply-420-p256.py"
+  ],
+  "patch_test_templates": [
+    "execution/patches/systemcall420_test.go.in",
+    "execution/patches/p256_420_test.go.in"
+  ],
+  "p256_precompile": "0x0000000000000000000000000000000000000100",
+  "p256_active_from": "cancun",
   "binary": "bin/upstream/geth-$TAG-420",
   "status": "QUALIFIED_BY_BUILD_SCRIPT"
 }
@@ -95,5 +121,6 @@ printf '%s\n' "$BINARY_SHA256" > "$ROOT/execution/geth-$TAG-420.binary.sha256"
 
 echo "node420 release gate passed"
 echo "upstream=$TAG commit=$COMMIT"
+echo "p256_precompile=0x0000000000000000000000000000000000000100 active_from=cancun"
 echo "patch_sha256=$PATCH_SHA256"
 echo "binary_sha256=$BINARY_SHA256"

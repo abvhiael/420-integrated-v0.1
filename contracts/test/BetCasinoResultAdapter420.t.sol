@@ -50,9 +50,10 @@ contract BetCasinoResultAdapter420Test {
     bytes32 constant SLOT_V1 = keccak256("420BET.GAME.SLOT.REFERENCE.V1");
     bytes32 constant ROULETTE_V1 = keccak256("420BET.GAME.ROULETTE.V1");
     bytes32 constant BLACKJACK_V1 = keccak256("420BET.GAME.BLACKJACK.V1");
+    bytes32 constant MINES_V1 = keccak256("420BET.GAME.MINES.V1");
 
-    function _versions() private pure returns (bytes32[6] memory versions) {
-        versions = [DICE_V1, KENO_V1, PLINKO_V1, SLOT_V1, ROULETTE_V1, BLACKJACK_V1];
+    function _versions() private pure returns (bytes32[7] memory versions) {
+        versions = [DICE_V1, KENO_V1, PLINKO_V1, SLOT_V1, ROULETTE_V1, BLACKJACK_V1, MINES_V1];
     }
 
     function _wager(bytes32 version, uint256 nonce, BetTypes420.WagerStatus status)
@@ -82,7 +83,7 @@ contract BetCasinoResultAdapter420Test {
     }
 
     function testPendingEnvelopeIsUniformAcrossCasinoGames() public {
-        bytes32[6] memory versions = _versions();
+        bytes32[7] memory versions = _versions();
         for (uint256 i = 0; i < versions.length; ++i) {
             MockCasinoResultRegistry420 registry = new MockCasinoResultRegistry420();
             MockCasinoResultRandomness420 randomness = new MockCasinoResultRandomness420();
@@ -106,7 +107,7 @@ contract BetCasinoResultAdapter420Test {
     }
 
     function testFulfilledSettledEnvelopeIsUniformAcrossCasinoGames() public {
-        bytes32[6] memory versions = _versions();
+        bytes32[7] memory versions = _versions();
         for (uint256 i = 0; i < versions.length; ++i) {
             MockCasinoResultRegistry420 registry = new MockCasinoResultRegistry420();
             MockCasinoResultRandomness420 randomness = new MockCasinoResultRandomness420();
@@ -150,7 +151,7 @@ contract BetCasinoResultAdapter420Test {
         MockCasinoResultRegistry420 registry = new MockCasinoResultRegistry420();
         MockCasinoResultRandomness420 randomness = new MockCasinoResultRandomness420();
         CasinoResultAdapter420 adapter = new CasinoResultAdapter420(address(registry), address(randomness));
-        BetTypes420.Wager memory wager = _wager(DICE_V1, 999, BetTypes420.WagerStatus.ACCEPTED);
+        BetTypes420.Wager memory wager = _wager(MINES_V1, 999, BetTypes420.WagerStatus.ACCEPTED);
         registry.setWager(wager);
         randomness.setRequest(RandomnessRouter420.RandomnessRequest({
             wagerId: wager.wagerId,

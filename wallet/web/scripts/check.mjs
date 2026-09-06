@@ -4,9 +4,9 @@ import process from 'node:process';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const required = [
-  'index.html','app.js','ui-v1.js','apps-page.js','recovery-ui.js','session-execution-ui.js','styles.css','apps.css','runtime-config.json',
-  'core/abi.js','core/accounts.js','core/apps.js','core/capabilities.js','core/capability-management.js','core/session-management.js','core/session-execution.js','core/entrypoint-transport.js','core/recovery.js','core/recovery-management.js','core/config.js','core/deployment.js','core/execution.js','core/portfolio.js','core/provider.js','core/provider-lifecycle.js','core/services.js','core/send.js',
-  'test/core.test.js','test/apps.test.js','test/execution.test.js','test/capabilities.test.js','test/capability-management.test.js','test/session-management.test.js','test/session-execution.test.js','test/entrypoint-transport.test.js','test/recovery.test.js','test/recovery-management.test.js','test/recovery-ui.test.js','test/session-execution-ui.test.js','test/ui-v1.test.js','test/send.test.js','test/provider-lifecycle.test.js','test/ui-hardening.test.js','test/session-hardening.test.js',
+  'index.html','app.js','ui-v1.js','apps-page.js','recovery-ui.js','session-execution-ui.js','batch-execution-ui.js','styles.css','apps.css','runtime-config.json',
+  'core/abi.js','core/accounts.js','core/apps.js','core/batch-execution.js','core/capabilities.js','core/capability-management.js','core/session-management.js','core/session-execution.js','core/entrypoint-transport.js','core/recovery.js','core/recovery-management.js','core/config.js','core/deployment.js','core/execution.js','core/portfolio.js','core/provider.js','core/provider-lifecycle.js','core/services.js','core/send.js',
+  'test/core.test.js','test/apps.test.js','test/execution.test.js','test/batch-execution.test.js','test/batch-execution-ui.test.js','test/capabilities.test.js','test/capability-management.test.js','test/session-management.test.js','test/session-execution.test.js','test/entrypoint-transport.test.js','test/recovery.test.js','test/recovery-management.test.js','test/recovery-ui.test.js','test/session-execution-ui.test.js','test/ui-v1.test.js','test/send.test.js','test/provider-lifecycle.test.js','test/ui-hardening.test.js','test/session-hardening.test.js',
 ];
 
 const errors = [];
@@ -27,9 +27,13 @@ const app = requireStrings('app.js', [
 for (const forbidden of ['privateKey','mnemonic','seedPhrase','localStorage.setItem("private']) if (app.includes(forbidden)) errors.push(`forbidden signing secret pattern in app.js: ${forbidden}`);
 
 requireStrings('ui-v1.js', ['recovery-ui.js','apps-page.js','buildSendExecution','installFailClosedBrowserLifecycle'], 'Wallet Web UI binding');
-requireStrings('index.html', ['./session-execution-ui.js'], 'Session Execution UI script binding');
+requireStrings('index.html', ['./session-execution-ui.js','./batch-execution-ui.js'], 'Wallet execution UI script binding');
 requireStrings('recovery-ui.js', ['Recovery management','Two-day safety delay','recovery-countdown','recovery-set-authority','recovery-propose','recovery-cancel','recovery-finalize','readDeployedSmartAccountState','sendFinalizeRecovery','confirmFinalizeRecovery'], 'recovery UI/timelock control');
 requireStrings('session-execution-ui.js', ['Session execution','Prepare + sign + simulate','Submit to EntryPoint420','prepareSessionUserOperationTransport','sendPreparedEntryPointUserOperation','confirmEntryPointUserOperation','sessionExecution','entryPointUserOpSubmission'], 'controlled session execution UI');
+requireStrings('batch-execution-ui.js', [
+  'Batch transaction','Compose calls','Review + simulate batch','Submit batch','moveBatchCall','escapeBatchHtml','prepareSmartAccountBatch','sendPreparedSmartAccountBatch','confirmSmartAccountBatch',
+  'exact simulated batch snapshot','Identical repeats','batchExecutionUi','batchExecution'
+], 'guarded batch execution UI');
 
 const appsPage = requireStrings('apps-page.js', ['resolveServices','Verified manifest','Awaiting manifest','noopener noreferrer','apps-search','app-filter','Not published'], 'verified 420 Apps page guard');
 if (appsPage.includes('javascript:')) errors.push('420 Apps page must not contain javascript service URLs');
@@ -42,6 +46,11 @@ requireStrings('core/accounts.js', ['readDeployedSmartAccountState','owner','rec
 requireStrings('core/recovery.js', ['RECOVERY_DELAY_SECONDS','pending recovery owner exists without executable timestamp','canSetAuthority','canPropose','canCancel','canFinalize'], 'recovery state policy guard');
 requireStrings('core/recovery-management.js', ['67bdcc3f','7ee76082','0ba234d6','e2ccb305','eth_call','eth_estimateGas','eth_sendTransaction','recovery finalization did not advance authorization epoch'], 'guarded recovery management control');
 requireStrings('core/execution.js', ['eth_call','eth_estimateGas','eth_sendTransaction','owner changed after simulation','authorization epoch changed after simulation'], 'Smart Account execution guard');
+requireStrings('core/batch-execution.js', [
+  '34fcd5be','MAX_BATCH_CALLS','MAX_BATCH_CALLDATA_BYTES','wallet authority contract','aggregate batch native value','aggregate batch calldata','duplicateCallIndexes',
+  'sendPreparedSmartAccountBatch','prepared batch calldata changed after simulation','prepared batch transaction envelope changed after simulation','prepared batch authorization epoch changed',
+  'eth_call','eth_estimateGas','eth_sendTransaction','owner changed after batch simulation','authorization epoch changed after batch simulation','reverted atomically; no batch call was committed'
+], 'guarded batch execution/hardening control');
 requireStrings('core/capabilities.js', ['0x0000000000000000000000000000000000000421','SESSION_EXECUTE_CAPABILITY_420','readActiveGrantId','readCapabilityAuthorization'], 'capability inspection guard');
 requireStrings('core/session-management.js', ['8d08b1a4','5ae7ab32','388c930c','d557e335','fdb3c749','authorizationEpoch','post-confirmation verification'], 'session administration guard');
 
@@ -69,7 +78,8 @@ if (config.features?.sessionExecutionPreflight !== true || config.features?.sess
 if (config.features?.sessionExecution !== true || config.features?.entryPointUserOpSubmission !== true) errors.push('qualified controlled session broadcast must be enabled');
 if (config.features?.delegatedCapabilities !== false) errors.push('general delegated capabilities must remain disabled beyond scoped session execution');
 if (config.features?.recoveryManagement !== true) errors.push('qualified recovery management UI must remain enabled');
-if (config.features?.batchExecution !== false || config.features?.passkeys !== false) errors.push('batching and passkeys must remain disabled');
+if (config.features?.batchExecutionUi !== true || config.features?.batchExecution !== true) errors.push('qualified guarded batch execution UI and broadcast must remain enabled');
+if (config.features?.passkeys !== false) errors.push('passkeys must remain disabled until their dedicated milestone qualifies');
 if (config.smartAccount?.factoryAddress !== '0x0000000000000000000000000000000000000420') errors.push('wallet must use frozen canonical SmartAccountFactory420 address');
 
 if (errors.length) {
@@ -87,8 +97,11 @@ console.log(JSON.stringify({
   sessionExecutionUiEnabled: true,
   sessionExecutionEnabled: true,
   entryPointUserOpSubmission: true,
+  guardedBatchExecutionCore: true,
+  batchExecutionUiEnabled: true,
+  finalBatchHardeningQualified: true,
+  batchExecutionEnabled: true,
   delegatedCapabilitiesEnabled: false,
   serverSideKeyCustody: false,
-  batchExecutionEnabled: false,
   passkeysEnabled: false
 }, null, 2));

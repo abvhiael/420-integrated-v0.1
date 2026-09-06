@@ -4,6 +4,7 @@ pragma solidity ^0.8.24;
 import "./ECDSA420.sol";
 import "./IEntryPoint420.sol";
 import "./SmartAccountScopes420.sol";
+import "./WebAuthnP256Verifier420.sol";
 import "../interfaces/genesis/ICapabilityRegistry420.sol";
 import "../interfaces/genesis/ICapabilityRegistryExtended420.sol";
 
@@ -11,6 +12,7 @@ contract SmartAccount420 {
     bytes4 public constant ERC1271_MAGICVALUE = 0x1626ba7e;
     bytes4 public constant ERC1271_INVALID = 0xffffffff;
     uint48 public constant RECOVERY_DELAY = 2 days;
+    bytes1 public constant PASSKEY_SIGNATURE_MODE = 0x01;
 
     bytes4 private constant _ERC20_TRANSFER = 0xa9059cbb;
     bytes4 private constant _ERC20_APPROVE = 0x095ea7b3;
@@ -41,6 +43,7 @@ contract SmartAccount420 {
 
     address public pendingRecoveryOwner;
     uint48 public recoveryExecutableAt;
+    WebAuthnP256Verifier420 public passkeyVerifier;
 
     mapping(address => uint64) public sessionEpoch;
 
@@ -65,6 +68,9 @@ contract SmartAccount420 {
         bytes32 indexed operation,
         bytes32 scopeHash
     );
+    event PasskeyVerifierChanged(address indexed previousVerifier, address indexed newVerifier);
+    event PasskeyCredentialBound(bytes32 indexed credentialIdHash, bytes32 indexed rpIdHash, bytes32 originHash);
+    event PasskeyCredentialRevoked();
     event Executed(address indexed target, uint256 value, bytes4 selector);
 
     error NotOwner();
@@ -76,6 +82,7 @@ contract SmartAccount420 {
     error InvalidSessionKey();
     error SessionAuthorizationFailed();
     error RecoveryNotReady();
+    error PasskeyVerifierUnavailable();
     error CallFailed(bytes returnData);
 
     constructor(address entryPoint_, address capabilityRegistry_, address owner_, address recoveryAuthority_) payable {
@@ -134,11 +141,6 @@ contract SmartAccount420 {
         }
     }
 
-    /// @notice EntryPoint-only execution envelope for session-key UserOperations.
-    /// @dev Validation is intentionally read-only with respect to capability usage.
-    ///      Grant consumption occurs here and therefore rolls back atomically if any
-    ///      target call reverts. The signer is part of the signed UserOperation calldata
-    ///      and is checked against the recovered signer during validateUserOp().
     function executeSession(address signer, Call[] calldata calls)
         external
         payable
@@ -257,6 +259,47 @@ contract SmartAccount420 {
         );
     }
 
+    function setPasskeyVerifier(address verifier) external onlyOwner {
+        address previous = address(passkeyVerifier);
+        if (verifier != address(0) && verifier.code.length == 0) revert InvalidAddress();
+        passkeyVerifier = WebAuthnP256Verifier420(verifier);
+        _advanceAuthorizationEpoch();
+        emit PasskeyVerifierChanged(previous, verifier);
+    }
+
+    function registerPasskeyCredential(
+        bytes32 credentialIdHash,
+        uint256 publicKeyX,
+        uint256 publicKeyY,
+        bytes32 rpIdHash,
+        bytes32 originHash
+    ) external onlyOwner {
+        if (address(passkeyVerifier) == address(0)) revert PasskeyVerifierUnavailable();
+        passkeyVerifier.registerCredential(credentialIdHash, publicKeyX, publicKeyY, rpIdHash, originHash);
+        _advanceAuthorizationEpoch();
+        emit PasskeyCredentialBound(credentialIdHash, rpIdHash, originHash);
+    }
+
+    function revokePasskeyCredential() external onlyOwner {
+        if (address(passkeyVerifier) == address(0)) revert PasskeyVerifierUnavailable();
+        passkeyVerifier.revokeCredential();
+        _advanceAuthorizationEpoch();
+        emit PasskeyCredentialRevoked();
+    }
+
+    function passkeyUserOpChallenge(bytes32 userOpHash, uint256 userOpNonce) public view returns (bytes32) {
+        return sha256(
+            abi.encodePacked(
+                "420/WALLET/PASSKEY_USEROP/V1",
+                block.chainid,
+                address(this),
+                authorizationEpoch,
+                userOpHash,
+                userOpNonce
+            )
+        );
+    }
+
     function revokeAllAuthorizations() external onlyOwner {
         _advanceAuthorizationEpoch();
     }
@@ -308,18 +351,33 @@ contract SmartAccount420 {
     {
         if (msg.sender != entryPoint || userOp.sender != address(this)) return 1;
 
-        address signer = ECDSA420.tryRecover(ECDSA420.toEthSignedMessageHash(userOpHash), userOp.signature);
-        if (signer == address(0)) return 1;
-
-        if (signer == owner) {
-            if (uint192(userOp.nonce >> 64) != 0) return 1;
+        if (userOp.signature.length > 1 && userOp.signature[0] == PASSKEY_SIGNATURE_MODE) {
+            if (uint192(userOp.nonce >> 64) != 0 || address(passkeyVerifier) == address(0)) return 1;
+            bytes calldata assertion = userOp.signature[1:];
+            bool valid;
+            try passkeyVerifier.verifyAssertion(address(this), passkeyUserOpChallenge(userOpHash, userOp.nonce), assertion)
+                returns (bool verified)
+            {
+                valid = verified;
+            } catch {
+                valid = false;
+            }
+            if (!valid) return 1;
             validationData = 0;
         } else {
-            if (sessionEpoch[signer] != authorizationEpoch) return 1;
-            if (uint192(userOp.nonce >> 64) != uint192(uint160(signer))) return 1;
-            (bool ok, uint48 validAfter, uint48 validUntil) = _authorizeSessionCalls(signer, userOp.callData);
-            if (!ok) return 1;
-            validationData = _packValidationData(validUntil, validAfter);
+            address signer = ECDSA420.tryRecover(ECDSA420.toEthSignedMessageHash(userOpHash), userOp.signature);
+            if (signer == address(0)) return 1;
+
+            if (signer == owner) {
+                if (uint192(userOp.nonce >> 64) != 0) return 1;
+                validationData = 0;
+            } else {
+                if (sessionEpoch[signer] != authorizationEpoch) return 1;
+                if (uint192(userOp.nonce >> 64) != uint192(uint160(signer))) return 1;
+                (bool ok, uint48 validAfter, uint48 validUntil) = _authorizeSessionCalls(signer, userOp.callData);
+                if (!ok) return 1;
+                validationData = _packValidationData(validUntil, validAfter);
+            }
         }
 
         if (missingAccountFunds != 0) {

@@ -11,6 +11,11 @@
     "recoveryAuthority": null,
     "salt": "0x0000000000000000000000000000000000000000000000000000000000000000"
   },
+  "passkey": {
+    "origin": null,
+    "rpId": null,
+    "production": false
+  },
   "trackedAssets": [],
   "manifest": {
     "url": null,
@@ -36,6 +41,7 @@
     "entryPointUserOpSubmission": true,
     "batchExecutionUi": true,
     "batchExecution": true,
+    "passkeyDeviceManagement": true,
     "passkeys": false,
     "sessionKeys": true,
     "delegatedCapabilities": false,

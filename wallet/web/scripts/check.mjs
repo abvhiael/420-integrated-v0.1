@@ -5,8 +5,8 @@ import process from 'node:process';
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const required = [
   'index.html','app.js','ui-v1.js','apps-page.js','recovery-ui.js','session-execution-ui.js','batch-execution-ui.js','styles.css','apps.css','runtime-config.json',
-  'core/abi.js','core/accounts.js','core/apps.js','core/batch-execution.js','core/capabilities.js','core/capability-management.js','core/session-management.js','core/session-execution.js','core/entrypoint-transport.js','core/recovery.js','core/recovery-management.js','core/config.js','core/deployment.js','core/execution.js','core/portfolio.js','core/provider.js','core/provider-lifecycle.js','core/services.js','core/send.js','core/passkeys.js','core/passkey-metadata.js',
-  'test/core.test.js','test/apps.test.js','test/execution.test.js','test/batch-execution.test.js','test/batch-execution-ui.test.js','test/capabilities.test.js','test/capability-management.test.js','test/session-management.test.js','test/session-execution.test.js','test/entrypoint-transport.test.js','test/recovery.test.js','test/recovery-management.test.js','test/recovery-ui.test.js','test/session-execution-ui.test.js','test/ui-v1.test.js','test/send.test.js','test/provider-lifecycle.test.js','test/ui-hardening.test.js','test/session-hardening.test.js','test/passkeys.test.js','test/passkey-metadata.test.js',
+  'core/abi.js','core/accounts.js','core/apps.js','core/batch-execution.js','core/capabilities.js','core/capability-management.js','core/session-management.js','core/session-execution.js','core/entrypoint-transport.js','core/recovery.js','core/recovery-management.js','core/config.js','core/deployment.js','core/execution.js','core/portfolio.js','core/provider.js','core/provider-lifecycle.js','core/services.js','core/send.js','core/passkeys.js','core/passkey-metadata.js','core/keccak.js','core/passkey-envelope.js','core/passkey-p256-browser.js',
+  'test/core.test.js','test/apps.test.js','test/execution.test.js','test/batch-execution.test.js','test/batch-execution-ui.test.js','test/capabilities.test.js','test/capability-management.test.js','test/session-management.test.js','test/session-execution.test.js','test/entrypoint-transport.test.js','test/recovery.test.js','test/recovery-management.test.js','test/recovery-ui.test.js','test/session-execution-ui.test.js','test/ui-v1.test.js','test/send.test.js','test/provider-lifecycle.test.js','test/ui-hardening.test.js','test/session-hardening.test.js','test/passkeys.test.js','test/passkey-metadata.test.js','test/passkey-envelope.test.js','test/passkey-p256-browser.test.js',
 ];
 
 const errors = [];
@@ -71,8 +71,12 @@ requireStrings('core/passkeys.js', [
 ], 'passkey/WebAuthn foundation guard');
 requireStrings('core/passkey-metadata.js', [
   '420-wallet-passkey-binding-v1','passkey binding requires a deployed SmartAccount420','passkey SmartAccount420 binding changed','passkey authorization epoch changed',
-  'passkey RP ID binding changed','passkey origin binding changed','authenticated WebAuthn sign counter did not advance'
+  'passkey RP ID binding changed','passkey origin binding changed','credentialIdHash','publicKeyX','publicKeyY','authenticated WebAuthn sign counter did not advance'
 ], 'passkey credential/account binding guard');
+requireStrings('core/keccak.js', ['ROUND_CONSTANTS','0x01','0x80','keccak256Hex'], 'Ethereum Keccak-256 credential hash guard');
+requireStrings('core/passkey-p256-browser.js', ['getPublicKey','getPublicKeyAlgorithm','canonical ES256/P-256 SubjectPublicKeyInfo','publicKeyX','publicKeyY'], 'browser P-256 registration extraction guard');
+const passkeyEnvelope = requireStrings('core/passkey-envelope.js', ['0x504b3432','parseP256DerSignature','credentialIdHash','buildPasskeyAssertionEnvelope','buildPk42Signature'], 'PK42 passkey signature envelope guard');
+if (passkeyEnvelope.includes('privateKey') || passkeyEnvelope.includes('localStorage')) errors.push('PK42 builder must not persist or handle passkey private key material');
 
 const abi = read('core/abi.js');
 if (!abi.includes("createAccount: '4003f6ba'")) errors.push('canonical SmartAccountFactory420 createAccount selector missing');
@@ -112,6 +116,8 @@ console.log(JSON.stringify({
   batchExecutionEnabled: true,
   passkeyWebAuthnFoundationQualified: true,
   passkeyCredentialBindingQualified: true,
+  passkeyP256PublicKeyExtractionQualified: true,
+  passkeyPk42EnvelopeBuilderQualified: true,
   passkeysEnabled: false,
   delegatedCapabilitiesEnabled: false,
   serverSideKeyCustody: false

@@ -1,4 +1,5 @@
 import './recovery-ui.js';
+import './passkey-management-ui.js';
 import './apps-page.js';
 import { buildSendExecution } from './core/send.js';
 import { installFailClosedBrowserLifecycle } from './core/provider-lifecycle.js';
@@ -33,6 +34,8 @@ export function classifyWalletActivity(message = '') {
   if (/session key .*verified/i.test(text)) return { kind: 'session', state: 'confirmed', label: 'Session key updated' };
   if (/recovery .*submitted:/i.test(text)) return { kind: 'recovery', state: 'pending', label: 'Recovery action submitted' };
   if (/recovery .*confirmed and canonical recovery state verified/i.test(text)) return { kind: 'recovery', state: 'confirmed', label: 'Recovery state updated' };
+  if (/passkey .*submitted:/i.test(text)) return { kind: 'passkey', state: 'pending', label: 'Passkey action submitted' };
+  if (/passkey .*confirmed/i.test(text) || /passkey revoked/i.test(text)) return { kind: 'passkey', state: 'confirmed', label: 'Passkey authority updated' };
   return null;
 }
 

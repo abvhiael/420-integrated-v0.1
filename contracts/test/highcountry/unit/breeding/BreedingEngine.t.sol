@@ -58,21 +58,43 @@ contract BreedingEngineTest {
         _grant(address(this), ModuleIds.BREEDING_ENGINE, ActionIds.BREEDING_REQUEST, scope, keccak256("hc5:req:2"));
         _grant(address(this), ModuleIds.BREEDING_ENGINE, ActionIds.BREEDING_FINALIZE, scope, keccak256("hc5:fin:2"));
 
-        bytes32 contextHash = keccak256(abi.encode(eventId, parentA, parentB, childId, keccak256("line:c"), keccak256("meta:c")));
+        bytes32 lineId = keccak256("line:c");
+        bytes32 metadataHash = keccak256("meta:c");
+        bytes32 contextHash = keccak256(abi.encode(eventId, parentA, parentB, childId, lineId, metadataHash));
         bytes32 requestId = keccak256(abi.encode(keccak256("HC.RANDOM.BREEDING.V1"), contextHash));
         _grant(address(breeding), ModuleIds.RANDOMNESS_COORDINATOR, ActionIds.RANDOMNESS_REQUEST, requestId, keccak256("hc5:rand:req"));
         _grant(address(this), ModuleIds.RANDOMNESS_COORDINATOR, ActionIds.RANDOMNESS_FULFILL, requestId, keccak256("hc5:rand:fulfill"));
         _grant(address(breeding), ModuleIds.GENOME_REGISTRY, ActionIds.GENOME_REGISTER, childId, keccak256("hc5:child:grant"));
 
-        breeding.requestBreeding(eventId, parentA, parentB, childId, keccak256("line:c"), keccak256("meta:c"));
-        randomness.fulfill(requestId, keccak256("entropy:2"));
+        breeding.requestBreeding(eventId, parentA, parentB, childId, lineId, metadataHash);
+        bytes32 entropy = keccak256("entropy:2");
+        randomness.fulfill(requestId, entropy);
+        RandomnessCoordinator.RandomRequest memory beforeConsume = randomness.getRequest(requestId);
+        require(beforeConsume.provider == address(this) && beforeConsume.fulfilled && !beforeConsume.consumed, "provider provenance");
+
         breeding.finalizeBreeding(eventId);
         require(genomes.exists(childId), "child genome missing");
+        RandomnessCoordinator.RandomRequest memory afterConsume = randomness.getRequest(requestId);
+        require(afterConsume.consumed && afterConsume.entropy == entropy, "request not consumed exactly once");
 
         (bool replayFulfill,) = address(randomness).call(abi.encodeWithSelector(randomness.fulfill.selector, requestId, keccak256("entropy:again")));
         require(!replayFulfill, "randomness replay allowed");
         (bool replayFinalize,) = address(breeding).call(abi.encodeWithSelector(breeding.finalizeBreeding.selector, eventId));
         require(!replayFinalize, "breeding finalized twice");
+    }
+
+    function testOnlyOriginalRequesterCanConsumeBoundRequest() public {
+        bytes32 requestId = keccak256("standalone:request");
+        bytes32 domain = keccak256("standalone:domain");
+        bytes32 contextHash = keccak256("standalone:context");
+        _grant(address(this), ModuleIds.RANDOMNESS_COORDINATOR, ActionIds.RANDOMNESS_REQUEST, requestId, keccak256("standalone:req"));
+        _grant(address(this), ModuleIds.RANDOMNESS_COORDINATOR, ActionIds.RANDOMNESS_FULFILL, requestId, keccak256("standalone:fulfill"));
+        randomness.request(requestId, domain, contextHash);
+        randomness.fulfill(requestId, keccak256("standalone:entropy"));
+        bytes32 entropy = randomness.consume(requestId, domain, contextHash);
+        require(entropy == keccak256("standalone:entropy"), "consume entropy mismatch");
+        (bool replay,) = address(randomness).call(abi.encodeWithSelector(randomness.consume.selector, requestId, domain, contextHash));
+        require(!replay, "randomness consumed twice");
     }
 
     function _grant(address principal, bytes32 moduleId, bytes32 actionId, bytes32 scopeHash, bytes32 grantId) private {

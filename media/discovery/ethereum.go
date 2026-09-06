@@ -71,11 +71,15 @@ func (e *EthereumDiscovery) OperatorIDs(ctx context.Context, capabilityID [32]by
 			return nil, ErrMalformedChainData
 		}
 		words, err := decodeWords(log.Data)
-		if err != nil || len(words) != 1 {
+		if err != nil || len(words) != 2 {
 			return nil, ErrMalformedChainData
 		}
 		v, err := decodeBool(words[0])
 		if err != nil {
+			return nil, ErrMalformedChainData
+		}
+		revision, err := decodeUint(words[1])
+		if err != nil || revision > uint64(^uint32(0)) {
 			return nil, ErrMalformedChainData
 		}
 		enabled[opID] = v

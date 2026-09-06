@@ -36,7 +36,7 @@
     "entryPointUserOpSubmission": true,
     "batchExecutionUi": true,
     "batchExecution": true,
-    "passkeys": false,
+    "passkeys": true,
     "sessionKeys": true,
     "delegatedCapabilities": false,
     "recoveryManagement": true

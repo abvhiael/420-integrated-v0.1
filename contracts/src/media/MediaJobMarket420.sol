@@ -53,6 +53,17 @@ contract MediaJobMarket420 is SystemAccess, I420System {
         Status status;
     }
 
+    struct CreateParams {
+        bytes32 jobId;
+        bytes32 streamId;
+        bytes32 jobKind;
+        bytes32 capabilityId;
+        bytes32 slaPolicyId;
+        bytes32 inputRef;
+        uint256 maxSpend;
+        uint64 deadline;
+    }
+
     mapping(bytes32 => Job) public jobs;
     mapping(bytes32 => bytes32) public reservedOperatorId;
 
@@ -110,7 +121,8 @@ contract MediaJobMarket420 is SystemAccess, I420System {
         uint256 maxSpend,
         uint64 deadline
     ) external {
-        _createJob(jobId, streamId, jobKind, capabilityId, slaPolicyId, inputRef, maxSpend, deadline, bytes32(0));
+        CreateParams memory p = CreateParams(jobId, streamId, jobKind, capabilityId, slaPolicyId, inputRef, maxSpend, deadline);
+        _createJob(p, bytes32(0));
     }
 
     function createAssignedJob(
@@ -125,47 +137,39 @@ contract MediaJobMarket420 is SystemAccess, I420System {
         bytes32 operatorId
     ) external {
         if (operatorId == bytes32(0)) revert InvalidOperator();
-        if (!dependenciesBound || !IMediaOperatorJobs420(operatorRegistry).isOperationalFor(operatorId, capabilityId)) revert InvalidOperator();
-        _createJob(jobId, streamId, jobKind, capabilityId, slaPolicyId, inputRef, maxSpend, deadline, operatorId);
+        _requireOperational(operatorId, capabilityId);
+        CreateParams memory p = CreateParams(jobId, streamId, jobKind, capabilityId, slaPolicyId, inputRef, maxSpend, deadline);
+        _createJob(p, operatorId);
     }
 
-    function _createJob(
-        bytes32 jobId,
-        bytes32 streamId,
-        bytes32 jobKind,
-        bytes32 capabilityId,
-        bytes32 slaPolicyId,
-        bytes32 inputRef,
-        uint256 maxSpend,
-        uint64 deadline,
-        bytes32 operatorId
-    ) private {
-        if (!dependenciesBound) revert InvalidJob();
-        if (jobId == bytes32(0) || jobKind == bytes32(0) || capabilityId == bytes32(0) || inputRef == bytes32(0) || maxSpend == 0) revert InvalidJob();
-        if (jobs[jobId].status != Status.NONE) revert JobExists();
-        if (deadline <= block.timestamp) revert InvalidDeadline();
-        if (slaPolicyId != bytes32(0) && !IMediaSLAJobs420(slaRegistry).isActive(slaPolicyId)) revert InvalidSLA();
+    function _requireOperational(bytes32 operatorId, bytes32 capabilityId) private view {
+        if (!dependenciesBound) revert InvalidOperator();
+        if (!IMediaOperatorJobs420(operatorRegistry).isOperationalFor(operatorId, capabilityId)) revert InvalidOperator();
+    }
 
-        jobs[jobId] = Job({
-            requester: msg.sender,
-            streamId: streamId,
-            jobKind: jobKind,
-            capabilityId: capabilityId,
-            slaPolicyId: slaPolicyId,
-            inputRef: inputRef,
-            outputRef: bytes32(0),
-            operatorId: bytes32(0),
-            fundingRef: bytes32(0),
-            maxSpend: maxSpend,
-            fundedAmount: 0,
-            deadline: deadline,
-            status: Status.CREATED
-        });
+    function _createJob(CreateParams memory p, bytes32 operatorId) private {
+        if (!dependenciesBound) revert InvalidJob();
+        if (p.jobId == bytes32(0) || p.jobKind == bytes32(0) || p.capabilityId == bytes32(0) || p.inputRef == bytes32(0) || p.maxSpend == 0) revert InvalidJob();
+        if (jobs[p.jobId].status != Status.NONE) revert JobExists();
+        if (p.deadline <= block.timestamp) revert InvalidDeadline();
+        if (p.slaPolicyId != bytes32(0) && !IMediaSLAJobs420(slaRegistry).isActive(p.slaPolicyId)) revert InvalidSLA();
+
+        Job storage j = jobs[p.jobId];
+        j.requester = msg.sender;
+        j.streamId = p.streamId;
+        j.jobKind = p.jobKind;
+        j.capabilityId = p.capabilityId;
+        j.slaPolicyId = p.slaPolicyId;
+        j.inputRef = p.inputRef;
+        j.maxSpend = p.maxSpend;
+        j.deadline = p.deadline;
+        j.status = Status.CREATED;
+
         if (operatorId != bytes32(0)) {
-            reservedOperatorId[jobId] = operatorId;
-            emit JobAssigned(jobId, operatorId);
+            reservedOperatorId[p.jobId] = operatorId;
+            emit JobAssigned(p.jobId, operatorId);
         }
-        emit JobCreated(jobId, msg.sender, capabilityId, streamId, jobKind, slaPolicyId, maxSpend, deadline);
+        emit JobCreated(p.jobId, msg.sender, p.capabilityId, p.streamId, p.jobKind, p.slaPolicyId, p.maxSpend, p.deadline);
     }
 
     function acceptJob(bytes32 jobId, bytes32 operatorId) external {

@@ -29,6 +29,7 @@
     }
   },
   "global_controls": [
+    "canonical chain identity registry binding",
     "replay protection",
     "source contract/domain allowlist",
     "destination token allowlist",
@@ -41,8 +42,10 @@
     "no bridge verifier controlled by the 420 validator committee solely by virtue of validator status"
   ],
   "risk_limits": "contracts/config/bridge/risk-limits.json",
+  "launch_catalog": "contracts/config/bridge/launch-catalog-v12.5.1.json",
   "protocol_components": [
     "BridgeAssetRegistry",
+    "BridgeChainRegistry420",
     "BridgeRouteRegistry",
     "BridgeRiskManager",
     "BridgeTransferRegistry",

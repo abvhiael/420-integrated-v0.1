@@ -11,6 +11,7 @@ import "../../system/SystemAccess.sol";
 contract SolanaBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
     bytes32 public constant ADAPTER_ID = keccak256("420/BRIDGE/SOLANA/MAINNET/V12.5.2");
     bytes32 public constant SOLANA_CHAIN_KEY = keccak256("420/BRIDGE/CHAIN/SOL");
+    uint64 public constant SOLANA_ROUTE_CHAIN_ID = 0x534f4c414e410001; // "SOLANA" + profile version 1
     bytes32 public constant SOL_NATIVE_SOURCE_ASSET = keccak256("420/BRIDGE/SOLANA/NATIVE/SOL");
     bytes32 public constant SOLANA_MAINNET_GENESIS_HASH =
         0x45296998a6f8e2a784db5d9f95e18fc23f70441a1039446801089879b08c7ef0;

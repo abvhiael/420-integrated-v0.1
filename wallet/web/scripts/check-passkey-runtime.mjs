@@ -11,7 +11,7 @@ const required = [
   'test/passkey-runtime.test.js',
   'test/passkey-entrypoint-transport.test.js',
   'test/passkey-management.test.js',
-  'test/passkey-e2e.test.js',
+  'test/passkey-lifecycle.test.js',
 ];
 const errors = [];
 const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
@@ -70,7 +70,7 @@ requireStrings('core/passkey-management.js', [
   'authorizationEpoch: after.authorizationEpoch.toString()',
 ], 'passkey enrollment/re-enrollment runtime management');
 
-requireStrings('test/passkey-e2e.test.js', [
+requireStrings('test/passkey-lifecycle.test.js', [
   'W7.10',
   'reenroll',
   'authorizationEpoch',

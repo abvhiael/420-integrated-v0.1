@@ -21,6 +21,7 @@ contract SolanaBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
     mapping(bytes32 => bool) public gatewayPrograms;
     mapping(bytes32 => bytes32) public assetIdBySourceAsset;
     mapping(bytes32 => bytes32) public sourceAssetByAssetId;
+    mapping(bytes32 => bytes32) public routeIdByAssetId;
     mapping(bytes32 => bool) public consumedMessages;
 
     uint256 public outboundNonce;
@@ -32,6 +33,7 @@ contract SolanaBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
     error InvalidProof();
     error ProgramNotAllowed();
     error AssetNotAllowed();
+    error RouteNotAllowed();
     error Replay();
     error OnlyRouter();
     error InvalidOutbound();
@@ -39,6 +41,7 @@ contract SolanaBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
     event VerifierSet(address indexed verifier);
     event GatewayProgramSet(bytes32 indexed programId, bool allowed);
     event AssetMappingSet(bytes32 indexed sourceAsset, bytes32 indexed assetId, bool allowed);
+    event RouteBindingSet(bytes32 indexed assetId, bytes32 indexed routeId);
     event SolanaInboundConsumed(bytes32 indexed messageId, bytes32 indexed transactionSignature, uint64 slot);
     event SolanaOutboundRequested(
         bytes32 indexed messageId,
@@ -91,6 +94,12 @@ contract SolanaBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
         emit AssetMappingSet(sourceAsset, assetId, allowed);
     }
 
+    function setRouteBinding(bytes32 assetId, bytes32 routeId) external onlyGovernance {
+        if (assetId == bytes32(0)) revert InvalidProof();
+        routeIdByAssetId[assetId] = routeId;
+        emit RouteBindingSet(assetId, routeId);
+    }
+
     function verifyInbound(bytes calldata proof) external onlyRouter returns (VerifiedTransfer memory v) {
         ISolanaFinalityVerifier420.FinalizedTransfer memory p = verifier.verifyFinalizedTransfer(proof);
         if (!p.finalized) revert Unfinalized();
@@ -103,6 +112,8 @@ contract SolanaBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
         if (!gatewayPrograms[p.gatewayProgram]) revert ProgramNotAllowed();
         bytes32 assetId = assetIdBySourceAsset[p.sourceAsset];
         if (assetId == bytes32(0)) revert AssetNotAllowed();
+        bytes32 routeId = routeIdByAssetId[assetId];
+        if (routeId == bytes32(0)) revert RouteNotAllowed();
         if (consumedMessages[p.messageId]) revert Replay();
 
         address sourceSender = address(uint160(uint256(p.sourceOwner)));
@@ -112,7 +123,7 @@ contract SolanaBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
         emit SolanaInboundConsumed(p.messageId, p.transactionSignature, p.slot);
 
         v = VerifiedTransfer({
-            routeId: keccak256(abi.encodePacked(ADAPTER_ID, assetId)),
+            routeId: routeId,
             assetId: assetId,
             sender: sourceSender,
             recipient: p.recipient,
@@ -136,6 +147,7 @@ contract SolanaBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
         ) revert InvalidOutbound();
         bytes32 sourceAsset = sourceAssetByAssetId[assetId];
         if (sourceAsset == bytes32(0)) revert AssetNotAllowed();
+        if (routeIdByAssetId[assetId] != routeId) revert RouteNotAllowed();
 
         uint256 nonce = ++outboundNonce;
         sourceMessageId = keccak256(

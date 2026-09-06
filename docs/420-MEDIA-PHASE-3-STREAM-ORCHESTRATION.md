@@ -4,9 +4,9 @@
 
 Phase 3.2 converts the qualified Phase 3.1 provider set into a deterministic execution graph for a live stream and binds that graph to canonical `MediaJobMarket420` lifecycle coordination. The orchestration layer does not process media itself, bypass discovery, impersonate operator accounts, or assume settlement authority.
 
-## Initial orchestration profile
+## Orchestration profile
 
-The first profile models three service roles:
+The qualified profile models three service roles:
 
 1. **Ingress** — receives broadcaster input and is the graph root.
 2. **Transcoder** — one assigned job per requested rendition, each dependent on ingress.
@@ -47,13 +47,19 @@ Phase 3.2 uncovered a race in the original Phase 1 market: `createJob` did not b
 
 ## Live qualification
 
-The existing Anvil gate now also watches `media/orchestration/**`. `scripts/420media-anvil-integration.sh` deploys the Phase 1 contracts, registers an operational operator, and runs a live orchestration test that:
+The Anvil gate watches `media/orchestration/**`. `scripts/420media-anvil-integration.sh` deploys the Phase 1 contracts, registers four distinct operational operators, and runs a live orchestration test that proves:
 
-1. builds a valid orchestration DAG;
-2. runs `LifecycleCoordinator.CreateReady` against the real Ethereum lifecycle adapter;
-3. proves only the ingress/root job is created before dependencies succeed;
-4. verifies the canonical deterministic job ID on chain;
-5. verifies the selected operator reservation is visible through the live contract.
+1. only ingress is created at graph start;
+2. ingress crosses real accept → fund → run → result → verify transitions;
+3. ingress verification unlocks exactly two rendition transcoders;
+4. both transcoder jobs consume the verified ingress output reference;
+5. relay creation remains blocked while either rendition is incomplete;
+6. each rendition crosses its own live lifecycle to `VERIFIED`;
+7. relay creation unlocks only after the complete rendition set succeeds;
+8. the relay is reserved to the planned relay operator;
+9. the relay input is the deterministic manifest commitment over all verified transcoder outputs.
+
+Focused failure qualification additionally proves that one failed rendition blocks relay readiness even when another rendition succeeded, while a still-running rendition leaves relay pending rather than failing or creating it early.
 
 ## Phase 3.2 invariants
 
@@ -77,9 +83,13 @@ The existing Anvil gate now also watches `media/orchestration/**`. `scripts/420m
 - **MEDIA-ORCH-INV-018:** A different operator cannot claim an assigned orchestration job even when otherwise qualified.
 - **MEDIA-ORCH-INV-019:** The assigned-job extension must not change the existing public `jobs(bytes32)` getter shape relied on by Phase 2 adapters.
 - **MEDIA-ORCH-INV-020:** The live Anvil gate must cross both coordinator and Ethereum adapter boundaries before reporting orchestration job creation success.
+- **MEDIA-ORCH-INV-021:** Every requested rendition must complete canonically before relay becomes creatable.
+- **MEDIA-ORCH-INV-022:** Relay input must deterministically commit to the complete verified rendition output set.
+- **MEDIA-ORCH-INV-023:** A terminal failure in any rendition blocks relay creation for that orchestration graph.
+- **MEDIA-ORCH-INV-024:** A non-terminal rendition leaves relay pending; it must not be treated as success or failure prematurely.
 
-## Current completion boundary
+## Phase 3.2 completion boundary
 
-Phase 3.2 now includes deterministic provider/DAG planning, dependency-gated lifecycle coordination, the concrete Ethereum lifecycle adapter, operator reservation, and a live Anvil creation gate.
+Phase 3.2 is implementation-complete once the final qualification matrix is green. It now includes deterministic provider/DAG planning, dependency-gated lifecycle coordination, the Ethereum lifecycle adapter, operator reservation, live ingress-to-transcoder unlocking, multi-rendition completion, relay manifest creation and failure-path gating.
 
-The next Phase 3.2 increment is full multi-stage live lifecycle qualification: accept/fund/run/commit/finalize ingress, then prove transcoder creation unlocks from canonical parent success. Cross-node failover and geographic rerouting remain later Phase 3 work.
+The next roadmap phase is **Phase 3.3 — multi-node failover and recovery orchestration**, followed by geographic rerouting/resilience work later in Phase 3.

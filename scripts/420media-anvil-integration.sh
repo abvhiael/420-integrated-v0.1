@@ -88,13 +88,13 @@ ORCH_OUTPUT_REF_1080=$(cast keccak "420MEDIA_ANVIL_ORCH_OUTPUT_1080")
 ORCH_VAULT_REF=$(cast keccak "420MEDIA_ANVIL_ORCH_VAULT")
 ORCH_FUNDING_REF=$(cast keccak "420MEDIA_ANVIL_ORCH_FUNDING")
 ORCH_RESOLUTION_REF=$(cast keccak "420MEDIA_ANVIL_ORCH_RESOLUTION")
+RECOVERY_STREAM_ID=$(cast keccak "420MEDIA_ANVIL_RECOVERY_STREAM")
+RECOVERY_INPUT_REF=$(cast keccak "420MEDIA_ANVIL_RECOVERY_INPUT")
+RECOVERY_OUTPUT_REF=$(cast keccak "420MEDIA_ANVIL_RECOVERY_OUTPUT")
 DEADLINE=$(( $(date +%s) + 900 ))
 
 send_gov() { cast send --rpc-url "$RPC_URL" --from "$GOV_ADDR" --unlocked "$@" >/dev/null; }
 send_op() { cast send --rpc-url "$RPC_URL" --from "$OP_ADDR" --unlocked "$@" >/dev/null; }
-send_op2() { cast send --rpc-url "$RPC_URL" --from "$SECOND_OP_ADDR" --unlocked "$@" >/dev/null; }
-send_op3() { cast send --rpc-url "$RPC_URL" --from "$THIRD_OP_ADDR" --unlocked "$@" >/dev/null; }
-send_op4() { cast send --rpc-url "$RPC_URL" --from "$FOURTH_OP_ADDR" --unlocked "$@" >/dev/null; }
 
 stage "binding protocol dependencies"
 send_gov "$OP_REG" "bindCapabilityRegistry(address)" "$CAP_REG"
@@ -144,6 +144,7 @@ export MEDIA420_ACCEPT_SELECTOR="$(cast sig 'acceptJob(bytes32,bytes32)')"
 export MEDIA420_MARK_RUNNING_SELECTOR="$(cast sig 'markRunning(bytes32)')"
 export MEDIA420_COMMIT_RESULT_SELECTOR="$(cast sig 'commitResult(bytes32,bytes32)')"
 export MEDIA420_FINALIZE_SELECTOR="$(cast sig 'finalize(bytes32,bytes32)')"
+export MEDIA420_EXPIRE_SELECTOR="$(cast sig 'expire(bytes32)')"
 export MEDIA420_CONFIRM_VAULT_FUNDING_SELECTOR="$(cast sig 'confirmVaultFunding(bytes32,address,bytes32,address,bytes32,bytes32,uint256)')"
 export MEDIA420_JOB_CREATED_TOPIC="$(cast keccak 'JobCreated(bytes32,address,bytes32,bytes32,bytes32,bytes32,uint256,uint64)')"
 export MEDIA420_ORCH_STREAM_ID="$ORCH_STREAM_ID"
@@ -160,6 +161,9 @@ export MEDIA420_ORCH_OUTPUT_REF_1080="$ORCH_OUTPUT_REF_1080"
 export MEDIA420_ORCH_VAULT_REF="$ORCH_VAULT_REF"
 export MEDIA420_ORCH_FUNDING_REF="$ORCH_FUNDING_REF"
 export MEDIA420_ORCH_RESOLUTION_REF="$ORCH_RESOLUTION_REF"
+export MEDIA420_RECOVERY_STREAM_ID="$RECOVERY_STREAM_ID"
+export MEDIA420_RECOVERY_INPUT_REF="$RECOVERY_INPUT_REF"
+export MEDIA420_RECOVERY_OUTPUT_REF="$RECOVERY_OUTPUT_REF"
 
 stage "running live node adapter lifecycle test"
 cd "$ROOT"
@@ -167,5 +171,8 @@ go test ./media/node/ethadapter -run TestAnvilMediaJobAdapterLifecycle -count=1 
 
 stage "running live multi-rendition relay orchestration test"
 go test ./media/orchestration -run TestAnvilOrchestrationCompletesMultiRenditionRelay -count=1 -v
+
+stage "running live recovery execution test"
+go test ./media/orchestration -run TestAnvilRecoveryPreservesOriginalAndExecutesReplacement -count=1 -v
 
 stage "completed successfully"

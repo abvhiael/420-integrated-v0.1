@@ -3,6 +3,8 @@
   "status": "APPROVED_INACTIVE_PENDING_PRODUCTION_VERIFIER_AND_GATEWAY_PROGRAM",
   "canonical_chain_key": "420/BRIDGE/CHAIN/SOL",
   "chain_family": "SOLANA",
+  "route_chain_id": "0x534f4c414e410001",
+  "route_chain_id_encoding": "ASCII SOLANA plus profile version 1, interpreted as uint64",
   "network_identity": {
     "method": "GENESIS_HASH",
     "full_base58": "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d",
@@ -22,7 +24,7 @@
     "native_value_on_420_outbound": "rejected"
   },
   "activation_requirements": [
-    "BridgeChainRegistry420 entry uses the pinned mainnet genesis identity",
+    "BridgeChainRegistry420 entry uses route_chain_id and the pinned mainnet genesis identity",
     "production ISolanaFinalityVerifier420 implementation is deployed and reviewed",
     "canonical Solana gateway program id is governance allowlisted",
     "SOL source-asset mapping is bound to the canonical SOL bridge asset id",

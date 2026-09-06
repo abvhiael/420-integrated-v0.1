@@ -48,9 +48,9 @@ func TestEthereumIndexReconstructsLatestCapabilityState(t *testing.T) {
 		if method != "eth_getLogs" { t.Fatalf("method=%s", method) }
 		logs := result.(*[]rpcLog)
 		*logs = []rpcLog{
-			{BlockNumber:"0x8", LogIndex:"0x1", Topics:[]string{config(nil).CapabilityChangedTopic, hex32(opA), hex32(capID)}, Data:encodeWords(wordUint(1))},
-			{BlockNumber:"0x9", LogIndex:"0x0", Topics:[]string{config(nil).CapabilityChangedTopic, hex32(opA), hex32(capID)}, Data:encodeWords(wordUint(0))},
-			{BlockNumber:"0x8", LogIndex:"0x2", Topics:[]string{config(nil).CapabilityChangedTopic, hex32(opB), hex32(capID)}, Data:encodeWords(wordUint(1))},
+			{BlockNumber:"0x8", LogIndex:"0x1", Topics:[]string{config(nil).CapabilityChangedTopic, hex32(opA), hex32(capID)}, Data:encodeWords(wordUint(1), wordUint(1))},
+			{BlockNumber:"0x9", LogIndex:"0x0", Topics:[]string{config(nil).CapabilityChangedTopic, hex32(opA), hex32(capID)}, Data:encodeWords(wordUint(0), wordUint(2))},
+			{BlockNumber:"0x8", LogIndex:"0x2", Topics:[]string{config(nil).CapabilityChangedTopic, hex32(opB), hex32(capID)}, Data:encodeWords(wordUint(1), wordUint(7))},
 		}
 		return nil
 	}}
@@ -67,7 +67,33 @@ func TestEthereumIndexRejectsRemovedOrMalformedLogs(t *testing.T) {
 	opID := id32(1)
 	rpc := &fakeRPC{fn: func(_ string, _ any, result any) error {
 		logs := result.(*[]rpcLog)
-		*logs = []rpcLog{{BlockNumber:"0x8", LogIndex:"0x0", Removed:true, Topics:[]string{config(nil).CapabilityChangedTopic, hex32(opID), hex32(capID)}, Data:encodeWords(wordUint(1))}}
+		*logs = []rpcLog{{BlockNumber:"0x8", LogIndex:"0x0", Removed:true, Topics:[]string{config(nil).CapabilityChangedTopic, hex32(opID), hex32(capID)}, Data:encodeWords(wordUint(1), wordUint(1))}}
+		return nil
+	}}
+	d, _ := NewEthereumDiscovery(config(rpc))
+	if _, err := d.OperatorIDs(context.Background(), capID); !errors.Is(err, ErrMalformedChainData) { t.Fatalf("err=%v", err) }
+}
+
+func TestEthereumIndexRejectsMissingRevisionWord(t *testing.T) {
+	capID := id32(2)
+	opID := id32(1)
+	rpc := &fakeRPC{fn: func(_ string, _ any, result any) error {
+		logs := result.(*[]rpcLog)
+		*logs = []rpcLog{{BlockNumber:"0x8", LogIndex:"0x0", Topics:[]string{config(nil).CapabilityChangedTopic, hex32(opID), hex32(capID)}, Data:encodeWords(wordUint(1))}}
+		return nil
+	}}
+	d, _ := NewEthereumDiscovery(config(rpc))
+	if _, err := d.OperatorIDs(context.Background(), capID); !errors.Is(err, ErrMalformedChainData) { t.Fatalf("err=%v", err) }
+}
+
+func TestEthereumIndexRejectsRevisionOverflow(t *testing.T) {
+	capID := id32(2)
+	opID := id32(1)
+	var overflow [32]byte
+	overflow[27] = 1
+	rpc := &fakeRPC{fn: func(_ string, _ any, result any) error {
+		logs := result.(*[]rpcLog)
+		*logs = []rpcLog{{BlockNumber:"0x8", LogIndex:"0x0", Topics:[]string{config(nil).CapabilityChangedTopic, hex32(opID), hex32(capID)}, Data:encodeWords(wordUint(1), overflow)}}
 		return nil
 	}}
 	d, _ := NewEthereumDiscovery(config(rpc))

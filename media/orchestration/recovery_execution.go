@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/binary"
+	"errors"
 )
 
 // RecoveryJobID derives an attempt-scoped job identity without overwriting the
@@ -72,7 +73,7 @@ func (c *LifecycleCoordinator) CreateRecoveryAttempt(
 			return zero, ErrInvalidRecovery
 		}
 		return jobID, nil
-	} else if err != ErrLifecycleJobNotFound {
+	} else if !errors.Is(err, ErrLifecycleJobNotFound) {
 		return zero, err
 	}
 

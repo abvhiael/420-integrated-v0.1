@@ -1,4 +1,5 @@
 import { base64urlDecode, base64urlEncode, passkeyPolicy } from './passkeys.js';
+import { credentialIdHash } from './passkey-envelope.js';
 
 export const PASSKEY_BINDING_SCHEMA = '420-wallet-passkey-binding-v1';
 
@@ -23,6 +24,13 @@ function normalizeCredentialId(value) {
   const canonical = base64urlEncode(bytes);
   if (canonical !== value) throw new Error('credential ID must use canonical base64url encoding');
   return canonical;
+}
+
+function normalizeBytes32Hex(value, label) {
+  if (typeof value !== 'string' || !/^0x[0-9a-fA-F]{64}$/.test(value)) throw new Error(`${label} must be 32-byte hex`);
+  const normalized = value.toLowerCase();
+  if (normalized === `0x${'0'.repeat(64)}`) throw new Error(`${label} cannot be zero`);
+  return normalized;
 }
 
 function normalizeTransports(values) {
@@ -62,10 +70,15 @@ export function createPasskeyCredentialBinding({ registration, smartAccountState
   if (registration.rawId != null && normalizeCredentialId(registration.rawId) !== credentialId) {
     throw new Error('passkey registration credential ID mismatch');
   }
+  const publicKeyX = normalizeBytes32Hex(registration.publicKeyX, 'P-256 public key x');
+  const publicKeyY = normalizeBytes32Hex(registration.publicKeyY, 'P-256 public key y');
 
   return Object.freeze({
     schema: PASSKEY_BINDING_SCHEMA,
     credentialId,
+    credentialIdHash: credentialIdHash(credentialId),
+    publicKeyX,
+    publicKeyY,
     smartAccount: account.smartAccount,
     authorizationEpoch: account.authorizationEpoch.toString(),
     rpId: policy.rpId,
@@ -87,6 +100,10 @@ export function validatePasskeyCredentialBinding(binding, {
   assertOriginWithinRpId(policy.origin, policy.rpId);
 
   const boundCredentialId = normalizeCredentialId(binding.credentialId);
+  const boundCredentialIdHash = normalizeBytes32Hex(binding.credentialIdHash, 'bound credential ID hash');
+  if (credentialIdHash(boundCredentialId) !== boundCredentialIdHash) throw new Error('passkey credential ID hash binding changed');
+  const publicKeyX = normalizeBytes32Hex(binding.publicKeyX, 'bound P-256 public key x');
+  const publicKeyY = normalizeBytes32Hex(binding.publicKeyY, 'bound P-256 public key y');
   const boundAccount = normalizeAddress(binding.smartAccount, 'bound SmartAccount420');
   const boundEpoch = normalizeAuthorizationEpoch(binding.authorizationEpoch);
   if (boundAccount !== account.smartAccount) throw new Error('passkey SmartAccount420 binding changed');
@@ -101,6 +118,9 @@ export function validatePasskeyCredentialBinding(binding, {
 
   return {
     credentialId: boundCredentialId,
+    credentialIdHash: boundCredentialIdHash,
+    publicKeyX,
+    publicKeyY,
     smartAccount: boundAccount,
     authorizationEpoch: boundEpoch,
     rpId: policy.rpId,

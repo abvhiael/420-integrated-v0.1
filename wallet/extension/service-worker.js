@@ -1,7 +1,9 @@
 const CHANNEL = '420-wallet-provider-v1';
 const PERMISSIONS_KEY = '420-wallet-origin-permissions-v1';
 const APPROVALS_KEY = '420-wallet-pending-approvals-v1';
+const AUTHORITY_KEY = '420-wallet-pending-authority-v1';
 const READ_METHODS = new Set(['eth_chainId','eth_blockNumber','eth_call','eth_estimateGas','eth_getBalance','eth_getCode','eth_getTransactionCount','eth_getTransactionReceipt','eth_getTransactionByHash','eth_getBlockByNumber','eth_getLogs','net_version']);
+const AUTHORITY_TRANSPORT_METHODS = new Set([...READ_METHODS, 'eth_sendUserOperation', 'eth_getUserOperationReceipt']);
 const APPROVAL_METHODS = new Set(['eth_requestAccounts','eth_sendTransaction','personal_sign','eth_signTypedData_v4']);
 const LOCAL_AUTHORITY_METHODS = new Set(['eth_sendTransaction','personal_sign','eth_signTypedData_v4']);
 const LOCAL_AUTHORITY_SOURCE = '420-wallet-local-authority';
@@ -53,29 +55,51 @@ async function executeWithLocalAuthority(request, context) {
     throw Object.assign(new Error(`unsupported local authority method: ${request.method}`), { code: 4200 });
   }
   const authorityRequestId = `authority-${context.tabId ?? 'tab'}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-  let response;
-  try {
-    response = await chrome.runtime.sendMessage({
-      source: '420-wallet-service-worker',
-      kind: 'authority-request',
-      authorityRequestId,
-      request,
-      context: { origin: context.origin, accounts: context.accounts ?? [], tabId: context.tabId ?? null },
-    });
-  } catch (error) {
-    throw Object.assign(new Error('420 Wallet local signing authority is unavailable'), { code: 4900, data: error?.message });
-  }
-  if (!response || response.source !== LOCAL_AUTHORITY_SOURCE || response.kind !== 'authority-result' || response.authorityRequestId !== authorityRequestId) {
-    throw Object.assign(new Error('420 Wallet local authority returned an invalid response'), { code: 4100 });
-  }
-  if (response.error) {
-    throw Object.assign(new Error(response.error.message || 'local wallet authority rejected the request'), {
-      code: Number.isInteger(response.error.code) ? response.error.code : -32603,
-      ...('data' in response.error ? { data: response.error.data } : {}),
-    });
-  }
-  if (!('result' in response)) throw Object.assign(new Error('420 Wallet local authority returned no result'), { code: -32603 });
-  return response.result;
+  const pending = await readObject(AUTHORITY_KEY);
+  pending[authorityRequestId] = {
+    authorityRequestId,
+    request,
+    context: { origin: context.origin, accounts: context.accounts ?? [], tabId: context.tabId ?? null },
+    createdAt: Date.now(),
+  };
+  await chrome.storage.local.set({ [AUTHORITY_KEY]: pending });
+  await chrome.windows.create({
+    url: chrome.runtime.getURL(`authority.html?request=${encodeURIComponent(authorityRequestId)}`),
+    type: 'popup',
+    width: 460,
+    height: 680,
+  });
+
+  return new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      cleanup().finally(() => reject(Object.assign(new Error('local wallet authority timed out'), { code: 4001 })));
+    }, 120000);
+    const listener = (message) => {
+      if (!message || message.source !== LOCAL_AUTHORITY_SOURCE || message.kind !== 'authority-result' || message.authorityRequestId !== authorityRequestId) return;
+      cleanup().then(() => {
+        if (message.error) {
+          reject(Object.assign(new Error(message.error.message || 'local wallet authority rejected the request'), {
+            code: Number.isInteger(message.error.code) ? message.error.code : -32603,
+            ...('data' in message.error ? { data: message.error.data } : {}),
+          }));
+          return;
+        }
+        if (!('result' in message)) {
+          reject(Object.assign(new Error('420 Wallet local authority returned no result'), { code: -32603 }));
+          return;
+        }
+        resolve(message.result);
+      });
+    };
+    async function cleanup() {
+      clearTimeout(timeout);
+      chrome.runtime.onMessage.removeListener(listener);
+      const current = await readObject(AUTHORITY_KEY);
+      delete current[authorityRequestId];
+      await chrome.storage.local.set({ [AUTHORITY_KEY]: current });
+    }
+    chrome.runtime.onMessage.addListener(listener);
+  });
 }
 
 async function createApproval(request, context) {
@@ -119,6 +143,24 @@ async function handleApprovalMethod(request, context) {
 }
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message?.source === '420-wallet-authority-ui' && message.kind === 'authority-rpc') {
+    (async () => {
+      try {
+        const expected = chrome.runtime.getURL('authority.html');
+        if (!sender?.url?.startsWith(expected)) throw Object.assign(new Error('authority RPC caller is not trusted extension UI'), { code: 4100 });
+        const request = message.request;
+        if (!request || !AUTHORITY_TRANSPORT_METHODS.has(request.method)) {
+          throw Object.assign(new Error(`unsupported authority transport method: ${request?.method}`), { code: 4200 });
+        }
+        const result = await rpcRequest(request.method, request.params ?? []);
+        sendResponse({ result });
+      } catch (error) {
+        sendResponse({ error: serializeError(error) });
+      }
+    })();
+    return true;
+  }
+
   if (!message || message.source !== '420-wallet-content' || message.channel !== CHANNEL || message.kind !== 'rpc') return;
   (async () => {
     try {
@@ -141,5 +183,5 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 chrome.runtime.onInstalled.addListener(async () => {
   const config = await readObject('420-wallet-extension-config-v1');
-  if (!Object.keys(config).length) await chrome.storage.local.set({ '420-wallet-extension-config-v1': { rpcUrl: null, accounts: [] } });
+  if (!Object.keys(config).length) await chrome.storage.local.set({ '420-wallet-extension-config-v1': { rpcUrl: null, accounts: [], smartAccountConfig: null } });
 });

@@ -3,6 +3,8 @@ const PERMISSIONS_KEY = '420-wallet-origin-permissions-v1';
 const APPROVALS_KEY = '420-wallet-pending-approvals-v1';
 const READ_METHODS = new Set(['eth_chainId','eth_blockNumber','eth_call','eth_estimateGas','eth_getBalance','eth_getCode','eth_getTransactionCount','eth_getTransactionReceipt','eth_getTransactionByHash','eth_getBlockByNumber','eth_getLogs','net_version']);
 const APPROVAL_METHODS = new Set(['eth_requestAccounts','eth_sendTransaction','personal_sign','eth_signTypedData_v4']);
+const LOCAL_AUTHORITY_METHODS = new Set(['eth_sendTransaction','personal_sign','eth_signTypedData_v4']);
+const LOCAL_AUTHORITY_SOURCE = '420-wallet-local-authority';
 
 function normalizeOrigin(value) {
   const url = new URL(value);
@@ -33,6 +35,9 @@ async function setAccounts(origin, accounts) {
 }
 
 async function rpcRequest(method, params) {
+  if (LOCAL_AUTHORITY_METHODS.has(method)) {
+    throw Object.assign(new Error('sensitive wallet methods cannot use RPC signing or submission authority'), { code: 4100 });
+  }
   const config = await readObject('420-wallet-extension-config-v1');
   const rpcUrl = config.rpcUrl;
   if (!rpcUrl) throw Object.assign(new Error('420 Wallet RPC endpoint is not configured'), { code: 4900 });
@@ -41,6 +46,36 @@ async function rpcRequest(method, params) {
   const payload = await response.json();
   if (payload.error) throw Object.assign(new Error(payload.error.message || 'rpc error'), { code: payload.error.code, data: payload.error.data });
   return payload.result;
+}
+
+async function executeWithLocalAuthority(request, context) {
+  if (!LOCAL_AUTHORITY_METHODS.has(request.method)) {
+    throw Object.assign(new Error(`unsupported local authority method: ${request.method}`), { code: 4200 });
+  }
+  const authorityRequestId = `authority-${context.tabId ?? 'tab'}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  let response;
+  try {
+    response = await chrome.runtime.sendMessage({
+      source: '420-wallet-service-worker',
+      kind: 'authority-request',
+      authorityRequestId,
+      request,
+      context: { origin: context.origin, accounts: context.accounts ?? [], tabId: context.tabId ?? null },
+    });
+  } catch (error) {
+    throw Object.assign(new Error('420 Wallet local signing authority is unavailable'), { code: 4900, data: error?.message });
+  }
+  if (!response || response.source !== LOCAL_AUTHORITY_SOURCE || response.kind !== 'authority-result' || response.authorityRequestId !== authorityRequestId) {
+    throw Object.assign(new Error('420 Wallet local authority returned an invalid response'), { code: 4100 });
+  }
+  if (response.error) {
+    throw Object.assign(new Error(response.error.message || 'local wallet authority rejected the request'), {
+      code: Number.isInteger(response.error.code) ? response.error.code : -32603,
+      ...('data' in response.error ? { data: response.error.data } : {}),
+    });
+  }
+  if (!('result' in response)) throw Object.assign(new Error('420 Wallet local authority returned no result'), { code: -32603 });
+  return response.result;
 }
 
 async function createApproval(request, context) {
@@ -80,7 +115,7 @@ async function handleApprovalMethod(request, context) {
   const granted = await accountsFor(origin);
   if (!granted.length) throw Object.assign(new Error('origin is not connected to 420 Wallet'), { code: 4100 });
   await createApproval(request, { ...context, accounts: granted });
-  return rpcRequest(request.method, request.params ?? []);
+  return executeWithLocalAuthority(request, { ...context, accounts: granted });
 }
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {

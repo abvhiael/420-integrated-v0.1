@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>420 Wallet</title>
+  <style>
+    body{font-family:system-ui,sans-serif;margin:0;background:#111;color:#eee;min-width:360px}
+    main{padding:20px}.muted{color:#aaa;font-size:13px}.card{background:#1c1c1c;border:1px solid #333;border-radius:12px;padding:16px;margin:12px 0;word-break:break-word}
+    button{border:0;border-radius:8px;padding:10px 14px;font-weight:600;cursor:pointer}button.primary{background:#eee;color:#111}button.secondary{background:#333;color:#eee}.actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
+    select{width:100%;padding:8px;background:#111;color:#eee;border:1px solid #444;border-radius:8px}
+  </style>
+</head>
+<body>
+  <main>
+    <h2>420 Wallet</h2>
+    <p id="status" class="muted">Loading request…</p>
+    <section id="request" class="card" hidden>
+      <div><strong id="kind"></strong></div>
+      <div class="muted" id="origin"></div>
+      <pre id="details" style="white-space:pre-wrap"></pre>
+      <div id="account-picker" hidden>
+        <label for="account">Account</label>
+        <select id="account"></select>
+      </div>
+    </section>
+    <div class="actions" id="actions" hidden>
+      <button id="reject" class="secondary">Reject</button>
+      <button id="approve" class="primary">Approve</button>
+    </div>
+  </main>
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

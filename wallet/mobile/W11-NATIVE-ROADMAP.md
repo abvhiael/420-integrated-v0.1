@@ -50,7 +50,7 @@ W11 converts the qualified mobile architecture into real platform applications a
 - Responses require JSON-RPC 2.0, matching request ID, and an explicit result when no error is returned.
 - Closeout qualification passed on Wallet Mobile Verification #274 and Integrated Qualification #1344.
 
-### W11.5 — Deep links, universal/app links, QR and dApp handoff — IN PROGRESS
+### W11.5 — Deep links, universal/app links, QR and dApp handoff — QUALIFYING
 - Shared handoff envelope binds HTTPS dApp origin, opaque request ID, expiry, and same-origin HTTPS callback.
 - Handoff lifetime is capped at ten minutes and expired requests fail closed.
 - Replay guard rejects a reused origin/request-ID pair until expiry.
@@ -59,8 +59,13 @@ W11 converts the qualified mobile architecture into real platform applications a
 - iOS Universal Links use Associated Domains with a build-time configured wallet link host; no production domain is hardcoded.
 - Android and iOS native handoff parsers enforce the same host/path/origin/request/expiry/callback contract and carry no signing authority.
 - Android `MainActivity` and SwiftUI app entry points route inbound links through the strict native parser before presenting request state.
-- Regression tests cover production host/path binding, dev-scheme gating, callback origin binding, expiry windows, replay rejection, Associated Domains, Android App Links, and absence of signing/private-key authority.
-- Next: qualify native builds and shared handoff tests, then add QR payload ingestion/canonical request rehydration and callback completion hardening.
+- QR ingestion reuses the same strict verified-link/dev-link parser, accepts text only, caps payload size, and carries no approval/signing authority.
+- QR/deep-link handoffs remain reference-only: the provider request is rehydrated through an injected canonical request fetcher using the bound HTTPS origin and request ID.
+- Rehydrated requests are normalized through the shared provider policy and must match both the handoff origin and request ID before any approval path.
+- Callback completion is bound to the original callback/origin/request ID, expires with the handoff, and is single-shot to prevent duplicate completion/replay.
+- Regression tests cover production host/path binding, dev-scheme gating, callback origin binding, expiry windows, replay rejection, QR length/format, request origin/ID substitution, expiry during rehydration, duplicate completion, Associated Domains, Android App Links, and absence of signing/private-key authority.
+- Initial verified-link layer qualified on Wallet Mobile Verification #304 and Integrated Qualification #1359.
+- Closeout condition: current QR/rehydration/callback-completion head passes native builds, Wallet Mobile Verification, and Integrated Qualification.
 
 ### W11.6 — Push authorization
 - APNs and FCM device registration.

@@ -16,6 +16,8 @@ targets:
         PRODUCT_NAME: "420 Wallet"
         SWIFT_VERSION: "5.9"
         CODE_SIGN_STYLE: Automatic
+        WALLET_LINK_HOST: wallet.invalid
+        CODE_SIGN_ENTITLEMENTS: Wallet420/Wallet420.entitlements
     info:
       path: Wallet420/Info.plist
       properties:

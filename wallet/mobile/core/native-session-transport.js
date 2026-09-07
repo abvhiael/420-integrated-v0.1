@@ -1,5 +1,6 @@
 import { normalizeAddress, normalizeBytes32 } from '../../web/core/abi.js';
 import { prepareSessionExecution } from '../../web/core/session-execution.js';
+import { SESSION_EXECUTE_CAPABILITY_420 } from '../../web/core/capabilities.js';
 import {
   normalizePackedUserOperation,
   readEntryPointUserOpHash,
@@ -7,8 +8,6 @@ import {
   decodeHandleOpSuccess,
   revalidatePreparedSession,
 } from '../../web/core/entrypoint-transport.js';
-
-const SESSION_EXECUTE_CAPABILITY_420 = `0x${'0'.repeat(63)}1`;
 
 function normalizeHash(value, label = 'hash') {
   if (typeof value !== 'string' || !/^0x[0-9a-fA-F]{64}$/.test(value)) throw new Error(`invalid ${label}`);

@@ -15,12 +15,16 @@ const required = [
   'android/app/src/main/java/io/fourtwenty/wallet/NativeWalletBridge420.kt',
   'android/app/src/main/java/io/fourtwenty/wallet/AndroidSecureStore420.kt',
   'android/app/src/main/java/io/fourtwenty/wallet/AndroidSessionKey420.kt',
+  'android/app/src/main/java/io/fourtwenty/wallet/AndroidPasskey420.kt',
+  'android/app/src/main/java/io/fourtwenty/wallet/AndroidBiometricGate420.kt',
   'ios/project.yml',
   'ios/Wallet420/Info.plist',
   'ios/Wallet420/Wallet420App.swift',
   'ios/Wallet420/NativeWalletBridge420.swift',
   'ios/Wallet420/KeychainStore420.swift',
   'ios/Wallet420/SessionKey420.swift',
+  'ios/Wallet420/Passkey420.swift',
+  'ios/Wallet420/BiometricGate420.swift',
 ];
 
 const bridgeCapabilities = [
@@ -30,6 +34,7 @@ const bridgeCapabilities = [
   'secureDelete',
   'createPasskey',
   'getPasskey',
+  'authorizeBiometric',
   'ensureSessionKey',
   'sessionPublicKey',
   'rotateSessionKey',
@@ -100,6 +105,39 @@ test('W11.2 enforces locked-device behavior and versioned migration', () => {
   assert.match(ios, /io\.fourtwenty\.wallet\.session\.v1\./);
   assert.match(ios, /legacyTagPrefix/);
   assert.match(ios, /migrateLegacyAlias/);
+});
+
+test('W11.3 uses platform-native passkeys and returns WebAuthn response material', () => {
+  const android = fs.readFileSync(path.join(root, 'android/app/src/main/java/io/fourtwenty/wallet/AndroidPasskey420.kt'), 'utf8');
+  const ios = fs.readFileSync(path.join(root, 'ios/Wallet420/Passkey420.swift'), 'utf8');
+
+  assert.match(android, /CredentialManager/);
+  assert.match(android, /CreatePublicKeyCredentialRequest/);
+  assert.match(android, /GetPublicKeyCredentialOption/);
+  assert.match(android, /registrationResponseJson/);
+  assert.match(android, /authenticationResponseJson/);
+
+  assert.match(ios, /AuthenticationServices/);
+  assert.match(ios, /ASAuthorizationPlatformPublicKeyCredentialProvider/);
+  assert.match(ios, /createCredentialRegistrationRequest/);
+  assert.match(ios, /createCredentialAssertionRequest/);
+  assert.match(ios, /rawClientDataJSON/);
+  assert.match(ios, /signature/);
+});
+
+test('W11.3 biometric approval is a local presence gate, not signing authority', () => {
+  const android = fs.readFileSync(path.join(root, 'android/app/src/main/java/io/fourtwenty/wallet/AndroidBiometricGate420.kt'), 'utf8');
+  const ios = fs.readFileSync(path.join(root, 'ios/Wallet420/BiometricGate420.swift'), 'utf8');
+
+  assert.match(android, /BiometricPrompt/);
+  assert.match(android, /BIOMETRIC_STRONG/);
+  assert.match(android, /DEVICE_CREDENTIAL/);
+  assert.doesNotMatch(android, /Signature|getEntry|PrivateKey/);
+
+  assert.match(ios, /LocalAuthentication/);
+  assert.match(ios, /deviceOwnerAuthentication/);
+  assert.match(ios, /evaluatePolicy/);
+  assert.doesNotMatch(ios, /SecKeyCreateSignature|privateKey/);
 });
 
 test('native bootstrap contains no remote signing fallback or plaintext private key', () => {

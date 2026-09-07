@@ -17,20 +17,23 @@ W11 converts the qualified mobile architecture into real platform applications a
 
 ## W11 — real native projects and device integration
 
-### W11.1 — Native project bootstrap + bridge boundary — QUALIFYING
+### W11.1 — Native project bootstrap + bridge boundary — COMPLETE
 - Real Android Gradle application/source tree created.
 - Real iOS SwiftUI application/source tree created with deterministic XcodeGen project definition.
 - Matching native bridge contracts defined for RPC, secure storage, passkeys, session signing, transaction submission, external URLs, and lifecycle.
 - RPC remains read/transport only; no remote signer or private-key storage fallback.
 - Android/iOS application identifiers and minimum platform versions established.
-- CI now compiles Android debug and iOS simulator applications on every relevant pull request.
-- Closeout condition: native compile jobs and shared wallet qualification green on the current head.
+- CI compiles Android debug and iOS simulator applications on every relevant pull request.
+- Closeout qualification passed on Wallet Mobile Verification #196 and Integrated Qualification #1305.
 
-### W11.2 — Hardware-backed secure storage — IN PROGRESS
+### W11.2 — Hardware-backed secure storage + session keys — IN PROGRESS
 - Android Keystore-backed AES-GCM secure storage implemented for device-bound wallet state.
 - iOS Keychain storage implemented with `kSecAttrAccessibleWhenUnlockedThisDeviceOnly`.
-- Qualification guards require both platform secure-storage implementations and forbid plaintext private-key / remote-signer fallbacks.
-- Next: non-exportable session-signing keys, StrongBox / TEE preference and Secure Enclave policy where compatible, key rotation/invalidation, migration, and device-lock behavior.
+- Android non-exportable P-256 session keys implemented inside `AndroidKeyStore`, preferring StrongBox on API 28+ and falling back to platform AndroidKeyStore / TEE-backed storage when StrongBox is unavailable.
+- iOS non-exportable P-256 session keys implemented with Secure Enclave preference on physical devices and a non-exportable Keychain-backed simulator/unsupported-device fallback.
+- Session-key lifecycle is now part of the native bridge: ensure, public-key retrieval, rotate, invalidate, and local hash signing.
+- Qualification guards require both platform key implementations, lifecycle methods, hardware-backed policy markers, and absence of private-key export paths.
+- Next: compile qualification of the new key managers, invalidation/error-state hardening, device-lock behavior, migration/version metadata, and lifecycle regression tests.
 
 ### W11.3 — Native passkeys + biometric authorization
 - AuthenticationServices passkeys on iOS.

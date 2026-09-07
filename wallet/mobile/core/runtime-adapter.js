@@ -31,7 +31,9 @@ export function createMobileRuntimeAdapter420(capabilities = {}) {
     platform: typeof capabilities.platform === 'string' && capabilities.platform ? capabilities.platform : 'mobile',
     request(request) {
       const normalized = normalizeRpcRequest(request);
-      if (normalized.method === 'personal_sign') throw new Error('mobile RPC transport cannot provide signing authority');
+      if (normalized.method === 'personal_sign' || normalized.method === 'eth_sendTransaction') {
+        throw new Error('mobile RPC transport cannot provide signing authority');
+      }
       return capabilities.rpc(normalized.method, normalized.params);
     },
     secureStorage: Object.freeze({
@@ -59,23 +61,22 @@ export function createMobileRuntimeAdapter420(capabilities = {}) {
         return capabilities.passkeys.get(options);
       },
     }),
-    sessionSigner: Object.freeze({
-      signHash(address, hash) {
-        if (typeof capabilities.sessionSigner?.signHash !== 'function') throw new Error('native non-exportable session signer capability required');
-        return capabilities.sessionSigner.signHash(address, hash);
-      },
-    }),
-    transaction: Object.freeze({
-      submit(transaction) {
-        if (typeof capabilities.transaction?.submit !== 'function') throw new Error('native transaction submission capability required');
-        return capabilities.transaction.submit(transaction);
-      },
-    }),
     openExternalUrl(url) {
       if (typeof url !== 'string' || !/^https:\/\//i.test(url)) throw new TypeError('https URL required');
       return capabilities.openExternalUrl(url);
     },
   };
+
+  if (typeof capabilities.sessionSigner?.signHash === 'function') {
+    adapter.sessionSigner = Object.freeze({
+      signHash(address, hash) { return capabilities.sessionSigner.signHash(address, hash); },
+    });
+  }
+  if (typeof capabilities.transaction?.submit === 'function') {
+    adapter.transaction = Object.freeze({
+      submit(transaction) { return capabilities.transaction.submit(transaction); },
+    });
+  }
 
   return Object.freeze(adapter);
 }

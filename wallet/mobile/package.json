@@ -5,6 +5,6 @@
   "type": "module",
   "scripts": {
     "test": "node --test test/*.test.js",
-    "check": "node --check core/runtime-adapter.js && node --check core/passkey-auth.js && node --check core/wallet-surfaces.js && node --check test/runtime-adapter.test.js && node --check test/passkey-auth.test.js && node --check test/wallet-surfaces.test.js"
+    "check": "node --check core/runtime-adapter.js && node --check core/passkey-auth.js && node --check core/wallet-surfaces.js && node --check core/session-capabilities.js && node --check test/runtime-adapter.test.js && node --check test/passkey-auth.test.js && node --check test/wallet-surfaces.test.js && node --check test/session-capabilities.test.js"
   }
 }

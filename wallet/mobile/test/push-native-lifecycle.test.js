@@ -32,7 +32,7 @@ test('Android foreground lifecycle consumes pending push before approval present
 
 test('iOS active scene consumes pending push and notification response covers terminated launch', () => {
   assert.match(iosApp, /scenePhase/);
-  assert.match(iosApp, /phase == \.active/);
+  assert.match(iosApp, /phase == \.active|case \.active:/);
   assert.match(iosApp, /consumePendingPush/);
   assert.match(iosPush, /UNNotificationResponse/);
   assert.match(iosPush, /state: "terminated"/);

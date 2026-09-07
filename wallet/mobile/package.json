@@ -1,0 +1,10 @@
+{
+  "name": "@420-integrated/wallet-mobile",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "check": "node --check core/runtime-adapter.js && node --check test/runtime-adapter.test.js"
+  }
+}

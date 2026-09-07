@@ -13,6 +13,7 @@ import {
   sendFinalizeRecovery,
 } from '../../web/core/recovery-management.js';
 import { prepareMobilePasskeyExecution420, sendMobilePasskeyExecution420 } from './passkey-auth.js';
+import { createMobileProvider420 } from './runtime-adapter.js';
 
 function assertRuntime(runtime) {
   if (!runtime || typeof runtime.request !== 'function') throw new Error('mobile runtime adapter required');
@@ -27,8 +28,9 @@ function assertState(state) {
 
 export async function readMobileWalletSurface420({ runtime, smartAccount, controller, nowSeconds } = {}) {
   assertRuntime(runtime);
+  const provider = createMobileProvider420(runtime);
   const account = normalizeAddress(smartAccount);
-  const state = await readDeployedSmartAccountState(runtime, account, controller ? { controller } : {});
+  const state = await readDeployedSmartAccountState(provider, account, controller ? { controller } : {});
   const recovery = summarizeRecoveryState(state, nowSeconds);
   const actions = recoveryActionAvailability(state, controller ?? null, nowSeconds);
   return Object.freeze({
@@ -61,7 +63,7 @@ export async function prepareMobileExecution420({
   }
   if (mode !== 'owner') throw new Error(`unsupported mobile execution mode: ${mode}`);
   if (!controller) throw new Error('owner controller required');
-  return prepareSmartAccountExecution(runtime, controller, state, request);
+  return prepareSmartAccountExecution(createMobileProvider420(runtime), controller, state, request);
 }
 
 export async function sendMobileExecution420({ runtime, mode = 'owner', controller, smartAccountState, request, prepared, transactionSender } = {}) {
@@ -70,23 +72,24 @@ export async function sendMobileExecution420({ runtime, mode = 'owner', controll
   if (mode !== 'owner') throw new Error(`unsupported mobile execution mode: ${mode}`);
   assertState(smartAccountState);
   if (!controller) throw new Error('owner controller required');
-  return sendSmartAccountExecution(runtime, controller, smartAccountState, request);
+  return sendSmartAccountExecution(createMobileProvider420(runtime), controller, smartAccountState, request);
 }
 
 export async function prepareMobileRecoveryAction420({ runtime, action, actor, smartAccountState, value, nowSeconds } = {}) {
   assertRuntime(runtime);
   const state = assertState(smartAccountState);
   if (!actor) throw new Error('recovery actor required');
+  const provider = createMobileProvider420(runtime);
 
   switch (action) {
     case 'setRecoveryAuthority':
-      return prepareSetRecoveryAuthority(runtime, actor, state, value);
+      return prepareSetRecoveryAuthority(provider, actor, state, value);
     case 'proposeRecovery':
-      return prepareProposeRecovery(runtime, actor, state, value);
+      return prepareProposeRecovery(provider, actor, state, value);
     case 'cancelRecovery':
-      return prepareCancelRecovery(runtime, actor, state);
+      return prepareCancelRecovery(provider, actor, state);
     case 'finalizeRecovery':
-      return prepareFinalizeRecovery(runtime, actor, state, nowSeconds);
+      return prepareFinalizeRecovery(provider, actor, state, nowSeconds);
     default:
       throw new Error(`unsupported mobile recovery action: ${action}`);
   }
@@ -96,16 +99,17 @@ export async function sendMobileRecoveryAction420({ runtime, action, actor, smar
   assertRuntime(runtime);
   const state = assertState(smartAccountState);
   if (!actor) throw new Error('recovery actor required');
+  const provider = createMobileProvider420(runtime);
 
   switch (action) {
     case 'setRecoveryAuthority':
-      return sendSetRecoveryAuthority(runtime, actor, state, value);
+      return sendSetRecoveryAuthority(provider, actor, state, value);
     case 'proposeRecovery':
-      return sendProposeRecovery(runtime, actor, state, value);
+      return sendProposeRecovery(provider, actor, state, value);
     case 'cancelRecovery':
-      return sendCancelRecovery(runtime, actor, state);
+      return sendCancelRecovery(provider, actor, state);
     case 'finalizeRecovery':
-      return sendFinalizeRecovery(runtime, actor, state, nowSeconds);
+      return sendFinalizeRecovery(provider, actor, state, nowSeconds);
     default:
       throw new Error(`unsupported mobile recovery action: ${action}`);
   }

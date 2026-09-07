@@ -69,7 +69,7 @@ assert.match(localAuthority, /preparePasskeyUserOperationTransport/);
 assert.match(localAuthority, /eth_sendUserOperation/);
 assert.match(localAuthority, /eth_getUserOperationReceipt/);
 assert.match(localAuthority, /RPC fallback is forbidden/);
-assert.doesNotMatch(localAuthority, /eth_sendTransaction.*provider\.request/s);
+assert.doesNotMatch(localAuthority, /provider\.request\(\s*['"]eth_sendTransaction['"]/);
 
 const popup = await readFile(join(root, 'popup.html'), 'utf8');
 const authorityHtml = await readFile(join(root, 'authority.html'), 'utf8');

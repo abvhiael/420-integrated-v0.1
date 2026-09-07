@@ -28,7 +28,7 @@ test('apps screen only exposes normalized https application destinations', () =>
       { id: 'bad', name: 'Bad', url: 'http://bad.example', category: 'unknown' },
     ],
   });
-  assert.equal(apps.sections[0].apps[0].url, 'https://swap.example');
+  assert.equal(apps.sections[0].apps[0].url, 'https://swap.example/');
   assert.equal(apps.sections[0].apps[1].url, null);
 });
 

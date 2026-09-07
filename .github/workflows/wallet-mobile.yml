@@ -29,6 +29,9 @@ jobs:
       - name: Mobile runtime tests
         working-directory: wallet/mobile
         run: npm test
+      - name: Mobile release qualification
+        working-directory: wallet/mobile
+        run: npm run release:check
       - name: Shared wallet core regression
         working-directory: wallet/web
         run: |

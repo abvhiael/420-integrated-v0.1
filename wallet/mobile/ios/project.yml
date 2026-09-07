@@ -39,3 +39,12 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: io.fourtwenty.wallet.tests
         SWIFT_VERSION: "5.9"
+schemes:
+  Wallet420:
+    build:
+      targets:
+        Wallet420: all
+        Wallet420Tests: [test]
+    test:
+      targets:
+        - Wallet420Tests

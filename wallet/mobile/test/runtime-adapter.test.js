@@ -48,9 +48,10 @@ test('mobile adapter rejects non-https external URLs', () => {
   assert.throws(() => adapter.openExternalUrl('http://example.com'), /https URL required/);
 });
 
-test('mobile RPC transport cannot sign session hashes', async () => {
+test('mobile RPC transport cannot provide signing authority', async () => {
   const adapter = createMobileRuntimeAdapter420(capabilities().value);
-  await assert.rejects(adapter.request({ method: 'personal_sign', params: [`0x${'0'.repeat(64)}`, '0x1111111111111111111111111111111111111111'] }), /cannot provide signing authority/);
+  await assert.rejects(async () => adapter.request({ method: 'personal_sign', params: [`0x${'0'.repeat(64)}`, '0x1111111111111111111111111111111111111111'] }), /cannot provide signing authority/);
+  await assert.rejects(async () => adapter.request({ method: 'eth_sendTransaction', params: [{ to: '0x1111111111111111111111111111111111111111' }] }), /cannot provide signing authority/);
 });
 
 test('mobile capability inspection is fail-closed', () => {

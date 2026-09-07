@@ -28,28 +28,13 @@ const required = [
 ];
 
 const bridgeCapabilities = [
-  'rpc',
-  'secureGet',
-  'secureSet',
-  'secureDelete',
-  'createPasskey',
-  'getPasskey',
-  'authorizeBiometric',
-  'ensureSessionKey',
-  'sessionPublicKey',
-  'rotateSessionKey',
-  'invalidateSessionKey',
-  'signSessionHash',
-  'submitTransaction',
-  'openExternal',
-  'onResume',
-  'onPause',
+  'rpc','secureGet','secureSet','secureDelete','createPasskey','getPasskey','authorizeBiometric',
+  'ensureSessionKey','sessionPublicKey','rotateSessionKey','invalidateSessionKey','signSessionHash',
+  'submitTransaction','openExternal','onResume','onPause',
 ];
 
 test('W11 contains real native project source trees', () => {
-  for (const file of required) {
-    assert.equal(fs.existsSync(path.join(root, file)), true, `missing W11 native project file: ${file}`);
-  }
+  for (const file of required) assert.equal(fs.existsSync(path.join(root, file)), true, `missing W11 native project file: ${file}`);
 });
 
 test('iOS and Android expose the same qualified authority boundary', () => {
@@ -73,19 +58,16 @@ test('native secure storage is device-bound', () => {
 test('W11.2 session signing keys are local, non-exportable and lifecycle-managed', () => {
   const android = fs.readFileSync(path.join(root, 'android/app/src/main/java/io/fourtwenty/wallet/AndroidSessionKey420.kt'), 'utf8');
   const ios = fs.readFileSync(path.join(root, 'ios/Wallet420/SessionKey420.swift'), 'utf8');
-
   assert.match(android, /AndroidKeyStore/);
   assert.match(android, /setIsStrongBoxBacked\(true\)/);
   assert.match(android, /KeyProperties\.PURPOSE_SIGN/);
   assert.match(android, /rotate\(alias/);
   assert.match(android, /invalidate\(alias/);
-
   assert.match(ios, /kSecAttrTokenIDSecureEnclave/);
   assert.match(ios, /kSecAttrAccessibleWhenUnlockedThisDeviceOnly/);
   assert.match(ios, /SecKeyCreateRandomKey/);
   assert.match(ios, /rotate\(alias/);
   assert.match(ios, /invalidate\(alias/);
-
   assert.doesNotMatch(android, /privateKey\.encoded|encoded\.private/i);
   assert.doesNotMatch(ios, /SecKeyCopyExternalRepresentation\(privateKey/i);
 });
@@ -93,13 +75,11 @@ test('W11.2 session signing keys are local, non-exportable and lifecycle-managed
 test('W11.2 enforces locked-device behavior and versioned migration', () => {
   const android = fs.readFileSync(path.join(root, 'android/app/src/main/java/io/fourtwenty/wallet/AndroidSessionKey420.kt'), 'utf8');
   const ios = fs.readFileSync(path.join(root, 'ios/Wallet420/SessionKey420.swift'), 'utf8');
-
   assert.match(android, /setUnlockedDeviceRequired\(true\)/);
   assert.match(android, /KeyPermanentlyInvalidatedException/);
   assert.match(android, /UserNotAuthenticatedException/);
   assert.match(android, /wallet420\.session\.v1\./);
   assert.match(android, /migrateLegacyAlias/);
-
   assert.match(ios, /kSecAttrAccessibleWhenUnlockedThisDeviceOnly/);
   assert.match(ios, /errSecInteractionNotAllowed/);
   assert.match(ios, /io\.fourtwenty\.wallet\.session\.v1\./);
@@ -110,13 +90,11 @@ test('W11.2 enforces locked-device behavior and versioned migration', () => {
 test('W11.3 uses platform-native passkeys and returns WebAuthn response material', () => {
   const android = fs.readFileSync(path.join(root, 'android/app/src/main/java/io/fourtwenty/wallet/AndroidPasskey420.kt'), 'utf8');
   const ios = fs.readFileSync(path.join(root, 'ios/Wallet420/Passkey420.swift'), 'utf8');
-
   assert.match(android, /CredentialManager/);
   assert.match(android, /CreatePublicKeyCredentialRequest/);
   assert.match(android, /GetPublicKeyCredentialOption/);
   assert.match(android, /registrationResponseJson/);
   assert.match(android, /authenticationResponseJson/);
-
   assert.match(ios, /AuthenticationServices/);
   assert.match(ios, /ASAuthorizationPlatformPublicKeyCredentialProvider/);
   assert.match(ios, /createCredentialRegistrationRequest/);
@@ -125,15 +103,34 @@ test('W11.3 uses platform-native passkeys and returns WebAuthn response material
   assert.match(ios, /signature/);
 });
 
+test('W11.3 hardens cancellation, RP binding and canonical PK42 WebAuthn fields', () => {
+  const android = fs.readFileSync(path.join(root, 'android/app/src/main/java/io/fourtwenty/wallet/AndroidPasskey420.kt'), 'utf8');
+  const ios = fs.readFileSync(path.join(root, 'ios/Wallet420/Passkey420.swift'), 'utf8');
+  for (const source of [android, ios]) {
+    assert.match(source, /relying-party|RelyingParty|RPID|rpId/);
+    assert.match(source, /clientDataJSON/);
+    assert.match(source, /authenticatorData/);
+    assert.match(source, /signature/);
+    assert.match(source, /attestationObject/);
+    assert.match(source, /public-key/);
+  }
+  assert.match(android, /CreateCredentialCancellationException/);
+  assert.match(android, /GetCredentialCancellationException/);
+  assert.match(android, /validateRpId/);
+  assert.match(android, /validateCanonicalResponse/);
+  assert.match(ios, /ASAuthorizationError/);
+  assert.match(ios, /\.canceled/);
+  assert.match(ios, /validateRPID/);
+  assert.match(ios, /invalidCanonicalResponse/);
+});
+
 test('W11.3 biometric approval is a local presence gate, not signing authority', () => {
   const android = fs.readFileSync(path.join(root, 'android/app/src/main/java/io/fourtwenty/wallet/AndroidBiometricGate420.kt'), 'utf8');
   const ios = fs.readFileSync(path.join(root, 'ios/Wallet420/BiometricGate420.swift'), 'utf8');
-
   assert.match(android, /BiometricPrompt/);
   assert.match(android, /BIOMETRIC_STRONG/);
   assert.match(android, /DEVICE_CREDENTIAL/);
   assert.doesNotMatch(android, /Signature|getEntry|PrivateKey/);
-
   assert.match(ios, /LocalAuthentication/);
   assert.match(ios, /deviceOwnerAuthentication/);
   assert.match(ios, /evaluatePolicy/);

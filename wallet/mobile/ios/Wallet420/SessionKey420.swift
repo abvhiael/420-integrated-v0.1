@@ -37,7 +37,8 @@ final class SessionKey420 {
             hash as CFData,
             &error
         ) as Data? else {
-            throw error?.takeRetainedValue() ?? SessionKeyError.signingFailed
+            if let error { throw error.takeRetainedValue() }
+            throw SessionKeyError.signingFailed
         }
         return signature
     }
@@ -81,21 +82,24 @@ final class SessionKey420 {
         #endif
 
         var error: Unmanaged<CFError>?
-        guard let key = SecKeyCreateRandomKey(attributes as CFDictionary, &error) else {
-            #if targetEnvironment(simulator)
-            throw error?.takeRetainedValue() ?? SessionKeyError.generationFailed
-            #else
-            // Some physical devices/configurations may not expose Secure Enclave.
-            attributes.removeValue(forKey: kSecAttrTokenID as String)
-            privateAttrs[kSecAttrAccessControl as String] = access
-            attributes[kSecPrivateKeyAttrs as String] = privateAttrs
-            guard let fallback = SecKeyCreateRandomKey(attributes as CFDictionary, &error) else {
-                throw error?.takeRetainedValue() ?? SessionKeyError.generationFailed
-            }
-            return fallback
-            #endif
+        if let key = SecKeyCreateRandomKey(attributes as CFDictionary, &error) {
+            return key
         }
-        return key
+
+        #if targetEnvironment(simulator)
+        if let error { throw error.takeRetainedValue() }
+        throw SessionKeyError.generationFailed
+        #else
+        attributes.removeValue(forKey: kSecAttrTokenID as String)
+        privateAttrs[kSecAttrAccessControl as String] = access
+        attributes[kSecPrivateKeyAttrs as String] = privateAttrs
+        error = nil
+        if let fallback = SecKeyCreateRandomKey(attributes as CFDictionary, &error) {
+            return fallback
+        }
+        if let error { throw error.takeRetainedValue() }
+        throw SessionKeyError.generationFailed
+        #endif
     }
 
     private func privateKey(alias: String) throws -> SecKey? {
@@ -116,10 +120,11 @@ final class SessionKey420 {
             throw SessionKeyError.unavailable
         }
         var error: Unmanaged<CFError>?
-        guard let data = SecKeyCopyExternalRepresentation(publicKey, &error) as Data? else {
-            throw error?.takeRetainedValue() ?? SessionKeyError.unavailable
+        if let data = SecKeyCopyExternalRepresentation(publicKey, &error) as Data? {
+            return data
         }
-        return data
+        if let error { throw error.takeRetainedValue() }
+        throw SessionKeyError.unavailable
     }
 
     private func baseQuery(alias: String) -> [String: Any] {

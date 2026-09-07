@@ -18,9 +18,7 @@ function normalizeTxHash(value) {
 function assertBinding(binding) {
   if (!binding || typeof binding !== 'object') throw new TypeError('passkey binding required');
   if (typeof binding.credentialId !== 'string' || !binding.credentialId) throw new TypeError('passkey credential id required');
-  if (typeof binding.credentialIdHash !== 'string' || !/^0x[0-9a-fA-F]{64}$/.test(binding.credentialIdHash)) {
-    throw new TypeError('passkey credential id hash required');
-  }
+  if (typeof binding.credentialIdHash !== 'string' || !/^0x[0-9a-fA-F]{64}$/.test(binding.credentialIdHash)) throw new TypeError('passkey credential id hash required');
   if (typeof binding.rpId !== 'string' || !binding.rpId) throw new TypeError('passkey rpId required');
   if (typeof binding.origin !== 'string' || !/^https:\/\//i.test(binding.origin)) throw new TypeError('https passkey origin required');
   return binding;
@@ -70,9 +68,7 @@ export async function prepareMobilePasskeyExecution420({ runtime, smartAccountSt
     origin: origin ?? binding.origin,
     timeout,
   });
-  if (prepared.signerType !== 'passkey' || !prepared.broadcastReady || !prepared.entryPointSimulation?.simulationPassed) {
-    throw new Error('mobile passkey execution did not qualify for broadcast');
-  }
+  if (prepared.signerType !== 'passkey' || !prepared.broadcastReady || !prepared.entryPointSimulation?.simulationPassed) throw new Error('mobile passkey execution did not qualify for broadcast');
   if (normalizeAddress(prepared.smartAccount) !== normalizeAddress(smartAccountState.smartAccount)) throw new Error('mobile passkey execution SmartAccount mismatch');
   if (prepared.advancedBinding?.credentialId !== binding.credentialId) throw new Error('mobile passkey credential binding changed unexpectedly');
   return Object.freeze({ ...prepared, nativeSubmitRequired: true });
@@ -80,10 +76,8 @@ export async function prepareMobilePasskeyExecution420({ runtime, smartAccountSt
 
 export async function sendMobilePasskeyExecution420({ runtime, prepared } = {}) {
   if (!runtime || typeof runtime.request !== 'function') throw new Error('mobile runtime adapter required');
+  if (!prepared || prepared.signerType !== 'passkey' || prepared.nativeSubmitRequired !== true || !prepared.broadcastReady) throw new Error('prepared mobile passkey execution required');
   if (typeof runtime.transaction?.submit !== 'function') throw new Error('native transaction submission capability required');
-  if (!prepared || prepared.signerType !== 'passkey' || prepared.nativeSubmitRequired !== true || !prepared.broadcastReady) {
-    throw new Error('prepared mobile passkey execution required');
-  }
   const provider = createMobileProvider420(runtime);
   const live = await readDeployedSmartAccountState(provider, prepared.smartAccount);
   if (normalizeAddress(live.entryPoint) !== normalizeAddress(prepared.entryPoint)) throw new Error('SmartAccount420 EntryPoint changed before passkey broadcast');

@@ -39,6 +39,8 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: io.fourtwenty.wallet.tests
         SWIFT_VERSION: "5.9"
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/420 Wallet.app/420 Wallet"
+        BUNDLE_LOADER: "$(TEST_HOST)"
 schemes:
   Wallet420:
     build:

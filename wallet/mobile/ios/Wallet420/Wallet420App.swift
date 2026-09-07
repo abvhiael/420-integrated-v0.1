@@ -14,43 +14,81 @@ struct Wallet420App: App {
     @Environment(\.scenePhase) private var scenePhase
     @State private var selectedSurface: WalletSurface420 = .wallet
     @State private var handoffStatus: String?
+    @State private var privacyShield = false
+    @State private var localLocked = false
 
     var body: some Scene {
         WindowGroup {
-            VStack(spacing: 16) {
-                Text(selectedSurface.rawValue == "Wallet" ? "420 Wallet" : selectedSurface.rawValue)
-                    .font(.title)
-                Text(surfaceText(selectedSurface))
-                    .font(.body)
-                    .multilineTextAlignment(.center)
-                if let handoffStatus {
-                    Divider()
-                    Text(handoffStatus)
-                        .font(.subheadline)
+            ZStack {
+                VStack(spacing: 16) {
+                    Text(selectedSurface.rawValue == "Wallet" ? "420 Wallet" : selectedSurface.rawValue)
+                        .font(.title)
+                    Text(localLocked ? "unlock required after backgrounding" : surfaceText(selectedSurface))
+                        .font(.body)
                         .multilineTextAlignment(.center)
-                }
-                Spacer()
-                HStack {
-                    ForEach(WalletSurface420.allCases) { surface in
-                        Button(surface.rawValue) {
-                            selectedSurface = surface
-                            handoffStatus = nil
+                    if let handoffStatus, !localLocked {
+                        Divider()
+                        Text(handoffStatus)
+                            .font(.subheadline)
+                            .multilineTextAlignment(.center)
+                    }
+                    Spacer()
+                    HStack {
+                        ForEach(WalletSurface420.allCases) { surface in
+                            Button(surface.rawValue) {
+                                selectedSurface = surface
+                                handoffStatus = nil
+                            }
+                            .disabled(localLocked)
                         }
                     }
                 }
+                .padding()
+
+                if privacyShield {
+                    Rectangle()
+                        .fill(.background)
+                        .ignoresSafeArea()
+                    Text("420 Wallet Locked")
+                        .font(.title2)
+                }
             }
-            .padding()
             .task {
                 try? await PushRegistration420.shared.register()
+                inspectDeviceSecurity()
                 consumePendingPush()
             }
             .onChange(of: scenePhase) { phase in
-                if phase == .active { consumePendingPush() }
+                switch phase {
+                case .active:
+                    privacyShield = UIScreen.main.isCaptured
+                    inspectDeviceSecurity()
+                    consumePendingPush()
+                case .inactive, .background:
+                    privacyShield = true
+                    localLocked = true
+                    handoffStatus = nil
+                @unknown default:
+                    privacyShield = true
+                    localLocked = true
+                }
             }
-            .onOpenURL { url in handle(url) }
+            .onReceive(NotificationCenter.default.publisher(for: UIScreen.capturedDidChangeNotification)) { _ in
+                privacyShield = UIScreen.main.isCaptured || scenePhase != .active
+            }
+            .onOpenURL { url in if !localLocked { handle(url) } }
             .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { activity in
-                if let url = activity.webpageURL { handle(url) }
+                if !localLocked, let url = activity.webpageURL { handle(url) }
             }
+        }
+    }
+
+    private func inspectDeviceSecurity() {
+        let signals = DeviceSecurity420.inspect()
+        if signals.jailbroken || signals.debuggerAttached {
+            localLocked = true
+            privacyShield = true
+            handoffStatus = nil
         }
     }
 
@@ -68,6 +106,7 @@ struct Wallet420App: App {
     }
 
     private func consumePendingPush() {
+        guard !localLocked else { return }
         guard let reference = PushRegistration420.shared.consumePending() else { return }
         handoffStatus = "push (\(reference.state)) from \(reference.origin)\n\(reference.requestID)"
     }

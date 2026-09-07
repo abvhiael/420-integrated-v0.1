@@ -1,21 +1,6 @@
+import { createDappPermission420, normalizeDappPermission420, assertDappPermissionActive420, touchDappPermission420, normalizeDappPermissionOrigin420 } from './dapp-permissions.js';
+
 const STORAGE_KEY = '420-wallet-origin-permissions-v1';
-
-function normalizeOrigin(value) {
-  if (typeof value !== 'string' || !value) throw new TypeError('origin required');
-  const url = new URL(value);
-  if (!['https:', 'http:'].includes(url.protocol)) throw new TypeError('unsupported origin');
-  if (url.protocol !== 'https:' && !['localhost', '127.0.0.1', '[::1]'].includes(url.hostname)) throw new TypeError('insecure origin');
-  return url.origin;
-}
-
-function normalizeAccounts(accounts) {
-  if (!Array.isArray(accounts)) throw new TypeError('accounts array required');
-  const normalized = [...new Set(accounts.map((account) => {
-    if (typeof account !== 'string' || !/^0x[0-9a-fA-F]{40}$/.test(account)) throw new TypeError('valid account address required');
-    return account.toLowerCase();
-  }))];
-  return Object.freeze(normalized);
-}
 
 export class OriginPermissionStore420 {
   constructor(storageArea, storageKey = STORAGE_KEY) {
@@ -32,32 +17,70 @@ export class OriginPermissionStore420 {
     return value && typeof value === 'object' && !Array.isArray(value) ? value : {};
   }
 
-  async accountsFor(origin) {
-    const key = normalizeOrigin(origin);
+  async permissionFor(origin, { chainId = null, nowMs = Date.now() } = {}) {
+    const key = normalizeDappPermissionOrigin420(origin, { allowLocalHttp: true });
     const permissions = await this.readAll();
-    const accounts = permissions[key]?.accounts;
-    if (!Array.isArray(accounts)) return [];
+    const raw = permissions[key];
+    if (!raw) return null;
     try {
-      return [...normalizeAccounts(accounts)];
+      const legacy = raw.origin ? raw : {
+        origin: key,
+        accounts: raw.accounts,
+        grantedAt: raw.grantedAt,
+        lastUsedAt: raw.lastUsedAt ?? raw.grantedAt,
+        chainId: raw.chainId ?? null,
+        sessionScopes: raw.sessionScopes ?? [],
+        expiresAt: raw.expiresAt ?? null,
+      };
+      return assertDappPermissionActive420(legacy, { origin: key, chainId, nowMs, allowLocalHttp: true });
     } catch {
-      return [];
+      return null;
     }
   }
 
-  async grant(origin, accounts) {
-    const key = normalizeOrigin(origin);
-    const normalizedAccounts = normalizeAccounts(accounts);
+  async accountsFor(origin, options = {}) {
+    return [...((await this.permissionFor(origin, options))?.accounts ?? [])];
+  }
+
+  async grant(origin, accounts, { chainId = null, sessionScopes = [], expiresAt = null, nowMs = Date.now() } = {}) {
+    const permission = createDappPermission420({
+      origin,
+      accounts,
+      chainId,
+      sessionScopes,
+      grantedAt: nowMs,
+      lastUsedAt: nowMs,
+      expiresAt,
+      allowLocalHttp: true,
+    });
     const permissions = await this.readAll();
-    permissions[key] = {
-      accounts: [...normalizedAccounts],
-      grantedAt: Date.now(),
-    };
+    permissions[permission.origin] = { ...permission, accounts: [...permission.accounts], sessionScopes: [...permission.sessionScopes] };
     await this.storageArea.set({ [this.storageKey]: permissions });
-    return [...normalizedAccounts];
+    return [...permission.accounts];
+  }
+
+  async touch(origin, nowMs = Date.now()) {
+    const key = normalizeDappPermissionOrigin420(origin, { allowLocalHttp: true });
+    const permissions = await this.readAll();
+    const existing = permissions[key];
+    if (!existing) return false;
+    const normalized = normalizeDappPermission420(existing.origin ? existing : {
+      origin: key,
+      accounts: existing.accounts,
+      grantedAt: existing.grantedAt,
+      lastUsedAt: existing.lastUsedAt ?? existing.grantedAt,
+      chainId: existing.chainId ?? null,
+      sessionScopes: existing.sessionScopes ?? [],
+      expiresAt: existing.expiresAt ?? null,
+    }, { allowLocalHttp: true });
+    const touched = touchDappPermission420(normalized, nowMs, { allowLocalHttp: true });
+    permissions[key] = { ...touched, accounts: [...touched.accounts], sessionScopes: [...touched.sessionScopes] };
+    await this.storageArea.set({ [this.storageKey]: permissions });
+    return true;
   }
 
   async revoke(origin) {
-    const key = normalizeOrigin(origin);
+    const key = normalizeDappPermissionOrigin420(origin, { allowLocalHttp: true });
     const permissions = await this.readAll();
     const existed = Object.prototype.hasOwnProperty.call(permissions, key);
     delete permissions[key];
@@ -66,4 +89,4 @@ export class OriginPermissionStore420 {
   }
 }
 
-export { normalizeOrigin as normalizePermissionOrigin420, STORAGE_KEY as EXTENSION_PERMISSION_STORAGE_KEY_420 };
+export { normalizeDappPermissionOrigin420 as normalizePermissionOrigin420, STORAGE_KEY as EXTENSION_PERMISSION_STORAGE_KEY_420 };

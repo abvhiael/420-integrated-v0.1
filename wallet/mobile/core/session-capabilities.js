@@ -12,16 +12,16 @@ import {
 } from '../../web/core/session-management.js';
 import {
   inspectCapabilityGrant,
-  SESSION_EXECUTE_CAPABILITY_420,
 } from '../../web/core/capabilities.js';
 import {
   prepareCapabilityGrantRevocation,
   sendCapabilityGrantRevocation,
 } from '../../web/core/capability-management.js';
 import {
-  prepareSessionUserOperationTransport,
-  sendPreparedEntryPointUserOperation,
-} from '../../web/core/entrypoint-transport.js';
+  prepareNativeMobileSessionTransport420,
+  sendNativeMobileSessionTransport420,
+  assertNativeMobileSessionGrant420,
+} from './native-session-transport.js';
 
 function assertRuntime(runtime) {
   if (!runtime || typeof runtime.request !== 'function') throw new Error('mobile runtime adapter required');
@@ -137,18 +137,15 @@ export async function prepareMobileSessionExecution420({ runtime, smartAccountSt
   assertRuntime(runtime);
   const state = assertState(smartAccountState);
   const provider = createMobileProvider420(runtime);
-  const prepared = await prepareSessionUserOperationTransport(provider, state, sessionKey, request);
+  const prepared = await prepareNativeMobileSessionTransport420({ runtime, provider, smartAccountState: state, sessionKey, request });
   if (!prepared.broadcastReady || !prepared.entryPointSimulation?.simulationPassed) {
     throw new Error('mobile session execution did not qualify for broadcast');
   }
-  if (prepared.grant?.grant?.capabilityId && normalizeBytes32(prepared.grant.grant.capabilityId) !== SESSION_EXECUTE_CAPABILITY_420) {
-    throw new Error('mobile session execution grant is not SESSION_EXECUTE');
-  }
-  return prepared;
+  return assertNativeMobileSessionGrant420(prepared);
 }
 
 export async function sendMobileSessionExecution420({ runtime, prepared } = {}) {
   assertRuntime(runtime);
   if (!prepared?.broadcastReady) throw new Error('prepared mobile session execution required');
-  return sendPreparedEntryPointUserOperation(createMobileProvider420(runtime), prepared);
+  return sendNativeMobileSessionTransport420({ runtime, provider: createMobileProvider420(runtime), prepared });
 }

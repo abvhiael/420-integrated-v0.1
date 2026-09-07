@@ -17,18 +17,20 @@ W11 converts the qualified mobile architecture into real platform applications a
 
 ## W11 — real native projects and device integration
 
-### W11.1 — Native project bootstrap + bridge boundary — IN PROGRESS
-- Create real Android application project/source tree.
-- Create real iOS application project/source tree.
-- Define platform bridge implementations matching `platform-adapters.js`.
-- Keep RPC read/transport only; no remote signer or private-key storage fallback.
-- Establish build identifiers, minimum platform versions, app lifecycle hooks, and dependency boundaries.
+### W11.1 — Native project bootstrap + bridge boundary — QUALIFYING
+- Real Android Gradle application/source tree created.
+- Real iOS SwiftUI application/source tree created with deterministic XcodeGen project definition.
+- Matching native bridge contracts defined for RPC, secure storage, passkeys, session signing, transaction submission, external URLs, and lifecycle.
+- RPC remains read/transport only; no remote signer or private-key storage fallback.
+- Android/iOS application identifiers and minimum platform versions established.
+- CI now compiles Android debug and iOS simulator applications on every relevant pull request.
+- Closeout condition: native compile jobs and shared wallet qualification green on the current head.
 
-### W11.2 — Hardware-backed secure storage
-- iOS Keychain / Secure Enclave-backed non-exportable session material where supported.
-- Android Keystore StrongBox / TEE-backed non-exportable session material where supported.
-- Key generation, rotation, invalidation, migration, and device-lock handling.
-- No plaintext private-key persistence.
+### W11.2 — Hardware-backed secure storage — IN PROGRESS
+- Android Keystore-backed AES-GCM secure storage implemented for device-bound wallet state.
+- iOS Keychain storage implemented with `kSecAttrAccessibleWhenUnlockedThisDeviceOnly`.
+- Qualification guards require both platform secure-storage implementations and forbid plaintext private-key / remote-signer fallbacks.
+- Next: non-exportable session-signing keys, StrongBox / TEE preference and Secure Enclave policy where compatible, key rotation/invalidation, migration, and device-lock behavior.
 
 ### W11.3 — Native passkeys + biometric authorization
 - AuthenticationServices passkeys on iOS.

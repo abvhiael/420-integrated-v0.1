@@ -6,7 +6,7 @@ import { buildExtension420 } from './build.mjs';
 
 const sourceRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const { dist: root } = await buildExtension420();
-const required = ['manifest.json', 'service-worker.js', 'content-script.js', 'inpage.js', 'popup.html', 'popup.js', 'authority.html', 'authority.js', 'core/extension-local-authority.js'];
+const required = ['manifest.json', 'service-worker.js', 'content-script.js', 'inpage.js', 'popup.html', 'popup.js', 'authority.html', 'authority.js', 'core/extension-local-authority.js', 'core/signing-policy.js'];
 const forbiddenPatterns = [
   /\beval\s*\(/,
   /\bnew\s+Function\s*\(/,
@@ -58,6 +58,18 @@ assert.match(serviceWorker, /420-wallet-authority-ui/);
 assert.doesNotMatch(serviceWorker, /return rpcRequest\(request\.method, request\.params/);
 assert.doesNotMatch(serviceWorker, /localStorage|sessionStorage/);
 
+const router = await readFile(join(root, 'core/extension-rpc-router.js'), 'utf8');
+assert.match(router, /signing-policy\.js/);
+assert.match(router, /classifyProviderMethod420/);
+assert.doesNotMatch(router, /const READ_METHODS = new Set/);
+assert.doesNotMatch(router, /const APPROVAL_METHODS = new Set/);
+
+const signingPolicy = await readFile(join(root, 'core/signing-policy.js'), 'utf8');
+assert.match(signingPolicy, /eth_sendTransaction: 'owner-transaction'/);
+assert.match(signingPolicy, /personal_sign: 'message-signature'/);
+assert.match(signingPolicy, /eth_signTypedData_v4: 'typed-data-signature'/);
+assert.match(signingPolicy, /return 'unsupported'/);
+
 const authority = await readFile(join(root, 'authority.js'), 'utf8');
 assert.match(authority, /createExtensionLocalAuthority420/);
 assert.match(authority, /navigatorLike: navigator/);
@@ -69,7 +81,7 @@ assert.match(localAuthority, /preparePasskeyUserOperationTransport/);
 assert.match(localAuthority, /eth_sendUserOperation/);
 assert.match(localAuthority, /eth_getUserOperationReceipt/);
 assert.match(localAuthority, /RPC fallback is forbidden/);
-assert.doesNotMatch(localAuthority, /provider\.request\(\s*['"]eth_sendTransaction['"]/);
+assert.doesNotMatch(localAuthority, /provider\.request\(['"]eth_sendTransaction['"]/);
 
 const popup = await readFile(join(root, 'popup.html'), 'utf8');
 const authorityHtml = await readFile(join(root, 'authority.html'), 'utf8');

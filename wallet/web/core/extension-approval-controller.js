@@ -1,3 +1,5 @@
+import { buildSigningReview420 } from './signing-review.js';
+
 const SIGNING_METHODS = new Set(['eth_sendTransaction', 'personal_sign', 'eth_signTypedData_v4']);
 
 function rpcError(code, message, data) {
@@ -48,15 +50,17 @@ export function createExtensionApprovalController420({
     if (SIGNING_METHODS.has(request.method)) {
       const granted = await permissionStore.accountsFor(origin);
       if (!granted.length) throw rpcError(4100, 'origin is not connected to 420 Wallet');
+      const review = buildSigningReview420(request, { ...context, accounts: granted });
       const decision = await promptApproval({
         type: 'sign-or-send',
         origin,
         accounts: granted,
         request,
-        context,
+        review,
+        context: { ...context, signingReview: review },
       });
       if (!decision?.approved) throw rpcError(4001, 'User rejected the request');
-      return executeApprovedRequest(request, { ...context, accounts: granted });
+      return executeApprovedRequest(request, { ...context, accounts: granted, signingReview: review });
     }
 
     throw rpcError(4200, `unsupported approval method: ${request.method}`);

@@ -61,15 +61,18 @@ W11 converts the qualified mobile architecture into real platform applications a
 - Callback completion remains expiry-bound, origin/request-bound, and single-shot.
 - Closeout qualification passed on Wallet Mobile Verification #314 and Integrated Qualification #1364.
 
-### W11.6 — Push authorization — IN PROGRESS
+### W11.6 — Push authorization — QUALIFYING
 - Shared push envelope accepts only HTTPS `origin`, opaque `requestId`, and bounded `expiresAt`; extra fields fail closed.
 - Push payloads carry references only and explicitly exclude signatures, private keys, UserOperations, authorization state, and pre-authorized execution.
 - APNs and FCM registration paths are present in the real native projects.
-- Android registers FCM at startup, handles token rotation through `FirebaseMessagingService`, and persists only reference fields from inbound messages.
-- iOS registers with APNs, captures device-token rotation through `UIApplicationDelegate`, and persists only reference fields from inbound notifications.
-- Foreground push rehydration fetches the canonical provider request and revalidates origin, request ID, active SmartAccount, chain ID, authorization epoch, and expiry before approval.
-- Regression tests cover reference-only envelopes, APNs/FCM registration vocabulary, origin/request substitution, account drift, chain drift, epoch drift, expiry, and absence of signing authority.
-- Current step: qualify shared runtime tests plus Android/iOS native compilation, then harden foreground/background/terminated push state transitions and replay handling.
+- Android registers FCM at startup, handles token rotation through `FirebaseMessagingService`, persists only reference fields, and consumes a pending reference once when the app becomes active.
+- iOS registers with APNs, captures device-token rotation through `UIApplicationDelegate`, handles foreground/background delivery plus notification-response/terminated launch, and consumes a pending reference once when the active scene resumes.
+- Foreground, background, and terminated delivery states converge on one shared coordinator before approval.
+- The shared replay guard rejects duplicate origin/request-ID pairs before a second canonical fetch and rejects stale references before any fetch.
+- Canonical push rehydration revalidates origin, request ID, active SmartAccount, chain ID, authorization epoch, and expiry before approval.
+- Native lifecycle regression guards require one-shot pending-reference consumption and forbid push code from acquiring signing/private-key/UserOperation authority.
+- First W11.6 slice qualified on Wallet Mobile Verification #340 and Integrated Qualification #1377.
+- Closeout condition: current lifecycle/replay-hardening head passes shared runtime tests, Android/iOS native compilation, Wallet Mobile Verification, and Integrated Qualification.
 
 ### W11.7 — Native Wallet / Apps / Activity / Security UX
 - Wallet balances and assets.

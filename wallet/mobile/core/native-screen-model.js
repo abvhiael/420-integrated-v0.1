@@ -15,11 +15,23 @@ function normalizeAssets(items = []) {
   })));
 }
 
+function normalizeHttpsUrl(value) {
+  if (typeof value !== 'string') return null;
+  try {
+    const parsed = new URL(value);
+    if (parsed.protocol !== ['https', ':'].join('')) return null;
+    if (!parsed.hostname || parsed.username || parsed.password) return null;
+    return parsed.href;
+  } catch {
+    return null;
+  }
+}
+
 function normalizeApps(items = []) {
   return freezeItems(items.map((item) => ({
     id: item.id ?? null,
     name: item.name ?? null,
-    url: typeof item.url === 'string' && item.url.startsWith('https://') ? item.url : null,
+    url: normalizeHttpsUrl(item.url),
     category: item.category ?? null,
   })));
 }

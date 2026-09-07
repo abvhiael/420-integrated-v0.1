@@ -1,11 +1,22 @@
 import { normalizeAddress } from '../../web/core/abi.js';
+import {
+  classifyProviderMethod420,
+  WALLET_READ_METHODS_420,
+  WALLET_PROVIDER_POLICY_420,
+} from '../../web/core/signing-policy.js';
+import { buildSigningReview420 } from '../../web/core/signing-review.js';
 
-const READ_METHODS = new Set([
-  'eth_chainId', 'eth_blockNumber', 'eth_call', 'eth_estimateGas', 'eth_getBalance',
-  'eth_getCode', 'eth_getTransactionCount', 'eth_getTransactionReceipt',
-  'eth_getTransactionByHash', 'eth_getBlockByNumber', 'eth_getLogs', 'net_version',
+const APPROVAL_CLASSIFICATIONS = new Set([
+  'account-connect',
+  'owner-transaction',
+  'message-signature',
+  'typed-data-signature',
 ]);
-const APPROVAL_METHODS = new Set(['eth_requestAccounts', 'eth_sendTransaction', 'personal_sign', 'eth_signTypedData_v4']);
+const SIGNING_REVIEW_CLASSIFICATIONS = new Set([
+  'owner-transaction',
+  'message-signature',
+  'typed-data-signature',
+]);
 
 function rpcError(code, message) {
   const error = new Error(message);
@@ -40,10 +51,9 @@ export function normalizeMobileDappRequest420(request = {}, expectedOrigin) {
   if (request.params !== undefined && !Array.isArray(request.params) && (typeof request.params !== 'object' || request.params === null)) {
     throw rpcError(-32602, 'RPC params must be array or object');
   }
-  if (!READ_METHODS.has(request.method) && !APPROVAL_METHODS.has(request.method) && request.method !== 'eth_accounts') {
-    throw rpcError(4200, `unsupported provider method: ${request.method}`);
-  }
-  return Object.freeze({ id: request.id, origin, method: request.method, params: request.params ?? [] });
+  const authorityClass = classifyProviderMethod420(request.method);
+  if (authorityClass === 'unsupported') throw rpcError(4200, `unsupported provider method: ${request.method}`);
+  return Object.freeze({ id: request.id, origin, method: request.method, params: request.params ?? [], authorityClass });
 }
 
 export function createMobileDappConnection420({ rpcRequest, requestApproval, accountsFor } = {}) {
@@ -54,10 +64,27 @@ export function createMobileDappConnection420({ rpcRequest, requestApproval, acc
   return Object.freeze({
     async handle(request, expectedOrigin) {
       const normalized = normalizeMobileDappRequest420(request, expectedOrigin);
-      const context = Object.freeze({ origin: normalized.origin, requestId: normalized.id, method: normalized.method });
-      if (READ_METHODS.has(normalized.method)) return rpcRequest(normalized.method, normalized.params, context);
-      if (normalized.method === 'eth_accounts') return accountsFor(normalized.origin);
-      return requestApproval({ method: normalized.method, params: normalized.params }, context);
+      const context = {
+        origin: normalized.origin,
+        requestId: normalized.id,
+        method: normalized.method,
+        authorityClass: normalized.authorityClass,
+      };
+      if (normalized.authorityClass === 'read-only') return rpcRequest(normalized.method, normalized.params, Object.freeze(context));
+      if (normalized.authorityClass === 'accounts-read') return accountsFor(normalized.origin);
+      if (APPROVAL_CLASSIFICATIONS.has(normalized.authorityClass)) {
+        if (SIGNING_REVIEW_CLASSIFICATIONS.has(normalized.authorityClass)) {
+          const accounts = await accountsFor(normalized.origin);
+          if (!accounts.length) throw rpcError(4100, 'dApp is not connected to 420 Wallet');
+          const activeChainId = await rpcRequest('eth_chainId', [], Object.freeze({ ...context, authorityClass: 'read-only' }));
+          context.signingReview = buildSigningReview420(
+            { method: normalized.method, params: normalized.params },
+            { ...context, accounts, chainId: activeChainId },
+          );
+        }
+        return requestApproval({ method: normalized.method, params: normalized.params }, Object.freeze(context));
+      }
+      throw rpcError(4200, `unsupported provider authority class: ${normalized.authorityClass}`);
     },
     async assertAccountAccess(origin, account) {
       const normalizedOrigin = normalizeMobileDappOrigin420(origin);
@@ -69,5 +96,7 @@ export function createMobileDappConnection420({ rpcRequest, requestApproval, acc
   });
 }
 
-export const MOBILE_DAPP_READ_METHODS_420 = Object.freeze([...READ_METHODS]);
-export const MOBILE_DAPP_APPROVAL_METHODS_420 = Object.freeze([...APPROVAL_METHODS]);
+export const MOBILE_DAPP_READ_METHODS_420 = WALLET_READ_METHODS_420;
+export const MOBILE_DAPP_APPROVAL_METHODS_420 = Object.freeze(Object.entries(WALLET_PROVIDER_POLICY_420)
+  .filter(([, classification]) => APPROVAL_CLASSIFICATIONS.has(classification))
+  .map(([method]) => method));

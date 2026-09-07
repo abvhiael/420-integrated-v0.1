@@ -63,16 +63,22 @@ test('packaged extension never grants account visibility without origin-scoped p
   assert.match(worker, /origin is not connected to 420 Wallet/);
 });
 
-test('sensitive extension methods never fall through to RPC signing or submission authority', () => {
+test('sensitive extension methods execute through local authority and signed UserOperation transport only', () => {
   const worker = read('service-worker.js');
+  const authority = read('authority.js');
   assert.match(worker, /LOCAL_AUTHORITY_METHODS/);
   assert.match(worker, /eth_sendTransaction/);
   assert.match(worker, /personal_sign/);
   assert.match(worker, /eth_signTypedData_v4/);
   assert.match(worker, /sensitive wallet methods cannot use RPC signing or submission authority/);
-  assert.match(worker, /executeWithLocalAuthority/);
-  assert.match(worker, /kind: 'authority-request'/);
+  assert.match(worker, /authority\.html\?request=/);
+  assert.match(worker, /AUTHORITY_TRANSPORT_METHODS/);
+  assert.match(worker, /eth_sendUserOperation/);
+  assert.match(worker, /eth_getUserOperationReceipt/);
+  assert.match(worker, /420-wallet-authority-ui/);
   assert.match(worker, /420-wallet-local-authority/);
-  assert.match(worker, /local signing authority is unavailable/);
   assert.doesNotMatch(worker, /return rpcRequest\(request\.method, request\.params/);
+  assert.match(authority, /createExtensionLocalAuthority420/);
+  assert.match(authority, /navigatorLike: navigator/);
+  assert.match(authority, /420-wallet-passkey-bindings-v1/);
 });

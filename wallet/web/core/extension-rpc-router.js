@@ -1,25 +1,15 @@
+import {
+  classifyProviderMethod420,
+  WALLET_READ_METHODS_420,
+  WALLET_PROVIDER_POLICY_420,
+} from './signing-policy.js';
+
 const DEFAULT_CHANNEL = '420-wallet-provider-v1';
-
-const READ_METHODS = new Set([
-  'eth_chainId',
-  'eth_blockNumber',
-  'eth_call',
-  'eth_estimateGas',
-  'eth_getBalance',
-  'eth_getCode',
-  'eth_getTransactionCount',
-  'eth_getTransactionReceipt',
-  'eth_getTransactionByHash',
-  'eth_getBlockByNumber',
-  'eth_getLogs',
-  'net_version',
-]);
-
-const APPROVAL_METHODS = new Set([
-  'eth_requestAccounts',
-  'eth_sendTransaction',
-  'personal_sign',
-  'eth_signTypedData_v4',
+const APPROVAL_CLASSIFICATIONS = new Set([
+  'account-connect',
+  'owner-transaction',
+  'message-signature',
+  'typed-data-signature',
 ]);
 
 function rpcError(code, message, data) {
@@ -88,22 +78,26 @@ export function createExtensionRpcRouter420({
       if (claimedOrigin !== actualOrigin) throw rpcError(4100, 'request origin does not match extension sender');
       if (sender?.frameId !== undefined && sender.frameId !== 0) throw rpcError(4100, 'subframe provider requests are not authorized');
 
+      const classification = classifyProviderMethod420(request.method);
+      if (classification === 'unsupported') throw rpcError(4200, `unsupported provider method: ${request.method}`);
+
       const context = Object.freeze({
         origin: actualOrigin,
         tabId: Number.isInteger(sender?.tab?.id) ? sender.tab.id : null,
         frameId: sender?.frameId ?? 0,
         method: request.method,
+        authorityClass: classification,
       });
 
       let result;
-      if (READ_METHODS.has(request.method)) {
+      if (classification === 'read-only') {
         result = await rpcRequest(request.method, request.params ?? [], context);
-      } else if (APPROVAL_METHODS.has(request.method)) {
-        result = await requestApproval({ method: request.method, params: request.params ?? [] }, context);
-      } else if (request.method === 'eth_accounts') {
+      } else if (classification === 'accounts-read') {
         result = await requestApproval({ method: 'eth_accounts', params: [] }, { ...context, passive: true });
+      } else if (APPROVAL_CLASSIFICATIONS.has(classification)) {
+        result = await requestApproval({ method: request.method, params: request.params ?? [] }, context);
       } else {
-        throw rpcError(4200, `unsupported provider method: ${request.method}`);
+        throw rpcError(4200, `unsupported provider authority class: ${classification}`);
       }
 
       return { id: request.id, result };
@@ -127,5 +121,7 @@ export function attachExtensionRpcRouter420(runtime, router) {
   return () => runtime.onMessage.removeListener?.(listener);
 }
 
-export const EXTENSION_READ_METHODS_420 = Object.freeze([...READ_METHODS]);
-export const EXTENSION_APPROVAL_METHODS_420 = Object.freeze([...APPROVAL_METHODS]);
+export const EXTENSION_READ_METHODS_420 = WALLET_READ_METHODS_420;
+export const EXTENSION_APPROVAL_METHODS_420 = Object.freeze(Object.entries(WALLET_PROVIDER_POLICY_420)
+  .filter(([, classification]) => APPROVAL_CLASSIFICATIONS.has(classification))
+  .map(([method]) => method));

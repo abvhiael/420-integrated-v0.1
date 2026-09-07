@@ -16,7 +16,9 @@ final class PushRegistration420: NSObject {
 
     func register() async throws {
         let center = UNUserNotificationCenter.current()
-        center.delegate = AppDelegate420.sharedDelegate
+        await MainActor.run {
+            center.delegate = AppDelegate420.sharedDelegate
+        }
         _ = try await center.requestAuthorization(options: [.alert, .badge, .sound])
         await MainActor.run { UIApplication.shared.registerForRemoteNotifications() }
     }

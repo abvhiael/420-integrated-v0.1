@@ -27,35 +27,29 @@ W11 converts the qualified mobile architecture into real platform applications a
 - Closeout qualification passed on Wallet Mobile Verification #196 and Integrated Qualification #1305.
 
 ### W11.2 — Hardware-backed secure storage + session keys — COMPLETE
-- Android Keystore-backed AES-GCM secure storage implemented for device-bound wallet state.
-- iOS Keychain storage implemented with `kSecAttrAccessibleWhenUnlockedThisDeviceOnly`.
-- Android non-exportable P-256 session keys implemented inside `AndroidKeyStore`, preferring StrongBox on API 28+ and falling back to platform AndroidKeyStore / TEE-backed storage when StrongBox is unavailable.
-- Android session keys require an unlocked device on API 28+ and explicitly classify permanently-invalidated and locked-device signing failures.
-- iOS non-exportable P-256 session keys implemented with Secure Enclave preference on physical devices and a non-exportable Keychain-backed simulator/unsupported-device fallback.
-- iOS session keys are device-only and unavailable while the device is locked; `errSecInteractionNotAllowed` is surfaced as a locked-device state.
-- Session-key lifecycle is part of the native bridge: ensure, public-key retrieval, rotate, invalidate, and local hash signing.
-- Both platforms use versioned v1 key namespaces. Legacy W11 aliases are deleted and replaced with freshly generated v1 hardware-backed keys rather than exporting/copying old private material.
-- Qualification guards cover StrongBox/Secure Enclave policy, unlocked-device behavior, invalidation states, v1 migration markers, lifecycle methods, and absence of private-key export paths.
+- Android Keystore-backed AES-GCM secure storage and AndroidKeyStore/StrongBox-preferred non-exportable P-256 session keys.
+- iOS Keychain storage and Secure Enclave-preferred non-exportable P-256 session keys.
+- Locked-device, invalidation, v1 migration, rotation and non-exportability guards qualified.
 - Closeout qualification passed on Wallet Mobile Verification #218 and Integrated Qualification #1316.
 
-### W11.3 — Native passkeys + biometric authorization — QUALIFYING
-- Android Credential Manager performs native registration/assertion and returns canonical WebAuthn response JSON to Wallet Core.
-- iOS AuthenticationServices performs native registration/assertion and returns canonical WebAuthn response material.
-- Android `BiometricPrompt` and iOS `LocalAuthentication` provide local user-presence approval only; they never sign or create capability authority.
-- Both native passkey adapters require WebAuthn user verification.
-- Android and iOS now reject malformed relying-party identifiers that contain URL schemes, ports, path separators, or empty hostname labels.
-- Platform cancellation is normalized into an explicit cancelled state instead of being treated as an opaque credential failure.
-- Android validates returned WebAuthn credential type/id/rawId plus registration `attestationObject` and assertion `authenticatorData`/`signature` fields before returning the response to Wallet Core.
-- iOS explicitly validates non-empty attestation/authenticator/signature material and emits the canonical `id`, `rawId`, `type: public-key`, `clientDataJSON`, attestation/authenticator data, signature, and userHandle response vocabulary.
-- Regression guards cover RP binding, cancellation classification, canonical PK42/WebAuthn payload fields, and the rule that biometric gates contain no signing/private-key authority.
-- Initial W11.3 implementation passed Wallet Mobile Verification #236 and Integrated Qualification #1325.
-- Closeout condition: current hardening head passes Android/iOS native compile plus Wallet Mobile and Integrated qualification.
+### W11.3 — Native passkeys + biometric authorization — COMPLETE
+- Android Credential Manager and iOS AuthenticationServices native passkey ceremonies.
+- Canonical WebAuthn/PK42 response material retained across both platforms.
+- Malformed RP identifiers rejected; cancellation/error states normalized explicitly.
+- Android `BiometricPrompt` and iOS `LocalAuthentication` remain local user-presence gates only.
+- Regression guards prohibit biometric signing/private-key authority.
+- Closeout qualification passed on Wallet Mobile Verification #246 and Integrated Qualification #1330.
 
-### W11.4 — Native transaction submission and RPC transport
-- Platform HTTP transport with chain allowlisting and TLS-only endpoints.
-- Native `eth_call`, reads, estimates, UserOperation submission/receipt polling.
-- Native owner/recovery/session transaction submit boundary.
-- Fail closed on chain/account/epoch drift.
+### W11.4 — Native transaction submission and RPC transport — IN PROGRESS
+- Android native JSON-RPC transport added with configured chain endpoint allowlisting and HTTPS-only enforcement.
+- iOS native JSON-RPC transport added with configured chain endpoint allowlisting and HTTPS-only enforcement.
+- RPC method vocabulary is explicit and restricted to reads/estimates plus EIP-4337 UserOperation transport; `personal_sign`, `eth_sendTransaction`, and typed-data signing are not transport capabilities.
+- Native transport supports `eth_call`, `eth_estimateGas`, balance/code/nonce/block/log reads, `eth_estimateUserOperationGas`, `eth_sendUserOperation`, and `eth_getUserOperationReceipt`.
+- Android/iOS guarded UserOperation submitters now accept owner/recovery/session flows only.
+- Submission revalidates canonical chain ID, SmartAccount address, and authorization epoch immediately before transport and fails closed on drift.
+- UserOperation receipt polling is native and bounded; RPC never receives private signing material.
+- Qualification guards now require HTTPS-only transport, explicit method allowlists, UserOperation submission/receipt polling, and chain/account/epoch drift checks.
+- Next: compile/qualification of the initial W11.4 transport head, then endpoint/config wiring and transport failure/timeout regression hardening.
 
 ### W11.5 — Deep links, universal/app links, QR and dApp handoff
 - `420wallet://` development scheme.

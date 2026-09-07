@@ -1,0 +1,27 @@
+name: Wallet420
+options:
+  bundleIdPrefix: io.fourtwenty
+settings:
+  base:
+    IPHONEOS_DEPLOYMENT_TARGET: "16.0"
+targets:
+  Wallet420:
+    type: application
+    platform: iOS
+    sources:
+      - Wallet420
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: io.fourtwenty.wallet
+        PRODUCT_NAME: "420 Wallet"
+        SWIFT_VERSION: "5.9"
+        CODE_SIGN_STYLE: Automatic
+    info:
+      path: Wallet420/Info.plist
+      properties:
+        CFBundleDisplayName: "420 Wallet"
+        UILaunchScreen: {}
+        CFBundleURLTypes:
+          - CFBundleURLName: io.fourtwenty.wallet
+            CFBundleURLSchemes:
+              - 420wallet

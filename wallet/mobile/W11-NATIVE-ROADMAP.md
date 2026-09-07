@@ -40,16 +40,20 @@ W11 converts the qualified mobile architecture into real platform applications a
 - Regression guards prohibit biometric signing/private-key authority.
 - Closeout qualification passed on Wallet Mobile Verification #246 and Integrated Qualification #1330.
 
-### W11.4 — Native transaction submission and RPC transport — IN PROGRESS
+### W11.4 — Native transaction submission and RPC transport — QUALIFYING
 - Android native JSON-RPC transport added with configured chain endpoint allowlisting and HTTPS-only enforcement.
 - iOS native JSON-RPC transport added with configured chain endpoint allowlisting and HTTPS-only enforcement.
 - RPC method vocabulary is explicit and restricted to reads/estimates plus EIP-4337 UserOperation transport; `personal_sign`, `eth_sendTransaction`, and typed-data signing are not transport capabilities.
 - Native transport supports `eth_call`, `eth_estimateGas`, balance/code/nonce/block/log reads, `eth_estimateUserOperationGas`, `eth_sendUserOperation`, and `eth_getUserOperationReceipt`.
-- Android/iOS guarded UserOperation submitters now accept owner/recovery/session flows only.
+- Android/iOS guarded UserOperation submitters accept owner/recovery/session flows only.
 - Submission revalidates canonical chain ID, SmartAccount address, and authorization epoch immediately before transport and fails closed on drift.
 - UserOperation receipt polling is native and bounded; RPC never receives private signing material.
-- Qualification guards now require HTTPS-only transport, explicit method allowlists, UserOperation submission/receipt polling, and chain/account/epoch drift checks.
-- Next: compile/qualification of the initial W11.4 transport head, then endpoint/config wiring and transport failure/timeout regression hardening.
+- Initial transport implementation qualified on Wallet Mobile Verification #260 and Integrated Qualification #1337.
+- Android and iOS now have dedicated configuration-only network registries; chain IDs are canonicalized and RPC URLs must be configuration-provided HTTPS endpoints with valid hosts and no embedded credentials.
+- Transport errors are explicitly classified as timeout, network, HTTP status, malformed JSON-RPC response, or JSON-RPC application failure.
+- JSON-RPC response validation now requires version `2.0`, matching request ID, and an explicit result when no error is returned.
+- Regression guards cover configuration injection, canonical chain normalization, HTTPS rejection, error classification, response-ID binding, missing-result rejection, transport method allowlisting, and chain/account/epoch drift.
+- Closeout condition: current config/error-hardening head passes Android/iOS native compile, Wallet Mobile Verification, and Integrated Qualification.
 
 ### W11.5 — Deep links, universal/app links, QR and dApp handoff
 - `420wallet://` development scheme.

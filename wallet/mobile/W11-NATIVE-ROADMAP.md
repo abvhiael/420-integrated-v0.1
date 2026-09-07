@@ -73,19 +73,22 @@ W11 converts the qualified mobile architecture into real platform applications a
 - Native lifecycle regression guards require one-shot pending-reference consumption and forbid push code from acquiring signing/private-key/UserOperation authority.
 - Closeout qualification passed on Wallet Mobile Verification #364 and Integrated Qualification #1389.
 
-### W11.7 — Native Wallet / Apps / Activity / Security UX — IN PROGRESS
-- Shared app-shell navigation now treats Wallet, Apps, Activity, and Security as first-class native surfaces while preserving account/connect/approval/settings subflows.
-- Wallet presentation model includes portfolio total, normalized asset rows, receive/send/connect actions, and recent activity count.
-- Apps gateway model accepts HTTPS application destinations only and carries no signing authority.
-- Activity model presents UserOperation status, chain, hash, and timestamp without introducing transaction execution authority.
-- Security Center model surfaces passkeys, sessions, dApp permissions, recovery, and device status with management actions routed back through qualified Wallet Core flows.
-- Current step: wire these presentation models into Android/iOS native navigation and qualify that native UI code remains presentation-only.
+### W11.7 — Native Wallet / Apps / Activity / Security UX — COMPLETE
+- Wallet, Apps, Activity, and Security are first-class native surfaces on Android and iOS.
+- Wallet presentation includes portfolio totals, normalized assets, send/receive/connect affordances, and recent activity.
+- Apps gateway accepts structurally validated HTTPS destinations only and carries no signing authority.
+- Activity presents UserOperation status, chain, hash, and timestamps without introducing execution authority.
+- Security Center surfaces passkeys, sessions, dApp permissions, recovery, and device state with management actions routed through qualified Wallet Core flows.
+- Native UI regression guards prohibit remote signing/private-key authority.
+- Closeout qualification passed on Wallet Mobile Verification #388 and Integrated Qualification #1401.
 
-### W11.8 — Device lifecycle and hostile-state hardening
-- Lock/background/resume behavior.
-- Jailbreak/root/debugger policy signals without treating them as canonical authority.
-- Clipboard/screenshot/privacy-screen handling for sensitive views.
-- Lost-device session invalidation and recovery pathways.
+### W11.8 — Device lifecycle and hostile-state hardening — IN PROGRESS
+- Shared hostile-state policy classifies root/jailbreak/debugger/device-compromise/screen-capture signals as local risk inputs only.
+- Background, inactive, locked, sensitive, and capture-active states drive local privacy shielding and local lock policy without changing canonical SmartAccount420 authority.
+- Android enables `FLAG_SECURE`, inspects root/debugger signals, and locally locks presentation on backgrounding.
+- iOS shields inactive/background/captured presentation, inspects jailbreak/debug configuration signals, and clears pending presentation state on lock.
+- Lost-device policy invalidates local session material and local permissions, then routes recovery through the canonical recovery path.
+- Current step: qualify shared hostile-state behavior plus Android/iOS native compilation and regressions.
 
 ### W11.9 — Native automated qualification
 - Android unit/instrumentation tests and emulator build.

@@ -4,19 +4,11 @@ import {
   readSessionEpoch,
   readSessionScope,
   prepareSessionKeyEnablement,
-  sendSessionKeyEnablement,
   prepareSessionKeyRevocation,
-  sendSessionKeyRevocation,
   prepareSessionGrantCreation,
-  sendSessionGrantCreation,
 } from '../../web/core/session-management.js';
-import {
-  inspectCapabilityGrant,
-} from '../../web/core/capabilities.js';
-import {
-  prepareCapabilityGrantRevocation,
-  sendCapabilityGrantRevocation,
-} from '../../web/core/capability-management.js';
+import { inspectCapabilityGrant } from '../../web/core/capabilities.js';
+import { prepareCapabilityGrantRevocation } from '../../web/core/capability-management.js';
 import {
   prepareNativeMobileSessionTransport420,
   sendNativeMobileSessionTransport420,
@@ -26,6 +18,17 @@ import {
 function assertRuntime(runtime) {
   if (!runtime || typeof runtime.request !== 'function') throw new Error('mobile runtime adapter required');
   return runtime;
+}
+
+function assertNativeSubmit(runtime) {
+  assertRuntime(runtime);
+  if (typeof runtime.transaction?.submit !== 'function') throw new Error('native transaction submission capability required');
+  return runtime.transaction.submit;
+}
+
+function normalizeTxHash(value) {
+  if (typeof value !== 'string' || !/^0x[0-9a-fA-F]{64}$/.test(value)) throw new Error('invalid transaction hash');
+  return value.toLowerCase();
 }
 
 function assertState(state) {
@@ -101,36 +104,20 @@ export async function prepareMobileSessionAdmin420({ runtime, action, controller
   assertOwner(controller, state);
   const provider = createMobileProvider420(runtime);
   switch (action) {
-    case 'enableSessionKey':
-      return prepareSessionKeyEnablement(provider, controller, state, sessionKey);
-    case 'revokeSessionKey':
-      return prepareSessionKeyRevocation(provider, controller, state, sessionKey);
-    case 'createSessionGrant':
-      return prepareSessionGrantCreation(provider, controller, state, grantRequest);
-    case 'revokeCapabilityGrant':
-      return prepareCapabilityGrantRevocation(provider, controller, state, grantId);
-    default:
-      throw new Error(`unsupported mobile session admin action: ${action}`);
+    case 'enableSessionKey': return prepareSessionKeyEnablement(provider, controller, state, sessionKey);
+    case 'revokeSessionKey': return prepareSessionKeyRevocation(provider, controller, state, sessionKey);
+    case 'createSessionGrant': return prepareSessionGrantCreation(provider, controller, state, grantRequest);
+    case 'revokeCapabilityGrant': return prepareCapabilityGrantRevocation(provider, controller, state, grantId);
+    default: throw new Error(`unsupported mobile session admin action: ${action}`);
   }
 }
 
-export async function sendMobileSessionAdmin420({ runtime, action, controller, smartAccountState, sessionKey, grantRequest, grantId } = {}) {
-  assertRuntime(runtime);
-  const state = assertState(smartAccountState);
-  assertOwner(controller, state);
-  const provider = createMobileProvider420(runtime);
-  switch (action) {
-    case 'enableSessionKey':
-      return sendSessionKeyEnablement(provider, controller, state, sessionKey);
-    case 'revokeSessionKey':
-      return sendSessionKeyRevocation(provider, controller, state, sessionKey);
-    case 'createSessionGrant':
-      return sendSessionGrantCreation(provider, controller, state, grantRequest);
-    case 'revokeCapabilityGrant':
-      return sendCapabilityGrantRevocation(provider, controller, state, grantId);
-    default:
-      throw new Error(`unsupported mobile session admin action: ${action}`);
-  }
+export async function sendMobileSessionAdmin420(args = {}) {
+  const { runtime } = args;
+  const prepared = await prepareMobileSessionAdmin420(args);
+  if (!prepared?.transaction) throw new Error('qualified mobile session admin transaction required');
+  const txHash = normalizeTxHash(await assertNativeSubmit(runtime)(prepared.transaction));
+  return Object.freeze({ ...prepared, submitted: true, txHash, nativeSubmitted: true });
 }
 
 export async function prepareMobileSessionExecution420({ runtime, smartAccountState, sessionKey, request } = {}) {

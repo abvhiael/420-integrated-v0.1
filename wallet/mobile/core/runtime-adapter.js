@@ -67,6 +67,16 @@ export function createMobileRuntimeAdapter420(capabilities = {}) {
   return Object.freeze(adapter);
 }
 
+export function createMobileProvider420(runtime) {
+  if (!runtime || typeof runtime.request !== 'function') throw new Error('mobile runtime adapter required');
+  return Object.freeze({
+    request(method, params = []) {
+      if (typeof method !== 'string' || !method) throw new TypeError('RPC method required');
+      return runtime.request({ method, params });
+    },
+  });
+}
+
 export function inspectMobileCapabilities420(capabilities = {}) {
   return Object.freeze({
     rpc: typeof capabilities.rpc === 'function',

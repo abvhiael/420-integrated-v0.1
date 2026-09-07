@@ -1,0 +1,36 @@
+name: 420 Wallet Mobile Verification
+
+on:
+  push:
+    paths:
+      - "wallet/mobile/**"
+      - "wallet/web/**"
+      - ".github/workflows/wallet-mobile.yml"
+  pull_request:
+    paths:
+      - "wallet/mobile/**"
+      - "wallet/web/**"
+      - ".github/workflows/wallet-mobile.yml"
+  workflow_dispatch:
+
+jobs:
+  verify-wallet-mobile:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Mobile static checks
+        working-directory: wallet/mobile
+        run: npm run check
+      - name: Mobile runtime tests
+        working-directory: wallet/mobile
+        run: npm test
+      - name: Shared wallet core regression
+        working-directory: wallet/web
+        run: |
+          npm run check
+          npm test

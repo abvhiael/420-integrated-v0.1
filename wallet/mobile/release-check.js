@@ -54,15 +54,27 @@ for (const file of sourceFiles) {
 const runtime = fs.readFileSync(path.join(root, 'core/runtime-adapter.js'), 'utf8');
 if (!runtime.includes('secureStorage')) throw new Error('mobile release requires secure-storage boundary');
 if (!runtime.includes("/^https:\\/\\//i")) throw new Error('external URL policy must remain HTTPS-only');
-if (!runtime.includes("normalized.method === 'personal_sign'")) throw new Error('mobile RPC signing authority must remain blocked');
+if (!runtime.includes("normalized.method === 'personal_sign'") || !runtime.includes("normalized.method === 'eth_sendTransaction'")) {
+  throw new Error('mobile RPC signing and transaction authority must remain blocked');
+}
 if (!runtime.includes('sessionSigner') || !runtime.includes('transaction')) throw new Error('mobile release requires native signer and transaction submission boundaries');
 
 const session = fs.readFileSync(path.join(root, 'core/session-capabilities.js'), 'utf8');
-if (session.includes('prepareSessionUserOperationTransport') || session.includes("provider.request('personal_sign'")) {
-  throw new Error('mobile session path must not reuse RPC/browser signing authority');
+if (session.includes('prepareSessionUserOperationTransport') || session.includes('sendSessionKeyEnablement') || session.includes('sendSessionGrantCreation')) {
+  throw new Error('mobile session path must not reuse browser/RPC write authority');
 }
-if (!session.includes('prepareNativeMobileSessionTransport420') || !session.includes('sendNativeMobileSessionTransport420')) {
-  throw new Error('mobile session path must use native session transport');
+if (!session.includes('prepareNativeMobileSessionTransport420') || !session.includes('sendNativeMobileSessionTransport420') || !session.includes('transaction.submit')) {
+  throw new Error('mobile session path must use native signing and submission');
+}
+
+const passkey = fs.readFileSync(path.join(root, 'core/passkey-auth.js'), 'utf8');
+if (passkey.includes('sendPreparedPasskeyUserOperation') || !passkey.includes('runtime.transaction.submit')) {
+  throw new Error('mobile passkey broadcast must use native transaction submission');
+}
+
+const wallet = fs.readFileSync(path.join(root, 'core/wallet-surfaces.js'), 'utf8');
+if (wallet.includes('sendSmartAccountExecution') || wallet.includes('sendFinalizeRecovery') || !wallet.includes('transaction.submit')) {
+  throw new Error('mobile owner/recovery writes must use native transaction submission');
 }
 
 const bootstrap = fs.readFileSync(path.join(root, 'core/account-bootstrap.js'), 'utf8');

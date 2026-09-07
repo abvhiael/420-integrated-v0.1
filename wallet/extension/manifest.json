@@ -26,5 +26,8 @@
       "resources": ["inpage.js"],
       "matches": ["https://*/*", "http://localhost/*", "http://127.0.0.1/*"]
     }
-  ]
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; base-uri 'none'; frame-ancestors 'none'"
+  }
 }

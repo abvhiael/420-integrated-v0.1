@@ -1,0 +1,16 @@
+{
+  "platform": "ios",
+  "minimumOsVersion": "17.0",
+  "capabilities": {
+    "secureStorage": "keychain",
+    "passkeys": true,
+    "universalLinks": true,
+    "lifecycleResume": true,
+    "lifecyclePause": true
+  },
+  "security": {
+    "exportablePrivateKeys": false,
+    "arbitraryHttpLoads": false,
+    "remoteSignerAuthority": false
+  }
+}

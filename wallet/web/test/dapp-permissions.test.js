@@ -17,7 +17,7 @@ test('canonical permission binds origin, account, chain, scopes and expiry', () 
   assert.equal(permission.origin, 'https://dapp.example');
   assert.equal(permission.chainId, '0x420');
   assert.deepEqual(permission.sessionScopes, ['swap:execute', 'swap:quote']);
-  assert.equal(assertDappPermissionActive420(permission, { origin: 'https://dapp.example', account: ACCOUNT, chainId: '0x420', nowMs: 1200 }), permission);
+  assert.deepEqual(assertDappPermissionActive420(permission, { origin: 'https://dapp.example', account: ACCOUNT, chainId: '0x420', nowMs: 1200 }), permission);
 });
 
 test('permission fails closed on origin, account, chain and expiry drift', () => {

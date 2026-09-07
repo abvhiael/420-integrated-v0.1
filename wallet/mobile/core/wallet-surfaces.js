@@ -1,16 +1,12 @@
 import { normalizeAddress } from '../../web/core/abi.js';
 import { readDeployedSmartAccountState } from '../../web/core/accounts.js';
-import { prepareSmartAccountExecution, sendSmartAccountExecution } from '../../web/core/execution.js';
+import { prepareSmartAccountExecution } from '../../web/core/execution.js';
 import { recoveryActionAvailability, summarizeRecoveryState } from '../../web/core/recovery.js';
 import {
   prepareSetRecoveryAuthority,
   prepareProposeRecovery,
   prepareCancelRecovery,
   prepareFinalizeRecovery,
-  sendSetRecoveryAuthority,
-  sendProposeRecovery,
-  sendCancelRecovery,
-  sendFinalizeRecovery,
 } from '../../web/core/recovery-management.js';
 import { prepareMobilePasskeyExecution420, sendMobilePasskeyExecution420 } from './passkey-auth.js';
 import { createMobileProvider420 } from './runtime-adapter.js';
@@ -18,6 +14,17 @@ import { createMobileProvider420 } from './runtime-adapter.js';
 function assertRuntime(runtime) {
   if (!runtime || typeof runtime.request !== 'function') throw new Error('mobile runtime adapter required');
   return runtime;
+}
+
+function assertNativeSubmit(runtime) {
+  assertRuntime(runtime);
+  if (typeof runtime.transaction?.submit !== 'function') throw new Error('native transaction submission capability required');
+  return runtime.transaction.submit;
+}
+
+function normalizeTxHash(value) {
+  if (typeof value !== 'string' || !/^0x[0-9a-fA-F]{64}$/.test(value)) throw new Error('invalid transaction hash');
+  return value.toLowerCase();
 }
 
 function assertState(state) {
@@ -66,13 +73,15 @@ export async function prepareMobileExecution420({
   return prepareSmartAccountExecution(createMobileProvider420(runtime), controller, state, request);
 }
 
-export async function sendMobileExecution420({ runtime, mode = 'owner', controller, smartAccountState, request, prepared, transactionSender } = {}) {
+export async function sendMobileExecution420({ runtime, mode = 'owner', controller, smartAccountState, request, prepared } = {}) {
   assertRuntime(runtime);
-  if (mode === 'passkey') return sendMobilePasskeyExecution420({ runtime, prepared, transactionSender });
+  if (mode === 'passkey') return sendMobilePasskeyExecution420({ runtime, prepared });
   if (mode !== 'owner') throw new Error(`unsupported mobile execution mode: ${mode}`);
-  assertState(smartAccountState);
+  const state = assertState(smartAccountState);
   if (!controller) throw new Error('owner controller required');
-  return sendSmartAccountExecution(createMobileProvider420(runtime), controller, smartAccountState, request);
+  const fresh = await prepareSmartAccountExecution(createMobileProvider420(runtime), controller, state, request);
+  const txHash = normalizeTxHash(await assertNativeSubmit(runtime)(fresh.transaction));
+  return Object.freeze({ ...fresh, submitted: true, txHash, nativeSubmitted: true });
 }
 
 export async function prepareMobileRecoveryAction420({ runtime, action, actor, smartAccountState, value, nowSeconds } = {}) {
@@ -97,20 +106,8 @@ export async function prepareMobileRecoveryAction420({ runtime, action, actor, s
 
 export async function sendMobileRecoveryAction420({ runtime, action, actor, smartAccountState, value, nowSeconds } = {}) {
   assertRuntime(runtime);
-  const state = assertState(smartAccountState);
-  if (!actor) throw new Error('recovery actor required');
-  const provider = createMobileProvider420(runtime);
-
-  switch (action) {
-    case 'setRecoveryAuthority':
-      return sendSetRecoveryAuthority(provider, actor, state, value);
-    case 'proposeRecovery':
-      return sendProposeRecovery(provider, actor, state, value);
-    case 'cancelRecovery':
-      return sendCancelRecovery(provider, actor, state);
-    case 'finalizeRecovery':
-      return sendFinalizeRecovery(provider, actor, state, nowSeconds);
-    default:
-      throw new Error(`unsupported mobile recovery action: ${action}`);
-  }
+  const prepared = await prepareMobileRecoveryAction420({ runtime, action, actor, smartAccountState, value, nowSeconds });
+  if (!prepared?.transaction) throw new Error('qualified mobile recovery transaction required');
+  const txHash = normalizeTxHash(await assertNativeSubmit(runtime)(prepared.transaction));
+  return Object.freeze({ ...prepared, submitted: true, txHash, nativeSubmitted: true });
 }

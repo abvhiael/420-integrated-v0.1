@@ -40,26 +40,27 @@ W11 converts the qualified mobile architecture into real platform applications a
 - Regression guards prohibit biometric signing/private-key authority.
 - Closeout qualification passed on Wallet Mobile Verification #246 and Integrated Qualification #1330.
 
-### W11.4 — Native transaction submission and RPC transport — QUALIFYING
-- Android native JSON-RPC transport added with configured chain endpoint allowlisting and HTTPS-only enforcement.
-- iOS native JSON-RPC transport added with configured chain endpoint allowlisting and HTTPS-only enforcement.
-- RPC method vocabulary is explicit and restricted to reads/estimates plus EIP-4337 UserOperation transport; `personal_sign`, `eth_sendTransaction`, and typed-data signing are not transport capabilities.
-- Native transport supports `eth_call`, `eth_estimateGas`, balance/code/nonce/block/log reads, `eth_estimateUserOperationGas`, `eth_sendUserOperation`, and `eth_getUserOperationReceipt`.
-- Android/iOS guarded UserOperation submitters accept owner/recovery/session flows only.
-- Submission revalidates canonical chain ID, SmartAccount address, and authorization epoch immediately before transport and fails closed on drift.
-- UserOperation receipt polling is native and bounded; RPC never receives private signing material.
-- Initial transport implementation qualified on Wallet Mobile Verification #260 and Integrated Qualification #1337.
-- Android and iOS now have dedicated configuration-only network registries; chain IDs are canonicalized and RPC URLs must be configuration-provided HTTPS endpoints with valid hosts and no embedded credentials.
-- Transport errors are explicitly classified as timeout, network, HTTP status, malformed JSON-RPC response, or JSON-RPC application failure.
-- JSON-RPC response validation now requires version `2.0`, matching request ID, and an explicit result when no error is returned.
-- Regression guards cover configuration injection, canonical chain normalization, HTTPS rejection, error classification, response-ID binding, missing-result rejection, transport method allowlisting, and chain/account/epoch drift.
-- Closeout condition: current config/error-hardening head passes Android/iOS native compile, Wallet Mobile Verification, and Integrated Qualification.
+### W11.4 — Native transaction submission and RPC transport — COMPLETE
+- Android/iOS HTTPS-only JSON-RPC transports with configured chain endpoint allowlisting.
+- RPC vocabulary restricted to reads/estimates plus EIP-4337 UserOperation transport; signing authority is excluded.
+- Guarded owner/recovery/session UserOperation submitters revalidate chain ID, SmartAccount address, and authorization epoch immediately before transport.
+- Native receipt polling is bounded and RPC never receives private signing material.
+- Dedicated configuration-only network registries canonicalize chain IDs and reject invalid/insecure endpoints.
+- Timeout, network, HTTP, malformed JSON-RPC, and JSON-RPC application errors are classified explicitly.
+- Responses require JSON-RPC 2.0, matching request ID, and an explicit result when no error is returned.
+- Closeout qualification passed on Wallet Mobile Verification #274 and Integrated Qualification #1344.
 
-### W11.5 — Deep links, universal/app links, QR and dApp handoff
-- `420wallet://` development scheme.
-- iOS Universal Links and Android App Links for production domains.
-- QR request parsing and strict origin/request binding.
-- Return/callback flow with replay protection and expiry.
+### W11.5 — Deep links, universal/app links, QR and dApp handoff — IN PROGRESS
+- Shared handoff envelope binds HTTPS dApp origin, opaque request ID, expiry, and same-origin HTTPS callback.
+- Handoff lifetime is capped at ten minutes and expired requests fail closed.
+- Replay guard rejects a reused origin/request-ID pair until expiry.
+- `420wallet://connect` remains an explicit development-only route; production uses verified HTTPS links.
+- Android App Links use `android:autoVerify="true"` with a build-time configured wallet link host and `/connect` route.
+- iOS Universal Links use Associated Domains with a build-time configured wallet link host; no production domain is hardcoded.
+- Android and iOS native handoff parsers enforce the same host/path/origin/request/expiry/callback contract and carry no signing authority.
+- Android `MainActivity` and SwiftUI app entry points route inbound links through the strict native parser before presenting request state.
+- Regression tests cover production host/path binding, dev-scheme gating, callback origin binding, expiry windows, replay rejection, Associated Domains, Android App Links, and absence of signing/private-key authority.
+- Next: qualify native builds and shared handoff tests, then add QR payload ingestion/canonical request rehydration and callback completion hardening.
 
 ### W11.6 — Push authorization
 - APNs and FCM device registration.

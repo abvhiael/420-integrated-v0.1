@@ -37,3 +37,43 @@ jobs:
         run: |
           npm run check
           npm test
+
+  build-android-native:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.10.2"
+      - name: Compile Android debug application
+        working-directory: wallet/mobile/android
+        run: gradle :app:assembleDebug --no-daemon --stacktrace
+
+  build-ios-native:
+    runs-on: macos-15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate Xcode project
+        working-directory: wallet/mobile/ios
+        run: xcodegen generate
+      - name: Compile iOS simulator application
+        working-directory: wallet/mobile/ios
+        run: |
+          xcodebuild \
+            -project Wallet420.xcodeproj \
+            -scheme Wallet420 \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO \
+            build

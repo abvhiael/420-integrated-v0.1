@@ -11,6 +11,10 @@ interface NativeWalletBridge420 {
     suspend fun secureDelete(key: String)
     suspend fun createPasskey(requestJson: String): String
     suspend fun getPasskey(requestJson: String): String
+    suspend fun ensureSessionKey(alias: String): ByteArray
+    suspend fun sessionPublicKey(alias: String): ByteArray
+    suspend fun rotateSessionKey(alias: String): ByteArray
+    suspend fun invalidateSessionKey(alias: String)
     suspend fun signSessionHash(alias: String, hash: ByteArray): ByteArray
     suspend fun submitTransaction(requestJson: String): String
     fun openExternalUrl(url: String)

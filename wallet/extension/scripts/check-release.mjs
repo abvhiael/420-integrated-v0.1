@@ -44,6 +44,12 @@ assert.match(serviceWorker, /eth_requestAccounts/);
 assert.match(serviceWorker, /eth_sendTransaction/);
 assert.match(serviceWorker, /personal_sign/);
 assert.match(serviceWorker, /eth_signTypedData_v4/);
+assert.match(serviceWorker, /LOCAL_AUTHORITY_METHODS/);
+assert.match(serviceWorker, /executeWithLocalAuthority/);
+assert.match(serviceWorker, /sensitive wallet methods cannot use RPC signing or submission authority/);
+assert.match(serviceWorker, /kind: 'authority-request'/);
+assert.match(serviceWorker, /420-wallet-local-authority/);
+assert.doesNotMatch(serviceWorker, /return rpcRequest\(request\.method, request\.params/);
 assert.doesNotMatch(serviceWorker, /localStorage|sessionStorage/);
 
 const popup = await readFile(join(root, 'popup.html'), 'utf8');

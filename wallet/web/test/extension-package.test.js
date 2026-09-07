@@ -62,3 +62,17 @@ test('packaged extension never grants account visibility without origin-scoped p
   assert.match(worker, /setAccounts\(origin, selected\)/);
   assert.match(worker, /origin is not connected to 420 Wallet/);
 });
+
+test('sensitive extension methods never fall through to RPC signing or submission authority', () => {
+  const worker = read('service-worker.js');
+  assert.match(worker, /LOCAL_AUTHORITY_METHODS/);
+  assert.match(worker, /eth_sendTransaction/);
+  assert.match(worker, /personal_sign/);
+  assert.match(worker, /eth_signTypedData_v4/);
+  assert.match(worker, /sensitive wallet methods cannot use RPC signing or submission authority/);
+  assert.match(worker, /executeWithLocalAuthority/);
+  assert.match(worker, /kind: 'authority-request'/);
+  assert.match(worker, /420-wallet-local-authority/);
+  assert.match(worker, /local signing authority is unavailable/);
+  assert.doesNotMatch(worker, /return rpcRequest\(request\.method, request\.params/);
+});

@@ -9,6 +9,8 @@ function assertPlatformBridge(bridge, platform) {
     ['secureStorage.delete', bridge.secureStorage?.delete],
     ['passkeys.create', bridge.passkeys?.create],
     ['passkeys.get', bridge.passkeys?.get],
+    ['sessionSigner.signHash', bridge.sessionSigner?.signHash],
+    ['transaction.submit', bridge.transaction?.submit],
     ['openExternalUrl', bridge.openExternalUrl],
     ['lifecycle.onResume', bridge.lifecycle?.onResume],
     ['lifecycle.onPause', bridge.lifecycle?.onPause],
@@ -26,6 +28,8 @@ function createPlatformAdapter420(platform, bridge) {
     rpc: native.rpc,
     secureStorage: native.secureStorage,
     passkeys: native.passkeys,
+    sessionSigner: native.sessionSigner,
+    transaction: native.transaction,
     openExternalUrl: native.openExternalUrl,
   });
   return Object.freeze({

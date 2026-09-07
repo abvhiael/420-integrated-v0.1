@@ -14,11 +14,13 @@ const required = [
   'android/app/src/main/java/io/fourtwenty/wallet/MainActivity.kt',
   'android/app/src/main/java/io/fourtwenty/wallet/NativeWalletBridge420.kt',
   'android/app/src/main/java/io/fourtwenty/wallet/AndroidSecureStore420.kt',
+  'android/app/src/main/java/io/fourtwenty/wallet/AndroidSessionKey420.kt',
   'ios/project.yml',
   'ios/Wallet420/Info.plist',
   'ios/Wallet420/Wallet420App.swift',
   'ios/Wallet420/NativeWalletBridge420.swift',
   'ios/Wallet420/KeychainStore420.swift',
+  'ios/Wallet420/SessionKey420.swift',
 ];
 
 const bridgeCapabilities = [
@@ -28,6 +30,10 @@ const bridgeCapabilities = [
   'secureDelete',
   'createPasskey',
   'getPasskey',
+  'ensureSessionKey',
+  'sessionPublicKey',
+  'rotateSessionKey',
+  'invalidateSessionKey',
   'signSessionHash',
   'submitTransaction',
   'openExternal',
@@ -57,6 +63,26 @@ test('native secure storage is device-bound', () => {
   assert.match(android, /AES\/GCM\/NoPadding/);
   assert.match(ios, /kSecAttrAccessibleWhenUnlockedThisDeviceOnly/);
   assert.match(ios, /SecItem(Add|Update|CopyMatching|Delete)/);
+});
+
+test('W11.2 session signing keys are local, non-exportable and lifecycle-managed', () => {
+  const android = fs.readFileSync(path.join(root, 'android/app/src/main/java/io/fourtwenty/wallet/AndroidSessionKey420.kt'), 'utf8');
+  const ios = fs.readFileSync(path.join(root, 'ios/Wallet420/SessionKey420.swift'), 'utf8');
+
+  assert.match(android, /AndroidKeyStore/);
+  assert.match(android, /setIsStrongBoxBacked\(true\)/);
+  assert.match(android, /KeyProperties\.PURPOSE_SIGN/);
+  assert.match(android, /rotate\(alias/);
+  assert.match(android, /invalidate\(alias/);
+
+  assert.match(ios, /kSecAttrTokenIDSecureEnclave/);
+  assert.match(ios, /kSecAttrAccessibleWhenUnlockedThisDeviceOnly/);
+  assert.match(ios, /SecKeyCreateRandomKey/);
+  assert.match(ios, /rotate\(alias/);
+  assert.match(ios, /invalidate\(alias/);
+
+  assert.doesNotMatch(android, /privateKey\.encoded|encoded\.private/i);
+  assert.doesNotMatch(ios, /SecKeyCopyExternalRepresentation\(privateKey/i);
 });
 
 test('native bootstrap contains no remote signing fallback or plaintext private key', () => {

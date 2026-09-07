@@ -87,11 +87,13 @@ W11 converts the qualified mobile architecture into real platform applications a
 - Background, inactive, locked, sensitive, and capture-active states drive local privacy shielding and local lock policy without changing canonical SmartAccount420 authority.
 - Android enables `FLAG_SECURE`, inspects root/debugger signals, and locally locks presentation on backgrounding.
 - iOS shields inactive/background/captured presentation, inspects jailbreak/debug configuration signals, and clears pending presentation state on lock.
-- Android and iOS now require their existing qualified biometric/device-owner authentication gates to restore local presentation access after backgrounding; handoffs, navigation, and pending push presentation remain blocked while locally locked.
-- Local unlock explicitly restores presentation access only and does not change canonical SmartAccount420/capability authority.
-- Lost-device policy invalidates local session material and local permissions, then routes recovery through the canonical recovery path.
-- Previous hostile-state slice qualified on Wallet Mobile Verification #408 and Integrated Qualification #1411.
-- Current step: qualify local-presence unlock lifecycle behavior, then finish lost-device invalidation and clipboard/sensitive-view privacy hardening.
+- Android and iOS require existing qualified biometric/device-owner authentication gates to restore local presentation access after backgrounding; handoffs, navigation, and pending push presentation remain blocked while locally locked.
+- Local unlock restores presentation access only and does not change canonical SmartAccount420/capability authority.
+- Lost-device coordinators now invalidate native session keys first, clear local push/permission state and clipboard contents, then invoke the canonical recovery callback.
+- Android clipboard handling marks copied public values sensitive where supported and clears clipboard state during lost-device handling.
+- iOS clipboard handling is local-only and expires copied public values after 60 seconds; lost-device handling clears it immediately.
+- Hostile-state slice qualified on Wallet Mobile Verification #408 / Integrated Qualification #1411; local-unlock slice qualified on #416 / #1415.
+- Current step: W11.8 closeout qualification for lost-device invalidation and sensitive clipboard/privacy hardening.
 
 ### W11.9 — Native automated qualification
 - Android unit/instrumentation tests and emulator build.

@@ -1,5 +1,6 @@
 import { normalizeAddress } from '../../web/core/abi.js';
 import { preparePasskeyUserOperationTransport, sendPreparedPasskeyUserOperation } from '../../web/core/passkey-entrypoint-transport.js';
+import { createMobileProvider420 } from './runtime-adapter.js';
 
 function assertBinding(binding) {
   if (!binding || typeof binding !== 'object') throw new TypeError('passkey binding required');
@@ -37,9 +38,10 @@ export async function prepareMobilePasskeyExecution420({
   if (!runtime || typeof runtime.request !== 'function') throw new Error('mobile runtime adapter required');
   if (!smartAccountState?.deployed) throw new Error('deployed SmartAccount420 required');
   assertBinding(binding);
+  const provider = createMobileProvider420(runtime);
 
   const prepared = await preparePasskeyUserOperationTransport(
-    runtime,
+    provider,
     createNavigatorLike(runtime),
     smartAccountState,
     binding,
@@ -67,5 +69,5 @@ export async function prepareMobilePasskeyExecution420({
 export async function sendMobilePasskeyExecution420({ runtime, prepared, transactionSender = null } = {}) {
   if (!runtime || typeof runtime.request !== 'function') throw new Error('mobile runtime adapter required');
   if (!prepared || prepared.signerType !== 'passkey') throw new Error('prepared mobile passkey execution required');
-  return sendPreparedPasskeyUserOperation(runtime, prepared, transactionSender);
+  return sendPreparedPasskeyUserOperation(createMobileProvider420(runtime), prepared, transactionSender);
 }

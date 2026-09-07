@@ -17,16 +17,30 @@ test('request origin must match connection origin', () => {
   }, 'https://dapp.example'), /origin mismatch/);
 });
 
-test('read methods bypass approval but signing methods require approval', async () => {
+test('read methods bypass approval but signing methods require canonical classified approval', async () => {
   const calls = [];
   const connection = createMobileDappConnection420({
-    rpcRequest: async (method) => { calls.push(['rpc', method]); return '0x420'; },
-    requestApproval: async (request, context) => { calls.push(['approval', request.method, context.origin]); return 'approved'; },
+    rpcRequest: async (method, _params, context) => { calls.push(['rpc', method, context.authorityClass]); return '0x420'; },
+    requestApproval: async (request, context) => { calls.push(['approval', request.method, context.origin, context.authorityClass]); return 'approved'; },
     accountsFor: async () => [account],
   });
   assert.equal(await connection.handle({ id: '1', origin: 'https://dapp.example', method: 'eth_chainId', params: [] }), '0x420');
   assert.equal(await connection.handle({ id: '2', origin: 'https://dapp.example', method: 'eth_sendTransaction', params: [{}] }), 'approved');
-  assert.deepEqual(calls, [['rpc', 'eth_chainId'], ['approval', 'eth_sendTransaction', 'https://dapp.example']]);
+  assert.deepEqual(calls, [
+    ['rpc', 'eth_chainId', 'read-only'],
+    ['approval', 'eth_sendTransaction', 'https://dapp.example', 'owner-transaction'],
+  ]);
+});
+
+test('unknown signing methods fail closed before RPC or approval dispatch', async () => {
+  let dispatched = false;
+  const connection = createMobileDappConnection420({
+    rpcRequest: async () => { dispatched = true; },
+    requestApproval: async () => { dispatched = true; },
+    accountsFor: async () => [account],
+  });
+  await assert.rejects(() => connection.handle({ id: '3', origin: 'https://dapp.example', method: 'eth_sign', params: [] }), (error) => error?.code === 4200);
+  assert.equal(dispatched, false);
 });
 
 test('account access is bound to granted origin accounts', async () => {

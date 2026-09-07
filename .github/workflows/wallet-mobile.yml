@@ -52,6 +52,9 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.10.2"
+      - name: Run Android native unit tests
+        working-directory: wallet/mobile/android
+        run: gradle :app:testDebugUnitTest --no-daemon --stacktrace
       - name: Compile Android debug application
         working-directory: wallet/mobile/android
         run: gradle :app:assembleDebug --no-daemon --stacktrace
@@ -67,6 +70,16 @@ jobs:
       - name: Generate Xcode project
         working-directory: wallet/mobile/ios
         run: xcodegen generate
+      - name: Run iOS native unit tests
+        working-directory: wallet/mobile/ios
+        run: |
+          xcodebuild \
+            -project Wallet420.xcodeproj \
+            -scheme Wallet420 \
+            -sdk iphonesimulator \
+            -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=latest' \
+            CODE_SIGNING_ALLOWED=NO \
+            test
       - name: Compile iOS simulator application
         working-directory: wallet/mobile/ios
         run: |

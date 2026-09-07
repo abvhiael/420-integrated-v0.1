@@ -28,3 +28,14 @@ targets:
           - CFBundleURLName: io.fourtwenty.wallet
             CFBundleURLSchemes:
               - 420wallet
+  Wallet420Tests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - Wallet420Tests
+    dependencies:
+      - target: Wallet420
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: io.fourtwenty.wallet.tests
+        SWIFT_VERSION: "5.9"

@@ -9,6 +9,10 @@ protocol NativeWalletBridge420 {
     func secureDelete(key: String) async throws
     func createPasskey(requestJSON: String) async throws -> String
     func getPasskey(requestJSON: String) async throws -> String
+    func ensureSessionKey(alias: String) async throws -> Data
+    func sessionPublicKey(alias: String) async throws -> Data
+    func rotateSessionKey(alias: String) async throws -> Data
+    func invalidateSessionKey(alias: String) async throws
     func signSessionHash(alias: String, hash: Data) async throws -> Data
     func submitTransaction(requestJSON: String) async throws -> String
     func openExternalURL(_ url: URL) throws

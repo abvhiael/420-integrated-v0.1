@@ -19,7 +19,7 @@ struct Wallet420App: App {
                 try? await PushRegistration420.shared.register()
                 consumePendingPush()
             }
-            .onChange(of: scenePhase) { _, phase in
+            .onChange(of: scenePhase) { phase in
                 if phase == .active { consumePendingPush() }
             }
             .onOpenURL { url in handle(url) }

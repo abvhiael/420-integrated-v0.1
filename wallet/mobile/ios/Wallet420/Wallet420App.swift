@@ -3,6 +3,7 @@ import SwiftUI
 @main
 struct Wallet420App: App {
     @UIApplicationDelegateAdaptor(AppDelegate420.self) private var appDelegate
+    @Environment(\.scenePhase) private var scenePhase
     @State private var handoffStatus = "W11 native bootstrap"
 
     var body: some Scene {
@@ -16,12 +17,22 @@ struct Wallet420App: App {
             .padding()
             .task {
                 try? await PushRegistration420.shared.register()
+                consumePendingPush()
+            }
+            .onChange(of: scenePhase) { _, phase in
+                if phase == .active { consumePendingPush() }
             }
             .onOpenURL { url in handle(url) }
             .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { activity in
                 if let url = activity.webpageURL { handle(url) }
             }
         }
+    }
+
+    private func consumePendingPush() {
+        guard let reference = PushRegistration420.shared.consumePending() else { return }
+        // Presentation only. Shared Wallet Core must canonically rehydrate and revalidate before approval.
+        handoffStatus = "push (\(reference.state)) from \(reference.origin)\n\(reference.requestID)"
     }
 
     private func handle(_ url: URL) {

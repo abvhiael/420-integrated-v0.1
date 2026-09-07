@@ -9,9 +9,11 @@ final class Passkey420: NSObject, ASAuthorizationControllerDelegate, ASAuthoriza
 
     func create(requestJSON: String) async throws -> String {
         let options = try JSONDecoder().decode(CreationOptions.self, from: Data(requestJSON.utf8))
-        guard !options.rp.id.isEmpty,
-              let challenge = Data(base64URLEncoded: options.challenge),
-              let userID = Data(base64URLEncoded: options.user.id)
+        try validateRPID(options.rp.id)
+        guard let challenge = Data(base64URLEncoded: options.challenge),
+              !challenge.isEmpty,
+              let userID = Data(base64URLEncoded: options.user.id),
+              !userID.isEmpty
         else { throw Passkey420Error.invalidRequest }
 
         let provider = ASAuthorizationPlatformPublicKeyCredentialProvider(relyingPartyIdentifier: options.rp.id)
@@ -26,18 +28,27 @@ final class Passkey420: NSObject, ASAuthorizationControllerDelegate, ASAuthoriza
 
     func get(requestJSON: String) async throws -> String {
         let options = try JSONDecoder().decode(RequestOptions.self, from: Data(requestJSON.utf8))
-        guard !options.rpId.isEmpty,
-              let challenge = Data(base64URLEncoded: options.challenge)
+        try validateRPID(options.rpId)
+        guard let challenge = Data(base64URLEncoded: options.challenge), !challenge.isEmpty
         else { throw Passkey420Error.invalidRequest }
 
         let provider = ASAuthorizationPlatformPublicKeyCredentialProvider(relyingPartyIdentifier: options.rpId)
         let request = provider.createCredentialAssertionRequest(challenge: challenge)
         request.userVerificationPreference = .required
         request.allowedCredentials = (options.allowCredentials ?? []).compactMap { item in
-            guard let id = Data(base64URLEncoded: item.id) else { return nil }
+            guard let id = Data(base64URLEncoded: item.id), !id.isEmpty else { return nil }
             return ASAuthorizationPlatformPublicKeyCredentialDescriptor(credentialID: id)
         }
         return try await perform(request)
+    }
+
+    private func validateRPID(_ rpID: String) throws {
+        guard !rpID.isEmpty,
+              !rpID.contains("://"),
+              !rpID.contains("/"),
+              !rpID.contains(":"),
+              rpID.split(separator: ".", omittingEmptySubsequences: false).allSatisfy({ !$0.isEmpty })
+        else { throw Passkey420Error.invalidRelyingParty }
     }
 
     private func perform(_ request: ASAuthorizationRequest) async throws -> String {
@@ -55,16 +66,22 @@ final class Passkey420: NSObject, ASAuthorizationControllerDelegate, ASAuthoriza
         do {
             let response: WebAuthnResponse
             if let registration = authorization.credential as? ASAuthorizationPlatformPublicKeyCredentialRegistration {
+                guard let attestationObject = registration.rawAttestationObject, !attestationObject.isEmpty else {
+                    throw Passkey420Error.invalidCanonicalResponse
+                }
                 response = WebAuthnResponse(
                     id: registration.credentialID.base64URLEncodedString(),
                     rawId: registration.credentialID.base64URLEncodedString(),
                     type: "public-key",
                     response: .registration(
                         clientDataJSON: registration.rawClientDataJSON.base64URLEncodedString(),
-                        attestationObject: registration.rawAttestationObject?.base64URLEncodedString() ?? ""
+                        attestationObject: attestationObject.base64URLEncodedString()
                     )
                 )
             } else if let assertion = authorization.credential as? ASAuthorizationPlatformPublicKeyCredentialAssertion {
+                guard !assertion.rawAuthenticatorData.isEmpty, !assertion.signature.isEmpty else {
+                    throw Passkey420Error.invalidCanonicalResponse
+                }
                 response = WebAuthnResponse(
                     id: assertion.credentialID.base64URLEncodedString(),
                     rawId: assertion.credentialID.base64URLEncodedString(),
@@ -87,7 +104,12 @@ final class Passkey420: NSObject, ASAuthorizationControllerDelegate, ASAuthoriza
     }
 
     func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
-        finish(.failure(error))
+        if let authorizationError = error as? ASAuthorizationError,
+           authorizationError.code == .canceled {
+            finish(.failure(Passkey420Error.cancelled))
+        } else {
+            finish(.failure(Passkey420Error.platformFailure(error.localizedDescription)))
+        }
     }
 
     func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
@@ -161,6 +183,10 @@ private extension Data {
 
 enum Passkey420Error: Error {
     case invalidRequest
+    case invalidRelyingParty
+    case cancelled
     case ceremonyInProgress
     case unexpectedCredential
+    case invalidCanonicalResponse
+    case platformFailure(String)
 }

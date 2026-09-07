@@ -2,6 +2,7 @@ import SwiftUI
 
 @main
 struct Wallet420App: App {
+    @UIApplicationDelegateAdaptor(AppDelegate420.self) private var appDelegate
     @State private var handoffStatus = "W11 native bootstrap"
 
     var body: some Scene {
@@ -13,6 +14,9 @@ struct Wallet420App: App {
                     .font(.subheadline)
             }
             .padding()
+            .task {
+                try? await PushRegistration420.shared.register()
+            }
             .onOpenURL { url in handle(url) }
             .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { activity in
                 if let url = activity.webpageURL { handle(url) }

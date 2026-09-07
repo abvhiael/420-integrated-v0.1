@@ -18,6 +18,7 @@ const ORIGIN_A = 'https://a.example';
 const ORIGIN_B = 'https://b.example';
 const ACCOUNT_A = '0x1111111111111111111111111111111111111111';
 const ACCOUNT_B = '0x2222222222222222222222222222222222222222';
+const TARGET = '0x3333333333333333333333333333333333333333';
 
 function extensionEnvelope(method, params = [], origin = ORIGIN_A) {
   return {
@@ -31,6 +32,12 @@ function extensionEnvelope(method, params = [], origin = ORIGIN_A) {
 
 function extensionSender(origin = ORIGIN_A) {
   return { url: `${origin}/page`, tab: { id: 42, url: `${origin}/page` }, frameId: 0 };
+}
+
+function privilegedParams(method) {
+  if (method === 'eth_sendTransaction') return [{ from: ACCOUNT_A, to: TARGET, value: '0x0' }];
+  if (method === 'personal_sign') return ['0x1234', ACCOUNT_A];
+  return [ACCOUNT_A, JSON.stringify({ domain: { chainId: '0x420', verifyingContract: TARGET }, primaryType: 'Message', types: {}, message: {} })];
 }
 
 test('W10.5 matrix: one origin permission cannot authorize another origin, account, chain, or expired session', () => {
@@ -56,28 +63,37 @@ test('W10.5 matrix: one origin permission cannot authorize another origin, accou
   assert.throws(() => assertDappPermissionActive420(permission, { nowMs: 5000 }), /expired/);
 });
 
-test('W10.5 matrix: Extension and Mobile route privileged methods to approval, never public RPC', async () => {
+test('W10.5 matrix: Extension and Mobile route privileged methods to approval, never public signing RPC', async () => {
   for (const method of ['eth_sendTransaction', 'personal_sign', 'eth_signTypedData_v4']) {
     assert.notEqual(classifyProviderMethod420(method), 'read-only');
+    const params = privilegedParams(method);
 
     const extensionCalls = [];
     const extension = createExtensionRpcRouter420({
       rpcRequest: async (rpcMethod) => { extensionCalls.push(['rpc', rpcMethod]); return null; },
       requestApproval: async (request, context) => { extensionCalls.push(['approval', request.method, context.origin]); return 'approved'; },
     });
-    const extensionResult = await extension(extensionEnvelope(method, []), extensionSender());
+    const extensionResult = await extension(extensionEnvelope(method, params), extensionSender());
     assert.equal(extensionResult.result, 'approved');
     assert.deepEqual(extensionCalls, [['approval', method, ORIGIN_A]]);
 
     const mobileCalls = [];
     const mobile = createMobileDappConnection420({
-      rpcRequest: async (rpcMethod) => { mobileCalls.push(['rpc', rpcMethod]); return null; },
+      rpcRequest: async (rpcMethod) => {
+        mobileCalls.push(['rpc', rpcMethod]);
+        if (rpcMethod === 'eth_chainId') return '0x420';
+        throw new Error(`unexpected public RPC method: ${rpcMethod}`);
+      },
       requestApproval: async (request, context) => { mobileCalls.push(['approval', request.method, context.origin]); return 'approved'; },
       accountsFor: async () => [ACCOUNT_A],
     });
-    const mobileResult = await mobile.handle({ id: `mobile-${method}`, origin: ORIGIN_A, method, params: [] }, ORIGIN_A);
+    const mobileResult = await mobile.handle({ id: `mobile-${method}`, origin: ORIGIN_A, method, params }, ORIGIN_A);
     assert.equal(mobileResult, 'approved');
-    assert.deepEqual(mobileCalls, [['approval', method, ORIGIN_A]]);
+    assert.deepEqual(mobileCalls, [
+      ['rpc', 'eth_chainId'],
+      ['approval', method, ORIGIN_A],
+    ]);
+    assert.equal(mobileCalls.some(([kind, rpcMethod]) => kind === 'rpc' && rpcMethod === method), false);
   }
 });
 
@@ -131,7 +147,7 @@ test('W10.5 matrix: hostile or mismatched origins fail before any authority or t
     rpcRequest: async () => { extensionCalls.push('rpc'); return null; },
     requestApproval: async () => { extensionCalls.push('approval'); return null; },
   });
-  const forged = await extension(extensionEnvelope('eth_sendTransaction', [], ORIGIN_A), extensionSender(ORIGIN_B));
+  const forged = await extension(extensionEnvelope('eth_sendTransaction', privilegedParams('eth_sendTransaction'), ORIGIN_A), extensionSender(ORIGIN_B));
   assert.equal(forged.error?.code, 4100);
   assert.deepEqual(extensionCalls, []);
 
@@ -142,7 +158,7 @@ test('W10.5 matrix: hostile or mismatched origins fail before any authority or t
     accountsFor: async () => [ACCOUNT_A],
   });
   await assert.rejects(
-    mobile.handle({ id: 'mobile-origin-drift', origin: ORIGIN_A, method: 'eth_sendTransaction', params: [] }, ORIGIN_B),
+    mobile.handle({ id: 'mobile-origin-drift', origin: ORIGIN_A, method: 'eth_sendTransaction', params: privilegedParams('eth_sendTransaction') }, ORIGIN_B),
     (error) => error.code === 4100,
   );
   assert.deepEqual(mobileCalls, []);

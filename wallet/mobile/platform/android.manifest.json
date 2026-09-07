@@ -1,0 +1,16 @@
+{
+  "platform": "android",
+  "minimumApiLevel": 34,
+  "capabilities": {
+    "secureStorage": "keystore",
+    "passkeys": true,
+    "appLinks": true,
+    "lifecycleResume": true,
+    "lifecyclePause": true
+  },
+  "security": {
+    "exportablePrivateKeys": false,
+    "cleartextTraffic": false,
+    "remoteSignerAuthority": false
+  }
+}

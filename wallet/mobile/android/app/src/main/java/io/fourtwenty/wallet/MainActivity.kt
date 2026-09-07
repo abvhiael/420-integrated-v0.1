@@ -16,6 +16,10 @@ class MainActivity : Activity() {
             setPadding(32, 64, 32, 32)
         }
         setContentView(statusView)
+        AndroidPush420.register(
+            onToken = { token -> getSharedPreferences("wallet420_push_v1", MODE_PRIVATE).edit().putString("fcm_token", token).apply() },
+            onError = { getSharedPreferences("wallet420_push_v1", MODE_PRIVATE).edit().remove("fcm_token").apply() },
+        )
         handleIntent(intent)
     }
 

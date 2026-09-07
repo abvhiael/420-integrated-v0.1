@@ -9,6 +9,8 @@ const required = [
   'core/passkey-auth.js',
   'core/wallet-surfaces.js',
   'core/session-capabilities.js',
+  'core/native-session-transport.js',
+  'core/account-bootstrap.js',
   'core/lifecycle-hardening.js',
   'core/dapp-connection.js',
   'core/dapp-session.js',
@@ -23,6 +25,8 @@ const required = [
   'test/passkey-auth.test.js',
   'test/wallet-surfaces.test.js',
   'test/session-capabilities.test.js',
+  'test/native-session-transport.test.js',
+  'test/account-bootstrap.test.js',
   'test/lifecycle-hardening.test.js',
   'test/dapp-connection.test.js',
   'test/dapp-session.test.js',
@@ -50,6 +54,21 @@ for (const file of sourceFiles) {
 const runtime = fs.readFileSync(path.join(root, 'core/runtime-adapter.js'), 'utf8');
 if (!runtime.includes('secureStorage')) throw new Error('mobile release requires secure-storage boundary');
 if (!runtime.includes("/^https:\\/\\//i")) throw new Error('external URL policy must remain HTTPS-only');
+if (!runtime.includes("normalized.method === 'personal_sign'")) throw new Error('mobile RPC signing authority must remain blocked');
+if (!runtime.includes('sessionSigner') || !runtime.includes('transaction')) throw new Error('mobile release requires native signer and transaction submission boundaries');
+
+const session = fs.readFileSync(path.join(root, 'core/session-capabilities.js'), 'utf8');
+if (session.includes('prepareSessionUserOperationTransport') || session.includes("provider.request('personal_sign'")) {
+  throw new Error('mobile session path must not reuse RPC/browser signing authority');
+}
+if (!session.includes('prepareNativeMobileSessionTransport420') || !session.includes('sendNativeMobileSessionTransport420')) {
+  throw new Error('mobile session path must use native session transport');
+}
+
+const bootstrap = fs.readFileSync(path.join(root, 'core/account-bootstrap.js'), 'utf8');
+for (const invariant of ['discoverSmartAccount', 'prepareSmartAccountCreation', 'eth_call', 'eth_estimateGas', 'transaction.submit', 'confirmSmartAccountCreation']) {
+  if (!bootstrap.includes(invariant)) throw new Error(`missing mobile account bootstrap invariant: ${invariant}`);
+}
 
 const lifecycle = fs.readFileSync(path.join(root, 'core/lifecycle-hardening.js'), 'utf8');
 for (const requiredInvariant of ['chainChanged', 'accountsChanged', 'authorizationEpochChanged', 'invalidateSessions', 'invalidatePasskey']) {
@@ -59,7 +78,9 @@ for (const requiredInvariant of ['chainChanged', 'accountsChanged', 'authorizati
 for (const platform of ['ios', 'android']) {
   const manifest = JSON.parse(fs.readFileSync(path.join(root, `platform/${platform}.manifest.json`), 'utf8'));
   const result = qualifyMobileDeviceManifest420(manifest);
-  if (!result.qualified) throw new Error(`${platform} mobile package did not qualify`);
+  if (!result.qualified || !result.nonExportableSessionSigner || !result.nativeTransactionSubmit) {
+    throw new Error(`${platform} mobile package did not qualify native signing boundaries`);
+  }
 }
 
 console.log('420 Wallet mobile release qualification passed');

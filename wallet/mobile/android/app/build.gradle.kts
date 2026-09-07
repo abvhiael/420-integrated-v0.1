@@ -13,6 +13,10 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "0.1.0-w11"
+
+        val walletLinkHost = providers.gradleProperty("walletLinkHost").orElse("wallet.invalid").get()
+        manifestPlaceholders["walletLinkHost"] = walletLinkHost
+        buildConfigField("String", "WALLET_LINK_HOST", "\"$walletLinkHost\"")
     }
 
     buildFeatures {

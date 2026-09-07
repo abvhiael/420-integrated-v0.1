@@ -14,12 +14,13 @@ const required = [
   'android/app/src/main/java/io/fourtwenty/wallet/AndroidSessionKey420.kt',
   'android/app/src/main/java/io/fourtwenty/wallet/AndroidPasskey420.kt',
   'android/app/src/main/java/io/fourtwenty/wallet/AndroidBiometricGate420.kt',
+  'android/app/src/main/java/io/fourtwenty/wallet/NativeNetworkConfig420.kt',
   'android/app/src/main/java/io/fourtwenty/wallet/AndroidRpcTransport420.kt',
   'android/app/src/main/java/io/fourtwenty/wallet/AndroidTransactionSubmitter420.kt',
   'ios/project.yml','ios/Wallet420/Info.plist','ios/Wallet420/Wallet420App.swift',
   'ios/Wallet420/NativeWalletBridge420.swift','ios/Wallet420/KeychainStore420.swift',
   'ios/Wallet420/SessionKey420.swift','ios/Wallet420/Passkey420.swift','ios/Wallet420/BiometricGate420.swift',
-  'ios/Wallet420/RpcTransport420.swift','ios/Wallet420/TransactionSubmitter420.swift',
+  'ios/Wallet420/NativeNetworkConfig420.swift','ios/Wallet420/RpcTransport420.swift','ios/Wallet420/TransactionSubmitter420.swift',
 ];
 
 const bridgeCapabilities = ['rpc','secureGet','secureSet','secureDelete','createPasskey','getPasskey','authorizeBiometric','ensureSessionKey','sessionPublicKey','rotateSessionKey','invalidateSessionKey','signSessionHash','submitTransaction','openExternal','onResume','onPause'];
@@ -65,6 +66,32 @@ test('W11.4 RPC transport is HTTPS-only, allowlisted and never a signing authori
     assert.match(source, /eth_call/); assert.match(source, /eth_estimateGas/);
     assert.match(source, /eth_sendUserOperation/); assert.match(source, /eth_getUserOperationReceipt/);
     assert.doesNotMatch(source, /personal_sign|eth_sendTransaction|eth_signTypedData/i);
+  }
+});
+
+test('W11.4 network configuration is injected, canonicalizes chain ids and rejects insecure endpoints', () => {
+  const android = fs.readFileSync(path.join(root, 'android/app/src/main/java/io/fourtwenty/wallet/NativeNetworkConfig420.kt'), 'utf8');
+  const ios = fs.readFileSync(path.join(root, 'ios/Wallet420/NativeNetworkConfig420.swift'), 'utf8');
+  for (const source of [android, ios]) {
+    assert.match(source, /chainId|chainID/);
+    assert.match(source, /rpcUrl|rpcURL/);
+    assert.match(source, /normalizeChainId|normalizeChainID/);
+    assert.match(source, /https/i);
+    assert.doesNotMatch(source, /privateKey|remoteSigner|signingService/i);
+  }
+  assert.match(android, /fromAsset/);
+  assert.match(ios, /Bundle/);
+});
+
+test('W11.4 RPC transport classifies timeout, network, HTTP, malformed and JSON-RPC errors', () => {
+  const android = fs.readFileSync(path.join(root, 'android/app/src/main/java/io/fourtwenty/wallet/AndroidRpcTransport420.kt'), 'utf8');
+  const ios = fs.readFileSync(path.join(root, 'ios/Wallet420/RpcTransport420.swift'), 'utf8');
+  assert.match(android, /SocketTimeoutException/); assert.match(android, /NetworkFailure/); assert.match(android, /HttpFailure/); assert.match(android, /MalformedResponse/); assert.match(android, /RpcFailure/);
+  assert.match(ios, /\.timedOut/); assert.match(ios, /networkFailure/); assert.match(ios, /httpFailure/); assert.match(ios, /malformedResponse/); assert.match(ios, /rpcFailure/);
+  for (const source of [android, ios]) {
+    assert.match(source, /jsonrpc/);
+    assert.match(source, /response id mismatch/);
+    assert.match(source, /missing result/);
   }
 });
 

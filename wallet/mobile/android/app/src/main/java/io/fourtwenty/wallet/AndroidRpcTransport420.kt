@@ -76,7 +76,7 @@ class AndroidRpcTransport420(
                 val error = json.optJSONObject("error")
                 throw RpcTransport420Exception.RpcFailure(
                     code = error?.optInt("code") ?: 0,
-                    message = error?.optString("message")?.takeIf { it.isNotBlank() } ?: "unknown RPC error",
+                    rpcMessage = error?.optString("message")?.takeIf { it.isNotBlank() } ?: "unknown RPC error",
                 )
             }
             if (!json.has("result")) throw RpcTransport420Exception.MalformedResponse("missing result")

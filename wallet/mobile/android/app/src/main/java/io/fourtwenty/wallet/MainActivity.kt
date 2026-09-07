@@ -71,6 +71,7 @@ class MainActivity : Activity() {
 
     private fun consumePendingPush() {
         val reference = AndroidPush420.consumePending(this) ?: return
+        // Shared Wallet Core must canonically rehydrate and revalidate before approval.
         titleView.text = "Approval Request"
         statusView.text = "push (${reference.state})\n${reference.origin}\n${reference.requestId}"
     }

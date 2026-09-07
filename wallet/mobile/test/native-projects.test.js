@@ -13,10 +13,12 @@ const required = [
   'android/app/src/main/AndroidManifest.xml',
   'android/app/src/main/java/io/fourtwenty/wallet/MainActivity.kt',
   'android/app/src/main/java/io/fourtwenty/wallet/NativeWalletBridge420.kt',
+  'android/app/src/main/java/io/fourtwenty/wallet/AndroidSecureStore420.kt',
   'ios/project.yml',
   'ios/Wallet420/Info.plist',
   'ios/Wallet420/Wallet420App.swift',
   'ios/Wallet420/NativeWalletBridge420.swift',
+  'ios/Wallet420/KeychainStore420.swift',
 ];
 
 const bridgeCapabilities = [
@@ -46,6 +48,15 @@ test('iOS and Android expose the same qualified authority boundary', () => {
     assert.match(android, new RegExp(capability), `Android missing bridge capability ${capability}`);
     assert.match(ios, new RegExp(capability), `iOS missing bridge capability ${capability}`);
   }
+});
+
+test('native secure storage is device-bound', () => {
+  const android = fs.readFileSync(path.join(root, 'android/app/src/main/java/io/fourtwenty/wallet/AndroidSecureStore420.kt'), 'utf8');
+  const ios = fs.readFileSync(path.join(root, 'ios/Wallet420/KeychainStore420.swift'), 'utf8');
+  assert.match(android, /AndroidKeyStore/);
+  assert.match(android, /AES\/GCM\/NoPadding/);
+  assert.match(ios, /kSecAttrAccessibleWhenUnlockedThisDeviceOnly/);
+  assert.match(ios, /SecItem(Add|Update|CopyMatching|Delete)/);
 });
 
 test('native bootstrap contains no remote signing fallback or plaintext private key', () => {

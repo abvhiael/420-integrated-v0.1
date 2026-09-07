@@ -16,6 +16,14 @@ test('W11.8 Android enables screenshot privacy and local background lock', () =>
   assert.match(androidSecurity, /rootIndicators/);
   assert.match(androidApp, /override fun onPause/);
   assert.match(androidApp, /onBackground/);
+  assert.match(androidApp, /localLocked = true/);
+});
+
+test('W11.8 Android local unlock requires existing biometric device-presence gate', () => {
+  assert.match(androidApp, /AndroidBiometricGate420/);
+  assert.match(androidApp, /authorize\("Unlock 420 Wallet after backgrounding"\)/);
+  assert.match(androidApp, /if \(!localLocked\) consumePendingPush\(\)/);
+  assert.match(androidApp, /Local presence only restores presentation access; canonical SmartAccount authority is unchanged/);
 });
 
 test('W11.8 iOS shields background and captured screens', () => {
@@ -24,6 +32,14 @@ test('W11.8 iOS shields background and captured screens', () => {
   assert.match(iosApp, /capturedDidChangeNotification/);
   assert.match(iosApp, /case \.inactive, \.background/);
   assert.match(iosApp, /privacyShield = true/);
+  assert.match(iosApp, /localLocked = true/);
+});
+
+test('W11.8 iOS local unlock requires existing device-owner authentication gate', () => {
+  assert.match(iosApp, /BiometricGate420/);
+  assert.match(iosApp, /authorize\(reason: "Unlock 420 Wallet after backgrounding"\)/);
+  assert.match(iosApp, /guard !localLocked else \{ return \}/);
+  assert.match(iosApp, /Local presence only restores presentation access; canonical SmartAccount authority is unchanged/);
 });
 
 test('hostile device signals remain non-authoritative presentation and risk inputs', () => {

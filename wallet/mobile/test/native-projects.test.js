@@ -85,6 +85,23 @@ test('W11.2 session signing keys are local, non-exportable and lifecycle-managed
   assert.doesNotMatch(ios, /SecKeyCopyExternalRepresentation\(privateKey/i);
 });
 
+test('W11.2 enforces locked-device behavior and versioned migration', () => {
+  const android = fs.readFileSync(path.join(root, 'android/app/src/main/java/io/fourtwenty/wallet/AndroidSessionKey420.kt'), 'utf8');
+  const ios = fs.readFileSync(path.join(root, 'ios/Wallet420/SessionKey420.swift'), 'utf8');
+
+  assert.match(android, /setUnlockedDeviceRequired\(true\)/);
+  assert.match(android, /KeyPermanentlyInvalidatedException/);
+  assert.match(android, /UserNotAuthenticatedException/);
+  assert.match(android, /wallet420\.session\.v1\./);
+  assert.match(android, /migrateLegacyAlias/);
+
+  assert.match(ios, /kSecAttrAccessibleWhenUnlockedThisDeviceOnly/);
+  assert.match(ios, /errSecInteractionNotAllowed/);
+  assert.match(ios, /io\.fourtwenty\.wallet\.session\.v1\./);
+  assert.match(ios, /legacyTagPrefix/);
+  assert.match(ios, /migrateLegacyAlias/);
+});
+
 test('native bootstrap contains no remote signing fallback or plaintext private key', () => {
   for (const relative of required.filter((file) => /\.(kt|swift)$/.test(file))) {
     const text = fs.readFileSync(path.join(root, relative), 'utf8');

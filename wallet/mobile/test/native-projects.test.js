@@ -58,8 +58,9 @@ test('W11.3 native passkeys preserve canonical WebAuthn material and local biome
 test('W11.4 RPC transport is HTTPS-only, allowlisted and never a signing authority', () => {
   const android = fs.readFileSync(path.join(root, 'android/app/src/main/java/io/fourtwenty/wallet/AndroidRpcTransport420.kt'), 'utf8');
   const ios = fs.readFileSync(path.join(root, 'ios/Wallet420/RpcTransport420.swift'), 'utf8');
+  assert.match(android, /https:\/\//i);
+  assert.match(ios, /url\.scheme\?\.lowercased\(\)\s*==\s*["']https["']/);
   for (const source of [android, ios]) {
-    assert.match(source, /https:\/\//i);
     assert.match(source, /allowedMethods/);
     assert.match(source, /eth_call/); assert.match(source, /eth_estimateGas/);
     assert.match(source, /eth_sendUserOperation/); assert.match(source, /eth_getUserOperationReceipt/);

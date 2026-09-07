@@ -4,6 +4,8 @@
   "capabilities": {
     "secureStorage": "keychain",
     "passkeys": true,
+    "nonExportableSessionSigner": true,
+    "nativeTransactionSubmit": true,
     "universalLinks": true,
     "lifecycleResume": true,
     "lifecyclePause": true

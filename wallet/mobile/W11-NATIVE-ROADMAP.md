@@ -26,14 +26,17 @@ W11 converts the qualified mobile architecture into real platform applications a
 - CI compiles Android debug and iOS simulator applications on every relevant pull request.
 - Closeout qualification passed on Wallet Mobile Verification #196 and Integrated Qualification #1305.
 
-### W11.2 — Hardware-backed secure storage + session keys — IN PROGRESS
+### W11.2 — Hardware-backed secure storage + session keys — QUALIFYING
 - Android Keystore-backed AES-GCM secure storage implemented for device-bound wallet state.
 - iOS Keychain storage implemented with `kSecAttrAccessibleWhenUnlockedThisDeviceOnly`.
 - Android non-exportable P-256 session keys implemented inside `AndroidKeyStore`, preferring StrongBox on API 28+ and falling back to platform AndroidKeyStore / TEE-backed storage when StrongBox is unavailable.
+- Android session keys now require an unlocked device on API 28+ and explicitly classify permanently-invalidated and locked-device signing failures.
 - iOS non-exportable P-256 session keys implemented with Secure Enclave preference on physical devices and a non-exportable Keychain-backed simulator/unsupported-device fallback.
-- Session-key lifecycle is now part of the native bridge: ensure, public-key retrieval, rotate, invalidate, and local hash signing.
-- Qualification guards require both platform key implementations, lifecycle methods, hardware-backed policy markers, and absence of private-key export paths.
-- Next: compile qualification of the new key managers, invalidation/error-state hardening, device-lock behavior, migration/version metadata, and lifecycle regression tests.
+- iOS session keys are device-only and unavailable while the device is locked; `errSecInteractionNotAllowed` is surfaced as a locked-device state.
+- Session-key lifecycle is part of the native bridge: ensure, public-key retrieval, rotate, invalidate, and local hash signing.
+- Both platforms now use versioned v1 key namespaces. Legacy W11 aliases are deleted and replaced with freshly generated v1 hardware-backed keys rather than exporting/copying old private material.
+- Qualification guards cover StrongBox/Secure Enclave policy, unlocked-device behavior, invalidation states, v1 migration markers, lifecycle methods, and absence of private-key export paths.
+- Closeout condition: current-head Android/iOS compile and shared Wallet/Integrated qualification green.
 
 ### W11.3 — Native passkeys + biometric authorization
 - AuthenticationServices passkeys on iOS.

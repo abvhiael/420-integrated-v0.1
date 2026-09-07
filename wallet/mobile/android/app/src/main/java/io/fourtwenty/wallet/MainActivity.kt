@@ -21,12 +21,25 @@ class MainActivity : Activity() {
             onError = { getSharedPreferences("wallet420_push_v1", MODE_PRIVATE).edit().remove("fcm_token").apply() },
         )
         handleIntent(intent)
+        consumePendingPush()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        consumePendingPush()
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
         handleIntent(intent)
+        consumePendingPush()
+    }
+
+    private fun consumePendingPush() {
+        val reference = AndroidPush420.consumePending(this) ?: return
+        // Presentation only. Shared Wallet Core must canonically rehydrate and revalidate before approval.
+        statusView.text = "420 Wallet push (${reference.state})\n${reference.origin}\n${reference.requestId}"
     }
 
     private fun handleIntent(intent: Intent?) {

@@ -9,6 +9,7 @@ protocol NativeWalletBridge420 {
     func secureDelete(key: String) async throws
     func createPasskey(requestJSON: String) async throws -> String
     func getPasskey(requestJSON: String) async throws -> String
+    func authorizeBiometric(reason: String) async throws -> Bool
     func ensureSessionKey(alias: String) async throws -> Data
     func sessionPublicKey(alias: String) async throws -> Data
     func rotateSessionKey(alias: String) async throws -> Data

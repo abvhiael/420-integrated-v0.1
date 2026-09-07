@@ -38,15 +38,18 @@ W11 converts the qualified mobile architecture into real platform applications a
 - Qualification guards cover StrongBox/Secure Enclave policy, unlocked-device behavior, invalidation states, v1 migration markers, lifecycle methods, and absence of private-key export paths.
 - Closeout qualification passed on Wallet Mobile Verification #218 and Integrated Qualification #1316.
 
-### W11.3 — Native passkeys + biometric authorization — IN PROGRESS
-- Android Credential Manager adapter now performs native `CreatePublicKeyCredentialRequest` and `GetPublicKeyCredentialOption` ceremonies and returns canonical WebAuthn response JSON to Wallet Core.
-- iOS AuthenticationServices adapter now performs platform passkey registration and assertion ceremonies and returns canonical WebAuthn response material (`clientDataJSON`, attestation/authenticator data, signature, credential id, user handle).
-- Android biometric approval gate uses `BiometricPrompt` with `BIOMETRIC_STRONG` or device credential.
-- iOS biometric approval gate uses `LocalAuthentication` / `deviceOwnerAuthentication` for Face ID, Touch ID, or device credential policy.
-- Biometric approval remains a local user-presence gate only. It never signs, creates capability authority, or bypasses PK42/WebAuthn verification.
-- Native bridge vocabulary now includes explicit biometric authorization alongside passkey creation/assertion.
-- Qualification guards require both platform passkey implementations and reject biometric gates that contain signing/private-key authority.
-- Next: compile qualification, cancellation/error-state hardening, relying-party/origin binding regression coverage, and canonical PK42 payload compatibility tests.
+### W11.3 — Native passkeys + biometric authorization — QUALIFYING
+- Android Credential Manager performs native registration/assertion and returns canonical WebAuthn response JSON to Wallet Core.
+- iOS AuthenticationServices performs native registration/assertion and returns canonical WebAuthn response material.
+- Android `BiometricPrompt` and iOS `LocalAuthentication` provide local user-presence approval only; they never sign or create capability authority.
+- Both native passkey adapters require WebAuthn user verification.
+- Android and iOS now reject malformed relying-party identifiers that contain URL schemes, ports, path separators, or empty hostname labels.
+- Platform cancellation is normalized into an explicit cancelled state instead of being treated as an opaque credential failure.
+- Android validates returned WebAuthn credential type/id/rawId plus registration `attestationObject` and assertion `authenticatorData`/`signature` fields before returning the response to Wallet Core.
+- iOS explicitly validates non-empty attestation/authenticator/signature material and emits the canonical `id`, `rawId`, `type: public-key`, `clientDataJSON`, attestation/authenticator data, signature, and userHandle response vocabulary.
+- Regression guards cover RP binding, cancellation classification, canonical PK42/WebAuthn payload fields, and the rule that biometric gates contain no signing/private-key authority.
+- Initial W11.3 implementation passed Wallet Mobile Verification #236 and Integrated Qualification #1325.
+- Closeout condition: current hardening head passes Android/iOS native compile plus Wallet Mobile and Integrated qualification.
 
 ### W11.4 — Native transaction submission and RPC transport
 - Platform HTTP transport with chain allowlisting and TLS-only endpoints.

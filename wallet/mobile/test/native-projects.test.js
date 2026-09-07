@@ -17,10 +17,12 @@ const required = [
   'android/app/src/main/java/io/fourtwenty/wallet/NativeNetworkConfig420.kt',
   'android/app/src/main/java/io/fourtwenty/wallet/AndroidRpcTransport420.kt',
   'android/app/src/main/java/io/fourtwenty/wallet/AndroidTransactionSubmitter420.kt',
-  'ios/project.yml','ios/Wallet420/Info.plist','ios/Wallet420/Wallet420App.swift',
+  'android/app/src/main/java/io/fourtwenty/wallet/AndroidDappHandoff420.kt',
+  'ios/project.yml','ios/Wallet420/Info.plist','ios/Wallet420/Wallet420App.swift','ios/Wallet420/Wallet420.entitlements',
   'ios/Wallet420/NativeWalletBridge420.swift','ios/Wallet420/KeychainStore420.swift',
   'ios/Wallet420/SessionKey420.swift','ios/Wallet420/Passkey420.swift','ios/Wallet420/BiometricGate420.swift',
   'ios/Wallet420/NativeNetworkConfig420.swift','ios/Wallet420/RpcTransport420.swift','ios/Wallet420/TransactionSubmitter420.swift',
+  'ios/Wallet420/DappHandoff420.swift',
 ];
 
 const bridgeCapabilities = ['rpc','secureGet','secureSet','secureDelete','createPasskey','getPasskey','authorizeBiometric','ensureSessionKey','sessionPublicKey','rotateSessionKey','invalidateSessionKey','signSessionHash','submitTransaction','openExternal','onResume','onPause'];
@@ -102,6 +104,27 @@ test('W11.4 UserOperation submission fails closed on chain, account and authoriz
     assert.match(source, /owner/); assert.match(source, /recovery/); assert.match(source, /session/);
     assert.match(source, /chain/i); assert.match(source, /account/i); assert.match(source, /authorizationEpoch/);
     assert.match(source, /eth_sendUserOperation/); assert.match(source, /eth_getUserOperationReceipt/);
+  }
+});
+
+test('W11.5 native projects expose verified production links and dev-only custom scheme', () => {
+  const manifest = fs.readFileSync(path.join(root, 'android/app/src/main/AndroidManifest.xml'), 'utf8');
+  const gradle = fs.readFileSync(path.join(root, 'android/app/build.gradle.kts'), 'utf8');
+  const project = fs.readFileSync(path.join(root, 'ios/project.yml'), 'utf8');
+  const entitlements = fs.readFileSync(path.join(root, 'ios/Wallet420/Wallet420.entitlements'), 'utf8');
+  assert.match(manifest, /android:autoVerify="true"/); assert.match(manifest, /android:scheme="https"/); assert.match(manifest, /\$\{walletLinkHost\}/); assert.match(manifest, /420wallet/);
+  assert.match(gradle, /walletLinkHost/); assert.match(gradle, /WALLET_LINK_HOST/);
+  assert.match(project, /WALLET_LINK_HOST/); assert.match(project, /CODE_SIGN_ENTITLEMENTS/);
+  assert.match(entitlements, /com\.apple\.developer\.associated-domains/); assert.match(entitlements, /applinks:\$\(WALLET_LINK_HOST\)/);
+});
+
+test('W11.5 native handoff parsers bind origin, request, expiry and callback without signing authority', () => {
+  const android = fs.readFileSync(path.join(root, 'android/app/src/main/java/io/fourtwenty/wallet/AndroidDappHandoff420.kt'), 'utf8');
+  const ios = fs.readFileSync(path.join(root, 'ios/Wallet420/DappHandoff420.swift'), 'utf8');
+  for (const source of [android, ios]) {
+    assert.match(source, /requestId|requestID/); assert.match(source, /expiresAt/); assert.match(source, /callback/); assert.match(source, /origin/);
+    assert.match(source, /10 \* 60/); assert.match(source, /420wallet/); assert.match(source, /https/);
+    assert.doesNotMatch(source, /privateKey|remoteSigner|signingService|eth_sendTransaction|personal_sign/i);
   }
 });
 

@@ -10,6 +10,8 @@ export function qualifyMobileDeviceManifest420(manifest = {}) {
 
   if (!['keychain', 'keystore'].includes(capabilities.secureStorage)) throw new Error('native secure storage declaration required');
   assertBoolean(capabilities.passkeys, 'native passkey capability');
+  assertBoolean(capabilities.nonExportableSessionSigner, 'native non-exportable session signer capability');
+  assertBoolean(capabilities.nativeTransactionSubmit, 'native transaction submission capability');
   assertBoolean(capabilities.lifecycleResume, 'resume lifecycle capability');
   assertBoolean(capabilities.lifecyclePause, 'pause lifecycle capability');
 
@@ -28,6 +30,8 @@ export function qualifyMobileDeviceManifest420(manifest = {}) {
     platform: manifest.platform,
     secureStorage: capabilities.secureStorage,
     passkeys: true,
+    nonExportableSessionSigner: true,
+    nativeTransactionSubmit: true,
     deepLinks: true,
     lifecycle: true,
     exportablePrivateKeys: false,

@@ -61,7 +61,7 @@ W11 converts the qualified mobile architecture into real platform applications a
 - Callback completion remains expiry-bound, origin/request-bound, and single-shot.
 - Closeout qualification passed on Wallet Mobile Verification #314 and Integrated Qualification #1364.
 
-### W11.6 — Push authorization — QUALIFYING
+### W11.6 — Push authorization — COMPLETE
 - Shared push envelope accepts only HTTPS `origin`, opaque `requestId`, and bounded `expiresAt`; extra fields fail closed.
 - Push payloads carry references only and explicitly exclude signatures, private keys, UserOperations, authorization state, and pre-authorized execution.
 - APNs and FCM registration paths are present in the real native projects.
@@ -71,14 +71,15 @@ W11 converts the qualified mobile architecture into real platform applications a
 - The shared replay guard rejects duplicate origin/request-ID pairs before a second canonical fetch and rejects stale references before any fetch.
 - Canonical push rehydration revalidates origin, request ID, active SmartAccount, chain ID, authorization epoch, and expiry before approval.
 - Native lifecycle regression guards require one-shot pending-reference consumption and forbid push code from acquiring signing/private-key/UserOperation authority.
-- First W11.6 slice qualified on Wallet Mobile Verification #340 and Integrated Qualification #1377.
-- Closeout condition: current lifecycle/replay-hardening head passes shared runtime tests, Android/iOS native compilation, Wallet Mobile Verification, and Integrated Qualification.
+- Closeout qualification passed on Wallet Mobile Verification #364 and Integrated Qualification #1389.
 
-### W11.7 — Native Wallet / Apps / Activity / Security UX
-- Wallet balances and assets.
-- Ecosystem Apps gateway.
-- Activity/UserOperation status.
-- Security center for passkeys, sessions, permissions, recovery, and device state.
+### W11.7 — Native Wallet / Apps / Activity / Security UX — IN PROGRESS
+- Shared app-shell navigation now treats Wallet, Apps, Activity, and Security as first-class native surfaces while preserving account/connect/approval/settings subflows.
+- Wallet presentation model includes portfolio total, normalized asset rows, receive/send/connect actions, and recent activity count.
+- Apps gateway model accepts HTTPS application destinations only and carries no signing authority.
+- Activity model presents UserOperation status, chain, hash, and timestamp without introducing transaction execution authority.
+- Security Center model surfaces passkeys, sessions, dApp permissions, recovery, and device status with management actions routed back through qualified Wallet Core flows.
+- Current step: wire these presentation models into Android/iOS native navigation and qualify that native UI code remains presentation-only.
 
 ### W11.8 — Device lifecycle and hostile-state hardening
 - Lock/background/resume behavior.

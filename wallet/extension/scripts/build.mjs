@@ -12,7 +12,6 @@ const sourceFiles = [
   'inpage.js',
   'popup.html',
   'popup.js',
-  'popup.css',
   'authority.html',
   'authority.js',
 ];

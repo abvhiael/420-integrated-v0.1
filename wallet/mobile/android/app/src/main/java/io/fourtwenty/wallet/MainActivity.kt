@@ -14,6 +14,7 @@ class MainActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        AndroidDeviceSecurity420.enablePrivacyShield(this)
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(32, 48, 32, 32)
@@ -24,6 +25,12 @@ class MainActivity : Activity() {
         root.addView(statusView)
         root.addView(navigationRow())
         setContentView(root)
+
+        val securitySignals = AndroidDeviceSecurity420.inspect(this)
+        if (securitySignals.rooted || securitySignals.debuggerAttached) {
+            titleView.text = "420 Wallet Locked"
+            statusView.text = "device security risk detected\nre-authentication required"
+        }
 
         AndroidPush420.register(
             onToken = { token -> getSharedPreferences("wallet420_push_v1", MODE_PRIVATE).edit().putString("fcm_token", token).apply() },
@@ -36,6 +43,14 @@ class MainActivity : Activity() {
     override fun onResume() {
         super.onResume()
         consumePendingPush()
+    }
+
+    override fun onPause() {
+        AndroidDeviceSecurity420.onBackground(this) {
+            titleView.text = "420 Wallet Locked"
+            statusView.text = "unlock required after backgrounding"
+        }
+        super.onPause()
     }
 
     override fun onNewIntent(intent: Intent) {

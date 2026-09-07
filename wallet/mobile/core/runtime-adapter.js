@@ -31,6 +31,9 @@ export function createMobileRuntimeAdapter420(capabilities = {}) {
     platform: typeof capabilities.platform === 'string' && capabilities.platform ? capabilities.platform : 'mobile',
     request(request) {
       const normalized = normalizeRpcRequest(request);
+      if (normalized.method === 'personal_sign' || normalized.method === 'eth_sendTransaction') {
+        throw new Error('mobile RPC transport cannot provide signing authority');
+      }
       return capabilities.rpc(normalized.method, normalized.params);
     },
     secureStorage: Object.freeze({
@@ -64,6 +67,17 @@ export function createMobileRuntimeAdapter420(capabilities = {}) {
     },
   };
 
+  if (typeof capabilities.sessionSigner?.signHash === 'function') {
+    adapter.sessionSigner = Object.freeze({
+      signHash(address, hash) { return capabilities.sessionSigner.signHash(address, hash); },
+    });
+  }
+  if (typeof capabilities.transaction?.submit === 'function') {
+    adapter.transaction = Object.freeze({
+      submit(transaction) { return capabilities.transaction.submit(transaction); },
+    });
+  }
+
   return Object.freeze(adapter);
 }
 
@@ -82,6 +96,8 @@ export function inspectMobileCapabilities420(capabilities = {}) {
     rpc: typeof capabilities.rpc === 'function',
     secureStorage: ['get', 'set', 'delete'].every((key) => typeof capabilities.secureStorage?.[key] === 'function'),
     passkeys: ['create', 'get'].every((key) => typeof capabilities.passkeys?.[key] === 'function'),
+    sessionSigner: typeof capabilities.sessionSigner?.signHash === 'function',
+    transactionSubmit: typeof capabilities.transaction?.submit === 'function',
     openExternalUrl: typeof capabilities.openExternalUrl === 'function',
     required: [...REQUIRED_CAPABILITIES],
   });

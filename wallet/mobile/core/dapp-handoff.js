@@ -34,13 +34,21 @@ export function parseMobileDappHandoff420(value, {
   allowDevelopmentScheme = false,
 } = {}) {
   if (typeof value !== 'string' || !value) throw rpcError(-32600, 'dApp handoff URL required');
+
+  // The WHATWG URL parser rejects schemes beginning with a digit, so recognize
+  // the explicit 420wallet development scheme before applying production URL parsing.
+  const isDevelopment = value.toLowerCase().startsWith('420wallet://');
+  if (isDevelopment && !allowDevelopmentScheme) throw rpcError(4100, 'development wallet scheme is disabled');
+
   let url;
-  try { url = new URL(value); } catch { throw rpcError(-32600, 'invalid dApp handoff URL'); }
+  try {
+    url = new URL(isDevelopment ? `https://${value.slice('420wallet://'.length)}` : value);
+  } catch {
+    throw rpcError(-32600, 'invalid dApp handoff URL');
+  }
   if (url.hash || url.username || url.password) throw rpcError(-32600, 'dApp handoff URL contains forbidden components');
 
-  const isDevelopment = url.protocol === '420wallet:';
   if (isDevelopment) {
-    if (!allowDevelopmentScheme) throw rpcError(4100, 'development wallet scheme is disabled');
     if (url.hostname !== 'connect' || (url.pathname && url.pathname !== '/')) throw rpcError(-32600, 'invalid development wallet handoff path');
   } else {
     if (url.protocol !== 'https:') throw rpcError(4100, 'production wallet handoff must use https');

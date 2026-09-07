@@ -26,23 +26,27 @@ W11 converts the qualified mobile architecture into real platform applications a
 - CI compiles Android debug and iOS simulator applications on every relevant pull request.
 - Closeout qualification passed on Wallet Mobile Verification #196 and Integrated Qualification #1305.
 
-### W11.2 — Hardware-backed secure storage + session keys — QUALIFYING
+### W11.2 — Hardware-backed secure storage + session keys — COMPLETE
 - Android Keystore-backed AES-GCM secure storage implemented for device-bound wallet state.
 - iOS Keychain storage implemented with `kSecAttrAccessibleWhenUnlockedThisDeviceOnly`.
 - Android non-exportable P-256 session keys implemented inside `AndroidKeyStore`, preferring StrongBox on API 28+ and falling back to platform AndroidKeyStore / TEE-backed storage when StrongBox is unavailable.
-- Android session keys now require an unlocked device on API 28+ and explicitly classify permanently-invalidated and locked-device signing failures.
+- Android session keys require an unlocked device on API 28+ and explicitly classify permanently-invalidated and locked-device signing failures.
 - iOS non-exportable P-256 session keys implemented with Secure Enclave preference on physical devices and a non-exportable Keychain-backed simulator/unsupported-device fallback.
 - iOS session keys are device-only and unavailable while the device is locked; `errSecInteractionNotAllowed` is surfaced as a locked-device state.
 - Session-key lifecycle is part of the native bridge: ensure, public-key retrieval, rotate, invalidate, and local hash signing.
-- Both platforms now use versioned v1 key namespaces. Legacy W11 aliases are deleted and replaced with freshly generated v1 hardware-backed keys rather than exporting/copying old private material.
+- Both platforms use versioned v1 key namespaces. Legacy W11 aliases are deleted and replaced with freshly generated v1 hardware-backed keys rather than exporting/copying old private material.
 - Qualification guards cover StrongBox/Secure Enclave policy, unlocked-device behavior, invalidation states, v1 migration markers, lifecycle methods, and absence of private-key export paths.
-- Closeout condition: current-head Android/iOS compile and shared Wallet/Integrated qualification green.
+- Closeout qualification passed on Wallet Mobile Verification #218 and Integrated Qualification #1316.
 
-### W11.3 — Native passkeys + biometric authorization
-- AuthenticationServices passkeys on iOS.
-- Credential Manager / passkeys on Android.
-- Face ID / Touch ID and Android biometric policy gates where appropriate.
-- Preserve canonical WebAuthn/PK42 payload semantics and signer/account binding.
+### W11.3 — Native passkeys + biometric authorization — IN PROGRESS
+- Android Credential Manager adapter now performs native `CreatePublicKeyCredentialRequest` and `GetPublicKeyCredentialOption` ceremonies and returns canonical WebAuthn response JSON to Wallet Core.
+- iOS AuthenticationServices adapter now performs platform passkey registration and assertion ceremonies and returns canonical WebAuthn response material (`clientDataJSON`, attestation/authenticator data, signature, credential id, user handle).
+- Android biometric approval gate uses `BiometricPrompt` with `BIOMETRIC_STRONG` or device credential.
+- iOS biometric approval gate uses `LocalAuthentication` / `deviceOwnerAuthentication` for Face ID, Touch ID, or device credential policy.
+- Biometric approval remains a local user-presence gate only. It never signs, creates capability authority, or bypasses PK42/WebAuthn verification.
+- Native bridge vocabulary now includes explicit biometric authorization alongside passkey creation/assertion.
+- Qualification guards require both platform passkey implementations and reject biometric gates that contain signing/private-key authority.
+- Next: compile qualification, cancellation/error-state hardening, relying-party/origin binding regression coverage, and canonical PK42 payload compatibility tests.
 
 ### W11.4 — Native transaction submission and RPC transport
 - Platform HTTP transport with chain allowlisting and TLS-only endpoints.

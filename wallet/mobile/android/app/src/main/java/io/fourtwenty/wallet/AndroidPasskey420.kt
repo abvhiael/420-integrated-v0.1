@@ -1,16 +1,16 @@
 package io.fourtwenty.wallet
 
 import android.app.Activity
-import androidx.credentials.CreateCredentialCancellationException
-import androidx.credentials.CreateCredentialException
 import androidx.credentials.CreatePublicKeyCredentialRequest
 import androidx.credentials.CreatePublicKeyCredentialResponse
 import androidx.credentials.CredentialManager
-import androidx.credentials.GetCredentialCancellationException
-import androidx.credentials.GetCredentialException
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.GetPublicKeyCredentialOption
 import androidx.credentials.PublicKeyCredential
+import androidx.credentials.exceptions.CreateCredentialCancellationException
+import androidx.credentials.exceptions.CreateCredentialException
+import androidx.credentials.exceptions.GetCredentialCancellationException
+import androidx.credentials.exceptions.GetCredentialException
 import org.json.JSONObject
 
 /**

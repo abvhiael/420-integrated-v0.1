@@ -58,6 +58,17 @@ jobs:
       - name: Compile Android debug application
         working-directory: wallet/mobile/android
         run: gradle :app:assembleDebug --no-daemon --stacktrace
+      - name: Build unsigned Android release APK and AAB
+        working-directory: wallet/mobile/android
+        run: gradle :app:assembleRelease :app:bundleRelease --no-daemon --stacktrace
+      - name: Upload Android release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: wallet420-android-release-${{ github.sha }}
+          if-no-files-found: error
+          path: |
+            wallet/mobile/android/app/build/outputs/apk/release/*.apk
+            wallet/mobile/android/app/build/outputs/bundle/release/*.aab
       - name: Enable KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -136,3 +147,23 @@ jobs:
             -destination 'generic/platform=iOS Simulator' \
             CODE_SIGNING_ALLOWED=NO \
             build
+      - name: Build unsigned iOS generic-device archive
+        working-directory: wallet/mobile/ios
+        run: |
+          rm -rf build/Wallet420.xcarchive
+          xcodebuild \
+            -project Wallet420.xcodeproj \
+            -scheme Wallet420 \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$PWD/build/Wallet420.xcarchive" \
+            CODE_SIGNING_ALLOWED=NO \
+            archive
+          test -d build/Wallet420.xcarchive
+          test -f "build/Wallet420.xcarchive/Info.plist"
+      - name: Upload iOS unsigned archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: wallet420-ios-unsigned-archive-${{ github.sha }}
+          if-no-files-found: error
+          path: wallet/mobile/ios/build/Wallet420.xcarchive

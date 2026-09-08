@@ -22,7 +22,9 @@ assert(closeout.distribution.ios === 'AUTHORIZED_ONLY_AFTER_DEVICE_CLOSEOUT', 'i
 assert(closeout.security.committedSigningCredentials === false, 'committed signing credentials forbidden');
 assert(closeout.security.remoteSignerFallback === false, 'remote signer fallback forbidden');
 assert(closeout.security.plaintextPrivateKeyFallback === false, 'plaintext private-key fallback forbidden');
-assert(distribution.productionReadiness === 'BLOCKED_EXTERNAL_DEVICE', 'distribution qualification must remain fail-closed');
+assert(distribution.productionReadiness?.requiresDeviceCloseout === true, 'distribution qualification must require device closeout');
+assert(distribution.productionReadiness?.currentStatus === 'BLOCKED_EXTERNAL_DEVICE', 'distribution qualification must remain fail-closed');
+assert(distribution.productionReadiness?.requiredCommand === 'npm run device:closeout', 'distribution device-closeout command drift');
 assert(device.buildSha === 'UNRECORDED', 'device evidence unexpectedly claims a recorded build without closeout update');
 for (const platform of ['android', 'ios']) {
   assert(device[platform].deviceModel === 'UNRECORDED', `${platform} device model must remain unrecorded until genuine hardware qualification`);

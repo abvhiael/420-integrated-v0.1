@@ -122,11 +122,13 @@ contract ExchangeLimitOrderStateMachineHardeningV12Test is ExchangeLimitOrderSet
         sellToken.approve(address(settlement), 0);
 
         vm.prank(filler);
-        vm.expectRevert();
-        settlement.fillOrder(order, 10 ether, signature, pathHash, hops);
+        (bool ok,) = address(settlement).call(
+            abi.encodeWithSelector(settlement.fillOrder.selector, order, 10 ether, signature, pathHash, hops)
+        );
+        assertFalse(ok);
 
         assertEq(settlement.filledSellAmount(orderHash), 0);
-        assertEq(settlement.nonceOrderHash(maker, order.nonce), bytes32(0));
+        assertTrue(settlement.nonceOrderHash(maker, order.nonce) == bytes32(0));
         assertEq(sellToken.balanceOf(address(settlement)), 0);
         assertEq(sellToken.allowance(address(settlement), address(router)), 0);
     }

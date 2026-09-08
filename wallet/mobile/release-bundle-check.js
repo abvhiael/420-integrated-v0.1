@@ -22,7 +22,7 @@ assert(bundle.security.signingCredentialsCommitted === false, 'signing credentia
 assert(bundle.security.remoteSignerFallback === false, 'remote signer fallback must remain disabled');
 assert(bundle.security.plaintextPrivateKeyFallback === false, 'plaintext private key fallback must remain disabled');
 assert(android.applicationId === manifest.android.applicationId, 'android play metadata drift');
-assert(ios.bundleId === manifest.ios.bundleId, 'ios app store metadata drift');
+assert(ios.bundleIdentifier === manifest.ios.bundleId, 'ios app store metadata drift');
 for (const required of ['release-manifest.json','android/play-internal-testing.json','ios-appstore-package.json','artifact-checksums.sha256']) {
   assert(bundle.sbom.requiredComponents.includes(required), `missing required BOM component: ${required}`);
 }

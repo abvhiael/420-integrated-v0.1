@@ -4,6 +4,8 @@ pragma solidity ^0.8.24;
 library ActionIds {
     bytes32 internal constant GROWER_PROFILE_CREATE = keccak256("HC.ACTION.GROWER_PROFILE_REGISTRY.CREATE");
     bytes32 internal constant REGION_REGISTER = keccak256("HC.ACTION.REGION_REGISTRY.REGISTER");
+    bytes32 internal constant BONUS_REGION_REGISTER = keccak256("HC.ACTION.REGION_REGISTRY.BONUS_REGION_REGISTER");
+    bytes32 internal constant BONUS_REGION_SET_STATUS = keccak256("HC.ACTION.REGION_REGISTRY.BONUS_REGION_SET_STATUS");
 
     bytes32 internal constant LAND_REGISTER = keccak256("HC.ACTION.LAND_REGISTRY.REGISTER");
     bytes32 internal constant LAND_GENESIS_REGISTER = keccak256("HC.ACTION.LAND_REGISTRY.GENESIS_REGISTER");

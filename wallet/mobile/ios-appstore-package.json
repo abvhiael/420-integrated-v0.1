@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "platform": "ios",
+  "distribution": "app-store-connect",
+  "bundleIdentifier": "io.fourtwenty.wallet",
+  "productName": "420 Wallet",
+  "deploymentTarget": "16.0",
+  "buildNumber": 1,
+  "archiveName": "420 Wallet.xcarchive",
+  "exportOptionsTemplate": "ios/ExportOptions-AppStore.template.plist",
+  "associatedDomains": {
+    "required": true,
+    "configurationDriven": true
+  },
+  "pushNotifications": {
+    "required": true,
+    "apsEnvironmentConfigurationDriven": true
+  },
+  "privacyManifest": {
+    "required": true,
+    "path": "ios/Wallet420/PrivacyInfo.xcprivacy"
+  },
+  "signing": {
+    "mode": "external-only",
+    "committedCertificates": false,
+    "committedProvisioningProfiles": false,
+    "committedAppStoreConnectKeys": false
+  },
+  "physicalDeviceQualification": {
+    "requiredForProductionRelease": true,
+    "iosStatus": "BLOCKED_EXTERNAL_DEVICE"
+  }
+}

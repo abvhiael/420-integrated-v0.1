@@ -61,6 +61,18 @@ jobs:
       - name: Build unsigned Android release APK and AAB
         working-directory: wallet/mobile/android
         run: gradle :app:assembleRelease :app:bundleRelease --no-daemon --stacktrace
+      - name: Generate Android release checksums
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd wallet/mobile/android
+          mkdir -p build/release-provenance
+          {
+            echo "git_sha=${GITHUB_SHA}"
+            sha256sum app/build/outputs/apk/release/*.apk
+            sha256sum app/build/outputs/bundle/release/*.aab
+          } > build/release-provenance/SHA256SUMS.txt
+          cat build/release-provenance/SHA256SUMS.txt
       - name: Upload Android release artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -69,6 +81,7 @@ jobs:
           path: |
             wallet/mobile/android/app/build/outputs/apk/release/*.apk
             wallet/mobile/android/app/build/outputs/bundle/release/*.aab
+            wallet/mobile/android/build/release-provenance/SHA256SUMS.txt
       - name: Enable KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -150,7 +163,7 @@ jobs:
       - name: Build unsigned iOS generic-device archive
         working-directory: wallet/mobile/ios
         run: |
-          rm -rf build/Wallet420.xcarchive
+          rm -rf build/Wallet420.xcarchive build/Wallet420.xcarchive.zip build/release-provenance
           xcodebuild \
             -project Wallet420.xcodeproj \
             -scheme Wallet420 \
@@ -161,9 +174,23 @@ jobs:
             archive
           test -d build/Wallet420.xcarchive
           test -f "build/Wallet420.xcarchive/Info.plist"
+      - name: Package iOS archive and generate checksum
+        working-directory: wallet/mobile/ios
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build/release-provenance
+          ditto -c -k --sequesterRsrc --keepParent build/Wallet420.xcarchive build/Wallet420.xcarchive.zip
+          {
+            echo "git_sha=${GITHUB_SHA}"
+            shasum -a 256 build/Wallet420.xcarchive.zip
+          } > build/release-provenance/SHA256SUMS.txt
+          cat build/release-provenance/SHA256SUMS.txt
       - name: Upload iOS unsigned archive
         uses: actions/upload-artifact@v4
         with:
           name: wallet420-ios-unsigned-archive-${{ github.sha }}
           if-no-files-found: error
-          path: wallet/mobile/ios/build/Wallet420.xcarchive
+          path: |
+            wallet/mobile/ios/build/Wallet420.xcarchive.zip
+            wallet/mobile/ios/build/release-provenance/SHA256SUMS.txt

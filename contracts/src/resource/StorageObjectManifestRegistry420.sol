@@ -21,7 +21,7 @@ contract StorageObjectManifestRegistry420 is I420System {
         uint32 dataShards;
         uint32 totalShards;
         uint32 placedShards;
-        bool sealed;
+        bool isSealed;
         bool exists;
     }
 
@@ -125,7 +125,7 @@ contract StorageObjectManifestRegistry420 is I420System {
             dataShards: dataShards,
             totalShards: totalShards,
             placedShards: 0,
-            sealed: false,
+            isSealed: false,
             exists: true
         });
         emit ObjectManifestRegistered(manifestId, msg.sender, objectId, objectContentRoot, manifestHash, objectSizeBytes, dataShards, totalShards);
@@ -139,7 +139,7 @@ contract StorageObjectManifestRegistry420 is I420System {
         uint128 shardSizeBytes
     ) external returns (bytes32 placementId) {
         Manifest storage manifest = _manifest(manifestId);
-        if (manifest.sealed) revert ManifestSealed();
+        if (manifest.isSealed) revert ManifestSealed();
         if (msg.sender != manifest.controller) revert Unauthorized();
         if (shardIndex >= manifest.totalShards || agreementId == bytes32(0) || shardRoot == bytes32(0) || shardSizeBytes == 0) {
             revert InvalidPlacement();
@@ -185,9 +185,9 @@ contract StorageObjectManifestRegistry420 is I420System {
     function sealManifest(bytes32 manifestId) external {
         Manifest storage manifest = _manifest(manifestId);
         if (msg.sender != manifest.controller) revert Unauthorized();
-        if (manifest.sealed) revert ManifestSealed();
+        if (manifest.isSealed) revert ManifestSealed();
         if (manifest.placedShards != manifest.totalShards) revert IncompleteManifest();
-        manifest.sealed = true;
+        manifest.isSealed = true;
         emit ObjectManifestSealed(manifestId, manifest.placedShards);
     }
 
@@ -206,7 +206,7 @@ contract StorageObjectManifestRegistry420 is I420System {
 
     function isRetrievable(bytes32 manifestId) external view returns (bool) {
         Manifest memory manifest = _manifests[manifestId];
-        if (!manifest.exists || !manifest.sealed) return false;
+        if (!manifest.exists || !manifest.isSealed) return false;
         uint32 live;
         for (uint32 i = 0; i < manifest.totalShards; ++i) {
             bytes32 placementId = _placementByIndex[manifestId][i];

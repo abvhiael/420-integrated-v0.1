@@ -52,12 +52,16 @@ test('release metadata never embeds signing credentials or wallet secrets', () =
 
   for (const forbidden of [
     /BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY/,
-    /provisioningProfile/i,
-    /keystorePassword/i,
-    /keyPassword/i,
-    /apnsAuthKey/i,
+    /provisioningProfile\s*[:=]\s*["'][^$][^"']*["']/i,
+    /storePassword\s*=\s*["'][^"']+["']/i,
+    /keyPassword\s*=\s*["'][^"']+["']/i,
+    /apnsAuthKey\s*[:=]\s*["'][^$][^"']*["']/i,
     /remoteSigner/i,
   ]) {
     assert.doesNotMatch(files, forbidden);
   }
+
+  const gradle = read('android/app/build.gradle.kts');
+  assert.match(gradle, /providers\.environmentVariable\("WALLET420_ANDROID_KEYSTORE_PASSWORD"\)/);
+  assert.match(gradle, /providers\.environmentVariable\("WALLET420_ANDROID_KEY_PASSWORD"\)/);
 });

@@ -11,7 +11,10 @@ struct Wallet420DesignSystem {
     static let textSecondaryDark = Color(red: 169 / 255, green: 184 / 255, blue: 174 / 255)
     static let brandPrimaryLight = Color(red: 23 / 255, green: 107 / 255, blue: 58 / 255)
     static let brandPrimaryDark = Color(red: 101 / 255, green: 200 / 255, blue: 135 / 255)
+    static let dividerLight = Color(red: 220 / 255, green: 229 / 255, blue: 222 / 255)
+    static let dividerDark = Color(red: 44 / 255, green: 58 / 255, blue: 49 / 255)
 
+    static let spacingXSmall: CGFloat = 4
     static let spacingSmall: CGFloat = 8
     static let spacingMedium: CGFloat = 16
     static let spacingLarge: CGFloat = 24
@@ -31,6 +34,18 @@ struct Wallet420SurfaceModifier: ViewModifier {
     }
 }
 
+struct Wallet420CardModifier: ViewModifier {
+    @Environment(\.colorScheme) private var colorScheme
+
+    func body(content: Content) -> some View {
+        content
+            .padding(Wallet420DesignSystem.spacingMedium)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(colorScheme == .dark ? Wallet420DesignSystem.surfaceDark : Wallet420DesignSystem.surfaceLight)
+            .clipShape(RoundedRectangle(cornerRadius: Wallet420DesignSystem.cornerRadiusMedium, style: .continuous))
+    }
+}
+
 struct Wallet420PrimaryButtonStyle: ButtonStyle {
     @Environment(\.colorScheme) private var colorScheme
 
@@ -46,8 +61,27 @@ struct Wallet420PrimaryButtonStyle: ButtonStyle {
     }
 }
 
+struct Wallet420SecondaryButtonStyle: ButtonStyle {
+    @Environment(\.colorScheme) private var colorScheme
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.system(size: 14, weight: .semibold))
+            .frame(minHeight: Wallet420DesignSystem.minimumTouchTarget)
+            .padding(.horizontal, Wallet420DesignSystem.spacingMedium)
+            .background(colorScheme == .dark ? Wallet420DesignSystem.surfaceDark : Wallet420DesignSystem.surfaceLight)
+            .foregroundStyle(colorScheme == .dark ? Wallet420DesignSystem.textPrimaryDark : Wallet420DesignSystem.textPrimaryLight)
+            .clipShape(RoundedRectangle(cornerRadius: Wallet420DesignSystem.cornerRadiusMedium, style: .continuous))
+            .opacity(configuration.isPressed ? 0.82 : 1)
+    }
+}
+
 extension View {
     func wallet420Surface() -> some View {
         modifier(Wallet420SurfaceModifier())
+    }
+
+    func wallet420Card() -> some View {
+        modifier(Wallet420CardModifier())
     }
 }

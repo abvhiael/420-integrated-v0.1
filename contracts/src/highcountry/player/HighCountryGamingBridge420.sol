@@ -81,6 +81,7 @@ contract HighCountryGamingBridge420 {
     error MigrationClaimUnavailable();
     error MigrationClaimMismatch();
     error MigrationClaimAlreadyBound();
+    error EntitlementRequired();
 
     event GrowerGamingProfileBound(uint64 indexed growerProfileId, bytes32 indexed gameProfileId, address indexed account);
     event MigrationClaimBound(bytes32 indexed claimId, uint64 indexed growerProfileId, bytes32 indexed gameProfileId);
@@ -143,12 +144,77 @@ contract HighCountryGamingBridge420 {
         emit MigrationClaimBound(claimId, growerProfileId, gameProfileId);
     }
 
-    function hasActiveEntitlement(uint64 growerProfileId, bytes32 entitlementId) external view returns (bool) {
+    function hasActiveEntitlement(uint64 growerProfileId, bytes32 entitlementId) public view returns (bool) {
         bytes32 gameProfileId = gameProfileIdOfGrower[growerProfileId];
         if (gameProfileId == bytes32(0)) return false;
         if (!gameEntitlements.isActive(entitlementId)) return false;
 
         IGameEntitlementsHC420.Entitlement memory record = gameEntitlements.entitlement(entitlementId);
         return record.exists && record.gameId == HighCountryGamingIds.GAME_ID && record.profileId == gameProfileId;
+    }
+
+    function hasScopedEntitlement(
+        uint64 growerProfileId,
+        bytes32 entitlementId,
+        bytes32 expectedType,
+        bytes32 expectedContentId
+    ) public view returns (bool) {
+        bytes32 gameProfileId = gameProfileIdOfGrower[growerProfileId];
+        if (gameProfileId == bytes32(0)) return false;
+        if (!gameEntitlements.isActive(entitlementId)) return false;
+
+        IGameEntitlementsHC420.Entitlement memory record = gameEntitlements.entitlement(entitlementId);
+        return record.exists
+            && record.gameId == HighCountryGamingIds.GAME_ID
+            && record.profileId == gameProfileId
+            && record.entitlementType == expectedType
+            && record.contentId == expectedContentId;
+    }
+
+    function requireScopedEntitlement(
+        uint64 growerProfileId,
+        bytes32 entitlementId,
+        bytes32 expectedType,
+        bytes32 expectedContentId
+    ) external view {
+        if (!hasScopedEntitlement(growerProfileId, entitlementId, expectedType, expectedContentId)) {
+            revert EntitlementRequired();
+        }
+    }
+
+    function hasBonusRegion(uint64 growerProfileId, bytes32 entitlementId, bytes32 regionContentId) external view returns (bool) {
+        return hasScopedEntitlement(
+            growerProfileId,
+            entitlementId,
+            HighCountryGamingIds.ENTITLEMENT_BONUS_REGION,
+            regionContentId
+        );
+    }
+
+    function hasCosmetic(uint64 growerProfileId, bytes32 entitlementId, bytes32 cosmeticContentId) external view returns (bool) {
+        return hasScopedEntitlement(
+            growerProfileId,
+            entitlementId,
+            HighCountryGamingIds.ENTITLEMENT_COSMETIC,
+            cosmeticContentId
+        );
+    }
+
+    function hasCompetitionAccess(uint64 growerProfileId, bytes32 entitlementId, bytes32 competitionContentId) external view returns (bool) {
+        return hasScopedEntitlement(
+            growerProfileId,
+            entitlementId,
+            HighCountryGamingIds.ENTITLEMENT_COMPETITION,
+            competitionContentId
+        );
+    }
+
+    function hasGeneticsAccess(uint64 growerProfileId, bytes32 entitlementId, bytes32 geneticsContentId) external view returns (bool) {
+        return hasScopedEntitlement(
+            growerProfileId,
+            entitlementId,
+            HighCountryGamingIds.ENTITLEMENT_GENETICS,
+            geneticsContentId
+        );
     }
 }

@@ -20,6 +20,40 @@ android {
         buildConfigField("String", "WALLET_LINK_HOST", "\"$walletLinkHost\"")
     }
 
+    val releaseKeystorePath = providers.environmentVariable("WALLET420_ANDROID_KEYSTORE_PATH").orNull
+    val releaseKeystorePassword = providers.environmentVariable("WALLET420_ANDROID_KEYSTORE_PASSWORD").orNull
+    val releaseKeyAlias = providers.environmentVariable("WALLET420_ANDROID_KEY_ALIAS").orNull
+    val releaseKeyPassword = providers.environmentVariable("WALLET420_ANDROID_KEY_PASSWORD").orNull
+    val releaseSigningValues = listOf(
+        releaseKeystorePath,
+        releaseKeystorePassword,
+        releaseKeyAlias,
+        releaseKeyPassword,
+    )
+    val releaseSigningRequested = releaseSigningValues.any { !it.isNullOrBlank() }
+    val releaseSigningComplete = releaseSigningValues.all { !it.isNullOrBlank() }
+
+    if (releaseSigningRequested && !releaseSigningComplete) {
+        throw GradleException("authorized Android release signing requires all WALLET420_ANDROID_* signing environment variables")
+    }
+
+    signingConfigs {
+        if (releaseSigningComplete) {
+            create("authorizedRelease") {
+                storeFile = file(releaseKeystorePath!!)
+                storePassword = releaseKeystorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+            }
+        }
+    }
+
+    buildTypes {
+        getByName("release") {
+            signingConfig = signingConfigs.findByName("authorizedRelease")
+        }
+    }
+
     buildFeatures {
         buildConfig = true
     }

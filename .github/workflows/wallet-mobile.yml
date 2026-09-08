@@ -83,6 +83,39 @@ jobs:
       - name: Generate Xcode project
         working-directory: wallet/mobile/ios
         run: xcodegen generate
+      - name: Create and boot available iOS simulator
+        shell: bash
+        run: |
+          set -euo pipefail
+          RUNTIME_ID="$(xcrun simctl list runtimes -j | python3 -c '
+          import json, sys
+          data = json.load(sys.stdin)
+          runtimes = [r for r in data.get("runtimes", []) if r.get("isAvailable") and r.get("platform") == "iOS"]
+          if not runtimes:
+              raise SystemExit("no available iOS simulator runtime")
+          runtimes.sort(key=lambda r: tuple(int(x) for x in r.get("version", "0").split(".")), reverse=True)
+          print(runtimes[0]["identifier"])
+          ')"
+          DEVICE_TYPE_ID="$(xcrun simctl list devicetypes -j | python3 -c '
+          import json, sys
+          types = json.load(sys.stdin).get("devicetypes", [])
+          preferred = ["iPhone 16 Pro", "iPhone 16", "iPhone 15 Pro", "iPhone 15"]
+          by_name = {d.get("name"): d.get("identifier") for d in types}
+          for name in preferred:
+              if by_name.get(name):
+                  print(by_name[name])
+                  break
+          else:
+              fallback = next((d.get("identifier") for d in types if str(d.get("name", "")).startswith("iPhone")), None)
+              if not fallback:
+                  raise SystemExit("no available iPhone simulator device type")
+              print(fallback)
+          ')"
+          UDID="$(xcrun simctl create Wallet420-CI "$DEVICE_TYPE_ID" "$RUNTIME_ID")"
+          xcrun simctl boot "$UDID" || true
+          xcrun simctl bootstatus "$UDID" -b
+          echo "IOS_SIMULATOR_UDID=$UDID" >> "$GITHUB_ENV"
+          echo "Using iOS simulator runtime $RUNTIME_ID, device type $DEVICE_TYPE_ID, UDID $UDID"
       - name: Run iOS native unit + UI simulator tests
         working-directory: wallet/mobile/ios
         run: |
@@ -90,7 +123,7 @@ jobs:
             -project Wallet420.xcodeproj \
             -scheme Wallet420 \
             -sdk iphonesimulator \
-            -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=latest' \
+            -destination "platform=iOS Simulator,id=$IOS_SIMULATOR_UDID" \
             CODE_SIGNING_ALLOWED=NO \
             test
       - name: Compile iOS simulator application

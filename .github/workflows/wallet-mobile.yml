@@ -83,7 +83,7 @@ jobs:
       - name: Generate Xcode project
         working-directory: wallet/mobile/ios
         run: xcodegen generate
-      - name: Run iOS native unit tests
+      - name: Run iOS native unit + UI simulator tests
         working-directory: wallet/mobile/ios
         run: |
           xcodebuild \

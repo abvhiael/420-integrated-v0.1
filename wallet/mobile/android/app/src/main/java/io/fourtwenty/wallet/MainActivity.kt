@@ -21,14 +21,13 @@ class MainActivity : FragmentActivity() {
     private lateinit var navigation: LinearLayout
     private var localLocked = false
     private var selectedSurface = "Wallet"
+    private var onboardingActive = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         AndroidDeviceSecurity420.enablePrivacyShield(this)
 
-        val root = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-        }
+        val root = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         Wallet420DesignSystem.applyRoot(root)
 
         titleView = TextView(this).apply {
@@ -36,9 +35,7 @@ class MainActivity : FragmentActivity() {
             Wallet420DesignSystem.styleTitle(this)
             contentDescription = "420 Wallet"
         }
-        statusView = TextView(this).apply {
-            Wallet420DesignSystem.styleBody(this)
-        }
+        statusView = TextView(this).apply { Wallet420DesignSystem.styleBody(this) }
         unlockButton = Button(this).apply {
             text = "Unlock wallet"
             visibility = View.GONE
@@ -63,7 +60,9 @@ class MainActivity : FragmentActivity() {
         root.addView(navigation)
         setContentView(root)
 
-        showSurface("Wallet")
+        onboardingActive = !getSharedPreferences("wallet420_onboarding_v1", MODE_PRIVATE)
+            .getBoolean("completed", false)
+        if (onboardingActive) renderOnboardingWelcome() else showSurface("Wallet")
 
         val securitySignals = AndroidDeviceSecurity420.inspect(this)
         if (securitySignals.rooted || securitySignals.debuggerAttached) enterLocalLock("device security risk detected\nre-authentication required")
@@ -72,7 +71,7 @@ class MainActivity : FragmentActivity() {
             onToken = { token -> getSharedPreferences("wallet420_push_v1", MODE_PRIVATE).edit().putString("fcm_token", token).apply() },
             onError = { getSharedPreferences("wallet420_push_v1", MODE_PRIVATE).edit().remove("fcm_token").apply() },
         )
-        if (!localLocked) {
+        if (!localLocked && !onboardingActive) {
             handleIntent(intent)
             consumePendingPush()
         }
@@ -80,7 +79,7 @@ class MainActivity : FragmentActivity() {
 
     override fun onResume() {
         super.onResume()
-        if (!localLocked) consumePendingPush()
+        if (!localLocked && !onboardingActive) consumePendingPush()
     }
 
     override fun onPause() {
@@ -91,7 +90,7 @@ class MainActivity : FragmentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        if (!localLocked) {
+        if (!localLocked && !onboardingActive) {
             handleIntent(intent)
             consumePendingPush()
         }
@@ -110,11 +109,80 @@ class MainActivity : FragmentActivity() {
         text = label
         contentDescription = "$label tab"
         Wallet420DesignSystem.styleNavigation(this, selectedSurface == label)
-        setOnClickListener { if (!localLocked) showSurface(label) }
+        setOnClickListener { if (!localLocked && !onboardingActive) showSurface(label) }
+    }
+
+    private fun renderOnboardingWelcome() {
+        onboardingActive = true
+        navigation.visibility = View.GONE
+        titleView.text = "Welcome to 420 Wallet"
+        titleView.contentDescription = "420 Wallet onboarding"
+        statusView.text = "Your SmartAccount is the canonical account. This phone is a secure local client for passkeys, approvals, recovery access, and wallet presentation."
+        contentHost.removeAllViews()
+        contentHost.addView(card("Built for local authorization", "Private signing material stays device-bound where supported. Public RPC is transport only and never signing authority."))
+        contentHost.addView(space())
+        contentHost.addView(card("Recovery matters", "Your device is replaceable. Recovery follows canonical SmartAccount policy, not an app-local password or hidden remote signer."))
+        contentHost.addView(space())
+        contentHost.addView(onboardingChoiceCard())
+    }
+
+    private fun onboardingChoiceCard(): LinearLayout = LinearLayout(this).apply {
+        Wallet420DesignSystem.styleCard(this)
+        addView(sectionTitle("How do you want to begin?"))
+        addView(Wallet420DesignSystem.verticalSpace(this, Wallet420DesignSystem.SPACE_SM_DP))
+        addView(onboardingButton("Set up a new wallet") { renderOnboardingSecurity("new") })
+        addView(Wallet420DesignSystem.verticalSpace(this, Wallet420DesignSystem.SPACE_SM_DP))
+        addView(onboardingButton("Find an existing wallet") { renderOnboardingSecurity("existing") })
+        addView(Wallet420DesignSystem.verticalSpace(this, Wallet420DesignSystem.SPACE_SM_DP))
+        addView(onboardingButton("Recover a wallet") { renderOnboardingSecurity("recovery") })
+    }
+
+    private fun onboardingButton(label: String, action: () -> Unit): Button = Button(this).apply {
+        text = label
+        contentDescription = label
+        Wallet420DesignSystem.styleSecondaryAction(this)
+        setOnClickListener { if (!localLocked) action() }
+    }
+
+    private fun renderOnboardingSecurity(path: String) {
+        titleView.text = "Secure your wallet"
+        statusView.text = when (path) {
+            "new" -> "Wallet Core will create/discover the canonical SmartAccount and bind a passkey through the qualified account bootstrap flow."
+            "existing" -> "Wallet Core will discover the canonical SmartAccount before this device receives any local authorization capability."
+            else -> "Recovery uses the canonical recovery policy and timelock. This app cannot bypass or replace that authority."
+        }
+        contentHost.removeAllViews()
+        contentHost.addView(card("Passkeys", "Passkeys authorize locally with platform security. Biometrics prove local presence only; they do not become account authority."))
+        contentHost.addView(space())
+        contentHost.addView(card("Before you continue", "Review recovery, keep device security enabled, and remember that dApp permissions are scoped, revocable, and independently revalidated."))
+        contentHost.addView(space())
+        contentHost.addView(Button(this).apply {
+            text = "Continue to wallet"
+            contentDescription = "Complete onboarding"
+            Wallet420DesignSystem.styleAction(this)
+            setOnClickListener { completeOnboarding() }
+        })
+        contentHost.addView(space())
+        contentHost.addView(Button(this).apply {
+            text = "Back"
+            contentDescription = "Back to onboarding choices"
+            Wallet420DesignSystem.styleSecondaryAction(this)
+            setOnClickListener { renderOnboardingWelcome() }
+        })
+    }
+
+    private fun completeOnboarding() {
+        getSharedPreferences("wallet420_onboarding_v1", MODE_PRIVATE).edit().putBoolean("completed", true).apply()
+        onboardingActive = false
+        navigation.visibility = View.VISIBLE
+        showSurface("Wallet")
+        statusView.text = "Onboarding complete. Account, passkey, recovery, and signing authority remain governed by Wallet Core and canonical SmartAccount policy."
+        handleIntent(intent)
+        consumePendingPush()
     }
 
     private fun showSurface(surface: String) {
-        if (localLocked) return
+        if (localLocked || onboardingActive) return
         selectedSurface = surface
         titleView.text = if (surface == "Wallet") "420 Wallet" else surface
         titleView.contentDescription = titleView.text
@@ -225,25 +293,21 @@ class MainActivity : FragmentActivity() {
             return
         }
         lifecycleScope.launch {
-            val authorized = try {
-                gate.authorize("Unlock 420 Wallet after backgrounding")
-            } catch (_: Exception) {
-                false
-            }
+            val authorized = try { gate.authorize("Unlock 420 Wallet after backgrounding") } catch (_: Exception) { false }
             if (!authorized) {
                 enterLocalLock("unlock cancelled or failed")
                 return@launch
             }
             localLocked = false
             unlockButton.visibility = View.GONE
-            showSurface("Wallet")
+            if (onboardingActive) renderOnboardingWelcome() else showSurface("Wallet")
             // Local presence only restores presentation access; canonical SmartAccount authority is unchanged.
-            consumePendingPush()
+            if (!onboardingActive) consumePendingPush()
         }
     }
 
     private fun consumePendingPush() {
-        if (localLocked) return
+        if (localLocked || onboardingActive) return
         val reference = AndroidPush420.consumePending(this) ?: return
         // Shared Wallet Core must canonically rehydrate and revalidate before approval.
         titleView.text = "Approval Request"
@@ -251,7 +315,7 @@ class MainActivity : FragmentActivity() {
     }
 
     private fun handleIntent(intent: Intent?) {
-        if (localLocked) return
+        if (localLocked || onboardingActive) return
         val value = intent?.dataString ?: return
         titleView.text = "Approval Request"
         statusView.text = try {

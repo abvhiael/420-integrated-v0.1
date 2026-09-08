@@ -14,6 +14,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: io.fourtwenty.wallet
         PRODUCT_NAME: "420 Wallet"
+        PRODUCT_MODULE_NAME: Wallet420
         SWIFT_VERSION: "5.9"
         CODE_SIGN_STYLE: Automatic
         WALLET_LINK_HOST: wallet.invalid

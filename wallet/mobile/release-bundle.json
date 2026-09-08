@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "releaseVersion": "0.1.0-w11",
+  "authorityPolicy": "wallet-core-canonical-v1",
+  "qualifiedSourceCommit": "ffebc7076abc7f9ccab86674219bd012f97fdc42",
+  "platforms": {
+    "android": {
+      "applicationId": "io.fourtwenty.wallet",
+      "artifacts": ["app-release.apk", "app-release.aab"],
+      "checksumAlgorithm": "sha256"
+    },
+    "ios": {
+      "bundleId": "io.fourtwenty.wallet",
+      "artifact": "420 Wallet.xcarchive.zip",
+      "checksumAlgorithm": "sha256"
+    }
+  },
+  "releaseNotes": {
+    "title": "420 Wallet native release candidate",
+    "summary": "Native Android and iOS wallet package with canonical Wallet Core authority, local passkey/session authorization, guarded RPC transport, dApp handoff, push authorization, lifecycle hardening, and release packaging.",
+    "securityNotice": "Production Play/TestFlight/App Store readiness remains blocked until npm run device:closeout passes with genuine physical-device evidence."
+  },
+  "sbom": {
+    "format": "wallet420-release-bom-v1",
+    "requiredComponents": [
+      "release-manifest.json",
+      "android/play-internal-testing.json",
+      "ios-appstore-package.json",
+      "artifact-checksums.sha256"
+    ]
+  },
+  "security": {
+    "physicalDeviceCloseoutRequired": true,
+    "signingCredentialsCommitted": false,
+    "remoteSignerFallback": false,
+    "plaintextPrivateKeyFallback": false
+  }
+}

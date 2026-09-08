@@ -20,6 +20,10 @@ struct Wallet420App: App {
     @State private var localLocked = false
     @State private var unlockStatus: String?
 
+    private var isUITest: Bool {
+        ProcessInfo.processInfo.arguments.contains("--ui-test")
+    }
+
     var body: some Scene {
         WindowGroup {
             ZStack {
@@ -66,7 +70,9 @@ struct Wallet420App: App {
                 }
             }
             .task {
-                try? await PushRegistration420.shared.register()
+                if !isUITest {
+                    try? await PushRegistration420.shared.register()
+                }
                 inspectDeviceSecurity()
                 if !localLocked { consumePendingPush() }
             }

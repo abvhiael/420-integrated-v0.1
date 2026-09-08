@@ -80,7 +80,7 @@ contract StorageCapacityRegistry420 is I420System {
         if (node.serviceId != ResourceIds420.SERVICE_STORE || !nodes.isActiveFor(nodeId, ResourceIds420.SERVICE_STORE)) {
             revert InvalidStoreNode();
         }
-        _requireAuthorized(msg.sender, node, StorageIds420.ACTION_CONFIGURE_STORAGE_CAPACITY);
+        _requireAuthorized(msg.sender, nodeId, node, StorageIds420.ACTION_CONFIGURE_STORAGE_CAPACITY);
 
         Capacity storage capacity = _capacities[nodeId];
         if (totalBytes < capacity.reservedBytes) revert InvalidCapacity();
@@ -103,7 +103,7 @@ contract StorageCapacityRegistry420 is I420System {
         if (node.serviceId != ResourceIds420.SERVICE_STORE || !nodes.isActiveFor(nodeId, ResourceIds420.SERVICE_STORE)) {
             revert InvalidStoreNode();
         }
-        _requireAuthorized(msg.sender, node, StorageIds420.ACTION_RESERVE_STORAGE_CAPACITY);
+        _requireAuthorized(msg.sender, nodeId, node, StorageIds420.ACTION_RESERVE_STORAGE_CAPACITY);
 
         Capacity storage capacity = _capacities[nodeId];
         if (!capacity.exists) revert CapacityNotFound();
@@ -129,8 +129,7 @@ contract StorageCapacityRegistry420 is I420System {
 
     function releaseCapacity(bytes32 reservationId) external {
         Reservation storage reservation = _reservation(reservationId);
-        if (!reservation.active) revert ReservationLocked();
-        if (block.timestamp < reservation.releaseAfter) revert ReservationLocked();
+        if (!reservation.active || block.timestamp < reservation.releaseAfter) revert ReservationLocked();
 
         Capacity storage capacity = _capacities[reservation.nodeId];
         capacity.reservedBytes -= reservation.sizeBytes;
@@ -158,16 +157,17 @@ contract StorageCapacityRegistry420 is I420System {
         return reservation.exists && reservation.active && block.timestamp < reservation.releaseAfter;
     }
 
-    function _requireAuthorized(address actor, ResourceNodeRegistry420.Node memory node, bytes32 actionId) private view {
+    function _requireAuthorized(
+        address actor,
+        bytes32 nodeId,
+        ResourceNodeRegistry420.Node memory node,
+        bytes32 actionId
+    ) private view {
         ResourceProviderRegistry420.Provider memory provider = providers.getProvider(node.providerId);
         if (
             actor != node.operatorAccount && actor != provider.operatorAccount
-                && !authorization.isNodeAuthorized(actor, node.providerId, node.operatorAccount == address(0) ? bytes32(0) : _nodeId(node), actionId)
+                && !authorization.isNodeAuthorized(actor, node.providerId, nodeId, actionId)
         ) revert Unauthorized();
-    }
-
-    function _nodeId(ResourceNodeRegistry420.Node memory) private pure returns (bytes32) {
-        revert("node id required");
     }
 
     function _reservation(bytes32 reservationId) private view returns (Reservation storage reservation) {

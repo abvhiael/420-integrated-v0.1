@@ -6,6 +6,7 @@ import android.view.Gravity
 import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
+import android.widget.ScrollView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
@@ -15,12 +16,16 @@ import kotlinx.coroutines.launch
 class MainActivity : FragmentActivity() {
     private lateinit var titleView: TextView
     private lateinit var statusView: TextView
+    private lateinit var contentHost: LinearLayout
     private lateinit var unlockButton: Button
+    private lateinit var navigation: LinearLayout
     private var localLocked = false
+    private var selectedSurface = "Wallet"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         AndroidDeviceSecurity420.enablePrivacyShield(this)
+
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
         }
@@ -29,9 +34,9 @@ class MainActivity : FragmentActivity() {
         titleView = TextView(this).apply {
             text = "420 Wallet"
             Wallet420DesignSystem.styleTitle(this)
+            contentDescription = "420 Wallet"
         }
         statusView = TextView(this).apply {
-            text = walletText()
             Wallet420DesignSystem.styleBody(this)
         }
         unlockButton = Button(this).apply {
@@ -40,11 +45,25 @@ class MainActivity : FragmentActivity() {
             Wallet420DesignSystem.styleAction(this)
             setOnClickListener { authorizeLocalUnlock() }
         }
+        contentHost = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        navigation = navigationRow()
+
         root.addView(titleView)
+        root.addView(Wallet420DesignSystem.verticalSpace(root, Wallet420DesignSystem.SPACE_SM_DP))
         root.addView(statusView)
+        root.addView(Wallet420DesignSystem.verticalSpace(root, Wallet420DesignSystem.SPACE_MD_DP))
         root.addView(unlockButton)
-        root.addView(navigationRow())
+
+        val scroll = ScrollView(this).apply {
+            isFillViewport = true
+            addView(contentHost)
+        }
+        root.addView(scroll, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f))
+        root.addView(Wallet420DesignSystem.verticalSpace(root, Wallet420DesignSystem.SPACE_SM_DP))
+        root.addView(navigation)
         setContentView(root)
+
+        showSurface("Wallet")
 
         val securitySignals = AndroidDeviceSecurity420.inspect(this)
         if (securitySignals.rooted || securitySignals.debuggerAttached) enterLocalLock("device security risk detected\nre-authentication required")
@@ -81,28 +100,116 @@ class MainActivity : FragmentActivity() {
     private fun navigationRow(): LinearLayout = LinearLayout(this).apply {
         orientation = LinearLayout.HORIZONTAL
         gravity = Gravity.CENTER
-        addView(navButton("Wallet") { showSurface("Wallet", walletText()) })
-        addView(navButton("Apps") { showSurface("Apps", appsText()) })
-        addView(navButton("Activity") { showSurface("Activity", activityText()) })
-        addView(navButton("Security") { showSurface("Security", securityText()) })
+        addView(navButton("Wallet"))
+        addView(navButton("Apps"))
+        addView(navButton("Activity"))
+        addView(navButton("Security"))
     }
 
-    private fun navButton(label: String, action: () -> Unit): Button = Button(this).apply {
+    private fun navButton(label: String): Button = Button(this).apply {
         text = label
-        Wallet420DesignSystem.styleNavigation(this)
-        setOnClickListener { if (!localLocked) action() }
+        contentDescription = "$label tab"
+        Wallet420DesignSystem.styleNavigation(this, selectedSurface == label)
+        setOnClickListener { if (!localLocked) showSurface(label) }
     }
 
-    private fun showSurface(title: String, body: String) {
+    private fun showSurface(surface: String) {
         if (localLocked) return
-        titleView.text = title
-        statusView.text = body
+        selectedSurface = surface
+        titleView.text = if (surface == "Wallet") "420 Wallet" else surface
+        titleView.contentDescription = titleView.text
+        statusView.text = when (surface) {
+            "Wallet" -> "Your portfolio, actions, and recent wallet activity."
+            "Apps" -> "Trusted entry points into the 420 Integrated ecosystem."
+            "Activity" -> "Track submitted UserOperations and wallet events."
+            else -> "Manage passkeys, sessions, permissions, recovery, and this device."
+        }
+        contentHost.removeAllViews()
+        when (surface) {
+            "Wallet" -> renderWallet()
+            "Apps" -> renderApps()
+            "Activity" -> renderActivity()
+            else -> renderSecurity()
+        }
+        refreshNavigation()
     }
+
+    private fun refreshNavigation() {
+        for (index in 0 until navigation.childCount) {
+            val button = navigation.getChildAt(index) as? Button ?: continue
+            Wallet420DesignSystem.styleNavigation(button, button.text.toString() == selectedSurface)
+        }
+    }
+
+    private fun renderWallet() {
+        contentHost.addView(card("Portfolio", "$420  —  balance from Wallet Core\nAssets stay chain-derived and presentation-only here."))
+        contentHost.addView(space())
+        contentHost.addView(actionCard("Quick actions", listOf("Send", "Receive", "Connect")))
+        contentHost.addView(space())
+        contentHost.addView(card("Recent activity", "No local signing state is stored in this screen.\nOpen Activity for UserOperation status and transaction details."))
+    }
+
+    private fun renderApps() {
+        contentHost.addView(card("420 Integrated", "HTTPS destinations only. App navigation never becomes signing authority."))
+        contentHost.addView(space())
+        contentHost.addView(card("Discover", "Search · AppStore · AI"))
+        contentHost.addView(space())
+        contentHost.addView(card("Finance & governance", "Swap · Bridge · Stake · Governance"))
+    }
+
+    private fun renderActivity() {
+        contentHost.addView(card("UserOperations", "Status · chain · hash · timestamps"))
+        contentHost.addView(space())
+        contentHost.addView(card("Authority boundary", "Activity is presentation-only. Submission and signing remain governed by Wallet Core and canonical SmartAccount policy."))
+    }
+
+    private fun renderSecurity() {
+        contentHost.addView(card("Authentication", "Passkeys · local biometric presence · session keys"))
+        contentHost.addView(space())
+        contentHost.addView(card("Permissions", "dApp capabilities · session scope · expiry"))
+        contentHost.addView(space())
+        contentHost.addView(card("Recovery & device", "Recovery policy · device state · lost-device controls"))
+    }
+
+    private fun actionCard(title: String, actions: List<String>): LinearLayout = LinearLayout(this).apply {
+        Wallet420DesignSystem.styleCard(this)
+        addView(sectionTitle(title))
+        addView(Wallet420DesignSystem.verticalSpace(this, Wallet420DesignSystem.SPACE_SM_DP))
+        val row = LinearLayout(context).apply { orientation = LinearLayout.HORIZONTAL }
+        actions.forEachIndexed { index, label ->
+            val button = Button(context).apply {
+                text = label
+                contentDescription = "$label action"
+                if (index == 0) Wallet420DesignSystem.styleAction(this) else Wallet420DesignSystem.styleSecondaryAction(this)
+                setOnClickListener { statusView.text = "$label request prepared for Wallet Core authorization" }
+            }
+            row.addView(button, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
+        }
+        addView(row)
+    }
+
+    private fun card(title: String, body: String): LinearLayout = LinearLayout(this).apply {
+        Wallet420DesignSystem.styleCard(this)
+        addView(sectionTitle(title))
+        addView(Wallet420DesignSystem.verticalSpace(this, Wallet420DesignSystem.SPACE_SM_DP))
+        addView(TextView(context).apply {
+            text = body
+            Wallet420DesignSystem.styleBody(this)
+        })
+    }
+
+    private fun sectionTitle(value: String): TextView = TextView(this).apply {
+        text = value
+        Wallet420DesignSystem.styleSectionTitle(this)
+    }
+
+    private fun space(): View = Wallet420DesignSystem.verticalSpace(contentHost, Wallet420DesignSystem.SPACE_MD_DP)
 
     private fun enterLocalLock(reason: String) {
         localLocked = true
         titleView.text = "420 Wallet Locked"
         statusView.text = reason
+        contentHost.removeAllViews()
         unlockButton.visibility = View.VISIBLE
     }
 
@@ -129,17 +236,11 @@ class MainActivity : FragmentActivity() {
             }
             localLocked = false
             unlockButton.visibility = View.GONE
-            titleView.text = "420 Wallet"
-            statusView.text = walletText()
+            showSurface("Wallet")
             // Local presence only restores presentation access; canonical SmartAccount authority is unchanged.
             consumePendingPush()
         }
     }
-
-    private fun walletText() = "Portfolio\nAssets and balances from qualified Wallet Core\n\nSend · Receive · Connect"
-    private fun appsText() = "420 Integrated Apps\nHTTPS destinations only\n\nSearch · AppStore · AI · Swap · Bridge · Stake · Governance"
-    private fun activityText() = "Activity\nUserOperation status, chain, hash, and timestamps\n\nPresentation only — no signing authority"
-    private fun securityText() = "Security Center\nPasskeys · Sessions · dApp permissions · Recovery · Device"
 
     private fun consumePendingPush() {
         if (localLocked) return

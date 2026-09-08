@@ -7,14 +7,15 @@ import "./ResourceIds420.sol";
 import "./ResourceNodeRegistry420.sol";
 import "./ResourceOfferRegistry420.sol";
 import "./ResourceProviderRegistry420.sol";
+import "./StorageCapacityRegistry420.sol";
 import "./StorageCommitmentRegistry420.sol";
 import "./StorageProofIds420.sol";
 import "./StorageProofSchemeRegistry420.sol";
 
 /// @notice Canonical 420Store agreement lifecycle binding a consumer request to
-///         a STORE offer and an immutable provider storage commitment.
+///         a STORE offer, locked node capacity and an immutable provider storage commitment.
 /// @dev Payload bytes remain off-chain. This registry anchors object identity,
-///      durability policy, timing and the commitment that the proof layer verifies.
+///      durability policy, timing, capacity and the commitment that the proof layer verifies.
 contract StorageAgreementRegistry420 is I420System {
     uint32 public constant MAX_TOTAL_SHARDS = 1024;
 
@@ -30,6 +31,7 @@ contract StorageAgreementRegistry420 is I420System {
         bytes32 repairPolicyHash;
         bytes32 proofSchemeId;
         bytes32 commitmentId;
+        bytes32 capacityReservationId;
         uint128 sizeBytes;
         uint64 startTime;
         uint64 endTime;
@@ -46,6 +48,7 @@ contract StorageAgreementRegistry420 is I420System {
     ResourceProviderRegistry420 public immutable providers;
     StorageProofSchemeRegistry420 public immutable schemes;
     StorageCommitmentRegistry420 public immutable commitments;
+    StorageCapacityRegistry420 public immutable capacity;
 
     mapping(bytes32 => Agreement) private _agreements;
 
@@ -57,6 +60,7 @@ contract StorageAgreementRegistry420 is I420System {
     error InvalidStoreOffer();
     error InactiveProofScheme();
     error CommitmentMismatch();
+    error CapacityReservationMismatch();
     error Unauthorized();
 
     event StorageAgreementProposed(
@@ -69,7 +73,12 @@ contract StorageAgreementRegistry420 is I420System {
         uint64 startTime,
         uint64 endTime
     );
-    event StorageAgreementActivated(bytes32 indexed agreementId, bytes32 indexed commitmentId, bytes32 indexed nodeId);
+    event StorageAgreementActivated(
+        bytes32 indexed agreementId,
+        bytes32 indexed commitmentId,
+        bytes32 indexed nodeId,
+        bytes32 capacityReservationId
+    );
     event StorageAgreementCompleted(bytes32 indexed agreementId);
     event StorageAgreementCancelled(bytes32 indexed agreementId);
 
@@ -79,11 +88,13 @@ contract StorageAgreementRegistry420 is I420System {
         address nodes_,
         address providers_,
         address schemes_,
-        address commitments_
+        address commitments_,
+        address capacity_
     ) {
         if (
             authorization_ == address(0) || offers_ == address(0) || nodes_ == address(0)
                 || providers_ == address(0) || schemes_ == address(0) || commitments_ == address(0)
+                || capacity_ == address(0)
         ) revert ZeroAddress();
         authorization = ResourceAuthorization420(authorization_);
         offers = ResourceOfferRegistry420(offers_);
@@ -91,6 +102,7 @@ contract StorageAgreementRegistry420 is I420System {
         providers = ResourceProviderRegistry420(providers_);
         schemes = StorageProofSchemeRegistry420(schemes_);
         commitments = StorageCommitmentRegistry420(commitments_);
+        capacity = StorageCapacityRegistry420(capacity_);
     }
 
     function systemName() external pure returns (string memory) { return "StorageAgreementRegistry420"; }
@@ -146,6 +158,7 @@ contract StorageAgreementRegistry420 is I420System {
             repairPolicyHash: repairPolicyHash,
             proofSchemeId: proofSchemeId,
             commitmentId: bytes32(0),
+            capacityReservationId: bytes32(0),
             sizeBytes: sizeBytes,
             startTime: startTime,
             endTime: endTime,
@@ -159,9 +172,12 @@ contract StorageAgreementRegistry420 is I420System {
         emit StorageAgreementProposed(agreementId, msg.sender, offerId, objectId, contentRoot, sizeBytes, startTime, endTime);
     }
 
-    function activateAgreement(bytes32 agreementId, bytes32 commitmentId) external {
+    function activateAgreement(bytes32 agreementId, bytes32 commitmentId, bytes32 capacityReservationId) external {
         Agreement storage agreement = _get(agreementId);
-        if (agreement.state != State.PROPOSED || commitmentId == bytes32(0) || block.timestamp >= agreement.startTime) revert InvalidState();
+        if (
+            agreement.state != State.PROPOSED || commitmentId == bytes32(0) || capacityReservationId == bytes32(0)
+                || block.timestamp >= agreement.startTime
+        ) revert InvalidState();
 
         ResourceOfferRegistry420.Offer memory offer = offers.getOffer(agreement.offerId);
         if (offer.serviceId != ResourceIds420.SERVICE_STORE || !offers.isEffective(agreement.offerId)) revert InvalidStoreOffer();
@@ -173,6 +189,13 @@ contract StorageAgreementRegistry420 is I420System {
                 && !authorization.isNodeAuthorized(msg.sender, node.providerId, offer.nodeId, StorageProofIds420.ACTION_ACCEPT_STORAGE_AGREEMENT)
         ) revert Unauthorized();
 
+        StorageCapacityRegistry420.Reservation memory reservation = capacity.getReservation(capacityReservationId);
+        if (
+            !reservation.active || reservation.nodeId != offer.nodeId || reservation.agreementId != agreementId
+                || reservation.sizeBytes != agreement.sizeBytes || reservation.releaseAfter < agreement.endTime
+                || !capacity.isReservationActive(capacityReservationId)
+        ) revert CapacityReservationMismatch();
+
         StorageCommitmentRegistry420.Commitment memory commitment = commitments.getCommitment(commitmentId);
         if (
             commitment.nodeId != offer.nodeId || commitment.providerId != node.providerId
@@ -182,8 +205,9 @@ contract StorageAgreementRegistry420 is I420System {
         ) revert CommitmentMismatch();
 
         agreement.commitmentId = commitmentId;
+        agreement.capacityReservationId = capacityReservationId;
         agreement.state = State.ACTIVE;
-        emit StorageAgreementActivated(agreementId, commitmentId, offer.nodeId);
+        emit StorageAgreementActivated(agreementId, commitmentId, offer.nodeId, capacityReservationId);
     }
 
     function cancelAgreement(bytes32 agreementId) external {

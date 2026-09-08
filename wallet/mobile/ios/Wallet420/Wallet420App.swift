@@ -10,10 +10,18 @@ private enum WalletSurface420: String, CaseIterable, Identifiable {
     var tabAccessibilityID: String { "wallet420.tab.\(rawValue.lowercased())" }
 }
 
+private enum OnboardingPath420: String {
+    case newWallet
+    case existingWallet
+    case recovery
+}
+
 @main
 struct Wallet420App: App {
     @UIApplicationDelegateAdaptor(AppDelegate420.self) private var appDelegate
     @Environment(\.scenePhase) private var scenePhase
+    @AppStorage("wallet420.onboarding.completed") private var onboardingCompleted = false
+    @State private var onboardingPath: OnboardingPath420?
     @State private var selectedSurface: WalletSurface420 = .wallet
     @State private var handoffStatus: String?
     @State private var privacyShield = false
@@ -25,32 +33,18 @@ struct Wallet420App: App {
         ProcessInfo.processInfo.arguments.contains("--ui-test")
     }
 
+    private var onboardingActive: Bool {
+        !onboardingCompleted && !isUITest
+    }
+
     var body: some Scene {
         WindowGroup {
             ZStack {
-                VStack(alignment: .leading, spacing: Wallet420DesignSystem.spacingMedium) {
-                    header
-
-                    if localLocked {
-                        lockedContent
-                    } else {
-                        ScrollView {
-                            VStack(spacing: Wallet420DesignSystem.spacingMedium) {
-                                surfaceContent(selectedSurface)
-                                if let handoffStatus {
-                                    statusCard(title: "Approval request", body: handoffStatus)
-                                } else if let transientStatus {
-                                    statusCard(title: "Ready for authorization", body: transientStatus)
-                                }
-                            }
-                            .frame(maxWidth: .infinity)
-                        }
-                    }
-
-                    navigationBar
+                if onboardingActive {
+                    onboardingRoot
+                } else {
+                    mainWalletRoot
                 }
-                .padding(Wallet420DesignSystem.spacingMedium)
-                .wallet420Surface()
 
                 if privacyShield {
                     Rectangle()
@@ -66,7 +60,7 @@ struct Wallet420App: App {
                 if !isUITest {
                     try? await PushRegistration420.shared.register()
                     inspectDeviceSecurity()
-                    if !localLocked { consumePendingPush() }
+                    if !localLocked && !onboardingActive { consumePendingPush() }
                 } else {
                     privacyShield = false
                     localLocked = false
@@ -87,7 +81,7 @@ struct Wallet420App: App {
                 case .active:
                     privacyShield = UIScreen.main.isCaptured
                     inspectDeviceSecurity()
-                    if !localLocked { consumePendingPush() }
+                    if !localLocked && !onboardingActive { consumePendingPush() }
                 case .inactive, .background:
                     privacyShield = true
                     localLocked = true
@@ -107,11 +101,106 @@ struct Wallet420App: App {
                     privacyShield = UIScreen.main.isCaptured || scenePhase != .active
                 }
             }
-            .onOpenURL { url in if !localLocked { handle(url) } }
+            .onOpenURL { url in if !localLocked && !onboardingActive { handle(url) } }
             .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { activity in
-                if !localLocked, let url = activity.webpageURL { handle(url) }
+                if !localLocked && !onboardingActive, let url = activity.webpageURL { handle(url) }
             }
         }
+    }
+
+    private var onboardingRoot: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: Wallet420DesignSystem.spacingMedium) {
+                Text(onboardingPath == nil ? "Welcome to 420 Wallet" : "Secure your wallet")
+                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                    .accessibilityIdentifier("wallet420.onboarding.title")
+
+                if let onboardingPath {
+                    onboardingSecurity(path: onboardingPath)
+                } else {
+                    Text("Your SmartAccount is the canonical account. This iPhone is a secure local client for passkeys, approvals, recovery access, and wallet presentation.")
+                        .font(.body)
+                        .foregroundStyle(.secondary)
+                    infoCard(title: "Built for local authorization", body: "Private signing material stays device-bound where supported. Public RPC is transport only and never signing authority.")
+                    infoCard(title: "Recovery matters", body: "Your device is replaceable. Recovery follows canonical SmartAccount policy, not an app-local password or hidden remote signer.")
+                    onboardingChoices
+                }
+            }
+            .padding(Wallet420DesignSystem.spacingMedium)
+        }
+        .wallet420Surface()
+    }
+
+    private var onboardingChoices: some View {
+        VStack(alignment: .leading, spacing: Wallet420DesignSystem.spacingSmall) {
+            Text("How do you want to begin?").font(.headline)
+            Button("Set up a new wallet") { onboardingPath = .newWallet }
+                .buttonStyle(Wallet420SecondaryButtonStyle())
+                .accessibilityIdentifier("wallet420.onboarding.new")
+            Button("Find an existing wallet") { onboardingPath = .existingWallet }
+                .buttonStyle(Wallet420SecondaryButtonStyle())
+                .accessibilityIdentifier("wallet420.onboarding.existing")
+            Button("Recover a wallet") { onboardingPath = .recovery }
+                .buttonStyle(Wallet420SecondaryButtonStyle())
+                .accessibilityIdentifier("wallet420.onboarding.recovery")
+        }
+        .wallet420Card()
+    }
+
+    @ViewBuilder
+    private func onboardingSecurity(path: OnboardingPath420) -> some View {
+        let description: String = {
+            switch path {
+            case .newWallet:
+                return "Wallet Core will create or discover the canonical SmartAccount and bind a passkey through the qualified account bootstrap flow."
+            case .existingWallet:
+                return "Wallet Core will discover the canonical SmartAccount before this device receives any local authorization capability."
+            case .recovery:
+                return "Recovery uses the canonical recovery policy and timelock. This app cannot bypass or replace that authority."
+            }
+        }()
+
+        Text(description)
+            .font(.body)
+            .foregroundStyle(.secondary)
+        infoCard(title: "Passkeys", body: "Passkeys authorize locally with platform security. Face ID or Touch ID prove local presence only; they do not become account authority.")
+        infoCard(title: "Before you continue", body: "Review recovery, keep device security enabled, and remember that dApp permissions are scoped, revocable, and independently revalidated.")
+        Button("Continue to wallet") {
+            onboardingCompleted = true
+            onboardingPath = nil
+            transientStatus = "Onboarding complete. Account, passkey, recovery, and signing authority remain governed by Wallet Core and canonical SmartAccount policy."
+        }
+        .buttonStyle(Wallet420PrimaryButtonStyle())
+        .accessibilityIdentifier("wallet420.onboarding.complete")
+        Button("Back") { onboardingPath = nil }
+            .buttonStyle(Wallet420SecondaryButtonStyle())
+            .accessibilityIdentifier("wallet420.onboarding.back")
+    }
+
+    private var mainWalletRoot: some View {
+        VStack(alignment: .leading, spacing: Wallet420DesignSystem.spacingMedium) {
+            header
+
+            if localLocked {
+                lockedContent
+            } else {
+                ScrollView {
+                    VStack(spacing: Wallet420DesignSystem.spacingMedium) {
+                        surfaceContent(selectedSurface)
+                        if let handoffStatus {
+                            statusCard(title: "Approval request", body: handoffStatus)
+                        } else if let transientStatus {
+                            statusCard(title: "Ready for authorization", body: transientStatus)
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+            }
+
+            navigationBar
+        }
+        .padding(Wallet420DesignSystem.spacingMedium)
+        .wallet420Surface()
     }
 
     private var header: some View {
@@ -181,8 +270,7 @@ struct Wallet420App: App {
 
     private var quickActions: some View {
         VStack(alignment: .leading, spacing: Wallet420DesignSystem.spacingSmall) {
-            Text("Quick actions")
-                .font(.headline)
+            Text("Quick actions").font(.headline)
             HStack(spacing: Wallet420DesignSystem.spacingSmall) {
                 Button("Send") { transientStatus = "Send request prepared for Wallet Core authorization" }
                     .buttonStyle(Wallet420PrimaryButtonStyle())
@@ -262,21 +350,21 @@ struct Wallet420App: App {
             privacyShield = UIScreen.main.isCaptured
             selectedSurface = .wallet
             // Local presence only restores presentation access; canonical SmartAccount authority is unchanged.
-            consumePendingPush()
+            if !onboardingActive { consumePendingPush() }
         } catch {
             unlockStatus = "unlock failed"
         }
     }
 
     private func consumePendingPush() {
-        guard !localLocked else { return }
+        guard !localLocked, !onboardingActive else { return }
         guard let reference = PushRegistration420.shared.consumePending() else { return }
         handoffStatus = "push (\(reference.state)) from \(reference.origin)\n\(reference.requestID)"
         transientStatus = nil
     }
 
     private func handle(_ url: URL) {
-        guard !localLocked else { return }
+        guard !localLocked, !onboardingActive else { return }
         let productionHost = (Bundle.main.object(forInfoDictionaryKey: "WalletLinkHost") as? String) ?? ""
         do {
             let handoff = try DappHandoffParser420.parse(

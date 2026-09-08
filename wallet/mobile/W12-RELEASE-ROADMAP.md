@@ -31,19 +31,22 @@ W12 turns the W11 native applications and qualified release boundaries into repr
 - `npm run release:bundle:check` is wired into the normal mobile qualification path.
 - Patched and qualified the iOS metadata field-name regression; Wallet Mobile #568 and Integrated #1494 both passed.
 
-## W12.5 — Distribution qualification — IN PROGRESS
+## W12.5 — Distribution qualification — COMPLETE
 - `distribution-qualification.json` defines the repository-side distribution qualification contract.
 - `distribution-qualification-check.js` verifies cross-platform release identity, SHA-256 provenance policy, external-only signing, absence of committed signing/wallet secrets, and preservation of the device-closeout production gate.
 - `npm run distribution:qualify` is wired into the normal mobile `check` path.
 - Repository qualification is allowed to pass while production readiness remains `BLOCKED_EXTERNAL_DEVICE`.
 - Production/TestFlight/Play readiness remains blocked until genuine physical Android and iPhone evidence makes `npm run device:closeout` pass.
 - `W12.5-DISTRIBUTION-QUALIFICATION.md` documents the qualification boundary and external release requirements.
-- Remaining W12.5 work: qualify the current head in CI and inspect any resulting failures before closing the phase.
+- Qualified on W12.5 head `befc19720b09e0198a88c25deaeb981402925491`: Wallet Mobile #578 and Integrated #1501 both passed.
 
-## W12.6 — Release candidate closeout
-- Reconcile with current parent branch/main as appropriate.
-- Run Wallet Mobile and Integrated qualification on the release-candidate head.
-- Prepare release candidate for authorized Play/TestFlight distribution only after W11 device closeout is satisfied.
+## W12.6 — Release candidate closeout — IN PROGRESS
+- `release-candidate-closeout.json` records the W12.5 qualified baseline, PR #113, the `main` SHA observed when closeout began, required final workflows, and the unchanged physical-device production gate.
+- `release-candidate-closeout-check.js` validates release-version/authority parity, required qualification workflows, fail-closed distribution status, absence of signing fallbacks, and honest `BLOCKED_EXTERNAL_DEVICE` device evidence.
+- `npm run release:candidate:check` is wired into the normal mobile qualification path.
+- `W12.6-RELEASE-CANDIDATE-CLOSEOUT.md` documents the repository closeout boundary.
+- PR #113 is currently mergeable into `main`; final qualification is intentionally performed on GitHub's current PR merge head so the candidate includes current `main`.
+- Remaining W12.6 work: obtain green Wallet Mobile and Integrated qualification on the closeout head, then prepare PR #113 for merge. Production Play/TestFlight distribution remains blocked until genuine device closeout passes.
 
 # W13 — Visual Design, UX Polish and Store Presentation
 

@@ -27,9 +27,9 @@ struct Wallet420App: App {
     var body: some Scene {
         WindowGroup {
             ZStack {
-                VStack(spacing: 16) {
+                VStack(spacing: Wallet420DesignSystem.spacingMedium) {
                     Text(selectedSurface.rawValue == "Wallet" ? "420 Wallet" : selectedSurface.rawValue)
-                        .font(.title)
+                        .font(.system(size: 24, weight: .bold, design: .rounded))
                         .accessibilityIdentifier(selectedSurface.accessibilityID)
                     Text(localLocked ? (unlockStatus ?? "unlock required after backgrounding") : surfaceText(selectedSurface))
                         .font(.body)
@@ -38,6 +38,7 @@ struct Wallet420App: App {
                         Button("Unlock wallet") {
                             Task { await authorizeLocalUnlock() }
                         }
+                        .buttonStyle(Wallet420PrimaryButtonStyle())
                     }
                     if let handoffStatus, !localLocked {
                         Divider()
@@ -46,26 +47,30 @@ struct Wallet420App: App {
                             .multilineTextAlignment(.center)
                     }
                     Spacer()
-                    HStack {
+                    HStack(spacing: Wallet420DesignSystem.spacingSmall) {
                         ForEach(WalletSurface420.allCases) { surface in
                             Button(surface.rawValue) {
                                 guard !localLocked else { return }
                                 selectedSurface = surface
                                 handoffStatus = nil
                             }
+                            .font(.system(size: 14, weight: .semibold))
+                            .frame(minHeight: Wallet420DesignSystem.minimumTouchTarget)
                             .accessibilityIdentifier(surface.tabAccessibilityID)
                             .disabled(localLocked)
                         }
                     }
                 }
-                .padding()
+                .padding(Wallet420DesignSystem.spacingMedium)
+                .wallet420Surface()
 
                 if privacyShield {
                     Rectangle()
-                        .fill(.background)
+                        .fill(Wallet420DesignSystem.backgroundDark)
                         .ignoresSafeArea()
                     Text("420 Wallet Locked")
-                        .font(.title2)
+                        .font(.title2.bold())
+                        .foregroundStyle(Wallet420DesignSystem.textPrimaryDark)
                         .accessibilityIdentifier("wallet420.privacy-shield")
                 }
             }

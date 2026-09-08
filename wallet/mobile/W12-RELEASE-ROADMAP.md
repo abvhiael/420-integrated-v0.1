@@ -24,17 +24,21 @@ W12 turns the W11 native applications and qualified release boundaries into repr
 - Certificates, provisioning profiles and App Store Connect credentials remain external.
 - Real-iPhone device qualification remains an explicit external production-release blocker.
 
-## W12.4 — Cross-platform release bundle — IN PROGRESS
+## W12.4 — Cross-platform release bundle — COMPLETE
 - `release-bundle.json` defines one cross-platform release identity, shared authority policy, release notes, security gate, and release bill-of-materials contract.
 - `release-bundle-check.js` verifies release version, qualified source commit, Android/iOS identities, SHA-256 provenance policy, authority-policy parity, BOM contents and preservation of the `device:closeout` release gate.
 - `W12.4-RELEASE-BUNDLE.md` documents the bundle and its verification rules.
 - `npm run release:bundle:check` is wired into the normal mobile qualification path.
-- Remaining W12.4 work: qualify the current head in CI and inspect generated checksum/release artifacts before closing the phase.
+- Patched and qualified the iOS metadata field-name regression; Wallet Mobile #568 and Integrated #1494 both passed.
 
-## W12.5 — Distribution qualification
-- Validate packaged release metadata and checksums in CI.
-- Verify no signing secrets or wallet secrets are packaged.
-- Require W11 physical-device evidence gate before production release readiness can pass.
+## W12.5 — Distribution qualification — IN PROGRESS
+- `distribution-qualification.json` defines the repository-side distribution qualification contract.
+- `distribution-qualification-check.js` verifies cross-platform release identity, SHA-256 provenance policy, external-only signing, absence of committed signing/wallet secrets, and preservation of the device-closeout production gate.
+- `npm run distribution:qualify` is wired into the normal mobile `check` path.
+- Repository qualification is allowed to pass while production readiness remains `BLOCKED_EXTERNAL_DEVICE`.
+- Production/TestFlight/Play readiness remains blocked until genuine physical Android and iPhone evidence makes `npm run device:closeout` pass.
+- `W12.5-DISTRIBUTION-QUALIFICATION.md` documents the qualification boundary and external release requirements.
+- Remaining W12.5 work: qualify the current head in CI and inspect any resulting failures before closing the phase.
 
 ## W12.6 — Release candidate closeout
 - Reconcile with current parent branch/main as appropriate.

@@ -149,7 +149,7 @@ struct Wallet420App: App {
                 }
                 .font(.system(size: 13, weight: selectedSurface == surface ? .bold : .medium))
                 .frame(maxWidth: .infinity, minHeight: Wallet420DesignSystem.minimumTouchTarget)
-                .foregroundStyle(selectedSurface == surface ? Wallet420DesignSystem.brandPrimaryDark : .primary)
+                .foregroundStyle(selectedSurface == surface ? Wallet420DesignSystem.brandPrimaryDark : Color.primary)
                 .background(selectedSurface == surface ? Wallet420DesignSystem.surfaceDark.opacity(0.55) : Color.clear)
                 .clipShape(RoundedRectangle(cornerRadius: Wallet420DesignSystem.cornerRadiusMedium, style: .continuous))
                 .accessibilityIdentifier(surface.tabAccessibilityID)

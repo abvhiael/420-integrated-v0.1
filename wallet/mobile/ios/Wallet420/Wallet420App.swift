@@ -72,11 +72,23 @@ struct Wallet420App: App {
             .task {
                 if !isUITest {
                     try? await PushRegistration420.shared.register()
+                    inspectDeviceSecurity()
+                    if !localLocked { consumePendingPush() }
+                } else {
+                    privacyShield = false
+                    localLocked = false
+                    unlockStatus = nil
+                    handoffStatus = nil
                 }
-                inspectDeviceSecurity()
-                if !localLocked { consumePendingPush() }
             }
             .onChange(of: scenePhase) { phase in
+                if isUITest {
+                    privacyShield = false
+                    localLocked = false
+                    unlockStatus = nil
+                    return
+                }
+
                 switch phase {
                 case .active:
                     privacyShield = UIScreen.main.isCaptured
@@ -94,7 +106,11 @@ struct Wallet420App: App {
                 }
             }
             .onReceive(NotificationCenter.default.publisher(for: UIScreen.capturedDidChangeNotification)) { _ in
-                privacyShield = UIScreen.main.isCaptured || scenePhase != .active
+                if isUITest {
+                    privacyShield = false
+                } else {
+                    privacyShield = UIScreen.main.isCaptured || scenePhase != .active
+                }
             }
             .onOpenURL { url in if !localLocked { handle(url) } }
             .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { activity in

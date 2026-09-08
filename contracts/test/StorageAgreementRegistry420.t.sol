@@ -9,6 +9,7 @@ import "../src/resource/ResourceOfferRegistry420.sol";
 import "../src/resource/ResourcePolicyRegistry420.sol";
 import "../src/resource/ResourceProviderRegistry420.sol";
 import "../src/resource/StorageAgreementRegistry420.sol";
+import "../src/resource/StorageCapacityRegistry420.sol";
 import "../src/resource/StorageCommitmentRegistry420.sol";
 import "../src/resource/StorageProofIds420.sol";
 import "../src/resource/StorageProofSchemeRegistry420.sol";
@@ -44,6 +45,7 @@ contract StorageAgreementRegistry420Test {
         MockStorageAgreementVerifier420 verifier;
         StorageProofSchemeRegistry420 schemes;
         StorageCommitmentRegistry420 commitments;
+        StorageCapacityRegistry420 capacity;
         StorageAgreementRegistry420 agreements;
         bytes32 providerId;
         bytes32 nodeId;
@@ -61,7 +63,8 @@ contract StorageAgreementRegistry420Test {
         e.verifier = new MockStorageAgreementVerifier420();
         e.schemes = new StorageProofSchemeRegistry420(address(e.auth));
         e.commitments = new StorageCommitmentRegistry420(address(e.auth), address(e.providers), address(e.nodes), address(e.schemes));
-        e.agreements = new StorageAgreementRegistry420(address(e.auth), address(e.offers), address(e.nodes), address(e.providers), address(e.schemes), address(e.commitments));
+        e.capacity = new StorageCapacityRegistry420(address(e.auth), address(e.nodes), address(e.providers));
+        e.agreements = new StorageAgreementRegistry420(address(e.auth), address(e.offers), address(e.nodes), address(e.providers), address(e.schemes), address(e.commitments), address(e.capacity));
 
         e.providerId = keccak256("provider");
         e.nodeId = keccak256("store-node");
@@ -72,6 +75,7 @@ contract StorageAgreementRegistry420Test {
         vm.prank(ALICE); e.providers.setState(e.providerId, ResourceProviderRegistry420.State.ACTIVE);
         vm.prank(ALICE); e.nodes.registerNode(e.nodeId, e.providerId, ResourceIds420.SERVICE_STORE, ALICE, keccak256("endpoint"), keccak256("capacity"));
         vm.prank(ALICE); e.nodes.setState(e.nodeId, ResourceNodeRegistry420.State.ACTIVE);
+        vm.prank(ALICE); e.capacity.configureCapacity(e.nodeId, 100_000_000, keccak256("capacity-v1"));
         e.policy.setPolicy(ResourceIds420.SERVICE_STORE, keccak256("store-terms"), 30 days, type(uint128).max, true);
         vm.prank(ALICE); e.offers.publishOffer(e.offerId, e.nodeId, 42, type(uint128).max, keccak256("offer-terms"), uint64(block.timestamp + 30 days));
 
@@ -83,37 +87,17 @@ contract StorageAgreementRegistry420Test {
         startTime = uint64(block.timestamp + 600);
         endTime = uint64(block.timestamp + 1 days);
         vm.prank(BOB);
-        agreementId = e.agreements.proposeAgreement(
-            e.offerId,
-            keccak256("object"),
-            keccak256("content-root"),
-            keccak256("manifest"),
-            keccak256("standard-storage"),
-            keccak256("repair-standard"),
-            e.schemeId,
-            1_048_576,
-            startTime,
-            endTime,
-            300,
-            20,
-            40,
-            nonce
-        );
+        agreementId = e.agreements.proposeAgreement(e.offerId, keccak256("object"), keccak256("content-root"), keccak256("manifest"), keccak256("standard-storage"), keccak256("repair-standard"), e.schemeId, 1_048_576, startTime, endTime, 300, 20, 40, nonce);
     }
 
     function registerMatchingCommitment(Env memory e, bytes32 commitmentId, uint64 startTime, uint64 endTime) internal {
         vm.prank(ALICE);
-        e.commitments.registerCommitment(
-            commitmentId,
-            e.nodeId,
-            e.schemeId,
-            keccak256("content-root"),
-            keccak256("replica-root"),
-            1_048_576,
-            startTime,
-            endTime,
-            keccak256("commitment-meta")
-        );
+        e.commitments.registerCommitment(commitmentId, e.nodeId, e.schemeId, keccak256("content-root"), keccak256("replica-root"), 1_048_576, startTime, endTime, keccak256("commitment-meta"));
+    }
+
+    function reserveMatchingCapacity(Env memory e, bytes32 agreementId, uint64 endTime) internal returns (bytes32 reservationId) {
+        vm.prank(ALICE);
+        reservationId = e.capacity.reserveCapacity(e.nodeId, agreementId, 1_048_576, endTime);
     }
 
     function testConsumerCanProposeCanonicalStoreAgreement() public {
@@ -133,33 +117,25 @@ contract StorageAgreementRegistry420Test {
     function testInvalidErasureOrTimingPolicyFailsClosed() public {
         Env memory e = setup();
         vm.prank(BOB);
-        (bool badShards,) = address(e.agreements).call(abi.encodeWithSelector(
-            e.agreements.proposeAgreement.selector,
-            e.offerId, keccak256("object"), keccak256("content-root"), keccak256("manifest"), keccak256("storage-class"),
-            keccak256("repair"), e.schemeId, uint128(1024), uint64(block.timestamp + 600), uint64(block.timestamp + 3600),
-            uint64(60), uint32(20), uint32(19), uint256(1)
-        ));
+        (bool badShards,) = address(e.agreements).call(abi.encodeWithSelector(e.agreements.proposeAgreement.selector, e.offerId, keccak256("object"), keccak256("content-root"), keccak256("manifest"), keccak256("storage-class"), keccak256("repair"), e.schemeId, uint128(1024), uint64(block.timestamp + 600), uint64(block.timestamp + 3600), uint64(60), uint32(20), uint32(19), uint256(1)));
         require(!badShards, "invalid shard policy accepted");
 
         vm.prank(BOB);
-        (bool badWindow,) = address(e.agreements).call(abi.encodeWithSelector(
-            e.agreements.proposeAgreement.selector,
-            e.offerId, keccak256("object-2"), keccak256("content-root"), keccak256("manifest"), keccak256("storage-class"),
-            keccak256("repair"), e.schemeId, uint128(1024), uint64(block.timestamp), uint64(block.timestamp + 3600),
-            uint64(60), uint32(10), uint32(20), uint256(2)
-        ));
+        (bool badWindow,) = address(e.agreements).call(abi.encodeWithSelector(e.agreements.proposeAgreement.selector, e.offerId, keccak256("object-2"), keccak256("content-root"), keccak256("manifest"), keccak256("storage-class"), keccak256("repair"), e.schemeId, uint128(1024), uint64(block.timestamp), uint64(block.timestamp + 3600), uint64(60), uint32(10), uint32(20), uint256(2)));
         require(!badWindow, "non-future start accepted");
     }
 
-    function testActivationBindsExactImmutableCommitment() public {
+    function testActivationBindsExactImmutableCommitmentAndCapacity() public {
         Env memory e = setup();
         (bytes32 agreementId, uint64 startTime, uint64 endTime) = propose(e, 1);
         bytes32 commitmentId = keccak256("commitment");
         registerMatchingCommitment(e, commitmentId, startTime, endTime);
+        bytes32 reservationId = reserveMatchingCapacity(e, agreementId, endTime);
 
-        vm.prank(ALICE); e.agreements.activateAgreement(agreementId, commitmentId);
+        vm.prank(ALICE); e.agreements.activateAgreement(agreementId, commitmentId, reservationId);
         StorageAgreementRegistry420.Agreement memory agreement = e.agreements.getAgreement(agreementId);
         require(agreement.commitmentId == commitmentId, "commitment not bound");
+        require(agreement.capacityReservationId == reservationId, "capacity not bound");
         require(agreement.state == StorageAgreementRegistry420.State.ACTIVE, "not active");
 
         vm.warp(startTime);
@@ -171,17 +147,28 @@ contract StorageAgreementRegistry420Test {
         (bytes32 agreementId, uint64 startTime, uint64 endTime) = propose(e, 2);
         bytes32 commitmentId = keccak256("commitment-ok");
         registerMatchingCommitment(e, commitmentId, startTime, endTime);
+        bytes32 reservationId = reserveMatchingCapacity(e, agreementId, endTime);
 
         vm.prank(BOB);
-        (bool unauthorized,) = address(e.agreements).call(abi.encodeWithSelector(e.agreements.activateAgreement.selector, agreementId, commitmentId));
+        (bool unauthorized,) = address(e.agreements).call(abi.encodeWithSelector(e.agreements.activateAgreement.selector, agreementId, commitmentId, reservationId));
         require(!unauthorized, "consumer activated provider commitment");
 
         bytes32 mismatchId = keccak256("commitment-mismatch");
         vm.prank(ALICE);
         e.commitments.registerCommitment(mismatchId, e.nodeId, e.schemeId, keccak256("other-content"), keccak256("replica-root"), 1_048_576, startTime, endTime, keccak256("meta"));
         vm.prank(ALICE);
-        (bool mismatch,) = address(e.agreements).call(abi.encodeWithSelector(e.agreements.activateAgreement.selector, agreementId, mismatchId));
+        (bool mismatch,) = address(e.agreements).call(abi.encodeWithSelector(e.agreements.activateAgreement.selector, agreementId, mismatchId, reservationId));
         require(!mismatch, "mismatched commitment activated");
+    }
+
+    function testActivationRejectsMissingCapacityReservation() public {
+        Env memory e = setup();
+        (bytes32 agreementId, uint64 startTime, uint64 endTime) = propose(e, 9);
+        bytes32 commitmentId = keccak256("commitment-no-capacity");
+        registerMatchingCommitment(e, commitmentId, startTime, endTime);
+        vm.prank(ALICE);
+        (bool ok,) = address(e.agreements).call(abi.encodeWithSelector(e.agreements.activateAgreement.selector, agreementId, commitmentId, keccak256("missing")));
+        require(!ok, "agreement activated without locked capacity");
     }
 
     function testConsumerCanCancelOnlyBeforeActivation() public {
@@ -193,7 +180,8 @@ contract StorageAgreementRegistry420Test {
         (bytes32 activeId, uint64 startTime, uint64 endTime) = propose(e, 4);
         bytes32 commitmentId = keccak256("commitment-active");
         registerMatchingCommitment(e, commitmentId, startTime, endTime);
-        vm.prank(ALICE); e.agreements.activateAgreement(activeId, commitmentId);
+        bytes32 reservationId = reserveMatchingCapacity(e, activeId, endTime);
+        vm.prank(ALICE); e.agreements.activateAgreement(activeId, commitmentId, reservationId);
         vm.prank(BOB);
         (bool cancelledActive,) = address(e.agreements).call(abi.encodeWithSelector(e.agreements.cancelAgreement.selector, activeId));
         require(!cancelledActive, "active agreement cancelled");
@@ -204,7 +192,8 @@ contract StorageAgreementRegistry420Test {
         (bytes32 agreementId, uint64 startTime, uint64 endTime) = propose(e, 5);
         bytes32 commitmentId = keccak256("commitment-complete");
         registerMatchingCommitment(e, commitmentId, startTime, endTime);
-        vm.prank(ALICE); e.agreements.activateAgreement(agreementId, commitmentId);
+        bytes32 reservationId = reserveMatchingCapacity(e, agreementId, endTime);
+        vm.prank(ALICE); e.agreements.activateAgreement(agreementId, commitmentId, reservationId);
 
         vm.warp(endTime);
         (bool early,) = address(e.agreements).call(abi.encodeWithSelector(e.agreements.completeAgreement.selector, agreementId));

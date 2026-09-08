@@ -94,23 +94,25 @@ W11 converts the qualified mobile architecture into real platform applications a
 - iOS clipboard handling is local-only and expires copied public values after 60 seconds; lost-device handling clears it immediately.
 - Closeout qualification passed on Wallet Mobile Verification #430 and Integrated Qualification #1422.
 
-### W11.9 — Native automated qualification — IN PROGRESS
+### W11.9 — Native automated qualification — COMPLETE
 - Android platform-native JUnit authority-policy tests cover canonical SmartAccount/CapabilityRegistry authority, RPC transport-only policy, qualified UserOperation RPC vocabulary, and credential-free HTTPS endpoint validation.
 - Android emulator instrumentation tests run device-side authority/RPC fail-closed checks, including rejection of `personal_sign`, `eth_sendTransaction`, insecure HTTP, and credential-bearing endpoints.
 - iOS XCTest covers the same authority-policy contract with an explicitly hosted `Wallet420Tests` target and stable `PRODUCT_MODULE_NAME: Wallet420` import surface.
-- iOS UI smoke tests now launch the simulator app and verify the primary Wallet / Apps / Activity / Security surfaces are reachable.
+- iOS UI smoke tests launch the simulator app and verify the primary Wallet / Apps / Activity / Security surfaces are reachable.
+- UI-test-only launch behavior suppresses APNs prompts and simulator/XCTest scene churn without changing production lifecycle/security behavior.
 - Shared Node qualification fixtures assert Android/iOS authority-policy parity and fail on native authority drift.
 - Static native-source guards forbid embedded private-key material, private-key export paths, remote-signing fallbacks, insecure HTTP RPC endpoints, and legacy signing-method transport.
 - Wallet Mobile CI executes Android unit tests + emulator instrumentation, iOS unit + UI simulator tests, native builds, shared mobile checks, release checks, and shared wallet-core regression in the same PR qualification path.
-- Android emulator/static-guard slice qualified on Wallet Mobile Verification #464 and Integrated Qualification #1439.
-- Current step: W11.9 closeout qualification for iOS UI/simulator coverage and consolidated native qualification.
+- Closeout qualification passed on Wallet Mobile Verification #484 and Integrated Qualification #1449.
 
-### W11.10 — Release engineering and device qualification
-- Signed internal Android build and iOS archive path.
-- Physical-device passkey/biometric/secure-storage qualification.
-- Deep-link and push matrix across locked/unlocked/background/terminated states.
-- Store metadata/privacy entitlements review.
-- W11 closeout qualification before merge to `main`.
+### W11.10 — Release engineering and device qualification — IN PROGRESS
+- W11.10.1 release build/archive lane is qualified: CI produces unsigned Android release APK/AAB artifacts and an unsigned generic-device iOS `.xcarchive` without committing signing credentials.
+- Release build/archive slice qualified on Wallet Mobile Verification #488 and Integrated Qualification #1451.
+- W11.10.2 store/privacy/entitlement hardening is in progress: iOS Face ID usage text and remote-notification background mode are explicit, APNs environment remains deployment-configurable, Associated Domains stays configuration-driven, and an iOS privacy manifest declares app-local `UserDefaults` required-reason use.
+- Native store-qualification regression guards now verify Android backup/notification/App Link settings, iOS bundle/Face ID/background-push/Associated Domains/APNs/privacy-manifest settings, and prohibit embedded signing credentials or remote-signer material.
+- W11.10.3 physical-device qualification matrix is defined in `W11.10-DEVICE-QUALIFICATION.md` for passkeys, biometrics, secure storage/session keys, lifecycle/privacy shielding, deep links, push states, drift, lost-device handling, clipboard policy, and RPC transport.
+- Physical-device PASS/FAIL evidence remains external-device work: results must record device model, OS version, build SHA, and notes; no simulated result may be recorded as a physical-device pass.
+- Remaining before W11 closeout: qualify this store/entitlement slice in CI, complete or explicitly block the physical-device matrix, review authorized Play/TestFlight signing/export configuration outside source control, and run final W11 qualification before PR #112 is made ready for merge.
 
 ## W11 invariants
 

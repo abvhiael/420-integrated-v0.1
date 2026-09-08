@@ -147,4 +147,50 @@ contract HighCountryGamingBridge420Test {
         }), true);
         require(!bridge.hasActiveEntitlement(1, foreignEntitlement), "foreign entitlement accepted");
     }
+
+    function testScopedEntitlementRequiresMatchingTypeAndContent() public {
+        bytes32 sharedProfileId = _bindAlice();
+        bytes32 entitlementId = keccak256("breeders-district");
+        bytes32 contentId = keccak256("breeders-district-content");
+        entitlements.setEntitlement(IGameEntitlementsHC420.Entitlement({
+            entitlementId: entitlementId,
+            profileId: sharedProfileId,
+            gameId: HighCountryGamingIds.GAME_ID,
+            entitlementType: HighCountryGamingIds.ENTITLEMENT_BONUS_REGION,
+            contentId: contentId,
+            validFrom: 0,
+            validUntil: 0,
+            revoked: false,
+            exists: true
+        }), true);
+
+        require(
+            bridge.hasScopedEntitlement(1, entitlementId, HighCountryGamingIds.ENTITLEMENT_BONUS_REGION, contentId),
+            "valid scoped entitlement rejected"
+        );
+        require(bridge.hasBonusRegion(1, entitlementId, contentId), "bonus region helper rejected valid entitlement");
+        require(
+            !bridge.hasScopedEntitlement(1, entitlementId, HighCountryGamingIds.ENTITLEMENT_COSMETIC, contentId),
+            "wrong entitlement type accepted"
+        );
+        require(
+            !bridge.hasScopedEntitlement(1, entitlementId, HighCountryGamingIds.ENTITLEMENT_BONUS_REGION, keccak256("wrong-content")),
+            "wrong content accepted"
+        );
+    }
+
+    function testRequireScopedEntitlementFailsClosed() public {
+        _bindAlice();
+        bytes32 missingId = keccak256("missing-entitlement");
+        (bool ok,) = address(bridge).call(
+            abi.encodeWithSelector(
+                bridge.requireScopedEntitlement.selector,
+                uint64(1),
+                missingId,
+                HighCountryGamingIds.ENTITLEMENT_COMPETITION,
+                keccak256("global-420-cup")
+            )
+        );
+        require(!ok, "missing entitlement did not fail closed");
+    }
 }

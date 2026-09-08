@@ -181,7 +181,11 @@ contract ExchangeMultiHopConservationV12Test {
         p = new ExchangeAtomicRouter420.Hop[](count);
         p[0] = ExchangeAtomicRouter420.Hop(AB, ROUTE, address(tokenB), 95 ether, "");
         if (count > 1) p[1] = ExchangeAtomicRouter420.Hop(BC, ROUTE, address(tokenC), 95 ether, "");
-        if (count > 2) p[2] = ExchangeAtomicRouter420.Hop(CD, ROUTE, address(tokenD), 95 ether, breakThird ? hex"01" : bytes(""));
+        if (count > 2) {
+            bytes memory routeData = new bytes(breakThird ? 1 : 0);
+            if (breakThird) routeData[0] = bytes1(uint8(1));
+            p[2] = ExchangeAtomicRouter420.Hop(CD, ROUTE, address(tokenD), 95 ether, routeData);
+        }
         if (count > 3) p[3] = ExchangeAtomicRouter420.Hop(DE, ROUTE, address(tokenE), 95 ether, "");
     }
 

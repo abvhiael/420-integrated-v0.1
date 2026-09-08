@@ -23,13 +23,21 @@ class MainActivity : FragmentActivity() {
         AndroidDeviceSecurity420.enablePrivacyShield(this)
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(32, 48, 32, 32)
         }
-        titleView = TextView(this).apply { text = "420 Wallet"; textSize = 24f }
-        statusView = TextView(this).apply { text = walletText(); textSize = 16f; setPadding(0, 24, 0, 24) }
+        Wallet420DesignSystem.applyRoot(root)
+
+        titleView = TextView(this).apply {
+            text = "420 Wallet"
+            Wallet420DesignSystem.styleTitle(this)
+        }
+        statusView = TextView(this).apply {
+            text = walletText()
+            Wallet420DesignSystem.styleBody(this)
+        }
         unlockButton = Button(this).apply {
             text = "Unlock wallet"
             visibility = View.GONE
+            Wallet420DesignSystem.styleAction(this)
             setOnClickListener { authorizeLocalUnlock() }
         }
         root.addView(titleView)
@@ -81,6 +89,7 @@ class MainActivity : FragmentActivity() {
 
     private fun navButton(label: String, action: () -> Unit): Button = Button(this).apply {
         text = label
+        Wallet420DesignSystem.styleNavigation(this)
         setOnClickListener { if (!localLocked) action() }
     }
 

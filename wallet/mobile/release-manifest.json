@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "releaseVersion": "0.1.0-w11",
+  "source": {
+    "commit": "ffebc7076abc7f9ccab86674219bd012f97fdc42",
+    "branch": "feature/420wallet-w11-native-projects"
+  },
+  "authorityPolicy": "wallet-core-canonical-v1",
+  "android": {
+    "applicationId": "io.fourtwenty.wallet",
+    "versionCode": 1,
+    "minSdk": 28,
+    "targetSdk": 35,
+    "artifacts": {
+      "apk": "app-release.apk",
+      "aab": "app-release.aab"
+    }
+  },
+  "ios": {
+    "bundleId": "io.fourtwenty.wallet",
+    "buildNumber": 1,
+    "minimumOS": "16.0",
+    "archive": "420 Wallet.xcarchive"
+  },
+  "security": {
+    "requiresPhysicalDeviceCloseout": true,
+    "committedSigningCredentials": false,
+    "remoteSignerFallback": false,
+    "plaintextPrivateKeyFallback": false
+  }
+}

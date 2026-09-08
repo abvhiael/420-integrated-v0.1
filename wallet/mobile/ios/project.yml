@@ -42,12 +42,26 @@ targets:
         SWIFT_VERSION: "5.9"
         TEST_HOST: "$(BUILT_PRODUCTS_DIR)/420 Wallet.app/420 Wallet"
         BUNDLE_LOADER: "$(TEST_HOST)"
+  Wallet420UITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - Wallet420UITests
+    dependencies:
+      - target: Wallet420
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: io.fourtwenty.wallet.uitests
+        SWIFT_VERSION: "5.9"
+        TEST_TARGET_NAME: Wallet420
 schemes:
   Wallet420:
     build:
       targets:
         Wallet420: all
         Wallet420Tests: [test]
+        Wallet420UITests: [test]
     test:
       targets:
         - Wallet420Tests
+        - Wallet420UITests

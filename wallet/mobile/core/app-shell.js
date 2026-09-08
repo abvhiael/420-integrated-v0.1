@@ -1,4 +1,4 @@
-const VALID_VIEWS = new Set(['home', 'account', 'activity', 'connect', 'approvals', 'settings']);
+const VALID_VIEWS = new Set(['wallet', 'apps', 'activity', 'security', 'account', 'connect', 'approvals', 'settings']);
 
 function normalizeView(view) {
   if (typeof view !== 'string' || !VALID_VIEWS.has(view)) throw new Error(`unsupported mobile view: ${view}`);
@@ -7,7 +7,7 @@ function normalizeView(view) {
 
 export function createMobileAppShell420(initial = {}) {
   let state = Object.freeze({
-    view: normalizeView(initial.view ?? 'home'),
+    view: normalizeView(initial.view ?? 'wallet'),
     activeConnectionOrigin: initial.activeConnectionOrigin ?? null,
     pendingApprovals: Number.isInteger(initial.pendingApprovals) && initial.pendingApprovals >= 0 ? initial.pendingApprovals : 0,
     accountReady: Boolean(initial.accountReady),

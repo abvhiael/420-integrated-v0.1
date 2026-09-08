@@ -1,5 +1,6 @@
 import Foundation
 import UIKit
+import Darwin
 
 struct DeviceSecuritySignals420 {
     let jailbroken: Bool
@@ -19,9 +20,20 @@ enum DeviceSecurity420 {
         let jailbroken = jailbreakIndicators.contains { FileManager.default.fileExists(atPath: $0) }
         return DeviceSecuritySignals420(
             jailbroken: jailbroken,
-            debuggerAttached: _isDebugAssertConfiguration(),
+            debuggerAttached: isDebuggerAttached(),
             screenCaptureActive: UIScreen.main.isCaptured
         )
+    }
+
+    private static func isDebuggerAttached() -> Bool {
+        var info = kinfo_proc()
+        var size = MemoryLayout<kinfo_proc>.stride
+        var mib: [Int32] = [CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid()]
+        let result = mib.withUnsafeMutableBufferPointer { pointer in
+            sysctl(pointer.baseAddress, u_int(pointer.count), &info, &size, nil, 0)
+        }
+        guard result == 0 else { return false }
+        return (info.kp_proc.p_flag & P_TRACED) != 0
     }
 
     @MainActor

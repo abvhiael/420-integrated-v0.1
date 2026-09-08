@@ -2,22 +2,27 @@
 
 W12 turns the W11 native applications and qualified release boundaries into reproducible versioned release packages for Android and iOS. W12 does not weaken the W11 physical-device closeout gate and does not place signing credentials in source control.
 
-## W12.1 — Versioned release manifest + provenance — IN PROGRESS
-- Define one canonical release manifest for Android and iOS artifacts.
-- Bind release version, version code/build number, Git commit, source branch, application/bundle identifiers, minimum OS versions, artifact names, and SHA-256 digests.
-- Require artifact provenance to identify the exact qualified source head.
-- Keep signing identity/certificate/keystore details out of committed release metadata.
-- Validate that Android APK/AAB and iOS archive metadata agree on release version and source commit.
+## W12.1 — Versioned release manifest + provenance — COMPLETE
+- Canonical Android/iOS release manifest established in `release-manifest.json`.
+- Release version, platform version/build numbers, application/bundle identifiers, minimum OS/SDK versions, artifact names, authority-policy version, source branch and exact qualified W11 source commit are bound in one record.
+- `release-manifest-check.js` validates release metadata against Android Gradle and iOS XcodeGen configuration.
+- Wallet Mobile CI now emits SHA-256 checksum records tied to the exact `GITHUB_SHA` for the Android APK/AAB and packaged unsigned iOS archive.
+- Signing identity/certificate/keystore details remain outside committed release metadata.
 
-## W12.2 — Android Play packaging
-- Produce deterministic Play internal-testing package metadata.
-- Verify package ID, version code, target SDK, App Links host configuration, notification permission, Data Safety checklist, and signed artifact provenance.
-- Keep upload key / Play App Signing credentials external.
+## W12.2 — Android Play packaging — IN PROGRESS
+- Canonical Play internal-testing metadata added in `android/play-internal-testing.json`.
+- `android-play-package-check.js` verifies package ID, version/versionCode, SDK levels, AAB identity, verified HTTPS App Link contract, notification permission, backup policy and external-only signing configuration.
+- Production App Link host remains build-configured and requires Digital Asset Links.
+- Play App Signing/upload key remain external authorized configuration.
+- Google Play Data Safety is explicitly `REQUIRED_EXTERNAL_REVIEW`; no repository test falsely marks it complete.
+- `W12.2-ANDROID-PLAY.md` defines the internal-test/upload procedure and external production requirements.
+- Remaining W12.2 work: qualify the current branch in CI, inspect generated release/checksum artifacts, and close the repo-side Android Play package contract before moving to W12.3.
 
 ## W12.3 — iOS TestFlight/App Store packaging
 - Produce deterministic archive/export metadata for TestFlight/App Store Connect.
 - Verify bundle ID, build number, deployment target, Associated Domains, APNs entitlement, privacy manifest, and signed archive provenance.
 - Keep certificates, provisioning profiles, App Store Connect API keys, and signing credentials external.
+- Real-iPhone device qualification remains an explicit external production-release blocker.
 
 ## W12.4 — Cross-platform release bundle
 - Create release-note/change-summary metadata tied to the same source SHA.

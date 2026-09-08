@@ -6,6 +6,8 @@ private enum WalletSurface420: String, CaseIterable, Identifiable {
     case activity = "Activity"
     case security = "Security"
     var id: String { rawValue }
+    var accessibilityID: String { "wallet420.surface.\(rawValue.lowercased())" }
+    var tabAccessibilityID: String { "wallet420.tab.\(rawValue.lowercased())" }
 }
 
 @main
@@ -24,6 +26,7 @@ struct Wallet420App: App {
                 VStack(spacing: 16) {
                     Text(selectedSurface.rawValue == "Wallet" ? "420 Wallet" : selectedSurface.rawValue)
                         .font(.title)
+                        .accessibilityIdentifier(selectedSurface.accessibilityID)
                     Text(localLocked ? (unlockStatus ?? "unlock required after backgrounding") : surfaceText(selectedSurface))
                         .font(.body)
                         .multilineTextAlignment(.center)
@@ -46,6 +49,7 @@ struct Wallet420App: App {
                                 selectedSurface = surface
                                 handoffStatus = nil
                             }
+                            .accessibilityIdentifier(surface.tabAccessibilityID)
                             .disabled(localLocked)
                         }
                     }
@@ -58,6 +62,7 @@ struct Wallet420App: App {
                         .ignoresSafeArea()
                     Text("420 Wallet Locked")
                         .font(.title2)
+                        .accessibilityIdentifier("wallet420.privacy-shield")
                 }
             }
             .task {

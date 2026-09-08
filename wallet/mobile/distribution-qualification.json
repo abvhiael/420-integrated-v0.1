@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "stage": "W12.5",
+  "releaseBundle": "release-bundle.json",
+  "checksumAlgorithm": "sha256",
+  "requiredChecks": [
+    "release-manifest",
+    "android-play-package",
+    "ios-appstore-package",
+    "release-bundle",
+    "distribution-readiness",
+    "secret-absence",
+    "device-closeout-policy"
+  ],
+  "secretPolicy": {
+    "committedSigningCredentials": false,
+    "committedWalletSecrets": false,
+    "remoteSignerFallback": false,
+    "plaintextPrivateKeyFallback": false
+  },
+  "productionReadiness": {
+    "requiresDeviceCloseout": true,
+    "currentStatus": "BLOCKED_EXTERNAL_DEVICE",
+    "requiredCommand": "npm run device:closeout"
+  }
+}

@@ -6,30 +6,30 @@ W12 turns the W11 native applications and qualified release boundaries into repr
 - Canonical Android/iOS release manifest established in `release-manifest.json`.
 - Release version, platform version/build numbers, application/bundle identifiers, minimum OS/SDK versions, artifact names, authority-policy version, source branch and exact qualified W11 source commit are bound in one record.
 - `release-manifest-check.js` validates release metadata against Android Gradle and iOS XcodeGen configuration.
-- Wallet Mobile CI now emits SHA-256 checksum records tied to the exact `GITHUB_SHA` for the Android APK/AAB and packaged unsigned iOS archive.
+- Wallet Mobile CI emits SHA-256 checksum records tied to the exact `GITHUB_SHA` for the Android APK/AAB and packaged unsigned iOS archive.
 - Signing identity/certificate/keystore details remain outside committed release metadata.
 
 ## W12.2 — Android Play packaging — COMPLETE
-- Canonical Play internal-testing metadata added in `android/play-internal-testing.json`.
+- Canonical Play internal-testing metadata in `android/play-internal-testing.json`.
 - `android-play-package-check.js` verifies package ID, version/versionCode, SDK levels, AAB identity, verified HTTPS App Link contract, notification permission, backup policy and external-only signing configuration.
 - Production App Link host remains build-configured and requires Digital Asset Links.
 - Play App Signing/upload key remain external authorized configuration.
-- Google Play Data Safety is explicitly `REQUIRED_EXTERNAL_REVIEW`; no repository test falsely marks it complete.
+- Google Play Data Safety remains explicit `REQUIRED_EXTERNAL_REVIEW`; repository checks do not falsely mark it complete.
 - `W12.2-ANDROID-PLAY.md` defines the internal-test/upload procedure and external production requirements.
-- Wallet Mobile Verification #546 and Integrated Qualification #1480 passed on the W12.2 head.
 
-## W12.3 — iOS TestFlight/App Store packaging — IN PROGRESS
-- Canonical App Store package metadata added in `ios-appstore-package.json`.
-- `ios-appstore-package-check.js` verifies bundle ID, deployment target, Associated Domains configuration, APNs configuration, background notification mode, privacy manifest, export method, external-only signing policy and the real-iPhone release blocker.
-- `W12.3-IOS-APPSTORE.md` defines authorized archive/export/TestFlight procedure and required external evidence.
-- Certificates, provisioning profiles, App Store Connect API keys and signing credentials remain external to source control.
-- Real-iPhone qualification remains `BLOCKED_EXTERNAL_DEVICE` and mandatory before production App Store readiness.
-- Remaining W12.3 work: qualify the current branch in CI and inspect the resulting native/release artifact lane before closing the repo-side package contract.
+## W12.3 — iOS TestFlight/App Store packaging — COMPLETE
+- Canonical iOS distribution metadata in `ios-appstore-package.json`.
+- `ios-appstore-package-check.js` verifies bundle ID, deployment target, Associated Domains, APNs configuration, background notification mode, privacy manifest, export method and external-only signing requirements.
+- `W12.3-IOS-APPSTORE.md` defines authorized TestFlight/App Store packaging and upload requirements.
+- Certificates, provisioning profiles and App Store Connect credentials remain external.
+- Real-iPhone device qualification remains an explicit external production-release blocker.
 
-## W12.4 — Cross-platform release bundle
-- Create release-note/change-summary metadata tied to the same source SHA.
-- Generate artifact checksum manifest and release bill of materials.
-- Require identical wallet authority/security policy version across mobile platforms.
+## W12.4 — Cross-platform release bundle — IN PROGRESS
+- `release-bundle.json` defines one cross-platform release identity, shared authority policy, release notes, security gate, and release bill-of-materials contract.
+- `release-bundle-check.js` verifies release version, qualified source commit, Android/iOS identities, SHA-256 provenance policy, authority-policy parity, BOM contents and preservation of the `device:closeout` release gate.
+- `W12.4-RELEASE-BUNDLE.md` documents the bundle and its verification rules.
+- `npm run release:bundle:check` is wired into the normal mobile qualification path.
+- Remaining W12.4 work: qualify the current head in CI and inspect generated checksum/release artifacts before closing the phase.
 
 ## W12.5 — Distribution qualification
 - Validate packaged release metadata and checksums in CI.

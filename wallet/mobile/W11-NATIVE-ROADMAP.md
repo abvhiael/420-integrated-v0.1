@@ -95,11 +95,15 @@ W11 converts the qualified mobile architecture into real platform applications a
 - Closeout qualification passed on Wallet Mobile Verification #430 and Integrated Qualification #1422.
 
 ### W11.9 — Native automated qualification — IN PROGRESS
-- Android now has platform-native JUnit authority-policy tests for canonical SmartAccount/CapabilityRegistry authority, RPC transport-only policy, qualified UserOperation RPC vocabulary, and credential-free HTTPS endpoint validation.
-- iOS now has an XCTest target with the same authority-policy tests.
+- Android platform-native JUnit authority-policy tests cover canonical SmartAccount/CapabilityRegistry authority, RPC transport-only policy, qualified UserOperation RPC vocabulary, and credential-free HTTPS endpoint validation.
+- Android emulator instrumentation tests run device-side authority/RPC fail-closed checks, including rejection of `personal_sign`, `eth_sendTransaction`, insecure HTTP, and credential-bearing endpoints.
+- iOS XCTest covers the same authority-policy contract with an explicitly hosted `Wallet420Tests` target and stable `PRODUCT_MODULE_NAME: Wallet420` import surface.
+- iOS UI smoke tests now launch the simulator app and verify the primary Wallet / Apps / Activity / Security surfaces are reachable.
 - Shared Node qualification fixtures assert Android/iOS authority-policy parity and fail on native authority drift.
-- Wallet Mobile CI now executes Android `testDebugUnitTest` before assembling the debug app and executes the iOS XCTest suite before the simulator build.
-- Current step: qualify native unit-test execution in CI, then add emulator/instrumentation and broader static no-key/remote-signer/insecure-HTTP guards.
+- Static native-source guards forbid embedded private-key material, private-key export paths, remote-signing fallbacks, insecure HTTP RPC endpoints, and legacy signing-method transport.
+- Wallet Mobile CI executes Android unit tests + emulator instrumentation, iOS unit + UI simulator tests, native builds, shared mobile checks, release checks, and shared wallet-core regression in the same PR qualification path.
+- Android emulator/static-guard slice qualified on Wallet Mobile Verification #464 and Integrated Qualification #1439.
+- Current step: W11.9 closeout qualification for iOS UI/simulator coverage and consolidated native qualification.
 
 ### W11.10 — Release engineering and device qualification
 - Signed internal Android build and iOS archive path.

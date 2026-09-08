@@ -19,6 +19,7 @@ struct Wallet420App: App {
     @State private var privacyShield = false
     @State private var localLocked = false
     @State private var unlockStatus: String?
+    @State private var transientStatus: String?
 
     private var isUITest: Bool {
         ProcessInfo.processInfo.arguments.contains("--ui-test")
@@ -27,39 +28,26 @@ struct Wallet420App: App {
     var body: some Scene {
         WindowGroup {
             ZStack {
-                VStack(spacing: Wallet420DesignSystem.spacingMedium) {
-                    Text(selectedSurface.rawValue == "Wallet" ? "420 Wallet" : selectedSurface.rawValue)
-                        .font(.system(size: 24, weight: .bold, design: .rounded))
-                        .accessibilityIdentifier(selectedSurface.accessibilityID)
-                    Text(localLocked ? (unlockStatus ?? "unlock required after backgrounding") : surfaceText(selectedSurface))
-                        .font(.body)
-                        .multilineTextAlignment(.center)
+                VStack(alignment: .leading, spacing: Wallet420DesignSystem.spacingMedium) {
+                    header
+
                     if localLocked {
-                        Button("Unlock wallet") {
-                            Task { await authorizeLocalUnlock() }
-                        }
-                        .buttonStyle(Wallet420PrimaryButtonStyle())
-                    }
-                    if let handoffStatus, !localLocked {
-                        Divider()
-                        Text(handoffStatus)
-                            .font(.subheadline)
-                            .multilineTextAlignment(.center)
-                    }
-                    Spacer()
-                    HStack(spacing: Wallet420DesignSystem.spacingSmall) {
-                        ForEach(WalletSurface420.allCases) { surface in
-                            Button(surface.rawValue) {
-                                guard !localLocked else { return }
-                                selectedSurface = surface
-                                handoffStatus = nil
+                        lockedContent
+                    } else {
+                        ScrollView {
+                            VStack(spacing: Wallet420DesignSystem.spacingMedium) {
+                                surfaceContent(selectedSurface)
+                                if let handoffStatus {
+                                    statusCard(title: "Approval request", body: handoffStatus)
+                                } else if let transientStatus {
+                                    statusCard(title: "Ready for authorization", body: transientStatus)
+                                }
                             }
-                            .font(.system(size: 14, weight: .semibold))
-                            .frame(minHeight: Wallet420DesignSystem.minimumTouchTarget)
-                            .accessibilityIdentifier(surface.tabAccessibilityID)
-                            .disabled(localLocked)
+                            .frame(maxWidth: .infinity)
                         }
                     }
+
+                    navigationBar
                 }
                 .padding(Wallet420DesignSystem.spacingMedium)
                 .wallet420Surface()
@@ -84,6 +72,7 @@ struct Wallet420App: App {
                     localLocked = false
                     unlockStatus = nil
                     handoffStatus = nil
+                    transientStatus = nil
                 }
             }
             .onChange(of: scenePhase) { phase in
@@ -104,6 +93,7 @@ struct Wallet420App: App {
                     localLocked = true
                     unlockStatus = "unlock required after backgrounding"
                     handoffStatus = nil
+                    transientStatus = nil
                 @unknown default:
                     privacyShield = true
                     localLocked = true
@@ -124,6 +114,118 @@ struct Wallet420App: App {
         }
     }
 
+    private var header: some View {
+        VStack(alignment: .leading, spacing: Wallet420DesignSystem.spacingSmall) {
+            Text(selectedSurface == .wallet ? "420 Wallet" : selectedSurface.rawValue)
+                .font(.system(size: 26, weight: .bold, design: .rounded))
+                .accessibilityIdentifier(selectedSurface.accessibilityID)
+            Text(localLocked ? (unlockStatus ?? "unlock required after backgrounding") : subtitle(selectedSurface))
+                .font(.body)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private var lockedContent: some View {
+        VStack(alignment: .leading, spacing: Wallet420DesignSystem.spacingMedium) {
+            statusCard(
+                title: "Wallet locked",
+                body: unlockStatus ?? "Re-authenticate locally to restore presentation access. Canonical SmartAccount authority is unchanged."
+            )
+            Button("Unlock wallet") {
+                Task { await authorizeLocalUnlock() }
+            }
+            .buttonStyle(Wallet420PrimaryButtonStyle())
+        }
+    }
+
+    private var navigationBar: some View {
+        HStack(spacing: Wallet420DesignSystem.spacingSmall) {
+            ForEach(WalletSurface420.allCases) { surface in
+                Button(surface.rawValue) {
+                    guard !localLocked else { return }
+                    selectedSurface = surface
+                    handoffStatus = nil
+                    transientStatus = nil
+                }
+                .font(.system(size: 13, weight: selectedSurface == surface ? .bold : .medium))
+                .frame(maxWidth: .infinity, minHeight: Wallet420DesignSystem.minimumTouchTarget)
+                .foregroundStyle(selectedSurface == surface ? Wallet420DesignSystem.brandPrimaryDark : .primary)
+                .background(selectedSurface == surface ? Wallet420DesignSystem.surfaceDark.opacity(0.55) : Color.clear)
+                .clipShape(RoundedRectangle(cornerRadius: Wallet420DesignSystem.cornerRadiusMedium, style: .continuous))
+                .accessibilityIdentifier(surface.tabAccessibilityID)
+                .disabled(localLocked)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func surfaceContent(_ surface: WalletSurface420) -> some View {
+        switch surface {
+        case .wallet:
+            infoCard(title: "Portfolio", body: "$420  —  balance from Wallet Core\nAssets and balances remain chain-derived and presentation-only here.")
+            quickActions
+            infoCard(title: "Recent activity", body: "Open Activity for UserOperation status, chain, hash, and timestamps.")
+        case .apps:
+            infoCard(title: "420 Integrated", body: "HTTPS destinations only. App navigation never becomes signing authority.")
+            infoCard(title: "Discover", body: "Search · AppStore · AI")
+            infoCard(title: "Finance & governance", body: "Swap · Bridge · Stake · Governance")
+        case .activity:
+            infoCard(title: "UserOperations", body: "Status · chain · hash · timestamps")
+            infoCard(title: "Authority boundary", body: "Activity is presentation-only. Submission and signing remain governed by Wallet Core and canonical SmartAccount policy.")
+        case .security:
+            infoCard(title: "Authentication", body: "Passkeys · local biometric presence · session keys")
+            infoCard(title: "Permissions", body: "dApp capabilities · session scope · expiry")
+            infoCard(title: "Recovery & device", body: "Recovery policy · device state · lost-device controls")
+        }
+    }
+
+    private var quickActions: some View {
+        VStack(alignment: .leading, spacing: Wallet420DesignSystem.spacingSmall) {
+            Text("Quick actions")
+                .font(.headline)
+            HStack(spacing: Wallet420DesignSystem.spacingSmall) {
+                Button("Send") { transientStatus = "Send request prepared for Wallet Core authorization" }
+                    .buttonStyle(Wallet420PrimaryButtonStyle())
+                Button("Receive") { transientStatus = "Receive presentation opened" }
+                    .buttonStyle(Wallet420SecondaryButtonStyle())
+                Button("Connect") { transientStatus = "Connect request prepared for Wallet Core authorization" }
+                    .buttonStyle(Wallet420SecondaryButtonStyle())
+            }
+        }
+        .wallet420Card()
+    }
+
+    private func infoCard(title: String, body: String) -> some View {
+        VStack(alignment: .leading, spacing: Wallet420DesignSystem.spacingSmall) {
+            Text(title).font(.headline)
+            Text(body)
+                .font(.body)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .wallet420Card()
+    }
+
+    private func statusCard(title: String, body: String) -> some View {
+        VStack(alignment: .leading, spacing: Wallet420DesignSystem.spacingSmall) {
+            Text(title).font(.headline)
+            Text(body)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .wallet420Card()
+    }
+
+    private func subtitle(_ surface: WalletSurface420) -> String {
+        switch surface {
+        case .wallet: return "Your portfolio, actions, and recent wallet activity."
+        case .apps: return "Trusted entry points into the 420 Integrated ecosystem."
+        case .activity: return "Track submitted UserOperations and wallet events."
+        case .security: return "Manage passkeys, sessions, permissions, recovery, and this device."
+        }
+    }
+
     private func inspectDeviceSecurity() {
         let signals = DeviceSecurity420.inspect()
         if signals.jailbroken || signals.debuggerAttached {
@@ -131,6 +233,7 @@ struct Wallet420App: App {
             privacyShield = true
             unlockStatus = "device security risk detected\nunlock blocked"
             handoffStatus = nil
+            transientStatus = nil
         }
     }
 
@@ -157,6 +260,7 @@ struct Wallet420App: App {
             localLocked = false
             unlockStatus = nil
             privacyShield = UIScreen.main.isCaptured
+            selectedSurface = .wallet
             // Local presence only restores presentation access; canonical SmartAccount authority is unchanged.
             consumePendingPush()
         } catch {
@@ -164,23 +268,11 @@ struct Wallet420App: App {
         }
     }
 
-    private func surfaceText(_ surface: WalletSurface420) -> String {
-        switch surface {
-        case .wallet:
-            return "Portfolio\nAssets and balances from qualified Wallet Core\n\nSend · Receive · Connect"
-        case .apps:
-            return "420 Integrated Apps\nHTTPS destinations only\n\nSearch · AppStore · AI · Swap · Bridge · Stake · Governance"
-        case .activity:
-            return "UserOperation status, chain, hash, and timestamps\n\nPresentation only — no signing authority"
-        case .security:
-            return "Passkeys · Sessions · dApp permissions · Recovery · Device"
-        }
-    }
-
     private func consumePendingPush() {
         guard !localLocked else { return }
         guard let reference = PushRegistration420.shared.consumePending() else { return }
         handoffStatus = "push (\(reference.state)) from \(reference.origin)\n\(reference.requestID)"
+        transientStatus = nil
     }
 
     private func handle(_ url: URL) {
@@ -193,8 +285,10 @@ struct Wallet420App: App {
                 allowDevelopmentScheme: _isDebugAssertConfiguration()
             )
             handoffStatus = "request from \(handoff.origin)\n\(handoff.requestID)"
+            transientStatus = nil
         } catch {
             handoffStatus = "rejected invalid handoff"
+            transientStatus = nil
         }
     }
 }

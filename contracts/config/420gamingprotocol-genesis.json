@@ -1,0 +1,36 @@
+{
+  "schema": "420-gaming-protocol-genesis-v1",
+  "status": "IMPLEMENTED_PENDING_EXACT_HEAD_QUALIFICATION",
+  "suite": "420 Gaming Protocol",
+  "class": "GENESIS_PROTOCOL",
+  "contractsRequired": true,
+  "contracts": [
+    "GamingIds420.sol",
+    "GamingAuthorization420.sol",
+    "GameRegistry420.sol",
+    "GameIdentity420.sol",
+    "GameEntitlements420.sol",
+    "GameClaims420.sol",
+    "CrossGameRegistry420.sol"
+  ],
+  "principles": [
+    "Games must remain playable without a 420 Wallet unless a game explicitly documents a separate non-420 requirement.",
+    "Wallet connection expands ownership, interoperability, prestige, ecosystem participation or optional content rather than serving as a mandatory core-game admission gate.",
+    "Guest profiles, ordinary saves, anti-cheat and routine gameplay state remain off-chain by default.",
+    "Only provenance-sensitive identity links, entitlements, migration commitments and cross-game attestations belong in the canonical protocol layer.",
+    "420 Wallet and Capability Registry remain authoritative for wallet ownership, sessions and execution; Gaming Protocol creates no parallel wallet authority.",
+    "Cross-game consumers query explicit known attestations or entitlements; the protocol exposes no canonical global player-activity enumeration surface."
+  ],
+  "invariants": [
+    "GAME-INV-001: registering, updating or disabling a game is default-deny and capability-authorized.",
+    "GAME-INV-002: an active registered game may be joined by a wallet account without administrator approval.",
+    "GAME-INV-003: one wallet account has at most one canonical profile per game namespace in v1.",
+    "GAME-INV-004: only the registered game operator may issue or revoke that game's entitlements, migration claims and cross-game attestations.",
+    "GAME-INV-005: migration claims are target-account-bound, expiry-aware and single-consumption.",
+    "GAME-INV-006: entitlement and attestation revocation is fail-closed.",
+    "GAME-INV-007: inactive games cannot create new canonical player profiles.",
+    "GAME-INV-008: no contract in this suite stores seed phrases, private keys, session signing material, cloud-save data or raw guest progression.",
+    "GAME-INV-009: game-specific mechanics remain outside the shared genesis protocol.",
+    "GAME-INV-010: connecting a wallet does not itself grant pay-to-win statistical advantages."
+  ]
+}

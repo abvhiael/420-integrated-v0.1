@@ -9,20 +9,22 @@ W12 turns the W11 native applications and qualified release boundaries into repr
 - Wallet Mobile CI now emits SHA-256 checksum records tied to the exact `GITHUB_SHA` for the Android APK/AAB and packaged unsigned iOS archive.
 - Signing identity/certificate/keystore details remain outside committed release metadata.
 
-## W12.2 — Android Play packaging — IN PROGRESS
+## W12.2 — Android Play packaging — COMPLETE
 - Canonical Play internal-testing metadata added in `android/play-internal-testing.json`.
 - `android-play-package-check.js` verifies package ID, version/versionCode, SDK levels, AAB identity, verified HTTPS App Link contract, notification permission, backup policy and external-only signing configuration.
 - Production App Link host remains build-configured and requires Digital Asset Links.
 - Play App Signing/upload key remain external authorized configuration.
 - Google Play Data Safety is explicitly `REQUIRED_EXTERNAL_REVIEW`; no repository test falsely marks it complete.
 - `W12.2-ANDROID-PLAY.md` defines the internal-test/upload procedure and external production requirements.
-- Remaining W12.2 work: qualify the current branch in CI, inspect generated release/checksum artifacts, and close the repo-side Android Play package contract before moving to W12.3.
+- Wallet Mobile Verification #546 and Integrated Qualification #1480 passed on the W12.2 head.
 
-## W12.3 — iOS TestFlight/App Store packaging
-- Produce deterministic archive/export metadata for TestFlight/App Store Connect.
-- Verify bundle ID, build number, deployment target, Associated Domains, APNs entitlement, privacy manifest, and signed archive provenance.
-- Keep certificates, provisioning profiles, App Store Connect API keys, and signing credentials external.
-- Real-iPhone device qualification remains an explicit external production-release blocker.
+## W12.3 — iOS TestFlight/App Store packaging — IN PROGRESS
+- Canonical App Store package metadata added in `ios-appstore-package.json`.
+- `ios-appstore-package-check.js` verifies bundle ID, deployment target, Associated Domains configuration, APNs configuration, background notification mode, privacy manifest, export method, external-only signing policy and the real-iPhone release blocker.
+- `W12.3-IOS-APPSTORE.md` defines authorized archive/export/TestFlight procedure and required external evidence.
+- Certificates, provisioning profiles, App Store Connect API keys and signing credentials remain external to source control.
+- Real-iPhone qualification remains `BLOCKED_EXTERNAL_DEVICE` and mandatory before production App Store readiness.
+- Remaining W12.3 work: qualify the current branch in CI and inspect the resulting native/release artifact lane before closing the repo-side package contract.
 
 ## W12.4 — Cross-platform release bundle
 - Create release-note/change-summary metadata tied to the same source SHA.

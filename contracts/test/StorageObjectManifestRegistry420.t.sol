@@ -170,7 +170,7 @@ contract StorageObjectManifestRegistry420Test {
 
         vm.prank(CONSUMER); e.manifests.registerPlacement(manifestId, 0, agreementId, keccak256("shard-root"), 1_048_576);
         vm.prank(CONSUMER); e.manifests.sealManifest(manifestId);
-        require(e.manifests.getManifest(manifestId).sealed, "not sealed");
+        require(e.manifests.getManifest(manifestId).isSealed, "not sealed");
         require(!e.manifests.isRetrievable(manifestId), "retrievable before start");
         vm.warp(startTime);
         require(e.manifests.isRetrievable(manifestId), "not retrievable at quorum");

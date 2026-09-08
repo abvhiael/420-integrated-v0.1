@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "track": "internal",
+  "applicationId": "io.fourtwenty.wallet",
+  "releaseVersion": "0.1.0-w11",
+  "versionCode": 1,
+  "minSdk": 28,
+  "targetSdk": 35,
+  "artifact": "app-release.aab",
+  "appLinks": {
+    "scheme": "https",
+    "pathPrefix": "/connect",
+    "host": "BUILD_CONFIGURED",
+    "requiresDigitalAssetLinks": true
+  },
+  "permissions": {
+    "internet": true,
+    "postNotifications": true,
+    "backupAllowed": false
+  },
+  "distribution": {
+    "playAppSigning": "EXTERNAL_AUTHORIZED_CONFIGURATION",
+    "uploadKey": "EXTERNAL_AUTHORIZED_CONFIGURATION",
+    "signedArtifactRequiredForUpload": true,
+    "productionReleaseBlockedUntilDeviceCloseout": true
+  },
+  "dataSafety": {
+    "status": "REQUIRED_EXTERNAL_REVIEW",
+    "mustMatchImplementedBehavior": true,
+    "mustBeReviewedBeforeProduction": true
+  }
+}

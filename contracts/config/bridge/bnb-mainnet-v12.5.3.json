@@ -1,0 +1,46 @@
+{
+  "schema": "420-bridge-bnb-mainnet-v12.5.3",
+  "status": "APPROVED_INACTIVE_PENDING_PRODUCTION_VERIFIER_AND_GATEWAY",
+  "canonical_chain_key": "420/BRIDGE/CHAIN/BNB",
+  "chain_family": "EVM_BNB",
+  "route_chain_id": "0x424e424d41494e01",
+  "route_chain_id_encoding": "ASCII BNBMAIN plus profile version 1, interpreted as uint64",
+  "network_identity": {
+    "method": "EIP155_CHAIN_ID",
+    "chain_id": 56,
+    "caip2": "eip155:56"
+  },
+  "native_asset": {
+    "symbol": "BNB",
+    "source_asset_marker": "420/BRIDGE/BNB/NATIVE/BNB",
+    "units": "wei"
+  },
+  "adapter": {
+    "contract": "BnbBridgeAdapter420",
+    "adapter_id_preimage": "420/BRIDGE/BNB/MAINNET/V12.5.3",
+    "required_finality": "production verifier-defined finalized checkpoint",
+    "recipient_encoding": "20-byte EVM address",
+    "native_value_on_420_outbound": "rejected"
+  },
+  "activation_requirements": [
+    "BridgeChainRegistry420 entry uses route_chain_id and canonical BNB Smart Chain mainnet identity",
+    "production IBnbFinalityVerifier420 implementation is deployed and reviewed",
+    "canonical BNB gateway contract is governance allowlisted",
+    "BNB native source mapping is bound to the canonical BNB bridge asset id",
+    "every BEP-20 token is explicitly source-token mapped before qualification",
+    "each asset id is bound to an active BridgeRouteRegistry route",
+    "route risk caps and emergency isolation are configured",
+    "end-to-end inbound and outbound qualification passes"
+  ],
+  "bep20_policy": "Default deny. Every BEP-20 contract requires an explicit source-token-to-420-asset mapping and route binding before acceptance.",
+  "security_invariants": [
+    "wrong EIP-155 chain id fails closed",
+    "non-finalized proof fails closed",
+    "unapproved gateway fails closed",
+    "unapproved native/BEP-20 source asset fails closed",
+    "route substitution fails closed",
+    "message replay fails closed",
+    "direct adapter calls bypassing GatewayRouter420 fail closed",
+    "outbound recipients must be exactly 20 bytes"
+  ]
+}

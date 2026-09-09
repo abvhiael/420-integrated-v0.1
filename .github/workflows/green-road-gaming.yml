@@ -1,0 +1,29 @@
+name: The Green Road Gaming Integration
+
+on:
+  pull_request:
+    paths:
+      - 'clients/greenroad-access-v1/**'
+      - 'packages/420-gaming-sdk/**'
+      - '.github/workflows/green-road-gaming.yml'
+  push:
+    branches: [ main ]
+    paths:
+      - 'clients/greenroad-access-v1/**'
+      - 'packages/420-gaming-sdk/**'
+      - '.github/workflows/green-road-gaming.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test shared gaming SDK
+        working-directory: packages/420-gaming-sdk
+        run: npm test
+      - name: Test The Green Road integration
+        working-directory: clients/greenroad-access-v1
+        run: npm test

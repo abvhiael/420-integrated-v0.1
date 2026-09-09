@@ -50,15 +50,29 @@
 - decoder dispatch pinned to the exact historical service/version
 - missing historical decoder fails closed; no fall-forward to newer decoder
 - decoded results retain registry identity, decoder version and canonical log provenance
-- qualification for historical version resolution, deprecation, version gaps, replay conflicts and decoder pinning
+- raw ABI decoding for canonical ProtocolRegistry version/profile/deprecation events
+- malformed and unknown registry logs fail closed
+- qualification for historical version resolution, deprecation, version gaps, replay conflicts, decoder pinning and raw ABI decoding
+
+### GEN-11.1E — shared production read API
+
+- stable `/v1` HTTP read boundary with no canonical authority
+- health and single-block reads
+- fixed-snapshot cursor encoding/decoding
+- deterministic snapshot-pinned block pagination
+- durable transaction lookup
+- durable receipt lookup
+- deterministic block-log reads
+- ProtocolRegistry service/version reads from the rebuildable historical catalogue
+- explicit `canonicalAuthority: false` response envelopes for derived/consumer reads
+- persistent-store-backed API adapter
+- qualification for pagination stability, extended endpoints, authority boundary, case-insensitive tx/receipt lookup and log ordering
 
 ## Remaining before GEN-11.1 completion
 
 - finalized/safe tag ingestion and promotion of finality metadata
-- raw ProtocolRegistry ABI event decoding from indexed logs into the normalized GEN-11.1D event surface
-- production HTTP/read API
-- fixed-snapshot cursor implementation
 - scalable database-backed store option after file-store baseline qualification
 - full rebuild tooling
 - restart/reorg integration fixtures
+- GEN-11.1F final qualification / readiness closeout
 - first GEN-10 consumer integration, recommended 420Explorer

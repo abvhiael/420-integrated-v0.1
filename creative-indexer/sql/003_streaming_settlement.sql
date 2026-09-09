@@ -14,7 +14,12 @@ CREATE TABLE IF NOT EXISTS streaming_settlements (
   allocation_root TEXT,
   recording_count INTEGER,
   allocated_revenue NUMERIC(78,0),
-  routed_revenue NUMERIC(78,0) NOT NULL DEFAULT 0 CHECK (routed_revenue >= 0)
+  routed_revenue NUMERIC(78,0) NOT NULL DEFAULT 0 CHECK (routed_revenue >= 0),
+  CHECK (
+    (allocation_root IS NULL AND recording_count IS NULL AND allocated_revenue IS NULL)
+    OR
+    (allocation_root IS NOT NULL AND recording_count IS NOT NULL AND recording_count > 0 AND allocated_revenue IS NOT NULL)
+  )
 );
 
 CREATE TABLE IF NOT EXISTS streaming_recording_allocations (
@@ -26,7 +31,12 @@ CREATE TABLE IF NOT EXISTS streaming_recording_allocations (
   routed BOOLEAN NOT NULL DEFAULT FALSE,
   route_settlement_id TEXT,
   routed_block BIGINT,
-  PRIMARY KEY (settlement_id, recording_id)
+  PRIMARY KEY (settlement_id, recording_id),
+  CHECK (
+    (routed = FALSE AND route_settlement_id IS NULL AND routed_block IS NULL)
+    OR
+    (routed = TRUE AND route_settlement_id IS NOT NULL AND routed_block IS NOT NULL)
+  )
 );
 
 CREATE INDEX IF NOT EXISTS streaming_allocations_recording_idx

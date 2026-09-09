@@ -3,12 +3,13 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "qualify:syntax": "node --check scripts/profile-journey.mjs && node --check scripts/entitlement-journey.mjs && node --check scripts/migration-journey.mjs && node --check scripts/cross-game-journey.mjs",
+    "qualify:syntax": "node --check scripts/registry-journey.mjs && node --check scripts/profile-journey.mjs && node --check scripts/entitlement-journey.mjs && node --check scripts/migration-journey.mjs && node --check scripts/cross-game-journey.mjs",
+    "qualify:registry": "node scripts/registry-journey.mjs",
     "qualify:profile": "node scripts/profile-journey.mjs",
     "qualify:entitlement": "node scripts/entitlement-journey.mjs",
     "qualify:migration": "node scripts/migration-journey.mjs",
     "qualify:cross-game": "node scripts/cross-game-journey.mjs",
-    "qualify:lifecycle": "npm run qualify:profile && npm run qualify:entitlement && npm run qualify:migration && npm run qualify:cross-game"
+    "qualify:lifecycle": "npm run qualify:registry && npm run qualify:profile && npm run qualify:entitlement && npm run qualify:migration && npm run qualify:cross-game"
   },
   "dependencies": {
     "viem": "2.56.0"

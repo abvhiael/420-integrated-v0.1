@@ -22,3 +22,9 @@ type HealthResponse struct {
 	Health model.Health `json:"health"`
 	CanonicalAuthority bool `json:"canonicalAuthority"`
 }
+
+// ReadResponse wraps single-record and bounded collection reads with an explicit authority marker.
+type ReadResponse[T any] struct {
+	Data               T    `json:"data"`
+	CanonicalAuthority bool `json:"canonicalAuthority"`
+}

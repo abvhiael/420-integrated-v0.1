@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "brand": "420 Wallet",
+  "principles": ["calm", "legible", "security-explicit", "platform-native"],
+  "color": {
+    "light": {
+      "background": "#F4F7F3",
+      "surface": "#FFFFFF",
+      "surfaceElevated": "#EAF0E8",
+      "textPrimary": "#132018",
+      "textSecondary": "#526158",
+      "brandPrimary": "#176B3A",
+      "brandOnPrimary": "#FFFFFF",
+      "accent": "#B6E36B",
+      "border": "#CBD6CD",
+      "success": "#247A45",
+      "warning": "#8A5B00",
+      "danger": "#A62B2B"
+    },
+    "dark": {
+      "background": "#0E1511",
+      "surface": "#151F19",
+      "surfaceElevated": "#1D2A22",
+      "textPrimary": "#F2F6F2",
+      "textSecondary": "#A9B8AE",
+      "brandPrimary": "#65C887",
+      "brandOnPrimary": "#08110B",
+      "accent": "#B6E36B",
+      "border": "#33453A",
+      "success": "#65C887",
+      "warning": "#E9BA59",
+      "danger": "#F08080"
+    }
+  },
+  "typography": {
+    "display": {"size": 32, "weight": 700},
+    "title": {"size": 24, "weight": 700},
+    "headline": {"size": 18, "weight": 600},
+    "body": {"size": 16, "weight": 400},
+    "label": {"size": 14, "weight": 600},
+    "caption": {"size": 12, "weight": 400}
+  },
+  "spacing": {"xs": 4, "sm": 8, "md": 16, "lg": 24, "xl": 32, "xxl": 48},
+  "radius": {"sm": 8, "md": 14, "lg": 20, "pill": 999},
+  "elevation": {"surface": 0, "raised": 2, "modal": 8},
+  "icon": {"sm": 18, "md": 24, "lg": 32},
+  "accessibility": {"minimumTouchTarget": 44, "minimumBodyText": 16, "supportsReducedMotion": true, "supportsDynamicType": true},
+  "authority": {"presentationOnly": true, "maySign": false, "mayRecover": false, "mayGrantCapabilities": false}
+}

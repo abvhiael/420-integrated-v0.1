@@ -1,0 +1,41 @@
+{
+  "version": 2,
+  "authority": "presentation-only",
+  "masterIcon": "design/app-icon-master.svg",
+  "wordmark": "design/420-integrated-wordmark.svg",
+  "palette": {
+    "blue": "#273B9C",
+    "green": "#45B84A",
+    "white": "#FFFFFF",
+    "wordmark": "#20397E"
+  },
+  "android": {
+    "adaptiveIcon": {
+      "foregroundSource": "design/app-icon-master.svg",
+      "background": "#FFFFFF",
+      "safeZonePercent": 66
+    },
+    "launcherSizesPx": [48, 72, 96, 144, 192, 512]
+  },
+  "ios": {
+    "appIconSizesPx": [40, 58, 60, 80, 87, 120, 152, 167, 180, 1024],
+    "marketingIconPx": 1024,
+    "source": "design/app-icon-master.svg"
+  },
+  "launch": {
+    "mark": "design/app-icon-master.svg",
+    "wordmark": "design/420-integrated-wordmark.svg",
+    "background": "#FFFFFF",
+    "tagline": "420 Integrated"
+  },
+  "illustrations": [
+    "design/illustration-empty-wallet.svg",
+    "design/illustration-security.svg"
+  ],
+  "privacy": {
+    "forbidRealWalletAddresses": true,
+    "forbidPrivateKeys": true,
+    "forbidTransactionHashes": true,
+    "forbidPersonalData": true
+  }
+}

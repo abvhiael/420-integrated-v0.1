@@ -22,7 +22,8 @@ test('W11.8 Android enables screenshot privacy and local background lock', () =>
 test('W11.8 Android local unlock requires existing biometric device-presence gate', () => {
   assert.match(androidApp, /AndroidBiometricGate420/);
   assert.match(androidApp, /authorize\("Unlock 420 Wallet after backgrounding"\)/);
-  assert.match(androidApp, /if \(!localLocked\) consumePendingPush\(\)/);
+  assert.match(androidApp, /if \(!onboardingActive\) consumePendingPush\(\)/);
+  assert.match(androidApp, /if \(!localLocked && !onboardingActive\) consumePendingPush\(\)/);
   assert.match(androidApp, /Local presence only restores presentation access; canonical SmartAccount authority is unchanged/);
 });
 

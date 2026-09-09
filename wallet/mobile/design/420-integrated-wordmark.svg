@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 720" role="img" aria-labelledby="title desc">
+  <title id="title">420 Integrated logo</title>
+  <desc id="desc">Canonical blue and green interlocked mark above the 420 Integrated wordmark.</desc>
+  <rect width="1600" height="720" fill="#FFFFFF"/>
+  <g transform="translate(550 35) scale(.49)" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="86">
+    <path d="M490 218c-68-86-194-106-286-42-106 73-129 220-53 323 56 75 155 105 243 76 42-14 81-40 111-74l121-137c46-52 124-58 177-14 56 47 64 131 18 188-38 47-103 64-160 40-20-8-38-20-53-36" stroke="#273B9C"/>
+    <path d="M534 806c68 86 194 106 286 42 106-73 129-220 53-323-56-75-155-105-243-76-42 14-81 40-111 74L398 660c-46 52-124 58-177 14-56-47-64-131-18-188 38-47 103-64 160-40 20 8 38 20 53 36" stroke="#45B84A"/>
+    <path d="M218 490c-86-68-106-194-42-286 73-106 220-129 323-53 75 56 105 155 76 243-14 42-40 81-74 111L364 626c-52 46-58 124-14 177 47 56 131 64 188 18 47-38 64-103 40-160-8-20-20-38-36-53" stroke="#45B84A"/>
+    <path d="M806 534c86 68 106 194 42 286-73 106-220 129-323 53-75-56-105-155-76-243 14-42 40-81 74-111l137-121c52-46 58-124 14-177-47-56-131-64-188-18-47 38-64 103-40 160 8 20 20 38 36 53" stroke="#273B9C"/>
+  </g>
+  <text x="800" y="500" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="208" font-weight="800" fill="#20397E">420</text>
+  <text x="800" y="626" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="104" font-weight="700" letter-spacing="8" fill="#20397E">INTEGRATED</text>
+</svg>

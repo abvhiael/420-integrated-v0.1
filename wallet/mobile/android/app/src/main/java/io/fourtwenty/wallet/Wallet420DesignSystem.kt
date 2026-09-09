@@ -4,6 +4,7 @@ import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
+import android.provider.Settings
 import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
@@ -30,9 +31,39 @@ object Wallet420DesignSystem {
     const val SPACE_LG_DP = 24
     const val SPACE_XL_DP = 32
     const val RADIUS_MD_DP = 14
+    const val MOTION_SHORT_MS = 140L
+    const val MOTION_MEDIUM_MS = 220L
 
     fun isDark(view: View): Boolean =
         (view.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+
+    fun reducedMotion(view: View): Boolean = try {
+        Settings.Global.getFloat(view.context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) == 0f
+    } catch (_: Exception) {
+        false
+    }
+
+    fun animateContentIn(view: View) {
+        if (reducedMotion(view)) {
+            view.alpha = 1f
+            view.translationY = 0f
+            return
+        }
+        view.animate().cancel()
+        view.alpha = 0f
+        view.translationY = dp(view, SPACE_SM_DP).toFloat()
+        view.animate().alpha(1f).translationY(0f).setDuration(MOTION_MEDIUM_MS).start()
+    }
+
+    fun pulseStatus(view: View) {
+        if (reducedMotion(view)) {
+            view.alpha = 1f
+            return
+        }
+        view.animate().cancel()
+        view.alpha = 0.55f
+        view.animate().alpha(1f).setDuration(MOTION_SHORT_MS).start()
+    }
 
     fun applyRoot(root: LinearLayout) {
         val dark = isDark(root)

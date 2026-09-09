@@ -124,6 +124,7 @@ class MainActivity : FragmentActivity() {
         contentHost.addView(card("Recovery matters", "Your device is replaceable. Recovery follows canonical SmartAccount policy, not an app-local password or hidden remote signer."))
         contentHost.addView(space())
         contentHost.addView(onboardingChoiceCard())
+        Wallet420DesignSystem.animateContentIn(contentHost)
     }
 
     private fun onboardingChoiceCard(): LinearLayout = LinearLayout(this).apply {
@@ -169,6 +170,8 @@ class MainActivity : FragmentActivity() {
             Wallet420DesignSystem.styleSecondaryAction(this)
             setOnClickListener { renderOnboardingWelcome() }
         })
+        Wallet420DesignSystem.animateContentIn(contentHost)
+        Wallet420DesignSystem.pulseStatus(statusView)
     }
 
     private fun completeOnboarding() {
@@ -177,6 +180,7 @@ class MainActivity : FragmentActivity() {
         navigation.visibility = View.VISIBLE
         showSurface("Wallet")
         statusView.text = "Onboarding complete. Account, passkey, recovery, and signing authority remain governed by Wallet Core and canonical SmartAccount policy."
+        Wallet420DesignSystem.pulseStatus(statusView)
         handleIntent(intent)
         consumePendingPush()
     }
@@ -200,6 +204,7 @@ class MainActivity : FragmentActivity() {
             else -> renderSecurity()
         }
         refreshNavigation()
+        Wallet420DesignSystem.animateContentIn(contentHost)
     }
 
     private fun refreshNavigation() {
@@ -249,7 +254,10 @@ class MainActivity : FragmentActivity() {
                 text = label
                 contentDescription = "$label action"
                 if (index == 0) Wallet420DesignSystem.styleAction(this) else Wallet420DesignSystem.styleSecondaryAction(this)
-                setOnClickListener { statusView.text = "$label request prepared for Wallet Core authorization" }
+                setOnClickListener {
+                    statusView.text = "$label request prepared for Wallet Core authorization"
+                    Wallet420DesignSystem.pulseStatus(statusView)
+                }
             }
             row.addView(button, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
         }
@@ -279,6 +287,7 @@ class MainActivity : FragmentActivity() {
         statusView.text = reason
         contentHost.removeAllViews()
         unlockButton.visibility = View.VISIBLE
+        Wallet420DesignSystem.pulseStatus(statusView)
     }
 
     private fun authorizeLocalUnlock() {
@@ -312,6 +321,7 @@ class MainActivity : FragmentActivity() {
         // Shared Wallet Core must canonically rehydrate and revalidate before approval.
         titleView.text = "Approval Request"
         statusView.text = "push (${reference.state})\n${reference.origin}\n${reference.requestId}"
+        Wallet420DesignSystem.pulseStatus(statusView)
     }
 
     private fun handleIntent(intent: Intent?) {
@@ -328,5 +338,6 @@ class MainActivity : FragmentActivity() {
         } catch (_: Exception) {
             "rejected invalid handoff"
         }
+        Wallet420DesignSystem.pulseStatus(statusView)
     }
 }

@@ -5,6 +5,8 @@ library ModuleIds {
     bytes32 internal constant GROWER_PROFILE_REGISTRY = keccak256("HC.MODULE.GROWER_PROFILE_REGISTRY");
     bytes32 internal constant AUTHORIZATION = keccak256("HC.MODULE.HIGH_COUNTRY_AUTHORIZATION");
     bytes32 internal constant REGION_REGISTRY = keccak256("HC.MODULE.REGION_REGISTRY");
+    bytes32 internal constant GAMING_SESSION_POLICY = keccak256("HC.MODULE.GAMING_SESSION_POLICY");
+    bytes32 internal constant GUEST_MIGRATION = keccak256("HC.MODULE.GUEST_MIGRATION");
     bytes32 internal constant GENESIS_REGISTRY = keccak256("HC.MODULE.GENESIS_REGISTRY");
     bytes32 internal constant RULESET_REGISTRY = keccak256("HC.MODULE.RULESET_REGISTRY");
     bytes32 internal constant RULESET_ROUTER = keccak256("HC.MODULE.RULESET_ROUTER");

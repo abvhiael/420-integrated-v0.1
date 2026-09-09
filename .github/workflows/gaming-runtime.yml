@@ -1,0 +1,22 @@
+name: 420 Gaming Runtime
+
+on:
+  pull_request:
+    paths:
+      - 'deployments/gaming/**'
+      - 'scripts/gaming/**'
+      - 'docs/gaming/420GP-9-RUNTIME-WIRING.md'
+      - 'contracts/config/420gamingprotocol-genesis.json'
+      - '.github/workflows/gaming-runtime.yml'
+  workflow_dispatch:
+
+jobs:
+  verify-runtime:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify gaming runtime manifest
+        run: node scripts/gaming/verify-runtime-manifest.mjs deployments/gaming/testnet.runtime.json

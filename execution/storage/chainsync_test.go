@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -118,7 +119,7 @@ func TestFileCursorStoreIsRestartSafe(t *testing.T) {
 func TestRPCBackendDecodesCanonicalEthereumResponses(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var req struct{ Method string `json:"method"` }
-		if err := jsonNewDecoder(r).Decode(&req); err != nil { t.Fatal(err) }
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil { t.Fatal(err) }
 		w.Header().Set("Content-Type", "application/json")
 		switch req.Method {
 		case "eth_blockNumber":
@@ -139,13 +140,4 @@ func TestRPCBackendDecodesCanonicalEthereumResponses(t *testing.T) {
 	logs, err := backend.Logs(context.Background(), 16, 16, LogFilter{Addresses:[]string{"0xabc"}, Topics:[][]string{{"0xtopic"}}})
 	if err != nil { t.Fatal(err) }
 	if len(logs) != 1 || logs[0].LogIndex != 2 || logs[0].BlockNumber != 16 { t.Fatalf("logs=%+v", logs) }
-}
-
-// Small wrapper keeps the test imports focused while still exercising the real JSON decoder.
-func jsonNewDecoder(r *http.Request) interface{ Decode(interface{}) error } {
-	return jsonDecoder{r: r}
-}
-type jsonDecoder struct{ r *http.Request }
-func (d jsonDecoder) Decode(v interface{}) error {
-	return json.NewDecoder(d.r.Body).Decode(v)
 }

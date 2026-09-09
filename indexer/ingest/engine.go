@@ -7,6 +7,7 @@ import (
 
 	"github.com/420integrated/420-integrated/indexer/core"
 	"github.com/420integrated/420-integrated/indexer/model"
+	"github.com/420integrated/420-integrated/indexer/reorg"
 	indexerrpc "github.com/420integrated/420-integrated/indexer/rpc"
 )
 
@@ -36,7 +37,8 @@ func New(chainID uint64, schemaVersion string, source Source, store Store) *Engi
 }
 
 // CatchUp ingests sequential canonical blocks through the current RPC head.
-// GEN-11.1B intentionally stops on an ancestry mismatch; deterministic reorg discovery/replay is GEN-11.1C.
+// On an ancestry mismatch, GEN-11.1C deterministically finds the highest common ancestor,
+// rolls back only non-finalized history, and replays the remote canonical branch.
 func (e *Engine) CatchUp(ctx context.Context) error {
 	if err := e.core.ValidateSource(e.source); err != nil { return err }
 	head, err := e.source.BlockNumber(ctx)
@@ -55,7 +57,9 @@ func (e *Engine) CatchUp(ctx context.Context) error {
 			if err != nil { return err }
 			if hasCP || number > start {
 				if !ok || parent.Hash != bundle.Block.ParentHash {
-					return fmt.Errorf("%w at block %d", core.ErrParentMismatch, number)
+					r := reorg.New(e.chainID, e.schemaVersion, e.source, e.store)
+					if err := r.Repair(ctx, head); err != nil { return fmt.Errorf("repair reorg at block %d: %w", number, err) }
+					return nil
 				}
 			}
 		}
@@ -65,7 +69,11 @@ func (e *Engine) CatchUp(ctx context.Context) error {
 			return fmt.Errorf("persist block %d bundle: %w", number, err)
 		}
 		if err := e.core.AcceptBlock(bundle.Block); err != nil {
-			if errors.Is(err, core.ErrParentMismatch) { return err }
+			if errors.Is(err, core.ErrParentMismatch) {
+				r := reorg.New(e.chainID, e.schemaVersion, e.source, e.store)
+				if repairErr := r.Repair(ctx, head); repairErr != nil { return fmt.Errorf("repair reorg after accept block %d: %w", number, repairErr) }
+				return nil
+			}
 			return fmt.Errorf("accept block %d: %w", number, err)
 		}
 	}

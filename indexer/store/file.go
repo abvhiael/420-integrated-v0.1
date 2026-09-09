@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
+	"strings"
 	"sync"
 
 	"github.com/420integrated/420-integrated/indexer/model"
@@ -90,10 +92,36 @@ func (s *FileStore) PutBlock(b model.BlockRecord) error {
 func (s *FileStore) PutBundle(block model.BlockRecord, txs []model.TransactionRecord, receipts []model.ReceiptRecord, logs []model.LogRecord) error {
 	s.mu.Lock(); defer s.mu.Unlock()
 	s.data.Blocks[block.Number] = block
-	for _, tx := range txs { s.data.Transactions[tx.Hash] = tx }
-	for _, r := range receipts { s.data.Receipts[r.TransactionHash] = r }
+	for _, tx := range txs { s.data.Transactions[strings.ToLower(tx.Hash)] = tx }
+	for _, r := range receipts { s.data.Receipts[strings.ToLower(r.TransactionHash)] = r }
 	for _, lg := range logs { s.data.Logs[logKey(lg)] = lg }
 	return s.persistLocked()
+}
+
+func (s *FileStore) Transaction(hash string) (model.TransactionRecord, bool, error) {
+	s.mu.Lock(); defer s.mu.Unlock()
+	tx, ok := s.data.Transactions[strings.ToLower(hash)]
+	return tx, ok, nil
+}
+
+func (s *FileStore) Receipt(txHash string) (model.ReceiptRecord, bool, error) {
+	s.mu.Lock(); defer s.mu.Unlock()
+	r, ok := s.data.Receipts[strings.ToLower(txHash)]
+	return r, ok, nil
+}
+
+// LogsByBlock returns canonical-source logs for one indexed block in deterministic log order.
+func (s *FileStore) LogsByBlock(number uint64) ([]model.LogRecord, error) {
+	s.mu.Lock(); defer s.mu.Unlock()
+	out := make([]model.LogRecord, 0)
+	for _, lg := range s.data.Logs {
+		if lg.BlockNumber == number { out = append(out, lg) }
+	}
+	sort.Slice(out, func(i, j int) bool {
+		if out[i].TransactionIndex != out[j].TransactionIndex { return out[i].TransactionIndex < out[j].TransactionIndex }
+		return out[i].LogIndex < out[j].LogIndex
+	})
+	return out, nil
 }
 
 func (s *FileStore) DeleteBlocksAbove(number uint64) error {
@@ -106,5 +134,5 @@ func (s *FileStore) DeleteBlocksAbove(number uint64) error {
 }
 
 func logKey(lg model.LogRecord) string {
-	return fmt.Sprintf("%s:%d", lg.TransactionHash, lg.LogIndex)
+	return fmt.Sprintf("%s:%d", strings.ToLower(lg.TransactionHash), lg.LogIndex)
 }

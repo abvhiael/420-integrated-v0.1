@@ -38,9 +38,10 @@ jobs:
       - name: Install transaction-journey dependencies
         working-directory: clients/420-gaming-testnet-v1
         run: npm install --ignore-scripts --no-audit --no-fund
-      - name: Qualify live profile transaction journey
+      - name: Qualify complete live Gaming Protocol lifecycle
         working-directory: clients/420-gaming-testnet-v1
         env:
           GAMING_TESTNET_RPC_URL: ${{ secrets.GAMING_TESTNET_RPC_URL }}
           GAMING_TESTNET_PLAYER_PRIVATE_KEY: ${{ secrets.GAMING_TESTNET_PLAYER_PRIVATE_KEY }}
-        run: npm run qualify:profile
+          GAMING_TESTNET_HIGH_COUNTRY_OPERATOR_PRIVATE_KEY: ${{ secrets.GAMING_TESTNET_HIGH_COUNTRY_OPERATOR_PRIVATE_KEY }}
+        run: npm run qualify:lifecycle

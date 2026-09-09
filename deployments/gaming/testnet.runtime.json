@@ -1,0 +1,41 @@
+{
+  "schema": "420-gaming-runtime-v1",
+  "network": "testnet",
+  "chainId": null,
+  "status": "UNRESOLVED_UNTIL_DEPLOYMENT",
+  "contracts": {
+    "gamingAuthorization": null,
+    "gameRegistry": null,
+    "gameIdentity": null,
+    "gameEntitlements": null,
+    "gameClaims": null,
+    "crossGameRegistry": null
+  },
+  "operators": {
+    "protocolAdmin": null,
+    "highCountryOperator": null
+  },
+  "games": [
+    {
+      "name": "High Country",
+      "gameIdDomain": "420/GAMING/GAME/HIGH_COUNTRY/V1",
+      "active": true,
+      "operatorRef": "highCountryOperator",
+      "metadataHash": null,
+      "entitlementDomains": [
+        "420/HC/ENTITLEMENT/BONUS_REGION/V1",
+        "420/HC/ENTITLEMENT/COSMETIC/V1",
+        "420/HC/ENTITLEMENT/COMPETITION/V1",
+        "420/HC/ENTITLEMENT/GENETICS/V1",
+        "420/HC/ENTITLEMENT/CROSS_GAME/V1"
+      ]
+    }
+  ],
+  "requirements": [
+    "All contract addresses must be resolved before acceptance.",
+    "chainId must be a positive integer.",
+    "Protocol and game operators must be explicit non-zero addresses.",
+    "High Country game registration must use the canonical game-id domain.",
+    "Runtime configuration must never contain private keys, seed phrases or session signing material."
+  ]
+}

@@ -32,31 +32,29 @@ type ServiceStatus struct {
 }
 
 type Service struct {
-	cfg        ServiceConfig
-	backend    RPCBackend
+	cfg         ServiceConfig
+	backend     RPCBackend
 	projection *StorageProjection
-	runtime    *Runtime
-	syncer     Syncer
-	httpServer *http.Server
-	mu         sync.RWMutex
-	status     ServiceStatus
+	runtime     *Runtime
+	syncer      Syncer
+	httpServer  *http.Server
+	mu          sync.RWMutex
+	status      ServiceStatus
 }
 
 func NewService(cfg ServiceConfig) (*Service, error) {
-	if cfg.NodeID == "" || cfg.CapacityBytes == 0 || cfg.DataDir == "" || cfg.ListenAddr == "" || cfg.RPCURL == "" {
+	if cfg.CapacityBytes == 0 || cfg.DataDir == "" || cfg.ListenAddr == "" || cfg.RPCURL == "" {
 		return nil, ErrInvalidChainState
 	}
-	if cfg.SyncInterval <= 0 {
-		cfg.SyncInterval = 5 * time.Second
-	}
-	if cfg.BatchSize == 0 {
-		cfg.BatchSize = 256
-	}
-	if err := os.MkdirAll(cfg.DataDir, 0o700); err != nil {
-		return nil, err
-	}
+	if _, err := bytes32Arg(cfg.NodeID); err != nil { return nil, ErrInvalidChainState }
+	if cfg.SyncInterval <= 0 { cfg.SyncInterval = 5 * time.Second }
+	if cfg.BatchSize == 0 { cfg.BatchSize = 256 }
+	if err := os.MkdirAll(cfg.DataDir, 0o700); err != nil { return nil, err }
+
 	backend := RPCBackend{URL: cfg.RPCURL, Client: &http.Client{Timeout: 15 * time.Second}}
 	reader := RPCStorageReader{Backend: backend, Contracts: cfg.Contracts, StartBlock: cfg.StartBlock}
+	if err := reader.validate(); err != nil { return nil, err }
+
 	state, err := NewFileProjectionStateStore(filepath.Join(cfg.DataDir, "projection.json"))
 	if err != nil { return nil, err }
 	projection, err := NewStorageProjection(
@@ -77,6 +75,7 @@ func NewService(cfg ServiceConfig) (*Service, error) {
 	if err != nil { return nil, err }
 	cursor, err := NewFileCursorStore(filepath.Join(cfg.DataDir, "cursor.json"))
 	if err != nil { return nil, err }
+
 	s := &Service{cfg: cfg, backend: backend, projection: projection, runtime: runtime}
 	s.syncer = Syncer{Backend: backend, Cursor: cursor, Projection: projection, StartBlock: cfg.StartBlock, Confirmations: cfg.Confirmations, BatchSize: cfg.BatchSize}
 	s.httpServer = &http.Server{Addr: cfg.ListenAddr, Handler: NewTransportHandler(s), ReadHeaderTimeout: 10 * time.Second}
@@ -94,7 +93,7 @@ func (s *Service) setSyncResult(cursor SyncCursor, err error) {
 	s.mu.Lock(); defer s.mu.Unlock()
 	if err != nil {
 		s.status.LastError = err.Error()
-		if errors.Is(err, ErrChainReorganization) { s.status.Ready = false }
+		s.status.Ready = false
 		return
 	}
 	s.status.Ready = true

@@ -1,0 +1,41 @@
+{
+  "schema": "420-bridge-dogecoin-mainnet-v12.5.5",
+  "status": "APPROVED_INACTIVE_PENDING_PRODUCTION_SPV_AUXPOW_VERIFIER_AND_GATEWAY_SCRIPT",
+  "canonical_chain_key": "420/BRIDGE/CHAIN/DOGE",
+  "chain_family": "UTXO_DOGECOIN",
+  "route_chain_id": "0x444f474500000001",
+  "network_identity": {
+    "genesis_hash": "0x1a91e3dace36e2be3bf030a65679fe821aa1d6ef92e7c9902eb318182c355691",
+    "message_start": "0xc0c0c0c0",
+    "auxpow_chain_id": 98
+  },
+  "native_asset": {
+    "symbol": "DOGE",
+    "units": "koinu"
+  },
+  "adapter": {
+    "contract": "DogecoinBridgeAdapter420",
+    "adapter_id_preimage": "420/BRIDGE/DOGECOIN/MAINNET/V12.5.5",
+    "outbound_recipient": "20-byte hash160 plus one-byte script type: 0=P2PKH, 1=P2SH",
+    "native_value_on_420_outbound": "rejected"
+  },
+  "activation_requirements": [
+    "production IDogecoinFinalityVerifier420 implementation validates canonical mainnet PoW/AuxPoW header-chain work",
+    "transaction inclusion is proven against the accepted Dogecoin block",
+    "confirmation/finality threshold is enforced by the verifier",
+    "canonical bridge output script hash is governance allowlisted",
+    "DOGE asset id and route id are governance bound",
+    "route risk caps and emergency isolation are configured",
+    "end-to-end inbound and outbound qualification passes"
+  ],
+  "security_invariants": [
+    "wrong genesis hash or message-start bytes fail closed",
+    "unfinalized proofs fail closed",
+    "unapproved gateway scripts fail closed",
+    "message replay fails closed",
+    "source-output replay under a different message id fails closed",
+    "direct adapter calls bypassing GatewayRouter420 fail closed",
+    "outbound recipient hashes must be exactly 20 bytes",
+    "only P2PKH and P2SH outbound script types are accepted"
+  ]
+}

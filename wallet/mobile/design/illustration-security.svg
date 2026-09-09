@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 420" role="img" aria-labelledby="title desc">
+  <title id="title">Wallet security illustration</title>
+  <desc id="desc">Abstract shield and passkey illustration containing no credentials or personal data.</desc>
+  <rect width="640" height="420" rx="40" fill="#0E1511"/>
+  <path d="M320 76l142 52v92c0 92-58 154-142 184-84-30-142-92-142-184v-92l142-52z" fill="#151F19" stroke="#65C887" stroke-width="14"/>
+  <circle cx="310" cy="210" r="48" fill="#176B3A"/>
+  <circle cx="310" cy="210" r="18" fill="#F2F6F2"/>
+  <path d="M358 210h112m-24 0v30m-34-30v24" stroke="#65C887" stroke-width="20" stroke-linecap="round"/>
+</svg>

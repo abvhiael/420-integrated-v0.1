@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"net/http"
 	"strconv"
 	"strings"
@@ -84,6 +85,10 @@ func (t *transportServer) shard(w http.ResponseWriter, r *http.Request) {
 }
 
 func (t *transportServer) putShard(w http.ResponseWriter, r *http.Request, id string, assignment Assignment) {
+	if assignment.SizeBytes == 0 || assignment.SizeBytes >= math.MaxInt64 {
+		writeStorageError(w, ErrInvalidShard)
+		return
+	}
 	if r.ContentLength > 0 && uint64(r.ContentLength) > assignment.SizeBytes {
 		http.Error(w, "request body too large", http.StatusRequestEntityTooLarge)
 		return
@@ -93,12 +98,19 @@ func (t *transportServer) putShard(w http.ResponseWriter, r *http.Request, id st
 		return
 	}
 
-	limit := int64(assignment.SizeBytes) + 1
-	if limit <= 0 {
-		writeStorageError(w, ErrInvalidShard)
+	if _, rec, err := t.service.runtime.Retrieve(r.Context(), id, 0, 1); err == nil {
+		if rec.AgreementID != assignment.AgreementID || rec.CommitmentID != assignment.CommitmentID || rec.ShardRoot != assignment.ShardRoot || rec.SizeBytes != assignment.SizeBytes {
+			writeStorageError(w, ErrCommitmentMismatch)
+			return
+		}
+		writeJSON(w, http.StatusOK, rec)
+		return
+	} else if !errors.Is(err, ErrShardNotFound) {
+		writeStorageError(w, err)
 		return
 	}
-	r.Body = http.MaxBytesReader(w, r.Body, limit)
+
+	r.Body = http.MaxBytesReader(w, r.Body, int64(assignment.SizeBytes)+1)
 	rec, err := t.service.runtime.StoreShard(r.Context(), id, r.Body)
 	if err != nil {
 		var maxErr *http.MaxBytesError
@@ -109,14 +121,7 @@ func (t *transportServer) putShard(w http.ResponseWriter, r *http.Request, id st
 		writeStorageError(w, err)
 		return
 	}
-
-	status := http.StatusCreated
-	if existing, _, err := t.service.runtime.Retrieve(r.Context(), id, 0, 1); err == nil && len(existing) >= 0 {
-		if r.Header.Get("If-None-Match") == "*" {
-			status = http.StatusOK
-		}
-	}
-	writeJSON(w, status, rec)
+	writeJSON(w, http.StatusCreated, rec)
 }
 
 func (t *transportServer) getShard(w http.ResponseWriter, r *http.Request, id string) {

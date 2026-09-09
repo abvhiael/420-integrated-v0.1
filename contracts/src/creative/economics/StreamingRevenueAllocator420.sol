@@ -50,6 +50,13 @@ contract StreamingRevenueAllocator420 {
     mapping(bytes32 => uint256) public allocatedRevenueOf;
     mapping(bytes32 => mapping(uint256 => RecordingAllocation420)) private _allocations;
 
+    event RecordingRevenueAllocated(
+        bytes32 indexed settlementId,
+        uint256 indexed recordingId,
+        uint256 playCount,
+        uint256 qualifiedMs,
+        uint256 revenue
+    );
     event SettlementAllocated(
         bytes32 indexed settlementId,
         uint64 indexed playbackEpoch,
@@ -117,6 +124,14 @@ contract StreamingRevenueAllocator420 {
 
             rollingRoot = keccak256(
                 abi.encode(rollingRoot, rawId, aggregate.playCount, aggregate.qualifiedMs, revenue)
+            );
+
+            emit RecordingRevenueAllocated(
+                settlementId,
+                rawId,
+                aggregate.playCount,
+                aggregate.qualifiedMs,
+                revenue
             );
         }
 

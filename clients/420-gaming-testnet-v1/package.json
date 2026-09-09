@@ -1,0 +1,11 @@
+{
+  "name": "@420/gaming-testnet-v1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "qualify:profile": "node scripts/profile-journey.mjs"
+  },
+  "dependencies": {
+    "viem": "2.56.0"
+  }
+}

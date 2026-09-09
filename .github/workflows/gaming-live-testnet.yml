@@ -1,0 +1,46 @@
+name: 420 Gaming Live Testnet Qualification
+
+on:
+  pull_request:
+    paths:
+      - 'deployments/gaming/**'
+      - 'scripts/gaming/**'
+      - 'clients/420-gaming-testnet-v1/**'
+      - '.github/workflows/gaming-live-testnet.yml'
+  workflow_dispatch:
+
+jobs:
+  manifest-readiness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify gaming runtime manifest
+        run: node scripts/gaming/verify-runtime-manifest.mjs deployments/gaming/testnet.runtime.json
+      - name: Record live qualification gate
+        run: |
+          node -e 'const m=require("./deployments/gaming/testnet.runtime.json"); if(m.status==="UNRESOLVED_UNTIL_DEPLOYMENT") console.log("GP-15 live RPC qualification remains blocked until deployment resolves runtime addresses and chainId.");'
+
+  live-rpc:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Qualify deployed gaming contracts on testnet
+        env:
+          GAMING_TESTNET_RPC_URL: ${{ secrets.GAMING_TESTNET_RPC_URL }}
+        run: node scripts/gaming/qualify-live-testnet.mjs deployments/gaming/testnet.runtime.json
+      - name: Install transaction-journey dependencies
+        working-directory: clients/420-gaming-testnet-v1
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Qualify live profile transaction journey
+        working-directory: clients/420-gaming-testnet-v1
+        env:
+          GAMING_TESTNET_RPC_URL: ${{ secrets.GAMING_TESTNET_RPC_URL }}
+          GAMING_TESTNET_PLAYER_PRIVATE_KEY: ${{ secrets.GAMING_TESTNET_PLAYER_PRIVATE_KEY }}
+        run: npm run qualify:profile

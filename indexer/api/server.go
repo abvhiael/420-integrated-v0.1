@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/420integrated/420-integrated/indexer/decoder"
 	"github.com/420integrated/420-integrated/indexer/model"
 )
 
@@ -21,6 +22,7 @@ type Backend interface {
 	Transaction(hash string) (model.TransactionRecord, bool, error)
 	Receipt(txHash string) (model.ReceiptRecord, bool, error)
 	LogsByBlock(number uint64) ([]model.LogRecord, error)
+	ServiceVersion(serviceID string, version uint32) (decoder.ServiceVersion, error)
 }
 
 type Server struct { backend Backend }
@@ -35,6 +37,7 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("GET /v1/transactions/{hash}", s.transaction)
 	mux.HandleFunc("GET /v1/receipts/{hash}", s.receipt)
 	mux.HandleFunc("GET /v1/blocks/{number}/logs", s.blockLogs)
+	mux.HandleFunc("GET /v1/services/{service}/versions/{version}", s.serviceVersion)
 	return mux
 }
 
@@ -73,6 +76,18 @@ func (s *Server) blockLogs(w http.ResponseWriter, r *http.Request) {
 	logs, err := s.backend.LogsByBlock(n)
 	if err != nil { writeError(w, http.StatusServiceUnavailable, err); return }
 	writeJSON(w, http.StatusOK, ReadResponse[[]model.LogRecord]{Data: logs, CanonicalAuthority: false})
+}
+
+func (s *Server) serviceVersion(w http.ResponseWriter, r *http.Request) {
+	n, err := strconv.ParseUint(r.PathValue("version"), 10, 32)
+	if err != nil || n == 0 { writeError(w, http.StatusBadRequest, decoder.ErrUnknownServiceVersion); return }
+	record, err := s.backend.ServiceVersion(r.PathValue("service"), uint32(n))
+	if err != nil {
+		status := http.StatusServiceUnavailable
+		if errors.Is(err, decoder.ErrUnknownServiceVersion) { status = http.StatusNotFound }
+		writeError(w, status, err); return
+	}
+	writeJSON(w, http.StatusOK, ReadResponse[decoder.ServiceVersion]{Data: record, CanonicalAuthority: false})
 }
 
 func (s *Server) blocks(w http.ResponseWriter, r *http.Request) {

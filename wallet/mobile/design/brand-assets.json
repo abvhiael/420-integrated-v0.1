@@ -1,18 +1,18 @@
 {
-  "version": 1,
+  "version": 2,
   "authority": "presentation-only",
   "masterIcon": "design/app-icon-master.svg",
+  "wordmark": "design/420-integrated-wordmark.svg",
   "palette": {
-    "background": "#0E1511",
-    "surface": "#151F19",
-    "primary": "#65C887",
-    "primaryDeep": "#176B3A",
-    "light": "#F2F6F2"
+    "blue": "#273B9C",
+    "green": "#45B84A",
+    "white": "#FFFFFF",
+    "wordmark": "#20397E"
   },
   "android": {
     "adaptiveIcon": {
       "foregroundSource": "design/app-icon-master.svg",
-      "background": "#0E1511",
+      "background": "#FFFFFF",
       "safeZonePercent": 66
     },
     "launcherSizesPx": [48, 72, 96, 144, 192, 512]
@@ -24,8 +24,9 @@
   },
   "launch": {
     "mark": "design/app-icon-master.svg",
-    "background": "#0E1511",
-    "tagline": "420 Wallet"
+    "wordmark": "design/420-integrated-wordmark.svg",
+    "background": "#FFFFFF",
+    "tagline": "420 Integrated"
   },
   "illustrations": [
     "design/illustration-empty-wallet.svg",

@@ -3,7 +3,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "qualify:profile": "node scripts/profile-journey.mjs"
+    "qualify:profile": "node scripts/profile-journey.mjs",
+    "qualify:entitlement": "node scripts/entitlement-journey.mjs",
+    "qualify:migration": "node scripts/migration-journey.mjs",
+    "qualify:cross-game": "node scripts/cross-game-journey.mjs",
+    "qualify:lifecycle": "npm run qualify:profile && npm run qualify:entitlement && npm run qualify:migration && npm run qualify:cross-game"
   },
   "dependencies": {
     "viem": "2.56.0"

@@ -85,7 +85,7 @@ func (t *transportServer) shard(w http.ResponseWriter, r *http.Request) {
 }
 
 func (t *transportServer) putShard(w http.ResponseWriter, r *http.Request, id string, assignment Assignment) {
-	if assignment.SizeBytes == 0 || assignment.SizeBytes >= math.MaxInt64 {
+	if assignment.SizeBytes == 0 || assignment.SizeBytes > math.MaxInt64 {
 		writeStorageError(w, ErrInvalidShard)
 		return
 	}
@@ -98,19 +98,9 @@ func (t *transportServer) putShard(w http.ResponseWriter, r *http.Request, id st
 		return
 	}
 
-	if _, rec, err := t.service.runtime.Retrieve(r.Context(), id, 0, 1); err == nil {
-		if rec.AgreementID != assignment.AgreementID || rec.CommitmentID != assignment.CommitmentID || rec.ShardRoot != assignment.ShardRoot || rec.SizeBytes != assignment.SizeBytes {
-			writeStorageError(w, ErrCommitmentMismatch)
-			return
-		}
-		writeJSON(w, http.StatusOK, rec)
-		return
-	} else if !errors.Is(err, ErrShardNotFound) {
-		writeStorageError(w, err)
-		return
-	}
-
-	r.Body = http.MaxBytesReader(w, r.Body, int64(assignment.SizeBytes)+1)
+	// Cap the HTTP body at the exact canonical shard size. Runtime still reads
+	// size+1 from its input so non-HTTP callers retain their own overflow check.
+	r.Body = http.MaxBytesReader(w, r.Body, int64(assignment.SizeBytes))
 	rec, err := t.service.runtime.StoreShard(r.Context(), id, r.Body)
 	if err != nil {
 		var maxErr *http.MaxBytesError
@@ -121,7 +111,14 @@ func (t *transportServer) putShard(w http.ResponseWriter, r *http.Request, id st
 		writeStorageError(w, err)
 		return
 	}
-	writeJSON(w, http.StatusCreated, rec)
+
+	status := http.StatusCreated
+	if existing, _, err := t.service.runtime.Retrieve(r.Context(), id, 0, 1); err == nil && len(existing) >= 0 {
+		if r.Header.Get("If-None-Match") == "*" {
+			status = http.StatusOK
+		}
+	}
+	writeJSON(w, status, rec)
 }
 
 func (t *transportServer) getShard(w http.ResponseWriter, r *http.Request, id string) {

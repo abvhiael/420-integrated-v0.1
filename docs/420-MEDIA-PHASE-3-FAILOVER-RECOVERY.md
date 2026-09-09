@@ -26,9 +26,19 @@ Phase 3.3 preserves the original Phase 3.2 canonical job as immutable history. A
 
 Recovery creation is idempotent for a matching already-created attempt. Any conflicting operator identity or non-not-found lookup error fails closed. Operator acceptance/execution/result commitment and settlement funding/resolution remain outside the requester coordinator.
 
+## Multi-node recovery propagation
+
+Phase 3.3C adds an explicit recovery-aware dependency boundary for downstream DAG progression. `ReadyWithRecovery` and `CreateReadyWithRecovery` keep canonical lifecycle state authoritative, but when a dependency is proven terminal-failed they may resolve that dependency through one explicitly bound recovery attempt.
+
+A recovery binding is valid only when its node ID and previous operator match the failed canonical node, its attempt is positive, and the recovery job identity and replacement operator match the deterministic recovery decision. Missing, pending, mismatched, or failed recovery attempts never unlock downstream work.
+
+Healthy sibling renditions remain on their canonical job IDs and are never rebound or recreated. For a multi-rendition relay, the input manifest is rebuilt deterministically from the healthy canonical outputs plus the successful recovery output. The failed canonical output is never substituted into the relay manifest. The relay itself retains its canonical Phase 3.2 job identity.
+
+This creates a narrow propagation rule: canonical success is preferred; canonical terminal failure requires an explicit successful recovery; every other state waits or fails closed. No recovery path mutates the original failure record, changes sibling assignments, or creates a second settlement path.
+
 ## Live recovery qualification
 
-The Anvil gate now includes canonical recovery execution. The live test:
+The Anvil gate includes canonical recovery execution. The live test:
 
 1. creates a canonical assigned ingress job;
 2. advances chain time and expires that original job as a real terminal-failure condition;
@@ -38,6 +48,8 @@ The Anvil gate now includes canonical recovery execution. The live test:
 6. drives the replacement through accept → fund → run → result commit → verify using the existing operator and settlement authority paths;
 7. verifies the recovery output on chain; and
 8. re-reads the original canonical job to prove recovery did not mutate or overwrite failure history.
+
+Phase 3.3C additionally qualifies the orchestration propagation boundary in deterministic coordinator tests: a failed transcoder plus a verified replacement unlocks its downstream relay, the healthy sibling remains unchanged, a pending replacement does not unlock relay work, absent recovery fails closed, and replacement-operator identity mismatches are rejected.
 
 ## Discovery ABI hardening
 
@@ -64,9 +76,14 @@ Before enabling recovery selection, Phase 3.3 fixes the Ethereum discovery decod
 - **MEDIA-REC-INV-017:** Recovery-attempt lookups fail closed on every error except explicit lifecycle not-found.
 - **MEDIA-REC-INV-018:** Repeating creation for the same matching recovery attempt is idempotent rather than duplicating work.
 - **MEDIA-REC-INV-019:** Live qualification must cross requester creation, replacement-operator execution and settlement funding boundaries before recovery is considered successful.
+- **MEDIA-REC-INV-020:** A failed canonical dependency may be satisfied only by an explicitly bound, successful recovery attempt for the same node and failed operator.
+- **MEDIA-REC-INV-021:** Recovery propagation must not mutate or recreate healthy sibling rendition jobs.
+- **MEDIA-REC-INV-022:** Downstream relay input commits the successful recovery output in place of the failed canonical attempt while preserving healthy canonical sibling outputs.
+- **MEDIA-REC-INV-023:** Pending, missing, failed, or identity-mismatched recovery attempts cannot unlock downstream DAG nodes.
+- **MEDIA-REC-INV-024:** Recovery propagation preserves downstream canonical job identity and does not create an alternate settlement identity for the relay.
 
 ## Current completion boundary
 
-Phase 3.3 now includes deterministic replacement selection, exclusion/attempt tracking, bounded retries, immutable plan rebinding, canonical attempt-scoped recovery identity, requester-side recovery creation, and live recovery execution qualification.
+Phase 3.3 now includes deterministic replacement selection, exclusion/attempt tracking, bounded retries, immutable plan rebinding, canonical attempt-scoped recovery identity, requester-side recovery creation, live recovery execution qualification, and multi-node recovery propagation through downstream lifecycle readiness and input commitment.
 
-The next Phase 3.3 increment is recovery propagation through a multi-node DAG: prove a failed transcoder can be replaced without invalidating healthy siblings, then bind downstream relay readiness to the successful recovery attempt output rather than the failed canonical attempt.
+Phase 3.3C is complete at the coordinator boundary once its qualification matrix is green. The next resilience increment is Phase 3.4: geography-aware rerouting and failure-domain resilience without weakening the canonical recovery and settlement boundaries established here.

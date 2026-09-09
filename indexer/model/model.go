@@ -26,24 +26,36 @@ type ChainCheckpoint struct {
 
 // BlockRecord is a canonical-source block record. Derived projections must retain a reference to it.
 type BlockRecord struct {
-	ChainID      uint64   `json:"chainId"`
-	Number       uint64   `json:"number"`
-	Hash         string   `json:"hash"`
-	ParentHash   string   `json:"parentHash"`
-	Timestamp    uint64   `json:"timestamp"`
-	Finality     Finality `json:"finality"`
-	SchemaVersion string  `json:"schemaVersion"`
+	ChainID       uint64   `json:"chainId"`
+	Number        uint64   `json:"number"`
+	Hash          string   `json:"hash"`
+	ParentHash    string   `json:"parentHash"`
+	Timestamp     uint64   `json:"timestamp"`
+	Finality      Finality `json:"finality"`
+	SchemaVersion string   `json:"schemaVersion"`
 }
 
 // TransactionRecord preserves transaction provenance.
 type TransactionRecord struct {
-	ChainID    uint64 `json:"chainId"`
+	ChainID     uint64 `json:"chainId"`
 	BlockNumber uint64 `json:"blockNumber"`
-	BlockHash  string `json:"blockHash"`
-	Hash       string `json:"hash"`
-	Index      uint64 `json:"index"`
-	From       string `json:"from"`
-	To         string `json:"to,omitempty"`
+	BlockHash   string `json:"blockHash"`
+	Hash        string `json:"hash"`
+	Index       uint64 `json:"index"`
+	From        string `json:"from"`
+	To          string `json:"to,omitempty"`
+}
+
+// ReceiptRecord preserves execution outcome provenance without becoming settlement authority.
+type ReceiptRecord struct {
+	ChainID          uint64 `json:"chainId"`
+	BlockNumber      uint64 `json:"blockNumber"`
+	BlockHash        string `json:"blockHash"`
+	TransactionHash  string `json:"transactionHash"`
+	TransactionIndex uint64 `json:"transactionIndex"`
+	Status           uint64 `json:"status"`
+	GasUsed          uint64 `json:"gasUsed"`
+	ContractAddress  string `json:"contractAddress,omitempty"`
 }
 
 // LogRecord preserves the complete chain/log location required for deterministic identity.

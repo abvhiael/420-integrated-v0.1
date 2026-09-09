@@ -2,6 +2,8 @@
 
 The Green Road is the second reference game for the shared 420 Gaming Protocol after High Country.
 
+The game-specific architecture is frozen in [`TGR-0-ARCHITECTURE.md`](./TGR-0-ARCHITECTURE.md). GP-11 defines the shared Gaming Protocol integration boundary; TGR-0 defines the Green Road domain, persistence, offline/sync, content and authority model layered on top of it.
+
 ## Access model
 
 - Guest: core road-trip / hidden-object gameplay, local progress, no wallet.
@@ -38,3 +40,5 @@ The Green Road client must not enumerate a wallet's game history or cross-game a
 4. all shared SDK adapter calls are scoped to the Green Road game ID;
 5. unsupported feature classes fail closed;
 6. wallet linkage does not grant pay-to-win statistical advantage.
+
+TGR-0 adds game-specific qualification for immutable content IDs, versioned save envelopes, offline reconciliation, authority separation and portable-state revalidation without weakening any GP-11 invariant.

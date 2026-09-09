@@ -1,9 +1,6 @@
 package api
 
 import (
-	"errors"
-	"time"
-
 	"github.com/420integrated/420-integrated/indexer/decoder"
 	"github.com/420integrated/420-integrated/indexer/model"
 )
@@ -99,6 +96,3 @@ func (b *StoreBackend) Blocks(cur *Cursor, limit uint32) (BlockPage, error) {
 	}
 	return BlockPage{Meta: meta, Blocks: blocks}, nil
 }
-
-var _ = errors.Is
-var _ = time.Time{}

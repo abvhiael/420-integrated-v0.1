@@ -14,7 +14,13 @@ The repository now contains the complete live-qualification harness for the four
 4. Run `scripts/gaming/qualify-live-testnet.mjs` to verify chain identity and deployed bytecode.
 5. Run the complete transaction lifecycle with `npm run qualify:lifecycle` in `clients/420-gaming-testnet-v1`.
 
-## Live transaction journeys
+## Live qualification journeys
+
+### Reference-game registry
+- verifies all four canonical game IDs exist in deployed `GameRegistry420`;
+- verifies all four games are active;
+- verifies each deployed operator binding exactly matches the runtime manifest;
+- fails closed on missing, inactive or mis-bound games.
 
 ### Profile
 - verifies the High Country game is active;
@@ -48,7 +54,7 @@ The repository now contains the complete live-qualification harness for the four
 - Budtender
 - Smoke & Chrome
 
-The testnet manifest carries canonical IDs and operator bindings for all four reference games. High Country is the first live transaction reference because its profile and operator flows are the established integration baseline. Cross-game consumers remain verification-driven and do not gain a wallet-wide activity enumeration API.
+The testnet manifest carries canonical IDs and operator bindings for all four reference games. High Country is the first state-mutating live transaction reference because its profile and operator flows are the established integration baseline. Cross-game consumers remain verification-driven and do not gain a wallet-wide activity enumeration API.
 
 ## Security boundary
 
@@ -60,7 +66,8 @@ The GP-15 implementation harness is complete when repository qualification is gr
 
 1. the runtime is deployment-resolved;
 2. the manual live workflow passes RPC/bytecode qualification;
-3. profile, entitlement, migration and cross-game transaction journeys all pass against the deployed testnet;
-4. no secret material is persisted in repository artifacts.
+3. all four reference games pass registry/operator verification;
+4. profile, entitlement, migration and cross-game transaction journeys all pass against the deployed testnet;
+5. no secret material is persisted in repository artifacts.
 
 Until those live conditions are satisfied, the project must report GP-15 as **implementation-complete / deployment-pending**, not live-testnet-qualified.

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"sync"
@@ -110,13 +111,10 @@ func (r *gateReader) Read(p []byte) (int, error) {
 	r.once.Do(func() { r.started <- struct{}{} })
 	<-r.release
 	if len(r.data) == 0 {
-		return 0, context.Canceled
+		return 0, io.EOF
 	}
 	n := copy(p, r.data)
 	r.data = r.data[n:]
-	if len(r.data) == 0 {
-		return n, nil
-	}
 	return n, nil
 }
 

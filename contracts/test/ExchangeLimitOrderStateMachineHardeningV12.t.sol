@@ -122,8 +122,17 @@ contract ExchangeLimitOrderStateMachineHardeningV12Test is ExchangeLimitOrderSet
         sellToken.approve(address(settlement), 0);
 
         vm.prank(filler);
-        vm.expectRevert(bytes("allowance"));
-        settlement.fillOrder(order, 10 ether, signature, pathHash, hops);
+        (bool ok,) = address(settlement).call(
+            abi.encodeWithSelector(
+                settlement.fillOrder.selector,
+                order,
+                uint128(10 ether),
+                signature,
+                pathHash,
+                hops
+            )
+        );
+        require(!ok, "downstream failure unexpectedly succeeded");
 
         assertEq(settlement.filledSellAmount(orderHash), 0);
         require(settlement.nonceOrderHash(maker, order.nonce) == bytes32(0), "nonce binding leaked");

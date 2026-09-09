@@ -1,0 +1,22 @@
+import json
+import pathlib
+import sys
+
+root = pathlib.Path(__file__).resolve().parents[1]
+errors = []
+
+cfg = json.loads((root / "config/420indexer-v1.json").read_text())
+ready = json.loads((root / "testnet/public-services/indexer/readiness.json").read_text())
+
+if cfg.get("name") != "420Indexer": errors.append("name")
+if cfg.get("canonicalStateAuthority") is not False: errors.append("authority")
+if cfg.get("ingestion", {}).get("requiredChainId") != 420: errors.append("chain id")
+if cfg.get("reorgPolicy", {}).get("rewriteFinalized") is not False: errors.append("finalized rewrite")
+if ready.get("service") != "420Indexer": errors.append("readiness service")
+if ready.get("authority", {}).get("canonical_state") is not False: errors.append("readiness authority")
+
+required_consumers = {"420Explorer", "420Search", "420Analytics", "420Notifications", "420Status"}
+if not required_consumers.issubset(set(cfg.get("consumers", []))): errors.append("consumers")
+
+print(json.dumps({"pass": not errors, "errors": errors}, indent=2))
+sys.exit(1 if errors else 0)

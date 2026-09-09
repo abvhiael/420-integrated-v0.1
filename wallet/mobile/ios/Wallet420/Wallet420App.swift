@@ -20,6 +20,7 @@ private enum OnboardingPath420: String {
 struct Wallet420App: App {
     @UIApplicationDelegateAdaptor(AppDelegate420.self) private var appDelegate
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @AppStorage("wallet420.onboarding.completed") private var onboardingCompleted = false
     @State private var onboardingPath: OnboardingPath420?
     @State private var selectedSurface: WalletSurface420 = .wallet
@@ -42,8 +43,10 @@ struct Wallet420App: App {
             ZStack {
                 if onboardingActive {
                     onboardingRoot
+                        .transition(reduceMotion ? .identity : .opacity.combined(with: .move(edge: .trailing)))
                 } else {
                     mainWalletRoot
+                        .transition(reduceMotion ? .identity : .opacity)
                 }
 
                 if privacyShield {
@@ -56,6 +59,7 @@ struct Wallet420App: App {
                         .accessibilityIdentifier("wallet420.privacy-shield")
                 }
             }
+            .animation(Wallet420DesignSystem.contentAnimation(reduceMotion: reduceMotion), value: onboardingCompleted)
             .task {
                 if !isUITest {
                     try? await PushRegistration420.shared.register()
@@ -117,6 +121,7 @@ struct Wallet420App: App {
 
                 if let onboardingPath {
                     onboardingSecurity(path: onboardingPath)
+                        .transition(reduceMotion ? .identity : .opacity.combined(with: .move(edge: .trailing)))
                 } else {
                     Text("Your SmartAccount is the canonical account. This iPhone is a secure local client for passkeys, approvals, recovery access, and wallet presentation.")
                         .font(.body)
@@ -124,9 +129,11 @@ struct Wallet420App: App {
                     infoCard(title: "Built for local authorization", body: "Private signing material stays device-bound where supported. Public RPC is transport only and never signing authority.")
                     infoCard(title: "Recovery matters", body: "Your device is replaceable. Recovery follows canonical SmartAccount policy, not an app-local password or hidden remote signer.")
                     onboardingChoices
+                        .transition(reduceMotion ? .identity : .opacity)
                 }
             }
             .padding(Wallet420DesignSystem.spacingMedium)
+            .animation(Wallet420DesignSystem.contentAnimation(reduceMotion: reduceMotion), value: onboardingPath)
         }
         .wallet420Surface()
     }
@@ -183,17 +190,25 @@ struct Wallet420App: App {
 
             if localLocked {
                 lockedContent
+                    .transition(reduceMotion ? .identity : .opacity)
             } else {
                 ScrollView {
                     VStack(spacing: Wallet420DesignSystem.spacingMedium) {
                         surfaceContent(selectedSurface)
+                            .id(selectedSurface)
+                            .transition(reduceMotion ? .identity : .opacity.combined(with: .move(edge: .bottom)))
                         if let handoffStatus {
                             statusCard(title: "Approval request", body: handoffStatus)
+                                .transition(reduceMotion ? .identity : .opacity)
                         } else if let transientStatus {
                             statusCard(title: "Ready for authorization", body: transientStatus)
+                                .transition(reduceMotion ? .identity : .opacity)
                         }
                     }
                     .frame(maxWidth: .infinity)
+                    .animation(Wallet420DesignSystem.contentAnimation(reduceMotion: reduceMotion), value: selectedSurface)
+                    .animation(Wallet420DesignSystem.statusAnimation(reduceMotion: reduceMotion), value: handoffStatus)
+                    .animation(Wallet420DesignSystem.statusAnimation(reduceMotion: reduceMotion), value: transientStatus)
                 }
             }
 

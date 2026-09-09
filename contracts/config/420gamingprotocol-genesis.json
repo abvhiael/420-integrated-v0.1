@@ -1,6 +1,6 @@
 {
   "schema": "420-gaming-protocol-genesis-v1",
-  "status": "IMPLEMENTED_PENDING_EXACT_HEAD_QUALIFICATION",
+  "status": "IMPLEMENTED_QUALIFIED_RUNTIME_WIRING_PENDING_DEPLOYMENT",
   "suite": "420 Gaming Protocol",
   "class": "GENESIS_PROTOCOL",
   "contractsRequired": true,

@@ -4,6 +4,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/420integrated/420-integrated/indexer/decoder"
 	"github.com/420integrated/420-integrated/indexer/model"
 )
 
@@ -21,6 +22,9 @@ func (fakeBackend) Receipt(hash string) (model.ReceiptRecord, bool, error) {
 }
 func (fakeBackend) LogsByBlock(number uint64) ([]model.LogRecord, error) {
 	return []model.LogRecord{{ChainID: 420, BlockNumber: number, BlockHash: "0xblock", TransactionHash: "0xtx", LogIndex: 0}}, nil
+}
+func (fakeBackend) ServiceVersion(serviceID string, version uint32) (decoder.ServiceVersion, error) {
+	return decoder.ServiceVersion{ServiceID: serviceID, Version: version, Implementation: "0x420", ActivatedBlock: 7, ActivatedHash: "0x07"}, nil
 }
 
 func TestHealthEndpointNeverClaimsCanonicalAuthority(t *testing.T) {
@@ -40,9 +44,9 @@ func TestBlocksRejectsOversizedPage(t *testing.T) {
 	if w.Code != 400 { t.Fatalf("expected 400, got %d", w.Code) }
 }
 
-func TestTransactionReceiptAndLogsEndpoints(t *testing.T) {
+func TestExtendedReadEndpoints(t *testing.T) {
 	h := NewServer(fakeBackend{}).Handler()
-	for _, path := range []string{"/v1/transactions/0xtx", "/v1/receipts/0xtx", "/v1/blocks/12/logs"} {
+	for _, path := range []string{"/v1/transactions/0xtx", "/v1/receipts/0xtx", "/v1/blocks/12/logs", "/v1/services/registry/versions/1"} {
 		r := httptest.NewRequest("GET", path, nil)
 		w := httptest.NewRecorder()
 		h.ServeHTTP(w, r)

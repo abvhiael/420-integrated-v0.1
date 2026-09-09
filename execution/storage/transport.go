@@ -98,6 +98,21 @@ func (t *transportServer) putShard(w http.ResponseWriter, r *http.Request, id st
 		return
 	}
 
+	// A retry of an already-stored shard is idempotent only if the local record
+	// still matches the current canonical assignment. Return the existing record
+	// without consuming the body, touching storage, or reserving capacity again.
+	if _, existing, err := t.service.runtime.Retrieve(r.Context(), id, 0, 1); err == nil {
+		if existing.AgreementID != assignment.AgreementID || existing.CommitmentID != assignment.CommitmentID || existing.ShardRoot != assignment.ShardRoot || existing.SizeBytes != assignment.SizeBytes {
+			writeStorageError(w, ErrCommitmentMismatch)
+			return
+		}
+		writeJSON(w, http.StatusOK, existing)
+		return
+	} else if !errors.Is(err, ErrShardNotFound) {
+		writeStorageError(w, err)
+		return
+	}
+
 	// Cap the HTTP body at the exact canonical shard size. Runtime still reads
 	// size+1 from its input so non-HTTP callers retain their own overflow check.
 	r.Body = http.MaxBytesReader(w, r.Body, int64(assignment.SizeBytes))
@@ -111,14 +126,7 @@ func (t *transportServer) putShard(w http.ResponseWriter, r *http.Request, id st
 		writeStorageError(w, err)
 		return
 	}
-
-	status := http.StatusCreated
-	if existing, _, err := t.service.runtime.Retrieve(r.Context(), id, 0, 1); err == nil && len(existing) >= 0 {
-		if r.Header.Get("If-None-Match") == "*" {
-			status = http.StatusOK
-		}
-	}
-	writeJSON(w, status, rec)
+	writeJSON(w, http.StatusCreated, rec)
 }
 
 func (t *transportServer) getShard(w http.ResponseWriter, r *http.Request, id string) {

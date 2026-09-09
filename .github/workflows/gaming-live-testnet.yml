@@ -19,6 +19,12 @@ jobs:
           node-version: 22
       - name: Verify gaming runtime manifest
         run: node scripts/gaming/verify-runtime-manifest.mjs deployments/gaming/testnet.runtime.json
+      - name: Install live-journey dependencies
+        working-directory: clients/420-gaming-testnet-v1
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Syntax-check complete GP-15 transaction harness
+        working-directory: clients/420-gaming-testnet-v1
+        run: npm run qualify:syntax
       - name: Record live qualification gate
         run: |
           node -e 'const m=require("./deployments/gaming/testnet.runtime.json"); if(m.status==="UNRESOLVED_UNTIL_DEPLOYMENT") console.log("GP-15 live RPC qualification remains blocked until deployment resolves runtime addresses and chainId.");'

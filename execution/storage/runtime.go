@@ -7,15 +7,16 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math"
 	"sync"
 	"time"
 )
 
 var (
-	ErrInvalidShard      = errors.New("invalid shard")
-	ErrShardNotFound     = errors.New("shard not found")
+	ErrInvalidShard       = errors.New("invalid shard")
+	ErrShardNotFound      = errors.New("shard not found")
 	ErrCommitmentMismatch = errors.New("commitment mismatch")
-	ErrCapacityExceeded  = errors.New("storage capacity exceeded")
+	ErrCapacityExceeded   = errors.New("storage capacity exceeded")
 	ErrInactiveAssignment = errors.New("inactive storage assignment")
 )
 
@@ -81,12 +82,13 @@ type ProofSubmitter interface {
 }
 
 type Runtime struct {
-	mu        sync.RWMutex
-	nodeID    string
-	store     Store
-	chain     ChainSource
-	submitter ProofSubmitter
-	capacity  Capacity
+	mu            sync.RWMutex
+	nodeID        string
+	store         Store
+	chain         ChainSource
+	submitter     ProofSubmitter
+	capacity      Capacity
+	reservedBytes uint64
 }
 
 func NewRuntime(nodeID string, totalBytes uint64, store Store, chain ChainSource, submitter ProofSubmitter) (*Runtime, error) {
@@ -116,6 +118,33 @@ func (r *Runtime) Capacity() Capacity {
 	return r.capacity
 }
 
+func (r *Runtime) reserve(size uint64) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if r.reservedBytes > r.capacity.TotalBytes-r.capacity.UsedBytes {
+		return ErrCapacityExceeded
+	}
+	available := r.capacity.TotalBytes - r.capacity.UsedBytes - r.reservedBytes
+	if size > available {
+		return ErrCapacityExceeded
+	}
+	r.reservedBytes += size
+	return nil
+}
+
+func (r *Runtime) releaseReservation(size uint64, committed bool) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if size <= r.reservedBytes {
+		r.reservedBytes -= size
+	} else {
+		r.reservedBytes = 0
+	}
+	if committed {
+		r.capacity.UsedBytes += size
+	}
+}
+
 func (r *Runtime) StoreShard(ctx context.Context, commitmentID string, src io.Reader) (ShardRecord, error) {
 	if commitmentID == "" || src == nil {
 		return ShardRecord{}, ErrInvalidShard
@@ -128,9 +157,31 @@ func (r *Runtime) StoreShard(ctx context.Context, commitmentID string, src io.Re
 	if !assignment.Active || assignment.NodeID != r.nodeID || assignment.CommitmentID != commitmentID || now.Before(assignment.StartTime) || now.After(assignment.EndTime) {
 		return ShardRecord{}, ErrInactiveAssignment
 	}
+	if assignment.SizeBytes == 0 || assignment.SizeBytes >= math.MaxInt64 {
+		return ShardRecord{}, ErrInvalidShard
+	}
 
-	buf, err := io.ReadAll(io.LimitReader(src, int64(assignment.SizeBytes)+1))
+	if rc, rec, err := r.store.Open(ctx, commitmentID); err == nil {
+		_ = rc.Close()
+		if rec.AgreementID == assignment.AgreementID && rec.CommitmentID == assignment.CommitmentID && rec.ShardRoot == assignment.ShardRoot && rec.SizeBytes == assignment.SizeBytes {
+			return rec, nil
+		}
+		return ShardRecord{}, ErrCommitmentMismatch
+	} else if !errors.Is(err, ErrShardNotFound) {
+		return ShardRecord{}, err
+	}
+
+	if err := r.reserve(assignment.SizeBytes); err != nil {
+		return ShardRecord{}, err
+	}
+	committed := false
+	defer func() { r.releaseReservation(assignment.SizeBytes, committed) }()
+
+	buf, err := io.ReadAll(io.LimitReader(contextReader{ctx: ctx, r: src}, int64(assignment.SizeBytes)+1))
 	if err != nil {
+		return ShardRecord{}, err
+	}
+	if err := ctx.Err(); err != nil {
 		return ShardRecord{}, err
 	}
 	if uint64(len(buf)) != assignment.SizeBytes {
@@ -142,21 +193,11 @@ func (r *Runtime) StoreShard(ctx context.Context, commitmentID string, src io.Re
 		return ShardRecord{}, ErrCommitmentMismatch
 	}
 
-	r.mu.Lock()
-	if assignment.SizeBytes > r.capacity.AvailableBytes() {
-		r.mu.Unlock()
-		return ShardRecord{}, ErrCapacityExceeded
-	}
-	r.mu.Unlock()
-
 	rec := ShardRecord{AgreementID: assignment.AgreementID, CommitmentID: commitmentID, ShardRoot: root, SizeBytes: assignment.SizeBytes, StoredAt: now}
 	if err := r.store.Put(ctx, rec, bytesReader(buf)); err != nil {
 		return ShardRecord{}, err
 	}
-
-	r.mu.Lock()
-	r.capacity.UsedBytes += assignment.SizeBytes
-	r.mu.Unlock()
+	committed = true
 	return rec, nil
 }
 
@@ -166,7 +207,7 @@ func (r *Runtime) Retrieve(ctx context.Context, commitmentID string, offset, len
 		return nil, ShardRecord{}, err
 	}
 	defer rc.Close()
-	if offset > rec.SizeBytes {
+	if offset > rec.SizeBytes || offset > math.MaxInt64 {
 		return nil, ShardRecord{}, ErrInvalidShard
 	}
 	if _, err := io.CopyN(io.Discard, rc, int64(offset)); err != nil && !errors.Is(err, io.EOF) {
@@ -175,6 +216,9 @@ func (r *Runtime) Retrieve(ctx context.Context, commitmentID string, offset, len
 	remaining := rec.SizeBytes - offset
 	if length == 0 || length > remaining {
 		length = remaining
+	}
+	if length > math.MaxInt64 {
+		return nil, ShardRecord{}, ErrInvalidShard
 	}
 	data, err := io.ReadAll(io.LimitReader(rc, int64(length)))
 	return data, rec, err
@@ -235,11 +279,32 @@ func (r *Runtime) Delete(ctx context.Context, commitmentID string) error {
 	return nil
 }
 
+type contextReader struct {
+	ctx context.Context
+	r   io.Reader
+}
+
+func (r contextReader) Read(p []byte) (int, error) {
+	if err := r.ctx.Err(); err != nil {
+		return 0, err
+	}
+	n, err := r.r.Read(p)
+	if err == nil {
+		if ctxErr := r.ctx.Err(); ctxErr != nil {
+			return n, ctxErr
+		}
+	}
+	return n, err
+}
+
 func bytesReader(b []byte) io.Reader { return &sliceReader{b: b} }
 
-type sliceReader struct { b []byte }
+type sliceReader struct{ b []byte }
+
 func (r *sliceReader) Read(p []byte) (int, error) {
-	if len(r.b) == 0 { return 0, io.EOF }
+	if len(r.b) == 0 {
+		return 0, io.EOF
+	}
 	n := copy(p, r.b)
 	r.b = r.b[n:]
 	return n, nil

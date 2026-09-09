@@ -1,0 +1,45 @@
+{
+  "schema": "420-testnet-indexer-readiness-v1",
+  "service": "420Indexer",
+  "status": "PENDING_IMPLEMENTATION",
+  "backend": {
+    "url": "REPLACE",
+    "required_checks": [
+      "rejects wrong-chain RPC sources",
+      "indexes blocks by canonical hash and chain id",
+      "indexes transactions receipts and logs",
+      "tracks head safe and finalized independently",
+      "persists checkpoints",
+      "survives restart and resumes deterministically",
+      "repairs non-finalized reorgs deterministically",
+      "fails closed on finalized-history conflict",
+      "supports full rebuild from canonical sources",
+      "reports indexed head safe and finalized heights",
+      "reports schema and decoder versions",
+      "provides deterministic pagination for fixed snapshots",
+      "preserves source provenance for derived records"
+    ]
+  },
+  "consumer_gates": {
+    "420Explorer": "PENDING",
+    "420Search": "PENDING",
+    "420Analytics": "PENDING",
+    "420Notifications": "PENDING",
+    "420Status": "PENDING"
+  },
+  "privacy_checks": [
+    "does not index private Messenger plaintext",
+    "does not index private Identity fields",
+    "does not index encrypted Resource payload contents",
+    "does not index raw private Attention telemetry",
+    "does not index wallet secrets"
+  ],
+  "authority": {
+    "canonical_state": false,
+    "custody": false,
+    "governance": false,
+    "bridge": false,
+    "validator": false,
+    "smart_account_execution": false
+  }
+}

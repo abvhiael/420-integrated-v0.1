@@ -1,0 +1,32 @@
+name: 420Indexer
+
+on:
+  pull_request:
+    paths:
+      - 'indexer/**'
+      - 'config/420indexer-v1.json'
+      - 'testnet/public-services/indexer/**'
+      - '.github/workflows/420indexer.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'indexer/**'
+      - 'config/420indexer-v1.json'
+      - 'testnet/public-services/indexer/**'
+      - '.github/workflows/420indexer.yml'
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Test indexer
+        run: go test ./indexer/...
+      - name: Vet indexer
+        run: go vet ./indexer/...
+      - name: Validate readiness JSON
+        run: python -m json.tool config/420indexer-v1.json >/dev/null && python -m json.tool testnet/public-services/indexer/readiness.json >/dev/null

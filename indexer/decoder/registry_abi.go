@@ -3,7 +3,6 @@ package decoder
 import (
 	"encoding/hex"
 	"errors"
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -105,7 +104,9 @@ func abiWords(data string) ([][]byte, error) {
 
 func normalizeWord(v string) string {
 	raw := strings.ToLower(strings.TrimPrefix(v, "0x"))
-	return "0x" + fmt.Sprintf("%064s", raw)
+	if len(raw) > 64 { raw = raw[len(raw)-64:] }
+	if len(raw) < 64 { raw = strings.Repeat("0", 64-len(raw)) + raw }
+	return "0x" + raw
 }
 
 func wordHex(v []byte) string { return "0x" + hex.EncodeToString(v) }
@@ -113,7 +114,8 @@ func wordHex(v []byte) string { return "0x" + hex.EncodeToString(v) }
 func addressFromTopic(v string) string {
 	raw := strings.ToLower(strings.TrimPrefix(v, "0x"))
 	if len(raw) > 40 { raw = raw[len(raw)-40:] }
-	return "0x" + fmt.Sprintf("%040s", raw)
+	if len(raw) < 40 { raw = strings.Repeat("0", 40-len(raw)) + raw }
+	return "0x" + raw
 }
 
 func uint32Topic(v string) (uint32, error) {

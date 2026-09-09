@@ -144,6 +144,7 @@ func main() {
 	storageCapacityContract := flag.String("storage.contract.capacity", "", "StorageCapacityRegistry420 address")
 	storageSettlement := flag.String("storage.contract.settlement", "", "StorageSettlementRegistry420 address")
 	storageScheme := flag.String("storage.contract.scheme", "", "StorageProofSchemeRegistry420 address")
+	storageManifest := flag.String("storage.contract.manifest", "", "StorageObjectManifestRegistry420 address")
 	flag.Parse()
 
 	if *showVersion { fmt.Printf("node420 %s (go-ethereum baseline %s)\n", version, gethBaseline); return }
@@ -187,7 +188,7 @@ func main() {
 	service, err := storage.NewService(storage.ServiceConfig{
 		NodeID:*storageNodeID, CapacityBytes:*storageCapacity, DataDir:filepath.Join(*datadir,"storage"), ListenAddr:*storageListen,
 		RPCURL:rpcURL, StartBlock:*storageStartBlock, Confirmations:*storageConfirmations, SyncInterval:*storageSyncInterval,
-		Contracts:storage.RPCStorageContracts{Agreement:*storageAgreement,Commitment:*storageCommitment,Capacity:*storageCapacityContract,Settlement:*storageSettlement,Scheme:*storageScheme},
+		Contracts:storage.RPCStorageContracts{Agreement:*storageAgreement,Commitment:*storageCommitment,Capacity:*storageCapacityContract,Settlement:*storageSettlement,Scheme:*storageScheme,Manifest:*storageManifest},
 	})
 	if err != nil { fmt.Fprintln(os.Stderr,"node420 storage config:",err); os.Exit(2) }
 

@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -21,6 +22,8 @@ const (
 	gethBaseline = "v1.17.5"
 )
 
+var errStorageServiceExited = errors.New("storage service exited unexpectedly")
+
 func findGeth(explicit string) (string, error) {
 	if explicit != "" { return explicit, nil }
 	if env := os.Getenv("NODE420_GETH"); env != "" { return env, nil }
@@ -32,6 +35,86 @@ func verifyBaseline(path string) error {
 	if err != nil { return fmt.Errorf("geth version: %w: %s", err, string(out)) }
 	if !bytes.Contains(out, []byte("1.17.5")) { return fmt.Errorf("node420 requires go-ethereum %s; got: %s", gethBaseline, strings.TrimSpace(string(out))) }
 	return nil
+}
+
+type serviceRunner interface { Run(context.Context) error }
+
+type managedProcess interface {
+	Wait() error
+	Signal(os.Signal) error
+	Kill() error
+}
+
+type commandProcess struct { cmd *exec.Cmd }
+func (p commandProcess) Wait() error { return p.cmd.Wait() }
+func (p commandProcess) Signal(sig os.Signal) error {
+	if p.cmd == nil || p.cmd.Process == nil { return os.ErrInvalid }
+	return p.cmd.Process.Signal(sig)
+}
+func (p commandProcess) Kill() error {
+	if p.cmd == nil || p.cmd.Process == nil { return os.ErrInvalid }
+	return p.cmd.Process.Kill()
+}
+
+func stopProcess(proc managedProcess, processErr <-chan error, timeout time.Duration) error {
+	if timeout <= 0 { timeout = 10 * time.Second }
+	if err := proc.Signal(syscall.SIGTERM); err != nil && !errors.Is(err, os.ErrProcessDone) {
+		_ = proc.Kill()
+	}
+	timer := time.NewTimer(timeout)
+	defer timer.Stop()
+	select {
+	case err := <-processErr:
+		return err
+	case <-timer.C:
+		if err := proc.Kill(); err != nil && !errors.Is(err, os.ErrProcessDone) { return err }
+		return <-processErr
+	}
+}
+
+func supervise(ctx context.Context, proc managedProcess, service serviceRunner, shutdownTimeout time.Duration) error {
+	if proc == nil || service == nil { return errors.New("invalid node420 supervisor") }
+	runCtx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	serviceErr := make(chan error, 1)
+	go func() { serviceErr <- service.Run(runCtx) }()
+	processErr := make(chan error, 1)
+	go func() { processErr <- proc.Wait() }()
+
+	select {
+	case err := <-processErr:
+		cancel()
+		select {
+		case serviceRunErr := <-serviceErr:
+			if err != nil { return fmt.Errorf("geth: %w", err) }
+			if serviceRunErr != nil && !errors.Is(serviceRunErr, context.Canceled) { return fmt.Errorf("storage service: %w", serviceRunErr) }
+			return nil
+		case <-time.After(shutdownTimeout):
+			if err != nil { return fmt.Errorf("geth: %w", err) }
+			return errors.New("storage service did not stop after geth exit")
+		}
+	case err := <-serviceErr:
+		cancel()
+		stopErr := stopProcess(proc, processErr, shutdownTimeout)
+		if err != nil && !errors.Is(err, context.Canceled) { return fmt.Errorf("storage service: %w", err) }
+		if ctx.Err() == nil {
+			if stopErr != nil { return fmt.Errorf("%w; geth shutdown: %v", errStorageServiceExited, stopErr) }
+			return errStorageServiceExited
+		}
+		return nil
+	case <-ctx.Done():
+		cancel()
+		stopErr := stopProcess(proc, processErr, shutdownTimeout)
+		select {
+		case err := <-serviceErr:
+			if err != nil && !errors.Is(err, context.Canceled) { return fmt.Errorf("storage service shutdown: %w", err) }
+		case <-time.After(shutdownTimeout):
+			return errors.New("storage service shutdown timed out")
+		}
+		if stopErr != nil { return fmt.Errorf("geth shutdown: %w", stopErr) }
+		return nil
+	}
 }
 
 func main() {
@@ -111,20 +194,8 @@ func main() {
 	ctx,cancel:=signal.NotifyContext(context.Background(),os.Interrupt,syscall.SIGTERM)
 	defer cancel()
 	if err:=cmd.Start(); err!=nil { fmt.Fprintln(os.Stderr,"node420:",err); os.Exit(1) }
-	serviceErr:=make(chan error,1)
-	go func(){ serviceErr<-service.Run(ctx) }()
-	gethErr:=make(chan error,1)
-	go func(){ gethErr<-cmd.Wait() }()
-	select {
-	case err:=<-gethErr:
-		cancel()
-		if err!=nil { fmt.Fprintln(os.Stderr,"node420:",err); os.Exit(1) }
-	case err:=<-serviceErr:
-		cancel()
-		if cmd.Process!=nil { _=cmd.Process.Kill() }
-		if err!=nil { fmt.Fprintln(os.Stderr,"node420 storage:",err); os.Exit(1) }
-	case <-ctx.Done():
-		if cmd.Process!=nil { _=cmd.Process.Kill() }
-		<-gethErr
+	if err:=supervise(ctx, commandProcess{cmd:cmd}, service, 10*time.Second); err!=nil {
+		fmt.Fprintln(os.Stderr,"node420:",err)
+		os.Exit(1)
 	}
 }

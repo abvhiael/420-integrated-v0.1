@@ -64,5 +64,5 @@ func TestTransportRejectsForeignOrExpiredAssignment(t *testing.T){
 	req:=httptest.NewRequest(http.MethodPut,"/v1/shards/"+a.CommitmentID,bytes.NewReader(data)); req.ContentLength=int64(len(data))
 	w:=httptest.NewRecorder(); NewTransportHandler(s).ServeHTTP(w,req)
 	if w.Code!=http.StatusForbidden{t.Fatalf("status=%d",w.Code)}
-	if _,err:=s.runtime.Retrieve(context.Background(),a.CommitmentID,0,0); err==nil{t.Fatal("foreign assignment should not store")}
+	if _,_,err:=s.runtime.Retrieve(context.Background(),a.CommitmentID,0,0); err==nil{t.Fatal("foreign assignment should not store")}
 }

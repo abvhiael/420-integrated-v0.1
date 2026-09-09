@@ -21,6 +21,18 @@ Phase 3.4 supports two explicit diversity modes above the hard failed-domain exc
 
 The discovery selector's deterministic ranking remains authoritative. Geographic recovery never re-scores candidates; it filters the ranked set according to the resilience policy and chooses the first remaining provider.
 
+## DAG-derived failure-domain state
+
+Phase 3.4B removes manually supplied healthy-domain state from the orchestration boundary. `DeriveFailureDomainSnapshot` walks the validated stream DAG and derives the current effective placement of every node.
+
+Canonical nodes resolve their geography through a `GeographyResolver` backed by the same revalidated service-metadata boundary used by discovery. A node with an explicit valid recovery binding uses the replacement operator and its recovery geography as the current effective placement. Inconsistent recovery identity, resolver failure, or missing geography metadata fails closed.
+
+The failed node's canonical operator determines the outage geography. Every node whose current effective placement is in that geography is included in `AffectedNodeIDs`; nodes outside the outage become the derived healthy occupied operator/geography set. This means a regional failure can identify multiple affected ingress/transcoder/relay jobs from one DAG snapshot rather than treating each operator failure as unrelated.
+
+`GeographicRecoveryRequestFromSnapshot` converts an existing bounded Phase 3.3 recovery request into a geographic recovery request using this graph-derived state. A node outside the outage cannot be converted into a regional recovery request.
+
+This preserves the separation between detection and execution: the snapshot determines failure-domain scope, geographic selection chooses a qualified replacement, and Phase 3.3 recovery execution still owns attempt-scoped job creation and downstream propagation.
+
 ## Failure-domain invariants
 
 - **MEDIA-GEO-INV-001:** A recovery replacement must never be selected from the failed geography.
@@ -31,15 +43,26 @@ The discovery selector's deterministic ranking remains authoritative. Geographic
 - **MEDIA-GEO-INV-006:** Prefer-diversity mode may fall back to a healthy occupied geography only when no fresh geography is eligible; it may never fall back into the failed geography.
 - **MEDIA-GEO-INV-007:** Require-diversity mode fails closed rather than collapsing multiple stream roles into the same healthy geography.
 - **MEDIA-GEO-INV-008:** Geographic recovery does not relax capability, price, latency, allow-list, capacity, reliability, operator-authority, lifecycle, settlement, or recovery-attempt constraints.
+- **MEDIA-GEO-INV-009:** Regional outage scope must be derived from the validated DAG and current effective recovery bindings rather than caller-asserted occupied geography state.
+- **MEDIA-GEO-INV-010:** All nodes currently placed in the failed geography are marked affected; healthy nodes outside that geography remain outside the outage set.
+- **MEDIA-GEO-INV-011:** A valid recovery binding replaces the canonical operator only for failure-domain placement accounting; inconsistent recovery identity fails closed.
+- **MEDIA-GEO-INV-012:** Geography lookup failure or missing geography metadata prevents a regional recovery snapshot from being produced.
+- **MEDIA-GEO-INV-013:** Healthy occupied operator and geography sets exclude all nodes inside the failed domain and include effective recovered placements outside it.
+- **MEDIA-GEO-INV-014:** A node outside the derived regional outage cannot be promoted into geographic recovery through request construction.
 
-## Current Phase 3.4 boundary
+## Phase 3.4 status
 
-The first Phase 3.4 increment provides deterministic geography-aware replacement selection and unit qualification for hard failed-domain exclusion, fresh-domain preference, strict diversity, fallback behavior, metadata fail-closed handling, and preservation of Phase 3.3 attempt/operator exclusions.
+### 3.4A — geographic recovery selection
+
+Complete and qualified. Provides hard failed-domain exclusion, fresh-domain preference, strict diversity, controlled fallback, metadata fail-closed behavior, and preservation of Phase 3.3 attempt/operator exclusions.
+
+### 3.4B — DAG-derived failure-domain awareness
+
+Implemented. The orchestration layer now derives regional outage scope, healthy occupied geographies/operators, and effective recovered placements from the live plan/recovery graph rather than accepting that state manually. Qualification covers multi-node same-region outage detection, healthy remote placement preservation, effective recovery placement, lookup/missing-metadata failure, graph-derived request construction, and rejection of healthy nodes outside the outage.
 
 The next Phase 3.4 increments are:
 
-1. propagate geography/failure-domain state through live stream orchestration so occupied geographies are derived from the active DAG rather than supplied manually;
-2. add multi-node regional outage qualification where multiple operators in one geography become unavailable together;
-3. prove relay continuity across regional transcoder loss while preserving healthy remote renditions;
-4. add live Anvil qualification for geographic reroute and recovery execution;
-5. define controlled rebalancing/failback rules so restored regions are not immediately trusted without health/reputation evidence.
+1. execute coordinated multi-node regional recovery so multiple affected jobs are rerouted without replacement collisions;
+2. prove relay continuity across regional transcoder loss while preserving healthy remote renditions;
+3. add live Anvil qualification for geographic reroute and recovery execution;
+4. define controlled rebalancing/failback rules so restored regions are not immediately trusted without health/reputation evidence.

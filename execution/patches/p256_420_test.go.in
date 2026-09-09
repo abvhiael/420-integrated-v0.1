@@ -1,0 +1,32 @@
+// Copyright 2026 The 420 Integrated Authors
+// SPDX-License-Identifier: LGPL-3.0
+
+package vm
+
+import (
+    "testing"
+
+    "github.com/ethereum/go-ethereum/common"
+    "github.com/ethereum/go-ethereum/params"
+)
+
+func Test420P256PrecompileEnabledBeforeOsaka(t *testing.T) {
+    address := common.BytesToAddress([]byte{0x1, 0x00})
+    sets := map[string]PrecompiledContracts{
+        "cancun": PrecompiledContractsCancun,
+        "prague": PrecompiledContractsPrague,
+    }
+
+    for name, contracts := range sets {
+        verifier, ok := contracts[address]
+        if !ok {
+            t.Fatalf("%s precompile set does not contain P-256 verifier at %s", name, address)
+        }
+        if got := verifier.RequiredGas(make([]byte, 160)); got != params.P256VerifyGas {
+            t.Fatalf("%s P-256 gas = %d, want %d", name, got, params.P256VerifyGas)
+        }
+        if verifier.Name() != "P256VERIFY" {
+            t.Fatalf("%s P-256 implementation = %q, want P256VERIFY", name, verifier.Name())
+        }
+    }
+}

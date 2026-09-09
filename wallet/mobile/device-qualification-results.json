@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "buildSha": "UNRECORDED",
+  "android": {
+    "deviceModel": "UNRECORDED",
+    "osVersion": "UNRECORDED",
+    "results": {
+      "freshInstall": "BLOCKED_EXTERNAL_DEVICE",
+      "upgrade": "BLOCKED_EXTERNAL_DEVICE",
+      "passkeyRegistration": "BLOCKED_EXTERNAL_DEVICE",
+      "passkeyAssertion": "BLOCKED_EXTERNAL_DEVICE",
+      "biometricGate": "BLOCKED_EXTERNAL_DEVICE",
+      "sessionKeyCreation": "BLOCKED_EXTERNAL_DEVICE",
+      "sessionKeyRotation": "BLOCKED_EXTERNAL_DEVICE",
+      "lockedDeviceAccess": "BLOCKED_EXTERNAL_DEVICE",
+      "backgroundForeground": "BLOCKED_EXTERNAL_DEVICE",
+      "screenCapture": "BLOCKED_EXTERNAL_DEVICE",
+      "verifiedLinkUnlocked": "BLOCKED_EXTERNAL_DEVICE",
+      "verifiedLinkLocked": "BLOCKED_EXTERNAL_DEVICE",
+      "pushForeground": "BLOCKED_EXTERNAL_DEVICE",
+      "pushBackground": "BLOCKED_EXTERNAL_DEVICE",
+      "pushTerminated": "BLOCKED_EXTERNAL_DEVICE",
+      "pushReplay": "BLOCKED_EXTERNAL_DEVICE",
+      "expiredReference": "BLOCKED_EXTERNAL_DEVICE",
+      "authorityDrift": "BLOCKED_EXTERNAL_DEVICE",
+      "lostDevice": "BLOCKED_EXTERNAL_DEVICE",
+      "clipboard": "BLOCKED_EXTERNAL_DEVICE",
+      "rpcTransport": "BLOCKED_EXTERNAL_DEVICE"
+    },
+    "notes": "Requires an authorized signed build installed on a supported physical Android device."
+  },
+  "ios": {
+    "deviceModel": "UNRECORDED",
+    "osVersion": "UNRECORDED",
+    "results": {
+      "freshInstall": "BLOCKED_EXTERNAL_DEVICE",
+      "upgrade": "BLOCKED_EXTERNAL_DEVICE",
+      "passkeyRegistration": "BLOCKED_EXTERNAL_DEVICE",
+      "passkeyAssertion": "BLOCKED_EXTERNAL_DEVICE",
+      "biometricGate": "BLOCKED_EXTERNAL_DEVICE",
+      "sessionKeyCreation": "BLOCKED_EXTERNAL_DEVICE",
+      "sessionKeyRotation": "BLOCKED_EXTERNAL_DEVICE",
+      "lockedDeviceAccess": "BLOCKED_EXTERNAL_DEVICE",
+      "backgroundForeground": "BLOCKED_EXTERNAL_DEVICE",
+      "screenCapture": "BLOCKED_EXTERNAL_DEVICE",
+      "verifiedLinkUnlocked": "BLOCKED_EXTERNAL_DEVICE",
+      "verifiedLinkLocked": "BLOCKED_EXTERNAL_DEVICE",
+      "pushForeground": "BLOCKED_EXTERNAL_DEVICE",
+      "pushBackground": "BLOCKED_EXTERNAL_DEVICE",
+      "pushTerminated": "BLOCKED_EXTERNAL_DEVICE",
+      "pushReplay": "BLOCKED_EXTERNAL_DEVICE",
+      "expiredReference": "BLOCKED_EXTERNAL_DEVICE",
+      "authorityDrift": "BLOCKED_EXTERNAL_DEVICE",
+      "lostDevice": "BLOCKED_EXTERNAL_DEVICE",
+      "clipboard": "BLOCKED_EXTERNAL_DEVICE",
+      "rpcTransport": "BLOCKED_EXTERNAL_DEVICE"
+    },
+    "notes": "Requires an authorized signed build installed on a supported physical iPhone."
+  }
+}

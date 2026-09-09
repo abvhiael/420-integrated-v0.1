@@ -43,6 +43,21 @@ The new pipeline is:
 
 Constructor bytecode is never inserted directly.
 
+## Native precompiles are not predeploys
+
+Protocol-native EVM precompiles are outside the reserved `0x0420-0x04FF` application/system predeploy map and MUST NOT be materialized as `alloc.code`.
+
+The passkey P-256 boundary uses the standard native verifier address `0x0000000000000000000000000000000000000100`. The pinned go-ethereum v1.17.5 baseline already contains its `p256Verify` implementation, while node420's maintained execution patch explicitly makes that implementation active for the chain's Cancun-at-genesis rules and preserves it through a future Prague activation. This does not activate Prague or Osaka generally.
+
+Contract deployment is layered above that native boundary:
+1. node420 qualifies the native verifier at `0x0100`;
+2. deploy `Rip7212P256Verifier420`, which performs the exact 160-byte raw precompile call and fails closed on malformed output;
+3. deploy `P256WebAuthnVerifier420` with that adapter as its P-256 backend;
+4. the SmartAccount owner explicitly installs the WebAuthn verifier with `setPasskeyVerifier`;
+5. passkeys remain runtime-disabled until the complete wallet/contract/node qualification gate passes.
+
+The authoritative passkey P-256 wiring policy is `config/passkey-p256.json`.
+
 ## Fail-closed inputs
 
 Two inputs remain intentionally unresolved:

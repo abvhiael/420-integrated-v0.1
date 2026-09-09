@@ -1,0 +1,36 @@
+{
+  "schema": "420-passkey-p256-v1",
+  "status": "RUNTIME_DISABLED_PENDING_FULL_PASSKEY_QUALIFICATION",
+  "execution": {
+    "baseline": "go-ethereum-v1.17.5",
+    "baseline_commit": "9621c6ad10934a01b5514886fb6fbd87640b6c05",
+    "precompile_address": "0x0000000000000000000000000000000000000100",
+    "implementation": "upstream go-ethereum p256Verify",
+    "activation": "node420 maintained patch adds p256Verify to Cancun and Prague precompile sets",
+    "genesis_rule": "Cancun is active at genesis; Prague remains deferred",
+    "gas_schedule": "go-ethereum params.P256VerifyGas"
+  },
+  "contracts": {
+    "backend": "Rip7212P256Verifier420",
+    "webauthn_verifier": "P256WebAuthnVerifier420",
+    "smart_account": "SmartAccount420",
+    "wiring": [
+      "deploy Rip7212P256Verifier420",
+      "deploy P256WebAuthnVerifier420 with the backend address",
+      "owner calls SmartAccount420.setPasskeyVerifier with the WebAuthn verifier address",
+      "owner enrolls a credential only after wallet and chain qualification"
+    ]
+  },
+  "activation_gates": [
+    "node420 release gate proves P-256 exists at 0x0100 under Cancun rules",
+    "Solidity adapter accepts only exact 32-byte return value 1",
+    "P256WebAuthnVerifier420 and SmartAccount420 passkey integration tests pass",
+    "wallet constructs canonical PK42 envelopes from WebAuthn assertions",
+    "runtime features.passkeys remains false until the full end-to-end gate passes"
+  ],
+  "notes": [
+    "0x0100 is a protocol precompile, not a genesis alloc.code predeploy.",
+    "No code.length check is valid for the native precompile address.",
+    "The P-256 patch intentionally moves only the existing upstream verifier forward; it does not activate Prague or Osaka generally."
+  ]
+}

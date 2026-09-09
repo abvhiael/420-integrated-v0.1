@@ -1,0 +1,8 @@
+{
+  "name": "@420/gaming-cross-game-qualification",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  }
+}

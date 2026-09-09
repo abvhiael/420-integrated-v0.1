@@ -1,0 +1,39 @@
+{
+  "schema": "420-bridge-ethereum-mainnet-v12.5.4",
+  "status": "APPROVED_INACTIVE_PENDING_PRODUCTION_LIGHT_CLIENT_MESSAGE_VERIFIER_AND_GATEWAY",
+  "canonical_chain_key": "420/BRIDGE/CHAIN/ETH",
+  "chain_family": "EVM_ETHEREUM",
+  "route_chain_id": "0x4554484d41494e01",
+  "network_identity": { "method": "EIP155_CHAIN_ID", "chain_id": 1, "caip2": "eip155:1" },
+  "native_asset": { "symbol": "ETH", "source_asset_marker": "420/BRIDGE/ETHEREUM/NATIVE/ETH", "units": "wei" },
+  "adapter": {
+    "contract": "EthereumBridgeAdapter420",
+    "adapter_id_preimage": "420/BRIDGE/ETHEREUM/MAINNET/V12.5.4",
+    "recipient_encoding": "20-byte EVM address",
+    "native_value_on_420_outbound": "rejected"
+  },
+  "verifier": {
+    "contract": "EthereumFinalityVerifier420",
+    "finality_requirement": "execution block must be finalized by the configured Ethereum light-client/finality oracle",
+    "message_requirement": "canonical gateway message must be proven against the exact finalized block receipts root"
+  },
+  "activation_requirements": [
+    "production IEthereumFinalityOracle420 light-client/finality implementation is deployed and reviewed",
+    "production IEthereumGatewayMessageVerifier420 receipts/message proof implementation is deployed and reviewed",
+    "canonical Ethereum gateway contract is governance allowlisted",
+    "ETH and each ERC-20 source token are explicitly mapped to canonical 420 bridge asset ids",
+    "each asset id is bound to an active BridgeRouteRegistry route",
+    "route risk caps and emergency isolation are configured",
+    "end-to-end finalized block plus receipt inclusion qualification passes"
+  ],
+  "security_invariants": [
+    "non-finalized execution blocks fail closed",
+    "message proofs are bound to the exact finalized block hash and receipts root",
+    "unapproved gateway fails closed",
+    "unknown ETH/ERC-20 source assets fail closed",
+    "route substitution fails closed",
+    "message replay fails closed",
+    "direct adapter calls bypassing GatewayRouter420 fail closed",
+    "outbound recipients must be exactly 20 bytes"
+  ]
+}

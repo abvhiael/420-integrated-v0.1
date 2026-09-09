@@ -1,0 +1,27 @@
+name: Budtender Gaming Integration
+
+on:
+  pull_request:
+    paths:
+      - "clients/budtender-access-v1/**"
+      - "packages/420-gaming-sdk/**"
+      - ".github/workflows/budtender-gaming.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Test shared gaming SDK
+        working-directory: packages/420-gaming-sdk
+        run: npm test
+      - name: Test Budtender integration
+        working-directory: clients/budtender-access-v1
+        run: npm test

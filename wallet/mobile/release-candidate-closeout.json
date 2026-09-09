@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "releaseVersion": "0.1.0-w11",
+  "pullRequest": 113,
+  "qualifiedBaselineCommit": "befc19720b09e0198a88c25deaeb981402925491",
+  "observedMainAtCloseoutStart": "f92c2648894014706056d427cd85edf3a96d2c4a",
+  "qualificationMode": "pull-request-merge-head",
+  "authorityPolicy": "wallet-core-canonical-v1",
+  "repositoryQualification": "REQUIRED",
+  "productionReadiness": "BLOCKED_EXTERNAL_DEVICE",
+  "requiredChecks": [
+    "420 Wallet Mobile Verification",
+    "420 Integrated Qualification"
+  ],
+  "releaseGate": "npm run device:closeout",
+  "distribution": {
+    "android": "AUTHORIZED_ONLY_AFTER_DEVICE_CLOSEOUT",
+    "ios": "AUTHORIZED_ONLY_AFTER_DEVICE_CLOSEOUT"
+  },
+  "security": {
+    "committedSigningCredentials": false,
+    "remoteSignerFallback": false,
+    "plaintextPrivateKeyFallback": false
+  }
+}

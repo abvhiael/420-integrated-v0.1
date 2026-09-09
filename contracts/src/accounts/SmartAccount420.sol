@@ -3,6 +3,7 @@ pragma solidity ^0.8.24;
 
 import "./ECDSA420.sol";
 import "./IEntryPoint420.sol";
+import "./IPasskeyVerifier420.sol";
 import "./SmartAccountScopes420.sol";
 import "../interfaces/genesis/ICapabilityRegistry420.sol";
 import "../interfaces/genesis/ICapabilityRegistryExtended420.sol";
@@ -10,6 +11,7 @@ import "../interfaces/genesis/ICapabilityRegistryExtended420.sol";
 contract SmartAccount420 {
     bytes4 public constant ERC1271_MAGICVALUE = 0x1626ba7e;
     bytes4 public constant ERC1271_INVALID = 0xffffffff;
+    bytes4 public constant PASSKEY_SIGNATURE_MAGIC = 0x504b3432; // "PK42"
     uint48 public constant RECOVERY_DELAY = 2 days;
 
     bytes4 private constant _ERC20_TRANSFER = 0xa9059cbb;
@@ -29,6 +31,14 @@ contract SmartAccount420 {
         uint48 validUntil;
     }
 
+    struct PasskeyCredential {
+        uint64 epoch;
+        bytes32 rpIdHash;
+        bytes32 originHash;
+        uint256 publicKeyX;
+        uint256 publicKeyY;
+    }
+
     address public immutable entryPoint;
     ICapabilityRegistryExtended420 public immutable capabilityRegistry;
     bytes32 public immutable accountComponentId;
@@ -42,6 +52,8 @@ contract SmartAccount420 {
     address public pendingRecoveryOwner;
     uint48 public recoveryExecutableAt;
 
+    IPasskeyVerifier420 public passkeyVerifier;
+    mapping(bytes32 => PasskeyCredential) public passkeyCredential;
     mapping(address => uint64) public sessionEpoch;
 
     event OwnerChanged(address indexed previousOwner, address indexed newOwner);
@@ -50,6 +62,10 @@ contract SmartAccount420 {
     event RecoveryCancelled();
     event AuthorizationEpochAdvanced(uint64 indexed newEpoch);
     event AuthorizationPolicyVersionChanged(uint32 indexed previousVersion, uint32 indexed newVersion);
+    event PasskeyVerifierChanged(address indexed previousVerifier, address indexed newVerifier);
+    event PasskeyEnrolled(bytes32 indexed credentialIdHash, uint64 indexed epoch, bytes32 rpIdHash, bytes32 originHash);
+    event PasskeyReenrolled(bytes32 indexed credentialIdHash, uint64 indexed previousEpoch, uint64 indexed newEpoch);
+    event PasskeyRevoked(bytes32 indexed credentialIdHash);
     event SessionKeyEnabled(address indexed key, uint64 indexed epoch);
     event SessionKeyRevoked(address indexed key);
     event SessionGrantCreated(
@@ -74,6 +90,11 @@ contract SmartAccount420 {
     error InvalidAddress();
     error InvalidPolicyVersion();
     error InvalidSessionKey();
+    error InvalidPasskeyVerifier();
+    error InvalidPasskeyCredential();
+    error PasskeyAlreadyEnrolled();
+    error PasskeyNotStale();
+    error RecoveryInProgress();
     error SessionAuthorizationFailed();
     error RecoveryNotReady();
     error CallFailed(bytes returnData);
@@ -161,6 +182,72 @@ contract SmartAccount420 {
         for (uint256 i = 0; i < callSet.length; ++i) {
             results[i] = _call(callSet[i].target, callSet[i].value, callSet[i].data);
         }
+    }
+
+    function setPasskeyVerifier(address verifier) external onlyOwner {
+        if (verifier == address(0) || verifier.code.length == 0) revert InvalidPasskeyVerifier();
+        address previous = address(passkeyVerifier);
+        if (previous == verifier) return;
+        passkeyVerifier = IPasskeyVerifier420(verifier);
+        // A verifier replacement changes the trust boundary. Existing passkeys are
+        // invalidated by advancing the same global authorization epoch used by recovery.
+        if (previous != address(0)) _advanceAuthorizationEpoch();
+        emit PasskeyVerifierChanged(previous, verifier);
+    }
+
+    function enrollPasskey(
+        bytes32 credentialIdHash,
+        bytes32 rpIdHash,
+        bytes32 originHash,
+        uint256 publicKeyX,
+        uint256 publicKeyY
+    ) external onlyOwner {
+        if (pendingRecoveryOwner != address(0)) revert RecoveryInProgress();
+        if (address(passkeyVerifier) == address(0)) revert InvalidPasskeyVerifier();
+        if (
+            credentialIdHash == bytes32(0) || rpIdHash == bytes32(0) || originHash == bytes32(0)
+                || publicKeyX == 0 || publicKeyY == 0
+        ) revert InvalidPasskeyCredential();
+        if (passkeyCredential[credentialIdHash].epoch != 0) revert PasskeyAlreadyEnrolled();
+
+        passkeyCredential[credentialIdHash] = PasskeyCredential({
+            epoch: authorizationEpoch,
+            rpIdHash: rpIdHash,
+            originHash: originHash,
+            publicKeyX: publicKeyX,
+            publicKeyY: publicKeyY
+        });
+        emit PasskeyEnrolled(credentialIdHash, authorizationEpoch, rpIdHash, originHash);
+    }
+
+    /// @notice Explicitly reactivate an already-known credential after an authorization-epoch change.
+    /// @dev Re-enrollment cannot change the stored credential identity, RP/origin binding, or public key.
+    ///      A credential with new public material must use a new credentialIdHash through enrollPasskey().
+    function reenrollPasskey(bytes32 credentialIdHash) external onlyOwner {
+        if (pendingRecoveryOwner != address(0)) revert RecoveryInProgress();
+        if (address(passkeyVerifier) == address(0)) revert InvalidPasskeyVerifier();
+        PasskeyCredential storage credential = passkeyCredential[credentialIdHash];
+        uint64 previousEpoch = credential.epoch;
+        if (previousEpoch == 0) revert InvalidPasskeyCredential();
+        if (previousEpoch == authorizationEpoch) revert PasskeyNotStale();
+        credential.epoch = authorizationEpoch;
+        emit PasskeyReenrolled(credentialIdHash, previousEpoch, authorizationEpoch);
+    }
+
+    function revokePasskey(bytes32 credentialIdHash) external onlyOwner {
+        if (passkeyCredential[credentialIdHash].epoch == 0) revert InvalidPasskeyCredential();
+        delete passkeyCredential[credentialIdHash];
+        emit PasskeyRevoked(credentialIdHash);
+    }
+
+    function isPasskeyActive(bytes32 credentialIdHash) external view returns (bool) {
+        uint64 epoch = passkeyCredential[credentialIdHash].epoch;
+        return epoch != 0 && epoch == authorizationEpoch && address(passkeyVerifier) != address(0);
+    }
+
+    function isPasskeyStale(bytes32 credentialIdHash) external view returns (bool) {
+        uint64 epoch = passkeyCredential[credentialIdHash].epoch;
+        return epoch != 0 && epoch != authorizationEpoch;
     }
 
     function enableSessionKey(address key) external onlyOwner {
@@ -308,19 +395,12 @@ contract SmartAccount420 {
     {
         if (msg.sender != entryPoint || userOp.sender != address(this)) return 1;
 
-        address signer = ECDSA420.tryRecover(ECDSA420.toEthSignedMessageHash(userOpHash), userOp.signature);
-        if (signer == address(0)) return 1;
-
-        if (signer == owner) {
-            if (uint192(userOp.nonce >> 64) != 0) return 1;
-            validationData = 0;
+        if (_isPasskeySignature(userOp.signature)) {
+            validationData = _validatePasskeyUserOp(userOp, userOpHash);
         } else {
-            if (sessionEpoch[signer] != authorizationEpoch) return 1;
-            if (uint192(userOp.nonce >> 64) != uint192(uint160(signer))) return 1;
-            (bool ok, uint48 validAfter, uint48 validUntil) = _authorizeSessionCalls(signer, userOp.callData);
-            if (!ok) return 1;
-            validationData = _packValidationData(validUntil, validAfter);
+            validationData = _validateEcdsaUserOp(userOp, userOpHash);
         }
+        if (validationData == 1) return 1;
 
         if (missingAccountFunds != 0) {
             (bool ok,) = payable(msg.sender).call{value: missingAccountFunds}("");
@@ -328,13 +408,86 @@ contract SmartAccount420 {
         }
     }
 
+    /// @notice Decode helper used through an external self-call so malformed passkey
+    ///         envelopes fail validation instead of reverting the EntryPoint call.
+    function decodePasskeySignature(bytes calldata encoded)
+        external
+        pure
+        returns (bytes32 credentialIdHash, bytes memory assertionEnvelope)
+    {
+        return abi.decode(encoded, (bytes32, bytes));
+    }
+
     function isValidSignature(bytes32 hash, bytes calldata signature) external view returns (bytes4) {
+        // ERC-1271 remains deliberately ECDSA-owner-only in this milestone. Passkey
+        // ERC-1271 semantics will only be added after the UserOperation path qualifies.
         address signer = ECDSA420.tryRecover(ECDSA420.toEthSignedMessageHash(hash), signature);
         return signer == owner ? ERC1271_MAGICVALUE : ERC1271_INVALID;
     }
 
     function nonce(uint192 key) external view returns (uint256) {
         return IEntryPoint420(entryPoint).getNonce(address(this), key);
+    }
+
+    function _validatePasskeyUserOp(PackedUserOperation420 calldata userOp, bytes32 userOpHash)
+        internal
+        view
+        returns (uint256)
+    {
+        // Passkeys are owner-level authority and therefore use the canonical owner nonce lane.
+        if (uint192(userOp.nonce >> 64) != 0 || address(passkeyVerifier) == address(0)) return 1;
+
+        bytes32 credentialIdHash;
+        bytes memory assertionEnvelope;
+        try this.decodePasskeySignature(userOp.signature[4:]) returns (bytes32 credentialIdHash_, bytes memory assertionEnvelope_) {
+            credentialIdHash = credentialIdHash_;
+            assertionEnvelope = assertionEnvelope_;
+        } catch {
+            return 1;
+        }
+
+        PasskeyCredential memory credential = passkeyCredential[credentialIdHash];
+        if (credential.epoch == 0 || credential.epoch != authorizationEpoch) return 1;
+
+        try passkeyVerifier.verifyPasskeyAssertion(
+            userOpHash,
+            assertionEnvelope,
+            credentialIdHash,
+            credential.rpIdHash,
+            credential.originHash,
+            credential.publicKeyX,
+            credential.publicKeyY
+        ) returns (bool ok) {
+            return ok ? 0 : 1;
+        } catch {
+            return 1;
+        }
+    }
+
+    function _validateEcdsaUserOp(PackedUserOperation420 calldata userOp, bytes32 userOpHash)
+        internal
+        view
+        returns (uint256 validationData)
+    {
+        address signer = ECDSA420.tryRecover(ECDSA420.toEthSignedMessageHash(userOpHash), userOp.signature);
+        if (signer == address(0)) return 1;
+
+        if (signer == owner) {
+            if (uint192(userOp.nonce >> 64) != 0) return 1;
+            return 0;
+        }
+
+        if (sessionEpoch[signer] != authorizationEpoch) return 1;
+        if (uint192(userOp.nonce >> 64) != uint192(uint160(signer))) return 1;
+        (bool ok, uint48 validAfter, uint48 validUntil) = _authorizeSessionCalls(signer, userOp.callData);
+        if (!ok) return 1;
+        return _packValidationData(validUntil, validAfter);
+    }
+
+    function _isPasskeySignature(bytes calldata signature) internal pure returns (bool) {
+        // Existing ECDSA owner/session signatures are exactly 65 bytes. Requiring a
+        // non-ECDSA length prevents the PK42 prefix from shadowing a valid ECDSA signature.
+        return signature.length != 65 && signature.length > 4 && bytes4(signature[:4]) == PASSKEY_SIGNATURE_MAGIC;
     }
 
     function _authorizeSessionCalls(address signer, bytes calldata callData)

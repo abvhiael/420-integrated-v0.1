@@ -1,0 +1,29 @@
+name: 420 Gaming SDK
+
+on:
+  pull_request:
+    paths:
+      - "packages/420-gaming-sdk/**"
+      - "clients/highcountry-access-v1/**"
+      - ".github/workflows/gaming-sdk.yml"
+  push:
+    branches: [main]
+    paths:
+      - "packages/420-gaming-sdk/**"
+      - "clients/highcountry-access-v1/**"
+      - ".github/workflows/gaming-sdk.yml"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Test shared Gaming SDK
+        working-directory: packages/420-gaming-sdk
+        run: npm test
+      - name: Test High Country reference client
+        working-directory: clients/highcountry-access-v1
+        run: npm test

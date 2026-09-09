@@ -1,0 +1,24 @@
+name: Smoke & Chrome Gaming Integration
+
+on:
+  pull_request:
+    paths:
+      - 'clients/smoke-chrome-access-v1/**'
+      - 'packages/420-gaming-sdk/**'
+      - '.github/workflows/smoke-chrome-gaming.yml'
+  workflow_dispatch:
+
+jobs:
+  smoke-chrome-gaming:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test shared gaming SDK
+        working-directory: packages/420-gaming-sdk
+        run: npm test
+      - name: Test Smoke & Chrome integration
+        working-directory: clients/smoke-chrome-access-v1
+        run: npm test

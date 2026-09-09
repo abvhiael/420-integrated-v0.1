@@ -1,0 +1,71 @@
+name: Wallet420
+options:
+  bundleIdPrefix: io.fourtwenty
+settings:
+  base:
+    IPHONEOS_DEPLOYMENT_TARGET: "16.0"
+targets:
+  Wallet420:
+    type: application
+    platform: iOS
+    sources:
+      - Wallet420
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: io.fourtwenty.wallet
+        PRODUCT_NAME: "420 Wallet"
+        PRODUCT_MODULE_NAME: Wallet420
+        SWIFT_VERSION: "5.9"
+        CODE_SIGN_STYLE: Automatic
+        WALLET_LINK_HOST: wallet.invalid
+        APS_ENVIRONMENT: development
+        CODE_SIGN_ENTITLEMENTS: Wallet420/Wallet420.entitlements
+    info:
+      path: Wallet420/Info.plist
+      properties:
+        CFBundleDisplayName: "420 Wallet"
+        UILaunchScreen: {}
+        WalletLinkHost: $(WALLET_LINK_HOST)
+        NSFaceIDUsageDescription: "Use Face ID to unlock 420 Wallet locally. Face ID never becomes wallet signing or account authority."
+        UIBackgroundModes:
+          - remote-notification
+        CFBundleURLTypes:
+          - CFBundleURLName: io.fourtwenty.wallet
+            CFBundleURLSchemes:
+              - 420wallet
+  Wallet420Tests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - Wallet420Tests
+    dependencies:
+      - target: Wallet420
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: io.fourtwenty.wallet.tests
+        SWIFT_VERSION: "5.9"
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/420 Wallet.app/420 Wallet"
+        BUNDLE_LOADER: "$(TEST_HOST)"
+  Wallet420UITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - Wallet420UITests
+    dependencies:
+      - target: Wallet420
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: io.fourtwenty.wallet.uitests
+        SWIFT_VERSION: "5.9"
+        TEST_TARGET_NAME: Wallet420
+schemes:
+  Wallet420:
+    build:
+      targets:
+        Wallet420: all
+        Wallet420Tests: [test]
+        Wallet420UITests: [test]
+    test:
+      targets:
+        - Wallet420Tests
+        - Wallet420UITests

@@ -1,0 +1,45 @@
+{
+  "schema": "420-bridge-solana-mainnet-v12.5.2",
+  "status": "APPROVED_INACTIVE_PENDING_PRODUCTION_VERIFIER_AND_GATEWAY_PROGRAM",
+  "canonical_chain_key": "420/BRIDGE/CHAIN/SOL",
+  "chain_family": "SOLANA",
+  "route_chain_id": "0x534f4c414e410001",
+  "route_chain_id_encoding": "ASCII SOLANA plus profile version 1, interpreted as uint64",
+  "network_identity": {
+    "method": "GENESIS_HASH",
+    "full_base58": "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d",
+    "caip2": "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
+    "raw_32_byte_hex": "0x45296998a6f8e2a784db5d9f95e18fc23f70441a1039446801089879b08c7ef0"
+  },
+  "native_asset": {
+    "symbol": "SOL",
+    "source_asset_marker": "420/BRIDGE/SOLANA/NATIVE/SOL",
+    "units": "lamports"
+  },
+  "adapter": {
+    "contract": "SolanaBridgeAdapter420",
+    "adapter_id_preimage": "420/BRIDGE/SOLANA/MAINNET/V12.5.2",
+    "required_commitment": "finalized",
+    "recipient_encoding": "32-byte Solana public key",
+    "native_value_on_420_outbound": "rejected"
+  },
+  "activation_requirements": [
+    "BridgeChainRegistry420 entry uses route_chain_id and the pinned mainnet genesis identity",
+    "production ISolanaFinalityVerifier420 implementation is deployed and reviewed",
+    "canonical Solana gateway program id is governance allowlisted",
+    "SOL source-asset mapping is bound to the canonical SOL bridge asset id",
+    "SOL asset id is bound to an active BridgeRouteRegistry route",
+    "route risk caps and emergency isolation are configured",
+    "end-to-end inbound and outbound qualification passes"
+  ],
+  "spl_policy": "Default deny. Each SPL mint requires an explicit sourceAsset-to-420-asset mapping and its own route binding before it can be accepted.",
+  "security_invariants": [
+    "wrong Solana cluster fails closed",
+    "non-finalized proof fails closed",
+    "unapproved gateway program fails closed",
+    "unapproved SOL/SPL source asset fails closed",
+    "route substitution fails closed",
+    "message replay fails closed",
+    "direct adapter calls bypassing GatewayRouter420 fail closed"
+  ]
+}

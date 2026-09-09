@@ -1,8 +1,12 @@
-export const PlayerAccessState = Object.freeze({
-  GUEST: "guest",
-  REGISTERED: "registered",
-  WALLET_LINKED: "wallet-linked"
-});
+import {
+  AccessRequirement,
+  PlayerAccessState,
+  PromptKind,
+  derivePlayerAccessState,
+  evaluateAccessRequirement
+} from "../../../packages/420-gaming-sdk/src/index.js";
+
+export { PlayerAccessState, PromptKind, derivePlayerAccessState };
 
 export const FeatureClass = Object.freeze({
   CORE_GAMEPLAY: "core-gameplay",
@@ -14,96 +18,40 @@ export const FeatureClass = Object.freeze({
   REWARD: "reward"
 });
 
-export const PromptKind = Object.freeze({
-  NONE: "none",
-  REGISTER: "register",
-  LINK_WALLET: "link-wallet",
-  CONNECT_WALLET: "connect-wallet"
-});
-
-const WALLET_ONLY = new Set([
-  FeatureClass.OPTIONAL_CONTENT,
-  FeatureClass.OWNERSHIP,
-  FeatureClass.MARKETPLACE,
-  FeatureClass.CROSS_GAME,
-  FeatureClass.REWARD
+const REQUIREMENT_BY_FEATURE = new Map([
+  [FeatureClass.CORE_GAMEPLAY, AccessRequirement.CORE],
+  [FeatureClass.CLOUD_SAVE, AccessRequirement.REGISTERED],
+  [FeatureClass.OPTIONAL_CONTENT, AccessRequirement.WALLET],
+  [FeatureClass.OWNERSHIP, AccessRequirement.WALLET],
+  [FeatureClass.MARKETPLACE, AccessRequirement.WALLET],
+  [FeatureClass.CROSS_GAME, AccessRequirement.WALLET],
+  [FeatureClass.REWARD, AccessRequirement.WALLET]
 ]);
 
-export function derivePlayerAccessState({ registered = false, walletLinked = false } = {}) {
-  if (walletLinked) return PlayerAccessState.WALLET_LINKED;
-  if (registered) return PlayerAccessState.REGISTERED;
-  return PlayerAccessState.GUEST;
-}
+export function evaluateFeatureAccess({ feature, ...state } = {}) {
+  const requirement = REQUIREMENT_BY_FEATURE.get(feature);
+  if (!requirement) throw new TypeError(`Unsupported High Country feature class: ${feature}`);
 
-export function evaluateFeatureAccess({
-  feature,
-  registered = false,
-  walletLinked = false,
-  walletConnected = false
-} = {}) {
-  const state = derivePlayerAccessState({ registered, walletLinked });
+  const decision = evaluateAccessRequirement({ requirement, ...state });
 
   if (feature === FeatureClass.CORE_GAMEPLAY) {
-    return {
-      allowed: true,
-      state,
-      prompt: PromptKind.NONE,
-      optional: false,
-      reason: "core-gameplay-remains-wallet-free"
-    };
+    return { ...decision, reason: "core-gameplay-remains-wallet-free" };
   }
-
   if (feature === FeatureClass.CLOUD_SAVE) {
-    if (state !== PlayerAccessState.GUEST) {
-      return {
-        allowed: true,
-        state,
-        prompt: PromptKind.NONE,
-        optional: true,
-        reason: "registered-account-satisfies-cloud-save"
-      };
-    }
-
     return {
-      allowed: false,
-      state,
-      prompt: PromptKind.REGISTER,
-      optional: true,
-      reason: "registration-required-for-cloud-save"
+      ...decision,
+      reason: decision.allowed
+        ? "registered-account-satisfies-cloud-save"
+        : "registration-required-for-cloud-save"
     };
   }
-
-  if (WALLET_ONLY.has(feature)) {
-    if (!walletLinked) {
-      return {
-        allowed: false,
-        state,
-        prompt: PromptKind.LINK_WALLET,
-        optional: true,
-        reason: "wallet-link-required-for-optional-web3-feature"
-      };
-    }
-
-    if (!walletConnected) {
-      return {
-        allowed: false,
-        state,
-        prompt: PromptKind.CONNECT_WALLET,
-        optional: true,
-        reason: "wallet-reconnect-required-at-feature-boundary"
-      };
-    }
-
-    return {
-      allowed: true,
-      state,
-      prompt: PromptKind.NONE,
-      optional: true,
-      reason: "wallet-linked-feature-available"
-    };
+  if (decision.prompt === PromptKind.LINK_WALLET) {
+    return { ...decision, reason: "wallet-link-required-for-optional-web3-feature" };
   }
-
-  throw new TypeError(`Unsupported High Country feature class: ${feature}`);
+  if (decision.prompt === PromptKind.CONNECT_WALLET) {
+    return { ...decision, reason: "wallet-reconnect-required-at-feature-boundary" };
+  }
+  return { ...decision, reason: "wallet-linked-feature-available" };
 }
 
 export function shouldPromptDuringRoutinePlay(decision) {

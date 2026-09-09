@@ -83,6 +83,16 @@ contract StreamingRevenueAllocator420Test {
         require(allocator.allocationRootOf(SETTLEMENT) != bytes32(0), "allocation root");
     }
 
+    function testAllocationRowsRemainQueryableForIndexerReconciliation() public {
+        allocator.allocate(SETTLEMENT, _threeTracks());
+        StreamingRevenueAllocator420.RecordingAllocation420 memory one = allocator.allocation(SETTLEMENT, TRACK_ONE);
+        StreamingRevenueAllocator420.RecordingAllocation420 memory two = allocator.allocation(SETTLEMENT, TRACK_TWO);
+        StreamingRevenueAllocator420.RecordingAllocation420 memory three = allocator.allocation(SETTLEMENT, TRACK_THREE);
+        require(one.playCount == 10 && one.qualifiedMs == 1000 && one.revenue == 16, "track one projection row");
+        require(two.playCount == 20 && two.qualifiedMs == 2000 && two.revenue == 33, "track two projection row");
+        require(three.playCount == 30 && three.qualifiedMs == 3000 && three.revenue == 52, "track three projection row");
+    }
+
     function testSettlementCannotAllocateTwice() public {
         RecordingId[] memory ids = _threeTracks();
         allocator.allocate(SETTLEMENT, ids);

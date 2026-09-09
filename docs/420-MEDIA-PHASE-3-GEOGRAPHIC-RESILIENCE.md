@@ -33,6 +33,18 @@ The failed node's canonical operator determines the outage geography. Every node
 
 This preserves the separation between detection and execution: the snapshot determines failure-domain scope, geographic selection chooses a qualified replacement, and Phase 3.3 recovery execution still owns attempt-scoped job creation and downstream propagation.
 
+## Coordinated multi-node regional recovery
+
+Phase 3.4C adds `PlanRegionalRecovery`, which plans recovery for every node in one derived regional outage as a single deterministic batch.
+
+Affected node IDs are sorted before planning. For each node, the planner starts from the graph-derived healthy occupied operators/geographies, applies that node's original discovery constraints and Phase 3.3 attempt state, then carries every prior replacement selected in the same batch forward as newly occupied state. This prevents two independently recovered nodes from selecting the same operator.
+
+By default, Phase 3.4C also prevents two replacements in the same regional recovery batch from collapsing into the same new geography. Each selected replacement geography becomes occupied for the rest of the batch. If the remaining affected node cannot be placed in a distinct healthy geography, the batch fails closed and returns no partial recovery plan.
+
+An explicit `AllowSharedReplacementGeography` policy can relax only the intra-batch geography anti-affinity rule. It does not relax operator uniqueness, the hard failed-geography exclusion, existing healthy occupied-operator protection, capability/price/latency/reliability/capacity constraints, or bounded attempt semantics.
+
+`PlanRegionalRecovery` is planning-only. It does not create jobs, execute operators, settle funds, mutate the canonical plan, or partially apply earlier decisions. Phase 3.3 attempt-scoped execution remains the only execution path after a complete regional plan is produced.
+
 ## Failure-domain invariants
 
 - **MEDIA-GEO-INV-001:** A recovery replacement must never be selected from the failed geography.
@@ -49,6 +61,14 @@ This preserves the separation between detection and execution: the snapshot dete
 - **MEDIA-GEO-INV-012:** Geography lookup failure or missing geography metadata prevents a regional recovery snapshot from being produced.
 - **MEDIA-GEO-INV-013:** Healthy occupied operator and geography sets exclude all nodes inside the failed domain and include effective recovered placements outside it.
 - **MEDIA-GEO-INV-014:** A node outside the derived regional outage cannot be promoted into geographic recovery through request construction.
+- **MEDIA-GEO-INV-015:** Coordinated regional recovery must produce decisions in deterministic affected-node order.
+- **MEDIA-GEO-INV-016:** Two nodes in the same regional recovery batch must never receive the same replacement operator.
+- **MEDIA-GEO-INV-017:** Default coordinated recovery must not collapse multiple replacements into the same replacement geography.
+- **MEDIA-GEO-INV-018:** Every replacement chosen earlier in a batch becomes occupied state for every later selection in that batch.
+- **MEDIA-GEO-INV-019:** A regional recovery batch is atomic at the planning boundary: any unplaceable affected node returns no partial decision set.
+- **MEDIA-GEO-INV-020:** Missing recovery input for any affected node makes the regional plan incomplete and fails closed.
+- **MEDIA-GEO-INV-021:** Explicit shared-geography mode may relax only intra-batch geographic anti-affinity; operator uniqueness and all Phase 3.3/3.4A safety constraints remain mandatory.
+- **MEDIA-GEO-INV-022:** Coordinated regional planning never mutates canonical DAG state or assumes execution/settlement authority.
 
 ## Phase 3.4 status
 
@@ -58,11 +78,14 @@ Complete and qualified. Provides hard failed-domain exclusion, fresh-domain pref
 
 ### 3.4B — DAG-derived failure-domain awareness
 
-Implemented. The orchestration layer now derives regional outage scope, healthy occupied geographies/operators, and effective recovered placements from the live plan/recovery graph rather than accepting that state manually. Qualification covers multi-node same-region outage detection, healthy remote placement preservation, effective recovery placement, lookup/missing-metadata failure, graph-derived request construction, and rejection of healthy nodes outside the outage.
+Complete and qualified. The orchestration layer derives regional outage scope, healthy occupied geographies/operators, and effective recovered placements from the live plan/recovery graph. Qualification covers multi-node same-region outage detection, healthy remote placement preservation, effective recovery placement, lookup/missing-metadata failure, graph-derived request construction, and rejection of healthy nodes outside the outage.
+
+### 3.4C — coordinated multi-node regional recovery
+
+Implemented. Multiple affected DAG nodes are planned as one deterministic recovery batch, with replacement-operator anti-collision, default replacement-geography anti-affinity, graph-derived healthy placement protection, complete-batch fail-closed semantics, and an explicit opt-in shared-geography mode that does not relax operator or failed-domain safety.
 
 The next Phase 3.4 increments are:
 
-1. execute coordinated multi-node regional recovery so multiple affected jobs are rerouted without replacement collisions;
-2. prove relay continuity across regional transcoder loss while preserving healthy remote renditions;
-3. add live Anvil qualification for geographic reroute and recovery execution;
-4. define controlled rebalancing/failback rules so restored regions are not immediately trusted without health/reputation evidence.
+1. prove relay continuity across regional transcoder loss while preserving healthy remote renditions;
+2. add live Anvil qualification for geographic reroute and recovery execution;
+3. define controlled rebalancing/failback rules so restored regions are not immediately trusted without health/reputation evidence.

@@ -1,5 +1,6 @@
 BEGIN;
 
+-- HZ-4.4 application-facing projection of canonical streaming settlement state.
 CREATE TABLE IF NOT EXISTS streaming_settlements (
   settlement_id TEXT PRIMARY KEY,
   playback_epoch BIGINT NOT NULL UNIQUE,

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+  <title id="title">420 Wallet app icon</title>
+  <desc id="desc">Rounded dark green field with a bright green four twenty monogram and wallet arc.</desc>
+  <rect width="1024" height="1024" rx="224" fill="#0E1511"/>
+  <path d="M208 338c0-72 58-130 130-130h348c72 0 130 58 130 130v348c0 72-58 130-130 130H338c-72 0-130-58-130-130V338z" fill="#151F19" stroke="#65C887" stroke-width="34"/>
+  <path d="M328 566h168V330h-84L260 548v82h236v74h94v-74h82v-64h-82V330h-94v236H366l130-190v-46h-92L268 526v40h60z" fill="#65C887"/>
+  <path d="M664 444h118c48 0 86 38 86 86v54c0 48-38 86-86 86H664c-48 0-86-38-86-86v-54c0-48 38-86 86-86z" fill="#176B3A"/>
+  <circle cx="752" cy="557" r="26" fill="#F2F6F2"/>
+</svg>

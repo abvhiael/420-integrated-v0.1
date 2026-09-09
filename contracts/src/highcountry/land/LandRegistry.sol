@@ -165,6 +165,12 @@ contract LandRegistry {
         return parcel.growCapacity;
     }
 
+    function regionIdOf(uint64 parcelId) external view returns (uint16) {
+        LandParcel memory parcel = _parcels[parcelId];
+        if (!parcel.exists) revert HCNotFound();
+        return parcel.regionId;
+    }
+
     function exists(uint64 parcelId) external view returns (bool) {
         return _parcels[parcelId].exists;
     }

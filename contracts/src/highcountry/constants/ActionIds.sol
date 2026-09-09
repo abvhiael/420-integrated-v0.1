@@ -37,6 +37,11 @@ library ActionIds {
     bytes32 internal constant BREEDING_REQUEST = keccak256("HC.ACTION.BREEDING_ENGINE.REQUEST");
     bytes32 internal constant BREEDING_FINALIZE = keccak256("HC.ACTION.BREEDING_ENGINE.FINALIZE");
 
+    bytes32 internal constant PLANT_REGISTER = keccak256("HC.ACTION.PLANT_REGISTRY.REGISTER");
+    bytes32 internal constant PLANT_ADVANCE = keccak256("HC.ACTION.PLANT_REGISTRY.ADVANCE");
+    bytes32 internal constant CULTIVATION_UPDATE = keccak256("HC.ACTION.CULTIVATION_ENGINE.UPDATE");
+    bytes32 internal constant PHENOTYPE_EXPRESS = keccak256("HC.ACTION.CULTIVATION_ENGINE.EXPRESS_PHENOTYPE");
+
     bytes32 internal constant GENESIS_SET_ROOTS = keccak256("HC.ACTION.GENESIS_REGISTRY.SET_ROOTS");
     bytes32 internal constant GENESIS_FINALIZE = keccak256("HC.ACTION.GENESIS_REGISTRY.FINALIZE");
     bytes32 internal constant RULESET_REGISTER = keccak256("HC.ACTION.RULESET_REGISTRY.REGISTER");

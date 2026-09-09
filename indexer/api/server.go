@@ -18,6 +18,9 @@ type Backend interface {
 	Health() (model.Health, error)
 	Block(number uint64) (model.BlockRecord, bool, error)
 	Blocks(cursor *Cursor, limit uint32) (BlockPage, error)
+	Transaction(hash string) (model.TransactionRecord, bool, error)
+	Receipt(txHash string) (model.ReceiptRecord, bool, error)
+	LogsByBlock(number uint64) ([]model.LogRecord, error)
 }
 
 type Server struct { backend Backend }
@@ -29,6 +32,9 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("GET /v1/health", s.health)
 	mux.HandleFunc("GET /v1/blocks/{number}", s.block)
 	mux.HandleFunc("GET /v1/blocks", s.blocks)
+	mux.HandleFunc("GET /v1/transactions/{hash}", s.transaction)
+	mux.HandleFunc("GET /v1/receipts/{hash}", s.receipt)
+	mux.HandleFunc("GET /v1/blocks/{number}/logs", s.blockLogs)
 	return mux
 }
 
@@ -45,6 +51,28 @@ func (s *Server) block(w http.ResponseWriter, r *http.Request) {
 	if err != nil { writeError(w, http.StatusServiceUnavailable, err); return }
 	if !ok { writeError(w, http.StatusNotFound, errors.New("block not indexed")); return }
 	writeJSON(w, http.StatusOK, b)
+}
+
+func (s *Server) transaction(w http.ResponseWriter, r *http.Request) {
+	tx, ok, err := s.backend.Transaction(r.PathValue("hash"))
+	if err != nil { writeError(w, http.StatusServiceUnavailable, err); return }
+	if !ok { writeError(w, http.StatusNotFound, errors.New("transaction not indexed")); return }
+	writeJSON(w, http.StatusOK, ReadResponse[model.TransactionRecord]{Data: tx, CanonicalAuthority: false})
+}
+
+func (s *Server) receipt(w http.ResponseWriter, r *http.Request) {
+	receipt, ok, err := s.backend.Receipt(r.PathValue("hash"))
+	if err != nil { writeError(w, http.StatusServiceUnavailable, err); return }
+	if !ok { writeError(w, http.StatusNotFound, errors.New("receipt not indexed")); return }
+	writeJSON(w, http.StatusOK, ReadResponse[model.ReceiptRecord]{Data: receipt, CanonicalAuthority: false})
+}
+
+func (s *Server) blockLogs(w http.ResponseWriter, r *http.Request) {
+	n, err := strconv.ParseUint(r.PathValue("number"), 10, 64)
+	if err != nil { writeError(w, http.StatusBadRequest, err); return }
+	logs, err := s.backend.LogsByBlock(n)
+	if err != nil { writeError(w, http.StatusServiceUnavailable, err); return }
+	writeJSON(w, http.StatusOK, ReadResponse[[]model.LogRecord]{Data: logs, CanonicalAuthority: false})
 }
 
 func (s *Server) blocks(w http.ResponseWriter, r *http.Request) {

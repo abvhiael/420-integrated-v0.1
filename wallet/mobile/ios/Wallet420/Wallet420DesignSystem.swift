@@ -21,6 +21,14 @@ struct Wallet420DesignSystem {
     static let spacingXLarge: CGFloat = 32
     static let cornerRadiusMedium: CGFloat = 14
     static let minimumTouchTarget: CGFloat = 44
+
+    static func contentAnimation(reduceMotion: Bool) -> Animation? {
+        reduceMotion ? nil : .easeOut(duration: 0.22)
+    }
+
+    static func statusAnimation(reduceMotion: Bool) -> Animation? {
+        reduceMotion ? nil : .easeOut(duration: 0.14)
+    }
 }
 
 struct Wallet420SurfaceModifier: ViewModifier {
@@ -48,6 +56,7 @@ struct Wallet420CardModifier: ViewModifier {
 
 struct Wallet420PrimaryButtonStyle: ButtonStyle {
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
@@ -58,11 +67,14 @@ struct Wallet420PrimaryButtonStyle: ButtonStyle {
             .foregroundStyle(colorScheme == .dark ? Wallet420DesignSystem.backgroundDark : Color.white)
             .clipShape(RoundedRectangle(cornerRadius: Wallet420DesignSystem.cornerRadiusMedium, style: .continuous))
             .opacity(configuration.isPressed ? 0.82 : 1)
+            .scaleEffect(configuration.isPressed && !reduceMotion ? 0.98 : 1)
+            .animation(Wallet420DesignSystem.statusAnimation(reduceMotion: reduceMotion), value: configuration.isPressed)
     }
 }
 
 struct Wallet420SecondaryButtonStyle: ButtonStyle {
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
@@ -73,6 +85,8 @@ struct Wallet420SecondaryButtonStyle: ButtonStyle {
             .foregroundStyle(colorScheme == .dark ? Wallet420DesignSystem.textPrimaryDark : Wallet420DesignSystem.textPrimaryLight)
             .clipShape(RoundedRectangle(cornerRadius: Wallet420DesignSystem.cornerRadiusMedium, style: .continuous))
             .opacity(configuration.isPressed ? 0.82 : 1)
+            .scaleEffect(configuration.isPressed && !reduceMotion ? 0.985 : 1)
+            .animation(Wallet420DesignSystem.statusAnimation(reduceMotion: reduceMotion), value: configuration.isPressed)
     }
 }
 

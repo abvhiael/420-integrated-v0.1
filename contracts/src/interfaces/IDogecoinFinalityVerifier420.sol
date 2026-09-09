@@ -3,7 +3,7 @@ pragma solidity ^0.8.24;
 
 /// @notice Verifier boundary for canonical Dogecoin mainnet bridge messages.
 /// @dev Production implementations must validate Dogecoin PoW/AuxPoW header-chain work,
-///      transaction inclusion and the configured confirmation/finality policy before returning a transfer.
+///      transaction inclusion, canonical bridge-script output and the configured confirmation/finality policy.
 interface IDogecoinFinalityVerifier420 {
     struct FinalizedTransfer {
         bytes32 genesisHash;
@@ -12,6 +12,7 @@ interface IDogecoinFinalityVerifier420 {
         bytes32 blockHash;
         bytes32 transactionHash;
         bytes32 messageId;
+        bytes32 gatewayScriptHash;
         bytes32 sourceOutput;
         address recipient;
         uint256 amount;

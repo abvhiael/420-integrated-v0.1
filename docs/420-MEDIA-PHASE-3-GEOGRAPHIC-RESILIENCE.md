@@ -45,6 +45,16 @@ An explicit `AllowSharedReplacementGeography` policy can relax only the intra-ba
 
 `PlanRegionalRecovery` is planning-only. It does not create jobs, execute operators, settle funds, mutate the canonical plan, or partially apply earlier decisions. Phase 3.3 attempt-scoped execution remains the only execution path after a complete regional plan is produced.
 
+## Relay continuity across regional transcoder loss
+
+Phase 3.4D adds `RecoveryBindingsFromRegionalPlan` and `CreateReadyWithRegionalRecovery` at the lifecycle boundary. A coordinated regional recovery plan must cover the complete affected-node set exactly once before it can be converted into authoritative recovery bindings.
+
+The conversion validates the original canonical operator for every affected node, rejects decisions for healthy nodes outside the outage, rejects duplicate replacement operators, rejects missing or zero-attempt decisions, and preserves the hard failed-geography exclusion. An incomplete batch cannot unlock downstream work.
+
+After validation, Phase 3.4D deliberately reuses the qualified Phase 3.3C dependency-resolution path. Canonical successful dependencies remain canonical. A terminal-failed affected transcoder contributes only the output of its explicitly bound successful recovery attempt. Pending or terminal-failed recovery attempts do not satisfy the dependency.
+
+For a relay with multiple renditions, `inputRefWithRecovery` sorts dependency node IDs before hashing the manifest. This means a regional outage may replace several failed rendition outputs while healthy remote rendition outputs remain unchanged, yet the relay still receives one deterministic manifest under the canonical relay job ID. Original failed transcoder lifecycle records are never rewritten.
+
 ## Failure-domain invariants
 
 - **MEDIA-GEO-INV-001:** A recovery replacement must never be selected from the failed geography.
@@ -69,6 +79,13 @@ An explicit `AllowSharedReplacementGeography` policy can relax only the intra-ba
 - **MEDIA-GEO-INV-020:** Missing recovery input for any affected node makes the regional plan incomplete and fails closed.
 - **MEDIA-GEO-INV-021:** Explicit shared-geography mode may relax only intra-batch geographic anti-affinity; operator uniqueness and all Phase 3.3/3.4A safety constraints remain mandatory.
 - **MEDIA-GEO-INV-022:** Coordinated regional planning never mutates canonical DAG state or assumes execution/settlement authority.
+- **MEDIA-GEO-INV-023:** A regional recovery batch must cover every affected node exactly once before downstream dependency resolution may consume it.
+- **MEDIA-GEO-INV-024:** A regional recovery decision for a healthy node outside the derived outage fails closed.
+- **MEDIA-GEO-INV-025:** Regional continuity preserves canonical-success dependencies and substitutes output only for terminal-failed dependencies with explicitly bound successful recovery attempts.
+- **MEDIA-GEO-INV-026:** A downstream relay cannot become ready while any affected dependency recovery is missing, pending, terminal-failed, or identity-inconsistent.
+- **MEDIA-GEO-INV-027:** Healthy remote rendition lifecycle state and output references remain unchanged during regional recovery propagation.
+- **MEDIA-GEO-INV-028:** Original failed canonical transcoder lifecycle history remains unchanged after recovery and downstream relay creation.
+- **MEDIA-GEO-INV-029:** Mixed canonical/recovered relay input manifests remain deterministic and the relay retains its canonical job identity.
 
 ## Phase 3.4 status
 
@@ -82,10 +99,13 @@ Complete and qualified. The orchestration layer derives regional outage scope, h
 
 ### 3.4C — coordinated multi-node regional recovery
 
-Implemented. Multiple affected DAG nodes are planned as one deterministic recovery batch, with replacement-operator anti-collision, default replacement-geography anti-affinity, graph-derived healthy placement protection, complete-batch fail-closed semantics, and an explicit opt-in shared-geography mode that does not relax operator or failed-domain safety.
+Complete and qualified. Multiple affected DAG nodes are planned as one deterministic recovery batch, with replacement-operator anti-collision, default replacement-geography anti-affinity, graph-derived healthy placement protection, complete-batch fail-closed semantics, and an explicit opt-in shared-geography mode that does not relax operator or failed-domain safety.
+
+### 3.4D — relay continuity across regional transcoder loss
+
+Implemented. Complete regional recovery batches are validated before conversion into Phase 3.3C recovery bindings. Qualification covers two failed regional renditions plus one healthy remote rendition, deterministic mixed-output relay manifest creation, healthy-rendition preservation, canonical failure-history preservation, pending-recovery blocking, incomplete-batch rejection, healthy-node injection rejection, and failed-domain replacement rejection.
 
 The next Phase 3.4 increments are:
 
-1. prove relay continuity across regional transcoder loss while preserving healthy remote renditions;
-2. add live Anvil qualification for geographic reroute and recovery execution;
-3. define controlled rebalancing/failback rules so restored regions are not immediately trusted without health/reputation evidence.
+1. add live Anvil qualification for geographic reroute and recovery execution;
+2. define controlled rebalancing/failback rules so restored regions are not immediately trusted without health/reputation evidence.

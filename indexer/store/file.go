@@ -65,6 +65,14 @@ func (s *FileStore) persistLocked() error {
 	return os.Rename(tmp, s.path)
 }
 
+// Reset discards all rebuildable indexed state while preserving only the store format version.
+// Canonical chain state is never mutated; the next ingestion pass reconstructs the projection from RPC.
+func (s *FileStore) Reset() error {
+	s.mu.Lock(); defer s.mu.Unlock()
+	s.data = emptyFileState()
+	return s.persistLocked()
+}
+
 func (s *FileStore) Checkpoint() (model.ChainCheckpoint, bool, error) {
 	s.mu.Lock(); defer s.mu.Unlock()
 	if s.data.Checkpoint == nil { return model.ChainCheckpoint{}, false, nil }
@@ -110,16 +118,13 @@ func (s *FileStore) Receipt(txHash string) (model.ReceiptRecord, bool, error) {
 	return r, ok, nil
 }
 
-// LogsByBlock returns canonical-source logs for one indexed block in deterministic log order.
 func (s *FileStore) LogsByBlock(number uint64) ([]model.LogRecord, error) {
 	s.mu.Lock(); defer s.mu.Unlock()
 	out := make([]model.LogRecord, 0)
-	for _, lg := range s.data.Logs {
-		if lg.BlockNumber == number { out = append(out, lg) }
-	}
+	for _, lg := range s.data.Logs { if lg.BlockNumber == number { out = append(out, lg) } }
 	sort.Slice(out, func(i, j int) bool {
-		if out[i].TransactionIndex != out[j].TransactionIndex { return out[i].TransactionIndex < out[j].TransactionIndex }
-		return out[i].LogIndex < out[j].LogIndex
+		if out[i].TransactionIndex == out[j].TransactionIndex { return out[i].LogIndex < out[j].LogIndex }
+		return out[i].TransactionIndex < out[j].TransactionIndex
 	})
 	return out, nil
 }

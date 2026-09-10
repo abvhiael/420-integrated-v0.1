@@ -68,9 +68,19 @@
 - persistent-store-backed API adapter
 - qualification for pagination stability, extended endpoints, authority boundary, case-insensitive tx/receipt lookup and log ordering
 
+### Finality ingestion and promotion
+
+- canonical `safe` and `finalized` JSON-RPC tag reads
+- post-catch-up and post-reorg finality refresh
+- exact indexed-hash verification at safe and finalized boundaries
+- HEAD -> SAFE -> FINALIZED promotion in durable block records
+- safe/finalized checkpoint height and hash persistence
+- invalid finality ordering fails closed
+- finalized boundary disagreement returns finalized-history conflict without advancing checkpoint
+- qualification for normal promotion, invalid ordering and finalized hash conflict
+
 ## Remaining before GEN-11.1 completion
 
-- finalized/safe tag ingestion and promotion of finality metadata
 - scalable database-backed store option after file-store baseline qualification
 - full rebuild tooling
 - restart/reorg integration fixtures

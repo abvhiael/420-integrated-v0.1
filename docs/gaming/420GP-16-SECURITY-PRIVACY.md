@@ -34,11 +34,11 @@ Dedicated required workflow: `420 Gaming Security Hardening`.
 
 ## GP-16.2 — Capability and wallet/session authority isolation
 
-Status: IN PROGRESS.
+Status: COMPLETE — merged through PR #153.
 
 Production qualification lives in `contracts/test/GamingProtocol420AuthorityIsolation.t.sol` and uses the real `CapabilityRegistry420`, `GamingAuthorization420` and `SmartAccount420` authority stack.
 
-Required coverage:
+Coverage includes:
 
 - exact `COMPONENT_GAMING` component binding;
 - exact action ID binding for register/update/status operations;
@@ -54,7 +54,7 @@ Required coverage:
 
 GP-16.2 identified that `CapabilityRegistry420` previously had no safe production path to register fixed protocol component IDs such as `GamingIds420.COMPONENT_GAMING`; only deterministic SmartAccount component IDs could be registered. Without remediation, a production gaming grant for `COMPONENT_GAMING` could never be created.
 
-The remediation adds a backward-compatible protocol-component registrar model:
+The remediation added a backward-compatible protocol-component registrar model:
 
 - the registry deployer becomes the initial `componentRegistrar`;
 - only the registrar can register fixed protocol component IDs and their grant-authority address;
@@ -64,18 +64,25 @@ The remediation adds a backward-compatible protocol-component registrar model:
 - SmartAccount component registration remains deterministic and self-managed;
 - grant creation remains default-deny and still requires the exact current component authority.
 
-This avoids an unsafe first-claimer model while keeping existing `new CapabilityRegistry420()` deployments/tests source-compatible.
-
 ## GP-16.3 — Query/indexer privacy & canonical-RPC consistency
 
-Harden the GP-10 query layer:
+Status: IN PROGRESS.
+
+The GP-10 query service is being hardened so indexed reads are scoped and carry canonical provenance instead of being accepted as implicitly authoritative.
+
+Current GP-16.3 qualification requires:
 
 - no API can enumerate all activity for a wallet across games;
-- profile/entitlement/attestation lookups require explicit game/scope identifiers;
-- cached/indexed state carries canonical block/finality metadata;
-- high-risk reads can revalidate against canonical RPC;
-- stale, reorged or contradictory indexer state fails closed;
-- retention/logging does not persist raw guest saves, signer material or migration payload plaintext.
+- profile, entitlement, claim and attestation lookups require explicit game/scope identifiers;
+- adapter-returned indexed records include `blockNumber`, `blockHash` and `finalized` provenance;
+- missing or malformed provenance fails closed;
+- entitlement, claim and attestation reads are treated as high-risk and require finalized indexed provenance;
+- an optional canonical RPC revalidator can reject non-canonical, reorged or contradictory indexed state;
+- canonical block number/hash mismatches fail closed;
+- no raw guest saves, signer material or migration payload plaintext is added to query-layer state or logging.
+
+Implementation: `services/420-gaming-query/src/query-service.js`.
+Qualification: `services/420-gaming-query/test/query-service.test.js` via `420 Gaming Query`.
 
 ## GP-16.4 — Client/SDK hostile-state qualification
 

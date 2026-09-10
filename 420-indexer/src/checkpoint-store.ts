@@ -1,10 +1,11 @@
-import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, rename, unlink, writeFile } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import type { IndexCheckpoint420 } from './indexing.js';
 
 export interface CheckpointStore420 {
   load(): Promise<IndexCheckpoint420 | null>;
   save(checkpoint: IndexCheckpoint420): Promise<void>;
+  clear(): Promise<void>;
 }
 
 export class MemoryCheckpointStore420 implements CheckpointStore420 {
@@ -16,6 +17,10 @@ export class MemoryCheckpointStore420 implements CheckpointStore420 {
 
   async save(checkpoint: IndexCheckpoint420): Promise<void> {
     this.checkpoint = { ...checkpoint };
+  }
+
+  async clear(): Promise<void> {
+    this.checkpoint = null;
   }
 }
 
@@ -60,5 +65,13 @@ export class FileCheckpointStore420 implements CheckpointStore420 {
     const temporary = `${this.path}.tmp`;
     await writeFile(temporary, `${JSON.stringify(payload, null, 2)}\n`, 'utf8');
     await rename(temporary, this.path);
+  }
+
+  async clear(): Promise<void> {
+    try {
+      await unlink(this.path);
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+    }
   }
 }

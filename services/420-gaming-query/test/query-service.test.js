@@ -5,23 +5,29 @@ import { createGamingQuery420, ForbiddenGamingQueries420 } from "../src/query-se
 const gameId = "game:hc";
 const account = "0xabc";
 const profileId = "profile:1";
+const provenance = Object.freeze({ blockNumber: 420, blockHash: "0x420", finalized: true });
 
-function service(overrides = {}) {
+function service(overrides = {}, options = {}) {
   const adapters = {
-    games: { async getGame(id) { return { gameId: id, active: true }; } },
-    profiles: { async getProfileForGameAccount(input) { return { ...input, profileId }; } },
-    entitlements: { async getEntitlement(id) { return { entitlementId: id, gameId, profileId }; } },
-    claims: { async getClaim(id) { return { claimId: id, gameId, targetAccount: account }; } },
-    attestations: { async getAttestation(id) { return { attestationId: id, sourceGameId: gameId, profileId, subjectType: "cup", subjectId: "2026" }; } },
+    games: { async getGame(id) { return { gameId: id, active: true, provenance }; } },
+    profiles: { async getProfileForGameAccount(input) { return { ...input, profileId, provenance }; } },
+    entitlements: { async getEntitlement(id) { return { entitlementId: id, gameId, profileId, provenance }; } },
+    claims: { async getClaim(id) { return { claimId: id, gameId, targetAccount: account, provenance }; } },
+    attestations: { async getAttestation(id) { return { attestationId: id, sourceGameId: gameId, profileId, subjectType: "cup", subjectId: "2026", provenance }; } },
     ...overrides
   };
-  return createGamingQuery420({ adapters });
+  return createGamingQuery420({ adapters, ...options });
 }
 
 test("resolves only game-scoped profile lookup", async () => {
   const result = await service().profileForGameAccount({ gameId, account });
   assert.equal(result.profileId, profileId);
   assert.equal(result.gameId, gameId);
+});
+
+test("profile lookup fails closed on adapter scope mismatch", async () => {
+  const query = service({ profiles: { async getProfileForGameAccount() { return { gameId: "game:other", account, profileId, provenance }; } } });
+  assert.equal(await query.profileForGameAccount({ gameId, account }), null);
 });
 
 test("entitlement lookup fails closed on wrong profile", async () => {
@@ -41,7 +47,42 @@ test("attestation requires exact source/profile/subject scope", async () => {
   assert.equal(wrong, null);
 });
 
+test("missing provenance fails closed", async () => {
+  const query = service({ entitlements: { async getEntitlement(id) { return { entitlementId: id, gameId, profileId }; } } });
+  assert.equal(await query.entitlement({ entitlementId: "e1", gameId, profileId }), null);
+});
+
+test("high-risk indexed reads require finalized provenance", async () => {
+  const pending = { blockNumber: 421, blockHash: "0x421", finalized: false };
+  const query = service({ claims: { async getClaim(id) { return { claimId: id, gameId, targetAccount: account, provenance: pending }; } } });
+  assert.equal(await query.claim({ claimId: "c1", gameId, targetAccount: account }), null);
+});
+
+test("canonical revalidator rejects reorged block hash", async () => {
+  const query = service({}, {
+    canonicalRevalidator: async () => ({ canonical: true, blockNumber: 420, blockHash: "0xdead", finalized: true })
+  });
+  assert.equal(await query.entitlement({ entitlementId: "e1", gameId, profileId }), null);
+});
+
+test("canonical revalidator rejects non-canonical state", async () => {
+  const query = service({}, {
+    canonicalRevalidator: async () => ({ canonical: false, blockNumber: 420, blockHash: "0x420", finalized: true })
+  });
+  assert.equal(await query.attestation({ attestationId: "a1", sourceGameId: gameId, profileId, subjectType: "cup", subjectId: "2026" }), null);
+});
+
+test("canonical finalized high-risk read is accepted", async () => {
+  const query = service({}, {
+    canonicalRevalidator: async () => ({ canonical: true, blockNumber: 420, blockHash: "0x420", finalized: true })
+  });
+  const value = await query.entitlement({ entitlementId: "e1", gameId, profileId });
+  assert.equal(value.entitlementId, "e1");
+});
+
 test("forbidden query catalogue excludes global player enumeration", () => {
   assert.ok(ForbiddenGamingQueries420.includes("wallet-wide-game-history"));
   assert.ok(ForbiddenGamingQueries420.includes("cross-game-player-activity-feed"));
+  assert.equal("walletHistory" in service(), false);
+  assert.equal("allEntitlementsForWallet" in service(), false);
 });

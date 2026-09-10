@@ -2,6 +2,8 @@ package storage
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -52,9 +54,14 @@ func (f *FileStore) Put(ctx context.Context, rec ShardRecord, src io.Reader) err
 	if err != nil { return err }
 	tmpName := tmp.Name()
 	cleanup := func() { _ = tmp.Close(); _ = os.Remove(tmpName) }
-	written, err := io.Copy(tmp, src)
+
+	h := sha256.New()
+	limited := io.LimitReader(contextReader{ctx: ctx, r: src}, int64(rec.SizeBytes)+1)
+	written, err := io.Copy(io.MultiWriter(tmp, h), limited)
 	if err != nil { cleanup(); return err }
+	if err := ctx.Err(); err != nil { cleanup(); return err }
 	if uint64(written) != rec.SizeBytes { cleanup(); return ErrInvalidShard }
+	if hex.EncodeToString(h.Sum(nil)) != rec.ShardRoot { cleanup(); return ErrCommitmentMismatch }
 	if err := tmp.Sync(); err != nil { cleanup(); return err }
 	if err := tmp.Close(); err != nil { _ = os.Remove(tmpName); return err }
 	if err := os.Rename(tmpName, final); err != nil { _ = os.Remove(tmpName); return err }

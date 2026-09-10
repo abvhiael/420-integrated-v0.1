@@ -15,9 +15,9 @@ GP-16 preserves the access model established in GP-1 through GP-15:
 
 ## GP-16.1 — Core contract adversarial qualification
 
-Status: IN PROGRESS
+Status: COMPLETE — merged through PR #150.
 
-Qualification lives in `contracts/test/GamingProtocol420Hardening.t.sol` and must prove:
+Qualification lives in `contracts/test/GamingProtocol420Hardening.t.sol` and proves:
 
 1. unauthorized registry updates and status changes fail closed;
 2. one canonical profile per wallet/game cannot be replaced;
@@ -34,16 +34,37 @@ Dedicated required workflow: `420 Gaming Security Hardening`.
 
 ## GP-16.2 — Capability and wallet/session authority isolation
 
-Verify `GamingAuthorization420` against the production `CapabilityRegistry420` semantics rather than a permissive mock. Required coverage:
+Status: IN PROGRESS.
+
+Production qualification lives in `contracts/test/GamingProtocol420AuthorityIsolation.t.sol` and uses the real `CapabilityRegistry420`, `GamingAuthorization420` and `SmartAccount420` authority stack.
+
+Required coverage:
 
 - exact `COMPONENT_GAMING` component binding;
 - exact action ID binding for register/update/status operations;
 - exact per-game scope binding;
-- wrong game scope denial;
-- wrong action denial;
+- wrong component, wrong game scope and wrong action denial;
 - expired/revoked capability denial;
-- SmartAccount420/session-key authority can authorize only the intended scoped gaming action;
+- SmartAccount420 session execution requires both the account's selector-scoped session grant and a separate exact gaming capability for the SmartAccount principal;
+- session principals do not inherit or manufacture gaming protocol authority;
+- SmartAccount component IDs remain self-managed and cannot be overwritten by the protocol-component registrar;
 - no parallel gaming private-key/session-authority subsystem is introduced.
+
+### GP-16.2 production authority remediation
+
+GP-16.2 identified that `CapabilityRegistry420` previously had no safe production path to register fixed protocol component IDs such as `GamingIds420.COMPONENT_GAMING`; only deterministic SmartAccount component IDs could be registered. Without remediation, a production gaming grant for `COMPONENT_GAMING` could never be created.
+
+The remediation adds a backward-compatible protocol-component registrar model:
+
+- the registry deployer becomes the initial `componentRegistrar`;
+- only the registrar can register fixed protocol component IDs and their grant-authority address;
+- protocol-managed component authority can be rotated only by the registrar;
+- registrar authority itself can be transferred;
+- a registrar cannot claim an already-registered SmartAccount component ID;
+- SmartAccount component registration remains deterministic and self-managed;
+- grant creation remains default-deny and still requires the exact current component authority.
+
+This avoids an unsafe first-claimer model while keeping existing `new CapabilityRegistry420()` deployments/tests source-compatible.
 
 ## GP-16.3 — Query/indexer privacy & canonical-RPC consistency
 

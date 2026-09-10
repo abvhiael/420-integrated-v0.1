@@ -1,0 +1,11 @@
+create index if not exists idx_blocks_desc on idx_blocks(chain_id, block_number desc);
+create index if not exists idx_transactions_chain_position on idx_transactions(chain_id, block_number desc, tx_index desc);
+create index if not exists idx_transactions_from_position on idx_transactions(chain_id, from_address, block_number desc, tx_index desc);
+create index if not exists idx_transactions_to_position on idx_transactions(chain_id, to_address, block_number desc, tx_index desc);
+create index if not exists idx_logs_chain_position on idx_logs(chain_id, block_number desc, tx_index desc, log_index desc);
+create index if not exists idx_logs_address_position on idx_logs(chain_id, address, block_number desc, tx_index desc, log_index desc);
+create index if not exists idx_asset_transfers_asset_position on idx_asset_transfers(chain_id, asset_key, block_number desc, tx_hash desc, log_index desc);
+create index if not exists idx_asset_transfers_from_position on idx_asset_transfers(chain_id, from_address, block_number desc);
+create index if not exists idx_asset_transfers_to_position on idx_asset_transfers(chain_id, to_address, block_number desc);
+create index if not exists idx_protocol_events_chain_position on idx_protocol_events(chain_id, block_number desc, tx_index desc, log_index desc);
+create index if not exists idx_protocol_events_protocol_position on idx_protocol_events(chain_id, protocol, block_number desc, tx_index desc, log_index desc);

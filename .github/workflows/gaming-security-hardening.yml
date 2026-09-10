@@ -4,7 +4,9 @@ on:
   pull_request:
     paths:
       - "contracts/src/gaming/**"
-      - "contracts/test/GamingProtocol420Hardening.t.sol"
+      - "contracts/src/system/CapabilityRegistry420.sol"
+      - "contracts/src/interfaces/genesis/ICapabilityRegistryExtended420.sol"
+      - "contracts/test/GamingProtocol420*.t.sol"
       - ".github/workflows/gaming-security-hardening.yml"
       - "docs/gaming/420GP-16-SECURITY-PRIVACY.md"
 
@@ -48,10 +50,12 @@ jobs:
             sleep $((attempt * 15))
           done
 
-      - name: Build GP-16 gaming hardening target
+      - name: Build GP-16 gaming hardening targets
         working-directory: contracts
-        run: forge build test/GamingProtocol420Hardening.t.sol --force
+        run: |
+          forge build test/GamingProtocol420Hardening.t.sol --force
+          forge build test/GamingProtocol420AuthorityIsolation.t.sol --force
 
       - name: Run GP-16 adversarial gaming suite
         working-directory: contracts
-        run: forge test --match-path 'test/GamingProtocol420Hardening.t.sol' -vvv
+        run: forge test --match-path 'test/GamingProtocol420*.t.sol' -vvv

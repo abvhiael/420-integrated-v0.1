@@ -13,11 +13,23 @@ interface ICapabilityRegistryExtended420 is ICapabilityRegistry420 {
     }
 
     event ComponentAuthorityRegistered(bytes32 indexed componentId, address indexed authority);
+    event ProtocolComponentAuthorityUpdated(bytes32 indexed componentId, address indexed previousAuthority, address indexed newAuthority);
+    event ComponentRegistrarTransferred(address indexed previousRegistrar, address indexed newRegistrar);
     event CapabilityConsumed(bytes32 indexed grantId, address indexed principal, uint256 amount, uint256 periodUsed);
 
     function componentAuthority(bytes32 componentId) external view returns (address);
 
+    function componentRegistrar() external view returns (address);
+
+    function protocolComponentManaged(bytes32 componentId) external view returns (bool);
+
     function registerSmartAccount(address account) external returns (bytes32 componentId);
+
+    function registerProtocolComponent(bytes32 componentId, address authority) external;
+
+    function updateProtocolComponentAuthority(bytes32 componentId, address newAuthority) external;
+
+    function transferComponentRegistrar(address newRegistrar) external;
 
     function createGrant(
         bytes32 grantId,

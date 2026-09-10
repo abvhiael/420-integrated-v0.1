@@ -51,6 +51,7 @@ export interface ChainSource420 {
   readonly sourceId: string;
   chainId(): Promise<bigint>;
   blockNumber(): Promise<bigint>;
+  finalizedBlockNumber?(): Promise<bigint>;
   getBlockByNumber(blockNumber: bigint): Promise<IndexerBlock | null>;
   getBlockByHash(blockHash: Hex): Promise<IndexerBlock | null>;
   getTransactionByHash(transactionHash: Hex): Promise<IndexerTransaction | null>;

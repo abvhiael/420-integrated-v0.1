@@ -101,7 +101,8 @@ func TestServiceProofSchedulerAdvancesOnlyAfterSubmission(t *testing.T) {
 	ctx := context.Background()
 	now := time.Now().UTC()
 	data := []byte("proof-stream")
-	a := assignmentFor(data,"proof-stream-1","node-1")	a.AgreementID = "0xaaa"
+	a := assignmentFor(data,"proof-stream-1","node-1")
+	a.AgreementID = "0xaaa"
 	a.StartTime = now.Add(-time.Hour)
 	a.EndTime = now.Add(time.Hour)
 	reader := fakeCanonicalReader{

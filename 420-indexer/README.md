@@ -22,31 +22,31 @@ Durable SQL projections for blocks, transactions, receipts, addresses/contracts,
 
 Native `$420`, ERC-20, ERC-721, and ERC-1155 transfer decoding; normalized asset identities; durable asset/transfer/balance projections; metadata surfaces; mint/burn semantics; and reorg-safe balance rebuilding.
 
-## IDX-5 — genesis protocol projections
+## IDX-5 — genesis protocol projections — functionally complete
 
-IDX-5 provides manifest-driven decoding and rebuildable state views for genesis-resident protocols.
+IDX-5 provides manifest-driven decoding and rebuildable state views for genesis-resident protocols. It includes deterministic ABI-derived descriptors, fixed/static ABI decoding, canonical object identities, protocol event journals, latest-object state views, protocol-specific lifecycle reducers, and reorg-bounded replay semantics.
 
-Implemented across IDX-5 so far:
+The remaining IDX-5 closeout is deployment-time only: generate and check the concrete descriptor manifest once compiled genesis artifacts land, then run the artifact-backed qualification suite.
 
-- descriptor-driven event decoding keyed by `topic0`;
-- deterministic indexed/data-word decoding for address, bool, fixed bytes, and unsigned integer widths used by current genesis contracts;
-- collision detection for conflicting topic descriptors;
-- deterministic descriptor generation from exported Foundry ABI artifacts;
-- descriptor binding to frozen genesis predeploy addresses;
-- fail-closed handling for missing required artifacts, anonymous events, contract-name mismatches, and unsupported dynamic ABI fields;
-- normalized protocol/event identity and canonical chain ordering metadata;
-- durable `idx_protocol_events` SQL projection with protocol/event/contract indexes;
-- protocol-scoped event query views;
-- canonical object-key extraction using common 420 event identifiers such as objectId, componentId, labelHash, profileId, validatorId, stakeId, proposalId, paymentId, routeId, requestId, rightId, licenseId, and assetId;
-- latest-object state views ordered by block number, transaction index, and log index;
-- lifecycle-state extraction from `stateAfter`, `status`, `state`, or `active` where present;
-- protocol-specific lifecycle reducers for Names, Stake, Governance, Pay, Bridge, Rights, and Randomness;
-- canonical-order reduction with terminal-state protection so completed/cancelled/revoked/expired/failed objects cannot be accidentally resurrected by later stale or duplicate lifecycle events;
-- protocol state views for Names, Identity, Stake, Governance, Pay, Swap/Exchange, Bridge, Rights, and Randomness;
-- bounded rollback of protocol events during reorg recovery;
-- regression coverage using the actual `Names420.NameRegistered(bytes32,address,uint64,uint8)` event shape and lifecycle reducer semantics.
+## IDX-6 — query/database layer
 
-The decoder intentionally consumes deployment/ABI-derived event descriptors rather than hard-coding protocol state assumptions. Events, state views, and lifecycle snapshots remain non-authoritative projections and can always be rebuilt from canonical chain history plus the pinned deployment/ABI manifest.
+The first IDX-6 increment establishes stable query contracts and database indexes for consumers of 420Indexer.
+
+Implemented in this increment:
+
+- opaque base64url cursors for block, transaction, and block/transaction/log positions;
+- bounded page sizes with a default of 50 and hard maximum of 200;
+- keyset pagination rather than OFFSET pagination;
+- deterministic ascending or descending block feeds;
+- deterministic transaction feeds ordered by block number and transaction index;
+- address-filtered transaction history;
+- deterministic log feeds ordered by block, transaction, and log index;
+- protocol-event history filtered by protocol and canonical object key;
+- asset-transfer history filtered by asset and/or holder address;
+- fetch-one-extra-row semantics for stable `nextCursor` construction at the service/API layer;
+- covering/query-oriented indexes for the block, transaction, log, asset-transfer, and protocol-event paths used by Explorer, Wallet, Analytics, Search, Notifications, and Developer APIs.
+
+Query contracts are chain-scoped and operate only on rebuildable index projections. Canonical protocol state remains on-chain.
 
 ## Authority boundary
 
@@ -58,4 +58,4 @@ The decoder intentionally consumes deployment/ABI-derived event descriptors rath
 
 ## Next phase
 
-IDX-5 is now functionally complete at the generic projection/reducer layer. The remaining deployment-time closeout is to generate and check the concrete descriptor manifest once compiled genesis artifacts land, then run the full artifact-backed qualification suite. The next development phase is IDX-6: the indexed query/database layer, pagination/index strategy, and stable query contracts consumed by Explorer, Search, Analytics, Wallet, Notifications, and Developer APIs.
+Continue IDX-6 with an executable database repository/service layer that turns the SQL query contracts into typed pages, stable cursor emission, direct hash/address lookup helpers, and search-oriented query primitives. Then IDX-7 exposes the public/index-consumer API surface for Explorer, Search, Analytics, Wallet, Notifications, and the Developer Hub.

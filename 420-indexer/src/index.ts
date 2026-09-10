@@ -11,3 +11,4 @@ export * from './protocol-decoder.js';
 export * from './protocol-projections.js';
 export * from './abi-manifest.js';
 export * from './lifecycle-reducer.js';
+export * from './query-layer.js';

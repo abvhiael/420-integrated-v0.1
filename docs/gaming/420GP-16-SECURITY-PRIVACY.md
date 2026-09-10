@@ -17,18 +17,7 @@ GP-16 preserves the access model established in GP-1 through GP-15:
 
 Status: COMPLETE — merged through PR #150.
 
-Qualification lives in `contracts/test/GamingProtocol420Hardening.t.sol` and proves:
-
-1. unauthorized registry updates and status changes fail closed;
-2. one canonical profile per wallet/game cannot be replaced;
-3. non-operators cannot issue or revoke entitlements;
-4. entitlement `validFrom` / `validUntil` windows fail closed;
-5. migration claims require the target account and canonical profile;
-6. consumed claims cannot replay;
-7. cancelled and expired claims cannot be consumed;
-8. non-operators cannot issue or revoke cross-game attestations;
-9. expired/revoked attestations fail closed;
-10. protocol contracts expose no wallet-wide profile/claim/attestation enumeration surface.
+Qualification lives in `contracts/test/GamingProtocol420Hardening.t.sol` and proves unauthorized registry mutation denial, one canonical profile per wallet/game, operator isolation, entitlement time windows, migration replay/cancel/expiry denial, cross-game attestation isolation, and absence of wallet-wide enumeration surfaces.
 
 Dedicated required workflow: `420 Gaming Security Hardening`.
 
@@ -36,79 +25,45 @@ Dedicated required workflow: `420 Gaming Security Hardening`.
 
 Status: COMPLETE — merged through PR #153.
 
-Production qualification lives in `contracts/test/GamingProtocol420AuthorityIsolation.t.sol` and uses the real `CapabilityRegistry420`, `GamingAuthorization420` and `SmartAccount420` authority stack.
-
-Coverage includes:
-
-- exact `COMPONENT_GAMING` component binding;
-- exact action ID binding for register/update/status operations;
-- exact per-game scope binding;
-- wrong component, wrong game scope and wrong action denial;
-- expired/revoked capability denial;
-- SmartAccount420 session execution requires both the account's selector-scoped session grant and a separate exact gaming capability for the SmartAccount principal;
-- session principals do not inherit or manufacture gaming protocol authority;
-- SmartAccount component IDs remain self-managed and cannot be overwritten by the protocol-component registrar;
-- no parallel gaming private-key/session-authority subsystem is introduced.
-
-### GP-16.2 production authority remediation
-
-GP-16.2 identified that `CapabilityRegistry420` previously had no safe production path to register fixed protocol component IDs such as `GamingIds420.COMPONENT_GAMING`; only deterministic SmartAccount component IDs could be registered. Without remediation, a production gaming grant for `COMPONENT_GAMING` could never be created.
-
-The remediation added a backward-compatible protocol-component registrar model:
-
-- the registry deployer becomes the initial `componentRegistrar`;
-- only the registrar can register fixed protocol component IDs and their grant-authority address;
-- protocol-managed component authority can be rotated only by the registrar;
-- registrar authority itself can be transferred;
-- a registrar cannot claim an already-registered SmartAccount component ID;
-- SmartAccount component registration remains deterministic and self-managed;
-- grant creation remains default-deny and still requires the exact current component authority.
+Production qualification uses the real `CapabilityRegistry420`, `GamingAuthorization420` and `SmartAccount420` authority stack and proves exact component/action/game scope binding, expiry/revocation denial, two-layer SmartAccount/session authority, and registrar-safe fixed protocol component registration.
 
 ## GP-16.3 — Query/indexer privacy & canonical-RPC consistency
 
 Status: COMPLETE — merged through PR #154.
 
-The GP-10 query service now treats indexed reads as scoped, provenance-bearing data rather than implicitly canonical state.
-
-Coverage includes:
-
-- no API can enumerate all activity for a wallet across games;
-- profile, entitlement, claim and attestation lookups require explicit game/scope identifiers;
-- adapter-returned indexed records include `blockNumber`, `blockHash` and `finalized` provenance;
-- missing or malformed provenance fails closed;
-- entitlement, claim and attestation reads are treated as high-risk and require finalized indexed provenance;
-- optional canonical RPC revalidation rejects non-canonical, reorged or contradictory indexed state;
-- canonical block number/hash mismatches fail closed;
-- no raw guest saves, signer material or migration payload plaintext is added to query-layer state or logging.
+The GP-10 query service treats indexed reads as scoped, provenance-bearing data. High-risk reads require finalized provenance and can be revalidated against canonical RPC; stale, reorged, malformed or contradictory data fails closed. Wallet-wide player activity enumeration remains forbidden.
 
 Implementation: `services/420-gaming-query/src/query-service.js`.
 Qualification: `services/420-gaming-query/test/query-service.test.js` via `420 Gaming Query`.
 
 ## GP-16.4 — Client/SDK hostile-state qualification
 
-Status: IN PROGRESS.
+Status: IN PROGRESS — first slice merged through PR #155; second slice active.
 
 Shared qualification lives in `packages/420-gaming-client-hardening` and exercises the real access integrations for High Country, The Green Road, Budtender and Smoke & Chrome.
 
-Current GP-16.4 coverage requires:
+Coverage now includes:
 
 - unknown feature/access requirements fail closed instead of guessing;
 - guest core gameplay remains available without registration or wallet state;
 - disconnected wallet sessions deny only optional wallet-gated features and never routine/core play;
 - revoked/unlinked wallet state downgrades to an explicit wallet-link boundary;
-- expired/revoked entitlement adapter results remain `null` and are not converted into access;
-- each game's SDK client is pinned to its canonical `gameId` for profile and entitlement adapter calls;
-- no game client can inject a different game namespace through public SDK method arguments;
+- expired/revoked entitlement results remain denied/null;
+- each game's SDK client is pinned to its canonical `gameId` for adapter calls;
+- adapter responses explicitly scoped to a different `gameId` are rejected at the shared SDK boundary;
+- entitlement reads are not cached by the SDK across revocation/expiry changes;
+- migration adapter failures are never automatically retried, preventing hidden duplicate migration submissions;
+- hostile adapter/RPC failures propagate without converting an optional feature into access;
+- cross-game poisoned results cannot grant another game's optional feature or progression;
 - wallet-gated functionality remains marked optional and cannot become core progression.
 
 Dedicated workflow: `420 Gaming Client Hardening`.
 
-Remaining GP-16.4 work after this slice:
+Remaining GP-16.4 closeout work:
 
-- migration replay/error recovery qualification without duplicate ownership;
-- cached entitlement invalidation after a previously valid result becomes revoked/expired;
-- cross-game response poisoning tests proving no core statistical/economic advantage;
-- hostile adapter/RPC error qualification across all four clients.
+- qualify migration consumed/replayed/error recovery semantics against the player/profile service response model;
+- verify any downstream client cache implementation invalidates entitlement state on revocation/expiry rather than relying solely on the cache-free shared SDK;
+- reconcile and merge the complete GP-16.4 head after all dedicated workflows are green.
 
 ## GP-16.5 — Finality, reorg and RPC failure handling
 

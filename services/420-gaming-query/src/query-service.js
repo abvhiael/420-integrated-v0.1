@@ -1,3 +1,5 @@
+import { evaluateFinalityState420 } from "./finality-state.js";
+
 const REQUIRED = ["games", "profiles", "entitlements", "claims", "attestations"];
 
 function requireAdapter(adapters, name) {
@@ -23,34 +25,58 @@ function normalizeProvenance(value) {
   return { blockNumber, blockHash, finalized };
 }
 
-async function validateIndexedValue({ value, revalidator, risk = "standard" }) {
+async function validateIndexedValue({ value, revalidator, finalityResolver, risk = "standard" }) {
   if (!value) return null;
 
   const provenance = normalizeProvenance(value);
   if (!provenance) return null;
 
   if (risk === "high" && !provenance.finalized) return null;
-  if (!revalidator) return value;
 
-  const verdict = await revalidator({ provenance, value, risk });
-  if (!verdict || verdict.canonical !== true) return null;
-  if (verdict.blockHash && verdict.blockHash !== provenance.blockHash) return null;
-  if (Number.isInteger(verdict.blockNumber) && verdict.blockNumber !== provenance.blockNumber) return null;
-  if (risk === "high" && verdict.finalized !== true) return null;
+  if (revalidator) {
+    let verdict;
+    try {
+      verdict = await revalidator({ provenance, value, risk });
+    } catch {
+      return null;
+    }
+    if (!verdict || verdict.canonical !== true) return null;
+    if (verdict.blockHash && verdict.blockHash !== provenance.blockHash) return null;
+    if (Number.isInteger(verdict.blockNumber) && verdict.blockNumber !== provenance.blockNumber) return null;
+    if (risk === "high" && verdict.finalized !== true) return null;
+  }
+
+  if (risk === "high" && finalityResolver) {
+    let context;
+    try {
+      context = await finalityResolver({ provenance, value, risk });
+    } catch {
+      return null;
+    }
+    const finality = evaluateFinalityState420({
+      ...context,
+      receiptBlockNumber: provenance.blockNumber,
+      receiptBlockHash: provenance.blockHash
+    });
+    if (finality.canonical !== true || finality.finalized !== true) return null;
+  }
 
   return value;
 }
 
-export function createGamingQuery420({ adapters, canonicalRevalidator } = {}) {
+export function createGamingQuery420({ adapters, canonicalRevalidator, finalityResolver } = {}) {
   for (const name of REQUIRED) requireAdapter(adapters, name);
   if (canonicalRevalidator !== undefined && typeof canonicalRevalidator !== "function") {
     throw new TypeError("canonicalRevalidator must be a function");
+  }
+  if (finalityResolver !== undefined && typeof finalityResolver !== "function") {
+    throw new TypeError("finalityResolver must be a function");
   }
 
   return Object.freeze({
     async game(gameId) {
       const value = await requireAdapter(adapters, "games").getGame(requireId("gameId", gameId));
-      return validateIndexedValue({ value, revalidator: canonicalRevalidator, risk: "standard" });
+      return validateIndexedValue({ value, revalidator: canonicalRevalidator, finalityResolver, risk: "standard" });
     },
 
     async profileForGameAccount({ gameId, account }) {
@@ -58,7 +84,7 @@ export function createGamingQuery420({ adapters, canonicalRevalidator } = {}) {
       requireId("account", account);
       const value = await requireAdapter(adapters, "profiles").getProfileForGameAccount({ gameId, account });
       if (!value || value.gameId !== gameId || value.account !== account) return null;
-      return validateIndexedValue({ value, revalidator: canonicalRevalidator, risk: "standard" });
+      return validateIndexedValue({ value, revalidator: canonicalRevalidator, finalityResolver, risk: "standard" });
     },
 
     async entitlement({ entitlementId, gameId, profileId }) {
@@ -67,7 +93,7 @@ export function createGamingQuery420({ adapters, canonicalRevalidator } = {}) {
       requireId("profileId", profileId);
       const value = await requireAdapter(adapters, "entitlements").getEntitlement(entitlementId);
       if (!value || value.gameId !== gameId || value.profileId !== profileId) return null;
-      return validateIndexedValue({ value, revalidator: canonicalRevalidator, risk: "high" });
+      return validateIndexedValue({ value, revalidator: canonicalRevalidator, finalityResolver, risk: "high" });
     },
 
     async claim({ claimId, gameId, targetAccount }) {
@@ -76,7 +102,7 @@ export function createGamingQuery420({ adapters, canonicalRevalidator } = {}) {
       requireId("targetAccount", targetAccount);
       const value = await requireAdapter(adapters, "claims").getClaim(claimId);
       if (!value || value.gameId !== gameId || value.targetAccount !== targetAccount) return null;
-      return validateIndexedValue({ value, revalidator: canonicalRevalidator, risk: "high" });
+      return validateIndexedValue({ value, revalidator: canonicalRevalidator, finalityResolver, risk: "high" });
     },
 
     async attestation({ attestationId, sourceGameId, profileId, subjectType, subjectId }) {
@@ -89,7 +115,7 @@ export function createGamingQuery420({ adapters, canonicalRevalidator } = {}) {
       if (value.profileId !== profileId) return null;
       if (value.subjectType !== subjectType) return null;
       if (value.subjectId !== subjectId) return null;
-      return validateIndexedValue({ value, revalidator: canonicalRevalidator, risk: "high" });
+      return validateIndexedValue({ value, revalidator: canonicalRevalidator, finalityResolver, risk: "high" });
     }
   });
 }

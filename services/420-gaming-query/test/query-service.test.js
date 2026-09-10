@@ -19,6 +19,20 @@ function service(overrides = {}, options = {}) {
   return createGamingQuery420({ adapters, ...options });
 }
 
+function finalizedContext(overrides = {}) {
+  return {
+    expectedChainId: 420,
+    rpcChainId: 420,
+    txStatus: "success",
+    canonicalBlockHash: "0x420",
+    canonicalHeadNumber: 423,
+    finalizedHeadNumber: 423,
+    indexerHeadNumber: 423,
+    confirmationsRequired: 3,
+    ...overrides
+  };
+}
+
 test("resolves only game-scoped profile lookup", async () => {
   const result = await service().profileForGameAccount({ gameId, account });
   assert.equal(result.profileId, profileId);
@@ -78,6 +92,51 @@ test("canonical finalized high-risk read is accepted", async () => {
   });
   const value = await query.entitlement({ entitlementId: "e1", gameId, profileId });
   assert.equal(value.entitlementId, "e1");
+});
+
+test("high-risk entitlement requires live finality when finalityResolver is configured", async () => {
+  const query = service({}, { finalityResolver: async () => finalizedContext() });
+  const value = await query.entitlement({ entitlementId: "e1", gameId, profileId });
+  assert.equal(value.entitlementId, "e1");
+});
+
+test("reorged entitlement is removed from the consumable query path", async () => {
+  const query = service({}, { finalityResolver: async () => finalizedContext({ canonicalBlockHash: "0xdead" }) });
+  assert.equal(await query.entitlement({ entitlementId: "e1", gameId, profileId }), null);
+});
+
+test("RPC failure and chain mismatch fail closed for claims", async () => {
+  const rpcDown = service({}, { finalityResolver: async () => finalizedContext({ rpcChainId: undefined }) });
+  assert.equal(await rpcDown.claim({ claimId: "c1", gameId, targetAccount: account }), null);
+
+  const wrongChain = service({}, { finalityResolver: async () => finalizedContext({ rpcChainId: 1 }) });
+  assert.equal(await wrongChain.claim({ claimId: "c1", gameId, targetAccount: account }), null);
+});
+
+test("indexer ahead or behind RPC suppresses attestation consumption", async () => {
+  const behind = service({}, { finalityResolver: async () => finalizedContext({ indexerHeadNumber: 422 }) });
+  assert.equal(await behind.attestation({ attestationId: "a1", sourceGameId: gameId, profileId, subjectType: "cup", subjectId: "2026" }), null);
+
+  const ahead = service({}, { finalityResolver: async () => finalizedContext({ indexerHeadNumber: 424 }) });
+  assert.equal(await ahead.attestation({ attestationId: "a1", sourceGameId: gameId, profileId, subjectType: "cup", subjectId: "2026" }), null);
+});
+
+test("insufficient confirmations keep high-risk reads pending", async () => {
+  const query = service({}, { finalityResolver: async () => finalizedContext({ finalizedHeadNumber: 420, confirmationsRequired: 3 }) });
+  assert.equal(await query.entitlement({ entitlementId: "e1", gameId, profileId }), null);
+});
+
+test("finality resolver exceptions fail closed instead of leaking optimistic state", async () => {
+  const query = service({}, { finalityResolver: async () => { throw new Error("rpc-timeout"); } });
+  assert.equal(await query.claim({ claimId: "c1", gameId, targetAccount: account }), null);
+});
+
+test("standard-risk game/profile reads remain available without live finality hook", async () => {
+  let calls = 0;
+  const query = service({}, { finalityResolver: async () => { calls += 1; throw new Error("should-not-run"); } });
+  assert.equal((await query.game(gameId)).gameId, gameId);
+  assert.equal((await query.profileForGameAccount({ gameId, account })).profileId, profileId);
+  assert.equal(calls, 0);
 });
 
 test("forbidden query catalogue excludes global player enumeration", () => {

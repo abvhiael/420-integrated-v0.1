@@ -27,33 +27,37 @@ Status: COMPLETE — merged through PR #154.
 
 ## GP-16.4 — Client/SDK hostile-state qualification
 
-Status: CLOSEOUT IN QUALIFICATION — PR #155 and PR #156 merged; migration closeout active.
+Status: COMPLETE — merged through PR #157.
 
 Shared qualification exercises the real access integrations for High Country, The Green Road, Budtender and Smoke & Chrome.
 
-Coverage includes:
-
-- unknown feature/access requirements fail closed;
-- guest core gameplay remains wallet-free;
-- disconnected or revoked wallet state denies only optional web3 features;
-- canonical game IDs are enforced on both SDK requests and explicitly scoped adapter responses;
-- cross-game response poisoning fails closed;
-- entitlement reads are not cached by the shared SDK and therefore re-read current adapter state after revocation/expiry;
-- hostile adapter/RPC errors propagate without becoming access;
-- migration submission is never silently auto-retried by the SDK;
-- player/profile migration preparation is idempotent for the same account + game + guest-state commitment + migration-payload hash;
-- replay recovery returns the canonical existing migration instead of creating duplicate ownership paths;
-- claim issuance is idempotent only for the same canonical claim ID and rejects alternate-claim replay;
-- consumed migrations are one-way and duplicate acknowledgement of the same claim is safely recoverable;
-- no downstream entitlement cache implementation currently exists in the four reference clients; future caches must preserve revocation/expiry invalidation semantics.
-
-Dedicated workflows include `420 Gaming Client Hardening`, the shared Gaming SDK workflow, player/profile service qualification, cross-game qualification, reference-game integrations, Gaming Security Hardening and Integrated Qualification.
-
-GP-16.4 is complete once this migration closeout head is reconciled and all triggered workflows are green.
+Coverage includes unknown feature/access failure, wallet-free core play, safe downgrade of disconnected/revoked wallet state, canonical game namespace enforcement, cross-game response poisoning denial, cache-free entitlement reads, hostile adapter/RPC failure propagation, idempotent migration preparation/recovery, replay-safe claim issuance/consumption, and no downstream entitlement cache in the four reference clients.
 
 ## GP-16.5 — Finality, reorg and RPC failure handling
 
-Qualify transaction submission/finality, optimistic rollback, short reorgs, RPC failure, chain ID mismatch, indexer/RPC disagreement, duplicate event delivery and finality transitions. No ownership/reward/cross-game state is canonical solely from optimistic client state.
+Status: CLOSEOUT IN QUALIFICATION — PR #158.
+
+The shared finality model lives beside the production gaming query layer and is wired into the consumable high-risk read path.
+
+Coverage includes:
+
+- submitted transactions remain pending until canonical receipt/finality exists;
+- reverted optimistic state fails closed;
+- short reorgs reject a prior receipt block hash;
+- RPC unavailability/timeouts fail closed;
+- chain ID mismatch fails closed;
+- indexer ahead/behind canonical RPC suppresses high-risk consumption;
+- duplicate event delivery is classified non-canonical for re-application;
+- confirmation thresholds transition state from pending to finalized;
+- entitlement, claim and attestation reads can require live finality through `finalityResolver`;
+- finality resolver exceptions return `null` instead of leaking optimistic state;
+- standard-risk game/profile reads remain independent from the live high-risk finality hook;
+- no ownership, reward, claim, entitlement or cross-game state becomes canonical solely from optimistic client/indexer state.
+
+Implementation: `services/420-gaming-query/src/finality-state.js` and `services/420-gaming-query/src/query-service.js`.
+Qualification: `services/420-gaming-query/test/finality-state.test.js` and `services/420-gaming-query/test/query-service.test.js` through `420 Gaming Query` and Integrated Qualification.
+
+GP-16.5 is complete once the exact reconciled PR #158 head is green and merged.
 
 ## GP-16.6 — Four-game adversarial E2E gate
 
@@ -63,4 +67,4 @@ Final GP-16 qualification must prove deliberate guest -> registered -> wallet-li
 
 GP-16 is complete only when GP-16.1 through GP-16.6 are implemented, dedicated security/privacy workflows are green on the exact reconciled head, no unresolved critical/high finding remains, four-game adversarial qualification is green, and residual risks/operational assumptions are documented.
 
-After GP-16, proceed to **420GP-17 — Developer Portal / Game Onboarding**.
+After GP-16, complete the Developer Hub core foundation before proceeding to **420GP-17 — Developer Portal / Game Onboarding**.

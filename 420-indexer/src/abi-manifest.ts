@@ -14,7 +14,10 @@ export interface GenesisDescriptor420 extends ProtocolEventDescriptor420 {
   signature: string;
 }
 
-const SUPPORTED = new Set<ProtocolFieldKind420>(['bytes32','address','uint256','bool']);
+const SUPPORTED = new Set<ProtocolFieldKind420>([
+  'bytes4','bytes8','bytes16','bytes32','address','bool',
+  'uint8','uint16','uint32','uint64','uint128','uint256'
+]);
 
 export const GENESIS_PROTOCOL_BY_CONTRACT_420: Record<string, string> = {
   ProtocolRegistry: '420Registry',

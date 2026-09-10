@@ -8,10 +8,15 @@
 - checkpoint/finality core
 - wrong-chain validation
 - finalized-history fail-closed behavior
-- rebuildable memory store
-- shared read API response types
-- RPC source consistency interface
-- indexer-specific CI workflow
+- rebuildable memory and durable file stores
+- shared production read API
+- RPC source consistency and finality-tag ingestion
+- deterministic reorg repair
+- Registry-backed historical decoder resolution
+- full rebuild tooling
+- restart/reorg qualification fixtures
+- machine-enforced readiness verification
+- first GEN-10 consumer integration: 420Explorer
 
 ### GEN-11.1B — production ingestion
 
@@ -42,61 +47,54 @@
 ### GEN-11.1D — Registry-backed protocol decoder resolution
 
 - rebuildable historical ProtocolRegistry service catalogue
-- `ServiceVersionPublished` projection with canonical block provenance
-- `ServiceRegistrationProfilePublished` projection for component/manifest/dependency/interface commitments
-- `ServiceDeprecated` projection and historical deprecation boundary
+- Registry version/profile/deprecation projection with canonical provenance
 - exact implementation-at-block service/version resolution
-- monotonic version-history enforcement and idempotent replay
+- monotonic history and idempotent replay enforcement
 - decoder dispatch pinned to the exact historical service/version
-- missing historical decoder fails closed; no fall-forward to newer decoder
-- decoded results retain registry identity, decoder version and canonical log provenance
-- raw ABI decoding for canonical ProtocolRegistry version/profile/deprecation events
+- missing historical decoder fails closed; no fall-forward
+- raw ABI decoding for canonical ProtocolRegistry events
 - malformed and unknown registry logs fail closed
-- qualification for historical version resolution, deprecation, version gaps, replay conflicts, decoder pinning and raw ABI decoding
 
 ### GEN-11.1E — shared production read API
 
 - stable `/v1` HTTP read boundary with no canonical authority
-- health and single-block reads
-- fixed-snapshot cursor encoding/decoding
-- deterministic snapshot-pinned block pagination
-- durable transaction lookup
-- durable receipt lookup
+- health, block and fixed-snapshot block pagination
+- transaction and receipt reads
 - deterministic block-log reads
-- ProtocolRegistry service/version reads from the rebuildable historical catalogue
-- explicit `canonicalAuthority: false` response envelopes for derived/consumer reads
+- ProtocolRegistry service/version reads
+- explicit `canonicalAuthority: false` envelopes
 - persistent-store-backed API adapter
-- qualification for pagination stability, extended endpoints, authority boundary, case-insensitive tx/receipt lookup and log ordering
 
 ### Finality ingestion and promotion
 
 - canonical `safe` and `finalized` JSON-RPC tag reads
 - post-catch-up and post-reorg finality refresh
-- exact indexed-hash verification at safe and finalized boundaries
-- HEAD -> SAFE -> FINALIZED promotion in durable block records
-- safe/finalized checkpoint height and hash persistence
-- invalid finality ordering fails closed
-- finalized boundary disagreement returns finalized-history conflict without advancing checkpoint
-- qualification for normal promotion, invalid ordering and finalized hash conflict
+- exact indexed-hash verification at safe/finalized boundaries
+- HEAD -> SAFE -> FINALIZED durable promotion
+- safe/finalized checkpoint height/hash persistence
+- invalid ordering and finalized disagreement fail closed
 
 ### GEN-11.1F — final qualification / readiness closeout
 
 - `INDEXER_REBUILD=1` full rebuild mode over canonical RPC
-- atomic durable-store reset clears only rebuildable indexed state
-- canonical `version.Schema` used by the production command
-- reset/reopen qualification proves no stale block, tx, receipt, log or checkpoint state survives rebuild reset
+- atomic durable-store reset of rebuildable indexed state
+- canonical `version.Schema` in production command
+- reset/reopen qualification proving stale indexed records do not survive rebuild
 - restart -> non-finalized fork -> deterministic repair integration fixture
-- readiness status advanced to `GEN11_1F_QUALIFICATION`
-- machine-readable qualification evidence in testnet readiness profile
-- `scripts/verify-420indexer.py` enforced by the dedicated 420Indexer workflow
-- first-consumer gate explicitly reserved for 420Explorer
+- machine-readable qualification evidence
+- `scripts/verify-420indexer.py` enforced by 420Indexer CI
+- reconciled with current `main`
+- 420Explorer Go consumer client over 420Indexer `/v1`
+- Explorer profile explicitly disables independent RPC ingestion, checkpoints, reorg engine and decoder registry
+- Explorer/indexer consumer boundary regression tests
+- `scripts/verify-explorer-indexer-consumer.py` enforced by 420Indexer CI
+- 420Explorer consumer gate set to `QUALIFIED_INDEXER_API_CONSUMER`
 
-## Remaining before GEN-11.1 completion
+## GEN-11.1 completion state
 
-- clear the GEN-11.1F CI gate on the current reconciled head
-- integrate 420Explorer as the first GEN-10 consumer with no independent chain-ingestion path
-- mark the 420Explorer consumer gate qualified after integration tests
-- testnet deployment URL/service probe remains a deployment-stage task
+The implementation completion gate is satisfied once the current integration head clears CI: the index can be built from canonical sources, interrupted/resumed, reorg-repaired, rebuilt from zero, and consumed by 420Explorer without an independent chain-ingestion pipeline.
+
+Testnet deployment URL/service probes remain deployment-stage work rather than GEN-11.1 implementation blockers.
 
 ## Post-baseline scalability
 

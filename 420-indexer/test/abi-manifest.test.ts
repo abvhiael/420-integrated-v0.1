@@ -10,20 +10,21 @@ const artifact = {
   contractName: 'Names420',
   abi: [
     { type: 'event' as const, name: 'NameRegistered', inputs: [
-      { name: 'nameId', type: 'bytes32', indexed: true },
+      { name: 'labelHash', type: 'bytes32', indexed: true },
       { name: 'owner', type: 'address', indexed: true },
-      { name: 'expiresAt', type: 'uint256', indexed: false }
+      { name: 'expiresAt', type: 'uint64', indexed: false },
+      { name: 'labelLength', type: 'uint8', indexed: false }
     ] }
   ]
 };
 
 test('builds deterministic descriptors from genesis ABI events', () => {
   const [descriptor] = descriptorsFromArtifact420('420Names', predeploy, artifact);
-  assert.equal(descriptor.signature, 'NameRegistered(bytes32,address,uint256)');
+  assert.equal(descriptor.signature, 'NameRegistered(bytes32,address,uint64,uint8)');
   assert.equal(descriptor.topic0, id(descriptor.signature));
   assert.equal(descriptor.contractAddress, predeploy.address);
   assert.deepEqual(descriptor.fields.map((f) => [f.name, f.kind, f.indexed]), [
-    ['nameId','bytes32',true], ['owner','address',true], ['expiresAt','uint256',false]
+    ['labelHash','bytes32',true], ['owner','address',true], ['expiresAt','uint64',false], ['labelLength','uint8',false]
   ]);
 });
 

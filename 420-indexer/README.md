@@ -24,21 +24,27 @@ Native `$420`, ERC-20, ERC-721, and ERC-1155 transfer decoding; normalized asset
 
 ## IDX-5 — genesis protocol projections
 
-IDX-5 introduces a manifest-driven decoder and projection boundary for genesis-resident protocol events.
+IDX-5 provides manifest-driven decoding and rebuildable state views for genesis-resident protocols.
 
-Implemented in the first IDX-5 increment:
+Implemented across IDX-5 so far:
 
 - descriptor-driven event decoding keyed by `topic0`;
-- deterministic indexed/data-word decoding for bytes32, address, uint256, and bool fields;
+- deterministic indexed/data-word decoding for address, bool, fixed bytes, and unsigned integer widths used by current genesis contracts;
 - collision detection for conflicting topic descriptors;
+- deterministic descriptor generation from exported Foundry ABI artifacts;
+- descriptor binding to frozen genesis predeploy addresses;
+- fail-closed handling for missing required artifacts, anonymous events, contract-name mismatches, and unsupported dynamic ABI fields;
 - normalized protocol/event identity and canonical chain ordering metadata;
 - durable `idx_protocol_events` SQL projection with protocol/event/contract indexes;
-- idempotent writes keyed by canonical block/transaction/log identity;
+- protocol-scoped event query views;
+- canonical object-key extraction using common 420 event identifiers such as objectId, componentId, labelHash, profileId, validatorId, proposalId, paymentId, routeId, requestId, rightId, and assetId;
+- latest-object state views ordered by block number, transaction index, and log index;
+- lifecycle-state extraction from `stateAfter`, `status`, `state`, or `active` where present;
+- protocol state views for Names, Identity, Stake, Governance, Pay, Swap/Exchange, Bridge, Rights, and Randomness;
 - bounded rollback of protocol events during reorg recovery;
-- explicit genesis protocol catalog covering 420Registry, 420Names, 420Identity, 420Stake, 420Governance, 420Treasury, 420Pay, 420Swap, 420Exchange, 420Bridge, 420Rights, and 420Randomness;
-- tests for deterministic decoding, unknown-event rejection, persistence, and rollback.
+- regression coverage using the actual `Names420.NameRegistered(bytes32,address,uint64,uint8)` event shape.
 
-The decoder intentionally consumes deployment/ABI-derived event descriptors rather than hard-coding protocol state assumptions. This preserves the frozen 420 event-standard rule that events are auditable projections and never substitutes for authoritative contract state.
+The decoder intentionally consumes deployment/ABI-derived event descriptors rather than hard-coding protocol state assumptions. Events and materialized views remain non-authoritative projections and can always be rebuilt from canonical chain history plus the pinned deployment/ABI manifest.
 
 ## Authority boundary
 
@@ -50,4 +56,4 @@ The decoder intentionally consumes deployment/ABI-derived event descriptors rath
 
 ## Next phase
 
-Complete IDX-5 by generating concrete descriptor manifests from the genesis deployment ABI set and adding protocol-specific materialized views for Registry, Names, Identity, Stake, Governance, Treasury, Pay, Swap/Exchange, Bridge, Rights, Randomness, and the remaining genesis-resident event surfaces.
+Finish IDX-5 by covering any remaining ABI types exposed by the compiled genesis artifact set, generating and checking the concrete descriptor manifest once those artifacts land, and adding protocol-specific lifecycle reducers where a latest-event view is insufficient. After that, IDX-6 builds the indexed query/database layer and pagination/index strategy consumed by Explorer, Search, Analytics, Wallet, and Developer APIs.

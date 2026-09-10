@@ -1,0 +1,25 @@
+name: 420Indexer
+
+on:
+  pull_request:
+    paths:
+      - '420-indexer/**'
+      - '.github/workflows/420-indexer.yml'
+  push:
+    paths:
+      - '420-indexer/**'
+      - '.github/workflows/420-indexer.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: 420-indexer
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-package-lock
+      - run: npm test

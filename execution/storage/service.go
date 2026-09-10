@@ -4,9 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 )
@@ -23,6 +25,7 @@ type ServiceConfig struct {
 	SyncInterval    time.Duration
 	ProofInterval   time.Duration
 	ProofSubmitter  ProofSubmitter
+	AuthToken       string
 	Contracts       RPCStorageContracts
 }
 
@@ -52,6 +55,7 @@ func NewService(cfg ServiceConfig) (*Service, error) {
 		return nil, ErrInvalidChainState
 	}
 	if _, err := bytes32Arg(cfg.NodeID); err != nil { return nil, ErrInvalidChainState }
+	if !loopbackListen(cfg.ListenAddr) && strings.TrimSpace(cfg.AuthToken) == "" { return nil, ErrInvalidChainState }
 	if cfg.SyncInterval <= 0 { cfg.SyncInterval = 5 * time.Second }
 	if cfg.ProofInterval <= 0 { cfg.ProofInterval = cfg.SyncInterval }
 	if cfg.BatchSize == 0 { cfg.BatchSize = 256 }
@@ -84,8 +88,23 @@ func NewService(cfg ServiceConfig) (*Service, error) {
 
 	s := &Service{cfg: cfg, backend: backend, projection: projection, runtime: runtime, scheduler: ProofScheduler{Projection: projection}}
 	s.syncer = Syncer{Backend: backend, Cursor: cursor, Projection: projection, StartBlock: cfg.StartBlock, Confirmations: cfg.Confirmations, BatchSize: cfg.BatchSize}
-	s.httpServer = &http.Server{Addr: cfg.ListenAddr, Handler: NewTransportHandler(s), ReadHeaderTimeout: 10 * time.Second}
+	s.httpServer = &http.Server{
+		Addr: cfg.ListenAddr,
+		Handler: NewTransportHandler(s),
+		ReadHeaderTimeout: 10 * time.Second,
+		IdleTimeout: 60 * time.Second,
+		MaxHeaderBytes: 32 << 10,
+	}
 	return s, nil
+}
+
+func loopbackListen(addr string) bool {
+	host, _, err := net.SplitHostPort(addr)
+	if err != nil { return false }
+	host = strings.TrimSpace(strings.Trim(host, "[]"))
+	if strings.EqualFold(host, "localhost") { return true }
+	ip := net.ParseIP(host)
+	return ip != nil && ip.IsLoopback()
 }
 
 func (s *Service) Runtime() *Runtime { return s.runtime }

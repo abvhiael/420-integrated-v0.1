@@ -1,0 +1,20 @@
+name: 420 Gaming Player Profile Service
+
+on:
+  pull_request:
+    paths:
+      - 'services/420-gaming-player-profile/**'
+      - '.github/workflows/gaming-player-profile-service.yml'
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Test player/profile service
+        working-directory: services/420-gaming-player-profile
+        run: npm test

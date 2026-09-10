@@ -123,12 +123,19 @@ contract ExchangeLimitOrderStateMachineHardeningV12Test is ExchangeLimitOrderSet
 
         vm.prank(filler);
         (bool ok,) = address(settlement).call(
-            abi.encodeWithSelector(settlement.fillOrder.selector, order, 10 ether, signature, pathHash, hops)
+            abi.encodeWithSelector(
+                settlement.fillOrder.selector,
+                order,
+                uint128(10 ether),
+                signature,
+                pathHash,
+                hops
+            )
         );
-        assertFalse(ok);
+        require(!ok, "downstream failure unexpectedly succeeded");
 
         assertEq(settlement.filledSellAmount(orderHash), 0);
-        assertTrue(settlement.nonceOrderHash(maker, order.nonce) == bytes32(0));
+        require(settlement.nonceOrderHash(maker, order.nonce) == bytes32(0), "nonce binding leaked");
         assertEq(sellToken.balanceOf(address(settlement)), 0);
         assertEq(sellToken.allowance(address(settlement), address(router)), 0);
     }

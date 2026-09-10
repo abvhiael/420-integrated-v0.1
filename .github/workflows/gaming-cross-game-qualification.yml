@@ -1,0 +1,24 @@
+name: 420 Gaming Cross-Game Qualification
+
+on:
+  pull_request:
+    paths:
+      - "packages/420-gaming-cross-game-qualification/**"
+      - "clients/highcountry-access-v1/**"
+      - "clients/greenroad-access-v1/**"
+      - "clients/budtender-access-v1/**"
+      - "clients/smoke-chrome-access-v1/**"
+      - "packages/420-gaming-sdk/**"
+      - ".github/workflows/gaming-cross-game-qualification.yml"
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Run cross-game qualification
+        working-directory: packages/420-gaming-cross-game-qualification
+        run: npm test

@@ -1,0 +1,21 @@
+name: 420 Gaming Query
+
+on:
+  pull_request:
+    paths:
+      - "services/420-gaming-query/**"
+      - "docs/gaming/420GP-10-QUERY-LAYER.md"
+      - ".github/workflows/gaming-query.yml"
+  workflow_dispatch:
+
+jobs:
+  query-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run gaming query tests
+        working-directory: services/420-gaming-query
+        run: npm test

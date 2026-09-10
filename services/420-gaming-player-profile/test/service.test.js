@@ -42,12 +42,64 @@ test("migration preparation requires a wallet link and stores only commitments",
   assert.equal("email" in migration, false);
 });
 
-test("migration claim issuance is one-way and replay safe", () => {
+test("duplicate migration preparation is idempotent for the same account game and payload", () => {
+  const service = fixture();
+  service.registerAccount({ accountId: "acct-1", credentialRef: "credential:opaque" });
+  service.linkWallet({ accountId: "acct-1", gameId: "game-a", walletAccount: "0xabc" });
+
+  const first = service.prepareMigration({
+    accountId: "acct-1",
+    gameId: "game-a",
+    guestStateCommitment: "0xguest",
+    migrationPayloadHash: "0xpayload"
+  });
+  const replay = service.prepareMigration({
+    accountId: "acct-1",
+    gameId: "game-a",
+    guestStateCommitment: "0xguest",
+    migrationPayloadHash: "0xpayload"
+  });
+
+  assert.equal(replay.migrationId, first.migrationId);
+  assert.equal(replay.preparedAt, first.preparedAt);
+});
+
+test("migration replay key remains game scoped", () => {
+  const service = fixture();
+  service.registerAccount({ accountId: "acct-1", credentialRef: "credential:opaque" });
+  service.linkWallet({ accountId: "acct-1", gameId: "game-a", walletAccount: "0xabc" });
+  service.linkWallet({ accountId: "acct-1", gameId: "game-b", walletAccount: "0xabc" });
+
+  const a = service.prepareMigration({ accountId: "acct-1", gameId: "game-a", guestStateCommitment: "0xguest", migrationPayloadHash: "0xpayload" });
+  const b = service.prepareMigration({ accountId: "acct-1", gameId: "game-b", guestStateCommitment: "0xguest", migrationPayloadHash: "0xpayload" });
+
+  assert.notEqual(a.migrationId, b.migrationId);
+});
+
+test("migration claim issuance is idempotent for the canonical claim and rejects alternate replay", () => {
   const service = fixture();
   service.registerAccount({ accountId: "acct-1", credentialRef: "credential:opaque" });
   service.linkWallet({ accountId: "acct-1", gameId: "game-a", walletAccount: "0xabc" });
   const migration = service.prepareMigration({ accountId: "acct-1", gameId: "game-a", guestStateCommitment: "0xguest", migrationPayloadHash: "0xpayload" });
   const issued = service.markMigrationClaimIssued({ migrationId: migration.migrationId, claimId: "claim-1" });
+  const recovered = service.markMigrationClaimIssued({ migrationId: migration.migrationId, claimId: "claim-1" });
   assert.equal(issued.status, "claim-issued");
+  assert.equal(recovered, issued);
   assert.throws(() => service.markMigrationClaimIssued({ migrationId: migration.migrationId, claimId: "claim-2" }), /migration-state-invalid/);
+});
+
+test("migration consumption is one-way and safely recoverable after duplicate acknowledgement", () => {
+  const service = fixture();
+  service.registerAccount({ accountId: "acct-1", credentialRef: "credential:opaque" });
+  service.linkWallet({ accountId: "acct-1", gameId: "game-a", walletAccount: "0xabc" });
+  const migration = service.prepareMigration({ accountId: "acct-1", gameId: "game-a", guestStateCommitment: "0xguest", migrationPayloadHash: "0xpayload" });
+  service.markMigrationClaimIssued({ migrationId: migration.migrationId, claimId: "claim-1" });
+
+  const consumed = service.markMigrationConsumed({ migrationId: migration.migrationId, claimId: "claim-1" });
+  const replay = service.markMigrationConsumed({ migrationId: migration.migrationId, claimId: "claim-1" });
+
+  assert.equal(consumed.status, "consumed");
+  assert.equal(replay, consumed);
+  assert.throws(() => service.markMigrationConsumed({ migrationId: migration.migrationId, claimId: "claim-2" }), /migration-state-invalid/);
+  assert.throws(() => service.markMigrationClaimIssued({ migrationId: migration.migrationId, claimId: "claim-1" }), /migration-state-invalid/);
 });

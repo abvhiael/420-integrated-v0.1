@@ -39,6 +39,7 @@ func New(chainID uint64, schemaVersion string, source Source, store Store) *Engi
 // CatchUp ingests sequential canonical blocks through the current RPC head.
 // On an ancestry mismatch, GEN-11.1C deterministically finds the highest common ancestor,
 // rolls back only non-finalized history, and replays the remote canonical branch.
+// After ingestion or repair, safe/finalized tags are verified and promoted into durable state.
 func (e *Engine) CatchUp(ctx context.Context) error {
 	if err := e.core.ValidateSource(e.source); err != nil { return err }
 	head, err := e.source.BlockNumber(ctx)
@@ -59,7 +60,7 @@ func (e *Engine) CatchUp(ctx context.Context) error {
 				if !ok || parent.Hash != bundle.Block.ParentHash {
 					r := reorg.New(e.chainID, e.schemaVersion, e.source, e.store)
 					if err := r.Repair(ctx, head); err != nil { return fmt.Errorf("repair reorg at block %d: %w", number, err) }
-					return nil
+					return e.PromoteFinality(ctx)
 				}
 			}
 		}
@@ -72,12 +73,12 @@ func (e *Engine) CatchUp(ctx context.Context) error {
 			if errors.Is(err, core.ErrParentMismatch) {
 				r := reorg.New(e.chainID, e.schemaVersion, e.source, e.store)
 				if repairErr := r.Repair(ctx, head); repairErr != nil { return fmt.Errorf("repair reorg after accept block %d: %w", number, repairErr) }
-				return nil
+				return e.PromoteFinality(ctx)
 			}
 			return fmt.Errorf("accept block %d: %w", number, err)
 		}
 	}
-	return nil
+	return e.PromoteFinality(ctx)
 }
 
 func (e *Engine) Core() *core.Indexer { return e.core }

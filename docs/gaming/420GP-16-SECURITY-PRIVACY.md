@@ -66,18 +66,18 @@ The remediation added a backward-compatible protocol-component registrar model:
 
 ## GP-16.3 — Query/indexer privacy & canonical-RPC consistency
 
-Status: IN PROGRESS.
+Status: COMPLETE — merged through PR #154.
 
-The GP-10 query service is being hardened so indexed reads are scoped and carry canonical provenance instead of being accepted as implicitly authoritative.
+The GP-10 query service now treats indexed reads as scoped, provenance-bearing data rather than implicitly canonical state.
 
-Current GP-16.3 qualification requires:
+Coverage includes:
 
 - no API can enumerate all activity for a wallet across games;
 - profile, entitlement, claim and attestation lookups require explicit game/scope identifiers;
 - adapter-returned indexed records include `blockNumber`, `blockHash` and `finalized` provenance;
 - missing or malformed provenance fails closed;
 - entitlement, claim and attestation reads are treated as high-risk and require finalized indexed provenance;
-- an optional canonical RPC revalidator can reject non-canonical, reorged or contradictory indexed state;
+- optional canonical RPC revalidation rejects non-canonical, reorged or contradictory indexed state;
 - canonical block number/hash mismatches fail closed;
 - no raw guest saves, signer material or migration payload plaintext is added to query-layer state or logging.
 
@@ -86,15 +86,29 @@ Qualification: `services/420-gaming-query/test/query-service.test.js` via `420 G
 
 ## GP-16.4 — Client/SDK hostile-state qualification
 
-Across High Country, The Green Road, Budtender and Smoke & Chrome:
+Status: IN PROGRESS.
 
-- unknown access states fail closed;
-- optional wallet prompts cannot block routine/core gameplay;
-- disconnected/revoked wallet sessions downgrade safely;
-- expired/revoked entitlements do not remain unlocked from cache;
-- migration replay/error states remain recoverable without duplicating ownership;
-- cross-game checks cannot grant core statistical or economic advantage;
-- one game's client cannot inject another game's namespace or authority.
+Shared qualification lives in `packages/420-gaming-client-hardening` and exercises the real access integrations for High Country, The Green Road, Budtender and Smoke & Chrome.
+
+Current GP-16.4 coverage requires:
+
+- unknown feature/access requirements fail closed instead of guessing;
+- guest core gameplay remains available without registration or wallet state;
+- disconnected wallet sessions deny only optional wallet-gated features and never routine/core play;
+- revoked/unlinked wallet state downgrades to an explicit wallet-link boundary;
+- expired/revoked entitlement adapter results remain `null` and are not converted into access;
+- each game's SDK client is pinned to its canonical `gameId` for profile and entitlement adapter calls;
+- no game client can inject a different game namespace through public SDK method arguments;
+- wallet-gated functionality remains marked optional and cannot become core progression.
+
+Dedicated workflow: `420 Gaming Client Hardening`.
+
+Remaining GP-16.4 work after this slice:
+
+- migration replay/error recovery qualification without duplicate ownership;
+- cached entitlement invalidation after a previously valid result becomes revoked/expired;
+- cross-game response poisoning tests proving no core statistical/economic advantage;
+- hostile adapter/RPC error qualification across all four clients.
 
 ## GP-16.5 — Finality, reorg and RPC failure handling
 

@@ -1,0 +1,57 @@
+name: 420 Gaming Security Hardening
+
+on:
+  pull_request:
+    paths:
+      - "contracts/src/gaming/**"
+      - "contracts/test/GamingProtocol420Hardening.t.sol"
+      - ".github/workflows/gaming-security-hardening.yml"
+      - "docs/gaming/420GP-16-SECURITY-PRIVACY.md"
+
+jobs:
+  hardening:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Foundry with retry
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L https://foundry.paradigm.xyz | bash
+
+          if [ -x "$HOME/.config/.foundry/bin/foundryup" ]; then
+            FOUNDRY_BIN="$HOME/.config/.foundry/bin"
+          elif [ -x "$HOME/.foundry/bin/foundryup" ]; then
+            FOUNDRY_BIN="$HOME/.foundry/bin"
+          else
+            echo "foundryup installer completed but binary was not found." >&2
+            find "$HOME" -maxdepth 4 -type f -name foundryup -print || true
+            exit 1
+          fi
+
+          export PATH="$FOUNDRY_BIN:$PATH"
+          echo "$FOUNDRY_BIN" >> "$GITHUB_PATH"
+
+          for attempt in 1 2 3 4; do
+            if "$FOUNDRY_BIN/foundryup"; then
+              forge --version
+              cast --version
+              exit 0
+            fi
+            if [ "$attempt" -eq 4 ]; then
+              echo "Foundry installation failed after 4 attempts." >&2
+              exit 1
+            fi
+            sleep $((attempt * 15))
+          done
+
+      - name: Build GP-16 gaming hardening target
+        working-directory: contracts
+        run: forge build test/GamingProtocol420Hardening.t.sol --force
+
+      - name: Run GP-16 adversarial gaming suite
+        working-directory: contracts
+        run: forge test --match-path 'test/GamingProtocol420Hardening.t.sol' -vvv

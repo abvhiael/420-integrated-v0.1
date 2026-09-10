@@ -54,6 +54,7 @@ export interface ChainSource420 {
   finalizedBlockNumber?(): Promise<bigint>;
   getBlockByNumber(blockNumber: bigint): Promise<IndexerBlock | null>;
   getBlockByHash(blockHash: Hex): Promise<IndexerBlock | null>;
+  getBlockTransactionsByNumber?(blockNumber: bigint): Promise<IndexerTransaction[]>;
   getTransactionByHash(transactionHash: Hex): Promise<IndexerTransaction | null>;
   getTransactionReceipt(transactionHash: Hex): Promise<IndexerReceipt | null>;
   getLogs(filter: LogFilter420): Promise<IndexerLog[]>;

@@ -37,14 +37,16 @@ Implemented across IDX-5 so far:
 - normalized protocol/event identity and canonical chain ordering metadata;
 - durable `idx_protocol_events` SQL projection with protocol/event/contract indexes;
 - protocol-scoped event query views;
-- canonical object-key extraction using common 420 event identifiers such as objectId, componentId, labelHash, profileId, validatorId, proposalId, paymentId, routeId, requestId, rightId, and assetId;
+- canonical object-key extraction using common 420 event identifiers such as objectId, componentId, labelHash, profileId, validatorId, stakeId, proposalId, paymentId, routeId, requestId, rightId, licenseId, and assetId;
 - latest-object state views ordered by block number, transaction index, and log index;
 - lifecycle-state extraction from `stateAfter`, `status`, `state`, or `active` where present;
+- protocol-specific lifecycle reducers for Names, Stake, Governance, Pay, Bridge, Rights, and Randomness;
+- canonical-order reduction with terminal-state protection so completed/cancelled/revoked/expired/failed objects cannot be accidentally resurrected by later stale or duplicate lifecycle events;
 - protocol state views for Names, Identity, Stake, Governance, Pay, Swap/Exchange, Bridge, Rights, and Randomness;
 - bounded rollback of protocol events during reorg recovery;
-- regression coverage using the actual `Names420.NameRegistered(bytes32,address,uint64,uint8)` event shape.
+- regression coverage using the actual `Names420.NameRegistered(bytes32,address,uint64,uint8)` event shape and lifecycle reducer semantics.
 
-The decoder intentionally consumes deployment/ABI-derived event descriptors rather than hard-coding protocol state assumptions. Events and materialized views remain non-authoritative projections and can always be rebuilt from canonical chain history plus the pinned deployment/ABI manifest.
+The decoder intentionally consumes deployment/ABI-derived event descriptors rather than hard-coding protocol state assumptions. Events, state views, and lifecycle snapshots remain non-authoritative projections and can always be rebuilt from canonical chain history plus the pinned deployment/ABI manifest.
 
 ## Authority boundary
 
@@ -56,4 +58,4 @@ The decoder intentionally consumes deployment/ABI-derived event descriptors rath
 
 ## Next phase
 
-Finish IDX-5 by covering any remaining ABI types exposed by the compiled genesis artifact set, generating and checking the concrete descriptor manifest once those artifacts land, and adding protocol-specific lifecycle reducers where a latest-event view is insufficient. After that, IDX-6 builds the indexed query/database layer and pagination/index strategy consumed by Explorer, Search, Analytics, Wallet, and Developer APIs.
+IDX-5 is now functionally complete at the generic projection/reducer layer. The remaining deployment-time closeout is to generate and check the concrete descriptor manifest once compiled genesis artifacts land, then run the full artifact-backed qualification suite. The next development phase is IDX-6: the indexed query/database layer, pagination/index strategy, and stable query contracts consumed by Explorer, Search, Analytics, Wallet, Notifications, and Developer APIs.

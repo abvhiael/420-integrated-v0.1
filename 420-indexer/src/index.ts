@@ -7,3 +7,5 @@ export * from './ingestor.js';
 export * from './core-projections.js';
 export * from './asset-decoder.js';
 export * from './asset-projections.js';
+export * from './protocol-decoder.js';
+export * from './protocol-projections.js';

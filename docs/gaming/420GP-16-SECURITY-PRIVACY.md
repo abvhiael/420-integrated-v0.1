@@ -35,7 +35,7 @@ Coverage includes unknown feature/access failure, wallet-free core play, safe do
 
 ## GP-16.5 — Finality, reorg and RPC failure handling
 
-Status: CLOSEOUT IN QUALIFICATION — PR #158.
+Status: COMPLETE — merged through PR #158.
 
 The shared finality model lives beside the production gaming query layer and is wired into the consumable high-risk read path.
 
@@ -57,11 +57,28 @@ Coverage includes:
 Implementation: `services/420-gaming-query/src/finality-state.js` and `services/420-gaming-query/src/query-service.js`.
 Qualification: `services/420-gaming-query/test/finality-state.test.js` and `services/420-gaming-query/test/query-service.test.js` through `420 Gaming Query` and Integrated Qualification.
 
-GP-16.5 is complete once the exact reconciled PR #158 head is green and merged.
-
 ## GP-16.6 — Four-game adversarial E2E gate
 
-Final GP-16 qualification must prove deliberate guest -> registered -> wallet-linked transitions, no cross-game authority escalation, no wallet-wide activity enumeration, wallet-free ordinary progression, fail-closed revoked/expired/reorged state, and SmartAccount420/CapabilityRegistry420 as the sole product authority/session boundary.
+Status: IN PROGRESS — dedicated four-game E2E qualification active.
+
+The final GP-16 gate runs the same hostile-state assumptions through High Country, The Green Road, Budtender and Smoke & Chrome.
+
+Coverage includes:
+
+- deliberate guest -> registered -> wallet-linked progression;
+- ordinary/core gameplay remains available without a wallet;
+- wallet-only capabilities remain optional and deny safely while unlinked or disconnected;
+- each SDK client remains pinned to its canonical game namespace;
+- cross-game poisoned entitlement responses fail closed;
+- no wallet-wide history/entitlement/claim enumeration surface appears in reference clients;
+- short reorg and insufficient-finality states cannot become canonical ownership/reward state;
+- canonical finalized state is the only accepted high-risk chain state;
+- existing GP-16 authority qualification remains the source of truth that SmartAccount420/CapabilityRegistry420 is the sole product authority/session boundary.
+
+Implementation: `packages/420-gaming-client-hardening/test/four-game-e2e.test.js`.
+Dedicated workflow: `420 Gaming Four-Game E2E`.
+
+GP-16.6 closes only after the exact reconciled head is green across the four-game E2E gate, Gaming Client Hardening, Gaming Security Hardening, affected reference integrations, and Integrated Qualification, with no unresolved critical/high finding.
 
 ## Exit criteria
 

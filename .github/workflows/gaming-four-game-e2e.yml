@@ -1,0 +1,27 @@
+name: 420 Gaming Four-Game E2E
+
+on:
+  pull_request:
+    paths:
+      - "packages/420-gaming-client-hardening/**"
+      - "packages/420-gaming-sdk/**"
+      - "clients/highcountry-access-v1/**"
+      - "clients/greenroad-access-v1/**"
+      - "clients/budtender-access-v1/**"
+      - "clients/smoke-chrome-access-v1/**"
+      - "services/420-gaming-query/**"
+      - "docs/gaming/420GP-16-SECURITY-PRIVACY.md"
+      - ".github/workflows/gaming-four-game-e2e.yml"
+  workflow_dispatch:
+
+jobs:
+  four-game-e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run four-game adversarial E2E gate
+        working-directory: packages/420-gaming-client-hardening
+        run: npm test

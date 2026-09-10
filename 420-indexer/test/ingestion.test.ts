@@ -109,14 +109,14 @@ test('file checkpoint store round-trips bigint fields atomically', async () => {
   }
 });
 
-test('finalized mode is fail-closed until the source exposes finalized head semantics', async () => {
+test('finalized mode fails closed when the source lacks finalized block semantics', async () => {
   const ingestor = new IndexerIngestor420(
     new FakeSource420(chain420(1)),
     new MemoryCheckpointStore420(),
     new RecordingConsumer420(),
     { finality: { mode: 'finalized' } }
   );
-  await assert.rejects(ingestor.runOnce(), /finalized ingestion is unavailable/);
+  await assert.rejects(ingestor.runOnce(), /chain source does not expose finalized block semantics/);
 });
 
 class StubTransport420 implements JsonRpcTransport420 {

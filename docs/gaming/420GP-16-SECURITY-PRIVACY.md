@@ -1,17 +1,21 @@
 # 420GP-16 — Security & Privacy Hardening
 
-## Objective
+## Status
 
-Harden the shared 420 Gaming Protocol and its client/query integrations against hostile authority, replay, expiry, privacy-enumeration and inconsistent-state failures before developer onboarding is opened in 420GP-17.
+**COMPLETE — merged through PR #160.**
 
-GP-16 preserves the access model established in GP-1 through GP-15:
+GP-16.1 through GP-16.6 are implemented and the final four-game adversarial E2E gate passed on the exact reconciled PR #160 head before merge.
+
+The security/privacy hardening phase now closes with the following guarantees established across the shared Gaming Protocol and the four reference games:
 
 - core gameplay remains wallet-free;
 - wallet linkage is optional and explicit;
 - on-chain state contains commitments/entitlements/attestations, not raw saves or guest state;
 - game authority is scoped to the exact game/action boundary;
 - cross-game verification is explicit and scoped, never wallet-wide activity enumeration;
-- missing, expired, revoked, mismatched or unauthorized state fails closed.
+- missing, expired, revoked, mismatched, reorged, non-finalized or unauthorized state fails closed;
+- SmartAccount420 and CapabilityRegistry420 remain the product authority/session boundary;
+- optimistic client/indexer state cannot become canonical ownership, reward, claim, entitlement or cross-game state without canonical finality.
 
 ## GP-16.1 — Core contract adversarial qualification
 
@@ -59,7 +63,7 @@ Qualification: `services/420-gaming-query/test/finality-state.test.js` and `serv
 
 ## GP-16.6 — Four-game adversarial E2E gate
 
-Status: IN PROGRESS — dedicated four-game E2E qualification active.
+Status: COMPLETE — merged through PR #160.
 
 The final GP-16 gate runs the same hostile-state assumptions through High Country, The Green Road, Budtender and Smoke & Chrome.
 
@@ -78,10 +82,31 @@ Coverage includes:
 Implementation: `packages/420-gaming-client-hardening/test/four-game-e2e.test.js`.
 Dedicated workflow: `420 Gaming Four-Game E2E`.
 
-GP-16.6 closes only after the exact reconciled head is green across the four-game E2E gate, Gaming Client Hardening, Gaming Security Hardening, affected reference integrations, and Integrated Qualification, with no unresolved critical/high finding.
+Final PR #160 qualification on exact reconciled head `d501969babb7d0d9dd4418f358a1f27a8288c92e`:
+
+- 420 Gaming Four-Game E2E #2 — PASS;
+- 420 Gaming Client Hardening #6 — PASS;
+- 420 Gaming Security Hardening #14 — PASS;
+- 420 Integrated Qualification #1850 — PASS.
+
+PR #160 merged to `main` at merge commit `68c50d5bc0b5ae43b1a5abed2d29de46a4bb3222`.
 
 ## Exit criteria
 
-GP-16 is complete only when GP-16.1 through GP-16.6 are implemented, dedicated security/privacy workflows are green on the exact reconciled head, no unresolved critical/high finding remains, four-game adversarial qualification is green, and residual risks/operational assumptions are documented.
+Status: SATISFIED.
 
-After GP-16, complete the Developer Hub core foundation before proceeding to **420GP-17 — Developer Portal / Game Onboarding**.
+- GP-16.1 through GP-16.6 implemented;
+- dedicated security/privacy workflows green on the exact reconciled heads used for merge;
+- four-game adversarial qualification green;
+- no unresolved critical/high finding identified in the GP-16 qualification work;
+- residual operational assumptions documented in the GP-16.5 and GP-16.6 sections.
+
+## Next phase
+
+Do **not** begin 420GP-17 as a standalone gaming portal.
+
+First complete the **420 Developer Hub core foundation** so GP-17 lands inside the permanent ecosystem-wide developer surface rather than becoming a parallel onboarding stack.
+
+Developer Hub foundation should establish the shared developer account/project model, application registration, environment/configuration management, SDK/API discovery, capability/permission wiring, documentation/package catalogue, deployment metadata, and basic portal shell/navigation.
+
+After that foundation exists, proceed to **420GP-17 — Developer Portal / Game Onboarding** as the gaming-specific onboarding layer inside the Developer Hub.

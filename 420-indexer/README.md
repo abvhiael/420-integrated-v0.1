@@ -19,27 +19,43 @@ Implemented in IDX-0:
 - deterministic log ordering;
 - removed-log rejection and duplicate suppression.
 
-## IDX-1 — EVM ingestion core
+## IDX-1 — EVM ingestion core — complete
 
-IDX-1 adds the first production-shaped ingestion path while preserving the IDX-0 transport boundary.
+IDX-1 added the first production-shaped ingestion path while preserving the IDX-0 transport boundary.
 
 Implemented in IDX-1:
 
 - `HttpJsonRpcTransport420` JSON-RPC 2.0 transport with explicit RPC/HTTP failure handling;
-- `EvmJsonRpcSource420` adapter for `eth_chainId`, `eth_blockNumber`, block, transaction, receipt, log, call, and bytecode reads;
-- canonical EVM quantity conversion with safe integer checks for transaction/log indexes;
-- `CheckpointStore420` abstraction;
-- in-memory checkpoint implementation for tests and embedded use;
-- atomic file checkpoint persistence for single-process operation;
+- `EvmJsonRpcSource420` adapter for standard EVM reads;
+- canonical EVM quantity conversion with safe integer checks;
+- `CheckpointStore420` abstraction plus memory and atomic-file implementations;
 - `IndexerIngestor420` sequential block ingestion;
-- configurable start block and bounded `maxBlocksPerRun` backfill;
+- configurable start block and bounded backfill;
 - confirmation-safe head support;
 - chain-ID checkpoint validation;
 - missing/mismatched block rejection;
-- parent-hash reorg detection before consumer mutation;
 - checkpoint advancement only after successful consumer application;
-- restart-safe replay tests after consumer failure;
-- finalized mode remains fail-closed until a chain source exposes explicit finalized-head semantics.
+- restart-safe replay after consumer failure.
+
+## IDX-2 — reorg/finality engine
+
+IDX-2 upgrades ingestion from fail-on-reorg behavior to bounded deterministic recovery.
+
+Implemented in IDX-2:
+
+- explicit optional finalized-head capability on `ChainSource420`;
+- EVM `finalized` block-tag support through `EvmJsonRpcSource420`;
+- `CanonicalHistoryStore420` abstraction and deterministic in-memory reference store;
+- reorg-aware consumer rollback contract;
+- canonical checkpoint ancestry comparison;
+- nearest-common-ancestor recovery;
+- configurable `maxReorgDepth` with fail-closed excessive-depth behavior;
+- projection rollback before replay;
+- canonical-history trimming after rollback;
+- checkpoint rewind or clear semantics;
+- automatic checkpoint validation at each ingestion run;
+- finalized-mode ingestion that uses the source finalized head instead of ordinary latest head;
+- deterministic tests for shallow recovery, depth-limit refusal, finalized RPC resolution, and finalized ingestion bounds.
 
 ## Authority boundary
 
@@ -47,12 +63,12 @@ Implemented in IDX-1:
 
 ## RPC dependency
 
-420Indexer does not depend on a dedicated 420RPC implementation. IDX-1 uses ordinary EVM JSON-RPC behind `ChainSource420`. A future 420RPC implementation can satisfy the same source contract without changing ingestion semantics.
+420Indexer does not depend on a dedicated 420RPC implementation. It uses ordinary EVM JSON-RPC behind `ChainSource420`. A future 420RPC implementation can satisfy the same source contract without changing indexing semantics.
 
-## Persistence boundary
+## Recovery boundary
 
-The file checkpoint store is deliberately a minimal IDX-1 implementation, not the final production database. Projection/database transactions arrive in later phases. The correctness rule is already fixed: a block checkpoint must never advance until all consumer-side work for that block has completed successfully.
+A projection consumer that wants automatic reorg recovery implements `rollbackTo(blockNumber)`. Recovery first verifies the saved checkpoint against canonical chain state, searches backwards through retained local history up to `maxReorgDepth`, rolls projection state back to the nearest common ancestor, rewinds the checkpoint, and only then resumes forward ingestion. A reorg deeper than the configured retained window fails closed rather than guessing.
 
 ## Next phase
 
-IDX-2 adds the reorg/finality engine: canonical ancestry recovery, rollback/replay contracts for projection stores, configurable reorg depth limits, finalized-head source support, and deterministic recovery tests.
+IDX-3 builds the durable core chain projection layer: blocks, transactions, receipts, addresses/contracts, canonical logs, database schema/migrations, and transactional coupling between projections and checkpoints.

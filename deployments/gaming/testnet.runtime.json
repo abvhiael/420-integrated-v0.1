@@ -13,7 +13,10 @@
   },
   "operators": {
     "protocolAdmin": null,
-    "highCountryOperator": null
+    "highCountryOperator": null,
+    "greenRoadOperator": null,
+    "budtenderOperator": null,
+    "smokeChromeOperator": null
   },
   "games": [
     {
@@ -21,21 +24,35 @@
       "gameIdDomain": "420/GAMING/GAME/HIGH_COUNTRY/V1",
       "active": true,
       "operatorRef": "highCountryOperator",
-      "metadataHash": null,
-      "entitlementDomains": [
-        "420/HC/ENTITLEMENT/BONUS_REGION/V1",
-        "420/HC/ENTITLEMENT/COSMETIC/V1",
-        "420/HC/ENTITLEMENT/COMPETITION/V1",
-        "420/HC/ENTITLEMENT/GENETICS/V1",
-        "420/HC/ENTITLEMENT/CROSS_GAME/V1"
-      ]
+      "metadataHash": null
+    },
+    {
+      "name": "The Green Road",
+      "gameIdDomain": "420/GAMING/GAME/THE_GREEN_ROAD/V1",
+      "active": true,
+      "operatorRef": "greenRoadOperator",
+      "metadataHash": null
+    },
+    {
+      "name": "Budtender",
+      "gameIdDomain": "420/GAMING/GAME/BUDTENDER/V1",
+      "active": true,
+      "operatorRef": "budtenderOperator",
+      "metadataHash": null
+    },
+    {
+      "name": "Smoke & Chrome",
+      "gameIdDomain": "420/GAMING/GAME/SMOKE_AND_CHROME/V1",
+      "active": true,
+      "operatorRef": "smokeChromeOperator",
+      "metadataHash": null
     }
   ],
   "requirements": [
-    "All contract addresses must be resolved before acceptance.",
+    "All contract addresses must be resolved before live acceptance.",
     "chainId must be a positive integer.",
     "Protocol and game operators must be explicit non-zero addresses.",
-    "High Country game registration must use the canonical game-id domain.",
+    "All four reference games must use their canonical game-id domains.",
     "Runtime configuration must never contain private keys, seed phrases or session signing material."
   ]
 }

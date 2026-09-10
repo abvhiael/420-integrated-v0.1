@@ -44,7 +44,7 @@ contract BetCasinoSettlementInvariant420Test {
     bytes32 constant DICE_V1 = keccak256("420BET.GAME.DICE.V1"); bytes32 constant KENO_V1 = keccak256("420BET.GAME.KENO.V1");
     bytes32 constant PLINKO_V1 = keccak256("420BET.GAME.PLINKO.V1"); bytes32 constant SLOT_V1 = keccak256("420BET.GAME.SLOT.REFERENCE.V1");
     bytes32 constant ROULETTE_V1 = keccak256("420BET.GAME.ROULETTE.V1"); bytes32 constant BLACKJACK_V1 = keccak256("420BET.GAME.BLACKJACK.V1");
-    bytes32 constant MINES_V1 = keccak256("420BET.GAME.MINES.V1");
+    bytes32 constant MINES_V1 = keccak256("420BET.GAME.MINES.V1"); bytes32 constant CRASH_V1 = keccak256("420BET.GAME.CRASH.V1");
 
     struct Suite { MockCapabilityRegistryCasinoSettlement420 caps; BetAuthorization420 auth; MockCasinoSettlementRegistry420 registry; MockCasinoSettlementRisk420 risk; MockCasinoSettlementVault420 vault; MockCasinoSettlementEconomics420 economics; SettlementEngine420 engine; bytes32 wagerId; }
 
@@ -56,18 +56,18 @@ contract BetCasinoSettlementInvariant420Test {
         s.registry.setWager(BetTypes420.Wager({wagerId:s.wagerId, player:PLAYER, operatorId:keccak256("operator"), gameId:keccak256(abi.encode("game", gameVersionId)), gameVersionId:gameVersionId, asset:ASSET, stake:100 ether, maxGrossPayout:500 ether, paramsHash:keccak256(abi.encode("params", gameVersionId)), vaultId:VAULT, randomnessProfileId:keccak256("randomness"), riskProfileId:keccak256("risk"), settlementProfileId:SETTLEMENT_PROFILE, accessPolicyId:keccak256("access"), rulesetId:keccak256(abi.encode("ruleset", gameVersionId)), acceptedAt:uint64(block.timestamp), deadline:uint64(block.timestamp + 1 hours), status:BetTypes420.WagerStatus.ACCEPTED}));
         s.caps.setAllowed(SETTLER, BetIds420.COMPONENT_BET, BetIds420.ACTION_SETTLE, s.auth.scopeForWager(s.wagerId), true);
     }
-    function _versions() private pure returns (bytes32[7] memory versions) { versions = [DICE_V1, KENO_V1, PLINKO_V1, SLOT_V1, ROULETTE_V1, BLACKJACK_V1, MINES_V1]; }
+    function _versions() private pure returns (bytes32[8] memory versions) { versions = [DICE_V1, KENO_V1, PLINKO_V1, SLOT_V1, ROULETTE_V1, BLACKJACK_V1, MINES_V1, CRASH_V1]; }
 
     function testMaxGrossPayoutBoundaryIsIdenticalAcrossCasinoGames() public {
-        bytes32[7] memory versions = _versions();
+        bytes32[8] memory versions = _versions();
         for (uint256 i = 0; i < versions.length; ++i) { Suite memory s = _deploy(versions[i], i); vm.prank(SETTLER); vm.expectRevert(SettlementEngine420.InvalidPayout.selector); s.engine.settle(s.wagerId, BetTypes420.TerminalOutcome.WIN, 501 ether); require(!s.registry.settlementExists(s.wagerId), "settlement leaked"); require(!s.risk.released(), "risk leaked"); require(!s.vault.resolved(), "vault leaked"); require(!s.economics.finalized(), "economics leaked"); }
     }
     function testAuthorizedTerminalSettlementAndRetryAreIdenticalAcrossCasinoGames() public {
-        bytes32[7] memory versions = _versions();
+        bytes32[8] memory versions = _versions();
         for (uint256 i = 0; i < versions.length; ++i) { Suite memory s = _deploy(versions[i], i + 100); vm.prank(SETTLER); BetTypes420.Settlement memory first = s.engine.settle(s.wagerId, BetTypes420.TerminalOutcome.WIN, 500 ether); require(first.wagerId == s.wagerId && first.outcome == BetTypes420.TerminalOutcome.WIN && first.grossPayout == 500 ether, "first"); require(s.risk.released() && s.vault.resolved() && s.vault.payout() == 500 ether && s.economics.finalized(), "effects"); vm.prank(SETTLER); BetTypes420.Settlement memory retry = s.engine.settle(s.wagerId, BetTypes420.TerminalOutcome.WIN, 500 ether); require(retry.wagerId == first.wagerId && retry.outcome == first.outcome && retry.grossPayout == first.grossPayout, "retry"); }
     }
     function testConflictingSecondTerminalOutcomeFailsAcrossCasinoGames() public {
-        bytes32[7] memory versions = _versions();
+        bytes32[8] memory versions = _versions();
         for (uint256 i = 0; i < versions.length; ++i) { Suite memory s = _deploy(versions[i], i + 200); vm.prank(SETTLER); s.engine.settle(s.wagerId, BetTypes420.TerminalOutcome.WIN, 500 ether); vm.prank(SETTLER); vm.expectRevert(SettlementEngine420.SettlementConflict.selector); s.engine.settle(s.wagerId, BetTypes420.TerminalOutcome.LOSS, 0); BetTypes420.Settlement memory settlement = s.registry.getSettlement(s.wagerId); require(settlement.outcome == BetTypes420.TerminalOutcome.WIN && settlement.grossPayout == 500 ether, "terminal changed"); }
     }
 }

@@ -144,6 +144,38 @@ for (const game of games) {
     });
     assert.equal(entitlement, null);
   });
+
+  test(`${game.name}: cross-game poisoned adapter result fails closed`, async () => {
+    const client = game.createClient({
+      getEntitlement: async () => ({
+        gameId: "420/GAMING/GAME/HOSTILE_OTHER_GAME/V1",
+        entitlementId: "poison",
+        active: true
+      })
+    });
+    const entitlement = await client.getEntitlement({
+      profileId: "profile:1",
+      entitlementId: "poison"
+    });
+    assert.equal(entitlement, null);
+  });
+
+  test(`${game.name}: hostile adapter/RPC error propagates without unlocking optional feature`, async () => {
+    const client = game.createClient({
+      getEntitlement: async () => { throw new Error("rpc unavailable"); }
+    });
+    await assert.rejects(
+      () => client.getEntitlement({ profileId: "profile:1", entitlementId: "e1" }),
+      /rpc unavailable/
+    );
+    const decision = game.evaluate({
+      feature: game.walletFeature,
+      registered: true,
+      walletLinked: false,
+      walletConnected: false
+    });
+    assert.equal(decision.allowed, false);
+  });
 }
 
 test("shared SDK rejects unknown access requirement instead of guessing", () => {

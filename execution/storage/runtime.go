@@ -5,7 +5,6 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
-	"fmt"
 	"io"
 	"math"
 	"sync"
@@ -81,6 +80,11 @@ type ProofSubmitter interface {
 	SubmitProof(ctx context.Context, proof Proof) error
 }
 
+type commitmentLock struct {
+	mu   sync.Mutex
+	refs int
+}
+
 type Runtime struct {
 	mu            sync.RWMutex
 	nodeID        string
@@ -89,13 +93,15 @@ type Runtime struct {
 	submitter     ProofSubmitter
 	capacity      Capacity
 	reservedBytes uint64
+	locksMu       sync.Mutex
+	locks         map[string]*commitmentLock
 }
 
 func NewRuntime(nodeID string, totalBytes uint64, store Store, chain ChainSource, submitter ProofSubmitter) (*Runtime, error) {
 	if nodeID == "" || totalBytes == 0 || store == nil || chain == nil {
 		return nil, ErrInvalidShard
 	}
-	r := &Runtime{nodeID: nodeID, store: store, chain: chain, submitter: submitter, capacity: Capacity{TotalBytes: totalBytes}}
+	r := &Runtime{nodeID: nodeID, store: store, chain: chain, submitter: submitter, capacity: Capacity{TotalBytes: totalBytes}, locks: make(map[string]*commitmentLock)}
 	records, err := store.List(context.Background())
 	if err != nil {
 		return nil, err
@@ -145,9 +151,36 @@ func (r *Runtime) releaseReservation(size uint64, committed bool) {
 	}
 }
 
+func (r *Runtime) lockCommitment(id string) func() {
+	r.locksMu.Lock()
+	entry := r.locks[id]
+	if entry == nil {
+		entry = &commitmentLock{}
+		r.locks[id] = entry
+	}
+	entry.refs++
+	r.locksMu.Unlock()
+
+	entry.mu.Lock()
+	return func() {
+		entry.mu.Unlock()
+		r.locksMu.Lock()
+		entry.refs--
+		if entry.refs == 0 {
+			delete(r.locks, id)
+		}
+		r.locksMu.Unlock()
+	}
+}
+
 func (r *Runtime) StoreShard(ctx context.Context, commitmentID string, src io.Reader) (ShardRecord, error) {
 	if commitmentID == "" || src == nil {
 		return ShardRecord{}, ErrInvalidShard
+	}
+	unlock := r.lockCommitment(commitmentID)
+	defer unlock()
+	if err := ctx.Err(); err != nil {
+		return ShardRecord{}, err
 	}
 	assignment, err := r.chain.Assignment(ctx, commitmentID)
 	if err != nil {
@@ -263,6 +296,8 @@ func (r *Runtime) Prove(ctx context.Context, ch Challenge) (Proof, error) {
 }
 
 func (r *Runtime) Delete(ctx context.Context, commitmentID string) error {
+	unlock := r.lockCommitment(commitmentID)
+	defer unlock()
 	_, rec, err := r.store.Open(ctx, commitmentID)
 	if err != nil {
 		return err
@@ -315,5 +350,3 @@ func (r *sliceReader) Read(p []byte) (int, error) {
 	r.b = r.b[n:]
 	return n, nil
 }
-
-var _ = fmt.Sprintf

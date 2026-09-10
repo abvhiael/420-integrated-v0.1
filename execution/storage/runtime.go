@@ -121,7 +121,7 @@ func (r *Runtime) Capacity() Capacity {
 func (r *Runtime) reserve(size uint64) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	if r.reservedBytes > r.capacity.TotalBytes-r.capacity.UsedBytes {
+	if r.capacity.UsedBytes > r.capacity.TotalBytes || r.reservedBytes > r.capacity.TotalBytes-r.capacity.UsedBytes {
 		return ErrCapacityExceeded
 	}
 	available := r.capacity.TotalBytes - r.capacity.UsedBytes - r.reservedBytes
@@ -177,50 +177,53 @@ func (r *Runtime) StoreShard(ctx context.Context, commitmentID string, src io.Re
 	committed := false
 	defer func() { r.releaseReservation(assignment.SizeBytes, committed) }()
 
-	buf, err := io.ReadAll(io.LimitReader(contextReader{ctx: ctx, r: src}, int64(assignment.SizeBytes)+1))
-	if err != nil {
-		return ShardRecord{}, err
-	}
-	if err := ctx.Err(); err != nil {
-		return ShardRecord{}, err
-	}
-	if uint64(len(buf)) != assignment.SizeBytes {
-		return ShardRecord{}, fmt.Errorf("%w: expected %d bytes, got %d", ErrInvalidShard, assignment.SizeBytes, len(buf))
-	}
-	digest := sha256.Sum256(buf)
-	root := hex.EncodeToString(digest[:])
-	if root != assignment.ShardRoot {
-		return ShardRecord{}, ErrCommitmentMismatch
-	}
-
-	rec := ShardRecord{AgreementID: assignment.AgreementID, CommitmentID: commitmentID, ShardRoot: root, SizeBytes: assignment.SizeBytes, StoredAt: now}
-	if err := r.store.Put(ctx, rec, bytesReader(buf)); err != nil {
+	rec := ShardRecord{AgreementID: assignment.AgreementID, CommitmentID: commitmentID, ShardRoot: assignment.ShardRoot, SizeBytes: assignment.SizeBytes, StoredAt: now}
+	if err := r.store.Put(ctx, rec, contextReader{ctx: ctx, r: src}); err != nil {
 		return ShardRecord{}, err
 	}
 	committed = true
 	return rec, nil
 }
 
-func (r *Runtime) Retrieve(ctx context.Context, commitmentID string, offset, length uint64) ([]byte, ShardRecord, error) {
+func (r *Runtime) RetrieveStream(ctx context.Context, commitmentID string, offset, length uint64) (io.ReadCloser, ShardRecord, uint64, error) {
 	rc, rec, err := r.store.Open(ctx, commitmentID)
 	if err != nil {
-		return nil, ShardRecord{}, err
+		return nil, ShardRecord{}, 0, err
 	}
-	defer rc.Close()
 	if offset > rec.SizeBytes || offset > math.MaxInt64 {
-		return nil, ShardRecord{}, ErrInvalidShard
+		_ = rc.Close()
+		return nil, ShardRecord{}, 0, ErrInvalidShard
 	}
-	if _, err := io.CopyN(io.Discard, rc, int64(offset)); err != nil && !errors.Is(err, io.EOF) {
-		return nil, ShardRecord{}, err
+	if seeker, ok := rc.(io.Seeker); ok {
+		if _, err := seeker.Seek(int64(offset), io.SeekStart); err != nil {
+			_ = rc.Close()
+			return nil, ShardRecord{}, 0, err
+		}
+	} else if offset > 0 {
+		if _, err := io.CopyN(io.Discard, contextReader{ctx: ctx, r: rc}, int64(offset)); err != nil {
+			_ = rc.Close()
+			if errors.Is(err, io.EOF) { return nil, ShardRecord{}, 0, ErrInvalidShard }
+			return nil, ShardRecord{}, 0, err
+		}
 	}
 	remaining := rec.SizeBytes - offset
 	if length == 0 || length > remaining {
 		length = remaining
 	}
 	if length > math.MaxInt64 {
-		return nil, ShardRecord{}, ErrInvalidShard
+		_ = rc.Close()
+		return nil, ShardRecord{}, 0, ErrInvalidShard
 	}
-	data, err := io.ReadAll(io.LimitReader(rc, int64(length)))
+	return &limitedReadCloser{Reader: io.LimitReader(contextReader{ctx: ctx, r: rc}, int64(length)), Closer: rc}, rec, length, nil
+}
+
+func (r *Runtime) Retrieve(ctx context.Context, commitmentID string, offset, length uint64) ([]byte, ShardRecord, error) {
+	rc, rec, _, err := r.RetrieveStream(ctx, commitmentID, offset, length)
+	if err != nil {
+		return nil, ShardRecord{}, err
+	}
+	defer rc.Close()
+	data, err := io.ReadAll(rc)
 	return data, rec, err
 }
 
@@ -233,15 +236,13 @@ func (r *Runtime) BuildProof(ctx context.Context, ch Challenge) (Proof, error) {
 		return Proof{}, err
 	}
 	defer rc.Close()
-	data, err := io.ReadAll(rc)
-	if err != nil {
-		return Proof{}, err
-	}
 	seed := sha256.New()
 	seed.Write([]byte(ch.CommitmentID))
 	seed.Write([]byte(ch.ChallengeID))
 	seed.Write([]byte(ch.Epoch.UTC().Format(time.RFC3339Nano)))
-	seed.Write(data)
+	if _, err := io.Copy(seed, contextReader{ctx: ctx, r: rc}); err != nil {
+		return Proof{}, err
+	}
 	digest := hex.EncodeToString(seed.Sum(nil))
 	payload := []byte(digest)
 	return Proof{CommitmentID: rec.CommitmentID, ChallengeID: ch.ChallengeID, Epoch: ch.Epoch.UTC(), Digest: digest, Payload: payload}, nil
@@ -297,6 +298,11 @@ func (r contextReader) Read(p []byte) (int, error) {
 	return n, err
 }
 
+type limitedReadCloser struct {
+	io.Reader
+	io.Closer
+}
+
 func bytesReader(b []byte) io.Reader { return &sliceReader{b: b} }
 
 type sliceReader struct{ b []byte }
@@ -309,3 +315,5 @@ func (r *sliceReader) Read(p []byte) (int, error) {
 	r.b = r.b[n:]
 	return n, nil
 }
+
+var _ = fmt.Sprintf

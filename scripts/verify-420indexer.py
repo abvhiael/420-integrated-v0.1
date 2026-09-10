@@ -32,13 +32,14 @@ expected_evidence = {
     "fixed_snapshot_pagination",
     "restart_reorg_integration_fixture",
     "production_http_read_api",
+    "first_consumer_420explorer",
 }
 evidence = ready.get("backend", {}).get("qualification_evidence", {})
 for key in expected_evidence:
     if not str(evidence.get(key, "")).startswith("IMPLEMENTED"):
         errors.append(f"qualification evidence: {key}")
 
-if ready.get("consumer_gates", {}).get("420Explorer") != "PENDING_FIRST_CONSUMER_INTEGRATION":
+if ready.get("consumer_gates", {}).get("420Explorer") != "QUALIFIED_INDEXER_API_CONSUMER":
     errors.append("explorer consumer gate")
 
 print(json.dumps({"pass": not errors, "errors": errors}, indent=2))

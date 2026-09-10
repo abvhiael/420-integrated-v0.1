@@ -1,0 +1,30 @@
+name: Bong Goggles Indexer Verification
+
+on:
+  pull_request:
+    paths:
+      - 'services/bong-goggles-indexer-v1/**'
+      - 'docs/BONG-GOGGLES-BG-12-1.md'
+      - '.github/workflows/bong-goggles-indexer.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'services/bong-goggles-indexer-v1/**'
+      - 'docs/BONG-GOGGLES-BG-12-1.md'
+      - '.github/workflows/bong-goggles-indexer.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test-indexer:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/bong-goggles-indexer-v1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm test

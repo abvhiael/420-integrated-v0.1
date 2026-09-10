@@ -9,6 +9,7 @@ library StorageProofIds420 {
     bytes32 internal constant ACTION_REGISTER_PROOF_SCHEME = keccak256("420/STORAGE/ACTION/REGISTER_PROOF_SCHEME/V1");
     bytes32 internal constant ACTION_SET_PROOF_SCHEME_STATE = keccak256("420/STORAGE/ACTION/SET_PROOF_SCHEME_STATE/V1");
     bytes32 internal constant ACTION_REGISTER_STORAGE_COMMITMENT = keccak256("420/STORAGE/ACTION/REGISTER_STORAGE_COMMITMENT/V1");
+    bytes32 internal constant ACTION_ACCEPT_STORAGE_AGREEMENT = keccak256("420/STORAGE/ACTION/ACCEPT_STORAGE_AGREEMENT/V1");
 
     function validProofClass(bytes32 proofClass) internal pure returns (bool) {
         return proofClass == PROOF_REPLICA_COMMITMENT

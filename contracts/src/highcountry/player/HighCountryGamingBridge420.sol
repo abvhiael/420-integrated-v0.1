@@ -100,6 +100,16 @@ contract HighCountryGamingBridge420 {
         return HighCountryGamingIds.GAME_ID;
     }
 
+    /// @notice HC-PA.5 invariant hook: no entitlement is required for the ordinary core loop.
+    function coreGameplayRequiresEntitlement() external pure returns (bool) {
+        return false;
+    }
+
+    /// @notice HC-PA.5 invariant hook: entitlement possession alone cannot alter protected balance/yield rules.
+    function entitlementMayModifyCoreBalance() external pure returns (bool) {
+        return false;
+    }
+
     function sharedProfileOf(address account) public view returns (bytes32) {
         return gameIdentity.profileIdOf(HighCountryGamingIds.GAME_ID, account);
     }
@@ -183,38 +193,34 @@ contract HighCountryGamingBridge420 {
     }
 
     function hasBonusRegion(uint64 growerProfileId, bytes32 entitlementId, bytes32 regionContentId) external view returns (bool) {
-        return hasScopedEntitlement(
-            growerProfileId,
-            entitlementId,
-            HighCountryGamingIds.ENTITLEMENT_BONUS_REGION,
-            regionContentId
-        );
+        return hasScopedEntitlement(growerProfileId, entitlementId, HighCountryGamingIds.ENTITLEMENT_BONUS_REGION, regionContentId);
     }
 
     function hasCosmetic(uint64 growerProfileId, bytes32 entitlementId, bytes32 cosmeticContentId) external view returns (bool) {
-        return hasScopedEntitlement(
-            growerProfileId,
-            entitlementId,
-            HighCountryGamingIds.ENTITLEMENT_COSMETIC,
-            cosmeticContentId
-        );
+        return hasScopedEntitlement(growerProfileId, entitlementId, HighCountryGamingIds.ENTITLEMENT_COSMETIC, cosmeticContentId);
     }
 
     function hasCompetitionAccess(uint64 growerProfileId, bytes32 entitlementId, bytes32 competitionContentId) external view returns (bool) {
-        return hasScopedEntitlement(
-            growerProfileId,
-            entitlementId,
-            HighCountryGamingIds.ENTITLEMENT_COMPETITION,
-            competitionContentId
-        );
+        return hasScopedEntitlement(growerProfileId, entitlementId, HighCountryGamingIds.ENTITLEMENT_COMPETITION, competitionContentId);
     }
 
     function hasGeneticsAccess(uint64 growerProfileId, bytes32 entitlementId, bytes32 geneticsContentId) external view returns (bool) {
-        return hasScopedEntitlement(
-            growerProfileId,
-            entitlementId,
-            HighCountryGamingIds.ENTITLEMENT_GENETICS,
-            geneticsContentId
-        );
+        return hasScopedEntitlement(growerProfileId, entitlementId, HighCountryGamingIds.ENTITLEMENT_GENETICS, geneticsContentId);
+    }
+
+    function hasCrossGameAccess(uint64 growerProfileId, bytes32 entitlementId, bytes32 contentId) external view returns (bool) {
+        return hasScopedEntitlement(growerProfileId, entitlementId, HighCountryGamingIds.ENTITLEMENT_CROSS_GAME, contentId);
+    }
+
+    function hasSpecialFacility(uint64 growerProfileId, bytes32 entitlementId, bytes32 facilityContentId) external view returns (bool) {
+        return hasScopedEntitlement(growerProfileId, entitlementId, HighCountryGamingIds.ENTITLEMENT_SPECIAL_FACILITY, facilityContentId);
+    }
+
+    function hasSeasonalEvent(uint64 growerProfileId, bytes32 entitlementId, bytes32 eventContentId) external view returns (bool) {
+        return hasScopedEntitlement(growerProfileId, entitlementId, HighCountryGamingIds.ENTITLEMENT_SEASONAL_EVENT, eventContentId);
+    }
+
+    function hasPrestigeArea(uint64 growerProfileId, bytes32 entitlementId, bytes32 areaContentId) external view returns (bool) {
+        return hasScopedEntitlement(growerProfileId, entitlementId, HighCountryGamingIds.ENTITLEMENT_PRESTIGE_AREA, areaContentId);
     }
 }

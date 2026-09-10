@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"crypto/subtle"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -20,7 +21,34 @@ func NewTransportHandler(service *Service) http.Handler {
 	mux.HandleFunc("/healthz", t.health)
 	mux.HandleFunc("/v1/capacity", t.capacity)
 	mux.HandleFunc("/v1/shards/", t.shard)
-	return mux
+	return securityHeaders(mux)
+}
+
+func securityHeaders(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		w.Header().Set("Cache-Control", "no-store")
+		w.Header().Set("Referrer-Policy", "no-referrer")
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (t *transportServer) authorized(r *http.Request) bool {
+	if t.service == nil { return false }
+	expected := strings.TrimSpace(t.service.cfg.AuthToken)
+	if expected == "" { return true }
+	raw := strings.TrimSpace(r.Header.Get("Authorization"))
+	if !strings.HasPrefix(raw, "Bearer ") { return false }
+	provided := strings.TrimSpace(strings.TrimPrefix(raw, "Bearer "))
+	if len(provided) != len(expected) { return false }
+	return subtle.ConstantTimeCompare([]byte(provided), []byte(expected)) == 1
+}
+
+func (t *transportServer) requireAuth(w http.ResponseWriter, r *http.Request) bool {
+	if t.authorized(r) { return true }
+	w.Header().Set("WWW-Authenticate", `Bearer realm="420Store"`)
+	http.Error(w, "unauthorized", http.StatusUnauthorized)
+	return false
 }
 
 func (t *transportServer) health(w http.ResponseWriter, _ *http.Request) {
@@ -37,6 +65,7 @@ func (t *transportServer) health(w http.ResponseWriter, _ *http.Request) {
 }
 
 func (t *transportServer) capacity(w http.ResponseWriter, r *http.Request) {
+	if !t.requireAuth(w, r) { return }
 	if r.Method != http.MethodGet {
 		w.Header().Set("Allow", http.MethodGet)
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
@@ -50,6 +79,7 @@ func (t *transportServer) capacity(w http.ResponseWriter, r *http.Request) {
 }
 
 func (t *transportServer) shard(w http.ResponseWriter, r *http.Request) {
+	if !t.requireAuth(w, r) { return }
 	if t.service == nil || t.service.runtime == nil {
 		http.Error(w, "service unavailable", http.StatusServiceUnavailable)
 		return

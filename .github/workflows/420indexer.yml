@@ -1,0 +1,50 @@
+name: 420Indexer
+
+on:
+  pull_request:
+    paths:
+      - 'indexer/**'
+      - 'explorer/**'
+      - 'config/420indexer-v1.json'
+      - 'contracts/config/420explorer-genesis.json'
+      - 'testnet/public-services/indexer/**'
+      - 'testnet/public-services/explorer/**'
+      - 'scripts/verify-420indexer.py'
+      - 'scripts/verify-explorer-indexer-consumer.py'
+      - '.github/workflows/420indexer.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'indexer/**'
+      - 'explorer/**'
+      - 'config/420indexer-v1.json'
+      - 'contracts/config/420explorer-genesis.json'
+      - 'testnet/public-services/indexer/**'
+      - 'testnet/public-services/explorer/**'
+      - 'scripts/verify-420indexer.py'
+      - 'scripts/verify-explorer-indexer-consumer.py'
+      - '.github/workflows/420indexer.yml'
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Test indexer
+        run: go test ./indexer/...
+      - name: Vet indexer
+        run: go vet ./indexer/...
+      - name: Test Explorer indexer consumer
+        run: go test ./explorer/...
+      - name: Vet Explorer indexer consumer
+        run: go vet ./explorer/...
+      - name: Validate readiness JSON
+        run: python -m json.tool config/420indexer-v1.json >/dev/null && python -m json.tool contracts/config/420explorer-genesis.json >/dev/null && python -m json.tool testnet/public-services/indexer/readiness.json >/dev/null && python -m json.tool testnet/public-services/explorer/readiness.json >/dev/null
+      - name: Verify GEN-11.1 readiness contract
+        run: python scripts/verify-420indexer.py
+      - name: Verify 420Explorer shared-indexer consumer contract
+        run: python scripts/verify-explorer-indexer-consumer.py

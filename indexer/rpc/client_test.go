@@ -7,6 +7,8 @@ import (
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	"github.com/420integrated/420-integrated/indexer/model"
 )
 
 func TestClientChainIDAndBundle(t *testing.T) {
@@ -42,10 +44,17 @@ func TestClientChainIDAndBundle(t *testing.T) {
 	if chainID != 420 { t.Fatalf("chain id=%d", chainID) }
 	head, err := c.BlockNumber(context.Background())
 	if err != nil || head != 1 { t.Fatalf("head=%d err=%v", head, err) }
-	bundle, err := c.BundleByNumber(context.Background(), 420, 1, "HEAD", "v1")
+	bundle, err := c.BundleByNumber(context.Background(), 420, 1, model.FinalityHead, "v1")
 	if err != nil { t.Fatal(err) }
 	if bundle.Block.Hash != "0xb1" || len(bundle.Transactions) != 1 || len(bundle.Receipts) != 1 || len(bundle.Logs) != 1 {
 		t.Fatalf("unexpected bundle: %+v", bundle)
 	}
 	if bundle.Logs[0].BlockHash != "0xb1" || bundle.Receipts[0].Status != 1 { t.Fatalf("provenance lost: %+v %+v", bundle.Logs[0], bundle.Receipts[0]) }
+
+	safe, err := c.SafeBlock(context.Background(), 420, "v1")
+	if err != nil { t.Fatal(err) }
+	if safe.Number != 1 || safe.Hash != "0xb1" || safe.Finality != model.FinalitySafe { t.Fatalf("unexpected safe block: %+v", safe) }
+	finalized, err := c.FinalizedBlock(context.Background(), 420, "v1")
+	if err != nil { t.Fatal(err) }
+	if finalized.Number != 1 || finalized.Hash != "0xb1" || finalized.Finality != model.FinalityFinalized { t.Fatalf("unexpected finalized block: %+v", finalized) }
 }

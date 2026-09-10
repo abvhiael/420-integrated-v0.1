@@ -79,10 +79,25 @@
 - finalized boundary disagreement returns finalized-history conflict without advancing checkpoint
 - qualification for normal promotion, invalid ordering and finalized hash conflict
 
+### GEN-11.1F — final qualification / readiness closeout
+
+- `INDEXER_REBUILD=1` full rebuild mode over canonical RPC
+- atomic durable-store reset clears only rebuildable indexed state
+- canonical `version.Schema` used by the production command
+- reset/reopen qualification proves no stale block, tx, receipt, log or checkpoint state survives rebuild reset
+- restart -> non-finalized fork -> deterministic repair integration fixture
+- readiness status advanced to `GEN11_1F_QUALIFICATION`
+- machine-readable qualification evidence in testnet readiness profile
+- `scripts/verify-420indexer.py` enforced by the dedicated 420Indexer workflow
+- first-consumer gate explicitly reserved for 420Explorer
+
 ## Remaining before GEN-11.1 completion
 
-- scalable database-backed store option after file-store baseline qualification
-- full rebuild tooling
-- restart/reorg integration fixtures
-- GEN-11.1F final qualification / readiness closeout
-- first GEN-10 consumer integration, recommended 420Explorer
+- clear the GEN-11.1F CI gate on the current reconciled head
+- integrate 420Explorer as the first GEN-10 consumer with no independent chain-ingestion path
+- mark the 420Explorer consumer gate qualified after integration tests
+- testnet deployment URL/service probe remains a deployment-stage task
+
+## Post-baseline scalability
+
+A database-backed store remains recommended before high-volume production operation, but it is not a correctness prerequisite for the first consumer integration. The file-backed store is the qualified deterministic baseline and preserves the replaceable-store boundary.

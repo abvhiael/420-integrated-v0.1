@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"math"
 	"net/http"
 	"strconv"
@@ -85,7 +86,7 @@ func (t *transportServer) shard(w http.ResponseWriter, r *http.Request) {
 }
 
 func (t *transportServer) putShard(w http.ResponseWriter, r *http.Request, id string, assignment Assignment) {
-	if assignment.SizeBytes == 0 || assignment.SizeBytes > math.MaxInt64 {
+	if assignment.SizeBytes == 0 || assignment.SizeBytes >= math.MaxInt64 {
 		writeStorageError(w, ErrInvalidShard)
 		return
 	}
@@ -98,10 +99,8 @@ func (t *transportServer) putShard(w http.ResponseWriter, r *http.Request, id st
 		return
 	}
 
-	// A retry of an already-stored shard is idempotent only if the local record
-	// still matches the current canonical assignment. Return the existing record
-	// without consuming the body, touching storage, or reserving capacity again.
-	if _, existing, err := t.service.runtime.Retrieve(r.Context(), id, 0, 1); err == nil {
+	if rc, existing, _, err := t.service.runtime.RetrieveStream(r.Context(), id, 0, 1); err == nil {
+		_ = rc.Close()
 		if existing.AgreementID != assignment.AgreementID || existing.CommitmentID != assignment.CommitmentID || existing.ShardRoot != assignment.ShardRoot || existing.SizeBytes != assignment.SizeBytes {
 			writeStorageError(w, ErrCommitmentMismatch)
 			return
@@ -113,9 +112,7 @@ func (t *transportServer) putShard(w http.ResponseWriter, r *http.Request, id st
 		return
 	}
 
-	// Cap the HTTP body at the exact canonical shard size. Runtime still reads
-	// size+1 from its input so non-HTTP callers retain their own overflow check.
-	r.Body = http.MaxBytesReader(w, r.Body, int64(assignment.SizeBytes))
+	r.Body = http.MaxBytesReader(w, r.Body, int64(assignment.SizeBytes)+1)
 	rec, err := t.service.runtime.StoreShard(r.Context(), id, r.Body)
 	if err != nil {
 		var maxErr *http.MaxBytesError
@@ -135,21 +132,24 @@ func (t *transportServer) getShard(w http.ResponseWriter, r *http.Request, id st
 		http.Error(w, "invalid range", http.StatusRequestedRangeNotSatisfiable)
 		return
 	}
-	data, rec, err := t.service.runtime.Retrieve(r.Context(), id, offset, length)
+	rc, rec, streamLen, err := t.service.runtime.RetrieveStream(r.Context(), id, offset, length)
 	if err != nil {
 		writeStorageError(w, err)
 		return
 	}
-	if offset > rec.SizeBytes {
+	defer rc.Close()
+	if partial && offset >= rec.SizeBytes {
+		w.Header().Set("Content-Range", fmt.Sprintf("bytes */%d", rec.SizeBytes))
 		http.Error(w, "invalid range", http.StatusRequestedRangeNotSatisfiable)
 		return
 	}
 	end := offset
-	if len(data) > 0 {
-		end = offset + uint64(len(data)) - 1
+	if streamLen > 0 {
+		end = offset + streamLen - 1
 	}
 	w.Header().Set("Accept-Ranges", "bytes")
 	w.Header().Set("Content-Type", "application/octet-stream")
+	w.Header().Set("Content-Length", strconv.FormatUint(streamLen, 10))
 	w.Header().Set("ETag", fmt.Sprintf("\"%s\"", rec.ShardRoot))
 	w.Header().Set("X-420-Agreement-ID", rec.AgreementID)
 	w.Header().Set("X-420-Commitment-ID", rec.CommitmentID)
@@ -160,7 +160,7 @@ func (t *transportServer) getShard(w http.ResponseWriter, r *http.Request, id st
 		w.WriteHeader(http.StatusOK)
 	}
 	if r.Method != http.MethodHead {
-		_, _ = w.Write(data)
+		_, _ = io.Copy(w, rc)
 	}
 }
 

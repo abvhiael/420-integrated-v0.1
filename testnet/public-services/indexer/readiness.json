@@ -1,9 +1,10 @@
 {
   "schema": "420-testnet-indexer-readiness-v1",
   "service": "420Indexer",
-  "status": "PENDING_IMPLEMENTATION",
+  "status": "GEN11_1F_QUALIFICATION",
   "backend": {
     "url": "REPLACE",
+    "deployment_status": "PENDING_TESTNET_DEPLOYMENT",
     "required_checks": [
       "rejects wrong-chain RPC sources",
       "indexes blocks by canonical hash and chain id",
@@ -18,10 +19,23 @@
       "reports schema and decoder versions",
       "provides deterministic pagination for fixed snapshots",
       "preserves source provenance for derived records"
-    ]
+    ],
+    "qualification_evidence": {
+      "wrong_chain": "IMPLEMENTED_AND_TESTED",
+      "canonical_block_tx_receipt_log_ingestion": "IMPLEMENTED_AND_TESTED",
+      "checkpoint_restart_resume": "IMPLEMENTED_AND_TESTED",
+      "nonfinalized_reorg_repair": "IMPLEMENTED_AND_TESTED",
+      "finalized_conflict_fail_closed": "IMPLEMENTED_AND_TESTED",
+      "full_rebuild": "IMPLEMENTED_AND_TESTED",
+      "head_safe_finalized_promotion": "IMPLEMENTED_AND_TESTED",
+      "registry_backed_historical_decoding": "IMPLEMENTED_AND_TESTED",
+      "fixed_snapshot_pagination": "IMPLEMENTED_AND_TESTED",
+      "restart_reorg_integration_fixture": "IMPLEMENTED",
+      "production_http_read_api": "IMPLEMENTED_AND_TESTED"
+    }
   },
   "consumer_gates": {
-    "420Explorer": "PENDING",
+    "420Explorer": "PENDING_FIRST_CONSUMER_INTEGRATION",
     "420Search": "PENDING",
     "420Analytics": "PENDING",
     "420Notifications": "PENDING",

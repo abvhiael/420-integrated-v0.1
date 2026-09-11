@@ -5,6 +5,7 @@ import {
   encodeBlockCursor420, decodeBlockCursor420,
   encodeTransactionCursor420, decodeTransactionCursor420,
   encodePositionCursor420, decodePositionCursor420,
+  encodeAssetTransferCursor420, decodeAssetTransferCursor420,
   blocksQuery420, transactionsQuery420, logsQuery420, protocolEventsQuery420, assetTransfersQuery420
 } from '../src/query-layer.js';
 
@@ -12,6 +13,7 @@ test('cursor codecs round-trip canonical positions', () => {
   assert.deepEqual(decodeBlockCursor420(encodeBlockCursor420({ blockNumber: 42n })), { blockNumber: 42n });
   assert.deepEqual(decodeTransactionCursor420(encodeTransactionCursor420({ blockNumber: 42n, txIndex: 7 })), { blockNumber: 42n, txIndex: 7 });
   assert.deepEqual(decodePositionCursor420(encodePositionCursor420({ blockNumber: 42n, txIndex: 7, logIndex: 3 })), { blockNumber: 42n, txIndex: 7, logIndex: 3 });
+  assert.deepEqual(decodeAssetTransferCursor420(encodeAssetTransferCursor420({ blockNumber: 42n, txHash: '0xABC', logIndex: -1 })), { blockNumber: 42n, txHash: '0xabc', logIndex: -1 });
 });
 
 test('limits are bounded and fail closed', () => {
@@ -57,6 +59,6 @@ test('asset transfer query is chain scoped and deterministic', () => {
   assert.match(query.text, /asset_key = \$2/);
   assert.match(query.text, /from_address = \$3 or to_address = \$3/);
   assert.match(query.text, /block_number < \$4/);
-  assert.match(query.text, /order by block_number desc, tx_hash desc, log_index desc nulls last/);
+  assert.match(query.text, /order by block_number desc, lower\(tx_hash\) desc, coalesce\(log_index,-1\) desc/);
   assert.deepEqual(query.params, ['420','erc20:0x1:','0xabc','99',21]);
 });

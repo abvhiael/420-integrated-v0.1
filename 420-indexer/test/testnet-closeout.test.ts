@@ -11,8 +11,10 @@ import type {
 import type { TestnetConsumerQualificationReport420 } from '../src/testnet-consumer-qualification.js';
 
 const GENESIS = `0x${'ab'.repeat(32)}` as Hex;
-const H5 = `0x${'05'.repeat(32)}` as Hex;
+const H2 = `0x${'02'.repeat(32)}` as Hex;
 const H3 = `0x${'03'.repeat(32)}` as Hex;
+const H4 = `0x${'04'.repeat(32)}` as Hex;
+const H5 = `0x${'05'.repeat(32)}` as Hex;
 
 const config: TestnetQualificationConfig420 = {
   chainId: '420420',
@@ -40,19 +42,19 @@ const smoke: TestnetSmokeQualificationReport420 = {
 const restart: TestnetRestartQualificationReport420 = {
   sourceId: 'live-rpc',
   observedSafeHead: 5n,
-  checkpointBefore: { chainId: 420420n, blockNumber: 3n, blockHash: H3 },
+  checkpointBefore: { chainId: 420420n, blockNumber: 3n, blockHash: H3, parentHash: H2 },
   replayGap: 2,
   processed: 2,
-  checkpointAfter: { chainId: 420420n, blockNumber: 5n, blockHash: H5 },
+  checkpointAfter: { chainId: 420420n, blockNumber: 5n, blockHash: H5, parentHash: H4 },
   idempotentProcessed: 0,
 };
 
 const reorg: TestnetReorgQualificationReport420 = {
   sourceId: 'live-rpc',
   observedSafeHead: 5n,
-  checkpointBefore: { chainId: 420420n, blockNumber: 5n, blockHash: H5 },
+  checkpointBefore: { chainId: 420420n, blockNumber: 5n, blockHash: H5, parentHash: H4 },
   recoveredReorgDepth: 2,
-  checkpointAfter: { chainId: 420420n, blockNumber: 5n, blockHash: H5 },
+  checkpointAfter: { chainId: 420420n, blockNumber: 5n, blockHash: H5, parentHash: H4 },
   replayedBlocks: 2,
 };
 

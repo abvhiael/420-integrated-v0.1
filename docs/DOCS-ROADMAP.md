@@ -16,7 +16,7 @@ Exit condition: documentation taxonomy, standards, app contract, ADR rules, diag
 ## DOC-1 — 420Docs site foundation — IN PROGRESS
 
 - [x] DOC-1.1 Establish MkDocs Material project foundation.
-- [ ] DOC-1.2 Add GitHub Pages deployment through GitHub Actions.
+- [x] DOC-1.2 Add GitHub Pages deployment through GitHub Actions.
 - [ ] DOC-1.3 Build documentation landing page and audience-based navigation.
 - [ ] DOC-1.4 Integrate 420Docs links into the repository README.
 - [ ] DOC-1.5 Complete whole-site search/navigation qualification.

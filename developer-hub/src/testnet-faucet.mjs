@@ -16,6 +16,18 @@ function normalizeAddress420(address) {
   return address.toLowerCase();
 }
 
+function validateEndpoint420(endpoint) {
+  assert420(typeof endpoint === 'string' && endpoint.length > 0, 'canonical faucet endpoint is unavailable');
+  let parsed;
+  try {
+    parsed = new URL(endpoint);
+  } catch {
+    throw new FaucetError420('canonical faucet endpoint is invalid');
+  }
+  assert420(parsed.protocol === 'http:' || parsed.protocol === 'https:', 'canonical faucet endpoint must use HTTP(S)');
+  return endpoint;
+}
+
 export function createDeveloperTestAccount420(address, label = 'developer') {
   const normalized = normalizeAddress420(address);
   assert420(typeof label === 'string' && label.length > 0 && label.length <= 64, 'developer test-account label is invalid');
@@ -32,8 +44,7 @@ export function createFaucetClient420({ network, transport }) {
   assert420(network.environment === 'testnet', 'remote faucet requests are testnet-only');
   assert420(network.canRequestFaucet === true, 'selected testnet does not expose faucet capability');
   assert420(typeof network.service === 'function', 'discovered network service resolver is required');
-  const endpoint = network.service('faucet');
-  assert420(typeof endpoint === 'string' && endpoint.length > 0, 'canonical faucet endpoint is unavailable');
+  const endpoint = validateEndpoint420(network.service('faucet'));
   assert420(transport && typeof transport.request === 'function', 'faucet transport is required');
 
   return Object.freeze({

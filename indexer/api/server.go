@@ -42,6 +42,7 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("GET /v1/transactions/{hash}", s.transaction)
 	mux.HandleFunc("GET /v1/receipts/{hash}", s.receipt)
 	mux.HandleFunc("GET /v1/blocks/{number}/logs", s.blockLogs)
+	mux.HandleFunc("GET /v1/contracts/{address}", s.contract)
 	mux.HandleFunc("GET /v1/services/{service}/versions/{version}", s.serviceVersion)
 	return mux
 }

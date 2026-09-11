@@ -69,19 +69,21 @@ The completed IDX-7.4 surface includes:
 
 See `docs/420INDEXER-API-V1.md` for the complete route table and stability contract.
 
-## IDX-8 — notification/event-stream delivery — in progress
+## IDX-8 — notification/event-stream delivery — complete
 
-IDX-8 builds replayable delivery primitives over the qualified public projection API. Delivery remains non-authoritative and preserves canonical provenance.
+IDX-8 provides replayable, non-authoritative notification delivery primitives over the qualified public projection API.
 
-Slices:
+Completed slices:
 
-- **IDX-8.1 — replayable event-stream contract — complete:** stable event envelopes and IDs, opaque cursor replay, public-API-only dependency, protocol event filtering and provenance preservation.
-- **IDX-8.2 — subscription/watch matching — complete:** deterministic opt-in matching by chain, protocol, event, topic, object key, lifecycle state and contract address; empty selector sets fail closed; private subscription state remains outside index projections.
-- **IDX-8.3 — delivery queue and retry semantics — complete:** deterministic deduplication keys, idempotent enqueue, provider-neutral handoff records, bounded exponential retry/backoff, dead-letter state, priority/severity metadata, explicit rate-limit decisions and non-authoritative delivery records.
-- **IDX-8.4 — reorg/finality delivery semantics — complete:** append-only finalization, retraction and supersession signals; non-finalized events may be retracted or superseded; finalized event history is immutable; replacement events retain their own fork-sensitive identities; cross-chain and conflicting replacements fail closed.
-- **IDX-8.5 — 420Notifications integration and qualification:** consumer adapter, end-to-end replay/restart tests, failure isolation and documentation.
+- **IDX-8.1 — replayable event-stream contract:** stable fork-sensitive event IDs, provenance-preserving envelopes, opaque cursor replay and public-API-only dependency.
+- **IDX-8.2 — subscription/watch matching:** deterministic opt-in matching by chain, protocol, event, topic, object key, lifecycle state and contract address; private subscription state remains outside index projections.
+- **IDX-8.3 — delivery queue and retry semantics:** deterministic deduplication, idempotent enqueue, provider-neutral handoffs, bounded retry/backoff, dead-letter state, priority/severity and rate limiting.
+- **IDX-8.4 — reorg/finality delivery semantics:** append-only finalization/retraction/supersession signals, immutable finalized history and distinct replacement-event identities.
+- **IDX-8.5 — 420Notifications integration and qualification:** exported consumer adapter, consumer-owned replay checkpoints, restart/resume support, deterministic replay idempotency, failure isolation, canonicality-update mapping and closeout documentation.
 
-IDX-8.1 through IDX-8.4 consume only the stable public projection boundary. Subscription configuration, delivery queue state and delivery-time canonicality tracking are presentation/delivery policy rather than canonical or indexed protocol state. Reorg handling emits append-only signals instead of rewriting prior envelopes, while finalized events cannot be retracted or superseded.
+IDX-8 consumes only stable public projection/event surfaces. Subscription configuration, replay checkpoints, delivery queues and canonicality tracking are presentation/delivery state and remain `authoritative: false`. A malformed replay batch fails closed before checkpoint advancement. Individual notification enqueue failures do not block other subscriptions, replay progress or protocol execution.
+
+See `docs/420NOTIFICATIONS.md` for the notification integration, privacy, replay and reliability contract.
 
 ## Authority boundary
 
@@ -93,4 +95,4 @@ IDX-8.1 through IDX-8.4 consume only the stable public projection boundary. Subs
 
 ## Next phase
 
-Complete IDX-8 delivery, then proceed to IDX-9 operational hardening and IDX-10 testnet qualification.
+Proceed to IDX-9 operational hardening, then IDX-10 testnet qualification.

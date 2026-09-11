@@ -38,6 +38,7 @@ func (s *Server) routes() {
 	s.mux.HandleFunc("GET /v1/blocks", s.handleBlocks)
 	s.mux.HandleFunc("GET /v1/blocks/{number}", s.handleBlock)
 	s.mux.HandleFunc("GET /v1/transactions/{hash}", s.handleTransaction)
+	s.mux.HandleFunc("GET /v1/receipts/{hash}", s.handleReceipt)
 	s.mux.HandleFunc("GET /v1/services/{service}/versions/{version}", s.handleServiceVersion)
 }
 
@@ -88,7 +89,21 @@ func (s *Server) handleTransaction(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "transaction hash required")
 		return
 	}
-	view, err := s.service.Transaction(r.Context(), hash)
+	view, err := s.service.TransactionDetail(r.Context(), hash)
+	if err != nil {
+		writeError(w, explorerErrorStatus(err), err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, view)
+}
+
+func (s *Server) handleReceipt(w http.ResponseWriter, r *http.Request) {
+	hash := strings.TrimSpace(r.PathValue("hash"))
+	if hash == "" {
+		writeError(w, http.StatusBadRequest, "transaction hash required")
+		return
+	}
+	view, err := s.service.ReceiptDetail(r.Context(), hash)
 	if err != nil {
 		writeError(w, explorerErrorStatus(err), err.Error())
 		return

@@ -9,9 +9,8 @@ import type {
   TransactionPageRequest420
 } from '../src/api-surface.js';
 import { INDEXER_API_VERSION_420 } from '../src/api-surface.js';
-import type { AddressDto420, AssetTransferDto420, BlockDto420, TransactionDto420 } from '../src/public-dto.js';
+import type { AddressDto420, AssetTransferDto420, BlockDto420, ProtocolEventDto420, TransactionDto420 } from '../src/public-dto.js';
 import type { QueryPage420 } from '../src/query-layer.js';
-import type { QueryRow420 } from '../src/query-service.js';
 import { routeIndexerHttp420 } from '../src/http-transport.js';
 
 class FakeApi420 implements IndexerPublicApi420 {
@@ -51,7 +50,7 @@ class FakeApi420 implements IndexerPublicApi420 {
     return { items: [], nextCursor: null };
   }
 
-  async protocolEvents(chainId: bigint, request: ProtocolEventPageRequest420 = {}): Promise<QueryPage420<QueryRow420>> {
+  async protocolEvents(chainId: bigint, request: ProtocolEventPageRequest420 = {}): Promise<QueryPage420<ProtocolEventDto420>> {
     this.calls.push({ name: 'protocolEvents', chainId, request });
     return { items: [], nextCursor: null };
   }

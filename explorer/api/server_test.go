@@ -48,21 +48,16 @@ func TestStatusRoute(t *testing.T) {
 		SchemaVersion: "v1", DecoderSet: "genesis", State: "READY", LastIngestAt: now,
 	}}}
 	s := newTestServer(t, f)
-	req := httptest.NewRequest(http.MethodGet, "/v1/status", nil)
 	rr := httptest.NewRecorder()
-	s.Handler().ServeHTTP(rr, req)
+	s.Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodGet, "/v1/status", nil))
 	if rr.Code != http.StatusOK { t.Fatalf("status=%d body=%s", rr.Code, rr.Body.String()) }
 	var got explorerservice.NetworkStatus
 	if err := json.Unmarshal(rr.Body.Bytes(), &got); err != nil { t.Fatal(err) }
-	if got.ChainID != 420 || got.IndexedHeight != 100 || got.SafeHeight != 99 || got.FinalizedHeight != 98 {
-		t.Fatalf("unexpected status: %+v", got)
-	}
+	if got.ChainID != 420 || got.IndexedHeight != 100 || got.SafeHeight != 99 || got.FinalizedHeight != 98 { t.Fatalf("unexpected status: %+v", got) }
 }
 
 func TestStatusRouteFailsClosedOnWrongChain(t *testing.T) {
-	f := &fakeIndexer{health: indexerapi.HealthResponse{Health: model.Health{
-		ChainID: 1, State: "READY", LastIngestAt: time.Now().UTC(),
-	}}}
+	f := &fakeIndexer{health: indexerapi.HealthResponse{Health: model.Health{ChainID: 1, State: "READY", LastIngestAt: time.Now().UTC()}}}
 	s := newTestServer(t, f)
 	rr := httptest.NewRecorder()
 	s.Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodGet, "/v1/status", nil))
@@ -82,9 +77,7 @@ func TestBlockDetailRoute(t *testing.T) {
 	var got explorerservice.BlockDetailView
 	if err := json.Unmarshal(rr.Body.Bytes(), &got); err != nil { t.Fatal(err) }
 	if got.Block.Number != 7 || got.Block.Finality != model.FinalitySafe || got.LogCount != 1 { t.Fatalf("unexpected block detail: %+v", got) }
-	if got.Navigation.Previous == nil || *got.Navigation.Previous != 6 || got.Navigation.Next == nil || *got.Navigation.Next != 8 {
-		t.Fatalf("unexpected navigation: %+v", got.Navigation)
-	}
+	if got.Navigation.Previous == nil || *got.Navigation.Previous != 6 || got.Navigation.Next == nil || *got.Navigation.Next != 8 { t.Fatalf("unexpected navigation: %+v", got.Navigation) }
 }
 
 func TestBlocksRouteReturnsPresentationPage(t *testing.T) {
@@ -98,23 +91,36 @@ func TestBlocksRouteReturnsPresentationPage(t *testing.T) {
 	if rr.Code != http.StatusOK { t.Fatalf("status=%d body=%s", rr.Code, rr.Body.String()) }
 	var got explorerservice.BlockPageView
 	if err := json.Unmarshal(rr.Body.Bytes(), &got); err != nil { t.Fatal(err) }
-	if got.Meta.SnapshotHeight != 9 || got.Meta.NextCursor != "cursor" || len(got.Blocks) != 1 || got.Blocks[0].Finality != model.FinalityHead {
-		t.Fatalf("unexpected block page: %+v", got)
+	if got.Meta.SnapshotHeight != 9 || got.Meta.NextCursor != "cursor" || len(got.Blocks) != 1 || got.Blocks[0].Finality != model.FinalityHead { t.Fatalf("unexpected block page: %+v", got) }
+}
+
+func transactionFixture() *fakeIndexer {
+	return &fakeIndexer{
+		tx: model.TransactionRecord{ChainID: 420, BlockNumber: 7, BlockHash: "0xblock", Hash: "0xtx", Index: 1, From: "0xfrom", To: "0xto"},
+		receipt: model.ReceiptRecord{ChainID: 420, BlockNumber: 7, BlockHash: "0xblock", TransactionHash: "0xtx", TransactionIndex: 1, Status: 1, GasUsed: 21000},
+		block: model.BlockRecord{ChainID: 420, Number: 7, Hash: "0xblock", Finality: model.FinalityFinalized},
+		logs: []model.LogRecord{{ChainID: 420, BlockNumber: 7, BlockHash: "0xblock", TransactionHash: "0xtx", TransactionIndex: 1, LogIndex: 0, Address: "0xcontract"}},
 	}
 }
 
 func TestTransactionRoute(t *testing.T) {
-	f := &fakeIndexer{
-		tx: model.TransactionRecord{ChainID: 420, BlockNumber: 7, BlockHash: "0xblock", Hash: "0xtx"},
-		receipt: model.ReceiptRecord{ChainID: 420, BlockNumber: 7, BlockHash: "0xblock", TransactionHash: "0xtx", Status: 1},
-	}
-	s := newTestServer(t, f)
+	s := newTestServer(t, transactionFixture())
 	rr := httptest.NewRecorder()
 	s.Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodGet, "/v1/transactions/0xtx", nil))
 	if rr.Code != http.StatusOK { t.Fatalf("status=%d body=%s", rr.Code, rr.Body.String()) }
-	var got explorerservice.TransactionView
+	var got explorerservice.TransactionDetailView
 	if err := json.Unmarshal(rr.Body.Bytes(), &got); err != nil { t.Fatal(err) }
-	if got.Transaction.Hash != "0xtx" || got.Receipt.Status != 1 { t.Fatalf("unexpected tx view: %+v", got) }
+	if got.Transaction.Hash != "0xtx" || got.Receipt.StatusLabel != "SUCCESS" || got.LogCount != 1 || got.Finality != model.FinalityFinalized { t.Fatalf("unexpected tx detail: %+v", got) }
+}
+
+func TestReceiptRoute(t *testing.T) {
+	s := newTestServer(t, transactionFixture())
+	rr := httptest.NewRecorder()
+	s.Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodGet, "/v1/receipts/0xtx", nil))
+	if rr.Code != http.StatusOK { t.Fatalf("status=%d body=%s", rr.Code, rr.Body.String()) }
+	var got explorerservice.ReceiptDetailView
+	if err := json.Unmarshal(rr.Body.Bytes(), &got); err != nil { t.Fatal(err) }
+	if got.Receipt.TransactionHash != "0xtx" || got.Transaction.Hash != "0xtx" || got.LogCount != 1 { t.Fatalf("unexpected receipt detail: %+v", got) }
 }
 
 func TestServiceVersionRoute(t *testing.T) {

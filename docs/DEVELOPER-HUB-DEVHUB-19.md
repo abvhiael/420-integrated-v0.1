@@ -2,13 +2,13 @@
 
 ## Status
 
-DEVHUB-19 begins the production-launch phase by introducing a developer-facing readiness gate that **consumes existing evidence** rather than creating a new source of truth.
+DEVHUB-19 implements a developer-facing production-launch readiness and release-candidate closeout surface that **consumes existing evidence** rather than creating a new source of truth.
 
 The Developer Hub does not decide that the chain, contracts, wallets, services, or public testnet are production-ready merely because tooling exists. DEVHUB-19 requires explicit evidence from DEVHUB-18 and the repository's release-readiness pipeline.
 
 ## Required inputs
 
-The initial launch gate consumes three independent inputs:
+The launch gate consumes three independent inputs:
 
 1. a DEVHUB-18 security/developer qualification report;
 2. the DEVHUB-18 exact-head CI handoff for the same release candidate;
@@ -28,9 +28,35 @@ The bounded launch states are:
 
 ## Existing release boundary
 
-The current repository `release/readiness.json` remains authoritative for the repository release-readiness process. At the start of DEVHUB-19 it still reports `public_testnet_ready: false` with production gates blocked where explicit evidence is absent.
+The repository `release/readiness.json` remains the independent release-readiness evidence source. At DEVHUB-19 implementation time it still reports `public_testnet_ready: false` where production gates remain blocked.
 
-DEVHUB-19 must preserve that state. It cannot infer readiness from source files, successful local tests, the existence of production adapters, or Developer Hub qualification alone.
+DEVHUB-19 preserves that state. It cannot infer readiness from source files, successful local tests, the existence of production adapters, or Developer Hub qualification alone.
+
+## Exact release-candidate closeout
+
+DEVHUB-19 adds a release-candidate descriptor with:
+
+- one `candidateId`;
+- one exact lowercase 40-hex `commitSha`;
+- one explicit `releaseChannel`;
+- one creation timestamp;
+- `canonicalAuthority: false`.
+
+Closeout requires the descriptor commit SHA to equal the DEVHUB-18 CI-handoff candidate SHA carried into the DEVHUB-19 readiness report. The release channel must also match the repository readiness evidence. Evidence from another commit or channel is rejected rather than reused.
+
+A closeout result can be `READY`, `BLOCKED`, or `FAIL`; it cannot upgrade a blocked or failed readiness report.
+
+## Dashboard
+
+The localhost Developer Hub dashboard exposes GET-only launch routes:
+
+- `/api/launch/view` — readiness and closeout contracts;
+- `/api/launch/check` — current redacted readiness result;
+- `/api/launch/closeout` — exact candidate closeout result.
+
+`DEVHUB_CANDIDATE_SHA` binds the runtime to one candidate commit. `DEVHUB_RELEASE_CANDIDATE_DESCRIPTOR` selects the release-candidate descriptor. Missing configuration returns `BLOCKED` rather than guessing.
+
+No launch dashboard route deploys, signs, broadcasts, publishes, activates a network, grants capabilities, approves governance, mutates Registry state, or exposes secrets.
 
 ## CLI
 
@@ -62,10 +88,20 @@ DEVHUB-INV-182 — The existence of tooling, source adapters, manifests, workflo
 
 DEVHUB-INV-183 — Launch readiness cannot confer protocol authority, Registry legitimacy, Wallet capability, governance approval, audit status, finality, settlement, or public-testnet activation.
 
-## Foundation exit gate
+DEVHUB-INV-184 — The readiness report carries the exact CI-handoff candidate commit SHA and release channel used for closeout provenance.
 
-The DEVHUB-19 foundation slice is complete when the readiness runtime, hostile-state tests, `420-launch` CLI, and documentation qualify in CI.
+DEVHUB-INV-185 — Release-candidate closeout rejects any commit SHA that differs from the readiness evidence candidate SHA.
 
-## Next DEVHUB-19 slice
+DEVHUB-INV-186 — Release-candidate closeout rejects any release channel that differs from the readiness evidence release channel.
 
-After the foundation qualifies, DEVHUB-19 will add redacted dashboard launch-readiness views and candidate/provenance binding suitable for final release-candidate closeout without introducing deployment or governance authority.
+DEVHUB-INV-187 — A release-candidate descriptor must explicitly declare `canonicalAuthority: false`.
+
+DEVHUB-INV-188 — Dashboard launch surfaces are GET-only and expose no deploy, activate, publish, sign, approve, execute, secret, or token mutation route.
+
+DEVHUB-INV-189 — Release-candidate closeout cannot upgrade `BLOCKED` or `FAIL` readiness into `READY`.
+
+## DEVHUB-19 closeout gate
+
+DEVHUB-19 is complete when the readiness runtime, exact candidate binding, hostile-state tests, `420-launch` CLI, redacted dashboard launch surface, and documentation qualify together on one exact PR head.
+
+A green DEVHUB-19 implementation still does **not** mean the public testnet or mainnet is operationally ready. Actual launch remains contingent on the independent release evidence and any external deployment/governance procedures required by the system.

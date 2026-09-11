@@ -63,7 +63,7 @@ IDX-8 provides replayable, non-authoritative notification delivery primitives ov
 
 See `docs/420NOTIFICATIONS.md` for the notification integration, privacy, replay and reliability contract.
 
-## IDX-9 — operational hardening — in progress
+## IDX-9 — operational hardening — complete
 
 Completed slices:
 
@@ -71,10 +71,7 @@ Completed slices:
 - **IDX-9.2 — graceful shutdown and bounded work:** stop admission before shutdown, drain already accepted work, reject new ingest runs during drain, preserve the existing per-run block bound, enforce a hard drain deadline, and fail runtime closed on shutdown timeout.
 - **IDX-9.3 — observability and operational telemetry:** aggregate non-authoritative telemetry for ingest, reorgs, lag, work pressure and delivery state without private payload leakage.
 - **IDX-9.4 — durable recovery invariants:** persistent SQL canonical-history storage, SQL-backed checkpoint/history readers, atomic projection + checkpoint + canonical-history advancement through `DurableBlockConsumer420`, and atomic reorg rollback/history truncation/checkpoint reset when the durable consumer path is available. Legacy non-durable consumers remain supported for tests and adapters that intentionally use external stores.
-
-Remaining slice:
-
-- **IDX-9.5 — failure injection and recovery qualification:** restart, RPC outage, stale-head, database interruption, reorg and dependency-failure scenarios with operator-facing recovery guidance.
+- **IDX-9.5 — failure injection and recovery qualification:** deterministic fault coverage for process restart, RPC outage, stale ingestion, database interruption and canonical reorg recovery; failure-state assertions ensure checkpoints do not advance past failed work and readiness fails closed. `docs/420INDEXER-RECOVERY.md` defines operator actions and safe recovery criteria for restart, RPC/source outages, stale heads, DB failures, bounded/deep reorgs, shutdown timeout and notification-provider failures.
 
 `/health` remains a process-liveness probe; `/ready` is the traffic-admission gate when runtime state is supplied. Runtime, shutdown, telemetry and recovery metadata remain off-chain service state and never replace canonical chain authority.
 
@@ -88,4 +85,4 @@ Remaining slice:
 
 ## Next phase
 
-Complete IDX-9.5 failure-injection/recovery qualification, then proceed to IDX-10 testnet qualification.
+Proceed to IDX-10 testnet qualification: deploy the hardened indexer against the 420 Integrated testnet, qualify real RPC/finality/reorg behavior and consumer surfaces under sustained chain activity, and close the remaining deployment-time IDX-5 artifact-manifest qualification against the compiled genesis suite.

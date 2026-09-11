@@ -1,3 +1,8 @@
+import { MemoryCheckpointStore420 } from './checkpoint-store.js';
+import type { ChainSource420, Hex } from './chain-source.js';
+import { IndexerIngestor420, type BlockConsumer420 } from './ingestor.js';
+import { safeHead420, type FinalityPolicy420 } from './indexing.js';
+
 export type TestnetFinalityMode420 = 'head' | 'confirmations' | 'finalized';
 
 export interface TestnetQualificationConfig420 {
@@ -20,6 +25,18 @@ export interface TestnetQualificationEnvironment420 {
   IDX420_SUSTAINED_BLOCKS?: string;
   IDX420_MAX_REORG_DEPTH?: string;
   IDX420_RESTART_REPLAY_BLOCKS?: string;
+}
+
+export interface TestnetSmokeQualificationReport420 {
+  chainId: bigint;
+  sourceId: string;
+  genesisHash: Hex;
+  observedHead: bigint;
+  observedSafeHead: bigint;
+  firstBlock: bigint;
+  lastBlock: bigint;
+  processed: number;
+  checkpointHash: Hex;
 }
 
 const DECIMAL = /^(0|[1-9][0-9]*)$/;
@@ -64,6 +81,28 @@ function rpcUrl(value: string | undefined): string {
   return parsed.toString();
 }
 
+function finalityPolicy420(config: TestnetQualificationConfig420): FinalityPolicy420 {
+  if (config.finalityMode === 'confirmations') {
+    if (config.confirmations === null) throw new Error('testnet qualification confirmations are missing');
+    return { mode: 'confirmations', confirmations: BigInt(config.confirmations) };
+  }
+  return { mode: config.finalityMode };
+}
+
+async function qualificationSafeHead420(
+  source: ChainSource420,
+  config: TestnetQualificationConfig420,
+  observedHead: bigint,
+): Promise<bigint> {
+  if (config.finalityMode === 'finalized') {
+    if (!source.finalizedBlockNumber) {
+      throw new Error('testnet qualification source does not expose finalized block semantics');
+    }
+    return source.finalizedBlockNumber();
+  }
+  return safeHead420(observedHead, finalityPolicy420(config));
+}
+
 export function parseTestnetQualificationConfig420(
   env: TestnetQualificationEnvironment420,
 ): TestnetQualificationConfig420 {
@@ -105,5 +144,67 @@ export function parseTestnetQualificationConfig420(
     sustainedBlocks: positiveInt('IDX420_SUSTAINED_BLOCKS', env.IDX420_SUSTAINED_BLOCKS),
     maxReorgDepth,
     restartReplayBlocks,
+  };
+}
+
+export async function runTestnetSmokeQualification420(
+  source: ChainSource420,
+  consumer: BlockConsumer420,
+  config: TestnetQualificationConfig420,
+): Promise<TestnetSmokeQualificationReport420> {
+  const expectedChainId = BigInt(config.chainId);
+  const actualChainId = await source.chainId();
+  if (actualChainId !== expectedChainId) {
+    throw new Error(`testnet chain mismatch: expected ${expectedChainId}, got ${actualChainId}`);
+  }
+
+  const genesis = await source.getBlockByNumber(0n);
+  if (!genesis || genesis.number !== 0n) throw new Error('testnet source returned no canonical genesis block');
+  if (genesis.hash.toLowerCase() !== config.expectedGenesisHash.toLowerCase()) {
+    throw new Error(`testnet genesis mismatch: expected ${config.expectedGenesisHash}, got ${genesis.hash}`);
+  }
+
+  const observedHead = await source.blockNumber();
+  const observedSafeHead = await qualificationSafeHead420(source, config, observedHead);
+  const requiredWindow = BigInt(config.sustainedBlocks);
+  if (observedSafeHead + 1n < requiredWindow) {
+    throw new Error(`testnet has only ${observedSafeHead + 1n} safe blocks; ${requiredWindow} required for smoke qualification`);
+  }
+
+  const firstBlock = observedSafeHead - requiredWindow + 1n;
+  const checkpoints = new MemoryCheckpointStore420();
+  const ingestor = new IndexerIngestor420(
+    source,
+    checkpoints,
+    consumer,
+    {
+      finality: finalityPolicy420(config),
+      startBlock: firstBlock,
+      maxBlocksPerRun: config.sustainedBlocks,
+      maxReorgDepth: config.maxReorgDepth,
+    },
+  );
+
+  const run = await ingestor.runOnce();
+  if (run.processed !== config.sustainedBlocks) {
+    throw new Error(`testnet smoke qualification processed ${run.processed} blocks; expected ${config.sustainedBlocks}`);
+  }
+  if (run.firstBlock !== firstBlock || run.lastBlock !== observedSafeHead) {
+    throw new Error(`testnet smoke qualification window changed unexpectedly: expected ${firstBlock}-${observedSafeHead}, got ${run.firstBlock}-${run.lastBlock}`);
+  }
+  if (!run.checkpoint || run.checkpoint.blockNumber !== observedSafeHead) {
+    throw new Error('testnet smoke qualification did not advance checkpoint through the observed safe head');
+  }
+
+  return {
+    chainId: actualChainId,
+    sourceId: source.sourceId,
+    genesisHash: genesis.hash,
+    observedHead,
+    observedSafeHead,
+    firstBlock,
+    lastBlock: observedSafeHead,
+    processed: run.processed,
+    checkpointHash: run.checkpoint.blockHash,
   };
 }

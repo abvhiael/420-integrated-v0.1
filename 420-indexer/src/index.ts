@@ -18,5 +18,6 @@ export * from './public-dto.js';
 export * from './receipt-log-dto.js';
 export * from './protocol-object-service.js';
 export * from './operational-api.js';
+export * from './api-contract.js';
 export * from './api-surface.js';
 export * from './http-transport.js';

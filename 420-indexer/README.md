@@ -89,15 +89,18 @@ See `docs/420NOTIFICATIONS.md` for the notification integration, privacy, replay
 
 IDX-9 hardens the indexer for sustained testnet and production-like operation without changing the on-chain authority boundary.
 
-Planned slices:
+Completed slices:
 
 - **IDX-9.1 — runtime lifecycle and readiness:** explicit starting/serving/draining/failed state, stale-ingest detection, source-head lag reporting, and fail-closed readiness semantics.
-- **IDX-9.2 — graceful shutdown and bounded work:** stop admission before shutdown, drain in-flight work, bound concurrency/queues, and prevent partial lifecycle transitions.
+- **IDX-9.2 — graceful shutdown and bounded work:** stop admission before shutdown, drain already accepted work, reject new ingest runs during drain, preserve the existing per-run block bound, enforce a hard drain deadline, and fail runtime closed on shutdown timeout.
+
+Remaining slices:
+
 - **IDX-9.3 — observability and operational telemetry:** structured counters/gauges for ingest progress, lag, retries, reorgs, delivery failures and queue pressure with no private payload leakage.
 - **IDX-9.4 — durable recovery invariants:** close restart-durability gaps around canonical history/reorg recovery and strengthen atomicity between projection progress and recovery metadata.
 - **IDX-9.5 — failure injection and recovery qualification:** restart, RPC outage, stale-head, database interruption, reorg and dependency-failure scenarios with operator-facing recovery guidance.
 
-IDX-9.1 is underway on the operational readiness surface. `/health` remains a process-liveness probe; `/ready` becomes the traffic-admission gate when runtime state is supplied. Runtime status remains non-authoritative and never substitutes for canonical chain state.
+`/health` remains a process-liveness probe; `/ready` is the traffic-admission gate when runtime state is supplied. Runtime and shutdown state remain local and non-authoritative. Graceful shutdown changes service admission and lifecycle only; it never changes canonical chain or protocol state.
 
 ## Authority boundary
 
@@ -109,4 +112,4 @@ IDX-9.1 is underway on the operational readiness surface. `/health` remains a pr
 
 ## Next phase
 
-Complete IDX-9 operational hardening, then proceed to IDX-10 testnet qualification.
+Continue IDX-9 with observability and operational telemetry, then durable recovery and failure-injection qualification before IDX-10 testnet qualification.

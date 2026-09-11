@@ -25,7 +25,7 @@ func TestSponsoredLaneDoesNotMutateOrganicRankingOrCanonicalData(t *testing.T) {
 	if len(set.Sponsored) != 1 || len(set.Organic) != 1 { t.Fatalf("unexpected set sizes: %#v", set) }
 	got := set.Sponsored[0].Result
 	if !got.Sponsorship.Sponsored || got.Sponsorship.Label != "Sponsored" || got.Sponsorship.Campaign != "campaign-1" { t.Fatalf("bad sponsorship: %#v", got.Sponsorship) }
-	if got.Ranking != candidate.Ranking { t.Fatalf("sponsorship changed ranking: %#v vs %#v", got.Ranking, candidate.Ranking) }
+	if !reflect.DeepEqual(got.Ranking, candidate.Ranking) { t.Fatalf("sponsorship changed ranking: %#v vs %#v", got.Ranking, candidate.Ranking) }
 	if got.ID != candidate.ID || got.SourceKey != candidate.SourceKey || got.Provenance != candidate.Provenance || !reflect.DeepEqual(got.Presentation, candidate.Presentation) { t.Fatal("sponsorship changed canonical/result identity fields") }
 	if !reflect.DeepEqual(set.Organic[0], original) { t.Fatal("organic result mutated") }
 	if !reflect.DeepEqual(candidate, original) { t.Fatal("input candidate mutated") }

@@ -92,6 +92,9 @@ func (e *Engine) Repair(ctx context.Context, remoteHead uint64) error {
 		if err := e.store.PutBundle(bundle.Block, bundle.Transactions, bundle.Receipts, bundle.Logs); err != nil {
 			return fmt.Errorf("replay persist block %d: %w", h, err)
 		}
+		if err := e.replayContracts(ctx, bundle.Block, bundle.Receipts); err != nil {
+			return fmt.Errorf("replay contract runtime projection at block %d: %w", h, err)
+		}
 		cp.IndexedHeight, cp.IndexedHash = h, bundle.Block.Hash
 		cp.UpdatedAt = time.Now().UTC()
 		if err := e.store.SaveCheckpoint(cp); err != nil { return fmt.Errorf("replay checkpoint block %d: %w", h, err) }

@@ -69,6 +69,9 @@ func (e *Engine) CatchUp(ctx context.Context) error {
 		if err := e.store.PutBundle(bundle.Block, bundle.Transactions, bundle.Receipts, bundle.Logs); err != nil {
 			return fmt.Errorf("persist block %d bundle: %w", number, err)
 		}
+		if err := e.indexContracts(ctx, bundle.Block, bundle.Receipts); err != nil {
+			return fmt.Errorf("persist block %d contract runtime projection: %w", number, err)
+		}
 		if err := e.core.AcceptBlock(bundle.Block); err != nil {
 			if errors.Is(err, core.ErrParentMismatch) {
 				r := reorg.New(e.chainID, e.schemaVersion, e.source, e.store)

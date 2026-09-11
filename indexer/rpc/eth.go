@@ -3,6 +3,8 @@ package rpc
 import (
 	"context"
 	"fmt"
+	"math/big"
+	"strings"
 
 	"github.com/420integrated/420-integrated/indexer/model"
 )
@@ -20,6 +22,8 @@ type rpcTransaction struct {
 	TransactionIndex string `json:"transactionIndex"`
 	From             string `json:"from"`
 	To               string `json:"to"`
+	Value            string `json:"value"`
+	Input            string `json:"input"`
 }
 
 type rpcReceipt struct {
@@ -51,6 +55,14 @@ type Bundle struct {
 	Logs         []model.LogRecord
 }
 
+func hexQuantityDecimal(v string) (string, error) {
+	v = strings.TrimPrefix(strings.ToLower(v), "0x")
+	if v == "" { return "0", nil }
+	n, ok := new(big.Int).SetString(v, 16)
+	if !ok { return "", fmt.Errorf("invalid hex quantity") }
+	return n.String(), nil
+}
+
 func (c *Client) BundleByNumber(ctx context.Context, chainID uint64, number uint64, finality model.Finality, schemaVersion string) (Bundle, error) {
 	var raw rpcBlock
 	if err := c.call(ctx, "eth_getBlockByNumber", []interface{}{fmt.Sprintf("0x%x", number), true}, &raw); err != nil { return Bundle{}, err }
@@ -60,7 +72,8 @@ func (c *Client) BundleByNumber(ctx context.Context, chainID uint64, number uint
 	bundle := Bundle{Block: model.BlockRecord{ChainID: chainID, Number: rn, Hash: raw.Hash, ParentHash: raw.ParentHash, Timestamp: ts, Finality: finality, SchemaVersion: schemaVersion}}
 	for _, tx := range raw.Transactions {
 		ti, err := parseHexUint64(tx.TransactionIndex); if err != nil { return Bundle{}, err }
-		bundle.Transactions = append(bundle.Transactions, model.TransactionRecord{ChainID: chainID, BlockNumber: rn, BlockHash: raw.Hash, Hash: tx.Hash, Index: ti, From: tx.From, To: tx.To})
+		valueWei, err := hexQuantityDecimal(tx.Value); if err != nil { return Bundle{}, err }
+		bundle.Transactions = append(bundle.Transactions, model.TransactionRecord{ChainID: chainID, BlockNumber: rn, BlockHash: raw.Hash, Hash: tx.Hash, Index: ti, From: tx.From, To: tx.To, ValueWei: valueWei, Input: tx.Input})
 		var receipt rpcReceipt
 		if err := c.call(ctx, "eth_getTransactionReceipt", []interface{}{tx.Hash}, &receipt); err != nil { return Bundle{}, err }
 		bi, err := parseHexUint64(receipt.BlockNumber); if err != nil { return Bundle{}, err }

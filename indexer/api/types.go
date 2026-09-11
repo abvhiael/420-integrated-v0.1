@@ -18,6 +18,14 @@ type BlockPage struct {
 	Blocks []model.BlockRecord `json:"blocks"`
 }
 
+type AssetTransferPage struct {
+	Meta               PageMeta                    `json:"meta"`
+	AssetKey           string                      `json:"assetKey,omitempty"`
+	Address            string                      `json:"address,omitempty"`
+	Transfers          []model.AssetTransferRecord `json:"transfers"`
+	CanonicalAuthority bool                        `json:"canonicalAuthority"`
+}
+
 type HealthResponse struct {
 	Health model.Health `json:"health"`
 	CanonicalAuthority bool `json:"canonicalAuthority"`

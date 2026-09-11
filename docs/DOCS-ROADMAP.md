@@ -33,13 +33,28 @@ Exit condition: 420Docs builds strictly, publishes through GitHub Pages, exposes
 
 Exit condition: the system architecture explains the top-level layers, design principles, genesis composition, dependencies, authority boundaries, normal flows, failure assumptions, and links to deeper chain, consensus, protocol, infrastructure, and application documentation.
 
-## DOC-3 — Chain documentation
+## DOC-3 — Chain documentation — COMPLETE
 
-- Execution layer, accounts, transactions, blocks, state, fees, native $420, and network configuration.
+- [x] DOC-3.1 Document the execution layer and establish the chain-documentation index.
+- [x] DOC-3.2 Document accounts, addresses, balances, nonces, EOAs, contracts, and smart-account relationships.
+- [x] DOC-3.3 Document transaction structure and lifecycle from signing through receipt/failure.
+- [x] DOC-3.4 Document blocks, execution ordering, receipts/logs, state roots, canonical state, and reorg/finality relationships.
+- [x] DOC-3.5 Document gas accounting, fees, base fee, priority-fee behavior, consensus system-call gas, and native `$420` semantics.
+- [x] DOC-3.6 Document chain identity, execution genesis, fork activation, network configuration, genesis allocations, and compatibility checks.
 
-## DOC-4 — Consensus documentation
+Exit condition: developers, operators, and reviewers can trace how 420 Integrated represents accounts, accepts and executes transactions, constructs execution blocks/state, accounts for gas/fees/native `$420`, and identifies/configures the canonical network from genesis onward.
 
-- Validator lifecycle, proposer selection, cohorts, epochs, rewards, slashing, finality, failure, and recovery.
+## DOC-4 — Consensus documentation — COMPLETE
+
+- [x] DOC-4.1 Publish the consensus architecture index and consensus overview.
+- [x] DOC-4.2 Document validator lifecycle, eligibility, bonding, activation, tenure, exits, cooldown, and validator signing boundaries.
+- [x] DOC-4.3 Document proposer selection, fallback scheduling, cohorts, rotations, committee scaling, migration, and anti-flapping.
+- [x] DOC-4.4 Document slots, epochs, attestations, QCs, fork choice, chained finality, head/safe/finalized mapping, and reorganization behavior.
+- [x] DOC-4.5 Document security rewards, issuance accounting, proposer/participant shares, missed participation, and execution settlement.
+- [x] DOC-4.6 Document slashable evidence, equivocation protection, ejection, bond effects, local slashing protection, and consensus safety boundaries.
+- [x] DOC-4.7 Document quorum loss, partitions, restarts, Engine failures, safety halt/recovery, remote signing, persistence, and operator recovery order.
+
+Exit condition: developers, validators, operators, and reviewers can trace how 420 Integrated forms and rotates validator committees, schedules block proposers, certifies/finalizes execution payloads, accounts for consensus rewards and faults, preserves signing safety, and recovers from quorum, partition, execution, or process failures.
 
 ## DOC-5 — Infrastructure documentation
 

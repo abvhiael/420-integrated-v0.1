@@ -1,0 +1,13 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { createProductionReadiness420, createProductionReadinessView420, ProductionReadinessError420 } from '../src/production-readiness.mjs';
+const qualification={result:'PASS',qualifiedForDeveloperRelease:true,canonicalAuthority:false,securityCertification:false};
+const ciHandoff={releaseEvidenceReady:true,commitSha:'1111111111111111111111111111111111111111',canonicalAuthority:false};
+const blockedRelease={public_testnet_ready:false,checks:[{name:'production soak',status:'BLOCKED',detail:'pending'}]};
+const readyRelease={public_testnet_ready:true,checks:[{name:'production soak',status:'PASS',detail:'qualified'}]};
+test('view declares evidence-driven non-authority semantics',()=>{const view=createProductionReadinessView420();assert.equal(view.canonicalAuthority,false);assert.equal(view.securityCertification,false);assert.deepEqual(view.states,['READY','BLOCKED','FAIL']);});
+test('blocked core release evidence cannot be upgraded by DEVHUB tooling',()=>{const report=createProductionReadiness420({qualification,ciHandoff,releaseReadiness:blockedRelease});assert.equal(report.result,'BLOCKED');assert.equal(report.readyForProductionLaunch,false);assert.equal(report.publicTestnetReady,false);});
+test('all required evidence can produce READY',()=>{const report=createProductionReadiness420({qualification,ciHandoff,releaseReadiness:readyRelease});assert.equal(report.result,'READY');assert.equal(report.readyForProductionLaunch,true);});
+test('failed qualification dominates readiness',()=>{const report=createProductionReadiness420({qualification:{...qualification,result:'FAIL',qualifiedForDeveloperRelease:false},ciHandoff,releaseReadiness:readyRelease});assert.equal(report.result,'FAIL');assert.equal(report.readyForProductionLaunch,false);});
+test('missing exact-head CI handoff blocks launch',()=>{const report=createProductionReadiness420({qualification,ciHandoff:{...ciHandoff,releaseEvidenceReady:false},releaseReadiness:readyRelease});assert.equal(report.result,'BLOCKED');});
+test('malformed release statuses fail closed',()=>{assert.throws(()=>createProductionReadiness420({qualification,ciHandoff,releaseReadiness:{public_testnet_ready:false,checks:[{name:'x',status:'UNKNOWN'}]}}),ProductionReadinessError420);});

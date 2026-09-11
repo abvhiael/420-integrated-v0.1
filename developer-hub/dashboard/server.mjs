@@ -13,9 +13,12 @@ import { createCredentialLifecycleView420 } from '../src/credential-lifecycle.mj
 import { createStatusAggregator420, createStatusControlView420 } from '../src/status-control.mjs';
 import { createSecurityQualificationReport420, createSecurityQualificationView420 } from '../src/security-qualification.mjs';
 import { createQualificationEvidenceHandoff420, createQualificationHandoffView420 } from '../src/qualification-handoff.mjs';
+import { createProductionReadiness420, createProductionReadinessView420 } from '../src/production-readiness.mjs';
+import { createReleaseCandidateCloseout420, createReleaseCandidateCloseoutView420 } from '../src/release-candidate-closeout.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, '..');
+const repoRoot = resolve(root, '..');
 const staticRoot = resolve(here, 'static');
 const port = Number(process.env.PORT ?? 4420);
 
@@ -62,6 +65,16 @@ async function qualification420() {
   return { profile, evidence };
 }
 
+async function launchReadiness420() {
+  const expectedCommitSha = process.env.DEVHUB_CANDIDATE_SHA;
+  if (!expectedCommitSha) return { blocked:{ result:'BLOCKED', readyForProductionLaunch:false, reason:'DEVHUB_CANDIDATE_SHA is not configured', canonicalAuthority:false, securityCertification:false } };
+  const { network } = await runtime420(); const { profile, evidence } = await qualification420();
+  const qualification = createSecurityQualificationReport420({ profile, evidence, network });
+  const ciHandoff = createQualificationEvidenceHandoff420({ report:qualification, evidence, expectedCommitSha, maxAgeSeconds:86400 });
+  const releaseReadiness = JSON.parse(await readFile(resolve(repoRoot, 'release/readiness.json'), 'utf8'));
+  return { readiness:createProductionReadiness420({ qualification, ciHandoff, releaseReadiness }) };
+}
+
 async function serviceProbe420(_name, endpoint) {
   const healthUrl = `${endpoint.replace(/\/$/, '')}/health`;
   const response = await fetch(healthUrl, { method:'GET', headers:{ accept:'application/json' } });
@@ -89,6 +102,17 @@ const server = createServer(async (req, res) => {
     if (req.method !== 'GET') { res.writeHead(405).end('method not allowed'); return; }
     const url = new URL(req.url, `http://127.0.0.1:${port}`);
     if (url.pathname === '/api/dashboard') { json420(res, 200, await snapshot420()); return; }
+    if (url.pathname === '/api/launch/view') { json420(res, 200, { readiness:createProductionReadinessView420(), closeout:createReleaseCandidateCloseoutView420() }); return; }
+    if (url.pathname === '/api/launch/check') { const launch=await launchReadiness420(); json420(res, 200, launch.blocked??launch.readiness); return; }
+    if (url.pathname === '/api/launch/closeout') {
+      const descriptorPath=process.env.DEVHUB_RELEASE_CANDIDATE_DESCRIPTOR;
+      if(!descriptorPath){ json420(res,200,{state:'BLOCKED',reason:'DEVHUB_RELEASE_CANDIDATE_DESCRIPTOR is not configured',...createReleaseCandidateCloseoutView420()}); return; }
+      const launch=await launchReadiness420();
+      if(launch.blocked){ json420(res,200,launch.blocked); return; }
+      const candidate=JSON.parse(await readFile(resolve(process.cwd(),descriptorPath),'utf8'));
+      json420(res,200,createReleaseCandidateCloseout420({candidate,readiness:launch.readiness})); return;
+    }
+    if (url.pathname.startsWith('/api/launch')) { json420(res, 404, { error:'launch route not found' }); return; }
     if (url.pathname === '/api/qualification/view') {
       const { profile } = await qualification420();
       json420(res, 200, { qualification:createSecurityQualificationView420(profile), handoff:createQualificationHandoffView420() }); return;
@@ -143,7 +167,7 @@ const server = createServer(async (req, res) => {
     res.writeHead(200, { 'content-type':type420(path), 'cache-control':'no-store' });
     res.end(body);
   } catch (error) {
-    const badRequest = ['DebugControlError420','IndexerClientError420','ServiceIdentityError420','CredentialLifecycleError420','StatusControlError420','SecurityQualificationError420','QualificationHandoffError420'].includes(error?.name);
+    const badRequest = ['DebugControlError420','IndexerClientError420','ServiceIdentityError420','CredentialLifecycleError420','StatusControlError420','SecurityQualificationError420','QualificationHandoffError420','ProductionReadinessError420','ReleaseCandidateCloseoutError420'].includes(error?.name);
     const status = badRequest ? 400 : (error?.code === 'ENOENT' ? 404 : 500);
     if (req.url?.startsWith('/api/')) { json420(res, status, { error:error.message }); return; }
     res.writeHead(status, { 'content-type':'text/plain; charset=utf-8' });

@@ -1,0 +1,8 @@
+{
+  "schemaVersion": "1.0.0",
+  "candidateId": "devhub-19-rc1",
+  "commitSha": "1111111111111111111111111111111111111111",
+  "releaseChannel": "TESTNET_RC",
+  "createdAt": "2026-09-11T18:15:00.000Z",
+  "canonicalAuthority": false
+}

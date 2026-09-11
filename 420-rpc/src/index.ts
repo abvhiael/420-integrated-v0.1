@@ -7,3 +7,4 @@ export * from './request-policy.js';
 export * from './resource-controls.js';
 export * from './websocket.js';
 export * from './indexer-reads.js';
+export * from './auth.js';

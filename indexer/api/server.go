@@ -24,6 +24,7 @@ type Backend interface {
 
 type addressBackend interface { AddressTransactions(address string, limit uint32) (AddressTransactionPage, error) }
 type registryBackend interface { Service(string) (decoder.ServiceSummary, error); Services() []decoder.ServiceSummary }
+type assetBackend interface { AssetTransfers(assetKey, address string, limit uint32) (AssetTransferPage, error) }
 type Server struct { backend Backend }
 func NewServer(backend Backend) *Server { return &Server{backend: backend} }
 
@@ -37,6 +38,7 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("GET /v1/receipts/{hash}", s.receipt)
 	mux.HandleFunc("GET /v1/blocks/{number}/logs", s.blockLogs)
 	mux.HandleFunc("GET /v1/contracts/{address}", s.contract)
+	mux.HandleFunc("GET /v1/asset-transfers", s.assetTransfers)
 	mux.HandleFunc("GET /v1/services", s.services)
 	mux.HandleFunc("GET /v1/services/{service}", s.service)
 	mux.HandleFunc("GET /v1/services/{service}/versions/{version}", s.serviceVersion)
@@ -49,6 +51,7 @@ func (s *Server) transaction(w http.ResponseWriter,r *http.Request){tx,ok,err:=s
 func (s *Server) transactions(w http.ResponseWriter,r *http.Request){address:=r.URL.Query().Get("address");if address==""{writeError(w,http.StatusBadRequest,errors.New("address query required"));return};limit:=uint32(50);if raw:=r.URL.Query().Get("limit");raw!=""{n,err:=strconv.ParseUint(raw,10,32);if err!=nil||n==0||n>250{writeError(w,http.StatusBadRequest,ErrInvalidCursor);return};limit=uint32(n)};backend,ok:=s.backend.(addressBackend);if !ok{writeError(w,http.StatusServiceUnavailable,ErrAddressQueryUnavailable);return};page,err:=backend.AddressTransactions(address,limit);if err!=nil{status:=http.StatusServiceUnavailable;if errors.Is(err,ErrSnapshotUnavailable){status=http.StatusConflict};writeError(w,status,err);return};writeJSON(w,http.StatusOK,page)}
 func (s *Server) receipt(w http.ResponseWriter,r *http.Request){receipt,ok,err:=s.backend.Receipt(r.PathValue("hash"));if err!=nil{writeError(w,http.StatusServiceUnavailable,err);return};if !ok{writeError(w,http.StatusNotFound,errors.New("receipt not indexed"));return};writeJSON(w,http.StatusOK,ReadResponse[model.ReceiptRecord]{Data:receipt,CanonicalAuthority:false})}
 func (s *Server) blockLogs(w http.ResponseWriter,r *http.Request){n,err:=strconv.ParseUint(r.PathValue("number"),10,64);if err!=nil{writeError(w,http.StatusBadRequest,err);return};logs,err:=s.backend.LogsByBlock(n);if err!=nil{writeError(w,http.StatusServiceUnavailable,err);return};writeJSON(w,http.StatusOK,ReadResponse[[]model.LogRecord]{Data:logs,CanonicalAuthority:false})}
+func (s *Server) assetTransfers(w http.ResponseWriter,r *http.Request){limit:=uint32(50);if raw:=r.URL.Query().Get("limit");raw!=""{n,err:=strconv.ParseUint(raw,10,32);if err!=nil||n==0||n>250{writeError(w,http.StatusBadRequest,ErrInvalidCursor);return};limit=uint32(n)};backend,ok:=s.backend.(assetBackend);if !ok{writeError(w,http.StatusServiceUnavailable,ErrAssetQueryUnavailable);return};page,err:=backend.AssetTransfers(r.URL.Query().Get("assetKey"),r.URL.Query().Get("address"),limit);if err!=nil{status:=http.StatusServiceUnavailable;if errors.Is(err,ErrSnapshotUnavailable){status=http.StatusConflict};writeError(w,status,err);return};writeJSON(w,http.StatusOK,page)}
 func (s *Server) services(w http.ResponseWriter,_ *http.Request){backend,ok:=s.backend.(registryBackend);if !ok{writeError(w,http.StatusServiceUnavailable,errors.New("registry query unavailable"));return};writeJSON(w,http.StatusOK,ReadResponse[[]decoder.ServiceSummary]{Data:backend.Services(),CanonicalAuthority:false})}
 func (s *Server) service(w http.ResponseWriter,r *http.Request){backend,ok:=s.backend.(registryBackend);if !ok{writeError(w,http.StatusServiceUnavailable,errors.New("registry query unavailable"));return};record,err:=backend.Service(r.PathValue("service"));if err!=nil{status:=http.StatusServiceUnavailable;if errors.Is(err,decoder.ErrUnknownServiceVersion){status=http.StatusNotFound};writeError(w,status,err);return};writeJSON(w,http.StatusOK,ReadResponse[decoder.ServiceSummary]{Data:record,CanonicalAuthority:false})}
 func (s *Server) serviceVersion(w http.ResponseWriter,r *http.Request){n,err:=strconv.ParseUint(r.PathValue("version"),10,32);if err!=nil||n==0{writeError(w,http.StatusBadRequest,decoder.ErrUnknownServiceVersion);return};record,err:=s.backend.ServiceVersion(r.PathValue("service"),uint32(n));if err!=nil{status:=http.StatusServiceUnavailable;if errors.Is(err,decoder.ErrUnknownServiceVersion){status=http.StatusNotFound};writeError(w,status,err);return};writeJSON(w,http.StatusOK,ReadResponse[decoder.ServiceVersion]{Data:record,CanonicalAuthority:false})}

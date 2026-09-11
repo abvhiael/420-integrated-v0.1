@@ -4,7 +4,7 @@ This guide ties the current Developer Hub phases together into one production-or
 
 ## Goal
 
-Build a dApp that can discover a network, read protocol state, render indexed UX, submit wallet-authorized writes, deploy and verify app contracts, and later publish through Registry/AppStore without turning Developer Hub into a privileged control plane.
+Build a dApp that can discover a network, read protocol state, render indexed UX, submit wallet-authorized writes, deploy and verify app contracts, and register/publish through 420Registry and 420AppStore without turning Developer Hub into a privileged control plane.
 
 ## 1. Bootstrap network and contracts
 
@@ -67,20 +67,31 @@ Keep the meanings separate:
 
 - deployed code comes from chain state;
 - verification classification comes from 420Verify;
-- official ecosystem registration comes from 420Registry/AppStore;
+- official ecosystem registration comes from 420Registry;
+- AppStore listing is a non-canonical catalogue projection;
 - wallet authorization comes from Wallet/Smart Account authority.
 
-## 6. Plan for registration/publication
+## 6. Register and publish the application
 
-DEVHUB-13 will connect validated application metadata to 420Registry and 420AppStore. Until that phase exists, do not invent a local `registered: true` flag and treat it as ecosystem legitimacy.
+DEVHUB-13 validates the application release and prepares the canonical Registry governance handoff:
 
-The expected later handoff is:
+```text
+420 app plan app-release.json
+420 app view app-release.json
+```
 
-1. validate app/release manifest;
-2. confirm publisher identity/capability;
-3. submit through Registry/AppStore authority;
-4. consume resulting canonical registration state;
-5. expose publication state through Developer Hub.
+Before Registry submission, confirm from canonical sources:
+
+1. release chain ID matches the selected network;
+2. implementation code exists at the declared address;
+3. deployed runtime code hash matches the release evidence;
+4. the service ID is Genesis-canonical or already approved by 420Registry;
+5. Registry `currentVersion(serviceId) + 1` equals the proposed version;
+6. Registry governance authorization is available.
+
+The resulting `publishRegisteredService` call remains governance-only. Developer Hub cannot sign or bypass that authority.
+
+After Registry confirmation, 420AppStore may project the application into discovery/catalogue UX. Categories, descriptions, rankings, screenshots and featured placement remain non-canonical and cannot create or revoke Registry legitimacy.
 
 ## 7. Operational diagnostics
 
@@ -91,7 +102,8 @@ Before blaming application logic, inspect:
 - canonical contract catalogue entries;
 - Indexer health/readiness/status;
 - 420Verify service availability when verification is needed;
-- Wallet chain/account/capability state for writes.
+- Wallet chain/account/capability state for writes;
+- Registry service-ID approval and current version before application publication.
 
 ## End-to-end authority map
 
@@ -105,7 +117,8 @@ Before blaming application logic, inspect:
 | Deployment signature | Wallet or qualified project adapter |
 | Deployed bytecode | canonical chain state |
 | Source/build verification | 420Verify |
-| App legitimacy/publication | 420Registry / 420AppStore |
+| App registration/version legitimacy | 420Registry / ProtocolRegistry governance + chain state |
+| AppStore catalogue presentation | 420AppStore, non-canonical |
 | Developer orchestration | Developer Hub, non-authoritative |
 
 ## Safe design rule

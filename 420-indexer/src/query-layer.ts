@@ -1,3 +1,5 @@
+import { NATIVE_TRANSFER_LOG_INDEX_420 } from './asset-decoder.js';
+
 export type QueryDirection420 = 'asc' | 'desc';
 
 export interface QueryPage420<T> {
@@ -22,7 +24,7 @@ export interface AssetTransferCursor420 { blockNumber: bigint; txHash: string; l
 
 const LIMIT_DEFAULT = 50;
 const LIMIT_MAX = 200;
-export const NATIVE_ASSET_TRANSFER_POSITION_420 = -1;
+export const NATIVE_ASSET_TRANSFER_POSITION_420 = NATIVE_TRANSFER_LOG_INDEX_420;
 
 export function normalizeLimit420(limit?: number): number {
   if (limit === undefined) return LIMIT_DEFAULT;

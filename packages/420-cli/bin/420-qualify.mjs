@@ -10,7 +10,8 @@ function print(value){process.stdout.write(`${JSON.stringify(value,null,2)}\n`);
 async function json420(path){return JSON.parse(await readFile(resolve(process.cwd(),path),'utf8'));}
 async function main(){
   const [command='view',evidencePath,manifestPath,profilePath]=process.argv.slice(2);
-  const profile=await json420(profilePath??resolve(repoRoot,'developer-hub/qualification/profile.v1.json'));
+  const selectedProfile=command==='view'?evidencePath:profilePath;
+  const profile=await json420(selectedProfile??resolve(repoRoot,'developer-hub/qualification/profile.v1.json'));
   if(command==='view')return print(createSecurityQualificationView420(profile));
   if(command!=='check'||!evidencePath)fail('usage: 420-qualify view [PROFILE_JSON] | check EVIDENCE_JSON [MANIFEST_JSON] [PROFILE_JSON]');
   const evidence=await json420(evidencePath);

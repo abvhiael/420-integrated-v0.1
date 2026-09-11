@@ -49,7 +49,7 @@ Implemented:
 
 Query contracts are chain-scoped and operate only on rebuildable index projections. Canonical protocol state remains on-chain.
 
-## IDX-7 — public/index-consumer API — IDX-7.4 complete
+## IDX-7 — public/index-consumer API — complete
 
 IDX-7 exposes the stable v1 consumer boundary for 420Explorer, 420Search, 420Analytics, 420Wallet, 420Notifications, and the Developer Hub.
 
@@ -69,6 +69,20 @@ The completed IDX-7.4 surface includes:
 
 See `docs/420INDEXER-API-V1.md` for the complete route table and stability contract.
 
+## IDX-8 — notification/event-stream delivery — in progress
+
+IDX-8 builds replayable delivery primitives over the qualified public projection API. Delivery remains non-authoritative and preserves canonical provenance.
+
+Planned slices:
+
+- **IDX-8.1 — replayable event-stream contract:** stable event envelopes and IDs, opaque cursor replay, public-API-only dependency, protocol event filtering and provenance preservation.
+- **IDX-8.2 — subscription/watch matching:** deterministic opt-in topic, protocol, object and address matching without exposing private subscription state to the index database.
+- **IDX-8.3 — delivery queue and retry semantics:** deduplication, retry safety, rate limits, priority/severity and provider-neutral delivery handoff.
+- **IDX-8.4 — reorg/finality delivery semantics:** supersession/retraction signals for replaced non-finalized events and immutable finalized-history behavior.
+- **IDX-8.5 — 420Notifications integration and qualification:** consumer adapter, end-to-end replay/restart tests, failure isolation and documentation.
+
+IDX-8.1 starts with protocol events because they already expose typed, chain-scoped provenance and deterministic cursors through the stable v1 API. Later slices can add additional public stream families without coupling consumers to database rows.
+
 ## Authority boundary
 
 420Indexer is never authoritative for balances, ownership, registrations, settlements, rights, governance outcomes, bridge state, or protocol eligibility. Those remain canonical on-chain. All indexed views are rebuildable from canonical chain history plus deployment and ABI manifests.
@@ -79,4 +93,4 @@ See `docs/420INDEXER-API-V1.md` for the complete route table and stability contr
 
 ## Next phase
 
-After IDX-7 closeout, continue with IDX-8 notification/event-stream delivery over the qualified public projection surface, followed by IDX-9 operational hardening and IDX-10 testnet qualification.
+Complete IDX-8 delivery, then proceed to IDX-9 operational hardening and IDX-10 testnet qualification.

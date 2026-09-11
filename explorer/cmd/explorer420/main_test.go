@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -88,5 +89,8 @@ func TestRuntimeStartsWithUnavailableIndexerAndFailsReadinessOnly(t *testing.T) 
 
 	ready := httptest.NewRecorder()
 	server.Handler.ServeHTTP(ready, httptest.NewRequest(http.MethodGet, "/v1/ready", nil))
-	if ready.Code != http.StatusBadGateway { t.Fatalf("ready status=%d body=%s", ready.Code, ready.Body.String()) }
+	if ready.Code != http.StatusServiceUnavailable { t.Fatalf("ready status=%d body=%s", ready.Code, ready.Body.String()) }
+	if !strings.Contains(ready.Body.String(), "UPSTREAM_UNAVAILABLE") {
+		t.Fatalf("ready body missing fail-closed upstream code: %s", ready.Body.String())
+	}
 }

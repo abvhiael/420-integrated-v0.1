@@ -13,9 +13,10 @@ import (
 )
 
 var (
-	ErrWrongChain      = errors.New("420Explorer indexer is on the wrong chain")
-	ErrIndexerStale    = errors.New("420Explorer indexer data is stale")
-	ErrIndexerDegraded = errors.New("420Explorer indexer is degraded")
+	ErrWrongChain          = errors.New("420Explorer indexer is on the wrong chain")
+	ErrIndexerStale        = errors.New("420Explorer indexer data is stale")
+	ErrIndexerDegraded     = errors.New("420Explorer indexer is degraded")
+	ErrIndexerInconsistent = errors.New("420Explorer indexer finality heights are inconsistent")
 )
 
 // IndexerReader is the complete chain-index dependency for the Explorer
@@ -58,18 +59,26 @@ func New(indexer IndexerReader, requiredChainID uint64, staleAfter time.Duration
 
 // NetworkStatus is presentation state derived from 420Indexer health. It is
 // descriptive only and must never be treated as canonical consensus state.
+// HeadHeight is the Indexer's current indexed head; IndexedHeight is retained
+// for compatibility with earlier Explorer consumers.
 type NetworkStatus struct {
-	ChainID         uint64    `json:"chainId"`
-	IndexedHeight   uint64    `json:"indexedHeight"`
-	SafeHeight      uint64    `json:"safeHeight"`
-	FinalizedHeight uint64    `json:"finalizedHeight"`
-	SchemaVersion   string    `json:"schemaVersion"`
-	DecoderSet      string    `json:"decoderSet"`
-	IndexerState    string    `json:"indexerState"`
-	LastIngestAt    time.Time `json:"lastIngestAt"`
-	WrongChain      bool      `json:"wrongChain"`
-	Stale           bool      `json:"stale"`
-	Degraded        bool      `json:"degraded"`
+	ChainID          uint64    `json:"chainId"`
+	HeadHeight       uint64    `json:"headHeight"`
+	IndexedHeight    uint64    `json:"indexedHeight"`
+	SafeHeight       uint64    `json:"safeHeight"`
+	FinalizedHeight  uint64    `json:"finalizedHeight"`
+	SafeLag          uint64    `json:"safeLag"`
+	FinalizedLag     uint64    `json:"finalizedLag"`
+	SchemaVersion    string    `json:"schemaVersion"`
+	DecoderSet       string    `json:"decoderSet"`
+	IndexerState     string    `json:"indexerState"`
+	LastIngestAt     time.Time `json:"lastIngestAt"`
+	IngestAgeSeconds uint64    `json:"ingestAgeSeconds"`
+	WrongChain       bool      `json:"wrongChain"`
+	Stale            bool      `json:"stale"`
+	Degraded         bool      `json:"degraded"`
+	Consistent       bool      `json:"consistent"`
+	Ready            bool      `json:"ready"`
 }
 
 func (s *Service) NetworkStatus(ctx context.Context) (NetworkStatus, error) {
@@ -79,21 +88,39 @@ func (s *Service) NetworkStatus(ctx context.Context) (NetworkStatus, error) {
 	}
 	h := response.Health
 	state := strings.ToUpper(strings.TrimSpace(h.State))
-	status := NetworkStatus{
-		ChainID:         h.ChainID,
-		IndexedHeight:   h.IndexedHeight,
-		SafeHeight:      h.SafeHeight,
-		FinalizedHeight: h.FinalizedHeight,
-		SchemaVersion:   h.SchemaVersion,
-		DecoderSet:      h.DecoderSet,
-		IndexerState:    h.State,
-		LastIngestAt:    h.LastIngestAt,
-		WrongChain:      h.ChainID != s.requiredChainID,
-		Stale:           h.LastIngestAt.IsZero() || s.now().Sub(h.LastIngestAt) > s.staleAfter,
-		Degraded:        state != "READY" && state != "HEALTHY" && state != "OK",
+	now := s.now()
+	age := time.Duration(0)
+	if !h.LastIngestAt.IsZero() && now.After(h.LastIngestAt) {
+		age = now.Sub(h.LastIngestAt)
 	}
+	consistent := h.FinalizedHeight <= h.SafeHeight && h.SafeHeight <= h.IndexedHeight
+	status := NetworkStatus{
+		ChainID:          h.ChainID,
+		HeadHeight:       h.IndexedHeight,
+		IndexedHeight:    h.IndexedHeight,
+		SafeHeight:       h.SafeHeight,
+		FinalizedHeight:  h.FinalizedHeight,
+		SchemaVersion:    h.SchemaVersion,
+		DecoderSet:       h.DecoderSet,
+		IndexerState:     h.State,
+		LastIngestAt:     h.LastIngestAt,
+		IngestAgeSeconds: uint64(age / time.Second),
+		WrongChain:       h.ChainID != s.requiredChainID,
+		Stale:            h.LastIngestAt.IsZero() || age > s.staleAfter,
+		Degraded:         state != "READY" && state != "HEALTHY" && state != "OK",
+		Consistent:       consistent,
+	}
+	if consistent {
+		status.SafeLag = h.IndexedHeight - h.SafeHeight
+		status.FinalizedLag = h.IndexedHeight - h.FinalizedHeight
+	}
+	status.Ready = !status.WrongChain && !status.Stale && !status.Degraded && status.Consistent
+
 	if status.WrongChain {
 		return status, fmt.Errorf("%w: expected %d, got %d", ErrWrongChain, s.requiredChainID, h.ChainID)
+	}
+	if !status.Consistent {
+		return status, fmt.Errorf("%w: head=%d safe=%d finalized=%d", ErrIndexerInconsistent, h.IndexedHeight, h.SafeHeight, h.FinalizedHeight)
 	}
 	if status.Degraded {
 		return status, fmt.Errorf("%w: state=%s", ErrIndexerDegraded, h.State)

@@ -7,7 +7,8 @@
     "420": "./bin/420.mjs",
     "420-auth": "./bin/420-auth.mjs",
     "420-status": "./bin/420-status.mjs",
-    "420-qualify": "./bin/420-qualify.mjs"
+    "420-qualify": "./bin/420-qualify.mjs",
+    "420-launch": "./bin/420-launch.mjs"
   },
   "scripts": {
     "test": "node --test test/*.test.mjs"

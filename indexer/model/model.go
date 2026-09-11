@@ -35,7 +35,8 @@ type BlockRecord struct {
 	SchemaVersion string   `json:"schemaVersion"`
 }
 
-// TransactionRecord preserves transaction provenance.
+// TransactionRecord preserves transaction provenance and the value/input fields
+// required to build deterministic downstream asset projections.
 type TransactionRecord struct {
 	ChainID     uint64 `json:"chainId"`
 	BlockNumber uint64 `json:"blockNumber"`
@@ -44,6 +45,8 @@ type TransactionRecord struct {
 	Index       uint64 `json:"index"`
 	From        string `json:"from"`
 	To          string `json:"to,omitempty"`
+	ValueWei    string `json:"valueWei,omitempty"`
+	Input       string `json:"input,omitempty"`
 }
 
 // ReceiptRecord preserves execution outcome provenance without becoming settlement authority.

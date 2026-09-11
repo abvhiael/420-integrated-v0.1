@@ -1,6 +1,6 @@
 # 420Explorer testnet deployment
 
-EXP-7.1 packages the qualified `420Explorer` runtime for testnet deployment and provides an independent HTTP smoke qualifier.
+EXP-7 packages the qualified `420Explorer` runtime for testnet deployment, smoke qualification, and live-data validation.
 
 ## Runtime contract
 
@@ -33,17 +33,9 @@ docker run --rm -p 8420:8420 \
   420explorer:testnet
 ```
 
-## Live smoke qualification
+## EXP-7.1 smoke qualification
 
-Run `explorersmoke` from the image (override the normal entrypoint) or build it locally. The qualifier requires all of the following to pass over the live HTTP surface:
-
-- `/v1/health` reports Explorer process liveness.
-- `/v1/ready` is ready and reports the expected chain.
-- `/v1/status` is ready and reports the expected chain.
-- `/v1/capabilities` advertises the qualified read-only surface.
-- every checked response declares `420Explorer`, `420Indexer`, `canonicalAuthority=false`, and `QUALIFIED_INDEXER_API_CONSUMER` provenance headers.
-
-Example:
+Run `explorersmoke` from the image (override the normal entrypoint) or build it locally. The qualifier checks liveness, readiness, status, capabilities, expected chain ID, and qualified provenance headers.
 
 ```sh
 docker run --rm --entrypoint /usr/local/bin/explorersmoke \
@@ -52,4 +44,35 @@ docker run --rm --entrypoint /usr/local/bin/explorersmoke \
   420explorer:testnet
 ```
 
-A successful run emits a JSON record with `"status":"QUALIFIED"`. Any unavailable, stale, degraded, wrong-chain, inconsistent, or provenance-invalid Explorer fails closed with a non-zero exit code.
+A successful run emits `"status":"QUALIFIED"`. Any unavailable, stale, degraded, wrong-chain, inconsistent, or provenance-invalid Explorer fails closed.
+
+## EXP-7.2 live-data validation
+
+`explorerlivevalidate` is the stronger end-to-end gate. It requires representative indexed testnet data rather than merely healthy endpoints. A successful validation proves the live Explorer can present:
+
+- process liveness and strict readiness;
+- network status and qualified capability metadata;
+- a real indexed block and block-detail view;
+- a real transaction and receipt;
+- a real address view;
+- Registry service listing and a concrete service detail;
+- asset activity;
+- consensus state;
+- consistent `420Explorer`/`420Indexer` non-authoritative provenance on every checked response.
+
+The validator discovers a transaction and address from the first log in its sampled block. On a quiet testnet, seed one transaction that emits a log before validation. Alternatively set `EXPLORER_LIVE_TX_HASH` and `EXPLORER_LIVE_ADDRESS` to known indexed samples.
+
+```sh
+docker run --rm --entrypoint /usr/local/bin/explorerlivevalidate \
+  -e EXPLORER_LIVE_URL=https://explorer.testnet.example \
+  -e EXPLORER_EXPECTED_CHAIN_ID=420 \
+  420explorer:testnet
+```
+
+Optional validation environment:
+
+- `EXPLORER_LIVE_TX_HASH` — known indexed transaction hash when auto-discovery is unavailable.
+- `EXPLORER_LIVE_ADDRESS` — known indexed address when auto-discovery is unavailable.
+- `EXPLORER_LIVE_TIMEOUT` — per-request timeout, default `10s`.
+
+The command emits a JSON evidence report containing every check plus sampled block, transaction, address, and service identifiers. `passed` must be `true` before EXP-7.2 is considered complete. A testnet with no representative transaction/address/registry data fails closed rather than receiving a false live-validation pass.

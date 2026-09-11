@@ -12,26 +12,27 @@ Each RPC phase is developed on its own branch and pull request. At the end of ev
 - **RPC-1:** upstream node/provider abstraction and runtime capability discovery.
 - **RPC-2:** explicit Ethereum JSON-RPC compatibility and method profiles.
 - **RPC-3:** deterministic routing, health-aware selection, circuit breaking and safe failover.
-- **RPC-4 — implementation complete:** chain identity, freshness and finality-safety enforcement.
+- **RPC-4:** chain identity, freshness and finality-safety enforcement.
+- **RPC-5 — implementation complete:** request validation, method policy and privileged-surface enforcement.
 
-## RPC-4 — chain identity, freshness and finality safety
+## RPC-5 — request validation and method policy
 
-RPC-4 adds a chain-safety gate before RPC-3 routing:
+RPC-5 adds the request firewall in front of RPC-4 safety and RPC-3 routing:
 
-- chain observations bind provider ID, chain ID, head, safe and finalized checkpoints;
-- chain ID remains pinned to 420 and changes relative to RPC-1 discovery are rejected;
-- malformed or internally impossible checkpoint ordering fails closed;
-- observations have a bounded age and future-dated evidence is rejected;
-- providers that fall too far behind the freshest valid fleet head are removed from routing;
-- required safe and finalized evidence must be present;
-- same-height safe hash disagreement fails closed across the fleet;
-- same-height finalized hash disagreement fails closed across the fleet;
-- provider priority never resolves a finality disagreement;
-- only providers that pass RPC-4 safety are handed to RPC-3 health/method/transport routing.
+- requires JSON-RPC 2.0 request objects;
+- validates request IDs and rejects public notifications by default;
+- requires every method to be present in the RPC-2 compatibility catalogue;
+- blocks Engine, admin, personal, debug, miner and txpool namespaces before upstream dispatch;
+- keeps node-managed account/signing methods excluded;
+- requires positional array params on the public surface;
+- validates method arity and canonical addresses, hashes, hex quantities, byte strings and block selectors;
+- validates transaction call objects, log filters, fee-history percentile arrays, raw signed transaction bytes and supported subscription shapes;
+- rejects malformed envelopes with `-32600`, blocked/unknown methods with `-32601`, and invalid params with `-32602`;
+- validates batch entries without taking over RPC-6 resource/batch-size policy.
 
-### RPC-4 authority boundary
+### RPC-5 authority boundary
 
-420RPC does not decide which fork is canonical and does not create safe or finalized checkpoints. RPC-4 evaluates whether upstream evidence is mutually consistent and fresh enough to route. If eligible providers disagree at the same safe/finalized height, the gateway refuses to select a winner.
+Policy decides whether 420RPC will forward a syntactically allowed public request. It does not decide whether a transaction is valid, sign transactions, rewrite signed bytes, invent chain state, choose fork choice or decide finality.
 
 ## Roadmap
 
@@ -39,9 +40,9 @@ RPC-4 adds a chain-safety gate before RPC-3 routing:
 - **RPC-1 — complete:** upstream node/provider abstraction and capability discovery.
 - **RPC-2 — complete:** canonical Ethereum JSON-RPC compatibility and method profiles.
 - **RPC-3 — complete:** routing, health-aware upstream selection, circuit breaking and failover.
-- **RPC-4 — implementation complete:** chain identity, freshness and finality-safety enforcement.
-- **RPC-5 — next:** request validation, method policy and privileged-surface exclusion.
-- **RPC-6:** rate limiting, quotas, resource bounds and abuse controls.
+- **RPC-4 — complete:** chain identity, freshness and finality-safety enforcement.
+- **RPC-5 — implementation complete:** request validation, method policy and privileged-surface enforcement.
+- **RPC-6 — next:** rate limiting, quotas, resource bounds and abuse controls.
 - **RPC-7:** WebSocket transport and subscription lifecycle.
 - **RPC-8:** 420Indexer-backed enriched/read APIs with explicit derived-state semantics.
 - **RPC-9:** authentication, API credentials and Developer Hub integration.
@@ -61,11 +62,12 @@ RPC-4 adds a chain-safety gate before RPC-3 routing:
 8. Public transports require TLS in the deployment contract.
 9. Routing, rate limiting, caching and failover never alter chain validity or finality semantics.
 10. Capability discovery and chain observations are evidence about upstreams, not authority over the chain.
-11. Unknown or privileged RPC methods are not silently passed through the gateway.
+11. Unknown, privileged or malformed RPC requests are rejected locally instead of being transparently proxied.
 12. Availability pressure never promotes an ineligible, wrong-chain, stale or open-circuit provider.
 13. Ambiguous transaction submission failures are not automatically replayed across providers.
 14. Provider priority never resolves safe/finalized disagreement.
+15. Request-policy acceptance never implies execution validity.
 
 ## Next phase
 
-After RPC-4 is reconciled, fully qualified and merged to `main`, RPC-5 adds request validation and public method-policy enforcement.
+After RPC-5 is reconciled, fully qualified and merged to `main`, RPC-6 adds rate limiting, quotas, batch/resource bounds and abuse controls.

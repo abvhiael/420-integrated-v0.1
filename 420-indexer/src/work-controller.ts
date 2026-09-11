@@ -1,3 +1,4 @@
+import type { IndexerOperationalTelemetry420 } from './operational-telemetry.js';
 import type { IndexerRuntimeState420 } from './runtime-state.js';
 
 export interface IndexerDrainResult420 {
@@ -32,6 +33,8 @@ export class IndexerWorkController420 {
   private inFlightValue = 0;
   private readonly idleWaiters = new Set<() => void>();
 
+  constructor(readonly telemetry?: IndexerOperationalTelemetry420) {}
+
   get accepting(): boolean { return this.acceptingValue; }
   get inFlight(): number { return this.inFlightValue; }
 
@@ -41,12 +44,17 @@ export class IndexerWorkController420 {
   }
 
   async run<T>(operation: () => Promise<T>): Promise<T> {
-    if (!this.acceptingValue) throw new Error('indexer is draining and cannot accept new work');
+    if (!this.acceptingValue) {
+      this.telemetry?.recordWorkRejected();
+      throw new Error('indexer is draining and cannot accept new work');
+    }
     this.inFlightValue += 1;
+    this.telemetry?.setWorkInFlight(this.inFlightValue);
     try {
       return await operation();
     } finally {
       this.inFlightValue -= 1;
+      this.telemetry?.setWorkInFlight(this.inFlightValue);
       this.resolveIdle420();
     }
   }
@@ -81,13 +89,15 @@ export class IndexerWorkController420 {
 export class IndexerShutdownCoordinator420 {
   constructor(
     readonly runtime: IndexerRuntimeState420,
-    readonly work: IndexerWorkController420
+    readonly work: IndexerWorkController420,
+    readonly telemetry?: IndexerOperationalTelemetry420
   ) {}
 
   async shutdown(timeoutMs: number, timer: IndexerTimer420 = DEFAULT_TIMER_420): Promise<IndexerShutdownResult420> {
     this.runtime.markDraining();
     const result = await this.work.drain(timeoutMs, timer);
     if (result.timedOut) {
+      this.telemetry?.recordShutdownTimeout();
       this.runtime.markFailed('shutdown_timeout');
       return { ...result, runtimeFailed: true };
     }

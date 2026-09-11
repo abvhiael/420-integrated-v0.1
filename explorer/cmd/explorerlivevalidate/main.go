@@ -30,17 +30,20 @@ type report struct {
 }
 
 type validator struct {
-	baseURL string
-	chainID uint64
-	http    *http.Client
-	report  report
+	baseURL    string
+	chainID    uint64
+	http       *http.Client
+	block      *uint64
+	txHash     string
+	address    string
+	serviceID  string
+	assetKey   string
+	report     report
 }
 
 func main() {
 	baseURL := strings.TrimRight(strings.TrimSpace(os.Getenv("EXPLORER_LIVE_URL")), "/")
-	if baseURL == "" {
-		fatal(errors.New("EXPLORER_LIVE_URL is required"))
-	}
+	if baseURL == "" { fatal(errors.New("EXPLORER_LIVE_URL is required")) }
 	chainID := uint64(420)
 	if raw := strings.TrimSpace(os.Getenv("EXPLORER_EXPECTED_CHAIN_ID")); raw != "" {
 		parsed, err := strconv.ParseUint(raw, 10, 64)
@@ -54,6 +57,15 @@ func main() {
 		timeout = parsed
 	}
 	v := newValidator(baseURL, chainID, &http.Client{Timeout: timeout})
+	if raw := strings.TrimSpace(os.Getenv("EXPLORER_LIVE_BLOCK_NUMBER")); raw != "" {
+		parsed, err := strconv.ParseUint(raw, 10, 64)
+		if err != nil { fatal(errors.New("EXPLORER_LIVE_BLOCK_NUMBER must be a uint64")) }
+		v.block = &parsed
+	}
+	v.txHash = strings.TrimSpace(os.Getenv("EXPLORER_LIVE_TX_HASH"))
+	v.address = strings.TrimSpace(os.Getenv("EXPLORER_LIVE_ADDRESS"))
+	v.serviceID = strings.TrimSpace(os.Getenv("EXPLORER_LIVE_SERVICE_ID"))
+	v.assetKey = strings.TrimSpace(os.Getenv("EXPLORER_LIVE_ASSET_KEY"))
 	result := v.run()
 	encoded, _ := json.MarshalIndent(result, "", "  ")
 	fmt.Println(string(encoded))
@@ -69,14 +81,14 @@ func newValidator(baseURL string, chainID uint64, hc *http.Client) *validator {
 }
 
 func (v *validator) run() report {
-	v.require("liveness", "/v1/health", nil)
-	ready := v.require("readiness", "/v1/ready", nil)
+	v.require("liveness", "/v1/health")
+	ready := v.require("readiness", "/v1/ready")
 	if ready != nil { v.assertBool("readiness.ready", ready, "ready", true) }
-	status := v.require("network-status", "/v1/status", nil)
+	status := v.require("network-status", "/v1/status")
 	if status != nil { v.assertNumber("network-status.chain", status, "chainId", float64(v.chainID)) }
-	v.require("capabilities", "/v1/capabilities", nil)
+	v.require("capabilities", "/v1/capabilities")
 
-	blocks := v.require("blocks", "/v1/blocks?limit=3", nil)
+	blocks := v.require("blocks", "/v1/blocks?limit=3")
 	var blockNumber uint64
 	var txHash, address string
 	if blocks != nil {
@@ -89,9 +101,13 @@ func (v *validator) run() report {
 			v.report.Samples["blockHash"] = stringValue(first["hash"])
 		}
 	}
+	if v.block != nil { blockNumber = *v.block; v.report.Samples["blockNumber"] = blockNumber }
 	if blockNumber > 0 || blocks != nil {
-		detail := v.require("block-detail", "/v1/blocks/"+strconv.FormatUint(blockNumber, 10), nil)
+		detail := v.require("block-detail", "/v1/blocks/"+strconv.FormatUint(blockNumber, 10))
 		if detail != nil {
+			if block, ok := detail["block"].(map[string]any); ok {
+				if hash := stringValue(block["hash"]); hash != "" { v.report.Samples["blockHash"] = hash }
+			}
 			if logs, ok := detail["logs"].([]any); ok && len(logs) > 0 {
 				if row, ok := logs[0].(map[string]any); ok {
 					txHash = stringValue(row["transactionHash"])
@@ -100,52 +116,73 @@ func (v *validator) run() report {
 			}
 		}
 	}
-	if envTx := strings.TrimSpace(os.Getenv("EXPLORER_LIVE_TX_HASH")); envTx != "" { txHash = envTx }
-	if envAddress := strings.TrimSpace(os.Getenv("EXPLORER_LIVE_ADDRESS")); envAddress != "" { address = envAddress }
+	if v.txHash != "" { txHash = v.txHash }
+	if v.address != "" { address = v.address }
 	if txHash == "" {
 		v.fail("transaction.sample", "no transaction sample discovered; seed a test transaction or set EXPLORER_LIVE_TX_HASH")
 	} else {
 		v.report.Samples["transactionHash"] = txHash
-		v.require("transaction-detail", "/v1/transactions/"+url.PathEscape(txHash), nil)
-		v.require("receipt-detail", "/v1/receipts/"+url.PathEscape(txHash), nil)
+		v.require("transaction-detail", "/v1/transactions/"+url.PathEscape(txHash))
+		v.require("receipt-detail", "/v1/receipts/"+url.PathEscape(txHash))
 	}
 	if address == "" {
 		v.fail("address.sample", "no address sample discovered; seed a logged transaction or set EXPLORER_LIVE_ADDRESS")
 	} else {
 		v.report.Samples["address"] = address
-		v.require("address-detail", "/v1/addresses/"+url.PathEscape(address)+"?limit=10", nil)
+		v.require("address-detail", "/v1/addresses/"+url.PathEscape(address)+"?limit=10")
 	}
 
-	services := v.require("registry", "/v1/services", nil)
-	if services != nil {
+	services := v.require("registry", "/v1/services")
+	serviceID := v.serviceID
+	if services != nil && serviceID == "" {
 		rows, _ := services["services"].([]any)
 		if len(rows) == 0 {
 			v.fail("registry.sample", "no registered services returned")
 		} else if first, ok := rows[0].(map[string]any); ok {
-			serviceID := stringValue(first["serviceId"])
-			if serviceID == "" { v.fail("registry.sample", "registered service missing serviceId") } else {
-				v.report.Samples["serviceId"] = serviceID
-				v.require("registry-service", "/v1/services/"+url.PathEscape(serviceID), nil)
-			}
+			serviceID = stringValue(first["serviceId"])
 		}
 	}
-	v.require("asset-activity", "/v1/assets/activity?limit=10", nil)
-	v.require("consensus", "/v1/consensus", nil)
+	if serviceID == "" {
+		v.fail("registry.sample", "no registered service sample available; set EXPLORER_LIVE_SERVICE_ID")
+	} else {
+		v.report.Samples["serviceId"] = serviceID
+		v.require("registry-service", "/v1/services/"+url.PathEscape(serviceID))
+	}
+
+	assetPath := "/v1/assets/activity?limit=10"
+	if v.assetKey != "" { assetPath += "&assetKey=" + url.QueryEscape(v.assetKey) }
+	assets := v.require("asset-activity", assetPath)
+	if assets != nil {
+		transfers, _ := assets["transfers"].([]any)
+		if len(transfers) == 0 {
+			v.fail("asset-activity.sample", "no live asset transfer evidence returned")
+		} else if first, ok := transfers[0].(map[string]any); ok {
+			assetKey := stringValue(first["assetKey"])
+			if assetKey == "" { assetKey = stringValue(assets["assetKey"]) }
+			if assetKey == "" { v.fail("asset-activity.sample", "asset transfer missing assetKey") } else { v.report.Samples["assetKey"] = assetKey }
+		}
+	}
+
+	consensus := v.require("consensus", "/v1/consensus")
+	if consensus != nil {
+		slot := number(consensus["currentSlot"])
+		validators := number(consensus["activeValidatorCount"])
+		if slot < 1 { v.fail("consensus.slot", fmt.Sprintf("currentSlot=%v", consensus["currentSlot"])) } else { v.pass("consensus.slot", fmt.Sprintf("currentSlot=%.0f", slot)); v.report.Samples["currentSlot"] = uint64(slot) }
+		if validators < 1 { v.fail("consensus.validators", fmt.Sprintf("activeValidatorCount=%v", consensus["activeValidatorCount"])) } else { v.pass("consensus.validators", fmt.Sprintf("activeValidatorCount=%.0f", validators)); v.report.Samples["activeValidatorCount"] = uint64(validators) }
+	}
 	v.report.CompletedAt = time.Now().UTC()
 	return v.report
 }
 
-func (v *validator) require(name, path string, target map[string]any) map[string]any {
+func (v *validator) require(name, path string) map[string]any {
 	req, err := http.NewRequest(http.MethodGet, v.baseURL+path, nil)
 	if err != nil { v.fail(name, err.Error()); return nil }
 	resp, err := v.http.Do(req)
 	if err != nil { v.fail(name, err.Error()); return nil }
 	defer resp.Body.Close()
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		v.fail(name, "HTTP "+resp.Status); return nil
-	}
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 { v.fail(name, "HTTP "+resp.Status); return nil }
 	if err := validateBoundary(resp.Header); err != nil { v.fail(name, err.Error()); return nil }
-	if target == nil { target = map[string]any{} }
+	target := map[string]any{}
 	if err := json.NewDecoder(resp.Body).Decode(&target); err != nil { v.fail(name, "invalid JSON: "+err.Error()); return nil }
 	v.pass(name, resp.Status)
 	return target

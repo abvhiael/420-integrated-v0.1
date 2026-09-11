@@ -13,13 +13,15 @@ The DOCS workstream builds the canonical documentation system for the 420 Integr
 
 Exit condition: documentation taxonomy, standards, app contract, ADR rules, diagram conventions, terminology rules, and minimum contribution requirements are committed and reviewable.
 
-## DOC-1 — 420Docs site foundation — IN PROGRESS
+## DOC-1 — 420Docs site foundation — COMPLETE
 
 - [x] DOC-1.1 Establish MkDocs Material project foundation.
 - [x] DOC-1.2 Add GitHub Pages deployment through GitHub Actions.
 - [x] DOC-1.3 Build documentation landing page and audience-based navigation.
 - [x] DOC-1.4 Integrate 420Docs links into the repository README.
-- [ ] DOC-1.5 Complete whole-site search/navigation qualification.
+- [x] DOC-1.5 Complete whole-site search/navigation qualification.
+
+Exit condition: 420Docs builds strictly, publishes through GitHub Pages, exposes audience-based entry points, is discoverable from the repository README, and automatically qualifies navigation and search indexing before publication.
 
 ## DOC-2 — System architecture
 
@@ -59,7 +61,7 @@ Exit condition: documentation taxonomy, standards, app contract, ADR rules, diag
 
 ## DOC-10 — Generated reference documentation
 
-- NatSpec, ABI, RPC, API, SDK, events, errors, chain registry, canonical deployments, and machine-derived reference pages.
+- NatSpec, ABI, RPC, API, SDKs, events, errors, chain registry, canonical deployments, and machine-derived reference pages.
 
 ## DOC-11 — Troubleshooting and error registry
 

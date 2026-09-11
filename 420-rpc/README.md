@@ -6,7 +6,7 @@
 
 Each RPC phase is developed on its own branch and pull request. At the end of every phase, the branch is reconciled with current `main`, qualification is rerun, and the phase is merged to `main` before work begins on the next RPC phase.
 
-## RPC-0 — architecture and trust foundation — in progress
+## RPC-0 — architecture and trust foundation — complete
 
 RPC-0 establishes the non-negotiable service contract before network routing is implemented:
 
@@ -20,7 +20,8 @@ RPC-0 establishes the non-negotiable service contract before network routing is 
 - no transaction signing or signed-byte rewriting;
 - no independent finality decision-making;
 - fail-closed behavior for finalized-state disagreement;
-- executable validation of architecture invariants.
+- executable validation of architecture invariants;
+- documented threat model and phase qualification workflow.
 
 ### RPC-0 authority boundary
 
@@ -30,19 +31,19 @@ Canonical execution reads come from compatible `node420` execution endpoints. 42
 
 ## Roadmap
 
-- **RPC-0** — architecture, authority boundaries, threat model, package layout and qualification contract.
-- **RPC-1** — upstream node/provider abstraction and capability discovery.
-- **RPC-2** — canonical Ethereum JSON-RPC compatibility and method profiles.
-- **RPC-3** — routing, health-aware upstream selection and failover.
-- **RPC-4** — chain identity, freshness and finality-safety enforcement.
-- **RPC-5** — request validation, method policy and privileged-surface exclusion.
-- **RPC-6** — rate limiting, quotas, resource bounds and abuse controls.
-- **RPC-7** — WebSocket transport and subscription lifecycle.
-- **RPC-8** — 420Indexer-backed enriched/read APIs with explicit derived-state semantics.
-- **RPC-9** — authentication, API credentials and Developer Hub integration.
-- **RPC-10** — observability, metrics, operational readiness and recovery.
-- **RPC-11** — hostile-state/security hardening and fault qualification.
-- **RPC-12** — testnet qualification and launch closeout.
+- **RPC-0 — complete:** architecture, authority boundaries, threat model, package layout and qualification contract.
+- **RPC-1 — next:** upstream node/provider abstraction and capability discovery.
+- **RPC-2:** canonical Ethereum JSON-RPC compatibility and method profiles.
+- **RPC-3:** routing, health-aware upstream selection and failover.
+- **RPC-4:** chain identity, freshness and finality-safety enforcement.
+- **RPC-5:** request validation, method policy and privileged-surface exclusion.
+- **RPC-6:** rate limiting, quotas, resource bounds and abuse controls.
+- **RPC-7:** WebSocket transport and subscription lifecycle.
+- **RPC-8:** 420Indexer-backed enriched/read APIs with explicit derived-state semantics.
+- **RPC-9:** authentication, API credentials and Developer Hub integration.
+- **RPC-10:** observability, metrics, operational readiness and recovery.
+- **RPC-11:** hostile-state/security hardening and fault qualification.
+- **RPC-12:** testnet qualification and launch closeout.
 
 ## Core invariants
 
@@ -55,3 +56,7 @@ Canonical execution reads come from compatible `node420` execution endpoints. 42
 7. 420Indexer-backed data remains visibly non-authoritative and derived.
 8. Public transports require TLS in the deployment contract.
 9. Routing, rate limiting, caching and failover never alter chain validity or finality semantics.
+
+## Next phase
+
+RPC-1 will define the upstream provider abstraction, capability discovery and normalized provider identity used by later routing and failover phases.

@@ -17,6 +17,7 @@ const unixTime = (value) => {
   const d = new Date(Number(value) * 1000);
   return Number.isNaN(d.valueOf()) ? esc(value) : `${esc(d.toLocaleString())} · ${esc(value)}`;
 };
+const pct = (value) => value === null || value === undefined ? '—' : `${Number(value).toFixed(1)}%`;
 
 async function api(path) {
   const response = await fetch(path, {headers:{'Accept':'application/json'}, cache:'no-store'});
@@ -33,8 +34,9 @@ async function api(path) {
 
 function panelError(err) {
   const issue = err.body?.issue;
-  const action = issue?.action ? `<p class="muted">${esc(issue.action)}</p>` : '';
-  return `<div class="panel error"><strong>${esc(issue?.code || 'UNAVAILABLE')}</strong><p>${esc(err.message)}</p>${action}</div>`;
+  const action = issue?.action ? `<p class="muted"><strong>Action:</strong> ${esc(issue.action)}</p>` : '';
+  const retry = issue?.retryable ? '<p class="muted">This condition may recover automatically.</p>' : '';
+  return `<div class="panel error"><strong>${esc(issue?.code || 'UNAVAILABLE')}</strong><p>${esc(err.message)}</p>${action}${retry}</div>`;
 }
 
 function setNav(route) {
@@ -58,6 +60,10 @@ function finalityBadge(value) {
   return `<span class="badge badge-${esc(state.toLowerCase())}">${esc(state)}</span>`;
 }
 
+function statusBadge(ok, yes='READY', no='ATTENTION') {
+  return `<span class="badge ${ok ? 'badge-ready' : 'badge-warn'}">${esc(ok ? yes : no)}</span>`;
+}
+
 async function refreshNetworkPill() {
   try {
     const status = await api('/v1/status');
@@ -66,7 +72,7 @@ async function refreshNetworkPill() {
   } catch (err) {
     const status = err.body?.status;
     networkPill.dataset.state = 'bad';
-    networkPill.textContent = status?.wrongChain ? 'wrong chain' : status?.stale ? 'indexer stale' : status?.degraded ? 'indexer degraded' : 'network unavailable';
+    networkPill.textContent = status?.wrongChain ? 'wrong chain' : status?.stale ? 'indexer stale' : status?.degraded ? 'indexer degraded' : !status?.consistent ? 'indexer inconsistent' : 'network unavailable';
   }
 }
 
@@ -164,32 +170,109 @@ async function contractDetail(address) {
   ])}</div>` + `<div class="panel"><h3>Runtime bytecode</h3>${c.runtimeCode ? `<div class="codebox mono">${esc(c.runtimeCode)}</div>` : '<p class="muted">No runtime bytecode indexed.</p>'}</div>`;
 }
 
+function registryTable(services) {
+  if (!services.length) return '<p class="muted">No registered services available.</p>';
+  return `<div class="table-wrap"><table><thead><tr><th>Service</th><th>Latest</th><th>Active</th><th>Implementation</th></tr></thead><tbody>${services.map(s => `<tr><td>${link(`#/registry/${encodeURIComponent(s.serviceId)}`,s.serviceId)}</td><td>v${fmt(s.latestVersion)}</td><td>${s.activeVersion ? `<span class="badge badge-ready">v${esc(s.activeVersion)}</span>` : '<span class="badge badge-warn">none</span>'}</td><td>${s.implementation ? link(`#/contracts/${s.implementation}`,short(s.implementation)) : '—'}</td></tr>`).join('')}</tbody></table></div>`;
+}
+
 async function registry() {
   const view = await api('/v1/services');
-  const services = view.services || view.data || [];
-  app.innerHTML = title('Protocol registry', `${services.length} services`) + `<div class="panel">${services.length ? `<div class="table-wrap"><table><thead><tr><th>Service</th><th>Versions</th></tr></thead><tbody>${services.map(s => `<tr><td>${mono(s.serviceId || s.serviceID)}</td><td>${fmt(s.versions?.length ?? s.versionCount)}</td></tr>`).join('')}</tbody></table></div>` : '<p class="muted">No registered services available.</p>'}</div>`;
+  const services = view.services || [];
+  app.innerHTML = title('Protocol registry', `${view.count ?? services.length} services`) + `<div class="panel"><p class="muted">Rebuildable 420Registry history projected through the qualified Indexer boundary.</p>${registryTable(services)}</div>`;
+}
+
+async function registryService(serviceId) {
+  const view = await api(`/v1/services/${encodeURIComponent(serviceId)}`);
+  const versions = view.versions || [];
+  app.innerHTML = title(view.serviceId || serviceId, `${versions.length} published version${versions.length===1?'':'s'}`) + stats([
+    ['Latest version',view.latestVersion],['Active version',view.activeVersion || 'none'],['Versions',view.versionCount ?? versions.length],['Implementation',view.implementation ? short(view.implementation) : '—']
+  ]) + `<div class="panel">${detailRows([
+    ['Service ID', mono(view.serviceId || serviceId), true],
+    ['Active implementation', view.implementation ? link(`#/contracts/${view.implementation}`,view.implementation) : '—', true]
+  ])}</div>` + `<div class="panel"><h3>Version history</h3>${registryVersionsTable(versions)}</div>`;
+}
+
+function registryVersionsTable(versions) {
+  if (!versions.length) return '<p class="muted">No version history available.</p>';
+  return `<div class="table-wrap"><table><thead><tr><th>Version</th><th>State</th><th>Implementation</th><th>Activated</th><th>Code hash</th></tr></thead><tbody>${versions.map(v => `<tr><td>${link(`#/registry/${encodeURIComponent(v.serviceId)}/versions/${v.version}`,`v${v.version}`)}</td><td>${statusBadge(v.active,'ACTIVE','HISTORICAL')}</td><td>${v.implementation ? link(`#/contracts/${v.implementation}`,short(v.implementation)) : '—'}</td><td>${v.activatedBlock ? link(`#/blocks/${v.activatedBlock}`,v.activatedBlock) : '—'}</td><td title="${esc(v.codeHash)}">${mono(short(v.codeHash))}</td></tr>`).join('')}</tbody></table></div>`;
+}
+
+async function registryVersion(serviceId, version) {
+  const v = await api(`/v1/services/${encodeURIComponent(serviceId)}/versions/${encodeURIComponent(version)}`);
+  app.innerHTML = title(`${v.serviceId} · v${v.version}`, v.active ? 'active' : 'historical') + stats([
+    ['Version',v.version],['Active',v.active ? 'yes':'no'],['Activated block',v.activatedBlock],['Deprecated block',v.deprecatedBlock || '—']
+  ]) + `<div class="panel">${detailRows([
+    ['Implementation', v.implementation ? link(`#/contracts/${v.implementation}`,v.implementation) : '—', true],
+    ['Code hash', mono(v.codeHash), true],
+    ['Metadata hash', mono(v.metadataHash), true],
+    ['Manifest hash', mono(v.manifestHash), true],
+    ['Dependency root', mono(v.dependencyRoot), true],
+    ['Interface hash', mono(v.interfaceHash), true],
+    ['Activated block hash', mono(v.activatedHash), true],
+    ['Component type', v.componentType]
+  ])}</div>`;
 }
 
 async function assets() {
-  const view = await api('/v1/assets/activity?limit=50');
+  const params = new URLSearchParams();
+  params.set('limit','50');
+  const view = await api(`/v1/assets/activity?${params.toString()}`);
   const transfers = view.transfers || [];
-  app.innerHTML = title('Asset activity', `${transfers.length} recent transfers`) + `<div class="panel">${transfers.length ? `<div class="table-wrap"><table><thead><tr><th>Asset</th><th>Amount</th><th>From</th><th>To</th><th>Tx</th></tr></thead><tbody>${transfers.map(t => `<tr><td>${mono(t.assetKey)}</td><td>${fmt(t.amount)}</td><td>${mono(t.from)}</td><td>${mono(t.to)}</td><td>${link(`#/transactions/${t.transactionHash}`,t.transactionHash)}</td></tr>`).join('')}</tbody></table></div>` : '<p class="muted">No indexed asset transfers available.</p>'}</div>`;
+  app.innerHTML = title('Asset activity', `${view.transferCount ?? transfers.length} recent transfers`) + stats([
+    ['Snapshot',view.meta?.snapshotHeight],['Safe',view.meta?.safeHeight],['Finalized',view.meta?.finalizedHeight],['Transfers',view.transferCount ?? transfers.length]
+  ]) + `<div class="panel"><p class="muted">Native and token movement projected from qualified indexed transactions and logs.</p>${assetTable(transfers)}</div>`;
+}
+
+function assetTable(transfers) {
+  if (!transfers.length) return '<p class="muted">No indexed asset transfers available.</p>';
+  return `<div class="table-wrap"><table><thead><tr><th>Block</th><th>Asset</th><th>Kind</th><th>Token ID</th><th>Amount</th><th>From</th><th>To</th><th>Tx</th></tr></thead><tbody>${transfers.map(t => `<tr><td>${link(`#/blocks/${t.blockNumber}`,t.blockNumber)}</td><td title="${esc(t.assetKey)}">${mono(short(t.assetKey,14,8))}</td><td><span class="badge">${esc(String(t.assetKind || '').toUpperCase())}</span></td><td>${t.tokenId ? mono(t.tokenId) : '—'}</td><td>${mono(t.amount)}</td><td>${t.from ? link(`#/addresses/${t.from}`,short(t.from)) : '—'}</td><td>${t.to ? link(`#/addresses/${t.to}`,short(t.to)) : '—'}</td><td>${link(`#/transactions/${t.transactionHash}`,short(t.transactionHash))}</td></tr>`).join('')}</tbody></table></div>`;
 }
 
 async function consensus() {
   const c = await api('/v1/consensus');
+  const proposer = c.scheduledProposer || {};
+  const qc = c.latestQc || {};
+  const seats = c.activeSeats || [];
   app.innerHTML = title('Consensus', 'consensus-owned projection') + stats([
-    ['Slot',c.slot],['Epoch',c.epoch],['Rotation',c.rotation],['Active validators',c.activeValidatorCount],['QC signers',c.latestQC?.signerCount],['QC participation',c.latestQC?.participationPercent != null ? `${c.latestQC.participationPercent}%` : '—']
-  ]) + `<div class="panel"><h3>Scheduled proposer seats</h3><p>primary ${mono(c.proposer?.primarySeat)} · fallback 1 ${mono(c.proposer?.fallback1Seat)} · fallback 2 ${mono(c.proposer?.fallback2Seat)}</p></div>`;
+    ['Current slot',c.currentSlot],['Next slot',c.nextSlot],['Epoch',c.epoch],['Rotation',c.rotation],['Active validators',c.activeValidatorCount],['QC participation',pct(c.quorumParticipationPercent)]
+  ]) + `<div class="panel"><h3>Epoch & rotation</h3>${detailRows([
+    ['Slot in epoch',`${c.slotInEpoch} / ${c.slotsPerEpoch}`],
+    ['Slots until epoch boundary',c.slotsUntilEpochBoundary],
+    ['Slot in rotation',`${c.slotInRotation} / ${c.slotsPerRotation}`],
+    ['Epochs per rotation',c.epochsPerRotation],
+    ['Slots until rotation boundary',c.slotsUntilRotationBoundary]
+  ])}</div>` + `<div class="panel"><h3>Scheduled proposer · slot ${fmt(proposer.slot)}</h3>${detailRows([
+    ['Primary seat',mono(proposer.primary),true],['Fallback 1',mono(proposer.fallback1),true],['Fallback 2',mono(proposer.fallback2),true]
+  ])}</div>` + `<div class="panel"><h3>Latest quorum certificate</h3>${detailRows([
+    ['Certified',statusBadge(Boolean(qc.certified),'CERTIFIED','NOT CERTIFIED'),true],
+    ['Slot',qc.slot],['Signers',qc.signers],['Quorum threshold',qc.quorum],['Block root',mono(qc.blockRoot),true],['Parent root',mono(qc.parentRoot),true]
+  ])}</div>` + `<div class="panel"><h3>Finality checkpoints</h3>${checkpointTable(c)}</div>` + `<div class="panel"><h3>Active seats</h3><div class="seat-list">${seats.map(seat => `<span class="seat">${esc(seat)}</span>`).join('') || '<span class="muted">No active seats reported.</span>'}</div></div>`;
+}
+
+function checkpointTable(c) {
+  return `<div class="table-wrap"><table><thead><tr><th>Checkpoint</th><th>Slot</th><th>Root</th></tr></thead><tbody>${[['Head',c.head],['Safe',c.safe],['Finalized',c.finalized]].map(([name,cp]) => `<tr><td>${esc(name)}</td><td>${fmt(cp?.slot)}</td><td title="${esc(cp?.root)}">${mono(short(cp?.root))}</td></tr>`).join('')}</tbody></table></div>`;
+}
+
+function statusDetails(s) {
+  return stats([
+    ['State',s.indexerState],['Chain',s.chainId],['Head',s.headHeight],['Safe',s.safeHeight],['Finalized',s.finalizedHeight],['Ingest age',s.ingestAgeSeconds != null ? `${s.ingestAgeSeconds}s` : '—'],['Safe lag',s.safeLag],['Finalized lag',s.finalizedLag]
+  ]) + `<div class="panel">${detailRows([
+    ['Ready',statusBadge(Boolean(s.ready),'READY','NOT READY'),true],
+    ['Chain check',statusBadge(!s.wrongChain,'MATCH','WRONG CHAIN'),true],
+    ['Freshness',statusBadge(!s.stale,'FRESH','STALE'),true],
+    ['Indexer health',statusBadge(!s.degraded,'HEALTHY','DEGRADED'),true],
+    ['Finality ordering',statusBadge(Boolean(s.consistent),'CONSISTENT','INCONSISTENT'),true],
+    ['Schema version',s.schemaVersion],['Decoder set',s.decoderSet],['Last ingest',s.lastIngestAt]
+  ])}</div>`;
 }
 
 async function statusPage() {
   try {
     const s = await api('/v1/status');
-    app.innerHTML = title('Explorer status') + stats([['State',s.indexerState],['Chain',s.chainId],['Ingest age',`${s.ingestAgeSeconds}s`],['Head lag / safe',s.safeLag],['Head lag / finalized',s.finalizedLag],['Ready',s.ready ? 'yes':'no']]);
+    app.innerHTML = title('Explorer status', 'qualified availability & freshness') + statusDetails(s);
   } catch (err) {
     const s = err.body?.status || {};
-    app.innerHTML = title('Explorer status') + panelError(err) + stats([['Chain',s.chainId],['State',s.indexerState],['Head',s.headHeight],['Safe',s.safeHeight],['Finalized',s.finalizedHeight],['Ingest age',s.ingestAgeSeconds != null ? `${s.ingestAgeSeconds}s` : '—']]);
+    app.innerHTML = title('Explorer status', 'fail-closed') + panelError(err) + statusDetails(s);
   }
 }
 
@@ -210,6 +293,8 @@ async function route() {
     if (root === 'transactions') return transactionsLanding();
     if (root === 'addresses' && parts[1]) return await addressDetail(parts[1]);
     if (root === 'contracts' && parts[1]) return await contractDetail(parts[1]);
+    if (root === 'registry' && parts[1] && parts[2] === 'versions' && parts[3]) return await registryVersion(decodeURIComponent(parts[1]),parts[3]);
+    if (root === 'registry' && parts[1]) return await registryService(decodeURIComponent(parts[1]));
     if (root === 'registry') return await registry();
     if (root === 'assets') return await assets();
     if (root === 'consensus') return await consensus();

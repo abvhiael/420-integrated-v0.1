@@ -13,6 +13,15 @@ nav:
       - Overview: getting-started/index.md
   - Use:
       - Overview: users/index.md
+      - 420 Wallet:
+          - Onboarding: users/wallet/index.md
+          - Setup, Import & Protection: users/wallet/setup-import-and-protection.md
+          - Send, Receive & Activity: users/wallet/send-receive-and-activity.md
+          - Connect Applications: users/wallet/dapp-connections.md
+          - Signing & Transaction Review: users/wallet/signing-and-transaction-review.md
+          - Permissions & Sessions: users/wallet/permissions-and-sessions.md
+          - Recovery & Device Safety: users/wallet/recovery-and-device-safety.md
+          - Troubleshooting: users/wallet/troubleshooting.md
   - Build:
       - Overview: developers/index.md
   - Operate:

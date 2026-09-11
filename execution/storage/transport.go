@@ -142,7 +142,10 @@ func (t *transportServer) putShard(w http.ResponseWriter, r *http.Request, id st
 		return
 	}
 
-	r.Body = http.MaxBytesReader(w, r.Body, int64(assignment.SizeBytes)+1)
+	// Limit the HTTP body to the exact canonical size. FileStore deliberately
+	// asks its reader for size+1 bytes; an oversized chunked body therefore
+	// surfaces http.MaxBytesError, which maps deterministically to 413.
+	r.Body = http.MaxBytesReader(w, r.Body, int64(assignment.SizeBytes))
 	rec, err := t.service.runtime.StoreShard(r.Context(), id, r.Body)
 	if err != nil {
 		var maxErr *http.MaxBytesError

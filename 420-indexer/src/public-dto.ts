@@ -1,6 +1,8 @@
 import type { QueryRow420 } from './query-service.js';
 import { NATIVE_ASSET_TRANSFER_POSITION_420 } from './query-layer.js';
 
+export type JsonValue420 = null | boolean | number | string | JsonValue420[] | { [key: string]: JsonValue420 };
+
 function requiredString(row: QueryRow420, field: string): string {
   const value = row[field];
   if (typeof value !== 'string' || value.length === 0) throw new Error(`invalid ${field} in query row`);
@@ -48,6 +50,24 @@ function requiredAssetPosition(row: QueryRow420, field: string): number {
   throw new Error(`invalid ${field} in query row`);
 }
 
+function jsonValue420(value: unknown, field = 'fields'): JsonValue420 {
+  if (value === null || typeof value === 'string' || typeof value === 'boolean') return value;
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  if (Array.isArray(value)) return value.map((item) => jsonValue420(item, field));
+  if (value && typeof value === 'object') {
+    const out: { [key: string]: JsonValue420 } = {};
+    for (const [key, entry] of Object.entries(value as Record<string, unknown>)) out[key] = jsonValue420(entry, field);
+    return out;
+  }
+  throw new Error(`invalid ${field} in query row`);
+}
+
+function requiredJsonObject420(row: QueryRow420, field: string): { [key: string]: JsonValue420 } {
+  const value = jsonValue420(row[field], field);
+  if (!value || Array.isArray(value) || typeof value !== 'object') throw new Error(`invalid ${field} in query row`);
+  return value;
+}
+
 export interface BlockDto420 {
   chainId: string;
   number: string;
@@ -86,6 +106,36 @@ export interface AssetTransferDto420 {
   from: string;
   to: string;
   amount: string;
+}
+
+export interface ProtocolEventDto420 {
+  chainId: string;
+  blockNumber: string;
+  blockHash: string;
+  transactionHash: string;
+  transactionIndex: number;
+  logIndex: number;
+  contractAddress: string;
+  protocol: string;
+  eventName: string;
+  objectKey: string | null;
+  lifecycleState: string | null;
+  fields: { [key: string]: JsonValue420 };
+}
+
+export interface ProtocolObjectStateDto420 {
+  chainId: string;
+  protocol: string;
+  objectKey: string;
+  contractAddress: string;
+  eventName: string;
+  lifecycleState: string | null;
+  fields: { [key: string]: JsonValue420 };
+  blockNumber: string;
+  blockHash: string;
+  transactionHash: string;
+  transactionIndex: number;
+  logIndex: number;
 }
 
 export function blockDto420(row: QueryRow420): BlockDto420 {
@@ -134,5 +184,39 @@ export function assetTransferDto420(row: QueryRow420): AssetTransferDto420 {
     from: requiredString(row, 'from_address'),
     to: requiredString(row, 'to_address'),
     amount: requiredBigintString(row, 'amount')
+  };
+}
+
+export function protocolEventDto420(row: QueryRow420): ProtocolEventDto420 {
+  return {
+    chainId: requiredBigintString(row, 'chain_id'),
+    blockNumber: requiredBigintString(row, 'block_number'),
+    blockHash: requiredString(row, 'block_hash'),
+    transactionHash: requiredString(row, 'tx_hash'),
+    transactionIndex: requiredInteger(row, 'tx_index'),
+    logIndex: requiredInteger(row, 'log_index'),
+    contractAddress: requiredString(row, 'contract_address'),
+    protocol: requiredString(row, 'protocol'),
+    eventName: requiredString(row, 'event_name'),
+    objectKey: optionalString(row, 'object_key'),
+    lifecycleState: optionalString(row, 'lifecycle_state'),
+    fields: requiredJsonObject420(row, 'fields')
+  };
+}
+
+export function protocolObjectStateDto420(row: QueryRow420): ProtocolObjectStateDto420 {
+  return {
+    chainId: requiredBigintString(row, 'chain_id'),
+    protocol: requiredString(row, 'protocol'),
+    objectKey: requiredString(row, 'object_key'),
+    contractAddress: requiredString(row, 'contract_address'),
+    eventName: requiredString(row, 'event_name'),
+    lifecycleState: optionalString(row, 'lifecycle_state'),
+    fields: requiredJsonObject420(row, 'fields'),
+    blockNumber: requiredBigintString(row, 'block_number'),
+    blockHash: requiredString(row, 'block_hash'),
+    transactionHash: requiredString(row, 'tx_hash'),
+    transactionIndex: requiredInteger(row, 'tx_index'),
+    logIndex: requiredInteger(row, 'log_index')
   };
 }

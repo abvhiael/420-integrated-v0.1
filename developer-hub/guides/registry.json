@@ -65,7 +65,7 @@
         {"id":"authorize-write","component":"DEVHUB-4","authority":"420Wallet/SmartAccount","canonical":true,"action":"Route any state-changing interaction through the qualified wallet/capability boundary."},
         {"id":"deploy-if-needed","component":"DEVHUB-9","authority":"external-signer-and-chain","canonical":true,"action":"Use the deployment planner and external signer flow for app-owned contracts; confirm receipt from canonical RPC."},
         {"id":"verify-if-deployed","component":"DEVHUB-10","authority":"420Verify","canonical":false,"action":"Publish reproducible source/compiler evidence without equating verification with audit, safety or official status."},
-        {"id":"register-publish-later","component":"DEVHUB-13","authority":"420Registry/420AppStore","canonical":true,"action":"When DEVHUB-13 is available, validate and submit app registration/publication through the owning Registry/AppStore path rather than inventing local legitimacy."}
+        {"id":"register-publish","component":"DEVHUB-13","authority":"420Registry/420AppStore","canonical":true,"action":"Validate the application release, perform canonical Registry preflight, hand publishRegisteredService to Registry governance, then project confirmed registration into the non-canonical AppStore catalogue."}
       ]
     }
   ]

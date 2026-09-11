@@ -84,6 +84,8 @@ export class IndexerRuntimeState420 {
   }
 }
 
+// Readiness evaluates only local service health. Aggregate telemetry is likewise local,
+// rebuildable and non-authoritative; neither surface may substitute for canonical chain state.
 export function evaluateIndexerRuntimeReadiness420(
   snapshot: IndexerRuntimeSnapshot420,
   nowMs: number,

@@ -34,11 +34,13 @@ IDX-10 qualifies the hardened 420Indexer against the 420 Integrated testnet with
    - require bounded search to resolve configured testnet witness data
    - replay the protocol event through `IndexerEventStream420` and require canonical provenance plus `authoritative: false`
    - fail closed when readiness is false, the index is behind the witness block, a direct witness is absent, a required feed is empty, or replay metadata does not match the selected chain/protocol
-5. **IDX-10.5 — readiness report and closeout — next**
+5. **IDX-10.5 — readiness report and closeout — implemented; deployment evidence pending**
+   - reconcile IDX-10.2, IDX-10.3 and IDX-10.4 reports into one closeout record
    - record exact node/indexer revisions and qualification environment
-   - record sustained-block window and observed failures/recoveries
-   - close deployment-time ABI/descriptor qualification against compiled genesis artifacts
-   - publish operator go/no-go checklist
+   - require live smoke, restart/replay, bounded-reorg and API/consumer evidence
+   - require artifact-backed descriptor-manifest qualification plus manifest/artifact digests
+   - emit explicit `go` or `no-go` with blockers; missing evidence always fails closed to `no-go`
+   - keep the closeout report explicitly `authoritative: false`
 
 ## Environment contract
 
@@ -83,6 +85,16 @@ Notification integration is qualified through the real `IndexerEventStream420` c
 
 As with IDX-10.2, CI proves the qualification contract and fail-closed behavior but does not replace live deployment evidence. IDX-10.5 must retain the concrete witness identifiers and qualification result used against the deployed testnet.
 
+## IDX-10.5 closeout semantics
+
+`buildTestnetCloseoutReport420` is the final qualification aggregator. It accepts the pinned testnet configuration plus the concrete IDX-10.2 smoke report, IDX-10.3 restart and reorg reports, IDX-10.4 consumer report, and deployment evidence describing exact indexer/node revisions and artifact qualification.
+
+The aggregator cross-checks chain and genesis identity, safe-head consistency, checkpoint advancement, restart idempotence, positive bounded-reorg recovery/replay, and consumer witness coverage. It then requires independent deployment flags proving that smoke, restart, reorg and consumer qualification were executed against the deployed testnet candidate.
+
+Descriptor closeout is also fail closed. Claiming descriptor qualification requires both a descriptor-manifest digest and a compiled-artifacts digest. Exact indexer and node/client revisions are mandatory. Any missing deployment evidence or internally inconsistent report adds a blocker and forces `decision: "no-go"`. Only a blocker-free report may emit `decision: "go"`.
+
+The report records only the RPC origin rather than credentials or full secret-bearing endpoint details and remains explicitly `authoritative: false`. A CI-generated synthetic passing fixture proves the closeout logic; it is not itself launch authorization.
+
 ## Evidence required for closeout
 
 A completed IDX-10 qualification should retain:
@@ -98,7 +110,8 @@ A completed IDX-10 qualification should retain:
 - deep-reorg fail-closed/no-mutation result;
 - API/consumer witness identifiers and smoke results;
 - notification/event-stream replay and canonicality result;
+- descriptor-manifest digest and compiled-artifacts digest;
 - any injected or observed failures and recovery result;
-- final operator go/no-go decision.
+- final operator go/no-go decision and blockers, if any.
 
 Secrets, RPC credentials, notification payloads and private subscription data must never be committed to the report or repository.

@@ -24,3 +24,4 @@ export * from './http-transport.js';
 export * from './event-stream.js';
 export * from './event-subscription.js';
 export * from './event-delivery.js';
+export * from './event-canonicality.js';

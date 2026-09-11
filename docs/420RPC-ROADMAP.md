@@ -28,34 +28,36 @@ Delivered deterministic method/transport-aware provider selection, gateway-local
 
 Delivered chain-observation validation, strict chain identity continuity, freshness and head-lag bounds, safe/finalized evidence requirements, fail-closed same-height checkpoint disagreement, and integration ahead of RPC-3 routing.
 
-## RPC-5 — request validation, method policy and privileged-surface enforcement — implementation complete
+### RPC-5 — request validation, method policy and privileged-surface enforcement — complete
+
+Delivered JSON-RPC envelope and parameter validation, public compatibility policy enforcement, privileged namespace exclusion, raw transaction byte checks, subscription-shape checks and stable local policy errors before upstream dispatch.
+
+## RPC-6 — rate limiting, quotas, resource bounds and abuse protection — implementation complete
 
 Delivered:
 
-- JSON-RPC 2.0 envelope validation;
-- request-ID validation and default-deny public notifications;
-- explicit RPC-2 catalogue enforcement before safety/routing;
-- local blocking of Engine, admin, personal, debug, miner and txpool namespaces;
-- continued exclusion of node-managed account/signing methods;
-- positional-array parameter policy for the public surface;
-- method-specific arity checks;
-- canonical address, 32-byte hash, hex quantity, byte-data and block-selector validation;
-- transaction call-object validation for `eth_call` and `eth_estimateGas`;
-- log-filter validation including mutually exclusive `blockHash` versus block-range fields;
-- fee-history percentile validation;
-- non-empty signed raw transaction byte validation without rewriting transaction bytes;
-- supported subscription type/filter validation;
-- stable local JSON-RPC error classes: `-32600`, `-32601`, `-32602`;
-- per-entry batch-envelope validation while leaving batch/resource limits to RPC-6;
-- hostile-state tests and `docs/420RPC-REQUEST-POLICY.md`.
+- independent single-request and batch payload byte ceilings;
+- a hard batch-entry limit;
+- deterministic method-cost weights with higher cost for expensive queries/simulation/submission paths;
+- aggregate batch cost enforcement so batching cannot bypass quotas;
+- per-client token-bucket quotas with deterministic refill and retry guidance;
+- per-client concurrency limits;
+- global concurrency limits;
+- batch concurrency charged by entry count/fanout units;
+- explicit admission leases and idempotent release handling;
+- a bounded tracked-client table;
+- idle-client eviction that never removes active leases;
+- fail-closed behavior when tracked-client capacity is exhausted;
+- RPC-5-first ordering so malformed/privileged requests consume no RPC-6 quota;
+- configurable policy validation and accounting snapshots;
+- hostile-state tests and `docs/420RPC-RESOURCE-CONTROLS.md`.
 
-RPC-5 is a forwarding policy boundary only. Passing validation does not mean a transaction, call or block reference is valid on-chain; canonical execution nodes retain execution authority.
+RPC-6 governs gateway work only. Client accounting keys are not authentication claims; credential identity remains RPC-9 scope. Admission never changes transaction validity, chain state, consensus, fork choice or finality.
 
 Exit gate: implementation is complete. Merge requires the exact final head to pass 420RPC, docs and repository-wide qualification and remain reconciled with current `main`.
 
 ## Remaining phases
 
-- **RPC-6:** rate limits, quotas, batch/resource bounds and abuse protection.
 - **RPC-7:** WebSocket transport and subscription lifecycle.
 - **RPC-8:** enriched/indexer-backed read APIs with explicit derived-state semantics.
 - **RPC-9:** authentication, API credentials and Developer Hub integration.
@@ -65,4 +67,4 @@ Exit gate: implementation is complete. Merge requires the exact final head to pa
 
 ## Authority rule
 
-420RPC may refuse malformed, unsupported, privileged, stale, wrong-chain or unsafe requests/upstreams, but it never determines canonical blocks, transaction validity, consensus, safe/finalized checkpoints or fork choice. Request validation is gateway policy, not protocol authority.
+420RPC may refuse malformed, unsupported, privileged, over-budget, stale, wrong-chain or unsafe requests/upstreams, but it never determines canonical blocks, transaction validity, consensus, safe/finalized checkpoints or fork choice. Resource admission is gateway policy, not protocol authority.

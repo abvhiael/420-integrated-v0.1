@@ -12,6 +12,7 @@ import {
   encodeTransactionCursor420,
   encodePositionCursor420,
   encodeAssetTransferCursor420,
+  NATIVE_ASSET_TRANSFER_POSITION_420,
   normalizeLimit420
 } from './query-layer.js';
 import { classifySearch420, type SearchRoute420 } from './search-router.js';
@@ -46,10 +47,14 @@ function integerField420(row: QueryRow420, field: string): number {
   throw new Error(`invalid ${field} in query row`);
 }
 
-function nullableIntegerField420(row: QueryRow420, field: string): number {
+function assetPositionField420(row: QueryRow420, field: string): number {
   const value = row[field];
-  if (value === null || value === undefined) return -1;
-  return integerField420(row, field);
+  if (typeof value === 'number' && Number.isSafeInteger(value) && value >= NATIVE_ASSET_TRANSFER_POSITION_420) return value;
+  if (typeof value === 'string' && /^-?\d+$/.test(value)) {
+    const parsed = Number(value);
+    if (Number.isSafeInteger(parsed) && parsed >= NATIVE_ASSET_TRANSFER_POSITION_420) return parsed;
+  }
+  throw new Error(`invalid ${field} in query row`);
 }
 
 function stringField420(row: QueryRow420, field: string): string {
@@ -125,7 +130,7 @@ export class IndexerQueryService420 {
     return page420(rows, limit, (row) => encodeAssetTransferCursor420({
       blockNumber: bigintField420(row, 'block_number'),
       txHash: stringField420(row, 'tx_hash'),
-      logIndex: nullableIntegerField420(row, 'log_index')
+      logIndex: assetPositionField420(row, 'log_index')
     }));
   }
 

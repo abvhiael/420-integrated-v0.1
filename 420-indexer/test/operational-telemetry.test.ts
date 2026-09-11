@@ -4,6 +4,7 @@ import { IndexerOperationalTelemetry420 } from '../src/operational-telemetry.js'
 import { IndexerDeliveryQueue420 } from '../src/event-delivery.js';
 import { IndexerWorkController420 } from '../src/work-controller.js';
 import type { IndexerEventEnvelope420 } from '../src/event-stream.js';
+import type { IndexerEventMatch420 } from '../src/event-subscription.js';
 
 function event420(): IndexerEventEnvelope420 {
   return {
@@ -51,7 +52,7 @@ test('delivery telemetry tracks pressure and retry/dead-letter transitions witho
   const telemetry = new IndexerOperationalTelemetry420();
   const queue = new IndexerDeliveryQueue420(telemetry);
   const event = event420();
-  const match = { subscriptionId: 'private-subscription', eventId: event.id, matched: true };
+  const match: IndexerEventMatch420 = { subscriptionId: 'private-subscription', eventId: event.id, matched: true };
   const policy = { provider: 'mail', destination: 'private@example.test', maxAttempts: 1 };
 
   const record = queue.enqueue(match, event, policy, 1000);

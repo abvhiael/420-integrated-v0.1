@@ -73,15 +73,15 @@ See `docs/420INDEXER-API-V1.md` for the complete route table and stability contr
 
 IDX-8 builds replayable delivery primitives over the qualified public projection API. Delivery remains non-authoritative and preserves canonical provenance.
 
-Planned slices:
+Slices:
 
-- **IDX-8.1 — replayable event-stream contract:** stable event envelopes and IDs, opaque cursor replay, public-API-only dependency, protocol event filtering and provenance preservation.
-- **IDX-8.2 — subscription/watch matching:** deterministic opt-in topic, protocol, object and address matching without exposing private subscription state to the index database.
+- **IDX-8.1 — replayable event-stream contract — complete:** stable event envelopes and IDs, opaque cursor replay, public-API-only dependency, protocol event filtering and provenance preservation.
+- **IDX-8.2 — subscription/watch matching — complete:** deterministic opt-in matching by chain, protocol, event, topic, object key, lifecycle state and contract address; empty selector sets fail closed; private subscription state remains outside index projections.
 - **IDX-8.3 — delivery queue and retry semantics:** deduplication, retry safety, rate limits, priority/severity and provider-neutral delivery handoff.
 - **IDX-8.4 — reorg/finality delivery semantics:** supersession/retraction signals for replaced non-finalized events and immutable finalized-history behavior.
 - **IDX-8.5 — 420Notifications integration and qualification:** consumer adapter, end-to-end replay/restart tests, failure isolation and documentation.
 
-IDX-8.1 starts with protocol events because they already expose typed, chain-scoped provenance and deterministic cursors through the stable v1 API. Later slices can add additional public stream families without coupling consumers to database rows.
+IDX-8.1 and IDX-8.2 deliberately consume only the stable public projection boundary. Subscription configuration is delivery policy rather than canonical or indexed protocol state, and malformed or selector-free subscriptions fail closed instead of becoming accidental global watches.
 
 ## Authority boundary
 

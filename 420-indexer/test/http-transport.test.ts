@@ -10,7 +10,7 @@ import type {
   TransactionPageRequest420
 } from '../src/api-surface.js';
 import { INDEXER_API_VERSION_420 } from '../src/api-surface.js';
-import type { AddressDto420, AssetTransferDto420, BlockDto420, ProtocolEventDto420, TransactionDto420 } from '../src/public-dto.js';
+import type { AddressDto420, AssetTransferDto420, BlockDto420, ProtocolEventDto420, ProtocolObjectStateDto420, TransactionDto420 } from '../src/public-dto.js';
 import type { LogDto420, ReceiptDto420 } from '../src/receipt-log-dto.js';
 import type { QueryPage420 } from '../src/query-layer.js';
 import { routeIndexerHttp420 } from '../src/http-transport.js';
@@ -71,6 +71,25 @@ class FakeApi420 implements IndexerPublicApi420 {
     return { items: [], nextCursor: null };
   }
 
+  async protocolObject(chainId: bigint, protocol: string, objectKey: string): Promise<ProtocolObjectStateDto420 | null> {
+    this.calls.push({ name: 'protocolObject', chainId, request: { protocol, objectKey } });
+    if (objectKey === 'missing') return null;
+    return {
+      chainId: chainId.toString(),
+      protocol,
+      objectKey,
+      contractAddress: '0xcontract',
+      eventName: 'ProposalActivated',
+      lifecycleState: 'ACTIVE',
+      fields: { proposalId: objectKey },
+      blockNumber: '10',
+      blockHash: '0x10',
+      transactionHash: '0xabc',
+      transactionIndex: 0,
+      logIndex: 1
+    };
+  }
+
   async search(chainId: bigint, term: string, limit?: number): Promise<SearchResult420[]> {
     this.calls.push({ name: 'search', chainId, request: { term, limit } });
     return [{ type: 'block', key: '10', value: '0x10' }];
@@ -117,17 +136,48 @@ test('HTTP transport routes receipts and paged logs through the public API', asy
   ]);
 });
 
+test('HTTP transport routes direct protocol object state with encoded keys', async () => {
+  const api = new FakeApi420();
+  const result = await routeIndexerHttp420(api, 'GET', '/v1/protocols/420Governance/objects/proposal%3A0xabc?chainId=420');
+
+  assert.equal(result.status, 200);
+  assert.deepEqual(api.calls[0], {
+    name: 'protocolObject',
+    chainId: 420n,
+    request: { protocol: '420Governance', objectKey: 'proposal:0xabc' }
+  });
+  assert.deepEqual(result.body, {
+    apiVersion: 'v1',
+    data: {
+      chainId: '420',
+      protocol: '420Governance',
+      objectKey: 'proposal:0xabc',
+      contractAddress: '0xcontract',
+      eventName: 'ProposalActivated',
+      lifecycleState: 'ACTIVE',
+      fields: { proposalId: 'proposal:0xabc' },
+      blockNumber: '10',
+      blockHash: '0x10',
+      transactionHash: '0xabc',
+      transactionIndex: 0,
+      logIndex: 1
+    }
+  });
+});
+
 test('HTTP transport returns stable 404 envelopes for missing direct resources', async () => {
   const api = new FakeApi420();
   const block = await routeIndexerHttp420(api, 'GET', '/v1/blocks/missing?chainId=420');
   const transaction = await routeIndexerHttp420(api, 'GET', '/v1/transactions/missing?chainId=420');
   const receipt = await routeIndexerHttp420(api, 'GET', '/v1/transactions/missing/receipt?chainId=420');
   const address = await routeIndexerHttp420(api, 'GET', '/v1/addresses/missing?chainId=420');
+  const protocolObject = await routeIndexerHttp420(api, 'GET', '/v1/protocols/420Governance/objects/missing?chainId=420');
 
   assert.deepEqual(block.body, { apiVersion: 'v1', error: { code: 'not_found', message: 'block not found' } });
   assert.equal(transaction.status, 404);
   assert.deepEqual(receipt.body, { apiVersion: 'v1', error: { code: 'not_found', message: 'receipt not found' } });
   assert.equal(address.status, 404);
+  assert.deepEqual(protocolObject.body, { apiVersion: 'v1', error: { code: 'not_found', message: 'protocol object not found' } });
 });
 
 test('HTTP transport parses transaction, asset, protocol and search filters', async () => {

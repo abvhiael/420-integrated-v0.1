@@ -125,7 +125,7 @@ export function createWalletSdk420(input: {
     factory,
     capabilityRegistry,
     connect,
-    discoverSmartAccount: async (controller?: string) => {
+    discoverSmartAccount: async (controller?: string): Promise<SmartAccountState420> => {
       const state = await adapter.discoverSmartAccount(provider, await controller420(controller), { factoryAddress: factory.address });
       const account = normalizeAddress420(state.smartAccount, 'smart account');
       if (state.factoryAddress !== undefined && normalizeAddress420(state.factoryAddress, 'smart account factory') !== factory.address.toLowerCase()) {
@@ -136,8 +136,9 @@ export function createWalletSdk420(input: {
       }
       return Object.freeze({ ...state, smartAccount: account });
     },
-    prepareSession: (smartAccount, sessionKey, request) => adapter.prepareSessionUserOperation(provider, smartAccount, normalizeAddress420(sessionKey, 'session key'), request),
-    sendPreparedSession: (prepared) => adapter.sendPreparedSessionUserOperation(provider, prepared),
-    confirmSession: (submitted) => adapter.confirmSessionUserOperation(provider, submitted)
+    prepareSession: (smartAccount: SmartAccountState420, sessionKey: string, request: SessionRequest420): Promise<unknown> =>
+      adapter.prepareSessionUserOperation(provider, smartAccount, normalizeAddress420(sessionKey, 'session key'), request),
+    sendPreparedSession: (prepared: unknown): Promise<unknown> => adapter.sendPreparedSessionUserOperation(provider, prepared),
+    confirmSession: (submitted: unknown): Promise<unknown> => adapter.confirmSessionUserOperation(provider, submitted)
   });
 }

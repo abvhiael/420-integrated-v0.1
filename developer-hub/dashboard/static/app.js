@@ -16,6 +16,8 @@ load().then(async data=>{
   $('guides').innerHTML=data.guides.map(g=>card(g.title,`<p>${esc(g.summary)}</p><p><code>${esc(g.id)}</code></p>`)).join('');
   $('surfaces').innerHTML=Object.entries(data.surfaces).map(([name,s])=>card(name,`<p>${badge(s.phase)}</p><p>${esc(s.authority)}</p><p>${s.canonical===false?'projection only':s.executableHere===false?'handoff only':'read surface'}</p>`)).join('');
   $('security').textContent=data.securityRule;
+  const [serviceIdentity,credential]=await Promise.all([api('/api/service-auth/view'),api('/api/service-auth/credential')]);
+  $('service-auth').innerHTML=card(serviceIdentity.title,`<p>${badge(serviceIdentity.applicationId,'ok')}</p><p>chain ${esc(serviceIdentity.chainId)} · ${esc(serviceIdentity.environment)}</p><p>audiences: ${esc(serviceIdentity.audiences.join(', '))}</p><p>${esc(serviceIdentity.securityRule)}</p>`)+card(credential.title,`<p>${badge(credential.status,credential.status==='ACTIVE'?'ok':'warn')} ${esc(credential.credentialId)}</p><p>audience: ${esc(credential.audience)}</p><p>scopes: ${esc(credential.scopes.join(', '))}</p><p>revision ${esc(credential.revision)} · expires ${esc(credential.expiresAt)}</p><p>secret digest recorded: ${credential.secretDigestPresent?'yes':'no'} · bearer secret exposed: no</p>`);
   const debugView=await api('/api/debug/view');
   $('debug-meta').innerHTML=card(debugView.title,`<p>${badge(`chain ${debugView.chainId}`,'ok')}</p><p>${esc(debugView.supported.join(', '))}</p><p>${esc(debugView.securityRule)}</p>`);
   $('debug-tx-run').addEventListener('click',()=>runDebug(()=>api(`/api/debug/transaction?hash=${encodeURIComponent($('debug-tx').value.trim())}`)));

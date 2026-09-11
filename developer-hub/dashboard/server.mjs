@@ -8,6 +8,8 @@ import { loadIntegrationGuideRegistry420, listIntegrationGuides420 } from '../sr
 import { createDashboardSnapshot420 } from '../src/dashboard-model.mjs';
 import { createIndexerClient420 } from '../src/indexer-client.mjs';
 import { createDebugClient420, createDebugControlView420 } from '../src/debug-control.mjs';
+import { createServiceIdentityView420 } from '../src/service-identity.mjs';
+import { createCredentialLifecycleView420 } from '../src/credential-lifecycle.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, '..');
@@ -44,6 +46,12 @@ async function snapshot420() {
   return createDashboardSnapshot420({ network, contracts: catalogue, guides });
 }
 
+async function serviceAuth420() {
+  const application = JSON.parse(await readFile(resolve(root, 'service-auth/application.example.json'), 'utf8'));
+  const credential = JSON.parse(await readFile(resolve(root, 'service-auth/credential.example.json'), 'utf8'));
+  return { application, credential };
+}
+
 function type420(path) {
   return ({ '.html':'text/html; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.css':'text/css; charset=utf-8', '.json':'application/json; charset=utf-8' })[extname(path)] ?? 'application/octet-stream';
 }
@@ -65,6 +73,16 @@ const server = createServer(async (req, res) => {
     if (req.method !== 'GET') { res.writeHead(405).end('method not allowed'); return; }
     const url = new URL(req.url, `http://127.0.0.1:${port}`);
     if (url.pathname === '/api/dashboard') { json420(res, 200, await snapshot420()); return; }
+    if (url.pathname === '/api/service-auth/view') {
+      const { application } = await serviceAuth420();
+      json420(res, 200, createServiceIdentityView420(application)); return;
+    }
+    if (url.pathname === '/api/service-auth/credential') {
+      const { credential } = await serviceAuth420();
+      const at = url.searchParams.get('at') || undefined;
+      json420(res, 200, createCredentialLifecycleView420(credential, at)); return;
+    }
+    if (url.pathname.startsWith('/api/service-auth')) { json420(res, 404, { error: 'service-auth route not found' }); return; }
     if (url.pathname.startsWith('/api/debug')) {
       const { debug } = await runtime420();
       if (url.pathname === '/api/debug/view') { json420(res, 200, createDebugControlView420(debug)); return; }
@@ -90,7 +108,8 @@ const server = createServer(async (req, res) => {
     res.writeHead(200, { 'content-type': type420(path), 'cache-control':'no-store' });
     res.end(body);
   } catch (error) {
-    const status = error?.name === 'DebugControlError420' || error?.name === 'IndexerClientError420' ? 400 : (error?.code === 'ENOENT' ? 404 : 500);
+    const badRequest = ['DebugControlError420','IndexerClientError420','ServiceIdentityError420','CredentialLifecycleError420'].includes(error?.name);
+    const status = badRequest ? 400 : (error?.code === 'ENOENT' ? 404 : 500);
     if (req.url?.startsWith('/api/')) { json420(res, status, { error: error.message }); return; }
     res.writeHead(status, { 'content-type':'text/plain; charset=utf-8' });
     res.end(status === 404 ? 'not found' : `dashboard error: ${error.message}`);

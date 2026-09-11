@@ -4,7 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test test/*.test.mjs"
+    "test": "node --test test/*.test.mjs",
+    "devnet:plan": "node devnet/bootstrap.mjs plan",
+    "devnet:doctor": "node devnet/bootstrap.mjs doctor",
+    "devnet:prepare": "node devnet/bootstrap.mjs prepare",
+    "devnet:up": "node devnet/bootstrap.mjs up",
+    "devnet:smoke": "node devnet/bootstrap.mjs smoke 30"
   },
   "engines": {
     "node": ">=22"

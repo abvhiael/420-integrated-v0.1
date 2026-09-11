@@ -28,11 +28,11 @@ IDX-5 provides manifest-driven decoding and rebuildable state views for genesis-
 
 The remaining IDX-5 closeout is deployment-time only: generate and check the concrete descriptor manifest once compiled genesis artifacts land, then run the artifact-backed qualification suite.
 
-## IDX-6 — query/database layer
+## IDX-6 — query/database layer — complete
 
-The first IDX-6 increment establishes stable query contracts and database indexes for consumers of 420Indexer.
+IDX-6 establishes stable query contracts and database indexes for consumers of 420Indexer.
 
-Implemented in this increment:
+Implemented:
 
 - opaque base64url cursors for block, transaction, and block/transaction/log positions;
 - bounded page sizes with a default of 50 and hard maximum of 200;
@@ -43,10 +43,31 @@ Implemented in this increment:
 - deterministic log feeds ordered by block, transaction, and log index;
 - protocol-event history filtered by protocol and canonical object key;
 - asset-transfer history filtered by asset and/or holder address;
-- fetch-one-extra-row semantics for stable `nextCursor` construction at the service/API layer;
-- covering/query-oriented indexes for the block, transaction, log, asset-transfer, and protocol-event paths used by Explorer, Wallet, Analytics, Search, Notifications, and Developer APIs.
+- fetch-one-extra-row semantics for stable `nextCursor` construction;
+- direct block, transaction, address, receipt, protocol-object and search query helpers;
+- covering/query-oriented indexes for Explorer, Wallet, Analytics, Search, Notifications, and Developer APIs.
 
 Query contracts are chain-scoped and operate only on rebuildable index projections. Canonical protocol state remains on-chain.
+
+## IDX-7 — public/index-consumer API — IDX-7.4 complete
+
+IDX-7 exposes the stable v1 consumer boundary for 420Explorer, 420Search, 420Analytics, 420Wallet, 420Notifications, and the Developer Hub.
+
+The completed IDX-7.4 surface includes:
+
+- stable typed DTOs for blocks, transactions, addresses, receipts, logs, asset transfers, protocol events, and protocol-object state;
+- versioned JSON envelopes with a stable public adapter boundary;
+- direct block, transaction, receipt, address, and protocol-object routes;
+- paged blocks, transactions, logs, asset transfers, and protocol-event routes;
+- bounded search;
+- `/health`, `/ready`, and `/v1/status` operational surfaces;
+- indexed-head and finality metadata explicitly marked `authoritative: false`;
+- an exported `INDEXER_V1_ROUTES_420` consumer route contract;
+- client-validation errors separated from backend failures (`400` vs generic `500`);
+- bounded direct-resource path parameters;
+- consumer contract, transport, DTO, operational, and regression test coverage.
+
+See `docs/420INDEXER-API-V1.md` for the complete route table and stability contract.
 
 ## Authority boundary
 
@@ -58,4 +79,4 @@ Query contracts are chain-scoped and operate only on rebuildable index projectio
 
 ## Next phase
 
-Continue IDX-6 with an executable database repository/service layer that turns the SQL query contracts into typed pages, stable cursor emission, direct hash/address lookup helpers, and search-oriented query primitives. Then IDX-7 exposes the public/index-consumer API surface for Explorer, Search, Analytics, Wallet, Notifications, and the Developer Hub.
+After IDX-7 closeout, continue with IDX-8 notification/event-stream delivery over the qualified public projection surface, followed by IDX-9 operational hardening and IDX-10 testnet qualification.

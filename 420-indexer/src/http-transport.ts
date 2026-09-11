@@ -19,6 +19,13 @@ export interface ApiErrorEnvelope420 {
 }
 
 const JSON_HEADERS_420 = { 'content-type': 'application/json; charset=utf-8' };
+const MAX_PATH_PARAM_LENGTH_420 = 512;
+
+class InvalidRequest420 extends Error {}
+
+function invalidRequest420(message: string): never {
+  throw new InvalidRequest420(message);
+}
 
 function ok420<T>(data: T, status = 200): HttpJsonResponse420 {
   return { status, headers: JSON_HEADERS_420, body: { apiVersion: INDEXER_API_VERSION_420, data } satisfies ApiEnvelope420<T> };
@@ -29,30 +36,30 @@ function error420(status: number, code: string, message: string): HttpJsonRespon
 }
 
 function parseChainId420(raw: string | null): bigint {
-  if (!raw || !/^\d+$/.test(raw)) throw new Error('chainId must be an unsigned integer');
+  if (!raw || !/^\d+$/.test(raw)) invalidRequest420('chainId must be an unsigned integer');
   return BigInt(raw);
 }
 
 function optionalLimit420(url: URL): number | undefined {
   const raw = url.searchParams.get('limit');
   if (raw === null) return undefined;
-  if (!/^\d+$/.test(raw)) throw new Error('limit must be an integer between 1 and 200');
+  if (!/^\d+$/.test(raw)) invalidRequest420('limit must be an integer between 1 and 200');
   const value = Number(raw);
-  if (!Number.isSafeInteger(value) || value < 1 || value > 200) throw new Error('limit must be an integer between 1 and 200');
+  if (!Number.isSafeInteger(value) || value < 1 || value > 200) invalidRequest420('limit must be an integer between 1 and 200');
   return value;
 }
 
 function optionalDirection420(url: URL): QueryDirection420 | undefined {
   const raw = url.searchParams.get('direction');
   if (raw === null) return undefined;
-  if (raw !== 'asc' && raw !== 'desc') throw new Error('direction must be asc or desc');
+  if (raw !== 'asc' && raw !== 'desc') invalidRequest420('direction must be asc or desc');
   return raw;
 }
 
 function optionalBigint420(url: URL, name: string): bigint | undefined {
   const raw = url.searchParams.get(name);
   if (raw === null) return undefined;
-  if (!/^\d+$/.test(raw)) throw new Error(`${name} must be an unsigned integer`);
+  if (!/^\d+$/.test(raw)) invalidRequest420(`${name} must be an unsigned integer`);
   return BigInt(raw);
 }
 
@@ -64,11 +71,22 @@ function pageRequest420(url: URL) {
   };
 }
 
-function pathParam420(path: string, pattern: RegExp): string | null {
+function pathParams420(path: string, pattern: RegExp): string[] | null {
   const match = pattern.exec(path);
-  if (!match?.[1]) return null;
-  try { return decodeURIComponent(match[1]); }
-  catch { throw new Error('invalid path parameter encoding'); }
+  if (!match) return null;
+  try {
+    const values = match.slice(1).map((value) => decodeURIComponent(value ?? ''));
+    if (values.some((value) => value.length > MAX_PATH_PARAM_LENGTH_420)) invalidRequest420('path parameter exceeds maximum length');
+    return values;
+  } catch (error) {
+    if (error instanceof InvalidRequest420) throw error;
+    invalidRequest420('invalid path parameter encoding');
+  }
+}
+
+function pathParam420(path: string, pattern: RegExp): string | null {
+  const values = pathParams420(path, pattern);
+  return values?.[0] || null;
 }
 
 export async function routeIndexerHttp420(api: IndexerPublicApi420, method: string, requestUrl: string): Promise<HttpJsonResponse420> {
@@ -80,9 +98,29 @@ export async function routeIndexerHttp420(api: IndexerPublicApi420, method: stri
 
   try {
     const path = url.pathname.replace(/\/+$/, '') || '/';
+    if (path === '/health') return ok420(await api.health());
     if (path === '/v1') return ok420({ version: api.version });
 
     const chainId = parseChainId420(url.searchParams.get('chainId'));
+    if (path === '/ready') {
+      const readiness = await api.readiness(chainId);
+      return ok420(readiness, readiness.ready ? 200 : 503);
+    }
+    if (path === '/v1/status') return ok420(await api.status(chainId));
+
+    const receiptHash = pathParam420(path, /^\/v1\/transactions\/([^/]+)\/receipt$/);
+    if (receiptHash !== null) {
+      const receipt = await api.receipt(chainId, receiptHash);
+      return receipt ? ok420(receipt) : error420(404, 'not_found', 'receipt not found');
+    }
+
+    const protocolObjectParams = pathParams420(path, /^\/v1\/protocols\/([^/]+)\/objects\/([^/]+)$/);
+    if (protocolObjectParams !== null) {
+      const [protocol, objectKey] = protocolObjectParams;
+      if (!protocol || !objectKey) return error420(400, 'invalid_request', 'protocol and object key are required');
+      const object = await api.protocolObject(chainId, protocol, objectKey);
+      return object ? ok420(object) : error420(404, 'not_found', 'protocol object not found');
+    }
 
     const blockId = pathParam420(path, /^\/v1\/blocks\/([^/]+)$/);
     if (blockId !== null) {
@@ -105,6 +143,9 @@ export async function routeIndexerHttp420(api: IndexerPublicApi420, method: stri
     if (path === '/v1/blocks') return ok420(await api.blocks(chainId, pageRequest420(url)));
     if (path === '/v1/transactions') {
       return ok420(await api.transactions(chainId, { ...pageRequest420(url), address: url.searchParams.get('address') ?? undefined }));
+    }
+    if (path === '/v1/logs') {
+      return ok420(await api.logs(chainId, { ...pageRequest420(url), address: url.searchParams.get('address') ?? undefined }));
     }
     if (path === '/v1/assets/transfers') {
       return ok420(await api.assetTransfers(chainId, {
@@ -129,8 +170,8 @@ export async function routeIndexerHttp420(api: IndexerPublicApi420, method: stri
 
     return error420(404, 'not_found', 'route not found');
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'invalid request';
-    return error420(400, 'invalid_request', message);
+    if (error instanceof InvalidRequest420) return error420(400, 'invalid_request', error.message);
+    return error420(500, 'internal_error', 'internal server error');
   }
 }
 

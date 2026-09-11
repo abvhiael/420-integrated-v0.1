@@ -1,7 +1,8 @@
-import { MemoryCheckpointStore420 } from './checkpoint-store.js';
+import { MemoryCheckpointStore420, type CheckpointStore420 } from './checkpoint-store.js';
 import type { ChainSource420, Hex } from './chain-source.js';
 import { IndexerIngestor420, type BlockConsumer420 } from './ingestor.js';
-import { safeHead420, type FinalityPolicy420 } from './indexing.js';
+import { safeHead420, type FinalityPolicy420, type IndexCheckpoint420 } from './indexing.js';
+import type { CanonicalHistoryStore420 } from './reorg.js';
 
 export type TestnetFinalityMode420 = 'head' | 'confirmations' | 'finalized';
 
@@ -37,6 +38,25 @@ export interface TestnetSmokeQualificationReport420 {
   lastBlock: bigint;
   processed: number;
   checkpointHash: Hex;
+}
+
+export interface TestnetRestartQualificationReport420 {
+  sourceId: string;
+  observedSafeHead: bigint;
+  checkpointBefore: IndexCheckpoint420;
+  replayGap: number;
+  processed: number;
+  checkpointAfter: IndexCheckpoint420;
+  idempotentProcessed: number;
+}
+
+export interface TestnetReorgQualificationReport420 {
+  sourceId: string;
+  observedSafeHead: bigint;
+  checkpointBefore: IndexCheckpoint420;
+  recoveredReorgDepth: number;
+  checkpointAfter: IndexCheckpoint420;
+  replayedBlocks: number;
 }
 
 const DECIMAL = /^(0|[1-9][0-9]*)$/;
@@ -103,6 +123,24 @@ async function qualificationSafeHead420(
   return safeHead420(observedHead, finalityPolicy420(config));
 }
 
+async function assertTestnetIdentity420(
+  source: ChainSource420,
+  config: TestnetQualificationConfig420,
+): Promise<{ chainId: bigint; genesisHash: Hex }> {
+  const expectedChainId = BigInt(config.chainId);
+  const actualChainId = await source.chainId();
+  if (actualChainId !== expectedChainId) {
+    throw new Error(`testnet chain mismatch: expected ${expectedChainId}, got ${actualChainId}`);
+  }
+
+  const genesis = await source.getBlockByNumber(0n);
+  if (!genesis || genesis.number !== 0n) throw new Error('testnet source returned no canonical genesis block');
+  if (genesis.hash.toLowerCase() !== config.expectedGenesisHash.toLowerCase()) {
+    throw new Error(`testnet genesis mismatch: expected ${config.expectedGenesisHash}, got ${genesis.hash}`);
+  }
+  return { chainId: actualChainId, genesisHash: genesis.hash };
+}
+
 export function parseTestnetQualificationConfig420(
   env: TestnetQualificationEnvironment420,
 ): TestnetQualificationConfig420 {
@@ -152,18 +190,7 @@ export async function runTestnetSmokeQualification420(
   consumer: BlockConsumer420,
   config: TestnetQualificationConfig420,
 ): Promise<TestnetSmokeQualificationReport420> {
-  const expectedChainId = BigInt(config.chainId);
-  const actualChainId = await source.chainId();
-  if (actualChainId !== expectedChainId) {
-    throw new Error(`testnet chain mismatch: expected ${expectedChainId}, got ${actualChainId}`);
-  }
-
-  const genesis = await source.getBlockByNumber(0n);
-  if (!genesis || genesis.number !== 0n) throw new Error('testnet source returned no canonical genesis block');
-  if (genesis.hash.toLowerCase() !== config.expectedGenesisHash.toLowerCase()) {
-    throw new Error(`testnet genesis mismatch: expected ${config.expectedGenesisHash}, got ${genesis.hash}`);
-  }
-
+  const identity = await assertTestnetIdentity420(source, config);
   const observedHead = await source.blockNumber();
   const observedSafeHead = await qualificationSafeHead420(source, config, observedHead);
   const requiredWindow = BigInt(config.sustainedBlocks);
@@ -197,14 +224,115 @@ export async function runTestnetSmokeQualification420(
   }
 
   return {
-    chainId: actualChainId,
+    chainId: identity.chainId,
     sourceId: source.sourceId,
-    genesisHash: genesis.hash,
+    genesisHash: identity.genesisHash,
     observedHead,
     observedSafeHead,
     firstBlock,
     lastBlock: observedSafeHead,
     processed: run.processed,
     checkpointHash: run.checkpoint.blockHash,
+  };
+}
+
+export async function runTestnetRestartQualification420(
+  source: ChainSource420,
+  consumer: BlockConsumer420,
+  checkpoints: CheckpointStore420,
+  history: CanonicalHistoryStore420,
+  config: TestnetQualificationConfig420,
+): Promise<TestnetRestartQualificationReport420> {
+  await assertTestnetIdentity420(source, config);
+  const checkpointBefore = await checkpoints.load();
+  if (!checkpointBefore) throw new Error('IDX-10.3 restart qualification requires an existing durable checkpoint');
+  if (checkpointBefore.chainId !== BigInt(config.chainId)) {
+    throw new Error(`IDX-10.3 checkpoint chain mismatch: expected ${config.chainId}, got ${checkpointBefore.chainId}`);
+  }
+
+  const observedHead = await source.blockNumber();
+  const observedSafeHead = await qualificationSafeHead420(source, config, observedHead);
+  if (checkpointBefore.blockNumber > observedSafeHead) {
+    throw new Error(`IDX-10.3 checkpoint ${checkpointBefore.blockNumber} is ahead of safe head ${observedSafeHead}`);
+  }
+  const gap = observedSafeHead - checkpointBefore.blockNumber;
+  if (gap > BigInt(config.restartReplayBlocks)) {
+    throw new Error(`IDX-10.3 restart replay gap ${gap} exceeds configured window ${config.restartReplayBlocks}`);
+  }
+
+  const ingestor = new IndexerIngestor420(
+    source,
+    checkpoints,
+    consumer,
+    {
+      finality: finalityPolicy420(config),
+      maxBlocksPerRun: Math.max(1, config.restartReplayBlocks),
+      maxReorgDepth: config.maxReorgDepth,
+    },
+    history,
+  );
+  const resumed = await ingestor.runOnce();
+  const checkpointAfter = await checkpoints.load();
+  if (!checkpointAfter || checkpointAfter.blockNumber !== observedSafeHead) {
+    throw new Error('IDX-10.3 restart qualification did not recover through the observed safe head');
+  }
+
+  const idempotent = await ingestor.runOnce();
+  if (idempotent.processed !== 0 || idempotent.checkpoint?.blockNumber !== checkpointAfter.blockNumber || idempotent.checkpoint.blockHash.toLowerCase() !== checkpointAfter.blockHash.toLowerCase()) {
+    throw new Error('IDX-10.3 repeated restart was not idempotent at the same safe head');
+  }
+
+  return {
+    sourceId: source.sourceId,
+    observedSafeHead,
+    checkpointBefore,
+    replayGap: Number(gap),
+    processed: resumed.processed,
+    checkpointAfter,
+    idempotentProcessed: idempotent.processed,
+  };
+}
+
+export async function runTestnetReorgQualification420(
+  source: ChainSource420,
+  consumer: BlockConsumer420,
+  checkpoints: CheckpointStore420,
+  history: CanonicalHistoryStore420,
+  config: TestnetQualificationConfig420,
+): Promise<TestnetReorgQualificationReport420> {
+  await assertTestnetIdentity420(source, config);
+  const checkpointBefore = await checkpoints.load();
+  if (!checkpointBefore) throw new Error('IDX-10.3 reorg qualification requires an existing durable checkpoint');
+
+  const observedHead = await source.blockNumber();
+  const observedSafeHead = await qualificationSafeHead420(source, config, observedHead);
+  const ingestor = new IndexerIngestor420(
+    source,
+    checkpoints,
+    consumer,
+    {
+      finality: finalityPolicy420(config),
+      maxBlocksPerRun: Math.max(1, config.maxReorgDepth + config.restartReplayBlocks + 1),
+      maxReorgDepth: config.maxReorgDepth,
+    },
+    history,
+  );
+
+  const recovered = await ingestor.runOnce();
+  if (recovered.recoveredReorgDepth <= 0) {
+    throw new Error('IDX-10.3 reorg qualification did not observe a canonical reorg');
+  }
+  const checkpointAfter = await checkpoints.load();
+  if (!checkpointAfter || checkpointAfter.blockNumber !== observedSafeHead) {
+    throw new Error('IDX-10.3 reorg qualification did not replay through the observed safe head');
+  }
+
+  return {
+    sourceId: source.sourceId,
+    observedSafeHead,
+    checkpointBefore,
+    recoveredReorgDepth: recovered.recoveredReorgDepth,
+    checkpointAfter,
+    replayedBlocks: recovered.processed,
   };
 }

@@ -15,3 +15,4 @@ export * from './query-layer.js';
 export * from './query-service.js';
 export * from './search-router.js';
 export * from './public-dto.js';
+export * from './api-surface.js';

@@ -75,6 +75,16 @@ Completed slices:
 
 `/health` remains a process-liveness probe; `/ready` is the traffic-admission gate when runtime state is supplied. Runtime, shutdown, telemetry and recovery metadata remain off-chain service state and never replace canonical chain authority.
 
+## IDX-10 — testnet qualification — in progress
+
+- **IDX-10.1 — qualification environment and harness contract:** in progress. The testnet runner must pin chain ID, genesis hash, RPC endpoint, finality mode, sustained-block target, bounded reorg depth and restart-replay window; malformed or inconsistent configuration fails closed.
+- **IDX-10.2 — live RPC ingest/indexing smoke:** next.
+- **IDX-10.3 — restart, replay and bounded reorg qualification:** pending.
+- **IDX-10.4 — public API and consumer integration qualification:** pending.
+- **IDX-10.5 — readiness report/operator closeout:** pending.
+
+See `docs/420INDEXER-TESTNET.md` for the qualification contract and required evidence.
+
 ## Authority boundary
 
 420Indexer is never authoritative for balances, ownership, registrations, settlements, rights, governance outcomes, bridge state, or protocol eligibility. Those remain canonical on-chain. All indexed views are rebuildable from canonical chain history plus deployment and ABI manifests.
@@ -85,4 +95,4 @@ Completed slices:
 
 ## Next phase
 
-Proceed to IDX-10 testnet qualification: deploy the hardened indexer against the 420 Integrated testnet, qualify real RPC/finality/reorg behavior and consumer surfaces under sustained chain activity, and close the remaining deployment-time IDX-5 artifact-manifest qualification against the compiled genesis suite.
+Finish IDX-10.1 qualification, then run IDX-10.2 against the live 420 Integrated testnet RPC endpoint and pinned genesis identity.

@@ -29,6 +29,7 @@ type fileState struct {
 	Transactions map[string]model.TransactionRecord   `json:"transactions"`
 	Receipts     map[string]model.ReceiptRecord       `json:"receipts"`
 	Logs         map[string]model.LogRecord           `json:"logs"`
+	Contracts    map[string]model.ContractRecord      `json:"contracts"`
 }
 
 func NewFileStore(path string) (*FileStore, error) {
@@ -45,11 +46,12 @@ func NewFileStore(path string) (*FileStore, error) {
 	if s.data.Transactions == nil { s.data.Transactions = map[string]model.TransactionRecord{} }
 	if s.data.Receipts == nil { s.data.Receipts = map[string]model.ReceiptRecord{} }
 	if s.data.Logs == nil { s.data.Logs = map[string]model.LogRecord{} }
+	if s.data.Contracts == nil { s.data.Contracts = map[string]model.ContractRecord{} }
 	return s, nil
 }
 
 func emptyFileState() fileState {
-	return fileState{Version: 1, Blocks: map[uint64]model.BlockRecord{}, Transactions: map[string]model.TransactionRecord{}, Receipts: map[string]model.ReceiptRecord{}, Logs: map[string]model.LogRecord{}}
+	return fileState{Version: 1, Blocks: map[uint64]model.BlockRecord{}, Transactions: map[string]model.TransactionRecord{}, Receipts: map[string]model.ReceiptRecord{}, Logs: map[string]model.LogRecord{}, Contracts: map[string]model.ContractRecord{}}
 }
 
 func (s *FileStore) persistLocked() error {
@@ -106,6 +108,18 @@ func (s *FileStore) PutBundle(block model.BlockRecord, txs []model.TransactionRe
 	return s.persistLocked()
 }
 
+func (s *FileStore) PutContract(record model.ContractRecord) error {
+	s.mu.Lock(); defer s.mu.Unlock()
+	s.data.Contracts[strings.ToLower(record.Address)] = record
+	return s.persistLocked()
+}
+
+func (s *FileStore) Contract(address string) (model.ContractRecord, bool, error) {
+	s.mu.Lock(); defer s.mu.Unlock()
+	record, ok := s.data.Contracts[strings.ToLower(address)]
+	return record, ok, nil
+}
+
 func (s *FileStore) Transaction(hash string) (model.TransactionRecord, bool, error) {
 	s.mu.Lock(); defer s.mu.Unlock()
 	tx, ok := s.data.Transactions[strings.ToLower(hash)]
@@ -135,6 +149,7 @@ func (s *FileStore) DeleteBlocksAbove(number uint64) error {
 	for h, tx := range s.data.Transactions { if tx.BlockNumber > number { delete(s.data.Transactions, h) } }
 	for h, r := range s.data.Receipts { if r.BlockNumber > number { delete(s.data.Receipts, h) } }
 	for k, lg := range s.data.Logs { if lg.BlockNumber > number { delete(s.data.Logs, k) } }
+	for address, record := range s.data.Contracts { if record.DeploymentBlock > number { delete(s.data.Contracts, address) } }
 	return s.persistLocked()
 }
 

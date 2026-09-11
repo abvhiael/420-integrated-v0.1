@@ -19,6 +19,13 @@ export interface ApiErrorEnvelope420 {
 }
 
 const JSON_HEADERS_420 = { 'content-type': 'application/json; charset=utf-8' };
+const MAX_PATH_PARAM_LENGTH_420 = 512;
+
+class InvalidRequest420 extends Error {}
+
+function invalidRequest420(message: string): never {
+  throw new InvalidRequest420(message);
+}
 
 function ok420<T>(data: T, status = 200): HttpJsonResponse420 {
   return { status, headers: JSON_HEADERS_420, body: { apiVersion: INDEXER_API_VERSION_420, data } satisfies ApiEnvelope420<T> };
@@ -29,30 +36,30 @@ function error420(status: number, code: string, message: string): HttpJsonRespon
 }
 
 function parseChainId420(raw: string | null): bigint {
-  if (!raw || !/^\d+$/.test(raw)) throw new Error('chainId must be an unsigned integer');
+  if (!raw || !/^\d+$/.test(raw)) invalidRequest420('chainId must be an unsigned integer');
   return BigInt(raw);
 }
 
 function optionalLimit420(url: URL): number | undefined {
   const raw = url.searchParams.get('limit');
   if (raw === null) return undefined;
-  if (!/^\d+$/.test(raw)) throw new Error('limit must be an integer between 1 and 200');
+  if (!/^\d+$/.test(raw)) invalidRequest420('limit must be an integer between 1 and 200');
   const value = Number(raw);
-  if (!Number.isSafeInteger(value) || value < 1 || value > 200) throw new Error('limit must be an integer between 1 and 200');
+  if (!Number.isSafeInteger(value) || value < 1 || value > 200) invalidRequest420('limit must be an integer between 1 and 200');
   return value;
 }
 
 function optionalDirection420(url: URL): QueryDirection420 | undefined {
   const raw = url.searchParams.get('direction');
   if (raw === null) return undefined;
-  if (raw !== 'asc' && raw !== 'desc') throw new Error('direction must be asc or desc');
+  if (raw !== 'asc' && raw !== 'desc') invalidRequest420('direction must be asc or desc');
   return raw;
 }
 
 function optionalBigint420(url: URL, name: string): bigint | undefined {
   const raw = url.searchParams.get(name);
   if (raw === null) return undefined;
-  if (!/^\d+$/.test(raw)) throw new Error(`${name} must be an unsigned integer`);
+  if (!/^\d+$/.test(raw)) invalidRequest420(`${name} must be an unsigned integer`);
   return BigInt(raw);
 }
 
@@ -67,8 +74,14 @@ function pageRequest420(url: URL) {
 function pathParams420(path: string, pattern: RegExp): string[] | null {
   const match = pattern.exec(path);
   if (!match) return null;
-  try { return match.slice(1).map((value) => decodeURIComponent(value ?? '')); }
-  catch { throw new Error('invalid path parameter encoding'); }
+  try {
+    const values = match.slice(1).map((value) => decodeURIComponent(value ?? ''));
+    if (values.some((value) => value.length > MAX_PATH_PARAM_LENGTH_420)) invalidRequest420('path parameter exceeds maximum length');
+    return values;
+  } catch (error) {
+    if (error instanceof InvalidRequest420) throw error;
+    invalidRequest420('invalid path parameter encoding');
+  }
 }
 
 function pathParam420(path: string, pattern: RegExp): string | null {
@@ -157,8 +170,8 @@ export async function routeIndexerHttp420(api: IndexerPublicApi420, method: stri
 
     return error420(404, 'not_found', 'route not found');
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'invalid request';
-    return error420(400, 'invalid_request', message);
+    if (error instanceof InvalidRequest420) return error420(400, 'invalid_request', error.message);
+    return error420(500, 'internal_error', 'internal server error');
   }
 }
 

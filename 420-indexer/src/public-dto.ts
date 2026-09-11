@@ -1,4 +1,5 @@
 import type { QueryRow420 } from './query-service.js';
+import { NATIVE_ASSET_TRANSFER_POSITION_420 } from './query-layer.js';
 
 function requiredString(row: QueryRow420, field: string): string {
   const value = row[field];
@@ -31,6 +32,16 @@ function requiredInteger(row: QueryRow420, field: string): number {
   throw new Error(`invalid ${field} in query row`);
 }
 
+function requiredAssetPosition(row: QueryRow420, field: string): number {
+  const value = row[field];
+  if (typeof value === 'number' && Number.isSafeInteger(value) && value >= NATIVE_ASSET_TRANSFER_POSITION_420) return value;
+  if (typeof value === 'string' && /^-?\d+$/.test(value)) {
+    const parsed = Number(value);
+    if (Number.isSafeInteger(parsed) && parsed >= NATIVE_ASSET_TRANSFER_POSITION_420) return parsed;
+  }
+  throw new Error(`invalid ${field} in query row`);
+}
+
 export interface BlockDto420 {
   chainId: string;
   number: string;
@@ -55,7 +66,7 @@ export interface AssetTransferDto420 {
   chainId: string;
   blockNumber: string;
   transactionHash: string;
-  logIndex: number | null;
+  logIndex: number;
   assetKey: string;
   assetKind: string;
   contractAddress: string | null;
@@ -90,13 +101,12 @@ export function transactionDto420(row: QueryRow420): TransactionDto420 {
 }
 
 export function assetTransferDto420(row: QueryRow420): AssetTransferDto420 {
-  const logIndexValue = row.log_index;
   const tokenIdValue = row.token_id;
   return {
     chainId: requiredBigintString(row, 'chain_id'),
     blockNumber: requiredBigintString(row, 'block_number'),
     transactionHash: requiredString(row, 'tx_hash'),
-    logIndex: logIndexValue === null || logIndexValue === undefined ? null : requiredInteger(row, 'log_index'),
+    logIndex: requiredAssetPosition(row, 'log_index'),
     assetKey: requiredString(row, 'asset_key'),
     assetKind: requiredString(row, 'asset_kind'),
     contractAddress: optionalString(row, 'contract_address'),

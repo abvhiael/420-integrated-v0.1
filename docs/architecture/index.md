@@ -11,6 +11,7 @@ This directory is the canonical home for system-level architecture documentation
 - [Trust-boundary model](trust-boundary-model.md) — custody, protocol, governance, provider, external-system, operator, and application trust crossings plus validation and compromise-containment rules.
 - [Chain architecture](chain/index.md) — execution, accounts, transactions, blocks/state, gas/fees, native `$420`, and network configuration.
 - [Consensus architecture](consensus/index.md) — validators, committees/cohorts, proposer scheduling, epochs, QCs/finality, rewards, slashing, failure, and recovery.
+- [Infrastructure architecture](infrastructure/index.md) — `fourtwentyd`, `node420`, 420Indexer, RPC/gateways, storage/resources, AI compute, oracle/provider infrastructure, observability, and operator services.
 - [Architecture Decision Records](decisions/README.md) — accepted, proposed, superseded, and deprecated architectural decisions.
 
 ## Purpose

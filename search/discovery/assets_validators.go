@@ -99,8 +99,8 @@ func (d *AssetValidatorDiscovery) ResolveValidator(ctx context.Context, validato
 	p.Source = architecture.SourceIndexer
 	p.Authority = "ValidatorRegistry canonical lifecycle via qualified 420Indexer 420Stake projection"
 	p.LogIndex = &logIndex
-	owner := fieldString(registered.Fields, "owner")
-	withdrawal := fieldString(registered.Fields, "withdrawal")
+	owner := validatorFieldString(registered.Fields, "owner")
+	withdrawal := validatorFieldString(registered.Fields, "withdrawal")
 	subtitle := owner
 	if withdrawal != "" && withdrawal != owner { subtitle += " · withdrawal " + withdrawal }
 	tags := []string{"validator", "420Stake", strings.ToLower(latest.EventName)}
@@ -133,7 +133,7 @@ func (d *AssetValidatorDiscovery) qualifiedStatus(ctx context.Context) (indexerc
 	return status, indexedHeight, safeHeight, nil
 }
 
-func fieldString(fields map[string]any, key string) string {
+func validatorFieldString(fields map[string]any, key string) string {
 	value, ok := fields[key]
 	if !ok || value == nil { return "" }
 	switch v := value.(type) {

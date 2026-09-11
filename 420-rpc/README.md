@@ -10,7 +10,7 @@ Each RPC phase is developed on its own branch and pull request. At the end of ev
 
 RPC-0 established the non-negotiable service contract: chain ID 420, Engine isolation, no Wallet-key custody, no transaction signing or mutation, no gateway-owned finality, TLS public transport, explicit derived Indexer semantics and fail-closed finalized disagreement.
 
-## RPC-1 — upstream abstraction and capability discovery — in progress
+## RPC-1 — upstream abstraction and capability discovery — complete
 
 RPC-1 turns the RPC-0 upstream concepts into runtime provider contracts:
 
@@ -32,8 +32,8 @@ Discovery can determine whether an endpoint is suitable for 420RPC routing. It c
 ## Roadmap
 
 - **RPC-0 — complete:** architecture, authority boundaries, threat model, package layout and qualification contract.
-- **RPC-1 — in progress:** upstream node/provider abstraction and capability discovery.
-- **RPC-2:** canonical Ethereum JSON-RPC compatibility and method profiles.
+- **RPC-1 — complete:** upstream node/provider abstraction and capability discovery.
+- **RPC-2 — next:** canonical Ethereum JSON-RPC compatibility and method profiles.
 - **RPC-3:** routing, health-aware upstream selection and failover.
 - **RPC-4:** chain identity, freshness and finality-safety enforcement.
 - **RPC-5:** request validation, method policy and privileged-surface exclusion.
@@ -60,4 +60,4 @@ Discovery can determine whether an endpoint is suitable for 420RPC routing. It c
 
 ## Next phase
 
-After RPC-1 is reconciled, qualified and merged, RPC-2 will define canonical Ethereum JSON-RPC compatibility and explicit method profiles.
+RPC-2 will define canonical Ethereum JSON-RPC compatibility and explicit method profiles after RPC-1 is merged to `main`.

@@ -32,6 +32,15 @@ nav:
           - Blocks & State: architecture/chain/blocks-and-state.md
           - Gas, Fees & Native $420: architecture/chain/gas-fees-native-420.md
           - Network Identity & Configuration: architecture/chain/network-identity-and-configuration.md
+      - Consensus:
+          - Overview: architecture/consensus/index.md
+          - Consensus Overview: architecture/consensus/consensus-overview.md
+          - Validator Lifecycle: architecture/consensus/validator-lifecycle.md
+          - Proposer Selection, Cohorts & Rotation: architecture/consensus/proposer-selection-cohorts-rotation.md
+          - Epochs, Fork Choice, QCs & Finality: architecture/consensus/epochs-fork-choice-qcs-finality.md
+          - Rewards & Issuance: architecture/consensus/rewards-and-issuance.md
+          - Slashing & Safety: architecture/consensus/slashing-and-safety.md
+          - Failure, Recovery & Operator Safety: architecture/consensus/failure-recovery-operator-safety.md
       - Architecture Decisions: architecture/decisions/README.md
   - Reference:
       - Overview: reference/index.md

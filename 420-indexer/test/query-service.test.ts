@@ -58,15 +58,21 @@ test('normalizes direct hash and address lookups', async () => {
   assert.deepEqual(db.calls[2]!.params, ['420', '0x123']);
 });
 
-test('search is exact, bounded, and empty-safe', async () => {
+test('search is routed, bounded, and invalid-token safe', async () => {
   const db = new FakeDb420();
   const svc = new IndexerQueryService420(db);
   assert.deepEqual(await svc.search(420n, '   '), []);
+  assert.deepEqual(await svc.search(420n, '0xabc'), []);
   assert.equal(db.calls.length, 0);
-  db.queue.push({ rows: [{ result_type: 'transaction', result_key: '0xabc', result_value: '0xabc' }] });
-  const results = await svc.search(420n, ' 0xAbC ', 200);
+
+  const hash = `0x${'a'.repeat(64)}`;
+  db.queue.push({ rows: [] });
+  db.queue.push({ rows: [{ tx_hash: hash }] });
+  const results = await svc.search(420n, hash, 200);
   assert.equal(results.length, 1);
-  assert.deepEqual(db.calls[0]!.params, ['420', '0xabc', 50]);
+  assert.equal(results[0]!.result_type, 'transaction');
+  assert.deepEqual(db.calls[0]!.params, ['420', hash]);
+  assert.deepEqual(db.calls[1]!.params, ['420', hash]);
 });
 
 test('fails closed on malformed database rows used for cursors', async () => {

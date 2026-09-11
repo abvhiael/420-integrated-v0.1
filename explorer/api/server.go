@@ -38,6 +38,7 @@ func (s *Server) routes() {
 	s.mux.HandleFunc("GET /v1/transactions/{hash}", s.handleTransaction)
 	s.mux.HandleFunc("GET /v1/receipts/{hash}", s.handleReceipt)
 	s.mux.HandleFunc("GET /v1/addresses/{address}", s.handleAddress)
+	s.mux.HandleFunc("GET /v1/contracts/{address}", s.handleContract)
 	s.mux.HandleFunc("GET /v1/services/{service}/versions/{version}", s.handleServiceVersion)
 }
 
@@ -94,6 +95,17 @@ func (s *Server) handleAddress(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		status := explorerErrorStatus(err)
 		if errors.Is(err, explorerservice.ErrInvalidAddress) { status = http.StatusBadRequest }
+		writeError(w, status, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, view)
+}
+
+func (s *Server) handleContract(w http.ResponseWriter, r *http.Request) {
+	view, err := s.service.ContractDetail(r.Context(), r.PathValue("address"))
+	if err != nil {
+		status := explorerErrorStatus(err)
+		if strings.Contains(err.Error(), "invalid contract address") { status = http.StatusBadRequest }
 		writeError(w, status, err.Error())
 		return
 	}

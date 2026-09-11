@@ -82,7 +82,7 @@ class DurableRecoveryConsumer420 implements DurableBlockConsumer420 {
     for (let index = this.batches.length - 1; index >= 0; index -= 1) {
       if (blockNumber === null || this.batches[index].block.number > blockNumber) this.batches.splice(index, 1);
     }
-    await this.history.truncateAfter(blockNumber);
+    await this.history.deleteAfter(blockNumber ?? -1n);
     if (ancestor) await this.checkpoints.save(ancestor);
     else await this.checkpoints.clear();
   }
@@ -193,7 +193,7 @@ test('IDX-10.3 deep reorg fails closed without destructive rollback or checkpoin
       history,
       config420({ IDX420_MAX_REORG_DEPTH: '1', IDX420_RESTART_REPLAY_BLOCKS: '1' }),
     ),
-    /reorg exceeds maximum supported depth 1/,
+    /reorg exceeds configured max depth 1/,
   );
 
   assert.deepEqual(await checkpoints.load(), before);

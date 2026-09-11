@@ -1,6 +1,6 @@
 # 420 Integrated Documentation Roadmap
 
-The DOCS workstream builds the canonical documentation system for the 420 Integrated ecosystem. Repository-controlled Markdown is the source of truth; a public 420Docs site will render and index it.
+The DOCS workstream builds the canonical documentation system for the 420 Integrated ecosystem. Repository-controlled Markdown is the source of truth; a public 420Docs site renders and indexes it.
 
 ## DOC-0 — Documentation foundation — COMPLETE
 
@@ -23,13 +23,15 @@ Exit condition: documentation taxonomy, standards, app contract, ADR rules, diag
 
 Exit condition: 420Docs builds strictly, publishes through GitHub Pages, exposes audience-based entry points, is discoverable from the repository README, and automatically qualifies navigation and search indexing before publication.
 
-## DOC-2 — System architecture
+## DOC-2 — System architecture — COMPLETE
 
-- System overview.
-- Design principles.
-- Genesis architecture.
-- Dependency map.
-- Trust-boundary model.
+- [x] DOC-2.1 Publish canonical system overview.
+- [x] DOC-2.2 Document system design principles.
+- [x] DOC-2.3 Document genesis architecture.
+- [x] DOC-2.4 Publish dependency map.
+- [x] DOC-2.5 Publish trust-boundary model.
+
+Exit condition: the system architecture explains the top-level layers, design principles, genesis composition, dependencies, authority boundaries, normal flows, failure assumptions, and links to deeper chain, consensus, protocol, infrastructure, and application documentation.
 
 ## DOC-3 — Chain documentation
 

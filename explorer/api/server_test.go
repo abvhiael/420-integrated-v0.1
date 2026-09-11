@@ -71,16 +71,36 @@ func TestStatusRouteFailsClosedOnWrongChain(t *testing.T) {
 
 func TestBlockDetailRoute(t *testing.T) {
 	f := &fakeIndexer{
-		block: model.BlockRecord{ChainID: 420, Number: 7, Hash: "0xblock"},
+		health: indexerapi.HealthResponse{Health: model.Health{ChainID: 420, IndexedHeight: 8}},
+		block: model.BlockRecord{ChainID: 420, Number: 7, Hash: "0xblock", ParentHash: "0xparent", Finality: model.FinalitySafe},
 		logs: []model.LogRecord{{ChainID: 420, BlockNumber: 7, BlockHash: "0xblock", TransactionHash: "0xtx"}},
 	}
 	s := newTestServer(t, f)
 	rr := httptest.NewRecorder()
 	s.Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodGet, "/v1/blocks/7", nil))
 	if rr.Code != http.StatusOK { t.Fatalf("status=%d body=%s", rr.Code, rr.Body.String()) }
-	var got explorerservice.BlockView
+	var got explorerservice.BlockDetailView
 	if err := json.Unmarshal(rr.Body.Bytes(), &got); err != nil { t.Fatal(err) }
-	if got.Block.Number != 7 || len(got.Logs) != 1 { t.Fatalf("unexpected block view: %+v", got) }
+	if got.Block.Number != 7 || got.Block.Finality != model.FinalitySafe || got.LogCount != 1 { t.Fatalf("unexpected block detail: %+v", got) }
+	if got.Navigation.Previous == nil || *got.Navigation.Previous != 6 || got.Navigation.Next == nil || *got.Navigation.Next != 8 {
+		t.Fatalf("unexpected navigation: %+v", got.Navigation)
+	}
+}
+
+func TestBlocksRouteReturnsPresentationPage(t *testing.T) {
+	f := &fakeIndexer{blocks: indexerapi.BlockPage{
+		Meta: indexerapi.PageMeta{ChainID: 420, SnapshotHeight: 9, SnapshotHash: "0x9", NextCursor: "cursor"},
+		Blocks: []model.BlockRecord{{ChainID: 420, Number: 9, Hash: "0x9", ParentHash: "0x8", Finality: model.FinalityHead}},
+	}}
+	s := newTestServer(t, f)
+	rr := httptest.NewRecorder()
+	s.Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodGet, "/v1/blocks?limit=10", nil))
+	if rr.Code != http.StatusOK { t.Fatalf("status=%d body=%s", rr.Code, rr.Body.String()) }
+	var got explorerservice.BlockPageView
+	if err := json.Unmarshal(rr.Body.Bytes(), &got); err != nil { t.Fatal(err) }
+	if got.Meta.SnapshotHeight != 9 || got.Meta.NextCursor != "cursor" || len(got.Blocks) != 1 || got.Blocks[0].Finality != model.FinalityHead {
+		t.Fatalf("unexpected block page: %+v", got)
+	}
 }
 
 func TestTransactionRoute(t *testing.T) {

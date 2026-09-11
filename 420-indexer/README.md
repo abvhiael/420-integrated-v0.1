@@ -85,6 +85,20 @@ IDX-8 consumes only stable public projection/event surfaces. Subscription config
 
 See `docs/420NOTIFICATIONS.md` for the notification integration, privacy, replay and reliability contract.
 
+## IDX-9 — operational hardening — in progress
+
+IDX-9 hardens the indexer for sustained testnet and production-like operation without changing the on-chain authority boundary.
+
+Planned slices:
+
+- **IDX-9.1 — runtime lifecycle and readiness:** explicit starting/serving/draining/failed state, stale-ingest detection, source-head lag reporting, and fail-closed readiness semantics.
+- **IDX-9.2 — graceful shutdown and bounded work:** stop admission before shutdown, drain in-flight work, bound concurrency/queues, and prevent partial lifecycle transitions.
+- **IDX-9.3 — observability and operational telemetry:** structured counters/gauges for ingest progress, lag, retries, reorgs, delivery failures and queue pressure with no private payload leakage.
+- **IDX-9.4 — durable recovery invariants:** close restart-durability gaps around canonical history/reorg recovery and strengthen atomicity between projection progress and recovery metadata.
+- **IDX-9.5 — failure injection and recovery qualification:** restart, RPC outage, stale-head, database interruption, reorg and dependency-failure scenarios with operator-facing recovery guidance.
+
+IDX-9.1 is underway on the operational readiness surface. `/health` remains a process-liveness probe; `/ready` becomes the traffic-admission gate when runtime state is supplied. Runtime status remains non-authoritative and never substitutes for canonical chain state.
+
 ## Authority boundary
 
 420Indexer is never authoritative for balances, ownership, registrations, settlements, rights, governance outcomes, bridge state, or protocol eligibility. Those remain canonical on-chain. All indexed views are rebuildable from canonical chain history plus deployment and ABI manifests.
@@ -95,4 +109,4 @@ See `docs/420NOTIFICATIONS.md` for the notification integration, privacy, replay
 
 ## Next phase
 
-Proceed to IDX-9 operational hardening, then IDX-10 testnet qualification.
+Complete IDX-9 operational hardening, then proceed to IDX-10 testnet qualification.

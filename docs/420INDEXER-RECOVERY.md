@@ -11,6 +11,12 @@ This runbook covers operator recovery for 420Indexer. All checkpoints, canonical
 5. Treat a reorg beyond `maxReorgDepth` as fail-closed. Investigate the source node before increasing the bound.
 6. After recovery, verify indexed head, observed source head, lag, ingest-failure telemetry and canonical continuity before restoring traffic.
 
+## Automated IDX-9.5 fault qualification
+
+The automated failure matrix injects process-restart/resume, RPC outage, stale-ingest, database-interruption and canonical-reorg scenarios. It asserts that failed work cannot advance the checkpoint, stale service state becomes unready, reorg recovery resumes from the nearest canonical ancestor, and restart continues exactly after the last committed checkpoint.
+
+Shutdown timeout, bounded work, notification retry/dead-letter behavior and durable SQL recovery-store reads remain covered by their dedicated IDX-9.2–IDX-9.4 regression suites and are included in the operator procedures below.
+
 ## Fault matrix
 
 ### Process restart

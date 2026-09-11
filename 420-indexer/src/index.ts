@@ -13,3 +13,5 @@ export * from './abi-manifest.js';
 export * from './lifecycle-reducer.js';
 export * from './query-layer.js';
 export * from './query-service.js';
+export * from './search-router.js';
+export * from './public-dto.js';

@@ -16,7 +16,7 @@ create table if not exists idx_asset_transfers (
   chain_id numeric(78,0) not null,
   block_number numeric(78,0) not null,
   tx_hash text not null,
-  log_index integer,
+  log_index integer not null check (log_index >= -1),
   asset_key text not null,
   asset_kind text not null,
   contract_address text,

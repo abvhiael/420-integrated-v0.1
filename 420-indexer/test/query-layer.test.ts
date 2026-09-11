@@ -57,6 +57,6 @@ test('asset transfer query is chain scoped and deterministic', () => {
   assert.match(query.text, /asset_key = \$2/);
   assert.match(query.text, /from_address = \$3 or to_address = \$3/);
   assert.match(query.text, /block_number < \$4/);
-  assert.match(query.text, /order by block_number desc, tx_hash desc, log_index desc nulls last/);
+  assert.match(query.text, /order by block_number desc, lower\(tx_hash\) desc, log_index desc/);
   assert.deepEqual(query.params, ['420','erc20:0x1:','0xabc','99',21]);
 });

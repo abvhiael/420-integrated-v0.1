@@ -32,33 +32,38 @@ Delivered chain-observation validation, strict chain identity continuity, freshn
 
 Delivered JSON-RPC envelope and parameter validation, public compatibility policy enforcement, privileged namespace exclusion, raw transaction byte checks, subscription-shape checks and stable local policy errors before upstream dispatch.
 
-## RPC-6 — rate limiting, quotas, resource bounds and abuse protection — implementation complete
+### RPC-6 — rate limiting, quotas, resource bounds and abuse protection — complete
+
+Delivered weighted method admission, per-client token buckets, batch/count/byte/cost ceilings, per-client/global concurrency leases, bounded tracked-client state and fail-closed resource exhaustion behavior.
+
+## RPC-7 — WebSocket transport and subscription lifecycle — implementation complete
 
 Delivered:
 
-- independent single-request and batch payload byte ceilings;
-- a hard batch-entry limit;
-- deterministic method-cost weights with higher cost for expensive queries/simulation/submission paths;
-- aggregate batch cost enforcement so batching cannot bypass quotas;
-- per-client token-bucket quotas with deterministic refill and retry guidance;
-- per-client concurrency limits;
-- global concurrency limits;
-- batch concurrency charged by entry count/fanout units;
-- explicit admission leases and idempotent release handling;
-- a bounded tracked-client table;
-- idle-client eviction that never removes active leases;
-- fail-closed behavior when tracked-client capacity is exhausted;
-- RPC-5-first ordering so malformed/privileged requests consume no RPC-6 quota;
-- configurable policy validation and accounting snapshots;
-- hostile-state tests and `docs/420RPC-RESOURCE-CONTROLS.md`.
+- bounded WebSocket session creation with unique local session IDs;
+- heartbeat and idle-expiry tracking;
+- per-session and global subscription caps;
+- RPC-5 request validation before subscription lifecycle allocation;
+- RPC-6 resource admission for subscription setup;
+- gateway-local pending subscription IDs;
+- explicit binding from each local subscription to one `(upstreamId, upstreamSubscriptionId)` pair;
+- upstream-subscription IDs namespaced by provider identity;
+- ownership enforcement preventing cross-session unsubscribe;
+- exact-bound event delivery to the owning local subscription/session;
+- individual event-size bounds;
+- per-session queued-message and queued-byte bounds;
+- fail-closed session cleanup on backpressure exhaustion;
+- full subscription cleanup when sessions close;
+- upstream-loss invalidation that forces client resubscription instead of silently claiming gap-free failover;
+- lifecycle snapshots and hostile-state regression tests;
+- `docs/420RPC-WEBSOCKET.md`.
 
-RPC-6 governs gateway work only. Client accounting keys are not authentication claims; credential identity remains RPC-9 scope. Admission never changes transaction validity, chain state, consensus, fork choice or finality.
+RPC-7 is a transport/lifecycle boundary only. Subscription events remain upstream evidence and do not become gateway assertions of canonicality or finality. RPC-3 may select a different provider for a new subscription, but existing streams are not silently migrated across providers after upstream loss.
 
 Exit gate: implementation is complete. Merge requires the exact final head to pass 420RPC, docs and repository-wide qualification and remain reconciled with current `main`.
 
 ## Remaining phases
 
-- **RPC-7:** WebSocket transport and subscription lifecycle.
 - **RPC-8:** enriched/indexer-backed read APIs with explicit derived-state semantics.
 - **RPC-9:** authentication, API credentials and Developer Hub integration.
 - **RPC-10:** observability, health/readiness, metrics and operational recovery.
@@ -67,4 +72,4 @@ Exit gate: implementation is complete. Merge requires the exact final head to pa
 
 ## Authority rule
 
-420RPC may refuse malformed, unsupported, privileged, over-budget, stale, wrong-chain or unsafe requests/upstreams, but it never determines canonical blocks, transaction validity, consensus, safe/finalized checkpoints or fork choice. Resource admission is gateway policy, not protocol authority.
+420RPC may refuse malformed, unsupported, privileged, over-budget, stale, wrong-chain or unsafe requests/upstreams and may close unhealthy WebSocket sessions, but it never determines canonical blocks, transaction validity, consensus, safe/finalized checkpoints or fork choice. Subscription delivery is transport, not protocol authority.

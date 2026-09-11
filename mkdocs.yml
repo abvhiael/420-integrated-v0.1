@@ -24,6 +24,14 @@ nav:
       - Genesis Architecture: architecture/genesis-architecture.md
       - Dependency Map: architecture/dependency-map.md
       - Trust Boundaries: architecture/trust-boundary-model.md
+      - Chain:
+          - Overview: architecture/chain/index.md
+          - Execution Layer: architecture/chain/execution-layer.md
+          - Accounts: architecture/chain/accounts.md
+          - Transactions: architecture/chain/transactions.md
+          - Blocks & State: architecture/chain/blocks-and-state.md
+          - Gas, Fees & Native $420: architecture/chain/gas-fees-native-420.md
+          - Network Identity & Configuration: architecture/chain/network-identity-and-configuration.md
       - Architecture Decisions: architecture/decisions/README.md
   - Reference:
       - Overview: reference/index.md

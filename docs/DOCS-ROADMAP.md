@@ -33,9 +33,16 @@ Exit condition: 420Docs builds strictly, publishes through GitHub Pages, exposes
 
 Exit condition: the system architecture explains the top-level layers, design principles, genesis composition, dependencies, authority boundaries, normal flows, failure assumptions, and links to deeper chain, consensus, protocol, infrastructure, and application documentation.
 
-## DOC-3 — Chain documentation
+## DOC-3 — Chain documentation — COMPLETE
 
-- Execution layer, accounts, transactions, blocks, state, fees, native $420, and network configuration.
+- [x] DOC-3.1 Document the execution layer and establish the chain-documentation index.
+- [x] DOC-3.2 Document accounts, addresses, balances, nonces, EOAs, contracts, and smart-account relationships.
+- [x] DOC-3.3 Document transaction structure and lifecycle from signing through receipt/failure.
+- [x] DOC-3.4 Document blocks, execution ordering, receipts/logs, state roots, canonical state, and reorg/finality relationships.
+- [x] DOC-3.5 Document gas accounting, fees, base fee, priority-fee behavior, consensus system-call gas, and native `$420` semantics.
+- [x] DOC-3.6 Document chain identity, execution genesis, fork activation, network configuration, genesis allocations, and compatibility checks.
+
+Exit condition: developers, operators, and reviewers can trace how 420 Integrated represents accounts, accepts and executes transactions, constructs execution blocks/state, accounts for gas/fees/native `$420`, and identifies/configures the canonical network from genesis onward.
 
 ## DOC-4 — Consensus documentation
 

@@ -77,9 +77,9 @@ Completed slices:
 
 ## IDX-10 — testnet qualification — in progress
 
-- **IDX-10.1 — qualification environment and harness contract:** in progress. The testnet runner must pin chain ID, genesis hash, RPC endpoint, finality mode, sustained-block target, bounded reorg depth and restart-replay window; malformed or inconsistent configuration fails closed.
-- **IDX-10.2 — live RPC ingest/indexing smoke:** next.
-- **IDX-10.3 — restart, replay and bounded reorg qualification:** pending.
+- **IDX-10.1 — qualification environment and harness contract:** implemented. The runner pins chain ID, genesis hash, RPC endpoint, finality mode, sustained-block target, bounded reorg depth and restart-replay window; malformed or inconsistent configuration fails closed.
+- **IDX-10.2 — live RPC ingest/indexing smoke:** harness implemented. It verifies chain/genesis identity before writes, derives the configured safe head, requires the full sustained safe-block window, runs that exact window through `IndexerIngestor420`, and requires exact checkpoint advancement. Live testnet evidence remains deployment-time.
+- **IDX-10.3 — restart, replay and bounded reorg qualification:** next.
 - **IDX-10.4 — public API and consumer integration qualification:** pending.
 - **IDX-10.5 — readiness report/operator closeout:** pending.
 
@@ -95,4 +95,4 @@ See `docs/420INDEXER-TESTNET.md` for the qualification contract and required evi
 
 ## Next phase
 
-Finish IDX-10.1 qualification, then run IDX-10.2 against the live 420 Integrated testnet RPC endpoint and pinned genesis identity.
+Qualify the current IDX-10.2 head, then proceed to IDX-10.3 restart, replay and bounded-reorg qualification. The live testnet smoke is executed once the deployment endpoint and pinned genesis identity are available.

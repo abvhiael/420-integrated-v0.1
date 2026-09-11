@@ -1,29 +1,37 @@
 {
-  "schema": "420-testnet-explorer-readiness-v2",
+  "schema": "420-testnet-explorer-readiness-v3",
   "genesis_profile": "contracts/config/420explorer-genesis.json",
   "backend": {
     "url": "REPLACE",
-    "status": "PENDING",
+    "status": "INDEXER_CONSUMER_IMPLEMENTED_PENDING_DEPLOYMENT",
+    "data_source": "420Indexer /v1",
+    "independent_chain_ingestion": false,
     "required_checks": [
-      "indexes blocks by canonical hash and chain id",
-      "indexes transactions",
-      "indexes receipts/logs",
-      "tracks head safe and finalized independently",
-      "survives restart and resumes deterministically",
-      "reorg handling limited to non-finalized history",
-      "can rebuild the complete index from supported node/RPC data",
-      "reports indexed height and finalized height",
-      "detects wrong-chain RPC endpoints"
-    ]
+      "consumes indexed blocks from 420Indexer",
+      "consumes transactions from 420Indexer",
+      "consumes receipts/logs from 420Indexer",
+      "consumes head safe and finalized health from 420Indexer",
+      "uses 420Indexer deterministic fixed-snapshot pagination",
+      "does not implement an independent JSON-RPC block crawler",
+      "does not maintain an independent checkpoint or reorg engine",
+      "does not maintain an independent protocol decoder registry",
+      "fails closed if an indexer response claims canonical authority",
+      "surfaces stale/degraded/wrong-chain indexer state"
+    ],
+    "qualification_evidence": {
+      "go_client": "explorer/indexerclient/client.go",
+      "consumer_boundary_tests": "explorer/indexerclient/client_test.go",
+      "shared_verifier": "scripts/verify-explorer-indexer-consumer.py"
+    }
   },
   "protocol_discovery": {
-    "registry": "420Registry / ProtocolRegistry",
+    "registry": "420Indexer Registry-backed service/version projection",
     "required_checks": [
-      "resolves active registered services",
-      "preserves historical service/version decoding",
-      "shows runtime code hash",
+      "resolves active registered services through 420Indexer",
+      "preserves historical service/version decoding through 420Indexer",
+      "shows runtime code hash when indexed/available",
       "shows manifest/interface commitments when registered",
-      "fails closed on inactive registry resolution"
+      "fails closed on unavailable or unknown service/version resolution"
     ]
   },
   "frontend": {

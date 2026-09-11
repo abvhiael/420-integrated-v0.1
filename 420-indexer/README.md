@@ -75,6 +75,16 @@ Completed slices:
 
 `/health` remains a process-liveness probe; `/ready` is the traffic-admission gate when runtime state is supplied. Runtime, shutdown, telemetry and recovery metadata remain off-chain service state and never replace canonical chain authority.
 
+## IDX-10 — testnet qualification — implementation complete
+
+- **IDX-10.1 — qualification environment and harness contract:** implemented. The runner pins chain ID, genesis hash, RPC endpoint, finality mode, sustained-block target, bounded reorg depth and restart-replay window; malformed or inconsistent configuration fails closed.
+- **IDX-10.2 — live RPC ingest/indexing smoke:** harness implemented. It verifies chain/genesis identity before writes, derives the configured safe head, requires the full sustained safe-block window, runs that exact window through `IndexerIngestor420`, and requires exact checkpoint advancement. Live testnet evidence remains deployment-time.
+- **IDX-10.3 — restart, replay and bounded reorg qualification:** implemented. Restart qualification requires an existing durable checkpoint, rejects catch-up beyond the configured replay window, advances through the production ingestor, then requires a repeated restart at the same safe head to be a no-op. Reorg qualification exercises the durable rollback path, bounded ancestor recovery and deterministic branch replay; deep reorgs fail closed before rollback or checkpoint movement.
+- **IDX-10.4 — public API and consumer integration qualification:** implemented. The qualifier requires healthy v1 operational metadata, traffic-admitting readiness, a non-authoritative status surface whose indexed head covers the configured witness block, direct block/transaction/receipt/address/protocol-object witnesses, non-empty block/transaction/log/asset/protocol feeds, bounded search evidence, and replayable notification/event-stream output carrying canonical provenance and `authoritative: false` metadata. Live witness evidence remains deployment-time.
+- **IDX-10.5 — readiness report/operator closeout:** implemented. `buildTestnetCloseoutReport420` reconciles IDX-10.2–10.4 reports, exact node/indexer revisions, live qualification flags, descriptor-manifest qualification and compiled-artifact digests into one non-authoritative go/no-go report. Missing live evidence, missing revisions, missing qualified artifact digests or internally inconsistent phase evidence produce `no-go` blockers rather than an inferred launch approval.
+
+See `docs/420INDEXER-TESTNET.md` for the qualification contract and required evidence.
+
 ## Authority boundary
 
 420Indexer is never authoritative for balances, ownership, registrations, settlements, rights, governance outcomes, bridge state, or protocol eligibility. Those remain canonical on-chain. All indexed views are rebuildable from canonical chain history plus deployment and ABI manifests.
@@ -85,4 +95,4 @@ Completed slices:
 
 ## Next phase
 
-Proceed to IDX-10 testnet qualification: deploy the hardened indexer against the 420 Integrated testnet, qualify real RPC/finality/reorg behavior and consumer surfaces under sustained chain activity, and close the remaining deployment-time IDX-5 artifact-manifest qualification against the compiled genesis suite.
+IDX-10 implementation is complete. The branch still requires final CI/reconciliation before merge. Actual testnet closeout remains intentionally `no-go` until live IDX-10.2/10.3/10.4 evidence, exact deployed revisions, concrete witness data, and artifact-backed genesis descriptor qualification are supplied. After the Indexer PR is reconciled and merged, the infrastructure roadmap proceeds to 420RPC.

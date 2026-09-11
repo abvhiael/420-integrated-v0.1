@@ -12,6 +12,24 @@ This repository contains the chain architecture, genesis contracts, protocol mod
 
 ---
 
+# Documentation
+
+**420Docs** is the canonical documentation portal for the 420 Integrated ecosystem. Repository-controlled Markdown under [`docs/`](docs/) remains the source of truth; the GitHub Pages site is the public presentation and discovery layer.
+
+- **420Docs:** https://abvhiael.github.io/420-integrated-v0.1/
+- **Get Started:** [`docs/getting-started/`](docs/getting-started/)
+- **Use 420:** [`docs/users/`](docs/users/)
+- **Build on 420:** [`docs/developers/`](docs/developers/)
+- **Operate 420:** [`docs/operators/`](docs/operators/)
+- **Architecture:** [`docs/architecture/`](docs/architecture/)
+- **Reference:** [`docs/reference/`](docs/reference/)
+- **Troubleshooting:** [`docs/troubleshooting/`](docs/troubleshooting/)
+- **Documentation roadmap:** [`docs/DOCS-ROADMAP.md`](docs/DOCS-ROADMAP.md)
+
+The documentation is organized by task and audience so users can find operational instructions without needing to understand the repository layout first.
+
+---
+
 ## The idea
 
 Most general-purpose chains launch the base network first and wait for wallets, identity, payments, discovery, application distribution, governance tools and consumer experiences to appear independently.
@@ -325,12 +343,22 @@ Important areas include:
 - `contracts/` — protocol and application smart contracts and interfaces
 - `contracts/config/` — genesis/service wiring and application configuration
 - `config/` — chain-level and genesis application decisions
-- `docs/` — architecture, protocol, hardening and application documentation
+- `docs/` — canonical architecture, user, developer, operator, reference and troubleshooting documentation
+- `mkdocs.yml` — 420Docs site configuration and navigation
+- `.github/workflows/docs-pages.yml` — GitHub Pages build and deployment workflow
 - `genesis/` — genesis configuration and allocation material
 - `.github/` — CI and qualification workflows
 
 Useful starting points:
 
+- `docs/index.md` — 420Docs source landing page
+- `docs/getting-started/index.md` — new-user entry point
+- `docs/developers/index.md` — developer entry point
+- `docs/operators/index.md` — validator/operator entry point
+- `docs/architecture/index.md` — canonical architecture documentation
+- `docs/reference/index.md` — protocol/API/reference entry point
+- `docs/troubleshooting/index.md` — troubleshooting entry point
+- `docs/DOCS-ROADMAP.md` — documentation workstream roadmap
 - `config/genesis-applications.json` — frozen genesis application decision and service roles
 - `config/protocol.json` — protocol-level parameters under freeze discipline
 - `docs/ROADMAP.md` — protocol development roadmap

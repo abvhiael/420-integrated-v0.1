@@ -13,6 +13,15 @@ nav:
       - Overview: getting-started/index.md
   - Use:
       - Overview: users/index.md
+      - 420 Wallet:
+          - Onboarding: users/wallet/index.md
+          - Setup, Import & Protection: users/wallet/setup-import-and-protection.md
+          - Send, Receive & Activity: users/wallet/send-receive-and-activity.md
+          - Connect Applications: users/wallet/dapp-connections.md
+          - Signing & Transaction Review: users/wallet/signing-and-transaction-review.md
+          - Permissions & Sessions: users/wallet/permissions-and-sessions.md
+          - Recovery & Device Safety: users/wallet/recovery-and-device-safety.md
+          - Troubleshooting: users/wallet/troubleshooting.md
   - Build:
       - Overview: developers/index.md
   - Operate:
@@ -41,6 +50,17 @@ nav:
           - Rewards & Issuance: architecture/consensus/rewards-and-issuance.md
           - Slashing & Safety: architecture/consensus/slashing-and-safety.md
           - Failure, Recovery & Operator Safety: architecture/consensus/failure-recovery-operator-safety.md
+      - Infrastructure:
+          - Overview: architecture/infrastructure/index.md
+          - Infrastructure Overview: architecture/infrastructure/infrastructure-overview.md
+          - fourtwentyd: architecture/infrastructure/fourtwentyd.md
+          - node420: architecture/infrastructure/node420.md
+          - 420Indexer: architecture/infrastructure/420indexer.md
+          - RPC, Gateways & Network Ingress: architecture/infrastructure/rpc-gateways-network-ingress.md
+          - Storage & Resource Infrastructure: architecture/infrastructure/storage-resource-infrastructure.md
+          - 420AI Compute Infrastructure: architecture/infrastructure/420ai-compute-infrastructure.md
+          - Oracle & External-Provider Infrastructure: architecture/infrastructure/oracle-external-provider-infrastructure.md
+          - Observability, Status & Operator Services: architecture/infrastructure/observability-status-operator-services.md
       - Architecture Decisions: architecture/decisions/README.md
   - Reference:
       - Overview: reference/index.md

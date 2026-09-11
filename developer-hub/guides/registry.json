@@ -1,0 +1,72 @@
+{
+  "schemaVersion": "1.0.0",
+  "guides": [
+    {
+      "id": "read-only-protocol-client",
+      "title": "Read-only protocol client",
+      "summary": "Discover a network, resolve canonical contracts, read chain state through the SDK, and use 420Indexer only for projection/query acceleration.",
+      "document": "docs/developer-hub/guides/read-only-protocol-client.md",
+      "steps": [
+        {"id":"discover-network","component":"DEVHUB-1","authority":"network-manifest","canonical":true,"action":"Load and validate the selected network manifest and explicit chain ID."},
+        {"id":"resolve-contract","component":"DEVHUB-2","authority":"canonical-contract-catalogue","canonical":true,"action":"Resolve the protocol address and verified interface from the selected catalogue."},
+        {"id":"read-chain","component":"DEVHUB-3","authority":"420-chain-rpc","canonical":true,"action":"Read security-relevant state from the selected chain through the shared SDK."},
+        {"id":"query-indexer","component":"DEVHUB-11","authority":"420Indexer","canonical":false,"action":"Use Indexer blocks, transactions, logs, protocol projections or search for developer UX and discovery."},
+        {"id":"revalidate-before-decision","component":"DEVHUB-0","authority":"canonical-chain-or-protocol","canonical":true,"action":"Revalidate any security-sensitive decision against canonical chain/protocol state rather than an indexed projection."}
+      ]
+    },
+    {
+      "id": "wallet-aware-transaction",
+      "title": "Wallet-aware transaction",
+      "summary": "Prepare a protocol interaction with the SDK and hand signing/submission to 420 Wallet or a qualified smart-account runtime.",
+      "document": "docs/developer-hub/guides/wallet-aware-transaction.md",
+      "steps": [
+        {"id":"discover","component":"DEVHUB-1/2","authority":"network-manifest-and-catalogue","canonical":true,"action":"Bind the app to the selected network and canonical contract catalogue."},
+        {"id":"prepare-call","component":"DEVHUB-3","authority":"application","canonical":false,"action":"Encode the intended protocol call using the shared SDK/interface metadata."},
+        {"id":"check-capability","component":"DEVHUB-4","authority":"420Wallet/SmartAccount","canonical":true,"action":"Ask the qualified wallet runtime to evaluate account, chain and capability requirements."},
+        {"id":"sign-submit","component":"DEVHUB-4","authority":"420Wallet/SmartAccount","canonical":true,"action":"Obtain explicit user/account authorization and submit through the wallet runtime. Developer Hub never handles raw signing secrets."},
+        {"id":"confirm","component":"420-chain-rpc","authority":"420-chain-rpc","canonical":true,"action":"Confirm transaction inclusion/receipt from canonical RPC."},
+        {"id":"observe","component":"DEVHUB-11","authority":"420Indexer","canonical":false,"action":"Use Indexer for subsequent history, logs and UI projections after canonical submission/confirmation."}
+      ]
+    },
+    {
+      "id": "deploy-and-verify",
+      "title": "Deploy and verify a contract",
+      "summary": "Plan a non-custodial deployment, submit through an external signer, confirm it on-chain, then publish reproducible verification evidence to 420Verify.",
+      "document": "docs/developer-hub/guides/deploy-and-verify.md",
+      "steps": [
+        {"id":"qualify-artifact","component":"build-system","authority":"qualified-build-artifact","canonical":false,"action":"Produce the exact artifact, source bundle, compiler settings and hashes required for reproducibility."},
+        {"id":"plan-deployment","component":"DEVHUB-9","authority":"developer-hub","canonical":false,"action":"Create a deployment plan bound to selected chain, canonical RPC, artifact provenance and public deployer identity."},
+        {"id":"sign-deploy","component":"DEVHUB-9","authority":"420Wallet-or-project-adapter","canonical":true,"action":"Hand deployment execution to the declared external signer/executor. Developer Hub does not custody secrets."},
+        {"id":"confirm-receipt","component":"420-chain-rpc","authority":"420-chain-rpc","canonical":true,"action":"Confirm transaction receipt, contract address and deployed runtime bytecode from canonical RPC."},
+        {"id":"build-evidence","component":"DEVHUB-10","authority":"developer-hub","canonical":false,"action":"Bind verification evidence to chain ID, address, runtime code hash, source bundle and compiler settings."},
+        {"id":"verify","component":"420Verify","authority":"420Verify","canonical":false,"action":"Submit reproducible evidence and preserve FULL_MATCH, PARTIAL_MATCH, MISMATCH or UNVERIFIABLE without treating verification as an audit or registration."}
+      ]
+    },
+    {
+      "id": "indexer-diagnostics",
+      "title": "Indexer diagnostics and query workflow",
+      "summary": "Use the public 420Indexer v1 API safely for health, readiness, status and developer queries without promoting projections into protocol authority.",
+      "document": "docs/developer-hub/guides/indexer-diagnostics.md",
+      "steps": [
+        {"id":"discover-indexer","component":"DEVHUB-1/11","authority":"network-manifest","canonical":true,"action":"Resolve only the selected network's services.indexer endpoint and explicit chain ID."},
+        {"id":"check-health","component":"DEVHUB-11","authority":"420Indexer","canonical":false,"action":"Read health, readiness and chain-specific status; preserve readiness 503 as diagnostic data."},
+        {"id":"query","component":"DEVHUB-11","authority":"420Indexer","canonical":false,"action":"Use validated v1 queries, cursor pagination and structured errors for blocks, transactions, logs, transfers, protocol objects/events and search."},
+        {"id":"escalate-security-check","component":"DEVHUB-0","authority":"canonical-chain-or-protocol","canonical":true,"action":"For authorization, settlement, governance, Registry legitimacy or wallet permissions, leave the Indexer projection and query the owning canonical authority."}
+      ]
+    },
+    {
+      "id": "end-to-end-dapp",
+      "title": "End-to-end dApp integration",
+      "summary": "Combine discovery, SDK reads, wallet-authorized writes, deployment, verification and Indexer UX while preserving every authority boundary.",
+      "document": "docs/developer-hub/guides/end-to-end-dapp.md",
+      "steps": [
+        {"id":"bootstrap","component":"DEVHUB-1/2/3","authority":"manifest-catalogue-chain","canonical":true,"action":"Discover the network, load canonical contracts and initialize the SDK."},
+        {"id":"render-read-model","component":"DEVHUB-11","authority":"420Indexer","canonical":false,"action":"Populate fast UI/search/history views from Indexer projections, visibly retaining source provenance."},
+        {"id":"authorize-write","component":"DEVHUB-4","authority":"420Wallet/SmartAccount","canonical":true,"action":"Route any state-changing interaction through the qualified wallet/capability boundary."},
+        {"id":"deploy-if-needed","component":"DEVHUB-9","authority":"external-signer-and-chain","canonical":true,"action":"Use the deployment planner and external signer flow for app-owned contracts; confirm receipt from canonical RPC."},
+        {"id":"verify-if-deployed","component":"DEVHUB-10","authority":"420Verify","canonical":false,"action":"Publish reproducible source/compiler evidence without equating verification with audit, safety or official status."},
+        {"id":"register-publish","component":"DEVHUB-13","authority":"420Registry/420AppStore","canonical":true,"action":"Validate the application release, perform canonical Registry preflight, hand publishRegisteredService to Registry governance, then project confirmed registration into the non-canonical AppStore catalogue."}
+      ]
+    }
+  ]
+}

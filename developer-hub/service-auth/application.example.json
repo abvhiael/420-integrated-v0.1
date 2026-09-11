@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "1.0.0",
+  "applicationId": "example-app",
+  "chainId": "420",
+  "environment": "local",
+  "displayName": "Example Developer Application",
+  "ownerRef": "publisher:example",
+  "audiences": ["indexer", "verify"],
+  "allowedScopes": ["indexer:read", "verify:submit"],
+  "registrationRef": "service:example-app:v1"
+}

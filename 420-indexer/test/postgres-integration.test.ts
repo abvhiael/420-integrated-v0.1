@@ -6,13 +6,14 @@ import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import type { SqlExecutor420 } from '../src/core-projections.js';
 import { IndexerQueryService420 } from '../src/query-service.js';
+import { NATIVE_ASSET_TRANSFER_POSITION_420 } from '../src/query-layer.js';
 
 const execFileAsync = promisify(execFile);
 const databaseUrl = process.env.INDEXER_PG_URL;
 
 function sqlLiteral(value: unknown): string {
   if (typeof value === 'number' || typeof value === 'bigint') return String(value);
-  if (typeof value === 'string' && /^\d+$/.test(value)) return value;
+  if (typeof value === 'string' && /^-?\d+$/.test(value)) return value;
   if (value === null || value === undefined) return 'null';
   return `'${String(value).replaceAll("'", "''")}'`;
 }
@@ -54,7 +55,7 @@ test('query service executes keyset pages and routed lookups against PostgreSQL'
       (420,'0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',10,'0x10',1,'0x1111111111111111111111111111111111111111',null,42,'0x');
     insert into idx_asset_transfers(chain_id,block_number,tx_hash,log_index,asset_key,asset_kind,contract_address,token_id,from_address,to_address,amount) values
       (420,10,'0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',2,'native:420','native',null,null,'0x1111111111111111111111111111111111111111','0x2222222222222222222222222222222222222222',42),
-      (420,9,'0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',null,'native:420','native',null,null,'0x2222222222222222222222222222222222222222','0x1111111111111111111111111111111111111111',7);
+      (420,9,'0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',${NATIVE_ASSET_TRANSFER_POSITION_420},'native:420','native',null,null,'0x2222222222222222222222222222222222222222','0x1111111111111111111111111111111111111111',7);
     insert into idx_protocol_events(chain_id,block_number,block_hash,tx_hash,tx_index,log_index,contract_address,protocol,event_name,fields)
       values (420,10,'0x10','0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',1,3,'0x0437','420Governance','ProposalCreated','{"proposalId":"0xabc"}');
   `);
@@ -72,6 +73,7 @@ test('query service executes keyset pages and routed lookups against PostgreSQL'
   assert.ok(transfers.nextCursor);
   const transferTail = await service.assetTransfers(420n, { limit: 1, cursor: transfers.nextCursor! });
   assert.equal(transferTail.items.length, 1);
+  assert.equal(transferTail.items[0]!.log_index, NATIVE_ASSET_TRANSFER_POSITION_420);
 
   const addressResults = await service.search(420n, '0x1111111111111111111111111111111111111111');
   assert.equal(addressResults[0]!.result_type, 'address');

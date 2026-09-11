@@ -5,3 +5,4 @@ export * from './routing.js';
 export * from './safety.js';
 export * from './request-policy.js';
 export * from './resource-controls.js';
+export * from './websocket.js';

@@ -16,30 +16,36 @@ RPC-1 established normalized execution/Indexer provider descriptors, chain-bound
 
 ## RPC-2 — Ethereum JSON-RPC compatibility and method profiles — complete
 
-RPC-2 defines an explicit public compatibility catalogue rather than blindly proxying whatever methods an upstream happens to expose:
+RPC-2 established the explicit public Ethereum JSON-RPC compatibility catalogue, capability requirements, raw signed transaction submission, WebSocket subscription compatibility, and fail-closed exclusion of unknown, node-managed signing and privileged methods.
 
-- metadata profile for `web3_clientVersion`, `net_version` and `eth_chainId`;
-- canonical read profile covering blocks, transactions, receipts, logs, balances, code, storage, calls and fee estimation;
-- raw signed transaction submission through `eth_sendRawTransaction` only;
-- WebSocket-only `eth_subscribe` / `eth_unsubscribe` compatibility;
-- per-method transport, capability, mutation and user-signature metadata;
-- method eligibility intersected with RPC-1 discovered upstream capabilities;
-- unknown methods fail closed instead of being transparently proxied;
-- node-managed signing/account methods such as `eth_sendTransaction`, `eth_sign` and `eth_accounts` are excluded;
-- privileged `engine_`, `admin_`, `personal_`, `debug_`, `miner_` and `txpool_` namespaces are outside the public surface;
-- deterministic profile and hostile-state qualification tests.
+## RPC-3 — routing, health, circuit breaking and failover — implementation complete
 
-### RPC-2 authority boundary
+RPC-3 converts provider qualification and method compatibility into deterministic routing:
 
-The method catalogue defines what the gateway is willing to serve. It does not decide transaction validity, fork choice, finality or canonical state. `eth_sendRawTransaction` forwards already-signed bytes to an eligible execution provider; 420RPC never signs or rewrites them. RPC-4 and RPC-5 add freshness/finality safety and request-policy enforcement around this compatibility contract.
+- provider identity composition checks across descriptor, discovery and health state;
+- method-aware provider eligibility using the RPC-2 catalogue;
+- transport-aware selection for HTTP(S) and WebSocket providers;
+- deterministic ordering by circuit health, configured priority and provider ID;
+- independent closed/open/half-open circuit state per upstream;
+- configurable consecutive-failure threshold and cooldown;
+- successful half-open probes restore providers to service;
+- failed half-open probes immediately reopen the circuit;
+- metadata/read requests may fail over across already-qualified providers;
+- `eth_sendRawTransaction` is deliberately not automatically replayed to another upstream after an ambiguous dispatch failure;
+- established subscriptions are not transparently failed over; RPC-7 owns subscription lifecycle;
+- wrong-chain, ineligible, capability-incompatible and open-circuit providers remain excluded even when no healthy alternative exists.
+
+### RPC-3 authority boundary
+
+Routing changes which compatible provider receives a request; it never makes a provider canonical. Health state is gateway-local operational evidence only. 420RPC does not override transaction validity, chain identity, finality or fork choice in order to preserve availability.
 
 ## Roadmap
 
 - **RPC-0 — complete:** architecture, authority boundaries, threat model, package layout and qualification contract.
 - **RPC-1 — complete:** upstream node/provider abstraction and capability discovery.
 - **RPC-2 — complete:** canonical Ethereum JSON-RPC compatibility and method profiles.
-- **RPC-3 — next:** routing, health-aware upstream selection and failover.
-- **RPC-4:** chain identity, freshness and finality-safety enforcement.
+- **RPC-3 — implementation complete:** routing, health-aware upstream selection, circuit breaking and failover.
+- **RPC-4 — next:** chain identity, freshness and finality-safety enforcement.
 - **RPC-5:** request validation, method policy and privileged-surface exclusion.
 - **RPC-6:** rate limiting, quotas, resource bounds and abuse controls.
 - **RPC-7:** WebSocket transport and subscription lifecycle.
@@ -62,7 +68,9 @@ The method catalogue defines what the gateway is willing to serve. It does not d
 9. Routing, rate limiting, caching and failover never alter chain validity or finality semantics.
 10. Capability discovery is evidence about an upstream, not authority over the chain.
 11. Unknown or privileged RPC methods are not silently passed through the gateway.
+12. Availability pressure never promotes an ineligible, wrong-chain or open-circuit provider.
+13. Ambiguous transaction submission failures are not automatically replayed across providers.
 
 ## Next phase
 
-RPC-3 will implement routing, health-aware upstream selection, circuit breaking and failover after RPC-2 is reconciled, qualified and merged to `main`.
+After RPC-3 is reconciled, fully qualified and merged to `main`, RPC-4 will add chain identity, freshness and finality-safety enforcement to the routing layer.

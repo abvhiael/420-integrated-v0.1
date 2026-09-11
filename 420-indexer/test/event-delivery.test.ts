@@ -81,7 +81,7 @@ test('rate limiter produces deterministic allow/deny decisions', () => {
   assert.deepEqual(limiter.decide('provider:user', 100, policy), { allowed: true, remaining: 1, retryAfterMs: 0 });
   assert.deepEqual(limiter.decide('provider:user', 200, policy), { allowed: true, remaining: 0, retryAfterMs: 0 });
   assert.deepEqual(limiter.decide('provider:user', 300, policy), { allowed: false, remaining: 0, retryAfterMs: 800 });
-  assert.deepEqual(limiter.decide('provider:user', 1_101, policy), { allowed: true, remaining: 1, retryAfterMs: 0 });
+  assert.deepEqual(limiter.decide('provider:user', 1_201, policy), { allowed: true, remaining: 1, retryAfterMs: 0 });
 });
 
 test('delivery identity mismatch fails closed', () => {

@@ -8,10 +8,16 @@ const runDebug=async(fn)=>{try{renderDebug({status:'loading'});renderDebug(await
 const renderStatus=(value)=>{$('status-output').textContent=JSON.stringify(value,null,2);};
 const renderQualification=(value)=>{$('qualification-output').textContent=JSON.stringify(value,null,2);};
 const runQualification=async(fn)=>{try{renderQualification({status:'loading'});renderQualification(await fn());}catch(error){renderQualification({error:error.message});}};
+const renderLaunch=(value)=>{$('launch-output').textContent=JSON.stringify(value,null,2);};
+const runLaunch=async(fn)=>{try{renderLaunch({status:'loading'});renderLaunch(await fn());}catch(error){renderLaunch({error:error.message});}};
 async function load(){return api('/api/dashboard');}
 load().then(async data=>{
  $('summary').textContent=`${data.network.name} · ${data.network.environment} · chain ${data.network.chainId}`;
  $('network').innerHTML=`<h2>network</h2><div class="grid">${card('chain',`<p>${badge(data.network.chainId,'ok')} ${esc(data.network.nativeCurrency?.symbol??'')}</p><p>${esc(data.network.rpc.join(', '))}</p>`)}${card('mode',`<p>${badge(data.network.isProduction?'production':'non-production')}</p><p>faucet: ${data.network.canRequestFaucet?'available':'disabled'}</p>`)}</div>`;
+ const launchView=await api('/api/launch/view');
+ $('launch-meta').innerHTML=card(launchView.readiness.title,`<p>states: ${esc(launchView.readiness.states.join(', '))}</p><p>exact candidate binding: ${launchView.readiness.requiresExactCandidateBinding?'required':'no'}</p><p>${esc(launchView.readiness.securityRule)}</p>`)+card(launchView.closeout.title,`<p>exact commit binding: ${launchView.closeout.requiresExactCommitBinding?'required':'no'}</p><p>exact release channel: ${launchView.closeout.requiresExactReleaseChannel?'required':'no'}</p><p>${esc(launchView.closeout.securityRule)}</p>`);
+ $('launch-check-run').addEventListener('click',()=>runLaunch(()=>api('/api/launch/check')));
+ $('launch-closeout-run').addEventListener('click',()=>runLaunch(()=>api('/api/launch/closeout')));
  const qualificationView=await api('/api/qualification/view');
  $('qualification-meta').innerHTML=card(qualificationView.qualification.title,`<p>${badge(qualificationView.qualification.profileId,'ok')}</p><p>required checks: ${esc(qualificationView.qualification.requiredChecks.join(', '))}</p><p>${esc(qualificationView.qualification.securityRule)}</p>`)+card(qualificationView.handoff.title,`<p>exact commit binding: ${qualificationView.handoff.requiresExactCommitBinding?'required':'no'}</p><p>fresh evidence: ${qualificationView.handoff.requiresFreshEvidence?'required':'no'}</p><p>required workflows: ${esc(qualificationView.handoff.requiredWorkflows.join(', '))}</p><p>${esc(qualificationView.handoff.securityRule)}</p>`);
  $('qualification-report-run').addEventListener('click',()=>runQualification(()=>api('/api/qualification/report')));

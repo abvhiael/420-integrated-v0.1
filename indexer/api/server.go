@@ -25,6 +25,10 @@ type Backend interface {
 	ServiceVersion(serviceID string, version uint32) (decoder.ServiceVersion, error)
 }
 
+type addressBackend interface {
+	AddressTransactions(address string, limit uint32) (AddressTransactionPage, error)
+}
+
 type Server struct { backend Backend }
 
 func NewServer(backend Backend) *Server { return &Server{backend: backend} }
@@ -34,6 +38,7 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("GET /v1/health", s.health)
 	mux.HandleFunc("GET /v1/blocks/{number}", s.block)
 	mux.HandleFunc("GET /v1/blocks", s.blocks)
+	mux.HandleFunc("GET /v1/transactions", s.transactions)
 	mux.HandleFunc("GET /v1/transactions/{hash}", s.transaction)
 	mux.HandleFunc("GET /v1/receipts/{hash}", s.receipt)
 	mux.HandleFunc("GET /v1/blocks/{number}/logs", s.blockLogs)
@@ -61,6 +66,26 @@ func (s *Server) transaction(w http.ResponseWriter, r *http.Request) {
 	if err != nil { writeError(w, http.StatusServiceUnavailable, err); return }
 	if !ok { writeError(w, http.StatusNotFound, errors.New("transaction not indexed")); return }
 	writeJSON(w, http.StatusOK, ReadResponse[model.TransactionRecord]{Data: tx, CanonicalAuthority: false})
+}
+
+func (s *Server) transactions(w http.ResponseWriter, r *http.Request) {
+	address := r.URL.Query().Get("address")
+	if address == "" { writeError(w, http.StatusBadRequest, errors.New("address query required")); return }
+	limit := uint32(50)
+	if raw := r.URL.Query().Get("limit"); raw != "" {
+		n, err := strconv.ParseUint(raw, 10, 32)
+		if err != nil || n == 0 || n > 250 { writeError(w, http.StatusBadRequest, ErrInvalidCursor); return }
+		limit = uint32(n)
+	}
+	backend, ok := s.backend.(addressBackend)
+	if !ok { writeError(w, http.StatusServiceUnavailable, ErrAddressQueryUnavailable); return }
+	page, err := backend.AddressTransactions(address, limit)
+	if err != nil {
+		status := http.StatusServiceUnavailable
+		if errors.Is(err, ErrSnapshotUnavailable) { status = http.StatusConflict }
+		writeError(w, status, err); return
+	}
+	writeJSON(w, http.StatusOK, page)
 }
 
 func (s *Server) receipt(w http.ResponseWriter, r *http.Request) {

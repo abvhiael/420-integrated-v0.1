@@ -19,6 +19,7 @@ export * from './receipt-log-dto.js';
 export * from './protocol-object-service.js';
 export * from './runtime-state.js';
 export * from './work-controller.js';
+export * from './operational-telemetry.js';
 export * from './operational-api.js';
 export * from './api-contract.js';
 export * from './api-surface.js';

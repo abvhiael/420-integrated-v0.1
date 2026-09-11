@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>420Explorer</title>
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="420Explorer home">
+      <span class="brand-mark">420</span><span>Explorer</span>
+    </a>
+    <form id="global-search" class="search" role="search">
+      <label class="sr-only" for="search-input">Search Explorer</label>
+      <input id="search-input" name="q" autocomplete="off" spellcheck="false" placeholder="block number, transaction hash, address…">
+      <button type="submit">Search</button>
+    </form>
+    <div id="network-pill" class="network-pill" data-state="loading">checking network</div>
+  </header>
+
+  <div class="layout">
+    <nav class="sidebar" aria-label="Explorer navigation">
+      <a href="#/overview" data-nav="overview">Overview</a>
+      <a href="#/blocks" data-nav="blocks">Blocks</a>
+      <a href="#/transactions" data-nav="transactions">Transactions</a>
+      <a href="#/assets" data-nav="assets">Assets</a>
+      <a href="#/registry" data-nav="registry">Registry</a>
+      <a href="#/consensus" data-nav="consensus">Consensus</a>
+      <a href="#/status" data-nav="status">Status</a>
+    </nav>
+
+    <main id="app" class="content" tabindex="-1">
+      <section class="hero">
+        <p class="eyebrow">420 Integrated · chain 420</p>
+        <h1>420Explorer</h1>
+        <p>Qualified, read-only visibility into chain, protocol, asset & consensus state.</p>
+      </section>
+      <section id="route-content" aria-live="polite"></section>
+    </main>
+  </div>
+
+  <template id="loading-template"><div class="panel"><p class="muted">Loading qualified Explorer data…</p></div></template>
+  <script src="/app.js" defer></script>
+</body>
+</html>

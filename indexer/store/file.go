@@ -10,6 +10,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/420integrated/420-integrated/indexer/assets"
 	"github.com/420integrated/420-integrated/indexer/model"
 )
 
@@ -23,12 +24,14 @@ type FileStore struct {
 }
 
 type fileState struct {
-	Version      uint64                              `json:"version"`
-	Checkpoint   *model.ChainCheckpoint              `json:"checkpoint,omitempty"`
-	Blocks       map[uint64]model.BlockRecord         `json:"blocks"`
-	Transactions map[string]model.TransactionRecord   `json:"transactions"`
-	Receipts     map[string]model.ReceiptRecord       `json:"receipts"`
-	Logs         map[string]model.LogRecord           `json:"logs"`
+	Version        uint64                               `json:"version"`
+	Checkpoint     *model.ChainCheckpoint               `json:"checkpoint,omitempty"`
+	Blocks         map[uint64]model.BlockRecord          `json:"blocks"`
+	Transactions   map[string]model.TransactionRecord    `json:"transactions"`
+	Receipts       map[string]model.ReceiptRecord        `json:"receipts"`
+	Logs           map[string]model.LogRecord            `json:"logs"`
+	Contracts      map[string]model.ContractRecord       `json:"contracts"`
+	AssetTransfers map[string]model.AssetTransferRecord  `json:"assetTransfers"`
 }
 
 func NewFileStore(path string) (*FileStore, error) {
@@ -45,11 +48,13 @@ func NewFileStore(path string) (*FileStore, error) {
 	if s.data.Transactions == nil { s.data.Transactions = map[string]model.TransactionRecord{} }
 	if s.data.Receipts == nil { s.data.Receipts = map[string]model.ReceiptRecord{} }
 	if s.data.Logs == nil { s.data.Logs = map[string]model.LogRecord{} }
+	if s.data.Contracts == nil { s.data.Contracts = map[string]model.ContractRecord{} }
+	if s.data.AssetTransfers == nil { s.data.AssetTransfers = map[string]model.AssetTransferRecord{} }
 	return s, nil
 }
 
 func emptyFileState() fileState {
-	return fileState{Version: 1, Blocks: map[uint64]model.BlockRecord{}, Transactions: map[string]model.TransactionRecord{}, Receipts: map[string]model.ReceiptRecord{}, Logs: map[string]model.LogRecord{}}
+	return fileState{Version: 1, Blocks: map[uint64]model.BlockRecord{}, Transactions: map[string]model.TransactionRecord{}, Receipts: map[string]model.ReceiptRecord{}, Logs: map[string]model.LogRecord{}, Contracts: map[string]model.ContractRecord{}, AssetTransfers: map[string]model.AssetTransferRecord{}}
 }
 
 func (s *FileStore) persistLocked() error {
@@ -65,8 +70,6 @@ func (s *FileStore) persistLocked() error {
 	return os.Rename(tmp, s.path)
 }
 
-// Reset discards all rebuildable indexed state while preserving only the store format version.
-// Canonical chain state is never mutated; the next ingestion pass reconstructs the projection from RPC.
 func (s *FileStore) Reset() error {
 	s.mu.Lock(); defer s.mu.Unlock()
 	s.data = emptyFileState()
@@ -98,12 +101,27 @@ func (s *FileStore) PutBlock(b model.BlockRecord) error {
 }
 
 func (s *FileStore) PutBundle(block model.BlockRecord, txs []model.TransactionRecord, receipts []model.ReceiptRecord, logs []model.LogRecord) error {
+	transfers, err := assets.DecodeBundle(txs, logs)
+	if err != nil { return fmt.Errorf("decode asset transfers for block %d: %w", block.Number, err) }
 	s.mu.Lock(); defer s.mu.Unlock()
 	s.data.Blocks[block.Number] = block
 	for _, tx := range txs { s.data.Transactions[strings.ToLower(tx.Hash)] = tx }
 	for _, r := range receipts { s.data.Receipts[strings.ToLower(r.TransactionHash)] = r }
 	for _, lg := range logs { s.data.Logs[logKey(lg)] = lg }
+	for _, transfer := range transfers { s.data.AssetTransfers[assetTransferKey(transfer)] = transfer }
 	return s.persistLocked()
+}
+
+func (s *FileStore) PutContract(record model.ContractRecord) error {
+	s.mu.Lock(); defer s.mu.Unlock()
+	s.data.Contracts[strings.ToLower(record.Address)] = record
+	return s.persistLocked()
+}
+
+func (s *FileStore) Contract(address string) (model.ContractRecord, bool, error) {
+	s.mu.Lock(); defer s.mu.Unlock()
+	record, ok := s.data.Contracts[strings.ToLower(address)]
+	return record, ok, nil
 }
 
 func (s *FileStore) Transaction(hash string) (model.TransactionRecord, bool, error) {
@@ -129,15 +147,37 @@ func (s *FileStore) LogsByBlock(number uint64) ([]model.LogRecord, error) {
 	return out, nil
 }
 
+func (s *FileStore) AssetTransfers(assetKey, address string) ([]model.AssetTransferRecord, error) {
+	s.mu.Lock(); defer s.mu.Unlock()
+	assetKey = strings.ToLower(strings.TrimSpace(assetKey))
+	address = strings.ToLower(strings.TrimSpace(address))
+	out := make([]model.AssetTransferRecord, 0)
+	for _, transfer := range s.data.AssetTransfers {
+		if assetKey != "" && strings.ToLower(transfer.AssetKey) != assetKey { continue }
+		if address != "" && !strings.EqualFold(transfer.From, address) && !strings.EqualFold(transfer.To, address) { continue }
+		out = append(out, transfer)
+	}
+	sort.Slice(out, func(i, j int) bool {
+		if out[i].BlockNumber != out[j].BlockNumber { return out[i].BlockNumber > out[j].BlockNumber }
+		if out[i].TransactionIndex != out[j].TransactionIndex { return out[i].TransactionIndex > out[j].TransactionIndex }
+		if out[i].LogIndex != out[j].LogIndex { return out[i].LogIndex > out[j].LogIndex }
+		return out[i].AssetKey < out[j].AssetKey
+	})
+	return out, nil
+}
+
 func (s *FileStore) DeleteBlocksAbove(number uint64) error {
 	s.mu.Lock(); defer s.mu.Unlock()
 	for n := range s.data.Blocks { if n > number { delete(s.data.Blocks, n) } }
 	for h, tx := range s.data.Transactions { if tx.BlockNumber > number { delete(s.data.Transactions, h) } }
 	for h, r := range s.data.Receipts { if r.BlockNumber > number { delete(s.data.Receipts, h) } }
 	for k, lg := range s.data.Logs { if lg.BlockNumber > number { delete(s.data.Logs, k) } }
+	for address, record := range s.data.Contracts { if record.DeploymentBlock > number { delete(s.data.Contracts, address) } }
+	for key, transfer := range s.data.AssetTransfers { if transfer.BlockNumber > number { delete(s.data.AssetTransfers, key) } }
 	return s.persistLocked()
 }
 
-func logKey(lg model.LogRecord) string {
-	return fmt.Sprintf("%s:%d", strings.ToLower(lg.TransactionHash), lg.LogIndex)
+func logKey(lg model.LogRecord) string { return fmt.Sprintf("%s:%d", strings.ToLower(lg.TransactionHash), lg.LogIndex) }
+func assetTransferKey(t model.AssetTransferRecord) string {
+	return fmt.Sprintf("%s:%d:%s:%s:%s:%s", strings.ToLower(t.TransactionHash), t.LogIndex, strings.ToLower(t.AssetKey), strings.ToLower(t.From), strings.ToLower(t.To), t.Amount)
 }

@@ -10,6 +10,7 @@ import { createIndexerClient420 } from '../src/indexer-client.mjs';
 import { createDebugClient420, createDebugControlView420 } from '../src/debug-control.mjs';
 import { createServiceIdentityView420 } from '../src/service-identity.mjs';
 import { createCredentialLifecycleView420 } from '../src/credential-lifecycle.mjs';
+import { createStatusAggregator420, createStatusControlView420 } from '../src/status-control.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, '..');
@@ -38,7 +39,7 @@ async function runtime420() {
       return payload.result;
     }
   };
-  return { network, catalogue, guides: listIntegrationGuides420(guideRegistry), debug: createDebugClient420({ network, indexer, rpc }) };
+  return { network, catalogue, guides: listIntegrationGuides420(guideRegistry), indexer, rpc, debug: createDebugClient420({ network, indexer, rpc }) };
 }
 
 async function snapshot420() {
@@ -50,6 +51,12 @@ async function serviceAuth420() {
   const application = JSON.parse(await readFile(resolve(root, 'service-auth/application.example.json'), 'utf8'));
   const credential = JSON.parse(await readFile(resolve(root, 'service-auth/credential.example.json'), 'utf8'));
   return { application, credential };
+}
+
+async function serviceProbe420(_name, endpoint) {
+  const healthUrl = `${endpoint.replace(/\/$/, '')}/health`;
+  const response = await fetch(healthUrl, { method: 'GET', headers: { accept: 'application/json' } });
+  return { state: response.ok ? 'healthy' : 'degraded', live: response.status < 500, ready: response.ok, detail: `health HTTP ${response.status}` };
 }
 
 function type420(path) {
@@ -73,6 +80,9 @@ const server = createServer(async (req, res) => {
     if (req.method !== 'GET') { res.writeHead(405).end('method not allowed'); return; }
     const url = new URL(req.url, `http://127.0.0.1:${port}`);
     if (url.pathname === '/api/dashboard') { json420(res, 200, await snapshot420()); return; }
+    if (url.pathname === '/api/status/view') { const { network } = await runtime420(); json420(res, 200, createStatusControlView420(network)); return; }
+    if (url.pathname === '/api/status/check') { const { network, rpc, indexer } = await runtime420(); json420(res, 200, await createStatusAggregator420({ network, rpc, indexer, serviceProbe: serviceProbe420 }).snapshot()); return; }
+    if (url.pathname.startsWith('/api/status')) { json420(res, 404, { error: 'status route not found' }); return; }
     if (url.pathname === '/api/service-auth/view') {
       const { application } = await serviceAuth420();
       json420(res, 200, createServiceIdentityView420(application)); return;
@@ -108,7 +118,7 @@ const server = createServer(async (req, res) => {
     res.writeHead(200, { 'content-type': type420(path), 'cache-control':'no-store' });
     res.end(body);
   } catch (error) {
-    const badRequest = ['DebugControlError420','IndexerClientError420','ServiceIdentityError420','CredentialLifecycleError420'].includes(error?.name);
+    const badRequest = ['DebugControlError420','IndexerClientError420','ServiceIdentityError420','CredentialLifecycleError420','StatusControlError420'].includes(error?.name);
     const status = badRequest ? 400 : (error?.code === 'ENOENT' ? 404 : 500);
     if (req.url?.startsWith('/api/')) { json420(res, status, { error: error.message }); return; }
     res.writeHead(status, { 'content-type':'text/plain; charset=utf-8' });

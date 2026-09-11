@@ -39,7 +39,7 @@ var (
 	hex40RE          = regexp.MustCompile(`^0x[0-9a-f]{40}$`)
 	hex64RE          = regexp.MustCompile(`^0x[0-9a-f]{64}$`)
 	decimalRE        = regexp.MustCompile(`^[0-9]+$`)
-	protocolObjectRE = regexp.MustCompile(`^([a-z][a-z0-9_-]*):([^\s]+)$`)
+	protocolObjectRE = regexp.MustCompile(`^([a-z0-9][a-z0-9_-]*):([^\s]+)$`)
 )
 
 var domainAliases = map[string]architecture.ResultDomain{
@@ -109,9 +109,14 @@ func Parse(raw string) (Plan, error) {
 		return Plan{}, errors.New("search query required")
 	}
 
-	term, domains, err := extractDomainFilters(trimmed)
-	if err != nil {
-		return Plan{}, err
+	term := trimmed
+	var domains []architecture.ResultDomain
+	var err error
+	if strings.Contains(strings.ToLower(trimmed), "domain:") {
+		term, domains, err = extractDomainFilters(trimmed)
+		if err != nil {
+			return Plan{}, err
+		}
 	}
 	if term == "" {
 		return Plan{}, errors.New("search term required after domain filter")

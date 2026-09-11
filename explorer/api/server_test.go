@@ -15,13 +15,13 @@ import (
 )
 
 type fakeIndexer struct {
-	health       indexerapi.HealthResponse
-	blocks       indexerapi.BlockPage
-	block        model.BlockRecord
-	logs         []model.LogRecord
-	tx           model.TransactionRecord
-	receipt      model.ReceiptRecord
-	service      decoder.ServiceVersion
+	health  indexerapi.HealthResponse
+	blocks  indexerapi.BlockPage
+	block   model.BlockRecord
+	logs    []model.LogRecord
+	tx      model.TransactionRecord
+	receipt model.ReceiptRecord
+	service decoder.ServiceVersion
 }
 
 func (f *fakeIndexer) Health(context.Context) (indexerapi.HealthResponse, error) { return f.health, nil }
@@ -95,6 +95,17 @@ func TestTransactionRoute(t *testing.T) {
 	var got explorerservice.TransactionView
 	if err := json.Unmarshal(rr.Body.Bytes(), &got); err != nil { t.Fatal(err) }
 	if got.Transaction.Hash != "0xtx" || got.Receipt.Status != 1 { t.Fatalf("unexpected tx view: %+v", got) }
+}
+
+func TestServiceVersionRoute(t *testing.T) {
+	f := &fakeIndexer{service: decoder.ServiceVersion{ServiceID: "420/service/explorer/v1", Version: 2}}
+	s := newTestServer(t, f)
+	rr := httptest.NewRecorder()
+	s.Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodGet, "/v1/services/420%2Fservice%2Fexplorer%2Fv1/versions/2", nil))
+	if rr.Code != http.StatusOK { t.Fatalf("status=%d body=%s", rr.Code, rr.Body.String()) }
+	var got decoder.ServiceVersion
+	if err := json.Unmarshal(rr.Body.Bytes(), &got); err != nil { t.Fatal(err) }
+	if got.ServiceID != "420/service/explorer/v1" || got.Version != 2 { t.Fatalf("unexpected service version: %+v", got) }
 }
 
 func TestBlocksRejectInvalidLimit(t *testing.T) {

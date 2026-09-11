@@ -4,6 +4,8 @@
 
 DEVHUB-15 adds a developer debugging surface that correlates 420Indexer projections with canonical 420 chain RPC evidence. It is a diagnostic layer only and never becomes protocol, wallet, Registry, settlement, governance or verification authority.
 
+The runtime, CLI and local dashboard surfaces are now wired to the same DEVHUB-15 debugging client so provenance and authority rules are identical across programmatic and human-facing workflows.
+
 ## Scope
 
 DEVHUB-15 provides:
@@ -13,6 +15,8 @@ DEVHUB-15 provides:
 - filtered indexed log queries;
 - filtered protocol-event queries;
 - service/RPC diagnostic bundles with explicit provenance;
+- CLI transaction/log/event/diagnostic commands;
+- dashboard transaction/log/event/diagnostic views;
 - fail-closed chain binding between selected network and 420Indexer;
 - strict transaction-hash/address/query-limit validation;
 - source labels and security rules on every returned diagnostic view.
@@ -38,6 +42,34 @@ DEVHUB-15 reuses the DEVHUB-11 public API:
 These views support validated limits and descending/ascending ordering. Address filters are validated as EVM addresses by the diagnostic layer before reaching Indexer.
 
 Indexed logs/events are projections. Any security-sensitive conclusion derived from them must be revalidated against canonical RPC and/or the owning protocol contract.
+
+## CLI surface
+
+DEVHUB-15 extends `420 CLI` with:
+
+```text
+420 debug view
+420 debug diagnostics
+420 debug tx HASH
+420 debug logs [ADDRESS] [LIMIT]
+420 debug events PROTOCOL [OBJECT_KEY] [LIMIT]
+```
+
+`debug view` is network-free after local configuration validation and shows the authority boundary. The other commands perform live read-only diagnostics against the selected Indexer and/or canonical RPC. The CLI does not add signing, send-transaction or mutation commands as part of DEVHUB-15.
+
+## Dashboard surface
+
+The localhost DEVHUB-14 dashboard now exposes read-only endpoints:
+
+```text
+GET /api/debug/view
+GET /api/debug/diagnostics
+GET /api/debug/transaction?hash=...
+GET /api/debug/logs?address=...&limit=...
+GET /api/debug/events?protocol=...&objectKey=...&limit=...
+```
+
+The browser UI provides transaction, logs, protocol-event and diagnostic controls. The server rejects non-GET requests and intentionally exposes no generic RPC proxy, signing endpoint, raw transaction submission or state mutation route.
 
 ## Diagnostic bundle
 
@@ -82,10 +114,12 @@ Developer Hub may correlate disagreements; it may not silently resolve them by p
 - **DEVHUB-INV-121** — protocol-event projections cannot authorize settlement, governance, Registry legitimacy, wallet capability or other protocol transitions.
 - **DEVHUB-INV-122** — diagnostic output preserves source provenance rather than flattening Indexer and RPC evidence into an ambiguous result.
 - **DEVHUB-INV-123** — DEVHUB-15 introduces no signing, raw-key, deployment, Registry mutation, verification-classification or wallet-capability authority.
+- **DEVHUB-INV-124** — CLI and dashboard debugging commands are read-only orchestration over the same DEVHUB-15 client semantics.
+- **DEVHUB-INV-125** — dashboard debugging APIs accept GET only and expose no generic transaction-submission or state-mutation proxy.
 
 ## Exit criteria
 
-DEVHUB-15 is complete when transaction correlation, logs, protocol events and diagnostic bundles are available through a validated runtime surface; hostile/mismatched inputs fail closed; tests preserve the Indexer/canonical-RPC boundary; and the next off-chain application credential work remains isolated to DEVHUB-16.
+DEVHUB-15 is complete when transaction correlation, logs, protocol events and diagnostic bundles are available through validated runtime, CLI and dashboard surfaces; hostile/mismatched inputs fail closed; tests preserve the Indexer/canonical-RPC boundary; and the next off-chain application credential work remains isolated to DEVHUB-16.
 
 ## Next
 

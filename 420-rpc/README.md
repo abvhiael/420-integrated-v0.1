@@ -8,31 +8,31 @@ Each RPC phase is developed on its own branch and pull request. At the end of ev
 
 ## RPC-0 — architecture and trust foundation — complete
 
-RPC-0 establishes the non-negotiable service contract before network routing is implemented:
+RPC-0 established the non-negotiable service contract: chain ID 420, Engine isolation, no Wallet-key custody, no transaction signing or mutation, no gateway-owned finality, TLS public transport, explicit derived Indexer semantics and fail-closed finalized disagreement.
 
-- package and module layout;
-- explicit 420RPC service identity and architecture version;
-- expected chain ID pinned to 420;
-- canonical execution upstream class separated from derived 420Indexer reads;
-- public transport contract requiring TLS (`https`/`wss`);
-- Engine API isolation from all public gateway traffic;
-- no custody or storage of Wallet signing keys;
-- no transaction signing or signed-byte rewriting;
-- no independent finality decision-making;
-- fail-closed behavior for finalized-state disagreement;
-- executable validation of architecture invariants;
-- documented threat model and phase qualification workflow.
+## RPC-1 — upstream abstraction and capability discovery — in progress
 
-### RPC-0 authority boundary
+RPC-1 turns the RPC-0 upstream concepts into runtime provider contracts:
 
-420RPC is ingress infrastructure. It may eventually authenticate, route, load-balance, rate-limit, cache safe reads, expose WebSocket subscriptions, select compatible upstreams, and provide developer-facing helper APIs. None of those capabilities make it authoritative for chain state.
+- normalized execution-RPC and 420Indexer descriptors;
+- endpoint/transport consistency validation;
+- chain-ID pinning and duplicate-provider rejection;
+- enabled/priority metadata for later routing phases;
+- transport-neutral JSON-RPC requester interface;
+- transport-neutral Indexer metadata reader interface;
+- runtime execution discovery for chain identity, client version, head reads, safe/finalized tags, transaction-submission eligibility and subscription transport;
+- runtime 420Indexer discovery for chain identity, readiness and explicit non-authoritative/derived semantics;
+- wrong-chain, disabled, unreachable or misdeclared upstreams fail closed and never enter the eligible provider pool;
+- capability reports remain observations used by later routing logic rather than a new source of protocol authority.
 
-Canonical execution reads come from compatible `node420` execution endpoints. 420Indexer responses are explicitly derived and rebuildable. Consensus/finality remain with the chain. Wallet/user signatures remain with users and Wallet infrastructure. The authenticated Engine API remains a private consensus-to-execution control plane and is never a 420RPC public upstream.
+### RPC-1 authority boundary
+
+Discovery can determine whether an endpoint is suitable for 420RPC routing. It cannot make an endpoint canonical. Execution state remains canonical only because it comes from compatible `node420` execution on the intended chain. 420Indexer remains rebuildable derived state. Provider priority and eligibility affect gateway routing only; they do not affect fork choice, finality or transaction validity.
 
 ## Roadmap
 
 - **RPC-0 — complete:** architecture, authority boundaries, threat model, package layout and qualification contract.
-- **RPC-1 — next:** upstream node/provider abstraction and capability discovery.
+- **RPC-1 — in progress:** upstream node/provider abstraction and capability discovery.
 - **RPC-2:** canonical Ethereum JSON-RPC compatibility and method profiles.
 - **RPC-3:** routing, health-aware upstream selection and failover.
 - **RPC-4:** chain identity, freshness and finality-safety enforcement.
@@ -56,7 +56,8 @@ Canonical execution reads come from compatible `node420` execution endpoints. 42
 7. 420Indexer-backed data remains visibly non-authoritative and derived.
 8. Public transports require TLS in the deployment contract.
 9. Routing, rate limiting, caching and failover never alter chain validity or finality semantics.
+10. Capability discovery is evidence about an upstream, not authority over the chain.
 
 ## Next phase
 
-RPC-1 will define the upstream provider abstraction, capability discovery and normalized provider identity used by later routing and failover phases.
+After RPC-1 is reconciled, qualified and merged, RPC-2 will define canonical Ethereum JSON-RPC compatibility and explicit method profiles.

@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "bin": {
-    "420": "./bin/420.mjs"
+    "420": "./bin/420.mjs",
+    "420-auth": "./bin/420-auth.mjs"
   },
   "scripts": {
     "test": "node --test test/*.test.mjs"

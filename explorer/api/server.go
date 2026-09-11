@@ -13,9 +13,17 @@ import (
 
 type Server struct { service *explorerservice.Service; mux *http.ServeMux }
 type errorResponse struct { Error string `json:"error"` }
+type healthResponse struct { Service string `json:"service"`; Status string `json:"status"`; CanonicalAuthority bool `json:"canonicalAuthority"`; DataSource string `json:"dataSource"` }
+type readinessResponse struct { Ready bool `json:"ready"`; Status explorerservice.NetworkStatus `json:"status"`; Issue *OperationalIssue `json:"issue,omitempty"` }
+type capabilitiesResponse struct { Service string `json:"service"`; Qualification string `json:"qualification"`; CanonicalAuthority bool `json:"canonicalAuthority"`; DataSource string `json:"dataSource"`; Endpoints []string `json:"endpoints"` }
+
 func NewServer(service *explorerservice.Service) (*Server,error){if service==nil{return nil,errors.New("420Explorer service required")};s:=&Server{service:service,mux:http.NewServeMux()};s.routes();return s,nil}
-func (s *Server) Handler() http.Handler{return s.mux}
+func (s *Server) Handler() http.Handler{return provenanceHeaders(s.mux)}
+func provenanceHeaders(next http.Handler) http.Handler{return http.HandlerFunc(func(w http.ResponseWriter,r *http.Request){if strings.HasPrefix(r.URL.Path,"/v1/"){w.Header().Set("X-420-Service","420Explorer");w.Header().Set("X-420-Data-Source","420Indexer");w.Header().Set("X-420-Canonical-Authority","false");w.Header().Set("X-420-Consumer-Qualification","QUALIFIED_INDEXER_API_CONSUMER")};next.ServeHTTP(w,r)})}
 func (s *Server) routes(){
+	s.mux.HandleFunc("GET /v1/health",s.handleHealth)
+	s.mux.HandleFunc("GET /v1/ready",s.handleReady)
+	s.mux.HandleFunc("GET /v1/capabilities",s.handleCapabilities)
 	s.mux.HandleFunc("GET /v1/status",s.handleStatus)
 	s.mux.HandleFunc("GET /v1/blocks",s.handleBlocks)
 	s.mux.HandleFunc("GET /v1/blocks/{number}",s.handleBlock)
@@ -30,6 +38,9 @@ func (s *Server) routes(){
 	s.mux.HandleFunc("GET /v1/consensus",s.handleConsensus)
 	s.mux.Handle("/", explorerweb.Handler())
 }
+func (s *Server) handleHealth(w http.ResponseWriter,r *http.Request){writeJSON(w,http.StatusOK,healthResponse{Service:"420Explorer",Status:"LIVE",CanonicalAuthority:false,DataSource:"420Indexer"})}
+func (s *Server) handleReady(w http.ResponseWriter,r *http.Request){status,err:=s.service.NetworkStatus(r.Context());if err!=nil{issue:=operationalIssue(err);if issue.Retryable{w.Header().Set("Retry-After","15")};writeJSON(w,http.StatusServiceUnavailable,readinessResponse{Ready:false,Status:status,Issue:&issue});return};writeJSON(w,http.StatusOK,readinessResponse{Ready:true,Status:status})}
+func (s *Server) handleCapabilities(w http.ResponseWriter,r *http.Request){writeJSON(w,http.StatusOK,capabilitiesResponse{Service:"420Explorer",Qualification:"QUALIFIED_INDEXER_API_CONSUMER",CanonicalAuthority:false,DataSource:"420Indexer",Endpoints:[]string{"/v1/health","/v1/ready","/v1/status","/v1/blocks","/v1/transactions/{hash}","/v1/receipts/{hash}","/v1/addresses/{address}","/v1/contracts/{address}","/v1/services","/v1/assets/activity","/v1/consensus"}})}
 func (s *Server) handleStatus(w http.ResponseWriter,r *http.Request){status,err:=s.service.NetworkStatus(r.Context());if err!=nil{issue:=operationalIssue(err);if issue.Retryable{w.Header().Set("Retry-After","15")};writeJSON(w,explorerErrorStatus(err),statusFailureResponse{Status:status,Issue:issue});return};writeJSON(w,http.StatusOK,status)}
 func (s *Server) handleBlocks(w http.ResponseWriter,r *http.Request){var limit uint64;var err error;if raw:=strings.TrimSpace(r.URL.Query().Get("limit"));raw!=""{limit,err=strconv.ParseUint(raw,10,32);if err!=nil||limit==0{writeError(w,http.StatusBadRequest,"invalid limit");return}};page,err:=s.service.BlockPage(r.Context(),uint32(limit),r.URL.Query().Get("cursor"));if err!=nil{writeError(w,explorerErrorStatus(err),err.Error());return};writeJSON(w,http.StatusOK,page)}
 func (s *Server) handleBlock(w http.ResponseWriter,r *http.Request){number,err:=strconv.ParseUint(r.PathValue("number"),10,64);if err!=nil{writeError(w,http.StatusBadRequest,"invalid block number");return};view,err:=s.service.BlockDetail(r.Context(),number);if err!=nil{writeError(w,explorerErrorStatus(err),err.Error());return};writeJSON(w,http.StatusOK,view)}

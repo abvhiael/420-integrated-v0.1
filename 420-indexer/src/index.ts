@@ -1,6 +1,7 @@
 export * from './chain-source.js';
 export * from './indexing.js';
 export * from './checkpoint-store.js';
+export * from './recovery-store.js';
 export * from './rpc-source.js';
 export * from './reorg.js';
 export * from './ingestor.js';
@@ -17,6 +18,9 @@ export * from './search-router.js';
 export * from './public-dto.js';
 export * from './receipt-log-dto.js';
 export * from './protocol-object-service.js';
+export * from './runtime-state.js';
+export * from './work-controller.js';
+export * from './operational-telemetry.js';
 export * from './operational-api.js';
 export * from './api-contract.js';
 export * from './api-surface.js';

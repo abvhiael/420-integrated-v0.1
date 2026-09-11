@@ -172,3 +172,29 @@ test('durable reorg path delegates rollback atomically and resumes from the retu
   assert.equal(run.recoveredReorgDepth, 1);
   assert.equal(run.checkpoint?.blockNumber, 3n);
 });
+
+test('deep reorg beyond the configured bound fails closed without rollback', async () => {
+  const checkpoints = new MemoryCheckpointStore420();
+  const history = new MemoryCanonicalHistoryStore420();
+  for (let n = 1; n <= 5; n += 1) await history.save(checkpointFromBlock420(420n, block420(n)));
+  const current = checkpointFromBlock420(420n, block420(5));
+  await checkpoints.save(current);
+
+  const canonical = new Map<bigint, IndexerBlock>([
+    [3n, block420(3, 3000, 2999)],
+    [4n, block420(4, 4000, 3999)],
+    [5n, block420(5, 5000, 4999)]
+  ]);
+  let rolledBack = false;
+  const ingestor = new IndexerIngestor420(
+    source420(canonical, 5n),
+    checkpoints,
+    { async applyBlock() {}, async rollbackTo() { rolledBack = true; } },
+    { finality: { mode: 'head' }, maxReorgDepth: 2 },
+    history
+  );
+
+  await assert.rejects(() => ingestor.runOnce(), /reorg exceeds configured max depth 2/);
+  assert.equal(rolledBack, false);
+  assert.equal((await checkpoints.load())?.blockNumber, 5n);
+});

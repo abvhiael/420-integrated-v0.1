@@ -79,8 +79,8 @@ Completed slices:
 
 - **IDX-10.1 — qualification environment and harness contract:** implemented. The runner pins chain ID, genesis hash, RPC endpoint, finality mode, sustained-block target, bounded reorg depth and restart-replay window; malformed or inconsistent configuration fails closed.
 - **IDX-10.2 — live RPC ingest/indexing smoke:** harness implemented. It verifies chain/genesis identity before writes, derives the configured safe head, requires the full sustained safe-block window, runs that exact window through `IndexerIngestor420`, and requires exact checkpoint advancement. Live testnet evidence remains deployment-time.
-- **IDX-10.3 — restart, replay and bounded reorg qualification:** next.
-- **IDX-10.4 — public API and consumer integration qualification:** pending.
+- **IDX-10.3 — restart, replay and bounded reorg qualification:** implemented. Restart qualification requires an existing durable checkpoint, rejects catch-up beyond the configured replay window, advances through the production ingestor, then requires a repeated restart at the same safe head to be a no-op. Reorg qualification exercises the durable rollback path, bounded ancestor recovery and deterministic branch replay; deep reorgs fail closed before rollback or checkpoint movement.
+- **IDX-10.4 — public API and consumer integration qualification:** next.
 - **IDX-10.5 — readiness report/operator closeout:** pending.
 
 See `docs/420INDEXER-TESTNET.md` for the qualification contract and required evidence.
@@ -95,4 +95,4 @@ See `docs/420INDEXER-TESTNET.md` for the qualification contract and required evi
 
 ## Next phase
 
-Qualify the current IDX-10.2 head, then proceed to IDX-10.3 restart, replay and bounded-reorg qualification. The live testnet smoke is executed once the deployment endpoint and pinned genesis identity are available.
+Proceed to IDX-10.4 public API and consumer integration qualification. Live IDX-10.2 deployment evidence and final deployment-time descriptor evidence remain required for IDX-10.5 closeout once the testnet endpoint and compiled genesis artifacts are available.

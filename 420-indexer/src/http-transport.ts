@@ -85,9 +85,15 @@ export async function routeIndexerHttp420(api: IndexerPublicApi420, method: stri
 
   try {
     const path = url.pathname.replace(/\/+$/, '') || '/';
+    if (path === '/health') return ok420(await api.health());
     if (path === '/v1') return ok420({ version: api.version });
 
     const chainId = parseChainId420(url.searchParams.get('chainId'));
+    if (path === '/ready') {
+      const readiness = await api.readiness(chainId);
+      return ok420(readiness, readiness.ready ? 200 : 503);
+    }
+    if (path === '/v1/status') return ok420(await api.status(chainId));
 
     const receiptHash = pathParam420(path, /^\/v1\/transactions\/([^/]+)\/receipt$/);
     if (receiptHash !== null) {

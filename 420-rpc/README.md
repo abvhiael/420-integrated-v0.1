@@ -12,29 +12,33 @@ RPC-0 established the non-negotiable service contract: chain ID 420, Engine isol
 
 ## RPC-1 — upstream abstraction and capability discovery — complete
 
-RPC-1 turns the RPC-0 upstream concepts into runtime provider contracts:
+RPC-1 established normalized execution/Indexer provider descriptors, chain-bound runtime capability discovery, reachable-versus-eligible status and fail-closed provider qualification.
 
-- normalized execution-RPC and 420Indexer descriptors;
-- endpoint/transport consistency validation;
-- chain-ID pinning and duplicate-provider rejection;
-- enabled/priority metadata for later routing phases;
-- transport-neutral JSON-RPC requester interface;
-- transport-neutral Indexer metadata reader interface;
-- runtime execution discovery for chain identity, client version, head reads, safe/finalized tags, transaction-submission eligibility and subscription transport;
-- runtime 420Indexer discovery for chain identity, readiness and explicit non-authoritative/derived semantics;
-- wrong-chain, disabled, unreachable or misdeclared upstreams fail closed and never enter the eligible provider pool;
-- capability reports remain observations used by later routing logic rather than a new source of protocol authority.
+## RPC-2 — Ethereum JSON-RPC compatibility and method profiles — complete
 
-### RPC-1 authority boundary
+RPC-2 defines an explicit public compatibility catalogue rather than blindly proxying whatever methods an upstream happens to expose:
 
-Discovery can determine whether an endpoint is suitable for 420RPC routing. It cannot make an endpoint canonical. Execution state remains canonical only because it comes from compatible `node420` execution on the intended chain. 420Indexer remains rebuildable derived state. Provider priority and eligibility affect gateway routing only; they do not affect fork choice, finality or transaction validity.
+- metadata profile for `web3_clientVersion`, `net_version` and `eth_chainId`;
+- canonical read profile covering blocks, transactions, receipts, logs, balances, code, storage, calls and fee estimation;
+- raw signed transaction submission through `eth_sendRawTransaction` only;
+- WebSocket-only `eth_subscribe` / `eth_unsubscribe` compatibility;
+- per-method transport, capability, mutation and user-signature metadata;
+- method eligibility intersected with RPC-1 discovered upstream capabilities;
+- unknown methods fail closed instead of being transparently proxied;
+- node-managed signing/account methods such as `eth_sendTransaction`, `eth_sign` and `eth_accounts` are excluded;
+- privileged `engine_`, `admin_`, `personal_`, `debug_`, `miner_` and `txpool_` namespaces are outside the public surface;
+- deterministic profile and hostile-state qualification tests.
+
+### RPC-2 authority boundary
+
+The method catalogue defines what the gateway is willing to serve. It does not decide transaction validity, fork choice, finality or canonical state. `eth_sendRawTransaction` forwards already-signed bytes to an eligible execution provider; 420RPC never signs or rewrites them. RPC-4 and RPC-5 add freshness/finality safety and request-policy enforcement around this compatibility contract.
 
 ## Roadmap
 
 - **RPC-0 — complete:** architecture, authority boundaries, threat model, package layout and qualification contract.
 - **RPC-1 — complete:** upstream node/provider abstraction and capability discovery.
-- **RPC-2 — next:** canonical Ethereum JSON-RPC compatibility and method profiles.
-- **RPC-3:** routing, health-aware upstream selection and failover.
+- **RPC-2 — complete:** canonical Ethereum JSON-RPC compatibility and method profiles.
+- **RPC-3 — next:** routing, health-aware upstream selection and failover.
 - **RPC-4:** chain identity, freshness and finality-safety enforcement.
 - **RPC-5:** request validation, method policy and privileged-surface exclusion.
 - **RPC-6:** rate limiting, quotas, resource bounds and abuse controls.
@@ -57,7 +61,8 @@ Discovery can determine whether an endpoint is suitable for 420RPC routing. It c
 8. Public transports require TLS in the deployment contract.
 9. Routing, rate limiting, caching and failover never alter chain validity or finality semantics.
 10. Capability discovery is evidence about an upstream, not authority over the chain.
+11. Unknown or privileged RPC methods are not silently passed through the gateway.
 
 ## Next phase
 
-RPC-2 will define canonical Ethereum JSON-RPC compatibility and explicit method profiles after RPC-1 is merged to `main`.
+RPC-3 will implement routing, health-aware upstream selection, circuit breaking and failover after RPC-2 is reconciled, qualified and merged to `main`.

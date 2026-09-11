@@ -15,27 +15,25 @@ Each RPC phase is developed on its own branch and pull request. At the end of ev
 - **RPC-4:** chain identity, freshness and finality-safety enforcement.
 - **RPC-5:** request validation, method policy and privileged-surface enforcement.
 - **RPC-6:** weighted rate limits, quotas, batch/resource bounds, concurrency controls and abuse protection.
-- **RPC-7 — implementation complete:** WebSocket session, subscription lifecycle, backpressure and upstream-loss handling.
+- **RPC-7:** WebSocket session, subscription lifecycle, backpressure and upstream-loss handling.
+- **RPC-8 — implementation complete:** 420Indexer-backed enriched/read APIs with explicit derived-state semantics.
 
-## RPC-7 — WebSocket transport and subscription lifecycle
+## RPC-8 — derived 420Indexer reads
 
-RPC-7 adds bounded state around the RPC-2/RPC-5 WebSocket subscription surface:
+RPC-8 adds a distinct read surface for indexed and enriched data without changing the canonical Ethereum JSON-RPC path:
 
-- creates bounded gateway-local WebSocket sessions;
-- requires `eth_subscribe` setup to pass RPC-5 and RPC-6 before lifecycle allocation;
-- allocates local pending subscription IDs and explicitly binds them to `(upstreamId, upstreamSubscriptionId)` after upstream acceptance;
-- namespaces upstream subscription IDs by provider identity;
-- prevents cross-session unsubscribe;
-- enforces per-session and global subscription limits;
-- bounds individual event size, queued event count and queued bytes;
-- closes and cleans a session when backpressure capacity is exhausted;
-- tracks heartbeats and idle expiry;
-- cleans all subscription state when a session closes;
-- invalidates subscriptions on upstream loss and requires client resubscription rather than claiming silent gap-free failover.
+- routes only to eligible `indexer-api` upstreams with `derived-read` capability;
+- never substitutes execution RPC for a derived resource or Indexer for canonical `eth_*` methods;
+- maps the stable 420Indexer v1 resources for status, blocks, transactions, receipts, logs, addresses, asset transfers, protocol events, protocol objects and search;
+- chain-scopes every request to chain ID 420;
+- validates required path parameters before route construction;
+- rejects authoritative, transaction-capable, wrong-chain, unready or capability-incompatible Indexer providers;
+- validates projection observation metadata for readiness, chain identity and freshness;
+- wraps successful responses with explicit `source: 420Indexer`, `derived: true`, `authoritative: false`, chain ID, upstream ID, indexed head and observation time.
 
-### RPC-7 authority boundary
+### RPC-8 authority boundary
 
-WebSocket delivery is transport only. Subscription events are upstream evidence; 420RPC does not convert them into canonicality or finality claims. RPC-3 may route a new subscription to another eligible upstream, but RPC-7 never silently migrates an existing stream across providers while hiding a possible event gap.
+Indexer-backed data is rebuildable projection state. It can improve discovery, search and historical ergonomics, but it never decides canonical balances, ownership, registrations, settlements, rights, governance outcomes, bridge state, eligibility, transaction validity, fork choice or finality.
 
 ## Roadmap
 
@@ -46,9 +44,9 @@ WebSocket delivery is transport only. Subscription events are upstream evidence;
 - **RPC-4 — complete:** chain identity, freshness and finality-safety enforcement.
 - **RPC-5 — complete:** request validation, method policy and privileged-surface enforcement.
 - **RPC-6 — complete:** rate limiting, quotas, batch/resource bounds, concurrency controls and abuse protection.
-- **RPC-7 — implementation complete:** WebSocket transport and subscription lifecycle.
-- **RPC-8 — next:** 420Indexer-backed enriched/read APIs with explicit derived-state semantics.
-- **RPC-9:** authentication, API credentials and Developer Hub integration.
+- **RPC-7 — complete:** WebSocket transport and subscription lifecycle.
+- **RPC-8 — implementation complete:** enriched/indexer-backed read APIs with explicit derived-state semantics.
+- **RPC-9 — next:** authentication, API credentials and Developer Hub integration.
 - **RPC-10:** observability, metrics, operational readiness and recovery.
 - **RPC-11:** hostile-state/security hardening and fault qualification.
 - **RPC-12:** testnet qualification and launch closeout.
@@ -77,7 +75,9 @@ WebSocket delivery is transport only. Subscription events are upstream evidence;
 20. Subscription queues are bounded; backpressure exhaustion fails closed.
 21. Upstream subscription loss requires resubscription rather than silent stream migration.
 22. Subscription delivery never becomes a finality or canonicality assertion by 420RPC.
+23. Derived Indexer resources never satisfy canonical Ethereum JSON-RPC methods.
+24. Every RPC-8 response retains explicit non-authoritative projection provenance.
 
 ## Next phase
 
-After RPC-7 is reconciled, fully qualified and merged to `main`, RPC-8 adds 420Indexer-backed enriched/read APIs with explicit derived-state semantics.
+After RPC-8 is reconciled, fully qualified and merged to `main`, RPC-9 adds authentication, API credentials and Developer Hub integration.

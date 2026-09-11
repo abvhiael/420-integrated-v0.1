@@ -12,12 +12,24 @@ on:
         required: false
         default: "420"
         type: string
+      block_number:
+        description: Optional known indexed block number
+        required: false
+        type: string
       transaction_hash:
         description: Optional known indexed transaction hash
         required: false
         type: string
       address:
         description: Optional known indexed address
+        required: false
+        type: string
+      service_id:
+        description: Optional known registered service ID
+        required: false
+        type: string
+      asset_key:
+        description: Optional known asset key with indexed transfer activity
         required: false
         type: string
 
@@ -39,8 +51,11 @@ jobs:
         env:
           EXPLORER_LIVE_URL: ${{ inputs.explorer_url }}
           EXPLORER_EXPECTED_CHAIN_ID: ${{ inputs.expected_chain_id }}
+          EXPLORER_LIVE_BLOCK_NUMBER: ${{ inputs.block_number }}
           EXPLORER_LIVE_TX_HASH: ${{ inputs.transaction_hash }}
           EXPLORER_LIVE_ADDRESS: ${{ inputs.address }}
+          EXPLORER_LIVE_SERVICE_ID: ${{ inputs.service_id }}
+          EXPLORER_LIVE_ASSET_KEY: ${{ inputs.asset_key }}
         run: |
           set -o pipefail
           go run ./explorer/cmd/explorerlivevalidate | tee explorer-live-evidence.json

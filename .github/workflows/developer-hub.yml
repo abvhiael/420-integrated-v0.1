@@ -5,6 +5,7 @@ on:
     paths:
       - 'developer-hub/**'
       - 'packages/420-sdk/**'
+      - 'packages/420-cli/**'
       - 'docs/DEVELOPER-HUB-DEVHUB-*.md'
       - '.github/workflows/developer-hub.yml'
   push:
@@ -13,6 +14,7 @@ on:
     paths:
       - 'developer-hub/**'
       - 'packages/420-sdk/**'
+      - 'packages/420-cli/**'
       - 'docs/DEVELOPER-HUB-DEVHUB-*.md'
       - '.github/workflows/developer-hub.yml'
 
@@ -32,4 +34,10 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Test shared TypeScript SDK
         working-directory: packages/420-sdk
+        run: npm test
+      - name: Install CLI dependencies
+        working-directory: packages/420-cli
+        run: npm install --no-audit --no-fund
+      - name: Test 420 CLI
+        working-directory: packages/420-cli
         run: npm test

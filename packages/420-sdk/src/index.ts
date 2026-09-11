@@ -95,3 +95,5 @@ export function createSdk420(input: {
     rpc: <T = unknown>(request: RpcRequest420) => transport.request<T>(rpcEndpoint, request)
   });
 }
+
+export * from './wallet.js';

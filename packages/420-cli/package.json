@@ -1,0 +1,18 @@
+{
+  "name": "@420/cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "420": "./bin/420.mjs"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "@420/sdk": "file:../420-sdk"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

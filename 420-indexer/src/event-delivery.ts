@@ -1,5 +1,6 @@
 import type { IndexerEventEnvelope420 } from './event-stream.js';
 import type { IndexerEventMatch420 } from './event-subscription.js';
+import type { IndexerOperationalTelemetry420 } from './operational-telemetry.js';
 
 export type IndexerDeliveryPriority420 = 'low' | 'normal' | 'high' | 'critical';
 export type IndexerDeliverySeverity420 = 'info' | 'notice' | 'warning' | 'critical';
@@ -93,6 +94,23 @@ export class IndexerDeliveryQueue420 {
   readonly records = new Map<string, IndexerDeliveryRecord420>();
   readonly deduplication = new Map<string, string>();
 
+  constructor(readonly telemetry?: IndexerOperationalTelemetry420) {}
+
+  private refreshPressure420(): void {
+    if (!this.telemetry) return;
+    let queued = 0;
+    let inFlight = 0;
+    let retryWait = 0;
+    let deadLetter = 0;
+    for (const record of this.records.values()) {
+      if (record.state === 'queued') queued += 1;
+      else if (record.state === 'in_flight') inFlight += 1;
+      else if (record.state === 'retry_wait') retryWait += 1;
+      else if (record.state === 'dead_letter') deadLetter += 1;
+    }
+    this.telemetry.setDeliveryPressure(queued, inFlight, retryWait, deadLetter);
+  }
+
   enqueue(match: IndexerEventMatch420, event: IndexerEventEnvelope420, policy: IndexerDeliveryPolicy420, now: number): IndexerDeliveryRecord420 {
     if (match.eventId !== event.id) throw new Error('delivery event identity mismatch');
     if (!Number.isSafeInteger(now) || now < 0) throw new Error('invalid delivery time');
@@ -123,6 +141,8 @@ export class IndexerDeliveryQueue420 {
     };
     this.records.set(id, record);
     this.deduplication.set(key, id);
+    this.telemetry?.recordDeliveryEnqueued();
+    this.refreshPressure420();
     return record;
   }
 
@@ -133,6 +153,8 @@ export class IndexerDeliveryQueue420 {
     if (now < record.nextAttemptAt) return null;
     record.state = 'in_flight';
     record.attempts += 1;
+    this.telemetry?.recordDeliveryAttempt();
+    this.refreshPressure420();
     return {
       deliveryId: record.id,
       provider: record.provider,
@@ -150,6 +172,8 @@ export class IndexerDeliveryQueue420 {
     if (record.state !== 'in_flight') throw new Error('delivery is not in flight');
     record.state = 'delivered';
     record.lastError = null;
+    this.telemetry?.recordDeliverySuccess();
+    this.refreshPressure420();
     return record;
   }
 
@@ -161,10 +185,14 @@ export class IndexerDeliveryQueue420 {
     if (record.attempts >= record.maxAttempts) {
       record.state = 'dead_letter';
       record.nextAttemptAt = now;
+      this.telemetry?.recordDeliveryFailure(true);
+      this.refreshPressure420();
       return record;
     }
     record.state = 'retry_wait';
     record.nextAttemptAt = now + indexerRetryDelay420(record.attempts, policy.baseRetryMs, policy.maxRetryMs);
+    this.telemetry?.recordDeliveryFailure(false);
+    this.refreshPressure420();
     return record;
   }
 }

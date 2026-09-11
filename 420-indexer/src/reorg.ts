@@ -29,6 +29,7 @@ export class MemoryCanonicalHistoryStore420 implements CanonicalHistoryStore420 
 
 export interface ReorgAwareConsumer420 {
   rollbackTo(blockNumber: bigint | null): Promise<void>;
+  rollbackDurably?(blockNumber: bigint | null, ancestor: IndexCheckpoint420 | null): Promise<void>;
 }
 
 export interface ReorgRecovery420 {
@@ -39,6 +40,23 @@ export interface ReorgRecovery420 {
 
 function sameHash(a: string, b: string): boolean {
   return a.toLowerCase() === b.toLowerCase();
+}
+
+async function commitRollback420(
+  consumer: ReorgAwareConsumer420,
+  checkpoints: CheckpointStore420,
+  history: CanonicalHistoryStore420,
+  blockNumber: bigint | null,
+  ancestor: IndexCheckpoint420 | null
+): Promise<void> {
+  if (consumer.rollbackDurably) {
+    await consumer.rollbackDurably(blockNumber, ancestor);
+    return;
+  }
+  await consumer.rollbackTo(blockNumber);
+  await history.deleteAfter(blockNumber ?? -1n);
+  if (ancestor) await checkpoints.save(ancestor);
+  else await checkpoints.clear();
 }
 
 export async function recoverCanonicalAncestry420(
@@ -63,17 +81,13 @@ export async function recoverCanonicalAncestry420(
     if (!local) continue;
     const canonical = await source.getBlockByNumber(number);
     if (canonical && sameHash(canonical.hash, local.blockHash)) {
-      await consumer.rollbackTo(number);
-      await history.deleteAfter(number);
-      await checkpoints.save(local);
+      await commitRollback420(consumer, checkpoints, history, number, local);
       return { detected: true, depth, ancestor: local };
     }
   }
 
   if (current.blockNumber < BigInt(maxDepth)) {
-    await consumer.rollbackTo(null);
-    await history.deleteAfter(-1n);
-    await checkpoints.clear();
+    await commitRollback420(consumer, checkpoints, history, null, null);
     return { detected: true, depth: Number(current.blockNumber + 1n), ancestor: null };
   }
 

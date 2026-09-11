@@ -64,11 +64,16 @@ function pageRequest420(url: URL) {
   };
 }
 
-function pathParam420(path: string, pattern: RegExp): string | null {
+function pathParams420(path: string, pattern: RegExp): string[] | null {
   const match = pattern.exec(path);
-  if (!match?.[1]) return null;
-  try { return decodeURIComponent(match[1]); }
+  if (!match) return null;
+  try { return match.slice(1).map((value) => decodeURIComponent(value ?? '')); }
   catch { throw new Error('invalid path parameter encoding'); }
+}
+
+function pathParam420(path: string, pattern: RegExp): string | null {
+  const values = pathParams420(path, pattern);
+  return values?.[0] || null;
 }
 
 export async function routeIndexerHttp420(api: IndexerPublicApi420, method: string, requestUrl: string): Promise<HttpJsonResponse420> {
@@ -88,6 +93,14 @@ export async function routeIndexerHttp420(api: IndexerPublicApi420, method: stri
     if (receiptHash !== null) {
       const receipt = await api.receipt(chainId, receiptHash);
       return receipt ? ok420(receipt) : error420(404, 'not_found', 'receipt not found');
+    }
+
+    const protocolObjectParams = pathParams420(path, /^\/v1\/protocols\/([^/]+)\/objects\/([^/]+)$/);
+    if (protocolObjectParams !== null) {
+      const [protocol, objectKey] = protocolObjectParams;
+      if (!protocol || !objectKey) return error420(400, 'invalid_request', 'protocol and object key are required');
+      const object = await api.protocolObject(chainId, protocol, objectKey);
+      return object ? ok420(object) : error420(404, 'not_found', 'protocol object not found');
     }
 
     const blockId = pathParam420(path, /^\/v1\/blocks\/([^/]+)$/);

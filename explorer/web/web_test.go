@@ -58,6 +58,43 @@ func TestExplorerScriptContainsQualifiedCoreDetailViews(t *testing.T) {
 	}
 }
 
+func TestExplorerScriptContainsAdvancedPresentationViews(t *testing.T) {
+	rr := httptest.NewRecorder()
+	Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodGet, "/app.js", nil))
+	if rr.Code != http.StatusOK { t.Fatalf("status=%d", rr.Code) }
+	body := rr.Body.String()
+	for _, marker := range []string{
+		"Version history",
+		"Dependency root",
+		"Asset activity",
+		"Token ID",
+		"scheduledProposer",
+		"latestQc",
+		"quorumParticipationPercent",
+		"Active seats",
+		"Finality ordering",
+		"WRONG CHAIN",
+		"fail-closed",
+	} {
+		if !strings.Contains(body, marker) {
+			t.Fatalf("app.js missing EXP-5.3 marker %q", marker)
+		}
+	}
+	for _, endpoint := range []string{"/v1/services", "/v1/assets/activity", "/v1/consensus", "/v1/status"} {
+		if !strings.Contains(body, endpoint) {
+			t.Fatalf("app.js missing qualified EXP-5.3 endpoint %q", endpoint)
+		}
+	}
+	for _, obsolete := range []string{"c.proposer?.primarySeat", "c.latestQC?.signerCount", "['Slot',c.slot]"} {
+		if strings.Contains(body, obsolete) {
+			t.Fatalf("app.js still references obsolete consensus field %q", obsolete)
+		}
+	}
+	if strings.Contains(body, "eth_get") || strings.Contains(body, "INDEXER_RPC_URL") {
+		t.Fatal("frontend must not introduce direct RPC access")
+	}
+}
+
 func TestHandlerRejectsMutationMethods(t *testing.T) {
 	rr := httptest.NewRecorder()
 	Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodPost, "/", strings.NewReader("x")))

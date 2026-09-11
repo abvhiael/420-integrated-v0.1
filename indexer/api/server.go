@@ -25,12 +25,14 @@ type Backend interface {
 type addressBackend interface { AddressTransactions(address string, limit uint32) (AddressTransactionPage, error) }
 type registryBackend interface { Service(string) (decoder.ServiceSummary, error); Services() []decoder.ServiceSummary }
 type assetBackend interface { AssetTransfers(assetKey, address string, limit uint32) (AssetTransferPage, error) }
+type consensusBackend interface { Consensus() (model.ConsensusStatus, error) }
 type Server struct { backend Backend }
 func NewServer(backend Backend) *Server { return &Server{backend: backend} }
 
 func (s *Server) Handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /v1/health", s.health)
+	mux.HandleFunc("GET /v1/consensus", s.consensus)
 	mux.HandleFunc("GET /v1/blocks/{number}", s.block)
 	mux.HandleFunc("GET /v1/blocks", s.blocks)
 	mux.HandleFunc("GET /v1/transactions", s.transactions)
@@ -46,6 +48,7 @@ func (s *Server) Handler() http.Handler {
 }
 
 func (s *Server) health(w http.ResponseWriter, _ *http.Request) { h,err:=s.backend.Health(); if err!=nil{writeError(w,http.StatusServiceUnavailable,err);return}; writeJSON(w,http.StatusOK,HealthResponse{Health:h,CanonicalAuthority:false}) }
+func (s *Server) consensus(w http.ResponseWriter,_ *http.Request){backend,ok:=s.backend.(consensusBackend);if !ok{writeError(w,http.StatusServiceUnavailable,ErrConsensusQueryUnavailable);return};status,err:=backend.Consensus();if err!=nil{writeError(w,http.StatusServiceUnavailable,err);return};writeJSON(w,http.StatusOK,ReadResponse[model.ConsensusStatus]{Data:status,CanonicalAuthority:false})}
 func (s *Server) block(w http.ResponseWriter,r *http.Request){n,err:=strconv.ParseUint(r.PathValue("number"),10,64);if err!=nil{writeError(w,http.StatusBadRequest,err);return};b,ok,err:=s.backend.Block(n);if err!=nil{writeError(w,http.StatusServiceUnavailable,err);return};if !ok{writeError(w,http.StatusNotFound,errors.New("block not indexed"));return};writeJSON(w,http.StatusOK,b)}
 func (s *Server) transaction(w http.ResponseWriter,r *http.Request){tx,ok,err:=s.backend.Transaction(r.PathValue("hash"));if err!=nil{writeError(w,http.StatusServiceUnavailable,err);return};if !ok{writeError(w,http.StatusNotFound,errors.New("transaction not indexed"));return};writeJSON(w,http.StatusOK,ReadResponse[model.TransactionRecord]{Data:tx,CanonicalAuthority:false})}
 func (s *Server) transactions(w http.ResponseWriter,r *http.Request){address:=r.URL.Query().Get("address");if address==""{writeError(w,http.StatusBadRequest,errors.New("address query required"));return};limit:=uint32(50);if raw:=r.URL.Query().Get("limit");raw!=""{n,err:=strconv.ParseUint(raw,10,32);if err!=nil||n==0||n>250{writeError(w,http.StatusBadRequest,ErrInvalidCursor);return};limit=uint32(n)};backend,ok:=s.backend.(addressBackend);if !ok{writeError(w,http.StatusServiceUnavailable,ErrAddressQueryUnavailable);return};page,err:=backend.AddressTransactions(address,limit);if err!=nil{status:=http.StatusServiceUnavailable;if errors.Is(err,ErrSnapshotUnavailable){status=http.StatusConflict};writeError(w,status,err);return};writeJSON(w,http.StatusOK,page)}

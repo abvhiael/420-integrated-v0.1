@@ -44,6 +44,24 @@ class SmokeSource420 implements ChainSource420 {
   async getTransactionByHash(_transactionHash: Hex): Promise<IndexerTransaction | null> { return null; }
   async getTransactionReceipt(_transactionHash: Hex): Promise<IndexerReceipt | null> { return null; }
   async getLogs(_filter: LogFilter420): Promise<IndexerLog[]> { return []; }
+  async call(_request: { to: Hex; data: Hex }, _blockNumber?: bigint): Promise<Hex> { return '0x' as Hex; }
+  async getCode(_address: Hex, _blockNumber?: bigint): Promise<Hex> { return '0x' as Hex; }
+}
+
+function withoutFinalized420(source: SmokeSource420): ChainSource420 {
+  return {
+    sourceId: source.sourceId,
+    chainId: source.chainId.bind(source),
+    blockNumber: source.blockNumber.bind(source),
+    getBlockByNumber: source.getBlockByNumber.bind(source),
+    getBlockByHash: source.getBlockByHash.bind(source),
+    getBlockTransactionsByNumber: source.getBlockTransactionsByNumber.bind(source),
+    getTransactionByHash: source.getTransactionByHash.bind(source),
+    getTransactionReceipt: source.getTransactionReceipt.bind(source),
+    getLogs: source.getLogs.bind(source),
+    call: source.call.bind(source),
+    getCode: source.getCode.bind(source),
+  };
 }
 
 class RecordingConsumer420 implements BlockConsumer420 {
@@ -146,10 +164,8 @@ test('IDX-10.2 honors finalized finality and requires source support for it', as
   assert.equal(report.firstBlock, 3n);
   assert.equal(report.lastBlock, 4n);
 
-  const withoutFinalized = source as ChainSource420 & { finalizedBlockNumber?: undefined };
-  withoutFinalized.finalizedBlockNumber = undefined;
   await assert.rejects(
-    () => runTestnetSmokeQualification420(withoutFinalized, new RecordingConsumer420(), config),
+    () => runTestnetSmokeQualification420(withoutFinalized420(source), new RecordingConsumer420(), config),
     /does not expose finalized block semantics/,
   );
 });

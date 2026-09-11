@@ -145,9 +145,8 @@ test('durable reorg path delegates rollback atomically and resumes from the retu
   const durable: DurableBlockConsumer420 = {
     async applyBlock(batch) { applied.push(batch.block.number); },
     async rollbackTo(number) { rollbacks.push(number); },
-    async applyBlockDurably(batch) {
+    async applyBlockDurably(batch, checkpoint) {
       applied.push(batch.block.number);
-      const checkpoint = checkpointFromBlock420(batch.chainId, batch.block);
       await history.save(checkpoint);
       await checkpoints.save(checkpoint);
     },

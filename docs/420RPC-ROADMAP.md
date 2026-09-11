@@ -10,30 +10,35 @@ Each numbered RPC phase is developed, reconciled against current `main`, fully q
 
 Delivered the `420-rpc/` package, explicit architecture/service identity, execution-versus-derived upstream classes, chain-ID pinning, TLS public transport, Engine isolation, no key custody/signing/mutation, no gateway finality, fail-closed finalized disagreement, executable architecture tests, threat model and qualification workflow.
 
-RPC-0 was fully qualified and merged before RPC-1 began.
+## RPC-1 — upstream node/provider abstraction and capability discovery — complete
 
-## RPC-1 — upstream node/provider abstraction and capability discovery — in progress
+Delivered normalized execution and Indexer provider descriptors, runtime capability discovery, chain binding, reachable-versus-eligible status and fail-closed provider qualification. RPC-1 was fully qualified and merged before RPC-2 began.
+
+## RPC-2 — Ethereum JSON-RPC compatibility and method profiles — in progress
 
 Deliverables:
 
-- normalized upstream descriptors for execution RPC and 420Indexer providers;
-- endpoint/transport validation and duplicate-ID rejection;
-- expected chain-ID binding;
-- enabled/priority provider metadata for later routing;
-- transport-neutral execution JSON-RPC requester contract;
-- transport-neutral 420Indexer metadata contract;
-- execution capability discovery for chain identity, client version, head access, safe/finalized block tags, transaction-submission declaration and subscription transport;
-- Indexer discovery for chain identity, service identity, readiness and explicit derived/non-authoritative semantics;
-- reachable-versus-eligible distinction;
-- fail-closed rejection of wrong-chain, disabled, unreachable or structurally invalid providers;
-- eligible-provider filtering by upstream class;
-- deterministic hostile-state qualification tests.
+- explicit public Ethereum JSON-RPC method catalogue;
+- metadata, read, submit and subscription profiles;
+- per-method transport requirements;
+- per-method required upstream capabilities;
+- explicit mutation and user-signature semantics;
+- canonical wallet/dApp read methods for blocks, transactions, receipts, logs, state, calls and fee helpers;
+- raw signed transaction submission via `eth_sendRawTransaction`;
+- WebSocket subscription compatibility contract;
+- fail-closed unknown-method behavior;
+- exclusion of node-managed signing/account methods;
+- exclusion of privileged Engine/admin/personal/debug/miner/txpool namespaces;
+- intersection of method compatibility with RPC-1 provider discovery;
+- deterministic profile and hostile-state tests;
+- compatibility documentation for later routing and policy phases.
 
-Exit gate: the 420RPC package builds, RPC-1 tests pass, docs qualification and repository-wide qualification are green, the branch is reconciled to current `main`, and RPC-1 is merged before RPC-2 begins.
+RPC-2 defines compatibility, not routing. RPC-3 owns provider selection/failover, RPC-4 owns freshness/finality safety, RPC-5 owns request-policy enforcement, and RPC-7 owns subscription lifecycle.
+
+Exit gate: the 420RPC package builds, RPC-2 tests pass, docs qualification and repository-wide qualification are green, the branch is reconciled to current `main`, and RPC-2 is merged before RPC-3 begins.
 
 ## Remaining phases
 
-- **RPC-2:** Ethereum JSON-RPC compatibility and method profiles.
 - **RPC-3:** routing, upstream health, circuit breaking and failover.
 - **RPC-4:** chain identity, freshness and finality safety.
 - **RPC-5:** request validation, method policy and privileged-method exclusion.
@@ -47,4 +52,4 @@ Exit gate: the 420RPC package builds, RPC-1 tests pass, docs qualification and r
 
 ## Authority rule
 
-420RPC may influence availability and routing but never determines canonical blocks, transaction validity, ownership, balances, protocol state, consensus, safe/finalized checkpoints or governance outcomes. Those remain owned by the chain and the relevant canonical contracts. 420Indexer-backed responses remain rebuildable derived views. Capability discovery only determines gateway eligibility; it cannot confer chain authority.
+420RPC may influence availability, compatibility and routing but never determines canonical blocks, transaction validity, ownership, balances, protocol state, consensus, safe/finalized checkpoints or governance outcomes. Those remain owned by the chain and the relevant canonical contracts. A public method profile is a gateway exposure decision, not protocol authority.

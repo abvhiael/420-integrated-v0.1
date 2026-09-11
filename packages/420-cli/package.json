@@ -9,6 +9,9 @@
   "scripts": {
     "test": "node --test test/*.test.mjs"
   },
+  "dependencies": {
+    "@420/sdk": "file:../420-sdk"
+  },
   "engines": {
     "node": ">=22"
   }

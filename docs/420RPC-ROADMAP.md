@@ -12,34 +12,37 @@ Delivered the `420-rpc/` package, explicit architecture/service identity, execut
 
 ## RPC-1 — upstream node/provider abstraction and capability discovery — complete
 
-Delivered normalized execution and Indexer provider descriptors, runtime capability discovery, chain binding, reachable-versus-eligible status and fail-closed provider qualification. RPC-1 was fully qualified and merged before RPC-2 began.
+Delivered normalized execution and Indexer provider descriptors, runtime capability discovery, chain binding, reachable-versus-eligible status and fail-closed provider qualification.
 
 ## RPC-2 — Ethereum JSON-RPC compatibility and method profiles — complete
 
+Delivered the explicit public Ethereum JSON-RPC method catalogue, metadata/read/submit/subscription profiles, per-method capability requirements, raw signed transaction submission, WebSocket compatibility, and fail-closed exclusion of unknown, signing/account and privileged methods.
+
+## RPC-3 — routing, upstream health, circuit breaking and failover — implementation complete
+
 Delivered:
 
-- explicit public Ethereum JSON-RPC method catalogue;
-- metadata, read, submit and subscription profiles;
-- per-method transport requirements;
-- per-method required upstream capabilities;
-- explicit mutation and user-signature semantics;
-- canonical wallet/dApp read methods for blocks, transactions, receipts, logs, state, calls and fee helpers;
-- raw signed transaction submission via `eth_sendRawTransaction`;
-- WebSocket subscription compatibility contract;
-- fail-closed unknown-method behavior;
-- exclusion of node-managed signing/account methods;
-- exclusion of privileged Engine/admin/personal/debug/miner/txpool namespaces;
-- intersection of method compatibility with RPC-1 provider discovery;
-- deterministic profile and hostile-state tests;
-- compatibility documentation for later routing and policy phases.
+- deterministic provider composition from RPC-1 descriptor/discovery evidence plus gateway-local health state;
+- fail-closed descriptor/discovery/health identity validation;
+- RPC-2 method-aware candidate filtering;
+- HTTP(S) versus WebSocket transport-aware provider selection;
+- deterministic candidate ordering by circuit state, configured priority and provider ID;
+- independent closed/open/half-open circuit breakers;
+- positive-integer failure-threshold and cooldown validation;
+- threshold-based circuit opening and cooldown-based half-open probing;
+- success recovery and immediate half-open failure reopening;
+- read/metadata failover to the next prequalified candidate;
+- no automatic cross-provider replay for `eth_sendRawTransaction` after ambiguous dispatch;
+- no transparent established-subscription failover before RPC-7 owns subscription lifecycle;
+- hostile-state tests covering ineligible providers, missing capabilities, open circuits, transport mismatch, identity mismatch and unsupported methods;
+- operator-facing routing/failover documentation.
 
-RPC-2 defines compatibility, not routing. RPC-3 owns provider selection/failover, RPC-4 owns freshness/finality safety, RPC-5 owns request-policy enforcement, and RPC-7 owns subscription lifecycle.
+RPC-3 owns provider selection and availability behavior only. RPC-4 will add chain freshness and finality-safety constraints; RPC-5 adds request policy; RPC-7 owns subscription lifecycle.
 
-Exit gate: RPC-2 implementation is complete; merge requires the exact final head to pass 420RPC, docs and repository-wide qualification and remain reconciled with current `main`.
+Exit gate: implementation is complete. Merge requires the exact final head to pass 420RPC, docs and repository-wide qualification and remain reconciled with current `main`.
 
 ## Remaining phases
 
-- **RPC-3:** routing, upstream health, circuit breaking and failover.
 - **RPC-4:** chain identity, freshness and finality safety.
 - **RPC-5:** request validation, method policy and privileged-method exclusion.
 - **RPC-6:** rate limits, quotas, batch/resource bounds and abuse protection.
@@ -52,4 +55,4 @@ Exit gate: RPC-2 implementation is complete; merge requires the exact final head
 
 ## Authority rule
 
-420RPC may influence availability, compatibility and routing but never determines canonical blocks, transaction validity, ownership, balances, protocol state, consensus, safe/finalized checkpoints or governance outcomes. Those remain owned by the chain and the relevant canonical contracts. A public method profile is a gateway exposure decision, not protocol authority.
+420RPC may influence availability, compatibility and routing but never determines canonical blocks, transaction validity, ownership, balances, protocol state, consensus, safe/finalized checkpoints or governance outcomes. Circuit state is local gateway operational state, not chain state. If every eligible provider is unhealthy, unavailable or unsafe, 420RPC fails closed rather than manufacturing authority or routing to an invalid provider.

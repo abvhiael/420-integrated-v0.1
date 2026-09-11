@@ -1,0 +1,8 @@
+{
+  "schemaVersion": "1.0.0",
+  "templates": [
+    {"id":"sdk-basic","description":"Minimal read-only @420/sdk starter","source":"developer-hub/templates/starters/sdk-basic"},
+    {"id":"wallet-aware","description":"Wallet-aware starter that keeps signing in 420 Wallet","source":"developer-hub/templates/starters/wallet-aware"},
+    {"id":"protocol-reader","description":"Canonical contract/service discovery starter","source":"developer-hub/templates/starters/protocol-reader"}
+  ]
+}

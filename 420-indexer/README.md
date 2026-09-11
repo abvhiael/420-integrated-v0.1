@@ -78,10 +78,10 @@ Slices:
 - **IDX-8.1 — replayable event-stream contract — complete:** stable event envelopes and IDs, opaque cursor replay, public-API-only dependency, protocol event filtering and provenance preservation.
 - **IDX-8.2 — subscription/watch matching — complete:** deterministic opt-in matching by chain, protocol, event, topic, object key, lifecycle state and contract address; empty selector sets fail closed; private subscription state remains outside index projections.
 - **IDX-8.3 — delivery queue and retry semantics — complete:** deterministic deduplication keys, idempotent enqueue, provider-neutral handoff records, bounded exponential retry/backoff, dead-letter state, priority/severity metadata, explicit rate-limit decisions and non-authoritative delivery records.
-- **IDX-8.4 — reorg/finality delivery semantics:** supersession/retraction signals for replaced non-finalized events and immutable finalized-history behavior.
+- **IDX-8.4 — reorg/finality delivery semantics — complete:** append-only finalization, retraction and supersession signals; non-finalized events may be retracted or superseded; finalized event history is immutable; replacement events retain their own fork-sensitive identities; cross-chain and conflicting replacements fail closed.
 - **IDX-8.5 — 420Notifications integration and qualification:** consumer adapter, end-to-end replay/restart tests, failure isolation and documentation.
 
-IDX-8.1 through IDX-8.3 consume only the stable public projection boundary. Subscription configuration and delivery queue state are delivery policy rather than canonical or indexed protocol state. Duplicate handoffs collapse to the same deterministic deduplication key, retries are bounded, and exhausted deliveries move to dead-letter state instead of retrying forever.
+IDX-8.1 through IDX-8.4 consume only the stable public projection boundary. Subscription configuration, delivery queue state and delivery-time canonicality tracking are presentation/delivery policy rather than canonical or indexed protocol state. Reorg handling emits append-only signals instead of rewriting prior envelopes, while finalized events cannot be retracted or superseded.
 
 ## Authority boundary
 

@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { loadNetworkManifest420, discoverNetwork420 } from '../../../developer-hub/src/network-discovery.mjs';
 import { createContractCatalogue420 } from '../../../developer-hub/src/contract-catalogue.mjs';
-import { createSdk420 } from '../../420-sdk/dist/index.js';
+import { createSdk420 } from '@420/sdk';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(here, '../../..');

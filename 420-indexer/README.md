@@ -93,14 +93,14 @@ Completed slices:
 
 - **IDX-9.1 — runtime lifecycle and readiness:** explicit starting/serving/draining/failed state, stale-ingest detection, source-head lag reporting, and fail-closed readiness semantics.
 - **IDX-9.2 — graceful shutdown and bounded work:** stop admission before shutdown, drain already accepted work, reject new ingest runs during drain, preserve the existing per-run block bound, enforce a hard drain deadline, and fail runtime closed on shutdown timeout.
+- **IDX-9.3 — observability and operational telemetry:** exported aggregate telemetry for ingest runs/failures, processed blocks, reorg recovery depth, indexed/source head lag, work pressure/rejections, shutdown timeouts, delivery enqueue/attempt/success/failure/dead-letter totals and delivery queue pressure. Telemetry is optional, non-authoritative, and excludes event fields, destinations, subscription IDs, addresses, transaction hashes and private payloads.
 
 Remaining slices:
 
-- **IDX-9.3 — observability and operational telemetry:** structured counters/gauges for ingest progress, lag, retries, reorgs, delivery failures and queue pressure with no private payload leakage.
 - **IDX-9.4 — durable recovery invariants:** close restart-durability gaps around canonical history/reorg recovery and strengthen atomicity between projection progress and recovery metadata.
 - **IDX-9.5 — failure injection and recovery qualification:** restart, RPC outage, stale-head, database interruption, reorg and dependency-failure scenarios with operator-facing recovery guidance.
 
-`/health` remains a process-liveness probe; `/ready` is the traffic-admission gate when runtime state is supplied. Runtime and shutdown state remain local and non-authoritative. Graceful shutdown changes service admission and lifecycle only; it never changes canonical chain or protocol state.
+`/health` remains a process-liveness probe; `/ready` is the traffic-admission gate when runtime state is supplied. Runtime, shutdown and telemetry state remain local and non-authoritative. Operational telemetry is aggregate-only and must not become a side channel for private notification or protocol payload data.
 
 ## Authority boundary
 
@@ -112,4 +112,4 @@ Remaining slices:
 
 ## Next phase
 
-Continue IDX-9 with observability and operational telemetry, then durable recovery and failure-injection qualification before IDX-10 testnet qualification.
+Continue IDX-9 with durable recovery invariants, then failure-injection qualification before IDX-10 testnet qualification.

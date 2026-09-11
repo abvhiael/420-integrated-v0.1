@@ -4,20 +4,15 @@
 
 The source for this site lives in the `docs/` directory of the main 420 Integrated repository. The rendered site is a presentation and discovery layer; repository-controlled documentation remains authoritative.
 
-## Start here
+## Choose what you want to do
 
-Use the documentation according to what you are trying to do:
-
-- **New users** — learn what 420 Integrated is, set up 420 Wallet, receive and send `$420`, connect applications, and understand signing and permissions.
-- **Developers** — integrate contracts, RPC, SDKs, 420Indexer, Wallet, storage, AI, bridge, and game infrastructure.
-- **Validators and operators** — install, configure, monitor, recover, and maintain network infrastructure.
-- **Architects and reviewers** — inspect chain, consensus, protocol, infrastructure, security, governance, and application architecture.
-
-## Current documentation foundation
-
-DOC-0 established the documentation taxonomy, application documentation contract, Architecture Decision Record format, diagram conventions, terminology rules, and contribution requirements.
-
-DOC-1 builds the public 420Docs site on top of that foundation.
+- [Get Started](getting-started/index.md) — learn what 420 Integrated is, set up 420 Wallet, receive or acquire `$420`, make a first transaction, and learn security basics.
+- [Use 420 Integrated](users/index.md) — complete day-to-day tasks such as sending funds, connecting dApps, signing transactions, managing permissions, bridging, staking, and governance.
+- [Build on 420 Integrated](developers/index.md) — integrate contracts, RPC, SDKs, 420Indexer, Wallet, storage, AI, bridge, and game infrastructure.
+- [Operate 420 Integrated](operators/index.md) — run validators, nodes, RPC endpoints, storage/resource services, compute providers, gateways, indexers, and oracle infrastructure.
+- [Architecture](architecture/index.md) — inspect chain, consensus, protocol, infrastructure, application, security, governance, and trust-boundary architecture.
+- [Reference](reference/index.md) — find exact chain IDs, network configuration, deployed addresses, constants, events, errors, and canonical terminology.
+- [Troubleshooting](troubleshooting/index.md) — diagnose failures and follow safe recovery procedures.
 
 ## Documentation principles
 
@@ -30,10 +25,8 @@ DOC-1 builds the public 420Docs site on top of that foundation.
 - reviewable as source-controlled Markdown;
 - expandable as new applications and protocols join the ecosystem.
 
-## Architecture
+## Documentation project
 
-See the [Architecture Documentation](architecture/index.md) for the canonical system-level architecture taxonomy and requirements.
+DOC-0 established the taxonomy, application documentation contract, Architecture Decision Record format, diagram conventions, terminology rules, and contribution requirements. DOC-1 is building the public site, navigation, publication pipeline, and repository entry points.
 
-## Contributing
-
-Documentation changes follow the [Documentation Contribution Policy](contributing/documentation.md) and [Style Guide](contributing/style-guide.md).
+See the [Documentation Roadmap](DOCS-ROADMAP.md), [Documentation Contribution Policy](contributing/documentation.md), and [Style Guide](contributing/style-guide.md).

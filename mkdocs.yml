@@ -9,9 +9,21 @@ site_dir: site
 
 nav:
   - Home: index.md
+  - Get Started:
+      - Overview: getting-started/index.md
+  - Use:
+      - Overview: users/index.md
+  - Build:
+      - Overview: developers/index.md
+  - Operate:
+      - Overview: operators/index.md
   - Architecture:
       - Overview: architecture/index.md
       - Architecture Decisions: architecture/decisions/README.md
+  - Reference:
+      - Overview: reference/index.md
+  - Troubleshooting:
+      - Overview: troubleshooting/index.md
   - Documentation Project:
       - Roadmap: DOCS-ROADMAP.md
       - Contribution Policy: contributing/documentation.md
@@ -27,6 +39,7 @@ theme:
     - navigation.sections
     - navigation.top
     - navigation.tracking
+    - navigation.indexes
     - content.code.copy
     - search.suggest
     - search.highlight

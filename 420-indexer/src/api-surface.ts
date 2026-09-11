@@ -14,6 +14,15 @@ import {
 import { logDto420, type LogDto420, type ReceiptDto420 } from './receipt-log-dto.js';
 import { receiptByHash420 } from './receipt-log-service.js';
 import { protocolObjectState420 } from './protocol-object-service.js';
+import {
+  indexerHealth420,
+  indexerReadiness420,
+  indexerStatus420,
+  type IndexerHealthDto420,
+  type IndexerReadinessDto420,
+  type IndexerStatusDto420
+} from './operational-api.js';
+import type { FinalityPolicy420 } from './indexing.js';
 import type { QueryRow420 } from './query-service.js';
 import { IndexerQueryService420 } from './query-service.js';
 
@@ -52,6 +61,9 @@ export interface SearchResult420 {
 
 export interface IndexerPublicApi420 {
   readonly version: typeof INDEXER_API_VERSION_420;
+  health(): Promise<IndexerHealthDto420>;
+  readiness(chainId: bigint): Promise<IndexerReadinessDto420>;
+  status(chainId: bigint): Promise<IndexerStatusDto420>;
   blocks(chainId: bigint, request?: PageRequest420): Promise<QueryPage420<BlockDto420>>;
   block(chainId: bigint, id: string): Promise<BlockDto420 | null>;
   transactions(chainId: bigint, request?: TransactionPageRequest420): Promise<QueryPage420<TransactionDto420>>;
@@ -78,7 +90,22 @@ function searchResult420(row: QueryRow420): SearchResult420 {
 export class IndexerPublicApiAdapter420 implements IndexerPublicApi420 {
   readonly version = INDEXER_API_VERSION_420;
 
-  constructor(readonly service: IndexerQueryService420) {}
+  constructor(
+    readonly service: IndexerQueryService420,
+    readonly finalityPolicy: FinalityPolicy420 = { mode: 'head' }
+  ) {}
+
+  async health(): Promise<IndexerHealthDto420> {
+    return indexerHealth420();
+  }
+
+  readiness(chainId: bigint): Promise<IndexerReadinessDto420> {
+    return indexerReadiness420(this.service, chainId);
+  }
+
+  status(chainId: bigint): Promise<IndexerStatusDto420> {
+    return indexerStatus420(this.service, chainId, this.finalityPolicy);
+  }
 
   blocks(chainId: bigint, request: PageRequest420 = {}): Promise<QueryPage420<BlockDto420>> {
     return this.service.publicBlocks(chainId, request);

@@ -1,0 +1,35 @@
+name: 420 Developer Hub
+
+on:
+  pull_request:
+    paths:
+      - 'developer-hub/**'
+      - 'packages/420-sdk/**'
+      - 'docs/DEVELOPER-HUB-DEVHUB-*.md'
+      - '.github/workflows/developer-hub.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'developer-hub/**'
+      - 'packages/420-sdk/**'
+      - 'docs/DEVELOPER-HUB-DEVHUB-*.md'
+      - '.github/workflows/developer-hub.yml'
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test Developer Hub runtime
+        working-directory: developer-hub
+        run: npm test
+      - name: Install SDK build dependency
+        working-directory: packages/420-sdk
+        run: npm install --no-audit --no-fund
+      - name: Test shared TypeScript SDK
+        working-directory: packages/420-sdk
+        run: npm test

@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	explorerservice "github.com/420integrated/420-integrated/explorer/service"
+	explorerweb "github.com/420integrated/420-integrated/explorer/web"
 )
 
 type Server struct { service *explorerservice.Service; mux *http.ServeMux }
@@ -27,6 +28,7 @@ func (s *Server) routes(){
 	s.mux.HandleFunc("GET /v1/services/{service}/versions/{version}",s.handleServiceVersion)
 	s.mux.HandleFunc("GET /v1/assets/activity",s.handleAssetActivity)
 	s.mux.HandleFunc("GET /v1/consensus",s.handleConsensus)
+	s.mux.Handle("/", explorerweb.Handler())
 }
 func (s *Server) handleStatus(w http.ResponseWriter,r *http.Request){status,err:=s.service.NetworkStatus(r.Context());if err!=nil{issue:=operationalIssue(err);if issue.Retryable{w.Header().Set("Retry-After","15")};writeJSON(w,explorerErrorStatus(err),statusFailureResponse{Status:status,Issue:issue});return};writeJSON(w,http.StatusOK,status)}
 func (s *Server) handleBlocks(w http.ResponseWriter,r *http.Request){var limit uint64;var err error;if raw:=strings.TrimSpace(r.URL.Query().Get("limit"));raw!=""{limit,err=strconv.ParseUint(raw,10,32);if err!=nil||limit==0{writeError(w,http.StatusBadRequest,"invalid limit");return}};page,err:=s.service.BlockPage(r.Context(),uint32(limit),r.URL.Query().Get("cursor"));if err!=nil{writeError(w,explorerErrorStatus(err),err.Error());return};writeJSON(w,http.StatusOK,page)}

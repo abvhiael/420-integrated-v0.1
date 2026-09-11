@@ -14,7 +14,7 @@ RPC-0 established the non-negotiable service contract: chain ID 420, Engine isol
 
 RPC-1 established normalized execution/Indexer provider descriptors, chain-bound runtime capability discovery, reachable-versus-eligible status and fail-closed provider qualification.
 
-## RPC-2 — Ethereum JSON-RPC compatibility and method profiles — in progress
+## RPC-2 — Ethereum JSON-RPC compatibility and method profiles — complete
 
 RPC-2 defines an explicit public compatibility catalogue rather than blindly proxying whatever methods an upstream happens to expose:
 
@@ -31,14 +31,14 @@ RPC-2 defines an explicit public compatibility catalogue rather than blindly pro
 
 ### RPC-2 authority boundary
 
-The method catalogue defines what the gateway is willing to serve. It does not decide transaction validity, fork choice, finality or canonical state. `eth_sendRawTransaction` forwards already-signed bytes to an eligible execution provider; 420RPC never signs or rewrites them. RPC-4 and RPC-5 will later add freshness/finality safety and request-policy enforcement around this compatibility contract.
+The method catalogue defines what the gateway is willing to serve. It does not decide transaction validity, fork choice, finality or canonical state. `eth_sendRawTransaction` forwards already-signed bytes to an eligible execution provider; 420RPC never signs or rewrites them. RPC-4 and RPC-5 add freshness/finality safety and request-policy enforcement around this compatibility contract.
 
 ## Roadmap
 
 - **RPC-0 — complete:** architecture, authority boundaries, threat model, package layout and qualification contract.
 - **RPC-1 — complete:** upstream node/provider abstraction and capability discovery.
-- **RPC-2 — in progress:** canonical Ethereum JSON-RPC compatibility and method profiles.
-- **RPC-3:** routing, health-aware upstream selection and failover.
+- **RPC-2 — complete:** canonical Ethereum JSON-RPC compatibility and method profiles.
+- **RPC-3 — next:** routing, health-aware upstream selection and failover.
 - **RPC-4:** chain identity, freshness and finality-safety enforcement.
 - **RPC-5:** request validation, method policy and privileged-surface exclusion.
 - **RPC-6:** rate limiting, quotas, resource bounds and abuse controls.
@@ -65,4 +65,4 @@ The method catalogue defines what the gateway is willing to serve. It does not d
 
 ## Next phase
 
-After RPC-2 is reconciled, qualified and merged, RPC-3 will implement routing, health-aware upstream selection, circuit breaking and failover.
+RPC-3 will implement routing, health-aware upstream selection, circuit breaking and failover after RPC-2 is reconciled, qualified and merged to `main`.

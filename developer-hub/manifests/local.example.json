@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "1.0.0",
+  "network": {
+    "name": "420 Local Devnet",
+    "environment": "local",
+    "chainId": "420"
+  },
+  "nativeCurrency": {
+    "name": "420",
+    "symbol": "420",
+    "decimals": 18
+  },
+  "rpc": {
+    "http": ["http://127.0.0.1:8545"],
+    "websocket": ["ws://127.0.0.1:8545"]
+  },
+  "services": {
+    "explorer": "http://127.0.0.1:4201",
+    "indexer": "http://127.0.0.1:4202",
+    "verify": "http://127.0.0.1:4203",
+    "status": "http://127.0.0.1:4204",
+    "faucet": "http://127.0.0.1:4205"
+  },
+  "contracts": {
+    "Registry420": {
+      "address": "0x0000000000000000000000000000000000000420",
+      "source": "deployment-manifest",
+      "version": "local-example"
+    }
+  }
+}

@@ -10,6 +10,7 @@ This directory is the canonical home for system-level architecture documentation
 - [System dependency map](dependency-map.md) — authoritative, derived, replaceable, and external dependencies; failure containment; dependency direction; and recovery ordering.
 - [Trust-boundary model](trust-boundary-model.md) — custody, protocol, governance, provider, external-system, operator, and application trust crossings plus validation and compromise-containment rules.
 - [Chain architecture](chain/index.md) — execution, accounts, transactions, blocks/state, gas/fees, native `$420`, and network configuration.
+- [Consensus architecture](consensus/index.md) — validators, committees/cohorts, proposer scheduling, epochs, QCs/finality, rewards, slashing, failure, and recovery.
 - [Architecture Decision Records](decisions/README.md) — accepted, proposed, superseded, and deprecated architectural decisions.
 
 ## Purpose

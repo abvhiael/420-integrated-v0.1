@@ -49,7 +49,7 @@ Implemented:
 
 Query contracts are chain-scoped and operate only on rebuildable index projections. Canonical protocol state remains on-chain.
 
-## IDX-7 — public/index-consumer API — IDX-7.4 complete
+## IDX-7 — public/index-consumer API — complete
 
 IDX-7 exposes the stable v1 consumer boundary for 420Explorer, 420Search, 420Analytics, 420Wallet, 420Notifications, and the Developer Hub.
 
@@ -69,6 +69,22 @@ The completed IDX-7.4 surface includes:
 
 See `docs/420INDEXER-API-V1.md` for the complete route table and stability contract.
 
+## IDX-8 — notification/event-stream delivery — complete
+
+IDX-8 provides replayable, non-authoritative notification delivery primitives over the qualified public projection API.
+
+Completed slices:
+
+- **IDX-8.1 — replayable event-stream contract:** stable fork-sensitive event IDs, provenance-preserving envelopes, opaque cursor replay and public-API-only dependency.
+- **IDX-8.2 — subscription/watch matching:** deterministic opt-in matching by chain, protocol, event, topic, object key, lifecycle state and contract address; private subscription state remains outside index projections.
+- **IDX-8.3 — delivery queue and retry semantics:** deterministic deduplication, idempotent enqueue, provider-neutral handoffs, bounded retry/backoff, dead-letter state, priority/severity and rate limiting.
+- **IDX-8.4 — reorg/finality delivery semantics:** append-only finalization/retraction/supersession signals, immutable finalized history and distinct replacement-event identities.
+- **IDX-8.5 — 420Notifications integration and qualification:** exported consumer adapter, consumer-owned replay checkpoints, restart/resume support, deterministic replay idempotency, failure isolation, canonicality-update mapping and closeout documentation.
+
+IDX-8 consumes only stable public projection/event surfaces. Subscription configuration, replay checkpoints, delivery queues and canonicality tracking are presentation/delivery state and remain `authoritative: false`. A malformed replay batch fails closed before checkpoint advancement. Individual notification enqueue failures do not block other subscriptions, replay progress or protocol execution.
+
+See `docs/420NOTIFICATIONS.md` for the notification integration, privacy, replay and reliability contract.
+
 ## Authority boundary
 
 420Indexer is never authoritative for balances, ownership, registrations, settlements, rights, governance outcomes, bridge state, or protocol eligibility. Those remain canonical on-chain. All indexed views are rebuildable from canonical chain history plus deployment and ABI manifests.
@@ -79,4 +95,4 @@ See `docs/420INDEXER-API-V1.md` for the complete route table and stability contr
 
 ## Next phase
 
-After IDX-7 closeout, continue with IDX-8 notification/event-stream delivery over the qualified public projection surface, followed by IDX-9 operational hardening and IDX-10 testnet qualification.
+Proceed to IDX-9 operational hardening, then IDX-10 testnet qualification.

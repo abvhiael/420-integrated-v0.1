@@ -21,3 +21,8 @@ export * from './operational-api.js';
 export * from './api-contract.js';
 export * from './api-surface.js';
 export * from './http-transport.js';
+export * from './event-stream.js';
+export * from './event-subscription.js';
+export * from './event-delivery.js';
+export * from './event-canonicality.js';
+export * from './notifications-adapter.js';

@@ -48,6 +48,10 @@ test('faucet requires manifest-discovered faucet capability and endpoint', () =>
     () => createFaucetClient420({ network: network420({ service: () => null }), transport: { request: async () => ({}) } }),
     /endpoint is unavailable/
   );
+  assert.throws(
+    () => createFaucetClient420({ network: network420({ service: () => 'file:///tmp/faucet' }), transport: { request: async () => ({}) } }),
+    /must use HTTP\(S\)/
+  );
 });
 
 test('faucet request uses only the canonical manifest endpoint and validated address', async () => {

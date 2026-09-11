@@ -2,6 +2,7 @@ import type { ChainSource420, IndexerBlock, IndexerLog, IndexerReceipt, IndexerT
 import type { CheckpointStore420 } from './checkpoint-store.js';
 import { assertCheckpointContinuation420, assertFinalityPolicy420, checkpointFromBlock420, normalizeLogs420, safeHead420, type FinalityPolicy420, type IndexCheckpoint420 } from './indexing.js';
 import { MemoryCanonicalHistoryStore420, recoverCanonicalAncestry420, type CanonicalHistoryStore420 } from './reorg.js';
+import type { IndexerOperationalTelemetry420 } from './operational-telemetry.js';
 import type { IndexerWorkController420 } from './work-controller.js';
 
 export interface IndexedBlockBatch420 {
@@ -23,7 +24,8 @@ export class IndexerIngestor420 {
     readonly consumer: BlockConsumer420,
     readonly options: IngestionOptions420,
     history?: CanonicalHistoryStore420,
-    readonly workController?: IndexerWorkController420
+    readonly workController?: IndexerWorkController420,
+    readonly telemetry?: IndexerOperationalTelemetry420
   ) {
     this.history = history ?? new MemoryCanonicalHistoryStore420();
     assertFinalityPolicy420(options.finality);
@@ -81,9 +83,17 @@ export class IndexerIngestor420 {
     }
     return { chainId, sourceId: this.source.sourceId, safeHead, processed, firstBlock, lastBlock, checkpoint, recoveredReorgDepth };
   }
-  runOnce(): Promise<IngestionRun420> {
-    return this.workController
-      ? this.workController.run(() => this.runOnceInner())
-      : this.runOnceInner();
+  async runOnce(): Promise<IngestionRun420> {
+    try {
+      const run = await (this.workController
+        ? this.workController.run(() => this.runOnceInner())
+        : this.runOnceInner());
+      this.telemetry?.recordIngestRun(run.processed, run.recoveredReorgDepth);
+      this.telemetry?.setHeads(run.checkpoint?.blockNumber ?? null, run.safeHead);
+      return run;
+    } catch (error) {
+      this.telemetry?.recordIngestFailure();
+      throw error;
+    }
   }
 }

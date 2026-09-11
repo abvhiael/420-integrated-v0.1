@@ -1,11 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, rm } from 'node:fs/promises';
+import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 const repoRoot=resolve(import.meta.dirname,'../../..'); const cli=resolve(repoRoot,'packages/420-cli/bin/420.mjs');
 function run(args,cwd=repoRoot){return spawnSync(process.execPath,[cli,...args],{cwd,encoding:'utf8'});} function json(cp){assert.equal(cp.status,0,cp.stderr); return JSON.parse(cp.stdout);}
+async function deploymentRequestFile420(dir){const path=resolve(dir,'deploy.json'); await writeFile(path,JSON.stringify({schemaVersion:'1.0.0',project:'cli-test',chainId:'420',artifact:{contract:'Example420',path:'contracts/out/Example420.sol/Example420.json',sha256:'a'.repeat(64)},deployer:'0x1111111111111111111111111111111111111111',executor:'420-wallet',constructorArgs:[],requestVerification:true,requestRegistration:false})); return path;}
 test('version reports the CLI package identity',()=>{assert.equal(json(run(['version'])).name,'@420/cli');});
 test('network consumes canonical DEVHUB network discovery',()=>{const output=json(run(['network'])); assert.equal(output.environment,'local'); assert.equal(output.chainId,'420');});
 test('contract lookup consumes the canonical contract catalogue',()=>{assert.equal(json(run(['contract','ProtocolRegistry'])).verified,true);});
@@ -16,4 +17,6 @@ test('templates lists DEVHUB-7 starters',()=>{assert.deepEqual(json(run(['templa
 test('create delegates to DEVHUB-7 scaffolder',async()=>{const dir=await mkdtemp(resolve(tmpdir(),'cli420-create-')); try{const cp=run(['create','sdk-basic','demo'],dir); assert.equal(cp.status,0,cp.stderr);} finally{await rm(dir,{recursive:true,force:true});}});
 test('test-account creates an external-custody descriptor without secret material',()=>{const output=json(run(['test-account','0x1111111111111111111111111111111111111111','ci'])); assert.equal(output.label,'ci'); assert.equal(output.custody,'external-wallet'); assert.equal(output.secretMaterialManaged,false);});
 test('faucet request fails closed on the default local manifest',()=>{const cp=run(['faucet','request','0x1111111111111111111111111111111111111111']); assert.notEqual(cp.status,0); assert.match(cp.stderr,/testnet-only/);});
-test('CLI exposes no private-key or mnemonic command surface',()=>{const cp=run(['help']); assert.equal(cp.status,0); assert.doesNotMatch(cp.stdout,/private[- ]?key|mnemonic|seed phrase/i); assert.match(cp.stdout,/420 create TEMPLATE NAME/); assert.match(cp.stdout,/420 faucet request ADDRESS/);});
+test('deploy plan binds request to canonical selected network without executing',async()=>{const dir=await mkdtemp(resolve(tmpdir(),'cli420-deploy-')); try{const request=await deploymentRequestFile420(dir); const output=json(run(['deploy','plan',request])); assert.equal(output.status,'READY_FOR_EXTERNAL_SIGNER'); assert.equal(output.network.chainId,'420'); assert.equal(output.network.rpc,'http://127.0.0.1:8545'); assert.equal(output.secretMaterialManaged,false); assert.equal(output.canonicalDeploymentProof,false);} finally{await rm(dir,{recursive:true,force:true});}});
+test('deploy view exposes signer handoff as the next action',async()=>{const dir=await mkdtemp(resolve(tmpdir(),'cli420-deploy-view-')); try{const request=await deploymentRequestFile420(dir); const output=json(run(['deploy','view',request])); assert.equal(output.nextAction,'HAND_OFF_TO_EXTERNAL_SIGNER'); assert.equal(output.signerBoundary,'420-wallet'); assert.equal(output.secretMaterialManaged,false);} finally{await rm(dir,{recursive:true,force:true});}});
+test('CLI exposes no private-key or mnemonic command surface',()=>{const cp=run(['help']); assert.equal(cp.status,0); assert.doesNotMatch(cp.stdout,/private[- ]?key|mnemonic|seed phrase/i); assert.match(cp.stdout,/420 create TEMPLATE NAME/); assert.match(cp.stdout,/420 faucet request ADDRESS/); assert.match(cp.stdout,/420 deploy plan REQUEST_JSON/);});

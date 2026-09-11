@@ -1,6 +1,7 @@
 import type { Hex, IndexerLog, IndexerTransaction } from './chain-source.js';
 
 export const ZERO_ADDRESS_420 = '0x0000000000000000000000000000000000000000' as Hex;
+export const NATIVE_TRANSFER_LOG_INDEX_420 = -1;
 export const ERC_TRANSFER_TOPIC_420 = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef' as Hex;
 export const ERC1155_TRANSFER_SINGLE_TOPIC_420 = '0xc3d58168c5ae7397731d063d5bbf3d657854427343f4c083240f7aacaa2d0f62' as Hex;
 export const ERC1155_TRANSFER_BATCH_TOPIC_420 = '0x4a39dc06d4c0dbc64b70af90fd698a233a518aa5d07e595d983b8c0526c8f7fb' as Hex;
@@ -16,7 +17,7 @@ export interface AssetTransfer420 {
   amount: bigint;
   transactionHash: Hex;
   blockNumber: bigint;
-  logIndex: number | null;
+  logIndex: number;
 }
 
 function word(data: Hex, index: number): bigint {
@@ -74,5 +75,5 @@ export function decodeAssetLog420(log: IndexerLog): AssetTransfer420[] {
 
 export function decodeNativeTransfer420(transaction: IndexerTransaction): AssetTransfer420 | null {
   if (transaction.value === 0n || transaction.to === null) return null;
-  return { kind: 'native', contractAddress: null, tokenId: null, from: transaction.from, to: transaction.to, amount: transaction.value, transactionHash: transaction.hash, blockNumber: transaction.blockNumber, logIndex: null };
+  return { kind: 'native', contractAddress: null, tokenId: null, from: transaction.from, to: transaction.to, amount: transaction.value, transactionHash: transaction.hash, blockNumber: transaction.blockNumber, logIndex: NATIVE_TRANSFER_LOG_INDEX_420 };
 }

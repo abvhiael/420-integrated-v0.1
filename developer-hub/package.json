@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "test": "node --test test/*.test.mjs",
+    "dashboard": "node dashboard/server.mjs",
     "devnet:plan": "node devnet/bootstrap.mjs plan",
     "devnet:doctor": "node devnet/bootstrap.mjs doctor",
     "devnet:prepare": "node devnet/bootstrap.mjs prepare",

@@ -30,6 +30,34 @@ func TestHandlerServesStaticAssets(t *testing.T) {
 	}
 }
 
+func TestExplorerScriptContainsQualifiedCoreDetailViews(t *testing.T) {
+	rr := httptest.NewRecorder()
+	Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodGet, "/app.js", nil))
+	if rr.Code != http.StatusOK { t.Fatalf("status=%d", rr.Code) }
+	body := rr.Body.String()
+	for _, marker := range []string{
+		"Transaction history",
+		"Direction",
+		"Created contract",
+		"Runtime bytecode",
+		"Deployment transaction",
+		"Block hash",
+		"logTable(logs)",
+	} {
+		if !strings.Contains(body, marker) {
+			t.Fatalf("app.js missing EXP-5.2 marker %q", marker)
+		}
+	}
+	for _, endpoint := range []string{"/v1/blocks/", "/v1/transactions/", "/v1/addresses/", "/v1/contracts/"} {
+		if !strings.Contains(body, endpoint) {
+			t.Fatalf("app.js missing qualified endpoint %q", endpoint)
+		}
+	}
+	if strings.Contains(body, "eth_get") || strings.Contains(body, "INDEXER_RPC_URL") {
+		t.Fatal("frontend must not introduce direct RPC access")
+	}
+}
+
 func TestHandlerRejectsMutationMethods(t *testing.T) {
 	rr := httptest.NewRecorder()
 	Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodPost, "/", strings.NewReader("x")))

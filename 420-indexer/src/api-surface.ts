@@ -10,6 +10,8 @@ import {
   type AssetTransferDto420,
   type ProtocolEventDto420
 } from './public-dto.js';
+import { logDto420, type LogDto420, type ReceiptDto420 } from './receipt-log-dto.js';
+import { receiptByHash420 } from './receipt-log-service.js';
 import type { QueryRow420 } from './query-service.js';
 import { IndexerQueryService420 } from './query-service.js';
 
@@ -22,6 +24,10 @@ export interface PageRequest420 {
 }
 
 export interface TransactionPageRequest420 extends PageRequest420 {
+  address?: string;
+}
+
+export interface LogPageRequest420 extends PageRequest420 {
   address?: string;
 }
 
@@ -48,6 +54,8 @@ export interface IndexerPublicApi420 {
   block(chainId: bigint, id: string): Promise<BlockDto420 | null>;
   transactions(chainId: bigint, request?: TransactionPageRequest420): Promise<QueryPage420<TransactionDto420>>;
   transaction(chainId: bigint, hash: string): Promise<TransactionDto420 | null>;
+  receipt(chainId: bigint, hash: string): Promise<ReceiptDto420 | null>;
+  logs(chainId: bigint, request?: LogPageRequest420): Promise<QueryPage420<LogDto420>>;
   address(chainId: bigint, address: string): Promise<AddressDto420 | null>;
   assetTransfers(chainId: bigint, request?: AssetTransferPageRequest420): Promise<QueryPage420<AssetTransferDto420>>;
   protocolEvents(chainId: bigint, request?: ProtocolEventPageRequest420): Promise<QueryPage420<ProtocolEventDto420>>;
@@ -87,6 +95,15 @@ export class IndexerPublicApiAdapter420 implements IndexerPublicApi420 {
   async transaction(chainId: bigint, hash: string): Promise<TransactionDto420 | null> {
     const row = await this.service.transactionByHash(chainId, hash);
     return row ? transactionDto420(row) : null;
+  }
+
+  receipt(chainId: bigint, hash: string): Promise<ReceiptDto420 | null> {
+    return receiptByHash420(this.service, chainId, hash);
+  }
+
+  async logs(chainId: bigint, request: LogPageRequest420 = {}): Promise<QueryPage420<LogDto420>> {
+    const page = await this.service.logs(chainId, request);
+    return { items: page.items.map(logDto420), nextCursor: page.nextCursor };
   }
 
   async address(chainId: bigint, address: string): Promise<AddressDto420 | null> {

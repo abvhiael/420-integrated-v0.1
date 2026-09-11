@@ -37,7 +37,7 @@ test('core projection consumer persists a canonical block in one transaction', a
   assert.ok(db.calls.some((call) => call.sql.includes('insert into idx_checkpoints')));
 });
 
-test('rollback removes only block-scoped projections above the ancestor', async () => {
+test('rollback removes only block-scoped projections and recovery metadata above the ancestor', async () => {
   const db = new RecordingDb420();
   const consumer = new CoreProjectionConsumer420(db);
   await consumer.rollbackTo(12n);
@@ -48,6 +48,7 @@ test('rollback removes only block-scoped projections above the ancestor', async 
     'delete from idx_receipts where block_number > $1',
     'delete from idx_transactions where block_number > $1',
     'delete from idx_blocks where block_number > $1',
+    'delete from idx_canonical_history where block_number > $1',
     'delete from idx_checkpoints where block_number > $1'
   ]);
   assert.ok(!deletes.some((sql) => sql.includes('idx_addresses')));

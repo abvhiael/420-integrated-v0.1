@@ -5,6 +5,7 @@ import {
   ERC1155_TRANSFER_BATCH_TOPIC_420,
   ERC1155_TRANSFER_SINGLE_TOPIC_420,
   ERC_TRANSFER_TOPIC_420,
+  NATIVE_TRANSFER_LOG_INDEX_420,
   ZERO_ADDRESS_420,
   decodeAssetLog420,
   decodeNativeTransfer420
@@ -46,11 +47,13 @@ test('decodes ERC1155 TransferBatch arrays', () => {
   assert.deepEqual(decoded.map((x) => [x.tokenId, x.amount]), [[7n, 3n], [8n, 4n]]);
 });
 
-test('projects native $420 transfers only when value moves to an address', () => {
+test('projects native $420 transfers with the deterministic transaction-level sentinel', () => {
   const tx: IndexerTransaction = { hash: h(1n), blockHash: h(2n), blockNumber: 3n, transactionIndex: 0, from: address(1n), to: address(2n), input: '0x', value: 42n };
   const transfer = decodeNativeTransfer420(tx);
   assert.equal(transfer?.kind, 'native');
   assert.equal(transfer?.amount, 42n);
+  assert.equal(transfer?.logIndex, NATIVE_TRANSFER_LOG_INDEX_420);
+  assert.equal(NATIVE_TRANSFER_LOG_INDEX_420, -1);
   assert.equal(decodeNativeTransfer420({ ...tx, value: 0n }), null);
   assert.equal(decodeNativeTransfer420({ ...tx, to: null }), null);
 });

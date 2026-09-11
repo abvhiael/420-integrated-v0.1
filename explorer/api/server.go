@@ -60,7 +60,7 @@ func (s *Server) handleBlocks(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	page, err := s.service.Blocks(r.Context(), uint32(limit), r.URL.Query().Get("cursor"))
+	page, err := s.service.BlockPage(r.Context(), uint32(limit), r.URL.Query().Get("cursor"))
 	if err != nil {
 		writeError(w, explorerErrorStatus(err), err.Error())
 		return
@@ -74,7 +74,7 @@ func (s *Server) handleBlock(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "invalid block number")
 		return
 	}
-	view, err := s.service.Block(r.Context(), number)
+	view, err := s.service.BlockDetail(r.Context(), number)
 	if err != nil {
 		writeError(w, explorerErrorStatus(err), err.Error())
 		return

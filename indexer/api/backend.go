@@ -17,11 +17,17 @@ type ReadStore interface {
 }
 
 type assetReadStore interface { AssetTransfers(assetKey, address string) ([]model.AssetTransferRecord, error) }
+type ConsensusProvider interface { Consensus() (model.ConsensusStatus, error) }
 
-var ErrAssetQueryUnavailable = errors.New("asset transfer query unavailable")
+var (
+	ErrAssetQueryUnavailable = errors.New("asset transfer query unavailable")
+	ErrConsensusQueryUnavailable = errors.New("consensus query unavailable")
+)
 
-type StoreBackend struct { store ReadStore; catalog *decoder.Catalog }
+type StoreBackend struct { store ReadStore; catalog *decoder.Catalog; consensus ConsensusProvider }
 func NewStoreBackend(store ReadStore, catalog *decoder.Catalog) *StoreBackend { if catalog == nil { catalog = decoder.NewCatalog() }; return &StoreBackend{store: store, catalog: catalog} }
+func (b *StoreBackend) WithConsensusProvider(provider ConsensusProvider) *StoreBackend { b.consensus = provider; return b }
+func (b *StoreBackend) Consensus() (model.ConsensusStatus, error) { if b.consensus == nil { return model.ConsensusStatus{}, ErrConsensusQueryUnavailable }; return b.consensus.Consensus() }
 func (b *StoreBackend) Health() (model.Health, error) { cp, ok, err := b.store.Checkpoint(); if err != nil { return model.Health{}, err }; if !ok { return model.Health{State:"EMPTY"}, nil }; return model.Health{ChainID:cp.ChainID, IndexedHeight:cp.IndexedHeight, SafeHeight:cp.SafeHeight, FinalizedHeight:cp.FinalizedHeight, SchemaVersion:cp.SchemaVersion, State:"HEALTHY", LastIngestAt:cp.UpdatedAt}, nil }
 func (b *StoreBackend) Block(number uint64) (model.BlockRecord, bool, error) { return b.store.Block(number) }
 func (b *StoreBackend) Transaction(hash string) (model.TransactionRecord, bool, error) { return b.store.Transaction(hash) }
@@ -38,15 +44,8 @@ func (b *StoreBackend) AssetTransfers(assetKey, address string, limit uint32) (A
 	assetKey = strings.ToLower(strings.TrimSpace(assetKey)); address = strings.ToLower(strings.TrimSpace(address))
 	rows, err := reader.AssetTransfers(assetKey, address); if err != nil { return AssetTransferPage{}, err }
 	filtered := make([]model.AssetTransferRecord, 0, min(int(limit), len(rows)))
-	for _, transfer := range rows {
-		if transfer.ChainID != cp.ChainID || transfer.BlockNumber > cp.IndexedHeight { continue }
-		filtered = append(filtered, transfer)
-		if uint32(len(filtered)) == limit { break }
-	}
-	return AssetTransferPage{
-		Meta: PageMeta{ChainID:cp.ChainID, SnapshotHeight:cp.IndexedHeight, SnapshotHash:cp.IndexedHash, SafeHeight:cp.SafeHeight, FinalizedHeight:cp.FinalizedHeight, SchemaVersion:cp.SchemaVersion},
-		AssetKey: assetKey, Address: address, Transfers: filtered, CanonicalAuthority:false,
-	}, nil
+	for _, transfer := range rows { if transfer.ChainID != cp.ChainID || transfer.BlockNumber > cp.IndexedHeight { continue }; filtered = append(filtered, transfer); if uint32(len(filtered)) == limit { break } }
+	return AssetTransferPage{Meta: PageMeta{ChainID:cp.ChainID, SnapshotHeight:cp.IndexedHeight, SnapshotHash:cp.IndexedHash, SafeHeight:cp.SafeHeight, FinalizedHeight:cp.FinalizedHeight, SchemaVersion:cp.SchemaVersion}, AssetKey:assetKey, Address:address, Transfers:filtered, CanonicalAuthority:false}, nil
 }
 
 func (b *StoreBackend) Blocks(cur *Cursor, limit uint32) (BlockPage, error) {

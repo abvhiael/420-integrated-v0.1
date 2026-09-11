@@ -32,6 +32,12 @@ function requiredInteger(row: QueryRow420, field: string): number {
   throw new Error(`invalid ${field} in query row`);
 }
 
+function requiredBoolean(row: QueryRow420, field: string): boolean {
+  const value = row[field];
+  if (typeof value !== 'boolean') throw new Error(`invalid ${field} in query row`);
+  return value;
+}
+
 function requiredAssetPosition(row: QueryRow420, field: string): number {
   const value = row[field];
   if (typeof value === 'number' && Number.isSafeInteger(value) && value >= NATIVE_ASSET_TRANSFER_POSITION_420) return value;
@@ -60,6 +66,12 @@ export interface TransactionDto420 {
   to: string | null;
   valueWei: string;
   input: string;
+}
+
+export interface AddressDto420 {
+  chainId: string;
+  address: string;
+  isContract: boolean;
 }
 
 export interface AssetTransferDto420 {
@@ -97,6 +109,14 @@ export function transactionDto420(row: QueryRow420): TransactionDto420 {
     to: optionalString(row, 'to_address'),
     valueWei: requiredBigintString(row, 'value_wei'),
     input: requiredString(row, 'input')
+  };
+}
+
+export function addressDto420(row: QueryRow420): AddressDto420 {
+  return {
+    chainId: requiredBigintString(row, 'chain_id'),
+    address: requiredString(row, 'address'),
+    isContract: requiredBoolean(row, 'is_contract')
   };
 }
 

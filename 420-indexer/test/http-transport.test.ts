@@ -9,7 +9,7 @@ import type {
   TransactionPageRequest420
 } from '../src/api-surface.js';
 import { INDEXER_API_VERSION_420 } from '../src/api-surface.js';
-import type { AssetTransferDto420, BlockDto420, TransactionDto420 } from '../src/public-dto.js';
+import type { AddressDto420, AssetTransferDto420, BlockDto420, TransactionDto420 } from '../src/public-dto.js';
 import type { QueryPage420 } from '../src/query-layer.js';
 import type { QueryRow420 } from '../src/query-service.js';
 import { routeIndexerHttp420 } from '../src/http-transport.js';
@@ -23,9 +23,27 @@ class FakeApi420 implements IndexerPublicApi420 {
     return { items: [{ chainId: chainId.toString(), number: '10', hash: '0x10', parentHash: '0x09', timestamp: '1700000010' }], nextCursor: 'next-block' };
   }
 
+  async block(chainId: bigint, id: string): Promise<BlockDto420 | null> {
+    this.calls.push({ name: 'block', chainId, request: { id } });
+    if (id === 'missing') return null;
+    return { chainId: chainId.toString(), number: '10', hash: '0x10', parentHash: '0x09', timestamp: '1700000010' };
+  }
+
   async transactions(chainId: bigint, request: TransactionPageRequest420 = {}): Promise<QueryPage420<TransactionDto420>> {
     this.calls.push({ name: 'transactions', chainId, request });
     return { items: [], nextCursor: null };
+  }
+
+  async transaction(chainId: bigint, hash: string): Promise<TransactionDto420 | null> {
+    this.calls.push({ name: 'transaction', chainId, request: { hash } });
+    if (hash === 'missing') return null;
+    return { chainId: chainId.toString(), hash, blockNumber: '10', blockHash: '0x10', transactionIndex: 0, from: '0xfrom', to: '0xto', valueWei: '1', input: '0x' };
+  }
+
+  async address(chainId: bigint, address: string): Promise<AddressDto420 | null> {
+    this.calls.push({ name: 'address', chainId, request: { address } });
+    if (address === 'missing') return null;
+    return { chainId: chainId.toString(), address, isContract: false };
   }
 
   async assetTransfers(chainId: bigint, request: AssetTransferPageRequest420 = {}): Promise<QueryPage420<AssetTransferDto420>> {
@@ -53,6 +71,33 @@ test('HTTP transport routes paged block requests through the stable public API',
     apiVersion: 'v1',
     data: { items: [{ chainId: '420', number: '10', hash: '0x10', parentHash: '0x09', timestamp: '1700000010' }], nextCursor: 'next-block' }
   });
+});
+
+test('HTTP transport routes direct block, transaction and address resources', async () => {
+  const api = new FakeApi420();
+  const block = await routeIndexerHttp420(api, 'GET', '/v1/blocks/10?chainId=420');
+  const transaction = await routeIndexerHttp420(api, 'GET', '/v1/transactions/0xabc?chainId=420');
+  const address = await routeIndexerHttp420(api, 'GET', '/v1/addresses/0xdef?chainId=420');
+
+  assert.equal(block.status, 200);
+  assert.equal(transaction.status, 200);
+  assert.equal(address.status, 200);
+  assert.deepEqual(api.calls, [
+    { name: 'block', chainId: 420n, request: { id: '10' } },
+    { name: 'transaction', chainId: 420n, request: { hash: '0xabc' } },
+    { name: 'address', chainId: 420n, request: { address: '0xdef' } }
+  ]);
+});
+
+test('HTTP transport returns stable 404 envelopes for missing direct resources', async () => {
+  const api = new FakeApi420();
+  const block = await routeIndexerHttp420(api, 'GET', '/v1/blocks/missing?chainId=420');
+  const transaction = await routeIndexerHttp420(api, 'GET', '/v1/transactions/missing?chainId=420');
+  const address = await routeIndexerHttp420(api, 'GET', '/v1/addresses/missing?chainId=420');
+
+  assert.deepEqual(block.body, { apiVersion: 'v1', error: { code: 'not_found', message: 'block not found' } });
+  assert.equal(transaction.status, 404);
+  assert.equal(address.status, 404);
 });
 
 test('HTTP transport parses transaction, asset, protocol and search filters', async () => {

@@ -64,6 +64,13 @@ function pageRequest420(url: URL) {
   };
 }
 
+function pathParam420(path: string, pattern: RegExp): string | null {
+  const match = pattern.exec(path);
+  if (!match?.[1]) return null;
+  try { return decodeURIComponent(match[1]); }
+  catch { throw new Error('invalid path parameter encoding'); }
+}
+
 export async function routeIndexerHttp420(api: IndexerPublicApi420, method: string, requestUrl: string): Promise<HttpJsonResponse420> {
   if (method.toUpperCase() !== 'GET') return error420(405, 'method_not_allowed', 'only GET is supported');
 
@@ -76,6 +83,24 @@ export async function routeIndexerHttp420(api: IndexerPublicApi420, method: stri
     if (path === '/v1') return ok420({ version: api.version });
 
     const chainId = parseChainId420(url.searchParams.get('chainId'));
+
+    const blockId = pathParam420(path, /^\/v1\/blocks\/([^/]+)$/);
+    if (blockId !== null) {
+      const block = await api.block(chainId, blockId);
+      return block ? ok420(block) : error420(404, 'not_found', 'block not found');
+    }
+
+    const txHash = pathParam420(path, /^\/v1\/transactions\/([^/]+)$/);
+    if (txHash !== null) {
+      const transaction = await api.transaction(chainId, txHash);
+      return transaction ? ok420(transaction) : error420(404, 'not_found', 'transaction not found');
+    }
+
+    const addressValue = pathParam420(path, /^\/v1\/addresses\/([^/]+)$/);
+    if (addressValue !== null) {
+      const address = await api.address(chainId, addressValue);
+      return address ? ok420(address) : error420(404, 'not_found', 'address not found');
+    }
 
     if (path === '/v1/blocks') return ok420(await api.blocks(chainId, pageRequest420(url)));
     if (path === '/v1/transactions') {

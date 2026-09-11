@@ -1,5 +1,13 @@
 import type { QueryDirection420, QueryPage420 } from './query-layer.js';
-import type { BlockDto420, TransactionDto420, AssetTransferDto420 } from './public-dto.js';
+import {
+  blockDto420,
+  transactionDto420,
+  addressDto420,
+  type AddressDto420,
+  type BlockDto420,
+  type TransactionDto420,
+  type AssetTransferDto420
+} from './public-dto.js';
 import type { QueryRow420 } from './query-service.js';
 import { IndexerQueryService420 } from './query-service.js';
 
@@ -35,7 +43,10 @@ export interface SearchResult420 {
 export interface IndexerPublicApi420 {
   readonly version: typeof INDEXER_API_VERSION_420;
   blocks(chainId: bigint, request?: PageRequest420): Promise<QueryPage420<BlockDto420>>;
+  block(chainId: bigint, id: string): Promise<BlockDto420 | null>;
   transactions(chainId: bigint, request?: TransactionPageRequest420): Promise<QueryPage420<TransactionDto420>>;
+  transaction(chainId: bigint, hash: string): Promise<TransactionDto420 | null>;
+  address(chainId: bigint, address: string): Promise<AddressDto420 | null>;
   assetTransfers(chainId: bigint, request?: AssetTransferPageRequest420): Promise<QueryPage420<AssetTransferDto420>>;
   protocolEvents(chainId: bigint, request?: ProtocolEventPageRequest420): Promise<QueryPage420<QueryRow420>>;
   search(chainId: bigint, term: string, limit?: number): Promise<SearchResult420[]>;
@@ -60,8 +71,25 @@ export class IndexerPublicApiAdapter420 implements IndexerPublicApi420 {
     return this.service.publicBlocks(chainId, request);
   }
 
+  async block(chainId: bigint, id: string): Promise<BlockDto420 | null> {
+    const row = /^\d+$/.test(id)
+      ? await this.service.blockByNumber(chainId, BigInt(id))
+      : await this.service.blockByHash(chainId, id);
+    return row ? blockDto420(row) : null;
+  }
+
   transactions(chainId: bigint, request: TransactionPageRequest420 = {}): Promise<QueryPage420<TransactionDto420>> {
     return this.service.publicTransactions(chainId, request);
+  }
+
+  async transaction(chainId: bigint, hash: string): Promise<TransactionDto420 | null> {
+    const row = await this.service.transactionByHash(chainId, hash);
+    return row ? transactionDto420(row) : null;
+  }
+
+  async address(chainId: bigint, address: string): Promise<AddressDto420 | null> {
+    const row = await this.service.address(chainId, address);
+    return row ? addressDto420(row) : null;
   }
 
   assetTransfers(chainId: bigint, request: AssetTransferPageRequest420 = {}): Promise<QueryPage420<AssetTransferDto420>> {

@@ -8,10 +8,12 @@ import {
   type BlockDto420,
   type TransactionDto420,
   type AssetTransferDto420,
-  type ProtocolEventDto420
+  type ProtocolEventDto420,
+  type ProtocolObjectStateDto420
 } from './public-dto.js';
 import { logDto420, type LogDto420, type ReceiptDto420 } from './receipt-log-dto.js';
 import { receiptByHash420 } from './receipt-log-service.js';
+import { protocolObjectState420 } from './protocol-object-service.js';
 import type { QueryRow420 } from './query-service.js';
 import { IndexerQueryService420 } from './query-service.js';
 
@@ -59,6 +61,7 @@ export interface IndexerPublicApi420 {
   address(chainId: bigint, address: string): Promise<AddressDto420 | null>;
   assetTransfers(chainId: bigint, request?: AssetTransferPageRequest420): Promise<QueryPage420<AssetTransferDto420>>;
   protocolEvents(chainId: bigint, request?: ProtocolEventPageRequest420): Promise<QueryPage420<ProtocolEventDto420>>;
+  protocolObject(chainId: bigint, protocol: string, objectKey: string): Promise<ProtocolObjectStateDto420 | null>;
   search(chainId: bigint, term: string, limit?: number): Promise<SearchResult420[]>;
 }
 
@@ -118,6 +121,10 @@ export class IndexerPublicApiAdapter420 implements IndexerPublicApi420 {
   async protocolEvents(chainId: bigint, request: ProtocolEventPageRequest420 = {}): Promise<QueryPage420<ProtocolEventDto420>> {
     const page = await this.service.protocolEvents(chainId, request);
     return { items: page.items.map(protocolEventDto420), nextCursor: page.nextCursor };
+  }
+
+  protocolObject(chainId: bigint, protocol: string, objectKey: string): Promise<ProtocolObjectStateDto420 | null> {
+    return protocolObjectState420(this.service, chainId, protocol, objectKey);
   }
 
   async search(chainId: bigint, term: string, limit?: number): Promise<SearchResult420[]> {

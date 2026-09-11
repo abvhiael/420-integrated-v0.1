@@ -2,6 +2,15 @@
 
 This directory is the canonical home for system-level architecture documentation for 420 Integrated.
 
+## Start here
+
+- [System overview](system-overview.md) — top-level system layers, authority model, trust boundaries, invariants, normal transaction flow, and genesis status.
+- [System design principles](design-principles.md) — canonical architectural rules for authority, composability, provider neutrality, failure behavior, compatibility, recovery, and bounded privilege.
+- [Genesis architecture](genesis-architecture.md) — launch-time composition, canonical genesis services, frozen assumptions, replaceable providers, startup dependencies, and genesis invariants.
+- [System dependency map](dependency-map.md) — authoritative, derived, replaceable, and external dependencies; failure containment; dependency direction; and recovery ordering.
+- [Trust-boundary model](trust-boundary-model.md) — custody, protocol, governance, provider, external-system, operator, and application trust crossings plus validation and compromise-containment rules.
+- [Architecture Decision Records](decisions/README.md) — accepted, proposed, superseded, and deprecated architectural decisions.
+
 ## Purpose
 
 Architecture documentation explains how the system is designed, how components relate, where authority and trust boundaries live, and why important design choices were made. It is distinct from user guides, operator runbooks, and generated API/reference material.
@@ -39,4 +48,4 @@ Every architecture page should identify:
 
 ## Relationship to 420Docs
 
-The Markdown source in this repository is canonical. A future 420Docs site may render and index these files, but publication tooling must not become the authoritative source of architectural truth.
+The Markdown source in this repository is canonical. 420Docs renders and indexes these files, but publication tooling does not become the authoritative source of architectural truth.

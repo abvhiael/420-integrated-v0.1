@@ -19,6 +19,11 @@ nav:
       - Overview: operators/index.md
   - Architecture:
       - Overview: architecture/index.md
+      - System Overview: architecture/system-overview.md
+      - Design Principles: architecture/design-principles.md
+      - Genesis Architecture: architecture/genesis-architecture.md
+      - Dependency Map: architecture/dependency-map.md
+      - Trust Boundaries: architecture/trust-boundary-model.md
       - Architecture Decisions: architecture/decisions/README.md
   - Reference:
       - Overview: reference/index.md

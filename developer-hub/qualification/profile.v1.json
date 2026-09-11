@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "1.0.0",
+  "profileId": "devhub-security-v1",
+  "title": "420 Developer Hub security and developer qualification",
+  "canonicalAuthority": false,
+  "securityCertification": false,
+  "checks": [
+    {"id":"network-binding","category":"identity","required":true,"description":"Evidence is bound to the selected chain ID and environment."},
+    {"id":"authority-boundaries","category":"authority","required":true,"description":"Developer Hub surfaces do not claim chain, Registry, Wallet, governance, Identity, verification, or protocol authority."},
+    {"id":"secret-material","category":"secrets","required":true,"description":"Tracked evidence and reports contain no raw signing or bearer secrets."},
+    {"id":"wallet-signing-isolation","category":"wallet","required":true,"description":"Signing remains delegated to a qualified wallet/runtime boundary."},
+    {"id":"indexer-noncanonical","category":"provenance","required":true,"description":"420Indexer projections remain explicitly noncanonical."},
+    {"id":"service-auth-isolation","category":"service-auth","required":true,"description":"Off-chain service credentials confer no on-chain authority."},
+    {"id":"tests-qualified","category":"testing","required":true,"description":"Required automated qualification suites have passing evidence."},
+    {"id":"dependency-review","category":"dependencies","required":true,"description":"Dependency/release evidence is reviewed for the candidate."},
+    {"id":"production-https","category":"transport","required":true,"environments":["mainnet"],"description":"Production public service endpoints use HTTPS/WSS policy."}
+  ]
+}

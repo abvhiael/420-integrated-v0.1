@@ -56,9 +56,19 @@ Exit condition: developers, operators, and reviewers can trace how 420 Integrate
 
 Exit condition: developers, validators, operators, and reviewers can trace how 420 Integrated forms and rotates validator committees, schedules block proposers, certifies/finalizes execution payloads, accounts for consensus rewards and faults, preserves signing safety, and recovers from quorum, partition, execution, or process failures.
 
-## DOC-5 — Infrastructure documentation
+## DOC-5 — Infrastructure documentation — COMPLETE
 
-- fourtwentyd, node420, 420Indexer, RPC, gateways, storage/resource infrastructure, AI compute, oracle providers, and operational services.
+- [x] DOC-5.1 Publish the infrastructure architecture index and infrastructure overview.
+- [x] DOC-5.2 Document `fourtwentyd` process architecture, configuration, persistence, P2P, Engine dependency, signing boundary, health, startup/shutdown, and recovery.
+- [x] DOC-5.3 Document `node420` execution distribution/wrapper, pinned Geth relationship, datadir/genesis initialization, JSON-RPC, Engine API, P2P, optional services, health, and recovery.
+- [x] DOC-5.4 Document 420Indexer ingestion, canonical/finalized cursors, reorg reconciliation, projections, checkpoints, consumers, replay/rebuild, and non-authority guarantees.
+- [x] DOC-5.5 Document public RPC/WSS, private Engine transport, gateways/proxies, endpoint discovery, rate limits, failover, ingress security, and trust assumptions, including the future 420RPC integration boundary.
+- [x] DOC-5.6 Document storage/resource providers, content/proof boundaries, replication/availability, provider discovery, settlement, failure recovery, and provider neutrality.
+- [x] DOC-5.7 Document 420AI compute workers/providers, job routing, off-chain inference, on-chain commitments/economics, SLA/proof boundaries, result delivery, and failure isolation.
+- [x] DOC-5.8 Document oracle/external-provider infrastructure, provider-neutral adapters, freshness/verification, attestations, external computation, automation triggers, fallback, and replacement.
+- [x] DOC-5.9 Document metrics/logs/traces, health/readiness, alerts, 420Status/Notifications boundaries, backups, incident signals, and operator-service recovery.
+
+Exit condition: developers and operators can identify every major infrastructure service, distinguish canonical/derived/replaceable authority, deploy and connect the core node/indexing/access layers safely, understand provider-backed storage/AI/oracle boundaries, and recover infrastructure in canonical authority order without promoting operational services into protocol authority.
 
 ## DOC-6 — Wallet and user onboarding
 

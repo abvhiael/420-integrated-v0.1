@@ -24,6 +24,7 @@ export const GENESIS_PROTOCOL_BY_CONTRACT_420: Record<string, string> = {
   Names420: '420Names',
   Identity420: '420Identity',
   Stake420: '420Stake',
+  ValidatorRegistry: '420Stake',
   Governance420: '420Governance',
   GovernanceTimelock: '420Governance',
   AttentionTreasury: '420Treasury',

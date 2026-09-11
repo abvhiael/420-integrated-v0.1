@@ -36,35 +36,30 @@ Delivered JSON-RPC envelope and parameter validation, public compatibility polic
 
 Delivered weighted method admission, per-client token buckets, batch/count/byte/cost ceilings, per-client/global concurrency leases, bounded tracked-client state and fail-closed resource exhaustion behavior.
 
-## RPC-7 — WebSocket transport and subscription lifecycle — implementation complete
+### RPC-7 — WebSocket transport and subscription lifecycle — complete
+
+Delivered bounded sessions, subscription ownership/upstream binding, heartbeat and idle cleanup, queue backpressure bounds and explicit resubscription after upstream loss.
+
+## RPC-8 — 420Indexer-backed enriched/read APIs — implementation complete
 
 Delivered:
 
-- bounded WebSocket session creation with unique local session IDs;
-- heartbeat and idle-expiry tracking;
-- per-session and global subscription caps;
-- RPC-5 request validation before subscription lifecycle allocation;
-- RPC-6 resource admission for subscription setup;
-- gateway-local pending subscription IDs;
-- explicit binding from each local subscription to one `(upstreamId, upstreamSubscriptionId)` pair;
-- upstream-subscription IDs namespaced by provider identity;
-- ownership enforcement preventing cross-session unsubscribe;
-- exact-bound event delivery to the owning local subscription/session;
-- individual event-size bounds;
-- per-session queued-message and queued-byte bounds;
-- fail-closed session cleanup on backpressure exhaustion;
-- full subscription cleanup when sessions close;
-- upstream-loss invalidation that forces client resubscription instead of silently claiming gap-free failover;
-- lifecycle snapshots and hostile-state regression tests;
-- `docs/420RPC-WEBSOCKET.md`.
+- an explicit derived-resource catalogue mapped to the stable 420Indexer v1 API;
+- deterministic selection of only eligible `indexer-api` providers with `derived-read` capability;
+- fail-closed exclusion of execution providers, wrong-chain Indexers, unready Indexers and capability-incompatible providers;
+- chain-scoped request construction for status, blocks, transactions, receipts, logs, addresses, asset transfers, protocol events, protocol objects and search;
+- validation of required route parameters before any upstream request is constructed;
+- projection metadata validation for chain identity, readiness, observation time and staleness;
+- explicit response provenance carrying `source: 420Indexer`, `derived: true`, `authoritative: false`, chain ID, upstream ID, indexed head and observation time;
+- hostile-state tests proving Indexer data cannot silently satisfy canonical Ethereum RPC semantics;
+- `docs/420RPC-INDEXER-READS.md`.
 
-RPC-7 is a transport/lifecycle boundary only. Subscription events remain upstream evidence and do not become gateway assertions of canonicality or finality. RPC-3 may select a different provider for a new subscription, but existing streams are not silently migrated across providers after upstream loss.
+RPC-8 exposes rebuildable projection data only. Canonical Ethereum JSON-RPC remains execution-backed, and canonical balances, ownership, registrations, settlements, rights, governance outcomes, bridge state, eligibility, transaction validity, fork choice and finality remain outside Indexer authority.
 
 Exit gate: implementation is complete. Merge requires the exact final head to pass 420RPC, docs and repository-wide qualification and remain reconciled with current `main`.
 
 ## Remaining phases
 
-- **RPC-8:** enriched/indexer-backed read APIs with explicit derived-state semantics.
 - **RPC-9:** authentication, API credentials and Developer Hub integration.
 - **RPC-10:** observability, health/readiness, metrics and operational recovery.
 - **RPC-11:** hostile-state and security hardening.
@@ -72,4 +67,4 @@ Exit gate: implementation is complete. Merge requires the exact final head to pa
 
 ## Authority rule
 
-420RPC may refuse malformed, unsupported, privileged, over-budget, stale, wrong-chain or unsafe requests/upstreams and may close unhealthy WebSocket sessions, but it never determines canonical blocks, transaction validity, consensus, safe/finalized checkpoints or fork choice. Subscription delivery is transport, not protocol authority.
+420RPC may refuse malformed, unsupported, privileged, over-budget, stale, wrong-chain or unsafe requests/upstreams and may expose clearly labeled derived projection data, but it never determines canonical blocks, transaction validity, consensus, safe/finalized checkpoints or fork choice. Derived Indexer responses remain non-authoritative by construction.

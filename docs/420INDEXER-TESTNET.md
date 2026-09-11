@@ -26,11 +26,15 @@ IDX-10 qualifies the hardened 420Indexer against the 420 Integrated testnet with
    - exercise bounded canonical reorg ancestor recovery through the durable rollback path
    - replay the replacement canonical branch and require the checkpoint to return to the observed safe head
    - prove a reorg deeper than `IDX420_MAX_REORG_DEPTH` fails before rollback, checkpoint movement or projected-state mutation
-4. **IDX-10.4 — consumer/API qualification — next**
-   - qualify health/readiness/status against live indexed state
-   - exercise public v1 block, transaction, receipt, log, address, asset and protocol-object surfaces
-   - exercise notification replay/canonicality semantics against testnet-indexed events
-5. **IDX-10.5 — readiness report and closeout**
+4. **IDX-10.4 — consumer/API qualification — implemented; live witness evidence pending**
+   - require the stable v1 health surface and traffic-admitting readiness
+   - require non-authoritative status metadata and an indexed head at or beyond the witness block
+   - resolve explicit block, transaction, receipt, address and protocol-object witnesses through the public API
+   - require block, address-transaction, log, asset-transfer and protocol-event feeds to return witness data
+   - require bounded search to resolve configured testnet witness data
+   - replay the protocol event through `IndexerEventStream420` and require canonical provenance plus `authoritative: false`
+   - fail closed when readiness is false, the index is behind the witness block, a direct witness is absent, a required feed is empty, or replay metadata does not match the selected chain/protocol
+5. **IDX-10.5 — readiness report and closeout — next**
    - record exact node/indexer revisions and qualification environment
    - record sustained-block window and observed failures/recoveries
    - close deployment-time ABI/descriptor qualification against compiled genesis artifacts
@@ -69,6 +73,16 @@ A passing unit/CI harness proves the qualification logic and hostile-state behav
 
 The hostile deep-reorg case is part of the qualification contract. If the canonical divergence exceeds `IDX420_MAX_REORG_DEPTH`, recovery must throw before invoking rollback. Regression coverage snapshots checkpoint and projected-state evidence and requires both to remain unchanged after that failure.
 
+## IDX-10.4 consumer witness semantics
+
+`runTestnetConsumerQualification420` qualifies the stable consumer boundary instead of querying projection tables directly. The caller supplies the deployment candidate's `IndexerPublicApi420`, the selected chain ID and explicit testnet witnesses: a block number, transaction hash, address, asset key, protocol and protocol object key. An optional search term may be supplied; otherwise the transaction witness is used.
+
+The qualifier first requires v1 health, a ready database/indexer, matching chain identity and a non-authoritative status surface whose indexed head has reached the block witness. It then verifies the direct block, transaction, receipt, address and protocol-object resources and exercises the block, address-transaction, log, asset-transfer and protocol-event feeds. Search must resolve at least one witness result.
+
+Notification integration is qualified through the real `IndexerEventStream420` consumer layer. The same protocol/object witness is replayed from the stable public API and must produce at least one v1 event whose provenance chain matches the selected testnet and whose envelope remains explicitly `authoritative: false`. This prevents IDX-10.4 from silently treating indexed notification data as protocol authority.
+
+As with IDX-10.2, CI proves the qualification contract and fail-closed behavior but does not replace live deployment evidence. IDX-10.5 must retain the concrete witness identifiers and qualification result used against the deployed testnet.
+
 ## Evidence required for closeout
 
 A completed IDX-10 qualification should retain:
@@ -82,7 +96,8 @@ A completed IDX-10 qualification should retain:
 - repeated-restart idempotence result;
 - bounded reorg ancestor/depth and replay result;
 - deep-reorg fail-closed/no-mutation result;
-- API/consumer smoke results;
+- API/consumer witness identifiers and smoke results;
+- notification/event-stream replay and canonicality result;
 - any injected or observed failures and recovery result;
 - final operator go/no-go decision.
 

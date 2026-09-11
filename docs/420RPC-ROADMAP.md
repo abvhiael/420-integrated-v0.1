@@ -14,9 +14,9 @@ Delivered the `420-rpc/` package, explicit architecture/service identity, execut
 
 Delivered normalized execution and Indexer provider descriptors, runtime capability discovery, chain binding, reachable-versus-eligible status and fail-closed provider qualification. RPC-1 was fully qualified and merged before RPC-2 began.
 
-## RPC-2 — Ethereum JSON-RPC compatibility and method profiles — in progress
+## RPC-2 — Ethereum JSON-RPC compatibility and method profiles — complete
 
-Deliverables:
+Delivered:
 
 - explicit public Ethereum JSON-RPC method catalogue;
 - metadata, read, submit and subscription profiles;
@@ -35,7 +35,7 @@ Deliverables:
 
 RPC-2 defines compatibility, not routing. RPC-3 owns provider selection/failover, RPC-4 owns freshness/finality safety, RPC-5 owns request-policy enforcement, and RPC-7 owns subscription lifecycle.
 
-Exit gate: the 420RPC package builds, RPC-2 tests pass, docs qualification and repository-wide qualification are green, the branch is reconciled to current `main`, and RPC-2 is merged before RPC-3 begins.
+Exit gate: RPC-2 implementation is complete; merge requires the exact final head to pass 420RPC, docs and repository-wide qualification and remain reconciled with current `main`.
 
 ## Remaining phases
 

@@ -13,26 +13,27 @@ Each RPC phase is developed on its own branch and pull request. At the end of ev
 - **RPC-2:** explicit Ethereum JSON-RPC compatibility and method profiles.
 - **RPC-3:** deterministic routing, health-aware selection, circuit breaking and safe failover.
 - **RPC-4:** chain identity, freshness and finality-safety enforcement.
-- **RPC-5 — implementation complete:** request validation, method policy and privileged-surface enforcement.
+- **RPC-5:** request validation, method policy and privileged-surface enforcement.
+- **RPC-6 — implementation complete:** weighted rate limits, quotas, batch/resource bounds, concurrency controls and abuse protection.
 
-## RPC-5 — request validation and method policy
+## RPC-6 — resource admission and abuse protection
 
-RPC-5 adds the request firewall in front of RPC-4 safety and RPC-3 routing:
+RPC-6 adds a bounded admission layer after RPC-5 validation and before chain-safety/routing work:
 
-- requires JSON-RPC 2.0 request objects;
-- validates request IDs and rejects public notifications by default;
-- requires every method to be present in the RPC-2 compatibility catalogue;
-- blocks Engine, admin, personal, debug, miner and txpool namespaces before upstream dispatch;
-- keeps node-managed account/signing methods excluded;
-- requires positional array params on the public surface;
-- validates method arity and canonical addresses, hashes, hex quantities, byte strings and block selectors;
-- validates transaction call objects, log filters, fee-history percentile arrays, raw signed transaction bytes and supported subscription shapes;
-- rejects malformed envelopes with `-32600`, blocked/unknown methods with `-32601`, and invalid params with `-32602`;
-- validates batch entries without taking over RPC-6 resource/batch-size policy.
+- enforces independent single-request and batch byte ceilings;
+- caps batch entry count and aggregate weighted cost;
+- gives expensive methods higher admission cost than cheap metadata/read methods;
+- charges every batch entry so batching cannot bypass quotas;
+- enforces per-client and global concurrency using explicit admission leases;
+- uses a per-client token bucket with deterministic refill and `retryAfterMs` guidance;
+- bounds the number of tracked client identities;
+- evicts only idle client state and never evicts an active lease to preserve availability;
+- rejects malformed/blocked RPC-5 requests before quota is consumed;
+- keeps client identity accounting separate from RPC-9 authentication semantics.
 
-### RPC-5 authority boundary
+### RPC-6 authority boundary
 
-Policy decides whether 420RPC will forward a syntactically allowed public request. It does not decide whether a transaction is valid, sign transactions, rewrite signed bytes, invent chain state, choose fork choice or decide finality.
+Admission controls gateway resource use only. Passing RPC-6 does not make a transaction valid, create canonical state, decide safe/finalized checkpoints or fork choice, authorize a user, or alter signed bytes. Resource pressure never promotes an otherwise unsafe or ineligible provider.
 
 ## Roadmap
 
@@ -41,9 +42,9 @@ Policy decides whether 420RPC will forward a syntactically allowed public reques
 - **RPC-2 — complete:** canonical Ethereum JSON-RPC compatibility and method profiles.
 - **RPC-3 — complete:** routing, health-aware upstream selection, circuit breaking and failover.
 - **RPC-4 — complete:** chain identity, freshness and finality-safety enforcement.
-- **RPC-5 — implementation complete:** request validation, method policy and privileged-surface enforcement.
-- **RPC-6 — next:** rate limiting, quotas, resource bounds and abuse controls.
-- **RPC-7:** WebSocket transport and subscription lifecycle.
+- **RPC-5 — complete:** request validation, method policy and privileged-surface enforcement.
+- **RPC-6 — implementation complete:** rate limiting, quotas, batch/resource bounds, concurrency controls and abuse protection.
+- **RPC-7 — next:** WebSocket transport and subscription lifecycle.
 - **RPC-8:** 420Indexer-backed enriched/read APIs with explicit derived-state semantics.
 - **RPC-9:** authentication, API credentials and Developer Hub integration.
 - **RPC-10:** observability, metrics, operational readiness and recovery.
@@ -67,7 +68,10 @@ Policy decides whether 420RPC will forward a syntactically allowed public reques
 13. Ambiguous transaction submission failures are not automatically replayed across providers.
 14. Provider priority never resolves safe/finalized disagreement.
 15. Request-policy acceptance never implies execution validity.
+16. Batches are charged by aggregate work and cannot bypass quotas or concurrency limits.
+17. Resource exhaustion fails closed rather than disabling safety or policy checks.
+18. RPC-6 client accounting identity is not authentication authority.
 
 ## Next phase
 
-After RPC-5 is reconciled, fully qualified and merged to `main`, RPC-6 adds rate limiting, quotas, batch/resource bounds and abuse controls.
+After RPC-6 is reconciled, fully qualified and merged to `main`, RPC-7 adds WebSocket transport and subscription lifecycle management.

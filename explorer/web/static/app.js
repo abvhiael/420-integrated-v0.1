@@ -7,6 +7,16 @@ const esc = (value) => String(value ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;
 const mono = (value) => `<span class="mono">${esc(value)}</span>`;
 const link = (href, label) => `<a class="link mono" href="${href}">${esc(label)}</a>`;
 const fmt = (value) => value === null || value === undefined || value === '' ? '—' : esc(value);
+const short = (value, left=10, right=8) => {
+  const s = String(value ?? '');
+  if (s.length <= left + right + 3) return s;
+  return `${s.slice(0,left)}…${s.slice(-right)}`;
+};
+const unixTime = (value) => {
+  if (value === null || value === undefined || value === '') return '—';
+  const d = new Date(Number(value) * 1000);
+  return Number.isNaN(d.valueOf()) ? esc(value) : `${esc(d.toLocaleString())} · ${esc(value)}`;
+};
 
 async function api(path) {
   const response = await fetch(path, {headers:{'Accept':'application/json'}, cache:'no-store'});
@@ -39,6 +49,15 @@ function stats(items) {
   return `<div class="grid">${items.map(([label,value]) => `<div class="stat"><span class="label">${esc(label)}</span><span class="value">${fmt(value)}</span></div>`).join('')}</div>`;
 }
 
+function detailRows(items) {
+  return `<dl class="details">${items.map(([label,value,raw=false]) => `<div><dt>${esc(label)}</dt><dd>${raw ? value : fmt(value)}</dd></div>`).join('')}</dl>`;
+}
+
+function finalityBadge(value) {
+  const state = String(value || 'UNKNOWN').toUpperCase();
+  return `<span class="badge badge-${esc(state.toLowerCase())}">${esc(state)}</span>`;
+}
+
 async function refreshNetworkPill() {
   try {
     const status = await api('/v1/status');
@@ -61,7 +80,7 @@ async function overview() {
 
 function blockTable(blocks) {
   if (!blocks.length) return '<p class="muted">No indexed blocks available.</p>';
-  return `<div class="table-wrap"><table><thead><tr><th>Block</th><th>Hash</th><th>Finality</th><th>Transactions</th></tr></thead><tbody>${blocks.map(b => `<tr><td>${link(`#/blocks/${b.number}`, b.number)}</td><td>${mono(b.hash)}</td><td>${fmt(b.finality)}</td><td>${fmt(b.transactionCount ?? b.transactions?.length)}</td></tr>`).join('')}</tbody></table></div>`;
+  return `<div class="table-wrap"><table><thead><tr><th>Block</th><th>Hash</th><th>Finality</th><th>Timestamp</th></tr></thead><tbody>${blocks.map(b => `<tr><td>${link(`#/blocks/${b.number}`, b.number)}</td><td title="${esc(b.hash)}">${mono(short(b.hash))}</td><td>${finalityBadge(b.finality)}</td><td>${unixTime(b.timestamp)}</td></tr>`).join('')}</tbody></table></div>`;
 }
 
 async function blocks() {
@@ -72,29 +91,77 @@ async function blocks() {
 async function blockDetail(number) {
   const view = await api(`/v1/blocks/${encodeURIComponent(number)}`);
   const b = view.block || view;
+  const logs = view.logs || [];
+  const nav = view.navigation || {};
   app.innerHTML = title(`Block ${number}`, b.finality || '') + stats([
-    ['Number', b.number], ['Finality', b.finality], ['Transactions', b.transactionCount ?? view.transactionCount], ['Logs', view.logCount], ['Timestamp', b.timestamp]
-  ]) + `<div class="panel"><p><span class="muted">Hash</span><br>${mono(b.hash)}</p><p><span class="muted">Parent</span><br>${mono(b.parentHash)}</p></div>`;
+    ['Number', b.number], ['Finality', b.finality], ['Logs', view.logCount ?? logs.length], ['Timestamp', unixTime(b.timestamp)]
+  ]) + `<div class="panel">${detailRows([
+    ['Hash', mono(b.hash), true],
+    ['Parent hash', mono(b.parentHash), true],
+    ['Chain ID', b.chainId],
+    ['Schema', b.schemaVersion]
+  ])}</div>` + `<div class="pager">${nav.previous !== null && nav.previous !== undefined ? link(`#/blocks/${nav.previous}`, `← block ${nav.previous}`) : '<span></span>'}${nav.next !== null && nav.next !== undefined ? link(`#/blocks/${nav.next}`, `block ${nav.next} →`) : '<span></span>'}</div>` + `<div class="panel"><h3>Logs</h3>${logTable(logs)}</div>`;
+}
+
+function logTable(logs) {
+  if (!logs.length) return '<p class="muted">No logs indexed for this resource.</p>';
+  return `<div class="table-wrap"><table><thead><tr><th>Log</th><th>Address</th><th>Transaction</th><th>Topics</th></tr></thead><tbody>${logs.map(l => `<tr><td>${fmt(l.logIndex)}</td><td>${l.address ? link(`#/addresses/${l.address}`,short(l.address)) : '—'}</td><td>${l.transactionHash ? link(`#/transactions/${l.transactionHash}`,short(l.transactionHash)) : '—'}</td><td>${fmt(l.topics?.length ?? 0)}</td></tr>`).join('')}</tbody></table></div>`;
 }
 
 async function transactionDetail(hash) {
   const view = await api(`/v1/transactions/${encodeURIComponent(hash)}`);
   const tx = view.transaction || {};
   const receipt = view.receipt || {};
+  const logs = view.logs || [];
+  const created = receipt.contractAddress;
   app.innerHTML = title('Transaction', receipt.statusLabel || '') + stats([
     ['Block', tx.blockNumber], ['Index', tx.index], ['Status', receipt.statusLabel ?? receipt.status], ['Gas used', receipt.gasUsed], ['Finality', view.finality]
-  ]) + `<div class="panel"><p><span class="muted">Hash</span><br>${mono(tx.hash || hash)}</p><p><span class="muted">From</span><br>${tx.from ? link(`#/addresses/${tx.from}`,tx.from) : '—'}</p><p><span class="muted">To</span><br>${tx.to ? link(`#/addresses/${tx.to}`,tx.to) : 'contract creation'}</p></div>`;
+  ]) + `<div class="panel">${detailRows([
+    ['Hash', mono(tx.hash || hash), true],
+    ['Block hash', mono(tx.blockHash), true],
+    ['From', tx.from ? link(`#/addresses/${tx.from}`, tx.from) : '—', true],
+    ['To', tx.to ? link(`#/addresses/${tx.to}`, tx.to) : 'contract creation', true],
+    ['Value (wei)', mono(tx.valueWei || '0'), true],
+    ['Created contract', created ? link(`#/contracts/${created}`, created) : '—', true],
+    ['Input', tx.input ? `<div class="codebox mono">${esc(tx.input)}</div>` : '—', true]
+  ])}</div>` + `<div class="panel"><h3>Logs</h3>${logTable(logs)}</div>`;
 }
 
 async function addressDetail(address) {
   const view = await api(`/v1/addresses/${encodeURIComponent(address)}?limit=50`);
-  const txs = view.transactions || view.history || [];
-  app.innerHTML = title('Address') + `<div class="panel"><p>${mono(view.address || address)}</p><p class="muted">${txs.length} indexed transaction record${txs.length===1?'':'s'} in this view.</p></div>` + (txs.length ? `<div class="table-wrap"><table><thead><tr><th>Hash</th><th>Block</th><th>From</th><th>To</th></tr></thead><tbody>${txs.map(tx => `<tr><td>${link(`#/transactions/${tx.hash}`,tx.hash)}</td><td>${fmt(tx.blockNumber)}</td><td>${mono(tx.from)}</td><td>${mono(tx.to)}</td></tr>`).join('')}</tbody></table></div>` : '');
+  const txs = view.transactions || [];
+  const normalized = view.address || address;
+  app.innerHTML = title('Address', `${view.txCount ?? txs.length} indexed transactions`) + `<div class="panel">${detailRows([
+    ['Address', mono(normalized), true],
+    ['Snapshot height', view.meta?.snapshotHeight],
+    ['Safe height', view.meta?.safeHeight],
+    ['Finalized height', view.meta?.finalizedHeight]
+  ])}</div>` + `<div class="panel"><h3>Transaction history</h3>${addressTxTable(txs, normalized)}</div>`;
+}
+
+function addressTxTable(txs, address) {
+  if (!txs.length) return '<p class="muted">No indexed transaction history for this address.</p>';
+  const addr = String(address).toLowerCase();
+  return `<div class="table-wrap"><table><thead><tr><th>Hash</th><th>Block</th><th>Direction</th><th>Counterparty</th><th>Value (wei)</th></tr></thead><tbody>${txs.map(tx => {
+    const from = String(tx.from || '').toLowerCase();
+    const outgoing = from === addr;
+    const counterparty = outgoing ? tx.to : tx.from;
+    return `<tr><td>${link(`#/transactions/${tx.hash}`,short(tx.hash))}</td><td>${link(`#/blocks/${tx.blockNumber}`,tx.blockNumber)}</td><td><span class="badge ${outgoing?'badge-out':'badge-in'}">${outgoing?'OUT':'IN'}</span></td><td>${counterparty ? link(`#/addresses/${counterparty}`,short(counterparty)) : 'contract creation'}</td><td>${mono(tx.valueWei || '0')}</td></tr>`;
+  }).join('')}</tbody></table></div>`;
 }
 
 async function contractDetail(address) {
   const view = await api(`/v1/contracts/${encodeURIComponent(address)}`);
-  app.innerHTML = title('Contract') + stats([['Deployment block',view.deploymentBlockNumber],['Code hash',view.codeHash],['Runtime bytes',view.runtimeByteLength]]) + `<div class="panel"><p>${mono(view.address || address)}</p></div>`;
+  const c = view.contract || {};
+  app.innerHTML = title('Contract', view.hasRuntimeCode ? 'runtime code indexed' : 'no runtime code') + stats([
+    ['Deployment block',c.deploymentBlockNumber],['Runtime bytes',view.runtimeCodeBytes],['Has runtime code',view.hasRuntimeCode ? 'yes':'no'],['Chain',c.chainId]
+  ]) + `<div class="panel">${detailRows([
+    ['Address', mono(c.address || address), true],
+    ['Deployment transaction', c.deploymentTxHash ? link(`#/transactions/${c.deploymentTxHash}`,c.deploymentTxHash) : '—', true],
+    ['Deployment block hash', mono(c.deploymentHash), true],
+    ['Code hash', mono(c.codeHash), true],
+    ['Schema', c.schemaVersion]
+  ])}</div>` + `<div class="panel"><h3>Runtime bytecode</h3>${c.runtimeCode ? `<div class="codebox mono">${esc(c.runtimeCode)}</div>` : '<p class="muted">No runtime bytecode indexed.</p>'}</div>`;
 }
 
 async function registry() {

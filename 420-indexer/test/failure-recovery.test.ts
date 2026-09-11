@@ -42,7 +42,7 @@ test('RPC outage fails the run without advancing checkpoint state', async () => 
     source,
     checkpoints,
     { async applyBlock() { throw new Error('must not apply'); } },
-    { finality: { mode: 'confirmations', confirmations: 0 }, startBlock: 0n },
+    { finality: { mode: 'head' }, startBlock: 0n },
     history,
     undefined,
     telemetry
@@ -68,7 +68,7 @@ test('database interruption cannot advance external checkpoint beyond the failed
         if (applies === 2) throw new Error('database interrupted');
       }
     },
-    { finality: { mode: 'confirmations', confirmations: 0 }, startBlock: 0n, maxBlocksPerRun: 10 },
+    { finality: { mode: 'head' }, startBlock: 0n, maxBlocksPerRun: 10 },
     history
   );
 
@@ -87,7 +87,7 @@ test('restart resumes exactly after the last durable checkpoint', async () => {
     source420(blocks, 2n),
     checkpoints,
     { async applyBlock(batch) { firstApplied.push(batch.block.number); } },
-    { finality: { mode: 'confirmations', confirmations: 0 }, startBlock: 0n, maxBlocksPerRun: 2 },
+    { finality: { mode: 'head' }, startBlock: 0n, maxBlocksPerRun: 2 },
     history
   );
   await first.runOnce();
@@ -98,7 +98,7 @@ test('restart resumes exactly after the last durable checkpoint', async () => {
     source420(blocks, 2n),
     checkpoints,
     { async applyBlock(batch) { resumed.push(batch.block.number); } },
-    { finality: { mode: 'confirmations', confirmations: 0 }, startBlock: 0n, maxBlocksPerRun: 10 },
+    { finality: { mode: 'head' }, startBlock: 0n, maxBlocksPerRun: 10 },
     history
   );
   const run = await second.runOnce();
@@ -163,7 +163,7 @@ test('durable reorg path delegates rollback atomically and resumes from the retu
     source420(canonical, 3n),
     checkpoints,
     durable,
-    { finality: { mode: 'confirmations', confirmations: 0 }, maxReorgDepth: 8 },
+    { finality: { mode: 'head' }, maxReorgDepth: 8 },
     history
   );
   const run = await ingestor.runOnce();

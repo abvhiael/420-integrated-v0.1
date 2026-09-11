@@ -84,6 +84,12 @@ export async function routeIndexerHttp420(api: IndexerPublicApi420, method: stri
 
     const chainId = parseChainId420(url.searchParams.get('chainId'));
 
+    const receiptHash = pathParam420(path, /^\/v1\/transactions\/([^/]+)\/receipt$/);
+    if (receiptHash !== null) {
+      const receipt = await api.receipt(chainId, receiptHash);
+      return receipt ? ok420(receipt) : error420(404, 'not_found', 'receipt not found');
+    }
+
     const blockId = pathParam420(path, /^\/v1\/blocks\/([^/]+)$/);
     if (blockId !== null) {
       const block = await api.block(chainId, blockId);
@@ -105,6 +111,9 @@ export async function routeIndexerHttp420(api: IndexerPublicApi420, method: stri
     if (path === '/v1/blocks') return ok420(await api.blocks(chainId, pageRequest420(url)));
     if (path === '/v1/transactions') {
       return ok420(await api.transactions(chainId, { ...pageRequest420(url), address: url.searchParams.get('address') ?? undefined }));
+    }
+    if (path === '/v1/logs') {
+      return ok420(await api.logs(chainId, { ...pageRequest420(url), address: url.searchParams.get('address') ?? undefined }));
     }
     if (path === '/v1/assets/transfers') {
       return ok420(await api.assetTransfers(chainId, {

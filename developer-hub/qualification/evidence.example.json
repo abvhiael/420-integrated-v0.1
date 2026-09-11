@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "1.0.0",
+  "profileId": "devhub-security-v1",
+  "projectId": "example-dapp",
+  "network": {"chainId":"420","environment":"local"},
+  "observedAt": "2026-09-11T17:40:00.000Z",
+  "provenance": {
+    "provider": "github-actions",
+    "repository": "abvhiael/420-integrated-v0.1",
+    "commitSha": "e1e6f4547e139357c978f4d7906c24642e8642fd",
+    "runs": [
+      {"name":"420 Developer Hub","runId":34628824467,"conclusion":"success","commitSha":"e1e6f4547e139357c978f4d7906c24642e8642fd"},
+      {"name":"420Docs Qualification","runId":34628824457,"conclusion":"success","commitSha":"e1e6f4547e139357c978f4d7906c24642e8642fd"},
+      {"name":"420 Integrated Qualification","runId":34628824413,"conclusion":"success","commitSha":"e1e6f4547e139357c978f4d7906c24642e8642fd"}
+    ]
+  },
+  "checks": [
+    {"id":"network-binding","status":"PASS","source":"developer-hub/network-discovery"},
+    {"id":"authority-boundaries","status":"PASS","source":"DEVHUB invariants"},
+    {"id":"secret-material","status":"PASS","source":"tracked-artifact review"},
+    {"id":"wallet-signing-isolation","status":"PASS","source":"wallet SDK qualification"},
+    {"id":"indexer-noncanonical","status":"PASS","source":"DEVHUB-11 qualification"},
+    {"id":"service-auth-isolation","status":"PASS","source":"DEVHUB-16 qualification"},
+    {"id":"tests-qualified","status":"PASS","source":"420 Developer Hub CI"},
+    {"id":"dependency-review","status":"PASS","source":"candidate dependency review"}
+  ]
+}

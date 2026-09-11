@@ -6,10 +6,16 @@ async function api(path){const res=await fetch(path,{cache:'no-store'});let body
 const renderDebug=(value)=>{$('debug-output').textContent=JSON.stringify(value,null,2);};
 const runDebug=async(fn)=>{try{renderDebug({status:'loading'});renderDebug(await fn());}catch(error){renderDebug({error:error.message});}};
 const renderStatus=(value)=>{$('status-output').textContent=JSON.stringify(value,null,2);};
+const renderQualification=(value)=>{$('qualification-output').textContent=JSON.stringify(value,null,2);};
+const runQualification=async(fn)=>{try{renderQualification({status:'loading'});renderQualification(await fn());}catch(error){renderQualification({error:error.message});}};
 async function load(){return api('/api/dashboard');}
 load().then(async data=>{
  $('summary').textContent=`${data.network.name} · ${data.network.environment} · chain ${data.network.chainId}`;
  $('network').innerHTML=`<h2>network</h2><div class="grid">${card('chain',`<p>${badge(data.network.chainId,'ok')} ${esc(data.network.nativeCurrency?.symbol??'')}</p><p>${esc(data.network.rpc.join(', '))}</p>`)}${card('mode',`<p>${badge(data.network.isProduction?'production':'non-production')}</p><p>faucet: ${data.network.canRequestFaucet?'available':'disabled'}</p>`)}</div>`;
+ const qualificationView=await api('/api/qualification/view');
+ $('qualification-meta').innerHTML=card(qualificationView.qualification.title,`<p>${badge(qualificationView.qualification.profileId,'ok')}</p><p>required checks: ${esc(qualificationView.qualification.requiredChecks.join(', '))}</p><p>${esc(qualificationView.qualification.securityRule)}</p>`)+card(qualificationView.handoff.title,`<p>exact commit binding: ${qualificationView.handoff.requiresExactCommitBinding?'required':'no'}</p><p>fresh evidence: ${qualificationView.handoff.requiresFreshEvidence?'required':'no'}</p><p>required workflows: ${esc(qualificationView.handoff.requiredWorkflows.join(', '))}</p><p>${esc(qualificationView.handoff.securityRule)}</p>`);
+ $('qualification-report-run').addEventListener('click',()=>runQualification(()=>api('/api/qualification/report')));
+ $('qualification-handoff-run').addEventListener('click',()=>runQualification(()=>api('/api/qualification/handoff')));
  const statusView=await api('/api/status/view');
  $('status-meta').innerHTML=card(statusView.title,`<p>${badge(`chain ${statusView.chainId}`,'ok')} ${esc(statusView.environment)}</p><p>${esc(statusView.supported.join(', '))}</p><p>${esc(statusView.securityRule)}</p>`);
  $('status-run').addEventListener('click',async()=>{try{renderStatus({status:'checking'});renderStatus(await api('/api/status/check'));}catch(error){renderStatus({error:error.message});}});

@@ -2,6 +2,7 @@ import type { ChainSource420, IndexerBlock, IndexerLog, IndexerReceipt, IndexerT
 import type { CheckpointStore420 } from './checkpoint-store.js';
 import { assertCheckpointContinuation420, assertFinalityPolicy420, checkpointFromBlock420, normalizeLogs420, safeHead420, type FinalityPolicy420, type IndexCheckpoint420 } from './indexing.js';
 import { MemoryCanonicalHistoryStore420, recoverCanonicalAncestry420, type CanonicalHistoryStore420 } from './reorg.js';
+import type { IndexerWorkController420 } from './work-controller.js';
 
 export interface IndexedBlockBatch420 {
   chainId: bigint;
@@ -16,7 +17,14 @@ export interface IngestionRun420 { chainId: bigint; sourceId: string; safeHead: 
 
 export class IndexerIngestor420 {
   readonly history: CanonicalHistoryStore420;
-  constructor(readonly source: ChainSource420, readonly checkpoints: CheckpointStore420, readonly consumer: BlockConsumer420, readonly options: IngestionOptions420, history?: CanonicalHistoryStore420) {
+  constructor(
+    readonly source: ChainSource420,
+    readonly checkpoints: CheckpointStore420,
+    readonly consumer: BlockConsumer420,
+    readonly options: IngestionOptions420,
+    history?: CanonicalHistoryStore420,
+    readonly workController?: IndexerWorkController420
+  ) {
     this.history = history ?? new MemoryCanonicalHistoryStore420();
     assertFinalityPolicy420(options.finality);
     if (options.startBlock !== undefined && options.startBlock < 0n) throw new Error('startBlock cannot be negative');
@@ -30,7 +38,7 @@ export class IndexerIngestor420 {
     }
     return safeHead420(await this.source.blockNumber(), this.options.finality);
   }
-  async runOnce(): Promise<IngestionRun420> {
+  private async runOnceInner(): Promise<IngestionRun420> {
     const chainId = await this.source.chainId();
     let checkpoint = await this.checkpoints.load();
     if (checkpoint && checkpoint.chainId !== chainId) throw new Error(`checkpoint chain mismatch: expected ${chainId}, got ${checkpoint.chainId}`);
@@ -72,5 +80,10 @@ export class IndexerIngestor420 {
       lastBlock = blockNumber;
     }
     return { chainId, sourceId: this.source.sourceId, safeHead, processed, firstBlock, lastBlock, checkpoint, recoveredReorgDepth };
+  }
+  runOnce(): Promise<IngestionRun420> {
+    return this.workController
+      ? this.workController.run(() => this.runOnceInner())
+      : this.runOnceInner();
   }
 }

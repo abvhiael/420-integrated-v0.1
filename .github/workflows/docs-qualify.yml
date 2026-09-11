@@ -1,0 +1,50 @@
+name: 420Docs Qualification
+
+on:
+  pull_request:
+    paths:
+      - 'docs/**'
+      - 'mkdocs.yml'
+      - 'requirements-docs.txt'
+      - 'README.md'
+      - 'scripts/qualify-docs.py'
+      - '.github/workflows/docs-qualify.yml'
+      - '.github/workflows/docs-pages.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/**'
+      - 'mkdocs.yml'
+      - 'requirements-docs.txt'
+      - 'README.md'
+      - 'scripts/qualify-docs.py'
+      - '.github/workflows/docs-qualify.yml'
+      - '.github/workflows/docs-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: requirements-docs.txt
+
+      - name: Install documentation dependencies
+        run: pip install -r requirements-docs.txt
+
+      - name: Build 420Docs strictly
+        run: mkdocs build --strict
+
+      - name: Qualify search and navigation
+        run: python scripts/qualify-docs.py

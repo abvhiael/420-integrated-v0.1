@@ -41,8 +41,10 @@ func TestNetworkStatusHealthy(t *testing.T) {
 	svc.now = func() time.Time { return now }
 	status, err := svc.NetworkStatus(context.Background())
 	if err != nil { t.Fatal(err) }
-	if status.WrongChain || status.Stale || status.Degraded { t.Fatalf("unexpected unhealthy status: %+v", status) }
-	if status.IndexedHeight != 100 || status.SafeHeight != 98 || status.FinalizedHeight != 95 { t.Fatalf("unexpected heights: %+v", status) }
+	if status.WrongChain || status.Stale || status.Degraded || !status.Consistent || !status.Ready { t.Fatalf("unexpected unhealthy status: %+v", status) }
+	if status.HeadHeight != 100 || status.IndexedHeight != 100 || status.SafeHeight != 98 || status.FinalizedHeight != 95 { t.Fatalf("unexpected heights: %+v", status) }
+	if status.SafeLag != 2 || status.FinalizedLag != 5 { t.Fatalf("unexpected finality lags: %+v", status) }
+	if status.IngestAgeSeconds != 10 { t.Fatalf("unexpected ingest age: %+v", status) }
 }
 
 func TestNetworkStatusFailsClosedOnWrongChain(t *testing.T) {
@@ -52,7 +54,7 @@ func TestNetworkStatusFailsClosedOnWrongChain(t *testing.T) {
 	svc.now = func() time.Time { return now }
 	status, err := svc.NetworkStatus(context.Background())
 	if !errors.Is(err, ErrWrongChain) { t.Fatalf("expected wrong-chain error, got %v", err) }
-	if !status.WrongChain { t.Fatal("expected wrongChain presentation flag") }
+	if !status.WrongChain || status.Ready { t.Fatal("expected wrongChain presentation flag and not-ready status") }
 }
 
 func TestNetworkStatusSurfacesStaleAndDegraded(t *testing.T) {
@@ -62,7 +64,34 @@ func TestNetworkStatusSurfacesStaleAndDegraded(t *testing.T) {
 	svc.now = func() time.Time { return now }
 	status, err := svc.NetworkStatus(context.Background())
 	if !errors.Is(err, ErrIndexerDegraded) { t.Fatalf("expected degraded error, got %v", err) }
-	if !status.Degraded || !status.Stale { t.Fatalf("expected degraded and stale flags: %+v", status) }
+	if !status.Degraded || !status.Stale || status.Ready { t.Fatalf("expected degraded and stale flags: %+v", status) }
+}
+
+func TestNetworkStatusRejectsImpossibleFinalityOrdering(t *testing.T) {
+	now := time.Now()
+	idx := &fakeIndexer{health: indexerapi.HealthResponse{Health: model.Health{
+		ChainID: 420, IndexedHeight: 100, SafeHeight: 101, FinalizedHeight: 99,
+		State: "READY", LastIngestAt: now,
+	}}}
+	svc, _ := New(idx, 420, time.Minute)
+	svc.now = func() time.Time { return now }
+	status, err := svc.NetworkStatus(context.Background())
+	if !errors.Is(err, ErrIndexerInconsistent) { t.Fatalf("expected inconsistent finality error, got %v", err) }
+	if status.Consistent || status.Ready { t.Fatalf("expected inconsistent not-ready status: %+v", status) }
+	if status.SafeLag != 0 || status.FinalizedLag != 0 { t.Fatalf("lags must not underflow on inconsistent heights: %+v", status) }
+}
+
+func TestNetworkStatusDoesNotUnderflowFutureIngestTimestamp(t *testing.T) {
+	now := time.Now()
+	idx := &fakeIndexer{health: indexerapi.HealthResponse{Health: model.Health{
+		ChainID: 420, IndexedHeight: 10, SafeHeight: 9, FinalizedHeight: 8,
+		State: "READY", LastIngestAt: now.Add(5 * time.Second),
+	}}}
+	svc, _ := New(idx, 420, time.Minute)
+	svc.now = func() time.Time { return now }
+	status, err := svc.NetworkStatus(context.Background())
+	if err != nil { t.Fatal(err) }
+	if status.IngestAgeSeconds != 0 || !status.Ready { t.Fatalf("unexpected future-timestamp handling: %+v", status) }
 }
 
 func TestBlockViewPreservesCanonicalProvenance(t *testing.T) {

@@ -13,13 +13,13 @@ The DOCS workstream builds the canonical documentation system for the 420 Integr
 
 Exit condition: documentation taxonomy, standards, app contract, ADR rules, diagram conventions, terminology rules, and minimum contribution requirements are committed and reviewable.
 
-## DOC-1 — 420Docs site foundation
+## DOC-1 — 420Docs site foundation — IN PROGRESS
 
-- MkDocs Material project configuration.
-- GitHub Pages deployment through GitHub Actions.
-- Documentation landing page and audience-based navigation.
-- Repository README integration.
-- Whole-site search.
+- [x] DOC-1.1 Establish MkDocs Material project foundation.
+- [ ] DOC-1.2 Add GitHub Pages deployment through GitHub Actions.
+- [ ] DOC-1.3 Build documentation landing page and audience-based navigation.
+- [ ] DOC-1.4 Integrate 420Docs links into the repository README.
+- [ ] DOC-1.5 Complete whole-site search/navigation qualification.
 
 ## DOC-2 — System architecture
 

@@ -70,9 +70,18 @@ Exit condition: developers, validators, operators, and reviewers can trace how 4
 
 Exit condition: developers and operators can identify every major infrastructure service, distinguish canonical/derived/replaceable authority, deploy and connect the core node/indexing/access layers safely, understand provider-backed storage/AI/oracle boundaries, and recover infrastructure in canonical authority order without promoting operational services into protocol authority.
 
-## DOC-6 — Wallet and user onboarding
+## DOC-6 — Wallet and user onboarding — COMPLETE
 
-- Wallet installation/import, recovery protection, send/receive, dApp connections, signing, permissions, recovery, and troubleshooting.
+- [x] DOC-6.1 Publish the 420 Wallet onboarding overview, client-selection guidance, canonical account model, safe first-session sequence, and support-safety rules.
+- [x] DOC-6.2 Document setup/import boundaries, SmartAccount420 discovery, authorization epochs, passkey enrollment/re-enrollment, recovery preparation, and baseline account protection.
+- [x] DOC-6.3 Document receiving/sending native `$420`, address checks, fee behavior, activity/finality states, failed/pending transactions, and post-send verification.
+- [x] DOC-6.4 Document dApp connection, verified destinations, connection-versus-capability boundaries, network mismatch, disconnection, and compromise response.
+- [x] DOC-6.5 Document signing review, simulation, message versus transaction signatures, contract/batch calls, passkey signing, post-execution verification, and red flags.
+- [x] DOC-6.6 Document owner/operator/capability/session/recovery/passkey authority classes, scoped permissions, authorization epochs, revocation, spend limits, and incident response.
+- [x] DOC-6.7 Document recovery authority, the canonical timelocked recovery flow, owner cancellation, lost-device response, passkey/device considerations, and compromise handling.
+- [x] DOC-6.8 Publish wallet troubleshooting for connection/network/account discovery, pending/failed transactions, simulation, passkeys, sessions, recovery, stale activity, and safe support diagnostics.
+
+Exit condition: a new user can choose a qualified 420 Wallet client, establish or discover an account safely, protect it, send/receive `$420`, connect applications, understand and approve signing requests, control reusable permissions/sessions, recover from owner/device loss using the canonical timelocked path, and diagnose common failures without exposing private signing material or needing protocol internals.
 
 ## DOC-7 — Core protocol documentation
 

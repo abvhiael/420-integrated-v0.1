@@ -7,11 +7,15 @@ import {
   transactionsQuery420,
   logsQuery420,
   protocolEventsQuery420,
+  assetTransfersQuery420,
   encodeBlockCursor420,
   encodeTransactionCursor420,
   encodePositionCursor420,
+  encodeAssetTransferCursor420,
   normalizeLimit420
 } from './query-layer.js';
+import { classifySearch420, type SearchRoute420 } from './search-router.js';
+import { blockDto420, transactionDto420, assetTransferDto420, type BlockDto420, type TransactionDto420, type AssetTransferDto420 } from './public-dto.js';
 
 export type QueryRow420 = Record<string, unknown>;
 
@@ -42,6 +46,12 @@ function integerField420(row: QueryRow420, field: string): number {
   throw new Error(`invalid ${field} in query row`);
 }
 
+function nullableIntegerField420(row: QueryRow420, field: string): number {
+  const value = row[field];
+  if (value === null || value === undefined) return -1;
+  return integerField420(row, field);
+}
+
 function stringField420(row: QueryRow420, field: string): string {
   const value = row[field];
   if (typeof value !== 'string' || value.length === 0) throw new Error(`invalid ${field} in query row`);
@@ -53,6 +63,10 @@ function page420<T extends QueryRow420>(rows: T[], limit: number, cursorFor: (ro
   const items = hasMore ? rows.slice(0, limit) : rows;
   const nextCursor = hasMore && items.length > 0 ? cursorFor(items[items.length - 1]!) : null;
   return { items, nextCursor };
+}
+
+function mapPage420<T>(page: QueryPage420<QueryRow420>, mapper: (row: QueryRow420) => T): QueryPage420<T> {
+  return { items: page.items.map(mapper), nextCursor: page.nextCursor };
 }
 
 async function run420(db: SqlExecutor420, query: SqlQuery420): Promise<QueryRow420[]> {
@@ -68,6 +82,10 @@ export class IndexerQueryService420 {
     return page420(rows, limit, (row) => encodeBlockCursor420({ blockNumber: bigintField420(row, 'block_number') }));
   }
 
+  async publicBlocks(chainId: bigint, opts: { cursor?: string; limit?: number; direction?: QueryDirection420 } = {}): Promise<QueryPage420<BlockDto420>> {
+    return mapPage420(await this.blocks(chainId, opts), blockDto420);
+  }
+
   async transactions(chainId: bigint, opts: { address?: string; cursor?: string; limit?: number; direction?: QueryDirection420 } = {}): Promise<QueryPage420<QueryRow420>> {
     const limit = normalizeLimit420(opts.limit);
     const rows = await run420(this.db, transactionsQuery420(chainId, opts));
@@ -75,6 +93,10 @@ export class IndexerQueryService420 {
       blockNumber: bigintField420(row, 'block_number'),
       txIndex: integerField420(row, 'tx_index')
     }));
+  }
+
+  async publicTransactions(chainId: bigint, opts: { address?: string; cursor?: string; limit?: number; direction?: QueryDirection420 } = {}): Promise<QueryPage420<TransactionDto420>> {
+    return mapPage420(await this.transactions(chainId, opts), transactionDto420);
   }
 
   async logs(chainId: bigint, opts: { address?: string; cursor?: string; limit?: number; direction?: QueryDirection420 } = {}): Promise<QueryPage420<QueryRow420>> {
@@ -97,6 +119,20 @@ export class IndexerQueryService420 {
     }));
   }
 
+  async assetTransfers(chainId: bigint, opts: { assetKey?: string; address?: string; cursor?: string; beforeBlock?: bigint; limit?: number; direction?: QueryDirection420 } = {}): Promise<QueryPage420<QueryRow420>> {
+    const limit = normalizeLimit420(opts.limit);
+    const rows = await run420(this.db, assetTransfersQuery420(chainId, opts));
+    return page420(rows, limit, (row) => encodeAssetTransferCursor420({
+      blockNumber: bigintField420(row, 'block_number'),
+      txHash: stringField420(row, 'tx_hash'),
+      logIndex: nullableIntegerField420(row, 'log_index')
+    }));
+  }
+
+  async publicAssetTransfers(chainId: bigint, opts: { assetKey?: string; address?: string; cursor?: string; beforeBlock?: bigint; limit?: number; direction?: QueryDirection420 } = {}): Promise<QueryPage420<AssetTransferDto420>> {
+    return mapPage420(await this.assetTransfers(chainId, opts), assetTransferDto420);
+  }
+
   async blockByNumber(chainId: bigint, blockNumber: bigint): Promise<QueryRow420 | null> {
     const rows = rows420(await this.db.query('select * from idx_blocks where chain_id = $1 and block_number = $2 limit 1', [chainId.toString(), blockNumber.toString()]));
     return rows[0] ?? null;
@@ -117,19 +153,34 @@ export class IndexerQueryService420 {
     return rows[0] ?? null;
   }
 
+  classifySearch(term: string): SearchRoute420 { return classifySearch420(term); }
+
   async search(chainId: bigint, term: string, limit = 20): Promise<QueryRow420[]> {
-    const normalized = term.trim().toLowerCase();
-    if (!normalized) return [];
+    const route = classifySearch420(term);
+    if (route.kind === 'unknown') return [];
     const bounded = Math.min(normalizeLimit420(limit), 50);
+    const normalized = route.normalized;
+
+    if (route.kind === 'block_number') {
+      const row = await this.blockByNumber(chainId, BigInt(normalized));
+      return row ? [{ result_type: 'block', result_key: normalized, result_value: row.block_hash }] : [];
+    }
+    if (route.kind === 'address') {
+      const row = await this.address(chainId, normalized);
+      return row ? [{ result_type: 'address', result_key: normalized, result_value: normalized }] : [];
+    }
+    if (route.kind === 'hash') {
+      const [block, transaction] = await Promise.all([this.blockByHash(chainId, normalized), this.transactionByHash(chainId, normalized)]);
+      const results: QueryRow420[] = [];
+      if (block) results.push({ result_type: 'block', result_key: block.block_number, result_value: normalized });
+      if (transaction) results.push({ result_type: 'transaction', result_key: normalized, result_value: normalized });
+      return results.slice(0, bounded);
+    }
+
     const result = await this.db.query(
-      `select 'block' as result_type, block_number::text as result_key, block_hash as result_value from idx_blocks where chain_id = $1 and (block_hash = $2 or block_number::text = $2)
-       union all
-       select 'transaction', tx_hash, tx_hash from idx_transactions where chain_id = $1 and tx_hash = $2
-       union all
-       select 'address', address, address from idx_addresses where chain_id = $1 and address = $2
-       union all
-       select 'protocol_object', object_key, protocol from idx_protocol_object_events where chain_id = $1 and lower(object_key) = $2
-       limit $3`,
+      `select 'protocol_object' as result_type, object_key as result_key, protocol as result_value
+       from idx_protocol_object_events where chain_id = $1 and lower(object_key) = $2
+       order by block_number desc, tx_index desc, log_index desc limit $3`,
       [chainId.toString(), normalized, bounded]
     );
     return rows420(result);

@@ -357,6 +357,24 @@ nav:
                   - Events & Finality: apps/attention/developer/events.md
                   - Errors & Retries: apps/attention/developer/errors.md
                   - Examples: apps/attention/developer/examples.md
+          - 420 Faucet:
+              - Overview: apps/faucet/index.md
+              - Getting Started: apps/faucet/getting-started.md
+              - User Guide: apps/faucet/user-guide.md
+              - Concepts: apps/faucet/concepts.md
+              - Architecture: apps/faucet/architecture.md
+              - Permissions: apps/faucet/permissions.md
+              - Fees & Limits: apps/faucet/fees.md
+              - Security: apps/faucet/security.md
+              - Troubleshooting: apps/faucet/troubleshooting.md
+              - FAQ: apps/faucet/faq.md
+              - Developer Integration:
+                  - Overview: apps/faucet/developer/index.md
+                  - Contracts: apps/faucet/developer/contracts.md
+                  - API: apps/faucet/developer/api.md
+                  - Events & Observability: apps/faucet/developer/events.md
+                  - Errors & Retries: apps/faucet/developer/errors.md
+                  - Examples: apps/faucet/developer/examples.md
       - 420 Wallet:
           - Onboarding: users/wallet/index.md
           - Setup, Import & Protection: users/wallet/setup-import-and-protection.md

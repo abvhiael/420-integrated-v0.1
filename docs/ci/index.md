@@ -21,11 +21,12 @@ The current deterministic stage order is:
 
 1. governed front-matter validation;
 2. governed internal-link and anchor validation;
-3. DOC-10 generated-reference freshness;
-4. strict MkDocs build;
-5. audience navigation and search-index qualification.
+3. stable troubleshooting-ID validation;
+4. DOC-10 generated-reference freshness;
+5. strict MkDocs build;
+6. audience navigation and search-index qualification.
 
-DOC-12 continues to extend this runner with stable-ID, orphan/coverage and narrowly scoped publication-safety checks.
+DOC-12 continues to extend this runner with orphan/coverage and narrowly scoped publication-safety checks.
 
 ## Front-matter policy
 
@@ -53,9 +54,23 @@ Run it directly with:
 python scripts/validate-doc-links.py
 ```
 
+## Troubleshooting-ID policy
+
+`docs/ci/troubleshooting-id-policy.json` declares the DOC-11 pages that own stable troubleshooting entries, the reserved domain vocabulary and the narrow files excluded from exact-reference resolution because they intentionally contain examples, templates or audit prose.
+
+`scripts/validate-troubleshooting-ids.py` verifies stable `TRB-<DOMAIN>-<NNN>` syntax, one owner per published ID, reserved-domain use, exact-reference resolution and troubleshooting-anchor ownership.
+
+Run it directly with:
+
+```bash
+python scripts/validate-troubleshooting-ids.py
+```
+
+The qualified DOC-11 corpus currently contains 92 unique stable owner IDs; the DOC-12.4 qualification checked 105 exact ID-reference occurrences.
+
 ## CI contract
 
-- [Documentation qualification contract](qualification-contract.md) — scope, authority, deterministic stage order, exit codes, failure ownership, front-matter compatibility, internal-link rules and CI/local equivalence.
+- [Documentation qualification contract](qualification-contract.md) — scope, authority, deterministic stage order, exit codes, failure ownership and validator rules.
 - [DOC-12 documentation CI roadmap](DOC-12-ROADMAP.md) — implementation sequence for DOC-12.1 through DOC-12.10.
 
 ## Design rule
@@ -64,4 +79,4 @@ Documentation CI must report machine-verifiable defects without claiming semanti
 
 ## Phase status
 
-DOC-12.1 through DOC-12.3 are complete. Next is DOC-12.4 — stable troubleshooting-ID validation.
+DOC-12.1 through DOC-12.4 are complete. Next is DOC-12.5 — orphan-page and navigation validation.

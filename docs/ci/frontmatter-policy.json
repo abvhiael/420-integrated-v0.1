@@ -36,5 +36,8 @@
     "security",
     "auditor"
   ],
-  "legacy_exceptions": []
+  "legacy_exceptions": [],
+  "legacy_exception_globs": [
+    "docs/apps/*/architecture.md"
+  ]
 }

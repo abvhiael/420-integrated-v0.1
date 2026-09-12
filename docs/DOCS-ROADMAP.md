@@ -116,7 +116,7 @@ Exit condition: every user-facing frozen Genesis application has a predictable, 
 
 - [x] DOC-9.1 Establish the developer-documentation foundation and integration model: developer audiences, prerequisites, tooling/source-of-truth matrix, canonical-versus-derived authority map, task-guide structure, navigation and the DOC-9/DOC-10 boundary.
 - [x] DOC-9.2 Publish the developer quickstart and local-development workflow: repository/toolchain setup, local/devnet bootstrap, project structure, starter flow and first canonical read plus Wallet-authorized write.
-- [ ] DOC-9.3 Document networks, testnet and RPC access: network discovery, chain identity/manifests, Faucet/test accounts, public RPC/WSS, 420RPC boundaries, endpoint health/failover and environment-safety checks.
+- [x] DOC-9.3 Document networks, testnet and RPC access: network discovery, chain identity/manifests, Faucet/test accounts, public RPC/WSS, 420RPC boundaries, endpoint health/failover and environment-safety checks.
 - [ ] DOC-9.4 Document contracts, deployments, Registry and verification: canonical contract/interface discovery, versioning, deployment planning/external signing, receipt/runtime-code confirmation, 420Verify evidence and Registry/AppStore publication handoffs.
 - [ ] DOC-9.5 Document reads, APIs and 420Indexer: canonical RPC versus projections, Indexer endpoints, query/pagination/cursor/replay patterns, provenance, reorg/finality semantics, rate limits and fallback behavior.
 - [ ] DOC-9.6 Document Wallet, Smart Account and capability integration: connection versus authority, transaction preparation/simulation, capability/session scopes, passkeys, recovery-aware UX, signing handoff and post-submit confirmation.

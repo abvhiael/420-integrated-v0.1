@@ -29,34 +29,14 @@ class Stage:
 
 
 STAGES: tuple[Stage, ...] = (
-    Stage(
-        "front-matter",
-        (sys.executable, "scripts/validate-doc-frontmatter.py"),
-    ),
-    Stage(
-        "internal-links",
-        (sys.executable, "scripts/validate-doc-links.py"),
-    ),
-    Stage(
-        "troubleshooting-ids",
-        (sys.executable, "scripts/validate-troubleshooting-ids.py"),
-    ),
-    Stage(
-        "orphan-navigation",
-        (sys.executable, "scripts/validate-doc-orphans.py"),
-    ),
-    Stage(
-        "generated-reference-freshness",
-        (sys.executable, "scripts/qualify-generated-reference.py", "--check"),
-    ),
-    Stage(
-        "strict-mkdocs-build",
-        (sys.executable, "-m", "mkdocs", "build", "--strict"),
-    ),
-    Stage(
-        "search-navigation",
-        (sys.executable, "scripts/qualify-docs.py"),
-    ),
+    Stage("front-matter", (sys.executable, "scripts/validate-doc-frontmatter.py")),
+    Stage("internal-links", (sys.executable, "scripts/validate-doc-links.py")),
+    Stage("troubleshooting-ids", (sys.executable, "scripts/validate-troubleshooting-ids.py")),
+    Stage("orphan-navigation", (sys.executable, "scripts/validate-doc-orphans.py")),
+    Stage("required-doc-coverage", (sys.executable, "scripts/validate-required-docs.py")),
+    Stage("generated-reference-freshness", (sys.executable, "scripts/qualify-generated-reference.py", "--check")),
+    Stage("strict-mkdocs-build", (sys.executable, "-m", "mkdocs", "build", "--strict")),
+    Stage("search-navigation", (sys.executable, "scripts/qualify-docs.py")),
 )
 
 
@@ -67,23 +47,14 @@ def render_command(command: Sequence[str]) -> str:
 def run_stage(stage: Stage) -> int:
     print(f"420Docs CI: START {stage.name}")
     print(f"420Docs CI: RUN   {render_command(stage.command)}")
-
     try:
         completed = subprocess.run(stage.command, cwd=ROOT, check=False)
     except OSError as exc:
-        print(
-            f"420Docs CI: ERROR {stage.name}: could not execute stage: {exc}",
-            file=sys.stderr,
-        )
+        print(f"420Docs CI: ERROR {stage.name}: could not execute stage: {exc}", file=sys.stderr)
         return RUNNER_ERROR
-
     if completed.returncode != 0:
-        print(
-            f"420Docs CI: FAIL  {stage.name}: command exited {completed.returncode}",
-            file=sys.stderr,
-        )
+        print(f"420Docs CI: FAIL  {stage.name}: command exited {completed.returncode}", file=sys.stderr)
         return QUALIFICATION_FAILURE
-
     print(f"420Docs CI: PASS  {stage.name}")
     return PASS
 
@@ -91,12 +62,10 @@ def run_stage(stage: Stage) -> int:
 def main() -> int:
     print(f"420Docs CI: root={ROOT}")
     print(f"420Docs CI: stages={len(STAGES)}")
-
     for stage in STAGES:
         result = run_stage(stage)
         if result != PASS:
             return result
-
     print("420Docs CI: PASS  all documentation qualification stages")
     return PASS
 

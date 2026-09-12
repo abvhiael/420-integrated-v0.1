@@ -11,7 +11,6 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = ROOT / "scripts"
 GENERATED = ROOT / "docs" / "reference" / "generated"
-FRESHNESS = GENERATED / "freshness.md"
 
 
 def load_module(filename: str, name: str):
@@ -45,34 +44,6 @@ def expected_outputs() -> dict[Path, str]:
         if not callable(render):
             raise RuntimeError(f"renderer has no render() function: {filename}")
         outputs[GENERATED / output_name] = render()
-
-    lines = [
-        "---",
-        "title: Generated reference freshness manifest",
-        "audience:",
-        "  - developer",
-        "category: reference",
-        "status: generated",
-        "version: current",
-        "---",
-        "",
-        "# Generated reference freshness manifest",
-        "",
-        "> GENERATED FILE - DO NOT EDIT. Regenerate with `python scripts/qualify-generated-reference.py --write`.",
-        "",
-        "This manifest records the deterministic SHA-256 identity of every DOC-10 generated output covered by the freshness gate. The manifest does not include its own hash.",
-        "",
-        "| Generated output | SHA-256 |",
-        "| --- | --- |",
-    ]
-    for path, content in sorted(outputs.items(), key=lambda item: item[0].as_posix()):
-        lines.append(f"| `{path.relative_to(ROOT).as_posix()}` | `{sha256_text(content)}` |")
-    lines += [
-        "",
-        "Qualification rule: CI recomputes every expected output directly from implementation/reference sources and fails if any committed generated file is missing or differs byte-for-byte.",
-        "",
-    ]
-    outputs[FRESHNESS] = "\n".join(lines)
     return outputs
 
 
@@ -84,6 +55,12 @@ def stale_paths(outputs: dict[Path, str]) -> list[str]:
     return stale
 
 
+def print_identities(outputs: dict[Path, str]) -> None:
+    print("DOC-10 generated output identities:")
+    for path, content in sorted(outputs.items(), key=lambda item: item[0].as_posix()):
+        print(f"  {sha256_text(content)}  {path.relative_to(ROOT).as_posix()}")
+
+
 def check(outputs: dict[Path, str]) -> int:
     stale = stale_paths(outputs)
     if stale:
@@ -93,6 +70,7 @@ def check(outputs: dict[Path, str]) -> int:
         print("Run: python scripts/qualify-generated-reference.py --write", file=sys.stderr)
         return 1
     print(f"DOC-10 generated reference is current ({len(outputs)} outputs)")
+    print_identities(outputs)
     return 0
 
 
@@ -101,6 +79,7 @@ def write(outputs: dict[Path, str]) -> int:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(content, encoding="utf-8", newline="\n")
         print(f"wrote {path.relative_to(ROOT).as_posix()}")
+    print_identities(outputs)
     return 0
 
 
@@ -108,7 +87,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--check", action="store_true", help="fail when any generated reference output is stale or missing")
-    mode.add_argument("--write", action="store_true", help="rewrite all generated reference outputs and freshness manifest")
+    mode.add_argument("--write", action="store_true", help="rewrite all generated reference outputs")
     args = parser.parse_args()
     try:
         outputs = expected_outputs()

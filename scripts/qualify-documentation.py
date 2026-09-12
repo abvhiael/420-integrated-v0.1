@@ -31,6 +31,7 @@ class Stage:
 STAGES: tuple[Stage, ...] = (
     Stage("front-matter", (sys.executable, "scripts/validate-doc-frontmatter.py")),
     Stage("version-metadata", (sys.executable, "scripts/validate-doc-version-metadata.py")),
+    Stage("version-registry", (sys.executable, "scripts/validate-doc-version-registry.py")),
     Stage("internal-links", (sys.executable, "scripts/validate-doc-links.py")),
     Stage("troubleshooting-ids", (sys.executable, "scripts/validate-troubleshooting-ids.py")),
     Stage("orphan-navigation", (sys.executable, "scripts/validate-doc-orphans.py")),

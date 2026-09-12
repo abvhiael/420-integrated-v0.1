@@ -321,6 +321,42 @@ nav:
                   - Events & Finality: apps/arbitration/developer/events.md
                   - Errors & Retries: apps/arbitration/developer/errors.md
                   - Examples: apps/arbitration/developer/examples.md
+          - 420 AI:
+              - Overview: apps/ai/index.md
+              - Getting Started: apps/ai/getting-started.md
+              - User Guide: apps/ai/user-guide.md
+              - Concepts: apps/ai/concepts.md
+              - Architecture: apps/ai/architecture.md
+              - Permissions: apps/ai/permissions.md
+              - Fees & Settlement: apps/ai/fees.md
+              - Security & Privacy: apps/ai/security.md
+              - Troubleshooting: apps/ai/troubleshooting.md
+              - FAQ: apps/ai/faq.md
+              - Developer Integration:
+                  - Overview: apps/ai/developer/index.md
+                  - Contracts: apps/ai/developer/contracts.md
+                  - API & Provider Boundary: apps/ai/developer/api.md
+                  - Events & Finality: apps/ai/developer/events.md
+                  - Errors & Retries: apps/ai/developer/errors.md
+                  - Examples: apps/ai/developer/examples.md
+          - 420 Attention:
+              - Overview: apps/attention/index.md
+              - Getting Started: apps/attention/getting-started.md
+              - User Guide: apps/attention/user-guide.md
+              - Concepts: apps/attention/concepts.md
+              - Architecture: apps/attention/architecture.md
+              - Permissions: apps/attention/permissions.md
+              - Fees & Rewards: apps/attention/fees.md
+              - Security & Privacy: apps/attention/security.md
+              - Troubleshooting: apps/attention/troubleshooting.md
+              - FAQ: apps/attention/faq.md
+              - Developer Integration:
+                  - Overview: apps/attention/developer/index.md
+                  - Contracts: apps/attention/developer/contracts.md
+                  - API & Privacy Boundary: apps/attention/developer/api.md
+                  - Events & Finality: apps/attention/developer/events.md
+                  - Errors & Retries: apps/attention/developer/errors.md
+                  - Examples: apps/attention/developer/examples.md
       - 420 Wallet:
           - Onboarding: users/wallet/index.md
           - Setup, Import & Protection: users/wallet/setup-import-and-protection.md

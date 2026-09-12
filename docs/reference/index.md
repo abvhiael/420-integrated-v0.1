@@ -59,15 +59,15 @@ Generated files are not edited by hand. Human-authored explanation belongs in DO
 
 ## DOC-10 work order
 
-1. **DOC-10.1 — Generation foundation and source inventory — COMPLETE** — generated-reference contract, source classes, output layout, provenance model, deterministic-generation rules, source registry, generator entry point and first generated source manifest.
-2. **DOC-10.2 — Contract/NatSpec/ABI reference — COMPLETE** — generated contract catalogue/source reference with NatSpec extraction, public/external source surfaces, ABI provenance/status and fail-closed handling when artifact/hash/interface evidence is incomplete or only example-grade.
-3. **DOC-10.3 — Events and custom errors — COMPLETE** — generated catalogue-bounded event/error indexes with canonical signatures, indexed fields, Ethereum Keccak-256 topics/selectors and fail-closed handling for ambiguous source types.
-4. **DOC-10.4 — RPC reference — COMPLETE** — generated public 420RPC compatibility/request-policy reference from `420-rpc` implementation source, including method profiles/transports/parameters/capabilities and explicit private/admin/signer exclusions.
-5. **DOC-10.5 — 420Indexer and service API reference — COMPLETE** — generated stable v1 Indexer routes, path/query parameters, success/error envelopes, keyset pagination/cursor limits, filter surfaces, readiness/status semantics and explicit non-authoritative boundary.
-6. **DOC-10.6 — SDK and CLI reference — COMPLETE** — generated SDK exports, Wallet adapter/configuration surfaces, primary CLI command forms/options/defaults, installed binaries and signer-secret isolation boundaries.
-7. **DOC-10.7 — Network and chain registry reference — COMPLETE** — generated environment availability, exact local manifest chain/RPC/service discovery, schema constraints and fail-closed absence for devnet/testnet/mainnet.
-8. **DOC-10.8 — Canonical deployment reference** — deployment/catalogue records, versions, provenance, verified artifact identities and approved addresses.
-9. **DOC-10.9 — Determinism and freshness qualification** — regeneration check, stale-output detection, source/output hashes and generator-specific CI qualification.
-10. **DOC-10.10 — Reference coverage audit and closeout** — verify all required generated families, task-guide cross-links, provenance markers, environment boundaries and phase exit criteria.
+1. **DOC-10.1 — Generation foundation and source inventory — COMPLETE**
+2. **DOC-10.2 — Contract/NatSpec/ABI reference — COMPLETE**
+3. **DOC-10.3 — Events and custom errors — COMPLETE**
+4. **DOC-10.4 — RPC reference — COMPLETE**
+5. **DOC-10.5 — 420Indexer and service API reference — COMPLETE**
+6. **DOC-10.6 — SDK and CLI reference — COMPLETE**
+7. **DOC-10.7 — Network and chain registry reference — COMPLETE**
+8. **DOC-10.8 — Canonical deployment reference**
+9. **DOC-10.9 — Determinism and freshness qualification**
+10. **DOC-10.10 — Reference coverage audit and closeout**
 
 DOC-10 is monolithic: DOC-10.1 through DOC-10.10 remain on one branch/PR and merge once after the final coverage audit, reconciliation with current `main`, exact-head 420Docs qualification and exact-head full 420 Integrated qualification.

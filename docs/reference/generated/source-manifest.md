@@ -13,7 +13,7 @@ version: current
 
 Generator schema: `1.0.0`  
 Source registry: `docs/reference/reference-sources.json`  
-Source registry SHA-256: `93c9f45a2f691c1ac7ef60ed49b11eb3b7d3c412d15d5cd64c47e8904c0d36c7`
+Source registry SHA-256: `62163571bc6613ae0205cdd6301280b4dacaa194903f0b56da3d83131c5b1c37`
 
 This manifest records the checked-in source locations used by DOC-10 renderers. Presence is not authority: later family renderers must still enforce verification, environment and provenance rules before publishing distributable reference values.
 
@@ -31,8 +31,8 @@ This manifest records the checked-in source locations used by DOC-10 renderers. 
 | `indexer-api` | `DOC-10.5` | `420-indexer/src/api-contract.ts` | file |
 | `indexer-api` | `DOC-10.5` | `420-indexer/src/api-surface.ts` | file |
 | `networks` | `DOC-10.7` | `developer-hub/manifests` | directory |
-| `rpc` | `DOC-10.4` | `execution` | directory |
-| `rpc` | `DOC-10.4` | `packages/420-cli` | directory |
+| `rpc` | `DOC-10.4` | `420-rpc/src/methods.ts` | file |
+| `rpc` | `DOC-10.4` | `420-rpc/src/request-policy.ts` | file |
 | `sdk-cli` | `DOC-10.6` | `packages/420-cli` | directory |
 | `sdk-cli` | `DOC-10.6` | `packages/420-sdk/src/index.ts` | file |
 | `sdk-cli` | `DOC-10.6` | `packages/420-sdk/src/wallet.ts` | file |
@@ -61,7 +61,7 @@ Environment-scoped only; do not promote local example values into testnet/mainne
 
 ### rpc
 
-Public execution/420RPC-facing reference only; exclude private Engine/admin/signer surfaces.
+Public 420RPC compatibility and request-policy reference only; private Engine/admin/personal/debug/miner/txpool and node-managed account/signing surfaces remain excluded.
 
 ### sdk-cli
 

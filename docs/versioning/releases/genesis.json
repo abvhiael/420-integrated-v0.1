@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "release": "genesis",
+  "environment": "genesis",
+  "publication_status": "current",
+  "immutable": true,
+  "authority": "frozen-genesis-documentation-contract",
+  "evidence": [
+    "docs/apps/coverage-audit.md",
+    "docs/architecture/genesis.md",
+    "docs/versioning/version-authority-contract.md"
+  ],
+  "network_authority": false,
+  "deployment_authority": false,
+  "notes": "Frozen Genesis documentation identity. This manifest does not claim a live testnet/mainnet deployment or canonical live network values."
+}

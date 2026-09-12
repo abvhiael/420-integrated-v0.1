@@ -35,9 +35,11 @@
       "sources": [
         "420-indexer/src/api-contract.ts",
         "420-indexer/src/api-surface.ts",
-        "420-indexer/src/abi-manifest.ts"
+        "420-indexer/src/http-transport.ts",
+        "420-indexer/src/query-layer.ts",
+        "420-indexer/src/operational-api.ts"
       ],
-      "notes": "420Indexer projections remain derived, rebuildable and non-authoritative."
+      "notes": "Stable public read API only. 420Indexer projections remain derived, rebuildable and non-authoritative; generated reference must preserve authoritative:false and readiness/finality provenance."
     },
     {
       "id": "sdk-cli",

@@ -42,6 +42,10 @@ STAGES: tuple[Stage, ...] = (
         (sys.executable, "scripts/validate-troubleshooting-ids.py"),
     ),
     Stage(
+        "orphan-navigation",
+        (sys.executable, "scripts/validate-doc-orphans.py"),
+    ),
+    Stage(
         "generated-reference-freshness",
         (sys.executable, "scripts/qualify-generated-reference.py", "--check"),
     ),

@@ -6,7 +6,7 @@ DOC-10 builds reproducible machine-derived technical reference for 420 Integrate
 
 - [x] **DOC-10.1 — Generation foundation and source inventory** — establish generated-reference authority rules, source registry, deterministic output layout, generator schema, `generate`/`--check` entry point and initial source manifest.
 - [x] **DOC-10.2 — Contract, NatSpec and ABI reference** — generate catalogue/source contract reference, extract contract-level NatSpec and public/external source surfaces, expose ABI provenance/availability, and fail closed rather than publish example-grade or unverifiable ABI evidence.
-- [ ] **DOC-10.3 — Events and custom errors** — derive per-contract/global event and custom-error indexes, full signatures, indexed fields and topics/selectors where derivable.
+- [x] **DOC-10.3 — Events and custom errors** — derive per-contract/global event and custom-error indexes, canonical signatures, indexed parameter positions, event topics and error selectors where source types can be normalized unambiguously; fail closed on unresolved/user-defined types.
 - [ ] **DOC-10.4 — RPC reference** — derive supported public execution JSON-RPC/420RPC-facing methods, parameters/results and public/private classifications without exposing Engine/admin/signer surfaces.
 - [ ] **DOC-10.5 — 420Indexer and service API reference** — derive stable routes, query/path parameters, envelopes, pagination/cursors, status/readiness and error surfaces from API source contracts.
 - [ ] **DOC-10.6 — SDK and CLI reference** — derive exported SDK types/functions plus stable CLI commands/options/examples from canonical source definitions.
@@ -31,6 +31,12 @@ DOC-10.1 establishes:
 DOC-10.2 extends the generator with `docs/reference/generated/contracts.md`. The renderer currently consumes the checked-in Developer Hub catalogue and matching Solidity source, extracts contract-level NatSpec and public/external functions, and reports artifact/interface/ABI evidence explicitly.
 
 The only checked-in catalogue is `developer-hub/catalogue/local.example.json`. It is example-scoped, its declared `contracts/out/...` artifact and interface are not checked in, and its ABI SHA-256 value is a placeholder. Therefore the generator deliberately reports **Distributable verified ABI: NO — fail closed** rather than presenting the example address or placeholder hash as canonical testnet/mainnet ABI/deployment evidence. When qualified build artifacts/catalogues are added later, the same renderer can publish the verified ABI surface without changing the authority model.
+
+## DOC-10.3 completed event/error reference
+
+DOC-10.3 adds `docs/reference/generated/events-errors.md` and extends the same generator to extract events and custom errors from catalogue-bounded Solidity source. It publishes canonical ABI signatures, indexed event parameter positions, Ethereum Keccak-256 `topic0` values and four-byte custom-error selectors only when the source types are unambiguous.
+
+The generator includes an internal Ethereum Keccak-256 implementation with known-vector self-checks for the empty-string digest and ERC-20 `transfer(address,uint256)` selector. This avoids accidentally substituting NIST SHA3-256 and avoids a new runtime dependency. Elementary Solidity ABI types are normalized (`uint`→`uint256`, `int`→`int256`); source enums are normalized to their ABI integer representation for signature derivation. Any user-defined/ambiguous type fails closed to an unresolved signature rather than being guessed.
 
 ## Phase exit condition
 

@@ -25,11 +25,12 @@ The current deterministic stage order is:
 4. orphan-page and navigation reachability validation;
 5. required-document coverage;
 6. generated-reference family/source/navigation integration;
-7. DOC-10 generated-reference byte-for-byte freshness;
-8. strict MkDocs build;
-9. audience navigation and search-index qualification.
+7. publication authority/environment/secret-safety validation;
+8. DOC-10 generated-reference byte-for-byte freshness;
+9. strict MkDocs build;
+10. audience navigation and search-index qualification.
 
-DOC-12 continues with narrowly scoped publication-safety checks and workflow ergonomics.
+DOC-12 continues with workflow ergonomics and final CI self-tests/audit.
 
 ## Front-matter policy
 
@@ -59,13 +60,13 @@ The qualified DOC-11 corpus currently contains 92 unique stable owner IDs; DOC-1
 
 `docs/ci/orphan-policy.json` defines governed roots, approved entry pages, required audience entry pages and explicit orphan exclusions. `scripts/validate-doc-orphans.py` starts from actual MkDocs navigation plus approved entry pages and follows governed internal Markdown links.
 
-The current qualified corpus contains 434 governed pages. All 434 are reachable; 367 are directly represented in governed MkDocs navigation and the graph contains 602 governed link edges. No approved orphan exceptions are required.
+The qualified corpus contains 434 governed pages. All 434 are reachable; 367 are directly represented in governed MkDocs navigation and the graph contains 602 governed link edges. No approved orphan exceptions are required.
 
 ## Required-document coverage
 
 `docs/ci/required-docs-policy.json` protects the canonical documentation entry surfaces, four architecture entry families, all eight generated DOC-10 outputs and the complete 16-file manual package for each frozen Genesis/testnet application.
 
-`scripts/validate-required-docs.py` currently validates 340 required files across 20 frozen application packages.
+`scripts/validate-required-docs.py` validates 340 required files across 20 frozen application packages.
 
 ## Generated-reference integration
 
@@ -79,6 +80,18 @@ python scripts/qualify-generated-reference.py --check
 
 Current corpus evidence: 7 generated families, 8 outputs and 25 declared source paths pass integration checks, and every generated output is linked from the reference index.
 
+## Publication-safety policy
+
+`docs/ci/publication-safety-policy.json` defines the narrow machine-checkable safety rules introduced by DOC-12.8. `scripts/validate-doc-publication-safety.py` scans troubleshooting documentation for affirmative secret-request language, requires selected high-risk safety notices, and verifies that local/example environment material carries explicit scope/authority guards.
+
+The gate intentionally does not claim semantic security review. It protects only deterministic invariants such as: support must not request signer/recovery secrets; Faucet documentation remains testnet-only/no-value; local/example network values are not promoted to testnet/mainnet authority; and example deployment records are not published as canonical deployments.
+
+Run it directly with:
+
+```bash
+python scripts/validate-doc-publication-safety.py
+```
+
 ## CI contract
 
 - [Documentation qualification contract](qualification-contract.md) — scope, authority, deterministic stage order, exit codes, failure ownership and validator rules.
@@ -90,4 +103,4 @@ Documentation CI must report machine-verifiable defects without claiming semanti
 
 ## Phase status
 
-DOC-12.1 through DOC-12.7 are complete. Next is DOC-12.8 — cross-document authority and environment safety checks.
+DOC-12.1 through DOC-12.8 are complete. Next is DOC-12.9 — workflow integration and developer ergonomics.

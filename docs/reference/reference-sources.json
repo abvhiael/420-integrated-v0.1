@@ -45,11 +45,13 @@
       "id": "sdk-cli",
       "phase": "DOC-10.6",
       "sources": [
+        "packages/420-sdk/package.json",
         "packages/420-sdk/src/index.ts",
         "packages/420-sdk/src/wallet.ts",
-        "packages/420-cli"
+        "packages/420-cli/package.json",
+        "packages/420-cli/bin/420.mjs"
       ],
-      "notes": "Generated SDK/CLI reference must preserve signer-secret isolation and non-authority boundaries."
+      "notes": "Generate SDK exports and the stable primary 420 CLI command surface from implementation source. Preserve network/catalogue binding, signer-secret isolation and the rule that SDK/CLI convenience layers do not gain protocol authority."
     },
     {
       "id": "networks",

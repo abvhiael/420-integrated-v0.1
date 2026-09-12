@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "required_roots": [
+    "docs/architecture/index.md",
+    "docs/users/index.md",
+    "docs/developers/index.md",
+    "docs/operators/index.md",
+    "docs/reference/index.md",
+    "docs/troubleshooting/index.md",
+    "docs/apps/index.md",
+    "docs/ci/index.md"
+  ],
+  "required_architecture_entries": [
+    "docs/architecture/chain/index.md",
+    "docs/architecture/consensus/index.md",
+    "docs/architecture/infrastructure/index.md",
+    "docs/architecture/protocols/index.md"
+  ],
+  "genesis_app_directories": [
+    "wallet",
+    "explorer",
+    "search",
+    "analytics",
+    "appstore",
+    "verify",
+    "notifications",
+    "registry",
+    "names",
+    "identity",
+    "arbitration",
+    "swap",
+    "bridge",
+    "stake",
+    "governance",
+    "ai",
+    "attention",
+    "token",
+    "status",
+    "faucet"
+  ],
+  "genesis_app_required_files": [
+    "index.md",
+    "getting-started.md",
+    "user-guide.md",
+    "concepts.md",
+    "architecture.md",
+    "permissions.md",
+    "fees.md",
+    "security.md",
+    "troubleshooting.md",
+    "faq.md",
+    "developer/index.md",
+    "developer/contracts.md",
+    "developer/api.md",
+    "developer/events.md",
+    "developer/errors.md",
+    "developer/examples.md"
+  ],
+  "required_reference_outputs": [
+    "docs/reference/generated/source-manifest.md",
+    "docs/reference/generated/contracts.md",
+    "docs/reference/generated/events-errors.md",
+    "docs/reference/generated/rpc.md",
+    "docs/reference/generated/indexer-api.md",
+    "docs/reference/generated/sdk-cli.md",
+    "docs/reference/generated/networks.md",
+    "docs/reference/generated/deployments.md"
+  ]
+}

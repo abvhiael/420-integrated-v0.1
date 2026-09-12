@@ -7,6 +7,16 @@ on:
       - 'mkdocs.yml'
       - 'requirements-docs.txt'
       - 'README.md'
+      - 'scripts/qualify-documentation.py'
+      - 'scripts/validate-doc-frontmatter.py'
+      - 'scripts/validate-doc-links.py'
+      - 'scripts/validate-troubleshooting-ids.py'
+      - 'scripts/validate-doc-orphans.py'
+      - 'scripts/validate-required-docs.py'
+      - 'scripts/validate-generated-reference-integration.py'
+      - 'scripts/validate-doc-publication-safety.py'
+      - 'scripts/validate-doc-workflow.py'
+      - 'scripts/selftest-documentation-ci.py'
       - 'scripts/qualify-docs.py'
       - 'scripts/generate-reference-docs.py'
       - 'scripts/qualify-generated-reference.py'
@@ -35,6 +45,16 @@ on:
       - 'mkdocs.yml'
       - 'requirements-docs.txt'
       - 'README.md'
+      - 'scripts/qualify-documentation.py'
+      - 'scripts/validate-doc-frontmatter.py'
+      - 'scripts/validate-doc-links.py'
+      - 'scripts/validate-troubleshooting-ids.py'
+      - 'scripts/validate-doc-orphans.py'
+      - 'scripts/validate-required-docs.py'
+      - 'scripts/validate-generated-reference-integration.py'
+      - 'scripts/validate-doc-publication-safety.py'
+      - 'scripts/validate-doc-workflow.py'
+      - 'scripts/selftest-documentation-ci.py'
       - 'scripts/qualify-docs.py'
       - 'scripts/generate-reference-docs.py'
       - 'scripts/qualify-generated-reference.py'
@@ -81,11 +101,5 @@ jobs:
       - name: Install documentation dependencies
         run: pip install -r requirements-docs.txt
 
-      - name: Qualify generated reference freshness
-        run: python scripts/qualify-generated-reference.py --check
-
-      - name: Build 420Docs strictly
-        run: mkdocs build --strict
-
-      - name: Qualify search and navigation
-        run: python scripts/qualify-docs.py
+      - name: Run documentation qualification
+        run: python scripts/qualify-documentation.py

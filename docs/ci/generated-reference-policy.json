@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "source_registry": "docs/reference/reference-sources.json",
+  "reference_index": "docs/reference/index.md",
+  "required_families": {
+    "contracts": "docs/reference/generated/contracts.md",
+    "events-errors": "docs/reference/generated/events-errors.md",
+    "rpc": "docs/reference/generated/rpc.md",
+    "indexer-api": "docs/reference/generated/indexer-api.md",
+    "sdk-cli": "docs/reference/generated/sdk-cli.md",
+    "networks": "docs/reference/generated/networks.md",
+    "deployments": "docs/reference/generated/deployments.md"
+  },
+  "required_outputs": [
+    "docs/reference/generated/source-manifest.md",
+    "docs/reference/generated/contracts.md",
+    "docs/reference/generated/events-errors.md",
+    "docs/reference/generated/rpc.md",
+    "docs/reference/generated/indexer-api.md",
+    "docs/reference/generated/sdk-cli.md",
+    "docs/reference/generated/networks.md",
+    "docs/reference/generated/deployments.md"
+  ],
+  "freshness_command": ["python", "scripts/qualify-generated-reference.py", "--check"]
+}

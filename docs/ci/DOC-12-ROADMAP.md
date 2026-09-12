@@ -144,19 +144,29 @@ Deliverables:
 
 Deliverables:
 
-- `docs/ci/publication-safety-policy.json` — secret-sensitive terms, request/negation vocabulary, required notices and environment guards
-- `scripts/validate-doc-publication-safety.py` — deterministic troubleshooting secret-safety scan plus required authority/environment notice checks
+- `docs/ci/publication-safety-policy.json`
+- `scripts/validate-doc-publication-safety.py`
 - `publication-safety` stage in `scripts/qualify-documentation.py`
 - explicit guards for local/example generated network/deployment values, Faucet testnet-only/no-value semantics and DOC-11 secret-safe support rules
 - corpus qualification evidence: corrected exact-head 420Docs Qualification #662 passed after the validator learned the existing explicit `no troubleshooting step ... paste ... secrets` negation form
 
-### DOC-12.9 — Workflow integration and developer ergonomics
+### DOC-12.9 — Workflow integration and developer ergonomics — COMPLETE
 
-- Wire all DOC-12 checks into `420Docs Qualification`.
-- Keep one local command/path equivalent to CI.
-- Ensure path triggers include validators, schemas and governed documentation sources.
-- Preserve workflow concurrency cancellation for superseded PR runs.
-- Produce concise, actionable failure output.
+- [x] Wire all DOC-12 checks into `420Docs Qualification`.
+- [x] Keep one local command/path equivalent to CI.
+- [x] Ensure path triggers include validators, schemas and governed documentation sources.
+- [x] Preserve workflow concurrency cancellation for superseded PR runs.
+- [x] Produce concise, actionable failure output.
+- [x] Add a self-checking workflow contract so CI wiring cannot silently drift.
+
+Deliverables:
+
+- `docs/ci/workflow-policy.json` — required runner stages, local/CI command, PR/push path triggers, `main` push coverage and concurrency expectations
+- `scripts/validate-doc-workflow.py` — deterministic workflow/runner contract validator
+- `workflow-contract` stage in `scripts/qualify-documentation.py`
+- ordered unbuffered runner diagnostics for START/RUN/PASS/FAIL stage messages
+- workflow trigger coverage for the workflow validator itself
+- exact-head qualification evidence: 420Docs Qualification #668 passed with the workflow contract enabled
 
 ### DOC-12.10 — CI self-tests, audit and closeout
 
@@ -168,4 +178,4 @@ Deliverables:
 
 ## Exit condition
 
-A documentation change cannot merge through the DOC-12 gate while it contains a broken governed internal link, invalid governed front matter, duplicate stable troubleshooting ID, accidental governed orphan, missing required documentation surface, stale generated reference, unsafe machine-detectable publication condition, or another explicitly machine-checkable violation covered by this phase. Developers can run the same qualification locally, failures identify the offending file/rule clearly, and the CI remains deterministic enough to serve as a reliable publication gate rather than a heuristic lint layer.
+A documentation change cannot merge through the DOC-12 gate while it contains a broken governed internal link, invalid governed front matter, duplicate stable troubleshooting ID, accidental governed orphan, missing required documentation surface, stale generated reference, unsafe machine-detectable publication condition, workflow integration drift, or another explicitly machine-checkable violation covered by this phase. Developers can run the same qualification locally, failures identify the offending file/rule clearly, and the CI remains deterministic enough to serve as a reliable publication gate rather than a heuristic lint layer.

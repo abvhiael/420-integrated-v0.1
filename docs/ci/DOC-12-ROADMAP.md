@@ -49,11 +49,10 @@ Deliverables:
 
 Deliverables:
 
-- `docs/ci/frontmatter-policy.json` — governed roots, required fields, vocabulary and explicit legacy missing-metadata policy
-- `scripts/validate-doc-frontmatter.py` — deterministic YAML parsing, aggregated diagnostics and policy enforcement
+- `docs/ci/frontmatter-policy.json`
+- `scripts/validate-doc-frontmatter.py`
 - explicit `PyYAML` documentation dependency
 - `front-matter` as the first stage of `scripts/qualify-documentation.py`
-- workflow triggers for the validator/policy through `docs/**` and `scripts/validate-doc-frontmatter.py`
 - compatibility rule: legacy patterns may permit missing front matter, but front matter is fully validated whenever present
 - corpus qualification evidence: 434 governed pages checked; 271 declared legacy pages permitted without front matter; exact-head 420Docs Qualification #622 passed
 
@@ -67,13 +66,9 @@ Deliverables:
 
 Deliverables:
 
-- `docs/ci/link-policy.json` — governed roots, external schemes and explicit target/anchor exception lists
-- `scripts/validate-doc-links.py` — deterministic relative-target resolution, Markdown heading/explicit-ID collection and aggregated failure diagnostics
+- `docs/ci/link-policy.json`
+- `scripts/validate-doc-links.py`
 - `internal-links` as the second stage of `scripts/qualify-documentation.py`
-- workflow trigger coverage for `scripts/validate-doc-links.py` and policy changes under `docs/**`
-- resolution rules for relative Markdown targets, docs-root targets, extensionless Markdown pages, directory `index.md` pages and percent-decoded fragments
-- anchor validation generated with the repository Markdown toolchain (`toc` + `attr_list`) rather than a separate ad-hoc slug algorithm
-- external `http`, `https`, `mailto` and `tel` links excluded from repository-target validation
 - corpus qualification evidence: 687 internal links checked across 434 governed pages with zero target/anchor exceptions required; exact-head 420Docs Qualification #629 passed
 
 ### DOC-12.4 — Stable troubleshooting-ID validation — COMPLETE
@@ -86,11 +81,9 @@ Deliverables:
 
 Deliverables:
 
-- `docs/ci/troubleshooting-id-policy.json` — authoritative owner pages, reserved domains and deliberate reference exclusions for contract/template/audit examples
-- `scripts/validate-troubleshooting-ids.py` — deterministic owner extraction, global uniqueness checks, reserved-domain validation, reference resolution and troubleshooting-anchor checks
+- `docs/ci/troubleshooting-id-policy.json`
+- `scripts/validate-troubleshooting-ids.py`
 - `troubleshooting-ids` as the third stage of `scripts/qualify-documentation.py`
-- workflow trigger coverage for the validator and policy
-- canonical owner-heading parser supports the DOC-11 backtick heading form, for example ``## `TRB-CHAIN-001` — ...``
 - corpus qualification evidence: 92 unique stable owner IDs and 105 exact ID-reference occurrences checked; exact-head 420Docs Qualification #637 passed
 
 ### DOC-12.5 — Orphan-page and navigation validation — COMPLETE
@@ -103,8 +96,8 @@ Deliverables:
 
 Deliverables:
 
-- `docs/ci/orphan-policy.json` — governed roots, approved entry pages, required audience entry pages and explicit orphan exclusions
-- `scripts/validate-doc-orphans.py` — deterministic MkDocs-nav extraction and governed reachability traversal
+- `docs/ci/orphan-policy.json`
+- `scripts/validate-doc-orphans.py`
 - non-executing YAML parsing for MkDocs navigation, including configs containing Python-tagged extension values
 - `orphan-navigation` stage in `scripts/qualify-documentation.py`
 - corpus qualification evidence: 434 governed pages, 367 directly in governed MkDocs navigation, all 434 reachable through 602 governed link edges, zero approved orphans; exact-head 420Docs Qualification #654 passed
@@ -119,8 +112,8 @@ Deliverables:
 
 Deliverables:
 
-- `docs/ci/required-docs-policy.json` — required root pages, architecture entry families, frozen Genesis/testnet application packages and generated-reference outputs
-- `scripts/validate-required-docs.py` — deterministic required-file/package validation
+- `docs/ci/required-docs-policy.json`
+- `scripts/validate-required-docs.py`
 - `required-doc-coverage` stage in `scripts/qualify-documentation.py`
 - coverage for the complete 16-file documentation package of each of 20 frozen Genesis/testnet applications
 - corpus qualification evidence: 340 required files checked and all 20 frozen application packages present; exact-head 420Docs Qualification #654 passed
@@ -135,18 +128,27 @@ Deliverables:
 
 Deliverables:
 
-- `docs/ci/generated-reference-policy.json` — expected DOC-10 family/output mapping, source registry, reference index and freshness command
-- `scripts/validate-generated-reference-integration.py` — generated family/source/output/discoverability validation
+- `docs/ci/generated-reference-policy.json`
+- `scripts/validate-generated-reference-integration.py`
 - `generated-reference-integration` immediately before DOC-10 `generated-reference-freshness` in the unified runner
 - DOC-10 byte-for-byte freshness remains owned by `scripts/qualify-generated-reference.py --check`
 - corpus qualification evidence: 7 generated families, 8 generated outputs and 25 declared source paths validated; all outputs directly linked from `docs/reference/index.md`; exact-head 420Docs Qualification #654 passed
 
-### DOC-12.8 — Cross-document authority and environment safety checks
+### DOC-12.8 — Cross-document authority and environment safety checks — COMPLETE
 
-- Detect localhost/example/testnet-only values presented as canonical production authority where machine-checkable.
-- Check for known unsafe secret-request patterns in support/troubleshooting documentation.
-- Validate required authority/scope notices on high-risk documentation classes where practical.
-- Keep semantic checks narrow enough to avoid pretending CI can replace human review.
+- [x] Detect localhost/example/testnet-only values presented without required scope/authority guards where machine-checkable.
+- [x] Check for known unsafe secret-request patterns in support/troubleshooting documentation.
+- [x] Validate required authority/scope notices on selected high-risk documentation classes.
+- [x] Keep semantic checks narrow enough to avoid pretending CI can replace human review.
+- [x] Wire publication-safety validation into the unified local/CI gate.
+
+Deliverables:
+
+- `docs/ci/publication-safety-policy.json` — secret-sensitive terms, request/negation vocabulary, required notices and environment guards
+- `scripts/validate-doc-publication-safety.py` — deterministic troubleshooting secret-safety scan plus required authority/environment notice checks
+- `publication-safety` stage in `scripts/qualify-documentation.py`
+- explicit guards for local/example generated network/deployment values, Faucet testnet-only/no-value semantics and DOC-11 secret-safe support rules
+- corpus qualification evidence: corrected exact-head 420Docs Qualification #662 passed after the validator learned the existing explicit `no troubleshooting step ... paste ... secrets` negation form
 
 ### DOC-12.9 — Workflow integration and developer ergonomics
 
@@ -166,4 +168,4 @@ Deliverables:
 
 ## Exit condition
 
-A documentation change cannot merge through the DOC-12 gate while it contains a broken governed internal link, invalid governed front matter, duplicate stable troubleshooting ID, accidental governed orphan, missing required documentation surface, stale generated reference, or another explicitly machine-checkable publication violation covered by this phase. Developers can run the same qualification locally, failures identify the offending file/rule clearly, and the CI remains deterministic enough to serve as a reliable publication gate rather than a heuristic lint layer.
+A documentation change cannot merge through the DOC-12 gate while it contains a broken governed internal link, invalid governed front matter, duplicate stable troubleshooting ID, accidental governed orphan, missing required documentation surface, stale generated reference, unsafe machine-detectable publication condition, or another explicitly machine-checkable violation covered by this phase. Developers can run the same qualification locally, failures identify the offending file/rule clearly, and the CI remains deterministic enough to serve as a reliable publication gate rather than a heuristic lint layer.

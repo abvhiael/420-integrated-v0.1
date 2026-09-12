@@ -11,7 +11,7 @@ DOC-10 builds reproducible machine-derived technical reference for 420 Integrate
 - [x] **DOC-10.5 — 420Indexer and service API reference** — derive the stable public v1 route inventory, chain/global scope, query/path parameters, success/error envelopes, paging/cursor policy, route filters, readiness/status semantics and non-authoritative boundary from checked-in Indexer API implementation sources.
 - [x] **DOC-10.6 — SDK and CLI reference** — derive the exported `@420/sdk` interfaces/classes/functions, Wallet adapter boundaries, primary `420` CLI command forms, runtime options/defaults and installed binaries while preserving network/catalogue binding and signer-secret isolation.
 - [x] **DOC-10.7 — Network and chain registry reference** — derive environment-scoped chain identity, RPC/service discovery, manifest contract hints and environment availability from checked-in Developer Hub manifest/schema/discovery sources; publish only the local example currently present and fail closed for absent devnet/testnet/mainnet manifests.
-- [ ] **DOC-10.8 — Canonical deployment reference** — derive approved contract deployments, versions, addresses, deployment blocks, provenance and verified artifact/ABI identities from canonical/approved records.
+- [x] **DOC-10.8 — Canonical deployment reference** — derive the canonical-publication evidence contract from deployment/verification controls and checked-in catalogue/deployment/release records; publish zero canonical deployments when only example-scoped/unconfirmed evidence exists rather than promoting plans, manifest hints, example addresses or unverified artifacts.
 - [ ] **DOC-10.9 — Determinism and freshness qualification** — add generator-specific stale-output detection, source/output identity checks and CI qualification while leaving broader documentation CI to DOC-12.
 - [ ] **DOC-10.10 — Reference coverage audit and closeout** — verify every required generated family, provenance marker, environment boundary and DOC-8/DOC-9 cross-link before phase merge.
 
@@ -42,6 +42,10 @@ DOC-10.6 generates `sdk-cli.md` from the SDK and CLI packages, recording exporte
 ## DOC-10.7 completed network/chain registry reference
 
 DOC-10.7 generates `networks.md` from the checked-in network manifest, schema and discovery implementation. Only the local environment is currently available. Devnet, testnet and mainnet remain explicitly unavailable/fail-closed, and local chain ID/endpoints/contract hints are never promoted into those absent environments.
+
+## DOC-10.8 completed canonical deployment reference
+
+DOC-10.8 adds `deployments.md` plus `reference_deployment_renderer.py`. Deployment plans remain noncanonical (`canonicalDeploymentProof: false`), recorded receipts still require canonical RPC confirmation, and 420Verify results are evidence rather than audit/registration/protocol authority. Because the checked-in deployment request, release candidate and catalogue are example-scoped—and the catalogue's artifact/interface/ABI evidence is not distributable—the generated canonical deployment table intentionally contains no publishable local/devnet/testnet/mainnet deployments.
 
 ## Phase exit condition
 

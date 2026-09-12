@@ -17,50 +17,31 @@ DOC-10 builds reproducible machine-derived technical reference for 420 Integrate
 
 ## DOC-10.1 completed foundation
 
-DOC-10.1 establishes:
-
-- `docs/reference/index.md` as the generated-reference entry point;
-- `docs/reference/generation-model.md` as the authority/provenance/determinism contract;
-- `docs/reference/source-inventory.md` as the current source availability/caveat inventory;
-- `docs/reference/reference-sources.json` as the machine-readable family/source registry;
-- `scripts/generate-reference-docs.py` as the deterministic generator entry point with `--check` mode;
-- `docs/reference/generated/source-manifest.md` as the first generated artifact and proof of the output convention.
+DOC-10.1 establishes `docs/reference/index.md`, `generation-model.md`, `source-inventory.md`, `reference-sources.json`, `scripts/generate-reference-docs.py`, and the first generated source manifest.
 
 ## DOC-10.2 completed contract reference
 
-DOC-10.2 extends the generator with `docs/reference/generated/contracts.md`. The renderer currently consumes the checked-in Developer Hub catalogue and matching Solidity source, extracts contract-level NatSpec and public/external functions, and reports artifact/interface/ABI evidence explicitly.
-
-The only checked-in catalogue is `developer-hub/catalogue/local.example.json`. It is example-scoped, its declared `contracts/out/...` artifact and interface are not checked in, and its ABI SHA-256 value is a placeholder. Therefore the generator deliberately reports **Distributable verified ABI: NO — fail closed** rather than presenting the example address or placeholder hash as canonical testnet/mainnet ABI/deployment evidence. When qualified build artifacts/catalogues are added later, the same renderer can publish the verified ABI surface without changing the authority model.
+DOC-10.2 generates `contracts.md` from the checked-in Developer Hub catalogue plus Solidity source. The only checked-in catalogue is local/example scoped and lacks qualified distributable ABI evidence, so ABI publication fails closed rather than presenting example values as canonical deployment data.
 
 ## DOC-10.3 completed event/error reference
 
-DOC-10.3 adds `docs/reference/generated/events-errors.md` and extends the same generator to extract events and custom errors from catalogue-bounded Solidity source. It publishes canonical ABI signatures, indexed event parameter positions, Ethereum Keccak-256 `topic0` values and four-byte custom-error selectors only when the source types are unambiguous.
-
-The generator includes an internal Ethereum Keccak-256 implementation with known-vector self-checks for the empty-string digest and ERC-20 `transfer(address,uint256)` selector. This avoids accidentally substituting NIST SHA3-256 and avoids a new runtime dependency. Elementary Solidity ABI types are normalized (`uint`→`uint256`, `int`→`int256`); source enums are normalized to their ABI integer representation for signature derivation. Any user-defined/ambiguous type fails closed to an unresolved signature rather than being guessed.
+DOC-10.3 generates catalogue-bounded event/error indexes with canonical signatures, indexed positions, Ethereum Keccak-256 topics and custom-error selectors when types normalize unambiguously. Ambiguous/user-defined types remain unresolved rather than guessed.
 
 ## DOC-10.4 completed RPC reference
 
-DOC-10.4 adds `docs/reference/generated/rpc.md` and binds the RPC source inventory to `420-rpc/src/methods.ts` plus `420-rpc/src/request-policy.ts`. `scripts/reference_rpc_renderer.py` deterministically derives the public compatibility list, method profile, HTTP/WebSocket transport, positional parameter form, required upstream capability, chain-mutation flag and user-signature requirement.
-
-The generated reference also records request-envelope rules (`-32600`, `-32601`, `-32602`), accepted block selectors, allowed subscription kinds and the explicit public exclusions. `engine_`, `admin_`, `personal_`, `debug_`, `miner_` and `txpool_` namespaces are outside the public surface, as are node-managed account/signing methods such as `eth_sendTransaction`, `eth_sign`, `eth_signTransaction`, `eth_accounts` and `eth_coinbase`. Result schemas are not invented where 420RPC itself does not redeclare them; successful result shapes remain those of the compatible execution upstream. DOC-10.9 will fold all family renderers into final unified stale-output qualification.
+DOC-10.4 generates `rpc.md` from `420-rpc/src/methods.ts` and `request-policy.ts`, covering the explicit public compatibility surface, parameter rules and public exclusions while keeping Engine/admin/signer namespaces out of public reference.
 
 ## DOC-10.5 completed Indexer/API reference
 
-DOC-10.5 adds `docs/reference/generated/indexer-api.md` and `scripts/reference_indexer_renderer.py`. The renderer binds to `api-contract.ts`, `api-surface.ts`, `http-transport.ts`, `query-layer.ts` and `operational-api.ts` so the generated page comes from the stable implementation boundary rather than prose.
-
-The generated page covers all 15 public GET routes, chain/global scope, path/query parameters, v1 success/error envelopes, `400 invalid_request`, `404 not_found`, `405 method_not_allowed`, generic `500 internal_error`, and the special readiness behavior where an unready service returns HTTP `503` with the normal readiness data envelope. Paging is recorded as opaque base64url keyset cursors with default `50`, maximum `200`, `asc|desc`, and `{ items, nextCursor }` responses. Readiness/status documentation preserves the implementation's `authoritative: false` boundary and makes clear that Indexer data remains derived and must be canonically rechecked for security-sensitive decisions.
+DOC-10.5 generates `indexer-api.md` from the stable Indexer route/transport/query/operational sources, including all public GET routes, envelopes, filters, keyset pagination and readiness/status provenance with `authoritative: false` preserved.
 
 ## DOC-10.6 completed SDK/CLI reference
 
-DOC-10.6 adds `docs/reference/generated/sdk-cli.md` and `scripts/reference_sdk_cli_renderer.py`. The renderer binds to `@420/sdk` package/source plus the primary `420` CLI package/entry point. It records the SDK's exported network/contract/RPC/Wallet surfaces, network↔catalogue chain identity checks, RPC endpoint membership checks, Wallet-chain checks, canonical Smart Account factory and CapabilityRegistry requirements, and Wallet runtime adapter methods.
-
-The CLI portion derives the stable primary `420` command forms from `420.mjs`, records manifest/catalogue/RPC overrides and local-example defaults, and lists the installed binaries from package metadata. The generated reference explicitly preserves signer-secret isolation: neither the SDK nor CLI accepts raw private keys, seed phrases or mnemonics as an authorization path; state-changing authorization remains at the qualified Wallet/external signer boundary.
+DOC-10.6 generates `sdk-cli.md` from the SDK and CLI packages, recording exported integration surfaces, chain/catalogue checks, Wallet/Smart Account boundaries, stable command forms and signer-secret isolation.
 
 ## DOC-10.7 completed network/chain registry reference
 
-DOC-10.7 adds `docs/reference/generated/networks.md` and `scripts/reference_network_renderer.py`. The renderer binds to the checked-in manifest directory, the v1 network-manifest schema and the Developer Hub network-discovery implementation.
-
-The repository currently contains only `developer-hub/manifests/local.example.json`, so the generated environment table publishes **local** as available and reports **devnet**, **testnet** and **mainnet** as unavailable/fail-closed. It does not copy chain ID `420`, localhost endpoints or the local `Registry420` hint into absent environments. The local record exposes the exact manifest-scoped RPC endpoints, service endpoints, native currency, Faucet eligibility and production flag. Manifest contract entries are explicitly treated as environment-scoped discovery hints; approved canonical deployment publication remains DOC-10.8.
+DOC-10.7 generates `networks.md` from the checked-in network manifest, schema and discovery implementation. Only the local environment is currently available. Devnet, testnet and mainnet remain explicitly unavailable/fail-closed, and local chain ID/endpoints/contract hints are never promoted into those absent environments.
 
 ## Phase exit condition
 

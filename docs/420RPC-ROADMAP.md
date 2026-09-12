@@ -35,35 +35,36 @@ Delivered bounded sessions, subscription ownership/upstream binding, heartbeat c
 ### RPC-8 — 420Indexer-derived reads — complete
 Delivered an explicit non-authoritative derived-read surface with provider eligibility, chain/freshness checks, route validation and provenance envelopes.
 
-### RPC-9 — authentication, API credentials and Developer Hub integration — complete
-Delivered DEVHUB-16-compatible credential authentication, chain/environment/audience binding, RPC scope authorization, timing-safe bearer verification, terminal/expiry handling, bounded credential registry semantics and RPC-6 principal binding.
+### RPC-9 — authentication and Developer Hub integration — complete
+Delivered DEVHUB-16-compatible credentials, strict audience/chain/environment binding, scoped authorization and stable RPC-6 client identities.
 
-## RPC-10 — observability, health/readiness, metrics and operational recovery — implementation complete
+### RPC-10 — observability and operational recovery — complete
+Delivered liveness/readiness separation, fail-closed canonical readiness, independent derived-read health, recovery hysteresis, bounded metrics and redacted operational snapshots.
+
+## RPC-11 — hostile-state and security hardening — implementation complete
 
 Delivered:
 
-- explicit separation between process liveness and request readiness;
-- fresh chain/environment evidence requirements for canonical readiness;
-- readiness dependence on at least one reachable, eligible, non-open-circuit, RPC-4-safe execution provider;
-- fail-closed readiness on wrong chain, stale observations, process heartbeat loss, finality conflict or loss of canonical providers;
-- independent derived-read readiness requiring a fresh ready 420Indexer provider;
-- degraded operation when canonical ingress remains healthy but optional derived reads are unavailable;
-- configurable recovery hysteresis requiring consecutive healthy observations before ingress reopens;
-- fixed-name, low-cardinality operational counters with bounded sample budget;
-- aggregate WebSocket, RPC-6 resource and RPC-9 credential telemetry without bearer secrets or principal identifiers;
-- redacted operational snapshots carrying `canonicalAuthority: false`;
-- hostile-state tests for stale/wrong-chain/finality-conflict/provider-loss/recovery cases;
-- `docs/420RPC-OBSERVABILITY.md` and DEVHUB-17 compatibility guidance.
+- a cross-layer ingress security gate spanning RPC-5, RPC-9 and RPC-6;
+- bounded JSON depth, total node count, aggregate string/key bytes and object-key count;
+- fail-closed handling for non-finite/non-JSON values;
+- rejection of prototype-pollution keys before downstream JavaScript processing;
+- rejection of unexpected top-level JSON-RPC envelope keys;
+- proof that structural and authorization failures occur before RPC-6 state/quota mutation;
+- atomic mixed-scope batch authorization;
+- proof that `rpc:admin` cannot bypass Engine/admin/debug/signing exclusions;
+- authenticated client-key binding through successful admission and lease release;
+- preservation of RPC-6 resource rejection semantics through the security gate;
+- hostile-state regression coverage and `docs/420RPC-SECURITY-HARDENING.md`.
 
-RPC-10 telemetry describes gateway operational state only. It cannot establish consensus, transaction validity, finality, settlement, ownership, Registry legitimacy, protocol authorization or fork choice.
+RPC-11 is a gateway defense layer only. It cannot establish consensus, finality, transaction validity, ownership, Registry legitimacy, wallet authority, governance state or fork choice.
 
-Exit gate: implementation is complete. Merge requires the exact final head to pass 420RPC, docs and repository-wide qualification and remain reconciled with current `main`.
+Exit gate: implementation is complete. Merge requires exact-head 420RPC, docs and repository-wide qualification plus reconciliation with current `main`.
 
-## Remaining phases
+## Remaining phase
 
-- **RPC-11:** hostile-state and security hardening across RPC-0 through RPC-10.
-- **RPC-12:** testnet qualification and launch closeout.
+- **RPC-12:** public testnet qualification and 420RPC launch closeout.
 
 ## Authority rule
 
-420RPC may authenticate and authorize off-chain service access, refuse unsafe traffic, expose clearly labeled derived projection data, and report bounded operational telemetry, but it never determines canonical blocks, transaction validity, consensus, safe/finalized checkpoints, fork choice, wallet authority, protocol identity or finality.
+420RPC may authenticate and authorize off-chain service access, reject hostile traffic, refuse unsafe upstreams, expose clearly labeled derived projection data and report bounded operational telemetry, but it never determines canonical blocks, transaction validity, consensus, safe/finalized checkpoints, fork choice, wallet authority, protocol identity or finality.

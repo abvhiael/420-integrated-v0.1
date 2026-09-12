@@ -13,6 +13,32 @@ DOC-9 is the canonical cross-ecosystem developer documentation phase for buildin
 
 The Developer Hub implementation is already complete through DEVHUB-19. DOC-9 does not rebuild that control plane or duplicate the DOC-8 application manuals. It turns the existing chain, protocol, infrastructure, Wallet, Indexer, Developer Hub and application integration material into a coherent developer journey: discover the correct network and contracts, build locally, use testnet safely, read canonical and derived state, prepare Wallet-authorized writes, integrate shared services, handle finality/errors/retries and ship reproducible examples.
 
+## Start here
+
+DOC-9.1 establishes the developer contract used by every later guide:
+
+- [Developer integration model](integration-model.md) — canonical authority boundaries, read/write handoffs, provider neutrality, failure behavior and the standard integration sequence.
+- [Source of truth and finality](source-of-truth.md) — source precedence, canonical versus indexed reads, provenance, confirmations, finality and reorg handling.
+- [Developer prerequisites and tooling](prerequisites.md) — common prerequisites, tooling matrix, environment discipline, secret/signer rules and the baseline integration checklist.
+
+Read these pages before implementing a production-facing integration. Later DOC-9 sections may add convenience abstractions, but they must not weaken these rules.
+
+## Developer paths
+
+Use the documentation according to the job you are doing:
+
+| Goal | Start with | Continue in |
+| --- | --- | --- |
+| Build a first local dApp | prerequisites + integration model | DOC-9.2 quickstart/local development |
+| Connect to testnet/RPC | source of truth + prerequisites | DOC-9.3 networks/testnet/RPC |
+| Deploy/register a contract | integration model | DOC-9.4 contracts/deployment/Registry/Verify |
+| Build read-heavy UX | source of truth | DOC-9.5 RPC/APIs/420Indexer |
+| Submit user-authorized writes | integration model | DOC-9.6 Wallet/Smart Accounts/capabilities |
+| Build resilient SDK/event handling | source of truth | DOC-9.7 SDK/events/errors/reliability |
+| Integrate Storage, AI or Bridge | integration model + source of truth | DOC-9.8 provider/value integrations |
+| Integrate a game | prerequisites + integration model | DOC-9.9 Gaming Protocol |
+| Review a complete production flow | all DOC-9 foundation pages | DOC-9.10 examples/audit |
+
 ## Authority rule
 
 Developer tooling is never a substitute for the authority that owns the state being changed.
@@ -28,7 +54,7 @@ Developer tooling is never a substitute for the authority that owns the state be
 
 ## DOC-9 work order
 
-1. **DOC-9.1 — Developer documentation foundation and integration model** — establish developer audiences, source-of-truth rules, authority map, prerequisite/tooling matrix, navigation and the boundary between task guides and generated DOC-10 reference.
+1. **DOC-9.1 — Developer documentation foundation and integration model — COMPLETE** — developer audiences, source-of-truth rules, authority model, prerequisite/tooling matrix, landing/navigation paths and the DOC-10 generated-reference boundary.
 2. **DOC-9.2 — Quickstart and local development** — repository setup, toolchains, local/devnet bootstrap, starter workflow, project structure and first read/write integration.
 3. **DOC-9.3 — Networks, testnet and RPC access** — network discovery, chain identity, manifests, testnet/Faucet use, public RPC/WSS, 420RPC boundaries, endpoint health and environment safety.
 4. **DOC-9.4 — Contracts, deployments, Registry and verification** — canonical contract discovery, interfaces/versions, deployment workflow, bytecode confirmation, 420Verify evidence, Registry registration and AppStore publication boundaries.
@@ -43,7 +69,7 @@ DOC-9 follows the same monolithic phase policy as DOC-8: all DOC-9.x commits rem
 
 ## Existing implementation sources
 
-DOC-9 will consolidate rather than replace the implemented Developer Hub and architecture material, including:
+DOC-9 consolidates rather than replaces the implemented Developer Hub and architecture material, including:
 
 - Developer Hub network/environment discovery and canonical contract catalogue;
 - TypeScript SDK and CLI;
@@ -62,3 +88,5 @@ The existing [end-to-end dApp integration guide](../developer-hub/guides/end-to-
 ## Generated reference boundary
 
 DOC-9 is task-oriented documentation. Machine-derived NatSpec, ABI, RPC/API/SDK reference, event/error catalogues, deployment registries and similar generated material belong to DOC-10 and will be linked from these guides rather than copied by hand.
+
+Handwritten DOC-9 pages may name the interface or operation a developer needs, explain the safe sequence and identify the owning authority. They must not become a second manually maintained ABI, event catalogue or deployment-address registry.

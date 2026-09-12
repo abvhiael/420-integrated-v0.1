@@ -5,7 +5,7 @@ audience:
   - developer
   - operator
 category: applications
-status: development
+status: current
 version: current
 ---
 
@@ -37,6 +37,8 @@ The authoritative application inventory is `config/genesis-applications.json`. D
 - [420 AI](ai/index.md) — model/provider/job/verification/settlement workflows with bounded spend, privacy and off-chain compute execution.
 - [420 Attention](attention/index.md) — opt-in sponsor campaigns, consent, proof commitments, reward entitlements and segregated sponsor liabilities.
 - [420 Faucet](faucet/index.md) — explicitly testnet-only distribution for developer onboarding, with no monetary value and bounded abuse controls.
+
+The completed [Genesis application coverage audit](coverage-audit.md) records the DOC-8.10 package, navigation, authority/security and scope checks.
 
 ## Manual contract
 
@@ -84,7 +86,7 @@ No manual may instruct a user to disclose private keys or recovery secrets, pass
 
 ## DOC-8 build order
 
-1. **DOC-8.1 — Application catalog and coverage contract** — complete.
+1. **DOC-8.1 — Application catalog and coverage contract** — COMPLETE.
 2. **DOC-8.2 — 420 Wallet application package** — COMPLETE.
 3. **DOC-8.3 — Explorer, Search and Analytics manuals** — COMPLETE.
 4. **DOC-8.4 — AppStore, Verify, Notifications and Status manuals** — COMPLETE.
@@ -92,11 +94,16 @@ No manual may instruct a user to disclose private keys or recovery secrets, pass
 6. **DOC-8.6 — Swap, Bridge and Token manuals** — COMPLETE.
 7. **DOC-8.7 — Stake, Governance and Arbitration manuals** — COMPLETE.
 8. **DOC-8.8 — AI and Attention manuals** — COMPLETE.
-9. **DOC-8.9 — Faucet manual — COMPLETE** — explicitly testnet-only acquisition, 42-testnet-$420 request amount, 24-hour address cooldown, 5/hour IP limit, daily operator cap, abuse controls, no-value semantics and chain-state confirmation.
-10. **DOC-8.10 — Genesis application coverage audit** — confirm every required manual/package, navigation path, authority warning and cross-link before phase closeout.
+9. **DOC-8.9 — Faucet manual** — COMPLETE.
+10. **DOC-8.10 — Genesis application coverage audit** — COMPLETE. [Audit record](coverage-audit.md).
+
+## DOC-8 result
+
+DOC-8 is complete. The audit confirms 20 manual targets, 16 required pages per target, 320 required standard pages total, complete application navigation, explicit authority/security boundaries, correct testnet-only Faucet scope and correct protocol-only routing for 420 Gaming Protocol.
 
 ## Related documentation
 
+- [Genesis application coverage audit](coverage-audit.md)
 - [Application documentation contract](../contributing/app-documentation-contract.md)
 - [Registry, Names, Identity & 420-IS architecture](../architecture/protocols/registry-names-identity-420is.md)
 - [Pay, Token, Swap/Exchange & Bridge architecture](../architecture/protocols/pay-token-exchange-bridge.md)

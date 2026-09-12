@@ -74,12 +74,26 @@ Deliverables:
 - current publication state: development and Genesis published; testnet and mainnet intentionally unavailable until approved evidence exists
 - qualification evidence: exact-head 420Docs Qualification #700 passed with the registry validator enabled
 
-### DOC-13.4 — URL and renderer version model
+### DOC-13.4 — URL and renderer version model — COMPLETE
 
-- Define stable URL structure for current and historical documentation.
-- Add renderer support for version/environment selection.
-- Preserve stable deep links where practical.
-- Prevent historical pages from silently resolving to current incompatible content.
+- [x] Define stable URL structure for current and historical documentation.
+- [x] Add renderer support for version/environment resolution.
+- [x] Preserve existing flat deep links as explicit compatibility surfaces pending DOC-13.8 migration rules.
+- [x] Prevent historical/versioned routes from silently resolving to current incompatible content.
+- [x] Publish deterministic renderer context during the GitHub Pages build.
+
+Deliverables:
+
+- `docs/versioning/url-renderer-contract.md` — route classes, stability, fallback and renderer authority rules
+- `docs/versioning/url-renderer-policy.json` — machine route templates and fail-closed behavior
+- `scripts/render-doc-version-context.py` — registry-backed route resolver and deterministic `site/version-context.json` generator
+- `scripts/validate-doc-version-routing.py` — exact resolver/route qualification for current, immutable, unknown and unpublished paths
+- immutable route shape: `/versions/<environment>/<release>/<path>`
+- mutable alias route shape: `/versions/<environment>/current/<path>`
+- cross-environment and cross-release fallback disabled
+- mutable development release prohibited from masquerading as an immutable release route
+- GitHub Pages now emits version renderer context after strict MkDocs build
+- qualification evidence: exact-head 420Docs Qualification #711 passed with the routing gate enabled
 
 ### DOC-13.5 — Navigation and version selector
 

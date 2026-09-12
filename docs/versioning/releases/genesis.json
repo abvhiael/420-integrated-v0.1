@@ -7,7 +7,7 @@
   "authority": "frozen-genesis-documentation-contract",
   "evidence": [
     "docs/apps/coverage-audit.md",
-    "docs/architecture/genesis.md",
+    "docs/architecture/genesis-architecture.md",
     "docs/versioning/version-authority-contract.md"
   ],
   "network_authority": false,

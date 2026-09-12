@@ -13,7 +13,7 @@ version: current
 
 Generator schema: `1.0.0`  
 Source registry: `docs/reference/reference-sources.json`  
-Source registry SHA-256: `bd3f0a51be9d831a31235ee5b634412b813bdab73e3a06a5ca6c554468d8cf92`
+Source registry SHA-256: `7268d16f84b0965660ca2266de69e91462f284f8e2d5d9b2a1b241afbeb2a695`
 
 This manifest records the checked-in source locations used by DOC-10 renderers. Presence is not authority: family renderers still enforce verification, environment and provenance rules before publishing distributable reference values.
 
@@ -22,9 +22,11 @@ This manifest records the checked-in source locations used by DOC-10 renderers. 
 | `contracts` | `DOC-10.2` | `contracts/src` | directory |
 | `contracts` | `DOC-10.2` | `developer-hub/catalogue/local.example.json` | file |
 | `contracts` | `DOC-10.2` | `developer-hub/src/contract-catalogue.mjs` | file |
-| `deployments` | `DOC-10.8` | `developer-hub/catalogue` | directory |
-| `deployments` | `DOC-10.8` | `developer-hub/deployment` | directory |
-| `deployments` | `DOC-10.8` | `developer-hub/release` | directory |
+| `deployments` | `DOC-10.8` | `developer-hub/catalogue/local.example.json` | file |
+| `deployments` | `DOC-10.8` | `developer-hub/deployment/request.example.json` | file |
+| `deployments` | `DOC-10.8` | `developer-hub/release/release-candidate.example.json` | file |
+| `deployments` | `DOC-10.8` | `developer-hub/src/deployment-control.mjs` | file |
+| `deployments` | `DOC-10.8` | `developer-hub/src/verification-control.mjs` | file |
 | `events-errors` | `DOC-10.3` | `contracts/src` | directory |
 | `events-errors` | `DOC-10.3` | `developer-hub/src/contract-catalogue.mjs` | file |
 | `indexer-api` | `DOC-10.5` | `420-indexer/src/api-contract.ts` | file |
@@ -51,7 +53,7 @@ Distributable ABI/NatSpec output requires verified artifact/catalogue provenance
 
 ### deployments
 
-Publish approved canonical/verified deployment records only; planned/predicted addresses are not deployment proof.
+Canonical deployment publication requires evidence beyond plans/examples: canonical RPC-confirmed deployment receipt plus verified artifact/runtime evidence and approved registration/catalogue provenance. Current checked-in deployment, release and catalogue records are example-scoped and must not be promoted as canonical deployments.
 
 ### events-errors
 

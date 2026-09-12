@@ -20,6 +20,7 @@ Generated reference is **descriptive, not authoritative**. It must never replace
 - [Source inventory](source-inventory.md)
 - [Generated source manifest](generated/source-manifest.md)
 - [Generated contract, NatSpec and ABI reference](generated/contracts.md)
+- [Generated events and custom errors](generated/events-errors.md)
 
 The machine source registry is `docs/reference/reference-sources.json`; generation is performed by `python scripts/generate-reference-docs.py`, with `--check` reserved for deterministic stale-output verification.
 
@@ -56,7 +57,7 @@ Generated files are not edited by hand. Human-authored explanation belongs in DO
 
 1. **DOC-10.1 — Generation foundation and source inventory — COMPLETE** — generated-reference contract, source classes, output layout, provenance model, deterministic-generation rules, source registry, generator entry point and first generated source manifest.
 2. **DOC-10.2 — Contract/NatSpec/ABI reference — COMPLETE** — generated contract catalogue/source reference with NatSpec extraction, public/external source surfaces, ABI provenance/status and fail-closed handling when artifact/hash/interface evidence is incomplete or only example-grade.
-3. **DOC-10.3 — Events and custom errors** — per-contract and global event/error indexes with signatures/topics/selectors where derivable.
+3. **DOC-10.3 — Events and custom errors — COMPLETE** — generated catalogue-bounded event/error indexes with canonical signatures, indexed fields, Ethereum Keccak-256 topics/selectors and fail-closed handling for ambiguous source types.
 4. **DOC-10.4 — RPC reference** — public execution JSON-RPC and 420RPC ingress/gateway reference, excluding private Engine/admin/signer surfaces.
 5. **DOC-10.5 — 420Indexer and service API reference** — stable API routes, parameters, envelopes, pagination/cursor and status/readiness surfaces.
 6. **DOC-10.6 — SDK and CLI reference** — exported SDK types/functions plus stable CLI commands/options and authority boundaries.

@@ -87,6 +87,78 @@ nav:
                   - Events & Updates: apps/analytics/developer/events.md
                   - Errors: apps/analytics/developer/errors.md
                   - Examples: apps/analytics/developer/examples.md
+          - 420 AppStore:
+              - Overview: apps/appstore/index.md
+              - Getting Started: apps/appstore/getting-started.md
+              - User Guide: apps/appstore/user-guide.md
+              - Concepts: apps/appstore/concepts.md
+              - Architecture: apps/appstore/architecture.md
+              - Permissions: apps/appstore/permissions.md
+              - Fees: apps/appstore/fees.md
+              - Security: apps/appstore/security.md
+              - Troubleshooting: apps/appstore/troubleshooting.md
+              - FAQ: apps/appstore/faq.md
+              - Developer Integration:
+                  - Overview: apps/appstore/developer/index.md
+                  - Contracts: apps/appstore/developer/contracts.md
+                  - API: apps/appstore/developer/api.md
+                  - Events & Updates: apps/appstore/developer/events.md
+                  - Errors: apps/appstore/developer/errors.md
+                  - Examples: apps/appstore/developer/examples.md
+          - 420 Verify:
+              - Overview: apps/verify/index.md
+              - Getting Started: apps/verify/getting-started.md
+              - User Guide: apps/verify/user-guide.md
+              - Concepts: apps/verify/concepts.md
+              - Architecture: apps/verify/architecture.md
+              - Permissions: apps/verify/permissions.md
+              - Fees: apps/verify/fees.md
+              - Security: apps/verify/security.md
+              - Troubleshooting: apps/verify/troubleshooting.md
+              - FAQ: apps/verify/faq.md
+              - Developer Integration:
+                  - Overview: apps/verify/developer/index.md
+                  - Contracts: apps/verify/developer/contracts.md
+                  - API: apps/verify/developer/api.md
+                  - Events & Upgrades: apps/verify/developer/events.md
+                  - Errors: apps/verify/developer/errors.md
+                  - Examples: apps/verify/developer/examples.md
+          - 420 Notifications:
+              - Overview: apps/notifications/index.md
+              - Getting Started: apps/notifications/getting-started.md
+              - User Guide: apps/notifications/user-guide.md
+              - Concepts: apps/notifications/concepts.md
+              - Architecture: apps/notifications/architecture.md
+              - Permissions: apps/notifications/permissions.md
+              - Fees: apps/notifications/fees.md
+              - Security & Privacy: apps/notifications/security.md
+              - Troubleshooting: apps/notifications/troubleshooting.md
+              - FAQ: apps/notifications/faq.md
+              - Developer Integration:
+                  - Overview: apps/notifications/developer/index.md
+                  - Contracts: apps/notifications/developer/contracts.md
+                  - API: apps/notifications/developer/api.md
+                  - Events & Canonicality: apps/notifications/developer/events.md
+                  - Errors & Retries: apps/notifications/developer/errors.md
+                  - Examples: apps/notifications/developer/examples.md
+          - 420 Status:
+              - Overview: apps/status/index.md
+              - Getting Started: apps/status/getting-started.md
+              - User Guide: apps/status/user-guide.md
+              - Concepts: apps/status/concepts.md
+              - Architecture: apps/status/architecture.md
+              - Permissions: apps/status/permissions.md
+              - Fees: apps/status/fees.md
+              - Security & Privacy: apps/status/security.md
+              - Troubleshooting: apps/status/troubleshooting.md
+              - FAQ: apps/status/faq.md
+              - Developer Integration:
+                  - Overview: apps/status/developer/index.md
+                  - Contracts: apps/status/developer/contracts.md
+                  - API: apps/status/developer/api.md
+                  - Incidents & Updates: apps/status/developer/events.md
+                  - Errors: apps/status/developer/errors.md
+                  - Examples: apps/status/developer/examples.md
       - 420 Wallet:
           - Onboarding: users/wallet/index.md
           - Setup, Import & Protection: users/wallet/setup-import-and-protection.md

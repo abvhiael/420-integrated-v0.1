@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import json
 import sys
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 import yaml
 
@@ -13,16 +13,28 @@ ROOT = Path(__file__).resolve().parents[1]
 POLICY_PATH = ROOT / "docs" / "ci" / "frontmatter-policy.json"
 
 
-def fail(message: str) -> None:
-    print(f"420Docs front matter FAILED: {message}", file=sys.stderr)
+def fatal(message: str) -> None:
+    print(f"420Docs front matter ERROR: {message}", file=sys.stderr)
     raise SystemExit(1)
 
 
 def load_policy() -> dict:
     try:
-        return json.loads(POLICY_PATH.read_text(encoding="utf-8"))
+        data = json.loads(POLICY_PATH.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
-        fail(f"cannot read policy {POLICY_PATH.relative_to(ROOT)}: {exc}")
+        fatal(f"cannot read policy {POLICY_PATH.relative_to(ROOT)}: {exc}")
+    if not isinstance(data, dict):
+        fatal("front-matter policy must be a JSON object")
+    return data
+
+
+def is_legacy_exception(path: Path, policy: dict) -> bool:
+    rel = path.relative_to(ROOT).as_posix()
+    exact = set(policy.get("legacy_exceptions", []))
+    if rel in exact:
+        return True
+    posix = PurePosixPath(rel)
+    return any(posix.match(pattern) for pattern in policy.get("legacy_exception_globs", []))
 
 
 def governed_markdown(policy: dict) -> list[Path]:
@@ -30,82 +42,89 @@ def governed_markdown(policy: dict) -> list[Path]:
     for raw_root in policy.get("governed_roots", []):
         root = ROOT / raw_root
         if not root.is_dir():
-            fail(f"governed root does not exist: {raw_root}")
+            fatal(f"governed root does not exist: {raw_root}")
         result.update(root.rglob("*.md"))
-    exceptions = {str(ROOT / value) for value in policy.get("legacy_exceptions", [])}
-    return sorted(path for path in result if str(path) not in exceptions)
+    return sorted(path for path in result if not is_legacy_exception(path, policy))
 
 
-def parse_front_matter(path: Path) -> dict:
-    text = path.read_text(encoding="utf-8")
-    lines = text.splitlines()
+def parse_front_matter(path: Path) -> tuple[dict | None, list[str]]:
+    errors: list[str] = []
     rel = path.relative_to(ROOT)
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError as exc:
+        return None, [f"{rel}: cannot read file: {exc}"]
+    lines = text.splitlines()
     if not lines or lines[0].strip() != "---":
-        fail(f"{rel}: missing opening front-matter delimiter")
+        return None, [f"{rel}: missing opening front-matter delimiter"]
     try:
         end = next(i for i, line in enumerate(lines[1:], start=1) if line.strip() == "---")
     except StopIteration:
-        fail(f"{rel}: missing closing front-matter delimiter")
+        return None, [f"{rel}: missing closing front-matter delimiter"]
     raw = "\n".join(lines[1:end])
     try:
         data = yaml.safe_load(raw)
     except yaml.YAMLError as exc:
-        fail(f"{rel}: malformed YAML front matter: {exc}")
+        return None, [f"{rel}: malformed YAML front matter: {exc}"]
     if not isinstance(data, dict):
-        fail(f"{rel}: front matter must be a YAML mapping")
-    return data
+        return None, [f"{rel}: front matter must be a YAML mapping"]
+    return data, errors
 
 
-def require_nonempty_string(rel: Path, data: dict, field: str) -> str:
-    value = data.get(field)
-    if not isinstance(value, str) or not value.strip():
-        fail(f"{rel}: {field} must be a non-empty string")
-    return value.strip()
-
-
-def validate_page(path: Path, policy: dict) -> None:
+def validate_page(path: Path, policy: dict) -> list[str]:
     rel = path.relative_to(ROOT)
-    data = parse_front_matter(path)
+    data, errors = parse_front_matter(path)
+    if data is None:
+        return errors
 
     for field in policy.get("required_fields", []):
         if field not in data:
-            fail(f"{rel}: missing required front-matter field '{field}'")
+            errors.append(f"{rel}: missing required front-matter field '{field}'")
 
-    require_nonempty_string(rel, data, "title")
-    category = require_nonempty_string(rel, data, "category")
-    status = require_nonempty_string(rel, data, "status")
-    version = require_nonempty_string(rel, data, "version")
+    for field in ("title", "category", "status", "version"):
+        if field in data and (not isinstance(data[field], str) or not data[field].strip()):
+            errors.append(f"{rel}: {field} must be a non-empty string")
 
-    allowed_category = set(policy.get("allowed_category", []))
-    allowed_status = set(policy.get("allowed_status", []))
-    if category not in allowed_category:
-        fail(f"{rel}: category '{category}' is not allowed")
-    if status not in allowed_status:
-        fail(f"{rel}: status '{status}' is not allowed")
-    if not version:
-        fail(f"{rel}: version must be non-empty")
+    category = data.get("category")
+    status = data.get("status")
+    if isinstance(category, str) and category.strip() and category not in set(policy.get("allowed_category", [])):
+        errors.append(f"{rel}: category '{category}' is not allowed")
+    if isinstance(status, str) and status.strip() and status not in set(policy.get("allowed_status", [])):
+        errors.append(f"{rel}: status '{status}' is not allowed")
 
     if "audience" in data:
         audience = data["audience"]
         if isinstance(audience, str):
             audience = [audience]
         if not isinstance(audience, list) or not audience:
-            fail(f"{rel}: audience must be a non-empty string or list")
-        allowed_audience = set(policy.get("allowed_audience", []))
-        for value in audience:
-            if not isinstance(value, str) or not value.strip():
-                fail(f"{rel}: audience entries must be non-empty strings")
-            if value not in allowed_audience:
-                fail(f"{rel}: audience '{value}' is not allowed")
+            errors.append(f"{rel}: audience must be a non-empty string or list")
+        else:
+            allowed_audience = set(policy.get("allowed_audience", []))
+            for value in audience:
+                if not isinstance(value, str) or not value.strip():
+                    errors.append(f"{rel}: audience entries must be non-empty strings")
+                elif value not in allowed_audience:
+                    errors.append(f"{rel}: audience '{value}' is not allowed")
+
+    return errors
 
 
 def main() -> int:
     policy = load_policy()
     pages = governed_markdown(policy)
     if not pages:
-        fail("policy selected no governed Markdown pages")
+        fatal("policy selected no governed Markdown pages")
+
+    errors: list[str] = []
     for path in pages:
-        validate_page(path, policy)
+        errors.extend(validate_page(path, policy))
+
+    if errors:
+        print(f"420Docs front matter FAILED: {len(errors)} defect(s)", file=sys.stderr)
+        for error in errors:
+            print(f"- {error}", file=sys.stderr)
+        return 1
+
     print(f"420Docs front matter PASS: {len(pages)} governed pages validated")
     return 0
 

@@ -19,6 +19,7 @@ DOC-11 organizes troubleshooting around two ways people actually arrive here:
 - [Troubleshooting registry contract](registry-contract.md) — stable ID, severity, authority, retry and secret-safety rules.
 - [Troubleshooting entry template](entry-template.md) — required shape for every registry entry.
 - [Wallet, account and authorization registry](wallet-account-authorization.md) — `TRB-WALLET-001` through `TRB-WALLET-011` covering connection, network mismatch, SmartAccount420 discovery, capabilities/sessions, passkeys, signing/simulation, recovery, transaction outcomes, stale presentation and compromise response.
+- [Chain, RPC and transaction registry](chain-rpc-transactions.md) — `TRB-CHAIN-*`, `TRB-RPC-*` and `TRB-TX-*` covering chain identity, transport/method failures, ambiguous submissions, nonce/gas/replacement states, receipt/revert handling, finality/reorgs and canonical-versus-derived disagreements.
 
 ## Safety rules
 
@@ -30,6 +31,6 @@ DOC-11 organizes troubleshooting around two ways people actually arrive here:
 
 ## Phase status
 
-DOC-11.1 and DOC-11.2 are complete. The implementation roadmap is in [`DOC-11-ROADMAP.md`](DOC-11-ROADMAP.md).
+DOC-11.1 through DOC-11.3 are complete. The implementation roadmap is in [`DOC-11-ROADMAP.md`](DOC-11-ROADMAP.md).
 
 Remaining domain registries will be added incrementally within the same DOC-11 branch/PR and merged only after the final ecosystem-wide troubleshooting audit and exact-head qualification.

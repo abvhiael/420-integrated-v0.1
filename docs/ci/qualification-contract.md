@@ -17,11 +17,12 @@ DOC-12 defines the repository-level contract for automated 420Docs qualification
 The documentation gate covers repository-controlled 420Docs sources and the source material that deterministically generates or configures published documentation. The current gate includes:
 
 1. governed front-matter validation;
-2. generated-reference freshness;
-3. strict MkDocs build;
-4. search and navigation qualification.
+2. governed internal-link and anchor validation;
+3. generated-reference freshness;
+4. strict MkDocs build;
+5. search and navigation qualification.
 
-DOC-12.3 through DOC-12.9 add further deterministic validators to this same gate. They do not replace the existing stages.
+DOC-12.4 through DOC-12.9 add further deterministic validators to this same gate. They do not replace the existing stages.
 
 ## Authority
 
@@ -29,6 +30,8 @@ The qualification runner does not create protocol authority. It checks documenta
 
 - `docs/ci/frontmatter-policy.json` defines the DOC-12.2 governed front-matter scope, vocabulary and explicit legacy missing-metadata exceptions.
 - `scripts/validate-doc-frontmatter.py` owns deterministic front-matter parsing and policy enforcement for that scope.
+- `docs/ci/link-policy.json` defines DOC-12.3 governed roots plus explicit target/anchor exceptions.
+- `scripts/validate-doc-links.py` owns deterministic repository-target and practical Markdown-anchor resolution for that scope.
 - DOC-10 remains authoritative for generated-reference provenance and byte-for-byte freshness.
 - MkDocs strict build remains authoritative for renderer-level warnings and broken configured navigation/build conditions.
 - `scripts/qualify-docs.py` remains authoritative for the current audience-entry, search-index and repository-discoverability checks.
@@ -51,9 +54,10 @@ The same entry point is used by `420Docs Qualification` in GitHub Actions. Indiv
 The runner executes stages in deterministic order and stops at the first failure:
 
 1. `front-matter`
-2. `generated-reference-freshness`
-3. `strict-mkdocs-build`
-4. `search-navigation`
+2. `internal-links`
+3. `generated-reference-freshness`
+4. `strict-mkdocs-build`
+5. `search-navigation`
 
 Later DOC-12 stages must be added deliberately to this ordered list. A validator may not silently bypass an earlier mandatory stage.
 
@@ -66,6 +70,20 @@ DOC-12.2 distinguishes a legacy page that predates governed front matter from a 
 - It does not permit malformed YAML, invalid category/status/audience values or missing required fields when front matter is present.
 - Legacy exceptions are repository policy and must be listed explicitly in `docs/ci/frontmatter-policy.json`; the validator must not infer exceptions from filenames or content.
 - New governed documentation should use valid front matter rather than expanding a legacy exception merely for convenience.
+
+## Internal-link rule
+
+DOC-12.3 validates repository-internal Markdown links without turning CI into a network crawler.
+
+- Relative targets resolve from the source page directory.
+- A docs-root target beginning with `/` resolves beneath `docs/`.
+- Extensionless targets may resolve to a sibling `.md` file or a directory `index.md`.
+- Percent-encoded path/fragment values are decoded before validation.
+- Fragment links into Markdown must resolve to an ID produced by the configured Markdown parser using `toc` and `attr_list`, covering ordinary heading IDs and explicit IDs.
+- External `http`, `https`, `mailto` and `tel` links are excluded from repository-target validation.
+- Any target or anchor exception must be explicit in `docs/ci/link-policy.json`; the validator does not infer exceptions from broken links.
+
+The link gate proves repository target/anchor existence only. It does not claim that an external URL is reachable, that linked content is semantically correct, or that every prose mention should be a link.
 
 ## Failure policy
 
@@ -109,6 +127,7 @@ Workflow path triggers must include:
 Each failure should be repaired at the layer that owns it.
 
 - front-matter failure: repair the governed page metadata or intentionally update the documented policy/legacy contract;
+- internal-link failure: repair the source link, restore/rename the intended target, repair the target anchor, or add a narrowly reviewed explicit policy exception;
 - stale generated output: regenerate or correct the DOC-10 source/generator;
 - strict MkDocs failure: repair the page, link, configuration or renderer warning;
 - search/navigation failure: repair discoverability or the qualification rule if the documentation contract intentionally changed;

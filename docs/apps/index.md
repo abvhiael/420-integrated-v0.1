@@ -36,6 +36,7 @@ The authoritative application inventory is `config/genesis-applications.json`. D
 - [420 Arbitration](arbitration/index.md) — domain-scoped disputes, evidence commitments, rulings, bounded appeals and explicit remedy-consumption boundaries.
 - [420 AI](ai/index.md) — model/provider/job/verification/settlement workflows with bounded spend, privacy and off-chain compute execution.
 - [420 Attention](attention/index.md) — opt-in sponsor campaigns, consent, proof commitments, reward entitlements and segregated sponsor liabilities.
+- [420 Faucet](faucet/index.md) — explicitly testnet-only distribution for developer onboarding, with no monetary value and bounded abuse controls.
 
 ## Manual contract
 
@@ -66,7 +67,7 @@ Generated ABI/API/event/error reference belongs in DOC-10; DOC-8 explains how to
 | 420 Attention | Genesis protocol + user app | [available](attention/index.md) | opt-in sponsor campaigns, proofs and attention rewards |
 | 420 Token | Genesis protocol + user app | [available](token/index.md) | qualified token-template deployment for the fixed native `$420` creation fee |
 | 420 Status | Genesis user app | [available](status/index.md) | network/finality/validator/RPC/protocol service health |
-| 420 Faucet | testnet only | required, testnet-scoped | no-value testnet distribution and developer onboarding |
+| 420 Faucet | testnet only | [available](faucet/index.md) | no-value testnet distribution and developer onboarding |
 | 420 Gaming Protocol | Genesis protocol only | not an application manual target | shared optional-wallet game interoperability; covered by protocol/developer documentation |
 
 The protocol-only Gaming Protocol remains part of Genesis, but it has no standalone user application in the frozen catalog.
@@ -75,11 +76,11 @@ The protocol-only Gaming Protocol remains part of Genesis, but it has no standal
 
 Every manual must distinguish canonical-state authority, user application over canonical state, derived/rebuildable presentation, replaceable provider/service infrastructure, and testnet-only scope.
 
-Registry, Names and Identity remain bounded to discovery/naming/identity state. Swap, Bridge and Token preserve separate value-domain authorities. Stake, Governance and Arbitration continue that separation. AI and Attention follow the same model: workers/providers do not gain chain authority, result commitments do not become universal truth proofs, sponsors/verifiers do not gain Wallet authority, and raw private payloads/telemetry remain outside canonical public state.
+Registry, Names and Identity remain bounded to discovery/naming/identity state. Swap, Bridge and Token preserve separate value-domain authorities. Stake, Governance and Arbitration continue that separation. AI and Attention follow the same model: workers/providers do not gain chain authority, result commitments do not become universal truth proofs, sponsors/verifiers do not gain Wallet authority, and raw private payloads/telemetry remain outside canonical public state. Faucet is strictly testnet-only: it does not define issuance policy, participate in mainnet genesis economics or create monetary entitlement.
 
 ## Security and support rule
 
-No manual may instruct a user to disclose private keys or recovery secrets, passkey private material, Wallet signing secrets, validator signing keys, JWT/Engine credentials, private evidence payloads, private Messenger payloads, encrypted Resource payloads, raw Attention telemetry, private AI prompts/datasets/outputs or unrelated private Identity fields.
+No manual may instruct a user to disclose private keys or recovery secrets, passkey private material, Wallet signing secrets, validator signing keys, JWT/Engine credentials, private evidence payloads, private Messenger payloads, encrypted Resource payloads, raw Attention telemetry, private AI prompts/datasets/outputs or unrelated private Identity fields. Faucet support requires only a public destination testnet address and normal abuse-control input.
 
 ## DOC-8 build order
 
@@ -90,8 +91,8 @@ No manual may instruct a user to disclose private keys or recovery secrets, pass
 5. **DOC-8.5 — Registry, Names and Identity manuals** — COMPLETE.
 6. **DOC-8.6 — Swap, Bridge and Token manuals** — COMPLETE.
 7. **DOC-8.7 — Stake, Governance and Arbitration manuals** — COMPLETE.
-8. **DOC-8.8 — AI and Attention manuals — COMPLETE** — documents model/provider/job/verification/settlement workflows with bounded off-chain execution and opt-in consent/campaign/proof/reward workflows with replay resistance, liability segregation and privacy boundaries.
-9. **DOC-8.9 — Faucet manual** — explicitly testnet-only acquisition, limits, abuse controls and troubleshooting.
+8. **DOC-8.8 — AI and Attention manuals** — COMPLETE.
+9. **DOC-8.9 — Faucet manual — COMPLETE** — explicitly testnet-only acquisition, 42-testnet-$420 request amount, 24-hour address cooldown, 5/hour IP limit, daily operator cap, abuse controls, no-value semantics and chain-state confirmation.
 10. **DOC-8.10 — Genesis application coverage audit** — confirm every required manual/package, navigation path, authority warning and cross-link before phase closeout.
 
 ## Related documentation
@@ -107,3 +108,5 @@ No manual may instruct a user to disclose private keys or recovery secrets, pass
 - [420Indexer infrastructure](../architecture/infrastructure/420indexer.md)
 - [Core protocol architecture](../architecture/protocols/index.md)
 - `config/genesis-applications.json`
+- `testnet/services/faucet-policy.json`
+- `testnet/public-services/faucet/operations.json`

@@ -12,7 +12,7 @@ DOC-10 builds reproducible machine-derived technical reference for 420 Integrate
 - [x] **DOC-10.6 — SDK and CLI reference** — derive the exported `@420/sdk` interfaces/classes/functions, Wallet adapter boundaries, primary `420` CLI command forms, runtime options/defaults and installed binaries while preserving network/catalogue binding and signer-secret isolation.
 - [x] **DOC-10.7 — Network and chain registry reference** — derive environment-scoped chain identity, RPC/service discovery, manifest contract hints and environment availability from checked-in Developer Hub manifest/schema/discovery sources; publish only the local example currently present and fail closed for absent devnet/testnet/mainnet manifests.
 - [x] **DOC-10.8 — Canonical deployment reference** — derive the canonical-publication evidence contract from deployment/verification controls and checked-in catalogue/deployment/release records; publish zero canonical deployments when only example-scoped/unconfirmed evidence exists rather than promoting plans, manifest hints, example addresses or unverified artifacts.
-- [ ] **DOC-10.9 — Determinism and freshness qualification** — add generator-specific stale-output detection, source/output identity checks and CI qualification while leaving broader documentation CI to DOC-12.
+- [x] **DOC-10.9 — Determinism and freshness qualification** — add unified byte-for-byte stale-output detection across every DOC-10 generated family, emit output SHA-256 identities during qualification, and make 420Docs Qualification run the freshness gate whenever documentation or generated-reference implementation sources change.
 - [ ] **DOC-10.10 — Reference coverage audit and closeout** — verify every required generated family, provenance marker, environment boundary and DOC-8/DOC-9 cross-link before phase merge.
 
 ## DOC-10.1 completed foundation
@@ -46,6 +46,12 @@ DOC-10.7 generates `networks.md` from the checked-in network manifest, schema an
 ## DOC-10.8 completed canonical deployment reference
 
 DOC-10.8 adds `deployments.md` plus `reference_deployment_renderer.py`. Deployment plans remain noncanonical (`canonicalDeploymentProof: false`), recorded receipts still require canonical RPC confirmation, and 420Verify results are evidence rather than audit/registration/protocol authority. Because the checked-in deployment request, release candidate and catalogue are example-scoped—and the catalogue's artifact/interface/ABI evidence is not distributable—the generated canonical deployment table intentionally contains no publishable local/devnet/testnet/mainnet deployments.
+
+## DOC-10.9 completed determinism/freshness qualification
+
+DOC-10.9 adds `scripts/qualify-generated-reference.py` as the unified qualification surface for all committed DOC-10 outputs. It loads the original contract/event/source-manifest generation plan plus the RPC, Indexer, SDK/CLI, network and deployment family renderers, computes every expected page in memory and compares committed output byte-for-byte. `--write` can regenerate the complete generated set; normal/`--check` mode fails closed on any missing or stale output and prints deterministic SHA-256 identities for the expected pages.
+
+`420Docs Qualification` now runs this freshness gate before the strict MkDocs build. Its path filters include the generated docs, generator/check scripts, Solidity contract sources, 420RPC/420Indexer source, SDK/CLI source, and the Developer Hub manifest/catalogue/deployment/verification inputs that can change generated output. This makes stale generated reference a documentation qualification failure while leaving broader documentation quality policy and repository-wide documentation CI expansion to DOC-12.
 
 ## Phase exit condition
 

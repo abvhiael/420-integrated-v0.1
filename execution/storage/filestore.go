@@ -2,6 +2,8 @@ package storage
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -42,21 +44,40 @@ func (f *FileStore) Put(ctx context.Context, rec ShardRecord, src io.Reader) err
 		return ErrInvalidShard
 	}
 
-	f.mu.Lock()
-	defer f.mu.Unlock()
-	if _, exists := f.records[rec.CommitmentID]; exists {
+	// Never hold the metadata lock while consuming an upload stream. A slow or
+	// blocked body must not prevent Open/List calls for unrelated commitments.
+	f.mu.RLock()
+	_, exists := f.records[rec.CommitmentID]
+	f.mu.RUnlock()
+	if exists {
 		return fmt.Errorf("%w: commitment already stored", ErrInvalidShard)
 	}
+
 	final := f.shardPath(rec.CommitmentID)
 	tmp, err := os.CreateTemp(filepath.Dir(final), ".shard-*")
 	if err != nil { return err }
 	tmpName := tmp.Name()
 	cleanup := func() { _ = tmp.Close(); _ = os.Remove(tmpName) }
-	written, err := io.Copy(tmp, src)
+
+	h := sha256.New()
+	limited := io.LimitReader(contextReader{ctx: ctx, r: src}, int64(rec.SizeBytes)+1)
+	written, err := io.Copy(io.MultiWriter(tmp, h), limited)
 	if err != nil { cleanup(); return err }
+	if err := ctx.Err(); err != nil { cleanup(); return err }
 	if uint64(written) != rec.SizeBytes { cleanup(); return ErrInvalidShard }
+	if hex.EncodeToString(h.Sum(nil)) != rec.ShardRoot { cleanup(); return ErrCommitmentMismatch }
 	if err := tmp.Sync(); err != nil { cleanup(); return err }
 	if err := tmp.Close(); err != nil { _ = os.Remove(tmpName); return err }
+
+	// Serialize only the publication/index update. Recheck existence under the
+	// write lock so FileStore remains safe even if called outside Runtime's
+	// per-commitment serialization.
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if _, exists := f.records[rec.CommitmentID]; exists {
+		_ = os.Remove(tmpName)
+		return fmt.Errorf("%w: commitment already stored", ErrInvalidShard)
+	}
 	if err := os.Rename(tmpName, final); err != nil { _ = os.Remove(tmpName); return err }
 	f.records[rec.CommitmentID] = rec
 	if err := f.persistLocked(); err != nil {

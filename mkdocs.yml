@@ -15,6 +15,24 @@ nav:
       - Overview: users/index.md
       - Applications:
           - Genesis Application Manuals: apps/index.md
+          - 420 Wallet:
+              - Overview: apps/wallet/index.md
+              - Getting Started: apps/wallet/getting-started.md
+              - User Guide: apps/wallet/user-guide.md
+              - Concepts: apps/wallet/concepts.md
+              - Architecture: apps/wallet/architecture.md
+              - Permissions: apps/wallet/permissions.md
+              - Fees: apps/wallet/fees.md
+              - Security: apps/wallet/security.md
+              - Troubleshooting: apps/wallet/troubleshooting.md
+              - FAQ: apps/wallet/faq.md
+              - Developer Integration:
+                  - Overview: apps/wallet/developer/index.md
+                  - Contracts: apps/wallet/developer/contracts.md
+                  - API & Provider Boundary: apps/wallet/developer/api.md
+                  - Events & Finality: apps/wallet/developer/events.md
+                  - Errors & Retries: apps/wallet/developer/errors.md
+                  - Examples: apps/wallet/developer/examples.md
       - 420 Wallet:
           - Onboarding: users/wallet/index.md
           - Setup, Import & Protection: users/wallet/setup-import-and-protection.md

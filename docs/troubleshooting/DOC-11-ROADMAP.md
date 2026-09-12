@@ -152,13 +152,23 @@ Deliverables:
 - testnet-only/no-value Faucet scope preserved
 - troubleshooting index navigation into the Genesis application coverage matrix
 
-### DOC-11.9 — Search, diagnostics and support workflow
+### DOC-11.9 — Search, diagnostics and support workflow — COMPLETE
 
-- Build searchable error-ID and symptom indexes.
-- Add audience/surface/severity filters in documentation structure where practical.
-- Define copy-safe diagnostic bundles that exclude secrets.
-- Define escalation paths for user support, developer debugging and operator incidents.
-- Add direct stable anchors suitable for later contextual deep links in DOC-14.
+- [x] Build searchable error-ID and symptom indexes.
+- [x] Add audience/surface/severity discovery rules in the documentation structure.
+- [x] Define copy-safe diagnostic bundles that exclude secrets.
+- [x] Define escalation paths for user support, developer debugging and operator incidents.
+- [x] Add stable deep-link rules suitable for later contextual links in DOC-14.
+
+Deliverables:
+
+- `docs/troubleshooting/search-diagnostics-support.md`
+- exact-ID and symptom-first search guidance
+- audience/severity/surface routing and quick-routing table
+- minimum copy-safe diagnostic bundle plus explicit forbidden-secret list
+- user/developer/operator escalation workflows
+- stable `/troubleshooting/<registry-page>/#trb-domain-nnn` deep-link contract for DOC-14
+- troubleshooting index navigation into search/diagnostics/support guidance
 
 ### DOC-11.10 — Ecosystem troubleshooting coverage audit and closeout
 

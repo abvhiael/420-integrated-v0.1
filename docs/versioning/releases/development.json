@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "release": "development",
+  "environment": "development",
+  "publication_status": "development",
+  "immutable": false,
+  "authority": "repository-head",
+  "evidence": [
+    "docs/versioning/version-authority-contract.md",
+    "docs/versioning/version-metadata-schema.md"
+  ],
+  "network_authority": false,
+  "deployment_authority": false,
+  "notes": "Mutable repository-head documentation. This manifest does not assert canonical testnet or mainnet network/deployment state."
+}

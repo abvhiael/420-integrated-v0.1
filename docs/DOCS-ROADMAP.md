@@ -101,7 +101,7 @@ Exit condition: developers, architects and reviewers can identify every canonica
 
 - [x] DOC-8.1 Publish the Genesis application manual index and exact frozen application inventory, establish the per-application coverage contract, distinguish protocol-only/testnet-only entries, expose the application-manual navigation entry, and lock the DOC-8 build order.
 - [x] DOC-8.2 Build the 420 Wallet application package around the completed DOC-6 user journey, filling concepts, architecture, permissions, fees, security, FAQ and developer integration without duplicating the canonical Wallet task guides.
-- [ ] DOC-8.3 Build 420 Explorer, 420 Search and 420 Analytics manuals for chain discovery, search and derived analytics, preserving canonical-versus-derived authority and finality/reorg semantics.
+- [x] DOC-8.3 Build 420 Explorer, 420 Search and 420 Analytics manuals for chain discovery, search and derived analytics, preserving canonical-versus-derived authority and finality/reorg semantics.
 - [ ] DOC-8.4 Build 420 AppStore, 420 Verify, 420 Notifications and 420 Status manuals for application discovery, reproducible verification, alerts and operational presentation, including explicit non-authority/security boundaries.
 - [ ] DOC-8.5 Build 420 Registry, 420 Names and 420 Identity manuals for canonical registered discovery, `.420` naming and optional pseudonymous identity/credential workflows.
 - [ ] DOC-8.6 Build 420 Swap, 420 Bridge and 420 Token manuals for swaps/routes, verified cross-chain movement and qualified token-template deployment, including value/fee/risk/settlement safety.

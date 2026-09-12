@@ -1,0 +1,42 @@
+{
+  "schema": "420-bridge-xrpl-mainnet-v12.5.6",
+  "status": "APPROVED_INACTIVE_PENDING_PRODUCTION_VALIDATED_LEDGER_VERIFIER_AND_GATEWAY_ACCOUNT",
+  "canonical_chain_key": "420/BRIDGE/CHAIN/XRP",
+  "chain_family": "XRPL",
+  "route_chain_id": "0x5852504c00000001",
+  "network_identity": {
+    "method": "validated-ledger consensus",
+    "ledger_index_type": "UInt32",
+    "ledger_hash_type": "SHA-512Half UInt256"
+  },
+  "native_asset": {
+    "symbol": "XRP",
+    "units": "drops"
+  },
+  "adapter": {
+    "contract": "XrplBridgeAdapter420",
+    "adapter_id_preimage": "420/BRIDGE/XRPL/MAINNET/V12.5.6",
+    "inbound_finality": "transaction must be in a validated ledger and have tesSUCCESS",
+    "outbound_recipient": "20-byte XRPL AccountID + 1-byte destination-tag flag + 4-byte destination tag",
+    "native_value_on_420_outbound": "rejected"
+  },
+  "activation_requirements": [
+    "production IXrplFinalityVerifier420 implementation proves transaction membership in a validated XRP Ledger",
+    "verifier proves the transaction result is tesSUCCESS",
+    "canonical bridge AccountID is governance allowlisted",
+    "XRP asset id and route id are governance bound",
+    "destination-tag encoding is enforced for outbound transfers",
+    "route risk caps and emergency isolation are configured",
+    "end-to-end inbound and outbound qualification passes"
+  ],
+  "security_invariants": [
+    "provisional or non-validated ledger results fail closed",
+    "non-tesSUCCESS transactions fail closed",
+    "unapproved gateway accounts fail closed",
+    "message replay fails closed",
+    "transaction replay under a different message id fails closed",
+    "direct adapter calls bypassing GatewayRouter420 fail closed",
+    "outbound AccountID payloads must be exactly 20 bytes plus explicit tag metadata",
+    "a destination tag cannot be supplied when the tag-present flag is false"
+  ]
+}

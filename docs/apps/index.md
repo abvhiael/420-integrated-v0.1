@@ -159,7 +159,7 @@ Support diagnostics should prefer public transaction hashes, addresses, chain ID
 DOC-8 groups applications by user workflow while still producing one predictable package per application:
 
 1. **DOC-8.1 — Application catalog and coverage contract** — this index, exact Genesis inventory, manual standard, exclusions and phase map.
-2. **DOC-8.2 — 420 Wallet application package** — integrate the completed DOC-6 user journey and fill the application/developer package around it.
+2. **DOC-8.2 — 420 Wallet application package — COMPLETE** — integrates the completed DOC-6 user journey and fills the application/developer package around it without duplicating canonical task guides.
 3. **DOC-8.3 — Explorer, Search and Analytics manuals** — chain discovery and derived-data surfaces.
 4. **DOC-8.4 — AppStore, Verify, Notifications and Status manuals** — application/security discovery, verification, alerts and operational presentation.
 5. **DOC-8.5 — Registry, Names and Identity manuals** — registered discovery, naming and optional identity workflows.

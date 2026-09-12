@@ -40,7 +40,7 @@ For detailed Wallet task procedures, use the canonical [Wallet troubleshooting g
 - **Retry safety:** unsafe for state-changing actions until network identity matches.
 - **Recovery:** stop signing; verify qualified network settings independently; switch to the intended network; disconnect/reconnect if the application remains stale; reject unknown custom RPC instructions.
 - **Escalation:** stop if the requested chain cannot be matched to approved network documentation.
-- **Related:** [Wallet troubleshooting](../users/wallet/troubleshooting.md#wrong-network-or-chain-mismatch), [Developer networks and RPC](../developers/networks-testnet-rpc.md).
+- **Related:** [Wallet troubleshooting](../users/wallet/troubleshooting.md#wrong-network-or-chain-mismatch), [Developer networks and RPC](../developers/networks-and-manifests.md).
 
 ## TRB-WALLET-003 — SmartAccount420 cannot be discovered
 
@@ -54,7 +54,7 @@ For detailed Wallet task procedures, use the canonical [Wallet troubleshooting g
 - **Retry safety:** safe for read/discovery retries; unsafe to deploy or create a replacement account solely to make discovery succeed without confirming canonical state.
 - **Recovery:** verify network and controller; re-read canonical discovery state; use the deployed SmartAccount420 address directly where the recovery flow explicitly requires it.
 - **Escalation:** stop before creating/redeploying anything if account existence is ambiguous.
-- **Related:** [Wallet troubleshooting](../users/wallet/troubleshooting.md#smartaccount420-cannot-be-discovered), [Wallet developer integration](../developers/wallet-smart-account-capabilities.md).
+- **Related:** [Wallet troubleshooting](../users/wallet/troubleshooting.md#smartaccount420-cannot-be-discovered), [Wallet developer integration](../developers/wallet-and-smart-accounts.md).
 
 ## TRB-WALLET-004 — Permission or session stopped working
 
@@ -82,7 +82,7 @@ For detailed Wallet task procedures, use the canonical [Wallet troubleshooting g
 - **Retry safety:** safe for enrollment UI retries only after verifying the intended account/network; do not repeatedly sign state-changing actions while binding state is unclear.
 - **Recovery:** use explicit enrollment/re-enrollment; restore via qualified client support where available; never export/copy passkey private material.
 - **Escalation:** stop if any support flow asks for passkey private material or authenticator secrets.
-- **Related:** [Wallet troubleshooting](../users/wallet/troubleshooting.md#passkey-unavailable), [Wallet setup and protection](../users/wallet/setup-and-protection.md).
+- **Related:** [Wallet troubleshooting](../users/wallet/troubleshooting.md#passkey-unavailable), [Wallet setup and protection](../users/wallet/setup-import-and-protection.md).
 
 ## TRB-WALLET-006 — Signing or simulation failed
 
@@ -96,7 +96,7 @@ For detailed Wallet task procedures, use the canonical [Wallet troubleshooting g
 - **Retry safety:** unsafe to bypass simulation or blindly resubmit a write.
 - **Recovery:** inspect the reason; refresh canonical state; correct the transaction/authority; re-simulate; sign only after the request is understood.
 - **Escalation:** stop on unexpected target/value/data, unexplained authority escalation or suspicious signing prompts.
-- **Related:** [Wallet signing review](../users/wallet/signing-and-simulation.md), [Wallet troubleshooting](../users/wallet/troubleshooting.md#simulation-failed).
+- **Related:** [Wallet signing review](../users/wallet/signing-and-transaction-review.md), [Wallet troubleshooting](../users/wallet/troubleshooting.md#simulation-failed).
 
 ## TRB-WALLET-007 — Recovery action is unavailable or countdown appears wrong
 
@@ -152,7 +152,7 @@ For detailed Wallet task procedures, use the canonical [Wallet troubleshooting g
 - **Retry safety:** safe for reads; unsafe to submit compensating writes merely to make the UI match.
 - **Recovery:** verify canonical state and finality; compare qualified read endpoints; allow derived services to catch up/rebuild.
 - **Escalation:** escalate if canonical sources disagree or the intended network cannot be established.
-- **Related:** [Wallet troubleshooting](../users/wallet/troubleshooting.md#balance-or-activity-looks-stale), [420Indexer developer guide](../developers/reads-apis-indexer.md).
+- **Related:** [Wallet troubleshooting](../users/wallet/troubleshooting.md#balance-or-activity-looks-stale), [420Indexer developer guide](../developers/indexer-api.md).
 
 ## TRB-WALLET-011 — Suspicious approval or possible authority compromise
 

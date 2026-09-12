@@ -25,6 +25,7 @@ Generated reference is **descriptive, not authoritative**. It must never replace
 - [Generated 420Indexer API reference](generated/indexer-api.md)
 - [Generated SDK and CLI reference](generated/sdk-cli.md)
 - [Generated network and chain registry reference](generated/networks.md)
+- [Generated canonical deployment reference](generated/deployments.md)
 
 The machine source registry is `docs/reference/reference-sources.json`; generation starts from `python scripts/generate-reference-docs.py`. Family renderers are being consolidated into unified `--check` freshness qualification in DOC-10.9.
 
@@ -51,7 +52,8 @@ Examples:
 - an address is never invented from a documentation example;
 - an API route is generated from the stable implementation contract, not copied by hand from prose;
 - SDK/CLI reference is generated from exported source/command definitions;
-- network/deployment reference must remain environment-specific and must not silently substitute local values for testnet/mainnet values.
+- network/deployment reference must remain environment-specific and must not silently substitute local values for testnet/mainnet values;
+- deployment plans, predicted addresses, manifest hints, unconfirmed receipts and example catalogues never become canonical deployment records merely by appearing in generated docs.
 
 ## Generated-content rule
 
@@ -66,7 +68,7 @@ Generated files are not edited by hand. Human-authored explanation belongs in DO
 5. **DOC-10.5 — 420Indexer and service API reference — COMPLETE**
 6. **DOC-10.6 — SDK and CLI reference — COMPLETE**
 7. **DOC-10.7 — Network and chain registry reference — COMPLETE**
-8. **DOC-10.8 — Canonical deployment reference**
+8. **DOC-10.8 — Canonical deployment reference — COMPLETE**
 9. **DOC-10.9 — Determinism and freshness qualification**
 10. **DOC-10.10 — Reference coverage audit and closeout**
 

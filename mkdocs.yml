@@ -267,6 +267,60 @@ nav:
                   - Events & Finality: apps/token/developer/events.md
                   - Errors & Retries: apps/token/developer/errors.md
                   - Examples: apps/token/developer/examples.md
+          - 420 Stake:
+              - Overview: apps/stake/index.md
+              - Getting Started: apps/stake/getting-started.md
+              - User Guide: apps/stake/user-guide.md
+              - Concepts: apps/stake/concepts.md
+              - Architecture: apps/stake/architecture.md
+              - Permissions: apps/stake/permissions.md
+              - Fees & Economics: apps/stake/fees.md
+              - Security: apps/stake/security.md
+              - Troubleshooting: apps/stake/troubleshooting.md
+              - FAQ: apps/stake/faq.md
+              - Developer Integration:
+                  - Overview: apps/stake/developer/index.md
+                  - Contracts: apps/stake/developer/contracts.md
+                  - API & Reads: apps/stake/developer/api.md
+                  - Events & Finality: apps/stake/developer/events.md
+                  - Errors & Retries: apps/stake/developer/errors.md
+                  - Examples: apps/stake/developer/examples.md
+          - 420 Governance:
+              - Overview: apps/governance/index.md
+              - Getting Started: apps/governance/getting-started.md
+              - User Guide: apps/governance/user-guide.md
+              - Concepts: apps/governance/concepts.md
+              - Architecture: apps/governance/architecture.md
+              - Permissions: apps/governance/permissions.md
+              - Fees: apps/governance/fees.md
+              - Security: apps/governance/security.md
+              - Troubleshooting: apps/governance/troubleshooting.md
+              - FAQ: apps/governance/faq.md
+              - Developer Integration:
+                  - Overview: apps/governance/developer/index.md
+                  - Contracts: apps/governance/developer/contracts.md
+                  - API & Reads: apps/governance/developer/api.md
+                  - Events & Finality: apps/governance/developer/events.md
+                  - Errors & Retries: apps/governance/developer/errors.md
+                  - Examples: apps/governance/developer/examples.md
+          - 420 Arbitration:
+              - Overview: apps/arbitration/index.md
+              - Getting Started: apps/arbitration/getting-started.md
+              - User Guide: apps/arbitration/user-guide.md
+              - Concepts: apps/arbitration/concepts.md
+              - Architecture: apps/arbitration/architecture.md
+              - Permissions: apps/arbitration/permissions.md
+              - Fees: apps/arbitration/fees.md
+              - Security & Privacy: apps/arbitration/security.md
+              - Troubleshooting: apps/arbitration/troubleshooting.md
+              - FAQ: apps/arbitration/faq.md
+              - Developer Integration:
+                  - Overview: apps/arbitration/developer/index.md
+                  - Contracts: apps/arbitration/developer/contracts.md
+                  - API & Reads: apps/arbitration/developer/api.md
+                  - Events & Finality: apps/arbitration/developer/events.md
+                  - Errors & Retries: apps/arbitration/developer/errors.md
+                  - Examples: apps/arbitration/developer/examples.md
       - 420 Wallet:
           - Onboarding: users/wallet/index.md
           - Setup, Import & Protection: users/wallet/setup-import-and-protection.md

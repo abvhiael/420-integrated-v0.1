@@ -51,6 +51,13 @@ DOC-9.5 adds the read and 420Indexer path:
 - [Pagination, replay and reorgs](pagination-replay-and-reorgs.md) — opaque keyset cursors, bounded pages, consumer checkpoints, replay and non-finalized reorg reconciliation.
 - [API fallback and reliability](api-fallback-and-reliability.md) — stale/degraded behavior, same-environment fallback, retry/caching/privacy rules and deployment-specific rate-limit handling.
 
+DOC-9.6 adds the Wallet/Smart Account authorization path:
+
+- [Wallet and Smart Account integration](wallet-and-smart-accounts.md) — connection versus authority, canonical account-state revalidation, EntryPoint execution and authorization epochs.
+- [Transaction preparation and simulation](transaction-preparation-and-simulation.md) — bounded intent, Wallet simulation/review, stale-state invalidation and canonical post-submit confirmation.
+- [Capabilities and sessions](capabilities-and-sessions.md) — session keys, target/selector-scoped grants, limits, validity, revocation and gas-sponsorship boundaries.
+- [Passkeys and recovery-aware integrations](passkeys-and-recovery.md) — owner-level passkey UserOperations, epoch-bound credentials, two-day recovery and post-recovery authority invalidation.
+
 Read the foundation pages before implementing a production-facing integration. Later DOC-9 sections may add convenience abstractions, but they must not weaken these rules.
 
 ## Local workflow at a glance
@@ -88,7 +95,7 @@ Starter projects are discovered through `420 templates` and created with `420 cr
 | Connect to testnet/RPC | [networks and manifests](networks-and-manifests.md) | testnet/Faucet + RPC/WSS + endpoint health/failover |
 | Deploy/register a contract | [contracts and interfaces](contracts-and-interfaces.md) | deployment + verification + Registry/publishing |
 | Build read-heavy UX | [reads and source selection](reads-and-source-selection.md) | 420Indexer API + pagination/replay + fallback/reliability |
-| Submit user-authorized writes | first read/write + integration model | DOC-9.6 Wallet/Smart Accounts/capabilities |
+| Submit user-authorized writes | [Wallet and Smart Account integration](wallet-and-smart-accounts.md) | transaction preparation + capabilities/sessions + passkeys/recovery |
 | Build resilient SDK/event handling | source of truth | DOC-9.7 SDK/events/errors/reliability |
 | Integrate Storage, AI or Bridge | integration model + source of truth | DOC-9.8 provider/value integrations |
 | Integrate a game | prerequisites + integration model | DOC-9.9 Gaming Protocol |
@@ -114,7 +121,7 @@ Developer tooling is never a substitute for the authority that owns the state be
 3. **DOC-9.3 — Networks, testnet and RPC access — COMPLETE** — explicit manifest/environment discovery, testnet/Faucet procedure without invented deployment values, current `node420` public RPC/WSS access, 420RPC ingress boundary, endpoint readiness/failover and cross-environment fail-closed rules.
 4. **DOC-9.4 — Contracts, deployments, Registry and verification — COMPLETE** — canonical contract/service/version/interface discovery, non-custodial deployment planning/external signing, canonical receipt/runtime-code confirmation, 420Verify evidence semantics and governance-only Registry plus AppStore publication handoffs.
 5. **DOC-9.5 — Reads, APIs and 420Indexer — COMPLETE** — canonical-versus-derived read selection, stable Indexer v1 API use, opaque cursor pagination/replay, provenance/finality/reorg handling, stale/degraded fallback and non-invented deployment rate-limit policy.
-6. **DOC-9.6 — Wallet, Smart Accounts and capabilities** — connect versus authorize, transaction preparation, simulation, capability/session scopes, passkeys, recovery-aware integrations and post-submit confirmation.
+6. **DOC-9.6 — Wallet, Smart Accounts and capabilities — COMPLETE** — connection-versus-authority boundaries, canonical Smart Account revalidation, bounded transaction preparation/simulation, target/selector-scoped capability/session grants, passkey UserOperation semantics, recovery-aware invalidation and post-submit canonical confirmation.
 7. **DOC-9.7 — SDKs, events, errors and reliability patterns** — shared SDK/CLI usage, event consumption, stable error handling, retry/idempotency, deadlines, confirmations/finality and diagnostic correlation.
 8. **DOC-9.8 — Storage, AI/Compute and Bridge integrations** — provider-neutral storage/resource flows, 420AI/ComputeMarket jobs, privacy/verification/settlement boundaries and verified cross-chain route/proof/risk handling.
 9. **DOC-9.9 — Gaming Protocol integration** — optional-wallet/guest flows, registered game namespaces, entitlements, guest migration commitments, scoped cross-game attestations and no pay-to-win Wallet coupling.

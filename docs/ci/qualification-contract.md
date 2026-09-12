@@ -1,0 +1,113 @@
+---
+title: Documentation qualification contract
+audience:
+  - developer
+  - operator
+category: contributing
+status: current
+version: current
+---
+
+# Documentation qualification contract
+
+DOC-12 defines the repository-level contract for automated 420Docs qualification. The contract is intentionally narrower than documentation review: CI enforces deterministic publication invariants, while human review remains responsible for architectural correctness, protocol meaning, safety judgment and prose quality.
+
+## Scope
+
+The documentation gate covers repository-controlled 420Docs sources and the source material that deterministically generates or configures published documentation. The current baseline includes:
+
+1. generated-reference freshness;
+2. strict MkDocs build;
+3. search and navigation qualification.
+
+DOC-12.2 through DOC-12.9 add deterministic validators to this same gate. They do not replace the baseline.
+
+## Authority
+
+The qualification runner does not create protocol authority. It checks documentation structure against repository rules and authoritative source files already defined by earlier documentation phases.
+
+- DOC-10 remains authoritative for generated-reference provenance and byte-for-byte freshness.
+- MkDocs strict build remains authoritative for renderer-level warnings and broken configured navigation/build conditions.
+- `scripts/qualify-docs.py` remains authoritative for the current audience-entry, search-index and repository-discoverability checks.
+- Later DOC-12 validators own only the machine-checkable invariants explicitly assigned to them.
+
+A passing CI result means the checked publication invariants passed. It does not certify protocol correctness, legal correctness, security correctness or factual completeness.
+
+## Unified entry point
+
+Run the complete documentation qualification pipeline from the repository root with:
+
+```bash
+python scripts/qualify-documentation.py
+```
+
+The same entry point is used by `420Docs Qualification` in GitHub Actions. Individual validators may still be run directly while diagnosing a failure, but the unified runner is the merge/publication gate.
+
+## Baseline stage order
+
+The runner executes stages in deterministic order and stops at the first failure:
+
+1. `generated-reference-freshness`
+2. `strict-mkdocs-build`
+3. `search-navigation`
+
+Later DOC-12 stages must be added deliberately to this ordered list. A validator may not silently bypass an earlier mandatory stage.
+
+## Failure policy
+
+Documentation qualification fails closed for a machine-verifiable rule owned by DOC-12. A failure must identify the stage and preserve the underlying validator output so the offending source can be diagnosed.
+
+The runner uses stable process exit semantics:
+
+| Exit code | Meaning |
+| --- | --- |
+| `0` | every configured documentation qualification stage passed |
+| `1` | a qualification stage executed and failed |
+| `2` | the runner could not execute a configured stage |
+
+A nonzero result blocks the DOC-12 documentation gate. Warnings emitted by tools configured in strict mode are failures when the underlying tool returns nonzero.
+
+## Determinism rules
+
+A DOC-12 validator must:
+
+- operate only on repository state and declared generated/build outputs;
+- avoid network-dependent success criteria unless a later phase explicitly defines a deterministic exception;
+- report the same result for the same repository tree and supported toolchain;
+- avoid timestamps, random sampling or mutable external service state as acceptance inputs;
+- fail on malformed governed input rather than guessing intent;
+- produce concise output that names the failed rule, file or identifier where practical.
+
+## CI and local equivalence
+
+The GitHub Actions workflow installs the documented documentation dependencies and then calls the same unified runner available to developers locally. CI must not contain hidden validation logic that cannot be invoked through the repository entry point.
+
+Workflow path triggers must include:
+
+- governed documentation sources;
+- MkDocs configuration and documentation dependencies;
+- the unified runner and component validators;
+- generated-reference generators/renderers and their authoritative source families;
+- documentation workflow files themselves.
+
+## Failure ownership
+
+Each failure should be repaired at the layer that owns it.
+
+- stale generated output: regenerate or correct the DOC-10 source/generator;
+- strict MkDocs failure: repair the page, link, configuration or renderer warning;
+- search/navigation failure: repair discoverability or the qualification rule if the documentation contract intentionally changed;
+- later DOC-12 validator failure: repair the governed source or update the rule only when the documentation contract itself has intentionally changed.
+
+Do not weaken a gate merely to make a failing branch green.
+
+## Deliberate non-goals
+
+DOC-12 CI does not attempt to determine whether prose is persuasive, whether an architecture is well designed, whether a protocol decision is economically optimal, or whether a security claim is substantively correct. Those remain review responsibilities unless a specific deterministic invariant is encoded in a later DOC-12 step.
+
+## Related documentation
+
+- [Documentation CI](index.md)
+- [DOC-12 roadmap](DOC-12-ROADMAP.md)
+- [Generated reference](../reference/index.md)
+- [Troubleshooting registry contract](../troubleshooting/registry-contract.md)

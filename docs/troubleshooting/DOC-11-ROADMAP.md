@@ -72,14 +72,20 @@ Deliverables:
 - stable `TRB-CHAIN-*`, `TRB-RPC-*` and `TRB-TX-*` entries covering identity, transport, method policy, ambiguous write submission, nonce/gas/replacement/pending/revert states, reorg/finality and derived-view disagreement
 - troubleshooting index navigation into the chain/RPC/transaction registry
 
-### DOC-11.4 — Consensus, validator and node troubleshooting
+### DOC-11.4 — Consensus, validator and node troubleshooting — COMPLETE
 
-- Validator eligibility/activation/exit issues.
-- Proposer/attestation/QC/finality symptoms.
-- Quorum loss and partition behavior.
-- `fourtwentyd` and `node420` startup/health failures.
-- Engine connectivity and signing safety.
-- Recovery order and stop conditions.
+- [x] Validator eligibility/activation/exit issues.
+- [x] Proposer/attestation/QC/finality symptoms.
+- [x] Quorum loss and partition behavior.
+- [x] `fourtwentyd` and `node420` startup/health failures.
+- [x] Engine connectivity and signing safety.
+- [x] Recovery order and stop conditions.
+
+Deliverables:
+
+- `docs/troubleshooting/consensus-validator-node.md`
+- stable `TRB-CONSENSUS-*` and `TRB-NODE-*` entries covering validator lifecycle, proposer/attestation/QC/finality, quorum loss, partitions, safety halt/equivocation, process health, Engine connectivity, consensus/execution divergence, remote signer uncertainty and restart recovery
+- troubleshooting index navigation into the consensus/validator/node registry
 
 ### DOC-11.5 — Indexer, Explorer, Search, Analytics and status troubleshooting
 

@@ -23,6 +23,7 @@ Generated reference is **descriptive, not authoritative**. It must never replace
 - [Generated events and custom errors](generated/events-errors.md)
 - [Generated public RPC reference](generated/rpc.md)
 - [Generated 420Indexer API reference](generated/indexer-api.md)
+- [Generated SDK and CLI reference](generated/sdk-cli.md)
 
 The machine source registry is `docs/reference/reference-sources.json`; generation starts from `python scripts/generate-reference-docs.py`. Family renderers are being consolidated into unified `--check` freshness qualification in DOC-10.9.
 
@@ -62,7 +63,7 @@ Generated files are not edited by hand. Human-authored explanation belongs in DO
 3. **DOC-10.3 — Events and custom errors — COMPLETE** — generated catalogue-bounded event/error indexes with canonical signatures, indexed fields, Ethereum Keccak-256 topics/selectors and fail-closed handling for ambiguous source types.
 4. **DOC-10.4 — RPC reference — COMPLETE** — generated public 420RPC compatibility/request-policy reference from `420-rpc` implementation source, including method profiles/transports/parameters/capabilities and explicit private/admin/signer exclusions.
 5. **DOC-10.5 — 420Indexer and service API reference — COMPLETE** — generated stable v1 Indexer routes, path/query parameters, success/error envelopes, keyset pagination/cursor limits, filter surfaces, readiness/status semantics and explicit non-authoritative boundary.
-6. **DOC-10.6 — SDK and CLI reference** — exported SDK types/functions plus stable CLI commands/options and authority boundaries.
+6. **DOC-10.6 — SDK and CLI reference — COMPLETE** — generated `@420/sdk` export surface, Wallet/Smart Account adapter boundaries, primary `420` CLI command/options/defaults, installed binaries and signer-secret isolation rules from checked-in source.
 7. **DOC-10.7 — Network and chain registry reference** — chain identity, manifests, service endpoints and environment-scoped registry data.
 8. **DOC-10.8 — Canonical deployment reference** — deployment/catalogue records, versions, provenance, verified artifact identities and approved addresses.
 9. **DOC-10.9 — Determinism and freshness qualification** — regeneration check, stale-output detection, source/output hashes and generator-specific CI qualification.

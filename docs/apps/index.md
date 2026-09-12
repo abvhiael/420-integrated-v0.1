@@ -18,6 +18,9 @@ The authoritative application inventory is `config/genesis-applications.json`. D
 ## Available manuals
 
 - [420 Wallet](wallet/index.md) — account management, authorization, security, economics, troubleshooting and developer integration. The detailed end-user task journey remains in the canonical DOC-6 Wallet guides and is linked from this package rather than duplicated.
+- [420 Explorer](explorer/index.md) — blocks, transactions, receipts/logs, addresses, contracts, provenance and finality-aware chain inspection.
+- [420 Search](search/index.md) — unified public discovery with explicit provenance, privacy boundaries and ranking-as-presentation semantics.
+- [420 Analytics](analytics/index.md) — reproducible metrics, trends and dashboards with source-window, version and finality context.
 
 ## Manual contract
 
@@ -59,9 +62,9 @@ Generated ABI/API/event/error reference belongs in DOC-10; the DOC-8 developer p
 | Application | Class | DOC-8 manual | Primary role |
 | --- | --- | --- | --- |
 | 420 Wallet | Genesis user app | [available](wallet/index.md) | Smart Account management, capabilities, recovery, assets and dApp access |
-| 420 Explorer | Genesis user app | required | chain, transaction, contract, validator, asset, governance and finality inspection |
-| 420 Search | Genesis user app | required | unified discovery across canonical and registered public ecosystem data |
-| 420 Analytics | Genesis user app | required | rebuildable analytics, metrics, trends and dashboards |
+| 420 Explorer | Genesis user app | [available](explorer/index.md) | chain, transaction, contract, validator, asset, governance and finality inspection |
+| 420 Search | Genesis user app | [available](search/index.md) | unified discovery across canonical and registered public ecosystem data |
+| 420 Analytics | Genesis user app | [available](analytics/index.md) | rebuildable analytics, metrics, trends and dashboards |
 | 420 AppStore | Genesis user app | required | non-authoritative application catalogue and security/provenance context |
 | 420 Verify | Genesis user app | required | reproducible deployed-contract source verification |
 | 420 Notifications | Genesis user app | required | opt-in event alerts with source provenance and no execution authority |
@@ -108,6 +111,8 @@ Every manual must distinguish whether the application is:
 - **testnet-only**.
 
 A frontend badge, index, search result, notification, chart, catalogue entry or status indicator must never be described as stronger authority than its canonical source.
+
+Explorer, Search and Analytics are the clearest Genesis examples of this rule: each is useful and first-class, but each remains a rebuildable view over qualified indexed/canonical sources rather than a new source of chain or protocol truth.
 
 ## User-manual minimum
 
@@ -160,7 +165,7 @@ DOC-8 groups applications by user workflow while still producing one predictable
 
 1. **DOC-8.1 — Application catalog and coverage contract** — this index, exact Genesis inventory, manual standard, exclusions and phase map.
 2. **DOC-8.2 — 420 Wallet application package — COMPLETE** — integrates the completed DOC-6 user journey and fills the application/developer package around it without duplicating canonical task guides.
-3. **DOC-8.3 — Explorer, Search and Analytics manuals** — chain discovery and derived-data surfaces.
+3. **DOC-8.3 — Explorer, Search and Analytics manuals — COMPLETE** — documents the three primary derived discovery/observability applications, including 420Indexer consumption, provenance, privacy, ranking/metric semantics, head/safe/finalized state and reorg-safe behavior.
 4. **DOC-8.4 — AppStore, Verify, Notifications and Status manuals** — application/security discovery, verification, alerts and operational presentation.
 5. **DOC-8.5 — Registry, Names and Identity manuals** — registered discovery, naming and optional identity workflows.
 6. **DOC-8.6 — Swap, Bridge and Token manuals** — user-facing value movement and token deployment.
@@ -173,7 +178,9 @@ DOC-8 groups applications by user workflow while still producing one predictable
 
 - [Application documentation contract](../contributing/app-documentation-contract.md)
 - [420 Wallet user documentation](../users/wallet/index.md)
+- [420Indexer infrastructure](../architecture/infrastructure/420indexer.md)
 - [Core protocol architecture](../architecture/protocols/index.md)
 - [Infrastructure architecture](../architecture/infrastructure/index.md)
+- `docs/420INDEXER-API-V1.md`
 - `config/genesis-applications.json`
 - `docs/GENESIS-DAPPS.md`

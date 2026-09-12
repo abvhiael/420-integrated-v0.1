@@ -57,14 +57,20 @@ Deliverables:
 - stable `TRB-WALLET-001` through `TRB-WALLET-011`
 - troubleshooting index navigation into the Wallet/account registry
 
-### DOC-11.3 — Chain, RPC and transaction troubleshooting
+### DOC-11.3 — Chain, RPC and transaction troubleshooting — COMPLETE
 
-- RPC availability and method failures.
-- Chain-ID/network mismatch.
-- Transaction submission, replacement, nonce and gas failures.
-- Receipt/finality/reorg interpretation.
-- Safe retry/idempotency guidance.
-- Canonical node versus gateway/proxy diagnosis.
+- [x] RPC availability and method failures.
+- [x] Chain-ID/network mismatch.
+- [x] Transaction submission, replacement, nonce and gas failures.
+- [x] Receipt/finality/reorg interpretation.
+- [x] Safe retry/idempotency guidance.
+- [x] Canonical node versus gateway/proxy diagnosis.
+
+Deliverables:
+
+- `docs/troubleshooting/chain-rpc-transactions.md`
+- stable `TRB-CHAIN-*`, `TRB-RPC-*` and `TRB-TX-*` entries covering identity, transport, method policy, ambiguous write submission, nonce/gas/replacement/pending/revert states, reorg/finality and derived-view disagreement
+- troubleshooting index navigation into the chain/RPC/transaction registry
 
 ### DOC-11.4 — Consensus, validator and node troubleshooting
 

@@ -44,6 +44,13 @@ DOC-9.4 adds the contract release path:
 - [Verification and evidence](verification-and-evidence.md) — 420Verify evidence inputs/result classes, proxy/upgrade handling and the distinction between reproducibility and endorsement.
 - [Registry and publishing](registry-and-publishing.md) — release manifests, Registry preflight, governance-authorized canonical registration and non-canonical AppStore publication.
 
+DOC-9.5 adds the read and 420Indexer path:
+
+- [Reads and source selection](reads-and-source-selection.md) — when to use canonical RPC/owning contracts versus rebuildable 420Indexer projections and when to recheck chain truth.
+- [420Indexer API](indexer-api.md) — stable v1 envelopes/routes, chain scoping, readiness/status semantics and the public API boundary.
+- [Pagination, replay and reorgs](pagination-replay-and-reorgs.md) — opaque keyset cursors, bounded pages, consumer checkpoints, replay and non-finalized reorg reconciliation.
+- [API fallback and reliability](api-fallback-and-reliability.md) — stale/degraded behavior, same-environment fallback, retry/caching/privacy rules and deployment-specific rate-limit handling.
+
 Read the foundation pages before implementing a production-facing integration. Later DOC-9 sections may add convenience abstractions, but they must not weaken these rules.
 
 ## Local workflow at a glance
@@ -80,7 +87,7 @@ Starter projects are discovered through `420 templates` and created with `420 cr
 | Build a first local dApp | [quickstart](quickstart.md) | local development + project structure + first read/write |
 | Connect to testnet/RPC | [networks and manifests](networks-and-manifests.md) | testnet/Faucet + RPC/WSS + endpoint health/failover |
 | Deploy/register a contract | [contracts and interfaces](contracts-and-interfaces.md) | deployment + verification + Registry/publishing |
-| Build read-heavy UX | source of truth | DOC-9.5 RPC/APIs/420Indexer |
+| Build read-heavy UX | [reads and source selection](reads-and-source-selection.md) | 420Indexer API + pagination/replay + fallback/reliability |
 | Submit user-authorized writes | first read/write + integration model | DOC-9.6 Wallet/Smart Accounts/capabilities |
 | Build resilient SDK/event handling | source of truth | DOC-9.7 SDK/events/errors/reliability |
 | Integrate Storage, AI or Bridge | integration model + source of truth | DOC-9.8 provider/value integrations |
@@ -106,7 +113,7 @@ Developer tooling is never a substitute for the authority that owns the state be
 2. **DOC-9.2 — Quickstart and local development — COMPLETE** — repository/toolchain setup, local real15 bootstrap, starter selection/project structure, first canonical read and first Wallet-authorized write/confirmation flow.
 3. **DOC-9.3 — Networks, testnet and RPC access — COMPLETE** — explicit manifest/environment discovery, testnet/Faucet procedure without invented deployment values, current `node420` public RPC/WSS access, 420RPC ingress boundary, endpoint readiness/failover and cross-environment fail-closed rules.
 4. **DOC-9.4 — Contracts, deployments, Registry and verification — COMPLETE** — canonical contract/service/version/interface discovery, non-custodial deployment planning/external signing, canonical receipt/runtime-code confirmation, 420Verify evidence semantics and governance-only Registry plus AppStore publication handoffs.
-5. **DOC-9.5 — Reads, APIs and 420Indexer** — canonical RPC versus indexed projections, Indexer API patterns, pagination/replay/cursors, provenance, finality/reorg handling and service fallbacks.
+5. **DOC-9.5 — Reads, APIs and 420Indexer — COMPLETE** — canonical-versus-derived read selection, stable Indexer v1 API use, opaque cursor pagination/replay, provenance/finality/reorg handling, stale/degraded fallback and non-invented deployment rate-limit policy.
 6. **DOC-9.6 — Wallet, Smart Accounts and capabilities** — connect versus authorize, transaction preparation, simulation, capability/session scopes, passkeys, recovery-aware integrations and post-submit confirmation.
 7. **DOC-9.7 — SDKs, events, errors and reliability patterns** — shared SDK/CLI usage, event consumption, stable error handling, retry/idempotency, deadlines, confirmations/finality and diagnostic correlation.
 8. **DOC-9.8 — Storage, AI/Compute and Bridge integrations** — provider-neutral storage/resource flows, 420AI/ComputeMarket jobs, privacy/verification/settlement boundaries and verified cross-chain route/proof/risk handling.

@@ -42,14 +42,20 @@ Deliverables:
 - `docs/troubleshooting/registry-contract.md`
 - `docs/troubleshooting/entry-template.md`
 
-### DOC-11.2 — Wallet, account and authorization troubleshooting
+### DOC-11.2 — Wallet, account and authorization troubleshooting — COMPLETE
 
-- Wallet connection and network mismatch.
-- Smart-account discovery and authorization epochs.
-- Capability/session/passkey failures.
-- Signing/simulation failures.
-- Recovery and lost-device states.
-- Pending/failed transaction interpretation.
+- [x] Wallet connection and network mismatch.
+- [x] Smart-account discovery and authorization epochs.
+- [x] Capability/session/passkey failures.
+- [x] Signing/simulation failures.
+- [x] Recovery and lost-device states.
+- [x] Pending/failed transaction interpretation.
+
+Deliverables:
+
+- `docs/troubleshooting/wallet-account-authorization.md`
+- stable `TRB-WALLET-001` through `TRB-WALLET-011`
+- troubleshooting index navigation into the Wallet/account registry
 
 ### DOC-11.3 — Chain, RPC and transaction troubleshooting
 

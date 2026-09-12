@@ -93,25 +93,53 @@ Deliverables:
 - canonical owner-heading parser supports the DOC-11 backtick heading form, for example ``## `TRB-CHAIN-001` — ...``
 - corpus qualification evidence: 92 unique stable owner IDs and 105 exact ID-reference occurrences checked; exact-head 420Docs Qualification #637 passed
 
-### DOC-12.5 — Orphan-page and navigation validation
+### DOC-12.5 — Orphan-page and navigation validation — COMPLETE
 
-- Detect governed pages unreachable from 420Docs navigation or approved index routes.
-- Distinguish intentionally non-published source/reference material from accidental orphans.
-- Verify audience entry points remain reachable and indexed.
+- [x] Detect governed pages unreachable from 420Docs navigation or approved index routes.
+- [x] Distinguish intentionally non-published source/reference material from accidental orphans.
+- [x] Verify audience entry points remain reachable and indexed.
+- [x] Traverse governed links from actual MkDocs navigation plus explicitly approved entry pages.
+- [x] Wire orphan/navigation validation into the unified local/CI gate.
 
-### DOC-12.6 — Required-document coverage
+Deliverables:
 
-- Encode required documentation families and minimum entry pages.
-- Verify frozen Genesis application manuals remain present.
-- Verify architecture, user, developer, operator, reference and troubleshooting roots remain present.
-- Fail closed when a required canonical documentation surface disappears.
+- `docs/ci/orphan-policy.json` — governed roots, approved entry pages, required audience entry pages and explicit orphan exclusions
+- `scripts/validate-doc-orphans.py` — deterministic MkDocs-nav extraction and governed reachability traversal
+- non-executing YAML parsing for MkDocs navigation, including configs containing Python-tagged extension values
+- `orphan-navigation` stage in `scripts/qualify-documentation.py`
+- corpus qualification evidence: 434 governed pages, 367 directly in governed MkDocs navigation, all 434 reachable through 602 governed link edges, zero approved orphans; exact-head 420Docs Qualification #654 passed
 
-### DOC-12.7 — Generated-reference and source-freshness integration
+### DOC-12.6 — Required-document coverage — COMPLETE
 
-- Keep DOC-10 generated-reference freshness as a required gate.
-- Verify generated outputs remain discoverable from reference navigation.
-- Detect missing generated source registry/output families.
-- Keep generated output validation deterministic and byte-for-byte reproducible.
+- [x] Encode required documentation families and minimum entry pages.
+- [x] Verify frozen Genesis application manuals remain present.
+- [x] Verify architecture, user, developer, operator, reference and troubleshooting roots remain present.
+- [x] Fail closed when a required canonical documentation surface disappears.
+- [x] Wire required-document coverage into the unified local/CI gate.
+
+Deliverables:
+
+- `docs/ci/required-docs-policy.json` — required root pages, architecture entry families, frozen Genesis/testnet application packages and generated-reference outputs
+- `scripts/validate-required-docs.py` — deterministic required-file/package validation
+- `required-doc-coverage` stage in `scripts/qualify-documentation.py`
+- coverage for the complete 16-file documentation package of each of 20 frozen Genesis/testnet applications
+- corpus qualification evidence: 340 required files checked and all 20 frozen application packages present; exact-head 420Docs Qualification #654 passed
+
+### DOC-12.7 — Generated-reference and source-freshness integration — COMPLETE
+
+- [x] Keep DOC-10 generated-reference freshness as a required gate.
+- [x] Verify generated outputs remain discoverable from reference navigation.
+- [x] Detect missing generated source registry/output families.
+- [x] Keep generated output validation deterministic and byte-for-byte reproducible.
+- [x] Validate declared source paths for each generated-reference family.
+
+Deliverables:
+
+- `docs/ci/generated-reference-policy.json` — expected DOC-10 family/output mapping, source registry, reference index and freshness command
+- `scripts/validate-generated-reference-integration.py` — generated family/source/output/discoverability validation
+- `generated-reference-integration` immediately before DOC-10 `generated-reference-freshness` in the unified runner
+- DOC-10 byte-for-byte freshness remains owned by `scripts/qualify-generated-reference.py --check`
+- corpus qualification evidence: 7 generated families, 8 generated outputs and 25 declared source paths validated; all outputs directly linked from `docs/reference/index.md`; exact-head 420Docs Qualification #654 passed
 
 ### DOC-12.8 — Cross-document authority and environment safety checks
 

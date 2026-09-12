@@ -125,7 +125,7 @@ Developer documentation completion must not be confused with network launch read
 
 The canonical developer entry point is `docs/developers/index.md`. Every DOC-9 subphase is linked from that landing page and the end-to-end/security/audit closeout pages cross-link back into the owning task guides.
 
-DOC-9 deliberately keeps machine-generated reference out of handwritten task pages. Later generated ABI, NatSpec, RPC/API/SDK, event/error and deployment-registry reference should link into these task flows rather than replacing them.
+DOC-9 deliberately keeps machine-generated reference out of handwritten task pages. The completed [DOC-10 generated reference](../reference/index.md) now provides exact machine-derived contract/NatSpec/ABI status, events/errors, public RPC, Indexer API, SDK/CLI, network and deployment reference without replacing these task flows.
 
 ## Deliberate exclusions
 
@@ -155,6 +155,7 @@ After merge, DOC-10 becomes the next documentation development phase.
 ## Related documentation
 
 - [Developer landing page](index.md)
+- [DOC-10 generated reference](../reference/index.md)
 - [End-to-end developer examples](end-to-end-examples.md)
 - [Production and security checklist](production-security-checklist.md)
 - [Developer integration model](integration-model.md)

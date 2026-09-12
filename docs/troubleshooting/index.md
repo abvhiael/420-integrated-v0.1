@@ -24,6 +24,7 @@ DOC-11 organizes troubleshooting around two ways people actually arrive here:
 - [Indexer, Explorer, Search, Analytics and Status registry](indexer-explorer-search-analytics-status.md) — `TRB-INDEXER-*`, `TRB-EXPLORER-*`, `TRB-SEARCH-*`, `TRB-ANALYTICS-*` and `TRB-STATUS-*` covering stale/missing projections, replay/rebuild states, presentation mismatches, readiness semantics and canonical-RPC fallback.
 - [Value movement and economics registry](value-movement-economics.md) — `TRB-PAY-*`, `TRB-TOKEN-*`, `TRB-SWAP-*`, `TRB-BRIDGE-*`, `TRB-STAKE-*` and `TRB-TX-008` covering ambiguous payment/swap outcomes, invoices/quotes, refunds, settlement, token deployment/balances, bridge proof/replay/finality, staking lifecycle, rewards and fee interpretation.
 - [Shared protocol and provider registry](shared-protocol-provider.md) — `TRB-REGISTRY-*`, `TRB-NAMES-*`, `TRB-IDENTITY-*`, `TRB-RANDOM-*`, `TRB-ORACLE-*`, `TRB-STORAGE-*`, `TRB-AI-*`, `TRB-RIGHTS-*`, `TRB-VERIFY-*`, `TRB-ARBITRATION-*`, `TRB-MESSENGER-*`, `TRB-NOTIFY-*` and `TRB-ATTENTION-*` covering discovery, freshness, proofs, provider availability, AI jobs, rights/evidence, disputes and off-chain delivery boundaries.
+- [Genesis application coverage](genesis-application-coverage.md) — maps all 20 frozen Genesis/testnet application manual targets into DOC-11 and defines the limited `TRB-APP-*` cases for AppStore, Governance and Faucet where application-level indexing is useful.
 
 ## Safety rules
 
@@ -35,10 +36,11 @@ DOC-11 organizes troubleshooting around two ways people actually arrive here:
 - For payments, swaps, refunds, bridge messages and staking writes, a timeout or stale UI is never proof of failure; identify the original operation and reconcile canonical state before retrying.
 - For Indexer/Explorer/Search/Analytics/Status discrepancies, repair or rebuild the derived layer; do not mutate canonical state merely to make the UI match.
 - For provider-backed protocols, provider-local success/failure is operational evidence only; use replacement/fallback providers only through canonical protocol rules.
+- Application manuals may summarize first actions, but shared `TRB-*` entries own the stable retry/recovery identity; do not fork recovery procedures across application pages.
 - Stop and escalate when evidence is ambiguous, authority cannot be established, or a recovery step could increase loss or state divergence.
 
 ## Phase status
 
-DOC-11.1 through DOC-11.7 are complete. The implementation roadmap is in [`DOC-11-ROADMAP.md`](DOC-11-ROADMAP.md).
+DOC-11.1 through DOC-11.8 are complete. The implementation roadmap is in [`DOC-11-ROADMAP.md`](DOC-11-ROADMAP.md).
 
-Remaining application coverage, support workflow and final audit work will continue within the same DOC-11 branch/PR and merge only after the final ecosystem-wide troubleshooting audit and exact-head qualification.
+Search/diagnostic support workflow and final audit work will continue within the same DOC-11 branch/PR and merge only after the final ecosystem-wide troubleshooting audit and exact-head qualification.

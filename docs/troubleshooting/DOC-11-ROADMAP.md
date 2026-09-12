@@ -29,13 +29,18 @@ No troubleshooting flow may ask a user to reveal private keys, seed phrases, pas
 
 ## Roadmap
 
-### DOC-11.1 — Troubleshooting foundation and registry contract
+### DOC-11.1 — Troubleshooting foundation and registry contract — COMPLETE
 
-- Define stable documentation error-ID format and namespace rules.
-- Define required registry fields: ID, title, audience, surface, symptom, likely causes, authority source, severity, retry safety, diagnostic evidence, recovery steps, escalation and cross-links.
-- Define canonical-versus-derived diagnosis rules.
-- Establish safe-support and secret-handling requirements.
-- Establish troubleshooting navigation and page layout.
+- [x] Define stable documentation error-ID format and namespace rules.
+- [x] Define required registry fields: ID, title, audience, surface, symptom, likely causes, authority source, severity, retry safety, diagnostic evidence, recovery steps, escalation and cross-links.
+- [x] Define canonical-versus-derived diagnosis rules.
+- [x] Establish safe-support and secret-handling requirements.
+- [x] Establish troubleshooting navigation and page layout through the reusable entry template.
+
+Deliverables:
+
+- `docs/troubleshooting/registry-contract.md`
+- `docs/troubleshooting/entry-template.md`
 
 ### DOC-11.2 — Wallet, account and authorization troubleshooting
 

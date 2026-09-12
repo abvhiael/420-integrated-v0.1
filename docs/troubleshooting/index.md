@@ -21,6 +21,7 @@ DOC-11 organizes troubleshooting around two ways people actually arrive here:
 - [Wallet, account and authorization registry](wallet-account-authorization.md) — `TRB-WALLET-001` through `TRB-WALLET-011` covering connection, network mismatch, SmartAccount420 discovery, capabilities/sessions, passkeys, signing/simulation, recovery, transaction outcomes, stale presentation and compromise response.
 - [Chain, RPC and transaction registry](chain-rpc-transactions.md) — `TRB-CHAIN-*`, `TRB-RPC-*` and `TRB-TX-*` covering chain identity, transport/method failures, ambiguous submissions, nonce/gas/replacement states, receipt/revert handling, finality/reorgs and canonical-versus-derived disagreements.
 - [Consensus, validator and node registry](consensus-validator-node.md) — `TRB-CONSENSUS-*` and `TRB-NODE-*` covering validator lifecycle, proposer/attestation/QC/finality symptoms, quorum loss, partitions, safety halts, signing conflicts, `fourtwentyd`/`node420`, Engine connectivity, consensus/execution divergence and crash recovery.
+- [Indexer, Explorer, Search, Analytics and Status registry](indexer-explorer-search-analytics-status.md) — `TRB-INDEXER-*`, `TRB-EXPLORER-*`, `TRB-SEARCH-*`, `TRB-ANALYTICS-*` and `TRB-STATUS-*` covering stale/missing projections, replay/rebuild states, presentation mismatches, readiness semantics and canonical-RPC fallback.
 - [Value movement and economics registry](value-movement-economics.md) — `TRB-PAY-*`, `TRB-TOKEN-*`, `TRB-SWAP-*`, `TRB-BRIDGE-*`, `TRB-STAKE-*` and `TRB-TX-008` covering ambiguous payment/swap outcomes, invoices/quotes, refunds, settlement, token deployment/balances, bridge proof/replay/finality, staking lifecycle, rewards and fee interpretation.
 
 ## Safety rules
@@ -31,10 +32,11 @@ DOC-11 organizes troubleshooting around two ways people actually arrive here:
 - Treat retries of state-changing or value-changing actions as unsafe until transaction identity, canonical state and idempotency implications are understood.
 - For validator/operator incidents, consensus safety outranks liveness: do not lower quorum, bypass signing protection, duplicate signer identity or force a preferred head.
 - For payments, swaps, refunds, bridge messages and staking writes, a timeout or stale UI is never proof of failure; identify the original operation and reconcile canonical state before retrying.
+- For Indexer/Explorer/Search/Analytics/Status discrepancies, repair or rebuild the derived layer; do not mutate canonical state merely to make the UI match.
 - Stop and escalate when evidence is ambiguous, authority cannot be established, or a recovery step could increase loss or state divergence.
 
 ## Phase status
 
-DOC-11.1 through DOC-11.4 and DOC-11.6 are complete. DOC-11.5 remains outstanding. The implementation roadmap is in [`DOC-11-ROADMAP.md`](DOC-11-ROADMAP.md).
+DOC-11.1 through DOC-11.6 are complete. The implementation roadmap is in [`DOC-11-ROADMAP.md`](DOC-11-ROADMAP.md).
 
 Remaining domain registries will be added incrementally within the same DOC-11 branch/PR and merged only after the final ecosystem-wide troubleshooting audit and exact-head qualification.

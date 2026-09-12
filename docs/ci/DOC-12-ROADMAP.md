@@ -57,12 +57,24 @@ Deliverables:
 - compatibility rule: legacy patterns may permit missing front matter, but front matter is fully validated whenever present
 - corpus qualification evidence: 434 governed pages checked; 271 declared legacy pages permitted without front matter; exact-head 420Docs Qualification #622 passed
 
-### DOC-12.3 — Internal links and anchors
+### DOC-12.3 — Internal links and anchors — COMPLETE
 
-- Validate relative internal Markdown links.
-- Validate document targets and explicit anchors where practical.
-- Reject links to missing renamed pages.
-- Exclude approved external URLs from repository-target validation.
+- [x] Validate relative internal Markdown links.
+- [x] Validate document targets and fragment anchors where practical.
+- [x] Reject links to missing/renamed pages inside governed documentation.
+- [x] Exclude external URL schemes from repository-target validation.
+- [x] Wire internal-link validation into the unified local/CI gate.
+
+Deliverables:
+
+- `docs/ci/link-policy.json` — governed roots, external schemes and explicit target/anchor exception lists
+- `scripts/validate-doc-links.py` — deterministic relative-target resolution, Markdown heading/explicit-ID collection and aggregated failure diagnostics
+- `internal-links` as the second stage of `scripts/qualify-documentation.py`
+- workflow trigger coverage for `scripts/validate-doc-links.py` and policy changes under `docs/**`
+- resolution rules for relative Markdown targets, docs-root targets, extensionless Markdown pages, directory `index.md` pages and percent-decoded fragments
+- anchor validation generated with the repository Markdown toolchain (`toc` + `attr_list`) rather than a separate ad-hoc slug algorithm
+- external `http`, `https`, `mailto` and `tel` links excluded from repository-target validation
+- corpus qualification evidence: 687 internal links checked across 434 governed pages with zero target/anchor exceptions required; exact-head 420Docs Qualification #629 passed
 
 ### DOC-12.4 — Stable troubleshooting-ID validation
 

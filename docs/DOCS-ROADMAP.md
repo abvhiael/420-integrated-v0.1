@@ -97,7 +97,7 @@ Exit condition: a new user can choose a qualified 420 Wallet client, establish o
 
 Exit condition: developers, architects and reviewers can identify every canonical shared protocol family, discover and integrate it through approved interfaces, understand its authority and external dependencies, compose protocols without cross-domain privilege leakage, and recover or replace operational providers without rewriting canonical protocol state.
 
-## DOC-8 — Genesis application manuals
+## DOC-8 — Genesis application manuals — COMPLETE
 
 - [x] DOC-8.1 Publish the Genesis application manual index and exact frozen application inventory, establish the per-application coverage contract, distinguish protocol-only/testnet-only entries, expose the application-manual navigation entry, and lock the DOC-8 build order.
 - [x] DOC-8.2 Build the 420 Wallet application package around the completed DOC-6 user journey, filling concepts, architecture, permissions, fees, security, FAQ and developer integration without duplicating the canonical Wallet task guides.
@@ -108,9 +108,9 @@ Exit condition: developers, architects and reviewers can identify every canonica
 - [x] DOC-8.7 Build 420 Stake, 420 Governance and 420 Arbitration manuals for validator economics/lifecycle, proposals/voting/treasury and bounded dispute-resolution workflows.
 - [x] DOC-8.8 Build 420 AI and 420 Attention manuals for provider/model/job/escrow workflows and opt-in sponsor/consent/proof/reward workflows with privacy and authority boundaries.
 - [x] DOC-8.9 Build the explicitly testnet-only 420 Faucet manual covering acquisition, limits, no-value semantics, abuse controls and troubleshooting without implying mainnet availability.
-- [ ] DOC-8.10 Run the Genesis application manual coverage audit: verify every required user/developer/security/troubleshooting package, navigation path, authority warning, cross-link and application-version/genesis scope before phase closeout.
+- [x] DOC-8.10 Run the Genesis application manual coverage audit: verify every required user/developer/security/troubleshooting package, navigation path, authority warning, cross-link and application-version/genesis scope before phase closeout.
 
-Exit condition: every user-facing frozen Genesis application has a predictable, task-oriented manual package that explains safe startup, state-changing/value-changing actions, signing/permissions, economics, security/privacy, failure recovery, canonical authority and supported developer integration; the protocol-only Gaming Protocol is correctly routed to protocol/developer documentation, and Faucet documentation is unambiguously testnet-only.
+Exit condition: every user-facing frozen Genesis application has a predictable, task-oriented manual package that explains safe startup, state-changing/value-changing actions, signing/permissions, economics, security/privacy, failure recovery, canonical authority and supported developer integration; the protocol-only Gaming Protocol is correctly routed to protocol/developer documentation, and Faucet documentation is unambiguously testnet-only. See `docs/apps/coverage-audit.md` for the recorded DOC-8.10 result.
 
 ## DOC-9 — Developer documentation
 

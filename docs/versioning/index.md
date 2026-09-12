@@ -59,10 +59,23 @@ python scripts/validate-doc-version-registry.py
 
 Neither the Genesis registry record nor its manifest claims a live network or canonical deployment. Live testnet/mainnet authority remains unavailable until the required evidence exists.
 
+## URL and renderer model
+
+[Documentation URL and renderer version model](url-renderer-contract.md) defines stable version-qualified routing.
+
+- immutable releases use `/versions/<environment>/<release>/<path>`;
+- moving aliases use `/versions/<environment>/current/<path>` and resolve only through the registry;
+- unknown, unpublished or missing version/page combinations fail closed rather than falling through to current or another environment;
+- existing flat URLs remain compatibility surfaces until DOC-13.8 defines explicit redirects/migration.
+
+Machine policy is `url-renderer-policy.json`. `scripts/render-doc-version-context.py` resolves version routes and generates the deployed `site/version-context.json` runtime manifest after the MkDocs build. `scripts/validate-doc-version-routing.py` exercises the same resolver in the unified qualification gate.
+
+The renderer context exposes only registry-approved published tracks and release routes; it does not create network or deployment authority.
+
 ## Phase roadmap
 
 See [DOC-13 documentation versioning roadmap](DOC-13-ROADMAP.md).
 
 ## Current state
 
-DOC-13.1 through DOC-13.3 are complete. Next is DOC-13.4 — URL and renderer version model.
+DOC-13.1 through DOC-13.4 are implemented. DOC-13.4 closeout qualification is pending; DOC-13.5 adds visible navigation and the version selector.

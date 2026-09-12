@@ -3,7 +3,7 @@ title: Generated reference
 audience:
   - developer
 category: reference
-status: development
+status: current
 version: current
 ---
 
@@ -13,9 +13,10 @@ DOC-10 publishes machine-derived reference material for 420 Integrated. These pa
 
 Generated reference is **descriptive, not authoritative**. It must never replace the canonical source that owns the underlying state or behavior. If a generated page disagrees with chain state, an owning protocol contract, an approved manifest/deployment record, or verified build evidence, the canonical source wins and the reference must be regenerated or fixed at its source.
 
-## DOC-10 foundation
+## DOC-10 reference
 
 - [DOC-10 roadmap](DOC-10-ROADMAP.md)
+- [DOC-10 coverage audit](coverage-audit.md)
 - [Generated reference model](generation-model.md)
 - [Source inventory](source-inventory.md)
 - [Generated source manifest](generated/source-manifest.md)
@@ -27,24 +28,30 @@ Generated reference is **descriptive, not authoritative**. It must never replace
 - [Generated network and chain registry reference](generated/networks.md)
 - [Generated canonical deployment reference](generated/deployments.md)
 
-The machine source registry is `docs/reference/reference-sources.json`. Core contract/event/source-manifest generation starts from `python scripts/generate-reference-docs.py`; **all DOC-10 generated outputs are now qualified together** by `python scripts/qualify-generated-reference.py --check`. Use `--write` on that unified qualifier to regenerate the complete generated set.
+The machine source registry is `docs/reference/reference-sources.json`. Core contract/event/source-manifest generation starts from `python scripts/generate-reference-docs.py`; all DOC-10 generated outputs are qualified together by `python scripts/qualify-generated-reference.py --check`. Use `--write` on that unified qualifier to regenerate the complete generated set.
+
+## Task-documentation handoff
+
+Use DOC-8 and DOC-9 for procedures, sequencing, security guidance and authority boundaries. Use DOC-10 when those task guides need exact machine-derived implementation reference.
+
+- [Genesis application manuals and DOC-8 coverage](../apps/coverage-audit.md)
+- [Developer documentation and DOC-9 coverage](../developers/coverage-audit.md)
 
 ## Reference families
 
-DOC-10 is organized into these generated families:
+DOC-10 covers:
 
-- contracts — NatSpec, ABI, interfaces, functions, events and custom errors;
+- contracts — NatSpec, ABI status, interfaces and public/external source surfaces;
+- event/error indexes — canonical signatures, indexed fields, event topics and custom-error selectors;
 - RPC — public execution JSON-RPC and 420RPC-facing method reference;
-- APIs — 420Indexer and other stable service API surfaces;
+- APIs — stable 420Indexer service API surfaces;
 - SDK/CLI — exported SDK types/functions and stable CLI commands/options;
 - network registry — chain identity, manifests and service discovery metadata;
-- deployments — canonical/approved deployment records and contract catalogue metadata;
-- event/error indexes — cross-contract and cross-service searchable indexes;
-- application/protocol links — generated deep links from DOC-8/DOC-9 task guides into the relevant reference entries.
+- deployments — canonical-publication evidence rules and approved deployment status.
 
 ## Source rules
 
-A generated page must identify its source class and provenance. The generator must fail closed when required source data is missing, malformed, ambiguous, unverified or inconsistent.
+A generated page must identify its source class and provenance. The generator fails closed when required source data is missing, malformed, ambiguous, unverified or inconsistent.
 
 Examples:
 
@@ -52,14 +59,14 @@ Examples:
 - an address is never invented from a documentation example;
 - an API route is generated from the stable implementation contract, not copied by hand from prose;
 - SDK/CLI reference is generated from exported source/command definitions;
-- network/deployment reference must remain environment-specific and must not silently substitute local values for testnet/mainnet values;
+- network/deployment reference remains environment-specific and never silently substitutes local values for testnet/mainnet values;
 - deployment plans, predicted addresses, manifest hints, unconfirmed receipts and example catalogues never become canonical deployment records merely by appearing in generated docs.
 
 ## Generated-content rule
 
 Generated files are not edited by hand. Human-authored explanation belongs in DOC-3 through DOC-9; DOC-10 output is regenerated from implementation sources. Each generated page carries a generated-file marker and source provenance.
 
-420Docs Qualification recomputes all expected DOC-10 output in memory and compares the committed pages byte-for-byte before the strict site build. Missing or stale generated reference fails CI, and successful qualification prints SHA-256 identities for each expected output.
+420Docs Qualification recomputes all expected DOC-10 output in memory and compares committed pages byte-for-byte before the strict site build. Missing or stale generated reference fails CI, and successful qualification prints SHA-256 identities for each expected output.
 
 ## DOC-10 work order
 
@@ -72,6 +79,6 @@ Generated files are not edited by hand. Human-authored explanation belongs in DO
 7. **DOC-10.7 — Network and chain registry reference — COMPLETE**
 8. **DOC-10.8 — Canonical deployment reference — COMPLETE**
 9. **DOC-10.9 — Determinism and freshness qualification — COMPLETE**
-10. **DOC-10.10 — Reference coverage audit and closeout**
+10. **DOC-10.10 — Reference coverage audit and closeout — COMPLETE**
 
-DOC-10 is monolithic: DOC-10.1 through DOC-10.10 remain on one branch/PR and merge once after the final coverage audit, reconciliation with current `main`, exact-head 420Docs qualification and exact-head full 420 Integrated qualification.
+DOC-10 is monolithic: DOC-10.1 through DOC-10.10 merge once after the final coverage audit, reconciliation with current `main`, exact-head 420Docs qualification and exact-head full 420 Integrated qualification.

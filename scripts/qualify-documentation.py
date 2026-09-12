@@ -37,6 +37,7 @@ STAGES: tuple[Stage, ...] = (
     Stage("generated-reference-integration", (sys.executable, "scripts/validate-generated-reference-integration.py")),
     Stage("publication-safety", (sys.executable, "scripts/validate-doc-publication-safety.py")),
     Stage("workflow-contract", (sys.executable, "scripts/validate-doc-workflow.py")),
+    Stage("ci-self-tests", (sys.executable, "scripts/selftest-documentation-ci.py")),
     Stage("generated-reference-freshness", (sys.executable, "scripts/qualify-generated-reference.py", "--check")),
     Stage("strict-mkdocs-build", (sys.executable, "-m", "mkdocs", "build", "--strict")),
     Stage("search-navigation", (sys.executable, "scripts/qualify-docs.py")),

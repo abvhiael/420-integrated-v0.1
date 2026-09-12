@@ -14,18 +14,21 @@ DOC-12 defines the repository-level contract for automated 420Docs qualification
 
 ## Scope
 
-The documentation gate covers repository-controlled 420Docs sources and the source material that deterministically generates or configures published documentation. The current baseline includes:
+The documentation gate covers repository-controlled 420Docs sources and the source material that deterministically generates or configures published documentation. The current gate includes:
 
-1. generated-reference freshness;
-2. strict MkDocs build;
-3. search and navigation qualification.
+1. governed front-matter validation;
+2. generated-reference freshness;
+3. strict MkDocs build;
+4. search and navigation qualification.
 
-DOC-12.2 through DOC-12.9 add deterministic validators to this same gate. They do not replace the baseline.
+DOC-12.3 through DOC-12.9 add further deterministic validators to this same gate. They do not replace the existing stages.
 
 ## Authority
 
 The qualification runner does not create protocol authority. It checks documentation structure against repository rules and authoritative source files already defined by earlier documentation phases.
 
+- `docs/ci/frontmatter-policy.json` defines the DOC-12.2 governed front-matter scope, vocabulary and explicit legacy missing-metadata exceptions.
+- `scripts/validate-doc-frontmatter.py` owns deterministic front-matter parsing and policy enforcement for that scope.
 - DOC-10 remains authoritative for generated-reference provenance and byte-for-byte freshness.
 - MkDocs strict build remains authoritative for renderer-level warnings and broken configured navigation/build conditions.
 - `scripts/qualify-docs.py` remains authoritative for the current audience-entry, search-index and repository-discoverability checks.
@@ -43,15 +46,26 @@ python scripts/qualify-documentation.py
 
 The same entry point is used by `420Docs Qualification` in GitHub Actions. Individual validators may still be run directly while diagnosing a failure, but the unified runner is the merge/publication gate.
 
-## Baseline stage order
+## Stage order
 
 The runner executes stages in deterministic order and stops at the first failure:
 
-1. `generated-reference-freshness`
-2. `strict-mkdocs-build`
-3. `search-navigation`
+1. `front-matter`
+2. `generated-reference-freshness`
+3. `strict-mkdocs-build`
+4. `search-navigation`
 
 Later DOC-12 stages must be added deliberately to this ordered list. A validator may not silently bypass an earlier mandatory stage.
+
+## Front-matter compatibility rule
+
+DOC-12.2 distinguishes a legacy page that predates governed front matter from a page with invalid metadata.
+
+- Governed pages with front matter are always validated, including pages whose path matches a legacy exception pattern.
+- A declared legacy exception may only permit an existing page to omit front matter.
+- It does not permit malformed YAML, invalid category/status/audience values or missing required fields when front matter is present.
+- Legacy exceptions are repository policy and must be listed explicitly in `docs/ci/frontmatter-policy.json`; the validator must not infer exceptions from filenames or content.
+- New governed documentation should use valid front matter rather than expanding a legacy exception merely for convenience.
 
 ## Failure policy
 
@@ -84,7 +98,7 @@ The GitHub Actions workflow installs the documented documentation dependencies a
 
 Workflow path triggers must include:
 
-- governed documentation sources;
+- governed documentation sources and CI policy files;
 - MkDocs configuration and documentation dependencies;
 - the unified runner and component validators;
 - generated-reference generators/renderers and their authoritative source families;
@@ -94,6 +108,7 @@ Workflow path triggers must include:
 
 Each failure should be repaired at the layer that owns it.
 
+- front-matter failure: repair the governed page metadata or intentionally update the documented policy/legacy contract;
 - stale generated output: regenerate or correct the DOC-10 source/generator;
 - strict MkDocs failure: repair the page, link, configuration or renderer warning;
 - search/navigation failure: repair discoverability or the qualification rule if the documentation contract intentionally changed;

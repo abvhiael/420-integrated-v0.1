@@ -5,6 +5,7 @@
   "ci_command": "python scripts/qualify-documentation.py",
   "required_runner_stages": [
     "front-matter",
+    "version-metadata",
     "internal-links",
     "troubleshooting-ids",
     "orphan-navigation",
@@ -24,6 +25,7 @@
     "README.md",
     "scripts/qualify-documentation.py",
     "scripts/validate-doc-frontmatter.py",
+    "scripts/validate-doc-version-metadata.py",
     "scripts/validate-doc-links.py",
     "scripts/validate-troubleshooting-ids.py",
     "scripts/validate-doc-orphans.py",
@@ -60,6 +62,7 @@
     "README.md",
     "scripts/qualify-documentation.py",
     "scripts/validate-doc-frontmatter.py",
+    "scripts/validate-doc-version-metadata.py",
     "scripts/validate-doc-links.py",
     "scripts/validate-troubleshooting-ids.py",
     "scripts/validate-doc-orphans.py",

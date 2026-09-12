@@ -37,6 +37,13 @@ DOC-9.3 adds safe environment and public-access guidance:
 
 The repository currently checks in only the local example manifest. DOC-9 does not invent public testnet or mainnet endpoints; deployment-specific values must come from an official manifest for that environment.
 
+DOC-9.4 adds the contract release path:
+
+- [Contracts and interfaces](contracts-and-interfaces.md) — canonical service/version discovery, implementation/code-hash checks, interface/profile commitments and ABI/version selection.
+- [Deployment workflow](deployment-workflow.md) — qualified artifacts, non-custodial planning, external signing, canonical receipt/code confirmation and safe retry boundaries.
+- [Verification and evidence](verification-and-evidence.md) — 420Verify evidence inputs/result classes, proxy/upgrade handling and the distinction between reproducibility and endorsement.
+- [Registry and publishing](registry-and-publishing.md) — release manifests, Registry preflight, governance-authorized canonical registration and non-canonical AppStore publication.
+
 Read the foundation pages before implementing a production-facing integration. Later DOC-9 sections may add convenience abstractions, but they must not weaken these rules.
 
 ## Local workflow at a glance
@@ -68,13 +75,11 @@ Starter projects are discovered through `420 templates` and created with `420 cr
 
 ## Developer paths
 
-Use the documentation according to the job you are doing:
-
 | Goal | Start with | Continue in |
 | --- | --- | --- |
 | Build a first local dApp | [quickstart](quickstart.md) | local development + project structure + first read/write |
 | Connect to testnet/RPC | [networks and manifests](networks-and-manifests.md) | testnet/Faucet + RPC/WSS + endpoint health/failover |
-| Deploy/register a contract | integration model | DOC-9.4 contracts/deployment/Registry/Verify |
+| Deploy/register a contract | [contracts and interfaces](contracts-and-interfaces.md) | deployment + verification + Registry/publishing |
 | Build read-heavy UX | source of truth | DOC-9.5 RPC/APIs/420Indexer |
 | Submit user-authorized writes | first read/write + integration model | DOC-9.6 Wallet/Smart Accounts/capabilities |
 | Build resilient SDK/event handling | source of truth | DOC-9.7 SDK/events/errors/reliability |
@@ -100,7 +105,7 @@ Developer tooling is never a substitute for the authority that owns the state be
 1. **DOC-9.1 — Developer documentation foundation and integration model — COMPLETE** — developer audiences, source-of-truth rules, authority model, prerequisite/tooling matrix, landing/navigation paths and the DOC-10 generated-reference boundary.
 2. **DOC-9.2 — Quickstart and local development — COMPLETE** — repository/toolchain setup, local real15 bootstrap, starter selection/project structure, first canonical read and first Wallet-authorized write/confirmation flow.
 3. **DOC-9.3 — Networks, testnet and RPC access — COMPLETE** — explicit manifest/environment discovery, testnet/Faucet procedure without invented deployment values, current `node420` public RPC/WSS access, 420RPC ingress boundary, endpoint readiness/failover and cross-environment fail-closed rules.
-4. **DOC-9.4 — Contracts, deployments, Registry and verification** — canonical contract discovery, interfaces/versions, deployment workflow, bytecode confirmation, 420Verify evidence, Registry registration and AppStore publication boundaries.
+4. **DOC-9.4 — Contracts, deployments, Registry and verification — COMPLETE** — canonical contract/service/version/interface discovery, non-custodial deployment planning/external signing, canonical receipt/runtime-code confirmation, 420Verify evidence semantics and governance-only Registry plus AppStore publication handoffs.
 5. **DOC-9.5 — Reads, APIs and 420Indexer** — canonical RPC versus indexed projections, Indexer API patterns, pagination/replay/cursors, provenance, finality/reorg handling and service fallbacks.
 6. **DOC-9.6 — Wallet, Smart Accounts and capabilities** — connect versus authorize, transaction preparation, simulation, capability/session scopes, passkeys, recovery-aware integrations and post-submit confirmation.
 7. **DOC-9.7 — SDKs, events, errors and reliability patterns** — shared SDK/CLI usage, event consumption, stable error handling, retry/idempotency, deadlines, confirmations/finality and diagnostic correlation.
@@ -112,19 +117,7 @@ DOC-9 follows the same monolithic phase policy as DOC-8: all DOC-9.x commits rem
 
 ## Existing implementation sources
 
-DOC-9 consolidates rather than replaces the implemented Developer Hub and architecture material, including:
-
-- Developer Hub network/environment discovery and canonical contract catalogue;
-- TypeScript SDK and CLI;
-- Wallet/smart-account SDK;
-- local/devnet bootstrap and templates;
-- testnet Faucet/test-account flows;
-- deployment and 420Verify workflows;
-- 420Indexer API integration;
-- protocol integration guides;
-- application registration/AppStore publishing;
-- logs/events/debugging and service-health diagnostics;
-- existing DOC-3 through DOC-8 architecture and application documentation.
+DOC-9 consolidates rather than replaces the implemented Developer Hub and architecture material, including Developer Hub network/environment discovery and canonical contract catalogue; TypeScript SDK and CLI; Wallet/smart-account SDK; local/devnet bootstrap and templates; testnet Faucet/test-account flows; deployment and 420Verify workflows; 420Indexer API integration; protocol integration guides; application registration/AppStore publishing; logs/events/debugging and service-health diagnostics; and existing DOC-3 through DOC-8 architecture/application documentation.
 
 The existing [end-to-end dApp integration guide](../developer-hub/guides/end-to-end-dapp.md) is an implementation source for DOC-9 examples, while the completed Developer Hub remains a noncanonical developer control plane.
 

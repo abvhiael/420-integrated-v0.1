@@ -7,7 +7,7 @@ DOC-10 builds reproducible machine-derived technical reference for 420 Integrate
 - [x] **DOC-10.1 — Generation foundation and source inventory** — establish generated-reference authority rules, source registry, deterministic output layout, generator schema, `generate`/`--check` entry point and initial source manifest.
 - [x] **DOC-10.2 — Contract, NatSpec and ABI reference** — generate catalogue/source contract reference, extract contract-level NatSpec and public/external source surfaces, expose ABI provenance/availability, and fail closed rather than publish example-grade or unverifiable ABI evidence.
 - [x] **DOC-10.3 — Events and custom errors** — derive per-contract/global event and custom-error indexes, canonical signatures, indexed parameter positions, event topics and error selectors where source types can be normalized unambiguously; fail closed on unresolved/user-defined types.
-- [ ] **DOC-10.4 — RPC reference** — derive supported public execution JSON-RPC/420RPC-facing methods, parameters/results and public/private classifications without exposing Engine/admin/signer surfaces.
+- [x] **DOC-10.4 — RPC reference** — derive the explicit public 420RPC compatibility surface and request-policy contract from implementation source, including profiles, transports, parameter forms, upstream capabilities, submission/signature flags, JSON-RPC policy/error classes, subscription/block-selector policy and fail-closed excluded namespaces/methods without exposing private Engine/admin/signer surfaces.
 - [ ] **DOC-10.5 — 420Indexer and service API reference** — derive stable routes, query/path parameters, envelopes, pagination/cursors, status/readiness and error surfaces from API source contracts.
 - [ ] **DOC-10.6 — SDK and CLI reference** — derive exported SDK types/functions plus stable CLI commands/options/examples from canonical source definitions.
 - [ ] **DOC-10.7 — Network and chain registry reference** — derive environment-scoped chain identity, manifests and service-discovery data; never promote local example values into testnet/mainnet output.
@@ -37,6 +37,12 @@ The only checked-in catalogue is `developer-hub/catalogue/local.example.json`. I
 DOC-10.3 adds `docs/reference/generated/events-errors.md` and extends the same generator to extract events and custom errors from catalogue-bounded Solidity source. It publishes canonical ABI signatures, indexed event parameter positions, Ethereum Keccak-256 `topic0` values and four-byte custom-error selectors only when the source types are unambiguous.
 
 The generator includes an internal Ethereum Keccak-256 implementation with known-vector self-checks for the empty-string digest and ERC-20 `transfer(address,uint256)` selector. This avoids accidentally substituting NIST SHA3-256 and avoids a new runtime dependency. Elementary Solidity ABI types are normalized (`uint`→`uint256`, `int`→`int256`); source enums are normalized to their ABI integer representation for signature derivation. Any user-defined/ambiguous type fails closed to an unresolved signature rather than being guessed.
+
+## DOC-10.4 completed RPC reference
+
+DOC-10.4 adds `docs/reference/generated/rpc.md` and binds the RPC source inventory to `420-rpc/src/methods.ts` plus `420-rpc/src/request-policy.ts`. `scripts/reference_rpc_renderer.py` deterministically derives the public compatibility list, method profile, HTTP/WebSocket transport, positional parameter form, required upstream capability, chain-mutation flag and user-signature requirement.
+
+The generated reference also records request-envelope rules (`-32600`, `-32601`, `-32602`), accepted block selectors, allowed subscription kinds and the explicit public exclusions. `engine_`, `admin_`, `personal_`, `debug_`, `miner_` and `txpool_` namespaces are outside the public surface, as are node-managed account/signing methods such as `eth_sendTransaction`, `eth_sign`, `eth_signTransaction`, `eth_accounts` and `eth_coinbase`. Result schemas are not invented where 420RPC itself does not redeclare them; successful result shapes remain those of the compatible execution upstream. DOC-10.9 will fold all family renderers into final unified stale-output qualification.
 
 ## Phase exit condition
 

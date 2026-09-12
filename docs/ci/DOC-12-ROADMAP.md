@@ -20,13 +20,7 @@ Branch: `docs/doc-12-documentation-ci`
 
 ## Existing baseline
 
-The existing `420Docs Qualification` workflow already performs:
-
-1. generated-reference freshness qualification;
-2. strict MkDocs build;
-3. search/navigation qualification.
-
-DOC-12 extends this baseline rather than replacing it. Existing generated-reference determinism remains owned by DOC-10; DOC-12 integrates and validates it as part of the whole documentation system.
+The existing `420Docs Qualification` workflow already performs generated-reference freshness, strict MkDocs build and search/navigation qualification. DOC-12 extends this baseline rather than replacing it. Existing generated-reference determinism remains owned by DOC-10; DOC-12 integrates and validates it as part of the whole documentation system.
 
 ## Roadmap
 
@@ -44,14 +38,24 @@ Deliverables:
 - `scripts/qualify-documentation.py`
 - `420Docs Qualification` routed through the unified local/CI entry point
 - stable runner exit semantics: `0` pass, `1` qualification failure, `2` runner execution error
-- preserved baseline stage order: generated-reference freshness → strict MkDocs build → search/navigation
 
-### DOC-12.2 — Front-matter validation
+### DOC-12.2 — Front-matter validation — COMPLETE
 
-- Validate required front-matter fields by documentation class.
-- Validate allowed `status`, `category`, `audience` and `version` shapes.
-- Detect malformed or missing front matter on governed pages.
-- Preserve explicit exceptions for legacy/non-governed source documents.
+- [x] Validate required front-matter fields on governed documentation.
+- [x] Validate allowed `status`, `category`, `audience` and `version` shapes.
+- [x] Detect malformed or missing front matter on governed pages.
+- [x] Preserve explicit exceptions for legacy/non-governed source documents.
+- [x] Wire front-matter validation into the unified local/CI gate.
+
+Deliverables:
+
+- `docs/ci/frontmatter-policy.json` — governed roots, required fields, vocabulary and explicit legacy missing-metadata policy
+- `scripts/validate-doc-frontmatter.py` — deterministic YAML parsing, aggregated diagnostics and policy enforcement
+- explicit `PyYAML` documentation dependency
+- `front-matter` as the first stage of `scripts/qualify-documentation.py`
+- workflow triggers for the validator/policy through `docs/**` and `scripts/validate-doc-frontmatter.py`
+- compatibility rule: legacy patterns may permit missing front matter, but front matter is fully validated whenever present
+- corpus qualification evidence: 434 governed pages checked; 271 declared legacy pages permitted without front matter; exact-head 420Docs Qualification #622 passed
 
 ### DOC-12.3 — Internal links and anchors
 

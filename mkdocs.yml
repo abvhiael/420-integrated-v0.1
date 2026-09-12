@@ -33,6 +33,60 @@ nav:
                   - Events & Finality: apps/wallet/developer/events.md
                   - Errors & Retries: apps/wallet/developer/errors.md
                   - Examples: apps/wallet/developer/examples.md
+          - 420 Explorer:
+              - Overview: apps/explorer/index.md
+              - Getting Started: apps/explorer/getting-started.md
+              - User Guide: apps/explorer/user-guide.md
+              - Concepts: apps/explorer/concepts.md
+              - Architecture: apps/explorer/architecture.md
+              - Permissions: apps/explorer/permissions.md
+              - Fees: apps/explorer/fees.md
+              - Security: apps/explorer/security.md
+              - Troubleshooting: apps/explorer/troubleshooting.md
+              - FAQ: apps/explorer/faq.md
+              - Developer Integration:
+                  - Overview: apps/explorer/developer/index.md
+                  - Contracts: apps/explorer/developer/contracts.md
+                  - API: apps/explorer/developer/api.md
+                  - Events & Finality: apps/explorer/developer/events.md
+                  - Errors: apps/explorer/developer/errors.md
+                  - Examples: apps/explorer/developer/examples.md
+          - 420 Search:
+              - Overview: apps/search/index.md
+              - Getting Started: apps/search/getting-started.md
+              - User Guide: apps/search/user-guide.md
+              - Concepts: apps/search/concepts.md
+              - Architecture: apps/search/architecture.md
+              - Permissions: apps/search/permissions.md
+              - Fees: apps/search/fees.md
+              - Security & Privacy: apps/search/security.md
+              - Troubleshooting: apps/search/troubleshooting.md
+              - FAQ: apps/search/faq.md
+              - Developer Integration:
+                  - Overview: apps/search/developer/index.md
+                  - Contracts: apps/search/developer/contracts.md
+                  - API: apps/search/developer/api.md
+                  - Events & Reorgs: apps/search/developer/events.md
+                  - Errors: apps/search/developer/errors.md
+                  - Examples: apps/search/developer/examples.md
+          - 420 Analytics:
+              - Overview: apps/analytics/index.md
+              - Getting Started: apps/analytics/getting-started.md
+              - User Guide: apps/analytics/user-guide.md
+              - Concepts: apps/analytics/concepts.md
+              - Architecture: apps/analytics/architecture.md
+              - Permissions: apps/analytics/permissions.md
+              - Fees: apps/analytics/fees.md
+              - Security: apps/analytics/security.md
+              - Troubleshooting: apps/analytics/troubleshooting.md
+              - FAQ: apps/analytics/faq.md
+              - Developer Integration:
+                  - Overview: apps/analytics/developer/index.md
+                  - Contracts: apps/analytics/developer/contracts.md
+                  - API: apps/analytics/developer/api.md
+                  - Events & Updates: apps/analytics/developer/events.md
+                  - Errors: apps/analytics/developer/errors.md
+                  - Examples: apps/analytics/developer/examples.md
       - 420 Wallet:
           - Onboarding: users/wallet/index.md
           - Setup, Import & Protection: users/wallet/setup-import-and-protection.md

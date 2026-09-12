@@ -13,6 +13,8 @@ nav:
       - Overview: getting-started/index.md
   - Use:
       - Overview: users/index.md
+      - Applications:
+          - Genesis Application Manuals: apps/index.md
       - 420 Wallet:
           - Onboarding: users/wallet/index.md
           - Setup, Import & Protection: users/wallet/setup-import-and-protection.md

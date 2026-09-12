@@ -8,3 +8,4 @@ export * from './resource-controls.js';
 export * from './websocket.js';
 export * from './indexer-reads.js';
 export * from './auth.js';
+export * from './observability.js';

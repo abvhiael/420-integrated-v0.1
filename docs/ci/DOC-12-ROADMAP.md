@@ -30,13 +30,21 @@ DOC-12 extends this baseline rather than replacing it. Existing generated-refere
 
 ## Roadmap
 
-### DOC-12.1 — CI foundation and qualification contract
+### DOC-12.1 — CI foundation and qualification contract — COMPLETE
 
-- Define documentation-CI scope, authority and failure policy.
-- Inventory existing documentation checks and identify gaps.
-- Establish one reusable documentation qualification entry point for local and CI execution.
-- Define deterministic exit codes and failure messages.
-- Preserve strict-build and generated-reference qualification as mandatory gates.
+- [x] Define documentation-CI scope, authority and failure policy.
+- [x] Inventory existing documentation checks and identify gaps.
+- [x] Establish one reusable documentation qualification entry point for local and CI execution.
+- [x] Define deterministic exit codes and failure messages.
+- [x] Preserve strict-build and generated-reference qualification as mandatory gates.
+
+Deliverables:
+
+- `docs/ci/qualification-contract.md`
+- `scripts/qualify-documentation.py`
+- `420Docs Qualification` routed through the unified local/CI entry point
+- stable runner exit semantics: `0` pass, `1` qualification failure, `2` runner execution error
+- preserved baseline stage order: generated-reference freshness → strict MkDocs build → search/navigation
 
 ### DOC-12.2 — Front-matter validation
 

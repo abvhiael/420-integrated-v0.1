@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "owner_pages": [
+    "docs/troubleshooting/wallet-account-authorization.md",
+    "docs/troubleshooting/chain-rpc-transactions.md",
+    "docs/troubleshooting/consensus-validator-node.md",
+    "docs/troubleshooting/indexer-explorer-search-analytics-status.md",
+    "docs/troubleshooting/value-movement-economics.md",
+    "docs/troubleshooting/shared-protocol-provider.md",
+    "docs/troubleshooting/genesis-application-coverage.md"
+  ],
+  "reference_roots": ["docs/troubleshooting"],
+  "reference_exclusions": [
+    "docs/troubleshooting/registry-contract.md",
+    "docs/troubleshooting/entry-template.md",
+    "docs/troubleshooting/DOC-11-ROADMAP.md",
+    "docs/troubleshooting/coverage-audit.md"
+  ],
+  "reserved_domains": [
+    "WALLET", "CHAIN", "RPC", "TX", "CONSENSUS", "NODE", "INDEXER", "EXPLORER", "SEARCH", "ANALYTICS", "STATUS", "PAY", "TOKEN", "SWAP", "BRIDGE", "STAKE", "GOV", "TREASURY", "GRANTS", "REGISTRY", "NAMES", "IDENTITY", "RANDOM", "ORACLE", "STORAGE", "AI", "RIGHTS", "VERIFY", "ARBITRATION", "MESSENGER", "NOTIFY", "ATTENTION", "APP"
+  ]
+}

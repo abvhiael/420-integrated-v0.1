@@ -24,10 +24,10 @@
       "id": "rpc",
       "phase": "DOC-10.4",
       "sources": [
-        "execution",
-        "packages/420-cli"
+        "420-rpc/src/methods.ts",
+        "420-rpc/src/request-policy.ts"
       ],
-      "notes": "Public execution/420RPC-facing reference only; exclude private Engine/admin/signer surfaces."
+      "notes": "Public 420RPC compatibility and request-policy reference only; private Engine/admin/personal/debug/miner/txpool and node-managed account/signing surfaces remain excluded."
     },
     {
       "id": "indexer-api",

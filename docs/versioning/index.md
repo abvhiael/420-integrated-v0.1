@@ -78,4 +78,4 @@ See [DOC-13 documentation versioning roadmap](DOC-13-ROADMAP.md).
 
 ## Current state
 
-DOC-13.1 through DOC-13.4 are implemented. DOC-13.4 closeout qualification is pending; DOC-13.5 adds visible navigation and the version selector.
+DOC-13.1 through DOC-13.4 are complete. Next is DOC-13.5 — navigation and version selector.

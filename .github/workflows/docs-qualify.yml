@@ -8,6 +8,23 @@ on:
       - 'requirements-docs.txt'
       - 'README.md'
       - 'scripts/qualify-docs.py'
+      - 'scripts/generate-reference-docs.py'
+      - 'scripts/qualify-generated-reference.py'
+      - 'scripts/reference_*_renderer.py'
+      - 'contracts/src/**'
+      - '420-rpc/src/**'
+      - '420-indexer/src/**'
+      - 'packages/420-sdk/**'
+      - 'packages/420-cli/**'
+      - 'developer-hub/manifests/**'
+      - 'developer-hub/schema/network-manifest.schema.json'
+      - 'developer-hub/catalogue/**'
+      - 'developer-hub/deployment/**'
+      - 'developer-hub/release/**'
+      - 'developer-hub/src/network-discovery.mjs'
+      - 'developer-hub/src/contract-catalogue.mjs'
+      - 'developer-hub/src/deployment-control.mjs'
+      - 'developer-hub/src/verification-control.mjs'
       - '.github/workflows/docs-qualify.yml'
       - '.github/workflows/docs-pages.yml'
   push:
@@ -19,9 +36,30 @@ on:
       - 'requirements-docs.txt'
       - 'README.md'
       - 'scripts/qualify-docs.py'
+      - 'scripts/generate-reference-docs.py'
+      - 'scripts/qualify-generated-reference.py'
+      - 'scripts/reference_*_renderer.py'
+      - 'contracts/src/**'
+      - '420-rpc/src/**'
+      - '420-indexer/src/**'
+      - 'packages/420-sdk/**'
+      - 'packages/420-cli/**'
+      - 'developer-hub/manifests/**'
+      - 'developer-hub/schema/network-manifest.schema.json'
+      - 'developer-hub/catalogue/**'
+      - 'developer-hub/deployment/**'
+      - 'developer-hub/release/**'
+      - 'developer-hub/src/network-discovery.mjs'
+      - 'developer-hub/src/contract-catalogue.mjs'
+      - 'developer-hub/src/deployment-control.mjs'
+      - 'developer-hub/src/verification-control.mjs'
       - '.github/workflows/docs-qualify.yml'
       - '.github/workflows/docs-pages.yml'
   workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -42,6 +80,9 @@ jobs:
 
       - name: Install documentation dependencies
         run: pip install -r requirements-docs.txt
+
+      - name: Qualify generated reference freshness
+        run: python scripts/qualify-generated-reference.py --check
 
       - name: Build 420Docs strictly
         run: mkdocs build --strict

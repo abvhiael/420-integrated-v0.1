@@ -75,6 +75,8 @@ Support guidance does not request private keys, recovery secrets, passkey privat
 
 Every package includes contract/interface guidance, API/provider boundaries, events/finality, errors/retries and safe examples. Generated ABI/NatSpec/RPC/API reference remains reserved for DOC-10 rather than being hand-maintained in DOC-8.
 
+The completed machine-derived reference is available from the [DOC-10 generated reference landing page](../reference/index.md). Application manuals remain task-oriented; use DOC-10 for exact generated contract/NatSpec/ABI status, events/errors, public RPC, 420Indexer API, SDK/CLI, network and deployment reference.
+
 ### Faucet scope
 
 420 Faucet is explicitly testnet-only. Its documented policy is 42 testnet `$420` per successful request, a 24-hour per-address cooldown, five requests per IP per hour, a 42,000 testnet `$420` daily operator cap, CAPTCHA or equivalent abuse control, a separate Faucet hot wallet and no mainnet keys. Testnet `$420` carries no monetary value and Faucet never participates in mainnet genesis economics.

@@ -129,9 +129,20 @@ Exit condition: a developer can start from a clean environment, identify the cor
 
 DOC-9 uses the same monolithic phase policy as DOC-8: DOC-9.1 through DOC-9.10 remain on one branch/PR and merge once after the final phase audit, reconciliation with current `main`, exact-head 420Docs qualification and exact-head full 420 Integrated qualification.
 
-## DOC-10 — Generated reference documentation
+## DOC-10 — Generated reference documentation — COMPLETE
 
-- NatSpec, ABI, RPC, API, SDKs, events, errors, chain registry, canonical deployments, and machine-derived reference pages.
+- [x] DOC-10.1 Establish generated-reference authority/provenance rules, source registry, deterministic output layout and generation entry point.
+- [x] DOC-10.2 Generate contract/NatSpec/public-external surface and verified-ABI publication status.
+- [x] DOC-10.3 Generate event/custom-error indexes, canonical signatures, indexed positions, Keccak event topics and error selectors.
+- [x] DOC-10.4 Generate the explicit public 420RPC compatibility/request-policy surface while excluding private/admin/signer methods.
+- [x] DOC-10.5 Generate stable 420Indexer route, envelope, paging, readiness/status and non-authoritative API reference.
+- [x] DOC-10.6 Generate `@420/sdk` exports, Wallet/Smart Account boundaries and stable primary `420` CLI command reference.
+- [x] DOC-10.7 Generate environment-scoped network/chain reference and fail closed for absent devnet/testnet/mainnet manifests.
+- [x] DOC-10.8 Generate canonical deployment publication status and withhold example/planned/unconfirmed records from canonical publication.
+- [x] DOC-10.9 Add unified deterministic stale/missing-output qualification and SHA-256 identities to 420Docs CI.
+- [x] DOC-10.10 Run the generated-reference coverage/provenance/environment/navigation audit and close the phase.
+
+Exit condition: developers can navigate from DOC-8/DOC-9 task guidance into deterministic machine-derived reference for contracts/NatSpec/ABI status, events/errors, public RPC, 420Indexer APIs, SDK/CLI, network identity and canonical deployment status; generated pages are reproducible, environment/provenance scoped and fail closed on missing, ambiguous or unverified inputs. See `docs/reference/coverage-audit.md` for the DOC-10.10 closeout record.
 
 ## DOC-11 — Troubleshooting and error registry
 

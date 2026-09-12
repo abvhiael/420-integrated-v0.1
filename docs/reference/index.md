@@ -13,6 +13,15 @@ DOC-10 publishes machine-derived reference material for 420 Integrated. These pa
 
 Generated reference is **descriptive, not authoritative**. It must never replace the canonical source that owns the underlying state or behavior. If a generated page disagrees with chain state, an owning protocol contract, an approved manifest/deployment record, or verified build evidence, the canonical source wins and the reference must be regenerated or fixed at its source.
 
+## DOC-10 foundation
+
+- [DOC-10 roadmap](DOC-10-ROADMAP.md)
+- [Generated reference model](generation-model.md)
+- [Source inventory](source-inventory.md)
+- [Generated source manifest](generated/source-manifest.md)
+
+The machine source registry is `docs/reference/reference-sources.json`; generation is performed by `python scripts/generate-reference-docs.py`, with `--check` reserved for deterministic stale-output verification.
+
 ## Reference families
 
 DOC-10 is organized into these generated families:
@@ -40,11 +49,11 @@ Examples:
 
 ## Generated-content rule
 
-Generated files are not edited by hand. Human-authored explanation belongs in DOC-3 through DOC-9; DOC-10 output is regenerated from implementation sources. Each generated page will carry a generated-file marker and source provenance.
+Generated files are not edited by hand. Human-authored explanation belongs in DOC-3 through DOC-9; DOC-10 output is regenerated from implementation sources. Each generated page carries a generated-file marker and source provenance.
 
 ## DOC-10 work order
 
-1. **DOC-10.1 — Generation foundation and source inventory** — generated-reference contract, source classes, output layout, provenance model, deterministic-generation rules and generator entry point.
+1. **DOC-10.1 — Generation foundation and source inventory — COMPLETE** — generated-reference contract, source classes, output layout, provenance model, deterministic-generation rules, source registry, generator entry point and first generated source manifest.
 2. **DOC-10.2 — Contract/NatSpec/ABI reference** — contract catalogue, verified artifacts, interfaces, functions and NatSpec-derived contract pages.
 3. **DOC-10.3 — Events and custom errors** — per-contract and global event/error indexes with signatures/topics/selectors where derivable.
 4. **DOC-10.4 — RPC reference** — public execution JSON-RPC and 420RPC ingress/gateway reference, excluding private Engine/admin/signer surfaces.

@@ -13,7 +13,7 @@
     "docs/architecture/protocols"
   ],
   "required_fields": ["title", "category", "status", "version"],
-  "allowed_status": ["active", "current", "development", "generated", "draft", "deprecated", "archived", "stable"],
+  "allowed_status": ["active", "current", "development", "generated", "draft", "deprecated", "archived", "stable", "complete"],
   "allowed_category": [
     "application",
     "applications",
@@ -34,10 +34,16 @@
     "integrator",
     "architect",
     "security",
-    "auditor"
+    "auditor",
+    "reviewer",
+    "maintainer",
+    "contributor"
   ],
-  "legacy_exceptions": [],
+  "legacy_exceptions": [
+    "docs/reference/DOC-10-ROADMAP.md"
+  ],
   "legacy_exception_globs": [
-    "docs/apps/*/architecture.md"
+    "docs/apps/*/*.md",
+    "docs/apps/*/developer/*.md"
   ]
 }

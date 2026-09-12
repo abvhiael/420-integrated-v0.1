@@ -37,12 +37,23 @@ Deliverables:
 - explicit rule that `genesis`, `testnet` and `mainnet` labels do not create canonical network/deployment authority by themselves
 - DOC-10 generated-reference and DOC-12 CI ownership preserved, with DOC-13 adding version/environment identity rather than replacing either system
 
-### DOC-13.2 — Version metadata schema
+### DOC-13.2 — Version metadata schema — COMPLETE
 
-- Define normalized version/environment front-matter fields and accepted vocabulary.
-- Define compatibility with the existing `version: current` corpus.
-- Define release identifiers, aliases and immutable historical labels.
-- Add deterministic validation without forcing an unsafe bulk rewrite of legacy pages.
+- [x] Define normalized version/environment front-matter fields and accepted vocabulary.
+- [x] Define compatibility with the existing `version: current` corpus.
+- [x] Define release identifiers, aliases and immutable historical labels.
+- [x] Add deterministic validation without forcing an unsafe bulk rewrite of legacy pages.
+
+Deliverables:
+
+- `docs/versioning/version-metadata-schema.md` — normalized DOC-13 metadata contract and migration rules
+- `docs/versioning/version-metadata-policy.json` — machine vocabulary, aliases, release syntax and compatibility constraints
+- `scripts/validate-doc-version-metadata.py` — deterministic complete-tuple and environment/release compatibility validation
+- atomic governed tuple: `doc_release`, `doc_environment`, `publication_status`
+- compatibility rule preserving existing `version: current` pages without inferring environment or immutable release authority
+- historical/deprecated pages prohibited from using mutable aliases such as `current`/`development`
+- `docs/versioning` added to governed front-matter roots
+- `version-metadata` added to the unified DOC-12 qualification runner and protected by the workflow contract/path triggers
 
 ### DOC-13.3 — Version registry and release manifests
 

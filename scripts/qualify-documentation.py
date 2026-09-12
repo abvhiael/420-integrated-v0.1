@@ -36,6 +36,7 @@ STAGES: tuple[Stage, ...] = (
     Stage("required-doc-coverage", (sys.executable, "scripts/validate-required-docs.py")),
     Stage("generated-reference-integration", (sys.executable, "scripts/validate-generated-reference-integration.py")),
     Stage("publication-safety", (sys.executable, "scripts/validate-doc-publication-safety.py")),
+    Stage("workflow-contract", (sys.executable, "scripts/validate-doc-workflow.py")),
     Stage("generated-reference-freshness", (sys.executable, "scripts/qualify-generated-reference.py", "--check")),
     Stage("strict-mkdocs-build", (sys.executable, "-m", "mkdocs", "build", "--strict")),
     Stage("search-navigation", (sys.executable, "scripts/qualify-docs.py")),
@@ -47,28 +48,28 @@ def render_command(command: Sequence[str]) -> str:
 
 
 def run_stage(stage: Stage) -> int:
-    print(f"420Docs CI: START {stage.name}")
-    print(f"420Docs CI: RUN   {render_command(stage.command)}")
+    print(f"420Docs CI: START {stage.name}", flush=True)
+    print(f"420Docs CI: RUN   {render_command(stage.command)}", flush=True)
     try:
         completed = subprocess.run(stage.command, cwd=ROOT, check=False)
     except OSError as exc:
-        print(f"420Docs CI: ERROR {stage.name}: could not execute stage: {exc}", file=sys.stderr)
+        print(f"420Docs CI: ERROR {stage.name}: could not execute stage: {exc}", file=sys.stderr, flush=True)
         return RUNNER_ERROR
     if completed.returncode != 0:
-        print(f"420Docs CI: FAIL  {stage.name}: command exited {completed.returncode}", file=sys.stderr)
+        print(f"420Docs CI: FAIL  {stage.name}: command exited {completed.returncode}", file=sys.stderr, flush=True)
         return QUALIFICATION_FAILURE
-    print(f"420Docs CI: PASS  {stage.name}")
+    print(f"420Docs CI: PASS  {stage.name}", flush=True)
     return PASS
 
 
 def main() -> int:
-    print(f"420Docs CI: root={ROOT}")
-    print(f"420Docs CI: stages={len(STAGES)}")
+    print(f"420Docs CI: root={ROOT}", flush=True)
+    print(f"420Docs CI: stages={len(STAGES)}", flush=True)
     for stage in STAGES:
         result = run_stage(stage)
         if result != PASS:
             return result
-    print("420Docs CI: PASS  all documentation qualification stages")
+    print("420Docs CI: PASS  all documentation qualification stages", flush=True)
     return PASS
 
 

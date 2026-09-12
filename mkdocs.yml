@@ -159,6 +159,60 @@ nav:
                   - Incidents & Updates: apps/status/developer/events.md
                   - Errors: apps/status/developer/errors.md
                   - Examples: apps/status/developer/examples.md
+          - 420 Registry:
+              - Overview: apps/registry/index.md
+              - Getting Started: apps/registry/getting-started.md
+              - User Guide: apps/registry/user-guide.md
+              - Concepts: apps/registry/concepts.md
+              - Architecture: apps/registry/architecture.md
+              - Permissions: apps/registry/permissions.md
+              - Fees: apps/registry/fees.md
+              - Security: apps/registry/security.md
+              - Troubleshooting: apps/registry/troubleshooting.md
+              - FAQ: apps/registry/faq.md
+              - Developer Integration:
+                  - Overview: apps/registry/developer/index.md
+                  - Contracts: apps/registry/developer/contracts.md
+                  - API: apps/registry/developer/api.md
+                  - Events & Finality: apps/registry/developer/events.md
+                  - Errors & Retries: apps/registry/developer/errors.md
+                  - Examples: apps/registry/developer/examples.md
+          - 420 Names:
+              - Overview: apps/names/index.md
+              - Getting Started: apps/names/getting-started.md
+              - User Guide: apps/names/user-guide.md
+              - Concepts: apps/names/concepts.md
+              - Architecture: apps/names/architecture.md
+              - Permissions: apps/names/permissions.md
+              - Fees: apps/names/fees.md
+              - Security: apps/names/security.md
+              - Troubleshooting: apps/names/troubleshooting.md
+              - FAQ: apps/names/faq.md
+              - Developer Integration:
+                  - Overview: apps/names/developer/index.md
+                  - Contracts: apps/names/developer/contracts.md
+                  - API: apps/names/developer/api.md
+                  - Events & Finality: apps/names/developer/events.md
+                  - Errors & Retries: apps/names/developer/errors.md
+                  - Examples: apps/names/developer/examples.md
+          - 420 Identity:
+              - Overview: apps/identity/index.md
+              - Getting Started: apps/identity/getting-started.md
+              - User Guide: apps/identity/user-guide.md
+              - Concepts: apps/identity/concepts.md
+              - Architecture: apps/identity/architecture.md
+              - Permissions: apps/identity/permissions.md
+              - Fees: apps/identity/fees.md
+              - Security & Privacy: apps/identity/security.md
+              - Troubleshooting: apps/identity/troubleshooting.md
+              - FAQ: apps/identity/faq.md
+              - Developer Integration:
+                  - Overview: apps/identity/developer/index.md
+                  - Contracts: apps/identity/developer/contracts.md
+                  - API: apps/identity/developer/api.md
+                  - Events & Finality: apps/identity/developer/events.md
+                  - Errors & Retries: apps/identity/developer/errors.md
+                  - Examples: apps/identity/developer/examples.md
       - 420 Wallet:
           - Onboarding: users/wallet/index.md
           - Setup, Import & Protection: users/wallet/setup-import-and-protection.md

@@ -119,14 +119,21 @@ Deliverables:
 - explicit fail-safe guidance for ambiguous payment/swap/bridge outcomes, replay protection, source/destination finality, settlement/refunds and duplicate-write prevention
 - troubleshooting index navigation into the value-movement/economics registry
 
-### DOC-11.7 — Shared protocol and provider troubleshooting
+### DOC-11.7 — Shared protocol and provider troubleshooting — COMPLETE
 
-- Registry/Names/Identity/420-IS discovery failures.
-- Randomness/oracle freshness and verification failures.
-- Storage/Resource provider availability and proof failures.
-- 420AI job/provider/SLA failures.
-- Rights/Verify/Arbitration evidence and state issues.
-- Messenger/Notifications/Attention delivery versus canonical-state distinctions.
+- [x] Registry/Names/Identity/420-IS discovery failures.
+- [x] Randomness/oracle freshness and verification failures.
+- [x] Storage/Resource provider availability and proof failures.
+- [x] 420AI job/provider/SLA failures.
+- [x] Rights/Verify/Arbitration evidence and state issues.
+- [x] Messenger/Notifications/Attention delivery versus canonical-state distinctions.
+
+Deliverables:
+
+- `docs/troubleshooting/shared-protocol-provider.md`
+- stable `TRB-REGISTRY-*`, `TRB-NAMES-*`, `TRB-IDENTITY-*`, `TRB-RANDOM-*`, `TRB-ORACLE-*`, `TRB-STORAGE-*`, `TRB-AI-*`, `TRB-RIGHTS-*`, `TRB-VERIFY-*`, `TRB-ARBITRATION-*`, `TRB-MESSENGER-*`, `TRB-NOTIFY-*` and `TRB-ATTENTION-*` coverage
+- provider-neutral recovery order that preserves original object/job/request IDs and never promotes provider-local success into canonical success
+- troubleshooting index navigation into the shared-protocol/provider registry
 
 ### DOC-11.8 — Genesis application troubleshooting coverage
 

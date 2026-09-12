@@ -5,7 +5,7 @@ DOC-10 builds reproducible machine-derived technical reference for 420 Integrate
 ## Status
 
 - [x] **DOC-10.1 — Generation foundation and source inventory** — establish generated-reference authority rules, source registry, deterministic output layout, generator schema, `generate`/`--check` entry point and initial source manifest.
-- [ ] **DOC-10.2 — Contract, NatSpec and ABI reference** — derive verified contract pages, functions, inputs/outputs, state mutability, interfaces and NatSpec from qualified build/catalogue sources.
+- [x] **DOC-10.2 — Contract, NatSpec and ABI reference** — generate catalogue/source contract reference, extract contract-level NatSpec and public/external source surfaces, expose ABI provenance/availability, and fail closed rather than publish example-grade or unverifiable ABI evidence.
 - [ ] **DOC-10.3 — Events and custom errors** — derive per-contract/global event and custom-error indexes, full signatures, indexed fields and topics/selectors where derivable.
 - [ ] **DOC-10.4 — RPC reference** — derive supported public execution JSON-RPC/420RPC-facing methods, parameters/results and public/private classifications without exposing Engine/admin/signer surfaces.
 - [ ] **DOC-10.5 — 420Indexer and service API reference** — derive stable routes, query/path parameters, envelopes, pagination/cursors, status/readiness and error surfaces from API source contracts.
@@ -26,7 +26,11 @@ DOC-10.1 establishes:
 - `scripts/generate-reference-docs.py` as the deterministic generator entry point with `--check` mode;
 - `docs/reference/generated/source-manifest.md` as the first generated artifact and proof of the output convention.
 
-The generator is intentionally extensible: later DOC-10 phases add renderers/families to the same entry point rather than creating disconnected generators.
+## DOC-10.2 completed contract reference
+
+DOC-10.2 extends the generator with `docs/reference/generated/contracts.md`. The renderer currently consumes the checked-in Developer Hub catalogue and matching Solidity source, extracts contract-level NatSpec and public/external functions, and reports artifact/interface/ABI evidence explicitly.
+
+The only checked-in catalogue is `developer-hub/catalogue/local.example.json`. It is example-scoped, its declared `contracts/out/...` artifact and interface are not checked in, and its ABI SHA-256 value is a placeholder. Therefore the generator deliberately reports **Distributable verified ABI: NO — fail closed** rather than presenting the example address or placeholder hash as canonical testnet/mainnet ABI/deployment evidence. When qualified build artifacts/catalogues are added later, the same renderer can publish the verified ABI surface without changing the authority model.
 
 ## Phase exit condition
 

@@ -6,6 +6,7 @@
   "required_runner_stages": [
     "front-matter",
     "version-metadata",
+    "version-registry",
     "internal-links",
     "troubleshooting-ids",
     "orphan-navigation",
@@ -26,6 +27,7 @@
     "scripts/qualify-documentation.py",
     "scripts/validate-doc-frontmatter.py",
     "scripts/validate-doc-version-metadata.py",
+    "scripts/validate-doc-version-registry.py",
     "scripts/validate-doc-links.py",
     "scripts/validate-troubleshooting-ids.py",
     "scripts/validate-doc-orphans.py",
@@ -63,6 +65,7 @@
     "scripts/qualify-documentation.py",
     "scripts/validate-doc-frontmatter.py",
     "scripts/validate-doc-version-metadata.py",
+    "scripts/validate-doc-version-registry.py",
     "scripts/validate-doc-links.py",
     "scripts/validate-troubleshooting-ids.py",
     "scripts/validate-doc-orphans.py",

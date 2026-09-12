@@ -25,6 +25,7 @@ DOC-11 organizes troubleshooting around two ways people actually arrive here:
 - [Value movement and economics registry](value-movement-economics.md) — `TRB-PAY-*`, `TRB-TOKEN-*`, `TRB-SWAP-*`, `TRB-BRIDGE-*`, `TRB-STAKE-*` and `TRB-TX-008` covering ambiguous payment/swap outcomes, invoices/quotes, refunds, settlement, token deployment/balances, bridge proof/replay/finality, staking lifecycle, rewards and fee interpretation.
 - [Shared protocol and provider registry](shared-protocol-provider.md) — `TRB-REGISTRY-*`, `TRB-NAMES-*`, `TRB-IDENTITY-*`, `TRB-RANDOM-*`, `TRB-ORACLE-*`, `TRB-STORAGE-*`, `TRB-AI-*`, `TRB-RIGHTS-*`, `TRB-VERIFY-*`, `TRB-ARBITRATION-*`, `TRB-MESSENGER-*`, `TRB-NOTIFY-*` and `TRB-ATTENTION-*` covering discovery, freshness, proofs, provider availability, AI jobs, rights/evidence, disputes and off-chain delivery boundaries.
 - [Genesis application coverage](genesis-application-coverage.md) — maps all 20 frozen Genesis/testnet application manual targets into DOC-11 and defines the limited `TRB-APP-*` cases for AppStore, Governance and Faucet where application-level indexing is useful.
+- [Search, diagnostics and support workflow](search-diagnostics-support.md) — exact-ID and symptom search, audience/severity/surface routing, copy-safe diagnostic bundles, escalation paths and stable deep-link rules for later contextual help.
 
 ## Safety rules
 
@@ -37,10 +38,11 @@ DOC-11 organizes troubleshooting around two ways people actually arrive here:
 - For Indexer/Explorer/Search/Analytics/Status discrepancies, repair or rebuild the derived layer; do not mutate canonical state merely to make the UI match.
 - For provider-backed protocols, provider-local success/failure is operational evidence only; use replacement/fallback providers only through canonical protocol rules.
 - Application manuals may summarize first actions, but shared `TRB-*` entries own the stable retry/recovery identity; do not fork recovery procedures across application pages.
+- Support reports use sanitized, copy-safe diagnostics only; never include signer, recovery, bearer-token, Engine/JWT or private payload secrets.
 - Stop and escalate when evidence is ambiguous, authority cannot be established, or a recovery step could increase loss or state divergence.
 
 ## Phase status
 
-DOC-11.1 through DOC-11.8 are complete. The implementation roadmap is in [`DOC-11-ROADMAP.md`](DOC-11-ROADMAP.md).
+DOC-11.1 through DOC-11.9 are complete. The implementation roadmap is in [`DOC-11-ROADMAP.md`](DOC-11-ROADMAP.md).
 
-Search/diagnostic support workflow and final audit work will continue within the same DOC-11 branch/PR and merge only after the final ecosystem-wide troubleshooting audit and exact-head qualification.
+Only the ecosystem-wide coverage audit and closeout remain before final reconciliation, exact-head qualification and the single monolithic DOC-11 merge.

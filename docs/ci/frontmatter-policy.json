@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "governed_roots": [
+    "docs/apps",
+    "docs/users/wallet",
+    "docs/developers",
+    "docs/reference",
+    "docs/troubleshooting",
+    "docs/ci",
+    "docs/architecture/chain",
+    "docs/architecture/consensus",
+    "docs/architecture/infrastructure",
+    "docs/architecture/protocols"
+  ],
+  "required_fields": ["title", "category", "status", "version"],
+  "allowed_status": ["active", "current", "development", "generated", "draft", "deprecated", "archived", "stable"],
+  "allowed_category": [
+    "application",
+    "applications",
+    "architecture",
+    "contributing",
+    "developer",
+    "developer-guide",
+    "how-to",
+    "reference",
+    "troubleshooting",
+    "user-guide"
+  ],
+  "allowed_audience": [
+    "user",
+    "developer",
+    "validator",
+    "operator",
+    "integrator",
+    "architect",
+    "security",
+    "auditor"
+  ],
+  "legacy_exceptions": []
+}

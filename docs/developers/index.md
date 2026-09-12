@@ -21,7 +21,14 @@ DOC-9.1 establishes the developer contract used by every later guide:
 - [Source of truth and finality](source-of-truth.md) — source precedence, canonical versus indexed reads, provenance, confirmations, finality and reorg handling.
 - [Developer prerequisites and tooling](prerequisites.md) — common prerequisites, tooling matrix, environment discipline, secret/signer rules and the baseline integration checklist.
 
-Read these pages before implementing a production-facing integration. Later DOC-9 sections may add convenience abstractions, but they must not weaken these rules.
+DOC-9.2 adds the first working developer path:
+
+- [Developer quickstart](quickstart.md) — clean checkout through local devnet, first canonical read and first Wallet-authorized write.
+- [Local development](local-development.md) — real15 topology, lifecycle commands, local data/reset expectations and health-check order.
+- [Project structure and starters](project-structure.md) — `sdk-basic`, `protocol-reader`, `wallet-aware` and the recommended integration layers.
+- [First read and Wallet-authorized write](first-read-write.md) — canonical-read versus signing-authority boundary and post-submit confirmation.
+
+Read the foundation pages before implementing a production-facing integration. Later DOC-9 sections may add convenience abstractions, but they must not weaken these rules.
 
 ## Developer paths
 
@@ -29,11 +36,11 @@ Use the documentation according to the job you are doing:
 
 | Goal | Start with | Continue in |
 | --- | --- | --- |
-| Build a first local dApp | prerequisites + integration model | DOC-9.2 quickstart/local development |
+| Build a first local dApp | [quickstart](quickstart.md) | local development + project structure + first read/write |
 | Connect to testnet/RPC | source of truth + prerequisites | DOC-9.3 networks/testnet/RPC |
 | Deploy/register a contract | integration model | DOC-9.4 contracts/deployment/Registry/Verify |
 | Build read-heavy UX | source of truth | DOC-9.5 RPC/APIs/420Indexer |
-| Submit user-authorized writes | integration model | DOC-9.6 Wallet/Smart Accounts/capabilities |
+| Submit user-authorized writes | first read/write + integration model | DOC-9.6 Wallet/Smart Accounts/capabilities |
 | Build resilient SDK/event handling | source of truth | DOC-9.7 SDK/events/errors/reliability |
 | Integrate Storage, AI or Bridge | integration model + source of truth | DOC-9.8 provider/value integrations |
 | Integrate a game | prerequisites + integration model | DOC-9.9 Gaming Protocol |
@@ -55,7 +62,7 @@ Developer tooling is never a substitute for the authority that owns the state be
 ## DOC-9 work order
 
 1. **DOC-9.1 — Developer documentation foundation and integration model — COMPLETE** — developer audiences, source-of-truth rules, authority model, prerequisite/tooling matrix, landing/navigation paths and the DOC-10 generated-reference boundary.
-2. **DOC-9.2 — Quickstart and local development** — repository setup, toolchains, local/devnet bootstrap, starter workflow, project structure and first read/write integration.
+2. **DOC-9.2 — Quickstart and local development — COMPLETE** — repository/toolchain setup, local real15 bootstrap, starter selection/project structure, first canonical read and first Wallet-authorized write/confirmation flow.
 3. **DOC-9.3 — Networks, testnet and RPC access** — network discovery, chain identity, manifests, testnet/Faucet use, public RPC/WSS, 420RPC boundaries, endpoint health and environment safety.
 4. **DOC-9.4 — Contracts, deployments, Registry and verification** — canonical contract discovery, interfaces/versions, deployment workflow, bytecode confirmation, 420Verify evidence, Registry registration and AppStore publication boundaries.
 5. **DOC-9.5 — Reads, APIs and 420Indexer** — canonical RPC versus indexed projections, Indexer API patterns, pagination/replay/cursors, provenance, finality/reorg handling and service fallbacks.

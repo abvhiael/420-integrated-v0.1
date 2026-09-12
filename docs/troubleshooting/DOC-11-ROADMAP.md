@@ -87,14 +87,21 @@ Deliverables:
 - stable `TRB-CONSENSUS-*` and `TRB-NODE-*` entries covering validator lifecycle, proposer/attestation/QC/finality, quorum loss, partitions, safety halt/equivocation, process health, Engine connectivity, consensus/execution divergence, remote signer uncertainty and restart recovery
 - troubleshooting index navigation into the consensus/validator/node registry
 
-### DOC-11.5 — Indexer, Explorer, Search, Analytics and status troubleshooting
+### DOC-11.5 — Indexer, Explorer, Search, Analytics and status troubleshooting — COMPLETE
 
-- Stale or missing indexed data.
-- Reorg/replay/rebuild states.
-- Search/index mismatch.
-- Explorer/Analytics derived-data discrepancies.
-- Health/readiness/status interpretation.
-- Canonical RPC fallback guidance.
+- [x] Stale or missing indexed data.
+- [x] Reorg/replay/rebuild states.
+- [x] Search/index mismatch.
+- [x] Explorer/Analytics derived-data discrepancies.
+- [x] Health/readiness/status interpretation.
+- [x] Canonical RPC fallback guidance.
+
+Deliverables:
+
+- `docs/troubleshooting/indexer-explorer-search-analytics-status.md`
+- stable `TRB-INDEXER-*`, `TRB-EXPLORER-*`, `TRB-SEARCH-*`, `TRB-ANALYTICS-*` and `TRB-STATUS-*` entries
+- canonical-RPC-first fallback order and explicit derived-service non-authority rules
+- troubleshooting index navigation into the derived-service registry
 
 ### DOC-11.6 — Value movement and economic troubleshooting — COMPLETE
 

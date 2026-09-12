@@ -15,6 +15,10 @@ This section is the canonical task-oriented manual collection for user-facing ap
 
 The authoritative application inventory is `config/genesis-applications.json`. DOC-8 follows that frozen catalog rather than an older hand-maintained app list.
 
+## Available manuals
+
+- [420 Wallet](wallet/index.md) — account management, authorization, security, economics, troubleshooting and developer integration. The detailed end-user task journey remains in the canonical DOC-6 Wallet guides and is linked from this package rather than duplicated.
+
 ## Manual contract
 
 Each user-facing application is documented under:
@@ -54,7 +58,7 @@ Generated ABI/API/event/error reference belongs in DOC-10; the DOC-8 developer p
 
 | Application | Class | DOC-8 manual | Primary role |
 | --- | --- | --- | --- |
-| 420 Wallet | Genesis user app | required | Smart Account management, capabilities, recovery, assets and dApp access |
+| 420 Wallet | Genesis user app | [available](wallet/index.md) | Smart Account management, capabilities, recovery, assets and dApp access |
 | 420 Explorer | Genesis user app | required | chain, transaction, contract, validator, asset, governance and finality inspection |
 | 420 Search | Genesis user app | required | unified discovery across canonical and registered public ecosystem data |
 | 420 Analytics | Genesis user app | required | rebuildable analytics, metrics, trends and dashboards |
@@ -91,7 +95,7 @@ DOC-6 already provides the canonical 420 Wallet user journey for:
 - recovery/device safety;
 - troubleshooting.
 
-DOC-8 will reuse and link those pages rather than fork their content. The Wallet application package will supply the normal application entry point plus any missing concepts, architecture, permissions, fees, security, FAQ and developer-integration surfaces.
+DOC-8 reuses and links those pages rather than forking their content. The [Wallet application package](wallet/index.md) supplies the application entry point plus concepts, architecture, permissions, fees, security, FAQ and developer-integration surfaces.
 
 ## Authority labels every manual must preserve
 

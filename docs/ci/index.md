@@ -26,11 +26,10 @@ The current deterministic stage order is:
 5. required-document coverage;
 6. generated-reference family/source/navigation integration;
 7. publication authority/environment/secret-safety validation;
-8. DOC-10 generated-reference byte-for-byte freshness;
-9. strict MkDocs build;
-10. audience navigation and search-index qualification.
-
-DOC-12 continues with workflow ergonomics and final CI self-tests/audit.
+8. workflow/local-CI integration contract validation;
+9. DOC-10 generated-reference byte-for-byte freshness;
+10. strict MkDocs build;
+11. audience navigation and search-index qualification.
 
 ## Front-matter policy
 
@@ -92,6 +91,18 @@ Run it directly with:
 python scripts/validate-doc-publication-safety.py
 ```
 
+## Workflow integration policy
+
+`docs/ci/workflow-policy.json` defines the DOC-12.9 local/CI contract. `scripts/validate-doc-workflow.py` verifies that `420Docs Qualification` still calls the unified local command, retains every required validator stage and source/path trigger, runs on `main` pushes, and cancels superseded runs for the same PR/ref.
+
+The runner flushes stage start/run/pass/fail messages so GitHub Actions output is ordered and actionable. A workflow-only validation failure identifies the missing stage, path trigger, command, branch or concurrency rule directly.
+
+Run the workflow contract check directly with:
+
+```bash
+python scripts/validate-doc-workflow.py
+```
+
 ## CI contract
 
 - [Documentation qualification contract](qualification-contract.md) — scope, authority, deterministic stage order, exit codes, failure ownership and validator rules.
@@ -103,4 +114,4 @@ Documentation CI must report machine-verifiable defects without claiming semanti
 
 ## Phase status
 
-DOC-12.1 through DOC-12.8 are complete. Next is DOC-12.9 — workflow integration and developer ergonomics.
+DOC-12.1 through DOC-12.9 are complete. Next is DOC-12.10 — CI self-tests, audit and closeout.

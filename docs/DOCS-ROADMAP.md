@@ -112,9 +112,22 @@ Exit condition: developers, architects and reviewers can identify every canonica
 
 Exit condition: every user-facing frozen Genesis application has a predictable, task-oriented manual package that explains safe startup, state-changing/value-changing actions, signing/permissions, economics, security/privacy, failure recovery, canonical authority and supported developer integration; the protocol-only Gaming Protocol is correctly routed to protocol/developer documentation, and Faucet documentation is unambiguously testnet-only. See `docs/apps/coverage-audit.md` for the recorded DOC-8.10 result.
 
-## DOC-9 — Developer documentation
+## DOC-9 — Developer documentation — COMPLETE
 
-- Quickstart, local environment, testnet, contracts, RPC, APIs, SDKs, events, errors, indexer, wallet, storage, AI, bridge, game integration, and examples.
+- [x] DOC-9.1 Establish the developer-documentation foundation and integration model: developer audiences, prerequisites, tooling/source-of-truth matrix, canonical-versus-derived authority map, task-guide structure, navigation and the DOC-9/DOC-10 boundary.
+- [x] DOC-9.2 Publish the developer quickstart and local-development workflow: repository/toolchain setup, local/devnet bootstrap, project structure, starter flow and first canonical read plus Wallet-authorized write.
+- [x] DOC-9.3 Document networks, testnet and RPC access: network discovery, chain identity/manifests, Faucet/test accounts, public RPC/WSS, 420RPC boundaries, endpoint health/failover and environment-safety checks.
+- [x] DOC-9.4 Document contracts, deployments, Registry and verification: canonical contract/interface discovery, versioning, deployment planning/external signing, receipt/runtime-code confirmation, 420Verify evidence and Registry/AppStore publication handoffs.
+- [x] DOC-9.5 Document reads, APIs and 420Indexer: canonical RPC versus projections, Indexer endpoints, query/pagination/cursor/replay patterns, provenance, reorg/finality semantics, rate-limit policy and fallback behavior.
+- [x] DOC-9.6 Document Wallet, Smart Account and capability integration: connection versus authority, transaction preparation/simulation, capability/session scopes, passkeys, recovery-aware UX, signing handoff and post-submit confirmation.
+- [x] DOC-9.7 Document SDKs, events, errors and reliability patterns: shared SDK/CLI use, event consumption, stable errors, retry/idempotency/deadlines, finality/confirmation policy, logs and diagnostic correlation.
+- [x] DOC-9.8 Document Storage/Resource, AI/Compute and Bridge integration: provider-neutral storage, job/request/verification/settlement flows, private-payload boundaries and verified cross-chain chain/asset/route/proof/risk/replay handling.
+- [x] DOC-9.9 Document 420 Gaming Protocol developer integration: optional-wallet and guest flows, namespaces, entitlements, guest migration commitments, scoped cross-game attestations, session/capability boundaries and no pay-to-win Wallet coupling.
+- [x] DOC-9.10 Publish end-to-end developer examples and run the DOC-9 coverage audit: complete application workflows from discovery/read/write through deploy/verify/register/publish, security checklist, cross-links and phase closeout qualification.
+
+Exit condition: a developer can start from a clean environment, identify the correct 420 network and canonical services, build locally, use testnet safely, select canonical RPC versus derived APIs correctly, integrate Wallet authorization without handling user secrets, discover/deploy/verify/register contracts, consume SDKs/events/errors reliably, integrate storage/AI/Bridge/Gaming boundaries, and follow complete examples without promoting Developer Hub or other tooling into protocol authority. Generated machine reference remains owned by DOC-10. See `docs/developers/coverage-audit.md` for the DOC-9.10 closeout record.
+
+DOC-9 uses the same monolithic phase policy as DOC-8: DOC-9.1 through DOC-9.10 remain on one branch/PR and merge once after the final phase audit, reconciliation with current `main`, exact-head 420Docs qualification and exact-head full 420 Integrated qualification.
 
 ## DOC-10 — Generated reference documentation
 

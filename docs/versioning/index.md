@@ -24,10 +24,26 @@ DOC-13 defines how 420Docs distinguishes development, Genesis, testnet and mainn
 
 Key rule: labels such as `genesis`, `testnet` and `mainnet` do not create network/deployment authority by themselves. Canonical values remain dependent on approved source evidence and, once DOC-13.3 is complete, an approved documentation release record.
 
+## Version metadata
+
+[Documentation version metadata schema](version-metadata-schema.md) defines the normalized DOC-13 tuple:
+
+- `doc_release`
+- `doc_environment`
+- `publication_status`
+
+The tuple is atomic: if one field is present, all three are required. Existing pages containing only `version: current` remain valid during migration, but that legacy field does not imply an environment or immutable release identity.
+
+Machine policy lives in `version-metadata-policy.json`, and the same documentation CI gate validates it with:
+
+```bash
+python scripts/validate-doc-version-metadata.py
+```
+
 ## Phase roadmap
 
 See [DOC-13 documentation versioning roadmap](DOC-13-ROADMAP.md).
 
 ## Current state
 
-DOC-13.1 is complete. Next is DOC-13.2 — version metadata schema.
+DOC-13.1 and DOC-13.2 are complete. Next is DOC-13.3 — version registry and release manifests.

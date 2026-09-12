@@ -30,6 +30,10 @@ class Stage:
 
 STAGES: tuple[Stage, ...] = (
     Stage(
+        "front-matter",
+        (sys.executable, "scripts/validate-doc-frontmatter.py"),
+    ),
+    Stage(
         "generated-reference-freshness",
         (sys.executable, "scripts/qualify-generated-reference.py", "--check"),
     ),

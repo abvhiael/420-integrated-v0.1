@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Render DOC-10.8 canonical deployment reference from checked-in evidence sources."""
 from __future__ import annotations
-import hashlib, json
+import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -13,10 +13,6 @@ VERIFICATION_CONTROL = ROOT / "developer-hub/src/verification-control.mjs"
 OUTPUT = ROOT / "docs/reference/generated/deployments.md"
 
 
-def sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
-
-
 def render() -> str:
     catalogue = json.loads(CATALOGUE.read_text(encoding="utf-8"))
     contracts = catalogue.get("contracts", [])
@@ -26,11 +22,11 @@ def render() -> str:
         "# Generated canonical deployment reference", "",
         "> GENERATED FILE - DO NOT EDIT. Current output fails closed unless deployment evidence satisfies the publication contract.", "",
         "## Evidence sources", "",
-        f"- catalogue SHA-256: `{sha256(CATALOGUE)}` — `developer-hub/catalogue/local.example.json`",
-        f"- deployment request SHA-256: `{sha256(DEPLOYMENT)}` — `developer-hub/deployment/request.example.json`",
-        f"- release candidate SHA-256: `{sha256(RELEASE)}` — `developer-hub/release/release-candidate.example.json`",
-        f"- deployment-control SHA-256: `{sha256(DEPLOYMENT_CONTROL)}`",
-        f"- verification-control SHA-256: `{sha256(VERIFICATION_CONTROL)}`", "",
+        "- `developer-hub/catalogue/local.example.json`",
+        "- `developer-hub/deployment/request.example.json`",
+        "- `developer-hub/release/release-candidate.example.json`",
+        "- `developer-hub/src/deployment-control.mjs`",
+        "- `developer-hub/src/verification-control.mjs`", "",
         "## Canonical publication contract", "",
         "A row is publishable here only when all of the following are available and mutually consistent:", "",
         "1. environment/chain identity is selected explicitly;",

@@ -13,7 +13,7 @@ version: current
 
 Generator schema: `1.0.0`  
 Source registry: `docs/reference/reference-sources.json`  
-Source registry SHA-256: `09751abdaffbd32eb24c0698611d5920726f992759a9ef4b36539f335c4b8f09`
+Source registry SHA-256: `86c44f4b520a6b501ac76fcfc89e3b2be396b9a8aa9fc09f6c0c0c17e6de8a6c`
 
 This manifest records the checked-in source locations used by DOC-10 renderers. Presence is not authority: later family renderers must still enforce verification, environment and provenance rules before publishing distributable reference values.
 
@@ -35,7 +35,9 @@ This manifest records the checked-in source locations used by DOC-10 renderers. 
 | `networks` | `DOC-10.7` | `developer-hub/manifests` | directory |
 | `rpc` | `DOC-10.4` | `420-rpc/src/methods.ts` | file |
 | `rpc` | `DOC-10.4` | `420-rpc/src/request-policy.ts` | file |
-| `sdk-cli` | `DOC-10.6` | `packages/420-cli` | directory |
+| `sdk-cli` | `DOC-10.6` | `packages/420-cli/bin/420.mjs` | file |
+| `sdk-cli` | `DOC-10.6` | `packages/420-cli/package.json` | file |
+| `sdk-cli` | `DOC-10.6` | `packages/420-sdk/package.json` | file |
 | `sdk-cli` | `DOC-10.6` | `packages/420-sdk/src/index.ts` | file |
 | `sdk-cli` | `DOC-10.6` | `packages/420-sdk/src/wallet.ts` | file |
 
@@ -67,4 +69,4 @@ Public 420RPC compatibility and request-policy reference only; private Engine/ad
 
 ### sdk-cli
 
-Generated SDK/CLI reference must preserve signer-secret isolation and non-authority boundaries.
+Generate SDK exports and the stable primary 420 CLI command surface from implementation source. Preserve network/catalogue binding, signer-secret isolation and the rule that SDK/CLI convenience layers do not gain protocol authority.

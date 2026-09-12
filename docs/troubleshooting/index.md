@@ -1,7 +1,7 @@
 ---
 title: Troubleshooting
 category: troubleshooting
-status: active
+status: current
 version: current
 ---
 
@@ -26,6 +26,7 @@ DOC-11 organizes troubleshooting around two ways people actually arrive here:
 - [Shared protocol and provider registry](shared-protocol-provider.md) — `TRB-REGISTRY-*`, `TRB-NAMES-*`, `TRB-IDENTITY-*`, `TRB-RANDOM-*`, `TRB-ORACLE-*`, `TRB-STORAGE-*`, `TRB-AI-*`, `TRB-RIGHTS-*`, `TRB-VERIFY-*`, `TRB-ARBITRATION-*`, `TRB-MESSENGER-*`, `TRB-NOTIFY-*` and `TRB-ATTENTION-*` covering discovery, freshness, proofs, provider availability, AI jobs, rights/evidence, disputes and off-chain delivery boundaries.
 - [Genesis application coverage](genesis-application-coverage.md) — maps all 20 frozen Genesis/testnet application manual targets into DOC-11 and defines the limited `TRB-APP-*` cases for AppStore, Governance and Faucet where application-level indexing is useful.
 - [Search, diagnostics and support workflow](search-diagnostics-support.md) — exact-ID and symptom search, audience/severity/surface routing, copy-safe diagnostic bundles, escalation paths and stable deep-link rules for later contextual help.
+- [DOC-11 coverage audit](coverage-audit.md) — phase-wide ID, authority, retry/finality, secret-safety, application coverage, search/navigation and provenance audit.
 
 ## Safety rules
 
@@ -43,6 +44,6 @@ DOC-11 organizes troubleshooting around two ways people actually arrive here:
 
 ## Phase status
 
-DOC-11.1 through DOC-11.9 are complete. The implementation roadmap is in [`DOC-11-ROADMAP.md`](DOC-11-ROADMAP.md).
+DOC-11.1 through DOC-11.10 are complete at the documentation-content level. See the [DOC-11 roadmap](DOC-11-ROADMAP.md) and [coverage audit](coverage-audit.md).
 
-Only the ecosystem-wide coverage audit and closeout remain before final reconciliation, exact-head qualification and the single monolithic DOC-11 merge.
+The monolithic phase is now at its final merge gate: reconcile with current `main`, qualify the reconciled exact head, require green 420Docs and 420 Integrated qualification, then merge PR #230 once.

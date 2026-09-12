@@ -254,9 +254,9 @@ For provider-backed protocols, use this order:
 ## Related documentation
 
 - [Core protocol architecture](../architecture/protocols/index.md)
-- [Randomness and oracle architecture](../architecture/protocols/randomness-oracles.md)
-- [Storage proof and resource architecture](../architecture/protocols/storage-resource.md)
+- [Randomness and oracle architecture](../architecture/protocols/randomness-oracle-interface.md)
+- [Storage proof and resource architecture](../architecture/protocols/storage-proof-resource-protocol.md)
 - [Rights and Verify architecture](../architecture/protocols/rights-verify.md)
 - [Arbitration architecture](../architecture/protocols/arbitration.md)
 - [Messenger, Notifications and Attention architecture](../architecture/protocols/messenger-notifications-attention.md)
-- [Developer storage/AI/Bridge integration](../developers/storage-ai-bridge.md)
+- [Developer provider-backed integrations](../developers/provider-backed-integrations.md)

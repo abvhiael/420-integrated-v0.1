@@ -72,6 +72,13 @@ DOC-9.8 adds provider-backed integrations:
 - [420AI and Compute integration](ai-and-compute-integration.md) — model/version identity, request constraints, ComputeMarket execution, result commitments, verification and settlement.
 - [420 Bridge integration](bridge-integration.md) — exact chain/asset/route identity, source finality, adapters/verifiers, risk, replay and destination completion.
 
+DOC-9.9 adds the Gaming Protocol path:
+
+- [420 Gaming Protocol integration](gaming-protocol-integration.md) — protocol authority map, wallet-free core play, canonical game namespaces and scoped interoperability state.
+- [Guest, registered and Wallet-linked play](guest-and-wallet-play.md) — progressive access, explicit wallet opt-in, safe downgrade, privacy and no-pay-to-win connection semantics.
+- [Gaming entitlements and migration](gaming-entitlements-and-migration.md) — game-scoped entitlements plus target-bound, expiry-aware and single-consumption migration claims.
+- [Cross-game attestations and gaming sessions](cross-game-attestations-and-sessions.md) — exact-scope cross-game verification, no wallet-wide enumeration and SmartAccount/CapabilityRegistry session boundaries.
+
 Read the foundation pages before implementing a production-facing integration. Later DOC-9 sections may add convenience abstractions, but they must not weaken these rules.
 
 ## Local workflow at a glance
@@ -112,7 +119,7 @@ Starter projects are discovered through `420 templates` and created with `420 cr
 | Submit user-authorized writes | [Wallet and Smart Account integration](wallet-and-smart-accounts.md) | transaction preparation + capabilities/sessions + passkeys/recovery |
 | Build resilient SDK/event handling | [SDK and CLI integration](sdk-and-cli.md) | events/finality + errors/retries + diagnostics/correlation |
 | Integrate Storage, AI or Bridge | [provider-backed integration model](provider-backed-integrations.md) | storage/resource + AI/Compute + Bridge guides |
-| Integrate a game | prerequisites + integration model | DOC-9.9 Gaming Protocol |
+| Integrate a game | [420 Gaming Protocol integration](gaming-protocol-integration.md) | guest/wallet play + entitlements/migration + cross-game attestations/sessions |
 | Review a complete production flow | all DOC-9 foundation pages | DOC-9.10 examples/audit |
 
 ## Authority rule
@@ -138,7 +145,7 @@ Developer tooling is never a substitute for the authority that owns the state be
 6. **DOC-9.6 — Wallet, Smart Accounts and capabilities — COMPLETE** — connection-versus-authority boundaries, canonical Smart Account revalidation, bounded transaction preparation/simulation, target/selector-scoped capability/session grants, passkey UserOperation semantics, recovery-aware invalidation and post-submit canonical confirmation.
 7. **DOC-9.7 — SDKs, events, errors and reliability patterns — COMPLETE** — shared SDK/CLI authority boundaries, replay/finality-safe event handling, classified errors, bounded retries/idempotency/deadlines and provenance-preserving diagnostic correlation.
 8. **DOC-9.8 — Storage, AI/Compute and Bridge integrations — COMPLETE** — common provider/evidence/privacy boundary, Resource/420Store offer-session-agreement-proof-settlement flow, AI/Compute request-match-result-verification-settlement flow and Bridge chain/asset/route/finality/proof/risk/replay flow.
-9. **DOC-9.9 — Gaming Protocol integration** — optional-wallet/guest flows, registered game namespaces, entitlements, guest migration commitments, scoped cross-game attestations and no pay-to-win Wallet coupling.
+9. **DOC-9.9 — Gaming Protocol integration — COMPLETE** — guest/registered/wallet-linked progression, canonical game namespace pinning, optional entitlements, target-bound guest migration, exact-scope cross-game attestations, Wallet capability/session separation and no-pay-to-win wallet linkage.
 10. **DOC-9.10 — End-to-end examples and developer coverage audit** — production-oriented example integrations, deployment/verification/publishing workflow, security checklist, cross-link audit and phase closeout.
 
 DOC-9 follows the same monolithic phase policy as DOC-8: all DOC-9.x commits remain on one branch/PR and the phase merges once, after DOC-9.10, reconciliation with current `main`, exact-head 420Docs qualification and exact-head full-repository qualification.

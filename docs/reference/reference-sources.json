@@ -1,0 +1,71 @@
+{
+  "schemaVersion": "1.0.0",
+  "families": [
+    {
+      "id": "contracts",
+      "phase": "DOC-10.2",
+      "sources": [
+        "developer-hub/src/contract-catalogue.mjs",
+        "developer-hub/catalogue/local.example.json",
+        "contracts/src"
+      ],
+      "notes": "Distributable ABI/NatSpec output requires verified artifact/catalogue provenance; the checked-in catalogue is local example scope only."
+    },
+    {
+      "id": "events-errors",
+      "phase": "DOC-10.3",
+      "sources": [
+        "developer-hub/src/contract-catalogue.mjs",
+        "contracts/src"
+      ],
+      "notes": "Generate contract events/custom errors only from verified ABI/artifact inputs."
+    },
+    {
+      "id": "rpc",
+      "phase": "DOC-10.4",
+      "sources": [
+        "execution",
+        "packages/420-cli"
+      ],
+      "notes": "Public execution/420RPC-facing reference only; exclude private Engine/admin/signer surfaces."
+    },
+    {
+      "id": "indexer-api",
+      "phase": "DOC-10.5",
+      "sources": [
+        "420-indexer/src/api-contract.ts",
+        "420-indexer/src/api-surface.ts",
+        "420-indexer/src/abi-manifest.ts"
+      ],
+      "notes": "420Indexer projections remain derived, rebuildable and non-authoritative."
+    },
+    {
+      "id": "sdk-cli",
+      "phase": "DOC-10.6",
+      "sources": [
+        "packages/420-sdk/src/index.ts",
+        "packages/420-sdk/src/wallet.ts",
+        "packages/420-cli"
+      ],
+      "notes": "Generated SDK/CLI reference must preserve signer-secret isolation and non-authority boundaries."
+    },
+    {
+      "id": "networks",
+      "phase": "DOC-10.7",
+      "sources": [
+        "developer-hub/manifests"
+      ],
+      "notes": "Environment-scoped only; do not promote local example values into testnet/mainnet reference."
+    },
+    {
+      "id": "deployments",
+      "phase": "DOC-10.8",
+      "sources": [
+        "developer-hub/deployment",
+        "developer-hub/release",
+        "developer-hub/catalogue"
+      ],
+      "notes": "Publish approved canonical/verified deployment records only; planned/predicted addresses are not deployment proof."
+    }
+  ]
+}

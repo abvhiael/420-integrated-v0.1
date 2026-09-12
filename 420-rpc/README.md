@@ -6,7 +6,7 @@
 
 Each RPC phase is developed on its own branch and pull request. At the end of every phase, the branch is reconciled with current `main`, qualification is rerun, and the phase is merged to `main` before work begins on the next RPC phase.
 
-## Completed phases
+## Completed implementation phases
 
 - **RPC-0:** architecture, authority boundaries, threat model, package layout and qualification contract.
 - **RPC-1:** explicit upstream abstraction and capability discovery.
@@ -19,32 +19,26 @@ Each RPC phase is developed on its own branch and pull request. At the end of ev
 - **RPC-8:** explicit non-authoritative 420Indexer-derived reads.
 - **RPC-9:** authentication, API credentials and Developer Hub integration.
 - **RPC-10:** observability, readiness, metrics and operational recovery.
-- **RPC-11 — implementation complete:** hostile-state and cross-layer security hardening.
+- **RPC-11:** hostile-state and cross-layer security hardening.
+- **RPC-12 — implementation complete:** public testnet qualification and launch closeout contract.
 
-## RPC-11 — hostile-state security hardening
+## RPC-12 — testnet qualification and closeout
 
-RPC-11 adds a single hardened ingress order across the existing layers:
+RPC-12 adds a fail-closed release-candidate evidence aggregator for deployed public-testnet candidates. It pins chain ID `420`, expected genesis, HTTPS/WSS public origins, canonical execution-provider identities and 420Indexer-provider identities.
 
-1. bounded JSON structural inspection;
-2. strict top-level JSON-RPC envelope shape;
-3. RPC-5 request/method/parameter validation;
-4. RPC-9 scope authorization;
-5. RPC-6 quota/cost/concurrency admission;
-6. RPC-4/RPC-3 safety-aware routing and transport handling.
+A candidate can emit `go` only when exact RPC/node/indexer revisions and artifact digests are present, RPC-10 readiness is traffic-admitting, canonical and derived providers are witnessed, the representative Ethereum compatibility surface is exercised, and live smoke/failure/recovery evidence covers HTTP, WSS, raw transaction submission, derived reads, auth, resource controls, safe failover, wrong-chain rejection, finality conflict, WebSocket upstream loss, readiness recovery and telemetry redaction.
 
-Structural hardening bounds nesting depth, JSON node count, aggregate string/key bytes and object-key count. It rejects non-JSON/non-finite values, prototype-pollution keys (`__proto__`, `prototype`, `constructor`) and unexpected top-level request keys before stateful admission.
+CI contains a synthetic passing fixture to prove the closeout logic. That fixture does **not** claim a live testnet has already been deployed. Real public-testnet launch evidence must still be collected against the deployed release candidate.
 
-Cross-layer hostile tests prove that malformed or unauthorized traffic cannot consume RPC-6 quota/client state, mixed-scope batches fail atomically, `rpc:admin` cannot bypass privileged-method exclusions, and accepted requests are accounted to the stable RPC-9 client key and release leases cleanly.
+### RPC-12 authority boundary
 
-### RPC-11 authority boundary
+The closeout report is operator evidence only. It is always `authoritative: false` and `launchAuthority: false`. 420RPC still cannot establish consensus, finality, transaction validity, fork choice, wallet authority, Registry legitimacy or governance approval.
 
-Security hardening can reject unsafe traffic. It cannot establish chain truth, finality, transaction validity, fork choice, wallet authority, Registry legitimacy or protocol authorization.
+## Roadmap status
 
-## Roadmap
+**RPC-0 through RPC-12 implementation is complete.**
 
-- **RPC-0 through RPC-10 — complete**
-- **RPC-11 — implementation complete:** hostile-state/security hardening and fault qualification.
-- **RPC-12 — next:** testnet qualification and launch closeout.
+The next ecosystem step is not another 420RPC implementation phase. It is deployment/infrastructure qualification alongside the remaining genesis infrastructure, followed by public testnet deployment and live evidence collection.
 
 ## Core invariants
 
@@ -63,8 +57,6 @@ Security hardening can reject unsafe traffic. It cannot establish chain truth, f
 13. Telemetry never exposes bearer material or principal identifiers.
 14. Malformed structure and authorization failures occur before stateful RPC-6 admission.
 15. Prototype-pollution object keys and envelope-smuggling keys fail closed.
-16. RPC-11 hardening never creates canonical authority.
-
-## Next phase
-
-After RPC-11 is reconciled, fully qualified and merged to `main`, RPC-12 performs testnet qualification and launch closeout.
+16. Public HTTP and WebSocket endpoints require TLS for launch qualification.
+17. RPC-12 cannot emit `go` with missing release identity, chain/genesis mismatch, missing compatibility witnesses or unproven failure/recovery drills.
+18. RPC-12 closeout never becomes launch or protocol authority.

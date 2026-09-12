@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "route_prefix": "versions",
+  "immutable_route": "/versions/{environment}/{release}/{path}",
+  "alias_route": "/versions/{environment}/current/{path}",
+  "legacy_flat_routes": true,
+  "legacy_flat_route_authority": "compatibility-only",
+  "unknown_route_behavior": "not-found",
+  "missing_page_behavior": "not-found",
+  "cross_environment_fallback": false,
+  "cross_release_fallback": false,
+  "current_alias_requires_registry_resolution": true,
+  "advertised_tracks_require_published_registry_track": true,
+  "immutable_release_route_requires_published_release": true,
+  "allowed_environments": ["development", "genesis", "testnet", "mainnet"],
+  "renderer_manifest": "/versioning/renderer-manifest.json",
+  "site_runtime_manifest": "/version-context.json"
+}

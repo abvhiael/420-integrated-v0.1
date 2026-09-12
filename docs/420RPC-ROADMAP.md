@@ -41,30 +41,31 @@ Delivered DEVHUB-16-compatible credentials, strict audience/chain/environment bi
 ### RPC-10 — observability and operational recovery — complete
 Delivered liveness/readiness separation, fail-closed canonical readiness, independent derived-read health, recovery hysteresis, bounded metrics and redacted operational snapshots.
 
-## RPC-11 — hostile-state and security hardening — implementation complete
+### RPC-11 — hostile-state and security hardening — complete
+Delivered cross-layer ingress ordering, bounded JSON structural inspection, prototype-pollution and envelope-smuggling rejection, authorization-before-admission, atomic batch scope enforcement and hostile-state qualification.
+
+### RPC-12 — public testnet qualification and launch closeout — implementation complete
 
 Delivered:
 
-- a cross-layer ingress security gate spanning RPC-5, RPC-9 and RPC-6;
-- bounded JSON depth, total node count, aggregate string/key bytes and object-key count;
-- fail-closed handling for non-finite/non-JSON values;
-- rejection of prototype-pollution keys before downstream JavaScript processing;
-- rejection of unexpected top-level JSON-RPC envelope keys;
-- proof that structural and authorization failures occur before RPC-6 state/quota mutation;
-- atomic mixed-scope batch authorization;
-- proof that `rpc:admin` cannot bypass Engine/admin/debug/signing exclusions;
-- authenticated client-key binding through successful admission and lease release;
-- preservation of RPC-6 resource rejection semantics through the security gate;
-- hostile-state regression coverage and `docs/420RPC-SECURITY-HARDENING.md`.
+- an explicit testnet environment contract pinned to chain ID `420`, expected genesis, HTTPS/WSS public endpoints and named execution/Indexer providers;
+- TLS-only public-origin validation with embedded-credential rejection;
+- exact release identity requirements for 420RPC, `node420`, 420Indexer, descriptor manifest and compiled artifacts;
+- a representative Ethereum JSON-RPC compatibility witness set spanning metadata, reads, logs, calls, estimation, fee history, raw transaction submission and subscriptions;
+- fail-closed requirements for canonical and derived provider evidence plus RPC-10 traffic-admitting readiness;
+- live deployment evidence flags for HTTP/WSS smoke, transaction submission, derived reads, auth, resource controls, safe failover, wrong-chain rejection, finality conflict, WebSocket upstream loss, recovery hysteresis and telemetry redaction;
+- `buildRpc12CloseoutReport420`, which emits explicit `go` or `no-go` with blockers;
+- closeout records that retain public origins rather than secret-bearing endpoint URLs and remain `authoritative: false` / `launchAuthority: false`;
+- hostile/missing-evidence regression tests and `docs/420RPC-TESTNET-CLOSEOUT.md`.
 
-RPC-11 is a gateway defense layer only. It cannot establish consensus, finality, transaction validity, ownership, Registry legitimacy, wallet authority, governance state or fork choice.
+A synthetic CI fixture can prove the closeout aggregator's logic. It is not live deployment evidence and does not by itself authorize a public testnet launch.
 
-Exit gate: implementation is complete. Merge requires exact-head 420RPC, docs and repository-wide qualification plus reconciliation with current `main`.
+Exit gate: RPC-12 implementation is complete. Merge requires exact-head 420RPC, docs and repository-wide qualification plus reconciliation with current `main`.
 
-## Remaining phase
+## Roadmap closeout
 
-- **RPC-12:** public testnet qualification and 420RPC launch closeout.
+With RPC-12 merged, the planned **RPC-0 through RPC-12 implementation roadmap is complete**. Remaining work belongs to deployment and broader genesis-infrastructure qualification: deploy the selected release candidate, collect live RPC-12 evidence, qualify the remaining infrastructure services, then make the separate public-testnet launch decision.
 
 ## Authority rule
 
-420RPC may authenticate and authorize off-chain service access, reject hostile traffic, refuse unsafe upstreams, expose clearly labeled derived projection data and report bounded operational telemetry, but it never determines canonical blocks, transaction validity, consensus, safe/finalized checkpoints, fork choice, wallet authority, protocol identity or finality.
+420RPC may authenticate and authorize off-chain service access, reject hostile traffic, refuse unsafe upstreams, expose clearly labeled derived projection data, report bounded operational telemetry and aggregate deployment evidence, but it never determines canonical blocks, transaction validity, consensus, safe/finalized checkpoints, fork choice, wallet authority, protocol identity, governance approval or finality.

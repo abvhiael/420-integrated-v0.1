@@ -10,3 +10,4 @@ export * from './indexer-reads.js';
 export * from './auth.js';
 export * from './observability.js';
 export * from './security.js';
+export * from './testnet.js';

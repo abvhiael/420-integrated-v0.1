@@ -28,6 +28,15 @@ DOC-9.2 adds the first working developer path:
 - [Project structure and starters](project-structure.md) — `sdk-basic`, `protocol-reader`, `wallet-aware` and the recommended integration layers.
 - [First read and Wallet-authorized write](first-read-write.md) — canonical-read versus signing-authority boundary and post-submit confirmation.
 
+DOC-9.3 adds safe environment and public-access guidance:
+
+- [Networks and manifests](networks-and-manifests.md) — manifest schema, explicit environment selection, chain/deployment identity and the rule that chain ID alone is insufficient proof of network.
+- [Testnet and Faucet](testnet-and-faucet.md) — official-testnet manifest workflow, external-custody test accounts, Faucet limits and canonical balance confirmation.
+- [RPC and WebSocket access](rpc-and-websocket.md) — current `node420` JSON-RPC path, public method boundary, transaction submission/finality, WebSocket recovery and the replaceable 420RPC boundary.
+- [Endpoint health and failover](endpoint-health-and-failover.md) — readiness checks, same-environment failover, finalized disagreement handling, provider quarantine and credential separation.
+
+The repository currently checks in only the local example manifest. DOC-9 does not invent public testnet or mainnet endpoints; deployment-specific values must come from an official manifest for that environment.
+
 Read the foundation pages before implementing a production-facing integration. Later DOC-9 sections may add convenience abstractions, but they must not weaken these rules.
 
 ## Local workflow at a glance
@@ -64,7 +73,7 @@ Use the documentation according to the job you are doing:
 | Goal | Start with | Continue in |
 | --- | --- | --- |
 | Build a first local dApp | [quickstart](quickstart.md) | local development + project structure + first read/write |
-| Connect to testnet/RPC | source of truth + prerequisites | DOC-9.3 networks/testnet/RPC |
+| Connect to testnet/RPC | [networks and manifests](networks-and-manifests.md) | testnet/Faucet + RPC/WSS + endpoint health/failover |
 | Deploy/register a contract | integration model | DOC-9.4 contracts/deployment/Registry/Verify |
 | Build read-heavy UX | source of truth | DOC-9.5 RPC/APIs/420Indexer |
 | Submit user-authorized writes | first read/write + integration model | DOC-9.6 Wallet/Smart Accounts/capabilities |
@@ -90,7 +99,7 @@ Developer tooling is never a substitute for the authority that owns the state be
 
 1. **DOC-9.1 — Developer documentation foundation and integration model — COMPLETE** — developer audiences, source-of-truth rules, authority model, prerequisite/tooling matrix, landing/navigation paths and the DOC-10 generated-reference boundary.
 2. **DOC-9.2 — Quickstart and local development — COMPLETE** — repository/toolchain setup, local real15 bootstrap, starter selection/project structure, first canonical read and first Wallet-authorized write/confirmation flow.
-3. **DOC-9.3 — Networks, testnet and RPC access** — network discovery, chain identity, manifests, testnet/Faucet use, public RPC/WSS, 420RPC boundaries, endpoint health and environment safety.
+3. **DOC-9.3 — Networks, testnet and RPC access — COMPLETE** — explicit manifest/environment discovery, testnet/Faucet procedure without invented deployment values, current `node420` public RPC/WSS access, 420RPC ingress boundary, endpoint readiness/failover and cross-environment fail-closed rules.
 4. **DOC-9.4 — Contracts, deployments, Registry and verification** — canonical contract discovery, interfaces/versions, deployment workflow, bytecode confirmation, 420Verify evidence, Registry registration and AppStore publication boundaries.
 5. **DOC-9.5 — Reads, APIs and 420Indexer** — canonical RPC versus indexed projections, Indexer API patterns, pagination/replay/cursors, provenance, finality/reorg handling and service fallbacks.
 6. **DOC-9.6 — Wallet, Smart Accounts and capabilities** — connect versus authorize, transaction preparation, simulation, capability/session scopes, passkeys, recovery-aware integrations and post-submit confirmation.

@@ -135,13 +135,22 @@ Deliverables:
 - provider-neutral recovery order that preserves original object/job/request IDs and never promotes provider-local success into canonical success
 - troubleshooting index navigation into the shared-protocol/provider registry
 
-### DOC-11.8 — Genesis application troubleshooting coverage
+### DOC-11.8 — Genesis application troubleshooting coverage — COMPLETE
 
-- Map every frozen Genesis application manual to troubleshooting entries.
-- Ensure protocol-only and testnet-only boundaries remain explicit.
-- Add application-specific symptom-to-recovery pages where shared entries are insufficient.
-- Cross-link application manuals, developer guides and generated reference.
-- Prevent duplicated or conflicting recovery instructions.
+- [x] Map every frozen Genesis application manual to troubleshooting entries.
+- [x] Ensure protocol-only and testnet-only boundaries remain explicit.
+- [x] Add application-specific symptom-to-recovery entries where shared entries are insufficient.
+- [x] Cross-link application manuals, developer guides and generated reference through the shared registry model.
+- [x] Prevent duplicated or conflicting recovery instructions.
+
+Deliverables:
+
+- `docs/troubleshooting/genesis-application-coverage.md`
+- explicit mapping for all 20 frozen Genesis/testnet manual targets
+- `TRB-APP-001` through `TRB-APP-003` for AppStore catalogue disagreement, Governance presentation disagreement and Faucet request-policy ambiguity
+- protocol-only 420 Gaming Protocol preserved outside the standalone application matrix
+- testnet-only/no-value Faucet scope preserved
+- troubleshooting index navigation into the Genesis application coverage matrix
 
 ### DOC-11.9 — Search, diagnostics and support workflow
 

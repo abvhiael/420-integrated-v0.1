@@ -213,6 +213,60 @@ nav:
                   - Events & Finality: apps/identity/developer/events.md
                   - Errors & Retries: apps/identity/developer/errors.md
                   - Examples: apps/identity/developer/examples.md
+          - 420 Swap:
+              - Overview: apps/swap/index.md
+              - Getting Started: apps/swap/getting-started.md
+              - User Guide: apps/swap/user-guide.md
+              - Concepts: apps/swap/concepts.md
+              - Architecture: apps/swap/architecture.md
+              - Permissions: apps/swap/permissions.md
+              - Fees: apps/swap/fees.md
+              - Security: apps/swap/security.md
+              - Troubleshooting: apps/swap/troubleshooting.md
+              - FAQ: apps/swap/faq.md
+              - Developer Integration:
+                  - Overview: apps/swap/developer/index.md
+                  - Contracts: apps/swap/developer/contracts.md
+                  - API & Quotes: apps/swap/developer/api.md
+                  - Events & Finality: apps/swap/developer/events.md
+                  - Errors & Retries: apps/swap/developer/errors.md
+                  - Examples: apps/swap/developer/examples.md
+          - 420 Bridge:
+              - Overview: apps/bridge/index.md
+              - Getting Started: apps/bridge/getting-started.md
+              - User Guide: apps/bridge/user-guide.md
+              - Concepts: apps/bridge/concepts.md
+              - Architecture: apps/bridge/architecture.md
+              - Permissions: apps/bridge/permissions.md
+              - Fees: apps/bridge/fees.md
+              - Security: apps/bridge/security.md
+              - Troubleshooting: apps/bridge/troubleshooting.md
+              - FAQ: apps/bridge/faq.md
+              - Developer Integration:
+                  - Overview: apps/bridge/developer/index.md
+                  - Contracts: apps/bridge/developer/contracts.md
+                  - API & Routes: apps/bridge/developer/api.md
+                  - Events & Finality: apps/bridge/developer/events.md
+                  - Errors & Retries: apps/bridge/developer/errors.md
+                  - Examples: apps/bridge/developer/examples.md
+          - 420 Token:
+              - Overview: apps/token/index.md
+              - Getting Started: apps/token/getting-started.md
+              - User Guide: apps/token/user-guide.md
+              - Concepts: apps/token/concepts.md
+              - Architecture: apps/token/architecture.md
+              - Permissions: apps/token/permissions.md
+              - Fees: apps/token/fees.md
+              - Security: apps/token/security.md
+              - Troubleshooting: apps/token/troubleshooting.md
+              - FAQ: apps/token/faq.md
+              - Developer Integration:
+                  - Overview: apps/token/developer/index.md
+                  - Contracts: apps/token/developer/contracts.md
+                  - API & Metadata: apps/token/developer/api.md
+                  - Events & Finality: apps/token/developer/events.md
+                  - Errors & Retries: apps/token/developer/errors.md
+                  - Examples: apps/token/developer/examples.md
       - 420 Wallet:
           - Onboarding: users/wallet/index.md
           - Setup, Import & Protection: users/wallet/setup-import-and-protection.md

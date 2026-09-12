@@ -13,9 +13,9 @@ version: current
 
 Generator schema: `1.0.0`  
 Source registry: `docs/reference/reference-sources.json`  
-Source registry SHA-256: `86c44f4b520a6b501ac76fcfc89e3b2be396b9a8aa9fc09f6c0c0c17e6de8a6c`
+Source registry SHA-256: `a0e470d617d0736700ac788a8dc2d145a90029b5d01d387209e0d0b1e844ece0`
 
-This manifest records the checked-in source locations used by DOC-10 renderers. Presence is not authority: later family renderers must still enforce verification, environment and provenance rules before publishing distributable reference values.
+This manifest records the checked-in source locations used by DOC-10 renderers. Presence is not authority: family renderers still enforce verification, environment and provenance rules before publishing distributable reference values.
 
 | Family | Phase | Source | Kind |
 | --- | --- | --- | --- |
@@ -32,7 +32,9 @@ This manifest records the checked-in source locations used by DOC-10 renderers. 
 | `indexer-api` | `DOC-10.5` | `420-indexer/src/http-transport.ts` | file |
 | `indexer-api` | `DOC-10.5` | `420-indexer/src/operational-api.ts` | file |
 | `indexer-api` | `DOC-10.5` | `420-indexer/src/query-layer.ts` | file |
-| `networks` | `DOC-10.7` | `developer-hub/manifests` | directory |
+| `networks` | `DOC-10.7` | `developer-hub/manifests/local.example.json` | file |
+| `networks` | `DOC-10.7` | `developer-hub/schema/network-manifest.schema.json` | file |
+| `networks` | `DOC-10.7` | `developer-hub/src/network-discovery.mjs` | file |
 | `rpc` | `DOC-10.4` | `420-rpc/src/methods.ts` | file |
 | `rpc` | `DOC-10.4` | `420-rpc/src/request-policy.ts` | file |
 | `sdk-cli` | `DOC-10.6` | `packages/420-cli/bin/420.mjs` | file |
@@ -61,7 +63,7 @@ Stable public read API only. 420Indexer projections remain derived, rebuildable 
 
 ### networks
 
-Environment-scoped only; do not promote local example values into testnet/mainnet reference.
+Environment-scoped only. The only checked-in manifest is local.example.json; generated reference must report devnet/testnet/mainnet as unavailable rather than promoting local chain identity, localhost endpoints or example contracts into those environments.
 
 ### rpc
 
@@ -69,4 +71,4 @@ Public 420RPC compatibility and request-policy reference only; private Engine/ad
 
 ### sdk-cli
 
-Generate SDK exports and the stable primary 420 CLI command surface from implementation source. Preserve network/catalogue binding, signer-secret isolation and the rule that SDK/CLI convenience layers do not gain protocol authority.
+Generated SDK/CLI reference must preserve signer-secret isolation and non-authority boundaries.

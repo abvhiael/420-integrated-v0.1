@@ -10,6 +10,7 @@ on:
       - 'mkdocs.yml'
       - 'requirements-docs.txt'
       - 'scripts/qualify-docs.py'
+      - 'scripts/render-doc-version-context.py'
       - '.github/workflows/docs-pages.yml'
   workflow_dispatch:
 
@@ -41,6 +42,9 @@ jobs:
 
       - name: Build 420Docs
         run: mkdocs build --strict
+
+      - name: Generate version renderer context
+        run: python scripts/render-doc-version-context.py --site-dir site
 
       - name: Qualify search and navigation
         run: python scripts/qualify-docs.py

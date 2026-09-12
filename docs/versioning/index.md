@@ -18,10 +18,16 @@ DOC-13 defines how 420Docs distinguishes development, Genesis, testnet and mainn
 - couple generated reference to the source/release context that produced it;
 - extend DOC-12 CI so versioning rules fail closed when they drift.
 
+## Authority model
+
+[Documentation version authority contract](version-authority-contract.md) defines the three independent versioning dimensions—release/lifecycle version, environment and publication status—and the fail-closed rules that prevent one context from masquerading as another.
+
+Key rule: labels such as `genesis`, `testnet` and `mainnet` do not create network/deployment authority by themselves. Canonical values remain dependent on approved source evidence and, once DOC-13.3 is complete, an approved documentation release record.
+
 ## Phase roadmap
 
 See [DOC-13 documentation versioning roadmap](DOC-13-ROADMAP.md).
 
 ## Current state
 
-DOC-13 has started. The first implementation step is DOC-13.1 — versioning model and authority contract.
+DOC-13.1 is complete. Next is DOC-13.2 — version metadata schema.

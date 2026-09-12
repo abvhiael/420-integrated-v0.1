@@ -7,6 +7,7 @@
     "docs/reference",
     "docs/troubleshooting",
     "docs/ci",
+    "docs/versioning",
     "docs/architecture/chain",
     "docs/architecture/consensus",
     "docs/architecture/infrastructure",

@@ -38,7 +38,7 @@ def load_json(path: Path) -> dict:
 
 def load_nav() -> set[str]:
     try:
-        config = yaml.safe_load(MKDOCS.read_text(encoding="utf-8"))
+        config = yaml.load(MKDOCS.read_text(encoding="utf-8"), Loader=yaml.BaseLoader)
     except (OSError, yaml.YAMLError) as exc:
         fail(f"cannot read mkdocs.yml: {exc}")
     nav = config.get("nav") if isinstance(config, dict) else None

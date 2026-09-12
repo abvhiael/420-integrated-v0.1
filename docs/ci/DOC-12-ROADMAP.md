@@ -76,12 +76,22 @@ Deliverables:
 - external `http`, `https`, `mailto` and `tel` links excluded from repository-target validation
 - corpus qualification evidence: 687 internal links checked across 434 governed pages with zero target/anchor exceptions required; exact-head 420Docs Qualification #629 passed
 
-### DOC-12.4 — Stable troubleshooting-ID validation
+### DOC-12.4 — Stable troubleshooting-ID validation — COMPLETE
 
-- Validate `TRB-<DOMAIN>-<NNN>` syntax.
-- Detect duplicate stable troubleshooting IDs across DOC-11.
-- Verify registry references resolve to an owning entry.
-- Detect malformed or ambiguous troubleshooting anchors.
+- [x] Validate `TRB-<DOMAIN>-<NNN>` syntax and reserved domain tokens.
+- [x] Detect duplicate stable troubleshooting IDs across DOC-11 owner pages.
+- [x] Verify exact registry references resolve to one owning entry.
+- [x] Detect troubleshooting anchors that do not resolve to an owning entry.
+- [x] Wire stable-ID validation into the unified local/CI gate.
+
+Deliverables:
+
+- `docs/ci/troubleshooting-id-policy.json` — authoritative owner pages, reserved domains and deliberate reference exclusions for contract/template/audit examples
+- `scripts/validate-troubleshooting-ids.py` — deterministic owner extraction, global uniqueness checks, reserved-domain validation, reference resolution and troubleshooting-anchor checks
+- `troubleshooting-ids` as the third stage of `scripts/qualify-documentation.py`
+- workflow trigger coverage for the validator and policy
+- canonical owner-heading parser supports the DOC-11 backtick heading form, for example ``## `TRB-CHAIN-001` — ...``
+- corpus qualification evidence: 92 unique stable owner IDs and 105 exact ID-reference occurrences checked; exact-head 420Docs Qualification #637 passed
 
 ### DOC-12.5 — Orphan-page and navigation validation
 

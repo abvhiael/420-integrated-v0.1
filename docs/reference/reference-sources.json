@@ -40,8 +40,8 @@
     {
       "id": "deployments",
       "phase": "DOC-10.8",
-      "sources": ["developer-hub/deployment", "developer-hub/release", "developer-hub/catalogue"],
-      "notes": "Publish approved canonical/verified deployment records only; planned/predicted addresses are not deployment proof."
+      "sources": ["developer-hub/catalogue/local.example.json", "developer-hub/deployment/request.example.json", "developer-hub/release/release-candidate.example.json", "developer-hub/src/deployment-control.mjs", "developer-hub/src/verification-control.mjs"],
+      "notes": "Canonical deployment publication requires evidence beyond plans/examples: canonical RPC-confirmed deployment receipt plus verified artifact/runtime evidence and approved registration/catalogue provenance. Current checked-in deployment, release and catalogue records are example-scoped and must not be promoted as canonical deployments."
     }
   ]
 }

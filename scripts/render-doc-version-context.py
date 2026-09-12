@@ -23,7 +23,25 @@ def load_json(path: Path) -> dict:
     return value
 
 
-def published_context(registry: dict, policy: dict) -> dict:
+def built_page_inventory(site_dir: Path) -> list[str]:
+    inventory: set[str] = set()
+    if not site_dir.is_dir():
+        return []
+    for page in site_dir.rglob("*.html"):
+        rel = page.relative_to(site_dir).as_posix()
+        if rel == "index.html":
+            inventory.add("")
+            inventory.add("index.html")
+            continue
+        if rel.endswith("/index.html"):
+            inventory.add(rel[: -len("index.html")])
+            inventory.add(rel)
+        else:
+            inventory.add(rel)
+    return sorted(inventory)
+
+
+def published_context(registry: dict, policy: dict, site_dir: Path | None = None) -> dict:
     tracks_out: dict[str, dict] = {}
     for track_name, track in sorted(registry.get("tracks", {}).items()):
         if not isinstance(track, dict):
@@ -61,7 +79,7 @@ def published_context(registry: dict, policy: dict) -> dict:
             "current_route": current_route,
             "releases": release_items,
         }
-    return {
+    manifest = {
         "schema_version": 1,
         "route_prefix": policy.get("route_prefix", "versions"),
         "unknown_route_behavior": policy.get("unknown_route_behavior", "not-found"),
@@ -70,6 +88,9 @@ def published_context(registry: dict, policy: dict) -> dict:
         "cross_release_fallback": bool(policy.get("cross_release_fallback", False)),
         "tracks": tracks_out,
     }
+    if site_dir is not None:
+        manifest["page_inventory"] = built_page_inventory(site_dir)
+    return manifest
 
 
 def resolve_route(route: str, registry: dict, policy: dict) -> dict:
@@ -127,7 +148,10 @@ def main() -> int:
     try:
         registry = load_json(REGISTRY)
         policy = load_json(POLICY)
-        manifest = published_context(registry, policy)
+        target_site = Path(args.site_dir) if args.site_dir else None
+        if target_site is not None and not target_site.is_absolute():
+            target_site = ROOT / target_site
+        manifest = published_context(registry, policy, target_site)
     except RuntimeError as exc:
         print(f"420Docs version renderer ERROR: {exc}", file=sys.stderr)
         return 1
@@ -136,12 +160,14 @@ def main() -> int:
         print(json.dumps(resolve_route(args.route, registry, policy), sort_keys=True))
         return 0
 
-    if args.site_dir:
-        site_dir = Path(args.site_dir)
-        site_dir.mkdir(parents=True, exist_ok=True)
-        output = site_dir / "version-context.json"
+    if target_site is not None:
+        target_site.mkdir(parents=True, exist_ok=True)
+        output = target_site / "version-context.json"
         output.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-        print(f"420Docs version renderer PASS: wrote {output}")
+        print(
+            f"420Docs version renderer PASS: wrote {output}; "
+            f"{len(manifest.get('page_inventory', []))} page inventory entry(s)"
+        )
         return 0
 
     if args.check:

@@ -20,13 +20,22 @@ Branch: `docs/doc-13-versioning`
 
 ## Roadmap
 
-### DOC-13.1 — Versioning model and authority contract
+### DOC-13.1 — Versioning model and authority contract — COMPLETE
 
-- Define documentation dimensions: lifecycle/release version, environment and publication status.
-- Define authoritative meanings for `development`, `genesis`, `testnet` and `mainnet` documentation.
-- Define which metadata fields are machine-governed and which remain descriptive.
-- Define current-versus-historical authority rules and fail-closed behavior for unknown versions.
-- Define the DOC-13 relationship to generated DOC-10 reference and DOC-12 CI.
+- [x] Define documentation dimensions: lifecycle/release version, environment and publication status.
+- [x] Define authoritative meanings for `development`, `genesis`, `testnet` and `mainnet` documentation.
+- [x] Define which metadata fields are machine-governed and which remain descriptive.
+- [x] Define current-versus-historical authority rules and fail-closed behavior for unknown versions.
+- [x] Define the DOC-13 relationship to generated DOC-10 reference and DOC-12 CI.
+
+Deliverables:
+
+- `docs/versioning/version-authority-contract.md`
+- explicit separation of release/lifecycle identity, environment and publication status
+- `current` defined as a mutable resolver alias rather than an immutable historical version
+- fail-closed rules for unknown/unpublished versions and missing environment/deployment evidence
+- explicit rule that `genesis`, `testnet` and `mainnet` labels do not create canonical network/deployment authority by themselves
+- DOC-10 generated-reference and DOC-12 CI ownership preserved, with DOC-13 adding version/environment identity rather than replacing either system
 
 ### DOC-13.2 — Version metadata schema
 

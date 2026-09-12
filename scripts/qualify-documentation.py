@@ -35,6 +35,7 @@ STAGES: tuple[Stage, ...] = (
     Stage("orphan-navigation", (sys.executable, "scripts/validate-doc-orphans.py")),
     Stage("required-doc-coverage", (sys.executable, "scripts/validate-required-docs.py")),
     Stage("generated-reference-integration", (sys.executable, "scripts/validate-generated-reference-integration.py")),
+    Stage("publication-safety", (sys.executable, "scripts/validate-doc-publication-safety.py")),
     Stage("generated-reference-freshness", (sys.executable, "scripts/qualify-generated-reference.py", "--check")),
     Stage("strict-mkdocs-build", (sys.executable, "-m", "mkdocs", "build", "--strict")),
     Stage("search-navigation", (sys.executable, "scripts/qualify-docs.py")),

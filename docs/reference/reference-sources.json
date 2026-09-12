@@ -51,15 +51,17 @@
         "packages/420-cli/package.json",
         "packages/420-cli/bin/420.mjs"
       ],
-      "notes": "Generate SDK exports and the stable primary 420 CLI command surface from implementation source. Preserve network/catalogue binding, signer-secret isolation and the rule that SDK/CLI convenience layers do not gain protocol authority."
+      "notes": "Generated SDK/CLI reference must preserve signer-secret isolation and non-authority boundaries."
     },
     {
       "id": "networks",
       "phase": "DOC-10.7",
       "sources": [
-        "developer-hub/manifests"
+        "developer-hub/manifests/local.example.json",
+        "developer-hub/schema/network-manifest.schema.json",
+        "developer-hub/src/network-discovery.mjs"
       ],
-      "notes": "Environment-scoped only; do not promote local example values into testnet/mainnet reference."
+      "notes": "Environment-scoped only. The only checked-in manifest is local.example.json; generated reference must report devnet/testnet/mainnet as unavailable rather than promoting local chain identity, localhost endpoints or example contracts into those environments."
     },
     {
       "id": "deployments",

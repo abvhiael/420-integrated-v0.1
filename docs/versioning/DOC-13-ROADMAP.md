@@ -55,12 +55,24 @@ Deliverables:
 - `docs/versioning` added to governed front-matter roots
 - `version-metadata` added to the unified DOC-12 qualification runner and protected by the workflow contract/path triggers
 
-### DOC-13.3 — Version registry and release manifests
+### DOC-13.3 — Version registry and release manifests — COMPLETE
 
-- Add a canonical documentation version registry.
-- Represent development, Genesis, testnet and mainnet publication tracks explicitly.
-- Bind each published track to repository/release evidence where available.
-- Fail closed when a requested release/environment lacks approved evidence.
+- [x] Add a canonical documentation version registry.
+- [x] Represent development, Genesis, testnet and mainnet publication tracks explicitly.
+- [x] Bind each published track to repository/release evidence where available.
+- [x] Fail closed when a requested release/environment lacks approved evidence.
+- [x] Wire registry/manifests into the unified documentation qualification gate.
+
+Deliverables:
+
+- `docs/versioning/version-registry.json` — canonical track/current/published/alias/release routing registry
+- `docs/versioning/releases/development.json` — mutable repository-head documentation manifest
+- `docs/versioning/releases/genesis.json` — immutable frozen Genesis documentation manifest without live-network/deployment authority claims
+- `docs/versioning/version-registry-contract.md` — registry, manifest, alias and fail-closed semantics
+- `scripts/validate-doc-version-registry.py` — deterministic track/release/manifest/evidence/alias validation
+- `version-registry` stage in `scripts/qualify-documentation.py`, protected by workflow contract/path triggers
+- current publication state: development and Genesis published; testnet and mainnet intentionally unavailable until approved evidence exists
+- qualification evidence: exact-head 420Docs Qualification #700 passed with the registry validator enabled
 
 ### DOC-13.4 — URL and renderer version model
 

@@ -83,9 +83,19 @@ Exit condition: developers and operators can identify every major infrastructure
 
 Exit condition: a new user can choose a qualified 420 Wallet client, establish or discover an account safely, protect it, send/receive `$420`, connect applications, understand and approve signing requests, control reusable permissions/sessions, recover from owner/device loss using the canonical timelocked path, and diagnose common failures without exposing private signing material or needing protocol internals.
 
-## DOC-7 — Core protocol documentation
+## DOC-7 — Core protocol documentation — COMPLETE
 
-- One architecture/integration package for each canonical protocol.
+- [x] DOC-7.1 Publish the core-protocol architecture index and integration model covering canonical authority, discovery, versioning, composition, provider neutrality, authorization, settlement, evidence, finality, failure and recovery.
+- [x] DOC-7.2 Document 420 Registry, 420 Names, 420 Identity and 420-IS discovery/interoperability architecture.
+- [x] DOC-7.3 Document 420 Pay, 420 Token, Swap/Exchange and Bridge value-movement architecture and integration boundaries.
+- [x] DOC-7.4 Document 420 Stake, Governance, Treasury and Grants validator/public-governance integration and governed-funds flows.
+- [x] DOC-7.5 Document 420 Randomness and Oracle Interface routing, verification, provider neutrality, freshness and fail-closed consumption.
+- [x] DOC-7.6 Document Storage Proof and Resource Protocol commitments, provider qualification, proofs, metering, availability and settlement.
+- [x] DOC-7.7 Document 420 Rights and 420 Verify provenance, licensing, evidence and verification integration.
+- [x] DOC-7.8 Document 420 Arbitration dispute intake, evidence, bounded authority, outcomes, appeal/finality semantics and protocol integration.
+- [x] DOC-7.9 Document 420 Messenger, Notifications and Attention communication/engagement state, off-chain delivery and bounded authority.
+
+Exit condition: developers, architects and reviewers can identify every canonical shared protocol family, discover and integrate it through approved interfaces, understand its authority and external dependencies, compose protocols without cross-domain privilege leakage, and recover or replace operational providers without rewriting canonical protocol state.
 
 ## DOC-8 — Genesis application manuals
 

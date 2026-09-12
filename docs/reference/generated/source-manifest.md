@@ -13,7 +13,7 @@ version: current
 
 Generator schema: `1.0.0`  
 Source registry: `docs/reference/reference-sources.json`  
-Source registry SHA-256: `a0e470d617d0736700ac788a8dc2d145a90029b5d01d387209e0d0b1e844ece0`
+Source registry SHA-256: `bd3f0a51be9d831a31235ee5b634412b813bdab73e3a06a5ca6c554468d8cf92`
 
 This manifest records the checked-in source locations used by DOC-10 renderers. Presence is not authority: family renderers still enforce verification, environment and provenance rules before publishing distributable reference values.
 

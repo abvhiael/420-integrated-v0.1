@@ -22,7 +22,7 @@ DOC-13 defines how 420Docs distinguishes development, Genesis, testnet and mainn
 
 [Documentation version authority contract](version-authority-contract.md) defines the three independent versioning dimensions—release/lifecycle version, environment and publication status—and the fail-closed rules that prevent one context from masquerading as another.
 
-Key rule: labels such as `genesis`, `testnet` and `mainnet` do not create network/deployment authority by themselves. Canonical values remain dependent on approved source evidence and, once DOC-13.3 is complete, an approved documentation release record.
+Key rule: labels such as `genesis`, `testnet` and `mainnet` do not create network/deployment authority by themselves. Canonical values remain dependent on approved source evidence and an approved documentation release record.
 
 ## Version metadata
 
@@ -40,10 +40,29 @@ Machine policy lives in `version-metadata-policy.json`, and the same documentati
 python scripts/validate-doc-version-metadata.py
 ```
 
+## Version registry
+
+[Documentation version registry contract](version-registry-contract.md) defines publication routing, release manifests, aliases and fail-closed behavior. The canonical machine registry is `version-registry.json`.
+
+Current publication state:
+
+- **development** — published; mutable repository-head documentation;
+- **Genesis** — published; immutable frozen Genesis documentation contract;
+- **testnet** — unavailable until an approved testnet documentation release and evidence manifest exist;
+- **mainnet** — unavailable until an approved mainnet documentation release and evidence manifest exist.
+
+The registry validator runs through the normal documentation qualification gate:
+
+```bash
+python scripts/validate-doc-version-registry.py
+```
+
+Neither the Genesis registry record nor its manifest claims a live network or canonical deployment. Live testnet/mainnet authority remains unavailable until the required evidence exists.
+
 ## Phase roadmap
 
 See [DOC-13 documentation versioning roadmap](DOC-13-ROADMAP.md).
 
 ## Current state
 
-DOC-13.1 and DOC-13.2 are complete. Next is DOC-13.3 — version registry and release manifests.
+DOC-13.1 through DOC-13.3 are complete. Next is DOC-13.4 — URL and renderer version model.

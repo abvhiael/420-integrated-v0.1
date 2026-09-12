@@ -61,6 +61,17 @@ nav:
           - 420AI Compute Infrastructure: architecture/infrastructure/420ai-compute-infrastructure.md
           - Oracle & External-Provider Infrastructure: architecture/infrastructure/oracle-external-provider-infrastructure.md
           - Observability, Status & Operator Services: architecture/infrastructure/observability-status-operator-services.md
+      - Core Protocols:
+          - Overview: architecture/protocols/index.md
+          - Protocol Integration Model: architecture/protocols/protocol-integration-model.md
+          - Registry, Names, Identity & 420-IS: architecture/protocols/registry-names-identity-420is.md
+          - Pay, Token, Swap/Exchange & Bridge: architecture/protocols/pay-token-exchange-bridge.md
+          - Stake, Governance, Treasury & Grants: architecture/protocols/stake-governance-treasury-grants.md
+          - Randomness & Oracle Interface: architecture/protocols/randomness-oracle-interface.md
+          - Storage Proof & Resource Protocol: architecture/protocols/storage-proof-resource-protocol.md
+          - Rights & Verify: architecture/protocols/rights-verify.md
+          - 420 Arbitration: architecture/protocols/arbitration.md
+          - Messenger, Notifications & Attention: architecture/protocols/messenger-notifications-attention.md
       - Architecture Decisions: architecture/decisions/README.md
   - Reference:
       - Overview: reference/index.md

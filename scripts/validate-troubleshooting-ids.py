@@ -12,7 +12,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 POLICY = ROOT / "docs" / "ci" / "troubleshooting-id-policy.json"
 STRICT_ID = re.compile(r"^TRB-([A-Z][A-Z0-9]*)-(\d{3})$")
-OWNER_HEADING = re.compile(r"^#{2,6}\s+(TRB-[A-Z][A-Z0-9]*-\d{3})\b", re.MULTILINE)
+OWNER_HEADING = re.compile(r"^#{2,6}\s+`?(TRB-[A-Z][A-Z0-9]*-\d{3})`?\b", re.MULTILINE)
 TOKEN = re.compile(r"\bTRB-[A-Za-z0-9_-]+-\d+\b")
 ANCHOR_REF = re.compile(r"\]\([^)]*#(trb-[a-z0-9-]+)\)")
 

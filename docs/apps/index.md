@@ -28,6 +28,9 @@ The authoritative application inventory is `config/genesis-applications.json`. D
 - [420 Registry](registry/index.md) — canonical service discovery/versioning with explicit limits on what registration means.
 - [420 Names](names/index.md) — `.420` lease, forward/reverse resolution, transfer and expiry workflows.
 - [420 Identity](identity/index.md) — optional pseudonymous profiles, governed issuers and lifecycle-bound credentials.
+- [420 Swap](swap/index.md) — bounded canonical swap execution with explicit route, authorization, fee, minimum-output and safety semantics.
+- [420 Bridge](bridge/index.md) — verified, replay-protected cross-chain movement with explicit chain/asset/route/proof/risk boundaries.
+- [420 Token](token/index.md) — governed-template ERC asset deployment with deterministic provenance and the exact 42 native `$420` creation fee.
 
 ## Manual contract
 
@@ -50,13 +53,13 @@ Generated ABI/API/event/error reference belongs in DOC-10; DOC-8 explains how to
 | 420 Names | Genesis protocol + user app | [available](names/index.md) | human-readable `.420` names layered over canonical identities |
 | 420 Identity | Genesis protocol + user app | [available](identity/index.md) | optional pseudonymous profiles, credentials and reputation |
 | 420 Arbitration | Genesis protocol + user app | required | dispute cases, evidence commitments, rulings and bounded appeals |
-| 420 Swap | Genesis protocol + user app | required | canonical exchange/swap user surface |
-| 420 Bridge | Genesis protocol + user app | required | verified, replay-protected cross-chain value movement |
+| 420 Swap | Genesis protocol + user app | [available](swap/index.md) | canonical exchange/swap user surface |
+| 420 Bridge | Genesis protocol + user app | [available](bridge/index.md) | verified, replay-protected cross-chain value movement |
 | 420 Stake | Genesis protocol + user app | required | validator bond, registration, lifecycle, rewards and withdrawals |
 | 420 Governance | Genesis protocol + user app | required | proposals, houses, voting, treasury and timelock workflows |
 | 420 AI | Genesis protocol + user app | required | provider/model/job/escrow/reputation AI-compute workflows |
 | 420 Attention | Genesis protocol + user app | required | opt-in sponsor campaigns, proofs and attention rewards |
-| 420 Token | Genesis protocol + user app | required | qualified token-template deployment for the fixed native `$420` creation fee |
+| 420 Token | Genesis protocol + user app | [available](token/index.md) | qualified token-template deployment for the fixed native `$420` creation fee |
 | 420 Status | Genesis user app | [available](status/index.md) | network/finality/validator/RPC/protocol service health |
 | 420 Faucet | testnet only | required, testnet-scoped | no-value testnet distribution and developer onboarding |
 | 420 Gaming Protocol | Genesis protocol only | not an application manual target | shared optional-wallet game interoperability; covered by protocol/developer documentation |
@@ -67,7 +70,7 @@ The protocol-only Gaming Protocol remains part of Genesis, but it has no standal
 
 Every manual must distinguish canonical-state authority, user application over canonical state, derived/rebuildable presentation, replaceable provider/service infrastructure, and testnet-only scope.
 
-Registry, Names and Identity show why those distinctions matter: Registry is canonical for service identity/version only; Names is canonical for `.420` ownership/expiry/resolution only; Identity is canonical for profile/issuer/credential lifecycle only. None of those domains automatically grants wallet authority, legal identity, universal reputation or execution permission.
+Registry, Names and Identity remain bounded to discovery/naming/identity state. Swap, Bridge and Token demonstrate the same rule for value: a quote cannot authorize spending, a valid bridge proof cannot bypass route/risk/replay policy, and a factory deployment cannot manufacture native `$420` or downstream listing/bridge legitimacy.
 
 ## Security and support rule
 
@@ -79,8 +82,8 @@ No manual may instruct a user to disclose private keys or recovery secrets, pass
 2. **DOC-8.2 — 420 Wallet application package** — COMPLETE.
 3. **DOC-8.3 — Explorer, Search and Analytics manuals** — COMPLETE.
 4. **DOC-8.4 — AppStore, Verify, Notifications and Status manuals** — COMPLETE.
-5. **DOC-8.5 — Registry, Names and Identity manuals — COMPLETE** — documents canonical service discovery/versioning, `.420` lease/expiry/resolution/transfer semantics, optional pseudonymous profiles and dynamic credential validity while preserving bounded authority and privacy.
-6. **DOC-8.6 — Swap, Bridge and Token manuals** — user-facing value movement and token deployment.
+5. **DOC-8.5 — Registry, Names and Identity manuals** — COMPLETE.
+6. **DOC-8.6 — Swap, Bridge and Token manuals — COMPLETE** — documents bounded swap execution/authorization, cross-chain route/proof/risk/replay semantics and qualified token-template deployment with the exact 42 native `$420` factory fee while preserving separate downstream qualification.
 7. **DOC-8.7 — Stake, Governance and Arbitration manuals** — validator, public-governance and dispute workflows.
 8. **DOC-8.8 — AI and Attention manuals** — provider/job/compute and opt-in engagement/reward workflows.
 9. **DOC-8.9 — Faucet manual** — explicitly testnet-only acquisition, limits, abuse controls and troubleshooting.
@@ -90,6 +93,7 @@ No manual may instruct a user to disclose private keys or recovery secrets, pass
 
 - [Application documentation contract](../contributing/app-documentation-contract.md)
 - [Registry, Names, Identity & 420-IS architecture](../architecture/protocols/registry-names-identity-420is.md)
+- [Pay, Token, Swap/Exchange & Bridge architecture](../architecture/protocols/pay-token-exchange-bridge.md)
 - [420 Wallet user documentation](../users/wallet/index.md)
 - [420Indexer infrastructure](../architecture/infrastructure/420indexer.md)
 - [Core protocol architecture](../architecture/protocols/index.md)

@@ -140,16 +140,18 @@ def main() -> int:
         if page not in nav_pages:
             errors.append(f"required audience entry page is not present in MkDocs navigation: {page}")
 
-    seeds = (nav_pages | entries) & governed
-    queue: deque[str] = deque(sorted(seeds))
-    reachable = set(seeds)
+    traversal_seeds = {page for page in (nav_pages | entries) if (ROOT / page).is_file()}
+    queue: deque[str] = deque(sorted(traversal_seeds))
+    traversed = set(traversal_seeds)
+    reachable = traversal_seeds & governed
     graph_edges = 0
     while queue:
         page = queue.popleft()
         for target in page_edges(page, governed):
             graph_edges += 1
-            if target not in reachable:
-                reachable.add(target)
+            reachable.add(target)
+            if target not in traversed:
+                traversed.add(target)
                 queue.append(target)
 
     allowed = set(policy.get("allowed_orphans", []))

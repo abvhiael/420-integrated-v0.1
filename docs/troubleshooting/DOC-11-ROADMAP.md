@@ -96,14 +96,21 @@ Deliverables:
 - Health/readiness/status interpretation.
 - Canonical RPC fallback guidance.
 
-### DOC-11.6 — Value movement and economic troubleshooting
+### DOC-11.6 — Value movement and economic troubleshooting — COMPLETE
 
-- 420Pay, Token, Swap/Exchange and Bridge failures.
-- Stake/reward/fee interpretation.
-- Settlement, timeout, replay and refund states.
-- Cross-chain proof/route/finality failures.
-- Safe retry versus manual review boundaries.
-- Explicit fund-risk and escalation warnings.
+- [x] 420Pay, Token, Swap/Exchange and Bridge failures.
+- [x] Stake/reward/fee interpretation.
+- [x] Settlement, timeout, replay and refund states.
+- [x] Cross-chain proof/route/finality failures.
+- [x] Safe retry versus manual review boundaries.
+- [x] Explicit fund-risk and escalation warnings.
+
+Deliverables:
+
+- `docs/troubleshooting/value-movement-economics.md`
+- stable `TRB-PAY-*`, `TRB-TOKEN-*`, `TRB-SWAP-*`, `TRB-BRIDGE-*`, `TRB-STAKE-*` and fee-related `TRB-TX-*` coverage
+- explicit fail-safe guidance for ambiguous payment/swap/bridge outcomes, replay protection, source/destination finality, settlement/refunds and duplicate-write prevention
+- troubleshooting index navigation into the value-movement/economics registry
 
 ### DOC-11.7 — Shared protocol and provider troubleshooting
 

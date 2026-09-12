@@ -23,6 +23,7 @@ DOC-11 organizes troubleshooting around two ways people actually arrive here:
 - [Consensus, validator and node registry](consensus-validator-node.md) — `TRB-CONSENSUS-*` and `TRB-NODE-*` covering validator lifecycle, proposer/attestation/QC/finality symptoms, quorum loss, partitions, safety halts, signing conflicts, `fourtwentyd`/`node420`, Engine connectivity, consensus/execution divergence and crash recovery.
 - [Indexer, Explorer, Search, Analytics and Status registry](indexer-explorer-search-analytics-status.md) — `TRB-INDEXER-*`, `TRB-EXPLORER-*`, `TRB-SEARCH-*`, `TRB-ANALYTICS-*` and `TRB-STATUS-*` covering stale/missing projections, replay/rebuild states, presentation mismatches, readiness semantics and canonical-RPC fallback.
 - [Value movement and economics registry](value-movement-economics.md) — `TRB-PAY-*`, `TRB-TOKEN-*`, `TRB-SWAP-*`, `TRB-BRIDGE-*`, `TRB-STAKE-*` and `TRB-TX-008` covering ambiguous payment/swap outcomes, invoices/quotes, refunds, settlement, token deployment/balances, bridge proof/replay/finality, staking lifecycle, rewards and fee interpretation.
+- [Shared protocol and provider registry](shared-protocol-provider.md) — `TRB-REGISTRY-*`, `TRB-NAMES-*`, `TRB-IDENTITY-*`, `TRB-RANDOM-*`, `TRB-ORACLE-*`, `TRB-STORAGE-*`, `TRB-AI-*`, `TRB-RIGHTS-*`, `TRB-VERIFY-*`, `TRB-ARBITRATION-*`, `TRB-MESSENGER-*`, `TRB-NOTIFY-*` and `TRB-ATTENTION-*` covering discovery, freshness, proofs, provider availability, AI jobs, rights/evidence, disputes and off-chain delivery boundaries.
 
 ## Safety rules
 
@@ -33,10 +34,11 @@ DOC-11 organizes troubleshooting around two ways people actually arrive here:
 - For validator/operator incidents, consensus safety outranks liveness: do not lower quorum, bypass signing protection, duplicate signer identity or force a preferred head.
 - For payments, swaps, refunds, bridge messages and staking writes, a timeout or stale UI is never proof of failure; identify the original operation and reconcile canonical state before retrying.
 - For Indexer/Explorer/Search/Analytics/Status discrepancies, repair or rebuild the derived layer; do not mutate canonical state merely to make the UI match.
+- For provider-backed protocols, provider-local success/failure is operational evidence only; use replacement/fallback providers only through canonical protocol rules.
 - Stop and escalate when evidence is ambiguous, authority cannot be established, or a recovery step could increase loss or state divergence.
 
 ## Phase status
 
-DOC-11.1 through DOC-11.6 are complete. The implementation roadmap is in [`DOC-11-ROADMAP.md`](DOC-11-ROADMAP.md).
+DOC-11.1 through DOC-11.7 are complete. The implementation roadmap is in [`DOC-11-ROADMAP.md`](DOC-11-ROADMAP.md).
 
-Remaining domain registries will be added incrementally within the same DOC-11 branch/PR and merged only after the final ecosystem-wide troubleshooting audit and exact-head qualification.
+Remaining application coverage, support workflow and final audit work will continue within the same DOC-11 branch/PR and merge only after the final ecosystem-wide troubleshooting audit and exact-head qualification.

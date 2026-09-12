@@ -34,6 +34,10 @@ STAGES: tuple[Stage, ...] = (
         (sys.executable, "scripts/validate-doc-frontmatter.py"),
     ),
     Stage(
+        "internal-links",
+        (sys.executable, "scripts/validate-doc-links.py"),
+    ),
+    Stage(
         "generated-reference-freshness",
         (sys.executable, "scripts/qualify-generated-reference.py", "--check"),
     ),

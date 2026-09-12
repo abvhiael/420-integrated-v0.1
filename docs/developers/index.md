@@ -30,6 +30,33 @@ DOC-9.2 adds the first working developer path:
 
 Read the foundation pages before implementing a production-facing integration. Later DOC-9 sections may add convenience abstractions, but they must not weaken these rules.
 
+## Local workflow at a glance
+
+From `developer-hub/`, inspect and qualify the local profile before starting it:
+
+```bash
+npm run devnet:plan
+npm run devnet:doctor
+npm run devnet:smoke
+```
+
+For a normal development session:
+
+```bash
+npm run devnet:prepare
+npm run devnet:up
+```
+
+Then confirm the selected network and canonical RPC path through the repository-native CLI:
+
+```bash
+420 network
+420 rpc eth_chainId '[]'
+420 rpc eth_blockNumber '[]'
+```
+
+Starter projects are discovered through `420 templates` and created with `420 create`. State-changing requests must cross the 420 Wallet/Smart Account boundary; the CLI and starter applications must not acquire raw user signing secrets.
+
 ## Developer paths
 
 Use the documentation according to the job you are doing:

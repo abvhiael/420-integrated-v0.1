@@ -5,9 +5,9 @@ DOC-18 reconciles `config/genesis-applications.json` with `contracts/config/gene
 ## Plan
 
 - DOC-18.1 — inventory reconciliation and classification — COMPLETE
-- DOC-18.2 — 420 Launchpad package — IN PROGRESS
-- DOC-18.3 — 420 Trust package
-- DOC-18.4 — 420 Commons package
+- DOC-18.2 — 420 Launchpad package — COMPLETE
+- DOC-18.3 — 420 Trust package — COMPLETE
+- DOC-18.4 — 420 Commons package — NEXT
 - DOC-18.5 — 420 Pulse package
 - DOC-18.6 — 420 Vault package
 - DOC-18.7 — 420 Market package
@@ -17,11 +17,15 @@ DOC-18 reconciles `config/genesis-applications.json` with `contracts/config/gene
 
 ## DOC-18.1 result
 
-The reconciliation inventory now tracks all 38 entries in `contracts/config/genesis-dapp-contract-map.json`. Existing governed coverage, protocol ownership, public/testnet application packages, the Civic/Governance implementation alias and the six documentation gaps are explicit in `docs/audit/genesis-contract-documentation-inventory.json`.
+The reconciliation inventory tracks all 38 entries in `contracts/config/genesis-dapp-contract-map.json`, including public/testnet applications, governed protocols, the Civic/Governance implementation alias and remaining documentation gaps.
 
-## DOC-18.2 progress
+## DOC-18.2 result
 
-420 Launchpad now has a standard 16-page application package plus canonical protocol architecture. Remaining DOC-18.2 work is navigation/index integration and qualification.
+420 Launchpad has a standard 16-page application package, canonical protocol architecture, application/protocol navigation and green exact-head 420Docs plus full 420 Integrated qualification.
+
+## DOC-18.3 result
+
+420 Trust is promoted from its frozen standalone implementation model into governed architecture, developer and troubleshooting coverage. The documentation preserves domain-scoped evidence semantics, the no-universal-score rule, Identity separation, exact issuer/metric authorization, append-only correction/revocation history, privacy minimization and the canonical `ITrust420` read boundary.
 
 ## Exit rule
 

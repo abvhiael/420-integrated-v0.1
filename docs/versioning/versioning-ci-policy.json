@@ -2,7 +2,7 @@
   "schema_version": 1,
   "registry": "docs/versioning/version-registry.json",
   "pages_workflow": ".github/workflows/docs-pages.yml",
-  "pages_qualification_command": "python scripts/qualify-documentation.py",
+  "pages_qualification_command": "python scripts/qualify-docs.py",
   "required_versioning_validators": [
     "scripts/validate-doc-version-metadata.py",
     "scripts/validate-doc-version-registry.py",

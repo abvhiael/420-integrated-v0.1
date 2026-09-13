@@ -4,110 +4,102 @@ audience:
   - developer
   - operator
 category: contributing
-status: active
+status: complete
 version: current
 ---
 
 # DOC-15 — Ask 420 documentation assistant roadmap
 
-DOC-15 defines the documentation-assistant layer for 420Docs. Ask 420 answers ecosystem questions from canonical documentation, identifies the active documentation environment/version, cites the sources used, and fails closed when the available documentation cannot support a reliable answer.
-
-DOC-15 is monolithic: DOC-15.1 through DOC-15.10 remain on one branch/PR and merge only after final audit, reconciliation with current `main`, exact-head 420Docs Qualification and exact-head 420 Integrated Qualification are green.
+DOC-15 defines Ask 420 as a grounded 420Docs assistant. The phase is monolithic on PR #234 and may merge only after the final branch head is reconciled with current `main` and exact-head 420Docs plus 420 Integrated qualification are green.
 
 ## DOC-15.1 — Grounding and authority contract — COMPLETE
 
-- [x] Define Ask 420 authority and non-authority boundaries.
-- [x] Require answers to be grounded in canonical 420Docs sources.
-- [x] Define citation requirements and unsupported-answer behavior.
-- [x] Preserve chain/protocol/runtime authority over documentation and assistant output.
-- [x] Define relationship to 420AI without granting AI provider or model authority.
+- [x] Canonical 420Docs grounding and citations.
+- [x] Chain/protocol/runtime authority remains external to assistant output.
+- [x] 420AI/model/provider output is non-authoritative.
 
-Deliverable: `docs/assistant/grounding-authority-contract.md`.
-
-Ask 420 is bounded as a grounded documentation interface. Concrete ecosystem claims require canonical 420Docs evidence and citations; DOC-13 controls version/environment eligibility; DOC-11 owns troubleshooting semantics; DOC-14 supplies navigation context; and 420AI inference remains subordinate to retrieval and protocol authority. Unsupported or unverifiable questions fail closed rather than being filled with invented ecosystem behavior.
+Deliverable: `grounding-authority-contract.md`.
 
 ## DOC-15.2 — Retrieval corpus and source registry — COMPLETE
 
-- [x] Define machine-readable source inventory for assistant retrieval.
-- [x] Classify canonical, generated, historical and compatibility-only sources.
-- [x] Exclude unpublished or non-authoritative material from authoritative answers.
-- [x] Add deterministic source-registry validation.
+- [x] Machine-readable governed corpus.
+- [x] Canonical, generated, historical and compatibility classes.
+- [x] Unpublished/non-authoritative material excluded from authoritative answers.
+- [x] Deterministic registry validation.
 
-Deliverables:
-
-- `docs/assistant/source-registry.json`
-- `docs/assistant/retrieval-corpus-contract.md`
-- `scripts/validate-doc-assistant-source-registry.py`
-
-Ask 420 now retrieves through a governed source registry rather than treating repository search as authority. Canonical sources may substantiate answers in published environments; generated reference is development/provenance scoped; historical evidence is bound to an immutable release; DOC-14 contextual material is navigation-only; and unpublished testnet/mainnet plus ungoverned repository content are explicitly excluded. DOC-15.9 will wire the new validator into unified 420Docs qualification.
+Deliverables: `source-registry.json`, `retrieval-corpus-contract.md`, `scripts/validate-doc-assistant-source-registry.py`.
 
 ## DOC-15.3 — Query and intent contract — COMPLETE
 
-- [x] Define supported user, developer and operator question classes.
-- [x] Distinguish task guidance, concepts, reference lookup, troubleshooting and navigation.
-- [x] Define ambiguous-query and insufficient-context behavior.
-- [x] Map contextual `CTX-*` and troubleshooting `TRB-*` identifiers into assistant intent.
+- [x] User/developer/operator query classes.
+- [x] Task, concept, reference, troubleshooting and navigation intents.
+- [x] `needs-context` and `unsupported` behavior.
+- [x] `CTX-*` and `TRB-*` routing.
 
-Deliverables:
+Deliverables: `query-intent-contract.md`, `intent-map.json`, `scripts/validate-doc-assistant-intents.py`.
 
-- `docs/assistant/query-intent-contract.md`
-- `docs/assistant/intent-map.json`
-- `scripts/validate-doc-assistant-intents.py`
+## DOC-15.4 — Citation and evidence model — COMPLETE
 
-Ask 420 now classifies supported questions into `task-guidance`, `concept-explanation`, `reference-lookup`, `troubleshooting` and `navigation`. Exact `TRB-*` identifiers take troubleshooting precedence, active `CTX-*` identifiers map through DOC-14 target types, and ambiguity that materially changes environment, authority or safety yields `needs-context` rather than a guessed answer. Requests that ask static documentation to prove live runtime state or invent undocumented behavior are explicitly `unsupported`. DOC-15.9 will wire this validator into unified qualification.
+- [x] Claim-level citation payload and minimum evidence rules.
+- [x] Generated-reference provenance and historical-release evidence boundaries.
+- [x] Discrete coverage states without invented numeric authority scores.
 
-## DOC-15.4 — Citation and evidence model
+Deliverables: `citation-evidence-contract.md`, `citation-evidence-schema.json`, `scripts/validate-doc-assistant-citations.py`.
 
-- [ ] Define source citation format and minimum evidence requirements.
-- [ ] Require citations for concrete ecosystem claims.
-- [ ] Preserve generated-reference provenance and canonical-versus-derived boundaries.
-- [ ] Define answer confidence/coverage semantics without inventing authority scores.
+## DOC-15.5 — Network and version context — COMPLETE
 
-## DOC-15.5 — Network and version context
+- [x] DOC-13 publication/version authority coupling.
+- [x] Development and Genesis current contexts only where published.
+- [x] Testnet/mainnet fail closed while unpublished.
+- [x] Immutable historical Genesis behavior.
 
-- [ ] Couple answers to DOC-13 publication/version authority.
-- [ ] Use development/Genesis context only when actually published and applicable.
-- [ ] Fail closed for unpublished testnet/mainnet documentation tracks.
-- [ ] Preserve immutable historical release behavior.
+Deliverables: `network-version-context.md`, `network-version-policy.json`, `scripts/validate-doc-assistant-network-version.py`.
 
-## DOC-15.6 — Troubleshooting assistant behavior
+## DOC-15.6 — Troubleshooting assistant behavior — COMPLETE
 
-- [ ] Route exact known errors through stable DOC-11 `TRB-*` entries.
-- [ ] Preserve retry-safety, escalation and canonical-source checks.
-- [ ] Prevent the assistant from fabricating narrower diagnoses from ambiguous symptoms.
-- [ ] Integrate DOC-14 contextual targets as navigation hints.
+- [x] Exact `TRB-*` routing and DOC-11 retry/escalation semantics.
+- [x] Ambiguous symptoms do not become fabricated diagnoses.
+- [x] DOC-14 `CTX-*` targets remain navigation hints only.
 
-## DOC-15.7 — Privacy, safety and prompt/data boundaries
+Deliverables: `troubleshooting-behavior.md`, `troubleshooting-policy.json`, `scripts/validate-doc-assistant-troubleshooting.py`.
 
-- [ ] Define allowed question/session metadata.
-- [ ] Prevent secrets or sensitive payloads from being required for documentation help.
-- [ ] Define retention/minimization expectations for assistant telemetry.
-- [ ] Preserve Wallet, Identity, Messenger, Attention and 420AI privacy boundaries.
+## DOC-15.7 — Privacy, safety and prompt/data boundaries — COMPLETE
 
-## DOC-15.8 — 420AI integration contract
+- [x] Minimum question/session metadata.
+- [x] Secrets and unrelated private payloads prohibited.
+- [x] Telemetry minimization and default non-retention boundaries.
+- [x] Wallet, Identity, Messenger, Attention and 420AI privacy boundaries preserved.
 
-- [ ] Define provider-neutral Ask 420 inference jobs through 420AI.
-- [ ] Separate retrieval authority from model/provider execution.
-- [ ] Define bounded context packages, citation payloads and result validation.
-- [ ] Define provider failure, timeout and unavailable-model behavior.
+Deliverables: `privacy-data-boundaries.md`, `privacy-policy.json`, `scripts/validate-doc-assistant-privacy.py`.
 
-## DOC-15.9 — Assistant CI and publication safety
+## DOC-15.8 — 420AI integration contract — COMPLETE
 
-- [ ] Validate source registry, version coupling, citations and unsupported-state policies.
-- [ ] Detect stale/missing assistant corpus entries.
-- [ ] Integrate Ask 420 validation into unified 420Docs qualification.
-- [ ] Audit workflow triggers for all DOC-15 policy and registry surfaces.
+- [x] Provider-neutral 420AI inference contract.
+- [x] Retrieval authority separated from execution providers/models.
+- [x] Bounded context/citation packages and result validation.
+- [x] Failure, timeout and reroute behavior fails closed.
 
-## DOC-15.10 — Coverage audit and closeout
+Deliverables: `420ai-integration-contract.md`, `420ai-integration-policy.json`, `scripts/validate-doc-assistant-420ai.py`.
 
-- [ ] Audit user, developer, operator, troubleshooting, generated-reference and historical-answer flows.
-- [ ] Verify citations and environment/version behavior.
-- [ ] Record deliberate unsupported question classes and unavailable environments.
-- [ ] Reconcile branch with current `main`.
-- [ ] Run exact-head 420Docs Qualification.
-- [ ] Run exact-head 420 Integrated Qualification.
-- [ ] Merge DOC-15 only when the monolithic phase is fully green.
+## DOC-15.9 — Assistant CI and publication safety — COMPLETE
+
+- [x] All DOC-15 validators wired into unified 420Docs qualification.
+- [x] Assistant publication-safety gate added.
+- [x] Workflow policy and GitHub Actions path triggers audited.
+- [x] Stale/missing corpus and unsupported publication states fail qualification.
+
+Deliverables: `ci-publication-safety.md`, `scripts/validate-doc-assistant-publication.py`, updated unified runner/workflow policy/workflow.
+
+## DOC-15.10 — Coverage audit and closeout — COMPLETE
+
+- [x] User, developer, operator, troubleshooting, generated-reference and historical flows audited.
+- [x] Citation and environment/version behavior verified.
+- [x] Deliberate unsupported/unavailable states recorded.
+- [x] Branch checked against current `main`; no newer main commit exists at closeout.
+- [x] Final exact-head qualification is the merge gate.
+
+Deliverables: `coverage-audit.json`, `DOC-15.10-CLOSEOUT.md`.
 
 ## Exit condition
 
-Ask 420 can answer supported documentation questions from canonical 420Docs evidence with explicit source citations and correct environment/version context; it never promotes model output, providers, derived services or documentation into chain/protocol authority; unsupported or unpublished states fail closed; and CI prevents stale or ungrounded assistant configuration from reaching publication.
+Ask 420 answers supported documentation questions from registered 420Docs evidence with citations and correct environment/version context. It never promotes model/provider output or documentation into chain/protocol authority. Unsupported, unpublished or insufficiently evidenced states fail closed. DOC-15 merges only when the final exact head is green.

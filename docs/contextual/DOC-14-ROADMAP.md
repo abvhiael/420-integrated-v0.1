@@ -76,11 +76,19 @@ Deliverables:
 
 Runtime error help now prefers exact stable DOC-11 `TRB-*` IDs, derives the canonical page from DOC-11 domain ownership, and uses the matching lower-case stable anchor. Application troubleshooting targets are the second-level fallback; `CTX-TRB-001` is the generic search/diagnostics/support fallback. Unknown or ambiguous errors are never guessed into a narrower `TRB-*` condition, and no fallback may cross documentation environments or releases.
 
-## DOC-14.6 — Developer and operator contextual links
+## DOC-14.6 — Developer and operator contextual links — COMPLETE
 
-- [ ] Define deep links from RPC/API/SDK/CLI and operator surfaces into canonical developer/operator docs.
-- [ ] Cover generated reference, network identity, deployment, finality, diagnostics and incident-response targets.
-- [ ] Preserve canonical-versus-derived authority boundaries.
+- [x] Define deep links from RPC/API/SDK/CLI and operator surfaces into canonical developer/operator docs.
+- [x] Cover generated reference, network identity, deployment, finality, diagnostics and incident-response targets.
+- [x] Preserve canonical-versus-derived authority boundaries.
+
+Deliverables:
+
+- `docs/contextual/developer-operator-contextual-help.md`
+- `docs/contextual/developer-operator-context-map.json`
+- `CTX-DEV-002` through `CTX-DEV-008` and `CTX-OPS-001` through `CTX-OPS-004` in the contextual-link registry.
+
+Developer/runtime surfaces now have stable contextual targets for contracts/interfaces, deployment, diagnostics, API reliability, generated reference, network identity and finality. Operator surfaces have dedicated incident-diagnostics, consensus/node recovery, service-health and chain/RPC/transaction routes. These links remain navigation only: canonical chain/protocol state outranks derived services, generated reference is provenance-scoped description rather than runtime authority, and documentation cannot create deployment, finality, signing or incident-response authority.
 
 ## DOC-14.7 — Version and environment coupling
 

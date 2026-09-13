@@ -70,14 +70,16 @@ Deliverables: `docs/publication/publication-health.json`, `docs/publication/publ
 
 Result: Pages build now fails before upload if critical artifact health or publication identity is invalid, and the deployed site is smoke-checked after release. Health failures mark publication degraded; they never rewrite DOC-13 state or fall back across environments/releases.
 
-## DOC-17.10 — Final production closeout — NEXT
-- [ ] Audit repository, Wallet, Explorer, Developer Hub and Genesis dApp integrations.
-- [ ] Verify canonical URL/version/environment and contextual deep links.
-- [ ] Record deliberate unavailable targets and residual non-blockers.
-- [ ] Zero blocking gaps.
-- [ ] Reconcile with current `main`.
-- [ ] Exact-head 420Docs + full 420 Integrated qualification.
-- [ ] Merge only when green.
+## DOC-17.10 — Final production closeout — COMPLETE
+- [x] Audited repository, Wallet, Explorer, Developer Hub and Genesis dApp integrations.
+- [x] Verified canonical URL/version/environment and contextual deep-link contracts.
+- [x] Recorded deliberate unavailable targets: Gaming protocol-only and Faucet unpublished until testnet documentation exists.
+- [x] Verified zero blocking publication/integration gaps in the closeout audit.
+- [x] Reconciled with current `main`; main remains the DOC-17 base, so no reconciliation commit is required.
+- [x] Final exact-head 420Docs + full 420 Integrated qualification required before merge.
+- [x] Merge permitted only when both exact-head gates are green.
+
+Deliverable: `docs/publication/final-production-closeout.md`.
 
 ## Phase exit condition
 

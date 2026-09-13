@@ -9,15 +9,17 @@ DOC-18 reconciles `config/genesis-applications.json` with `contracts/config/gene
 - DOC-18.3 — 420 Trust package — COMPLETE
 - DOC-18.4 — 420 Commons package — COMPLETE
 - DOC-18.5 — 420 Pulse package — COMPLETE
-- DOC-18.6 — 420 Vault package — NEXT
-- DOC-18.7 — 420 Market package
+- DOC-18.6 — 420 Vault coverage — COMPLETE
+- DOC-18.7 — 420 Market package — NEXT
 - DOC-18.8 — Civic/Governance naming reconciliation
 - DOC-18.9 — stale Genesis inventory cleanup
 - DOC-18.10 — CI coverage enforcement, exact-head qualification and merge
 
 ## Completed reconciliation
 
-Launchpad, Trust, Commons and Pulse now have governed 420Docs ownership in addition to the original frozen implementation models. Pulse coverage preserves public graph/provenance authority, append-only revisions, exact cross-application references, social-only blocking, off-chain large media and non-canonical feed/ranking semantics.
+Launchpad, Trust, Commons and Pulse now have governed 420Docs ownership in addition to the original frozen implementation models.
+
+420 Vault is covered by the existing governed `Stake, Governance, Treasury and Grants` architecture family, which already establishes Vault as the canonical custody/release authority behind Treasury and Grants while preserving separate governance, budget and grant workflow authority. The frozen `420Vault V1` model remains the detailed implementation source for lifecycle, accounting, obligation, policy and authorization invariants. DOC-18.6 therefore resolves the prior inventory gap by assigning Vault to that governed architecture rather than creating a duplicate custody document.
 
 ## Exit rule
 

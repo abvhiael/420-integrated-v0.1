@@ -48,10 +48,25 @@ The Pages build generates `version-context.json` and injects the version selecto
 
 `historical-retention-policy.json` and `scripts/validate-doc-historical-retention.py` enforce the machine-checkable rules. Historical/deprecated banner text is renderer metadata so support notices can change without rewriting the technical snapshot itself. Stable troubleshooting identifiers remain attributable to the historical release in which they appeared.
 
+## Generated reference coupling
+
+[Generated reference version coupling](generated-reference-version-contract.md) binds DOC-10 generated outputs to the release/environment that produced them.
+
+The checked-in `docs/reference/generated/` set is explicitly **development-scoped live reference**. It does not become Genesis, testnet or mainnet reference merely because a route, alias or page exists. Immutable releases must either own a frozen generated-reference snapshot with exact SHA-256 provenance for every governed output or declare generated reference unavailable.
+
+Current state:
+
+- development — live DOC-10 generated reference;
+- Genesis — generated reference unavailable until a frozen Genesis snapshot with hashes is materialized;
+- testnet — unpublished;
+- mainnet — unpublished.
+
+`scripts/validate-doc-generated-reference-version.py` enforces those rules in the unified documentation qualification runner.
+
 ## Phase roadmap
 
 See [DOC-13 documentation versioning roadmap](DOC-13-ROADMAP.md).
 
 ## Current state
 
-DOC-13.1 through DOC-13.6 are complete. Next is DOC-13.7 — generated reference version coupling.
+DOC-13.1 through DOC-13.7 are complete. Next is DOC-13.8 — redirects, migration and compatibility.

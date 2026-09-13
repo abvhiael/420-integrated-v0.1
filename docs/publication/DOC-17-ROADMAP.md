@@ -24,13 +24,17 @@ Deliverable: `docs/publication/pages-deployment-hardening.md`.
 
 Result: `.github/workflows/docs-pages.yml` now runs the full `scripts/qualify-documentation.py` gate before artifact upload, records the exact source SHA/repository/ref in `site/publication.json`, and deploys only from the successful build job. `scripts/validate-doc-pages-publication.py` enforces ordering, commit identity, Pages permissions/environment and serialized non-cancelling deployment; that validator is itself part of unified 420Docs CI.
 
-## DOC-17.3 — Canonical URL, metadata and release routing — NEXT
-- [ ] Define canonical URL generation without assuming an unconfigured custom domain.
-- [ ] Add site URL/canonical metadata only from an explicitly published production target.
-- [ ] Verify DOC-13 environment/version routes survive production publication.
-- [ ] Ensure unpublished testnet/mainnet routes remain unavailable and never redirect across environments.
+## DOC-17.3 — Canonical URL, metadata and release routing — COMPLETE
+- [x] Define canonical URL generation without assuming an unconfigured custom domain.
+- [x] Add canonical metadata only from an explicitly published production target.
+- [x] Verify DOC-13 environment/version routes survive production publication.
+- [x] Ensure unpublished testnet/mainnet routes remain unavailable and never redirect across environments.
 
-## DOC-17.4 — Repository integration
+Deliverable: `docs/publication/canonical-url-release-routing.md`.
+
+Result: `docs/publication/production-target.json` is the single committed production URL contract. The unified build injects and validates one canonical link per rendered page from that target. DOC-13 remains the version authority: development and Genesis are published, while testnet/mainnet remain unavailable with no cross-environment or cross-release fallback. Canonical-routing changes trigger both qualification and Pages publication workflows.
+
+## DOC-17.4 — Repository integration — NEXT
 - [ ] Verify README and repository navigation point to the canonical production docs entry.
 - [ ] Add stable architecture/user/developer/troubleshooting/reference entry links where useful.
 - [ ] Validate repository links against the production publication contract.

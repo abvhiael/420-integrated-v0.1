@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "citation_fields": [
+    "source_id",
+    "document",
+    "environment",
+    "evidence_class",
+    "claim_scope"
+  ],
+  "optional_fields": ["release", "section", "provenance"],
+  "evidence_classes": {
+    "canonical": {"substantive": true, "provenance_required": false},
+    "generated": {"substantive": true, "provenance_required": true},
+    "historical": {"substantive": true, "provenance_required": false, "immutable_release_required": true},
+    "compatibility": {"substantive": false, "provenance_required": false}
+  },
+  "coverage_states": [
+    "supported",
+    "partially-supported",
+    "needs-context",
+    "unsupported",
+    "unavailable"
+  ],
+  "rules": {
+    "concrete_claim_requires_citation": true,
+    "compatibility_cannot_substantiate": true,
+    "generated_requires_provenance": true,
+    "historical_requires_release": true,
+    "confidence_percentages_forbidden": true,
+    "unresolved_source_conflict_fails_closed": true
+  }
+}

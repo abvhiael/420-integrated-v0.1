@@ -20,13 +20,19 @@ Deliverables:
 
 The initial matrix is grounded in the frozen `config/genesis-applications.json` inventory: 20 user-facing/testnet manual targets plus the protocol-only 420 Gaming Protocol. Every row records its semantic environment, required audit dimensions, canonical evidence candidates and authority caveat. Faucet is explicitly testnet-only and remains unpublished until DOC-13 publishes a testnet documentation track.
 
-## DOC-16.2 — Architecture coverage audit — NEXT
+## DOC-16.2 — Architecture coverage audit — COMPLETE
 
-- [ ] Verify every Genesis surface has an architecture/system-context route.
-- [ ] Verify authority, dependency and trust-boundary coverage.
-- [ ] Record gaps, deliberate exclusions and remediation owners.
+- [x] Verify every Genesis surface has an architecture/system-context route.
+- [x] Verify authority, dependency and trust-boundary coverage.
+- [x] Record gaps, deliberate exclusions and remediation owners.
 
-## DOC-16.3 — User journey coverage audit
+Deliverable:
+
+- `docs/audit/architecture-coverage-audit.md`
+
+Result: all 21 frozen audit surfaces have architecture/system-context coverage. No blocking architecture gap was found. One non-blocking matrix metadata defect was recorded: the Gaming Protocol row points to nonexistent `docs/developers/gaming-protocol.md`; the canonical evidence exists at `docs/developers/gaming-protocol-integration.md`. DOC-16.9 owns correction plus automated target-existence validation.
+
+## DOC-16.3 — User journey coverage audit — NEXT
 
 - [ ] Verify onboarding, primary tasks, state/value-changing actions and safe completion states.
 - [ ] Verify signing, permissions, fees and network/environment warnings where applicable.

@@ -34,12 +34,16 @@ Deliverable: `docs/publication/canonical-url-release-routing.md`.
 
 Result: `docs/publication/production-target.json` is the single committed production URL contract. The unified build injects and validates one canonical link per rendered page from that target. DOC-13 remains the version authority: development and Genesis are published, while testnet/mainnet remain unavailable with no cross-environment or cross-release fallback. Canonical-routing changes trigger both qualification and Pages publication workflows.
 
-## DOC-17.4 — Repository integration — NEXT
-- [ ] Verify README and repository navigation point to the canonical production docs entry.
-- [ ] Add stable architecture/user/developer/troubleshooting/reference entry links where useful.
-- [ ] Validate repository links against the production publication contract.
+## DOC-17.4 — Repository integration — COMPLETE
+- [x] Verify README and repository navigation point to the canonical production docs entry.
+- [x] Preserve stable architecture/user/developer/operator/troubleshooting/reference source entry links.
+- [x] Validate repository links against the production publication contract.
 
-## DOC-17.5 — 420 Wallet integration
+Deliverable: `docs/publication/repository-integration.md` and `docs/publication/repository-entrypoints.json`.
+
+Result: the README public 420Docs root is bound to the committed production target while repository-relative audience links remain valid source-navigation paths. `scripts/validate-doc-repository-integration.py` checks the canonical root, required audience families, source-file existence and safe production-relative paths as part of unified documentation qualification. README and repository-integration changes participate in both qualification and Pages publication triggers.
+
+## DOC-17.5 — 420 Wallet integration — NEXT
 - [ ] Wire Wallet help/context entry points to stable DOC-14 identifiers or canonical production routes.
 - [ ] Preserve environment/version binding and safe fallback behavior.
 - [ ] Verify Wallet never treats docs as signing/account/runtime authority.

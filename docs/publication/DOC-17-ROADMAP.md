@@ -1,0 +1,69 @@
+# DOC-17 — Genesis publication roadmap
+
+DOC-17 turns the completed 420Docs corpus into a production publication and runtime-integration surface. It does not change chain, protocol, Wallet, deployment, provider, or governance authority. Repository-controlled documentation remains the source of truth; the published site is a version-aware presentation and navigation layer.
+
+DOC-17 follows the monolithic documentation-phase policy: DOC-17.1 through DOC-17.10 remain on one branch and pull request, reconcile with current `main`, then require exact-head 420Docs and full 420 Integrated qualification before one final merge.
+
+## DOC-17.1 — Production publication contract and deployment inventory — IN PROGRESS
+- [x] Freeze publication authority and non-authority boundaries.
+- [x] Define the current production publication target and canonical public URL policy.
+- [x] Define publication evidence, fail-closed behavior, rollback and runtime-link requirements.
+- [ ] Record the current Pages workflow/site configuration against the contract.
+
+Deliverable: `docs/publication/publication-contract.md`.
+
+## DOC-17.2 — Pages build and deployment hardening
+- [ ] Require the unified 420Docs qualification pipeline before artifact upload/deploy.
+- [ ] Bind deployment to a qualified commit identity and deterministic site artifact.
+- [ ] Preserve concurrency, permissions and rollback-safe deployment behavior.
+- [ ] Add publication-specific CI validation and workflow triggers.
+
+## DOC-17.3 — Canonical URL, metadata and release routing
+- [ ] Define canonical URL generation without assuming an unconfigured custom domain.
+- [ ] Add site URL/canonical metadata only from an explicitly published production target.
+- [ ] Verify DOC-13 environment/version routes survive production publication.
+- [ ] Ensure unpublished testnet/mainnet routes remain unavailable and never redirect across environments.
+
+## DOC-17.4 — Repository integration
+- [ ] Verify README and repository navigation point to the canonical production docs entry.
+- [ ] Add stable architecture/user/developer/troubleshooting/reference entry links where useful.
+- [ ] Validate repository links against the production publication contract.
+
+## DOC-17.5 — 420 Wallet integration
+- [ ] Wire Wallet help/context entry points to stable DOC-14 identifiers or canonical production routes.
+- [ ] Preserve environment/version binding and safe fallback behavior.
+- [ ] Verify Wallet never treats docs as signing/account/runtime authority.
+
+## DOC-17.6 — 420 Explorer integration
+- [ ] Wire Explorer help/context entry points to stable contextual/documentation routes.
+- [ ] Preserve chain/finality authority boundaries.
+- [ ] Verify stale/unavailable docs cannot alter canonical Explorer interpretation.
+
+## DOC-17.7 — Developer Hub integration
+- [ ] Wire Developer Hub documentation/help entry points to canonical production docs.
+- [ ] Bind network/version context explicitly.
+- [ ] Preserve Developer Hub as non-authoritative orchestration/tooling.
+
+## DOC-17.8 — Genesis dApp integration
+- [ ] Integrate the published DOC-14 dApp contextual namespace across supported Genesis applications.
+- [ ] Validate all published `CTX-*` identifiers resolve through the production route.
+- [ ] Keep Gaming Protocol protocol-only and Faucet unavailable until testnet documentation is published.
+
+## DOC-17.9 — Publication health, observability and recovery
+- [ ] Define health/readiness checks for build artifact, deployed root, search index, version context and critical deep links.
+- [ ] Add publication smoke qualification.
+- [ ] Define rollback/redeploy recovery without rewriting documentation authority or version history.
+- [ ] Record support-safe diagnostics for publication incidents.
+
+## DOC-17.10 — Final production publication closeout
+- [ ] Run production publication/integration audit across repository, Wallet, Explorer, Developer Hub and Genesis dApps.
+- [ ] Verify canonical URL/version/environment behavior and contextual deep links.
+- [ ] Record deliberate unavailable targets and residual non-blocking follow-ups.
+- [ ] Verify zero blocking publication/integration gaps remain.
+- [ ] Reconcile with current `main`.
+- [ ] Require exact-head 420Docs and full 420 Integrated qualification.
+- [ ] Merge DOC-17 only after all closeout gates are green.
+
+## Phase exit condition
+
+420Docs is reproducibly published from qualified repository state, exposes an explicit canonical production entry point, preserves DOC-13 version/environment semantics, and is safely integrated from the repository, Wallet, Explorer, Developer Hub and supported Genesis dApps through stable navigation/context identifiers. Publication failure cannot invent runtime state, weaken authority boundaries, or silently substitute another environment/release.

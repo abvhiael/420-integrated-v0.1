@@ -62,12 +62,19 @@ Deliverables:
 
 The application map covers the 18 non-Wallet Genesis user-facing applications plus Faucet. Each application receives six deterministic contextual slots: overview, primary task, permissions/signing, fees/economics, security/privacy and troubleshooting. Genesis applications are constrained to development/Genesis documentation authority. Faucet is declared testnet-only and remains non-resolvable until DOC-13 publishes a testnet documentation track. 420 Gaming Protocol remains intentionally protocol-only and does not receive a standalone user-application contextual namespace.
 
-## DOC-14.5 — Troubleshooting and error deep links
+## DOC-14.5 — Troubleshooting and error deep links — COMPLETE
 
-- [ ] Integrate stable `TRB-<DOMAIN>-<NNN>` anchors from DOC-11.
-- [ ] Define runtime error-to-troubleshooting routing rules.
-- [ ] Prevent applications from duplicating or silently forking canonical recovery guidance.
-- [ ] Define safe fallbacks when a specific troubleshooting target is unavailable.
+- [x] Integrate stable `TRB-<DOMAIN>-<NNN>` anchors from DOC-11.
+- [x] Define runtime error-to-troubleshooting routing rules.
+- [x] Prevent applications from duplicating or silently forking canonical recovery guidance.
+- [x] Define safe fallbacks when a specific troubleshooting target is unavailable.
+
+Deliverables:
+
+- `docs/contextual/troubleshooting-error-deep-links.md`
+- `docs/contextual/troubleshooting-route-map.json`
+
+Runtime error help now prefers exact stable DOC-11 `TRB-*` IDs, derives the canonical page from DOC-11 domain ownership, and uses the matching lower-case stable anchor. Application troubleshooting targets are the second-level fallback; `CTX-TRB-001` is the generic search/diagnostics/support fallback. Unknown or ambiguous errors are never guessed into a narrower `TRB-*` condition, and no fallback may cross documentation environments or releases.
 
 ## DOC-14.6 — Developer and operator contextual links
 

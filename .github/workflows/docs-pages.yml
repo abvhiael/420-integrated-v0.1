@@ -16,6 +16,7 @@ on:
       - 'scripts/inject-doc-canonical-links.py'
       - 'scripts/validate-doc-canonical-render.py'
       - 'scripts/validate-doc-repository-integration.py'
+      - 'scripts/validate-doc-publication-health.py'
       - 'scripts/qualify-docs.py'
       - 'scripts/render-doc-version-context.py'
       - 'scripts/inject-doc-version-selector.py'
@@ -70,6 +71,9 @@ jobs:
           Path("site/publication.json").write_text(json.dumps(payload, sort_keys=True, separators=(",", ":")) + "\n", encoding="utf-8")
           PY
 
+      - name: Smoke qualified Pages artifact
+        run: python scripts/validate-doc-publication-health.py --site-dir site
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
@@ -85,6 +89,14 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Smoke deployed 420Docs
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: python scripts/validate-doc-publication-health.py --base-url "$PAGE_URL"

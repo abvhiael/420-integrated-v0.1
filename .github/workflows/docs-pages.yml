@@ -9,6 +9,8 @@ on:
       - 'docs/**'
       - 'mkdocs.yml'
       - 'requirements-docs.txt'
+      - 'scripts/qualify-documentation.py'
+      - 'scripts/validate-doc-pages-publication.py'
       - 'scripts/qualify-docs.py'
       - 'scripts/render-doc-version-context.py'
       - 'scripts/inject-doc-version-selector.py'
@@ -41,17 +43,27 @@ jobs:
       - name: Install documentation dependencies
         run: pip install -r requirements-docs.txt
 
-      - name: Build 420Docs
-        run: mkdocs build --strict
+      - name: Qualify 420Docs for publication
+        run: python scripts/qualify-documentation.py
 
-      - name: Generate version renderer context
-        run: python scripts/render-doc-version-context.py --site-dir site
-
-      - name: Inject version selector
-        run: python scripts/inject-doc-version-selector.py --site-dir site
-
-      - name: Qualify search and navigation
-        run: python scripts/qualify-docs.py
+      - name: Record publication commit
+        env:
+          PUBLICATION_SHA: ${{ github.sha }}
+          PUBLICATION_REPOSITORY: ${{ github.repository }}
+          PUBLICATION_REF: ${{ github.ref }}
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          payload = {
+              "schema_version": 1,
+              "source_commit": os.environ["PUBLICATION_SHA"],
+              "repository": os.environ["PUBLICATION_REPOSITORY"],
+              "ref": os.environ["PUBLICATION_REF"],
+              "qualified": True,
+          }
+          Path("site/publication.json").write_text(json.dumps(payload, sort_keys=True, separators=(",", ":")) + "\n", encoding="utf-8")
+          PY
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

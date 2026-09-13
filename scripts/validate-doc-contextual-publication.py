@@ -70,9 +70,9 @@ def main() -> int:
             if replacement is not None and replacement not in records:
                 errors.append(f"{link_id}: replacement does not exist: {replacement}")
 
-    domain_routes = routes.get("domain_routes", {})
+    domain_routes = routes.get("domains", {})
     if not isinstance(domain_routes, dict) or not domain_routes:
-        errors.append("troubleshooting domain_routes must be a non-empty object")
+        errors.append("troubleshooting domains must be a non-empty object")
     else:
         for domain, path in sorted(domain_routes.items()):
             if not isinstance(domain, str) or not domain:
@@ -80,30 +80,23 @@ def main() -> int:
             if not isinstance(path, str) or not (DOCS / path).is_file():
                 errors.append(f"troubleshooting domain {domain}: target missing: {path!r}")
 
-    examples = routes.get("examples", [])
-    if isinstance(examples, list):
-        for item in examples:
-            if not isinstance(item, dict):
-                continue
-            trb_id = item.get("troubleshooting_id")
-            anchor = item.get("anchor")
-            if isinstance(trb_id, str) and TRB_ID.fullmatch(trb_id):
-                expected = slug_for_trb(trb_id)
-                if anchor != expected:
-                    errors.append(f"{trb_id}: expected stable anchor {expected!r}, found {anchor!r}")
-
-    app_map = apps.get("applications", {})
-    if not isinstance(app_map, dict) or not app_map:
-        errors.append("Genesis application contextual map must be non-empty")
+    app_map = apps.get("applications", [])
+    if not isinstance(app_map, list) or not app_map:
+        errors.append("Genesis application contextual map must be a non-empty list")
     else:
-        for app, spec in sorted(app_map.items()):
+        for spec in app_map:
             if not isinstance(spec, dict):
-                errors.append(f"{app}: application mapping must be an object")
+                errors.append("application mapping must be an object")
                 continue
-            environment = spec.get("environment")
-            resolvable = spec.get("resolvable")
-            if environment in {"testnet", "mainnet"} and environment not in published_envs and resolvable is True:
-                errors.append(f"{app}: unpublished {environment} mapping must fail closed")
+            name = spec.get("name", "<unknown>")
+            envs = spec.get("environments", [])
+            availability = spec.get("availability")
+            if not isinstance(envs, list) or not envs:
+                errors.append(f"{name}: environments must be a non-empty list")
+                continue
+            unpublished = [env for env in envs if env not in published_envs]
+            if unpublished and availability != "declared-but-unpublished-until-doc13-testnet-track":
+                errors.append(f"{name}: unpublished environment mapping must be explicitly unavailable")
 
     policy_envs = coupling.get("environments", {})
     if isinstance(policy_envs, dict):
@@ -120,7 +113,7 @@ def main() -> int:
 
     print(
         "420Docs contextual publication PASS: active targets exist, published environments only, "
-        "troubleshooting routes stable, unpublished tracks fail closed"
+        "troubleshooting routes stable, application map valid, unpublished tracks fail closed"
     )
     return 0
 

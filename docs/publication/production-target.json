@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "provider": "github-pages",
+  "canonical_base_url": "https://abvhiael.github.io/420-integrated-v0.1/",
+  "repository": "abvhiael/420-integrated-v0.1",
+  "publication_branch": "main",
+  "custom_domain": null,
+  "source_of_truth": "repository",
+  "cross_environment_fallback": false,
+  "cross_release_fallback": false,
+  "published_environments": ["development", "genesis"],
+  "unpublished_environments": ["testnet", "mainnet"]
+}

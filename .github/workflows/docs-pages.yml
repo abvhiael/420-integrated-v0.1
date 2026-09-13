@@ -9,6 +9,14 @@ on:
       - 'docs/**'
       - 'mkdocs.yml'
       - 'requirements-docs.txt'
+      - 'README.md'
+      - 'scripts/qualify-documentation.py'
+      - 'scripts/validate-doc-pages-publication.py'
+      - 'scripts/validate-doc-canonical-publication.py'
+      - 'scripts/inject-doc-canonical-links.py'
+      - 'scripts/validate-doc-canonical-render.py'
+      - 'scripts/validate-doc-repository-integration.py'
+      - 'scripts/validate-doc-publication-health.py'
       - 'scripts/qualify-docs.py'
       - 'scripts/render-doc-version-context.py'
       - 'scripts/inject-doc-version-selector.py'
@@ -41,16 +49,32 @@ jobs:
       - name: Install documentation dependencies
         run: pip install -r requirements-docs.txt
 
-      - name: Build 420Docs
-        run: mkdocs build --strict
+      - name: Qualify 420Docs for publication
+        run: python scripts/qualify-documentation.py
 
-      - name: Generate version renderer context
-        run: python scripts/render-doc-version-context.py --site-dir site
+      - name: Record publication commit
+        env:
+          PUBLICATION_SHA: ${{ github.sha }}
+          PUBLICATION_REPOSITORY: ${{ github.repository }}
+          PUBLICATION_REF: ${{ github.ref }}
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          payload = {
+              "schema_version": 1,
+              "source_commit": os.environ["PUBLICATION_SHA"],
+              "repository": os.environ["PUBLICATION_REPOSITORY"],
+              "ref": os.environ["PUBLICATION_REF"],
+              "qualified": True,
+          }
+          Path("site/publication.json").write_text(json.dumps(payload, sort_keys=True, separators=(",", ":")) + "\n", encoding="utf-8")
+          PY
 
-      - name: Inject version selector
-        run: python scripts/inject-doc-version-selector.py --site-dir site
+      - name: Smoke qualified Pages artifact
+        run: python scripts/validate-doc-publication-health.py --site-dir site
 
-      - name: Qualify search and navigation
+      - name: Final publication qualification
         run: python scripts/qualify-docs.py
 
       - name: Setup Pages
@@ -68,6 +92,14 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Smoke deployed 420Docs
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: python scripts/validate-doc-publication-health.py --base-url "$PAGE_URL"

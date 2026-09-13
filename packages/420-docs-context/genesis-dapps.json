@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "canonical_base_url": "https://abvhiael.github.io/420-integrated-v0.1/",
+  "version_intent": "current",
+  "authority": "documentation-navigation-only",
+  "cross_environment_fallback": false,
+  "cross_release_fallback": false,
+  "published_environments": [
+    "development",
+    "genesis"
+  ],
+  "applications": {
+    "420-explorer": {"name":"420 Explorer","domain":"EXPLORER","environments":["development","genesis"],"records":{"CTX-EXPLORER-001":"apps/explorer/","CTX-EXPLORER-002":"apps/explorer/user-guide/","CTX-EXPLORER-003":"apps/explorer/permissions/","CTX-EXPLORER-004":"apps/explorer/fees/","CTX-EXPLORER-005":"apps/explorer/security/","CTX-EXPLORER-006":"apps/explorer/troubleshooting/"}},
+    "420-search": {"name":"420 Search","domain":"SEARCH","environments":["development","genesis"],"records":{"CTX-SEARCH-001":"apps/search/","CTX-SEARCH-002":"apps/search/user-guide/","CTX-SEARCH-003":"apps/search/permissions/","CTX-SEARCH-004":"apps/search/fees/","CTX-SEARCH-005":"apps/search/security/","CTX-SEARCH-006":"apps/search/troubleshooting/"}},
+    "420-analytics": {"name":"420 Analytics","domain":"ANALYTICS","environments":["development","genesis"],"records":{"CTX-ANALYTICS-001":"apps/analytics/","CTX-ANALYTICS-002":"apps/analytics/user-guide/","CTX-ANALYTICS-003":"apps/analytics/permissions/","CTX-ANALYTICS-004":"apps/analytics/fees/","CTX-ANALYTICS-005":"apps/analytics/security/","CTX-ANALYTICS-006":"apps/analytics/troubleshooting/"}},
+    "420-appstore": {"name":"420 AppStore","domain":"APPSTORE","environments":["development","genesis"],"records":{"CTX-APPSTORE-001":"apps/appstore/","CTX-APPSTORE-002":"apps/appstore/user-guide/","CTX-APPSTORE-003":"apps/appstore/permissions/","CTX-APPSTORE-004":"apps/appstore/fees/","CTX-APPSTORE-005":"apps/appstore/security/","CTX-APPSTORE-006":"apps/appstore/troubleshooting/"}},
+    "420-verify": {"name":"420 Verify","domain":"VERIFY","environments":["development","genesis"],"records":{"CTX-VERIFY-001":"apps/verify/","CTX-VERIFY-002":"apps/verify/user-guide/","CTX-VERIFY-003":"apps/verify/permissions/","CTX-VERIFY-004":"apps/verify/fees/","CTX-VERIFY-005":"apps/verify/security/","CTX-VERIFY-006":"apps/verify/troubleshooting/"}},
+    "420-notifications": {"name":"420 Notifications","domain":"NOTIFY","environments":["development","genesis"],"records":{"CTX-NOTIFY-001":"apps/notifications/","CTX-NOTIFY-002":"apps/notifications/user-guide/","CTX-NOTIFY-003":"apps/notifications/permissions/","CTX-NOTIFY-004":"apps/notifications/fees/","CTX-NOTIFY-005":"apps/notifications/security/","CTX-NOTIFY-006":"apps/notifications/troubleshooting/"}},
+    "420-registry": {"name":"420 Registry","domain":"REGISTRY","environments":["development","genesis"],"records":{"CTX-REGISTRY-001":"apps/registry/","CTX-REGISTRY-002":"apps/registry/user-guide/","CTX-REGISTRY-003":"apps/registry/permissions/","CTX-REGISTRY-004":"apps/registry/fees/","CTX-REGISTRY-005":"apps/registry/security/","CTX-REGISTRY-006":"apps/registry/troubleshooting/"}},
+    "420-names": {"name":"420 Names","domain":"NAMES","environments":["development","genesis"],"records":{"CTX-NAMES-001":"apps/names/","CTX-NAMES-002":"apps/names/user-guide/","CTX-NAMES-003":"apps/names/permissions/","CTX-NAMES-004":"apps/names/fees/","CTX-NAMES-005":"apps/names/security/","CTX-NAMES-006":"apps/names/troubleshooting/"}},
+    "420-identity": {"name":"420 Identity","domain":"IDENTITY","environments":["development","genesis"],"records":{"CTX-IDENTITY-001":"apps/identity/","CTX-IDENTITY-002":"apps/identity/user-guide/","CTX-IDENTITY-003":"apps/identity/permissions/","CTX-IDENTITY-004":"apps/identity/fees/","CTX-IDENTITY-005":"apps/identity/security/","CTX-IDENTITY-006":"apps/identity/troubleshooting/"}},
+    "420-arbitration": {"name":"420 Arbitration","domain":"ARBITRATION","environments":["development","genesis"],"records":{"CTX-ARBITRATION-001":"apps/arbitration/","CTX-ARBITRATION-002":"apps/arbitration/user-guide/","CTX-ARBITRATION-003":"apps/arbitration/permissions/","CTX-ARBITRATION-004":"apps/arbitration/fees/","CTX-ARBITRATION-005":"apps/arbitration/security/","CTX-ARBITRATION-006":"apps/arbitration/troubleshooting/"}},
+    "420-swap": {"name":"420 Swap","domain":"SWAP","environments":["development","genesis"],"records":{"CTX-SWAP-001":"apps/swap/","CTX-SWAP-002":"apps/swap/user-guide/","CTX-SWAP-003":"apps/swap/permissions/","CTX-SWAP-004":"apps/swap/fees/","CTX-SWAP-005":"apps/swap/security/","CTX-SWAP-006":"apps/swap/troubleshooting/"}},
+    "420-bridge": {"name":"420 Bridge","domain":"BRIDGE","environments":["development","genesis"],"records":{"CTX-BRIDGE-001":"apps/bridge/","CTX-BRIDGE-002":"apps/bridge/user-guide/","CTX-BRIDGE-003":"apps/bridge/permissions/","CTX-BRIDGE-004":"apps/bridge/fees/","CTX-BRIDGE-005":"apps/bridge/security/","CTX-BRIDGE-006":"apps/bridge/troubleshooting/"}},
+    "420-stake": {"name":"420 Stake","domain":"STAKE","environments":["development","genesis"],"records":{"CTX-STAKE-001":"apps/stake/","CTX-STAKE-002":"apps/stake/user-guide/","CTX-STAKE-003":"apps/stake/permissions/","CTX-STAKE-004":"apps/stake/fees/","CTX-STAKE-005":"apps/stake/security/","CTX-STAKE-006":"apps/stake/troubleshooting/"}},
+    "420-governance": {"name":"420 Governance","domain":"GOV","environments":["development","genesis"],"records":{"CTX-GOV-001":"apps/governance/","CTX-GOV-002":"apps/governance/user-guide/","CTX-GOV-003":"apps/governance/permissions/","CTX-GOV-004":"apps/governance/fees/","CTX-GOV-005":"apps/governance/security/","CTX-GOV-006":"apps/governance/troubleshooting/"}},
+    "420-ai": {"name":"420 AI","domain":"AI","environments":["development","genesis"],"records":{"CTX-AI-001":"apps/ai/","CTX-AI-002":"apps/ai/user-guide/","CTX-AI-003":"apps/ai/permissions/","CTX-AI-004":"apps/ai/fees/","CTX-AI-005":"apps/ai/security/","CTX-AI-006":"apps/ai/troubleshooting/"}},
+    "420-attention": {"name":"420 Attention","domain":"ATTENTION","environments":["development","genesis"],"records":{"CTX-ATTENTION-001":"apps/attention/","CTX-ATTENTION-002":"apps/attention/user-guide/","CTX-ATTENTION-003":"apps/attention/permissions/","CTX-ATTENTION-004":"apps/attention/fees/","CTX-ATTENTION-005":"apps/attention/security/","CTX-ATTENTION-006":"apps/attention/troubleshooting/"}},
+    "420-token": {"name":"420 Token","domain":"TOKEN","environments":["development","genesis"],"records":{"CTX-TOKEN-001":"apps/token/","CTX-TOKEN-002":"apps/token/user-guide/","CTX-TOKEN-003":"apps/token/permissions/","CTX-TOKEN-004":"apps/token/fees/","CTX-TOKEN-005":"apps/token/security/","CTX-TOKEN-006":"apps/token/troubleshooting/"}},
+    "420-status": {"name":"420 Status","domain":"STATUS","environments":["development","genesis"],"records":{"CTX-STATUS-001":"apps/status/","CTX-STATUS-002":"apps/status/user-guide/","CTX-STATUS-003":"apps/status/permissions/","CTX-STATUS-004":"apps/status/fees/","CTX-STATUS-005":"apps/status/security/","CTX-STATUS-006":"apps/status/troubleshooting/"}}
+  },
+  "unavailable": [
+    {"name":"420 Faucet","domain":"FAUCET","environment":"testnet","reason":"testnet-documentation-unpublished"},
+    {"name":"420 Gaming Protocol","domain":"GAMING","reason":"protocol-only-no-dapp-context-namespace"}
+  ]
+}

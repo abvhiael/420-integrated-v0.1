@@ -43,6 +43,8 @@ STAGES: tuple[Stage, ...] = (
     Stage("ci-self-tests", (sys.executable, "scripts/selftest-documentation-ci.py")),
     Stage("generated-reference-freshness", (sys.executable, "scripts/qualify-generated-reference.py", "--check")),
     Stage("strict-mkdocs-build", (sys.executable, "-m", "mkdocs", "build", "--strict")),
+    Stage("version-renderer-context", (sys.executable, "scripts/render-doc-version-context.py", "--site-dir", "site")),
+    Stage("version-selector-render", (sys.executable, "scripts/inject-doc-version-selector.py", "--site-dir", "site")),
     Stage("search-navigation", (sys.executable, "scripts/qualify-docs.py")),
 )
 

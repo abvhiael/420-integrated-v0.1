@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "contextual_registry": "docs/contextual/contextual-link-registry.json",
+  "version_registry": "docs/versioning/version-registry.json",
+  "version_url_prefix": "/versions",
+  "require_same_environment": true,
+  "allow_cross_environment_fallback": false,
+  "allow_cross_release_fallback": false,
+  "require_published_current": true,
+  "require_immutable_explicit_historical_release": true,
+  "unpublished_environment_behavior": "unavailable",
+  "development_is_historical_immutable": false,
+  "current_environment_expectations": {
+    "development": {
+      "current": "development",
+      "published": true,
+      "immutable": false
+    },
+    "genesis": {
+      "current": "genesis",
+      "published": true,
+      "immutable": true
+    },
+    "testnet": {
+      "current": null,
+      "published": false
+    },
+    "mainnet": {
+      "current": null,
+      "published": false
+    }
+  }
+}

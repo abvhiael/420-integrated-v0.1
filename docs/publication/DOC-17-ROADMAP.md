@@ -42,14 +42,16 @@ Deliverable: `docs/publication/repository-integration.md` and `docs/publication/
 
 Deliverables: `docs/publication/wallet-integration.md`, `wallet/web/docs-context.json`, `wallet/web/core/docs-help.js`, `wallet/web/test/docs-help.test.js`, and `scripts/validate-doc-wallet-integration.py`.
 
-Result: the Wallet runtime now has a deterministic contextual-help resolver for all eight active `CTX-WALLET-*` records. It resolves only published `development`/`genesis` documentation with `current` version intent, returns unavailable for testnet/mainnet or unknown/unsafe inputs, and labels successful results `documentation-navigation-only`. Unified 420Docs qualification checks the bundle against DOC-14 and the DOC-17 production target.
+## DOC-17.6 — 420 Explorer integration — COMPLETE
+- [x] Wire Explorer help/context entry points to stable contextual/documentation routes.
+- [x] Preserve chain/finality authority boundaries.
+- [x] Verify stale/unavailable docs cannot alter canonical Explorer interpretation.
 
-## DOC-17.6 — 420 Explorer integration — NEXT
-- [ ] Wire Explorer help/context entry points to stable contextual/documentation routes.
-- [ ] Preserve chain/finality authority boundaries.
-- [ ] Verify stale/unavailable docs cannot alter canonical Explorer interpretation.
+Deliverables: `docs/publication/explorer-integration.md`, `explorer/web/static/docs-context.json`, `explorer/web/static/docs-help.js`, and `scripts/validate-doc-explorer-integration.py`.
 
-## DOC-17.7 — Developer Hub integration
+Result: Explorer exposes a canonical production Help entry and all six DOC-14 `CTX-EXPLORER-*` targets. Contextual resolution is navigation-only, accepts only published development/Genesis plus `current` version intent, and fails closed otherwise. Documentation can never change Indexer/RPC-derived chain identity, transaction state or safe/finalized interpretation.
+
+## DOC-17.7 — Developer Hub integration — NEXT
 - [ ] Wire Developer Hub documentation/help entry points to canonical production docs.
 - [ ] Bind network/version context explicitly.
 - [ ] Preserve Developer Hub as non-authoritative orchestration/tooling.

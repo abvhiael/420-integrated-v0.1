@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "id_pattern": "CTX-<DOMAIN>-<SUFFIX>",
+  "target_slots": {
+    "001": {"target_type": "concept", "file": "index.md", "purpose": "application overview and authority boundaries"},
+    "002": {"target_type": "task", "file": "user-guide.md", "purpose": "primary state-changing or user task guidance"},
+    "003": {"target_type": "task", "file": "permissions.md", "purpose": "connection, signing and authorization guidance"},
+    "004": {"target_type": "concept", "file": "fees.md", "purpose": "fees, economics and settlement guidance"},
+    "005": {"target_type": "concept", "file": "security.md", "purpose": "security and privacy guidance"},
+    "006": {"target_type": "troubleshooting", "file": "troubleshooting.md", "purpose": "application-specific failure and recovery guidance"}
+  },
+  "applications": [
+    {"name": "420 Explorer", "domain": "EXPLORER", "surface": "420-explorer", "environments": ["development", "genesis"], "base_path": "apps/explorer"},
+    {"name": "420 Search", "domain": "SEARCH", "surface": "420-search", "environments": ["development", "genesis"], "base_path": "apps/search"},
+    {"name": "420 Analytics", "domain": "ANALYTICS", "surface": "420-analytics", "environments": ["development", "genesis"], "base_path": "apps/analytics"},
+    {"name": "420 AppStore", "domain": "APPSTORE", "surface": "420-appstore", "environments": ["development", "genesis"], "base_path": "apps/appstore"},
+    {"name": "420 Verify", "domain": "VERIFY", "surface": "420-verify", "environments": ["development", "genesis"], "base_path": "apps/verify"},
+    {"name": "420 Notifications", "domain": "NOTIFY", "surface": "420-notifications", "environments": ["development", "genesis"], "base_path": "apps/notifications"},
+    {"name": "420 Registry", "domain": "REGISTRY", "surface": "420-registry", "environments": ["development", "genesis"], "base_path": "apps/registry"},
+    {"name": "420 Names", "domain": "NAMES", "surface": "420-names", "environments": ["development", "genesis"], "base_path": "apps/names"},
+    {"name": "420 Identity", "domain": "IDENTITY", "surface": "420-identity", "environments": ["development", "genesis"], "base_path": "apps/identity"},
+    {"name": "420 Arbitration", "domain": "ARBITRATION", "surface": "420-arbitration", "environments": ["development", "genesis"], "base_path": "apps/arbitration"},
+    {"name": "420 Swap", "domain": "SWAP", "surface": "420-swap", "environments": ["development", "genesis"], "base_path": "apps/swap"},
+    {"name": "420 Bridge", "domain": "BRIDGE", "surface": "420-bridge", "environments": ["development", "genesis"], "base_path": "apps/bridge"},
+    {"name": "420 Stake", "domain": "STAKE", "surface": "420-stake", "environments": ["development", "genesis"], "base_path": "apps/stake"},
+    {"name": "420 Governance", "domain": "GOV", "surface": "420-governance", "environments": ["development", "genesis"], "base_path": "apps/governance"},
+    {"name": "420 AI", "domain": "AI", "surface": "420-ai", "environments": ["development", "genesis"], "base_path": "apps/ai"},
+    {"name": "420 Attention", "domain": "ATTENTION", "surface": "420-attention", "environments": ["development", "genesis"], "base_path": "apps/attention"},
+    {"name": "420 Token", "domain": "TOKEN", "surface": "420-token", "environments": ["development", "genesis"], "base_path": "apps/token"},
+    {"name": "420 Status", "domain": "STATUS", "surface": "420-status", "environments": ["development", "genesis"], "base_path": "apps/status"},
+    {"name": "420 Faucet", "domain": "FAUCET", "surface": "420-faucet", "environments": ["testnet"], "base_path": "apps/faucet", "availability": "declared-but-unpublished-until-doc13-testnet-track"}
+  ],
+  "excluded": [
+    {"name": "420 Gaming Protocol", "reason": "GENESIS_PROTOCOL only; no standalone user application contextual namespace in DOC-14.4"}
+  ]
+}

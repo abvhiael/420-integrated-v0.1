@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "environments": ["development", "genesis"],
+  "developer": {
+    "overview": "CTX-DEV-001",
+    "contracts": "CTX-DEV-002",
+    "deployment": "CTX-DEV-003",
+    "diagnostics": "CTX-DEV-004",
+    "api_reliability": "CTX-DEV-005",
+    "generated_reference": "CTX-DEV-006",
+    "network_identity": "CTX-DEV-007",
+    "finality_and_transactions": "CTX-DEV-008"
+  },
+  "operator": {
+    "incident_diagnostics": "CTX-OPS-001",
+    "consensus_node_recovery": "CTX-OPS-002",
+    "service_health": "CTX-OPS-003",
+    "chain_rpc_transactions": "CTX-OPS-004"
+  },
+  "authority_rules": {
+    "canonical_chain_state_outranks_derived_services": true,
+    "generated_reference_is_descriptive_not_authoritative": true,
+    "documentation_does_not_create_deployment_or_finality_authority": true,
+    "cross_environment_fallback": false,
+    "cross_release_fallback": false
+  }
+}

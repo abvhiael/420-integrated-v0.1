@@ -9,6 +9,8 @@
     "version-registry",
     "version-routing",
     "historical-retention",
+    "generated-reference-version",
+    "migration-policy",
     "internal-links",
     "troubleshooting-ids",
     "orphan-navigation",

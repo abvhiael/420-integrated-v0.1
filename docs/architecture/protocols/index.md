@@ -11,9 +11,9 @@ version: current
 
 # Core protocol architecture
 
-420 Integrated uses shared canonical protocols so applications can compose common services without creating incompatible wallet, identity, discovery, payment, rights, randomness, storage, dispute, or communications systems.
+420 Integrated uses shared canonical protocols so applications can compose common services without creating incompatible wallet, identity, discovery, payment, rights, randomness, storage, dispute, communications or launch-allocation systems.
 
-This section documents those protocols as **authority and integration boundaries**. Application manuals belong in DOC-8; generated ABIs and machine reference material belong in DOC-10.
+This section documents those protocols as **authority and integration boundaries**. Application manuals belong in DOC-8/DOC-18; generated ABIs and machine reference material belong in DOC-10.
 
 ## Start here
 
@@ -26,6 +26,7 @@ This section documents those protocols as **authority and integration boundaries
 - [Rights and Verify](rights-verify.md) — rights subjects/claims/succession/licensing plus reproducible contract-source verification and their strict non-overlapping authority boundaries.
 - [420 Arbitration](arbitration.md) — domain-scoped dispute intake, policy snapshots, evidence commitments, exact resolver authority, bounded appeals, finality, and origin-protocol remedy boundaries.
 - [Messenger, Notifications and Attention](messenger-notifications-attention.md) — private message coordination with off-chain payloads, non-canonical event delivery, and opt-in sponsor-funded Attention proofs/rewards with segregated liabilities.
+- [420 Launchpad](launchpad.md) — project registry, sale configuration, allocation state, bounded routing, authorization and explicit non-endorsement boundaries for qualified project launches.
 
 ## DOC-7 phase map
 
@@ -40,12 +41,13 @@ The protocol documentation phase is organized by integration family:
 7. **DOC-7.7 — Rights and Verify** — rights provenance/licensing plus reproducible deployed-contract verification and evidence boundaries.
 8. **DOC-7.8 — Arbitration** — domain-scoped dispute intake, evidence commitments, exact resolver authority, bounded appeals/finality and explicit origin-protocol remedy consumption.
 9. **DOC-7.9 — Messenger, Notifications and Attention** — private-message coordination, non-canonical alert delivery, opt-in engagement proofs/rewards, privacy, bounded capabilities and provider-neutral delivery.
+10. **DOC-18.2 — 420 Launchpad** — reconciled contract-map surface documenting project, sale, allocation, authorization and router boundaries without changing the frozen public Genesis catalog.
 
 ## Protocol versus application
 
 A protocol defines reusable canonical state, interfaces, authorization rules or settlement semantics that multiple applications can compose. A dApp provides a user experience or application-specific domain on top of those primitives.
 
-For example, 420 Bridge can have a user-facing application while the underlying bridge protocol defines route, attestation, replay and settlement rules. DOC-7 documents the reusable protocol contract; DOC-8 documents how a person uses the genesis application.
+For example, 420 Bridge can have a user-facing application while the underlying bridge protocol defines route, attestation, replay and settlement rules. 420 Launchpad similarly has a task-oriented application manual while its contract family defines canonical project/sale/allocation state and bounded routing authority.
 
 ## Protocol versus infrastructure
 
@@ -59,3 +61,4 @@ Canonical permissions, commitments, ownership, settlement, registrations and gov
 - [Dependency map](../dependency-map.md)
 - [Trust-boundary model](../trust-boundary-model.md)
 - [Infrastructure architecture](../infrastructure/index.md)
+- [420 Launchpad manual](../../apps/launchpad/index.md)

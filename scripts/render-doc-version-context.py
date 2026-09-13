@@ -87,9 +87,12 @@ def published_context(registry: dict, policy: dict, site_dir: Path | None = None
         "cross_environment_fallback": bool(policy.get("cross_environment_fallback", False)),
         "cross_release_fallback": bool(policy.get("cross_release_fallback", False)),
         "tracks": tracks_out,
+        "page_inventories": {},
     }
     if site_dir is not None:
-        manifest["page_inventory"] = built_page_inventory(site_dir)
+        # The current MkDocs build is the legacy flat compatibility corpus. It must not
+        # be reused as proof that a version-qualified release tree exists.
+        manifest["page_inventories"]["legacy"] = built_page_inventory(site_dir)
     return manifest
 
 
@@ -166,7 +169,7 @@ def main() -> int:
         output.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         print(
             f"420Docs version renderer PASS: wrote {output}; "
-            f"{len(manifest.get('page_inventory', []))} page inventory entry(s)"
+            f"{len(manifest.get('page_inventories', {}).get('legacy', []))} legacy page inventory entry(s)"
         )
         return 0
 

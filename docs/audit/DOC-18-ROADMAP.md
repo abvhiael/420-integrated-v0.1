@@ -13,7 +13,7 @@ DOC-18 reconciles `config/genesis-applications.json` with `contracts/config/gene
 - DOC-18.7 — 420 Market package — COMPLETE
 - DOC-18.8 — Civic/Governance naming reconciliation — COMPLETE
 - DOC-18.9 — stale Genesis inventory cleanup — COMPLETE
-- DOC-18.10 — CI coverage enforcement, exact-head qualification and merge — NEXT
+- DOC-18.10 — CI coverage enforcement, exact-head qualification and merge — COMPLETE
 
 ## Completed reconciliation
 
@@ -26,6 +26,8 @@ Launchpad, Trust, Commons and Pulse now have governed 420Docs ownership in addit
 420 Governance remains the frozen public Genesis application name. 420 Civic is the implementation family used by the canonical contracts. The inventory records Civic as an implementation alias of Governance, and the Governance application docs explicitly state that `Governance420` is compatibility-only while canonical proposal, voting and execution authority lives in the Civic suite and `GovernanceTimelock`.
 
 `docs/GENESIS-DAPPS.md` now mirrors the authoritative 21-surface frozen public catalog from `config/genesis-applications.json`, including Search, Analytics, AppStore, Verify, Notifications, Gaming Protocol, Arbitration and Token. It also explicitly separates the public Genesis application decision from the broader contract-map inventory so implementation protocols and aliases are not misrepresented as additional public applications.
+
+DOC-18.10 adds deterministic coverage enforcement through `scripts/validate-doc-genesis-contract-inventory.py`. The validator requires every contract-map surface to appear exactly once in the documentation inventory, rejects unknown classifications and documentation gaps, verifies canonical documentation targets exist, validates implementation aliases against frozen public Genesis applications, preserves the Civic/Governance alias and testnet-only Faucet boundary, and proves that every frozen public Genesis surface is represented. The validator is part of `scripts/qualify-documentation.py`, the 420Docs workflow trigger contract and the governed workflow policy.
 
 ## Exit rule
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
-import json, sys
+import json, subprocess, sys
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -39,6 +39,10 @@ def main():
     if 'data-doc-context="CTX-EXPLORER-001"' not in index: errors.append('visible Explorer help entry is not tied to CTX-EXPLORER-001')
     if errors: fail(errors)
     print('420Docs Explorer integration PASS: six DOC-14 contexts, canonical production help entry, fail-closed environment/version handling, navigation-only authority')
+    developer=ROOT/'scripts/validate-doc-developer-hub-integration.py'
+    if developer.is_file():
+        result=subprocess.run([sys.executable,str(developer)],cwd=ROOT,check=False)
+        if result.returncode!=0: return result.returncode
     return 0
 
 if __name__=='__main__': raise SystemExit(main())

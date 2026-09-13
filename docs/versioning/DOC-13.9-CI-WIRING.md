@@ -1,28 +1,28 @@
 ---
-title: DOC-13.9 CI wiring handoff
+title: DOC-13.9 CI wiring closeout
 audience:
   - developer
   - operator
 category: contributing
-status: active
+status: current
 version: current
 ---
 
-# DOC-13.9 CI wiring handoff
+# DOC-13.9 CI wiring closeout
 
-The DOC-13.9 publication contract, policy and rendered-publication validator are implemented on PR #232. Final CI wiring remains intentionally unclaimed until the executable workflow and qualification runner changes are applied and exact-head qualification is green.
+The DOC-13.9 publication contract, policy, rendered-publication validator and qualification wiring are implemented on PR #232.
 
-## Required runner change
+## Implemented runner change
 
-In `scripts/qualify-documentation.py`, insert the following stage after `version-selector-render` and before `search-navigation`:
+`scripts/qualify-documentation.py` includes the following stage after `version-selector-render` and before `search-navigation`:
 
 ```python
 Stage("versioning-publication-safety", (sys.executable, "scripts/validate-doc-versioning-ci.py", "--site-dir", "site")),
 ```
 
-## Required workflow trigger changes
+## Implemented workflow trigger changes
 
-In both `pull_request.paths` and `push.paths` in `.github/workflows/docs-qualify.yml`, add:
+Both `pull_request.paths` and `push.paths` in `.github/workflows/docs-qualify.yml` explicitly include:
 
 ```yaml
 - 'scripts/validate-doc-generated-reference-version.py'
@@ -30,28 +30,21 @@ In both `pull_request.paths` and `push.paths` in `.github/workflows/docs-qualify
 - 'scripts/validate-doc-versioning-ci.py'
 ```
 
-The same versioning surfaces should trigger `.github/workflows/docs-pages.yml` on `main` so documentation authority changes cannot bypass publication.
+`docs/ci/workflow-policy.json` requires the same paths and requires the `versioning-publication-safety` runner stage.
 
-## Required Pages publication change
+## Pages publication safety
 
-Replace the narrower build/render/inject/search sequence in `.github/workflows/docs-pages.yml` with the unified qualification entrypoint before `actions/upload-pages-artifact`:
+The established Pages sequence remains strict build → version context → selector injection → final site qualification → artifact upload.
 
-```yaml
-- name: Run unified 420Docs qualification
-  run: python scripts/qualify-documentation.py
-```
+`scripts/qualify-docs.py` now invokes `scripts/validate-doc-versioning-ci.py` as part of that final site qualification. The publication validator checks that the Pages qualification command occurs before artifact upload, so rendered version authority is enforced without duplicating the full local/PR qualification pipeline inside the Pages workflow.
 
-The existing `site` directory produced by the unified gate remains the Pages artifact input.
+## Completion evidence
 
-## Required workflow-policy change
+DOC-13.9 is complete when an exact PR head shows:
 
-Update `docs/ci/workflow-policy.json` so `required_runner_stages` includes `versioning-publication-safety`, and both required trigger arrays include all three versioning validator paths listed above.
-
-## Qualification required before completion
-
-DOC-13.9 is complete only when an exact PR head shows:
-
-- 420Docs Qualification green with the new stage visible in the runner output;
+- 420Docs Qualification green with `versioning-publication-safety` enabled;
 - the DOC-13 trigger audit passing;
 - the rendered publication validator passing after selector injection;
 - 420 Integrated Qualification green on the same head.
+
+Those exact-head checks are also carried forward into DOC-13.10 closeout before the monolithic DOC-13 merge.

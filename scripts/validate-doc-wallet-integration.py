@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Validate DOC-17.5 Wallet publication/context integration."""
+"""Validate DOC-17 Wallet integration and chained runtime documentation consumers."""
 from __future__ import annotations
 import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -58,14 +59,7 @@ def main() -> int:
             errors.append(f'{contextual_id} target missing: {path}')
 
     resolver_text = RESOLVER.read_text(encoding='utf-8') if RESOLVER.is_file() else ''
-    required_resolver_terms = [
-        'documentation-navigation-only',
-        'environment-unpublished',
-        'cross_environment_fallback',
-        'cross_release_fallback',
-        'CTX-WALLET-',
-    ]
-    for term in required_resolver_terms:
+    for term in ['documentation-navigation-only','environment-unpublished','cross_environment_fallback','cross_release_fallback','CTX-WALLET-']:
         if term not in resolver_text:
             errors.append(f'Wallet resolver missing fail-closed contract term: {term}')
     if not TEST.is_file():
@@ -78,6 +72,11 @@ def main() -> int:
         return 1
 
     print(f'420Docs Wallet integration PASS: {len(wallet_records)} CTX-WALLET record(s) match DOC-14; production URL/environment binding is fail-closed')
+    explorer = ROOT / 'scripts/validate-doc-explorer-integration.py'
+    if explorer.is_file():
+        result = subprocess.run([sys.executable, str(explorer)], cwd=ROOT, check=False)
+        if result.returncode != 0:
+            return result.returncode
     return 0
 
 

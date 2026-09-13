@@ -1,48 +1,73 @@
+---
+title: 420 Integrated Genesis applications
+audience: [user, developer, architect, operator]
+category: architecture
+status: frozen
+version: current
+---
 
-# 420 Integrated Genesis dApps — Frozen Decision
+# 420 Integrated Genesis applications — Frozen Decision
 
-Genesis Application Decision #1 is frozen.
+Genesis Application Decision #1 is frozen. The authoritative public application catalog is `config/genesis-applications.json` (`420-genesis-application-decision-v9`).
 
-Genesis suite:
-- 420 Wallet
-- 420 Explorer
-- 420 Registry
-- 420 Names
-- 420 Identity
-- 420 Swap
-- 420 Bridge
-- 420 Stake
-- 420 Governance
-- 420 AI
-- 420 Attention
-- 420 Status
-- 420 Faucet (testnet only)
+## Frozen Genesis catalog
 
-## Contract readiness
+1. 420 Wallet
+2. 420 Explorer
+3. 420 Search
+4. 420 Analytics
+5. 420 AppStore
+6. 420 Verify
+7. 420 Notifications
+8. 420 Registry
+9. 420 Names
+10. 420 Identity
+11. 420 Gaming Protocol
+12. 420 Arbitration
+13. 420 Swap
+14. 420 Bridge
+15. 420 Stake
+16. 420 Governance
+17. 420 AI
+18. 420 Attention
+19. 420 Token
+20. 420 Status
+21. 420 Faucet — testnet only
 
-Protocol-state contracts now exist for every genesis dApp that requires on-chain state.
+420 Governance is the public Genesis application name. Its canonical production implementation family is 420 Civic. The retired `Governance420` surface is compatibility-only and is not an alternate governance authority.
 
-Wallet, Explorer and Status are deliberately contract-free as applications. They consume canonical
-chain/system data and discover protocol services through 420 Registry.
+## Public catalog versus implementation inventory
 
-420 Stake explicitly has delegation disabled at genesis.
+The frozen list above is the public Genesis application decision. It is intentionally narrower than `contracts/config/genesis-dapp-contract-map.json`, which also tracks implementation protocols, shared infrastructure, aliases, and other Genesis contract families such as Smart Accounts, 420-IS, Randomness, Trust, Commons, Pulse, Messenger, Vault, Treasury, Grants, Launchpad, Resource Protocol, Market, Rights, Pay, Oracle, Civic, and ComputeMarket.
 
-420 Names is a presentation alias system and does not replace canonical ProtocolRegistry identities.
+Those implementation-only surfaces do not become additional public Genesis applications merely because they appear in the contract map. Their documentation ownership is reconciled in `docs/audit/genesis-contract-documentation-inventory.json`.
 
-420 Bridge is proof-verifier based, replay-protected and pausable by governance; it exposes no
-unbacked administrator mint function.
+## Contract-readiness rules
 
-420 Faucet is explicitly testnet-only.
+Applications marked `contracts_required: false` in the frozen catalog are deliberately frontend/derived-data surfaces and do not gain protocol authority merely by being official Genesis applications. Search, Analytics, AppStore, Verify, Notifications, Wallet, Explorer, and Status remain replaceable clients or projections over canonical protocol state where applicable.
 
-## Remaining deployment gate
+Protocol-backed Genesis applications must preserve their frozen authority boundaries. In particular:
 
-Source readiness is not the same as deployed readiness. The remaining Step 6 deployment gate is to:
-1. freeze the new candidate application addresses within 0x0420-0x04FF;
-2. compile the Solidity suite with the pinned compiler;
-3. run Foundry tests and security review;
-4. generate bytecode and initial storage;
-5. inject those artifacts deterministically into genesis;
-6. verify every reserved address/code hash from the generated genesis.
+- 420 Registry remains the canonical discovery backbone.
+- 420 Names is a presentation/name layer and does not replace canonical protocol or service identity.
+- 420 Identity remains optional and pseudonymous.
+- 420 Gaming Protocol does not make routine game state canonical and does not create parallel wallet authority.
+- 420 Arbitration records bounded dispute process and rulings but cannot directly acquire blanket custody or execution authority.
+- 420 Bridge remains verifier-based and replay-protected; it does not gain unbacked mint authority.
+- 420 Stake has no stake-weighted delegation at Genesis.
+- 420 Governance uses the Civic implementation family and timelocked committed execution.
+- 420 Attention cannot access wallet keys or transact on behalf of users.
+- 420 Token accepts only qualified frozen templates and charges the exact frozen creation fee.
+- 420 Faucet is testnet-only and never participates in mainnet Genesis economics.
 
-Until those steps pass, the contracts are genesis-ready source definitions but not yet a frozen
-mainnet deployment image.
+## Deployment status
+
+Source readiness is not the same as production deployment readiness. Contract-backed surfaces still require the applicable deterministic deployment, compiler/build, invariant/security, bytecode/storage, Genesis-injection, and address/code-hash verification gates before a production deployment image is considered frozen.
+
+This document describes the frozen application decision. Deployment readiness is determined by the current qualified deployment/configuration artifacts, not by this summary page alone.
+
+## Canonical sources
+
+- `config/genesis-applications.json` — frozen public Genesis application catalog and rules.
+- `contracts/config/genesis-dapp-contract-map.json` — broader Genesis implementation/contract inventory.
+- `docs/audit/genesis-contract-documentation-inventory.json` — documentation ownership reconciliation across the broader contract inventory.

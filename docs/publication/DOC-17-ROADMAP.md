@@ -4,15 +4,17 @@ DOC-17 turns the completed 420Docs corpus into a production publication and runt
 
 DOC-17 follows the monolithic documentation-phase policy: DOC-17.1 through DOC-17.10 remain on one branch and pull request, reconcile with current `main`, then require exact-head 420Docs and full 420 Integrated qualification before one final merge.
 
-## DOC-17.1 — Production publication contract and deployment inventory — IN PROGRESS
+## DOC-17.1 — Production publication contract and deployment inventory — COMPLETE
 - [x] Freeze publication authority and non-authority boundaries.
 - [x] Define the current production publication target and canonical public URL policy.
 - [x] Define publication evidence, fail-closed behavior, rollback and runtime-link requirements.
-- [ ] Record the current Pages workflow/site configuration against the contract.
+- [x] Record the current Pages workflow/site configuration against the contract.
 
 Deliverable: `docs/publication/publication-contract.md`.
 
-## DOC-17.2 — Pages build and deployment hardening
+Result: GitHub Pages is the explicit current production presentation target at `https://abvhiael.github.io/420-integrated-v0.1/` until an explicitly configured replacement/custom domain is committed and qualified. Repository-controlled documentation remains authoritative; publication never proves runtime state. The current deployment gap is that the Pages workflow performs a strict build plus selected post-build checks but does not yet run the complete unified 420Docs qualification pipeline before artifact upload/deploy.
+
+## DOC-17.2 — Pages build and deployment hardening — NEXT
 - [ ] Require the unified 420Docs qualification pipeline before artifact upload/deploy.
 - [ ] Bind deployment to a qualified commit identity and deterministic site artifact.
 - [ ] Preserve concurrency, permissions and rollback-safe deployment behavior.

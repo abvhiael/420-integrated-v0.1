@@ -44,13 +44,19 @@ Deliverable:
 
 Result: the 20 user-facing/testnet targets preserve complete task-oriented journeys and the required signing/economic/finality boundaries where applicable. 420 Gaming Protocol remains deliberately protocol-only, while Faucet remains testnet-only and unpublished by DOC-13 policy. No blocking DOC-16.3 gap was found.
 
-## DOC-16.4 — Developer integration coverage audit — NEXT
+## DOC-16.4 — Developer integration coverage audit — COMPLETE
 
-- [ ] Verify canonical discovery, interfaces, network identity, reads/writes, events/errors and integration examples.
-- [ ] Verify generated reference handoffs and provenance.
-- [ ] Verify operational tooling is not promoted into protocol authority.
+- [x] Verify canonical discovery, interfaces, network identity, reads/writes, events/errors and integration examples.
+- [x] Verify generated reference handoffs and provenance.
+- [x] Verify operational tooling is not promoted into protocol authority.
 
-## DOC-16.5 — Security and privacy coverage audit
+Deliverable:
+
+- `docs/audit/developer-integration-coverage-audit.md`
+
+Result: the DOC-9 developer path and DOC-10 generated-reference handoff cover the frozen Genesis surface set without promoting Developer Hub, SDK, CLI, Indexer, AppStore or provider infrastructure into protocol authority. No blocking DOC-16.4 gap was found. The previously recorded Gaming Protocol matrix path defect remains queued for DOC-16.9 remediation.
+
+## DOC-16.5 — Security and privacy coverage audit — NEXT
 
 - [ ] Verify secret-handling boundaries, signing authority, private payloads and support-safety rules.
 - [ ] Verify value-risk, bridge/provider, identity and recovery-specific warnings.

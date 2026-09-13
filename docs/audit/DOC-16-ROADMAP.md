@@ -32,13 +32,19 @@ Deliverable:
 
 Result: all 21 frozen audit surfaces have architecture/system-context coverage. No blocking architecture gap was found. One non-blocking matrix metadata defect was recorded: the Gaming Protocol row points to nonexistent `docs/developers/gaming-protocol.md`; the canonical evidence exists at `docs/developers/gaming-protocol-integration.md`. DOC-16.9 owns correction plus automated target-existence validation.
 
-## DOC-16.3 — User journey coverage audit — NEXT
+## DOC-16.3 — User journey coverage audit — COMPLETE
 
-- [ ] Verify onboarding, primary tasks, state/value-changing actions and safe completion states.
-- [ ] Verify signing, permissions, fees and network/environment warnings where applicable.
-- [ ] Verify testnet-only and protocol-only surfaces are not presented as general user applications.
+- [x] Verify onboarding, primary tasks, state/value-changing actions and safe completion states.
+- [x] Verify signing, permissions, fees and network/environment warnings where applicable.
+- [x] Verify testnet-only and protocol-only surfaces are not presented as general user applications.
 
-## DOC-16.4 — Developer integration coverage audit
+Deliverable:
+
+- `docs/audit/user-journey-coverage-audit.md`
+
+Result: the 20 user-facing/testnet targets preserve complete task-oriented journeys and the required signing/economic/finality boundaries where applicable. 420 Gaming Protocol remains deliberately protocol-only, while Faucet remains testnet-only and unpublished by DOC-13 policy. No blocking DOC-16.3 gap was found.
+
+## DOC-16.4 — Developer integration coverage audit — NEXT
 
 - [ ] Verify canonical discovery, interfaces, network identity, reads/writes, events/errors and integration examples.
 - [ ] Verify generated reference handoffs and provenance.

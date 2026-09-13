@@ -41,12 +41,20 @@ Deliverables:
 
 Ask 420 now retrieves through a governed source registry rather than treating repository search as authority. Canonical sources may substantiate answers in published environments; generated reference is development/provenance scoped; historical evidence is bound to an immutable release; DOC-14 contextual material is navigation-only; and unpublished testnet/mainnet plus ungoverned repository content are explicitly excluded. DOC-15.9 will wire the new validator into unified 420Docs qualification.
 
-## DOC-15.3 — Query and intent contract
+## DOC-15.3 — Query and intent contract — COMPLETE
 
-- [ ] Define supported user, developer and operator question classes.
-- [ ] Distinguish task guidance, concepts, reference lookup, troubleshooting and navigation.
-- [ ] Define ambiguous-query and insufficient-context behavior.
-- [ ] Map contextual `CTX-*` and troubleshooting `TRB-*` identifiers into assistant intent.
+- [x] Define supported user, developer and operator question classes.
+- [x] Distinguish task guidance, concepts, reference lookup, troubleshooting and navigation.
+- [x] Define ambiguous-query and insufficient-context behavior.
+- [x] Map contextual `CTX-*` and troubleshooting `TRB-*` identifiers into assistant intent.
+
+Deliverables:
+
+- `docs/assistant/query-intent-contract.md`
+- `docs/assistant/intent-map.json`
+- `scripts/validate-doc-assistant-intents.py`
+
+Ask 420 now classifies supported questions into `task-guidance`, `concept-explanation`, `reference-lookup`, `troubleshooting` and `navigation`. Exact `TRB-*` identifiers take troubleshooting precedence, active `CTX-*` identifiers map through DOC-14 target types, and ambiguity that materially changes environment, authority or safety yields `needs-context` rather than a guessed answer. Requests that ask static documentation to prove live runtime state or invent undocumented behavior are explicitly `unsupported`. DOC-15.9 will wire this validator into unified qualification.
 
 ## DOC-15.4 — Citation and evidence model
 

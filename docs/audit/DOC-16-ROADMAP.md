@@ -4,21 +4,23 @@ DOC-16 is the final Genesis-wide documentation matrix audit. It does not create 
 
 DOC-16 follows the monolithic documentation-phase policy: DOC-16.1 through DOC-16.10 remain on one branch and pull request, then reconcile with current `main`, requalify the exact head with 420Docs and full 420 Integrated qualification, and merge once.
 
-## DOC-16.1 — Audit authority, dimensions and frozen Genesis inventory — ACTIVE
+## DOC-16.1 — Audit authority, dimensions and frozen Genesis inventory — COMPLETE
 
 - [x] Define the audit authority and non-authority boundary.
 - [x] Freeze the Genesis documentation audit dimensions: architecture, user, developer, security/privacy, troubleshooting/recovery, generated/reference.
 - [x] Define supported environment/version dimensions and fail-closed handling for unpublished tracks.
 - [x] Establish the matrix row contract and evidence requirements.
-- [ ] Materialize the canonical Genesis surface inventory into the machine-readable matrix.
+- [x] Materialize the canonical Genesis surface inventory into the machine-readable matrix.
 
 Deliverables:
 
 - `docs/audit/DOC-16-ROADMAP.md`
 - `docs/audit/genesis-documentation-matrix.md`
-- later in DOC-16.1: `docs/audit/genesis-documentation-matrix.json`
+- `docs/audit/genesis-documentation-matrix.json`
 
-## DOC-16.2 — Architecture coverage audit
+The initial matrix is grounded in the frozen `config/genesis-applications.json` inventory: 20 user-facing/testnet manual targets plus the protocol-only 420 Gaming Protocol. Every row records its semantic environment, required audit dimensions, canonical evidence candidates and authority caveat. Faucet is explicitly testnet-only and remains unpublished until DOC-13 publishes a testnet documentation track.
+
+## DOC-16.2 — Architecture coverage audit — NEXT
 
 - [ ] Verify every Genesis surface has an architecture/system-context route.
 - [ ] Verify authority, dependency and trust-boundary coverage.

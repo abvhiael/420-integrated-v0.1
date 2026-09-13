@@ -74,6 +74,9 @@ jobs:
       - name: Smoke qualified Pages artifact
         run: python scripts/validate-doc-publication-health.py --site-dir site
 
+      - name: Final publication qualification
+        run: python scripts/qualify-docs.py
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 

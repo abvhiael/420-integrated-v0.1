@@ -90,12 +90,20 @@ Deliverables:
 
 Developer/runtime surfaces now have stable contextual targets for contracts/interfaces, deployment, diagnostics, API reliability, generated reference, network identity and finality. Operator surfaces have dedicated incident-diagnostics, consensus/node recovery, service-health and chain/RPC/transaction routes. These links remain navigation only: canonical chain/protocol state outranks derived services, generated reference is provenance-scoped description rather than runtime authority, and documentation cannot create deployment, finality, signing or incident-response authority.
 
-## DOC-14.7 — Version and environment coupling
+## DOC-14.7 — Version and environment coupling — COMPLETE
 
-- [ ] Couple contextual targets to DOC-13 tracks, current aliases and immutable releases.
-- [ ] Prevent development links from being advertised as Genesis/testnet/mainnet authority.
-- [ ] Fail closed for unpublished testnet/mainnet documentation tracks.
-- [ ] Define historical contextual-link behavior.
+- [x] Couple contextual targets to DOC-13 tracks, current aliases and immutable releases.
+- [x] Prevent development links from being advertised as Genesis/testnet/mainnet authority.
+- [x] Fail closed for unpublished testnet/mainnet documentation tracks.
+- [x] Define historical contextual-link behavior.
+
+Deliverables:
+
+- `docs/contextual/version-environment-coupling.md`
+- `docs/contextual/version-coupling-policy.json`
+- `scripts/validate-doc-contextual-version-coupling.py`
+
+Contextual resolution now requires the intersection of a contextual record's environment allow-list and DOC-13 publication authority. `development/current` and `genesis/current` are the only published current aliases; `genesis/genesis` is the only immutable published release suitable for durable historical contextual links. Testnet and mainnet remain unavailable, development cannot be promoted into immutable or Genesis authority, and historical links fail closed rather than silently rewriting onto current or cross-environment content.
 
 ## DOC-14.8 — Contextual-link CI and publication safety
 

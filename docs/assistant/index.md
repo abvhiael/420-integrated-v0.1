@@ -24,6 +24,12 @@ Ask 420 is the documentation-assistant layer for 420Docs. It answers supported q
 - Return an unsupported/unavailable result when the documentation corpus cannot justify an answer.
 - Do not treat 420AI providers, models or inference output as chain, protocol, Wallet, Registry, governance, deployment or finality authority.
 
+## Retrieval corpus
+
+Ask 420 retrieves only from governed documentation collections registered in `source-registry.json`. Canonical documentation may substantiate answers, generated reference is provenance/environment scoped, historical evidence is immutable-release scoped, and compatibility/contextual material is navigation-only.
+
+See [retrieval corpus and source registry](retrieval-corpus-contract.md).
+
 ## Phase roadmap
 
 See [DOC-15 roadmap](DOC-15-ROADMAP.md).

@@ -27,11 +27,11 @@
       "class": "canonical",
       "roots": [
         "docs/architecture",
-        "docs/chain",
-        "docs/consensus",
-        "docs/infrastructure",
-        "docs/wallet",
-        "docs/protocols",
+        "docs/architecture/chain",
+        "docs/architecture/consensus",
+        "docs/architecture/infrastructure",
+        "docs/users/wallet",
+        "docs/architecture/protocols",
         "docs/apps",
         "docs/developers",
         "docs/troubleshooting"

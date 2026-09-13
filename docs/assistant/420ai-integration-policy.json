@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "execution_layer": "420AI",
+  "compute_market": "420 ComputeMarket",
+  "retrieval_before_inference": true,
+  "provider_neutral": true,
+  "authority": {
+    "assistant_controls": [
+      "environment-resolution",
+      "intent-classification",
+      "source-eligibility",
+      "retrieval",
+      "citation-binding",
+      "result-validation"
+    ],
+    "model_controls": [
+      "bounded-synthesis"
+    ],
+    "provider_controls": [
+      "inference-execution"
+    ],
+    "provider_is_documentation_authority": false,
+    "model_is_documentation_authority": false
+  },
+  "context_package": {
+    "required_fields": [
+      "request_id",
+      "environment",
+      "release",
+      "intent",
+      "question",
+      "evidence",
+      "citations",
+      "answer_state_constraints"
+    ],
+    "evidence_must_be_prevalidated": true,
+    "unregistered_repository_content_allowed": false,
+    "cross_environment_sources_allowed": false
+  },
+  "citations": {
+    "required_fields": [
+      "collection_id",
+      "path",
+      "environment",
+      "source_class"
+    ],
+    "generated_requires_provenance": true,
+    "model_may_invent_source_identity": false
+  },
+  "result_validation": {
+    "concrete_claims_require_evidence": true,
+    "citations_must_reference_supplied_evidence": true,
+    "environment_must_match": true,
+    "historical_release_must_match": true,
+    "live_runtime_claims_from_docs_allowed": false,
+    "invalid_result_action": "reject"
+  },
+  "failure": {
+    "provider_failure": "unavailable-or-approved-reroute",
+    "model_failure": "unavailable-or-approved-reroute",
+    "timeout": "reconcile-job-state-before-retry",
+    "no_eligible_provider": "unavailable",
+    "reroute_may_broaden_constraints": false,
+    "ungrounded_fallback_allowed": false
+  },
+  "privacy_policy": "docs/assistant/privacy-policy.json"
+}

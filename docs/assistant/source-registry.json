@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "default_answer_policy": "authoritative-only",
+  "classes": {
+    "canonical": {
+      "authoritative": true,
+      "citation_required": true
+    },
+    "generated": {
+      "authoritative": true,
+      "citation_required": true,
+      "provenance_required": true
+    },
+    "historical": {
+      "authoritative": true,
+      "citation_required": true,
+      "immutable_release_required": true
+    },
+    "compatibility": {
+      "authoritative": false,
+      "citation_required": true
+    }
+  },
+  "collections": [
+    {
+      "id": "SRC-CANONICAL-CORE",
+      "class": "canonical",
+      "roots": [
+        "docs/architecture",
+        "docs/architecture/chain",
+        "docs/architecture/consensus",
+        "docs/architecture/infrastructure",
+        "docs/users/wallet",
+        "docs/architecture/protocols",
+        "docs/apps",
+        "docs/developers",
+        "docs/troubleshooting"
+      ],
+      "environments": ["development", "genesis"],
+      "answer_use": "authoritative"
+    },
+    {
+      "id": "SRC-GENERATED-DEVELOPMENT",
+      "class": "generated",
+      "roots": ["docs/reference/generated"],
+      "environments": ["development"],
+      "answer_use": "authoritative-with-provenance",
+      "governed_by": "docs/versioning/generated-reference-version-policy.json"
+    },
+    {
+      "id": "SRC-HISTORICAL-GENESIS",
+      "class": "historical",
+      "roots": [
+        "docs/architecture/genesis-architecture.md",
+        "docs/apps/coverage-audit.md",
+        "docs/versioning/version-authority-contract.md"
+      ],
+      "environments": ["genesis"],
+      "release": "genesis",
+      "answer_use": "authoritative-historical",
+      "governed_by": "docs/versioning/releases/genesis.json"
+    },
+    {
+      "id": "SRC-CONTEXTUAL-NAVIGATION",
+      "class": "compatibility",
+      "roots": ["docs/contextual"],
+      "environments": ["development", "genesis"],
+      "answer_use": "navigation-only"
+    }
+  ],
+  "excluded": [
+    {
+      "id": "EXC-UNPUBLISHED-TRACKS",
+      "reason": "Unpublished testnet/mainnet documentation cannot support authoritative answers.",
+      "environments": ["testnet", "mainnet"]
+    },
+    {
+      "id": "EXC-LIVE-RUNTIME-INFERENCE",
+      "reason": "Documentation retrieval cannot prove live canonical chain, protocol, wallet, deployment or provider state."
+    },
+    {
+      "id": "EXC-UNGOVERNED-REPOSITORY-CONTENT",
+      "reason": "Repository files outside registered documentation collections are not Ask 420 authoritative retrieval sources unless explicitly added to this registry."
+    }
+  ]
+}

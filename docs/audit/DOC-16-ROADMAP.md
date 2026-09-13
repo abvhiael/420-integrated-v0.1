@@ -56,17 +56,23 @@ Deliverable:
 
 Result: the DOC-9 developer path and DOC-10 generated-reference handoff cover the frozen Genesis surface set without promoting Developer Hub, SDK, CLI, Indexer, AppStore or provider infrastructure into protocol authority. No blocking DOC-16.4 gap was found. The previously recorded Gaming Protocol matrix path defect remains queued for DOC-16.9 remediation.
 
-## DOC-16.5 — Security and privacy coverage audit — NEXT
+## DOC-16.5 — Security and privacy coverage audit — PENDING
 
 - [ ] Verify secret-handling boundaries, signing authority, private payloads and support-safety rules.
 - [ ] Verify value-risk, bridge/provider, identity and recovery-specific warnings.
 - [ ] Verify documentation never weakens runtime safety for liveness or convenience.
 
-## DOC-16.6 — Troubleshooting and recovery coverage audit
+## DOC-16.6 — Troubleshooting and recovery coverage audit — COMPLETE
 
-- [ ] Verify stable `TRB-*` coverage and contextual `CTX-*` routing for supported surfaces.
-- [ ] Verify retry safety, authority-first diagnostics and escalation paths.
-- [ ] Verify timeout/unknown-state handling does not fabricate success or failure.
+- [x] Verify stable `TRB-*` coverage and contextual `CTX-*` routing for supported surfaces.
+- [x] Verify retry safety, authority-first diagnostics and escalation paths.
+- [x] Verify timeout/unknown-state handling does not fabricate success or failure.
+
+Deliverable:
+
+- `docs/audit/troubleshooting-recovery-coverage-audit.md`
+
+Result: DOC-11 `TRB-*` coverage, retry safety, authority-first recovery, escalation and ambiguous-outcome handling pass across the frozen application set. One blocking cross-phase defect was found: the Genesis dApp contextual map declares application `CTX-<DOMAIN>-006` troubleshooting IDs by convention, but those IDs are not materialized in the authoritative contextual-link registry. DOC-16.9 must register or equivalently materialize those IDs and add deterministic map-to-registry validation before DOC-16 can close.
 
 ## DOC-16.7 — Reference, version and environment audit
 

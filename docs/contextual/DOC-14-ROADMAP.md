@@ -14,20 +14,30 @@ DOC-14 adds stable, version-aware deep links from Wallet, Genesis applications a
 
 DOC-14 is monolithic: DOC-14.1 through DOC-14.10 remain on one branch/PR and merge only after final coverage audit, reconciliation with current `main`, exact-head 420Docs Qualification and exact-head 420 Integrated Qualification are green.
 
-## DOC-14.1 — Contextual-link authority and URL contract — IN PROGRESS
+## DOC-14.1 — Contextual-link authority and URL contract — COMPLETE
 
-- [ ] Define contextual-link authority and non-authority boundaries.
-- [ ] Define stable target classes for task guides, concepts, reference and troubleshooting entries.
-- [ ] Define version/environment-aware URL behavior using DOC-13 authority.
-- [ ] Define fail-closed behavior for unknown, unpublished, retired and cross-environment targets.
-- [ ] Define application behavior when contextual help is unavailable.
+- [x] Define contextual-link authority and non-authority boundaries.
+- [x] Define stable target classes for task guides, concepts, reference and troubleshooting entries.
+- [x] Define version/environment-aware URL behavior using DOC-13 authority.
+- [x] Define fail-closed behavior for unknown, unpublished, retired and cross-environment targets.
+- [x] Define application behavior when contextual help is unavailable.
 
-## DOC-14.2 — Contextual-link registry and schema
+Deliverable: `docs/contextual/contextual-link-contract.md`.
 
-- [ ] Define machine-readable contextual-link registry.
-- [ ] Define stable link IDs, source surfaces, target type, audience and environment constraints.
-- [ ] Define aliases/deprecation rules without reassigning stable IDs.
-- [ ] Add deterministic registry validation.
+## DOC-14.2 — Contextual-link registry and schema — COMPLETE
+
+- [x] Define machine-readable contextual-link registry.
+- [x] Define stable link IDs, source surfaces, target type, audience and environment constraints.
+- [x] Define aliases/deprecation rules without reassigning stable IDs.
+- [x] Add deterministic registry validation.
+
+Deliverables:
+
+- `docs/contextual/contextual-link-registry.json`
+- `docs/contextual/contextual-link-schema.md`
+- `scripts/validate-doc-contextual-registry.py`
+
+The registry begins with foundational 420Docs, Wallet, troubleshooting and developer targets. DOC-14.3 through DOC-14.6 expand coverage; DOC-14.8 wires contextual validation into the unified documentation gate and publication trigger contract.
 
 ## DOC-14.3 — Wallet contextual help
 

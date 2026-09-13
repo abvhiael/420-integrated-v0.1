@@ -34,6 +34,15 @@ DOC-14 supports four canonical target classes:
 3. **reference** — machine-oriented generated or curated technical reference;
 4. **troubleshooting** — a stable DOC-11 troubleshooting entry or support workflow.
 
+## Current coverage
+
+- [Contextual-link authority and URL contract](contextual-link-contract.md)
+- [Contextual-link schema](contextual-link-schema.md)
+- [Wallet contextual help](wallet-contextual-help.md)
+- [Genesis dApp contextual help](genesis-dapp-contextual-help.md)
+
+The machine-readable contextual registry and Genesis application context map are maintained beside these contracts for runtime/tooling consumption.
+
 ## Phase roadmap
 
 See [DOC-14 roadmap](DOC-14-ROADMAP.md).
@@ -43,5 +52,6 @@ See [DOC-14 roadmap](DOC-14-ROADMAP.md).
 - [Documentation versioning](../versioning/index.md)
 - [Troubleshooting and support workflow](../troubleshooting/search-diagnostics-support.md)
 - [Wallet documentation](../users/index.md)
+- [Genesis application manuals](../apps/index.md)
 - [Developer documentation](../developers/index.md)
 - [Generated reference](../reference/index.md)

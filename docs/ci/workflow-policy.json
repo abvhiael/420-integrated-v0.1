@@ -18,6 +18,8 @@
     "ci-self-tests",
     "generated-reference-freshness",
     "strict-mkdocs-build",
+    "version-renderer-context",
+    "version-selector-render",
     "search-navigation"
   ],
   "required_pull_request_triggers": [
@@ -31,6 +33,7 @@
     "scripts/validate-doc-version-registry.py",
     "scripts/validate-doc-version-routing.py",
     "scripts/render-doc-version-context.py",
+    "scripts/inject-doc-version-selector.py",
     "scripts/validate-doc-links.py",
     "scripts/validate-troubleshooting-ids.py",
     "scripts/validate-doc-orphans.py",
@@ -71,6 +74,7 @@
     "scripts/validate-doc-version-registry.py",
     "scripts/validate-doc-version-routing.py",
     "scripts/render-doc-version-context.py",
+    "scripts/inject-doc-version-selector.py",
     "scripts/validate-doc-links.py",
     "scripts/validate-troubleshooting-ids.py",
     "scripts/validate-doc-orphans.py",

@@ -107,12 +107,26 @@ Deliverables:
 - `generated-reference-version` added to the unified 420Docs qualification runner
 - implementation qualification evidence: 420Docs Qualification #736 passed on `66e1d13502b2d86a5287224b44612aeb071cf630`
 
-### DOC-13.8 — Redirects, migration and compatibility
+### DOC-13.8 — Redirects, migration and compatibility — COMPLETE
 
-- Define redirects from pre-versioned documentation URLs.
-- Define page move/rename rules across versions.
-- Preserve stable troubleshooting/deep-link anchors where compatible.
-- Add explicit tombstone/deprecation behavior when redirecting would be misleading.
+- [x] Define compatibility behavior for pre-versioned documentation URLs.
+- [x] Define page move/rename rules without rewriting immutable historical snapshots.
+- [x] Preserve stable troubleshooting/deep-link anchors where their meaning remains equivalent.
+- [x] Define explicit retired-route behavior when automatic migration would be misleading.
+- [x] Add deterministic migration-policy validation to the unified documentation gate.
+
+Deliverables:
+
+- `docs/versioning/redirect-migration-contract.md`
+- `docs/versioning/migration-policy.json`
+- `scripts/validate-doc-migration-policy.py`
+- legacy flat routes remain `compatibility-only`; they do not acquire Genesis, testnet or mainnet authority
+- automatic fallback to `current`, cross-environment mapping and cross-release mapping are disabled
+- migration rules must be explicit; current policy intentionally contains zero automatic mappings
+- stable anchors and `TRB-<DOMAIN>-<NNN>` identifiers retain semantic identity across compatible moves
+- routes without a safe equivalent remain unresolved or explicitly retired instead of being guessed
+- `migration-policy` added to the unified 420Docs qualification runner and workflow contract
+- implementation qualification evidence: 420Docs Qualification #744 passed on `b4612a6dc827fe59f6aedddf2f01a63a84ad2629`
 
 ### DOC-13.9 — Versioning CI and publication safety
 

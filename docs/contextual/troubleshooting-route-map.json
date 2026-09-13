@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "fallback_contextual_id": "CTX-TRB-001",
+  "domains": {
+    "WALLET": "troubleshooting/wallet-account-authorization.md",
+    "CHAIN": "troubleshooting/chain-rpc-transactions.md",
+    "RPC": "troubleshooting/chain-rpc-transactions.md",
+    "TX": "troubleshooting/chain-rpc-transactions.md",
+    "CONSENSUS": "troubleshooting/consensus-validator-node.md",
+    "NODE": "troubleshooting/consensus-validator-node.md",
+    "INDEXER": "troubleshooting/indexer-explorer-search-analytics-status.md",
+    "EXPLORER": "troubleshooting/indexer-explorer-search-analytics-status.md",
+    "SEARCH": "troubleshooting/indexer-explorer-search-analytics-status.md",
+    "ANALYTICS": "troubleshooting/indexer-explorer-search-analytics-status.md",
+    "STATUS": "troubleshooting/indexer-explorer-search-analytics-status.md",
+    "PAY": "troubleshooting/value-movement-economics.md",
+    "TOKEN": "troubleshooting/value-movement-economics.md",
+    "SWAP": "troubleshooting/value-movement-economics.md",
+    "BRIDGE": "troubleshooting/value-movement-economics.md",
+    "STAKE": "troubleshooting/value-movement-economics.md",
+    "APP": "troubleshooting/genesis-application-coverage.md"
+  },
+  "shared_protocol_domains": [
+    "GOV", "TREASURY", "GRANTS", "REGISTRY", "NAMES", "IDENTITY",
+    "RANDOM", "ORACLE", "STORAGE", "AI", "RIGHTS", "VERIFY",
+    "ARBITRATION", "MESSENGER", "NOTIFY", "ATTENTION"
+  ],
+  "shared_protocol_page": "troubleshooting/shared-protocol-provider.md"
+}

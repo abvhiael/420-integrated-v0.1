@@ -32,6 +32,7 @@ STAGES: tuple[Stage, ...] = (
     Stage("version-routing", (sys.executable, "scripts/validate-doc-version-routing.py")),
     Stage("historical-retention", (sys.executable, "scripts/validate-doc-historical-retention.py")),
     Stage("generated-reference-version", (sys.executable, "scripts/validate-doc-generated-reference-version.py")),
+    Stage("migration-policy", (sys.executable, "scripts/validate-doc-migration-policy.py")),
     Stage("internal-links", (sys.executable, "scripts/validate-doc-links.py")),
     Stage("troubleshooting-ids", (sys.executable, "scripts/validate-troubleshooting-ids.py")),
     Stage("orphan-navigation", (sys.executable, "scripts/validate-doc-orphans.py")),

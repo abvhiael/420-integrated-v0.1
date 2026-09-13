@@ -13,7 +13,7 @@ version: current
 
 This section is the canonical task-oriented manual collection for user-facing applications that ship with, or are explicitly scoped to, the 420 Integrated Genesis environment.
 
-The authoritative application inventory is `config/genesis-applications.json`. DOC-8 follows that frozen catalog rather than an older hand-maintained app list.
+The frozen public application inventory remains `config/genesis-applications.json`. DOC-18 additionally reconciles contract-backed Genesis surfaces from `contracts/config/genesis-dapp-contract-map.json` so implementation families that are not separate public-catalog entries still receive governed documentation ownership.
 
 ## Available manuals
 
@@ -36,19 +36,20 @@ The authoritative application inventory is `config/genesis-applications.json`. D
 - [420 Arbitration](arbitration/index.md) — domain-scoped disputes, evidence commitments, rulings, bounded appeals and explicit remedy-consumption boundaries.
 - [420 AI](ai/index.md) — model/provider/job/verification/settlement workflows with bounded spend, privacy and off-chain compute execution.
 - [420 Attention](attention/index.md) — opt-in sponsor campaigns, consent, proof commitments, reward entitlements and segregated sponsor liabilities.
+- [420 Launchpad](launchpad/index.md) — qualified project registration, sale configuration and allocation workflows; registration is not endorsement.
 - [420 Faucet](faucet/index.md) — explicitly testnet-only distribution for developer onboarding, with no monetary value and bounded abuse controls.
 
-The completed [Genesis application coverage audit](coverage-audit.md) records the DOC-8.10 package, navigation, authority/security and scope checks.
+The completed [Genesis application coverage audit](coverage-audit.md) records the original DOC-8.10 package, navigation, authority/security and scope checks. DOC-18 extends governed coverage to additional contract-map surfaces without rewriting the frozen public Genesis catalog.
 
 ## Manual contract
 
-Each user-facing application is documented under `docs/apps/<app-id>/` using the standard package: overview, getting started, user guide, concepts, architecture, permissions, fees, security, troubleshooting, FAQ, and developer integration pages for contracts, API, events, errors and examples.
+Each user-facing application documented under `docs/apps/<app-id>/` uses the standard package: overview, getting started, user guide, concepts, architecture, permissions, fees, security, troubleshooting, FAQ, and developer integration pages for contracts, API, events, errors and examples.
 
-Generated ABI/API/event/error reference belongs in DOC-10; DOC-8 explains how to use those interfaces safely.
+Generated ABI/API/event/error reference belongs in DOC-10; application manuals explain how to use those interfaces safely.
 
 ## Genesis manual inventory
 
-| Application | Class | DOC-8 manual | Primary role |
+| Application | Class | Manual | Primary role |
 | --- | --- | --- | --- |
 | 420 Wallet | Genesis user app | [available](wallet/index.md) | Smart Account management, capabilities, recovery, assets and dApp access |
 | 420 Explorer | Genesis user app | [available](explorer/index.md) | chain, transaction, contract, validator, asset, governance and finality inspection |
@@ -71,40 +72,30 @@ Generated ABI/API/event/error reference belongs in DOC-10; DOC-8 explains how to
 | 420 Status | Genesis user app | [available](status/index.md) | network/finality/validator/RPC/protocol service health |
 | 420 Faucet | testnet only | [available](faucet/index.md) | no-value testnet distribution and developer onboarding |
 | 420 Gaming Protocol | Genesis protocol only | not an application manual target | shared optional-wallet game interoperability; covered by protocol/developer documentation |
+| 420 Launchpad | Genesis contract-map application surface | [available](launchpad/index.md) | qualified project launch, sale and allocation workflows |
 
-The protocol-only Gaming Protocol remains part of Genesis, but it has no standalone user application in the frozen catalog.
+The protocol-only Gaming Protocol remains part of Genesis but has no standalone user application in the frozen catalog. Launchpad is documented under DOC-18 because it exists as a distinct contract-backed application surface in the Genesis contract map even though it is not a separate entry in the frozen public-catalog file.
 
 ## Authority labels every manual must preserve
 
 Every manual must distinguish canonical-state authority, user application over canonical state, derived/rebuildable presentation, replaceable provider/service infrastructure, and testnet-only scope.
 
-Registry, Names and Identity remain bounded to discovery/naming/identity state. Swap, Bridge and Token preserve separate value-domain authorities. Stake, Governance and Arbitration continue that separation. AI and Attention follow the same model: workers/providers do not gain chain authority, result commitments do not become universal truth proofs, sponsors/verifiers do not gain Wallet authority, and raw private payloads/telemetry remain outside canonical public state. Faucet is strictly testnet-only: it does not define issuance policy, participate in mainnet genesis economics or create monetary entitlement.
+Registry, Names and Identity remain bounded to discovery/naming/identity state. Swap, Bridge and Token preserve separate value-domain authorities. Stake, Governance and Arbitration continue that separation. AI and Attention follow the same model: workers/providers do not gain chain authority, result commitments do not become universal truth proofs, sponsors/verifiers do not gain Wallet authority, and raw private payloads/telemetry remain outside canonical public state. Launchpad registration does not create endorsement, investment suitability, asset legitimacy or Wallet authorization. Faucet is strictly testnet-only: it does not define issuance policy, participate in mainnet genesis economics or create monetary entitlement.
 
 ## Security and support rule
 
 No manual may instruct a user to disclose private keys or recovery secrets, passkey private material, Wallet signing secrets, validator signing keys, JWT/Engine credentials, private evidence payloads, private Messenger payloads, encrypted Resource payloads, raw Attention telemetry, private AI prompts/datasets/outputs or unrelated private Identity fields. Faucet support requires only a public destination testnet address and normal abuse-control input.
 
-## DOC-8 build order
+## Documentation history
 
-1. **DOC-8.1 — Application catalog and coverage contract** — COMPLETE.
-2. **DOC-8.2 — 420 Wallet application package** — COMPLETE.
-3. **DOC-8.3 — Explorer, Search and Analytics manuals** — COMPLETE.
-4. **DOC-8.4 — AppStore, Verify, Notifications and Status manuals** — COMPLETE.
-5. **DOC-8.5 — Registry, Names and Identity manuals** — COMPLETE.
-6. **DOC-8.6 — Swap, Bridge and Token manuals** — COMPLETE.
-7. **DOC-8.7 — Stake, Governance and Arbitration manuals** — COMPLETE.
-8. **DOC-8.8 — AI and Attention manuals** — COMPLETE.
-9. **DOC-8.9 — Faucet manual** — COMPLETE.
-10. **DOC-8.10 — Genesis application coverage audit** — COMPLETE. [Audit record](coverage-audit.md).
-
-## DOC-8 result
-
-DOC-8 is complete. The audit confirms 20 manual targets, 16 required pages per target, 320 required standard pages total, complete application navigation, explicit authority/security boundaries, correct testnet-only Faucet scope and correct protocol-only routing for 420 Gaming Protocol.
+DOC-8 completed the frozen public Genesis application manual set. DOC-18 extends governed coverage to additional Genesis contract-map surfaces while preserving that frozen catalog boundary.
 
 ## Related documentation
 
 - [Genesis application coverage audit](coverage-audit.md)
+- [DOC-18 reconciliation roadmap](../audit/DOC-18-ROADMAP.md)
 - [Application documentation contract](../contributing/app-documentation-contract.md)
+- [420 Launchpad architecture](../architecture/protocols/launchpad.md)
 - [Registry, Names, Identity & 420-IS architecture](../architecture/protocols/registry-names-identity-420is.md)
 - [Pay, Token, Swap/Exchange & Bridge architecture](../architecture/protocols/pay-token-exchange-bridge.md)
 - [Stake, Governance, Treasury & Grants architecture](../architecture/protocols/stake-governance-treasury-grants.md)
@@ -115,5 +106,6 @@ DOC-8 is complete. The audit confirms 20 manual targets, 16 required pages per t
 - [420Indexer infrastructure](../architecture/infrastructure/420indexer.md)
 - [Core protocol architecture](../architecture/protocols/index.md)
 - `config/genesis-applications.json`
+- `contracts/config/genesis-dapp-contract-map.json`
 - `testnet/services/faucet-policy.json`
 - `testnet/public-services/faucet/operations.json`

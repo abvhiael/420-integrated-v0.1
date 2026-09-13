@@ -19,7 +19,7 @@
     {"name":"420 Gaming Protocol","classification":"public-genesis-protocol","docs":"docs/developers/gaming-protocol.md"},
     {"name":"420 Arbitration","classification":"public-genesis-app","docs":"docs/apps/arbitration"},
     {"name":"420 Trust","classification":"covered-protocol","docs":"docs/architecture/protocols/trust.md"},
-    {"name":"420 Commons","classification":"documentation-gap","docs":"docs/architecture/protocols/commons.md"},
+    {"name":"420 Commons","classification":"covered-protocol","docs":"docs/architecture/protocols/commons.md"},
     {"name":"420 Pulse","classification":"documentation-gap","docs":"docs/architecture/protocols/pulse.md"},
     {"name":"420 Messenger","classification":"covered-protocol","docs":"docs/architecture/protocols/messenger-notifications-attention.md"},
     {"name":"420 Vault","classification":"documentation-gap","docs":"docs/architecture/protocols/vault.md"},

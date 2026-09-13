@@ -1,6 +1,6 @@
 ---
 title: 420 Trust protocol
- audience:
+audience:
   - developer
   - architect
   - operator

@@ -92,13 +92,19 @@ Deliverable:
 
 Result: DOC-10 provenance boundaries remain intact; DOC-13 publishes only development/current and immutable genesis/current; testnet/mainnet remain unavailable; Genesis generated reference remains fail-closed until a release-owned snapshot exists; no cross-environment or cross-release fallback is permitted. No blocking DOC-16.7 gap was found.
 
-## DOC-16.8 — Navigation and cross-link audit
+## DOC-16.8 — Navigation and cross-link audit — COMPLETE
 
-- [ ] Verify audience entry points and predictable routes between architecture, manuals, developer docs, troubleshooting and reference.
-- [ ] Verify contextual links and Ask 420 citations resolve only to canonical published material.
-- [ ] Verify no orphaned required Genesis documentation remains.
+- [x] Verify audience entry points and predictable routes between architecture, manuals, developer docs, troubleshooting and reference.
+- [x] Verify contextual links and Ask 420 citations resolve only to canonical published material.
+- [x] Verify no orphaned required Genesis documentation remains.
 
-## DOC-16.9 — Gap remediation and automated matrix qualification
+Deliverable:
+
+- `docs/audit/navigation-cross-link-audit.md`
+
+Result: application, developer, troubleshooting and generated-reference entry points are coherent and Ask 420 keeps contextual material navigation-only. No required top-level Genesis documentation family is orphaned. The previously identified blocking contextual-ID registry defect remains: application `CTX-*` identifiers declared by the dApp context map are not fully materialized in the authoritative contextual-link registry. DOC-16.9 owns remediation plus deterministic map-to-registry validation.
+
+## DOC-16.9 — Gap remediation and automated matrix qualification — NEXT
 
 - [ ] Remediate all blocking coverage gaps discovered by DOC-16.2 through DOC-16.8.
 - [ ] Add deterministic machine validation for matrix completeness and evidence targets.

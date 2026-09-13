@@ -16,23 +16,21 @@ from pathlib import Path
 from typing import Sequence
 
 ROOT = Path(__file__).resolve().parents[1]
-
 PASS = 0
 QUALIFICATION_FAILURE = 1
 RUNNER_ERROR = 2
-
 
 @dataclass(frozen=True)
 class Stage:
     name: str
     command: tuple[str, ...]
 
-
 STAGES: tuple[Stage, ...] = (
     Stage("front-matter", (sys.executable, "scripts/validate-doc-frontmatter.py")),
     Stage("version-metadata", (sys.executable, "scripts/validate-doc-version-metadata.py")),
     Stage("version-registry", (sys.executable, "scripts/validate-doc-version-registry.py")),
     Stage("version-routing", (sys.executable, "scripts/validate-doc-version-routing.py")),
+    Stage("historical-retention", (sys.executable, "scripts/validate-doc-historical-retention.py")),
     Stage("internal-links", (sys.executable, "scripts/validate-doc-links.py")),
     Stage("troubleshooting-ids", (sys.executable, "scripts/validate-troubleshooting-ids.py")),
     Stage("orphan-navigation", (sys.executable, "scripts/validate-doc-orphans.py")),
@@ -48,10 +46,8 @@ STAGES: tuple[Stage, ...] = (
     Stage("search-navigation", (sys.executable, "scripts/qualify-docs.py")),
 )
 
-
 def render_command(command: Sequence[str]) -> str:
     return " ".join(command)
-
 
 def run_stage(stage: Stage) -> int:
     print(f"420Docs CI: START {stage.name}", flush=True)
@@ -67,7 +63,6 @@ def run_stage(stage: Stage) -> int:
     print(f"420Docs CI: PASS  {stage.name}", flush=True)
     return PASS
 
-
 def main() -> int:
     print(f"420Docs CI: root={ROOT}", flush=True)
     print(f"420Docs CI: stages={len(STAGES)}", flush=True)
@@ -77,7 +72,6 @@ def main() -> int:
             return result
     print("420Docs CI: PASS  all documentation qualification stages", flush=True)
     return PASS
-
 
 if __name__ == "__main__":
     raise SystemExit(main())

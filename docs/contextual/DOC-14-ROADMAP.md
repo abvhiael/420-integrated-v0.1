@@ -39,11 +39,15 @@ Deliverables:
 
 The registry begins with foundational 420Docs, Wallet, troubleshooting and developer targets. DOC-14.3 through DOC-14.6 expand coverage; DOC-14.8 wires contextual validation into the unified documentation gate and publication trigger contract.
 
-## DOC-14.3 — Wallet contextual help
+## DOC-14.3 — Wallet contextual help — COMPLETE
 
-- [ ] Map Wallet setup, send/receive, connection, signing, permissions, recovery and troubleshooting surfaces.
-- [ ] Provide stable task/help targets for user-visible Wallet states.
-- [ ] Preserve Smart Account/passkey/recovery authority boundaries.
+- [x] Map Wallet setup, send/receive, connection, signing, permissions, recovery and troubleshooting surfaces.
+- [x] Provide stable task/help targets for user-visible Wallet states.
+- [x] Preserve Smart Account/passkey/recovery authority boundaries.
+
+Deliverable: `docs/contextual/wallet-contextual-help.md`.
+
+Wallet contextual IDs now cover setup/import/protection, send/receive/activity, troubleshooting, dApp connections, signing/transaction review, permissions/sessions, recovery/device safety and the neutral Wallet overview. All targets are constrained to the currently published development and Genesis documentation environments; runtime Smart Account, passkey, signing and recovery authority remains independent of documentation resolution.
 
 ## DOC-14.4 — Genesis dApp contextual help
 

@@ -8,6 +8,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 TARGET = ROOT / "docs/publication/production-target.json"
 REGISTRY = ROOT / "docs/versioning/version-registry.json"
+QUALIFY_WORKFLOW = ROOT / ".github/workflows/docs-qualify.yml"
+PAGES_WORKFLOW = ROOT / ".github/workflows/docs-pages.yml"
+CANONICAL_SCRIPTS = (
+    "scripts/validate-doc-canonical-publication.py",
+    "scripts/inject-doc-canonical-links.py",
+    "scripts/validate-doc-canonical-render.py",
+)
 
 
 def load(path: Path) -> dict:
@@ -22,6 +29,8 @@ def main() -> int:
     try:
         target = load(TARGET)
         registry = load(REGISTRY)
+        qualify_text = QUALIFY_WORKFLOW.read_text(encoding="utf-8")
+        pages_text = PAGES_WORKFLOW.read_text(encoding="utf-8")
     except Exception as exc:
         print(f"420Docs canonical publication FAILED: {exc}", file=sys.stderr)
         return 1
@@ -52,12 +61,18 @@ def main() -> int:
         if f"{env}/current" in aliases:
             errors.append(f"unpublished environment exposes current alias: {env}")
 
+    for script in CANONICAL_SCRIPTS:
+        if script not in qualify_text:
+            errors.append(f"420Docs qualification workflow does not trigger on canonical script: {script}")
+        if script not in pages_text:
+            errors.append(f"Pages workflow does not trigger on canonical script: {script}")
+
     if errors:
         print(f"420Docs canonical publication FAILED: {len(errors)} defect(s)", file=sys.stderr)
         for error in errors:
             print(f"- {error}", file=sys.stderr)
         return 1
-    print("420Docs canonical publication PASS: production URL is explicit; DOC-13 published tracks match; testnet/mainnet remain fail-closed")
+    print("420Docs canonical publication PASS: production URL is explicit; DOC-13 published tracks match; canonical changes trigger qualification/deployment; testnet/mainnet remain fail-closed")
     return 0
 
 if __name__ == "__main__":

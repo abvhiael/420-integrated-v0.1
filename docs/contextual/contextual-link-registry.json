@@ -11,9 +11,7 @@
       "target_type": "concept",
       "audience": ["user", "developer", "operator"],
       "environments": ["development", "genesis"],
-      "target": {
-        "path": "contextual/index.md"
-      },
+      "target": {"path": "contextual/index.md"},
       "aliases": []
     },
     "CTX-WALLET-001": {
@@ -22,9 +20,7 @@
       "target_type": "task",
       "audience": ["user"],
       "environments": ["development", "genesis"],
-      "target": {
-        "path": "users/wallet/setup-import-and-protection.md"
-      },
+      "target": {"path": "users/wallet/setup-import-and-protection.md"},
       "aliases": []
     },
     "CTX-WALLET-002": {
@@ -33,9 +29,7 @@
       "target_type": "task",
       "audience": ["user"],
       "environments": ["development", "genesis"],
-      "target": {
-        "path": "users/wallet/send-receive-and-activity.md"
-      },
+      "target": {"path": "users/wallet/send-receive-and-activity.md"},
       "aliases": []
     },
     "CTX-WALLET-003": {
@@ -44,9 +38,52 @@
       "target_type": "troubleshooting",
       "audience": ["user"],
       "environments": ["development", "genesis"],
-      "target": {
-        "path": "users/wallet/troubleshooting.md"
-      },
+      "target": {"path": "users/wallet/troubleshooting.md"},
+      "aliases": []
+    },
+    "CTX-WALLET-004": {
+      "status": "active",
+      "source_surfaces": ["420-wallet"],
+      "target_type": "task",
+      "audience": ["user"],
+      "environments": ["development", "genesis"],
+      "target": {"path": "users/wallet/dapp-connections.md"},
+      "aliases": []
+    },
+    "CTX-WALLET-005": {
+      "status": "active",
+      "source_surfaces": ["420-wallet"],
+      "target_type": "task",
+      "audience": ["user"],
+      "environments": ["development", "genesis"],
+      "target": {"path": "users/wallet/signing-and-transaction-review.md"},
+      "aliases": []
+    },
+    "CTX-WALLET-006": {
+      "status": "active",
+      "source_surfaces": ["420-wallet"],
+      "target_type": "task",
+      "audience": ["user"],
+      "environments": ["development", "genesis"],
+      "target": {"path": "users/wallet/permissions-and-sessions.md"},
+      "aliases": []
+    },
+    "CTX-WALLET-007": {
+      "status": "active",
+      "source_surfaces": ["420-wallet"],
+      "target_type": "task",
+      "audience": ["user"],
+      "environments": ["development", "genesis"],
+      "target": {"path": "users/wallet/recovery-and-device-safety.md"},
+      "aliases": []
+    },
+    "CTX-WALLET-008": {
+      "status": "active",
+      "source_surfaces": ["420-wallet"],
+      "target_type": "concept",
+      "audience": ["user"],
+      "environments": ["development", "genesis"],
+      "target": {"path": "users/wallet/index.md"},
       "aliases": []
     },
     "CTX-TRB-001": {
@@ -67,9 +104,7 @@
       "target_type": "reference",
       "audience": ["developer"],
       "environments": ["development", "genesis"],
-      "target": {
-        "path": "developers/index.md"
-      },
+      "target": {"path": "developers/index.md"},
       "aliases": []
     }
   }

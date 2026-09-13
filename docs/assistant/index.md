@@ -30,6 +30,12 @@ Ask 420 retrieves only from governed documentation collections registered in `so
 
 See [retrieval corpus and source registry](retrieval-corpus-contract.md).
 
+## Query and intent routing
+
+Ask 420 classifies questions into task guidance, concept explanation, reference lookup, troubleshooting or navigation before retrieval. Exact `TRB-*` identifiers and active `CTX-*` identifiers seed deterministic routing, while materially ambiguous questions return `needs-context` instead of silently selecting a different environment, authority level or diagnosis.
+
+See [query and intent contract](query-intent-contract.md).
+
 ## Phase roadmap
 
 See [DOC-15 roadmap](DOC-15-ROADMAP.md).

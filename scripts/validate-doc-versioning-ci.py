@@ -178,11 +178,11 @@ def workflow_errors(policy: dict) -> list[str]:
     command_index = next((i for i, step in enumerate(steps) if isinstance(step, dict) and str(step.get("run", "")) == command), None)
     upload_index = next((i for i, step in enumerate(steps) if isinstance(step, dict) and str(step.get("uses", "")).startswith("actions/upload-pages-artifact@")), None)
     if command_index is None:
-        errors.append(f"Pages workflow missing unified qualification command: {command}")
+        errors.append(f"Pages workflow missing final publication qualification command: {command}")
     if upload_index is None:
         errors.append("Pages workflow missing Pages artifact upload")
     if command_index is not None and upload_index is not None and command_index > upload_index:
-        errors.append("Pages artifact is uploaded before unified qualification")
+        errors.append("Pages artifact is uploaded before final publication qualification")
     return errors
 
 
@@ -212,7 +212,7 @@ def main() -> int:
     print(
         "420Docs versioning CI PASS: "
         f"{len(choices)} authoritative choice(s); {pages} rendered page(s); "
-        f"{links} version-qualified link(s); unified Pages gate enforced"
+        f"{links} version-qualified link(s); Pages final publication gate enforced"
     )
     return 0
 

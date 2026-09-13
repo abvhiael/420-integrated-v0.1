@@ -47,7 +47,7 @@ The registry begins with foundational 420Docs, Wallet, troubleshooting and devel
 
 Deliverable: `docs/contextual/wallet-contextual-help.md`.
 
-Wallet contextual IDs now cover setup/import/protection, send/receive/activity, troubleshooting, dApp connections, signing/transaction review, permissions/sessions, recovery/device safety and the neutral Wallet overview. All targets are constrained to the currently published development and Genesis documentation environments; runtime Smart Account, passkey, signing and recovery authority remains independent of documentation resolution.
+Wallet contextual IDs cover setup/import/protection, send/receive/activity, troubleshooting, dApp connections, signing/transaction review, permissions/sessions, recovery/device safety and the neutral Wallet overview.
 
 ## DOC-14.4 — Genesis dApp contextual help — COMPLETE
 
@@ -60,7 +60,7 @@ Deliverables:
 - `docs/contextual/genesis-dapp-contextual-help.md`
 - `docs/contextual/genesis-dapp-context-map.json`
 
-The application map covers the 18 non-Wallet Genesis user-facing applications plus Faucet. Each application receives six deterministic contextual slots: overview, primary task, permissions/signing, fees/economics, security/privacy and troubleshooting. Genesis applications are constrained to development/Genesis documentation authority. Faucet is declared testnet-only and remains non-resolvable until DOC-13 publishes a testnet documentation track. 420 Gaming Protocol remains intentionally protocol-only and does not receive a standalone user-application contextual namespace.
+The application map covers the 18 non-Wallet Genesis user-facing applications plus Faucet. Each application receives six deterministic contextual slots. Faucet remains testnet-only and non-resolvable until DOC-13 publishes a testnet documentation track. 420 Gaming Protocol remains protocol-only.
 
 ## DOC-14.5 — Troubleshooting and error deep links — COMPLETE
 
@@ -74,7 +74,7 @@ Deliverables:
 - `docs/contextual/troubleshooting-error-deep-links.md`
 - `docs/contextual/troubleshooting-route-map.json`
 
-Runtime error help now prefers exact stable DOC-11 `TRB-*` IDs, derives the canonical page from DOC-11 domain ownership, and uses the matching lower-case stable anchor. Application troubleshooting targets are the second-level fallback; `CTX-TRB-001` is the generic search/diagnostics/support fallback. Unknown or ambiguous errors are never guessed into a narrower `TRB-*` condition, and no fallback may cross documentation environments or releases.
+Runtime error help prefers exact stable DOC-11 `TRB-*` IDs, application troubleshooting is the bounded second-level fallback, and `CTX-TRB-001` is the general diagnostics/support fallback.
 
 ## DOC-14.6 — Developer and operator contextual links — COMPLETE
 
@@ -88,8 +88,6 @@ Deliverables:
 - `docs/contextual/developer-operator-context-map.json`
 - `CTX-DEV-002` through `CTX-DEV-008` and `CTX-OPS-001` through `CTX-OPS-004` in the contextual-link registry.
 
-Developer/runtime surfaces now have stable contextual targets for contracts/interfaces, deployment, diagnostics, API reliability, generated reference, network identity and finality. Operator surfaces have dedicated incident-diagnostics, consensus/node recovery, service-health and chain/RPC/transaction routes. These links remain navigation only: canonical chain/protocol state outranks derived services, generated reference is provenance-scoped description rather than runtime authority, and documentation cannot create deployment, finality, signing or incident-response authority.
-
 ## DOC-14.7 — Version and environment coupling — COMPLETE
 
 - [x] Couple contextual targets to DOC-13 tracks, current aliases and immutable releases.
@@ -102,8 +100,6 @@ Deliverables:
 - `docs/contextual/version-environment-coupling.md`
 - `docs/contextual/version-coupling-policy.json`
 - `scripts/validate-doc-contextual-version-coupling.py`
-
-Contextual resolution now requires the intersection of a contextual record's environment allow-list and DOC-13 publication authority. `development/current` and `genesis/current` are the only published current aliases; `genesis/genesis` is the only immutable published release suitable for durable historical contextual links. Testnet and mainnet remain unavailable, development cannot be promoted into immutable or Genesis authority, and historical links fail closed rather than silently rewriting onto current or cross-environment content.
 
 ## DOC-14.8 — Contextual-link CI and publication safety — COMPLETE
 
@@ -120,8 +116,6 @@ Deliverables:
 - contextual validator paths in `docs/ci/workflow-policy.json`
 - contextual validator paths in `.github/workflows/docs-qualify.yml`
 
-The unified 420Docs runner now executes `contextual-registry`, `contextual-version-coupling` and `contextual-publication-safety` before link/navigation/build stages. Publication validation rejects missing active targets, active targets that advertise unpublished documentation environments, invalid troubleshooting route targets, unstable example anchors, and application mappings that expose unpublished testnet/mainnet authority. Workflow policy and GitHub Actions path filters include all DOC-14 validator scripts so policy changes cannot bypass qualification.
-
 ## DOC-14.9 — Application integration contract — COMPLETE
 
 - [x] Publish implementation guidance for Wallet/dApp/runtime teams.
@@ -135,17 +129,17 @@ Deliverables:
 - `docs/contextual/application-integration-contract.md`
 - `docs/contextual/application-integration-examples.json`
 
-Clients now treat stable `CTX-*` IDs as the application-facing API and version-qualified URLs as resolver output. Resolution intersects DOC-14 record authority with DOC-13 publication/version authority and returns `unavailable` rather than guessing, crossing environments or silently moving historical requests to current documentation. The contract defines privacy-minimizing optional telemetry, forbids secrets/private payloads in URLs or help events, requires offline help to preserve runtime safety, and provides Wallet, Genesis dApp, troubleshooting, CLI and operator examples without depending on MkDocs/site internals.
+## DOC-14.10 — Coverage audit and closeout — QUALIFICATION
 
-## DOC-14.10 — Coverage audit and closeout
-
-- [ ] Audit Wallet, all frozen Genesis applications, troubleshooting domains and developer/operator surfaces.
-- [ ] Verify every contextual target resolves under the correct environment/version semantics.
-- [ ] Record deliberate unsupported or unavailable contextual states.
-- [ ] Reconcile branch with current `main`.
+- [x] Audit Wallet, all frozen Genesis applications, troubleshooting domains and developer/operator surfaces.
+- [x] Verify every contextual target resolves under the correct environment/version semantics.
+- [x] Record deliberate unsupported or unavailable contextual states.
+- [x] Reconcile branch with current `main` (branch is ahead with `behind_by=0`).
 - [ ] Run exact-head 420Docs Qualification.
 - [ ] Run exact-head 420 Integrated Qualification.
 - [ ] Merge DOC-14 only when the monolithic phase is fully green.
+
+Deliverable: `docs/contextual/coverage-audit.md`.
 
 ## Exit condition
 

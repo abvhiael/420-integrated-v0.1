@@ -86,12 +86,26 @@ Deliverables:
 - stable `TRB-<DOMAIN>-<NNN>` troubleshooting identifiers remain historically attributable and cannot be silently reassigned
 - `historical-retention` added to the unified 420Docs qualification runner and workflow contract
 
-### DOC-13.7 — Generated reference version coupling
+### DOC-13.7 — Generated reference version coupling — COMPLETE
 
-- Bind generated DOC-10 outputs to the version/environment that produced them.
-- Prevent generated local/example/dev data from appearing as canonical testnet/mainnet reference.
-- Define regeneration rules for release snapshots.
-- Preserve source/provenance hashes for historical generated reference.
+- [x] Bind generated DOC-10 outputs to the version/environment that produced them.
+- [x] Prevent generated local/example/dev data from appearing as canonical testnet/mainnet reference.
+- [x] Define regeneration rules for mutable development versus immutable release snapshots.
+- [x] Require source/provenance hashes for historical generated-reference snapshots.
+- [x] Fail closed when an immutable release has no approved generated-reference snapshot.
+
+Deliverables:
+
+- `docs/versioning/generated-reference-version-contract.md`
+- `docs/versioning/generated-reference-version-policy.json`
+- `scripts/validate-doc-generated-reference-version.py`
+- development release manifest explicitly binds the checked-in DOC-10 outputs as `live` development-scoped reference
+- Genesis release manifest explicitly marks generated reference `unavailable` until a release-owned frozen snapshot with hashes exists
+- `snapshot` mode requires an immutable release, release-owned snapshot root, provenance manifest, exact governed output coverage and SHA-256 matches
+- live generated reference is forbidden outside the `development/development` release/environment pair
+- network/deployment authority remains false for the current live generated reference
+- `generated-reference-version` added to the unified 420Docs qualification runner
+- implementation qualification evidence: 420Docs Qualification #736 passed on `66e1d13502b2d86a5287224b44612aeb071cf630`
 
 ### DOC-13.8 — Redirects, migration and compatibility
 
@@ -107,6 +121,7 @@ Deliverables:
 - Validate renderer configuration and current aliases.
 - Prevent unpublished/unknown version tracks from being advertised as authoritative.
 - Integrate versioning checks into the DOC-12 unified documentation gate.
+- Audit path triggers so every DOC-13 validator and policy/source surface independently triggers documentation qualification.
 
 ### DOC-13.10 — Coverage audit and closeout
 

@@ -122,13 +122,20 @@ Deliverables:
 
 The unified 420Docs runner now executes `contextual-registry`, `contextual-version-coupling` and `contextual-publication-safety` before link/navigation/build stages. Publication validation rejects missing active targets, active targets that advertise unpublished documentation environments, invalid troubleshooting route targets, unstable example anchors, and application mappings that expose unpublished testnet/mainnet authority. Workflow policy and GitHub Actions path filters include all DOC-14 validator scripts so policy changes cannot bypass qualification.
 
-## DOC-14.9 — Application integration contract
+## DOC-14.9 — Application integration contract — COMPLETE
 
-- [ ] Publish implementation guidance for Wallet/dApp/runtime teams.
-- [ ] Define how clients resolve contextual-link IDs into version-aware URLs.
-- [ ] Define telemetry/privacy boundaries for help-link activation.
-- [ ] Define offline/unavailable documentation behavior.
-- [ ] Provide representative integration examples without coupling applications to site internals.
+- [x] Publish implementation guidance for Wallet/dApp/runtime teams.
+- [x] Define how clients resolve contextual-link IDs into version-aware URLs.
+- [x] Define telemetry/privacy boundaries for help-link activation.
+- [x] Define offline/unavailable documentation behavior.
+- [x] Provide representative integration examples without coupling applications to site internals.
+
+Deliverables:
+
+- `docs/contextual/application-integration-contract.md`
+- `docs/contextual/application-integration-examples.json`
+
+Clients now treat stable `CTX-*` IDs as the application-facing API and version-qualified URLs as resolver output. Resolution intersects DOC-14 record authority with DOC-13 publication/version authority and returns `unavailable` rather than guessing, crossing environments or silently moving historical requests to current documentation. The contract defines privacy-minimizing optional telemetry, forbids secrets/private payloads in URLs or help events, requires offline help to preserve runtime safety, and provides Wallet, Genesis dApp, troubleshooting, CLI and operator examples without depending on MkDocs/site internals.
 
 ## DOC-14.10 — Coverage audit and closeout
 

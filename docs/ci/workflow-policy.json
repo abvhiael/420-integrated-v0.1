@@ -23,6 +23,7 @@
     "strict-mkdocs-build",
     "version-renderer-context",
     "version-selector-render",
+    "versioning-publication-safety",
     "search-navigation"
   ],
   "required_pull_request_triggers": [
@@ -36,6 +37,9 @@
     "scripts/validate-doc-version-registry.py",
     "scripts/validate-doc-version-routing.py",
     "scripts/validate-doc-historical-retention.py",
+    "scripts/validate-doc-generated-reference-version.py",
+    "scripts/validate-doc-migration-policy.py",
+    "scripts/validate-doc-versioning-ci.py",
     "scripts/render-doc-version-context.py",
     "scripts/inject-doc-version-selector.py",
     "scripts/validate-doc-links.py",
@@ -78,6 +82,9 @@
     "scripts/validate-doc-version-registry.py",
     "scripts/validate-doc-version-routing.py",
     "scripts/validate-doc-historical-retention.py",
+    "scripts/validate-doc-generated-reference-version.py",
+    "scripts/validate-doc-migration-policy.py",
+    "scripts/validate-doc-versioning-ci.py",
     "scripts/render-doc-version-context.py",
     "scripts/inject-doc-version-selector.py",
     "scripts/validate-doc-links.py",

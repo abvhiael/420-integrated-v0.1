@@ -56,11 +56,17 @@ Deliverable:
 
 Result: the DOC-9 developer path and DOC-10 generated-reference handoff cover the frozen Genesis surface set without promoting Developer Hub, SDK, CLI, Indexer, AppStore or provider infrastructure into protocol authority. No blocking DOC-16.4 gap was found. The previously recorded Gaming Protocol matrix path defect remains queued for DOC-16.9 remediation.
 
-## DOC-16.5 — Security and privacy coverage audit — PENDING
+## DOC-16.5 — Security and privacy coverage audit — COMPLETE
 
-- [ ] Verify secret-handling boundaries, signing authority, private payloads and support-safety rules.
-- [ ] Verify value-risk, bridge/provider, identity and recovery-specific warnings.
-- [ ] Verify documentation never weakens runtime safety for liveness or convenience.
+- [x] Verify secret-handling boundaries, signing authority, private payloads and support-safety rules.
+- [x] Verify value-risk, bridge/provider, identity and recovery-specific warnings.
+- [x] Verify documentation never weakens runtime safety for liveness or convenience.
+
+Deliverable:
+
+- `docs/audit/security-privacy-coverage-audit.md`
+
+Result: the frozen Genesis documentation consistently isolates signing/service secrets, preserves Wallet/Smart Account and recovery authority, minimizes private payload exposure, treats provider evidence as bounded rather than ambient authority, and fails closed rather than weakening identity/finality/replay/risk/recovery checks for liveness. No blocking DOC-16.5 gap was found.
 
 ## DOC-16.6 — Troubleshooting and recovery coverage audit — COMPLETE
 

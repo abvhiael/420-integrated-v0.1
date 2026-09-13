@@ -17,7 +17,7 @@ BANNER_STYLE = """
 .doc-version-context{box-sizing:border-box;width:100%;padding:.55rem .9rem;font-size:.72rem;line-height:1.35;border-bottom:1px solid var(--md-default-fg-color--lightest);background:var(--md-default-bg-color);color:var(--md-default-fg-color)}
 .doc-version-context__inner{max-width:61rem;margin:0 auto;display:flex;gap:.7rem;align-items:center;flex-wrap:wrap}
 .doc-version-context__label{font-weight:700}
-.doc-version-context select{font:inherit;max-width:18rem;padding:.18rem .35rem}
+.doc-version-context select{font:inherit;max-width:20rem;padding:.18rem .35rem}
 .doc-version-context__note{opacity:.72}
 </style>
 """.strip()
@@ -29,14 +29,19 @@ SCRIPT = r"""
   if(!root)return;
   const select=root.querySelector('select');
   const note=root.querySelector('.doc-version-context__note');
-  const inventory=JSON.parse(root.dataset.inventory||'[]');
+  const inventories=JSON.parse(root.dataset.inventories||'{}');
   const currentPath=(location.pathname.replace(/^\/+|\/+$/g,'')||'index.html').replace(/\/index\.html$/,'/').replace(/^index\.html$/,'');
   const logical=currentPath.replace(/^versions\/[^/]+\/[^/]+\//,'');
+  function exists(inventory, path){
+    if(!Array.isArray(inventory))return false;
+    return inventory.includes(path)||inventory.includes(path.replace(/\/$/,'')+'.html')||inventory.includes(path.replace(/\/$/,'')+'/');
+  }
   for(const opt of select.options){
     if(!opt.value)continue;
     const template=opt.dataset.route;
-    const available=inventory.includes(logical)||inventory.includes(logical.replace(/\/$/,'')+'.html')||inventory.includes(logical.replace(/\/$/,'')+'/');
-    if(!template||!available){opt.disabled=true;opt.textContent += ' — page unavailable';}
+    const inventoryKey=opt.dataset.inventoryKey;
+    const available=!!template && exists(inventories[inventoryKey],logical);
+    if(!available){opt.disabled=true;opt.textContent += ' — page unavailable';}
   }
   select.addEventListener('change',function(){
     const opt=this.options[this.selectedIndex];
@@ -44,7 +49,14 @@ SCRIPT = r"""
     const target=opt.dataset.route.replace('{path}',logical);
     location.assign(target.startsWith('/')?target:'/'+target);
   });
-  if(note && location.pathname.indexOf('/versions/')===-1){note.textContent='compatibility URL; immutable release is not implied';}
+  if(note){
+    if(location.pathname.indexOf('/versions/')===-1){
+      note.textContent='compatibility URL; immutable release is not implied';
+    }else{
+      const m=location.pathname.match(/\/versions\/([^/]+)\/([^/]+)/);
+      note.textContent=m?('environment '+m[1]+' • '+m[2]):'';
+    }
+  }
 })();
 </script>
 """.strip()
@@ -71,9 +83,10 @@ def option_rows(context: dict) -> str:
         current = track.get("current")
         if isinstance(current_route, str) and isinstance(current, str):
             rows.append(
-                '<option value="{value}" data-route="{route}">{label}</option>'.format(
+                '<option value="{value}" data-route="{route}" data-inventory-key="{inventory}">{label}</option>'.format(
                     value=html.escape(f"{environment}/current", quote=True),
                     route=html.escape(current_route, quote=True),
+                    inventory=html.escape(f"{environment}/current", quote=True),
                     label=html.escape(f"{environment} / current → {current}"),
                 )
             )
@@ -84,26 +97,33 @@ def option_rows(context: dict) -> str:
             route = release.get("path_template")
             if isinstance(release_id, str) and isinstance(route, str):
                 rows.append(
-                    '<option value="{value}" data-route="{route}">{label}</option>'.format(
+                    '<option value="{value}" data-route="{route}" data-inventory-key="{inventory}">{label}</option>'.format(
                         value=html.escape(f"{environment}/{release_id}", quote=True),
                         route=html.escape(route, quote=True),
+                        inventory=html.escape(f"{environment}/{release_id}", quote=True),
                         label=html.escape(f"{environment} / {release_id}"),
                     )
                 )
     return "\n".join(rows)
 
 
-def inventory_for_client(context: dict) -> list[str]:
-    inventory = context.get("page_inventory", [])
-    return sorted({str(item) for item in inventory if isinstance(item, str)})
+def inventories_for_client(context: dict) -> dict[str, list[str]]:
+    raw = context.get("page_inventories", {})
+    if not isinstance(raw, dict):
+        return {}
+    out: dict[str, list[str]] = {}
+    for key, values in raw.items():
+        if isinstance(key, str) and isinstance(values, list):
+            out[key] = sorted({str(item) for item in values if isinstance(item, str)})
+    return out
 
 
 def banner(context: dict) -> str:
-    inventory_json = html.escape(json.dumps(inventory_for_client(context), separators=(",", ":")), quote=True)
+    inventories_json = html.escape(json.dumps(inventories_for_client(context), separators=(",", ":")), quote=True)
     return (
         BANNER_STYLE
-        + '\n<div id="doc-version-context" class="doc-version-context" data-inventory="'
-        + inventory_json
+        + '\n<div id="doc-version-context" class="doc-version-context" data-inventories="'
+        + inventories_json
         + '"><div class="doc-version-context__inner">'
         + '<span class="doc-version-context__label">420Docs context</span>'
         + '<select aria-label="Documentation version and environment">'
@@ -140,8 +160,14 @@ def main() -> int:
             raise RuntimeError(f"no built HTML pages found under {site_dir}")
         markup = banner(context)
         if args.check:
-            enabled = sum(1 for line in option_rows(context).splitlines() if 'data-route=' in line)
-            print(f"420Docs version selector PASS: {len(pages)} built page(s); {enabled} registry-backed choice(s)")
+            choices = sum(1 for line in option_rows(context).splitlines() if 'data-route=' in line)
+            inventories = inventories_for_client(context)
+            versioned_inventories = [key for key in inventories if key != "legacy"]
+            print(
+                "420Docs version selector PASS: "
+                f"{len(pages)} built page(s); {choices} registry-backed choice(s); "
+                f"{len(versioned_inventories)} materialized version inventory(ies)"
+            )
             return 0
         changed = sum(1 for path in pages if inject(path, markup))
     except (OSError, RuntimeError) as exc:

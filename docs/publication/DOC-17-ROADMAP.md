@@ -60,13 +60,17 @@ Deliverables: `docs/publication/genesis-dapp-integration.md`, `packages/420-docs
 
 Result: 18 published development/Genesis dApps and 108 DOC-14 contextual targets are materialized. Resolution requires an explicitly published environment plus `current` version intent and returns `documentation-navigation-only`; unknown IDs/surfaces and unpublished environments fail closed.
 
-## DOC-17.9 — Publication health, observability and recovery — NEXT
-- [ ] Health/readiness checks for built artifact, deployed root, search index, version context and critical deep links.
-- [ ] Publication smoke qualification.
-- [ ] Rollback/redeploy recovery without rewriting authority/version history.
-- [ ] Support-safe diagnostics.
+## DOC-17.9 — Publication health, observability and recovery — COMPLETE
+- [x] Health/readiness checks for built artifact, deployed root, search index, version context and critical deep links.
+- [x] Publication smoke qualification before upload and after deployment.
+- [x] Rollback/redeploy recovery preserves repository authority and version history.
+- [x] Support-safe diagnostics defined.
 
-## DOC-17.10 — Final production closeout
+Deliverables: `docs/publication/publication-health.json`, `docs/publication/publication-health-recovery.md`, `scripts/validate-doc-publication-health.py` and hardened `.github/workflows/docs-pages.yml` / `scripts/validate-doc-pages-publication.py`.
+
+Result: Pages build now fails before upload if critical artifact health or publication identity is invalid, and the deployed site is smoke-checked after release. Health failures mark publication degraded; they never rewrite DOC-13 state or fall back across environments/releases.
+
+## DOC-17.10 — Final production closeout — NEXT
 - [ ] Audit repository, Wallet, Explorer, Developer Hub and Genesis dApp integrations.
 - [ ] Verify canonical URL/version/environment and contextual deep links.
 - [ ] Record deliberate unavailable targets and residual non-blockers.

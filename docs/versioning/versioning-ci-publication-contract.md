@@ -18,7 +18,7 @@ The canonical version registry and release manifests are the only authority for 
 
 The DOC-12 unified documentation qualification runner remains the single local and CI entrypoint. Every DOC-13 validator is a required stage, and changes to DOC-13 validators or policy/source surfaces must trigger documentation qualification.
 
-GitHub Pages must execute the unified documentation qualification command before uploading the Pages artifact.
+The final site qualification used by GitHub Pages must enforce the same DOC-13.9 rendered-publication checks after version context generation and selector injection and before the Pages artifact is uploaded.
 
 ## Rendered publication invariants
 
@@ -36,6 +36,8 @@ The flat MkDocs output remains compatibility-only and never proves release-quali
 
 ## Pages invariant
 
-`.github/workflows/docs-pages.yml` must run `python scripts/qualify-documentation.py` before `actions/upload-pages-artifact`. The uploaded artifact is therefore the site directory produced and qualified by the unified gate.
+`.github/workflows/docs-pages.yml` runs `python scripts/qualify-docs.py` after version context generation and selector injection and before `actions/upload-pages-artifact`. `scripts/qualify-docs.py` invokes `scripts/validate-doc-versioning-ci.py`, so the rendered Pages artifact cannot be uploaded unless DOC-13.9 publication authority passes.
+
+The unified documentation runner also executes `versioning-publication-safety` directly. This gives local/PR qualification an explicit DOC-13.9 stage while preserving the established Pages build sequence.
 
 Any mismatch between registry authority, rendered context, selector choices, version-qualified links, workflow triggers or Pages publication flow fails qualification and blocks publication.

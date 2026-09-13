@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Validate DOC-17.7 Developer Hub documentation integration."""
+"""Validate DOC-17.7 Developer Hub documentation integration and chained Genesis dApp docs integration."""
 from __future__ import annotations
 import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -75,6 +76,11 @@ def main() -> int:
             print(f'- {error}', file=sys.stderr)
         return 1
     print(f'420Docs Developer Hub integration PASS: {len(records)} CTX-DEV record(s), explicit network/current binding, navigation-only authority')
+    dapps = ROOT / 'scripts/validate-doc-genesis-dapp-integration.py'
+    if dapps.is_file():
+        result = subprocess.run([sys.executable, str(dapps)], cwd=ROOT, check=False)
+        if result.returncode != 0:
+            return result.returncode
     return 0
 
 

@@ -4,8 +4,8 @@ DOC-18 reconciles `config/genesis-applications.json` with `contracts/config/gene
 
 ## Plan
 
-- DOC-18.1 — inventory reconciliation and classification — IN PROGRESS
-- DOC-18.2 — 420 Launchpad package — NEXT
+- DOC-18.1 — inventory reconciliation and classification — COMPLETE
+- DOC-18.2 — 420 Launchpad package — IN PROGRESS
 - DOC-18.3 — 420 Trust package
 - DOC-18.4 — 420 Commons package
 - DOC-18.5 — 420 Pulse package
@@ -14,6 +14,14 @@ DOC-18 reconciles `config/genesis-applications.json` with `contracts/config/gene
 - DOC-18.8 — Civic/Governance naming reconciliation
 - DOC-18.9 — stale Genesis inventory cleanup
 - DOC-18.10 — CI coverage enforcement, exact-head qualification and merge
+
+## DOC-18.1 result
+
+The reconciliation inventory now tracks all 38 entries in `contracts/config/genesis-dapp-contract-map.json`. Existing governed coverage, protocol ownership, public/testnet application packages, the Civic/Governance implementation alias and the six documentation gaps are explicit in `docs/audit/genesis-contract-documentation-inventory.json`.
+
+## DOC-18.2 progress
+
+420 Launchpad now has a standard 16-page application package plus canonical protocol architecture. Remaining DOC-18.2 work is navigation/index integration and qualification.
 
 ## Exit rule
 

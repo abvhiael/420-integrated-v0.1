@@ -66,15 +66,19 @@ Deliverable: `navigation-cross-link-audit.md`.
 
 Deliverables: `gap-remediation-qualification.md`, `scripts/validate-doc-genesis-matrix.py`, `scripts/validate-doc-contextual-dapp-map.py`.
 
-Result: the Gaming Protocol matrix evidence path now resolves through a stable compatibility handoff to the canonical integration guide. Published Genesis dApp `CTX-<DOMAIN>-001..006` records are deterministically validated from the dApp context map; Faucet/testnet remains unresolved until testnet publication. Matrix row count, unique IDs, required evidence and evidence-path existence are CI gates. No blocking DOC-16.2 through DOC-16.8 gap remains.
+Result: the Gaming Protocol matrix evidence path resolves through a stable compatibility handoff to the canonical integration guide. Published Genesis dApp `CTX-<DOMAIN>-001..006` records are deterministically validated from the dApp context map; Faucet/testnet remains unresolved until testnet publication. Matrix row count, unique IDs, required evidence and evidence-path existence are CI gates. No blocking DOC-16.2 through DOC-16.8 gap remains.
 
-## DOC-16.10 — Final Genesis documentation closeout — NEXT
-- [ ] Run the completed matrix audit across every frozen Genesis surface.
-- [ ] Record deliberate unsupported/unpublished states and residual non-blocking follow-ups.
-- [ ] Verify zero blocking documentation gaps remain.
-- [ ] Reconcile with current `main`.
+## DOC-16.10 — Final Genesis documentation closeout — COMPLETE
+- [x] Run the completed matrix audit across every frozen Genesis surface.
+- [x] Record deliberate unsupported/unpublished states and residual non-blocking follow-ups.
+- [x] Verify zero blocking documentation gaps remain.
+- [x] Reconcile with current `main`; `main` remained at the DOC-15 merge base, so no additional reconciliation commit was required.
 - [ ] Require exact-head 420Docs and full 420 Integrated qualification.
 - [ ] Merge DOC-16 only after all closeout gates are green.
+
+Deliverable: `DOC-16.10-CLOSEOUT.md`.
+
+Closeout result: documentation-content audit PASS with zero blocking gaps. Remaining deliberate states are testnet/mainnet publication unavailability, Genesis generated-reference unavailability pending an immutable release-owned snapshot, Faucet testnet-only scope, and Gaming Protocol protocol-only scope. These are explicit contract states rather than missing documentation.
 
 ## Phase exit condition
 Every frozen Genesis surface has explicit reviewable evidence across all required documentation dimensions, with correct environment/version semantics, canonical authority boundaries, navigation and generated-reference provenance. Missing or deliberately unsupported coverage is explicit. No blocking Genesis documentation gap remains at merge.

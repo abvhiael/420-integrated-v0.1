@@ -28,3 +28,4 @@ Unknown/mismatched project or sale identity, inactive configuration, authorizati
 - `contracts/config/420launchpad-genesis.json`
 - [420 Launchpad application manual](../../apps/launchpad/index.md)
 - [420 Trust protocol](trust.md) — domain-scoped evidence infrastructure used by ecosystem applications without creating universal reputation authority.
+- [420 Commons protocol](commons.md) — community, membership, role, channel and invitation authority with off-chain content boundaries.

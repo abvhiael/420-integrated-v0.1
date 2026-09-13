@@ -74,11 +74,17 @@ Deliverable:
 
 Result: DOC-11 `TRB-*` coverage, retry safety, authority-first recovery, escalation and ambiguous-outcome handling pass across the frozen application set. One blocking cross-phase defect was found: the Genesis dApp contextual map declares application `CTX-<DOMAIN>-006` troubleshooting IDs by convention, but those IDs are not materialized in the authoritative contextual-link registry. DOC-16.9 must register or equivalently materialize those IDs and add deterministic map-to-registry validation before DOC-16 can close.
 
-## DOC-16.7 — Reference, version and environment audit
+## DOC-16.7 — Reference, version and environment audit — COMPLETE
 
-- [ ] Verify generated-reference provenance and freshness.
-- [ ] Verify DOC-13 environment/version routing and immutable Genesis behavior.
-- [ ] Verify unpublished testnet/mainnet targets fail closed and no cross-environment fallback exists.
+- [x] Verify generated-reference provenance and freshness.
+- [x] Verify DOC-13 environment/version routing and immutable Genesis behavior.
+- [x] Verify unpublished testnet/mainnet targets fail closed and no cross-environment fallback exists.
+
+Deliverable:
+
+- `docs/audit/reference-version-environment-audit.md`
+
+Result: DOC-10 provenance boundaries remain intact; DOC-13 publishes only development/current and immutable genesis/current; testnet/mainnet remain unavailable; Genesis generated reference remains fail-closed until a release-owned snapshot exists; no cross-environment or cross-release fallback is permitted. No blocking DOC-16.7 gap was found.
 
 ## DOC-16.8 — Navigation and cross-link audit
 

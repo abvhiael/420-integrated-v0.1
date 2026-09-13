@@ -26,12 +26,20 @@ Deliverable: `docs/assistant/grounding-authority-contract.md`.
 
 Ask 420 is bounded as a grounded documentation interface. Concrete ecosystem claims require canonical 420Docs evidence and citations; DOC-13 controls version/environment eligibility; DOC-11 owns troubleshooting semantics; DOC-14 supplies navigation context; and 420AI inference remains subordinate to retrieval and protocol authority. Unsupported or unverifiable questions fail closed rather than being filled with invented ecosystem behavior.
 
-## DOC-15.2 — Retrieval corpus and source registry
+## DOC-15.2 — Retrieval corpus and source registry — COMPLETE
 
-- [ ] Define machine-readable source inventory for assistant retrieval.
-- [ ] Classify canonical, generated, historical and compatibility-only sources.
-- [ ] Exclude unpublished or non-authoritative material from authoritative answers.
-- [ ] Add deterministic source-registry validation.
+- [x] Define machine-readable source inventory for assistant retrieval.
+- [x] Classify canonical, generated, historical and compatibility-only sources.
+- [x] Exclude unpublished or non-authoritative material from authoritative answers.
+- [x] Add deterministic source-registry validation.
+
+Deliverables:
+
+- `docs/assistant/source-registry.json`
+- `docs/assistant/retrieval-corpus-contract.md`
+- `scripts/validate-doc-assistant-source-registry.py`
+
+Ask 420 now retrieves through a governed source registry rather than treating repository search as authority. Canonical sources may substantiate answers in published environments; generated reference is development/provenance scoped; historical evidence is bound to an immutable release; DOC-14 contextual material is navigation-only; and unpublished testnet/mainnet plus ungoverned repository content are explicitly excluded. DOC-15.9 will wire the new validator into unified 420Docs qualification.
 
 ## DOC-15.3 — Query and intent contract
 

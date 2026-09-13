@@ -49,11 +49,18 @@ Deliverable: `docs/contextual/wallet-contextual-help.md`.
 
 Wallet contextual IDs now cover setup/import/protection, send/receive/activity, troubleshooting, dApp connections, signing/transaction review, permissions/sessions, recovery/device safety and the neutral Wallet overview. All targets are constrained to the currently published development and Genesis documentation environments; runtime Smart Account, passkey, signing and recovery authority remains independent of documentation resolution.
 
-## DOC-14.4 — Genesis dApp contextual help
+## DOC-14.4 — Genesis dApp contextual help — COMPLETE
 
-- [ ] Map every frozen Genesis user-facing application to contextual task/help targets.
-- [ ] Cover state-changing, value-changing, signing, permissions, economics, security and privacy surfaces.
-- [ ] Preserve protocol-only Gaming Protocol and testnet-only Faucet boundaries.
+- [x] Map every frozen Genesis user-facing application to contextual task/help targets.
+- [x] Cover state-changing, value-changing, signing, permissions, economics, security and privacy surfaces.
+- [x] Preserve protocol-only Gaming Protocol and testnet-only Faucet boundaries.
+
+Deliverables:
+
+- `docs/contextual/genesis-dapp-contextual-help.md`
+- `docs/contextual/genesis-dapp-context-map.json`
+
+The application map covers the 18 non-Wallet Genesis user-facing applications plus Faucet. Each application receives six deterministic contextual slots: overview, primary task, permissions/signing, fees/economics, security/privacy and troubleshooting. Genesis applications are constrained to development/Genesis documentation authority. Faucet is declared testnet-only and remains non-resolvable until DOC-13 publishes a testnet documentation track. 420 Gaming Protocol remains intentionally protocol-only and does not receive a standalone user-application contextual namespace.
 
 ## DOC-14.5 — Troubleshooting and error deep links
 

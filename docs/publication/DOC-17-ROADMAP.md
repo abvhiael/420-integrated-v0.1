@@ -12,15 +12,19 @@ DOC-17 follows the monolithic documentation-phase policy: DOC-17.1 through DOC-1
 
 Deliverable: `docs/publication/publication-contract.md`.
 
-Result: GitHub Pages is the explicit current production presentation target at `https://abvhiael.github.io/420-integrated-v0.1/` until an explicitly configured replacement/custom domain is committed and qualified. Repository-controlled documentation remains authoritative; publication never proves runtime state. The current deployment gap is that the Pages workflow performs a strict build plus selected post-build checks but does not yet run the complete unified 420Docs qualification pipeline before artifact upload/deploy.
+Result: GitHub Pages is the explicit current production presentation target at `https://abvhiael.github.io/420-integrated-v0.1/` until an explicitly configured replacement/custom domain is committed and qualified. Repository-controlled documentation remains authoritative; publication never proves runtime state.
 
-## DOC-17.2 — Pages build and deployment hardening — NEXT
-- [ ] Require the unified 420Docs qualification pipeline before artifact upload/deploy.
-- [ ] Bind deployment to a qualified commit identity and deterministic site artifact.
-- [ ] Preserve concurrency, permissions and rollback-safe deployment behavior.
-- [ ] Add publication-specific CI validation and workflow triggers.
+## DOC-17.2 — Pages build and deployment hardening — COMPLETE
+- [x] Require the unified 420Docs qualification pipeline before artifact upload/deploy.
+- [x] Bind deployment to a qualified commit identity and deterministic site artifact.
+- [x] Preserve concurrency, permissions and rollback-safe deployment behavior.
+- [x] Add publication-specific CI validation and workflow triggers.
 
-## DOC-17.3 — Canonical URL, metadata and release routing
+Deliverable: `docs/publication/pages-deployment-hardening.md`.
+
+Result: `.github/workflows/docs-pages.yml` now runs the full `scripts/qualify-documentation.py` gate before artifact upload, records the exact source SHA/repository/ref in `site/publication.json`, and deploys only from the successful build job. `scripts/validate-doc-pages-publication.py` enforces ordering, commit identity, Pages permissions/environment and serialized non-cancelling deployment; that validator is itself part of unified 420Docs CI.
+
+## DOC-17.3 — Canonical URL, metadata and release routing — NEXT
 - [ ] Define canonical URL generation without assuming an unconfigured custom domain.
 - [ ] Add site URL/canonical metadata only from an explicitly published production target.
 - [ ] Verify DOC-13 environment/version routes survive production publication.

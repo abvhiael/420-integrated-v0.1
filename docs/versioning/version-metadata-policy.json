@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "metadata_fields": {
+    "release": "doc_release",
+    "environment": "doc_environment",
+    "publication_status": "publication_status"
+  },
+  "legacy_version_field": "version",
+  "legacy_current_alias": "current",
+  "allowed_environments": [
+    "development",
+    "genesis",
+    "testnet",
+    "mainnet"
+  ],
+  "allowed_publication_status": [
+    "development",
+    "current",
+    "historical",
+    "deprecated",
+    "unpublished"
+  ],
+  "mutable_release_aliases": [
+    "current",
+    "development"
+  ],
+  "reserved_release_labels": [
+    "current",
+    "development",
+    "genesis"
+  ],
+  "release_id_pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+  "compatibility": {
+    "allow_legacy_version_current_without_doc13_tuple": true,
+    "require_complete_tuple_when_any_doc13_field_present": true
+  },
+  "rules": {
+    "historical_requires_immutable_release": true,
+    "deprecated_requires_immutable_release": true,
+    "development_environment_allows_release": ["development", "current"],
+    "genesis_environment_disallows_release": ["development"],
+    "testnet_environment_disallows_release": ["development", "genesis"],
+    "mainnet_environment_disallows_release": ["development", "genesis"]
+  }
+}

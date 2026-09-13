@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "release": "development",
+  "environment": "development",
+  "publication_status": "development",
+  "immutable": false,
+  "authority": "repository-head",
+  "evidence": [
+    "docs/versioning/version-authority-contract.md",
+    "docs/versioning/version-metadata-schema.md"
+  ],
+  "network_authority": false,
+  "deployment_authority": false,
+  "generated_reference": {
+    "mode": "live",
+    "environment": "development",
+    "source_registry": "docs/reference/reference-sources.json",
+    "generated_root": "docs/reference/generated",
+    "outputs": [
+      "source-manifest.md",
+      "contracts.md",
+      "events-errors.md",
+      "rpc.md",
+      "indexer-api.md",
+      "sdk-cli.md",
+      "networks.md",
+      "deployments.md"
+    ],
+    "network_authority": false,
+    "deployment_authority": false
+  },
+  "notes": "Mutable repository-head documentation. Checked-in DOC-10 generated reference is development-scoped and does not assert canonical testnet or mainnet network/deployment state."
+}

@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "immutable_statuses": ["current", "historical", "deprecated"],
+  "unsupported_statuses": ["historical", "deprecated"],
+  "current_alias": "current",
+  "rules": {
+    "immutable_release_required_for_historical": true,
+    "immutable_release_required_for_deprecated": true,
+    "current_release_must_be_published": true,
+    "current_release_must_match_track_environment": true,
+    "one_current_release_per_track": true,
+    "historical_release_must_remain_published_by_id": true,
+    "deprecated_release_must_remain_published_by_id": true,
+    "historical_content_is_not_rewritten_in_place": true,
+    "unsupported_versions_require_banner": true,
+    "troubleshooting_ids_remain_stable": true,
+    "historical_deep_links_remain_release_qualified": true
+  },
+  "banner_labels": {
+    "historical": "Historical documentation — retained for the referenced release; not the current supported documentation.",
+    "deprecated": "Deprecated documentation — retained for compatibility/reference; use the current supported release when possible."
+  },
+  "unsupported_route_behavior": "retained-by-immutable-release-or-explicit-tombstone"
+}

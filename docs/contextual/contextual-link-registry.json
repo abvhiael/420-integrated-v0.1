@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "id_format": "CTX-<DOMAIN>-<NNN>",
+  "allowed_target_types": ["task", "concept", "reference", "troubleshooting"],
+  "allowed_audiences": ["user", "developer", "operator"],
+  "allowed_environments": ["development", "genesis", "testnet", "mainnet"],
+  "records": {
+    "CTX-DOCS-001": {
+      "status": "active",
+      "source_surfaces": ["420docs", "wallet", "dapp"],
+      "target_type": "concept",
+      "audience": ["user", "developer", "operator"],
+      "environments": ["development", "genesis"],
+      "target": {
+        "path": "contextual/index.md"
+      },
+      "aliases": []
+    },
+    "CTX-WALLET-001": {
+      "status": "active",
+      "source_surfaces": ["420-wallet"],
+      "target_type": "task",
+      "audience": ["user"],
+      "environments": ["development", "genesis"],
+      "target": {
+        "path": "users/wallet/setup-import-and-protection.md"
+      },
+      "aliases": []
+    },
+    "CTX-WALLET-002": {
+      "status": "active",
+      "source_surfaces": ["420-wallet"],
+      "target_type": "task",
+      "audience": ["user"],
+      "environments": ["development", "genesis"],
+      "target": {
+        "path": "users/wallet/send-receive-and-activity.md"
+      },
+      "aliases": []
+    },
+    "CTX-WALLET-003": {
+      "status": "active",
+      "source_surfaces": ["420-wallet"],
+      "target_type": "troubleshooting",
+      "audience": ["user"],
+      "environments": ["development", "genesis"],
+      "target": {
+        "path": "users/wallet/troubleshooting.md"
+      },
+      "aliases": []
+    },
+    "CTX-TRB-001": {
+      "status": "active",
+      "source_surfaces": ["wallet", "dapp", "cli", "operator"],
+      "target_type": "troubleshooting",
+      "audience": ["user", "developer", "operator"],
+      "environments": ["development", "genesis"],
+      "target": {
+        "path": "troubleshooting/search-diagnostics-support.md",
+        "anchor": "stable-deep-link-contract-for-doc-14"
+      },
+      "aliases": []
+    },
+    "CTX-DEV-001": {
+      "status": "active",
+      "source_surfaces": ["sdk", "cli", "developer-hub"],
+      "target_type": "reference",
+      "audience": ["developer"],
+      "environments": ["development", "genesis"],
+      "target": {
+        "path": "developers/index.md"
+      },
+      "aliases": []
+    }
+  }
+}

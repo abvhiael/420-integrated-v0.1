@@ -14,13 +14,17 @@ DOC-15 defines the documentation-assistant layer for 420Docs. Ask 420 answers ec
 
 DOC-15 is monolithic: DOC-15.1 through DOC-15.10 remain on one branch/PR and merge only after final audit, reconciliation with current `main`, exact-head 420Docs Qualification and exact-head 420 Integrated Qualification are green.
 
-## DOC-15.1 — Grounding and authority contract
+## DOC-15.1 — Grounding and authority contract — COMPLETE
 
-- [ ] Define Ask 420 authority and non-authority boundaries.
-- [ ] Require answers to be grounded in canonical 420Docs sources.
-- [ ] Define citation requirements and unsupported-answer behavior.
-- [ ] Preserve chain/protocol/runtime authority over documentation and assistant output.
-- [ ] Define relationship to 420AI without granting AI provider or model authority.
+- [x] Define Ask 420 authority and non-authority boundaries.
+- [x] Require answers to be grounded in canonical 420Docs sources.
+- [x] Define citation requirements and unsupported-answer behavior.
+- [x] Preserve chain/protocol/runtime authority over documentation and assistant output.
+- [x] Define relationship to 420AI without granting AI provider or model authority.
+
+Deliverable: `docs/assistant/grounding-authority-contract.md`.
+
+Ask 420 is bounded as a grounded documentation interface. Concrete ecosystem claims require canonical 420Docs evidence and citations; DOC-13 controls version/environment eligibility; DOC-11 owns troubleshooting semantics; DOC-14 supplies navigation context; and 420AI inference remains subordinate to retrieval and protocol authority. Unsupported or unverifiable questions fail closed rather than being filled with invented ecosystem behavior.
 
 ## DOC-15.2 — Retrieval corpus and source registry
 

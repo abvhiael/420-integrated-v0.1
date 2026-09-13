@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "authority": "DOC-17 repository integration contract; runtime authority remains with canonical subsystem sources",
+  "production_target": "docs/publication/production-target.json",
+  "readme": "README.md",
+  "public_root": "https://abvhiael.github.io/420-integrated-v0.1/",
+  "entries": [
+    {"id":"docs-root","label":"420Docs","source":"docs/index.md","public_path":""},
+    {"id":"get-started","label":"Get Started","source":"docs/getting-started/index.md","public_path":"getting-started/"},
+    {"id":"users","label":"Use 420","source":"docs/users/index.md","public_path":"users/"},
+    {"id":"developers","label":"Build on 420","source":"docs/developers/index.md","public_path":"developers/"},
+    {"id":"operators","label":"Operate 420","source":"docs/operators/index.md","public_path":"operators/"},
+    {"id":"architecture","label":"Architecture","source":"docs/architecture/index.md","public_path":"architecture/"},
+    {"id":"reference","label":"Reference","source":"docs/reference/index.md","public_path":"reference/"},
+    {"id":"troubleshooting","label":"Troubleshooting","source":"docs/troubleshooting/index.md","public_path":"troubleshooting/"}
+  ],
+  "rules": {
+    "readme_must_link_public_root": true,
+    "readme_must_link_source_entries": true,
+    "source_entries_must_exist": true,
+    "public_paths_must_be_relative_to_committed_target": true,
+    "repository_links_do_not_establish_runtime_authority": true
+  }
+}

@@ -28,15 +28,6 @@ Branch: `docs/doc-13-versioning`
 - [x] Define current-versus-historical authority rules and fail-closed behavior for unknown versions.
 - [x] Define the DOC-13 relationship to generated DOC-10 reference and DOC-12 CI.
 
-Deliverables:
-
-- `docs/versioning/version-authority-contract.md`
-- explicit separation of release/lifecycle identity, environment and publication status
-- `current` defined as a mutable resolver alias rather than an immutable historical version
-- fail-closed rules for unknown/unpublished versions and missing environment/deployment evidence
-- explicit rule that `genesis`, `testnet` and `mainnet` labels do not create canonical network/deployment authority by themselves
-- DOC-10 generated-reference and DOC-12 CI ownership preserved, with DOC-13 adding version/environment identity rather than replacing either system
-
 ### DOC-13.2 — Version metadata schema — COMPLETE
 
 - [x] Define normalized version/environment front-matter fields and accepted vocabulary.
@@ -44,35 +35,12 @@ Deliverables:
 - [x] Define release identifiers, aliases and immutable historical labels.
 - [x] Add deterministic validation without forcing an unsafe bulk rewrite of legacy pages.
 
-Deliverables:
-
-- `docs/versioning/version-metadata-schema.md` — normalized DOC-13 metadata contract and migration rules
-- `docs/versioning/version-metadata-policy.json` — machine vocabulary, aliases, release syntax and compatibility constraints
-- `scripts/validate-doc-version-metadata.py` — deterministic complete-tuple and environment/release compatibility validation
-- atomic governed tuple: `doc_release`, `doc_environment`, `publication_status`
-- compatibility rule preserving existing `version: current` pages without inferring environment or immutable release authority
-- historical/deprecated pages prohibited from using mutable aliases such as `current`/`development`
-- `docs/versioning` added to governed front-matter roots
-- `version-metadata` added to the unified DOC-12 qualification runner and protected by the workflow contract/path triggers
-
 ### DOC-13.3 — Version registry and release manifests — COMPLETE
 
 - [x] Add a canonical documentation version registry.
 - [x] Represent development, Genesis, testnet and mainnet publication tracks explicitly.
 - [x] Bind each published track to repository/release evidence where available.
 - [x] Fail closed when a requested release/environment lacks approved evidence.
-- [x] Wire registry/manifests into the unified documentation qualification gate.
-
-Deliverables:
-
-- `docs/versioning/version-registry.json` — canonical track/current/published/alias/release routing registry
-- `docs/versioning/releases/development.json` — mutable repository-head documentation manifest
-- `docs/versioning/releases/genesis.json` — immutable frozen Genesis documentation manifest without live-network/deployment authority claims
-- `docs/versioning/version-registry-contract.md` — registry, manifest, alias and fail-closed semantics
-- `scripts/validate-doc-version-registry.py` — deterministic track/release/manifest/evidence/alias validation
-- `version-registry` stage in `scripts/qualify-documentation.py`, protected by workflow contract/path triggers
-- current publication state: development and Genesis published; testnet and mainnet intentionally unavailable until approved evidence exists
-- qualification evidence: exact-head 420Docs Qualification #700 passed with the registry validator enabled
 
 ### DOC-13.4 — URL and renderer version model — COMPLETE
 
@@ -82,32 +50,41 @@ Deliverables:
 - [x] Prevent historical/versioned routes from silently resolving to current incompatible content.
 - [x] Publish deterministic renderer context during the GitHub Pages build.
 
+### DOC-13.5 — Navigation and version selector — COMPLETE
+
+- [x] Add visible current-version/environment context to rendered 420Docs.
+- [x] Add registry-backed version-switch navigation only where a corresponding page inventory proves the target exists.
+- [x] Disable unavailable same-page targets instead of manufacturing dead links or falling through to another context.
+- [x] Keep existing audience navigation intact while injecting version context after the strict MkDocs build.
+
 Deliverables:
 
-- `docs/versioning/url-renderer-contract.md` — route classes, stability, fallback and renderer authority rules
-- `docs/versioning/url-renderer-policy.json` — machine route templates and fail-closed behavior
-- `scripts/render-doc-version-context.py` — registry-backed route resolver and deterministic `site/version-context.json` generator
-- `scripts/validate-doc-version-routing.py` — exact resolver/route qualification for current, immutable, unknown and unpublished paths
-- immutable route shape: `/versions/<environment>/<release>/<path>`
-- mutable alias route shape: `/versions/<environment>/current/<path>`
-- cross-environment and cross-release fallback disabled
-- mutable development release prohibited from masquerading as an immutable release route
-- GitHub Pages now emits version renderer context after strict MkDocs build
-- qualification evidence: exact-head 420Docs Qualification #711 passed with the routing gate enabled
+- `docs/versioning/navigation-selector-contract.md`
+- `scripts/inject-doc-version-selector.py`
+- context-scoped page inventories emitted by `scripts/render-doc-version-context.py`
+- Pages and unified CI pipeline order: strict build → version context → selector injection → search/navigation qualification
+- exact-head qualification evidence: 420Docs Qualification #722 and 420 Integrated Qualification #2823 passed on `8a42138216a554038c7dc1a4e7843faf4814c4d6`
 
-### DOC-13.5 — Navigation and version selector
+### DOC-13.6 — Historical retention and archival policy — COMPLETE
 
-- Add visible current-version/environment context to 420Docs.
-- Add version-switch navigation where a corresponding page exists.
-- Define behavior when a page did not exist in another version.
-- Keep audience navigation intact within each selected documentation context.
+- [x] Define when documentation is snapshotted versus updated in place.
+- [x] Define immutable historical releases and supported-current aliases.
+- [x] Define archival/deprecation banner semantics and unsupported-version behavior.
+- [x] Preserve troubleshooting/error identifiers and canonical historical references.
+- [x] Add deterministic retention validation to the unified documentation gate.
 
-### DOC-13.6 — Historical retention and archival policy
+Deliverables:
 
-- Define when documentation is snapshotted versus updated in place.
-- Define immutable historical releases and supported-current aliases.
-- Define archival/deprecation banners and unsupported-version semantics.
-- Preserve troubleshooting/error identifiers and canonical historical references.
+- `docs/versioning/historical-retention-contract.md`
+- `docs/versioning/historical-retention-policy.json`
+- `scripts/validate-doc-historical-retention.py`
+- immutable released documentation is retained by release-qualified identity rather than rewritten in place
+- moving a track-local `current` alias cannot destroy or reinterpret the previous immutable snapshot
+- historical/deprecated releases must remain immutable and explicitly published by release ID while retained
+- unsupported historical routes use retained immutable content or an explicit tombstone, never silent fallback to current
+- historical/deprecated notice text is renderer metadata and does not mutate the underlying snapshot
+- stable `TRB-<DOMAIN>-<NNN>` troubleshooting identifiers remain historically attributable and cannot be silently reassigned
+- `historical-retention` added to the unified 420Docs qualification runner and workflow contract
 
 ### DOC-13.7 — Generated reference version coupling
 

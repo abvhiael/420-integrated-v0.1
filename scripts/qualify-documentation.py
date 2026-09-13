@@ -46,6 +46,7 @@ STAGES: tuple[Stage, ...] = (
     Stage("assistant-420ai", (sys.executable, "scripts/validate-doc-assistant-420ai.py")),
     Stage("assistant-publication-safety", (sys.executable, "scripts/validate-doc-assistant-publication.py")),
     Stage("genesis-documentation-matrix", (sys.executable, "scripts/validate-doc-genesis-matrix.py")),
+    Stage("genesis-contract-documentation-inventory", (sys.executable, "scripts/validate-doc-genesis-contract-inventory.py")),
     Stage("internal-links", (sys.executable, "scripts/validate-doc-links.py")),
     Stage("troubleshooting-ids", (sys.executable, "scripts/validate-troubleshooting-ids.py")),
     Stage("orphan-navigation", (sys.executable, "scripts/validate-doc-orphans.py")),

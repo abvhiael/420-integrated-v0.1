@@ -12,8 +12,6 @@ DOC-17 follows the monolithic documentation-phase policy: DOC-17.1 through DOC-1
 
 Deliverable: `docs/publication/publication-contract.md`.
 
-Result: GitHub Pages is the explicit current production presentation target at `https://abvhiael.github.io/420-integrated-v0.1/` until an explicitly configured replacement/custom domain is committed and qualified. Repository-controlled documentation remains authoritative; publication never proves runtime state.
-
 ## DOC-17.2 — Pages build and deployment hardening — COMPLETE
 - [x] Require the unified 420Docs qualification pipeline before artifact upload/deploy.
 - [x] Bind deployment to a qualified commit identity and deterministic site artifact.
@@ -21,8 +19,6 @@ Result: GitHub Pages is the explicit current production presentation target at `
 - [x] Add publication-specific CI validation and workflow triggers.
 
 Deliverable: `docs/publication/pages-deployment-hardening.md`.
-
-Result: `.github/workflows/docs-pages.yml` now runs the full `scripts/qualify-documentation.py` gate before artifact upload, records the exact source SHA/repository/ref in `site/publication.json`, and deploys only from the successful build job. `scripts/validate-doc-pages-publication.py` enforces ordering, commit identity, Pages permissions/environment and serialized non-cancelling deployment; that validator is itself part of unified 420Docs CI.
 
 ## DOC-17.3 — Canonical URL, metadata and release routing — COMPLETE
 - [x] Define canonical URL generation without assuming an unconfigured custom domain.
@@ -32,8 +28,6 @@ Result: `.github/workflows/docs-pages.yml` now runs the full `scripts/qualify-do
 
 Deliverable: `docs/publication/canonical-url-release-routing.md`.
 
-Result: `docs/publication/production-target.json` is the single committed production URL contract. The unified build injects and validates one canonical link per rendered page from that target. DOC-13 remains the version authority: development and Genesis are published, while testnet/mainnet remain unavailable with no cross-environment or cross-release fallback. Canonical-routing changes trigger both qualification and Pages publication workflows.
-
 ## DOC-17.4 — Repository integration — COMPLETE
 - [x] Verify README and repository navigation point to the canonical production docs entry.
 - [x] Preserve stable architecture/user/developer/operator/troubleshooting/reference source entry links.
@@ -41,14 +35,16 @@ Result: `docs/publication/production-target.json` is the single committed produc
 
 Deliverable: `docs/publication/repository-integration.md` and `docs/publication/repository-entrypoints.json`.
 
-Result: the README public 420Docs root is bound to the committed production target while repository-relative audience links remain valid source-navigation paths. `scripts/validate-doc-repository-integration.py` checks the canonical root, required audience families, source-file existence and safe production-relative paths as part of unified documentation qualification. README and repository-integration changes participate in both qualification and Pages publication triggers.
+## DOC-17.5 — 420 Wallet integration — COMPLETE
+- [x] Wire Wallet help/context entry points to stable DOC-14 identifiers and the canonical production route contract.
+- [x] Preserve explicit environment/version binding and fail-closed behavior.
+- [x] Verify Wallet documentation resolution remains navigation-only and cannot become signing/account/runtime authority.
 
-## DOC-17.5 — 420 Wallet integration — NEXT
-- [ ] Wire Wallet help/context entry points to stable DOC-14 identifiers or canonical production routes.
-- [ ] Preserve environment/version binding and safe fallback behavior.
-- [ ] Verify Wallet never treats docs as signing/account/runtime authority.
+Deliverables: `docs/publication/wallet-integration.md`, `wallet/web/docs-context.json`, `wallet/web/core/docs-help.js`, `wallet/web/test/docs-help.test.js`, and `scripts/validate-doc-wallet-integration.py`.
 
-## DOC-17.6 — 420 Explorer integration
+Result: the Wallet runtime now has a deterministic contextual-help resolver for all eight active `CTX-WALLET-*` records. It resolves only published `development`/`genesis` documentation with `current` version intent, returns unavailable for testnet/mainnet or unknown/unsafe inputs, and labels successful results `documentation-navigation-only`. Unified 420Docs qualification checks the bundle against DOC-14 and the DOC-17 production target.
+
+## DOC-17.6 — 420 Explorer integration — NEXT
 - [ ] Wire Explorer help/context entry points to stable contextual/documentation routes.
 - [ ] Preserve chain/finality authority boundaries.
 - [ ] Verify stale/unavailable docs cannot alter canonical Explorer interpretation.

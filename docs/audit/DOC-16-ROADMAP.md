@@ -1,124 +1,80 @@
 # DOC-16 — Genesis documentation audit roadmap
 
-DOC-16 is the final Genesis-wide documentation matrix audit. It does not create new protocol or application authority. It verifies that the documentation already produced in DOC-0 through DOC-15 is complete, internally coherent, environment/version correct, safely navigable, and explicit about unsupported or unpublished states.
-
-DOC-16 follows the monolithic documentation-phase policy: DOC-16.1 through DOC-16.10 remain on one branch and pull request, then reconcile with current `main`, requalify the exact head with 420Docs and full 420 Integrated qualification, and merge once.
+DOC-16 is the final Genesis-wide documentation matrix audit. It verifies completeness, internal consistency, environment/version correctness, safe navigation and explicit unsupported/unpublished states. DOC-16.1 through DOC-16.10 remain on one monolithic branch/PR and merge only after final reconciliation plus exact-head 420Docs and full 420 Integrated qualification.
 
 ## DOC-16.1 — Audit authority, dimensions and frozen Genesis inventory — COMPLETE
+- [x] Freeze architecture, user, developer, security/privacy, troubleshooting/recovery and reference dimensions.
+- [x] Freeze supported environment/version semantics and the Genesis surface inventory.
+- [x] Establish machine-readable matrix evidence requirements.
 
-- [x] Define the audit authority and non-authority boundary.
-- [x] Freeze the Genesis documentation audit dimensions: architecture, user, developer, security/privacy, troubleshooting/recovery, generated/reference.
-- [x] Define supported environment/version dimensions and fail-closed handling for unpublished tracks.
-- [x] Establish the matrix row contract and evidence requirements.
-- [x] Materialize the canonical Genesis surface inventory into the machine-readable matrix.
-
-Deliverables:
-
-- `docs/audit/DOC-16-ROADMAP.md`
-- `docs/audit/genesis-documentation-matrix.md`
-- `docs/audit/genesis-documentation-matrix.json`
-
-The initial matrix is grounded in the frozen `config/genesis-applications.json` inventory: 20 user-facing/testnet manual targets plus the protocol-only 420 Gaming Protocol. Every row records its semantic environment, required audit dimensions, canonical evidence candidates and authority caveat. Faucet is explicitly testnet-only and remains unpublished until DOC-13 publishes a testnet documentation track.
+Deliverables: `genesis-documentation-matrix.md`, `genesis-documentation-matrix.json`.
 
 ## DOC-16.2 — Architecture coverage audit — COMPLETE
+- [x] Architecture/system-context routes verified for all frozen surfaces.
+- [x] Authority, dependency and trust boundaries verified.
+- [x] Gaps/exclusions recorded.
 
-- [x] Verify every Genesis surface has an architecture/system-context route.
-- [x] Verify authority, dependency and trust-boundary coverage.
-- [x] Record gaps, deliberate exclusions and remediation owners.
-
-Deliverable:
-
-- `docs/audit/architecture-coverage-audit.md`
-
-Result: all 21 frozen audit surfaces have architecture/system-context coverage. No blocking architecture gap was found. One non-blocking matrix metadata defect was recorded: the Gaming Protocol row points to nonexistent `docs/developers/gaming-protocol.md`; the canonical evidence exists at `docs/developers/gaming-protocol-integration.md`. DOC-16.9 owns correction plus automated target-existence validation.
+Deliverable: `architecture-coverage-audit.md`.
 
 ## DOC-16.3 — User journey coverage audit — COMPLETE
+- [x] Onboarding, primary tasks, state/value-changing actions and completion states verified.
+- [x] Signing, permissions, fees and environment warnings verified where applicable.
+- [x] Gaming Protocol remains protocol-only; Faucet remains testnet-only.
 
-- [x] Verify onboarding, primary tasks, state/value-changing actions and safe completion states.
-- [x] Verify signing, permissions, fees and network/environment warnings where applicable.
-- [x] Verify testnet-only and protocol-only surfaces are not presented as general user applications.
-
-Deliverable:
-
-- `docs/audit/user-journey-coverage-audit.md`
-
-Result: the 20 user-facing/testnet targets preserve complete task-oriented journeys and the required signing/economic/finality boundaries where applicable. 420 Gaming Protocol remains deliberately protocol-only, while Faucet remains testnet-only and unpublished by DOC-13 policy. No blocking DOC-16.3 gap was found.
+Deliverable: `user-journey-coverage-audit.md`.
 
 ## DOC-16.4 — Developer integration coverage audit — COMPLETE
+- [x] Discovery, interfaces, network identity, reads/writes, events/errors and examples verified.
+- [x] Generated-reference handoffs/provenance verified.
+- [x] Developer Hub/SDK/CLI/Indexer/provider tooling remains non-authoritative.
 
-- [x] Verify canonical discovery, interfaces, network identity, reads/writes, events/errors and integration examples.
-- [x] Verify generated reference handoffs and provenance.
-- [x] Verify operational tooling is not promoted into protocol authority.
-
-Deliverable:
-
-- `docs/audit/developer-integration-coverage-audit.md`
-
-Result: the DOC-9 developer path and DOC-10 generated-reference handoff cover the frozen Genesis surface set without promoting Developer Hub, SDK, CLI, Indexer, AppStore or provider infrastructure into protocol authority. No blocking DOC-16.4 gap was found. The previously recorded Gaming Protocol matrix path defect remains queued for DOC-16.9 remediation.
+Deliverable: `developer-integration-coverage-audit.md`.
 
 ## DOC-16.5 — Security and privacy coverage audit — COMPLETE
+- [x] Secret handling, signing authority, private payloads and support safety verified.
+- [x] Value-risk, Bridge/provider, Identity and recovery warnings verified.
+- [x] No documentation weakens runtime safety for liveness/convenience.
 
-- [x] Verify secret-handling boundaries, signing authority, private payloads and support-safety rules.
-- [x] Verify value-risk, bridge/provider, identity and recovery-specific warnings.
-- [x] Verify documentation never weakens runtime safety for liveness or convenience.
-
-Deliverable:
-
-- `docs/audit/security-privacy-coverage-audit.md`
-
-Result: the frozen Genesis documentation consistently isolates signing/service secrets, preserves Wallet/Smart Account and recovery authority, minimizes private payload exposure, treats provider evidence as bounded rather than ambient authority, and fails closed rather than weakening identity/finality/replay/risk/recovery checks for liveness. No blocking DOC-16.5 gap was found.
+Deliverable: `security-privacy-coverage-audit.md`.
 
 ## DOC-16.6 — Troubleshooting and recovery coverage audit — COMPLETE
+- [x] Stable `TRB-*` coverage verified.
+- [x] Retry safety, authority-first diagnostics, escalation and ambiguous-outcome handling verified.
+- [x] Missing dApp CTX materialization identified for DOC-16.9 remediation.
 
-- [x] Verify stable `TRB-*` coverage and contextual `CTX-*` routing for supported surfaces.
-- [x] Verify retry safety, authority-first diagnostics and escalation paths.
-- [x] Verify timeout/unknown-state handling does not fabricate success or failure.
-
-Deliverable:
-
-- `docs/audit/troubleshooting-recovery-coverage-audit.md`
-
-Result: DOC-11 `TRB-*` coverage, retry safety, authority-first recovery, escalation and ambiguous-outcome handling pass across the frozen application set. One blocking cross-phase defect was found: the Genesis dApp contextual map declares application `CTX-<DOMAIN>-006` troubleshooting IDs by convention, but those IDs are not materialized in the authoritative contextual-link registry. DOC-16.9 must register or equivalently materialize those IDs and add deterministic map-to-registry validation before DOC-16 can close.
+Deliverable: `troubleshooting-recovery-coverage-audit.md`.
 
 ## DOC-16.7 — Reference, version and environment audit — COMPLETE
+- [x] Generated-reference provenance/freshness verified.
+- [x] DOC-13 routing and immutable Genesis behavior verified.
+- [x] Unpublished testnet/mainnet fail closed with no cross-environment fallback.
 
-- [x] Verify generated-reference provenance and freshness.
-- [x] Verify DOC-13 environment/version routing and immutable Genesis behavior.
-- [x] Verify unpublished testnet/mainnet targets fail closed and no cross-environment fallback exists.
-
-Deliverable:
-
-- `docs/audit/reference-version-environment-audit.md`
-
-Result: DOC-10 provenance boundaries remain intact; DOC-13 publishes only development/current and immutable genesis/current; testnet/mainnet remain unavailable; Genesis generated reference remains fail-closed until a release-owned snapshot exists; no cross-environment or cross-release fallback is permitted. No blocking DOC-16.7 gap was found.
+Deliverable: `reference-version-environment-audit.md`.
 
 ## DOC-16.8 — Navigation and cross-link audit — COMPLETE
+- [x] Audience entry points and cross-links verified.
+- [x] Ask 420/contextual routing remains publication- and authority-safe.
+- [x] No required top-level Genesis documentation family is orphaned.
 
-- [x] Verify audience entry points and predictable routes between architecture, manuals, developer docs, troubleshooting and reference.
-- [x] Verify contextual links and Ask 420 citations resolve only to canonical published material.
-- [x] Verify no orphaned required Genesis documentation remains.
+Deliverable: `navigation-cross-link-audit.md`.
 
-Deliverable:
+## DOC-16.9 — Gap remediation and automated matrix qualification — COMPLETE
+- [x] Remediate all blocking gaps from DOC-16.2 through DOC-16.8.
+- [x] Add deterministic validation for matrix completeness/evidence targets.
+- [x] Add deterministic validation for published dApp contextual IDs.
+- [x] Wire both validators into unified 420Docs qualification, workflow triggers and workflow policy.
 
-- `docs/audit/navigation-cross-link-audit.md`
+Deliverables: `gap-remediation-qualification.md`, `scripts/validate-doc-genesis-matrix.py`, `scripts/validate-doc-contextual-dapp-map.py`.
 
-Result: application, developer, troubleshooting and generated-reference entry points are coherent and Ask 420 keeps contextual material navigation-only. No required top-level Genesis documentation family is orphaned. The previously identified blocking contextual-ID registry defect remains: application `CTX-*` identifiers declared by the dApp context map are not fully materialized in the authoritative contextual-link registry. DOC-16.9 owns remediation plus deterministic map-to-registry validation.
+Result: the Gaming Protocol matrix evidence path now resolves through a stable compatibility handoff to the canonical integration guide. Published Genesis dApp `CTX-<DOMAIN>-001..006` records are deterministically validated from the dApp context map; Faucet/testnet remains unresolved until testnet publication. Matrix row count, unique IDs, required evidence and evidence-path existence are CI gates. No blocking DOC-16.2 through DOC-16.8 gap remains.
 
-## DOC-16.9 — Gap remediation and automated matrix qualification — NEXT
-
-- [ ] Remediate all blocking coverage gaps discovered by DOC-16.2 through DOC-16.8.
-- [ ] Add deterministic machine validation for matrix completeness and evidence targets.
-- [ ] Integrate the matrix validator into unified 420Docs qualification and workflow trigger policy.
-
-## DOC-16.10 — Final Genesis documentation closeout
-
+## DOC-16.10 — Final Genesis documentation closeout — NEXT
 - [ ] Run the completed matrix audit across every frozen Genesis surface.
 - [ ] Record deliberate unsupported/unpublished states and residual non-blocking follow-ups.
 - [ ] Verify zero blocking documentation gaps remain.
-- [ ] Reconcile the monolithic DOC-16 branch with current `main`.
-- [ ] Require exact-head 420Docs qualification and exact-head full 420 Integrated qualification.
+- [ ] Reconcile with current `main`.
+- [ ] Require exact-head 420Docs and full 420 Integrated qualification.
 - [ ] Merge DOC-16 only after all closeout gates are green.
 
 ## Phase exit condition
-
-Every frozen Genesis surface has explicit, reviewable evidence across architecture, user, developer, security/privacy, troubleshooting/recovery and reference documentation, with correct environment/version semantics, canonical authority boundaries, navigation and generated-reference provenance. Missing or deliberately unsupported coverage is explicit rather than silently substituted. No blocking Genesis documentation gap remains when DOC-16 merges.
+Every frozen Genesis surface has explicit reviewable evidence across all required documentation dimensions, with correct environment/version semantics, canonical authority boundaries, navigation and generated-reference provenance. Missing or deliberately unsupported coverage is explicit. No blocking Genesis documentation gap remains at merge.

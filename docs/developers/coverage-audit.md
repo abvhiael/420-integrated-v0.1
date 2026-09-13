@@ -155,6 +155,7 @@ After merge, DOC-10 becomes the next documentation development phase.
 ## Related documentation
 
 - [Developer landing page](index.md)
+- [420 Gaming Protocol stable route](gaming-protocol.md)
 - [DOC-10 generated reference](../reference/index.md)
 - [End-to-end developer examples](end-to-end-examples.md)
 - [Production and security checklist](production-security-checklist.md)

@@ -52,7 +52,7 @@ The Pages build generates `version-context.json` and injects the version selecto
 
 [Generated reference version coupling](generated-reference-version-contract.md) binds DOC-10 generated outputs to the release/environment that produced them.
 
-The checked-in `docs/reference/generated/` set is explicitly **development-scoped live reference**. It does not become Genesis, testnet or mainnet reference merely because a route, alias or page exists. Immutable releases must either own a frozen generated-reference snapshot with exact SHA-256 provenance for every governed output or declare generated reference unavailable.
+The checked-in `docs/reference/generated/` set is explicitly **development-scoped live reference**. Immutable releases must either own a frozen generated-reference snapshot with exact SHA-256 provenance for every governed output or declare generated reference unavailable.
 
 Current state:
 
@@ -61,7 +61,11 @@ Current state:
 - testnet — unpublished;
 - mainnet — unpublished.
 
-`scripts/validate-doc-generated-reference-version.py` enforces those rules in the unified documentation qualification runner.
+## Migration compatibility
+
+[Documentation migration contract](redirect-migration-contract.md) and `migration-policy.json` govern compatibility between flat legacy routes and version-qualified routes.
+
+There are currently no automatic mappings. Legacy flat URLs remain compatibility-only; missing pages do not fall through to `current`; cross-environment and cross-release mappings are disabled; and routes without a materially equivalent target remain unresolved or explicitly retired. Stable deep-link anchors and troubleshooting identifiers retain their semantic identity.
 
 ## Phase roadmap
 
@@ -69,4 +73,4 @@ See [DOC-13 documentation versioning roadmap](DOC-13-ROADMAP.md).
 
 ## Current state
 
-DOC-13.1 through DOC-13.7 are complete. Next is DOC-13.8 — redirects, migration and compatibility.
+DOC-13.1 through DOC-13.8 are complete. Next is DOC-13.9 — versioning CI and publication safety.

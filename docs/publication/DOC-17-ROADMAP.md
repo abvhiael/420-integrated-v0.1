@@ -51,12 +51,16 @@ Deliverables: `docs/publication/explorer-integration.md`, `explorer/web/static/d
 
 Result: Explorer exposes a canonical production Help entry and all six DOC-14 `CTX-EXPLORER-*` targets. Contextual resolution is navigation-only, accepts only published development/Genesis plus `current` version intent, and fails closed otherwise. Documentation can never change Indexer/RPC-derived chain identity, transaction state or safe/finalized interpretation.
 
-## DOC-17.7 — Developer Hub integration — NEXT
-- [ ] Wire Developer Hub documentation/help entry points to canonical production docs.
-- [ ] Bind network/version context explicitly.
-- [ ] Preserve Developer Hub as non-authoritative orchestration/tooling.
+## DOC-17.7 — Developer Hub integration — COMPLETE
+- [x] Wire Developer Hub documentation/help entry points to canonical production docs.
+- [x] Bind network/version context explicitly.
+- [x] Preserve Developer Hub as non-authoritative orchestration/tooling.
 
-## DOC-17.8 — Genesis dApp integration
+Deliverables: `docs/publication/developer-hub-integration.md`, `developer-hub/dashboard/static/docs-context.json`, `developer-hub/dashboard/static/docs-help.js`, `developer-hub/dashboard/static/docs-ui.js`, and `scripts/validate-doc-developer-hub-integration.py`.
+
+Result: the Developer Hub dashboard exposes all eight active `CTX-DEV-*` targets. It derives documentation environment from the Hub's selected network context, requires `current` version intent, resolves only published development/Genesis tracks, and returns unavailable rather than crossing environment/release boundaries. Documentation remains navigation/reference only and cannot deploy, activate, verify, authorize, or establish finality.
+
+## DOC-17.8 — Genesis dApp integration — NEXT
 - [ ] Integrate the published DOC-14 dApp contextual namespace across supported Genesis applications.
 - [ ] Validate all published `CTX-*` identifiers resolve through the production route.
 - [ ] Keep Gaming Protocol protocol-only and Faucet unavailable until testnet documentation is published.

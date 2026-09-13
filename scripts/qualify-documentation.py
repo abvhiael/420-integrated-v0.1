@@ -45,6 +45,7 @@ STAGES: tuple[Stage, ...] = (
     Stage("strict-mkdocs-build", (sys.executable, "-m", "mkdocs", "build", "--strict")),
     Stage("version-renderer-context", (sys.executable, "scripts/render-doc-version-context.py", "--site-dir", "site")),
     Stage("version-selector-render", (sys.executable, "scripts/inject-doc-version-selector.py", "--site-dir", "site")),
+    Stage("versioning-publication-safety", (sys.executable, "scripts/validate-doc-versioning-ci.py", "--site-dir", "site")),
     Stage("search-navigation", (sys.executable, "scripts/qualify-docs.py")),
 )
 

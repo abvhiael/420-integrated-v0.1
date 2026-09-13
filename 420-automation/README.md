@@ -21,7 +21,13 @@ Workers never:
 
 ## AUT-0
 
-AUT-0 establishes the package, trust model, explicit trigger classes, authority boundaries, qualification workflow, and implementation roadmap. Later phases will add the job model, trigger evaluation, scheduler, execution coordination, retries/idempotency, worker competition, Oracle integration, Developer Hub/API integration, observability, hostile-state hardening, and public-testnet qualification.
+AUT-0 established the package, trust model, explicit trigger classes, authority boundaries, qualification workflow, and implementation roadmap.
+
+## AUT-1
+
+AUT-1 adds stable job identity and the first registry contract for off-chain coordination. A job binds protocol identity, owner/controller identity, trigger reference, target, selector, calldata commitment, native-value bound, gas bound, chain ID, lifecycle state, revision, and timestamps. The execution envelope is immutable after registration. Enable/disable operations may advance lifecycle revision, but cannot alter target, selector, calldata commitment, native value, or gas limit.
+
+Job IDs are deterministically derived from protocol/owner/trigger/execution intent, and registry reads return defensive copies so callers cannot mutate stored state indirectly.
 
 ## Delivery discipline
 

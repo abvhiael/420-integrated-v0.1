@@ -105,13 +105,22 @@ Deliverables:
 
 Contextual resolution now requires the intersection of a contextual record's environment allow-list and DOC-13 publication authority. `development/current` and `genesis/current` are the only published current aliases; `genesis/genesis` is the only immutable published release suitable for durable historical contextual links. Testnet and mainnet remain unavailable, development cannot be promoted into immutable or Genesis authority, and historical links fail closed rather than silently rewriting onto current or cross-environment content.
 
-## DOC-14.8 — Contextual-link CI and publication safety
+## DOC-14.8 — Contextual-link CI and publication safety — COMPLETE
 
-- [ ] Validate registry schema and target existence.
-- [ ] Validate stable anchors and task routes.
-- [ ] Reject unknown, stale, retired, unpublished and cross-environment authoritative targets.
-- [ ] Integrate contextual-link validation into unified 420Docs qualification.
-- [ ] Audit workflow triggers for all contextual policy/registry/validator surfaces.
+- [x] Validate registry schema and target existence.
+- [x] Validate stable anchors and task routes.
+- [x] Reject unknown, stale, retired, unpublished and cross-environment authoritative targets.
+- [x] Integrate contextual-link validation into unified 420Docs qualification.
+- [x] Audit workflow triggers for all contextual policy/registry/validator surfaces.
+
+Deliverables:
+
+- `scripts/validate-doc-contextual-publication.py`
+- contextual registry, version-coupling and publication-safety stages in `scripts/qualify-documentation.py`
+- contextual validator paths in `docs/ci/workflow-policy.json`
+- contextual validator paths in `.github/workflows/docs-qualify.yml`
+
+The unified 420Docs runner now executes `contextual-registry`, `contextual-version-coupling` and `contextual-publication-safety` before link/navigation/build stages. Publication validation rejects missing active targets, active targets that advertise unpublished documentation environments, invalid troubleshooting route targets, unstable example anchors, and application mappings that expose unpublished testnet/mainnet authority. Workflow policy and GitHub Actions path filters include all DOC-14 validator scripts so policy changes cannot bypass qualification.
 
 ## DOC-14.9 — Application integration contract
 

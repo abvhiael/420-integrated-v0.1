@@ -28,30 +28,37 @@ Delivered immutable-envelope-bound plans, selector/hash-verified calldata, deter
 
 ## AUT-5 — funding, fees and execution budgets — implementation complete
 
+Delivered bounded worker/escrow/paymaster funding modes, fee/gas/value/total/reimbursement ceilings, fresh balance/allowance and fee evidence, exact job binding, deterministic funding authorizations, and a paymaster boundary that cannot expand execution authority.
+
+## AUT-6 — retries, idempotency, replay protection and recovery — implementation complete
+
 Delivered:
 
-- per-job funding modes for worker, escrow, and future paymaster sponsorship;
-- explicit caps for max fee per gas and max priority fee per gas;
-- gas-cost, native-value, total-cost, and reimbursement ceilings;
-- fresh funding-balance and allowance evidence requirements;
-- fresh fee-quote requirements with future/stale evidence rejection;
-- exact job binding across transaction plan, budget, and funding snapshot;
-- fail-closed insufficient-balance and insufficient-allowance checks before execution;
-- deterministic maximum gas-cost and total-cost calculations from the AUT-4 gas limit;
-- bounded reimbursement that never exceeds the configured reimbursement ceiling;
-- optional paymaster quote binding to exact paymaster identity, quote ID, expiry, and sponsorship amount;
-- sponsorship clamped to the job's gas-cost ceiling so a paymaster cannot inflate execution spend;
-- explicit rejection of paymaster data for non-paymaster funding modes;
-- deterministic funding-authorization digests bound to the AUT-4 intent and fee/funding decision;
-- hostile tests for fee/value/gas/total overruns, stale evidence, insufficient funding, malformed budgets, paymaster mismatch, and expired sponsorship.
+- deterministic attempt IDs bound to job ID, occurrence ID, AUT-4 intent digest, and attempt number;
+- explicit attempt states for ready, submitted, retry-wait, ambiguous, confirmed, and terminal execution;
+- capped exponential backoff for retryable pre-accept rejections;
+- maximum-attempt enforcement with terminal exhaustion semantics;
+- immediate terminal handling for non-retryable rejections;
+- exact receipt binding so a retry state cannot be updated by a different job, occurrence, or intent;
+- no automatic retry after an accepted submission;
+- no automatic retry after an ambiguous submission;
+- ambiguity hold periods before any not-submitted recovery can become retryable;
+- fresh chain-420 canonical-safe recovery evidence requirements;
+- accepted ambiguity resolution that converts directly to submitted state without replay;
+- transaction observation handling for pending, canonical, finalized, missing, and reorged submissions;
+- finalized transaction confirmation as the terminal success state;
+- fail-closed `not-found` handling that becomes ambiguous rather than retryable;
+- reorg retry only after explicit canonical-safe safe-non-inclusion evidence;
+- uncertain reorg state converted to ambiguity rather than speculative replay;
+- duplicate-active-attempt detection for the same occurrence;
+- hostile tests for premature retries, wrong-chain recovery evidence, unsafe evidence, max-attempt exhaustion, identity mismatch, ambiguous acceptance, missing transactions, and reorg recovery.
 
-AUT-5 authorizes a bounded maximum spend envelope only. It does not custody funds, move balances, choose arbitrary execution intent, enlarge the AUT-1 envelope, or give 420Gas/Paymaster authority over protocol execution.
+AUT-6 does not grant permission to execute a job twice. Recovery evidence can unlock a new bounded attempt only after the previous attempt is proven not to have executed under the phase's fail-closed rules.
 
 Exit gate: merge only after exact-head 420Automation, docs, and repository-wide qualification plus reconciliation with current `main`.
 
 ## Planned phases
 
-- **AUT-6 — retries, idempotency, replay protection and recovery.** Attempt IDs, retry classes/backoff, duplicate execution prevention, reorg-aware recovery and terminal failure semantics.
 - **AUT-7 — worker registry, leases and competition.** Replaceable worker identities, assignment/lease rules, liveness, anti-double-execution coordination and optional stake/slashing references.
 - **AUT-8 — 420Oracle and external-condition integration.** Canonical automation-feed consumption, freshness/quorum checks, provider neutrality and fail-closed trigger evaluation.
 - **AUT-9 — API, authentication and Developer Hub integration.** Job inspection/submission surfaces, scoped API credentials, operator/developer ergonomics and RPC integration.
@@ -61,4 +68,4 @@ Exit gate: merge only after exact-head 420Automation, docs, and repository-wide 
 
 ## Authority rule
 
-420Automation may decide that a registered job is eligible for attempted execution and may coordinate a bounded worker transaction. It never determines consensus, canonical chain state, finality, ownership, wallet authority, bridge settlement, oracle truth, governance authority, arbitrary protocol permissions, or open-ended spending authority.
+420Automation may decide that a registered job is eligible for attempted execution and may coordinate a bounded worker transaction. It never determines consensus, canonical chain state, finality, ownership, wallet authority, bridge settlement, oracle truth, governance authority, arbitrary protocol permissions, open-ended spending authority, or speculative replay authority.

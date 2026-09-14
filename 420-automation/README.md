@@ -6,18 +6,9 @@
 
 **A trigger means a registered job may be eligible for evaluation. It never grants ambient execution authority.**
 
-420Automation workers may eventually observe time, block, event, 420Oracle automation-feed, and explicit manual triggers. The consuming protocol or job definition still owns authorization, target, calldata/value bounds, timing, replay rules, and the state transition itself.
+420Automation workers may observe time, block, event, 420Oracle automation-feed, and explicit manual triggers. The consuming protocol or job definition still owns authorization, target, calldata/value bounds, timing, replay rules, and the state transition itself.
 
-Workers never:
-
-- custody user private keys;
-- sign transactions as a user;
-- invent job targets, calldata, or native value;
-- bypass contract authorization;
-- define canonical blocks, safe/finalized state, or fork choice;
-- turn an oracle result into a general remote-execution channel;
-- substitute automation evidence for bridge proofs;
-- expose or consume public Engine API authority.
+Workers never custody user keys, sign as users, invent target/calldata/value, bypass contract authorization, define canonical/finalized chain state, convert oracle data into remote execution authority, substitute for bridge proofs, or expose Engine API authority.
 
 ## AUT-0
 
@@ -25,9 +16,13 @@ AUT-0 established the package, trust model, explicit trigger classes, authority 
 
 ## AUT-1
 
-AUT-1 adds stable job identity and the first registry contract for off-chain coordination. A job binds protocol identity, owner/controller identity, trigger reference, target, selector, calldata commitment, native-value bound, gas bound, chain ID, lifecycle state, revision, and timestamps. The execution envelope is immutable after registration. Enable/disable operations may advance lifecycle revision, but cannot alter target, selector, calldata commitment, native value, or gas limit.
+AUT-1 added stable job identity and an immutable execution envelope. Job IDs bind protocol identity, owner/controller identity, trigger reference, target, selector, calldata commitment, native-value bound, gas bound, chain ID, lifecycle state, revision, and timestamps.
 
-Job IDs are deterministically derived from protocol/owner/trigger/execution intent, and registry reads return defensive copies so callers cannot mutate stored state indirectly.
+## AUT-2
+
+AUT-2 adds deterministic trigger normalization for all five trigger classes. Time triggers support one-shot, interval, and bounded five-field cron-like schedule definitions. Block triggers use bigint-safe start/interval values. Event triggers bind address, topic filters and confirmation requirements. Oracle triggers bind a feed, comparison predicate, normalized decimal threshold and freshness ceiling. Manual triggers bind an explicit requester policy.
+
+Every normalized trigger receives a deterministic `triggerRef`. Unknown fields and attempts to smuggle target, selector, calldata, native value or gas authority through a trigger are rejected before scheduling. Trigger bindings can therefore be verified against the AUT-1 job registry without making the trigger itself an execution-capability object.
 
 ## Delivery discipline
 

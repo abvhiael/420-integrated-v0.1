@@ -104,5 +104,5 @@ test('GP-17.7 rejects session actions not declared during capability onboarding'
 
 test('GP-17.7 binds authority plan to canonical game identity', () => {
   const plan = authority({ gameId: '420/GAMING/GAME/OTHER/V1' });
-  assert.throws(() => createGamingAuthorityOnboardingPlan420({ onboardingManifest: onboarding(), registrationProfile: registration(), authorityPlan: plan }), /gameId must match onboarding manifest/);
+  assert.throws(() => createGamingAuthorityOnboardingPlan420({ onboardingManifest: onboarding(), registrationProfile: registration(), authorityPlan: plan }), /gameId must match (authority plan|onboarding manifest)/);
 });

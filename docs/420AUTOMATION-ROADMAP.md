@@ -16,25 +16,31 @@ Delivered deterministic job identity, protocol/owner identity, immutable executi
 
 ## AUT-2 — trigger model and normalization — implementation complete
 
+Delivered deterministic normalization and `triggerRef` derivation for time, block, event, Oracle, and manual triggers, plus exact binding verification and execution-authority-smuggling rejection.
+
+## AUT-3 — deterministic eligibility engine and scheduler — implementation complete
+
 Delivered:
 
-- deterministic normalization and `triggerRef` derivation for all trigger classes;
-- one-shot, interval, and bounded five-field cron-like time definitions;
-- bigint-safe block start/interval definitions;
-- event address/topic filtering plus confirmation requirements;
-- 420Oracle feed/predicate/threshold/freshness trigger facts;
-- explicit manual requester policy;
-- canonical decimal and cron normalization so equivalent inputs have stable identity;
-- exact trigger-class/reference verification against registered jobs;
-- rejection of unknown trigger fields;
-- explicit rejection of target, selector, calldata, native-value, and gas authority smuggling through trigger inputs;
-- hostile validation tests for malformed schedules, blocks, events, oracle facts, and manual policies.
+- chain-420 observation validation with freshness and head/safe/finalized ordering checks;
+- deterministic eligibility decisions for all five normalized trigger classes;
+- safe-head block scheduling and event-confirmation evaluation;
+- deterministic occurrence IDs for one-shot, interval, cron, block, event, Oracle, and manual trigger occurrences;
+- duplicate suppression using consumed occurrence IDs;
+- Oracle value freshness plus exact decimal predicate comparison without floating-point arithmetic;
+- manual requester identity enforcement against AUT-1 owner/protocol identity;
+- disabled-job rejection and exact AUT-1/AUT-2 trigger-binding enforcement;
+- deterministic next-time and next-block hints where available;
+- deterministic job-ID scan ordering;
+- configurable per-scan job bound that fails closed on excessive work;
+- hostile tests for wrong-chain, stale-chain, binding mismatch, premature event confirmation, duplicate occurrences, and scan exhaustion.
+
+AUT-3 produces eligibility facts only. It does not construct, sign, fund, submit, retry, or authorize transactions.
 
 Exit gate: merge only after exact-head 420Automation, docs, and repository-wide qualification plus reconciliation with current `main`.
 
 ## Planned phases
 
-- **AUT-3 — deterministic eligibility engine and scheduler.** Evaluate trigger state, next-run windows, chain safety/freshness, duplicate suppression and bounded scan work.
 - **AUT-4 — execution coordination and transaction submission.** Build bounded worker transactions from registered job intent and submit through safe public RPC without user-key custody or ambiguous replay.
 - **AUT-5 — funding, fees and execution budgets.** Job balances/allowances, gas ceilings, fee policy, reimbursements and future 420Gas/Paymaster integration boundaries.
 - **AUT-6 — retries, idempotency, replay protection and recovery.** Attempt IDs, retry classes/backoff, duplicate execution prevention, reorg-aware recovery and terminal failure semantics.

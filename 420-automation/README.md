@@ -62,6 +62,14 @@ Both canonical numeric median reads and exact-result quorum reads are supported.
 
 Oracle provenance remains explicit and provider-neutral. A qualified Oracle fact can establish trigger eligibility, but cannot select a worker, create an AUT-7 lease, alter an AUT-1 execution envelope, bypass AUT-6 replay protection, enlarge AUT-5 funding, or authorize arbitrary execution.
 
+## AUT-9
+
+AUT-9 adds the authenticated off-chain service surface used by operators and Developer Hub applications. Credential records follow the existing Developer Hub service-identity lifecycle shape, use the dedicated `420automation` audience, retain only SHA-256 secret digests, and support `automation:read`, `automation:submit`, `automation:manage`, and `automation:admin` scopes.
+
+Credentials are additionally bound to configured application owner/protocol identities. Read APIs return only jobs visible to that binding; submission and status mutation require the corresponding scope plus a matching owner or protocol binding. Service-admin scope may cross application bindings for Automation administration, but it cannot bypass AUT-1 job validation, mutate the execution envelope, create trigger eligibility, override Oracle truth, acquire worker leases, bypass replay protection, or authorize target-protocol state transitions.
+
+The AUT-9 API is transport-neutral and intentionally small: service inspection, filtered job listing, job lookup, validated job registration, and lifecycle enable/disable. It creates no hidden RPC or Engine surface and treats 420RPC as a separate transport/read-submission dependency rather than an authority source.
+
 ## Delivery discipline
 
 Each Automation phase is developed on its own branch and pull request, reconciled against current `main`, fully qualified on its exact final head, and merged before the next phase starts.

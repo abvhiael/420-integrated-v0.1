@@ -227,12 +227,15 @@ A representative recovery sequence is:
 
 ## Implementation status
 
-The repository currently contains the shared 420 Resource Protocol, the 420Store storage-proof profile, storage agreement/capacity/commitment/proof/settlement registries, object-manifest and shard-placement logic, and an optional provider service supervised by `node420`.
+The repository contains the shared 420 Resource Protocol, the 420Store storage-proof profile, storage agreement/capacity/commitment/proof/settlement registries, object-manifest and shard-placement logic, and the qualified core SR-4.3 provider runtime supervised by `node420`.
+
+The current implementation roadmap, including remaining SR-4.3 closeout and SR-4.4 through SR-10, is maintained in [420Store & storage resource roadmap](420store-roadmap.md).
 
 Operational extensions such as larger-scale provider discovery, repair orchestration, retrieval/bandwidth proofs, proof aggregation, and production multi-provider deployment can evolve behind these boundaries without changing the core authority model.
 
 ## Related documentation
 
+- [420Store & storage resource roadmap](420store-roadmap.md)
 - [Infrastructure overview](infrastructure-overview.md)
 - [`node420`](node420.md)
 - [RPC, gateways, and network ingress](rpc-gateways-network-ingress.md)

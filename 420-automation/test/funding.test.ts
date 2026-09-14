@@ -49,8 +49,8 @@ test('AUT-5 rejects fee, value, gas and total budget overruns', () => {
 });
 
 test('AUT-5 rejects stale funding and stale fee evidence', () => {
-  assert.throws(() => authorizeAutomationFunding420({ plan, budget, funding: { ...funding, observedAtMs: 0 }, feeQuote, nowMs: 20_000 }), /AUT5_FUNDING_STALE/);
-  assert.throws(() => authorizeAutomationFunding420({ plan, budget, funding, feeQuote: { ...feeQuote, observedAtMs: 0 }, nowMs: 20_000 }), /AUT5_FEE_QUOTE_STALE/);
+  assert.throws(() => authorizeAutomationFunding420({ plan, budget, funding: { ...funding, observedAtMs: 0 }, feeQuote: { ...feeQuote, observedAtMs: 20_000 }, nowMs: 20_000 }), /AUT5_FUNDING_STALE/);
+  assert.throws(() => authorizeAutomationFunding420({ plan, budget, funding: { ...funding, observedAtMs: 20_000 }, feeQuote: { ...feeQuote, observedAtMs: 0 }, nowMs: 20_000 }), /AUT5_FEE_QUOTE_STALE/);
 });
 
 test('AUT-5 rejects insufficient balance or allowance before execution', () => {

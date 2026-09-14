@@ -8,41 +8,32 @@ Each numbered AUT phase is developed on its own branch/PR, reconciled against cu
 
 ## AUT-0 — architecture and trust foundation — implementation complete
 
-Delivered:
-
-- `420-automation/` package foundation and TypeScript qualification surface;
-- chain ID 420 pinning;
-- explicit trigger classes: time, block, event, oracle, manual;
-- replaceable off-chain worker model;
-- no user-key custody or user transaction signing;
-- no worker-invented target, calldata, or native value;
-- no bypass of protocol-owned authorization/state checks;
-- no canonical-chain/finality/fork-choice authority;
-- 420Oracle automation triggers treated as eligibility facts, never remote execution;
-- bridge-proof and Engine API separation;
-- hostile configuration tests for authority escalation.
+Delivered package foundation, chain-420 pinning, explicit trigger classes, replaceable workers, and no-custody/no-authority invariants.
 
 ## AUT-1 — job identity, registry and immutable execution envelope — implementation complete
 
+Delivered deterministic job identity, protocol/owner identity, immutable execution envelopes, lifecycle state/revisions, discovery, defensive-copy reads, and fail-closed validation.
+
+## AUT-2 — trigger model and normalization — implementation complete
+
 Delivered:
 
-- deterministic job IDs bound to protocol, owner, trigger and execution intent;
-- explicit protocol and owner/controller identity;
-- chain-420 pinning per job;
-- immutable target, selector, calldata commitment, native-value bound and gas bound;
-- enable/disable lifecycle state;
-- monotonic lifecycle revisions and timestamps;
-- duplicate registration rejection;
-- deterministic discovery/list semantics;
-- defensive-copy registry reads;
-- explicit rejection of execution-envelope replacement after registration;
-- hostile validation tests for wrong-chain IDs, malformed targets/selectors/hashes, invalid value/gas bounds and identity mismatch.
+- deterministic normalization and `triggerRef` derivation for all trigger classes;
+- one-shot, interval, and bounded five-field cron-like time definitions;
+- bigint-safe block start/interval definitions;
+- event address/topic filtering plus confirmation requirements;
+- 420Oracle feed/predicate/threshold/freshness trigger facts;
+- explicit manual requester policy;
+- canonical decimal and cron normalization so equivalent inputs have stable identity;
+- exact trigger-class/reference verification against registered jobs;
+- rejection of unknown trigger fields;
+- explicit rejection of target, selector, calldata, native-value, and gas authority smuggling through trigger inputs;
+- hostile validation tests for malformed schedules, blocks, events, oracle facts, and manual policies.
 
 Exit gate: merge only after exact-head 420Automation, docs, and repository-wide qualification plus reconciliation with current `main`.
 
 ## Planned phases
 
-- **AUT-2 — trigger model and normalization.** Time/cron-like schedules, block-height/interval triggers, chain-event filters, 420Oracle trigger facts, and explicit manual eligibility requests.
 - **AUT-3 — deterministic eligibility engine and scheduler.** Evaluate trigger state, next-run windows, chain safety/freshness, duplicate suppression and bounded scan work.
 - **AUT-4 — execution coordination and transaction submission.** Build bounded worker transactions from registered job intent and submit through safe public RPC without user-key custody or ambiguous replay.
 - **AUT-5 — funding, fees and execution budgets.** Job balances/allowances, gas ceilings, fee policy, reimbursements and future 420Gas/Paymaster integration boundaries.

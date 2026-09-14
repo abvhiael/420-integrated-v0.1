@@ -5,11 +5,13 @@ on:
     paths:
       - '420-automation/**'
       - 'docs/420AUTOMATION-*.md'
+      - 'testnet/public-services/automation/**'
       - '.github/workflows/420-automation.yml'
   pull_request:
     paths:
       - '420-automation/**'
       - 'docs/420AUTOMATION-*.md'
+      - 'testnet/public-services/automation/**'
       - '.github/workflows/420-automation.yml'
 
 jobs:

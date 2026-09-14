@@ -12,15 +12,22 @@ interface IAccountValidation420 {
 }
 
 /// @notice Canonical 420 Integrated Smart Account EntryPoint.
-/// @dev GAS-3 adds on-chain sponsor deposits and exact max-cost reservations. Account validation remains
-///      independently authoritative. GAS-3 reserves validated sponsorship before execution and releases
-///      the reservation afterward without charging it; actual settlement and refunds are introduced in GAS-4.
+/// @dev GAS-4 settles sponsored operations against the GAS-3 reservation after account execution.
+///      Settlement is bounded by the reserved maximum. The paymaster callback is advisory to its own
+///      accounting only: callback failure cannot undo EntryPoint settlement or mutate account authority.
 contract EntryPoint420 is IEntryPoint420 {
     bytes32 public constant USER_OPERATION_DOMAIN = keccak256("420/ENTRY_POINT/USER_OPERATION/V1");
 
     struct SponsorshipReservation {
         uint256 amountWei;
         bool active;
+    }
+
+    struct SponsorshipExecution {
+        address paymaster;
+        bytes32 authorizationId;
+        uint256 reservedCostWei;
+        bytes context;
     }
 
     mapping(address => mapping(uint192 => uint64)) private _sequence;
@@ -48,6 +55,21 @@ contract EntryPoint420 is IEntryPoint420 {
     event PaymasterDepositWithdrawn(address indexed paymaster, address indexed recipient, uint256 amountWei, uint256 balanceWei);
     event SponsorshipReserved(address indexed paymaster, bytes32 indexed authorizationId, uint256 amountWei);
     event SponsorshipReservationReleased(address indexed paymaster, bytes32 indexed authorizationId, uint256 amountWei);
+    event SponsorshipSettled(
+        address indexed paymaster,
+        bytes32 indexed authorizationId,
+        bytes32 indexed userOpHash,
+        uint256 reservedWei,
+        uint256 chargedWei,
+        uint256 refundedWei,
+        bool executionSucceeded
+    );
+    event PaymasterPostOpResult(
+        address indexed paymaster,
+        bytes32 indexed authorizationId,
+        bytes32 indexed userOpHash,
+        bool callbackSucceeded
+    );
 
     error ReentrantEntryPoint();
     error InvalidSender();
@@ -148,6 +170,8 @@ contract EntryPoint420 is IEntryPoint420 {
         nonReentrant
         returns (bool success, bytes memory returnData)
     {
+        uint256 gasAtStart = gasleft();
+
         if (userOp.sender == address(0) || userOp.sender.code.length == 0) revert InvalidSender();
         if (userOp.initCode.length != 0) revert UnsupportedInitCode();
 
@@ -160,20 +184,19 @@ contract EntryPoint420 is IEntryPoint420 {
         uint256 accountValidationData = IAccountValidation420(userOp.sender).validateUserOp(userOp, userOpHash, 0);
         _enforceValidationData(accountValidationData);
 
-        address paymaster;
-        bytes32 authorizationId;
-        uint256 reservedCostWei;
+        SponsorshipExecution memory sponsorship;
         if (userOp.paymasterAndData.length != 0) {
-            (paymaster, authorizationId, reservedCostWei) = _validatePaymaster(userOp, userOpHash);
-            _reserveSponsorship(paymaster, authorizationId, reservedCostWei);
+            sponsorship = _validatePaymaster(userOp, userOpHash);
+            _reserveSponsorship(sponsorship.paymaster, sponsorship.authorizationId, sponsorship.reservedCostWei);
         }
 
         unchecked { _sequence[userOp.sender][key] = sequence + 1; }
 
         (success, returnData) = userOp.sender.call(userOp.callData);
 
-        if (paymaster != address(0)) {
-            _releaseSponsorship(paymaster, authorizationId);
+        if (sponsorship.paymaster != address(0)) {
+            uint256 actualGasCostWei = _actualUserOpCostWei(userOp, gasAtStart);
+            _settleSponsorship(sponsorship, userOpHash, actualGasCostWei, success);
         }
 
         emit UserOperationHandled(userOpHash, userOp.sender, key, sequence, success);
@@ -181,7 +204,7 @@ contract EntryPoint420 is IEntryPoint420 {
 
     function _validatePaymaster(PackedUserOperation420 calldata userOp, bytes32 userOpHash)
         private
-        returns (address paymaster, bytes32 authorizationId, uint256 maxCostWei)
+        returns (SponsorshipExecution memory execution)
     {
         PaymasterData420.V1 memory sponsorship = PaymasterData420.decodeV1(userOp.paymasterAndData);
 
@@ -194,12 +217,12 @@ contract EntryPoint420 is IEntryPoint420 {
         if (nowTs < sponsorship.validAfter) revert ValidationNotYetValid(sponsorship.validAfter);
         if (nowTs > sponsorship.validUntil) revert ValidationExpired(sponsorship.validUntil);
 
-        maxCostWei = _maximumUserOpCostWei(userOp);
+        uint256 maxCostWei = _maximumUserOpCostWei(userOp);
         if (maxCostWei > sponsorship.maxSponsoredCostWei) {
             revert SponsorshipCostExceeded(maxCostWei, sponsorship.maxSponsoredCostWei);
         }
 
-        (, uint256 paymasterValidationData) =
+        (bytes memory context, uint256 paymasterValidationData) =
             IPaymaster420(sponsorship.paymaster).validatePaymasterUserOp(userOp, userOpHash, maxCostWei);
         _enforcePaymasterValidationData(paymasterValidationData);
 
@@ -211,7 +234,12 @@ contract EntryPoint420 is IEntryPoint420 {
             maxCostWei
         );
 
-        return (sponsorship.paymaster, sponsorship.authorizationId, maxCostWei);
+        execution = SponsorshipExecution({
+            paymaster: sponsorship.paymaster,
+            authorizationId: sponsorship.authorizationId,
+            reservedCostWei: maxCostWei,
+            context: context
+        });
     }
 
     function _reserveSponsorship(address paymaster, bytes32 authorizationId, uint256 amountWei) private {
@@ -228,15 +256,44 @@ contract EntryPoint420 is IEntryPoint420 {
         emit SponsorshipReserved(paymaster, authorizationId, amountWei);
     }
 
-    function _releaseSponsorship(address paymaster, bytes32 authorizationId) private {
-        SponsorshipReservation storage reservation = _reservations[paymaster][authorizationId];
-        uint256 amountWei = reservation.amountWei;
+    function _settleSponsorship(
+        SponsorshipExecution memory sponsorship,
+        bytes32 userOpHash,
+        uint256 actualGasCostWei,
+        bool executionSucceeded
+    ) private {
+        SponsorshipReservation storage reservation =
+            _reservations[sponsorship.paymaster][sponsorship.authorizationId];
+        uint256 reservedWei = reservation.amountWei;
         if (!reservation.active) return;
+
+        uint256 chargedWei = actualGasCostWei > reservedWei ? reservedWei : actualGasCostWei;
+        uint256 refundedWei = reservedWei - chargedWei;
 
         reservation.active = false;
         reservation.amountWei = 0;
-        _reserved[paymaster] -= amountWei;
-        emit SponsorshipReservationReleased(paymaster, authorizationId, amountWei);
+        _reserved[sponsorship.paymaster] -= reservedWei;
+        _deposits[sponsorship.paymaster] -= chargedWei;
+
+        emit SponsorshipSettled(
+            sponsorship.paymaster,
+            sponsorship.authorizationId,
+            userOpHash,
+            reservedWei,
+            chargedWei,
+            refundedWei,
+            executionSucceeded
+        );
+        emit SponsorshipReservationReleased(sponsorship.paymaster, sponsorship.authorizationId, reservedWei);
+
+        PostOpMode420 mode = executionSucceeded ? PostOpMode420.OpSucceeded : PostOpMode420.OpReverted;
+        bool callbackSucceeded;
+        try IPaymaster420(sponsorship.paymaster).postOp(mode, sponsorship.context, chargedWei) {
+            callbackSucceeded = true;
+        } catch {
+            callbackSucceeded = false;
+        }
+        emit PaymasterPostOpResult(sponsorship.paymaster, sponsorship.authorizationId, userOpHash, callbackSucceeded);
     }
 
     function _maximumUserOpCostWei(PackedUserOperation420 calldata userOp) private pure returns (uint256) {
@@ -246,6 +303,16 @@ contract EntryPoint420 is IEntryPoint420 {
         uint256 maxFeePerGas = uint128(uint256(userOp.gasFees));
         uint256 totalGas = verificationGasLimit + callGasLimit + userOp.preVerificationGas;
         return totalGas * maxFeePerGas;
+    }
+
+    function _actualUserOpCostWei(PackedUserOperation420 calldata userOp, uint256 gasAtStart)
+        private
+        view
+        returns (uint256)
+    {
+        uint256 meteredGas = gasAtStart - gasleft();
+        uint256 maxFeePerGas = uint128(uint256(userOp.gasFees));
+        return (meteredGas + userOp.preVerificationGas) * maxFeePerGas;
     }
 
     function _enforcePaymasterValidationData(uint256 validationData) private view {

@@ -24,11 +24,15 @@ AUT-2 added deterministic trigger normalization for all five trigger classes. Ev
 
 ## AUT-3
 
-AUT-3 adds the deterministic eligibility engine and bounded scheduler. Registered jobs are evaluated only against fresh chain-420 observations and their exact AUT-2 trigger binding. Time, block, event, Oracle, and manual triggers produce deterministic occurrence IDs, which allow already-consumed occurrences to be suppressed without mutating job intent.
+AUT-3 added the deterministic eligibility engine and bounded scheduler. Registered jobs are evaluated only against fresh chain-420 observations and their exact AUT-2 trigger binding. Time, block, event, Oracle, and manual triggers produce deterministic occurrence IDs, allowing already-consumed occurrences to be suppressed without mutating job intent.
 
-The scheduler uses the safe chain head for block and event decisions, enforces Oracle freshness, checks manual requester identity, reports next eligible time/block hints where deterministic, sorts scans by job ID, and rejects scans that exceed the configured work bound. Disabled jobs remain ineligible, wrong-chain or stale observations fail closed, and trigger-binding mismatches are rejected rather than reinterpreted.
+## AUT-4
 
-AUT-3 decides only whether a registered job occurrence is eligible for an execution attempt. It does not build, sign, fund, submit, retry, or authorize a transaction; those responsibilities remain in later phases and protocol contracts.
+AUT-4 adds bounded execution coordination. An eligible AUT-3 occurrence is converted into a deterministic transaction plan that copies target, selector-bound calldata, native value and gas limit from the immutable AUT-1 envelope. Resolved calldata must match both the registered selector and calldata hash before a worker can sign anything.
+
+Worker signing is explicitly separate from user custody: workers sign only their own automation submission plan. 420Automation requires a same-chain, canonical-safe, ready RPC adapter before submission. Accepted, rejected and ambiguous submission outcomes are recorded distinctly. Ambiguous outcomes are never automatically replayed, preventing duplicate execution when the network may have accepted a submission before transport failure.
+
+AUT-4 still does not decide funding, fee reimbursement, retry policy, worker competition, or protocol authorization. Those remain later phases and on-chain protocol responsibilities.
 
 ## Delivery discipline
 

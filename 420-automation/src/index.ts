@@ -5,3 +5,4 @@ export * from './scheduler.js';
 export * from './execution.js';
 export * from './funding.js';
 export * from './recovery.js';
+export * from './workers.js';

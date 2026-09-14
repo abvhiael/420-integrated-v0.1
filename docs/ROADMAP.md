@@ -72,18 +72,29 @@ Run 3–5 nodes first, then a 15-validator simulation. Exercise validator rotati
 
 **Deliverable:** one-command local 420 devnet.
 
-## 12. Build reference wallet / explorer interface
-Native 420 balances, validator registration, Attention rewards, Development Fund transparency, dApp interaction, and network status.
+## 12. Build reference wallet / explorer interface and Genesis service layer — IN PROGRESS
+Native 420 balances, validator registration, Attention rewards, Development Fund transparency, dApp interaction, network status, and shared service infrastructure required by the Genesis application ecosystem.
 
-**Deliverable:** usable reference wallet and explorer dashboard.
+### Genesis dApp/service status
+
+- **420Indexer** — shared rebuildable projection service implemented and qualified through its current roadmap.
+- **420RPC** — public RPC/routing/policy layer implemented through its planned hardening/qualification roadmap.
+- **420Automation** — AUT-0 through AUT-11 implemented; hostile-state and cross-layer adversarial qualification passed. AUT-11 is in documentation/reconciliation closeout before merge. **Next:** AUT-12 public-testnet qualification and launch closeout.
+- **420Explorer / Wallet / remaining Genesis applications** — continue to consume the shared infrastructure and protocol surfaces through their respective roadmaps and qualification gates.
+
+420Automation remains shared replaceable infrastructure, not a new entry in the frozen `config/genesis-applications.json` user-facing application inventory. Its purpose is to support bounded scheduled/conditional execution for approved protocols and dApps without becoming wallet, protocol, Oracle, bridge, consensus, or finality authority.
+
+**Deliverable:** usable reference wallet/explorer plus qualified shared Genesis service infrastructure and application integrations.
 
 ## 13. Attack the economics and consensus
 Sybil simulations, validator concentration, correlated failures, randomness manipulation, reward gaming, Attention fraud, treasury abuse, and stress tests.
 
 **Deliverable:** adversarial simulation report.
 
-## 14. Public testnet
+## 14. Public testnet — PREPARATION ACTIVE
 Open validator qualification, faucet, public dApp deployment, bug bounties, telemetry, upgrades, and community testing.
+
+Shared-service launch gates are being completed before public exposure. For 420Automation, AUT-12 will require exact release identity, live worker/job evidence, failure drills, compatibility evidence, and an explicit go/no-go closeout.
 
 **Deliverable:** stable public 420 testnet.
 

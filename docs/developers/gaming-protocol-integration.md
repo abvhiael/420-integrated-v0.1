@@ -13,6 +13,8 @@ version: current
 
 The integration rule is strict: **core gameplay remains available without a 420 Wallet unless a game explicitly documents some separate non-420 requirement.** Wallet linkage expands ownership, interoperability, prestige, ecosystem participation or optional content. It is not a default admission gate and does not itself grant pay-to-win statistical advantages.
 
+For the complete GP-17 onboarding sequence from manifest/preflight through local rehearsal, testnet evidence and closeout, use [Gaming onboarding](gaming-onboarding.md).
+
 ## What belongs on-chain
 
 Canonical Gaming Protocol state is limited to provenance-sensitive interoperability state:
@@ -138,6 +140,7 @@ Games may still define balanced game mechanics involving owned items or optional
 
 ## Related documentation
 
+- [Gaming onboarding](gaming-onboarding.md)
 - [Guest, registered and Wallet-linked play](guest-and-wallet-play.md)
 - [Gaming entitlements and migration](gaming-entitlements-and-migration.md)
 - [Cross-game attestations and sessions](cross-game-attestations-and-sessions.md)

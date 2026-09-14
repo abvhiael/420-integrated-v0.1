@@ -48,6 +48,12 @@ Submitted transactions are never automatically retried. An ambiguous submission 
 
 AUT-6 therefore treats idempotency as an execution-safety boundary rather than a convenience feature: absence, transport timeout, or temporary RPC disagreement is never enough by itself to justify replaying a job.
 
+## AUT-7
+
+AUT-7 adds replaceable worker identity, heartbeat-based liveness, draining/disabled lifecycle states, and single-owner leases for eligible occurrences. A worker must be registered, active, and fresh before it can acquire or renew a lease. Each occurrence may have at most one active lease, lease tables are bounded, and expired leases are removed before new work is assigned.
+
+Lease ownership does not grant protocol authority. It only grants one live worker temporary coordination rights for one already-authorized occurrence. Leases cannot change job intent, bypass AUT-6 replay protection, sign as users, enlarge budgets, or override chain-safety evidence. Optional stake references are metadata only; stake/slashing policy remains external to Automation authority.
+
 ## Delivery discipline
 
 Each Automation phase is developed on its own branch and pull request, reconciled against current `main`, fully qualified on its exact final head, and merged before the next phase starts.

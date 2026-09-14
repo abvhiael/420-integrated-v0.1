@@ -74,7 +74,7 @@ test('operational snapshot uses bounded low-cardinality counts and explicit non-
   const readiness = controller.evaluate({ nowMs: 1_100, chain: healthyChain, schedulerReady: true, oracleReady: true, workerSnapshot: workers, jobsTotal: 7, activeAttempts: [attempt('ambiguous')] });
   const journal = new AutomationReceiptJournal420();
   const snapshot = automationOperationalSnapshot420({ readiness, chainId: 420n, jobsTotal: 7, workerSnapshot: workers, attempts: [attempt('ambiguous'), attempt('confirmed')], receipts: journal });
-  assert.equal(snapshot.ready ?? snapshot.readiness.ready, true);
+  assert.equal(snapshot.readiness.ready, true);
   assert.equal(snapshot.activeAttempts, 1);
   assert.equal(snapshot.ambiguousAttempts, 1);
   assert.equal(snapshot.canonicalAuthority, false);

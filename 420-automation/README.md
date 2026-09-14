@@ -54,6 +54,14 @@ AUT-7 adds replaceable worker identity, heartbeat-based liveness, draining/disab
 
 Lease ownership does not grant protocol authority. It only grants one live worker temporary coordination rights for one already-authorized occurrence. Leases cannot change job intent, bypass AUT-6 replay protection, sign as users, enlarge budgets, or override chain-safety evidence. Optional stake references are metadata only; stake/slashing policy remains external to Automation authority.
 
+## AUT-8
+
+AUT-8 integrates 420Automation with the frozen provider-neutral 420Oracle V1 consumer model. Automation accepts Oracle facts only from the canonical `IOracle420`/`OracleRouter420` read boundary for `420/ORACLE/FEED/AUTOMATION/V1`; raw provider submissions and provider-specific payloads are not valid Automation facts.
+
+Both canonical numeric median reads and exact-result quorum reads are supported. Automation applies additional local freshness, confidence, quorum and spread bounds before converting a successful router read into an AUT-3 scheduler observation. Exact-result conditions receive their own deterministic trigger representation without changing the identity of existing numeric Oracle triggers.
+
+Oracle provenance remains explicit and provider-neutral. A qualified Oracle fact can establish trigger eligibility, but cannot select a worker, create an AUT-7 lease, alter an AUT-1 execution envelope, bypass AUT-6 replay protection, enlarge AUT-5 funding, or authorize arbitrary execution.
+
 ## Delivery discipline
 
 Each Automation phase is developed on its own branch and pull request, reconciled against current `main`, fully qualified on its exact final head, and merged before the next phase starts.

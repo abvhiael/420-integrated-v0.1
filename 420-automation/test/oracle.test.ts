@@ -8,6 +8,8 @@ import {
   evaluateAutomationEligibility420,
   AutomationJobRegistry420,
   deriveAutomationJobId420,
+  type AutomationCanonicalNumericRead420,
+  type AutomationCanonicalResultRead420,
   type AutomationJobDefinition420,
 } from '../src/index.js';
 
@@ -20,13 +22,13 @@ const policy = {
   maxSpreadBps: 500,
 };
 
-const numericRead = {
-  canonical: true as const,
+const numericRead: AutomationCanonicalNumericRead420 = {
+  canonical: true,
   chainId: 420n,
   routerRef: policy.routerRef,
   feedId: 'condition.numeric',
   feedType: AUTOMATION_ORACLE_FEED_TYPE_420,
-  aggregation: 'MEDIAN_NUMERIC' as const,
+  aggregation: 'MEDIAN_NUMERIC',
   value: 4_200_000_000_000_000_000n,
   updatedAtSec: 10n,
   decimals: 18,
@@ -36,13 +38,13 @@ const numericRead = {
 };
 
 const resultHash = `0x${'ab'.repeat(32)}`;
-const resultRead = {
-  canonical: true as const,
+const resultRead: AutomationCanonicalResultRead420 = {
+  canonical: true,
   chainId: 420n,
   routerRef: policy.routerRef,
   feedId: 'condition.result',
   feedType: AUTOMATION_ORACLE_FEED_TYPE_420,
-  aggregation: 'QUORUM_EQUAL' as const,
+  aggregation: 'QUORUM_EQUAL',
   resultHash,
   updatedAtSec: 10n,
   confidenceBps: 9_500,
@@ -91,7 +93,7 @@ test('AUT-8 consumes canonical provider-neutral numeric automation reads', () =>
 test('AUT-8 rejects wrong chain, router, feed type and provider-shaped extra fields', () => {
   assert.throws(() => consumeCanonicalAutomationNumericRead420({ ...numericRead, chainId: 1n }, policy, 20_000), /AUT8_CHAIN_ID_MISMATCH/);
   assert.throws(() => consumeCanonicalAutomationNumericRead420({ ...numericRead, routerRef: 'other-router' }, policy, 20_000), /AUT8_ROUTER_MISMATCH/);
-  assert.throws(() => consumeCanonicalAutomationNumericRead420({ ...numericRead, feedType: '420\/ORACLE\/FEED\/PRICE\/V1' as typeof AUTOMATION_ORACLE_FEED_TYPE_420 }, policy, 20_000), /AUT8_FEED_TYPE_INVALID/);
+  assert.throws(() => consumeCanonicalAutomationNumericRead420({ ...numericRead, feedType: '420/ORACLE/FEED/PRICE/V1' as typeof AUTOMATION_ORACLE_FEED_TYPE_420 }, policy, 20_000), /AUT8_FEED_TYPE_INVALID/);
   const providerPayload = { ...numericRead, providerId: 'vendor.alpha' };
   assert.throws(() => consumeCanonicalAutomationNumericRead420(providerPayload, policy, 20_000), /AUT8_READ_FIELD_UNKNOWN/);
 });

@@ -38,7 +38,15 @@ AUT-5 adds funding, fee, and execution-budget authorization before a worker spen
 
 Worker-funded and escrow-funded jobs use the same bounded cost calculation. Future 420Gas/Paymaster integration is represented only as an optional sponsorship quote bound to an exact paymaster identity, quote ID, expiry, and sponsored-gas amount. Sponsorship may reduce the worker-funded gas portion but cannot expand any job budget or modify target, calldata, native value, gas limit, trigger eligibility, protocol authorization, or transaction intent.
 
-AUT-5 authorizes a maximum spend envelope; it does not transfer funds, custody job balances, choose arbitrary fee values, or grant a paymaster protocol authority. Retry/idempotency, worker competition, and settlement mechanics remain later phases.
+AUT-5 authorizes a maximum spend envelope; it does not transfer funds, custody job balances, choose arbitrary fee values, or grant a paymaster protocol authority.
+
+## AUT-6
+
+AUT-6 adds deterministic attempt identity, bounded retries, replay protection, and recovery semantics. Every occurrence/intent pair receives a deterministic attempt ID per attempt number, retryable pre-accept failures use capped exponential backoff, non-retryable failures terminate, and a configured maximum attempt count prevents infinite retry loops.
+
+Submitted transactions are never automatically retried. An ambiguous submission remains blocked until fresh, canonical-safe chain-420 evidence explicitly resolves it as accepted or not submitted. A transaction that disappears from a lookup becomes ambiguous rather than immediately retryable. Reorg recovery permits a retry only when canonical-safe evidence proves safe non-inclusion; uncertain reorg state remains blocked. Duplicate concurrent attempts for the same occurrence are rejected.
+
+AUT-6 therefore treats idempotency as an execution-safety boundary rather than a convenience feature: absence, transport timeout, or temporary RPC disagreement is never enough by itself to justify replaying a job.
 
 ## Delivery discipline
 

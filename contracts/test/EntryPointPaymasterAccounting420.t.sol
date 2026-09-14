@@ -21,7 +21,7 @@ contract Gas3Paymaster420 is IPaymaster420 {
     }
 
     function postOp(PostOpMode420, bytes calldata, uint256) external pure {
-        revert("GAS-4 only");
+        revert("GAS-4 callback failure must not undo settlement");
     }
 
     function withdraw(EntryPoint420 entryPoint, address payable recipient, uint256 amountWei) external {
@@ -78,7 +78,7 @@ contract EntryPointPaymasterAccounting420Test {
         require(entryPoint.availableOf(address(paymaster)) == 5 ether, "available balance mismatch");
     }
 
-    function testSponsoredOperationReservesExactMaxCostDuringExecutionAndReleasesAfter() public {
+    function testSponsoredOperationReservesExactMaxCostDuringExecutionAndSettlesAfter() public {
         entryPoint.depositTo{value: 1 ether}(address(paymaster));
         uint256 maxCostWei = 221_000 * 1 gwei;
         bytes32 authorizationId = keccak256("420/GAS/GAS3/AUTH/1");
@@ -90,7 +90,9 @@ contract EntryPointPaymasterAccounting420Test {
         require(success, "sponsored execution failed");
         require(account.observedReservation() == maxCostWei, "execution did not observe reservation");
         require(entryPoint.reservedOf(address(paymaster)) == 0, "reservation not released");
-        require(entryPoint.availableOf(address(paymaster)) == 1 ether, "GAS-3 charged deposit early");
+        require(entryPoint.balanceOf(address(paymaster)) < 1 ether, "settlement did not charge deposit");
+        require(entryPoint.balanceOf(address(paymaster)) > 1 ether - maxCostWei, "settlement exceeded reservation");
+        require(entryPoint.availableOf(address(paymaster)) == entryPoint.balanceOf(address(paymaster)), "released reserve still unavailable");
         require(entryPoint.authorizationConsumed(address(paymaster), authorizationId), "authorization not consumed");
         (uint256 amountWei, bool active) = entryPoint.reservationOf(address(paymaster), authorizationId);
         require(amountWei == 0 && !active, "released reservation remains active");

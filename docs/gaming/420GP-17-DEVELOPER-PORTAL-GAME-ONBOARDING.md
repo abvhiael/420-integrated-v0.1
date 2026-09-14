@@ -22,13 +22,15 @@ Provide a safe, deterministic path for external game developers to onboard a gam
 
 ### GP-17.1 — Game onboarding manifest & preflight
 
-Status: IN PROGRESS.
+Status: COMPLETE — merged through PR #253.
 
-Define the gaming-specific onboarding manifest and deterministic preflight inside Developer Hub. Validate canonical game identity, progressive-access policy, requested Gaming Protocol surfaces, application identity binding and network consistency. Reuse DEVHUB-13 application publication instead of duplicating Registry/AppStore logic.
+Defines the gaming-specific onboarding manifest and deterministic preflight inside Developer Hub. Validates canonical game identity, progressive-access policy, requested Gaming Protocol surfaces, application identity binding and network consistency. Reuses DEVHUB-13 application publication instead of duplicating Registry/AppStore logic.
 
 ### GP-17.2 — Game registration profile & protocol capability declaration
 
-Define machine-readable game registration metadata, supported protocol surfaces, requested actions/capabilities and compatibility requirements. Reject undeclared or wallet-global authority.
+Status: IN QUALIFICATION.
+
+Defines machine-readable game registration metadata, supported protocol surfaces, requested actions/capabilities and compatibility requirements. Capability declarations are game-scoped, action-catalogue constrained and noncanonical. Wildcard, global and wallet-wide authority requests fail closed. Developer Hub prepares the capability handoff but cannot mint grants; canonical authority remains with CapabilityRegistry420 and the established gaming authority boundary.
 
 ### GP-17.3 — SDK integration generator
 
@@ -79,6 +81,23 @@ It validates:
 - network consistency through the existing Developer Hub application-publishing preflight.
 
 The resulting plan is noncanonical. It is a developer preflight and handoff artifact, not registration, governance authorization, Wallet authority or chain state.
+
+## GP-17.2 implementation
+
+`developer-hub/src/gaming-registration-profile.mjs` defines the machine-readable game registration profile and capability preflight.
+
+It enforces:
+
+- exact game/application identity binding back to the GP-17.1 onboarding manifest;
+- one declaration per protocol;
+- only protocols declared during GP-17.1 may request capabilities;
+- every capability scope is exactly `game`;
+- requested actions must come from the fixed Gaming Protocol action catalogue;
+- wildcard, global and wallet-wide authority requests fail closed;
+- compatibility remains bound to `420GP/V1`, `@420/gaming-sdk` and the GP-16 finality model;
+- Developer Hub creates no canonical grant and cannot replace CapabilityRegistry420 authority.
+
+Qualification lives in `developer-hub/test/gaming-registration-profile.test.mjs`.
 
 ## GP-17 exit criteria
 

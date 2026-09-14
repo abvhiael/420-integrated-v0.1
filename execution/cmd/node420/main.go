@@ -139,12 +139,16 @@ func main() {
 	storageStartBlock := flag.Uint64("storage.start-block", 0, "first block to scan for storage events")
 	storageConfirmations := flag.Uint64("storage.confirmations", 2, "confirmed blocks required before projection")
 	storageSyncInterval := flag.Duration("storage.sync-interval", 5*time.Second, "storage chain synchronization interval")
+	storageProofInterval := flag.Duration("storage.proof-interval", 5*time.Second, "storage proof scheduler interval")
+	storageProofReceiptWait := flag.Duration("storage.proof-receipt-wait", 30*time.Second, "maximum wait for a proof transaction receipt")
+	storageProofFrom := flag.String("storage.proof.from", "", "execution account used to sign storage proof transactions")
 	storageAgreement := flag.String("storage.contract.agreement", "", "StorageAgreementRegistry420 address")
 	storageCommitment := flag.String("storage.contract.commitment", "", "StorageCommitmentRegistry420 address")
 	storageCapacityContract := flag.String("storage.contract.capacity", "", "StorageCapacityRegistry420 address")
 	storageSettlement := flag.String("storage.contract.settlement", "", "StorageSettlementRegistry420 address")
 	storageScheme := flag.String("storage.contract.scheme", "", "StorageProofSchemeRegistry420 address")
 	storageManifest := flag.String("storage.contract.manifest", "", "StorageObjectManifestRegistry420 address")
+	storageProofRegistry := flag.String("storage.contract.proof", "", "StorageProofRegistry420 address")
 	flag.Parse()
 
 	if *showVersion { fmt.Printf("node420 %s (go-ethereum baseline %s)\n", version, gethBaseline); return }
@@ -188,6 +192,7 @@ func main() {
 	service, err := storage.NewService(storage.ServiceConfig{
 		NodeID:*storageNodeID, CapacityBytes:*storageCapacity, DataDir:filepath.Join(*datadir,"storage"), ListenAddr:*storageListen,
 		RPCURL:rpcURL, StartBlock:*storageStartBlock, Confirmations:*storageConfirmations, SyncInterval:*storageSyncInterval,
+		ProofInterval:*storageProofInterval, ProofRegistry:*storageProofRegistry, ProofFrom:*storageProofFrom, ProofReceiptWait:*storageProofReceiptWait,
 		Contracts:storage.RPCStorageContracts{Agreement:*storageAgreement,Commitment:*storageCommitment,Capacity:*storageCapacityContract,Settlement:*storageSettlement,Scheme:*storageScheme,Manifest:*storageManifest},
 	})
 	if err != nil { fmt.Fprintln(os.Stderr,"node420 storage config:",err); os.Exit(2) }

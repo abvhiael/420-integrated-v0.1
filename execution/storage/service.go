@@ -14,19 +14,22 @@ import (
 )
 
 type ServiceConfig struct {
-	NodeID          string
-	CapacityBytes   uint64
-	DataDir         string
-	ListenAddr      string
-	RPCURL          string
-	StartBlock      uint64
-	Confirmations   uint64
-	BatchSize       uint64
-	SyncInterval    time.Duration
-	ProofInterval   time.Duration
-	ProofSubmitter  ProofSubmitter
-	AuthToken       string
-	Contracts       RPCStorageContracts
+	NodeID           string
+	CapacityBytes    uint64
+	DataDir          string
+	ListenAddr       string
+	RPCURL           string
+	StartBlock       uint64
+	Confirmations    uint64
+	BatchSize        uint64
+	SyncInterval     time.Duration
+	ProofInterval    time.Duration
+	ProofSubmitter   ProofSubmitter
+	ProofRegistry    string
+	ProofFrom        string
+	ProofReceiptWait time.Duration
+	AuthToken        string
+	Contracts        RPCStorageContracts
 }
 
 type ServiceStatus struct {
@@ -56,12 +59,19 @@ func NewService(cfg ServiceConfig) (*Service, error) {
 	}
 	if _, err := bytes32Arg(cfg.NodeID); err != nil { return nil, ErrInvalidChainState }
 	if !loopbackListen(cfg.ListenAddr) && strings.TrimSpace(cfg.AuthToken) == "" { return nil, ErrInvalidChainState }
+	proofRegistry := strings.TrimSpace(cfg.ProofRegistry)
+	proofFrom := strings.TrimSpace(cfg.ProofFrom)
+	if (proofRegistry == "") != (proofFrom == "") { return nil, ErrInvalidChainState }
+	if proofRegistry != "" && (!validHexAddress(proofRegistry) || !validHexAddress(proofFrom)) { return nil, ErrInvalidChainState }
 	if cfg.SyncInterval <= 0 { cfg.SyncInterval = 5 * time.Second }
 	if cfg.ProofInterval <= 0 { cfg.ProofInterval = cfg.SyncInterval }
 	if cfg.BatchSize == 0 { cfg.BatchSize = 256 }
 	if err := os.MkdirAll(cfg.DataDir, 0o700); err != nil { return nil, err }
 
 	backend := RPCBackend{URL: cfg.RPCURL, Client: &http.Client{Timeout: 15 * time.Second}}
+	if cfg.ProofSubmitter == nil && proofRegistry != "" {
+		cfg.ProofSubmitter = RPCProofSubmitter{Backend: backend, Registry: proofRegistry, From: proofFrom, ReceiptWait: cfg.ProofReceiptWait}
+	}
 	reader := RPCStorageReader{Backend: backend, Contracts: cfg.Contracts, StartBlock: cfg.StartBlock}
 	if err := reader.validate(); err != nil { return nil, err }
 

@@ -8,6 +8,7 @@ import "../src/accounts/PaymasterData420.sol";
 interface VmGas2 {
     function chainId(uint256 newChainId) external;
     function warp(uint256 newTimestamp) external;
+    function deal(address who, uint256 newBalance) external;
 }
 
 contract Gas2Account420 is IAccountValidation420 {
@@ -60,9 +61,11 @@ contract EntryPointPaymaster420Test {
     function setUp() public {
         vm.chainId(420);
         vm.warp(500);
+        vm.deal(address(this), 100 ether);
         entryPoint = new EntryPoint420();
         account = new Gas2Account420();
         paymaster = new Gas2Paymaster420();
+        entryPoint.depositTo{value: 50 ether}(address(paymaster));
     }
 
     function testValidSponsoredOperationRequiresAccountAndPaymasterValidation() public {

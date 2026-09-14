@@ -84,3 +84,28 @@ export async function buildAutomationTransactionPlan420(input: {
   const material = ['420Automation/intent/v1', input.entry.job.jobId, input.eligibility.occurrenceId, input.worker.workerId, input.worker.address.toLowerCase(), input.entry.job.envelope.target.toLowerCase(), data.toLowerCase(), input.entry.job.envelope.nativeValueWei.toString(10), input.entry.job.envelope.gasLimit.toString(10), input.entry.envelopeDigest].join('|');
   return { chainId: input.entry.job.chainId, jobId: input.entry.job.jobId, occurrenceId: input.eligibility.occurrenceId, workerId: input.worker.workerId, from: input.worker.address.toLowerCase(), to: input.entry.job.envelope.target.toLowerCase(), data: data.toLowerCase(), valueWei: input.entry.job.envelope.nativeValueWei, gasLimit: input.entry.job.envelope.gasLimit, envelopeDigest: input.entry.envelopeDigest, intentDigest: digest420(material) };
 }
+
+export async function coordinateAutomationExecution420(input: {
+  entry: AutomationJobRegistryEntry420;
+  eligibility: AutomationEligibility420;
+  worker: AutomationWorkerSigner420;
+  calldataResolver: AutomationCalldataResolver420;
+  rpc: AutomationRpcSubmitter420;
+}): Promise<AutomationExecutionReceipt420> {
+  if (input.rpc.chainId !== input.entry.job.chainId) throw new Error('AUT4_RPC_CHAIN_ID_MISMATCH');
+  if (!input.rpc.ready || !input.rpc.canonicalSafe) throw new Error('AUT4_RPC_NOT_READY');
+
+  const plan = await buildAutomationTransactionPlan420(input);
+  const signedPayload = await input.worker.signPlan(structuredClone(plan));
+  if (!HEX_DATA.test(signedPayload) || signedPayload.length <= 2) throw new Error('AUT4_SIGNED_PAYLOAD_INVALID');
+
+  const outcome = await input.rpc.submitSignedPayload(signedPayload);
+  if (outcome.status === 'accepted') {
+    if (!HASH32.test(outcome.transactionHash)) throw new Error('AUT4_TRANSACTION_HASH_INVALID');
+    return { jobId: plan.jobId, occurrenceId: plan.occurrenceId, workerId: plan.workerId, intentDigest: plan.intentDigest, status: 'submitted', transactionHash: outcome.transactionHash.toLowerCase(), code: null, retryable: false };
+  }
+  if (outcome.status === 'ambiguous') {
+    return { jobId: plan.jobId, occurrenceId: plan.occurrenceId, workerId: plan.workerId, intentDigest: plan.intentDigest, status: 'ambiguous', transactionHash: null, code: outcome.code, retryable: false };
+  }
+  return { jobId: plan.jobId, occurrenceId: plan.occurrenceId, workerId: plan.workerId, intentDigest: plan.intentDigest, status: 'rejected', transactionHash: null, code: outcome.code, retryable: outcome.retryable };
+}

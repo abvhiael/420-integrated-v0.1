@@ -20,28 +20,31 @@ Delivered deterministic normalization and `triggerRef` derivation for time, bloc
 
 ## AUT-3 — deterministic eligibility engine and scheduler — implementation complete
 
+Delivered fresh chain-420 observations, safe-head scheduling, deterministic eligibility and occurrence IDs, duplicate suppression, Oracle/manual validation, next-run hints, and bounded deterministic scans.
+
+## AUT-4 — execution coordination and transaction submission — implementation complete
+
 Delivered:
 
-- chain-420 observation validation with freshness and head/safe/finalized ordering checks;
-- deterministic eligibility decisions for all five normalized trigger classes;
-- safe-head block scheduling and event-confirmation evaluation;
-- deterministic occurrence IDs for one-shot, interval, cron, block, event, Oracle, and manual trigger occurrences;
-- duplicate suppression using consumed occurrence IDs;
-- Oracle value freshness plus exact decimal predicate comparison without floating-point arithmetic;
-- manual requester identity enforcement against AUT-1 owner/protocol identity;
-- disabled-job rejection and exact AUT-1/AUT-2 trigger-binding enforcement;
-- deterministic next-time and next-block hints where available;
-- deterministic job-ID scan ordering;
-- configurable per-scan job bound that fails closed on excessive work;
-- hostile tests for wrong-chain, stale-chain, binding mismatch, premature event confirmation, duplicate occurrences, and scan exhaustion.
+- deterministic execution plans bound to an eligible AUT-3 occurrence;
+- strict copying of chain ID, target, native value and gas limit from the immutable AUT-1 execution envelope;
+- calldata resolution followed by selector and calldata-hash verification before signing;
+- deterministic intent digests binding job, occurrence, worker identity, execution envelope and resolved calldata;
+- explicit worker identity/address validation;
+- worker-only signing interface with no user-key custody or user impersonation;
+- same-chain RPC requirement before submission;
+- canonical-safe and ready RPC requirement before submission;
+- distinct accepted, rejected and ambiguous outcome receipts;
+- no automatic replay after ambiguous transport/submission outcome;
+- validation of returned transaction hashes and signed payload shape;
+- hostile tests for envelope mismatch, ineligible/disabled jobs, wrong-chain RPC, unsafe RPC, malformed worker identity, malformed signed payload and ambiguous submission behavior.
 
-AUT-3 produces eligibility facts only. It does not construct, sign, fund, submit, retry, or authorize transactions.
+AUT-4 coordinates one bounded submission attempt only. Funding/fees, retries/idempotency, worker leasing/competition and protocol authorization remain outside this phase.
 
 Exit gate: merge only after exact-head 420Automation, docs, and repository-wide qualification plus reconciliation with current `main`.
 
 ## Planned phases
 
-- **AUT-4 — execution coordination and transaction submission.** Build bounded worker transactions from registered job intent and submit through safe public RPC without user-key custody or ambiguous replay.
 - **AUT-5 — funding, fees and execution budgets.** Job balances/allowances, gas ceilings, fee policy, reimbursements and future 420Gas/Paymaster integration boundaries.
 - **AUT-6 — retries, idempotency, replay protection and recovery.** Attempt IDs, retry classes/backoff, duplicate execution prevention, reorg-aware recovery and terminal failure semantics.
 - **AUT-7 — worker registry, leases and competition.** Replaceable worker identities, assignment/lease rules, liveness, anti-double-execution coordination and optional stake/slashing references.

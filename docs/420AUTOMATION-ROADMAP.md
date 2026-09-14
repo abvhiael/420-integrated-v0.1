@@ -15,30 +15,32 @@
 - AUT-8 — 420Oracle and external-condition integration.
 - AUT-9 — API, authentication, scoped credentials, and Developer Hub integration.
 - AUT-10 — observability, readiness, execution receipts, and operational recovery.
+- AUT-11 — hostile-state/security hardening and cross-layer adversarial qualification.
 
-## AUT-10 closeout
+## AUT-11 closeout
 
-AUT-10 provides a bounded operational-observability layer without making telemetry a protocol or chain authority.
+AUT-11 hardens the full Automation path against hostile inputs and failure races without expanding Automation authority.
 
 Delivered:
 
-- separate readiness state from process liveness;
-- fresh chain-420, RPC-ready, canonical-safe evidence requirements;
-- scheduler-readiness and minimum-live-worker requirements;
-- Oracle-specific degraded state separated from canonical safety failure;
-- recovery hysteresis requiring consecutive healthy observations before reopening;
-- fixed low-cardinality metrics for jobs, workers, leases, active/ambiguous attempts, and execution outcomes;
-- bounded execution-receipt journal with deterministic sequence ordering and eviction;
-- explicit reminder that submitted receipts do not prove inclusion/finality;
-- redacted operational snapshots with `canonicalAuthority: false` and `containsSecrets: false`;
-- no secret, credential-ID, address, calldata, transaction-hash, provider-payload, or arbitrary-label metric dimensions;
-- operator recovery procedure that defers ambiguity/reorg decisions to AUT-6 canonical recovery evidence.
+- authenticated observation envelopes with source identity, chain binding, freshness, clock-skew limits, monotonic sequencing, and signature verification;
+- bounded replay protection for duplicate request identities and source-sequence rollback;
+- explicit calldata-size, execution-gas, retry, batch-job, and batch-byte ceilings;
+- finalized-chain rollback and finalized-hash conflict detection;
+- safe-head/finality ordering checks that fail closed;
+- recursive secret redaction for hostile diagnostic payloads;
+- bounded, low-cardinality metric-label validation with secret/high-cardinality rejection;
+- cross-layer adversarial tests for spoofed manual triggers, repeated/racing trigger delivery, execution-envelope immutability, tampered calldata, finality conflict, and secret-leak attempts;
+- successful dedicated 420Automation qualification and full 420 Integrated qualification on the AUT-11 branch head.
 
-Readiness is an ingress/operator safety signal only. It does not define canonical chain state, finality, Oracle truth, protocol permissions, funding authority, worker ownership, or replay eligibility.
+AUT-11 does not make Automation an oracle of canonical chain truth. It enforces that Automation refuses to proceed when its bounded evidence conflicts with previously accepted safety conditions.
 
-## Planned phases
+## Current phase
 
-- **AUT-11 — hostile-state/security hardening.** Cross-layer adversarial tests, trigger spoofing, replay/race abuse, malicious jobs, quota/resource abuse, reorg/finality faults, secret-leak prevention, and observability abuse.
+**AUT-11 is implementation-complete and qualified on the phase branch.** Remaining closeout work is documentation synchronization, reconciliation with current `main`, exact-head requalification, and merge.
+
+## Planned phase
+
 - **AUT-12 — public-testnet qualification and launch closeout.** Exact release identity, live worker/job evidence, failure drills, compatibility evidence, and explicit go/no-go closeout.
 
 ## Authority rule

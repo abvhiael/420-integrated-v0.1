@@ -24,29 +24,25 @@ Provide a safe, deterministic path for external game developers to onboard a gam
 
 Status: COMPLETE — merged through PR #253.
 
-Defines the gaming-specific onboarding manifest and deterministic preflight inside Developer Hub. Validates canonical game identity, progressive-access policy, requested Gaming Protocol surfaces, application identity binding and network consistency. Reuses DEVHUB-13 application publication instead of duplicating Registry/AppStore logic.
-
 ### GP-17.2 — Game registration profile & protocol capability declaration
 
 Status: COMPLETE — merged through PR #254.
-
-Defines machine-readable game registration metadata, supported protocol surfaces, requested actions/capabilities and compatibility requirements. Capability declarations are game-scoped, action-catalogue constrained and noncanonical. Wildcard, global and wallet-wide authority requests fail closed. Developer Hub prepares the capability handoff but cannot mint grants; canonical authority remains with CapabilityRegistry420 and the established gaming authority boundary.
 
 ### GP-17.3 — SDK integration generator
 
 Status: COMPLETE — merged through PR #255.
 
-Generates deterministic game-scoped SDK configuration and starter integration material from accepted GP-17.1 and GP-17.2 artifacts. Generated clients remain pinned to the canonical game ID, preserve the declared protocol/action subset, carry GP-16 finality compatibility and never generate wallet-global enumeration or undeclared authority surfaces.
-
 ### GP-17.4 — Progressive-access policy qualification
 
-Status: IN QUALIFICATION.
+Status: COMPLETE — merged through PR #257.
 
 Provides a reusable Developer Hub qualification gate for feature-level access policy. It proves guest-accessible core gameplay, registered wallet-free continuity, optional wallet-linked capabilities, no wallet-required core progression and no wallet-linked pay-to-win advantage.
 
 ### GP-17.5 — Entitlement, claim & attestation onboarding
 
-Guide and qualify high-risk Gaming Protocol integrations, including scoped entitlements, claims and cross-game attestations using the GP-16 finality/reorg fail-closed model.
+Status: IN QUALIFICATION.
+
+Guides and qualifies high-risk Gaming Protocol integrations for entitlements, claims and cross-game attestations. High-risk reads must use finalized canonical state, reorg and RPC failure must fail closed, all authority remains game-scoped, and cross-game attestation scope must be explicit rather than wallet-wide.
 
 ### GP-17.6 — Migration & wallet-link onboarding
 
@@ -87,6 +83,24 @@ Complete portal/dashboard surfaces, task-oriented game onboarding documentation,
 `developer-hub/src/gaming-progressive-access-qualification.mjs` qualifies feature-level progression policy. It requires at least one guest-accessible core progression feature, preserves wallet-free core progression for registered players, keeps wallet-linked features optional, rejects wallet-required core progression and rejects wallet-linked competitive advantage/pay-to-win behavior.
 
 Qualification lives in `developer-hub/test/gaming-progressive-access-qualification.test.mjs`. The qualification result is noncanonical and changes no Registry, Wallet, CapabilityRegistry or chain authority.
+
+### GP-17.5
+
+`developer-hub/src/gaming-high-risk-onboarding.mjs` qualifies entitlement, claim and attestation integration plans before any canonical handoff.
+
+It requires:
+
+- exact binding to the onboarding game ID;
+- high-risk integration scope exactly `game`;
+- finalized canonical state under the GP-16 finality model;
+- reorg handling to fail closed;
+- RPC failure handling to fail closed;
+- canonical RPC revalidation for high-risk state;
+- no wallet-wide enumeration;
+- explicit cross-game scope for attestations;
+- declared GP-17.1 protocols for every requested high-risk integration.
+
+Qualification lives in `developer-hub/test/gaming-high-risk-onboarding.test.mjs`. Developer Hub only produces a noncanonical preflight result; it cannot establish ownership, entitlement, claim validity, attestation validity or finality by itself.
 
 ## GP-17 exit criteria
 

@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "registry": "docs/versioning/version-registry.json",
+  "pages_workflow": ".github/workflows/docs-pages.yml",
+  "pages_qualification_command": "python scripts/qualify-docs.py",
+  "required_versioning_validators": [
+    "scripts/validate-doc-version-metadata.py",
+    "scripts/validate-doc-version-registry.py",
+    "scripts/validate-doc-version-routing.py",
+    "scripts/validate-doc-historical-retention.py",
+    "scripts/validate-doc-generated-reference-version.py",
+    "scripts/validate-doc-migration-policy.py",
+    "scripts/validate-doc-versioning-ci.py"
+  ]
+}

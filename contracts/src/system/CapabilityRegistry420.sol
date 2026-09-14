@@ -16,7 +16,10 @@ contract CapabilityRegistry420 is ICapabilityRegistryExtended420 {
     mapping(bytes32 => CapabilityGrant) private _grants;
     mapping(bytes32 => UsageState) private _usage;
     mapping(bytes32 => address) public override componentAuthority;
+    mapping(bytes32 => bool) public override protocolComponentManaged;
     mapping(bytes32 => bytes32) private _activeGrantByAuthorization;
+
+    address public override componentRegistrar;
 
     error InvalidAddress();
     error InvalidIdentifier();
@@ -28,6 +31,12 @@ contract CapabilityRegistry420 is ICapabilityRegistryExtended420 {
     error GrantRevoked();
     error GrantInactive();
     error CapabilityLimitExceeded();
+    error ComponentAlreadyRegistered();
+    error UnknownProtocolComponent();
+
+    constructor() {
+        componentRegistrar = msg.sender;
+    }
 
     function smartAccountComponentId(address account) public pure returns (bytes32) {
         return keccak256(abi.encode(_SMART_ACCOUNT_COMPONENT_DOMAIN, account));
@@ -43,6 +52,33 @@ contract CapabilityRegistry420 is ICapabilityRegistryExtended420 {
         } else if (current != account) {
             revert UnauthorizedAuthority();
         }
+    }
+
+    function registerProtocolComponent(bytes32 componentId, address authority) external override {
+        if (msg.sender != componentRegistrar) revert UnauthorizedAuthority();
+        if (componentId == bytes32(0)) revert InvalidIdentifier();
+        if (authority == address(0)) revert InvalidAddress();
+        if (componentAuthority[componentId] != address(0)) revert ComponentAlreadyRegistered();
+        protocolComponentManaged[componentId] = true;
+        componentAuthority[componentId] = authority;
+        emit ComponentAuthorityRegistered(componentId, authority);
+    }
+
+    function updateProtocolComponentAuthority(bytes32 componentId, address newAuthority) external override {
+        if (msg.sender != componentRegistrar) revert UnauthorizedAuthority();
+        if (!protocolComponentManaged[componentId]) revert UnknownProtocolComponent();
+        if (newAuthority == address(0)) revert InvalidAddress();
+        address previous = componentAuthority[componentId];
+        componentAuthority[componentId] = newAuthority;
+        emit ProtocolComponentAuthorityUpdated(componentId, previous, newAuthority);
+    }
+
+    function transferComponentRegistrar(address newRegistrar) external override {
+        if (msg.sender != componentRegistrar) revert UnauthorizedAuthority();
+        if (newRegistrar == address(0)) revert InvalidAddress();
+        address previous = componentRegistrar;
+        componentRegistrar = newRegistrar;
+        emit ComponentRegistrarTransferred(previous, newRegistrar);
     }
 
     function createGrant(

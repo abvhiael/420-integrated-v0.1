@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { createReleaseCandidateCloseout420, createReleaseCandidateCloseoutView420, ReleaseCandidateCloseoutError420 } from '../src/release-candidate-closeout.mjs';
+const candidate={schemaVersion:'1.0.0',candidateId:'devhub-19-rc1',commitSha:'1111111111111111111111111111111111111111',releaseChannel:'TESTNET_RC',createdAt:'2026-09-11T18:15:00.000Z',canonicalAuthority:false};
+const readiness={result:'READY',readyForProductionLaunch:true,publicTestnetReady:true,candidateCommitSha:candidate.commitSha,releaseChannel:'TESTNET_RC',canonicalAuthority:false,securityCertification:false};
+test('closeout view declares exact provenance and non-authority boundaries',()=>{const view=createReleaseCandidateCloseoutView420();assert.equal(view.canonicalAuthority,false);assert.equal(view.securityCertification,false);assert.equal(view.requiresExactCommitBinding,true);assert.equal(view.requiresExactReleaseChannel,true);});
+test('matching ready candidate can close out',()=>{const result=createReleaseCandidateCloseout420({candidate,readiness});assert.equal(result.state,'READY');assert.equal(result.closeoutReady,true);assert.equal(result.commitSha,candidate.commitSha);assert.equal(result.releaseChannel,'TESTNET_RC');assert.equal(result.canonicalAuthority,false);});
+test('blocked readiness cannot be upgraded by closeout descriptor',()=>{const result=createReleaseCandidateCloseout420({candidate,readiness:{...readiness,result:'BLOCKED',readyForProductionLaunch:false,publicTestnetReady:false}});assert.equal(result.state,'BLOCKED');assert.equal(result.closeoutReady,false);});
+test('wrong commit evidence fails closed',()=>{assert.throws(()=>createReleaseCandidateCloseout420({candidate,readiness:{...readiness,candidateCommitSha:'2222222222222222222222222222222222222222'}}),ReleaseCandidateCloseoutError420);});
+test('wrong release channel evidence fails closed',()=>{assert.throws(()=>createReleaseCandidateCloseout420({candidate,readiness:{...readiness,releaseChannel:'MAINNET'}}),ReleaseCandidateCloseoutError420);});
+test('candidate cannot claim canonical authority',()=>{assert.throws(()=>createReleaseCandidateCloseout420({candidate:{...candidate,canonicalAuthority:true},readiness}),ReleaseCandidateCloseoutError420);});

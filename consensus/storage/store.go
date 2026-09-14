@@ -10,12 +10,29 @@ import (
 	ctypes "github.com/420integrated/420-integrated/consensus/types"
 )
 
+type ProposerStatus struct {
+	Slot      uint64 `json:"slot"`
+	Primary   uint16 `json:"primary"`
+	Fallback1 uint16 `json:"fallback1"`
+	Fallback2 uint16 `json:"fallback2"`
+}
+
+type QCStatus struct {
+	Slot       uint64 `json:"slot"`
+	BlockRoot  string `json:"block_root"`
+	ParentRoot string `json:"parent_root"`
+	Signers    int    `json:"signers"`
+}
+
 type Status struct {
-	Head          ctypes.Checkpoint `json:"head"`
-	Safe          ctypes.Checkpoint `json:"safe"`
-	Finalized     ctypes.Checkpoint `json:"finalized"`
-	NextSlot      uint64            `json:"next_slot"`
-	LastQCMessage string            `json:"last_qc_message,omitempty"`
+	Head             ctypes.Checkpoint `json:"head"`
+	Safe             ctypes.Checkpoint `json:"safe"`
+	Finalized        ctypes.Checkpoint `json:"finalized"`
+	NextSlot         uint64            `json:"next_slot"`
+	ActiveSeats      []uint16          `json:"active_seats,omitempty"`
+	ScheduledProposer ProposerStatus   `json:"scheduled_proposer"`
+	LatestQC         QCStatus          `json:"latest_qc"`
+	LastQCMessage    string            `json:"last_qc_message,omitempty"`
 }
 
 type FileStore struct {

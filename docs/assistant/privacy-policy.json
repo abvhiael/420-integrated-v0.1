@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "principles": {
+    "minimum_input": true,
+    "ephemeral_by_default": true,
+    "ambient_authorization_forbidden": true,
+    "private_payload_auto_inclusion_forbidden": true
+  },
+  "allowed_context": [
+    "question_text",
+    "environment",
+    "release",
+    "audience",
+    "client_surface",
+    "application_or_protocol",
+    "intent_class",
+    "contextual_id",
+    "troubleshooting_id",
+    "public_transaction_hash",
+    "public_block_number",
+    "public_contract_address",
+    "public_protocol_object_id",
+    "sanitized_error_text",
+    "sanitized_logs"
+  ],
+  "prohibited": [
+    "seed_phrase",
+    "private_key",
+    "passkey_private_material",
+    "recovery_secret",
+    "validator_signing_key",
+    "remote_signer_secret",
+    "engine_jwt",
+    "bearer_token",
+    "api_secret",
+    "authentication_cookie",
+    "authorization_header",
+    "private_messenger_payload",
+    "unrelated_private_identity_payload",
+    "unrelated_private_attention_payload",
+    "automatic_private_ai_prompt_dataset_or_output"
+  ],
+  "telemetry_allowed": [
+    "intent_class",
+    "environment",
+    "release",
+    "source_collection_ids",
+    "citation_count",
+    "coverage_state",
+    "contextual_id",
+    "troubleshooting_id",
+    "coarse_client_surface",
+    "latency_class",
+    "error_class"
+  ],
+  "telemetry_raw_question_required": false,
+  "retention_default": "no-assumed-retention",
+  "application_boundaries": ["wallet", "identity", "messenger", "attention", "420ai"],
+  "secret_required_behavior": "stop-and-sanitize-or-escalate"
+}

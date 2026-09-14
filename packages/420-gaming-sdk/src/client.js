@@ -6,8 +6,19 @@ function requireAdapter(adapters, name) {
   return fn;
 }
 
+function scopedResult(gameId, value) {
+  if (value == null) return value;
+  if (typeof value === "object" && "gameId" in value && value.gameId !== gameId) return null;
+  return value;
+}
+
 export function createGamingClient420({ gameId, adapters = {} } = {}) {
   if (!gameId) throw new TypeError("gameId is required");
+
+  async function callScoped(name, args) {
+    const value = await requireAdapter(adapters, name)({ gameId, ...args });
+    return scopedResult(gameId, value);
+  }
 
   return Object.freeze({
     gameId,
@@ -21,16 +32,15 @@ export function createGamingClient420({ gameId, adapters = {} } = {}) {
     },
 
     async getProfile(account) {
-      return requireAdapter(adapters, "getProfile")({ gameId, account });
+      return callScoped("getProfile", { account });
     },
 
     async ensureProfile(account) {
-      return requireAdapter(adapters, "ensureProfile")({ gameId, account });
+      return callScoped("ensureProfile", { account });
     },
 
     async getEntitlement({ profileId, entitlementId, entitlementType, contentId }) {
-      return requireAdapter(adapters, "getEntitlement")({
-        gameId,
+      return callScoped("getEntitlement", {
         profileId,
         entitlementId,
         entitlementType,
@@ -39,8 +49,7 @@ export function createGamingClient420({ gameId, adapters = {} } = {}) {
     },
 
     async prepareMigration({ targetAccount, guestStateCommitment, migrationPayloadHash, validUntil }) {
-      return requireAdapter(adapters, "prepareMigration")({
-        gameId,
+      return callScoped("prepareMigration", {
         targetAccount,
         guestStateCommitment,
         migrationPayloadHash,
@@ -49,12 +58,11 @@ export function createGamingClient420({ gameId, adapters = {} } = {}) {
     },
 
     async getMigrationClaim(claimId) {
-      return requireAdapter(adapters, "getMigrationClaim")({ gameId, claimId });
+      return callScoped("getMigrationClaim", { claimId });
     },
 
     async getSessionStatus({ account, sessionKey, target, selector }) {
-      return requireAdapter(adapters, "getSessionStatus")({
-        gameId,
+      return callScoped("getSessionStatus", {
         account,
         sessionKey,
         target,
@@ -63,8 +71,7 @@ export function createGamingClient420({ gameId, adapters = {} } = {}) {
     },
 
     async verifyAttestation({ attestationId, subjectType, subjectId, payloadHash }) {
-      return requireAdapter(adapters, "verifyAttestation")({
-        gameId,
+      return callScoped("verifyAttestation", {
         attestationId,
         subjectType,
         subjectId,

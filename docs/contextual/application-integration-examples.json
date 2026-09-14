@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "examples": [
+    {
+      "surface": "420-wallet",
+      "runtime_state": "transaction-review",
+      "contextual_id": "CTX-WALLET-005",
+      "environment": "genesis",
+      "version_intent": "current",
+      "expected_behavior": "resolve-version-qualified-url"
+    },
+    {
+      "surface": "420-swap",
+      "runtime_state": "fees-economics",
+      "context_map": "genesis-dapp-context-map",
+      "slot": "fees_economics",
+      "environment": "genesis",
+      "version_intent": "current",
+      "expected_behavior": "resolve-within-genesis-only"
+    },
+    {
+      "surface": "runtime-error",
+      "runtime_state": "known-troubleshooting-id",
+      "troubleshooting_id": "TRB-TX-001",
+      "environment": "genesis",
+      "version_intent": "current",
+      "expected_behavior": "resolve-exact-doc11-anchor-or-fallback"
+    },
+    {
+      "surface": "420-cli",
+      "runtime_state": "network-identity-help",
+      "contextual_id": "CTX-DEV-007",
+      "environment": "development",
+      "version_intent": "current",
+      "expected_behavior": "resolve-version-qualified-url"
+    },
+    {
+      "surface": "operator-dashboard",
+      "runtime_state": "incident-diagnostics",
+      "contextual_id": "CTX-OPS-001",
+      "environment": "genesis",
+      "version_intent": "genesis",
+      "expected_behavior": "resolve-immutable-historical-url"
+    },
+    {
+      "surface": "420-faucet",
+      "runtime_state": "help",
+      "environment": "testnet",
+      "version_intent": "current",
+      "expected_behavior": "unavailable-until-testnet-published"
+    }
+  ]
+}

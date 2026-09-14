@@ -1,0 +1,29 @@
+name: 420RPC
+
+on:
+  push:
+    paths:
+      - '420-rpc/**'
+      - 'docs/420RPC-ROADMAP.md'
+      - 'docs/architecture/infrastructure/rpc-gateways-network-ingress.md'
+      - '.github/workflows/420-rpc.yml'
+  pull_request:
+    paths:
+      - '420-rpc/**'
+      - 'docs/420RPC-ROADMAP.md'
+      - 'docs/architecture/infrastructure/rpc-gateways-network-ingress.md'
+      - '.github/workflows/420-rpc.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: 420-rpc
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-package-lock
+      - run: npm test

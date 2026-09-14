@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "exact_id_prefix": "TRB-",
+  "exact_id_precedence": true,
+  "symptom_routing": {
+    "start_from_observable_symptoms": true,
+    "allow_narrowing_by": ["audience", "surface", "severity", "environment", "application", "public_diagnostics"],
+    "ambiguous_result": "needs-context"
+  },
+  "retry_policy": {
+    "assistant_may_authorize_retry": false,
+    "require_doc11_retry_safety": true,
+    "unresolved_retry_result": "needs-context"
+  },
+  "escalation_policy": {
+    "preserve_doc11_escalation": true,
+    "value_risk_prefers_safest_documented_state": true,
+    "security_critical_prefers_safest_documented_state": true
+  },
+  "contextual_navigation": {
+    "ctx_ids_are_navigation_only": true,
+    "trb_precedes_ctx_for_known_errors": true,
+    "generic_ctx_fallback_without_diagnosis": true
+  },
+  "live_state": {
+    "documentation_proves_runtime_state": false,
+    "require_canonical_observation_for_live_claims": true
+  },
+  "diagnostics": {
+    "copy_safe_only": true,
+    "forbid_secrets": true
+  },
+  "fail_closed_results": ["unsupported", "needs-context", "unavailable"]
+}

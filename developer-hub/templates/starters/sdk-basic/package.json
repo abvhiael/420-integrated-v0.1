@@ -1,0 +1,8 @@
+{
+  "name": "{{projectName}}",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {"@420/sdk":"^0.1.0"},
+  "scripts": {"start":"node src/index.mjs"}
+}

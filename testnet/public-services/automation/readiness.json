@@ -1,0 +1,73 @@
+{
+  "schema": "420-testnet-automation-readiness-v1",
+  "service": "420Automation",
+  "phase": "AUT-12",
+  "status": "PENDING_LIVE_TESTNET_EVIDENCE",
+  "decision": "NO_GO",
+  "environment": {
+    "chain_id": 420,
+    "expected_genesis_hash": "REPLACE",
+    "public_automation_url": "REPLACE",
+    "rpc_provider_ids": [],
+    "oracle_provider_ids": []
+  },
+  "release_identity": {
+    "automation_revision": "REPLACE",
+    "node420_revision": "REPLACE",
+    "rpc_revision": "REPLACE",
+    "oracle_revision": "REPLACE",
+    "descriptor_manifest_digest": "REPLACE",
+    "compiled_artifacts_digest": "REPLACE"
+  },
+  "implementation_evidence": {
+    "closeout_contract": "IMPLEMENTED_AND_TESTED",
+    "chain_and_genesis_binding": "IMPLEMENTED_AND_TESTED",
+    "release_identity_validation": "IMPLEMENTED_AND_TESTED",
+    "worker_and_job_witness_validation": "IMPLEMENTED_AND_TESTED",
+    "trigger_compatibility_gate": "IMPLEMENTED_AND_TESTED",
+    "cross_service_compatibility_gate": "IMPLEMENTED_AND_TESTED",
+    "failure_drill_gate": "IMPLEMENTED_AND_TESTED",
+    "go_no_go_aggregation": "IMPLEMENTED_AND_TESTED"
+  },
+  "live_evidence": {
+    "automation_readiness": "PENDING",
+    "scheduler_readiness": "PENDING",
+    "live_worker_ids": [],
+    "registered_job_ids": [],
+    "time_trigger_witness": "PENDING",
+    "block_trigger_witness": "PENDING",
+    "event_trigger_witness": "PENDING",
+    "oracle_trigger_witness": "PENDING",
+    "manual_trigger_witness": "PENDING",
+    "automation_api_compatibility": "PENDING",
+    "rpc_compatibility": "PENDING",
+    "oracle_compatibility": "PENDING",
+    "developer_hub_compatibility": "PENDING",
+    "live_job_execution": "PENDING",
+    "worker_lease_failover_drill": "PENDING",
+    "replay_suppression_drill": "PENDING",
+    "ambiguous_submission_recovery_drill": "PENDING",
+    "wrong_chain_drill": "PENDING",
+    "finality_conflict_drill": "PENDING",
+    "hostile_observation_drill": "PENDING",
+    "resource_abuse_drill": "PENDING",
+    "auth_scope_drill": "PENDING",
+    "readiness_recovery_drill": "PENDING",
+    "telemetry_redaction": "PENDING"
+  },
+  "blockers": [
+    "public Automation deployment is not recorded",
+    "pinned testnet genesis evidence is not recorded",
+    "live worker and registered-job witnesses are not recorded",
+    "cross-service compatibility evidence is not recorded",
+    "required live execution and failure drills are not recorded"
+  ],
+  "authority": {
+    "canonical_state": false,
+    "finality": false,
+    "oracle_truth": false,
+    "wallet_custody": false,
+    "protocol_authorization": false,
+    "launch_authority": false
+  }
+}

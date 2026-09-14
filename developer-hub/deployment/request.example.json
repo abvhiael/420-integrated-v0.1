@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "1.0.0",
+  "project": "example-app",
+  "chainId": "420",
+  "artifact": {
+    "contract": "Example420",
+    "path": "contracts/out/Example420.sol/Example420.json",
+    "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "deployer": "0x1111111111111111111111111111111111111111",
+  "executor": "420-wallet",
+  "constructorArgs": [],
+  "requestVerification": true,
+  "requestRegistration": false
+}

@@ -1,0 +1,57 @@
+{
+  "schema": "420-indexer-v1",
+  "status": "IMPLEMENTATION_ACTIVE",
+  "name": "420Indexer",
+  "class": "SHARED_NON_AUTHORITATIVE_INFRASTRUCTURE",
+  "canonicalStateAuthority": false,
+  "consumers": [
+    "420Explorer",
+    "420Search",
+    "420Analytics",
+    "420Notifications",
+    "420Status"
+  ],
+  "ingestion": {
+    "requiredChainId": 420,
+    "trackHead": true,
+    "trackSafe": true,
+    "trackFinalized": true,
+    "rejectWrongChain": true,
+    "resumeFromCheckpoint": true,
+    "fullRebuildSupported": true
+  },
+  "reorgPolicy": {
+    "rollbackNonFinalized": true,
+    "rewriteFinalized": false,
+    "finalizedConflictBehavior": "FAIL_CLOSED_DEGRADED"
+  },
+  "provenance": {
+    "blockHashRequired": true,
+    "transactionHashRequiredWhenApplicable": true,
+    "logPositionRequiredWhenApplicable": true,
+    "schemaVersionRequired": true,
+    "decoderVersionRequiredForDecodedProtocolRecords": true
+  },
+  "privacy": {
+    "publicRecordsOnly": true,
+    "privateMessengerPayloads": false,
+    "privateIdentityFields": false,
+    "encryptedResourcePayloads": false,
+    "rawPrivateAttentionTelemetry": false,
+    "walletSecrets": false
+  },
+  "invariants": [
+    "IDX-INV-001",
+    "IDX-INV-002",
+    "IDX-INV-003",
+    "IDX-INV-004",
+    "IDX-INV-005",
+    "IDX-INV-006",
+    "IDX-INV-007",
+    "IDX-INV-008",
+    "IDX-INV-009",
+    "IDX-INV-010",
+    "IDX-INV-011",
+    "IDX-INV-012"
+  ]
+}

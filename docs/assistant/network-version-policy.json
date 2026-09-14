@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "authority": "docs/versioning/version-registry.json",
+  "resolution_states": ["resolved", "needs-context", "unavailable"],
+  "tracks": {
+    "development": {
+      "current_alias": "development/current",
+      "published": true,
+      "release": "development",
+      "immutable": false,
+      "generated_reference": "live-development-only"
+    },
+    "genesis": {
+      "current_alias": "genesis/current",
+      "published": true,
+      "release": "genesis",
+      "immutable": true,
+      "historical_route": "genesis/genesis",
+      "generated_reference": "unavailable-until-release-snapshot"
+    },
+    "testnet": {
+      "current_alias": "testnet/current",
+      "published": false,
+      "release": null,
+      "fail_closed": true
+    },
+    "mainnet": {
+      "current_alias": "mainnet/current",
+      "published": false,
+      "release": null,
+      "fail_closed": true
+    }
+  },
+  "rules": {
+    "cross_environment_fallback": false,
+    "implicit_cross_release_fallback": false,
+    "development_as_genesis_authority": false,
+    "development_as_testnet_authority": false,
+    "development_as_mainnet_authority": false,
+    "historical_requires_immutable_published_release": true,
+    "material_context_ambiguity_state": "needs-context",
+    "unpublished_context_state": "unavailable",
+    "documentation_proves_live_runtime_state": false
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "phase": "EXP-7.2",
+  "chainId": 420,
+  "explorerUrl": "https://explorer.testnet.example",
+  "evidence": {
+    "blockNumber": 0,
+    "transactionHash": "0x...",
+    "address": "0x...",
+    "serviceId": "420Registry",
+    "assetKey": "native:420"
+  },
+  "requirements": {
+    "readiness": "ready=true on chain 420",
+    "block": "known block is indexed and queryable",
+    "transaction": "known transaction and receipt are indexed and queryable",
+    "address": "known address view is queryable",
+    "registry": "known service is registered and queryable",
+    "assetActivity": "at least one transfer is indexed for the selected asset evidence",
+    "consensus": "currentSlot > 0 and activeValidatorCount > 0",
+    "provenance": "every checked response declares 420Explorer over 420Indexer with canonicalAuthority=false and QUALIFIED_INDEXER_API_CONSUMER"
+  }
+}

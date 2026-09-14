@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "canonical_base_url": "https://abvhiael.github.io/420-integrated-v0.1/",
+  "required_artifact_files": [
+    "index.html",
+    "search/search_index.json",
+    "versions/development/current/index.html",
+    "versions/genesis/current/index.html"
+  ],
+  "critical_routes": [
+    "",
+    "versions/development/current/",
+    "versions/genesis/current/",
+    "versions/genesis/current/apps/explorer/",
+    "versions/genesis/current/developers/",
+    "versions/genesis/current/troubleshooting/"
+  ],
+  "publication_identity_file": "publication.json",
+  "expected_repository": "abvhiael/420-integrated-v0.1",
+  "expected_ref": "refs/heads/main",
+  "published_environments": ["development", "genesis"],
+  "unpublished_environments": ["testnet", "mainnet"],
+  "authority": "documentation-health-evidence-only",
+  "health_failure_effect": "publication-degraded-no-authority-fallback"
+}

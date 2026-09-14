@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "source_registry": "docs/reference/reference-sources.json",
+  "live_generated_root": "docs/reference/generated",
+  "governed_outputs": [
+    "source-manifest.md",
+    "contracts.md",
+    "events-errors.md",
+    "rpc.md",
+    "indexer-api.md",
+    "sdk-cli.md",
+    "networks.md",
+    "deployments.md"
+  ],
+  "allowed_modes": ["live", "snapshot", "unavailable"],
+  "live_mode_release": "development",
+  "live_mode_environment": "development",
+  "snapshot_requires_immutable_release": true,
+  "snapshot_requires_hashes": true,
+  "snapshot_hash_algorithm": "sha256",
+  "forbid_cross_environment_fallback": true,
+  "forbid_live_reference_for_non_development": true
+}

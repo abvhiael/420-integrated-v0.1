@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "surface": "developer-hub",
+  "canonical_base_url": "https://abvhiael.github.io/420-integrated-v0.1/",
+  "published_environments": ["development", "genesis"],
+  "cross_environment_fallback": false,
+  "cross_release_fallback": false,
+  "records": {
+    "CTX-DEV-001": "developers/index.md",
+    "CTX-DEV-002": "developers/contracts-and-interfaces.md",
+    "CTX-DEV-003": "developers/deployment-workflow.md",
+    "CTX-DEV-004": "developers/diagnostics-and-correlation.md",
+    "CTX-DEV-005": "developers/api-fallback-and-reliability.md",
+    "CTX-DEV-006": "reference/index.md",
+    "CTX-DEV-007": "developers/networks-and-manifests.md",
+    "CTX-DEV-008": "developers/events-and-finality.md"
+  }
+}

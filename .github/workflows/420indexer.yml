@@ -1,0 +1,76 @@
+name: 420Indexer
+
+on:
+  pull_request:
+    paths:
+      - 'indexer/**'
+      - '420-indexer/**'
+      - 'explorer/**'
+      - 'config/420indexer-v1.json'
+      - 'contracts/config/420explorer-genesis.json'
+      - 'testnet/public-services/indexer/**'
+      - 'testnet/public-services/explorer/**'
+      - 'scripts/verify-420indexer.py'
+      - 'scripts/verify-explorer-indexer-consumer.py'
+      - '.github/workflows/420indexer.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'indexer/**'
+      - '420-indexer/**'
+      - 'explorer/**'
+      - 'config/420indexer-v1.json'
+      - 'contracts/config/420explorer-genesis.json'
+      - 'testnet/public-services/indexer/**'
+      - 'testnet/public-services/explorer/**'
+      - 'scripts/verify-420indexer.py'
+      - 'scripts/verify-explorer-indexer-consumer.py'
+      - '.github/workflows/420indexer.yml'
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: indexer420
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d indexer420"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test indexer
+        run: go test ./indexer/...
+      - name: Vet indexer
+        run: go vet ./indexer/...
+      - name: Test TypeScript 420Indexer
+        working-directory: 420-indexer
+        env:
+          INDEXER_PG_URL: postgresql://postgres:postgres@localhost:5432/indexer420
+        run: |
+          npm install --no-audit --no-fund
+          npm test
+      - name: Test Explorer indexer consumer
+        run: go test ./explorer/...
+      - name: Vet Explorer indexer consumer
+        run: go vet ./explorer/...
+      - name: Validate readiness JSON
+        run: python -m json.tool config/420indexer-v1.json >/dev/null && python -m json.tool contracts/config/420explorer-genesis.json >/dev/null && python -m json.tool testnet/public-services/indexer/readiness.json >/dev/null && python -m json.tool testnet/public-services/explorer/readiness.json >/dev/null
+      - name: Verify GEN-11.1 readiness contract
+        run: python scripts/verify-420indexer.py
+      - name: Verify 420Explorer shared-indexer consumer contract
+        run: python scripts/verify-explorer-indexer-consumer.py

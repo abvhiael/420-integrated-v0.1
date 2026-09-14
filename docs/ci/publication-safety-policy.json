@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "secret_safety_roots": [
+    "docs/troubleshooting"
+  ],
+  "sensitive_terms": [
+    "seed phrase",
+    "private key",
+    "recovery secret",
+    "signing-device secret",
+    "bearer token",
+    "api secret",
+    "session credential",
+    "authentication header",
+    "auth header"
+  ],
+  "request_terms": [
+    "send",
+    "paste",
+    "share",
+    "provide",
+    "post",
+    "upload",
+    "include",
+    "request"
+  ],
+  "negation_terms": [
+    "do not",
+    "don't",
+    "never",
+    "must not",
+    "no troubleshooting step",
+    "without",
+    "redact",
+    "removed",
+    "non-secret"
+  ],
+  "required_notices": [
+    {
+      "path": "docs/troubleshooting/registry-contract.md",
+      "contains_all": [
+        "support never needs a seed phrase or private key",
+        "credentials, cookies, bearer tokens and private endpoint secrets must be redacted"
+      ]
+    },
+    {
+      "path": "docs/troubleshooting/genesis-application-coverage.md",
+      "contains_all": [
+        "Environment:** testnet only",
+        "Testnet Faucet `$420` has no monetary value"
+      ]
+    },
+    {
+      "path": "docs/reference/generated/networks.md",
+      "contains_all": [
+        "this page never promotes local example values into devnet, testnet or mainnet",
+        "`mainnet` | none | unavailable — fail closed"
+      ]
+    },
+    {
+      "path": "docs/reference/generated/deployments.md",
+      "contains_all": [
+        "example-scoped deployment, release and catalogue inputs only",
+        "refuses to publish any address as a canonical devnet/testnet/mainnet deployment"
+      ]
+    }
+  ],
+  "environment_guards": [
+    {
+      "path": "docs/reference/generated/networks.md",
+      "trigger_any": ["127.0.0.1", "localhost", "local.example"],
+      "required_any": [
+        "Environment: `local`",
+        "never promotes local example values into devnet, testnet or mainnet"
+      ]
+    },
+    {
+      "path": "docs/reference/generated/deployments.md",
+      "trigger_any": ["local.example", "request.example", "release-candidate.example"],
+      "required_any": [
+        "example-scoped deployment, release and catalogue inputs only",
+        "not merely an example, plan, predicted address, manifest hint, or unconfirmed receipt"
+      ]
+    }
+  ]
+}

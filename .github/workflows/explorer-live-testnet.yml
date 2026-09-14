@@ -1,0 +1,68 @@
+name: 420Explorer Live Testnet Validation
+
+on:
+  workflow_dispatch:
+    inputs:
+      explorer_url:
+        description: Live 420Explorer testnet base URL
+        required: true
+        type: string
+      expected_chain_id:
+        description: Expected chain ID
+        required: false
+        default: "420"
+        type: string
+      block_number:
+        description: Optional known indexed block number
+        required: false
+        type: string
+      transaction_hash:
+        description: Optional known indexed transaction hash
+        required: false
+        type: string
+      address:
+        description: Optional known indexed address
+        required: false
+        type: string
+      service_id:
+        description: Optional known registered service ID
+        required: false
+        type: string
+      asset_key:
+        description: Optional known asset key with indexed transfer activity
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Test live validator
+        run: go test ./explorer/cmd/explorerlivevalidate
+      - name: Validate live testnet Explorer
+        env:
+          EXPLORER_LIVE_URL: ${{ inputs.explorer_url }}
+          EXPLORER_EXPECTED_CHAIN_ID: ${{ inputs.expected_chain_id }}
+          EXPLORER_LIVE_BLOCK_NUMBER: ${{ inputs.block_number }}
+          EXPLORER_LIVE_TX_HASH: ${{ inputs.transaction_hash }}
+          EXPLORER_LIVE_ADDRESS: ${{ inputs.address }}
+          EXPLORER_LIVE_SERVICE_ID: ${{ inputs.service_id }}
+          EXPLORER_LIVE_ASSET_KEY: ${{ inputs.asset_key }}
+        run: |
+          set -o pipefail
+          go run ./explorer/cmd/explorerlivevalidate | tee explorer-live-evidence.json
+      - name: Upload live validation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: explorer-live-testnet-evidence
+          path: explorer-live-evidence.json
+          if-no-files-found: warn

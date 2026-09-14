@@ -26,10 +26,37 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
-        with:
-          version: stable
+      - name: Install Foundry with retry
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L https://foundry.paradigm.xyz | bash
+
+          if [ -x "$HOME/.config/.foundry/bin/foundryup" ]; then
+            FOUNDRY_BIN="$HOME/.config/.foundry/bin"
+          elif [ -x "$HOME/.foundry/bin/foundryup" ]; then
+            FOUNDRY_BIN="$HOME/.foundry/bin"
+          else
+            echo "foundryup was not installed in a known location." >&2
+            find "$HOME" -maxdepth 4 -type f -name foundryup -print || true
+            exit 1
+          fi
+
+          export PATH="$FOUNDRY_BIN:$PATH"
+          echo "$FOUNDRY_BIN" >> "$GITHUB_PATH"
+
+          for attempt in 1 2 3 4; do
+            if "$FOUNDRY_BIN/foundryup"; then
+              forge --version
+              cast --version
+              exit 0
+            fi
+            if [ "$attempt" -eq 4 ]; then
+              echo "Foundry installation failed after 4 attempts." >&2
+              exit 1
+            fi
+            sleep $((attempt * 15))
+          done
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -114,9 +141,6 @@ jobs:
           with open(path, encoding="utf-8") as handle:
               report = json.load(handle)
 
-          # Slither may return non-zero when detector findings exist. Treat the JSON
-          # report's success flag as the analysis-health signal, then enforce our own
-          # explicit High-severity policy below. Compilation/analysis errors remain fatal.
           if report.get("success") is not True:
               print(
                   f"Slither analysis failed: {report.get('error') or 'unknown error'}",
@@ -165,11 +189,6 @@ jobs:
               if detector.get("impact") != "High":
                   continue
 
-              # SmartAccount420 is intentionally a programmable account executor. The
-              # exception is deliberately exact: only _call(address,uint256,bytes) and
-              # its target.call{value:value}(data) node are accepted. This replaces the
-              # older looser allowance, which could become stale as Slither's element
-              # shape or the account implementation evolved.
               allowed = exact_arbitrary_send(
                   detector,
                   contract="SmartAccount420",
@@ -179,10 +198,6 @@ jobs:
                   call_fragment="target.call{value: value}(data)",
               )
 
-              # RoyaltyVault420.claim lets an authenticated creator choose the payout
-              # recipient for funds already accrued to that creator. Effects are applied
-              # before the external call. Allow only this exact claim function/send node;
-              # any other arbitrary ETH send in RoyaltyVault420 remains a hard failure.
               if not allowed:
                   allowed = exact_arbitrary_send(
                       detector,
@@ -193,11 +208,6 @@ jobs:
                       call_fragment="recipient.call{value: amount}()",
                   )
 
-              # ExchangeFeeRouter420.routeTokenFee intentionally snapshots the router's
-              # token balance around transferFrom so fee-on-transfer/rebasing assets are
-              # rejected before any distribution. The function itself is protected by
-              # ExchangeFeeRouter420's nonReentrant mutex. Keep this exception exact to
-              # this detector, function, contract, file, and stale balance variable.
               if detector.get("check") == "reentrancy-balance":
                   description = detector.get("description", "")
                   exact_function = False

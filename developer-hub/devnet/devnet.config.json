@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "1.0.0",
+  "profile": "real15",
+  "environment": "local",
+  "chainId": "420",
+  "consensusTransport": "devnet-tcp",
+  "executionNodes": 15,
+  "consensusNodes": 15,
+  "slotMs": 12000,
+  "bus": "127.0.0.1:9420",
+  "ports": {
+    "rpcBase": 8545,
+    "engineBase": 8551,
+    "p2pBase": 30303
+  },
+  "paths": {
+    "prepare": "scripts/prepare-real-devnet15.sh",
+    "run": "scripts/run-real-devnet15.py",
+    "data": "devnet-data/real15",
+    "geth": "bin/upstream/geth-v1.17.5"
+  }
+}

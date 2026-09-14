@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "1.0.0",
+  "chainId": "420",
+  "address": "0x2222222222222222222222222222222222222222",
+  "runtimeCodeHash": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "creationBytecodeHash": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "sourceBundle": {
+    "format": "solidity-standard-json",
+    "path": "contracts/verification/Example420.standard-input.json",
+    "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+  },
+  "compiler": {
+    "version": "0.8.30+commit.73712a01",
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "evmVersion": "cancun",
+    "viaIR": false,
+    "metadataHashMode": "ipfs"
+  },
+  "constructorArgs": "UNKNOWN",
+  "libraries": {},
+  "proxy": {
+    "role": "none",
+    "relatedAddress": null
+  }
+}

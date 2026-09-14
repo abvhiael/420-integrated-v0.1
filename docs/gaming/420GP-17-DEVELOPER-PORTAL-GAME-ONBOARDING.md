@@ -40,13 +40,15 @@ Provides a reusable Developer Hub qualification gate for feature-level access po
 
 ### GP-17.5 — Entitlement, claim & attestation onboarding
 
-Status: IN QUALIFICATION.
+Status: COMPLETE — merged through PR #258.
 
-Guides and qualifies high-risk Gaming Protocol integrations for entitlements, claims and cross-game attestations. High-risk reads must use finalized canonical state, reorg and RPC failure must fail closed, all authority remains game-scoped, and cross-game attestation scope must be explicit rather than wallet-wide.
+Guides and qualifies high-risk Gaming Protocol integrations for entitlements, claims and cross-game attestations. High-risk reads require finalized canonical state, reorg and RPC failure fail closed, authority remains game-scoped, and cross-game attestation scope is explicit rather than wallet-wide.
 
 ### GP-17.6 — Migration & wallet-link onboarding
 
-Qualify guest-to-account and account-to-wallet migration plans, replay/idempotency behavior and deliberate wallet-link consent boundaries.
+Status: IN QUALIFICATION.
+
+Qualifies guest/registered-to-wallet migration and deliberate wallet-link consent boundaries. Migration must remain target-bound, game-scoped, commitment-only, expiry-aware, single-consumption and idempotent. Retry logic checks canonical state before resubmission, raw save payloads never become canonical migration state, and off-chain reconciliation waits for finalized canonical consumption.
 
 ### GP-17.7 — SmartAccount / CapabilityRegistry onboarding
 
@@ -88,19 +90,30 @@ Qualification lives in `developer-hub/test/gaming-progressive-access-qualificati
 
 `developer-hub/src/gaming-high-risk-onboarding.mjs` qualifies entitlement, claim and attestation integration plans before any canonical handoff.
 
-It requires:
-
-- exact binding to the onboarding game ID;
-- high-risk integration scope exactly `game`;
-- finalized canonical state under the GP-16 finality model;
-- reorg handling to fail closed;
-- RPC failure handling to fail closed;
-- canonical RPC revalidation for high-risk state;
-- no wallet-wide enumeration;
-- explicit cross-game scope for attestations;
-- declared GP-17.1 protocols for every requested high-risk integration.
+It requires exact onboarding game binding, `game` scope, finalized canonical state under GP-16, reorg/RPC fail-closed handling, canonical RPC revalidation, no wallet-wide enumeration, explicit cross-game attestation scope and prior declaration of each requested high-risk protocol.
 
 Qualification lives in `developer-hub/test/gaming-high-risk-onboarding.test.mjs`. Developer Hub only produces a noncanonical preflight result; it cannot establish ownership, entitlement, claim validity, attestation validity or finality by itself.
+
+### GP-17.6
+
+`developer-hub/src/gaming-migration-wallet-link.mjs` qualifies migration and wallet-link plans before any claim issuance or Wallet authorization.
+
+It enforces:
+
+- explicit wallet-link consent;
+- wallet linkage remains optional for core gameplay;
+- the target account is displayed before authorization;
+- source state is guest or registered state, never an implicit wallet-global source;
+- migration claims are target-bound and game-scoped;
+- canonical migration state contains commitments, not raw save payloads;
+- expiry and single-consumption are mandatory;
+- migration preparation is idempotent;
+- uncertain submission outcomes require canonical-state checks before retry;
+- reorg and RPC failure fail closed under GP-16;
+- off-chain reconciliation occurs only after finalized canonical consumption;
+- Developer Hub cannot create the canonical claim, link the wallet or declare migration complete.
+
+Qualification lives in `developer-hub/test/gaming-migration-wallet-link.test.mjs`.
 
 ## GP-17 exit criteria
 

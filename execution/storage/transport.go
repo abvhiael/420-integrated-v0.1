@@ -1,9 +1,11 @@
 package storage
 
 import (
+	"crypto/subtle"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"math"
 	"net/http"
 	"strconv"
@@ -19,7 +21,34 @@ func NewTransportHandler(service *Service) http.Handler {
 	mux.HandleFunc("/healthz", t.health)
 	mux.HandleFunc("/v1/capacity", t.capacity)
 	mux.HandleFunc("/v1/shards/", t.shard)
-	return mux
+	return securityHeaders(mux)
+}
+
+func securityHeaders(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		w.Header().Set("Cache-Control", "no-store")
+		w.Header().Set("Referrer-Policy", "no-referrer")
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (t *transportServer) authorized(r *http.Request) bool {
+	if t.service == nil { return false }
+	expected := strings.TrimSpace(t.service.cfg.AuthToken)
+	if expected == "" { return true }
+	raw := strings.TrimSpace(r.Header.Get("Authorization"))
+	if !strings.HasPrefix(raw, "Bearer ") { return false }
+	provided := strings.TrimSpace(strings.TrimPrefix(raw, "Bearer "))
+	if len(provided) != len(expected) { return false }
+	return subtle.ConstantTimeCompare([]byte(provided), []byte(expected)) == 1
+}
+
+func (t *transportServer) requireAuth(w http.ResponseWriter, r *http.Request) bool {
+	if t.authorized(r) { return true }
+	w.Header().Set("WWW-Authenticate", `Bearer realm="420Store"`)
+	http.Error(w, "unauthorized", http.StatusUnauthorized)
+	return false
 }
 
 func (t *transportServer) health(w http.ResponseWriter, _ *http.Request) {
@@ -36,6 +65,7 @@ func (t *transportServer) health(w http.ResponseWriter, _ *http.Request) {
 }
 
 func (t *transportServer) capacity(w http.ResponseWriter, r *http.Request) {
+	if !t.requireAuth(w, r) { return }
 	if r.Method != http.MethodGet {
 		w.Header().Set("Allow", http.MethodGet)
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
@@ -49,6 +79,7 @@ func (t *transportServer) capacity(w http.ResponseWriter, r *http.Request) {
 }
 
 func (t *transportServer) shard(w http.ResponseWriter, r *http.Request) {
+	if !t.requireAuth(w, r) { return }
 	if t.service == nil || t.service.runtime == nil {
 		http.Error(w, "service unavailable", http.StatusServiceUnavailable)
 		return
@@ -85,7 +116,7 @@ func (t *transportServer) shard(w http.ResponseWriter, r *http.Request) {
 }
 
 func (t *transportServer) putShard(w http.ResponseWriter, r *http.Request, id string, assignment Assignment) {
-	if assignment.SizeBytes == 0 || assignment.SizeBytes > math.MaxInt64 {
+	if assignment.SizeBytes == 0 || assignment.SizeBytes >= math.MaxInt64 {
 		writeStorageError(w, ErrInvalidShard)
 		return
 	}
@@ -98,10 +129,8 @@ func (t *transportServer) putShard(w http.ResponseWriter, r *http.Request, id st
 		return
 	}
 
-	// A retry of an already-stored shard is idempotent only if the local record
-	// still matches the current canonical assignment. Return the existing record
-	// without consuming the body, touching storage, or reserving capacity again.
-	if _, existing, err := t.service.runtime.Retrieve(r.Context(), id, 0, 1); err == nil {
+	if rc, existing, _, err := t.service.runtime.RetrieveStream(r.Context(), id, 0, 1); err == nil {
+		_ = rc.Close()
 		if existing.AgreementID != assignment.AgreementID || existing.CommitmentID != assignment.CommitmentID || existing.ShardRoot != assignment.ShardRoot || existing.SizeBytes != assignment.SizeBytes {
 			writeStorageError(w, ErrCommitmentMismatch)
 			return
@@ -113,8 +142,9 @@ func (t *transportServer) putShard(w http.ResponseWriter, r *http.Request, id st
 		return
 	}
 
-	// Cap the HTTP body at the exact canonical shard size. Runtime still reads
-	// size+1 from its input so non-HTTP callers retain their own overflow check.
+	// Limit the HTTP body to the exact canonical size. FileStore deliberately
+	// asks its reader for size+1 bytes; an oversized chunked body therefore
+	// surfaces http.MaxBytesError, which maps deterministically to 413.
 	r.Body = http.MaxBytesReader(w, r.Body, int64(assignment.SizeBytes))
 	rec, err := t.service.runtime.StoreShard(r.Context(), id, r.Body)
 	if err != nil {
@@ -135,21 +165,24 @@ func (t *transportServer) getShard(w http.ResponseWriter, r *http.Request, id st
 		http.Error(w, "invalid range", http.StatusRequestedRangeNotSatisfiable)
 		return
 	}
-	data, rec, err := t.service.runtime.Retrieve(r.Context(), id, offset, length)
+	rc, rec, streamLen, err := t.service.runtime.RetrieveStream(r.Context(), id, offset, length)
 	if err != nil {
 		writeStorageError(w, err)
 		return
 	}
-	if offset > rec.SizeBytes {
+	defer rc.Close()
+	if partial && offset >= rec.SizeBytes {
+		w.Header().Set("Content-Range", fmt.Sprintf("bytes */%d", rec.SizeBytes))
 		http.Error(w, "invalid range", http.StatusRequestedRangeNotSatisfiable)
 		return
 	}
 	end := offset
-	if len(data) > 0 {
-		end = offset + uint64(len(data)) - 1
+	if streamLen > 0 {
+		end = offset + streamLen - 1
 	}
 	w.Header().Set("Accept-Ranges", "bytes")
 	w.Header().Set("Content-Type", "application/octet-stream")
+	w.Header().Set("Content-Length", strconv.FormatUint(streamLen, 10))
 	w.Header().Set("ETag", fmt.Sprintf("\"%s\"", rec.ShardRoot))
 	w.Header().Set("X-420-Agreement-ID", rec.AgreementID)
 	w.Header().Set("X-420-Commitment-ID", rec.CommitmentID)
@@ -160,7 +193,7 @@ func (t *transportServer) getShard(w http.ResponseWriter, r *http.Request, id st
 		w.WriteHeader(http.StatusOK)
 	}
 	if r.Method != http.MethodHead {
-		_, _ = w.Write(data)
+		_, _ = io.Copy(w, rc)
 	}
 }
 

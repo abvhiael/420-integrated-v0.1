@@ -7,12 +7,17 @@ The source for this site lives in the `docs/` directory of the main 420 Integrat
 ## Choose what you want to do
 
 - [Get Started](getting-started/index.md) — learn what 420 Integrated is, set up 420 Wallet, receive or acquire `$420`, make a first transaction, and learn security basics.
-- [Use 420 Integrated](users/index.md) — complete day-to-day tasks such as sending funds, connecting dApps, signing transactions, managing permissions, bridging, staking, and governance.
-- [Build on 420 Integrated](developers/index.md) — integrate contracts, RPC, SDKs, 420Indexer, Wallet, storage, AI, bridge, and game infrastructure.
-- [Operate 420 Integrated](operators/index.md) — run validators, nodes, RPC endpoints, storage/resource services, compute providers, gateways, indexers, and oracle infrastructure.
+- [Use 420 Integrated](users/index.md) — complete day-to-day tasks such as sending funds, connecting dApps, signing transactions, managing permissions, bridging, staking, governance, and safely using 420Automation.
+- [Build on 420 Integrated](developers/index.md) — integrate contracts, RPC, SDKs, 420Indexer, 420Automation, Wallet, storage, AI, bridge, and game infrastructure.
+- [Operate 420 Integrated](operators/index.md) — run validators, nodes, RPC endpoints, storage/resource services, compute providers, gateways, indexers, automation workers, and oracle infrastructure.
 - [Architecture](architecture/index.md) — inspect chain, consensus, protocol, infrastructure, application, security, governance, and trust-boundary architecture.
 - [Reference](reference/index.md) — find exact chain IDs, network configuration, deployed addresses, constants, events, errors, and canonical terminology.
 - [Troubleshooting](troubleshooting/index.md) — diagnose failures and follow safe recovery procedures.
+
+## Featured infrastructure
+
+- [420Automation infrastructure](architecture/infrastructure/420automation.md) — scheduling, triggers, workers, replay/finality safety, resource bounds, and the non-authority boundary.
+- [Use 420Automation safely](users/420automation.md) — task-oriented guide to registering/managing jobs, trigger behavior, ambiguous submissions, and fail-closed security behavior.
 
 ## Documentation principles
 

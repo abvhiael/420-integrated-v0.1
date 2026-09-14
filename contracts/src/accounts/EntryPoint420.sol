@@ -12,13 +12,22 @@ interface IAccountValidation420 {
 }
 
 /// @notice Canonical 420 Integrated Smart Account EntryPoint.
-/// @dev GAS-2 enables bounded paymaster validation for already-authorized deployed-account operations.
-///      Account validation remains an independent authority gate and always runs before paymaster validation.
-///      GAS-2 does not implement sponsor deposits/reservations or post-operation settlement; those are GAS-3/GAS-4.
+/// @dev GAS-3 adds on-chain sponsor deposits and exact max-cost reservations. Account validation remains
+///      independently authoritative. GAS-3 reserves validated sponsorship before execution and releases
+///      the reservation afterward without charging it; actual settlement and refunds are introduced in GAS-4.
 contract EntryPoint420 is IEntryPoint420 {
     bytes32 public constant USER_OPERATION_DOMAIN = keccak256("420/ENTRY_POINT/USER_OPERATION/V1");
 
+    struct SponsorshipReservation {
+        uint256 amountWei;
+        bool active;
+    }
+
     mapping(address => mapping(uint192 => uint64)) private _sequence;
+    mapping(address => uint256) private _deposits;
+    mapping(address => uint256) private _reserved;
+    mapping(address => mapping(bytes32 => bool)) private _authorizationConsumed;
+    mapping(address => mapping(bytes32 => SponsorshipReservation)) private _reservations;
     bool private _entered;
 
     event UserOperationHandled(
@@ -35,6 +44,10 @@ contract EntryPoint420 is IEntryPoint420 {
         bytes32 authorizationId,
         uint256 maxCostWei
     );
+    event PaymasterDepositAdded(address indexed paymaster, address indexed funder, uint256 amountWei, uint256 balanceWei);
+    event PaymasterDepositWithdrawn(address indexed paymaster, address indexed recipient, uint256 amountWei, uint256 balanceWei);
+    event SponsorshipReserved(address indexed paymaster, bytes32 indexed authorizationId, uint256 amountWei);
+    event SponsorshipReservationReleased(address indexed paymaster, bytes32 indexed authorizationId, uint256 amountWei);
 
     error ReentrantEntryPoint();
     error InvalidSender();
@@ -47,6 +60,11 @@ contract EntryPoint420 is IEntryPoint420 {
     error InvalidPaymasterContract();
     error SponsorshipCostExceeded(uint256 maxCostWei, uint256 authorizedCostWei);
     error PaymasterValidationFailed();
+    error InvalidDepositAmount();
+    error InvalidWithdrawalRecipient();
+    error InsufficientPaymasterDeposit(uint256 availableWei, uint256 requiredWei);
+    error SponsorshipAuthorizationAlreadyConsumed(address paymaster, bytes32 authorizationId);
+    error WithdrawalFailed();
 
     modifier nonReentrant() {
         if (_entered) revert ReentrantEntryPoint();
@@ -59,6 +77,52 @@ contract EntryPoint420 is IEntryPoint420 {
 
     function getNonce(address sender, uint192 key) public view returns (uint256) {
         return (uint256(key) << 64) | uint256(_sequence[sender][key]);
+    }
+
+    function balanceOf(address paymaster) external view returns (uint256) {
+        return _deposits[paymaster];
+    }
+
+    function reservedOf(address paymaster) external view returns (uint256) {
+        return _reserved[paymaster];
+    }
+
+    function availableOf(address paymaster) public view returns (uint256) {
+        return _deposits[paymaster] - _reserved[paymaster];
+    }
+
+    function authorizationConsumed(address paymaster, bytes32 authorizationId) external view returns (bool) {
+        return _authorizationConsumed[paymaster][authorizationId];
+    }
+
+    function reservationOf(address paymaster, bytes32 authorizationId)
+        external
+        view
+        returns (uint256 amountWei, bool active)
+    {
+        SponsorshipReservation storage reservation = _reservations[paymaster][authorizationId];
+        return (reservation.amountWei, reservation.active);
+    }
+
+    function depositTo(address paymaster) external payable nonReentrant {
+        if (paymaster == address(0) || paymaster.code.length == 0) revert InvalidPaymasterContract();
+        if (msg.value == 0) revert InvalidDepositAmount();
+        _deposits[paymaster] += msg.value;
+        emit PaymasterDepositAdded(paymaster, msg.sender, msg.value, _deposits[paymaster]);
+    }
+
+    /// @notice Withdraw only unreserved sponsor funds. The paymaster itself is the withdrawal authority.
+    function withdrawTo(address payable recipient, uint256 amountWei) external nonReentrant {
+        if (recipient == address(0)) revert InvalidWithdrawalRecipient();
+        uint256 availableWei = availableOf(msg.sender);
+        if (amountWei == 0 || amountWei > availableWei) {
+            revert InsufficientPaymasterDeposit(availableWei, amountWei);
+        }
+
+        _deposits[msg.sender] -= amountWei;
+        (bool sent,) = recipient.call{value: amountWei}("");
+        if (!sent) revert WithdrawalFailed();
+        emit PaymasterDepositWithdrawn(msg.sender, recipient, amountWei, _deposits[msg.sender]);
     }
 
     function getUserOpHash(PackedUserOperation420 calldata userOp) public view returns (bytes32) {
@@ -93,21 +157,32 @@ contract EntryPoint420 is IEntryPoint420 {
 
         bytes32 userOpHash = getUserOpHash(userOp);
 
-        // Account authorization is always evaluated first and cannot be replaced by sponsorship.
         uint256 accountValidationData = IAccountValidation420(userOp.sender).validateUserOp(userOp, userOpHash, 0);
         _enforceValidationData(accountValidationData);
 
+        address paymaster;
+        bytes32 authorizationId;
+        uint256 reservedCostWei;
         if (userOp.paymasterAndData.length != 0) {
-            _validatePaymaster(userOp, userOpHash);
+            (paymaster, authorizationId, reservedCostWei) = _validatePaymaster(userOp, userOpHash);
+            _reserveSponsorship(paymaster, authorizationId, reservedCostWei);
         }
 
         unchecked { _sequence[userOp.sender][key] = sequence + 1; }
 
         (success, returnData) = userOp.sender.call(userOp.callData);
+
+        if (paymaster != address(0)) {
+            _releaseSponsorship(paymaster, authorizationId);
+        }
+
         emit UserOperationHandled(userOpHash, userOp.sender, key, sequence, success);
     }
 
-    function _validatePaymaster(PackedUserOperation420 calldata userOp, bytes32 userOpHash) private {
+    function _validatePaymaster(PackedUserOperation420 calldata userOp, bytes32 userOpHash)
+        private
+        returns (address paymaster, bytes32 authorizationId, uint256 maxCostWei)
+    {
         PaymasterData420.V1 memory sponsorship = PaymasterData420.decodeV1(userOp.paymasterAndData);
 
         if (sponsorship.entryPoint != address(this) || sponsorship.chainId != block.chainid) {
@@ -119,7 +194,7 @@ contract EntryPoint420 is IEntryPoint420 {
         if (nowTs < sponsorship.validAfter) revert ValidationNotYetValid(sponsorship.validAfter);
         if (nowTs > sponsorship.validUntil) revert ValidationExpired(sponsorship.validUntil);
 
-        uint256 maxCostWei = _maximumUserOpCostWei(userOp);
+        maxCostWei = _maximumUserOpCostWei(userOp);
         if (maxCostWei > sponsorship.maxSponsoredCostWei) {
             revert SponsorshipCostExceeded(maxCostWei, sponsorship.maxSponsoredCostWei);
         }
@@ -135,6 +210,33 @@ contract EntryPoint420 is IEntryPoint420 {
             sponsorship.authorizationId,
             maxCostWei
         );
+
+        return (sponsorship.paymaster, sponsorship.authorizationId, maxCostWei);
+    }
+
+    function _reserveSponsorship(address paymaster, bytes32 authorizationId, uint256 amountWei) private {
+        if (_authorizationConsumed[paymaster][authorizationId]) {
+            revert SponsorshipAuthorizationAlreadyConsumed(paymaster, authorizationId);
+        }
+
+        uint256 availableWei = availableOf(paymaster);
+        if (amountWei > availableWei) revert InsufficientPaymasterDeposit(availableWei, amountWei);
+
+        _authorizationConsumed[paymaster][authorizationId] = true;
+        _reserved[paymaster] += amountWei;
+        _reservations[paymaster][authorizationId] = SponsorshipReservation({amountWei: amountWei, active: true});
+        emit SponsorshipReserved(paymaster, authorizationId, amountWei);
+    }
+
+    function _releaseSponsorship(address paymaster, bytes32 authorizationId) private {
+        SponsorshipReservation storage reservation = _reservations[paymaster][authorizationId];
+        uint256 amountWei = reservation.amountWei;
+        if (!reservation.active) return;
+
+        reservation.active = false;
+        reservation.amountWei = 0;
+        _reserved[paymaster] -= amountWei;
+        emit SponsorshipReservationReleased(paymaster, authorizationId, amountWei);
     }
 
     function _maximumUserOpCostWei(PackedUserOperation420 calldata userOp) private pure returns (uint256) {
@@ -159,7 +261,6 @@ contract EntryPoint420 is IEntryPoint420 {
 
     function _enforceValidationData(uint256 validationData) private view {
         if (validationData == 1) revert ValidationFailed();
-        // Low 160 bits are reserved for an aggregator address in ERC-4337-style validation data.
         if (address(uint160(validationData)) != address(0)) revert ValidationFailed();
 
         uint48 validUntil = uint48(validationData >> 160);

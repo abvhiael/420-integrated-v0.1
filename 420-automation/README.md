@@ -20,9 +20,15 @@ AUT-1 added stable job identity and an immutable execution envelope. Job IDs bin
 
 ## AUT-2
 
-AUT-2 adds deterministic trigger normalization for all five trigger classes. Time triggers support one-shot, interval, and bounded five-field cron-like schedule definitions. Block triggers use bigint-safe start/interval values. Event triggers bind address, topic filters and confirmation requirements. Oracle triggers bind a feed, comparison predicate, normalized decimal threshold and freshness ceiling. Manual triggers bind an explicit requester policy.
+AUT-2 added deterministic trigger normalization for all five trigger classes. Every trigger receives a stable `triggerRef`, and trigger payloads cannot smuggle execution authority.
 
-Every normalized trigger receives a deterministic `triggerRef`. Unknown fields and attempts to smuggle target, selector, calldata, native value or gas authority through a trigger are rejected before scheduling. Trigger bindings can therefore be verified against the AUT-1 job registry without making the trigger itself an execution-capability object.
+## AUT-3
+
+AUT-3 adds the deterministic eligibility engine and bounded scheduler. Registered jobs are evaluated only against fresh chain-420 observations and their exact AUT-2 trigger binding. Time, block, event, Oracle, and manual triggers produce deterministic occurrence IDs, which allow already-consumed occurrences to be suppressed without mutating job intent.
+
+The scheduler uses the safe chain head for block and event decisions, enforces Oracle freshness, checks manual requester identity, reports next eligible time/block hints where deterministic, sorts scans by job ID, and rejects scans that exceed the configured work bound. Disabled jobs remain ineligible, wrong-chain or stale observations fail closed, and trigger-binding mismatches are rejected rather than reinterpreted.
+
+AUT-3 decides only whether a registered job occurrence is eligible for an execution attempt. It does not build, sign, fund, submit, retry, or authorize a transaction; those responsibilities remain in later phases and protocol contracts.
 
 ## Delivery discipline
 

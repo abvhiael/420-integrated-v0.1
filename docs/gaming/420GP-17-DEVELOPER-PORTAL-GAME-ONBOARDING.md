@@ -28,13 +28,15 @@ Defines the gaming-specific onboarding manifest and deterministic preflight insi
 
 ### GP-17.2 — Game registration profile & protocol capability declaration
 
-Status: IN QUALIFICATION.
+Status: COMPLETE — merged through PR #254.
 
 Defines machine-readable game registration metadata, supported protocol surfaces, requested actions/capabilities and compatibility requirements. Capability declarations are game-scoped, action-catalogue constrained and noncanonical. Wildcard, global and wallet-wide authority requests fail closed. Developer Hub prepares the capability handoff but cannot mint grants; canonical authority remains with CapabilityRegistry420 and the established gaming authority boundary.
 
 ### GP-17.3 — SDK integration generator
 
-Generate deterministic game-scoped SDK configuration and starter integration material from an accepted onboarding manifest. Generated clients must remain pinned to the canonical game ID.
+Status: IN QUALIFICATION.
+
+Generate deterministic game-scoped SDK configuration and starter integration material from accepted GP-17.1 and GP-17.2 artifacts. Generated clients remain pinned to the canonical game ID, preserve the declared protocol/action subset, carry GP-16 finality compatibility and never generate wallet-global enumeration or undeclared authority surfaces.
 
 ### GP-17.4 — Progressive-access policy qualification
 
@@ -68,17 +70,7 @@ Complete portal/dashboard surfaces, task-oriented game onboarding documentation,
 
 `developer-hub/src/gaming-onboarding.mjs` defines the first gaming-specific Developer Hub surface.
 
-It validates:
-
-- schema version;
-- canonical game ID format;
-- game display identity;
-- `guest -> registered -> wallet-linked` progression;
-- wallet-free core gameplay;
-- optional wallet-linked features;
-- declared protocol surfaces only;
-- application ID derived from the canonical game ID;
-- network consistency through the existing Developer Hub application-publishing preflight.
+It validates schema version, canonical game ID format, game display identity, `guest -> registered -> wallet-linked` progression, wallet-free core gameplay, optional wallet-linked features, declared protocol surfaces only, application ID derived from the canonical game ID and network consistency through the existing Developer Hub application-publishing preflight.
 
 The resulting plan is noncanonical. It is a developer preflight and handoff artifact, not registration, governance authorization, Wallet authority or chain state.
 
@@ -86,18 +78,25 @@ The resulting plan is noncanonical. It is a developer preflight and handoff arti
 
 `developer-hub/src/gaming-registration-profile.mjs` defines the machine-readable game registration profile and capability preflight.
 
-It enforces:
-
-- exact game/application identity binding back to the GP-17.1 onboarding manifest;
-- one declaration per protocol;
-- only protocols declared during GP-17.1 may request capabilities;
-- every capability scope is exactly `game`;
-- requested actions must come from the fixed Gaming Protocol action catalogue;
-- wildcard, global and wallet-wide authority requests fail closed;
-- compatibility remains bound to `420GP/V1`, `@420/gaming-sdk` and the GP-16 finality model;
-- Developer Hub creates no canonical grant and cannot replace CapabilityRegistry420 authority.
+It enforces exact game/application identity binding back to GP-17.1, one declaration per protocol, declared-protocol-only capability requests, exact `game` scope, fixed action-catalogue constraints, fail-closed wildcard/global/wallet-wide rejection, compatibility with `420GP/V1`, `@420/gaming-sdk` and GP-16 finality, and no Developer Hub-created canonical grant.
 
 Qualification lives in `developer-hub/test/gaming-registration-profile.test.mjs`.
+
+## GP-17.3 implementation
+
+`developer-hub/src/gaming-sdk-generator.mjs` produces deterministic integration artifacts from validated onboarding and registration profiles.
+
+It generates:
+
+- `420-gaming.config.json` pinned to the canonical game ID;
+- a starter `src/420-gaming-client.mjs` that constructs the shared SDK with that exact game ID;
+- protocol client declarations restricted to the GP-17.2 capability subset;
+- progressive-access defaults from GP-17.1;
+- SDK/protocol/finality compatibility metadata;
+- explicit forbidden wallet-global query surfaces;
+- noncanonical authority metadata that leaves canonical grants with CapabilityRegistry420.
+
+Qualification lives in `developer-hub/test/gaming-sdk-generator.test.mjs` and checks deterministic generation, identity binding, protocol subset preservation, game scope, finality compatibility and fail-closed mismatches.
 
 ## GP-17 exit criteria
 

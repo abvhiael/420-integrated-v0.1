@@ -18,8 +18,8 @@ export interface Automation12DeploymentEvidence420 {
   observedGenesisHash: string;
   readinessReady: boolean;
   schedulerReady: boolean;
-  liveWorkerCount: number;
-  registeredJobCount: number;
+  liveWorkerIds: readonly string[];
+  registeredJobIds: readonly string[];
   witnessedTriggerClasses: readonly string[];
   apiCompatibilityPassed: boolean;
   rpcCompatibilityPassed: boolean;
@@ -86,6 +86,10 @@ function validIds(ids: readonly string[]): boolean {
   return ids.length > 0 && new Set(ids).size === ids.length && ids.every((id) => ID.test(id));
 }
 
+function validJobIds(ids: readonly string[]): boolean {
+  return ids.length > 0 && new Set(ids.map((id) => id.toLowerCase())).size === ids.length && ids.every((id) => HASH32.test(id));
+}
+
 function validateRevision(value: string, label: string, blockers: string[]): void {
   if (!REVISION.test(value)) blockers.push(`${label} revision is missing or malformed`);
 }
@@ -118,8 +122,8 @@ export function buildAutomation12CloseoutReport420(
   if (evidence.observedGenesisHash.toLowerCase() !== environment.expectedGenesisHash.toLowerCase()) blockers.push('observed genesis hash does not match configured testnet genesis');
   if (!evidence.readinessReady) blockers.push('420Automation readiness was not traffic-admitting');
   if (!evidence.schedulerReady) blockers.push('Automation scheduler was not ready');
-  if (!Number.isInteger(evidence.liveWorkerCount) || evidence.liveWorkerCount < 1) blockers.push('no live Automation worker was observed');
-  if (!Number.isInteger(evidence.registeredJobCount) || evidence.registeredJobCount < 1) blockers.push('no registered Automation job was observed');
+  if (!validIds(evidence.liveWorkerIds)) blockers.push('live Automation worker witnesses must be unique and non-empty');
+  if (!validJobIds(evidence.registeredJobIds)) blockers.push('registered Automation job witnesses must be unique 32-byte job IDs');
 
   const triggerClasses = new Set(evidence.witnessedTriggerClasses);
   for (const triggerClass of REQUIRED_AUT12_TRIGGER_CLASSES_420) {
@@ -160,8 +164,8 @@ export function buildAutomation12CloseoutReport420(
     nodeRevision: evidence.nodeRevision,
     rpcRevision: evidence.rpcRevision,
     oracleRevision: evidence.oracleRevision,
-    liveWorkerCount: evidence.liveWorkerCount,
-    registeredJobCount: evidence.registeredJobCount,
+    liveWorkerCount: evidence.liveWorkerIds.length,
+    registeredJobCount: evidence.registeredJobIds.length,
     authoritative: false,
     launchAuthority: false,
   });

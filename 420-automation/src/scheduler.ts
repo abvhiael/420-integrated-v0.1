@@ -25,6 +25,12 @@ export interface AutomationOracleObservation420 {
   observedAtMs: number;
 }
 
+export interface AutomationOracleResultObservation420 {
+  feedId: string;
+  resultHash: string;
+  observedAtMs: number;
+}
+
 export interface AutomationManualObservation420 {
   requesterId: string;
   requesterRole: 'owner' | 'protocol';
@@ -36,6 +42,7 @@ export interface AutomationSchedulerObservation420 {
   chain: AutomationChainObservation420;
   events?: readonly AutomationEventObservation420[];
   oracles?: readonly AutomationOracleObservation420[];
+  oracleResults?: readonly AutomationOracleResultObservation420[];
   manuals?: readonly AutomationManualObservation420[];
 }
 
@@ -200,6 +207,17 @@ function evaluateCanonical420(jobId: string, canonical: string, observation: Aut
     if (oracle.observedAtMs > observation.nowMs || observation.nowMs - oracle.observedAtMs > maxAge) return { jobId, eligible: false, reason: 'oracle-stale', occurrenceId: null, nextEligibleAtMs: null, nextEligibleBlock: null };
     if (!evaluatePredicate420(oracle.value, predicate, threshold)) return { jobId, eligible: false, reason: 'oracle-predicate-false', occurrenceId: null, nextEligibleAtMs: null, nextEligibleBlock: null };
     return { jobId, eligible: true, reason: 'oracle-predicate-true', occurrenceId: occurrenceId420(jobId, `oracle:${feedId}:${oracle.observedAtMs}:${oracle.value}`), nextEligibleAtMs: null, nextEligibleBlock: null };
+  }
+  if (kind === 'oracle-result') {
+    const [, feedId, expectedResultHash, maxAgeRaw] = parts;
+    const maxAge = Number(maxAgeRaw);
+    const candidates = (observation.oracleResults ?? []).filter((oracle) => oracle.feedId === feedId).sort((a, b) => b.observedAtMs - a.observedAtMs);
+    const oracle = candidates[0];
+    if (!oracle) return { jobId, eligible: false, reason: 'oracle-result-missing', occurrenceId: null, nextEligibleAtMs: null, nextEligibleBlock: null };
+    if (!HASH32.test(oracle.resultHash)) return { jobId, eligible: false, reason: 'oracle-result-invalid', occurrenceId: null, nextEligibleAtMs: null, nextEligibleBlock: null };
+    if (oracle.observedAtMs > observation.nowMs || observation.nowMs - oracle.observedAtMs > maxAge) return { jobId, eligible: false, reason: 'oracle-result-stale', occurrenceId: null, nextEligibleAtMs: null, nextEligibleBlock: null };
+    if (oracle.resultHash.toLowerCase() !== expectedResultHash) return { jobId, eligible: false, reason: 'oracle-result-mismatch', occurrenceId: null, nextEligibleAtMs: null, nextEligibleBlock: null };
+    return { jobId, eligible: true, reason: 'oracle-result-match', occurrenceId: occurrenceId420(jobId, `oracle-result:${feedId}:${oracle.observedAtMs}:${oracle.resultHash.toLowerCase()}`), nextEligibleAtMs: null, nextEligibleBlock: null };
   }
   if (kind === 'manual') {
     const policy = parts[1];

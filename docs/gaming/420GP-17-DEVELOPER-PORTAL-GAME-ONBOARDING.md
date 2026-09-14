@@ -33,12 +33,14 @@ Status: COMPLETE — merged through PR #259.
 Qualifies target-bound, game-scoped, commitment-only migration with explicit wallet-link consent, expiry, single consumption, idempotency and GP-16 finalized completion.
 
 ### GP-17.7 — SmartAccount / CapabilityRegistry onboarding
-Status: IN QUALIFICATION.
+Status: COMPLETE — merged through PR #260.
 
 Generate and validate the exact game-scoped authority plan without creating authority inside Developer Hub. SmartAccount420 remains the session-execution boundary and CapabilityRegistry420 remains the canonical grant authority. Session calls are target/selector/action/game scoped, default deny, authorization-epoch aware and cannot authorize native-value transfer or undeclared/global/wallet-wide authority.
 
 ### GP-17.8 — Local/devnet onboarding rehearsal
-Run the generated integration against Developer Hub local/devnet tooling with deterministic fixtures before any testnet handoff.
+Status: IN QUALIFICATION.
+
+Run the generated integration against the existing DEVHUB-5 local real15/devnet profile with deterministic fixtures before any testnet handoff. Rehearsal is pinned to local chain ID 420, 15 execution nodes, 15 consensus nodes and the deterministic `devnet-tcp` transport; it exercises SDK generation, progressive-access guarantees, authority boundaries and GP-16 finality semantics without creating canonical registration, grants or live testnet claims.
 
 ### GP-17.9 — Testnet onboarding qualification
 Produce an evidence package for real testnet onboarding. No live qualification claim is valid without deployed-network evidence.
@@ -69,21 +71,28 @@ Complete portal/dashboard surfaces, task-oriented onboarding docs, troubleshooti
 ### GP-17.7
 `developer-hub/src/gaming-authority-onboarding.mjs` validates the SmartAccount420 / CapabilityRegistry420 handoff.
 
-It enforces:
-
-- SmartAccount420 is never required for core gameplay;
-- wallet linkage stays optional;
-- reusable gaming authority executes only through SmartAccount420 session execution;
-- CapabilityRegistry420 remains canonical grant authority;
-- Developer Hub cannot mint grants;
-- every grant remains exact-game and exact-action bound;
-- session policy is default deny and authorization-epoch aware;
-- every reusable call is target + selector + action + game scoped;
-- session calls authorize zero native value;
-- wildcard, global, wallet-wide and undeclared actions fail closed;
-- no canonical grant is created during onboarding.
+It enforces SmartAccount420 independence for core gameplay, optional wallet linkage, CapabilityRegistry420 canonical grant authority, exact game/action scoping, default-deny session policy, authorization-epoch validation, target/selector/action/game call scoping, zero native-value session calls and fail-closed wildcard/global/wallet-wide/undeclared authority.
 
 Qualification lives in `developer-hub/test/gaming-authority-onboarding.test.mjs`.
+
+### GP-17.8
+`developer-hub/src/gaming-local-devnet-rehearsal.mjs` creates the deterministic local rehearsal handoff using the established DEVHUB-5 real15 profile rather than a parallel gaming-specific chain harness.
+
+It requires:
+
+- DEVHUB-5 `real15` profile;
+- `local` environment only;
+- chain ID `420`;
+- 15 execution and 15 consensus nodes;
+- deterministic `devnet-tcp` transport;
+- generated GP-17.3 SDK integration pinned to the canonical game ID;
+- GP-16 finality semantics;
+- wallet-free guest and registered core progression;
+- optional wallet-linked capability;
+- no Developer Hub grant, session or registration authority;
+- no implication of live testnet qualification.
+
+The rehearsal plan explicitly reuses `npm run devnet:doctor`, `npm run devnet:plan`, `npm run devnet:prepare` and `npm run devnet:smoke`. Qualification lives in `developer-hub/test/gaming-local-devnet-rehearsal.test.mjs`.
 
 ## GP-17 exit criteria
 

@@ -1,6 +1,7 @@
 package pagination
 
 import (
+	"sort"
 	"testing"
 	"time"
 
@@ -69,7 +70,8 @@ func TestRejectsInvalidPageSizeAndSnapshot(t *testing.T) {
 func TestRejectsUnsortedOrWrongRankerResults(t *testing.T) {
 	plan, _ := query.Parse("kush")
 	snapshot := Snapshot{IndexedHeight:4200, FinalizedHeight:4190}
-	ranked := rankedFixtures(t, []fixture{{"a", 10}, {"b", 20}})
+	ranked := rankedFixtures(t, []fixture{{"a", 20}, {"b", 10}})
+	ranked[0], ranked[1] = ranked[1], ranked[0]
 	if _, err := Paginate(plan, ranked, snapshot, 2, ""); err == nil { t.Fatal("expected unsorted result rejection") }
 	ranked = rankedFixtures(t, []fixture{{"a", 20}})
 	ranked[0].Ranking.Ranker = "old-ranker"
@@ -100,5 +102,11 @@ func rankedFixtures(t *testing.T, fixtures []fixture) []searchresult.Result {
 		r.Ranking = searchresult.Ranking{Score:f.score, Signals:[]string{"fixture"}, Ranker:ranking.RankerVersion, Canonical:false}
 		out = append(out, r)
 	}
+	sort.Slice(out, func(i, j int) bool {
+		if out[i].Ranking.Score != out[j].Ranking.Score {
+			return out[i].Ranking.Score > out[j].Ranking.Score
+		}
+		return out[i].ID < out[j].ID
+	})
 	return out
 }

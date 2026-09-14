@@ -38,12 +38,14 @@ Status: COMPLETE — merged through PR #260.
 Generate and validate the exact game-scoped authority plan without creating authority inside Developer Hub. SmartAccount420 remains the session-execution boundary and CapabilityRegistry420 remains the canonical grant authority. Session calls are target/selector/action/game scoped, default deny, authorization-epoch aware and cannot authorize native-value transfer or undeclared/global/wallet-wide authority.
 
 ### GP-17.8 — Local/devnet onboarding rehearsal
-Status: IN QUALIFICATION.
+Status: COMPLETE — merged through PR #262.
 
 Run the generated integration against the existing DEVHUB-5 local real15/devnet profile with deterministic fixtures before any testnet handoff. Rehearsal is pinned to local chain ID 420, 15 execution nodes, 15 consensus nodes and the deterministic `devnet-tcp` transport; it exercises SDK generation, progressive-access guarantees, authority boundaries and GP-16 finality semantics without creating canonical registration, grants or live testnet claims.
 
 ### GP-17.9 — Testnet onboarding qualification
-Produce an evidence package for real testnet onboarding. No live qualification claim is valid without deployed-network evidence.
+Status: IN QUALIFICATION.
+
+Produce an evidence-driven testnet onboarding report bound to the exact canonical game ID, application ID, discovered testnet chain, observation time and 40-character commit SHA. Qualification requires live-network observation and complete evidence for network discovery, testnet account/faucet access, SDK integration, registration reads, finalized-state reads, wallet optionality and exact authority scope. Missing evidence blocks; explicit failures fail. Repository CI and local/devnet rehearsal cannot manufacture a live testnet PASS.
 
 ### GP-17.10 — Developer UX, documentation & closeout
 Complete portal/dashboard surfaces, task-oriented onboarding docs, troubleshooting, examples, exact-head qualification and GP-17 closeout.
@@ -93,6 +95,21 @@ It requires:
 - no implication of live testnet qualification.
 
 The rehearsal plan explicitly reuses `npm run devnet:doctor`, `npm run devnet:plan`, `npm run devnet:prepare` and `npm run devnet:smoke`. Qualification lives in `developer-hub/test/gaming-local-devnet-rehearsal.test.mjs`.
+
+### GP-17.9
+`developer-hub/src/gaming-testnet-qualification.mjs` binds testnet onboarding evidence to the exact game, application, discovered testnet chain and repository commit while reusing the Developer Hub evidence-driven security qualification model.
+
+Required evidence covers:
+
+- discovered testnet identity;
+- testnet-only faucet/developer-account access;
+- generated SDK integration;
+- canonical registration reads;
+- finalized state reads under GP-16 semantics;
+- wallet-free core gameplay / optional wallet linkage;
+- exact game/action authority scope.
+
+A complete live evidence package can report `QUALIFIED_FOR_TESTNET_ONBOARDING`; missing required evidence reports BLOCKED and explicit failures report FAIL. The report remains noncanonical, creates no Registry entry or CapabilityRegistry grant, is not a security certification and cannot infer live qualification from repository CI or GP-17.8 local rehearsal. Qualification lives in `developer-hub/test/gaming-testnet-qualification.test.mjs`.
 
 ## GP-17 exit criteria
 

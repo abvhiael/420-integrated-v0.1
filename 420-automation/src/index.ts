@@ -7,3 +7,5 @@ export * from './funding.js';
 export * from './recovery.js';
 export * from './workers.js';
 export * from './oracle.js';
+export * from './auth.js';
+export * from './api.js';

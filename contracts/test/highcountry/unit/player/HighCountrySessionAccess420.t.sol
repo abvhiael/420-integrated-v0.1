@@ -74,7 +74,12 @@ contract MockCapabilityRegistryHCSession is ICapabilityRegistryExtended420 {
     }
 
     function componentAuthority(bytes32) external pure returns (address) { return address(0); }
+    function componentRegistrar() external pure returns (address) { return address(0); }
+    function protocolComponentManaged(bytes32) external pure returns (bool) { return false; }
     function registerSmartAccount(address) external pure returns (bytes32) { return bytes32(0); }
+    function registerProtocolComponent(bytes32, address) external pure {}
+    function updateProtocolComponentAuthority(bytes32, address) external pure {}
+    function transferComponentRegistrar(address) external pure {}
 
     function createGrant(
         bytes32,

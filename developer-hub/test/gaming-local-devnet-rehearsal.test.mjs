@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createGamingLocalDevnetRehearsal420, GamingLocalDevnetRehearsalError420 } from '../src/gaming-local-devnet-rehearsal.mjs';
+import { createGamingLocalDevnetRehearsal420 } from '../src/gaming-local-devnet-rehearsal.mjs';
+import { GamingSdkGeneratorError420 } from '../src/gaming-sdk-generator.mjs';
 
 const hash = (c) => `0x${c.repeat(64)}`;
 const address = `0x${'1'.repeat(40)}`;
@@ -87,5 +88,5 @@ test('GP-17.8 remains noncanonical and cannot claim live testnet qualification',
 test('GP-17.8 fails closed on malformed generated integration inputs', () => {
   const bad = registration();
   bad.gameId = '420/GAMING/GAME/OTHER/V1';
-  assert.throws(() => createGamingLocalDevnetRehearsal420({ onboardingManifest: onboarding(), registrationProfile: bad, devnetProfile: devnet() }), GamingLocalDevnetRehearsalError420);
+  assert.throws(() => createGamingLocalDevnetRehearsal420({ onboardingManifest: onboarding(), registrationProfile: bad, devnetProfile: devnet() }), GamingSdkGeneratorError420);
 });

@@ -26,3 +26,4 @@ export {
   type AutomationExecutionEnvelope420 as AutomationSecurityExecutionEnvelope420,
   type AutomationFinalityCheckpoint420,
 } from './security.js';
+export * from './testnet.js';

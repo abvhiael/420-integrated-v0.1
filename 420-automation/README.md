@@ -36,13 +36,25 @@ Operational output is hardened as well: recursive secret redaction removes crede
 
 AUT-11 also includes cross-layer qualification proving that spoofed manual triggers cannot gain eligibility, consumed occurrences remain replay-suppressed under repeated/racing delivery, trigger evaluation cannot mutate an AUT-1 execution envelope, tampered calldata fails before submission, finalized-chain conflicts fail closed, and hostile diagnostic payloads do not leak secrets.
 
-The AUT-11 implementation and cross-layer suite passed both the dedicated 420Automation workflow and the full 420 Integrated qualification workflow on the qualified branch head.
+AUT-11 was exact-head qualified through the dedicated 420Automation workflow, 420Docs qualification, and the full 420 Integrated qualification workflow, then merged to `main` in PR #249.
+
+## AUT-12 — public-testnet qualification and launch closeout
+
+AUT-12 is the final planned implementation phase. It defines a fail-closed closeout contract for a deployed public-testnet release candidate.
+
+The candidate must pin chain ID `420`, the exact testnet genesis hash, a public HTTPS Automation origin, explicit RPC and Oracle providers, and exact Automation/node/RPC/Oracle release identity plus manifest/artifact digests.
+
+Live closeout evidence must show traffic-admitting Automation readiness, a ready scheduler, at least one live worker, at least one registered job, and compatibility witnesses for all five trigger classes: time, block, event, Oracle, and manual.
+
+The deployed release must also prove authenticated Automation API compatibility, 420RPC integration, 420Oracle integration, Developer Hub credential compatibility, and a live registered-job execution. Failure drills are mandatory: worker lease failover, replay suppression, ambiguous-submission recovery, wrong-chain rejection, finality-conflict fail-closed behavior, hostile-observation rejection, resource-abuse rejection, auth/scope isolation, readiness recovery/hysteresis, and telemetry redaction.
+
+`buildAutomation12CloseoutReport420` aggregates that evidence into explicit `go` or `no-go` with blockers while remaining `authoritative: false` and `launchAuthority: false`.
+
+Synthetic CI fixtures validate the closeout logic only. They do not prove live deployment behavior and cannot authorize public-testnet launch.
 
 ## Current status
 
-AUT-0 through AUT-11 are implemented and qualified on the AUT-11 branch. AUT-11 remains pending final branch reconciliation/documentation closeout and merge into `main`.
-
-The next planned phase is **AUT-12 — public-testnet qualification and launch closeout**, covering exact release identity, live worker/job evidence, failure drills, compatibility evidence, and an explicit go/no-go decision.
+AUT-0 through AUT-11 are merged to `main`. **AUT-12 is active on PR #250.** The closeout model and automated contract tests are implemented; real AUT-12 completion still requires exact-head qualification plus retained live public-testnet evidence for the pinned release candidate.
 
 ## Delivery discipline
 

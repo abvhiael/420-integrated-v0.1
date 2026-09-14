@@ -4,14 +4,14 @@ on:
   push:
     paths:
       - '420-automation/**'
-      - 'docs/420AUTOMATION-ROADMAP.md'
-      - 'docs/420AUTOMATION-ARCHITECTURE.md'
+      - 'docs/420AUTOMATION-*.md'
+      - 'testnet/public-services/automation/**'
       - '.github/workflows/420-automation.yml'
   pull_request:
     paths:
       - '420-automation/**'
-      - 'docs/420AUTOMATION-ROADMAP.md'
-      - 'docs/420AUTOMATION-ARCHITECTURE.md'
+      - 'docs/420AUTOMATION-*.md'
+      - 'testnet/public-services/automation/**'
       - '.github/workflows/420-automation.yml'
 
 jobs:

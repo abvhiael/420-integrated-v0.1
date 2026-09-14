@@ -8,6 +8,7 @@ export type AutomationTriggerInput420 =
   | { kind: 'block'; startBlock: bigint; intervalBlocks: bigint }
   | { kind: 'event'; address: string; topic0: string; topics?: readonly (string | null)[]; minConfirmations: number }
   | { kind: 'oracle'; feedId: string; predicate: 'eq' | 'ne' | 'gt' | 'gte' | 'lt' | 'lte'; threshold: string; maxAgeMs: number }
+  | { kind: 'oracle'; mode: 'result'; feedId: string; expectedResultHash: string; maxAgeMs: number }
   | { kind: 'manual'; requesterPolicy: 'owner' | 'protocol' | 'either' };
 
 export interface AutomationNormalizedTrigger420 {
@@ -119,10 +120,17 @@ export function normalizeAutomationTrigger420(input: unknown): AutomationNormali
     }
     case 'oracle': {
       triggerClass = 'oracle';
-      assertExactKeys420(input, ['kind', 'feedId', 'predicate', 'threshold', 'maxAgeMs']);
-      if (typeof input.feedId !== 'string' || !ID.test(input.feedId)) throw new Error('AUT2_ORACLE_FEED_INVALID');
-      if (!['eq', 'ne', 'gt', 'gte', 'lt', 'lte'].includes(String(input.predicate))) throw new Error('AUT2_ORACLE_PREDICATE_INVALID');
-      canonical = `oracle|${input.feedId}|${String(input.predicate)}|${normalizeDecimal420(input.threshold)}|${positiveSafeInteger420(input.maxAgeMs, 'AUT2_ORACLE_MAX_AGE_INVALID')}`;
+      if (input.mode === 'result') {
+        assertExactKeys420(input, ['kind', 'mode', 'feedId', 'expectedResultHash', 'maxAgeMs']);
+        if (typeof input.feedId !== 'string' || !ID.test(input.feedId)) throw new Error('AUT2_ORACLE_FEED_INVALID');
+        if (typeof input.expectedResultHash !== 'string' || !HASH32.test(input.expectedResultHash)) throw new Error('AUT2_ORACLE_RESULT_HASH_INVALID');
+        canonical = `oracle-result|${input.feedId}|${input.expectedResultHash.toLowerCase()}|${positiveSafeInteger420(input.maxAgeMs, 'AUT2_ORACLE_MAX_AGE_INVALID')}`;
+      } else {
+        assertExactKeys420(input, ['kind', 'feedId', 'predicate', 'threshold', 'maxAgeMs']);
+        if (typeof input.feedId !== 'string' || !ID.test(input.feedId)) throw new Error('AUT2_ORACLE_FEED_INVALID');
+        if (!['eq', 'ne', 'gt', 'gte', 'lt', 'lte'].includes(String(input.predicate))) throw new Error('AUT2_ORACLE_PREDICATE_INVALID');
+        canonical = `oracle|${input.feedId}|${String(input.predicate)}|${normalizeDecimal420(input.threshold)}|${positiveSafeInteger420(input.maxAgeMs, 'AUT2_ORACLE_MAX_AGE_INVALID')}`;
+      }
       break;
     }
     case 'manual': {

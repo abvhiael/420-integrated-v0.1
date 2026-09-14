@@ -1,0 +1,29 @@
+name: 420Gas Qualification
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '420-gas/**'
+      - '.github/workflows/420-gas.yml'
+  push:
+    branches: [ main ]
+    paths:
+      - '420-gas/**'
+      - '.github/workflows/420-gas.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quote-service:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run 420Gas tests
+        working-directory: 420-gas
+        run: npm test

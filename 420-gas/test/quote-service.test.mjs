@@ -16,7 +16,7 @@ function credential(overrides = {}) {
   return {
     applicationId: 'wallet420',
     audience: '420gas',
-    scopes: ['gas:quote'],
+    scopes: ['gas:quote', 'gas:read'],
     expiresAt: '2026-09-14T23:00:00.000Z',
     ...overrides
   };
@@ -72,7 +72,7 @@ test('same operation-bound request produces same commitment at the same issuance
   assert.notEqual(issue({ request: { userOpHash: hash(7) } }).quoteCommitment, issue().quoteCommitment);
 });
 
-test('fails closed on wrong audience, missing scope and expired credential', () => {
+test('fails closed on wrong audience, missing quote scope and expired credential', () => {
   assert.throws(() => issue({ credential: { audience: 'developerhub' } }), GasQuoteError420);
   assert.throws(() => issue({ credential: { scopes: ['gas:read'] } }), GasQuoteError420);
   assert.throws(() => issue({ credential: { expiresAt: '2026-09-14T21:59:59.000Z' } }), GasQuoteError420);
@@ -91,7 +91,7 @@ test('strict request binding rejects malformed identifiers and unsupported field
   assert.throws(() => validateGasQuoteRequest420({ ...request(), extra: true }), /unsupported field/);
 });
 
-test('quote read view remains authority-minimized', () => {
+test('quote read view remains authority-minimized and requires read scope', () => {
   const quote = issue();
   const view = createGasQuoteReadView420(quote, { credential: credential(), now });
   assert.deepEqual(Object.keys(view).sort(), [
@@ -101,6 +101,7 @@ test('quote read view remains authority-minimized', () => {
   ].sort());
   assert.equal(view.executionAuthorization, false);
   assert.equal(view.canonicalProtocolAuthority, false);
+  assert.throws(() => createGasQuoteReadView420(quote, { credential: credential({ scopes: ['gas:quote'] }), now }), /gas:read/);
 });
 
 test('credential and request validators normalize canonical fields', () => {

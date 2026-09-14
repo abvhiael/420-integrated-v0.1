@@ -186,7 +186,7 @@ contract StorageObjectManifestRegistry420 is I420System {
 
     /// @notice Rotates the backing agreement for an unavailable shard in a sealed manifest.
     /// @dev Repair cannot change content identity: shard index, shard root and shard size are preserved.
-    ///      The existing placement must no longer be effective before replacement is accepted.
+    ///      The incumbent service window must have begun and the placement must no longer be effective.
     function replacePlacement(bytes32 manifestId, uint32 shardIndex, bytes32 agreementId)
         external
         returns (bytes32 placementId)
@@ -200,6 +200,9 @@ contract StorageObjectManifestRegistry420 is I420System {
         if (placementId == bytes32(0)) revert PlacementNotFound();
         Placement storage placement = _placements[placementId];
         if (!placement.exists || placement.shardIndex != shardIndex || placement.manifestId != manifestId) revert InvalidPlacement();
+
+        StorageAgreementRegistry420.Agreement memory incumbent = agreements.getAgreement(placement.agreementId);
+        if (block.timestamp < incumbent.startTime) revert PlacementStillEffective();
         if (agreements.isEffective(placement.agreementId) && commitments.isLive(placement.commitmentId)) {
             revert PlacementStillEffective();
         }

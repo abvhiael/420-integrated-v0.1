@@ -80,7 +80,23 @@ function canonicalQuoteMaterial420(value) {
   ]);
 }
 
-export function validateGasQuoteCredential420(input, { now = new Date() } = {}) {
+function requestProjection420(value) {
+  return {
+    schemaVersion: value.schemaVersion,
+    chainId: value.chainId,
+    entryPoint: value.entryPoint,
+    paymaster: value.paymaster,
+    account: value.account,
+    userOpHash: value.userOpHash,
+    policyId: value.policyId,
+    authorizationId: value.authorizationId,
+    maxSponsoredCostWei: value.maxSponsoredCostWei,
+    validAfter: value.validAfter,
+    validUntil: value.validUntil
+  };
+}
+
+export function validateGasQuoteCredential420(input, { now = new Date(), requiredScope = 'gas:quote' } = {}) {
   const credential = object420(input, 'credential');
   exact420(credential, new Set(['applicationId', 'audience', 'scopes', 'expiresAt']), 'credential');
   const applicationId = id420(credential.applicationId, 'applicationId');
@@ -89,7 +105,8 @@ export function validateGasQuoteCredential420(input, { now = new Date() } = {}) 
   assert420(Array.isArray(credential.scopes) && credential.scopes.length > 0, 'credential scopes must be non-empty');
   const scopes = credential.scopes.map((scope, index) => text420(scope, `scopes[${index}]`, 128));
   assert420(new Set(scopes).size === scopes.length, 'credential scopes must be unique');
-  assert420(scopes.includes('gas:quote'), 'credential requires gas:quote scope');
+  assert420(requiredScope === 'gas:quote' || requiredScope === 'gas:read', 'required credential scope is invalid');
+  assert420(scopes.includes(requiredScope), `credential requires ${requiredScope} scope`);
   const expiresAt = iso420(credential.expiresAt, 'expiresAt');
   assert420(Date.parse(expiresAt) > now.getTime(), 'credential is expired');
   return Object.freeze({ applicationId, audience, scopes: Object.freeze(scopes), expiresAt });
@@ -118,7 +135,7 @@ export function validateGasQuoteRequest420(input) {
 
 export function createGasQuote420({ request, credential, now = new Date(), maxTtlSeconds = DEFAULT_MAX_TTL_SECONDS, sign }) {
   assert420(Number.isInteger(maxTtlSeconds) && maxTtlSeconds > 0 && maxTtlSeconds <= 3600, 'maxTtlSeconds is invalid');
-  const caller = validateGasQuoteCredential420(credential, { now });
+  const caller = validateGasQuoteCredential420(credential, { now, requiredScope: 'gas:quote' });
   const quoteRequest = validateGasQuoteRequest420(request);
   const issuedAt = now.toISOString();
   const issuedMs = now.getTime();
@@ -151,10 +168,10 @@ export function createGasQuote420({ request, credential, now = new Date(), maxTt
 }
 
 export function createGasQuoteReadView420(quote, { credential, now = new Date() } = {}) {
-  validateGasQuoteCredential420(credential, { now });
-  const validated = validateGasQuoteRequest420(quote);
+  validateGasQuoteCredential420(credential, { now, requiredScope: 'gas:read' });
+  const validated = validateGasQuoteRequest420(requestProjection420(quote));
   return Object.freeze({
-    quoteId: text420(quote.quoteId, 'quoteId', 66),
+    quoteId: bytes32420(quote.quoteId, 'quoteId'),
     chainId: validated.chainId,
     entryPoint: validated.entryPoint,
     paymaster: validated.paymaster,

@@ -70,6 +70,14 @@ Credentials are additionally bound to configured application owner/protocol iden
 
 The AUT-9 API is transport-neutral and intentionally small: service inspection, filtered job listing, job lookup, validated job registration, and lifecycle enable/disable. It creates no hidden RPC or Engine surface and treats 420RPC as a separate transport/read-submission dependency rather than an authority source.
 
+## AUT-10
+
+AUT-10 adds bounded observability and operational readiness. Automation distinguishes canonical-path failures from Oracle-only degradation, requires fresh chain-420/RPC/canonical-safety/scheduler/live-worker evidence before reporting ready, and uses consecutive healthy observations before reopening after failure.
+
+Metrics are fixed and low-cardinality, covering counts for jobs, workers, leases, active/ambiguous attempts, and execution outcomes. A bounded execution-receipt journal provides operational correlation without turning a submission receipt into inclusion/finality evidence. Redacted operational snapshots explicitly report `canonicalAuthority: false` and `containsSecrets: false`; they never expose bearer material, credential IDs, user keys, calldata, addresses, arbitrary labels, or Oracle-provider payloads.
+
+AUT-10 observability never overrides AUT-6 recovery. Operators must resolve ambiguous or reorg-affected execution using fresh canonical-safe evidence rather than metrics or receipt history.
+
 ## Delivery discipline
 
 Each Automation phase is developed on its own branch and pull request, reconciled against current `main`, fully qualified on its exact final head, and merged before the next phase starts.

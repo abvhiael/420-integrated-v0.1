@@ -13,35 +13,38 @@
 - AUT-6 — retries, idempotency, replay protection, and recovery.
 - AUT-7 — worker registry, liveness, leases, and competition control.
 - AUT-8 — 420Oracle and external-condition integration.
+- AUT-9 — API, authentication, scoped credentials, and Developer Hub integration.
 
-## AUT-8 closeout
+## AUT-9 closeout
 
-AUT-8 consumes only provider-neutral canonical 420Oracle V1 reads for the `420/ORACLE/FEED/AUTOMATION/V1` feed class. Raw provider submissions do not become Automation facts.
+AUT-9 delivers a transport-neutral authenticated service boundary for Developer Hub applications and Automation operators without turning off-chain API identity into protocol authority.
 
 Delivered:
 
-- exact binding to chain 420 and the configured canonical Oracle router identity;
-- canonical numeric `MEDIAN_NUMERIC` automation facts;
-- canonical exact-result `QUORUM_EQUAL` automation facts;
-- deterministic fixed-point conversion from Oracle numeric values to AUT-3 decimal observations;
-- exact-result Oracle triggers with deterministic trigger references while preserving existing numeric trigger identity;
-- local maximum-read-age checks in addition to Oracle's own heartbeat/epoch rules;
-- configurable minimum confidence and minimum source/quorum requirements;
-- local numeric spread bounds;
-- V1 source-count bounds matching the frozen Oracle maximum of 16;
-- provider-neutral provenance on accepted facts;
-- rejection of wrong-chain, wrong-router, wrong-feed-type, stale/future, low-confidence, insufficient-quorum, excessive-spread, malformed-result, and provider-shaped payloads;
-- AUT-3 eligibility integration for exact-result conditions.
+- Developer Hub-shaped credential records using the dedicated `420automation` audience;
+- `automation:read`, `automation:submit`, `automation:manage`, and `automation:admin` scopes;
+- chain-420 and environment binding with issuance/expiry checks;
+- ACTIVE/ROTATED/REVOKED lifecycle enforcement;
+- SHA-256 secret-digest matching with no bearer-secret persistence in Automation state;
+- bounded credential cardinality and revision-regression protection;
+- explicit application bindings to allowed Automation owner IDs and protocol IDs;
+- authenticated principals with opaque client accounting keys;
+- service inspection, filtered job listing, job lookup, validated job registration, and job enable/disable operations;
+- read filtering that does not reveal jobs outside an application's owner/protocol binding;
+- submit/manage separation so a submission credential cannot mutate job lifecycle;
+- application-binding enforcement for registration and lifecycle changes;
+- service-admin cross-binding authority limited to the Automation service itself;
+- exact-field API request validation and fail-closed malformed-request handling;
+- preservation of AUT-1 immutable job/envelope validation beneath every API mutation.
 
-A successful Oracle read is trigger evidence only. It cannot assign a worker, create an AUT-7 lease, alter execution intent, change funding, bypass replay protection, or authorize arbitrary calls.
+A successful AUT-9 authentication proves only that an off-chain application may use specific Automation service operations. It does not create wallet authority, 420 Identity credentials, Registry legitimacy, governance authority, target-protocol permissions, trigger truth, worker leases, funding authority, replay authority, canonical chain state, or arbitrary RPC/Engine access.
 
 ## Planned phases
 
-- **AUT-9 — API, authentication and Developer Hub integration.** Job inspection/submission surfaces, scoped API credentials, operator/developer ergonomics, and RPC integration.
 - **AUT-10 — observability, readiness and operational recovery.** Health/readiness, bounded metrics, execution receipts, redacted status, recovery hysteresis, and operator procedures.
 - **AUT-11 — hostile-state/security hardening.** Cross-layer adversarial tests, trigger spoofing, replay/race abuse, malicious jobs, quota/resource abuse, reorg/finality faults, and secret-leak prevention.
 - **AUT-12 — public-testnet qualification and launch closeout.** Exact release identity, live worker/job evidence, failure drills, compatibility evidence, and explicit go/no-go closeout.
 
 ## Authority rule
 
-420Automation may decide that a registered job is eligible for attempted execution and may coordinate a bounded worker transaction. It never determines consensus, canonical chain state, finality, ownership, wallet authority, bridge settlement, oracle truth, governance authority, arbitrary protocol permissions, open-ended spending authority, speculative replay authority, worker-created execution authority, or raw-provider Oracle authority.
+420Automation may decide that a registered job is eligible for attempted execution and may coordinate a bounded worker transaction. It never determines consensus, canonical chain state, finality, ownership, wallet authority, bridge settlement, oracle truth, governance authority, arbitrary protocol permissions, open-ended spending authority, speculative replay authority, worker-created execution authority, raw-provider Oracle authority, or API-created protocol authority.

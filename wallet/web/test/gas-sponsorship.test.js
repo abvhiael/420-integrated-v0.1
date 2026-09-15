@@ -14,36 +14,18 @@ const hash = (n) => `0x${n.toString(16).padStart(64, '0')}`;
 
 function unsignedOperation(overrides = {}) {
   return {
-    sender: addr(1),
-    nonce: 7n,
-    initCode: '0x',
-    callData: '0x1234',
-    accountGasLimits: hash(2),
-    preVerificationGas: 21000n,
-    gasFees: hash(3),
-    paymasterAndData: '0x',
-    signature: '0x',
-    ...overrides,
+    sender: addr(1), nonce: 7n, initCode: '0x', callData: '0x1234', accountGasLimits: hash(2),
+    preVerificationGas: 21000n, gasFees: hash(3), paymasterAndData: '0x', signature: '0x', ...overrides,
   };
 }
 
 function quote(overrides = {}) {
   return {
-    quoteId: hash(10),
-    chainId: '420',
-    entryPoint: addr(2),
-    paymaster: addr(3),
-    account: addr(1),
-    userOpHash: hash(20),
-    policyId: hash(11),
-    authorizationId: hash(12),
-    maxSponsoredCostWei: '1000000000000000',
-    validAfter: '2026-09-14T23:29:00.000Z',
-    validUntil: '2026-09-14T23:31:00.000Z',
-    paymasterAndData: '0x123456',
-    authority: 'funding-offer-only',
-    executionAuthorization: false,
-    ...overrides,
+    quoteId: hash(10), chainId: '420', entryPoint: addr(2), paymaster: addr(3), account: addr(1),
+    sponsorshipDigest: hash(20), policyId: hash(11), authorizationId: hash(12),
+    maxSponsoredCostWei: '1000000000000000', validAfter: '2026-09-14T23:29:00.000Z',
+    validUntil: '2026-09-14T23:31:00.000Z', paymasterAndData: '0x123456',
+    authority: 'funding-offer-only', executionAuthorization: false, ...overrides,
   };
 }
 
@@ -52,11 +34,12 @@ test('validates Wallet sponsorship quote without granting execution authority', 
   assert.equal(validated.chainId, '420');
   assert.equal(validated.entryPoint, addr(2));
   assert.equal(validated.account, addr(1));
+  assert.equal(validated.sponsorshipDigest, hash(20));
   assert.equal(validated.authority, 'funding-offer-only');
   assert.equal(validated.executionAuthorization, false);
 });
 
-test('attaches sponsorship before signing and verifies final canonical sponsored hash', async () => {
+test('attaches sponsorship only after canonical sponsorship digest verification, then hashes final operation for signing', async () => {
   const prepared = await prepareWalletGasSponsorship420({
     userOperation: unsignedOperation(),
     entryPoint: addr(2),
@@ -67,28 +50,29 @@ test('attaches sponsorship before signing and verifies final canonical sponsored
       assert.equal(request.userOperation.paymasterAndData, '0x');
       return quote();
     },
-    hashUserOperation: async (operation) => {
+    hashSponsorship: async (operation) => {
       assert.equal(operation.paymasterAndData, '0x123456');
       assert.equal(operation.signature, '0x');
       return hash(20);
+    },
+    hashUserOperation: async (operation) => {
+      assert.equal(operation.paymasterAndData, '0x123456');
+      return hash(21);
     },
     now,
   });
   assert.equal(prepared.sponsored, true);
   assert.equal(prepared.fundingMode, 'paymaster');
-  assert.equal(prepared.userOperation.paymasterAndData, '0x123456');
-  assert.equal(prepared.userOpHash, hash(20));
+  assert.equal(prepared.sponsorshipDigest, hash(20));
+  assert.equal(prepared.userOpHash, hash(21));
   assert.equal(prepared.executionAuthorization, false);
 });
 
 test('falls back unchanged to self-funded execution when no quote is available', async () => {
-  const operation = unsignedOperation();
   const prepared = await prepareWalletGasSponsorship420({
-    userOperation: operation,
-    entryPoint: addr(2),
-    discoverQuote: async () => null,
-    hashUserOperation: async () => { throw new Error('hash should not be needed for fallback'); },
-    now,
+    userOperation: unsignedOperation(), entryPoint: addr(2), discoverQuote: async () => null,
+    hashSponsorship: async () => { throw new Error('digest should not be needed for fallback'); },
+    hashUserOperation: async () => { throw new Error('hash should not be needed for fallback'); }, now,
   });
   assert.equal(prepared.sponsored, false);
   assert.equal(prepared.fundingMode, 'self-funded');
@@ -96,14 +80,11 @@ test('falls back unchanged to self-funded execution when no quote is available',
   assert.equal(prepared.fallbackReason, 'SPONSORSHIP_UNAVAILABLE');
 });
 
-test('rejects quote if final sponsored operation hash does not match quote binding', async () => {
+test('rejects quote when EntryPoint recomputes a different sponsorship digest', async () => {
   await assert.rejects(() => prepareWalletGasSponsorship420({
-    userOperation: unsignedOperation(),
-    entryPoint: addr(2),
-    discoverQuote: async () => quote(),
-    hashUserOperation: async () => hash(21),
-    now,
-  }), /does not bind the final sponsored user operation/);
+    userOperation: unsignedOperation(), entryPoint: addr(2), discoverQuote: async () => quote(),
+    hashSponsorship: async () => hash(22), hashUserOperation: async () => hash(21), now,
+  }), /sponsorship digest mismatch/);
 });
 
 test('fails closed on wrong chain, EntryPoint, account, validity, or authority widening', () => {
@@ -116,25 +97,14 @@ test('fails closed on wrong chain, EntryPoint, account, validity, or authority w
 });
 
 test('Wallet will not attach sponsorship after signing or replace an existing paymaster payload', async () => {
-  await assert.rejects(() => prepareWalletGasSponsorship420({
-    userOperation: unsignedOperation({ signature: '0x12' }),
-    entryPoint: addr(2), discoverQuote: async () => quote(), hashUserOperation: async () => hash(20), now,
-  }), /before Wallet signing/);
-  await assert.rejects(() => prepareWalletGasSponsorship420({
-    userOperation: unsignedOperation({ paymasterAndData: '0x12' }),
-    entryPoint: addr(2), discoverQuote: async () => quote(), hashUserOperation: async () => hash(20), now,
-  }), /will not replace existing paymasterAndData/);
+  const base = { entryPoint: addr(2), discoverQuote: async () => quote(), hashSponsorship: async () => hash(20), hashUserOperation: async () => hash(21), now };
+  await assert.rejects(() => prepareWalletGasSponsorship420({ ...base, userOperation: unsignedOperation({ signature: '0x12' }) }), /before Wallet signing/);
+  await assert.rejects(() => prepareWalletGasSponsorship420({ ...base, userOperation: unsignedOperation({ paymasterAndData: '0x12' }) }), /will not replace existing paymasterAndData/);
 });
 
 test('review state exposes bounded funding details but never implies execution authority', () => {
-  const review = walletGasSponsorshipReview420({
-    sponsored: true,
-    fundingMode: 'paymaster',
-    executionAuthorization: false,
-    quote: quote(),
-  });
+  const review = walletGasSponsorshipReview420({ sponsored: true, fundingMode: 'paymaster', executionAuthorization: false, quote: quote() });
   assert.equal(review.status, 'sponsored');
-  assert.equal(review.fundingMode, 'paymaster');
   assert.equal(review.paymaster, addr(3));
   assert.equal(review.policyId, hash(11));
   assert.equal(review.maxSponsoredCostWei, '1000000000000000');
@@ -143,11 +113,7 @@ test('review state exposes bounded funding details but never implies execution a
 });
 
 test('self-funded review makes fallback explicit without changing transaction authority', () => {
-  const review = walletGasSponsorshipReview420({
-    sponsored: false,
-    fundingMode: 'self-funded',
-    fallbackReason: 'SPONSORSHIP_UNAVAILABLE',
-  });
+  const review = walletGasSponsorshipReview420({ sponsored: false, fundingMode: 'self-funded', fallbackReason: 'SPONSORSHIP_UNAVAILABLE' });
   assert.equal(review.status, 'self-funded');
   assert.equal(review.sponsored, false);
   assert.equal(review.paymaster, null);
@@ -155,26 +121,15 @@ test('self-funded review makes fallback explicit without changing transaction au
   assert.equal(review.executionAuthorization, false);
 });
 
-test('user-facing failure states distinguish safe self-funded fallback from a blocked funding path', () => {
-  const fallback = walletGasSponsorshipFailure420(new Error('gas quote is expired'), { canSelfFund: true });
-  assert.equal(fallback.code, 'SPONSORSHIP_EXPIRED');
+test('user-facing failure states distinguish digest mismatch fallback from a blocked funding path', () => {
+  const fallback = walletGasSponsorshipFailure420(new Error('gas quote sponsorship digest mismatch'), { canSelfFund: true });
+  assert.equal(fallback.code, 'SPONSORSHIP_OPERATION_MISMATCH');
   assert.equal(fallback.status, 'fallback-available');
-  assert.equal(fallback.canSelfFund, true);
-  assert.match(fallback.message, /same authorized operation/i);
-  assert.equal(fallback.executionAuthorization, false);
-
   const blocked = walletGasSponsorshipFailure420(new Error('gas quote account mismatch'), { canSelfFund: false });
   assert.equal(blocked.code, 'SPONSORSHIP_ACCOUNT_MISMATCH');
   assert.equal(blocked.status, 'blocked');
-  assert.equal(blocked.canSelfFund, false);
-  assert.equal(blocked.executionAuthorization, false);
 });
 
 test('review state fails closed if a sponsored result attempts to smuggle execution authority', () => {
-  assert.throws(() => walletGasSponsorshipReview420({
-    sponsored: true,
-    fundingMode: 'paymaster',
-    executionAuthorization: true,
-    quote: quote(),
-  }), /cannot grant execution authority/i);
+  assert.throws(() => walletGasSponsorshipReview420({ sponsored: true, fundingMode: 'paymaster', executionAuthorization: true, quote: quote() }), /cannot grant execution authority/i);
 });

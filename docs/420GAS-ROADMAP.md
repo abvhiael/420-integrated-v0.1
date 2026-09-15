@@ -83,15 +83,15 @@ GAS-9 remains funding-only. Quota, budget, cache and quote state never becomes S
 
 Add bounded low-cardinality metrics, redacted operational status, sponsor/deposit readiness, settlement journals, and recovery procedures. Telemetry never becomes settlement or authorization evidence.
 
-Planned GAS-10 work:
-- **GAS-10.1** bounded low-cardinality metrics and redacted, explicitly non-authoritative operational status.
-- **GAS-10.2** sponsor/deposit readiness evaluation from authoritative inputs without converting telemetry into accounting truth.
+GAS-10 progress:
+- **GAS-10.1 — COMPLETE / QUALIFIED** bounded low-cardinality metrics and redacted, explicitly non-authoritative operational status. Exact head `06c850091e70cf6af9060a2a7d10e8151b390322`; 420Gas #38, 420Docs #1141 and Integrated #3387 passed.
+- **GAS-10.2 — ACTIVE** sponsor/deposit readiness evaluation from observed deposit/reservation inputs with deterministic `ready`, `degraded`, and `not-ready` classification. Readiness is `telemetry-only`; it does not authorize sponsorship or replace canonical EntryPoint/paymaster accounting.
 - **GAS-10.3** bounded settlement journal projection for diagnosis/reconciliation, with canonical on-chain settlement remaining authoritative.
 - **GAS-10.4** recovery/degraded-mode state machine for signer, sponsor-funding and settlement-observation failures.
 - **GAS-10.5** health/readiness API projections with secret redaction and stable machine-readable reason codes.
 - **GAS-10.6** adversarial observability/recovery closeout, roadmap update, exact-head qualification, reconciliation and merge.
 
-GAS-10.1 is in progress on branch `gas-10-observability-readiness-recovery`.
+Active branch: `gas-10-observability-readiness-recovery` (PR #294).
 
 ## GAS-11 — hostile-state/security hardening
 

@@ -2,21 +2,18 @@ name: 420 Genesis Contract Verification
 
 on:
   push:
+    branches:
+      - main
     paths:
       - "contracts/**"
       - "scripts/contracts-*.sh"
       - "scripts/export-contract-manifest.py"
       - ".github/workflows/contracts-genesis.yml"
       - "Dockerfile.contracts"
-  pull_request:
-    paths:
-      - "contracts/**"
-      - "scripts/**"
-      - "Dockerfile.contracts"
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -26,7 +23,7 @@ jobs:
     permissions:
       contents: read
     env:
-      FOUNDRY_PROFILE: ${{ github.event_name == 'pull_request' && 'pr' || 'ci' }}
+      FOUNDRY_PROFILE: ci
 
     steps:
       - uses: actions/checkout@v4
@@ -49,13 +46,7 @@ jobs:
       - name: Bootstrap
         run: bash ./scripts/contracts-bootstrap.sh
 
-      - name: Pull-request contract verification
-        if: github.event_name == 'pull_request'
-        continue-on-error: true
-        run: bash ./scripts/contracts-verify.sh
-
       - name: Full contract verification
-        if: github.event_name != 'pull_request'
         continue-on-error: true
         run: bash ./scripts/contracts-ci.sh
 

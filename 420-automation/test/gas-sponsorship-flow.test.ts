@@ -73,10 +73,10 @@ function quoteClient(overrides: Partial<CanonicalGasQuote420> = {}): AutomationG
 }
 
 test('GAS-8.5 prepares a canonical request, validates the returned quote and authorizes sponsorship', async () => {
-  let seen: CanonicalGasQuoteRequest420 | null = null;
+  const capture: { request?: CanonicalGasQuoteRequest420 } = {};
   const client: AutomationGasQuoteClient420 = {
     async requestQuote(request) {
-      seen = request;
+      capture.request = request;
       return { status: 'quote', quote: quoteFrom(request) };
     },
   };
@@ -94,10 +94,9 @@ test('GAS-8.5 prepares a canonical request, validates the returned quote and aut
   assert.equal(result.fundingMode, 'paymaster');
   assert.equal(result.authorization.paymasterSponsoredWei, 1_000n);
   assert.equal(result.authorization.workerRequiredWei, 100n);
-  assert.notEqual(seen, null);
-  const captured = seen as CanonicalGasQuoteRequest420;
-  assert.equal(captured.authorizationId, attempt.attemptId);
-  assert.equal(captured.sponsorshipDigest, sponsorshipDigest);
+  assert.ok(capture.request);
+  assert.equal(capture.request.authorizationId, attempt.attemptId);
+  assert.equal(capture.request.sponsorshipDigest, sponsorshipDigest);
   assert.equal(result.fallbackReason, null);
 });
 

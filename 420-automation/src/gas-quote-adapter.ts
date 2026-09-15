@@ -6,9 +6,9 @@ import type { AutomationAttempt420 } from './recovery.js';
 const ADDRESS20 = /^0x[0-9a-fA-F]{40}$/;
 const HASH32 = /^0x[0-9a-fA-F]{64}$/;
 
-export interface CanonicalGasQuote420 {
-  schemaVersion: string;
-  chainId: string;
+export interface CanonicalGasQuoteRequest420 {
+  schemaVersion: '1.1.0';
+  chainId: '420';
   entryPoint: string;
   paymaster: string;
   account: string;
@@ -18,6 +18,9 @@ export interface CanonicalGasQuote420 {
   maxSponsoredCostWei: string;
   validAfter: string;
   validUntil: string;
+}
+
+export interface CanonicalGasQuote420 extends CanonicalGasQuoteRequest420 {
   quoteId: string;
   fundingMode: string;
   authority: string;
@@ -57,6 +60,52 @@ function uint420(value: string, code: string): bigint {
   return BigInt(value);
 }
 
+function assertAttemptPlanBinding420(attempt: AutomationAttempt420, plan: AutomationTransactionPlan420): void {
+  if (attempt.state !== 'ready') throw new Error('GAS8_ATTEMPT_NOT_READY');
+  if (attempt.jobId !== plan.jobId) throw new Error('GAS8_QUOTE_PLAN_ATTEMPT_MISMATCH');
+  if (attempt.occurrenceId !== plan.occurrenceId.toLowerCase()) throw new Error('GAS8_QUOTE_PLAN_ATTEMPT_MISMATCH');
+  if (attempt.intentDigest !== plan.intentDigest.toLowerCase()) throw new Error('GAS8_QUOTE_PLAN_ATTEMPT_MISMATCH');
+}
+
+export function buildCanonicalGasQuoteRequestForAutomation420(input: {
+  binding: AutomationGasQuoteBinding420;
+  attempt: AutomationAttempt420;
+  plan: AutomationTransactionPlan420;
+  sponsorshipDigest: string;
+  requestedSponsoredCostWei: bigint;
+  validAfterMs: number;
+  validUntilMs: number;
+}): CanonicalGasQuoteRequest420 {
+  const { binding, attempt, plan } = input;
+  assertAttemptPlanBinding420(attempt, plan);
+  if (plan.chainId !== 420n) throw new Error('GAS8_REQUEST_CHAIN_MISMATCH');
+
+  const entryPoint = address420(binding.entryPoint, 'GAS8_BINDING_ENTRYPOINT_INVALID');
+  const paymaster = address420(binding.paymaster, 'GAS8_BINDING_PAYMASTER_INVALID');
+  const account = address420(binding.account, 'GAS8_BINDING_ACCOUNT_INVALID');
+  const policyId = hash32420(binding.policyId, 'GAS8_BINDING_POLICY_INVALID');
+  const authorizationId = hash32420(attempt.attemptId, 'GAS8_ATTEMPT_ID_INVALID');
+  const sponsorshipDigest = hash32420(input.sponsorshipDigest, 'GAS8_REQUEST_SPONSORSHIP_DIGEST_INVALID');
+
+  if (binding.maxSponsoredCostWei <= 0n) throw new Error('GAS8_BINDING_COST_INVALID');
+  if (input.requestedSponsoredCostWei <= 0n || input.requestedSponsoredCostWei > binding.maxSponsoredCostWei) throw new Error('GAS8_REQUEST_COST_EXCEEDED');
+  if (!Number.isSafeInteger(input.validAfterMs) || !Number.isSafeInteger(input.validUntilMs) || input.validAfterMs < 0 || input.validUntilMs <= input.validAfterMs) throw new Error('GAS8_REQUEST_WINDOW_INVALID');
+
+  return Object.freeze({
+    schemaVersion: '1.1.0',
+    chainId: '420',
+    entryPoint,
+    paymaster,
+    account,
+    sponsorshipDigest,
+    policyId,
+    authorizationId,
+    maxSponsoredCostWei: input.requestedSponsoredCostWei.toString(10),
+    validAfter: new Date(input.validAfterMs).toISOString(),
+    validUntil: new Date(input.validUntilMs).toISOString(),
+  });
+}
+
 export function adaptCanonicalGasQuoteForAutomation420(input: {
   quote: CanonicalGasQuote420;
   binding: AutomationGasQuoteBinding420;
@@ -78,7 +127,7 @@ export function adaptCanonicalGasQuoteForAutomation420(input: {
 
   const attemptId = hash32420(attempt.attemptId, 'GAS8_ATTEMPT_ID_INVALID');
   if (hash32420(quote.authorizationId, 'GAS8_QUOTE_AUTHORIZATION_ID_INVALID') !== attemptId) throw new Error('GAS8_QUOTE_ATTEMPT_MISMATCH');
-  if (attempt.jobId !== plan.jobId || attempt.occurrenceId !== plan.occurrenceId.toLowerCase() || attempt.intentDigest !== plan.intentDigest.toLowerCase()) throw new Error('GAS8_QUOTE_PLAN_ATTEMPT_MISMATCH');
+  assertAttemptPlanBinding420(attempt, plan);
 
   const validAfterMs = parseTime420(quote.validAfter, 'GAS8_QUOTE_VALID_AFTER_INVALID');
   const validUntilMs = parseTime420(quote.validUntil, 'GAS8_QUOTE_VALID_UNTIL_INVALID');

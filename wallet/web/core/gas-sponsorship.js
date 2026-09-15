@@ -38,7 +38,7 @@ export function validateWalletGasQuote420(quote, { entryPoint, account, now = ne
     entryPoint: normalizeAddress(quote.entryPoint),
     paymaster: normalizeAddress(quote.paymaster),
     account: normalizeAddress(quote.account),
-    userOpHash: bytes32420(quote.userOpHash, 'userOpHash'),
+    sponsorshipDigest: bytes32420(quote.sponsorshipDigest, 'sponsorshipDigest'),
     policyId: bytes32420(quote.policyId, 'policyId'),
     authorizationId: bytes32420(quote.authorizationId, 'authorizationId'),
     maxSponsoredCostWei: decimal420(quote.maxSponsoredCostWei, 'maxSponsoredCostWei'),
@@ -66,35 +66,22 @@ export function walletGasSponsorshipReview420(prepared) {
   if (!sponsored) {
     assert420(prepared.fundingMode === 'self-funded', 'self-funded sponsorship state is invalid');
     return Object.freeze({
-      status: 'self-funded',
-      fundingMode: 'self-funded',
-      sponsored: false,
-      title: 'You pay network gas',
+      status: 'self-funded', fundingMode: 'self-funded', sponsored: false, title: 'You pay network gas',
       message: 'No gas sponsorship is attached. Wallet authorization and transaction details are unchanged.',
-      paymaster: null,
-      policyId: null,
-      maxSponsoredCostWei: null,
-      validUntil: null,
-      executionAuthorization: false,
-      fallbackReason: prepared.fallbackReason ?? null,
+      paymaster: null, policyId: null, maxSponsoredCostWei: null, validUntil: null,
+      executionAuthorization: false, fallbackReason: prepared.fallbackReason ?? null,
     });
   }
-
   assert420(prepared.fundingMode === 'paymaster', 'sponsored funding mode is invalid');
   assert420(prepared.executionAuthorization === false, 'sponsorship review cannot grant execution authority');
   assert420(prepared.quote && typeof prepared.quote === 'object', 'sponsored quote is required for review');
   return Object.freeze({
-    status: 'sponsored',
-    fundingMode: 'paymaster',
-    sponsored: true,
-    title: 'Network gas is sponsored',
+    status: 'sponsored', fundingMode: 'paymaster', sponsored: true, title: 'Network gas is sponsored',
     message: 'A paymaster may fund this exact operation. Your Wallet or session authorization still controls execution.',
     paymaster: normalizeAddress(prepared.quote.paymaster),
     policyId: bytes32420(prepared.quote.policyId, 'policyId'),
     maxSponsoredCostWei: decimal420(prepared.quote.maxSponsoredCostWei, 'maxSponsoredCostWei'),
-    validUntil: prepared.quote.validUntil,
-    executionAuthorization: false,
-    fallbackReason: null,
+    validUntil: prepared.quote.validUntil, executionAuthorization: false, fallbackReason: null,
   });
 }
 
@@ -106,19 +93,16 @@ export function walletGasSponsorshipFailure420(error, { canSelfFund = true } = {
   else if (/wrong chain|chain/i.test(message)) code = 'SPONSORSHIP_WRONG_CHAIN';
   else if (/EntryPoint mismatch/i.test(message)) code = 'SPONSORSHIP_ENTRYPOINT_MISMATCH';
   else if (/account mismatch/i.test(message)) code = 'SPONSORSHIP_ACCOUNT_MISMATCH';
-  else if (/does not bind the final sponsored user operation/i.test(message)) code = 'SPONSORSHIP_OPERATION_MISMATCH';
+  else if (/sponsorship digest/i.test(message)) code = 'SPONSORSHIP_OPERATION_MISMATCH';
   else if (/authority|execution authority/i.test(message)) code = 'SPONSORSHIP_AUTHORITY_INVALID';
   else if (/unavailable/i.test(message)) code = 'SPONSORSHIP_UNAVAILABLE';
-
   return Object.freeze({
-    status: canSelfFund ? 'fallback-available' : 'blocked',
-    code,
+    status: canSelfFund ? 'fallback-available' : 'blocked', code,
     title: canSelfFund ? 'Gas sponsorship unavailable' : 'Transaction cannot continue',
     message: canSelfFund
       ? 'The sponsorship offer cannot be used. You can continue with the same authorized operation and pay network gas yourself.'
       : 'The sponsorship offer cannot be used and this Wallet cannot safely continue without another valid funding path.',
-    canSelfFund: Boolean(canSelfFund),
-    executionAuthorization: false,
+    canSelfFund: Boolean(canSelfFund), executionAuthorization: false,
   });
 }
 
@@ -126,6 +110,7 @@ export async function prepareWalletGasSponsorship420({
   userOperation,
   entryPoint,
   discoverQuote,
+  hashSponsorship,
   hashUserOperation,
   now = new Date(),
 } = {}) {
@@ -135,45 +120,28 @@ export async function prepareWalletGasSponsorship420({
   assert420(signature === '0x', 'sponsorship must be prepared before Wallet signing');
   assert420(paymasterAndData === '0x', 'Wallet will not replace existing paymasterAndData');
   assert420(typeof discoverQuote === 'function', 'sponsorship quote discovery function is required');
+  assert420(typeof hashSponsorship === 'function', 'canonical sponsorship digest function is required');
   assert420(typeof hashUserOperation === 'function', 'canonical user operation hash function is required');
 
   const request = Object.freeze({
-    chainId: '420',
-    entryPoint: normalizeAddress(entryPoint),
-    account: normalizeAddress(userOperation.sender),
+    chainId: '420', entryPoint: normalizeAddress(entryPoint), account: normalizeAddress(userOperation.sender),
     userOperation: Object.freeze({ ...userOperation, signature: '0x', paymasterAndData: '0x' }),
-    authority: 'funding-request-only',
-    executionAuthorization: false,
+    authority: 'funding-request-only', executionAuthorization: false,
   });
 
   const discovered = await discoverQuote(request);
   if (discovered == null) {
-    return Object.freeze({
-      sponsored: false,
-      fundingMode: 'self-funded',
-      userOperation: request.userOperation,
-      quote: null,
-      fallbackReason: 'SPONSORSHIP_UNAVAILABLE',
-    });
+    return Object.freeze({ sponsored: false, fundingMode: 'self-funded', userOperation: request.userOperation, quote: null, fallbackReason: 'SPONSORSHIP_UNAVAILABLE' });
   }
 
-  const quote = validateWalletGasQuote420(discovered, {
-    entryPoint: request.entryPoint,
-    account: request.account,
-    now,
-  });
+  const quote = validateWalletGasQuote420(discovered, { entryPoint: request.entryPoint, account: request.account, now });
   const sponsoredOperation = Object.freeze({ ...request.userOperation, paymasterAndData: quote.paymasterAndData });
+  const sponsorshipDigest = bytes32420(await hashSponsorship(sponsoredOperation), 'canonical sponsorship digest');
+  assert420(sponsorshipDigest === quote.sponsorshipDigest, 'gas quote sponsorship digest mismatch');
   const canonicalHash = bytes32420(await hashUserOperation(sponsoredOperation), 'canonical sponsored userOpHash');
-  assert420(canonicalHash === quote.userOpHash, 'gas quote does not bind the final sponsored user operation');
 
   return Object.freeze({
-    sponsored: true,
-    fundingMode: 'paymaster',
-    userOperation: sponsoredOperation,
-    quote,
-    userOpHash: canonicalHash,
-    fallbackReason: null,
-    authority: 'funding-only',
-    executionAuthorization: false,
+    sponsored: true, fundingMode: 'paymaster', userOperation: sponsoredOperation, quote,
+    sponsorshipDigest, userOpHash: canonicalHash, fallbackReason: null, authority: 'funding-only', executionAuthorization: false,
   });
 }

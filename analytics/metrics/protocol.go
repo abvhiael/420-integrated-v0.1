@@ -11,32 +11,32 @@ import (
 )
 
 const (
-	MetricProtocolEventCount = "protocol.event_count"
-	MetricProtocolObjectCount = "protocol.object_count"
+	MetricProtocolEventCount        = "protocol.event_count"
+	MetricProtocolObjectCount       = "protocol.object_count"
 	MetricProtocolActiveObjectCount = "protocol.active_object_count"
-	MetricProtocolCount = "protocol.distinct_count"
+	MetricProtocolCount             = "protocol.distinct_count"
 )
 
 type ProtocolEventProjection struct {
-	ChainID uint64
-	BlockNumber uint64
+	ChainID         uint64
+	BlockNumber     uint64
 	TransactionHash string
-	LogIndex uint64
-	Protocol string
-	EventName string
+	LogIndex        uint64
+	Protocol        string
+	EventName       string
 }
 
 type ProtocolObjectProjection struct {
-	ChainID uint64
-	BlockNumber uint64
-	Protocol string
-	ObjectKey string
+	ChainID        uint64
+	BlockNumber    uint64
+	Protocol       string
+	ObjectKey      string
 	LifecycleState string
 }
 
 type ProtocolInput struct {
-	Source string
-	Events []ProtocolEventProjection
+	Source  string
+	Events  []ProtocolEventProjection
 	Objects []ProtocolObjectProjection
 }
 
@@ -89,22 +89,24 @@ func BuildProtocolMetrics(input ProtocolInput, provenance model.Provenance) ([]m
 	}
 
 	defs := []struct {
-		id string
+		id    string
 		label string
-		unit string
-		method string
-		description string
+		unit  string
 		value uint64
 	}{
-		{MetricProtocolEventCount, "Protocol events", "events", "protocol-event-count", "count of unique typed protocol events exposed through qualified 420Indexer at or before the analytics snapshot", uint64(len(events))},
-		{MetricProtocolObjectCount, "Protocol objects", "objects", "protocol-object-count", "count of unique latest protocol-object projections exposed through qualified 420Indexer", uint64(len(objects))},
-		{MetricProtocolActiveObjectCount, "Active protocol objects", "objects", "protocol-active-object-count", "count of latest protocol objects whose lifecycle state is active or enabled", active},
-		{MetricProtocolCount, "Distinct protocols", "protocols", "distinct-protocol-count", "count of distinct protocol identifiers represented by indexed event and object projections", uint64(len(protocols))},
+		{MetricProtocolEventCount, "Protocol events", "events", uint64(len(events))},
+		{MetricProtocolObjectCount, "Protocol objects", "objects", uint64(len(objects))},
+		{MetricProtocolActiveObjectCount, "Active protocol objects", "objects", active},
+		{MetricProtocolCount, "Distinct protocols", "protocols", uint64(len(protocols))},
 	}
 
 	out := make([]model.Metric, 0, len(defs))
 	for _, def := range defs {
-		metric, err := model.NewMetric(def.id, architecture.MetricProtocol, def.label, strconv.FormatUint(def.value, 10), def.unit, model.Methodology{ID: def.method, Version: "v1", Description: def.description}, model.Window{Kind: model.WindowPoint}, provenance)
+		method, err := registeredMethodology(def.id)
+		if err != nil {
+			return nil, err
+		}
+		metric, err := model.NewMetric(def.id, architecture.MetricProtocol, def.label, strconv.FormatUint(def.value, 10), def.unit, method, model.Window{Kind: model.WindowPoint}, provenance)
 		if err != nil {
 			return nil, fmt.Errorf("build %s: %w", def.id, err)
 		}

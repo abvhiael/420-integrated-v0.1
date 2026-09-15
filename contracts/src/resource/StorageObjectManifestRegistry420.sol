@@ -5,9 +5,11 @@ import "../interfaces/I420System.sol";
 import "./StorageAgreementRegistry420.sol";
 import "./StorageCommitmentRegistry420.sol";
 
-/// @notice Canonical SR-3.3 object manifests and immutable shard-placement commitments.
+/// @notice Canonical SR-3.3 object manifests and shard-placement commitments.
 /// @dev Encrypted payloads and shard bytes remain off-chain. This registry anchors the
 ///      manifest envelope and binds each erasure-coded shard to a qualified storage agreement.
+///      Sealed manifests are content-immutable, but an unavailable shard placement may rotate
+///      to a replacement agreement while preserving its canonical shard root and byte length.
 contract StorageObjectManifestRegistry420 is I420System {
     struct Manifest {
         address controller;
@@ -52,6 +54,8 @@ contract StorageObjectManifestRegistry420 is I420System {
     error PlacementNotFound();
     error Unauthorized();
     error ManifestSealed();
+    error ManifestNotSealed();
+    error PlacementStillEffective();
     error IncompleteManifest();
 
     event ObjectManifestRegistered(
@@ -73,6 +77,17 @@ contract StorageObjectManifestRegistry420 is I420System {
         bytes32 nodeId,
         bytes32 shardRoot,
         uint128 shardSizeBytes
+    );
+    event ShardPlacementReplaced(
+        bytes32 indexed manifestId,
+        uint32 indexed shardIndex,
+        bytes32 indexed placementId,
+        bytes32 oldAgreementId,
+        bytes32 newAgreementId,
+        bytes32 oldCommitmentId,
+        bytes32 newCommitmentId,
+        bytes32 oldNodeId,
+        bytes32 newNodeId
     );
     event ObjectManifestSealed(bytes32 indexed manifestId, uint32 placedShards);
 
@@ -146,21 +161,8 @@ contract StorageObjectManifestRegistry420 is I420System {
         }
         if (_placementByIndex[manifestId][shardIndex] != bytes32(0)) revert PlacementExists();
 
-        StorageAgreementRegistry420.Agreement memory agreement = agreements.getAgreement(agreementId);
-        if (
-            agreement.consumer != manifest.controller || agreement.objectId != manifest.objectId
-                || agreement.manifestHash != manifest.manifestHash
-                || agreement.dataShards != manifest.dataShards || agreement.totalShards != manifest.totalShards
-                || agreement.state != StorageAgreementRegistry420.State.ACTIVE || agreement.commitmentId == bytes32(0)
-                || shardSizeBytes > agreement.sizeBytes
-        ) revert InvalidPlacement();
-
-        StorageCommitmentRegistry420.Commitment memory commitment = commitments.getCommitment(agreement.commitmentId);
-        if (
-            commitment.nodeId == bytes32(0) || commitment.contentRoot != agreement.contentRoot
-                || commitment.sizeBytes != agreement.sizeBytes || commitment.startTime != agreement.startTime
-                || commitment.endTime != agreement.endTime
-        ) revert InvalidPlacement();
+        (StorageAgreementRegistry420.Agreement memory agreement, StorageCommitmentRegistry420.Commitment memory commitment) =
+            _validatedBacking(manifest, agreementId, shardSizeBytes);
 
         placementId = canonicalPlacementId(manifestId, shardIndex);
         if (_placements[placementId].exists) revert PlacementExists();
@@ -179,6 +181,53 @@ contract StorageObjectManifestRegistry420 is I420System {
 
         emit ShardPlacementRegistered(
             manifestId, shardIndex, placementId, agreementId, agreement.commitmentId, commitment.nodeId, shardRoot, shardSizeBytes
+        );
+    }
+
+    /// @notice Rotates the backing agreement for an unavailable shard in a sealed manifest.
+    /// @dev Repair cannot change content identity: shard index, shard root and shard size are preserved.
+    ///      The incumbent service window must have begun and the placement must no longer be effective.
+    function replacePlacement(bytes32 manifestId, uint32 shardIndex, bytes32 agreementId)
+        external
+        returns (bytes32 placementId)
+    {
+        Manifest storage manifest = _manifest(manifestId);
+        if (!manifest.isSealed) revert ManifestNotSealed();
+        if (msg.sender != manifest.controller) revert Unauthorized();
+        if (shardIndex >= manifest.totalShards || agreementId == bytes32(0)) revert InvalidPlacement();
+
+        placementId = _placementByIndex[manifestId][shardIndex];
+        if (placementId == bytes32(0)) revert PlacementNotFound();
+        Placement storage placement = _placements[placementId];
+        if (!placement.exists || placement.shardIndex != shardIndex || placement.manifestId != manifestId) revert InvalidPlacement();
+
+        StorageAgreementRegistry420.Agreement memory incumbent = agreements.getAgreement(placement.agreementId);
+        if (block.timestamp < incumbent.startTime) revert PlacementStillEffective();
+        if (agreements.isEffective(placement.agreementId) && commitments.isLive(placement.commitmentId)) {
+            revert PlacementStillEffective();
+        }
+        if (agreementId == placement.agreementId) revert InvalidPlacement();
+
+        (StorageAgreementRegistry420.Agreement memory agreement, StorageCommitmentRegistry420.Commitment memory commitment) =
+            _validatedBacking(manifest, agreementId, placement.shardSizeBytes);
+
+        bytes32 oldAgreementId = placement.agreementId;
+        bytes32 oldCommitmentId = placement.commitmentId;
+        bytes32 oldNodeId = placement.nodeId;
+        placement.agreementId = agreementId;
+        placement.commitmentId = agreement.commitmentId;
+        placement.nodeId = commitment.nodeId;
+
+        emit ShardPlacementReplaced(
+            manifestId,
+            shardIndex,
+            placementId,
+            oldAgreementId,
+            agreementId,
+            oldCommitmentId,
+            agreement.commitmentId,
+            oldNodeId,
+            commitment.nodeId
         );
     }
 
@@ -218,6 +267,28 @@ contract StorageObjectManifestRegistry420 is I420System {
             }
         }
         return false;
+    }
+
+    function _validatedBacking(Manifest storage manifest, bytes32 agreementId, uint128 shardSizeBytes)
+        private
+        view
+        returns (StorageAgreementRegistry420.Agreement memory agreement, StorageCommitmentRegistry420.Commitment memory commitment)
+    {
+        agreement = agreements.getAgreement(agreementId);
+        if (
+            agreement.consumer != manifest.controller || agreement.objectId != manifest.objectId
+                || agreement.manifestHash != manifest.manifestHash
+                || agreement.dataShards != manifest.dataShards || agreement.totalShards != manifest.totalShards
+                || agreement.state != StorageAgreementRegistry420.State.ACTIVE || agreement.commitmentId == bytes32(0)
+                || shardSizeBytes > agreement.sizeBytes
+        ) revert InvalidPlacement();
+
+        commitment = commitments.getCommitment(agreement.commitmentId);
+        if (
+            commitment.nodeId == bytes32(0) || commitment.contentRoot != agreement.contentRoot
+                || commitment.sizeBytes != agreement.sizeBytes || commitment.startTime != agreement.startTime
+                || commitment.endTime != agreement.endTime
+        ) revert InvalidPlacement();
     }
 
     function _manifest(bytes32 manifestId) private view returns (Manifest storage manifest) {

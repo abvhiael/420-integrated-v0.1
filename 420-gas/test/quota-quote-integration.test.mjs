@@ -72,6 +72,7 @@ test('GAS-9.2 reserves quota before signing and exposes the bounded reservation'
   assert.equal(snapshotDuringSign.accountSponsoredWei, 100n);
   assert.equal(quote.quotaReservation.authorizationId, hash(6));
   assert.equal(quote.quotaReservation.reservedWei, 100n);
+  assert.equal(quote.quotaReservation.reservationId, 1);
 });
 
 test('GAS-9.2 refuses a second outstanding quote when account concurrency is exhausted', () => {
@@ -87,7 +88,7 @@ test('GAS-9.2 refuses a second outstanding quote when account concurrency is exh
   }), /GAS9_ACCOUNT_CONCURRENCY_EXCEEDED/);
 });
 
-test('GAS-9.2 rolls quota reservation back when signing fails', () => {
+test('GAS-9.2 rolls quota reservation and window accounting back when signing fails', () => {
   const quota = controller({ maxConcurrentPerAccount: 1 });
   assert.throws(() => createGasQuote420({
     request: request(),
@@ -100,6 +101,10 @@ test('GAS-9.2 rolls quota reservation back when signing fails', () => {
   const snapshot = quota.snapshot({ account: addr(3), policyId: hash(5), nowMs: now.getTime() });
   assert.equal(snapshot.accountConcurrent, 0);
   assert.equal(snapshot.trackedAuthorizations, 0);
+  assert.equal(snapshot.accountOperations, 0);
+  assert.equal(snapshot.policyOperations, 0);
+  assert.equal(snapshot.sponsorOperations, 0);
+  assert.equal(snapshot.accountSponsoredWei, 0n);
 
   assert.doesNotThrow(() => createGasQuote420({
     request: request(),
@@ -112,9 +117,9 @@ test('GAS-9.2 rolls quota reservation back when signing fails', () => {
 
 test('GAS-9.2 explicit release frees outstanding capacity without refunding window spend', () => {
   const quota = controller({ maxConcurrentPerAccount: 1 });
-  createGasQuote420({ request: request(), credential: credential(), now, quotaController: quota, sign: () => 'sig-1' });
+  const first = createGasQuote420({ request: request(), credential: credential(), now, quotaController: quota, sign: () => 'sig-1' });
 
-  assert.equal(releaseGasQuoteQuota420({ quotaController: quota, authorizationId: hash(6) }), true);
+  assert.equal(releaseGasQuoteQuota420({ quotaController: quota, quotaReservation: first.quotaReservation }), true);
   const snapshot = quota.snapshot({ account: addr(3), policyId: hash(5), nowMs: now.getTime() });
   assert.equal(snapshot.accountConcurrent, 0);
   assert.equal(snapshot.accountOperations, 1);
@@ -166,4 +171,73 @@ test('GAS-9.3 sponsor concurrency is recovered automatically from abandoned expi
     quotaController: quota,
     sign: () => 'sig-2',
   }));
+});
+
+test('GAS-9.5 re-entrant duplicate issuance cannot pass the active authorization reservation', () => {
+  const quota = controller({ maxConcurrentPerAccount: 10, maxConcurrentSponsor: 10 });
+  let nestedError;
+  const outer = createGasQuote420({
+    request: request(),
+    credential: credential(),
+    now,
+    quotaController: quota,
+    sign: () => {
+      try {
+        createGasQuote420({ request: request(), credential: credential(), now, quotaController: quota, sign: () => 'nested' });
+      } catch (error) {
+        nestedError = error;
+      }
+      return 'outer';
+    },
+  });
+  assert.match(String(nestedError?.message), /GAS9_DUPLICATE_AUTHORIZATION/);
+  assert.equal(outer.quotaReservation.authorizationId, hash(6));
+  assert.equal(quota.snapshot({ account: addr(3), policyId: hash(5), nowMs: now.getTime() }).accountConcurrent, 1);
+});
+
+test('GAS-9.5 re-entrant different authorization cannot oversubscribe account concurrency', () => {
+  const quota = controller({ maxConcurrentPerAccount: 1, maxConcurrentSponsor: 10 });
+  let nestedError;
+  createGasQuote420({
+    request: request(),
+    credential: credential(),
+    now,
+    quotaController: quota,
+    sign: () => {
+      try {
+        createGasQuote420({
+          request: request({ authorizationId: hash(7), sponsorshipDigest: hash(8) }),
+          credential: credential(),
+          now,
+          quotaController: quota,
+          sign: () => 'nested',
+        });
+      } catch (error) {
+        nestedError = error;
+      }
+      return 'outer';
+    },
+  });
+  assert.match(String(nestedError?.message), /GAS9_ACCOUNT_CONCURRENCY_EXCEEDED/);
+  const snapshot = quota.snapshot({ account: addr(3), policyId: hash(5), nowMs: now.getTime() });
+  assert.equal(snapshot.accountConcurrent, 1);
+  assert.equal(snapshot.accountOperations, 1);
+  assert.equal(snapshot.accountSponsoredWei, 100n);
+});
+
+test('GAS-9.5 stale release from an expired quote cannot release its replacement reservation', () => {
+  const quota = controller({ maxConcurrentPerAccount: 10, maxConcurrentSponsor: 10, maxAccountOperationsPerWindow: 20 });
+  const first = createGasQuote420({ request: request({ validUntil: '2026-09-15T18:50:10.000Z' }), credential: credential(), now, quotaController: quota, sign: () => 'first' });
+  const later = new Date('2026-09-15T18:50:10.000Z');
+  const second = createGasQuote420({
+    request: request({ validAfter: '2026-09-15T18:50:09.000Z', validUntil: '2026-09-15T18:51:00.000Z' }),
+    credential: credential(),
+    now: later,
+    quotaController: quota,
+    sign: () => 'second',
+  });
+  assert.notEqual(first.quotaReservation.reservationId, second.quotaReservation.reservationId);
+  assert.equal(releaseGasQuoteQuota420({ quotaController: quota, quotaReservation: first.quotaReservation }), false);
+  assert.equal(quota.snapshot({ account: addr(3), policyId: hash(5), nowMs: later.getTime() }).accountConcurrent, 1);
+  assert.equal(releaseGasQuoteQuota420({ quotaController: quota, quotaReservation: second.quotaReservation }), true);
 });

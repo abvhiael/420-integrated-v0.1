@@ -11,17 +11,23 @@ import (
 )
 
 var (
-	gatewayEnabled    = flag.Bool("gateway", false, "enable 420Gateway HTTP service")
-	gatewayListen     = flag.String("gateway.listen", "127.0.0.1:8422", "420Gateway HTTP listen address")
-	gatewayCacheURL   = flag.String("gateway.cache-url", "", "optional upstream 420Cache base URL")
-	gatewayCacheToken = flag.String("gateway.cache-token", "", "optional bearer token for upstream 420Cache")
-	gatewayStoreURL   = flag.String("gateway.store-url", "", "optional upstream 420Store base URL")
-	gatewayStoreToken = flag.String("gateway.store-token", "", "optional bearer token for upstream 420Store")
-	gatewayTimeout    = flag.Duration("gateway.upstream-timeout", 10*time.Second, "420Gateway upstream request timeout")
+	gatewayEnabled       = flag.Bool("gateway", false, "enable 420Gateway HTTP service")
+	gatewayListen        = flag.String("gateway.listen", "127.0.0.1:8422", "420Gateway HTTP listen address")
+	gatewayCacheURL      = flag.String("gateway.cache-url", "", "optional upstream 420Cache base URL")
+	gatewayCacheToken    = flag.String("gateway.cache-token", "", "optional bearer token for upstream 420Cache")
+	gatewayStoreURL      = flag.String("gateway.store-url", "", "optional upstream 420Store base URL")
+	gatewayStoreToken    = flag.String("gateway.store-token", "", "optional bearer token for upstream 420Store")
+	gatewayTimeout       = flag.Duration("gateway.upstream-timeout", 10*time.Second, "420Gateway upstream request timeout")
+	gatewayMaxConcurrent = flag.Uint("gateway.max-concurrent-requests", 128, "maximum concurrent 420Gateway requests")
+	gatewayRateRequests  = flag.Uint("gateway.rate-limit-requests", 240, "maximum requests per client in each rate-limit window")
+	gatewayRateWindow    = flag.Duration("gateway.rate-limit-window", time.Minute, "per-client 420Gateway rate-limit window")
 )
 
 func newNodeGatewayService() (serviceRunner, error) {
-	if strings.TrimSpace(*gatewayListen) == "" || *gatewayTimeout <= 0 {
+	if strings.TrimSpace(*gatewayListen) == "" || *gatewayTimeout <= 0 || *gatewayRateWindow <= 0 {
+		return nil, storage.ErrGatewayRoute
+	}
+	if *gatewayMaxConcurrent == 0 || *gatewayRateRequests == 0 || uint64(*gatewayMaxConcurrent) > uint64(^uint32(0)) || uint64(*gatewayRateRequests) > uint64(^uint32(0)) {
 		return nil, storage.ErrGatewayRoute
 	}
 	client := &http.Client{Timeout: *gatewayTimeout}
@@ -43,5 +49,9 @@ func newNodeGatewayService() (serviceRunner, error) {
 	if len(router.Cache) == 0 && len(router.Store) == 0 {
 		return nil, errors.New("gateway requires at least one cache or store upstream")
 	}
-	return storage.NewGatewayHTTPService(*gatewayListen, storage.GatewayHTTPHandler{Router: router})
+	return storage.NewGatewayHTTPServiceWithPolicy(*gatewayListen, storage.GatewayHTTPHandler{Router: router}, storage.GatewayHTTPPolicy{
+		MaxConcurrentRequests: uint32(*gatewayMaxConcurrent),
+		RateLimitRequests: uint32(*gatewayRateRequests),
+		RateLimitWindow: *gatewayRateWindow,
+	})
 }

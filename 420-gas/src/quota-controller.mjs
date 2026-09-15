@@ -39,6 +39,7 @@ export function validateGasQuotaPolicy420(input = {}) {
     maxConcurrentPerAccount: input.maxConcurrentPerAccount ?? 10,
     maxConcurrentSponsor: input.maxConcurrentSponsor ?? 1_000,
     maxTrackedAuthorizations: input.maxTrackedAuthorizations ?? 10_000,
+    maxTrackedWindows: input.maxTrackedWindows ?? 25_000,
     maxReservationAgeMs: input.maxReservationAgeMs ?? 300_000,
   };
   positiveInt420(policy.windowMs, 'GAS9_WINDOW_INVALID', 86_400_000);
@@ -48,6 +49,7 @@ export function validateGasQuotaPolicy420(input = {}) {
   positiveInt420(policy.maxConcurrentPerAccount, 'GAS9_CONCURRENCY_LIMIT_INVALID', 10_000);
   positiveInt420(policy.maxConcurrentSponsor, 'GAS9_SPONSOR_CONCURRENCY_LIMIT_INVALID', 1_000_000);
   positiveInt420(policy.maxTrackedAuthorizations, 'GAS9_TRACKED_AUTHORIZATIONS_LIMIT_INVALID', 1_000_000);
+  positiveInt420(policy.maxTrackedWindows, 'GAS9_TRACKED_WINDOWS_LIMIT_INVALID', 2_000_001);
   positiveInt420(policy.maxReservationAgeMs, 'GAS9_RESERVATION_AGE_INVALID', 3_600_000);
   return Object.freeze(policy);
 }
@@ -72,6 +74,35 @@ export class GasQuotaController420 {
     const next = { id, operations: 0, sponsoredWei: 0n };
     this.windows.set(key, next);
     return next;
+  }
+
+  _windowView(key, nowMs) {
+    const id = this._windowId(nowMs);
+    const current = this.windows.get(key);
+    return current && current.id === id ? current : { id, operations: 0, sponsoredWei: 0n };
+  }
+
+  _pruneWindows(nowMs) {
+    const currentId = this._windowId(nowMs);
+    let pruned = 0;
+    for (const [key, window] of this.windows.entries()) {
+      if (window.id !== currentId) {
+        this.windows.delete(key);
+        pruned += 1;
+      }
+    }
+    return pruned;
+  }
+
+  _ensureWindowCapacity(keys, nowMs) {
+    this._pruneWindows(nowMs);
+    const id = this._windowId(nowMs);
+    let missing = 0;
+    for (const key of new Set(keys)) {
+      const current = this.windows.get(key);
+      if (!current || current.id !== id) missing += 1;
+    }
+    if (this.windows.size + missing > this.policy.maxTrackedWindows) fail420('GAS9_WINDOW_STATE_CAPACITY_EXCEEDED');
   }
 
   _reservationId() {
@@ -112,6 +143,7 @@ export class GasQuotaController420 {
     if (!Number.isSafeInteger(expiry) || expiry <= nowMs || expiry - nowMs > this.policy.maxReservationAgeMs) fail420('GAS9_RESERVATION_EXPIRY_INVALID');
 
     this.reapExpired(nowMs);
+    this._pruneWindows(nowMs);
     if (cost > this.policy.maxSponsoredCostPerOperationWei) fail420('GAS9_OPERATION_COST_EXCEEDED');
     if (this.active.has(authorizationKey)) fail420('GAS9_DUPLICATE_AUTHORIZATION');
     if (this.active.size >= this.policy.maxTrackedAuthorizations) fail420('GAS9_STATE_CAPACITY_EXCEEDED');
@@ -120,20 +152,24 @@ export class GasQuotaController420 {
     const accountWindowKey = `account:${accountKey}`;
     const policyWindowKey = `policy:${policyKey}`;
     const sponsorWindowKey = 'sponsor:global';
-    const accountWindow = this._window(accountWindowKey, nowMs);
-    const policyWindow = this._window(policyWindowKey, nowMs);
-    const sponsorWindow = this._window(sponsorWindowKey, nowMs);
-    if (accountWindow.operations >= this.policy.maxAccountOperationsPerWindow) fail420('GAS9_ACCOUNT_OPERATION_QUOTA_EXCEEDED');
-    if (policyWindow.operations >= this.policy.maxPolicyOperationsPerWindow) fail420('GAS9_POLICY_OPERATION_QUOTA_EXCEEDED');
-    if (sponsorWindow.operations >= this.policy.maxSponsorOperationsPerWindow) fail420('GAS9_SPONSOR_OPERATION_QUOTA_EXCEEDED');
-    if (accountWindow.sponsoredWei + cost > this.policy.maxAccountWindowWei) fail420('GAS9_ACCOUNT_SPEND_QUOTA_EXCEEDED');
-    if (policyWindow.sponsoredWei + cost > this.policy.maxPolicyWindowWei) fail420('GAS9_POLICY_SPEND_QUOTA_EXCEEDED');
-    if (sponsorWindow.sponsoredWei + cost > this.policy.maxSponsorWindowWei) fail420('GAS9_SPONSOR_SPEND_QUOTA_EXCEEDED');
+    const accountView = this._windowView(accountWindowKey, nowMs);
+    const policyView = this._windowView(policyWindowKey, nowMs);
+    const sponsorView = this._windowView(sponsorWindowKey, nowMs);
+    if (accountView.operations >= this.policy.maxAccountOperationsPerWindow) fail420('GAS9_ACCOUNT_OPERATION_QUOTA_EXCEEDED');
+    if (policyView.operations >= this.policy.maxPolicyOperationsPerWindow) fail420('GAS9_POLICY_OPERATION_QUOTA_EXCEEDED');
+    if (sponsorView.operations >= this.policy.maxSponsorOperationsPerWindow) fail420('GAS9_SPONSOR_OPERATION_QUOTA_EXCEEDED');
+    if (accountView.sponsoredWei + cost > this.policy.maxAccountWindowWei) fail420('GAS9_ACCOUNT_SPEND_QUOTA_EXCEEDED');
+    if (policyView.sponsoredWei + cost > this.policy.maxPolicyWindowWei) fail420('GAS9_POLICY_SPEND_QUOTA_EXCEEDED');
+    if (sponsorView.sponsoredWei + cost > this.policy.maxSponsorWindowWei) fail420('GAS9_SPONSOR_SPEND_QUOTA_EXCEEDED');
 
     let concurrent = 0;
     for (const reservation of this.active.values()) if (reservation.account === accountKey) concurrent += 1;
     if (concurrent >= this.policy.maxConcurrentPerAccount) fail420('GAS9_ACCOUNT_CONCURRENCY_EXCEEDED');
 
+    this._ensureWindowCapacity([accountWindowKey, policyWindowKey, sponsorWindowKey], nowMs);
+    const accountWindow = this._window(accountWindowKey, nowMs);
+    const policyWindow = this._window(policyWindowKey, nowMs);
+    const sponsorWindow = this._window(sponsorWindowKey, nowMs);
     accountWindow.operations += 1;
     accountWindow.sponsoredWei += cost;
     policyWindow.operations += 1;
@@ -192,9 +228,10 @@ export class GasQuotaController420 {
     const accountKey = key420(account, 'GAS9_ACCOUNT_INVALID');
     const policyKey = key420(policyId, 'GAS9_POLICY_INVALID');
     this.reapExpired(nowMs);
-    const accountWindow = this._window(`account:${accountKey}`, nowMs);
-    const policyWindow = this._window(`policy:${policyKey}`, nowMs);
-    const sponsorWindow = this._window('sponsor:global', nowMs);
+    this._pruneWindows(nowMs);
+    const accountWindow = this._windowView(`account:${accountKey}`, nowMs);
+    const policyWindow = this._windowView(`policy:${policyKey}`, nowMs);
+    const sponsorWindow = this._windowView('sponsor:global', nowMs);
     let concurrent = 0;
     for (const reservation of this.active.values()) if (reservation.account === accountKey) concurrent += 1;
     return Object.freeze({
@@ -208,6 +245,7 @@ export class GasQuotaController420 {
       accountConcurrent: concurrent,
       sponsorConcurrent: this.active.size,
       trackedAuthorizations: this.active.size,
+      trackedWindows: this.windows.size,
     });
   }
 }

@@ -1,6 +1,7 @@
 import { normalizeAddress, normalizeBytes32 } from './abi.js';
 import { normalizeCallData } from './execution.js';
 import { prepareSessionExecution, readSessionNonce } from './session-execution.js';
+import { prepareWalletGasSponsorship420 } from './gas-sponsorship.js';
 import { readDeployedSmartAccountState } from './accounts.js';
 import {
   SESSION_EXECUTE_CAPABILITY_420,
@@ -160,7 +161,7 @@ export async function revalidatePreparedSession(provider, prepared) {
   return { live, inspection, currentNonce };
 }
 
-export async function prepareEntryPointTransport(provider, smartAccountState, sessionKey, sessionPreflight) {
+export async function prepareEntryPointTransport(provider, smartAccountState, sessionKey, sessionPreflight, options = {}) {
   if (!sessionPreflight || sessionPreflight.broadcastReady !== false) throw new Error('qualified session execution preflight required before EntryPoint420 transport');
   const signer = normalizeAddress(sessionKey);
   if (normalizeAddress(sessionPreflight.signer) !== signer) throw new Error('session preflight signer mismatch');
@@ -170,9 +171,29 @@ export async function prepareEntryPointTransport(provider, smartAccountState, se
   if (unsigned.signature !== '0x') throw new Error('session preflight must be unsigned');
   await assertSignerAvailable(provider, signer);
 
-  const userOpHash = await readEntryPointUserOpHash(provider, entryPoint, unsigned);
+  let funding = {
+    sponsored: false,
+    fundingMode: 'self-funded',
+    userOperation: unsigned,
+    quote: null,
+    fallbackReason: null,
+  };
+  if (typeof options.discoverGasQuote === 'function') {
+    funding = await prepareWalletGasSponsorship420({
+      userOperation: unsigned,
+      entryPoint,
+      discoverQuote: options.discoverGasQuote,
+      hashUserOperation: (operation) => readEntryPointUserOpHash(provider, entryPoint, operation),
+      now: options.now,
+    });
+  }
+
+  const unsignedForSigning = normalizePackedUserOperation(funding.userOperation);
+  const userOpHash = funding.sponsored
+    ? normalizeHash(funding.userOpHash)
+    : await readEntryPointUserOpHash(provider, entryPoint, unsignedForSigning);
   const signature = normalizeSignature(await provider.request('personal_sign', [userOpHash, signer]));
-  const userOperation = { ...unsigned, signature };
+  const userOperation = { ...unsignedForSigning, signature };
   const simulation = await simulateSignedUserOperation(provider, signer, entryPoint, userOperation);
   return {
     ...sessionPreflight,
@@ -180,15 +201,23 @@ export async function prepareEntryPointTransport(provider, smartAccountState, se
     userOpHash,
     userOperation,
     signature,
+    gasSponsorship: {
+      sponsored: Boolean(funding.sponsored),
+      fundingMode: funding.fundingMode,
+      quote: funding.quote,
+      fallbackReason: funding.fallbackReason,
+      authority: funding.sponsored ? 'funding-only' : 'self-funded',
+      executionAuthorization: false,
+    },
     entryPointSimulation: simulation,
     broadcastReady: true,
     blockReason: null,
   };
 }
 
-export async function prepareSessionUserOperationTransport(provider, smartAccountState, sessionKey, request = {}) {
+export async function prepareSessionUserOperationTransport(provider, smartAccountState, sessionKey, request = {}, transportOptions = {}) {
   const preflight = await prepareSessionExecution(provider, smartAccountState, sessionKey, request);
-  return prepareEntryPointTransport(provider, smartAccountState, sessionKey, preflight);
+  return prepareEntryPointTransport(provider, smartAccountState, sessionKey, preflight, transportOptions);
 }
 
 export async function sendPreparedEntryPointUserOperation(provider, prepared) {
@@ -204,8 +233,8 @@ export async function sendPreparedEntryPointUserOperation(provider, prepared) {
   return { ...prepared, entryPointSimulation: resimulation, submitted: true, txHash };
 }
 
-export async function sendSessionUserOperation(provider, smartAccountState, sessionKey, request = {}) {
-  const prepared = await prepareSessionUserOperationTransport(provider, smartAccountState, sessionKey, request);
+export async function sendSessionUserOperation(provider, smartAccountState, sessionKey, request = {}, transportOptions = {}) {
+  const prepared = await prepareSessionUserOperationTransport(provider, smartAccountState, sessionKey, request, transportOptions);
   return sendPreparedEntryPointUserOperation(provider, prepared);
 }
 

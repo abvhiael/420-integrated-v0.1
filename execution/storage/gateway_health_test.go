@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"testing"
+	"time"
 )
 
 func TestGatewayHealthDegradesAndRecovers(t *testing.T) {
@@ -35,7 +36,7 @@ func TestGatewayHealthEndpointsAndMetricsIsolation(t *testing.T) {
 	service, metrics, _, err := NewGatewayHTTPServiceWithHealthObservability(
 		"127.0.0.1:0",
 		GatewayHTTPHandler{},
-		GatewayHTTPPolicy{MaxConcurrentRequests: 8, RateLimitRequests: 100, RateLimitWindow: defaultGatewayRateWindowForTest},
+		GatewayHTTPPolicy{MaxConcurrentRequests: 8, RateLimitRequests: 100, RateLimitWindow: time.Minute},
 		GatewayHTTPTransportPolicy{AllowedHosts: []string{"gateway.example"}},
 		health,
 		nil,
@@ -90,7 +91,7 @@ func TestGatewayReadinessReturns503WhenDegraded(t *testing.T) {
 	health := NewGatewayHealthTracker(1)
 	health.ObserveGatewayHTTP(context.Background(), GatewayHTTPObservation{StatusCode: http.StatusBadGateway})
 
-	recorder := newGatewayHTTPTestRecorder()
+	recorder := &gatewayResponseRecorder{header: make(http.Header)}
 	req, err := http.NewRequest(http.MethodGet, "http://gateway.example/readyz", nil)
 	if err != nil {
 		t.Fatal(err)

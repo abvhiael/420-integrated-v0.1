@@ -21,6 +21,9 @@ var (
 	gatewayMaxConcurrent = flag.Uint("gateway.max-concurrent-requests", 128, "maximum concurrent 420Gateway requests")
 	gatewayRateRequests  = flag.Uint("gateway.rate-limit-requests", 240, "maximum requests per client in each rate-limit window")
 	gatewayRateWindow    = flag.Duration("gateway.rate-limit-window", time.Minute, "per-client 420Gateway rate-limit window")
+	gatewayTLSCert       = flag.String("gateway.tls-cert", "", "TLS certificate file for 420Gateway HTTPS")
+	gatewayTLSKey        = flag.String("gateway.tls-key", "", "TLS private key file for 420Gateway HTTPS")
+	gatewayAllowedHosts  = flag.String("gateway.allowed-hosts", "", "comma-separated allowed Host values; required for non-loopback gateway exposure")
 )
 
 func newNodeGatewayService() (serviceRunner, error) {
@@ -49,9 +52,17 @@ func newNodeGatewayService() (serviceRunner, error) {
 	if len(router.Cache) == 0 && len(router.Store) == 0 {
 		return nil, errors.New("gateway requires at least one cache or store upstream")
 	}
-	return storage.NewGatewayHTTPServiceWithPolicy(*gatewayListen, storage.GatewayHTTPHandler{Router: router}, storage.GatewayHTTPPolicy{
+	var hosts []string
+	for _, host := range strings.Split(*gatewayAllowedHosts, ",") {
+		if host = strings.TrimSpace(host); host != "" { hosts = append(hosts, host) }
+	}
+	return storage.NewGatewayHTTPServiceWithTransport(*gatewayListen, storage.GatewayHTTPHandler{Router: router}, storage.GatewayHTTPPolicy{
 		MaxConcurrentRequests: uint32(*gatewayMaxConcurrent),
 		RateLimitRequests: uint32(*gatewayRateRequests),
 		RateLimitWindow: *gatewayRateWindow,
+	}, storage.GatewayHTTPTransportPolicy{
+		TLSCertFile: *gatewayTLSCert,
+		TLSKeyFile: *gatewayTLSKey,
+		AllowedHosts: hosts,
 	})
 }

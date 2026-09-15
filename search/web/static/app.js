@@ -49,7 +49,7 @@ function setNav(name) {
 }
 
 function renderError(err) {
-  route.innerHTML = `<div class="panel error"><strong>Search unavailable</strong><p>${esc(err.message)}</p></div>`;
+  route.innerHTML = `<div class="panel error"><strong>Search unavailable</strong><p>${esc(err.message)}</p><p class="muted">420Search fails closed when qualified source context cannot be established.</p></div>`;
 }
 
 function presentationFor(result) {
@@ -66,6 +66,28 @@ function metaValue(label, value, mono=false) {
   return `<span class="meta-pair"><span class="meta-label">${esc(label)}</span><span${mono ? ' class="mono"' : ''}>${esc(value)}</span></span>`;
 }
 
+function finalityBadge(value) {
+  const state = String(value || 'unknown').toLowerCase();
+  const label = state === 'finalized' ? 'Finalized' : state === 'safe' ? 'Safe' : state === 'head' ? 'Head' : 'Unknown finality';
+  return `<span class="badge trust-badge trust-${esc(state)}">${esc(label)}</span>`;
+}
+
+function authorityBadge(result) {
+  const authority = String(result?.provenance?.authority || '').trim();
+  return authority ? `<span class="badge authority-badge" title="Canonical authority: ${esc(authority)}">authority · ${esc(authority)}</span>` : '<span class="badge trust-unknown">authority unknown</span>';
+}
+
+function trustMeta(result) {
+  const p = result?.provenance || {};
+  return `<div class="trust-meta">
+    ${metaValue('Block', p.blockNumber)}
+    ${metaValue('Block hash', short(p.blockHash), true)}
+    ${metaValue('Tx', short(p.transactionHash), true)}
+    ${metaValue('Indexed height', p.indexedHeight)}
+    ${metaValue('Finalized height', p.finalizedHeight)}
+  </div>`;
+}
+
 function resultCard(result, sponsored=false) {
   const p = presentationFor(result);
   const title = result?.presentation?.title || result?.sourceKey || result?.id || 'Search result';
@@ -76,10 +98,11 @@ function resultCard(result, sponsored=false) {
   const sourceKey = result?.sourceKey || '';
   const href = canonicalHref(result);
   const campaign = result?._campaign || '';
+  const finality = result?.provenance?.finality || 'unknown';
   return `<article class="result result-${esc(p.family)}${sponsored ? ' result-sponsored' : ''}">
     <div class="result-icon" aria-hidden="true">${esc(p.icon)}</div>
     <div class="result-body">
-      <div class="result-kicker"><span class="badge domain-badge">${esc(p.label)}</span>${sponsored ? '<span class="badge sponsored-badge">Sponsored</span>' : ''}</div>
+      <div class="result-kicker"><span class="badge domain-badge">${esc(p.label)}</span>${finalityBadge(finality)}${authorityBadge(result)}${sponsored ? '<span class="badge sponsored-badge">Sponsored</span>' : ''}</div>
       <div class="result-title"><a href="${esc(href)}">${esc(title)}</a></div>
       ${subtitle ? `<div class="result-subtitle">${esc(subtitle)}</div>` : ''}
       ${snippet ? `<div class="result-snippet">${esc(snippet)}</div>` : ''}
@@ -89,9 +112,19 @@ function resultCard(result, sponsored=false) {
         ${metaValue('Category', category)}
         ${sponsored && campaign ? metaValue('Campaign', campaign) : ''}
       </div>
+      ${trustMeta(result)}
       <div class="result-actions"><a class="result-link" href="${esc(href)}">Open canonical view <span aria-hidden="true">→</span></a></div>
     </div>
   </article>`;
+}
+
+function snapshotBanner(snapshot) {
+  const indexed = Number(snapshot?.indexedHeight || 0);
+  const finalized = Number(snapshot?.finalizedHeight || 0);
+  const lag = Math.max(0, indexed - finalized);
+  const state = indexed === 0 ? 'unknown' : lag === 0 ? 'finalized' : lag <= 12 ? 'safe' : 'head';
+  const message = indexed === 0 ? 'Snapshot unavailable' : `snapshot ${indexed} · finalized ${finalized} · ${lag} block${lag===1?'':'s'} ahead of finality`;
+  return `<div class="snapshot-banner snapshot-${esc(state)}"><div><strong>${esc(message)}</strong><span>Search results are rebuildable projections. Canonical truth remains with the source protocol & chain.</span></div><span class="badge trust-${esc(state)}">${esc(state)}</span></div>`;
 }
 
 function renderResults(payload, append=false) {
@@ -103,13 +136,11 @@ function renderResults(payload, append=false) {
   const pager = payload.nextCursor ? '<div class="pager"><button id="load-more" type="button">Load more</button></div>' : '';
   if (append) {
     const organic = route.querySelector('.organic-section');
-    if (organic && results.length) {
-      organic.querySelector('.section-heading')?.insertAdjacentHTML('afterend', results.map(r => resultCard(r, false)).join(''));
-    }
+    if (organic && results.length) organic.querySelector('.section-heading')?.insertAdjacentHTML('afterend', results.map(r => resultCard(r, false)).join(''));
     route.querySelector('.pager')?.remove();
     route.insertAdjacentHTML('beforeend', pager);
   } else {
-    route.innerHTML = `<div class="panel results-panel">${html}</div>${pager}`;
+    route.innerHTML = `${snapshotBanner(payload.snapshot)}<div class="panel results-panel">${html}</div>${pager}`;
   }
   nextCursor = payload.nextCursor || null;
   document.querySelector('#load-more')?.addEventListener('click', () => runSearch(lastQuery, true));
@@ -138,9 +169,11 @@ async function refreshStatus() {
     const status = await api('/v1/status');
     statusPill.dataset.state = status.ok ? 'ready' : 'warn';
     statusPill.textContent = status.ok ? `ready · ${status.indexedHeight || 'indexed'}` : (status.state || 'degraded');
+    statusPill.title = status.ok ? `qualified projection · finalized ${status.finalizedHeight || 'unknown'}` : (status.reason || 'search degraded');
   } catch {
     statusPill.dataset.state = 'bad';
     statusPill.textContent = 'search unavailable';
+    statusPill.title = 'qualified source context unavailable';
   }
 }
 
@@ -156,7 +189,8 @@ async function statusView() {
   setNav('status');
   try {
     const s = await api('/v1/status');
-    route.innerHTML = `<div class="panel"><h2>Status</h2><div class="capability-grid"><div><span>State</span><strong>${esc(s.state)}</strong></div><div><span>Indexed height</span><strong>${esc(s.indexedHeight || '—')}</strong></div><div><span>Finalized height</span><strong>${esc(s.finalizedHeight || '—')}</strong></div><div><span>Availability</span><strong>${s.ok ? 'ready' : 'degraded'}</strong></div></div></div>`;
+    const trustState = s.ok ? 'qualified' : 'degraded';
+    route.innerHTML = `<div class="panel"><h2>Status</h2><div class="trust-callout ${s.ok ? 'trust-callout-ok' : 'trust-callout-warn'}"><strong>${esc(trustState)}</strong><span>420Search is non-canonical. It presents qualified source provenance and fails closed when source context is not trustworthy.</span></div><div class="capability-grid"><div><span>State</span><strong>${esc(s.state)}</strong></div><div><span>Indexed height</span><strong>${esc(s.indexedHeight || '—')}</strong></div><div><span>Finalized height</span><strong>${esc(s.finalizedHeight || '—')}</strong></div><div><span>Availability</span><strong>${s.ok ? 'ready' : 'degraded'}</strong></div></div>${s.reason ? `<p class="muted">Reason: ${esc(s.reason)}</p>` : ''}</div>`;
   } catch (err) { renderError(err); }
 }
 

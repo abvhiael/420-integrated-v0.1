@@ -85,8 +85,8 @@ Add bounded low-cardinality metrics, redacted operational status, sponsor/deposi
 
 GAS-10 progress:
 - **GAS-10.1 — COMPLETE / QUALIFIED** bounded low-cardinality metrics and redacted, explicitly non-authoritative operational status. Exact head `06c850091e70cf6af9060a2a7d10e8151b390322`; 420Gas #38, 420Docs #1141 and Integrated #3387 passed.
-- **GAS-10.2 — ACTIVE** sponsor/deposit readiness evaluation from observed deposit/reservation inputs with deterministic `ready`, `degraded`, and `not-ready` classification. Readiness is `telemetry-only`; it does not authorize sponsorship or replace canonical EntryPoint/paymaster accounting.
-- **GAS-10.3** bounded settlement journal projection for diagnosis/reconciliation, with canonical on-chain settlement remaining authoritative.
+- **GAS-10.2 — COMPLETE / QUALIFIED** sponsor/deposit readiness evaluation from observed deposit/reservation inputs with deterministic `ready`, `degraded`, and `not-ready` classification. Exact head `2a67d859e23be4a73668c1cd1e1d3a1e2ad3c3e3`; 420Gas #40, 420Docs #1146 and Integrated #3394 passed. Readiness remains `telemetry-only`; it does not authorize sponsorship or replace canonical EntryPoint/paymaster accounting.
+- **GAS-10.3 — ACTIVE** bounded settlement journal projection for diagnosis/reconciliation. Journal entries retain only bounded opaque settlement commitments and observed reservation/cost/outcome/confirmation data, flag observed cost-over-reservation discrepancies, and expose projection-only summaries. Canonical on-chain EntryPoint/paymaster settlement remains authoritative.
 - **GAS-10.4** recovery/degraded-mode state machine for signer, sponsor-funding and settlement-observation failures.
 - **GAS-10.5** health/readiness API projections with secret redaction and stable machine-readable reason codes.
 - **GAS-10.6** adversarial observability/recovery closeout, roadmap update, exact-head qualification, reconciliation and merge.

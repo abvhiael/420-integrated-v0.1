@@ -12,6 +12,8 @@ import (
 
 var (
 	cacheEnabled    = flag.Bool("cache", false, "enable 420Cache reconciliation service")
+	cacheListen     = flag.String("cache.listen", "127.0.0.1:8421", "420Cache HTTP listen address")
+	cacheOriginURL  = flag.String("cache.origin", "", "optional upstream 420Cache/420Gateway origin URL")
 	cacheMaxBytes   = flag.Uint64("cache.max-bytes", 1<<30, "maximum local cache bytes")
 	cacheMaxEntries = flag.Uint("cache.max-entries", 4096, "maximum local cache entries")
 	cacheTTL        = flag.Duration("cache.ttl", 30*time.Minute, "default local cache TTL")
@@ -34,7 +36,14 @@ func newNodeCacheService(datadir, rpcURL string, contracts storage.RPCStorageCon
 	}}
 	reconciler, err := storage.NewCacheReconcileService(persistent, canonical, *cacheInterval, *cacheMinBackoff, *cacheMaxBackoff)
 	if err != nil { return nil, err }
-	return storage.NewCacheRuntimeService(reconciler)
+	runtime, err := storage.NewCacheRuntimeService(reconciler)
+	if err != nil { return nil, err }
+	var origin storage.CacheOrigin
+	if *cacheOriginURL != "" { origin = storage.HTTPCacheOrigin{BaseURL:*cacheOriginURL} }
+	handler := storage.CacheHTTPHandler{Runtime:persistent, Reconciler:reconciler, Origin:origin, TTL:*cacheTTL}
+	transport, err := storage.NewCacheHTTPService(*cacheListen, handler)
+	if err != nil { return nil, err }
+	return serviceGroup{services:[]serviceRunner{runtime, transport}}, nil
 }
 
 type serviceGroup struct { services []serviceRunner }

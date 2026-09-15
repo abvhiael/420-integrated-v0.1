@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "id_format": "CTX-<DOMAIN>-<NNN>",
+  "allowed_target_types": ["task", "concept", "reference", "troubleshooting"],
+  "allowed_audiences": ["user", "developer", "operator"],
+  "allowed_environments": ["development", "genesis", "testnet", "mainnet"],
+  "records": {
+    "CTX-DOCS-001": {
+      "status": "active",
+      "source_surfaces": ["420docs", "wallet", "dapp"],
+      "target_type": "concept",
+      "audience": ["user", "developer", "operator"],
+      "environments": ["development", "genesis"],
+      "target": {"path": "contextual/index.md"},
+      "aliases": []
+    },
+    "CTX-WALLET-001": {"status":"active","source_surfaces":["420-wallet"],"target_type":"task","audience":["user"],"environments":["development","genesis"],"target":{"path":"users/wallet/setup-import-and-protection.md"},"aliases":[]},
+    "CTX-WALLET-002": {"status":"active","source_surfaces":["420-wallet"],"target_type":"task","audience":["user"],"environments":["development","genesis"],"target":{"path":"users/wallet/send-receive-and-activity.md"},"aliases":[]},
+    "CTX-WALLET-003": {"status":"active","source_surfaces":["420-wallet"],"target_type":"troubleshooting","audience":["user"],"environments":["development","genesis"],"target":{"path":"users/wallet/troubleshooting.md"},"aliases":[]},
+    "CTX-WALLET-004": {"status":"active","source_surfaces":["420-wallet"],"target_type":"task","audience":["user"],"environments":["development","genesis"],"target":{"path":"users/wallet/dapp-connections.md"},"aliases":[]},
+    "CTX-WALLET-005": {"status":"active","source_surfaces":["420-wallet"],"target_type":"task","audience":["user"],"environments":["development","genesis"],"target":{"path":"users/wallet/signing-and-transaction-review.md"},"aliases":[]},
+    "CTX-WALLET-006": {"status":"active","source_surfaces":["420-wallet"],"target_type":"task","audience":["user"],"environments":["development","genesis"],"target":{"path":"users/wallet/permissions-and-sessions.md"},"aliases":[]},
+    "CTX-WALLET-007": {"status":"active","source_surfaces":["420-wallet"],"target_type":"task","audience":["user"],"environments":["development","genesis"],"target":{"path":"users/wallet/recovery-and-device-safety.md"},"aliases":[]},
+    "CTX-WALLET-008": {"status":"active","source_surfaces":["420-wallet"],"target_type":"concept","audience":["user"],"environments":["development","genesis"],"target":{"path":"users/wallet/index.md"},"aliases":[]},
+    "CTX-TRB-001": {
+      "status": "active",
+      "source_surfaces": ["wallet", "dapp", "cli", "operator"],
+      "target_type": "troubleshooting",
+      "audience": ["user", "developer", "operator"],
+      "environments": ["development", "genesis"],
+      "target": {"path": "troubleshooting/search-diagnostics-support.md", "anchor": "stable-deep-link-contract-for-doc-14"},
+      "aliases": []
+    },
+    "CTX-DEV-001": {"status":"active","source_surfaces":["sdk","cli","developer-hub"],"target_type":"reference","audience":["developer"],"environments":["development","genesis"],"target":{"path":"developers/index.md"},"aliases":[]},
+    "CTX-DEV-002": {"status":"active","source_surfaces":["sdk","cli","developer-hub","rpc-console"],"target_type":"reference","audience":["developer"],"environments":["development","genesis"],"target":{"path":"developers/contracts-and-interfaces.md"},"aliases":[]},
+    "CTX-DEV-003": {"status":"active","source_surfaces":["cli","developer-hub","deployment-tool"],"target_type":"task","audience":["developer","operator"],"environments":["development","genesis"],"target":{"path":"developers/deployment-workflow.md"},"aliases":[]},
+    "CTX-DEV-004": {"status":"active","source_surfaces":["sdk","cli","developer-hub","rpc-console"],"target_type":"task","audience":["developer","operator"],"environments":["development","genesis"],"target":{"path":"developers/diagnostics-and-correlation.md"},"aliases":[]},
+    "CTX-DEV-005": {"status":"active","source_surfaces":["sdk","cli","rpc-console","gateway"],"target_type":"task","audience":["developer","operator"],"environments":["development","genesis"],"target":{"path":"developers/api-fallback-and-reliability.md"},"aliases":[]},
+    "CTX-DEV-006": {"status":"active","source_surfaces":["sdk","cli","developer-hub","rpc-console"],"target_type":"reference","audience":["developer","operator"],"environments":["development","genesis"],"target":{"path":"reference/index.md"},"aliases":[]},
+    "CTX-DEV-007": {"status":"active","source_surfaces":["sdk","cli","developer-hub","rpc-console"],"target_type":"reference","audience":["developer","operator"],"environments":["development","genesis"],"target":{"path":"developers/networks-and-manifests.md"},"aliases":[]},
+    "CTX-DEV-008": {"status":"active","source_surfaces":["sdk","cli","rpc-console","indexer-client"],"target_type":"concept","audience":["developer","operator"],"environments":["development","genesis"],"target":{"path":"developers/events-and-finality.md"},"aliases":[]},
+    "CTX-OPS-001": {"status":"active","source_surfaces":["operator","monitoring","node-admin"],"target_type":"task","audience":["operator"],"environments":["development","genesis"],"target":{"path":"developers/diagnostics-and-correlation.md"},"aliases":[]},
+    "CTX-OPS-002": {"status":"active","source_surfaces":["operator","monitoring","node-admin"],"target_type":"troubleshooting","audience":["operator"],"environments":["development","genesis"],"target":{"path":"troubleshooting/consensus-validator-node.md"},"aliases":[]},
+    "CTX-OPS-003": {"status":"active","source_surfaces":["operator","monitoring","status-dashboard"],"target_type":"troubleshooting","audience":["operator"],"environments":["development","genesis"],"target":{"path":"troubleshooting/indexer-explorer-search-analytics-status.md"},"aliases":[]},
+    "CTX-OPS-004": {"status":"active","source_surfaces":["operator","monitoring","rpc-console"],"target_type":"troubleshooting","audience":["operator"],"environments":["development","genesis"],"target":{"path":"troubleshooting/chain-rpc-transactions.md"},"aliases":[]}
+  }
+}

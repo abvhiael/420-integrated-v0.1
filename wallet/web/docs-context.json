@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "canonical_base_url": "https://abvhiael.github.io/420-integrated-v0.1/",
+  "published_environments": ["development", "genesis"],
+  "cross_environment_fallback": false,
+  "cross_release_fallback": false,
+  "records": {
+    "CTX-WALLET-001": "users/wallet/setup-import-and-protection.md",
+    "CTX-WALLET-002": "users/wallet/send-receive-and-activity.md",
+    "CTX-WALLET-003": "users/wallet/troubleshooting.md",
+    "CTX-WALLET-004": "users/wallet/dapp-connections.md",
+    "CTX-WALLET-005": "users/wallet/signing-and-transaction-review.md",
+    "CTX-WALLET-006": "users/wallet/permissions-and-sessions.md",
+    "CTX-WALLET-007": "users/wallet/recovery-and-device-safety.md",
+    "CTX-WALLET-008": "users/wallet/index.md"
+  }
+}

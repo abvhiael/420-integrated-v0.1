@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "phase": "DOC-15.10",
+  "status": "complete",
+  "covered_flows": {
+    "user": ["task-guidance", "concept-explanation", "navigation", "troubleshooting"],
+    "developer": ["reference-lookup", "task-guidance", "troubleshooting", "generated-reference"],
+    "operator": ["troubleshooting", "reference-lookup", "network-version-context"],
+    "historical": ["genesis/genesis"],
+    "generated_reference": ["development-only-with-provenance"],
+    "contextual_navigation": ["CTX-* navigation-hints"],
+    "troubleshooting_ids": ["TRB-* exact-routing"]
+  },
+  "published_contexts": ["development/current", "genesis/current", "genesis/genesis"],
+  "deliberate_unavailable_contexts": ["testnet/current", "mainnet/current"],
+  "deliberate_unsupported_classes": [
+    "live-runtime-state-proof-from-static-documentation",
+    "undocumented-system-behavior",
+    "secret-dependent-support",
+    "cross-environment-fallback",
+    "implicit-cross-release-fallback",
+    "uncited-concrete-ecosystem-claims",
+    "provider-or-model-as-authority"
+  ],
+  "required_answer_properties": [
+    "grounded-in-registered-sources",
+    "claim-level-citations",
+    "environment-version-bound",
+    "privacy-minimized",
+    "fail-closed-on-insufficient-evidence"
+  ],
+  "closeout_gate": {
+    "main_reconciliation_required": true,
+    "exact_head_420docs_required": true,
+    "exact_head_420_integrated_required": true,
+    "merge_only_when_green": true
+  }
+}

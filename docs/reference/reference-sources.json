@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "1.0.0",
+  "families": [
+    {
+      "id": "contracts",
+      "phase": "DOC-10.2",
+      "sources": ["developer-hub/src/contract-catalogue.mjs", "developer-hub/catalogue/local.example.json", "contracts/src"],
+      "notes": "Distributable ABI/NatSpec output requires verified artifact/catalogue provenance; the checked-in catalogue is local example scope only."
+    },
+    {
+      "id": "events-errors",
+      "phase": "DOC-10.3",
+      "sources": ["developer-hub/src/contract-catalogue.mjs", "contracts/src"],
+      "notes": "Generate contract events/custom errors only from verified ABI/artifact inputs."
+    },
+    {
+      "id": "rpc",
+      "phase": "DOC-10.4",
+      "sources": ["420-rpc/src/methods.ts", "420-rpc/src/request-policy.ts"],
+      "notes": "Public 420RPC compatibility and request-policy reference only; private Engine/admin/personal/debug/miner/txpool and node-managed account/signing surfaces remain excluded."
+    },
+    {
+      "id": "indexer-api",
+      "phase": "DOC-10.5",
+      "sources": ["420-indexer/src/api-contract.ts", "420-indexer/src/api-surface.ts", "420-indexer/src/http-transport.ts", "420-indexer/src/query-layer.ts", "420-indexer/src/operational-api.ts"],
+      "notes": "Stable public read API only. 420Indexer projections remain derived, rebuildable and non-authoritative; generated reference must preserve authoritative:false and readiness/finality provenance."
+    },
+    {
+      "id": "sdk-cli",
+      "phase": "DOC-10.6",
+      "sources": ["packages/420-sdk/package.json", "packages/420-sdk/src/index.ts", "packages/420-sdk/src/wallet.ts", "packages/420-cli/package.json", "packages/420-cli/bin/420.mjs"],
+      "notes": "Generated SDK/CLI reference must preserve signer-secret isolation and non-authority boundaries."
+    },
+    {
+      "id": "networks",
+      "phase": "DOC-10.7",
+      "sources": ["developer-hub/manifests/local.example.json", "developer-hub/schema/network-manifest.schema.json", "developer-hub/src/network-discovery.mjs"],
+      "notes": "Environment-scoped only. The only checked-in manifest is local.example.json; generated reference must report devnet/testnet/mainnet as unavailable rather than promoting local chain identity, localhost endpoints or example contracts into those environments."
+    },
+    {
+      "id": "deployments",
+      "phase": "DOC-10.8",
+      "sources": ["developer-hub/catalogue/local.example.json", "developer-hub/deployment/request.example.json", "developer-hub/release/release-candidate.example.json", "developer-hub/src/deployment-control.mjs", "developer-hub/src/verification-control.mjs"],
+      "notes": "Canonical deployment publication requires evidence beyond plans/examples: canonical RPC-confirmed deployment receipt plus verified artifact/runtime evidence and approved registration/catalogue provenance. Current checked-in deployment, release and catalogue records are example-scoped and must not be promoted as canonical deployments."
+    }
+  ]
+}

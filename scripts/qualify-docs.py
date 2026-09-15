@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Qualify the built 420Docs site for navigation and search discoverability."""
+"""Qualify the built 420Docs site for navigation, search and version publication safety."""
 
 from __future__ import annotations
 
 import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -37,6 +38,16 @@ def normalized_location(value: str) -> str:
     if value.endswith("index.html"):
         value = value[: -len("index.html")]
     return value.strip("/")
+
+
+def qualify_version_publication() -> None:
+    result = subprocess.run(
+        [sys.executable, "scripts/validate-doc-versioning-ci.py", "--site-dir", "site"],
+        cwd=ROOT,
+        check=False,
+    )
+    if result.returncode != 0:
+        fail("versioning publication-safety qualification failed")
 
 
 def main() -> None:
@@ -90,9 +101,11 @@ def main() -> None:
     if missing_markers:
         fail("README is missing documentation entry points: " + ", ".join(missing_markers))
 
+    qualify_version_publication()
+
     print(
         "420Docs qualification PASS: strict build output, audience navigation, "
-        "search indexing, and repository discoverability are present."
+        "search indexing, repository discoverability and version publication safety are present."
     )
 
 

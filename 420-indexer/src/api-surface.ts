@@ -19,12 +19,14 @@ import {
   indexerReadiness420,
   indexerStatus420,
   type IndexerHealthDto420,
+  type IndexerOperationalContext420,
   type IndexerReadinessDto420,
   type IndexerStatusDto420
 } from './operational-api.js';
 import type { FinalityPolicy420 } from './indexing.js';
 import type { QueryRow420 } from './query-service.js';
 import { IndexerQueryService420 } from './query-service.js';
+import type { IndexerRuntimeState420 } from './runtime-state.js';
 
 export const INDEXER_API_VERSION_420 = 'v1' as const;
 
@@ -57,6 +59,12 @@ export interface SearchResult420 {
   type: string;
   key: string;
   value: string;
+}
+
+export interface IndexerPublicApiOperationalOptions420 {
+  runtimeState?: IndexerRuntimeState420;
+  maxIngestStaleMs?: number;
+  now?: () => number;
 }
 
 export interface IndexerPublicApi420 {
@@ -92,19 +100,29 @@ export class IndexerPublicApiAdapter420 implements IndexerPublicApi420 {
 
   constructor(
     readonly service: IndexerQueryService420,
-    readonly finalityPolicy: FinalityPolicy420 = { mode: 'head' }
+    readonly finalityPolicy: FinalityPolicy420 = { mode: 'head' },
+    readonly operational: IndexerPublicApiOperationalOptions420 = {}
   ) {}
+
+  private operationalContext(): IndexerOperationalContext420 {
+    if (!this.operational.runtimeState) return {};
+    return {
+      runtime: this.operational.runtimeState.snapshot(),
+      nowMs: this.operational.now?.() ?? Date.now(),
+      maxIngestStaleMs: this.operational.maxIngestStaleMs ?? 60_000
+    };
+  }
 
   async health(): Promise<IndexerHealthDto420> {
     return indexerHealth420();
   }
 
   readiness(chainId: bigint): Promise<IndexerReadinessDto420> {
-    return indexerReadiness420(this.service, chainId);
+    return indexerReadiness420(this.service, chainId, this.operationalContext());
   }
 
   status(chainId: bigint): Promise<IndexerStatusDto420> {
-    return indexerStatus420(this.service, chainId, this.finalityPolicy);
+    return indexerStatus420(this.service, chainId, this.finalityPolicy, this.operationalContext());
   }
 
   blocks(chainId: bigint, request: PageRequest420 = {}): Promise<QueryPage420<BlockDto420>> {

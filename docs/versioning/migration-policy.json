@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "legacy_flat_routes": "compatibility-only",
+  "missing_page_behavior": "not-found",
+  "cross_environment_mapping": false,
+  "cross_release_mapping": false,
+  "automatic_current_fallback": false,
+  "require_explicit_mappings": true,
+  "preserve_equivalent_anchors": true,
+  "preserve_troubleshooting_ids": true,
+  "mappings": [],
+  "retired_routes": []
+}

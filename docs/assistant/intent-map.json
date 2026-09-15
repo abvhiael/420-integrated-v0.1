@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "primary_intents": [
+    "task-guidance",
+    "concept-explanation",
+    "reference-lookup",
+    "troubleshooting",
+    "navigation"
+  ],
+  "states": ["ready", "needs-context", "unsupported"],
+  "audiences": ["user", "developer", "operator"],
+  "contextual_target_type_map": {
+    "task": "task-guidance",
+    "concept": "concept-explanation",
+    "reference": "reference-lookup",
+    "troubleshooting": "troubleshooting"
+  },
+  "precedence": [
+    "exact-troubleshooting-id",
+    "exact-active-contextual-id",
+    "explicit-user-intent",
+    "conservative-semantic-inference",
+    "needs-context"
+  ],
+  "supported_signals": {
+    "troubleshooting_id_pattern": "^TRB-[A-Z0-9]+-[0-9]{3}$",
+    "contextual_id_pattern": "^CTX-[A-Z0-9]+-[0-9]{3}$"
+  },
+  "needs_context_when": [
+    "environment materially changes the answer",
+    "release materially changes the answer",
+    "component identity is ambiguous",
+    "task versus explanation changes safety guidance",
+    "multiple troubleshooting conditions remain plausible"
+  ],
+  "unsupported_when": [
+    "static documentation is asked to prove live runtime state",
+    "assistant is asked to authorize a state-changing or signing action",
+    "requested documentation environment is unpublished",
+    "requested ecosystem behavior is undocumented"
+  ]
+}

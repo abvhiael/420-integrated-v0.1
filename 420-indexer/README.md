@@ -49,25 +49,41 @@ Implemented:
 
 Query contracts are chain-scoped and operate only on rebuildable index projections. Canonical protocol state remains on-chain.
 
-## IDX-7 — public/index-consumer API — IDX-7.4 complete
+## IDX-7 — public/index-consumer API — complete
 
 IDX-7 exposes the stable v1 consumer boundary for 420Explorer, 420Search, 420Analytics, 420Wallet, 420Notifications, and the Developer Hub.
 
-The completed IDX-7.4 surface includes:
-
-- stable typed DTOs for blocks, transactions, addresses, receipts, logs, asset transfers, protocol events, and protocol-object state;
-- versioned JSON envelopes with a stable public adapter boundary;
-- direct block, transaction, receipt, address, and protocol-object routes;
-- paged blocks, transactions, logs, asset transfers, and protocol-event routes;
-- bounded search;
-- `/health`, `/ready`, and `/v1/status` operational surfaces;
-- indexed-head and finality metadata explicitly marked `authoritative: false`;
-- an exported `INDEXER_V1_ROUTES_420` consumer route contract;
-- client-validation errors separated from backend failures (`400` vs generic `500`);
-- bounded direct-resource path parameters;
-- consumer contract, transport, DTO, operational, and regression test coverage.
+The completed IDX-7.4 surface includes stable typed DTOs, versioned JSON envelopes, direct-resource routes, paged feeds, bounded search, operational surfaces, indexed-head/finality metadata marked `authoritative: false`, exported route contracts, bounded path parameters, and consumer/transport/DTO regression coverage.
 
 See `docs/420INDEXER-API-V1.md` for the complete route table and stability contract.
+
+## IDX-8 — notification/event-stream delivery — complete
+
+IDX-8 provides replayable, non-authoritative notification delivery primitives over the qualified public projection API, including replayable event envelopes, private subscription matching, retry-safe delivery, canonicality signals and the 420Notifications adapter.
+
+See `docs/420NOTIFICATIONS.md` for the notification integration, privacy, replay and reliability contract.
+
+## IDX-9 — operational hardening — complete
+
+Completed slices:
+
+- **IDX-9.1 — runtime lifecycle and readiness:** explicit starting/serving/draining/failed state, stale-ingest detection, source-head lag reporting, and fail-closed readiness semantics.
+- **IDX-9.2 — graceful shutdown and bounded work:** stop admission before shutdown, drain already accepted work, reject new ingest runs during drain, preserve the existing per-run block bound, enforce a hard drain deadline, and fail runtime closed on shutdown timeout.
+- **IDX-9.3 — observability and operational telemetry:** aggregate non-authoritative telemetry for ingest, reorgs, lag, work pressure and delivery state without private payload leakage.
+- **IDX-9.4 — durable recovery invariants:** persistent SQL canonical-history storage, SQL-backed checkpoint/history readers, atomic projection + checkpoint + canonical-history advancement through `DurableBlockConsumer420`, and atomic reorg rollback/history truncation/checkpoint reset when the durable consumer path is available. Legacy non-durable consumers remain supported for tests and adapters that intentionally use external stores.
+- **IDX-9.5 — failure injection and recovery qualification:** deterministic fault coverage for process restart/resume, RPC outage, stale ingestion, database interruption, bounded canonical reorg recovery and deep-reorg fail-closed behavior. Dedicated IDX-9.2–IDX-9.4 suites continue to qualify shutdown timeout, bounded work, notification retry/dead-letter behavior and durable SQL recovery-store reads. `docs/420INDEXER-RECOVERY.md` defines operator actions and safe recovery criteria for restart, RPC/source outages, stale heads, DB failures, bounded/deep reorgs, shutdown timeout and notification-provider failures.
+
+`/health` remains a process-liveness probe; `/ready` is the traffic-admission gate when runtime state is supplied. Runtime, shutdown, telemetry and recovery metadata remain off-chain service state and never replace canonical chain authority.
+
+## IDX-10 — testnet qualification — implementation complete
+
+- **IDX-10.1 — qualification environment and harness contract:** implemented. The runner pins chain ID, genesis hash, RPC endpoint, finality mode, sustained-block target, bounded reorg depth and restart-replay window; malformed or inconsistent configuration fails closed.
+- **IDX-10.2 — live RPC ingest/indexing smoke:** harness implemented. It verifies chain/genesis identity before writes, derives the configured safe head, requires the full sustained safe-block window, runs that exact window through `IndexerIngestor420`, and requires exact checkpoint advancement. Live testnet evidence remains deployment-time.
+- **IDX-10.3 — restart, replay and bounded reorg qualification:** implemented. Restart qualification requires an existing durable checkpoint, rejects catch-up beyond the configured replay window, advances through the production ingestor, then requires a repeated restart at the same safe head to be a no-op. Reorg qualification exercises the durable rollback path, bounded ancestor recovery and deterministic branch replay; deep reorgs fail closed before rollback or checkpoint movement.
+- **IDX-10.4 — public API and consumer integration qualification:** implemented. The qualifier requires healthy v1 operational metadata, traffic-admitting readiness, a non-authoritative status surface whose indexed head covers the configured witness block, direct block/transaction/receipt/address/protocol-object witnesses, non-empty block/transaction/log/asset/protocol feeds, bounded search evidence, and replayable notification/event-stream output carrying canonical provenance and `authoritative: false` metadata. Live witness evidence remains deployment-time.
+- **IDX-10.5 — readiness report/operator closeout:** implemented. `buildTestnetCloseoutReport420` reconciles IDX-10.2–10.4 reports, exact node/indexer revisions, live qualification flags, descriptor-manifest qualification and compiled-artifact digests into one non-authoritative go/no-go report. Missing live evidence, missing revisions, missing qualified artifact digests or internally inconsistent phase evidence produce `no-go` blockers rather than an inferred launch approval.
+
+See `docs/420INDEXER-TESTNET.md` for the qualification contract and required evidence.
 
 ## Authority boundary
 
@@ -75,8 +91,8 @@ See `docs/420INDEXER-API-V1.md` for the complete route table and stability contr
 
 ## RPC dependency
 
-420Indexer does not depend on a dedicated 420RPC implementation. It consumes conventional EVM JSON-RPC behind `ChainSource420`. A future 420RPC adapter can satisfy the same source contract without changing indexing semantics.
+420Indexer consumes conventional EVM JSON-RPC behind `ChainSource420`; a future 420RPC adapter can satisfy the same source contract without changing indexing semantics.
 
 ## Next phase
 
-After IDX-7 closeout, continue with IDX-8 notification/event-stream delivery over the qualified public projection surface, followed by IDX-9 operational hardening and IDX-10 testnet qualification.
+IDX-10 implementation is complete. The branch still requires final CI/reconciliation before merge. Actual testnet closeout remains intentionally `no-go` until live IDX-10.2/10.3/10.4 evidence, exact deployed revisions, concrete witness data, and artifact-backed genesis descriptor qualification are supplied. After the Indexer PR is reconciled and merged, the infrastructure roadmap proceeds to 420RPC.

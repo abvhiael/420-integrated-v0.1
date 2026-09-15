@@ -123,6 +123,10 @@ type gatewayResponseRecorder struct {
 	bytes  int64
 }
 
+func (r *gatewayResponseRecorder) Unwrap() http.ResponseWriter {
+	return r.ResponseWriter
+}
+
 func (r *gatewayResponseRecorder) WriteHeader(status int) {
 	if r.status != 0 {
 		return

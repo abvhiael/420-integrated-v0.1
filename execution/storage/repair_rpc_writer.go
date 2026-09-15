@@ -2,7 +2,6 @@ package storage
 
 import (
 	"context"
-	"encoding/binary"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -147,7 +146,6 @@ func (w RPCRepairLifecycleWriter) reservationActive(ctx context.Context,id [32]b
 func (w RPCRepairLifecycleWriter) placementAt(ctx context.Context,manifest [32]byte,index uint32)([][32]byte,error){ raw,err:=w.Backend.EthCall(ctx,w.Contracts.Manifest,calldata("placementAt(bytes32,uint32)",manifest,uintWord(uint64(index))),"latest"); if err!=nil{return nil,err}; return abiWords(raw,8) }
 
 func fixedCalldata(signature string, words ...[32]byte) []byte { sig:=keccak256([]byte(signature)); out:=make([]byte,4+32*len(words)); copy(out[:4],sig[:4]); for i,w:=range words{copy(out[4+i*32:4+(i+1)*32],w[:])}; return out }
-func uintWord(v uint64) [32]byte { var w [32]byte; binary.BigEndian.PutUint64(w[24:],v); return w }
 func addressWord(v string) [32]byte { var w [32]byte; s:=strings.TrimPrefix(strings.ToLower(strings.TrimSpace(v)),"0x"); b,_:=hex.DecodeString(s); copy(w[12:],b); return w }
 func mustBytes32(v string) [32]byte { w,err:=bytes32Arg(v); if err!=nil { return [32]byte{} }; return w }
 func repairNonce(intent RepairExecutionIntent) [32]byte { return keccak256([]byte(fmt.Sprintf("420/REPAIR/AGREEMENT/V1|%s|%d|%s",strings.ToLower(intent.ManifestID),intent.Shard.ShardIndex,strings.ToLower(intent.Candidate.NodeID)))) }

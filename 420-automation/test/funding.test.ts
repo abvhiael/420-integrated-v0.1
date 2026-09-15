@@ -1,6 +1,10 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { authorizeAutomationFunding420, validateAutomationExecutionBudget420 } from '../src/index.js';
+import {
+  automationFundingPlanDigest420,
+  authorizeAutomationFunding420,
+  validateAutomationExecutionBudget420,
+} from '../src/index.js';
 import type { AutomationExecutionBudget420, AutomationTransactionPlan420 } from '../src/index.js';
 
 const plan: AutomationTransactionPlan420 = {
@@ -30,6 +34,16 @@ const budget: AutomationExecutionBudget420 = {
 
 const funding = { jobId: plan.jobId, availableBalanceWei: 2_000n, allowanceWei: 2_000n, observedAtMs: 1_000 };
 const feeQuote = { maxFeePerGasWei: 10n, maxPriorityFeePerGasWei: 2n, observedAtMs: 1_000 };
+const sponsorshipDigest = `0x${'dd'.repeat(32)}`;
+const paymasterQuote = (overrides = {}) => ({
+  paymasterId: '420gas.alpha',
+  sponsoredGasWei: 5_000n,
+  quoteId: 'quote-1',
+  expiresAtMs: 2_000,
+  planDigest: automationFundingPlanDigest420(plan),
+  sponsorshipDigest,
+  ...overrides,
+});
 
 test('AUT-5 authorizes a bounded worker-funded execution', () => {
   const auth = authorizeAutomationFunding420({ plan, budget, funding, feeQuote, nowMs: 1_100 });
@@ -38,6 +52,8 @@ test('AUT-5 authorizes a bounded worker-funded execution', () => {
   assert.equal(auth.reimbursementCeilingWei, 800n);
   assert.equal(auth.workerRequiredWei, 1_100n);
   assert.equal(auth.paymasterSponsoredWei, 0n);
+  assert.equal(auth.paymasterPlanDigest, null);
+  assert.equal(auth.sponsorshipDigest, null);
   assert.match(auth.authorizationDigest, /^0x[0-9a-f]{64}$/);
 });
 
@@ -58,7 +74,7 @@ test('AUT-5 rejects insufficient balance or allowance before execution', () => {
   assert.throws(() => authorizeAutomationFunding420({ plan, budget, funding: { ...funding, allowanceWei: 1_099n }, feeQuote, nowMs: 1_100 }), /AUT5_INSUFFICIENT_ALLOWANCE/);
 });
 
-test('AUT-5 enforces paymaster identity, expiry and bounded sponsorship', () => {
+test('GAS-8 paymaster quote is bound to the exact Automation execution plan and 420Gas digest', () => {
   const pmBudget: AutomationExecutionBudget420 = { ...budget, mode: 'paymaster', paymasterId: '420gas.alpha' };
   const auth = authorizeAutomationFunding420({
     plan,
@@ -66,14 +82,49 @@ test('AUT-5 enforces paymaster identity, expiry and bounded sponsorship', () => 
     funding: { ...funding, availableBalanceWei: 100n, allowanceWei: 100n },
     feeQuote,
     nowMs: 1_100,
-    paymasterQuote: { paymasterId: '420gas.alpha', sponsoredGasWei: 5_000n, quoteId: 'quote-1', expiresAtMs: 2_000 },
+    paymasterQuote: paymasterQuote(),
   });
   assert.equal(auth.paymasterSponsoredWei, 1_000n);
   assert.equal(auth.workerRequiredWei, 100n);
   assert.equal(auth.paymasterQuoteId, 'quote-1');
+  assert.equal(auth.paymasterPlanDigest, automationFundingPlanDigest420(plan));
+  assert.equal(auth.sponsorshipDigest, sponsorshipDigest);
+});
+
+test('GAS-8 rejects sponsorship replay onto a different occurrence, target, calldata, value, gas or intent', () => {
+  const pmBudget: AutomationExecutionBudget420 = { ...budget, mode: 'paymaster', paymasterId: '420gas.alpha' };
+  const quote = paymasterQuote();
+  const mutations: AutomationTransactionPlan420[] = [
+    { ...plan, occurrenceId: `0x${'01'.repeat(32)}` },
+    { ...plan, to: '0x9999999999999999999999999999999999999999' },
+    { ...plan, data: '0xdeadbeef' },
+    { ...plan, valueWei: 99n },
+    { ...plan, gasLimit: 99n },
+    { ...plan, intentDigest: `0x${'ee'.repeat(32)}` },
+  ];
+  for (const mutatedPlan of mutations) {
+    assert.throws(() => authorizeAutomationFunding420({
+      plan: mutatedPlan,
+      budget: pmBudget,
+      funding: { ...funding, jobId: mutatedPlan.jobId },
+      feeQuote,
+      nowMs: 1_100,
+      paymasterQuote: quote,
+    }), /GAS8_PLAN_BINDING_MISMATCH/);
+  }
+});
+
+test('GAS-8 rejects malformed sponsorship binding evidence', () => {
+  const pmBudget: AutomationExecutionBudget420 = { ...budget, mode: 'paymaster', paymasterId: '420gas.alpha' };
+  assert.throws(() => authorizeAutomationFunding420({ plan, budget: pmBudget, funding, feeQuote, nowMs: 1_100, paymasterQuote: paymasterQuote({ planDigest: '0x12' }) }), /GAS8_PLAN_DIGEST_INVALID/);
+  assert.throws(() => authorizeAutomationFunding420({ plan, budget: pmBudget, funding, feeQuote, nowMs: 1_100, paymasterQuote: paymasterQuote({ sponsorshipDigest: '0x12' }) }), /GAS8_SPONSORSHIP_DIGEST_INVALID/);
+});
+
+test('AUT-5 enforces paymaster identity, expiry and bounded sponsorship', () => {
+  const pmBudget: AutomationExecutionBudget420 = { ...budget, mode: 'paymaster', paymasterId: '420gas.alpha' };
   assert.throws(() => authorizeAutomationFunding420({ plan, budget: pmBudget, funding, feeQuote, nowMs: 1_100 }), /AUT5_PAYMASTER_QUOTE_REQUIRED/);
-  assert.throws(() => authorizeAutomationFunding420({ plan, budget: pmBudget, funding, feeQuote, nowMs: 1_100, paymasterQuote: { paymasterId: 'wrong', sponsoredGasWei: 1n, quoteId: 'q', expiresAtMs: 2_000 } }), /AUT5_PAYMASTER_ID_MISMATCH/);
-  assert.throws(() => authorizeAutomationFunding420({ plan, budget: pmBudget, funding, feeQuote, nowMs: 1_100, paymasterQuote: { paymasterId: '420gas.alpha', sponsoredGasWei: 1n, quoteId: 'q', expiresAtMs: 1_100 } }), /AUT5_PAYMASTER_QUOTE_EXPIRED/);
+  assert.throws(() => authorizeAutomationFunding420({ plan, budget: pmBudget, funding, feeQuote, nowMs: 1_100, paymasterQuote: paymasterQuote({ paymasterId: 'wrong' }) }), /AUT5_PAYMASTER_ID_MISMATCH/);
+  assert.throws(() => authorizeAutomationFunding420({ plan, budget: pmBudget, funding, feeQuote, nowMs: 1_100, paymasterQuote: paymasterQuote({ expiresAtMs: 1_100 }) }), /AUT5_PAYMASTER_QUOTE_EXPIRED/);
 });
 
 test('AUT-5 budget validation fails closed on malformed policy', () => {

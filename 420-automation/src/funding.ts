@@ -33,6 +33,8 @@ export interface AutomationPaymasterQuote420 {
   sponsoredGasWei: bigint;
   quoteId: string;
   expiresAtMs: number;
+  planDigest: string;
+  sponsorshipDigest: string;
 }
 
 export interface AutomationFundingPolicy420 {
@@ -56,15 +58,42 @@ export interface AutomationBudgetAuthorization420 {
   workerRequiredWei: bigint;
   paymasterSponsoredWei: bigint;
   paymasterQuoteId: string | null;
+  paymasterPlanDigest: string | null;
+  sponsorshipDigest: string | null;
   authorizationDigest: string;
 }
+
+const BYTES32_RE = /^0x[0-9a-fA-F]{64}$/;
 
 function digest420(material: string): string {
   return `0x${createHash('sha256').update(material).digest('hex')}`;
 }
 
+function bytes32420(value: string, code: string): string {
+  if (!BYTES32_RE.test(value)) throw new Error(code);
+  return value.toLowerCase();
+}
+
 function assertNonNegative420(value: bigint, code: string): void {
   if (value < 0n) throw new Error(code);
+}
+
+export function automationFundingPlanDigest420(plan: AutomationTransactionPlan420): string {
+  const material = [
+    '420Automation/gas-plan/v1',
+    plan.chainId.toString(10),
+    plan.jobId,
+    plan.occurrenceId.toLowerCase(),
+    plan.workerId,
+    plan.from.toLowerCase(),
+    plan.to.toLowerCase(),
+    plan.data.toLowerCase(),
+    plan.valueWei.toString(10),
+    plan.gasLimit.toString(10),
+    plan.envelopeDigest.toLowerCase(),
+    plan.intentDigest.toLowerCase(),
+  ].join('|');
+  return digest420(material);
 }
 
 export function validateAutomationExecutionBudget420(budget: AutomationExecutionBudget420): void {
@@ -114,6 +143,8 @@ export function authorizeAutomationFunding420(input: {
 
   let sponsored = 0n;
   let quoteId: string | null = null;
+  let paymasterPlanDigest: string | null = null;
+  let sponsorshipDigest: string | null = null;
   if (input.budget.mode === 'paymaster') {
     const quote = input.paymasterQuote;
     if (!quote) throw new Error('AUT5_PAYMASTER_QUOTE_REQUIRED');
@@ -121,6 +152,10 @@ export function authorizeAutomationFunding420(input: {
     if (!Number.isSafeInteger(quote.expiresAtMs) || quote.expiresAtMs <= input.nowMs) throw new Error('AUT5_PAYMASTER_QUOTE_EXPIRED');
     if (quote.quoteId.length === 0 || quote.quoteId.length > 128) throw new Error('AUT5_PAYMASTER_QUOTE_ID_INVALID');
     assertNonNegative420(quote.sponsoredGasWei, 'AUT5_PAYMASTER_SPONSORSHIP_INVALID');
+    paymasterPlanDigest = bytes32420(quote.planDigest, 'GAS8_PLAN_DIGEST_INVALID');
+    sponsorshipDigest = bytes32420(quote.sponsorshipDigest, 'GAS8_SPONSORSHIP_DIGEST_INVALID');
+    const expectedPlanDigest = automationFundingPlanDigest420(input.plan);
+    if (paymasterPlanDigest !== expectedPlanDigest) throw new Error('GAS8_PLAN_BINDING_MISMATCH');
     sponsored = quote.sponsoredGasWei > gasCost ? gasCost : quote.sponsoredGasWei;
     quoteId = quote.quoteId;
   } else if (input.paymasterQuote !== undefined) {
@@ -131,7 +166,21 @@ export function authorizeAutomationFunding420(input: {
   if (input.funding.availableBalanceWei < workerRequired) throw new Error('AUT5_INSUFFICIENT_BALANCE');
   if (input.funding.allowanceWei < workerRequired) throw new Error('AUT5_INSUFFICIENT_ALLOWANCE');
   const reimbursement = gasCost < input.budget.maxReimbursementWei ? gasCost : input.budget.maxReimbursementWei;
-  const material = ['420Automation/funding/v1', input.plan.intentDigest, input.budget.mode, input.feeQuote.maxFeePerGasWei.toString(10), input.feeQuote.maxPriorityFeePerGasWei.toString(10), gasCost.toString(10), total.toString(10), reimbursement.toString(10), workerRequired.toString(10), sponsored.toString(10), quoteId ?? 'none'].join('|');
+  const material = [
+    '420Automation/funding/v2',
+    input.plan.intentDigest,
+    input.budget.mode,
+    input.feeQuote.maxFeePerGasWei.toString(10),
+    input.feeQuote.maxPriorityFeePerGasWei.toString(10),
+    gasCost.toString(10),
+    total.toString(10),
+    reimbursement.toString(10),
+    workerRequired.toString(10),
+    sponsored.toString(10),
+    quoteId ?? 'none',
+    paymasterPlanDigest ?? 'none',
+    sponsorshipDigest ?? 'none',
+  ].join('|');
   return {
     jobId: input.plan.jobId,
     occurrenceId: input.plan.occurrenceId,
@@ -143,6 +192,8 @@ export function authorizeAutomationFunding420(input: {
     workerRequiredWei: workerRequired,
     paymasterSponsoredWei: sponsored,
     paymasterQuoteId: quoteId,
+    paymasterPlanDigest,
+    sponsorshipDigest,
     authorizationDigest: digest420(material),
   };
 }

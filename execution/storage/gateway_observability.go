@@ -117,17 +117,17 @@ func (o GatewaySlogObserver) ObserveGatewayHTTP(ctx context.Context, observation
 	)
 }
 
-type gatewayResponseRecorder struct {
+type gatewayObservationResponseRecorder struct {
 	http.ResponseWriter
 	status int
 	bytes  int64
 }
 
-func (r *gatewayResponseRecorder) Unwrap() http.ResponseWriter {
+func (r *gatewayObservationResponseRecorder) Unwrap() http.ResponseWriter {
 	return r.ResponseWriter
 }
 
-func (r *gatewayResponseRecorder) WriteHeader(status int) {
+func (r *gatewayObservationResponseRecorder) WriteHeader(status int) {
 	if r.status != 0 {
 		return
 	}
@@ -135,7 +135,7 @@ func (r *gatewayResponseRecorder) WriteHeader(status int) {
 	r.ResponseWriter.WriteHeader(status)
 }
 
-func (r *gatewayResponseRecorder) Write(payload []byte) (int, error) {
+func (r *gatewayObservationResponseRecorder) Write(payload []byte) (int, error) {
 	if r.status == 0 {
 		r.WriteHeader(http.StatusOK)
 	}
@@ -156,7 +156,7 @@ func gatewayObservedHandler(observers []GatewayHTTPObserver, next http.Handler) 
 	}
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		started := time.Now()
-		recorder := &gatewayResponseRecorder{ResponseWriter: w}
+		recorder := &gatewayObservationResponseRecorder{ResponseWriter: w}
 		next.ServeHTTP(recorder, r)
 		status := recorder.status
 		if status == 0 {

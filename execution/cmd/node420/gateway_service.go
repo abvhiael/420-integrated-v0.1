@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"flag"
+	"log/slog"
 	"net/http"
 	"strings"
 	"time"
@@ -24,6 +25,7 @@ var (
 	gatewayTLSCert       = flag.String("gateway.tls-cert", "", "TLS certificate file for 420Gateway HTTPS")
 	gatewayTLSKey        = flag.String("gateway.tls-key", "", "TLS private key file for 420Gateway HTTPS")
 	gatewayAllowedHosts  = flag.String("gateway.allowed-hosts", "", "comma-separated allowed Host values; required for non-loopback gateway exposure")
+	gatewayMetrics       *storage.GatewayHTTPMetrics
 )
 
 func newNodeGatewayService() (serviceRunner, error) {
@@ -38,15 +40,15 @@ func newNodeGatewayService() (serviceRunner, error) {
 	if strings.TrimSpace(*gatewayCacheURL) != "" {
 		router.Cache = append(router.Cache, storage.HTTPGatewayCacheSource{
 			BaseURL: *gatewayCacheURL,
-			Client: client,
-			Token: *gatewayCacheToken,
+			Client:  client,
+			Token:   *gatewayCacheToken,
 		})
 	}
 	if strings.TrimSpace(*gatewayStoreURL) != "" {
 		router.Store = append(router.Store, storage.HTTPGatewayStoreSource{
 			BaseURL: *gatewayStoreURL,
-			Client: client,
-			Token: *gatewayStoreToken,
+			Client:  client,
+			Token:   *gatewayStoreToken,
 		})
 	}
 	if len(router.Cache) == 0 && len(router.Store) == 0 {
@@ -54,15 +56,22 @@ func newNodeGatewayService() (serviceRunner, error) {
 	}
 	var hosts []string
 	for _, host := range strings.Split(*gatewayAllowedHosts, ",") {
-		if host = strings.TrimSpace(host); host != "" { hosts = append(hosts, host) }
+		if host = strings.TrimSpace(host); host != "" {
+			hosts = append(hosts, host)
+		}
 	}
-	return storage.NewGatewayHTTPServiceWithTransport(*gatewayListen, storage.GatewayHTTPHandler{Router: router}, storage.GatewayHTTPPolicy{
+	service, metrics, err := storage.NewGatewayHTTPServiceWithObservability(*gatewayListen, storage.GatewayHTTPHandler{Router: router}, storage.GatewayHTTPPolicy{
 		MaxConcurrentRequests: uint32(*gatewayMaxConcurrent),
-		RateLimitRequests: uint32(*gatewayRateRequests),
-		RateLimitWindow: *gatewayRateWindow,
+		RateLimitRequests:     uint32(*gatewayRateRequests),
+		RateLimitWindow:       *gatewayRateWindow,
 	}, storage.GatewayHTTPTransportPolicy{
-		TLSCertFile: *gatewayTLSCert,
-		TLSKeyFile: *gatewayTLSKey,
+		TLSCertFile:  *gatewayTLSCert,
+		TLSKeyFile:   *gatewayTLSKey,
 		AllowedHosts: hosts,
-	})
+	}, storage.GatewaySlogObserver{Logger: slog.Default()})
+	if err != nil {
+		return nil, err
+	}
+	gatewayMetrics = metrics
+	return service, nil
 }

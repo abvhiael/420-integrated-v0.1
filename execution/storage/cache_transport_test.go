@@ -22,7 +22,7 @@ func TestCacheHTTPHandlerMissFillThenHit(t *testing.T) {
 	key:=cacheTestKey(payload,"manifest-a",1)
 	calls:=0
 	h:=CacheHTTPHandler{Runtime:p,Reconciler:r,TTL:time.Hour,Now:func()time.Time{return time.Unix(100,0)},Origin:cacheOriginFunc(func(context.Context,CacheKey)([]byte,error){calls++;return payload,nil})}
-	url:="/v1/cache?object_id="+key.ObjectID+"&manifest_id="+key.ManifestID+"&shard_index=1&shard_root="+key.ShardRoot+"&size_bytes="+"10"
+	url:="/v1/cache?object_id="+key.ObjectID+"&manifest_id="+key.ManifestID+"&shard_index=1&shard_root="+key.ShardRoot+"&size_bytes=10"
 	req:=httptest.NewRequest(http.MethodGet,url,nil); w:=httptest.NewRecorder(); h.ServeHTTP(w,req)
 	if w.Code!=http.StatusOK||w.Header().Get("X-420-Cache")!="MISS"||w.Body.String()!="cache-data"||calls!=1{t.Fatalf("first code=%d cache=%q body=%q calls=%d",w.Code,w.Header().Get("X-420-Cache"),w.Body.String(),calls)}
 	req=httptest.NewRequest(http.MethodGet,url,nil); w=httptest.NewRecorder(); h.ServeHTTP(w,req)
@@ -35,7 +35,7 @@ func TestCacheHTTPHandlerHealthAndMetrics(t *testing.T) {
 	r,err:=NewCacheReconcileService(p,cacheCanonicalStub{valid:true},time.Minute,time.Second,time.Minute); if err!=nil{t.Fatal(err)}
 	h:=CacheHTTPHandler{Runtime:p,Reconciler:r,Now:func()time.Time{return time.Unix(100,0)}}
 	w:=httptest.NewRecorder(); h.ServeHTTP(w,httptest.NewRequest(http.MethodGet,"/healthz",nil)); if w.Code!=http.StatusOK||!strings.Contains(w.Body.String(),"\"ready\":true"){t.Fatalf("health %d %s",w.Code,w.Body.String())}
-	w=httptest.NewRecorder(); h.ServeHTTP(w,httptest.NewRequest(http.MethodGet,"/metrics",nil)); body:=w.Body.String(); if w.Code!=http.StatusOK||!strings.Contains(body,"420_cache_entries 0")||!strings.Contains(body,"420_cache_reconcile_runs_total 0"){t.Fatalf("metrics %d %s",w.Code,body)}
+	w=httptest.NewRecorder(); h.ServeHTTP(w,httptest.NewRequest(http.MethodGet,"/metrics",nil)); body:=w.Body.String(); if w.Code!=http.StatusOK||!strings.Contains(body,"fourtwenty_cache_entries 0")||!strings.Contains(body,"fourtwenty_cache_reconcile_runs_total 0"){t.Fatalf("metrics %d %s",w.Code,body)}
 }
 
 func TestHTTPCacheOrigin(t *testing.T) {
@@ -54,4 +54,8 @@ func TestCacheHTTPHeadHasNoBody(t *testing.T) {
 	h:=CacheHTTPHandler{Runtime:p,Reconciler:r,Now:func()time.Time{return now}}
 	url:="/v1/cache?object_id="+key.ObjectID+"&manifest_id="+key.ManifestID+"&shard_index=0&shard_root="+key.ShardRoot+"&size_bytes=4"
 	w:=httptest.NewRecorder(); h.ServeHTTP(w,httptest.NewRequest(http.MethodHead,url,nil)); b,_:=io.ReadAll(w.Result().Body); if w.Code!=http.StatusOK||len(b)!=0{t.Fatalf("code=%d body=%q",w.Code,b)}
+}
+
+func TestCacheHTTPServiceRejectsNonLoopback(t *testing.T) {
+	if _,err:=NewCacheHTTPService("0.0.0.0:8421",http.HandlerFunc(func(http.ResponseWriter,*http.Request){})); !errors.Is(err,ErrCacheTransport){t.Fatalf("expected transport error, got %v",err)}
 }

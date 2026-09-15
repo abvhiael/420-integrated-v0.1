@@ -84,6 +84,7 @@ export async function prepareAutomationGasFunding420(input: {
     binding: input.binding,
     attempt: input.attempt,
     plan: input.plan,
+    feeQuote: input.feeQuote,
     sponsorshipDigest: input.sponsorshipDigest,
     requestedSponsoredCostWei: requestedSponsoredCost420(input.plan, input.feeQuote, input.binding),
     validAfterMs: input.nowMs,
@@ -99,6 +100,7 @@ export async function prepareAutomationGasFunding420(input: {
       binding: input.binding,
       attempt: input.attempt,
       plan: input.plan,
+      feeQuote: input.feeQuote,
       nowMs: input.nowMs,
     });
     const authorization = authorizeAutomationSponsoredAttempt420({

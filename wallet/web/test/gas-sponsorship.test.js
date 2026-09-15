@@ -4,6 +4,8 @@ import {
   GasSponsorshipError420,
   prepareWalletGasSponsorship420,
   validateWalletGasQuote420,
+  walletGasSponsorshipFailure420,
+  walletGasSponsorshipReview420,
 } from '../core/gas-sponsorship.js';
 
 const now = new Date('2026-09-14T23:30:00.000Z');
@@ -122,4 +124,57 @@ test('Wallet will not attach sponsorship after signing or replace an existing pa
     userOperation: unsignedOperation({ paymasterAndData: '0x12' }),
     entryPoint: addr(2), discoverQuote: async () => quote(), hashUserOperation: async () => hash(20), now,
   }), /will not replace existing paymasterAndData/);
+});
+
+test('review state exposes bounded funding details but never implies execution authority', () => {
+  const review = walletGasSponsorshipReview420({
+    sponsored: true,
+    fundingMode: 'paymaster',
+    executionAuthorization: false,
+    quote: quote(),
+  });
+  assert.equal(review.status, 'sponsored');
+  assert.equal(review.fundingMode, 'paymaster');
+  assert.equal(review.paymaster, addr(3));
+  assert.equal(review.policyId, hash(11));
+  assert.equal(review.maxSponsoredCostWei, '1000000000000000');
+  assert.equal(review.executionAuthorization, false);
+  assert.match(review.message, /Wallet or session authorization still controls execution/i);
+});
+
+test('self-funded review makes fallback explicit without changing transaction authority', () => {
+  const review = walletGasSponsorshipReview420({
+    sponsored: false,
+    fundingMode: 'self-funded',
+    fallbackReason: 'SPONSORSHIP_UNAVAILABLE',
+  });
+  assert.equal(review.status, 'self-funded');
+  assert.equal(review.sponsored, false);
+  assert.equal(review.paymaster, null);
+  assert.equal(review.fallbackReason, 'SPONSORSHIP_UNAVAILABLE');
+  assert.equal(review.executionAuthorization, false);
+});
+
+test('user-facing failure states distinguish safe self-funded fallback from a blocked funding path', () => {
+  const fallback = walletGasSponsorshipFailure420(new Error('gas quote is expired'), { canSelfFund: true });
+  assert.equal(fallback.code, 'SPONSORSHIP_EXPIRED');
+  assert.equal(fallback.status, 'fallback-available');
+  assert.equal(fallback.canSelfFund, true);
+  assert.match(fallback.message, /same authorized operation/i);
+  assert.equal(fallback.executionAuthorization, false);
+
+  const blocked = walletGasSponsorshipFailure420(new Error('gas quote account mismatch'), { canSelfFund: false });
+  assert.equal(blocked.code, 'SPONSORSHIP_ACCOUNT_MISMATCH');
+  assert.equal(blocked.status, 'blocked');
+  assert.equal(blocked.canSelfFund, false);
+  assert.equal(blocked.executionAuthorization, false);
+});
+
+test('review state fails closed if a sponsored result attempts to smuggle execution authority', () => {
+  assert.throws(() => walletGasSponsorshipReview420({
+    sponsored: true,
+    fundingMode: 'paymaster',
+    executionAuthorization: true,
+    quote: quote(),
+  }), /cannot grant execution authority/i);
 });

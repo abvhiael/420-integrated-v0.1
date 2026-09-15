@@ -142,6 +142,12 @@ func main() {
 	storageProofInterval := flag.Duration("storage.proof-interval", 5*time.Second, "storage proof scheduler interval")
 	storageProofReceiptWait := flag.Duration("storage.proof-receipt-wait", 30*time.Second, "maximum wait for a proof transaction receipt")
 	storageProofFrom := flag.String("storage.proof.from", "", "execution account used to sign storage proof transactions")
+	storageAuthToken := flag.String("storage.auth-token", "", "legacy bearer token for all protected storage operations")
+	storageReadToken := flag.String("storage.auth.read-token", "", "bearer token for storage read/capacity operations")
+	storageWriteToken := flag.String("storage.auth.write-token", "", "bearer token for storage write operations")
+	storageTLSCert := flag.String("storage.tls-cert", "", "TLS certificate file for provider HTTPS")
+	storageTLSKey := flag.String("storage.tls-key", "", "TLS private key file for provider HTTPS")
+	storageMaxConcurrent := flag.Uint("storage.max-concurrent-requests", 128, "maximum concurrent provider HTTP requests")
 	storageAgreement := flag.String("storage.contract.agreement", "", "StorageAgreementRegistry420 address")
 	storageCommitment := flag.String("storage.contract.commitment", "", "StorageCommitmentRegistry420 address")
 	storageCapacityContract := flag.String("storage.contract.capacity", "", "StorageCapacityRegistry420 address")
@@ -177,7 +183,7 @@ func main() {
 	args = append(args, flag.Args()...)
 	if *dryRun {
 		fmt.Printf("%s %s\n", filepath.Clean(path), strings.Join(args, " "))
-		if *storageEnabled { fmt.Printf("node420 storage listen=%s data=%s\n", *storageListen, filepath.Join(*datadir,"storage")) }
+		if *storageEnabled { fmt.Printf("node420 storage listen=%s data=%s tls=%t max_concurrent=%d\n", *storageListen, filepath.Join(*datadir,"storage"), *storageTLSCert != "", *storageMaxConcurrent) }
 		if *cacheEnabled { fmt.Printf("node420 cache data=%s interval=%s\n", filepath.Join(*datadir,"cache"), cacheInterval.String()) }
 		return
 	}
@@ -193,11 +199,13 @@ func main() {
 	contracts := storage.RPCStorageContracts{Agreement:*storageAgreement,Commitment:*storageCommitment,Capacity:*storageCapacityContract,Settlement:*storageSettlement,Scheme:*storageScheme,Manifest:*storageManifest}
 	services := make([]serviceRunner, 0, 2)
 	if *storageEnabled {
+		if uint64(*storageMaxConcurrent) > uint64(^uint32(0)) { fmt.Fprintln(os.Stderr,"node420 storage config: max concurrent requests too large"); os.Exit(2) }
 		service, err := storage.NewService(storage.ServiceConfig{
 			NodeID:*storageNodeID, CapacityBytes:*storageCapacity, DataDir:filepath.Join(*datadir,"storage"), ListenAddr:*storageListen,
 			RPCURL:rpcURL, StartBlock:*storageStartBlock, Confirmations:*storageConfirmations, SyncInterval:*storageSyncInterval,
 			ProofInterval:*storageProofInterval, ProofRegistry:*storageProofRegistry, ProofFrom:*storageProofFrom, ProofReceiptWait:*storageProofReceiptWait,
-			Contracts:contracts,
+			AuthToken:*storageAuthToken, ReadAuthToken:*storageReadToken, WriteAuthToken:*storageWriteToken,
+			TLSCertFile:*storageTLSCert, TLSKeyFile:*storageTLSKey, MaxConcurrentRequests:uint32(*storageMaxConcurrent), Contracts:contracts,
 		})
 		if err != nil { fmt.Fprintln(os.Stderr,"node420 storage config:",err); os.Exit(2) }
 		services = append(services, service)

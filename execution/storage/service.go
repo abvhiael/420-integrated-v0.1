@@ -14,22 +14,27 @@ import (
 )
 
 type ServiceConfig struct {
-	NodeID           string
-	CapacityBytes    uint64
-	DataDir          string
-	ListenAddr       string
-	RPCURL           string
-	StartBlock       uint64
-	Confirmations    uint64
-	BatchSize        uint64
-	SyncInterval     time.Duration
-	ProofInterval    time.Duration
-	ProofSubmitter   ProofSubmitter
-	ProofRegistry    string
-	ProofFrom        string
-	ProofReceiptWait time.Duration
-	AuthToken        string
-	Contracts        RPCStorageContracts
+	NodeID                string
+	CapacityBytes         uint64
+	DataDir               string
+	ListenAddr            string
+	RPCURL                string
+	StartBlock            uint64
+	Confirmations         uint64
+	BatchSize             uint64
+	SyncInterval          time.Duration
+	ProofInterval         time.Duration
+	ProofSubmitter        ProofSubmitter
+	ProofRegistry         string
+	ProofFrom             string
+	ProofReceiptWait      time.Duration
+	AuthToken             string // legacy token; used for read/write when scoped tokens are unset
+	ReadAuthToken         string
+	WriteAuthToken        string
+	TLSCertFile           string
+	TLSKeyFile            string
+	MaxConcurrentRequests uint32
+	Contracts             RPCStorageContracts
 }
 
 type ServiceStatus struct {
@@ -53,12 +58,46 @@ type Service struct {
 	status      ServiceStatus
 }
 
+func normalizeProviderAuth(cfg *ServiceConfig) {
+	legacy := strings.TrimSpace(cfg.AuthToken)
+	if strings.TrimSpace(cfg.ReadAuthToken) == "" {
+		cfg.ReadAuthToken = legacy
+	}
+	if strings.TrimSpace(cfg.WriteAuthToken) == "" {
+		cfg.WriteAuthToken = legacy
+	}
+	cfg.ReadAuthToken = strings.TrimSpace(cfg.ReadAuthToken)
+	cfg.WriteAuthToken = strings.TrimSpace(cfg.WriteAuthToken)
+	cfg.TLSCertFile = strings.TrimSpace(cfg.TLSCertFile)
+	cfg.TLSKeyFile = strings.TrimSpace(cfg.TLSKeyFile)
+	if cfg.MaxConcurrentRequests == 0 {
+		cfg.MaxConcurrentRequests = 128
+	}
+}
+
+func validateProviderTransportSecurity(cfg ServiceConfig) error {
+	if (cfg.TLSCertFile == "") != (cfg.TLSKeyFile == "") {
+		return ErrInvalidChainState
+	}
+	if loopbackListen(cfg.ListenAddr) {
+		return nil
+	}
+	if cfg.ReadAuthToken == "" || cfg.WriteAuthToken == "" {
+		return ErrInvalidChainState
+	}
+	if cfg.TLSCertFile == "" || cfg.TLSKeyFile == "" {
+		return ErrInvalidChainState
+	}
+	return nil
+}
+
 func NewService(cfg ServiceConfig) (*Service, error) {
 	if cfg.CapacityBytes == 0 || cfg.DataDir == "" || cfg.ListenAddr == "" || cfg.RPCURL == "" {
 		return nil, ErrInvalidChainState
 	}
 	if _, err := bytes32Arg(cfg.NodeID); err != nil { return nil, ErrInvalidChainState }
-	if !loopbackListen(cfg.ListenAddr) && strings.TrimSpace(cfg.AuthToken) == "" { return nil, ErrInvalidChainState }
+	normalizeProviderAuth(&cfg)
+	if err := validateProviderTransportSecurity(cfg); err != nil { return nil, err }
 	proofRegistry := strings.TrimSpace(cfg.ProofRegistry)
 	proofFrom := strings.TrimSpace(cfg.ProofFrom)
 	if (proofRegistry == "") != (proofFrom == "") { return nil, ErrInvalidChainState }
@@ -99,11 +138,11 @@ func NewService(cfg ServiceConfig) (*Service, error) {
 	s := &Service{cfg: cfg, backend: backend, projection: projection, runtime: runtime, scheduler: ProofScheduler{Projection: projection}}
 	s.syncer = Syncer{Backend: backend, Cursor: cursor, Projection: projection, StartBlock: cfg.StartBlock, Confirmations: cfg.Confirmations, BatchSize: cfg.BatchSize}
 	s.httpServer = &http.Server{
-		Addr: cfg.ListenAddr,
-		Handler: NewTransportHandler(s),
+		Addr:              cfg.ListenAddr,
+		Handler:           NewTransportHandler(s),
 		ReadHeaderTimeout: 10 * time.Second,
-		IdleTimeout: 60 * time.Second,
-		MaxHeaderBytes: 32 << 10,
+		IdleTimeout:       60 * time.Second,
+		MaxHeaderBytes:    32 << 10,
 	}
 	return s, nil
 }
@@ -184,7 +223,12 @@ func (s *Service) Run(ctx context.Context) error {
 
 	errCh := make(chan error, 1)
 	go func() {
-		err := s.httpServer.ListenAndServe()
+		var err error
+		if s.cfg.TLSCertFile != "" {
+			err = s.httpServer.ListenAndServeTLS(s.cfg.TLSCertFile, s.cfg.TLSKeyFile)
+		} else {
+			err = s.httpServer.ListenAndServe()
+		}
 		if errors.Is(err, http.ErrServerClosed) { err = nil }
 		errCh <- err
 	}()

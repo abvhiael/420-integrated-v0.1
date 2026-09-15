@@ -33,6 +33,21 @@ int_types = "long"
 multiline_func_header = "params_first"
 quote_style = "double"
 
+# Fast pull-request qualification. This catches regressions on every development
+# commit without paying the full Genesis hardening cost. Full `ci` and
+# `hardening` profiles remain the merge/closeout qualification gates.
+[profile.pr]
+fuzz = { runs = 2500, max_test_rejects = 65536, seed = "0x420" }
+
+[profile.pr.invariant]
+runs = 128
+depth = 64
+fail_on_revert = true
+call_override = false
+dictionary_weight = 80
+include_storage = true
+include_push_bytes = true
+
 [profile.ci]
 fuzz = { runs = 50000, max_test_rejects = 131072, seed = "0x420" }
 

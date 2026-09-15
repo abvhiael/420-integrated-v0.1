@@ -100,3 +100,15 @@ func gatewayServeHealth(health *GatewayHealthTracker, w http.ResponseWriter, r *
 	}
 	return true
 }
+
+func gatewayHealthHandler(health *GatewayHealthTracker, next http.Handler) http.Handler {
+	if health == nil {
+		return next
+	}
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if gatewayServeHealth(health, w, r) {
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}

@@ -60,6 +60,68 @@ export function validateWalletGasQuote420(quote, { entryPoint, account, now = ne
   return Object.freeze(normalized);
 }
 
+export function walletGasSponsorshipReview420(prepared) {
+  assert420(prepared && typeof prepared === 'object', 'prepared sponsorship state is required');
+  const sponsored = prepared.sponsored === true;
+  if (!sponsored) {
+    assert420(prepared.fundingMode === 'self-funded', 'self-funded sponsorship state is invalid');
+    return Object.freeze({
+      status: 'self-funded',
+      fundingMode: 'self-funded',
+      sponsored: false,
+      title: 'You pay network gas',
+      message: 'No gas sponsorship is attached. Wallet authorization and transaction details are unchanged.',
+      paymaster: null,
+      policyId: null,
+      maxSponsoredCostWei: null,
+      validUntil: null,
+      executionAuthorization: false,
+      fallbackReason: prepared.fallbackReason ?? null,
+    });
+  }
+
+  assert420(prepared.fundingMode === 'paymaster', 'sponsored funding mode is invalid');
+  assert420(prepared.executionAuthorization === false, 'sponsorship review cannot grant execution authority');
+  assert420(prepared.quote && typeof prepared.quote === 'object', 'sponsored quote is required for review');
+  return Object.freeze({
+    status: 'sponsored',
+    fundingMode: 'paymaster',
+    sponsored: true,
+    title: 'Network gas is sponsored',
+    message: 'A paymaster may fund this exact operation. Your Wallet or session authorization still controls execution.',
+    paymaster: normalizeAddress(prepared.quote.paymaster),
+    policyId: bytes32420(prepared.quote.policyId, 'policyId'),
+    maxSponsoredCostWei: decimal420(prepared.quote.maxSponsoredCostWei, 'maxSponsoredCostWei'),
+    validUntil: prepared.quote.validUntil,
+    executionAuthorization: false,
+    fallbackReason: null,
+  });
+}
+
+export function walletGasSponsorshipFailure420(error, { canSelfFund = true } = {}) {
+  const message = String(error?.message || error || 'gas sponsorship failed');
+  let code = 'SPONSORSHIP_FAILED';
+  if (/expired/i.test(message)) code = 'SPONSORSHIP_EXPIRED';
+  else if (/not yet valid/i.test(message)) code = 'SPONSORSHIP_NOT_YET_VALID';
+  else if (/wrong chain|chain/i.test(message)) code = 'SPONSORSHIP_WRONG_CHAIN';
+  else if (/EntryPoint mismatch/i.test(message)) code = 'SPONSORSHIP_ENTRYPOINT_MISMATCH';
+  else if (/account mismatch/i.test(message)) code = 'SPONSORSHIP_ACCOUNT_MISMATCH';
+  else if (/does not bind the final sponsored user operation/i.test(message)) code = 'SPONSORSHIP_OPERATION_MISMATCH';
+  else if (/authority|execution authority/i.test(message)) code = 'SPONSORSHIP_AUTHORITY_INVALID';
+  else if (/unavailable/i.test(message)) code = 'SPONSORSHIP_UNAVAILABLE';
+
+  return Object.freeze({
+    status: canSelfFund ? 'fallback-available' : 'blocked',
+    code,
+    title: canSelfFund ? 'Gas sponsorship unavailable' : 'Transaction cannot continue',
+    message: canSelfFund
+      ? 'The sponsorship offer cannot be used. You can continue with the same authorized operation and pay network gas yourself.'
+      : 'The sponsorship offer cannot be used and this Wallet cannot safely continue without another valid funding path.',
+    canSelfFund: Boolean(canSelfFund),
+    executionAuthorization: false,
+  });
+}
+
 export async function prepareWalletGasSponsorship420({
   userOperation,
   entryPoint,

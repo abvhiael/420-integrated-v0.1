@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 const ADDRESS_RE = /^0x[0-9a-fA-F]{40}$/;
 const BYTES32_RE = /^0x[0-9a-fA-F]{64}$/;
 const ID_RE = /^[a-z0-9][a-z0-9._-]{0,63}$/;
-const SCHEMA_VERSION = '1.0.0';
+const SCHEMA_VERSION = '1.1.0';
 const DEFAULT_MAX_TTL_SECONDS = 300;
 
 export class GasQuoteError420 extends Error {
@@ -70,7 +70,7 @@ function canonicalQuoteMaterial420(value) {
     value.entryPoint,
     value.paymaster,
     value.account,
-    value.userOpHash,
+    value.sponsorshipDigest,
     value.policyId,
     value.authorizationId,
     value.maxSponsoredCostWei,
@@ -87,7 +87,7 @@ function requestProjection420(value) {
     entryPoint: value.entryPoint,
     paymaster: value.paymaster,
     account: value.account,
-    userOpHash: value.userOpHash,
+    sponsorshipDigest: value.sponsorshipDigest,
     policyId: value.policyId,
     authorizationId: value.authorizationId,
     maxSponsoredCostWei: value.maxSponsoredCostWei,
@@ -115,7 +115,7 @@ export function validateGasQuoteCredential420(input, { now = new Date(), require
 export function validateGasQuoteRequest420(input) {
   const request = object420(input, 'quote request');
   exact420(request, new Set([
-    'schemaVersion', 'chainId', 'entryPoint', 'paymaster', 'account', 'userOpHash', 'policyId',
+    'schemaVersion', 'chainId', 'entryPoint', 'paymaster', 'account', 'sponsorshipDigest', 'policyId',
     'authorizationId', 'maxSponsoredCostWei', 'validAfter', 'validUntil'
   ]), 'quote request');
   assert420(request.schemaVersion === SCHEMA_VERSION, 'unsupported quote request schemaVersion');
@@ -123,14 +123,14 @@ export function validateGasQuoteRequest420(input) {
   const entryPoint = address420(request.entryPoint, 'entryPoint');
   const paymaster = address420(request.paymaster, 'paymaster');
   const account = address420(request.account, 'account');
-  const userOpHash = bytes32420(request.userOpHash, 'userOpHash');
+  const sponsorshipDigest = bytes32420(request.sponsorshipDigest, 'sponsorshipDigest');
   const policyId = bytes32420(request.policyId, 'policyId');
   const authorizationId = bytes32420(request.authorizationId, 'authorizationId');
   const maxSponsoredCostWei = uintString420(request.maxSponsoredCostWei, 'maxSponsoredCostWei');
   const validAfter = iso420(request.validAfter, 'validAfter');
   const validUntil = iso420(request.validUntil, 'validUntil');
   assert420(Date.parse(validUntil) > Date.parse(validAfter), 'validUntil must be after validAfter');
-  return Object.freeze({ schemaVersion: SCHEMA_VERSION, chainId, entryPoint, paymaster, account, userOpHash, policyId, authorizationId, maxSponsoredCostWei, validAfter, validUntil });
+  return Object.freeze({ schemaVersion: SCHEMA_VERSION, chainId, entryPoint, paymaster, account, sponsorshipDigest, policyId, authorizationId, maxSponsoredCostWei, validAfter, validUntil });
 }
 
 export function createGasQuote420({ request, credential, now = new Date(), maxTtlSeconds = DEFAULT_MAX_TTL_SECONDS, sign }) {
@@ -148,7 +148,7 @@ export function createGasQuote420({ request, credential, now = new Date(), maxTt
 
   const unsigned = Object.freeze({ ...quoteRequest, issuedAt });
   const quoteCommitment = `0x${createHash('sha256').update(canonicalQuoteMaterial420(unsigned)).digest('hex')}`;
-  const signature = sign({ quoteCommitment, quote: unsigned });
+  const signature = sign({ sponsorshipDigest: unsigned.sponsorshipDigest, quoteCommitment, quote: unsigned });
   assert420(typeof signature === 'string' && signature.length > 0 && signature.length <= 4096, 'quote signer returned invalid signature');
 
   return Object.freeze({
@@ -176,7 +176,7 @@ export function createGasQuoteReadView420(quote, { credential, now = new Date() 
     entryPoint: validated.entryPoint,
     paymaster: validated.paymaster,
     account: validated.account,
-    userOpHash: validated.userOpHash,
+    sponsorshipDigest: validated.sponsorshipDigest,
     policyId: validated.policyId,
     authorizationId: validated.authorizationId,
     maxSponsoredCostWei: validated.maxSponsoredCostWei,

@@ -82,25 +82,29 @@ func BuildValidatorMetrics(input ValidatorInput, provenance model.Provenance) ([
 	}
 
 	defs := []struct {
-		id, label, unit, methodID, description string
-		value                                  uint64
+		id, label, unit string
+		value           uint64
 	}{
-		{MetricValidatorCount, "Registered validators", "validators", "registered-validator-count", "count of unique validator projections exposed through qualified 420Indexer", registered},
-		{MetricActiveValidatorCount, "Active validators", "validators", "active-validator-count", "count of indexed validators whose lifecycle is active at the qualified snapshot", active},
-		{MetricNativeCollateral, "Native validator collateral", "base_units", "native-validator-collateral", "sum of indexed validator-owned collateral at the qualified snapshot", native},
-		{MetricCommunityCollateral, "Community validator collateral", "base_units", "community-validator-collateral", "sum of indexed community reserve collateral assigned to validators at the qualified snapshot", community},
-		{MetricAccruedRewards, "Accrued validator rewards", "base_units", "validator-accrued-rewards", "sum of indexed accrued validator rewards at the qualified snapshot", rewards},
+		{MetricValidatorCount, "Registered validators", "validators", registered},
+		{MetricActiveValidatorCount, "Active validators", "validators", active},
+		{MetricNativeCollateral, "Native validator collateral", "base_units", native},
+		{MetricCommunityCollateral, "Community validator collateral", "base_units", community},
+		{MetricAccruedRewards, "Accrued validator rewards", "base_units", rewards},
 	}
 
 	out := make([]model.Metric, 0, len(defs))
 	for _, def := range defs {
+		method, err := registeredMethodology(def.id)
+		if err != nil {
+			return nil, err
+		}
 		metric, err := model.NewMetric(
 			def.id,
 			architecture.MetricValidator,
 			def.label,
 			strconv.FormatUint(def.value, 10),
 			def.unit,
-			model.Methodology{ID: def.methodID, Version: "v1", Description: def.description},
+			method,
 			model.Window{Kind: model.WindowPoint},
 			provenance,
 		)

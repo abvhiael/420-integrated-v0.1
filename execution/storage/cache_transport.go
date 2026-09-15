@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"crypto/subtle"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -48,16 +49,30 @@ type CacheHTTPHandler struct {
 	Reconciler *CacheReconcileService
 	Origin     CacheOrigin
 	TTL        time.Duration
+	AuthToken  string
 	Now        func() time.Time
 }
 
 func (h CacheHTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if !h.authorized(r) {
+		w.Header().Set("WWW-Authenticate", `Bearer realm="420cache"`)
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
 	switch r.URL.Path {
 	case "/healthz": h.serveHealth(w,r)
 	case "/metrics": h.serveMetrics(w,r)
 	case "/v1/cache": h.serveCache(w,r)
 	default: http.NotFound(w,r)
 	}
+}
+
+func (h CacheHTTPHandler) authorized(r *http.Request) bool {
+	token := strings.TrimSpace(h.AuthToken)
+	if token == "" { return true }
+	got := strings.TrimSpace(strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer "))
+	if len(got) != len(token) { return false }
+	return subtle.ConstantTimeCompare([]byte(got), []byte(token)) == 1
 }
 
 func (h CacheHTTPHandler) serveCache(w http.ResponseWriter, r *http.Request) {
@@ -76,11 +91,53 @@ func (h CacheHTTPHandler) serveCache(w http.ResponseWriter, r *http.Request) {
 		if errors.Is(err,ErrCacheMiss) { http.Error(w,"cache miss",http.StatusNotFound); return }
 		http.Error(w,"cache fetch failed",http.StatusBadGateway); return
 	}
+
+	etag := `"` + strings.TrimPrefix(strings.ToLower(strings.TrimSpace(key.ShardRoot)), "0x") + `"`
 	w.Header().Set("Content-Type","application/octet-stream")
-	w.Header().Set("Content-Length",strconv.Itoa(len(payload)))
+	w.Header().Set("Accept-Ranges","bytes")
+	w.Header().Set("ETag",etag)
 	if hit { w.Header().Set("X-420-Cache","HIT") } else { w.Header().Set("X-420-Cache","MISS") }
+	if r.Header.Get("If-None-Match") == etag {
+		w.WriteHeader(http.StatusNotModified)
+		return
+	}
+
+	start, end, partial, rangeErr := cacheByteRange(r.Header.Get("Range"), uint64(len(payload)))
+	if rangeErr != nil {
+		w.Header().Set("Content-Range", fmt.Sprintf("bytes */%d", len(payload)))
+		w.WriteHeader(http.StatusRequestedRangeNotSatisfiable)
+		return
+	}
+	if partial && r.Header.Get("If-Range") != "" && r.Header.Get("If-Range") != etag { partial = false }
+	if partial {
+		part := payload[start:end+1]
+		w.Header().Set("Content-Range",fmt.Sprintf("bytes %d-%d/%d",start,end,len(payload)))
+		w.Header().Set("Content-Length",strconv.Itoa(len(part)))
+		w.WriteHeader(http.StatusPartialContent)
+		if r.Method == http.MethodGet { _, _ = w.Write(part) }
+		return
+	}
+	w.Header().Set("Content-Length",strconv.Itoa(len(payload)))
 	w.WriteHeader(http.StatusOK)
 	if r.Method == http.MethodGet { _, _ = w.Write(payload) }
+}
+
+func cacheByteRange(header string, size uint64) (uint64,uint64,bool,error) {
+	header = strings.TrimSpace(header)
+	if header == "" { return 0,0,false,nil }
+	if size == 0 || !strings.HasPrefix(header,"bytes=") || strings.Contains(header,",") { return 0,0,false,ErrCacheTransport }
+	spec := strings.TrimSpace(strings.TrimPrefix(header,"bytes="))
+	parts := strings.SplitN(spec,"-",2)
+	if len(parts) != 2 { return 0,0,false,ErrCacheTransport }
+	if parts[0] == "" {
+		suffix,err:=strconv.ParseUint(parts[1],10,64); if err!=nil||suffix==0{return 0,0,false,ErrCacheTransport}
+		if suffix>size { suffix=size }
+		return size-suffix,size-1,true,nil
+	}
+	start,err:=strconv.ParseUint(parts[0],10,64); if err!=nil||start>=size{return 0,0,false,ErrCacheTransport}
+	end:=size-1
+	if parts[1]!="" { end,err=strconv.ParseUint(parts[1],10,64); if err!=nil||end<start{return 0,0,false,ErrCacheTransport}; if end>=size{end=size-1} }
+	return start,end,true,nil
 }
 
 func (h CacheHTTPHandler) serveHealth(w http.ResponseWriter, r *http.Request) {
@@ -115,9 +172,10 @@ func cacheKeyFromRequest(r *http.Request) (CacheKey,error) {
 }
 
 type CacheHTTPService struct { Server *http.Server }
-func NewCacheHTTPService(listen string, handler http.Handler) (*CacheHTTPService,error) {
-	if strings.TrimSpace(listen)=="" || handler==nil || !loopbackListen(listen) { return nil,ErrCacheTransport }
-	return &CacheHTTPService{Server:&http.Server{Addr:listen,Handler:handler,ReadHeaderTimeout:10*time.Second,IdleTimeout:60*time.Second,MaxHeaderBytes:32<<10}},nil
+func NewCacheHTTPService(listen string, handler http.Handler, authToken string) (*CacheHTTPService,error) {
+	if strings.TrimSpace(listen)=="" || handler==nil { return nil,ErrCacheTransport }
+	if !loopbackListen(listen) && strings.TrimSpace(authToken)=="" { return nil,ErrCacheTransport }
+	return &CacheHTTPService{Server:&http.Server{Addr:listen,Handler:handler,ReadHeaderTimeout:10*time.Second,ReadTimeout:30*time.Second,WriteTimeout:30*time.Second,IdleTimeout:60*time.Second,MaxHeaderBytes:32<<10}},nil
 }
 func (s *CacheHTTPService) Run(ctx context.Context) error {
 	if s==nil||s.Server==nil{return ErrCacheTransport}; errCh:=make(chan error,1); go func(){err:=s.Server.ListenAndServe();if errors.Is(err,http.ErrServerClosed){err=nil};errCh<-err}()

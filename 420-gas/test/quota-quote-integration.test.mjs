@@ -18,7 +18,7 @@ function credential() {
 
 function request(overrides = {}) {
   return {
-    schemaVersion: '1.1.0',
+    schemaVersion: '1.2.0',
     chainId: '420',
     entryPoint: addr(1),
     paymaster: addr(2),
@@ -27,6 +27,9 @@ function request(overrides = {}) {
     policyId: hash(5),
     authorizationId: hash(6),
     maxSponsoredCostWei: '100',
+    gasLimit: '100',
+    maxFeePerGasWei: '1',
+    maxPriorityFeePerGasWei: '0',
     validAfter: '2026-09-15T18:49:59.000Z',
     validUntil: '2026-09-15T18:51:00.000Z',
     ...overrides,

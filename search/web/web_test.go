@@ -50,6 +50,47 @@ func TestSearchShellContainsNavigationAndFilterBehavior(t *testing.T) {
 	}
 }
 
+func TestSearchShellContainsDomainAwareResultPresentation(t *testing.T) {
+	rr := httptest.NewRecorder()
+	Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodGet, "/app.js", nil))
+	if rr.Code != http.StatusOK { t.Fatal(rr.Code) }
+	body := rr.Body.String()
+	for _, marker := range []string{
+		"domainPresentation",
+		"public_identity",
+		"market_listing",
+		"rights_record",
+		"public_commons",
+		"public_pulse",
+		"resultCard",
+		"Open canonical view",
+		"Source",
+		"Category",
+		"Sponsored",
+		"organic ranking unchanged",
+	} {
+		if !strings.Contains(body, marker) { t.Fatalf("app.js missing SEARCH-7.2 marker %q", marker) }
+	}
+}
+
+func TestSearchShellSeparatesSponsoredAndOrganicResults(t *testing.T) {
+	rr := httptest.NewRecorder()
+	Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodGet, "/app.js", nil))
+	body := rr.Body.String()
+	for _, marker := range []string{"sponsored-section", "organic-section", "result-sponsored", "sponsored-badge"} {
+		if !strings.Contains(body, marker) { t.Fatalf("app.js missing sponsored separation marker %q", marker) }
+	}
+}
+
+func TestSearchStylesContainResultPresentationClasses(t *testing.T) {
+	rr := httptest.NewRecorder()
+	Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodGet, "/app.css", nil))
+	body := rr.Body.String()
+	for _, marker := range []string{".result-icon", ".result-kicker", ".result-subtitle", ".meta-pair", ".sponsored-badge", ".empty-state", ".capability-grid"} {
+		if !strings.Contains(body, marker) { t.Fatalf("app.css missing SEARCH-7.2 marker %q", marker) }
+	}
+}
+
 func TestHandlerRejectsMutationMethods(t *testing.T) {
 	rr := httptest.NewRecorder()
 	Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodPost, "/", strings.NewReader("x")))

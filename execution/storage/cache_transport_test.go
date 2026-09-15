@@ -14,6 +14,19 @@ import (
 type cacheOriginFunc func(context.Context, CacheKey) ([]byte, error)
 func (f cacheOriginFunc) FetchCacheObject(ctx context.Context, key CacheKey) ([]byte, error) { return f(ctx,key) }
 
+func cacheTransportFixture(t *testing.T, payload []byte) (CacheHTTPHandler, CacheKey, string) {
+	t.Helper()
+	policy:=CachePolicy{MaxBytes:1024,MaxEntries:8,DefaultTTL:time.Hour,MaxTTL:2*time.Hour}
+	p,err:=NewPersistentCacheRuntime(t.TempDir(),policy); if err!=nil{t.Fatal(err)}
+	key:=cacheTestKey(payload,"manifest-a",0); now:=time.Unix(100,0)
+	if _,err:=p.Put(key,payload,now,time.Hour);err!=nil{t.Fatal(err)}
+	r,err:=NewCacheReconcileService(p,cacheCanonicalStub{valid:map[string]bool{}},time.Minute,time.Second,time.Minute); if err!=nil{t.Fatal(err)}
+	url:="/v1/cache?object_id="+key.ObjectID+"&manifest_id="+key.ManifestID+"&shard_index=0&shard_root="+key.ShardRoot+"&size_bytes="+strconvFormat(len(payload))
+	return CacheHTTPHandler{Runtime:p,Reconciler:r,Now:func()time.Time{return now}},key,url
+}
+
+func strconvFormat(v int) string { return fmt.Sprintf("%d",v) }
+
 func TestCacheHTTPHandlerMissFillThenHit(t *testing.T) {
 	policy:=CachePolicy{MaxBytes:1024,MaxEntries:8,DefaultTTL:time.Hour,MaxTTL:2*time.Hour}
 	p,err:=NewPersistentCacheRuntime(t.TempDir(),policy); if err!=nil{t.Fatal(err)}
@@ -48,15 +61,32 @@ func TestHTTPCacheOrigin(t *testing.T) {
 }
 
 func TestCacheHTTPHeadHasNoBody(t *testing.T) {
-	policy:=CachePolicy{MaxBytes:1024,MaxEntries:8,DefaultTTL:time.Hour,MaxTTL:2*time.Hour}
-	p,_:=NewPersistentCacheRuntime(t.TempDir(),policy)
-	payload:=[]byte("abcd"); key:=cacheTestKey(payload,"manifest-a",0); now:=time.Unix(100,0); if _,err:=p.Put(key,payload,now,time.Hour);err!=nil{t.Fatal(err)}
-	r,_:=NewCacheReconcileService(p,cacheCanonicalStub{valid:map[string]bool{}},time.Minute,time.Second,time.Minute)
-	h:=CacheHTTPHandler{Runtime:p,Reconciler:r,Now:func()time.Time{return now}}
-	url:="/v1/cache?object_id="+key.ObjectID+"&manifest_id="+key.ManifestID+"&shard_index=0&shard_root="+key.ShardRoot+"&size_bytes=4"
+	h,_,url:=cacheTransportFixture(t,[]byte("abcd"))
 	w:=httptest.NewRecorder(); h.ServeHTTP(w,httptest.NewRequest(http.MethodHead,url,nil)); b,_:=io.ReadAll(w.Result().Body); if w.Code!=http.StatusOK||len(b)!=0{t.Fatalf("code=%d body=%q",w.Code,b)}
 }
 
-func TestCacheHTTPServiceRejectsNonLoopback(t *testing.T) {
-	if _,err:=NewCacheHTTPService("0.0.0.0:8421",http.HandlerFunc(func(http.ResponseWriter,*http.Request){})); !errors.Is(err,ErrCacheTransport){t.Fatalf("expected transport error, got %v",err)}
+func TestCacheHTTPRangeAndConditional(t *testing.T) {
+	h,key,url:=cacheTransportFixture(t,[]byte("abcdefghij"))
+	req:=httptest.NewRequest(http.MethodGet,url,nil); req.Header.Set("Range","bytes=2-5")
+	w:=httptest.NewRecorder(); h.ServeHTTP(w,req)
+	if w.Code!=http.StatusPartialContent||w.Body.String()!="cdef"||w.Header().Get("Content-Range")!="bytes 2-5/10"{t.Fatalf("range code=%d body=%q headers=%v",w.Code,w.Body.String(),w.Header())}
+	etag:=`"`+strings.TrimPrefix(strings.ToLower(key.ShardRoot),"0x")+`"`
+	req=httptest.NewRequest(http.MethodGet,url,nil); req.Header.Set("If-None-Match",etag)
+	w=httptest.NewRecorder(); h.ServeHTTP(w,req); if w.Code!=http.StatusNotModified||w.Body.Len()!=0{t.Fatalf("conditional code=%d body=%q",w.Code,w.Body.String())}
+	req=httptest.NewRequest(http.MethodGet,url,nil); req.Header.Set("Range","bytes=99-100")
+	w=httptest.NewRecorder(); h.ServeHTTP(w,req); if w.Code!=http.StatusRequestedRangeNotSatisfiable||w.Header().Get("Content-Range")!="bytes */10"{t.Fatalf("invalid range code=%d headers=%v",w.Code,w.Header())}
+}
+
+func TestCacheHTTPAuth(t *testing.T) {
+	h,_,url:=cacheTransportFixture(t,[]byte("abcd")); h.AuthToken="secret"
+	w:=httptest.NewRecorder(); h.ServeHTTP(w,httptest.NewRequest(http.MethodGet,url,nil)); if w.Code!=http.StatusUnauthorized{t.Fatalf("unauthorized code=%d",w.Code)}
+	req:=httptest.NewRequest(http.MethodGet,url,nil); req.Header.Set("Authorization","Bearer secret")
+	w=httptest.NewRecorder(); h.ServeHTTP(w,req); if w.Code!=http.StatusOK{t.Fatalf("authorized code=%d body=%s",w.Code,w.Body.String())}
+}
+
+func TestCacheHTTPServiceNonLoopbackRequiresAuth(t *testing.T) {
+	h:=http.HandlerFunc(func(http.ResponseWriter,*http.Request){})
+	if _,err:=NewCacheHTTPService("0.0.0.0:8421",h,""); !errors.Is(err,ErrCacheTransport){t.Fatalf("expected transport error, got %v",err)}
+	if _,err:=NewCacheHTTPService("0.0.0.0:8421",h,"secret"); err!=nil{t.Fatalf("authenticated non-loopback rejected: %v",err)}
+	if _,err:=NewCacheHTTPService("127.0.0.1:8421",h,""); err!=nil{t.Fatalf("loopback rejected: %v",err)}
 }

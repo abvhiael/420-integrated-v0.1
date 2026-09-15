@@ -24,12 +24,12 @@ function credential(overrides = {}) {
 
 function request(overrides = {}) {
   return {
-    schemaVersion: '1.0.0',
+    schemaVersion: '1.1.0',
     chainId: '420',
     entryPoint: addr(1),
     paymaster: addr(2),
     account: addr(3),
-    userOpHash: hash(4),
+    sponsorshipDigest: hash(4),
     policyId: hash(5),
     authorizationId: hash(6),
     maxSponsoredCostWei: '1000000000000000',
@@ -44,15 +44,15 @@ function issue(overrides = {}) {
     request: request(overrides.request),
     credential: credential(overrides.credential),
     now,
-    sign: ({ quoteCommitment }) => `sig:${quoteCommitment}`
+    sign: ({ sponsorshipDigest }) => `sig:${sponsorshipDigest}`
   });
 }
 
-test('issues deterministic operation-bound funding quote without execution authority', () => {
+test('issues deterministic sponsorship-bound funding quote without execution authority', () => {
   const quote = issue();
   assert.equal(quote.chainId, '420');
   assert.equal(quote.account, addr(3));
-  assert.equal(quote.userOpHash, hash(4));
+  assert.equal(quote.sponsorshipDigest, hash(4));
   assert.equal(quote.policyId, hash(5));
   assert.equal(quote.authorizationId, hash(6));
   assert.equal(quote.fundingMode, 'paymaster');
@@ -64,12 +64,18 @@ test('issues deterministic operation-bound funding quote without execution autho
   assert.equal(quote.sponsorSecretExposed, false);
   assert.match(quote.quoteId, /^0x[0-9a-f]{64}$/);
   assert.equal(quote.quoteId, quote.quoteCommitment);
-  assert.equal(quote.signature, `sig:${quote.quoteCommitment}`);
+  assert.equal(quote.signature, `sig:${quote.sponsorshipDigest}`);
 });
 
-test('same operation-bound request produces same commitment at the same issuance time', () => {
+test('same sponsorship-bound request produces same commitment at the same issuance time', () => {
   assert.equal(issue().quoteCommitment, issue().quoteCommitment);
-  assert.notEqual(issue({ request: { userOpHash: hash(7) } }).quoteCommitment, issue().quoteCommitment);
+  assert.notEqual(issue({ request: { sponsorshipDigest: hash(7) } }).quoteCommitment, issue().quoteCommitment);
+});
+
+test('legacy final userOpHash field is rejected so funding and execution signatures cannot be conflated', () => {
+  const legacy = { ...request(), userOpHash: hash(7) };
+  delete legacy.sponsorshipDigest;
+  assert.throws(() => validateGasQuoteRequest420(legacy), /unsupported field|sponsorshipDigest/);
 });
 
 test('fails closed on wrong audience, missing quote scope and expired credential', () => {
@@ -87,7 +93,7 @@ test('enforces short lived quote window', () => {
 test('strict request binding rejects malformed identifiers and unsupported fields', () => {
   assert.throws(() => validateGasQuoteRequest420(request({ chainId: '0' })), GasQuoteError420);
   assert.throws(() => validateGasQuoteRequest420(request({ account: '0x1234' })), GasQuoteError420);
-  assert.throws(() => validateGasQuoteRequest420(request({ userOpHash: '0x1234' })), GasQuoteError420);
+  assert.throws(() => validateGasQuoteRequest420(request({ sponsorshipDigest: '0x1234' })), GasQuoteError420);
   assert.throws(() => validateGasQuoteRequest420({ ...request(), extra: true }), /unsupported field/);
 });
 
@@ -96,7 +102,7 @@ test('quote read view remains authority-minimized and requires read scope', () =
   const view = createGasQuoteReadView420(quote, { credential: credential(), now });
   assert.deepEqual(Object.keys(view).sort(), [
     'account', 'authorizationId', 'authority', 'canonicalProtocolAuthority', 'chainId', 'entryPoint',
-    'executionAuthorization', 'maxSponsoredCostWei', 'paymaster', 'policyId', 'quoteId', 'userOpHash',
+    'executionAuthorization', 'maxSponsoredCostWei', 'paymaster', 'policyId', 'quoteId', 'sponsorshipDigest',
     'validAfter', 'validUntil'
   ].sort());
   assert.equal(view.executionAuthorization, false);

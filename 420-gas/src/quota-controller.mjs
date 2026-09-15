@@ -32,16 +32,23 @@ export function validateGasQuotaPolicy420(input = {}) {
     maxSponsoredCostPerOperationWei: positiveBigInt420(input.maxSponsoredCostPerOperationWei ?? '1000000000000000000', 'GAS9_OPERATION_COST_LIMIT_INVALID'),
     maxAccountWindowWei: positiveBigInt420(input.maxAccountWindowWei ?? '5000000000000000000', 'GAS9_ACCOUNT_WINDOW_LIMIT_INVALID'),
     maxPolicyWindowWei: positiveBigInt420(input.maxPolicyWindowWei ?? '10000000000000000000', 'GAS9_POLICY_WINDOW_LIMIT_INVALID'),
+    maxSponsorWindowWei: positiveBigInt420(input.maxSponsorWindowWei ?? '50000000000000000000', 'GAS9_SPONSOR_WINDOW_LIMIT_INVALID'),
     maxAccountOperationsPerWindow: input.maxAccountOperationsPerWindow ?? 100,
     maxPolicyOperationsPerWindow: input.maxPolicyOperationsPerWindow ?? 500,
+    maxSponsorOperationsPerWindow: input.maxSponsorOperationsPerWindow ?? 2_000,
     maxConcurrentPerAccount: input.maxConcurrentPerAccount ?? 10,
+    maxConcurrentSponsor: input.maxConcurrentSponsor ?? 1_000,
     maxTrackedAuthorizations: input.maxTrackedAuthorizations ?? 10_000,
+    maxReservationAgeMs: input.maxReservationAgeMs ?? 300_000,
   };
   positiveInt420(policy.windowMs, 'GAS9_WINDOW_INVALID', 86_400_000);
   positiveInt420(policy.maxAccountOperationsPerWindow, 'GAS9_ACCOUNT_OPS_LIMIT_INVALID', 100_000);
   positiveInt420(policy.maxPolicyOperationsPerWindow, 'GAS9_POLICY_OPS_LIMIT_INVALID', 1_000_000);
+  positiveInt420(policy.maxSponsorOperationsPerWindow, 'GAS9_SPONSOR_OPS_LIMIT_INVALID', 10_000_000);
   positiveInt420(policy.maxConcurrentPerAccount, 'GAS9_CONCURRENCY_LIMIT_INVALID', 10_000);
+  positiveInt420(policy.maxConcurrentSponsor, 'GAS9_SPONSOR_CONCURRENCY_LIMIT_INVALID', 1_000_000);
   positiveInt420(policy.maxTrackedAuthorizations, 'GAS9_TRACKED_AUTHORIZATIONS_LIMIT_INVALID', 1_000_000);
+  positiveInt420(policy.maxReservationAgeMs, 'GAS9_RESERVATION_AGE_INVALID', 3_600_000);
   return Object.freeze(policy);
 }
 
@@ -66,21 +73,42 @@ export class GasQuotaController420 {
     return next;
   }
 
-  reserve({ account, policyId, authorizationId, maxSponsoredCostWei, nowMs }) {
+  reapExpired(nowMs) {
+    this._windowId(nowMs);
+    let released = 0;
+    for (const [authorizationId, reservation] of this.active.entries()) {
+      if (reservation.expiresAtMs <= nowMs) {
+        this.active.delete(authorizationId);
+        released += 1;
+      }
+    }
+    return released;
+  }
+
+  reserve({ account, policyId, authorizationId, maxSponsoredCostWei, nowMs, expiresAtMs }) {
     const accountKey = key420(account, 'GAS9_ACCOUNT_INVALID');
     const policyKey = key420(policyId, 'GAS9_POLICY_INVALID');
     const authorizationKey = key420(authorizationId, 'GAS9_AUTHORIZATION_INVALID');
     const cost = positiveBigInt420(maxSponsoredCostWei, 'GAS9_OPERATION_COST_INVALID');
+    this._windowId(nowMs);
+    const expiry = expiresAtMs ?? nowMs + this.policy.maxReservationAgeMs;
+    if (!Number.isSafeInteger(expiry) || expiry <= nowMs || expiry - nowMs > this.policy.maxReservationAgeMs) fail420('GAS9_RESERVATION_EXPIRY_INVALID');
+
+    this.reapExpired(nowMs);
     if (cost > this.policy.maxSponsoredCostPerOperationWei) fail420('GAS9_OPERATION_COST_EXCEEDED');
     if (this.active.has(authorizationKey)) fail420('GAS9_DUPLICATE_AUTHORIZATION');
     if (this.active.size >= this.policy.maxTrackedAuthorizations) fail420('GAS9_STATE_CAPACITY_EXCEEDED');
+    if (this.active.size >= this.policy.maxConcurrentSponsor) fail420('GAS9_SPONSOR_CONCURRENCY_EXCEEDED');
 
     const accountWindow = this._window(`account:${accountKey}`, nowMs);
     const policyWindow = this._window(`policy:${policyKey}`, nowMs);
+    const sponsorWindow = this._window('sponsor:global', nowMs);
     if (accountWindow.operations >= this.policy.maxAccountOperationsPerWindow) fail420('GAS9_ACCOUNT_OPERATION_QUOTA_EXCEEDED');
     if (policyWindow.operations >= this.policy.maxPolicyOperationsPerWindow) fail420('GAS9_POLICY_OPERATION_QUOTA_EXCEEDED');
+    if (sponsorWindow.operations >= this.policy.maxSponsorOperationsPerWindow) fail420('GAS9_SPONSOR_OPERATION_QUOTA_EXCEEDED');
     if (accountWindow.sponsoredWei + cost > this.policy.maxAccountWindowWei) fail420('GAS9_ACCOUNT_SPEND_QUOTA_EXCEEDED');
     if (policyWindow.sponsoredWei + cost > this.policy.maxPolicyWindowWei) fail420('GAS9_POLICY_SPEND_QUOTA_EXCEEDED');
+    if (sponsorWindow.sponsoredWei + cost > this.policy.maxSponsorWindowWei) fail420('GAS9_SPONSOR_SPEND_QUOTA_EXCEEDED');
 
     let concurrent = 0;
     for (const reservation of this.active.values()) if (reservation.account === accountKey) concurrent += 1;
@@ -90,7 +118,9 @@ export class GasQuotaController420 {
     accountWindow.sponsoredWei += cost;
     policyWindow.operations += 1;
     policyWindow.sponsoredWei += cost;
-    const reservation = Object.freeze({ account: accountKey, policyId: policyKey, authorizationId: authorizationKey, reservedWei: cost, windowId: this._windowId(nowMs) });
+    sponsorWindow.operations += 1;
+    sponsorWindow.sponsoredWei += cost;
+    const reservation = Object.freeze({ account: accountKey, policyId: policyKey, authorizationId: authorizationKey, reservedWei: cost, windowId: this._windowId(nowMs), expiresAtMs: expiry });
     this.active.set(authorizationKey, reservation);
     return reservation;
   }
@@ -103,8 +133,10 @@ export class GasQuotaController420 {
   snapshot({ account, policyId, nowMs }) {
     const accountKey = key420(account, 'GAS9_ACCOUNT_INVALID');
     const policyKey = key420(policyId, 'GAS9_POLICY_INVALID');
+    this.reapExpired(nowMs);
     const accountWindow = this._window(`account:${accountKey}`, nowMs);
     const policyWindow = this._window(`policy:${policyKey}`, nowMs);
+    const sponsorWindow = this._window('sponsor:global', nowMs);
     let concurrent = 0;
     for (const reservation of this.active.values()) if (reservation.account === accountKey) concurrent += 1;
     return Object.freeze({
@@ -113,7 +145,10 @@ export class GasQuotaController420 {
       accountSponsoredWei: accountWindow.sponsoredWei,
       policyOperations: policyWindow.operations,
       policySponsoredWei: policyWindow.sponsoredWei,
+      sponsorOperations: sponsorWindow.operations,
+      sponsorSponsoredWei: sponsorWindow.sponsoredWei,
       accountConcurrent: concurrent,
+      sponsorConcurrent: this.active.size,
       trackedAuthorizations: this.active.size,
     });
   }

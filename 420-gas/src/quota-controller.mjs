@@ -57,6 +57,7 @@ export class GasQuotaController420 {
     this.policy = validateGasQuotaPolicy420(policy);
     this.windows = new Map();
     this.active = new Map();
+    this.nextReservationId = 1;
   }
 
   _windowId(nowMs) {
@@ -71,6 +72,22 @@ export class GasQuotaController420 {
     const next = { id, operations: 0, sponsoredWei: 0n };
     this.windows.set(key, next);
     return next;
+  }
+
+  _reservationId() {
+    if (!Number.isSafeInteger(this.nextReservationId) || this.nextReservationId < 1) fail420('GAS9_RESERVATION_ID_EXHAUSTED');
+    const id = this.nextReservationId;
+    this.nextReservationId += 1;
+    return id;
+  }
+
+  _exactReservation(input) {
+    if (!input || typeof input !== 'object' || Array.isArray(input)) fail420('GAS9_RESERVATION_HANDLE_INVALID');
+    const authorizationKey = key420(input.authorizationId, 'GAS9_AUTHORIZATION_INVALID');
+    const reservationId = positiveInt420(input.reservationId, 'GAS9_RESERVATION_ID_INVALID');
+    const current = this.active.get(authorizationKey);
+    if (!current || current.reservationId !== reservationId) return null;
+    return current;
   }
 
   reapExpired(nowMs) {
@@ -100,9 +117,12 @@ export class GasQuotaController420 {
     if (this.active.size >= this.policy.maxTrackedAuthorizations) fail420('GAS9_STATE_CAPACITY_EXCEEDED');
     if (this.active.size >= this.policy.maxConcurrentSponsor) fail420('GAS9_SPONSOR_CONCURRENCY_EXCEEDED');
 
-    const accountWindow = this._window(`account:${accountKey}`, nowMs);
-    const policyWindow = this._window(`policy:${policyKey}`, nowMs);
-    const sponsorWindow = this._window('sponsor:global', nowMs);
+    const accountWindowKey = `account:${accountKey}`;
+    const policyWindowKey = `policy:${policyKey}`;
+    const sponsorWindowKey = 'sponsor:global';
+    const accountWindow = this._window(accountWindowKey, nowMs);
+    const policyWindow = this._window(policyWindowKey, nowMs);
+    const sponsorWindow = this._window(sponsorWindowKey, nowMs);
     if (accountWindow.operations >= this.policy.maxAccountOperationsPerWindow) fail420('GAS9_ACCOUNT_OPERATION_QUOTA_EXCEEDED');
     if (policyWindow.operations >= this.policy.maxPolicyOperationsPerWindow) fail420('GAS9_POLICY_OPERATION_QUOTA_EXCEEDED');
     if (sponsorWindow.operations >= this.policy.maxSponsorOperationsPerWindow) fail420('GAS9_SPONSOR_OPERATION_QUOTA_EXCEEDED');
@@ -120,14 +140,43 @@ export class GasQuotaController420 {
     policyWindow.sponsoredWei += cost;
     sponsorWindow.operations += 1;
     sponsorWindow.sponsoredWei += cost;
-    const reservation = Object.freeze({ account: accountKey, policyId: policyKey, authorizationId: authorizationKey, reservedWei: cost, windowId: this._windowId(nowMs), expiresAtMs: expiry });
+    const reservation = Object.freeze({
+      account: accountKey,
+      policyId: policyKey,
+      authorizationId: authorizationKey,
+      reservationId: this._reservationId(),
+      reservedWei: cost,
+      windowId: this._windowId(nowMs),
+      expiresAtMs: expiry,
+      accountWindowKey,
+      policyWindowKey,
+      sponsorWindowKey,
+    });
     this.active.set(authorizationKey, reservation);
     return reservation;
   }
 
-  release(authorizationId) {
-    const authorizationKey = key420(authorizationId, 'GAS9_AUTHORIZATION_INVALID');
-    return this.active.delete(authorizationKey);
+  release(handle) {
+    const reservation = this._exactReservation(handle);
+    if (!reservation) return false;
+    this.active.delete(reservation.authorizationId);
+    return true;
+  }
+
+  rollback(handle) {
+    const reservation = this._exactReservation(handle);
+    if (!reservation) return false;
+    this.active.delete(reservation.authorizationId);
+    const accountWindow = this.windows.get(reservation.accountWindowKey);
+    const policyWindow = this.windows.get(reservation.policyWindowKey);
+    const sponsorWindow = this.windows.get(reservation.sponsorWindowKey);
+    for (const window of [accountWindow, policyWindow, sponsorWindow]) {
+      if (!window || window.id !== reservation.windowId) continue;
+      if (window.operations < 1 || window.sponsoredWei < reservation.reservedWei) fail420('GAS9_ROLLBACK_INVARIANT');
+      window.operations -= 1;
+      window.sponsoredWei -= reservation.reservedWei;
+    }
+    return true;
   }
 
   snapshot({ account, policyId, nowMs }) {

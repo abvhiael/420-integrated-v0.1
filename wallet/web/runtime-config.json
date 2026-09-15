@@ -11,6 +11,10 @@
     "recoveryAuthority": null,
     "salt": "0x0000000000000000000000000000000000000000000000000000000000000000"
   },
+  "gasQuote": {
+    "enabled": false,
+    "endpoint": null
+  },
   "trackedAssets": [],
   "manifest": {
     "url": null,

@@ -9,16 +9,16 @@ library ECDSA420 {
         return keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hash));
     }
 
-    function tryRecover(bytes32 hash, bytes calldata signature) internal pure returns (address signer) {
+    function tryRecover(bytes32 hash, bytes memory signature) internal pure returns (address signer) {
         if (signature.length != 65) return address(0);
 
         bytes32 r;
         bytes32 s;
         uint8 v;
         assembly {
-            r := calldataload(signature.offset)
-            s := calldataload(add(signature.offset, 32))
-            v := byte(0, calldataload(add(signature.offset, 64)))
+            r := mload(add(signature, 32))
+            s := mload(add(signature, 64))
+            v := byte(0, mload(add(signature, 96)))
         }
 
         if (uint256(s) > _SECP256K1N_HALF || (v != 27 && v != 28)) return address(0);

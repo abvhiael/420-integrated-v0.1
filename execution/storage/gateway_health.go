@@ -31,7 +31,7 @@ func NewGatewayHealthTracker(failureThreshold uint64) *GatewayHealthTracker {
 	}
 	return &GatewayHealthTracker{
 		failureThreshold: failureThreshold,
-		snapshot: GatewayHealthSnapshot{Ready: true},
+		snapshot:         GatewayHealthSnapshot{Ready: true},
 	}
 }
 
@@ -71,45 +71,32 @@ func (h *GatewayHealthTracker) Snapshot() GatewayHealthSnapshot {
 	return h.snapshot
 }
 
-func gatewayHealthHandler(health *GatewayHealthTracker, next http.Handler) http.Handler {
-	if health == nil {
-		return next
+func gatewayServeHealth(health *GatewayHealthTracker, w http.ResponseWriter, r *http.Request) bool {
+	if health == nil || (r.URL.Path != "/healthz" && r.URL.Path != "/readyz") {
+		return false
 	}
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		switch r.URL.Path {
-		case "/healthz":
-			if r.Method != http.MethodGet && r.Method != http.MethodHead {
-				w.Header().Set("Allow", "GET, HEAD")
-				http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-				return
-			}
-			w.Header().Set("Content-Type", "application/json")
-			w.Header().Set("Cache-Control", "no-store")
-			w.WriteHeader(http.StatusOK)
-			if r.Method == http.MethodGet {
-				_, _ = w.Write([]byte("{\"live\":true}\n"))
-			}
-			return
-		case "/readyz":
-			if r.Method != http.MethodGet && r.Method != http.MethodHead {
-				w.Header().Set("Allow", "GET, HEAD")
-				http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-				return
-			}
-			snapshot := health.Snapshot()
-			w.Header().Set("Content-Type", "application/json")
-			w.Header().Set("Cache-Control", "no-store")
-			status := http.StatusOK
-			if !snapshot.Ready {
-				status = http.StatusServiceUnavailable
-			}
-			w.WriteHeader(status)
-			if r.Method == http.MethodGet {
-				_ = json.NewEncoder(w).Encode(snapshot)
-			}
-			return
-		default:
-			next.ServeHTTP(w, r)
+	if r.Method != http.MethodGet && r.Method != http.MethodHead {
+		w.Header().Set("Allow", "GET, HEAD")
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return true
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Cache-Control", "no-store")
+	if r.URL.Path == "/healthz" {
+		w.WriteHeader(http.StatusOK)
+		if r.Method == http.MethodGet {
+			_, _ = w.Write([]byte("{\"live\":true}\n"))
 		}
-	})
+		return true
+	}
+	snapshot := health.Snapshot()
+	status := http.StatusOK
+	if !snapshot.Ready {
+		status = http.StatusServiceUnavailable
+	}
+	w.WriteHeader(status)
+	if r.Method == http.MethodGet {
+		_ = json.NewEncoder(w).Encode(snapshot)
+	}
+	return true
 }

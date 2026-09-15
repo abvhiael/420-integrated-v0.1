@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -106,23 +107,109 @@ func gatewayRequestFromHTTP(r *http.Request) (GatewayRequest, error) {
 	return req, nil
 }
 
+type GatewayHTTPPolicy struct {
+	MaxConcurrentRequests uint32
+	RateLimitRequests     uint32
+	RateLimitWindow       time.Duration
+}
+
+type gatewayRateEntry struct {
+	windowStart time.Time
+	requests    uint32
+}
+
+type gatewayAbuseGuard struct {
+	sem        chan struct{}
+	rate       uint32
+	window     time.Duration
+	mu         sync.Mutex
+	clients    map[string]gatewayRateEntry
+}
+
+func newGatewayAbuseGuard(policy GatewayHTTPPolicy) (*gatewayAbuseGuard, error) {
+	if policy.MaxConcurrentRequests == 0 || policy.RateLimitRequests == 0 || policy.RateLimitWindow <= 0 {
+		return nil, fmt.Errorf("%w: invalid gateway abuse policy", ErrGatewayRoute)
+	}
+	return &gatewayAbuseGuard{
+		sem: make(chan struct{}, policy.MaxConcurrentRequests),
+		rate: policy.RateLimitRequests,
+		window: policy.RateLimitWindow,
+		clients: make(map[string]gatewayRateEntry),
+	}, nil
+}
+
+func (g *gatewayAbuseGuard) allowClient(remoteAddr string, now time.Time) (bool, time.Duration) {
+	host, _, err := net.SplitHostPort(remoteAddr)
+	if err != nil || strings.TrimSpace(host) == "" {
+		host = strings.TrimSpace(remoteAddr)
+	}
+	if host == "" {
+		host = "unknown"
+	}
+	now = now.UTC()
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	entry := g.clients[host]
+	if entry.windowStart.IsZero() || now.Sub(entry.windowStart) >= g.window {
+		g.clients[host] = gatewayRateEntry{windowStart: now, requests: 1}
+		return true, 0
+	}
+	if entry.requests >= g.rate {
+		return false, g.window - now.Sub(entry.windowStart)
+	}
+	entry.requests++
+	g.clients[host] = entry
+	return true, 0
+}
+
+func (g *gatewayAbuseGuard) wrap(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		allowed, retryAfter := g.allowClient(r.RemoteAddr, time.Now())
+		if !allowed {
+			seconds := int64(retryAfter.Round(time.Second) / time.Second)
+			if seconds < 1 { seconds = 1 }
+			w.Header().Set("Retry-After", strconv.FormatInt(seconds, 10))
+			http.Error(w, "gateway rate limit exceeded", http.StatusTooManyRequests)
+			return
+		}
+		select {
+		case g.sem <- struct{}{}:
+			defer func() { <-g.sem }()
+			next.ServeHTTP(w, r)
+		default:
+			w.Header().Set("Retry-After", "1")
+			http.Error(w, "gateway concurrency limit exceeded", http.StatusTooManyRequests)
+		}
+	})
+}
+
 type GatewayHTTPService struct {
 	server *http.Server
 	ln     net.Listener
 }
 
 func NewGatewayHTTPService(listenAddr string, handler GatewayHTTPHandler) (*GatewayHTTPService, error) {
+	return NewGatewayHTTPServiceWithPolicy(listenAddr, handler, GatewayHTTPPolicy{
+		MaxConcurrentRequests: 128,
+		RateLimitRequests: 240,
+		RateLimitWindow: time.Minute,
+	})
+}
+
+func NewGatewayHTTPServiceWithPolicy(listenAddr string, handler GatewayHTTPHandler, policy GatewayHTTPPolicy) (*GatewayHTTPService, error) {
 	listenAddr = strings.TrimSpace(listenAddr)
 	if listenAddr == "" {
 		return nil, fmt.Errorf("%w: empty gateway listen address", ErrGatewayRoute)
 	}
+	guard, err := newGatewayAbuseGuard(policy)
+	if err != nil { return nil, err }
 	ln, err := net.Listen("tcp", listenAddr)
 	if err != nil {
 		return nil, err
 	}
 	return &GatewayHTTPService{
 		server: &http.Server{
-			Handler: handler,
+			Handler: guard.wrap(handler),
 			ReadHeaderTimeout: 5 * time.Second,
 			IdleTimeout: 30 * time.Second,
 		},

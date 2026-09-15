@@ -1,6 +1,7 @@
 import type { AutomationTransactionPlan420 } from './execution.js';
 import {
   authorizeAutomationFunding420,
+  automationFundingPlanDigest420,
   type AutomationBudgetAuthorization420,
   type AutomationExecutionBudget420,
   type AutomationFeeQuote420,
@@ -78,6 +79,7 @@ export async function prepareAutomationGasFunding420(input: {
   const preparationPolicy = input.preparationPolicy ?? DEFAULT_GAS8_PREPARATION_POLICY_420;
   validatePreparationPolicy420(preparationPolicy);
 
+  const pinnedPlanDigest = automationFundingPlanDigest420(input.plan);
   const request = buildCanonicalGasQuoteRequestForAutomation420({
     binding: input.binding,
     attempt: input.attempt,
@@ -89,6 +91,8 @@ export async function prepareAutomationGasFunding420(input: {
   });
 
   const result = await input.client.requestQuote(request);
+  if (automationFundingPlanDigest420(input.plan) !== pinnedPlanDigest) throw new Error('GAS8_PLAN_MUTATED_DURING_QUOTE');
+
   if (result.status === 'quote') {
     const paymasterQuote = adaptCanonicalGasQuoteForAutomation420({
       quote: result.quote,

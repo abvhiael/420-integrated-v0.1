@@ -115,14 +115,14 @@ func (h CacheHTTPHandler) serveMetrics(w http.ResponseWriter, r *http.Request) {
 	state := h.Runtime.Runtime.State(now)
 	m := h.Reconciler.Metrics()
 	w.Header().Set("Content-Type", "text/plain; version=0.0.4")
-	fmt.Fprintf(w, "420_cache_entries %d\n", len(state.Entries))
-	fmt.Fprintf(w, "420_cache_used_bytes %d\n", state.UsedBytes)
-	fmt.Fprintf(w, "420_cache_reconcile_runs_total %d\n", m.Runs)
-	fmt.Fprintf(w, "420_cache_reconcile_success_total %d\n", m.Successes)
-	fmt.Fprintf(w, "420_cache_reconcile_failures_total %d\n", m.Failures)
-	fmt.Fprintf(w, "420_cache_reconcile_invalidated_total %d\n", m.Invalidated)
-	fmt.Fprintf(w, "420_cache_triggered_evictions_total %d\n", m.TriggeredEvictions)
-	fmt.Fprintf(w, "420_cache_reconcile_consecutive_failures %d\n", m.ConsecutiveFailures)
+	fmt.Fprintf(w, "fourtwenty_cache_entries %d\n", len(state.Entries))
+	fmt.Fprintf(w, "fourtwenty_cache_used_bytes %d\n", state.UsedBytes)
+	fmt.Fprintf(w, "fourtwenty_cache_reconcile_runs_total %d\n", m.Runs)
+	fmt.Fprintf(w, "fourtwenty_cache_reconcile_success_total %d\n", m.Successes)
+	fmt.Fprintf(w, "fourtwenty_cache_reconcile_failures_total %d\n", m.Failures)
+	fmt.Fprintf(w, "fourtwenty_cache_reconcile_invalidated_total %d\n", m.Invalidated)
+	fmt.Fprintf(w, "fourtwenty_cache_triggered_evictions_total %d\n", m.TriggeredEvictions)
+	fmt.Fprintf(w, "fourtwenty_cache_reconcile_consecutive_failures %d\n", m.ConsecutiveFailures)
 }
 
 func cacheKeyFromRequest(r *http.Request) (CacheKey, error) {

@@ -86,11 +86,96 @@ test('qualified transport obtains canonical hash, requests session-key signature
   assert.equal(prepared.userOpHash, hash);
   assert.equal(prepared.signature, signature);
   assert.equal(prepared.userOperation.signature, signature);
+  assert.equal(prepared.gasSponsorship.sponsored, false);
+  assert.equal(prepared.gasSponsorship.fundingMode, 'self-funded');
   assert.equal(prepared.broadcastReady, true);
   assert.equal(prepared.entryPointSimulation.simulationPassed, true);
   assert.equal(prepared.entryPointSimulation.gas, '0x5208');
   assert.ok(calls.some((call) => call.method === 'personal_sign'));
   assert.ok(calls.some((call) => call.method === 'eth_estimateGas'));
+});
+
+test('GAS-7 attaches sponsorship before canonical hashing and Wallet signing', async () => {
+  const sponsoredHash = `0x${'88'.repeat(32)}`;
+  const paymasterAndData = '0x12345678';
+  const calls = [];
+  let discovered = false;
+  const provider = { request: async (method, params = []) => {
+    calls.push({ method, params });
+    if (method === 'eth_accounts') return [signer];
+    if (method === 'eth_call') {
+      const data = params[0].data;
+      if (data.startsWith('0x22cdde4c')) {
+        assert.equal(discovered, true, 'canonical sponsored hash requested before quote discovery');
+        assert.ok(data.includes(paymasterAndData.slice(2)), 'canonical hash did not include paymasterAndData');
+        return sponsoredHash;
+      }
+      if (data.startsWith('0x9eec012b')) return successResult;
+      throw new Error(`unexpected eth_call ${data.slice(0, 10)}`);
+    }
+    if (method === 'personal_sign') {
+      assert.deepEqual(params, [sponsoredHash, signer]);
+      const priorHashCall = calls.findIndex((call) => call.method === 'eth_call' && call.params[0].data.startsWith('0x22cdde4c'));
+      assert.ok(priorHashCall >= 0 && priorHashCall < calls.length - 1, 'Wallet signed before sponsored canonical hash');
+      return signature;
+    }
+    if (method === 'eth_estimateGas') return '0x5208';
+    throw new Error(method);
+  } };
+
+  const prepared = await prepareEntryPointTransport(provider, { smartAccount: account, entryPoint }, signer, preflight(), {
+    now: new Date('2026-09-14T23:00:00.000Z'),
+    discoverGasQuote: async (request) => {
+      discovered = true;
+      assert.equal(request.executionAuthorization, false);
+      assert.equal(request.userOperation.paymasterAndData, '0x');
+      assert.equal(request.userOperation.signature, '0x');
+      return {
+        quoteId: `0x${'91'.repeat(32)}`,
+        chainId: '420',
+        entryPoint,
+        paymaster: '0x4444444444444444444444444444444444444444',
+        account,
+        userOpHash: sponsoredHash,
+        policyId: `0x${'92'.repeat(32)}`,
+        authorizationId: `0x${'93'.repeat(32)}`,
+        maxSponsoredCostWei: '1000000000000000',
+        validAfter: '2026-09-14T22:59:00.000Z',
+        validUntil: '2026-09-14T23:01:00.000Z',
+        paymasterAndData,
+        authority: 'funding-offer-only',
+        executionAuthorization: false,
+      };
+    },
+  });
+
+  assert.equal(prepared.userOpHash, sponsoredHash);
+  assert.equal(prepared.userOperation.paymasterAndData, paymasterAndData);
+  assert.equal(prepared.userOperation.signature, signature);
+  assert.equal(prepared.gasSponsorship.sponsored, true);
+  assert.equal(prepared.gasSponsorship.fundingMode, 'paymaster');
+  assert.equal(prepared.gasSponsorship.executionAuthorization, false);
+});
+
+test('GAS-7 quote unavailability preserves self-funded transport without changing authorization', async () => {
+  const provider = { request: async (method, params = []) => {
+    if (method === 'eth_accounts') return [signer];
+    if (method === 'eth_call') {
+      if (params[0].data.startsWith('0x22cdde4c')) return hash;
+      if (params[0].data.startsWith('0x9eec012b')) return successResult;
+    }
+    if (method === 'personal_sign') return signature;
+    if (method === 'eth_estimateGas') return '0x5208';
+    throw new Error(method);
+  } };
+  const prepared = await prepareEntryPointTransport(provider, { smartAccount: account, entryPoint }, signer, preflight(), {
+    discoverGasQuote: async () => null,
+  });
+  assert.equal(prepared.userOperation.paymasterAndData, '0x');
+  assert.equal(prepared.gasSponsorship.sponsored, false);
+  assert.equal(prepared.gasSponsorship.fundingMode, 'self-funded');
+  assert.equal(prepared.gasSponsorship.fallbackReason, 'SPONSORSHIP_UNAVAILABLE');
+  assert.equal(prepared.gasSponsorship.executionAuthorization, false);
 });
 
 test('transport fails closed when the session signer is not exposed by the connected wallet', async () => {

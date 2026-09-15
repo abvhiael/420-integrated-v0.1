@@ -116,8 +116,15 @@ function requestProjection420(value) {
 
 function quotaController420(value) {
   if (value === undefined || value === null) return null;
-  assert420(typeof value === 'object' && typeof value.reserve === 'function' && typeof value.release === 'function', 'quotaController is invalid');
+  assert420(typeof value === 'object' && typeof value.reserve === 'function' && typeof value.release === 'function' && typeof value.rollback === 'function', 'quotaController is invalid');
   return value;
+}
+
+function quotaHandle420(reservation) {
+  assert420(reservation && typeof reservation === 'object', 'quota reservation is required');
+  const authorizationId = bytes32420(reservation.authorizationId, 'quota authorizationId');
+  assert420(Number.isSafeInteger(reservation.reservationId) && reservation.reservationId > 0, 'quota reservationId is invalid');
+  return Object.freeze({ authorizationId, reservationId: reservation.reservationId });
 }
 
 export function validateGasEconomicLimits420(input = {}) {
@@ -229,15 +236,15 @@ export function createGasQuote420({ request, credential, now = new Date(), maxTt
       quotaReservation: reservation,
     });
   } catch (error) {
-    if (quota && reservation) quota.release(quoteRequest.authorizationId);
+    if (quota && reservation) quota.rollback(quotaHandle420(reservation));
     throw error;
   }
 }
 
-export function releaseGasQuoteQuota420({ quotaController, authorizationId }) {
+export function releaseGasQuoteQuota420({ quotaController, quotaReservation }) {
   const quota = quotaController420(quotaController);
   assert420(quota !== null, 'quotaController is required');
-  return quota.release(bytes32420(authorizationId, 'authorizationId'));
+  return quota.release(quotaHandle420(quotaReservation));
 }
 
 export function createGasQuoteReadView420(quote, { credential, now = new Date() } = {}) {

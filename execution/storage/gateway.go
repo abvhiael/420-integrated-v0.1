@@ -10,6 +10,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 )
 
 var (
@@ -116,7 +117,9 @@ func (g GatewayRouter) Route(ctx context.Context, req GatewayRequest) (GatewayRe
 				if left.Capability != right.Capability {
 					return gatewayCapabilityRank(left.Capability) < gatewayCapabilityRank(right.Capability)
 				}
-				if left.Priority != right.Priority { return left.Priority < right.Priority }
+				if left.Priority != right.Priority {
+					return left.Priority < right.Priority
+				}
 				if strings.ToLower(left.ProviderID) != strings.ToLower(right.ProviderID) {
 					return strings.ToLower(left.ProviderID) < strings.ToLower(right.ProviderID)
 				}
@@ -127,9 +130,13 @@ func (g GatewayRouter) Route(ctx context.Context, req GatewayRequest) (GatewayRe
 				if !candidate.Active || candidate.Source == nil || strings.TrimSpace(candidate.ProviderID) == "" || strings.TrimSpace(candidate.NodeID) == "" {
 					continue
 				}
-				if candidate.Capability != GatewayCapabilityCache && candidate.Capability != GatewayCapabilityStore { continue }
+				if candidate.Capability != GatewayCapabilityCache && candidate.Capability != GatewayCapabilityStore {
+					continue
+				}
 				key := strings.ToLower(string(candidate.Capability) + "\x00" + candidate.ProviderID + "\x00" + candidate.NodeID)
-				if _, ok := seen[key]; ok { continue }
+				if _, ok := seen[key]; ok {
+					continue
+				}
 				seen[key] = struct{}{}
 				routeSource := gatewayRouteSource{Source: candidate.Source, ProviderID: candidate.ProviderID, NodeID: candidate.NodeID}
 				if candidate.Capability == GatewayCapabilityCache {
@@ -140,8 +147,12 @@ func (g GatewayRouter) Route(ctx context.Context, req GatewayRequest) (GatewayRe
 			}
 		}
 	}
-	for _, source := range g.Cache { cacheSources = append(cacheSources, gatewayRouteSource{Source: source}) }
-	for _, source := range g.Store { storeSources = append(storeSources, gatewayRouteSource{Source: source}) }
+	for _, source := range g.Cache {
+		cacheSources = append(cacheSources, gatewayRouteSource{Source: source})
+	}
+	for _, source := range g.Store {
+		storeSources = append(storeSources, gatewayRouteSource{Source: source})
+	}
 	try := func(tier string, sources []gatewayRouteSource) (GatewayResult, bool) {
 		for i, source := range sources {
 			if source.Source == nil {
@@ -149,26 +160,40 @@ func (g GatewayRouter) Route(ctx context.Context, req GatewayRequest) (GatewayRe
 				continue
 			}
 			payload, err := source.Source.FetchGatewayObject(ctx, req)
-			if err == nil { err = verifyCachePayload(req.CacheKey, payload) }
+			if err == nil {
+				err = verifyCachePayload(req.CacheKey, payload)
+			}
 			if err == nil {
 				return GatewayResult{Payload: payload, Tier: tier, Source: i, ProviderID: source.ProviderID, NodeID: source.NodeID, Attempts: append([]GatewayAttempt(nil), attempts...)}, true
 			}
 			attempts = append(attempts, GatewayAttempt{Tier: tier, Source: i, ProviderID: source.ProviderID, NodeID: source.NodeID, Error: err.Error()})
-			if ctx.Err() != nil { return GatewayResult{}, false }
+			if ctx.Err() != nil {
+				return GatewayResult{}, false
+			}
 		}
 		return GatewayResult{}, false
 	}
-	if result, ok := try("cache", cacheSources); ok { return result, nil }
-	if result, ok := try("store", storeSources); ok { return result, nil }
+	if result, ok := try("cache", cacheSources); ok {
+		return result, nil
+	}
+	if result, ok := try("store", storeSources); ok {
+		return result, nil
+	}
 	return GatewayResult{Attempts: attempts}, ErrGatewayRoute
 }
 
 func (g GatewayRouter) authorize(ctx context.Context, req GatewayRequest) error {
 	access := req.Access
 	mode := access.Mode
-	if mode == "" { mode = GatewayAccessPublic }
-	if mode == GatewayAccessPublic { return nil }
-	if mode != GatewayAccessPrivate { return ErrGatewayUnauthorized }
+	if mode == "" {
+		mode = GatewayAccessPublic
+	}
+	if mode == GatewayAccessPublic {
+		return nil
+	}
+	if mode != GatewayAccessPrivate {
+		return ErrGatewayUnauthorized
+	}
 	access.Subject = strings.TrimSpace(access.Subject)
 	access.SessionID = strings.TrimSpace(access.SessionID)
 	access.Capability = strings.TrimSpace(strings.ToLower(access.Capability))
@@ -192,48 +217,155 @@ func gatewayCapabilityRank(capability GatewayCapability) int {
 	}
 }
 
+type GatewayRetryPolicy struct {
+	MaxAttempts    uint32
+	InitialBackoff time.Duration
+	MaxBackoff     time.Duration
+}
+
+func (p GatewayRetryPolicy) normalized() GatewayRetryPolicy {
+	if p.MaxAttempts == 0 {
+		p.MaxAttempts = 1
+	}
+	if p.MaxAttempts > 1 {
+		if p.InitialBackoff <= 0 {
+			p.InitialBackoff = 100 * time.Millisecond
+		}
+		if p.MaxBackoff <= 0 {
+			p.MaxBackoff = time.Second
+		}
+		if p.MaxBackoff < p.InitialBackoff {
+			p.MaxBackoff = p.InitialBackoff
+		}
+	}
+	return p
+}
+
 type HTTPGatewayCacheSource struct {
 	BaseURL string
 	Client  *http.Client
 	Token   string
+	Retry   GatewayRetryPolicy
 }
 
 func (s HTTPGatewayCacheSource) FetchGatewayObject(ctx context.Context, req GatewayRequest) ([]byte, error) {
 	base := strings.TrimRight(strings.TrimSpace(s.BaseURL), "/")
-	if base == "" { return nil, ErrGatewayRoute }
+	if base == "" {
+		return nil, ErrGatewayRoute
+	}
 	q := url.Values{}
 	q.Set("object_id", req.CacheKey.ObjectID)
 	q.Set("manifest_id", req.CacheKey.ManifestID)
 	q.Set("shard_index", strconv.FormatUint(uint64(req.CacheKey.ShardIndex), 10))
 	q.Set("shard_root", req.CacheKey.ShardRoot)
 	q.Set("size_bytes", strconv.FormatUint(req.CacheKey.SizeBytes, 10))
-	return gatewayHTTPGet(ctx, s.Client, base+"/v1/cache?"+q.Encode(), s.Token, req.CacheKey.SizeBytes)
+	return gatewayHTTPGetWithRetry(ctx, s.Client, base+"/v1/cache?"+q.Encode(), s.Token, req.CacheKey.SizeBytes, s.Retry)
 }
 
 type HTTPGatewayStoreSource struct {
 	BaseURL string
 	Client  *http.Client
 	Token   string
+	Retry   GatewayRetryPolicy
 }
 
 func (s HTTPGatewayStoreSource) FetchGatewayObject(ctx context.Context, req GatewayRequest) ([]byte, error) {
 	base := strings.TrimRight(strings.TrimSpace(s.BaseURL), "/")
 	commitment := strings.TrimSpace(req.CommitmentID)
-	if base == "" || commitment == "" { return nil, ErrGatewayRoute }
-	return gatewayHTTPGet(ctx, s.Client, base+"/v1/shards/"+url.PathEscape(commitment), s.Token, req.CacheKey.SizeBytes)
+	if base == "" || commitment == "" {
+		return nil, ErrGatewayRoute
+	}
+	return gatewayHTTPGetWithRetry(ctx, s.Client, base+"/v1/shards/"+url.PathEscape(commitment), s.Token, req.CacheKey.SizeBytes, s.Retry)
 }
 
 func gatewayHTTPGet(ctx context.Context, client *http.Client, endpoint, token string, size uint64) ([]byte, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
-	if err != nil { return nil, err }
-	if strings.TrimSpace(token) != "" { req.Header.Set("Authorization", "Bearer "+token) }
-	if client == nil { client = http.DefaultClient }
-	resp, err := client.Do(req)
-	if err != nil { return nil, err }
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK { return nil, fmt.Errorf("%w: upstream status %d", ErrGatewayRoute, resp.StatusCode) }
-	payload, err := io.ReadAll(io.LimitReader(resp.Body, int64(size)+1))
-	if err != nil { return nil, err }
-	if uint64(len(payload)) != size { return nil, ErrCacheIntegrity }
-	return payload, nil
+	return gatewayHTTPGetWithRetry(ctx, client, endpoint, token, size, GatewayRetryPolicy{MaxAttempts: 1})
+}
+
+func gatewayHTTPGetWithRetry(ctx context.Context, client *http.Client, endpoint, token string, size uint64, policy GatewayRetryPolicy) ([]byte, error) {
+	policy = policy.normalized()
+	if client == nil {
+		client = http.DefaultClient
+	}
+	var lastErr error
+	for attempt := uint32(1); attempt <= policy.MaxAttempts; attempt++ {
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
+		if err != nil {
+			return nil, err
+		}
+		if strings.TrimSpace(token) != "" {
+			req.Header.Set("Authorization", "Bearer "+token)
+		}
+		resp, err := client.Do(req)
+		if err != nil {
+			if ctx.Err() != nil {
+				return nil, ctx.Err()
+			}
+			lastErr = err
+		} else {
+			if resp.StatusCode == http.StatusOK {
+				payload, readErr := io.ReadAll(io.LimitReader(resp.Body, int64(size)+1))
+				_ = resp.Body.Close()
+				if readErr != nil {
+					return nil, readErr
+				}
+				if uint64(len(payload)) != size {
+					return nil, ErrCacheIntegrity
+				}
+				return payload, nil
+			}
+			status := resp.StatusCode
+			_, _ = io.Copy(io.Discard, io.LimitReader(resp.Body, 4096))
+			_ = resp.Body.Close()
+			lastErr = fmt.Errorf("%w: upstream status %d", ErrGatewayRoute, status)
+			if !gatewayRetryableHTTPStatus(status) {
+				return nil, lastErr
+			}
+		}
+		if attempt == policy.MaxAttempts {
+			break
+		}
+		if err := waitGatewayRetry(ctx, gatewayRetryBackoff(policy, attempt)); err != nil {
+			return nil, err
+		}
+	}
+	if lastErr == nil {
+		lastErr = ErrGatewayRoute
+	}
+	return nil, lastErr
+}
+
+func gatewayRetryableHTTPStatus(status int) bool {
+	return status == http.StatusRequestTimeout || status == http.StatusTooEarly || status == http.StatusTooManyRequests || status >= 500
+}
+
+func gatewayRetryBackoff(policy GatewayRetryPolicy, failedAttempt uint32) time.Duration {
+	backoff := policy.InitialBackoff
+	for i := uint32(1); i < failedAttempt && backoff < policy.MaxBackoff; i++ {
+		if backoff > policy.MaxBackoff/2 {
+			return policy.MaxBackoff
+		}
+		backoff *= 2
+	}
+	if backoff > policy.MaxBackoff {
+		return policy.MaxBackoff
+	}
+	return backoff
+}
+
+func waitGatewayRetry(ctx context.Context, delay time.Duration) error {
+	if delay <= 0 {
+		return nil
+	}
+	timer := time.NewTimer(delay)
+	defer timer.Stop()
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-timer.C:
+		return nil
+	}
 }

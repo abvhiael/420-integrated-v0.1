@@ -25,6 +25,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    env:
+      FOUNDRY_PROFILE: ${{ github.event_name == 'pull_request' && 'pr' || 'ci' }}
 
     steps:
       - uses: actions/checkout@v4
@@ -47,7 +49,13 @@ jobs:
       - name: Bootstrap
         run: bash ./scripts/contracts-bootstrap.sh
 
+      - name: Pull-request contract verification
+        if: github.event_name == 'pull_request'
+        continue-on-error: true
+        run: bash ./scripts/contracts-verify.sh
+
       - name: Full contract verification
+        if: github.event_name != 'pull_request'
         continue-on-error: true
         run: bash ./scripts/contracts-ci.sh
 

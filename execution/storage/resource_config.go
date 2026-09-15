@@ -106,9 +106,17 @@ func (s *ResourceConfigStore) Snapshot() []ResourceConfigEntry {
 	}
 	s.mu.RUnlock()
 	sort.Slice(out, func(i, j int) bool {
-		li := strings.ToLower(string(out[i].Scope) + "\x00" + out[i].ServiceID + "\x00" + out[i].Key)
-		lj := strings.ToLower(string(out[j].Scope) + "\x00" + out[j].ServiceID + "\x00" + out[j].Key)
-		return li < lj
+		leftRank := configScopeRank(out[i].Scope)
+		rightRank := configScopeRank(out[j].Scope)
+		if leftRank != rightRank {
+			return leftRank < rightRank
+		}
+		leftService := strings.ToLower(out[i].ServiceID)
+		rightService := strings.ToLower(out[j].ServiceID)
+		if leftService != rightService {
+			return leftService < rightService
+		}
+		return strings.ToLower(out[i].Key) < strings.ToLower(out[j].Key)
 	})
 	return out
 }
@@ -124,4 +132,15 @@ func (s *ResourceConfigStore) hasService(serviceID string) bool {
 
 func configEntryKey(scope ResourceConfigScope, serviceID, key string) string {
 	return strings.ToLower(string(scope) + "\x00" + strings.TrimSpace(serviceID) + "\x00" + strings.TrimSpace(key))
+}
+
+func configScopeRank(scope ResourceConfigScope) int {
+	switch scope {
+	case ResourceConfigShared:
+		return 0
+	case ResourceConfigService:
+		return 1
+	default:
+		return 2
+	}
 }

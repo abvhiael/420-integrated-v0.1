@@ -1,5 +1,5 @@
 import type { AutomationTransactionPlan420 } from './execution.js';
-import { automationFundingPlanDigest420 } from './funding.js';
+import { automationFundingPlanDigest420, type AutomationFeeQuote420 } from './funding.js';
 import type { AutomationAttemptPaymasterQuote420 } from './gas-integration.js';
 import type { AutomationAttempt420 } from './recovery.js';
 
@@ -7,7 +7,7 @@ const ADDRESS20 = /^0x[0-9a-fA-F]{40}$/;
 const HASH32 = /^0x[0-9a-fA-F]{64}$/;
 
 export interface CanonicalGasQuoteRequest420 {
-  schemaVersion: '1.1.0';
+  schemaVersion: '1.2.0';
   chainId: '420';
   entryPoint: string;
   paymaster: string;
@@ -16,6 +16,9 @@ export interface CanonicalGasQuoteRequest420 {
   policyId: string;
   authorizationId: string;
   maxSponsoredCostWei: string;
+  gasLimit: string;
+  maxFeePerGasWei: string;
+  maxPriorityFeePerGasWei: string;
   validAfter: string;
   validUntil: string;
 }
@@ -67,18 +70,27 @@ function assertAttemptPlanBinding420(attempt: AutomationAttempt420, plan: Automa
   if (attempt.intentDigest !== plan.intentDigest.toLowerCase()) throw new Error('GAS8_QUOTE_PLAN_ATTEMPT_MISMATCH');
 }
 
+function assertFeeQuote420(feeQuote: AutomationFeeQuote420): void {
+  if (feeQuote.maxFeePerGasWei <= 0n) throw new Error('GAS9_MAX_FEE_INVALID');
+  if (feeQuote.maxPriorityFeePerGasWei < 0n) throw new Error('GAS9_PRIORITY_FEE_INVALID');
+  if (feeQuote.maxPriorityFeePerGasWei > feeQuote.maxFeePerGasWei) throw new Error('GAS9_PRIORITY_EXCEEDS_MAX_FEE');
+}
+
 export function buildCanonicalGasQuoteRequestForAutomation420(input: {
   binding: AutomationGasQuoteBinding420;
   attempt: AutomationAttempt420;
   plan: AutomationTransactionPlan420;
+  feeQuote: AutomationFeeQuote420;
   sponsorshipDigest: string;
   requestedSponsoredCostWei: bigint;
   validAfterMs: number;
   validUntilMs: number;
 }): CanonicalGasQuoteRequest420 {
-  const { binding, attempt, plan } = input;
+  const { binding, attempt, plan, feeQuote } = input;
   assertAttemptPlanBinding420(attempt, plan);
+  assertFeeQuote420(feeQuote);
   if (plan.chainId !== 420n) throw new Error('GAS8_REQUEST_CHAIN_MISMATCH');
+  if (plan.gasLimit <= 0n) throw new Error('GAS9_GAS_LIMIT_INVALID');
 
   const entryPoint = address420(binding.entryPoint, 'GAS8_BINDING_ENTRYPOINT_INVALID');
   const paymaster = address420(binding.paymaster, 'GAS8_BINDING_PAYMASTER_INVALID');
@@ -92,7 +104,7 @@ export function buildCanonicalGasQuoteRequestForAutomation420(input: {
   if (!Number.isSafeInteger(input.validAfterMs) || !Number.isSafeInteger(input.validUntilMs) || input.validAfterMs < 0 || input.validUntilMs <= input.validAfterMs) throw new Error('GAS8_REQUEST_WINDOW_INVALID');
 
   return Object.freeze({
-    schemaVersion: '1.1.0',
+    schemaVersion: '1.2.0',
     chainId: '420',
     entryPoint,
     paymaster,
@@ -101,6 +113,9 @@ export function buildCanonicalGasQuoteRequestForAutomation420(input: {
     policyId,
     authorizationId,
     maxSponsoredCostWei: input.requestedSponsoredCostWei.toString(10),
+    gasLimit: plan.gasLimit.toString(10),
+    maxFeePerGasWei: feeQuote.maxFeePerGasWei.toString(10),
+    maxPriorityFeePerGasWei: feeQuote.maxPriorityFeePerGasWei.toString(10),
     validAfter: new Date(input.validAfterMs).toISOString(),
     validUntil: new Date(input.validUntilMs).toISOString(),
   });
@@ -111,14 +126,15 @@ export function adaptCanonicalGasQuoteForAutomation420(input: {
   binding: AutomationGasQuoteBinding420;
   attempt: AutomationAttempt420;
   plan: AutomationTransactionPlan420;
+  feeQuote: AutomationFeeQuote420;
   nowMs: number;
 }): AutomationAttemptPaymasterQuote420 {
-  const { quote, binding, attempt, plan } = input;
+  const { quote, binding, attempt, plan, feeQuote } = input;
   if (!Number.isSafeInteger(input.nowMs) || input.nowMs < 0) throw new Error('GAS8_QUOTE_NOW_INVALID');
-  if (quote.schemaVersion !== '1.1.0') throw new Error('GAS8_QUOTE_SCHEMA_UNSUPPORTED');
+  if (quote.schemaVersion !== '1.2.0') throw new Error('GAS8_QUOTE_SCHEMA_UNSUPPORTED');
   if (quote.chainId !== '420' || plan.chainId !== 420n) throw new Error('GAS8_QUOTE_CHAIN_MISMATCH');
   if (quote.fundingMode !== 'paymaster' || quote.authority !== 'funding-offer-only') throw new Error('GAS8_QUOTE_AUTHORITY_INVALID');
-  if (quote.executionAuthorization || quote.targetProtocolAuthorization || quote.canonicalProtocolAuthority) throw new Error('GAS8_QUOTE_AUTHORITY_ESCALATION');
+  if (quote.executionAuthorization || quote.walletAuthorization || quote.targetProtocolAuthorization || quote.canonicalProtocolAuthority) throw new Error('GAS8_QUOTE_AUTHORITY_ESCALATION');
 
   if (address420(quote.entryPoint, 'GAS8_QUOTE_ENTRYPOINT_INVALID') !== address420(binding.entryPoint, 'GAS8_BINDING_ENTRYPOINT_INVALID')) throw new Error('GAS8_QUOTE_ENTRYPOINT_MISMATCH');
   if (address420(quote.paymaster, 'GAS8_QUOTE_PAYMASTER_INVALID') !== address420(binding.paymaster, 'GAS8_BINDING_PAYMASTER_INVALID')) throw new Error('GAS8_QUOTE_PAYMASTER_MISMATCH');
@@ -128,6 +144,15 @@ export function adaptCanonicalGasQuoteForAutomation420(input: {
   const attemptId = hash32420(attempt.attemptId, 'GAS8_ATTEMPT_ID_INVALID');
   if (hash32420(quote.authorizationId, 'GAS8_QUOTE_AUTHORIZATION_ID_INVALID') !== attemptId) throw new Error('GAS8_QUOTE_ATTEMPT_MISMATCH');
   assertAttemptPlanBinding420(attempt, plan);
+  assertFeeQuote420(feeQuote);
+
+  const quotedGasLimit = uint420(quote.gasLimit, 'GAS9_QUOTE_GAS_LIMIT_INVALID');
+  const quotedMaxFee = uint420(quote.maxFeePerGasWei, 'GAS9_QUOTE_MAX_FEE_INVALID');
+  const quotedPriorityFee = uint420(quote.maxPriorityFeePerGasWei, 'GAS9_QUOTE_PRIORITY_FEE_INVALID');
+  if (quotedGasLimit !== plan.gasLimit) throw new Error('GAS9_QUOTE_GAS_LIMIT_MISMATCH');
+  if (quotedMaxFee !== feeQuote.maxFeePerGasWei) throw new Error('GAS9_QUOTE_MAX_FEE_MISMATCH');
+  if (quotedPriorityFee !== feeQuote.maxPriorityFeePerGasWei) throw new Error('GAS9_QUOTE_PRIORITY_FEE_MISMATCH');
+  if (quotedPriorityFee > quotedMaxFee) throw new Error('GAS9_QUOTE_PRIORITY_EXCEEDS_MAX_FEE');
 
   const validAfterMs = parseTime420(quote.validAfter, 'GAS8_QUOTE_VALID_AFTER_INVALID');
   const validUntilMs = parseTime420(quote.validUntil, 'GAS8_QUOTE_VALID_UNTIL_INVALID');

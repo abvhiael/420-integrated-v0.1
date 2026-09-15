@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"net"
@@ -109,8 +110,14 @@ func gatewayRequestFromHTTP(r *http.Request) (GatewayRequest, error) {
 
 type GatewayHTTPPolicy struct {
 	MaxConcurrentRequests uint32
-	RateLimitRequests     uint32
-	RateLimitWindow       time.Duration
+	RateLimitRequests      uint32
+	RateLimitWindow        time.Duration
+}
+
+type GatewayHTTPTransportPolicy struct {
+	TLSCertFile  string
+	TLSKeyFile   string
+	AllowedHosts []string
 }
 
 type gatewayRateEntry struct {
@@ -119,11 +126,11 @@ type gatewayRateEntry struct {
 }
 
 type gatewayAbuseGuard struct {
-	sem        chan struct{}
-	rate       uint32
-	window     time.Duration
-	mu         sync.Mutex
-	clients    map[string]gatewayRateEntry
+	sem     chan struct{}
+	rate    uint32
+	window  time.Duration
+	mu      sync.Mutex
+	clients map[string]gatewayRateEntry
 }
 
 func newGatewayAbuseGuard(policy GatewayHTTPPolicy) (*gatewayAbuseGuard, error) {
@@ -183,60 +190,118 @@ func (g *gatewayAbuseGuard) wrap(next http.Handler) http.Handler {
 	})
 }
 
-type GatewayHTTPService struct {
-	server *http.Server
-	ln     net.Listener
+func gatewayListenIsLoopback(listenAddr string) bool {
+	host, _, err := net.SplitHostPort(strings.TrimSpace(listenAddr))
+	if err != nil { return false }
+	host = strings.TrimSpace(strings.Trim(host, "[]"))
+	if strings.EqualFold(host, "localhost") { return true }
+	ip := net.ParseIP(host)
+	return ip != nil && ip.IsLoopback()
 }
 
-func NewGatewayHTTPService(listenAddr string, handler GatewayHTTPHandler) (*GatewayHTTPService, error) {
-	return NewGatewayHTTPServiceWithPolicy(listenAddr, handler, GatewayHTTPPolicy{
-		MaxConcurrentRequests: 128,
-		RateLimitRequests: 240,
-		RateLimitWindow: time.Minute,
+func normalizeGatewayHost(host string) string {
+	host = strings.TrimSpace(strings.ToLower(host))
+	if parsed, _, err := net.SplitHostPort(host); err == nil {
+		host = parsed
+	}
+	return strings.Trim(strings.TrimSpace(host), "[]")
+}
+
+func validateGatewayAllowedHosts(hosts []string) (map[string]struct{}, error) {
+	allowed := make(map[string]struct{}, len(hosts))
+	for _, raw := range hosts {
+		host := normalizeGatewayHost(raw)
+		if host == "" || strings.ContainsAny(host, "/\\* ") {
+			return nil, fmt.Errorf("%w: invalid gateway allowed host", ErrGatewayRoute)
+		}
+		allowed[host] = struct{}{}
+	}
+	return allowed, nil
+}
+
+func gatewayHostGuard(allowed map[string]struct{}, next http.Handler) http.Handler {
+	if len(allowed) == 0 { return next }
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if _, ok := allowed[normalizeGatewayHost(r.Host)]; !ok {
+			http.Error(w, "gateway host not allowed", http.StatusMisdirectedRequest)
+			return
+		}
+		next.ServeHTTP(w, r)
 	})
 }
 
+type GatewayHTTPService struct {
+	server    *http.Server
+	ln        net.Listener
+	tlsConfig *tls.Config
+}
+
+func NewGatewayHTTPService(listenAddr string, handler GatewayHTTPHandler) (*GatewayHTTPService, error) {
+	return NewGatewayHTTPServiceWithTransport(listenAddr, handler, GatewayHTTPPolicy{
+		MaxConcurrentRequests: 128,
+		RateLimitRequests: 240,
+		RateLimitWindow: time.Minute,
+	}, GatewayHTTPTransportPolicy{})
+}
+
 func NewGatewayHTTPServiceWithPolicy(listenAddr string, handler GatewayHTTPHandler, policy GatewayHTTPPolicy) (*GatewayHTTPService, error) {
+	return NewGatewayHTTPServiceWithTransport(listenAddr, handler, policy, GatewayHTTPTransportPolicy{})
+}
+
+func NewGatewayHTTPServiceWithTransport(listenAddr string, handler GatewayHTTPHandler, policy GatewayHTTPPolicy, transport GatewayHTTPTransportPolicy) (*GatewayHTTPService, error) {
 	listenAddr = strings.TrimSpace(listenAddr)
 	if listenAddr == "" {
 		return nil, fmt.Errorf("%w: empty gateway listen address", ErrGatewayRoute)
 	}
 	guard, err := newGatewayAbuseGuard(policy)
 	if err != nil { return nil, err }
-	ln, err := net.Listen("tcp", listenAddr)
-	if err != nil {
-		return nil, err
+	allowed, err := validateGatewayAllowedHosts(transport.AllowedHosts)
+	if err != nil { return nil, err }
+	certFile := strings.TrimSpace(transport.TLSCertFile)
+	keyFile := strings.TrimSpace(transport.TLSKeyFile)
+	if (certFile == "") != (keyFile == "") {
+		return nil, fmt.Errorf("%w: gateway TLS certificate and key must be configured together", ErrGatewayRoute)
 	}
+	publicBind := !gatewayListenIsLoopback(listenAddr)
+	if publicBind && (certFile == "" || len(allowed) == 0) {
+		return nil, fmt.Errorf("%w: non-loopback gateway requires TLS and allowed hosts", ErrGatewayRoute)
+	}
+	var tlsConfig *tls.Config
+	if certFile != "" {
+		cert, err := tls.LoadX509KeyPair(certFile, keyFile)
+		if err != nil { return nil, fmt.Errorf("%w: gateway TLS: %v", ErrGatewayRoute, err) }
+		tlsConfig = &tls.Config{Certificates: []tls.Certificate{cert}, MinVersion: tls.VersionTLS12}
+	}
+	ln, err := net.Listen("tcp", listenAddr)
+	if err != nil { return nil, err }
+	wrapped := gatewayHostGuard(allowed, guard.wrap(handler))
 	return &GatewayHTTPService{
 		server: &http.Server{
-			Handler: guard.wrap(handler),
+			Handler: wrapped,
 			ReadHeaderTimeout: 5 * time.Second,
 			IdleTimeout: 30 * time.Second,
 		},
 		ln: ln,
+		tlsConfig: tlsConfig,
 	}, nil
 }
 
 func (s *GatewayHTTPService) Addr() net.Addr {
-	if s == nil || s.ln == nil {
-		return nil
-	}
+	if s == nil || s.ln == nil { return nil }
 	return s.ln.Addr()
 }
 
 func (s *GatewayHTTPService) Run(ctx context.Context) error {
-	if s == nil || s.server == nil || s.ln == nil {
-		return ErrGatewayRoute
-	}
+	if s == nil || s.server == nil || s.ln == nil { return ErrGatewayRoute }
 	errCh := make(chan error, 1)
 	go func() {
-		errCh <- s.server.Serve(s.ln)
+		ln := s.ln
+		if s.tlsConfig != nil { ln = tls.NewListener(ln, s.tlsConfig.Clone()) }
+		errCh <- s.server.Serve(ln)
 	}()
 	select {
 	case err := <-errCh:
-		if errors.Is(err, http.ErrServerClosed) {
-			return nil
-		}
+		if errors.Is(err, http.ErrServerClosed) { return nil }
 		return err
 	case <-ctx.Done():
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -246,9 +311,7 @@ func (s *GatewayHTTPService) Run(ctx context.Context) error {
 			return err
 		}
 		err := <-errCh
-		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			return err
-		}
+		if err != nil && !errors.Is(err, http.ErrServerClosed) { return err }
 		return nil
 	}
 }

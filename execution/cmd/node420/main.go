@@ -178,24 +178,37 @@ func main() {
 	if *dryRun {
 		fmt.Printf("%s %s\n", filepath.Clean(path), strings.Join(args, " "))
 		if *storageEnabled { fmt.Printf("node420 storage listen=%s data=%s\n", *storageListen, filepath.Join(*datadir,"storage")) }
+		if *cacheEnabled { fmt.Printf("node420 cache data=%s interval=%s\n", filepath.Join(*datadir,"cache"), cacheInterval.String()) }
 		return
 	}
 
 	cmd := exec.Command(path,args...); cmd.Stdin=os.Stdin; cmd.Stdout=os.Stdout; cmd.Stderr=os.Stderr
-	if !*storageEnabled {
+	if !*storageEnabled && !*cacheEnabled {
 		if err := cmd.Run(); err != nil { fmt.Fprintln(os.Stderr,"node420:",err); os.Exit(1) }
 		return
 	}
 
 	rpcURL := *storageRPC
 	if rpcURL == "" { rpcURL = fmt.Sprintf("http://%s:%d", *httpAddr, *httpPort) }
-	service, err := storage.NewService(storage.ServiceConfig{
-		NodeID:*storageNodeID, CapacityBytes:*storageCapacity, DataDir:filepath.Join(*datadir,"storage"), ListenAddr:*storageListen,
-		RPCURL:rpcURL, StartBlock:*storageStartBlock, Confirmations:*storageConfirmations, SyncInterval:*storageSyncInterval,
-		ProofInterval:*storageProofInterval, ProofRegistry:*storageProofRegistry, ProofFrom:*storageProofFrom, ProofReceiptWait:*storageProofReceiptWait,
-		Contracts:storage.RPCStorageContracts{Agreement:*storageAgreement,Commitment:*storageCommitment,Capacity:*storageCapacityContract,Settlement:*storageSettlement,Scheme:*storageScheme,Manifest:*storageManifest},
-	})
-	if err != nil { fmt.Fprintln(os.Stderr,"node420 storage config:",err); os.Exit(2) }
+	contracts := storage.RPCStorageContracts{Agreement:*storageAgreement,Commitment:*storageCommitment,Capacity:*storageCapacityContract,Settlement:*storageSettlement,Scheme:*storageScheme,Manifest:*storageManifest}
+	services := make([]serviceRunner, 0, 2)
+	if *storageEnabled {
+		service, err := storage.NewService(storage.ServiceConfig{
+			NodeID:*storageNodeID, CapacityBytes:*storageCapacity, DataDir:filepath.Join(*datadir,"storage"), ListenAddr:*storageListen,
+			RPCURL:rpcURL, StartBlock:*storageStartBlock, Confirmations:*storageConfirmations, SyncInterval:*storageSyncInterval,
+			ProofInterval:*storageProofInterval, ProofRegistry:*storageProofRegistry, ProofFrom:*storageProofFrom, ProofReceiptWait:*storageProofReceiptWait,
+			Contracts:contracts,
+		})
+		if err != nil { fmt.Fprintln(os.Stderr,"node420 storage config:",err); os.Exit(2) }
+		services = append(services, service)
+	}
+	if *cacheEnabled {
+		cacheService, err := newNodeCacheService(*datadir, rpcURL, contracts)
+		if err != nil { fmt.Fprintln(os.Stderr,"node420 cache config:",err); os.Exit(2) }
+		services = append(services, cacheService)
+	}
+	var service serviceRunner
+	if len(services) == 1 { service = services[0] } else { service = serviceGroup{services:services} }
 
 	ctx,cancel:=signal.NotifyContext(context.Background(),os.Interrupt,syscall.SIGTERM)
 	defer cancel()

@@ -9,12 +9,6 @@ import (
 	"time"
 )
 
-type gatewayAuthorizerFunc func(context.Context, GatewayAccess, GatewayRequest) error
-
-func (f gatewayAuthorizerFunc) AuthorizeGatewayAccess(ctx context.Context, access GatewayAccess, req GatewayRequest) error {
-	return f(ctx, access, req)
-}
-
 func TestGatewayHTTPHandlerPublicGETAndHEAD(t *testing.T) {
 	payload := []byte("abcd")
 	key := cacheTestKey(payload, "manifest-a", 1)

@@ -13,25 +13,25 @@ import (
 )
 
 var (
-	gatewayEnabled          = flag.Bool("gateway", false, "enable 420Gateway HTTP service")
-	gatewayListen           = flag.String("gateway.listen", "127.0.0.1:8422", "420Gateway HTTP listen address")
-	gatewayCacheURL         = flag.String("gateway.cache-url", "", "optional upstream 420Cache base URL")
-	gatewayCacheToken       = flag.String("gateway.cache-token", "", "optional bearer token for upstream 420Cache")
-	gatewayStoreURL         = flag.String("gateway.store-url", "", "optional upstream 420Store base URL")
-	gatewayStoreToken       = flag.String("gateway.store-token", "", "optional bearer token for upstream 420Store")
-	gatewayTimeout          = flag.Duration("gateway.upstream-timeout", 10*time.Second, "420Gateway upstream request timeout")
-	gatewayUpstreamAttempts = flag.Uint("gateway.upstream-attempts", 3, "maximum attempts per 420Gateway HTTP upstream")
-	gatewayUpstreamBackoff  = flag.Duration("gateway.upstream-backoff", 100*time.Millisecond, "initial retry backoff for transient 420Gateway upstream failures")
+	gatewayEnabled            = flag.Bool("gateway", false, "enable 420Gateway HTTP service")
+	gatewayListen             = flag.String("gateway.listen", "127.0.0.1:8422", "420Gateway HTTP listen address")
+	gatewayCacheURL           = flag.String("gateway.cache-url", "", "optional upstream 420Cache base URL")
+	gatewayCacheToken         = flag.String("gateway.cache-token", "", "optional bearer token for upstream 420Cache")
+	gatewayStoreURL           = flag.String("gateway.store-url", "", "optional upstream 420Store base URL")
+	gatewayStoreToken         = flag.String("gateway.store-token", "", "optional bearer token for upstream 420Store")
+	gatewayTimeout            = flag.Duration("gateway.upstream-timeout", 10*time.Second, "420Gateway upstream request timeout")
+	gatewayUpstreamAttempts   = flag.Uint("gateway.upstream-attempts", 3, "maximum attempts per 420Gateway HTTP upstream")
+	gatewayUpstreamBackoff    = flag.Duration("gateway.upstream-backoff", 100*time.Millisecond, "initial retry backoff for transient 420Gateway upstream failures")
 	gatewayUpstreamMaxBackoff = flag.Duration("gateway.upstream-max-backoff", time.Second, "maximum retry backoff for transient 420Gateway upstream failures")
-	gatewayMaxConcurrent    = flag.Uint("gateway.max-concurrent-requests", 128, "maximum concurrent 420Gateway requests")
-	gatewayRateRequests     = flag.Uint("gateway.rate-limit-requests", 240, "maximum requests per client in each rate-limit window")
-	gatewayRateWindow       = flag.Duration("gateway.rate-limit-window", time.Minute, "per-client 420Gateway rate-limit window")
-	gatewayTLSCert          = flag.String("gateway.tls-cert", "", "TLS certificate file for 420Gateway HTTPS")
-	gatewayTLSKey           = flag.String("gateway.tls-key", "", "TLS private key file for 420Gateway HTTPS")
-	gatewayAllowedHosts     = flag.String("gateway.allowed-hosts", "", "comma-separated allowed Host values; required for non-loopback gateway exposure")
-	gatewayFailureThreshold = flag.Uint64("gateway.degraded-failure-threshold", 3, "consecutive gateway 5xx responses before readiness becomes degraded")
-	gatewayMetrics          *storage.GatewayHTTPMetrics
-	gatewayHealth           *storage.GatewayHealthTracker
+	gatewayMaxConcurrent      = flag.Uint("gateway.max-concurrent-requests", 128, "maximum concurrent 420Gateway requests")
+	gatewayRateRequests       = flag.Uint("gateway.rate-limit-requests", 240, "maximum requests per client in each rate-limit window")
+	gatewayRateWindow         = flag.Duration("gateway.rate-limit-window", time.Minute, "per-client 420Gateway rate-limit window")
+	gatewayTLSCert            = flag.String("gateway.tls-cert", "", "TLS certificate file for 420Gateway HTTPS")
+	gatewayTLSKey             = flag.String("gateway.tls-key", "", "TLS private key file for 420Gateway HTTPS")
+	gatewayAllowedHosts       = flag.String("gateway.allowed-hosts", "", "comma-separated allowed Host values; required for non-loopback gateway exposure")
+	gatewayFailureThreshold   = flag.Uint64("gateway.degraded-failure-threshold", 3, "consecutive gateway 5xx responses before readiness becomes degraded")
+	gatewayMetrics            *storage.GatewayHTTPMetrics
+	gatewayHealth             *storage.GatewayHealthTracker
 )
 
 func newNodeGatewayService() (serviceRunner, error) {

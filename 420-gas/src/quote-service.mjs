@@ -161,6 +161,7 @@ export function createGasQuote420({ request, credential, now = new Date(), maxTt
       authorizationId: quoteRequest.authorizationId,
       maxSponsoredCostWei: quoteRequest.maxSponsoredCostWei,
       nowMs: issuedMs,
+      expiresAtMs: validUntilMs,
     });
   }
 

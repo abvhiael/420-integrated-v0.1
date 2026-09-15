@@ -35,12 +35,17 @@ function reserve(q, n, overrides = {}) {
   });
 }
 
+function handle(reservation) {
+  return { authorizationId: reservation.authorizationId, reservationId: reservation.reservationId };
+}
+
 test('GAS-9.1 reserves bounded sponsorship without granting execution authority', () => {
   const q = controller();
   const r = reserve(q, 10);
   assert.equal(r.reservedWei, 100n);
   assert.equal(r.expiresAtMs, 1_000);
-  assert.deepEqual(Object.keys(r).sort(), ['account', 'authorizationId', 'expiresAtMs', 'policyId', 'reservedWei', 'windowId'].sort());
+  assert.equal(r.reservationId, 1);
+  assert.deepEqual(Object.keys(r).sort(), ['account', 'authorizationId', 'expiresAtMs', 'policyId', 'reservationId', 'reservedWei', 'windowId'].sort());
   const s = q.snapshot({ account: addr(1), policyId: hash(2), nowMs: 100 });
   assert.equal(s.accountOperations, 1);
   assert.equal(s.accountSponsoredWei, 100n);
@@ -65,9 +70,9 @@ test('GAS-9.1 enforces per-account spend, operation and concurrency quotas', () 
   assert.throws(() => reserve(spend, 21), /GAS9_ACCOUNT_SPEND_QUOTA_EXCEEDED/);
 
   const concurrent = controller({ maxAccountOperationsPerWindow: 10, maxAccountWindowWei: 1_000n, maxConcurrentPerAccount: 1 });
-  reserve(concurrent, 30);
+  const first = reserve(concurrent, 30);
   assert.throws(() => reserve(concurrent, 31), /GAS9_ACCOUNT_CONCURRENCY_EXCEEDED/);
-  assert.equal(concurrent.release(hash(30)), true);
+  assert.equal(concurrent.release(handle(first)), true);
   reserve(concurrent, 31);
 });
 
@@ -94,10 +99,10 @@ test('GAS-9.1 resets rolling quota counters at the next fixed window while activ
 
 test('GAS-9.1 bounds tracked outstanding authorization state', () => {
   const q = controller({ maxAccountOperationsPerWindow: 100, maxPolicyOperationsPerWindow: 100, maxAccountWindowWei: 10_000n, maxPolicyWindowWei: 10_000n, maxConcurrentPerAccount: 100, maxConcurrentSponsor: 100, maxTrackedAuthorizations: 2 });
-  reserve(q, 10);
+  const first = reserve(q, 10);
   reserve(q, 11, { account: addr(2) });
   assert.throws(() => reserve(q, 12, { account: addr(3) }), /GAS9_STATE_CAPACITY_EXCEEDED/);
-  q.release(hash(10));
+  q.release(handle(first));
   reserve(q, 12, { account: addr(3) });
 });
 
@@ -171,4 +176,30 @@ test('GAS-9.3 rejects invalid or overlong reservation expiry', () => {
   const q = controller({ maxReservationAgeMs: 500 });
   assert.throws(() => reserve(q, 80, { nowMs: 100, expiresAtMs: 100 }), /GAS9_RESERVATION_EXPIRY_INVALID/);
   assert.throws(() => reserve(q, 81, { nowMs: 100, expiresAtMs: 601 }), /GAS9_RESERVATION_EXPIRY_INVALID/);
+});
+
+test('GAS-9.5 stale release handles cannot delete a newer reservation for the same authorization', () => {
+  const q = controller({ maxAccountOperationsPerWindow: 10, maxPolicyOperationsPerWindow: 10, maxConcurrentPerAccount: 10 });
+  const first = reserve(q, 90, { nowMs: 100, expiresAtMs: 200 });
+  q.reapExpired(200);
+  const second = reserve(q, 90, { nowMs: 200, expiresAtMs: 300 });
+  assert.notEqual(first.reservationId, second.reservationId);
+  assert.equal(q.release(handle(first)), false);
+  assert.equal(q.snapshot({ account: addr(1), policyId: hash(2), nowMs: 200 }).accountConcurrent, 1);
+  assert.equal(q.release(handle(second)), true);
+});
+
+test('GAS-9.5 rollback is exact and refunds only the failed reservation accounting', () => {
+  const q = controller({ maxAccountOperationsPerWindow: 10, maxPolicyOperationsPerWindow: 10, maxConcurrentPerAccount: 10 });
+  const first = reserve(q, 91);
+  const second = reserve(q, 92);
+  assert.equal(q.rollback(handle(first)), true);
+  assert.equal(q.rollback(handle(first)), false);
+  const s = q.snapshot({ account: addr(1), policyId: hash(2), nowMs: 100 });
+  assert.equal(s.accountOperations, 1);
+  assert.equal(s.policyOperations, 1);
+  assert.equal(s.sponsorOperations, 1);
+  assert.equal(s.accountSponsoredWei, 100n);
+  assert.equal(s.accountConcurrent, 1);
+  assert.equal(q.release(handle(second)), true);
 });

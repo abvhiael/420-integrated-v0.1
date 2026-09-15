@@ -24,9 +24,9 @@ func TestGatewayHealthDegradesAndRecovers(t *testing.T) {
 		t.Fatalf("after threshold = %+v", snapshot)
 	}
 
-	health.ObserveGatewayHTTP(context.Background(), GatewayHTTPObservation{StatusCode: http.StatusOK, Tier: GatewayTierCache})
+	health.ObserveGatewayHTTP(context.Background(), GatewayHTTPObservation{StatusCode: http.StatusOK, Tier: "cache"})
 	snapshot := health.Snapshot()
-	if !snapshot.Ready || snapshot.Degraded || snapshot.ConsecutiveFailures != 0 || snapshot.LastTier != GatewayTierCache || snapshot.LastSuccess.IsZero() {
+	if !snapshot.Ready || snapshot.Degraded || snapshot.ConsecutiveFailures != 0 || snapshot.LastTier != "cache" || snapshot.LastSuccess.IsZero() {
 		t.Fatalf("after recovery = %+v", snapshot)
 	}
 }

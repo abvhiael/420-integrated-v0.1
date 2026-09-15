@@ -11,6 +11,9 @@ import (
 type gatewaySourceFunc func(context.Context, GatewayRequest) ([]byte, error)
 func (f gatewaySourceFunc) FetchGatewayObject(ctx context.Context, req GatewayRequest) ([]byte,error){ return f(ctx,req) }
 
+type gatewayDiscoveryFunc func(context.Context, GatewayRequest) ([]GatewayCandidate, error)
+func (f gatewayDiscoveryFunc) DiscoverGatewaySources(ctx context.Context, req GatewayRequest) ([]GatewayCandidate,error){ return f(ctx,req) }
+
 func gatewayRequest(payload []byte) GatewayRequest {
 	return GatewayRequest{CacheKey:cacheTestKey(payload,"manifest-a",1),CommitmentID:"commitment-a"}
 }
@@ -49,6 +52,50 @@ func TestGatewayRouterFailsClosed(t *testing.T){
 	payload:=[]byte("abcd"); req:=gatewayRequest(payload)
 	g:=GatewayRouter{Cache:[]GatewaySource{gatewaySourceFunc(func(context.Context,GatewayRequest)([]byte,error){return nil,errors.New("miss")})}}
 	res,err:=g.Route(context.Background(),req); if !errors.Is(err,ErrGatewayRoute)||len(res.Attempts)!=1{t.Fatalf("res=%+v err=%v",res,err)}
+}
+
+func TestGatewayRouterDiscoveryFiltersAndFailsOverDeterministically(t *testing.T){
+	payload:=[]byte("abcd"); req:=gatewayRequest(payload); calls:=[]string{}
+	source:=func(name string, data []byte, err error) GatewaySource {
+		return gatewaySourceFunc(func(context.Context,GatewayRequest)([]byte,error){calls=append(calls,name);return data,err})
+	}
+	g:=GatewayRouter{Discovery:gatewayDiscoveryFunc(func(context.Context,GatewayRequest)([]GatewayCandidate,error){
+		return []GatewayCandidate{
+			{ProviderID:"provider-z",NodeID:"node-z",Capability:GatewayCapabilityCache,Priority:10,Active:true,Source:source("cache-z",payload,nil)},
+			{ProviderID:"provider-a",NodeID:"node-a",Capability:GatewayCapabilityCache,Priority:5,Active:true,Source:source("cache-a",nil,errors.New("cache a down"))},
+			{ProviderID:"provider-inactive",NodeID:"node-inactive",Capability:GatewayCapabilityCache,Priority:0,Active:false,Source:source("inactive",payload,nil)},
+			{ProviderID:"provider-other",NodeID:"node-other",Capability:GatewayCapability("relay"),Priority:0,Active:true,Source:source("wrong-capability",payload,nil)},
+			{ProviderID:"provider-store",NodeID:"node-store",Capability:GatewayCapabilityStore,Priority:0,Active:true,Source:source("store",payload,nil)},
+		},nil
+	})}
+	res,err:=g.Route(context.Background(),req);if err!=nil{t.Fatal(err)}
+	if res.Tier!="cache"||res.ProviderID!="provider-z"||res.NodeID!="node-z"{t.Fatalf("bad result %+v",res)}
+	if len(calls)!=2||calls[0]!="cache-a"||calls[1]!="cache-z"{t.Fatalf("calls=%v",calls)}
+	if len(res.Attempts)!=1||res.Attempts[0].ProviderID!="provider-a"{t.Fatalf("attempts=%+v",res.Attempts)}
+}
+
+func TestGatewayRouterDiscoveryTieBreakAndDedup(t *testing.T){
+	payload:=[]byte("abcd"); req:=gatewayRequest(payload); calls:=[]string{}
+	g:=GatewayRouter{Discovery:gatewayDiscoveryFunc(func(context.Context,GatewayRequest)([]GatewayCandidate,error){
+		return []GatewayCandidate{
+			{ProviderID:"provider-b",NodeID:"node-b",Capability:GatewayCapabilityCache,Priority:7,Active:true,Source:gatewaySourceFunc(func(context.Context,GatewayRequest)([]byte,error){calls=append(calls,"b");return payload,nil})},
+			{ProviderID:"provider-a",NodeID:"node-a",Capability:GatewayCapabilityCache,Priority:7,Active:true,Source:gatewaySourceFunc(func(context.Context,GatewayRequest)([]byte,error){calls=append(calls,"a");return payload,nil})},
+			{ProviderID:"provider-a",NodeID:"node-a",Capability:GatewayCapabilityCache,Priority:7,Active:true,Source:gatewaySourceFunc(func(context.Context,GatewayRequest)([]byte,error){calls=append(calls,"duplicate");return payload,nil})},
+		},nil
+	})}
+	res,err:=g.Route(context.Background(),req);if err!=nil{t.Fatal(err)}
+	if res.ProviderID!="provider-a"||res.NodeID!="node-a"{t.Fatalf("bad result %+v",res)}
+	if len(calls)!=1||calls[0]!="a"{t.Fatalf("calls=%v",calls)}
+}
+
+func TestGatewayRouterDiscoveryFailureFallsBackToStatic(t *testing.T){
+	payload:=[]byte("abcd"); req:=gatewayRequest(payload)
+	g:=GatewayRouter{
+		Discovery:gatewayDiscoveryFunc(func(context.Context,GatewayRequest)([]GatewayCandidate,error){return nil,errors.New("discovery unavailable")}),
+		Store:[]GatewaySource{gatewaySourceFunc(func(context.Context,GatewayRequest)([]byte,error){return payload,nil})},
+	}
+	res,err:=g.Route(context.Background(),req);if err!=nil{t.Fatal(err)}
+	if res.Tier!="store"||len(res.Attempts)!=1||res.Attempts[0].Tier!="discovery"{t.Fatalf("bad result %+v",res)}
 }
 
 func TestGatewayHTTPSources(t *testing.T){

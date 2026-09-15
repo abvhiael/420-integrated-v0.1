@@ -5,6 +5,9 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 RPC_URL="${MEDIA420_RPC_URL:-http://127.0.0.1:8545}"
 GOV_ADDR="0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
 OP_ADDR="0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
+SECOND_OP_ADDR="0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"
+THIRD_OP_ADDR="0x90F79bf6EB2c4f870365E785982E1f101E93b906"
+FOURTH_OP_ADDR="0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65"
 ZERO="0x0000000000000000000000000000000000000000000000000000000000000000"
 ANVIL_LOG="${TMPDIR:-/tmp}/420media-anvil.log"
 
@@ -14,16 +17,10 @@ cleanup() {
 }
 trap cleanup EXIT
 
-stage() {
-  printf '\n==> 420Media Anvil: %s\n' "$1"
-}
-
+stage() { printf '\n==> 420Media Anvil: %s\n' "$1"; }
 fail() {
   echo "420Media Anvil integration failed: $*" >&2
-  if [[ -f "$ANVIL_LOG" ]]; then
-    echo "--- anvil log tail ---" >&2
-    tail -n 80 "$ANVIL_LOG" >&2 || true
-  fi
+  if [[ -f "$ANVIL_LOG" ]]; then tail -n 80 "$ANVIL_LOG" >&2 || true; fi
   exit 1
 }
 
@@ -32,13 +29,8 @@ anvil --silent --host 127.0.0.1 --port 8545 >"$ANVIL_LOG" 2>&1 &
 ANVIL_PID=$!
 READY=0
 for _ in $(seq 1 100); do
-  if cast block-number --rpc-url "$RPC_URL" >/dev/null 2>&1; then
-    READY=1
-    break
-  fi
-  if ! kill -0 "$ANVIL_PID" >/dev/null 2>&1; then
-    fail "Anvil exited before becoming ready"
-  fi
+  if cast block-number --rpc-url "$RPC_URL" >/dev/null 2>&1; then READY=1; break; fi
+  if ! kill -0 "$ANVIL_PID" >/dev/null 2>&1; then fail "Anvil exited before becoming ready"; fi
   sleep 0.05
 done
 [[ "$READY" == "1" ]] || fail "Anvil did not become ready"
@@ -53,8 +45,7 @@ forge build --force \
   src/media/MediaJobMarket420.sol
 
 deploy() {
-  local target="$1"
-  local out
+  local target="$1" out
   echo "deploying $target" >&2
   out=$(forge create "$target" --broadcast --unlocked --from "$GOV_ADDR" --rpc-url "$RPC_URL" --constructor-args "$GOV_ADDR")
   awk '/Deployed to:/ {print $3}' <<<"$out"
@@ -68,13 +59,17 @@ SETTLEMENT=$(deploy "src/media/MediaSettlement420.sol:MediaSettlement420")
 MARKET=$(deploy "src/media/MediaJobMarket420.sol:MediaJobMarket420")
 popd >/dev/null
 
-for v in CAP_REG OP_REG SLA_REG SETTLEMENT MARKET; do
-  [[ -n "${!v}" ]] || fail "failed to deploy $v"
-done
+for v in CAP_REG OP_REG SLA_REG SETTLEMENT MARKET; do [[ -n "${!v}" ]] || fail "failed to deploy $v"; done
 
 CAP_ID=$(cast keccak "420MEDIA_ANVIL_CAP")
 OP_ID=$(cast keccak "420MEDIA_ANVIL_OPERATOR")
+SECOND_OP_ID=$(cast keccak "420MEDIA_ANVIL_SECOND_OPERATOR")
+THIRD_OP_ID=$(cast keccak "420MEDIA_ANVIL_THIRD_OPERATOR")
+FOURTH_OP_ID=$(cast keccak "420MEDIA_ANVIL_FOURTH_OPERATOR")
 STAKE_REF=$(cast keccak "420MEDIA_ANVIL_STAKE")
+SECOND_STAKE_REF=$(cast keccak "420MEDIA_ANVIL_SECOND_STAKE")
+THIRD_STAKE_REF=$(cast keccak "420MEDIA_ANVIL_THIRD_STAKE")
+FOURTH_STAKE_REF=$(cast keccak "420MEDIA_ANVIL_FOURTH_STAKE")
 JOB_KIND=$(cast keccak "420MEDIA_ANVIL_TRANSCODE")
 INPUT_REF=$(cast keccak "420MEDIA_ANVIL_INPUT")
 CREATED_JOB=$(cast keccak "420MEDIA_ANVIL_CREATED_JOB")
@@ -82,6 +77,20 @@ FUNDED_JOB=$(cast keccak "420MEDIA_ANVIL_FUNDED_JOB")
 VAULT_REF=$(cast keccak "420MEDIA_ANVIL_VAULT")
 FUNDING_REF=$(cast keccak "420MEDIA_ANVIL_FUNDING")
 OUTPUT_REF=$(cast keccak "420MEDIA_ANVIL_OUTPUT")
+ORCH_STREAM_ID=$(cast keccak "420MEDIA_ANVIL_ORCH_STREAM")
+ORCH_INGRESS_KIND=$(cast keccak "420MEDIA_ANVIL_ORCH_INGRESS")
+ORCH_TRANSCODE_KIND=$(cast keccak "420MEDIA_ANVIL_ORCH_TRANSCODE")
+ORCH_RELAY_KIND=$(cast keccak "420MEDIA_ANVIL_ORCH_RELAY")
+ORCH_INPUT_REF=$(cast keccak "420MEDIA_ANVIL_ORCH_INPUT")
+ORCH_OUTPUT_REF=$(cast keccak "420MEDIA_ANVIL_ORCH_OUTPUT")
+ORCH_OUTPUT_REF_720=$(cast keccak "420MEDIA_ANVIL_ORCH_OUTPUT_720")
+ORCH_OUTPUT_REF_1080=$(cast keccak "420MEDIA_ANVIL_ORCH_OUTPUT_1080")
+ORCH_VAULT_REF=$(cast keccak "420MEDIA_ANVIL_ORCH_VAULT")
+ORCH_FUNDING_REF=$(cast keccak "420MEDIA_ANVIL_ORCH_FUNDING")
+ORCH_RESOLUTION_REF=$(cast keccak "420MEDIA_ANVIL_ORCH_RESOLUTION")
+RECOVERY_STREAM_ID=$(cast keccak "420MEDIA_ANVIL_RECOVERY_STREAM")
+RECOVERY_INPUT_REF=$(cast keccak "420MEDIA_ANVIL_RECOVERY_INPUT")
+RECOVERY_OUTPUT_REF=$(cast keccak "420MEDIA_ANVIL_RECOVERY_OUTPUT")
 DEADLINE=$(( $(date +%s) + 900 ))
 
 send_gov() { cast send --rpc-url "$RPC_URL" --from "$GOV_ADDR" --unlocked "$@" >/dev/null; }
@@ -95,10 +104,18 @@ send_gov "$SETTLEMENT" "bindPayoutAdapter(address)" "$GOV_ADDR"
 send_gov "$MARKET" "bindDependencies(address,address,address)" "$OP_REG" "$SLA_REG" "$SETTLEMENT"
 send_gov "$CAP_REG" "registerCapability(bytes32,bytes32)" "$CAP_ID" "$ZERO"
 
-stage "registering operator fixture"
-send_op "$OP_REG" "registerOperator(bytes32,address,address,bytes32,bytes32,bytes32)" "$OP_ID" "$OP_ADDR" "$OP_ADDR" "$ZERO" "$ZERO" "$STAKE_REF"
-send_op "$OP_REG" "setCapability(bytes32,bytes32,bool)" "$OP_ID" "$CAP_ID" true
-send_op "$OP_REG" "activate(bytes32)" "$OP_ID"
+register_operator() {
+  local sender="$1" opid="$2" stake="$3"
+  cast send --rpc-url "$RPC_URL" --from "$sender" --unlocked "$OP_REG" "registerOperator(bytes32,address,address,bytes32,bytes32,bytes32)" "$opid" "$sender" "$sender" "$ZERO" "$ZERO" "$stake" >/dev/null
+  cast send --rpc-url "$RPC_URL" --from "$sender" --unlocked "$OP_REG" "setCapability(bytes32,bytes32,bool)" "$opid" "$CAP_ID" true >/dev/null
+  cast send --rpc-url "$RPC_URL" --from "$sender" --unlocked "$OP_REG" "activate(bytes32)" "$opid" >/dev/null
+}
+
+stage "registering operator fixtures"
+register_operator "$OP_ADDR" "$OP_ID" "$STAKE_REF"
+register_operator "$SECOND_OP_ADDR" "$SECOND_OP_ID" "$SECOND_STAKE_REF"
+register_operator "$THIRD_OP_ADDR" "$THIRD_OP_ID" "$THIRD_STAKE_REF"
+register_operator "$FOURTH_OP_ADDR" "$FOURTH_OP_ID" "$FOURTH_STAKE_REF"
 
 stage "creating CREATED and FUNDED job fixtures"
 send_gov "$MARKET" "createJob(bytes32,bytes32,bytes32,bytes32,bytes32,bytes32,uint256,uint64)" "$CREATED_JOB" "$ZERO" "$JOB_KIND" "$CAP_ID" "$ZERO" "$INPUT_REF" 420000000 "$DEADLINE"
@@ -109,19 +126,53 @@ send_gov "$SETTLEMENT" "confirmVaultFunding(bytes32,address,bytes32,address,byte
 export MEDIA420_ANVIL=1
 export MEDIA420_RPC_URL="$RPC_URL"
 export MEDIA420_MARKET="$MARKET"
+export MEDIA420_SETTLEMENT="$SETTLEMENT"
+export MEDIA420_GOV_ACCOUNT="$GOV_ADDR"
 export MEDIA420_OPERATOR_ACCOUNT="$OP_ADDR"
+export MEDIA420_SECOND_OPERATOR_ACCOUNT="$SECOND_OP_ADDR"
+export MEDIA420_THIRD_OPERATOR_ACCOUNT="$THIRD_OP_ADDR"
+export MEDIA420_FOURTH_OPERATOR_ACCOUNT="$FOURTH_OP_ADDR"
 export MEDIA420_OPERATOR_ID="$OP_ID"
+export MEDIA420_CAP_ID="$CAP_ID"
 export MEDIA420_CREATED_JOB="$CREATED_JOB"
 export MEDIA420_FUNDED_JOB="$FUNDED_JOB"
 export MEDIA420_OUTPUT_REF="$OUTPUT_REF"
 export MEDIA420_JOBS_SELECTOR="$(cast sig 'jobs(bytes32)')"
+export MEDIA420_RESERVED_OPERATOR_SELECTOR="$(cast sig 'reservedOperatorId(bytes32)')"
+export MEDIA420_CREATE_ASSIGNED_SELECTOR="$(cast sig 'createAssignedJob(bytes32,bytes32,bytes32,bytes32,bytes32,bytes32,uint256,uint64,bytes32)')"
 export MEDIA420_ACCEPT_SELECTOR="$(cast sig 'acceptJob(bytes32,bytes32)')"
 export MEDIA420_MARK_RUNNING_SELECTOR="$(cast sig 'markRunning(bytes32)')"
 export MEDIA420_COMMIT_RESULT_SELECTOR="$(cast sig 'commitResult(bytes32,bytes32)')"
+export MEDIA420_FINALIZE_SELECTOR="$(cast sig 'finalize(bytes32,bytes32)')"
+export MEDIA420_EXPIRE_SELECTOR="$(cast sig 'expire(bytes32)')"
+export MEDIA420_CONFIRM_VAULT_FUNDING_SELECTOR="$(cast sig 'confirmVaultFunding(bytes32,address,bytes32,address,bytes32,bytes32,uint256)')"
 export MEDIA420_JOB_CREATED_TOPIC="$(cast keccak 'JobCreated(bytes32,address,bytes32,bytes32,bytes32,bytes32,uint256,uint64)')"
+export MEDIA420_ORCH_STREAM_ID="$ORCH_STREAM_ID"
+export MEDIA420_ORCH_SECOND_OPERATOR_ID="$SECOND_OP_ID"
+export MEDIA420_ORCH_THIRD_OPERATOR_ID="$THIRD_OP_ID"
+export MEDIA420_ORCH_FOURTH_OPERATOR_ID="$FOURTH_OP_ID"
+export MEDIA420_ORCH_INGRESS_KIND="$ORCH_INGRESS_KIND"
+export MEDIA420_ORCH_TRANSCODE_KIND="$ORCH_TRANSCODE_KIND"
+export MEDIA420_ORCH_RELAY_KIND="$ORCH_RELAY_KIND"
+export MEDIA420_ORCH_INPUT_REF="$ORCH_INPUT_REF"
+export MEDIA420_ORCH_OUTPUT_REF="$ORCH_OUTPUT_REF"
+export MEDIA420_ORCH_OUTPUT_REF_720="$ORCH_OUTPUT_REF_720"
+export MEDIA420_ORCH_OUTPUT_REF_1080="$ORCH_OUTPUT_REF_1080"
+export MEDIA420_ORCH_VAULT_REF="$ORCH_VAULT_REF"
+export MEDIA420_ORCH_FUNDING_REF="$ORCH_FUNDING_REF"
+export MEDIA420_ORCH_RESOLUTION_REF="$ORCH_RESOLUTION_REF"
+export MEDIA420_RECOVERY_STREAM_ID="$RECOVERY_STREAM_ID"
+export MEDIA420_RECOVERY_INPUT_REF="$RECOVERY_INPUT_REF"
+export MEDIA420_RECOVERY_OUTPUT_REF="$RECOVERY_OUTPUT_REF"
 
-stage "running live Go adapter lifecycle test"
+stage "running live node adapter lifecycle test"
 cd "$ROOT"
 go test ./media/node/ethadapter -run TestAnvilMediaJobAdapterLifecycle -count=1 -v
+
+stage "running live multi-rendition relay orchestration test"
+go test ./media/orchestration -run TestAnvilOrchestrationCompletesMultiRenditionRelay -count=1 -v
+
+stage "running live recovery execution test"
+go test ./media/orchestration -run TestAnvilRecoveryPreservesOriginalAndExecutesReplacement -count=1 -v
 
 stage "completed successfully"

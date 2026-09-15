@@ -94,8 +94,10 @@ test('GAS-8.5 prepares a canonical request, validates the returned quote and aut
   assert.equal(result.fundingMode, 'paymaster');
   assert.equal(result.authorization.paymasterSponsoredWei, 1_000n);
   assert.equal(result.authorization.workerRequiredWei, 100n);
-  assert.equal(seen?.authorizationId, attempt.attemptId);
-  assert.equal(seen?.sponsorshipDigest, sponsorshipDigest);
+  assert.notEqual(seen, null);
+  const captured = seen as CanonicalGasQuoteRequest420;
+  assert.equal(captured.authorizationId, attempt.attemptId);
+  assert.equal(captured.sponsorshipDigest, sponsorshipDigest);
   assert.equal(result.fallbackReason, null);
 });
 

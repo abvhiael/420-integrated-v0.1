@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 	"time"
@@ -63,13 +64,13 @@ type Metric struct {
 }
 
 type Snapshot struct {
-	SchemaVersion string      `json:"schemaVersion"`
-	ID            string      `json:"id"`
-	GeneratedAt   time.Time   `json:"generatedAt"`
-	Provenance    Provenance  `json:"provenance"`
-	Metrics       []Metric    `json:"metrics"`
-	Canonical     bool        `json:"canonical"`
-	Rebuildable   bool        `json:"rebuildable"`
+	SchemaVersion string     `json:"schemaVersion"`
+	ID            string     `json:"id"`
+	GeneratedAt   time.Time  `json:"generatedAt"`
+	Provenance    Provenance `json:"provenance"`
+	Metrics       []Metric   `json:"metrics"`
+	Canonical     bool       `json:"canonical"`
+	Rebuildable   bool       `json:"rebuildable"`
 }
 
 func ProvenanceFromIndexer(p indexerclient.SnapshotProvenance) Provenance {
@@ -115,8 +116,9 @@ func ValidateMetric(m Metric) error {
 	if !validMetricClass(m.Class) {
 		return errors.New("unsupported metric class")
 	}
-	if _, err := strconv.ParseFloat(m.Value, 64); err != nil {
-		return errors.New("metric value must be numeric text")
+	parsed, err := strconv.ParseFloat(m.Value, 64)
+	if err != nil || math.IsNaN(parsed) || math.IsInf(parsed, 0) {
+		return errors.New("metric value must be finite numeric text")
 	}
 	if err := validateMethodology(m.Methodology); err != nil {
 		return err

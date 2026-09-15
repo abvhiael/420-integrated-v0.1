@@ -33,17 +33,17 @@ func (f GatewayHTTPObserverFunc) ObserveGatewayHTTP(ctx context.Context, observa
 }
 
 type GatewayHTTPMetricsSnapshot struct {
-	Requests         uint64
-	Responses2xx     uint64
-	Responses3xx     uint64
-	Responses4xx     uint64
-	Responses5xx     uint64
-	PublicRequests   uint64
-	PrivateRequests  uint64
-	RangeRequests    uint64
-	Conditional      uint64
-	ResponseBytes    uint64
-	CumulativeNanos  uint64
+	Requests        uint64
+	Responses2xx    uint64
+	Responses3xx    uint64
+	Responses4xx    uint64
+	Responses5xx    uint64
+	PublicRequests  uint64
+	PrivateRequests uint64
+	RangeRequests   uint64
+	Conditional     uint64
+	ResponseBytes   uint64
+	CumulativeNanos uint64
 }
 
 type GatewayHTTPMetrics struct {
@@ -163,17 +163,27 @@ func gatewayObservedHandler(observers []GatewayHTTPObserver, next http.Handler) 
 			mode = GatewayAccessPublic
 		}
 		observation := GatewayHTTPObservation{
-			Method: r.Method,
-			AccessMode: mode,
-			StatusCode: status,
-			Tier: recorder.Header().Get(GatewayHeaderTier),
-			Ranged: strings.TrimSpace(r.Header.Get("Range")) != "",
+			Method:      r.Method,
+			AccessMode:  mode,
+			StatusCode:  status,
+			Tier:        recorder.Header().Get(GatewayHeaderTier),
+			Ranged:      strings.TrimSpace(r.Header.Get("Range")) != "",
 			Conditional: strings.TrimSpace(r.Header.Get("If-None-Match")) != "",
-			Duration: time.Since(started),
-			Bytes: recorder.bytes,
+			Duration:    time.Since(started),
+			Bytes:       recorder.bytes,
 		}
 		for _, observer := range active {
 			observer.ObserveGatewayHTTP(r.Context(), observation)
 		}
 	})
+}
+
+func NewGatewayHTTPServiceWithObservability(listenAddr string, handler GatewayHTTPHandler, policy GatewayHTTPPolicy, transport GatewayHTTPTransportPolicy, observer GatewayHTTPObserver) (*GatewayHTTPService, *GatewayHTTPMetrics, error) {
+	service, err := NewGatewayHTTPServiceWithTransport(listenAddr, handler, policy, transport)
+	if err != nil {
+		return nil, nil, err
+	}
+	metrics := &GatewayHTTPMetrics{}
+	service.server.Handler = gatewayObservedHandler([]GatewayHTTPObserver{metrics, observer}, service.server.Handler)
+	return service, metrics, nil
 }

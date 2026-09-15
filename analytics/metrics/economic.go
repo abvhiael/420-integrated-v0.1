@@ -11,11 +11,11 @@ import (
 )
 
 const (
-	MetricTreasuryBudgetCeiling             = "economic.treasury_budget_ceiling"
-	MetricTreasuryCommitted                 = "economic.treasury_committed"
-	MetricTreasuryExecuted                  = "economic.treasury_executed"
-	MetricTreasuryScheduledDisbursement     = "economic.treasury_scheduled_disbursement_volume"
-	MetricTreasuryExecutedDisbursement      = "economic.treasury_executed_disbursement_volume"
+	MetricTreasuryBudgetCeiling         = "economic.treasury_budget_ceiling"
+	MetricTreasuryCommitted             = "economic.treasury_committed"
+	MetricTreasuryExecuted              = "economic.treasury_executed"
+	MetricTreasuryScheduledDisbursement = "economic.treasury_scheduled_disbursement_volume"
+	MetricTreasuryExecutedDisbursement  = "economic.treasury_executed_disbursement_volume"
 )
 
 type TreasuryDisbursementState string
@@ -43,11 +43,11 @@ type TreasuryBudgetProjection struct {
 // units and is aggregated only across projections supplied for one compatible
 // economic dataset.
 type TreasuryDisbursementProjection struct {
-	ChainID       uint64
-	BlockNumber   uint64
+	ChainID        uint64
+	BlockNumber    uint64
 	DisbursementID string
-	Amount        uint64
-	State         TreasuryDisbursementState
+	Amount         uint64
+	State          TreasuryDisbursementState
 }
 
 type TreasuryEconomicInput struct {
@@ -127,25 +127,29 @@ func BuildTreasuryEconomicMetrics(input TreasuryEconomicInput, provenance model.
 	}
 
 	defs := []struct {
-		id, label, unit, method, description string
-		value                                uint64
+		id, label, unit string
+		value           uint64
 	}{
-		{MetricTreasuryBudgetCeiling, "Treasury budget ceiling", "base_units", "treasury-budget-ceiling", "sum of indexed governed Treasury budget spending ceilings at the qualified snapshot", ceiling},
-		{MetricTreasuryCommitted, "Treasury committed", "base_units", "treasury-committed", "sum of indexed amounts reserved against governed Treasury budgets at the qualified snapshot", committed},
-		{MetricTreasuryExecuted, "Treasury executed", "base_units", "treasury-executed", "sum of indexed successfully executed governed Treasury budget amounts at the qualified snapshot", executed},
-		{MetricTreasuryScheduledDisbursement, "Scheduled Treasury disbursement volume", "base_units", "treasury-scheduled-disbursement-volume", "sum of indexed Treasury disbursements currently in scheduled state at the qualified snapshot", scheduledVolume},
-		{MetricTreasuryExecutedDisbursement, "Executed Treasury disbursement volume", "base_units", "treasury-executed-disbursement-volume", "sum of indexed Treasury disbursements in executed state with canonical Treasury execution recorded", executedVolume},
+		{MetricTreasuryBudgetCeiling, "Treasury budget ceiling", "base_units", ceiling},
+		{MetricTreasuryCommitted, "Treasury committed", "base_units", committed},
+		{MetricTreasuryExecuted, "Treasury executed", "base_units", executed},
+		{MetricTreasuryScheduledDisbursement, "Scheduled Treasury disbursement volume", "base_units", scheduledVolume},
+		{MetricTreasuryExecutedDisbursement, "Executed Treasury disbursement volume", "base_units", executedVolume},
 	}
 
 	out := make([]model.Metric, 0, len(defs))
 	for _, def := range defs {
+		method, err := registeredMethodology(def.id)
+		if err != nil {
+			return nil, err
+		}
 		metric, err := model.NewMetric(
 			def.id,
 			architecture.MetricEconomic,
 			def.label,
 			strconv.FormatUint(def.value, 10),
 			def.unit,
-			model.Methodology{ID: def.method, Version: "v1", Description: def.description},
+			method,
 			model.Window{Kind: model.WindowPoint},
 			provenance,
 		)

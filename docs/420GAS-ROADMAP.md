@@ -38,9 +38,9 @@ Add a replaceable authenticated quote/read service for Wallet, applications, and
 
 Integrate sponsorship discovery, quote review, operation assembly, fallback-to-self-funded flows, and user-facing failure states in Wallet Core. Wallet signing/review/session authority remains unchanged.
 
-## GAS-8 — 420Automation integration — CLOSEOUT / FINAL QUALIFICATION
+## GAS-8 — 420Automation integration — COMPLETE / MERGED
 
-Bind Automation paymaster funding to exact AUT execution plans and existing AUT replay/ambiguity rules. A quote may fund only an execution already authorized by Automation and the target protocol.
+Merged to `main` in PR #291 at merge commit `fa3cdaa19a815c869ec54b85dcb97c348acaf404` after exact-head qualification.
 
 Completed GAS-8 work:
 - **GAS-8.1** exact Automation plan binding and sponsorship digest propagation.
@@ -50,9 +50,14 @@ Completed GAS-8 work:
 - **GAS-8.5** end-to-end sponsorship preparation flow with fail-closed default behavior and explicit self-funded fallback only through existing AUT-5 budget gates.
 - **GAS-8.6** adversarial/E2E closeout covering mid-flight plan mutation, ambiguous/retry states, stale retry quote replay, wrong chain/paymaster/policy and authority escalation.
 
-Remaining before GAS-8 is complete: exact-head CI qualification, reconcile with current `main`, re-qualify the reconciled head, then merge PR #291.
+Final qualified GAS-8 head: `cdf4d80769d5ca6ff87dcc3ad4bd08b8d087b1fc`.
 
-## GAS-9 — budgets, quotas, abuse resistance — NEXT
+Qualification passed:
+- 420Automation #156
+- 420Docs Qualification #1130
+- 420 Integrated Qualification #3329
+
+## GAS-9 — budgets, quotas, abuse resistance — ACTIVE / NEXT
 
 Add per-operation, per-account, per-policy, and time-window quotas; gas/fee ceilings; concurrency controls; denial-of-service limits; sponsor-drain resistance; and bounded caches/state.
 

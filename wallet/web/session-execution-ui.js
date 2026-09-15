@@ -1,6 +1,7 @@
 import { readDeployedSmartAccountState } from './core/accounts.js';
 import { validateRuntimeConfig } from './core/config.js';
 import { InjectedProvider420 } from './core/provider.js';
+import { walletGasSponsorshipReview420 } from './core/gas-sponsorship.js';
 import {
   confirmEntryPointUserOperation,
   prepareSessionUserOperationTransport,
@@ -9,6 +10,12 @@ import {
 
 function short(value) {
   return value && value.length > 18 ? `${value.slice(0, 10)}…${value.slice(-8)}` : value || '—';
+}
+
+export function resolveGasQuoteDiscovery420(source) {
+  if (source == null) return null;
+  if (typeof source?.discoverQuote !== 'function') throw new Error('420Gas quote provider must expose discoverQuote(request)');
+  return (request) => source.discoverQuote(request);
 }
 
 export function buildSessionExecutionReview(prepared) {
@@ -25,8 +32,21 @@ export function buildSessionExecutionReview(prepared) {
     nonceKey: null,
     userOpHash: null,
     gas: null,
+    fundingStatus: 'self-funded',
+    fundingTitle: 'You pay network gas',
+    fundingMessage: 'No gas sponsorship is attached.',
+    paymaster: null,
+    policyId: null,
+    maxSponsoredCostWei: null,
+    sponsorshipValidUntil: null,
+    executionAuthorization: false,
     broadcastReady: false,
   };
+  const funding = walletGasSponsorshipReview420(prepared.gasSponsorship || {
+    sponsored: false,
+    fundingMode: 'self-funded',
+    fallbackReason: null,
+  });
   return {
     state: prepared.broadcastReady ? 'ready' : 'blocked',
     stateLabel: prepared.broadcastReady ? 'Signed + simulated' : 'Blocked',
@@ -40,6 +60,14 @@ export function buildSessionExecutionReview(prepared) {
     nonceKey: prepared.nonceKey?.toString?.() ?? null,
     userOpHash: prepared.userOpHash,
     gas: prepared.entryPointSimulation?.gas || null,
+    fundingStatus: funding.status,
+    fundingTitle: funding.title,
+    fundingMessage: funding.message,
+    paymaster: funding.paymaster,
+    policyId: funding.policyId,
+    maxSponsoredCostWei: funding.maxSponsoredCostWei,
+    sponsorshipValidUntil: funding.validUntil,
+    executionAuthorization: funding.executionAuthorization,
     broadcastReady: prepared.broadcastReady === true && prepared.entryPointSimulation?.simulationPassed === true,
   };
 }
@@ -64,7 +92,7 @@ function createPanel() {
     <div class="split-panel">
       <div class="form-card">
         <p class="eyebrow">Controlled transport</p>
-        <p class="muted">Preparation re-checks session epoch, grant, scope, limits and nonce lane; then requests a session-key signature over the canonical EntryPoint420 user-op hash and simulates handleOp before submission becomes available.</p>
+        <p class="muted">Preparation re-checks session epoch, grant, scope, limits and nonce lane; optionally requests a bounded 420Gas funding quote; then requests a session-key signature over the final canonical EntryPoint420 user-op hash and simulates handleOp before submission becomes available.</p>
         <div class="button-row"><button id="session-exec-prepare" type="button">Prepare + sign + simulate</button><button id="session-exec-submit" class="primary-action" type="button" disabled>Submit to EntryPoint420</button></div>
       </div>
       <aside class="review-card" aria-label="Session execution review">
@@ -80,7 +108,13 @@ function createPanel() {
           <div><dt>Nonce</dt><dd id="session-review-nonce">—</dd></div>
           <div><dt>User-op hash</dt><dd id="session-review-hash">—</dd></div>
           <div><dt>Estimated gas</dt><dd id="session-review-gas">—</dd></div>
+          <div><dt>Gas funding</dt><dd id="session-review-funding">You pay network gas</dd></div>
+          <div><dt>Paymaster</dt><dd id="session-review-paymaster">—</dd></div>
+          <div><dt>Policy</dt><dd id="session-review-policy">—</dd></div>
+          <div><dt>Sponsor ceiling</dt><dd id="session-review-sponsor-max">—</dd></div>
+          <div><dt>Sponsor expiry</dt><dd id="session-review-sponsor-expiry">—</dd></div>
         </dl>
+        <div class="security-check"><span>✓</span><p><strong>Execution authority unchanged</strong><small id="session-review-funding-message">Gas funding never grants session or Wallet authority.</small></p></div>
       </aside>
     </div>
     <p id="session-exec-status" class="muted" role="status">Prepare a delegated call. Submission remains unavailable unless the signed EntryPoint420 simulation passes.</p>
@@ -130,6 +164,12 @@ export async function initSessionExecutionUi() {
     $('#session-review-nonce').textContent = review.nonce ?? '—';
     $('#session-review-hash').textContent = short(review.userOpHash);
     $('#session-review-gas').textContent = review.gas || '—';
+    $('#session-review-funding').textContent = review.fundingTitle;
+    $('#session-review-paymaster').textContent = short(review.paymaster);
+    $('#session-review-policy').textContent = short(review.policyId);
+    $('#session-review-sponsor-max').textContent = review.maxSponsoredCostWei ?? '—';
+    $('#session-review-sponsor-expiry').textContent = review.sponsorshipValidUntil || '—';
+    $('#session-review-funding-message').textContent = review.fundingMessage;
     $('#session-exec-prepare').disabled = local.busy;
     $('#session-exec-submit').disabled = local.busy || !review.broadcastReady || local.config?.features?.sessionExecution !== true || local.config?.features?.entryPointUserOpSubmission !== true;
   };
@@ -149,13 +189,17 @@ export async function initSessionExecutionUi() {
       const signer = $('#session-exec-signer').value.trim();
       if (!smartAccount || !signer) throw new Error('SmartAccount420 address and session signer are required');
       local.account = await readDeployedSmartAccountState(local.provider, smartAccount);
-      setStatus('Checking session grant, nonce lane and authorization; then requesting the session signature…');
+      const discoverGasQuote = resolveGasQuoteDiscovery420(globalThis.wallet420GasQuoteProvider);
+      setStatus(discoverGasQuote
+        ? 'Checking session authority and requesting a bounded 420Gas quote before signing…'
+        : 'Checking session grant, nonce lane and authorization; no 420Gas quote provider is configured, so this operation will be self-funded.');
       local.prepared = await prepareSessionUserOperationTransport(local.provider, local.account, signer, {
         target: $('#session-exec-target').value.trim(),
         value: $('#session-exec-value').value.trim() || '0',
         data: $('#session-exec-data').value.trim() || '0x',
-      });
-      setStatus(`Session user operation signed and simulated successfully. Hash ${local.prepared.userOpHash}.`);
+      }, discoverGasQuote ? { discoverGasQuote } : {});
+      const review = buildSessionExecutionReview(local.prepared);
+      setStatus(`${review.fundingTitle}. Session user operation signed and simulated successfully. Hash ${local.prepared.userOpHash}.`);
     } catch (error) {
       local.prepared = null;
       setStatus(error.message);
@@ -166,13 +210,14 @@ export async function initSessionExecutionUi() {
 
   $('#session-exec-submit').addEventListener('click', async () => {
     if (local.busy || !local.prepared) return;
-    if (globalThis.confirm && !globalThis.confirm(`Submit this signed session operation to EntryPoint420? Nonce ${local.prepared.nonce}.`)) return;
+    const review = buildSessionExecutionReview(local.prepared);
+    if (globalThis.confirm && !globalThis.confirm(`Submit this signed session operation to EntryPoint420? ${review.fundingTitle}. Nonce ${local.prepared.nonce}.`)) return;
     local.busy = true; render();
     try {
       setStatus('Rechecking the session nonce, re-simulating EntryPoint420.handleOp and requesting transaction approval…');
       const submitted = await sendPreparedEntryPointUserOperation(local.provider, local.prepared);
       setStatus(`Session operation submitted: ${submitted.txHash}. Waiting for EntryPoint420 confirmation…`);
-      const confirmed = await confirmEntryPointUserOperation(local.provider, submitted);
+      await confirmEntryPointUserOperation(local.provider, submitted);
       setStatus(`Session execution confirmed. EntryPoint420 consumed nonce ${local.prepared.nonce} exactly once.`);
       local.prepared = null;
     } catch (error) {

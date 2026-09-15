@@ -2,7 +2,9 @@ package storage
 
 import (
 	"context"
+	"crypto/sha256"
 	"crypto/tls"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"net"
@@ -56,8 +58,10 @@ func (h GatewayHTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	etag := gatewayETag(req)
 	w.Header().Set("Content-Type", "application/octet-stream")
-	w.Header().Set("Content-Length", strconv.Itoa(len(result.Payload)))
+	w.Header().Set("Accept-Ranges", "bytes")
+	w.Header().Set("ETag", etag)
 	w.Header().Set(GatewayHeaderTier, result.Tier)
 	if result.ProviderID != "" {
 		w.Header().Set(GatewayHeaderProviderID, result.ProviderID)
@@ -65,11 +69,92 @@ func (h GatewayHTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if result.NodeID != "" {
 		w.Header().Set(GatewayHeaderNodeID, result.NodeID)
 	}
-	w.WriteHeader(http.StatusOK)
+
+	if gatewayETagMatches(r.Header.Get("If-None-Match"), etag) {
+		w.WriteHeader(http.StatusNotModified)
+		return
+	}
+
+	payload := result.Payload
+	status := http.StatusOK
+	if rangeHeader := strings.TrimSpace(r.Header.Get("Range")); rangeHeader != "" {
+		start, end, ok := gatewayByteRange(rangeHeader, int64(len(payload)))
+		if !ok {
+			w.Header().Set("Content-Range", fmt.Sprintf("bytes */%d", len(payload)))
+			w.WriteHeader(http.StatusRequestedRangeNotSatisfiable)
+			return
+		}
+		w.Header().Set("Content-Range", fmt.Sprintf("bytes %d-%d/%d", start, end, len(payload)))
+		payload = payload[start : end+1]
+		status = http.StatusPartialContent
+	}
+
+	w.Header().Set("Content-Length", strconv.Itoa(len(payload)))
+	w.WriteHeader(status)
 	if r.Method == http.MethodHead {
 		return
 	}
-	_, _ = w.Write(result.Payload)
+	_, _ = w.Write(payload)
+}
+
+func gatewayETag(req GatewayRequest) string {
+	canonical, _ := CanonicalCacheKey(req.CacheKey)
+	sum := sha256.Sum256([]byte(canonical + "\n" + req.CommitmentID))
+	return `"` + hex.EncodeToString(sum[:]) + `"`
+}
+
+func gatewayETagMatches(header, etag string) bool {
+	header = strings.TrimSpace(header)
+	if header == "" {
+		return false
+	}
+	for _, candidate := range strings.Split(header, ",") {
+		candidate = strings.TrimSpace(candidate)
+		if candidate == "*" || candidate == etag || strings.TrimPrefix(candidate, "W/") == etag {
+			return true
+		}
+	}
+	return false
+}
+
+func gatewayByteRange(header string, size int64) (int64, int64, bool) {
+	if size <= 0 || !strings.HasPrefix(header, "bytes=") {
+		return 0, 0, false
+	}
+	spec := strings.TrimSpace(strings.TrimPrefix(header, "bytes="))
+	if spec == "" || strings.Contains(spec, ",") {
+		return 0, 0, false
+	}
+	parts := strings.SplitN(spec, "-", 2)
+	if len(parts) != 2 {
+		return 0, 0, false
+	}
+	left, right := strings.TrimSpace(parts[0]), strings.TrimSpace(parts[1])
+	if left == "" {
+		suffix, err := strconv.ParseInt(right, 10, 64)
+		if err != nil || suffix <= 0 {
+			return 0, 0, false
+		}
+		if suffix > size {
+			suffix = size
+		}
+		return size - suffix, size - 1, true
+	}
+	start, err := strconv.ParseInt(left, 10, 64)
+	if err != nil || start < 0 || start >= size {
+		return 0, 0, false
+	}
+	if right == "" {
+		return start, size - 1, true
+	}
+	end, err := strconv.ParseInt(right, 10, 64)
+	if err != nil || end < start {
+		return 0, 0, false
+	}
+	if end >= size {
+		end = size - 1
+	}
+	return start, end, true
 }
 
 func gatewayRequestFromHTTP(r *http.Request) (GatewayRequest, error) {

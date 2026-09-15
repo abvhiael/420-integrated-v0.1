@@ -57,9 +57,19 @@ Qualification passed:
 - 420Docs Qualification #1130
 - 420 Integrated Qualification #3329
 
-## GAS-9 — budgets, quotas, abuse resistance — ACTIVE / NEXT
+## GAS-9 — budgets, quotas, abuse resistance — CLOSEOUT / QUALIFICATION
 
-Add per-operation, per-account, per-policy, and time-window quotas; gas/fee ceilings; concurrency controls; denial-of-service limits; sponsor-drain resistance; and bounded caches/state.
+Bound sponsor exposure and off-chain quote-service resource consumption without creating execution authority or replacing canonical on-chain accounting.
+
+Completed GAS-9 work:
+- **GAS-9.1** bounded quota controller with per-operation, per-account, per-policy, spend, operation-count, concurrency and outstanding-authorization limits.
+- **GAS-9.2** canonical quote-service quota admission before signing, signer-failure cleanup, and explicit release lifecycle while preserving no-controller compatibility.
+- **GAS-9.3** sponsor-wide spend/operation/concurrency budgets plus automatic expiry of abandoned outstanding reservations.
+- **GAS-9.4** canonical quote schema `1.2.0` with signed gas limit, max-fee and priority-fee envelope; sponsor-side economic ceilings; synchronized Automation request/return validation; wallet-authority escalation rejection.
+- **GAS-9.5** exact reservation-generation handles, stale-release/ABA protection, transactional signer-failure rollback, and re-entrant duplicate/concurrency hardening.
+- **GAS-9.6** bounded/pruned fixed-window state, read-only snapshots that do not allocate attacker-controlled keys, current-window state caps, rollover cleanup, and adversarial state-flood closeout tests.
+
+GAS-9 remains funding-only. Quota, budget, cache, quote and telemetry state never becomes Smart Account, Wallet, Automation, target-protocol, settlement, or canonical-chain authority. On-chain EntryPoint/paymaster accounting remains authoritative for actual sponsored settlement.
 
 ## GAS-10 — observability, readiness, and recovery
 

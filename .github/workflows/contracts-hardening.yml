@@ -22,7 +22,7 @@ jobs:
     permissions:
       contents: read
     env:
-      FOUNDRY_PROFILE: hardening
+      FOUNDRY_PROFILE: ${{ github.event_name == 'pull_request' && 'pr' || 'hardening' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -64,6 +64,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install Slither
+        if: github.event_name != 'pull_request'
         run: python -m pip install --disable-pip-version-check slither-analyzer
 
       - name: Capture toolchain
@@ -72,10 +73,11 @@ jobs:
           mkdir -p ../artifacts/hardening
           {
             echo "commit=${GITHUB_SHA}"
+            echo "foundry_profile=${FOUNDRY_PROFILE}"
             forge --version
             cast --version
             python --version
-            slither --version
+            if command -v slither >/dev/null 2>&1; then slither --version; fi
             forge config
           } | tee ../artifacts/hardening/toolchain.txt
 
@@ -120,10 +122,12 @@ jobs:
         run: forge test --match-path 'test/*Invariant*.t.sol' -vv 2>&1 | tee ../artifacts/hardening/invariants.txt
 
       - name: AI gas and denial-of-service review evidence
+        if: github.event_name != 'pull_request'
         working-directory: contracts
         run: forge test --match-path 'test/AI*.t.sol' --gas-report 2>&1 | tee ../artifacts/hardening/gas-report.txt
 
       - name: Slither high-severity gate
+        if: github.event_name != 'pull_request'
         working-directory: contracts
         run: |
           set +e

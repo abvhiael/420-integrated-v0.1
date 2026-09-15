@@ -3,8 +3,14 @@ import { createHash } from 'node:crypto';
 const ADDRESS_RE = /^0x[0-9a-fA-F]{40}$/;
 const BYTES32_RE = /^0x[0-9a-fA-F]{64}$/;
 const ID_RE = /^[a-z0-9][a-z0-9._-]{0,63}$/;
-const SCHEMA_VERSION = '1.1.0';
+const SCHEMA_VERSION = '1.2.0';
 const DEFAULT_MAX_TTL_SECONDS = 300;
+
+export const DEFAULT_GAS_ECONOMIC_LIMITS_420 = Object.freeze({
+  maxGasLimit: 30_000_000n,
+  maxFeePerGasWei: 1_000_000_000_000_000n,
+  maxPriorityFeePerGasWei: 100_000_000_000_000n,
+});
 
 export class GasQuoteError420 extends Error {
   constructor(message) {
@@ -56,6 +62,12 @@ function uintString420(value, name, { allowZero = false } = {}) {
   return parsed.toString(10);
 }
 
+function positiveBigInt420(value, name) {
+  const parsed = typeof value === 'bigint' ? value : (typeof value === 'string' && /^(0|[1-9][0-9]*)$/.test(value) ? BigInt(value) : -1n);
+  assert420(parsed > 0n, `${name} must be greater than zero`);
+  return parsed;
+}
+
 function iso420(value, name) {
   const string = text420(value, name, 64);
   const ms = Date.parse(string);
@@ -74,6 +86,9 @@ function canonicalQuoteMaterial420(value) {
     value.policyId,
     value.authorizationId,
     value.maxSponsoredCostWei,
+    value.gasLimit,
+    value.maxFeePerGasWei,
+    value.maxPriorityFeePerGasWei,
     value.issuedAt,
     value.validAfter,
     value.validUntil
@@ -91,6 +106,9 @@ function requestProjection420(value) {
     policyId: value.policyId,
     authorizationId: value.authorizationId,
     maxSponsoredCostWei: value.maxSponsoredCostWei,
+    gasLimit: value.gasLimit,
+    maxFeePerGasWei: value.maxFeePerGasWei,
+    maxPriorityFeePerGasWei: value.maxPriorityFeePerGasWei,
     validAfter: value.validAfter,
     validUntil: value.validUntil
   };
@@ -100,6 +118,16 @@ function quotaController420(value) {
   if (value === undefined || value === null) return null;
   assert420(typeof value === 'object' && typeof value.reserve === 'function' && typeof value.release === 'function', 'quotaController is invalid');
   return value;
+}
+
+export function validateGasEconomicLimits420(input = {}) {
+  const limits = object420(input, 'economic limits');
+  exact420(limits, new Set(['maxGasLimit', 'maxFeePerGasWei', 'maxPriorityFeePerGasWei']), 'economic limits');
+  return Object.freeze({
+    maxGasLimit: positiveBigInt420(limits.maxGasLimit ?? DEFAULT_GAS_ECONOMIC_LIMITS_420.maxGasLimit, 'maxGasLimit'),
+    maxFeePerGasWei: positiveBigInt420(limits.maxFeePerGasWei ?? DEFAULT_GAS_ECONOMIC_LIMITS_420.maxFeePerGasWei, 'maxFeePerGasWei limit'),
+    maxPriorityFeePerGasWei: positiveBigInt420(limits.maxPriorityFeePerGasWei ?? DEFAULT_GAS_ECONOMIC_LIMITS_420.maxPriorityFeePerGasWei, 'maxPriorityFeePerGasWei limit'),
+  });
 }
 
 export function validateGasQuoteCredential420(input, { now = new Date(), requiredScope = 'gas:quote' } = {}) {
@@ -122,7 +150,8 @@ export function validateGasQuoteRequest420(input) {
   const request = object420(input, 'quote request');
   exact420(request, new Set([
     'schemaVersion', 'chainId', 'entryPoint', 'paymaster', 'account', 'sponsorshipDigest', 'policyId',
-    'authorizationId', 'maxSponsoredCostWei', 'validAfter', 'validUntil'
+    'authorizationId', 'maxSponsoredCostWei', 'gasLimit', 'maxFeePerGasWei', 'maxPriorityFeePerGasWei',
+    'validAfter', 'validUntil'
   ]), 'quote request');
   assert420(request.schemaVersion === SCHEMA_VERSION, 'unsupported quote request schemaVersion');
   const chainId = uintString420(request.chainId, 'chainId');
@@ -133,16 +162,29 @@ export function validateGasQuoteRequest420(input) {
   const policyId = bytes32420(request.policyId, 'policyId');
   const authorizationId = bytes32420(request.authorizationId, 'authorizationId');
   const maxSponsoredCostWei = uintString420(request.maxSponsoredCostWei, 'maxSponsoredCostWei');
+  const gasLimit = uintString420(request.gasLimit, 'gasLimit');
+  const maxFeePerGasWei = uintString420(request.maxFeePerGasWei, 'maxFeePerGasWei');
+  const maxPriorityFeePerGasWei = uintString420(request.maxPriorityFeePerGasWei, 'maxPriorityFeePerGasWei', { allowZero: true });
+  assert420(BigInt(maxPriorityFeePerGasWei) <= BigInt(maxFeePerGasWei), 'maxPriorityFeePerGasWei exceeds maxFeePerGasWei');
   const validAfter = iso420(request.validAfter, 'validAfter');
   const validUntil = iso420(request.validUntil, 'validUntil');
   assert420(Date.parse(validUntil) > Date.parse(validAfter), 'validUntil must be after validAfter');
-  return Object.freeze({ schemaVersion: SCHEMA_VERSION, chainId, entryPoint, paymaster, account, sponsorshipDigest, policyId, authorizationId, maxSponsoredCostWei, validAfter, validUntil });
+  return Object.freeze({ schemaVersion: SCHEMA_VERSION, chainId, entryPoint, paymaster, account, sponsorshipDigest, policyId, authorizationId, maxSponsoredCostWei, gasLimit, maxFeePerGasWei, maxPriorityFeePerGasWei, validAfter, validUntil });
 }
 
-export function createGasQuote420({ request, credential, now = new Date(), maxTtlSeconds = DEFAULT_MAX_TTL_SECONDS, sign, quotaController }) {
+export function enforceGasQuoteEconomicLimits420(request, limits = {}) {
+  const economic = validateGasEconomicLimits420(limits);
+  assert420(BigInt(request.gasLimit) <= economic.maxGasLimit, 'gasLimit exceeds sponsor ceiling');
+  assert420(BigInt(request.maxFeePerGasWei) <= economic.maxFeePerGasWei, 'maxFeePerGasWei exceeds sponsor ceiling');
+  assert420(BigInt(request.maxPriorityFeePerGasWei) <= economic.maxPriorityFeePerGasWei, 'maxPriorityFeePerGasWei exceeds sponsor ceiling');
+  return economic;
+}
+
+export function createGasQuote420({ request, credential, now = new Date(), maxTtlSeconds = DEFAULT_MAX_TTL_SECONDS, sign, quotaController, economicLimits = {} }) {
   assert420(Number.isInteger(maxTtlSeconds) && maxTtlSeconds > 0 && maxTtlSeconds <= 3600, 'maxTtlSeconds is invalid');
   const caller = validateGasQuoteCredential420(credential, { now, requiredScope: 'gas:quote' });
   const quoteRequest = validateGasQuoteRequest420(request);
+  enforceGasQuoteEconomicLimits420(quoteRequest, economicLimits);
   const issuedAt = now.toISOString();
   const issuedMs = now.getTime();
   const validAfterMs = Date.parse(quoteRequest.validAfter);
@@ -211,6 +253,9 @@ export function createGasQuoteReadView420(quote, { credential, now = new Date() 
     policyId: validated.policyId,
     authorizationId: validated.authorizationId,
     maxSponsoredCostWei: validated.maxSponsoredCostWei,
+    gasLimit: validated.gasLimit,
+    maxFeePerGasWei: validated.maxFeePerGasWei,
+    maxPriorityFeePerGasWei: validated.maxPriorityFeePerGasWei,
     validAfter: validated.validAfter,
     validUntil: validated.validUntil,
     authority: 'funding-offer-only',

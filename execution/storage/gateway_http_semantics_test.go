@@ -4,6 +4,8 @@ import (
 	"context"
 	"io"
 	"net/http"
+	"net/url"
+	"strconv"
 	"testing"
 )
 
@@ -93,4 +95,15 @@ func TestGatewayHTTPRejectsUnsatisfiableOrMultiRange(t *testing.T) {
 			t.Fatalf("range=%q status=%d content-range=%q", value, resp.StatusCode, resp.Header.Get("Content-Range"))
 		}
 	}
+}
+
+func gatewayTestQueryForKey(key CacheKey, commitment string) url.Values {
+	q := url.Values{}
+	q.Set("object_id", key.ObjectID)
+	q.Set("manifest_id", key.ManifestID)
+	q.Set("shard_index", strconv.FormatUint(uint64(key.ShardIndex), 10))
+	q.Set("shard_root", key.ShardRoot)
+	q.Set("size_bytes", strconv.FormatUint(key.SizeBytes, 10))
+	q.Set("commitment_id", commitment)
+	return q
 }

@@ -155,6 +155,10 @@ func gatewayObservedHandler(observers []GatewayHTTPObserver, next http.Handler) 
 		return next
 	}
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/healthz" || r.URL.Path == "/readyz" {
+			next.ServeHTTP(w, r)
+			return
+		}
 		started := time.Now()
 		recorder := &gatewayObservationResponseRecorder{ResponseWriter: w}
 		next.ServeHTTP(recorder, r)
@@ -183,11 +187,26 @@ func gatewayObservedHandler(observers []GatewayHTTPObserver, next http.Handler) 
 }
 
 func NewGatewayHTTPServiceWithObservability(listenAddr string, handler GatewayHTTPHandler, policy GatewayHTTPPolicy, transport GatewayHTTPTransportPolicy, observer GatewayHTTPObserver) (*GatewayHTTPService, *GatewayHTTPMetrics, error) {
+	service, metrics, _, err := NewGatewayHTTPServiceWithHealthObservability(listenAddr, handler, policy, transport, nil, observer)
+	return service, metrics, err
+}
+
+func NewGatewayHTTPServiceWithHealthObservability(listenAddr string, handler GatewayHTTPHandler, policy GatewayHTTPPolicy, transport GatewayHTTPTransportPolicy, health *GatewayHealthTracker, observer GatewayHTTPObserver) (*GatewayHTTPService, *GatewayHTTPMetrics, *GatewayHealthTracker, error) {
 	service, err := NewGatewayHTTPServiceWithTransport(listenAddr, handler, policy, transport)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 	metrics := &GatewayHTTPMetrics{}
-	service.server.Handler = gatewayObservedHandler([]GatewayHTTPObserver{metrics, observer}, service.server.Handler)
-	return service, metrics, nil
+	if health == nil {
+		health = NewGatewayHealthTracker(0)
+	}
+	allowed, err := validateGatewayAllowedHosts(transport.AllowedHosts)
+	if err != nil {
+		_ = service.ln.Close()
+		return nil, nil, nil, err
+	}
+	inner := gatewayHealthHandler(health, service.server.Handler)
+	inner = gatewayHostGuard(allowed, inner)
+	service.server.Handler = gatewayObservedHandler([]GatewayHTTPObserver{metrics, health, observer}, inner)
+	return service, metrics, health, nil
 }

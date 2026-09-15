@@ -41,28 +41,30 @@ func BuildNetworkMetrics(input NetworkInput, provenance model.Provenance) ([]mod
 
 	window := model.Window{Kind: model.WindowPoint}
 	defs := []struct {
-		id          string
-		label       string
-		value       uint64
-		unit        string
-		methodID    string
-		description string
+		id    string
+		label string
+		value uint64
+		unit  string
 	}{
-		{MetricIndexedHeight, "Indexed height", indexed, "blocks", "indexed-height", "420Indexer indexed head at the qualified analytics snapshot"},
-		{MetricSafeHeight, "Safe height", safe, "blocks", "safe-height", "420Indexer safe head at the qualified analytics snapshot"},
-		{MetricFinalityDepth, "Finality depth", depth, "blocks", "finality-depth", "difference between indexed head and safe head at the qualified analytics snapshot"},
-		{MetricProjectionLag, "Projection lag", lag, "blocks", "projection-lag", "420Indexer-reported projection lag when available; zero when omitted by the source contract"},
+		{MetricIndexedHeight, "Indexed height", indexed, "blocks"},
+		{MetricSafeHeight, "Safe height", safe, "blocks"},
+		{MetricFinalityDepth, "Finality depth", depth, "blocks"},
+		{MetricProjectionLag, "Projection lag", lag, "blocks"},
 	}
 
 	out := make([]model.Metric, 0, len(defs))
 	for _, def := range defs {
+		method, err := registeredMethodology(def.id)
+		if err != nil {
+			return nil, err
+		}
 		metric, err := model.NewMetric(
 			def.id,
 			architecture.MetricNetwork,
 			def.label,
 			strconv.FormatUint(def.value, 10),
 			def.unit,
-			model.Methodology{ID: def.methodID, Version: "v1", Description: def.description},
+			method,
 			window,
 			provenance,
 		)

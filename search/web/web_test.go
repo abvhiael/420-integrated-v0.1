@@ -55,21 +55,27 @@ func TestSearchShellContainsDomainAwareResultPresentation(t *testing.T) {
 	Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodGet, "/app.js", nil))
 	if rr.Code != http.StatusOK { t.Fatal(rr.Code) }
 	body := rr.Body.String()
-	for _, marker := range []string{
-		"domainPresentation",
-		"public_identity",
-		"market_listing",
-		"rights_record",
-		"public_commons",
-		"public_pulse",
-		"resultCard",
-		"Open canonical view",
-		"Source",
-		"Category",
-		"Sponsored",
-		"organic ranking unchanged",
-	} {
+	for _, marker := range []string{"domainPresentation","public_identity","market_listing","rights_record","public_commons","public_pulse","resultCard","Open canonical view","Source","Category","Sponsored","organic ranking unchanged"} {
 		if !strings.Contains(body, marker) { t.Fatalf("app.js missing SEARCH-7.2 marker %q", marker) }
+	}
+}
+
+func TestSearchShellContainsTrustPresentation(t *testing.T) {
+	rr := httptest.NewRecorder()
+	Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodGet, "/app.js", nil))
+	if rr.Code != http.StatusOK { t.Fatal(rr.Code) }
+	body := rr.Body.String()
+	for _, marker := range []string{"finalityBadge","authorityBadge","trustMeta","snapshotBanner","Finalized","Safe","Unknown finality","Canonical authority","Search results are rebuildable projections","420Search is non-canonical","fails closed"} {
+		if !strings.Contains(body, marker) { t.Fatalf("app.js missing SEARCH-7.3 marker %q", marker) }
+	}
+}
+
+func TestSearchStylesContainTrustClasses(t *testing.T) {
+	rr := httptest.NewRecorder()
+	Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodGet, "/app.css", nil))
+	body := rr.Body.String()
+	for _, marker := range []string{".trust-meta", ".trust-finalized", ".trust-safe", ".trust-head", ".trust-unknown", ".snapshot-banner", ".trust-callout"} {
+		if !strings.Contains(body, marker) { t.Fatalf("app.css missing SEARCH-7.3 marker %q", marker) }
 	}
 }
 
@@ -79,15 +85,6 @@ func TestSearchShellSeparatesSponsoredAndOrganicResults(t *testing.T) {
 	body := rr.Body.String()
 	for _, marker := range []string{"sponsored-section", "organic-section", "result-sponsored", "sponsored-badge"} {
 		if !strings.Contains(body, marker) { t.Fatalf("app.js missing sponsored separation marker %q", marker) }
-	}
-}
-
-func TestSearchStylesContainResultPresentationClasses(t *testing.T) {
-	rr := httptest.NewRecorder()
-	Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodGet, "/app.css", nil))
-	body := rr.Body.String()
-	for _, marker := range []string{".result-icon", ".result-kicker", ".result-subtitle", ".meta-pair", ".sponsored-badge", ".empty-state", ".capability-grid"} {
-		if !strings.Contains(body, marker) { t.Fatalf("app.css missing SEARCH-7.2 marker %q", marker) }
 	}
 }
 

@@ -96,6 +96,12 @@ function requestProjection420(value) {
   };
 }
 
+function quotaController420(value) {
+  if (value === undefined || value === null) return null;
+  assert420(typeof value === 'object' && typeof value.reserve === 'function' && typeof value.release === 'function', 'quotaController is invalid');
+  return value;
+}
+
 export function validateGasQuoteCredential420(input, { now = new Date(), requiredScope = 'gas:quote' } = {}) {
   const credential = object420(input, 'credential');
   exact420(credential, new Set(['applicationId', 'audience', 'scopes', 'expiresAt']), 'credential');
@@ -133,7 +139,7 @@ export function validateGasQuoteRequest420(input) {
   return Object.freeze({ schemaVersion: SCHEMA_VERSION, chainId, entryPoint, paymaster, account, sponsorshipDigest, policyId, authorizationId, maxSponsoredCostWei, validAfter, validUntil });
 }
 
-export function createGasQuote420({ request, credential, now = new Date(), maxTtlSeconds = DEFAULT_MAX_TTL_SECONDS, sign }) {
+export function createGasQuote420({ request, credential, now = new Date(), maxTtlSeconds = DEFAULT_MAX_TTL_SECONDS, sign, quotaController }) {
   assert420(Number.isInteger(maxTtlSeconds) && maxTtlSeconds > 0 && maxTtlSeconds <= 3600, 'maxTtlSeconds is invalid');
   const caller = validateGasQuoteCredential420(credential, { now, requiredScope: 'gas:quote' });
   const quoteRequest = validateGasQuoteRequest420(request);
@@ -146,25 +152,49 @@ export function createGasQuote420({ request, credential, now = new Date(), maxTt
   assert420(validUntilMs - issuedMs <= maxTtlSeconds * 1000, 'quote validity exceeds maximum TTL');
   assert420(typeof sign === 'function', 'quote signer is required');
 
-  const unsigned = Object.freeze({ ...quoteRequest, issuedAt });
-  const quoteCommitment = `0x${createHash('sha256').update(canonicalQuoteMaterial420(unsigned)).digest('hex')}`;
-  const signature = sign({ sponsorshipDigest: unsigned.sponsorshipDigest, quoteCommitment, quote: unsigned });
-  assert420(typeof signature === 'string' && signature.length > 0 && signature.length <= 4096, 'quote signer returned invalid signature');
+  const quota = quotaController420(quotaController);
+  let reservation = null;
+  if (quota) {
+    reservation = quota.reserve({
+      account: quoteRequest.account,
+      policyId: quoteRequest.policyId,
+      authorizationId: quoteRequest.authorizationId,
+      maxSponsoredCostWei: quoteRequest.maxSponsoredCostWei,
+      nowMs: issuedMs,
+    });
+  }
 
-  return Object.freeze({
-    ...unsigned,
-    quoteId: quoteCommitment,
-    quoteCommitment,
-    signature,
-    issuedToApplicationId: caller.applicationId,
-    fundingMode: 'paymaster',
-    authority: 'funding-offer-only',
-    executionAuthorization: false,
-    walletAuthorization: false,
-    targetProtocolAuthorization: false,
-    canonicalProtocolAuthority: false,
-    sponsorSecretExposed: false
-  });
+  try {
+    const unsigned = Object.freeze({ ...quoteRequest, issuedAt });
+    const quoteCommitment = `0x${createHash('sha256').update(canonicalQuoteMaterial420(unsigned)).digest('hex')}`;
+    const signature = sign({ sponsorshipDigest: unsigned.sponsorshipDigest, quoteCommitment, quote: unsigned });
+    assert420(typeof signature === 'string' && signature.length > 0 && signature.length <= 4096, 'quote signer returned invalid signature');
+
+    return Object.freeze({
+      ...unsigned,
+      quoteId: quoteCommitment,
+      quoteCommitment,
+      signature,
+      issuedToApplicationId: caller.applicationId,
+      fundingMode: 'paymaster',
+      authority: 'funding-offer-only',
+      executionAuthorization: false,
+      walletAuthorization: false,
+      targetProtocolAuthorization: false,
+      canonicalProtocolAuthority: false,
+      sponsorSecretExposed: false,
+      quotaReservation: reservation,
+    });
+  } catch (error) {
+    if (quota && reservation) quota.release(quoteRequest.authorizationId);
+    throw error;
+  }
+}
+
+export function releaseGasQuoteQuota420({ quotaController, authorizationId }) {
+  const quota = quotaController420(quotaController);
+  assert420(quota !== null, 'quotaController is required');
+  return quota.release(bytes32420(authorizationId, 'authorizationId'));
 }
 
 export function createGasQuoteReadView420(quote, { credential, now = new Date() } = {}) {

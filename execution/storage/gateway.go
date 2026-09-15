@@ -12,11 +12,34 @@ import (
 	"strings"
 )
 
-var ErrGatewayRoute = errors.New("gateway route failure")
+var (
+	ErrGatewayRoute        = errors.New("gateway route failure")
+	ErrGatewayUnauthorized = errors.New("gateway access unauthorized")
+)
+
+type GatewayAccessMode string
+
+const (
+	GatewayAccessPublic  GatewayAccessMode = "public"
+	GatewayAccessPrivate GatewayAccessMode = "private"
+	GatewayAccessRead    string            = "read"
+)
+
+type GatewayAccess struct {
+	Mode       GatewayAccessMode
+	Subject    string
+	SessionID  string
+	Capability string
+}
 
 type GatewayRequest struct {
 	CacheKey     CacheKey
 	CommitmentID string
+	Access       GatewayAccess
+}
+
+type GatewayAccessAuthorizer interface {
+	AuthorizeGatewayAccess(context.Context, GatewayAccess, GatewayRequest) error
 }
 
 type GatewaySource interface {
@@ -61,9 +84,10 @@ type GatewayResult struct {
 }
 
 type GatewayRouter struct {
-	Cache     []GatewaySource
-	Store     []GatewaySource
-	Discovery GatewayDiscovery
+	Cache      []GatewaySource
+	Store      []GatewaySource
+	Discovery  GatewayDiscovery
+	Authorizer GatewayAccessAuthorizer
 }
 
 type gatewayRouteSource struct {
@@ -75,6 +99,9 @@ type gatewayRouteSource struct {
 func (g GatewayRouter) Route(ctx context.Context, req GatewayRequest) (GatewayResult, error) {
 	if _, err := CanonicalCacheKey(req.CacheKey); err != nil || strings.TrimSpace(req.CommitmentID) == "" {
 		return GatewayResult{}, ErrGatewayRoute
+	}
+	if err := g.authorize(ctx, req); err != nil {
+		return GatewayResult{}, err
 	}
 	attempts := make([]GatewayAttempt, 0, len(g.Cache)+len(g.Store))
 	cacheSources := make([]gatewayRouteSource, 0, len(g.Cache))
@@ -134,6 +161,24 @@ func (g GatewayRouter) Route(ctx context.Context, req GatewayRequest) (GatewayRe
 	if result, ok := try("cache", cacheSources); ok { return result, nil }
 	if result, ok := try("store", storeSources); ok { return result, nil }
 	return GatewayResult{Attempts: attempts}, ErrGatewayRoute
+}
+
+func (g GatewayRouter) authorize(ctx context.Context, req GatewayRequest) error {
+	access := req.Access
+	mode := access.Mode
+	if mode == "" { mode = GatewayAccessPublic }
+	if mode == GatewayAccessPublic { return nil }
+	if mode != GatewayAccessPrivate { return ErrGatewayUnauthorized }
+	access.Subject = strings.TrimSpace(access.Subject)
+	access.SessionID = strings.TrimSpace(access.SessionID)
+	access.Capability = strings.TrimSpace(strings.ToLower(access.Capability))
+	if access.Subject == "" || access.SessionID == "" || access.Capability != GatewayAccessRead || g.Authorizer == nil {
+		return ErrGatewayUnauthorized
+	}
+	if err := g.Authorizer.AuthorizeGatewayAccess(ctx, access, req); err != nil {
+		return fmt.Errorf("%w: %v", ErrGatewayUnauthorized, err)
+	}
+	return nil
 }
 
 func gatewayCapabilityRank(capability GatewayCapability) int {

@@ -57,9 +57,9 @@ Qualification passed:
 - 420Docs Qualification #1130
 - 420 Integrated Qualification #3329
 
-## GAS-9 — budgets, quotas, abuse resistance — CLOSEOUT / QUALIFICATION
+## GAS-9 — budgets, quotas, abuse resistance — COMPLETE / MERGED
 
-Bound sponsor exposure and off-chain quote-service resource consumption without creating execution authority or replacing canonical on-chain accounting.
+Merged to `main` in PR #293 at merge commit `57103d7f429dda6e3a53588915808a7f92454bc1` after exact-head qualification.
 
 Completed GAS-9 work:
 - **GAS-9.1** bounded quota controller with per-operation, per-account, per-policy, spend, operation-count, concurrency and outstanding-authorization limits.
@@ -69,11 +69,29 @@ Completed GAS-9 work:
 - **GAS-9.5** exact reservation-generation handles, stale-release/ABA protection, transactional signer-failure rollback, and re-entrant duplicate/concurrency hardening.
 - **GAS-9.6** bounded/pruned fixed-window state, read-only snapshots that do not allocate attacker-controlled keys, current-window state caps, rollover cleanup, and adversarial state-flood closeout tests.
 
-GAS-9 remains funding-only. Quota, budget, cache, quote and telemetry state never becomes Smart Account, Wallet, Automation, target-protocol, settlement, or canonical-chain authority. On-chain EntryPoint/paymaster accounting remains authoritative for actual sponsored settlement.
+Final qualified GAS-9 head: `c4ac74a41620607fd0b266c5983b485b527d1fdb`.
 
-## GAS-10 — observability, readiness, and recovery
+Qualification passed:
+- 420Gas Qualification #36
+- 420Automation #173
+- 420Docs Qualification #1134
+- 420 Integrated Qualification #3380
 
-Add low-cardinality metrics, redacted operational status, sponsor/deposit readiness, settlement journals, and recovery procedures. Telemetry never becomes settlement or authorization evidence.
+GAS-9 remains funding-only. Quota, budget, cache and quote state never becomes Smart Account, Wallet, Automation, target-protocol, settlement, or canonical-chain authority. On-chain EntryPoint/paymaster accounting remains authoritative for actual sponsored settlement.
+
+## GAS-10 — observability, readiness, and recovery — ACTIVE
+
+Add bounded low-cardinality metrics, redacted operational status, sponsor/deposit readiness, settlement journals, and recovery procedures. Telemetry never becomes settlement or authorization evidence.
+
+Planned GAS-10 work:
+- **GAS-10.1** bounded low-cardinality metrics and redacted, explicitly non-authoritative operational status.
+- **GAS-10.2** sponsor/deposit readiness evaluation from authoritative inputs without converting telemetry into accounting truth.
+- **GAS-10.3** bounded settlement journal projection for diagnosis/reconciliation, with canonical on-chain settlement remaining authoritative.
+- **GAS-10.4** recovery/degraded-mode state machine for signer, sponsor-funding and settlement-observation failures.
+- **GAS-10.5** health/readiness API projections with secret redaction and stable machine-readable reason codes.
+- **GAS-10.6** adversarial observability/recovery closeout, roadmap update, exact-head qualification, reconciliation and merge.
+
+GAS-10.1 is in progress on branch `gas-10-observability-readiness-recovery`.
 
 ## GAS-11 — hostile-state/security hardening
 

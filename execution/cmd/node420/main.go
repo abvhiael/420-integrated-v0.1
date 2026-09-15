@@ -177,15 +177,16 @@ func main() {
 		fmt.Printf("%s %s\n", filepath.Clean(path), strings.Join(args, " "))
 		if *storageEnabled { fmt.Printf("node420 storage listen=%s data=%s tls=%t max_concurrent=%d reconcile=%s\n", *storageListen, filepath.Join(*datadir,"storage"), *storageTLSCert != "", *storageMaxConcurrent, storageReconcileInterval.String()) }
 		if *cacheEnabled { fmt.Printf("node420 cache data=%s interval=%s\n", filepath.Join(*datadir,"cache"), cacheInterval.String()) }
+		if *gatewayEnabled { fmt.Printf("node420 gateway listen=%s cache=%s store=%s timeout=%s\n", *gatewayListen, *gatewayCacheURL, *gatewayStoreURL, gatewayTimeout.String()) }
 		return
 	}
 
 	cmd := exec.Command(path,args...); cmd.Stdin=os.Stdin; cmd.Stdout=os.Stdout; cmd.Stderr=os.Stderr
-	if !*storageEnabled && !*cacheEnabled { if err := cmd.Run(); err != nil { fmt.Fprintln(os.Stderr,"node420:",err); os.Exit(1) }; return }
+	if !*storageEnabled && !*cacheEnabled && !*gatewayEnabled { if err := cmd.Run(); err != nil { fmt.Fprintln(os.Stderr,"node420:",err); os.Exit(1) }; return }
 	rpcURL := *storageRPC
 	if rpcURL == "" { rpcURL = fmt.Sprintf("http://%s:%d", *httpAddr, *httpPort) }
 	contracts := storage.RPCStorageContracts{Agreement:*storageAgreement,Commitment:*storageCommitment,Capacity:*storageCapacityContract,Settlement:*storageSettlement,Scheme:*storageScheme,Manifest:*storageManifest}
-	services := make([]serviceRunner, 0, 2)
+	services := make([]serviceRunner, 0, 3)
 	if *storageEnabled {
 		if uint64(*storageMaxConcurrent) > uint64(^uint32(0)) { fmt.Fprintln(os.Stderr,"node420 storage config: max concurrent requests too large"); os.Exit(2) }
 		service, err := storage.NewService(storage.ServiceConfig{
@@ -203,6 +204,11 @@ func main() {
 		cacheService, err := newNodeCacheService(*datadir, rpcURL, contracts)
 		if err != nil { fmt.Fprintln(os.Stderr,"node420 cache config:",err); os.Exit(2) }
 		services = append(services, cacheService)
+	}
+	if *gatewayEnabled {
+		gatewayService, err := newNodeGatewayService()
+		if err != nil { fmt.Fprintln(os.Stderr,"node420 gateway config:",err); os.Exit(2) }
+		services = append(services, gatewayService)
 	}
 	var service serviceRunner
 	if len(services) == 1 { service = services[0] } else { service = serviceGroup{services:services} }

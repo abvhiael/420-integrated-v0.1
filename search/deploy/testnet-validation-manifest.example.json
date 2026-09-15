@@ -1,0 +1,46 @@
+{
+  "schema": "420-search-testnet-validation-v1",
+  "phase": "SEARCH-9",
+  "service": "420Search",
+  "required": {
+    "runtime": "search420",
+    "dataSource": "420Indexer",
+    "canonicalAuthority": false,
+    "directRpc": false,
+    "health": "/v1/health",
+    "readiness": "/v1/readiness",
+    "status": "/v1/status",
+    "capabilities": "/v1/capabilities",
+    "search": "/v1/search"
+  },
+  "qualification": {
+    "snapshot": "indexedHeight > 0 && finalizedHeight <= indexedHeight",
+    "provenance": "every emitted result carries non-empty source and authority",
+    "privacy": [
+      "private_messenger",
+      "private_commons",
+      "private_identity",
+      "encrypted_resource_payload",
+      "raw_attention_telemetry"
+    ],
+    "allowedDomains": [
+      "block",
+      "transaction",
+      "address",
+      "contract",
+      "service",
+      "name",
+      "public_identity",
+      "asset",
+      "validator",
+      "market_listing",
+      "rights_record",
+      "public_commons",
+      "public_pulse"
+    ]
+  },
+  "commands": {
+    "smoke": "SEARCH_SMOKE_URL=https://search.testnet.example searchsmoke",
+    "live": "SEARCH_LIVE_URL=https://search.testnet.example searchlivevalidate"
+  }
+}

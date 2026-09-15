@@ -2,17 +2,15 @@ name: 420 Genesis Contract Hardening
 
 on:
   push:
-    paths:
-      - "contracts/**"
-      - ".github/workflows/contracts-hardening.yml"
-  pull_request:
+    branches:
+      - main
     paths:
       - "contracts/**"
       - ".github/workflows/contracts-hardening.yml"
   workflow_dispatch:
 
 concurrency:
-  group: contract-hardening-${{ github.event.pull_request.number || github.ref }}
+  group: contract-hardening-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -22,7 +20,7 @@ jobs:
     permissions:
       contents: read
     env:
-      FOUNDRY_PROFILE: ${{ github.event_name == 'pull_request' && 'pr' || 'hardening' }}
+      FOUNDRY_PROFILE: hardening
     steps:
       - uses: actions/checkout@v4
 
@@ -64,7 +62,6 @@ jobs:
           python-version: "3.12"
 
       - name: Install Slither
-        if: github.event_name != 'pull_request'
         run: python -m pip install --disable-pip-version-check slither-analyzer
 
       - name: Capture toolchain
@@ -77,7 +74,7 @@ jobs:
             forge --version
             cast --version
             python --version
-            if command -v slither >/dev/null 2>&1; then slither --version; fi
+            slither --version
             forge config
           } | tee ../artifacts/hardening/toolchain.txt
 
@@ -122,12 +119,10 @@ jobs:
         run: forge test --match-path 'test/*Invariant*.t.sol' -vv 2>&1 | tee ../artifacts/hardening/invariants.txt
 
       - name: AI gas and denial-of-service review evidence
-        if: github.event_name != 'pull_request'
         working-directory: contracts
         run: forge test --match-path 'test/AI*.t.sol' --gas-report 2>&1 | tee ../artifacts/hardening/gas-report.txt
 
       - name: Slither high-severity gate
-        if: github.event_name != 'pull_request'
         working-directory: contracts
         run: |
           set +e

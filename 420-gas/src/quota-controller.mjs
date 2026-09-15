@@ -140,11 +140,12 @@ export class GasQuotaController420 {
     policyWindow.sponsoredWei += cost;
     sponsorWindow.operations += 1;
     sponsorWindow.sponsoredWei += cost;
-    const reservation = Object.freeze({
+    const reservationId = this._reservationId();
+    const record = Object.freeze({
       account: accountKey,
       policyId: policyKey,
       authorizationId: authorizationKey,
-      reservationId: this._reservationId(),
+      reservationId,
       reservedWei: cost,
       windowId: this._windowId(nowMs),
       expiresAtMs: expiry,
@@ -152,8 +153,16 @@ export class GasQuotaController420 {
       policyWindowKey,
       sponsorWindowKey,
     });
-    this.active.set(authorizationKey, reservation);
-    return reservation;
+    this.active.set(authorizationKey, record);
+    return Object.freeze({
+      account: accountKey,
+      policyId: policyKey,
+      authorizationId: authorizationKey,
+      reservationId,
+      reservedWei: cost,
+      windowId: record.windowId,
+      expiresAtMs: expiry,
+    });
   }
 
   release(handle) {

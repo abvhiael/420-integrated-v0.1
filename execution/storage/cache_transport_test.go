@@ -17,7 +17,7 @@ func (f cacheOriginFunc) FetchCacheObject(ctx context.Context, key CacheKey) ([]
 func TestCacheHTTPHandlerMissFillThenHit(t *testing.T) {
 	policy:=CachePolicy{MaxBytes:1024,MaxEntries:8,DefaultTTL:time.Hour,MaxTTL:2*time.Hour}
 	p,err:=NewPersistentCacheRuntime(t.TempDir(),policy); if err!=nil{t.Fatal(err)}
-	canonical:=cacheCanonicalStub{valid:true}
+	canonical:=cacheCanonicalStub{valid:map[string]bool{}}
 	r,err:=NewCacheReconcileService(p,canonical,time.Minute,time.Second,time.Minute); if err!=nil{t.Fatal(err)}
 	payload:=[]byte("cache-data")
 	key:=cacheTestKey(payload,"manifest-a",1)
@@ -33,7 +33,7 @@ func TestCacheHTTPHandlerMissFillThenHit(t *testing.T) {
 func TestCacheHTTPHandlerHealthAndMetrics(t *testing.T) {
 	policy:=CachePolicy{MaxBytes:1024,MaxEntries:8,DefaultTTL:time.Hour,MaxTTL:2*time.Hour}
 	p,err:=NewPersistentCacheRuntime(t.TempDir(),policy); if err!=nil{t.Fatal(err)}
-	r,err:=NewCacheReconcileService(p,cacheCanonicalStub{valid:true},time.Minute,time.Second,time.Minute); if err!=nil{t.Fatal(err)}
+	r,err:=NewCacheReconcileService(p,cacheCanonicalStub{valid:map[string]bool{}},time.Minute,time.Second,time.Minute); if err!=nil{t.Fatal(err)}
 	h:=CacheHTTPHandler{Runtime:p,Reconciler:r,Now:func()time.Time{return time.Unix(100,0)}}
 	w:=httptest.NewRecorder(); h.ServeHTTP(w,httptest.NewRequest(http.MethodGet,"/healthz",nil)); if w.Code!=http.StatusOK||!strings.Contains(w.Body.String(),"\"ready\":true"){t.Fatalf("health %d %s",w.Code,w.Body.String())}
 	w=httptest.NewRecorder(); h.ServeHTTP(w,httptest.NewRequest(http.MethodGet,"/metrics",nil)); body:=w.Body.String(); if w.Code!=http.StatusOK||!strings.Contains(body,"fourtwenty_cache_entries 0")||!strings.Contains(body,"fourtwenty_cache_reconcile_runs_total 0"){t.Fatalf("metrics %d %s",w.Code,body)}
@@ -51,7 +51,7 @@ func TestCacheHTTPHeadHasNoBody(t *testing.T) {
 	policy:=CachePolicy{MaxBytes:1024,MaxEntries:8,DefaultTTL:time.Hour,MaxTTL:2*time.Hour}
 	p,_:=NewPersistentCacheRuntime(t.TempDir(),policy)
 	payload:=[]byte("abcd"); key:=cacheTestKey(payload,"manifest-a",0); now:=time.Unix(100,0); if _,err:=p.Put(key,payload,now,time.Hour);err!=nil{t.Fatal(err)}
-	r,_:=NewCacheReconcileService(p,cacheCanonicalStub{valid:true},time.Minute,time.Second,time.Minute)
+	r,_:=NewCacheReconcileService(p,cacheCanonicalStub{valid:map[string]bool{}},time.Minute,time.Second,time.Minute)
 	h:=CacheHTTPHandler{Runtime:p,Reconciler:r,Now:func()time.Time{return now}}
 	url:="/v1/cache?object_id="+key.ObjectID+"&manifest_id="+key.ManifestID+"&shard_index=0&shard_root="+key.ShardRoot+"&size_bytes=4"
 	w:=httptest.NewRecorder(); h.ServeHTTP(w,httptest.NewRequest(http.MethodHead,url,nil)); b,_:=io.ReadAll(w.Result().Body); if w.Code!=http.StatusOK||len(b)!=0{t.Fatalf("code=%d body=%q",w.Code,b)}

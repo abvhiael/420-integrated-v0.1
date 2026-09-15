@@ -5,6 +5,7 @@ export * from './scheduler.js';
 export * from './execution.js';
 export * from './funding.js';
 export * from './gas-integration.js';
+export * from './gas-quote-adapter.js';
 export * from './recovery.js';
 export * from './workers.js';
 export * from './oracle.js';

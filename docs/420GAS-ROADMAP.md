@@ -6,43 +6,53 @@
 
 Each numbered GAS phase is developed on its own branch and pull request, reconciled with current `main`, fully qualified on the exact final head, and merged before the next phase begins.
 
-## GAS-0 — architecture and trust foundation
+## GAS-0 — architecture and trust foundation — COMPLETE
 
 Define sponsorship authority, operation binding, deposit/accounting boundaries, policy narrowing, replay/concurrency rules, failure behavior, cross-service dependencies, and invariants. Preserve the current fail-closed `UnsupportedPaymaster` behavior in `EntryPoint420` while the model is frozen.
 
-## GAS-1 — paymaster interface and payload encoding
+## GAS-1 — paymaster interface and payload encoding — COMPLETE
 
 Define the canonical `IPaymaster420` contract interface and strict `paymasterAndData` encoding/versioning. Bind payloads to exact EntryPoint, paymaster, operation, policy, validity window, cost ceiling, and replay identity. Add malformed/unknown-version rejection tests.
 
-## GAS-2 — EntryPoint paymaster validation path
+## GAS-2 — EntryPoint paymaster validation path — COMPLETE
 
 Extend `EntryPoint420` with a bounded sponsorship-validation path while preserving account validation as an independent authority gate. A paymaster can fund an operation only after normal sender/nonce/account checks and can never make failed account validation succeed.
 
-## GAS-3 — sponsor deposits and reservations
+## GAS-3 — sponsor deposits and reservations — COMPLETE
 
 Add native `$420` sponsor deposits, bounded reservations, withdrawal authority, reservation uniqueness, and accounting invariants. Prevent negative balances, double reservation, unbounded credit, and settlement beyond reserved maximum cost.
 
-## GAS-4 — post-operation settlement
+## GAS-4 — post-operation settlement — COMPLETE
 
 Implement deterministic settlement/refund semantics for successful and reverted Smart Account execution. Account for legitimate gas without allowing paymaster callbacks or post-op accounting to reenter or mutate unrelated execution authority.
 
-## GAS-5 — sponsorship policy engine
+## GAS-5 — sponsorship policy engine — COMPLETE
 
 Implement deterministic on-chain/off-chain-compatible policy commitments for approved accounts/apps/targets/selectors, cost ceilings, validity, budgets, and optional capability/session constraints. Policy can only narrow sponsorship.
 
-## GAS-6 — quote service and Developer Hub API
+## GAS-6 — quote service and Developer Hub API — COMPLETE
 
 Add a replaceable authenticated quote/read service for Wallet, applications, and developers. Quotes are short-lived operation-bound funding offers, not execution authorizations. Integrate scoped service credentials without exposing sponsor/operator secrets.
 
-## GAS-7 — Wallet and Smart Account integration
+## GAS-7 — Wallet and Smart Account integration — COMPLETE
 
 Integrate sponsorship discovery, quote review, operation assembly, fallback-to-self-funded flows, and user-facing failure states in Wallet Core. Wallet signing/review/session authority remains unchanged.
 
-## GAS-8 — 420Automation integration
+## GAS-8 — 420Automation integration — CLOSEOUT / FINAL QUALIFICATION
 
 Bind Automation paymaster funding to exact AUT execution plans and existing AUT replay/ambiguity rules. A quote may fund only an execution already authorized by Automation and the target protocol.
 
-## GAS-9 — budgets, quotas, abuse resistance
+Completed GAS-8 work:
+- **GAS-8.1** exact Automation plan binding and sponsorship digest propagation.
+- **GAS-8.2** attempt/replay binding; only a `ready` attempt may be sponsored and retries require a fresh attempt-bound quote.
+- **GAS-8.3** canonical 420Gas quote adapter with strict chain, EntryPoint, paymaster, Smart Account, policy, cost, validity, attempt and authority checks.
+- **GAS-8.4** canonical Automation → 420Gas quote-request builder deriving `authorizationId` from the exact Automation attempt.
+- **GAS-8.5** end-to-end sponsorship preparation flow with fail-closed default behavior and explicit self-funded fallback only through existing AUT-5 budget gates.
+- **GAS-8.6** adversarial/E2E closeout covering mid-flight plan mutation, ambiguous/retry states, stale retry quote replay, wrong chain/paymaster/policy and authority escalation.
+
+Remaining before GAS-8 is complete: exact-head CI qualification, reconcile with current `main`, re-qualify the reconciled head, then merge PR #291.
+
+## GAS-9 — budgets, quotas, abuse resistance — NEXT
 
 Add per-operation, per-account, per-policy, and time-window quotas; gas/fee ceilings; concurrency controls; denial-of-service limits; sponsor-drain resistance; and bounded caches/state.
 

@@ -39,10 +39,14 @@ function controller(overrides = {}) {
     maxSponsoredCostPerOperationWei: '1000',
     maxAccountWindowWei: '1000',
     maxPolicyWindowWei: '2000',
+    maxSponsorWindowWei: '10000',
     maxAccountOperationsPerWindow: 10,
     maxPolicyOperationsPerWindow: 20,
+    maxSponsorOperationsPerWindow: 100,
     maxConcurrentPerAccount: 2,
+    maxConcurrentSponsor: 20,
     maxTrackedAuthorizations: 20,
+    maxReservationAgeMs: 300_000,
     ...overrides,
   });
 }
@@ -127,4 +131,36 @@ test('GAS-9.2 preserves backwards-compatible quote issuance without a quota cont
   assert.equal(quote.quotaReservation, null);
   assert.equal(quote.executionAuthorization, false);
   assert.equal(quote.canonicalProtocolAuthority, false);
+});
+
+test('GAS-9.3 binds outstanding reservation expiry to the signed quote validity window', () => {
+  const quota = controller({ maxConcurrentPerAccount: 1 });
+  const quote = createGasQuote420({ request: request(), credential: credential(), now, quotaController: quota, sign: () => 'signature' });
+  assert.equal(quote.quotaReservation.expiresAtMs, Date.parse(quote.validUntil));
+
+  const beforeExpiry = quota.snapshot({ account: addr(3), policyId: hash(5), nowMs: Date.parse(quote.validUntil) - 1 });
+  assert.equal(beforeExpiry.accountConcurrent, 1);
+  const atExpiry = quota.snapshot({ account: addr(3), policyId: hash(5), nowMs: Date.parse(quote.validUntil) });
+  assert.equal(atExpiry.accountConcurrent, 0);
+  assert.equal(atExpiry.sponsorConcurrent, 0);
+});
+
+test('GAS-9.3 sponsor concurrency is recovered automatically from abandoned expired quotes', () => {
+  const quota = controller({ maxConcurrentPerAccount: 10, maxConcurrentSponsor: 1 });
+  const first = createGasQuote420({ request: request(), credential: credential(), now, quotaController: quota, sign: () => 'sig-1' });
+  assert.equal(first.quotaReservation.expiresAtMs, Date.parse(first.validUntil));
+
+  const later = new Date('2026-09-15T18:51:00.000Z');
+  assert.doesNotThrow(() => createGasQuote420({
+    request: request({
+      authorizationId: hash(7),
+      sponsorshipDigest: hash(8),
+      validAfter: '2026-09-15T18:50:59.000Z',
+      validUntil: '2026-09-15T18:52:00.000Z',
+    }),
+    credential: credential(),
+    now: later,
+    quotaController: quota,
+    sign: () => 'sig-2',
+  }));
 });

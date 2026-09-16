@@ -40,6 +40,18 @@ func Open(path string) (*Store, error) {
 	return &Store{path: path}, nil
 }
 
+func canonicalizeVersion(record appregistry.VersionRecord) appregistry.VersionRecord {
+	record.ServiceID = strings.ToLower(strings.TrimSpace(record.ServiceID))
+	record.Implementation = strings.ToLower(strings.TrimSpace(record.Implementation))
+	record.CodeHash = strings.ToLower(strings.TrimSpace(record.CodeHash))
+	record.MetadataHash = strings.ToLower(strings.TrimSpace(record.MetadataHash))
+	record.ManifestHash = strings.ToLower(strings.TrimSpace(record.ManifestHash))
+	record.DependencyRoot = strings.ToLower(strings.TrimSpace(record.DependencyRoot))
+	record.InterfaceHash = strings.ToLower(strings.TrimSpace(record.InterfaceHash))
+	record.BlockHash = strings.ToLower(strings.TrimSpace(record.BlockHash))
+	return record
+}
+
 func sortVersions(versions []appregistry.VersionRecord) {
 	sort.Slice(versions, func(i, j int) bool {
 		if strings.EqualFold(versions[i].ServiceID, versions[j].ServiceID) {
@@ -82,9 +94,11 @@ func RebuildFromSnapshot(snapshot appregistry.Snapshot) (Document, error) {
 	if err != nil { return Document{}, err }
 	if err := projection.Rebuild(snapshot); err != nil { return Document{}, err }
 	versions := make([]appregistry.VersionRecord, len(snapshot.Versions))
-	copy(versions, snapshot.Versions)
+	for i, record := range snapshot.Versions {
+		versions[i] = canonicalizeVersion(record)
+	}
 	sortVersions(versions)
-	return Document{SchemaVersion: SchemaVersion, ChainID: snapshot.ChainID, RegistryAddress: strings.ToLower(snapshot.RegistryAddress), FinalizedBlock: projection.FinalizedBlock(), Versions: versions}, nil
+	return Document{SchemaVersion: SchemaVersion, ChainID: snapshot.ChainID, RegistryAddress: strings.ToLower(strings.TrimSpace(snapshot.RegistryAddress)), FinalizedBlock: projection.FinalizedBlock(), Versions: versions}, nil
 }
 
 func RestoreProjection(doc Document) (*appregistry.Projection, error) {

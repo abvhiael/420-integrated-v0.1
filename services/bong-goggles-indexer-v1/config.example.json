@@ -1,0 +1,17 @@
+{
+  "chainId": 420,
+  "schemaHash": "0xREPLACE_WITH_CANONICAL_SEARCH_SCHEMA_HASH",
+  "startBlock": 0,
+  "confirmations": 2,
+  "reorgWindow": 64,
+  "maxBlockSpan": 500,
+  "staleAfterBlocks": 12,
+  "contracts": {
+    "profileRegistry": "0x1111111111111111111111111111111111111111",
+    "relationshipGraph": "0x2222222222222222222222222222222222222222",
+    "socialObjectRegistry": "0x3333333333333333333333333333333333333333",
+    "communityRegistry": "0x4444444444444444444444444444444444444444",
+    "discoveryRegistry": "0x5555555555555555555555555555555555555555",
+    "searchIndexSurface": "0x6666666666666666666666666666666666666666"
+  }
+}

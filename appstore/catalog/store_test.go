@@ -95,7 +95,7 @@ func TestUnsupportedSchemaFailsClosed(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "catalog.json")
 	if err := os.WriteFile(path, []byte(`{"schemaVersion":99,"chainId":420,"registryAddress":"0x0000000000000000000000000000000000000420","finalizedBlock":1,"versions":[]}`), 0o600); err != nil { t.Fatal(err) }
 	store, _ := Open(path)
-	_, err = store.Load()
+	_, err := store.Load()
 	if !errors.Is(err, ErrUnsupportedSchema) { t.Fatalf("expected ErrUnsupportedSchema, got %v", err) }
 }
 

@@ -47,18 +47,18 @@ func DeveloperCacheStatusForObject(state CacheState, object DeveloperObjectRef, 
 }
 
 type DeveloperRepairStatus struct {
-	Version         string             `json:"version"`
-	Authoritative   bool               `json:"authoritative"`
-	ObjectID        string             `json:"object_id"`
-	ManifestID      string             `json:"manifest_id"`
-	Sealed          bool               `json:"sealed"`
-	Retrievable     bool               `json:"retrievable"`
-	Recoverable     bool               `json:"recoverable"`
-	Degraded        bool               `json:"degraded"`
-	LiveShards      uint32             `json:"live_shards"`
-	RequiredShards  uint32             `json:"required_shards"`
-	TargetLiveShards uint32            `json:"target_live_shards"`
-	ReplaceShards   []uint32           `json:"replace_shards"`
+	Version          string   `json:"version"`
+	Authoritative    bool     `json:"authoritative"`
+	ObjectID         string   `json:"object_id"`
+	ManifestID       string   `json:"manifest_id"`
+	Sealed           bool     `json:"sealed"`
+	Retrievable      bool     `json:"retrievable"`
+	Recoverable      bool     `json:"recoverable"`
+	Degraded         bool     `json:"degraded"`
+	LiveShards       uint32   `json:"live_shards"`
+	RequiredShards   uint32   `json:"required_shards"`
+	TargetLiveShards uint32   `json:"target_live_shards"`
+	ReplaceShards    []uint32 `json:"replace_shards"`
 }
 
 func DeveloperRepairStatusForObject(object DeveloperObjectRef, manifest RepairManifest, policy RepairPolicy) (DeveloperRepairStatus, error) {
@@ -101,11 +101,30 @@ type DeveloperGatewayDiagnostics struct {
 }
 
 type DeveloperGatewayResult struct {
-	Result      DeveloperRetrieveResult      `json:"result"`
-	Diagnostics DeveloperGatewayDiagnostics  `json:"diagnostics"`
+	Result      DeveloperRetrieveResult     `json:"result"`
+	Diagnostics DeveloperGatewayDiagnostics `json:"diagnostics"`
 }
 
 type DeveloperGatewayHelper struct { Router GatewayRouter }
+
+type developerPolicyDiscovery struct {
+	inner      GatewayDiscovery
+	allowCache bool
+	allowStore bool
+}
+
+func (d developerPolicyDiscovery) DiscoverGatewaySources(ctx context.Context, req GatewayRequest) ([]GatewayCandidate, error) {
+	if d.inner == nil { return nil, nil }
+	candidates, err := d.inner.DiscoverGatewaySources(ctx, req)
+	if err != nil { return nil, err }
+	out := make([]GatewayCandidate, 0, len(candidates))
+	for _, candidate := range candidates {
+		if candidate.Capability == GatewayCapabilityCache && !d.allowCache { continue }
+		if candidate.Capability == GatewayCapabilityStore && !d.allowStore { continue }
+		out = append(out, candidate)
+	}
+	return out, nil
+}
 
 func (h DeveloperGatewayHelper) Retrieve(ctx context.Context, req DeveloperRetrieveRequest, policy DeveloperRetrievalPolicy) (DeveloperGatewayResult, error) {
 	gatewayReq, object, err := normalizeDeveloperRetrieveRequest(req)
@@ -115,6 +134,9 @@ func (h DeveloperGatewayHelper) Retrieve(ctx context.Context, req DeveloperRetri
 	router := h.Router
 	if !policy.AllowCache { router.Cache = nil }
 	if !policy.AllowStoreFallback { router.Store = nil }
+	if router.Discovery != nil {
+		router.Discovery = developerPolicyDiscovery{inner: router.Discovery, allowCache: policy.AllowCache, allowStore: policy.AllowStoreFallback}
+	}
 	result, routeErr := router.Route(ctx, gatewayReq)
 	diagnostics := DeveloperGatewayDiagnostics{Version: DeveloperAPIVersion, Authoritative: false, SelectedTier: result.Tier, ProviderID: result.ProviderID, NodeID: result.NodeID}
 	for _, attempt := range result.Attempts {

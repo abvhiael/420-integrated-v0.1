@@ -93,5 +93,5 @@ SR-10.8 is qualified when the exact branch head demonstrates deterministic alert
 - [420Storage load and capacity qualification](420storage-load-capacity-qualification.md)
 - [420Storage credential rotation and recovery qualification](420storage-credential-rotation.md)
 - [420Storage backup, restore and disaster recovery qualification](420storage-disaster-recovery.md)
-- [420Storage security review and abuse resistance](420storage-security-review.md)
+- [420Storage security and abuse-resistance qualification](420storage-security-abuse-review.md)
 - [Storage and Resource integration](storage-and-resource-integration.md)

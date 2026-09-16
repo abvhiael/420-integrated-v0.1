@@ -12,6 +12,7 @@ import (
 
 	"github.com/420integrated/420-integrated/analytics/architecture"
 	"github.com/420integrated/420-integrated/analytics/model"
+	"github.com/420integrated/420-integrated/analytics/privacy"
 )
 
 const (
@@ -28,9 +29,10 @@ type Definition struct {
 }
 
 type Member struct {
-	EntityID string `json:"entityId"`
-	Cohort   string `json:"cohort"`
-	Score    string `json:"score"`
+	EntityID     string `json:"entityId"`
+	Cohort       string `json:"cohort"`
+	Score        string `json:"score"`
+	PrivacyClass string `json:"privacyClass,omitempty"`
 }
 
 type RankedMember struct {
@@ -46,14 +48,14 @@ type Cohort struct {
 }
 
 type Result struct {
-	SchemaVersion     string            `json:"schemaVersion"`
-	ID                string            `json:"id"`
-	Definition        Definition        `json:"definition"`
-	Provenance        model.Provenance  `json:"provenance"`
-	Cohorts           []Cohort          `json:"cohorts"`
-	SuppressedCohorts int               `json:"suppressedCohorts"`
-	Canonical         bool              `json:"canonical"`
-	Rebuildable       bool              `json:"rebuildable"`
+	SchemaVersion     string           `json:"schemaVersion"`
+	ID                string           `json:"id"`
+	Definition        Definition       `json:"definition"`
+	Provenance        model.Provenance `json:"provenance"`
+	Cohorts           []Cohort         `json:"cohorts"`
+	SuppressedCohorts int              `json:"suppressedCohorts"`
+	Canonical         bool             `json:"canonical"`
+	Rebuildable       bool             `json:"rebuildable"`
 }
 
 type normalizedMember struct {
@@ -89,6 +91,9 @@ func Build(def Definition, provenance model.Provenance, members []Member) (Resul
 	seen := make(map[string]struct{}, len(members))
 	groups := map[string][]normalizedMember{}
 	for i, member := range members {
+		if err := privacy.Admit(member.PrivacyClass); err != nil {
+			return Result{}, fmt.Errorf("member %d privacy admission: %w", i, err)
+		}
 		entityID := strings.ToLower(strings.TrimSpace(member.EntityID))
 		cohort := strings.ToLower(strings.TrimSpace(member.Cohort))
 		score := strings.TrimSpace(member.Score)

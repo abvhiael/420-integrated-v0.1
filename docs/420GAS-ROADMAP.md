@@ -4,7 +4,7 @@
 
 ## Delivery rule
 
-Each numbered GAS phase is normally developed on its own branch and pull request, reconciled with current `main`, fully qualified on the exact final head, and merged before the next phase begins. GAS-11 is the explicit exception: GAS-11.1 through GAS-11.6 are delivered monolithically on PR #297, with reconciliation and merge only after GAS-11.6 closeout.
+Each numbered GAS phase is normally developed on its own branch and pull request, reconciled with current `main`, fully qualified on the exact final head, and merged before the next phase begins. GAS-11 was the explicit exception: GAS-11.1 through GAS-11.6 were delivered monolithically on PR #297, with reconciliation and merge only after GAS-11.6 closeout.
 
 ## GAS-0 — architecture and trust foundation — COMPLETE
 
@@ -100,21 +100,32 @@ Qualification passed on the reconciled head:
 
 GAS-10 remains operational/advisory only. Telemetry, readiness, journal, recovery and status projection state cannot authorize execution or sponsorship and cannot replace canonical on-chain EntryPoint/paymaster accounting or settlement truth.
 
-## GAS-11 — hostile-state/security hardening — ACTIVE
+## GAS-11 — hostile-state/security hardening — COMPLETE / MERGED
 
-Cross-layer adversarial hardening of the complete sponsorship stack before public-testnet closeout.
+Merged to `main` in PR #297 at merge commit `c8b573be025bd0c73744362ab8e5030236053820` after reconciliation with current `main` and full exact-head qualification.
 
-Current GAS-11 work:
+Completed GAS-11 work:
 - **GAS-11.1 — COMPLETE / QUALIFIED.** Forged, replayed and cross-domain sponsorship payload hardening across chain, EntryPoint, paymaster, policy, authorization identity, validity windows and sponsorship-digest binding. Signed sponsorship validity is now enforced at runtime. Qualified head: `3cdc9395aa596505ef30ed852652c38ef216e677`.
 - **GAS-11.2 — COMPLETE / QUALIFIED.** Deposit/reservation/settlement hostile-state coverage for callback reentrancy, withdrawal races, duplicate authorization/settlement attempts, reverted execution cleanup, stale replay and exact reservation charge bounds. Qualified head: `cd4897e060011353556c8395918b16be4727d7c0`.
-- **GAS-11.3 — COMPLETE / QUALIFIED.** Authority-confusion hardening across paymaster policy commitments and Wallet quote handling. Wallet now fail-closes quote-side `executionAuthorization`, `walletAuthorization`, `targetProtocolAuthorization` and `canonicalProtocolAuthority` escalation, including non-boolean smuggling. Qualified head: `38c1c9ae4aaadd63b629060a0bdf049c55a7b705`.
+- **GAS-11.3 — COMPLETE / QUALIFIED.** Authority-confusion hardening across paymaster policy commitments and Wallet quote handling. Wallet fail-closes quote-side `executionAuthorization`, `walletAuthorization`, `targetProtocolAuthorization` and `canonicalProtocolAuthority` escalation, including non-boolean smuggling. Qualified head: `38c1c9ae4aaadd63b629060a0bdf049c55a7b705`.
 - **GAS-11.4 — COMPLETE / QUALIFIED.** Resource-exhaustion and denial-of-service hardening across quote admission, quotas, metrics, journals, readiness/recovery state and attacker-controlled inputs. Decimal funding inputs are bounded to `uint256` before `BigInt` conversion, credential scope fanout is capped, and adversarial bounded-state tests cover quota flooding, metrics cardinality, journal retention, readiness inputs and recovery churn. Qualified head: `296a945ac8aa8dcc8cb228ad704118b35f0c99d5`.
-- **GAS-11.5 — COMPLETE / QUALIFIED.** Secret/credential and service-boundary hardening now sanitizes signer/HSM and generic dependency exceptions, preserves canonical quota policy errors, validates injected clock state, rejects credential-scope smuggling, minimizes and freezes signer input, redacts read views, and proves rollback cleanup under signer failure. Qualified head: `f010626b7b0d0eb795ae13f7ddfbb31272aca8b8`.
-- **GAS-11.6 — ACTIVE.** Cross-layer adversarial closeout and invariant review; reconcile PR #297 with current `main`, qualify the exact reconciled head, then merge only after every required workflow passes.
+- **GAS-11.5 — COMPLETE / QUALIFIED.** Secret/credential and service-boundary hardening sanitizes signer/HSM and generic dependency exceptions, preserves canonical quota policy errors, validates injected clock state, rejects credential-scope smuggling, minimizes and freezes signer input, redacts read views, and proves rollback cleanup under signer failure. Qualified head: `f010626b7b0d0eb795ae13f7ddfbb31272aca8b8`.
+- **GAS-11.6 — COMPLETE / QUALIFIED.** Cross-layer adversarial closeout and invariant review completed after reconciling current `main` into the GAS-11 branch. Final reconciled qualified head: `05d6dc99a1c5a81d4dd6c4e4a31c6d687c72c20c`.
 
-GAS-11 remains on PR #297 and is intentionally not merged until GAS-11.6 closeout and reconciliation.
+Final GAS-11.6 qualification passed:
+- 420Gas Qualification #66
+- 420 Wallet Web Verification #633
+- 420 Wallet Extension Verification #176
+- 420 Wallet Mobile Verification #801
+- Solidity Contracts #2395
+- 420Docs Qualification #1300
+- 420 Integrated Qualification #3560
+- 420 Genesis Contract Hardening #1647
+- 420 Genesis Contract Verification #2799
 
-## GAS-12 — public-testnet qualification and launch closeout
+Core invariant retained across GAS-11: paying gas never grants authority to change what the user or owning protocol authorized. Sponsorship remains funding-only, and canonical on-chain EntryPoint/paymaster accounting remains authoritative for settlement.
+
+## GAS-12 — public-testnet qualification and launch closeout — NEXT
 
 Pin exact release/deployment identity; collect live paymaster/deposit/Wallet/Automation evidence; execute failure drills; verify compatibility with `EntryPoint420`, Wallet, 420RPC, Registry and Automation; retain a machine-readable `go`/`no-go` report. Synthetic CI evidence validates closeout logic only and cannot authorize public-testnet launch.
 

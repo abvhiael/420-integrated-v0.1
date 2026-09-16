@@ -13,29 +13,29 @@ const Phase = "VERIFY-7"
 
 // EIP-1967 implementation/admin/beacon slots.
 const (
-	ImplementationSlot = "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc"
-	AdminSlot          = "0xb53127684a568b3173ae13b9f8a6016e0190208c3210000000000000000000000"
-	BeaconSlot         = "0xa3f0ad74e5423aebfd80d3ef4346578335a9a72aeaee59ff6cb3582b35133d50"
+	ImplementationSlot  = "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc"
+	AdminSlot           = "0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103"
+	BeaconSlot          = "0xa3f0ad74e5423aebfd80d3ef4346578335a9a72aeaee59ff6cb3582b35133d50"
 )
 
 type Kind string
 
 const (
-	KindNone       Kind = "NONE"
-	KindEIP1967    Kind = "EIP1967"
+	KindNone        Kind = "NONE"
+	KindEIP1967     Kind = "EIP1967"
 	KindMinimal1167 Kind = "EIP1167_MINIMAL"
 )
 
 type Relationship struct {
-	ChainID               uint64 `json:"chainId"`
-	ProxyAddress           string `json:"proxyAddress"`
-	ProxyRuntimeCodeHash   string `json:"proxyRuntimeCodeHash"`
-	Kind                    Kind   `json:"kind"`
-	ImplementationAddress  string `json:"implementationAddress,omitempty"`
-	AdminAddress           string `json:"adminAddress,omitempty"`
-	BeaconAddress          string `json:"beaconAddress,omitempty"`
-	ObservedBlock          uint64 `json:"observedBlock"`
-	ObservedBlockHash      string `json:"observedBlockHash"`
+	ChainID              uint64 `json:"chainId"`
+	ProxyAddress          string `json:"proxyAddress"`
+	ProxyRuntimeCodeHash  string `json:"proxyRuntimeCodeHash"`
+	Kind                  Kind   `json:"kind"`
+	ImplementationAddress string `json:"implementationAddress,omitempty"`
+	AdminAddress          string `json:"adminAddress,omitempty"`
+	BeaconAddress         string `json:"beaconAddress,omitempty"`
+	ObservedBlock         uint64 `json:"observedBlock"`
+	ObservedBlockHash     string `json:"observedBlockHash"`
 }
 
 func (r Relationship) Validate() error {
@@ -43,7 +43,7 @@ func (r Relationship) Validate() error {
 	if r.Kind == KindNone { return nil }
 	if r.Kind != KindEIP1967 && r.Kind != KindMinimal1167 { return errors.New("unsupported proxy kind") }
 	if !validAddress(r.ImplementationAddress) { return errors.New("proxy implementation address is required") }
-	if r.ObservedBlockHash == "" || !validHash(r.ObservedBlockHash) { return errors.New("canonical observation block hash is required") }
+	if !validHash(r.ObservedBlockHash) { return errors.New("canonical observation block hash is required") }
 	return nil
 }
 
@@ -91,21 +91,21 @@ func addressFromStorageWord(word string) string {
 
 // VerificationPair intentionally keeps proxy-shell and implementation status independent.
 type VerificationPair struct {
-	ProxyBinding           string                   `json:"proxyBinding"`
-	ProxyClass             architecture.ResultClass `json:"proxyClass"`
-	ImplementationAddress  string                   `json:"implementationAddress,omitempty"`
-	ImplementationBinding  string                   `json:"implementationBinding,omitempty"`
-	ImplementationClass    architecture.ResultClass `json:"implementationClass,omitempty"`
-	ImplementationCurrent  bool                     `json:"implementationCurrent"`
-	Generation             uint64                   `json:"generation"`
+	ProxyBinding          string                   `json:"proxyBinding"`
+	ProxyClass            architecture.ResultClass `json:"proxyClass"`
+	ImplementationAddress string                   `json:"implementationAddress,omitempty"`
+	ImplementationBinding string                   `json:"implementationBinding,omitempty"`
+	ImplementationClass   architecture.ResultClass `json:"implementationClass,omitempty"`
+	ImplementationCurrent bool                     `json:"implementationCurrent"`
+	Generation            uint64                   `json:"generation"`
 }
 
 type UpgradeEvent struct {
-	Generation            uint64 `json:"generation"`
-	FromImplementation    string `json:"fromImplementation,omitempty"`
-	ToImplementation      string `json:"toImplementation,omitempty"`
-	ObservedBlock         uint64 `json:"observedBlock"`
-	ObservedBlockHash     string `json:"observedBlockHash"`
+	Generation         uint64 `json:"generation"`
+	FromImplementation string `json:"fromImplementation,omitempty"`
+	ToImplementation   string `json:"toImplementation,omitempty"`
+	ObservedBlock      uint64 `json:"observedBlock"`
+	ObservedBlockHash  string `json:"observedBlockHash"`
 }
 
 type Tracker struct {
@@ -122,7 +122,7 @@ func (t *Tracker) Observe(r Relationship) (changed bool, generation uint64, err 
 	if !exists {
 		t.current[key] = r
 		if r.Kind != KindNone {
-			t.history[key] = append(t.history[key], UpgradeEvent{Generation:1, ToImplementation:r.ImplementationAddress, ObservedBlock:r.ObservedBlock, ObservedBlockHash:r.ObservedBlockHash})
+			t.history[key] = append(t.history[key], UpgradeEvent{Generation: 1, ToImplementation: r.ImplementationAddress, ObservedBlock: r.ObservedBlock, ObservedBlockHash: r.ObservedBlockHash})
 			return true, 1, nil
 		}
 		return false, 0, nil
@@ -133,15 +133,14 @@ func (t *Tracker) Observe(r Relationship) (changed bool, generation uint64, err 
 		return false, generation, nil
 	}
 	generation++
-	t.history[key] = append(t.history[key], UpgradeEvent{Generation:generation, FromImplementation:previous.ImplementationAddress, ToImplementation:r.ImplementationAddress, ObservedBlock:r.ObservedBlock, ObservedBlockHash:r.ObservedBlockHash})
+	t.history[key] = append(t.history[key], UpgradeEvent{Generation: generation, FromImplementation: previous.ImplementationAddress, ToImplementation: r.ImplementationAddress, ObservedBlock: r.ObservedBlock, ObservedBlockHash: r.ObservedBlockHash})
 	t.current[key] = r
 	return true, generation, nil
 }
 
 func (t *Tracker) History(chainID uint64, proxyAddress string) []UpgradeEvent {
 	key := fmt.Sprintf("%d:%s", chainID, strings.ToLower(proxyAddress))
-	out := append([]UpgradeEvent(nil), t.history[key]...)
-	return out
+	return append([]UpgradeEvent(nil), t.history[key]...)
 }
 
 func ApplyRelationship(pair VerificationPair, relationship Relationship, changed bool, generation uint64) VerificationPair {

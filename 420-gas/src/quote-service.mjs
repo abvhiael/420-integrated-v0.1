@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { GasQuotaError420 } from './quota-controller.mjs';
 
 const ADDRESS_RE = /^0x[0-9a-fA-F]{40}$/;
 const BYTES32_RE = /^0x[0-9a-fA-F]{64}$/;
@@ -151,6 +152,16 @@ function quotaHandle420(reservation) {
   return Object.freeze({ authorizationId, reservationId: reservation.reservationId });
 }
 
+function reserveQuota420(quota, input) {
+  if (!quota) return null;
+  try {
+    return quota.reserve(input);
+  } catch (error) {
+    if (error instanceof GasQuotaError420) throw error;
+    throw new GasQuoteError420('GAS11_QUOTA_DEPENDENCY_FAILED');
+  }
+}
+
 function rollbackQuotaReservation420(quota, reservation) {
   if (!quota || !reservation) return true;
   try {
@@ -243,17 +254,14 @@ export function createGasQuote420({ request, credential, now = new Date(), maxTt
   assert420(typeof sign === 'function', 'quote signer is required');
 
   const quota = quotaController420(quotaController);
-  let reservation = null;
-  if (quota) {
-    reservation = quota.reserve({
-      account: quoteRequest.account,
-      policyId: quoteRequest.policyId,
-      authorizationId: quoteRequest.authorizationId,
-      maxSponsoredCostWei: quoteRequest.maxSponsoredCostWei,
-      nowMs: issuedMs,
-      expiresAtMs: validUntilMs,
-    });
-  }
+  const reservation = reserveQuota420(quota, {
+    account: quoteRequest.account,
+    policyId: quoteRequest.policyId,
+    authorizationId: quoteRequest.authorizationId,
+    maxSponsoredCostWei: quoteRequest.maxSponsoredCostWei,
+    nowMs: issuedMs,
+    expiresAtMs: validUntilMs,
+  });
 
   try {
     const unsigned = Object.freeze({ ...quoteRequest, issuedAt });
@@ -297,7 +305,12 @@ export function createGasQuote420({ request, credential, now = new Date(), maxTt
 export function releaseGasQuoteQuota420({ quotaController, quotaReservation }) {
   const quota = quotaController420(quotaController);
   assert420(quota !== null, 'quotaController is required');
-  return quota.release(quotaHandle420(quotaReservation));
+  try {
+    return quota.release(quotaHandle420(quotaReservation));
+  } catch (error) {
+    if (error instanceof GasQuotaError420) throw error;
+    throw new GasQuoteError420('GAS11_QUOTA_DEPENDENCY_FAILED');
+  }
 }
 
 export function createGasQuoteReadView420(quote, { credential, now = new Date() } = {}) {

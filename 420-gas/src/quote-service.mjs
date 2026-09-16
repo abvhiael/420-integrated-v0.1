@@ -5,6 +5,9 @@ const BYTES32_RE = /^0x[0-9a-fA-F]{64}$/;
 const ID_RE = /^[a-z0-9][a-z0-9._-]{0,63}$/;
 const SCHEMA_VERSION = '1.2.0';
 const DEFAULT_MAX_TTL_SECONDS = 300;
+const MAX_UINT256_420 = (1n << 256n) - 1n;
+const MAX_UINT256_DECIMAL_DIGITS_420 = 78;
+const MAX_CREDENTIAL_SCOPES_420 = 16;
 
 export const DEFAULT_GAS_ECONOMIC_LIMITS_420 = Object.freeze({
   maxGasLimit: 30_000_000n,
@@ -56,15 +59,30 @@ function bytes32420(value, name) {
 }
 
 function uintString420(value, name, { allowZero = false } = {}) {
-  assert420(typeof value === 'string' && /^(0|[1-9][0-9]*)$/.test(value), `${name} must be a decimal string`);
+  assert420(
+    typeof value === 'string'
+      && value.length <= MAX_UINT256_DECIMAL_DIGITS_420
+      && /^(0|[1-9][0-9]*)$/.test(value),
+    `${name} must be a uint256 decimal string`,
+  );
   const parsed = BigInt(value);
+  assert420(parsed <= MAX_UINT256_420, `${name} exceeds uint256`);
   assert420(allowZero || parsed > 0n, `${name} must be greater than zero`);
   return parsed.toString(10);
 }
 
 function positiveBigInt420(value, name) {
-  const parsed = typeof value === 'bigint' ? value : (typeof value === 'string' && /^(0|[1-9][0-9]*)$/.test(value) ? BigInt(value) : -1n);
-  assert420(parsed > 0n, `${name} must be greater than zero`);
+  let parsed = -1n;
+  if (typeof value === 'bigint') {
+    parsed = value;
+  } else if (
+    typeof value === 'string'
+      && value.length <= MAX_UINT256_DECIMAL_DIGITS_420
+      && /^(0|[1-9][0-9]*)$/.test(value)
+  ) {
+    parsed = BigInt(value);
+  }
+  assert420(parsed > 0n && parsed <= MAX_UINT256_420, `${name} must be a positive uint256`);
   return parsed;
 }
 
@@ -143,7 +161,12 @@ export function validateGasQuoteCredential420(input, { now = new Date(), require
   const applicationId = id420(credential.applicationId, 'applicationId');
   const audience = id420(credential.audience, 'audience');
   assert420(audience === '420gas', 'credential audience must be 420gas');
-  assert420(Array.isArray(credential.scopes) && credential.scopes.length > 0, 'credential scopes must be non-empty');
+  assert420(
+    Array.isArray(credential.scopes)
+      && credential.scopes.length > 0
+      && credential.scopes.length <= MAX_CREDENTIAL_SCOPES_420,
+    'credential scopes must contain between 1 and 16 entries',
+  );
   const scopes = credential.scopes.map((scope, index) => text420(scope, `scopes[${index}]`, 128));
   assert420(new Set(scopes).size === scopes.length, 'credential scopes must be unique');
   assert420(requiredScope === 'gas:quote' || requiredScope === 'gas:read', 'required credential scope is invalid');

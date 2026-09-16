@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/420integrated/420-integrated/analytics/methodology"
+	"github.com/420integrated/420-integrated/analytics/model"
 	"github.com/420integrated/420-integrated/analytics/predictive"
 	"github.com/420integrated/420-integrated/analytics/timeseries"
 )

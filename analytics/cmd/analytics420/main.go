@@ -115,10 +115,10 @@ func newHTTPServer(cfg config) (*http.Server, *analyticsruntime.Service, error) 
 	dashboard, err := api.DashboardHandler()
 	if err != nil { return nil, nil, err }
 	mux := http.NewServeMux()
-	mux.Handle("/v1/", api.Handler())
-	mux.Handle("/health", api.Handler())
-	mux.Handle("/ready", api.Handler())
-	mux.Handle("/dashboard", dashboard)
+	mux.Handle("GET /v1/", api.Handler())
+	mux.Handle("GET /health", api.Handler())
+	mux.Handle("GET /ready", api.Handler())
+	mux.Handle("GET /dashboard", dashboard)
 	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/" { http.NotFound(w, r); return }
 		http.Redirect(w, r, "/dashboard", http.StatusTemporaryRedirect)

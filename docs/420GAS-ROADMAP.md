@@ -57,9 +57,9 @@ Qualification passed:
 - 420Docs Qualification #1130
 - 420 Integrated Qualification #3329
 
-## GAS-9 — budgets, quotas, abuse resistance — CLOSEOUT / QUALIFICATION
+## GAS-9 — budgets, quotas, abuse resistance — COMPLETE / MERGED
 
-Bound sponsor exposure and off-chain quote-service resource consumption without creating execution authority or replacing canonical on-chain accounting.
+Merged to `main` in PR #293 at merge commit `57103d7f429dda6e3a53588915808a7f92454bc1` after exact-head qualification.
 
 Completed GAS-9 work:
 - **GAS-9.1** bounded quota controller with per-operation, per-account, per-policy, spend, operation-count, concurrency and outstanding-authorization limits.
@@ -69,11 +69,29 @@ Completed GAS-9 work:
 - **GAS-9.5** exact reservation-generation handles, stale-release/ABA protection, transactional signer-failure rollback, and re-entrant duplicate/concurrency hardening.
 - **GAS-9.6** bounded/pruned fixed-window state, read-only snapshots that do not allocate attacker-controlled keys, current-window state caps, rollover cleanup, and adversarial state-flood closeout tests.
 
-GAS-9 remains funding-only. Quota, budget, cache, quote and telemetry state never becomes Smart Account, Wallet, Automation, target-protocol, settlement, or canonical-chain authority. On-chain EntryPoint/paymaster accounting remains authoritative for actual sponsored settlement.
+Final qualified GAS-9 head: `c4ac74a41620607fd0b266c5983b485b527d1fdb`.
 
-## GAS-10 — observability, readiness, and recovery
+Qualification passed:
+- 420Gas Qualification #36
+- 420Automation #173
+- 420Docs Qualification #1134
+- 420 Integrated Qualification #3380
 
-Add low-cardinality metrics, redacted operational status, sponsor/deposit readiness, settlement journals, and recovery procedures. Telemetry never becomes settlement or authorization evidence.
+GAS-9 remains funding-only. Quota, budget, cache and quote state never becomes Smart Account, Wallet, Automation, target-protocol, settlement, or canonical-chain authority. On-chain EntryPoint/paymaster accounting remains authoritative for actual sponsored settlement.
+
+## GAS-10 — observability, readiness, and recovery — ACTIVE / CLOSEOUT
+
+Add bounded low-cardinality metrics, redacted operational status, sponsor/deposit readiness, settlement journals, and recovery procedures. Telemetry never becomes settlement or authorization evidence.
+
+GAS-10 progress:
+- **GAS-10.1 — COMPLETE / QUALIFIED** bounded low-cardinality metrics and redacted, explicitly non-authoritative operational status. Exact head `06c850091e70cf6af9060a2a7d10e8151b390322`; 420Gas #38, 420Docs #1141 and Integrated #3387 passed.
+- **GAS-10.2 — COMPLETE / QUALIFIED** sponsor/deposit readiness evaluation from observed deposit/reservation inputs with deterministic `ready`, `degraded`, and `not-ready` classification. Exact head `2a67d859e23be4a73668c1cd1e1d3a1e2ad3c3e3`; 420Gas #40, 420Docs #1146 and Integrated #3394 passed. Readiness remains `telemetry-only`; it does not authorize sponsorship or replace canonical EntryPoint/paymaster accounting.
+- **GAS-10.3 — COMPLETE / QUALIFIED** bounded settlement journal projection for diagnosis/reconciliation. Journal entries retain only bounded opaque settlement commitments and observed reservation/cost/outcome/confirmation data, flag observed cost-over-reservation discrepancies, and expose projection-only summaries. Exact head `521264b758ce85123ee50958056ab612c59e3be3`; 420Gas #43, 420Docs #1150 and Integrated #3398 passed. Canonical on-chain EntryPoint/paymaster settlement remains authoritative.
+- **GAS-10.4 — COMPLETE / QUALIFIED** bounded recovery/degraded-mode state machine for signer, sponsor-funding and settlement-observation failures. It retains bounded transition history, suppresses duplicate churn, fails sponsorship guidance closed while components are unavailable/recovering, and remains operational guidance only. Exact head `bceb4cc7f645e36f2770fff27e3df81e9962facc`; 420Gas #46, 420Docs #1161 and Integrated #3413 passed.
+- **GAS-10.5 — COMPLETE / QUALIFIED** stable machine-readable health/readiness projection combining coarse sponsor readiness, recovery state and settlement diagnostics. The projection enforces fixed reason-code vocabularies, deterministic precedence, strict secret/high-cardinality redaction and no execution/sponsorship/settlement/accounting/canonical authority. Exact head `8d58c673fd2bf2bce6d02345ed6e93c4f7086a1f`; 420Gas #49, 420Docs #1167 and Integrated #3421 passed.
+- **GAS-10.6 — CLOSEOUT IN QUALIFICATION** adversarial observability/recovery closeout covering telemetry label/secret injection, reservation-over-deposit fail-closed behavior, settlement replay and bounded retention, recovery churn/history bounds, conflicting degraded-state precedence, strict public-status redaction, and proof that settlement discrepancies remain diagnostic rather than accounting authority. After exact-head qualification, reconcile PR #294 with current `main`, requalify the reconciled head, and merge.
+
+Active branch: `gas-10-observability-readiness-recovery` (PR #294).
 
 ## GAS-11 — hostile-state/security hardening
 

@@ -23,9 +23,9 @@ type S3ObjectAddress struct {
 }
 
 type S3ResolvedObject struct {
-	Address       S3ObjectAddress         `json:"address"`
-	Object        DeveloperObjectRef      `json:"object"`
-	Access        DeveloperReadAccess     `json:"access"`
+	Address       S3ObjectAddress              `json:"address"`
+	Object        DeveloperObjectRef           `json:"object"`
+	Access        DeveloperReadAccess          `json:"access"`
 	Preconditions DeveloperUploadPreconditions `json:"preconditions"`
 }
 
@@ -71,40 +71,63 @@ type S3PutResult struct {
 
 func (a S3CompatibilityAdapter) GetObject(ctx context.Context, address S3ObjectAddress) (S3GetResult, error) {
 	resolved, err := a.resolve(ctx, address)
-	if err != nil { return S3GetResult{}, err }
-	if a.Reader == nil { return S3GetResult{}, ErrS3Compatibility }
+	if err != nil {
+		return S3GetResult{}, err
+	}
+	if a.Reader == nil {
+		return S3GetResult{}, ErrS3Compatibility
+	}
 	result, err := a.Reader.Retrieve(ctx, DeveloperRetrieveRequest{Version: DeveloperAPIVersion, Object: resolved.Object, Access: resolved.Access})
-	if err != nil { return S3GetResult{}, err }
+	if err != nil {
+		return S3GetResult{}, err
+	}
 	return S3GetResult{Payload: append([]byte(nil), result.Payload...), ETag: s3PayloadETag(result.Payload), Object: result.Object, Route: result.Route}, nil
 }
 
 func (a S3CompatibilityAdapter) HeadObject(ctx context.Context, address S3ObjectAddress) (S3HeadResult, error) {
 	got, err := a.GetObject(ctx, address)
-	if err != nil { return S3HeadResult{}, err }
+	if err != nil {
+		return S3HeadResult{}, err
+	}
 	return S3HeadResult{SizeBytes: uint64(len(got.Payload)), ETag: got.ETag, Object: got.Object, Route: got.Route}, nil
 }
 
 func (a S3CompatibilityAdapter) PutObject(ctx context.Context, address S3ObjectAddress, idempotencyKey string, body io.Reader) (S3PutResult, error) {
 	resolved, err := a.resolve(ctx, address)
-	if err != nil { return S3PutResult{}, err }
-	if a.Writer == nil || body == nil || strings.TrimSpace(idempotencyKey) == "" { return S3PutResult{}, ErrS3Compatibility }
+	if err != nil {
+		return S3PutResult{}, err
+	}
+	if a.Writer == nil || body == nil || strings.TrimSpace(idempotencyKey) == "" {
+		return S3PutResult{}, ErrS3Compatibility
+	}
 	maxBytes := a.MaxBytes
-	if maxBytes == 0 { maxBytes = DefaultS3CompatMaxObjectBytes }
-	if resolved.Object.SizeBytes == 0 || resolved.Object.SizeBytes > maxBytes { return S3PutResult{}, ErrS3Compatibility }
+	if maxBytes == 0 {
+		maxBytes = DefaultS3CompatMaxObjectBytes
+	}
+	if resolved.Object.SizeBytes == 0 || resolved.Object.SizeBytes > maxBytes {
+		return S3PutResult{}, ErrS3Compatibility
+	}
 	plan, err := a.Writer.Prepare(ctx, DeveloperUploadPrepareRequest{Version: DeveloperAPIVersion, Object: resolved.Object, IdempotencyKey: strings.TrimSpace(idempotencyKey), Preconditions: resolved.Preconditions})
-	if err != nil { return S3PutResult{}, err }
-	receipt, err := a.Writer.Ingest(ctx, plan, body)
-	if err != nil { return S3PutResult{}, err }
-	// S3 ETag is deliberately not the 420 shard root/commitment. For a single-part
-	// compatibility PUT it is the conventional MD5 of the payload bytes, but the
-	// adapter never uses it as canonical object identity or integrity authority.
-	return S3PutResult{ETag: "", Receipt: receipt}, nil
+	if err != nil {
+		return S3PutResult{}, err
+	}
+	etagHash := md5.New() // S3 single-part compatibility tag only; never used as 420 integrity authority.
+	receipt, err := a.Writer.Ingest(ctx, plan, io.TeeReader(body, etagHash))
+	if err != nil {
+		return S3PutResult{}, err
+	}
+	etag := `"` + hex.EncodeToString(etagHash.Sum(nil)) + `"`
+	return S3PutResult{ETag: etag, Receipt: receipt}, nil
 }
 
 func (a S3CompatibilityAdapter) DeleteObject(ctx context.Context, address S3ObjectAddress) error {
 	resolved, err := a.resolve(ctx, address)
-	if err != nil { return err }
-	if a.Deleter == nil { return ErrS3Unsupported }
+	if err != nil {
+		return err
+	}
+	if a.Deleter == nil {
+		return ErrS3Unsupported
+	}
 	return a.Deleter.DeleteS3Object(ctx, resolved)
 }
 
@@ -121,13 +144,19 @@ func (a S3CompatibilityAdapter) SetVersioning(context.Context, string, bool) err
 }
 
 func (a S3CompatibilityAdapter) resolve(ctx context.Context, address S3ObjectAddress) (S3ResolvedObject, error) {
-	if a.Resolver == nil || strings.TrimSpace(address.Bucket) == "" || strings.TrimSpace(address.Key) == "" { return S3ResolvedObject{}, ErrS3Compatibility }
+	if a.Resolver == nil || strings.TrimSpace(address.Bucket) == "" || strings.TrimSpace(address.Key) == "" {
+		return S3ResolvedObject{}, ErrS3Compatibility
+	}
 	address.Bucket = strings.TrimSpace(address.Bucket)
 	address.Key = strings.TrimSpace(address.Key)
 	resolved, err := a.Resolver.ResolveS3Object(ctx, address)
-	if err != nil { return S3ResolvedObject{}, err }
+	if err != nil {
+		return S3ResolvedObject{}, err
+	}
 	resolved.Address = address
-	if _, _, err := normalizeDeveloperRetrieveRequest(DeveloperRetrieveRequest{Version: DeveloperAPIVersion, Object: resolved.Object, Access: resolved.Access}); err != nil { return S3ResolvedObject{}, ErrS3Compatibility }
+	if _, _, err := normalizeDeveloperRetrieveRequest(DeveloperRetrieveRequest{Version: DeveloperAPIVersion, Object: resolved.Object, Access: resolved.Access}); err != nil {
+		return S3ResolvedObject{}, ErrS3Compatibility
+	}
 	return resolved, nil
 }
 

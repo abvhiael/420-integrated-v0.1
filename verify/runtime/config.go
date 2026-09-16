@@ -8,11 +8,12 @@ import (
 )
 
 type Config struct {
-	ChainID       uint64
-	RPCURL        string
-	CompilerCache string
-	EvidenceStore string
-	ListenAddr    string
+	ChainID          uint64
+	RPCURL           string
+	ReadinessAddress string
+	CompilerCache    string
+	EvidenceStore    string
+	ListenAddr       string
 }
 
 func (c Config) Validate() error {
@@ -21,6 +22,9 @@ func (c Config) Validate() error {
 	}
 	if err := requireURL("rpc url", c.RPCURL); err != nil {
 		return err
+	}
+	if !validAddress(c.ReadinessAddress) {
+		return errors.New("readiness address must be a 20-byte hex address")
 	}
 	if strings.TrimSpace(c.CompilerCache) == "" {
 		return errors.New("compiler cache path is required")
@@ -46,4 +50,16 @@ func requireURL(name, raw string) error {
 		return fmt.Errorf("%s must use http or https", name)
 	}
 	return nil
+}
+
+func validAddress(raw string) bool {
+	if len(raw) != 42 || !strings.HasPrefix(raw, "0x") {
+		return false
+	}
+	for _, r := range raw[2:] {
+		if !(r >= '0' && r <= '9') && !(r >= 'a' && r <= 'f') && !(r >= 'A' && r <= 'F') {
+			return false
+		}
+	}
+	return true
 }

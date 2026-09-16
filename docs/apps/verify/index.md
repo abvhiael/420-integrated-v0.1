@@ -17,3 +17,4 @@ Verification is bound to network, address and deployed code hash.
 - [VERIFY-6 reproducible evidence store and history](verify-6-evidence-store.md) — defines append-only evidence history, restart reconstruction, content-hash validation, and the non-canonical storage boundary.
 - [VERIFY-7 proxies and upgrades](verify-7-proxies-upgrades.md) — defines canonical proxy relationship resolution, separate proxy/implementation verification, upgrade history, and invalidation of stale implementation status.
 - [VERIFY-8 public API and Genesis integrations](verify-8-public-api-integrations.md) — defines public lookup/submission/evidence endpoints plus Explorer, Registry and AppStore consumption boundaries.
+- [VERIFY-9 adversarial hardening and failure recovery](verify-9-adversarial-hardening.md) — defines hostile-input limits, secret rejection, compiler-abuse controls, degraded dependency behavior, restart/tamper recovery, and authority-preserving failure modes.

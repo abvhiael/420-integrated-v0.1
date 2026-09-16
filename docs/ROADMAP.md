@@ -1,4 +1,4 @@
-# 420 Integrated — 15-Step Build Roadmap
+# 420 Integrated — 16-Step Build Roadmap
 
 ## 1. Recover and preserve historical source — IN PROGRESS / PRESERVATION INVENTORY COMPLETE
 Archive PUFFScoin / 420 Integrated and surviving WhaleCoin code, commits, genesis files, documentation, and known chain parameters.
@@ -95,19 +95,63 @@ Protocol-backed Genesis applications continue through their own contract, deploy
 
 **Deliverable:** usable reference wallet/explorer plus qualified shared Genesis service infrastructure and completed contract-free Genesis application integrations.
 
-## 13. Attack the economics and consensus
+## 13. Genesis requirements reconciliation pass — REQUIRED GATE
+Reconcile every consensus, protocol, contract, service, dApp, deployment, documentation, and operational requirement into one canonical Genesis release manifest before adversarial qualification or public testnet promotion.
+
+This phase is a whole-system proof that independently completed components actually compose into one reproducible Genesis release. It is not a new feature-development phase. Any requirement discovered here as missing, ambiguous, stale, unqualified, or incompatible must be returned to its owning roadmap and closed before this gate can pass.
+
+### Required reconciliation checks
+
+1. **Protocol-spec closure** — map every consensus-critical rule to the normative protocol specification and verify there are no unresolved or contradictory Genesis variables.
+2. **Canonical network configuration** — bind chain ID, genesis state, allocations, system-contract addresses, validator/bootstrap configuration, fork parameters, fee policy, and release hashes to one reproducible source of truth.
+3. **Consensus and execution implementation traceability** — prove each normative requirement is implemented by an exact code path, test suite, and qualified release identity.
+4. **Genesis allocation ledger reconciliation** — independently total and verify all founder, validator, treasury, development, ecosystem, faucet/testnet-only, protocol, and reserved allocations against the canonical genesis state.
+5. **System-contract inventory** — verify every required Genesis contract is deployed at the expected deterministic address with the correct bytecode, constructor/init state, ownership, permissions, upgrade boundaries, and interfaces.
+6. **Genesis application inventory** — reconcile the frozen Genesis dApp/application list against implemented packages, dependencies, deployment manifests, service endpoints, documentation, and launch status.
+7. **Shared-service dependency graph** — verify Wallet, Explorer, Search, Analytics, Verify, AppStore, Notifications, Status, Indexer, RPC, Automation, Gas/Paymaster, Bundler, Oracle-facing surfaces, storage, and other approved Genesis consumers bind only to qualified upstream interfaces.
+8. **Cross-component compatibility** — exercise exact-version compatibility across node, contracts, RPC, indexer, wallet, dApps, automation, account-abstraction infrastructure, bridge/oracle interfaces, and documentation examples.
+9. **Authority and trust-boundary reconciliation** — confirm no service or application has silently acquired consensus, custody, bridge, oracle, governance, validator, treasury, or finality authority outside its adopted specification.
+10. **Security-control reconciliation** — verify authentication, signing domains, replay protection, chain provenance, rate limits, privilege boundaries, emergency controls, fail-closed behavior, and key-management assumptions across the complete Genesis stack.
+11. **Failure and recovery coverage** — identify every critical dependency and prove documented restart, rebuild, reorg, failover, degraded-mode, corruption-recovery, and state-reconstruction procedures exist and are tested where applicable.
+12. **Data/provenance reconciliation** — ensure user-facing applications clearly distinguish canonical chain state, indexed projections, cached data, inferred/analytical data, oracle attestations, external data, and non-authoritative search/discovery results.
+13. **Documentation parity** — verify architecture docs, operator guides, user guides, API/RPC references, contract references, deployment instructions, troubleshooting, and generated examples match the exact Genesis release rather than an earlier implementation.
+14. **CI and qualification evidence** — require all Genesis-critical repositories/packages to have passing qualification gates tied to exact commits and retain evidence sufficient to reproduce the go/no-go decision.
+15. **Known-blocker register** — enumerate every externally blocked, deferred, testnet-only, provisional, or post-Genesis item and prove none is incorrectly represented as a satisfied Genesis requirement.
+16. **Reproducible release assembly** — build the complete Genesis release from a clean environment and produce deterministic manifests, version identifiers, hashes, deployment artifacts, and provenance records.
+17. **Final reconciliation matrix** — classify every Genesis requirement as `IMPLEMENTED`, `QUALIFIED`, `DOCUMENTED`, `BOUND TO RELEASE`, `ADVERSARIALLY READY`, or `BLOCKED`, with an owner and evidence link for every non-complete item.
+
+### Exit criteria
+
+The reconciliation gate passes only when:
+
+- every Genesis requirement has one canonical owner and source of truth;
+- all consensus-critical ambiguities are resolved;
+- all required implementations and integrations are qualified;
+- exact release identities and hashes are frozen;
+- allocation, contract, application, service, and dependency inventories reconcile without unexplained differences;
+- all known blockers are either closed or explicitly proven non-blocking for the intended Genesis release;
+- the complete release can be reproduced from clean inputs; and
+- a signed/committed Genesis reconciliation report records an explicit **GO** for adversarial qualification.
+
+**Deliverable:** canonical Genesis requirements matrix, dependency/inventory manifest, reproducible release manifest, unresolved-blocker register, and explicit reconciliation go/no-go report.
+
+## 14. Attack the economics and consensus
 Sybil simulations, validator concentration, correlated failures, randomness manipulation, reward gaming, Attention fraud, treasury abuse, and stress tests.
 
-**Deliverable:** adversarial simulation report.
+This phase begins only after the Genesis requirements reconciliation gate passes so adversarial testing targets the exact release candidate rather than a moving collection of components.
 
-## 14. Public testnet — PREPARATION ACTIVE
+**Deliverable:** adversarial simulation report tied to the reconciled Genesis release identity.
+
+## 15. Public testnet — PREPARATION ACTIVE
 Open validator qualification, faucet, public dApp deployment, bug bounties, telemetry, upgrades, and community testing.
 
-Shared-service and application launch gates are being completed before public exposure. Every public-testnet application must bind to an exact qualified release identity, preserve chain/service provenance, pass its failure drills, and record an explicit go/no-go closeout.
+Shared-service and application launch gates are being completed before public exposure. Every public-testnet application must bind to an exact qualified release identity, preserve chain/service provenance, pass its failure drills, and record an explicit go/no-go closeout. Public-testnet promotion requires both the Genesis requirements reconciliation gate and adversarial qualification to pass against the same release lineage.
 
-**Deliverable:** stable public 420 testnet.
+**Deliverable:** stable public 420 testnet tied to a reconciled and adversarially qualified release candidate.
 
-## 15. Independent audit and launch review
+## 16. Independent audit and launch review
 Audit consensus-critical Go code, system contracts, genesis allocations, validator economics, bridges/oracles, and regulatory launch structure before considering mainnet.
+
+The audit target must be the exact reconciled, adversarially qualified, public-testnet release lineage. Any audit remediation that changes consensus-critical or Genesis-critical behavior must re-enter the applicable reconciliation and qualification gates before launch.
 
 **Deliverable:** release candidate and launch/no-launch review.

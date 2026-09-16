@@ -57,9 +57,9 @@ Qualification passed:
 - 420Docs Qualification #1130
 - 420 Integrated Qualification #3329
 
-## GAS-9 — budgets, quotas, abuse resistance — CLOSEOUT / QUALIFICATION
+## GAS-9 — budgets, quotas, abuse resistance — COMPLETE / MERGED
 
-Bound sponsor exposure and off-chain quote-service resource consumption without creating execution authority or replacing canonical on-chain accounting.
+Merged to `main` in PR #293 at merge commit `57103d7f429dda6e3a53588915808a7f92454bc1` after exact-head qualification.
 
 Completed GAS-9 work:
 - **GAS-9.1** bounded quota controller with per-operation, per-account, per-policy, spend, operation-count, concurrency and outstanding-authorization limits.
@@ -69,15 +69,48 @@ Completed GAS-9 work:
 - **GAS-9.5** exact reservation-generation handles, stale-release/ABA protection, transactional signer-failure rollback, and re-entrant duplicate/concurrency hardening.
 - **GAS-9.6** bounded/pruned fixed-window state, read-only snapshots that do not allocate attacker-controlled keys, current-window state caps, rollover cleanup, and adversarial state-flood closeout tests.
 
-GAS-9 remains funding-only. Quota, budget, cache, quote and telemetry state never becomes Smart Account, Wallet, Automation, target-protocol, settlement, or canonical-chain authority. On-chain EntryPoint/paymaster accounting remains authoritative for actual sponsored settlement.
+Final qualified GAS-9 head: `c4ac74a41620607fd0b266c5983b485b527d1fdb`.
 
-## GAS-10 — observability, readiness, and recovery
+Qualification passed:
+- 420Gas Qualification #36
+- 420Automation #173
+- 420Docs Qualification #1134
+- 420 Integrated Qualification #3380
 
-Add low-cardinality metrics, redacted operational status, sponsor/deposit readiness, settlement journals, and recovery procedures. Telemetry never becomes settlement or authorization evidence.
+GAS-9 remains funding-only. Quota, budget, cache and quote state never becomes Smart Account, Wallet, Automation, target-protocol, settlement, or canonical-chain authority. On-chain EntryPoint/paymaster accounting remains authoritative for actual sponsored settlement.
 
-## GAS-11 — hostile-state/security hardening
+## GAS-10 — observability, readiness, and recovery — COMPLETE / MERGED
 
-Cross-layer adversarial testing for sponsorship replay, forged payloads, policy confusion, deposit races, settlement manipulation, reentrancy, malicious accounts/paymasters, resource exhaustion, secret leakage, wrong-chain/EntryPoint binding, and Automation/Wallet authority smuggling.
+Merged to `main` in PR #294 at merge commit `bca09eea0d0f70c2310220b07169da6d8bf9b929` after reconciliation with current `main` and exact-head qualification.
+
+Completed GAS-10 work:
+- **GAS-10.1** bounded low-cardinality metrics and redacted, explicitly non-authoritative operational status.
+- **GAS-10.2** deterministic sponsor/deposit readiness from observed deposit/reservation inputs with `ready`, `degraded`, and `not-ready` classification.
+- **GAS-10.3** bounded settlement journal projection with opaque commitments, replay rejection, discrepancy detection and projection-only summaries.
+- **GAS-10.4** bounded recovery/degraded-mode state machine for signer, funding and settlement-observer failures with fail-closed sponsorship guidance.
+- **GAS-10.5** stable machine-readable health/readiness projection with deterministic reason precedence and strict redaction.
+- **GAS-10.6** adversarial observability/recovery closeout covering telemetry secret injection, funding underflow, settlement replay/retention, recovery churn/history bounds, conflicting degraded signals, public-status redaction and proof that telemetry never becomes accounting or authorization authority.
+
+Final reconciled GAS-10 head: `89f019920761421a68b65b93a70509dc216425ae`.
+
+Qualification passed on the reconciled head:
+- 420Gas Qualification #52
+- 420Docs Qualification #1173
+- 420 Integrated Qualification #3430
+
+GAS-10 remains operational/advisory only. Telemetry, readiness, journal, recovery and status projection state cannot authorize execution or sponsorship and cannot replace canonical on-chain EntryPoint/paymaster accounting or settlement truth.
+
+## GAS-11 — hostile-state/security hardening — NEXT
+
+Cross-layer adversarial hardening of the complete sponsorship stack before public-testnet closeout.
+
+Planned GAS-11 work:
+- **GAS-11.1** forged, replayed and cross-domain sponsorship payloads: wrong chain, EntryPoint, paymaster, policy, authorization identity, validity window and sponsorship-digest binding.
+- **GAS-11.2** deposit/reservation/settlement hostile-state tests: races, stale reservations, double settlement, cost-bound violations, reentrancy and malicious account/paymaster behavior.
+- **GAS-11.3** authority-confusion hardening across policy, capability/session constraints, Wallet, Smart Account and 420Automation; prove sponsorship cannot smuggle or broaden execution authority.
+- **GAS-11.4** resource-exhaustion and denial-of-service hardening across quote admission, quotas, metrics, journals, readiness/recovery state and attacker-controlled identifiers.
+- **GAS-11.5** secret/credential and service-boundary hardening: signer/operator isolation, malformed API inputs, credential misuse, leakage checks and fail-closed dependency behavior.
+- **GAS-11.6** cross-layer adversarial closeout, invariant review, roadmap update, exact-head qualification, reconciliation with current `main`, and merge.
 
 ## GAS-12 — public-testnet qualification and launch closeout
 

@@ -142,21 +142,19 @@ jobs:
           # reproduces _94. Start from that known-bad set and recursively split it.
           bisect_known_bad "test-root" "${TEST_FILES[@]}"
 
-          echo "Recursive test bisect complete; full build follows." | tee -a "$LOG"
+          echo "Recursive test bisect complete; diagnostic PR exits before full build." | tee -a "$LOG"
           exit 0
 
       - name: Build
+        if: github.event_name != 'pull_request'
         working-directory: contracts
         run: |
           mkdir -p ../artifacts/contracts
           set -o pipefail
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            forge build --sizes 2>&1 | tee ../artifacts/contracts/foundry-build.txt
-          else
-            forge build --force --sizes 2>&1 | tee ../artifacts/contracts/foundry-build.txt
-          fi
+          forge build --force --sizes 2>&1 | tee ../artifacts/contracts/foundry-build.txt
 
       - name: Tests
+        if: github.event_name != 'pull_request'
         working-directory: contracts
         run: |
           mkdir -p ../artifacts/contracts
@@ -176,6 +174,7 @@ jobs:
           retention-days: 30
 
       - name: Decision #10 deploy/seed harness
+        if: github.event_name != 'pull_request'
         working-directory: contracts
         run: |
           mkdir -p ../artifacts/contracts
@@ -201,6 +200,7 @@ jobs:
           ' ../artifacts/contracts/creative-kernel-v1.fixture.json
 
       - name: Upload Decision #10 fixture manifest
+        if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
           name: creative-kernel-v1-fixture

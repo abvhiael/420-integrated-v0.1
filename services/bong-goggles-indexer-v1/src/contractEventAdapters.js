@@ -4,6 +4,18 @@ import {
   relationshipMutation,
   deleteRelationshipMutation,
 } from './materializedViews.js';
+import {
+  pageMutation,
+  groupMutation,
+  groupMemberMutation,
+  deleteGroupMemberMutation,
+  eventMutation,
+  rsvpMutation,
+  discoverySubjectMutation,
+  reviewMutation,
+  correctionMutation,
+  verificationMutation,
+} from './communityDiscoveryReducers.js';
 
 function required(value, field) {
   if (value === undefined || value === null || value === '') throw new Error(`missing ${field}`);
@@ -50,6 +62,8 @@ export const CANONICAL_BONG_GOGGLES_EVENTS = Object.freeze({
   PROFILE: new Set(['ProfileCreated', 'ProfileUpdated', 'ProfileStatusChanged']),
   SOCIAL_OBJECT: new Set(['SocialObjectPublished', 'SocialObjectProvenance', 'SocialObjectEdited', 'SocialObjectHidden', 'SocialObjectRestored', 'SocialObjectDeleted']),
   RELATIONSHIP: new Set(['FriendRequestAccepted', 'FriendshipRemoved', 'Followed', 'Unfollowed', 'Blocked', 'Unblocked', 'Muted', 'Unmuted']),
+  COMMUNITY: new Set(['PageCreated', 'PageUpdated', 'GroupCreated', 'GroupUpdated', 'GroupJoinRequested', 'GroupMemberActivated', 'GroupMemberRemoved', 'EventCreated', 'EventUpdated', 'EventRSVP']),
+  DISCOVERY: new Set(['SubjectSubmitted', 'ReviewPublished', 'ReviewWithdrawn', 'CorrectionSubmitted', 'VerificationAttested']),
 });
 
 /**
@@ -89,6 +103,38 @@ export function adaptBongGogglesEvent(decoded, state = {}) {
       return [relationshipMutation({ relationshipType: 'MUTE', from: lower(args.muter), to: lower(args.subject), status: 'ACTIVE', muted: true })];
     case 'Unmuted':
       return [deleteRelationshipMutation({ relationshipType: 'MUTE', from: lower(args.muter), to: lower(args.subject) })];
+
+    case 'PageCreated':
+    case 'PageUpdated':
+      return [pageMutation(required(state.page, 'canonical page state'))];
+    case 'GroupCreated':
+    case 'GroupUpdated':
+      return [groupMutation(required(state.group, 'canonical group state'))];
+    case 'GroupJoinRequested':
+    case 'GroupMemberActivated':
+      return [groupMemberMutation(required(args.groupId, 'groupId'), required(args.account, 'account'), required(state.groupMember, 'canonical group member state'))];
+    case 'GroupMemberRemoved':
+      return [deleteGroupMemberMutation(required(args.groupId, 'groupId'), required(args.account, 'account'))];
+    case 'EventCreated':
+    case 'EventUpdated':
+      return [eventMutation(required(state.eventRecord, 'canonical event state'))];
+    case 'EventRSVP':
+      return [rsvpMutation(required(args.eventId, 'eventId'), required(args.account, 'account'), required(args.state, 'rsvp state'))];
+
+    case 'SubjectSubmitted':
+      return [discoverySubjectMutation(required(state.subject, 'canonical discovery subject state'))];
+    case 'ReviewPublished': {
+      const mutations = [];
+      if (state.previousReview) mutations.push(reviewMutation(state.previousReview));
+      mutations.push(reviewMutation(required(state.review, 'canonical review state')));
+      return mutations;
+    }
+    case 'ReviewWithdrawn':
+      return [reviewMutation(required(state.review, 'canonical review state'))];
+    case 'CorrectionSubmitted':
+      return [correctionMutation(required(state.correction, 'canonical correction state'))];
+    case 'VerificationAttested':
+      return [verificationMutation(required(state.verification, 'canonical verification state'))];
     default:
       throw new Error(`unsupported Bong Goggles event: ${eventName}`);
   }

@@ -29,6 +29,7 @@ func fixture(t *testing.T, runtimeHash string) (evidence.DeploymentEvidence, sub
 	submitted, err := submission.NewMultiFile(map[string]string{"A.sol": "contract A {}"}, buildSettings)
 	if err != nil { t.Fatal(err) }
 	build := compiler.BuildEvidence{CompilerVersion: buildSettings.CompilerVersion, CompilerSHA256: "sha256:compiler", BundleHash: submitted.BundleHash, InputSHA256: "sha256:input", OutputSHA256: "sha256:output", NetworkDisabled: true, WorkingDirClean: true, RuntimeBytecode: deployment.RuntimeBytecode, CreationBytecode: deployment.Creation.CreationBytecode, CompilerOutput: json.RawMessage(`{"contracts":{}}`)}
+	build.CompilerOutput = json.RawMessage("{\"contracts\":{}}")
 	result := matcher.Result{Class: architecture.ResultFullMatch, BindingKey: deployment.BindingKey(), RuntimeExact: true, CreationCompared: true, CreationExact: true, Diagnostics: []matcher.Diagnostic{{Reason: matcher.ReasonExactRuntimeMatch, Message: "runtime exact"}, {Reason: matcher.ReasonExactCreationMatch, Message: "creation exact"}}}
 	return deployment, submitted, build, result
 }

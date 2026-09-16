@@ -2,17 +2,15 @@ name: 420 Genesis Contract Hardening
 
 on:
   push:
-    paths:
-      - "contracts/**"
-      - ".github/workflows/contracts-hardening.yml"
-  pull_request:
+    branches:
+      - main
     paths:
       - "contracts/**"
       - ".github/workflows/contracts-hardening.yml"
   workflow_dispatch:
 
 concurrency:
-  group: contract-hardening-${{ github.event.pull_request.number || github.ref }}
+  group: contract-hardening-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -72,6 +70,7 @@ jobs:
           mkdir -p ../artifacts/hardening
           {
             echo "commit=${GITHUB_SHA}"
+            echo "foundry_profile=${FOUNDRY_PROFILE}"
             forge --version
             cast --version
             python --version

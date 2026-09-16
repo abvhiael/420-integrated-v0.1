@@ -183,24 +183,39 @@ contract Paymaster420AuthorityConfusionTest {
         bytes32 capabilityCommitment,
         bytes32 sessionCommitment
     ) internal returns (PackedUserOperation420 memory op) {
+        op = _baseOperation(sender, callTarget, targetSelector, valueWei);
+        PaymasterData420.V1 memory sponsorship = _sponsorship(sender, callTarget, targetSelector, valueWei);
+        sponsorship.sponsorData = _signedSponsorData(op, sponsorship, capabilityCommitment, sessionCommitment);
+        op.paymasterAndData = PaymasterData420.encodeV1(sponsorship);
+    }
+
+    function _baseOperation(address sender, address callTarget, bytes4 targetSelector, uint256 valueWei)
+        internal
+        pure
+        returns (PackedUserOperation420 memory op)
+    {
+        bytes memory targetCall = abi.encodeWithSelector(targetSelector, 420);
+        bytes memory accountCall = abi.encodeWithSelector(SmartAccount420.execute.selector, callTarget, valueWei, targetCall);
         op = PackedUserOperation420({
             sender: sender,
             nonce: 7,
             initCode: bytes(""),
-            callData: abi.encodeWithSelector(
-                SmartAccount420.execute.selector,
-                callTarget,
-                valueWei,
-                abi.encodeWithSelector(targetSelector, 420)
-            ),
+            callData: accountCall,
             accountGasLimits: bytes32(uint256(100000) << 128 | uint256(100000)),
             preVerificationGas: 21000,
             gasFees: bytes32(uint256(1 gwei)),
             paymasterAndData: bytes(""),
             signature: bytes("")
         });
+    }
 
-        PaymasterData420.V1 memory sponsorship = PaymasterData420.V1({
+    function _sponsorship(address sender, address callTarget, bytes4 targetSelector, uint256 valueWei)
+        internal
+        view
+        returns (PaymasterData420.V1 memory sponsorship)
+    {
+        bytes32 authorizationId = keccak256(abi.encode("GAS-11.3", sender, callTarget, targetSelector, valueWei));
+        sponsorship = PaymasterData420.V1({
             version: 1,
             paymaster: address(paymaster),
             entryPoint: ENTRY_POINT,
@@ -209,19 +224,21 @@ contract Paymaster420AuthorityConfusionTest {
             validAfter: 100,
             validUntil: 1000,
             maxSponsoredCostWei: 1 ether,
-            authorizationId: keccak256(abi.encode("GAS-11.3", sender, callTarget, targetSelector, valueWei)),
+            authorizationId: authorizationId,
             sponsorData: bytes("")
         });
+    }
 
+    function _signedSponsorData(
+        PackedUserOperation420 memory op,
+        PaymasterData420.V1 memory sponsorship,
+        bytes32 capabilityCommitment,
+        bytes32 sessionCommitment
+    ) internal returns (bytes memory) {
         bytes32 sponsorshipDigest = _sponsorshipDigest(op, sponsorship);
         bytes32 signedDigest = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", sponsorshipDigest));
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(SPONSOR_PK, signedDigest);
-        sponsorship.sponsorData = abi.encode(
-            abi.encodePacked(r, s, v),
-            capabilityCommitment,
-            sessionCommitment
-        );
-        op.paymasterAndData = PaymasterData420.encodeV1(sponsorship);
+        return abi.encode(abi.encodePacked(r, s, v), capabilityCommitment, sessionCommitment);
     }
 
     function _sponsorshipDigest(PackedUserOperation420 memory op, PaymasterData420.V1 memory sponsorship)

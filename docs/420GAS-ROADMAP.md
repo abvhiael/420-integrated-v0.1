@@ -79,23 +79,38 @@ Qualification passed:
 
 GAS-9 remains funding-only. Quota, budget, cache and quote state never becomes Smart Account, Wallet, Automation, target-protocol, settlement, or canonical-chain authority. On-chain EntryPoint/paymaster accounting remains authoritative for actual sponsored settlement.
 
-## GAS-10 — observability, readiness, and recovery — ACTIVE / CLOSEOUT
+## GAS-10 — observability, readiness, and recovery — COMPLETE / MERGED
 
-Add bounded low-cardinality metrics, redacted operational status, sponsor/deposit readiness, settlement journals, and recovery procedures. Telemetry never becomes settlement or authorization evidence.
+Merged to `main` in PR #294 at merge commit `bca09eea0d0f70c2310220b07169da6d8bf9b929` after reconciliation with current `main` and exact-head qualification.
 
-GAS-10 progress:
-- **GAS-10.1 — COMPLETE / QUALIFIED** bounded low-cardinality metrics and redacted, explicitly non-authoritative operational status. Exact head `06c850091e70cf6af9060a2a7d10e8151b390322`; 420Gas #38, 420Docs #1141 and Integrated #3387 passed.
-- **GAS-10.2 — COMPLETE / QUALIFIED** sponsor/deposit readiness evaluation from observed deposit/reservation inputs with deterministic `ready`, `degraded`, and `not-ready` classification. Exact head `2a67d859e23be4a73668c1cd1e1d3a1e2ad3c3e3`; 420Gas #40, 420Docs #1146 and Integrated #3394 passed. Readiness remains `telemetry-only`; it does not authorize sponsorship or replace canonical EntryPoint/paymaster accounting.
-- **GAS-10.3 — COMPLETE / QUALIFIED** bounded settlement journal projection for diagnosis/reconciliation. Journal entries retain only bounded opaque settlement commitments and observed reservation/cost/outcome/confirmation data, flag observed cost-over-reservation discrepancies, and expose projection-only summaries. Exact head `521264b758ce85123ee50958056ab612c59e3be3`; 420Gas #43, 420Docs #1150 and Integrated #3398 passed. Canonical on-chain EntryPoint/paymaster settlement remains authoritative.
-- **GAS-10.4 — COMPLETE / QUALIFIED** bounded recovery/degraded-mode state machine for signer, sponsor-funding and settlement-observation failures. It retains bounded transition history, suppresses duplicate churn, fails sponsorship guidance closed while components are unavailable/recovering, and remains operational guidance only. Exact head `bceb4cc7f645e36f2770fff27e3df81e9962facc`; 420Gas #46, 420Docs #1161 and Integrated #3413 passed.
-- **GAS-10.5 — COMPLETE / QUALIFIED** stable machine-readable health/readiness projection combining coarse sponsor readiness, recovery state and settlement diagnostics. The projection enforces fixed reason-code vocabularies, deterministic precedence, strict secret/high-cardinality redaction and no execution/sponsorship/settlement/accounting/canonical authority. Exact head `8d58c673fd2bf2bce6d02345ed6e93c4f7086a1f`; 420Gas #49, 420Docs #1167 and Integrated #3421 passed.
-- **GAS-10.6 — CLOSEOUT IN QUALIFICATION** adversarial observability/recovery closeout covering telemetry label/secret injection, reservation-over-deposit fail-closed behavior, settlement replay and bounded retention, recovery churn/history bounds, conflicting degraded-state precedence, strict public-status redaction, and proof that settlement discrepancies remain diagnostic rather than accounting authority. After exact-head qualification, reconcile PR #294 with current `main`, requalify the reconciled head, and merge.
+Completed GAS-10 work:
+- **GAS-10.1** bounded low-cardinality metrics and redacted, explicitly non-authoritative operational status.
+- **GAS-10.2** deterministic sponsor/deposit readiness from observed deposit/reservation inputs with `ready`, `degraded`, and `not-ready` classification.
+- **GAS-10.3** bounded settlement journal projection with opaque commitments, replay rejection, discrepancy detection and projection-only summaries.
+- **GAS-10.4** bounded recovery/degraded-mode state machine for signer, funding and settlement-observer failures with fail-closed sponsorship guidance.
+- **GAS-10.5** stable machine-readable health/readiness projection with deterministic reason precedence and strict redaction.
+- **GAS-10.6** adversarial observability/recovery closeout covering telemetry secret injection, funding underflow, settlement replay/retention, recovery churn/history bounds, conflicting degraded signals, public-status redaction and proof that telemetry never becomes accounting or authorization authority.
 
-Active branch: `gas-10-observability-readiness-recovery` (PR #294).
+Final reconciled GAS-10 head: `89f019920761421a68b65b93a70509dc216425ae`.
 
-## GAS-11 — hostile-state/security hardening
+Qualification passed on the reconciled head:
+- 420Gas Qualification #52
+- 420Docs Qualification #1173
+- 420 Integrated Qualification #3430
 
-Cross-layer adversarial testing for sponsorship replay, forged payloads, policy confusion, deposit races, settlement manipulation, reentrancy, malicious accounts/paymasters, resource exhaustion, secret leakage, wrong-chain/EntryPoint binding, and Automation/Wallet authority smuggling.
+GAS-10 remains operational/advisory only. Telemetry, readiness, journal, recovery and status projection state cannot authorize execution or sponsorship and cannot replace canonical on-chain EntryPoint/paymaster accounting or settlement truth.
+
+## GAS-11 — hostile-state/security hardening — NEXT
+
+Cross-layer adversarial hardening of the complete sponsorship stack before public-testnet closeout.
+
+Planned GAS-11 work:
+- **GAS-11.1** forged, replayed and cross-domain sponsorship payloads: wrong chain, EntryPoint, paymaster, policy, authorization identity, validity window and sponsorship-digest binding.
+- **GAS-11.2** deposit/reservation/settlement hostile-state tests: races, stale reservations, double settlement, cost-bound violations, reentrancy and malicious account/paymaster behavior.
+- **GAS-11.3** authority-confusion hardening across policy, capability/session constraints, Wallet, Smart Account and 420Automation; prove sponsorship cannot smuggle or broaden execution authority.
+- **GAS-11.4** resource-exhaustion and denial-of-service hardening across quote admission, quotas, metrics, journals, readiness/recovery state and attacker-controlled identifiers.
+- **GAS-11.5** secret/credential and service-boundary hardening: signer/operator isolation, malformed API inputs, credential misuse, leakage checks and fail-closed dependency behavior.
+- **GAS-11.6** cross-layer adversarial closeout, invariant review, roadmap update, exact-head qualification, reconciliation with current `main`, and merge.
 
 ## GAS-12 — public-testnet qualification and launch closeout
 

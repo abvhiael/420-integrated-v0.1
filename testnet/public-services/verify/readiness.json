@@ -1,11 +1,11 @@
 {
   "schema": "420-testnet-verify-readiness-v1",
-  "implementation_status": "QUALIFICATION_PENDING_FINAL_HEAD",
+  "implementation_status": "QUALIFIED_AND_MERGED",
   "implementation_phase": "VERIFY-10",
   "backend": {
     "url": "REPLACE",
     "status": "PENDING_DEPLOYMENT",
-    "implementation_status": "IMPLEMENTED",
+    "implementation_status": "IMPLEMENTED_AND_QUALIFIED",
     "required_checks": [
       "reads deployed runtime bytecode from configured 420 network RPC",
       "binds every result to chain ID, address and runtime code hash",
@@ -23,7 +23,7 @@
   "frontend": {
     "url": "REPLACE",
     "status": "PENDING_DEPLOYMENT",
-    "implementation_status": "API_AND_VIEW_MODEL_IMPLEMENTED",
+    "implementation_status": "API_AND_VIEW_MODEL_IMPLEMENTED_AND_QUALIFIED",
     "required_views": [
       "address/network verification lookup",
       "source and compiler submission",
@@ -55,7 +55,12 @@
   "closeout": {
     "latest_main_reconciled_via_pr": 304,
     "reconciliation_commit": "afaf3e9f669590299c4b0898341f8195db30d441",
+    "qualified_feature_head": "e723037ca7cd09e530035577d7eb41319f387e75",
+    "docs_qualification_run": 1418,
+    "integrated_qualification_run": 3678,
+    "phase_pr": 303,
+    "phase_merge_commit": "1f937b7ef641980cc118336763ba50ffc8f3cc5a",
     "public_endpoint_deployment_claimed": false,
-    "final_exact_head_qualification_required": true
+    "final_exact_head_qualification_required": false
   }
 }

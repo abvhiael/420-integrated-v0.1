@@ -20,20 +20,20 @@ type DeveloperDiscoveryRequest struct {
 }
 
 type DeveloperResourceDescriptor struct {
-	ProviderID   string               `json:"provider_id"`
-	NodeID       string               `json:"node_id"`
-	ServiceID    string               `json:"service_id"`
-	Capability   ResourceCapability   `json:"capability"`
-	Priority     uint32               `json:"priority"`
-	Endpoint     string               `json:"endpoint,omitempty"`
-	State        ResourceServiceState `json:"state"`
-	Health       ResourceServiceHealth `json:"health"`
-	Authoritative bool                `json:"authoritative"`
+	ProviderID    string                `json:"provider_id"`
+	NodeID        string                `json:"node_id"`
+	ServiceID     string                `json:"service_id"`
+	Capability    ResourceCapability    `json:"capability"`
+	Priority      uint32                `json:"priority"`
+	Endpoint      string                `json:"endpoint,omitempty"`
+	State         ResourceServiceState  `json:"state"`
+	Health        ResourceServiceHealth `json:"health"`
+	Authoritative bool                  `json:"authoritative"`
 }
 
 type DeveloperDiscoveryResult struct {
-	Version       string                      `json:"version"`
-	Authoritative bool                        `json:"authoritative"`
+	Version       string                        `json:"version"`
+	Authoritative bool                          `json:"authoritative"`
 	Resources     []DeveloperResourceDescriptor `json:"resources"`
 }
 
@@ -50,12 +50,12 @@ type DeveloperResourceStatus struct {
 }
 
 type DeveloperServiceStatus struct {
-	ProviderID   string               `json:"provider_id"`
-	NodeID       string               `json:"node_id"`
-	ServiceID    string               `json:"service_id"`
-	State        ResourceServiceState `json:"state"`
+	ProviderID   string                `json:"provider_id"`
+	NodeID       string                `json:"node_id"`
+	ServiceID    string                `json:"service_id"`
+	State        ResourceServiceState  `json:"state"`
 	Health       ResourceServiceHealth `json:"health"`
-	Capabilities []ResourceCapability `json:"capabilities"`
+	Capabilities []ResourceCapability  `json:"capabilities"`
 }
 
 type DeveloperResourceDirectory struct {
@@ -74,12 +74,10 @@ func (d DeveloperResourceDirectory) Discover(ctx context.Context, req DeveloperD
 	if version == "" {
 		version = DeveloperAPIVersion
 	}
-	if version != DeveloperAPIVersion {
+	if version != DeveloperAPIVersion || len(req.Capabilities) == 0 {
 		return DeveloperDiscoveryResult{}, ErrDeveloperDiscovery
 	}
-	if len(req.Capabilities) == 0 {
-		return DeveloperDiscoveryResult{}, ErrDeveloperDiscovery
-	}
+
 	seen := make(map[ResourceCapability]struct{}, len(req.Capabilities))
 	capabilities := make([]ResourceCapability, 0, len(req.Capabilities))
 	for _, capability := range req.Capabilities {
@@ -94,6 +92,7 @@ func (d DeveloperResourceDirectory) Discover(ctx context.Context, req DeveloperD
 		capabilities = append(capabilities, capability)
 	}
 	sort.Slice(capabilities, func(i, j int) bool { return capabilities[i] < capabilities[j] })
+
 	maxResults := req.MaxResults
 	if maxResults == 0 {
 		maxResults = DefaultDeveloperDiscoveryMaxResults
@@ -102,21 +101,28 @@ func (d DeveloperResourceDirectory) Discover(ctx context.Context, req DeveloperD
 		return DeveloperDiscoveryResult{}, ErrDeveloperDiscovery
 	}
 
-	endpoints, err := d.Discovery.DiscoverResources(ctx, ResourceDiscoveryRequest{Capabilities: capabilities, IncludeDegraded: req.IncludeDegraded})
+	endpoints, err := d.Discovery.DiscoverResources(ctx, ResourceDiscoveryRequest{
+		Capabilities: capabilities,
+		IncludeDegraded: req.IncludeDegraded,
+	})
 	if err != nil {
 		return DeveloperDiscoveryResult{}, err
 	}
+
 	resources := make([]DeveloperResourceDescriptor, 0, len(endpoints))
 	for _, endpoint := range endpoints {
-		if uint32(len(resources)) >= maxResults {
-			break
-		}
 		providerID := strings.TrimSpace(endpoint.ProviderID)
 		nodeID := strings.TrimSpace(endpoint.NodeID)
 		serviceID := strings.TrimSpace(endpoint.ServiceID)
 		publicEndpoint := strings.TrimSpace(endpoint.Endpoint)
 		if providerID == "" || nodeID == "" || serviceID == "" || !validResourceCapability(endpoint.Capability) {
 			return DeveloperDiscoveryResult{}, ErrDeveloperDiscovery
+		}
+		if endpoint.State != ResourceServiceRunning && endpoint.State != ResourceServiceDegraded {
+			return DeveloperDiscoveryResult{}, ErrDeveloperDiscovery
+		}
+		if endpoint.State == ResourceServiceDegraded && !req.IncludeDegraded {
+			continue
 		}
 		resources = append(resources, DeveloperResourceDescriptor{
 			ProviderID: providerID,
@@ -129,6 +135,25 @@ func (d DeveloperResourceDirectory) Discover(ctx context.Context, req DeveloperD
 			Health: resourceHealthForState(endpoint.State),
 			Authoritative: false,
 		})
+	}
+
+	sort.SliceStable(resources, func(i, j int) bool {
+		if resources[i].Capability != resources[j].Capability {
+			return resources[i].Capability < resources[j].Capability
+		}
+		if resources[i].Priority != resources[j].Priority {
+			return resources[i].Priority < resources[j].Priority
+		}
+		if !strings.EqualFold(resources[i].ProviderID, resources[j].ProviderID) {
+			return strings.ToLower(resources[i].ProviderID) < strings.ToLower(resources[j].ProviderID)
+		}
+		if !strings.EqualFold(resources[i].NodeID, resources[j].NodeID) {
+			return strings.ToLower(resources[i].NodeID) < strings.ToLower(resources[j].NodeID)
+		}
+		return strings.ToLower(resources[i].ServiceID) < strings.ToLower(resources[j].ServiceID)
+	})
+	if uint32(len(resources)) > maxResults {
+		resources = resources[:maxResults]
 	}
 	return DeveloperDiscoveryResult{Version: DeveloperAPIVersion, Authoritative: false, Resources: resources}, nil
 }

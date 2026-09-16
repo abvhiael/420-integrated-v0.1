@@ -41,56 +41,108 @@ jobs:
           cast --version
           forge config
 
-      - name: Yul binary-search probes
+      - name: Recursively bisect Yul failure across tests
         working-directory: contracts
         shell: bash
         run: |
           set +e
           mkdir -p ../artifacts/contracts
-          : > ../artifacts/contracts/yul-binary-search.txt
+          LOG=../artifacts/contracts/yul-test-bisect.txt
+          : > "$LOG"
+          YUL_SIG='Yul exception:Variable _94 is 1 too deep in the stack'
 
-          probe() {
-            label="$1"
+          probe_group() {
+            local label="$1"
             shift
-            echo "=== $label ===" | tee -a ../artifacts/contracts/yul-binary-search.txt
-            printf 'TARGETS' | tee -a ../artifacts/contracts/yul-binary-search.txt
-            printf ' %q' "$@" | tee -a ../artifacts/contracts/yul-binary-search.txt
-            echo | tee -a ../artifacts/contracts/yul-binary-search.txt
+            local tmp
+            tmp="$(mktemp)"
+
+            echo "=== $label ===" | tee -a "$LOG"
+            echo "COUNT $#" | tee -a "$LOG"
+            printf 'TARGETS' | tee -a "$LOG"
+            printf ' %q' "$@" | tee -a "$LOG"
+            echo | tee -a "$LOG"
+
             forge clean
-            forge build "$@" --sizes 2>&1 | tee -a ../artifacts/contracts/yul-binary-search.txt
-            rc=${PIPESTATUS[0]}
-            echo "RESULT $label rc=$rc" | tee -a ../artifacts/contracts/yul-binary-search.txt
-            echo | tee -a ../artifacts/contracts/yul-binary-search.txt
+            forge build "$@" 2>&1 | tee "$tmp" | tee -a "$LOG"
+            local forge_rc=${PIPESTATUS[0]}
+
+            if grep -Fq "$YUL_SIG" "$tmp"; then
+              echo "RESULT $label yul94=1 forge_rc=$forge_rc" | tee -a "$LOG"
+              rm -f "$tmp"
+              return 42
+            fi
+
+            echo "RESULT $label yul94=0 forge_rc=$forge_rc" | tee -a "$LOG"
+            rm -f "$tmp"
+            if (( forge_rc == 0 )); then
+              return 0
+            fi
+            return 2
           }
 
-          # Known-green XRPL graph retained as a control.
-          probe "control-xrpl-test" test/XrplBridgeAdapter420.t.sol
+          bisect_known_bad() {
+            local label="$1"
+            shift
+            local -a files=("$@")
+            local n=${#files[@]}
 
-          # Broad source partitions.
-          probe "src-half-a" \
-            src/accounts src/ai src/apps src/arbitration src/attention src/bet src/bonggoggles \
-            src/bridge src/commons src/creative src/exchange src/gaming src/governance src/grants \
-            src/highcountry src/interfaces
+            echo "BISECT $label count=$n" | tee -a "$LOG"
+            if (( n == 1 )); then
+              echo "CULPRIT ${files[0]}" | tee -a "$LOG"
+              return 0
+            fi
 
-          probe "src-half-b" \
-            src/interop src/launchpad src/libraries src/market src/media src/messenger src/oracle src/pay \
-            src/pulse src/randomness src/resource src/revenue src/review src/rewards src/rights src/swap \
-            src/system src/testnet src/token src/town src/treasury src/trust src/vault src/vpn \
-            src/IRewardController.sol src/IValidatorRegistry.sol
+            local mid=$((n / 2))
+            local -a left=("${files[@]:0:mid}")
+            local -a right=("${files[@]:mid}")
+            local left_rc right_rc
 
-          # High-risk domains that have seen recent contract growth.
-          probe "src-accounts" src/accounts
-          probe "src-resource" src/resource
-          probe "src-system" src/system
-          probe "src-bridge" src/bridge
-          probe "src-exchange" src/exchange
-          probe "src-gaming" src/gaming
+            probe_group "$label.L" "${left[@]}"
+            left_rc=$?
+            probe_group "$label.R" "${right[@]}"
+            right_rc=$?
 
-          # Full non-src roots. These distinguish source contracts from test/script-only failures.
-          probe "all-tests" test
-          probe "all-scripts" script
+            if (( left_rc == 42 && right_rc == 0 )); then
+              bisect_known_bad "$label.L" "${left[@]}"
+              return $?
+            fi
 
-          echo "Binary-search probes complete; full build follows." | tee -a ../artifacts/contracts/yul-binary-search.txt
+            if (( right_rc == 42 && left_rc == 0 )); then
+              bisect_known_bad "$label.R" "${right[@]}"
+              return $?
+            fi
+
+            if (( left_rc == 42 && right_rc == 42 )); then
+              echo "MULTIPLE_FAILING_BRANCHES $label" | tee -a "$LOG"
+              bisect_known_bad "$label.L" "${left[@]}"
+              bisect_known_bad "$label.R" "${right[@]}"
+              return 0
+            fi
+
+            if (( left_rc == 0 && right_rc == 0 )); then
+              echo "INTERACTION_ONLY $label count=$n" | tee -a "$LOG"
+              echo "Neither half alone reproduces _94; the failure requires files from both halves." | tee -a "$LOG"
+              return 0
+            fi
+
+            echo "NON_YUL_COMPILE_FAILURE $label left_rc=$left_rc right_rc=$right_rc" | tee -a "$LOG"
+            return 0
+          }
+
+          mapfile -t TEST_FILES < <(find test -type f -name '*.t.sol' | sort)
+          echo "TOTAL_TEST_FILES ${#TEST_FILES[@]}" | tee -a "$LOG"
+
+          if (( ${#TEST_FILES[@]} == 0 )); then
+            echo "ERROR no .t.sol files found" | tee -a "$LOG"
+            exit 1
+          fi
+
+          # The preceding diagnostic run established that the complete test tree
+          # reproduces _94. Start from that known-bad set and recursively split it.
+          bisect_known_bad "test-root" "${TEST_FILES[@]}"
+
+          echo "Recursive test bisect complete; full build follows." | tee -a "$LOG"
           exit 0
 
       - name: Build
@@ -119,7 +171,7 @@ jobs:
           path: |
             artifacts/contracts/foundry-build.txt
             artifacts/contracts/foundry-tests.txt
-            artifacts/contracts/yul-binary-search.txt
+            artifacts/contracts/yul-test-bisect.txt
           if-no-files-found: warn
           retention-days: 30
 

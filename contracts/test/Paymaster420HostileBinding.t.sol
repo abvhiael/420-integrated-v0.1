@@ -208,11 +208,44 @@ contract Paymaster420HostileBindingTest {
         returns (PackedUserOperation420 memory op)
     {
         op = _baseOp();
-        bytes32 sponsorshipDigest = SponsorshipDigest420.digestV1(op, sponsorship);
+        bytes32 sponsorshipDigest = _sponsorshipDigest(op, sponsorship);
         bytes32 signedDigest = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", sponsorshipDigest));
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(signerPk, signedDigest);
         sponsorship.sponsorData = abi.encode(abi.encodePacked(r, s, v), bytes32(0), bytes32(0));
         op.paymasterAndData = PaymasterData420.encodeV1(sponsorship);
+    }
+
+    function _sponsorshipDigest(PackedUserOperation420 memory op, PaymasterData420.V1 memory sponsorship)
+        internal
+        pure
+        returns (bytes32)
+    {
+        bytes32 baseHash = keccak256(
+            abi.encode(
+                keccak256("420/GAS/BASE_USER_OPERATION/V1"),
+                sponsorship.chainId,
+                sponsorship.entryPoint,
+                op.sender,
+                op.nonce,
+                keccak256(op.initCode),
+                keccak256(op.callData),
+                op.accountGasLimits,
+                op.preVerificationGas,
+                op.gasFees
+            )
+        );
+        return keccak256(
+            abi.encode(
+                keccak256("420/GAS/SPONSORSHIP_DIGEST/V1"),
+                baseHash,
+                sponsorship.paymaster,
+                sponsorship.policyId,
+                sponsorship.validAfter,
+                sponsorship.validUntil,
+                sponsorship.maxSponsoredCostWei,
+                sponsorship.authorizationId
+            )
+        );
     }
 
     function _sponsorData(PackedUserOperation420 memory op) internal pure returns (bytes memory sponsorData) {

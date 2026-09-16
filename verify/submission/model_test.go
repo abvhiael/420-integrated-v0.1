@@ -27,7 +27,7 @@ func TestMultiFileCommitmentIsOrderIndependentButContentSensitive(t *testing.T) 
 }
 
 func TestStandardJSONNormalizesPackagingButPreservesSubmittedBytes(t *testing.T) {
-	actual := []byte(`{"language":"Solidity","settings":{"viaIR":true,"optimizer":{"runs":200,"enabled":true}},"sources":{"A.sol":{"content":"contract A {}"}}}`)
+	actual := []byte("{\"language\":\"Solidity\",\"settings\":{\"viaIR\":true,\"optimizer\":{\"runs\":200,\"enabled\":true}},\"sources\":{\"A.sol\":{\"content\":\"contract A {}\"}}}")
 	var fixture any
 	if err := json.Unmarshal(actual, &fixture); err != nil { t.Fatal(err) }
 	s, err := NewStandardJSON(actual, buildSettings())

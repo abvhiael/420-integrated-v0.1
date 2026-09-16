@@ -14,3 +14,4 @@ Verification is bound to network, address and deployed code hash.
 ## Implementation references
 
 - [VERIFY-5 bytecode comparison and classification](verify-5-bytecode-classification.md) — defines `FULL_MATCH`, `PARTIAL_MATCH`, `MISMATCH`, and `UNVERIFIABLE`, including exact runtime/creation comparison and explicit diagnostics for metadata, linked libraries, and immutables.
+- [VERIFY-6 reproducible evidence store and history](verify-6-evidence-store.md) — defines append-only evidence history, restart reconstruction, content-hash validation, and the non-canonical storage boundary.

@@ -2,6 +2,17 @@
   "schema": "420-exchange-launch-bridge-catalog-v12.5.1",
   "status": "IDENTITY_REGISTRY_FOUNDATION",
   "policy": "Canonical network identity and verifier configuration must be registered before a bridge route can qualify an Exchange asset.",
+  "roadmap_status": {
+    "V12.5.6": {
+      "asset": "XRP",
+      "status": "IMPLEMENTED_DEFERRED_FROM_GENESIS_QUALIFICATION",
+      "note": "Adapter implementation is preserved but Genesis qualification is deferred pending resolution of the repository-wide Solidity/Yul compiler interaction."
+    },
+    "V12.5.7": {
+      "asset": "TRX",
+      "status": "IN_PROGRESS"
+    }
+  },
   "assets": [
     {"symbol":"BTC","canonical_network":"BITCOIN","canonical_chain_key":"420/BRIDGE/CHAIN/BTC","adapter_slice":"V12.5-BTC"},
     {"symbol":"ETH","canonical_network":"ETHEREUM","canonical_chain_key":"420/BRIDGE/CHAIN/ETH","adapter_slice":"V12.5.4"},

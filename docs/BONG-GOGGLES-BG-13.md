@@ -13,32 +13,26 @@ Canonical ownership remains split deliberately:
 
 ## Phase roadmap
 
-### BG-13.1 — Bong Goggles media descriptor + canonical resolver — IN PROGRESS
+### BG-13.1 — Bong Goggles media descriptor + canonical resolver — COMPLETE AND QUALIFIED
 
-Define the off-chain Bong Goggles media-manifest descriptor referenced by `BongGogglesMediaRegistry420.manifestHash` and implement the resolver/verification boundary.
+Implemented a deterministic versioned descriptor referenced by `BongGogglesMediaRegistry420.manifestHash`, exact owner/type/count/digest verification against canonical registry state, complete 420Storage object identity per item, derivative linkage, duplicate/tamper rejection, and a canonical-first manifest resolver. URLs, route metadata, credentials, tokens and session fields are rejected from the descriptor.
 
-Required guarantees:
-
-- deterministic versioned descriptor encoding and digest;
-- owner, media type and item count must match the canonical Bong Goggles media manifest;
-- each media item carries explicit 420Storage object identity rather than a URL or cache key;
-- storage references include object ID, storage manifest ID, shard index, shard root, exact byte size and commitment ID;
-- original and derivative relationships are explicit;
-- descriptor resolution fails closed on missing/tampered/mismatched data;
-- no Gateway/provider/cache route is treated as canonical identity;
-- no private access/session secret is stored in the descriptor.
-
-### BG-13.2 — upload preparation + ingest bridge
+### BG-13.2 — upload preparation + ingest bridge — IN PROGRESS
 
 Build the application upload coordinator over the frozen 420Storage `v1` prepare/ingest boundary.
 
-- calculate exact byte length and shard root before upload;
-- require canonical agreement/capacity/commitment prerequisites supplied by the owning storage protocol;
-- deterministic/idempotent upload requests;
-- bounded staging and retry behavior;
-- verify upload receipts but keep them explicitly non-authoritative;
-- construct the media descriptor only from verified stored object references;
-- prepare the `registerManifest` transaction payload only after every descriptor item is complete.
+Implemented in this increment:
+
+- translation from a verified Bong Goggles descriptor item to the exact 420Storage v1 object DTO;
+- required agreement, capacity-reservation and commitment preconditions;
+- fail-closed commitment matching between the storage precondition and descriptor object;
+- deterministic descriptor/item-bound idempotency keys;
+- prepare-plan validation so storage cannot silently change idempotency or commitment binding;
+- ingest-receipt verification over upload ID, complete object identity, exact size and shard root;
+- upload results explicitly marked non-authoritative presentation evidence;
+- callback boundary that delegates bounded staging, byte hashing, running-provider discovery and sink delivery to the existing 420Storage coordinator rather than duplicating that protocol logic.
+
+Remaining BG-13.2 work before qualification is limited to CI validation/documentation closeout; canonical placement/sealing remains BG-13.3.
 
 ### BG-13.3 — canonical storage placement/seal orchestration
 

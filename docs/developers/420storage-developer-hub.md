@@ -4,7 +4,7 @@ audience:
   - developer
 category: developer
 status: development
-version: v1
+version: current
 ---
 
 # 420Storage Developer Hub

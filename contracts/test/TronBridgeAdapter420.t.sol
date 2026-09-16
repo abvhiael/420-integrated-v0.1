@@ -80,7 +80,7 @@ contract TronBridgeAdapter420Test {
         require(!ok, "unsolidified accepted");
     }
 
-    function testFailedExecutionFailsClosed() public {
+    function testRejectedExecutionFailsClosed() public {
         ITronFinalityVerifier420.FinalizedTransfer memory p =
             _healthy(keccak256("failed-execution"), keccak256("tron-tx-4"));
         p.executionSuccess = false;

@@ -41,13 +41,23 @@ type Status struct {
 	Canonical     bool      `json:"canonical"`
 }
 
-type Server struct{ catalog Catalog }
+type Server struct {
+	catalog Catalog
+	limiter RateLimiter
+}
 
 func New(catalog Catalog) (*Server, error) {
+	return NewWithRateLimiter(catalog, nil)
+}
+
+func NewWithRateLimiter(catalog Catalog, limiter RateLimiter) (*Server, error) {
 	if catalog == nil {
 		return nil, errors.New("analytics HTTP API catalog required")
 	}
-	return &Server{catalog: catalog}, nil
+	if limiter == nil {
+		limiter = allowAllLimiter{}
+	}
+	return &Server{catalog: catalog, limiter: limiter}, nil
 }
 
 func (s *Server) Handler() http.Handler {
@@ -62,7 +72,7 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("GET /v1/series", s.series)
 	mux.HandleFunc("GET /v1/forecasts", s.forecasts)
 	mux.HandleFunc("GET /v1/anomalies", s.anomalies)
-	return mux
+	return s.resourceGuard(mux)
 }
 
 func (s *Server) health(w http.ResponseWriter, _ *http.Request) {
@@ -91,22 +101,32 @@ func (s *Server) capabilities(w http.ResponseWriter, _ *http.Request) {
 		"resources": []string{"metrics", "snapshots", "series", "methodologies", "forecasts", "anomalies"},
 		"maxLimit": MaxLimit,
 		"maxWindowHours": MaxWindowHours,
+		"maxQueryBytes": MaxQueryBytes,
+		"maxCatalogItems": MaxCatalogItems,
+		"maxResponseBytes": MaxResponseBytes,
+		"requestTimeoutMs": MaxRequestDuration.Milliseconds(),
+		"rateLimitHook": true,
 	})
 }
 
 func (s *Server) methodologies(w http.ResponseWriter, r *http.Request) {
+	if err := validateQuery(r, "limit"); err != nil { badRequest(w, err); return }
 	limit, err := boundedLimit(r)
 	if err != nil { badRequest(w, err); return }
 	entries := methodology.Entries()
+	if err := ensureCatalogBound(len(entries)); err != nil { resourceUnavailable(w, err); return }
 	if len(entries) > limit { entries = entries[:limit] }
 	writeJSON(w, http.StatusOK, map[string]any{"items": entries, "count": len(entries)})
 }
 
 func (s *Server) metrics(w http.ResponseWriter, r *http.Request) {
+	if err := validateQuery(r, "limit", "metricId"); err != nil { badRequest(w, err); return }
 	limit, err := boundedLimit(r)
 	if err != nil { badRequest(w, err); return }
-	metricID := strings.TrimSpace(r.URL.Query().Get("metricId"))
+	metricID, err := boundedMetricID(r)
+	if err != nil { badRequest(w, err); return }
 	items := append([]model.Metric(nil), s.catalog.Metrics()...)
+	if err := ensureCatalogBound(len(items)); err != nil { resourceUnavailable(w, err); return }
 	sort.Slice(items, func(i, j int) bool { return items[i].ID < items[j].ID })
 	out := make([]model.Metric, 0, min(limit, len(items)))
 	for _, item := range items {
@@ -119,9 +139,11 @@ func (s *Server) metrics(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) snapshots(w http.ResponseWriter, r *http.Request) {
+	if err := validateQuery(r, "limit"); err != nil { badRequest(w, err); return }
 	limit, err := boundedLimit(r)
 	if err != nil { badRequest(w, err); return }
 	items := append([]model.Snapshot(nil), s.catalog.Snapshots()...)
+	if err := ensureCatalogBound(len(items)); err != nil { resourceUnavailable(w, err); return }
 	sort.Slice(items, func(i, j int) bool {
 		if items[i].GeneratedAt.Equal(items[j].GeneratedAt) { return items[i].ID < items[j].ID }
 		return items[i].GeneratedAt.After(items[j].GeneratedAt)
@@ -136,12 +158,15 @@ func (s *Server) snapshots(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) series(w http.ResponseWriter, r *http.Request) {
+	if err := validateQuery(r, "limit", "metricId", "start", "end"); err != nil { badRequest(w, err); return }
 	limit, err := boundedLimit(r)
 	if err != nil { badRequest(w, err); return }
-	metricID := strings.TrimSpace(r.URL.Query().Get("metricId"))
+	metricID, err := boundedMetricID(r)
+	if err != nil { badRequest(w, err); return }
 	start, end, err := boundedWindow(r)
 	if err != nil { badRequest(w, err); return }
 	items := append([]timeseries.Series(nil), s.catalog.Series()...)
+	if err := ensureCatalogBound(len(items)); err != nil { resourceUnavailable(w, err); return }
 	sort.Slice(items, func(i, j int) bool { return items[i].ID < items[j].ID })
 	out := make([]timeseries.Series, 0, min(limit, len(items)))
 	for _, item := range items {
@@ -156,10 +181,13 @@ func (s *Server) series(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) forecasts(w http.ResponseWriter, r *http.Request) {
+	if err := validateQuery(r, "limit", "metricId"); err != nil { badRequest(w, err); return }
 	limit, err := boundedLimit(r)
 	if err != nil { badRequest(w, err); return }
-	metricID := strings.TrimSpace(r.URL.Query().Get("metricId"))
+	metricID, err := boundedMetricID(r)
+	if err != nil { badRequest(w, err); return }
 	items := append([]predictive.Forecast(nil), s.catalog.Forecasts()...)
+	if err := ensureCatalogBound(len(items)); err != nil { resourceUnavailable(w, err); return }
 	sort.Slice(items, func(i, j int) bool { return items[i].ID < items[j].ID })
 	out := make([]predictive.Forecast, 0, min(limit, len(items)))
 	for _, item := range items {
@@ -172,10 +200,13 @@ func (s *Server) forecasts(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) anomalies(w http.ResponseWriter, r *http.Request) {
+	if err := validateQuery(r, "limit", "metricId"); err != nil { badRequest(w, err); return }
 	limit, err := boundedLimit(r)
 	if err != nil { badRequest(w, err); return }
-	metricID := strings.TrimSpace(r.URL.Query().Get("metricId"))
+	metricID, err := boundedMetricID(r)
+	if err != nil { badRequest(w, err); return }
 	items := append([]predictive.AnomalySet(nil), s.catalog.Anomalies()...)
+	if err := ensureCatalogBound(len(items)); err != nil { resourceUnavailable(w, err); return }
 	sort.Slice(items, func(i, j int) bool { return items[i].ID < items[j].ID })
 	out := make([]predictive.AnomalySet, 0, min(limit, len(items)))
 	for _, item := range items {
@@ -214,10 +245,26 @@ func boundedWindow(r *http.Request) (time.Time, time.Time, error) {
 }
 
 func badRequest(w http.ResponseWriter, err error) { writeJSON(w, http.StatusBadRequest, map[string]any{"error": err.Error()}) }
+func resourceUnavailable(w http.ResponseWriter, err error) { writeJSON(w, http.StatusServiceUnavailable, map[string]any{"error": err.Error()}) }
 
 func writeJSON(w http.ResponseWriter, status int, value any) {
+	payload, err := json.Marshal(value)
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Cache-Control", "no-store")
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write([]byte(`{"error":"analytics response encoding failed"}`))
+		return
+	}
+	if len(payload) > MaxResponseBytes {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Cache-Control", "no-store")
+		w.WriteHeader(http.StatusServiceUnavailable)
+		_, _ = w.Write([]byte(`{"error":"analytics response exceeds maximum size"}`))
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Cache-Control", "no-store")
 	w.WriteHeader(status)
-	_ = json.NewEncoder(w).Encode(value)
+	_, _ = w.Write(append(payload, '\n'))
 }

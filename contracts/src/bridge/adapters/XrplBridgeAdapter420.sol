@@ -21,6 +21,16 @@ contract XrplBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
     mapping(bytes32 => bool) public consumedTransactions;
     uint256 public outboundNonce;
 
+    struct OutboundRequest {
+        bytes32 routeId;
+        bytes32 assetId;
+        address sender;
+        bytes20 destinationAccount;
+        uint8 hasTag;
+        uint32 destinationTag;
+        uint256 amount;
+    }
+
     error InvalidAddress();
     error InvalidVerifier();
     error InvalidBinding();
@@ -112,26 +122,78 @@ contract XrplBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
         uint256 amount,
         bytes calldata extra
     ) external payable onlyRouter returns (bytes32 sourceMessageId) {
+        _validateOutboundBase(routeId, assetId, sender, recipient.length, amount);
+
+        (bytes20 destinationAccount, uint8 hasTag, uint32 destinationTag) = _decodeRecipient(recipient);
+        OutboundRequest memory request = OutboundRequest({
+            routeId: routeId,
+            assetId: assetId,
+            sender: sender,
+            destinationAccount: destinationAccount,
+            hasTag: hasTag,
+            destinationTag: destinationTag,
+            amount: amount
+        });
+
+        uint256 nonce = ++outboundNonce;
+        sourceMessageId = _deriveOutboundMessageId(request, nonce, extra);
+        _emitOutbound(sourceMessageId, request);
+    }
+
+    function _validateOutboundBase(bytes32 routeId, bytes32 assetId, address sender, uint256 recipientLength, uint256 amount)
+        private
+        view
+    {
         if (
-            routeId == bytes32(0) || assetId == bytes32(0) || sender == address(0) || recipient.length != 25
+            routeId == bytes32(0) || assetId == bytes32(0) || sender == address(0) || recipientLength != 25
                 || amount == 0 || msg.value != 0 || routeId != xrpRouteId || assetId != xrpAssetId
         ) revert InvalidOutbound();
+    }
 
-        bytes20 destinationAccount;
-        uint8 hasTag;
-        uint32 destinationTag;
+    function _decodeRecipient(bytes calldata recipient)
+        private
+        pure
+        returns (bytes20 destinationAccount, uint8 hasTag, uint32 destinationTag)
+    {
         assembly {
             destinationAccount := calldataload(recipient.offset)
             hasTag := byte(0, calldataload(add(recipient.offset, 20)))
             destinationTag := shr(224, calldataload(add(recipient.offset, 21)))
         }
         if (destinationAccount == bytes20(0) || hasTag > 1 || (hasTag == 0 && destinationTag != 0)) revert InvalidOutbound();
+    }
 
-        uint256 nonce = ++outboundNonce;
-        sourceMessageId = keccak256(
-            abi.encode(ADAPTER_ID, block.chainid, routeId, assetId, sender, destinationAccount, hasTag, destinationTag, amount, nonce, extra)
+    function _deriveOutboundMessageId(OutboundRequest memory request, uint256 nonce, bytes calldata extra)
+        private
+        view
+        returns (bytes32)
+    {
+        bytes32 requestHash = keccak256(
+            abi.encode(
+                request.routeId,
+                request.assetId,
+                request.sender,
+                request.destinationAccount,
+                request.hasTag,
+                request.destinationTag,
+                request.amount,
+                extra
+            )
         );
-        emit XrpOutboundRequested(sourceMessageId, routeId, assetId, sender, destinationAccount, hasTag == 1, destinationTag, amount);
+        return keccak256(abi.encode(ADAPTER_ID, block.chainid, nonce, requestHash));
+    }
+
+    function _emitOutbound(bytes32 sourceMessageId, OutboundRequest memory request) private {
+        emit XrpOutboundRequested(
+            sourceMessageId,
+            request.routeId,
+            request.assetId,
+            request.sender,
+            request.destinationAccount,
+            request.hasTag == 1,
+            request.destinationTag,
+            request.amount
+        );
     }
 
     function _setVerifier(address verifier_) private {

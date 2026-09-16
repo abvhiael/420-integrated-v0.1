@@ -14,31 +14,34 @@ import (
 
 var ErrDeveloperUpload = errors.New("developer upload failure")
 
-const DefaultDeveloperUploadMaxBytes uint64 = 64 << 20
+const (
+	DefaultDeveloperUploadMaxBytes uint64 = 64 << 20
+	DeveloperUploadMaxIdempotencyKeyBytes = 256
+)
 
 type DeveloperUploadPreconditions struct {
-	AgreementID          string `json:"agreement_id"`
+	AgreementID           string `json:"agreement_id"`
 	CapacityReservationID string `json:"capacity_reservation_id"`
-	CommitmentID         string `json:"commitment_id"`
+	CommitmentID          string `json:"commitment_id"`
 }
 
 type DeveloperUploadPrepareRequest struct {
-	Version        string                     `json:"version"`
-	Object         DeveloperObjectRef         `json:"object"`
-	IdempotencyKey string                     `json:"idempotency_key"`
+	Version        string                       `json:"version"`
+	Object         DeveloperObjectRef           `json:"object"`
+	IdempotencyKey string                       `json:"idempotency_key"`
 	Preconditions  DeveloperUploadPreconditions `json:"preconditions"`
 }
 
 type DeveloperUploadPlan struct {
-	Version        string                     `json:"version"`
-	UploadID       string                     `json:"upload_id"`
-	Object         DeveloperObjectRef         `json:"object"`
-	IdempotencyKey string                     `json:"idempotency_key"`
+	Version        string                       `json:"version"`
+	UploadID       string                       `json:"upload_id"`
+	Object         DeveloperObjectRef           `json:"object"`
+	IdempotencyKey string                       `json:"idempotency_key"`
 	Preconditions  DeveloperUploadPreconditions `json:"preconditions"`
-	ProviderID     string                     `json:"provider_id"`
-	NodeID         string                     `json:"node_id"`
-	ServiceID      string                     `json:"service_id"`
-	Endpoint       string                     `json:"endpoint,omitempty"`
+	ProviderID     string                       `json:"provider_id"`
+	NodeID         string                       `json:"node_id"`
+	ServiceID      string                       `json:"service_id"`
+	Endpoint       string                       `json:"endpoint,omitempty"`
 }
 
 type DeveloperUploadReceipt struct {
@@ -67,6 +70,7 @@ type DeveloperUploadCoordinator struct {
 
 	mu       sync.Mutex
 	receipts map[string]DeveloperUploadReceipt
+	inflight map[string]string
 }
 
 func (c *DeveloperUploadCoordinator) Prepare(ctx context.Context, req DeveloperUploadPrepareRequest) (DeveloperUploadPlan, error) {
@@ -106,7 +110,7 @@ func (c *DeveloperUploadCoordinator) Prepare(ctx context.Context, req DeveloperU
 	pre.AgreementID = strings.TrimSpace(pre.AgreementID)
 	pre.CapacityReservationID = strings.TrimSpace(pre.CapacityReservationID)
 	pre.CommitmentID = strings.TrimSpace(pre.CommitmentID)
-	if idem == "" || pre.AgreementID == "" || pre.CapacityReservationID == "" || pre.CommitmentID == "" || object.CommitmentID != pre.CommitmentID {
+	if idem == "" || len(idem) > DeveloperUploadMaxIdempotencyKeyBytes || pre.AgreementID == "" || pre.CapacityReservationID == "" || pre.CommitmentID == "" || object.CommitmentID != pre.CommitmentID {
 		return DeveloperUploadPlan{}, ErrDeveloperUpload
 	}
 	endpoints, err := c.Discovery.DiscoverResources(ctx, ResourceDiscoveryRequest{Capabilities: []ResourceCapability{ResourceCapabilityStore}})
@@ -123,15 +127,15 @@ func (c *DeveloperUploadCoordinator) Prepare(ctx context.Context, req DeveloperU
 	identity := strings.Join([]string{DeveloperAPIVersion, object.ObjectID, object.ManifestID, fmt.Sprint(object.ShardIndex), object.ShardRoot, fmt.Sprint(object.SizeBytes), object.CommitmentID, idem, pre.AgreementID, pre.CapacityReservationID, selected.ProviderID, selected.NodeID, selected.ServiceID}, "\n")
 	sum := sha256.Sum256([]byte(identity))
 	return DeveloperUploadPlan{
-		Version: DeveloperAPIVersion,
-		UploadID: hex.EncodeToString(sum[:]),
-		Object: object,
+		Version:        DeveloperAPIVersion,
+		UploadID:       hex.EncodeToString(sum[:]),
+		Object:         object,
 		IdempotencyKey: idem,
-		Preconditions: pre,
-		ProviderID: selected.ProviderID,
-		NodeID: selected.NodeID,
-		ServiceID: selected.ServiceID,
-		Endpoint: selected.Endpoint,
+		Preconditions:  pre,
+		ProviderID:     selected.ProviderID,
+		NodeID:         selected.NodeID,
+		ServiceID:      selected.ServiceID,
+		Endpoint:       selected.Endpoint,
 	}, nil
 }
 
@@ -142,7 +146,8 @@ func (c *DeveloperUploadCoordinator) Ingest(ctx context.Context, plan DeveloperU
 	if err := ctx.Err(); err != nil {
 		return DeveloperUploadReceipt{}, err
 	}
-	if plan.Version != DeveloperAPIVersion || strings.TrimSpace(plan.UploadID) == "" || strings.TrimSpace(plan.IdempotencyKey) == "" || strings.TrimSpace(plan.ServiceID) == "" {
+	idem := strings.TrimSpace(plan.IdempotencyKey)
+	if plan.Version != DeveloperAPIVersion || strings.TrimSpace(plan.UploadID) == "" || idem == "" || len(idem) > DeveloperUploadMaxIdempotencyKeyBytes || strings.TrimSpace(plan.ServiceID) == "" {
 		return DeveloperUploadReceipt{}, ErrDeveloperUpload
 	}
 	maxBytes := c.MaxBytes
@@ -155,7 +160,7 @@ func (c *DeveloperUploadCoordinator) Ingest(ctx context.Context, plan DeveloperU
 
 	c.mu.Lock()
 	if c.receipts != nil {
-		if receipt, ok := c.receipts[plan.IdempotencyKey]; ok {
+		if receipt, ok := c.receipts[idem]; ok {
 			c.mu.Unlock()
 			if receipt.UploadID != plan.UploadID {
 				return DeveloperUploadReceipt{}, fmt.Errorf("%w: idempotency conflict", ErrDeveloperUpload)
@@ -163,7 +168,25 @@ func (c *DeveloperUploadCoordinator) Ingest(ctx context.Context, plan DeveloperU
 			return receipt, nil
 		}
 	}
+	if c.inflight == nil {
+		c.inflight = make(map[string]string)
+	}
+	if activeUploadID, exists := c.inflight[idem]; exists {
+		c.mu.Unlock()
+		if activeUploadID != plan.UploadID {
+			return DeveloperUploadReceipt{}, fmt.Errorf("%w: idempotency conflict", ErrDeveloperUpload)
+		}
+		return DeveloperUploadReceipt{}, fmt.Errorf("%w: upload already in progress", ErrDeveloperUpload)
+	}
+	c.inflight[idem] = plan.UploadID
 	c.mu.Unlock()
+	defer func() {
+		c.mu.Lock()
+		if c.inflight[idem] == plan.UploadID {
+			delete(c.inflight, idem)
+		}
+		c.mu.Unlock()
+	}()
 
 	staged, err := os.CreateTemp("", "420-upload-*")
 	if err != nil {
@@ -206,11 +229,11 @@ func (c *DeveloperUploadCoordinator) Ingest(ctx context.Context, plan DeveloperU
 	if c.receipts == nil {
 		c.receipts = make(map[string]DeveloperUploadReceipt)
 	}
-	if existing, exists := c.receipts[plan.IdempotencyKey]; exists && existing.UploadID != plan.UploadID {
+	if existing, exists := c.receipts[idem]; exists && existing.UploadID != plan.UploadID {
 		c.mu.Unlock()
 		return DeveloperUploadReceipt{}, fmt.Errorf("%w: idempotency conflict", ErrDeveloperUpload)
 	}
-	c.receipts[plan.IdempotencyKey] = receipt
+	c.receipts[idem] = receipt
 	c.mu.Unlock()
 	return receipt, nil
 }

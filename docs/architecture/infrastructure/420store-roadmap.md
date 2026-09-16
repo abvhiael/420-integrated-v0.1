@@ -18,9 +18,15 @@ Canonical storage truth is derived from chain state plus manifests, placements a
 
 ## Current status
 
-SR-0 through SR-9 are complete. SR-9 / Developer API, SDK and S3 compatibility merged to `main` through PR #299 at merge commit `494fb38ef85e7af6eb24e484da04e6a80fbd73aa` after final exact-head qualification of `604c26500478d6e75565ce394ba034a774245cf2`.
+SR-0 through SR-10 are complete. SR-9 / Developer API, SDK and S3 compatibility merged to `main` through PR #299 at merge commit `494fb38ef85e7af6eb24e484da04e6a80fbd73aa` after final exact-head qualification of `604c26500478d6e75565ce394ba034a774245cf2`.
 
-SR-10.1 through SR-10.9 are complete and exact-head qualified. SR-10.10 / Production launch closeout is active on PR #302. The branch was reconciled with current `main` at merge commit `8043e937a98b0edd46fe8f62d90067120147c789`; final merge is permitted only after the reconciled launch head passes node420, Integrated and Docs qualification.
+SR-10 / Production hardening and launch qualification completed through PR #302. The final reconciled launch head `ca46e0c238eb3a7aef806fd2bb4204e64e2eed0f` passed all three required exact-head gates and merged to `main` at `63ebcbf202e1a31879c0c72b77c06a0075c68f40`.
+
+Final SR-10.10 qualification evidence:
+
+- 420Docs Qualification #1390 / Actions run `35135256517` — PASS;
+- node420 Release Gate #286 / Actions run `35135256605` — PASS;
+- 420 Integrated Qualification #3650 / Actions run `35135256622` — PASS.
 
 ## Phase roadmap
 
@@ -36,7 +42,7 @@ SR-10.1 through SR-10.9 are complete and exact-head qualified. SR-10.10 / Produc
 | SR-7 | 420Gateway | COMPLETE / MERGED |
 | SR-8 | Unified Resource Network runtime | COMPLETE / MERGED |
 | SR-9 | Developer API / SDK / S3 compatibility | COMPLETE / MERGED |
-| SR-10 | Production hardening / launch qualification | IN PROGRESS — SR-10.10 FINAL CLOSEOUT |
+| SR-10 | Production hardening / launch qualification | COMPLETE / MERGED |
 
 ## Completed foundations
 
@@ -56,7 +62,7 @@ SR-9 remained monolithic through SR-9.10, reconciled current `main`, and merged 
 
 ## SR-10 — production hardening and launch qualification
 
-SR-10 turns the qualified Resource Network and developer surfaces into a production-qualified storage subsystem. Each slice produces reproducible qualification evidence and preserves the rule that operational/runtime state cannot replace canonical chain-backed authority.
+SR-10 turns the qualified Resource Network and developer surfaces into a production-qualified storage subsystem. Each slice produced reproducible qualification evidence and preserved the rule that operational/runtime state cannot replace canonical chain-backed authority.
 
 ### SR-10 architecture invariants
 
@@ -112,23 +118,17 @@ The testnet evidence contract binds commit/config/topology fingerprints, require
 
 Qualification evidence: Docs #1380 / `35133981988`, node420 #282 / `35133982020`, Integrated #3640 / `35133981934` — all PASS.
 
-### SR-10.10 — production launch closeout — ACTIVE
+### SR-10.10 — production launch closeout — COMPLETE / MERGED
 
-Closeout requirements:
+The branch reconciled current `main`, froze developer API `v1`, topology schema `storage-topology-v1`, testnet evidence schema `storage-testnet-evidence-v1`, and DR evidence schema `storage-dr-v1`, retained all prior SR-10 evidence, and qualified the exact reconciled launch head `ca46e0c238eb3a7aef806fd2bb4204e64e2eed0f`.
 
-- current `main` reconciled into the SR-10 branch;
-- launch compatibility contracts frozen at developer API `v1`, topology schema `storage-topology-v1`, testnet evidence schema `storage-testnet-evidence-v1`, and DR evidence schema `storage-dr-v1`;
-- all SR-10.1–SR-10.9 evidence retained and reproducible;
-- testnet evidence must identify exact software/config/topology fingerprints and contain no unresolved critical launch blocker;
-- final launch approval must name the exact reconciled SR-10 head and corresponding deployment/config fingerprints;
-- node420 Release Gate, 420 Integrated Qualification and 420Docs Qualification must all pass on that exact final head;
-- PR #302 may merge only after those exact-head gates are green.
+Final qualification evidence: Docs #1390 / `35135256517`, node420 #286 / `35135256605`, Integrated #3650 / `35135256622` — all PASS.
 
-The reconciliation commit `8043e937a98b0edd46fe8f62d90067120147c789` has parents SR-10.9 head `65228dd50d232ac23221e2229575877c9fb15af3` and current-main head `805150238ff1ec50859a1e3b95be03c388a1cac4`, using GitHub's clean PR merge tree. This preserves current mainline work while carrying every SR-10 change into closeout.
+PR #302 merged the completed SR-10 phase to `main` at `63ebcbf202e1a31879c0c72b77c06a0075c68f40`.
 
-## SR-10 merge policy
+## SR merge policy
 
-SR-10 is one monolithic production-hardening phase. Individual slices are qualified as evolving exact heads; the only phase merge occurs after SR-10.10 final exact-head qualification.
+The planned SR-0 through SR-10 storage-resource roadmap is complete. Future storage work should be treated as maintenance, production operations, protocol evolution, or a newly defined roadmap rather than silently extending SR-10.
 
 ## Dependency order
 
@@ -137,9 +137,7 @@ SR-8 Unified Resource Network — COMPLETE / MERGED
     ↓
 SR-9 Developer API / SDK / S3 compatibility — COMPLETE / MERGED
     ↓
-SR-10.1–SR-10.9 — COMPLETE / QUALIFIED
-    ↓
-SR-10.10 Production launch closeout — ACTIVE / FINAL GATES PENDING
+SR-10 Production hardening / launch qualification — COMPLETE / MERGED
 ```
 
 ## Architecture invariant

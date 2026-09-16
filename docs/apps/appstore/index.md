@@ -20,3 +20,4 @@ Use the AppStore to inspect provenance, versions, permissions, security context 
 - [APPSTORE-2 Registry synchronization](appstore-2-registry-sync.md) — builds the replay-safe, rebuildable projection of canonical Registry identity, version, implementation and provenance history.
 - [APPSTORE-3 catalogue persistence](appstore-3-catalogue-persistence.md) — adds deterministic noncanonical persistence, restart restoration, rebuild semantics, schema validation and corruption-safe failure behavior.
 - [APPSTORE-4 curation and presentation metadata](appstore-4-curation.md) — enforces noncanonical categories, featured/sponsored placement, rating/review boundaries and protection against canonical-field overrides.
+- [APPSTORE-5 security and provenance](appstore-5-security-provenance.md) — preserves verification, audit, publisher, trust, deprecation and malicious-warning provenance while preventing evidence from being presented as a safety or endorsement guarantee.

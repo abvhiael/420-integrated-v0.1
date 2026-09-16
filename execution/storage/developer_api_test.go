@@ -28,6 +28,18 @@ func (s developerGatewayAuthorizerStub) AuthorizeGatewayAccess(context.Context, 
 	return s.err
 }
 
+type developerGatewayDiscoveryStub struct {
+	candidates []GatewayCandidate
+	err        error
+}
+
+func (s developerGatewayDiscoveryStub) DiscoverGatewaySources(context.Context, GatewayRequest) ([]GatewayCandidate, error) {
+	if s.err != nil {
+		return nil, s.err
+	}
+	return append([]GatewayCandidate(nil), s.candidates...), nil
+}
+
 func developerObjectRef(payload []byte) DeveloperObjectRef {
 	digest := sha256.Sum256(payload)
 	return DeveloperObjectRef{
@@ -131,7 +143,7 @@ func TestGatewayDeveloperAPIPrivateAccessUsesExistingAuthorizer(t *testing.T) {
 
 func TestGatewayDeveloperAPIPreservesSelectedProviderMetadata(t *testing.T) {
 	payload := []byte("discovered")
-	discovery := staticGatewayDiscovery{candidates: []GatewayCandidate{{
+	discovery := developerGatewayDiscoveryStub{candidates: []GatewayCandidate{{
 		ProviderID: "provider-9",
 		NodeID:     "node-9",
 		Capability: GatewayCapabilityCache,

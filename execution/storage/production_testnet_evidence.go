@@ -70,7 +70,7 @@ func BuildProductionTestnetEvidence(e ProductionTestnetEvidence) (ProductionTest
 	e.TopologyFingerprint = strings.ToLower(strings.TrimSpace(e.TopologyFingerprint))
 	e.APIVersion = strings.TrimSpace(e.APIVersion)
 	e.TopologySchema = strings.TrimSpace(e.TopologySchema)
-	if e.CapturedAt.IsZero() || !validProductionEvidenceDigest(e.CommitSHA) || !validProductionEvidenceDigest(e.ConfigFingerprint) || !validProductionEvidenceDigest(e.TopologyFingerprint) || e.APIVersion != DeveloperAPIVersion || e.TopologySchema != ProductionTopologySchemaVersion || !e.SLO.Met {
+	if e.CapturedAt.IsZero() || !validProductionEvidenceDigest(e.CommitSHA) || !validProductionEvidenceDigest(e.ConfigFingerprint) || !validProductionEvidenceDigest(e.TopologyFingerprint) || e.APIVersion != DeveloperAPIVersion || e.TopologySchema != ProductionConfigSchemaVersion || !e.SLO.Met {
 		return ProductionTestnetEvidence{}, ErrProductionTestnetEvidence
 	}
 	checks, err := normalizeProductionTestnetChecks(e.Checks)

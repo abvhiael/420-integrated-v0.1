@@ -6,7 +6,7 @@ Production web target: `https://bonggoggles.420integrated.org`.
 
 ## Delivery rule from BG-12.3 onward
 
-Phase 12 is now monolithic. BG-12.3 through BG-12.7 are developed on `feature/bong-goggles-phase12-monolithic`, qualified together, reconciled with `main`, and merged only once the complete Phase 12 production backend/indexer is finished.
+Phase 12 is monolithic. BG-12.3 through BG-12.7 are developed on `feature/bong-goggles-phase12-monolithic`, qualified together, reconciled with `main`, and merged only once the complete Phase 12 production backend/indexer is finished.
 
 ## Completed foundation
 
@@ -36,11 +36,11 @@ Phase 12 is now monolithic. BG-12.3 through BG-12.7 are developed on `feature/bo
   Deterministic event identity/order, exact replay idempotency, reorg detection, rollback/replay, provenance-carrying projections, deterministic state roots and schema/snapshot-bound cursors.
 - **BG-12.2 — domain materialized views — COMPLETE, merged PR #146**
   Profiles, social objects, relationship edges and feed-entry projections; stale-edge/feed deletion; inactive/deleted filtering; deterministic ordering and view digests.
-- **BG-12.3 — canonical contract-event adapters + durable checkpoint recovery — IN PROGRESS**
-  Decode real Bong Goggles contract events, hydrate incomplete event payloads from canonical chain reads at the event block, reduce into BG-12.1/12.2 mutations, persist the event stream/checkpoint, verify state roots on restart, detect persisted corruption and roll back on reorg.
-- **BG-12.4 — pages/groups/events + discovery/review reducers — NEXT**
-  Materialize community membership/roles, pages, groups, events/RSVPs, discovery subjects, reviews, corrections and verification state.
-- **BG-12.5 — search + recommendation query service — REMAINS**
+- **BG-12.3 — canonical contract-event adapters + durable checkpoint recovery — COMPLETE ON PHASE-12 BRANCH**
+  Real Bong Goggles contract-event adapters, canonical state hydration for incomplete event payloads, deterministic mutation reduction, persistent event-stream/checkpoint storage, state-root verification, corruption detection and canonical reorg rollback recovery. Qualified on the monolithic branch before BG-12.4 began.
+- **BG-12.4 — pages/groups/events + discovery/review reducers — IN PROGRESS**
+  Canonical reducers for pages, groups, membership/roles, events/RSVPs, discovery subjects, reviews, corrections and verification attestations. Preserve review replacement/withdrawal state and delete stale removed membership.
+- **BG-12.5 — search + recommendation query service — NEXT**
   Search-class indexes, ranking adapters, snapshot/cursor semantics, canonical query-time eligibility revalidation, recommendation candidate generation and freshness handling.
 - **BG-12.6 — notification/event pipeline — REMAINS**
   Convert canonical activity into notification candidates; deduplicate, checkpoint and integrate with 420Notifications without making the indexer authoritative.
@@ -97,7 +97,7 @@ Phase 12 is now monolithic. BG-12.3 through BG-12.7 are developed on `feature/bo
 
 ## Current position
 
-**Completed through BG-12.2. Current work: BG-12.3 on the monolithic Phase-12 branch.**
+**Completed through BG-12.3 on the monolithic branch. Current work: BG-12.4 in PR #307. No Phase-12 merge occurs until BG-12.7 is complete.**
 
 Critical path:
 

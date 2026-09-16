@@ -13,6 +13,8 @@ The 420 Resource Protocol coordinates provider identity, service eligibility, of
 
 The developer boundary is strict: providers perform storage/relay/cache/gateway work, but canonical authorization and economic state stay in the Resource Protocol and 420Vault.
 
+For executable v1 examples, local/testnet setup, SDK usage, the S3 support matrix and troubleshooting, use the [420Storage Developer Hub](420storage-developer-hub.md).
+
 ## Shared Resource flow
 
 For Relay, Cache, Gateway and metered resource use:
@@ -79,6 +81,7 @@ A healthy provider filesystem alone is not canonical proof of availability, and 
 
 ## Related architecture
 
+- [420Storage Developer Hub](420storage-developer-hub.md)
 - [Storage Proof and Resource Protocol](../architecture/protocols/storage-proof-resource-protocol.md)
 - [Storage and Resource infrastructure](../architecture/infrastructure/storage-resource-infrastructure.md)
 - [Provider-backed integration model](provider-backed-integrations.md)

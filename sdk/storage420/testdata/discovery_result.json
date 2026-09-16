@@ -1,0 +1,1 @@
+{"version":"v1","authoritative":false,"resources":[{"provider_id":"provider-a","node_id":"node-a","service_id":"store-a","capability":"store","priority":1,"endpoint":"https://store-a.invalid","state":"running","health":"healthy","authoritative":false}]}

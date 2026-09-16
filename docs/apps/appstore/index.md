@@ -16,3 +16,4 @@ Use the AppStore to inspect provenance, versions, permissions, security context 
 ## Implementation references
 
 - [APPSTORE-0 architecture baseline](appstore-0-architecture-baseline.md) — freezes the contract-free trust boundary, canonical/non-canonical field split, privacy defaults, Wallet handoff limits and APP-INV-001 through APP-INV-013 qualification contract.
+- [APPSTORE-1 service/runtime scaffold](appstore-1-runtime.md) — defines runtime configuration, canonical network/Registry startup qualification, health/readiness behavior, graceful shutdown and fail-closed service boundaries.

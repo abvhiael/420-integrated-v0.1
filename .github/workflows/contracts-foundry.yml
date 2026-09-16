@@ -2,6 +2,8 @@ name: Solidity Contracts
 
 on:
   push:
+    branches:
+      - main
     paths:
       - "contracts/**"
       - "scripts/setup-foundry.sh"
@@ -9,6 +11,12 @@ on:
   pull_request:
     paths:
       - "contracts/**"
+      - ".github/workflows/contracts-foundry.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: solidity-contracts-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   foundry:
@@ -16,6 +24,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    env:
+      FOUNDRY_PROFILE: ${{ github.event_name == 'pull_request' && 'pr' || 'ci' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -36,7 +46,11 @@ jobs:
         run: |
           mkdir -p ../artifacts/contracts
           set -o pipefail
-          forge build --force 2>&1 | tee ../artifacts/contracts/foundry-build.txt
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            forge build --sizes 2>&1 | tee ../artifacts/contracts/foundry-build.txt
+          else
+            forge build --force --sizes 2>&1 | tee ../artifacts/contracts/foundry-build.txt
+          fi
 
       - name: Tests
         working-directory: contracts
@@ -89,6 +103,7 @@ jobs:
           if-no-files-found: error
 
       - name: Coverage
+        if: github.event_name != 'pull_request'
         continue-on-error: true
         working-directory: contracts
         run: FOUNDRY_PROFILE=coverage forge coverage --ir-minimum --report summary

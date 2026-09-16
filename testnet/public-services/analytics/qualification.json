@@ -1,0 +1,37 @@
+{
+  "schema": "420-analytics-testnet-qualification-v1",
+  "service": "420Analytics",
+  "serviceId": "420/service/analytics/v1",
+  "phase": "ANALYTICS-9",
+  "authority": {
+    "canonical": false,
+    "rebuildable": true,
+    "chainSource": "420Indexer",
+    "directRpcAllowed": false
+  },
+  "requiredChecks": [
+    "health",
+    "readiness",
+    "status.contract",
+    "capabilities.authority",
+    "metrics.seeded-network",
+    "snapshots.seeded",
+    "methodologies.seeded",
+    "restart-rebuild-determinism",
+    "non-safe-reorg-reconciliation",
+    "safe-height-regression-fail-closed"
+  ],
+  "requiredSeedMetrics": [
+    "network.indexed_height",
+    "network.safe_height",
+    "network.finality_depth",
+    "network.projection_lag"
+  ],
+  "live": {
+    "validator": "go run ./analytics/cmd/analyticslivevalidate",
+    "urlEnvironment": "ANALYTICS_LIVE_URL",
+    "timeoutEnvironment": "ANALYTICS_LIVE_TIMEOUT",
+    "evidenceFormat": "stdout JSON matching this schema identity",
+    "status": "READY_FOR_LIVE_EXECUTION"
+  }
+}

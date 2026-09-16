@@ -1,0 +1,53 @@
+{
+  "schema": "420-analytics-genesis-v1",
+  "application": "420Analytics",
+  "class": "GENESIS_USER_APP",
+  "serviceId": "420/service/analytics/v1",
+  "contractsRequired": false,
+  "canonicalStateAuthority": false,
+  "chainSource": "420Indexer",
+  "directRpcAllowed": false,
+  "ownsChainIngestion": false,
+  "databaseCanonical": false,
+  "derivedDataRebuildable": true,
+  "metricClasses": [
+    "network",
+    "validator",
+    "protocol",
+    "economic",
+    "cohort",
+    "ranking",
+    "forecast",
+    "anomaly"
+  ],
+  "requiredResultContext": [
+    "methodologyVersion",
+    "observationWindow",
+    "sourceProvenance",
+    "chainId",
+    "indexedHeight",
+    "finalizedHeight",
+    "freshness"
+  ],
+  "privacyExclusions": [
+    "private_messenger",
+    "private_commons",
+    "private_identity",
+    "encrypted_resource_payload",
+    "raw_attention_telemetry"
+  ],
+  "invariants": [
+    "ANL-INV-001 analytics is never canonical protocol authority",
+    "ANL-INV-002 chain-derived analytics consume qualified 420Indexer public APIs only",
+    "ANL-INV-003 direct node420 RPC crawling is forbidden",
+    "ANL-INV-004 analytics-owned ingestion finality checkpoint and reorg engines are forbidden",
+    "ANL-INV-005 metrics and materialized views remain rebuildable",
+    "ANL-INV-006 every published metric identifies methodology version and observation window",
+    "ANL-INV-007 every chain-derived metric preserves chain and source snapshot provenance",
+    "ANL-INV-008 wrong-chain stale degraded or provenance-invalid upstream state fails closed where canonical context is claimed",
+    "ANL-INV-009 finalized historical snapshots are immutable for a frozen methodology and source snapshot",
+    "ANL-INV-010 forecasts anomaly scores cohorts and rankings are explicitly non-canonical derived outputs",
+    "ANL-INV-011 protected private encrypted and raw-attention data is excluded from analytics admission",
+    "ANL-INV-012 analytics failure replacement or censorship cannot block underlying protocols or first-party clients"
+  ]
+}

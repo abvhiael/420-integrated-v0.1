@@ -2,8 +2,8 @@
   "schema": "420-analytics-readiness-v1",
   "service": "420Analytics",
   "serviceId": "420/service/analytics/v1",
-  "phase": "ANALYTICS-0",
-  "status": "IMPLEMENTATION_IN_PROGRESS",
+  "phase": "ANALYTICS-9",
+  "status": "LIVE_QUALIFICATION_READY",
   "authority": {
     "canonicalState": false,
     "contractsRequired": false,
@@ -12,13 +12,18 @@
   },
   "gates": {
     "architectureFrozen": true,
-    "qualifiedIndexerConsumer": false,
-    "metricModel": false,
-    "methodologyRegistry": false,
-    "httpApi": false,
-    "privacyHardening": false,
-    "runtimeDeployment": false,
+    "qualifiedIndexerConsumer": true,
+    "metricModel": true,
+    "methodologyRegistry": true,
+    "httpApi": true,
+    "privacyHardening": true,
+    "runtimeDeployment": true,
     "liveTestnetEvidence": false,
     "genesisCloseout": false
+  },
+  "qualification": {
+    "contract": "testnet/public-services/analytics/qualification.json",
+    "validator": "go run ./analytics/cmd/analyticslivevalidate",
+    "urlEnvironment": "ANALYTICS_LIVE_URL"
   }
 }

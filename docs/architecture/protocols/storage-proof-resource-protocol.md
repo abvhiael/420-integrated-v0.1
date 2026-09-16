@@ -6,435 +6,279 @@ audience:
   - architect
   - operator
 category: architecture
-status: development
+status: current
 version: current
 ---
 
 # Storage Proof & Resource Protocol
 
-420 Integrated separates **resource-service coordination** from the infrastructure that actually performs storage, relay, cache, retrieval, and gateway work. The 420 Resource Protocol anchors provider identity, node/service eligibility, offers, sessions, metering, storage agreements, capacity, commitments, proof policy, proof receipts, object manifests, and settlement while encrypted payload bytes and most service execution remain off-chain.
+The **420 Resource Protocol** is the canonical coordination layer for provider-backed Relay, Store, Cache, and Gateway services. **420Store** extends it with canonical storage capacity, agreements, commitments, proof policy/receipts, object manifests, repair-safe placement replacement, and proof-window settlement.
 
-The protocol rule is simple: **a provider may prove and bill for a qualified service without becoming consensus, execution, governance, wallet, application, or content authority.**
+Encrypted payloads, shards, cache contents, relay traffic, Gateway execution, Repair workers, provider filesystems, SDK state, and application presentation remain off-chain or derived.
 
-## Protocol family
+The core authority rule is: **a provider may deliver and prove a qualified service without becoming consensus, execution, governance, wallet, identity, content, or arbitrary settlement authority.**
 
-The shared Resource Protocol coordinates four service classes:
+## Public protocol family
+
+The frozen canonical Resource Protocol service classes are:
 
 - **420Relay** — encrypted routing and metered relay bandwidth;
-- **420Store** — persistent encrypted storage with capacity, commitments, proofs, manifests, and proof-driven settlement;
-- **420Cache** — cache/CDN and retrieval-bandwidth services;
-- **420Gateway** — public/private access gateways to decentralized resources.
+- **420Store** — durable encrypted storage;
+- **420Cache** — cache/CDN/retrieval bandwidth;
+- **420Gateway** — public/private access gateway.
 
-These services share common provider, node, offer, authorization, session, receipt, and router primitives but remain capability-separated. Eligibility to provide one service does not imply eligibility or authorization for another.
+The runtime capability named `repair` is **420Repair**, an operational recovery layer over 420Store. It is not a fifth canonical Resource Protocol service ID.
 
-## Authority model
+## Canonical authority map
 
-The protocol distinguishes several kinds of state:
-
-| State | Canonical authority |
+| State or decision | Canonical owner |
 | --- | --- |
-| Provider identity / lifecycle | Resource provider registry |
-| Node identity / service class | Resource node registry |
-| Offer terms and pricing | Resource offer registry |
-| Scoped provider/node actions | Resource authorization |
-| Consumer sessions / ceilings | Resource session registry |
-| Metering receipts | Resource receipt registry |
-| Storage capacity / reservations | Storage capacity registry |
-| Storage agreement terms | Storage agreement registry |
-| Immutable storage commitment | Storage commitment registry |
-| Proof policy and verifier | Storage proof-scheme registry |
-| Accepted proof receipts | Storage proof registry |
-| Object/shard provenance | Storage object-manifest registry |
-| Storage payment windows | Storage settlement registry + 420Vault |
-| Payload bytes / shards | Off-chain provider infrastructure |
+| Resource service policy | `ResourcePolicyRegistry420` |
+| Provider identity/lifecycle | `ResourceProviderRegistry420` |
+| Node identity/service class/lifecycle | `ResourceNodeRegistry420` |
+| Offer terms/pricing | `ResourceOfferRegistry420` |
+| Provider/node/session/proof-scheme permissions | `ResourceAuthorization420` + `CapabilityRegistry420` |
+| Consumer resource sessions | `ResourceSessionRegistry420` |
+| Metering receipts | `ResourceReceiptRegistry420` |
+| Route eligibility predicates | `ResourceRouter420` |
+| Store capacity/reservations | `StorageCapacityRegistry420` |
+| Store agreement lifecycle | `StorageAgreementRegistry420` |
+| Immutable storage commitment | `StorageCommitmentRegistry420` |
+| Proof-scheme policy/verifier | `StorageProofSchemeRegistry420` |
+| Accepted proof receipts | `StorageProofRegistry420` |
+| Object manifest/shard placements | `StorageObjectManifestRegistry420` |
+| Store proof-window settlement | `StorageSettlementRegistry420` + 420Vault |
+| Payload/shard bytes | off-chain provider infrastructure |
 
-Provider filesystems, databases, health checks, gateway responses, local capacity reports, or monitoring dashboards are never canonical protocol state by themselves.
+Wallet, UI, Indexer, Explorer, Search, Analytics, Status, Gateway, Cache, Repair, or SDK output may present or derive these values but cannot override the owning contract.
 
-## Provider qualification
+## Permissions and CapabilityRegistry scopes
 
-`ResourceProviderRegistry420` gives providers an explicit lifecycle:
+`ResourceAuthorization420` delegates authorization decisions to `CapabilityRegistry420` and domain-separates grants by scope:
 
-`REGISTERED → ACTIVE ↔ SUSPENDED → RETIRED`
+- provider scope: provider ID;
+- node scope: provider ID + node ID;
+- session scope: session ID;
+- proof-scheme scope: storage proof-scheme ID.
 
-Activation requires a nonzero staking reference. A provider may update mutable metadata/stake references only while it is not active or retired. State changes increment the provider revision.
+Resource action identifiers include `REGISTER_PROVIDER`, `UPDATE_PROVIDER`, `SET_PROVIDER_STATE`, `REGISTER_NODE`, `UPDATE_NODE`, `SET_NODE_STATE`, `PUBLISH_OFFER`, `OPEN_SESSION`, `SUBMIT_RECEIPT`, and `SETTLE`.
 
-Provider registration and activation grant only the resource-service authorities explicitly recognized by the Resource Protocol. They do not grant custody, governance, validator, arbitrary contract-call, or application-admin authority.
+Storage action identifiers include `CONFIGURE_CAPACITY`, `RESERVE_CAPACITY`, `REGISTER_PROOF_SCHEME`, `SET_PROOF_SCHEME_STATE`, `REGISTER_STORAGE_COMMITMENT`, and `ACCEPT_STORAGE_AGREEMENT`.
 
-Nodes are separately bound to providers and service classes. Consumers should therefore reason about both provider state and the specific node/service qualification rather than treating provider identity alone as proof that an endpoint may perform every resource role.
+Not every identifier implies a direct public mutator on every contract; the public methods described below are authoritative for current behavior.
 
-## Offers and economic terms
+## Resource policy
 
-Resource offers define the terms under which a qualified node is willing to provide one service class. The offer fixes the service identity, pricing/unit semantics, term limits, maximum units, expiry, and provider/node relationship before a consumer opens a session or storage agreement.
+`ResourcePolicyRegistry420` is governance-controlled. A service policy binds `termsHash`, `maxSessionSeconds`, `maxUnits`, revision, and active state. Only the four frozen Resource service IDs are valid.
 
-An effective offer is a prerequisite for downstream activity. Applications should not substitute an off-chain price quote for the canonical offer when the protocol requires the offer-bound terms.
+Event: `PolicyConfigured(serviceId, termsHash, maxSessionSeconds, maxUnits, revision, active)`.
 
-## Sessions, metering, and replay safety
+Errors: `InvalidPolicy()`, `PolicyNotFound()`.
 
-General resource consumption uses bounded sessions. A session is derived from the consumer, offer, chain, contract, and nonce so the same request cannot silently collide with another session.
+## Provider lifecycle
 
-Sessions establish explicit ceilings for:
+`ResourceProviderRegistry420` uses `NONE`, `REGISTERED`, `ACTIVE`, `SUSPENDED`, `RETIRED`.
 
-- allowed resource units;
-- maximum native `$420` spend;
-- service/offer identity;
-- consumer identity;
-- lifecycle state.
+Implemented transitions are `REGISTERED → ACTIVE|RETIRED`, `ACTIVE → SUSPENDED|RETIRED`, and `SUSPENDED → ACTIVE|RETIRED`. Activation requires a nonzero `stakeRef`. Metadata/stake references may be updated only while the provider is neither ACTIVE nor RETIRED.
 
-Metering receipts are cumulative rather than free-form invoices. Accepted usage must advance monotonically and remain inside session limits. The provider cannot create additional spend authority merely by reporting that more work was performed off-chain.
+Events: `ProviderRegistered(providerId, operatorAccount, stakeRef)`, `ProviderStateChanged(providerId, state)`.
 
-Resource settlement is therefore **metered and bounded**, not an ambient permission for providers to debit users.
+Errors: `InvalidProvider()`, `ProviderExists()`, `ProviderNotFound()`, `Unauthorized()`, `InvalidState()`, `StakeRequired()`.
 
-## 420Store agreement lifecycle
+## Node lifecycle
 
-420Store builds storage-specific guarantees on top of the shared Resource Protocol.
+`ResourceNodeRegistry420` uses `NONE`, `REGISTERED`, `ACTIVE`, `SUSPENDED`, `RETIRED` with the same bounded transition pattern as providers. A node is permanently bound at registration to one provider, one canonical service class, one operator, an endpoint hash, and a capacity hash. Activation requires the owning provider to be ACTIVE.
 
-A storage agreement progresses through:
+Events: `NodeRegistered(nodeId, providerId, serviceId)`, `NodeStateChanged(nodeId, state)`.
 
-`PROPOSED → ACTIVE → COMPLETED`
+Errors: `InvalidNode()`, `NodeExists()`, `NodeNotFound()`, `Unauthorized()`, `InvalidState()`.
 
-or, while still proposed:
+## Offers and pricing
 
-`PROPOSED → CANCELLED`
+`ResourceOfferRegistry420` binds an offer to a qualified node and snapshots service ID, `unitPrice420`, `maxUnits`, `termsHash`, optional `validUntil`, and active/existence state. Publishing requires a valid active node/service, active policy, and provider-operator or node-scoped offer-publication authority.
 
-The agreement binds:
+An offer is effective only while its own state/expiry, node eligibility, and service policy remain effective. The current contract emits no offer event.
 
-- consumer;
-- effective STORE offer;
-- object identity;
-- content root;
-- manifest hash;
-- storage class;
-- repair-policy commitment;
-- proof scheme;
-- storage commitment;
-- capacity reservation;
-- byte size;
-- start/end times;
-- proof interval;
-- erasure-coding data/total shard counts.
+Errors: `InvalidOffer()`, `OfferExists()`, `Unauthorized()`.
 
-Agreement IDs are domain-separated with chain ID, registry address, consumer, offer, object, and nonce.
+## General Resource sessions
 
-The agreement permits up to **1,024 total shards** and requires `totalShards >= dataShards > 0`.
+`ResourceSessionRegistry420` defines `NONE`, `OPEN`, `CLOSED`, `SETTLED`, `CANCELLED`.
 
-## Activation is a cross-registry qualification gate
+Current implemented flow:
 
-A proposed storage agreement cannot become active merely because a provider says it accepted the object.
+1. consumer opens a session against an effective offer;
+2. protocol computes `maxSpend420 = maxUnits × unitPrice420`;
+3. consumer may close an OPEN session;
+4. an actor with session-scoped `SETTLE` authority may mark the CLOSED session settled if the amount does not exceed `maxSpend420`.
 
-Activation verifies all of the following:
+The current implementation does **not** expose a public cancellation method despite the enum containing `CANCELLED`; documentation must not imply otherwise. The current contract emits no session events.
 
-1. the referenced offer is still an effective STORE offer;
-2. the caller is the node operator, provider operator, or holds the exact scoped storage-agreement acceptance authority;
-3. the capacity reservation is active;
-4. the reservation belongs to the same node and agreement;
-5. the reservation byte size matches the agreement;
-6. reservation lifetime covers the agreement end;
-7. the commitment belongs to the same node/provider;
-8. proof-scheme identity matches;
-9. content root and byte size match;
-10. commitment start/end times exactly match the agreement.
+Errors: `InvalidSession()`, `SessionExists()`, `Unauthorized()`, `InvalidState()`.
 
-The protocol therefore treats storage as a joined invariant across **offer + node/provider + reserved capacity + immutable commitment + proof policy**, not as a provider-local assertion.
+## Metering receipts
 
-## Capacity and oversubscription
+`ResourceReceiptRegistry420` accepts deterministic cumulative usage receipts from the node operator for an OPEN session. Cumulative units must be monotonic and cannot exceed the session cap. The provider cannot increase spend authority merely by claiming more work.
 
-Storage capacity is protocol state distinct from physical disk size.
+The current contract emits no receipt event.
 
-Operators and applications must distinguish:
+Errors: `InvalidReceipt()`, `ReceiptExists()`, `Unauthorized()`.
 
-- local disk capacity;
-- registered node capacity;
-- reserved capacity;
-- actual local bytes present;
-- live commitments;
-- effective agreements;
-- currently retrievable shard capacity.
+## Resource router
 
-A healthy disk does not prove that capacity is unreserved. Conversely, a canonical reservation does not prove that the payload is locally intact. Those guarantees are connected through the commitment/proof layer rather than collapsed into one flag.
+`ResourceRouter420` is read-only. `canRoute(nodeId, serviceId)` checks active policy and node eligibility; `canOpen(offerId)` checks effective offer state. It does not move value, open sessions, select a canonical provider, or create routing authority.
 
-Canonical reservations exist to prevent the same registered capacity from being promised incompatibly to multiple agreements.
+## Storage proof classes
+
+V1 recognizes exactly `REPLICA_COMMITMENT`, `AVAILABILITY_WINDOW`, and `AUDIT_RESPONSE`.
+
+Proof computation may occur off-chain or in specialized verifier infrastructure. Canonical chain state stores verifier policy, immutable commitment identity, challenge replay state, proof digest/receipt metadata, and settlement consequences.
+
+## Proof-scheme registry
+
+`StorageProofSchemeRegistry420` stores verifier, proof class, specification hash, maximum proof delay, and active state for each immutable scheme ID. Registering/changing state requires exact proof-scheme-scoped authority. New verifier semantics require a new scheme ID.
+
+Events: `StorageProofSchemeRegistered(...)`, `StorageProofSchemeStateChanged(proofSchemeId, active)`.
+
+Errors: `ZeroAddress()`, `InvalidScheme()`, `SchemeExists()`, `SchemeNotFound()`, `Unauthorized()`, `NoChange()`.
+
+## Store capacity and reservations
+
+`StorageCapacityRegistry420` records per-Store-node canonical capacity and deterministic agreement-bound reservations. Configuration requires an active Store node and operator or scoped capacity authority. Total bytes cannot be reduced below reserved bytes.
+
+Reservation requires an active Store node, nonzero agreement/size, future release time, authorization, and enough unreserved canonical capacity. Reservation ID is derived from node + agreement and is single-use. Release is allowed only after `releaseAfter`.
+
+Events: `StorageCapacityConfigured(...)`, `StorageCapacityReserved(...)`, `StorageCapacityReleased(...)`.
+
+Errors: `ZeroAddress()`, `InvalidCapacity()`, `CapacityNotFound()`, `ReservationNotFound()`, `ReservationExists()`, `InsufficientCapacity()`, `InvalidStoreNode()`, `Unauthorized()`, `ReservationLocked()`.
 
 ## Immutable storage commitments
 
-A storage commitment binds the provider/node to immutable storage parameters, including:
+`StorageCommitmentRegistry420` binds provider, Store node, proof scheme, content root, replica root, metadata hash, byte size, and service interval. Registration requires a unique commitment ID, active scheme, active Store node, valid interval, and provider/node operator or scoped authority.
 
-- content root;
-- replica root;
-- byte size;
-- proof scheme;
-- start/end interval;
-- provider identity;
-- node identity.
+A live commitment additionally requires current Store-node eligibility and active proof scheme. Historical commitment fields are never rewritten to follow later repair/provider replacement.
 
-Commitments are historical evidence. Their identity and bound fields must not be rewritten merely because a provider later changes configuration, operators, metadata, or local layout.
+Event: `StorageCommitmentRegistered(...)`.
 
-If service must migrate to another provider/node, the protocol should create the required new agreement/commitment/placement relationships while preserving old evidence.
+Errors: `ZeroAddress()`, `InvalidCommitment()`, `CommitmentExists()`, `CommitmentNotFound()`, `InvalidStoreNode()`, `InactiveProofScheme()`, `Unauthorized()`.
 
-## Proof schemes
+## Storage agreement lifecycle
 
-Proof policy is versioned and verifier-bound through `StorageProofSchemeRegistry420`. The current storage-proof profile recognizes:
+`StorageAgreementRegistry420` implements `NONE`, `PROPOSED`, `ACTIVE`, `COMPLETED`, `CANCELLED`.
 
-- `REPLICA_COMMITMENT`;
-- `AVAILABILITY_WINDOW`;
-- `AUDIT_RESPONSE`.
+A consumer proposes an agreement against an effective STORE offer with object/content/manifest identity, storage class, repair-policy commitment, proof scheme, size, interval, proof interval, and erasure parameters. `totalShards` is capped at **1,024** and must satisfy `totalShards >= dataShards > 0`.
 
-A scheme defines the verifier and maximum delay allowed after a challenge epoch.
+Before `startTime`, activation requires qualified provider/node authority plus matching active reservation and commitment. The reservation must match node, agreement, size, and lifetime; the commitment must match provider/node, proof scheme, content root, size, and exact service interval.
 
-Applications do not decide ad hoc whether a blob of proof bytes is valid. The canonical proof registry resolves the commitment's bound scheme and invokes the scheme's verifier.
+Only the consumer may cancel a PROPOSED agreement. An ACTIVE agreement can be completed after `endTime`.
 
-## Proof submission and acceptance
+Events: `StorageAgreementProposed(...)`, `StorageAgreementActivated(...)`, `StorageAgreementCompleted(agreementId)`, `StorageAgreementCancelled(agreementId)`.
 
-`StorageProofRegistry420` constrains proof submissions with several safety rules:
+Errors: `ZeroAddress()`, `InvalidAgreement()`, `AgreementExists()`, `AgreementNotFound()`, `InvalidState()`, `InvalidStoreOffer()`, `InactiveProofScheme()`, `CommitmentMismatch()`, `CapacityReservationMismatch()`, `Unauthorized()`.
 
-- commitment, challenge, epoch, and proof must be present;
-- proof payload is bounded to **65,536 bytes**;
-- a commitment/challenge pair is single-use;
-- challenge epoch must fall inside the commitment interval;
-- proof cannot be submitted before its challenge epoch;
-- the STORE node must still be active;
-- the proof scheme must still be active;
-- proof must arrive before `challengeEpoch + maxProofDelay`;
-- verifier reversion or a `false` result fails closed;
-- accepted proof identity is domain-separated over commitment, challenge, and proof digest.
+## Storage proof submission
 
-Only the proof digest/receipt is retained canonically. The protocol does not need to keep all raw proof bytes forever in canonical state.
+`StorageProofRegistry420` caps raw proof input at **65,536 bytes**. A submitted proof must bind nonzero identifiers/epoch, a unique commitment/challenge pair, an epoch inside the commitment interval, active Store node, active proof scheme, and the scheme deadline. Early/late submissions fail; verifier revert/false fails closed; reentrancy is rejected.
 
-## Proof receipts are evidence, not payment
+On acceptance the protocol stores commitment, challenge, proof digest, challenge epoch, and submitted-at metadata. Raw proof bytes are not retained canonically.
 
-An accepted proof establishes that the bound verifier accepted one challenge for one commitment under one proof scheme.
+Event: `StorageProofAccepted(...)`.
 
-It does **not** automatically mean:
+Errors: `ZeroAddress()`, `InvalidProof()`, `ProofExists()`, `ChallengeReplayed()`, `ChallengeOutsideCommitment()`, `ProofTooEarly()`, `ProofTooLate()`, `InactiveStoreNode()`, `InactiveProofScheme()`, `VerificationFailed()`, `Reentrancy()`.
 
-- every byte of an object is globally available forever;
-- every other challenge has been satisfied;
-- the provider may withdraw the full agreement value;
-- the object has enough live shards for reconstruction;
-- the consumer waived future proof requirements.
+Accepted proof is evidence for one bound challenge. It does not itself move funds.
 
-Payment is deliberately separated into proof windows in the settlement controller.
+## Object manifests and shard placements
 
-## Object manifests and shard provenance
+`StorageObjectManifestRegistry420` anchors controller, object/content identity, manifest/encryption/erasure commitments, object size, segment count, erasure threshold, total shards, placement count, and sealed state.
 
-`StorageObjectManifestRegistry420` anchors the object envelope while payload and shard bytes remain off-chain.
+Each placement binds one manifest/index to an active agreement, commitment, node, shard root, and shard byte length. Backing agreement must belong to the manifest controller and match object/manifest/erasure parameters.
 
-A manifest commits to:
+A manifest cannot be sealed until every declared shard index has a placement. After sealing, its content envelope is immutable.
 
-- object ID;
-- object content root;
-- manifest hash;
-- encryption commitment;
-- erasure root;
-- object size;
-- segment count;
-- data-shard threshold;
-- total shard count.
+`isRetrievable` returns true only when the manifest is sealed and at least `dataShards` placements remain backed by effective agreements/live commitments. Sealing and current retrievability are different concepts.
 
-Every shard placement binds:
+### Repair-safe replacement
 
-- manifest ID;
-- shard index;
-- shard root;
-- shard byte size;
-- storage agreement;
-- storage commitment;
-- node.
+`replacePlacement` is available only on sealed manifests to the manifest controller. The incumbent service window must have begun and incumbent placement must no longer be effective. Replacement preserves placement ID, manifest ID, shard index, shard root, and shard byte length while rotating backing agreement/commitment/node through valid state.
 
-A placement is accepted only when the agreement belongs to the manifest controller, matches the object/manifest and erasure parameters, is ACTIVE, and resolves to a compatible commitment.
+Events: `ObjectManifestRegistered(...)`, `ShardPlacementRegistered(...)`, `ShardPlacementReplaced(...)`, `ObjectManifestSealed(...)`.
 
-The same shard index cannot be registered twice for one manifest.
+Errors: `ZeroAddress()`, `InvalidManifest()`, `ManifestExists()`, `ManifestNotFound()`, `InvalidPlacement()`, `PlacementExists()`, `PlacementNotFound()`, `Unauthorized()`, `ManifestSealed()`, `ManifestNotSealed()`, `PlacementStillEffective()`, `IncompleteManifest()`.
 
-## Sealing and retrievability
+## Proof-window economics and 420Vault settlement
 
-A manifest can be sealed only after all declared shard indexes have placements.
+`StorageSettlementRegistry420` does not custody funds. It drives bounded obligations in **420Vault**.
 
-Sealing proves the placement envelope is complete. It does not freeze every provider into permanent service.
+Settlement states: `NONE`, `OPEN`, `FUNDED`, `COMPLETE`, `ABORTING`, `CANCELLED`.
 
-`isRetrievable()` evaluates the current effective agreements and live commitments behind those placements. An erasure-coded object is considered retrievable when at least `dataShards` placements remain live.
+Window states: `NONE`, `RESERVED`, `PAID`, `REFUNDED`.
 
-This gives the protocol an explicit distinction between:
+A consumer may open settlement only for its ACTIVE agreement before service starts. Beneficiary is resolved from the canonical offer/node/provider path.
 
-- **manifest completeness** — all intended shard placements were registered;
-- **current retrievability** — enough of those placements are still effective now.
-
-A sealed manifest may therefore become degraded later without rewriting its historical manifest or placement records.
-
-## Repair and provider replacement
-
-Provider failure should not cause historical commitments to be edited to point somewhere else.
-
-A safe repair flow preserves:
-
-1. object identity and content root;
-2. existing manifest and placement evidence;
-3. prior agreement/commitment/proof history;
-4. any settled/refunded payment windows;
-5. new provider/node qualification;
-6. new capacity reservation and commitment;
-7. new placement/repair state through whatever repair mechanism is authorized.
-
-Repair logic may automate new storage work, but it must not manufacture continuity by relabeling unrelated bytes as the original commitment.
-
-## Proof-driven settlement
-
-`StorageSettlementRegistry420` separates service evidence from custody. **420Vault remains the custodian.** The settlement registry creates, releases, or cancels Vault obligations according to storage agreement/proof state.
-
-Settlement IDs bind the agreement and Vault. The provider beneficiary is resolved from the agreement's qualified offer/node/provider state when the settlement opens.
-
-The total storage amount is derived from:
+Total amount is:
 
 `agreement.sizeBytes × offer.unitPrice420`
 
-The agreement duration is split into bounded proof windows, with a maximum of **4,096 settlement windows**.
+Window count is `ceil(duration / proofInterval)`, capped at **4,096**. Integer-division remainder is assigned to the final window so all window amounts sum exactly to total consideration.
 
-Before service starts, the consumer funds each window as a Vault obligation. Once every window is reserved, the settlement enters `FUNDED` state.
+`reserveWindows` creates Vault obligations. Once all are reserved, settlement becomes FUNDED. `settleWindow` releases exactly one reserved obligation only when an accepted proof matches agreement commitment, exact challenge epoch, and canonical settlement challenge ID. `refundMissedWindow` cancels/refunds a reserved obligation only after deadline. An OPEN settlement that reaches service start unfunded enters an abort/refund flow.
 
-## Canonical challenge windows
+Events: `StorageSettlementOpened(...)`, `StorageWindowReserved(...)`, `StorageSettlementFunded(...)`, `StorageWindowPaid(...)`, `StorageWindowRefunded(...)`, `StorageSettlementCompleted(...)`, `StorageSettlementAborting(...)`, `StorageSettlementCancelled(...)`.
 
-Each settlement window derives a deterministic challenge epoch from:
+Errors: `ZeroAddress()`, `InvalidSettlement()`, `SettlementExists()`, `SettlementNotFound()`, `InvalidState()`, `Unauthorized()`, `InvalidWindow()`, `InvalidProof()`, `ProofDeadlineOpen()`.
 
-- agreement start time;
-- proof interval;
-- window index;
-- agreement end time.
+## General Resource settlement versus Store settlement
 
-The challenge ID is domain-separated over the agreement, window index, and challenge epoch.
+General Resource sessions provide bounded metering suitable for Relay/Cache/Gateway-style use. 420Store is stricter because durable storage has time-based proof obligations. Generic cumulative usage receipts are not substitutes for Store proof-window evidence.
 
-To release a window, the proof receipt must match:
+## Security and trust boundaries
 
-- the agreement commitment;
-- the exact derived challenge epoch;
-- the exact canonical challenge ID.
+The protocol fails closed on inactive providers/nodes/policies/offers, insufficient capacity, mismatched reservation/commitment, inactive schemes, replayed/early/late proofs, verifier failure, incomplete manifests, still-effective placement replacement, wrong proof/window binding, and missed proof deadlines.
 
-A valid proof for some other challenge cannot be reused to release a different payment window.
+Runtime discovery, provider APIs, local databases, Wallet screens, Indexer tables, Explorer pages, Search results, Analytics metrics, Status health, and qualification evidence are presentation/operations layers only.
 
-## Paid versus refunded windows
+## Privacy boundary
 
-A funded window has exactly one terminal economic outcome:
+Off-chain/private by design: plaintext payloads, encrypted payload bytes, erasure-coded shard bytes, decryption keys, private app metadata, cache contents, relay traffic, raw service credentials, and private developer-access session material.
 
-- **PAID** — a qualifying proof exists and the corresponding Vault obligation is released to the provider beneficiary;
-- **REFUNDED** — the proof deadline expires and the obligation is cancelled/refunded.
+Canonical state contains only identities, commitments, proof/economic metadata, and lifecycle state required for enforcement.
 
-Proof absence therefore does not authorize late provider collection. Once the deadline passes, the protocol can refund the missed window instead.
+## End-to-end Store lifecycle
 
-If a settlement never finishes funding before service starts, it enters an abort flow and already-reserved obligations can be cancelled rather than stranded.
+`provider/node → Store offer → capacity reservation → commitment → proposed agreement → active agreement → off-chain verified upload → placements → sealed manifest → challenge/proof receipt → Vault proof-window release/refund → repair replacement as needed`
 
-## Rounding and accounting
+Every arrow is a real authority boundary. No provider/UI shortcut may collapse the sequence into one “uploaded”, “available”, or “paid” flag.
 
-The total agreement amount is divided across settlement windows deterministically.
+## Contract map
 
-All normal windows receive integer division of the total by the window count. Any remainder is added to the final window so:
+Shared Resource implementation:
 
-`sum(window amounts) == totalAmount420`
+`ResourceIds420.sol`, `ResourceAuthorization420.sol`, `ResourcePolicyRegistry420.sol`, `ResourceProviderRegistry420.sol`, `ResourceNodeRegistry420.sol`, `ResourceOfferRegistry420.sol`, `ResourceSessionRegistry420.sol`, `ResourceReceiptRegistry420.sol`, `ResourceRouter420.sol`.
 
-The settlement tracks paid and refunded totals separately and completes only after all windows have reached a terminal state.
+420Store/storage implementation:
 
-## General Resource Protocol and storage-specific settlement
+`StorageIds420.sol`, `StorageProofIds420.sol`, `IStorageProofVerifier420.sol`, `StorageProofSchemeRegistry420.sol`, `StorageCapacityRegistry420.sol`, `StorageCommitmentRegistry420.sol`, `StorageProofRegistry420.sol`, `StorageAgreementRegistry420.sol`, `StorageObjectManifestRegistry420.sol`, `StorageSettlementRegistry420.sol`.
 
-The shared Resource Protocol's sessions/receipts are suitable for metered Relay/Cache/Gateway-style usage and other bounded resource services.
+The Genesis public product mapping remains Relay, Store, Cache, Gateway. Storage contracts implement 420Store; they do not create separate Genesis user applications.
 
-420Store's storage-proof settlement is stricter because durable storage is time-based and must remain challengeable across an agreement interval. Storage payment therefore binds proof windows to immutable agreements and commitments instead of trusting generic cumulative usage alone.
+## Generated-reference boundary
 
-Consumers should choose the protocol surface that matches the guarantee they need rather than treating all resource receipts as equivalent proof of durable storage.
+`docs/reference/generated/` is environment/catalogue scoped. The checked-in local example catalogue does not currently publish every Resource/Storage ABI, so absence from generated reference is not evidence that a contract does not exist.
 
-## Data and privacy boundary
-
-The following remain off-chain:
-
-- plaintext payloads;
-- encrypted payload bytes;
-- erasure-coded shard bytes;
-- decryption keys;
-- private application metadata;
-- cache contents;
-- relay traffic payloads.
-
-The chain anchors only the state needed for identity, authority, offers, capacity, commitments, manifests, proof policy/results, metering, and settlement.
-
-A content root or proof receipt proves the protocol's bound commitment/evidence semantics; it does not authorize public disclosure of the underlying content.
-
-## Failure behavior
-
-### Provider or node suspension
-
-New service qualification fails where active provider/node status is required. Existing historical commitments and receipts remain evidence; they are not deleted to hide the incident.
-
-### Capacity exhaustion
-
-New reservations should fail rather than oversubscribe canonical capacity.
-
-### Commitment mismatch
-
-Agreement activation fails. Operators must correct the proposed storage state through valid new objects rather than editing historical commitment fields.
-
-### Verifier failure
-
-The proof fails closed. No receipt and no proof-driven payment release are created.
-
-### Proof deadline missed
-
-The corresponding settlement window becomes refundable after its deadline. The provider cannot later substitute an unrelated proof for that window.
-
-### Provider loses local data
-
-The provider must not claim continued availability. The affected placements may cease to satisfy retrievability, and repair/replacement must preserve provenance.
-
-### Insufficient live shards
-
-The object becomes non-retrievable according to the manifest threshold until enough qualified placements are restored.
-
-### Vault/settlement failure
-
-Payment state remains unresolved. Proof acceptance alone must never be interpreted as successful value transfer.
-
-## Recovery order
-
-A representative protocol recovery sequence is:
-
-1. verify canonical chain/finality and contract discovery;
-2. verify Resource authorization and provider/node state;
-3. verify effective offers and sessions;
-4. reconcile registered capacity and active reservations;
-5. reconcile storage agreements and immutable commitments;
-6. verify proof-scheme configuration and verifier identity;
-7. restore proof intake and reconcile accepted proof receipts;
-8. validate manifests, placements, and current retrievability;
-9. reconcile settlement/Vault obligations, paid windows, and refunds;
-10. initiate protocol-valid repair/replacement where redundancy is insufficient;
-11. resume dependent gateways, applications, and settlement flows only after canonical state agrees with provider operations.
-
-Local provider metadata must never be used to overwrite canonical agreement, proof, manifest, or settlement state during recovery.
-
-## Storage/Resource invariants
-
-- **RESOURCE-001** — provider registration or service delivery never grants consensus, execution, governance, wallet, or arbitrary application authority.
-- **RESOURCE-002** — service-class authority is scoped; Relay, Store, Cache, and Gateway permissions do not bleed into one another.
-- **RESOURCE-003** — active providers require canonical lifecycle qualification and a nonzero stake reference.
-- **RESOURCE-004** — offers/sessions bind service and economic ceilings before metered consumption; providers cannot create additional spend authority from off-chain usage claims.
-- **RESOURCE-005** — metering receipts advance usage monotonically and cannot exceed their bound session ceilings.
-- **STORE-001** — a storage agreement becomes ACTIVE only after compatible STORE offer, provider/node, capacity reservation, proof scheme, and immutable commitment state all qualify.
-- **STORE-002** — payload and shard bytes remain off-chain; canonical state anchors commitments and evidence rather than plaintext custody.
-- **STORE-003** — canonical capacity reservations prevent protocol-level oversubscription of registered storage capacity.
-- **STORE-004** — storage commitment identity and historical bound parameters are immutable evidence and are never rewritten to follow provider replacement.
-- **STORE-005** — proof challenges are single-use, interval-bound, deadline-bound, verifier-checked, and fail closed on inactive nodes/schemes or verifier failure.
-- **STORE-006** — an accepted proof receipt is evidence for one bound challenge and never by itself releases arbitrary payment.
-- **STORE-007** — manifest shard placements must resolve to compatible ACTIVE agreements and commitments, and every declared shard must be placed before sealing.
-- **STORE-008** — current retrievability requires at least the manifest's `dataShards` threshold of live/effective placements; stale provider assertions are insufficient.
-- **STORE-009** — storage settlement custody remains in canonical 420Vault; the settlement controller only creates/releases/cancels bounded obligations.
-- **STORE-010** — each proof-payment window binds one deterministic challenge; proof evidence from another window cannot release it.
-- **STORE-011** — missed proof windows refund rather than silently extending provider collection authority.
-- **STORE-012** — provider loss, repair, or replacement preserves agreement/commitment/proof/manifest/settlement history instead of rewriting canonical provenance.
+This page owns the canonical handwritten Resource/Storage contract semantics, lifecycle, event names, and custom-error names. Once a deployment catalogue contains distributable verified Resource/Storage artifacts, generated ABI/signature reference should be regenerated from source rather than hand-maintained.
 
 ## Implementation status
 
-The repository currently implements the shared provider/node/offer/session/receipt Resource Protocol plus the 420Store agreement, capacity, commitment, proof-scheme, proof-receipt, object-manifest, and proof-driven settlement stack. Provider-side payload handling and proof computation remain off-chain behind these canonical boundaries.
-
-Future provider discovery, repair automation, retrieval proofs, aggregated proofs, geographic diversity policy, or production storage orchestration can evolve without weakening these invariants.
+SR-0 through SR-10 are **complete, production-qualified, and merged**. Frozen V1 identifiers remain unchanged. Possible future protocol versions may add Randomness-driven challenge scheduling, additional retrieval/bandwidth-proof profiles, or proof aggregation/succinct verifier adapters; those are not current behavior.
 
 ## Related documentation
 
-- [Protocol integration model](protocol-integration-model.md)
 - [Storage & resource infrastructure](../infrastructure/storage-resource-infrastructure.md)
-- [Stake, Governance, Treasury and Grants](stake-governance-treasury-grants.md)
-- [Randomness and Oracle Interface](randomness-oracle-interface.md)
+- [420Storage Developer Hub](../../developers/420storage-developer-hub.md)
+- [Storage and Resource integration](../../developers/storage-and-resource-integration.md)
+- [Resource Network operations](../../420RESOURCE-NETWORK-OPERATIONS.md)
+- [420Gateway operations](../../420GATEWAY-OPERATIONS.md)
+- [Shared protocol/provider troubleshooting](../../troubleshooting/shared-protocol-provider.md)
 - `contracts/config/420resource-genesis.json`
 - `contracts/config/420storage-proof-v1.json`

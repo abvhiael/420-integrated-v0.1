@@ -11,7 +11,9 @@ import (
 	"syscall"
 	"time"
 
+	verifyapi "github.com/420integrated/420-integrated/verify/api"
 	verifyruntime "github.com/420integrated/420-integrated/verify/runtime"
+	verifystore "github.com/420integrated/420-integrated/verify/store"
 )
 
 func main() {
@@ -22,7 +24,14 @@ func main() {
 	if err := service.Qualify(ctx); err != nil { cancel(); fatal(err) }
 	cancel()
 
-	server := &http.Server{Addr: cfg.ListenAddr, Handler: service.Handler(), ReadHeaderTimeout: 5*time.Second}
+	evidenceStore, err := verifystore.Open(cfg.EvidenceStore); if err != nil { fatal(err) }
+	publicAPI, err := verifyapi.New(evidenceStore, nil); if err != nil { fatal(err) }
+	mux := http.NewServeMux()
+	mux.Handle("/healthz", service.Handler())
+	mux.Handle("/readyz", service.Handler())
+	mux.Handle("/v1/verify/", publicAPI.Handler())
+
+	server := &http.Server{Addr: cfg.ListenAddr, Handler: mux, ReadHeaderTimeout: 5*time.Second}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM); defer stop()
 	errCh := make(chan error, 1)
 	go func() { errCh <- server.ListenAndServe() }()

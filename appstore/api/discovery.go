@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/420integrated/420-integrated/appstore/curation"
+	"github.com/420integrated/420-integrated/appstore/hardening"
 	"github.com/420integrated/420-integrated/appstore/security"
 	"github.com/420integrated/420-integrated/appstore/wallet"
 )
@@ -74,12 +75,35 @@ func New(views []ApplicationView) (*Service, error) {
 		if view.Security.ServiceID != "" && (!strings.EqualFold(view.Security.ServiceID, id) || view.Security.Version != view.Listing.Canonical.Version) {
 			return nil, ErrInvalidView
 		}
+		if err := validateHardenedView(view); err != nil {
+			return nil, ErrInvalidView
+		}
 		if existing, ok := s.byID[id]; ok && existing.Listing.Canonical.Version >= view.Listing.Canonical.Version {
 			return nil, ErrInvalidView
 		}
 		s.byID[id] = view
 	}
 	return s, nil
+}
+
+func validateHardenedView(view ApplicationView) error {
+	m := hardening.Metadata{
+		Description:  view.Listing.Curation.Description,
+		Screenshots:  view.Listing.Curation.Screenshots,
+		Presentation: view.Listing.Curation.Presentation,
+	}
+	if err := hardening.ValidateMetadata(m); err != nil {
+		return err
+	}
+	for _, raw := range []string{view.Links.Registry, view.Links.Explorer, view.Links.Verify, view.Links.Direct} {
+		if strings.TrimSpace(raw) == "" {
+			continue
+		}
+		if err := hardening.ValidatePublicURL(raw); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (s *Service) Handler() http.Handler {

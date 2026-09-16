@@ -7,7 +7,7 @@ import (
 )
 
 func (s *Server) DashboardHandler() (http.Handler, error) {
-	shell, err := dashboard.New(func() dashboard.StatusView {
+	shell, err := dashboard.NewWithPresentation(func() dashboard.StatusView {
 		st := s.catalog.Status()
 		return dashboard.StatusView{
 			ChainID:       st.ChainID,
@@ -16,6 +16,8 @@ func (s *Server) DashboardHandler() (http.Handler, error) {
 			IndexedAt:     st.IndexedAt,
 			Stale:         st.Stale,
 		}
+	}, func() dashboard.Presentation {
+		return dashboard.BuildPresentation(s.catalog.Metrics(), s.catalog.Series())
 	})
 	if err != nil {
 		return nil, err

@@ -27,16 +27,9 @@ func TestMultiFileCommitmentIsOrderIndependentButContentSensitive(t *testing.T) 
 }
 
 func TestStandardJSONNormalizesPackagingButPreservesSubmittedBytes(t *testing.T) {
-	raw := []byte(`{"language":"Solidity","sources":{"A.sol":{"content":"contract A {}"}},"settings":{"optimizer":{"enabled":true,"runs":200},"viaIR":true}}`)
-	// Build the actual JSON bytes without rewriting the source content itself.
-	raw = []byte(`{"language":"Solidity"}`)
-	var value map[string]any
-	if err := json.Unmarshal(raw, &value); err != nil { t.Fatal(err) }
 	actual := []byte(`{"language":"Solidity","settings":{"viaIR":true,"optimizer":{"runs":200,"enabled":true}},"sources":{"A.sol":{"content":"contract A {}"}}}`)
-	// Convert escaped test literal to ordinary JSON once for fixture construction.
 	var fixture any
 	if err := json.Unmarshal(actual, &fixture); err != nil { t.Fatal(err) }
-	actual, _ = json.Marshal(fixture)
 	s, err := NewStandardJSON(actual, buildSettings())
 	if err != nil { t.Fatal(err) }
 	if string(s.StandardJSON) != string(actual) { t.Fatal("standard JSON input was rewritten in stored evidence") }

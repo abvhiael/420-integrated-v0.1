@@ -11,6 +11,14 @@ version: current
 
 420Storage exposes a versioned developer surface over 420Store, 420Gateway, 420Cache, 420Repair and the shared Resource Network. This layer is an adapter: canonical object identity, authorization, placements, commitments, proofs and settlement remain controlled by the underlying protocols and chain state.
 
+## v1 compatibility contract
+
+The SR-9 `v1` developer contract is frozen for the monolithic closeout. Public JSON field names and shapes for retrieval, upload preparation, manifest descriptors, discovery and resource status are represented by the language-neutral schema at `docs/schemas/storage/v1/storage420.schema.json` with stable identifier `urn:420integrated:storage:v1`.
+
+Golden fixtures under `sdk/storage420/testdata` are compatibility gates. A change that alters an existing `v1` field name, required meaning or serialized shape must not be merged as silent drift; incompatible evolution requires a new API version. Additive changes must still preserve existing `v1` consumers and must update the schema, fixtures, SDK and documentation together.
+
+The compatibility contract does not make SDK output, HTTP responses, S3 metadata, cache state, discovery results or provider status canonical protocol truth. Canonical identity and authority remain with the underlying Resource Protocol/420Store state.
+
 ## v1 object identity
 
 Every retrieval and upload is bound to the full object reference:
@@ -73,7 +81,7 @@ if err != nil { log.Fatal(err) }
 _ = result.Payload
 ```
 
-SDK retries are bounded and cancellation-aware. Mutation preparation requires an idempotency key.
+SDK retries are bounded and cancellation-aware. Mutation preparation requires an idempotency key. Retrieval verifies both exact byte length and the SHA-256 shard root before returning payload bytes to the caller.
 
 ## Upload → manifest → retrieval workflow
 

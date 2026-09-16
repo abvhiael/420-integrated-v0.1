@@ -40,13 +40,19 @@ func Open(path string) (*Store, error) {
 	return &Store{path: path}, nil
 }
 
+func sortVersions(versions []appregistry.VersionRecord) {
+	sort.Slice(versions, func(i, j int) bool {
+		if strings.EqualFold(versions[i].ServiceID, versions[j].ServiceID) {
+			return versions[i].Version < versions[j].Version
+		}
+		return strings.ToLower(versions[i].ServiceID) < strings.ToLower(versions[j].ServiceID)
+	})
+}
+
 func (s *Store) Save(doc Document) error {
 	s.mu.Lock(); defer s.mu.Unlock()
 	if doc.SchemaVersion != SchemaVersion || doc.ChainID == 0 || strings.TrimSpace(doc.RegistryAddress) == "" { return ErrInvalidStore }
-	sort.Slice(doc.Versions, func(i, j int) bool {
-		if strings.EqualFold(doc.Versions[i].ServiceID, doc.Versions[j].ServiceID) { return doc.Versions[i].Version < doc.Versions[j].Version }
-		return strings.ToLower(doc.Versions[i].ServiceID) < strings.ToLower(doc.Versions[j].ServiceID)
-	})
+	sortVersions(doc.Versions)
 	payload, err := json.MarshalIndent(doc, "", "  ")
 	if err != nil { return err }
 	payload = append(payload, '\n')
@@ -75,8 +81,9 @@ func RebuildFromSnapshot(snapshot appregistry.Snapshot) (Document, error) {
 	projection, err := appregistry.NewProjection(snapshot.ChainID, snapshot.RegistryAddress)
 	if err != nil { return Document{}, err }
 	if err := projection.Rebuild(snapshot); err != nil { return Document{}, err }
-	versions := make([]appregistry.VersionRecord, 0, len(snapshot.Versions))
-	for _, service := range snapshot.Versions { versions = append(versions, service) }
+	versions := make([]appregistry.VersionRecord, len(snapshot.Versions))
+	copy(versions, snapshot.Versions)
+	sortVersions(versions)
 	return Document{SchemaVersion: SchemaVersion, ChainID: snapshot.ChainID, RegistryAddress: strings.ToLower(snapshot.RegistryAddress), FinalizedBlock: projection.FinalizedBlock(), Versions: versions}, nil
 }
 

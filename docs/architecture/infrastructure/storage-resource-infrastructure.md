@@ -6,238 +6,333 @@ audience:
   - operator
   - architect
 category: architecture
-status: development
+status: complete
 version: current
 ---
 
 # Storage & resource infrastructure
 
-420 Integrated treats storage, retrieval, relay, cache, and gateway capacity as provider-backed infrastructure coordinated by the **420 Resource Protocol**. The protocol anchors provider identity, offers, sessions, receipts, storage agreements, commitments, proof policy, and settlement state on-chain while keeping encrypted payload bytes, shards, private metadata, and most provider execution off-chain.
+420 Integrated keeps payload bytes, provider execution, caching, repair work, retrieval traffic and most gateway delivery off-chain while anchoring the state that must be authoritative on-chain. The 420 Resource Protocol owns provider/node identity, offers, bounded sessions and receipts. 420Store adds canonical storage capacity, agreements, commitments, proof policy/receipts, object manifests/placements and proof-window settlement.
 
-The central rule is: **resource providers supply service, not protocol authority**. A provider may store data, route traffic, serve cached content, or expose a gateway without gaining consensus, execution, governance, identity, or application-admin authority.
+The infrastructure rule is: **providers supply service; they do not become protocol authority merely because they are reachable.**
 
-## Service classes
+## Canonical versus operational state
 
-The genesis Resource Protocol defines four related service classes:
+| Surface | Role | Authority |
+| --- | --- | --- |
+| Resource/Storage contracts | provider/node/offers/sessions/capacity/agreements/commitments/manifests/proofs/settlement | canonical |
+| 420Vault | custody of storage settlement obligations | canonical custody |
+| 420Store provider filesystem | encrypted payload/shard storage | operational |
+| Resource Network runtime | lifecycle, capability discovery, config, trust grants, metrics | operational |
+| 420Repair | repair/reconstruction orchestration | operational |
+| 420Cache | retrieval acceleration | operational |
+| 420Gateway | retrieval routing/public-private access | operational |
+| 420Storage API/SDK/S3 | developer integration | adapter |
+| 420Indexer / Explorer / Search / Analytics | projection/presentation/analysis | derived |
+
+If operational or derived state disagrees with the owning contract, fail closed and reconcile against canonical state.
+
+## Service classes and runtime capabilities
+
+The **canonical Resource Protocol** has four service classes:
 
 - **420Relay** — encrypted routing and metered bandwidth;
-- **420Store** — persistent encrypted decentralized storage with verifiable commitments and proof receipts;
-- **420Cache** — decentralized cache/CDN and retrieval bandwidth;
-- **420Gateway** — public/private gateways into decentralized services.
+- **420Store** — durable encrypted storage with commitments/proofs/manifests/settlement;
+- **420Cache** — decentralized cache/CDN/retrieval bandwidth;
+- **420Gateway** — public/private gateway access.
 
-These services share provider/node/session/accounting infrastructure but remain capability-separated. Authorization for one service does not imply authority over another.
+The **off-chain unified Resource Network runtime** recognizes five capabilities:
+
+`store`, `repair`, `cache`, `gateway`, `relay`.
+
+`repair` is intentionally an operational capability. 420Repair does not add a fifth canonical Resource Protocol service class and cannot create/alter chain authority by itself.
 
 ## Provider and node boundary
 
-Provider participation is represented through canonical provider and node registries. Active provider state requires a nonzero staking reference, and each node is bound to one provider and one canonical service class.
+Canonical provider lifecycle is owned by `ResourceProviderRegistry420`:
 
-Provider/node state may establish that an actor is eligible to offer a service. It does not make the provider's local database, filesystem, API response, or monitoring result canonical chain state.
+`REGISTERED → ACTIVE ↔ SUSPENDED → RETIRED`
 
-Applications should discover providers through canonical registries and approved manifests rather than hard-coding one operator wherever practical.
+Provider activation requires a nonzero staking reference. Nodes are separately bound to providers and canonical service classes. Provider/node eligibility never grants consensus, validator, Wallet, governance or arbitrary application authority.
 
-## Offers, sessions, metering, and settlement
+Runtime service lifecycle is separate and operational:
 
-Resource offers snapshot the service class, pricing, unit caps, terms, and expiry before consumption. Sessions are replay-safe and carry explicit unit and native-`$420` spend ceilings. Metering receipts advance cumulative usage monotonically and must remain within session limits.
+`registered → starting → running ↔ degraded → stopped/failed`
 
-Settlement authority is separately capability-scoped. A provider cannot exceed the session's maximum spend merely because it served additional off-chain work.
+with restart paths from stopped/failed back through starting. A running process is not proof that its provider/node/agreement is canonically eligible.
 
-This separation keeps service delivery off-chain while placing economic/control state on-chain.
+## Resource Network runtime
+
+The runtime provides:
+
+- provider/node-bound service registration;
+- capability-scoped discovery;
+- dependency-aware deterministic startup/shutdown;
+- lifecycle snapshots and health projection;
+- configuration scoping and secret redaction;
+- explicit operational trust grants;
+- read-only economic/accounting projections;
+- metrics/observability;
+- Gateway source adaptation;
+- production topology and multi-provider discovery.
+
+Running services are discoverable by default. Degraded services require explicit opt-in. Registered, starting, stopped and failed services are excluded from normal active routing.
+
+## Runtime configuration
+
+Configuration has two scopes:
+
+- **shared** — non-secret values only; not bound to a single service;
+- **service** — values bound to a known service; may be marked secret.
+
+Shared secret entries are rejected. Unknown service configuration fails closed. Snapshots redact secret values.
+
+Production topology/config compatibility is frozen at schema `storage-topology-v1`.
+
+## Operational trust domains
+
+Resource Network trust grants are operational permissions, not chain capabilities.
+
+| Domain | Permitted authorities |
+| --- | --- |
+| `storage` | `data.read`, `data.write` |
+| `delivery` | `data.read`, `discover`, `serve` |
+| `economic` | `settlement.read` |
+| `control` | `lifecycle`, `credential.read` |
+
+Cross-domain authority combinations are rejected. Shared runtime membership grants no ambient authority.
+
+On-chain authorization remains owned by `ResourceAuthorization420` and the owning protocol contracts. Wallet/Smart Account permissioning is a separate user-authorization layer and does not replace Resource/Storage contract checks.
+
+## Resource offers, sessions and metering
+
+Canonical Resource offers snapshot service identity, price/unit semantics, term limits, unit caps and expiry. Bounded sessions bind the consumer, offer and maximum native `$420` spend. Metering receipts advance cumulative usage monotonically and cannot exceed session ceilings.
+
+A provider-local invoice, runtime counter or accounting projection cannot expand spend authority.
 
 ## 420Store architecture
 
-420Store extends the shared Resource Protocol with storage-specific agreements, capacity reservations, commitments, proof schemes, proof receipts, manifests, shard placement, and settlement.
-
-A representative storage flow is:
+A representative storage path is:
 
 ```mermaid
 flowchart LR
     C[Consumer] --> O[STORE offer]
     O --> A[Storage agreement]
     A --> R[Capacity reservation]
-    A --> M[Provider commitment]
+    A --> M[Immutable commitment]
     M --> P[Proof challenge / receipt]
     A --> F[Object manifest / shard placements]
-    P --> S[Settlement]
-    F --> G[Retrieval / repair / gateway]
+    P --> S[Vault-backed proof-window settlement]
+    F --> G[Gateway / Cache / Repair delivery]
 ```
 
-The chain anchors identities and commitments. Encrypted object bytes and erasure-coded shards remain off-chain.
+The chain anchors identity/commitments/economics. Encrypted payload and shard bytes remain off-chain.
 
-## Storage agreements
+## Storage contracts and integration points
 
-`StorageAgreementRegistry420` binds a consumer request to a valid STORE offer, durability policy, proof scheme, object/content identity, capacity reservation, provider commitment, time interval, proof interval, and erasure parameters.
+The implemented storage-specific contract surfaces are:
 
-Agreement activation verifies that:
+- `StorageIds420.sol` — storage domain identifiers;
+- `StorageProofIds420.sol` — proof domain identifiers;
+- `IStorageProofVerifier420.sol` — verifier interface;
+- `StorageProofSchemeRegistry420.sol` — versioned proof policy/verifiers;
+- `StorageCapacityRegistry420.sol` — registered capacity and reservations;
+- `StorageCommitmentRegistry420.sol` — immutable provider/node storage commitments;
+- `StorageProofRegistry420.sol` — challenge-bound accepted proof receipts;
+- `StorageAgreementRegistry420.sol` — storage agreement lifecycle/activation gate;
+- `StorageObjectManifestRegistry420.sol` — object manifests, shard placements and retrievability;
+- `StorageSettlementRegistry420.sol` — 420Vault-backed proof-window settlement.
 
-- the referenced offer is an effective STORE offer;
-- the proof scheme is active;
-- the provider/node is authorized;
-- capacity is reserved for the same node, agreement, size, and lifetime;
-- the storage commitment matches the node, provider, content root, byte size, proof scheme, and time interval.
+These are integrated with the shared Resource provider/node/offer/authorization surfaces. Exact public/external methods, events and custom errors are maintained by the generated contract reference rather than duplicated manually here.
 
-Agreement state progresses through explicit lifecycle states rather than being inferred from provider claims.
+## Storage agreements and capacity
 
-## Capacity and oversubscription
+`StorageAgreementRegistry420` binds consumer, effective STORE offer, object/content identity, repair-policy commitment, proof scheme, commitment, reservation, byte size, time interval, proof interval and erasure parameters.
 
-Storage capacity is explicit infrastructure state. Providers advertise local capacity, while canonical reservations prevent the protocol from treating the same capacity as simultaneously available to incompatible agreements.
+Agreement lifecycle:
 
-Operators must distinguish:
+`PROPOSED → ACTIVE → COMPLETED`
 
-- configured/local disk capacity;
-- registered provider capacity;
-- reserved capacity;
-- actually stored bytes;
-- retrievable live capacity.
+or before activation:
 
-A healthy disk process is not sufficient evidence that a canonical storage agreement remains effective.
+`PROPOSED → CANCELLED`
 
-## Commitments and content addressing
+Activation validates the effective STORE offer, authorized caller, active matching capacity reservation, compatible immutable commitment, proof scheme, content root, byte size and exact storage interval.
 
-Storage commitments bind immutable storage parameters including provider/node identity, proof scheme, content root, byte size, and storage interval. Commitment identity is single-use and historical commitment fields are not rewritten to track later provider configuration.
+`StorageCapacityRegistry420` keeps canonical reservation accounting distinct from physical disk capacity. A healthy filesystem does not prove unreserved canonical capacity; a reservation does not prove local byte integrity.
 
-Content roots and manifest hashes identify the committed content envelope without placing plaintext payloads on-chain.
+## Commitments, proofs and manifests
 
-## Proof schemes and verification
+Storage commitments preserve provider/node, roots, byte size, proof scheme and interval as immutable historical evidence.
 
-Storage proof policy is versioned through `StorageProofSchemeRegistry420`. The current proof profile recognizes:
+The proof profile recognizes:
 
 - `REPLICA_COMMITMENT`;
 - `AVAILABILITY_WINDOW`;
 - `AUDIT_RESPONSE`.
 
-Proof computation occurs off-chain or in specialized verifier infrastructure. On-chain state carries proof-scheme policy, challenge replay protection, proof digests/receipts, and eligibility state.
+Proof payloads are bounded to **65,536 bytes**. A commitment/challenge pair is single-use, interval/deadline bound and verifier checked. Verifier failure/reversion fails closed. Canonical storage keeps proof receipt/digest metadata, not all raw proof bytes.
 
-Proof acceptance fails closed if the storage node or proof scheme is inactive, the verifier reverts, verification returns false, a deadline is exceeded, or a commitment/challenge pair has already produced an accepted receipt.
+`StorageObjectManifestRegistry420` anchors object/erasure metadata and shard placements. Up to **1,024 total shards** are supported by the agreement profile. A manifest seals only after all declared shard indexes have placements. Current retrievability requires at least the configured `dataShards` threshold of live/effective placements.
 
-Accepted raw proof bytes are not retained on-chain. Proof acceptance also does **not** itself release payment; settlement consumes verified proof state under separate accounting rules.
+Sealed is therefore not synonymous with permanently retrievable.
 
-## Object manifests, erasure coding, and shard placement
+## 420Repair
 
-`StorageObjectManifestRegistry420` anchors object-level manifests while encrypted payloads and shard bytes remain off-chain.
+420Repair is implemented as off-chain repair/reconstruction orchestration. Its job is to restore redundancy while preserving canonical identity/history.
 
-A manifest binds:
+Repair must preserve:
 
-- object identity and content root;
-- manifest hash;
-- encryption commitment;
-- erasure root;
-- object size and segment count;
-- required data-shard count;
-- total shard count.
+- object/content identity;
+- manifest/shard identity;
+- previous agreement/commitment/proof history;
+- settled/refunded windows;
+- new provider/node qualification;
+- new capacity/commitment/placement state where replacement is needed.
 
-Each shard placement is bound to a specific storage agreement, commitment, node, shard root, size, and shard index. A manifest cannot be sealed until every declared shard has a placement.
+Repair cannot relabel arbitrary replacement bytes or rewrite historical commitments to fabricate continuity.
 
-Retrievability is evaluated against live/effective agreements and commitments. For an erasure-coded object, the infrastructure can remain retrievable as long as at least the declared `dataShards` threshold remains live.
+## Gateway and Cache delivery
 
-## Replication, availability, and repair
+420Gateway routes verified retrievals across Cache and Store sources. Cache state is acceleration state only. Gateway route metadata is diagnostic only. Payload integrity remains bound to the requested shard root and size.
 
-Redundancy is a policy/manifest property, not an assumption that every object exists on every provider. Storage classes and repair-policy hashes define expected durability behavior while manifests expose the erasure/placement envelope.
+Private Gateway access is default-deny and forwarding headers are not promoted to identity/authority. Non-loopback developer API service requires TLS and explicit allowed hosts.
 
-Provider loss should trigger degraded availability and, where policy permits, repair/re-replication workflows. Recovery must preserve object identity, content commitments, and historical proof/settlement provenance rather than silently substituting unrelated bytes.
+## 420Storage developer interfaces
 
-Future or higher-level repair services may automate new placements, but they must operate through the same canonical agreement/commitment/manifest boundaries.
+The frozen developer surface is `v1` and includes:
 
-## Provider discovery and neutrality
+- GET/HEAD retrieval at `/v1/resources/retrieve`;
+- explicit public/private read metadata;
+- bounded prepare/ingest upload transport;
+- manifest/discovery/status helpers;
+- standalone Go SDK `sdk/storage420`;
+- semantics-preserving S3 subset.
 
-No individual 420Store operator is privileged simply because it was the first or default deployment.
+Uploads are transport only and do not create canonical placements/agreements/proofs. S3 multipart, ACL mutation and versioning are unsupported in v1. S3 ETags are compatibility metadata, not 420 content authority.
 
-Provider selection may consider price, capacity, service class, proof scheme, geographic/operator diversity, historical availability, latency, and application-specific policy. Selection logic must not invent canonical authority for provider reputation or health data.
+See [420Storage Developer Hub](../../developers/420storage-developer-hub.md) for the exact interface behavior and examples.
 
-Provider replacement is allowed only through protocol-valid state transitions and new agreements/commitments where required. Historical proof reproducibility must be preserved.
+## Economics and settlement
 
-## `node420` storage-service role
+General Relay/Cache/Gateway-style resource usage uses bounded Resource sessions/receipts.
 
-`node420` can optionally supervise a local 420Store provider process. Current operator configuration includes node ID, capacity, listen address, execution RPC source, scan start, confirmation depth, sync interval, and addresses for storage agreement, commitment, capacity, settlement, proof-scheme, and object-manifest registries.
+420Store settlement is stricter and proof-window based. The total storage amount is derived from:
 
-The optional provider service defaults to loopback `127.0.0.1:8420` and stores local provider data below the node420 datadir.
+`agreement.sizeBytes × offer.unitPrice420`
 
-This supervision is an operational convenience. 420Store remains a resource-provider role and does not become execution authority merely because it runs beside Geth.
+The agreement duration is divided into at most **4,096 settlement windows**. 420Vault holds the obligations. Each funded window ends as:
 
-## Data and privacy boundary
+- **PAID** after the exact canonical challenge/proof qualifies; or
+- **REFUNDED** when its proof deadline is missed.
 
-Encrypted user payloads, erasure-coded shards, private metadata, cache contents, and relay traffic remain off-chain.
+Proof acceptance alone never means payment succeeded.
 
-On-chain storage/resource state should contain only what is needed for identity, commitments, proof policy/results, metering, capacity, agreements, and settlement.
+## Production topology and upgrade compatibility
 
-Operators must not expose private payloads through indexers, public gateways, logs, metrics, proof receipts, or debugging endpoints.
+SR-10 production qualification requires at least two providers and deterministic topology validation. Multi-provider discovery/failover remains operational and cannot create canonical provider/placement state.
 
-## Failure behavior
+Rolling upgrade logic freezes:
 
-### Provider/node offline
+- Developer API `v1`;
+- topology/config schema `storage-topology-v1`.
 
-The affected service degrades. Canonical chain state remains intact. Proof deadlines or availability policy may later affect settlement/eligibility.
+Normal rolling upgrade rejects silent API/schema drift and provider/node substitution. Upgrade and rollback qualification preserve manifest/shard/agreement/commitment identity.
 
-### Local disk loss or corruption
+## Credentials and secret handling
 
-The provider must not claim availability for bytes it cannot reproduce. Recover from verified local replicas or initiate protocol-valid repair/replacement flows.
+Production credential management is service-operational state. It stores secret digests rather than raw secrets, supports bounded-overlap rotation, zero-overlap compromise rotation, full-service revocation and explicit recovery generations.
 
-### Capacity exhaustion
+Redacted qualification snapshots never contain raw credentials/bearer values. Credential state cannot create protocol authorization.
 
-Reject new reservations/offers rather than oversubscribing registered capacity.
+## Backup, restore and disaster recovery
 
-### Proof verifier failure
+DR evidence schema is `storage-dr-v1`. Backups intentionally contain only operational recovery state; they do not become authority for credentials, payload bytes, agreements, proofs or settlement.
 
-Fail closed for the affected proof. Do not invent a successful receipt.
+Restore reconciles exact canonical manifest identity and topology fingerprint and enforces configured RPO/RTO limits. Backup data cannot overwrite canonical history.
 
-### Proof-scheme deactivation
+## Alerts and SLOs
 
-New activity must respect current scheme policy while historical proofs/commitments retain their original scheme identity.
+Operational health categories are `healthy`, `degraded`, `pending`, `stopped` and `failed`.
 
-### Agreement/commitment mismatch
+Default qualification alert policy:
 
-Fail activation or service readiness. Do not repair the mismatch by rewriting historical commitment identity.
+- Store capacity warning 80%, critical 90%;
+- Repair backlog warning 25, critical 100;
+- first integrity failure critical;
+- authorization failures warning at 25 per aggregation window;
+- Gateway routing failures warning at 10 per aggregation window;
+- degraded service warning;
+- stopped/failed service critical.
 
-### Insufficient live shards
+Availability, integrity and recovery SLOs are independently evaluated. These thresholds/objectives are deployment policy, not consensus rules.
 
-Mark the object degraded/unretrievable according to the manifest threshold and begin approved repair if available. Do not report retrievability from stale provider metadata.
+## Testnet and launch evidence
 
-### Settlement failure
+Testnet evidence schema is `storage-testnet-evidence-v1`. A valid bundle binds exact commit, config and topology fingerprints and requires evidence for:
 
-Keep accounting unresolved/fail closed. Service delivery or proof verification alone must not manufacture settlement success.
+- upload;
+- manifest;
+- verified retrieval;
+- cache route;
+- Gateway route;
+- repair reconstruction;
+- provider-loss recovery;
+- discovery-degradation recovery;
+- credential-revocation recovery;
+- successful SLO evidence;
+- no unresolved critical launch blocker.
 
-## Recovery order
+The completed production launch froze the above compatibility contracts and passed exact-head Docs/node420/Integrated qualification before merge. Qualification evidence remains evidence only; it cannot rewrite canonical protocol state.
 
-A representative recovery sequence is:
+## `node420` integration
 
-1. verify canonical execution and relevant Resource/Storage registry state;
-2. verify provider and node identity/status;
-3. verify local payload/shard integrity against committed roots;
-4. reconcile registered capacity and active reservations;
-5. reconcile active agreements and immutable commitments;
-6. restore proof-verifier/provider services;
-7. determine manifest/shard retrievability;
-8. initiate approved repair/replacement where redundancy is insufficient;
-9. restore gateway/cache/retrieval paths;
-10. resume settlement only after proof and accounting state are consistent.
+`node420` can supervise the 420Store provider service and related Gateway delivery configuration. The provider role remains separate from execution authority even when co-located with the execution client.
 
-## Storage/resource invariants
+Provider configuration includes local identity/capacity/listen and canonical storage contract addresses needed by the service. Deployment-specific addresses must come from the qualified environment/configuration; documentation must not invent them.
 
-- **STORE-001** — resource/storage providers never receive ambient consensus, execution, governance, or application authority.
-- **STORE-002** — encrypted payload bytes, shards, private metadata, cache contents, and relay traffic remain off-chain.
-- **STORE-003** — active provider state requires canonical staking/registry eligibility; local service liveness alone is insufficient.
-- **STORE-004** — service-class capabilities remain default-deny and cannot bleed across Relay, Store, Cache, or Gateway roles.
-- **STORE-005** — storage agreements bind immutable object, durability, proof, capacity, provider/node, and time parameters before activation.
-- **STORE-006** — capacity reservations must prevent protocol-level oversubscription of the same registered capacity.
-- **STORE-007** — storage commitment identity and historical parameters are immutable after registration.
-- **STORE-008** — proof challenges are replay-safe and deadline-bounded; verification failure fails closed.
-- **STORE-009** — proof acceptance records digest/receipt state but does not by itself release payment.
-- **STORE-010** — object manifests and shard placements preserve content/erasure provenance while bytes remain off-chain.
-- **STORE-011** — retrievability claims must be derived from live/effective placements meeting the manifest threshold, not stale provider assertions.
-- **STORE-012** — provider loss or replacement must preserve canonical agreement/commitment/proof history and must not rewrite chain state to match local provider data.
+## Security and privacy boundary
 
-## Implementation status
+Remain off-chain/private unless explicitly required otherwise:
 
-The repository contains the shared 420 Resource Protocol, the 420Store storage-proof profile, storage agreement/capacity/commitment/proof/settlement registries, object-manifest and shard-placement logic, and the qualified core SR-4.3 provider runtime supervised by `node420`.
+- plaintext payloads;
+- encrypted payload bytes;
+- erasure-coded shard bytes;
+- decryption keys;
+- private application metadata;
+- cache contents;
+- relay traffic;
+- service credentials/session secrets.
 
-The current implementation roadmap, including remaining SR-4.3 closeout and SR-4.4 through SR-10, is maintained in [420Store & storage resource roadmap](420store-roadmap.md).
+Do not expose these through Indexer, Explorer, Search, Analytics, public gateways, logs, metrics or evidence artifacts.
 
-Operational extensions such as larger-scale provider discovery, repair orchestration, retrieval/bandwidth proofs, proof aggregation, and production multi-provider deployment can evolve behind these boundaries without changing the core authority model.
+The chain stores the minimum state required for identity, authorization, economics, commitments, manifests, proof policy/results and settlement.
+
+## Failure and recovery principles
+
+- provider/node offline: isolate delivery, preserve canonical history;
+- disk corruption/loss: reject unverifiable bytes and use protocol-valid repair;
+- capacity exhaustion: reject new reservations rather than oversubscribe;
+- proof verifier failure: fail closed, no proof receipt/payment release;
+- agreement/commitment mismatch: fail activation, never rewrite history;
+- insufficient live shards: report degraded/unretrievable until redundancy restored;
+- settlement/Vault failure: keep accounting unresolved; delivery/proof does not manufacture settlement success;
+- runtime/Indexer disagreement: re-read the owning canonical contracts.
+
+## Completed implementation status
+
+The Storage & Resource suite is complete through **SR-10**. Implemented scope includes Resource/Storage contracts, provider runtime, 420Repair, 420Cache, 420Gateway, unified Resource Network lifecycle/config/trust/observability, developer API/SDK/S3 compatibility, multi-provider production topology, adversarial/load qualification, upgrade/credential/DR procedures, abuse resistance, operator alerts/SLOs and deployment/launch evidence.
+
+The historical phase record is maintained in [420Store & storage resource roadmap](420store-roadmap.md). Future work must be introduced as a new version/roadmap rather than silently changing the frozen SR-10 semantics.
 
 ## Related documentation
 
+- [Storage Proof & Resource Protocol](../protocols/storage-proof-resource-protocol.md)
+- [420Storage Developer Hub](../../developers/420storage-developer-hub.md)
+- [420 Resource Network operations](../../420RESOURCE-NETWORK-OPERATIONS.md)
+- [420Gateway operations](../../420GATEWAY-OPERATIONS.md)
 - [420Store & storage resource roadmap](420store-roadmap.md)
-- [Infrastructure overview](infrastructure-overview.md)
 - [`node420`](node420.md)
-- [RPC, gateways, and network ingress](rpc-gateways-network-ingress.md)
+- [Generated reference](../../reference/index.md)
 - `contracts/config/420resource-genesis.json`
 - `contracts/config/420storage-proof-v1.json`

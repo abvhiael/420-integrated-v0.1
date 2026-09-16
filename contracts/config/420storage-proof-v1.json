@@ -9,7 +9,19 @@
     "payloadStorage": "off-chain encrypted data only",
     "proofClasses": ["REPLICA_COMMITMENT","AVAILABILITY_WINDOW","AUDIT_RESPONSE"]
   },
-  "contracts": ["StorageProofIds420.sol","IStorageProofVerifier420.sol","StorageProofSchemeRegistry420.sol","StorageCommitmentRegistry420.sol","StorageProofRegistry420.sol"],
+  "contracts": [
+    "StorageProofIds420.sol",
+    "IStorageProofVerifier420.sol",
+    "StorageProofSchemeRegistry420.sol",
+    "StorageCommitmentRegistry420.sol",
+    "StorageProofRegistry420.sol"
+  ],
+  "integratedStorageSurfaces": [
+    "StorageCapacityRegistry420.sol",
+    "StorageAgreementRegistry420.sol",
+    "StorageObjectManifestRegistry420.sol",
+    "StorageSettlementRegistry420.sol"
+  ],
   "invariants": [
     "STORAGE-PROOF-INV-001: only active 420Store nodes belonging to active staked Resource Protocol providers may originate storage commitments",
     "STORAGE-PROOF-INV-002: storage commitment identity is single-use and its provider, node, proof scheme, roots, byte size and time bounds are immutable after registration",
@@ -20,7 +32,14 @@
     "STORAGE-PROOF-INV-007: accepted proof bytes are not retained on-chain; only a proof digest and canonical receipt metadata are stored",
     "STORAGE-PROOF-INV-008: proof verification does not itself release payment; settlement modules consume verified proof state under separate accounting rules",
     "STORAGE-PROOF-INV-009: encrypted user payloads, erasure-coded shards and private metadata remain off-chain",
-    "STORAGE-PROOF-INV-010: proof scheme verifiers are replaceable only by registering a new scheme id, preserving historical proof reproducibility"
+    "STORAGE-PROOF-INV-010: proof scheme verifiers are replaceable only by registering a new scheme id, preserving historical proof reproducibility",
+    "STORAGE-PROOF-INV-011: storage agreements, capacity reservations, manifests and proof-window settlement consume proof state without rewriting historical proof identity",
+    "STORAGE-PROOF-INV-012: missed canonical proof windows may become refundable and cannot be satisfied by unrelated proof receipts"
   ],
-  "futureExtensions": ["storage lease/deal economics","provider collateral and storage-specific slashing","random challenge scheduling through 420 Random","erasure-set and redundancy manifests","repair attestations","retrieval proofs and bandwidth accounting","proof aggregation and succinct verifier adapters"]
+  "futureExtensions": [
+    "provider collateral and storage-specific slashing",
+    "random challenge scheduling through 420 Random",
+    "retrieval proofs and bandwidth accounting",
+    "proof aggregation and succinct verifier adapters"
+  ]
 }

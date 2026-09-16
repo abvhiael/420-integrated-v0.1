@@ -151,23 +151,8 @@ contract Paymaster420AuthorityConfusionTest {
             sessionCommitment: bytes32(0)
         });
         bytes32 permissiveId = policies.registerPolicy(permissive);
-        PackedUserOperation420 memory op = _signedOp(
-            ACCOUNT,
-            address(target),
-            Gas113Target420.allowed.selector,
-            0,
-            CAPABILITY,
-            SESSION
-        );
-
-        PaymasterData420.V1 memory sponsorship = this.decodePaymasterData(op.paymasterAndData);
-        sponsorship.policyId = permissiveId;
-        op.paymasterAndData = PaymasterData420.encodeV1(sponsorship);
+        PackedUserOperation420 memory op = _policySwappedOp(permissiveId);
         require(_validate(op) == 1, "post-signature policy substitution accepted");
-    }
-
-    function decodePaymasterData(bytes calldata raw) external pure returns (PaymasterData420.V1 memory) {
-        return PaymasterData420.decodeV1(raw);
     }
 
     function _validate(PackedUserOperation420 memory op) internal returns (uint256 validationData) {
@@ -186,6 +171,15 @@ contract Paymaster420AuthorityConfusionTest {
         op = _baseOperation(sender, callTarget, targetSelector, valueWei);
         PaymasterData420.V1 memory sponsorship = _sponsorship(sender, callTarget, targetSelector, valueWei);
         sponsorship.sponsorData = _signedSponsorData(op, sponsorship, capabilityCommitment, sessionCommitment);
+        op.paymasterAndData = PaymasterData420.encodeV1(sponsorship);
+    }
+
+    function _policySwappedOp(bytes32 substitutedPolicyId) internal returns (PackedUserOperation420 memory op) {
+        op = _baseOperation(ACCOUNT, address(target), Gas113Target420.allowed.selector, 0);
+        PaymasterData420.V1 memory sponsorship =
+            _sponsorship(ACCOUNT, address(target), Gas113Target420.allowed.selector, 0);
+        sponsorship.sponsorData = _signedSponsorData(op, sponsorship, CAPABILITY, SESSION);
+        sponsorship.policyId = substitutedPolicyId;
         op.paymasterAndData = PaymasterData420.encodeV1(sponsorship);
     }
 

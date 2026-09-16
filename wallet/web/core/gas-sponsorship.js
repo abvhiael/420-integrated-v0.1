@@ -30,6 +30,12 @@ function timestamp420(value, name) {
   return ms;
 }
 
+function fundingOnlyAuthority420(value, name) {
+  const normalized = value ?? false;
+  assert420(normalized === false, `gas quote must not grant ${name} authority`);
+  return false;
+}
+
 export function validateWalletGasQuote420(quote, { entryPoint, account, now = new Date() } = {}) {
   assert420(quote && typeof quote === 'object' && !Array.isArray(quote), 'gas quote must be an object');
   const normalized = {
@@ -46,14 +52,16 @@ export function validateWalletGasQuote420(quote, { entryPoint, account, now = ne
     validUntil: quote.validUntil,
     paymasterAndData: normalizeCallData(quote.paymasterAndData),
     authority: quote.authority,
-    executionAuthorization: quote.executionAuthorization,
+    executionAuthorization: fundingOnlyAuthority420(quote.executionAuthorization, 'execution'),
+    walletAuthorization: fundingOnlyAuthority420(quote.walletAuthorization, 'Wallet'),
+    targetProtocolAuthorization: fundingOnlyAuthority420(quote.targetProtocolAuthorization, 'target-protocol'),
+    canonicalProtocolAuthority: fundingOnlyAuthority420(quote.canonicalProtocolAuthority, 'canonical-protocol'),
   };
   assert420(normalized.chainId === '420', 'gas quote is bound to the wrong chain');
   assert420(normalized.entryPoint === normalizeAddress(entryPoint), 'gas quote EntryPoint mismatch');
   assert420(normalized.account === normalizeAddress(account), 'gas quote account mismatch');
   assert420(normalized.paymasterAndData !== '0x', 'gas quote is missing paymasterAndData');
   assert420(normalized.authority === 'funding-offer-only', 'gas quote authority is invalid');
-  assert420(normalized.executionAuthorization === false, 'gas quote must not grant execution authority');
   const at = now.getTime();
   assert420(timestamp420(normalized.validAfter, 'validAfter') <= at, 'gas quote is not yet valid');
   assert420(timestamp420(normalized.validUntil, 'validUntil') > at, 'gas quote is expired');
@@ -69,19 +77,28 @@ export function walletGasSponsorshipReview420(prepared) {
       status: 'self-funded', fundingMode: 'self-funded', sponsored: false, title: 'You pay network gas',
       message: 'No gas sponsorship is attached. Wallet authorization and transaction details are unchanged.',
       paymaster: null, policyId: null, maxSponsoredCostWei: null, validUntil: null,
-      executionAuthorization: false, fallbackReason: prepared.fallbackReason ?? null,
+      executionAuthorization: false, walletAuthorization: false, targetProtocolAuthorization: false,
+      canonicalProtocolAuthority: false, fallbackReason: prepared.fallbackReason ?? null,
     });
   }
   assert420(prepared.fundingMode === 'paymaster', 'sponsored funding mode is invalid');
-  assert420(prepared.executionAuthorization === false, 'sponsorship review cannot grant execution authority');
+  fundingOnlyAuthority420(prepared.executionAuthorization, 'execution');
+  fundingOnlyAuthority420(prepared.walletAuthorization, 'Wallet');
+  fundingOnlyAuthority420(prepared.targetProtocolAuthorization, 'target-protocol');
+  fundingOnlyAuthority420(prepared.canonicalProtocolAuthority, 'canonical-protocol');
   assert420(prepared.quote && typeof prepared.quote === 'object', 'sponsored quote is required for review');
+  fundingOnlyAuthority420(prepared.quote.executionAuthorization, 'execution');
+  fundingOnlyAuthority420(prepared.quote.walletAuthorization, 'Wallet');
+  fundingOnlyAuthority420(prepared.quote.targetProtocolAuthorization, 'target-protocol');
+  fundingOnlyAuthority420(prepared.quote.canonicalProtocolAuthority, 'canonical-protocol');
   return Object.freeze({
     status: 'sponsored', fundingMode: 'paymaster', sponsored: true, title: 'Network gas is sponsored',
     message: 'A paymaster may fund this exact operation. Your Wallet or session authorization still controls execution.',
     paymaster: normalizeAddress(prepared.quote.paymaster),
     policyId: bytes32420(prepared.quote.policyId, 'policyId'),
     maxSponsoredCostWei: decimal420(prepared.quote.maxSponsoredCostWei, 'maxSponsoredCostWei'),
-    validUntil: prepared.quote.validUntil, executionAuthorization: false, fallbackReason: null,
+    validUntil: prepared.quote.validUntil, executionAuthorization: false, walletAuthorization: false,
+    targetProtocolAuthorization: false, canonicalProtocolAuthority: false, fallbackReason: null,
   });
 }
 
@@ -94,7 +111,7 @@ export function walletGasSponsorshipFailure420(error, { canSelfFund = true } = {
   else if (/EntryPoint mismatch/i.test(message)) code = 'SPONSORSHIP_ENTRYPOINT_MISMATCH';
   else if (/account mismatch/i.test(message)) code = 'SPONSORSHIP_ACCOUNT_MISMATCH';
   else if (/sponsorship digest/i.test(message)) code = 'SPONSORSHIP_OPERATION_MISMATCH';
-  else if (/authority|execution authority/i.test(message)) code = 'SPONSORSHIP_AUTHORITY_INVALID';
+  else if (/authority|execution|wallet|target-protocol|canonical-protocol/i.test(message)) code = 'SPONSORSHIP_AUTHORITY_INVALID';
   else if (/unavailable/i.test(message)) code = 'SPONSORSHIP_UNAVAILABLE';
   return Object.freeze({
     status: canSelfFund ? 'fallback-available' : 'blocked', code,
@@ -102,7 +119,8 @@ export function walletGasSponsorshipFailure420(error, { canSelfFund = true } = {
     message: canSelfFund
       ? 'The sponsorship offer cannot be used. You can continue with the same authorized operation and pay network gas yourself.'
       : 'The sponsorship offer cannot be used and this Wallet cannot safely continue without another valid funding path.',
-    canSelfFund: Boolean(canSelfFund), executionAuthorization: false,
+    canSelfFund: Boolean(canSelfFund), executionAuthorization: false, walletAuthorization: false,
+    targetProtocolAuthorization: false, canonicalProtocolAuthority: false,
   });
 }
 
@@ -126,12 +144,17 @@ export async function prepareWalletGasSponsorship420({
   const request = Object.freeze({
     chainId: '420', entryPoint: normalizeAddress(entryPoint), account: normalizeAddress(userOperation.sender),
     userOperation: Object.freeze({ ...userOperation, signature: '0x', paymasterAndData: '0x' }),
-    authority: 'funding-request-only', executionAuthorization: false,
+    authority: 'funding-request-only', executionAuthorization: false, walletAuthorization: false,
+    targetProtocolAuthorization: false, canonicalProtocolAuthority: false,
   });
 
   const discovered = await discoverQuote(request);
   if (discovered == null) {
-    return Object.freeze({ sponsored: false, fundingMode: 'self-funded', userOperation: request.userOperation, quote: null, fallbackReason: 'SPONSORSHIP_UNAVAILABLE' });
+    return Object.freeze({
+      sponsored: false, fundingMode: 'self-funded', userOperation: request.userOperation, quote: null,
+      fallbackReason: 'SPONSORSHIP_UNAVAILABLE', executionAuthorization: false, walletAuthorization: false,
+      targetProtocolAuthorization: false, canonicalProtocolAuthority: false,
+    });
   }
 
   const quote = validateWalletGasQuote420(discovered, { entryPoint: request.entryPoint, account: request.account, now });
@@ -142,6 +165,8 @@ export async function prepareWalletGasSponsorship420({
 
   return Object.freeze({
     sponsored: true, fundingMode: 'paymaster', userOperation: sponsoredOperation, quote,
-    sponsorshipDigest, userOpHash: canonicalHash, fallbackReason: null, authority: 'funding-only', executionAuthorization: false,
+    sponsorshipDigest, userOpHash: canonicalHash, fallbackReason: null, authority: 'funding-only',
+    executionAuthorization: false, walletAuthorization: false, targetProtocolAuthorization: false,
+    canonicalProtocolAuthority: false,
   });
 }

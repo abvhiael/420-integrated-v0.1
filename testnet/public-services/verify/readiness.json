@@ -1,8 +1,11 @@
 {
   "schema": "420-testnet-verify-readiness-v1",
+  "implementation_status": "QUALIFICATION_PENDING_FINAL_HEAD",
+  "implementation_phase": "VERIFY-10",
   "backend": {
     "url": "REPLACE",
-    "status": "PENDING",
+    "status": "PENDING_DEPLOYMENT",
+    "implementation_status": "IMPLEMENTED",
     "required_checks": [
       "reads deployed runtime bytecode from configured 420 network RPC",
       "binds every result to chain ID, address and runtime code hash",
@@ -19,7 +22,8 @@
   },
   "frontend": {
     "url": "REPLACE",
-    "status": "PENDING",
+    "status": "PENDING_DEPLOYMENT",
+    "implementation_status": "API_AND_VIEW_MODEL_IMPLEMENTED",
     "required_views": [
       "address/network verification lookup",
       "source and compiler submission",
@@ -47,5 +51,11 @@
     "metadata mismatch cannot be silently promoted to FULL_MATCH",
     "new proxy implementation requires independent verification",
     "alternative verifier can reproduce a published FULL_MATCH"
-  ]
+  ],
+  "closeout": {
+    "latest_main_reconciled_via_pr": 304,
+    "reconciliation_commit": "afaf3e9f669590299c4b0898341f8195db30d441",
+    "public_endpoint_deployment_claimed": false,
+    "final_exact_head_qualification_required": true
+  }
 }

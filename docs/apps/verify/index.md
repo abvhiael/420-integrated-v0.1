@@ -10,3 +10,12 @@ version: current
 420 Verify reproduces deployed contract bytecode from published source and exact build settings. It answers whether source/build inputs correspond to deployed code; it does **not** certify that the code is secure, audited, endorsed, immutable or authorized.
 
 Verification is bound to network, address and deployed code hash.
+
+## Implementation references
+
+- [VERIFY-5 bytecode comparison and classification](verify-5-bytecode-classification.md) — defines `FULL_MATCH`, `PARTIAL_MATCH`, `MISMATCH`, and `UNVERIFIABLE`, including exact runtime/creation comparison and explicit diagnostics for metadata, linked libraries, and immutables.
+- [VERIFY-6 reproducible evidence store and history](verify-6-evidence-store.md) — defines append-only evidence history, restart reconstruction, content-hash validation, and the non-canonical storage boundary.
+- [VERIFY-7 proxies and upgrades](verify-7-proxies-upgrades.md) — defines canonical proxy relationship resolution, separate proxy/implementation verification, upgrade history, and invalidation of stale implementation status.
+- [VERIFY-8 public API and Genesis integrations](verify-8-public-api-integrations.md) — defines public lookup/submission/evidence endpoints plus Explorer, Registry and AppStore consumption boundaries.
+- [VERIFY-9 adversarial hardening and failure recovery](verify-9-adversarial-hardening.md) — defines hostile-input limits, secret rejection, compiler-abuse controls, degraded dependency behavior, restart/tamper recovery, and authority-preserving failure modes.
+- [VERIFY-10 qualification, reconciliation and closeout](verify-10-closeout.md) — defines final exact-head qualification requirements, latest-main reconciliation evidence, deployment-readiness boundaries and the GEN-10.5 phase handoff.

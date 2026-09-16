@@ -5,8 +5,11 @@ import (
 	"errors"
 	"time"
 
+	"github.com/420integrated/420-integrated/analytics/finality"
 	"github.com/420integrated/420-integrated/analytics/httpapi"
 	"github.com/420integrated/420-integrated/analytics/indexerclient"
+	"github.com/420integrated/420-integrated/analytics/metrics"
+	"github.com/420integrated/420-integrated/analytics/model"
 )
 
 type Service struct {
@@ -30,7 +33,28 @@ func (s *Service) Refresh(ctx context.Context) error {
 		s.catalog.SetStatus(httpapi.Status{Stale:true}, false)
 		return err
 	}
+	status, err := s.client.Status(ctx)
+	if err != nil {
+		s.catalog.SetStatus(httpapi.Status{Stale:true}, false)
+		return err
+	}
 	p, err := s.client.Snapshot(ctx)
+	if err != nil {
+		s.catalog.SetStatus(httpapi.Status{Stale:true}, false)
+		return err
+	}
+	provenance := model.ProvenanceFromIndexer(p)
+	derived, err := metrics.BuildNetworkMetrics(metrics.NetworkInput{Status:status}, provenance)
+	if err != nil {
+		s.catalog.SetStatus(httpapi.Status{Stale:true}, false)
+		return err
+	}
+	snapshot, err := model.NewSnapshot(p.IndexedAt, provenance, derived)
+	if err != nil {
+		s.catalog.SetStatus(httpapi.Status{Stale:true}, false)
+		return err
+	}
+	snapshots, _, err := finality.Reconcile(s.catalog.Snapshots(), snapshot)
 	if err != nil {
 		s.catalog.SetStatus(httpapi.Status{Stale:true}, false)
 		return err
@@ -39,6 +63,7 @@ func (s *Service) Refresh(ctx context.Context) error {
 		ChainID:p.ChainID, IndexedHeight:p.IndexedHeight, SafeHeight:p.SafeHeight,
 		IndexedAt:p.IndexedAt, Stale:stale(p.IndexedAt, s.now(), s.staleAfter), Canonical:false,
 	}
+	s.catalog.Replace(derived, snapshots, nil, nil, nil)
 	s.catalog.SetStatus(st, !st.Stale)
 	return nil
 }

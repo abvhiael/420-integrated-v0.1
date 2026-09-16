@@ -41,6 +41,32 @@ jobs:
           cast --version
           forge config
 
+      - name: XRPL Yul isolation probes
+        working-directory: contracts
+        shell: bash
+        run: |
+          set +e
+          mkdir -p ../artifacts/contracts
+          : > ../artifacts/contracts/xrpl-yul-isolation.txt
+
+          probe() {
+            label="$1"
+            target="$2"
+            echo "=== $label :: $target ===" | tee -a ../artifacts/contracts/xrpl-yul-isolation.txt
+            forge clean
+            forge build "$target" --sizes 2>&1 | tee -a ../artifacts/contracts/xrpl-yul-isolation.txt
+            rc=${PIPESTATUS[0]}
+            echo "RESULT $label rc=$rc" | tee -a ../artifacts/contracts/xrpl-yul-isolation.txt
+            echo | tee -a ../artifacts/contracts/xrpl-yul-isolation.txt
+          }
+
+          probe "interface" "src/interfaces/IXrplFinalityVerifier420.sol"
+          probe "adapter" "src/bridge/adapters/XrplBridgeAdapter420.sol"
+          probe "test" "test/XrplBridgeAdapter420.t.sol"
+
+          echo "Isolation probes complete; full build follows." | tee -a ../artifacts/contracts/xrpl-yul-isolation.txt
+          exit 0
+
       - name: Build
         working-directory: contracts
         run: |
@@ -67,6 +93,7 @@ jobs:
           path: |
             artifacts/contracts/foundry-build.txt
             artifacts/contracts/foundry-tests.txt
+            artifacts/contracts/xrpl-yul-isolation.txt
           if-no-files-found: warn
           retention-days: 30
 

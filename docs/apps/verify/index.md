@@ -2,7 +2,7 @@
 title: 420 Verify
 audience: [user, developer, auditor]
 category: application
-status: implemented
+status: complete
 version: genesis
 ---
 # 420 Verify

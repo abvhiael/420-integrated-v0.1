@@ -46,11 +46,11 @@ BG-13 integrates Bong Goggles with the already-built media/storage infrastructur
   Versioned deterministic Bong Goggles media descriptor, explicit 420Storage object identity, canonical owner/type/item-count/digest verification, derivative linkage, tamper detection, and fail-closed resolution of the off-chain descriptor referenced by `BongGogglesMediaRegistry420.manifestHash`.
 - **BG-13.2 — upload preparation + ingest bridge — COMPLETE AND QUALIFIED**
   Exact 420Storage v1 prepare DTO translation, agreement/reservation/commitment preconditions, descriptor-bound deterministic idempotency, prepare-plan validation, ingest receipt identity/root/size verification and explicitly non-authoritative upload evidence. Existing 420Storage remains responsible for bounded staging, byte hashing, provider discovery and sink delivery.
-- **BG-13.3 — canonical placement/seal orchestration — IN PROGRESS**
+- **BG-13.3 — canonical placement/seal orchestration — COMPLETE AND QUALIFIED**
   Canonical manifest/agreement/commitment/placement reads; fail-closed owner/object/erasure/root/size/commitment/node provenance validation; exact `registerPlacement` and `sealManifest` transaction intents requiring user/wallet authorization; canonical agreement/liveness evidence; and delivery readiness gated on `isRetrievable` rather than merely `isSealed`.
-- **BG-13.4 — verified retrieval + Gateway delivery — NEXT**
-  GET/HEAD/range retrieval, exact size + shard-root verification, public/private access, Gateway/Cache routing and stable client-safe delivery envelopes.
-- **BG-13.5 — thumbnails/posters/transcodes — REMAINS**
+- **BG-13.4 — verified retrieval + Gateway delivery — IN PROGRESS**
+  Exact 420Storage v1 retrieval DTOs, full-object identity/size/SHA-256 verification before delivery, GET/HEAD semantics, single byte-range responses, default-deny private access with trusted reauthorization, canonical delivery-readiness gating, and non-authoritative Gateway/Cache route metadata.
+- **BG-13.5 — thumbnails/posters/transcodes — NEXT**
   Bounded 420Media derivative jobs, image thumbnails, video posters/previews/transcodes, derivative storage and original/derivative provenance.
 - **BG-13.6 — lifecycle/edit/delete/privacy semantics — REMAINS**
   Social-object version/media-root changes, presentation eligibility, retention/tombstone behavior, private authorization revalidation and safe derivative retirement.
@@ -78,8 +78,8 @@ Detailed BG-13 invariants and phase requirements are in `docs/BONG-GOGGLES-BG-13
 
 ## Current position
 
-**Phase 12 is merged to `main` in PR #307. BG-13.1 and BG-13.2 are complete and qualified. Current work: BG-13.3 on PR #308 / `feature/bong-goggles-bg13-media-storage`.**
+**Phase 12 is merged to `main` in PR #307. BG-13.1 through BG-13.3 are complete and qualified. Current work: BG-13.4 on PR #308 / `feature/bong-goggles-bg13-media-storage`.**
 
 Critical path:
 
-`BG-13.3 placement/seal -> BG-13.4 delivery -> BG-13.5 derivatives -> BG-13.6 lifecycle/privacy -> BG-13.7 production closeout -> BG-14 messaging -> BG-15 games -> BG-16 notifications -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI -> BG-20 launch hardening -> READY`
+`BG-13.4 delivery -> BG-13.5 derivatives -> BG-13.6 lifecycle/privacy -> BG-13.7 production closeout -> BG-14 messaging -> BG-15 games -> BG-16 notifications -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI -> BG-20 launch hardening -> READY`

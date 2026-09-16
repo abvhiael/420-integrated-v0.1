@@ -91,6 +91,7 @@ A healthy provider filesystem alone is not canonical proof of availability, and 
 - [420Storage security and abuse-resistance qualification](420storage-security-abuse-review.md)
 - [420Storage operator runbooks, alerts and SLO qualification](420storage-operator-slos.md)
 - [420Storage testnet deployment evidence](420storage-testnet-evidence.md)
+- [420Storage production launch closeout](420storage-production-launch-closeout.md)
 - [Storage Proof and Resource Protocol](../architecture/protocols/storage-proof-resource-protocol.md)
 - [Storage and Resource infrastructure](../architecture/infrastructure/storage-resource-infrastructure.md)
 - [Provider-backed integration model](provider-backed-integrations.md)

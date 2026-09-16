@@ -30,7 +30,6 @@ func TestBuildDeveloperManifestIsDeterministicAcrossShardOrder(t *testing.T) {
 	a := developerManifestSpec()
 	b := developerManifestSpec()
 	b.Shards[0], b.Shards[1] = b.Shards[1], b.Shards[0]
-
 	first, err := BuildDeveloperManifest(a)
 	if err != nil { t.Fatal(err) }
 	second, err := BuildDeveloperManifest(b)
@@ -40,6 +39,22 @@ func TestBuildDeveloperManifestIsDeterministicAcrossShardOrder(t *testing.T) {
 	}
 	if first.Shards[0].ShardIndex != 0 || first.Shards[1].ShardIndex != 1 {
 		t.Fatalf("shards not canonicalized by index: %#v", first.Shards)
+	}
+}
+
+func TestManifestHashIgnoresPlacementAndLivenessRotation(t *testing.T) {
+	firstSpec := developerManifestSpec()
+	secondSpec := developerManifestSpec()
+	secondSpec.Shards[0].AgreementID = "replacement-agreement"
+	secondSpec.Shards[0].CommitmentID = "replacement-commitment"
+	secondSpec.Shards[0].NodeID = "replacement-node"
+	secondSpec.Shards[0].Live = false
+	first, err := BuildDeveloperManifest(firstSpec)
+	if err != nil { t.Fatal(err) }
+	second, err := BuildDeveloperManifest(secondSpec)
+	if err != nil { t.Fatal(err) }
+	if first.ManifestHash != second.ManifestHash {
+		t.Fatalf("placement rotation changed immutable manifest hash: %q != %q", first.ManifestHash, second.ManifestHash)
 	}
 }
 
@@ -68,21 +83,29 @@ func TestBuildDeveloperManifestRejectsPartialBackingIdentity(t *testing.T) {
 
 func TestSealReadinessIsSeparateFromRetrievability(t *testing.T) {
 	spec := developerManifestSpec()
-	for i := range spec.Shards { spec.Shards[i].Live = false }
 	manifest, err := BuildDeveloperManifest(spec)
 	if err != nil { t.Fatal(err) }
-	if !manifest.SealReady {
-		t.Fatal("complete placement set should be seal-ready")
-	}
-	if manifest.Retrievable {
-		t.Fatal("seal readiness must not imply retrievability")
-	}
+	if !manifest.SealReady { t.Fatal("complete placement set should be seal-ready") }
+	if manifest.Retrievable { t.Fatal("unsealed manifest must not be retrievable") }
+
+	spec.Sealed = true
+	for i := range spec.Shards { spec.Shards[i].Live = false }
+	manifest, err = BuildDeveloperManifest(spec)
+	if err != nil { t.Fatal(err) }
+	if manifest.Retrievable { t.Fatal("sealed manifest with no live data shards must not be retrievable") }
 
 	spec.Shards[1].Live = true
 	manifest, err = BuildDeveloperManifest(spec)
 	if err != nil { t.Fatal(err) }
-	if !manifest.Retrievable {
-		t.Fatal("one live shard should satisfy data_shards=1")
+	if !manifest.Retrievable { t.Fatal("sealed manifest with one live shard should satisfy data_shards=1") }
+}
+
+func TestSealedIncompleteManifestRejected(t *testing.T) {
+	spec := developerManifestSpec()
+	spec.Shards = spec.Shards[:1]
+	spec.Sealed = true
+	if _, err := BuildDeveloperManifest(spec); !errors.Is(err, ErrDeveloperManifest) {
+		t.Fatalf("expected sealed-incomplete rejection, got %v", err)
 	}
 }
 
@@ -100,22 +123,21 @@ func TestDeveloperPlacementCompatiblePreservesShardIdentity(t *testing.T) {
 	manifest, err := BuildDeveloperManifest(developerManifestSpec())
 	if err != nil { t.Fatal(err) }
 	shard := manifest.Shards[0]
-	if !DeveloperPlacementCompatible(manifest, shard) {
-		t.Fatal("expected compatible placement")
-	}
+	if !DeveloperPlacementCompatible(manifest, shard) { t.Fatal("expected compatible placement") }
 	shard.ShardRoot = DeveloperShardRoot([]byte("different"))
-	if DeveloperPlacementCompatible(manifest, shard) {
-		t.Fatal("replacement root must not be accepted")
-	}
+	if DeveloperPlacementCompatible(manifest, shard) { t.Fatal("replacement root must not be accepted") }
 }
 
-func TestDeveloperObjectRefFromManifest(t *testing.T) {
+func TestDeveloperObjectRefFromManifestRequiresCanonicalManifestID(t *testing.T) {
 	manifest, err := BuildDeveloperManifest(developerManifestSpec())
 	if err != nil { t.Fatal(err) }
-	ref, err := DeveloperObjectRefFromManifest(manifest, 0)
+	ref, err := DeveloperObjectRefFromManifest(manifest, "canonical-manifest-1", 0)
 	if err != nil { t.Fatal(err) }
-	if ref.ObjectID != manifest.ObjectID || ref.ManifestID != manifest.ManifestHash || ref.CommitmentID != "commitment-0" || ref.ShardIndex != 0 {
+	if ref.ObjectID != manifest.ObjectID || ref.ManifestID != "canonical-manifest-1" || ref.CommitmentID != "commitment-0" || ref.ShardIndex != 0 {
 		t.Fatalf("unexpected object ref %#v", ref)
+	}
+	if _, err := DeveloperObjectRefFromManifest(manifest, "", 0); !errors.Is(err, ErrDeveloperManifest) {
+		t.Fatalf("expected missing canonical manifest id error, got %v", err)
 	}
 }
 
@@ -126,7 +148,7 @@ func TestDeveloperObjectRefRequiresBackedShard(t *testing.T) {
 	spec.Shards[0].NodeID = ""
 	manifest, err := BuildDeveloperManifest(spec)
 	if err != nil { t.Fatal(err) }
-	if _, err := DeveloperObjectRefFromManifest(manifest, 1); !errors.Is(err, ErrDeveloperManifest) {
+	if _, err := DeveloperObjectRefFromManifest(manifest, "canonical-manifest-1", 1); !errors.Is(err, ErrDeveloperManifest) {
 		t.Fatalf("expected unbacked shard error, got %v", err)
 	}
 }

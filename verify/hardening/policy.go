@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"strings"
 
 	"github.com/420integrated/420-integrated/verify/submission"
@@ -33,9 +34,8 @@ func ValidateRawJSON(raw []byte) error {
 	dec.UseNumber()
 	var value any
 	if err := dec.Decode(&value); err != nil { return fmt.Errorf("invalid JSON: %w", err) }
-	if dec.More() { return errors.New("multiple JSON values are not allowed") }
 	var trailing any
-	if err := dec.Decode(&trailing); err == nil { return errors.New("trailing JSON value is not allowed") }
+	if err := dec.Decode(&trailing); err == nil { return errors.New("trailing JSON value is not allowed") } else if !errors.Is(err, io.EOF) { return fmt.Errorf("invalid trailing JSON: %w", err) }
 	return rejectSecrets(value)
 }
 

@@ -12,6 +12,7 @@ import (
 
 	"github.com/420integrated/420-integrated/analytics/architecture"
 	"github.com/420integrated/420-integrated/analytics/indexerclient"
+	"github.com/420integrated/420-integrated/analytics/privacy"
 )
 
 const (
@@ -57,6 +58,7 @@ type Metric struct {
 	Label         string                   `json:"label"`
 	Value         string                   `json:"value"`
 	Unit          string                   `json:"unit"`
+	PrivacyClass  string                   `json:"privacyClass"`
 	Methodology   Methodology              `json:"methodology"`
 	Window        Window                   `json:"window"`
 	Provenance    Provenance               `json:"provenance"`
@@ -92,6 +94,7 @@ func NewMetric(id string, class architecture.MetricClass, label, value, unit str
 		Label:         strings.TrimSpace(label),
 		Value:         strings.TrimSpace(value),
 		Unit:          strings.TrimSpace(unit),
+		PrivacyClass:  string(privacy.Public),
 		Methodology:   methodology,
 		Window:        window,
 		Provenance:    provenance,
@@ -115,6 +118,9 @@ func ValidateMetric(m Metric) error {
 	}
 	if !validMetricClass(m.Class) {
 		return errors.New("unsupported metric class")
+	}
+	if err := privacy.Admit(m.PrivacyClass); err != nil {
+		return err
 	}
 	parsed, err := strconv.ParseFloat(m.Value, 64)
 	if err != nil || math.IsNaN(parsed) || math.IsInf(parsed, 0) {

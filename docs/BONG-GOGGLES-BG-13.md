@@ -43,7 +43,7 @@ Implemented the canonical orchestration boundary over `StorageObjectManifestRegi
 - a sealed manifest is not delivery-ready unless canonical `isRetrievable(manifestId)` returns true;
 - agreement effectiveness and commitment liveness retained as canonical readiness evidence.
 
-### BG-13.4 — verified retrieval + Gateway delivery — IN PROGRESS
+### BG-13.4 — verified retrieval + Gateway delivery — COMPLETE AND QUALIFIED
 
 Implemented the application delivery boundary above the frozen 420Storage developer API and 420Gateway:
 
@@ -60,16 +60,21 @@ Implemented the application delivery boundary above the frozen 420Storage develo
 - Gateway/Cache tier, provider ID and node ID preserved only as non-authoritative route provenance;
 - stable client-safe response envelopes with MIME type, range headers, verified flag and no provider credentials, filesystem paths or forwarded arbitrary headers.
 
-### BG-13.5 — thumbnails, posters and transcodes
+### BG-13.5 — thumbnails, posters and transcodes — IN PROGRESS
 
-Use 420Media jobs for bounded derivative generation.
+Implemented the Bong Goggles derivative coordinator above the existing 420Media protocol/node boundary:
 
-- operator-controlled codec/profile vocabulary only;
-- image thumbnails, video posters/previews and launch-safe video transcodes;
-- optional audio waveform/preview derivatives where useful;
-- derivative output references stored through 420Store/420Storage;
-- derivative items linked to the original item in the Bong Goggles descriptor;
-- job/result/SLA provenance retained without exposing raw processing telemetry or secrets.
+- derivative roles are restricted to a launch-safe vocabulary: thumbnail, poster, preview, transcode and optional waveform;
+- each enabled role must map to an operator-controlled configured `capabilityId`, `profileId` and output MIME type;
+- Bong Goggles never supplies executable FFmpeg/GStreamer command fragments, codec flags, filesystem paths or source URLs;
+- each source media item produces a deterministic opaque 32-byte input reference derived from its canonical 420Storage identity;
+- media-job creation verifies the returned canonical job remains bound to the expected capability and opaque input reference;
+- derivative collection accepts only successful 420Media result states with non-zero opaque result references;
+- failed, expired, refunded, cancelled, incomplete or mismatched jobs fail closed;
+- resolved derivative outputs must return complete 420Storage object identity and a MIME type matching the configured derivative profile;
+- optional storage verification can require the returned 420Storage derivative reference to be canonically verified before the derivative is accepted;
+- derivative items preserve explicit `derivativeOf` linkage to the immutable source item rather than overwriting the original identity;
+- job ID, operator ID, opaque result reference and SLA evidence hash are retained as secret-free processing provenance.
 
 ### BG-13.6 — lifecycle, edits, deletion and privacy
 
@@ -108,5 +113,7 @@ Define application semantics across immutable storage history and mutable social
 12. `isSealed` is not treated as synonymous with current retrievability; canonical `isRetrievable` is required for delivery readiness.
 13. Byte-range responses never weaken integrity checking: the complete retrieved object is verified before the requested range is returned.
 14. Gateway/Cache routing metadata is operational evidence only and cannot replace canonical object identity or application authorization.
+15. Bong Goggles never converts requester-controlled strings into media-engine command lines; derivative execution is selected only through configured 420Media capability/profile mappings.
+16. A 420Media result is not accepted as a Bong Goggles derivative until the job/input/capability binding and returned 420Storage identity have been validated.
 
 BG-13 is developed on `feature/bong-goggles-bg13-media-storage` after Phase 12 merged to `main` in PR #307.

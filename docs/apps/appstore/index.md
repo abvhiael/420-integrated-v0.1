@@ -18,3 +18,4 @@ Use the AppStore to inspect provenance, versions, permissions, security context 
 - [APPSTORE-0 architecture baseline](appstore-0-architecture-baseline.md) — freezes the contract-free trust boundary, canonical/non-canonical field split, privacy defaults, Wallet handoff limits and APP-INV-001 through APP-INV-013 qualification contract.
 - [APPSTORE-1 service/runtime scaffold](appstore-1-runtime.md) — defines runtime configuration, canonical network/Registry startup qualification, health/readiness behavior, graceful shutdown and fail-closed service boundaries.
 - [APPSTORE-2 Registry synchronization](appstore-2-registry-sync.md) — builds the replay-safe, rebuildable projection of canonical Registry identity, version, implementation and provenance history.
+- [APPSTORE-3 catalogue persistence](appstore-3-catalogue-persistence.md) — adds deterministic noncanonical persistence, restart restoration, rebuild semantics, schema validation and corruption-safe failure behavior.

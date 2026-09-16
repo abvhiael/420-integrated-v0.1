@@ -12,3 +12,7 @@ version: current
 A listing does not create legitimacy, and delisting does not revoke Registry state. Featured placement, ratings, reviews, screenshots, categories and sponsorship remain presentation metadata.
 
 Use the AppStore to inspect provenance, versions, permissions, security context and launch destinations, then rely on 420 Wallet and Smart Accounts for authorization.
+
+## Implementation references
+
+- [APPSTORE-0 architecture baseline](appstore-0-architecture-baseline.md) — freezes the contract-free trust boundary, canonical/non-canonical field split, privacy defaults, Wallet handoff limits and APP-INV-001 through APP-INV-013 qualification contract.

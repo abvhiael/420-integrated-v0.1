@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -17,19 +18,8 @@ func (r securityUploadResolver) ResolveUploadSink(string) (DeveloperUploadSink, 
 	return r.sink, r.sink != nil
 }
 
-type securityBlockingSink struct {
-	mu      sync.Mutex
-	calls   int
-	started chan struct{}
-	release chan struct{}
-}
-
-func (s *securityBlockingSink) StorePreparedUpload(ctx context.Context, _ DeveloperUploadPlan, _ interface{ Read([]byte) (int, error) }) error {
-	panic("unreachable")
-}
-
-// securityBlockingUploadSink keeps the io.Reader signature explicit while
-// exposing deterministic synchronization for concurrent replay qualification.
+// securityBlockingUploadSink exposes deterministic synchronization for
+// concurrent replay qualification.
 type securityBlockingUploadSink struct {
 	mu      sync.Mutex
 	calls   int

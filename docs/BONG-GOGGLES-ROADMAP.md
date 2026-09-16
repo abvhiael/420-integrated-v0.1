@@ -29,9 +29,7 @@ Production web target: `https://bonggoggles.420integrated.org`.
 ## Phase 12 — production application/indexer backend — COMPLETE, merged PR #307
 
 - **BG-12.1 — deterministic projector/reorg foundation — COMPLETE, merged PR #140**
-  Deterministic event identity/order, exact replay idempotency, reorg detection, rollback/replay, provenance-carrying projections, deterministic state roots and schema/snapshot-bound cursors.
 - **BG-12.2 — domain materialized views — COMPLETE, merged PR #146**
-  Profiles, social objects, relationship edges and feed-entry projections; stale-edge/feed deletion; inactive/deleted filtering; deterministic ordering and view digests.
 - **BG-12.3 — canonical contract-event adapters + durable checkpoint recovery — COMPLETE**
 - **BG-12.4 — pages/groups/events + discovery/review reducers — COMPLETE**
 - **BG-12.5 — search + recommendation query service — COMPLETE**
@@ -40,15 +38,15 @@ Production web target: `https://bonggoggles.420integrated.org`.
 
 Phase 12 was implemented monolithically from BG-12.3 through BG-12.7, exact-head qualified against Bong Goggles Indexer Verification, 420Docs Qualification and 420 Integrated Qualification, reconciled with `main` with zero base drift, and merged once as PR #307.
 
-## Phase 13 — media/storage delivery — IN PROGRESS
+## Phase 13 — media/storage delivery — IN PROGRESS, PR #308
 
 BG-13 integrates Bong Goggles with the already-built media/storage infrastructure instead of creating a second protocol. `BongGogglesMediaRegistry420` remains the canonical Bong Goggles manifest registry; 420Store owns canonical storage agreements/commitments/manifests/placements/proofs; 420Storage is the frozen v1 developer adapter; 420Gateway/420Cache/420Repair provide operational delivery; and 420Media provides bounded derivative-processing jobs.
 
-- **BG-13.1 — media descriptor + canonical resolver — IN PROGRESS**
+- **BG-13.1 — media descriptor + canonical resolver — COMPLETE AND QUALIFIED**
   Versioned deterministic Bong Goggles media descriptor, explicit 420Storage object identity, canonical owner/type/item-count/digest verification, derivative linkage, tamper detection, and fail-closed resolution of the off-chain descriptor referenced by `BongGogglesMediaRegistry420.manifestHash`.
-- **BG-13.2 — upload preparation + ingest bridge — NEXT**
-  420Storage v1 prepare/ingest coordination, local size/root verification, canonical storage preconditions, idempotency, bounded staging, transport receipt verification, and manifest-registration transaction preparation.
-- **BG-13.3 — canonical placement/seal orchestration — REMAINS**
+- **BG-13.2 — upload preparation + ingest bridge — IN PROGRESS**
+  Exact 420Storage v1 prepare DTO translation, agreement/reservation/commitment preconditions, descriptor-bound deterministic idempotency, prepare-plan validation, ingest receipt identity/root/size verification and explicitly non-authoritative upload evidence. Existing 420Storage remains responsible for bounded staging, byte hashing, provider discovery and sink delivery.
+- **BG-13.3 — canonical placement/seal orchestration — NEXT**
   Read canonical agreement/commitment/object-manifest state, expose user-authorized placement/seal transaction intents, verify retrievability threshold and preserve provider/node provenance.
 - **BG-13.4 — verified retrieval + Gateway delivery — REMAINS**
   GET/HEAD/range retrieval, exact size + shard-root verification, public/private access, Gateway/Cache routing and stable client-safe delivery envelopes.
@@ -74,41 +72,14 @@ Detailed BG-13 invariants and phase requirements are in `docs/BONG-GOGGLES-BG-13
 - **BG-18 — rewards production configuration**
   Final reward policies, rate limits, abuse controls, eligibility, treasury/funding configuration, accounting views and launch qualification.
 - **BG-19 — full web application + public-facing UI**
-  Build and deploy the complete Bong Goggles web product at **`bonggoggles.420integrated.org`**.
-
-  Required web surfaces include:
-  - landing/sign-in/wallet-connect/passkey onboarding
-  - account/profile creation and edit pages
-  - home/feed and following feed
-  - composer for status/photo/media posts
-  - object/post detail and comment threads
-  - profile timelines, friends/followers/following
-  - friend/follow requests
-  - search results and discovery/recommendation pages
-  - pages and groups: directory, detail, membership, admin/role surfaces
-  - events: directory, event detail, RSVP and attendee views
-  - discovery/reviews/place/product/brand/resource pages
-  - media viewer/gallery/story-style surfaces where supported
-  - private messages/inbox/conversation views
-  - game invites/sessions/history
-  - notifications center
-  - account/privacy/session/security settings
-  - block/mute/report controls
-  - moderation/appeals flows for affected users
-  - rewards/activity views
-  - responsive mobile/tablet/desktop layouts
-  - accessible navigation, keyboard/focus behavior and WCAG-oriented semantics
-  - SEO/OpenGraph/public-profile metadata where privacy policy permits
-  - error/offline/loading/retry states
-
-  Hosting/deployment work includes DNS/TLS for `bonggoggles.420integrated.org`, environment separation, API/indexer endpoints, CSP/security headers, analytics/observability, cache/CDN policy and production deployment automation.
+  Build and deploy the complete Bong Goggles web product at **`bonggoggles.420integrated.org`**, including onboarding, profiles, feeds, composer, media, pages/groups/events, discovery, messaging, games, notifications, settings, safety/moderation, rewards, responsive/accessibility work and production hosting.
 - **BG-20 — launch hardening**
   End-to-end testnet/production-like qualification, threat-model verification, permission/session abuse tests, privacy/audience leakage tests, rate/DoS limits, performance/load testing, disaster recovery, accessibility review, browser/device matrix, deployment manifests and launch runbooks.
 
 ## Current position
 
-**Phase 12 is merged to `main` in PR #307. Current work: BG-13.1 on `feature/bong-goggles-bg13-media-storage`.**
+**Phase 12 is merged to `main` in PR #307. BG-13.1 is complete and qualified. Current work: BG-13.2 on PR #308 / `feature/bong-goggles-bg13-media-storage`.**
 
 Critical path:
 
-`BG-13 media/storage -> BG-14 messaging -> BG-15 games -> BG-16 notifications -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI at bonggoggles.420integrated.org -> BG-20 launch hardening -> READY`
+`BG-13.2 upload/ingest -> BG-13.3 placement/seal -> BG-13.4 delivery -> BG-13.5 derivatives -> BG-13.6 lifecycle/privacy -> BG-13.7 production closeout -> BG-14 messaging -> BG-15 games -> BG-16 notifications -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI -> BG-20 launch hardening -> READY`

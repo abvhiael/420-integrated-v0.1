@@ -20,13 +20,7 @@ Canonical storage truth is derived from chain state plus manifests, placements a
 
 SR-0 through SR-9 are complete. SR-9 / Developer API, SDK and S3 compatibility merged to `main` through PR #299 at merge commit `494fb38ef85e7af6eb24e484da04e6a80fbd73aa` after final exact-head qualification of `604c26500478d6e75565ce394ba034a774245cf2`.
 
-Final SR-9 qualification evidence:
-
-- 420Docs Qualification #1307 / Actions run `35119184005` — PASS;
-- node420 Release Gate #244 / Actions run `35119184004` — PASS;
-- 420 Integrated Qualification #3567 / Actions run `35119183995` — PASS.
-
-SR-10 / Production hardening and launch qualification is now the active phase.
+SR-10.1 through SR-10.9 are complete and exact-head qualified. SR-10.10 / Production launch closeout is active on PR #302. The branch was reconciled with current `main` at merge commit `8043e937a98b0edd46fe8f62d90067120147c789`; final merge is permitted only after the reconciled launch head passes node420, Integrated and Docs qualification.
 
 ## Phase roadmap
 
@@ -42,7 +36,7 @@ SR-10 / Production hardening and launch qualification is now the active phase.
 | SR-7 | 420Gateway | COMPLETE / MERGED |
 | SR-8 | Unified Resource Network runtime | COMPLETE / MERGED |
 | SR-9 | Developer API / SDK / S3 compatibility | COMPLETE / MERGED |
-| SR-10 | Production hardening / launch qualification | IN PROGRESS — SR-10.1 NEXT |
+| SR-10 | Production hardening / launch qualification | IN PROGRESS — SR-10.10 FINAL CLOSEOUT |
 
 ## Completed foundations
 
@@ -56,162 +50,85 @@ SR-8 unified Store, Repair, Cache, Gateway and Relay around shared provider iden
 
 ### SR-9 — Developer API, SDK and S3 compatibility
 
-SR-9 added the stable `v1` developer surface over the Resource Network without creating a second source of truth. Completed scope includes:
+SR-9 added the stable `v1` developer surface over the Resource Network without creating a second source of truth. Completed scope includes stable retrieval/upload contracts, immutable manifest helpers, provider discovery/status, standalone SDK, cache/repair/gateway helpers, an explicit S3 compatibility subset, private-access default-deny regression coverage, end-to-end/fuzz/integrity qualification, developer guidance and privacy/logging review.
 
-- stable object identity and public/private retrieval contracts;
-- versioned HTTP GET/HEAD retrieval with ranges, ETags and deterministic errors;
-- bounded upload preparation/ingest with idempotency and verified payload identity;
-- deterministic manifest/shard helpers and strict SHA-256 identity validation;
-- advisory provider discovery/resource-status views;
-- standalone Go SDK, JSON schema and frozen golden fixtures;
-- cache/repair/gateway developer helpers;
-- semantics-preserving S3 subset with explicit failure for unsupported multipart/ACL/versioning behavior;
-- private-read and private-write default-deny regressions;
-- SDK ↔ HTTP end-to-end coverage, fuzz/property tests and payload-substitution checks;
-- Developer Hub, local/testnet examples and privacy/logging review.
-
-SR-9 remained monolithic through SR-9.10, reconciled current `main` through PR #301, and merged only after the final exact head passed all three required gates.
+SR-9 remained monolithic through SR-9.10, reconciled current `main`, and merged only after the final exact head passed all three required gates.
 
 ## SR-10 — production hardening and launch qualification
 
-SR-10 turns the qualified Resource Network and developer surfaces into a production-qualified storage subsystem. It should remain evidence-driven: each step produces reproducible deployment/test artifacts and exact-head qualification evidence rather than relying on manual assertions.
+SR-10 turns the qualified Resource Network and developer surfaces into a production-qualified storage subsystem. Each slice produces reproducible qualification evidence and preserves the rule that operational/runtime state cannot replace canonical chain-backed authority.
 
 ### SR-10 architecture invariants
 
 - Production hardening cannot move canonical authority off-chain.
-- Fault recovery must preserve object/manifest/shard/commitment identity.
-- Repair, cache and gateway availability must never fabricate canonical placement/proof/settlement state.
+- Fault recovery preserves object/manifest/shard/commitment identity.
+- Repair, cache and gateway availability never fabricates canonical placement/proof/settlement state.
 - Security hardening remains default-deny for private access and service credentials.
-- Operational automation must be bounded, observable and cancellation-aware.
-- Load, failover and recovery tests must verify integrity as well as availability.
-- Launch evidence must bind software commits, configuration, schemas and test results to the qualified deployment.
+- Operational automation is bounded, observable and cancellation-aware.
+- Load, failover and recovery tests verify integrity as well as availability.
+- Launch evidence binds software commits, configuration, schemas and test results to the qualified deployment.
 
-### SR-10.1 — production topology and multi-provider qualification — NEXT
+### SR-10.1 — production topology and multi-provider qualification — COMPLETE / QUALIFIED
 
-Build the reproducible production deployment model before adversarial testing begins.
+Reproducible multi-provider topology, deterministic discovery, lifecycle handling, degraded-state behavior and cross-provider failover were qualified at exact head `7e85ca94a3dbbf708e5369d22417cdca45fb51c4`.
 
-Scope:
+### SR-10.2 — adversarial and fault-injection qualification — COMPLETE / QUALIFIED
 
-- define minimum production topology for Store, Repair, Cache, Gateway and Relay across multiple providers/nodes;
-- define provider/node/service identity and capability allocation per deployment;
-- add deterministic topology/config validation;
-- validate startup/shutdown ordering and degraded-service behavior across multiple providers;
-- exercise cross-provider discovery, cache/store routing and repair eligibility;
-- verify no shared configuration contains caller/service secrets;
-- add test harnesses/fixtures for multi-provider local or CI qualification;
-- capture topology manifests and exact configuration fingerprints as qualification evidence.
+Provider disappearance/rejoin, malformed/stale discovery, corrupt cache fallback, cancellation storms and private-read spoof resistance were qualified at `725b4132d2839df9540092b1ac72f24f3ad770ff`.
 
-Exit criteria: a reproducible multi-provider Resource Network can start, discover services, retrieve verified objects, degrade/fail over safely and shut down without violating authority boundaries.
+### SR-10.3 — sustained load, soak and capacity qualification — COMPLETE / QUALIFIED
 
-### SR-10.2 — adversarial and fault-injection qualification
+Concurrent verified retrieval, deterministic cache failure/store fallback, discovery churn, HTTP range load, cancellation bounds and integrity verification were qualified at `63a8a12b686707463506f8d0f6b49ecb08885471`.
 
-Scope:
+### SR-10.4 — upgrade, migration and compatibility procedures — COMPLETE / QUALIFIED
 
-- provider disappearance/rejoin;
-- stale or malicious discovery entries;
-- corrupted payload/shard substitution;
-- cache poisoning attempts;
-- repair source/placement mismatch;
-- delayed/failed storage writes;
-- partial network partitions and timeout storms;
-- authorization failures and forwarded-identity spoof attempts;
-- proof/settlement projection lag;
-- deterministic recovery assertions and bounded retry checks.
+Rolling upgrades, frozen public API `v1`, `storage-topology-v1` compatibility, rollback and immutable manifest/placement identity were qualified at `0d4bb480be29b04c86a4b1c9e50a28350b53e6a6`.
 
-### SR-10.3 — sustained load, soak and capacity qualification
+### SR-10.5 — credential rotation and recovery — COMPLETE / QUALIFIED
 
-Scope:
+Bounded credential rotation, immediate compromise rotation, revocation/recovery, secret-digest storage and redacted evidence were qualified at `d54e5a1fe87518c9ddb5dc873efc412576675985`.
 
-- concurrent upload/retrieval workloads;
-- cache hit/miss and store fallback distributions;
-- repair backlog pressure;
-- provider discovery churn;
-- gateway concurrency and range-request load;
-- memory/file-descriptor/goroutine/resource leak checks;
-- long-duration soak tests;
-- latency/error/throughput baselines and capacity envelopes.
+### SR-10.6 — backup, restore and disaster recovery — COMPLETE / QUALIFIED
 
-### SR-10.4 — upgrade, migration and compatibility procedures
+Operational backup evidence, canonical-identity reconciliation, topology binding, RPO/RTO enforcement and repair-driven recovery were qualified at `bc476b5d24e1fc55254ddd08494fa9d0263f6429`.
 
-Scope:
+Qualification evidence: Docs #1351 / run `35130302828`, node420 #267 / `35130302904`, Integrated #3611 / `35130302958` — all PASS.
 
-- rolling node/runtime upgrades;
-- backwards-compatible v1 API/SDK handling;
-- schema/config migration validation;
-- manifest/placement persistence across upgrades;
-- mixed-version deployment behavior;
-- rollback procedures and compatibility gates.
+### SR-10.7 — security review and abuse resistance — COMPLETE / QUALIFIED
 
-### SR-10.5 — credential rotation and recovery
+Concurrent idempotency replay protection, header/host boundaries, forwarded-host spoof resistance, private-read fail-closed handling and threat-model review were qualified at `34702a210f3545f7443a841aab56ab0792c22c0d`.
 
-Scope:
+Qualification evidence: Docs #1362 / `35131559190`, node420 #272 / `35131559238`, Integrated #3622 / `35131559169` — all PASS.
 
-- service credential rotation;
-- session/signing material rotation where applicable;
-- revocation propagation;
-- lost/compromised credential recovery;
-- secret redaction validation;
-- no credential material in public telemetry or canonical manifests.
+### SR-10.8 — operator runbooks, alerts and SLOs — COMPLETE / QUALIFIED
 
-### SR-10.6 — backup, restore and disaster recovery
+Deterministic capability alerts, Store capacity pressure, Repair backlog, integrity/auth/routing signals and availability/integrity/recovery SLO evidence were qualified at `3ff5110966b65f8082d24cc0ff1403961ed226b2`.
 
-Scope:
+Qualification evidence: Docs #1372 / `35132588771`, node420 #277 / `35132588875`, Integrated #3632 / `35132588655` — all PASS.
 
-- backup of required local operational state;
-- restore/reconcile against canonical chain/manifests/placements;
-- provider-loss recovery;
-- repair-driven reconstruction;
-- documented RPO/RTO targets;
-- repeatable recovery drills.
+### SR-10.9 — testnet deployment evidence — COMPLETE / QUALIFIED
 
-### SR-10.7 — security review and abuse resistance
+The testnet evidence contract binds commit/config/topology fingerprints, required end-to-end checks, provider/discovery/credential recovery drills, SLO evidence and launch blockers using `storage-testnet-evidence-v1`. It was qualified at `65228dd50d232ac23221e2229575877c9fb15af3`.
 
-Scope:
+Qualification evidence: Docs #1380 / `35133981988`, node420 #282 / `35133982020`, Integrated #3640 / `35133981934` — all PASS.
 
-- API/Gateway/S3 abuse controls;
-- malformed/fuzzed request expansion;
-- SSRF/host/header/forwarded-identity boundaries;
-- upload exhaustion and replay/idempotency abuse;
-- private-access default-deny audit;
-- dependency/static-analysis review;
-- threat-model and residual-risk documentation.
+### SR-10.10 — production launch closeout — ACTIVE
 
-### SR-10.8 — operator runbooks, alerts and SLOs
+Closeout requirements:
 
-Scope:
+- current `main` reconciled into the SR-10 branch;
+- launch compatibility contracts frozen at developer API `v1`, topology schema `storage-topology-v1`, testnet evidence schema `storage-testnet-evidence-v1`, and DR evidence schema `storage-dr-v1`;
+- all SR-10.1–SR-10.9 evidence retained and reproducible;
+- testnet evidence must identify exact software/config/topology fingerprints and contain no unresolved critical launch blocker;
+- final launch approval must name the exact reconciled SR-10 head and corresponding deployment/config fingerprints;
+- node420 Release Gate, 420 Integrated Qualification and 420Docs Qualification must all pass on that exact final head;
+- PR #302 may merge only after those exact-head gates are green.
 
-- health/readiness and degraded-state semantics;
-- alert thresholds for Store/Repair/Cache/Gateway/Relay;
-- storage capacity and repair backlog alerts;
-- integrity/auth/routing failure alerts;
-- incident triage and recovery procedures;
-- defined availability, integrity and recovery SLOs.
-
-### SR-10.9 — testnet deployment evidence
-
-Scope:
-
-- deploy the qualified topology to testnet;
-- record exact software/config/schema versions;
-- run end-to-end upload → manifest → retrieval → cache/gateway → repair flows;
-- execute selected fault/recovery drills;
-- capture metrics, logs and qualification artifacts;
-- document unresolved launch blockers explicitly.
-
-### SR-10.10 — production launch closeout
-
-Scope:
-
-- reconcile current `main`;
-- freeze launch configuration and compatibility contracts;
-- verify all SR-10 evidence is present and reproducible;
-- run final node420, Integrated and Docs qualification on the exact launch head;
-- bind launch approval to exact commit/configuration fingerprints;
-- merge SR-10 only after all launch gates are green.
+The reconciliation commit `8043e937a98b0edd46fe8f62d90067120147c789` has parents SR-10.9 head `65228dd50d232ac23221e2229575877c9fb15af3` and current-main head `805150238ff1ec50859a1e3b95be03c388a1cac4`, using GitHub's clean PR merge tree. This preserves current mainline work while carrying every SR-10 change into closeout.
 
 ## SR-10 merge policy
 
-Treat SR-10 as one production-hardening phase unless a later implementation decision explicitly splits deployment infrastructure from launch evidence. Individual SR-10.x slices may be qualified as they evolve, but final production closeout must run against one reconciled exact head.
+SR-10 is one monolithic production-hardening phase. Individual slices are qualified as evolving exact heads; the only phase merge occurs after SR-10.10 final exact-head qualification.
 
 ## Dependency order
 
@@ -220,7 +137,9 @@ SR-8 Unified Resource Network — COMPLETE / MERGED
     ↓
 SR-9 Developer API / SDK / S3 compatibility — COMPLETE / MERGED
     ↓
-SR-10 Production hardening / launch qualification — ACTIVE
+SR-10.1–SR-10.9 — COMPLETE / QUALIFIED
+    ↓
+SR-10.10 Production launch closeout — ACTIVE / FINAL GATES PENDING
 ```
 
 ## Architecture invariant
@@ -239,4 +158,6 @@ SR-10 Production hardening / launch qualification — ACTIVE
 - [Storage Proof & Resource Protocol](../protocols/storage-proof-resource-protocol.md)
 - [Storage & resource developer integration](../../developers/storage-and-resource-integration.md)
 - [420Storage Developer Hub](../../developers/420storage-developer-hub.md)
-- [SR-9 privacy and logging review](../../developers/420storage-sr9-privacy-review.md)
+- [420Storage production topology qualification](../../developers/420storage-production-topology.md)
+- [420Storage testnet deployment evidence](../../developers/420storage-testnet-evidence.md)
+- [420Storage operator runbooks, alerts and SLO qualification](../../developers/420storage-operator-slos.md)

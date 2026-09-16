@@ -104,6 +104,9 @@ func (g GatewayRouter) Route(ctx context.Context, req GatewayRequest) (GatewayRe
 	if err := g.authorize(ctx, req); err != nil {
 		return GatewayResult{}, err
 	}
+	if ctx.Err() != nil {
+		return GatewayResult{}, ErrGatewayRoute
+	}
 	attempts := make([]GatewayAttempt, 0, len(g.Cache)+len(g.Store))
 	cacheSources := make([]gatewayRouteSource, 0, len(g.Cache))
 	storeSources := make([]gatewayRouteSource, 0, len(g.Store))
@@ -155,11 +158,17 @@ func (g GatewayRouter) Route(ctx context.Context, req GatewayRequest) (GatewayRe
 	}
 	try := func(tier string, sources []gatewayRouteSource) (GatewayResult, bool) {
 		for i, source := range sources {
+			if ctx.Err() != nil {
+				return GatewayResult{}, false
+			}
 			if source.Source == nil {
 				attempts = append(attempts, GatewayAttempt{Tier: tier, Source: i, ProviderID: source.ProviderID, NodeID: source.NodeID, Error: ErrGatewayRoute.Error()})
 				continue
 			}
 			payload, err := source.Source.FetchGatewayObject(ctx, req)
+			if err == nil && ctx.Err() != nil {
+				err = ctx.Err()
+			}
 			if err == nil {
 				err = verifyCachePayload(req.CacheKey, payload)
 			}
@@ -175,6 +184,9 @@ func (g GatewayRouter) Route(ctx context.Context, req GatewayRequest) (GatewayRe
 	}
 	if result, ok := try("cache", cacheSources); ok {
 		return result, nil
+	}
+	if ctx.Err() != nil {
+		return GatewayResult{Attempts: attempts}, ErrGatewayRoute
 	}
 	if result, ok := try("store", storeSources); ok {
 		return result, nil

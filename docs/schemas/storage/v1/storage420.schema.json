@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://420integrated.example/schemas/storage/v1/storage420.schema.json",
+  "$id": "urn:420integrated:storage:v1",
   "title": "420 Storage Developer API v1",
   "type": "object",
   "$defs": {
@@ -38,6 +38,16 @@
         "access": {"$ref": "#/$defs/readAccess"}
       }
     },
+    "routeMetadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tier"],
+      "properties": {
+        "tier": {"type": "string"},
+        "provider_id": {"type": "string"},
+        "node_id": {"type": "string"}
+      }
+    },
     "uploadPreconditions": {
       "type": "object",
       "additionalProperties": false,
@@ -57,6 +67,59 @@
         "object": {"$ref": "#/$defs/objectRef"},
         "idempotency_key": {"type": "string", "minLength": 1},
         "preconditions": {"$ref": "#/$defs/uploadPreconditions"}
+      }
+    },
+    "uploadPlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "upload_id", "object", "idempotency_key", "preconditions", "provider_id", "node_id", "service_id"],
+      "properties": {
+        "version": {"const": "v1"},
+        "upload_id": {"type": "string", "minLength": 1},
+        "object": {"$ref": "#/$defs/objectRef"},
+        "idempotency_key": {"type": "string", "minLength": 1},
+        "preconditions": {"$ref": "#/$defs/uploadPreconditions"},
+        "provider_id": {"type": "string", "minLength": 1},
+        "node_id": {"type": "string", "minLength": 1},
+        "service_id": {"type": "string", "minLength": 1},
+        "endpoint": {"type": "string"}
+      }
+    },
+    "shardSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["shard_index", "shard_root", "size_bytes", "live"],
+      "properties": {
+        "shard_index": {"type": "integer", "minimum": 0},
+        "shard_root": {"type": "string", "minLength": 1},
+        "size_bytes": {"type": "integer", "minimum": 1},
+        "agreement_id": {"type": "string"},
+        "commitment_id": {"type": "string"},
+        "node_id": {"type": "string"},
+        "live": {"type": "boolean"}
+      }
+    },
+    "manifestDescriptor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "object_id", "object_content_root", "manifest_hash", "encryption_commitment", "erasure_root", "object_size_bytes", "segment_count", "data_shards", "total_shards", "placed_shards", "seal_ready", "sealed", "retrievable", "shards"],
+      "properties": {
+        "version": {"const": "v1"},
+        "manifest_id": {"type": "string"},
+        "object_id": {"type": "string", "minLength": 1},
+        "object_content_root": {"type": "string", "minLength": 1},
+        "manifest_hash": {"type": "string", "minLength": 1},
+        "encryption_commitment": {"type": "string", "minLength": 1},
+        "erasure_root": {"type": "string", "minLength": 1},
+        "object_size_bytes": {"type": "integer", "minimum": 1},
+        "segment_count": {"type": "integer", "minimum": 1},
+        "data_shards": {"type": "integer", "minimum": 1},
+        "total_shards": {"type": "integer", "minimum": 1},
+        "placed_shards": {"type": "integer", "minimum": 0},
+        "seal_ready": {"type": "boolean"},
+        "sealed": {"type": "boolean"},
+        "retrievable": {"type": "boolean"},
+        "shards": {"type": "array", "items": {"$ref": "#/$defs/shardSpec"}}
       }
     },
     "discoveryRequest": {
@@ -99,6 +162,46 @@
         "version": {"const": "v1"},
         "authoritative": {"const": false},
         "resources": {"type": "array", "items": {"$ref": "#/$defs/resourceDescriptor"}}
+      }
+    },
+    "serviceStatus": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider_id", "node_id", "service_id", "state", "health", "capabilities"],
+      "properties": {
+        "provider_id": {"type": "string"},
+        "node_id": {"type": "string"},
+        "service_id": {"type": "string"},
+        "state": {"enum": ["registered", "starting", "running", "degraded", "stopped", "failed"]},
+        "health": {"enum": ["healthy", "degraded", "pending", "stopped", "failed"]},
+        "capabilities": {"type": "array", "items": {"enum": ["store", "repair", "cache", "gateway", "relay"]}}
+      }
+    },
+    "capabilityStatus": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["capability", "running", "degraded", "unavailable"],
+      "properties": {
+        "capability": {"enum": ["store", "repair", "cache", "gateway", "relay"]},
+        "running": {"type": "integer", "minimum": 0},
+        "degraded": {"type": "integer", "minimum": 0},
+        "unavailable": {"type": "integer", "minimum": 0}
+      }
+    },
+    "resourceStatus": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "authoritative", "provider_id", "node_id", "ready", "degraded", "observed_at", "services", "capabilities"],
+      "properties": {
+        "version": {"const": "v1"},
+        "authoritative": {"const": false},
+        "provider_id": {"type": "string"},
+        "node_id": {"type": "string"},
+        "ready": {"type": "boolean"},
+        "degraded": {"type": "boolean"},
+        "observed_at": {"type": "string", "format": "date-time"},
+        "services": {"type": "array", "items": {"$ref": "#/$defs/serviceStatus"}},
+        "capabilities": {"type": "array", "items": {"$ref": "#/$defs/capabilityStatus"}}
       }
     }
   }

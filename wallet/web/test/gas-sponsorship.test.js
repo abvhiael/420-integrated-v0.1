@@ -131,5 +131,5 @@ test('user-facing failure states distinguish digest mismatch fallback from a blo
 });
 
 test('review state fails closed if a sponsored result attempts to smuggle execution authority', () => {
-  assert.throws(() => walletGasSponsorshipReview420({ sponsored: true, fundingMode: 'paymaster', executionAuthorization: true, quote: quote() }), /cannot grant execution authority/i);
+  assert.throws(() => walletGasSponsorshipReview420({ sponsored: true, fundingMode: 'paymaster', executionAuthorization: true, quote: quote() }), /must not grant execution authority/i);
 });

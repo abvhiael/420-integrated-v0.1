@@ -101,3 +101,19 @@ func TestPaginationCapsLimit(t *testing.T) {
 	if err := json.Unmarshal(w.Body.Bytes(), &got); err != nil { t.Fatal(err) }
 	if got.Limit != 100 { t.Fatalf("limit not capped: %d", got.Limit) }
 }
+
+func TestNewRejectsPrivatePresentationMetadata(t *testing.T) {
+	view := testView("420/service/alpha/v1", 1, []string{"social"}, false, false, true)
+	view.Listing.Curation.Presentation = map[string]string{"launchHistory": "wallet-123"}
+	if _, err := New([]ApplicationView{view}); err != ErrInvalidView { t.Fatalf("got %v want %v", err, ErrInvalidView) }
+}
+
+func TestNewRejectsUnsafePublicLinks(t *testing.T) {
+	view := testView("420/service/alpha/v1", 1, []string{"social"}, false, false, true)
+	view.Links.Direct = "http://example.test/insecure"
+	if _, err := New([]ApplicationView{view}); err != ErrInvalidView { t.Fatalf("got %v want %v", err, ErrInvalidView) }
+
+	view = testView("420/service/alpha/v1", 1, []string{"social"}, false, false, true)
+	view.Links.Verify = "https://localhost/admin"
+	if _, err := New([]ApplicationView{view}); err != ErrInvalidView { t.Fatalf("got %v want %v", err, ErrInvalidView) }
+}

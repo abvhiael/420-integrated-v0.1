@@ -1,0 +1,1 @@
+{"version":"v1","object":{"object_id":"object-1","manifest_id":"manifest-1","shard_index":3,"shard_root":"root-1","size_bytes":42,"commitment_id":"commitment-1"},"idempotency_key":"idem-1","preconditions":{"agreement_id":"agreement-1","capacity_reservation_id":"capacity-1","commitment_id":"commitment-1"}}

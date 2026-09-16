@@ -17,11 +17,9 @@ Canonical ownership remains split deliberately:
 
 Implemented a deterministic versioned descriptor referenced by `BongGogglesMediaRegistry420.manifestHash`, exact owner/type/count/digest verification against canonical registry state, complete 420Storage object identity per item, derivative linkage, duplicate/tamper rejection, and a canonical-first manifest resolver. URLs, route metadata, credentials, tokens and session fields are rejected from the descriptor.
 
-### BG-13.2 — upload preparation + ingest bridge — IN PROGRESS
+### BG-13.2 — upload preparation + ingest bridge — COMPLETE AND QUALIFIED
 
-Build the application upload coordinator over the frozen 420Storage `v1` prepare/ingest boundary.
-
-Implemented in this increment:
+Implemented the application upload coordinator over the frozen 420Storage `v1` prepare/ingest boundary:
 
 - translation from a verified Bong Goggles descriptor item to the exact 420Storage v1 object DTO;
 - required agreement, capacity-reservation and commitment preconditions;
@@ -32,17 +30,20 @@ Implemented in this increment:
 - upload results explicitly marked non-authoritative presentation evidence;
 - callback boundary that delegates bounded staging, byte hashing, running-provider discovery and sink delivery to the existing 420Storage coordinator rather than duplicating that protocol logic.
 
-Remaining BG-13.2 work before qualification is limited to CI validation/documentation closeout; canonical placement/sealing remains BG-13.3.
+### BG-13.3 — canonical storage placement/seal orchestration — IN PROGRESS
 
-### BG-13.3 — canonical storage placement/seal orchestration
+Implemented the first canonical orchestration boundary over `StorageObjectManifestRegistry420`, `StorageAgreementRegistry420` and `StorageCommitmentRegistry420`:
 
-Integrate the application with 420Store manifest/placement state.
+- canonical manifest, agreement, commitment and placement reads;
+- descriptor owner/object/shard identity checked against canonical storage state;
+- active agreement, commitment, erasure-policy, root, size, node and placement provenance validated fail-closed;
+- placement intent generation using the exact `registerPlacement(manifestId, shardIndex, agreementId, shardRoot, shardSizeBytes)` contract call;
+- seal intent generation using `sealManifest(manifestId)` only after all declared placements exist;
+- transaction intents are explicitly non-authoritative and require user/wallet authorization instead of granting the backend signing authority;
+- a sealed manifest is not considered delivery-ready unless canonical `isRetrievable(manifestId)` returns true;
+- agreement effectiveness and commitment liveness are retained as canonical readiness evidence rather than inferred from upload receipts or provider runtime state.
 
-- read canonical agreement/commitment/object-manifest state;
-- expose transaction intents for required placement/seal operations rather than granting the backend signing authority;
-- verify retrievability threshold before a media object is declared delivery-ready;
-- preserve provider/node/commitment provenance;
-- fail closed on agreement, root, size, placement or proof mismatch.
+Qualification of the BG-13.3 exact head is the remaining gate before BG-13.4 begins.
 
 ### BG-13.4 — verified retrieval + Gateway delivery
 
@@ -99,5 +100,7 @@ Define application semantics across immutable storage history and mutable social
 8. 420Media operators may process media but cannot gain social, wallet, storage-settlement or protocol authority by doing so.
 9. Derivatives never overwrite the identity/history of their original media item.
 10. A social-object lifecycle change can remove presentation eligibility without rewriting immutable storage/proof history.
+11. Backend placement/seal planning never signs or executes canonical transactions; user/wallet authorization remains mandatory.
+12. `isSealed` is not treated as synonymous with current retrievability; canonical `isRetrievable` is required for delivery readiness.
 
 BG-13 is developed on `feature/bong-goggles-bg13-media-storage` after Phase 12 merged to `main` in PR #307.

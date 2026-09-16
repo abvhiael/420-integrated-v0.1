@@ -95,7 +95,8 @@ contract Paymaster420 is IPaymaster420 {
         PaymasterData420.V1 memory sponsorship = PaymasterData420.decodeV1(userOp.paymasterAndData);
         if (
             sponsorship.paymaster != address(this) || sponsorship.entryPoint != entryPoint
-                || sponsorship.chainId != block.chainid || maxCostWei > sponsorship.maxSponsoredCostWei
+                || sponsorship.chainId != block.chainid || block.timestamp < sponsorship.validAfter
+                || block.timestamp > sponsorship.validUntil || maxCostWei > sponsorship.maxSponsoredCostWei
         ) return (bytes(""), 1);
 
         (bytes memory signature, bytes32 capabilityCommitment, bytes32 sessionCommitment) =

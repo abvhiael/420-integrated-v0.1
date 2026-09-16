@@ -96,7 +96,7 @@ test('GAS-9.2 rolls quota reservation and window accounting back when signing fa
     now,
     quotaController: quota,
     sign: () => { throw new Error('SIGNER_DOWN'); },
-  }), /SIGNER_DOWN/);
+  }), /GAS11_SIGNER_DEPENDENCY_FAILED/);
 
   const snapshot = quota.snapshot({ account: addr(3), policyId: hash(5), nowMs: now.getTime() });
   assert.equal(snapshot.accountConcurrent, 0);

@@ -1,3 +1,6 @@
+const MAX_UINT256_420 = (1n << 256n) - 1n;
+const MAX_UINT256_DECIMAL_DIGITS_420 = 78;
+
 export class GasSettlementJournalError420 extends Error {
   constructor(code) {
     super(code);
@@ -16,10 +19,17 @@ function positiveInt420(value, code, max = Number.MAX_SAFE_INTEGER) {
 }
 
 function nonNegativeBigInt420(value, code) {
-  const parsed = typeof value === 'bigint'
-    ? value
-    : (typeof value === 'string' && /^(0|[1-9][0-9]*)$/.test(value) ? BigInt(value) : -1n);
-  if (parsed < 0n) fail420(code);
+  let parsed = -1n;
+  if (typeof value === 'bigint') {
+    parsed = value;
+  } else if (
+    typeof value === 'string'
+    && value.length <= MAX_UINT256_DECIMAL_DIGITS_420
+    && /^(0|[1-9][0-9]*)$/.test(value)
+  ) {
+    parsed = BigInt(value);
+  }
+  if (parsed < 0n || parsed > MAX_UINT256_420) fail420(code);
   return parsed;
 }
 

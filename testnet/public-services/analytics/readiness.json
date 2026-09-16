@@ -1,0 +1,29 @@
+{
+  "schema": "420-analytics-readiness-v1",
+  "service": "420Analytics",
+  "serviceId": "420/service/analytics/v1",
+  "phase": "ANALYTICS-9",
+  "status": "LIVE_QUALIFICATION_READY",
+  "authority": {
+    "canonicalState": false,
+    "contractsRequired": false,
+    "chainSource": "420Indexer",
+    "directRpcAllowed": false
+  },
+  "gates": {
+    "architectureFrozen": true,
+    "qualifiedIndexerConsumer": true,
+    "metricModel": true,
+    "methodologyRegistry": true,
+    "httpApi": true,
+    "privacyHardening": true,
+    "runtimeDeployment": true,
+    "liveTestnetEvidence": false,
+    "genesisCloseout": false
+  },
+  "qualification": {
+    "contract": "testnet/public-services/analytics/qualification.json",
+    "validator": "go run ./analytics/cmd/analyticslivevalidate",
+    "urlEnvironment": "ANALYTICS_LIVE_URL"
+  }
+}

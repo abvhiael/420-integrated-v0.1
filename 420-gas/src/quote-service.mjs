@@ -8,6 +8,7 @@ const DEFAULT_MAX_TTL_SECONDS = 300;
 const MAX_UINT256_420 = (1n << 256n) - 1n;
 const MAX_UINT256_DECIMAL_DIGITS_420 = 78;
 const MAX_CREDENTIAL_SCOPES_420 = 16;
+const ALLOWED_CREDENTIAL_SCOPES_420 = new Set(['gas:quote', 'gas:read']);
 
 export const DEFAULT_GAS_ECONOMIC_LIMITS_420 = Object.freeze({
   maxGasLimit: 30_000_000n,
@@ -93,6 +94,11 @@ function iso420(value, name) {
   return new Date(ms).toISOString();
 }
 
+function now420(value) {
+  assert420(value instanceof Date && Number.isFinite(value.getTime()), 'service clock is invalid');
+  return value;
+}
+
 function canonicalQuoteMaterial420(value) {
   return JSON.stringify([
     value.schemaVersion,
@@ -145,6 +151,15 @@ function quotaHandle420(reservation) {
   return Object.freeze({ authorizationId, reservationId: reservation.reservationId });
 }
 
+function rollbackQuotaReservation420(quota, reservation) {
+  if (!quota || !reservation) return true;
+  try {
+    return quota.rollback(quotaHandle420(reservation)) === true;
+  } catch {
+    return false;
+  }
+}
+
 export function validateGasEconomicLimits420(input = {}) {
   const limits = object420(input, 'economic limits');
   exact420(limits, new Set(['maxGasLimit', 'maxFeePerGasWei', 'maxPriorityFeePerGasWei']), 'economic limits');
@@ -156,6 +171,7 @@ export function validateGasEconomicLimits420(input = {}) {
 }
 
 export function validateGasQuoteCredential420(input, { now = new Date(), requiredScope = 'gas:quote' } = {}) {
+  const current = now420(now);
   const credential = object420(input, 'credential');
   exact420(credential, new Set(['applicationId', 'audience', 'scopes', 'expiresAt']), 'credential');
   const applicationId = id420(credential.applicationId, 'applicationId');
@@ -169,10 +185,11 @@ export function validateGasQuoteCredential420(input, { now = new Date(), require
   );
   const scopes = credential.scopes.map((scope, index) => text420(scope, `scopes[${index}]`, 128));
   assert420(new Set(scopes).size === scopes.length, 'credential scopes must be unique');
+  for (const scope of scopes) assert420(ALLOWED_CREDENTIAL_SCOPES_420.has(scope), 'credential contains unsupported scope');
   assert420(requiredScope === 'gas:quote' || requiredScope === 'gas:read', 'required credential scope is invalid');
   assert420(scopes.includes(requiredScope), `credential requires ${requiredScope} scope`);
   const expiresAt = iso420(credential.expiresAt, 'expiresAt');
-  assert420(Date.parse(expiresAt) > now.getTime(), 'credential is expired');
+  assert420(Date.parse(expiresAt) > current.getTime(), 'credential is expired');
   return Object.freeze({ applicationId, audience, scopes: Object.freeze(scopes), expiresAt });
 }
 
@@ -211,12 +228,13 @@ export function enforceGasQuoteEconomicLimits420(request, limits = {}) {
 }
 
 export function createGasQuote420({ request, credential, now = new Date(), maxTtlSeconds = DEFAULT_MAX_TTL_SECONDS, sign, quotaController, economicLimits = {} }) {
+  const current = now420(now);
   assert420(Number.isInteger(maxTtlSeconds) && maxTtlSeconds > 0 && maxTtlSeconds <= 3600, 'maxTtlSeconds is invalid');
-  const caller = validateGasQuoteCredential420(credential, { now, requiredScope: 'gas:quote' });
+  const caller = validateGasQuoteCredential420(credential, { now: current, requiredScope: 'gas:quote' });
   const quoteRequest = validateGasQuoteRequest420(request);
   enforceGasQuoteEconomicLimits420(quoteRequest, economicLimits);
-  const issuedAt = now.toISOString();
-  const issuedMs = now.getTime();
+  const issuedAt = current.toISOString();
+  const issuedMs = current.getTime();
   const validAfterMs = Date.parse(quoteRequest.validAfter);
   const validUntilMs = Date.parse(quoteRequest.validUntil);
   assert420(validAfterMs <= issuedMs, 'quote is not yet valid');
@@ -240,7 +258,18 @@ export function createGasQuote420({ request, credential, now = new Date(), maxTt
   try {
     const unsigned = Object.freeze({ ...quoteRequest, issuedAt });
     const quoteCommitment = `0x${createHash('sha256').update(canonicalQuoteMaterial420(unsigned)).digest('hex')}`;
-    const signature = sign({ sponsorshipDigest: unsigned.sponsorshipDigest, quoteCommitment, quote: unsigned });
+    const signerInput = Object.freeze({
+      sponsorshipDigest: unsigned.sponsorshipDigest,
+      quoteCommitment,
+      quote: unsigned,
+    });
+    let signature;
+    try {
+      signature = sign(signerInput);
+    } catch {
+      if (!rollbackQuotaReservation420(quota, reservation)) throw new GasQuoteError420('GAS11_QUOTA_ROLLBACK_FAILED');
+      throw new GasQuoteError420('GAS11_SIGNER_DEPENDENCY_FAILED');
+    }
     assert420(typeof signature === 'string' && signature.length > 0 && signature.length <= 4096, 'quote signer returned invalid signature');
 
     return Object.freeze({
@@ -259,7 +288,8 @@ export function createGasQuote420({ request, credential, now = new Date(), maxTt
       quotaReservation: reservation,
     });
   } catch (error) {
-    if (quota && reservation) quota.rollback(quotaHandle420(reservation));
+    if (error instanceof GasQuoteError420 && (error.message === 'GAS11_SIGNER_DEPENDENCY_FAILED' || error.message === 'GAS11_QUOTA_ROLLBACK_FAILED')) throw error;
+    if (!rollbackQuotaReservation420(quota, reservation)) throw new GasQuoteError420('GAS11_QUOTA_ROLLBACK_FAILED');
     throw error;
   }
 }
@@ -271,7 +301,9 @@ export function releaseGasQuoteQuota420({ quotaController, quotaReservation }) {
 }
 
 export function createGasQuoteReadView420(quote, { credential, now = new Date() } = {}) {
-  validateGasQuoteCredential420(credential, { now, requiredScope: 'gas:read' });
+  const current = now420(now);
+  object420(quote, 'quote');
+  validateGasQuoteCredential420(credential, { now: current, requiredScope: 'gas:read' });
   const validated = validateGasQuoteRequest420(requestProjection420(quote));
   return Object.freeze({
     quoteId: bytes32420(quote.quoteId, 'quoteId'),

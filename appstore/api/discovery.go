@@ -25,21 +25,21 @@ type Links struct {
 }
 
 type ApplicationView struct {
-	Listing     curation.Listing       `json:"listing"`
-	Security    security.Presentation  `json:"security"`
-	Wallet      wallet.Presentation    `json:"wallet"`
-	Links       Links                  `json:"links"`
+	Listing     curation.Listing      `json:"listing"`
+	Security    security.Presentation `json:"security"`
+	Wallet      wallet.Presentation   `json:"wallet"`
+	Links       Links                 `json:"links"`
 }
 
 type Summary struct {
-	ServiceID      string                    `json:"serviceId"`
-	Version        uint32                    `json:"version"`
-	Implementation string                    `json:"implementation"`
-	Active         bool                      `json:"active"`
-	Canonical      bool                      `json:"canonical"`
-	Curation       curation.Metadata         `json:"curation"`
-	WarningCount   int                       `json:"warningCount"`
-	Links          Links                     `json:"links"`
+	ServiceID      string            `json:"serviceId"`
+	Version        uint32            `json:"version"`
+	Implementation string            `json:"implementation"`
+	Active         bool              `json:"active"`
+	Canonical      bool              `json:"canonical"`
+	Curation       curation.Metadata `json:"curation"`
+	WarningCount   int               `json:"warningCount"`
+	Links          Links             `json:"links"`
 }
 
 type ListResponse struct {
@@ -87,7 +87,10 @@ func (s *Service) Handler() http.Handler {
 	mux.HandleFunc("GET /v1/apps", s.handleBrowse)
 	mux.HandleFunc("GET /v1/apps/search", s.handleSearch)
 	mux.HandleFunc("GET /v1/apps/categories", s.handleCategories)
-	mux.HandleFunc("GET /v1/apps/{serviceID}", s.handleDetail)
+	// Registry service IDs are slash-delimited (for example
+	// 420/service/alpha/v1), so the detail route must capture the entire
+	// remaining path rather than a single path segment.
+	mux.HandleFunc("GET /v1/apps/{serviceID...}", s.handleDetail)
 	return mux
 }
 
@@ -108,11 +111,21 @@ func (s *Service) writeList(w http.ResponseWriter, r *http.Request, query string
 	items := make([]curation.Listing, 0, len(s.byID))
 	views := make(map[string]ApplicationView, len(s.byID))
 	for id, view := range s.byID {
-		if query != "" && !matches(view, query) { continue }
-		if category != "" && !contains(view.Listing.Curation.Categories, category) { continue }
-		if activeOnly && !view.Listing.Canonical.Active { continue }
-		if featuredOnly && !view.Listing.Curation.Featured { continue }
-		if sponsoredOnly && !view.Listing.Curation.Sponsored { continue }
+		if query != "" && !matches(view, query) {
+			continue
+		}
+		if category != "" && !contains(view.Listing.Curation.Categories, category) {
+			continue
+		}
+		if activeOnly && !view.Listing.Canonical.Active {
+			continue
+		}
+		if featuredOnly && !view.Listing.Curation.Featured {
+			continue
+		}
+		if sponsoredOnly && !view.Listing.Curation.Sponsored {
+			continue
+		}
 		items = append(items, view.Listing)
 		views[id] = view
 	}
@@ -120,11 +133,17 @@ func (s *Service) writeList(w http.ResponseWriter, r *http.Request, query string
 
 	page := positiveInt(r.URL.Query().Get("page"), 1)
 	limit := positiveInt(r.URL.Query().Get("limit"), 20)
-	if limit > 100 { limit = 100 }
+	if limit > 100 {
+		limit = 100
+	}
 	start := (page - 1) * limit
-	if start > len(items) { start = len(items) }
+	if start > len(items) {
+		start = len(items)
+	}
 	end := start + limit
-	if end > len(items) { end = len(items) }
+	if end > len(items) {
+		end = len(items)
+	}
 
 	out := make([]Summary, 0, end-start)
 	for _, listing := range items[start:end] {
@@ -147,10 +166,14 @@ func (s *Service) handleDetail(w http.ResponseWriter, r *http.Request) {
 func (s *Service) handleCategories(w http.ResponseWriter, _ *http.Request) {
 	seen := map[string]struct{}{}
 	for _, view := range s.byID {
-		for _, category := range view.Listing.Curation.Categories { seen[strings.ToLower(category)] = struct{}{} }
+		for _, category := range view.Listing.Curation.Categories {
+			seen[strings.ToLower(category)] = struct{}{}
+		}
 	}
 	categories := make([]string, 0, len(seen))
-	for category := range seen { categories = append(categories, category) }
+	for category := range seen {
+		categories = append(categories, category)
+	}
 	sort.Strings(categories)
 	writeJSON(w, http.StatusOK, CategoriesResponse{Categories: categories, Disclaimer: discoveryDisclaimer})
 }
@@ -158,28 +181,38 @@ func (s *Service) handleCategories(w http.ResponseWriter, _ *http.Request) {
 func summarize(view ApplicationView) Summary {
 	r := view.Listing.Canonical
 	return Summary{
-		ServiceID: r.ServiceID,
-		Version: r.Version,
+		ServiceID:      r.ServiceID,
+		Version:        r.Version,
 		Implementation: r.Implementation,
-		Active: r.Active,
-		Canonical: true,
-		Curation: view.Listing.Curation,
-		WarningCount: len(view.Security.Warnings),
-		Links: view.Links,
+		Active:         r.Active,
+		Canonical:      true,
+		Curation:       view.Listing.Curation,
+		WarningCount:   len(view.Security.Warnings),
+		Links:          view.Links,
 	}
 }
 
 func matches(view ApplicationView, query string) bool {
 	q := strings.ToLower(strings.TrimSpace(query))
-	if q == "" { return true }
+	if q == "" {
+		return true
+	}
 	fields := []string{view.Listing.Canonical.ServiceID, view.Listing.Curation.Description}
 	fields = append(fields, view.Listing.Curation.Categories...)
-	for _, field := range fields { if strings.Contains(strings.ToLower(field), q) { return true } }
+	for _, field := range fields {
+		if strings.Contains(strings.ToLower(field), q) {
+			return true
+		}
+	}
 	return false
 }
 
 func contains(values []string, want string) bool {
-	for _, v := range values { if strings.EqualFold(strings.TrimSpace(v), want) { return true } }
+	for _, v := range values {
+		if strings.EqualFold(strings.TrimSpace(v), want) {
+			return true
+		}
+	}
 	return false
 }
 
@@ -190,7 +223,9 @@ func parseBool(raw string) bool {
 
 func positiveInt(raw string, fallback int) int {
 	v, err := strconv.Atoi(strings.TrimSpace(raw))
-	if err != nil || v < 1 { return fallback }
+	if err != nil || v < 1 {
+		return fallback
+	}
 	return v
 }
 

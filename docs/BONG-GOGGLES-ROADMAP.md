@@ -4,10 +4,6 @@ Bong Goggles is the 420 Integrated social layer: an old-Facebook-style network c
 
 Production web target: `https://bonggoggles.420integrated.org`.
 
-## Delivery rule from BG-12.3 onward
-
-Phase 12 is monolithic. BG-12.3 through BG-12.7 are developed on `feature/bong-goggles-phase12-monolithic`, qualified together, reconciled with `main`, and merged only once the complete Phase 12 production backend/indexer is finished.
-
 ## Completed foundation
 
 - **Phase A / PR #55 — social foundation — COMPLETE**
@@ -30,29 +26,43 @@ Phase 12 is monolithic. BG-12.3 through BG-12.7 are developed on `feature/bong-g
 - **Phase 11C passkey/session access bridge / PR #136 — COMPLETE**
   Zero-value session execution, canonical Capability Registry scope checks, auth-epoch invalidation and owner/passkey escalation for sensitive actions.
 
-## Phase 12 — production application/indexer backend
+## Phase 12 — production application/indexer backend — COMPLETE, merged PR #307
 
 - **BG-12.1 — deterministic projector/reorg foundation — COMPLETE, merged PR #140**
   Deterministic event identity/order, exact replay idempotency, reorg detection, rollback/replay, provenance-carrying projections, deterministic state roots and schema/snapshot-bound cursors.
 - **BG-12.2 — domain materialized views — COMPLETE, merged PR #146**
   Profiles, social objects, relationship edges and feed-entry projections; stale-edge/feed deletion; inactive/deleted filtering; deterministic ordering and view digests.
-- **BG-12.3 — canonical contract-event adapters + durable checkpoint recovery — COMPLETE ON PHASE-12 BRANCH**
-  Real Bong Goggles contract-event adapters, canonical state hydration for incomplete event payloads, deterministic mutation reduction, persistent event-stream/checkpoint storage, state-root verification, corruption detection and canonical reorg rollback recovery. Qualified on the monolithic branch before BG-12.4 began.
-- **BG-12.4 — pages/groups/events + discovery/review reducers — COMPLETE ON PHASE-12 BRANCH**
-  Canonical reducers for pages, groups, membership/roles, events/RSVPs, discovery subjects, reviews, corrections and verification attestations. Review replacement/withdrawal state is preserved and stale removed membership is deleted. Qualified on the monolithic branch before BG-12.5 began.
-- **BG-12.5 — search + recommendation query service — COMPLETE ON PHASE-12 BRANCH**
-  Deterministic search-class candidate retrieval/ranking, snapshot-bound pagination, canonical cursor binding, query-time canonical eligibility revalidation, recommendation candidate generation/model binding and freshness envelopes. The backend fails closed without a canonical eligibility provider and never treats materialized active/privacy state as authority. Qualified on the monolithic branch before BG-12.6 began.
-- **BG-12.6 — notification/event pipeline — COMPLETE ON PHASE-12 BRANCH**
-  Deterministic non-authoritative notification candidates for relationship, safety, group, event and discovery activity; canonical state hydration where recipient context is omitted; provenance preservation; self-notification suppression; replay deduplication; restart-safe presentation checkpointing; and append-only finalized/retracted/superseded canonicality updates compatible with 420Notifications. Qualified on the monolithic branch before BG-12.7 began.
-- **BG-12.7 — production ingestion/operations closeout — COMPLETE AND QUALIFIED ON PHASE-12 BRANCH**
-  Provider-neutral RPC/log ingestion, deployment-address validation/configuration, confirmation-safe block processing, bounded reorg recovery, restart/replay behavior, pluggable durable-store boundary, deterministic full-rebuild verification, health/lag metrics, structured logs, alert guidance and production operator runbook.
+- **BG-12.3 — canonical contract-event adapters + durable checkpoint recovery — COMPLETE**
+- **BG-12.4 — pages/groups/events + discovery/review reducers — COMPLETE**
+- **BG-12.5 — search + recommendation query service — COMPLETE**
+- **BG-12.6 — notification/event pipeline — COMPLETE**
+- **BG-12.7 — production ingestion/operations closeout — COMPLETE**
 
-**Phase-12 merge gate:** BG-12.3 through BG-12.7 complete, all indexer tests green, 420 Integrated qualification green, deterministic rebuild verified, current `main` reconciled, then one Phase-12 merge.
+Phase 12 was implemented monolithically from BG-12.3 through BG-12.7, exact-head qualified against Bong Goggles Indexer Verification, 420Docs Qualification and 420 Integrated Qualification, reconciled with `main` with zero base drift, and merged once as PR #307.
 
-## Remaining product phases after Phase 12
+## Phase 13 — media/storage delivery — IN PROGRESS
 
-- **BG-13 — media/storage delivery**
-  Production media upload flow, 420 Storage integration, manifest resolution, thumbnails/transcodes, image/video delivery, CDN/cache strategy, lifecycle/deletion semantics and client-safe media URLs.
+BG-13 integrates Bong Goggles with the already-built media/storage infrastructure instead of creating a second protocol. `BongGogglesMediaRegistry420` remains the canonical Bong Goggles manifest registry; 420Store owns canonical storage agreements/commitments/manifests/placements/proofs; 420Storage is the frozen v1 developer adapter; 420Gateway/420Cache/420Repair provide operational delivery; and 420Media provides bounded derivative-processing jobs.
+
+- **BG-13.1 — media descriptor + canonical resolver — IN PROGRESS**
+  Versioned deterministic Bong Goggles media descriptor, explicit 420Storage object identity, canonical owner/type/item-count/digest verification, derivative linkage, tamper detection, and fail-closed resolution of the off-chain descriptor referenced by `BongGogglesMediaRegistry420.manifestHash`.
+- **BG-13.2 — upload preparation + ingest bridge — NEXT**
+  420Storage v1 prepare/ingest coordination, local size/root verification, canonical storage preconditions, idempotency, bounded staging, transport receipt verification, and manifest-registration transaction preparation.
+- **BG-13.3 — canonical placement/seal orchestration — REMAINS**
+  Read canonical agreement/commitment/object-manifest state, expose user-authorized placement/seal transaction intents, verify retrievability threshold and preserve provider/node provenance.
+- **BG-13.4 — verified retrieval + Gateway delivery — REMAINS**
+  GET/HEAD/range retrieval, exact size + shard-root verification, public/private access, Gateway/Cache routing and stable client-safe delivery envelopes.
+- **BG-13.5 — thumbnails/posters/transcodes — REMAINS**
+  Bounded 420Media derivative jobs, image thumbnails, video posters/previews/transcodes, derivative storage and original/derivative provenance.
+- **BG-13.6 — lifecycle/edit/delete/privacy semantics — REMAINS**
+  Social-object version/media-root changes, presentation eligibility, retention/tombstone behavior, private authorization revalidation and safe derivative retirement.
+- **BG-13.7 — production delivery closeout — REMAINS**
+  CDN/cache policy, responsive asset selection, observability, integrity/route alerts, provider-loss/retrieval-failure drills, load qualification and operator runbooks.
+
+Detailed BG-13 invariants and phase requirements are in `docs/BONG-GOGGLES-BG-13.md`.
+
+## Remaining product phases after BG-13
+
 - **BG-14 — full private messaging**
   Build application messaging UX over 420Messenger/Bong Goggles private contexts: conversations, requests, group threads where permitted, unread/read state, attachments, safety controls, epoch rotation and recovery behavior.
 - **BG-15 — social games application**
@@ -97,8 +107,8 @@ Phase 12 is monolithic. BG-12.3 through BG-12.7 are developed on `feature/bong-g
 
 ## Current position
 
-**BG-12.3 through BG-12.7 are complete and qualified on the monolithic Phase-12 branch. `main` is unchanged from the branch base, so reconciliation is a verified no-op. Current work: fresh exact-head qualification, then the single PR #307 merge.**
+**Phase 12 is merged to `main` in PR #307. Current work: BG-13.1 on `feature/bong-goggles-bg13-media-storage`.**
 
 Critical path:
 
-`Phase-12 exact-head qualification/merge -> BG-13 media/storage -> BG-14 messaging -> BG-15 games -> BG-16 notifications -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI at bonggoggles.420integrated.org -> BG-20 launch hardening -> READY`
+`BG-13 media/storage -> BG-14 messaging -> BG-15 games -> BG-16 notifications -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI at bonggoggles.420integrated.org -> BG-20 launch hardening -> READY`

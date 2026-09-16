@@ -24,37 +24,35 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Foundry with retry
+      - name: Install Foundry
         shell: bash
         run: |
           set -euo pipefail
-          curl -L https://foundry.paradigm.xyz | bash
+          VERSION="v1.8.3"
+          ARCHIVE="foundry_${VERSION}_linux_amd64.tar.gz"
+          CHECKSUM="${ARCHIVE%.tar.gz}.sha256"
+          BASE_URL="https://github.com/foundry-rs/foundry/releases/download/${VERSION}"
+          TMP_DIR="$(mktemp -d)"
+          trap 'rm -rf "$TMP_DIR"' EXIT
 
-          if [ -x "$HOME/.config/.foundry/bin/foundryup" ]; then
-            FOUNDRY_BIN="$HOME/.config/.foundry/bin"
-          elif [ -x "$HOME/.foundry/bin/foundryup" ]; then
-            FOUNDRY_BIN="$HOME/.foundry/bin"
-          else
-            echo "foundryup was not installed in a known location." >&2
-            find "$HOME" -maxdepth 4 -type f -name foundryup -print || true
-            exit 1
-          fi
+          curl --fail --location --retry 5 --retry-all-errors --retry-delay 3 \
+            --connect-timeout 15 --max-time 300 \
+            -o "$TMP_DIR/$ARCHIVE" "$BASE_URL/$ARCHIVE"
+          curl --fail --location --retry 5 --retry-all-errors --retry-delay 3 \
+            --connect-timeout 15 --max-time 60 \
+            -o "$TMP_DIR/$CHECKSUM" "$BASE_URL/$CHECKSUM"
 
-          export PATH="$FOUNDRY_BIN:$PATH"
-          echo "$FOUNDRY_BIN" >> "$GITHUB_PATH"
+          (
+            cd "$TMP_DIR"
+            sha256sum --check "$CHECKSUM"
+          )
 
-          for attempt in 1 2 3 4; do
-            if "$FOUNDRY_BIN/foundryup"; then
-              forge --version
-              cast --version
-              exit 0
-            fi
-            if [ "$attempt" -eq 4 ]; then
-              echo "Foundry installation failed after 4 attempts." >&2
-              exit 1
-            fi
-            sleep $((attempt * 15))
-          done
+          install -d "$HOME/.foundry/bin"
+          tar -xzf "$TMP_DIR/$ARCHIVE" -C "$HOME/.foundry/bin"
+          echo "$HOME/.foundry/bin" >> "$GITHUB_PATH"
+
+          "$HOME/.foundry/bin/forge" --version
+          "$HOME/.foundry/bin/cast" --version
 
       - name: Setup Python
         uses: actions/setup-python@v5

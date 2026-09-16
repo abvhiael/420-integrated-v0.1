@@ -4,6 +4,9 @@ audience: [user, developer, auditor]
 category: application
 status: complete
 version: genesis
+doc_release: genesis
+doc_environment: genesis
+publication_status: current
 ---
 # 420 Verify
 

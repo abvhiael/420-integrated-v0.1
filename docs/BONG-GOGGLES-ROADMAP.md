@@ -44,7 +44,7 @@ Phase 12 is monolithic. BG-12.3 through BG-12.7 are developed on `feature/bong-g
   Deterministic search-class candidate retrieval/ranking, snapshot-bound pagination, canonical cursor binding, query-time canonical eligibility revalidation, recommendation candidate generation/model binding and freshness envelopes. The backend fails closed without a canonical eligibility provider and never treats materialized active/privacy state as authority. Qualified on the monolithic branch before BG-12.6 began.
 - **BG-12.6 — notification/event pipeline — COMPLETE ON PHASE-12 BRANCH**
   Deterministic non-authoritative notification candidates for relationship, safety, group, event and discovery activity; canonical state hydration where recipient context is omitted; provenance preservation; self-notification suppression; replay deduplication; restart-safe presentation checkpointing; and append-only finalized/retracted/superseded canonicality updates compatible with 420Notifications. Qualified on the monolithic branch before BG-12.7 began.
-- **BG-12.7 — production ingestion/operations closeout — IMPLEMENTED, FINAL PHASE-12 QUALIFICATION PENDING**
+- **BG-12.7 — production ingestion/operations closeout — COMPLETE AND QUALIFIED ON PHASE-12 BRANCH**
   Provider-neutral RPC/log ingestion, deployment-address validation/configuration, confirmation-safe block processing, bounded reorg recovery, restart/replay behavior, pluggable durable-store boundary, deterministic full-rebuild verification, health/lag metrics, structured logs, alert guidance and production operator runbook.
 
 **Phase-12 merge gate:** BG-12.3 through BG-12.7 complete, all indexer tests green, 420 Integrated qualification green, deterministic rebuild verified, current `main` reconciled, then one Phase-12 merge.
@@ -97,8 +97,8 @@ Phase 12 is monolithic. BG-12.3 through BG-12.7 are developed on `feature/bong-g
 
 ## Current position
 
-**BG-12.3 through BG-12.7 are implemented on the monolithic Phase-12 branch. Current work: final Phase-12 qualification, reconciliation with current `main`, requalification of the reconciled head, then the single PR #307 merge.**
+**BG-12.3 through BG-12.7 are complete and qualified on the monolithic Phase-12 branch. `main` is unchanged from the branch base, so reconciliation is a verified no-op. Current work: fresh exact-head qualification, then the single PR #307 merge.**
 
 Critical path:
 
-`Phase-12 final qualification/reconciliation/merge -> BG-13 media/storage -> BG-14 messaging -> BG-15 games -> BG-16 notifications -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI at bonggoggles.420integrated.org -> BG-20 launch hardening -> READY`
+`Phase-12 exact-head qualification/merge -> BG-13 media/storage -> BG-14 messaging -> BG-15 games -> BG-16 notifications -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI at bonggoggles.420integrated.org -> BG-20 launch hardening -> READY`

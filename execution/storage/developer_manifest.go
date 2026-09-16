@@ -58,6 +58,14 @@ func DeveloperShardRoot(payload []byte) string {
 	return hex.EncodeToString(sum[:])
 }
 
+func validDeveloperDigest(value string) bool {
+	if len(value) != sha256.Size*2 {
+		return false
+	}
+	decoded, err := hex.DecodeString(value)
+	return err == nil && len(decoded) == sha256.Size
+}
+
 func BuildDeveloperManifest(spec DeveloperManifestSpec) (DeveloperManifestDescriptor, error) {
 	version := strings.TrimSpace(spec.Version)
 	if version == "" {
@@ -70,7 +78,7 @@ func BuildDeveloperManifest(spec DeveloperManifestSpec) (DeveloperManifestDescri
 	contentRoot := strings.ToLower(strings.TrimSpace(spec.ObjectContentRoot))
 	encryption := strings.ToLower(strings.TrimSpace(spec.EncryptionCommitment))
 	erasure := strings.ToLower(strings.TrimSpace(spec.ErasureRoot))
-	if objectID == "" || contentRoot == "" || encryption == "" || erasure == "" || spec.ObjectSizeBytes == 0 || spec.SegmentCount == 0 || spec.DataShards == 0 || spec.TotalShards == 0 || spec.DataShards > spec.TotalShards {
+	if objectID == "" || !validDeveloperDigest(contentRoot) || !validDeveloperDigest(encryption) || !validDeveloperDigest(erasure) || spec.ObjectSizeBytes == 0 || spec.SegmentCount == 0 || spec.DataShards == 0 || spec.TotalShards == 0 || spec.DataShards > spec.TotalShards {
 		return DeveloperManifestDescriptor{}, ErrDeveloperManifest
 	}
 	if len(spec.Shards) > int(spec.TotalShards) {
@@ -83,7 +91,7 @@ func BuildDeveloperManifest(spec DeveloperManifestSpec) (DeveloperManifestDescri
 		shards[i].AgreementID = strings.TrimSpace(shards[i].AgreementID)
 		shards[i].CommitmentID = strings.TrimSpace(shards[i].CommitmentID)
 		shards[i].NodeID = strings.TrimSpace(shards[i].NodeID)
-		if shards[i].ShardIndex >= spec.TotalShards || shards[i].ShardRoot == "" || shards[i].SizeBytes == 0 {
+		if shards[i].ShardIndex >= spec.TotalShards || !validDeveloperDigest(shards[i].ShardRoot) || shards[i].SizeBytes == 0 {
 			return DeveloperManifestDescriptor{}, ErrDeveloperManifest
 		}
 		if _, ok := seen[shards[i].ShardIndex]; ok {
@@ -147,12 +155,13 @@ func BuildDeveloperManifest(spec DeveloperManifestSpec) (DeveloperManifestDescri
 }
 
 func DeveloperPlacementCompatible(manifest DeveloperManifestDescriptor, shard DeveloperShardSpec) bool {
-	if manifest.Version != DeveloperAPIVersion || shard.ShardIndex >= manifest.TotalShards || strings.TrimSpace(shard.ShardRoot) == "" || shard.SizeBytes == 0 {
+	root := strings.ToLower(strings.TrimSpace(shard.ShardRoot))
+	if manifest.Version != DeveloperAPIVersion || shard.ShardIndex >= manifest.TotalShards || !validDeveloperDigest(root) || shard.SizeBytes == 0 {
 		return false
 	}
 	for _, expected := range manifest.Shards {
 		if expected.ShardIndex == shard.ShardIndex {
-			return strings.EqualFold(strings.TrimSpace(expected.ShardRoot), strings.TrimSpace(shard.ShardRoot)) && expected.SizeBytes == shard.SizeBytes
+			return strings.EqualFold(strings.TrimSpace(expected.ShardRoot), root) && expected.SizeBytes == shard.SizeBytes
 		}
 	}
 	return false
@@ -160,17 +169,17 @@ func DeveloperPlacementCompatible(manifest DeveloperManifestDescriptor, shard De
 
 func DeveloperObjectRefFromManifest(manifest DeveloperManifestDescriptor, manifestID string, shardIndex uint32) (DeveloperObjectRef, error) {
 	manifestID = strings.TrimSpace(manifestID)
-	if manifestID == "" {
+	if manifestID == "" || manifest.Version != DeveloperAPIVersion || strings.TrimSpace(manifest.ObjectID) == "" {
 		return DeveloperObjectRef{}, ErrDeveloperManifest
 	}
 	for _, shard := range manifest.Shards {
 		if shard.ShardIndex != shardIndex {
 			continue
 		}
-		if shard.CommitmentID == "" {
+		if strings.TrimSpace(shard.AgreementID) == "" || strings.TrimSpace(shard.CommitmentID) == "" || strings.TrimSpace(shard.NodeID) == "" || !validDeveloperDigest(strings.ToLower(strings.TrimSpace(shard.ShardRoot))) || shard.SizeBytes == 0 {
 			return DeveloperObjectRef{}, ErrDeveloperManifest
 		}
-		return DeveloperObjectRef{ObjectID: manifest.ObjectID, ManifestID: manifestID, ShardIndex: shard.ShardIndex, ShardRoot: shard.ShardRoot, SizeBytes: shard.SizeBytes, CommitmentID: shard.CommitmentID}, nil
+		return DeveloperObjectRef{ObjectID: manifest.ObjectID, ManifestID: manifestID, ShardIndex: shard.ShardIndex, ShardRoot: strings.ToLower(strings.TrimSpace(shard.ShardRoot)), SizeBytes: shard.SizeBytes, CommitmentID: strings.TrimSpace(shard.CommitmentID)}, nil
 	}
 	return DeveloperObjectRef{}, ErrDeveloperManifest
 }

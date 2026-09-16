@@ -10,8 +10,8 @@ import (
 type developerGatewaySourceFunc func(context.Context, GatewayRequest) ([]byte, error)
 func (f developerGatewaySourceFunc) FetchGatewayObject(ctx context.Context, req GatewayRequest) ([]byte, error) { return f(ctx, req) }
 
-type developerGatewayDiscoveryStub struct { candidates []GatewayCandidate }
-func (d developerGatewayDiscoveryStub) DiscoverGatewaySources(context.Context, GatewayRequest) ([]GatewayCandidate, error) { return append([]GatewayCandidate(nil), d.candidates...), nil }
+type developerHelperGatewayDiscoveryStub struct { candidates []GatewayCandidate }
+func (d developerHelperGatewayDiscoveryStub) DiscoverGatewaySources(context.Context, GatewayRequest) ([]GatewayCandidate, error) { return append([]GatewayCandidate(nil), d.candidates...), nil }
 
 func developerHelperObject(payload []byte) DeveloperObjectRef {
 	return DeveloperObjectRef{ObjectID: "object-1", ManifestID: "manifest-1", ShardIndex: 0, ShardRoot: DeveloperShardRoot(payload), SizeBytes: uint64(len(payload)), CommitmentID: "commitment-1"}
@@ -65,7 +65,7 @@ func TestDeveloperGatewayHelperCanForbidStoreFallbackIncludingDiscovery(t *testi
 	payload := []byte("gateway-payload")
 	object := developerHelperObject(payload)
 	store := developerGatewaySourceFunc(func(context.Context, GatewayRequest) ([]byte,error) { return append([]byte(nil), payload...), nil })
-	helper := DeveloperGatewayHelper{Router:GatewayRouter{Discovery:developerGatewayDiscoveryStub{candidates:[]GatewayCandidate{{ProviderID:"p", NodeID:"n", Capability:GatewayCapabilityStore, Priority:1, Active:true, Source:store}}}}}
+	helper := DeveloperGatewayHelper{Router:GatewayRouter{Discovery:developerHelperGatewayDiscoveryStub{candidates:[]GatewayCandidate{{ProviderID:"p", NodeID:"n", Capability:GatewayCapabilityStore, Priority:1, Active:true, Source:store}}}}}
 	_, err := helper.Retrieve(context.Background(), DeveloperRetrieveRequest{Object:object, Access:DeveloperReadAccess{Mode:DeveloperAccessPublic}}, DeveloperRetrievalPolicy{AllowCache:true, AllowStoreFallback:false})
 	if !errors.Is(err, ErrGatewayRoute) { t.Fatalf("store discovery bypassed policy: %v", err) }
 }

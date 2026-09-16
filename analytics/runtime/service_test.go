@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"testing"
 	"time"
 
@@ -21,7 +22,7 @@ func TestRefreshQualifiesIndexerAndMarksReady(t *testing.T) {
 		case "/ready":
 			_ = json.NewEncoder(w).Encode(map[string]any{"apiVersion":"v1","data":map[string]any{"ready":true,"databaseReady":true,"chainId":"420","indexedHead":"100"}})
 		case "/v1/status":
-			_ = json.NewEncoder(w).Encode(map[string]any{"apiVersion":"v1","data":map[string]any{"chainId":"420","indexedHead":"100","indexedHeadHash":"0xabc","indexedHeadTimestamp":now.Unix(),"lag":"0","authoritative":false,"finality":map[string]any{"mode":"safe","confirmations":"5","safeHead":"95"}}})
+			_ = json.NewEncoder(w).Encode(map[string]any{"apiVersion":"v1","data":map[string]any{"chainId":"420","indexedHead":"100","indexedHeadHash":"0xabc","indexedHeadTimestamp":strconv.FormatInt(now.Unix(),10),"lag":"0","authoritative":false,"finality":map[string]any{"mode":"safe","confirmations":"5","safeHead":"95"}}})
 		default:
 			http.NotFound(w, r)
 		}

@@ -1,6 +1,6 @@
 {
   "schema": "420-storage-proof-protocol-v1",
-  "status": "IMPLEMENTATION_QUALIFICATION",
+  "status": "PRODUCTION_QUALIFIED",
   "service": "420Store",
   "parentProtocol": "420 Resource Protocol",
   "design": {
@@ -9,7 +9,24 @@
     "payloadStorage": "off-chain encrypted data only",
     "proofClasses": ["REPLICA_COMMITMENT","AVAILABILITY_WINDOW","AUDIT_RESPONSE"]
   },
-  "contracts": ["StorageProofIds420.sol","IStorageProofVerifier420.sol","StorageProofSchemeRegistry420.sol","StorageCommitmentRegistry420.sol","StorageProofRegistry420.sol"],
+  "contracts": [
+    "StorageIds420.sol",
+    "StorageProofIds420.sol",
+    "IStorageProofVerifier420.sol",
+    "StorageProofSchemeRegistry420.sol",
+    "StorageCapacityRegistry420.sol",
+    "StorageCommitmentRegistry420.sol",
+    "StorageProofRegistry420.sol",
+    "StorageAgreementRegistry420.sol",
+    "StorageObjectManifestRegistry420.sol",
+    "StorageSettlementRegistry420.sol"
+  ],
+  "runtimeProfiles": {
+    "developerApi": "v1",
+    "topologySchema": "storage-topology-v1",
+    "disasterRecoveryEvidence": "storage-dr-v1",
+    "testnetEvidence": "storage-testnet-evidence-v1"
+  },
   "invariants": [
     "STORAGE-PROOF-INV-001: only active 420Store nodes belonging to active staked Resource Protocol providers may originate storage commitments",
     "STORAGE-PROOF-INV-002: storage commitment identity is single-use and its provider, node, proof scheme, roots, byte size and time bounds are immutable after registration",
@@ -20,7 +37,24 @@
     "STORAGE-PROOF-INV-007: accepted proof bytes are not retained on-chain; only a proof digest and canonical receipt metadata are stored",
     "STORAGE-PROOF-INV-008: proof verification does not itself release payment; settlement modules consume verified proof state under separate accounting rules",
     "STORAGE-PROOF-INV-009: encrypted user payloads, erasure-coded shards and private metadata remain off-chain",
-    "STORAGE-PROOF-INV-010: proof scheme verifiers are replaceable only by registering a new scheme id, preserving historical proof reproducibility"
+    "STORAGE-PROOF-INV-010: proof scheme verifiers are replaceable only by registering a new scheme id, preserving historical proof reproducibility",
+    "STORAGE-PROOF-INV-011: storage agreements bind STORE offers, reservations, immutable commitments, proof policy and erasure parameters before activation",
+    "STORAGE-PROOF-INV-012: manifests are content-immutable after sealing; repair may rotate an unavailable shard placement only while preserving shard index, shard root and byte length",
+    "STORAGE-PROOF-INV-013: proof-window settlement custody remains in 420Vault and each reserved window finalizes as PAID or REFUNDED"
   ],
-  "futureExtensions": ["storage lease/deal economics","provider collateral and storage-specific slashing","random challenge scheduling through 420 Random","erasure-set and redundancy manifests","repair attestations","retrieval proofs and bandwidth accounting","proof aggregation and succinct verifier adapters"]
+  "implementedExtensions": [
+    "storage agreements and lease economics",
+    "capacity reservations and oversubscription prevention",
+    "erasure-set manifests and shard placements",
+    "repair-driven placement replacement preserving content identity",
+    "proof-window settlement through 420Vault",
+    "developer API and SDK v1",
+    "Gateway, Cache and Repair runtime integration",
+    "multi-provider production topology and qualification evidence"
+  ],
+  "futureExtensions": [
+    "random challenge scheduling through 420 Random",
+    "retrieval proofs and additional bandwidth-proof profiles",
+    "proof aggregation and succinct verifier adapters"
+  ]
 }

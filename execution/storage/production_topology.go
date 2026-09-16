@@ -160,17 +160,40 @@ func (d MultiProviderResourceDiscovery) DiscoverResources(ctx context.Context, r
 	if len(d.Sources) < 2 {
 		return nil, ErrProductionTopology
 	}
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	requested := make(map[ResourceCapability]struct{}, len(req.Capabilities))
+	for _, capability := range req.Capabilities {
+		capability = ResourceCapability(strings.ToLower(strings.TrimSpace(string(capability))))
+		if !validResourceCapability(capability) {
+			return nil, ErrProductionTopology
+		}
+		requested[capability] = struct{}{}
+	}
+	if len(requested) == 0 {
+		return nil, ErrProductionTopology
+	}
+
 	merged := make([]ResourceEndpoint, 0)
 	seen := make(map[string]struct{})
+	succeeded := 0
 	for _, source := range d.Sources {
 		if source == nil {
-			return nil, ErrProductionTopology
+			continue
 		}
 		endpoints, err := source.DiscoverResources(ctx, req)
 		if err != nil {
-			return nil, err
+			if ctx.Err() != nil {
+				return nil, ctx.Err()
+			}
+			continue
 		}
+		succeeded++
 		for _, endpoint := range endpoints {
+			if !validProductionDiscoveredEndpoint(endpoint, requested, req.IncludeDegraded) {
+				continue
+			}
 			key := strings.ToLower(string(endpoint.Capability) + "\x00" + endpoint.ProviderID + "\x00" + endpoint.NodeID + "\x00" + endpoint.ServiceID)
 			if _, exists := seen[key]; exists {
 				continue
@@ -178,6 +201,9 @@ func (d MultiProviderResourceDiscovery) DiscoverResources(ctx context.Context, r
 			seen[key] = struct{}{}
 			merged = append(merged, endpoint)
 		}
+	}
+	if succeeded == 0 {
+		return nil, ErrProductionTopology
 	}
 	sort.SliceStable(merged, func(i, j int) bool {
 		if merged[i].Capability != merged[j].Capability {
@@ -195,4 +221,23 @@ func (d MultiProviderResourceDiscovery) DiscoverResources(ctx context.Context, r
 		return strings.ToLower(merged[i].ServiceID) < strings.ToLower(merged[j].ServiceID)
 	})
 	return merged, nil
+}
+
+func validProductionDiscoveredEndpoint(endpoint ResourceEndpoint, requested map[ResourceCapability]struct{}, includeDegraded bool) bool {
+	if strings.TrimSpace(endpoint.ProviderID) == "" || strings.TrimSpace(endpoint.NodeID) == "" || strings.TrimSpace(endpoint.ServiceID) == "" {
+		return false
+	}
+	if !validResourceCapability(endpoint.Capability) {
+		return false
+	}
+	if _, ok := requested[endpoint.Capability]; !ok {
+		return false
+	}
+	if endpoint.State != ResourceServiceRunning && !(includeDegraded && endpoint.State == ResourceServiceDegraded) {
+		return false
+	}
+	if strings.TrimSpace(endpoint.Endpoint) == "" && endpoint.Source == nil {
+		return false
+	}
+	return true
 }

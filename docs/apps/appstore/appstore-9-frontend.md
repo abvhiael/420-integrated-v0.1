@@ -1,6 +1,9 @@
 ---
 title: APPSTORE-9 Genesis frontend
-status: qualified implementation
+audience: [developer, operator, user]
+category: application
+status: development
+version: current
 ---
 # APPSTORE-9 — Genesis frontend
 

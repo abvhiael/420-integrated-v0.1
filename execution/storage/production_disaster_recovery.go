@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -28,9 +29,9 @@ type ProductionDRServiceState struct {
 }
 
 type ProductionDRBackup struct {
-	SchemaVersion       string                         `json:"schema_version"`
-	CapturedAt          time.Time                      `json:"captured_at"`
-	TopologyFingerprint string                         `json:"topology_fingerprint"`
+	SchemaVersion       string                          `json:"schema_version"`
+	CapturedAt          time.Time                       `json:"captured_at"`
+	TopologyFingerprint string                          `json:"topology_fingerprint"`
 	Manifests           []ProductionDRManifestIdentity `json:"manifests"`
 	Services            []ProductionDRServiceState     `json:"services"`
 }
@@ -115,7 +116,7 @@ func productionDRManifestIdentity(manifestID string, manifest DeveloperManifestD
 	shards := append([]DeveloperShardSpec(nil), manifest.Shards...)
 	sort.Slice(shards, func(i, j int) bool { return shards[i].ShardIndex < shards[j].ShardIndex })
 	for _, shard := range shards {
-		parts = append(parts, strings.Join([]string{string(rune(shard.ShardIndex)), strings.ToLower(strings.TrimSpace(shard.ShardRoot)), strings.TrimSpace(shard.AgreementID), strings.TrimSpace(shard.CommitmentID), strings.TrimSpace(shard.NodeID)}, "\x00"))
+		parts = append(parts, strings.Join([]string{strconv.FormatUint(uint64(shard.ShardIndex), 10), strings.ToLower(strings.TrimSpace(shard.ShardRoot)), strings.TrimSpace(shard.AgreementID), strings.TrimSpace(shard.CommitmentID), strings.TrimSpace(shard.NodeID)}, "\x00"))
 	}
 	sum := sha256.Sum256([]byte(strings.Join(parts, "\n")))
 	return ProductionDRManifestIdentity{ManifestID: manifestID, ObjectID: manifest.ObjectID, ManifestHash: strings.ToLower(strings.TrimSpace(manifest.ManifestHash)), Fingerprint: hex.EncodeToString(sum[:])}, nil

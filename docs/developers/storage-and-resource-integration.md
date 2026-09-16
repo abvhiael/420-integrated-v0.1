@@ -82,6 +82,7 @@ A healthy provider filesystem alone is not canonical proof of availability, and 
 ## Related architecture
 
 - [420Storage Developer Hub](420storage-developer-hub.md)
+- [420Storage production topology qualification](420storage-production-topology.md)
 - [Storage Proof and Resource Protocol](../architecture/protocols/storage-proof-resource-protocol.md)
 - [Storage and Resource infrastructure](../architecture/infrastructure/storage-resource-infrastructure.md)
 - [Provider-backed integration model](provider-backed-integrations.md)

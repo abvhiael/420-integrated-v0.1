@@ -60,7 +60,7 @@ Implemented the application delivery boundary above the frozen 420Storage develo
 - Gateway/Cache tier, provider ID and node ID preserved only as non-authoritative route provenance;
 - stable client-safe response envelopes with MIME type, range headers, verified flag and no provider credentials, filesystem paths or forwarded arbitrary headers.
 
-### BG-13.5 — thumbnails, posters and transcodes — IN PROGRESS
+### BG-13.5 — thumbnails, posters and transcodes — COMPLETE AND QUALIFIED
 
 Implemented the Bong Goggles derivative coordinator above the existing 420Media protocol/node boundary:
 
@@ -76,15 +76,19 @@ Implemented the Bong Goggles derivative coordinator above the existing 420Media 
 - derivative items preserve explicit `derivativeOf` linkage to the immutable source item rather than overwriting the original identity;
 - job ID, operator ID, opaque result reference and SLA evidence hash are retained as secret-free processing provenance.
 
-### BG-13.6 — lifecycle, edits, deletion and privacy
+### BG-13.6 — lifecycle, edits, deletion and privacy — IN PROGRESS
 
-Define application semantics across immutable storage history and mutable social presentation.
+Implemented the Bong Goggles media lifecycle/presentation policy above canonical social-object state:
 
-- social-object edits may point to a new `mediaRoot`; old historical version bindings remain auditable;
-- deleted/removed/hidden social content must stop normal client delivery according to canonical social policy;
-- storage deletion/retention is explicit and must not rewrite historical commitments/proofs;
-- private media delivery revalidates audience/session authorization at request time;
-- expired/superseded derivative references are removed from active delivery without falsifying canonical history.
+- reads the current `BongGogglesSocialObjectRegistry420` object and exact `mediaRootAtVersion(objectId, version)` binding before deciding presentation eligibility;
+- requires descriptor ownership to match the canonical social-object author;
+- current normal delivery requires the requested media root to match both the requested canonical version and the object's current media binding;
+- old versions remain auditable and retain immutable 420Store/420Storage history, but are not silently treated as current presentation media;
+- `HIDDEN`, `DELETED` and `REMOVED` objects all stop normal media presentation while leaving canonical storage agreements, commitments, manifests, placements and proofs untouched;
+- audience eligibility is re-evaluated for every active-current presentation request through the existing canonical `BongGogglesSocialPolicy420.canView` semantics rather than cached as permanent permission;
+- private/follower/friend visibility therefore fails closed when current social relationships or profile state no longer authorize the viewer;
+- retired/superseded derivatives can be excluded from active presentation through an explicit retirement policy while their original storage/provenance history remains intact;
+- retention disposition separates tombstone/hidden/current/historical presentation state from immutable canonical storage history.
 
 ### BG-13.7 — production delivery closeout
 
@@ -115,5 +119,8 @@ Define application semantics across immutable storage history and mutable social
 14. Gateway/Cache routing metadata is operational evidence only and cannot replace canonical object identity or application authorization.
 15. Bong Goggles never converts requester-controlled strings into media-engine command lines; derivative execution is selected only through configured 420Media capability/profile mappings.
 16. A 420Media result is not accepted as a Bong Goggles derivative until the job/input/capability binding and returned 420Storage identity have been validated.
+17. Historical `mediaRootAtVersion` bindings remain auditable but do not automatically regain current presentation eligibility after an edit.
+18. Hiding, deleting, removing or retiring presentation state never rewrites canonical storage commitments, placements or proof history.
+19. Audience authorization is evaluated from current canonical social policy at delivery time; prior visibility is not treated as a durable access grant.
 
 BG-13 is developed on `feature/bong-goggles-bg13-media-storage` after Phase 12 merged to `main` in PR #307.

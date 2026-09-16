@@ -30,31 +30,35 @@ Implemented the application upload coordinator over the frozen 420Storage `v1` p
 - upload results explicitly marked non-authoritative presentation evidence;
 - callback boundary that delegates bounded staging, byte hashing, running-provider discovery and sink delivery to the existing 420Storage coordinator rather than duplicating that protocol logic.
 
-### BG-13.3 — canonical storage placement/seal orchestration — IN PROGRESS
+### BG-13.3 — canonical storage placement/seal orchestration — COMPLETE AND QUALIFIED
 
-Implemented the first canonical orchestration boundary over `StorageObjectManifestRegistry420`, `StorageAgreementRegistry420` and `StorageCommitmentRegistry420`:
+Implemented the canonical orchestration boundary over `StorageObjectManifestRegistry420`, `StorageAgreementRegistry420` and `StorageCommitmentRegistry420`:
 
 - canonical manifest, agreement, commitment and placement reads;
 - descriptor owner/object/shard identity checked against canonical storage state;
 - active agreement, commitment, erasure-policy, root, size, node and placement provenance validated fail-closed;
 - placement intent generation using the exact `registerPlacement(manifestId, shardIndex, agreementId, shardRoot, shardSizeBytes)` contract call;
 - seal intent generation using `sealManifest(manifestId)` only after all declared placements exist;
-- transaction intents are explicitly non-authoritative and require user/wallet authorization instead of granting the backend signing authority;
-- a sealed manifest is not considered delivery-ready unless canonical `isRetrievable(manifestId)` returns true;
-- agreement effectiveness and commitment liveness are retained as canonical readiness evidence rather than inferred from upload receipts or provider runtime state.
+- transaction intents explicitly non-authoritative and requiring user/wallet authorization;
+- a sealed manifest is not delivery-ready unless canonical `isRetrievable(manifestId)` returns true;
+- agreement effectiveness and commitment liveness retained as canonical readiness evidence.
 
-Qualification of the BG-13.3 exact head is the remaining gate before BG-13.4 begins.
+### BG-13.4 — verified retrieval + Gateway delivery — IN PROGRESS
 
-### BG-13.4 — verified retrieval + Gateway delivery
+Implemented the application delivery boundary above the frozen 420Storage developer API and 420Gateway:
 
-Build the delivery resolver from Bong Goggles `mediaRoot` to 420Storage object references and Gateway retrieval.
-
-- GET/HEAD and byte-range support;
-- exact size + SHA-256 shard-root verification;
-- public/private access modes with default-deny private access;
-- no forwarding headers promoted to identity;
-- Cache/Gateway route failover remains operational metadata;
-- stable client-safe delivery envelopes without exposing provider credentials or filesystem paths.
+- exact 420Storage v1 retrieve DTO generation from descriptor object identity;
+- GET and HEAD delivery semantics;
+- single HTTP-style byte ranges including open-ended and suffix ranges;
+- full payload verification before any client range is sliced;
+- exact returned object identity verification across object ID, manifest ID, shard index, shard root, byte size and commitment ID;
+- exact byte-length verification and SHA-256 shard-root verification before bytes are marked verified;
+- canonical delivery-readiness hook so a non-retrievable object can fail closed before Gateway retrieval;
+- public access by explicit mode;
+- private access default-deny unless a trusted application authorization callback revalidates subject/session and returns permission;
+- only normalized `read` capability context is forwarded to 420Storage for private retrieval;
+- Gateway/Cache tier, provider ID and node ID preserved only as non-authoritative route provenance;
+- stable client-safe response envelopes with MIME type, range headers, verified flag and no provider credentials, filesystem paths or forwarded arbitrary headers.
 
 ### BG-13.5 — thumbnails, posters and transcodes
 
@@ -102,5 +106,7 @@ Define application semantics across immutable storage history and mutable social
 10. A social-object lifecycle change can remove presentation eligibility without rewriting immutable storage/proof history.
 11. Backend placement/seal planning never signs or executes canonical transactions; user/wallet authorization remains mandatory.
 12. `isSealed` is not treated as synonymous with current retrievability; canonical `isRetrievable` is required for delivery readiness.
+13. Byte-range responses never weaken integrity checking: the complete retrieved object is verified before the requested range is returned.
+14. Gateway/Cache routing metadata is operational evidence only and cannot replace canonical object identity or application authorization.
 
 BG-13 is developed on `feature/bong-goggles-bg13-media-storage` after Phase 12 merged to `main` in PR #307.

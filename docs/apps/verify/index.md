@@ -15,3 +15,4 @@ Verification is bound to network, address and deployed code hash.
 
 - [VERIFY-5 bytecode comparison and classification](verify-5-bytecode-classification.md) — defines `FULL_MATCH`, `PARTIAL_MATCH`, `MISMATCH`, and `UNVERIFIABLE`, including exact runtime/creation comparison and explicit diagnostics for metadata, linked libraries, and immutables.
 - [VERIFY-6 reproducible evidence store and history](verify-6-evidence-store.md) — defines append-only evidence history, restart reconstruction, content-hash validation, and the non-canonical storage boundary.
+- [VERIFY-7 proxies and upgrades](verify-7-proxies-upgrades.md) — defines canonical proxy relationship resolution, separate proxy/implementation verification, upgrade history, and invalidation of stale implementation status.

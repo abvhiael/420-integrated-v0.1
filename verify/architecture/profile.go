@@ -5,7 +5,7 @@ import "slices"
 const (
 	ServiceName = "420Verify"
 	ServiceID   = "420/service/verify/v1"
-	Phase       = "VERIFY-0"
+	Phase       = "VERIFY-1"
 )
 
 type ResultClass string
@@ -27,30 +27,30 @@ const (
 type SecurityExclusion string
 
 const (
-	PrivateKeys          SecurityExclusion = "wallet_private_keys"
-	SigningSecrets       SecurityExclusion = "signing_secrets"
-	RegistryAuthority    SecurityExclusion = "registry_authority"
-	WalletAuthority      SecurityExclusion = "wallet_authority"
-	GovernanceAuthority  SecurityExclusion = "governance_authority"
+	PrivateKeys         SecurityExclusion = "wallet_private_keys"
+	SigningSecrets      SecurityExclusion = "signing_secrets"
+	RegistryAuthority   SecurityExclusion = "registry_authority"
+	WalletAuthority     SecurityExclusion = "wallet_authority"
+	GovernanceAuthority SecurityExclusion = "governance_authority"
 )
 
 type Profile struct {
-	Service                         string
-	ServiceID                       string
-	Phase                           string
-	ContractsRequired               bool
-	CanonicalStateAuthority         bool
-	VerificationDatabaseCanonical   bool
-	AlternativeVerifiersAllowed     bool
-	FullMatchRequiresRuntimeMatch   bool
-	ResultsBoundToChainAddressCode  bool
-	ProxyAndImplementationSeparate  bool
-	VerificationImpliesAudit        bool
-	VerificationImpliesSafety       bool
-	VerificationImpliesOfficial     bool
-	Sources                         []CanonicalSource
-	ResultClasses                   []ResultClass
-	SecurityExclusions              []SecurityExclusion
+	Service                        string
+	ServiceID                      string
+	Phase                          string
+	ContractsRequired              bool
+	CanonicalStateAuthority        bool
+	VerificationDatabaseCanonical  bool
+	AlternativeVerifiersAllowed    bool
+	FullMatchRequiresRuntimeMatch  bool
+	ResultsBoundToChainAddressCode bool
+	ProxyAndImplementationSeparate bool
+	VerificationImpliesAudit       bool
+	VerificationImpliesSafety      bool
+	VerificationImpliesOfficial    bool
+	Sources                        []CanonicalSource
+	ResultClasses                  []ResultClass
+	SecurityExclusions             []SecurityExclusion
 }
 
 func GenesisProfile() Profile {

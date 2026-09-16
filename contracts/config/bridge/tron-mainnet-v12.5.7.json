@@ -1,0 +1,42 @@
+{
+  "schema": "420-bridge-tron-mainnet-v12.5.7",
+  "status": "APPROVED_INACTIVE_PENDING_PRODUCTION_SOLIDIFIED_RECEIPT_VERIFIER_AND_GATEWAY_ACCOUNT",
+  "canonical_chain_key": "420/BRIDGE/CHAIN/TRX",
+  "chain_family": "ACCOUNT_TRON_DPOS",
+  "route_chain_id": "0x5452580000000001",
+  "network_identity": {
+    "domain": "TRON/MAINNET",
+    "external_address_prefix": "0x41",
+    "finality_basis": "solidified block / SolidityNode view"
+  },
+  "native_asset": {
+    "symbol": "TRX",
+    "units": "sun",
+    "sun_per_trx": 1000000
+  },
+  "adapter": {
+    "contract": "TronBridgeAdapter420",
+    "adapter_id_preimage": "420/BRIDGE/TRON/MAINNET/V12.5.7",
+    "outbound_recipient": "21-byte TRON hex address: 0x41 prefix plus 20-byte account payload",
+    "native_value_on_420_outbound": "rejected"
+  },
+  "activation_requirements": [
+    "production ITronFinalityVerifier420 implementation proves transaction inclusion in a solidified TRON mainnet block",
+    "production verifier validates the final execution result from the solidified receipt where execution status applies",
+    "canonical bridge gateway account is governance allowlisted",
+    "TRX asset id and route id are governance bound",
+    "route risk caps and emergency isolation are configured",
+    "end-to-end inbound and outbound qualification passes"
+  ],
+  "security_invariants": [
+    "wrong network domain fails closed",
+    "unsolidified proofs fail closed",
+    "failed execution results fail closed",
+    "unapproved gateway accounts fail closed",
+    "message replay fails closed",
+    "transaction replay under a different message id fails closed",
+    "direct adapter calls bypassing GatewayRouter420 fail closed",
+    "outbound recipients must be exactly 21 bytes and begin with 0x41",
+    "outbound extra data is rejected"
+  ]
+}

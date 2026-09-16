@@ -48,6 +48,18 @@ func (c *RPCClient) Acquire(ctx context.Context, address string, expectedChainID
 	return e, nil
 }
 
+// StorageAt exposes canonical eth_getStorageAt reads for proxy relationship resolution.
+// The HTTP client timeout still bounds the request when callers use this context-free adapter.
+func (c *RPCClient) StorageAt(address, slot, block string) (string, error) {
+	if !validAddress(address) { return "", errors.New("invalid contract address") }
+	if !validHash(slot) { return "", errors.New("invalid storage slot") }
+	if strings.TrimSpace(block) == "" { return "", errors.New("block is required") }
+	var out string
+	if err := c.call(context.Background(), "eth_getStorageAt", []any{address, slot, block}, &out); err != nil { return "", err }
+	if len(out) != 66 || !strings.HasPrefix(out, "0x") { return "", errors.New("eth_getStorageAt returned invalid storage word") }
+	return strings.ToLower(out), nil
+}
+
 func (c *RPCClient) chainID(ctx context.Context) (uint64,error) { var out string; if err:=c.call(ctx,"eth_chainId",[]any{},&out); err!=nil{return 0,err}; return parseHexUint(out) }
 func (c *RPCClient) blockNumber(ctx context.Context) (uint64,error) { var out string; if err:=c.call(ctx,"eth_blockNumber",[]any{},&out); err!=nil{return 0,err}; return parseHexUint(out) }
 func (c *RPCClient) codeAt(ctx context.Context,address,block string)(string,error){var out string; if err:=c.call(ctx,"eth_getCode",[]any{address,block},&out); err!=nil{return "",err}; return out,nil}

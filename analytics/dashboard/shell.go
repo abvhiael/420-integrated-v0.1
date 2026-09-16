@@ -20,12 +20,14 @@ type StatusView struct {
 type StatusProvider func() StatusView
 
 type Shell struct {
-	status StatusProvider
-	tmpl   *template.Template
+	status       StatusProvider
+	presentation PresentationProvider
+	tmpl         *template.Template
 }
 
 type pageData struct {
 	Status         StatusView
+	Presentation   Presentation
 	IndexedAt      string
 	FinalityDepth  uint64
 	WindowPresets  []string
@@ -42,14 +44,21 @@ type navItem struct {
 }
 
 func New(status StatusProvider) (*Shell, error) {
+	return NewWithPresentation(status, nil)
+}
+
+func NewWithPresentation(status StatusProvider, presentation PresentationProvider) (*Shell, error) {
 	if status == nil {
 		status = func() StatusView { return StatusView{} }
+	}
+	if presentation == nil {
+		presentation = func() Presentation { return Presentation{} }
 	}
 	t, err := template.New("analytics-dashboard").Parse(pageTemplate)
 	if err != nil {
 		return nil, err
 	}
-	return &Shell{status: status, tmpl: t}, nil
+	return &Shell{status: status, presentation: presentation, tmpl: t}, nil
 }
 
 func (s *Shell) Handler() http.Handler {
@@ -69,10 +78,11 @@ func (s *Shell) serve(w http.ResponseWriter, _ *http.Request) {
 		indexedAt = status.IndexedAt.UTC().Format(time.RFC3339)
 	}
 	data := pageData{
-		Status:        status,
-		IndexedAt:     indexedAt,
-		FinalityDepth: depth,
-		WindowPresets: []string{"1h", "24h", "7d", "30d", "90d"},
+		Status:         status,
+		Presentation:   s.presentation(),
+		IndexedAt:      indexedAt,
+		FinalityDepth:  depth,
+		WindowPresets:  []string{"1h", "24h", "7d", "30d", "90d"},
 		Navigation: []navItem{
 			{Label: "Network", Href: Route + "#network"},
 			{Label: "Validators", Href: Route + "#validators"},
@@ -107,43 +117,21 @@ const pageTemplate = `<!doctype html>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>420Analytics</title>
 <style>
-:root{color-scheme:dark;background:#101311;color:#edf2ee;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-*{box-sizing:border-box}body{margin:0;background:#101311;color:#edf2ee}a{color:inherit}.shell{display:grid;grid-template-columns:230px 1fr;min-height:100vh}.side{border-right:1px solid #29322c;padding:24px}.brand{font-weight:750;letter-spacing:.02em}.muted{color:#a7b1aa}.nav{display:grid;gap:8px;margin-top:28px}.nav a{padding:10px 12px;border-radius:8px;text-decoration:none}.nav a:hover,.nav a:focus{background:#1a211d}.main{padding:28px;max-width:1400px;width:100%}.top{display:flex;gap:18px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}.trust{font-size:.86rem;padding:7px 10px;border:1px solid #3a463e;border-radius:999px}.overview{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:22px 0}.panel{background:#151a17;border:1px solid #29322c;border-radius:12px;padding:16px}.k{font-size:.78rem;color:#a7b1aa;text-transform:uppercase;letter-spacing:.07em}.v{font-size:1.35rem;font-weight:700;margin-top:6px}.controls{display:flex;gap:12px;flex-wrap:wrap;align-items:end}.controls label{display:grid;gap:6px;font-size:.85rem}.controls select,.controls input{background:#0e120f;color:#edf2ee;border:1px solid #39443d;border-radius:8px;padding:9px 10px}.controls button{border:1px solid #526156;background:#1d2721;color:#edf2ee;border-radius:8px;padding:10px 14px;cursor:pointer}.method{margin-left:auto}.sections{display:grid;gap:14px;margin-top:20px}.placeholder{min-height:120px;display:flex;align-items:center;justify-content:center;color:#8e9a92;border:1px dashed #39443d;border-radius:10px}.status-stale{color:#ffcc80}.status-fresh{color:#a9e3b8}@media(max-width:760px){.shell{grid-template-columns:1fr}.side{border-right:0;border-bottom:1px solid #29322c}.nav{grid-template-columns:repeat(2,minmax(0,1fr))}.main{padding:18px}}
+:root{color-scheme:dark;background:#101311;color:#edf2ee;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}*{box-sizing:border-box}body{margin:0;background:#101311;color:#edf2ee}a{color:inherit}.shell{display:grid;grid-template-columns:230px 1fr;min-height:100vh}.side{border-right:1px solid #29322c;padding:24px}.brand{font-weight:750;letter-spacing:.02em}.muted{color:#a7b1aa}.nav{display:grid;gap:8px;margin-top:28px}.nav a{padding:10px 12px;border-radius:8px;text-decoration:none}.nav a:hover,.nav a:focus{background:#1a211d}.main{padding:28px;max-width:1400px;width:100%}.top{display:flex;gap:18px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}.trust{font-size:.86rem;padding:7px 10px;border:1px solid #3a463e;border-radius:999px}.overview,.metric-grid,.chart-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:22px 0}.panel{background:#151a17;border:1px solid #29322c;border-radius:12px;padding:16px}.k{font-size:.78rem;color:#a7b1aa;text-transform:uppercase;letter-spacing:.07em}.v{font-size:1.35rem;font-weight:700;margin-top:6px}.meta{display:grid;gap:4px;margin-top:12px;font-size:.78rem;color:#a7b1aa}.controls{display:flex;gap:12px;flex-wrap:wrap;align-items:end}.controls label{display:grid;gap:6px;font-size:.85rem}.controls select,.controls input{background:#0e120f;color:#edf2ee;border:1px solid #39443d;border-radius:8px;padding:9px 10px}.controls button{border:1px solid #526156;background:#1d2721;color:#edf2ee;border-radius:8px;padding:10px 14px;cursor:pointer}.method{margin-left:auto}.sections{display:grid;gap:14px;margin-top:20px}.placeholder{min-height:100px;display:flex;align-items:center;justify-content:center;color:#8e9a92;border:1px dashed #39443d;border-radius:10px}.status-stale{color:#ffcc80}.status-fresh{color:#a9e3b8}.chart svg{width:100%;height:150px;border:1px solid #29322c;border-radius:8px;background:#0e120f}.chart polyline{fill:none;stroke:currentColor;stroke-width:2}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;font-size:.86rem}th,td{text-align:left;padding:9px;border-bottom:1px solid #29322c;vertical-align:top}th{color:#a7b1aa;font-weight:600}.nowrap{white-space:nowrap}@media(max-width:760px){.shell{grid-template-columns:1fr}.side{border-right:0;border-bottom:1px solid #29322c}.nav{grid-template-columns:repeat(2,minmax(0,1fr))}.main{padding:18px}}
 </style>
 </head>
 <body>
 <div class="shell">
-<aside class="side" aria-label="Analytics navigation">
-<div class="brand">420Analytics</div>
-<div class="muted">derived, rebuildable, non-canonical</div>
-<nav class="nav">{{range .Navigation}}<a href="{{.Href}}">{{.Label}}</a>{{end}}</nav>
-</aside>
+<aside class="side" aria-label="Analytics navigation"><div class="brand">420Analytics</div><div class="muted">derived, rebuildable, non-canonical</div><nav class="nav">{{range .Navigation}}<a href="{{.Href}}">{{.Label}}</a>{{end}}</nav></aside>
 <main class="main">
 <div class="top"><div><h1>Network overview</h1><div class="muted">Public analytics from the qualified 420Indexer projection boundary.</div></div><div class="trust">non-canonical analytics</div></div>
 <section id="network" class="overview" aria-label="Network overview">
-<div class="panel"><div class="k">Chain ID</div><div class="v">{{.Status.ChainLabel}}</div></div>
-<div class="panel"><div class="k">Indexed height</div><div class="v">{{.Status.IndexedHeight}}</div></div>
-<div class="panel"><div class="k">Safe height</div><div class="v">{{.Status.SafeHeight}}</div></div>
-<div class="panel"><div class="k">Finality depth</div><div class="v">{{.FinalityDepth}}</div></div>
-<div class="panel"><div class="k">Indexed at</div><div class="v" style="font-size:1rem">{{.IndexedAt}}</div></div>
-<div class="panel"><div class="k">Freshness</div><div class="v {{if .Status.Stale}}status-stale{{else}}status-fresh{{end}}">{{if .Status.Stale}}stale{{else}}fresh{{end}}</div></div>
+<div class="panel"><div class="k">Chain ID</div><div class="v">{{.Status.ChainLabel}}</div></div><div class="panel"><div class="k">Indexed height</div><div class="v">{{.Status.IndexedHeight}}</div></div><div class="panel"><div class="k">Safe height</div><div class="v">{{.Status.SafeHeight}}</div></div><div class="panel"><div class="k">Finality depth</div><div class="v">{{.FinalityDepth}}</div></div><div class="panel"><div class="k">Indexed at</div><div class="v" style="font-size:1rem">{{.IndexedAt}}</div></div><div class="panel"><div class="k">Freshness</div><div class="v {{if .Status.Stale}}status-stale{{else}}status-fresh{{end}}">{{if .Status.Stale}}stale{{else}}fresh{{end}}</div></div>
 </section>
-<section class="panel" aria-label="Analytics filters">
-<form class="controls" action="{{.SeriesURL}}" method="get">
-<label>Window<select name="window" id="window">{{range .WindowPresets}}<option value="{{.}}">{{.}}</option>{{end}}</select></label>
-<label>Metric ID<input name="metricId" maxlength="128" placeholder="network.indexed_height"></label>
-<button type="submit">Open series API</button>
-<a class="method" href="{{.MethodologyURL}}">Browse methodologies</a>
-</form>
-</section>
-<div class="sections">
-<section id="validators" class="panel"><h2>Validators</h2><div class="placeholder">metric presentation arrives in ANALYTICS-7.2</div></section>
-<section id="protocols" class="panel"><h2>Protocols</h2><div class="placeholder">metric presentation arrives in ANALYTICS-7.2</div></section>
-<section id="economics" class="panel"><h2>Economics</h2><div class="placeholder">metric presentation arrives in ANALYTICS-7.2</div></section>
-<section id="predictive" class="panel"><h2>Predictive</h2><div class="placeholder">forecast/anomaly presentation arrives in ANALYTICS-7.2/7.3</div></section>
-</div>
+<section class="panel" aria-label="Analytics filters"><form class="controls" action="{{.SeriesURL}}" method="get"><label>Window<select name="window" id="window">{{range .WindowPresets}}<option value="{{.}}">{{.}}</option>{{end}}</select></label><label>Metric ID<input name="metricId" maxlength="128" placeholder="network.indexed_height"></label><button type="submit">Open series API</button><a class="method" href="{{.MethodologyURL}}">Browse methodologies</a></form></section>
+<section class="panel" aria-labelledby="metric-cards-title"><h2 id="metric-cards-title">Metric cards</h2>{{if .Presentation.Cards}}<div class="metric-grid">{{range .Presentation.Cards}}<article class="panel"><div class="k">{{.Class}}</div><div class="v">{{.Value}} <span class="muted">{{.Unit}}</span></div><strong>{{.Label}}</strong><div class="meta"><span>window: {{.Window}}</span><span>source: {{.Source}}</span><span>methodology: {{.Methodology}}</span></div></article>{{end}}</div>{{else}}<div class="placeholder">No qualified metrics available.</div>{{end}}</section>
+<section class="panel" aria-labelledby="charts-title"><h2 id="charts-title">Time series</h2>{{if .Presentation.Charts}}<div class="chart-grid">{{range .Presentation.Charts}}<article class="chart panel"><strong>{{.MetricID}}</strong>{{if .Polyline}}<svg viewBox="0 0 100 100" role="img" aria-label="{{.MetricID}} time-series chart"><polyline points="{{.Polyline}}"></polyline></svg>{{else}}<div class="placeholder">No observed points.</div>{{end}}<div class="meta"><span>unit: {{.Unit}}</span><span>window: {{.Window}}</span><span>source: {{.Source}}</span><span>methodology: {{.Methodology}}</span><span>observed: {{.Observed}} · gaps: {{.Gaps}}</span></div></article>{{end}}</div>{{else}}<div class="placeholder">No qualified time series available.</div>{{end}}</section>
+<section id="validators" class="panel"><h2>Metric table</h2>{{if .Presentation.Rows}}<div class="table-wrap"><table><thead><tr><th>Metric</th><th>Value</th><th>Unit</th><th>Window</th><th>Source</th><th>Methodology</th></tr></thead><tbody>{{range .Presentation.Rows}}<tr><td><strong>{{.ID}}</strong><div class="muted">{{.Label}}</div></td><td class="nowrap">{{.Value}}</td><td>{{.Unit}}</td><td>{{.Window}}</td><td>{{.Source}}</td><td>{{.Methodology}}</td></tr>{{end}}</tbody></table></div>{{else}}<div class="placeholder">No qualified metrics available.</div>{{end}}</section>
+<div class="sections"><section id="protocols" class="panel"><h2>Protocols</h2><div class="muted">Use metric class and ID to filter protocol-derived rows above.</div></section><section id="economics" class="panel"><h2>Economics</h2><div class="muted">Economic metrics use the same unit/window/source/methodology contract.</div></section><section id="predictive" class="panel"><h2>Predictive</h2><div class="placeholder">Forecast/anomaly trust presentation is completed in ANALYTICS-7.3.</div></section></div>
 <footer class="muted" style="margin-top:24px">API: <a href="{{.StatusURL}}">status</a> · <a href="{{.MetricsURL}}">metrics</a> · <a href="{{.SeriesURL}}">series</a> · <a href="{{.MethodologyURL}}">methodologies</a></footer>
-</main>
-</div>
-</body>
-</html>`
+</main></div></body></html>`

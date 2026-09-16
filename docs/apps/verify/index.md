@@ -10,3 +10,7 @@ version: current
 420 Verify reproduces deployed contract bytecode from published source and exact build settings. It answers whether source/build inputs correspond to deployed code; it does **not** certify that the code is secure, audited, endorsed, immutable or authorized.
 
 Verification is bound to network, address and deployed code hash.
+
+## Implementation references
+
+- [VERIFY-5 bytecode comparison and classification](verify-5-bytecode-classification.md) — defines `FULL_MATCH`, `PARTIAL_MATCH`, `MISMATCH`, and `UNVERIFIABLE`, including exact runtime/creation comparison and explicit diagnostics for metadata, linked libraries, and immutables.

@@ -42,10 +42,10 @@ Phase 12 is monolithic. BG-12.3 through BG-12.7 are developed on `feature/bong-g
   Canonical reducers for pages, groups, membership/roles, events/RSVPs, discovery subjects, reviews, corrections and verification attestations. Review replacement/withdrawal state is preserved and stale removed membership is deleted. Qualified on the monolithic branch before BG-12.5 began.
 - **BG-12.5 — search + recommendation query service — COMPLETE ON PHASE-12 BRANCH**
   Deterministic search-class candidate retrieval/ranking, snapshot-bound pagination, canonical cursor binding, query-time canonical eligibility revalidation, recommendation candidate generation/model binding and freshness envelopes. The backend fails closed without a canonical eligibility provider and never treats materialized active/privacy state as authority. Qualified on the monolithic branch before BG-12.6 began.
-- **BG-12.6 — notification/event pipeline — IN PROGRESS**
-  Deterministic non-authoritative notification candidates for relationship, safety, group, event and discovery activity; canonical state hydration where recipient context is omitted; provenance preservation; self-notification suppression; replay deduplication; restart-safe presentation checkpointing; and append-only finalized/retracted/superseded canonicality updates compatible with 420Notifications.
-- **BG-12.7 — production ingestion/operations closeout — NEXT**
-  RPC/log ingestion, deployment-address configuration, restart/replay recovery, configurable reorg window, durable storage backend abstraction, full rebuild verification, health/lag metrics, structured logs, alert surfaces and production runbooks.
+- **BG-12.6 — notification/event pipeline — COMPLETE ON PHASE-12 BRANCH**
+  Deterministic non-authoritative notification candidates for relationship, safety, group, event and discovery activity; canonical state hydration where recipient context is omitted; provenance preservation; self-notification suppression; replay deduplication; restart-safe presentation checkpointing; and append-only finalized/retracted/superseded canonicality updates compatible with 420Notifications. Qualified on the monolithic branch before BG-12.7 began.
+- **BG-12.7 — production ingestion/operations closeout — IMPLEMENTED, FINAL PHASE-12 QUALIFICATION PENDING**
+  Provider-neutral RPC/log ingestion, deployment-address validation/configuration, confirmation-safe block processing, bounded reorg recovery, restart/replay behavior, pluggable durable-store boundary, deterministic full-rebuild verification, health/lag metrics, structured logs, alert guidance and production operator runbook.
 
 **Phase-12 merge gate:** BG-12.3 through BG-12.7 complete, all indexer tests green, 420 Integrated qualification green, deterministic rebuild verified, current `main` reconciled, then one Phase-12 merge.
 
@@ -97,8 +97,8 @@ Phase 12 is monolithic. BG-12.3 through BG-12.7 are developed on `feature/bong-g
 
 ## Current position
 
-**Completed through BG-12.5 on the monolithic branch. Current work: BG-12.6 in PR #307. No Phase-12 merge occurs until BG-12.7 is complete.**
+**BG-12.3 through BG-12.7 are implemented on the monolithic Phase-12 branch. Current work: final Phase-12 qualification, reconciliation with current `main`, requalification of the reconciled head, then the single PR #307 merge.**
 
 Critical path:
 
-`BG-12 backend completion -> BG-13 media/storage -> BG-14 messaging -> BG-15 games -> BG-16 notifications -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI at bonggoggles.420integrated.org -> BG-20 launch hardening -> READY`
+`Phase-12 final qualification/reconciliation/merge -> BG-13 media/storage -> BG-14 messaging -> BG-15 games -> BG-16 notifications -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI at bonggoggles.420integrated.org -> BG-20 launch hardening -> READY`

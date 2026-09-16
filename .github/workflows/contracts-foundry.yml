@@ -41,30 +41,56 @@ jobs:
           cast --version
           forge config
 
-      - name: XRPL Yul isolation probes
+      - name: Yul binary-search probes
         working-directory: contracts
         shell: bash
         run: |
           set +e
           mkdir -p ../artifacts/contracts
-          : > ../artifacts/contracts/xrpl-yul-isolation.txt
+          : > ../artifacts/contracts/yul-binary-search.txt
 
           probe() {
             label="$1"
-            target="$2"
-            echo "=== $label :: $target ===" | tee -a ../artifacts/contracts/xrpl-yul-isolation.txt
+            shift
+            echo "=== $label ===" | tee -a ../artifacts/contracts/yul-binary-search.txt
+            printf 'TARGETS' | tee -a ../artifacts/contracts/yul-binary-search.txt
+            printf ' %q' "$@" | tee -a ../artifacts/contracts/yul-binary-search.txt
+            echo | tee -a ../artifacts/contracts/yul-binary-search.txt
             forge clean
-            forge build "$target" --sizes 2>&1 | tee -a ../artifacts/contracts/xrpl-yul-isolation.txt
+            forge build "$@" --sizes 2>&1 | tee -a ../artifacts/contracts/yul-binary-search.txt
             rc=${PIPESTATUS[0]}
-            echo "RESULT $label rc=$rc" | tee -a ../artifacts/contracts/xrpl-yul-isolation.txt
-            echo | tee -a ../artifacts/contracts/xrpl-yul-isolation.txt
+            echo "RESULT $label rc=$rc" | tee -a ../artifacts/contracts/yul-binary-search.txt
+            echo | tee -a ../artifacts/contracts/yul-binary-search.txt
           }
 
-          probe "interface" "src/interfaces/IXrplFinalityVerifier420.sol"
-          probe "adapter" "src/bridge/adapters/XrplBridgeAdapter420.sol"
-          probe "test" "test/XrplBridgeAdapter420.t.sol"
+          # Known-green XRPL graph retained as a control.
+          probe "control-xrpl-test" test/XrplBridgeAdapter420.t.sol
 
-          echo "Isolation probes complete; full build follows." | tee -a ../artifacts/contracts/xrpl-yul-isolation.txt
+          # Broad source partitions.
+          probe "src-half-a" \
+            src/accounts src/ai src/apps src/arbitration src/attention src/bet src/bonggoggles \
+            src/bridge src/commons src/creative src/exchange src/gaming src/governance src/grants \
+            src/highcountry src/interfaces
+
+          probe "src-half-b" \
+            src/interop src/launchpad src/libraries src/market src/media src/messenger src/oracle src/pay \
+            src/pulse src/randomness src/resource src/revenue src/review src/rewards src/rights src/swap \
+            src/system src/testnet src/token src/town src/treasury src/trust src/vault src/vpn \
+            src/IRewardController.sol src/IValidatorRegistry.sol
+
+          # High-risk domains that have seen recent contract growth.
+          probe "src-accounts" src/accounts
+          probe "src-resource" src/resource
+          probe "src-system" src/system
+          probe "src-bridge" src/bridge
+          probe "src-exchange" src/exchange
+          probe "src-gaming" src/gaming
+
+          # Full non-src roots. These distinguish source contracts from test/script-only failures.
+          probe "all-tests" test
+          probe "all-scripts" script
+
+          echo "Binary-search probes complete; full build follows." | tee -a ../artifacts/contracts/yul-binary-search.txt
           exit 0
 
       - name: Build
@@ -93,7 +119,7 @@ jobs:
           path: |
             artifacts/contracts/foundry-build.txt
             artifacts/contracts/foundry-tests.txt
-            artifacts/contracts/xrpl-yul-isolation.txt
+            artifacts/contracts/yul-binary-search.txt
           if-no-files-found: warn
           retention-days: 30
 

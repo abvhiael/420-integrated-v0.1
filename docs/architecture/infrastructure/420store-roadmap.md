@@ -14,22 +14,19 @@ version: current
 
 420 Integrated keeps storage payloads, retrieval traffic, caching and provider execution off-chain while anchoring identity, authorization, commitments, economics, proofs and settlement on-chain.
 
-Canonical storage truth is derived from chain state plus manifests, placements and accepted proofs. No provider, filesystem, API, cache, repair worker, gateway or shared runtime becomes authoritative merely because it is reachable.
+Canonical storage truth is derived from chain state plus manifests, placements and accepted proofs. No provider, filesystem, API, cache, repair worker, gateway, SDK, compatibility adapter or shared runtime becomes authoritative merely because it is reachable.
 
 ## Current status
 
-SR-0 through SR-7 are complete and merged. SR-8 / Unified Resource Network runtime is in final monolithic closeout on PR #296 after implementation and exact-head qualification of SR-8.1 through SR-8.7.
+SR-0 through SR-9 are complete. SR-9 / Developer API, SDK and S3 compatibility merged to `main` through PR #299 at merge commit `494fb38ef85e7af6eb24e484da04e6a80fbd73aa` after final exact-head qualification of `604c26500478d6e75565ce394ba034a774245cf2`.
 
-The latest qualified SR-8.7 head before final closeout documentation and reconciliation is:
+Final SR-9 qualification evidence:
 
-`7fae98dfe4314e19b673a6edc24fc0cd6d187921`
+- 420Docs Qualification #1307 / Actions run `35119184005` — PASS;
+- node420 Release Gate #244 / Actions run `35119184004` — PASS;
+- 420 Integrated Qualification #3567 / Actions run `35119183995` — PASS.
 
-Qualification evidence:
-
-- node420 Release Gate #190 — PASS;
-- 420 Integrated Qualification #3437 — PASS.
-
-PR #296 was then reconciled with current `main` through reconciliation PR #298, producing merge commit `5cadd51a86f2ccf80fb8836d4a0f6c0050e4de8f`. Final closeout documentation changes the branch head again, so SR-8 requires one final exact-head qualification before merge.
+SR-10 / Production hardening and launch qualification is now the active phase.
 
 ## Phase roadmap
 
@@ -39,128 +36,198 @@ PR #296 was then reconciled with current `main` through reconciliation PR #298, 
 | SR-1 | 420 Resource Protocol foundation | COMPLETE |
 | SR-2 | Storage Proof Protocol V1 | COMPLETE / MERGED |
 | SR-3 | 420Store core storage market | COMPLETE |
-| SR-3.1 | Agreement lifecycle | COMPLETE |
-| SR-3.2 | Capacity accounting | COMPLETE |
-| SR-3.3 | Object manifests / shard placement | COMPLETE |
-| SR-3.4 | Proof-driven escrow settlement | COMPLETE |
-| SR-4 | Storage node runtime | COMPLETE |
-| SR-4.1 | Local shard runtime | COMPLETE / QUALIFIED |
-| SR-4.2 | Chain sync / canonical RPC reader | COMPLETE / QUALIFIED |
-| SR-4.3 | node420 service, transport and proof scheduling | COMPLETE / QUALIFIED |
-| SR-4.4 | Reconciliation, observability and resilience | COMPLETE / QUALIFIED |
+| SR-4 | Storage node runtime | COMPLETE / QUALIFIED |
 | SR-5 | 420Repair | COMPLETE / QUALIFIED |
 | SR-6 | 420Cache | COMPLETE / QUALIFIED |
 | SR-7 | 420Gateway | COMPLETE / MERGED |
-| SR-8 | Unified Resource Network runtime | FINAL CLOSEOUT / QUALIFICATION |
-| SR-9 | Developer API / SDK / S3 compatibility | NOT STARTED |
-| SR-10 | Production hardening / launch qualification | NOT STARTED |
+| SR-8 | Unified Resource Network runtime | COMPLETE / MERGED |
+| SR-9 | Developer API / SDK / S3 compatibility | COMPLETE / MERGED |
+| SR-10 | Production hardening / launch qualification | IN PROGRESS — SR-10.1 NEXT |
 
-## SR-7 — 420Gateway
+## Completed foundations
 
-SR-7 is complete and merged. 420Gateway provides public/private application access to decentralized resources without becoming canonical protocol authority. Its completed scope includes deterministic cache-first routing, provider discovery/failover, private-access default deny, HTTP GET/HEAD transport, abuse controls, TLS/host boundaries, ETags/ranges, observability, health/readiness, bounded retries, cancellation propagation and graceful shutdown.
+### SR-7 — 420Gateway
 
-Operational procedures and recovery semantics are documented in [`../../420GATEWAY-OPERATIONS.md`](../../420GATEWAY-OPERATIONS.md).
+420Gateway provides public/private resource access with deterministic cache-first routing, provider discovery/failover, private-access default deny, HTTP GET/HEAD transport, TLS/Host boundaries, ETags/ranges, bounded retries, cancellation propagation, observability and graceful shutdown.
 
-## SR-8 — Unified Resource Network runtime
+### SR-8 — Unified Resource Network runtime
 
-SR-8 unifies Store, Repair, Cache, Gateway and Relay provider operations around one shared provider/node/resource model while preserving explicit authority boundaries.
+SR-8 unified Store, Repair, Cache, Gateway and Relay around shared provider identity, capability, lifecycle, observability and trust-domain boundaries while preserving canonical protocol authority. It merged through PR #296 at `1232b1dc4d204c28bfd4a6949fa1fb9ece5012dc` after exact-head qualification of `5ad8b581f338b603f76afe157eae7c6fc65332ce`.
 
-### Completed implementation
+### SR-9 — Developer API, SDK and S3 compatibility
 
-SR-8.1 through SR-8.7 implement:
+SR-9 added the stable `v1` developer surface over the Resource Network without creating a second source of truth. Completed scope includes:
 
-- provider/node-bound `ResourceNetworkRuntime` with canonical Store, Repair, Cache, Gateway and Relay capability vocabulary;
-- deterministic service registration, capability normalization and constrained registered/starting/running/degraded/stopped/failed lifecycle transitions;
-- provider-neutral shared discovery with capability-scoped bindings, lifecycle filtering and deterministic ordering;
-- Gateway adaptation that consumes only running cache/store sources;
-- read-only accounting/settlement projection for economic capabilities without creating local settlement authority;
-- unified operator status, capability counts and bounded operational metrics;
-- deterministic dependency-aware service startup, reverse shutdown and rollback on partial startup failure;
-- shared non-secret configuration plus explicitly service-scoped credential/secret handling;
-- deterministic redacted configuration snapshots;
-- explicit storage, delivery, economic and control trust domains;
-- explicit per-service authority grants with default-deny authorization and rejection of cross-domain authority combinations;
-- copy-safe deterministic snapshots across lifecycle, observability, configuration and trust surfaces.
+- stable object identity and public/private retrieval contracts;
+- versioned HTTP GET/HEAD retrieval with ranges, ETags and deterministic errors;
+- bounded upload preparation/ingest with idempotency and verified payload identity;
+- deterministic manifest/shard helpers and strict SHA-256 identity validation;
+- advisory provider discovery/resource-status views;
+- standalone Go SDK, JSON schema and frozen golden fixtures;
+- cache/repair/gateway developer helpers;
+- semantics-preserving S3 subset with explicit failure for unsupported multipart/ACL/versioning behavior;
+- private-read and private-write default-deny regressions;
+- SDK ↔ HTTP end-to-end coverage, fuzz/property tests and payload-substitution checks;
+- Developer Hub, local/testnet examples and privacy/logging review.
 
-### Qualified slices
-
-The monolithic PR retained each SR-8.x implementation while qualifying the evolving exact head:
-
-- SR-8.1 exact head `ee05ad2d3790e7d82e609403dcac68be6cefeb70` — node420 #178 PASS; Integrated #3391 PASS;
-- SR-8.2 exact head `ab218539bead48cda5a7d2cc38561e1ebc1bbf25` — node420 #179 PASS; Integrated #3393 PASS;
-- SR-8.3 exact head `3b10e80001373b4e14aa1db9f1b802faceefffb3` — node420 #181 PASS; Integrated #3400 PASS;
-- SR-8.4 exact head `26b00e1a2c6920face012cdadff65ecdc4555dbf` — node420 #183 PASS; Integrated #3410 PASS;
-- SR-8.5 exact head `58aed289d00b2824143607667b1ae6426db938c2` — node420 #185 PASS; Integrated #3418 PASS;
-- SR-8.6 exact head `ee772fcb336fd2dbeca3ba98f3b7e1abf5a6ed1a` — node420 #188 PASS; Integrated #3429 PASS;
-- SR-8.7 exact head `7fae98dfe4314e19b673a6edc24fc0cd6d187921` — node420 #190 PASS; Integrated #3437 PASS.
-
-### SR-8 architecture invariants
-
-- Shared runtime membership never grants protocol authority.
-- Canonical chain/manifests/placements/proofs/settlement remain authoritative over local projections.
-- Discovery is derived routing state and cannot invent providers or capabilities.
-- Accounting is read-only projection; it cannot reserve funds, execute payouts or declare settlement finality.
-- Service lifecycle state is operational state only.
-- Shared configuration contains no secrets; service credentials remain service-scoped.
-- Trust domains are explicit and default deny.
-- Credential access is control-domain authority and must be granted explicitly per service.
-- Cross-domain authority combinations are rejected rather than inherited from shared runtime membership.
-- Operator snapshots are deterministic and copy-safe and cannot mutate runtime authority state.
-
-### SR-8 exit criteria
-
-SR-8 is complete when Store, Repair, Cache, Gateway and Relay can run as one operational Resource Network family with shared provider identity/capability semantics, deterministic lifecycle coordination and coherent observability while preserving canonical protocol and trust-domain boundaries.
-
-Implementation now satisfies those criteria. The remaining closeout action is final exact-head qualification after reconciliation and documentation, then merge PR #296.
-
-Operator procedures are documented in [`../../420RESOURCE-NETWORK-OPERATIONS.md`](../../420RESOURCE-NETWORK-OPERATIONS.md).
-
-## SR-9 — developer interfaces
-
-Expose stable developer-facing storage/resource interfaces after the unified runtime is established.
-
-Planned scope:
-
-- SDKs;
-- upload/retrieval APIs;
-- manifest helpers;
-- provider discovery helpers;
-- repair/cache/gateway integration;
-- optional S3-compatible adapter where it can preserve canonical 420Store semantics;
-- examples and Developer Hub integration.
+SR-9 remained monolithic through SR-9.10, reconciled current `main` through PR #301, and merged only after the final exact head passed all three required gates.
 
 ## SR-10 — production hardening and launch qualification
 
-Final production work should include:
+SR-10 turns the qualified Resource Network and developer surfaces into a production-qualified storage subsystem. It should remain evidence-driven: each step produces reproducible deployment/test artifacts and exact-head qualification evidence rather than relying on manual assertions.
 
-- multi-provider deployment qualification;
-- adversarial/fault testing;
-- sustained load/soak testing;
-- upgrade/migration procedures;
-- key rotation and credential recovery;
-- backup/recovery drills;
-- security review;
-- operator runbooks and alert thresholds;
-- testnet evidence;
-- launch closeout bound to exact deployed commits/configuration.
+### SR-10 architecture invariants
+
+- Production hardening cannot move canonical authority off-chain.
+- Fault recovery must preserve object/manifest/shard/commitment identity.
+- Repair, cache and gateway availability must never fabricate canonical placement/proof/settlement state.
+- Security hardening remains default-deny for private access and service credentials.
+- Operational automation must be bounded, observable and cancellation-aware.
+- Load, failover and recovery tests must verify integrity as well as availability.
+- Launch evidence must bind software commits, configuration, schemas and test results to the qualified deployment.
+
+### SR-10.1 — production topology and multi-provider qualification — NEXT
+
+Build the reproducible production deployment model before adversarial testing begins.
+
+Scope:
+
+- define minimum production topology for Store, Repair, Cache, Gateway and Relay across multiple providers/nodes;
+- define provider/node/service identity and capability allocation per deployment;
+- add deterministic topology/config validation;
+- validate startup/shutdown ordering and degraded-service behavior across multiple providers;
+- exercise cross-provider discovery, cache/store routing and repair eligibility;
+- verify no shared configuration contains caller/service secrets;
+- add test harnesses/fixtures for multi-provider local or CI qualification;
+- capture topology manifests and exact configuration fingerprints as qualification evidence.
+
+Exit criteria: a reproducible multi-provider Resource Network can start, discover services, retrieve verified objects, degrade/fail over safely and shut down without violating authority boundaries.
+
+### SR-10.2 — adversarial and fault-injection qualification
+
+Scope:
+
+- provider disappearance/rejoin;
+- stale or malicious discovery entries;
+- corrupted payload/shard substitution;
+- cache poisoning attempts;
+- repair source/placement mismatch;
+- delayed/failed storage writes;
+- partial network partitions and timeout storms;
+- authorization failures and forwarded-identity spoof attempts;
+- proof/settlement projection lag;
+- deterministic recovery assertions and bounded retry checks.
+
+### SR-10.3 — sustained load, soak and capacity qualification
+
+Scope:
+
+- concurrent upload/retrieval workloads;
+- cache hit/miss and store fallback distributions;
+- repair backlog pressure;
+- provider discovery churn;
+- gateway concurrency and range-request load;
+- memory/file-descriptor/goroutine/resource leak checks;
+- long-duration soak tests;
+- latency/error/throughput baselines and capacity envelopes.
+
+### SR-10.4 — upgrade, migration and compatibility procedures
+
+Scope:
+
+- rolling node/runtime upgrades;
+- backwards-compatible v1 API/SDK handling;
+- schema/config migration validation;
+- manifest/placement persistence across upgrades;
+- mixed-version deployment behavior;
+- rollback procedures and compatibility gates.
+
+### SR-10.5 — credential rotation and recovery
+
+Scope:
+
+- service credential rotation;
+- session/signing material rotation where applicable;
+- revocation propagation;
+- lost/compromised credential recovery;
+- secret redaction validation;
+- no credential material in public telemetry or canonical manifests.
+
+### SR-10.6 — backup, restore and disaster recovery
+
+Scope:
+
+- backup of required local operational state;
+- restore/reconcile against canonical chain/manifests/placements;
+- provider-loss recovery;
+- repair-driven reconstruction;
+- documented RPO/RTO targets;
+- repeatable recovery drills.
+
+### SR-10.7 — security review and abuse resistance
+
+Scope:
+
+- API/Gateway/S3 abuse controls;
+- malformed/fuzzed request expansion;
+- SSRF/host/header/forwarded-identity boundaries;
+- upload exhaustion and replay/idempotency abuse;
+- private-access default-deny audit;
+- dependency/static-analysis review;
+- threat-model and residual-risk documentation.
+
+### SR-10.8 — operator runbooks, alerts and SLOs
+
+Scope:
+
+- health/readiness and degraded-state semantics;
+- alert thresholds for Store/Repair/Cache/Gateway/Relay;
+- storage capacity and repair backlog alerts;
+- integrity/auth/routing failure alerts;
+- incident triage and recovery procedures;
+- defined availability, integrity and recovery SLOs.
+
+### SR-10.9 — testnet deployment evidence
+
+Scope:
+
+- deploy the qualified topology to testnet;
+- record exact software/config/schema versions;
+- run end-to-end upload → manifest → retrieval → cache/gateway → repair flows;
+- execute selected fault/recovery drills;
+- capture metrics, logs and qualification artifacts;
+- document unresolved launch blockers explicitly.
+
+### SR-10.10 — production launch closeout
+
+Scope:
+
+- reconcile current `main`;
+- freeze launch configuration and compatibility contracts;
+- verify all SR-10 evidence is present and reproducible;
+- run final node420, Integrated and Docs qualification on the exact launch head;
+- bind launch approval to exact commit/configuration fingerprints;
+- merge SR-10 only after all launch gates are green.
+
+## SR-10 merge policy
+
+Treat SR-10 as one production-hardening phase unless a later implementation decision explicitly splits deployment infrastructure from launch evidence. Individual SR-10.x slices may be qualified as they evolve, but final production closeout must run against one reconciled exact head.
 
 ## Dependency order
 
 ```text
-SR-8 Unified Resource Network final qualification / merge
+SR-8 Unified Resource Network — COMPLETE / MERGED
     ↓
-SR-9 developer API / SDK / S3 compatibility
+SR-9 Developer API / SDK / S3 compatibility — COMPLETE / MERGED
     ↓
-SR-10 production hardening / launch qualification
+SR-10 Production hardening / launch qualification — ACTIVE
 ```
 
 ## Architecture invariant
 
-Throughout every remaining phase:
-
 > Files, network traffic, caching and execution happen off-chain; identity, authorization, commitments, economics, proofs and settlement are anchored on-chain.
 
-420Store, 420Repair, 420Cache, 420Gateway and Relay are one Resource Network family. They reuse common provider identity, capability, lifecycle, observability and trust boundaries rather than evolving as unrelated systems.
+420Store, 420Repair, 420Cache, 420Gateway and Relay remain one Resource Network family. Developer APIs, SDKs and compatibility adapters translate and compose those qualified capabilities; they do not become alternate protocol authority.
 
 ## Related documentation
 
@@ -171,3 +238,5 @@ Throughout every remaining phase:
 - [RPC, gateways, and network ingress](rpc-gateways-network-ingress.md)
 - [Storage Proof & Resource Protocol](../protocols/storage-proof-resource-protocol.md)
 - [Storage & resource developer integration](../../developers/storage-and-resource-integration.md)
+- [420Storage Developer Hub](../../developers/420storage-developer-hub.md)
+- [SR-9 privacy and logging review](../../developers/420storage-sr9-privacy-review.md)

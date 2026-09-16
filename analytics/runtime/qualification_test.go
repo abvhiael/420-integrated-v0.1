@@ -3,6 +3,7 @@ package runtime
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"sync"
@@ -98,6 +99,4 @@ func TestSafeHeightRegressionFailsClosed(t *testing.T) {
 	if !catalog.Status().Stale { t.Fatal("failed reconciliation must expose stale status") }
 }
 
-func formatUnix(v int64) string {
-	return fmt.Sprintf("%d",v)
-}
+func formatUnix(v int64) string { return fmt.Sprintf("%d",v) }

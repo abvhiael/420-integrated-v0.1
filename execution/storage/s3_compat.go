@@ -33,6 +33,10 @@ type S3NamespaceResolver interface {
 	ResolveS3Object(context.Context, S3ObjectAddress) (S3ResolvedObject, error)
 }
 
+type S3PutAuthorizer interface {
+	AuthorizeS3Put(context.Context, S3ResolvedObject) error
+}
+
 type S3DeleteAuthorizer interface {
 	DeleteS3Object(context.Context, S3ResolvedObject) error
 }
@@ -43,11 +47,12 @@ type S3PutBackend interface {
 }
 
 type S3CompatibilityAdapter struct {
-	Resolver S3NamespaceResolver
-	Reader   DeveloperResourceAPI
-	Writer   S3PutBackend
-	Deleter  S3DeleteAuthorizer
-	MaxBytes uint64
+	Resolver      S3NamespaceResolver
+	Reader        DeveloperResourceAPI
+	Writer        S3PutBackend
+	PutAuthorizer S3PutAuthorizer
+	Deleter       S3DeleteAuthorizer
+	MaxBytes      uint64
 }
 
 type S3GetResult struct {
@@ -100,6 +105,16 @@ func (a S3CompatibilityAdapter) PutObject(ctx context.Context, address S3ObjectA
 	if a.Writer == nil || body == nil || strings.TrimSpace(idempotencyKey) == "" {
 		return S3PutResult{}, ErrS3Compatibility
 	}
+	// S3 translation must never turn read/session metadata into implicit write authority.
+	// Private namespace writes require an explicit write authorizer and fail closed otherwise.
+	if resolved.Access.Mode == DeveloperAccessPrivate {
+		if a.PutAuthorizer == nil {
+			return S3PutResult{}, ErrS3Compatibility
+		}
+		if err := a.PutAuthorizer.AuthorizeS3Put(ctx, resolved); err != nil {
+			return S3PutResult{}, err
+		}
+	}
 	maxBytes := a.MaxBytes
 	if maxBytes == 0 {
 		maxBytes = DefaultS3CompatMaxObjectBytes
@@ -115,6 +130,9 @@ func (a S3CompatibilityAdapter) PutObject(ctx context.Context, address S3ObjectA
 	receipt, err := a.Writer.Ingest(ctx, plan, io.TeeReader(body, etagHash))
 	if err != nil {
 		return S3PutResult{}, err
+	}
+	if !s3ReceiptMatchesResolved(receipt, resolved.Object) {
+		return S3PutResult{}, ErrS3Compatibility
 	}
 	etag := `"` + hex.EncodeToString(etagHash.Sum(nil)) + `"`
 	return S3PutResult{ETag: etag, Receipt: receipt}, nil
@@ -158,6 +176,18 @@ func (a S3CompatibilityAdapter) resolve(ctx context.Context, address S3ObjectAdd
 		return S3ResolvedObject{}, ErrS3Compatibility
 	}
 	return resolved, nil
+}
+
+func s3ReceiptMatchesResolved(receipt DeveloperUploadReceipt, object DeveloperObjectRef) bool {
+	return receipt.Version == DeveloperAPIVersion &&
+		receipt.Object.ObjectID == object.ObjectID &&
+		receipt.Object.ManifestID == object.ManifestID &&
+		receipt.Object.ShardIndex == object.ShardIndex &&
+		strings.EqualFold(strings.TrimSpace(receipt.Object.ShardRoot), strings.TrimSpace(object.ShardRoot)) &&
+		receipt.Object.SizeBytes == object.SizeBytes &&
+		receipt.Object.CommitmentID == object.CommitmentID &&
+		receipt.SizeBytes == object.SizeBytes &&
+		strings.EqualFold(strings.TrimSpace(receipt.ShardRoot), strings.TrimSpace(object.ShardRoot))
 }
 
 func s3PayloadETag(payload []byte) string {

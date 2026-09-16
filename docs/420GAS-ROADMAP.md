@@ -100,17 +100,19 @@ Qualification passed on the reconciled head:
 
 GAS-10 remains operational/advisory only. Telemetry, readiness, journal, recovery and status projection state cannot authorize execution or sponsorship and cannot replace canonical on-chain EntryPoint/paymaster accounting or settlement truth.
 
-## GAS-11 — hostile-state/security hardening — NEXT
+## GAS-11 — hostile-state/security hardening — ACTIVE
 
 Cross-layer adversarial hardening of the complete sponsorship stack before public-testnet closeout.
 
-Planned GAS-11 work:
-- **GAS-11.1** forged, replayed and cross-domain sponsorship payloads: wrong chain, EntryPoint, paymaster, policy, authorization identity, validity window and sponsorship-digest binding.
-- **GAS-11.2** deposit/reservation/settlement hostile-state tests: races, stale reservations, double settlement, cost-bound violations, reentrancy and malicious account/paymaster behavior.
-- **GAS-11.3** authority-confusion hardening across policy, capability/session constraints, Wallet, Smart Account and 420Automation; prove sponsorship cannot smuggle or broaden execution authority.
-- **GAS-11.4** resource-exhaustion and denial-of-service hardening across quote admission, quotas, metrics, journals, readiness/recovery state and attacker-controlled identifiers.
-- **GAS-11.5** secret/credential and service-boundary hardening: signer/operator isolation, malformed API inputs, credential misuse, leakage checks and fail-closed dependency behavior.
-- **GAS-11.6** cross-layer adversarial closeout, invariant review, roadmap update, exact-head qualification, reconciliation with current `main`, and merge.
+Current GAS-11 work:
+- **GAS-11.1 — COMPLETE / QUALIFIED.** Forged, replayed and cross-domain sponsorship payload hardening across chain, EntryPoint, paymaster, policy, authorization identity, validity windows and sponsorship-digest binding. Signed sponsorship validity is now enforced at runtime. Qualified head: `3cdc9395aa596505ef30ed852652c38ef216e677`.
+- **GAS-11.2 — COMPLETE / QUALIFIED.** Deposit/reservation/settlement hostile-state coverage for callback reentrancy, withdrawal races, duplicate authorization/settlement attempts, reverted execution cleanup, stale replay and exact reservation charge bounds. Qualified head: `cd4897e060011353556c8395918b16be4727d7c0`.
+- **GAS-11.3 — COMPLETE / QUALIFIED.** Authority-confusion hardening across paymaster policy commitments and Wallet quote handling. Wallet now fail-closes quote-side `executionAuthorization`, `walletAuthorization`, `targetProtocolAuthorization` and `canonicalProtocolAuthority` escalation, including non-boolean smuggling. Qualified head: `38c1c9ae4aaadd63b629060a0bdf049c55a7b705`.
+- **GAS-11.4 — ACTIVE.** Resource-exhaustion and denial-of-service hardening across quote admission, quotas, metrics, journals, readiness/recovery state and attacker-controlled inputs. Decimal funding inputs are bounded to `uint256` before `BigInt` conversion, credential scope fanout is capped, and adversarial bounded-state tests cover quota flooding, metrics cardinality, journal retention, readiness inputs and recovery churn.
+- **GAS-11.5 — PENDING.** Secret/credential and service-boundary hardening: signer/operator isolation, malformed API inputs, credential misuse, leakage checks and fail-closed dependency behavior.
+- **GAS-11.6 — PENDING.** Cross-layer adversarial closeout, invariant review, roadmap update, exact-head qualification, reconciliation with current `main`, and merge.
+
+GAS-11 remains on PR #297 and is intentionally not merged until GAS-11.6 closeout and reconciliation.
 
 ## GAS-12 — public-testnet qualification and launch closeout
 

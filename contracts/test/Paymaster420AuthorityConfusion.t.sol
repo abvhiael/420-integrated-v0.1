@@ -160,10 +160,14 @@ contract Paymaster420AuthorityConfusionTest {
             SESSION
         );
 
-        PaymasterData420.V1 memory sponsorship = PaymasterData420.decodeV1(op.paymasterAndData);
+        PaymasterData420.V1 memory sponsorship = this.decodePaymasterData(op.paymasterAndData);
         sponsorship.policyId = permissiveId;
         op.paymasterAndData = PaymasterData420.encodeV1(sponsorship);
         require(_validate(op) == 1, "post-signature policy substitution accepted");
+    }
+
+    function decodePaymasterData(bytes calldata raw) external pure returns (PaymasterData420.V1 memory) {
+        return PaymasterData420.decodeV1(raw);
     }
 
     function _validate(PackedUserOperation420 memory op) internal returns (uint256 validationData) {

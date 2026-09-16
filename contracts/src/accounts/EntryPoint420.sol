@@ -4,6 +4,7 @@ pragma solidity ^0.8.24;
 import "./IEntryPoint420.sol";
 import "./IPaymaster420.sol";
 import "./PaymasterData420.sol";
+import "./SponsorshipDigest420.sol";
 
 interface IAccountValidation420 {
     function validateUserOp(PackedUserOperation420 calldata userOp, bytes32 userOpHash, uint256 missingAccountFunds)
@@ -163,6 +164,17 @@ contract EntryPoint420 is IEntryPoint420 {
                 keccak256(userOp.paymasterAndData)
             )
         );
+    }
+
+    /// @notice Canonical non-circular 420Gas sponsorship digest for a completed sponsorship envelope.
+    /// @dev The digest excludes sponsor proof bytes and the Wallet signature by construction while binding the
+    ///      operation, chain, EntryPoint, paymaster, policy, validity window, ceiling and authorization id.
+    function getSponsorshipDigest(PackedUserOperation420 calldata userOp) external view returns (bytes32) {
+        PaymasterData420.V1 memory sponsorship = PaymasterData420.decodeV1(userOp.paymasterAndData);
+        if (sponsorship.entryPoint != address(this) || sponsorship.chainId != block.chainid) {
+            revert InvalidPaymasterBinding();
+        }
+        return SponsorshipDigest420.digestV1(userOp, sponsorship);
     }
 
     function handleOp(PackedUserOperation420 calldata userOp)

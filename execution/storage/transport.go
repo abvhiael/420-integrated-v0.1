@@ -19,9 +19,29 @@ func NewTransportHandler(service *Service) http.Handler {
 	mux := http.NewServeMux()
 	t := &transportServer{service: service}
 	mux.HandleFunc("/healthz", t.health)
+	mux.HandleFunc("/metrics", t.metrics)
 	mux.HandleFunc("/v1/capacity", t.capacity)
 	mux.HandleFunc("/v1/shards/", t.shard)
-	return securityHeaders(mux)
+	var h http.Handler = securityHeaders(mux)
+	if service != nil && service.cfg.MaxConcurrentRequests > 0 {
+		h = limitConcurrent(h, service.cfg.MaxConcurrentRequests)
+	}
+	return h
+}
+
+func limitConcurrent(next http.Handler, max uint32) http.Handler {
+	if max == 0 { return next }
+	sem := make(chan struct{}, max)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		select {
+		case sem <- struct{}{}:
+			defer func(){ <-sem }()
+			next.ServeHTTP(w, r)
+		default:
+			w.Header().Set("Retry-After", "1")
+			http.Error(w, "provider busy", http.StatusServiceUnavailable)
+		}
+	})
 }
 
 func securityHeaders(next http.Handler) http.Handler {
@@ -33,19 +53,26 @@ func securityHeaders(next http.Handler) http.Handler {
 	})
 }
 
-func (t *transportServer) authorized(r *http.Request) bool {
-	if t.service == nil { return false }
-	expected := strings.TrimSpace(t.service.cfg.AuthToken)
+func tokenMatch(raw, expected string) bool {
+	expected = strings.TrimSpace(expected)
 	if expected == "" { return true }
-	raw := strings.TrimSpace(r.Header.Get("Authorization"))
+	raw = strings.TrimSpace(raw)
 	if !strings.HasPrefix(raw, "Bearer ") { return false }
 	provided := strings.TrimSpace(strings.TrimPrefix(raw, "Bearer "))
 	if len(provided) != len(expected) { return false }
 	return subtle.ConstantTimeCompare([]byte(provided), []byte(expected)) == 1
 }
 
-func (t *transportServer) requireAuth(w http.ResponseWriter, r *http.Request) bool {
-	if t.authorized(r) { return true }
+func (t *transportServer) authorized(r *http.Request, write bool) bool {
+	if t.service == nil { return false }
+	expected := t.service.cfg.ReadAuthToken
+	if write { expected = t.service.cfg.WriteAuthToken }
+	if strings.TrimSpace(expected) == "" { expected = t.service.cfg.AuthToken }
+	return tokenMatch(r.Header.Get("Authorization"), expected)
+}
+
+func (t *transportServer) requireAuth(w http.ResponseWriter, r *http.Request, write bool) bool {
+	if t.authorized(r, write) { return true }
 	w.Header().Set("WWW-Authenticate", `Bearer realm="420Store"`)
 	http.Error(w, "unauthorized", http.StatusUnauthorized)
 	return false
@@ -58,14 +85,12 @@ func (t *transportServer) health(w http.ResponseWriter, _ *http.Request) {
 	}
 	status := t.service.Status()
 	code := http.StatusOK
-	if !status.Ready {
-		code = http.StatusServiceUnavailable
-	}
+	if !status.Ready { code = http.StatusServiceUnavailable }
 	writeJSON(w, code, status)
 }
 
 func (t *transportServer) capacity(w http.ResponseWriter, r *http.Request) {
-	if !t.requireAuth(w, r) { return }
+	if !t.requireAuth(w, r, false) { return }
 	if r.Method != http.MethodGet {
 		w.Header().Set("Allow", http.MethodGet)
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
@@ -79,7 +104,8 @@ func (t *transportServer) capacity(w http.ResponseWriter, r *http.Request) {
 }
 
 func (t *transportServer) shard(w http.ResponseWriter, r *http.Request) {
-	if !t.requireAuth(w, r) { return }
+	write := r.Method == http.MethodPut
+	if !t.requireAuth(w, r, write) { return }
 	if t.service == nil || t.service.runtime == nil {
 		http.Error(w, "service unavailable", http.StatusServiceUnavailable)
 		return
@@ -94,10 +120,7 @@ func (t *transportServer) shard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	assignment, err := t.service.projection.Assignment(r.Context(), id)
-	if err != nil {
-		writeStorageError(w, err)
-		return
-	}
+	if err != nil { writeStorageError(w, err); return }
 	now := time.Now().UTC()
 	if !assignment.Active || assignment.NodeID != t.service.cfg.NodeID || now.Before(assignment.StartTime) || now.After(assignment.EndTime) {
 		writeStorageError(w, ErrInactiveAssignment)
@@ -116,18 +139,12 @@ func (t *transportServer) shard(w http.ResponseWriter, r *http.Request) {
 }
 
 func (t *transportServer) putShard(w http.ResponseWriter, r *http.Request, id string, assignment Assignment) {
-	if assignment.SizeBytes == 0 || assignment.SizeBytes >= math.MaxInt64 {
-		writeStorageError(w, ErrInvalidShard)
-		return
-	}
+	if assignment.SizeBytes == 0 || assignment.SizeBytes >= math.MaxInt64 { writeStorageError(w, ErrInvalidShard); return }
 	if r.ContentLength > 0 && uint64(r.ContentLength) > assignment.SizeBytes {
 		http.Error(w, "request body too large", http.StatusRequestEntityTooLarge)
 		return
 	}
-	if r.ContentLength >= 0 && uint64(r.ContentLength) != assignment.SizeBytes {
-		writeStorageError(w, ErrInvalidShard)
-		return
-	}
+	if r.ContentLength >= 0 && uint64(r.ContentLength) != assignment.SizeBytes { writeStorageError(w, ErrInvalidShard); return }
 
 	if rc, existing, _, err := t.service.runtime.RetrieveStream(r.Context(), id, 0, 1); err == nil {
 		_ = rc.Close()
@@ -142,17 +159,11 @@ func (t *transportServer) putShard(w http.ResponseWriter, r *http.Request, id st
 		return
 	}
 
-	// Limit the HTTP body to the exact canonical size. FileStore deliberately
-	// asks its reader for size+1 bytes; an oversized chunked body therefore
-	// surfaces http.MaxBytesError, which maps deterministically to 413.
 	r.Body = http.MaxBytesReader(w, r.Body, int64(assignment.SizeBytes))
 	rec, err := t.service.runtime.StoreShard(r.Context(), id, r.Body)
 	if err != nil {
 		var maxErr *http.MaxBytesError
-		if errors.As(err, &maxErr) {
-			http.Error(w, "request body too large", http.StatusRequestEntityTooLarge)
-			return
-		}
+		if errors.As(err, &maxErr) { http.Error(w, "request body too large", http.StatusRequestEntityTooLarge); return }
 		writeStorageError(w, err)
 		return
 	}
@@ -160,32 +171,32 @@ func (t *transportServer) putShard(w http.ResponseWriter, r *http.Request, id st
 }
 
 func (t *transportServer) getShard(w http.ResponseWriter, r *http.Request, id string) {
-	offset, length, partial, err := requestedRange(r)
-	if err != nil {
-		http.Error(w, "invalid range", http.StatusRequestedRangeNotSatisfiable)
+	metaReader, rec, _, err := t.service.runtime.RetrieveStream(r.Context(), id, 0, 1)
+	if err != nil { writeStorageError(w, err); return }
+	_ = metaReader.Close()
+	etag := fmt.Sprintf("\"%s\"", rec.ShardRoot)
+	w.Header().Set("ETag", etag)
+	w.Header().Set("Accept-Ranges", "bytes")
+	w.Header().Set("X-420-Agreement-ID", rec.AgreementID)
+	w.Header().Set("X-420-Commitment-ID", rec.CommitmentID)
+	if etagMatches(r.Header.Get("If-None-Match"), etag) {
+		w.WriteHeader(http.StatusNotModified)
 		return
 	}
-	rc, rec, streamLen, err := t.service.runtime.RetrieveStream(r.Context(), id, offset, length)
+
+	offset, length, partial, err := requestedRangeForSize(r, rec.SizeBytes, etag)
 	if err != nil {
-		writeStorageError(w, err)
-		return
-	}
-	defer rc.Close()
-	if partial && offset >= rec.SizeBytes {
 		w.Header().Set("Content-Range", fmt.Sprintf("bytes */%d", rec.SizeBytes))
 		http.Error(w, "invalid range", http.StatusRequestedRangeNotSatisfiable)
 		return
 	}
+	rc, _, streamLen, err := t.service.runtime.RetrieveStream(r.Context(), id, offset, length)
+	if err != nil { writeStorageError(w, err); return }
+	defer rc.Close()
 	end := offset
-	if streamLen > 0 {
-		end = offset + streamLen - 1
-	}
-	w.Header().Set("Accept-Ranges", "bytes")
+	if streamLen > 0 { end = offset + streamLen - 1 }
 	w.Header().Set("Content-Type", "application/octet-stream")
 	w.Header().Set("Content-Length", strconv.FormatUint(streamLen, 10))
-	w.Header().Set("ETag", fmt.Sprintf("\"%s\"", rec.ShardRoot))
-	w.Header().Set("X-420-Agreement-ID", rec.AgreementID)
-	w.Header().Set("X-420-Commitment-ID", rec.CommitmentID)
 	if partial {
 		w.Header().Set("Content-Range", fmt.Sprintf("bytes %d-%d/%d", offset, end, rec.SizeBytes))
 		w.WriteHeader(http.StatusPartialContent)
@@ -197,59 +208,76 @@ func (t *transportServer) getShard(w http.ResponseWriter, r *http.Request, id st
 	}
 }
 
-func requestedRange(r *http.Request) (offset, length uint64, partial bool, err error) {
-	if raw := strings.TrimSpace(r.Header.Get("Range")); raw != "" {
-		if !strings.HasPrefix(raw, "bytes=") || strings.Contains(raw, ",") {
-			return 0, 0, false, ErrInvalidShard
+func etagMatches(raw, etag string) bool {
+	raw = strings.TrimSpace(raw)
+	if raw == "" { return false }
+	for _, part := range strings.Split(raw, ",") {
+		part = strings.TrimSpace(part)
+		if part == "*" || part == etag || strings.TrimPrefix(part, "W/") == etag { return true }
+	}
+	return false
+}
+
+func requestedRangeForSize(r *http.Request, size uint64, etag string) (offset, length uint64, partial bool, err error) {
+	raw := strings.TrimSpace(r.Header.Get("Range"))
+	if raw != "" {
+		if ifRange := strings.TrimSpace(r.Header.Get("If-Range")); ifRange != "" && ifRange != etag {
+			return 0, 0, false, nil
 		}
+		if !strings.HasPrefix(raw, "bytes=") || strings.Contains(raw, ",") { return 0,0,false,ErrInvalidShard }
 		parts := strings.Split(strings.TrimPrefix(raw, "bytes="), "-")
-		if len(parts) != 2 || parts[0] == "" {
-			return 0, 0, false, ErrInvalidShard
+		if len(parts) != 2 { return 0,0,false,ErrInvalidShard }
+		if parts[0] == "" {
+			suffix, e := strconv.ParseUint(parts[1], 10, 64)
+			if e != nil || suffix == 0 || size == 0 { return 0,0,false,ErrInvalidShard }
+			if suffix > size { suffix = size }
+			return size-suffix, suffix, true, nil
 		}
 		start, e := strconv.ParseUint(parts[0], 10, 64)
-		if e != nil {
-			return 0, 0, false, ErrInvalidShard
-		}
-		if parts[1] == "" {
-			return start, 0, true, nil
-		}
+		if e != nil || start >= size { return 0,0,false,ErrInvalidShard }
+		if parts[1] == "" { return start, size-start, true, nil }
 		end, e := strconv.ParseUint(parts[1], 10, 64)
-		if e != nil || end < start {
-			return 0, 0, false, ErrInvalidShard
-		}
-		return start, end - start + 1, true, nil
+		if e != nil || end < start { return 0,0,false,ErrInvalidShard }
+		if end >= size { end = size-1 }
+		return start, end-start+1, true, nil
 	}
 	q := r.URL.Query()
-	if q.Get("offset") == "" && q.Get("length") == "" {
-		return 0, 0, false, nil
-	}
+	if q.Get("offset") == "" && q.Get("length") == "" { return 0,0,false,nil }
 	if q.Get("offset") != "" {
-		offset, err = strconv.ParseUint(q.Get("offset"), 10, 64)
-		if err != nil {
-			return 0, 0, false, err
-		}
+		offset, err = strconv.ParseUint(q.Get("offset"),10,64); if err != nil { return 0,0,false,err }
 	}
+	if offset >= size { return 0,0,false,ErrInvalidShard }
 	if q.Get("length") != "" {
-		length, err = strconv.ParseUint(q.Get("length"), 10, 64)
-		if err != nil {
-			return 0, 0, false, err
-		}
+		length, err = strconv.ParseUint(q.Get("length"),10,64); if err != nil { return 0,0,false,err }
+		if length > size-offset { length = size-offset }
 	}
-	return offset, length, true, nil
+	return offset,length,true,nil
+}
+
+func requestedRange(r *http.Request) (offset, length uint64, partial bool, err error) {
+	if raw := strings.TrimSpace(r.Header.Get("Range")); raw != "" {
+		if !strings.HasPrefix(raw, "bytes=") || strings.Contains(raw, ",") { return 0,0,false,ErrInvalidShard }
+		parts := strings.Split(strings.TrimPrefix(raw,"bytes="), "-")
+		if len(parts)!=2 || parts[0]=="" { return 0,0,false,ErrInvalidShard }
+		start,e:=strconv.ParseUint(parts[0],10,64); if e!=nil{return 0,0,false,ErrInvalidShard}
+		if parts[1]=="" { return start,0,true,nil }
+		end,e:=strconv.ParseUint(parts[1],10,64); if e!=nil||end<start{return 0,0,false,ErrInvalidShard}
+		return start,end-start+1,true,nil
+	}
+	q:=r.URL.Query()
+	if q.Get("offset")==""&&q.Get("length")==""{return 0,0,false,nil}
+	if q.Get("offset")!=""{offset,err=strconv.ParseUint(q.Get("offset"),10,64);if err!=nil{return 0,0,false,err}}
+	if q.Get("length")!=""{length,err=strconv.ParseUint(q.Get("length"),10,64);if err!=nil{return 0,0,false,err}}
+	return offset,length,true,nil
 }
 
 func writeStorageError(w http.ResponseWriter, err error) {
 	switch {
-	case errors.Is(err, ErrShardNotFound):
-		http.Error(w, "shard not found", http.StatusNotFound)
-	case errors.Is(err, ErrInactiveAssignment):
-		http.Error(w, "inactive assignment", http.StatusForbidden)
-	case errors.Is(err, ErrCapacityExceeded):
-		http.Error(w, "capacity exceeded", http.StatusInsufficientStorage)
-	case errors.Is(err, ErrCommitmentMismatch), errors.Is(err, ErrInvalidShard):
-		http.Error(w, "invalid shard", http.StatusUnprocessableEntity)
-	default:
-		http.Error(w, "storage service error", http.StatusInternalServerError)
+	case errors.Is(err, ErrShardNotFound): http.Error(w,"shard not found",http.StatusNotFound)
+	case errors.Is(err, ErrInactiveAssignment): http.Error(w,"inactive assignment",http.StatusForbidden)
+	case errors.Is(err, ErrCapacityExceeded): http.Error(w,"capacity exceeded",http.StatusInsufficientStorage)
+	case errors.Is(err, ErrCommitmentMismatch), errors.Is(err, ErrInvalidShard): http.Error(w,"invalid shard",http.StatusUnprocessableEntity)
+	default: http.Error(w,"storage service error",http.StatusInternalServerError)
 	}
 }
 

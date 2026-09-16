@@ -24,15 +24,18 @@ function credential(overrides = {}) {
 
 function request(overrides = {}) {
   return {
-    schemaVersion: '1.0.0',
+    schemaVersion: '1.2.0',
     chainId: '420',
     entryPoint: addr(1),
     paymaster: addr(2),
     account: addr(3),
-    userOpHash: hash(4),
+    sponsorshipDigest: hash(4),
     policyId: hash(5),
     authorizationId: hash(6),
     maxSponsoredCostWei: '1000000000000000',
+    gasLimit: '500000',
+    maxFeePerGasWei: '1000000000',
+    maxPriorityFeePerGasWei: '100000000',
     validAfter: '2026-09-14T21:59:50.000Z',
     validUntil: '2026-09-14T22:02:00.000Z',
     ...overrides
@@ -44,17 +47,21 @@ function issue(overrides = {}) {
     request: request(overrides.request),
     credential: credential(overrides.credential),
     now,
-    sign: ({ quoteCommitment }) => `sig:${quoteCommitment}`
+    economicLimits: overrides.economicLimits,
+    sign: ({ sponsorshipDigest }) => `sig:${sponsorshipDigest}`
   });
 }
 
-test('issues deterministic operation-bound funding quote without execution authority', () => {
+test('issues deterministic sponsorship-bound funding quote without execution authority', () => {
   const quote = issue();
   assert.equal(quote.chainId, '420');
   assert.equal(quote.account, addr(3));
-  assert.equal(quote.userOpHash, hash(4));
+  assert.equal(quote.sponsorshipDigest, hash(4));
   assert.equal(quote.policyId, hash(5));
   assert.equal(quote.authorizationId, hash(6));
+  assert.equal(quote.gasLimit, '500000');
+  assert.equal(quote.maxFeePerGasWei, '1000000000');
+  assert.equal(quote.maxPriorityFeePerGasWei, '100000000');
   assert.equal(quote.fundingMode, 'paymaster');
   assert.equal(quote.authority, 'funding-offer-only');
   assert.equal(quote.executionAuthorization, false);
@@ -64,12 +71,20 @@ test('issues deterministic operation-bound funding quote without execution autho
   assert.equal(quote.sponsorSecretExposed, false);
   assert.match(quote.quoteId, /^0x[0-9a-f]{64}$/);
   assert.equal(quote.quoteId, quote.quoteCommitment);
-  assert.equal(quote.signature, `sig:${quote.quoteCommitment}`);
+  assert.equal(quote.signature, `sig:${quote.sponsorshipDigest}`);
 });
 
-test('same operation-bound request produces same commitment at the same issuance time', () => {
+test('same sponsorship-bound request produces same commitment at the same issuance time and gas economics are committed', () => {
   assert.equal(issue().quoteCommitment, issue().quoteCommitment);
-  assert.notEqual(issue({ request: { userOpHash: hash(7) } }).quoteCommitment, issue().quoteCommitment);
+  assert.notEqual(issue({ request: { sponsorshipDigest: hash(7) } }).quoteCommitment, issue().quoteCommitment);
+  assert.notEqual(issue({ request: { gasLimit: '500001' } }).quoteCommitment, issue().quoteCommitment);
+  assert.notEqual(issue({ request: { maxFeePerGasWei: '1000000001' } }).quoteCommitment, issue().quoteCommitment);
+});
+
+test('legacy final userOpHash field is rejected so funding and execution signatures cannot be conflated', () => {
+  const legacy = { ...request(), userOpHash: hash(7) };
+  delete legacy.sponsorshipDigest;
+  assert.throws(() => validateGasQuoteRequest420(legacy), /unsupported field|sponsorshipDigest/);
 });
 
 test('fails closed on wrong audience, missing quote scope and expired credential', () => {
@@ -84,10 +99,24 @@ test('enforces short lived quote window', () => {
   assert.throws(() => issue({ request: { validUntil: '2026-09-14T22:06:00.000Z' } }), /maximum TTL/);
 });
 
+test('GAS-9.4 enforces sponsor gas and fee ceilings before signing', () => {
+  let signed = false;
+  const limits = { maxGasLimit: 500000n, maxFeePerGasWei: 1000000000n, maxPriorityFeePerGasWei: 100000000n };
+  assert.throws(() => createGasQuote420({ request: request({ gasLimit: '500001' }), credential: credential(), now, economicLimits: limits, sign: () => { signed = true; return 'sig'; } }), /gasLimit exceeds sponsor ceiling/);
+  assert.equal(signed, false);
+  assert.throws(() => issue({ request: { maxFeePerGasWei: '1000000001' }, economicLimits: limits }), /maxFeePerGasWei exceeds sponsor ceiling/);
+  assert.throws(() => issue({ request: { maxPriorityFeePerGasWei: '100000001' }, economicLimits: limits }), /maxPriorityFeePerGasWei exceeds sponsor ceiling/);
+});
+
+test('GAS-9.4 rejects internally inconsistent fee envelopes', () => {
+  assert.throws(() => validateGasQuoteRequest420(request({ maxFeePerGasWei: '100', maxPriorityFeePerGasWei: '101' })), /exceeds maxFeePerGasWei/);
+  assert.throws(() => validateGasQuoteRequest420(request({ gasLimit: '0' })), /greater than zero/);
+});
+
 test('strict request binding rejects malformed identifiers and unsupported fields', () => {
   assert.throws(() => validateGasQuoteRequest420(request({ chainId: '0' })), GasQuoteError420);
   assert.throws(() => validateGasQuoteRequest420(request({ account: '0x1234' })), GasQuoteError420);
-  assert.throws(() => validateGasQuoteRequest420(request({ userOpHash: '0x1234' })), GasQuoteError420);
+  assert.throws(() => validateGasQuoteRequest420(request({ sponsorshipDigest: '0x1234' })), GasQuoteError420);
   assert.throws(() => validateGasQuoteRequest420({ ...request(), extra: true }), /unsupported field/);
 });
 
@@ -96,8 +125,8 @@ test('quote read view remains authority-minimized and requires read scope', () =
   const view = createGasQuoteReadView420(quote, { credential: credential(), now });
   assert.deepEqual(Object.keys(view).sort(), [
     'account', 'authorizationId', 'authority', 'canonicalProtocolAuthority', 'chainId', 'entryPoint',
-    'executionAuthorization', 'maxSponsoredCostWei', 'paymaster', 'policyId', 'quoteId', 'userOpHash',
-    'validAfter', 'validUntil'
+    'executionAuthorization', 'gasLimit', 'maxFeePerGasWei', 'maxPriorityFeePerGasWei', 'maxSponsoredCostWei',
+    'paymaster', 'policyId', 'quoteId', 'sponsorshipDigest', 'validAfter', 'validUntil'
   ].sort());
   assert.equal(view.executionAuthorization, false);
   assert.equal(view.canonicalProtocolAuthority, false);

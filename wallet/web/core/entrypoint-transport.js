@@ -1,6 +1,7 @@
 import { normalizeAddress, normalizeBytes32 } from './abi.js';
 import { normalizeCallData } from './execution.js';
 import { prepareSessionExecution, readSessionNonce } from './session-execution.js';
+import { prepareWalletGasSponsorship420 } from './gas-sponsorship.js';
 import { readDeployedSmartAccountState } from './accounts.js';
 import {
   SESSION_EXECUTE_CAPABILITY_420,
@@ -12,6 +13,7 @@ import { readSessionEpoch, readSessionScope } from './session-management.js';
 
 const SELECTOR_GET_USER_OP_HASH = '22cdde4c';
 const SELECTOR_HANDLE_OP = '9eec012b';
+const SPONSORSHIP_DIGEST_SIGNATURE = 'getSponsorshipDigest((address,uint256,bytes,bytes,bytes32,uint256,bytes32,bytes,bytes))';
 export const USER_OPERATION_HANDLED_TOPIC = '0x112a8640ccbb4f7d6b7d89a235e0e74c02afd6a9f6a9dd27cee0ff1e874cf62a';
 const ZERO_BYTES32 = `0x${'0'.repeat(64)}`;
 
@@ -44,6 +46,10 @@ function normalizeHash(value, label = 'user operation hash') {
 
 function normalizeTxHash(value) {
   return normalizeHash(value, 'transaction hash');
+}
+
+function utf8Hex(value) {
+  return `0x${Array.from(new TextEncoder().encode(value), (byte) => byte.toString(16).padStart(2, '0')).join('')}`;
 }
 
 export function normalizePackedUserOperation(userOperation = {}) {
@@ -93,6 +99,11 @@ export function encodeHandleOp(userOperation) {
   return `0x${SELECTOR_HANDLE_OP}${uintWord(32)}${encodePackedUserOperationTuple(userOperation)}`;
 }
 
+async function encodeGetSponsorshipDigest(provider, userOperation) {
+  const signatureHash = normalizeHash(await provider.request('web3_sha3', [utf8Hex(SPONSORSHIP_DIGEST_SIGNATURE)]), 'sponsorship digest selector hash');
+  return `0x${signatureHash.slice(2, 10)}${uintWord(32)}${encodePackedUserOperationTuple(userOperation)}`;
+}
+
 export function decodeHandleOpSuccess(result) {
   if (typeof result !== 'string' || !/^0x[0-9a-fA-F]+$/.test(result) || result.length < 130) throw new Error('invalid EntryPoint420 handleOp simulation result');
   const successWord = result.slice(2, 66);
@@ -104,6 +115,13 @@ export async function readEntryPointUserOpHash(provider, entryPoint, userOperati
   const to = normalizeAddress(entryPoint);
   const result = await provider.request('eth_call', [{ to, data: encodeGetUserOpHash(userOperation) }, 'latest']);
   return normalizeHash(result);
+}
+
+export async function readEntryPointSponsorshipDigest(provider, entryPoint, userOperation) {
+  const to = normalizeAddress(entryPoint);
+  const data = await encodeGetSponsorshipDigest(provider, userOperation);
+  const result = await provider.request('eth_call', [{ to, data }, 'latest']);
+  return normalizeHash(result, 'sponsorship digest');
 }
 
 async function assertSignerAvailable(provider, signer) {
@@ -160,7 +178,7 @@ export async function revalidatePreparedSession(provider, prepared) {
   return { live, inspection, currentNonce };
 }
 
-export async function prepareEntryPointTransport(provider, smartAccountState, sessionKey, sessionPreflight) {
+export async function prepareEntryPointTransport(provider, smartAccountState, sessionKey, sessionPreflight, options = {}) {
   if (!sessionPreflight || sessionPreflight.broadcastReady !== false) throw new Error('qualified session execution preflight required before EntryPoint420 transport');
   const signer = normalizeAddress(sessionKey);
   if (normalizeAddress(sessionPreflight.signer) !== signer) throw new Error('session preflight signer mismatch');
@@ -170,9 +188,22 @@ export async function prepareEntryPointTransport(provider, smartAccountState, se
   if (unsigned.signature !== '0x') throw new Error('session preflight must be unsigned');
   await assertSignerAvailable(provider, signer);
 
-  const userOpHash = await readEntryPointUserOpHash(provider, entryPoint, unsigned);
+  let funding = { sponsored: false, fundingMode: 'self-funded', userOperation: unsigned, quote: null, fallbackReason: null };
+  if (typeof options.discoverGasQuote === 'function') {
+    funding = await prepareWalletGasSponsorship420({
+      userOperation: unsigned,
+      entryPoint,
+      discoverQuote: options.discoverGasQuote,
+      hashSponsorship: (operation) => readEntryPointSponsorshipDigest(provider, entryPoint, operation),
+      hashUserOperation: (operation) => readEntryPointUserOpHash(provider, entryPoint, operation),
+      now: options.now,
+    });
+  }
+
+  const unsignedForSigning = normalizePackedUserOperation(funding.userOperation);
+  const userOpHash = funding.sponsored ? normalizeHash(funding.userOpHash) : await readEntryPointUserOpHash(provider, entryPoint, unsignedForSigning);
   const signature = normalizeSignature(await provider.request('personal_sign', [userOpHash, signer]));
-  const userOperation = { ...unsigned, signature };
+  const userOperation = { ...unsignedForSigning, signature };
   const simulation = await simulateSignedUserOperation(provider, signer, entryPoint, userOperation);
   return {
     ...sessionPreflight,
@@ -180,15 +211,20 @@ export async function prepareEntryPointTransport(provider, smartAccountState, se
     userOpHash,
     userOperation,
     signature,
+    gasSponsorship: {
+      sponsored: Boolean(funding.sponsored), fundingMode: funding.fundingMode, quote: funding.quote,
+      sponsorshipDigest: funding.sponsorshipDigest ?? null,
+      fallbackReason: funding.fallbackReason, authority: funding.sponsored ? 'funding-only' : 'self-funded', executionAuthorization: false,
+    },
     entryPointSimulation: simulation,
     broadcastReady: true,
     blockReason: null,
   };
 }
 
-export async function prepareSessionUserOperationTransport(provider, smartAccountState, sessionKey, request = {}) {
+export async function prepareSessionUserOperationTransport(provider, smartAccountState, sessionKey, request = {}, transportOptions = {}) {
   const preflight = await prepareSessionExecution(provider, smartAccountState, sessionKey, request);
-  return prepareEntryPointTransport(provider, smartAccountState, sessionKey, preflight);
+  return prepareEntryPointTransport(provider, smartAccountState, sessionKey, preflight, transportOptions);
 }
 
 export async function sendPreparedEntryPointUserOperation(provider, prepared) {
@@ -204,8 +240,8 @@ export async function sendPreparedEntryPointUserOperation(provider, prepared) {
   return { ...prepared, entryPointSimulation: resimulation, submitted: true, txHash };
 }
 
-export async function sendSessionUserOperation(provider, smartAccountState, sessionKey, request = {}) {
-  const prepared = await prepareSessionUserOperationTransport(provider, smartAccountState, sessionKey, request);
+export async function sendSessionUserOperation(provider, smartAccountState, sessionKey, request = {}, transportOptions = {}) {
+  const prepared = await prepareSessionUserOperationTransport(provider, smartAccountState, sessionKey, request, transportOptions);
   return sendPreparedEntryPointUserOperation(provider, prepared);
 }
 

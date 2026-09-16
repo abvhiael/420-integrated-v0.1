@@ -76,12 +76,10 @@ func supervise(ctx context.Context, proc managedProcess, service serviceRunner, 
 	if proc == nil || service == nil { return errors.New("invalid node420 supervisor") }
 	runCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
-
 	serviceErr := make(chan error, 1)
 	go func() { serviceErr <- service.Run(runCtx) }()
 	processErr := make(chan error, 1)
 	go func() { processErr <- proc.Wait() }()
-
 	select {
 	case err := <-processErr:
 		cancel()
@@ -139,9 +137,18 @@ func main() {
 	storageStartBlock := flag.Uint64("storage.start-block", 0, "first block to scan for storage events")
 	storageConfirmations := flag.Uint64("storage.confirmations", 2, "confirmed blocks required before projection")
 	storageSyncInterval := flag.Duration("storage.sync-interval", 5*time.Second, "storage chain synchronization interval")
+	storageReconcileInterval := flag.Duration("storage.reconcile-interval", 30*time.Second, "canonical/local storage reconciliation interval")
+	storageReconcileMinBackoff := flag.Duration("storage.reconcile-min-backoff", 5*time.Second, "minimum storage reconciliation retry backoff")
+	storageReconcileMaxBackoff := flag.Duration("storage.reconcile-max-backoff", time.Minute, "maximum storage reconciliation retry backoff")
 	storageProofInterval := flag.Duration("storage.proof-interval", 5*time.Second, "storage proof scheduler interval")
 	storageProofReceiptWait := flag.Duration("storage.proof-receipt-wait", 30*time.Second, "maximum wait for a proof transaction receipt")
 	storageProofFrom := flag.String("storage.proof.from", "", "execution account used to sign storage proof transactions")
+	storageAuthToken := flag.String("storage.auth-token", "", "legacy bearer token for all protected storage operations")
+	storageReadToken := flag.String("storage.auth.read-token", "", "bearer token for storage read/capacity operations")
+	storageWriteToken := flag.String("storage.auth.write-token", "", "bearer token for storage write operations")
+	storageTLSCert := flag.String("storage.tls-cert", "", "TLS certificate file for provider HTTPS")
+	storageTLSKey := flag.String("storage.tls-key", "", "TLS private key file for provider HTTPS")
+	storageMaxConcurrent := flag.Uint("storage.max-concurrent-requests", 128, "maximum concurrent provider HTTP requests")
 	storageAgreement := flag.String("storage.contract.agreement", "", "StorageAgreementRegistry420 address")
 	storageCommitment := flag.String("storage.contract.commitment", "", "StorageCommitmentRegistry420 address")
 	storageCapacityContract := flag.String("storage.contract.capacity", "", "StorageCapacityRegistry420 address")
@@ -156,7 +163,6 @@ func main() {
 	if err != nil { fmt.Fprintln(os.Stderr, "node420: pinned geth binary not found"); os.Exit(1) }
 	if err := verifyBaseline(path); err != nil { fmt.Fprintln(os.Stderr, err); os.Exit(2) }
 	if *verify { fmt.Printf("node420: verified go-ethereum %s\n", gethBaseline); return }
-
 	if *initGenesis != "" {
 		args := []string{"--datadir", *datadir, "init", *initGenesis}
 		if *dryRun { fmt.Printf("%s %s\n", filepath.Clean(path), strings.Join(args, " ")); return }
@@ -165,43 +171,48 @@ func main() {
 		return
 	}
 
-	args := []string{
-		"--datadir", *datadir,
-		"--authrpc.addr", *authAddr, "--authrpc.port", fmt.Sprintf("%d", *authPort),
-		"--authrpc.jwtsecret", *jwtSecret, "--authrpc.vhosts", "localhost",
-		"--http", "--http.addr", *httpAddr, "--http.port", fmt.Sprintf("%d", *httpPort),
-		"--http.api", "eth,net,web3",
-		"--port", fmt.Sprintf("%d", *p2pPort),
-		"--syncmode", "full",
-	}
+	args := []string{"--datadir",*datadir,"--authrpc.addr",*authAddr,"--authrpc.port",fmt.Sprintf("%d",*authPort),"--authrpc.jwtsecret",*jwtSecret,"--authrpc.vhosts","localhost","--http","--http.addr",*httpAddr,"--http.port",fmt.Sprintf("%d",*httpPort),"--http.api","eth,net,web3","--port",fmt.Sprintf("%d",*p2pPort),"--syncmode","full"}
 	args = append(args, flag.Args()...)
 	if *dryRun {
 		fmt.Printf("%s %s\n", filepath.Clean(path), strings.Join(args, " "))
-		if *storageEnabled { fmt.Printf("node420 storage listen=%s data=%s\n", *storageListen, filepath.Join(*datadir,"storage")) }
+		if *storageEnabled { fmt.Printf("node420 storage listen=%s data=%s tls=%t max_concurrent=%d reconcile=%s\n", *storageListen, filepath.Join(*datadir,"storage"), *storageTLSCert != "", *storageMaxConcurrent, storageReconcileInterval.String()) }
+		if *cacheEnabled { fmt.Printf("node420 cache data=%s interval=%s\n", filepath.Join(*datadir,"cache"), cacheInterval.String()) }
+		if *gatewayEnabled { fmt.Printf("node420 gateway listen=%s cache=%s store=%s timeout=%s\n", *gatewayListen, *gatewayCacheURL, *gatewayStoreURL, gatewayTimeout.String()) }
 		return
 	}
 
 	cmd := exec.Command(path,args...); cmd.Stdin=os.Stdin; cmd.Stdout=os.Stdout; cmd.Stderr=os.Stderr
-	if !*storageEnabled {
-		if err := cmd.Run(); err != nil { fmt.Fprintln(os.Stderr,"node420:",err); os.Exit(1) }
-		return
-	}
-
+	if !*storageEnabled && !*cacheEnabled && !*gatewayEnabled { if err := cmd.Run(); err != nil { fmt.Fprintln(os.Stderr,"node420:",err); os.Exit(1) }; return }
 	rpcURL := *storageRPC
 	if rpcURL == "" { rpcURL = fmt.Sprintf("http://%s:%d", *httpAddr, *httpPort) }
-	service, err := storage.NewService(storage.ServiceConfig{
-		NodeID:*storageNodeID, CapacityBytes:*storageCapacity, DataDir:filepath.Join(*datadir,"storage"), ListenAddr:*storageListen,
-		RPCURL:rpcURL, StartBlock:*storageStartBlock, Confirmations:*storageConfirmations, SyncInterval:*storageSyncInterval,
-		ProofInterval:*storageProofInterval, ProofRegistry:*storageProofRegistry, ProofFrom:*storageProofFrom, ProofReceiptWait:*storageProofReceiptWait,
-		Contracts:storage.RPCStorageContracts{Agreement:*storageAgreement,Commitment:*storageCommitment,Capacity:*storageCapacityContract,Settlement:*storageSettlement,Scheme:*storageScheme,Manifest:*storageManifest},
-	})
-	if err != nil { fmt.Fprintln(os.Stderr,"node420 storage config:",err); os.Exit(2) }
-
-	ctx,cancel:=signal.NotifyContext(context.Background(),os.Interrupt,syscall.SIGTERM)
-	defer cancel()
-	if err:=cmd.Start(); err!=nil { fmt.Fprintln(os.Stderr,"node420:",err); os.Exit(1) }
-	if err:=supervise(ctx, commandProcess{cmd:cmd}, service, 10*time.Second); err!=nil {
-		fmt.Fprintln(os.Stderr,"node420:",err)
-		os.Exit(1)
+	contracts := storage.RPCStorageContracts{Agreement:*storageAgreement,Commitment:*storageCommitment,Capacity:*storageCapacityContract,Settlement:*storageSettlement,Scheme:*storageScheme,Manifest:*storageManifest}
+	services := make([]serviceRunner, 0, 3)
+	if *storageEnabled {
+		if uint64(*storageMaxConcurrent) > uint64(^uint32(0)) { fmt.Fprintln(os.Stderr,"node420 storage config: max concurrent requests too large"); os.Exit(2) }
+		service, err := storage.NewService(storage.ServiceConfig{
+			NodeID:*storageNodeID, CapacityBytes:*storageCapacity, DataDir:filepath.Join(*datadir,"storage"), ListenAddr:*storageListen,
+			RPCURL:rpcURL, StartBlock:*storageStartBlock, Confirmations:*storageConfirmations, SyncInterval:*storageSyncInterval,
+			ReconcileInterval:*storageReconcileInterval, ReconcileMinBackoff:*storageReconcileMinBackoff, ReconcileMaxBackoff:*storageReconcileMaxBackoff,
+			ProofInterval:*storageProofInterval, ProofRegistry:*storageProofRegistry, ProofFrom:*storageProofFrom, ProofReceiptWait:*storageProofReceiptWait,
+			AuthToken:*storageAuthToken, ReadAuthToken:*storageReadToken, WriteAuthToken:*storageWriteToken,
+			TLSCertFile:*storageTLSCert, TLSKeyFile:*storageTLSKey, MaxConcurrentRequests:uint32(*storageMaxConcurrent), Contracts:contracts,
+		})
+		if err != nil { fmt.Fprintln(os.Stderr,"node420 storage config:",err); os.Exit(2) }
+		services = append(services, service)
 	}
+	if *cacheEnabled {
+		cacheService, err := newNodeCacheService(*datadir, rpcURL, contracts)
+		if err != nil { fmt.Fprintln(os.Stderr,"node420 cache config:",err); os.Exit(2) }
+		services = append(services, cacheService)
+	}
+	if *gatewayEnabled {
+		gatewayService, err := newNodeGatewayService()
+		if err != nil { fmt.Fprintln(os.Stderr,"node420 gateway config:",err); os.Exit(2) }
+		services = append(services, gatewayService)
+	}
+	var service serviceRunner
+	if len(services) == 1 { service = services[0] } else { service = serviceGroup{services:services} }
+	ctx,cancel:=signal.NotifyContext(context.Background(),os.Interrupt,syscall.SIGTERM);defer cancel()
+	if err:=cmd.Start(); err!=nil { fmt.Fprintln(os.Stderr,"node420:",err); os.Exit(1) }
+	if err:=supervise(ctx, commandProcess{cmd:cmd}, service, 10*time.Second); err!=nil { fmt.Fprintln(os.Stderr,"node420:",err); os.Exit(1) }
 }

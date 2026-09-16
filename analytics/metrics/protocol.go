@@ -8,6 +8,7 @@ import (
 
 	"github.com/420integrated/420-integrated/analytics/architecture"
 	"github.com/420integrated/420-integrated/analytics/model"
+	"github.com/420integrated/420-integrated/analytics/privacy"
 )
 
 const (
@@ -24,6 +25,7 @@ type ProtocolEventProjection struct {
 	LogIndex        uint64
 	Protocol        string
 	EventName       string
+	PrivacyClass    string
 }
 
 type ProtocolObjectProjection struct {
@@ -32,6 +34,7 @@ type ProtocolObjectProjection struct {
 	Protocol       string
 	ObjectKey      string
 	LifecycleState string
+	PrivacyClass   string
 }
 
 type ProtocolInput struct {
@@ -51,6 +54,9 @@ func BuildProtocolMetrics(input ProtocolInput, provenance model.Provenance) ([]m
 	protocols := map[string]struct{}{}
 	events := map[string]struct{}{}
 	for i, event := range input.Events {
+		if err := privacy.Admit(event.PrivacyClass); err != nil {
+			return nil, fmt.Errorf("event %d privacy admission: %w", i, err)
+		}
 		if err := validateProtocolCoordinates(event.ChainID, event.BlockNumber, provenance); err != nil {
 			return nil, fmt.Errorf("event %d: %w", i, err)
 		}
@@ -69,6 +75,9 @@ func BuildProtocolMetrics(input ProtocolInput, provenance model.Provenance) ([]m
 	objects := map[string]struct{}{}
 	var active uint64
 	for i, object := range input.Objects {
+		if err := privacy.Admit(object.PrivacyClass); err != nil {
+			return nil, fmt.Errorf("object %d privacy admission: %w", i, err)
+		}
 		if err := validateProtocolCoordinates(object.ChainID, object.BlockNumber, provenance); err != nil {
 			return nil, fmt.Errorf("object %d: %w", i, err)
 		}

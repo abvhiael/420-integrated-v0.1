@@ -50,6 +50,8 @@ contract BridgeAccountingRegistry is GenesisResidentAccess420 {
         );
         require(assetId != bytes32(0) && evidenceHash != bytes32(0), "invalid");
         require(observedAt > 0 && observedAt <= block.timestamp, "observation time");
+        Reconciliation storage previous = reconciliations[assetId];
+        require(previous.observedAt == 0 || observedAt > previous.observedAt, "stale observation");
         ICanonicalAssetRegistry420 assets = ICanonicalAssetRegistry420(
             _resolveRequired(GenesisInterfaceIds420.CANONICAL_ASSET_REGISTRY)
         );

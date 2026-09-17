@@ -1,0 +1,35 @@
+{
+  "schema": "420-exchange-cross-adapter-hardening-v12.6.1",
+  "status": "COMPLETED_QUALIFIED_UNMERGED",
+  "scope": "CROSS_ADAPTER_COMMON_INVARIANTS",
+  "adapters": [
+    "EthereumBridgeAdapter420",
+    "SolanaBridgeAdapter420"
+  ],
+  "invariants": [
+    "router-only inbound and outbound access remains enforced independently by each adapter",
+    "unknown outbound assets fail closed on every adapter",
+    "route bindings cannot be crossed between adapters",
+    "the same global asset id may map to distinct canonical source assets and distinct routes per chain",
+    "replay state is adapter-local: the same external message id can be valid once per canonical source chain but cannot replay within either adapter",
+    "outbound source message ids are adapter-domain-separated and do not collide for equivalent economic transfers",
+    "asset source rebinding clears stale reverse mappings on both adapters"
+  ],
+  "qualification_tests": [
+    "same asset id binds distinct canonical Ethereum and Solana sources and routes",
+    "shared message id is independently consumed once on Ethereum and Solana and rejected on replay within each adapter",
+    "equivalent Ethereum and Solana outbound requests produce distinct source message ids",
+    "direct adapter calls cannot bypass either router",
+    "unknown assets fail closed on Ethereum and Solana outbound",
+    "cross-chain route substitution fails closed",
+    "source rebinding clears stale mappings on both adapters"
+  ],
+  "follow_on_hardening": [
+    "V12.6.2 replay namespace and collision hardening across remaining native-chain adapters",
+    "V12.6.3 verifier rotation and authorization hardening",
+    "V12.6.4 pause and emergency controls",
+    "V12.6.5 malformed proof and recipient fuzz hardening",
+    "V12.6.6 domain, nonce and router-bypass hardening",
+    "V12.6.7 governance, accounting, registry and recovery hardening"
+  ]
+}

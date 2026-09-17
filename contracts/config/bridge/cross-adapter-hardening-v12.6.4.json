@@ -1,0 +1,29 @@
+{
+  "schema": "420-exchange-cross-adapter-hardening-v12.6.4",
+  "status": "IN_QUALIFICATION",
+  "scope": "DIRECTIONAL_PAUSE_AND_EMERGENCY_CONTROLS",
+  "model": "Ethereum and Solana bridge adapters add governance-only directional emergency halts as defense in depth beneath GatewayRouter420 system safety. Inbound and outbound movement can be stopped independently, each halt records a nonzero incident hash, reopening clears the incident marker, and emergency state does not alter replay, asset, route, verifier or custody state.",
+  "invariants": [
+    "only governance may change adapter emergency state",
+    "inbound and outbound emergency domains are independent",
+    "enabling a halt requires a nonzero incident hash",
+    "reopening a direction clears its incident hash",
+    "inbound halt rejects proof consumption before replay state mutates",
+    "outbound halt rejects message creation before the outbound nonce advances",
+    "halting one direction does not halt the opposite direction",
+    "emergency state cannot rewrite verifier, gateway, asset or route configuration",
+    "emergency controls add no custody, confiscation, mint or burn authority",
+    "existing GatewayRouter420 system-level safety remains authoritative and unchanged"
+  ],
+  "qualification_tests": [
+    "unauthorized emergency-state changes rejected on Ethereum and Solana adapters",
+    "zero incident hashes rejected when enabling a halt",
+    "Ethereum inbound halt blocks proof consumption without consuming message replay state",
+    "Solana inbound halt blocks proof consumption without consuming message replay state",
+    "Ethereum outbound halt blocks initiation without advancing nonce",
+    "Solana outbound halt blocks initiation without advancing nonce",
+    "directional independence verified for inbound versus outbound",
+    "governance reopen restores movement and clears incident hash"
+  ],
+  "follow_on": "V12.6.5 malformed proof and recipient fuzz hardening"
+}

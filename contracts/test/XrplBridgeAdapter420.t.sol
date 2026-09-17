@@ -51,7 +51,7 @@ contract XrplBridgeAdapter420Test {
         require(!ok, "unvalidated accepted");
     }
 
-    function testFailedTransactionFailsClosed() public {
+    function testTransactionFailureFailsClosed() public {
         IXrplFinalityVerifier420.FinalizedTransfer memory p = _healthy(keccak256("failed"), keccak256("tx-f"));
         p.tesSuccess = false;
         verifier.set(p);

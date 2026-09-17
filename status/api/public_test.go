@@ -55,18 +55,19 @@ func TestIncidentAndMaintenanceFeedsRemainSeparate(t *testing.T) {
 	if err := incidentStore.Create(incident); err != nil { t.Fatal(err) }
 	if err := incidentStore.Create(maintenance); err != nil { t.Fatal(err) }
 
-	for path, key, want := range map[string]struct{ key string; want int }{
+	cases := map[string]struct{ key string; want int }{
 		"/v1/incidents": {key:"incidents", want:1},
 		"/v1/maintenance": {key:"maintenance", want:1},
-	} {
+	}
+	for path, tc := range cases {
 		req := httptest.NewRequest(http.MethodGet, path, nil)
 		res := httptest.NewRecorder()
 		api.Handler().ServeHTTP(res, req)
 		if res.Code != http.StatusOK { t.Fatalf("%s expected 200, got %d", path, res.Code) }
 		var body map[string]any
 		if err := json.Unmarshal(res.Body.Bytes(), &body); err != nil { t.Fatal(err) }
-		items, ok := body[key.key].([]any)
-		if !ok || len(items) != key.want { t.Fatalf("%s expected %d items: %#v", path, key.want, body) }
+		items, ok := body[tc.key].([]any)
+		if !ok || len(items) != tc.want { t.Fatalf("%s expected %d items: %#v", path, tc.want, body) }
 	}
 }
 

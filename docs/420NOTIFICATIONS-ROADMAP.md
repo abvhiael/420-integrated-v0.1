@@ -8,7 +8,7 @@
 - **NOTIFY-1 — runtime/service scaffold — COMPLETE**
 - **NOTIFY-2 — subscription engine — COMPLETE**
 - **NOTIFY-3 — indexer ingestion + replay — COMPLETE**
-- NOTIFY-4 — delivery queue + retry/dedup — pending
+- **NOTIFY-4 — delivery queue + retry/dedup — COMPLETE**
 - NOTIFY-5 — provider-neutral delivery adapters — pending
 - NOTIFY-6 — provenance + security — pending
 - NOTIFY-7 — API + feed/history — pending
@@ -67,7 +67,9 @@ Tests cover successful resume, failed-batch checkpoint immutability, wrong-chain
 
 ## NOTIFY-4 — delivery queue + retry/dedup
 
-Implement deterministic enqueue keys across subscription/event/provider/destination, bounded retry/backoff, dead-letter state, severity/priority handling, rate limits and isolation so one failing destination cannot block other subscriptions or indexer replay.
+Implemented deterministic enqueue keys across subscription/event/provider/destination, idempotent deduplication, bounded exponential retry/backoff, dead-letter state, severity/priority ordering, per-provider/destination fixed-window rate-limit decisions, defensive payload cloning and isolated delivery state so one failing destination does not affect another. Delivery records remain noncanonical presentation state.
+
+Tests cover deduplication, ordering, retry timing, dead-letter transition, destination failure isolation, payload cloning, rate-limit throttling/reset and destination-level rate-limit isolation.
 
 ## NOTIFY-5 — provider-neutral delivery adapters
 

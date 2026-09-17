@@ -46,7 +46,7 @@ BG-14 builds the Bong Goggles application messaging layer over the already-canon
 - Rebuild materialized inbox state from current canonical inputs after reorg/replay so removed/replaced envelopes cannot leave stale unread counts or last-message pointers.
 - Fail closed on conversation/envelope participant mismatch and impossible receipt ordering (`readAt` without `deliveredAt`).
 
-### BG-14.4 — permitted group threads — IN PROGRESS
+### BG-14.4 — permitted group threads — COMPLETE AND QUALIFIED
 
 - Treat `BongGogglesCommunityRegistry420` as canonical group/membership authority; only ACTIVE members may read or send through a private group thread.
 - Keep the group-thread descriptor application-level and explicitly non-authoritative; it binds `groupId`, thread ID, group epoch commitment, membership digest and exact active-member set.
@@ -57,12 +57,16 @@ BG-14 builds the Bong Goggles application messaging layer over the already-canon
 - Fail the fan-out plan closed when any required recipient route is unavailable instead of silently omitting a current group member.
 - Keep public/Commons group-channel semantics separate: a PUBLIC Bong Goggles group does not make a Commons channel a private Messenger thread.
 
-### BG-14.5 — private attachments
+### BG-14.5 — private attachments — IN PROGRESS
 
-- Reuse BG-13 descriptor/storage identity, upload and verified retrieval machinery for attachments.
-- Require active conversation/context authorization before upload association or retrieval presentation.
-- Keep attachment keys, private URLs, provider credentials and payload bytes out of public indexes/logs.
-- Preserve immutable storage provenance while allowing message/context lifecycle to remove presentation eligibility.
+- Reuse BG-13 canonical `mediaRoot`, manifest descriptor, item ID and 420Storage object identity rather than introducing messaging-specific storage identity.
+- Bind each attachment descriptor to the exact active Messenger conversation, Bong Goggles private context and current private epoch.
+- Require exact `BongGogglesMediaRegistry420` owner/mediaRoot/manifestHash identity plus exact manifest item -> storage object identity before association or presentation.
+- Permit upload association only for the attachment owner and only while current block/social messaging policy remains eligible.
+- Permit retrieval presentation only to current canonical conversation participants and re-read conversation/context/block/policy state on every authorization.
+- Delegate actual upload preparation, ingest verification and full-object retrieval verification to the already-qualified BG-13 media/storage services.
+- Reject attachment/decryption keys, signed/private/provider URLs, credentials, tokens, cookies, session secrets, payload bytes, plaintext and ciphertext from attachment descriptors/public projections.
+- Preserve immutable storage/media provenance when a conversation closes, a block is introduced, a context closes or an epoch rotates; those lifecycle events remove current presentation eligibility instead of rewriting storage history.
 
 ### BG-14.6 — safety, devices, epoch rotation and recovery
 
@@ -106,5 +110,9 @@ BG-14 builds the Bong Goggles application messaging layer over the already-canon
 23. Every group-thread recipient is delivered through a canonical direct Messenger/private context; group fan-out never creates parallel conversation authority.
 24. Group fan-out fails closed if any current recipient lacks an eligible direct route; it may not silently shrink the canonical member set.
 25. PUBLIC group/community visibility does not convert a Commons/public channel into private Messenger authority.
+26. A private attachment must resolve to the exact canonical BG-13 mediaRoot/manifest/item/storage-object identity before messaging may associate or present it.
+27. Attachment association is allowed only to the attachment owner in a currently eligible active Messenger/private context.
+28. Attachment presentation eligibility is re-evaluated at read time; closing/blocking/context closure/epoch rotation revokes presentation without mutating immutable storage provenance.
+29. Attachment descriptors and public projections never contain attachment/decryption keys, signed/private/provider URLs, credentials, tokens, session secrets or payload bytes.
 
 BG-14 is developed on `feature/bong-goggles-bg14-private-messaging` after BG-13 merged to `main` in PR #308.

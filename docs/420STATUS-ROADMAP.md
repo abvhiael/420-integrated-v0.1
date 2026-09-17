@@ -8,7 +8,7 @@
 - **STATUS-1 — runtime/service scaffold — COMPLETE**
 - **STATUS-2 — component registry + health model — COMPLETE**
 - **STATUS-3 — evidence ingestion + source adapters — COMPLETE**
-- STATUS-4 — incident lifecycle + severity model — pending
+- **STATUS-4 — incident lifecycle + severity model — COMPLETE**
 - STATUS-5 — aggregation, freshness + degraded-state engine — pending
 - STATUS-6 — history, provenance + canonical references — pending
 - STATUS-7 — API + public status feed — pending
@@ -74,7 +74,11 @@ The ingestor binds each observation to a registered component and configured net
 
 ## STATUS-4 — incident lifecycle + severity model
 
-Implement incident IDs, `INFO`/`WARN`/`MAJOR`/`CRITICAL` severities, affected components, evidence references, mitigation notes, open/monitoring/resolved states, planned maintenance and recovery timestamps. Incident records are auditable coordination state only.
+Implemented typed incident coordination under `status/incidents` with `INFO`, `WARN`, `MAJOR` and `CRITICAL` severities; `open`, `monitoring` and `resolved` lifecycle states; affected-component sets; evidence references; mitigation notes; planned-maintenance windows; and explicit recovery timestamps.
+
+Incident histories are append-only. The first update must open the incident, updates cannot move backward in time, resolved incidents are immutable, and a resolved record cannot be silently reopened. Corrections therefore require a new auditable incident/update rather than history replacement. Incident updates explicitly reject protocol-authority claims.
+
+Planned maintenance is modeled separately from unplanned incidents and requires a bounded start/end window. The in-memory store returns deterministic active-incident ordering and defensive copies so callers cannot mutate stored history out of band.
 
 ## STATUS-5 — aggregation, freshness + degraded-state engine
 

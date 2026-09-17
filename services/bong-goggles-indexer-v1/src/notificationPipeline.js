@@ -51,12 +51,32 @@ function qualifiedInteraction(state, { mention = false } = {}) {
   return true;
 }
 
+function recipientAllowed(entry) {
+  if (!entry || typeof entry !== 'object') return false;
+  if (!entry.account) return false;
+  if (entry.active === false || entry.notificationsMuted === true || entry.blockedEither === true) return false;
+  return true;
+}
+
+function activeRecord(record) {
+  if (!record || record.exists === false || record.active === false) return false;
+  return true;
+}
+
 function isCommentType(value) {
   return value === 3 || value === 'COMMENT';
 }
 
 function isProfileTag(value) {
   return value === 0 || value === 'PROFILE';
+}
+
+function isActiveMember(value) {
+  return value === 2 || value === 'ACTIVE';
+}
+
+function isRemovedMember(value) {
+  return value === 3 || value === 'REMOVED';
 }
 
 export function notificationCandidatesForEvent(log, state = {}) {
@@ -119,18 +139,64 @@ export function notificationCandidatesForEvent(log, state = {}) {
     }
     case 'GroupJoinRequested': {
       const group = required(state.group, 'canonical group state');
+      if (!activeRecord(group)) break;
       add(candidate(log, { recipient: group.owner, actor: args.account, kind: 'GROUP_JOIN_REQUESTED', topic: 'groups', subjectId: args.groupId }));
       break;
     }
-    case 'GroupMemberActivated':
-      add(candidate(log, { recipient: args.account, actor: state.group?.owner ?? null, kind: 'GROUP_MEMBER_ACTIVATED', topic: 'groups', subjectId: args.groupId }));
+    case 'GroupMemberActivated': {
+      const group = required(state.group, 'canonical group state');
+      const member = required(state.groupMember, 'canonical group member state');
+      if (!activeRecord(group) || !isActiveMember(member.state)) break;
+      add(candidate(log, { recipient: args.account, actor: group.owner, kind: 'GROUP_MEMBER_ACTIVATED', topic: 'groups', subjectId: args.groupId, metadata: { role: args.role ?? member.role ?? null } }));
       break;
-    case 'GroupMemberRemoved':
-      add(candidate(log, { recipient: args.account, actor: state.group?.owner ?? null, kind: 'GROUP_MEMBER_REMOVED', topic: 'groups', subjectId: args.groupId }));
+    }
+    case 'GroupMemberRemoved': {
+      const group = required(state.group, 'canonical group state');
+      const member = required(state.groupMember, 'canonical group member state');
+      if (!isRemovedMember(member.state)) break;
+      add(candidate(log, { recipient: args.account, actor: null, kind: 'GROUP_MEMBER_REMOVED', topic: 'groups', subjectId: args.groupId, metadata: { groupOwner: group.owner ?? null } }));
       break;
+    }
+    case 'GroupUpdated': {
+      const group = required(state.group, 'canonical group state');
+      if (group.exists === false) break;
+      const recipients = required(state.groupNotificationRecipients, 'canonical group notification recipients');
+      if (!Array.isArray(recipients)) throw new Error('invalid canonical group notification recipients');
+      for (const recipient of recipients) {
+        if (!recipientAllowed(recipient)) continue;
+        add(candidate(log, {
+          recipient: recipient.account,
+          actor: group.owner,
+          kind: 'GROUP_ACTIVITY',
+          topic: 'groups',
+          subjectId: args.groupId,
+          metadata: { privacy: args.privacy ?? group.privacy ?? null, joinPolicy: args.joinPolicy ?? group.joinPolicy ?? null, active: args.active ?? group.active ?? null },
+        }));
+      }
+      break;
+    }
     case 'EventRSVP': {
       const eventRecord = required(state.eventRecord, 'canonical event state');
+      if (!activeRecord(eventRecord)) break;
       add(candidate(log, { recipient: eventRecord.owner, actor: args.account, kind: 'EVENT_RSVP', topic: 'events', subjectId: args.eventId, metadata: { state: args.state ?? null } }));
+      break;
+    }
+    case 'EventUpdated': {
+      const eventRecord = required(state.eventRecord, 'canonical event state');
+      if (eventRecord.exists === false) break;
+      const recipients = required(state.eventNotificationRecipients, 'canonical event notification recipients');
+      if (!Array.isArray(recipients)) throw new Error('invalid canonical event notification recipients');
+      for (const recipient of recipients) {
+        if (!recipientAllowed(recipient)) continue;
+        add(candidate(log, {
+          recipient: recipient.account,
+          actor: eventRecord.owner,
+          kind: 'EVENT_ACTIVITY',
+          topic: 'events',
+          subjectId: args.eventId,
+          metadata: { startsAt: args.startsAt ?? eventRecord.startsAt ?? null, endsAt: args.endsAt ?? eventRecord.endsAt ?? null, active: args.active ?? eventRecord.active ?? null },
+        }));
+      }
       break;
     }
     case 'ReviewPublished': {

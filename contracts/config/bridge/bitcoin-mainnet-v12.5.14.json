@@ -1,0 +1,29 @@
+{
+  "schema": "420-bridge-bitcoin-mainnet-v12.5.14",
+  "status": "APPROVED_INACTIVE_PENDING_PRODUCTION_VERIFIER_AND_GATEWAY",
+  "canonical_chain_key": "420/BRIDGE/CHAIN/BTC",
+  "chain_family": "UTXO_PROOF_OF_WORK",
+  "route_chain_id": "0x4254430000000001",
+  "network_identity": {
+    "genesis_hash": "0x000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f",
+    "message_start": "0xf9beb4d9",
+    "p2p_port": 8333,
+    "p2pkh_version": 0,
+    "p2sh_version": 5,
+    "bech32_hrp": "bc",
+    "target_block_seconds": 600
+  },
+  "consensus_profile": {
+    "security_model": "SHA256D_PROOF_OF_WORK_WITH_CUMULATIVE_CHAINWORK",
+    "minimum_bridge_confirmations": 6,
+    "finality_policy": "production verifier must prove canonical mainnet header-chain work, transaction inclusion, source-output ownership and at least six confirmations"
+  },
+  "outbound_script_types": ["P2PKH", "P2SH", "P2WPKH", "P2WSH", "P2TR"],
+  "activation_requirements": [
+    "production Bitcoin verifier",
+    "gateway custody/signing policy",
+    "route and risk limits",
+    "end-to-end native BTC settlement rehearsal",
+    "governance enablement"
+  ]
+}

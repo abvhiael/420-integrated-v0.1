@@ -1,0 +1,37 @@
+{
+  "schema": "420-exchange-link-ethereum-v12.5.17",
+  "status": "APPROVED_INACTIVE",
+  "integration_type": "TOKEN_OVER_EXISTING_CANONICAL_CHAIN_ADAPTER",
+  "asset": {
+    "symbol": "LINK",
+    "asset_id": "420/BRIDGE/ASSET/LINK",
+    "canonical_network": "ETHEREUM",
+    "canonical_chain_key": "420/BRIDGE/CHAIN/ETH",
+    "ethereum_chain_id": 1,
+    "ethereum_token": "0x514910771AF9Ca656af840dff83E8264EcF986CA",
+    "decimals": 18,
+    "token_standard": "ERC-677 / ERC-20-compatible"
+  },
+  "route": {
+    "route_id": "420/BRIDGE/ROUTE/LINK/ETHEREUM/MAINNET",
+    "adapter": "EthereumBridgeAdapter420",
+    "adapter_id": "420/BRIDGE/ETHEREUM/MAINNET/V12.5.4",
+    "verifier": "IEthereumFinalityVerifier420"
+  },
+  "qualification": [
+    "canonical LINK Ethereum token address pinned",
+    "Ethereum mainnet chain id pinned to 1",
+    "LINK source-token mapping required",
+    "LINK route binding required",
+    "finalized Ethereum proof required",
+    "approved gateway required",
+    "message replay protection inherited from EthereumBridgeAdapter420",
+    "router-only inbound and outbound inherited from EthereumBridgeAdapter420"
+  ],
+  "activation_blockers": [
+    "420 local LINK representation deployed and registered",
+    "production Ethereum finality verifier deployed and reviewed",
+    "production gateway approved by governance",
+    "route and risk limits activated by governance"
+  ]
+}

@@ -5,7 +5,7 @@
 ## GEN-10.8 status
 
 - **STATUS-0 — Genesis boundary + executable invariant baseline — COMPLETE**
-- STATUS-1 — runtime/service scaffold — pending
+- **STATUS-1 — runtime/service scaffold — COMPLETE**
 - STATUS-2 — component registry + health model — pending
 - STATUS-3 — evidence ingestion + source adapters — pending
 - STATUS-4 — incident lifecycle + severity model — pending
@@ -39,7 +39,22 @@ Freeze service identity `420/service/status/v1`, require no Status-specific Gene
 
 ## STATUS-1 — runtime/service scaffold
 
-Implement configuration validation, service lifecycle, `/healthz` and `/readyz`, chain/environment identity, public evidence-source configuration and fail-closed startup. Readiness must require correct network identity and sufficiently healthy dependencies rather than process liveness alone.
+Implemented configuration validation, service lifecycle, `/healthz` and `/readyz`, chain identity validation, public 420Indexer probing and fail-closed startup. The runtime entrypoint is `status/cmd/status420`.
+
+Readiness is deliberately stricter than process liveness: the configured chain must match the public 420Indexer identity, the Indexer must report ready, and its status evidence must carry a sufficiently recent observation timestamp. Stale, future-dated, missing, wrong-chain or unavailable dependency evidence leaves 420Status unready rather than presenting a misleading healthy surface.
+
+Required environment:
+
+- `STATUS_CHAIN_ID`
+- `STATUS_INDEXER_URL`
+
+Optional environment:
+
+- `STATUS_LISTEN_ADDR` (default `:8422`)
+- `STATUS_REQUEST_TIMEOUT` (default `5s`)
+- `STATUS_MAX_EVIDENCE_AGE` (default `2m`)
+
+Health/readiness responses explicitly report `canonical: false`; service qualification never grants consensus, execution, Wallet or protocol authority.
 
 ## STATUS-2 — component registry + health model
 

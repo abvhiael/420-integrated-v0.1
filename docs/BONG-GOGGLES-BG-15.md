@@ -52,34 +52,54 @@ Status: COMPLETE AND QUALIFIED
 
 ## BG-15.8 — abuse, integrity, replay & recovery hardening
 
-Status: IMPLEMENTED — EXACT-HEAD QUALIFICATION PENDING
+Status: COMPLETE AND QUALIFIED
+
+## BG-15.9 — production load qualification, runbook, reconciliation & phase closeout
+
+Status: IMPLEMENTED — RECONCILIATION AND EXACT-HEAD QUALIFICATION PENDING
 
 Requirements:
 
-- Re-read current player profile activity, bilateral block state and social-game policy before sensitive invitation, move or finish actions; stale previously-authorized clients fail closed when policy changes.
-- Reject nonparticipant actions even when the caller possesses stale local session state.
-- Bound repeated challenge/invitation attempts with deterministic application-layer pairwise rate limiting; rate limits never replace canonical social policy.
-- Preserve BG-15.3 canonical move sequencing and replay protection as the source of truth for stale, duplicate, skipped and replayed move rejection.
-- Rebuild local game state from canonical move commitments/payload verification and compare the resulting state digest against the local digest.
-- Force canonical rebuild whenever local and canonical replay digests diverge; local cached state never overrides a verified canonical replay.
-- Detect conflicting finish attempts against an already-canonical winner and fail closed; identical already-finished outcomes may be represented idempotently without rewriting chain state.
-- Classify abandoned sessions as application metadata only; timeout classification must never mutate canonical lifecycle or fabricate a winner.
-- Recursively redact hidden/private game material from logs and telemetry, including hands, decks, tiles, seeds, salts, plaintext/ciphertext, key material and other hidden-state fields.
-- Prove the Bong Goggles zero-wager boundary explicitly: nonzero wager attempts must continue to fail through the canonical invite builder and wagered play remains routed to 420Bet.
+- Provide a bounded production qualification profile covering lobby/session projection, active sessions, canonical move verification, history projection, leaderboard projection and concurrent resolver activity.
+- Reject runaway qualification inputs above explicit hard caps; BG-15.9 is a bounded release qualification, not an unbounded stress test.
+- Record P95 latency evidence for projection, intent construction, canonical replay/rebuild, history projection and leaderboard projection.
+- Fail load qualification on any budget overrun, observed error or unresolved canonical/local divergence.
+- Emit structured games telemetry with operation, outcome, latency, retries, bounded reason and safe labels only after BG-15.8 recursive private/hidden-state redaction.
+- Qualify the required production failure drills: projection stall, canonical replay divergence, ruleset disable/rollback, randomness unavailable, hidden-state reveal failure, policy invalidation, challenge spam and wager boundary.
+- Use `docs/BONG-GOGGLES-BG-15-9-RUNBOOK.md` for stuck projection, replay divergence, ruleset rollback, randomness, hidden-state and abuse-response procedures.
+- Reconcile `feature/bong-goggles-bg15-social-games` with current `main` before phase closeout.
+- Require the reconciled exact head to pass Bong Goggles Games Verification, Bong Goggles Media Verification, 420Docs Qualification and 420 Integrated Qualification.
+- Keep PR #321 open and unmerged until an explicit merge instruction is given.
 
-### BG-15.8 invariants
+### BG-15.9 bounded load baseline
 
-57. Current profile/block/policy state overrides stale client authorization for every protected game action.
-58. Nonparticipants cannot use BG-15 application helpers to prepare protected canonical game actions.
-59. Challenge spam controls are bounded application safeguards and never become canonical relationship or invitation authority.
-60. Canonical move sequence/commitment history remains authoritative for stale-client, duplicate, skipped and replay detection.
-61. Local/canonical state-digest divergence always resolves toward deterministic canonical replay, never toward cached local state.
-62. A conflicting finish can never overwrite the canonical terminal winner.
-63. Abandonment detection is advisory metadata only and cannot terminate a canonical session or assign a winner.
-64. Private/hidden game material is redacted before telemetry leaves the game service boundary.
-65. Bong Goggles remains strictly zero-wager; nonzero wager attempts fail closed and wagered play belongs in 420Bet.
-66. BG-15.8 adds no second lifecycle, policy, settlement, moderation or replay authority.
+- 500 lobby sessions;
+- 250 active sessions;
+- 5,000 canonical move commitments/payload verifications;
+- 10,000 history rows;
+- 1,000 leaderboard players;
+- 25 concurrent resolvers.
 
-## Remaining BG-15 phases
+P95 release budgets:
 
-- **BG-15.9 — production load qualification, runbook, reconciliation & phase closeout**
+- projection <= 500 ms;
+- intent construction <= 250 ms;
+- canonical replay/rebuild <= 1,500 ms;
+- history projection <= 750 ms;
+- leaderboard projection <= 1,000 ms;
+- qualification errors = 0;
+- unresolved divergence after rebuild = 0.
+
+### BG-15.9 invariants
+
+67. Production qualification is bounded and cannot silently expand into uncontrolled stress/load generation.
+68. Any latency-budget breach, qualification error or unresolved canonical/local divergence blocks closeout.
+69. Operational metrics never carry hidden/private game material beyond the service boundary.
+70. Failure drills prove containment and recovery without inventing a second canonical authority.
+71. Existing canonical session, move, winner, policy and randomness authorities remain unchanged by closeout instrumentation.
+72. Ruleset rollback disables application execution without mutating immutable canonical `rulesetHash` bindings.
+73. Production recovery always rebuilds toward verified canonical state rather than promoting stale local cache.
+74. The zero-wager boundary remains release-blocking: wagered play belongs in 420Bet.
+75. The phase branch must be reconciled with current `main` before final qualification.
+76. BG-15 cannot be considered phase-closed until all four required exact-head workflow families are green on the reconciled head.
+77. PR #321 must not be merged without explicit user instruction.

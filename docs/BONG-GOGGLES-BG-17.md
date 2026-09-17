@@ -10,7 +10,7 @@ Appeal resolution preserves the contract's separation-of-duty rule: the case ope
 
 ## Roadmap
 
-### BG-17.1 — canonical moderation projector + operator queues
+### BG-17.1 — canonical moderation projector + operator queues — COMPLETE AND QUALIFIED
 
 - consume `ReportSubmitted`, `CaseOpened`, `SafetyActionApplied`, `SafetyActionRevoked`, `CaseClosed`, `AppealFiled`, `AppealResolved` and `EmergencyHideSet`;
 - deterministic untriaged-report, open-case and pending-appeal queues;
@@ -18,16 +18,18 @@ Appeal resolution preserves the contract's separation-of-duty rule: the case ope
 - fail closed on impossible local transitions or missing prerequisite projections;
 - deterministic snapshot/restore for restart and replay.
 
-### BG-17.2 — report triage + case-opening preparation
+### BG-17.2 — report triage + case-opening preparation — IMPLEMENTED, QUALIFICATION PENDING
 
-- report detail view model and evidence-reference handling;
-- reason-code/policy-version mapping;
-- duplicate/related report grouping without rewriting canonical reports;
-- capability-aware case-open intent preparation;
-- scope derivation identical to canonical `scopeForTarget` semantics;
-- Wallet confirmation remains mandatory for canonical writes.
+- deterministic report-detail and linked case/evidence/provenance view models;
+- evidence and rationale surfaces expose only canonical hashes/references, never private bodies;
+- canonical hydration is cross-checked against projected report/case/action/appeal identifiers and subjects;
+- related/duplicate report grouping is presentation-only and never rewrites canonical reports;
+- reason-code to policy-version mapping fails closed when no policy exists;
+- case-open preparation delegates target-scope derivation to the canonical `scopeForTarget` path and requires a positive capability check;
+- prepared intents target `BongGogglesSafetyRegistry420.openCase(reportId, policyVersion)` and remain unsigned/unbroadcast;
+- Wallet confirmation remains mandatory for every canonical write.
 
-### BG-17.3 — case workspace + action preparation
+### BG-17.3 — case workspace + action preparation — NEXT
 
 - chronological case timeline;
 - active/latest action visibility;
@@ -88,4 +90,4 @@ Appeal resolution preserves the contract's separation-of-duty rule: the case ope
 
 ## Current increment
 
-BG-17.1 begins on `feature/bong-goggles-bg17-moderation-ops`. The first implementation is the non-authoritative moderation operations projector and deterministic operator queues.
+BG-17.1 is qualified. BG-17.2 is implemented on `feature/bong-goggles-bg17-moderation-ops`; exact-head qualification is pending before advancing to BG-17.3.

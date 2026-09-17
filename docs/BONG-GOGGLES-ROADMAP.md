@@ -57,7 +57,7 @@ BG-16 integrates the production Bong Goggles application with the existing 420No
 - Messenger notifications are metadata-only and explicitly forbid private/encrypted payload carriage;
 - subscription state, channels, rate limits, provider retry state and promotional consent remain owned by 420Notifications.
 
-### BG-16.2 — relationships + interaction emitters — IMPLEMENTED, QUALIFICATION PENDING
+### BG-16.2 — relationships + interaction emitters — COMPLETE AND QUALIFIED
 
 - incoming friend requests and accepted requests;
 - approval-required follow requests and completed follows;
@@ -67,13 +67,19 @@ BG-16 integrates the production Bong Goggles application with the existing 420No
 - self-notification suppression through the common candidate builder;
 - deterministic replay deduplication retained from the BG-12.6 pipeline.
 
-### BG-16.3 — groups + events emitters — NEXT
+### BG-16.3 — groups + events emitters — IMPLEMENTED, QUALIFICATION PENDING
 
-- group join requests, approvals/removals and material group activity;
-- event invitations, RSVP/material event changes;
-- canonical ownership/membership hydration where recipient context is not carried by the source event.
+- canonical `GroupJoinRequested`, `GroupMemberActivated`, `GroupMemberRemoved` and `GroupUpdated` emitters;
+- canonical `EventRSVP` and `EventUpdated` emitters;
+- current group/event state hydration before recipient selection;
+- current group membership hydration before activation/removal notices;
+- material group/event updates fan out only to hydrated eligible recipients;
+- muted, inactive and currently blocked recipients are suppressed during fan-out;
+- group-removal notices do not invent a logical actor when the canonical event exposes only the transaction operator;
+- no synthetic event-invitation primitive is introduced because the current canonical registry does not emit one;
+- deterministic replay deduplication remains unchanged.
 
-### BG-16.4 — games + messaging emitters
+### BG-16.4 — games + messaging emitters — NEXT
 
 - game invites, invite acceptance, turn-ready and game-finished notices;
 - strict zero-wager boundary preservation;
@@ -129,8 +135,8 @@ BG-16 integrates the production Bong Goggles application with the existing 420No
 
 ## Current position
 
-**Phase 15 is merged in PR #321. BG-16.1 is qualified. Current work: BG-16.2 relationships + interaction emitters on PR #330 / `feature/bong-goggles-bg16-notifications`.**
+**Phase 15 is merged in PR #321. BG-16.1 and BG-16.2 are qualified. Current work: BG-16.3 groups + events emitters on PR #330 / `feature/bong-goggles-bg16-notifications`.**
 
 Critical path:
 
-`BG-16.2 relationships/interactions -> BG-16.3 groups/events -> BG-16.4 games/messages -> BG-16.5 moderation/rewards -> BG-16.6 preferences/delivery -> BG-16.7 notification centre -> BG-16.8 hardening -> BG-16.9 closeout -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI -> BG-20 launch hardening -> READY`
+`BG-16.3 groups/events -> BG-16.4 games/messages -> BG-16.5 moderation/rewards -> BG-16.6 preferences/delivery -> BG-16.7 notification centre -> BG-16.8 hardening -> BG-16.9 closeout -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI -> BG-20 launch hardening -> READY`

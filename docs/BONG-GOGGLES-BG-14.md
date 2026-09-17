@@ -14,7 +14,7 @@ BG-14 builds the Bong Goggles application messaging layer over the already-canon
 
 ## Phase roadmap
 
-### BG-14.1 — conversation/request projection + canonical context resolver — IN PROGRESS
+### BG-14.1 — conversation/request projection + canonical context resolver — COMPLETE AND QUALIFIED
 
 - Project canonical Messenger conversation state into Bong Goggles inbox/request views.
 - Distinguish incoming requests, outgoing requests, active conversations and closed conversations.
@@ -23,12 +23,16 @@ BG-14 builds the Bong Goggles application messaging layer over the already-canon
 - Expose wallet-authorized intents for request, accept, close and private-context binding; the service never signs or executes them.
 - Exclude plaintext, ciphertext, keys, credentials, sessions and transport routes from canonical/application projections.
 
-### BG-14.2 — encrypted send/receive bridge
+### BG-14.2 — encrypted send/receive bridge — IN PROGRESS
 
-- Build application send/receive coordination over Messenger envelope IDs, sequence rules and encrypted-envelope commitments.
-- Keep encryption/decryption client-side or trusted endpoint-side; no plaintext reaches chain/index/search logs.
-- Validate sender, conversation, sequence, epoch and envelope commitment before presentation.
-- Make retry/idempotency behavior deterministic and replay-safe.
+- Coordinate outbound/inbound application delivery over canonical `MessengerEnvelopeRegistry420` commitments.
+- Require exact sender/recipient/conversation binding, active conversation state, current block/social policy and current Bong Goggles private epoch.
+- Enforce exact per-sender next-sequence semantics before wallet commit intent construction.
+- Bind transport metadata to canonical envelope hash and storage-reference hash before presentation.
+- Keep ciphertext payload bytes off-chain and outside public projections; only an opaque bounded ciphertext reference is passed through the application bridge.
+- Reject plaintext, message bodies, private keys, session secrets and credentials from transport-envelope DTOs.
+- Expose wallet-authorized `commit` and recipient `acknowledge` intents without signing/executing them.
+- Preserve deterministic retry/replay behavior through canonical sequence + envelope identity rather than transport arrival order.
 
 ### BG-14.3 — inbox, unread/read and request state
 
@@ -80,5 +84,9 @@ BG-14 builds the Bong Goggles application messaging layer over the already-canon
 10. Closing, blocking or rotating presentation/security state does not rewrite historical canonical envelope/receipt/storage provenance.
 11. Logs, metrics and alerts redact message bodies, ciphertext where unnecessary, keys, tokens, cookies, session IDs and credentials.
 12. 420Commons remains authoritative for public/community channels; BG-14 does not silently convert them into Messenger conversations.
+13. Outbound message sequence must equal canonical sender sequence + 1; retries do not invent a new sequence.
+14. Inbound transport payload metadata must match the canonical envelope commitment exactly before the application may present it.
+15. A stale private epoch cannot send or present a message even if the envelope transport is otherwise reachable.
+16. Delivery/read acknowledgements can only be constructed for the canonical recipient and remain wallet/session authorized.
 
 BG-14 is developed on `feature/bong-goggles-bg14-private-messaging` after BG-13 merged to `main` in PR #308.

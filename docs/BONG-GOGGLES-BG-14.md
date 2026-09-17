@@ -23,7 +23,7 @@ BG-14 builds the Bong Goggles application messaging layer over the already-canon
 - Expose wallet-authorized intents for request, accept, close and private-context binding; the service never signs or executes them.
 - Exclude plaintext, ciphertext, keys, credentials, sessions and transport routes from canonical/application projections.
 
-### BG-14.2 — encrypted send/receive bridge — IN PROGRESS
+### BG-14.2 — encrypted send/receive bridge — COMPLETE AND QUALIFIED
 
 - Coordinate outbound/inbound application delivery over canonical `MessengerEnvelopeRegistry420` commitments.
 - Require exact sender/recipient/conversation binding, active conversation state, current block/social policy and current Bong Goggles private epoch.
@@ -34,12 +34,16 @@ BG-14 builds the Bong Goggles application messaging layer over the already-canon
 - Expose wallet-authorized `commit` and recipient `acknowledge` intents without signing/executing them.
 - Preserve deterministic retry/replay behavior through canonical sequence + envelope identity rather than transport arrival order.
 
-### BG-14.3 — inbox, unread/read and request state
+### BG-14.3 — inbox, unread/read and request state — IN PROGRESS
 
-- Materialize inbox/request/conversation summaries from canonical conversations, envelopes and receipts.
-- Track local presentation metadata separately from canonical delivery/read receipts.
-- Implement pagination, unread counters, last-message ordering and request acceptance/closure refresh.
-- Fail closed across reorgs and canonical state changes.
+- Materialize inbox/request/conversation summaries strictly from current canonical conversations, envelopes and receipts.
+- Distinguish incoming requests, outgoing requests and active/closed conversations without inventing separate application authority.
+- Rebuild unread counts from inbound canonical envelopes whose canonical receipt has no `readAt`; viewer-sent envelopes never increment unread count.
+- Order inbox deterministically with incoming requests first, then latest canonical message timestamp, then conversation ID as a stable tie-breaker.
+- Paginate with canonical conversation IDs as deterministic cursors and bounded page sizes.
+- Keep local presentation state non-authoritative and separate from canonical delivery/read receipt state.
+- Rebuild materialized inbox state from current canonical inputs after reorg/replay so removed/replaced envelopes cannot leave stale unread counts or last-message pointers.
+- Fail closed on conversation/envelope participant mismatch and impossible receipt ordering (`readAt` without `deliveredAt`).
 
 ### BG-14.4 — permitted group threads
 
@@ -88,5 +92,9 @@ BG-14 builds the Bong Goggles application messaging layer over the already-canon
 14. Inbound transport payload metadata must match the canonical envelope commitment exactly before the application may present it.
 15. A stale private epoch cannot send or present a message even if the envelope transport is otherwise reachable.
 16. Delivery/read acknowledgements can only be constructed for the canonical recipient and remain wallet/session authorized.
+17. Inbox unread counts are derived from canonical envelopes and canonical receipt state, never incremented/decremented as independent authority.
+18. Reorg/replay rebuild must be able to remove stale unread counts and last-message pointers when canonical envelopes disappear or change.
+19. A read receipt without a delivery receipt is invalid for presentation and must fail closed.
+20. Inbox ordering and pagination are deterministic from canonical request state, canonical message time and conversation identity.
 
 BG-14 is developed on `feature/bong-goggles-bg14-private-messaging` after BG-13 merged to `main` in PR #308.

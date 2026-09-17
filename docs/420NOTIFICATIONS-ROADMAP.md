@@ -4,8 +4,8 @@
 
 ## GEN-10.7 status
 
-- **NOTIFY-0 — Genesis boundary + executable invariant baseline — ACTIVE**
-- NOTIFY-1 — runtime/service scaffold — pending
+- **NOTIFY-0 — Genesis boundary + executable invariant baseline — COMPLETE**
+- **NOTIFY-1 — runtime/service scaffold — COMPLETE**
 - NOTIFY-2 — subscription engine — pending
 - NOTIFY-3 — indexer ingestion + replay — pending
 - NOTIFY-4 — delivery queue + retry/dedup — pending
@@ -39,7 +39,19 @@ Freeze the service identity `420/service/notifications/v1`, require no Notificat
 
 ## NOTIFY-1 — runtime/service scaffold
 
-Add configuration, service lifecycle, `/healthz` and `/readyz`, chain/indexer identity validation and fail-closed startup when the configured network or required public indexer boundary is unavailable.
+Implemented configuration validation, service lifecycle, `/healthz` and `/readyz`, chain/indexer identity validation, HTTP indexer probing and fail-closed startup. The service remains noncanonical, starts unready, rejects wrong-chain or unavailable indexer dependencies, and only becomes ready after the configured public indexer boundary qualifies.
+
+Runtime entrypoint: `notifications/cmd/notifications420`.
+
+Required environment:
+
+- `NOTIFICATIONS_CHAIN_ID`
+- `NOTIFICATIONS_INDEXER_URL`
+
+Optional environment:
+
+- `NOTIFICATIONS_LISTEN_ADDR` (default `:8421`)
+- `NOTIFICATIONS_REQUEST_TIMEOUT` (default `5s`)
 
 ## NOTIFY-2 — subscription engine
 

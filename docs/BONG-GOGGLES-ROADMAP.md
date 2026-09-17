@@ -67,7 +67,7 @@ BG-16 integrates the production Bong Goggles application with the existing 420No
 - self-notification suppression through the common candidate builder;
 - deterministic replay deduplication retained from the BG-12.6 pipeline.
 
-### BG-16.3 — groups + events emitters — IMPLEMENTED, QUALIFICATION PENDING
+### BG-16.3 — groups + events emitters — COMPLETE AND QUALIFIED
 
 - canonical `GroupJoinRequested`, `GroupMemberActivated`, `GroupMemberRemoved` and `GroupUpdated` emitters;
 - canonical `EventRSVP` and `EventUpdated` emitters;
@@ -79,14 +79,20 @@ BG-16 integrates the production Bong Goggles application with the existing 420No
 - no synthetic event-invitation primitive is introduced because the current canonical registry does not emit one;
 - deterministic replay deduplication remains unchanged.
 
-### BG-16.4 — games + messaging emitters — NEXT
+### BG-16.4 — games + messaging emitters — IMPLEMENTED, QUALIFICATION PENDING
 
-- game invites, invite acceptance, turn-ready and game-finished notices;
-- strict zero-wager boundary preservation;
-- Messenger notification metadata only, never plaintext/ciphertext/private payload indexing;
-- reuse BG-14 conversation/session authorization rather than creating notification authority.
+- canonical `GameInvited`, `GameAccepted`, `GameMoveCommitted` and `GameFinished` emitters;
+- game recipients derived from canonical session players, including turn-ready notices to the opposing player;
+- current profile/block/mute/game-policy revalidation before game notification emission;
+- explicit zero-wager notification gate preserves the BG-15 boundary and creates no wager/escrow/settlement authority;
+- canonical 420Messenger `EnvelopeCommitted` events produce Bong Goggles `MESSAGE_RECEIVED` presentation only when bound to a current open BG-14 direct context;
+- message recipient is derived from the canonical direct-context participant pair;
+- current conversation/send authorization is revalidated before message notification emission;
+- message notification metadata is limited to opaque IDs and sequence numbers;
+- plaintext, ciphertext, payload/body/content, envelope/storage commitments, device-key commitments and epoch commitments are forbidden from message notification metadata;
+- deterministic replay deduplication and non-authoritative provenance remain unchanged.
 
-### BG-16.5 — moderation, appeals + rewards emitters
+### BG-16.5 — moderation, appeals + rewards emitters — NEXT
 
 - moderation action/status notifications;
 - appeal lifecycle updates;
@@ -135,8 +141,8 @@ BG-16 integrates the production Bong Goggles application with the existing 420No
 
 ## Current position
 
-**Phase 15 is merged in PR #321. BG-16.1 and BG-16.2 are qualified. Current work: BG-16.3 groups + events emitters on PR #330 / `feature/bong-goggles-bg16-notifications`.**
+**Phase 15 is merged in PR #321. BG-16.1 through BG-16.3 are qualified. Current work: BG-16.4 games + messaging emitters on PR #330 / `feature/bong-goggles-bg16-notifications`.**
 
 Critical path:
 
-`BG-16.3 groups/events -> BG-16.4 games/messages -> BG-16.5 moderation/rewards -> BG-16.6 preferences/delivery -> BG-16.7 notification centre -> BG-16.8 hardening -> BG-16.9 closeout -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI -> BG-20 launch hardening -> READY`
+`BG-16.4 games/messages -> BG-16.5 moderation/rewards -> BG-16.6 preferences/delivery -> BG-16.7 notification centre -> BG-16.8 hardening -> BG-16.9 closeout -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI -> BG-20 launch hardening -> READY`

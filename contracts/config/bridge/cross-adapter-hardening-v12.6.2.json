@@ -1,0 +1,34 @@
+{
+  "schema": "420-exchange-cross-adapter-hardening-v12.6.2",
+  "status": "IN_QUALIFICATION",
+  "scope": "REPLAY_NAMESPACE_AND_COLLISION_HARDENING",
+  "model": "Each bridge adapter owns replay consumption in its own contract storage. Cross-adapter collision analysis is domain-separated by canonical ADAPTER_ID when reasoning about a shared external source message id.",
+  "canonical_adapter_domains": [
+    "420/BRIDGE/SOLANA/MAINNET/V12.5.2",
+    "420/BRIDGE/BNB/MAINNET/V12.5.3",
+    "420/BRIDGE/ETHEREUM/MAINNET/V12.5.4",
+    "420/BRIDGE/DOGECOIN/MAINNET/V12.5.5",
+    "420/BRIDGE/TRON/MAINNET/V12.5.7",
+    "420/BRIDGE/POTCOIN/MAINNET/V12.5.9",
+    "420/BRIDGE/DOBBSCOIN/MAINNET/V12.5.10",
+    "420/BRIDGE/CURECOIN/MAINNET/V12.5.11",
+    "420/BRIDGE/PIRATE/MAINNET/V12.5.12",
+    "420/BRIDGE/LITECOIN/MAINNET/V12.5.13",
+    "420/BRIDGE/BITCOIN/MAINNET/V12.5.14",
+    "420/BRIDGE/XRPL/MAINNET/V12.5.15"
+  ],
+  "invariants": [
+    "all canonical adapter domains are nonzero and pairwise unique",
+    "a shared external source message id derives a distinct replay namespace key for every adapter domain",
+    "two different source message ids remain distinct inside the same adapter domain",
+    "economically equivalent transfers on different source chains cannot share a replay namespace key",
+    "per-adapter consumedMessages state remains authoritative for actual replay rejection"
+  ],
+  "qualification_tests": [
+    "canonical adapter domains are pairwise unique",
+    "shared external message id is namespace-separated across all canonical adapters",
+    "message identity remains collision-resistant within one adapter domain",
+    "paired native-chain economic twins produce distinct replay keys"
+  ],
+  "follow_on": "V12.6.3 verifier rotation and authorization hardening"
+}

@@ -317,6 +317,116 @@ export function notificationCandidatesForEvent(log, state = {}) {
       }));
       break;
     }
+    case 'SafetyActionApplied': {
+      const safetyCase = required(state.safetyCase, 'canonical safety case state');
+      const action = required(state.safetyAction, 'canonical safety action state');
+      if (safetyCase.exists === false || action.exists === false) break;
+      if (action.caseId !== args.caseId || action.actionId !== args.actionId) break;
+      add(candidate(log, {
+        recipient: safetyCase.subjectAccount,
+        actor: args.operator,
+        kind: 'MODERATION_ACTION',
+        topic: 'moderation',
+        subjectId: args.caseId,
+        metadata: {
+          actionId: args.actionId,
+          actionType: args.actionType ?? action.actionType ?? null,
+          status: 'APPLIED',
+          expiresAt: args.expiresAt ?? action.expiresAt ?? null,
+        },
+      }));
+      break;
+    }
+    case 'SafetyActionRevoked': {
+      const safetyCase = required(state.safetyCase, 'canonical safety case state');
+      const action = required(state.safetyAction, 'canonical safety action state');
+      if (safetyCase.exists === false || action.exists === false) break;
+      if (action.caseId !== args.caseId || action.actionId !== args.actionId) break;
+      add(candidate(log, {
+        recipient: safetyCase.subjectAccount,
+        actor: args.operator,
+        kind: 'MODERATION_ACTION',
+        topic: 'moderation',
+        subjectId: args.caseId,
+        metadata: { actionId: args.actionId, actionType: action.actionType ?? null, status: 'REVOKED' },
+      }));
+      break;
+    }
+    case 'CaseClosed': {
+      const safetyCase = required(state.safetyCase, 'canonical safety case state');
+      if (safetyCase.exists === false) break;
+      add(candidate(log, {
+        recipient: safetyCase.subjectAccount,
+        actor: args.operator,
+        kind: 'MODERATION_ACTION',
+        topic: 'moderation',
+        subjectId: args.caseId,
+        metadata: { status: 'CASE_CLOSED', caseState: safetyCase.state ?? null, closedAt: safetyCase.closedAt ?? null },
+      }));
+      break;
+    }
+    case 'AppealResolved': {
+      const appeal = required(state.appeal, 'canonical safety appeal state');
+      if (appeal.exists === false) break;
+      if (appeal.caseId !== args.caseId || appeal.appealId !== args.appealId) break;
+      add(candidate(log, {
+        recipient: appeal.appellant,
+        actor: args.operator,
+        kind: 'APPEAL_UPDATED',
+        topic: 'moderation',
+        subjectId: args.caseId,
+        metadata: {
+          appealId: args.appealId,
+          result: args.result ?? appeal.state ?? null,
+          resolvedAt: appeal.resolvedAt ?? null,
+        },
+      }));
+      break;
+    }
+    case 'RewardContributionSubmitted': {
+      const rewardContribution = required(state.rewardContribution, 'canonical reward contribution state');
+      if (rewardContribution.exists === false) break;
+      if (rewardContribution.contributionId !== args.contributionId) break;
+      add(candidate(log, {
+        recipient: args.beneficiary ?? rewardContribution.beneficiary,
+        actor: args.relay ?? null,
+        kind: 'REWARD_CONTRIBUTION_SUBMITTED',
+        topic: 'rewards',
+        subjectId: args.contributionId,
+        metadata: {
+          sourceKey: args.sourceKey ?? rewardContribution.sourceKey ?? null,
+          contributionType: args.contributionType ?? rewardContribution.contributionType ?? null,
+          rewardState: rewardContribution.status ?? 'SUBMITTED',
+        },
+      }));
+      break;
+    }
+    case 'RewardEarned': {
+      const rewardState = required(state.rewardState, 'canonical reward state');
+      if (rewardState.exists === false || rewardState.earned !== true) break;
+      add(candidate(log, {
+        recipient: rewardState.beneficiary,
+        actor: null,
+        kind: 'REWARD_EARNED',
+        topic: 'rewards',
+        subjectId: args.rewardId ?? rewardState.rewardId ?? null,
+        metadata: { status: rewardState.status ?? 'EARNED', amount: rewardState.amount ?? null, asset: rewardState.asset ?? null },
+      }));
+      break;
+    }
+    case 'RewardPayoutUpdated': {
+      const rewardState = required(state.rewardState, 'canonical reward state');
+      if (rewardState.exists === false) break;
+      add(candidate(log, {
+        recipient: rewardState.beneficiary,
+        actor: null,
+        kind: 'REWARD_PAYOUT_UPDATED',
+        topic: 'rewards',
+        subjectId: args.rewardId ?? rewardState.rewardId ?? null,
+        metadata: { status: args.status ?? rewardState.status ?? null, payoutId: args.payoutId ?? rewardState.payoutId ?? null },
+      }));
+      break;
+    }
     case 'ReviewPublished': {
       const subject = required(state.subject, 'canonical discovery subject state');
       add(candidate(log, { recipient: subject.submitter, actor: args.author, kind: 'REVIEW_PUBLISHED', topic: 'discovery', subjectId: args.subjectId, metadata: { reviewId: args.reviewId ?? null, ratingBps: args.ratingBps ?? null } }));

@@ -92,7 +92,7 @@ BG-16 integrates the production Bong Goggles application with the existing 420No
 - plaintext, ciphertext, payload/body/content, envelope/storage commitments, device-key commitments and epoch commitments are forbidden from message notification metadata;
 - deterministic replay deduplication and non-authoritative provenance remain unchanged.
 
-### BG-16.5 — moderation, appeals + rewards emitters — IMPLEMENTED, QUALIFICATION PENDING
+### BG-16.5 — moderation, appeals + rewards emitters — COMPLETE AND QUALIFIED
 
 - canonical `SafetyActionApplied`, `SafetyActionRevoked` and `CaseClosed` events notify the canonical safety subject;
 - canonical `AppealResolved` events notify the canonical appellant;
@@ -104,15 +104,21 @@ BG-16 integrates the production Bong Goggles application with the existing 420No
 - synthetic `RewardEarned` / `RewardPayoutUpdated` source events intentionally emit nothing;
 - deterministic replay deduplication and non-authoritative provenance remain unchanged.
 
-### BG-16.6 — preference + delivery integration — NEXT
+### BG-16.6 — preference + delivery integration — IMPLEMENTED, QUALIFICATION PENDING
 
-- connect Bong Goggles topic/kind vocabulary to 420Notifications subscriptions;
-- granular per-topic/per-class controls;
-- in-app/web/push delivery handoff;
-- mute/unmute/unsubscribe behavior remains 420Notifications-owned;
-- promotional consent remains separate and opt-in.
+- Bong Goggles topic/kind vocabulary maps to the existing 420Notifications source/topic/event filters;
+- activation and operational consent must be explicit before a Bong Goggles subscription preference is produced;
+- unknown topics, kinds and channels fail closed;
+- granular topic/kind and minimum-severity filters are applied before delivery handoff;
+- supported Genesis delivery channels remain `in_app`, `web` and `push`;
+- channel handoff targets the qualified `genesis-in-app`, `genesis-web` and `genesis-push` providers;
+- mute and operational-consent withdrawal suppress presentation only and never alter canonical source state;
+- retry counters, backoff, rate limiting, provider health and queue state remain owned entirely by 420Notifications;
+- promotional consent remains separate, independent and off unless explicitly enabled;
+- operational Bong Goggles events remain operational even when promotional consent is separately enabled;
+- Messenger private-payload validation runs before delivery handoff.
 
-### BG-16.7 — notification centre application surfaces
+### BG-16.7 — notification centre application surfaces — NEXT
 
 - unread counts and paged history;
 - deep links back to the canonical Bong Goggles subject;
@@ -146,8 +152,8 @@ BG-16 integrates the production Bong Goggles application with the existing 420No
 
 ## Current position
 
-**Phase 15 is merged in PR #321. BG-16.1 through BG-16.4 are qualified. Current work: BG-16.5 moderation, appeals + rewards emitters on PR #330 / `feature/bong-goggles-bg16-notifications`.**
+**Phase 15 is merged in PR #321. BG-16.1 through BG-16.5 are qualified. Current work: BG-16.6 preference + delivery integration on PR #330 / `feature/bong-goggles-bg16-notifications`.**
 
 Critical path:
 
-`BG-16.5 moderation/rewards -> BG-16.6 preferences/delivery -> BG-16.7 notification centre -> BG-16.8 hardening -> BG-16.9 closeout -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI -> BG-20 launch hardening -> READY`
+`BG-16.6 preferences/delivery -> BG-16.7 notification centre -> BG-16.8 hardening -> BG-16.9 closeout -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI -> BG-20 launch hardening -> READY`

@@ -1,0 +1,42 @@
+{
+  "schema": "420-bridge-litecoin-mainnet-v12.5.13",
+  "status": "APPROVED_INACTIVE_PENDING_PRODUCTION_VERIFIER_AND_GATEWAY",
+  "canonical_chain_key": "420/BRIDGE/CHAIN/LTC",
+  "chain_family": "UTXO_SCRYPT_POW",
+  "route_chain_id": "0x4c54430000000001",
+  "network_identity": {
+    "genesis_hash": "0x12a765e31ffd4059bada1e25190f6e98c99d9714d334efa41a195a7e7e04bfe2",
+    "message_start": "0xfbc0b6db",
+    "p2p_port": 9333,
+    "target_block_seconds": 150,
+    "p2pkh_version": 48,
+    "p2sh_versions": [5, 50],
+    "bech32_hrp": "ltc",
+    "mweb_hrp": "ltcmweb"
+  },
+  "consensus_profile": {
+    "pow": "scrypt",
+    "minimum_bridge_confirmations": 12,
+    "segwit_supported": true,
+    "taproot_supported": true,
+    "mweb_supported_by_chain": true,
+    "mweb_supported_by_genesis_bridge": false
+  },
+  "native_asset": {"symbol":"LTC","decimals":8,"base_unit":"litoshi"},
+  "adapter": {
+    "contract": "LitecoinBridgeAdapter420",
+    "adapter_id_preimage": "420/BRIDGE/LITECOIN/MAINNET/V12.5.13",
+    "outbound_program_types": ["P2PKH","P2SH","P2WPKH","P2WSH","P2TR"],
+    "mweb": "rejected at Genesis"
+  },
+  "activation_requirements": [
+    "production verifier validates Litecoin mainnet scrypt PoW and cumulative chainwork",
+    "transaction inclusion and canonical source output are proven",
+    "at least 12 confirmations are proven",
+    "MWEB deposits and withdrawals are rejected until a dedicated privacy-preserving verifier path is qualified",
+    "LTC asset id and route id are governance bound",
+    "gateway custody and withdrawal signing are production configured",
+    "route risk caps and emergency isolation are configured",
+    "end-to-end inbound and outbound qualification passes"
+  ]
+}

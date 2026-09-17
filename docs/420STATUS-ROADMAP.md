@@ -7,7 +7,7 @@
 - **STATUS-0 — Genesis boundary + executable invariant baseline — COMPLETE**
 - **STATUS-1 — runtime/service scaffold — COMPLETE**
 - **STATUS-2 — component registry + health model — COMPLETE**
-- STATUS-3 — evidence ingestion + source adapters — pending
+- **STATUS-3 — evidence ingestion + source adapters — COMPLETE**
 - STATUS-4 — incident lifecycle + severity model — pending
 - STATUS-5 — aggregation, freshness + degraded-state engine — pending
 - STATUS-6 — history, provenance + canonical references — pending
@@ -66,7 +66,11 @@ STATUS-2 also defines presentation health separately from process liveness/readi
 
 ## STATUS-3 — evidence ingestion + source adapters
 
-Consume public/canonical evidence through provider-neutral adapters: consensus/execution/RPC checks, 420Indexer public status, service health/readiness endpoints and registered service manifests. Preserve source identity, observed-at time, network identity and canonical references where available. No adapter may write protocol state.
+Implemented typed noncanonical observations under `status/evidence`, including component/source/network/environment identity, health/liveness/readiness, observation and expiry timestamps, summaries and preserved protocol/canonical references.
+
+Provider-neutral `Probe` and `ProbeSource` interfaces allow consensus/execution/RPC, 420Indexer, health/readiness and future manifest-backed sources to feed the same evidence pipeline without granting any adapter protocol-write authority. Probe failures are isolated and do not fabricate evidence.
+
+The ingestor binds each observation to a registered component and configured network/environment, rejects unknown components, source-identity mismatches, wrong-network evidence, future-dated observations, invalid freshness windows, partial references and any `canonical: true` authority claim. Latest evidence is retained per component/source with deterministic ordering for downstream aggregation.
 
 ## STATUS-4 — incident lifecycle + severity model
 

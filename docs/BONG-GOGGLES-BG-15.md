@@ -52,7 +52,7 @@ Requirements:
 
 ## BG-15.2 — versioned ruleset registry + client game engines
 
-Status: IMPLEMENTED — EXACT-HEAD QUALIFICATION PENDING
+Status: COMPLETE AND QUALIFIED
 
 Requirements:
 
@@ -77,9 +77,36 @@ Requirements:
 15. Cross-client replay of the same initial state and move sequence must produce identical move digests, intermediate state digests and final state digest.
 16. BG-15.2 never mutates canonical session or move state; it only resolves immutable rule/engine identity.
 
+## BG-15.3 — move engine + canonical commitment bridge
+
+Status: IMPLEMENTED — EXACT-HEAD QUALIFICATION PENDING
+
+Requirements:
+
+- Treat canonical `nextMoveNumber` from `BongGogglesGameSessionRegistry420` as the sole sequencing authority for the next move.
+- Build wallet/session-authorized `commitMove(player, sessionId, moveNumber, moveHash)` intents; backend services never sign or execute the transaction.
+- Derive `moveHash` from a deterministic namespaced payload containing exact `sessionId`, exact canonical `rulesetHash`, exact move number and the stable-serialized move payload.
+- Reject stale, skipped or replayed move numbers before intent construction.
+- Reject move submission for non-active sessions or actors who are not canonical session players.
+- Verify canonical move history is contiguous from move 1 through `nextMoveNumber - 1`, with no gaps, duplicates or divergent `nextMoveNumber`.
+- Rebuild local game state only after each allowed off-chain move payload hashes exactly to its corresponding canonical move commitment.
+- Resolve the deterministic BG-15.2 client engine by exact `(rulesetHash, gameType)` before replay.
+- Fail closed on payload-count mismatch, commitment mismatch, history gaps/replays, ruleset/engine mismatch or canonical next-move divergence.
+- Re-read canonical session state before move preparation and rebuild so reconnect/reload/reorg recovery does not trust stale local sequencing.
+
+### BG-15.3 invariants
+
+17. Canonical `nextMoveNumber` always wins over cached/local next-move state.
+18. Move commitments bind `sessionId`, `rulesetHash`, move number and deterministic move payload together.
+19. A `commitMove` intent may only target the exact current canonical next move number.
+20. Canonical move history must be contiguous and internally consistent with session `nextMoveNumber` before local replay is accepted.
+21. Off-chain move payloads are non-authoritative; every payload must verify against the exact canonical commitment before replay.
+22. Local state is derived/rebuildable and is invalid whenever commitment verification or deterministic replay diverges.
+23. Reconnect/reload/reorg handling re-reads canonical session/history and reconstructs state rather than preserving stale local authority.
+24. BG-15.3 does not alter ruleset identity, canonical session lifecycle or game outcome authority.
+
 ## Remaining BG-15 phases
 
-- **BG-15.3 — move engine + canonical commitment bridge**
 - **BG-15.4 — turn UX, clocks, rematches & challenges**
 - **BG-15.5 — spectator, presence & BG-14 messaging integration**
 - **BG-15.6 — 420Randomness + hidden-state games**

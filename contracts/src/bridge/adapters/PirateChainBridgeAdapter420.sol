@@ -13,7 +13,7 @@ contract PirateChainBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
     bytes32 public constant ARRR_CHAIN_KEY = keccak256("420/BRIDGE/CHAIN/ARRR");
     uint64 public constant ARRR_ROUTE_CHAIN_ID = 0x4152525200000001; // "ARRR" + profile version 1
     bytes32 public constant PIRATE_MAINNET_NETWORK_ID = keccak256("PIRATE/MAINNET");
-    uint32 public constant MIN_CONFIRMATIONS = 100;
+    uint32 public constant MIN_DPOW_CONFIRMATIONS = 3;
     uint8 public constant SAPLING_POOL = 0;
     uint8 public constant IRONWOOD_POOL = 1;
 
@@ -88,7 +88,7 @@ contract PirateChainBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
         if (!p.finalized) revert Unfinalized();
         if (p.networkId != PIRATE_MAINNET_NETWORK_ID) revert WrongNetwork();
         if (!p.equihashValidated || !p.notarizationValidated) revert InvalidConsensusProof();
-        if (p.confirmations < MIN_CONFIRMATIONS) revert InsufficientConfirmations();
+        if (p.confirmations < MIN_DPOW_CONFIRMATIONS) revert InsufficientConfirmations();
         if (p.shieldedPool > IRONWOOD_POOL) revert InvalidShieldedPool();
         if (
             p.blockHeight == 0 || p.blockHash == bytes32(0) || p.transactionHash == bytes32(0)

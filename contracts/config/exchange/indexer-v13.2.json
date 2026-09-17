@@ -1,0 +1,38 @@
+{
+  "schema": "420-exchange-indexer-v13.2",
+  "status": "IN_QUALIFICATION",
+  "scope": "DETERMINISTIC_INDEXER_CORE",
+  "model": "A read-only deterministic projection state machine over the V13.1 canonical event schema. It provides idempotent ingestion, canonical/finalized checkpoint tracking, bounded reorg rollback and recovery semantics without protocol execution authority.",
+  "limits": {
+    "maxRollbackBlocks": 256
+  },
+  "invariants": [
+    "replaying an identical canonical record is idempotent",
+    "a conflicting replay with the same record ID fails closed",
+    "canonical checkpoints never regress during ordinary ingestion",
+    "finalized checkpoints never move backward",
+    "rollback cannot cross the finalized checkpoint",
+    "rollback depth is bounded",
+    "rollback clears canonical block-hash claims above the selected ancestor",
+    "a replacement canonical branch can occupy rolled-back heights",
+    "orphaned records cannot be promoted to finalized",
+    "finalized records cannot be orphaned",
+    "indexer state grants no execution, custody, mint, burn or settlement authority"
+  ],
+  "qualification_tests": [
+    "identical replay returns false without mutation",
+    "conflicting replay fails closed",
+    "canonical checkpoint progression is monotonic",
+    "bounded rollback restores an ancestor and accepts a replacement branch",
+    "rollback cannot cross finalized head",
+    "rollback beyond the configured depth is rejected",
+    "canonical records can advance through finalized lifecycle",
+    "orphaned records cannot be finalized"
+  ],
+  "implementation": {
+    "reference_core": "contracts/src/exchange/ExchangeDeterministicIndexer420.sol",
+    "qualification_test": "contracts/test/ExchangeDeterministicIndexer420.t.sol",
+    "schema_dependency": "contracts/src/exchange/ExchangeMarketDataTypes420.sol"
+  },
+  "follow_on": "V13.3 market snapshots"
+}

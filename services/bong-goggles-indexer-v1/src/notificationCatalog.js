@@ -1,6 +1,7 @@
 const CATALOG = Object.freeze({
   FRIEND_REQUEST_RECEIVED: { topic: 'relationships', severity: 'info', actionable: true },
   FRIEND_ACCEPTED: { topic: 'relationships', severity: 'info', actionable: true },
+  FOLLOW_REQUEST_RECEIVED: { topic: 'relationships', severity: 'info', actionable: true },
   FOLLOWED: { topic: 'relationships', severity: 'info', actionable: true },
   BLOCKED: { topic: 'safety', severity: 'warning', actionable: false },
 

@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -97,7 +98,20 @@ func TestHistoryPaginationUsesMonotonicSequenceCursor(t *testing.T) {
 
 func TestHistoryRejectsInvalidPagination(t *testing.T) {
 	api, _, _, _, _, _ := fixture(t)
-	for _, path := range []string{"/v1/history?limit=0", "/v1/history?limit=201", "/v1/history?cursor=%%%"} {
+	nonDecimal := base64.RawURLEncoding.EncodeToString([]byte("abc"))
+	zero := base64.RawURLEncoding.EncodeToString([]byte("0"))
+	leadingZero := base64.RawURLEncoding.EncodeToString([]byte("01"))
+	overflow := base64.RawURLEncoding.EncodeToString([]byte("18446744073709551616"))
+	for _, path := range []string{
+		"/v1/history?limit=0",
+		"/v1/history?limit=201",
+		"/v1/history?cursor=%%%",
+		"/v1/history?cursor=***",
+		"/v1/history?cursor="+nonDecimal,
+		"/v1/history?cursor="+zero,
+		"/v1/history?cursor="+leadingZero,
+		"/v1/history?cursor="+overflow,
+	} {
 		res := httptest.NewRecorder()
 		api.Handler().ServeHTTP(res, httptest.NewRequest(http.MethodGet, path, nil))
 		if res.Code != http.StatusBadRequest { t.Fatalf("%s expected 400, got %d", path, res.Code) }

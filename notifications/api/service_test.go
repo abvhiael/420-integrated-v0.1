@@ -13,7 +13,7 @@ func testSub() subscriptions.Subscription {
 	return subscriptions.Subscription{
 		ID: "sub-1",
 		Filters: subscriptions.Filters{Sources: []string{"420/service/pay/v1"}},
-		MinSeverity: subscriptions.SeverityInfo,
+		MinimumSeverity: subscriptions.SeverityInfo,
 		Channels: []subscriptions.Channel{subscriptions.ChannelInApp},
 		Active: true,
 		OperationalConsent: true,

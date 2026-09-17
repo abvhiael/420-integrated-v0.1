@@ -2,7 +2,7 @@
 
 V13 turns the hardened execution and bridge state from V1–V12 into deterministic read surfaces for clients, indexers, analytics and the V14 Exchange Web UI. V13 does not add new custody or execution authority; all APIs are projections of canonical on-chain state and events.
 
-## V13.1 — Canonical market-data/event schema — IN QUALIFICATION
+## V13.1 — Canonical market-data/event schema — QUALIFIED
 
 - [x] define stable market, trade, order, liquidity, bridge and fee event domains
 - [x] bind every indexed record to chain id, block number, block hash, transaction hash and log index
@@ -13,18 +13,35 @@ V13 turns the hardened execution and bridge state from V1–V12 into determinist
 - [x] define versioned derived-record identity binding source set and aggregation window
 - [x] add executable qualification for idempotence, reorg separation and malformed provenance
 
+Qualification:
+- exact head `7246c8f03e4a3b31d3f6ac86f1a8c9c791202409`
+- Solidity Contracts #2588
+- 420 Integrated Qualification #4093
+- 420Docs Qualification #1803
+
 Implementation:
 - `contracts/src/exchange/ExchangeMarketDataTypes420.sol`
 - `contracts/test/ExchangeMarketDataTypes420.t.sol`
 - `contracts/config/exchange/market-data-v13.1.json`
 
-## V13.2 — Deterministic indexer core
+## V13.2 — Deterministic indexer core — IN QUALIFICATION
 
-- ingest canonical Exchange/Bridge events
-- idempotent replay by provenance key
-- bounded rollback on reorg
-- finalized/canonical head tracking
-- indexer checkpoint persistence and recovery
+- [x] ingest V13.1 record envelopes with deterministic validation
+- [x] idempotent replay by record/provenance identity
+- [x] reject conflicting replay under the same record ID
+- [x] canonical block-hash tracking by chain and height
+- [x] monotonic canonical checkpoint persistence
+- [x] monotonic finalized checkpoint persistence
+- [x] bounded rollback on reorg
+- [x] prohibit rollback across finalized head
+- [x] clear rolled-back canonical block claims so replacement branches can be indexed
+- [x] preserve explicit ORPHANED and FINALIZED record lifecycle states
+- [x] add executable qualification for replay, checkpoint and reorg recovery behavior
+
+Implementation:
+- `contracts/src/exchange/ExchangeDeterministicIndexer420.sol`
+- `contracts/test/ExchangeDeterministicIndexer420.t.sol`
+- `contracts/config/exchange/indexer-v13.2.json`
 
 ## V13.3 — Market snapshots
 

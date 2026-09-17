@@ -1,0 +1,35 @@
+name: Bong Goggles Media Verification
+
+on:
+  pull_request:
+    paths:
+      - 'services/bong-goggles-media-v1/**'
+      - 'docs/BONG-GOGGLES-BG-13.md'
+      - 'docs/BONG-GOGGLES-ROADMAP.md'
+      - '.github/workflows/bong-goggles-media.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'services/bong-goggles-media-v1/**'
+      - 'docs/BONG-GOGGLES-BG-13.md'
+      - 'docs/BONG-GOGGLES-ROADMAP.md'
+      - '.github/workflows/bong-goggles-media.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test-media:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run BG-13 media tests
+        working-directory: services/bong-goggles-media-v1
+        run: npm test

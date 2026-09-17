@@ -1,6 +1,6 @@
 {
   "schema": "420-exchange-cross-adapter-hardening-v12.6.1",
-  "status": "IN_QUALIFICATION",
+  "status": "COMPLETED_QUALIFIED_UNMERGED",
   "scope": "CROSS_ADAPTER_COMMON_INVARIANTS",
   "adapters": [
     "EthereumBridgeAdapter420",

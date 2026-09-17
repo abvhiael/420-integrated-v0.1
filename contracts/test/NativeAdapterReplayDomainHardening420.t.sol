@@ -13,7 +13,7 @@ contract NativeAdapterReplayDomainHardening420Test {
     bytes32 private constant POT = keccak256("420/BRIDGE/POTCOIN/MAINNET/V12.5.9");
     bytes32 private constant BOB = keccak256("420/BRIDGE/DOBBSCOIN/MAINNET/V12.5.10");
     bytes32 private constant CURE = keccak256("420/BRIDGE/CURECOIN/MAINNET/V12.5.11");
-    bytes32 private constant ARRR = keccak256("420/BRIDGE/PIRATECHAIN/MAINNET/V12.5.12");
+    bytes32 private constant ARRR = keccak256("420/BRIDGE/PIRATE/MAINNET/V12.5.12");
     bytes32 private constant LTC = keccak256("420/BRIDGE/LITECOIN/MAINNET/V12.5.13");
     bytes32 private constant BTC = keccak256("420/BRIDGE/BITCOIN/MAINNET/V12.5.14");
     bytes32 private constant XRP = keccak256("420/BRIDGE/XRPL/MAINNET/V12.5.15");

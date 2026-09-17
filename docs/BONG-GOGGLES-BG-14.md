@@ -57,7 +57,7 @@ BG-14 builds the Bong Goggles application messaging layer over the already-canon
 - Fail the fan-out plan closed when any required recipient route is unavailable instead of silently omitting a current group member.
 - Keep public/Commons group-channel semantics separate: a PUBLIC Bong Goggles group does not make a Commons channel a private Messenger thread.
 
-### BG-14.5 — private attachments — IN PROGRESS
+### BG-14.5 — private attachments — COMPLETE AND QUALIFIED
 
 - Reuse BG-13 canonical `mediaRoot`, manifest descriptor, item ID and 420Storage object identity rather than introducing messaging-specific storage identity.
 - Bind each attachment descriptor to the exact active Messenger conversation, Bong Goggles private context and current private epoch.
@@ -68,12 +68,16 @@ BG-14 builds the Bong Goggles application messaging layer over the already-canon
 - Reject attachment/decryption keys, signed/private/provider URLs, credentials, tokens, cookies, session secrets, payload bytes, plaintext and ciphertext from attachment descriptors/public projections.
 - Preserve immutable storage/media provenance when a conversation closes, a block is introduced, a context closes or an epoch rotates; those lifecycle events remove current presentation eligibility instead of rewriting storage history.
 
-### BG-14.6 — safety, devices, epoch rotation and recovery
+### BG-14.6 — safety, devices, epoch rotation and recovery — IN PROGRESS
 
-- Integrate blocks, message policy, spam/request controls and report hooks.
-- Handle device-key set/revoke flows and stale-device failure semantics.
-- Implement private epoch rotation and recovery flows without exposing key material.
-- Invalidate send/read capability promptly after blocks, closure, profile disablement, device revocation or epoch change.
+- Re-read current profile activity, bilateral block state, Bong Goggles `canMessage`, spam/request eligibility, Messenger conversation state, Bong Goggles private-context state, device-key record and private epoch before each protected send/read authorization.
+- Treat device-key `{ keyCommitment, revision, active }` from `BongGogglesPrivateMessaging420` as canonical device security metadata; application caches may never override a newer revision or revocation.
+- Reject stale device revisions, revoked devices, stale private epochs and stale epoch commitments even when a previously authorized session remains reachable.
+- Expose wallet-authorized device set/revoke, epoch rotation and context-close intents; the service never signs or executes them.
+- Model device-loss recovery as an ordered plan: establish/refresh the surviving device commitment, revoke lost devices, then rotate every affected private context to a fresh externally produced epoch commitment.
+- Require a fresh canonical read after every recovery stage before continuing to prevent recovery from racing a block, closure, device revision or epoch change.
+- Keep private device keys and decrypted epoch material entirely outside the service plan; only commitments and opaque device/context identifiers are handled.
+- Fail closed immediately after block, message/spam policy denial, profile disablement, Messenger conversation closure, Bong Goggles context closure, device revocation/revision or epoch rotation.
 
 ### BG-14.7 — production messaging closeout
 
@@ -114,5 +118,10 @@ BG-14 builds the Bong Goggles application messaging layer over the already-canon
 27. Attachment association is allowed only to the attachment owner in a currently eligible active Messenger/private context.
 28. Attachment presentation eligibility is re-evaluated at read time; closing/blocking/context closure/epoch rotation revokes presentation without mutating immutable storage provenance.
 29. Attachment descriptors and public projections never contain attachment/decryption keys, signed/private/provider URLs, credentials, tokens, session secrets or payload bytes.
+30. A cached messaging capability is never durable authority: current profile/block/policy/conversation/context/device/epoch state must be re-read before protected send/read use.
+31. Device revocation or revision invalidates any capability tied to an older device revision without rewriting historical message provenance.
+32. Private epoch rotation invalidates any capability tied to the prior epoch or epoch commitment immediately.
+33. Device-loss recovery never transports private key or decrypted epoch material through Bong Goggles services; it coordinates commitments and wallet-authorized intents only.
+34. Recovery must refresh canonical state between device establishment, lost-device revocation and context epoch rotation stages.
 
 BG-14 is developed on `feature/bong-goggles-bg14-private-messaging` after BG-13 merged to `main` in PR #308.

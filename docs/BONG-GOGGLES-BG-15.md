@@ -44,34 +44,38 @@ Status: COMPLETE AND QUALIFIED
 
 ## BG-15.6 — 420Randomness + hidden-state games
 
+Status: COMPLETE AND QUALIFIED
+
+## BG-15.7 — history, statistics, leaderboards & social discovery
+
 Status: IMPLEMENTED — EXACT-HEAD QUALIFICATION PENDING
 
 Requirements:
 
-- Treat the canonical session `randomnessRef` as the only randomness-request anchor for a game session.
-- Resolve randomness through the generalized provider-neutral `RandomnessRouter420` / 420Randomness path rather than introducing a Bong Goggles randomness provider.
-- Require exact `randomnessRef == requestId` agreement before randomness-dependent rulesets may consume a result.
-- Accept randomness only when the referenced request is `FULFILLED` and exposes both the derived randomness value and proof hash; requested, fallback-active, voided or malformed results fail closed.
-- Rulesets marked `randomnessRequired=false` must not be forced through a randomness resolver.
-- Derive deterministic hidden-state seeds by binding canonical `sessionId`, immutable `rulesetHash`, exact `randomnessRef` and fulfilled randomness together.
-- Keep hidden hands, tiles, decks, draws and salts off-chain or commitment-protected; on-chain/session state never stores plaintext private material.
-- Verify each hidden-state reveal against its deterministic commitment before the reveal can be accepted by application logic.
-- Reject duplicate reveal IDs, stale randomness references, premature reveals and commitment mismatches.
-- Keep hidden-state reveal verification non-authoritative: canonical move/lifecycle/outcome state remains in `BongGogglesGameSessionRegistry420` and deterministic client engines.
+- Derive player history only from canonical `FINISHED` sessions in `BongGogglesGameSessionRegistry420`.
+- Preserve exact session ID, game type, immutable ruleset hash, players, winner and canonical timestamps in every history row.
+- Derive win/loss/draw outcomes from the canonical winner, including zero-address draws.
+- Produce deterministic overall and per-game summaries containing games, wins, losses, draws, current streak and best win streak.
+- Build profile game shelves as bounded newest-first projections over canonical finished sessions.
+- Build deterministic per-game leaderboards as application projections only; ranking never becomes canonical game or reward authority.
+- Apply current visibility policy before friend activity or discoverable game activity is emitted.
+- Shape player/game discovery candidates for consumption by the existing BG-12 search/recommendation service rather than creating a second search authority.
+- Keep all discovery/search scores as hints only; canonical eligibility and BG-12 filtering remain authoritative for presentation.
+- Expose BG-18 rewards hooks containing derived stat snapshots only. BG-15 never awards, mints or settles rewards.
+- Keep every history/stat/leaderboard surface rebuildable from canonical finished sessions after reorg/replay.
 
-### BG-15.6 invariants
+### BG-15.7 invariants
 
-41. A randomness-dependent game binds to exactly one canonical `randomnessRef`; applications may not silently substitute another request.
-42. 420Randomness remains provider-neutral authority for request routing, fallback and verified resolution; BG-15 does not create a game-specific entropy protocol.
-43. Unfulfilled or voided randomness can never advance a randomness-dependent game.
-44. Hidden-state seeds bind session, immutable ruleset, canonical randomness reference and fulfilled randomness together.
-45. Reveal material remains off-chain until disclosed; commitments, not plaintext secrets, are the integrity boundary.
-46. A reveal must hash back to its exact commitment before application state can use it.
-47. Duplicate, stale, premature and mismatched reveals fail closed.
-48. BG-15.6 does not change canonical session lifecycle, move sequencing, winner authority or the zero-wager boundary.
+49. Only canonical `FINISHED` sessions contribute to historical outcomes and competitive statistics.
+50. Win/loss/draw derivation uses the canonical winner field; application rankings cannot rewrite outcomes.
+51. History rows and statistics are derived and rebuildable, never canonical authority.
+52. Leaderboard ordering is deterministic for the same canonical session set and player set.
+53. Leaderboards never authorize gameplay, settlement, rewards, moderation or identity decisions.
+54. Friend/discovery activity must pass current visibility policy before presentation.
+55. BG-12 remains the search/recommendation query authority; BG-15 only emits compatible game/player candidates.
+56. BG-18 reward integration is hook-only in BG-15; `awardRequested` and `mintRequested` remain false.
 
 ## Remaining BG-15 phases
 
-- **BG-15.7 — history, statistics, leaderboards & social discovery**
 - **BG-15.8 — abuse, integrity, replay & recovery hardening**
 - **BG-15.9 — production load qualification, runbook, reconciliation & phase closeout**

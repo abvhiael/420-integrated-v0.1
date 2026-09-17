@@ -13,7 +13,7 @@
 - **STATUS-6 — history, provenance + canonical references — COMPLETE**
 - **STATUS-7 — API + public status feed — COMPLETE**
 - **STATUS-8 — privacy/security + anti-spoofing hardening — COMPLETE**
-- STATUS-9 — Genesis frontend — pending
+- **STATUS-9 — Genesis frontend — COMPLETE**
 - STATUS-10 — qualification, reconciliation + closeout — pending
 
 ## STATUS-0 — Genesis boundary + executable invariant baseline
@@ -116,7 +116,11 @@ Runtime probe targets are SSRF-hardened. Configuration rejects loopback, RFC1918
 
 ## STATUS-9 — Genesis frontend
 
-Build the public status page with network banner, component grid, freshness indicators, active incidents, planned maintenance, incident history, provenance/evidence links and explicit language distinguishing operational health from canonical protocol truth.
+Implemented the dependency-free embedded Genesis frontend under `status/web`. The public page presents a network-health banner, public component grid, liveness/readiness and freshness indicators, conflicting-evidence warnings, active incidents, planned maintenance and append-only history/provenance from the STATUS-7 read-only API.
+
+The frontend consumes only `GET /v1/status`, `GET /v1/incidents`, `GET /v1/maintenance` and `GET /v1/history`; it introduces no mutation/operator surface and refuses API payloads that do not explicitly declare `canonical: false`. Historical observations expose source identity, observation/expiry timestamps and preserved evidence references while STATUS-8 projections keep raw/private payloads out of the browser.
+
+The page carries explicit language that operational health is not consensus, settlement or ownership authority and that a red service state alone does not prove canonical chain failure. Static assets are embedded in the Go binary and served with restrictive CSP, no-referrer, nosniff and disabled camera/microphone/geolocation/payment permissions. Frontend qualification tests verify required Genesis views, read-only behavior, security headers and the expected versioned API dependencies.
 
 ## STATUS-10 — qualification, reconciliation + closeout
 

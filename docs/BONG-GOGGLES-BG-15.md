@@ -24,7 +24,7 @@ BG-15 builds the production Bong Goggles social-games application over the canon
 
 ## BG-15.1 — canonical game-session projector + resolver
 
-Status: IN PROGRESS
+Status: IMPLEMENTED — EXACT-HEAD QUALIFICATION PENDING
 
 Requirements:
 

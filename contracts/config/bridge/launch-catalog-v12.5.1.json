@@ -25,9 +25,14 @@
       "note":"BOB bridges directly to Dobbscoin mainnet with 2026 LWMA/emergency-difficulty rules and scheduled AuxPoW activation modeled in the verifier boundary."
     },
     "V12.5.11": {
-      "asset":"CURE","status":"IN_PROGRESS",
+      "asset":"CURE","status":"COMPLETED_QUALIFIED_MERGED",
       "integration_type":"NATIVE_CURECOIN_CHAIN_ADAPTER",
-      "note":"CURE bridges directly to Curecoin mainnet. PoS chain finality and transaction inclusion are verified independently of Folding@home research-reward accounting."
+      "note":"CURE bridges directly to Curecoin mainnet. PoS chain finality and transaction inclusion are verified independently of Folding at Home research-reward accounting."
+    },
+    "V12.5.12": {
+      "asset":"ARRR","status":"IN_PROGRESS",
+      "integration_type":"NATIVE_PIRATE_CHAIN_SHIELDED_ADAPTER",
+      "note":"ARRR uses a shielded-note verifier boundary with dPoW notarization and authorized viewing-key evidence; transparent user transfer assumptions are explicitly rejected."
     }
   },
   "assets": [

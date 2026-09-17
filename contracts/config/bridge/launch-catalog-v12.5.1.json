@@ -20,9 +20,14 @@
       "note":"POT bridges directly to native PotCoin mainnet; the Solana SPL representation is not the canonical V12.5.9 route."
     },
     "V12.5.10": {
-      "asset":"BOB","status":"IN_PROGRESS",
+      "asset":"BOB","status":"COMPLETED_QUALIFIED_MERGED",
       "integration_type":"NATIVE_DOBBSCOIN_CHAIN_ADAPTER",
       "note":"BOB bridges directly to Dobbscoin mainnet with 2026 LWMA/emergency-difficulty rules and scheduled AuxPoW activation modeled in the verifier boundary."
+    },
+    "V12.5.11": {
+      "asset":"CURE","status":"IN_PROGRESS",
+      "integration_type":"NATIVE_CURECOIN_CHAIN_ADAPTER",
+      "note":"CURE bridges directly to Curecoin mainnet. PoS chain finality and transaction inclusion are verified independently of Folding@home research-reward accounting."
     }
   },
   "assets": [

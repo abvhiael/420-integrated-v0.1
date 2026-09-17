@@ -7,7 +7,7 @@
 - **NOTIFY-0 — Genesis boundary + executable invariant baseline — COMPLETE**
 - **NOTIFY-1 — runtime/service scaffold — COMPLETE**
 - **NOTIFY-2 — subscription engine — COMPLETE**
-- NOTIFY-3 — indexer ingestion + replay — pending
+- **NOTIFY-3 — indexer ingestion + replay — COMPLETE**
 - NOTIFY-4 — delivery queue + retry/dedup — pending
 - NOTIFY-5 — provider-neutral delivery adapters — pending
 - NOTIFY-6 — provenance + security — pending
@@ -59,7 +59,11 @@ Implemented an in-memory private subscription model/store with explicit opt-in a
 
 ## NOTIFY-3 — indexer ingestion + replay
 
-Consume `NotificationsConsumerAdapter420` / the qualified 420Indexer public projection interface. Implement chain-bound replay checkpoints, malformed-batch rejection, deterministic restart/replay and append-only canonicality updates for finalized/retracted/superseded events.
+Implemented a public-indexer replay processor modeled on the qualified `NotificationsConsumerAdapter420` contract. Event batches must use stream version `v1`, remain explicitly non-authoritative, identify `protocol` as their source and preserve valid event/provenance identity. Chain mismatch, malformed envelopes or invalid provenance fail before checkpoint advancement.
+
+Replay checkpoints are consumer-owned, chain-bound and non-authoritative. Restart resumes from the persisted opaque cursor, and the next cursor is saved only after every event in the batch is processed successfully. Canonicality updates accept only append-only `finalized`, `retracted` and `superseded` signals and reject authoritative, cross-chain or malformed signals.
+
+Tests cover successful resume, failed-batch checkpoint immutability, wrong-chain rejection and canonicality-signal validation.
 
 ## NOTIFY-4 — delivery queue + retry/dedup
 

@@ -1,0 +1,34 @@
+{
+  "schema": "420-exchange-market-data-v13.1",
+  "status": "IN_PROGRESS",
+  "scope": "CANONICAL_MARKET_DATA_EVENT_SCHEMA",
+  "record_envelope": {
+    "required_provenance": [
+      "chainId",
+      "blockNumber",
+      "blockHash",
+      "transactionHash",
+      "logIndex"
+    ],
+    "recordIdentity": "keccak256(chainId, blockHash, transactionHash, logIndex)",
+    "canonicality": ["observed", "canonical", "orphaned", "finalized"],
+    "derivedRecordRule": "derived aggregates must reference the canonical source record set and aggregation version"
+  },
+  "domains": [
+    "MARKET",
+    "TRADE",
+    "ORDER",
+    "LIQUIDITY",
+    "BRIDGE",
+    "FEE"
+  ],
+  "invariants": [
+    "indexing never grants execution or custody authority",
+    "every canonical record is chain-provenanced",
+    "record identity is stable and idempotent for one canonical log",
+    "orphaned records remain distinguishable from canonical replacements",
+    "derived fields cannot overwrite canonical event fields",
+    "all public schemas are versioned before V14 UI consumption"
+  ],
+  "follow_on": "V13.2 deterministic indexer core"
+}

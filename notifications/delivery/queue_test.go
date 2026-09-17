@@ -56,6 +56,10 @@ func TestRetryBackoffAndDeadLetter(t *testing.T) {
 	r3, err := q.MarkFailed(rec.Key, "still bad", now.Add(3*time.Second))
 	if err != nil { t.Fatal(err) }
 	if r3.Status != StatusDead || !r3.NextAttempt.IsZero() { t.Fatalf("expected dead letter: %+v", r3) }
+
+	terminal, err := q.MarkFailed(rec.Key, "late duplicate failure", now.Add(4*time.Second))
+	if err == nil { t.Fatal("expected terminal dead-letter rejection") }
+	if terminal.Status != StatusDead || terminal.Attempts != r3.Attempts { t.Fatalf("dead-letter state mutated: %+v", terminal) }
 }
 
 func TestFailureIsolationAcrossDestinations(t *testing.T) {
@@ -68,6 +72,16 @@ func TestFailureIsolationAcrossDestinations(t *testing.T) {
 	ar,_ := q.Get(a.Key); br,_ := q.Get(b.Key)
 	if ar.Status != StatusRetry { t.Fatalf("expected a retry, got %s", ar.Status) }
 	if br.Status != StatusDelivered { t.Fatalf("expected b delivered, got %s", br.Status) }
+	if !br.NextAttempt.IsZero() { t.Fatal("delivered record retained retry schedule") }
+}
+
+func TestDeliveryTransitionsRequireTime(t *testing.T) {
+	q := testQueue(t)
+	now := time.Unix(450, 0)
+	rec,_,err := q.Enqueue(EnqueueRequest{SubscriptionID:"a", EventID:"evt", Provider:"push", Destination:"device", Severity:SeverityInfo}, now)
+	if err != nil { t.Fatal(err) }
+	if err := q.MarkDelivered(rec.Key, time.Time{}); err == nil { t.Fatal("expected zero delivery time rejection") }
+	if _, err := q.MarkFailed(rec.Key, "x", time.Time{}); err == nil { t.Fatal("expected zero failure time rejection") }
 }
 
 func TestPayloadIsDefensivelyCloned(t *testing.T) {

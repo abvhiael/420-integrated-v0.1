@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -85,21 +86,27 @@ func (a *PublicAPI) handleMaintenance(w http.ResponseWriter, _ *http.Request) {
 }
 
 type historyItem struct {
-	Sequence   uint64             `json:"sequence"`
-	RecordedAt time.Time          `json:"recorded_at"`
-	Type       string             `json:"type"`
+	Sequence   uint64                `json:"sequence"`
+	RecordedAt time.Time             `json:"recorded_at"`
+	Type       string                `json:"type"`
 	Observation *evidence.Observation `json:"observation,omitempty"`
 	Incident    *incidents.Incident    `json:"incident,omitempty"`
 }
 
 func (a *PublicAPI) handleHistory(w http.ResponseWriter, r *http.Request) {
+	query, err := url.ParseQuery(r.URL.RawQuery)
+	if err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]any{"error":"invalid query encoding"})
+		return
+	}
+
 	limit := 50
-	if raw := r.URL.Query().Get("limit"); raw != "" {
+	if raw := query.Get("limit"); raw != "" {
 		v, err := strconv.Atoi(raw)
 		if err != nil || v < 1 || v > 200 { writeJSON(w, http.StatusBadRequest, map[string]any{"error":"limit must be between 1 and 200"}); return }
 		limit = v
 	}
-	cursor, err := decodeCursor(r.URL.Query().Get("cursor"))
+	cursor, err := decodeCursor(query.Get("cursor"))
 	if err != nil { writeJSON(w, http.StatusBadRequest, map[string]any{"error":"invalid cursor"}); return }
 	items := a.historyItems(cursor)
 	if len(items) > limit { items = items[:limit] }
@@ -154,9 +161,20 @@ func encodeCursor(sequence uint64) string {
 
 func decodeCursor(raw string) (uint64, error) {
 	if strings.TrimSpace(raw) == "" { return 0, nil }
-	b, err := base64.RawURLEncoding.DecodeString(raw)
+	if raw != strings.TrimSpace(raw) { return 0, errors.New("cursor contains surrounding whitespace") }
+
+	b, err := base64.RawURLEncoding.Strict().DecodeString(raw)
 	if err != nil { return 0, err }
-	return strconv.ParseUint(string(b), 10, 64)
+	if len(b) == 0 { return 0, errors.New("cursor payload is empty") }
+	for _, ch := range b {
+		if ch < '0' || ch > '9' { return 0, errors.New("cursor payload must be a decimal sequence") }
+	}
+
+	sequence, err := strconv.ParseUint(string(b), 10, 64)
+	if err != nil { return 0, err }
+	if sequence == 0 { return 0, errors.New("cursor sequence must be greater than zero") }
+	if encodeCursor(sequence) != raw { return 0, errors.New("cursor is not canonical") }
+	return sequence, nil
 }
 
 func writeError(w http.ResponseWriter, err error) {

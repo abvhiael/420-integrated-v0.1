@@ -78,7 +78,7 @@ Hard boundary: Bong Goggles social games remain **zero-wager**. Any wagered game
 - preserves the zero-wager invariant in every application path;
 - dedicated Bong Goggles Games Verification plus normal Docs/Integrated qualification green on exact head.
 
-### BG-15.2 — versioned ruleset registry + client game engines — IMPLEMENTED, QUALIFICATION PENDING
+### BG-15.2 — versioned ruleset registry + client game engines — COMPLETE AND QUALIFIED
 
 - versioned immutable ruleset descriptors keyed by canonical `rulesetHash`;
 - stable V1 catalog for Cribbage, Russian Cribbage, Chess, Word Game, Checkers, Backgammon and Dominoes;
@@ -86,18 +86,18 @@ Hard boundary: Bong Goggles social games remain **zero-wager**. Any wagered game
 - exact engine ID/version, state codec, move codec, hidden-state and randomness metadata per ruleset;
 - fail-closed handling for unknown hashes, duplicate identities, duplicate hashes, game/hash mismatches and missing/mismatched engine implementations;
 - deterministic stable-JSON state/move codecs with order-independent serialization;
-- deterministic move/state digests and cross-client replay vectors;
-- canonical move sequencing/commit construction intentionally deferred to BG-15.3.
+- deterministic move/state digests and cross-client replay vectors.
 
-### BG-15.3 — move engine + canonical commitment bridge
+### BG-15.3 — move engine + canonical commitment bridge — IMPLEMENTED, QUALIFICATION PENDING
 
-- maintain local game state from the selected ruleset engine while treating canonical move number/commitment state as authoritative sequencing;
-- build `commitMove` intents using the exact next canonical move number;
-- hash deterministic move payloads into canonical commitments;
-- reject duplicate, skipped, stale or replayed move numbers;
-- rebuild local state from canonical move history plus allowed off-chain move payload storage when required;
-- fail closed when canonical commitments and local replay diverge;
-- support reconnect/reload/reorg-safe reconstruction.
+- canonical `nextMoveNumber` is the sole sequencing authority;
+- wallet/session-authorized `commitMove` intents use the exact current canonical move number;
+- deterministic commitment payload binds `sessionId`, `rulesetHash`, move number and stable move payload;
+- stale, skipped, replayed, inactive-session and non-player submissions fail closed;
+- canonical move history must be contiguous from move 1 through `nextMoveNumber - 1`;
+- allowed off-chain move payloads must hash exactly to their corresponding canonical commitments before replay;
+- local state rebuild resolves the exact BG-15.2 deterministic client engine and fails closed on commitment or replay divergence;
+- reconnect/reload/reorg recovery re-reads canonical session/history instead of trusting cached sequence state.
 
 ### BG-15.4 — turn UX, clocks, rematch and challenge flow
 
@@ -159,8 +159,8 @@ Hard boundary: Bong Goggles social games remain **zero-wager**. Any wagered game
 
 ## Current position
 
-**Phase 12 is merged in PR #307. Phase 13 is merged in PR #308. Phase 14 is merged in PR #314. Current work: BG-15.2 versioned ruleset registry + client game engines on PR #321 / `feature/bong-goggles-bg15-social-games`.**
+**Phase 12 is merged in PR #307. Phase 13 is merged in PR #308. Phase 14 is merged in PR #314. Current work: BG-15.3 move engine + canonical commitment bridge on PR #321 / `feature/bong-goggles-bg15-social-games`.**
 
 Critical path:
 
-`BG-15.2 rulesets -> BG-15.3 move bridge -> BG-15.4 turn UX -> BG-15.5 spectator/presence/chat -> BG-15.6 randomness/hidden state -> BG-15.7 history/leaderboards/social surfaces -> BG-15.8 integrity/recovery -> BG-15.9 production closeout -> BG-16 notifications -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI -> BG-20 launch hardening -> READY`
+`BG-15.3 move bridge -> BG-15.4 turn UX -> BG-15.5 spectator/presence/chat -> BG-15.6 randomness/hidden state -> BG-15.7 history/leaderboards/social surfaces -> BG-15.8 integrity/recovery -> BG-15.9 production closeout -> BG-16 notifications -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI -> BG-20 launch hardening -> READY`

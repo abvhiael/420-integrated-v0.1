@@ -26,45 +26,60 @@ Production web target: `https://bonggoggles.420integrated.org`.
 
 ## Phase 12 — production application/indexer backend — COMPLETE, merged PR #307
 
-- **BG-12.1 — deterministic projector/reorg foundation — COMPLETE**
-- **BG-12.2 — domain materialized views — COMPLETE**
-- **BG-12.3 — canonical contract-event adapters + durable checkpoint recovery — COMPLETE**
-- **BG-12.4 — pages/groups/events + discovery/review reducers — COMPLETE**
-- **BG-12.5 — search + recommendation query service — COMPLETE**
-- **BG-12.6 — notification/event pipeline — COMPLETE**
-- **BG-12.7 — production ingestion/operations closeout — COMPLETE**
+- **BG-12.1 through BG-12.7 — COMPLETE**
 
 ## Phase 13 — media/storage delivery — COMPLETE, merged PR #308
 
-- **BG-13.1 — media descriptor + canonical resolver — COMPLETE AND QUALIFIED**
-- **BG-13.2 — upload preparation + ingest bridge — COMPLETE AND QUALIFIED**
-- **BG-13.3 — canonical placement/seal orchestration — COMPLETE AND QUALIFIED**
-- **BG-13.4 — verified retrieval + Gateway delivery — COMPLETE AND QUALIFIED**
-- **BG-13.5 — thumbnails/posters/transcodes — COMPLETE AND QUALIFIED**
-- **BG-13.6 — lifecycle/edit/delete/privacy semantics — COMPLETE AND QUALIFIED**
-- **BG-13.7 — production delivery closeout — COMPLETE AND QUALIFIED**
+- **BG-13.1 through BG-13.7 — COMPLETE AND QUALIFIED**
 
-## Phase 14 — full private messaging — IN PROGRESS, PR #314
+## Phase 14 — full private messaging — COMPLETE, merged PR #314
 
-BG-14 builds the Bong Goggles application messaging layer over 420Messenger and `BongGogglesPrivateMessaging420`; plaintext/ciphertext and key material remain off-chain and no parallel messaging authority is introduced.
+- **BG-14.1 through BG-14.7 — COMPLETE AND QUALIFIED**
 
-- **BG-14.1 — conversation/request projection + canonical context resolver — COMPLETE AND QUALIFIED**
-- **BG-14.2 — encrypted send/receive bridge — COMPLETE AND QUALIFIED**
-- **BG-14.3 — inbox, unread/read and request state — COMPLETE AND QUALIFIED**
-- **BG-14.4 — permitted group threads — COMPLETE AND QUALIFIED**
-  Application-level private group-thread descriptors derive eligibility from canonical `BongGogglesCommunityRegistry420` membership. Group delivery fans out over canonical direct Messenger/private contexts, with deterministic membership digests, group-epoch invalidation on membership/role change, current membership revalidation and fail-closed recipient routing. Public/Commons channels remain separate authority.
-- **BG-14.5 — private attachments — COMPLETE AND QUALIFIED**
-  Reuses BG-13 canonical mediaRoot/manifest/item/420Storage object identity and verified upload/retrieval machinery. Messaging adds exact active conversation/private-context/current-epoch binding, current block/message-policy checks, owner-only upload association, participant-only read authorization, secret/private-route exclusion and lifecycle-driven presentation revocation without rewriting immutable storage provenance.
-- **BG-14.6 — safety, devices, epoch rotation and recovery — COMPLETE AND QUALIFIED**
-  Revalidates profile activity, blocks, message/spam policy, canonical conversation/context state, device-key revision/active state and private epoch at every protected use. Adds wallet-authorized device set/revoke, context close and epoch-rotation intents plus staged device-loss recovery that refreshes canonical state between establishing a surviving device, revoking lost devices and rotating affected private contexts without exposing key material.
-- **BG-14.7 — production messaging closeout — IN PROGRESS**
-  Adds strict secret-redacted messaging telemetry, deterministic transport-loss/duplicate-replay/stale-epoch/device-loss/blocked-peer/attachment-failure drills, bounded inbox/send/receipt/attachment load qualification, a production operator/recovery runbook, phase-end reconciliation with current main and reconciled exact-head qualification.
+## Phase 15 — social games application — IN PROGRESS, PR #321
 
-Detailed BG-14 invariants and requirements are in `docs/BONG-GOGGLES-BG-14.md`; production operations are in `docs/BONG-GOGGLES-BG-14-7-RUNBOOK.md`.
+Branch: `feature/bong-goggles-bg15-social-games`
 
-## Remaining product phases after BG-14
+BG-15 turns the canonical `BongGogglesGameSessionRegistry420` foundation from PR #82 into a production Bong Goggles games experience. The registry remains authoritative for session identity/lifecycle, immutable `rulesetHash`, move sequencing/commitments, winner state and player authorization. Game-specific rendering, rule execution, timers, notation, local UX state, spectator presentation, discovery and rankings remain application-layer concerns.
 
-- **BG-15 — social games application**
+Hard boundary: Bong Goggles social games remain **zero-wager**. Any wagered mode belongs in 420Bet.
+
+### BG-15.1 — canonical game-session projector + resolver — COMPLETE AND QUALIFIED
+
+### BG-15.2 — versioned ruleset registry + client game engines — COMPLETE AND QUALIFIED
+
+### BG-15.3 — move engine + canonical commitment bridge — COMPLETE AND QUALIFIED
+
+### BG-15.4 — turn UX, clocks, rematches & challenges — COMPLETE AND QUALIFIED
+
+### BG-15.5 — spectator, presence & BG-14 messaging integration — COMPLETE AND QUALIFIED
+
+### BG-15.6 — randomness + hidden-state games — COMPLETE AND QUALIFIED
+
+### BG-15.7 — discovery, history, leaderboards and social surfaces — COMPLETE AND QUALIFIED
+
+### BG-15.8 — abuse, integrity and recovery hardening — COMPLETE AND QUALIFIED
+
+- current policy/profile/block state invalidates stale application authorization;
+- challenge rate limiting, canonical replay, conflicting-finish containment and abandoned-session classification fail closed without becoming authority;
+- local/canonical divergence forces deterministic rebuild;
+- hidden/private telemetry is recursively redacted;
+- explicit zero-wager tests preserve the 420Bet boundary.
+
+### BG-15.9 — production games closeout — IMPLEMENTED, RECONCILIATION/QUALIFICATION PENDING
+
+- bounded baseline: 500 lobby sessions, 250 active sessions, 5,000 canonical moves, 10,000 history rows, 1,000 leaderboard players and 25 concurrent resolvers;
+- P95 budgets: projection 500 ms, intent 250 ms, canonical replay 1,500 ms, history 750 ms and leaderboard 1,000 ms;
+- zero qualification errors and zero unresolved canonical/local divergence required;
+- structured operational telemetry uses BG-15.8 redaction before emission;
+- required drills cover projection stall, replay divergence, ruleset rollback, randomness unavailable, hidden-state reveal failure, policy invalidation, challenge spam and wager boundary;
+- operator runbook: `docs/BONG-GOGGLES-BG-15-9-RUNBOOK.md`;
+- reconcile the phase branch with current `main` before final qualification;
+- reconciled exact head must pass Games, Media, Docs and Integrated workflows;
+- PR #321 remains unmerged until explicitly instructed.
+
+## Remaining product phases after BG-15
+
 - **BG-16 — notifications**
 - **BG-17 — moderation operations**
 - **BG-18 — rewards production configuration**
@@ -73,8 +88,8 @@ Detailed BG-14 invariants and requirements are in `docs/BONG-GOGGLES-BG-14.md`; 
 
 ## Current position
 
-**Phase 12 is merged in PR #307. Phase 13 is merged in PR #308. Current work: BG-14.7 production messaging closeout on PR #314 / `feature/bong-goggles-bg14-private-messaging`.**
+**Phase 12 is merged in PR #307. Phase 13 is merged in PR #308. Phase 14 is merged in PR #314. Current work: BG-15.9 production games closeout on PR #321 / `feature/bong-goggles-bg15-social-games`.**
 
 Critical path:
 
-`BG-14.7 production closeout -> BG-15 games -> BG-16 notifications -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI -> BG-20 launch hardening -> READY`
+`BG-15.9 production closeout -> BG-16 notifications -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI -> BG-20 launch hardening -> READY`

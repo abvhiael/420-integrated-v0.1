@@ -1,6 +1,6 @@
 {
   "schema": "420-exchange-market-data-v13.1",
-  "status": "IN_QUALIFICATION",
+  "status": "QUALIFIED",
   "scope": "CANONICAL_MARKET_DATA_EVENT_SCHEMA",
   "schema_version": {
     "major": 13,
@@ -78,6 +78,12 @@
   "implementation": {
     "schema_library": "contracts/src/exchange/ExchangeMarketDataTypes420.sol",
     "qualification_test": "contracts/test/ExchangeMarketDataTypes420.t.sol"
+  },
+  "qualification": {
+    "exact_head": "7246c8f03e4a3b31d3f6ac86f1a8c9c791202409",
+    "solidity_contracts": 2588,
+    "integrated_qualification": 4093,
+    "docs_qualification": 1803
   },
   "follow_on": "V13.2 deterministic indexer core"
 }

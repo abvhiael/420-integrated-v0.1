@@ -51,6 +51,23 @@ function qualifiedInteraction(state, { mention = false } = {}) {
   return true;
 }
 
+function qualifiedGame(state, { invite = false } = {}) {
+  const policy = required(state.gameNotificationPolicy, 'canonical game notification policy state');
+  if (policy.actorActive !== true || policy.recipientActive !== true) return false;
+  if (policy.blockedEither === true || policy.notificationsMuted === true || policy.gameInvitesMuted === true) return false;
+  if (policy.zeroWager !== true) return false;
+  if (invite && policy.canInviteToGame !== true) return false;
+  return true;
+}
+
+function qualifiedMessage(state) {
+  const policy = required(state.messageNotificationPolicy, 'canonical message notification policy state');
+  if (policy.senderActive !== true || policy.recipientActive !== true) return false;
+  if (policy.blockedEither === true || policy.notificationsMuted === true) return false;
+  if (policy.conversationActive !== true || policy.canSend !== true) return false;
+  return true;
+}
+
 function recipientAllowed(entry) {
   if (!entry || typeof entry !== 'object') return false;
   if (!entry.account) return false;
@@ -77,6 +94,32 @@ function isActiveMember(value) {
 
 function isRemovedMember(value) {
   return value === 3 || value === 'REMOVED';
+}
+
+function isInvitedGame(value) {
+  return value === 1 || value === 'INVITED';
+}
+
+function isActiveGame(value) {
+  return value === 2 || value === 'ACTIVE';
+}
+
+function isFinishedGame(value) {
+  return value === 3 || value === 'FINISHED';
+}
+
+function gamePeer(session, actor) {
+  const normalizedActor = lower(actor);
+  if (lower(session.playerA) === normalizedActor) return session.playerB;
+  if (lower(session.playerB) === normalizedActor) return session.playerA;
+  throw new Error('game actor is not a canonical session player');
+}
+
+function directMessagePeer(context, sender) {
+  const normalizedSender = lower(sender);
+  if (lower(context.a) === normalizedSender) return context.b;
+  if (lower(context.b) === normalizedSender) return context.a;
+  throw new Error('message sender is not a canonical direct-context participant');
 }
 
 export function notificationCandidatesForEvent(log, state = {}) {
@@ -197,6 +240,81 @@ export function notificationCandidatesForEvent(log, state = {}) {
           metadata: { startsAt: args.startsAt ?? eventRecord.startsAt ?? null, endsAt: args.endsAt ?? eventRecord.endsAt ?? null, active: args.active ?? eventRecord.active ?? null },
         }));
       }
+      break;
+    }
+    case 'GameInvited': {
+      const session = required(state.gameSession, 'canonical game session state');
+      if (!isInvitedGame(session.state) || !qualifiedGame(state, { invite: true })) break;
+      add(candidate(log, {
+        recipient: args.recipient,
+        actor: args.inviter,
+        kind: 'GAME_INVITE',
+        topic: 'games',
+        subjectId: args.sessionId,
+        metadata: { gameType: args.gameType ?? session.gameType ?? null, rulesetHash: args.rulesetHash ?? session.rulesetHash ?? null },
+      }));
+      break;
+    }
+    case 'GameAccepted': {
+      const session = required(state.gameSession, 'canonical game session state');
+      if (!isActiveGame(session.state) || !qualifiedGame(state)) break;
+      add(candidate(log, {
+        recipient: session.playerA,
+        actor: args.accepter,
+        kind: 'GAME_INVITE_ACCEPTED',
+        topic: 'games',
+        subjectId: args.sessionId,
+        metadata: { startedAt: args.startedAt ?? session.startedAt ?? null },
+      }));
+      break;
+    }
+    case 'GameMoveCommitted': {
+      const session = required(state.gameSession, 'canonical game session state');
+      if (!isActiveGame(session.state) || !qualifiedGame(state)) break;
+      const recipient = gamePeer(session, args.player);
+      add(candidate(log, {
+        recipient,
+        actor: args.player,
+        kind: 'GAME_TURN',
+        topic: 'games',
+        subjectId: args.sessionId,
+        metadata: { moveNumber: args.moveNumber ?? null, nextMoveNumber: session.nextMoveNumber ?? null },
+      }));
+      break;
+    }
+    case 'GameFinished': {
+      const session = required(state.gameSession, 'canonical game session state');
+      if (!isFinishedGame(session.state) || !qualifiedGame(state)) break;
+      const recipient = gamePeer(session, args.actor);
+      add(candidate(log, {
+        recipient,
+        actor: args.actor,
+        kind: 'GAME_FINISHED',
+        topic: 'games',
+        subjectId: args.sessionId,
+        metadata: { winner: args.winner ?? session.winner ?? null, finishedAt: args.finishedAt ?? session.finishedAt ?? null },
+      }));
+      break;
+    }
+    case 'EnvelopeCommitted': {
+      const context = required(state.privateContext, 'canonical Bong Goggles private context state');
+      if (context.exists === false || context.closed === true) break;
+      if (context.messengerConversationId !== args.conversationId) break;
+      if (!qualifiedMessage(state)) break;
+      const recipient = directMessagePeer(context, args.sender);
+      add(candidate(log, {
+        recipient,
+        actor: args.sender,
+        kind: 'MESSAGE_RECEIVED',
+        topic: 'messages',
+        subjectId: args.conversationId,
+        metadata: {
+          messageId: args.messageId ?? null,
+          conversationId: args.conversationId ?? null,
+          contextId: context.contextId ?? null,
+          sequence: args.sequence ?? null,
+        },
+      }));
       break;
     }
     case 'ReviewPublished': {

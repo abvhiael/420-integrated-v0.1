@@ -22,13 +22,20 @@ contract EthereumBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
     mapping(bytes32 => bool) public consumedMessages;
     uint256 public outboundNonce;
 
+    bool public inboundHalted;
+    bool public outboundHalted;
+    bytes32 public inboundIncidentHash;
+    bytes32 public outboundIncidentHash;
+
     error InvalidAddress(); error InvalidVerifier(); error WrongChain(); error Unfinalized(); error InvalidProof();
     error GatewayNotAllowed(); error AssetNotAllowed(); error RouteNotAllowed(); error Replay(); error OnlyRouter(); error InvalidOutbound();
+    error InboundHalted(); error OutboundHalted(); error InvalidIncident();
 
     event VerifierSet(address indexed verifier);
     event GatewaySet(address indexed gateway, bool allowed);
     event AssetMappingSet(bytes32 indexed sourceAsset, bytes32 indexed assetId, bool allowed);
     event RouteBindingSet(bytes32 indexed assetId, bytes32 indexed routeId);
+    event EmergencyHaltSet(bool indexed inbound, bool halted, bytes32 indexed incidentHash);
     event EthereumInboundConsumed(bytes32 indexed messageId, bytes32 indexed transactionHash, uint64 blockNumber);
     event EthereumOutboundRequested(bytes32 indexed messageId, bytes32 indexed routeId, bytes32 indexed assetId, address sender, bytes recipient, uint256 amount, bytes32 sourceAsset);
 
@@ -42,6 +49,19 @@ contract EthereumBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
     function adapterId() external pure returns (bytes32) { return ADAPTER_ID; }
     function setVerifier(address verifier_) external onlyGovernance { _setVerifier(verifier_); }
     function setGateway(address gateway, bool allowed) external onlyGovernance { if (gateway == address(0)) revert InvalidAddress(); gateways[gateway] = allowed; emit GatewaySet(gateway, allowed); }
+
+    function setEmergencyHalt(bool inbound, bool halted, bytes32 incidentHash_) external onlyGovernance {
+        if (halted && incidentHash_ == bytes32(0)) revert InvalidIncident();
+        bytes32 incident = halted ? incidentHash_ : bytes32(0);
+        if (inbound) {
+            inboundHalted = halted;
+            inboundIncidentHash = incident;
+        } else {
+            outboundHalted = halted;
+            outboundIncidentHash = incident;
+        }
+        emit EmergencyHaltSet(inbound, halted, incident);
+    }
 
     function setAssetMapping(bytes32 sourceAsset, bytes32 assetId, bool allowed) external onlyGovernance {
         if (sourceAsset == bytes32(0) || assetId == bytes32(0)) revert InvalidProof();
@@ -71,6 +91,7 @@ contract EthereumBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
     }
 
     function verifyInbound(bytes calldata proof) external onlyRouter returns (VerifiedTransfer memory v) {
+        if (inboundHalted) revert InboundHalted();
         IEthereumFinalityVerifier420.FinalizedTransfer memory p = verifier.verifyFinalizedTransfer(proof);
         if (!p.finalized) revert Unfinalized();
         if (p.sourceChainId != ETHEREUM_MAINNET_CHAIN_ID) revert WrongChain();
@@ -88,6 +109,7 @@ contract EthereumBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
     }
 
     function initiateOutbound(bytes32 routeId, bytes32 assetId, address sender, bytes calldata recipient, uint256 amount, bytes calldata extra) external payable onlyRouter returns (bytes32 sourceMessageId) {
+        if (outboundHalted) revert OutboundHalted();
         if (routeId == bytes32(0) || assetId == bytes32(0) || sender == address(0) || recipient.length != 20 || amount == 0 || msg.value != 0) revert InvalidOutbound();
         bytes32 sourceAsset = sourceAssetByAssetId[assetId];
         if (sourceAsset == bytes32(0)) revert AssetNotAllowed();

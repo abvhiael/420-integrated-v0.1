@@ -6,7 +6,7 @@
 
 - **STATUS-0 — Genesis boundary + executable invariant baseline — COMPLETE**
 - **STATUS-1 — runtime/service scaffold — COMPLETE**
-- STATUS-2 — component registry + health model — pending
+- **STATUS-2 — component registry + health model — COMPLETE**
 - STATUS-3 — evidence ingestion + source adapters — pending
 - STATUS-4 — incident lifecycle + severity model — pending
 - STATUS-5 — aggregation, freshness + degraded-state engine — pending
@@ -58,7 +58,11 @@ Health/readiness responses explicitly report `canonical: false`; service qualifi
 
 ## STATUS-2 — component registry + health model
 
-Define component identities and classes for consensus, execution, RPC/WSS, Indexer, Explorer, Search, Analytics, storage/resource services, AI compute, oracles, bridge routes, Wallet-facing services and registered dApps. Model `healthy`, `degraded`, `unavailable`, `maintenance` and `unknown` presentation states separately from liveness/readiness.
+Implemented a typed component registry under `status/components` for consensus, execution, RPC, Indexer, Explorer, Search, Analytics, storage/resource services, AI compute, oracle, bridge, Wallet-facing and registered dApp classes.
+
+The registry rejects invalid or duplicate component identities and produces deterministic ID-sorted listings. Component identity includes network and environment so testnet, development and future production observations cannot be silently mixed.
+
+STATUS-2 also defines presentation health separately from process liveness/readiness. Supported presentation states are `healthy`, `degraded`, `unavailable`, `maintenance` and `unknown`. A component cannot validate as healthy unless it is both live and ready; planned maintenance requires an explicit reason; and every snapshot rejects `authoritative: true` so presentation state cannot acquire protocol authority.
 
 ## STATUS-3 — evidence ingestion + source adapters
 

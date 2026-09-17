@@ -1,0 +1,51 @@
+{
+  "schema": "420-exchange-qcad-ethereum-v12.5.20",
+  "status": "APPROVED_INACTIVE",
+  "integration_type": "TOKEN_OVER_EXISTING_CANONICAL_CHAIN_ADAPTER",
+  "asset": {
+    "symbol": "QCAD",
+    "asset_id": "420/BRIDGE/ASSET/QCAD",
+    "canonical_network": "ETHEREUM",
+    "canonical_chain_key": "420/BRIDGE/CHAIN/ETH",
+    "ethereum_chain_id": 1,
+    "ethereum_token": "0x3fa142dd3f384414e05e71ad0939274edc82ec0a",
+    "decimals": 6,
+    "issuer": "QCAD Digital Trust",
+    "servicer": "Stablecorp Digital Currencies Inc."
+  },
+  "legacy_exclusion": {
+    "ethereum_token": "0x4A16BAf414b8e637Ed12019faD5Dd705735DB2e0",
+    "status": "LEGACY_NOT_QUALIFIED",
+    "note": "Pre-prospectus QCAD is excluded from this route and must never satisfy the canonical source-token mapping."
+  },
+  "route": {
+    "route_id": "420/BRIDGE/ROUTE/QCAD/ETHEREUM/MAINNET",
+    "adapter": "EthereumBridgeAdapter420",
+    "adapter_id": "420/BRIDGE/ETHEREUM/MAINNET/V12.5.4",
+    "verifier": "IEthereumFinalityVerifier420"
+  },
+  "qualification": [
+    "current trust-era QCAD Ethereum token address pinned",
+    "legacy pre-prospectus QCAD Ethereum token explicitly excluded",
+    "Ethereum mainnet chain id pinned to 1",
+    "QCAD decimals pinned to 6",
+    "QCAD source-token mapping required",
+    "QCAD route binding required",
+    "finalized Ethereum proof required",
+    "approved gateway required",
+    "message replay protection inherited from EthereumBridgeAdapter420",
+    "router-only inbound and outbound inherited from EthereumBridgeAdapter420"
+  ],
+  "risk_notes": [
+    "QCAD is issuer-administered and subject to issuer and regulatory controls",
+    "canonical contract identity must be reverified against Stablecorp/QCAD Digital Trust before production activation",
+    "Base and other supported-chain QCAD representations are outside this Ethereum qualification slice"
+  ],
+  "activation_blockers": [
+    "420 local QCAD representation deployed and registered",
+    "production Ethereum finality verifier deployed and reviewed",
+    "production gateway approved by governance",
+    "issuer-control and redemption/freeze-risk runbook approved",
+    "route and risk limits activated by governance"
+  ]
+}

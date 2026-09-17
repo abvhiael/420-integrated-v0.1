@@ -26,13 +26,7 @@ Production web target: `https://bonggoggles.420integrated.org`.
 
 ## Phase 12 — production application/indexer backend — COMPLETE, merged PR #307
 
-- **BG-12.1 — deterministic projector/reorg foundation — COMPLETE**
-- **BG-12.2 — domain materialized views — COMPLETE**
-- **BG-12.3 — canonical contract-event adapters + durable checkpoint recovery — COMPLETE**
-- **BG-12.4 — pages/groups/events + discovery/review reducers — COMPLETE**
-- **BG-12.5 — search + recommendation query service — COMPLETE**
-- **BG-12.6 — notification/event pipeline — COMPLETE**
-- **BG-12.7 — production ingestion/operations closeout — COMPLETE**
+- **BG-12.1 through BG-12.7 — COMPLETE**
 
 ## Phase 13 — media/storage delivery — COMPLETE, merged PR #308
 
@@ -62,30 +56,25 @@ Hard boundary: Bong Goggles social games remain **zero-wager**. Any wagered mode
 
 ### BG-15.6 — randomness + hidden-state games — COMPLETE AND QUALIFIED
 
-- canonical `randomnessRef` is the sole randomness anchor where required;
-- provider-neutral 420Randomness resolves entropy;
-- hidden state remains off-chain/commitment-protected;
-- stale, duplicate, premature and mismatched reveals fail closed.
+### BG-15.7 — discovery, history, leaderboards and social surfaces — COMPLETE AND QUALIFIED
 
-### BG-15.7 — discovery, history, leaderboards and social surfaces — IMPLEMENTED, QUALIFICATION PENDING
+- canonical finished sessions produce newest-first history and deterministic win/loss/draw statistics;
+- profile shelves, leaderboards and friend activity remain rebuildable application projections;
+- visibility is applied before social discovery presentation;
+- BG-12 remains search/recommendation authority;
+- BG-18 hooks contain stat snapshots only and never mint/award in BG-15.
 
-- canonical finished sessions produce newest-first game history;
-- win/loss/draw summaries and streaks are deterministic rebuildable projections;
-- overall and per-game player statistics derive only from canonical finished outcomes;
-- bounded recent-game shelves support profile surfaces;
-- deterministic per-game leaderboards remain application projections with no canonical authority;
-- friend activity is filtered by current visibility policy before presentation;
-- game/player discovery candidates are shaped for the existing BG-12 search/recommendation service;
-- BG-18 receives stat-snapshot hooks only; BG-15 never awards or mints rewards.
+### BG-15.8 — abuse, integrity and recovery hardening — IMPLEMENTED, QUALIFICATION PENDING
 
-### BG-15.8 — abuse, integrity and recovery hardening
-
-- block/profile-disable/policy-change invalidation during invitations and active sessions;
-- stale-client, duplicate-move, replay, abandoned-session and conflicting-finish drills;
-- rate limits and spam controls for game invitations/challenges;
-- detect local-state/canonical-state divergence and force deterministic rebuild;
-- secret/private-state redaction in logs and telemetry;
-- explicit 420Bet boundary tests proving wagered sessions fail closed.
+- current profile-active, bilateral-block and social-policy state invalidates stale invitation/move/finish actions;
+- nonparticipants fail closed even with stale local state;
+- pairwise challenge rate limits reduce invitation spam without replacing canonical policy;
+- BG-15.3 canonical move sequencing/commitments remain authoritative for stale, duplicate, skipped and replayed move rejection;
+- deterministic canonical replay is compared against local state digests and divergence forces rebuild;
+- conflicting finishes against canonical terminal winners fail closed;
+- abandoned-session classification is advisory only and cannot mutate lifecycle or assign winners;
+- hidden/private material is recursively redacted from logs and telemetry;
+- explicit zero-wager boundary tests ensure any nonzero wager attempt fails and wagered play remains in 420Bet.
 
 ### BG-15.9 — production games closeout
 
@@ -105,8 +94,8 @@ Hard boundary: Bong Goggles social games remain **zero-wager**. Any wagered mode
 
 ## Current position
 
-**Phase 12 is merged in PR #307. Phase 13 is merged in PR #308. Phase 14 is merged in PR #314. Current work: BG-15.7 history, statistics, leaderboards & social discovery on PR #321 / `feature/bong-goggles-bg15-social-games`.**
+**Phase 12 is merged in PR #307. Phase 13 is merged in PR #308. Phase 14 is merged in PR #314. Current work: BG-15.8 abuse, integrity & recovery hardening on PR #321 / `feature/bong-goggles-bg15-social-games`.**
 
 Critical path:
 
-`BG-15.7 history/leaderboards/social discovery -> BG-15.8 integrity/recovery -> BG-15.9 production closeout -> BG-16 notifications -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI -> BG-20 launch hardening -> READY`
+`BG-15.8 integrity/recovery -> BG-15.9 production closeout -> BG-16 notifications -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI -> BG-20 launch hardening -> READY`

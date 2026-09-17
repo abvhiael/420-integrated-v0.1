@@ -1,0 +1,28 @@
+{
+  "schema": "420-exchange-cross-adapter-hardening-v12.6.7",
+  "status": "IN_QUALIFICATION",
+  "scope": "GOVERNANCE_ACCOUNTING_REGISTRY_AND_RECOVERY_HARDENING",
+  "model": "The final V12.6 qualification step pins governance-only mutation boundaries, live registry provenance, monotonic bridge accounting evidence, unhealthy mismatch recording, and recovery using strictly newer reconciliation evidence. Recovery changes health evidence only; it does not mint, burn, confiscate or rewrite settled history.",
+  "invariants": [
+    "bridge accounting reconciliation remains governance-only",
+    "reconciliation applies only while the accounting component and required dependencies are active",
+    "only canonical assets may receive bridge accounting evidence",
+    "accounting mismatches are recorded as unhealthy evidence rather than repaired silently",
+    "older or duplicate observation timestamps cannot overwrite newer reconciliation evidence",
+    "recovery from unhealthy to healthy requires strictly newer evidence",
+    "registry and qualification drift fail closed instead of preserving stale eligibility",
+    "recovery does not alter bridge replay, route, asset, verifier or adapter authority",
+    "accounting registry has no mint, burn, confiscation or balance-repair authority",
+    "completed V12.6 hardening remains additive to GatewayRouter420 and genesis governance controls"
+  ],
+  "qualification_tests": [
+    "unauthorized reconciliation mutation rejected",
+    "noncanonical asset reconciliation rejected",
+    "supply mismatch recorded unhealthy with evidence hash",
+    "duplicate or older observedAt reconciliation rejected",
+    "newer healthy reconciliation succeeds after unhealthy state",
+    "healthy recovery preserves asset identity and replaces only reconciliation evidence",
+    "live bridge qualification fails after registry provenance drift and succeeds only after governed requalification"
+  ],
+  "follow_on": "final V12.6 exact-head qualification, reconcile with main, then merge PR #331"
+}

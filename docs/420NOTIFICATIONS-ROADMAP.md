@@ -10,7 +10,7 @@
 - **NOTIFY-3 — indexer ingestion + replay — COMPLETE**
 - **NOTIFY-4 — delivery queue + retry/dedup — COMPLETE**
 - **NOTIFY-5 — provider-neutral delivery adapters — COMPLETE**
-- NOTIFY-6 — provenance + security — pending
+- **NOTIFY-6 — provenance + security — COMPLETE**
 - NOTIFY-7 — API + feed/history — pending
 - NOTIFY-8 — privacy + abuse hardening — pending
 - NOTIFY-9 — Genesis frontend — pending
@@ -79,7 +79,9 @@ Tests cover all three Genesis provider kinds, non-authoritative results, alterna
 
 ## NOTIFY-6 — provenance + security
 
-Require source attribution, network identity, canonical links, anti-spoofing metadata, hostile-link validation and safe action handoffs. Actions are deep links/handoffs only; Wallet or the originating app performs authorization.
+Implemented provenance validation that requires chain identity, source identity, block number/hash, transaction hash and non-negative log index together with a validated origin link. Link validation rejects unsupported schemes, hostile `javascript:`/`data:` content and credential-bearing HTTP(S) URLs while allowing canonical HTTP(S) origins and registered app/wallet handoff schemes.
+
+Action handoffs remain non-authoritative: notifications may deep-link to `wallet420://` or other registered app routes, but the handoff object is rejected if it attempts to carry signing, spending, grant or Wallet-bypass authority. Tests cover required provenance, hostile URL schemes/userinfo, valid canonical/app links and explicit Wallet-authority rejection.
 
 ## NOTIFY-7 — API + feed/history
 

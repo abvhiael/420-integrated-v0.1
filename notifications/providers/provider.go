@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/abvhiael/420-integrated-v0.1/notifications/delivery"
+	"github.com/420integrated/420-integrated/notifications/delivery"
 )
 
 type Kind string
@@ -18,12 +18,12 @@ const (
 )
 
 type Request struct {
-	DeliveryKey  string
-	EventID      string
-	Destination  string
-	Severity     delivery.Severity
-	Payload      []byte
-	Attempt      int
+	DeliveryKey string
+	EventID     string
+	Destination string
+	Severity    delivery.Severity
+	Payload     []byte
+	Attempt     int
 }
 
 type Result struct {

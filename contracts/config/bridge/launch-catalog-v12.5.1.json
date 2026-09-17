@@ -23,7 +23,8 @@
     "V12.5.19": {"asset":"USDT","status":"COMPLETED_QUALIFIED_MERGED","integration_type":"TOKEN_OVER_EXISTING_ETHEREUM_ADAPTER","note":"USDT qualifies canonical Ethereum USD₮ over EthereumBridgeAdapter420 with exact source-token mapping, 6-decimal amount semantics, route binding, Ethereum finality, gateway authorization, replay protection and documented issuer-control risk."},
     "V12.5.20": {"asset":"QCAD","status":"COMPLETED_QUALIFIED_MERGED","integration_type":"TOKEN_OVER_EXISTING_ETHEREUM_ADAPTER","note":"QCAD qualifies the current trust-era Ethereum contract over EthereumBridgeAdapter420 with 6-decimal amount semantics and explicit rejection of the legacy pre-prospectus Ethereum QCAD contract."},
     "V12.5.21": {"asset":"EURC","status":"COMPLETED_QUALIFIED_MERGED","integration_type":"TOKEN_OVER_EXISTING_ETHEREUM_ADAPTER","note":"EURC qualifies Circle's canonical Ethereum ERC-20 over EthereumBridgeAdapter420 with 6-decimal amount semantics, exact source-token mapping, route binding, Ethereum finality, gateway authorization and replay protection."},
-    "V12.5.22": {"asset":"EURC","status":"IN_PROGRESS","integration_type":"TOKEN_OVER_EXISTING_SOLANA_ADAPTER","note":"EURC qualifies Circle's canonical Solana SPL mint over SolanaBridgeAdapter420 with exact 32-byte mint mapping, 6-decimal amount semantics, mainnet cluster binding, gateway-program authorization and replay protection."}
+    "V12.5.22": {"asset":"EURC","status":"COMPLETED_QUALIFIED_MERGED","integration_type":"TOKEN_OVER_EXISTING_SOLANA_ADAPTER","note":"EURC qualifies Circle's canonical Solana SPL mint over SolanaBridgeAdapter420 with exact 32-byte mint mapping, 6-decimal amount semantics, mainnet cluster binding, gateway-program authorization and replay protection."},
+    "V12.5.23": {"asset":"RAY","status":"IN_PROGRESS","integration_type":"TOKEN_OVER_EXISTING_SOLANA_ADAPTER","note":"RAY qualifies Raydium's canonical Solana SPL mint over SolanaBridgeAdapter420 with exact 32-byte mint mapping, 6-decimal amount semantics, mainnet cluster binding, gateway-program authorization and replay protection."}
   },
   "assets": [
     {"symbol":"BTC","canonical_network":"BITCOIN","canonical_chain_key":"420/BRIDGE/CHAIN/BTC","adapter_slice":"V12.5.14"},
@@ -44,6 +45,7 @@
     {"symbol":"QCAD","canonical_network":"ETHEREUM","canonical_chain_key":"420/BRIDGE/CHAIN/ETH","adapter_slice":"V12.5.20-token-qualification-over-EthereumBridgeAdapter420"},
     {"symbol":"EURC","canonical_network":"ETHEREUM","canonical_chain_key":"420/BRIDGE/CHAIN/ETH","adapter_slice":"V12.5.21-token-qualification-over-EthereumBridgeAdapter420"},
     {"symbol":"EURC","canonical_network":"SOLANA","canonical_chain_key":"420/BRIDGE/CHAIN/SOL","adapter_slice":"V12.5.22-token-qualification-over-SolanaBridgeAdapter420"},
+    {"symbol":"RAY","canonical_network":"SOLANA","canonical_chain_key":"420/BRIDGE/CHAIN/SOL","adapter_slice":"V12.5.23-token-qualification-over-SolanaBridgeAdapter420"},
     {"symbol":"BOB","canonical_network":"DOBBSCOIN","canonical_chain_key":"420/BRIDGE/CHAIN/BOB","adapter_slice":"V12.5.10"},
     {"symbol":"CURE","canonical_network":"CURECOIN","canonical_chain_key":"420/BRIDGE/CHAIN/CURE","adapter_slice":"V12.5.11"},
     {"symbol":"ARRR","canonical_network":"PIRATE_CHAIN","canonical_chain_key":"420/BRIDGE/CHAIN/ARRR","adapter_slice":"V12.5.12"},

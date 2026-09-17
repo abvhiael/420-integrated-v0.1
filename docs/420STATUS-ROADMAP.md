@@ -11,7 +11,7 @@
 - **STATUS-4 — incident lifecycle + severity model — COMPLETE**
 - **STATUS-5 — aggregation, freshness + degraded-state engine — COMPLETE**
 - **STATUS-6 — history, provenance + canonical references — COMPLETE**
-- STATUS-7 — API + public status feed — pending
+- **STATUS-7 — API + public status feed — COMPLETE**
 - STATUS-8 — privacy/security + anti-spoofing hardening — pending
 - STATUS-9 — Genesis frontend — pending
 - STATUS-10 — qualification, reconciliation + closeout — pending
@@ -100,7 +100,11 @@ All history reads return defensive copies so callers cannot mutate stored proven
 
 ## STATUS-7 — API + public status feed
 
-Expose read-only component status, aggregate network status, active incidents, maintenance windows and historical incident/recovery feeds with deterministic pagination. Mutating incident/operator endpoints, if present, remain authenticated operator controls and never protocol authority.
+Implemented the read-only public API under `status/api`. `GET /v1/status` exposes the deterministic network rollup and component counts; `GET /v1/components` exposes component presentation status; `GET /v1/incidents` and `GET /v1/maintenance` keep active incidents and planned maintenance explicitly separate; and `GET /v1/history` exposes append-only observation/incident history.
+
+Every public response declares `canonical: false`. Component/network output is derived through the STATUS-5 aggregation engine, so freshness, conflict and incident semantics are preserved rather than recomputed inconsistently at the HTTP layer.
+
+History pagination uses the STATUS-6 monotonic sequence as an opaque cursor. Limits are bounded to 1–200 entries, malformed cursors fail closed with `400`, ordering is deterministic, and the final page does not advertise a continuation cursor. STATUS-7 introduces no public mutation endpoint; incident/operator writes remain outside the public feed surface and therefore cannot acquire protocol authority.
 
 ## STATUS-8 — privacy/security + anti-spoofing hardening
 

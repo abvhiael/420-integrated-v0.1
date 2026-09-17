@@ -36,7 +36,7 @@ Status: COMPLETE AND QUALIFIED
 
 ## BG-15.4 — turn UX, clocks, rematches & challenges
 
-Status: IMPLEMENTED — EXACT-HEAD QUALIFICATION PENDING
+Status: COMPLETE AND QUALIFIED
 
 Requirements:
 
@@ -62,9 +62,36 @@ Requirements:
 31. The zero-address winner remains the canonical draw representation.
 32. BG-15.4 adds no second invitation, timing, turn or outcome authority.
 
+## BG-15.5 — spectator, presence & BG-14 messaging integration
+
+Status: IMPLEMENTED — EXACT-HEAD QUALIFICATION PENDING
+
+Requirements:
+
+- Build read-only spectator projections only for canonical `ACTIVE` or `FINISHED` sessions.
+- Re-read current player profile activity, viewer-to-player block state and spectator visibility policy every time a protected spectator view is resolved.
+- Resolve the exact BG-15.2 ruleset descriptor and require exact `(rulesetHash, gameType)` agreement with the canonical session.
+- Accept only explicitly prepared `publicState` for spectator presentation. Full/private state objects are forbidden at the game-spectator boundary.
+- For hidden-state rulesets, reject spectator payloads containing common private-material fields such as hands, decks, private state, secrets or hidden state.
+- Keep presence/online indicators ephemeral application metadata. Presence expires to `OFFLINE`, is never canonical and has no effect on game lifecycle, turn, outcome or settlement.
+- De-duplicate presence by account using the newest observation and expose freshness/expiry metadata explicitly.
+- Reuse BG-14/420Messenger for all player/spectator chat. Game code consumes only a currently authorized Messenger route/context supplied by the BG-14 messaging layer.
+- Reject any chat route whose transport is not exactly `420MESSENGER`, whose actor/session binding mismatches, or whose current authorization is false.
+- Never embed game chat state or message payloads in `BongGogglesGameSessionRegistry420` or any BG-15 game contract path.
+
+### BG-15.5 invariants
+
+33. Spectator projections are derived, read-only and non-authoritative; canonical game state remains owned by `BongGogglesGameSessionRegistry420`.
+34. Current privacy/block/profile policy is re-evaluated at spectator-read time; cached permission never overrides a new denial.
+35. Spectator presentation receives explicit public state only; full/private game state is rejected at the boundary.
+36. Hidden-state rulesets must not expose hands, decks, unrevealed tiles/draw material, secrets or private state through spectator feeds.
+37. Presence is advisory application metadata and cannot affect canonical move, lifecycle, winner, settlement or rewards.
+38. Expired presence resolves to `OFFLINE`; stale presence cannot remain authoritative through cache.
+39. Game chat uses BG-14/420Messenger exclusively; BG-15 never creates a second conversation, encryption or message authority.
+40. A game chat route must be currently authorized and bound to the requested actor/session before presentation.
+
 ## Remaining BG-15 phases
 
-- **BG-15.5 — spectator, presence & BG-14 messaging integration**
 - **BG-15.6 — 420Randomness + hidden-state games**
 - **BG-15.7 — history, statistics, leaderboards & social discovery**
 - **BG-15.8 — abuse, integrity, replay & recovery hardening**

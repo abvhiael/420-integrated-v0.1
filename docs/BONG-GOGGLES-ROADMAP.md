@@ -58,31 +58,25 @@ Hard boundary: Bong Goggles social games remain **zero-wager**. Any wagered mode
 
 ### BG-15.7 — discovery, history, leaderboards and social surfaces — COMPLETE AND QUALIFIED
 
-- canonical finished sessions produce newest-first history and deterministic win/loss/draw statistics;
-- profile shelves, leaderboards and friend activity remain rebuildable application projections;
-- visibility is applied before social discovery presentation;
-- BG-12 remains search/recommendation authority;
-- BG-18 hooks contain stat snapshots only and never mint/award in BG-15.
+### BG-15.8 — abuse, integrity and recovery hardening — COMPLETE AND QUALIFIED
 
-### BG-15.8 — abuse, integrity and recovery hardening — IMPLEMENTED, QUALIFICATION PENDING
+- current policy/profile/block state invalidates stale application authorization;
+- challenge rate limiting, canonical replay, conflicting-finish containment and abandoned-session classification fail closed without becoming authority;
+- local/canonical divergence forces deterministic rebuild;
+- hidden/private telemetry is recursively redacted;
+- explicit zero-wager tests preserve the 420Bet boundary.
 
-- current profile-active, bilateral-block and social-policy state invalidates stale invitation/move/finish actions;
-- nonparticipants fail closed even with stale local state;
-- pairwise challenge rate limits reduce invitation spam without replacing canonical policy;
-- BG-15.3 canonical move sequencing/commitments remain authoritative for stale, duplicate, skipped and replayed move rejection;
-- deterministic canonical replay is compared against local state digests and divergence forces rebuild;
-- conflicting finishes against canonical terminal winners fail closed;
-- abandoned-session classification is advisory only and cannot mutate lifecycle or assign winners;
-- hidden/private material is recursively redacted from logs and telemetry;
-- explicit zero-wager boundary tests ensure any nonzero wager attempt fails and wagered play remains in 420Bet.
+### BG-15.9 — production games closeout — IMPLEMENTED, RECONCILIATION/QUALIFICATION PENDING
 
-### BG-15.9 — production games closeout
-
-- bounded lobby/session/move/history/leaderboard load qualification;
-- latency and failure telemetry for projection, intent construction and move reconciliation;
-- operator runbook for stuck projections, replay rebuilds, ruleset rollback/disable, randomness failures and game-engine regressions;
-- exact-head game verification plus normal Docs/Integrated qualification;
-- reconcile with current `main`, re-run exact-head qualification, then merge BG-15 only after the reconciled head is green.
+- bounded baseline: 500 lobby sessions, 250 active sessions, 5,000 canonical moves, 10,000 history rows, 1,000 leaderboard players and 25 concurrent resolvers;
+- P95 budgets: projection 500 ms, intent 250 ms, canonical replay 1,500 ms, history 750 ms and leaderboard 1,000 ms;
+- zero qualification errors and zero unresolved canonical/local divergence required;
+- structured operational telemetry uses BG-15.8 redaction before emission;
+- required drills cover projection stall, replay divergence, ruleset rollback, randomness unavailable, hidden-state reveal failure, policy invalidation, challenge spam and wager boundary;
+- operator runbook: `docs/BONG-GOGGLES-BG-15-9-RUNBOOK.md`;
+- reconcile the phase branch with current `main` before final qualification;
+- reconciled exact head must pass Games, Media, Docs and Integrated workflows;
+- PR #321 remains unmerged until explicitly instructed.
 
 ## Remaining product phases after BG-15
 
@@ -94,8 +88,8 @@ Hard boundary: Bong Goggles social games remain **zero-wager**. Any wagered mode
 
 ## Current position
 
-**Phase 12 is merged in PR #307. Phase 13 is merged in PR #308. Phase 14 is merged in PR #314. Current work: BG-15.8 abuse, integrity & recovery hardening on PR #321 / `feature/bong-goggles-bg15-social-games`.**
+**Phase 12 is merged in PR #307. Phase 13 is merged in PR #308. Phase 14 is merged in PR #314. Current work: BG-15.9 production games closeout on PR #321 / `feature/bong-goggles-bg15-social-games`.**
 
 Critical path:
 
-`BG-15.8 integrity/recovery -> BG-15.9 production closeout -> BG-16 notifications -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI -> BG-20 launch hardening -> READY`
+`BG-15.9 production closeout -> BG-16 notifications -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI -> BG-20 launch hardening -> READY`

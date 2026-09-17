@@ -1,0 +1,35 @@
+{
+  "schema": "420-bridge-curecoin-mainnet-v12.5.11",
+  "status": "APPROVED_INACTIVE_PENDING_PRODUCTION_VERIFIER_AND_GATEWAY_SCRIPT",
+  "canonical_chain_key": "420/BRIDGE/CHAIN/CURE",
+  "chain_family": "UTXO_PROOF_OF_STAKE",
+  "route_chain_id": "0x4355524500000001",
+  "network_identity": {
+    "genesis_hash": "0x00000ce427729d5393dbf9f464e7a1d2c039e393e881f93448516b1530b688fc",
+    "message_start": "0xe4e8e9e5",
+    "p2p_port": 9911,
+    "rpc_port": 19911,
+    "p2pkh_version": 25,
+    "p2sh_version": 30,
+    "target_block_seconds": 600
+  },
+  "consensus_profile": {
+    "security_model": "PURE_PROOF_OF_STAKE_V2_PLUS",
+    "research_rewards": "Folding@home reward distribution is external to consensus and outside the bridge verifier trust boundary",
+    "finality_policy": "production verifier must prove canonical PoS-chain inclusion and configured finalized depth"
+  },
+  "native_asset": {"symbol":"CURE","units":"satoshi-style base units"},
+  "adapter": {
+    "contract": "CurecoinBridgeAdapter420",
+    "adapter_id_preimage": "420/BRIDGE/CURECOIN/MAINNET/V12.5.11",
+    "outbound_recipient": "20-byte hash160 plus one-byte script type: 0=P2PKH, 1=P2SH",
+    "native_value_on_420_outbound": "rejected"
+  },
+  "activation_requirements": [
+    "production verifier validates Curecoin mainnet PoS header-chain trust/finality and transaction inclusion",
+    "canonical gateway script is governance allowlisted",
+    "CURE asset id and route id are governance bound",
+    "route risk caps and emergency isolation are configured",
+    "end-to-end native CURE settlement qualification passes"
+  ]
+}

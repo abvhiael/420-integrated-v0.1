@@ -1,0 +1,44 @@
+{
+  "schema": "420-bridge-pirate-mainnet-v12.5.12",
+  "status": "APPROVED_INACTIVE_PENDING_PRODUCTION_SHIELDED_VERIFIER_AND_GATEWAY",
+  "canonical_chain_key": "420/BRIDGE/CHAIN/ARRR",
+  "chain_family": "SHIELDED_EQUIHASH_DPOW",
+  "route_chain_id": "0x4152525200000001",
+  "network_identity": {
+    "network_id_preimage": "PIRATE/MAINNET",
+    "native_asset": "ARRR",
+    "target_block_seconds": 60,
+    "mining_algorithm": "Equihash 200,9",
+    "privacy_model": "shielded-only ordinary peer-to-peer transfers",
+    "shielded_pools": ["Sapling", "Ironwood/Orchard"]
+  },
+  "finality_policy": {
+    "delayed_proof_of_work_notarization_required": true,
+    "minimum_dpow_confirmations": 3,
+    "note": "Pirate service-provider guidance recommends using dPoW-aware confirmations rather than rawconfirmations; more than 2 after notarization is the baseline service-provider policy."
+  },
+  "adapter": {
+    "contract": "PirateChainBridgeAdapter420",
+    "adapter_id_preimage": "420/BRIDGE/PIRATE/MAINNET/V12.5.12",
+    "inbound_model": "viewing-key-backed shielded note evidence plus consensus/notarization verification",
+    "outbound_model": "shielded destination only: Sapling zs1... or Ironwood pirate1...",
+    "transparent_user_withdrawals": "rejected",
+    "native_value_on_420_outbound": "rejected"
+  },
+  "privacy_boundary": {
+    "public_chain_limit": "ordinary ARRR transfers do not publicly expose recipient and amount",
+    "production_requirement": "gateway verifier must derive deposit amount, memo binding, note commitment and recipient from authorized shielded viewing data without publishing private wallet material"
+  },
+  "activation_requirements": [
+    "production IPirateChainFinalityVerifier420 implementation",
+    "Equihash block/header validation",
+    "dPoW notarization validation",
+    "at least 3 dPoW-aware confirmations",
+    "shielded note and nullifier validation",
+    "gateway viewing-key evidence isolation",
+    "memo-to-420-recipient binding",
+    "ARRR asset id and route id governance binding",
+    "risk caps and emergency isolation configured",
+    "end-to-end Sapling and Ironwood inbound/outbound qualification"
+  ]
+}

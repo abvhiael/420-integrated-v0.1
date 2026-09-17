@@ -1,0 +1,39 @@
+{
+  "schema": "420-bridge-dobbscoin-mainnet-v12.5.10",
+  "status": "APPROVED_INACTIVE_PENDING_PRODUCTION_VERIFIER_AND_GATEWAY_SCRIPT",
+  "canonical_chain_key": "420/BRIDGE/CHAIN/BOB",
+  "chain_family": "UTXO_SCRYPT_POW_WITH_SCHEDULED_AUXPOW",
+  "route_chain_id": "0x424f420000000001",
+  "network_identity": {
+    "genesis_hash": "0x6d2d7d525900712451b9697d0b5b2304ebae6efb349540da445bf575c0159969",
+    "message_start": "0xa0fb1783",
+    "p2p_port": 19985,
+    "p2pkh_version": 0,
+    "p2sh_version": 5,
+    "target_block_seconds": 120
+  },
+  "consensus_profile": {
+    "lwma3_activation_height": 1888808,
+    "emergency_difficulty_activation_height": 1888888,
+    "auxpow_activation_height": 2000000,
+    "auxpow_chain_id": 176,
+    "minimum_bridge_confirmations": 288
+  },
+  "native_asset": {"symbol":"BOB","units":"satoshi-style base units"},
+  "adapter": {
+    "contract": "DobbscoinBridgeAdapter420",
+    "adapter_id_preimage": "420/BRIDGE/DOBBSCOIN/MAINNET/V12.5.10",
+    "outbound_recipient": "20-byte hash160 plus one-byte script type: 0=P2PKH, 1=P2SH",
+    "native_value_on_420_outbound": "rejected"
+  },
+  "activation_requirements": [
+    "production verifier validates Dobbscoin mainnet header chain and transaction inclusion",
+    "LWMA-3 and emergency-difficulty consensus rules are enforced at their activation heights",
+    "AuxPoW validation and chain-id separation are enforced at/after height 2000000",
+    "at least 288 confirmations are proven",
+    "canonical gateway script is governance allowlisted",
+    "BOB asset id and route id are governance bound",
+    "route risk caps and emergency isolation are configured",
+    "end-to-end inbound and outbound qualification passes"
+  ]
+}

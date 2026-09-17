@@ -68,7 +68,7 @@ BG-14 builds the Bong Goggles application messaging layer over the already-canon
 - Reject attachment/decryption keys, signed/private/provider URLs, credentials, tokens, cookies, session secrets, payload bytes, plaintext and ciphertext from attachment descriptors/public projections.
 - Preserve immutable storage/media provenance when a conversation closes, a block is introduced, a context closes or an epoch rotates; those lifecycle events remove current presentation eligibility instead of rewriting storage history.
 
-### BG-14.6 — safety, devices, epoch rotation and recovery — IN PROGRESS
+### BG-14.6 — safety, devices, epoch rotation and recovery — COMPLETE AND QUALIFIED
 
 - Re-read current profile activity, bilateral block state, Bong Goggles `canMessage`, spam/request eligibility, Messenger conversation state, Bong Goggles private-context state, device-key record and private epoch before each protected send/read authorization.
 - Treat device-key `{ keyCommitment, revision, active }` from `BongGogglesPrivateMessaging420` as canonical device security metadata; application caches may never override a newer revision or revocation.
@@ -79,13 +79,15 @@ BG-14 builds the Bong Goggles application messaging layer over the already-canon
 - Keep private device keys and decrypted epoch material entirely outside the service plan; only commitments and opaque device/context identifiers are handled.
 - Fail closed immediately after block, message/spam policy denial, profile disablement, Messenger conversation closure, Bong Goggles context closure, device revocation/revision or epoch rotation.
 
-### BG-14.7 — production messaging closeout
+### BG-14.7 — production messaging closeout — IN PROGRESS
 
-- Add delivery/receipt latency, retry, failure and abuse telemetry with strict secret redaction.
-- Run transport loss, duplicate/replay, stale epoch, device loss, blocked-peer and attachment-failure drills.
-- Run bounded inbox/send/receipt/attachment load qualification.
-- Add operator runbook, recovery procedures and exact-head phase qualification.
-- Reconcile with latest `main`, qualify, then merge BG-14 once.
+- Emit only bounded operational telemetry for send/read/receipt/attachment flows and recursively redact message bodies, plaintext, unnecessary ciphertext, keys, epoch material, tokens, cookies, credentials, signed/private/provider URLs and payload bytes.
+- Qualify six deterministic production drills: transport loss, duplicate/replay, stale epoch, device loss, blocked peer and attachment failure.
+- Require duplicate/replay recovery to preserve canonical message identity/sequence and stale-state drills to fail closed rather than presenting cached authorization.
+- Run bounded load qualification across inbox projection, send preparation, receipt transitions and attachment authorization/retrieval; this closeout does not treat unbounded stress as a release gate.
+- Require the operator/recovery procedures in `docs/BONG-GOGGLES-BG-14-7-RUNBOOK.md` before release readiness can be true.
+- Reconcile the complete BG-14 branch with the exact latest `main`, verify the branch is behind by zero, then run all qualification workflows on that reconciled exact head.
+- Do not merge BG-14 until the reconciled exact head is fully green.
 
 ## BG-14 invariants
 
@@ -123,5 +125,11 @@ BG-14 builds the Bong Goggles application messaging layer over the already-canon
 32. Private epoch rotation invalidates any capability tied to the prior epoch or epoch commitment immediately.
 33. Device-loss recovery never transports private key or decrypted epoch material through Bong Goggles services; it coordinates commitments and wallet-authorized intents only.
 34. Recovery must refresh canonical state between device establishment, lost-device revocation and context epoch rotation stages.
+35. Production telemetry must redact message content, cryptographic secret material, authentication/session secrets, private delivery routes and payload bytes before emission.
+36. BG-14.7 release readiness requires all six required failure/recovery drills to pass; a missing or failed drill is not releasable evidence.
+37. Closeout load qualification is bounded by explicit inbox/send/receipt/attachment/concurrency ceilings so the release gate remains deterministic and repeatable.
+38. A transport loss or duplicate/replay may cause a retry but may never create a second canonical message identity or bypass canonical sequence rules.
+39. Attachment delivery failure may not fall back to an unverified URL/provider route or present bytes that fail BG-13 canonical identity/integrity verification.
+40. BG-14 phase completion requires reconciliation with the exact latest `main`, behind count zero and all exact-head qualification workflows green before merge.
 
 BG-14 is developed on `feature/bong-goggles-bg14-private-messaging` after BG-13 merged to `main` in PR #308.

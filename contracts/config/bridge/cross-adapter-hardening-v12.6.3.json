@@ -1,0 +1,24 @@
+{
+  "schema": "420-exchange-cross-adapter-hardening-v12.6.3",
+  "status": "IN_QUALIFICATION",
+  "scope": "VERIFIER_ROTATION_AND_AUTHORIZATION_HARDENING",
+  "model": "Verifier replacement is governance-only, rejects zero/non-contract targets, and transfers proof authority atomically to the newly configured verifier without altering adapter replay, route or asset state.",
+  "invariants": [
+    "only governance may rotate a verifier",
+    "zero-address verifiers fail closed",
+    "non-contract verifier targets fail closed",
+    "successful rotation updates the verifier authority immediately",
+    "old verifier output is no longer authoritative after rotation",
+    "new verifier output is authoritative after rotation",
+    "replay state remains owned by the adapter across verifier rotation",
+    "asset and route bindings survive verifier rotation unchanged"
+  ],
+  "qualification_tests": [
+    "unauthorized verifier rotation rejected on Ethereum and Solana adapters",
+    "zero-address and EOA-like verifier rotation rejected",
+    "governance verifier rotation succeeds",
+    "Ethereum proof authority transfers from old verifier to new verifier",
+    "Solana proof authority transfers from old verifier to new verifier"
+  ],
+  "follow_on": "V12.6.4 pause and emergency controls"
+}

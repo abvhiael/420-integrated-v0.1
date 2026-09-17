@@ -17,7 +17,11 @@ function provenanceOf(item, fallback = null) {
   return fallback ? clone(fallback) : null;
 }
 
-export function buildModerationCaseDetail(snapshot, caseId) {
+function same(value, expected, field) {
+  if (String(value) !== String(expected)) throw new Error(`${field} canonical projection mismatch`);
+}
+
+export function buildModerationCaseDetail(snapshot, caseId, canonical = {}) {
   if (!snapshot || snapshot.authoritative !== false) throw new Error('non-authoritative moderation snapshot required');
   const cases = mapFromEntries(snapshot.cases, 'cases');
   const reports = mapFromEntries(snapshot.reports, 'reports');
@@ -35,6 +39,20 @@ export function buildModerationCaseDetail(snapshot, caseId) {
     throw new Error('report/case subject projection mismatch');
   }
 
+  const canonicalCase = canonical.caseRecord ?? null;
+  const canonicalReport = canonical.report ?? null;
+  if (canonicalCase) {
+    same(canonicalCase.caseId, safetyCase.caseId, 'caseId');
+    same(canonicalCase.reportId, safetyCase.reportId, 'reportId');
+    same(canonicalCase.subjectAccount, safetyCase.subjectAccount, 'subjectAccount');
+    same(canonicalCase.targetId, safetyCase.targetId, 'targetId');
+  }
+  if (canonicalReport) {
+    same(canonicalReport.reportId, report.reportId, 'reportId');
+    same(canonicalReport.subjectAccount, report.subjectAccount, 'report subjectAccount');
+    same(canonicalReport.targetId, report.targetId, 'report targetId');
+  }
+
   const linkedActions = [...actions.values()]
     .filter((action) => String(action.caseId) === String(safetyCase.caseId))
     .sort((a, b) => String(a.actionId).localeCompare(String(b.actionId)));
@@ -47,6 +65,17 @@ export function buildModerationCaseDetail(snapshot, caseId) {
   }
   if (safetyCase.pendingAppealId && !linkedAppeals.some((appeal) => String(appeal.appealId) === String(safetyCase.pendingAppealId) && appeal.state === 'PENDING')) {
     throw new Error('pending appeal projection missing');
+  }
+
+  const canonicalActions = new Map((canonical.actions ?? []).map((item) => [String(item.actionId), item]));
+  const canonicalAppeals = new Map((canonical.appeals ?? []).map((item) => [String(item.appealId), item]));
+  for (const action of linkedActions) {
+    const hydrated = canonicalActions.get(String(action.actionId));
+    if (hydrated) same(hydrated.caseId, safetyCase.caseId, 'action caseId');
+  }
+  for (const appeal of linkedAppeals) {
+    const hydrated = canonicalAppeals.get(String(appeal.appealId));
+    if (hydrated) same(hydrated.caseId, safetyCase.caseId, 'appeal caseId');
   }
 
   const timeline = [
@@ -71,20 +100,21 @@ export function buildModerationCaseDetail(snapshot, caseId) {
   }
 
   const evidence = [];
-  if (report.evidenceHash) {
+  if (canonicalReport?.evidenceHash) {
     evidence.push(Object.freeze({
       source: 'REPORT',
-      reference: String(report.evidenceHash),
+      reference: String(canonicalReport.evidenceHash),
       contentIncluded: false,
       authoritative: false,
     }));
   }
   for (const action of linkedActions) {
-    if (action.rationaleHash) {
+    const hydrated = canonicalActions.get(String(action.actionId));
+    if (hydrated?.rationaleHash) {
       evidence.push(Object.freeze({
         source: 'ACTION_RATIONALE',
         actionId: action.actionId,
-        reference: String(action.rationaleHash),
+        reference: String(hydrated.rationaleHash),
         contentIncluded: false,
         authoritative: false,
       }));

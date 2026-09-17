@@ -1,8 +1,25 @@
 {
   "schema": "420-testnet-appstore-readiness-v1",
+  "implementation_status": "QUALIFIED",
+  "deployment_status": "PENDING_PUBLIC_TESTNET",
+  "invariant_coverage": [
+    "APP-INV-001",
+    "APP-INV-002",
+    "APP-INV-003",
+    "APP-INV-004",
+    "APP-INV-005",
+    "APP-INV-006",
+    "APP-INV-007",
+    "APP-INV-008",
+    "APP-INV-009",
+    "APP-INV-010",
+    "APP-INV-011",
+    "APP-INV-012",
+    "APP-INV-013"
+  ],
   "backend": {
-    "url": "REPLACE",
-    "status": "PENDING",
+    "url": "REPLACE_AT_PUBLIC_TESTNET_DEPLOYMENT",
+    "status": "CODE_QUALIFIED_DEPLOYMENT_PENDING",
     "required_checks": [
       "resolves canonical application/service identity and version through 420Registry",
       "preserves chain ID and network identity",
@@ -15,8 +32,8 @@
     ]
   },
   "frontend": {
-    "url": "REPLACE",
-    "status": "PENDING",
+    "url": "REPLACE_AT_PUBLIC_TESTNET_DEPLOYMENT",
+    "status": "CODE_QUALIFIED_DEPLOYMENT_PENDING",
     "required_views": [
       "browse and categories",
       "search",
@@ -49,5 +66,12 @@
     "no private Identity field indexing",
     "no raw Attention telemetry indexing",
     "installation or launch history is not public by default"
-  ]
+  ],
+  "qualification_evidence": {
+    "appstore_9_exact_head": "19faa854fc7c47144fa3d2df7f17a2d2fb977543",
+    "docs_run": 35157767548,
+    "integrated_run": 35157767517,
+    "latest_main_reconciled_for_appstore_9": "b1433ba00f7ac0ce9303da476d33879739bafcef",
+    "note": "APPSTORE-10 closeout must requalify its own exact final head before phase merge; public URLs remain intentionally unset until deployment."
+  }
 }

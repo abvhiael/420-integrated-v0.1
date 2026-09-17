@@ -1,0 +1,36 @@
+{
+  "schema": "420-exchange-audio-ethereum-v12.5.8",
+  "status": "APPROVED_INACTIVE",
+  "integration_type": "TOKEN_OVER_EXISTING_CANONICAL_CHAIN_ADAPTER",
+  "asset": {
+    "symbol": "AUDIO",
+    "asset_id": "420/BRIDGE/ASSET/AUDIO",
+    "canonical_network": "ETHEREUM",
+    "canonical_chain_key": "420/BRIDGE/CHAIN/ETH",
+    "ethereum_chain_id": 1,
+    "ethereum_token": "0x18aAA7115705e8be94bfFEBDE57Af9BFc265B998",
+    "decimals": 18
+  },
+  "route": {
+    "route_id": "420/BRIDGE/ROUTE/AUDIO/ETHEREUM/MAINNET",
+    "adapter": "EthereumBridgeAdapter420",
+    "adapter_id": "420/BRIDGE/ETHEREUM/MAINNET/V12.5.4",
+    "verifier": "IEthereumFinalityVerifier420"
+  },
+  "qualification": [
+    "canonical AUDIO Ethereum token address pinned",
+    "Ethereum mainnet chain id pinned to 1",
+    "AUDIO source-token mapping required",
+    "AUDIO route binding required",
+    "finalized Ethereum proof required",
+    "approved gateway required",
+    "message replay protection inherited from EthereumBridgeAdapter420",
+    "router-only inbound and outbound inherited from EthereumBridgeAdapter420"
+  ],
+  "activation_blockers": [
+    "420 local AUDIO representation deployed and registered",
+    "production Ethereum finality verifier deployed and reviewed",
+    "production gateway approved by governance",
+    "route and risk limits activated by governance"
+  ]
+}

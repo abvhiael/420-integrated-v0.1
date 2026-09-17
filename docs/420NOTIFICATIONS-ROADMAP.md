@@ -14,7 +14,7 @@
 - **NOTIFY-7 — API + feed/history — COMPLETE**
 - **NOTIFY-8 — privacy + abuse hardening — COMPLETE**
 - **NOTIFY-9 — Genesis frontend — COMPLETE**
-- NOTIFY-10 — qualification, reconciliation + closeout — pending
+- **NOTIFY-10 — qualification, reconciliation + closeout — ACTIVE**
 
 ## NOTIFY-0 — Genesis boundary + executable invariant baseline
 
@@ -109,4 +109,6 @@ Tests cover required Genesis views, security headers, read-only asset serving, n
 
 ## NOTIFY-10 — qualification, reconciliation + closeout
 
-Run the full NOTIFY invariant suite, deterministic replay/dedup tests, restart and failure-injection tests, provider failure isolation and privacy/security checks. Produce testnet readiness evidence, reconcile the long-lived branch with latest `main`, requalify the exact final head and merge once at phase end.
+Implemented an executable Genesis closeout report that requires the complete 14-invariant set and evidence for invariant qualification, deterministic replay, deduplication, restart recovery, failure injection, provider isolation, privacy/security and the Genesis frontend. The closeout model rejects any canonical-authority claim and re-validates the contract-free/private boundary.
+
+Delivery terminal-state handling was hardened for final qualification: delivered records clear retry scheduling, dead-letter records reject duplicate failure mutation, and terminal transitions require explicit timestamps. The final remaining work is to reconcile the long-lived branch with latest `main`, run exact-head qualification on that reconciled commit, record the qualification evidence and merge PR #312 once all required workflows are green.

@@ -1,7 +1,11 @@
 {
   "schema": "420-exchange-market-data-v13.1",
-  "status": "IN_PROGRESS",
+  "status": "IN_QUALIFICATION",
   "scope": "CANONICAL_MARKET_DATA_EVENT_SCHEMA",
+  "schema_version": {
+    "major": 13,
+    "minor": 1
+  },
   "record_envelope": {
     "required_provenance": [
       "chainId",
@@ -10,9 +14,35 @@
       "transactionHash",
       "logIndex"
     ],
-    "recordIdentity": "keccak256(chainId, blockHash, transactionHash, logIndex)",
-    "canonicality": ["observed", "canonical", "orphaned", "finalized"],
-    "derivedRecordRule": "derived aggregates must reference the canonical source record set and aggregation version"
+    "recordIdentity": "keccak256(abi.encode(chainId, blockHash, transactionHash, logIndex))",
+    "canonicality": ["OBSERVED", "CANONICAL", "ORPHANED", "FINALIZED"],
+    "required_fields": [
+      "recordId",
+      "domain",
+      "subjectId",
+      "provenance",
+      "canonicality",
+      "observedAt",
+      "payloadHash"
+    ]
+  },
+  "subject_identity": {
+    "kinds": ["MARKET", "ASSET", "ROUTE", "ADAPTER", "ORDER"],
+    "rule": "keccak256(abi.encode(schemaMajor, schemaMinor, subjectKind, canonicalId))"
+  },
+  "derived_records": {
+    "identity": "keccak256(abi.encode(schemaMajor, schemaMinor, domain, subjectId, sourceSetHash, aggregationVersion, windowStart, windowEnd))",
+    "required_fields": [
+      "derivedId",
+      "domain",
+      "subjectId",
+      "sourceSetHash",
+      "aggregationVersion",
+      "windowStart",
+      "windowEnd",
+      "payloadHash"
+    ],
+    "rule": "derived aggregates must reference a nonzero canonical source-set hash and nonzero aggregation version"
   },
   "domains": [
     "MARKET",
@@ -26,9 +56,28 @@
     "indexing never grants execution or custody authority",
     "every canonical record is chain-provenanced",
     "record identity is stable and idempotent for one canonical log",
+    "block hash participates in record identity so reorg replacements cannot collide with orphaned records",
+    "transaction hash and log index participate in record identity",
+    "canonical subject identifiers are schema-versioned and kind-domain-separated",
     "orphaned records remain distinguishable from canonical replacements",
     "derived fields cannot overwrite canonical event fields",
+    "derived identity binds source-set hash, aggregation version and time window",
+    "invalid zero provenance or aggregation identifiers fail closed",
     "all public schemas are versioned before V14 UI consumption"
   ],
+  "qualification_tests": [
+    "same canonical log produces the same nonzero record ID",
+    "reorg replacement block hash produces a distinct record ID",
+    "transaction hash or log-index changes produce distinct record IDs",
+    "market, asset, route, adapter and order subject kinds are domain-separated",
+    "derived records change identity when aggregation version changes",
+    "derived records change identity when source set or window changes",
+    "zero chain, block hash or transaction hash provenance is rejected",
+    "zero aggregation version and empty aggregation windows are rejected"
+  ],
+  "implementation": {
+    "schema_library": "contracts/src/exchange/ExchangeMarketDataTypes420.sol",
+    "qualification_test": "contracts/test/ExchangeMarketDataTypes420.t.sol"
+  },
   "follow_on": "V13.2 deterministic indexer core"
 }

@@ -79,7 +79,7 @@ BG-16 integrates the production Bong Goggles application with the existing 420No
 - no synthetic event-invitation primitive is introduced because the current canonical registry does not emit one;
 - deterministic replay deduplication remains unchanged.
 
-### BG-16.4 — games + messaging emitters — IMPLEMENTED, QUALIFICATION PENDING
+### BG-16.4 — games + messaging emitters — COMPLETE AND QUALIFIED
 
 - canonical `GameInvited`, `GameAccepted`, `GameMoveCommitted` and `GameFinished` emitters;
 - game recipients derived from canonical session players, including turn-ready notices to the opposing player;
@@ -92,14 +92,19 @@ BG-16 integrates the production Bong Goggles application with the existing 420No
 - plaintext, ciphertext, payload/body/content, envelope/storage commitments, device-key commitments and epoch commitments are forbidden from message notification metadata;
 - deterministic replay deduplication and non-authoritative provenance remain unchanged.
 
-### BG-16.5 — moderation, appeals + rewards emitters — NEXT
+### BG-16.5 — moderation, appeals + rewards emitters — IMPLEMENTED, QUALIFICATION PENDING
 
-- moderation action/status notifications;
-- appeal lifecycle updates;
-- reward-earned/payout-status presentation sourced from qualified reward state;
-- no notification can redefine moderation/reward canonical truth.
+- canonical `SafetyActionApplied`, `SafetyActionRevoked` and `CaseClosed` events notify the canonical safety subject;
+- canonical `AppealResolved` events notify the canonical appellant;
+- case/action/appeal IDs are hydrated and revalidated before notification creation;
+- notifications cannot mutate or redefine moderation/appeal state;
+- canonical `RewardContributionSubmitted` events notify the verified contribution beneficiary;
+- contribution submission is explicitly presented as `REWARD_CONTRIBUTION_SUBMITTED`, never as reward earned or paid;
+- `REWARD_EARNED` and `REWARD_PAYOUT_UPDATED` remain reserved catalog kinds only until canonical reward lifecycle events exist;
+- synthetic `RewardEarned` / `RewardPayoutUpdated` source events intentionally emit nothing;
+- deterministic replay deduplication and non-authoritative provenance remain unchanged.
 
-### BG-16.6 — preference + delivery integration
+### BG-16.6 — preference + delivery integration — NEXT
 
 - connect Bong Goggles topic/kind vocabulary to 420Notifications subscriptions;
 - granular per-topic/per-class controls;
@@ -141,8 +146,8 @@ BG-16 integrates the production Bong Goggles application with the existing 420No
 
 ## Current position
 
-**Phase 15 is merged in PR #321. BG-16.1 through BG-16.3 are qualified. Current work: BG-16.4 games + messaging emitters on PR #330 / `feature/bong-goggles-bg16-notifications`.**
+**Phase 15 is merged in PR #321. BG-16.1 through BG-16.4 are qualified. Current work: BG-16.5 moderation, appeals + rewards emitters on PR #330 / `feature/bong-goggles-bg16-notifications`.**
 
 Critical path:
 
-`BG-16.4 games/messages -> BG-16.5 moderation/rewards -> BG-16.6 preferences/delivery -> BG-16.7 notification centre -> BG-16.8 hardening -> BG-16.9 closeout -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI -> BG-20 launch hardening -> READY`
+`BG-16.5 moderation/rewards -> BG-16.6 preferences/delivery -> BG-16.7 notification centre -> BG-16.8 hardening -> BG-16.9 closeout -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI -> BG-20 launch hardening -> READY`

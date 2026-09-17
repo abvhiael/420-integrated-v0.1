@@ -11,7 +11,7 @@
 - **NOTIFY-4 — delivery queue + retry/dedup — COMPLETE**
 - **NOTIFY-5 — provider-neutral delivery adapters — COMPLETE**
 - **NOTIFY-6 — provenance + security — COMPLETE**
-- NOTIFY-7 — API + feed/history — pending
+- **NOTIFY-7 — API + feed/history — COMPLETE**
 - NOTIFY-8 — privacy + abuse hardening — pending
 - NOTIFY-9 — Genesis frontend — pending
 - NOTIFY-10 — qualification, reconciliation + closeout — pending
@@ -85,7 +85,11 @@ Action handoffs remain non-authoritative: notifications may deep-link to `wallet
 
 ## NOTIFY-7 — API + feed/history
 
-Expose subscription CRUD, notification feed/history, read/unread state, delivery status, source/provenance details and replay-safe pagination. API state is presentation/delivery state only.
+Implemented a noncanonical notification feed/history store and API-facing service. Feed items preserve validated chain/source provenance, event/subscription identity, delivery status and read/unread state, and explicitly reject authoritative records. Deterministic reverse-chronological ordering with timestamp-plus-ID cursors provides replay-safe pagination, including stable ordering for events sharing the same timestamp.
+
+The API service exposes subscription create/get/list/update/delete through the qualified private subscription store, plus notification lookup, paged feed/history, read/unread updates and delivery-status updates. Presentation/history state remains local service state and cannot redefine protocol truth.
+
+Tests cover subscription CRUD, feed retrieval, read/unread transitions, delivery-status transitions, provenance preservation, hostile provenance rejection, non-authority enforcement and replay-safe pagination.
 
 ## NOTIFY-8 — privacy + abuse hardening
 

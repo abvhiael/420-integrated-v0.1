@@ -68,7 +68,7 @@ Hard boundary: Bong Goggles social games remain **zero-wager**. Any wagered game
 
 ### BG-15.3 — move engine + canonical commitment bridge — COMPLETE AND QUALIFIED
 
-### BG-15.4 — turn UX, clocks, rematches & challenges — IMPLEMENTED, QUALIFICATION PENDING
+### BG-15.4 — turn UX, clocks, rematches & challenges — COMPLETE AND QUALIFIED
 
 - application game-card projection for invited, active and terminal sessions;
 - engine-derived turn ownership validated against canonical session participants;
@@ -79,13 +79,18 @@ Hard boundary: Bong Goggles social games remain **zero-wager**. Any wagered game
 - accept/decline/cancel/finish/rematch presentation actions remain subordinate to wallet/session authorization and canonical lifecycle;
 - draw presentation preserves the canonical zero-address winner convention.
 
-### BG-15.5 — spectator, presence & BG-14 messaging integration
+### BG-15.5 — spectator, presence & BG-14 messaging integration — IMPLEMENTED, QUALIFICATION PENDING
 
-- read-only spectator presentation for sessions whose visibility policy allows it;
-- online/presence indicators remain application metadata, never canonical game authority;
-- reuse BG-14/420Messenger for player or spectator chat rather than embedding chat in game contracts;
-- apply current block/privacy policy before spectator or chat presentation;
-- never expose hidden-state game material through spectator feeds.
+- read-only spectator projection for canonical active/finished sessions only;
+- exact BG-15.2 ruleset descriptor binding required before spectator presentation;
+- current player-profile, viewer/player block and spectator-visibility policy re-read on each protected view;
+- spectator surface accepts explicit `publicState` only and rejects full/private state input;
+- hidden-state rulesets reject common private-material fields from spectator payloads;
+- presence/online indicators are ephemeral application metadata, de-duplicated by newest observation and expired to `OFFLINE`;
+- presence is never canonical and cannot affect lifecycle, turn, outcome, settlement or rewards;
+- player/spectator chat consumes only currently authorized BG-14/420Messenger routes;
+- non-420Messenger, unauthorized or actor/session-mismatched chat routes fail closed;
+- no game contract stores chat messages, encryption state or conversation authority.
 
 ### BG-15.6 — randomness + hidden-state games
 
@@ -131,8 +136,8 @@ Hard boundary: Bong Goggles social games remain **zero-wager**. Any wagered game
 
 ## Current position
 
-**Phase 12 is merged in PR #307. Phase 13 is merged in PR #308. Phase 14 is merged in PR #314. Current work: BG-15.4 turn UX, clocks, rematches & challenges on PR #321 / `feature/bong-goggles-bg15-social-games`.**
+**Phase 12 is merged in PR #307. Phase 13 is merged in PR #308. Phase 14 is merged in PR #314. Current work: BG-15.5 spectator, presence & BG-14 messaging integration on PR #321 / `feature/bong-goggles-bg15-social-games`.**
 
 Critical path:
 
-`BG-15.4 turn UX -> BG-15.5 spectator/presence/chat -> BG-15.6 randomness/hidden state -> BG-15.7 history/leaderboards/social surfaces -> BG-15.8 integrity/recovery -> BG-15.9 production closeout -> BG-16 notifications -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI -> BG-20 launch hardening -> READY`
+`BG-15.5 spectator/presence/chat -> BG-15.6 randomness/hidden state -> BG-15.7 history/leaderboards/social surfaces -> BG-15.8 integrity/recovery -> BG-15.9 production closeout -> BG-16 notifications -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI -> BG-20 launch hardening -> READY`

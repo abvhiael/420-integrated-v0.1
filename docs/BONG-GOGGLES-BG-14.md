@@ -9,6 +9,7 @@ BG-14 builds the Bong Goggles application messaging layer over the already-canon
 - `MessengerReceiptRegistry420` owns delivery/read acknowledgement state.
 - `MessengerBlockRegistry420` and Bong Goggles relationship/social-policy contracts own block and messaging eligibility.
 - `BongGogglesPrivateMessaging420` binds active Messenger conversations to Bong Goggles private contexts, device-key commitments and private epochs.
+- `BongGogglesCommunityRegistry420` owns canonical Bong Goggles group existence, privacy and membership state.
 - 420Resource/420Storage may carry encrypted payload/attachment bytes, but providers never become message-content authority.
 - BG-13 media/storage delivery is reused for private attachments with messaging authorization layered above it.
 
@@ -34,7 +35,7 @@ BG-14 builds the Bong Goggles application messaging layer over the already-canon
 - Expose wallet-authorized `commit` and recipient `acknowledge` intents without signing/executing them.
 - Preserve deterministic retry/replay behavior through canonical sequence + envelope identity rather than transport arrival order.
 
-### BG-14.3 — inbox, unread/read and request state — IN PROGRESS
+### BG-14.3 — inbox, unread/read and request state — COMPLETE AND QUALIFIED
 
 - Materialize inbox/request/conversation summaries strictly from current canonical conversations, envelopes and receipts.
 - Distinguish incoming requests, outgoing requests and active/closed conversations without inventing separate application authority.
@@ -45,12 +46,16 @@ BG-14 builds the Bong Goggles application messaging layer over the already-canon
 - Rebuild materialized inbox state from current canonical inputs after reorg/replay so removed/replaced envelopes cannot leave stale unread counts or last-message pointers.
 - Fail closed on conversation/envelope participant mismatch and impossible receipt ordering (`readAt` without `deliveredAt`).
 
-### BG-14.4 — permitted group threads
+### BG-14.4 — permitted group threads — IN PROGRESS
 
-- Define Bong Goggles group-thread application contexts only where the owning group/community membership policy permits them.
-- Reuse 420Messenger/private-context primitives without converting public Commons channels into private Messenger authority.
-- Revalidate membership and epoch eligibility at send/read time.
-- Rotate group epochs on membership/security changes where required.
+- Treat `BongGogglesCommunityRegistry420` as canonical group/membership authority; only ACTIVE members may read or send through a private group thread.
+- Keep the group-thread descriptor application-level and explicitly non-authoritative; it binds `groupId`, thread ID, group epoch commitment, membership digest and exact active-member set.
+- Compute the membership digest deterministically from canonical active membership + roles so joins, removals and role/security changes make an old descriptor stale.
+- Require group-epoch rotation whenever the canonical membership digest changes before further group-thread read/send presentation is allowed.
+- Deliver group messages as per-recipient fan-out over already-canonical direct `MessengerConversationRegistry420` + `BongGogglesPrivateMessaging420` contexts; no parallel group conversation authority is invented.
+- Revalidate each recipient's direct conversation, private context, block state, message policy and direct epoch before fan-out.
+- Fail the fan-out plan closed when any required recipient route is unavailable instead of silently omitting a current group member.
+- Keep public/Commons group-channel semantics separate: a PUBLIC Bong Goggles group does not make a Commons channel a private Messenger thread.
 
 ### BG-14.5 — private attachments
 
@@ -96,5 +101,10 @@ BG-14 builds the Bong Goggles application messaging layer over the already-canon
 18. Reorg/replay rebuild must be able to remove stale unread counts and last-message pointers when canonical envelopes disappear or change.
 19. A read receipt without a delivery receipt is invalid for presentation and must fail closed.
 20. Inbox ordering and pagination are deterministic from canonical request state, canonical message time and conversation identity.
+21. Group-thread membership eligibility derives only from current canonical `BongGogglesCommunityRegistry420` ACTIVE membership.
+22. A changed canonical group membership/role set invalidates the previous group membership digest and requires a new group epoch before presentation or send.
+23. Every group-thread recipient is delivered through a canonical direct Messenger/private context; group fan-out never creates parallel conversation authority.
+24. Group fan-out fails closed if any current recipient lacks an eligible direct route; it may not silently shrink the canonical member set.
+25. PUBLIC group/community visibility does not convert a Commons/public channel into private Messenger authority.
 
 BG-14 is developed on `feature/bong-goggles-bg14-private-messaging` after BG-13 merged to `main` in PR #308.

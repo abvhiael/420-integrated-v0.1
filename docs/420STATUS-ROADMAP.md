@@ -12,7 +12,7 @@
 - **STATUS-5 — aggregation, freshness + degraded-state engine — COMPLETE**
 - **STATUS-6 — history, provenance + canonical references — COMPLETE**
 - **STATUS-7 — API + public status feed — COMPLETE**
-- STATUS-8 — privacy/security + anti-spoofing hardening — pending
+- **STATUS-8 — privacy/security + anti-spoofing hardening — COMPLETE**
 - STATUS-9 — Genesis frontend — pending
 - STATUS-10 — qualification, reconciliation + closeout — pending
 
@@ -108,7 +108,11 @@ History pagination uses the STATUS-6 monotonic sequence as an opaque cursor. Lim
 
 ## STATUS-8 — privacy/security + anti-spoofing hardening
 
-Enforce public-payload minimization, source binding, hostile metadata validation, bounded payloads, SSRF-safe probe targets, rate/abuse controls and explicit protection against forged component identity or misleading green-state claims.
+Implemented public-surface hardening under `status/security`, `status/api` and `status/runtime`. Public component and network feeds now include only components explicitly registered with `Public: true`; private component observations and affected-component IDs are filtered from active incidents, maintenance and historical feeds. Public observation history uses a dedicated projection that preserves source/network/environment/freshness and canonical/protocol references while never serializing the raw free-form observation summary.
+
+Hostile metadata is bounded and validated: source/reference identifiers reject unsafe control/space characters, reference counts and values are capped, incident public text is bounded and redacted on validation failure, history page size remains capped, and HTTP responses set `nosniff` and `no-store` headers. Existing STATUS-3 source/component/network binding and STATUS-5 fail-closed conflict handling continue to prevent a forged source or a lone optimistic probe from manufacturing a green result.
+
+Runtime probe targets are SSRF-hardened. Configuration rejects loopback, RFC1918/private, link-local, metadata-service, credentialed and non-HTTP(S) targets. DNS answers are revalidated at dial time so hostnames resolving to private/special-purpose addresses fail closed; redirects are revalidated; redirect depth is bounded; and probe response bodies are capped at 1 MiB before JSON decoding. These boundaries, together with bounded pagination/response sizes and failure isolation, provide the Genesis abuse-control surface without granting 420Status any protocol authority.
 
 ## STATUS-9 — Genesis frontend
 

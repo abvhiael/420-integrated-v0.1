@@ -5,8 +5,8 @@
   "roadmap_status": {
     "V12.5.6": {
       "asset": "XRP",
-      "status": "IMPLEMENTED_DEFERRED_FROM_GENESIS_QUALIFICATION",
-      "note": "Adapter implementation is preserved but Genesis qualification is deferred pending resolution of the repository-wide Solidity/Yul compiler interaction."
+      "status": "SUPERSEDED_BY_V12.5.15_REQUALIFICATION",
+      "note": "The preserved XRP design from V12.5.6 is being requalified on current main under V12.5.15 using modular adapter CI without the obsolete diagnostic workflow changes."
     },
     "V12.5.7": {"asset":"TRX","status":"COMPLETED_QUALIFIED_MERGED"},
     "V12.5.8": {"asset":"AUDIO","status":"COMPLETED_QUALIFIED_MERGED","integration_type":"TOKEN_OVER_EXISTING_ETHEREUM_ADAPTER","note":"AUDIO is qualified as the canonical Ethereum ERC-20 asset using EthereumBridgeAdapter420."},
@@ -15,7 +15,8 @@
     "V12.5.11": {"asset":"CURE","status":"COMPLETED_QUALIFIED_MERGED","integration_type":"NATIVE_CURECOIN_CHAIN_ADAPTER","note":"CURE bridges directly to Curecoin mainnet. PoS chain finality and transaction inclusion are verified independently of Folding at Home research-reward accounting."},
     "V12.5.12": {"asset":"ARRR","status":"COMPLETED_QUALIFIED_MERGED","integration_type":"NATIVE_PIRATE_CHAIN_SHIELDED_ADAPTER","note":"ARRR uses a shielded-note verifier boundary with dPoW notarization and authorized viewing-key evidence; transparent user transfer assumptions are explicitly rejected."},
     "V12.5.13": {"asset":"LTC","status":"COMPLETED_QUALIFIED_MERGED","integration_type":"NATIVE_LITECOIN_CHAIN_ADAPTER","note":"LTC bridges directly to Litecoin mainnet with scrypt PoW/chainwork verification and standard legacy/SegWit/Taproot output support. MWEB is excluded from the Genesis route pending dedicated qualification."},
-    "V12.5.14": {"asset":"BTC","status":"IN_PROGRESS","integration_type":"NATIVE_BITCOIN_CHAIN_ADAPTER","note":"BTC bridges directly to Bitcoin mainnet with SHA-256d PoW/cumulative-chainwork verification, six-confirmation bridge policy, replay protection and standard legacy/SegWit/Taproot output support."}
+    "V12.5.14": {"asset":"BTC","status":"COMPLETED_QUALIFIED_MERGED","integration_type":"NATIVE_BITCOIN_CHAIN_ADAPTER","note":"BTC bridges directly to Bitcoin mainnet with SHA-256d PoW/cumulative-chainwork verification, six-confirmation bridge policy, replay protection and standard legacy/SegWit/Taproot output support."},
+    "V12.5.15": {"asset":"XRP","status":"IN_PROGRESS","integration_type":"NATIVE_XRPL_VALIDATED_LEDGER_ADAPTER","note":"XRP requalification restores the V12.5.6 adapter design on current main with validated-ledger and tesSUCCESS requirements, AccountID allowlisting, destination-tag encoding and replay protection, using modular adapter CI."}
   },
   "assets": [
     {"symbol":"BTC","canonical_network":"BITCOIN","canonical_chain_key":"420/BRIDGE/CHAIN/BTC","adapter_slice":"V12.5.14"},
@@ -23,7 +24,7 @@
     {"symbol":"SOL","canonical_network":"SOLANA","canonical_chain_key":"420/BRIDGE/CHAIN/SOL","adapter_slice":"V12.5.2"},
     {"symbol":"BNB","canonical_network":"BNB_SMART_CHAIN","canonical_chain_key":"420/BRIDGE/CHAIN/BNB","adapter_slice":"V12.5.3"},
     {"symbol":"DOGE","canonical_network":"DOGECOIN","canonical_chain_key":"420/BRIDGE/CHAIN/DOGE","adapter_slice":"V12.5.5"},
-    {"symbol":"XRP","canonical_network":"XRP_LEDGER","canonical_chain_key":"420/BRIDGE/CHAIN/XRP","adapter_slice":"V12.5.6"},
+    {"symbol":"XRP","canonical_network":"XRP_LEDGER","canonical_chain_key":"420/BRIDGE/CHAIN/XRP","adapter_slice":"V12.5.15"},
     {"symbol":"TRX","canonical_network":"TRON","canonical_chain_key":"420/BRIDGE/CHAIN/TRX","adapter_slice":"V12.5.7"},
     {"symbol":"POT","canonical_network":"POTCOIN","canonical_chain_key":"420/BRIDGE/CHAIN/POT","adapter_slice":"V12.5.9"},
     {"symbol":"USDC","canonical_network":"ETHEREUM","canonical_chain_key":"420/BRIDGE/CHAIN/ETH","adapter_slice":"existing-CCTP-plus-launch-qualification"},

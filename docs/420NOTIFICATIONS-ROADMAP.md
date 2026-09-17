@@ -9,7 +9,7 @@
 - **NOTIFY-2 — subscription engine — COMPLETE**
 - **NOTIFY-3 — indexer ingestion + replay — COMPLETE**
 - **NOTIFY-4 — delivery queue + retry/dedup — COMPLETE**
-- NOTIFY-5 — provider-neutral delivery adapters — pending
+- **NOTIFY-5 — provider-neutral delivery adapters — COMPLETE**
 - NOTIFY-6 — provenance + security — pending
 - NOTIFY-7 — API + feed/history — pending
 - NOTIFY-8 — privacy + abuse hardening — pending
@@ -73,7 +73,9 @@ Tests cover deduplication, ordering, retry timing, dead-letter transition, desti
 
 ## NOTIFY-5 — provider-neutral delivery adapters
 
-Define provider interfaces and Genesis adapters for in-app/web/mobile-push delivery. Keep future email/SMS/Messenger transports pluggable. No provider becomes canonical or receives protocol authority.
+Implemented a provider-neutral delivery interface and registry plus Genesis adapters for in-app, web and mobile push. Provider IDs are normalized, duplicate IDs are rejected, requests are validated before send, payload buffers are defensively copied and provider results are explicitly non-authoritative. Alternative providers can be registered beside the Genesis adapters, keeping future email/SMS/Messenger transports pluggable without changing protocol authority.
+
+Tests cover all three Genesis provider kinds, non-authoritative results, alternative-provider registration, duplicate rejection, provider failure propagation, request validation and payload isolation.
 
 ## NOTIFY-6 — provenance + security
 

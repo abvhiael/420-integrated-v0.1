@@ -8,22 +8,14 @@
       "status": "IMPLEMENTED_DEFERRED_FROM_GENESIS_QUALIFICATION",
       "note": "Adapter implementation is preserved but Genesis qualification is deferred pending resolution of the repository-wide Solidity/Yul compiler interaction."
     },
-    "V12.5.7": {
-      "asset": "TRX",
-      "status": "COMPLETED_QUALIFIED_MERGED"
-    },
-    "V12.5.8": {
-      "asset": "AUDIO",
-      "status": "COMPLETED_QUALIFIED_MERGED",
-      "integration_type": "TOKEN_OVER_EXISTING_ETHEREUM_ADAPTER",
-      "note": "AUDIO is qualified as the canonical Ethereum ERC-20 asset using EthereumBridgeAdapter420."
-    },
-    "V12.5.9": {
-      "asset": "POT",
-      "status": "IN_PROGRESS",
-      "integration_type": "NATIVE_POTCOIN_CHAIN_ADAPTER",
-      "note": "POT bridges directly to native PotCoin mainnet; the Solana SPL representation is not the canonical V12.5.9 route."
-    }
+    "V12.5.7": {"asset":"TRX","status":"COMPLETED_QUALIFIED_MERGED"},
+    "V12.5.8": {"asset":"AUDIO","status":"COMPLETED_QUALIFIED_MERGED","integration_type":"TOKEN_OVER_EXISTING_ETHEREUM_ADAPTER","note":"AUDIO is qualified as the canonical Ethereum ERC-20 asset using EthereumBridgeAdapter420."},
+    "V12.5.9": {"asset":"POT","status":"COMPLETED_QUALIFIED_MERGED","integration_type":"NATIVE_POTCOIN_CHAIN_ADAPTER","note":"POT bridges directly to native PotCoin mainnet; the Solana SPL representation is not the canonical V12.5.9 route."},
+    "V12.5.10": {"asset":"BOB","status":"COMPLETED_QUALIFIED_MERGED","integration_type":"NATIVE_DOBBSCOIN_CHAIN_ADAPTER","note":"BOB bridges directly to Dobbscoin mainnet with 2026 LWMA/emergency-difficulty rules and scheduled AuxPoW activation modeled in the verifier boundary."},
+    "V12.5.11": {"asset":"CURE","status":"COMPLETED_QUALIFIED_MERGED","integration_type":"NATIVE_CURECOIN_CHAIN_ADAPTER","note":"CURE bridges directly to Curecoin mainnet. PoS chain finality and transaction inclusion are verified independently of Folding at Home research-reward accounting."},
+    "V12.5.12": {"asset":"ARRR","status":"COMPLETED_QUALIFIED_MERGED","integration_type":"NATIVE_PIRATE_CHAIN_SHIELDED_ADAPTER","note":"ARRR uses a shielded-note verifier boundary with dPoW notarization and authorized viewing-key evidence; transparent user transfer assumptions are explicitly rejected."},
+    "V12.5.13": {"asset":"LTC","status":"COMPLETED_QUALIFIED_MERGED","integration_type":"NATIVE_LITECOIN_CHAIN_ADAPTER","note":"LTC bridges directly to Litecoin mainnet with scrypt PoW/chainwork verification and standard legacy/SegWit/Taproot output support. MWEB is excluded from the Genesis route pending dedicated qualification."},
+    "V12.5.14": {"asset":"BTC","status":"IN_PROGRESS","integration_type":"NATIVE_BITCOIN_CHAIN_ADAPTER","note":"BTC bridges directly to Bitcoin mainnet with SHA-256d PoW/cumulative-chainwork verification, six-confirmation bridge policy, replay protection and standard legacy/SegWit/Taproot output support."}
   },
   "assets": [
     {"symbol":"BTC","canonical_network":"BITCOIN","canonical_chain_key":"420/BRIDGE/CHAIN/BTC","adapter_slice":"V12.5.14"},
@@ -42,13 +34,6 @@
     {"symbol":"ARRR","canonical_network":"PIRATE_CHAIN","canonical_chain_key":"420/BRIDGE/CHAIN/ARRR","adapter_slice":"V12.5.12"},
     {"symbol":"LTC","canonical_network":"LITECOIN","canonical_chain_key":"420/BRIDGE/CHAIN/LTC","adapter_slice":"V12.5.13"}
   ],
-  "identity_fields_required_before_activation": [
-    "routeChainId",
-    "networkId",
-    "nativeAssetId",
-    "verifierFamily",
-    "chainFamily",
-    "active"
-  ],
+  "identity_fields_required_before_activation": ["routeChainId","networkId","nativeAssetId","verifierFamily","chainFamily","active"],
   "note": "Non-EVM routeChainId values are internal canonical bridge identifiers. Exact network fingerprints and verifier parameters are pinned during each adapter implementation slice rather than guessed in this catalogue."
 }

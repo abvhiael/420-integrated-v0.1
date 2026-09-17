@@ -36,31 +36,19 @@ Production web target: `https://bonggoggles.420integrated.org`.
 
 ## Phase 13 — media/storage delivery — COMPLETE, merged PR #308
 
-- **BG-13.1 — media descriptor + canonical resolver — COMPLETE AND QUALIFIED**
-- **BG-13.2 — upload preparation + ingest bridge — COMPLETE AND QUALIFIED**
-- **BG-13.3 — canonical placement/seal orchestration — COMPLETE AND QUALIFIED**
-- **BG-13.4 — verified retrieval + Gateway delivery — COMPLETE AND QUALIFIED**
-- **BG-13.5 — thumbnails/posters/transcodes — COMPLETE AND QUALIFIED**
-- **BG-13.6 — lifecycle/edit/delete/privacy semantics — COMPLETE AND QUALIFIED**
-- **BG-13.7 — production delivery closeout — COMPLETE AND QUALIFIED**
+- **BG-13.1 through BG-13.7 — COMPLETE AND QUALIFIED**
 
 ## Phase 14 — full private messaging — COMPLETE, merged PR #314
 
-- **BG-14.1 — conversation/request projection + canonical context resolver — COMPLETE AND QUALIFIED**
-- **BG-14.2 — encrypted send/receive bridge — COMPLETE AND QUALIFIED**
-- **BG-14.3 — inbox, unread/read and request state — COMPLETE AND QUALIFIED**
-- **BG-14.4 — permitted group threads — COMPLETE AND QUALIFIED**
-- **BG-14.5 — private attachments — COMPLETE AND QUALIFIED**
-- **BG-14.6 — safety, devices, epoch rotation and recovery — COMPLETE AND QUALIFIED**
-- **BG-14.7 — production messaging closeout — COMPLETE AND QUALIFIED**
+- **BG-14.1 through BG-14.7 — COMPLETE AND QUALIFIED**
 
 ## Phase 15 — social games application — IN PROGRESS, PR #321
 
 Branch: `feature/bong-goggles-bg15-social-games`
 
-BG-15 turns the existing canonical `BongGogglesGameSessionRegistry420` foundation from PR #82 into a production Bong Goggles games experience. The registry remains authoritative for session identity/lifecycle, immutable `rulesetHash`, move sequencing/commitments, winner state and player authorization. Game-specific rendering, rule execution, timers, notation, local UX state, spectator presentation and matchmaking remain application-layer concerns unless a later protocol requirement explicitly promotes them on-chain.
+BG-15 turns the canonical `BongGogglesGameSessionRegistry420` foundation from PR #82 into a production Bong Goggles games experience. The registry remains authoritative for session identity/lifecycle, immutable `rulesetHash`, move sequencing/commitments, winner state and player authorization. Game-specific rendering, rule execution, timers, notation, local UX state, spectator presentation, discovery and rankings remain application-layer concerns.
 
-Hard boundary: Bong Goggles social games remain **zero-wager**. Any wagered game mode belongs in 420Bet.
+Hard boundary: Bong Goggles social games remain **zero-wager**. Any wagered mode belongs in 420Bet.
 
 ### BG-15.1 — canonical game-session projector + resolver — COMPLETE AND QUALIFIED
 
@@ -72,31 +60,23 @@ Hard boundary: Bong Goggles social games remain **zero-wager**. Any wagered game
 
 ### BG-15.5 — spectator, presence & BG-14 messaging integration — COMPLETE AND QUALIFIED
 
-- spectator views are read-only derived projections with current privacy/block/profile-policy checks;
-- hidden-state rulesets expose explicit public state only;
-- presence remains ephemeral non-canonical metadata;
-- chat uses BG-14/420Messenger exclusively.
+### BG-15.6 — randomness + hidden-state games — COMPLETE AND QUALIFIED
 
-### BG-15.6 — randomness + hidden-state games — IMPLEMENTED, QUALIFICATION PENDING
+- canonical `randomnessRef` is the sole randomness anchor where required;
+- provider-neutral 420Randomness resolves entropy;
+- hidden state remains off-chain/commitment-protected;
+- stale, duplicate, premature and mismatched reveals fail closed.
 
-- canonical session `randomnessRef` is the sole request anchor for randomness-dependent games;
-- generalized provider-neutral 420Randomness / `RandomnessRouter420` resolves the referenced request;
-- only exact, fulfilled request results with randomness and proof hash are accepted;
-- non-random rulesets bypass randomness resolution;
-- deterministic hidden-state seeds bind `sessionId`, immutable `rulesetHash`, `randomnessRef` and fulfilled randomness;
-- hands, tiles, decks, draws, salts and other private material remain off-chain/commitment-protected;
-- hidden-state reveals must verify against their exact commitments before application use;
-- duplicate reveal IDs, stale randomness references, premature reveals and commitment mismatches fail closed;
-- BG-15 creates no second entropy provider, fallback mechanism, lifecycle authority or wager path.
+### BG-15.7 — discovery, history, leaderboards and social surfaces — IMPLEMENTED, QUALIFICATION PENDING
 
-### BG-15.7 — discovery, history, leaderboards and social surfaces
-
-- active/recent game shelves on profiles;
-- friend activity and discoverable public games where privacy permits;
-- per-game history, win/loss/draw summaries and streak/stat projections derived from canonical finished sessions;
-- leaderboards are application projections, not a replacement for canonical session outcomes;
-- search/recommendation integration for players and game types using existing BG-12 query infrastructure;
-- hooks for BG-18 rewards configuration without minting or awarding rewards directly in BG-15.
+- canonical finished sessions produce newest-first game history;
+- win/loss/draw summaries and streaks are deterministic rebuildable projections;
+- overall and per-game player statistics derive only from canonical finished outcomes;
+- bounded recent-game shelves support profile surfaces;
+- deterministic per-game leaderboards remain application projections with no canonical authority;
+- friend activity is filtered by current visibility policy before presentation;
+- game/player discovery candidates are shaped for the existing BG-12 search/recommendation service;
+- BG-18 receives stat-snapshot hooks only; BG-15 never awards or mints rewards.
 
 ### BG-15.8 — abuse, integrity and recovery hardening
 
@@ -125,8 +105,8 @@ Hard boundary: Bong Goggles social games remain **zero-wager**. Any wagered game
 
 ## Current position
 
-**Phase 12 is merged in PR #307. Phase 13 is merged in PR #308. Phase 14 is merged in PR #314. Current work: BG-15.6 420Randomness + hidden-state games on PR #321 / `feature/bong-goggles-bg15-social-games`.**
+**Phase 12 is merged in PR #307. Phase 13 is merged in PR #308. Phase 14 is merged in PR #314. Current work: BG-15.7 history, statistics, leaderboards & social discovery on PR #321 / `feature/bong-goggles-bg15-social-games`.**
 
 Critical path:
 
-`BG-15.6 randomness/hidden state -> BG-15.7 history/leaderboards/social surfaces -> BG-15.8 integrity/recovery -> BG-15.9 production closeout -> BG-16 notifications -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI -> BG-20 launch hardening -> READY`
+`BG-15.7 history/leaderboards/social discovery -> BG-15.8 integrity/recovery -> BG-15.9 production closeout -> BG-16 notifications -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI -> BG-20 launch hardening -> READY`

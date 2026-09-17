@@ -9,7 +9,7 @@
 - **STATUS-2 — component registry + health model — COMPLETE**
 - **STATUS-3 — evidence ingestion + source adapters — COMPLETE**
 - **STATUS-4 — incident lifecycle + severity model — COMPLETE**
-- STATUS-5 — aggregation, freshness + degraded-state engine — pending
+- **STATUS-5 — aggregation, freshness + degraded-state engine — COMPLETE**
 - STATUS-6 — history, provenance + canonical references — pending
 - STATUS-7 — API + public status feed — pending
 - STATUS-8 — privacy/security + anti-spoofing hardening — pending
@@ -82,7 +82,13 @@ Planned maintenance is modeled separately from unplanned incidents and requires 
 
 ## STATUS-5 — aggregation, freshness + degraded-state engine
 
-Aggregate component observations deterministically. Enforce freshness TTLs, explicit unknown state on missing/conflicting evidence, severity-aware rollups and failure isolation so one broken probe does not fabricate a network-wide outage. A green rollup must be supported by fresh evidence.
+Implemented deterministic component and network rollups under `status/aggregation`. Component evaluation consumes registered observations and active incidents without mutating protocol state or treating presentation data as canonical.
+
+Freshness is enforced directly from observation expiry. Components with only stale or missing evidence fail closed to `unknown`; conflicting fresh source states also resolve to `unknown` rather than whichever source reports green. A nominally `healthy` claim that is not simultaneously live and ready is downgraded to `degraded`.
+
+Incident severity is applied independently of probe health: `WARN` can degrade an otherwise healthy component, `MAJOR` forces degraded presentation, and `CRITICAL` forces unavailable presentation. Planned maintenance is presented as `maintenance` only when it is not masking an active higher-severity fault.
+
+Network rollups preserve failure isolation. One unavailable or unknown component degrades the aggregate rather than fabricating a network-wide outage; the rollup becomes `unavailable` only when every evaluated component is unavailable, and becomes `unknown` only when every evaluated component is unknown. Component ordering and health counts are deterministic and aggregate results explicitly remain non-authoritative.
 
 ## STATUS-6 — history, provenance + canonical references
 

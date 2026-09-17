@@ -1,0 +1,41 @@
+{
+  "schema": "420-exchange-usdt-ethereum-v12.5.19",
+  "status": "APPROVED_INACTIVE",
+  "integration_type": "TOKEN_OVER_EXISTING_CANONICAL_CHAIN_ADAPTER",
+  "asset": {
+    "symbol": "USDT",
+    "asset_id": "420/BRIDGE/ASSET/USDT",
+    "canonical_network": "ETHEREUM",
+    "canonical_chain_key": "420/BRIDGE/CHAIN/ETH",
+    "ethereum_chain_id": 1,
+    "ethereum_token": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+    "decimals": 6,
+    "token_standard": "ERC20",
+    "issuer_controls": ["pause", "blocklist", "upgrade/administrative controls per canonical token implementation"]
+  },
+  "route": {
+    "route_id": "420/BRIDGE/ROUTE/USDT/ETHEREUM/MAINNET",
+    "adapter": "EthereumBridgeAdapter420",
+    "adapter_id": "420/BRIDGE/ETHEREUM/MAINNET/V12.5.4",
+    "verifier": "IEthereumFinalityVerifier420"
+  },
+  "qualification": [
+    "canonical USDT Ethereum token address pinned",
+    "Ethereum mainnet chain id pinned to 1",
+    "USDT decimals pinned to 6",
+    "USDT source-token mapping required",
+    "USDT route binding required",
+    "finalized Ethereum proof required",
+    "approved gateway required",
+    "message replay protection inherited from EthereumBridgeAdapter420",
+    "router-only inbound and outbound inherited from EthereumBridgeAdapter420",
+    "issuer pause/blocklist risk documented and monitored operationally"
+  ],
+  "activation_blockers": [
+    "420 local USDT representation deployed and registered",
+    "production Ethereum finality verifier deployed and reviewed",
+    "production gateway approved by governance",
+    "USDT issuer-control and freeze-risk runbook approved",
+    "route and risk limits activated by governance"
+  ]
+}

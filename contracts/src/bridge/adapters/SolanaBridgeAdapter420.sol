@@ -26,6 +26,10 @@ contract SolanaBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
     mapping(bytes32 => bool) public consumedMessages;
 
     uint256 public outboundNonce;
+    bool public inboundHalted;
+    bool public outboundHalted;
+    bytes32 public inboundIncidentHash;
+    bytes32 public outboundIncidentHash;
 
     error InvalidAddress();
     error InvalidVerifier();
@@ -38,11 +42,15 @@ contract SolanaBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
     error Replay();
     error OnlyRouter();
     error InvalidOutbound();
+    error InboundHalted();
+    error OutboundHalted();
+    error InvalidIncident();
 
     event VerifierSet(address indexed verifier);
     event GatewayProgramSet(bytes32 indexed programId, bool allowed);
     event AssetMappingSet(bytes32 indexed sourceAsset, bytes32 indexed assetId, bool allowed);
     event RouteBindingSet(bytes32 indexed assetId, bytes32 indexed routeId);
+    event EmergencyHaltSet(bool indexed inbound, bool halted, bytes32 indexed incidentHash);
     event SolanaInboundConsumed(bytes32 indexed messageId, bytes32 indexed transactionSignature, uint64 slot);
     event SolanaOutboundRequested(
         bytes32 indexed messageId,
@@ -68,6 +76,19 @@ contract SolanaBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
     function adapterId() external pure returns (bytes32) { return ADAPTER_ID; }
 
     function setVerifier(address verifier_) external onlyGovernance { _setVerifier(verifier_); }
+
+    function setEmergencyHalt(bool inbound, bool halted, bytes32 incidentHash_) external onlyGovernance {
+        if (halted && incidentHash_ == bytes32(0)) revert InvalidIncident();
+        bytes32 incident = halted ? incidentHash_ : bytes32(0);
+        if (inbound) {
+            inboundHalted = halted;
+            inboundIncidentHash = incident;
+        } else {
+            outboundHalted = halted;
+            outboundIncidentHash = incident;
+        }
+        emit EmergencyHaltSet(inbound, halted, incident);
+    }
 
     function setGatewayProgram(bytes32 programId, bool allowed) external onlyGovernance {
         if (programId == bytes32(0)) revert InvalidProof();
@@ -102,6 +123,7 @@ contract SolanaBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
     }
 
     function verifyInbound(bytes calldata proof) external onlyRouter returns (VerifiedTransfer memory v) {
+        if (inboundHalted) revert InboundHalted();
         ISolanaFinalityVerifier420.FinalizedTransfer memory p = verifier.verifyFinalizedTransfer(proof);
         if (!p.finalized) revert Unfinalized();
         if (p.genesisHash != SOLANA_MAINNET_GENESIS_HASH) revert WrongCluster();
@@ -142,6 +164,7 @@ contract SolanaBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
         uint256 amount,
         bytes calldata extra
     ) external payable onlyRouter returns (bytes32 sourceMessageId) {
+        if (outboundHalted) revert OutboundHalted();
         if (
             routeId == bytes32(0) || assetId == bytes32(0) || sender == address(0) || recipient.length != 32
                 || amount == 0 || msg.value != 0

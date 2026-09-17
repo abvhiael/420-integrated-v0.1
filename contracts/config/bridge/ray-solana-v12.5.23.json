@@ -1,0 +1,45 @@
+{
+  "schema": "420-exchange-ray-solana-v12.5.23",
+  "status": "APPROVED_INACTIVE",
+  "integration_type": "TOKEN_OVER_EXISTING_CANONICAL_CHAIN_ADAPTER",
+  "asset": {
+    "symbol": "RAY",
+    "asset_id": "420/BRIDGE/ASSET/RAY",
+    "canonical_network": "SOLANA",
+    "canonical_chain_key": "420/BRIDGE/CHAIN/SOL",
+    "solana_mint": "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R",
+    "solana_mint_bytes32": "0x37998ccbf2d0458b615cbcc6b1a367c4749e9fef7306622e1b1b58910120bc9a",
+    "decimals": 6,
+    "token_standard": "SPL",
+    "protocol": "Raydium"
+  },
+  "route": {
+    "route_id": "420/BRIDGE/ROUTE/RAY/SOLANA/MAINNET",
+    "adapter": "SolanaBridgeAdapter420",
+    "adapter_id": "420/BRIDGE/SOLANA/MAINNET/V12.5.2",
+    "verifier": "ISolanaFinalityVerifier420"
+  },
+  "qualification": [
+    "canonical Raydium Solana RAY mint pinned",
+    "raw 32-byte Solana mint public key pinned",
+    "Solana mainnet genesis identity inherited from SolanaBridgeAdapter420",
+    "RAY decimals pinned to 6",
+    "RAY mint mapping required",
+    "RAY Solana route binding required",
+    "finalized Solana proof required",
+    "approved gateway program required",
+    "message replay protection inherited from SolanaBridgeAdapter420",
+    "router-only inbound and outbound inherited from SolanaBridgeAdapter420"
+  ],
+  "risk_notes": [
+    "ticker and metadata are not trusted for identity; the canonical Solana mint is authoritative",
+    "bridged or wrapped RAY representations on other chains are outside this Solana qualification slice",
+    "protocol governance, staking, buyback and market mechanics do not alter bridge mint identity"
+  ],
+  "activation_blockers": [
+    "420 local RAY representation deployed and registered",
+    "production Solana finality verifier deployed and reviewed",
+    "production gateway program approved by governance",
+    "route and liquidity/risk limits activated by governance"
+  ]
+}

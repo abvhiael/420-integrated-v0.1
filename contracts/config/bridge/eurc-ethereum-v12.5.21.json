@@ -1,0 +1,45 @@
+{
+  "schema": "420-exchange-eurc-ethereum-v12.5.21",
+  "status": "APPROVED_INACTIVE",
+  "integration_type": "TOKEN_OVER_EXISTING_CANONICAL_CHAIN_ADAPTER",
+  "asset": {
+    "symbol": "EURC",
+    "asset_id": "420/BRIDGE/ASSET/EURC",
+    "canonical_network": "ETHEREUM",
+    "canonical_chain_key": "420/BRIDGE/CHAIN/ETH",
+    "ethereum_chain_id": 1,
+    "ethereum_token": "0x1aBaEA1f7C830bD89Acc67eC4af516284b1bC33c",
+    "decimals": 6,
+    "issuer": "Circle Internet Financial Europe SAS"
+  },
+  "route": {
+    "route_id": "420/BRIDGE/ROUTE/EURC/ETHEREUM/MAINNET",
+    "adapter": "EthereumBridgeAdapter420",
+    "adapter_id": "420/BRIDGE/ETHEREUM/MAINNET/V12.5.4",
+    "verifier": "IEthereumFinalityVerifier420"
+  },
+  "qualification": [
+    "Circle-issued Ethereum EURC token address pinned",
+    "Ethereum mainnet chain id pinned to 1",
+    "EURC decimals pinned to 6",
+    "EURC source-token mapping required",
+    "EURC route binding required",
+    "finalized Ethereum proof required",
+    "approved gateway required",
+    "message replay protection inherited from EthereumBridgeAdapter420",
+    "router-only inbound and outbound inherited from EthereumBridgeAdapter420"
+  ],
+  "risk_notes": [
+    "EURC is issuer-administered and subject to Circle and applicable regulatory controls",
+    "the historical Euro Coin/EUROC name is an alias of the same existing token address, not a separate asset",
+    "other supported-chain EURC representations are outside this Ethereum qualification slice",
+    "CCTP-based EURC movement may be qualified separately and does not replace this canonical Ethereum asset identity"
+  ],
+  "activation_blockers": [
+    "420 local EURC representation deployed and registered",
+    "production Ethereum finality verifier deployed and reviewed",
+    "production gateway approved by governance",
+    "issuer-control, redemption, freeze and regulatory-risk runbook approved",
+    "route and risk limits activated by governance"
+  ]
+}

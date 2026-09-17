@@ -2,13 +2,21 @@
 
 V13 turns the hardened execution and bridge state from V1–V12 into deterministic read surfaces for clients, indexers, analytics and the V14 Exchange Web UI. V13 does not add new custody or execution authority; all APIs are projections of canonical on-chain state and events.
 
-## V13.1 — Canonical market-data/event schema — IN PROGRESS
+## V13.1 — Canonical market-data/event schema — IN QUALIFICATION
 
-- define stable market, trade, order, liquidity, bridge and fee event envelopes
-- bind every indexed record to chain id, block number, block hash, transaction hash and log index
-- define canonical identifiers for markets, assets, routes, adapters and orders
-- prohibit indexer-generated authority or silent mutation of canonical fields
-- establish reorg-safe record identity and replacement semantics
+- [x] define stable market, trade, order, liquidity, bridge and fee event domains
+- [x] bind every indexed record to chain id, block number, block hash, transaction hash and log index
+- [x] define schema-versioned canonical identifiers for markets, assets, routes, adapters and orders
+- [x] prohibit indexer-generated authority or silent mutation of canonical fields
+- [x] establish reorg-safe record identity and replacement semantics
+- [x] define OBSERVED/CANONICAL/ORPHANED/FINALIZED canonicality states
+- [x] define versioned derived-record identity binding source set and aggregation window
+- [x] add executable qualification for idempotence, reorg separation and malformed provenance
+
+Implementation:
+- `contracts/src/exchange/ExchangeMarketDataTypes420.sol`
+- `contracts/test/ExchangeMarketDataTypes420.t.sol`
+- `contracts/config/exchange/market-data-v13.1.json`
 
 ## V13.2 — Deterministic indexer core
 

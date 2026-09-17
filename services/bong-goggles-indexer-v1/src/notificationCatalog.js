@@ -32,7 +32,9 @@ const CATALOG = Object.freeze({
 
   MODERATION_ACTION: { topic: 'moderation', severity: 'warning', actionable: true },
   APPEAL_UPDATED: { topic: 'moderation', severity: 'info', actionable: true },
+  REWARD_CONTRIBUTION_SUBMITTED: { topic: 'rewards', severity: 'info', actionable: true },
   REWARD_EARNED: { topic: 'rewards', severity: 'info', actionable: true },
+  REWARD_PAYOUT_UPDATED: { topic: 'rewards', severity: 'info', actionable: true },
 
   REVIEW_PUBLISHED: { topic: 'discovery', severity: 'info', actionable: true },
   CORRECTION_SUBMITTED: { topic: 'discovery', severity: 'info', actionable: true },

@@ -1,0 +1,33 @@
+name: GEN-SVC-0 Architecture
+
+on:
+  pull_request:
+    paths:
+      - 'config/genesis-consumer-services.json'
+      - 'docs/genesis-services/**'
+      - 'scripts/validate-gen-svc-0.py'
+      - '.github/workflows/gen-svc-0.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'config/genesis-consumer-services.json'
+      - 'docs/genesis-services/**'
+      - 'scripts/validate-gen-svc-0.py'
+      - '.github/workflows/gen-svc-0.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate GEN-SVC-0 architecture
+        run: python3 scripts/validate-gen-svc-0.py

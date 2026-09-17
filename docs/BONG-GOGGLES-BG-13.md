@@ -76,7 +76,7 @@ Implemented the Bong Goggles derivative coordinator above the existing 420Media 
 - derivative items preserve explicit `derivativeOf` linkage to the immutable source item rather than overwriting the original identity;
 - job ID, operator ID, opaque result reference and SLA evidence hash are retained as secret-free processing provenance.
 
-### BG-13.6 — lifecycle, edits, deletion and privacy — IN PROGRESS
+### BG-13.6 — lifecycle, edits, deletion and privacy — COMPLETE AND QUALIFIED
 
 Implemented the Bong Goggles media lifecycle/presentation policy above canonical social-object state:
 
@@ -90,16 +90,20 @@ Implemented the Bong Goggles media lifecycle/presentation policy above canonical
 - retired/superseded derivatives can be excluded from active presentation through an explicit retirement policy while their original storage/provenance history remains intact;
 - retention disposition separates tombstone/hidden/current/historical presentation state from immutable canonical storage history.
 
-### BG-13.7 — production delivery closeout
+### BG-13.7 — production delivery closeout — IN PROGRESS
 
-- CDN/cache policy over 420Gateway/420Cache;
-- immutable asset caching keyed by verified object identity;
-- responsive image/video source selection;
-- health, latency, integrity-failure and route-failure metrics;
-- structured logs with secret redaction;
-- provider-loss/cache-loss/retrieval-failure drills;
-- upload/retrieval/transcode load tests;
-- operator runbook and launch qualification.
+Implemented the Bong Goggles production delivery operations layer above the existing 420Gateway/420Cache routing and 420Storage verification boundary:
+
+- immutable cache identity derived from complete verified 420Storage object identity rather than URL, provider, ETag or filename;
+- verified public/current media may use `public, max-age=31536000, immutable`; private media is always `private, no-store`; unverified presentation media is `no-store`;
+- responsive image/video candidates are selected only from the verified descriptor, limited to the original plus explicitly linked thumbnail/poster/preview/transcode derivatives in the same media family, and returned deterministically with canonical cache identity;
+- request, success, failure, cache-tier, store-tier, p50/p95/p99 latency, integrity-failure and route-failure telemetry is retained as non-authoritative operations evidence;
+- integrity failures and route/provider failures are classified separately so corrupted bytes are not mislabeled as transport failures;
+- structured logs redact authorization, cookies, credentials, passwords, private keys, secrets, sessions and tokens before emission;
+- failure-drill helpers require provider/cache/retrieval failures to actually be observed instead of treating unexpected success as a passing drill;
+- bounded load qualification records request count, concurrency, failures and p95 latency against explicit budgets;
+- launch readiness fails closed when a required drill/load qualification fails or unresolved integrity failures remain;
+- the operator runbook is `docs/BONG-GOGGLES-BG-13-7-RUNBOOK.md` and requires exact-head Bong Goggles Media Verification, 420Docs Qualification and 420 Integrated Qualification before phase closeout.
 
 ## BG-13 invariants
 
@@ -122,5 +126,9 @@ Implemented the Bong Goggles media lifecycle/presentation policy above canonical
 17. Historical `mediaRootAtVersion` bindings remain auditable but do not automatically regain current presentation eligibility after an edit.
 18. Hiding, deleting, removing or retiring presentation state never rewrites canonical storage commitments, placements or proof history.
 19. Audience authorization is evaluated from current canonical social policy at delivery time; prior visibility is not treated as a durable access grant.
+20. Immutable CDN/cache identity is derived from verified canonical 420Storage object identity; route/provider metadata never becomes the object key.
+21. Private or unverified presentation media is never made publicly immutable-cacheable by the Bong Goggles operations layer.
+22. Operational metrics, drills, load results and launch-readiness decisions are evidence only and cannot override canonical media/storage/social state.
+23. Structured production logs must redact secrets/session/authorization material before emission.
 
 BG-13 is developed on `feature/bong-goggles-bg13-media-storage` after Phase 12 merged to `main` in PR #307.

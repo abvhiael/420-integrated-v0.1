@@ -12,7 +12,7 @@
 - **NOTIFY-5 — provider-neutral delivery adapters — COMPLETE**
 - **NOTIFY-6 — provenance + security — COMPLETE**
 - **NOTIFY-7 — API + feed/history — COMPLETE**
-- NOTIFY-8 — privacy + abuse hardening — pending
+- **NOTIFY-8 — privacy + abuse hardening — COMPLETE**
 - NOTIFY-9 — Genesis frontend — pending
 - NOTIFY-10 — qualification, reconciliation + closeout — pending
 
@@ -93,7 +93,11 @@ Tests cover subscription CRUD, feed retrieval, read/unread transitions, delivery
 
 ## NOTIFY-8 — privacy + abuse hardening
 
-Minimize wallet-address-to-provider-endpoint correlation, enforce private-source exclusions, validate hostile metadata, add abuse/rate controls, degraded-mode semantics and failure isolation.
+Implemented explicit private-source exclusions for private Messenger/Commons payload classes, encrypted Resource payloads, private Identity data and raw Attention telemetry. Delivery endpoints can be reduced to deterministic opaque provider-local keys for abuse controls instead of retaining raw endpoint correlation keys. Presentation metadata is trimmed, length-bounded and rejected when it contains control characters.
+
+Added bounded per-scope abuse throttling, provider-level failure isolation and degraded-mode health semantics. A failed provider does not mark unrelated providers unavailable, and degraded notification/indexer state is always explicitly noncanonical. Abuse or presentation controls affect only notification delivery/presentation and never redefine the canonical event or block direct Wallet/Explorer/RPC access.
+
+Tests cover opaque endpoint keys, private-source rejection, hostile/oversized metadata rejection, rate-window reset, provider-failure isolation and the guarantee that degraded health never claims canonical authority.
 
 ## NOTIFY-9 — Genesis frontend
 

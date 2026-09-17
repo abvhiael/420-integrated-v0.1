@@ -1,6 +1,6 @@
 'use strict';
 
-const { redactGameTelemetry } = require('./integrityRecovery');
+const { buildSafeGameTelemetry } = require('./integrityHardening');
 
 const CLOSEOUT_DRILLS = Object.freeze([
   'projection-stall',
@@ -27,7 +27,7 @@ function boundedInteger(value, field, min, max) {
 function buildGamesMetric({ operation, outcome, latencyMs, retries = 0, reason = null, labels = {} }) {
   const result = String(required(outcome, 'outcome')).trim().toLowerCase();
   if (!['success', 'failure', 'denied', 'rebuild'].includes(result)) throw new Error('invalid outcome');
-  return Object.freeze(redactGameTelemetry({
+  return buildSafeGameTelemetry({
     subsystem: 'bong-goggles-games',
     operation: String(required(operation, 'operation')).trim(),
     outcome: result,
@@ -35,7 +35,7 @@ function buildGamesMetric({ operation, outcome, latencyMs, retries = 0, reason =
     retries: boundedInteger(retries, 'retries', 0, 100),
     reason: reason === null ? null : String(reason).slice(0, 160),
     labels
-  }));
+  });
 }
 
 function buildLoadQualification(input = {}) {

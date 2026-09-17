@@ -13,7 +13,7 @@
 - **NOTIFY-6 — provenance + security — COMPLETE**
 - **NOTIFY-7 — API + feed/history — COMPLETE**
 - **NOTIFY-8 — privacy + abuse hardening — COMPLETE**
-- NOTIFY-9 — Genesis frontend — pending
+- **NOTIFY-9 — Genesis frontend — COMPLETE**
 - NOTIFY-10 — qualification, reconciliation + closeout — pending
 
 ## NOTIFY-0 — Genesis boundary + executable invariant baseline
@@ -101,7 +101,11 @@ Tests cover opaque endpoint keys, private-source rejection, hostile/oversized me
 
 ## NOTIFY-9 — Genesis frontend
 
-Build a notification centre with unread badge, feed filters, severity/source indicators, finality/retraction/superseded states, provenance links, subscription/preferences controls and safe Wallet/origin-app handoff.
+Implemented a dependency-free Genesis notification centre served from `notifications/web`. The frontend includes an unread badge, source/severity/read-state filters, explicit finalized/retracted/superseded presentation states, paged feed/history loading, read/unread actions, provenance details and origin links, channel/promotional preferences, and safe 420Wallet/origin-app handoff links.
+
+The web surface is presentation-only and inherits the NOTIFY authority boundary: it exposes no signing, spending, capability-grant or Wallet-bypass controls. Security headers deny framing, object embedding, sensitive browser permissions and off-origin connections. Degraded notification service errors explicitly direct users back to Wallet, Explorer and RPC for canonical protocol truth.
+
+Tests cover required Genesis views, security headers, read-only asset serving, notification API routes, provenance and Wallet handoff affordances, canonicality states and absence of execution-authority controls.
 
 ## NOTIFY-10 — qualification, reconciliation + closeout
 

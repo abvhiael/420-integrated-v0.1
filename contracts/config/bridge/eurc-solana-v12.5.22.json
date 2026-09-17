@@ -1,0 +1,47 @@
+{
+  "schema": "420-exchange-eurc-solana-v12.5.22",
+  "status": "APPROVED_INACTIVE",
+  "integration_type": "TOKEN_OVER_EXISTING_CANONICAL_CHAIN_ADAPTER",
+  "asset": {
+    "symbol": "EURC",
+    "asset_id": "420/BRIDGE/ASSET/EURC",
+    "canonical_network": "SOLANA",
+    "canonical_chain_key": "420/BRIDGE/CHAIN/SOL",
+    "solana_mint": "HzwqbKZw8HxMN6bF2yFZNrht3c2iXXzpKcFu7uBEDKtr",
+    "solana_mint_bytes32": "0xfc931a2b58cd23db2d91d296d96505a06f80942083f841e8a887f138ac030437",
+    "decimals": 6,
+    "token_standard": "SPL",
+    "issuer": "Circle Internet Financial Europe SAS"
+  },
+  "route": {
+    "route_id": "420/BRIDGE/ROUTE/EURC/SOLANA/MAINNET",
+    "adapter": "SolanaBridgeAdapter420",
+    "adapter_id": "420/BRIDGE/SOLANA/MAINNET/V12.5.2",
+    "verifier": "ISolanaFinalityVerifier420"
+  },
+  "qualification": [
+    "Circle-issued Solana EURC mint pinned",
+    "raw 32-byte Solana mint public key pinned",
+    "Solana mainnet genesis identity inherited from SolanaBridgeAdapter420",
+    "EURC decimals pinned to 6",
+    "EURC mint mapping required",
+    "EURC Solana route binding required",
+    "finalized Solana proof required",
+    "approved gateway program required",
+    "message replay protection inherited from SolanaBridgeAdapter420",
+    "router-only inbound and outbound inherited from SolanaBridgeAdapter420"
+  ],
+  "risk_notes": [
+    "EURC is issuer-administered and subject to Circle and applicable regulatory controls",
+    "the historical Euro Coin/EUROC name is an alias of the same existing token rather than a separate asset",
+    "Ethereum and other supported-chain EURC representations are outside this Solana qualification slice",
+    "CCTP-based EURC movement may be qualified separately and does not replace this canonical Solana mint identity"
+  ],
+  "activation_blockers": [
+    "420 local EURC representation deployed and registered",
+    "production Solana finality verifier deployed and reviewed",
+    "production gateway program approved by governance",
+    "issuer-control, redemption, freeze and regulatory-risk runbook approved",
+    "route and risk limits activated by governance"
+  ]
+}

@@ -42,6 +42,23 @@ function candidate(log, { recipient, actor = null, kind, topic, subjectId = null
   return { ...envelope, notificationId: digest(envelope) };
 }
 
+function qualifiedInteraction(state, { mention = false } = {}) {
+  const policy = required(state.notificationPolicy, 'canonical notification policy state');
+  if (policy.actorActive !== true || policy.recipientActive !== true) return false;
+  if (policy.blockedEither === true || policy.notificationsMuted === true) return false;
+  if (policy.canInteract !== true) return false;
+  if (mention && policy.canMention !== true) return false;
+  return true;
+}
+
+function isCommentType(value) {
+  return value === 3 || value === 'COMMENT';
+}
+
+function isProfileTag(value) {
+  return value === 0 || value === 'PROFILE';
+}
+
 export function notificationCandidatesForEvent(log, state = {}) {
   const eventName = required(log?.eventName, 'eventName');
   const args = log.args ?? {};
@@ -49,17 +66,57 @@ export function notificationCandidatesForEvent(log, state = {}) {
   const add = (entry) => { if (entry) out.push(entry); };
 
   switch (eventName) {
+    case 'FriendRequestCreated':
+      if (qualifiedInteraction(state)) {
+        add(candidate(log, { recipient: args.recipient, actor: args.requester, kind: 'FRIEND_REQUEST_RECEIVED', topic: 'relationships', subjectId: args.requestId ?? null }));
+      }
+      break;
     case 'FriendRequestAccepted': {
       const request = required(state.friendRequest, 'canonical friend request state');
       add(candidate(log, { recipient: request.requester, actor: request.recipient, kind: 'FRIEND_ACCEPTED', topic: 'relationships', subjectId: args.requestId ?? null }));
       break;
     }
+    case 'FollowRequestCreated':
+      if (qualifiedInteraction(state)) {
+        add(candidate(log, { recipient: args.subject, actor: args.follower, kind: 'FOLLOW_REQUEST_RECEIVED', topic: 'relationships', subjectId: args.requestId ?? null }));
+      }
+      break;
     case 'Followed':
       add(candidate(log, { recipient: args.subject, actor: args.follower, kind: 'FOLLOWED', topic: 'relationships' }));
       break;
     case 'Blocked':
       add(candidate(log, { recipient: args.subject, actor: args.blocker, kind: 'BLOCKED', topic: 'safety' }));
       break;
+    case 'SocialObjectPublished': {
+      const object = required(state.socialObject, 'canonical social object state');
+      if (!isCommentType(args.objectType ?? object.objectType)) break;
+      const parent = required(state.parentObject, 'canonical parent social object state');
+      if (object.status !== undefined && object.status !== 0 && object.status !== 'ACTIVE') break;
+      if (parent.status !== undefined && parent.status !== 0 && parent.status !== 'ACTIVE') break;
+      if (!qualifiedInteraction(state)) break;
+      add(candidate(log, {
+        recipient: parent.author,
+        actor: args.author ?? object.author,
+        kind: 'COMMENT_CREATED',
+        topic: 'interactions',
+        subjectId: args.objectId ?? object.objectId ?? null,
+        metadata: { parentId: args.parentId ?? object.parentId ?? null, rootId: object.rootId ?? null },
+      }));
+      break;
+    }
+    case 'TagCreated': {
+      const mention = isProfileTag(args.targetType);
+      if (!qualifiedInteraction(state, { mention })) break;
+      add(candidate(log, {
+        recipient: args.target,
+        actor: args.objectAuthor,
+        kind: mention ? 'MENTIONED' : 'TAGGED',
+        topic: 'interactions',
+        subjectId: args.objectId ?? null,
+        metadata: { tagId: args.tagId ?? null, targetType: args.targetType ?? null, tagState: args.state ?? null },
+      }));
+      break;
+    }
     case 'GroupJoinRequested': {
       const group = required(state.group, 'canonical group state');
       add(candidate(log, { recipient: group.owner, actor: args.account, kind: 'GROUP_JOIN_REQUESTED', topic: 'groups', subjectId: args.groupId }));

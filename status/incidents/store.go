@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"sort"
 	"sync"
+
+	"github.com/420integrated/420-integrated/status/evidence"
 )
 
 type Store struct {

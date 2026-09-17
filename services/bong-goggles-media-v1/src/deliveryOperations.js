@@ -148,10 +148,9 @@ export class DeliveryMetrics {
 
 function classifyFailure(error) {
   const message = String(error?.message ?? error).toLowerCase();
-  return {
-    integrity: message.includes('integrity') || message.includes('shard root') || message.includes('size mismatch'),
-    route: message.includes('route') || message.includes('gateway') || message.includes('retriev') || message.includes('provider'),
-  };
+  const integrity = message.includes('integrity') || message.includes('shard root') || message.includes('size mismatch');
+  const route = !integrity && (message.includes('route') || message.includes('gateway') || message.includes('retriev') || message.includes('provider'));
+  return { integrity, route };
 }
 
 export class BongGogglesProductionDelivery {

@@ -2,20 +2,45 @@
   "schema": "420-exchange-launch-bridge-catalog-v12.5.1",
   "status": "IDENTITY_REGISTRY_FOUNDATION",
   "policy": "Canonical network identity and verifier configuration must be registered before a bridge route can qualify an Exchange asset.",
+  "roadmap_status": {
+    "V12.5.6": {
+      "asset": "XRP",
+      "status": "IMPLEMENTED_DEFERRED_FROM_GENESIS_QUALIFICATION",
+      "note": "Adapter implementation is preserved but Genesis qualification is deferred pending resolution of the repository-wide Solidity/Yul compiler interaction."
+    },
+    "V12.5.7": {
+      "asset": "TRX",
+      "status": "COMPLETED_QUALIFIED_MERGED"
+    },
+    "V12.5.8": {
+      "asset": "AUDIO",
+      "status": "COMPLETED_QUALIFIED_MERGED",
+      "integration_type": "TOKEN_OVER_EXISTING_ETHEREUM_ADAPTER",
+      "note": "AUDIO is qualified as the canonical Ethereum ERC-20 asset using EthereumBridgeAdapter420."
+    },
+    "V12.5.9": {
+      "asset": "POT",
+      "status": "IN_PROGRESS",
+      "integration_type": "NATIVE_POTCOIN_CHAIN_ADAPTER",
+      "note": "POT bridges directly to native PotCoin mainnet; the Solana SPL representation is not the canonical V12.5.9 route."
+    }
+  },
   "assets": [
-    {"symbol":"BTC","canonical_network":"BITCOIN","canonical_chain_key":"420/BRIDGE/CHAIN/BTC","adapter_slice":"V12.5-BTC"},
+    {"symbol":"BTC","canonical_network":"BITCOIN","canonical_chain_key":"420/BRIDGE/CHAIN/BTC","adapter_slice":"V12.5.14"},
     {"symbol":"ETH","canonical_network":"ETHEREUM","canonical_chain_key":"420/BRIDGE/CHAIN/ETH","adapter_slice":"V12.5.4"},
     {"symbol":"SOL","canonical_network":"SOLANA","canonical_chain_key":"420/BRIDGE/CHAIN/SOL","adapter_slice":"V12.5.2"},
     {"symbol":"BNB","canonical_network":"BNB_SMART_CHAIN","canonical_chain_key":"420/BRIDGE/CHAIN/BNB","adapter_slice":"V12.5.3"},
     {"symbol":"DOGE","canonical_network":"DOGECOIN","canonical_chain_key":"420/BRIDGE/CHAIN/DOGE","adapter_slice":"V12.5.5"},
     {"symbol":"XRP","canonical_network":"XRP_LEDGER","canonical_chain_key":"420/BRIDGE/CHAIN/XRP","adapter_slice":"V12.5.6"},
     {"symbol":"TRX","canonical_network":"TRON","canonical_chain_key":"420/BRIDGE/CHAIN/TRX","adapter_slice":"V12.5.7"},
+    {"symbol":"POT","canonical_network":"POTCOIN","canonical_chain_key":"420/BRIDGE/CHAIN/POT","adapter_slice":"V12.5.9"},
     {"symbol":"USDC","canonical_network":"ETHEREUM","canonical_chain_key":"420/BRIDGE/CHAIN/ETH","adapter_slice":"existing-CCTP-plus-launch-qualification"},
     {"symbol":"CADC","canonical_network":"ETHEREUM","canonical_chain_key":"420/BRIDGE/CHAIN/ETH","adapter_slice":"existing-LayerZero-plus-launch-qualification"},
-    {"symbol":"AUDIO","canonical_network":"ETHEREUM","canonical_chain_key":"420/BRIDGE/CHAIN/ETH","adapter_slice":"V12.5.8"},
-    {"symbol":"ARRR","canonical_network":"PIRATE_CHAIN","canonical_chain_key":"420/BRIDGE/CHAIN/ARRR","adapter_slice":"V12.5.11"},
-    {"symbol":"BOB","canonical_network":"DOBBSCOIN","canonical_chain_key":"420/BRIDGE/CHAIN/BOB","adapter_slice":"V12.5.9"},
-    {"symbol":"CURE","canonical_network":"CURECOIN","canonical_chain_key":"420/BRIDGE/CHAIN/CURE","adapter_slice":"V12.5.10"}
+    {"symbol":"AUDIO","canonical_network":"ETHEREUM","canonical_chain_key":"420/BRIDGE/CHAIN/ETH","adapter_slice":"V12.5.8-token-qualification-over-EthereumBridgeAdapter420"},
+    {"symbol":"BOB","canonical_network":"DOBBSCOIN","canonical_chain_key":"420/BRIDGE/CHAIN/BOB","adapter_slice":"V12.5.10"},
+    {"symbol":"CURE","canonical_network":"CURECOIN","canonical_chain_key":"420/BRIDGE/CHAIN/CURE","adapter_slice":"V12.5.11"},
+    {"symbol":"ARRR","canonical_network":"PIRATE_CHAIN","canonical_chain_key":"420/BRIDGE/CHAIN/ARRR","adapter_slice":"V12.5.12"},
+    {"symbol":"LTC","canonical_network":"LITECOIN","canonical_chain_key":"420/BRIDGE/CHAIN/LTC","adapter_slice":"V12.5.13"}
   ],
   "identity_fields_required_before_activation": [
     "routeChainId",

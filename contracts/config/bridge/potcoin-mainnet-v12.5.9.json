@@ -1,0 +1,50 @@
+{
+  "schema": "420-bridge-potcoin-mainnet-v12.5.9",
+  "status": "APPROVED_INACTIVE_PENDING_PRODUCTION_POS_FINALITY_VERIFIER_AND_GATEWAY_SCRIPT",
+  "canonical_chain_key": "420/BRIDGE/CHAIN/POT",
+  "chain_family": "UTXO_PROOF_OF_STAKE",
+  "route_chain_id": "0x504f540000000001",
+  "network_identity": {
+    "network": "POTCOIN_MAINNET",
+    "network_id_preimage": "POTCOIN/MAINNET",
+    "consensus": "pure proof-of-stake after block 500",
+    "last_pow_block": 500,
+    "target_block_seconds": 260,
+    "p2p_port": 16420,
+    "rpc_port": 16421,
+    "p2pkh_version": 55,
+    "p2sh_version": 110
+  },
+  "native_asset": {
+    "symbol": "POT",
+    "units": "pot-satoshis",
+    "decimals": 8
+  },
+  "adapter": {
+    "contract": "PotcoinBridgeAdapter420",
+    "adapter_id_preimage": "420/BRIDGE/POTCOIN/MAINNET/V12.5.9",
+    "outbound_recipient": "20-byte hash160 plus one-byte script type: 0=P2PKH, 1=P2SH",
+    "native_value_on_420_outbound": "rejected"
+  },
+  "activation_requirements": [
+    "production IPotcoinFinalityVerifier420 validates canonical PotCoin mainnet header/stake chain",
+    "only post-bootstrap proof-of-stake blocks above height 500 are accepted",
+    "transaction inclusion is proven against a finalized canonical PotCoin block",
+    "gateway output script is governance allowlisted",
+    "source UTXO provenance and output identity are proven",
+    "POT asset id and route id are governance bound",
+    "route risk caps and emergency isolation are configured",
+    "end-to-end native POT inbound and outbound qualification passes"
+  ],
+  "security_invariants": [
+    "pre-or-at-height-500 bootstrap blocks fail closed",
+    "post-bootstrap non-PoS blocks fail closed",
+    "unfinalized proofs fail closed",
+    "wrong-network proofs fail closed",
+    "unapproved gateway scripts fail closed",
+    "message replay fails closed",
+    "source-output replay under a different message id fails closed",
+    "direct adapter calls bypassing GatewayRouter420 fail closed",
+    "outbound destinations are constrained to native PotCoin P2PKH/P2SH hash160 payloads"
+  ]
+}

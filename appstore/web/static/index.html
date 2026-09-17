@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>420AppStore</title>
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#/browse"><span class="brand-mark">420</span><span>AppStore</span></a>
+    <form id="search-form" class="search" role="search">
+      <label class="sr-only" for="search-input">Search 420 applications</label>
+      <input id="search-input" name="q" autocomplete="off" spellcheck="false" maxlength="160" placeholder="search apps, categories, services…">
+      <button type="submit">Search</button>
+    </form>
+    <span class="status-pill" id="network-status">chain 420</span>
+  </header>
+
+  <div class="layout">
+    <nav class="sidebar" aria-label="AppStore navigation">
+      <a href="#/browse">Browse</a>
+      <a href="#/categories">Categories</a>
+      <a href="#/security">Security</a>
+      <a href="#/about">About</a>
+    </nav>
+    <main class="content" id="app" tabindex="-1">
+      <section class="hero">
+        <p class="eyebrow">420 Integrated · Genesis application catalogue</p>
+        <h1>420AppStore</h1>
+        <p>Discover registered apps, inspect provenance and permissions, review security evidence, then open the app in 420Wallet.</p>
+        <p><span class="muted">Application detail views expose an explicit </span><strong>Open in 420Wallet</strong><span class="muted"> handoff. 420Wallet and Smart Accounts remain the authorization boundary.</span></p>
+      </section>
+      <section id="route-content" aria-live="polite">
+        <div class="panel"><p class="muted">Loading catalogue…</p></div>
+      </section>
+    </main>
+  </div>
+  <script src="/app.js" defer></script>
+</body>
+</html>

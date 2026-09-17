@@ -401,32 +401,6 @@ export function notificationCandidatesForEvent(log, state = {}) {
       }));
       break;
     }
-    case 'RewardEarned': {
-      const rewardState = required(state.rewardState, 'canonical reward state');
-      if (rewardState.exists === false || rewardState.earned !== true) break;
-      add(candidate(log, {
-        recipient: rewardState.beneficiary,
-        actor: null,
-        kind: 'REWARD_EARNED',
-        topic: 'rewards',
-        subjectId: args.rewardId ?? rewardState.rewardId ?? null,
-        metadata: { status: rewardState.status ?? 'EARNED', amount: rewardState.amount ?? null, asset: rewardState.asset ?? null },
-      }));
-      break;
-    }
-    case 'RewardPayoutUpdated': {
-      const rewardState = required(state.rewardState, 'canonical reward state');
-      if (rewardState.exists === false) break;
-      add(candidate(log, {
-        recipient: rewardState.beneficiary,
-        actor: null,
-        kind: 'REWARD_PAYOUT_UPDATED',
-        topic: 'rewards',
-        subjectId: args.rewardId ?? rewardState.rewardId ?? null,
-        metadata: { status: args.status ?? rewardState.status ?? null, payoutId: args.payoutId ?? rewardState.payoutId ?? null },
-      }));
-      break;
-    }
     case 'ReviewPublished': {
       const subject = required(state.subject, 'canonical discovery subject state');
       add(candidate(log, { recipient: subject.submitter, actor: args.author, kind: 'REVIEW_PUBLISHED', topic: 'discovery', subjectId: args.subjectId, metadata: { reviewId: args.reviewId ?? null, ratingBps: args.ratingBps ?? null } }));

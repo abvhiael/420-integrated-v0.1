@@ -38,31 +38,43 @@ Production web target: `https://bonggoggles.420integrated.org`.
 
 Phase 12 was implemented monolithically from BG-12.3 through BG-12.7, exact-head qualified against Bong Goggles Indexer Verification, 420Docs Qualification and 420 Integrated Qualification, reconciled with `main` with zero base drift, and merged once as PR #307.
 
-## Phase 13 — media/storage delivery — IN PROGRESS, PR #308
+## Phase 13 — media/storage delivery — COMPLETE, merged PR #308
 
 BG-13 integrates Bong Goggles with the already-built media/storage infrastructure instead of creating a second protocol. `BongGogglesMediaRegistry420` remains the canonical Bong Goggles manifest registry; 420Store owns canonical storage agreements/commitments/manifests/placements/proofs; 420Storage is the frozen v1 developer adapter; 420Gateway/420Cache/420Repair provide operational delivery; and 420Media provides bounded derivative-processing jobs.
 
 - **BG-13.1 — media descriptor + canonical resolver — COMPLETE AND QUALIFIED**
-  Versioned deterministic Bong Goggles media descriptor, explicit 420Storage object identity, canonical owner/type/item-count/digest verification, derivative linkage, tamper detection, and fail-closed resolution of the off-chain descriptor referenced by `BongGogglesMediaRegistry420.manifestHash`.
 - **BG-13.2 — upload preparation + ingest bridge — COMPLETE AND QUALIFIED**
-  Exact 420Storage v1 prepare DTO translation, agreement/reservation/commitment preconditions, descriptor-bound deterministic idempotency, prepare-plan validation, ingest receipt identity/root/size verification and explicitly non-authoritative upload evidence. Existing 420Storage remains responsible for bounded staging, byte hashing, provider discovery and sink delivery.
 - **BG-13.3 — canonical placement/seal orchestration — COMPLETE AND QUALIFIED**
-  Canonical manifest/agreement/commitment/placement reads; fail-closed owner/object/erasure/root/size/commitment/node provenance validation; exact `registerPlacement` and `sealManifest` transaction intents requiring user/wallet authorization; canonical agreement/liveness evidence; and delivery readiness gated on `isRetrievable` rather than merely `isSealed`.
 - **BG-13.4 — verified retrieval + Gateway delivery — COMPLETE AND QUALIFIED**
-  Exact 420Storage v1 retrieval DTOs, full-object identity/size/SHA-256 verification before delivery, GET/HEAD semantics, single byte-range responses, default-deny private access with trusted reauthorization, canonical delivery-readiness gating, and non-authoritative Gateway/Cache route metadata.
 - **BG-13.5 — thumbnails/posters/transcodes — COMPLETE AND QUALIFIED**
-  Launch-safe derivative roles, operator-controlled 420Media capability/profile mappings, deterministic opaque source references, media-job creation/result binding, fail-closed terminal-state validation, returned 420Storage identity checks, optional canonical storage verification, explicit original→derivative provenance, and secret-free job/operator/result/SLA provenance.
 - **BG-13.6 — lifecycle/edit/delete/privacy semantics — COMPLETE AND QUALIFIED**
-  Canonical social-object/version media-root binding, current-versus-historical presentation state, hidden/deleted/removed fail-closed delivery, immutable storage-history preservation, delivery-time audience reauthorization through canonical social policy, retention/tombstone semantics, and derivative retirement without rewriting provenance.
-- **BG-13.7 — production delivery closeout — IN PROGRESS**
-  Immutable verified-object cache identity, public/private cache-control policy, responsive image/video source selection, latency/integrity/route telemetry, secret-redacted structured logs, provider/cache/retrieval failure drills, bounded load qualification, launch-readiness evaluation and operator runbook.
+- **BG-13.7 — production delivery closeout — COMPLETE AND QUALIFIED**
 
-Detailed BG-13 invariants and phase requirements are in `docs/BONG-GOGGLES-BG-13.md`. BG-13.7 operational procedures are in `docs/BONG-GOGGLES-BG-13-7-RUNBOOK.md`.
+BG-13 was reconciled with `main`, exact-head qualified against Bong Goggles Media Verification, 420Docs Qualification and 420 Integrated Qualification, then merged as PR #308. Detailed requirements and operational procedures remain in `docs/BONG-GOGGLES-BG-13.md` and `docs/BONG-GOGGLES-BG-13-7-RUNBOOK.md`.
 
-## Remaining product phases after BG-13
+## Phase 14 — full private messaging — IN PROGRESS
 
-- **BG-14 — full private messaging**
-  Build application messaging UX over 420Messenger/Bong Goggles private contexts: conversations, requests, group threads where permitted, unread/read state, attachments, safety controls, epoch rotation and recovery behavior.
+BG-14 builds the Bong Goggles application messaging layer over 420Messenger and `BongGogglesPrivateMessaging420`; plaintext/ciphertext and key material remain off-chain and no parallel messaging authority is introduced.
+
+- **BG-14.1 — conversation/request projection + canonical context resolver — IN PROGRESS**
+  Canonical request/active/closed conversation projection, incoming/outgoing request state, current block/social-policy revalidation, exact Bong Goggles private-context binding checks, and wallet-authorized request/accept/close/bind intents.
+- **BG-14.2 — encrypted send/receive bridge — NEXT**
+  Envelope/sequence/epoch coordination over 420Messenger without exposing plaintext or duplicating canonical envelope authority.
+- **BG-14.3 — inbox, unread/read and request state**
+  Canonical conversation/envelope/receipt-derived inbox views, unread counters, pagination and reorg-safe refresh.
+- **BG-14.4 — permitted group threads**
+  Group-thread application contexts with current membership/epoch enforcement while keeping 420Commons authoritative for public/community channels.
+- **BG-14.5 — private attachments**
+  Reuse BG-13/420Storage object identity and verified delivery with conversation-level authorization.
+- **BG-14.6 — safety, devices, epoch rotation and recovery**
+  Blocks, spam/request controls, device-key lifecycle, stale-device handling, epoch rotation and recovery.
+- **BG-14.7 — production messaging closeout**
+  Secret-redacted observability, failure/replay/device/attachment drills, load qualification, runbook, reconciliation and exact-head closeout.
+
+Detailed BG-14 invariants and requirements are in `docs/BONG-GOGGLES-BG-14.md`.
+
+## Remaining product phases after BG-14
+
 - **BG-15 — social games application**
   User-facing challenge/invite/session flows, casual game surfaces, results/history and rewards integration while keeping game settlement/authority canonical.
 - **BG-16 — notifications**
@@ -78,8 +90,8 @@ Detailed BG-13 invariants and phase requirements are in `docs/BONG-GOGGLES-BG-13
 
 ## Current position
 
-**Phase 12 is merged to `main` in PR #307. BG-13.1 through BG-13.6 are complete and qualified. Current work: BG-13.7 production delivery closeout on PR #308 / `feature/bong-goggles-bg13-media-storage`.**
+**Phase 12 is merged in PR #307. Phase 13 is merged in PR #308. Current work: BG-14.1 on `feature/bong-goggles-bg14-private-messaging`.**
 
 Critical path:
 
-`BG-13.7 production closeout -> BG-14 messaging -> BG-15 games -> BG-16 notifications -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI -> BG-20 launch hardening -> READY`
+`BG-14.1 conversation/request projection -> BG-14.2 encrypted send/receive -> BG-14.3 inbox/read state -> BG-14.4 group threads -> BG-14.5 attachments -> BG-14.6 safety/device/epoch recovery -> BG-14.7 production closeout -> BG-15 games -> BG-16 notifications -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI -> BG-20 launch hardening -> READY`

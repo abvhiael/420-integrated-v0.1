@@ -48,34 +48,38 @@ Status: COMPLETE AND QUALIFIED
 
 ## BG-15.7 — history, statistics, leaderboards & social discovery
 
+Status: COMPLETE AND QUALIFIED
+
+## BG-15.8 — abuse, integrity, replay & recovery hardening
+
 Status: IMPLEMENTED — EXACT-HEAD QUALIFICATION PENDING
 
 Requirements:
 
-- Derive player history only from canonical `FINISHED` sessions in `BongGogglesGameSessionRegistry420`.
-- Preserve exact session ID, game type, immutable ruleset hash, players, winner and canonical timestamps in every history row.
-- Derive win/loss/draw outcomes from the canonical winner, including zero-address draws.
-- Produce deterministic overall and per-game summaries containing games, wins, losses, draws, current streak and best win streak.
-- Build profile game shelves as bounded newest-first projections over canonical finished sessions.
-- Build deterministic per-game leaderboards as application projections only; ranking never becomes canonical game or reward authority.
-- Apply current visibility policy before friend activity or discoverable game activity is emitted.
-- Shape player/game discovery candidates for consumption by the existing BG-12 search/recommendation service rather than creating a second search authority.
-- Keep all discovery/search scores as hints only; canonical eligibility and BG-12 filtering remain authoritative for presentation.
-- Expose BG-18 rewards hooks containing derived stat snapshots only. BG-15 never awards, mints or settles rewards.
-- Keep every history/stat/leaderboard surface rebuildable from canonical finished sessions after reorg/replay.
+- Re-read current player profile activity, bilateral block state and social-game policy before sensitive invitation, move or finish actions; stale previously-authorized clients fail closed when policy changes.
+- Reject nonparticipant actions even when the caller possesses stale local session state.
+- Bound repeated challenge/invitation attempts with deterministic application-layer pairwise rate limiting; rate limits never replace canonical social policy.
+- Preserve BG-15.3 canonical move sequencing and replay protection as the source of truth for stale, duplicate, skipped and replayed move rejection.
+- Rebuild local game state from canonical move commitments/payload verification and compare the resulting state digest against the local digest.
+- Force canonical rebuild whenever local and canonical replay digests diverge; local cached state never overrides a verified canonical replay.
+- Detect conflicting finish attempts against an already-canonical winner and fail closed; identical already-finished outcomes may be represented idempotently without rewriting chain state.
+- Classify abandoned sessions as application metadata only; timeout classification must never mutate canonical lifecycle or fabricate a winner.
+- Recursively redact hidden/private game material from logs and telemetry, including hands, decks, tiles, seeds, salts, plaintext/ciphertext, key material and other hidden-state fields.
+- Prove the Bong Goggles zero-wager boundary explicitly: nonzero wager attempts must continue to fail through the canonical invite builder and wagered play remains routed to 420Bet.
 
-### BG-15.7 invariants
+### BG-15.8 invariants
 
-49. Only canonical `FINISHED` sessions contribute to historical outcomes and competitive statistics.
-50. Win/loss/draw derivation uses the canonical winner field; application rankings cannot rewrite outcomes.
-51. History rows and statistics are derived and rebuildable, never canonical authority.
-52. Leaderboard ordering is deterministic for the same canonical session set and player set.
-53. Leaderboards never authorize gameplay, settlement, rewards, moderation or identity decisions.
-54. Friend/discovery activity must pass current visibility policy before presentation.
-55. BG-12 remains the search/recommendation query authority; BG-15 only emits compatible game/player candidates.
-56. BG-18 reward integration is hook-only in BG-15; `awardRequested` and `mintRequested` remain false.
+57. Current profile/block/policy state overrides stale client authorization for every protected game action.
+58. Nonparticipants cannot use BG-15 application helpers to prepare protected canonical game actions.
+59. Challenge spam controls are bounded application safeguards and never become canonical relationship or invitation authority.
+60. Canonical move sequence/commitment history remains authoritative for stale-client, duplicate, skipped and replay detection.
+61. Local/canonical state-digest divergence always resolves toward deterministic canonical replay, never toward cached local state.
+62. A conflicting finish can never overwrite the canonical terminal winner.
+63. Abandonment detection is advisory metadata only and cannot terminate a canonical session or assign a winner.
+64. Private/hidden game material is redacted before telemetry leaves the game service boundary.
+65. Bong Goggles remains strictly zero-wager; nonzero wager attempts fail closed and wagered play belongs in 420Bet.
+66. BG-15.8 adds no second lifecycle, policy, settlement, moderation or replay authority.
 
 ## Remaining BG-15 phases
 
-- **BG-15.8 — abuse, integrity, replay & recovery hardening**
 - **BG-15.9 — production load qualification, runbook, reconciliation & phase closeout**

@@ -1,0 +1,114 @@
+# 420Notifications Genesis Roadmap
+
+420Notifications is the opt-in alert and event-delivery layer for 420 Integrated. It is a contract-free Genesis user application/service that derives alerts from canonical or registered sources without becoming authority for the underlying event and without inheriting 420Wallet execution rights.
+
+## GEN-10.7 status
+
+- **NOTIFY-0 — Genesis boundary + executable invariant baseline — COMPLETE**
+- **NOTIFY-1 — runtime/service scaffold — COMPLETE**
+- **NOTIFY-2 — subscription engine — COMPLETE**
+- **NOTIFY-3 — indexer ingestion + replay — COMPLETE**
+- **NOTIFY-4 — delivery queue + retry/dedup — COMPLETE**
+- **NOTIFY-5 — provider-neutral delivery adapters — COMPLETE**
+- **NOTIFY-6 — provenance + security — COMPLETE**
+- **NOTIFY-7 — API + feed/history — COMPLETE**
+- **NOTIFY-8 — privacy + abuse hardening — COMPLETE**
+- **NOTIFY-9 — Genesis frontend — COMPLETE**
+- **NOTIFY-10 — qualification, reconciliation + closeout — ACTIVE**
+
+## NOTIFY-0 — Genesis boundary + executable invariant baseline
+
+Freeze the service identity `420/service/notifications/v1`, require no Notifications-specific Genesis contract, and encode the authority, replay, privacy and Wallet boundaries in executable Go tests and the Genesis configuration.
+
+### Genesis invariants
+
+- **NOTIFY-INV-001** — 420Notifications owns no canonical protocol state and requires no Notifications-specific Genesis contract.
+- **NOTIFY-INV-002** — a notification never becomes authority for the event it describes; chain/protocol state remains canonical.
+- **NOTIFY-INV-003** — actionable notifications preserve source provenance and a path back to the canonical or registered origin.
+- **NOTIFY-INV-004** — 420Notifications cannot sign transactions, approve spending, transfer assets, grant Smart Account capabilities or bypass Wallet confirmation.
+- **NOTIFY-INV-005** — subscriptions are opt-in and reversible; source/topic/severity controls are user-controlled and promotional consent is separate.
+- **NOTIFY-INV-006** — retry, fan-out and provider failover cannot create canonical events or mutate underlying protocol state.
+- **NOTIFY-INV-007** — private Messenger/Commons payloads, encrypted Resource payloads, private Identity fields and raw Attention telemetry are excluded from notification indexing.
+- **NOTIFY-INV-008** — subscriptions, watchlists, notification history and delivery endpoints are private by default and are not protocol state.
+- **NOTIFY-INV-009** — on-chain alerts preserve chain/network identity and relevant block/transaction/log provenance plus finality context where available.
+- **NOTIFY-INV-010** — reorged/reverted/superseded presentation may be updated through append-only `finalized`, `retracted` or `superseded` signals; finalized canonical history is never rewritten.
+- **NOTIFY-INV-011** — rate limiting, deduplication and abuse controls cannot redefine or suppress canonical protocol truth; users retain direct Wallet/Explorer/RPC access.
+- **NOTIFY-INV-012** — notification service failure cannot block payments, swaps, bridges, governance, staking, contract interaction or any protocol operation.
+- **NOTIFY-INV-013** — alternative clients and notification providers are explicitly allowed and may independently derive alerts from the same canonical sources.
+- **NOTIFY-INV-014** — replay checkpoints are consumer-owned, chain-bound, opaque and non-authoritative; a batch advances its checkpoint only after successful processing.
+
+## NOTIFY-1 — runtime/service scaffold
+
+Implemented configuration validation, service lifecycle, `/healthz` and `/readyz`, chain/indexer identity validation, HTTP indexer probing and fail-closed startup. The service remains noncanonical, starts unready, rejects wrong-chain or unavailable indexer dependencies, and only becomes ready after the configured public indexer boundary qualifies.
+
+Runtime entrypoint: `notifications/cmd/notifications420`.
+
+Required environment:
+
+- `NOTIFICATIONS_CHAIN_ID`
+- `NOTIFICATIONS_INDEXER_URL`
+
+Optional environment:
+
+- `NOTIFICATIONS_LISTEN_ADDR` (default `:8421`)
+- `NOTIFICATIONS_REQUEST_TIMEOUT` (default `5s`)
+
+## NOTIFY-2 — subscription engine
+
+Implemented an in-memory private subscription model/store with explicit opt-in activation; source/topic/event filters; minimum severity; in-app/web/push channel preferences; deterministic normalization; reversible mute/unmute; unsubscribe; operational consent; and promotional consent that is independent and off unless explicitly granted. The store clones mutable slices on read/write so callers cannot mutate private subscription state by retaining references. Subscription data remains noncanonical and is not published as chain or protocol state.
+
+## NOTIFY-3 — indexer ingestion + replay
+
+Implemented a public-indexer replay processor modeled on the qualified `NotificationsConsumerAdapter420` contract. Event batches must use stream version `v1`, remain explicitly non-authoritative, identify `protocol` as their source and preserve valid event/provenance identity. Chain mismatch, malformed envelopes or invalid provenance fail before checkpoint advancement.
+
+Replay checkpoints are consumer-owned, chain-bound and non-authoritative. Restart resumes from the persisted opaque cursor, and the next cursor is saved only after every event in the batch is processed successfully. Canonicality updates accept only append-only `finalized`, `retracted` and `superseded` signals and reject authoritative, cross-chain or malformed signals.
+
+Tests cover successful resume, failed-batch checkpoint immutability, wrong-chain rejection and canonicality-signal validation.
+
+## NOTIFY-4 — delivery queue + retry/dedup
+
+Implemented deterministic enqueue keys across subscription/event/provider/destination, idempotent deduplication, bounded exponential retry/backoff, dead-letter state, severity/priority ordering, per-provider/destination fixed-window rate-limit decisions, defensive payload cloning and isolated delivery state so one failing destination does not affect another. Delivery records remain noncanonical presentation state.
+
+Tests cover deduplication, ordering, retry timing, dead-letter transition, destination failure isolation, payload cloning, rate-limit throttling/reset and destination-level rate-limit isolation.
+
+## NOTIFY-5 — provider-neutral delivery adapters
+
+Implemented a provider-neutral delivery interface and registry plus Genesis adapters for in-app, web and mobile push. Provider IDs are normalized, duplicate IDs are rejected, requests are validated before send, payload buffers are defensively copied and provider results are explicitly non-authoritative. Alternative providers can be registered beside the Genesis adapters, keeping future email/SMS/Messenger transports pluggable without changing protocol authority.
+
+Tests cover all three Genesis provider kinds, non-authoritative results, alternative-provider registration, duplicate rejection, provider failure propagation, request validation and payload isolation.
+
+## NOTIFY-6 — provenance + security
+
+Implemented provenance validation that requires chain identity, source identity, block number/hash, transaction hash and non-negative log index together with a validated origin link. Link validation rejects unsupported schemes, hostile `javascript:`/`data:` content and credential-bearing HTTP(S) URLs while allowing canonical HTTP(S) origins and registered app/wallet handoff schemes.
+
+Action handoffs remain non-authoritative: notifications may deep-link to `wallet420://` or other registered app routes, but the handoff object is rejected if it attempts to carry signing, spending, grant or Wallet-bypass authority. Tests cover required provenance, hostile URL schemes/userinfo, valid canonical/app links and explicit Wallet-authority rejection.
+
+## NOTIFY-7 — API + feed/history
+
+Implemented a noncanonical notification feed/history store and API-facing service. Feed items preserve validated chain/source provenance, event/subscription identity, delivery status and read/unread state, and explicitly reject authoritative records. Deterministic reverse-chronological ordering with timestamp-plus-ID cursors provides replay-safe pagination, including stable ordering for events sharing the same timestamp.
+
+The API service exposes subscription create/get/list/update/delete through the qualified private subscription store, plus notification lookup, paged feed/history, read/unread updates and delivery-status updates. Presentation/history state remains local service state and cannot redefine protocol truth.
+
+Tests cover subscription CRUD, feed retrieval, read/unread transitions, delivery-status transitions, provenance preservation, hostile provenance rejection, non-authority enforcement and replay-safe pagination.
+
+## NOTIFY-8 — privacy + abuse hardening
+
+Implemented explicit private-source exclusions for private Messenger/Commons payload classes, encrypted Resource payloads, private Identity data and raw Attention telemetry. Delivery endpoints can be reduced to deterministic opaque provider-local keys for abuse controls instead of retaining raw endpoint correlation keys. Presentation metadata is trimmed, length-bounded and rejected when it contains control characters.
+
+Added bounded per-scope abuse throttling, provider-level failure isolation and degraded-mode health semantics. A failed provider does not mark unrelated providers unavailable, and degraded notification/indexer state is always explicitly noncanonical. Abuse or presentation controls affect only notification delivery/presentation and never redefine the canonical event or block direct Wallet/Explorer/RPC access.
+
+Tests cover opaque endpoint keys, private-source rejection, hostile/oversized metadata rejection, rate-window reset, provider-failure isolation and the guarantee that degraded health never claims canonical authority.
+
+## NOTIFY-9 — Genesis frontend
+
+Implemented a dependency-free Genesis notification centre served from `notifications/web`. The frontend includes an unread badge, source/severity/read-state filters, explicit finalized/retracted/superseded presentation states, paged feed/history loading, read/unread actions, provenance details and origin links, channel/promotional preferences, and safe 420Wallet/origin-app handoff links.
+
+The web surface is presentation-only and inherits the NOTIFY authority boundary: it exposes no signing, spending, capability-grant or Wallet-bypass controls. Security headers deny framing, object embedding, sensitive browser permissions and off-origin connections. Degraded notification service errors explicitly direct users back to Wallet, Explorer and RPC for canonical protocol truth.
+
+Tests cover required Genesis views, security headers, read-only asset serving, notification API routes, provenance and Wallet handoff affordances, canonicality states and absence of execution-authority controls.
+
+## NOTIFY-10 — qualification, reconciliation + closeout
+
+Implemented an executable Genesis closeout report that requires the complete 14-invariant set and evidence for invariant qualification, deterministic replay, deduplication, restart recovery, failure injection, provider isolation, privacy/security and the Genesis frontend. The closeout model rejects any canonical-authority claim and re-validates the contract-free/private boundary.
+
+Delivery terminal-state handling was hardened for final qualification: delivered records clear retry scheduling, dead-letter records reject duplicate failure mutation, and terminal transitions require explicit timestamps. The final remaining work is to reconcile the long-lived branch with latest `main`, run exact-head qualification on that reconciled commit, record the qualification evidence and merge PR #312 once all required workflows are green.

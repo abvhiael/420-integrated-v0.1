@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/abvhiael/420-integrated-v0.1/notifications/delivery"
+	"github.com/420integrated/420-integrated/notifications/delivery"
 )
 
 type fakeSender struct {

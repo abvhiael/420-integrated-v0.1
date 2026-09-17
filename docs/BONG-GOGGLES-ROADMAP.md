@@ -70,35 +70,24 @@ Hard boundary: Bong Goggles social games remain **zero-wager**. Any wagered game
 
 ### BG-15.4 — turn UX, clocks, rematches & challenges — COMPLETE AND QUALIFIED
 
-- application game-card projection for invited, active and terminal sessions;
-- engine-derived turn ownership validated against canonical session participants;
-- canonical `nextMoveNumber` remains the sequencing source while notation/history stays application presentation;
-- profile/friend/group/lobby challenge entry points all route through the canonical zero-wager `invite` intent;
-- rematches require a terminal prior session and always request a fresh canonical session rather than cloning/reusing the previous `sessionId`;
-- application time controls are explicitly non-canonical, advisory and have no settlement authority;
-- accept/decline/cancel/finish/rematch presentation actions remain subordinate to wallet/session authorization and canonical lifecycle;
-- draw presentation preserves the canonical zero-address winner convention.
+### BG-15.5 — spectator, presence & BG-14 messaging integration — COMPLETE AND QUALIFIED
 
-### BG-15.5 — spectator, presence & BG-14 messaging integration — IMPLEMENTED, QUALIFICATION PENDING
+- spectator views are read-only derived projections with current privacy/block/profile-policy checks;
+- hidden-state rulesets expose explicit public state only;
+- presence remains ephemeral non-canonical metadata;
+- chat uses BG-14/420Messenger exclusively.
 
-- read-only spectator projection for canonical active/finished sessions only;
-- exact BG-15.2 ruleset descriptor binding required before spectator presentation;
-- current player-profile, viewer/player block and spectator-visibility policy re-read on each protected view;
-- spectator surface accepts explicit `publicState` only and rejects full/private state input;
-- hidden-state rulesets reject common private-material fields from spectator payloads;
-- presence/online indicators are ephemeral application metadata, de-duplicated by newest observation and expired to `OFFLINE`;
-- presence is never canonical and cannot affect lifecycle, turn, outcome, settlement or rewards;
-- player/spectator chat consumes only currently authorized BG-14/420Messenger routes;
-- non-420Messenger, unauthorized or actor/session-mismatched chat routes fail closed;
-- no game contract stores chat messages, encryption state or conversation authority.
+### BG-15.6 — randomness + hidden-state games — IMPLEMENTED, QUALIFICATION PENDING
 
-### BG-15.6 — randomness + hidden-state games
-
-- use canonical `randomnessRef` only for rulesets that genuinely require auditable randomness;
-- integrate 420Randomness through a provider-neutral resolver rather than inventing game-specific randomness authority;
-- keep hidden hands/tiles/draw state off-chain or commitment-protected as required by the ruleset;
-- verify reveal/commit consistency before advancing hidden-state games;
-- add adversarial tests for stale randomness, duplicate reveals, premature reveal attempts and mismatched commitments.
+- canonical session `randomnessRef` is the sole request anchor for randomness-dependent games;
+- generalized provider-neutral 420Randomness / `RandomnessRouter420` resolves the referenced request;
+- only exact, fulfilled request results with randomness and proof hash are accepted;
+- non-random rulesets bypass randomness resolution;
+- deterministic hidden-state seeds bind `sessionId`, immutable `rulesetHash`, `randomnessRef` and fulfilled randomness;
+- hands, tiles, decks, draws, salts and other private material remain off-chain/commitment-protected;
+- hidden-state reveals must verify against their exact commitments before application use;
+- duplicate reveal IDs, stale randomness references, premature reveals and commitment mismatches fail closed;
+- BG-15 creates no second entropy provider, fallback mechanism, lifecycle authority or wager path.
 
 ### BG-15.7 — discovery, history, leaderboards and social surfaces
 
@@ -136,8 +125,8 @@ Hard boundary: Bong Goggles social games remain **zero-wager**. Any wagered game
 
 ## Current position
 
-**Phase 12 is merged in PR #307. Phase 13 is merged in PR #308. Phase 14 is merged in PR #314. Current work: BG-15.5 spectator, presence & BG-14 messaging integration on PR #321 / `feature/bong-goggles-bg15-social-games`.**
+**Phase 12 is merged in PR #307. Phase 13 is merged in PR #308. Phase 14 is merged in PR #314. Current work: BG-15.6 420Randomness + hidden-state games on PR #321 / `feature/bong-goggles-bg15-social-games`.**
 
 Critical path:
 
-`BG-15.5 spectator/presence/chat -> BG-15.6 randomness/hidden state -> BG-15.7 history/leaderboards/social surfaces -> BG-15.8 integrity/recovery -> BG-15.9 production closeout -> BG-16 notifications -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI -> BG-20 launch hardening -> READY`
+`BG-15.6 randomness/hidden state -> BG-15.7 history/leaderboards/social surfaces -> BG-15.8 integrity/recovery -> BG-15.9 production closeout -> BG-16 notifications -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI -> BG-20 launch hardening -> READY`

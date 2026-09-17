@@ -60,7 +60,7 @@ BG-14 closed with secret-redacted telemetry, deterministic transport-loss/duplic
 
 Detailed BG-14 invariants and requirements are in `docs/BONG-GOGGLES-BG-14.md`; production operations are in `docs/BONG-GOGGLES-BG-14-7-RUNBOOK.md`.
 
-## Phase 15 — social games application — IN PROGRESS
+## Phase 15 — social games application — IN PROGRESS, PR #321
 
 Branch: `feature/bong-goggles-bg15-social-games`
 
@@ -68,24 +68,26 @@ BG-15 turns the existing canonical `BongGogglesGameSessionRegistry420` foundatio
 
 Hard boundary: Bong Goggles social games remain **zero-wager**. Any wagered game mode belongs in 420Bet and must not be smuggled into the Bong Goggles game-session path.
 
-### BG-15.1 — canonical game-session projector + resolver — CURRENT
+### BG-15.1 — canonical game-session projector + resolver — COMPLETE AND QUALIFIED
 
-- project `INVITED`, `ACTIVE`, `FINISHED`, `DECLINED` and `CANCELLED` sessions from canonical registry state/events;
-- normalize player identities, game type, immutable ruleset hash, randomness reference, timestamps, next move number, winner and lifecycle state;
-- expose incoming/outgoing game invitations and active/recent games per profile;
-- revalidate current profile activity, bilateral block state and social game-invite policy before presenting actionable intents;
-- construct wallet-authorized invite/accept/decline/cancel/finish transaction intents without backend signing;
-- preserve the zero-wager invariant in every application path;
-- add dedicated Bong Goggles Games Verification CI and deterministic unit coverage.
+- projects `INVITED`, `ACTIVE`, `FINISHED`, `DECLINED` and `CANCELLED` sessions from canonical registry state/events;
+- normalizes player identities, game type, immutable ruleset hash, randomness reference, timestamps, next move number, winner and lifecycle state;
+- exposes incoming/outgoing game invitations and active/recent games per profile;
+- revalidates current profile activity, bilateral block state and social game-invite policy before actionable presentation;
+- constructs wallet-authorized invite/accept/decline/cancel/finish intents without backend signing;
+- preserves the zero-wager invariant in every application path;
+- dedicated Bong Goggles Games Verification plus normal Docs/Integrated qualification green on exact head.
 
-### BG-15.2 — game ruleset registry + client engines
+### BG-15.2 — versioned ruleset registry + client game engines — IMPLEMENTED, QUALIFICATION PENDING
 
-- define versioned application ruleset descriptors keyed by canonical `rulesetHash`;
-- support the V1 vocabulary already committed on-chain: Cribbage, Russian Cribbage, Chess, Word Game, Checkers, Backgammon and Dominoes;
-- map each ruleset hash to deterministic client-engine/version metadata;
-- reject unknown or mismatched rulesets rather than guessing behavior;
-- keep game rules out of `BongGogglesGameSessionRegistry420` so historical sessions remain reproducible against immutable ruleset versions;
-- add serialization fixtures and cross-client deterministic replay vectors.
+- versioned immutable ruleset descriptors keyed by canonical `rulesetHash`;
+- stable V1 catalog for Cribbage, Russian Cribbage, Chess, Word Game, Checkers, Backgammon and Dominoes;
+- deterministic namespaced hash derivation for official V1 ruleset identities;
+- exact engine ID/version, state codec, move codec, hidden-state and randomness metadata per ruleset;
+- fail-closed handling for unknown hashes, duplicate identities, duplicate hashes, game/hash mismatches and missing/mismatched engine implementations;
+- deterministic stable-JSON state/move codecs with order-independent serialization;
+- deterministic move/state digests and cross-client replay vectors;
+- canonical move sequencing/commit construction intentionally deferred to BG-15.3.
 
 ### BG-15.3 — move engine + canonical commitment bridge
 
@@ -157,8 +159,8 @@ Hard boundary: Bong Goggles social games remain **zero-wager**. Any wagered game
 
 ## Current position
 
-**Phase 12 is merged in PR #307. Phase 13 is merged in PR #308. Phase 14 is merged in PR #314. Current work: BG-15.1 canonical game-session projector + resolver on `feature/bong-goggles-bg15-social-games`.**
+**Phase 12 is merged in PR #307. Phase 13 is merged in PR #308. Phase 14 is merged in PR #314. Current work: BG-15.2 versioned ruleset registry + client game engines on PR #321 / `feature/bong-goggles-bg15-social-games`.**
 
 Critical path:
 
-`BG-15.1 session projector -> BG-15.2 rulesets -> BG-15.3 move bridge -> BG-15.4 turn UX -> BG-15.5 spectator/presence/chat -> BG-15.6 randomness/hidden state -> BG-15.7 history/leaderboards/social surfaces -> BG-15.8 integrity/recovery -> BG-15.9 production closeout -> BG-16 notifications -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI -> BG-20 launch hardening -> READY`
+`BG-15.2 rulesets -> BG-15.3 move bridge -> BG-15.4 turn UX -> BG-15.5 spectator/presence/chat -> BG-15.6 randomness/hidden state -> BG-15.7 history/leaderboards/social surfaces -> BG-15.8 integrity/recovery -> BG-15.9 production closeout -> BG-16 notifications -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI -> BG-20 launch hardening -> READY`

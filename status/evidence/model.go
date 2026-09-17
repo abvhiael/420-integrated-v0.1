@@ -19,7 +19,7 @@ type Observation struct {
 	SourceID    string
 	Network     string
 	Environment string
-	State       components.HealthState
+	State       components.Health
 	Live        bool
 	Ready       bool
 	Summary     string
@@ -36,7 +36,7 @@ func (o Observation) Validate(now time.Time) error {
 	if strings.TrimSpace(o.Network) == "" || strings.TrimSpace(o.Environment) == "" {
 		return errors.New("observation requires network and environment")
 	}
-	if !components.ValidHealthState(o.State) {
+	if !components.ValidHealth(o.State) {
 		return fmt.Errorf("invalid health state %q", o.State)
 	}
 	if o.ObservedAt.IsZero() || o.ExpiresAt.IsZero() {

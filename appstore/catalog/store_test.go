@@ -4,6 +4,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	appregistry "github.com/420integrated/420-integrated/appstore/registry"
@@ -39,40 +40,51 @@ func TestSaveLoadRestoreRoundTrip(t *testing.T) {
 }
 
 func TestRebuildCanonicalizesAndSortsRecordsBeforeReturn(t *testing.T) {
-	snapshot := sampleSnapshot()
-	alpha := snapshot.Versions[0]
-	alpha.ServiceID = "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-	alpha.Implementation = "0x000000000000000000000000000000000000ABCD"
-	alpha.CodeHash = "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
-	alpha.MetadataHash = "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
-	alpha.BlockHash = "0xDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD"
+	hex32 := func(ch string) string { return "0x" + strings.Repeat(ch, 64) }
 
-	beta := snapshot.Versions[0]
-	beta.ServiceID = "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
-	beta.Implementation = "0x000000000000000000000000000000000000BCDE"
-	beta.CodeHash = "0xEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"
-	beta.MetadataHash = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
-	beta.BlockNumber = 11
-	beta.BlockHash = "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+	alpha := appregistry.VersionRecord{
+		ServiceID:      "420/SERVICE/ALPHA/V1",
+		Version:        1,
+		Implementation: "0x000000000000000000000000000000000000ABCD",
+		CodeHash:       hex32("B"),
+		MetadataHash:   hex32("C"),
+		Active:         true,
+		BlockNumber:    10,
+		BlockHash:      hex32("D"),
+	}
+	beta := appregistry.VersionRecord{
+		ServiceID:      "420/SERVICE/BETA/V1",
+		Version:        1,
+		Implementation: "0x000000000000000000000000000000000000BCDE",
+		CodeHash:       hex32("E"),
+		MetadataHash:   hex32("F"),
+		Active:         true,
+		BlockNumber:    11,
+		BlockHash:      hex32("A"),
+	}
 
-	// Deliberately reverse canonical service-ID order. Both records still satisfy
+	// Deliberately reverse canonical service-ID order. Every field satisfies
 	// Registry validation; only casing and ordering require catalogue normalization.
-	snapshot.Versions = []appregistry.VersionRecord{beta, alpha}
-	snapshot.FinalizedBlock = 11
+	snapshot := appregistry.Snapshot{
+		ChainID:         420,
+		RegistryAddress: "0x0000000000000000000000000000000000000420",
+		FinalizedBlock:  11,
+		Versions:        []appregistry.VersionRecord{beta, alpha},
+	}
 
 	doc, err := RebuildFromSnapshot(snapshot)
 	if err != nil { t.Fatal(err) }
 	if len(doc.Versions) != 2 { t.Fatalf("versions=%d", len(doc.Versions)) }
-	if doc.Versions[0].ServiceID != "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" ||
-		doc.Versions[1].ServiceID != "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" {
+	if doc.Versions[0].ServiceID != "420/service/alpha/v1" ||
+		doc.Versions[1].ServiceID != "420/service/beta/v1" {
 		t.Fatalf("records not canonically sorted: %#v", doc.Versions)
 	}
 	if doc.Versions[0].Implementation != "0x000000000000000000000000000000000000abcd" {
 		t.Fatalf("implementation not canonicalized: %q", doc.Versions[0].Implementation)
 	}
-	if doc.Versions[0].CodeHash != "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" ||
-		doc.Versions[0].MetadataHash != "0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc" ||
-		doc.Versions[0].BlockHash != "0xdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd" {
+	if doc.Versions[0].CodeHash != hex32("b") ||
+		doc.Versions[0].MetadataHash != hex32("c") ||
+		doc.Versions[0].BlockHash != hex32("d") {
 		t.Fatalf("hash fields not canonicalized: %#v", doc.Versions[0])
 	}
 }

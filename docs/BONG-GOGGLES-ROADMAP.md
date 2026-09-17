@@ -36,51 +36,91 @@ Production web target: `https://bonggoggles.420integrated.org`.
 
 - **BG-14.1 through BG-14.7 — COMPLETE AND QUALIFIED**
 
-## Phase 15 — social games application — IN PROGRESS, PR #321
+## Phase 15 — social games application — COMPLETE, merged PR #321
 
-Branch: `feature/bong-goggles-bg15-social-games`
+- **BG-15.1 through BG-15.9 — COMPLETE AND QUALIFIED**
+- merge commit: `95ab47efaccb1a50084c33c5b7c8d4faf44ab529`
+- production social games remain strictly zero-wager; wagered play belongs in 420Bet.
 
-BG-15 turns the canonical `BongGogglesGameSessionRegistry420` foundation from PR #82 into a production Bong Goggles games experience. The registry remains authoritative for session identity/lifecycle, immutable `rulesetHash`, move sequencing/commitments, winner state and player authorization. Game-specific rendering, rule execution, timers, notation, local UX state, spectator presentation, discovery and rankings remain application-layer concerns.
+## Phase 16 — notifications — ACTIVE
 
-Hard boundary: Bong Goggles social games remain **zero-wager**. Any wagered mode belongs in 420Bet.
+Branch: `feature/bong-goggles-bg16-notifications`
 
-### BG-15.1 — canonical game-session projector + resolver — COMPLETE AND QUALIFIED
+BG-16 integrates the production Bong Goggles application with the existing 420Notifications service. Notifications remain presentation-only, opt-in through 420Notifications, non-authoritative and unable to sign transactions or mutate canonical state. Private Messenger payloads, encrypted content, private Identity fields and raw Attention telemetry remain excluded.
 
-### BG-15.2 — versioned ruleset registry + client game engines — COMPLETE AND QUALIFIED
+### BG-16.1 — notification taxonomy + 420Notifications boundary — IMPLEMENTED, QUALIFICATION PENDING
 
-### BG-15.3 — move engine + canonical commitment bridge — COMPLETE AND QUALIFIED
+- freeze the application notification kind/topic catalog;
+- validate Bong Goggles candidates before handoff to `420/service/notifications/v1`;
+- preserve the BG-12.6 deterministic/provenance/non-authority guarantees;
+- reserve production classes for relationships, interactions, groups, events, games, messages, moderation/appeals, rewards, discovery and safety;
+- Messenger notifications are metadata-only and explicitly forbid private/encrypted payload carriage;
+- subscription state, channels, rate limits, provider retry state and promotional consent remain owned by 420Notifications.
 
-### BG-15.4 — turn UX, clocks, rematches & challenges — COMPLETE AND QUALIFIED
+### BG-16.2 — relationships + interaction emitters — NEXT
 
-### BG-15.5 — spectator, presence & BG-14 messaging integration — COMPLETE AND QUALIFIED
+- incoming friend requests and accepted requests;
+- follows;
+- comments/replies;
+- mentions and tags;
+- policy/block revalidation before emission;
+- self-notification suppression and deterministic replay deduplication.
 
-### BG-15.6 — randomness + hidden-state games — COMPLETE AND QUALIFIED
+### BG-16.3 — groups + events emitters
 
-### BG-15.7 — discovery, history, leaderboards and social surfaces — COMPLETE AND QUALIFIED
+- group join requests, approvals/removals and material group activity;
+- event invitations, RSVP/material event changes;
+- canonical ownership/membership hydration where recipient context is not carried by the source event.
 
-### BG-15.8 — abuse, integrity and recovery hardening — COMPLETE AND QUALIFIED
+### BG-16.4 — games + messaging emitters
 
-- current policy/profile/block state invalidates stale application authorization;
-- challenge rate limiting, canonical replay, conflicting-finish containment and abandoned-session classification fail closed without becoming authority;
-- local/canonical divergence forces deterministic rebuild;
-- hidden/private telemetry is recursively redacted;
-- explicit zero-wager tests preserve the 420Bet boundary.
+- game invites, invite acceptance, turn-ready and game-finished notices;
+- strict zero-wager boundary preservation;
+- Messenger notification metadata only, never plaintext/ciphertext/private payload indexing;
+- reuse BG-14 conversation/session authorization rather than creating notification authority.
 
-### BG-15.9 — production games closeout — IMPLEMENTED, RECONCILIATION/QUALIFICATION PENDING
+### BG-16.5 — moderation, appeals + rewards emitters
 
-- bounded baseline: 500 lobby sessions, 250 active sessions, 5,000 canonical moves, 10,000 history rows, 1,000 leaderboard players and 25 concurrent resolvers;
-- P95 budgets: projection 500 ms, intent 250 ms, canonical replay 1,500 ms, history 750 ms and leaderboard 1,000 ms;
-- zero qualification errors and zero unresolved canonical/local divergence required;
-- structured operational telemetry uses BG-15.8 redaction before emission;
-- required drills cover projection stall, replay divergence, ruleset rollback, randomness unavailable, hidden-state reveal failure, policy invalidation, challenge spam and wager boundary;
-- operator runbook: `docs/BONG-GOGGLES-BG-15-9-RUNBOOK.md`;
-- reconcile the phase branch with current `main` before final qualification;
-- reconciled exact head must pass Games, Media, Docs and Integrated workflows;
-- PR #321 remains unmerged until explicitly instructed.
+- moderation action/status notifications;
+- appeal lifecycle updates;
+- reward-earned/payout-status presentation sourced from qualified reward state;
+- no notification can redefine moderation/reward canonical truth.
 
-## Remaining product phases after BG-15
+### BG-16.6 — preference + delivery integration
 
-- **BG-16 — notifications**
+- connect Bong Goggles topic/kind vocabulary to 420Notifications subscriptions;
+- granular per-topic/per-class controls;
+- in-app/web/push delivery handoff;
+- mute/unmute/unsubscribe behavior remains 420Notifications-owned;
+- promotional consent remains separate and opt-in.
+
+### BG-16.7 — notification centre application surfaces
+
+- unread counts and paged history;
+- deep links back to the canonical Bong Goggles subject;
+- finalized/retracted/superseded presentation states;
+- degraded-notification UX points users back to canonical app/Wallet/Explorer state.
+
+### BG-16.8 — abuse, privacy + recovery hardening
+
+- rate/fan-out abuse controls;
+- redacted structured telemetry;
+- replay/restart recovery;
+- provider failure isolation;
+- private-source exclusion regression tests;
+- canonical/local divergence cannot be hidden by notification state.
+
+### BG-16.9 — production notification closeout
+
+- bounded load/latency qualification;
+- deterministic replay and canonicality drills;
+- provider-degradation exercises;
+- operator runbook;
+- reconcile the phase branch with current `main`;
+- exact-head qualification before merge.
+
+## Remaining product phases after BG-16
+
 - **BG-17 — moderation operations**
 - **BG-18 — rewards production configuration**
 - **BG-19 — full web application + public-facing UI**
@@ -88,8 +128,8 @@ Hard boundary: Bong Goggles social games remain **zero-wager**. Any wagered mode
 
 ## Current position
 
-**Phase 12 is merged in PR #307. Phase 13 is merged in PR #308. Phase 14 is merged in PR #314. Current work: BG-15.9 production games closeout on PR #321 / `feature/bong-goggles-bg15-social-games`.**
+**Phase 15 is merged in PR #321. Current work: BG-16.1 notification taxonomy + 420Notifications boundary on `feature/bong-goggles-bg16-notifications`.**
 
 Critical path:
 
-`BG-15.9 production closeout -> BG-16 notifications -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI -> BG-20 launch hardening -> READY`
+`BG-16.1 notification boundary -> BG-16.2 relationships/interactions -> BG-16.3 groups/events -> BG-16.4 games/messages -> BG-16.5 moderation/rewards -> BG-16.6 preferences/delivery -> BG-16.7 notification centre -> BG-16.8 hardening -> BG-16.9 closeout -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI -> BG-20 launch hardening -> READY`

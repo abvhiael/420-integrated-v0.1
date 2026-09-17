@@ -42,31 +42,32 @@ Production web target: `https://bonggoggles.420integrated.org`.
 - merge commit: `95ab47efaccb1a50084c33c5b7c8d4faf44ab529`
 - production social games remain strictly zero-wager; wagered play belongs in 420Bet.
 
-## Phase 16 — notifications — ACTIVE
+## Phase 16 — notifications — ACTIVE, PR #330
 
 Branch: `feature/bong-goggles-bg16-notifications`
 
 BG-16 integrates the production Bong Goggles application with the existing 420Notifications service. Notifications remain presentation-only, opt-in through 420Notifications, non-authoritative and unable to sign transactions or mutate canonical state. Private Messenger payloads, encrypted content, private Identity fields and raw Attention telemetry remain excluded.
 
-### BG-16.1 — notification taxonomy + 420Notifications boundary — IMPLEMENTED, QUALIFICATION PENDING
+### BG-16.1 — notification taxonomy + 420Notifications boundary — COMPLETE AND QUALIFIED
 
-- freeze the application notification kind/topic catalog;
-- validate Bong Goggles candidates before handoff to `420/service/notifications/v1`;
-- preserve the BG-12.6 deterministic/provenance/non-authority guarantees;
-- reserve production classes for relationships, interactions, groups, events, games, messages, moderation/appeals, rewards, discovery and safety;
+- application notification kind/topic catalog frozen;
+- Bong Goggles candidates validated before handoff to `420/service/notifications/v1`;
+- BG-12.6 deterministic/provenance/non-authority guarantees preserved;
+- production classes reserved for relationships, interactions, groups, events, games, messages, moderation/appeals, rewards, discovery and safety;
 - Messenger notifications are metadata-only and explicitly forbid private/encrypted payload carriage;
 - subscription state, channels, rate limits, provider retry state and promotional consent remain owned by 420Notifications.
 
-### BG-16.2 — relationships + interaction emitters — NEXT
+### BG-16.2 — relationships + interaction emitters — IMPLEMENTED, QUALIFICATION PENDING
 
 - incoming friend requests and accepted requests;
-- follows;
-- comments/replies;
-- mentions and tags;
-- policy/block revalidation before emission;
-- self-notification suppression and deterministic replay deduplication.
+- approval-required follow requests and completed follows;
+- comments/replies from canonical `SocialObjectPublished` COMMENT projections;
+- mentions and tags from canonical `TagCreated` events;
+- current profile/policy/block/mute revalidation before request/comment/tag emission;
+- self-notification suppression through the common candidate builder;
+- deterministic replay deduplication retained from the BG-12.6 pipeline.
 
-### BG-16.3 — groups + events emitters
+### BG-16.3 — groups + events emitters — NEXT
 
 - group join requests, approvals/removals and material group activity;
 - event invitations, RSVP/material event changes;
@@ -128,8 +129,8 @@ BG-16 integrates the production Bong Goggles application with the existing 420No
 
 ## Current position
 
-**Phase 15 is merged in PR #321. Current work: BG-16.1 notification taxonomy + 420Notifications boundary on `feature/bong-goggles-bg16-notifications`.**
+**Phase 15 is merged in PR #321. BG-16.1 is qualified. Current work: BG-16.2 relationships + interaction emitters on PR #330 / `feature/bong-goggles-bg16-notifications`.**
 
 Critical path:
 
-`BG-16.1 notification boundary -> BG-16.2 relationships/interactions -> BG-16.3 groups/events -> BG-16.4 games/messages -> BG-16.5 moderation/rewards -> BG-16.6 preferences/delivery -> BG-16.7 notification centre -> BG-16.8 hardening -> BG-16.9 closeout -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI -> BG-20 launch hardening -> READY`
+`BG-16.2 relationships/interactions -> BG-16.3 groups/events -> BG-16.4 games/messages -> BG-16.5 moderation/rewards -> BG-16.6 preferences/delivery -> BG-16.7 notification centre -> BG-16.8 hardening -> BG-16.9 closeout -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI -> BG-20 launch hardening -> READY`

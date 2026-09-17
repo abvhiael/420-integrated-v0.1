@@ -10,7 +10,7 @@
 - **STATUS-3 — evidence ingestion + source adapters — COMPLETE**
 - **STATUS-4 — incident lifecycle + severity model — COMPLETE**
 - **STATUS-5 — aggregation, freshness + degraded-state engine — COMPLETE**
-- STATUS-6 — history, provenance + canonical references — pending
+- **STATUS-6 — history, provenance + canonical references — COMPLETE**
 - STATUS-7 — API + public status feed — pending
 - STATUS-8 — privacy/security + anti-spoofing hardening — pending
 - STATUS-9 — Genesis frontend — pending
@@ -92,7 +92,11 @@ Network rollups preserve failure isolation. One unavailable or unknown component
 
 ## STATUS-6 — history, provenance + canonical references
 
-Store rebuildable noncanonical history for observations, incidents and recoveries. Preserve source provenance, chain/environment identity, block/slot/tx/checkpoint references where applicable and auditable correction/recovery transitions.
+Implemented append-only noncanonical history under `status/history`. Observation records preserve component/source identity, network/environment, timestamps, health state and canonical/protocol reference values while explicitly rejecting any observation that claims canonical authority.
+
+Incident snapshots preserve the full auditable update sequence, including evidence references and recovery timestamps. History entries receive a single monotonic sequence across observation and incident record types, providing deterministic replay order for rebuildable status views without turning the history store into protocol authority.
+
+All history reads return defensive copies so callers cannot mutate stored provenance or references out of band. Corrections and recoveries are represented as new append-only records rather than destructive rewrites, preserving the evidence chain required by STATUS-INV-013.
 
 ## STATUS-7 — API + public status feed
 

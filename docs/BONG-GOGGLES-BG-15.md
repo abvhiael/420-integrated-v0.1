@@ -26,88 +26,44 @@ BG-15 builds the production Bong Goggles social-games application over the canon
 
 Status: COMPLETE AND QUALIFIED
 
-Requirements:
-
-- Normalize only canonical sessions where `exists == true`.
-- Preserve exact `sessionId`, players, game type, `rulesetHash`, `randomnessRef`, canonical timestamps, next move number, state and winner.
-- Reject malformed canonical state, impossible winners, missing terminal timestamps and nonparticipant viewers.
-- Project incoming invites, outgoing invites, active games and recent terminal games deterministically.
-- Re-read current profile activity, bilateral block state and `canInviteToGame` policy whenever resolving a session for protected presentation/action eligibility.
-- An invite that became blocked, policy-denied or profile-inactive after creation must not remain acceptable through cached application state.
-- Active-game move/finish eligibility must fail closed when either profile is inactive or the pair is currently blocked.
-- Build wallet/session-authorized transaction intents for `invite`, `accept`, `decline`, `cancel` and `finish`; the backend must never sign or execute these actions on behalf of a player.
-- Reject all nonzero wager amounts before constructing an invite intent.
-- Preserve the canonical contract as the only source of session lifecycle truth.
-
-### BG-15.1 invariants
-
-1. Application projections are non-authoritative and must be rebuildable from canonical state.
-2. Only `playerA` or `playerB` can receive a session projection.
-3. `rulesetHash` is immutable canonical identity and may never be substituted by an application rule label.
-4. Acceptance eligibility always uses current profile/block/invite policy, never invite-time cached policy.
-5. Move/finish presentation eligibility always uses current profile/block state.
-6. Zero-wager is an application and contract boundary; a nonzero wager is rejected and routed conceptually to 420Bet instead.
-7. Invite/accept/decline/cancel/finish intents require user wallet/session authorization; backend signing is forbidden.
-8. Terminal session ordering is derived from canonical timestamps and may be rebuilt after reorgs without preserving stale local order.
-
 ## BG-15.2 — versioned ruleset registry + client game engines
 
 Status: COMPLETE AND QUALIFIED
 
-Requirements:
-
-- Bind each supported ruleset to the exact canonical `rulesetHash`; never infer a ruleset from a game label alone.
-- Maintain immutable application descriptors containing game type, ruleset ID/version, client engine ID/version, state codec, move codec, hidden-state flag and randomness requirement.
-- Cover all seven V1 game types with stable versioned descriptors.
-- Derive official V1 ruleset hashes deterministically from a namespaced ruleset identity so independent clients resolve the same hash.
-- Reject unknown ruleset hashes, duplicate ruleset identities, duplicate ruleset hashes and game/ruleset mismatches.
-- Require deterministic client-engine implementations and fail closed when an engine implementation is missing or advertises a descriptor that does not exactly match the registered ruleset.
-- Use stable canonical JSON serialization for state and move payloads so semantically identical objects produce identical bytes regardless of key order.
-- Produce deterministic move/state digests and replay traces so two clients using the same ruleset version and move sequence reproduce the same state digest.
-- Keep actual canonical move submission, sequence reconciliation and `commitMove` transaction construction in BG-15.3.
-
-### BG-15.2 invariants
-
-9. `rulesetHash` is the sole lookup key for historical rule identity; unknown hashes fail closed.
-10. A ruleset descriptor is immutable for a given `(gameType, rulesetId, rulesetVersion)` identity.
-11. A canonical session may only bind to a descriptor whose `gameType` exactly matches the session game type.
-12. Engine version and codecs are part of the reproducibility boundary and may not silently change under an existing ruleset hash.
-13. Client engines must be deterministic; nondeterministic descriptors are rejected.
-14. Stable state/move serialization must be independent of object insertion order.
-15. Cross-client replay of the same initial state and move sequence must produce identical move digests, intermediate state digests and final state digest.
-16. BG-15.2 never mutates canonical session or move state; it only resolves immutable rule/engine identity.
-
 ## BG-15.3 — move engine + canonical commitment bridge
+
+Status: COMPLETE AND QUALIFIED
+
+## BG-15.4 — turn UX, clocks, rematches & challenges
 
 Status: IMPLEMENTED — EXACT-HEAD QUALIFICATION PENDING
 
 Requirements:
 
-- Treat canonical `nextMoveNumber` from `BongGogglesGameSessionRegistry420` as the sole sequencing authority for the next move.
-- Build wallet/session-authorized `commitMove(player, sessionId, moveNumber, moveHash)` intents; backend services never sign or execute the transaction.
-- Derive `moveHash` from a deterministic namespaced payload containing exact `sessionId`, exact canonical `rulesetHash`, exact move number and the stable-serialized move payload.
-- Reject stale, skipped or replayed move numbers before intent construction.
-- Reject move submission for non-active sessions or actors who are not canonical session players.
-- Verify canonical move history is contiguous from move 1 through `nextMoveNumber - 1`, with no gaps, duplicates or divergent `nextMoveNumber`.
-- Rebuild local game state only after each allowed off-chain move payload hashes exactly to its corresponding canonical move commitment.
-- Resolve the deterministic BG-15.2 client engine by exact `(rulesetHash, gameType)` before replay.
-- Fail closed on payload-count mismatch, commitment mismatch, history gaps/replays, ruleset/engine mismatch or canonical next-move divergence.
-- Re-read canonical session state before move preparation and rebuild so reconnect/reload/reorg recovery does not trust stale local sequencing.
+- Project application game cards for invited, active and terminal sessions without creating new canonical game authority.
+- Keep canonical session lifecycle, players, ruleset identity, winner and next move sequence sourced from `BongGogglesGameSessionRegistry420`.
+- Derive current turn ownership from the deterministic client engine, but validate the returned turn owner is one of the two canonical session players.
+- Preserve canonical `nextMoveNumber` as the sequence source while exposing application move-history/notation presentation separately.
+- Support profile, friend, group and lobby challenge entry points only by constructing the existing canonical `invite` intent through the BG-15.1 zero-wager path.
+- Rematches must create a fresh canonical `invite`; the previous `sessionId` may be retained only as non-authoritative presentation provenance.
+- Reject rematch attempts from non-terminal sessions or nonparticipants.
+- Model time controls as application metadata only. Clocks are advisory, non-canonical and have no settlement authority.
+- Expose accept/decline/cancel/finish/rematch presentation actions according to canonical lifecycle while wallet/session authorization remains required for actual state-changing intents.
+- Preserve draw presentation using the canonical zero-address winner convention.
 
-### BG-15.3 invariants
+### BG-15.4 invariants
 
-17. Canonical `nextMoveNumber` always wins over cached/local next-move state.
-18. Move commitments bind `sessionId`, `rulesetHash`, move number and deterministic move payload together.
-19. A `commitMove` intent may only target the exact current canonical next move number.
-20. Canonical move history must be contiguous and internally consistent with session `nextMoveNumber` before local replay is accepted.
-21. Off-chain move payloads are non-authoritative; every payload must verify against the exact canonical commitment before replay.
-22. Local state is derived/rebuildable and is invalid whenever commitment verification or deterministic replay diverges.
-23. Reconnect/reload/reorg handling re-reads canonical session/history and reconstructs state rather than preserving stale local authority.
-24. BG-15.3 does not alter ruleset identity, canonical session lifecycle or game outcome authority.
+25. Turn ownership is engine-derived application state; BG-15 must never invent turn order from move-number parity.
+26. Canonical `nextMoveNumber` remains authoritative even when application turn/history presentation is stale.
+27. Every profile/friend/group/lobby challenge resolves to the canonical zero-wager `invite` path.
+28. A rematch never reuses or mutates the prior canonical session; it requests creation of a fresh session with the selected immutable ruleset binding.
+29. Application clocks are advisory only and cannot determine canonical winners, forfeits, settlement or rewards.
+30. Presentation actions do not authorize themselves; contract wallet/session authorization and current policy checks remain authoritative.
+31. The zero-address winner remains the canonical draw representation.
+32. BG-15.4 adds no second invitation, timing, turn or outcome authority.
 
 ## Remaining BG-15 phases
 
-- **BG-15.4 — turn UX, clocks, rematches & challenges**
 - **BG-15.5 — spectator, presence & BG-14 messaging integration**
 - **BG-15.6 — 420Randomness + hidden-state games**
 - **BG-15.7 — history, statistics, leaderboards & social discovery**

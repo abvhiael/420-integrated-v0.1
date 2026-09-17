@@ -52,12 +52,12 @@ BG-13 integrates Bong Goggles with the already-built media/storage infrastructur
   Exact 420Storage v1 retrieval DTOs, full-object identity/size/SHA-256 verification before delivery, GET/HEAD semantics, single byte-range responses, default-deny private access with trusted reauthorization, canonical delivery-readiness gating, and non-authoritative Gateway/Cache route metadata.
 - **BG-13.5 — thumbnails/posters/transcodes — COMPLETE AND QUALIFIED**
   Launch-safe derivative roles, operator-controlled 420Media capability/profile mappings, deterministic opaque source references, media-job creation/result binding, fail-closed terminal-state validation, returned 420Storage identity checks, optional canonical storage verification, explicit original→derivative provenance, and secret-free job/operator/result/SLA provenance.
-- **BG-13.6 — lifecycle/edit/delete/privacy semantics — IN PROGRESS**
+- **BG-13.6 — lifecycle/edit/delete/privacy semantics — COMPLETE AND QUALIFIED**
   Canonical social-object/version media-root binding, current-versus-historical presentation state, hidden/deleted/removed fail-closed delivery, immutable storage-history preservation, delivery-time audience reauthorization through canonical social policy, retention/tombstone semantics, and derivative retirement without rewriting provenance.
-- **BG-13.7 — production delivery closeout — NEXT**
-  CDN/cache policy, responsive asset selection, observability, integrity/route alerts, provider-loss/retrieval-failure drills, load qualification and operator runbooks.
+- **BG-13.7 — production delivery closeout — IN PROGRESS**
+  Immutable verified-object cache identity, public/private cache-control policy, responsive image/video source selection, latency/integrity/route telemetry, secret-redacted structured logs, provider/cache/retrieval failure drills, bounded load qualification, launch-readiness evaluation and operator runbook.
 
-Detailed BG-13 invariants and phase requirements are in `docs/BONG-GOGGLES-BG-13.md`.
+Detailed BG-13 invariants and phase requirements are in `docs/BONG-GOGGLES-BG-13.md`. BG-13.7 operational procedures are in `docs/BONG-GOGGLES-BG-13-7-RUNBOOK.md`.
 
 ## Remaining product phases after BG-13
 
@@ -78,8 +78,8 @@ Detailed BG-13 invariants and phase requirements are in `docs/BONG-GOGGLES-BG-13
 
 ## Current position
 
-**Phase 12 is merged to `main` in PR #307. BG-13.1 through BG-13.5 are complete and qualified. Current work: BG-13.6 on PR #308 / `feature/bong-goggles-bg13-media-storage`.**
+**Phase 12 is merged to `main` in PR #307. BG-13.1 through BG-13.6 are complete and qualified. Current work: BG-13.7 production delivery closeout on PR #308 / `feature/bong-goggles-bg13-media-storage`.**
 
 Critical path:
 
-`BG-13.6 lifecycle/privacy -> BG-13.7 production closeout -> BG-14 messaging -> BG-15 games -> BG-16 notifications -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI -> BG-20 launch hardening -> READY`
+`BG-13.7 production closeout -> BG-14 messaging -> BG-15 games -> BG-16 notifications -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI -> BG-20 launch hardening -> READY`

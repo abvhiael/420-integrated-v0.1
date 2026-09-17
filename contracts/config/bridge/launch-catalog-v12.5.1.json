@@ -17,7 +17,8 @@
     "V12.5.13": {"asset":"LTC","status":"COMPLETED_QUALIFIED_MERGED","integration_type":"NATIVE_LITECOIN_CHAIN_ADAPTER","note":"LTC bridges directly to Litecoin mainnet with scrypt PoW/chainwork verification and standard legacy/SegWit/Taproot output support. MWEB is excluded from the Genesis route pending dedicated qualification."},
     "V12.5.14": {"asset":"BTC","status":"COMPLETED_QUALIFIED_MERGED","integration_type":"NATIVE_BITCOIN_CHAIN_ADAPTER","note":"BTC bridges directly to Bitcoin mainnet with SHA-256d PoW/cumulative-chainwork verification, six-confirmation bridge policy, replay protection and standard legacy/SegWit/Taproot output support."},
     "V12.5.15": {"asset":"XRP","status":"COMPLETED_QUALIFIED_MERGED","integration_type":"NATIVE_XRPL_VALIDATED_LEDGER_ADAPTER","note":"XRP was requalified on current main with validated-ledger and tesSUCCESS requirements, AccountID allowlisting, destination-tag encoding and replay protection under modular adapter CI."},
-    "V12.5.16": {"asset":"UNI","status":"IN_PROGRESS","integration_type":"TOKEN_OVER_EXISTING_ETHEREUM_ADAPTER","note":"UNI qualifies the canonical Ethereum ERC-20 contract over EthereumBridgeAdapter420 with exact source-token mapping, route binding, Ethereum finality, gateway authorization and replay protection."}
+    "V12.5.16": {"asset":"UNI","status":"COMPLETED_QUALIFIED_MERGED","integration_type":"TOKEN_OVER_EXISTING_ETHEREUM_ADAPTER","note":"UNI qualifies the canonical Ethereum ERC-20 contract over EthereumBridgeAdapter420 with exact source-token mapping, route binding, Ethereum finality, gateway authorization and replay protection."},
+    "V12.5.17": {"asset":"LINK","status":"IN_PROGRESS","integration_type":"TOKEN_OVER_EXISTING_ETHEREUM_ADAPTER","note":"LINK qualifies the canonical Ethereum LINK token over EthereumBridgeAdapter420 with exact source-token mapping, route binding, Ethereum finality, gateway authorization and replay protection."}
   },
   "assets": [
     {"symbol":"BTC","canonical_network":"BITCOIN","canonical_chain_key":"420/BRIDGE/CHAIN/BTC","adapter_slice":"V12.5.14"},
@@ -32,6 +33,7 @@
     {"symbol":"CADC","canonical_network":"ETHEREUM","canonical_chain_key":"420/BRIDGE/CHAIN/ETH","adapter_slice":"existing-LayerZero-plus-launch-qualification"},
     {"symbol":"AUDIO","canonical_network":"ETHEREUM","canonical_chain_key":"420/BRIDGE/CHAIN/ETH","adapter_slice":"V12.5.8-token-qualification-over-EthereumBridgeAdapter420"},
     {"symbol":"UNI","canonical_network":"ETHEREUM","canonical_chain_key":"420/BRIDGE/CHAIN/ETH","adapter_slice":"V12.5.16-token-qualification-over-EthereumBridgeAdapter420"},
+    {"symbol":"LINK","canonical_network":"ETHEREUM","canonical_chain_key":"420/BRIDGE/CHAIN/ETH","adapter_slice":"V12.5.17-token-qualification-over-EthereumBridgeAdapter420"},
     {"symbol":"BOB","canonical_network":"DOBBSCOIN","canonical_chain_key":"420/BRIDGE/CHAIN/BOB","adapter_slice":"V12.5.10"},
     {"symbol":"CURE","canonical_network":"CURECOIN","canonical_chain_key":"420/BRIDGE/CHAIN/CURE","adapter_slice":"V12.5.11"},
     {"symbol":"ARRR","canonical_network":"PIRATE_CHAIN","canonical_chain_key":"420/BRIDGE/CHAIN/ARRR","adapter_slice":"V12.5.12"},

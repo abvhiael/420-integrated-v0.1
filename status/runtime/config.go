@@ -3,9 +3,10 @@ package runtime
 import (
 	"errors"
 	"fmt"
-	"net/url"
 	"strings"
 	"time"
+
+	statussecurity "github.com/420integrated/420-integrated/status/security"
 )
 
 type Config struct {
@@ -27,8 +28,6 @@ func (c Config) Validate() error {
 
 func requireURL(name, raw string) error {
 	if strings.TrimSpace(raw) == "" { return fmt.Errorf("%s is required", name) }
-	u, err := url.Parse(raw)
-	if err != nil || u.Scheme == "" || u.Host == "" { return fmt.Errorf("%s must be an absolute URL", name) }
-	if u.Scheme != "http" && u.Scheme != "https" { return fmt.Errorf("%s must use http or https", name) }
+	if err := statussecurity.ValidateProbeURL(raw); err != nil { return fmt.Errorf("%s: %w", name, err) }
 	return nil
 }

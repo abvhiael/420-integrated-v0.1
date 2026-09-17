@@ -6,7 +6,7 @@
 
 - **NOTIFY-0 — Genesis boundary + executable invariant baseline — COMPLETE**
 - **NOTIFY-1 — runtime/service scaffold — COMPLETE**
-- NOTIFY-2 — subscription engine — pending
+- **NOTIFY-2 — subscription engine — COMPLETE**
 - NOTIFY-3 — indexer ingestion + replay — pending
 - NOTIFY-4 — delivery queue + retry/dedup — pending
 - NOTIFY-5 — provider-neutral delivery adapters — pending
@@ -55,7 +55,7 @@ Optional environment:
 
 ## NOTIFY-2 — subscription engine
 
-Implement private opt-in subscriptions with source/topic/event filters, severity thresholds, mute/unmute, channel preferences, unsubscribe and separate promotional consent. Subscription state remains noncanonical and may remain client-local.
+Implemented an in-memory private subscription model/store with explicit opt-in activation; source/topic/event filters; minimum severity; in-app/web/push channel preferences; deterministic normalization; reversible mute/unmute; unsubscribe; operational consent; and promotional consent that is independent and off unless explicitly granted. The store clones mutable slices on read/write so callers cannot mutate private subscription state by retaining references. Subscription data remains noncanonical and is not published as chain or protocol state.
 
 ## NOTIFY-3 — indexer ingestion + replay
 

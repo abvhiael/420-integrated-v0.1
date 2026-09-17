@@ -1,6 +1,9 @@
 package architecture
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestGenesisBoundary(t *testing.T) {
 	b := GenesisBoundary()
@@ -41,8 +44,7 @@ func TestGenesisInvariantSetIsCompleteAndUnique(t *testing.T) {
 		seen[id] = true
 	}
 	for i := 1; i <= 14; i++ {
-		want := "STATUS-INV-0"
-		if i < 10 { want += string(rune('0'+i)) } else { want = "STATUS-INV-" + string(rune('0'+i/10)) + string(rune('0'+i%10)) }
+		want := fmt.Sprintf("STATUS-INV-%03d", i)
 		if !seen[want] { t.Fatalf("missing invariant %s", want) }
 	}
 }

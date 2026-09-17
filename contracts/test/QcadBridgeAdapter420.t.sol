@@ -40,7 +40,7 @@ contract QcadEthereumRouterCaller420 {
 
 /// @notice V12.5.20 qualification: trust-era QCAD is the canonical Ethereum ERC-20 asset over the existing ETH adapter.
 contract QcadBridgeAdapter420Test {
-    address private constant QCAD_ETHEREUM = 0x3fa142dd3f384414e05e71ad0939274edc82ec0a;
+    address private constant QCAD_ETHEREUM = 0x3Fa142dD3f384414e05E71Ad0939274EdC82EC0A;
     address private constant LEGACY_QCAD_ETHEREUM = 0x4A16BAf414b8e637Ed12019faD5Dd705735DB2e0;
     address private constant GATEWAY = address(0x420420);
     bytes32 private constant QCAD_ASSET = keccak256("420/BRIDGE/ASSET/QCAD");

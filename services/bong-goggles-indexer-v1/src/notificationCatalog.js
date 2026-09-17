@@ -39,6 +39,18 @@ const CATALOG = Object.freeze({
   VERIFICATION_ATTESTED: { topic: 'discovery', severity: 'info', actionable: true },
 });
 
+const FORBIDDEN_PRIVATE_MESSAGE_METADATA = Object.freeze([
+  'plaintext',
+  'ciphertext',
+  'payload',
+  'body',
+  'content',
+  'envelopeHash',
+  'storageRefHash',
+  'epochCommitment',
+  'keyCommitment',
+]);
+
 export const BONG_GOGGLES_NOTIFICATION_KINDS = Object.freeze(Object.keys(CATALOG));
 
 export function bongGogglesNotificationDescriptor(kind) {
@@ -62,6 +74,15 @@ export function validateBongGogglesNotificationCandidate(candidate) {
 
   const descriptor = bongGogglesNotificationDescriptor(candidate.kind);
   if (candidate.topic !== descriptor.topic) throw new Error('notification topic does not match catalog');
+
+  if (descriptor.privatePayloadForbidden === true) {
+    const metadata = candidate.metadata ?? {};
+    for (const field of FORBIDDEN_PRIVATE_MESSAGE_METADATA) {
+      if (Object.prototype.hasOwnProperty.call(metadata, field)) {
+        throw new Error(`private notification metadata field forbidden: ${field}`);
+      }
+    }
+  }
 
   return {
     ...candidate,

@@ -8,21 +8,21 @@
       "status": "IMPLEMENTED_DEFERRED_FROM_GENESIS_QUALIFICATION",
       "note": "Adapter implementation is preserved but Genesis qualification is deferred pending resolution of the repository-wide Solidity/Yul compiler interaction."
     },
-    "V12.5.7": {
-      "asset": "TRX",
-      "status": "COMPLETED_QUALIFIED_MERGED"
-    },
+    "V12.5.7": {"asset":"TRX","status":"COMPLETED_QUALIFIED_MERGED"},
     "V12.5.8": {
-      "asset": "AUDIO",
-      "status": "COMPLETED_QUALIFIED_MERGED",
-      "integration_type": "TOKEN_OVER_EXISTING_ETHEREUM_ADAPTER",
-      "note": "AUDIO is qualified as the canonical Ethereum ERC-20 asset using EthereumBridgeAdapter420."
+      "asset":"AUDIO","status":"COMPLETED_QUALIFIED_MERGED",
+      "integration_type":"TOKEN_OVER_EXISTING_ETHEREUM_ADAPTER",
+      "note":"AUDIO is qualified as the canonical Ethereum ERC-20 asset using EthereumBridgeAdapter420."
     },
     "V12.5.9": {
-      "asset": "POT",
-      "status": "IN_PROGRESS",
-      "integration_type": "NATIVE_POTCOIN_CHAIN_ADAPTER",
-      "note": "POT bridges directly to native PotCoin mainnet; the Solana SPL representation is not the canonical V12.5.9 route."
+      "asset":"POT","status":"COMPLETED_QUALIFIED_MERGED",
+      "integration_type":"NATIVE_POTCOIN_CHAIN_ADAPTER",
+      "note":"POT bridges directly to native PotCoin mainnet; the Solana SPL representation is not the canonical V12.5.9 route."
+    },
+    "V12.5.10": {
+      "asset":"BOB","status":"IN_PROGRESS",
+      "integration_type":"NATIVE_DOBBSCOIN_CHAIN_ADAPTER",
+      "note":"BOB bridges directly to Dobbscoin mainnet with 2026 LWMA/emergency-difficulty rules and scheduled AuxPoW activation modeled in the verifier boundary."
     }
   },
   "assets": [
@@ -43,12 +43,7 @@
     {"symbol":"LTC","canonical_network":"LITECOIN","canonical_chain_key":"420/BRIDGE/CHAIN/LTC","adapter_slice":"V12.5.13"}
   ],
   "identity_fields_required_before_activation": [
-    "routeChainId",
-    "networkId",
-    "nativeAssetId",
-    "verifierFamily",
-    "chainFamily",
-    "active"
+    "routeChainId","networkId","nativeAssetId","verifierFamily","chainFamily","active"
   ],
   "note": "Non-EVM routeChainId values are internal canonical bridge identifiers. Exact network fingerprints and verifier parameters are pinned during each adapter implementation slice rather than guessed in this catalogue."
 }

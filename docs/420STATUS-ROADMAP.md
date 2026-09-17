@@ -14,7 +14,7 @@
 - **STATUS-7 — API + public status feed — COMPLETE**
 - **STATUS-8 — privacy/security + anti-spoofing hardening — COMPLETE**
 - **STATUS-9 — Genesis frontend — COMPLETE**
-- STATUS-10 — qualification, reconciliation + closeout — pending
+- **STATUS-10 — qualification, reconciliation + closeout — IN QUALIFICATION**
 
 ## STATUS-0 — Genesis boundary + executable invariant baseline
 
@@ -124,4 +124,8 @@ The page carries explicit language that operational health is not consensus, set
 
 ## STATUS-10 — qualification, reconciliation + closeout
 
-Run the full invariant suite, source-conflict/freshness tests, incident lifecycle tests, restart/failure injection, privacy/security checks and provider-failure isolation. Produce testnet readiness evidence, reconcile the long-lived branch with latest `main`, requalify the exact final head and merge once at phase end.
+STATUS-10 is in final qualification. The long-lived STATUS branch was reconciled with current `main` through reconciliation PR #332 before the closeout matrix was added. The reconciliation merge produced head `953580159d95dc44cd6cdd0d4a5164f2eb432ece`; closeout qualification continues on descendants of that reconciled head so no pre-reconciliation result is treated as final evidence.
+
+The dedicated closeout suite under `status/closeout` re-exercises the cross-phase Genesis boundaries together: conflicting source evidence fails closed, component failures remain isolated from canonical network authority, private components and raw free-form observation content stay off public feeds, a restarted service remains unready until it is requalified against fresh dependency evidence, failed dependencies block readiness, SSRF/private-network probe targets fail closed, hostile source identifiers are rejected, and all public presentation remains explicitly noncanonical.
+
+Final closeout requires all repository qualification workflows to pass on one exact final head after the roadmap records qualification evidence. Only that exact qualified head may be merged through PR #325.

@@ -1,6 +1,6 @@
 {
   "schema": "420-exchange-cross-adapter-hardening-v12.6.5",
-  "status": "IN_QUALIFICATION",
+  "status": "QUALIFIED",
   "scope": "MALFORMED_PROOF_AND_RECIPIENT_FUZZ_HARDENING",
   "model": "Ethereum and Solana adapters are fuzz-qualified against malformed verifier output and malformed outbound recipient encodings. Invalid inbound proof fields must fail before replay consumption, and invalid outbound recipients must fail before nonce advancement or message creation.",
   "invariants": [
@@ -23,5 +23,11 @@
     "verify invalid recipient attempts preserve outbound nonce",
     "verify valid canonical recipient lengths advance outbound nonce exactly once"
   ],
+  "qualification": {
+    "exact_head": "edbe62a04a2a683871ac2874cb046431e7f573c2",
+    "solidity_contracts": 2556,
+    "integrated_qualification": 4048,
+    "docs_qualification": 1758
+  },
   "follow_on": "V12.6.6 domain, nonce and router-bypass hardening"
 }

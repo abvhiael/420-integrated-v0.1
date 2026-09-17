@@ -3,7 +3,7 @@ pragma solidity ^0.8.24;
 
 /// @notice Verifier boundary for canonical Curecoin mainnet bridge transfers.
 /// @dev Production implementations must validate Curecoin PoS header-chain trust/finality,
-///      transaction inclusion and the canonical gateway output. Folding@home reward accounting
+///      transaction inclusion and the canonical gateway output. Folding at Home reward accounting
 ///      is intentionally outside this bridge verifier boundary.
 interface ICurecoinFinalityVerifier420 {
     struct FinalizedTransfer {

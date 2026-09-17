@@ -37,20 +37,20 @@ type EnqueueRequest struct {
 }
 
 type Record struct {
-	Key          string
+	Key            string
 	SubscriptionID string
-	EventID      string
-	Provider     string
-	Destination  string
-	Severity     Severity
-	Priority     int
-	Payload      []byte
-	Status       Status
-	Attempts     int
-	NextAttempt  time.Time
-	LastError    string
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
+	EventID        string
+	Provider       string
+	Destination    string
+	Severity       Severity
+	Priority       int
+	Payload        []byte
+	Status         Status
+	Attempts       int
+	NextAttempt    time.Time
+	LastError      string
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
 }
 
 type Policy struct {
@@ -129,16 +129,20 @@ func (q *Queue) Due(now time.Time, limit int) []Record {
 }
 
 func (q *Queue) MarkDelivered(key string, now time.Time) error {
+	if now.IsZero() { return errors.New("delivery update time is required") }
 	q.mu.Lock(); defer q.mu.Unlock()
 	rec, ok := q.records[key]; if !ok { return errors.New("delivery record not found") }
 	if rec.Status == StatusDead { return errors.New("dead-letter delivery cannot be delivered") }
-	rec.Status = StatusDelivered; rec.UpdatedAt = now; rec.LastError = ""; return nil
+	if rec.Status == StatusDelivered { return nil }
+	rec.Status = StatusDelivered; rec.UpdatedAt = now; rec.LastError = ""; rec.NextAttempt = time.Time{}; return nil
 }
 
 func (q *Queue) MarkFailed(key, message string, now time.Time) (Record, error) {
+	if now.IsZero() { return Record{}, errors.New("delivery update time is required") }
 	q.mu.Lock(); defer q.mu.Unlock()
 	rec, ok := q.records[key]; if !ok { return Record{}, errors.New("delivery record not found") }
 	if rec.Status == StatusDelivered { return Record{}, errors.New("delivered record cannot fail") }
+	if rec.Status == StatusDead { return clone(*rec), errors.New("dead-letter delivery cannot fail again") }
 	rec.Attempts++
 	rec.LastError = safeError(message)
 	rec.UpdatedAt = now

@@ -129,7 +129,7 @@ BG-16 integrates the production Bong Goggles application with the existing 420No
 - degraded-notification UX links users directly to canonical Bong Goggles, 420Wallet and 420Explorer state;
 - notification-centre surfaces remain non-authoritative and carry no signing, spending, transaction-approval or capability-grant authority.
 
-### BG-16.8 — abuse, privacy + recovery hardening — IMPLEMENTED, QUALIFICATION PENDING
+### BG-16.8 — abuse, privacy + recovery hardening — COMPLETE AND QUALIFIED
 
 - bounded recipients-per-event fan-out and per-recipient notification-rate guards fail closed on abuse;
 - over-limit batch admission is atomic so partial quota consumption cannot create replay drift;
@@ -141,14 +141,17 @@ BG-16 integrates the production Bong Goggles application with the existing 420No
 - canonical/local checkpoint mismatch explicitly degrades notification presentation and forces stale local visibility off until replay converges;
 - notification hardening remains non-authoritative and cannot mutate canonical application or chain state.
 
-### BG-16.9 — production notification closeout — NEXT
+### BG-16.9 — production notification closeout — IMPLEMENTED, RECONCILIATION/QUALIFICATION PENDING
 
-- bounded load/latency qualification;
-- deterministic replay and canonicality drills;
-- provider-degradation exercises;
-- operator runbook;
-- reconcile the phase branch with current `main`;
-- exact-head qualification before merge.
+- bounded load qualification records failures and p95 latency under explicit iteration/concurrency budgets;
+- deterministic replay drill requires restored delivered IDs and checkpoint to converge exactly;
+- canonicality drill requires local height/hash to match canonical state before merge readiness;
+- provider-degradation drill proves one failing provider does not suppress unaffected delivery channels;
+- closeout decision fails closed unless load, replay, canonicality and provider-isolation gates all pass;
+- operator runbook: `docs/BONG-GOGGLES-BG-16-9-RUNBOOK.md`;
+- phase branch must be reconciled with current `main` before final qualification;
+- reconciled exact head must pass Bong Goggles Indexer, Games, Media, 420Docs and 420 Integrated workflows;
+- PR #330 remains unmerged until exact-head qualification is green and merge is explicitly performed.
 
 ## Remaining product phases after BG-16
 
@@ -159,8 +162,8 @@ BG-16 integrates the production Bong Goggles application with the existing 420No
 
 ## Current position
 
-**Phase 15 is merged in PR #321. BG-16.1 through BG-16.7 are qualified. Current work: BG-16.8 abuse, privacy + recovery hardening on PR #330 / `feature/bong-goggles-bg16-notifications`.**
+**Phase 15 is merged in PR #321. BG-16.1 through BG-16.8 are qualified. Current work: BG-16.9 production notification closeout on PR #330 / `feature/bong-goggles-bg16-notifications`.**
 
 Critical path:
 
-`BG-16.8 hardening -> BG-16.9 closeout -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI -> BG-20 launch hardening -> READY`
+`BG-16.9 production closeout -> merge Phase 16 -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI -> BG-20 launch hardening -> READY`

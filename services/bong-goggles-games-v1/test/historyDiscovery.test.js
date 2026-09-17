@@ -16,6 +16,7 @@ const A = '0x1111111111111111111111111111111111111111';
 const B = '0x2222222222222222222222222222222222222222';
 const C = '0x3333333333333333333333333333333333333333';
 const Z = '0x0000000000000000000000000000000000000000';
+const Z32 = '0x' + '00'.repeat(32);
 const R = '0x' + '11'.repeat(32);
 
 function s(idByte, a, b, winner, gameType, finishedAt) {
@@ -25,7 +26,7 @@ function s(idByte, a, b, winner, gameType, finishedAt) {
     playerB: b,
     gameType,
     rulesetHash: R,
-    randomnessRef: Z.replace('0x', '0x' + ''),
+    randomnessRef: Z32,
     createdAt: 1,
     startedAt: 2,
     finishedAt,

@@ -67,7 +67,10 @@ func TestCloseoutConflictAndFailureIsolationRemainFailClosed(t *testing.T) {
 }
 
 func TestCloseoutPublicSurfaceMinimizesPrivateAndFreeFormData(t *testing.T) {
-	now := time.Date(2026, 9, 17, 21, 0, 0, 0, time.UTC)
+	// PublicAPI evaluates freshness against its runtime clock. Anchor this fixture
+	// to that same clock so the qualification test proves payload minimization
+	// rather than failing because fixed evidence happens to be future-dated.
+	now := time.Now().UTC().Truncate(time.Second)
 	registry := components.NewRegistry()
 	public := components.Component{ID: "indexer", Name: "420Indexer", Class: components.ClassIndexer, Network: "420-testnet", Environment: "testnet", Public: true}
 	private := components.Component{ID: "private-ai", Name: "PrivateAI", Class: components.ClassAI, Network: "420-testnet", Environment: "testnet", Public: false}
@@ -90,7 +93,7 @@ func TestCloseoutPublicSurfaceMinimizesPrivateAndFreeFormData(t *testing.T) {
 	for _, path := range []string{"/v1/status", "/v1/components", "/v1/history"} {
 		w := httptest.NewRecorder()
 		api.Handler().ServeHTTP(w, httptest.NewRequest(http.MethodGet, path, nil))
-		if w.Code != http.StatusOK { t.Fatalf("%s status %d", path, w.Code) }
+		if w.Code != http.StatusOK { t.Fatalf("%s status %d: %s", path, w.Code, w.Body.String()) }
 		body := w.Body.String()
 		if strings.Contains(body, "private-ai") || strings.Contains(body, "PRIVATE-CONTENT") || strings.Contains(body, "SECRET-FREEFORM-PAYLOAD") {
 			t.Fatalf("%s leaked private/free-form data: %s", path, body)

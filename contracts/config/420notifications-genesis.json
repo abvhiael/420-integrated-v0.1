@@ -7,6 +7,7 @@
   "serviceId": "420/service/notifications/v1",
   "purpose": "Opt-in notification and alert delivery for public 420 Integrated chain, protocol, application and wallet-relevant events without becoming authority for the underlying event or gaining wallet execution rights.",
   "sources": {
+    "indexerBoundary": "420Indexer public projection API / NotificationsConsumerAdapter420",
     "chainAndProtocolEvents": true,
     "registry": "420Registry / ProtocolRegistry",
     "wallet": "420Wallet local account/watch context",
@@ -25,6 +26,15 @@
     "userCanUnsubscribe": true,
     "subscriptionStateMayRemainClientLocal": true,
     "promotionalNotificationsRequireSeparateConsent": true
+  },
+  "replay": {
+    "checkpointConsumerOwned": true,
+    "checkpointCanonical": false,
+    "checkpointChainBound": true,
+    "checkpointOpaque": true,
+    "advanceOnlyAfterSuccessfulBatch": true,
+    "chainMismatchFailsClosed": true,
+    "canonicalityUpdates": ["finalized", "retracted", "superseded"]
   },
   "delivery": {
     "supportedClasses": [
@@ -77,18 +87,19 @@
     "clientsMayUseAlternativeNotificationProviders": true
   },
   "invariants": [
-    "NOTIF-INV-001: 420Notifications owns no canonical protocol state and requires no Notifications-specific Genesis contract.",
-    "NOTIF-INV-002: A notification never becomes authority for the event it describes; underlying chain or protocol state remains canonical.",
-    "NOTIF-INV-003: Every actionable notification preserves source provenance and links back to the canonical or registered origin.",
-    "NOTIF-INV-004: 420Notifications cannot sign transactions, approve spending, grant Smart Account capabilities, transfer assets or bypass Wallet confirmation.",
-    "NOTIF-INV-005: User subscriptions are opt-in, reversible and independently controllable by source/topic/severity; promotional notifications require separate consent.",
-    "NOTIF-INV-006: Delivery retry, fan-out and provider failover cannot create duplicate canonical events or mutate the underlying protocol state.",
-    "NOTIF-INV-007: Private Messenger/Commons payloads, encrypted Resource payloads, private Identity fields and raw Attention telemetry are not indexed as notification source data.",
-    "NOTIF-INV-008: Wallet watchlists, notification history and delivery endpoints are private by default and are not published as protocol state.",
-    "NOTIF-INV-009: On-chain notifications identify chain/network and preserve relevant block/transaction/log references plus confirmation/finality context when available.",
-    "NOTIF-INV-010: Reorged, reverted, expired or superseded events can invalidate presentation state without rewriting finalized canonical history.",
-    "NOTIF-INV-011: Rate limiting, deduplication and abuse controls cannot silently suppress mandatory protocol state; users retain direct Wallet/Explorer/RPC access to truth.",
-    "NOTIF-INV-012: Notification service unavailability cannot block payments, swaps, bridges, governance, staking, contract interaction or any other protocol operation.",
-    "NOTIF-INV-013: Alternative notification clients and providers may independently derive and deliver alerts from the same canonical sources."
+    "NOTIFY-INV-001: 420Notifications owns no canonical protocol state and requires no Notifications-specific Genesis contract.",
+    "NOTIFY-INV-002: A notification never becomes authority for the event it describes; underlying chain or protocol state remains canonical.",
+    "NOTIFY-INV-003: Every actionable notification preserves source provenance and links back to the canonical or registered origin.",
+    "NOTIFY-INV-004: 420Notifications cannot sign transactions, approve spending, grant Smart Account capabilities, transfer assets or bypass Wallet confirmation.",
+    "NOTIFY-INV-005: User subscriptions are opt-in, reversible and independently controllable by source/topic/severity; promotional notifications require separate consent.",
+    "NOTIFY-INV-006: Delivery retry, fan-out and provider failover cannot create duplicate canonical events or mutate the underlying protocol state.",
+    "NOTIFY-INV-007: Private Messenger/Commons payloads, encrypted Resource payloads, private Identity fields and raw Attention telemetry are not indexed as notification source data.",
+    "NOTIFY-INV-008: Wallet watchlists, notification history and delivery endpoints are private by default and are not published as protocol state.",
+    "NOTIFY-INV-009: On-chain notifications identify chain/network and preserve relevant block/transaction/log references plus confirmation/finality context when available.",
+    "NOTIFY-INV-010: Reorged, reverted, expired or superseded events can invalidate presentation state through append-only canonicality updates without rewriting finalized canonical history.",
+    "NOTIFY-INV-011: Rate limiting, deduplication and abuse controls cannot silently redefine protocol truth; users retain direct Wallet/Explorer/RPC access to canonical state.",
+    "NOTIFY-INV-012: Notification service unavailability cannot block payments, swaps, bridges, governance, staking, contract interaction or any other protocol operation.",
+    "NOTIFY-INV-013: Alternative notification clients and providers may independently derive and deliver alerts from the same canonical sources.",
+    "NOTIFY-INV-014: Replay checkpoints are consumer-owned, chain-bound, opaque and non-authoritative, and advance only after successful batch processing."
   ]
 }

@@ -1,0 +1,29 @@
+name: Bong Goggles Games Verification
+
+on:
+  pull_request:
+    paths:
+      - 'services/bong-goggles-games-v1/**'
+      - 'docs/BONG-GOGGLES-BG-15.md'
+      - 'docs/BONG-GOGGLES-ROADMAP.md'
+      - '.github/workflows/bong-goggles-games.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-games:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: services/bong-goggles-games-v1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run BG-15 games tests
+        run: npm test

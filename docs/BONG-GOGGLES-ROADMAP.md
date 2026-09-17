@@ -104,7 +104,7 @@ BG-16 integrates the production Bong Goggles application with the existing 420No
 - synthetic `RewardEarned` / `RewardPayoutUpdated` source events intentionally emit nothing;
 - deterministic replay deduplication and non-authoritative provenance remain unchanged.
 
-### BG-16.6 — preference + delivery integration — IMPLEMENTED, QUALIFICATION PENDING
+### BG-16.6 — preference + delivery integration — COMPLETE AND QUALIFIED
 
 - Bong Goggles topic/kind vocabulary maps to the existing 420Notifications source/topic/event filters;
 - activation and operational consent must be explicit before a Bong Goggles subscription preference is produced;
@@ -118,14 +118,18 @@ BG-16 integrates the production Bong Goggles application with the existing 420No
 - operational Bong Goggles events remain operational even when promotional consent is separately enabled;
 - Messenger private-payload validation runs before delivery handoff.
 
-### BG-16.7 — notification centre application surfaces — NEXT
+### BG-16.7 — notification centre application surfaces — IMPLEMENTED, QUALIFICATION PENDING
 
-- unread counts and paged history;
-- deep links back to the canonical Bong Goggles subject;
-- finalized/retracted/superseded presentation states;
-- degraded-notification UX points users back to canonical app/Wallet/Explorer state.
+- deterministic unread counts across the current notification-centre history;
+- reverse-chronological paged history with stable timestamp + notification-ID cursors;
+- bounded page size and fail-closed invalid cursors;
+- HTTPS deep links back to the canonical Bong Goggles resolver carrying only notification kind, notification ID and opaque subject ID;
+- explicit `pending`, `finalized`, `retracted` and `superseded` presentation states;
+- source provenance preserved on every centre item;
+- degraded-notification UX links users directly to canonical Bong Goggles, 420Wallet and 420Explorer state;
+- notification-centre surfaces remain non-authoritative and carry no signing, spending, transaction-approval or capability-grant authority.
 
-### BG-16.8 — abuse, privacy + recovery hardening
+### BG-16.8 — abuse, privacy + recovery hardening — NEXT
 
 - rate/fan-out abuse controls;
 - redacted structured telemetry;
@@ -152,8 +156,8 @@ BG-16 integrates the production Bong Goggles application with the existing 420No
 
 ## Current position
 
-**Phase 15 is merged in PR #321. BG-16.1 through BG-16.5 are qualified. Current work: BG-16.6 preference + delivery integration on PR #330 / `feature/bong-goggles-bg16-notifications`.**
+**Phase 15 is merged in PR #321. BG-16.1 through BG-16.6 are qualified. Current work: BG-16.7 notification centre application surfaces on PR #330 / `feature/bong-goggles-bg16-notifications`.**
 
 Critical path:
 
-`BG-16.6 preferences/delivery -> BG-16.7 notification centre -> BG-16.8 hardening -> BG-16.9 closeout -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI -> BG-20 launch hardening -> READY`
+`BG-16.7 notification centre -> BG-16.8 hardening -> BG-16.9 closeout -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI -> BG-20 launch hardening -> READY`

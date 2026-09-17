@@ -18,22 +18,28 @@ const SEVERITY_VALUE = Object.freeze({ info: 1, warning: 2, critical: 3 });
 const TOPICS = new Set(bongGogglesNotificationTopics());
 const KINDS = new Set(BONG_GOGGLES_NOTIFICATION_KINDS);
 
-function uniqueSorted(values, field) {
+function uniqueNormalized(values, field, normalize) {
   if (!Array.isArray(values)) throw new Error(`${field} must be an array`);
-  return [...new Set(values.map((value) => String(value).trim()).filter(Boolean))].sort();
+  const set = new Set();
+  for (const value of values) {
+    const normalized = normalize(String(value).trim());
+    if (normalized) set.add(normalized);
+  }
+  return [...set];
 }
 
 function normalizeChannels(channels) {
-  const normalized = uniqueSorted(channels, 'channels');
+  const normalized = uniqueNormalized(channels, 'channels', (value) => value.toLowerCase());
   if (normalized.length === 0) throw new Error('at least one notification channel is required');
   for (const channel of normalized) {
     if (!BONG_GOGGLES_NOTIFICATION_CHANNELS.includes(channel)) throw new Error(`unsupported notification channel: ${channel}`);
   }
-  return normalized;
+  const selected = new Set(normalized);
+  return BONG_GOGGLES_NOTIFICATION_CHANNELS.filter((channel) => selected.has(channel));
 }
 
 function normalizeTopics(topics) {
-  const normalized = uniqueSorted(topics, 'topics').map((topic) => topic.toLowerCase());
+  const normalized = uniqueNormalized(topics, 'topics', (value) => value.toLowerCase()).sort();
   for (const topic of normalized) {
     if (!TOPICS.has(topic)) throw new Error(`unsupported Bong Goggles notification topic: ${topic}`);
   }
@@ -41,7 +47,7 @@ function normalizeTopics(topics) {
 }
 
 function normalizeKinds(kinds) {
-  const normalized = uniqueSorted(kinds, 'kinds').map((kind) => kind.toUpperCase());
+  const normalized = uniqueNormalized(kinds, 'kinds', (value) => value.toUpperCase()).sort();
   for (const kind of normalized) {
     if (!KINDS.has(kind)) throw new Error(`unsupported Bong Goggles notification kind: ${kind}`);
   }

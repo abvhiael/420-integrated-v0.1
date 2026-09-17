@@ -118,7 +118,7 @@ BG-16 integrates the production Bong Goggles application with the existing 420No
 - operational Bong Goggles events remain operational even when promotional consent is separately enabled;
 - Messenger private-payload validation runs before delivery handoff.
 
-### BG-16.7 — notification centre application surfaces — IMPLEMENTED, QUALIFICATION PENDING
+### BG-16.7 — notification centre application surfaces — COMPLETE AND QUALIFIED
 
 - deterministic unread counts across the current notification-centre history;
 - reverse-chronological paged history with stable timestamp + notification-ID cursors;
@@ -129,16 +129,19 @@ BG-16 integrates the production Bong Goggles application with the existing 420No
 - degraded-notification UX links users directly to canonical Bong Goggles, 420Wallet and 420Explorer state;
 - notification-centre surfaces remain non-authoritative and carry no signing, spending, transaction-approval or capability-grant authority.
 
-### BG-16.8 — abuse, privacy + recovery hardening — NEXT
+### BG-16.8 — abuse, privacy + recovery hardening — IMPLEMENTED, QUALIFICATION PENDING
 
-- rate/fan-out abuse controls;
-- redacted structured telemetry;
-- replay/restart recovery;
-- provider failure isolation;
-- private-source exclusion regression tests;
-- canonical/local divergence cannot be hidden by notification state.
+- bounded recipients-per-event fan-out and per-recipient notification-rate guards fail closed on abuse;
+- over-limit batch admission is atomic so partial quota consumption cannot create replay drift;
+- guard policy/counters are deterministic, snapshot-restorable and policy-bound;
+- structured operational telemetry recursively redacts private Messenger content/commitments, secrets, tokens, authorization data, cookies and raw Attention telemetry;
+- restart recovery restores both pipeline replay/deduplication state and fan-out guard state;
+- provider delivery is isolated per channel so one provider failure cannot suppress otherwise qualified channels;
+- provider retry, queue and rate state remain 420Notifications-owned;
+- canonical/local checkpoint mismatch explicitly degrades notification presentation and forces stale local visibility off until replay converges;
+- notification hardening remains non-authoritative and cannot mutate canonical application or chain state.
 
-### BG-16.9 — production notification closeout
+### BG-16.9 — production notification closeout — NEXT
 
 - bounded load/latency qualification;
 - deterministic replay and canonicality drills;
@@ -156,8 +159,8 @@ BG-16 integrates the production Bong Goggles application with the existing 420No
 
 ## Current position
 
-**Phase 15 is merged in PR #321. BG-16.1 through BG-16.6 are qualified. Current work: BG-16.7 notification centre application surfaces on PR #330 / `feature/bong-goggles-bg16-notifications`.**
+**Phase 15 is merged in PR #321. BG-16.1 through BG-16.7 are qualified. Current work: BG-16.8 abuse, privacy + recovery hardening on PR #330 / `feature/bong-goggles-bg16-notifications`.**
 
 Critical path:
 
-`BG-16.7 notification centre -> BG-16.8 hardening -> BG-16.9 closeout -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI -> BG-20 launch hardening -> READY`
+`BG-16.8 hardening -> BG-16.9 closeout -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI -> BG-20 launch hardening -> READY`

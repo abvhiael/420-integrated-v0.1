@@ -53,10 +53,10 @@ BG-14 builds the Bong Goggles application messaging layer over 420Messenger and 
 - **BG-14.3 — inbox, unread/read and request state — COMPLETE AND QUALIFIED**
 - **BG-14.4 — permitted group threads — COMPLETE AND QUALIFIED**
   Application-level private group-thread descriptors derive eligibility from canonical `BongGogglesCommunityRegistry420` membership. Group delivery fans out over canonical direct Messenger/private contexts, with deterministic membership digests, group-epoch invalidation on membership/role change, current membership revalidation and fail-closed recipient routing. Public/Commons channels remain separate authority.
-- **BG-14.5 — private attachments — IN PROGRESS**
+- **BG-14.5 — private attachments — COMPLETE AND QUALIFIED**
   Reuses BG-13 canonical mediaRoot/manifest/item/420Storage object identity and verified upload/retrieval machinery. Messaging adds exact active conversation/private-context/current-epoch binding, current block/message-policy checks, owner-only upload association, participant-only read authorization, secret/private-route exclusion and lifecycle-driven presentation revocation without rewriting immutable storage provenance.
-- **BG-14.6 — safety, devices, epoch rotation and recovery**
-  Blocks, spam/request controls, device-key lifecycle, stale-device handling, epoch rotation and recovery.
+- **BG-14.6 — safety, devices, epoch rotation and recovery — IN PROGRESS**
+  Revalidates profile activity, blocks, message/spam policy, canonical conversation/context state, device-key revision/active state and private epoch at every protected use. Adds wallet-authorized device set/revoke, context close and epoch-rotation intents plus staged device-loss recovery that refreshes canonical state between establishing a surviving device, revoking lost devices and rotating affected private contexts without exposing key material.
 - **BG-14.7 — production messaging closeout**
   Secret-redacted observability, failure/replay/device/attachment drills, load qualification, runbook, reconciliation and exact-head closeout.
 
@@ -73,8 +73,8 @@ Detailed BG-14 invariants and requirements are in `docs/BONG-GOGGLES-BG-14.md`.
 
 ## Current position
 
-**Phase 12 is merged in PR #307. Phase 13 is merged in PR #308. Current work: BG-14.5 private attachments on PR #314 / `feature/bong-goggles-bg14-private-messaging`.**
+**Phase 12 is merged in PR #307. Phase 13 is merged in PR #308. Current work: BG-14.6 safety, devices, epoch rotation and recovery on PR #314 / `feature/bong-goggles-bg14-private-messaging`.**
 
 Critical path:
 
-`BG-14.5 attachments -> BG-14.6 safety/device/epoch recovery -> BG-14.7 production closeout -> BG-15 games -> BG-16 notifications -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI -> BG-20 launch hardening -> READY`
+`BG-14.6 safety/device/epoch recovery -> BG-14.7 production closeout -> BG-15 games -> BG-16 notifications -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI -> BG-20 launch hardening -> READY`

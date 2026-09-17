@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>420Notifications</title>
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">420 Integrated</p>
+        <h1>420Notifications <span id="unread-badge" class="badge" aria-label="unread notifications">0</span></h1>
+        <p class="subtle">noncanonical alerts derived from registered and canonical sources</p>
+      </div>
+      <button id="refresh" type="button">refresh</button>
+    </header>
+
+    <section class="toolbar" aria-label="notification filters">
+      <label>source <select id="source-filter"><option value="">all</option></select></label>
+      <label>severity <select id="severity-filter"><option value="">all</option><option value="info">info</option><option value="warning">warning</option><option value="critical">critical</option></select></label>
+      <label>state <select id="state-filter"><option value="">all</option><option value="unread">unread</option><option value="read">read</option><option value="finalized">finalized</option><option value="retracted">retracted</option><option value="superseded">superseded</option></select></label>
+    </section>
+
+    <section class="layout">
+      <div>
+        <div id="status" class="status" role="status"></div>
+        <div id="feed" class="feed" aria-live="polite"></div>
+        <button id="load-more" class="load-more" type="button" hidden>load more</button>
+      </div>
+
+      <aside class="panel">
+        <h2>preferences</h2>
+        <p class="subtle">subscriptions remain private presentation state.</p>
+        <form id="preferences-form">
+          <label><input id="channel-in-app" type="checkbox" checked> in-app</label>
+          <label><input id="channel-web" type="checkbox"> web</label>
+          <label><input id="channel-push" type="checkbox"> push</label>
+          <label><input id="promotional-consent" type="checkbox"> promotional notifications</label>
+          <button type="submit">save preferences</button>
+        </form>
+        <hr>
+        <p><strong>security:</strong> notification actions only hand off to 420Wallet or the registered origin. They cannot sign, spend, grant permissions, or bypass confirmation.</p>
+      </aside>
+    </section>
+  </main>
+  <script src="/app.js" defer></script>
+</body>
+</html>

@@ -146,7 +146,7 @@ The production workflow now enforces create → canonical validation → fund �
 
 **Exit:** operators have a deterministic, reversible campaign activation procedure with explicit funding readiness checks.
 
-### BG-18.6 — accrual + claim application integration — IMPLEMENTED, QUALIFICATION PENDING
+### BG-18.6 — accrual + claim application integration — COMPLETE AND QUALIFIED
 
 - project canonical `ContributionPublished`, `RewardAccrued`, `RewardReserved`, `RewardClaimed` and `RewardReleased` lifecycle state;
 - Bong Goggles contribution submission remains distinct from accrual;
@@ -164,7 +164,7 @@ The application layer now projects canonical `ContributionPublished`, `RewardAcc
 
 **Exit:** application surfaces can accurately show reward lifecycle and prepare claims without inventing reward state.
 
-### BG-18.7 — notifications + user-facing reward semantics
+### BG-18.7 — notifications + user-facing reward semantics — IMPLEMENTED, QUALIFICATION PENDING
 
 - activate `REWARD_EARNED` only from canonical `RewardAccrued` lifecycle events;
 - activate `REWARD_PAYOUT_UPDATED` only from canonical claim/release lifecycle events;
@@ -177,6 +177,12 @@ The application layer now projects canonical `ContributionPublished`, `RewardAcc
 - deep links resolve to Bong Goggles reward detail, Wallet and Explorer;
 - notification replay/deduplication remains deterministic;
 - notification layer cannot trigger claims or mutate reward state.
+
+Implemented in:
+- `services/bong-goggles-indexer-v1/src/notificationPipeline.js`
+- `services/bong-goggles-indexer-v1/test/notificationModerationRewards.test.js`
+
+`REWARD_CONTRIBUTION_SUBMITTED` remains submission-only. `REWARD_EARNED` now emits only from canonical `RewardAccrued`. `REWARD_PAYOUT_UPDATED` now emits from canonical `RewardClaimed` and `RewardReleased`, explicitly distinguishing claim confirmation from final payment. Reward notifications fail closed on canonical beneficiary/campaign/amount mismatches, include Bong Goggles/Wallet/Explorer deep-link metadata, preserve deterministic replay deduplication, remain non-authoritative and cannot trigger claims or mutate reward state.
 
 **Exit:** users no longer see reserved earned/payout notification kinds as synthetic placeholders; they are driven only by real shared-rewards events.
 

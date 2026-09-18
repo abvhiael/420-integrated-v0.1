@@ -275,7 +275,7 @@ Qualification:
 - 420 Integrated Qualification #4242
 - 420Docs Qualification #1923
 
-## V14.4 — Markets overview — IN QUALIFICATION
+## V14.4 — Markets overview — QUALIFIED
 
 Deliverables:
 - [x] build searchable market list over V13-compatible snapshot data
@@ -309,23 +309,43 @@ Acceptance:
 - untrusted market labels are rendered as text rather than executable HTML
 - market list remains usable on narrow screens
 
-## V14.5 — Market detail + charting
+Qualification:
+- exact head `74de80709e1f2ea94fa711fb60316bc6387236f6`
+- 420Exchange Web Verification #64
+- 420 Integrated Qualification #4264
+- 420Docs Qualification #1939
+
+## V14.5 — Market detail + charting — IN QUALIFICATION
 
 Deliverables:
-- market header with pair, status, route and settlement health
-- live price and best bid/ask
-- OHLCV chart
-- selectable qualified aggregation windows
-- volume/liquidity presentation
-- trade tape
-- historical activity view
-- explicit reorg/replacement UI behavior
-- source/freshness diagnostics panel for advanced users
+- [x] market header with pair, canonical/freshness status, route health and settlement health
+- [x] live/snapshot last price and best bid/ask
+- [x] deterministic SVG OHLCV chart
+- [x] selectable 1h/4h/1d/7d aggregation windows
+- [x] derive live OHLCV from canonical V13 trade history rather than treating unrelated records as candles
+- [x] volume/liquidity presentation
+- [x] de-duplicated trade tape by record ID
+- [x] historical activity table retaining reorged/orphaned records
+- [x] explicit replacement linkage preserving old/new IDs
+- [x] source diagnostics and clearly labeled demo-history mode
+- [x] responsive detail/chart layout
+
+Implementation:
+- `exchange/web/core/market-detail.js`
+- `exchange/web/app.js`
+- `exchange/web/index.html`
+- `exchange/web/styles.css`
+- `exchange/web/fixtures/market-detail.json`
+- `exchange/web/test/market-detail.test.js`
+- `exchange/web/v14.5-qualification.json`
 
 Acceptance:
-- chart values reproduce V13 snapshot/history inputs
-- reconnect does not duplicate trade tape entries
+- chart values are deterministic derivations from V13-compatible trade/history inputs
+- inactive/orphaned records cannot affect the canonical chart domain
+- trade tape de-duplicates by canonical record ID
 - replacement events visibly reconcile without losing historical traceability
+- demo history remains explicitly non-live
+- no chart/detail component creates execution authority
 
 ## V14.6 — Swap / market execution UI
 
@@ -503,6 +523,6 @@ Release gate:
 
 **Now:** V14 — Exchange Web UI. V13 is merged and closed.
 
-**Current step:** V14.4 — Markets overview — in qualification.
+**Current step:** V14.5 — market detail + charting — in qualification.
 
 **V14 completion target:** a production-qualified Exchange UI at `exchange.420integrated.org`, backed by V13 read surfaces and the qualified V1–V12 Exchange execution stack.

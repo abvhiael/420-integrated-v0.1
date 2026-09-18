@@ -1,8 +1,8 @@
 {
-  "schema":"420-exchange-web-v14.12",
-  "status":"IN_QUALIFICATION",
-  "scope":"FRONTEND_SECURITY_HARDENING",
-  "invariants":[
+  "schema": "420-exchange-web-v14.12",
+  "status": "QUALIFIED",
+  "scope": "FRONTEND_SECURITY_HARDENING",
+  "invariants": [
     "runtime URLs are HTTPS/WSS only and cannot contain embedded credentials",
     "production origin is exact and pinned to exchange.420integrated.org",
     "query subject identifiers are length-limited and character allowlisted",
@@ -14,12 +14,18 @@
     "hostile public API or user-controlled labels are rendered as text, never executable HTML",
     "frontend contains no private key, mnemonic, seed phrase or signing secret"
   ],
-  "implementation":{
-    "securityModel":"exchange/web/core/security.js",
-    "securityHeaders":"exchange/web/security-headers.json",
-    "qualificationTest":"exchange/web/test/security.test.js",
-    "runtimeValidation":"exchange/web/core/config.js",
-    "app":"exchange/web/app.js"
+  "implementation": {
+    "securityModel": "exchange/web/core/security.js",
+    "securityHeaders": "exchange/web/security-headers.json",
+    "qualificationTest": "exchange/web/test/security.test.js",
+    "runtimeValidation": "exchange/web/core/config.js",
+    "app": "exchange/web/app.js"
   },
-  "follow_on":"V14.13 production deployment"
+  "follow_on": "V14.13 production deployment",
+  "qualification": {
+    "exact_head": "9df3a10b27d1ed8fdbce2dbde5d5e99ff86d8c00",
+    "exchange_web_verification": 209,
+    "integrated_qualification": 4396,
+    "docs_qualification": 2041
+  }
 }

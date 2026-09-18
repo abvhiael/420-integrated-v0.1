@@ -6,13 +6,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/420integrated/420-integrated/bundler/gasestimation"
 	"github.com/420integrated/420-integrated/bundler/mempool"
 	"github.com/420integrated/420-integrated/bundler/simulation"
 	"github.com/420integrated/420-integrated/bundler/userop"
 )
 
 var ErrValidationRejected = &Error{Code:-32502,Message:"UserOperation validation/simulation rejected"}
-var ErrEstimationNotImplemented = &Error{Code:-32504,Message:"UserOperation gas estimation is not available until GEN-11.7"}
 var ErrReceiptTrackingNotImplemented = &Error{Code:-32505,Message:"UserOperation receipt tracking is not available until GEN-11.9"}
 
 type Validator interface {
@@ -23,10 +23,15 @@ type AdmissionPool interface {
 	Add(userop.PackedUserOperation,simulation.Evidence,time.Time)(mempool.AddResult,error)
 }
 
+type GasEstimator interface {
+	Estimate(context.Context,userop.PackedUserOperation,string)(gasestimation.Estimate,error)
+}
+
 type BoundaryBackend struct {
 	EntryPoint string
 	Validator Validator
 	Mempool AdmissionPool
+	GasEstimator GasEstimator
 	Now func() time.Time
 }
 
@@ -57,8 +62,16 @@ func (b BoundaryBackend) SendUserOperation(ctx context.Context,op userop.PackedU
 	return admitted.Hash,nil
 }
 
-func (b BoundaryBackend) EstimateUserOperationGas(context.Context,userop.PackedUserOperation,string)(GasEstimate,error) {
-	return GasEstimate{},ErrEstimationNotImplemented
+func (b BoundaryBackend) EstimateUserOperationGas(ctx context.Context,op userop.PackedUserOperation,entryPoint string)(GasEstimate,error) {
+	if !strings.EqualFold(entryPoint,b.EntryPoint) { return GasEstimate{},&Error{Code:-32602,Message:"unsupported EntryPoint"} }
+	if b.GasEstimator==nil { return GasEstimate{},errors.New("gas estimator unavailable") }
+	estimate,err:=b.GasEstimator.Estimate(ctx,op,entryPoint)
+	if err!=nil { return GasEstimate{},&Error{Code:-32504,Message:"UserOperation gas estimation failed"} }
+	return GasEstimate{
+		PreVerificationGas:estimate.PreVerificationGas,
+		VerificationGasLimit:estimate.VerificationGasLimit,
+		CallGasLimit:estimate.CallGasLimit,
+	},nil
 }
 
 func (b BoundaryBackend) GetUserOperationReceipt(context.Context,string)(any,bool,error) {

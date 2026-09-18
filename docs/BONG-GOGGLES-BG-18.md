@@ -63,7 +63,7 @@ The configuration surface freezes the canonical app/contribution ID preimages, i
 
 **Exit:** one deterministic configuration surface describes every permitted Bong Goggles reward campaign without creating reward authority in the app layer.
 
-### BG-18.2 — contribution catalog + enablement policy — IMPLEMENTED, QUALIFICATION PENDING
+### BG-18.2 — contribution catalog + enablement policy — COMPLETE AND QUALIFIED
 
 - production catalog for POST, PHOTO, STORY, DISCOVERY, REVIEW, CORRECTION and VERIFICATION;
 - comments remain explicitly disabled;
@@ -82,7 +82,7 @@ The policy catalog covers exactly the seven canonical verifier classes, keeps CO
 
 **Exit:** each existing contribution class has an explicit production enable/disable policy and verified canonical beneficiary/source semantics.
 
-### BG-18.3 — scorer + eligibility policy profiles
+### BG-18.3 — scorer + eligibility policy profiles — IMPLEMENTED, QUALIFICATION PENDING
 
 - define replaceable scorer contracts/profiles per contribution class;
 - define optional eligibility-policy contracts for anti-abuse and campaign-specific rules;
@@ -91,6 +91,12 @@ The policy catalog covers exactly the seven canonical verifier classes, keeps CO
 - production policy can impose account-age, verified-profile, uniqueness, cooldown or other objective eligibility gates where supported by canonical state;
 - no popularity score, recommendation rank or off-chain engagement estimate is authoritative unless explicitly committed through an approved reward policy boundary;
 - zero score means no accrual.
+
+Implemented in:
+- `services/bong-goggles-indexer-v1/src/rewardScorerPolicyProfiles.js`
+- `services/bong-goggles-indexer-v1/test/rewardScorerPolicyProfiles.test.js`
+
+Enabled campaign types now require declared replaceable `IRewardScorer420` profiles and optional `IRewardPolicy420` profiles. Objective policy gates are constrained to canonical-state-compatible classes, popularity/recommendation/local-engagement signals are explicitly non-authoritative, zero scorer output requests no accrual, scorer amounts above the campaign cap fail closed, and policy profiles cannot redirect beneficiaries or rewrite canonical contribution evidence.
 
 **Exit:** every enabled contribution type is mapped to a production scorer and, where needed, a production eligibility policy with deterministic tests.
 

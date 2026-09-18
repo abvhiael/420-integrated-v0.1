@@ -70,6 +70,11 @@ func (f *fakeReviewService) PublicProjection(context.Context, model.Domain, mode
 	},nil
 }
 
+func setAuth(req *http.Request, typ, id string) {
+	req.Header.Set("X-420-Subject-Type",typ)
+	req.Header.Set("X-420-Subject-ID",id)
+}
+
 func testReview() model.Review {
 	now := time.Date(2026,9,18,3,0,0,0,time.UTC)
 	return model.Review{
@@ -95,6 +100,7 @@ func TestCreateRequiresIdempotencyAndReplays(t *testing.T) {
 	for i:=0;i<2;i++ {
 		req = httptest.NewRequest(http.MethodPost, "/v1/reviews", bytes.NewReader(body))
 		req.Header.Set("Idempotency-Key","idem-1")
+		setAuth(req,"PROFILE","buyer-1")
 		res = httptest.NewRecorder()
 		server.Handler().ServeHTTP(res, req)
 		if res.Code != http.StatusCreated { t.Fatalf("code=%d body=%s",res.Code,res.Body.String()) }
@@ -110,6 +116,7 @@ func TestIdempotencyKeyCannotBeReusedForDifferentRequest(t *testing.T) {
 	for _, body := range [][]byte{first,second} {
 		req := httptest.NewRequest(http.MethodPost,"/v1/reviews",bytes.NewReader(body))
 		req.Header.Set("Idempotency-Key","same")
+		setAuth(req,"PROFILE","buyer-1")
 		res := httptest.NewRecorder()
 		server.Handler().ServeHTTP(res,req)
 		if bytes.Equal(body, second) && res.Code != http.StatusBadRequest { t.Fatalf("code=%d",res.Code) }
@@ -136,6 +143,7 @@ func TestUpdateRequiresIdempotency(t *testing.T) {
 	body := []byte(`{"actorType":"PROFILE","actorId":"buyer-1","expectedVersion":1,"rating":4}`)
 	req := httptest.NewRequest(http.MethodPatch,"/v1/reviews/review-1",bytes.NewReader(body))
 	req.Header.Set("Idempotency-Key","patch-1")
+	setAuth(req,"PROFILE","buyer-1")
 	res := httptest.NewRecorder()
 	server.Handler().ServeHTTP(res,req)
 	if res.Code != http.StatusOK { t.Fatalf("code=%d body=%s",res.Code,res.Body.String()) }
@@ -148,6 +156,7 @@ func TestStrictJSONRejectsUnknownFields(t *testing.T) {
 	body := []byte(`{"reviewId":"review-1","domain":"CLASSIFIEDS","subjectType":"PROFILE","subjectId":"seller-1","reviewerType":"PROFILE","reviewerId":"buyer-1","rating":5,"verification":"UNVERIFIED_OPINION","surprise":true}`)
 	req := httptest.NewRequest(http.MethodPost,"/v1/reviews",bytes.NewReader(body))
 	req.Header.Set("Idempotency-Key","strict")
+	setAuth(req,"PROFILE","buyer-1")
 	res := httptest.NewRecorder()
 	server.Handler().ServeHTTP(res,req)
 	if res.Code != http.StatusBadRequest { t.Fatalf("code=%d",res.Code) }
@@ -165,6 +174,7 @@ func TestResponseRoutesRequireIdempotencyOnWrites(t *testing.T) {
 
 	req = httptest.NewRequest(http.MethodPost,"/v1/reviews/review-1/response",bytes.NewReader(body))
 	req.Header.Set("Idempotency-Key","resp-1")
+	setAuth(req,"PROFILE","seller-1")
 	res = httptest.NewRecorder()
 	server.Handler().ServeHTTP(res,req)
 	if res.Code != http.StatusCreated { t.Fatalf("create response code=%d body=%s",res.Code,res.Body.String()) }
@@ -177,6 +187,7 @@ func TestResponseRoutesRequireIdempotencyOnWrites(t *testing.T) {
 	update := []byte(`{"actorType":"PROFILE","actorId":"seller-1","bodyRef":"storage://response-2","expectedVersion":1}`)
 	req = httptest.NewRequest(http.MethodPatch,"/v1/reviews/review-1/response",bytes.NewReader(update))
 	req.Header.Set("Idempotency-Key","resp-2")
+	setAuth(req,"PROFILE","seller-1")
 	res = httptest.NewRecorder()
 	server.Handler().ServeHTTP(res,req)
 	if res.Code != http.StatusOK { t.Fatalf("update response code=%d body=%s",res.Code,res.Body.String()) }
@@ -195,6 +206,7 @@ func TestModerationRoutesRequireIdempotency(t *testing.T) {
 
 	req = httptest.NewRequest(http.MethodPost,"/v1/reviews/review-1/report",bytes.NewReader(report))
 	req.Header.Set("Idempotency-Key","report-1")
+	setAuth(req,"PROFILE","reporter-1")
 	res = httptest.NewRecorder()
 	server.Handler().ServeHTTP(res,req)
 	if res.Code != http.StatusCreated { t.Fatalf("report code=%d body=%s",res.Code,res.Body.String()) }
@@ -202,6 +214,7 @@ func TestModerationRoutesRequireIdempotency(t *testing.T) {
 	action := []byte(`{"moderationId":"mod-2","actorType":"PROFILE","actorId":"moderator-1","action":"HIDE","reason":"SPAM"}`)
 	req = httptest.NewRequest(http.MethodPost,"/v1/reviews/review-1/moderation",bytes.NewReader(action))
 	req.Header.Set("Idempotency-Key","mod-2")
+	setAuth(req,"PROFILE","moderator-1")
 	res = httptest.NewRecorder()
 	server.Handler().ServeHTTP(res,req)
 	if res.Code != http.StatusCreated { t.Fatalf("moderation code=%d body=%s",res.Code,res.Body.String()) }
@@ -241,5 +254,43 @@ func TestPublicProjectionRoute(t *testing.T) {
 	}
 	if bytes.Contains(res.Body.Bytes(), []byte("private-history-not-projected")) {
 		t.Fatalf("projection leaked private review history: %s",res.Body.String())
+	}
+}
+
+
+func TestWritesRejectMissingAndMismatchedPrincipal(t *testing.T) {
+	fake := &fakeReviewService{review:testReview()}
+	server,_ := New(fake)
+	body := []byte(`{"reviewId":"review-1","domain":"CLASSIFIEDS","subjectType":"PROFILE","subjectId":"seller-1","reviewerType":"PROFILE","reviewerId":"buyer-1","rating":5,"verification":"UNVERIFIED_OPINION"}`)
+
+	req := httptest.NewRequest(http.MethodPost,"/v1/reviews",bytes.NewReader(body))
+	req.Header.Set("Idempotency-Key","auth-missing")
+	res := httptest.NewRecorder()
+	server.Handler().ServeHTTP(res,req)
+	if res.Code != http.StatusUnauthorized { t.Fatalf("missing principal code=%d body=%s",res.Code,res.Body.String()) }
+	if fake.created != 0 { t.Fatalf("write reached service without principal: %d",fake.created) }
+
+	req = httptest.NewRequest(http.MethodPost,"/v1/reviews",bytes.NewReader(body))
+	req.Header.Set("Idempotency-Key","auth-mismatch")
+	setAuth(req,"PROFILE","attacker")
+	res = httptest.NewRecorder()
+	server.Handler().ServeHTTP(res,req)
+	if res.Code != http.StatusUnauthorized { t.Fatalf("mismatched principal code=%d body=%s",res.Code,res.Body.String()) }
+	if fake.created != 0 { t.Fatalf("impersonated write reached service: %d",fake.created) }
+}
+
+func TestPublicReadsDoNotRequirePrincipal(t *testing.T) {
+	fake := &fakeReviewService{review:testReview()}
+	server,_ := New(fake)
+	for _, path := range []string{
+		"/v1/reviews/review-1",
+		"/v1/reviews/CLASSIFIEDS/PROFILE/seller-1",
+		"/v1/reputation/CLASSIFIEDS/PROFILE/seller-1",
+		"/v1/reputation/CLASSIFIEDS/PROFILE/seller-1/projection",
+	} {
+		req:=httptest.NewRequest(http.MethodGet,path,nil)
+		res:=httptest.NewRecorder()
+		server.Handler().ServeHTTP(res,req)
+		if res.Code != http.StatusOK { t.Fatalf("public read %s code=%d body=%s",path,res.Code,res.Body.String()) }
 	}
 }

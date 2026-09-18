@@ -3,8 +3,11 @@ import assert from 'node:assert/strict';
 import { buildRewardOperatorCampaignSurface, buildRewardOperatorLookupSurface, prepareRewardOperatorAction } from '../src/rewardOperatorSurface.js';
 
 const plan={
+  schema:'bg-reward-campaign-plan-v1',
   appIdSymbol:'APP_ID_BONG_GOGGLES',
+  appIdPreimage:'420/APP/BONG_GOGGLES/V1',
   contributionType:'POST',
+  contributionTypePreimage:'420/BONG_GOGGLES/REWARD/POST/V1',
   scorer:'0x1111111111111111111111111111111111111111',
   policy:null,
   maxRewardPerContribution:10,

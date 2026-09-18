@@ -31,6 +31,7 @@ type ReviewService interface {
 	ReportReview(context.Context, service.ReportReviewInput, time.Time) (model.ModerationRecord, error)
 	ModerateReview(context.Context, service.ModerateReviewInput, time.Time) (model.ModerationRecord, error)
 	ListModeration(context.Context, string) ([]model.ModerationRecord, error)
+	ReputationSummary(context.Context, model.Domain, model.SubjectRef) (model.ReputationSummary, error)
 }
 
 type Server struct {
@@ -58,6 +59,7 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("POST /v1/reviews/{reviewId}/report", s.reportReview)
 	mux.HandleFunc("POST /v1/reviews/{reviewId}/moderation", s.moderateReview)
 	mux.HandleFunc("GET /v1/reviews/{reviewId}/moderation", s.listModeration)
+	mux.HandleFunc("GET /v1/reputation/{domain}/{subjectType}/{subjectId}", s.reputationSummary)
 	return mux
 }
 
@@ -255,6 +257,19 @@ func (s *Server) listModeration(w http.ResponseWriter, r *http.Request) {
 	records, err := s.service.ListModeration(r.Context(), r.PathValue("reviewId"))
 	if err != nil { badRequest(w, err); return }
 	writeJSON(w, http.StatusOK, map[string]any{"items":records, "count":len(records)})
+}
+
+func (s *Server) reputationSummary(w http.ResponseWriter, r *http.Request) {
+	summary, err := s.service.ReputationSummary(
+		r.Context(),
+		model.Domain(strings.ToUpper(strings.TrimSpace(r.PathValue("domain")))),
+		model.SubjectRef{Type:r.PathValue("subjectType"), ID:r.PathValue("subjectId")},
+	)
+	if err != nil { badRequest(w, err); return }
+	writeJSON(w, http.StatusOK, map[string]any{
+		"summary": summary,
+		"averageRating": summary.AverageRating(),
+	})
 }
 
 func readBody(r *http.Request) ([]byte, error) {

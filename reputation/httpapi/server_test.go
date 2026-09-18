@@ -48,6 +48,17 @@ func (f *fakeReviewService) ModerateReview(context.Context, service.ModerateRevi
 func (f *fakeReviewService) ListModeration(context.Context, string) ([]model.ModerationRecord, error) {
 	return []model.ModerationRecord{{ID:"mod-1", ReviewID:"review-1", Action:model.ModerationReport, Reason:model.ReasonSpam, Actor:model.SubjectRef{Type:"PROFILE",ID:"reporter-1"}, PreviousState:model.ReviewActive, ResultState:model.ReviewActive, State:model.ModerationOpen, Version:1, CreatedAt:f.review.CreatedAt}}, nil
 }
+func (f *fakeReviewService) ReputationSummary(context.Context, model.Domain, model.SubjectRef) (model.ReputationSummary, error) {
+	return model.ReputationSummary{
+		Domain:model.DomainClassifieds,
+		Subject:f.review.Subject,
+		PolicyVersion:model.ReputationPolicyVersion,
+		VisibleReviewCount:1,
+		UnverifiedReviewCount:1,
+		RatingDistribution:model.RatingDistribution{Five:1},
+		UpdatedAt:f.review.UpdatedAt,
+	}, nil
+}
 
 func testReview() model.Review {
 	now := time.Date(2026,9,18,3,0,0,0,time.UTC)
@@ -189,4 +200,20 @@ func TestModerationRoutesRequireIdempotency(t *testing.T) {
 	res = httptest.NewRecorder()
 	server.Handler().ServeHTTP(res,req)
 	if res.Code != http.StatusOK { t.Fatalf("moderation list code=%d",res.Code) }
+}
+
+
+func TestReputationSummaryRoute(t *testing.T) {
+	fake := &fakeReviewService{review:testReview()}
+	server,_ := New(fake)
+	req := httptest.NewRequest(http.MethodGet,"/v1/reputation/CLASSIFIEDS/PROFILE/seller-1",nil)
+	res := httptest.NewRecorder()
+	server.Handler().ServeHTTP(res,req)
+	if res.Code != http.StatusOK { t.Fatalf("summary code=%d body=%s",res.Code,res.Body.String()) }
+	if !bytes.Contains(res.Body.Bytes(), []byte(`"averageRating":5`)) {
+		t.Fatalf("summary missing average rating: %s",res.Body.String())
+	}
+	if !bytes.Contains(res.Body.Bytes(), []byte(model.ReputationPolicyVersion)) {
+		t.Fatalf("summary missing policy version: %s",res.Body.String())
+	}
 }

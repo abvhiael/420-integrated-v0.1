@@ -18,6 +18,10 @@ type TrustReader interface {
 
 type ReviewRepository interface {
 	Ready(ctx context.Context) error
+	Create(model.Review) (model.Review, error)
+	Get(string) (model.Review, error)
+	Update(model.Review, uint32) (model.Review, error)
+	ListBySubject(model.Domain, model.SubjectRef) []model.Review
 }
 
 type InteractionVerifier interface {

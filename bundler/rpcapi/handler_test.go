@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/420integrated/420-integrated/bundler/mempool"
 	"github.com/420integrated/420-integrated/bundler/simulation"
 	"github.com/420integrated/420-integrated/bundler/userop"
 )
@@ -41,11 +42,23 @@ func (f *fakeBackend) EstimateUserOperationGas(_ context.Context,_ userop.Packed
 }
 func (f *fakeBackend) SupportedEntryPoints(context.Context)([]string,error){ return f.points,f.pointsErr }
 
-type fakeValidator struct { err error }
+type fakeValidator struct {
+	err error
+	evidence simulation.Evidence
+}
 
 func (f fakeValidator) ValidateAndSimulate(context.Context,userop.PackedUserOperation,time.Time)(simulation.Evidence,error){
 	if f.err!=nil { return simulation.Evidence{},f.err }
-	return simulation.Evidence{ExecutionSucceeded:true},nil
+	return f.evidence,nil
+}
+
+type fakeAdmissionPool struct {
+	result mempool.AddResult
+	err error
+}
+
+func (f fakeAdmissionPool) Add(userop.PackedUserOperation,simulation.Evidence,time.Time)(mempool.AddResult,error){
+	return f.result,f.err
 }
 
 func rpcFixture() userop.PackedUserOperation {
@@ -120,18 +133,22 @@ func TestEstimateUserOperationGas(t *testing.T) {
 	if _,ok:=out["error"]; ok { t.Fatalf("unexpected error: %v",out) }
 }
 
-func TestBoundaryBackendExposesMethodsWithoutFabricatingLaterPhaseState(t *testing.T) {
-	b:=BoundaryBackend{EntryPoint:"0x1111111111111111111111111111111111111111",Validator:fakeValidator{}}
+func TestBoundaryBackendAdmitsValidatedOperationAndReturnsCanonicalHash(t *testing.T) {
+	hash:="0x"+strings.Repeat("11",32)
+	b:=BoundaryBackend{
+		EntryPoint:"0x1111111111111111111111111111111111111111",
+		Validator:fakeValidator{evidence:simulation.Evidence{UserOpHash:hash,ExecutionSucceeded:true}},
+		Mempool:fakeAdmissionPool{result:mempool.AddResult{Hash:hash}},
+	}
 	h,_:=NewHandler(b)
 	send:=call(t,h,map[string]any{"jsonrpc":"2.0","id":1,"method":"eth_sendUserOperation","params":[]any{rpcFixture(),b.EntryPoint}})
-	errObj:=send["error"].(map[string]any)
-	if int(errObj["code"].(float64))!=-32500 { t.Fatalf("unexpected send boundary error: %v",send) }
+	if send["result"]!=hash { t.Fatalf("unexpected send result: %v",send) }
 
 	estimate:=call(t,h,map[string]any{"jsonrpc":"2.0","id":2,"method":"eth_estimateUserOperationGas","params":[]any{rpcFixture(),b.EntryPoint}})
-	errObj=estimate["error"].(map[string]any)
+	errObj:=estimate["error"].(map[string]any)
 	if int(errObj["code"].(float64))!=-32504 { t.Fatalf("unexpected estimate boundary error: %v",estimate) }
 
-	receipt:=call(t,h,map[string]any{"jsonrpc":"2.0","id":3,"method":"eth_getUserOperationReceipt","params":[]any{"0x"+strings.Repeat("11",32)}})
+	receipt:=call(t,h,map[string]any{"jsonrpc":"2.0","id":3,"method":"eth_getUserOperationReceipt","params":[]any{hash}})
 	errObj=receipt["error"].(map[string]any)
 	if int(errObj["code"].(float64))!=-32505 { t.Fatalf("unexpected receipt boundary error: %v",receipt) }
 }
@@ -140,6 +157,7 @@ func TestBoundaryBackendRejectsFailedSimulation(t *testing.T) {
 	b:=BoundaryBackend{
 		EntryPoint:"0x1111111111111111111111111111111111111111",
 		Validator:fakeValidator{err:errors.New("reverted")},
+		Mempool:fakeAdmissionPool{},
 	}
 	h,_:=NewHandler(b)
 	out:=call(t,h,map[string]any{
@@ -148,6 +166,28 @@ func TestBoundaryBackendRejectsFailedSimulation(t *testing.T) {
 	})
 	errObj:=out["error"].(map[string]any)
 	if int(errObj["code"].(float64))!=-32502 { t.Fatalf("unexpected validation rejection: %v",out) }
+}
+
+func TestBoundaryBackendMapsMempoolConflictsAndCapacity(t *testing.T) {
+	hash:="0x"+strings.Repeat("11",32)
+	cases:=[]struct{name string; poolErr error; code int}{
+		{"nonce-conflict",mempool.ErrNonceConflict,-32503},
+		{"full",mempool.ErrFull,-32506},
+		{"sender-limit",mempool.ErrSenderLimit,-32506},
+	}
+	for _,tc:=range cases {
+		t.Run(tc.name,func(t *testing.T){
+			b:=BoundaryBackend{
+				EntryPoint:"0x1111111111111111111111111111111111111111",
+				Validator:fakeValidator{evidence:simulation.Evidence{UserOpHash:hash,ExecutionSucceeded:true}},
+				Mempool:fakeAdmissionPool{err:tc.poolErr},
+			}
+			h,_:=NewHandler(b)
+			out:=call(t,h,map[string]any{"jsonrpc":"2.0","id":1,"method":"eth_sendUserOperation","params":[]any{rpcFixture(),b.EntryPoint}})
+			errObj:=out["error"].(map[string]any)
+			if int(errObj["code"].(float64))!=tc.code { t.Fatalf("unexpected mempool error mapping: %v",out) }
+		})
+	}
 }
 
 func TestInvalidRequestsFailClosed(t *testing.T) {

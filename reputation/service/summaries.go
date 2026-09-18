@@ -34,14 +34,25 @@ func (s *Service) ReputationSummary(ctx context.Context, domain model.Domain, su
 			CreatedAt: review.CreatedAt,
 			UpdatedAt: review.UpdatedAt,
 		}
-		if _, err := s.reviews.GetResponse(review.ID); err == nil {
+		if review.UpdatedAt.After(out.UpdatedAt) {
+			out.UpdatedAt = review.UpdatedAt
+		}
+		if response, err := s.reviews.GetResponse(review.ID); err == nil {
 			entry.HasResponse = true
 			out.ResponseCount++
+			if response.UpdatedAt.After(out.UpdatedAt) {
+				out.UpdatedAt = response.UpdatedAt
+			}
 		}
 		moderation := s.reviews.ListModeration(review.ID)
 		entry.ModerationCount = uint64(len(moderation))
 		if len(moderation) > 0 {
 			out.ModeratedReviewCount++
+			for _, record := range moderation {
+				if record.CreatedAt.After(out.UpdatedAt) {
+					out.UpdatedAt = record.CreatedAt
+				}
+			}
 		}
 		out.History = append(out.History, entry)
 
@@ -74,9 +85,6 @@ func (s *Service) ReputationSummary(ctx context.Context, domain model.Domain, su
 			out.RatingDistribution.Four++
 		case 5:
 			out.RatingDistribution.Five++
-		}
-		if review.UpdatedAt.After(out.UpdatedAt) {
-			out.UpdatedAt = review.UpdatedAt
 		}
 	}
 

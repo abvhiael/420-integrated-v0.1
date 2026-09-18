@@ -42,7 +42,7 @@ Production web target: `https://bonggoggles.420integrated.org`.
 - merge commit: `95ab47efaccb1a50084c33c5b7c8d4faf44ab529`
 - production social games remain strictly zero-wager; wagered play belongs in 420Bet.
 
-## Phase 16 — notifications — ACTIVE, PR #330
+## Phase 16 — notifications — COMPLETE, merged PR #330
 
 Branch: `feature/bong-goggles-bg16-notifications`
 
@@ -153,17 +153,28 @@ BG-16 integrates the production Bong Goggles application with the existing 420No
 - reconciled exact head must pass Bong Goggles Indexer, Games, Media, 420Docs and 420 Integrated workflows;
 - PR #330 remains unmerged until exact-head qualification is green and merge is explicitly performed.
 
-## Remaining product phases after BG-16
+## Phase 17 — moderation operations — COMPLETE, merged PR #335
 
-- **BG-17 — moderation operations**
-- **BG-18 — rewards production configuration**
+- **BG-17.1 through BG-17.9 — COMPLETE AND QUALIFIED**
+- merge commit: `0612b39f017ad26092378e4292b61ec13adc172f`
+
+## Phase 18 — rewards production configuration — ACTIVE
+
+Branch: `feature/bong-goggles-bg18-rewards-config`
+
+Detailed roadmap: `docs/BONG-GOGGLES-BG-18.md`
+
+BG-18 productionizes the existing Bong Goggles reward verifier/adapter against the shared 420 rewards stack. It configures contribution enablement, scorers/policies, campaigns, caps, funding, accrual/claims, notifications, abuse hardening, operator surfaces and canonical accounting without creating a second reward ledger.
+
+## Remaining product phases after BG-18
+
 - **BG-19 — full web application + public-facing UI**
 - **BG-20 — launch hardening**
 
 ## Current position
 
-**Phase 15 is merged in PR #321. BG-16.1 through BG-16.8 are qualified. Current work: BG-16.9 production notification closeout on PR #330 / `feature/bong-goggles-bg16-notifications`.**
+**Phase 17 is merged in PR #335. Current work: BG-18 rewards production configuration on `feature/bong-goggles-bg18-rewards-config`.**
 
 Critical path:
 
-`BG-16.9 production closeout -> merge Phase 16 -> BG-17 moderation ops -> BG-18 rewards config -> BG-19 web UI -> BG-20 launch hardening -> READY`
+`BG-18 rewards config -> BG-19 web UI -> BG-20 launch hardening -> READY`

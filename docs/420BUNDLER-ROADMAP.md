@@ -12,8 +12,8 @@ The Bundler Network is not custody, wallet authorization, consensus, settlement 
 - **GEN-11.3 — public Bundler RPC API — COMPLETE**
 - **GEN-11.4 — deterministic validation + simulation engine — COMPLETE**
 - **GEN-11.5 — bounded UserOperation mempool — COMPLETE**
-- **GEN-11.6 — bundle construction + EntryPoint submission — IN QUALIFICATION**
-- GEN-11.7 — gas + fee estimation — pending
+- **GEN-11.6 — bundle construction + EntryPoint submission — COMPLETE**
+- **GEN-11.7 — gas + fee estimation — IN QUALIFICATION**
 - GEN-11.8 — Paymaster integration boundary — pending
 - GEN-11.9 — receipts + lifecycle tracking — pending
 - GEN-11.10 — multi-bundler propagation — pending
@@ -194,3 +194,24 @@ A successful execution-RPC submission yields an operational transaction hash and
 The builder preserves GEN-11.5 deterministic snapshot order, truncates selection to the configured per-cycle bound, records selected/submitted/rejected/failed counts, and emits only operational logs.
 
 GEN-11.6 is complete when all repository qualification workflows pass on one exact head containing deterministic bundle selection, current-state revalidation, EntryPoint transaction submission and the production submission loop.
+
+
+## GEN-11.7 — gas + fee estimation
+
+Added `bundler/gasestimation` and replaced the GEN-11.3 placeholder response for `eth_estimateUserOperationGas`.
+
+The estimator uses the same canonical `EntryPoint420.handleOp(PackedUserOperation420)` ABI as simulation/submission and asks the configured execution RPC for a bounded `eth_estimateGas` result. Because standard `eth_estimateGas` exposes only a full transaction estimate—not separate account-abstraction verification and execution phases—the Bundler does not fabricate a verifier benchmark.
+
+Genesis estimation semantics are therefore explicit:
+
+- `preVerificationGas` is computed locally from the encoded `handleOp` calldata using the intrinsic transaction floor plus zero/nonzero calldata byte costs, then raised to the client-supplied value if that value is already larger.
+- `verificationGasLimit` preserves the high 128-bit verification component already supplied in `accountGasLimits`; if none was supplied, it remains `0x0` rather than inventing a measurement the node did not provide.
+- `callGasLimit` preserves the supplied low 128-bit call component but is raised to at least the execution node's full `eth_estimateGas` result, giving a conservative execution envelope.
+
+The RPC path rejects unsupported EntryPoints and maps execution-provider estimation failures to Bundler error `-32504` without leaking arbitrary dependency detail. Responses remain canonical hexadecimal quantities.
+
+The estimator reuses the hardened public execution-RPC URL boundary and bounded 1 MiB response handling. When configured, `BUNDLER_SUBMITTER` is supplied as the transaction sender for estimation so node-side behavior matches the production submission path.
+
+GEN-11.7 does not set fee-market policy or mutate the operation's `gasFees`; fee ordering/economic policy remains separate from estimation and is addressed later in the Genesis ordering/policy phases.
+
+GEN-11.7 is complete when all repository qualification workflows pass on one exact head containing execution-backed gas estimation and the public RPC integration.

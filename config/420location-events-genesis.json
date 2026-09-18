@@ -1,0 +1,83 @@
+{
+  "schema": "420-location-events-genesis-v1",
+  "phase": "GEN-SVC-2",
+  "status": "IMPLEMENTATION_BASELINE",
+  "services": {
+    "location": {
+      "serviceId": "420/service/location/v1",
+      "name": "420Location",
+      "authority": "REPLACEABLE_APPLICATION_SERVICE",
+      "canonical_place_authority": "420 Registry where a Registry-owned record exists; otherwise application-owned place metadata with explicit provenance",
+      "map_provider_policy": "provider-neutral",
+      "geospatial_index_authority": "NON_CANONICAL_REBUILDABLE",
+      "private_location_policy": "private residential/user coordinates are not public by default"
+    },
+    "events": {
+      "serviceId": "420/service/events/v1",
+      "name": "420Events",
+      "authority": "REPLACEABLE_APPLICATION_SERVICE",
+      "event_discovery_authority": "NON_CANONICAL_REBUILDABLE",
+      "calendar_integration": "420Calendar-compatible",
+      "notification_integration": "420 Notifications-compatible"
+    }
+  },
+  "place": {
+    "required_fields": ["place_id","name","category","visibility","source","created_at","updated_at"],
+    "optional_fields": ["organization_id","registry_record_id","address","country","region","city","postal_region","latitude","longitude","service_radius_meters","hours","contact","metadata_uri"],
+    "categories": ["BUSINESS","VENUE","ATTRACTION","DISPENSARY","HOTEL","RENTAL","RESTAURANT","FARM","EVENT_LOCATION","SERVICE_PROVIDER","OTHER"],
+    "location_precision": ["EXACT_PUBLIC_PLACE","APPROXIMATE_AREA","PRIVATE"],
+    "rules": [
+      "name is display metadata and never a geospatial locator by itself",
+      "public exact coordinates require a public place/business justification",
+      "private user/residential coordinates are never required for public profiles",
+      "Registry-backed places preserve Registry provenance and verification status"
+    ]
+  },
+  "event": {
+    "required_fields": ["event_id","organizer_id","title","start_at","end_at","timezone","visibility","status","created_at","updated_at"],
+    "optional_fields": ["place_id","location_text","capacity","ticket_reference","tags","age_restrictions","media_asset_ids","calendar_event_id","metadata_uri"],
+    "statuses": ["DRAFT","SCHEDULED","LIVE","ENDED","CANCELLED"],
+    "visibility": ["PUBLIC","UNLISTED","FOLLOWERS","COMMUNITY_ONLY","PRIVATE","ORGANIZATION_MEMBERS"],
+    "rules": [
+      "event times are stored with explicit timezone context",
+      "cancelled events remain historically addressable",
+      "event discovery never overrides organizer ownership or Calendar authority",
+      "ticket/payment state, when present, remains owned by the authoritative payment/booking subsystem"
+    ]
+  },
+  "queries": {
+    "supported": ["NEAR_POINT","WITHIN_RADIUS","WITHIN_REGION","BOUNDING_BOX","NEAR_ROUTE","BY_CATEGORY","EVENTS_BY_DATE_RANGE","EVENTS_NEAR_POINT"],
+    "pagination": "cursor",
+    "default_sort": "RELEVANCE_OR_DISTANCE",
+    "distance_units": "meters",
+    "max_public_precision_rule": "consumer APIs must not reveal greater precision than source visibility permits"
+  },
+  "provider_abstraction": {
+    "capabilities": ["GEOCODE","REVERSE_GEOCODE","MAP_TILES","ROUTING","PLACE_LOOKUP"],
+    "requirements": [
+      "provider output is external/non-canonical data",
+      "provider failures must not mutate canonical Registry or Identity state",
+      "provider-specific IDs are stored only as aliases/provenance",
+      "switching providers must not require changing canonical place_id values"
+    ]
+  },
+  "privacy": {
+    "coarse_search_supported": true,
+    "client_side_proximity_supported": true,
+    "precise_location_logging_default": false,
+    "visibility_before_indexing": true,
+    "private_location_export": false
+  },
+  "integrations": {
+    "420Travel": ["maps","places","nearby discovery","events"],
+    "420Classifieds": ["local radius search","pickup regions"],
+    "420Grow": ["business/farm places"],
+    "420Commerce": ["store/service locations"],
+    "420Jobs": ["job location metadata"],
+    "420Calendar": ["event scheduling and RSVP references"],
+    "420Notifications": ["event reminders and changes"],
+    "420Search": ["public place/event discovery projection"],
+    "420Registry": ["canonical service/business provenance"],
+    "420Verify": ["verified application/business provenance"]
+  }
+}

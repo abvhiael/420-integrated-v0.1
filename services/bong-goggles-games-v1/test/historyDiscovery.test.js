@@ -113,12 +113,39 @@ test('search candidates are shaped for BG-12 query service without becoming cano
   assert.equal(alice.authoritative, false);
 });
 
-test('BG-18 hook never awards or mints in BG-15', () => {
+test('BG-18.8 formally defers game rewards until a canonical game contribution verifier exists', () => {
   const stats = projectPlayerStats({ sessions, player: A }).overall;
   const hook = buildRewardsHook({ player: A, gameType: 'CHESS', stats });
   assert.equal(hook.destination, 'BG-18_REWARDS_CONFIGURATION');
+  assert.equal(hook.productionDecision, 'DEFERRED');
+  assert.equal(hook.deferredReason, 'CANONICAL_GAME_CONTRIBUTION_VERIFIER_NOT_IMPLEMENTED');
+  assert.equal(hook.canonicalSessionSource, 'BongGogglesGameSessionRegistry420');
+  assert.equal(hook.canonicalGameContributionVerifierRequired, true);
+  assert.deepEqual(hook.supportedRewardContributionTypes, []);
   assert.equal(hook.awardRequested, false);
   assert.equal(hook.mintRequested, false);
+  assert.equal(hook.contributionRequested, false);
+});
+
+test('BG-18.8 local game stats rankings streaks and results cannot become reward authority', () => {
+  const stats = projectPlayerStats({ sessions, player: A }).overall;
+  const hook = buildRewardsHook({ player: A, gameType: 'CHESS', stats });
+  assert.equal(hook.statsRewardAuthority, false);
+  assert.equal(hook.leaderboardRewardAuthority, false);
+  assert.equal(hook.streakRewardAuthority, false);
+  assert.equal(hook.localGameResultRewardAuthority, false);
+  assert.equal(hook.authoritative, false);
+});
+
+test('BG-18.8 freezes requirements for any later game reward enablement', () => {
+  const stats = projectPlayerStats({ sessions, player: A }).overall;
+  const hook = buildRewardsHook({ player: A, gameType: 'CHESS', stats });
+  assert.equal(hook.zeroWagerRequiredIfEnabledLater, true);
+  assert.equal(hook.finishedSessionRequiredIfEnabledLater, true);
+  assert.equal(hook.canonicalParticipantBeneficiaryRequiredIfEnabledLater, true);
+  assert.equal(hook.deterministicSessionSourceKeyRequiredIfEnabledLater, true);
+  assert.equal(hook.antiFarmingPolicyRequiredIfEnabledLater, true);
+  assert.equal(hook.duplicateSessionRewardPreventionRequiredIfEnabledLater, true);
 });
 
 test('non-finished sessions are rejected from canonical history', () => {

@@ -1,0 +1,24 @@
+{
+  "schema":"420-exchange-web-v14.7",
+  "status":"IN_QUALIFICATION",
+  "scope":"LIMIT_ORDER_UI",
+  "protocolDependency":"V10 signed limit orders and atomic settlement",
+  "invariants":[
+    "order review preserves maker, sell token, buy token, total sell amount, minimum total net buy amount, recipient, primary market, nonce, expiry and partial-fill policy",
+    "partial-fill minimum buy requirements preserve the signed full-order ratio and round upward",
+    "non-partial orders cannot be partially filled",
+    "filled sell amount cannot exceed signed sell amount",
+    "open, partial, filled, cancelled and expired states are deterministic",
+    "cancellation remains fail closed until wallet/session integration is available",
+    "history preserves order hash and transaction provenance",
+    "demo order records are explicitly labeled and cannot be mistaken for live canonical orders"
+  ],
+  "implementation":{
+    "orderModel":"exchange/web/core/limit-orders.js",
+    "orderView":"exchange/web/app.js",
+    "template":"exchange/web/index.html",
+    "fixture":"exchange/web/fixtures/limit-orders.json",
+    "qualificationTest":"exchange/web/test/limit-orders.test.js"
+  },
+  "follow_on":"V14.8 bridge and cross-chain settlement UI"
+}

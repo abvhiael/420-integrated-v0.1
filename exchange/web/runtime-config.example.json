@@ -28,6 +28,6 @@
     "limitOrders": true,
     "bridge": true,
     "portfolio": true,
-    "walletConnection": false
+    "walletConnection": true
   }
 }

@@ -49,7 +49,7 @@ Appeal resolution preserves the contract's separation-of-duty rule: the case ope
 - local intent state is explicitly non-final and requires canonical `AppealResolved` confirmation;
 - overturned canonical events update the projected case/action presentation to resolved/revoked only after chain confirmation.
 
-### BG-17.5 — emergency hide operations — IMPLEMENTED, QUALIFICATION PENDING
+### BG-17.5 — emergency hide operations — COMPLETE AND QUALIFIED
 
 - deterministic emergency-hide workspace exposes current active/expired presentation state per canonical scope;
 - target scope is supplied by the canonical `scopeForTarget` derivation path before intent preparation;
@@ -59,13 +59,14 @@ Appeal resolution preserves the contract's separation-of-duty rule: the case ope
 - expiry reconciliation deterministically clears stale local presentation state;
 - emergency-hide presentation never claims to delete, edit or otherwise mutate the underlying canonical content object.
 
-### BG-17.6 — policy, capability + audit surfaces
+### BG-17.6 — policy, capability + audit surfaces — IMPLEMENTED, QUALIFICATION PENDING
 
-- current operator capability projection by action/scope;
-- explicit denial reasons for missing/expired capability;
-- immutable provenance timeline for canonical moderation events;
-- local operator notes/labels separated from canonical evidence and decisions;
-- Wallet/Explorer deep links for every canonical write.
+- deterministic operator capability projection by action/scope with explicit authorized state;
+- denial reasons distinguish missing, expired and revoked capability grants;
+- immutable audit timeline is built strictly from canonical moderation-event provenance and deterministic chain ordering;
+- local operator notes and labels are marked local-only and cannot contain or masquerade as canonical evidence/decisions;
+- canonical write intents can expose Wallet confirmation and Explorer links without making local state authoritative;
+- Explorer links resolve to the transaction when known and otherwise to the canonical safety-registry contract surface.
 
 ### BG-17.7 — privacy + evidence handling
 
@@ -95,4 +96,4 @@ Appeal resolution preserves the contract's separation-of-duty rule: the case ope
 
 ## Current increment
 
-BG-17.1 through BG-17.4 are qualified. BG-17.5 is implemented on `feature/bong-goggles-bg17-moderation-ops`; exact-head qualification is pending before advancing to BG-17.6.
+BG-17.1 through BG-17.5 are qualified. BG-17.6 is implemented on `feature/bong-goggles-bg17-moderation-ops`; exact-head qualification is pending before advancing to BG-17.7.

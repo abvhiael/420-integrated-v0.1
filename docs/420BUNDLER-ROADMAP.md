@@ -8,8 +8,8 @@ The Bundler Network is not custody, wallet authorization, consensus, settlement 
 
 - **GEN-11.0 — architecture + executable invariant baseline — COMPLETE**
 - **GEN-11.1 — core bundler runtime/service scaffold — COMPLETE**
-- **GEN-11.2 — canonical UserOperation model + hashing — IN QUALIFICATION**
-- GEN-11.3 — public Bundler RPC API — pending
+- **GEN-11.2 — canonical UserOperation model + hashing — COMPLETE**
+- **GEN-11.3 — public Bundler RPC API — IN QUALIFICATION**
 - GEN-11.4 — deterministic validation + simulation engine — pending
 - GEN-11.5 — bounded UserOperation mempool — pending
 - GEN-11.6 — bundle construction + EntryPoint submission — pending
@@ -105,3 +105,23 @@ RPC quantities are parsed fail-closed as canonical 0x-prefixed uint256 values. A
 The package includes an internal legacy Keccak-256 implementation with the standard empty-input test vector so canonical hashing does not introduce a new runtime dependency. Tests also prove that every hash-bound field, chain identity and EntryPoint mutation changes the digest, while signature mutation does not.
 
 GEN-11.2 is complete when all repository qualification workflows pass on one exact head containing this model and hash implementation.
+
+
+## GEN-11.3 — public Bundler RPC API
+
+Added the public JSON-RPC 2.0 boundary in `bundler/rpcapi` and mounted it on the production Bundler service root while preserving `/healthz` and `/readyz`.
+
+Genesis RPC vocabulary established in this phase:
+
+- `eth_supportedEntryPoints`
+- `eth_sendUserOperation`
+- `eth_getUserOperationReceipt`
+- `eth_estimateUserOperationGas`
+
+Requests are POST-only, bounded to 1 MiB, require JSON-RPC 2.0 envelopes, scalar request IDs, strict method names and method-specific parameter shapes. UserOperation payloads pass through the GEN-11.2 canonical parser before reaching any backend. EntryPoint addresses and UserOperation hashes are validated and normalized at the API boundary.
+
+The API returns standard JSON-RPC parse/request/method/parameter/internal error codes and supports Bundler-specific backend errors without leaking arbitrary dependency failures. Unknown receipts can be represented as an explicit successful `result: null`.
+
+GEN-11.3 intentionally does not fabricate later-phase behavior. The production boundary backend exposes the configured EntryPoint immediately, while admission returns `-32500` until the validation/mempool path exists, gas estimation returns `-32504` until GEN-11.7, and receipt tracking returns `-32505` until GEN-11.9. Later phases replace those backend methods without changing the public transport contract.
+
+GEN-11.3 is complete when all repository qualification workflows pass on one exact head containing this RPC boundary.

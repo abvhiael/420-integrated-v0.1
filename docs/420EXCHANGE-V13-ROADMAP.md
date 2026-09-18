@@ -430,7 +430,7 @@ Qualification:
 - 420 Integrated Qualification #4320
 - 420Docs Qualification #1979
 
-## V14.8 — Bridge + cross-chain settlement UI — IN QUALIFICATION
+## V14.8 — Bridge + cross-chain settlement UI — QUALIFIED
 
 Deliverables:
 - [x] source/destination network route selection
@@ -465,22 +465,43 @@ Acceptance:
 - failed settlements remain visible with explicit retryable/terminal guidance
 - demo bridge data remains explicitly non-production
 
-## V14.9 — Portfolio, balances + activity
+Qualification:
+- exact head `ee77d9f7de16e96b70f472d2fc9777b5424db3db`
+- 420Exchange Web Verification #138
+- 420 Integrated Qualification #4333
+- 420Docs Qualification #1988
+
+## V14.9 — Portfolio, balances + activity — IN QUALIFICATION
 
 Deliverables:
-- wallet-connected balances
-- Exchange-relevant asset positions
-- open orders
-- recent trades/fills
-- bridge activity
-- fee history where user-relevant
-- unified transaction/activity timeline
-- deterministic links to Explorer records
+- [x] canonical balance records with available/locked separation
+- [x] Exchange-relevant asset positions without invented valuation
+- [x] open and partially filled order exposure
+- [x] unified recent trade/order/bridge/fee activity model
+- [x] record-ID de-duplication across activity sources
+- [x] explicit canonical/reorg/replacement activity state
+- [x] deterministic Explorer links from configured explorer origin + transaction hash
+- [x] source provenance retained on each balance record
+- [x] explicitly labeled demo portfolio fallback until V14.10 wallet session supplies live balances
+
+Implementation:
+- `exchange/web/core/portfolio.js`
+- `exchange/web/app.js`
+- `exchange/web/index.html`
+- `exchange/web/styles.css`
+- `exchange/web/fixtures/portfolio-balances.json`
+- `exchange/web/fixtures/portfolio-activity.json`
+- `exchange/web/test/portfolio.test.js`
+- `exchange/web/v14.9-qualification.json`
 
 Acceptance:
-- portfolio state is read from canonical wallet/chain/indexed sources
-- history pagination uses V13.4 cursor rules
-- orphaned/replaced events remain inspectable
+- balance state comes from explicit canonical source records and is never inferred from trade history
+- available and locked amounts remain distinct
+- no fiat valuation is synthesized without a qualified price source
+- unified activity de-duplicates by canonical record ID
+- orphaned and replacement events remain inspectable
+- Explorer links require configured explorer origin and canonical transaction hash
+- demo portfolio data remains explicitly non-live
 
 ## V14.10 — Wallet/session integration
 
@@ -587,6 +608,6 @@ Release gate:
 
 **Now:** V14 — Exchange Web UI. V13 is merged and closed.
 
-**Current step:** V14.8 — bridge + cross-chain settlement UI — in qualification.
+**Current step:** V14.9 — portfolio, balances + activity — in qualification.
 
 **V14 completion target:** a production-qualified Exchange UI at `exchange.420integrated.org`, backed by V13 read surfaces and the qualified V1–V12 Exchange execution stack.

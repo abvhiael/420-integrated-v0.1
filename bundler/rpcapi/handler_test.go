@@ -9,7 +9,9 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
+	"github.com/420integrated/420-integrated/bundler/simulation"
 	"github.com/420integrated/420-integrated/bundler/userop"
 )
 
@@ -38,6 +40,13 @@ func (f *fakeBackend) EstimateUserOperationGas(_ context.Context,_ userop.Packed
 	return f.estimate,f.estimateErr
 }
 func (f *fakeBackend) SupportedEntryPoints(context.Context)([]string,error){ return f.points,f.pointsErr }
+
+type fakeValidator struct { err error }
+
+func (f fakeValidator) ValidateAndSimulate(context.Context,userop.PackedUserOperation,time.Time)(simulation.Evidence,error){
+	if f.err!=nil { return simulation.Evidence{},f.err }
+	return simulation.Evidence{ExecutionSucceeded:true},nil
+}
 
 func rpcFixture() userop.PackedUserOperation {
 	return userop.PackedUserOperation{
@@ -112,7 +121,7 @@ func TestEstimateUserOperationGas(t *testing.T) {
 }
 
 func TestBoundaryBackendExposesMethodsWithoutFabricatingLaterPhaseState(t *testing.T) {
-	b:=BoundaryBackend{EntryPoint:"0x1111111111111111111111111111111111111111"}
+	b:=BoundaryBackend{EntryPoint:"0x1111111111111111111111111111111111111111",Validator:fakeValidator{}}
 	h,_:=NewHandler(b)
 	send:=call(t,h,map[string]any{"jsonrpc":"2.0","id":1,"method":"eth_sendUserOperation","params":[]any{rpcFixture(),b.EntryPoint}})
 	errObj:=send["error"].(map[string]any)
@@ -125,6 +134,20 @@ func TestBoundaryBackendExposesMethodsWithoutFabricatingLaterPhaseState(t *testi
 	receipt:=call(t,h,map[string]any{"jsonrpc":"2.0","id":3,"method":"eth_getUserOperationReceipt","params":[]any{"0x"+strings.Repeat("11",32)}})
 	errObj=receipt["error"].(map[string]any)
 	if int(errObj["code"].(float64))!=-32505 { t.Fatalf("unexpected receipt boundary error: %v",receipt) }
+}
+
+func TestBoundaryBackendRejectsFailedSimulation(t *testing.T) {
+	b:=BoundaryBackend{
+		EntryPoint:"0x1111111111111111111111111111111111111111",
+		Validator:fakeValidator{err:errors.New("reverted")},
+	}
+	h,_:=NewHandler(b)
+	out:=call(t,h,map[string]any{
+		"jsonrpc":"2.0","id":1,"method":"eth_sendUserOperation",
+		"params":[]any{rpcFixture(),b.EntryPoint},
+	})
+	errObj:=out["error"].(map[string]any)
+	if int(errObj["code"].(float64))!=-32502 { t.Fatalf("unexpected validation rejection: %v",out) }
 }
 
 func TestInvalidRequestsFailClosed(t *testing.T) {

@@ -1,6 +1,6 @@
 {
   "schema": "420-exchange-web-v14.1",
-  "status": "IN_QUALIFICATION",
+  "status": "QUALIFIED",
   "scope": "FRONTEND_FOUNDATION_APPLICATION_SHELL",
   "productionOrigin": "https://exchange.420integrated.org",
   "runtimeSchema": "420-exchange-web-runtime-v14.1",
@@ -36,6 +36,12 @@
       "exchange/web/test/router.test.js"
     ],
     "ci": ".github/workflows/exchange-web.yml"
+  },
+  "qualification": {
+    "exact_head": "fac05f27aa6208fefd7fc3d946dc256d79152737",
+    "exchange_web_verification": 6,
+    "integrated_qualification": 4204,
+    "docs_qualification": 1896
   },
   "follow_on": "V14.2 design system and Exchange visual language"
 }

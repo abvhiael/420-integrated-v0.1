@@ -1,0 +1,7 @@
+[
+  {"recordId":"demo-trade-1","kind":"TRADE","timestamp":5,"subjectId":"demo-420-usd","txHash":"0xtrade","amount":10,"assetSymbol":"420","active":true,"demo":true},
+  {"recordId":"demo-order-old","kind":"ORDER","timestamp":4,"subjectId":"demo-420-usd","txHash":"0xorderold","amount":5,"assetSymbol":"420","active":false,"replacedBy":"demo-order-new","demo":true},
+  {"recordId":"demo-order-new","kind":"ORDER","timestamp":6,"subjectId":"demo-420-usd","txHash":"0xordernew","amount":5,"assetSymbol":"420","active":true,"demo":true},
+  {"recordId":"demo-bridge-1","kind":"BRIDGE_DEPOSIT","timestamp":3,"txHash":"0xbridge","amount":1.5,"assetSymbol":"ETH","active":true,"demo":true},
+  {"recordId":"demo-fee-1","kind":"FEE_ROUTING","timestamp":2,"txHash":"0xfee","feeAmount":0.42,"assetSymbol":"USD","active":true,"demo":true}
+]

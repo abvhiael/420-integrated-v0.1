@@ -323,6 +323,45 @@
     </div>
   </template>
 
+  <template id="portfolio-template">
+    <div class="section-heading">
+      <div><p class="eyebrow">V14.9</p><h2>Portfolio</h2></div>
+      <span id="portfolio-source" class="section-kicker">Loading portfolio…</span>
+    </div>
+
+    <div class="detail-stats">
+      <div><span class="label">Assets</span><strong id="portfolio-assets">—</strong></div>
+      <div><span class="label">Canonical assets</span><strong id="portfolio-canonical-assets">—</strong></div>
+      <div><span class="label">Total locked units</span><strong id="portfolio-locked">—</strong></div>
+    </div>
+
+    <section>
+      <h3>Balances</h3>
+      <div id="portfolio-balances" class="balance-grid"></div>
+    </section>
+
+    <section class="portfolio-section">
+      <h3>Open orders</h3>
+      <div class="table-wrap">
+        <table class="exchange-table">
+          <thead><tr><th>Order hash</th><th>Sell</th><th>Minimum buy</th><th>State</th></tr></thead>
+          <tbody id="portfolio-orders"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="portfolio-section">
+      <h3>Unified activity</h3>
+      <div class="table-wrap">
+        <table class="exchange-table">
+          <thead><tr><th>Kind</th><th>Amount</th><th>State</th><th>Fee</th><th>Transaction</th><th>Provenance</th></tr></thead>
+          <tbody id="portfolio-activity"></tbody>
+        </table>
+      </div>
+      <p class="muted">Balances are read-only canonical source records. Activity keeps reorged and replacement history visible; no portfolio valuation is synthesized without a qualified price source.</p>
+    </section>
+  </template>
+
   <template id="gated-template">
     <div class="empty-state">
       <strong id="gated-title">Feature gated</strong>

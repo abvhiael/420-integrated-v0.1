@@ -1,0 +1,16 @@
+{
+  "subjectId": "demo-420-usd",
+  "window": "1h",
+  "candles": [
+    {"recordId":"c1","subjectId":"demo-420-usd","active":true,"timestamp":1,"open":4.00,"high":4.08,"low":3.98,"close":4.05,"volume":120},
+    {"recordId":"c2","subjectId":"demo-420-usd","active":true,"timestamp":2,"open":4.05,"high":4.12,"low":4.02,"close":4.10,"volume":135},
+    {"recordId":"c3-old","subjectId":"demo-420-usd","active":false,"replacedBy":"c3","timestamp":3,"open":4.10,"high":4.30,"low":4.00,"close":4.25,"volume":180},
+    {"recordId":"c3","subjectId":"demo-420-usd","active":true,"timestamp":3,"open":4.10,"high":4.18,"low":4.06,"close":4.14,"volume":165},
+    {"recordId":"c4","subjectId":"demo-420-usd","active":true,"timestamp":4,"open":4.14,"high":4.22,"low":4.12,"close":4.20,"volume":200}
+  ],
+  "trades": [
+    {"recordId":"t1","subjectId":"demo-420-usd","active":true,"timestamp":4,"price":4.20,"amount":12,"side":"buy"},
+    {"recordId":"t0","subjectId":"demo-420-usd","active":false,"replacedBy":"t1","timestamp":3,"price":4.25,"amount":9,"side":"sell"}
+  ],
+  "demo": true
+}

@@ -62,6 +62,7 @@ func (s SubjectRef) Validate() error {
 
 type TrustMetricRef struct {
 	DomainID       string
+	UnitID         string
 	MetricID       string
 	MetricRevision uint32
 	Active         bool
@@ -72,6 +73,9 @@ type TrustMetricRef struct {
 func (m TrustMetricRef) Validate() error {
 	if strings.TrimSpace(m.DomainID) == "" {
 		return errors.New("trust metric domain id is required")
+	}
+	if strings.TrimSpace(m.UnitID) == "" {
+		return errors.New("trust metric unit id is required")
 	}
 	if strings.TrimSpace(m.MetricID) == "" {
 		return errors.New("trust metric id is required")

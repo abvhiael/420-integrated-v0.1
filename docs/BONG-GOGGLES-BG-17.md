@@ -87,7 +87,7 @@ Appeal resolution preserves the contract's separation-of-duty rule: the case ope
 - snapshot restore is verified deterministically for restart/recovery drills;
 - operator queue reads enforce configurable hard limits, preserve total counts and expose truncation explicitly.
 
-### BG-17.9 — production moderation closeout — IMPLEMENTED, FINAL QUALIFICATION PENDING
+### BG-17.9 — production moderation closeout — RECONCILED, FINAL QUALIFICATION PENDING
 
 - bounded load/latency regression exercises 1,000-report ingestion plus bounded queue materialization under conservative CI budgets;
 - end-to-end report → case → action → appeal overturn → emergency-hide drill verifies canonical projection convergence;
@@ -99,4 +99,4 @@ Appeal resolution preserves the contract's separation-of-duty rule: the case ope
 
 ## Current increment
 
-BG-17.1 through BG-17.8 are qualified. BG-17.9 closeout tests and operator runbook are implemented on `feature/bong-goggles-bg17-moderation-ops`; reconciliation with current `main` and exact-head final qualification remain before the phase can merge.
+BG-17.1 through BG-17.8 are qualified. BG-17.9 closeout tests and operator runbook are implemented, and the phase branch has been reconciled with `main` at `815519d991c4f79dfa17d2166cf568dc9a0bde66`. Exact-head final qualification remains before the phase can merge.

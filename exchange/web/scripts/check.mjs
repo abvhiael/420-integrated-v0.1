@@ -47,7 +47,7 @@ if (config.site?.productionOrigin !== 'https://exchange.420integrated.org') thro
 if (config.api?.schemaMajor !== 14 || config.api?.schemaMinor !== 0) throw new Error('V14 client schema drift');
 
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
-for (const needle of ['420Exchange', 'app-view', 'app.js', 'status-gallery', 'exchange-table']) {
+for (const needle of ['420Exchange', 'app-view', 'app.js', 'market-search', 'market-sort', 'market-rows', 'exchange-table']) {
   if (!html.includes(needle)) throw new Error(`application shell missing marker: ${needle}`);
 }
 
@@ -55,6 +55,9 @@ const app = fs.readFileSync(path.join(root, 'app.js'), 'utf8');
 if (!app.includes("fetch('./runtime-config.json'")) throw new Error('application does not load runtime-config.json');
 if (!app.includes('validateRuntimeConfig')) throw new Error('application does not validate runtime configuration');
 if (!app.includes('createStatusBadge')) throw new Error('application does not consume shared V14.2 semantic status components');
+for (const needle of ['normalizeMarket', 'filterMarkets', 'sortMarkets', 'freshnessState', 'Watchlist']) {
+  if (!app.includes(needle)) throw new Error(`application does not consume V14.4 market operation: ${needle}`);
+}
 
 const styles = fs.readFileSync(path.join(root, 'styles.css'), 'utf8');
 for (const needle of ['--positive:', '--warning:', '--info:', '--danger:', ':focus-visible', '.exchange-status', '.exchange-table']) {

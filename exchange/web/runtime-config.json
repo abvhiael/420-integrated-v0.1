@@ -22,7 +22,7 @@
     "markets": true,
     "marketDetail": true,
     "swap": true,
-    "limitOrders": false,
+    "limitOrders": true,
     "bridge": false,
     "portfolio": false,
     "walletConnection": false

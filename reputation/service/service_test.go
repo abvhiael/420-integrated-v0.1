@@ -4,7 +4,9 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 
+	"github.com/420integrated/420-integrated/reputation/interactions"
 	"github.com/420integrated/420-integrated/reputation/model"
 )
 
@@ -25,6 +27,15 @@ type fakeReviews struct{ err error }
 
 func (f fakeReviews) Ready(context.Context) error { return f.err }
 
+type fakeInteractions struct {
+	evidence interactions.Evidence
+	err      error
+}
+
+func (f fakeInteractions) Verify(context.Context, model.Domain, interactions.Kind, string, model.SubjectRef, model.SubjectRef) (interactions.Evidence, error) {
+	return f.evidence, f.err
+}
+
 func validDeps() Dependencies {
 	return Dependencies{
 		Subjects: fakeSubjects{},
@@ -38,6 +49,16 @@ func validDeps() Dependencies {
 			ActiveSignals:  3,
 		}},
 		Reviews: fakeReviews{},
+		Interactions: fakeInteractions{evidence: interactions.Evidence{
+			Kind:        interactions.KindP2PTransaction,
+			EvidenceRef: "evidence-1",
+			IssuerID:    "420/service/pay/v1",
+			Reviewer:    model.SubjectRef{Type: "PROFILE", ID: "buyer-1"},
+			Subject:     model.SubjectRef{Type: "PROFILE", ID: "seller-1"},
+			OccurredAt:  time.Date(2026, 9, 18, 2, 30, 0, 0, time.UTC),
+			Source:      "420Pay",
+			Final:       true,
+		}},
 	}
 }
 
@@ -49,6 +70,7 @@ func TestNewRequiresAllDependencies(t *testing.T) {
 		{"subjects", func(d *Dependencies) { d.Subjects = nil }},
 		{"trust", func(d *Dependencies) { d.Trust = nil }},
 		{"reviews", func(d *Dependencies) { d.Reviews = nil }},
+		{"interactions", func(d *Dependencies) { d.Interactions = nil }},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -133,6 +155,40 @@ func TestReadTrustMetricRejectsBadInputAndBadTrustOutput(t *testing.T) {
 	}
 	if _, err := svc.ReadTrustMetric(context.Background(), model.SubjectRef{Type: "PROFILE", ID: "p1"}, "m"); err == nil {
 		t.Fatal("expected malformed Trust result rejection")
+	}
+}
+
+func TestVerifyInteractionValidatesParticipantsBeforeEvidence(t *testing.T) {
+	svc, err := New(validDeps())
+	if err != nil { t.Fatal(err) }
+	got, err := svc.VerifyInteraction(
+		context.Background(),
+		model.DomainClassifieds,
+		interactions.KindP2PTransaction,
+		"evidence-1",
+		model.SubjectRef{Type: "PROFILE", ID: "buyer-1"},
+		model.SubjectRef{Type: "PROFILE", ID: "seller-1"},
+	)
+	if err != nil { t.Fatal(err) }
+	if !got.Final || got.EvidenceRef != "evidence-1" {
+		t.Fatalf("unexpected evidence: %+v", got)
+	}
+}
+
+func TestVerifyInteractionPropagatesVerifierFailure(t *testing.T) {
+	deps := validDeps()
+	deps.Interactions = fakeInteractions{err: errors.New("interaction unavailable")}
+	svc, err := New(deps)
+	if err != nil { t.Fatal(err) }
+	if _, err := svc.VerifyInteraction(
+		context.Background(),
+		model.DomainTravel,
+		interactions.KindStay,
+		"evidence-1",
+		model.SubjectRef{Type: "PROFILE", ID: "buyer-1"},
+		model.SubjectRef{Type: "PROFILE", ID: "seller-1"},
+	); err == nil {
+		t.Fatal("expected verifier failure")
 	}
 }
 

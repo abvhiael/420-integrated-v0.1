@@ -23,7 +23,7 @@ func sampleReview() model.Review {
 		AttachmentRefs: []string{
 			"storage://photo-1",
 		},
-		VerifiedInteractionRef: "interaction://classifieds/tx-1",
+		Verification:           model.VerificationUnverified,
 		Status:                 model.ReviewActive,
 		Version:                1,
 		CreatedAt:              now,

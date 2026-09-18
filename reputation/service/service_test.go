@@ -26,6 +26,10 @@ func (f fakeTrust) ReadMetric(context.Context, model.SubjectRef, string) (model.
 type fakeReviews struct{ err error }
 
 func (f fakeReviews) Ready(context.Context) error { return f.err }
+func (f fakeReviews) Create(r model.Review) (model.Review, error) { return r, f.err }
+func (f fakeReviews) Get(string) (model.Review, error) { return model.Review{}, f.err }
+func (f fakeReviews) Update(r model.Review, _ uint32) (model.Review, error) { return r, f.err }
+func (f fakeReviews) ListBySubject(model.Domain, model.SubjectRef) []model.Review { return nil }
 
 type fakeInteractions struct {
 	evidence interactions.Evidence

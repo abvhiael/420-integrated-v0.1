@@ -1,0 +1,36 @@
+{
+  "schema": "420-exchange-web-v14.3",
+  "status": "IN_QUALIFICATION",
+  "scope": "V13_CLIENT_SDK_DATA_ACCESS",
+  "clientSchema": "14.0",
+  "surfaces": {
+    "snapshot": "V13.3",
+    "history": "V13.4",
+    "liveStream": "V13.5",
+    "publicApiPolicy": "V13.6"
+  },
+  "limits": {
+    "historyPage": 100,
+    "liveFreshnessSeconds": 30
+  },
+  "invariants": [
+    "canonical market subject, snapshot and record identifiers are preserved without local re-keying",
+    "unsupported API major or future minor fails closed",
+    "history queries remain bounded to 100 records",
+    "stream sequence gaps fail closed rather than silently skipping state",
+    "WebSocket and SSE decode into identical event semantics",
+    "resume cursors are deterministic and transport-neutral",
+    "inactive/orphaned history remains addressable and explicitly reorg-marked",
+    "replacement events preserve distinct affected and replacement record IDs",
+    "stale state becomes explicit after the qualified 30-second bound",
+    "cache identity binds client schema, surface, subject, cursor and full filter semantics",
+    "read clients grant no execution, custody, mint, burn or settlement authority"
+  ],
+  "implementation": {
+    "httpClient": "exchange/web/core/exchange-client.js",
+    "stateStore": "exchange/web/core/exchange-store.js",
+    "streamAdapter": "exchange/web/core/exchange-stream.js",
+    "cache": "exchange/web/core/exchange-cache.js"
+  },
+  "follow_on": "V14.4 markets overview"
+}

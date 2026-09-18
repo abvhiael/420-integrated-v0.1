@@ -232,7 +232,7 @@ The shared hardening suite now additionally proves policy denial leaves contribu
 
 **Exit:** reward economics fail closed under replay, abuse, cap exhaustion, funding exhaustion and adversarial claim conditions.
 
-### BG-18.10 — operator/admin reward surfaces — IMPLEMENTED, QUALIFICATION PENDING
+### BG-18.10 — operator/admin reward surfaces — COMPLETE AND QUALIFIED
 
 - campaign inventory with app/type/scorer/policy/caps/window/active state;
 - pool funded/reserved/available balances;
@@ -252,7 +252,7 @@ The operator surface now exposes campaign app/type/scorer/policy/caps/window/act
 
 **Exit:** production operators can safely inspect and operate Bong Goggles campaigns without contract-console guesswork.
 
-### BG-18.11 — telemetry, accounting + reconciliation
+### BG-18.11 — telemetry, accounting + reconciliation — IMPLEMENTED, QUALIFICATION PENDING
 
 - deterministic reward-event projector for operational reporting;
 - compare local projections to canonical Contribution Registry, Campaign Registry, Distributor and Pool state;
@@ -261,6 +261,13 @@ The operator surface now exposes campaign app/type/scorer/policy/caps/window/act
 - export sanitized campaign/accounting reports without private Wallet data;
 - reconciliation fails closed on canonical/local mismatch;
 - restart/replay produces identical accounting totals.
+
+Implemented in:
+- `services/bong-goggles-indexer-v1/src/rewardAccountingReconciliation.js`
+- `services/bong-goggles-indexer-v1/test/rewardAccountingReconciliation.test.js`
+- `services/bong-goggles-indexer-v1/src/rewardLifecycleProjection.js`
+
+Operational accounting now rebuilds deterministically from canonical contribution/reward lifecycle events, deduplicates replay by canonical replay key, separates submitted contribution count, accrued reward count/amount, paid reward count/amount and per-campaign remaining budget, and rejects accrued totals beyond configured campaign budget. Reconciliation compares local projection totals and per-campaign accrued/paid/remaining values to canonical accounting and fails closed on any mismatch. Sanitized exports exclude replay provenance, private Wallet material and secrets. Lifecycle projection is additionally hardened for actual EVM event order: a canonical `RewardReleased` followed by `RewardClaimed` cannot downgrade a reward from PAID back to CLAIMED, preserving correct payout accounting across restart/replay.
 
 **Exit:** reward accounting is reconstructable from canonical events and can be independently reconciled.
 

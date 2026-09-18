@@ -315,7 +315,7 @@ Qualification:
 - 420 Integrated Qualification #4264
 - 420Docs Qualification #1939
 
-## V14.5 — Market detail + charting — IN QUALIFICATION
+## V14.5 — Market detail + charting — QUALIFIED
 
 Deliverables:
 - [x] market header with pair, canonical/freshness status, route health and settlement health
@@ -347,25 +347,45 @@ Acceptance:
 - demo history remains explicitly non-live
 - no chart/detail component creates execution authority
 
-## V14.6 — Swap / market execution UI
+Qualification:
+- exact head `c82494c1406299dced3fc630f55a60d518113c45`
+- 420Exchange Web Verification #84
+- 420 Integrated Qualification #4291
+- 420Docs Qualification #1956
+
+## V14.6 — Swap / market execution UI — IN QUALIFICATION
 
 Deliverables:
-- token/asset selectors
-- amount in/out
-- route quote display
-- price impact/slippage controls
-- fee breakdown
-- route-health and settlement-health checks
-- transaction review screen
-- wallet signing handoff
-- pending/submitted/confirmed/failed lifecycle
-- canonical post-trade refresh
+- [x] exact-input swap draft model matching V6 bounded 1-4 hop routing
+- [x] nonzero per-hop minimum-output preservation
+- [x] independent final minimum received after retained Exchange fee
+- [x] one-time final-output fee presentation from V9 semantics
+- [x] route quote display and route commitment review
+- [x] slippage control with bounded validation
+- [x] independent route-health and settlement-health checks
+- [x] transaction review screen preserving complete execution intent
+- [x] explicit stale-quote invalidation gate
+- [x] fail-closed wallet signing handoff until V14.10 wallet/session integration
+- [x] draft/quoted/review/signing/submitted/confirmed/failed lifecycle model
+- [x] prevent confirmation before submitted transaction state
+- [x] clearly labeled demo-quote mode when production execution quote service is not configured
+
+Implementation:
+- `exchange/web/core/swap.js`
+- `exchange/web/app.js`
+- `exchange/web/index.html`
+- `exchange/web/styles.css`
+- `exchange/web/fixtures/swap-quote.json`
+- `exchange/web/test/swap.test.js`
+- `exchange/web/v14.6-qualification.json`
 
 Acceptance:
-- execution parameters come from qualified Exchange execution/route interfaces
-- user sees fees, route and minimum received before signing
-- UI never reports success before chain confirmation
-- stale quote invalidation is enforced
+- execution intent preserves V6 route structure and V9 net-after-fee final minimum
+- user sees gross output, retained fee, net output, route and minimum received before signing
+- stale, unhealthy-route and unhealthy-settlement quotes cannot submit
+- wallet-unavailable state cannot simulate signing or submission
+- UI cannot report confirmation before submitted lifecycle state
+- demo quote is review-only and explicitly non-production
 
 ## V14.7 — Limit-order UI
 
@@ -523,6 +543,6 @@ Release gate:
 
 **Now:** V14 — Exchange Web UI. V13 is merged and closed.
 
-**Current step:** V14.5 — market detail + charting — in qualification.
+**Current step:** V14.6 — swap / market execution UI — in qualification.
 
 **V14 completion target:** a production-qualified Exchange UI at `exchange.420integrated.org`, backed by V13 read surfaces and the qualified V1–V12 Exchange execution stack.

@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	mempool420 "github.com/420integrated/420-integrated/bundler/mempool"
 	rpcapi420 "github.com/420integrated/420-integrated/bundler/rpcapi"
 	runtime420 "github.com/420integrated/420-integrated/bundler/runtime"
 	simulation420 "github.com/420integrated/420-integrated/bundler/simulation"
@@ -41,9 +42,16 @@ func main() {
 	if err != nil { log.Fatal(err) }
 	validationEngine, err := simulation420.NewEngine(cfg.ChainID, cfg.EntryPoint, cfg.MaxHeadAge, simulator)
 	if err != nil { log.Fatal(err) }
+	pool, err := mempool420.New(mempool420.Config{
+		MaxOperations: mustIntOr("BUNDLER_MEMPOOL_MAX_OPERATIONS", 4096),
+		MaxPerSender: mustIntOr("BUNDLER_MEMPOOL_MAX_PER_SENDER", 16),
+		TTL: mustDurationOr("BUNDLER_MEMPOOL_TTL", 10*time.Minute),
+	})
+	if err != nil { log.Fatal(err) }
 	rpcHandler, err := rpcapi420.NewHandler(rpcapi420.BoundaryBackend{
 		EntryPoint: cfg.EntryPoint,
 		Validator: validationEngine,
+		Mempool: pool,
 	})
 	if err != nil { log.Fatal(err) }
 	runtimeHandler := svc.Handler()
@@ -89,4 +97,13 @@ func mustDurationOr(name string,fallback time.Duration) time.Duration {
 	d,err:=time.ParseDuration(raw)
 	if err!=nil || d<=0 { log.Fatalf("%s must be a positive duration",name) }
 	return d
+}
+
+
+func mustIntOr(name string,fallback int) int {
+	raw:=os.Getenv(name)
+	if raw=="" { return fallback }
+	v,err:=strconv.Atoi(raw)
+	if err!=nil || v<=0 { log.Fatalf("%s must be a positive integer",name) }
+	return v
 }

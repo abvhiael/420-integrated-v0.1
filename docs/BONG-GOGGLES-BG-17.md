@@ -59,7 +59,7 @@ Appeal resolution preserves the contract's separation-of-duty rule: the case ope
 - expiry reconciliation deterministically clears stale local presentation state;
 - emergency-hide presentation never claims to delete, edit or otherwise mutate the underlying canonical content object.
 
-### BG-17.6 — policy, capability + audit surfaces — IMPLEMENTED, QUALIFICATION PENDING
+### BG-17.6 — policy, capability + audit surfaces — COMPLETE AND QUALIFIED
 
 - deterministic operator capability projection by action/scope with explicit authorized state;
 - denial reasons distinguish missing, expired and revoked capability grants;
@@ -68,13 +68,14 @@ Appeal resolution preserves the contract's separation-of-duty rule: the case ope
 - canonical write intents can expose Wallet confirmation and Explorer links without making local state authoritative;
 - Explorer links resolve to the transaction when known and otherwise to the canonical safety-registry contract surface.
 
-### BG-17.7 — privacy + evidence handling
+### BG-17.7 — privacy + evidence handling — IMPLEMENTED, QUALIFICATION PENDING
 
-- evidence references remain hashes/opaque storage references in operator telemetry;
-- private Messenger content remains excluded from moderation logs unless separately authorized/decrypted by the appropriate product flow;
-- structured telemetry redaction;
-- least-data queue/list views;
-- audit exports omit secrets, tokens and private payload material.
+- evidence surfaces are validated as opaque hashes/storage references with content bodies explicitly excluded;
+- moderation telemetry rejects private Messenger/decrypted payload fields rather than attempting to log them;
+- structured telemetry recursively redacts secrets, tokens, credentials, raw payloads and private-content fields;
+- queue/list serializers emit least-data views and omit reporter metadata, provenance and unrelated detail;
+- audit exports include only canonical provenance, opaque evidence references and redacted local annotations/metadata;
+- audit exports explicitly omit secrets, tokens, decrypted/private Messenger material and raw payloads.
 
 ### BG-17.8 — abuse, concurrency + recovery hardening
 
@@ -96,4 +97,4 @@ Appeal resolution preserves the contract's separation-of-duty rule: the case ope
 
 ## Current increment
 
-BG-17.1 through BG-17.5 are qualified. BG-17.6 is implemented on `feature/bong-goggles-bg17-moderation-ops`; exact-head qualification is pending before advancing to BG-17.7.
+BG-17.1 through BG-17.6 are qualified. BG-17.7 is implemented on `feature/bong-goggles-bg17-moderation-ops`; exact-head qualification is pending before advancing to BG-17.8.

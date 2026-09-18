@@ -142,7 +142,7 @@ func (c *Client) CreateReview(ctx context.Context, req CreateReviewRequest, idem
 		"rating":req.Rating,"bodyRef":req.BodyRef,"attachmentRefs":req.AttachmentRefs,
 		"verification":req.Verification,"interactionKind":req.InteractionKind,"evidenceRef":req.EvidenceRef,
 	}
-	err:=c.write(ctx,http.MethodPost,"/v1/reviews",body,idempotencyKey,&out)
+	err:=c.write(ctx,http.MethodPost,"/v1/reviews",body,idempotencyKey,req.Reviewer,&out)
 	return out,err
 }
 
@@ -153,7 +153,7 @@ func (c *Client) UpdateReview(ctx context.Context,id string,req UpdateReviewRequ
 		"actorType":req.Actor.Type,"actorId":req.Actor.ID,"expectedVersion":req.ExpectedVersion,
 		"rating":req.Rating,"bodyRef":req.BodyRef,"attachmentRefs":req.AttachmentRefs,
 	}
-	err:=c.write(ctx,http.MethodPatch,"/v1/reviews/"+url.PathEscape(strings.TrimSpace(id)),body,idempotencyKey,&out)
+	err:=c.write(ctx,http.MethodPatch,"/v1/reviews/"+url.PathEscape(strings.TrimSpace(id)),body,idempotencyKey,req.Actor,&out)
 	return out,err
 }
 
@@ -167,28 +167,28 @@ func (c *Client) GetResponse(ctx context.Context,reviewID string)(model.Response
 func (c *Client) CreateResponse(ctx context.Context,reviewID string,req ResponseRequest,idempotencyKey string)(model.Response,error){
 	var out model.Response
 	body:=map[string]any{"actorType":req.Actor.Type,"actorId":req.Actor.ID,"bodyRef":req.BodyRef}
-	err:=c.write(ctx,http.MethodPost,reviewSubPath(reviewID,"response"),body,idempotencyKey,&out)
+	err:=c.write(ctx,http.MethodPost,reviewSubPath(reviewID,"response"),body,idempotencyKey,req.Actor,&out)
 	return out,err
 }
 
 func (c *Client) UpdateResponse(ctx context.Context,reviewID string,req ResponseRequest,idempotencyKey string)(model.Response,error){
 	var out model.Response
 	body:=map[string]any{"actorType":req.Actor.Type,"actorId":req.Actor.ID,"bodyRef":req.BodyRef,"expectedVersion":req.ExpectedVersion}
-	err:=c.write(ctx,http.MethodPatch,reviewSubPath(reviewID,"response"),body,idempotencyKey,&out)
+	err:=c.write(ctx,http.MethodPatch,reviewSubPath(reviewID,"response"),body,idempotencyKey,req.Actor,&out)
 	return out,err
 }
 
 func (c *Client) Report(ctx context.Context,reviewID string,req ReportRequest,idempotencyKey string)(model.ModerationRecord,error){
 	var out model.ModerationRecord
 	body:=map[string]any{"moderationId":req.ModerationID,"actorType":req.Actor.Type,"actorId":req.Actor.ID,"reason":req.Reason,"bodyRef":req.BodyRef}
-	err:=c.write(ctx,http.MethodPost,reviewSubPath(reviewID,"report"),body,idempotencyKey,&out)
+	err:=c.write(ctx,http.MethodPost,reviewSubPath(reviewID,"report"),body,idempotencyKey,req.Actor,&out)
 	return out,err
 }
 
 func (c *Client) Moderate(ctx context.Context,reviewID string,req ModerateRequest,idempotencyKey string)(model.ModerationRecord,error){
 	var out model.ModerationRecord
 	body:=map[string]any{"moderationId":req.ModerationID,"actorType":req.Actor.Type,"actorId":req.Actor.ID,"action":req.Action,"reason":req.Reason,"bodyRef":req.BodyRef,"parentId":req.ParentID}
-	err:=c.write(ctx,http.MethodPost,reviewSubPath(reviewID,"moderation"),body,idempotencyKey,&out)
+	err:=c.write(ctx,http.MethodPost,reviewSubPath(reviewID,"moderation"),body,idempotencyKey,req.Actor,&out)
 	return out,err
 }
 
@@ -207,15 +207,16 @@ func reviewSubPath(reviewID,suffix string) string {
 }
 
 func (c *Client) get(ctx context.Context,path string,out any) error {
-	return c.do(ctx,http.MethodGet,path,nil,"",out)
+	return c.do(ctx,http.MethodGet,path,nil,"",model.SubjectRef{},out)
 }
 
-func (c *Client) write(ctx context.Context,method,path string,body any,idempotencyKey string,out any) error {
+func (c *Client) write(ctx context.Context,method,path string,body any,idempotencyKey string,principal model.SubjectRef,out any) error {
 	if strings.TrimSpace(idempotencyKey)=="" { return invalid("idempotency key is required") }
-	return c.do(ctx,method,path,body,idempotencyKey,out)
+	if err:=principal.Validate(); err!=nil { return invalid("authenticated subject is required") }
+	return c.do(ctx,method,path,body,idempotencyKey,principal,out)
 }
 
-func (c *Client) do(ctx context.Context,method,path string,body any,idempotencyKey string,out any) error {
+func (c *Client) do(ctx context.Context,method,path string,body any,idempotencyKey string,principal model.SubjectRef,out any) error {
 	if c==nil || c.http==nil { return &Error{Kind:ErrorTransport,Detail:"nil Reputation client"} }
 	var reader io.Reader
 	if body!=nil {
@@ -227,7 +228,11 @@ func (c *Client) do(ctx context.Context,method,path string,body any,idempotencyK
 	if err!=nil { return &Error{Kind:ErrorTransport,Err:err} }
 	req.Header.Set("Accept","application/json")
 	if body!=nil { req.Header.Set("Content-Type","application/json") }
-	if idempotencyKey!="" { req.Header.Set("Idempotency-Key",idempotencyKey) }
+	if idempotencyKey!="" {
+		req.Header.Set("Idempotency-Key",idempotencyKey)
+		req.Header.Set("X-420-Subject-Type",principal.Type)
+		req.Header.Set("X-420-Subject-ID",principal.ID)
+	}
 	resp,err:=c.http.Do(req)
 	if err!=nil { return &Error{Kind:ErrorTransport,Err:err} }
 	defer resp.Body.Close()

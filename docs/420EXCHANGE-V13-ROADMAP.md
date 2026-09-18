@@ -153,7 +153,7 @@ Build the production Exchange frontend that exposes the qualified V13 read surfa
 
 The UI is a presentation and transaction-construction layer. It must not create its own protocol truth. Market state, order history, bridge state, route health, freshness, reorg status and settlement state must come from qualified Exchange/V13 surfaces.
 
-## V14.1 — Frontend foundation + application shell — IN QUALIFICATION
+## V14.1 — Frontend foundation + application shell — QUALIFIED
 
 Deliverables:
 - [x] create `exchange/web` application package in the monorepo
@@ -182,6 +182,12 @@ Implementation:
 - `exchange/web/scripts/check.mjs`
 - `.github/workflows/exchange-web.yml`
 
+Qualification:
+- exact head `fac05f27aa6208fefd7fc3d946dc256d79152737`
+- 420Exchange Web Verification #6
+- 420 Integrated Qualification #4204
+- 420Docs Qualification #1896
+
 Acceptance:
 - production-origin/runtime contract fails closed on invalid configuration
 - application boots as a read-only shell before API endpoints are configured
@@ -189,20 +195,34 @@ Acceptance:
 - future feature routes are stable but remain explicitly gated until their roadmap phases qualify
 - responsive shell works without adding protocol authority
 
-## V14.2 — Design system + Exchange visual language
+## V14.2 — Design system + Exchange visual language — IN QUALIFICATION
 
 Deliverables:
-- typography, spacing, grids, cards, tables, tabs, forms, badges and dialogs
-- market-status, route-health, settlement-health and freshness indicators
-- semantic states for canonical/finalized/stale/reorg/replacement/degraded
-- reusable price, amount, token, address, hash and timestamp components
-- skeleton/loading/empty/error states
-- keyboard/focus foundations
-- dark/light behavior only if consistent with the wider 420 Integrated frontend system
+- [x] establish spacing, radius, surface, text and semantic status tokens
+- [x] add reusable card, table, form-control, button, badge, empty/error and skeleton primitives
+- [x] centralize canonical/finalized/stale/reorg/replacement/degraded semantics
+- [x] model route-health independently from settlement-health
+- [x] require status text + symbol so meaning never relies on color alone
+- [x] add compact hash and timestamp formatters
+- [x] add visible keyboard focus treatment across interactive controls
+- [x] honor reduced-motion preference for loading skeletons
+- [x] add responsive component gallery in the Markets shell
+- [x] add executable tests for semantic state completeness and fail-closed unknown states
+
+Implementation:
+- `exchange/web/core/design-system.js`
+- `exchange/web/styles.css`
+- `exchange/web/index.html`
+- `exchange/web/app.js`
+- `exchange/web/test/design-system.test.js`
+- `exchange/web/v14.2-qualification.json`
 
 Acceptance:
 - component primitives are reusable across every Exchange screen
-- protocol status is communicated semantically, not by color alone
+- protocol status is communicated semantically by text and symbol, not by color alone
+- reorg and replacement remain distinct visible states
+- route health and settlement health remain independently representable
+- unknown protocol states fail closed
 - no screen invents one-off status terminology
 
 ## V14.3 — V13 client SDK + data access layer
@@ -436,6 +456,6 @@ Release gate:
 
 **Now:** V14 — Exchange Web UI. V13 is merged and closed.
 
-**Current step:** V14.1 — frontend foundation + application shell — in qualification.
+**Current step:** V14.2 — design system + Exchange visual language — in qualification.
 
 **V14 completion target:** a production-qualified Exchange UI at `exchange.420integrated.org`, backed by V13 read surfaces and the qualified V1–V12 Exchange execution stack.

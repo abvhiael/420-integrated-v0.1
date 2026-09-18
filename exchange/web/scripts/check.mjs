@@ -37,6 +37,9 @@ const required = [
   'v14.10-qualification.json',
   'v14.11-qualification.json',
   'v14.12-qualification.json',
+  'v14.13-qualification.json',
+  'scripts/build.mjs',
+  'test/deployment.test.js',
   'core/security.js',
   'test/security.test.js',
   'security-headers.json',
@@ -189,4 +192,10 @@ const secretPattern = new RegExp([
 if (secretPattern.test(sourceScan)) {
   throw new Error('V14.12 secret-like material detected in frontend source');
 }
-console.log('420Exchange V14.1/V14.2/V14.3/V14.4/V14.5/V14.6/V14.7/V14.8/V14.9/V14.10/V14.11/V14.12 static qualification passed');
+const buildScript = fs.readFileSync(path.join(root, 'scripts/build.mjs'), 'utf8');
+for (const needle of ['EXCHANGE_CHAIN_ID','EXCHANGE_RPC_URL','EXCHANGE_API_BASE_URL','EXCHANGE_STREAM_URL','CNAME','build-meta.json','deployment-manifest.json']) {
+  if (!buildScript.includes(needle)) throw new Error(`V14.13 deployment builder missing marker: ${needle}`);
+}
+const v1413 = JSON.parse(fs.readFileSync(path.join(root, 'v14.13-qualification.json'), 'utf8'));
+if (v1413.productionOrigin !== 'https://exchange.420integrated.org') throw new Error('V14.13 production origin drift');
+console.log('420Exchange V14.1/V14.2/V14.3/V14.4/V14.5/V14.6/V14.7/V14.8/V14.9/V14.10/V14.11/V14.12/V14.13 static qualification passed');

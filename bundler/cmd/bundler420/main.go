@@ -12,6 +12,7 @@ import (
 
 	rpcapi420 "github.com/420integrated/420-integrated/bundler/rpcapi"
 	runtime420 "github.com/420integrated/420-integrated/bundler/runtime"
+	simulation420 "github.com/420integrated/420-integrated/bundler/simulation"
 )
 
 func main() {
@@ -36,7 +37,14 @@ func main() {
 	}
 	cancel()
 
-	rpcHandler, err := rpcapi420.NewHandler(rpcapi420.BoundaryBackend{EntryPoint: cfg.EntryPoint})
+	simulator, err := simulation420.NewRPCSimulator(cfg.ExecutionRPC, cfg.RequestTimeout)
+	if err != nil { log.Fatal(err) }
+	validationEngine, err := simulation420.NewEngine(cfg.ChainID, cfg.EntryPoint, cfg.MaxHeadAge, simulator)
+	if err != nil { log.Fatal(err) }
+	rpcHandler, err := rpcapi420.NewHandler(rpcapi420.BoundaryBackend{
+		EntryPoint: cfg.EntryPoint,
+		Validator: validationEngine,
+	})
 	if err != nil { log.Fatal(err) }
 	runtimeHandler := svc.Handler()
 	mux := http.NewServeMux()

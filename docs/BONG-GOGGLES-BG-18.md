@@ -186,7 +186,7 @@ Implemented in:
 
 **Exit:** users no longer see reserved earned/payout notification kinds as synthetic placeholders; they are driven only by real shared-rewards events.
 
-### BG-18.8 — game reward hook decision + safe integration boundary — IMPLEMENTED, QUALIFICATION PENDING
+### BG-18.8 — game reward hook decision + safe integration boundary — COMPLETE AND QUALIFIED
 
 - review the existing Phase 15 `BG-18_REWARDS_CONFIGURATION` game hook;
 - keep game rewards disabled unless a canonical game contribution verifier is introduced against `BongGogglesGameSessionRegistry420`;
@@ -207,7 +207,7 @@ Production decision: **DEFERRED**. BG-18 does not introduce GAME_PARTICIPATION o
 
 **Exit:** game rewards have an explicit production decision and cannot accidentally become active through the existing application hook.
 
-### BG-18.9 — abuse, budget + economic hardening
+### BG-18.9 — abuse, budget + economic hardening — IMPLEMENTED, QUALIFICATION PENDING
 
 - duplicate-source and cross-campaign replay testing;
 - sybil/farming-oriented eligibility scenarios;
@@ -221,6 +221,14 @@ Production decision: **DEFERRED**. BG-18 does not introduce GAME_PARTICIPATION o
 - scorer/policy failure fails closed;
 - malicious relay cannot redirect beneficiary;
 - invalid or hidden source transitions cannot generate fresh reward contributions.
+
+Implemented in:
+- `contracts/test/RewardsHardening420.t.sol`
+- `services/bong-goggles-indexer-v1/src/rewardEconomicHardening.js`
+- `services/bong-goggles-indexer-v1/test/rewardEconomicHardening.test.js`
+- existing `contracts/test/BongGogglesRewardsIntegration420.t.sol` regressions retained
+
+The shared hardening suite now additionally proves policy denial leaves contribution/accounting/pool state untouched, reverting scorer and policy contracts fail closed without economic mutation, deactivation blocks fresh accrual while preserving already-earned claims, and funded/reserved/available pool invariants reconcile across accrual and payout. Existing coverage continues to enforce same-campaign replay rejection, cross-app/type isolation, contribution/account/budget caps, underfunded atomic rollback, campaign timing, canonical beneficiary payout and reentrant-claim resistance. Bong Goggles adds non-authoritative abuse preflight signals for duplicate-source, cross-account source replay, cooldown violations and rapid submission bursts; those signals never become canonical accrual authority.
 
 **Exit:** reward economics fail closed under replay, abuse, cap exhaustion, funding exhaustion and adversarial claim conditions.
 

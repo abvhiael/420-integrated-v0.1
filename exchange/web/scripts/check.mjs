@@ -32,8 +32,16 @@ if (config.api?.schemaMajor !== 14 || config.api?.schemaMinor !== 0) {
 }
 
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
-for (const needle of ['420Exchange', 'app-view', 'runtime-config']) {
+for (const needle of ['420Exchange', 'app-view', 'app.js']) {
   if (!html.includes(needle)) throw new Error(`application shell missing marker: ${needle}`);
+}
+
+const app = fs.readFileSync(path.join(root, 'app.js'), 'utf8');
+if (!app.includes("fetch('./runtime-config.json'")) {
+  throw new Error('application does not load runtime-config.json');
+}
+if (!app.includes('validateRuntimeConfig')) {
+  throw new Error('application does not validate runtime configuration');
 }
 
 console.log('420Exchange V14.1 static qualification passed');

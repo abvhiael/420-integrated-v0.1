@@ -1,0 +1,37 @@
+{
+  "schema": "420-exchange-market-snapshots-v13.3",
+  "status": "IN_QUALIFICATION",
+  "scope": "DETERMINISTIC_MARKET_SNAPSHOTS",
+  "model": "Versioned derived market snapshots are reproducible projections over canonical V13 source records. Snapshot identity binds market subject, source-set hash, aggregation version and window so reorg replacements remain distinct without overwriting prior derivations.",
+  "fields": [
+    "market configuration hash",
+    "market status hash",
+    "best bid / best ask when available",
+    "last trade when available",
+    "rolling OHLCV",
+    "base and quote volume",
+    "liquidity",
+    "route health hash",
+    "settlement health"
+  ],
+  "invariants": [
+    "snapshot identity is derived from market subject, source-set hash, aggregation version and window",
+    "identical snapshot replay is idempotent",
+    "same derivation with conflicting payload fails closed",
+    "older windows cannot replace the latest market snapshot",
+    "same-window reorg replacement with a distinct source-set hash receives a distinct snapshot ID",
+    "prior reorg derivations remain addressable rather than silently overwritten",
+    "best bid cannot exceed best ask when order-book data is available",
+    "OHLCV high/low bounds must contain open and close",
+    "trade-derived fields and volume are zero when no trade data is available",
+    "bid/ask values are zero when order-book data is unavailable",
+    "snapshot projection grants no execution, custody, mint, burn or settlement authority"
+  ],
+  "implementation": {
+    "reference_projection": "contracts/src/exchange/ExchangeMarketSnapshot420.sol",
+    "qualification_test": "contracts/test/ExchangeMarketSnapshot420.t.sol",
+    "schema_dependency": "contracts/src/exchange/ExchangeMarketDataTypes420.sol",
+    "indexer_dependency": "contracts/src/exchange/ExchangeDeterministicIndexer420.sol"
+  },
+  "follow_on": "V13.4 historical query API"
+}

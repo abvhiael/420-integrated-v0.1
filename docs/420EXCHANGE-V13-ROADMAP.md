@@ -393,7 +393,7 @@ Qualification:
 - 420 Integrated Qualification #4306
 - 420Docs Qualification #1967
 
-## V14.7 — Limit-order UI — IN QUALIFICATION
+## V14.7 — Limit-order UI — QUALIFIED
 
 Deliverables:
 - [x] buy/sell limit-order form preserving all V10 signed fields
@@ -424,22 +424,46 @@ Acceptance:
 - order state reconciles from canonical history rather than local guesses
 - demo orders remain explicitly non-production
 
-## V14.8 — Bridge + cross-chain settlement UI
+Qualification:
+- exact head `aacca5806246915ef899a1139a5c71a24ab12ef2`
+- 420Exchange Web Verification #120
+- 420 Integrated Qualification #4320
+- 420Docs Qualification #1979
+
+## V14.8 — Bridge + cross-chain settlement UI — IN QUALIFICATION
 
 Deliverables:
-- source/destination network selection
-- route/adapter display
-- deposit/withdrawal flow
-- attestation/proof status
-- bridge fee presentation
-- settlement progress timeline
-- pause/degraded route handling
-- failed/retry-safe user guidance without inventing settlement authority
+- [x] source/destination network route selection
+- [x] canonical asset, local representation, adapter and verifier display
+- [x] deposit/withdrawal intent review derived from route direction
+- [x] bridge fee presentation
+- [x] independent route qualification and settlement-health status
+- [x] live V11 dependency checks represented in the frontend model
+- [x] pause/degraded route fail-closed submission gating
+- [x] attestation and proof provenance display
+- [x] settlement progress timeline model
+- [x] failed/retry-safe guidance without inventing retry authority
+- [x] wallet/session fail-closed submission until V14.10
+- [x] explicitly labeled demo route and settlement fallback
+
+Implementation:
+- `exchange/web/core/bridge.js`
+- `exchange/web/app.js`
+- `exchange/web/index.html`
+- `exchange/web/styles.css`
+- `exchange/web/fixtures/bridge-routes.json`
+- `exchange/web/fixtures/bridge-settlements.json`
+- `exchange/web/test/bridge.test.js`
+- `exchange/web/v14.8-qualification.json`
 
 Acceptance:
-- only qualified/authorized bridge routes are selectable
-- paused routes cannot be submitted
-- state reflects V11/V12/V13 bridge surfaces
+- only currently qualified V11 bridge routes can produce a bridge intent
+- canonical asset and local representation identity remain bound
+- route activity, direction enablement, adapter identity, verifier configuration and provenance checks fail closed
+- paused or settlement-unhealthy routes cannot submit
+- attestation/proof IDs remain inspectable throughout settlement
+- failed settlements remain visible with explicit retryable/terminal guidance
+- demo bridge data remains explicitly non-production
 
 ## V14.9 — Portfolio, balances + activity
 
@@ -563,6 +587,6 @@ Release gate:
 
 **Now:** V14 — Exchange Web UI. V13 is merged and closed.
 
-**Current step:** V14.7 — limit-order UI — in qualification.
+**Current step:** V14.8 — bridge + cross-chain settlement UI — in qualification.
 
 **V14 completion target:** a production-qualified Exchange UI at `exchange.420integrated.org`, backed by V13 read surfaces and the qualified V1–V12 Exchange execution stack.

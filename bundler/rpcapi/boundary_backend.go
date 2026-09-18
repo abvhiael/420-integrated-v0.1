@@ -80,7 +80,7 @@ func (b BoundaryBackend) EstimateUserOperationGas(ctx context.Context,op userop.
 }
 
 func (b BoundaryBackend) GetUserOperationReceipt(ctx context.Context,hash string)(any,bool,error) {
-	if b.Lifecycle==nil { return nil,false,errors.New("lifecycle tracker unavailable") }
+	if b.Lifecycle==nil { return nil,false,&Error{Code:-32505,Message:"UserOperation receipt tracking unavailable"} }
 	receipt,found,err:=b.Lifecycle.GetReceipt(ctx,hash)
 	if err!=nil { return nil,false,&Error{Code:-32505,Message:"UserOperation receipt reconciliation failed"} }
 	if !found { return nil,false,nil }

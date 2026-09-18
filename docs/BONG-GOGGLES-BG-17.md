@@ -29,7 +29,7 @@ Appeal resolution preserves the contract's separation-of-duty rule: the case ope
 - prepared intents target `BongGogglesSafetyRegistry420.openCase(reportId, policyVersion)` and remain unsigned/unbroadcast;
 - Wallet confirmation remains mandatory for every canonical write.
 
-### BG-17.3 — case workspace + action preparation — IMPLEMENTED, QUALIFICATION PENDING
+### BG-17.3 — case workspace + action preparation — COMPLETE AND QUALIFIED
 
 - case workspace reuses the canonical report/case/action/appeal timeline from BG-17.2;
 - latest and currently active actions are exposed explicitly without becoming authoritative state;
@@ -39,13 +39,15 @@ Appeal resolution preserves the contract's separation-of-duty rule: the case ope
 - rationale material remains off-chain; prepared action intents submit only the provided rationale hash;
 - every intent remains unsigned/unbroadcast and requires Wallet confirmation before the canonical contract can mutate state.
 
-### BG-17.4 — appeals workspace + separation of duty
+### BG-17.4 — appeals workspace + separation of duty — IMPLEMENTED, QUALIFICATION PENDING
 
-- pending-appeal queue and case linkage;
-- capability-aware uphold/overturn preparation;
-- prevent case opener from being presented as an eligible resolver;
-- overturned appeal presentation reflects canonical action revocation/case resolution;
-- no local appeal result is treated as final before canonical confirmation.
+- deterministic pending-appeal workspace links each appeal to its canonical case projection;
+- operator eligibility explicitly reflects the contract separation-of-duty rule before any intent is prepared;
+- case opener is blocked from appeal-resolution preparation even if a capability check would otherwise pass;
+- uphold/overturn intents require canonical scope derivation plus current appeal-resolve capability;
+- prepared intents target `resolveAppeal(appealId, uphold)` and remain unsigned/unbroadcast behind Wallet confirmation;
+- local intent state is explicitly non-final and requires canonical `AppealResolved` confirmation;
+- overturned canonical events update the projected case/action presentation to resolved/revoked only after chain confirmation.
 
 ### BG-17.5 — emergency hide operations
 
@@ -91,4 +93,4 @@ Appeal resolution preserves the contract's separation-of-duty rule: the case ope
 
 ## Current increment
 
-BG-17.1 and BG-17.2 are qualified. BG-17.3 is implemented on `feature/bong-goggles-bg17-moderation-ops`; exact-head qualification is pending before advancing to BG-17.4.
+BG-17.1 through BG-17.3 are qualified. BG-17.4 is implemented on `feature/bong-goggles-bg17-moderation-ops`; exact-head qualification is pending before advancing to BG-17.5.

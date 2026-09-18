@@ -271,7 +271,7 @@ Operational accounting now rebuilds deterministically from canonical contributio
 
 **Exit:** reward accounting is reconstructable from canonical events and can be independently reconciled.
 
-### BG-18.12 — production closeout — IMPLEMENTED, RECONCILIATION + FINAL QUALIFICATION PENDING
+### BG-18.12 — production closeout — IMPLEMENTED AND RECONCILED, FINAL QUALIFICATION PENDING
 
 - end-to-end drills:
   - canonical post → contribution → accrue → reserve → claim → release;

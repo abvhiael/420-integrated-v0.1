@@ -50,13 +50,6 @@ type request struct {
 	Params json.RawMessage `json:"params"`
 }
 
-type response struct {
-	JSONRPC string `json:"jsonrpc"`
-	ID json.RawMessage `json:"id"`
-	Result any `json:"result,omitempty"`
-	Error *responseError `json:"error,omitempty"`
-}
-
 type responseError struct {
 	Code int `json:"code"`
 	Message string `json:"message"`
@@ -86,7 +79,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.write(w,nil,nil,&Error{Code:-32700,Message:"parse error"})
 		return
 	}
-	if req.JSONRPC!="2.0" || len(req.ID)==0 || strings.TrimSpace(req.Method)=="" {
+	if req.JSONRPC!="2.0" || !validID(req.ID) || strings.TrimSpace(req.Method)=="" {
 		h.write(w,req.ID,nil,&Error{Code:-32600,Message:"invalid request"})
 		return
 	}
@@ -174,6 +167,18 @@ func isAddress(v string) bool {
 	return v!="0x0000000000000000000000000000000000000000"
 }
 
+func validID(raw json.RawMessage) bool {
+	if len(raw)==0 { return false }
+	var v any
+	if err:=json.Unmarshal(raw,&v); err!=nil { return false }
+	switch v.(type) {
+	case string,float64,nil:
+		return true
+	default:
+		return false
+	}
+}
+
 func isHash(v string) bool {
 	if len(v)!=66 || !strings.HasPrefix(v,"0x") { return false }
 	for _,c:=range v[2:] {
@@ -186,10 +191,19 @@ func (h *Handler) write(w http.ResponseWriter,id json.RawMessage,result any,rpcE
 	w.Header().Set("Content-Type","application/json")
 	w.WriteHeader(http.StatusOK)
 	if len(id)==0 { id=json.RawMessage("null") }
-	resp:=response{JSONRPC:"2.0",ID:id,Result:result}
+	var payload map[string]any
 	if rpcErr!=nil {
-		resp.Result=nil
-		resp.Error=&responseError{Code:rpcErr.Code,Message:rpcErr.Message,Data:rpcErr.Data}
+		payload=map[string]any{
+			"jsonrpc":"2.0",
+			"id":json.RawMessage(id),
+			"error":responseError{Code:rpcErr.Code,Message:rpcErr.Message,Data:rpcErr.Data},
+		}
+	} else {
+		payload=map[string]any{
+			"jsonrpc":"2.0",
+			"id":json.RawMessage(id),
+			"result":result,
+		}
 	}
-	if err:=json.NewEncoder(w).Encode(resp); err!=nil { _=fmt.Errorf("encode response: %w",err) }
+	if err:=json.NewEncoder(w).Encode(payload); err!=nil { _=fmt.Errorf("encode response: %w",err) }
 }

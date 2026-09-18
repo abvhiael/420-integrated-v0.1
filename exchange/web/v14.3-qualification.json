@@ -1,6 +1,6 @@
 {
   "schema": "420-exchange-web-v14.3",
-  "status": "IN_QUALIFICATION",
+  "status": "QUALIFIED",
   "scope": "V13_CLIENT_SDK_DATA_ACCESS",
   "clientSchema": "14.0",
   "surfaces": {
@@ -32,5 +32,11 @@
     "streamAdapter": "exchange/web/core/exchange-stream.js",
     "cache": "exchange/web/core/exchange-cache.js"
   },
-  "follow_on": "V14.4 markets overview"
+  "follow_on": "V14.4 markets overview",
+  "qualification": {
+    "exact_head": "df828c9edc825543719af0faa798f08d5bed165b",
+    "exchange_web_verification": 41,
+    "integrated_qualification": 4242,
+    "docs_qualification": 1923
+  }
 }

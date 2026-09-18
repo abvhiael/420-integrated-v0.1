@@ -51,6 +51,14 @@ const $ = (selector) => document.querySelector(selector);
 const formatNumber = (value, maximumFractionDigits = 6) =>
   value === null || value === undefined ? '—' : new Intl.NumberFormat('en-CA', { maximumFractionDigits }).format(value);
 const formatChange = (value) => value === null ? '—' : `${value >= 0 ? '+' : ''}${value.toFixed(2)}%`;
+const appendLabeledCells = (tr, headers, values) => {
+  values.forEach((value,index)=>{
+    const td=document.createElement('td');
+    td.dataset.label=headers[index] ?? '';
+    td.textContent=String(value);
+    tr.append(td);
+  });
+};
 
 function navLink(route) {
   const enabled = availability(state.config, route.feature);
@@ -343,17 +351,13 @@ function renderDetail(fragment) {
   const activityBody = fragment.querySelector('#detail-activity');
   activityBody.replaceChildren(...activity.map((record)=>{
     const tr=document.createElement('tr');
-    for (const value of [
+    appendLabeledCells(tr,['Record','Price','Amount / volume','State','Replacement'],[
       record.recordId,
       record.price ?? record.close ?? '—',
       record.amount ?? record.volume ?? '—',
       record.state,
       record.replacedBy ?? '—',
-    ]) {
-      const td=document.createElement('td');
-      td.textContent=String(value);
-      tr.append(td);
-    }
+    ]);
     return tr;
   }));
 
@@ -468,11 +472,7 @@ function renderOrders(fragment) {
       record.state,
       record.txHash || '—',
     ];
-    for(const value of values){
-      const td=document.createElement('td');
-      td.textContent=String(value);
-      tr.append(td);
-    }
+    appendLabeledCells(tr,['Order hash','Sell','Minimum buy','State','Transaction'],values);
     const action=document.createElement('td');
     const cancel=document.createElement('button');
     cancel.type='button';
@@ -600,11 +600,7 @@ function renderBridge(fragment) {
       record.txHash??'—',
       record.state==='FAILED' ? (record.retryable?'Retry after route revalidation':'Terminal') : '—',
     ];
-    for(const value of values){
-      const td=document.createElement('td');
-      td.textContent=String(value);
-      tr.append(td);
-    }
+    appendLabeledCells(tr,['Settlement','State','Progress','Attestation','Proof','Transaction','Guidance'],values);
     return tr;
   }));
 }
@@ -644,9 +640,7 @@ function renderPortfolio(fragment) {
   const orderBody=fragment.querySelector('#portfolio-orders');
   orderBody.replaceChildren(...openOrders.map((order)=>{
     const tr=document.createElement('tr');
-    for(const value of [order.orderHash||'—',`${order.sellAmount} ${order.sellToken}`,`${order.minTotalBuyAmount} ${order.buyToken}`,order.state]){
-      const td=document.createElement('td'); td.textContent=String(value); tr.append(td);
-    }
+    appendLabeledCells(tr,['Order hash','Sell','Minimum buy','State'],[order.orderHash||'—',`${order.sellAmount} ${order.sellToken}`,`${order.minTotalBuyAmount} ${order.buyToken}`,order.state]);
     return tr;
   }));
 
@@ -654,20 +648,19 @@ function renderPortfolio(fragment) {
   activityBody.replaceChildren(...state.portfolioActivity.map((record)=>{
     const tr=document.createElement('tr');
     const stateLabel=activityState(record);
-    for(const value of [
+    appendLabeledCells(tr,['Kind','Amount','State','Fee','Transaction'],[
       record.kind,
       record.amount===null?'—':`${formatNumber(record.amount)} ${record.assetSymbol??''}`,
       stateLabel,
       record.feeAmount===null?'—':formatNumber(record.feeAmount),
       record.txHash??'—',
-    ]){
-      const td=document.createElement('td'); td.textContent=String(value); tr.append(td);
-    }
+    ]);
     const provenance=document.createElement('td');
     const href=explorerHref(state.config?.network?.explorerUrl,record.txHash);
     if(href){
       const a=document.createElement('a'); a.href=href; a.textContent='Explorer'; a.rel='noopener noreferrer'; provenance.append(a);
     } else provenance.textContent='—';
+    provenance.dataset.label='Provenance';
     tr.append(provenance);
     return tr;
   }));

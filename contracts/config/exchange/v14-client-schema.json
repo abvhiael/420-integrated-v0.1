@@ -1,0 +1,35 @@
+{
+  "schema": "420-exchange-v14-client-handoff",
+  "version": "14.0",
+  "source": "420Exchange V13",
+  "authority": "READ_ONLY",
+  "surfaces": {
+    "marketSnapshot": "V13.3",
+    "historicalQuery": "V13.4",
+    "liveStream": "V13.5",
+    "publicApiPolicy": "V13.6"
+  },
+  "required_identity": [
+    "marketSubjectId",
+    "snapshotId",
+    "historyRecordId",
+    "canonicalHead"
+  ],
+  "canonicality": {
+    "maxHeadLagBlocks": 3,
+    "rule": "indexer, snapshot and stream heads must never lead the canonical head and may lag it by at most three blocks"
+  },
+  "freshness": {
+    "maxLiveStreamLagSeconds": 30,
+    "rule": "V14 clients must surface freshness metadata and treat data outside the qualified bound as stale"
+  },
+  "reorg": {
+    "rule": "replacement events must expose distinct affected/replacement record IDs and historical lookup must resolve the replacement record"
+  },
+  "client_rules": [
+    "V14 must consume V13 read surfaces and must not invent protocol state from local UI assumptions",
+    "V14 must preserve canonical subject identifiers and record IDs",
+    "V14 must surface stale/reorg/replacement state explicitly",
+    "V14 must not mutate execution, custody, mint, burn or settlement state through read APIs"
+  ]
+}

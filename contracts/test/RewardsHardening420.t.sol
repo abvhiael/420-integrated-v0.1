@@ -44,6 +44,16 @@ contract ToggleRewardPolicyHardening420 is IRewardPolicy420 {
     function isEligible(bytes32, bytes32, address, uint256) external view returns (bool) { return allowed; }
 }
 
+contract RevertingRewardScorerHardening420 is IRewardScorer420 {
+    error ScorerFailure();
+    function score(bytes32, bytes32, address, bytes32) external pure returns (uint256) { revert ScorerFailure(); }
+}
+
+contract RevertingRewardPolicyHardening420 is IRewardPolicy420 {
+    error PolicyFailure();
+    function isEligible(bytes32, bytes32, address, uint256) external pure returns (bool) { revert PolicyFailure(); }
+}
+
 contract ReentrantRewardReceiverHardening420 {
     RewardDistributor420 public immutable distributor;
     bytes32 public rewardId;
@@ -234,6 +244,97 @@ contract RewardsHardening420Test {
         vm.warp(201);
         vm.expectRevert(RewardDistributor420.InvalidState.selector);
         distributor.accrue(campaignId, afterContribution);
+    }
+
+    function testPolicyDenialFailsClosedWithoutConsumingContribution() public {
+        bytes32 campaignId = _standardCampaign();
+        bytes32 contributionId = _contributionFor(USER, keccak256("policy-denied"));
+        policy.setAllowed(false);
+
+        vm.expectRevert(RewardDistributor420.Ineligible.selector);
+        distributor.accrue(campaignId, contributionId);
+
+        require(!distributor.contributionConsumed(campaignId, contributionId), "policy denial cannot consume contribution");
+        require(distributor.earnedByCampaign(campaignId, USER) == 0, "policy denial cannot increment account earnings");
+        require(distributor.accruedByCampaign(campaignId) == 0, "policy denial cannot increment campaign accrued");
+        require(pool.reserved(campaignId) == 0, "policy denial cannot reserve funds");
+    }
+
+    function testScorerFailureFailsClosedWithoutEconomicMutation() public {
+        RevertingRewardScorerHardening420 hostileScorer = new RevertingRewardScorerHardening420();
+        bytes32 campaignId = _campaign(APP_ID, POST, address(hostileScorer), 2 ether, 10 ether, 10 ether, 10 ether, 0, type(uint64).max);
+        bytes32 contributionId = _contributionFor(USER, keccak256("scorer-revert"));
+
+        vm.expectRevert(RevertingRewardScorerHardening420.ScorerFailure.selector);
+        distributor.accrue(campaignId, contributionId);
+
+        require(!distributor.contributionConsumed(campaignId, contributionId), "scorer failure cannot consume contribution");
+        require(distributor.accruedByCampaign(campaignId) == 0, "scorer failure cannot accrue");
+        require(pool.reserved(campaignId) == 0, "scorer failure cannot reserve");
+    }
+
+    function testPolicyFailureFailsClosedWithoutEconomicMutation() public {
+        RevertingRewardPolicyHardening420 hostilePolicy = new RevertingRewardPolicyHardening420();
+        vm.prank(SPONSOR);
+        bytes32 campaignId = campaigns.createCampaign(
+            APP_ID,
+            POST,
+            address(scorer),
+            address(hostilePolicy),
+            2 ether,
+            10 ether,
+            10 ether,
+            0,
+            type(uint64).max
+        );
+        vm.prank(SPONSOR);
+        pool.fund{value: 10 ether}(campaignId);
+        vm.prank(SPONSOR);
+        campaigns.setActive(campaignId, true);
+
+        bytes32 contributionId = _contributionFor(USER, keccak256("policy-revert"));
+        vm.expectRevert(RevertingRewardPolicyHardening420.PolicyFailure.selector);
+        distributor.accrue(campaignId, contributionId);
+
+        require(!distributor.contributionConsumed(campaignId, contributionId), "policy failure cannot consume contribution");
+        require(distributor.accruedByCampaign(campaignId) == 0, "policy failure cannot accrue");
+        require(pool.reserved(campaignId) == 0, "policy failure cannot reserve");
+    }
+
+    function testDeactivationBlocksFreshAccrualButPreservesExistingClaim() public {
+        bytes32 campaignId = _standardCampaign();
+        bytes32 earnedContribution = _contributionFor(USER, keccak256("earned-before-pause"));
+        bytes32 rewardId = distributor.accrue(campaignId, earnedContribution);
+
+        vm.prank(SPONSOR);
+        campaigns.setActive(campaignId, false);
+
+        bytes32 freshContribution = _contributionFor(USER2, keccak256("after-pause"));
+        vm.expectRevert(RewardDistributor420.InvalidState.selector);
+        distributor.accrue(campaignId, freshContribution);
+
+        uint256 beforeBalance = USER.balance;
+        vm.prank(USER);
+        distributor.claim(rewardId, USER);
+        require(USER.balance == beforeBalance + 1 ether, "earned reward remains claimable after deactivation");
+    }
+
+    function testFundedReservedAvailableInvariantAcrossAccrualAndClaim() public {
+        bytes32 campaignId = _standardCampaign();
+        require(pool.funded(campaignId) == 10 ether, "initial funded");
+        require(pool.reserved(campaignId) == 0, "initial reserved");
+        require(pool.available(campaignId) == 10 ether, "initial available");
+
+        bytes32 rewardId = distributor.accrue(campaignId, _contributionFor(USER, keccak256("pool-invariant")));
+        require(pool.funded(campaignId) == 10 ether, "funded unchanged while reserved");
+        require(pool.reserved(campaignId) == 1 ether, "reward reserved");
+        require(pool.available(campaignId) == 9 ether, "available subtracts reserved");
+
+        vm.prank(USER);
+        distributor.claim(rewardId, USER);
+        require(pool.funded(campaignId) == 9 ether, "funded decremented on release");
+        require(pool.reserved(campaignId) == 0, "reserved cleared on release");
+        require(pool.available(campaignId) == 9 ether, "available reconciles after release");
     }
 
     function testDistributorBindingIsDefaultDenyAndOneTime() public {

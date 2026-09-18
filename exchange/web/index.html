@@ -216,6 +216,55 @@
     </div>
   </template>
 
+  <template id="orders-template">
+    <div class="section-heading">
+      <div><p class="eyebrow">V14.7</p><h2>Limit orders</h2></div>
+      <span id="orders-source" class="section-kicker">Loading orders…</span>
+    </div>
+
+    <div class="orders-grid">
+      <section class="component-card">
+        <h3>Create order</h3>
+        <div class="form-grid">
+          <label><span class="label">Maker</span><input id="order-maker" placeholder="0x…" /></label>
+          <label><span class="label">Recipient</span><input id="order-recipient" placeholder="0x…" /></label>
+          <label><span class="label">Sell token</span><input id="order-sell-token" /></label>
+          <label><span class="label">Buy token</span><input id="order-buy-token" /></label>
+          <label><span class="label">Sell amount</span><input id="order-sell-amount" type="number" min="0" step="any" /></label>
+          <label><span class="label">Minimum total net buy</span><input id="order-min-buy" type="number" min="0" step="any" /></label>
+          <label><span class="label">Primary market</span><input id="order-primary-market" /></label>
+          <label><span class="label">Nonce</span><input id="order-nonce" type="number" min="0" step="1" value="0" /></label>
+          <label><span class="label">Expiry (unix seconds)</span><input id="order-expiry" type="number" min="0" step="1" /></label>
+          <label class="watch-toggle"><input id="order-partial" type="checkbox" /><span>Allow partial fills</span></label>
+        </div>
+        <button id="order-review" class="button-primary" type="button">Review signed order</button>
+      </section>
+
+      <section id="order-review-panel" class="component-card" hidden>
+        <h3>Signing review</h3>
+        <dl class="review-grid">
+          <div><dt>Maker</dt><dd id="order-review-maker">—</dd></div>
+          <div><dt>Pair</dt><dd id="order-review-pair">—</dd></div>
+          <div><dt>Sell amount</dt><dd id="order-review-amount">—</dd></div>
+          <div><dt>Minimum total net buy</dt><dd id="order-review-min">—</dd></div>
+          <div><dt>Signed price floor</dt><dd id="order-review-floor">—</dd></div>
+          <div><dt>Nonce</dt><dd id="order-review-nonce">—</dd></div>
+          <div><dt>Expiry</dt><dd id="order-review-expiry">—</dd></div>
+          <div><dt>Partial fills</dt><dd id="order-review-partial">—</dd></div>
+        </dl>
+        <p class="muted">EIP-712 signing stays disabled until V14.10 wallet/session integration is qualified.</p>
+        <button type="button" disabled>Wallet integration required · V14.10</button>
+      </section>
+    </div>
+
+    <div class="table-wrap orders-table-wrap">
+      <table class="exchange-table">
+        <thead><tr><th>Order hash</th><th>Sell</th><th>Minimum buy</th><th>State</th><th>Transaction</th><th>Action</th></tr></thead>
+        <tbody id="orders-body"></tbody>
+      </table>
+    </div>
+  </template>
+
   <template id="gated-template">
     <div class="empty-state">
       <strong id="gated-title">Feature gated</strong>

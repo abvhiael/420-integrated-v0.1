@@ -30,6 +30,10 @@ const required = [
   'v14.3-qualification.json',
   'v14.4-qualification.json',
   'v14.5-qualification.json',
+  'v14.6-qualification.json',
+  'core/swap.js',
+  'test/swap.test.js',
+  'fixtures/swap-quote.json',
   'core/market-detail.js',
   'test/market-detail.test.js',
   'fixtures/market-detail.json',
@@ -92,4 +96,10 @@ for (const needle of ['normalizeCandle', 'normalizeTrade', 'candleGeometry', 'ag
 }
 const detailFixture = JSON.parse(fs.readFileSync(path.join(root, 'fixtures/market-detail.json'), 'utf8'));
 if (detailFixture.demo !== true) throw new Error('V14.5 detail fixture must be explicitly labeled demo');
-console.log('420Exchange V14.1/V14.2/V14.3/V14.4/V14.5 static qualification passed');
+const swap = fs.readFileSync(path.join(root, 'core/swap.js'), 'utf8');
+for (const needle of ['normalizeRouteQuote', 'buildSwapIntent', 'canSubmitSwap', 'SwapLifecycle']) {
+  if (!swap.includes(needle)) throw new Error(`V14.6 swap model missing operation: ${needle}`);
+}
+const swapFixture = JSON.parse(fs.readFileSync(path.join(root, 'fixtures/swap-quote.json'), 'utf8'));
+if (swapFixture.demo !== true) throw new Error('V14.6 quote fixture must be explicitly labeled demo');
+console.log('420Exchange V14.1/V14.2/V14.3/V14.4/V14.5/V14.6 static qualification passed');

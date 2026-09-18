@@ -5,6 +5,7 @@ import { Watchlist, filterMarkets, freshnessState, normalizeMarket, sortMarkets 
 import { aggregateTradesToCandles, bucketSecondsForWindow, candleGeometry, normalizeCandle, normalizeTrade, reconcileHistory } from './core/market-detail.js';
 import { ROUTES, routeFor } from './core/router.js';
 import { SwapLifecycle, buildSwapIntent, canSubmitSwap, normalizeRouteQuote } from './core/swap.js';
+import { buildLimitOrderDraft, canCancelOrder, normalizeOrderRecord, signedPriceFloor, validateFillPrice } from './core/limit-orders.js';
 
 const state = {
   config: null,
@@ -24,6 +25,8 @@ const state = {
   swapIntent: null,
   swapLifecycle: new SwapLifecycle(),
   swapSlippageBps: 100,
+  orders: [],
+  orderDraft: null,
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -321,6 +324,85 @@ function renderSwap(fragment) {
   fragment.querySelector('#swap-lifecycle').textContent=state.swapLifecycle.state;
 }
 
+
+async function loadOrders() {
+  if (state.marketSource === 'api' && state.dataLayer) {
+    const page = await state.dataLayer.loadHistory({kind:'ORDER',activeOnly:false,limit:100});
+    state.orders = page.records.map((record)=>normalizeOrderRecord(record));
+    return;
+  }
+  const response = await fetch('./fixtures/limit-orders.json', { cache:'no-store' });
+  if (!response.ok) throw new Error(`order fixtures ${response.status}`);
+  state.orders = (await response.json()).map((record)=>normalizeOrderRecord(record));
+}
+
+function renderOrders(fragment) {
+  const source=fragment.querySelector('#orders-source');
+  source.textContent = state.marketSource === 'api' ? 'V13 order history' : 'DEMO ORDERS · review only';
+
+  const market=state.markets[0] ?? null;
+  fragment.querySelector('#order-primary-market').value=market?.marketSubjectId ?? '';
+  fragment.querySelector('#order-sell-token').value=market?.baseSymbol ?? '420';
+  fragment.querySelector('#order-buy-token').value=market?.quoteSymbol ?? 'USD';
+
+  const tbody=fragment.querySelector('#orders-body');
+  tbody.replaceChildren(...state.orders.map((record)=>{
+    const tr=document.createElement('tr');
+    const values=[
+      record.orderHash || '—',
+      `${record.sellAmount} ${record.sellToken}`,
+      `${record.minTotalBuyAmount} ${record.buyToken}`,
+      record.state,
+      record.txHash || '—',
+    ];
+    for(const value of values){
+      const td=document.createElement('td');
+      td.textContent=String(value);
+      tr.append(td);
+    }
+    const action=document.createElement('td');
+    const cancel=document.createElement('button');
+    cancel.type='button';
+    cancel.dataset.cancelOrder=record.orderHash;
+    const gate=canCancelOrder(record,{walletReady:false,nowSeconds:Math.floor(Date.now()/1000)});
+    cancel.disabled=!gate.ok;
+    cancel.textContent=gate.ok?'Cancel':'Wallet required · V14.10';
+    action.append(cancel);
+    tr.append(action);
+    return tr;
+  }));
+
+  const reviewPanel=fragment.querySelector('#order-review-panel');
+  reviewPanel.hidden=!state.orderDraft;
+  if(state.orderDraft){
+    fragment.querySelector('#order-review-maker').textContent=state.orderDraft.maker;
+    fragment.querySelector('#order-review-pair').textContent=`${state.orderDraft.sellToken} → ${state.orderDraft.buyToken}`;
+    fragment.querySelector('#order-review-amount').textContent=String(state.orderDraft.sellAmount);
+    fragment.querySelector('#order-review-min').textContent=String(state.orderDraft.minTotalBuyAmount);
+    fragment.querySelector('#order-review-floor').textContent=String(signedPriceFloor(state.orderDraft));
+    fragment.querySelector('#order-review-nonce').textContent=String(state.orderDraft.nonce);
+    fragment.querySelector('#order-review-expiry').textContent=String(state.orderDraft.expiry);
+    fragment.querySelector('#order-review-partial').textContent=state.orderDraft.allowPartial?'Allowed':'Not allowed';
+  }
+}
+
+function captureOrderDraft() {
+  const get=(id)=>document.querySelector(id)?.value ?? '';
+  const allowPartial=Boolean(document.querySelector('#order-partial')?.checked);
+  state.orderDraft=buildLimitOrderDraft({
+    maker:get('#order-maker').trim(),
+    sellToken:get('#order-sell-token').trim(),
+    buyToken:get('#order-buy-token').trim(),
+    sellAmount:get('#order-sell-amount'),
+    minTotalBuyAmount:get('#order-min-buy'),
+    recipient:get('#order-recipient').trim(),
+    primaryMarket:get('#order-primary-market').trim(),
+    nonce:get('#order-nonce'),
+    expiry:get('#order-expiry'),
+    allowPartial,
+  });
+}
+
 function renderView() {
   $('#page-title').textContent = state.route.label;
   const view = $('#app-view');
@@ -360,6 +442,13 @@ function renderView() {
     return;
   }
 
+  if (state.route.id === 'orders' && availability(state.config, 'limitOrders')) {
+    const fragment = $('#orders-template').content.cloneNode(true);
+    renderOrders(fragment);
+    view.append(fragment);
+    return;
+  }
+
   const fragment = $('#gated-template').content.cloneNode(true);
   fragment.querySelector('#gated-title').textContent = `${state.route.label} is roadmap-gated`;
   fragment.querySelector('#gated-copy').textContent =
@@ -380,6 +469,10 @@ function navigate(path) {
     loadSwapQuote().then(render).catch((error)=>{ state.bootError=error; render(); });
     return;
   }
+  if (state.route.id === 'orders' && !state.orders.length) {
+    loadOrders().then(render).catch((error)=>{ state.bootError=error; render(); });
+    return;
+  }
   render();
 }
 
@@ -394,6 +487,15 @@ document.addEventListener('click', (event) => {
   if (watch) {
     state.watchlist.toggle(watch.dataset.watchMarket);
     refreshMarketView();
+    return;
+  }
+  const orderReview = event.target.closest('#order-review');
+  if (orderReview) {
+    try { captureOrderDraft(); render(); } catch (error) { state.bootError=error; render(); }
+    return;
+  }
+  const cancelOrder = event.target.closest('[data-cancel-order]');
+  if (cancelOrder) {
     return;
   }
   const openMarket = event.target.closest('[data-open-market]');
@@ -468,6 +570,7 @@ async function boot() {
       if (state.detailSubjectId) await loadDetailHistory(state.detailSubjectId);
     }
     if (state.route.id === 'swap') await loadSwapQuote();
+    if (state.route.id === 'orders') await loadOrders();
   } catch (error) {
     state.bootError = error;
     state.config = state.config ?? {

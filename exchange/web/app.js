@@ -9,6 +9,7 @@ import { buildLimitOrderDraft, canCancelOrder, normalizeOrderRecord, signedPrice
 import { bridgeQualification, buildBridgeIntent, canSubmitBridge, normalizeBridgeRoute, normalizeSettlement, settlementProgress } from './core/bridge.js';
 import { activityState, explorerHref, mergeActivity, normalizeBalance, portfolioSummary } from './core/portfolio.js';
 import { WalletController, WalletSession, buildSigningRequest, signingGate, validateNetwork } from './core/wallet-session.js';
+import { classifyApiFailure, focusAfterRender, onlineState } from './core/reliability.js';
 
 const state = {
   config: null,
@@ -42,6 +43,8 @@ const state = {
   orderDraftGeneration: null,
   bridgeIntentGeneration: null,
   signingRequest: null,
+  online: globalThis.navigator?.onLine !== false,
+  reliabilityMessage: '',
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -142,6 +145,28 @@ function reviewSigningRequest(kind,intent,intentGeneration) {
     kind,
   });
   return state.signingRequest;
+}
+
+
+function announce(message,{assertive=false}={}){
+  const region=$(assertive?'#status-alert':'#status-live');
+  if(region) region.textContent=String(message??'');
+}
+
+function renderReliabilityChrome(){
+  const network=$('#connectivity-state');
+  if(network){
+    network.textContent=state.online?'Online':'Offline';
+    network.dataset.state=state.online?'ready':'error';
+  }
+  if(state.reliabilityMessage) announce(state.reliabilityMessage,{assertive:true});
+}
+
+function preserveFocusRender(){
+  const active=document.activeElement;
+  const id=active?.id??null;
+  render();
+  focusAfterRender({previousId:id,documentRef:document});
 }
 
 function currentMarkets() {
@@ -658,8 +683,14 @@ function renderView() {
     $('#data-state').dataset.state = 'error';
     const card = document.createElement('div');
     card.className = 'error-state';
-    card.innerHTML = '<strong>Exchange configuration unavailable.</strong><p>The app failed closed. No market or transaction state will be invented locally.</p>';
+    const failure=classifyApiFailure(state.bootError);
+    card.innerHTML = '<strong>Exchange unavailable.</strong><p>No market or transaction state will be invented locally.</p>';
+    const detail=document.createElement('p');
+    detail.className='muted';
+    detail.textContent=failure.message;
+    card.append(detail);
     view.append(card);
+    announce(failure.message,{assertive:true});
     return;
   }
 
@@ -719,6 +750,7 @@ function render() {
   renderNavigation();
   renderRuntime();
   renderWalletChrome();
+  renderReliabilityChrome();
   renderView();
 }
 
@@ -775,6 +807,7 @@ document.addEventListener('click', (event) => {
   if (watch) {
     state.watchlist.toggle(watch.dataset.watchMarket);
     refreshMarketView();
+    announce('Watchlist updated');
     return;
   }
   const orderReview = event.target.closest('#order-review');
@@ -825,6 +858,9 @@ document.addEventListener('change', (event) => {
     render();
   }
 });
+
+window.addEventListener('online',()=>{ state.online=true; state.reliabilityMessage='Connection restored'; render(); });
+window.addEventListener('offline',()=>{ state.online=false; state.reliabilityMessage='You are offline. Existing data may become stale.'; render(); });
 
 window.addEventListener('popstate', () => {
   state.route = routeFor(window.location.pathname);

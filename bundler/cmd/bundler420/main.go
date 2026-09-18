@@ -11,6 +11,7 @@ import (
 	"time"
 
 	bundle420 "github.com/420integrated/420-integrated/bundler/bundle"
+	gasestimation420 "github.com/420integrated/420-integrated/bundler/gasestimation"
 	mempool420 "github.com/420integrated/420-integrated/bundler/mempool"
 	rpcapi420 "github.com/420integrated/420-integrated/bundler/rpcapi"
 	runtime420 "github.com/420integrated/420-integrated/bundler/runtime"
@@ -60,10 +61,17 @@ func main() {
 		MaxOperations: mustIntOr("BUNDLER_BUNDLE_MAX_OPERATIONS", 16),
 	}, pool, validationEngine, submitter)
 	if err != nil { log.Fatal(err) }
+	gasEstimator, err := gasestimation420.NewRPC(
+		cfg.ExecutionRPC,
+		os.Getenv("BUNDLER_SUBMITTER"),
+		cfg.RequestTimeout,
+	)
+	if err != nil { log.Fatal(err) }
 	rpcHandler, err := rpcapi420.NewHandler(rpcapi420.BoundaryBackend{
 		EntryPoint: cfg.EntryPoint,
 		Validator: validationEngine,
 		Mempool: pool,
+		GasEstimator: gasEstimator,
 	})
 	if err != nil { log.Fatal(err) }
 	runtimeHandler := svc.Handler()

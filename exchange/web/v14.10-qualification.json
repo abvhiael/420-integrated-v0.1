@@ -1,0 +1,22 @@
+{
+  "schema":"420-exchange-web-v14.10",
+  "status":"IN_QUALIFICATION",
+  "scope":"WALLET_SESSION_INTEGRATION",
+  "invariants":[
+    "wallet connection is always an explicit user action using eth_requestAccounts",
+    "account and chain identifiers are normalized and validated before signing",
+    "configured Exchange chain ID is required before transaction signing can become available",
+    "chain mismatch is explicit and fails closed until corrected",
+    "account change, chain change and disconnect invalidate previously reviewed transaction drafts",
+    "signing requests are bound to the reviewed intent and current wallet-session generation",
+    "no implicit signing request is produced by connect, navigation or data refresh",
+    "rejected connection/signature paths remain recoverable without mutating protocol state"
+  ],
+  "implementation":{
+    "walletModel":"exchange/web/core/wallet-session.js",
+    "walletView":"exchange/web/app.js",
+    "template":"exchange/web/index.html",
+    "qualificationTest":"exchange/web/test/wallet-session.test.js"
+  },
+  "follow_on":"V14.11 reliability, accessibility and responsive hardening"
+}

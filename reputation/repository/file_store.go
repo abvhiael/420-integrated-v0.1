@@ -21,14 +21,16 @@ var (
 )
 
 type snapshot struct {
-	Schema  string         `json:"schema"`
-	Reviews []model.Review `json:"reviews"`
+	Schema     string           `json:"schema"`
+	Reviews    []model.Review   `json:"reviews"`
+	Responses  []model.Response `json:"responses,omitempty"`
 }
 
 type FileStore struct {
-	mu    sync.RWMutex
-	path  string
-	items map[string]model.Review
+	mu        sync.RWMutex
+	path      string
+	items     map[string]model.Review
+	responses map[string]model.Response
 }
 
 func OpenFileStore(path string) (*FileStore, error) {
@@ -36,7 +38,7 @@ func OpenFileStore(path string) (*FileStore, error) {
 	if path == "" {
 		return nil, errors.New("review repository path is required")
 	}
-	s := &FileStore{path: path, items: map[string]model.Review{}}
+	s := &FileStore{path: path, items: map[string]model.Review{}, responses: map[string]model.Response{}}
 	if err := s.load(); err != nil {
 		return nil, err
 	}
@@ -168,6 +170,11 @@ func (s *FileStore) load() error {
 		}
 		s.items[review.ID] = model.CloneReview(review)
 	}
+	for _, response := range snap.Responses {
+		if err := response.Validate(); err != nil { return fmt.Errorf("invalid persisted response %q: %w", response.ReviewID, err) }
+		if _, exists := s.responses[response.ReviewID]; exists { return fmt.Errorf("duplicate persisted response review id %q", response.ReviewID) }
+		s.responses[response.ReviewID] = response
+	}
 	return nil
 }
 
@@ -177,9 +184,13 @@ func (s *FileStore) persistLocked() error {
 		reviews = append(reviews, model.CloneReview(review))
 	}
 	sort.Slice(reviews, func(i, j int) bool { return reviews[i].ID < reviews[j].ID })
+	responses := make([]model.Response, 0, len(s.responses))
+	for _, response := range s.responses { responses = append(responses, response) }
+	sort.Slice(responses, func(i, j int) bool { return responses[i].ReviewID < responses[j].ReviewID })
 	payload, err := json.MarshalIndent(snapshot{
 		Schema:  "420-reputation-review-store-v1",
 		Reviews: reviews,
+		Responses: responses,
 	}, "", "  ")
 	if err != nil {
 		return fmt.Errorf("encode review repository: %w", err)

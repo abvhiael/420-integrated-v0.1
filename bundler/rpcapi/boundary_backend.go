@@ -7,13 +7,13 @@ import (
 	"time"
 
 	"github.com/420integrated/420-integrated/bundler/gasestimation"
+	"github.com/420integrated/420-integrated/bundler/lifecycle"
 	"github.com/420integrated/420-integrated/bundler/mempool"
 	"github.com/420integrated/420-integrated/bundler/simulation"
 	"github.com/420integrated/420-integrated/bundler/userop"
 )
 
 var ErrValidationRejected = &Error{Code:-32502,Message:"UserOperation validation/simulation rejected"}
-var ErrReceiptTrackingNotImplemented = &Error{Code:-32505,Message:"UserOperation receipt tracking is not available until GEN-11.9"}
 
 type Validator interface {
 	ValidateAndSimulate(context.Context,userop.PackedUserOperation,time.Time)(simulation.Evidence,error)
@@ -27,11 +27,16 @@ type GasEstimator interface {
 	Estimate(context.Context,userop.PackedUserOperation,string)(gasestimation.Estimate,error)
 }
 
+type LifecycleTracker interface {
+	GetReceipt(context.Context,string)(lifecycle.Receipt,bool,error)
+}
+
 type BoundaryBackend struct {
 	EntryPoint string
 	Validator Validator
 	Mempool AdmissionPool
 	GasEstimator GasEstimator
+	Lifecycle LifecycleTracker
 	Now func() time.Time
 }
 
@@ -74,6 +79,10 @@ func (b BoundaryBackend) EstimateUserOperationGas(ctx context.Context,op userop.
 	},nil
 }
 
-func (b BoundaryBackend) GetUserOperationReceipt(context.Context,string)(any,bool,error) {
-	return nil,false,ErrReceiptTrackingNotImplemented
+func (b BoundaryBackend) GetUserOperationReceipt(ctx context.Context,hash string)(any,bool,error) {
+	if b.Lifecycle==nil { return nil,false,errors.New("lifecycle tracker unavailable") }
+	receipt,found,err:=b.Lifecycle.GetReceipt(ctx,hash)
+	if err!=nil { return nil,false,&Error{Code:-32505,Message:"UserOperation receipt reconciliation failed"} }
+	if !found { return nil,false,nil }
+	return receipt,true,nil
 }

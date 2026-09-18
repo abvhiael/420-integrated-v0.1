@@ -471,7 +471,7 @@ Qualification:
 - 420 Integrated Qualification #4333
 - 420Docs Qualification #1988
 
-## V14.9 — Portfolio, balances + activity — IN QUALIFICATION
+## V14.9 — Portfolio, balances + activity — QUALIFIED
 
 Deliverables:
 - [x] canonical balance records with available/locked separation
@@ -503,21 +503,43 @@ Acceptance:
 - Explorer links require configured explorer origin and canonical transaction hash
 - demo portfolio data remains explicitly non-live
 
-## V14.10 — Wallet/session integration
+Qualification:
+- exact head `49aa7c8fa6111b935713f84556aff6dcd9cba30d`
+- 420Exchange Web Verification #156
+- 420 Integrated Qualification #4353
+- 420Docs Qualification #2005
+
+## V14.10 — Wallet/session integration — IN QUALIFICATION
 
 Deliverables:
-- connect 420Wallet/web wallet
-- supported external EVM provider path if part of Genesis policy
-- network validation/switching
-- account-change/session lifecycle
-- signing review integration
-- rejected-signature and disconnected-session recovery
-- chain mismatch protection
+- [x] explicit EIP-1193 connect path suitable for 420Wallet/web wallet providers
+- [x] `eth_requestAccounts` user-authorized account connection
+- [x] strict account and chain-ID normalization
+- [x] configured-network validation and chain mismatch state
+- [x] `wallet_switchEthereumChain` handoff when an expected chain is configured
+- [x] account-change, chain-change and disconnect listeners
+- [x] reviewed swap/order/bridge intent generation binding
+- [x] automatic invalidation of reviewed transaction drafts on account/network/session change
+- [x] signing-request construction only after explicit transaction review
+- [x] swap, limit-order and bridge signing handoff integration
+- [x] rejected connection/signing recovery state
+- [x] fail-closed behavior while production chain ID is unconfigured
+
+Implementation:
+- `exchange/web/core/wallet-session.js`
+- `exchange/web/app.js`
+- `exchange/web/index.html`
+- `exchange/web/styles.css`
+- `exchange/web/test/wallet-session.test.js`
+- `exchange/web/v14.10-qualification.json`
 
 Acceptance:
-- no implicit signing
-- account/network changes invalidate stale transaction drafts
-- signing payload is reviewable before approval
+- no wallet request is triggered by page load, navigation or data refresh
+- account/network changes invalidate previously reviewed transaction drafts
+- signing requests bind the exact reviewed intent to the current account, chain and session generation
+- chain mismatch cannot sign until corrected
+- an unconfigured production chain ID fails closed rather than accepting an arbitrary network
+- rejected/disconnected sessions remain recoverable without mutating protocol state
 
 ## V14.11 — Reliability, accessibility + responsive hardening
 
@@ -608,6 +630,6 @@ Release gate:
 
 **Now:** V14 — Exchange Web UI. V13 is merged and closed.
 
-**Current step:** V14.9 — portfolio, balances + activity — in qualification.
+**Current step:** V14.10 — wallet/session integration — in qualification.
 
 **V14 completion target:** a production-qualified Exchange UI at `exchange.420integrated.org`, backed by V13 read surfaces and the qualified V1–V12 Exchange execution stack.

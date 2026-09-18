@@ -584,7 +584,7 @@ Qualification:
 - 420 Integrated Qualification #4377
 - 420Docs Qualification #2023
 
-## V14.12 — Frontend security hardening — IN QUALIFICATION
+## V14.12 — Frontend security hardening — QUALIFIED
 
 Deliverables:
 - [x] CSP/security-header policy with script, framing, object and browser-capability restrictions
@@ -618,25 +618,49 @@ Acceptance:
 - framing is denied and third-party script execution is blocked by policy
 - frontend source qualification fails on detected private-key/seed/mnemonic material
 
-## V14.13 — Production deployment for exchange.420integrated.org
+Qualification:
+- exact head `9df3a10b27d1ed8fdbce2dbde5d5e99ff86d8c00`
+- 420Exchange Web Verification #209
+- 420 Integrated Qualification #4396
+- 420Docs Qualification #2041
+
+## V14.13 — Production deployment for exchange.420integrated.org — IN QUALIFICATION
 
 Deliverables:
-- production build target
-- deployment workflow
-- DNS/custom-domain configuration for `exchange.420integrated.org`
-- HTTPS/TLS enforcement
-- production API/WebSocket/SSE endpoint configuration
-- cache/CDN policy consistent with V13.6
-- SPA routing/fallback configuration if required
-- environment-specific runtime config
-- health/version endpoint or build metadata surface
-- deployment rollback procedure
+- [x] deterministic production artifact builder
+- [x] deploy-time runtime configuration injection
+- [x] fail-closed production build when chain/RPC/Explorer/API/stream variables are absent
+- [x] custom-domain `CNAME` generation for `exchange.420integrated.org`
+- [x] HTTPS/WSS-only endpoint validation retained in deployment builder
+- [x] SPA deep-link fallback through generated `404.html`
+- [x] V14.12 security-header policy emitted as provider-compatible `_headers`
+- [x] exact-source build metadata in `build-meta.json`
+- [x] deployment manifest and cache-policy metadata
+- [x] production artifact GitHub Actions workflow
+- [x] deployment/rollback runbook
+- [x] executable artifact and fail-closed deployment tests
+
+Implementation:
+- `exchange/web/scripts/build.mjs`
+- `exchange/web/test/deployment.test.js`
+- `exchange/web/v14.13-qualification.json`
+- `.github/workflows/exchange-web-deploy.yml`
+- `docs/420EXCHANGE-WEB-DEPLOYMENT-V14.13.md`
+
+Operational gates still required before public production-live status:
+- production 420 chain ID
+- production RPC URL
+- production Explorer URL
+- V13 API base URL
+- V13 stream URL
+- DNS/hosting-provider configuration for `exchange.420integrated.org`
 
 Acceptance:
-- `exchange.420integrated.org` serves the qualified production artifact over HTTPS
-- browser connects only to approved production endpoints
-- version/build metadata is visible for operations
-- rollback can restore the last qualified artifact without changing protocol state
+- repository qualification proves the exact production artifact can be constructed deterministically
+- real production deployment cannot proceed with absent runtime network/API configuration
+- build metadata exposes source SHA and client schema
+- rollback can restore a previously qualified artifact without changing protocol state
+- public `exchange.420integrated.org` HTTPS/TLS/header verification remains an operational V14.13/V14.14 release gate until hosting/DNS values are configured
 
 ## V14.14 — End-to-end Genesis qualification + release
 
@@ -669,6 +693,6 @@ Release gate:
 
 **Now:** V14 — Exchange Web UI. V13 is merged and closed.
 
-**Current step:** V14.12 — frontend security hardening — in qualification.
+**Current step:** V14.13 — production deployment — in qualification.
 
 **V14 completion target:** a production-qualified Exchange UI at `exchange.420integrated.org`, backed by V13 read surfaces and the qualified V1–V12 Exchange execution stack.

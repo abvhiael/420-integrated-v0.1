@@ -25,6 +25,9 @@ type ReviewService interface {
 	GetReview(context.Context, string) (model.Review, error)
 	ListReviews(context.Context, model.Domain, model.SubjectRef) ([]model.Review, error)
 	UpdateReview(context.Context, service.UpdateReviewInput, time.Time) (model.Review, error)
+	CreateResponse(context.Context, service.CreateResponseInput, time.Time) (model.Response, error)
+	GetResponse(context.Context, string) (model.Response, error)
+	UpdateResponse(context.Context, service.UpdateResponseInput, time.Time) (model.Response, error)
 }
 
 type Server struct {
@@ -46,6 +49,9 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("GET /v1/reviews/{reviewId}", s.get)
 	mux.HandleFunc("GET /v1/reviews/{domain}/{subjectType}/{subjectId}", s.list)
 	mux.HandleFunc("PATCH /v1/reviews/{reviewId}", s.update)
+	mux.HandleFunc("POST /v1/reviews/{reviewId}/response", s.createResponse)
+	mux.HandleFunc("GET /v1/reviews/{reviewId}/response", s.getResponse)
+	mux.HandleFunc("PATCH /v1/reviews/{reviewId}/response", s.updateResponse)
 	return mux
 }
 
@@ -65,12 +71,19 @@ type createRequest struct {
 }
 
 type updateRequest struct {
-	ActorType      string   `json:"actorType"`
-	ActorID        string   `json:"actorId"`
-	ExpectedVersion uint32  `json:"expectedVersion"`
+	ActorType       string   `json:"actorType"`
+	ActorID         string   `json:"actorId"`
+	ExpectedVersion uint32   `json:"expectedVersion"`
 	Rating          uint8    `json:"rating"`
 	BodyRef         string   `json:"bodyRef"`
 	AttachmentRefs  []string `json:"attachmentRefs"`
+}
+
+type responseRequest struct {
+	ActorType       string `json:"actorType"`
+	ActorID         string `json:"actorId"`
+	BodyRef         string `json:"bodyRef"`
+	ExpectedVersion uint32 `json:"expectedVersion,omitempty"`
 }
 
 func (s *Server) create(w http.ResponseWriter, r *http.Request) {
@@ -139,6 +152,43 @@ func (s *Server) update(w http.ResponseWriter, r *http.Request) {
 	}, s.now().UTC())
 	if err != nil { badRequest(w, err); return }
 	payload, _ := json.Marshal(review)
+	s.idem.Put(r.Header.Get("Idempotency-Key"), idempotencyResult{Fingerprint:fp, Status:http.StatusOK, Body:payload})
+	writeRaw(w, http.StatusOK, payload)
+}
+
+func (s *Server) createResponse(w http.ResponseWriter, r *http.Request) {
+	body, err := readBody(r); if err != nil { badRequest(w, err); return }
+	fp := fingerprint("POST /v1/reviews/"+r.PathValue("reviewId")+"/response", body)
+	if replay, ok, err := s.idem.Get(r.Header.Get("Idempotency-Key"), fp); err != nil { badRequest(w, err); return } else if ok { writeRaw(w, replay.Status, replay.Body); return }
+	var req responseRequest
+	if err := decodeStrict(body, &req); err != nil { badRequest(w, err); return }
+	response, err := s.service.CreateResponse(r.Context(), service.CreateResponseInput{
+		ReviewID:r.PathValue("reviewId"), Actor:model.SubjectRef{Type:req.ActorType, ID:req.ActorID}, BodyRef:req.BodyRef,
+	}, s.now().UTC())
+	if err != nil { badRequest(w, err); return }
+	payload, _ := json.Marshal(response)
+	s.idem.Put(r.Header.Get("Idempotency-Key"), idempotencyResult{Fingerprint:fp, Status:http.StatusCreated, Body:payload})
+	writeRaw(w, http.StatusCreated, payload)
+}
+
+func (s *Server) getResponse(w http.ResponseWriter, r *http.Request) {
+	response, err := s.service.GetResponse(r.Context(), r.PathValue("reviewId"))
+	if err != nil { http.Error(w, err.Error(), http.StatusNotFound); return }
+	writeJSON(w, http.StatusOK, response)
+}
+
+func (s *Server) updateResponse(w http.ResponseWriter, r *http.Request) {
+	body, err := readBody(r); if err != nil { badRequest(w, err); return }
+	fp := fingerprint("PATCH /v1/reviews/"+r.PathValue("reviewId")+"/response", body)
+	if replay, ok, err := s.idem.Get(r.Header.Get("Idempotency-Key"), fp); err != nil { badRequest(w, err); return } else if ok { writeRaw(w, replay.Status, replay.Body); return }
+	var req responseRequest
+	if err := decodeStrict(body, &req); err != nil { badRequest(w, err); return }
+	response, err := s.service.UpdateResponse(r.Context(), service.UpdateResponseInput{
+		ReviewID:r.PathValue("reviewId"), Actor:model.SubjectRef{Type:req.ActorType, ID:req.ActorID},
+		BodyRef:req.BodyRef, ExpectedVersion:req.ExpectedVersion,
+	}, s.now().UTC())
+	if err != nil { badRequest(w, err); return }
+	payload, _ := json.Marshal(response)
 	s.idem.Put(r.Header.Get("Idempotency-Key"), idempotencyResult{Fingerprint:fp, Status:http.StatusOK, Body:payload})
 	writeRaw(w, http.StatusOK, payload)
 }

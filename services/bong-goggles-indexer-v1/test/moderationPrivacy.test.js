@@ -33,7 +33,8 @@ test('telemetry redacts secrets and rejects private Messenger payloads', () => {
 });
 
 test('least-data queues omit reporter, provenance and unrelated fields', () => {
-  const p=projection();
+  const p=new BongGogglesModerationOperationsProjection();
+  p.apply(log('ReportSubmitted',{reportId:'r1',reporter:'0xr',subjectAccount:'0xs',targetType:'POST',targetId:'p1',reasonCode:'spam'},1));
   const queues=buildLeastDataModerationQueues(p.operatorQueues());
   assert.equal(queues.untriagedReports[0].reportId,'r1');
   assert.equal('reporter' in queues.untriagedReports[0],false);

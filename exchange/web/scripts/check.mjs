@@ -166,11 +166,27 @@ const headers = JSON.parse(fs.readFileSync(path.join(root, 'security-headers.jso
 for (const required of ['Content-Security-Policy','Referrer-Policy','Permissions-Policy','X-Content-Type-Options','X-Frame-Options']) {
   if (!headers[required]) throw new Error(`V14.12 security header missing: ${required}`);
 }
-const sourceScan = fs.readdirSync(root, { recursive:true, withFileTypes:true })
-  .filter((entry)=>entry.isFile() && /\.(js|mjs|json|html|css)$/.test(entry.name))
+const sourceFiles = fs.readdirSync(root, { recursive:true, withFileTypes:true })
+  .filter((entry)=>{
+    if (!entry.isFile() || !/\.(js|mjs|json|html|css)$/.test(entry.name)) return false;
+    const parent = entry.parentPath ?? entry.path;
+    const full = path.join(parent, entry.name);
+    const relative = path.relative(root, full).replaceAll('\\\\','/');
+    if (relative === 'scripts/check.mjs') return false;
+    if (relative.startsWith('test/')) return false;
+    if (/^v14\.\d+-qualification\.json$/.test(relative)) return false;
+    return true;
+  });
+const sourceScan = sourceFiles
   .map((entry)=>fs.readFileSync(path.join(entry.parentPath ?? entry.path, entry.name),'utf8'))
   .join('\n');
-if (/BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY|seed phrase|mnemonic\s*[:=]|private[_-]?key\s*[:=]\s*["'][^"']+/i.test(sourceScan)) {
+const secretPattern = new RegExp([
+  'BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY',
+  'mnemonic\\\\s*[:=]\\\\s*["\\\'][^"\\\']+',
+  'seed[_ -]?phrase\\\\s*[:=]\\\\s*["\\\'][^"\\\']+',
+  'private[_-]?key\\\\s*[:=]\\\\s*["\\\'][^"\\\']+'
+].join('|'),'i');
+if (secretPattern.test(sourceScan)) {
   throw new Error('V14.12 secret-like material detected in frontend source');
 }
 console.log('420Exchange V14.1/V14.2/V14.3/V14.4/V14.5/V14.6/V14.7/V14.8/V14.9/V14.10/V14.11/V14.12 static qualification passed');

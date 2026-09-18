@@ -1,0 +1,48 @@
+name: 420Exchange Production Artifact
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "exchange/web/**"
+      - ".github/workflows/exchange-web-deploy.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build-production-artifact:
+    runs-on: ubuntu-latest
+    environment: exchange-production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Verify Exchange web
+        working-directory: exchange/web
+        run: |
+          npm run check
+          npm test
+      - name: Build production artifact
+        working-directory: exchange/web
+        env:
+          EXCHANGE_CHAIN_ID: ${{ vars.EXCHANGE_CHAIN_ID }}
+          EXCHANGE_RPC_URL: ${{ vars.EXCHANGE_RPC_URL }}
+          EXCHANGE_EXPLORER_URL: ${{ vars.EXCHANGE_EXPLORER_URL }}
+          EXCHANGE_API_BASE_URL: ${{ vars.EXCHANGE_API_BASE_URL }}
+          EXCHANGE_STREAM_URL: ${{ vars.EXCHANGE_STREAM_URL }}
+          EXCHANGE_MARKET_SUBJECTS: ${{ vars.EXCHANGE_MARKET_SUBJECTS }}
+          EXCHANGE_BUILD_TIME: ${{ github.event.repository.updated_at }}
+        run: npm run build
+      - name: Verify artifact source SHA
+        working-directory: exchange/web
+        run: node -e "const m=require('./dist/build-meta.json'); if(m.sourceSha!==process.env.GITHUB_SHA) process.exit(1)"
+      - name: Upload qualified production artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: 420exchange-production-${{ github.sha }}
+          path: exchange/web/dist
+          if-no-files-found: error
+          retention-days: 30

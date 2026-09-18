@@ -1,0 +1,27 @@
+{
+  "quoteId":"demo-q-420-usd",
+  "marketSubjectId":"demo-420-usd",
+  "inputToken":"420",
+  "outputToken":"USD",
+  "amountIn":10,
+  "grossAmountOut":42,
+  "feeAmount":0.42,
+  "finalMinAmountOut":41,
+  "observedAt":100,
+  "expiresAt":130,
+  "routeHealthy":true,
+  "settlementHealthy":true,
+  "routeCommitment":"demo-route-commitment",
+  "hops":[
+    {
+      "marketId":"demo-420-usd",
+      "adapter":"demo-canonical-swap-adapter",
+      "inputToken":"420",
+      "outputToken":"USD",
+      "amountIn":10,
+      "quotedAmountOut":42,
+      "minAmountOut":41.5
+    }
+  ],
+  "demo":true
+}

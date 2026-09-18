@@ -28,6 +28,9 @@ type ReviewService interface {
 	CreateResponse(context.Context, service.CreateResponseInput, time.Time) (model.Response, error)
 	GetResponse(context.Context, string) (model.Response, error)
 	UpdateResponse(context.Context, service.UpdateResponseInput, time.Time) (model.Response, error)
+	ReportReview(context.Context, service.ReportReviewInput, time.Time) (model.ModerationRecord, error)
+	ModerateReview(context.Context, service.ModerateReviewInput, time.Time) (model.ModerationRecord, error)
+	ListModeration(context.Context, string) ([]model.ModerationRecord, error)
 }
 
 type Server struct {
@@ -52,6 +55,9 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("POST /v1/reviews/{reviewId}/response", s.createResponse)
 	mux.HandleFunc("GET /v1/reviews/{reviewId}/response", s.getResponse)
 	mux.HandleFunc("PATCH /v1/reviews/{reviewId}/response", s.updateResponse)
+	mux.HandleFunc("POST /v1/reviews/{reviewId}/report", s.reportReview)
+	mux.HandleFunc("POST /v1/reviews/{reviewId}/moderation", s.moderateReview)
+	mux.HandleFunc("GET /v1/reviews/{reviewId}/moderation", s.listModeration)
 	return mux
 }
 
@@ -84,6 +90,24 @@ type responseRequest struct {
 	ActorID         string `json:"actorId"`
 	BodyRef         string `json:"bodyRef"`
 	ExpectedVersion uint32 `json:"expectedVersion,omitempty"`
+}
+
+type reportRequest struct {
+	ModerationID string `json:"moderationId"`
+	ActorType    string `json:"actorType"`
+	ActorID      string `json:"actorId"`
+	Reason       string `json:"reason"`
+	BodyRef      string `json:"bodyRef"`
+}
+
+type moderationRequest struct {
+	ModerationID string `json:"moderationId"`
+	ActorType    string `json:"actorType"`
+	ActorID      string `json:"actorId"`
+	Action       string `json:"action"`
+	Reason       string `json:"reason"`
+	BodyRef      string `json:"bodyRef"`
+	ParentID     string `json:"parentId"`
 }
 
 func (s *Server) create(w http.ResponseWriter, r *http.Request) {
@@ -191,6 +215,46 @@ func (s *Server) updateResponse(w http.ResponseWriter, r *http.Request) {
 	payload, _ := json.Marshal(response)
 	s.idem.Put(r.Header.Get("Idempotency-Key"), idempotencyResult{Fingerprint:fp, Status:http.StatusOK, Body:payload})
 	writeRaw(w, http.StatusOK, payload)
+}
+
+func (s *Server) reportReview(w http.ResponseWriter, r *http.Request) {
+	body, err := readBody(r); if err != nil { badRequest(w, err); return }
+	fp := fingerprint("POST /v1/reviews/"+r.PathValue("reviewId")+"/report", body)
+	if replay, ok, err := s.idem.Get(r.Header.Get("Idempotency-Key"), fp); err != nil { badRequest(w, err); return } else if ok { writeRaw(w, replay.Status, replay.Body); return }
+	var req reportRequest
+	if err := decodeStrict(body, &req); err != nil { badRequest(w, err); return }
+	record, err := s.service.ReportReview(r.Context(), service.ReportReviewInput{
+		ID:req.ModerationID, ReviewID:r.PathValue("reviewId"), Actor:model.SubjectRef{Type:req.ActorType, ID:req.ActorID},
+		Reason:model.ModerationReason(strings.ToUpper(strings.TrimSpace(req.Reason))), BodyRef:req.BodyRef,
+	}, s.now().UTC())
+	if err != nil { badRequest(w, err); return }
+	payload, _ := json.Marshal(record)
+	s.idem.Put(r.Header.Get("Idempotency-Key"), idempotencyResult{Fingerprint:fp, Status:http.StatusCreated, Body:payload})
+	writeRaw(w, http.StatusCreated, payload)
+}
+
+func (s *Server) moderateReview(w http.ResponseWriter, r *http.Request) {
+	body, err := readBody(r); if err != nil { badRequest(w, err); return }
+	fp := fingerprint("POST /v1/reviews/"+r.PathValue("reviewId")+"/moderation", body)
+	if replay, ok, err := s.idem.Get(r.Header.Get("Idempotency-Key"), fp); err != nil { badRequest(w, err); return } else if ok { writeRaw(w, replay.Status, replay.Body); return }
+	var req moderationRequest
+	if err := decodeStrict(body, &req); err != nil { badRequest(w, err); return }
+	record, err := s.service.ModerateReview(r.Context(), service.ModerateReviewInput{
+		ID:req.ModerationID, ReviewID:r.PathValue("reviewId"), Actor:model.SubjectRef{Type:req.ActorType, ID:req.ActorID},
+		Action:model.ModerationAction(strings.ToUpper(strings.TrimSpace(req.Action))),
+		Reason:model.ModerationReason(strings.ToUpper(strings.TrimSpace(req.Reason))),
+		BodyRef:req.BodyRef, ParentID:req.ParentID,
+	}, s.now().UTC())
+	if err != nil { badRequest(w, err); return }
+	payload, _ := json.Marshal(record)
+	s.idem.Put(r.Header.Get("Idempotency-Key"), idempotencyResult{Fingerprint:fp, Status:http.StatusCreated, Body:payload})
+	writeRaw(w, http.StatusCreated, payload)
+}
+
+func (s *Server) listModeration(w http.ResponseWriter, r *http.Request) {
+	records, err := s.service.ListModeration(r.Context(), r.PathValue("reviewId"))
+	if err != nil { badRequest(w, err); return }
+	writeJSON(w, http.StatusOK, map[string]any{"items":records, "count":len(records)})
 }
 
 func readBody(r *http.Request) ([]byte, error) {

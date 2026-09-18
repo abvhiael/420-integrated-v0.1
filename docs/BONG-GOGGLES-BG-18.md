@@ -124,7 +124,7 @@ Enabled campaigns now produce deterministic inspection-only `RewardCampaignRegis
 
 **Exit:** campaign plans can be generated, inspected and validated before any on-chain creation or funding occurs.
 
-### BG-18.5 — pool funding + activation workflow — IMPLEMENTED, QUALIFICATION PENDING
+### BG-18.5 — pool funding + activation workflow — COMPLETE AND QUALIFIED
 
 - define the production sequence:
   1. create campaign;
@@ -146,7 +146,7 @@ The production workflow now enforces create → canonical validation → fund �
 
 **Exit:** operators have a deterministic, reversible campaign activation procedure with explicit funding readiness checks.
 
-### BG-18.6 — accrual + claim application integration
+### BG-18.6 — accrual + claim application integration — IMPLEMENTED, QUALIFICATION PENDING
 
 - project canonical `ContributionPublished`, `RewardAccrued`, `RewardReserved`, `RewardClaimed` and `RewardReleased` lifecycle state;
 - Bong Goggles contribution submission remains distinct from accrual;
@@ -155,6 +155,12 @@ The production workflow now enforces create → canonical validation → fund �
 - beneficiary remains canonical from the contribution/reward record;
 - Wallet confirmation required for user-side claims where applicable;
 - local UI state cannot mark a reward paid before canonical confirmation.
+
+Implemented in:
+- `services/bong-goggles-indexer-v1/src/rewardLifecycleProjection.js`
+- `services/bong-goggles-indexer-v1/test/rewardLifecycleProjection.test.js`
+
+The application layer now projects canonical `ContributionPublished`, `RewardAccrued`, `RewardReserved`, `RewardClaimed` and `RewardReleased` lifecycle events into distinct SUBMITTED / ACCRUED / RESERVED / CLAIMED / PAID states. Beneficiary, campaign and amount drift fail closed. Claim intents target `RewardDistributor420.claim(rewardId, beneficiary)`, require Wallet confirmation, preserve the canonical beneficiary and never mark rewards paid locally before canonical release confirmation.
 
 **Exit:** application surfaces can accurately show reward lifecycle and prepare claims without inventing reward state.
 

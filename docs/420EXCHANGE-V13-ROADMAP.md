@@ -153,23 +153,41 @@ Build the production Exchange frontend that exposes the qualified V13 read surfa
 
 The UI is a presentation and transaction-construction layer. It must not create its own protocol truth. Market state, order history, bridge state, route health, freshness, reorg status and settlement state must come from qualified Exchange/V13 surfaces.
 
-## V14.1 — Frontend foundation + application shell
+## V14.1 — Frontend foundation + application shell — IN QUALIFICATION
 
 Deliverables:
-- create the Exchange web application package inside the monorepo
-- choose the repo-standard frontend toolchain already used by 420 Integrated web surfaces
-- establish application entrypoint, routing, environment loading and build scripts
-- global navigation, Exchange header, footer and connection/status chrome
-- responsive desktop/tablet/mobile layout foundations
-- error boundary and offline/degraded-state shell
-- production/runtime configuration contract
-- base CI workflow for lint/build/unit tests
+- [x] create `exchange/web` application package in the monorepo
+- [x] align with the repo-standard dependency-light Node 22 / ES module web pattern
+- [x] establish application entrypoint and stable route reservations
+- [x] add runtime configuration loading and validation
+- [x] lock production origin to `https://exchange.420integrated.org`
+- [x] reserve Markets, Market, Swap, Orders, Bridge and Portfolio routes
+- [x] add global Exchange navigation, status chrome and feature gating
+- [x] add responsive desktop/tablet/mobile shell
+- [x] add fail-closed degraded configuration state
+- [x] keep post-V14.1 transaction/wallet features disabled by runtime flags
+- [x] add static qualification and Node unit tests
+- [x] add dedicated `420Exchange Web Verification` CI workflow
+
+Implementation:
+- `exchange/web/index.html`
+- `exchange/web/app.js`
+- `exchange/web/styles.css`
+- `exchange/web/core/config.js`
+- `exchange/web/core/router.js`
+- `exchange/web/runtime-config.json`
+- `exchange/web/runtime-config.example.json`
+- `exchange/web/test/config.test.js`
+- `exchange/web/test/router.test.js`
+- `exchange/web/scripts/check.mjs`
+- `.github/workflows/exchange-web.yml`
 
 Acceptance:
-- clean production build
-- application boots with mocked/read-only V13 data
-- no secrets or chain configuration hard-coded into client bundles
-- route structure is stable before feature screens land
+- production-origin/runtime contract fails closed on invalid configuration
+- application boots as a read-only shell before API endpoints are configured
+- no secrets or production endpoint credentials are embedded in source
+- future feature routes are stable but remain explicitly gated until their roadmap phases qualify
+- responsive shell works without adding protocol authority
 
 ## V14.2 — Design system + Exchange visual language
 
@@ -418,6 +436,6 @@ Release gate:
 
 **Now:** V14 — Exchange Web UI. V13 is merged and closed.
 
-**Current step:** V14.1 — frontend foundation + application shell.
+**Current step:** V14.1 — frontend foundation + application shell — in qualification.
 
 **V14 completion target:** a production-qualified Exchange UI at `exchange.420integrated.org`, backed by V13 read surfaces and the qualified V1–V12 Exchange execution stack.

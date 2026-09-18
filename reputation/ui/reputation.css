@@ -1,0 +1,26 @@
+.rep-panel,.rep-review,.rep-response,.rep-state,.rep-composer,.rep-report{box-sizing:border-box}
+.rep-panel{display:grid;gap:1rem;max-width:52rem}
+.rep-panel-header{display:flex;align-items:center;gap:.75rem}
+.rep-panel-header h2{margin:0}
+.rep-domain,.rep-badge,.rep-moderation{display:inline-flex;align-items:center;border:1px solid currentColor;border-radius:999px;padding:.18rem .55rem;font-size:.78rem;line-height:1.2;text-transform:lowercase}
+.rep-summary{display:flex;align-items:center;gap:1rem}
+.rep-score{display:flex;align-items:baseline;gap:.15rem;font-size:1.2rem}
+.rep-score strong{font-size:2rem}
+.rep-summary-meta{display:grid;gap:.2rem}
+.rep-histogram{display:grid;gap:.4rem}
+.rep-hist-row{display:grid;grid-template-columns:2rem minmax(8rem,1fr) 3rem;gap:.5rem;align-items:center}
+.rep-bar{height:.65rem;border:1px solid currentColor;border-radius:999px;overflow:hidden}
+.rep-bar>span{display:block;height:100%;background:currentColor;opacity:.65}
+.rep-review{display:grid;gap:.55rem;border:1px solid currentColor;border-radius:.6rem;padding:1rem;margin:.75rem 0}
+.rep-review header{display:flex;justify-content:space-between;gap:.75rem;align-items:center}
+.rep-stars{letter-spacing:.08em}
+.rep-author,.rep-body-ref,.rep-policy,.rep-response p{margin:0}
+.rep-response{border-inline-start:.2rem solid currentColor;padding:.65rem .8rem}
+.rep-moderation-hidden,.rep-moderation-removed,.rep-error{font-weight:700}
+.rep-state{padding:1rem;border:1px dashed currentColor;border-radius:.5rem}
+.rep-composer fieldset,.rep-report{display:grid;gap:.75rem;border:1px solid currentColor;border-radius:.6rem;padding:1rem}
+.rep-composer label,.rep-report label{display:grid;gap:.25rem}
+.rep-composer input,.rep-composer select,.rep-report select,.rep-composer button,.rep-report button{font:inherit;min-height:2.5rem}
+.rep-policy{font-size:.82rem;opacity:.78}
+@media (max-width:36rem){.rep-summary{align-items:flex-start;flex-direction:column}.rep-review header{align-items:flex-start;flex-direction:column}.rep-hist-row{grid-template-columns:2rem 1fr 2rem}}
+@media (prefers-reduced-motion:reduce){.rep-panel *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}

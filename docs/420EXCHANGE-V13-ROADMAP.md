@@ -24,7 +24,7 @@ Implementation:
 - `contracts/test/ExchangeMarketDataTypes420.t.sol`
 - `contracts/config/exchange/market-data-v13.1.json`
 
-## V13.2 — Deterministic indexer core — IN QUALIFICATION
+## V13.2 — Deterministic indexer core — QUALIFIED
 
 - [x] ingest V13.1 record envelopes with deterministic validation
 - [x] idempotent replay by record/provenance identity
@@ -38,18 +38,34 @@ Implementation:
 - [x] preserve explicit ORPHANED and FINALIZED record lifecycle states
 - [x] add executable qualification for replay, checkpoint and reorg recovery behavior
 
+Qualification:
+- exact head `4dc287f42115d274e9e2bbf302b49cf2f77dd1bc`
+- Solidity Contracts #2597
+- 420 Integrated Qualification #4114
+- 420Docs Qualification #1824
+
 Implementation:
 - `contracts/src/exchange/ExchangeDeterministicIndexer420.sol`
 - `contracts/test/ExchangeDeterministicIndexer420.t.sol`
 - `contracts/config/exchange/indexer-v13.2.json`
 
-## V13.3 — Market snapshots
+## V13.3 — Market snapshots — IN QUALIFICATION
 
-- market status and configuration
-- best bid/ask where applicable
-- last trade and rolling OHLCV windows
-- liquidity/volume summaries
-- route and settlement-health projection
+- [x] project market configuration/status hashes
+- [x] project best bid/ask when order-book data is available
+- [x] project last trade and rolling OHLCV
+- [x] project base/quote volume and liquidity
+- [x] project route-health and settlement-health state
+- [x] bind snapshot identity to market + source-set hash + aggregation version + window
+- [x] retain prior same-window derivations across reorg replacement
+- [x] reject crossed books, invalid OHLCV and stale windows
+- [x] enforce zeroed trade/book fields when those data classes are unavailable
+- [x] add executable qualification for replay, replacement and validation semantics
+
+Implementation:
+- `contracts/src/exchange/ExchangeMarketSnapshot420.sol`
+- `contracts/test/ExchangeMarketSnapshot420.t.sol`
+- `contracts/config/exchange/market-snapshots-v13.3.json`
 
 ## V13.4 — Historical query API
 

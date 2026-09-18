@@ -1,0 +1,58 @@
+{
+  "schema": "420-genesis-consumer-services-v1",
+  "decision_id": "GEN_SVC_0_ARCHITECTURE_RECONCILIATION",
+  "status": "DRAFT_IMPLEMENTATION_BASELINE",
+  "frozen_application_catalog": "config/genesis-applications.json",
+  "policy": {
+    "frozen_catalog_unchanged": true,
+    "principle": "Consumer-service architecture may compose frozen Genesis applications, existing protocol surfaces and new replaceable services without silently changing consensus or protocol authority.",
+    "promotion_rule": "A service becomes a new frozen Genesis-facing application only through an explicit application-catalog decision update; this registry alone does not promote it.",
+    "on_chain_rule": "Only identity references, ownership, payments, escrow, attestations, rights, credentials, governance or other authority-bearing commitments belong on-chain by default.",
+    "off_chain_rule": "Large content, search indexes, feeds, media transport, review bodies, message bodies, geospatial indexes and other rebuildable/non-authoritative data remain off-chain by default."
+  },
+  "services": [
+    {"id":"420/service/media/v1","name":"420Media","role":"GENESIS_FACING_UPDATE","genesis_target":"video_uploads_basic_livestreaming","authority":"REPLACEABLE_APPLICATION","depends_on":["420 Identity","420 Rights","420 Storage","420 Search","420 Notifications","420 Pay","420 Compute Protocol"]},
+    {"id":"420/service/town/v1","name":"420Town Community Boards","role":"GENESIS_FACING_UPDATE","genesis_target":"communities_posts_threads_comments_votes_moderation","authority":"REPLACEABLE_APPLICATION","depends_on":["420 Identity","420 Search","420 Notifications","420 Storage"]},
+    {"id":"420/service/classifieds/v1","name":"420Classifieds","role":"GENESIS_FACING_NEW","genesis_target":"local_and_remote_p2p_listing_mvp","authority":"REPLACEABLE_APPLICATION","depends_on":["420 Identity","420 Messenger","420 Search","420 Notifications","420 Pay","420 Arbitration","420Reputation","420Location"]},
+    {"id":"420/service/travel/v1","name":"420Travel","role":"GENESIS_FACING_MVP","genesis_target":"maps_places_events_reviews_discovery","authority":"REPLACEABLE_APPLICATION","depends_on":["420 Registry","420 Verify","420 Search","420Reputation","420Location","420Events"]},
+    {"id":"420/service/reputation/v1","name":"420Reputation","role":"GENESIS_SHARED_INFRASTRUCTURE","genesis_target":"domain_scoped_verified_interaction_reputation","authority":"REPLACEABLE_DERIVED_SERVICE","depends_on":["420 Identity","420 Verify","420 Arbitration"]},
+    {"id":"420/service/events/v1","name":"420Events","role":"GENESIS_SHARED_INFRASTRUCTURE","genesis_target":"public_private_event_objects_and_discovery","authority":"REPLACEABLE_APPLICATION_SERVICE","depends_on":["420 Identity","420Location","420Calendar","420 Notifications"]},
+    {"id":"420/service/location/v1","name":"420Location","role":"GENESIS_SHARED_INFRASTRUCTURE","genesis_target":"place_registry_geospatial_query_provider_abstraction","authority":"REPLACEABLE_APPLICATION_SERVICE","depends_on":["420 Registry","420 Verify"]},
+    {"id":"420/service/launchpad-crowdfunding/v1","name":"420Launchpad Crowdfunding","role":"GENESIS_FACING_UPDATE","genesis_target":"reward_donation_community_project_product_preorder","authority":"APPLICATION_WITH_CONTRACT_BACKED_SETTLEMENT","depends_on":["420 Identity","420 Pay","420 Arbitration","420Reputation","420 Notifications"]},
+    {"id":"420/service/reefer-review/v1","name":"Reefer Review Publishing","role":"GENESIS_FACING_MVP","genesis_target":"editorial_news_plus_medium_style_publishing","authority":"REPLACEABLE_APPLICATION","depends_on":["420 Identity","420 Rights","420 Storage","420 Search","420 Notifications","420Mail"]},
+    {"id":"420/service/learn-knowledge/v1","name":"420Learn + 420Knowledge","role":"GENESIS_FACING_MVP","genesis_target":"courses_lessons_progress_q_and_a_answers_credentials","authority":"REPLACEABLE_APPLICATION","depends_on":["420 Identity","420 Search","420Reputation","420 Notifications"]},
+    {"id":"420/service/university/v1","name":"420University","role":"GENESIS_UMBRELLA_SHELL","genesis_target":"unified_navigation_and_shared_schema_only","authority":"REPLACEABLE_APPLICATION_SHELL","depends_on":["420Learn + 420Knowledge","420 Jobs","420 Identity"]},
+    {"id":"420/service/mail/v1","name":"420Mail","role":"GENESIS_SHARED_INFRASTRUCTURE_AND_THIN_UI","genesis_target":"identity_addressed_ecosystem_inbox","authority":"REPLACEABLE_COMMUNICATION_SERVICE","depends_on":["420 Identity","420 Messenger","420 Storage","420 Notifications"]},
+    {"id":"420/service/calendar/v1","name":"420Calendar","role":"GENESIS_SHARED_INFRASTRUCTURE_AND_THIN_UI","genesis_target":"shared_event_scheduling_rsvp_reminders","authority":"REPLACEABLE_APPLICATION_SERVICE","depends_on":["420 Identity","420 Notifications"]},
+    {"id":"420/service/freelance/v1","name":"420Freelance","role":"POST_GENESIS_APP_GENESIS_SCHEMA","genesis_target":"gig_proposal_contract_milestone_deliverable_escrow_schema","authority":"DEFERRED_APPLICATION_WITH_GENESIS_INTERFACES","depends_on":["420 Jobs","420Learn + 420Knowledge","420 Pay","420 Arbitration","420Reputation"]}
+  ],
+  "canonical_objects": [
+    "User","Organization","Profile","Location","Place","Event","Listing","Review","ReputationRecord","Content","Publication","Community","Post","Comment","Vote","Campaign","Contribution","Reward","Message","Conversation","CalendarEvent","Booking","Job","Gig","Credential","MediaAsset","Stream","Subscription"
+  ],
+  "visibility_scopes": ["PUBLIC","UNLISTED","FOLLOWERS","COMMUNITY_ONLY","PURCHASERS_OR_BACKERS","PRIVATE","ORGANIZATION_MEMBERS","MODERATORS","ADMINS"],
+  "moderation_actions": ["REPORT","HIDE","BLOCK","MUTE","SUSPEND","APPEAL","MODERATOR_DECISION","RESTORE","LOCK"],
+  "api_conventions": {
+    "version_prefix": "/v1",
+    "pagination": "cursor",
+    "timestamps": "RFC3339_UTC",
+    "object_ids": "opaque_stable_ids",
+    "signing": "domain_separated_typed_payloads",
+    "webhooks": "signed_replay_protected",
+    "errors": "stable_machine_code_plus_human_message",
+    "chain_provenance_required_for_authority_bearing_records": true
+  },
+  "feature_flags": [
+    {"key":"media.livestreaming","genesis_default":true},
+    {"key":"travel.bnb_booking","genesis_default":false},
+    {"key":"travel.doobr_transactions","genesis_default":false},
+    {"key":"mail.external_smtp","genesis_default":false},
+    {"key":"university.freelance_ui","genesis_default":false},
+    {"key":"launchpad.securities_or_equity","genesis_default":false},
+    {"key":"publishing.paid_external_newsletters","genesis_default":false},
+    {"key":"calendar.external_provider_sync","genesis_default":false}
+  ],
+  "required_threat_domains": [
+    "SPAM","SYBIL","FAKE_REVIEWS","SELLER_FRAUD","CROWDFUNDING_ABUSE","LOCATION_PRIVACY","MESSAGING_ABUSE","MODERATION_ABUSE","CONTENT_RIGHTS_ABUSE","ESCROW_FAILURE","INDEX_POISONING","WEBHOOK_REPLAY"
+  ],
+  "integration_fixture_personas": ["USER","BUSINESS","CREATOR","MODERATOR","BUYER","SELLER","STUDENT","PUBLISHER","BACKER","TRAVELLER","FREELANCER","CLIENT"]
+}

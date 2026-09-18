@@ -1,0 +1,33 @@
+name: GEN-SVC-1 Reputation
+
+on:
+  pull_request:
+    paths:
+      - 'config/420reputation-genesis.json'
+      - 'docs/genesis-services/GEN-SVC-1-REPUTATION.md'
+      - 'scripts/validate-gen-svc-1.py'
+      - '.github/workflows/gen-svc-1.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'config/420reputation-genesis.json'
+      - 'docs/genesis-services/GEN-SVC-1-REPUTATION.md'
+      - 'scripts/validate-gen-svc-1.py'
+      - '.github/workflows/gen-svc-1.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate GEN-SVC-1 reputation profile
+        run: python3 scripts/validate-gen-svc-1.py

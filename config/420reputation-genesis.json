@@ -1,0 +1,109 @@
+{
+  "schema": "420-reputation-genesis-v1",
+  "serviceId": "420/service/reputation/v1",
+  "status": "GENESIS_IMPLEMENTATION_BASELINE",
+  "canonicalTrustProtocol": "420Trust V1",
+  "trustReadBoundary": "ITrust420.readMetric(subjectType,subjectId,metricId)",
+  "authority": {
+    "model": "REPLACEABLE_DERIVED_SERVICE",
+    "createsUniversalScore": false,
+    "createsIdentityAuthority": false,
+    "createsWalletAuthority": false,
+    "createsSettlementAuthority": false,
+    "createsGovernanceOrValidatorWeight": false,
+    "canonicalEvidenceOwner": "420Trust",
+    "reviewTextCanonical": false
+  },
+  "domains": [
+    {"id":"marketplace","label":"Marketplace","verifiedInteractionKinds":["PURCHASE","SALE"],"allowUnverifiedOpinion":true},
+    {"id":"classifieds","label":"Classifieds","verifiedInteractionKinds":["P2P_TRANSACTION","LOCAL_HANDOFF","SHIPPED_TRANSACTION"],"allowUnverifiedOpinion":true},
+    {"id":"travel","label":"Travel","verifiedInteractionKinds":["STAY","BOOKING","EVENT_ATTENDANCE","PLACE_VISIT"],"allowUnverifiedOpinion":true},
+    {"id":"employer","label":"Employer","verifiedInteractionKinds":["EMPLOYMENT","INTERVIEW"],"allowUnverifiedOpinion":true},
+    {"id":"freelancer","label":"Freelancer","verifiedInteractionKinds":["GIG_CONTRACT","MILESTONE"],"allowUnverifiedOpinion":false},
+    {"id":"creator","label":"Creator","verifiedInteractionKinds":["SUBSCRIPTION","PURCHASE","BACKING"],"allowUnverifiedOpinion":true},
+    {"id":"crowdfunding","label":"Crowdfunding","verifiedInteractionKinds":["CONTRIBUTION","REWARD_DELIVERY"],"allowUnverifiedOpinion":true},
+    {"id":"community","label":"Community","verifiedInteractionKinds":["MEMBERSHIP","MODERATION_ACTION"],"allowUnverifiedOpinion":false},
+    {"id":"education","label":"Education","verifiedInteractionKinds":["ENROLLMENT","COURSE_COMPLETION","CREDENTIAL"],"allowUnverifiedOpinion":true}
+  ],
+  "review": {
+    "ratingScale": {"min":1,"max":5,"integerOnly":true},
+    "requiredFields":["reviewId","domainId","subjectType","subjectId","reviewerProfileId","rating","createdAt","verification"],
+    "optionalFields":["title","body","attachments","dimensions","response","editedAt"],
+    "verificationStates":["VERIFIED_INTERACTION","UNVERIFIED_OPINION"],
+    "verifiedInteractionRequiredFields":["kind","evidenceRef","issuerId","occurredAt"],
+    "bodyStorage":"OFF_CHAIN",
+    "attachmentsStorage":"OFF_CHAIN",
+    "canonicalAnchoring":"OPTIONAL_DIGEST_ONLY",
+    "oneReviewPerVerifiedInteraction":true,
+    "editing":"VERSIONED",
+    "deletion":"TOMBSTONE_OR_VISIBILITY_CHANGE",
+    "businessResponse":"SUPPORTED"
+  },
+  "trustSignals": {
+    "purpose":"Record objective verified-interaction facts and measurements in 420Trust; subjective star ratings remain application data unless a future explicitly governed metric defines objective semantics.",
+    "allowedGenesisFacts":["INTERACTION_COMPLETED","PAYMENT_SETTLED","ESCROW_RESOLVED","BOOKING_COMPLETED","CONTRIBUTION_CONFIRMED","DELIVERY_CONFIRMED","COURSE_COMPLETED","CREDENTIAL_ISSUED"],
+    "subjectiveStarRatingAsCanonicalTrustSignal":false,
+    "requiresExactMetricAuthorization":true,
+    "requiresEvidenceReplayProtection":true
+  },
+  "antiSybil": {
+    "verifiedInteractionWeightingAllowed":true,
+    "accountAgeAsProtocolTruth":false,
+    "stakeWeightedReputation":false,
+    "walletBalanceWeightedReputation":false,
+    "rateLimitsRequired":true,
+    "duplicateInteractionReviewBlocked":true,
+    "selfReviewBlocked":true,
+    "conflictSignalsMayReduceDisplayConfidence":true,
+    "confidenceIsApplicationPolicyNotCanonicalTruth":true
+  },
+  "moderation": {
+    "actions":["REPORT","HIDE","BLOCK","MUTE","SUSPEND","APPEAL","MODERATOR_DECISION","RESTORE","LOCK"],
+    "reasons":["SPAM","CONFLICT_OF_INTEREST","HARASSMENT","FRAUD","DUPLICATE","IRRELEVANT","PERSONAL_INFORMATION","RIGHTS_VIOLATION"],
+    "mayRewriteTrustHistory":false,
+    "mayTransferAssets":false,
+    "mayRevokeIdentity":false,
+    "reviewVisibilityIndependentFromEvidenceHistory":true
+  },
+  "api": {
+    "version":"v1",
+    "pagination":"cursor",
+    "endpoints":[
+      "GET /v1/reputation/{domainId}/{subjectType}/{subjectId}",
+      "GET /v1/reviews/{domainId}/{subjectType}/{subjectId}",
+      "POST /v1/reviews",
+      "PATCH /v1/reviews/{reviewId}",
+      "POST /v1/reviews/{reviewId}/response",
+      "POST /v1/reviews/{reviewId}/report",
+      "GET /v1/interactions/{evidenceRef}/verification",
+      "GET /v1/policy/{domainId}"
+    ],
+    "writeIdempotencyRequired":true,
+    "authorityBearingResponsesRequireProvenance":true
+  },
+  "portableView": {
+    "includes":["domainId","subjectType","subjectId","policyVersion","verifiedReviewCount","unverifiedReviewCount","ratingDistribution","dimensionSummaries","trustMetrics","moderationSummary","updatedAt"],
+    "forbids":["universalScore","hiddenCrossDomainScore","politicalScore","creditScore","validatorWeight","governanceWeight"],
+    "trustMetricShape":["metricId","domainId","unitId","revision","active","total","count","source"]
+  },
+  "privacy": {
+    "noSensitivePlaintextOnChain":true,
+    "preciseHomeLocationExcluded":true,
+    "privateMessagesExcluded":true,
+    "healthDataExcluded":true,
+    "reviewBodiesExcludedFromTrustState":true
+  },
+  "genesisConsumers":["420Classifieds","420Travel","420Launchpad Crowdfunding","420Learn + 420Knowledge","420Town Community Boards","420Freelance"],
+  "invariants":[
+    "REP-INV-001_NO_UNIVERSAL_SCORE",
+    "REP-INV-002_DOMAIN_SEPARATION",
+    "REP-INV-003_VERIFIED_INTERACTION_PROVENANCE",
+    "REP-INV-004_SUBJECTIVE_RATINGS_OFF_CHAIN",
+    "REP-INV-005_ONE_REVIEW_PER_VERIFIED_INTERACTION",
+    "REP-INV-006_SELF_REVIEW_BLOCKED",
+    "REP-INV-007_NO_STAKE_OR_BALANCE_WEIGHTING",
+    "REP-INV-008_MODERATION_CANNOT_REWRITE_TRUST",
+    "REP-INV-009_PRIVATE_DATA_MINIMIZATION",
+    "REP-INV-010_PORTABLE_POLICY_VERSIONED"
+  ]
+}

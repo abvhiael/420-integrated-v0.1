@@ -30,6 +30,15 @@ func (f *fakeReviewService) UpdateReview(context.Context, service.UpdateReviewIn
 	f.updated++
 	return f.review, nil
 }
+func (f *fakeReviewService) CreateResponse(context.Context, service.CreateResponseInput, time.Time) (model.Response, error) {
+	return model.Response{ReviewID:"review-1", Subject:f.review.Subject, Actor:f.review.Subject, BodyRef:"storage://response", Version:1, CreatedAt:f.review.CreatedAt, UpdatedAt:f.review.UpdatedAt}, nil
+}
+func (f *fakeReviewService) GetResponse(context.Context, string) (model.Response, error) {
+	return model.Response{ReviewID:"review-1", Subject:f.review.Subject, Actor:f.review.Subject, BodyRef:"storage://response", Version:1, CreatedAt:f.review.CreatedAt, UpdatedAt:f.review.UpdatedAt}, nil
+}
+func (f *fakeReviewService) UpdateResponse(context.Context, service.UpdateResponseInput, time.Time) (model.Response, error) {
+	return model.Response{ReviewID:"review-1", Subject:f.review.Subject, Actor:f.review.Subject, BodyRef:"storage://response-2", Version:2, CreatedAt:f.review.CreatedAt, UpdatedAt:f.review.UpdatedAt.Add(time.Minute)}, nil
+}
 
 func testReview() model.Review {
 	now := time.Date(2026,9,18,3,0,0,0,time.UTC)
@@ -112,4 +121,33 @@ func TestStrictJSONRejectsUnknownFields(t *testing.T) {
 	res := httptest.NewRecorder()
 	server.Handler().ServeHTTP(res,req)
 	if res.Code != http.StatusBadRequest { t.Fatalf("code=%d",res.Code) }
+}
+
+
+func TestResponseRoutesRequireIdempotencyOnWrites(t *testing.T) {
+	fake := &fakeReviewService{review:testReview()}
+	server,_ := New(fake)
+	body := []byte(`{"actorType":"PROFILE","actorId":"seller-1","bodyRef":"storage://response"}`)
+	req := httptest.NewRequest(http.MethodPost,"/v1/reviews/review-1/response",bytes.NewReader(body))
+	res := httptest.NewRecorder()
+	server.Handler().ServeHTTP(res,req)
+	if res.Code != http.StatusBadRequest { t.Fatalf("create response code=%d",res.Code) }
+
+	req = httptest.NewRequest(http.MethodPost,"/v1/reviews/review-1/response",bytes.NewReader(body))
+	req.Header.Set("Idempotency-Key","resp-1")
+	res = httptest.NewRecorder()
+	server.Handler().ServeHTTP(res,req)
+	if res.Code != http.StatusCreated { t.Fatalf("create response code=%d body=%s",res.Code,res.Body.String()) }
+
+	req = httptest.NewRequest(http.MethodGet,"/v1/reviews/review-1/response",nil)
+	res = httptest.NewRecorder()
+	server.Handler().ServeHTTP(res,req)
+	if res.Code != http.StatusOK { t.Fatalf("get response code=%d",res.Code) }
+
+	update := []byte(`{"actorType":"PROFILE","actorId":"seller-1","bodyRef":"storage://response-2","expectedVersion":1}`)
+	req = httptest.NewRequest(http.MethodPatch,"/v1/reviews/review-1/response",bytes.NewReader(update))
+	req.Header.Set("Idempotency-Key","resp-2")
+	res = httptest.NewRecorder()
+	server.Handler().ServeHTTP(res,req)
+	if res.Code != http.StatusOK { t.Fatalf("update response code=%d body=%s",res.Code,res.Body.String()) }
 }

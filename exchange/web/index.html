@@ -31,7 +31,7 @@
         </div>
         <div class="topbar-actions">
           <span id="data-state" class="status-pill" data-state="booting">Booting</span>
-          <button id="connect" type="button" disabled>Wallet connection · V14.10</button>
+          <button id="connect" type="button">Connect wallet</button>
         </div>
       </header>
 
@@ -210,7 +210,7 @@
           <div><dt>Route commitment</dt><dd id="swap-review-route" class="hash">—</dd></div>
           <div><dt>Minimum received</dt><dd id="swap-review-final-min">—</dd></div>
         </dl>
-        <p class="muted">Signing remains fail-closed until V14.10 wallet/session integration is qualified. This review cannot submit a transaction by itself.</p>
+        <p class="muted">Signing is bound to the current wallet account, configured Exchange network, and this reviewed intent. Account or network changes invalidate the draft before signing.</p>
         <button id="swap-submit" type="button" disabled>Wallet integration required · V14.10</button>
       </section>
     </div>
@@ -252,8 +252,8 @@
           <div><dt>Expiry</dt><dd id="order-review-expiry">—</dd></div>
           <div><dt>Partial fills</dt><dd id="order-review-partial">—</dd></div>
         </dl>
-        <p class="muted">EIP-712 signing stays disabled until V14.10 wallet/session integration is qualified.</p>
-        <button type="button" disabled>Wallet integration required · V14.10</button>
+        <p class="muted">The reviewed V10 payload is bound to the current wallet account and network. Account or network changes invalidate this review before signing.</p>
+        <button id="order-sign" type="button" disabled>Connect wallet to sign</button>
       </section>
     </div>
 
@@ -310,7 +310,7 @@
           <div><dt>Amount</dt><dd id="bridge-review-amount">—</dd></div>
           <div><dt>Quoted bridge fee</dt><dd id="bridge-review-fee">—</dd></div>
         </dl>
-        <p class="muted">Submission remains disabled until V14.10 provides an authorized wallet session. Paused or degraded bridge routes cannot be submitted.</p>
+        <p class="muted">Submission requires the reviewed bridge intent, current wallet account, configured Exchange network, and a still-qualified bridge route. Account or network changes invalidate this review.</p>
         <button id="bridge-submit" type="button" disabled>Wallet integration required · V14.10</button>
       </section>
     </div>
@@ -361,6 +361,8 @@
       <p class="muted">Balances are read-only canonical source records. Activity keeps reorged and replacement history visible; no portfolio valuation is synthesized without a qualified price source.</p>
     </section>
   </template>
+
+  <section id="wallet-status-panel" class="wallet-status-panel" aria-live="polite" hidden></section>
 
   <template id="gated-template">
     <div class="empty-state">

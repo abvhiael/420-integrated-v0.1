@@ -133,6 +133,58 @@ func (s *FileStore) ListBySubject(domain model.Domain, subject model.SubjectRef)
 	return out
 }
 
+func (s *FileStore) CreateResponse(response model.Response) (model.Response, error) {
+	if err := response.Validate(); err != nil {
+		return model.Response{}, err
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if _, ok := s.responses[response.ReviewID]; ok {
+		return model.Response{}, ErrExists
+	}
+	s.responses[response.ReviewID] = response
+	if err := s.persistLocked(); err != nil {
+		delete(s.responses, response.ReviewID)
+		return model.Response{}, err
+	}
+	return response, nil
+}
+
+func (s *FileStore) GetResponse(reviewID string) (model.Response, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	response, ok := s.responses[strings.TrimSpace(reviewID)]
+	if !ok {
+		return model.Response{}, ErrNotFound
+	}
+	return response, nil
+}
+
+func (s *FileStore) UpdateResponse(response model.Response, expectedVersion uint32) (model.Response, error) {
+	if err := response.Validate(); err != nil {
+		return model.Response{}, err
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	current, ok := s.responses[response.ReviewID]
+	if !ok {
+		return model.Response{}, ErrNotFound
+	}
+	if current.Version != expectedVersion || response.Version != expectedVersion+1 {
+		return model.Response{}, ErrVersion
+	}
+	if response.CreatedAt != current.CreatedAt || response.Subject != current.Subject {
+		return model.Response{}, errors.New("response immutable fields changed")
+	}
+	before := current
+	s.responses[response.ReviewID] = response
+	if err := s.persistLocked(); err != nil {
+		s.responses[response.ReviewID] = before
+		return model.Response{}, err
+	}
+	return response, nil
+}
+
 func (s *FileStore) Count() int {
 	s.mu.RLock()
 	defer s.mu.RUnlock()

@@ -32,6 +32,11 @@ const required = [
   'v14.5-qualification.json',
   'v14.6-qualification.json',
   'v14.7-qualification.json',
+  'v14.8-qualification.json',
+  'core/bridge.js',
+  'test/bridge.test.js',
+  'fixtures/bridge-routes.json',
+  'fixtures/bridge-settlements.json',
   'core/limit-orders.js',
   'test/limit-orders.test.js',
   'fixtures/limit-orders.json',
@@ -114,4 +119,12 @@ const orderFixtures = JSON.parse(fs.readFileSync(path.join(root, 'fixtures/limit
 if (!Array.isArray(orderFixtures) || !orderFixtures.length || orderFixtures.some((order)=>order.demo !== true)) {
   throw new Error('V14.7 order fixtures must be explicitly labeled demo');
 }
-console.log('420Exchange V14.1/V14.2/V14.3/V14.4/V14.5/V14.6/V14.7 static qualification passed');
+const bridge = fs.readFileSync(path.join(root, 'core/bridge.js'), 'utf8');
+for (const needle of ['normalizeBridgeRoute', 'bridgeQualification', 'buildBridgeIntent', 'normalizeSettlement', 'settlementProgress', 'canSubmitBridge']) {
+  if (!bridge.includes(needle)) throw new Error(`V14.8 bridge model missing operation: ${needle}`);
+}
+const bridgeRoutes = JSON.parse(fs.readFileSync(path.join(root, 'fixtures/bridge-routes.json'), 'utf8'));
+const bridgeSettlements = JSON.parse(fs.readFileSync(path.join(root, 'fixtures/bridge-settlements.json'), 'utf8'));
+if (!Array.isArray(bridgeRoutes) || !bridgeRoutes.length || bridgeRoutes.some((route)=>route.demo !== true)) throw new Error('V14.8 route fixtures must be explicitly labeled demo');
+if (!Array.isArray(bridgeSettlements) || !bridgeSettlements.length || bridgeSettlements.some((record)=>record.demo !== true)) throw new Error('V14.8 settlement fixtures must be explicitly labeled demo');
+console.log('420Exchange V14.1/V14.2/V14.3/V14.4/V14.5/V14.6/V14.7/V14.8 static qualification passed');

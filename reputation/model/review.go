@@ -7,11 +7,15 @@ import (
 )
 
 type ReviewStatus string
+type VerificationState string
 
 const (
 	ReviewActive  ReviewStatus = "ACTIVE"
 	ReviewHidden  ReviewStatus = "HIDDEN"
 	ReviewRemoved ReviewStatus = "REMOVED"
+
+	VerificationVerified   VerificationState = "VERIFIED_INTERACTION"
+	VerificationUnverified VerificationState = "UNVERIFIED_OPINION"
 )
 
 type Review struct {
@@ -22,7 +26,11 @@ type Review struct {
 	Rating                 uint8
 	BodyRef                string
 	AttachmentRefs         []string
+	Verification           VerificationState
+	InteractionKind        string
 	VerifiedInteractionRef string
+	VerificationIssuerID   string
+	VerifiedOccurredAt     time.Time
 	Status                 ReviewStatus
 	Version                uint32
 	CreatedAt              time.Time
@@ -48,6 +56,21 @@ func (r Review) Validate() error {
 	if r.Rating < 1 || r.Rating > 5 {
 		return errors.New("review rating must be between 1 and 5")
 	}
+	switch r.Verification {
+	case VerificationVerified:
+		if strings.TrimSpace(r.InteractionKind) == "" ||
+			strings.TrimSpace(r.VerifiedInteractionRef) == "" ||
+			strings.TrimSpace(r.VerificationIssuerID) == "" ||
+			r.VerifiedOccurredAt.IsZero() {
+			return errors.New("verified review requires interaction provenance")
+		}
+	case VerificationUnverified:
+		if r.InteractionKind != "" || r.VerifiedInteractionRef != "" || r.VerificationIssuerID != "" || !r.VerifiedOccurredAt.IsZero() {
+			return errors.New("unverified opinion cannot carry verified interaction provenance")
+		}
+	default:
+		return errors.New("review verification state is invalid")
+	}
 	if r.Status != ReviewActive && r.Status != ReviewHidden && r.Status != ReviewRemoved {
 		return errors.New("review status is invalid")
 	}
@@ -67,4 +90,14 @@ func CloneReview(in Review) Review {
 	out := in
 	out.AttachmentRefs = append([]string(nil), in.AttachmentRefs...)
 	return out
+}
+
+func AllowsUnverifiedOpinion(domain Domain) bool {
+	switch domain {
+	case DomainMarketplace, DomainClassifieds, DomainTravel, DomainEmployer,
+		DomainCreator, DomainCrowdfunding, DomainEducation:
+		return true
+	default:
+		return false
+	}
 }

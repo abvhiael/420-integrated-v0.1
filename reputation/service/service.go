@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/420integrated/420-integrated/reputation/interactions"
 	"github.com/420integrated/420-integrated/reputation/model"
 )
 
@@ -19,16 +20,22 @@ type ReviewRepository interface {
 	Ready(ctx context.Context) error
 }
 
+type InteractionVerifier interface {
+	Verify(ctx context.Context, domain model.Domain, kind interactions.Kind, evidenceRef string, reviewer, subject model.SubjectRef) (interactions.Evidence, error)
+}
+
 type Dependencies struct {
-	Subjects SubjectBinder
-	Trust    TrustReader
-	Reviews  ReviewRepository
+	Subjects     SubjectBinder
+	Trust        TrustReader
+	Reviews      ReviewRepository
+	Interactions InteractionVerifier
 }
 
 type Service struct {
-	subjects SubjectBinder
-	trust    TrustReader
-	reviews  ReviewRepository
+	subjects     SubjectBinder
+	trust        TrustReader
+	reviews      ReviewRepository
+	interactions InteractionVerifier
 }
 
 func New(deps Dependencies) (*Service, error) {
@@ -41,10 +48,14 @@ func New(deps Dependencies) (*Service, error) {
 	if deps.Reviews == nil {
 		return nil, errors.New("reputation service requires review repository")
 	}
+	if deps.Interactions == nil {
+		return nil, errors.New("reputation service requires verified interaction verifier")
+	}
 	return &Service{
-		subjects: deps.Subjects,
-		trust:    deps.Trust,
-		reviews:  deps.Reviews,
+		subjects:     deps.Subjects,
+		trust:        deps.Trust,
+		reviews:      deps.Reviews,
+		interactions: deps.Interactions,
 	}, nil
 }
 
@@ -92,4 +103,14 @@ func (s *Service) ReadTrustMetric(ctx context.Context, subject model.SubjectRef,
 		return model.TrustMetricRef{}, err
 	}
 	return metric, nil
+}
+
+func (s *Service) VerifyInteraction(ctx context.Context, domain model.Domain, kind interactions.Kind, evidenceRef string, reviewer, subject model.SubjectRef) (interactions.Evidence, error) {
+	if err := s.ValidateSubject(ctx, reviewer); err != nil {
+		return interactions.Evidence{}, err
+	}
+	if err := s.ValidateSubject(ctx, subject); err != nil {
+		return interactions.Evidence{}, err
+	}
+	return s.interactions.Verify(ctx, domain, kind, evidenceRef, reviewer, subject)
 }

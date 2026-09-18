@@ -1,6 +1,6 @@
 {
   "schema": "420-exchange-public-api-v13.6",
-  "status": "IN_QUALIFICATION",
+  "status": "QUALIFIED",
   "scope": "PUBLIC_API_HARDENING",
   "model": "A deterministic policy envelope shared by V13 read surfaces. It standardizes version negotiation, request bounds, abuse controls, cache/freshness behavior and machine-readable error semantics without adding protocol authority.",
   "version": {
@@ -43,6 +43,12 @@
   "implementation": {
     "reference_policy": "contracts/src/exchange/ExchangePublicApiPolicy420.sol",
     "qualification_test": "contracts/test/ExchangePublicApiPolicy420.t.sol"
+  },
+  "qualification": {
+    "exact_head": "7a2e1a879ca1ff106dd842210bc7c9e84f760c4f",
+    "solidity_contracts": 2621,
+    "integrated_qualification": 4166,
+    "docs_qualification": 1871
   },
   "follow_on": "V13.7 V14 UI handoff qualification"
 }

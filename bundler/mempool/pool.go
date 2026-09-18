@@ -71,6 +71,9 @@ func (p *Pool) Add(op userop.PackedUserOperation,evidence simulation.Evidence,no
 	hash:=strings.ToLower(evidence.UserOpHash)
 	if !validHash(hash) { return AddResult{},errors.New("simulation evidence hash is invalid") }
 	if !evidence.ExecutionSucceeded { return AddResult{},errors.New("successful simulation evidence is required") }
+	expectedHash,err:=userop.Hash(evidence.ChainID,evidence.EntryPoint,op)
+	if err!=nil { return AddResult{},fmt.Errorf("simulation evidence domain is invalid: %w",err) }
+	if strings.ToLower(expectedHash)!=hash { return AddResult{},errors.New("simulation evidence does not match UserOperation") }
 
 	sender:=strings.ToLower(op.Sender)
 	nonceKey:=senderNonceKey(sender,canonical.Nonce.String())

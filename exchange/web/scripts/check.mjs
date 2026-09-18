@@ -36,6 +36,10 @@ const required = [
   'v14.9-qualification.json',
   'v14.10-qualification.json',
   'v14.11-qualification.json',
+  'v14.12-qualification.json',
+  'core/security.js',
+  'test/security.test.js',
+  'security-headers.json',
   'core/reliability.js',
   'test/reliability.test.js',
   'core/wallet-session.js',
@@ -154,4 +158,19 @@ const reliability = fs.readFileSync(path.join(root, 'core/reliability.js'), 'utf
 for (const needle of ['classifyApiFailure', 'loadingCopy', 'responsiveTableLabel', 'focusAfterRender', 'onlineState']) {
   if (!reliability.includes(needle)) throw new Error(`V14.11 reliability model missing operation: ${needle}`);
 }
-console.log('420Exchange V14.1/V14.2/V14.3/V14.4/V14.5/V14.6/V14.7/V14.8/V14.9/V14.10/V14.11 static qualification passed');
+const security = fs.readFileSync(path.join(root, 'core/security.js'), 'utf8');
+for (const needle of ['sanitizeSubjectId', 'sanitizePathname', 'freezeReviewedIntent', 'reviewedIntentDigest', 'assertReviewedIntentUnchanged']) {
+  if (!security.includes(needle)) throw new Error(`V14.12 security model missing operation: ${needle}`);
+}
+const headers = JSON.parse(fs.readFileSync(path.join(root, 'security-headers.json'), 'utf8'));
+for (const required of ['Content-Security-Policy','Referrer-Policy','Permissions-Policy','X-Content-Type-Options','X-Frame-Options']) {
+  if (!headers[required]) throw new Error(`V14.12 security header missing: ${required}`);
+}
+const sourceScan = fs.readdirSync(root, { recursive:true, withFileTypes:true })
+  .filter((entry)=>entry.isFile() && /\.(js|mjs|json|html|css)$/.test(entry.name))
+  .map((entry)=>fs.readFileSync(path.join(entry.parentPath ?? entry.path, entry.name),'utf8'))
+  .join('\n');
+if (/BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY|seed phrase|mnemonic\s*[:=]|private[_-]?key\s*[:=]\s*["'][^"']+/i.test(sourceScan)) {
+  throw new Error('V14.12 secret-like material detected in frontend source');
+}
+console.log('420Exchange V14.1/V14.2/V14.3/V14.4/V14.5/V14.6/V14.7/V14.8/V14.9/V14.10/V14.11/V14.12 static qualification passed');

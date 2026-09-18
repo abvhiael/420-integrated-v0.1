@@ -30,6 +30,7 @@ func validDeps() Dependencies {
 		Subjects: fakeSubjects{},
 		Trust: fakeTrust{metric: model.TrustMetricRef{
 			DomainID:       "trust/domain/market",
+			UnitID:         "trust/unit/count",
 			MetricID:       "trust/metric/completed-transactions",
 			MetricRevision: 1,
 			Active:         true,

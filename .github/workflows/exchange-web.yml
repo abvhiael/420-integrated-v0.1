@@ -27,3 +27,7 @@ jobs:
       - name: Exchange web unit tests
         working-directory: exchange/web
         run: npm test
+      - name: Frontend secret scan
+        working-directory: exchange/web
+        run: |
+          ! grep -RniE 'BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY|mnemonic[[:space:]]*[:=]|seed phrase|private[_-]?key[[:space:]]*[:=]' --exclude-dir=node_modules .

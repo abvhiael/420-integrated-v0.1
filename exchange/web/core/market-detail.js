@@ -70,3 +70,35 @@ export function reconcileHistory(records) {
     replacement: record.replacedBy ? byId.get(record.replacedBy) ?? null : null,
   }));
 }
+
+export function aggregateTradesToCandles(trades, bucketSeconds) {
+  if (!Number.isInteger(bucketSeconds) || bucketSeconds <= 0) throw new Error('invalid candle bucket');
+  const active=trades.filter((trade)=>trade.active && trade.timestamp !== null && trade.price !== null);
+  const buckets=new Map();
+  for (const trade of active) {
+    const start=Math.floor(trade.timestamp/bucketSeconds)*bucketSeconds;
+    const bucket=buckets.get(start) ?? [];
+    bucket.push(trade);
+    buckets.set(start,bucket);
+  }
+  return [...buckets.entries()].sort((a,b)=>a[0]-b[0]).map(([start,bucket])=>{
+    const prices=bucket.map((trade)=>trade.price);
+    return normalizeCandle({
+      recordId:`derived:${bucketSeconds}:${start}:${bucket.map((trade)=>trade.recordId).join(',')}`,
+      subjectId:bucket[0].subjectId,
+      active:true,
+      timestamp:start,
+      open:bucket[0].price,
+      high:Math.max(...prices),
+      low:Math.min(...prices),
+      close:bucket[bucket.length-1].price,
+      volume:bucket.reduce((sum,trade)=>sum+(trade.amount ?? 0),0),
+    });
+  });
+}
+
+export function bucketSecondsForWindow(windowName) {
+  const mapping={ '1h':300, '4h':900, '1d':3600, '7d':21600 };
+  if (!(windowName in mapping)) throw new Error('unsupported detail window');
+  return mapping[windowName];
+}

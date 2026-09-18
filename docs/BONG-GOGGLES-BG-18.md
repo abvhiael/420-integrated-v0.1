@@ -164,7 +164,7 @@ The application layer now projects canonical `ContributionPublished`, `RewardAcc
 
 **Exit:** application surfaces can accurately show reward lifecycle and prepare claims without inventing reward state.
 
-### BG-18.7 — notifications + user-facing reward semantics — IMPLEMENTED, QUALIFICATION PENDING
+### BG-18.7 — notifications + user-facing reward semantics — COMPLETE AND QUALIFIED
 
 - activate `REWARD_EARNED` only from canonical `RewardAccrued` lifecycle events;
 - activate `REWARD_PAYOUT_UPDATED` only from canonical claim/release lifecycle events;
@@ -186,7 +186,7 @@ Implemented in:
 
 **Exit:** users no longer see reserved earned/payout notification kinds as synthetic placeholders; they are driven only by real shared-rewards events.
 
-### BG-18.8 — game reward hook decision + safe integration boundary
+### BG-18.8 — game reward hook decision + safe integration boundary — IMPLEMENTED, QUALIFICATION PENDING
 
 - review the existing Phase 15 `BG-18_REWARDS_CONFIGURATION` game hook;
 - keep game rewards disabled unless a canonical game contribution verifier is introduced against `BongGogglesGameSessionRegistry420`;
@@ -198,6 +198,12 @@ Implemented in:
   - use deterministic session-based source keys;
   - prevent self-play/farming and duplicate session reward claims through policy/nullifier rules;
 - otherwise formally defer game rewards and preserve `awardRequested:false`, `mintRequested:false`.
+
+Implemented in:
+- `services/bong-goggles-games-v1/src/historyDiscovery.js`
+- `services/bong-goggles-games-v1/test/historyDiscovery.test.js`
+
+Production decision: **DEFERRED**. BG-18 does not introduce GAME_PARTICIPATION or GAME_RESULT reward contribution types because no canonical game contribution verifier currently exists. The Phase-15 hook remains non-authoritative and now explicitly records the deferral reason, exposes no supported game reward contribution types, and keeps `awardRequested:false`, `mintRequested:false`, and `contributionRequested:false`. Local statistics, leaderboard rank, streaks and client-derived game results are permanently non-authoritative reward inputs. Any later game-reward enablement must require a canonical verifier over `BongGogglesGameSessionRegistry420`, FINISHED zero-wager sessions, canonical participant beneficiary binding, deterministic session source keys, anti-farming policy and duplicate-session reward prevention.
 
 **Exit:** game rewards have an explicit production decision and cannot accidentally become active through the existing application hook.
 

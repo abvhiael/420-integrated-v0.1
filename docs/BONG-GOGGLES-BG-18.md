@@ -100,7 +100,7 @@ Enabled campaign types now require declared replaceable `IRewardScorer420` profi
 
 **Exit:** every enabled contribution type is mapped to a production scorer and, where needed, a production eligibility policy with deterministic tests.
 
-### BG-18.4 — campaign construction + economic caps — IMPLEMENTED, QUALIFICATION PENDING
+### BG-18.4 — campaign construction + economic caps — COMPLETE AND QUALIFIED
 
 - build deterministic campaign-plan generation from the BG-18 configuration;
 - bind every campaign to `APP_ID_BONG_GOGGLES` and exactly one contribution type;
@@ -124,7 +124,7 @@ Enabled campaigns now produce deterministic inspection-only `RewardCampaignRegis
 
 **Exit:** campaign plans can be generated, inspected and validated before any on-chain creation or funding occurs.
 
-### BG-18.5 — pool funding + activation workflow
+### BG-18.5 — pool funding + activation workflow — IMPLEMENTED, QUALIFICATION PENDING
 
 - define the production sequence:
   1. create campaign;
@@ -137,6 +137,12 @@ Enabled campaigns now produce deterministic inspection-only `RewardCampaignRegis
 - define pause/deactivation workflow without destroying prior earned rewards;
 - no application service may custody campaign funds;
 - Wallet confirmation required for sponsor-side canonical writes.
+
+Implemented in:
+- `services/bong-goggles-indexer-v1/src/rewardFundingActivation.js`
+- `services/bong-goggles-indexer-v1/test/rewardFundingActivation.test.js`
+
+The production workflow now enforces create → canonical validation → fund → pool verification → activate ordering, validates canonical campaign fields against the prepared plan, exposes funded/reserved/available balances, blocks activation while underfunded, supports explicit top-up/fund decisions, preserves prior rewards on deactivation, and prepares only Wallet-confirmed `RewardPool420.fund` / `RewardCampaignRegistry420.setActive` writes. Bong Goggles services never custody campaign funds.
 
 **Exit:** operators have a deterministic, reversible campaign activation procedure with explicit funding readiness checks.
 

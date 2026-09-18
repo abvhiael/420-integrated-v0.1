@@ -35,6 +35,9 @@ const required = [
   'v14.8-qualification.json',
   'v14.9-qualification.json',
   'v14.10-qualification.json',
+  'v14.11-qualification.json',
+  'core/reliability.js',
+  'test/reliability.test.js',
   'core/wallet-session.js',
   'test/wallet-session.test.js',
   'core/portfolio.js',
@@ -147,4 +150,8 @@ const walletSession = fs.readFileSync(path.join(root, 'core/wallet-session.js'),
 for (const needle of ['WalletSession', 'WalletController', 'validateNetwork', 'signingGate', 'buildSigningRequest']) {
   if (!walletSession.includes(needle)) throw new Error(`V14.10 wallet model missing operation: ${needle}`);
 }
-console.log('420Exchange V14.1/V14.2/V14.3/V14.4/V14.5/V14.6/V14.7/V14.8/V14.9/V14.10 static qualification passed');
+const reliability = fs.readFileSync(path.join(root, 'core/reliability.js'), 'utf8');
+for (const needle of ['classifyApiFailure', 'loadingCopy', 'responsiveTableLabel', 'focusAfterRender', 'onlineState']) {
+  if (!reliability.includes(needle)) throw new Error(`V14.11 reliability model missing operation: ${needle}`);
+}
+console.log('420Exchange V14.1/V14.2/V14.3/V14.4/V14.5/V14.6/V14.7/V14.8/V14.9/V14.10/V14.11 static qualification passed');

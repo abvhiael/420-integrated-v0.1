@@ -45,7 +45,7 @@ Comments are intentionally not rewardable by default. The Phase 15 games layer e
 
 ## Roadmap
 
-### BG-18.1 — production reward inventory + configuration schema — IMPLEMENTED, QUALIFICATION PENDING
+### BG-18.1 — production reward inventory + configuration schema — COMPLETE AND QUALIFIED
 
 - freeze the canonical Bong Goggles app ID and all supported contribution-type IDs;
 - inventory verifier, adapter, Contribution Registry, Campaign Registry, Distributor and Pool dependencies;
@@ -63,7 +63,7 @@ The configuration surface freezes the canonical app/contribution ID preimages, i
 
 **Exit:** one deterministic configuration surface describes every permitted Bong Goggles reward campaign without creating reward authority in the app layer.
 
-### BG-18.2 — contribution catalog + enablement policy
+### BG-18.2 — contribution catalog + enablement policy — IMPLEMENTED, QUALIFICATION PENDING
 
 - production catalog for POST, PHOTO, STORY, DISCOVERY, REVIEW, CORRECTION and VERIFICATION;
 - comments remain explicitly disabled;
@@ -73,6 +73,12 @@ The configuration surface freezes the canonical app/contribution ID preimages, i
 - correction and verification contributions retain canonical author/verifier beneficiary binding;
 - source-key/nullifier/replay invariants documented and regression-tested;
 - allow contribution classes to be disabled independently without changing verifier identities.
+
+Implemented in:
+- `services/bong-goggles-indexer-v1/src/rewardContributionPolicy.js`
+- `services/bong-goggles-indexer-v1/test/rewardContributionPolicy.test.js`
+
+The policy catalog covers exactly the seven canonical verifier classes, keeps COMMENT explicitly unsupported, derives independent enablement from validated campaign config without changing verifier methods, mirrors the Solidity source-active rules, preserves canonical beneficiary binding, and documents adapter source replay plus shared-registry nullifier semantics.
 
 **Exit:** each existing contribution class has an explicit production enable/disable policy and verified canonical beneficiary/source semantics.
 

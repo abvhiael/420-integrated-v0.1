@@ -218,3 +218,7 @@ label { display: grid; gap: 7px; }
 .review-grid dt { color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.08em; }
 .review-grid dd { margin:5px 0 0; overflow-wrap:anywhere; }
 @media (max-width:900px) { .swap-grid { grid-template-columns:1fr; } }
+
+.orders-grid { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(320px,.8fr); gap:var(--space-4); margin-top:var(--space-5); margin-bottom:var(--space-5); }
+.orders-table-wrap { margin-top:var(--space-4); }
+@media (max-width:900px) { .orders-grid { grid-template-columns:1fr; } }

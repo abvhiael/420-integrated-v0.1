@@ -161,7 +161,7 @@
       </section>
     </div>
 
-    <div class="table-wrap">
+    <div class="table-wrap" tabindex="0" role="region" aria-label="Scrollable data table">
       <table class="exchange-table">
         <thead><tr><th>Record</th><th>Price / close</th><th>Amount / volume</th><th>State</th><th>Replacement</th></tr></thead>
         <tbody id="detail-activity"></tbody>
@@ -257,7 +257,7 @@
       </section>
     </div>
 
-    <div class="table-wrap orders-table-wrap">
+    <div class="table-wrap orders-table-wrap" tabindex="0" role="region" aria-label="Scrollable orders table">
       <table class="exchange-table">
         <thead><tr><th>Order hash</th><th>Sell</th><th>Minimum buy</th><th>State</th><th>Transaction</th><th>Action</th></tr></thead>
         <tbody id="orders-body"></tbody>
@@ -315,7 +315,7 @@
       </section>
     </div>
 
-    <div class="table-wrap bridge-table-wrap">
+    <div class="table-wrap bridge-table-wrap" tabindex="0" role="region" aria-label="Scrollable bridge settlement table">
       <table class="exchange-table">
         <thead><tr><th>Settlement</th><th>State</th><th>Progress</th><th>Attestation</th><th>Proof</th><th>Transaction</th><th>Guidance</th></tr></thead>
         <tbody id="bridge-settlements"></tbody>
@@ -342,7 +342,7 @@
 
     <section class="portfolio-section">
       <h3>Open orders</h3>
-      <div class="table-wrap">
+      <div class="table-wrap" tabindex="0" role="region" aria-label="Scrollable data table">
         <table class="exchange-table">
           <thead><tr><th>Order hash</th><th>Sell</th><th>Minimum buy</th><th>State</th></tr></thead>
           <tbody id="portfolio-orders"></tbody>
@@ -352,7 +352,7 @@
 
     <section class="portfolio-section">
       <h3>Unified activity</h3>
-      <div class="table-wrap">
+      <div class="table-wrap" tabindex="0" role="region" aria-label="Scrollable data table">
         <table class="exchange-table">
           <thead><tr><th>Kind</th><th>Amount</th><th>State</th><th>Fee</th><th>Transaction</th><th>Provenance</th></tr></thead>
           <tbody id="portfolio-activity"></tbody>

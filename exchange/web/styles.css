@@ -209,3 +209,12 @@ label { display: grid; gap: 7px; }
   .detail-stats { grid-template-columns:1fr; }
   .detail-toolbar { display:grid; }
 }
+
+.swap-grid { display:grid; grid-template-columns:minmax(0,1.35fr) minmax(320px,.65fr); gap:var(--space-4); margin-top:var(--space-5); }
+.swap-health { margin:var(--space-4) 0; }
+.route-list { display:grid; gap:var(--space-2); padding-left:22px; color:var(--muted); }
+.review-grid { margin:0; display:grid; gap:var(--space-3); }
+.review-grid div { background:var(--panel-3); border-radius:var(--radius-sm); padding:var(--space-3); }
+.review-grid dt { color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.08em; }
+.review-grid dd { margin:5px 0 0; overflow-wrap:anywhere; }
+@media (max-width:900px) { .swap-grid { grid-template-columns:1fr; } }

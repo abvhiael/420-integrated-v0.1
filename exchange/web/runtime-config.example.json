@@ -24,7 +24,7 @@
   "features": {
     "markets": true,
     "marketDetail": true,
-    "swap": false,
+    "swap": true,
     "limitOrders": false,
     "bridge": false,
     "portfolio": false,

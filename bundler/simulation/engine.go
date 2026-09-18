@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/420integrated/420-integrated/bundler/paymaster"
 	"github.com/420integrated/420-integrated/bundler/userop"
 )
 
@@ -54,6 +55,9 @@ func NewEngine(chainID uint64,entryPoint string,maxEvidenceAge time.Duration,sim
 func (e *Engine) ValidateAndSimulate(ctx context.Context,op userop.PackedUserOperation,now time.Time)(Evidence,error){
 	if now.IsZero() { return Evidence{},errors.New("validation time is required") }
 	if _,err:=op.Canonicalize(); err!=nil { return Evidence{},fmt.Errorf("canonical UserOperation rejected: %w",err) }
+	if _,err:=paymaster.Validate(op,e.chainID,e.entryPoint,now); err!=nil {
+		return Evidence{},fmt.Errorf("paymaster boundary rejected: %w",err)
+	}
 	hash,err:=userop.Hash(e.chainID,e.entryPoint,op)
 	if err!=nil { return Evidence{},fmt.Errorf("canonical hash unavailable: %w",err) }
 

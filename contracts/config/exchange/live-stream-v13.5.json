@@ -1,6 +1,6 @@
 {
   "schema": "420-exchange-live-stream-v13.5",
-  "status": "IN_QUALIFICATION",
+  "status": "QUALIFIED",
   "scope": "LIVE_MARKET_DATA_STREAM",
   "model": "A transport-neutral ordered event stream shared by WebSocket and SSE implementations. The stream carries canonical data references, heartbeats, reorg notices and replacement notices with deterministic sequence and resume semantics.",
   "event_kinds": [
@@ -30,6 +30,12 @@
     "reference_stream": "contracts/src/exchange/ExchangeLiveMarketData420.sol",
     "qualification_test": "contracts/test/ExchangeLiveMarketData420.t.sol",
     "history_dependency": "contracts/src/exchange/ExchangeHistoricalQuery420.sol"
+  },
+  "qualification": {
+    "exact_head": "a7ad5411c6f1d1f100cdfb6af3b0a57616076e73",
+    "solidity_contracts": 2618,
+    "integrated_qualification": 4163,
+    "docs_qualification": 1868
   },
   "follow_on": "V13.6 public API hardening"
 }

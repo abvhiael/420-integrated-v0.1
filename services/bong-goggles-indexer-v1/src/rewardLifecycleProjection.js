@@ -88,7 +88,11 @@ export function applyRewardLifecycleEvent(state,event){
     if(!reward) throw new Error('reward claim missing canonical accrual');
     if(String(required(event.beneficiary,'beneficiary'))!==reward.beneficiary) throw new Error('reward claim beneficiary mismatch');
     if(Number(required(event.amount,'amount'))!==reward.amount) throw new Error('reward claim amount mismatch');
-    state.rewards.set(rewardId,freeze({...reward,status:'CLAIMED',claimed:true}));
+    state.rewards.set(rewardId,freeze({
+      ...reward,
+      status:reward.released===true?'PAID':'CLAIMED',
+      claimed:true
+    }));
     return rewardLifecycleView(state,{rewardId});
   }
 

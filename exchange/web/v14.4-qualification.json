@@ -1,6 +1,6 @@
 {
   "schema": "420-exchange-web-v14.4",
-  "status": "IN_QUALIFICATION",
+  "status": "QUALIFIED",
   "scope": "MARKETS_OVERVIEW",
   "invariants": [
     "every market row is derived from a V13-compatible snapshot shape",
@@ -19,5 +19,11 @@
     "fixtures": "exchange/web/fixtures/markets.json",
     "qualificationTest": "exchange/web/test/markets.test.js"
   },
-  "follow_on": "V14.5 market detail and charting"
+  "follow_on": "V14.5 market detail and charting",
+  "qualification": {
+    "exact_head": "74de80709e1f2ea94fa711fb60316bc6387236f6",
+    "exchange_web_verification": 64,
+    "integrated_qualification": 4264,
+    "docs_qualification": 1939
+  }
 }

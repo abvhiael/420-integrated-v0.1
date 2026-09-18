@@ -10,6 +10,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/420integrated/420-integrated/reputation/model"
 )
@@ -133,6 +134,33 @@ func (s *FileStore) ListBySubject(domain model.Domain, subject model.SubjectRef)
 		return out[i].ID < out[j].ID
 	})
 	return out
+}
+
+func (s *FileStore) FindByVerifiedInteraction(ref string) (model.Review, bool) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	ref = strings.TrimSpace(ref)
+	if ref == "" {
+		return model.Review{}, false
+	}
+	for _, review := range s.items {
+		if review.Verification == model.VerificationVerified && review.VerifiedInteractionRef == ref {
+			return model.CloneReview(review), true
+		}
+	}
+	return model.Review{}, false
+}
+
+func (s *FileStore) CountByAuthorSince(author model.SubjectRef, since time.Time) uint64 {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	var count uint64
+	for _, review := range s.items {
+		if review.Author == author && !review.CreatedAt.Before(since) {
+			count++
+		}
+	}
+	return count
 }
 
 func (s *FileStore) CreateResponse(response model.Response) (model.Response, error) {

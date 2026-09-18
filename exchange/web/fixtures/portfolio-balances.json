@@ -1,0 +1,4 @@
+[
+  {"assetId":"demo-420","symbol":"420","balance":420,"available":400,"locked":20,"source":"demo-wallet-snapshot","canonical":true,"demo":true},
+  {"assetId":"demo-eth","symbol":"ETH","balance":1.5,"available":1.5,"locked":0,"source":"demo-wallet-snapshot","canonical":true,"demo":true}
+]

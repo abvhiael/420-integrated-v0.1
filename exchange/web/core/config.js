@@ -13,7 +13,9 @@ function isNullableUrl(value) {
   if (typeof value !== 'string' || value.length === 0) return false;
   try {
     const url = new URL(value);
-    return url.protocol === 'https:' || url.protocol === 'wss:';
+    if (!(url.protocol === 'https:' || url.protocol === 'wss:')) return false;
+    if (url.username || url.password) return false;
+    return true;
   } catch {
     return false;
   }
@@ -31,6 +33,11 @@ export function validateRuntimeConfig(config) {
   }
   if (!['websocket-or-sse', 'websocket', 'sse'].includes(config.api?.transport)) {
     throw new Error('invalid stream transport');
+  }
+  if (config.network?.chainId !== null && config.network?.chainId !== undefined) {
+    if (typeof config.network.chainId !== 'string' || !/^0x[0-9a-fA-F]+$/.test(config.network.chainId)) {
+      throw new Error('invalid chainId');
+    }
   }
   if (config.api?.marketSubjects !== undefined) {
     if (!Array.isArray(config.api.marketSubjects) || config.api.marketSubjects.some((value) => typeof value !== 'string' || value.length === 0)) {

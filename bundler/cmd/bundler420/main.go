@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	bundle420 "github.com/420integrated/420-integrated/bundler/bundle"
 	mempool420 "github.com/420integrated/420-integrated/bundler/mempool"
 	rpcapi420 "github.com/420integrated/420-integrated/bundler/rpcapi"
 	runtime420 "github.com/420integrated/420-integrated/bundler/runtime"
@@ -48,6 +49,17 @@ func main() {
 		TTL: mustDurationOr("BUNDLER_MEMPOOL_TTL", 10*time.Minute),
 	})
 	if err != nil { log.Fatal(err) }
+	submitter, err := bundle420.NewRPCSubmitter(
+		cfg.ExecutionRPC,
+		os.Getenv("BUNDLER_SUBMITTER"),
+		cfg.RequestTimeout,
+	)
+	if err != nil { log.Fatal(err) }
+	bundleBuilder, err := bundle420.New(bundle420.Config{
+		EntryPoint: cfg.EntryPoint,
+		MaxOperations: mustIntOr("BUNDLER_BUNDLE_MAX_OPERATIONS", 16),
+	}, pool, validationEngine, submitter)
+	if err != nil { log.Fatal(err) }
 	rpcHandler, err := rpcapi420.NewHandler(rpcapi420.BoundaryBackend{
 		EntryPoint: cfg.EntryPoint,
 		Validator: validationEngine,
@@ -67,6 +79,15 @@ func main() {
 	}
 	errCh := make(chan error,1)
 	go func(){ errCh <- server.ListenAndServe() }()
+
+	bundleCtx,bundleCancel:=context.WithCancel(context.Background())
+	defer bundleCancel()
+	go runBundleLoop(
+		bundleCtx,
+		bundleBuilder,
+		mustDurationOr("BUNDLER_BUNDLE_INTERVAL",2*time.Second),
+		cfg.RequestTimeout,
+	)
 
 	sig := make(chan os.Signal,1)
 	signal.Notify(sig,syscall.SIGINT,syscall.SIGTERM)
@@ -106,4 +127,32 @@ func mustIntOr(name string,fallback int) int {
 	v,err:=strconv.Atoi(raw)
 	if err!=nil || v<=0 { log.Fatalf("%s must be a positive integer",name) }
 	return v
+}
+
+
+type bundleSubmitter interface {
+	SubmitNext(context.Context,time.Time)(bundle420.Result,error)
+}
+
+func runBundleLoop(ctx context.Context,builder bundleSubmitter,interval,timeout time.Duration) {
+	ticker:=time.NewTicker(interval)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case now:=<-ticker.C:
+			runCtx,cancel:=context.WithTimeout(ctx,timeout)
+			result,err:=builder.SubmitNext(runCtx,now.UTC())
+			cancel()
+			if err!=nil {
+				log.Printf("bundler submission cycle failed: %v",err)
+				continue
+			}
+			if result.Selected>0 {
+				log.Printf("bundler submission cycle selected=%d submitted=%d rejected=%d failed=%d",
+					result.Selected,len(result.Submitted),len(result.Rejected),len(result.Failed))
+			}
+		}
+	}
 }

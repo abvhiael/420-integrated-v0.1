@@ -265,6 +265,64 @@
     </div>
   </template>
 
+  <template id="bridge-template">
+    <div class="section-heading">
+      <div><p class="eyebrow">V14.8</p><h2>Bridge</h2></div>
+      <span id="bridge-source" class="section-kicker">Loading bridge state…</span>
+    </div>
+
+    <div class="bridge-grid">
+      <section class="component-card">
+        <h3>Cross-chain route</h3>
+        <label>
+          <span class="label">Qualified route</span>
+          <select id="bridge-route-select"></select>
+        </label>
+
+        <div class="detail-stats">
+          <div><span class="label">Route</span><strong id="bridge-route-id">—</strong></div>
+          <div><span class="label">Canonical asset</span><strong id="bridge-asset">—</strong></div>
+          <div><span class="label">Adapter</span><strong id="bridge-adapter">—</strong></div>
+          <div><span class="label">Verifier</span><strong id="bridge-verifier">—</strong></div>
+          <div><span class="label">Bridge fee</span><strong id="bridge-fee">—</strong></div>
+        </div>
+
+        <div class="status-row bridge-health">
+          <span id="bridge-route-status"></span>
+          <span id="bridge-settlement-status"></span>
+          <span id="bridge-availability" class="status-pill"></span>
+        </div>
+
+        <div class="form-grid">
+          <label><span class="label">Amount</span><input id="bridge-amount" type="number" min="0" step="any" /></label>
+          <label><span class="label">Recipient</span><input id="bridge-recipient" placeholder="0x…" /></label>
+        </div>
+        <button id="bridge-review" class="button-primary" type="button">Review bridge</button>
+      </section>
+
+      <section id="bridge-review-panel" class="component-card" hidden>
+        <h3>Bridge review</h3>
+        <dl class="review-grid">
+          <div><dt>Intent</dt><dd id="bridge-review-kind">—</dd></div>
+          <div><dt>Route</dt><dd id="bridge-review-route">—</dd></div>
+          <div><dt>Canonical asset</dt><dd id="bridge-review-asset">—</dd></div>
+          <div><dt>Recipient</dt><dd id="bridge-review-recipient">—</dd></div>
+          <div><dt>Amount</dt><dd id="bridge-review-amount">—</dd></div>
+          <div><dt>Quoted bridge fee</dt><dd id="bridge-review-fee">—</dd></div>
+        </dl>
+        <p class="muted">Submission remains disabled until V14.10 provides an authorized wallet session. Paused or degraded bridge routes cannot be submitted.</p>
+        <button id="bridge-submit" type="button" disabled>Wallet integration required · V14.10</button>
+      </section>
+    </div>
+
+    <div class="table-wrap bridge-table-wrap">
+      <table class="exchange-table">
+        <thead><tr><th>Settlement</th><th>State</th><th>Progress</th><th>Attestation</th><th>Proof</th><th>Transaction</th><th>Guidance</th></tr></thead>
+        <tbody id="bridge-settlements"></tbody>
+      </table>
+    </div>
+  </template>
+
   <template id="gated-template">
     <div class="empty-state">
       <strong id="gated-title">Feature gated</strong>

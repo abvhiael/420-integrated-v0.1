@@ -1,0 +1,29 @@
+name: 420Exchange Web Verification
+
+on:
+  push:
+    paths:
+      - "exchange/web/**"
+      - ".github/workflows/exchange-web.yml"
+  pull_request:
+    paths:
+      - "exchange/web/**"
+      - ".github/workflows/exchange-web.yml"
+  workflow_dispatch:
+
+jobs:
+  verify-exchange-web:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Static Exchange checks
+        working-directory: exchange/web
+        run: npm run check
+      - name: Exchange web unit tests
+        working-directory: exchange/web
+        run: npm test

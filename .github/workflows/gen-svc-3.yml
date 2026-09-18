@@ -1,0 +1,29 @@
+name: GEN-SVC-3 Travel
+
+on:
+  pull_request:
+    paths:
+      - 'config/420travel-genesis.json'
+      - 'docs/genesis-services/GEN-SVC-3-TRAVEL.md'
+      - 'scripts/validate-gen-svc-3.py'
+      - '.github/workflows/gen-svc-3.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'config/420travel-genesis.json'
+      - 'docs/genesis-services/GEN-SVC-3-TRAVEL.md'
+      - 'scripts/validate-gen-svc-3.py'
+      - '.github/workflows/gen-svc-3.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python3 scripts/validate-gen-svc-3.py

@@ -4,6 +4,7 @@ import { ExchangeDataLayer } from './core/exchange-data.js';
 import { Watchlist, filterMarkets, freshnessState, normalizeMarket, sortMarkets } from './core/markets.js';
 import { aggregateTradesToCandles, bucketSecondsForWindow, candleGeometry, normalizeCandle, normalizeTrade, reconcileHistory } from './core/market-detail.js';
 import { ROUTES, routeFor } from './core/router.js';
+import { SwapLifecycle, buildSwapIntent, canSubmitSwap, normalizeRouteQuote } from './core/swap.js';
 
 const state = {
   config: null,
@@ -19,6 +20,10 @@ const state = {
   detailSubjectId: new URLSearchParams(window.location.search).get('subject'),
   detailWindow: '1h',
   detailHistory: null,
+  swapQuote: null,
+  swapIntent: null,
+  swapLifecycle: new SwapLifecycle(),
+  swapSlippageBps: 100,
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -252,6 +257,70 @@ function renderDetail(fragment) {
   }));
 }
 
+
+async function loadSwapQuote() {
+  const response = await fetch('./fixtures/swap-quote.json', { cache: 'no-store' });
+  if (!response.ok) throw new Error(`swap fixture ${response.status}`);
+  state.swapQuote = normalizeRouteQuote(await response.json());
+  state.swapLifecycle = new SwapLifecycle();
+  state.swapLifecycle.quoted();
+}
+
+function renderSwap(fragment) {
+  const quote=state.swapQuote;
+  const market=state.markets.find((item)=>item.marketSubjectId===quote?.marketSubjectId) ?? state.markets[0] ?? null;
+  const recipient=fragment.querySelector('#swap-recipient');
+  const review=fragment.querySelector('#swap-review');
+  const submit=fragment.querySelector('#swap-submit');
+  const source=fragment.querySelector('#swap-source');
+
+  fragment.querySelector('#swap-market').textContent=market?.label ?? quote?.marketSubjectId ?? '—';
+  fragment.querySelector('#swap-amount-in').textContent=formatNumber(quote?.amountIn);
+  fragment.querySelector('#swap-gross-out').textContent=formatNumber(quote?.grossAmountOut);
+  fragment.querySelector('#swap-fee').textContent=formatNumber(quote?.feeAmount);
+  fragment.querySelector('#swap-net-out').textContent=formatNumber(quote?.netAmountOut);
+  fragment.querySelector('#swap-min-out').textContent=formatNumber(quote?.finalMinAmountOut);
+  fragment.querySelector('#swap-slippage').value=String(state.swapSlippageBps/100);
+  source.textContent=quote?.demo ? 'DEMO QUOTE · review only' : 'Qualified execution quote';
+
+  const route=fragment.querySelector('#swap-route');
+  route.replaceChildren(...(quote?.hops ?? []).map((hop,index)=>{
+    const li=document.createElement('li');
+    li.textContent=`Hop ${index+1}: ${hop.inputToken} → ${hop.outputToken} · min ${formatNumber(hop.minAmountOut)}`;
+    return li;
+  }));
+
+  const routeStatus=fragment.querySelector('#swap-route-health');
+  routeStatus.append(createStatusBadge(document, quote?.routeHealthy ? 'routeHealthy' : 'routeUnhealthy'));
+  const settlementStatus=fragment.querySelector('#swap-settlement-health');
+  settlementStatus.append(createStatusBadge(document, quote?.settlementHealthy ? 'settlementHealthy' : 'settlementUnhealthy'));
+
+  review.addEventListener('click',()=>{
+    try {
+      state.swapIntent=buildSwapIntent(quote,{recipient:recipient.value.trim(),slippageBps:state.swapSlippageBps});
+      if (state.swapLifecycle.state==='quoted') state.swapLifecycle.review();
+      render();
+    } catch (error) {
+      state.swapLifecycle.failed(error);
+      render();
+    }
+  });
+
+  const reviewed=state.swapIntent && state.swapLifecycle.state==='review';
+  fragment.querySelector('#swap-review-panel').hidden=!reviewed;
+  if (reviewed) {
+    fragment.querySelector('#swap-review-kind').textContent=state.swapIntent.kind;
+    fragment.querySelector('#swap-review-recipient').textContent=state.swapIntent.recipient;
+    fragment.querySelector('#swap-review-route').textContent=state.swapIntent.routeCommitment ?? 'uncommitted';
+    fragment.querySelector('#swap-review-final-min').textContent=formatNumber(state.swapIntent.finalMinAmountOut);
+  }
+
+  const gate=canSubmitSwap({quote,intent:state.swapIntent,nowSeconds:Math.floor(Date.now()/1000),walletReady:false});
+  submit.disabled=!gate.ok;
+  submit.textContent=gate.ok ? 'Sign & submit' : gate.reason==='wallet-unavailable' ? 'Wallet integration required · V14.10' : 'Submission unavailable';
+  fragment.querySelector('#swap-lifecycle').textContent=state.swapLifecycle.state;
+}
+
 function renderView() {
   $('#page-title').textContent = state.route.label;
   const view = $('#app-view');
@@ -284,6 +353,13 @@ function renderView() {
     return;
   }
 
+  if (state.route.id === 'swap' && availability(state.config, 'swap')) {
+    const fragment = $('#swap-template').content.cloneNode(true);
+    renderSwap(fragment);
+    view.append(fragment);
+    return;
+  }
+
   const fragment = $('#gated-template').content.cloneNode(true);
   fragment.querySelector('#gated-title').textContent = `${state.route.label} is roadmap-gated`;
   fragment.querySelector('#gated-copy').textContent =
@@ -300,6 +376,10 @@ function render() {
 function navigate(path) {
   state.route = routeFor(path);
   history.pushState({}, '', state.route.path);
+  if (state.route.id === 'swap' && !state.swapQuote) {
+    loadSwapQuote().then(render).catch((error)=>{ state.bootError=error; render(); });
+    return;
+  }
   render();
 }
 
@@ -346,6 +426,9 @@ document.addEventListener('change', (event) => {
     } else {
       render();
     }
+  } else if (event.target.id === 'swap-slippage') {
+    const value=Number(event.target.value);
+    state.swapSlippageBps=Number.isFinite(value) ? Math.round(value*100) : 100;
   }
 });
 
@@ -384,6 +467,7 @@ async function boot() {
       state.detailSubjectId = state.detailSubjectId ?? state.markets[0]?.marketSubjectId ?? null;
       if (state.detailSubjectId) await loadDetailHistory(state.detailSubjectId);
     }
+    if (state.route.id === 'swap') await loadSwapQuote();
   } catch (error) {
     state.bootError = error;
     state.config = state.config ?? {

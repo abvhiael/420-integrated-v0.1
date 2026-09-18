@@ -1,0 +1,25 @@
+{
+  "schema":"420-exchange-web-v14.12",
+  "status":"IN_QUALIFICATION",
+  "scope":"FRONTEND_SECURITY_HARDENING",
+  "invariants":[
+    "runtime URLs are HTTPS/WSS only and cannot contain embedded credentials",
+    "production origin is exact and pinned to exchange.420integrated.org",
+    "query subject identifiers are length-limited and character allowlisted",
+    "unsafe or encoded path tricks fail back to the Markets route",
+    "reviewed transaction intents are deep-frozen and digest-checked before signing handoff",
+    "wallet signing remains bound to the reviewed intent and current session generation",
+    "CSP blocks third-party script execution, framing and object embedding",
+    "security headers deny framing and reduce browser capability surface",
+    "hostile public API or user-controlled labels are rendered as text, never executable HTML",
+    "frontend contains no private key, mnemonic, seed phrase or signing secret"
+  ],
+  "implementation":{
+    "securityModel":"exchange/web/core/security.js",
+    "securityHeaders":"exchange/web/security-headers.json",
+    "qualificationTest":"exchange/web/test/security.test.js",
+    "runtimeValidation":"exchange/web/core/config.js",
+    "app":"exchange/web/app.js"
+  },
+  "follow_on":"V14.13 production deployment"
+}

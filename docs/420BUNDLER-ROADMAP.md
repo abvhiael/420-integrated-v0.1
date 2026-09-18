@@ -10,8 +10,8 @@ The Bundler Network is not custody, wallet authorization, consensus, settlement 
 - **GEN-11.1 — core bundler runtime/service scaffold — COMPLETE**
 - **GEN-11.2 — canonical UserOperation model + hashing — COMPLETE**
 - **GEN-11.3 — public Bundler RPC API — COMPLETE**
-- **GEN-11.4 — deterministic validation + simulation engine — IN QUALIFICATION**
-- GEN-11.5 — bounded UserOperation mempool — pending
+- **GEN-11.4 — deterministic validation + simulation engine — COMPLETE**
+- **GEN-11.5 — bounded UserOperation mempool — IN QUALIFICATION**
 - GEN-11.6 — bundle construction + EntryPoint submission — pending
 - GEN-11.7 — gas + fee estimation — pending
 - GEN-11.8 — Paymaster integration boundary — pending
@@ -140,3 +140,31 @@ A reverted `eth_call`, malformed `handleOp` result, or a valid simulation whose 
 The public RPC boundary now runs this validation/simulation gate before any future admission. A failed simulation returns Bundler error `-32502`. A successful simulation still returns `-32500` because GEN-11.5 mempool admission is not yet implemented; GEN-11.4 deliberately cannot pretend an operation was accepted.
 
 GEN-11.4 is complete when all repository qualification workflows pass on one exact head containing the deterministic simulator and production RPC gate.
+
+
+## GEN-11.5 — bounded UserOperation mempool
+
+Added `bundler/mempool` and wired successful GEN-11.4 validation/simulation into actual local admission.
+
+The Genesis mempool is explicitly bounded and in-memory:
+
+- total operation capacity defaults to `4096`
+- per-sender capacity defaults to `16`
+- operation TTL defaults to `10m`
+- expired entries are pruned before admission, lookup and snapshot operations
+
+Runtime overrides:
+
+- `BUNDLER_MEMPOOL_MAX_OPERATIONS`
+- `BUNDLER_MEMPOOL_MAX_PER_SENDER`
+- `BUNDLER_MEMPOOL_TTL`
+
+Every admitted entry retains the exact `PackedUserOperation420`, canonical UserOperation hash, GEN-11.4 simulation evidence, admission time and expiry time. Admission independently recomputes the canonical hash from the evidence chain ID + EntryPoint + operation and rejects mismatched evidence.
+
+Duplicate submission of the exact same UserOperation hash is idempotent and does not consume additional capacity. A different hash using an already-admitted sender+nonce is rejected deterministically with Bundler error `-32503`; GEN-11.5 does not perform fee-based replacement because replacement/nonce hardening is reserved for GEN-11.12. Capacity exhaustion or sender quota exhaustion maps to `-32506`.
+
+Snapshots are deterministic: admission time is primary ordering and canonical hash is the tie-breaker. This gives GEN-11.6 bundle construction a stable candidate surface without yet defining economic prioritization.
+
+`eth_sendUserOperation` now returns the canonical UserOperation hash only after local validation/simulation succeeds and the operation is actually admitted (or is an idempotent duplicate already present). Failed simulation, nonce conflict or capacity rejection never returns an acceptance hash.
+
+GEN-11.5 is complete when all repository qualification workflows pass on one exact head containing the bounded mempool and production admission wiring.

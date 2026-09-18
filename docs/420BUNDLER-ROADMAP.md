@@ -13,8 +13,8 @@ The Bundler Network is not custody, wallet authorization, consensus, settlement 
 - **GEN-11.4 — deterministic validation + simulation engine — COMPLETE**
 - **GEN-11.5 — bounded UserOperation mempool — COMPLETE**
 - **GEN-11.6 — bundle construction + EntryPoint submission — COMPLETE**
-- **GEN-11.7 — gas + fee estimation — IN QUALIFICATION**
-- GEN-11.8 — Paymaster integration boundary — pending
+- **GEN-11.7 — gas + fee estimation — COMPLETE**
+- **GEN-11.8 — Paymaster integration boundary — IN QUALIFICATION**
 - GEN-11.9 — receipts + lifecycle tracking — pending
 - GEN-11.10 — multi-bundler propagation — pending
 - GEN-11.11 — reputation + anti-abuse controls — pending
@@ -215,3 +215,31 @@ The estimator reuses the hardened public execution-RPC URL boundary and bounded 
 GEN-11.7 does not set fee-market policy or mutate the operation's `gasFees`; fee ordering/economic policy remains separate from estimation and is addressed later in the Genesis ordering/policy phases.
 
 GEN-11.7 is complete when all repository qualification workflows pass on one exact head containing execution-backed gas estimation and the public RPC integration.
+
+
+## GEN-11.8 — Paymaster integration boundary
+
+Added `bundler/paymaster` as a strict, non-authoritative sponsorship-envelope boundary ahead of EntryPoint simulation.
+
+The Bundler mirrors the canonical `PaymasterData420.V1` ABI enough to reject malformed or incorrectly bound `paymasterAndData` before spending execution-RPC resources. The boundary validates:
+
+- version `1`
+- nonzero paymaster address
+- nonzero EntryPoint address
+- chain binding to the configured Bundler chain
+- EntryPoint binding to the configured canonical EntryPoint
+- nonzero policy ID
+- canonical `uint48` validity fields with `validUntil > validAfter`
+- current-time validity window
+- nonzero `uint128` maximum sponsored cost
+- nonzero authorization ID
+- canonical dynamic-bytes offset/length/padding
+- sponsor data bounded to 4096 bytes
+
+An empty `paymasterAndData` remains valid and is treated as an unsponsored UserOperation.
+
+GEN-11.8 does **not** decide whether a sponsor grants funding. It does not select a Paymaster, create policy, mint authorization, override account validation or mark an operation sponsored. After this structural/binding gate, the existing GEN-11.4 `handleOp` simulation remains authoritative for the actual EntryPoint + Paymaster validation path. The canonical `EntryPoint420` invokes `validatePaymasterUserOp`, enforces Paymaster validation data, verifies the sponsorship ceiling/deposit/reservation rules and remains the only execution authority for sponsorship acceptance.
+
+This preserves BUNDLER-INV-009: sponsorship authority remains with the Paymaster/account-abstraction validation path; the Bundler only rejects envelopes that are structurally impossible or bound to the wrong chain/EntryPoint/time window.
+
+GEN-11.8 is complete when all repository qualification workflows pass on one exact head containing the strict paymaster boundary and simulation integration.

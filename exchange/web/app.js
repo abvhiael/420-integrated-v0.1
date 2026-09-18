@@ -8,6 +8,7 @@ import { SwapLifecycle, buildSwapIntent, canSubmitSwap, normalizeRouteQuote } fr
 import { buildLimitOrderDraft, canCancelOrder, normalizeOrderRecord, signedPriceFloor, validateFillPrice } from './core/limit-orders.js';
 import { bridgeQualification, buildBridgeIntent, canSubmitBridge, normalizeBridgeRoute, normalizeSettlement, settlementProgress } from './core/bridge.js';
 import { activityState, explorerHref, mergeActivity, normalizeBalance, portfolioSummary } from './core/portfolio.js';
+import { WalletController, WalletSession, buildSigningRequest, signingGate, validateNetwork } from './core/wallet-session.js';
 
 const state = {
   config: null,
@@ -35,6 +36,12 @@ const state = {
   bridgeRouteId: null,
   portfolioBalances: [],
   portfolioActivity: [],
+  walletController: null,
+  walletSession: new WalletSession(),
+  swapIntentGeneration: null,
+  orderDraftGeneration: null,
+  bridgeIntentGeneration: null,
+  signingRequest: null,
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -64,6 +71,77 @@ function renderRuntime() {
   $('#data-mode').textContent = state.marketSource === 'demo'
     ? 'Demo fixtures · clearly non-live'
     : state.config?.api?.baseUrl ? 'Configured V13 read API' : 'Read-only shell / endpoints unset';
+}
+
+
+function walletReady() {
+  return validateNetwork(state.walletSession,state.config?.network?.chainId).ok && state.walletSession.status==='CONNECTED';
+}
+
+function invalidateReviewedIntents() {
+  state.swapIntent=null;
+  state.orderDraft=null;
+  state.bridgeIntent=null;
+  state.swapIntentGeneration=null;
+  state.orderDraftGeneration=null;
+  state.bridgeIntentGeneration=null;
+  state.signingRequest=null;
+  if(state.swapQuote){
+    state.swapLifecycle=new SwapLifecycle();
+    state.swapLifecycle.quoted();
+  }
+}
+
+function renderWalletChrome() {
+  const button=$('#connect');
+  if(!button) return;
+  if(!availability(state.config,'walletConnection')){
+    button.disabled=true;
+    button.textContent='Wallet unavailable';
+    return;
+  }
+  button.disabled=false;
+  const session=state.walletSession;
+  if(session.status==='CONNECTING') {
+    button.disabled=true;
+    button.textContent='Connecting wallet…';
+  } else if(session.status==='CONNECTED') {
+    button.textContent=`${session.account.slice(0,6)}…${session.account.slice(-4)}`;
+  } else if(session.status==='WRONG_CHAIN') {
+    button.textContent='Switch network';
+  } else {
+    button.textContent='Connect wallet';
+  }
+}
+
+async function connectOrSwitchWallet() {
+  if(state.walletSession.status==='WRONG_CHAIN' && state.walletController){
+    await state.walletController.switchChain();
+    invalidateReviewedIntents();
+    render();
+    return;
+  }
+  const provider=globalThis.ethereum;
+  if(!provider || typeof provider.request!=='function') throw new Error('No EIP-1193 wallet provider detected');
+  state.walletController=new WalletController(provider,{expectedChainId:state.config?.network?.chainId});
+  state.walletSession=state.walletController.session;
+  state.walletController.bind({onInvalidate:()=>{
+    invalidateReviewedIntents();
+    render();
+  }});
+  await state.walletController.connect();
+  render();
+}
+
+function reviewSigningRequest(kind,intent,intentGeneration) {
+  state.signingRequest=buildSigningRequest({
+    session:state.walletSession,
+    expectedChainId:state.config?.network?.chainId,
+    intent,
+    intentGeneration,
+    kind,
+  });
+  return state.signingRequest;
 }
 
 function currentMarkets() {
@@ -309,6 +387,7 @@ function renderSwap(fragment) {
   review.addEventListener('click',()=>{
     try {
       state.swapIntent=buildSwapIntent(quote,{recipient:recipient.value.trim(),slippageBps:state.swapSlippageBps});
+      state.swapIntentGeneration=state.walletSession.generation;
       if (state.swapLifecycle.state==='quoted') state.swapLifecycle.review();
       render();
     } catch (error) {
@@ -326,9 +405,10 @@ function renderSwap(fragment) {
     fragment.querySelector('#swap-review-final-min').textContent=formatNumber(state.swapIntent.finalMinAmountOut);
   }
 
-  const gate=canSubmitSwap({quote,intent:state.swapIntent,nowSeconds:Math.floor(Date.now()/1000),walletReady:false});
+  const sessionGate=signingGate({session:state.walletSession,expectedChainId:state.config?.network?.chainId,intent:state.swapIntent,intentGeneration:state.swapIntentGeneration});
+  const gate=canSubmitSwap({quote,intent:state.swapIntent,nowSeconds:Math.floor(Date.now()/1000),walletReady:sessionGate.ok});
   submit.disabled=!gate.ok;
-  submit.textContent=gate.ok ? 'Sign & submit' : gate.reason==='wallet-unavailable' ? 'Wallet integration required · V14.10' : 'Submission unavailable';
+  submit.textContent=gate.ok ? 'Prepare wallet signing' : sessionGate.reason==='chain-unconfigured' ? 'Network not configured' : sessionGate.reason==='chain-mismatch' ? 'Switch network' : 'Connect wallet to sign';
   fragment.querySelector('#swap-lifecycle').textContent=state.swapLifecycle.state;
 }
 
@@ -372,9 +452,9 @@ function renderOrders(fragment) {
     const cancel=document.createElement('button');
     cancel.type='button';
     cancel.dataset.cancelOrder=record.orderHash;
-    const gate=canCancelOrder(record,{walletReady:false,nowSeconds:Math.floor(Date.now()/1000)});
+    const gate=canCancelOrder(record,{walletReady:walletReady(),nowSeconds:Math.floor(Date.now()/1000)});
     cancel.disabled=!gate.ok;
-    cancel.textContent=gate.ok?'Cancel':'Wallet required · V14.10';
+    cancel.textContent=gate.ok?'Prepare cancellation':'Connect wallet to cancel';
     action.append(cancel);
     tr.append(action);
     return tr;
@@ -409,6 +489,7 @@ function captureOrderDraft() {
     expiry:get('#order-expiry'),
     allowPartial,
   });
+  state.orderDraftGeneration=state.walletSession.generation;
 }
 
 
@@ -457,6 +538,7 @@ function renderBridge(fragment) {
       const amount=fragment.querySelector('#bridge-amount').value;
       const recipient=fragment.querySelector('#bridge-recipient').value.trim();
       state.bridgeIntent=buildBridgeIntent(route,{amount,recipient});
+      state.bridgeIntentGeneration=state.walletSession.generation;
       render();
     }catch(error){
       state.bootError=error; render();
@@ -475,9 +557,10 @@ function renderBridge(fragment) {
   }
 
   const submit=fragment.querySelector('#bridge-submit');
-  const submitGate=canSubmitBridge({route,intent:state.bridgeIntent,walletReady:false});
+  const bridgeSessionGate=signingGate({session:state.walletSession,expectedChainId:state.config?.network?.chainId,intent:state.bridgeIntent,intentGeneration:state.bridgeIntentGeneration});
+  const submitGate=canSubmitBridge({route,intent:state.bridgeIntent,walletReady:bridgeSessionGate.ok});
   submit.disabled=!submitGate.ok;
-  submit.textContent=submitGate.ok?'Submit bridge transaction':'Wallet integration required · V14.10';
+  submit.textContent=submitGate.ok?'Prepare wallet signing':bridgeSessionGate.reason==='chain-unconfigured'?'Network not configured':bridgeSessionGate.reason==='chain-mismatch'?'Switch network':'Connect wallet to sign';
 
   const settlements=fragment.querySelector('#bridge-settlements');
   settlements.replaceChildren(...state.bridgeSettlements.map((record)=>{
@@ -635,6 +718,7 @@ function renderView() {
 function render() {
   renderNavigation();
   renderRuntime();
+  renderWalletChrome();
   renderView();
 }
 
@@ -661,6 +745,26 @@ function navigate(path) {
 }
 
 document.addEventListener('click', (event) => {
+  const connect = event.target.closest('#connect');
+  if (connect) {
+    connectOrSwitchWallet().catch((error)=>{ state.walletSession.failed(error); render(); });
+    return;
+  }
+  const swapSubmit=event.target.closest('#swap-submit');
+  if(swapSubmit && state.swapIntent){
+    try { reviewSigningRequest('SWAP',state.swapIntent,state.swapIntentGeneration); render(); } catch(error){ state.walletSession.failed(error); render(); }
+    return;
+  }
+  const orderSign=event.target.closest('#order-sign');
+  if(orderSign && state.orderDraft){
+    try { reviewSigningRequest('LIMIT_ORDER',state.orderDraft,state.orderDraftGeneration); render(); } catch(error){ state.walletSession.failed(error); render(); }
+    return;
+  }
+  const bridgeSubmit=event.target.closest('#bridge-submit');
+  if(bridgeSubmit && state.bridgeIntent){
+    try { reviewSigningRequest('BRIDGE',state.bridgeIntent,state.bridgeIntentGeneration); render(); } catch(error){ state.walletSession.failed(error); render(); }
+    return;
+  }
   const link = event.target.closest('[data-route]');
   if (link) {
     event.preventDefault();

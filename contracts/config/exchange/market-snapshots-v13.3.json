@@ -1,6 +1,6 @@
 {
   "schema": "420-exchange-market-snapshots-v13.3",
-  "status": "IN_QUALIFICATION",
+  "status": "QUALIFIED",
   "scope": "DETERMINISTIC_MARKET_SNAPSHOTS",
   "model": "Versioned derived market snapshots are reproducible projections over canonical V13 source records. Snapshot identity binds market subject, source-set hash, aggregation version and window so reorg replacements remain distinct without overwriting prior derivations.",
   "fields": [
@@ -32,6 +32,12 @@
     "qualification_test": "contracts/test/ExchangeMarketSnapshot420.t.sol",
     "schema_dependency": "contracts/src/exchange/ExchangeMarketDataTypes420.sol",
     "indexer_dependency": "contracts/src/exchange/ExchangeDeterministicIndexer420.sol"
+  },
+  "qualification": {
+    "exact_head": "3120c733c1859508d8b56cffc7ecbf2d9bc2dc82",
+    "solidity_contracts": 2607,
+    "integrated_qualification": 4131,
+    "docs_qualification": 1841
   },
   "follow_on": "V13.4 historical query API"
 }

@@ -23,14 +23,16 @@ var (
 type snapshot struct {
 	Schema     string           `json:"schema"`
 	Reviews    []model.Review   `json:"reviews"`
-	Responses  []model.Response `json:"responses,omitempty"`
+	Responses  []model.Response         `json:"responses,omitempty"`
+	Moderation []model.ModerationRecord `json:"moderation,omitempty"`
 }
 
 type FileStore struct {
 	mu        sync.RWMutex
 	path      string
 	items     map[string]model.Review
-	responses map[string]model.Response
+	responses  map[string]model.Response
+	moderation map[string]model.ModerationRecord
 }
 
 func OpenFileStore(path string) (*FileStore, error) {
@@ -38,7 +40,7 @@ func OpenFileStore(path string) (*FileStore, error) {
 	if path == "" {
 		return nil, errors.New("review repository path is required")
 	}
-	s := &FileStore{path: path, items: map[string]model.Review{}, responses: map[string]model.Response{}}
+	s := &FileStore{path: path, items: map[string]model.Review{}, responses: map[string]model.Response{}, moderation: map[string]model.ModerationRecord{}}
 	if err := s.load(); err != nil {
 		return nil, err
 	}
@@ -185,6 +187,28 @@ func (s *FileStore) UpdateResponse(response model.Response, expectedVersion uint
 	return response, nil
 }
 
+func (s *FileStore) CreateModeration(record model.ModerationRecord) (model.ModerationRecord, error) {
+	if err := record.Validate(); err != nil { return model.ModerationRecord{}, err }
+	s.mu.Lock(); defer s.mu.Unlock()
+	if _, ok := s.moderation[record.ID]; ok { return model.ModerationRecord{}, ErrExists }
+	s.moderation[record.ID] = record
+	if err := s.persistLocked(); err != nil { delete(s.moderation, record.ID); return model.ModerationRecord{}, err }
+	return record, nil
+}
+
+func (s *FileStore) ListModeration(reviewID string) []model.ModerationRecord {
+	s.mu.RLock(); defer s.mu.RUnlock()
+	out := make([]model.ModerationRecord, 0)
+	for _, record := range s.moderation {
+		if record.ReviewID == strings.TrimSpace(reviewID) { out = append(out, record) }
+	}
+	sort.Slice(out, func(i,j int) bool {
+		if !out[i].CreatedAt.Equal(out[j].CreatedAt) { return out[i].CreatedAt.Before(out[j].CreatedAt) }
+		return out[i].ID < out[j].ID
+	})
+	return out
+}
+
 func (s *FileStore) Count() int {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
@@ -227,6 +251,11 @@ func (s *FileStore) load() error {
 		if _, exists := s.responses[response.ReviewID]; exists { return fmt.Errorf("duplicate persisted response review id %q", response.ReviewID) }
 		s.responses[response.ReviewID] = response
 	}
+	for _, record := range snap.Moderation {
+		if err := record.Validate(); err != nil { return fmt.Errorf("invalid persisted moderation %q: %w", record.ID, err) }
+		if _, exists := s.moderation[record.ID]; exists { return fmt.Errorf("duplicate persisted moderation id %q", record.ID) }
+		s.moderation[record.ID] = record
+	}
 	return nil
 }
 
@@ -239,10 +268,14 @@ func (s *FileStore) persistLocked() error {
 	responses := make([]model.Response, 0, len(s.responses))
 	for _, response := range s.responses { responses = append(responses, response) }
 	sort.Slice(responses, func(i, j int) bool { return responses[i].ReviewID < responses[j].ReviewID })
+	moderation := make([]model.ModerationRecord, 0, len(s.moderation))
+	for _, record := range s.moderation { moderation = append(moderation, record) }
+	sort.Slice(moderation, func(i,j int) bool { return moderation[i].ID < moderation[j].ID })
 	payload, err := json.MarshalIndent(snapshot{
 		Schema:  "420-reputation-review-store-v1",
 		Reviews: reviews,
 		Responses: responses,
+		Moderation: moderation,
 	}, "", "  ")
 	if err != nil {
 		return fmt.Errorf("encode review repository: %w", err)

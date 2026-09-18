@@ -1,6 +1,6 @@
 {
   "schema": "420-exchange-web-v14.5",
-  "status": "IN_QUALIFICATION",
+  "status": "QUALIFIED",
   "scope": "MARKET_DETAIL_CHARTING",
   "invariants": [
     "market detail identity is selected by canonical marketSubjectId",
@@ -19,5 +19,11 @@
     "fixtures": "exchange/web/fixtures/market-detail.json",
     "qualificationTest": "exchange/web/test/market-detail.test.js"
   },
-  "follow_on": "V14.6 swap and market execution UI"
+  "follow_on": "V14.6 swap and market execution UI",
+  "qualification": {
+    "exact_head": "c82494c1406299dced3fc630f55a60d518113c45",
+    "exchange_web_verification": 84,
+    "integrated_qualification": 4291,
+    "docs_qualification": 1956
+  }
 }

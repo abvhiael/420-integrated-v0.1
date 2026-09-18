@@ -133,12 +133,13 @@ Reference:
 - explicit reorg/replacement parity rules
 - UI prohibited from inventing protocol state outside V13 read surfaces
 
-### V13 closeout — CURRENT
+### V13 closeout — COMPLETE
 - PR #333 reconciled with `main` at `0612b39f017ad26092378e4292b61ec13adc172f`
 - reconciliation commit: `cde09b9a0319953a222a9ba5fedf0181e200fdc3`
-- this roadmap commit is the post-reconciliation exact-head qualification trigger
-- once post-reconciliation CI is green: merge PR #333 to `main`
-- after merge: V13 is closed and V14 becomes active
+- reconciled roadmap head: `6a8bf40982b3d86ab4a89e29e6277747c25643e8`
+- PR #333 merged to `main`
+- V13 merge SHA: `78c35c79f5acb87973e4c5df064de42b63ead9a2`
+- V13 is closed; V14 Exchange Web UI is now the active roadmap phase
 
 ---
 
@@ -415,8 +416,8 @@ Release gate:
 
 # Current position
 
-**Now:** V13 closeout, post-reconciliation qualification of PR #333.
+**Now:** V14 — Exchange Web UI. V13 is merged and closed.
 
-**Immediately next after merge:** V14.1 — frontend foundation + application shell.
+**Current step:** V14.1 — frontend foundation + application shell.
 
 **V14 completion target:** a production-qualified Exchange UI at `exchange.420integrated.org`, backed by V13 read surfaces and the qualified V1–V12 Exchange execution stack.

@@ -353,7 +353,7 @@ Qualification:
 - 420 Integrated Qualification #4291
 - 420Docs Qualification #1956
 
-## V14.6 — Swap / market execution UI — IN QUALIFICATION
+## V14.6 — Swap / market execution UI — QUALIFIED
 
 Deliverables:
 - [x] exact-input swap draft model matching V6 bounded 1-4 hop routing
@@ -387,22 +387,42 @@ Acceptance:
 - UI cannot report confirmation before submitted lifecycle state
 - demo quote is review-only and explicitly non-production
 
-## V14.7 — Limit-order UI
+Qualification:
+- exact head `ea615cbfb1049c93662d619801eb60f1aa766897`
+- 420Exchange Web Verification #102
+- 420 Integrated Qualification #4306
+- 420Docs Qualification #1967
+
+## V14.7 — Limit-order UI — IN QUALIFICATION
 
 Deliverables:
-- buy/sell limit-order form
-- price/amount/total calculations
-- signing review
-- open orders
-- partial-fill state
-- filled/cancelled/expired history
-- cancellation action
-- order provenance/transaction links
+- [x] buy/sell limit-order form preserving all V10 signed fields
+- [x] price-floor calculation from total sell and minimum total net buy
+- [x] signing review for maker, pair, amounts, recipient, market, nonce, expiry and partial-fill policy
+- [x] open/partial/filled/cancelled/expired order states
+- [x] deterministic partial-fill minimum preserving signed full-order ratio
+- [x] rejection of partial fills when `allowPartial` is false
+- [x] order provenance via order hash and transaction hash
+- [x] cancellation action surface with wallet/session fail-closed gate
+- [x] V13 ORDER-history consumption when API data is available
+- [x] explicitly labeled demo-order history fallback
+
+Implementation:
+- `exchange/web/core/limit-orders.js`
+- `exchange/web/app.js`
+- `exchange/web/index.html`
+- `exchange/web/styles.css`
+- `exchange/web/fixtures/limit-orders.json`
+- `exchange/web/test/limit-orders.test.js`
+- `exchange/web/v14.7-qualification.json`
 
 Acceptance:
-- signed-order payload exactly matches V10 semantics
-- partial fills remain deterministic
-- cancellation state reconciles from canonical history
+- signed-order draft exactly preserves V10 payload semantics
+- partial-fill minimum cannot erode the signed price floor
+- non-partial orders cannot be partially filled
+- cancellation stays disabled without an authorized wallet session
+- order state reconciles from canonical history rather than local guesses
+- demo orders remain explicitly non-production
 
 ## V14.8 — Bridge + cross-chain settlement UI
 
@@ -543,6 +563,6 @@ Release gate:
 
 **Now:** V14 — Exchange Web UI. V13 is merged and closed.
 
-**Current step:** V14.6 — swap / market execution UI — in qualification.
+**Current step:** V14.7 — limit-order UI — in qualification.
 
 **V14 completion target:** a production-qualified Exchange UI at `exchange.420integrated.org`, backed by V13 read surfaces and the qualified V1–V12 Exchange execution stack.

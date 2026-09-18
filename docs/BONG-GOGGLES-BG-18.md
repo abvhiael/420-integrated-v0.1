@@ -207,7 +207,7 @@ Production decision: **DEFERRED**. BG-18 does not introduce GAME_PARTICIPATION o
 
 **Exit:** game rewards have an explicit production decision and cannot accidentally become active through the existing application hook.
 
-### BG-18.9 — abuse, budget + economic hardening — IMPLEMENTED, QUALIFICATION PENDING
+### BG-18.9 — abuse, budget + economic hardening — COMPLETE AND QUALIFIED
 
 - duplicate-source and cross-campaign replay testing;
 - sybil/farming-oriented eligibility scenarios;
@@ -232,7 +232,7 @@ The shared hardening suite now additionally proves policy denial leaves contribu
 
 **Exit:** reward economics fail closed under replay, abuse, cap exhaustion, funding exhaustion and adversarial claim conditions.
 
-### BG-18.10 — operator/admin reward surfaces
+### BG-18.10 — operator/admin reward surfaces — IMPLEMENTED, QUALIFICATION PENDING
 
 - campaign inventory with app/type/scorer/policy/caps/window/active state;
 - pool funded/reserved/available balances;
@@ -242,6 +242,13 @@ The shared hardening suite now additionally proves policy denial leaves contribu
 - Wallet-bound sponsor actions for create/fund/activate/deactivate;
 - Explorer links for all canonical campaign/reward transactions;
 - no secret keys or private Wallet material stored by Bong Goggles services.
+
+Implemented in:
+- `services/bong-goggles-indexer-v1/src/rewardOperatorSurface.js`
+- `services/bong-goggles-indexer-v1/test/rewardOperatorSurface.test.js`
+- reuses canonical BG-18.5 funding/activation intents from `rewardFundingActivation.js`
+
+The operator surface now exposes campaign app/type/scorer/policy/caps/window/active state, funded/reserved/available pool balances, accrued-by-campaign and earned-by-account accounting, canonical contribution/reward lookups and deterministic Explorer links. Readiness warnings cover underfunded, disabled, not-started, expired and accounting-invariant conditions. Sponsor FUND/TOP_UP/ACTIVATE/DEACTIVATE operations delegate to Wallet-confirmed canonical intents; Bong Goggles never stores private Wallet material, never signs sponsor operations and never custodies campaign funds.
 
 **Exit:** production operators can safely inspect and operate Bong Goggles campaigns without contract-console guesswork.
 

@@ -195,7 +195,7 @@ Acceptance:
 - future feature routes are stable but remain explicitly gated until their roadmap phases qualify
 - responsive shell works without adding protocol authority
 
-## V14.2 — Design system + Exchange visual language — IN QUALIFICATION
+## V14.2 — Design system + Exchange visual language — QUALIFIED
 
 Deliverables:
 - [x] establish spacing, radius, surface, text and semantic status tokens
@@ -225,24 +225,49 @@ Acceptance:
 - unknown protocol states fail closed
 - no screen invents one-off status terminology
 
-## V14.3 — V13 client SDK + data access layer
+Qualification:
+- exact head `1cd92059562a7df0e053151042a9c6832a5404de`
+- 420Exchange Web Verification #21
+- 420 Integrated Qualification #4228
+- 420Docs Qualification #1913
+
+## V14.3 — V13 client SDK + data access layer — IN QUALIFICATION
 
 Deliverables:
-- typed client generated/implemented against the V14 client schema
-- snapshot client for V13.3
-- historical-query client for V13.4
-- live-stream client for V13.5
-- public API/version/error/freshness policy for V13.6
-- reconnect/resume cursor persistence
-- canonical subject/record ID preservation
-- query caching keyed by schema version + subject + cursor/filter
-- explicit stale/reorg/replacement state propagation into UI stores
+- [x] implement V14 read client against the qualified V13 public surfaces
+- [x] add V13.3 market snapshot reads with canonical subject/snapshot ID preservation
+- [x] add V13.4 bounded historical queries and cursor-aware cache identity
+- [x] add V13.5 WebSocket/SSE-neutral stream decoding and resume cursor support
+- [x] enforce V13.6 API version negotiation and stable public error handling
+- [x] enforce the 100-record historical page bound
+- [x] enforce the 30-second live freshness bound
+- [x] preserve inactive/orphaned history as addressable reorg state
+- [x] propagate REORG and REPLACEMENT states explicitly into the client store
+- [x] fail closed on stream sequence gaps
+- [x] add deterministic query cache keyed by schema/surface/subject/cursor/full filters
+- [x] add one ExchangeDataLayer orchestration entry point for snapshot/history/stream/freshness
+- [x] add executable parity, cache, freshness, reorg, replacement and resume tests
+
+Implementation:
+- `exchange/web/core/exchange-client.js`
+- `exchange/web/core/exchange-store.js`
+- `exchange/web/core/exchange-stream.js`
+- `exchange/web/core/exchange-cache.js`
+- `exchange/web/core/exchange-data.js`
+- `exchange/web/test/exchange-client.test.js`
+- `exchange/web/test/exchange-store.test.js`
+- `exchange/web/test/exchange-stream.test.js`
+- `exchange/web/test/exchange-cache.test.js`
+- `exchange/web/test/exchange-data.test.js`
+- `exchange/web/v14.3-qualification.json`
 
 Acceptance:
-- SDK parity tests against V13 reference fixtures
-- WebSocket and SSE produce equivalent client state
+- SDK parity tests preserve V13 identities rather than re-keying client state
+- WebSocket and SSE decode into identical stream event semantics
 - unsupported API versions fail closed
 - client cannot silently convert stale or orphaned data into canonical state
+- reconnect resumes from the last delivered stream sequence
+- no V14.3 read surface adds execution, custody, mint, burn or settlement authority
 
 ## V14.4 — Markets overview
 
@@ -456,6 +481,6 @@ Release gate:
 
 **Now:** V14 — Exchange Web UI. V13 is merged and closed.
 
-**Current step:** V14.2 — design system + Exchange visual language — in qualification.
+**Current step:** V14.3 — V13 client SDK + data access layer — in qualification.
 
 **V14 completion target:** a production-qualified Exchange UI at `exchange.420integrated.org`, backed by V13 read surfaces and the qualified V1–V12 Exchange execution stack.

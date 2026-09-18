@@ -1,0 +1,41 @@
+{
+  "schema": "420-exchange-web-v14.1",
+  "status": "IN_QUALIFICATION",
+  "scope": "FRONTEND_FOUNDATION_APPLICATION_SHELL",
+  "productionOrigin": "https://exchange.420integrated.org",
+  "runtimeSchema": "420-exchange-web-runtime-v14.1",
+  "clientSchema": {
+    "major": 14,
+    "minor": 0
+  },
+  "routes": [
+    "/",
+    "/market",
+    "/swap",
+    "/orders",
+    "/bridge",
+    "/portfolio"
+  ],
+  "invariants": [
+    "invalid runtime configuration fails closed",
+    "production origin is pinned to exchange.420integrated.org",
+    "runtime service endpoints accept only secure HTTPS/WSS forms or null",
+    "future trading and wallet features remain feature-gated until their V14 phases qualify",
+    "unknown routes fail safely to the Markets shell",
+    "the shell can boot without configured production API endpoints",
+    "the frontend creates no independent protocol authority or canonical market truth"
+  ],
+  "implementation": {
+    "package": "exchange/web/package.json",
+    "entrypoint": "exchange/web/index.html",
+    "application": "exchange/web/app.js",
+    "runtimeConfig": "exchange/web/runtime-config.json",
+    "staticQualification": "exchange/web/scripts/check.mjs",
+    "unitTests": [
+      "exchange/web/test/config.test.js",
+      "exchange/web/test/router.test.js"
+    ],
+    "ci": ".github/workflows/exchange-web.yml"
+  },
+  "follow_on": "V14.2 design system and Exchange visual language"
+}

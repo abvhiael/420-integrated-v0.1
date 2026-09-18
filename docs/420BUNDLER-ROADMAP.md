@@ -7,8 +7,8 @@ The Bundler Network is not custody, wallet authorization, consensus, settlement 
 ## GEN-11 status
 
 - **GEN-11.0 — architecture + executable invariant baseline — COMPLETE**
-- **GEN-11.1 — core bundler runtime/service scaffold — IN QUALIFICATION**
-- GEN-11.2 — canonical UserOperation model + hashing — pending
+- **GEN-11.1 — core bundler runtime/service scaffold — COMPLETE**
+- **GEN-11.2 — canonical UserOperation model + hashing — IN QUALIFICATION**
 - GEN-11.3 — public Bundler RPC API — pending
 - GEN-11.4 — deterministic validation + simulation engine — pending
 - GEN-11.5 — bounded UserOperation mempool — pending
@@ -80,3 +80,28 @@ Optional environment:
 - `BUNDLER_MAX_HEAD_AGE` (default `2m`)
 
 GEN-11.1 is complete when all repository qualification workflows pass on one exact head containing this runtime scaffold.
+
+
+## GEN-11.2 — canonical UserOperation model + hashing
+
+Added `bundler/userop` as the canonical Bundler-side representation of `PackedUserOperation420`.
+
+The model mirrors `IEntryPoint420.sol` and the Wallet RPC envelope exactly:
+
+- `sender`
+- `nonce`
+- `initCode`
+- `callData`
+- `accountGasLimits`
+- `preVerificationGas`
+- `gasFees`
+- `paymasterAndData`
+- `signature`
+
+RPC quantities are parsed fail-closed as canonical 0x-prefixed uint256 values. Addresses, bytes32 fields and dynamic byte fields are length/hex validated before admission.
+
+`Hash()` mirrors `EntryPoint420.getUserOpHash()`: it binds `USER_OPERATION_DOMAIN = keccak256("420/ENTRY_POINT/USER_OPERATION/V1")`, chain ID, EntryPoint, sender, nonce, keccak256(initCode), keccak256(callData), account gas limits, pre-verification gas, gas fees and keccak256(paymasterAndData) using Solidity `abi.encode` word layout. Signature bytes are intentionally excluded because the account signs the resulting canonical hash.
+
+The package includes an internal legacy Keccak-256 implementation with the standard empty-input test vector so canonical hashing does not introduce a new runtime dependency. Tests also prove that every hash-bound field, chain identity and EntryPoint mutation changes the digest, while signature mutation does not.
+
+GEN-11.2 is complete when all repository qualification workflows pass on one exact head containing this model and hash implementation.

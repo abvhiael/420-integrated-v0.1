@@ -23,7 +23,7 @@
   },
   "features": {
     "markets": true,
-    "marketDetail": false,
+    "marketDetail": true,
     "swap": false,
     "limitOrders": false,
     "bridge": false,

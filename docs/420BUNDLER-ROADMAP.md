@@ -14,8 +14,8 @@ The Bundler Network is not custody, wallet authorization, consensus, settlement 
 - **GEN-11.5 — bounded UserOperation mempool — COMPLETE**
 - **GEN-11.6 — bundle construction + EntryPoint submission — COMPLETE**
 - **GEN-11.7 — gas + fee estimation — COMPLETE**
-- **GEN-11.8 — Paymaster integration boundary — IN QUALIFICATION**
-- GEN-11.9 — receipts + lifecycle tracking — pending
+- **GEN-11.8 — Paymaster integration boundary — COMPLETE**
+- **GEN-11.9 — receipts + lifecycle tracking — IN QUALIFICATION**
 - GEN-11.10 — multi-bundler propagation — pending
 - GEN-11.11 — reputation + anti-abuse controls — pending
 - GEN-11.12 — replacement + nonce hardening — pending
@@ -243,3 +243,31 @@ GEN-11.8 does **not** decide whether a sponsor grants funding. It does not selec
 This preserves BUNDLER-INV-009: sponsorship authority remains with the Paymaster/account-abstraction validation path; the Bundler only rejects envelopes that are structurally impossible or bound to the wrong chain/EntryPoint/time window.
 
 GEN-11.8 is complete when all repository qualification workflows pass on one exact head containing the strict paymaster boundary and simulation integration.
+
+
+## GEN-11.9 — receipts + lifecycle tracking
+
+Added `bundler/lifecycle` and connected successful GEN-11.6 submission evidence to the public `eth_getUserOperationReceipt` boundary.
+
+Lifecycle tracking begins only after the execution RPC accepts a transaction submission. The Bundler records the canonical UserOperation hash, transaction hash, configured EntryPoint and submission time in an in-memory operational store. A conflicting transaction binding for the same UserOperation hash fails closed.
+
+Receipt reconciliation does not treat a transaction hash as inclusion. The Bundler queries `eth_getTransactionReceipt` for the recorded transaction and requires all of the following before returning a positive UserOperation receipt:
+
+- a successful transaction receipt (`status == 0x1`)
+- canonical transaction and block hashes
+- a canonical block-number quantity
+- exactly one log from the configured EntryPoint
+- the canonical `UserOperationHandled` event topic
+- indexed UserOperation hash equal to the requested hash
+- well-formed indexed sender/nonce-key topics
+- canonical event data containing sequence + boolean execution outcome
+
+No matching event returns `result: null`; duplicate matching events fail closed as ambiguous evidence. A reverted EntryPoint transaction is not represented as successful inclusion.
+
+A positive GEN-11.9 receipt exposes the UserOperation hash, EntryPoint, transaction hash, block hash, block number, execution-success flag and operational lifecycle value `included`.
+
+GEN-11.9 intentionally does not claim finality. `included` means canonical receipt/event evidence currently exists at a specific block. Finality/reorg recovery remains governed by later GEN-11 phases, preserving BUNDLER-INV-003, BUNDLER-INV-012 and BUNDLER-INV-013.
+
+The submission recorder is attached to the bundle builder before active mempool removal, so a successfully submitted operation is not silently discarded without lifecycle evidence. If lifecycle evidence cannot be recorded, the operation remains in the active pool and the cycle reports failure rather than fabricating a successful tracked submission.
+
+GEN-11.9 is complete when all repository qualification workflows pass on one exact head containing submission tracking, canonical receipt/event reconciliation and the public receipt RPC implementation.

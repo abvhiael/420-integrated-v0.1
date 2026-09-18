@@ -28,6 +28,10 @@ const required = [
   'v14.1-qualification.json',
   'v14.2-qualification.json',
   'v14.3-qualification.json',
+  'v14.4-qualification.json',
+  'core/markets.js',
+  'test/markets.test.js',
+  'fixtures/markets.json',
 ];
 
 for (const relative of required) {
@@ -67,4 +71,12 @@ for (const needle of ['loadSnapshot', 'loadHistory', 'connectStream', 'freshness
   if (!dataLayer.includes(needle)) throw new Error(`V14.3 data layer missing operation: ${needle}`);
 }
 
-console.log('420Exchange V14.1/V14.2/V14.3 static qualification passed');
+const markets = fs.readFileSync(path.join(root, 'core/markets.js'), 'utf8');
+for (const needle of ['normalizeMarket', 'filterMarkets', 'sortMarkets', 'freshnessState', 'Watchlist']) {
+  if (!markets.includes(needle)) throw new Error(`V14.4 market model missing operation: ${needle}`);
+}
+const fixture = JSON.parse(fs.readFileSync(path.join(root, 'fixtures/markets.json'), 'utf8'));
+if (!Array.isArray(fixture) || !fixture.length || fixture.some((market) => market.demo !== true)) {
+  throw new Error('V14.4 demo fixtures must be explicitly labeled demo');
+}
+console.log('420Exchange V14.1/V14.2/V14.3/V14.4 static qualification passed');

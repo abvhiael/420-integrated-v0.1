@@ -27,7 +27,7 @@
     "swap": true,
     "limitOrders": true,
     "bridge": true,
-    "portfolio": false,
+    "portfolio": true,
     "walletConnection": false
   }
 }

@@ -1,6 +1,6 @@
 {
   "schema": "420-exchange-indexer-v13.2",
-  "status": "IN_QUALIFICATION",
+  "status": "QUALIFIED",
   "scope": "DETERMINISTIC_INDEXER_CORE",
   "model": "A read-only deterministic projection state machine over the V13.1 canonical event schema. It provides idempotent ingestion, canonical/finalized checkpoint tracking, bounded reorg rollback and recovery semantics without protocol execution authority.",
   "limits": {
@@ -33,6 +33,12 @@
     "reference_core": "contracts/src/exchange/ExchangeDeterministicIndexer420.sol",
     "qualification_test": "contracts/test/ExchangeDeterministicIndexer420.t.sol",
     "schema_dependency": "contracts/src/exchange/ExchangeMarketDataTypes420.sol"
+  },
+  "qualification": {
+    "exact_head": "4dc287f42115d274e9e2bbf302b49cf2f77dd1bc",
+    "solidity_contracts": 2597,
+    "integrated_qualification": 4114,
+    "docs_qualification": 1824
   },
   "follow_on": "V13.3 market snapshots"
 }

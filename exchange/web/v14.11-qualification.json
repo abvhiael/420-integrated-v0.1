@@ -1,0 +1,23 @@
+{
+  "schema":"420-exchange-web-v14.11",
+  "status":"IN_QUALIFICATION",
+  "scope":"RELIABILITY_ACCESSIBILITY_RESPONSIVE",
+  "invariants":[
+    "critical controls remain keyboard reachable with visible focus treatment",
+    "status and loading changes are announced through semantic live regions",
+    "API 429/503 and version mismatch states are distinct and fail safe",
+    "offline and reconnect state never promotes stale data to canonical",
+    "narrow-screen tables retain header/value meaning instead of relying on column position alone",
+    "slow-loading states remain explicit and understandable",
+    "destructive actions remain visible controls and are never hover-only",
+    "reduced-motion preference remains honored"
+  ],
+  "implementation":{
+    "reliabilityModel":"exchange/web/core/reliability.js",
+    "app":"exchange/web/app.js",
+    "template":"exchange/web/index.html",
+    "styles":"exchange/web/styles.css",
+    "qualificationTest":"exchange/web/test/reliability.test.js"
+  },
+  "follow_on":"V14.12 frontend security hardening"
+}

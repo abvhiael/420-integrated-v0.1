@@ -7,6 +7,7 @@ import { ROUTES, routeFor } from './core/router.js';
 import { SwapLifecycle, buildSwapIntent, canSubmitSwap, normalizeRouteQuote } from './core/swap.js';
 import { buildLimitOrderDraft, canCancelOrder, normalizeOrderRecord, signedPriceFloor, validateFillPrice } from './core/limit-orders.js';
 import { bridgeQualification, buildBridgeIntent, canSubmitBridge, normalizeBridgeRoute, normalizeSettlement, settlementProgress } from './core/bridge.js';
+import { activityState, explorerHref, mergeActivity, normalizeBalance, portfolioSummary } from './core/portfolio.js';
 
 const state = {
   config: null,
@@ -32,6 +33,8 @@ const state = {
   bridgeSettlements: [],
   bridgeIntent: null,
   bridgeRouteId: null,
+  portfolioBalances: [],
+  portfolioActivity: [],
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -498,6 +501,70 @@ function renderBridge(fragment) {
   }));
 }
 
+
+async function loadPortfolioData() {
+  const [balancesResponse,activityResponse]=await Promise.all([
+    fetch('./fixtures/portfolio-balances.json',{cache:'no-store'}),
+    fetch('./fixtures/portfolio-activity.json',{cache:'no-store'}),
+  ]);
+  if(!balancesResponse.ok||!activityResponse.ok) throw new Error('portfolio fixtures unavailable');
+  state.portfolioBalances=(await balancesResponse.json()).map(normalizeBalance);
+  state.portfolioActivity=mergeActivity(await activityResponse.json());
+}
+
+function renderPortfolio(fragment) {
+  fragment.querySelector('#portfolio-source').textContent='DEMO PORTFOLIO · not live wallet state';
+  const summary=portfolioSummary(state.portfolioBalances);
+  fragment.querySelector('#portfolio-assets').textContent=String(summary.assetCount);
+  fragment.querySelector('#portfolio-canonical-assets').textContent=String(summary.canonicalAssetCount);
+  fragment.querySelector('#portfolio-locked').textContent=formatNumber(summary.totalLocked);
+
+  const balances=fragment.querySelector('#portfolio-balances');
+  balances.replaceChildren(...state.portfolioBalances.map((balance)=>{
+    const card=document.createElement('article');
+    card.className='component-card balance-card';
+    const title=document.createElement('h3'); title.textContent=balance.symbol;
+    const total=document.createElement('strong'); total.textContent=formatNumber(balance.balance);
+    const meta=document.createElement('p'); meta.className='muted';
+    meta.textContent=`Available ${formatNumber(balance.available)} · Locked ${formatNumber(balance.locked)} · Source ${balance.source}`;
+    const badge=createStatusBadge(document,balance.canonical?'canonical':'degraded');
+    card.append(title,total,meta,badge);
+    return card;
+  }));
+
+  const openOrders=state.orders.filter((order)=>order.state==='OPEN'||order.state==='PARTIAL');
+  const orderBody=fragment.querySelector('#portfolio-orders');
+  orderBody.replaceChildren(...openOrders.map((order)=>{
+    const tr=document.createElement('tr');
+    for(const value of [order.orderHash||'—',`${order.sellAmount} ${order.sellToken}`,`${order.minTotalBuyAmount} ${order.buyToken}`,order.state]){
+      const td=document.createElement('td'); td.textContent=String(value); tr.append(td);
+    }
+    return tr;
+  }));
+
+  const activityBody=fragment.querySelector('#portfolio-activity');
+  activityBody.replaceChildren(...state.portfolioActivity.map((record)=>{
+    const tr=document.createElement('tr');
+    const stateLabel=activityState(record);
+    for(const value of [
+      record.kind,
+      record.amount===null?'—':`${formatNumber(record.amount)} ${record.assetSymbol??''}`,
+      stateLabel,
+      record.feeAmount===null?'—':formatNumber(record.feeAmount),
+      record.txHash??'—',
+    ]){
+      const td=document.createElement('td'); td.textContent=String(value); tr.append(td);
+    }
+    const provenance=document.createElement('td');
+    const href=explorerHref(state.config?.network?.explorerUrl,record.txHash);
+    if(href){
+      const a=document.createElement('a'); a.href=href; a.textContent='Explorer'; a.rel='noopener noreferrer'; provenance.append(a);
+    } else provenance.textContent='—';
+    tr.append(provenance);
+    return tr;
+  }));
+}
+
 function renderView() {
   $('#page-title').textContent = state.route.label;
   const view = $('#app-view');
@@ -551,6 +618,13 @@ function renderView() {
     return;
   }
 
+  if (state.route.id === 'portfolio' && availability(state.config, 'portfolio')) {
+    const fragment = $('#portfolio-template').content.cloneNode(true);
+    renderPortfolio(fragment);
+    view.append(fragment);
+    return;
+  }
+
   const fragment = $('#gated-template').content.cloneNode(true);
   fragment.querySelector('#gated-title').textContent = `${state.route.label} is roadmap-gated`;
   fragment.querySelector('#gated-copy').textContent =
@@ -577,6 +651,10 @@ function navigate(path) {
   }
   if (state.route.id === 'bridge' && !state.bridgeRoutes.length) {
     loadBridgeData().then(render).catch((error)=>{ state.bootError=error; render(); });
+    return;
+  }
+  if (state.route.id === 'portfolio' && !state.portfolioBalances.length) {
+    Promise.all([loadPortfolioData(), state.orders.length?Promise.resolve():loadOrders()]).then(render).catch((error)=>{ state.bootError=error; render(); });
     return;
   }
   render();
@@ -682,6 +760,9 @@ async function boot() {
     if (state.route.id === 'swap') await loadSwapQuote();
     if (state.route.id === 'orders') await loadOrders();
     if (state.route.id === 'bridge') await loadBridgeData();
+    if (state.route.id === 'portfolio') {
+      await Promise.all([loadPortfolioData(), state.orders.length?Promise.resolve():loadOrders()]);
+    }
   } catch (error) {
     state.bootError = error;
     state.config = state.config ?? {

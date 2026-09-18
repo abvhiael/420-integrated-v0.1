@@ -1,0 +1,48 @@
+{
+  "schema": "420-exchange-public-api-v13.6",
+  "status": "IN_QUALIFICATION",
+  "scope": "PUBLIC_API_HARDENING",
+  "model": "A deterministic policy envelope shared by V13 read surfaces. It standardizes version negotiation, request bounds, abuse controls, cache/freshness behavior and machine-readable error semantics without adding protocol authority.",
+  "version": {
+    "major": 13,
+    "minor": 6,
+    "rule": "major must match exactly; clients may request a supported minor <= 6"
+  },
+  "limits": {
+    "maxPageSize": 100,
+    "maxFilters": 8,
+    "maxQueryBytes": 2048,
+    "rateLimitWindowSeconds": 60,
+    "rateLimitMaxRequests": 120,
+    "maxStaleSeconds": 30
+  },
+  "error_codes": [
+    "UNSUPPORTED_VERSION",
+    "MALFORMED_QUERY",
+    "REQUEST_TOO_LARGE",
+    "PAGE_LIMIT_EXCEEDED",
+    "TOO_MANY_FILTERS",
+    "RATE_LIMITED",
+    "STALE_DATA"
+  ],
+  "invariants": [
+    "unsupported API major or future minor versions fail closed",
+    "zero-size, oversized, over-filtered and malformed queries fail closed",
+    "page size is bounded to 100",
+    "encoded query size is bounded to 2048 bytes",
+    "filter count is bounded to 8",
+    "client request budgets are bounded to 120 requests per 60-second window",
+    "rate-limit state rejects local time regression",
+    "observed/unconfirmed data is non-cacheable",
+    "canonical data uses a short bounded cache policy",
+    "finalized data may use a longer immutable-style cache window",
+    "freshness checks fail closed when data exceeds the caller's bounded max age",
+    "public error codes map to deterministic HTTP status and stable schema-versioned error IDs",
+    "API policy grants no execution, custody, mint, burn or settlement authority"
+  ],
+  "implementation": {
+    "reference_policy": "contracts/src/exchange/ExchangePublicApiPolicy420.sol",
+    "qualification_test": "contracts/test/ExchangePublicApiPolicy420.t.sol"
+  },
+  "follow_on": "V13.7 V14 UI handoff qualification"
+}

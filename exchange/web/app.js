@@ -2,6 +2,7 @@ import { availability, validateRuntimeConfig } from './core/config.js';
 import { createStatusBadge } from './core/design-system.js';
 import { ExchangeDataLayer } from './core/exchange-data.js';
 import { Watchlist, filterMarkets, freshnessState, normalizeMarket, sortMarkets } from './core/markets.js';
+import { candleGeometry, normalizeCandle, normalizeTrade, reconcileHistory } from './core/market-detail.js';
 import { ROUTES, routeFor } from './core/router.js';
 
 const state = {
@@ -15,6 +16,9 @@ const state = {
   marketSort: 'symbol:asc',
   watchOnly: false,
   watchlist: new Watchlist(globalThis.localStorage),
+  detailSubjectId: new URLSearchParams(window.location.search).get('subject'),
+  detailWindow: '1h',
+  detailHistory: null,
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -76,7 +80,12 @@ function marketRow(market) {
   const marketId = document.createElement('small');
   marketId.className = 'market-id';
   marketId.textContent = market.marketSubjectId;
-  name.append(marketName, marketId);
+  const marketLink = document.createElement('button');
+  marketLink.type = 'button';
+  marketLink.className = 'market-link';
+  marketLink.dataset.openMarket = market.marketSubjectId;
+  marketLink.append(marketName, marketId);
+  name.append(marketLink);
 
   const last = document.createElement('td');
   last.className = 'numeric';
@@ -136,6 +145,115 @@ function renderMarkets(fragment) {
   refreshMarketView(fragment);
 }
 
+
+function selectedMarket() {
+  return state.markets.find((market) => market.marketSubjectId === state.detailSubjectId) ?? state.markets[0] ?? null;
+}
+
+function drawCandles(svg, candles) {
+  const geometry = candleGeometry(candles, 720, 280, 24);
+  svg.replaceChildren();
+  svg.setAttribute('viewBox', '0 0 720 280');
+  svg.setAttribute('role', 'img');
+  svg.setAttribute('aria-label', 'OHLCV price chart');
+  const ns = 'http://www.w3.org/2000/svg';
+  for (const candle of geometry) {
+    const wick = document.createElementNS(ns, 'line');
+    wick.setAttribute('x1', candle.x);
+    wick.setAttribute('x2', candle.x);
+    wick.setAttribute('y1', candle.highY);
+    wick.setAttribute('y2', candle.lowY);
+    wick.setAttribute('class', `candle-wick ${candle.direction}`);
+
+    const body = document.createElementNS(ns, 'rect');
+    body.setAttribute('x', candle.x - candle.bodyWidth / 2);
+    body.setAttribute('width', candle.bodyWidth);
+    body.setAttribute('y', Math.min(candle.openY, candle.closeY));
+    body.setAttribute('height', Math.max(2, Math.abs(candle.openY - candle.closeY)));
+    body.setAttribute('class', `candle-body ${candle.direction}`);
+    svg.append(wick, body);
+  }
+}
+
+async function loadDetailHistory(subjectId) {
+  if (state.marketSource === 'api' && state.dataLayer) {
+    const [candlesPage,tradesPage] = await Promise.all([
+      state.dataLayer.loadHistory({kind:'LIQUIDITY',subjectId,activeOnly:false,limit:100}),
+      state.dataLayer.loadHistory({kind:'TRADE',subjectId,activeOnly:false,limit:100}),
+    ]);
+    state.detailHistory = {
+      candles: candlesPage.records.map(normalizeCandle),
+      trades: tradesPage.records.map(normalizeTrade),
+      source: 'api',
+    };
+    return;
+  }
+  const response = await fetch('./fixtures/market-detail.json', { cache: 'no-store' });
+  if (!response.ok) throw new Error(`detail fixture ${response.status}`);
+  const fixture = await response.json();
+  state.detailHistory = {
+    candles: fixture.candles.map(normalizeCandle),
+    trades: fixture.trades.map(normalizeTrade),
+    source: 'demo',
+  };
+}
+
+function renderDetail(fragment) {
+  const market = selectedMarket();
+  if (!market) return;
+
+  fragment.querySelector('#detail-pair').textContent = market.label;
+  fragment.querySelector('#detail-market-id').textContent = market.marketSubjectId;
+  fragment.querySelector('#detail-last').textContent = formatNumber(market.lastPrice, 8);
+  fragment.querySelector('#detail-bid').textContent = formatNumber(market.bestBid, 8);
+  fragment.querySelector('#detail-ask').textContent = formatNumber(market.bestAsk, 8);
+  fragment.querySelector('#detail-volume').textContent = formatNumber(market.quoteVolume);
+  fragment.querySelector('#detail-liquidity').textContent = formatNumber(market.liquidity);
+  fragment.querySelector('#detail-window').value = state.detailWindow;
+  fragment.querySelector('#detail-source').textContent = state.detailHistory?.source === 'demo'
+    ? 'DEMO HISTORY · not live'
+    : 'V13 historical query';
+
+  const fresh = state.marketSource === 'demo' ? 'degraded' : freshnessState(market, Math.floor(Date.now()/1000));
+  fragment.querySelector('#detail-status').append(createStatusBadge(document, fresh === 'canonical' ? 'canonical' : fresh === 'stale' ? 'stale' : 'degraded'));
+  fragment.querySelector('#detail-route').append(createStatusBadge(document, market.routeHealthy ? 'routeHealthy' : 'routeUnhealthy'));
+  fragment.querySelector('#detail-settlement').append(createStatusBadge(document, market.settlementHealthy ? 'settlementHealthy' : 'settlementUnhealthy'));
+
+  const candles = state.detailHistory?.candles ?? [];
+  drawCandles(fragment.querySelector('#detail-chart'), candles);
+
+  const activity = reconcileHistory([...(state.detailHistory?.trades ?? []), ...candles]);
+  const activityBody = fragment.querySelector('#detail-activity');
+  activityBody.replaceChildren(...activity.map((record)=>{
+    const tr=document.createElement('tr');
+    for (const value of [
+      record.recordId,
+      record.price ?? record.close ?? '—',
+      record.amount ?? record.volume ?? '—',
+      record.state,
+      record.replacedBy ?? '—',
+    ]) {
+      const td=document.createElement('td');
+      td.textContent=String(value);
+      tr.append(td);
+    }
+    return tr;
+  }));
+
+  const tape = fragment.querySelector('#trade-tape');
+  const seen=new Set();
+  const trades=(state.detailHistory?.trades ?? []).filter((trade)=>{
+    if (seen.has(trade.recordId)) return false;
+    seen.add(trade.recordId);
+    return true;
+  });
+  tape.replaceChildren(...trades.map((trade)=>{
+    const li=document.createElement('li');
+    li.textContent=`${trade.side.toUpperCase()} · ${formatNumber(trade.amount)} @ ${formatNumber(trade.price,8)} · ${trade.active ? 'canonical' : 'reorg'}`;
+    return li;
+  }));
+}
+
 function renderView() {
   $('#page-title').textContent = state.route.label;
   const view = $('#app-view');
@@ -157,6 +275,13 @@ function renderView() {
   if (state.route.id === 'markets' && availability(state.config, 'markets')) {
     const fragment = $('#markets-template').content.cloneNode(true);
     renderMarkets(fragment);
+    view.append(fragment);
+    return;
+  }
+
+  if (state.route.id === 'market' && availability(state.config, 'marketDetail')) {
+    const fragment = $('#market-detail-template').content.cloneNode(true);
+    renderDetail(fragment);
     view.append(fragment);
     return;
   }
@@ -191,6 +316,14 @@ document.addEventListener('click', (event) => {
   if (watch) {
     state.watchlist.toggle(watch.dataset.watchMarket);
     refreshMarketView();
+    return;
+  }
+  const openMarket = event.target.closest('[data-open-market]');
+  if (openMarket) {
+    state.detailSubjectId = openMarket.dataset.openMarket;
+    history.pushState({}, '', `/market?subject=${encodeURIComponent(state.detailSubjectId)}`);
+    state.route = routeFor('/market');
+    loadDetailHistory(state.detailSubjectId).then(render).catch((error)=>{ state.bootError = error; render(); });
   }
 });
 
@@ -208,11 +341,15 @@ document.addEventListener('change', (event) => {
   } else if (event.target.id === 'watch-only') {
     state.watchOnly = event.target.checked;
     refreshMarketView();
+  } else if (event.target.id === 'detail-window') {
+    state.detailWindow = event.target.value;
+    render();
   }
 });
 
 window.addEventListener('popstate', () => {
   state.route = routeFor(window.location.pathname);
+  state.detailSubjectId = new URLSearchParams(window.location.search).get('subject');
   render();
 });
 
@@ -241,6 +378,10 @@ async function boot() {
     if (!response.ok) throw new Error(`runtime config ${response.status}`);
     state.config = validateRuntimeConfig(await response.json());
     await loadMarketSource();
+    if (state.route.id === 'market') {
+      state.detailSubjectId = state.detailSubjectId ?? state.markets[0]?.marketSubjectId ?? null;
+      if (state.detailSubjectId) await loadDetailHistory(state.detailSubjectId);
+    }
   } catch (error) {
     state.bootError = error;
     state.config = state.config ?? {

@@ -29,6 +29,10 @@ const required = [
   'v14.2-qualification.json',
   'v14.3-qualification.json',
   'v14.4-qualification.json',
+  'v14.5-qualification.json',
+  'core/market-detail.js',
+  'test/market-detail.test.js',
+  'fixtures/market-detail.json',
   'core/markets.js',
   'test/markets.test.js',
   'fixtures/markets.json',
@@ -82,4 +86,10 @@ const fixture = JSON.parse(fs.readFileSync(path.join(root, 'fixtures/markets.jso
 if (!Array.isArray(fixture) || !fixture.length || fixture.some((market) => market.demo !== true)) {
   throw new Error('V14.4 demo fixtures must be explicitly labeled demo');
 }
-console.log('420Exchange V14.1/V14.2/V14.3/V14.4 static qualification passed');
+const detail = fs.readFileSync(path.join(root, 'core/market-detail.js'), 'utf8');
+for (const needle of ['normalizeCandle', 'normalizeTrade', 'candleGeometry', 'aggregateTradesToCandles', 'reconcileHistory']) {
+  if (!detail.includes(needle)) throw new Error(`V14.5 detail model missing operation: ${needle}`);
+}
+const detailFixture = JSON.parse(fs.readFileSync(path.join(root, 'fixtures/market-detail.json'), 'utf8'));
+if (detailFixture.demo !== true) throw new Error('V14.5 detail fixture must be explicitly labeled demo');
+console.log('420Exchange V14.1/V14.2/V14.3/V14.4/V14.5 static qualification passed');

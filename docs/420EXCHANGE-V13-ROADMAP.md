@@ -34,40 +34,38 @@ Qualification:
 - 420 Integrated Qualification #4141
 - 420Docs Qualification #1851
 
-Implementation:
-- `contracts/src/exchange/ExchangeHistoricalQuery420.sol`
-- `contracts/test/ExchangeHistoricalQuery420.t.sol`
-- `contracts/config/exchange/historical-query-v13.4.json`
+## V13.5 — Live market-data stream — QUALIFIED
 
-## V13.5 — Live market-data stream — IN QUALIFICATION
-
-- [x] define transport-neutral WebSocket/SSE stream semantics
-- [x] generate strictly ordered monotonic sequence numbers
-- [x] define schema-bound reconnect/resume cursor
-- [x] resume strictly after the cursor sequence
-- [x] reject malformed/future cursors
-- [x] define DATA, HEARTBEAT, REORG and REPLACEMENT event kinds
-- [x] carry canonical-head, observed-time and emitted-time metadata
-- [x] expose explicit freshness age from latest emitted event
-- [x] prohibit emission-time regression
-- [x] require reorg notices to identify affected records
-- [x] require replacements to bind distinct old/new record IDs
-- [x] bound resume pages to 100 events
-- [x] add executable qualification for ordering, reconnect, heartbeat and reorg semantics
+Qualification:
+- exact head `a7ad5411c6f1d1f100cdfb6af3b0a57616076e73`
+- Solidity Contracts #2618
+- 420 Integrated Qualification #4163
+- 420Docs Qualification #1868
 
 Implementation:
 - `contracts/src/exchange/ExchangeLiveMarketData420.sol`
 - `contracts/test/ExchangeLiveMarketData420.t.sol`
 - `contracts/config/exchange/live-stream-v13.5.json`
 
-## V13.6 — Public API hardening
+## V13.6 — Public API hardening — IN QUALIFICATION
 
-- schema/version negotiation
-- request bounds and pagination limits
-- rate-limit and abuse controls
-- malformed-query tests
-- deterministic error contract
-- cache/freshness policy
+- [x] define API schema/version negotiation
+- [x] require exact major and supported minor version
+- [x] bound public page size to 100
+- [x] bound query filters to 8
+- [x] bound encoded query size to 2048 bytes
+- [x] add deterministic 120-request / 60-second client budget reference policy
+- [x] reject rate-limit time regression
+- [x] define observed/canonical/finalized cache policy
+- [x] define bounded freshness checks with stale-data failure
+- [x] define stable machine-readable public error codes
+- [x] map error codes to deterministic HTTP status and schema-versioned stable IDs
+- [x] add executable malformed-query, rate-limit, cache and error-contract qualification
+
+Implementation:
+- `contracts/src/exchange/ExchangePublicApiPolicy420.sol`
+- `contracts/test/ExchangePublicApiPolicy420.t.sol`
+- `contracts/config/exchange/public-api-v13.6.json`
 
 ## V13.7 — V14 UI handoff qualification
 

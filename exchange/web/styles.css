@@ -227,3 +227,8 @@ label { display: grid; gap: 7px; }
 .bridge-health { margin:var(--space-4) 0; }
 .bridge-table-wrap { margin-top:var(--space-4); }
 @media (max-width:900px) { .bridge-grid { grid-template-columns:1fr; } }
+
+.balance-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:var(--space-4); }
+.balance-card strong { font-size:24px; }
+.portfolio-section { margin-top:var(--space-6); }
+@media (max-width:900px) { .balance-grid { grid-template-columns:1fr; } }

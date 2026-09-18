@@ -31,6 +31,10 @@ const required = [
   'v14.4-qualification.json',
   'v14.5-qualification.json',
   'v14.6-qualification.json',
+  'v14.7-qualification.json',
+  'core/limit-orders.js',
+  'test/limit-orders.test.js',
+  'fixtures/limit-orders.json',
   'core/swap.js',
   'test/swap.test.js',
   'fixtures/swap-quote.json',
@@ -102,4 +106,12 @@ for (const needle of ['normalizeRouteQuote', 'buildSwapIntent', 'canSubmitSwap',
 }
 const swapFixture = JSON.parse(fs.readFileSync(path.join(root, 'fixtures/swap-quote.json'), 'utf8'));
 if (swapFixture.demo !== true) throw new Error('V14.6 quote fixture must be explicitly labeled demo');
-console.log('420Exchange V14.1/V14.2/V14.3/V14.4/V14.5/V14.6 static qualification passed');
+const orders = fs.readFileSync(path.join(root, 'core/limit-orders.js'), 'utf8');
+for (const needle of ['buildLimitOrderDraft', 'minimumBuyForFill', 'normalizeOrderRecord', 'canCancelOrder']) {
+  if (!orders.includes(needle)) throw new Error(`V14.7 order model missing operation: ${needle}`);
+}
+const orderFixtures = JSON.parse(fs.readFileSync(path.join(root, 'fixtures/limit-orders.json'), 'utf8'));
+if (!Array.isArray(orderFixtures) || !orderFixtures.length || orderFixtures.some((order)=>order.demo !== true)) {
+  throw new Error('V14.7 order fixtures must be explicitly labeled demo');
+}
+console.log('420Exchange V14.1/V14.2/V14.3/V14.4/V14.5/V14.6/V14.7 static qualification passed');

@@ -35,12 +35,17 @@ func (f fakeReviews) GetResponse(string) (model.Response, error) { return model.
 func (f fakeReviews) UpdateResponse(r model.Response, _ uint32) (model.Response, error) { return r, f.err }
 func (f fakeReviews) CreateModeration(r model.ModerationRecord) (model.ModerationRecord, error) { return r, f.err }
 func (f fakeReviews) ListModeration(string) []model.ModerationRecord { return nil }
+func (f fakeReviews) FindByVerifiedInteraction(string) (model.Review, bool) { return model.Review{}, false }
+func (f fakeReviews) CountByAuthorSince(model.SubjectRef, time.Time) uint64 { return 0 }
 
 type fakeDelegations struct{ allowed bool; err error }
 func (f fakeDelegations) CanActFor(context.Context, model.SubjectRef, model.SubjectRef) (bool, error) { return f.allowed, f.err }
 
 type fakeModerators struct{ allowed bool; err error }
 func (f fakeModerators) CanModerate(context.Context, model.SubjectRef, model.Domain) (bool, error) { return f.allowed, f.err }
+
+type fakeAbuseGuard struct{ err error }
+func (f fakeAbuseGuard) CheckCreate(context.Context, model.Review, time.Time) error { return f.err }
 
 type fakeInteractions struct {
 	evidence interactions.Evidence
@@ -66,6 +71,7 @@ func validDeps() Dependencies {
 		Reviews: fakeReviews{},
 		Delegations: fakeDelegations{allowed:true},
 		Moderators: fakeModerators{allowed:true},
+		AbuseGuard: fakeAbuseGuard{},
 		Interactions: fakeInteractions{evidence: interactions.Evidence{
 			Kind:        interactions.KindP2PTransaction,
 			EvidenceRef: "evidence-1",
@@ -90,6 +96,7 @@ func TestNewRequiresAllDependencies(t *testing.T) {
 		{"interactions", func(d *Dependencies) { d.Interactions = nil }},
 		{"delegations", func(d *Dependencies) { d.Delegations = nil }},
 		{"moderators", func(d *Dependencies) { d.Moderators = nil }},
+		{"abuseGuard", func(d *Dependencies) { d.AbuseGuard = nil }},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

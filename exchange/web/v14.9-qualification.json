@@ -1,0 +1,23 @@
+{
+  "schema":"420-exchange-web-v14.9",
+  "status":"IN_QUALIFICATION",
+  "scope":"PORTFOLIO_BALANCES_ACTIVITY",
+  "invariants":[
+    "portfolio balances preserve their canonical wallet/chain source and are never synthesized from trade history",
+    "available and locked balances remain distinct",
+    "unified activity de-duplicates by canonical recordId",
+    "orphaned and replaced records remain inspectable with distinct states",
+    "Explorer links derive only from configured explorer origin plus canonical transaction hash",
+    "no fiat or portfolio valuation is invented without a qualified price source",
+    "demo portfolio data is explicitly labeled and cannot be mistaken for live wallet state"
+  ],
+  "implementation":{
+    "portfolioModel":"exchange/web/core/portfolio.js",
+    "portfolioView":"exchange/web/app.js",
+    "template":"exchange/web/index.html",
+    "balanceFixture":"exchange/web/fixtures/portfolio-balances.json",
+    "activityFixture":"exchange/web/fixtures/portfolio-activity.json",
+    "qualificationTest":"exchange/web/test/portfolio.test.js"
+  },
+  "follow_on":"V14.10 wallet/session integration"
+}

@@ -10,7 +10,6 @@ import (
 	"io"
 	"math/big"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
@@ -127,7 +126,6 @@ func parseQuantity(raw string)(*big.Int,error){
 	if len(raw)<3 || !strings.HasPrefix(raw,"0x") { return nil,errors.New("invalid quantity") }
 	digits:=raw[2:]
 	if len(digits)>1 && digits[0]=='0' { return nil,errors.New("noncanonical quantity") }
-	if _,err:=strconv.ParseUint("0",10,64); err!=nil { return nil,err }
 	v:=new(big.Int)
 	if _,ok:=v.SetString(digits,16); !ok || v.Sign()<0 || v.BitLen()>256 { return nil,errors.New("invalid quantity") }
 	return v,nil

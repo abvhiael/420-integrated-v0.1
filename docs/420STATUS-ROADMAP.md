@@ -1,0 +1,131 @@
+# 420Status Genesis Roadmap
+
+420Status is the public operational-health and incident-presentation layer for 420 Integrated. It aggregates live evidence about network, protocol, infrastructure and application services without becoming canonical authority for consensus, execution, settlement, ownership, validator eligibility, governance, bridge validity, oracle truth or Wallet authorization.
+
+## GEN-10.8 status
+
+- **STATUS-0 — Genesis boundary + executable invariant baseline — COMPLETE**
+- **STATUS-1 — runtime/service scaffold — COMPLETE**
+- **STATUS-2 — component registry + health model — COMPLETE**
+- **STATUS-3 — evidence ingestion + source adapters — COMPLETE**
+- **STATUS-4 — incident lifecycle + severity model — COMPLETE**
+- **STATUS-5 — aggregation, freshness + degraded-state engine — COMPLETE**
+- **STATUS-6 — history, provenance + canonical references — COMPLETE**
+- **STATUS-7 — API + public status feed — COMPLETE**
+- **STATUS-8 — privacy/security + anti-spoofing hardening — COMPLETE**
+- **STATUS-9 — Genesis frontend — COMPLETE**
+- **STATUS-10 — qualification, reconciliation + closeout — IN QUALIFICATION**
+
+## STATUS-0 — Genesis boundary + executable invariant baseline
+
+Freeze service identity `420/service/status/v1`, require no Status-specific Genesis contract and encode the authority, evidence, privacy, incident and provider-neutrality boundaries in executable Go tests and Genesis configuration.
+
+### Genesis invariants
+
+- **STATUS-INV-001** — 420Status owns no canonical protocol state and requires no Status-specific Genesis contract.
+- **STATUS-INV-002** — status observations, dashboards and incidents are operational evidence only and never determine finality, settlement, balances, ownership, validator eligibility, governance state, oracle truth or bridge validity.
+- **STATUS-INV-003** — every component observation identifies network/environment, source, observation time and freshness context.
+- **STATUS-INV-004** — canonical or protocol references are preserved where available, but a status observation cannot rewrite the referenced canonical state.
+- **STATUS-INV-005** — liveness and readiness are distinct; a live component may still be unready, degraded or unavailable for its intended role.
+- **STATUS-INV-006** — conflicting observations fail closed to an explicit unknown/degraded presentation state and are resolved against canonical or authoritative domain sources, never by whichever result makes the dashboard green.
+- **STATUS-INV-007** — incident severity and lifecycle are coordination/presentation state only and cannot weaken consensus, verification, authorization or settlement rules.
+- **STATUS-INV-008** — private keys, signer/JWT credentials, provider secrets, private message content, private Identity data, raw private AI content, raw Attention telemetry and user delivery endpoints are excluded from public status payloads.
+- **STATUS-INV-009** — 420Status failure or unavailability cannot block payments, swaps, bridges, governance, staking, contract interaction or canonical node operation.
+- **STATUS-INV-010** — alternate status clients and operators may independently derive health from the same public/canonical evidence; 420Status is not a monopoly on operational truth.
+- **STATUS-INV-011** — stale observations must be distinguishable from healthy fresh observations and may not remain green indefinitely after evidence expires.
+- **STATUS-INV-012** — planned maintenance is distinct from unplanned incident degradation and cannot disguise an active safety or integrity fault.
+- **STATUS-INV-013** — public incident/history updates are append-only or auditable; corrections and recoveries preserve prior incident evidence rather than silently rewriting history.
+- **STATUS-INV-014** — notifications derived from 420Status remain downstream, opt-in and non-authoritative; failure of 420Notifications does not alter Status evidence or protocol state.
+
+## STATUS-1 — runtime/service scaffold
+
+Implemented configuration validation, service lifecycle, `/healthz` and `/readyz`, chain identity validation, public 420Indexer probing and fail-closed startup. The runtime entrypoint is `status/cmd/status420`.
+
+Readiness is deliberately stricter than process liveness: the configured chain must match the public 420Indexer identity, the Indexer must report ready, and its status evidence must carry a sufficiently recent observation timestamp. Stale, future-dated, missing, wrong-chain or unavailable dependency evidence leaves 420Status unready rather than presenting a misleading healthy surface.
+
+Required environment:
+
+- `STATUS_CHAIN_ID`
+- `STATUS_INDEXER_URL`
+
+Optional environment:
+
+- `STATUS_LISTEN_ADDR` (default `:8422`)
+- `STATUS_REQUEST_TIMEOUT` (default `5s`)
+- `STATUS_MAX_EVIDENCE_AGE` (default `2m`)
+
+Health/readiness responses explicitly report `canonical: false`; service qualification never grants consensus, execution, Wallet or protocol authority.
+
+## STATUS-2 — component registry + health model
+
+Implemented a typed component registry under `status/components` for consensus, execution, RPC, Indexer, Explorer, Search, Analytics, storage/resource services, AI compute, oracle, bridge, Wallet-facing and registered dApp classes.
+
+The registry rejects invalid or duplicate component identities and produces deterministic ID-sorted listings. Component identity includes network and environment so testnet, development and future production observations cannot be silently mixed.
+
+STATUS-2 also defines presentation health separately from process liveness/readiness. Supported presentation states are `healthy`, `degraded`, `unavailable`, `maintenance` and `unknown`. A component cannot validate as healthy unless it is both live and ready; planned maintenance requires an explicit reason; and every snapshot rejects `authoritative: true` so presentation state cannot acquire protocol authority.
+
+## STATUS-3 — evidence ingestion + source adapters
+
+Implemented typed noncanonical observations under `status/evidence`, including component/source/network/environment identity, health/liveness/readiness, observation and expiry timestamps, summaries and preserved protocol/canonical references.
+
+Provider-neutral `Probe` and `ProbeSource` interfaces allow consensus/execution/RPC, 420Indexer, health/readiness and future manifest-backed sources to feed the same evidence pipeline without granting any adapter protocol-write authority. Probe failures are isolated and do not fabricate evidence.
+
+The ingestor binds each observation to a registered component and configured network/environment, rejects unknown components, source-identity mismatches, wrong-network evidence, future-dated observations, invalid freshness windows, partial references and any `canonical: true` authority claim. Latest evidence is retained per component/source with deterministic ordering for downstream aggregation.
+
+## STATUS-4 — incident lifecycle + severity model
+
+Implemented typed incident coordination under `status/incidents` with `INFO`, `WARN`, `MAJOR` and `CRITICAL` severities; `open`, `monitoring` and `resolved` lifecycle states; affected-component sets; evidence references; mitigation notes; planned-maintenance windows; and explicit recovery timestamps.
+
+Incident histories are append-only. The first update must open the incident, updates cannot move backward in time, resolved incidents are immutable, and a resolved record cannot be silently reopened. Corrections therefore require a new auditable incident/update rather than history replacement. Incident updates explicitly reject protocol-authority claims.
+
+Planned maintenance is modeled separately from unplanned incidents and requires a bounded start/end window. The in-memory store returns deterministic active-incident ordering and defensive copies so callers cannot mutate stored history out of band.
+
+## STATUS-5 — aggregation, freshness + degraded-state engine
+
+Implemented deterministic component and network rollups under `status/aggregation`. Component evaluation consumes registered observations and active incidents without mutating protocol state or treating presentation data as canonical.
+
+Freshness is enforced directly from observation expiry. Components with only stale or missing evidence fail closed to `unknown`; conflicting fresh source states also resolve to `unknown` rather than whichever source reports green. A nominally `healthy` claim that is not simultaneously live and ready is downgraded to `degraded`.
+
+Incident severity is applied independently of probe health: `WARN` can degrade an otherwise healthy component, `MAJOR` forces degraded presentation, and `CRITICAL` forces unavailable presentation. Planned maintenance is presented as `maintenance` only when it is not masking an active higher-severity fault.
+
+Network rollups preserve failure isolation. One unavailable or unknown component degrades the aggregate rather than fabricating a network-wide outage; the rollup becomes `unavailable` only when every evaluated component is unavailable, and becomes `unknown` only when every evaluated component is unknown. Component ordering and health counts are deterministic and aggregate results explicitly remain non-authoritative.
+
+## STATUS-6 — history, provenance + canonical references
+
+Implemented append-only noncanonical history under `status/history`. Observation records preserve component/source identity, network/environment, timestamps, health state and canonical/protocol reference values while explicitly rejecting any observation that claims canonical authority.
+
+Incident snapshots preserve the full auditable update sequence, including evidence references and recovery timestamps. History entries receive a single monotonic sequence across observation and incident record types, providing deterministic replay order for rebuildable status views without turning the history store into protocol authority.
+
+All history reads return defensive copies so callers cannot mutate stored provenance or references out of band. Corrections and recoveries are represented as new append-only records rather than destructive rewrites, preserving the evidence chain required by STATUS-INV-013.
+
+## STATUS-7 — API + public status feed
+
+Implemented the read-only public API under `status/api`. `GET /v1/status` exposes the deterministic network rollup and component counts; `GET /v1/components` exposes component presentation status; `GET /v1/incidents` and `GET /v1/maintenance` keep active incidents and planned maintenance explicitly separate; and `GET /v1/history` exposes append-only observation/incident history.
+
+Every public response declares `canonical: false`. Component/network output is derived through the STATUS-5 aggregation engine, so freshness, conflict and incident semantics are preserved rather than recomputed inconsistently at the HTTP layer.
+
+History pagination uses the STATUS-6 monotonic sequence as an opaque cursor. Limits are bounded to 1–200 entries, malformed cursors fail closed with `400`, ordering is deterministic, and the final page does not advertise a continuation cursor. STATUS-7 introduces no public mutation endpoint; incident/operator writes remain outside the public feed surface and therefore cannot acquire protocol authority.
+
+## STATUS-8 — privacy/security + anti-spoofing hardening
+
+Implemented public-surface hardening under `status/security`, `status/api` and `status/runtime`. Public component and network feeds now include only components explicitly registered with `Public: true`; private component observations and affected-component IDs are filtered from active incidents, maintenance and historical feeds. Public observation history uses a dedicated projection that preserves source/network/environment/freshness and canonical/protocol references while never serializing the raw free-form observation summary.
+
+Hostile metadata is bounded and validated: source/reference identifiers reject unsafe control/space characters, reference counts and values are capped, incident public text is bounded and redacted on validation failure, history page size remains capped, and HTTP responses set `nosniff` and `no-store` headers. Existing STATUS-3 source/component/network binding and STATUS-5 fail-closed conflict handling continue to prevent a forged source or a lone optimistic probe from manufacturing a green result.
+
+Runtime probe targets are SSRF-hardened. Configuration rejects loopback, RFC1918/private, link-local, metadata-service, credentialed and non-HTTP(S) targets. DNS answers are revalidated at dial time so hostnames resolving to private/special-purpose addresses fail closed; redirects are revalidated; redirect depth is bounded; and probe response bodies are capped at 1 MiB before JSON decoding. These boundaries, together with bounded pagination/response sizes and failure isolation, provide the Genesis abuse-control surface without granting 420Status any protocol authority.
+
+## STATUS-9 — Genesis frontend
+
+Implemented the dependency-free embedded Genesis frontend under `status/web`. The public page presents a network-health banner, public component grid, liveness/readiness and freshness indicators, conflicting-evidence warnings, active incidents, planned maintenance and append-only history/provenance from the STATUS-7 read-only API.
+
+The frontend consumes only `GET /v1/status`, `GET /v1/incidents`, `GET /v1/maintenance` and `GET /v1/history`; it introduces no mutation/operator surface and refuses API payloads that do not explicitly declare `canonical: false`. Historical observations expose source identity, observation/expiry timestamps and preserved evidence references while STATUS-8 projections keep raw/private payloads out of the browser.
+
+The page carries explicit language that operational health is not consensus, settlement or ownership authority and that a red service state alone does not prove canonical chain failure. Static assets are embedded in the Go binary and served with restrictive CSP, no-referrer, nosniff and disabled camera/microphone/geolocation/payment permissions. Frontend qualification tests verify required Genesis views, read-only behavior, security headers and the expected versioned API dependencies.
+
+## STATUS-10 — qualification, reconciliation + closeout
+
+STATUS-10 is in final qualification. The long-lived STATUS branch was reconciled with current `main` through reconciliation PR #332 before the closeout matrix was added. The reconciliation merge produced head `953580159d95dc44cd6cdd0d4a5164f2eb432ece`; closeout qualification continues on descendants of that reconciled head so no pre-reconciliation result is treated as final evidence.
+
+The dedicated closeout suite under `status/closeout` re-exercises the cross-phase Genesis boundaries together: conflicting source evidence fails closed, component failures remain isolated from canonical network authority, private components and raw free-form observation content stay off public feeds, a restarted service remains unready until it is requalified against fresh dependency evidence, failed dependencies block readiness, SSRF/private-network probe targets fail closed, hostile source identifiers are rejected, and all public presentation remains explicitly noncanonical.
+
+Final closeout requires all repository qualification workflows to pass on one exact final head after the roadmap records qualification evidence. Only that exact qualified head may be merged through PR #325.

@@ -1,0 +1,50 @@
+{
+  "schema": "420-status-genesis-v1",
+  "phase": "STATUS-0",
+  "class": "GENESIS_USER_APP",
+  "serviceId": "420/service/status/v1",
+  "contractsRequired": false,
+  "canonicalStateAuthority": false,
+  "purpose": "Public operational-health and incident presentation for 420 Integrated without becoming authority for canonical protocol or application state.",
+  "sources": {
+    "consensusExecution": "public canonical/readiness evidence",
+    "rpcWss": "public reachability and chain identity",
+    "indexer": "420Indexer public health/readiness/status boundary",
+    "registeredServices": "registered service manifests and public health endpoints",
+    "operatorIncidents": "authenticated operational incident records"
+  },
+  "presentation": {
+    "healthStates": ["healthy", "degraded", "unavailable", "maintenance", "unknown"],
+    "livenessDistinctFromReadiness": true,
+    "freshnessRequired": true,
+    "conflictsFailClosed": true,
+    "incidentHistoryAuditable": true
+  },
+  "privacy": {
+    "privatePayloadsPublic": false,
+    "excludeSigningSecrets": true,
+    "excludeJwtAndProviderCredentials": true,
+    "excludePrivateMessaging": true,
+    "excludePrivateIdentity": true,
+    "excludeRawPrivateAiContent": true,
+    "excludeRawAttentionTelemetry": true,
+    "excludeNotificationEndpoints": true
+  },
+  "authority": {
+    "canDetermineFinality": false,
+    "canDetermineSettlement": false,
+    "canDetermineOwnership": false,
+    "canDetermineValidatorEligibility": false,
+    "canDetermineGovernanceState": false,
+    "canDetermineOracleTruth": false,
+    "canDetermineBridgeValidity": false,
+    "canAuthorizeWalletActions": false,
+    "alternativeStatusClientsAllowed": true,
+    "notificationsAreDownstream": true
+  },
+  "invariants": [
+    "STATUS-INV-001", "STATUS-INV-002", "STATUS-INV-003", "STATUS-INV-004", "STATUS-INV-005",
+    "STATUS-INV-006", "STATUS-INV-007", "STATUS-INV-008", "STATUS-INV-009", "STATUS-INV-010",
+    "STATUS-INV-011", "STATUS-INV-012", "STATUS-INV-013", "STATUS-INV-014"
+  ]
+}

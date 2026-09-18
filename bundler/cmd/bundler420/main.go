@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	rpcapi420 "github.com/420integrated/420-integrated/bundler/rpcapi"
 	runtime420 "github.com/420integrated/420-integrated/bundler/runtime"
 )
 
@@ -35,9 +36,17 @@ func main() {
 	}
 	cancel()
 
+	rpcHandler, err := rpcapi420.NewHandler(rpcapi420.BoundaryBackend{EntryPoint: cfg.EntryPoint})
+	if err != nil { log.Fatal(err) }
+	runtimeHandler := svc.Handler()
+	mux := http.NewServeMux()
+	mux.Handle("/healthz", runtimeHandler)
+	mux.Handle("/readyz", runtimeHandler)
+	mux.Handle("/", rpcHandler)
+
 	server := &http.Server{
 		Addr: cfg.ListenAddr,
-		Handler: svc.Handler(),
+		Handler: mux,
 		ReadHeaderTimeout: 5*time.Second,
 	}
 	errCh := make(chan error,1)

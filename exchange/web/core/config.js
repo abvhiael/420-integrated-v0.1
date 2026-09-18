@@ -32,6 +32,14 @@ export function validateRuntimeConfig(config) {
   if (!['websocket-or-sse', 'websocket', 'sse'].includes(config.api?.transport)) {
     throw new Error('invalid stream transport');
   }
+  if (config.api?.marketSubjects !== undefined) {
+    if (!Array.isArray(config.api.marketSubjects) || config.api.marketSubjects.some((value) => typeof value !== 'string' || value.length === 0)) {
+      throw new Error('invalid market subject list');
+    }
+    if (new Set(config.api.marketSubjects).size !== config.api.marketSubjects.length) {
+      throw new Error('duplicate market subject');
+    }
+  }
   for (const key of REQUIRED_FEATURES) {
     if (typeof config.features?.[key] !== 'boolean') {
       throw new Error(`missing feature flag: ${key}`);

@@ -27,18 +27,18 @@ func NewHTTPExecutionProbe(rawURL string, timeout time.Duration) (*HTTPExecution
 }
 
 type rpcRequest struct {
-	JSONRPC string \`json:"jsonrpc"\`
-	ID int \`json:"id"\`
-	Method string \`json:"method"\`
-	Params any \`json:"params"\`
+	JSONRPC string `json:"jsonrpc"`
+	ID int `json:"id"`
+	Method string `json:"method"`
+	Params any `json:"params"`
 }
 
 type rpcResponse struct {
-	Result json.RawMessage \`json:"result"\`
+	Result json.RawMessage `json:"result"`
 	Error *struct {
-		Code int \`json:"code"\`
-		Message string \`json:"message"\`
-	} \`json:"error"\`
+		Code int `json:"code"`
+		Message string `json:"message"`
+	} `json:"error"`
 }
 
 func (p *HTTPExecutionProbe) call(ctx context.Context, method string, params any, out any) error {
@@ -77,7 +77,7 @@ func (p *HTTPExecutionProbe) EntryPointCode(ctx context.Context, entryPoint stri
 }
 
 func (p *HTTPExecutionProbe) LatestBlockTime(ctx context.Context) (time.Time,error) {
-	var block struct { Timestamp string \`json:"timestamp"\` }
+	var block struct { Timestamp string `json:"timestamp"` }
 	if err:=p.call(ctx,"eth_getBlockByNumber",[]any{"latest",false},&block); err!=nil { return time.Time{},err }
 	if block.Timestamp=="" { return time.Time{},errors.New("latest block timestamp missing") }
 	v,err:=strconv.ParseUint(strings.TrimPrefix(block.Timestamp,"0x"),16,64)

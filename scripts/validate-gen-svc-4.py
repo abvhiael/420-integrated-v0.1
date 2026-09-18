@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -25,6 +26,7 @@ cfg = json.loads(CFG.read_text(encoding="utf-8"))
 loc = json.loads(LOC.read_text(encoding="utf-8"))
 rep = json.loads(REP.read_text(encoding="utf-8"))
 doc = DOC.read_text(encoding="utf-8")
+doc_plain = re.sub(r"[`*_]", "", doc)
 
 require(cfg.get("schema") == "420-classifieds-genesis-v1", "unexpected classifieds schema")
 require(cfg.get("phase") == "GEN-SVC-4", "unexpected phase")
@@ -76,7 +78,7 @@ for i in range(1, 16):
     require(f"GEN-SVC-4.{i}" in doc, f"documentation missing GEN-SVC-4.{i}")
 
 for phrase in ["does not make local classifieds difficult","Acceptance creates transaction intent only","SOLD is a listing state"]:
-    require(phrase in doc, f"documentation missing invariant phrase: {phrase}")
+    require(phrase in doc_plain, f"documentation missing invariant phrase: {phrase}")
 
 if errors:
     print("\n".join("ERROR: " + e for e in errors))

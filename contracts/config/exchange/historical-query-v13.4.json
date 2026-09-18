@@ -1,6 +1,6 @@
 {
   "schema": "420-exchange-historical-query-v13.4",
-  "status": "IN_QUALIFICATION",
+  "status": "QUALIFIED",
   "scope": "HISTORICAL_QUERY_API",
   "model": "A bounded, deterministic read-model query surface over indexed record references. History remains append-only; reorged records are marked inactive rather than deleted, while active-only queries exclude them by default.",
   "history_classes": [
@@ -34,6 +34,12 @@
     "reference_api": "contracts/src/exchange/ExchangeHistoricalQuery420.sol",
     "qualification_test": "contracts/test/ExchangeHistoricalQuery420.t.sol",
     "indexer_dependency": "contracts/src/exchange/ExchangeDeterministicIndexer420.sol"
+  },
+  "qualification": {
+    "exact_head": "17a782146c960d64568e1c43a22c198a57e29f63",
+    "solidity_contracts": 2610,
+    "integrated_qualification": 4141,
+    "docs_qualification": 1851
   },
   "follow_on": "V13.5 live market-data stream"
 }

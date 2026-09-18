@@ -202,3 +202,28 @@ func TestModerationAuditPersists(t *testing.T) {
 	got := reopened.ListModeration("review-1")
 	if len(got) != 1 || got[0].ID != "mod-1" { t.Fatalf("unexpected moderation audit: %+v", got) }
 }
+
+
+func TestAntiSybilRepositoryQueries(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "reviews.json")
+	store, err := OpenFileStore(path)
+	if err != nil { t.Fatal(err) }
+	review := sampleReview()
+	review.Verification = model.VerificationVerified
+	review.InteractionKind = "P2P_TRANSACTION"
+	review.VerifiedInteractionRef = "evidence-unique-1"
+	review.VerificationIssuerID = "420Pay"
+	review.VerifiedOccurredAt = review.CreatedAt.Add(-time.Hour)
+	if _, err := store.Create(review); err != nil { t.Fatal(err) }
+
+	got, ok := store.FindByVerifiedInteraction("evidence-unique-1")
+	if !ok || got.ID != review.ID { t.Fatalf("evidence lookup failed: ok=%v review=%+v",ok,got) }
+	if _, ok := store.FindByVerifiedInteraction("missing"); ok { t.Fatal("unexpected evidence match") }
+
+	if n := store.CountByAuthorSince(review.Author, review.CreatedAt.Add(-time.Minute)); n != 1 {
+		t.Fatalf("author count=%d want=1",n)
+	}
+	if n := store.CountByAuthorSince(review.Author, review.CreatedAt.Add(time.Minute)); n != 0 {
+		t.Fatalf("future author count=%d want=0",n)
+	}
+}

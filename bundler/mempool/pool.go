@@ -110,6 +110,15 @@ func (p *Pool) Get(hash string,now time.Time)(Entry,bool){
 	return entry,ok
 }
 
+func (p *Pool) Remove(hash string) bool {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	entry,ok:=p.byHash[strings.ToLower(hash)]
+	if !ok { return false }
+	p.removeLocked(entry)
+	return true
+}
+
 func (p *Pool) Snapshot(now time.Time) []Entry {
 	p.mu.Lock()
 	defer p.mu.Unlock()

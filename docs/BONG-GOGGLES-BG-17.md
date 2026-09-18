@@ -1,0 +1,102 @@
+# Bong Goggles BG-17 — Moderation Operations
+
+BG-17 turns the canonical `BongGogglesSafetyRegistry420` trust-and-safety primitives into production operator workflows without moving moderation authority into the application/indexer layer.
+
+## Authority boundary
+
+The canonical safety registry remains the only source of truth for reports, cases, actions, appeals and emergency hides. Operator application surfaces may project, sort, filter, annotate locally and prepare transaction intents, but they cannot open/close cases, apply/revoke actions, resolve appeals or set emergency hides without the canonical contract and capability checks succeeding.
+
+Appeal resolution preserves the contract's separation-of-duty rule: the case opener cannot resolve the appeal. Permanent account suspension remains reserved. Emergency hides remain bounded by the canonical maximum window.
+
+## Roadmap
+
+### BG-17.1 — canonical moderation projector + operator queues — COMPLETE AND QUALIFIED
+
+- consume `ReportSubmitted`, `CaseOpened`, `SafetyActionApplied`, `SafetyActionRevoked`, `CaseClosed`, `AppealFiled`, `AppealResolved` and `EmergencyHideSet`;
+- deterministic untriaged-report, open-case and pending-appeal queues;
+- preserve source provenance and non-authoritative semantics;
+- fail closed on impossible local transitions or missing prerequisite projections;
+- deterministic snapshot/restore for restart and replay.
+
+### BG-17.2 — report triage + case-opening preparation — COMPLETE AND QUALIFIED
+
+- deterministic report-detail and linked case/evidence/provenance view models;
+- evidence and rationale surfaces expose only canonical hashes/references, never private bodies;
+- canonical hydration is cross-checked against projected report/case/action/appeal identifiers and subjects;
+- related/duplicate report grouping is presentation-only and never rewrites canonical reports;
+- reason-code to policy-version mapping fails closed when no policy exists;
+- case-open preparation delegates target-scope derivation to the canonical `scopeForTarget` path and requires a positive capability check;
+- prepared intents target `BongGogglesSafetyRegistry420.openCase(reportId, policyVersion)` and remain unsigned/unbroadcast;
+- Wallet confirmation remains mandatory for every canonical write.
+
+### BG-17.3 — case workspace + action preparation — COMPLETE AND QUALIFIED
+
+- case workspace reuses the canonical report/case/action/appeal timeline from BG-17.2;
+- latest and currently active actions are exposed explicitly without becoming authoritative state;
+- apply-action and revoke-action intents require current canonical scope derivation and positive capability checks;
+- temporary interaction/account restrictions require a future expiry at preparation time;
+- permanent account suspension remains unavailable from Bong Goggles and is rejected before intent creation;
+- rationale material remains off-chain; prepared action intents submit only the provided rationale hash;
+- every intent remains unsigned/unbroadcast and requires Wallet confirmation before the canonical contract can mutate state.
+
+### BG-17.4 — appeals workspace + separation of duty — COMPLETE AND QUALIFIED
+
+- deterministic pending-appeal workspace links each appeal to its canonical case projection;
+- operator eligibility explicitly reflects the contract separation-of-duty rule before any intent is prepared;
+- case opener is blocked from appeal-resolution preparation even if a capability check would otherwise pass;
+- uphold/overturn intents require canonical scope derivation plus current appeal-resolve capability;
+- prepared intents target `resolveAppeal(appealId, uphold)` and remain unsigned/unbroadcast behind Wallet confirmation;
+- local intent state is explicitly non-final and requires canonical `AppealResolved` confirmation;
+- overturned canonical events update the projected case/action presentation to resolved/revoked only after chain confirmation.
+
+### BG-17.5 — emergency hide operations — COMPLETE AND QUALIFIED
+
+- deterministic emergency-hide workspace exposes current active/expired presentation state per canonical scope;
+- target scope is supplied by the canonical `scopeForTarget` derivation path before intent preparation;
+- `hiddenUntil` must be strictly in the future and no more than 86,400 seconds beyond the preparation time;
+- emergency-hide intents require current `ACTION_SAFETY_EMERGENCY_HIDE` capability for the derived scope;
+- prepared intents target `setEmergencyHide(targetType, targetId, subjectAccount, hiddenUntil)` and remain unsigned/unbroadcast behind Wallet confirmation;
+- expiry reconciliation deterministically clears stale local presentation state;
+- emergency-hide presentation never claims to delete, edit or otherwise mutate the underlying canonical content object.
+
+### BG-17.6 — policy, capability + audit surfaces — COMPLETE AND QUALIFIED
+
+- deterministic operator capability projection by action/scope with explicit authorized state;
+- denial reasons distinguish missing, expired and revoked capability grants;
+- immutable audit timeline is built strictly from canonical moderation-event provenance and deterministic chain ordering;
+- local operator notes and labels are marked local-only and cannot contain or masquerade as canonical evidence/decisions;
+- canonical write intents can expose Wallet confirmation and Explorer links without making local state authoritative;
+- Explorer links resolve to the transaction when known and otherwise to the canonical safety-registry contract surface.
+
+### BG-17.7 — privacy + evidence handling — COMPLETE AND QUALIFIED
+
+- evidence surfaces are validated as opaque hashes/storage references with content bodies explicitly excluded;
+- moderation telemetry rejects private Messenger/decrypted payload fields rather than attempting to log them;
+- structured telemetry recursively redacts secrets, tokens, credentials, raw payloads and private-content fields;
+- queue/list serializers emit least-data views and omit reporter metadata, provenance and unrelated detail;
+- audit exports include only canonical provenance, opaque evidence references and redacted local annotations/metadata;
+- audit exports explicitly omit secrets, tokens, decrypted/private Messenger material and raw payloads.
+
+### BG-17.8 — abuse, concurrency + recovery hardening — COMPLETE AND QUALIFIED
+
+- prepared canonical-write intents receive deterministic checkpoint-bound fingerprints and exact duplicates are suppressed;
+- resource reservations detect concurrent operator write conflicts before Wallet handoff;
+- prepared intents fail closed when the canonical projection checkpoint has advanced;
+- current capability projection is revalidated at execution time so revoked/expired/missing capability invalidates stale local authorization;
+- canonical/local state comparisons surface divergence without mutating the local projection;
+- snapshot restore is verified deterministically for restart/recovery drills;
+- operator queue reads enforce configurable hard limits, preserve total counts and expose truncation explicitly.
+
+### BG-17.9 — production moderation closeout — RECONCILED, FINAL QUALIFICATION PENDING
+
+- bounded load/latency regression exercises 1,000-report ingestion plus bounded queue materialization under conservative CI budgets;
+- end-to-end report → case → action → appeal overturn → emergency-hide drill verifies canonical projection convergence;
+- separation-of-duty regression proves the case opener remains blocked and a distinct capable resolver can prepare Wallet-bound resolution;
+- replay/restart closeout verifies deterministic full-event-stream reconstruction;
+- production operator runbook covers authority boundaries, capability freshness, concurrency, privacy, divergence/recovery and incident escalation;
+- canonical contract signatures were revalidated against the current `BongGogglesSafetyRegistry420` implementation;
+- phase branch must be reconciled against current `main` and all three exact-head qualification workflows must succeed before merge.
+
+## Current increment
+
+BG-17.1 through BG-17.8 are qualified. BG-17.9 closeout tests and operator runbook are implemented, and the phase branch has been reconciled with `main` at `815519d991c4f79dfa17d2166cf568dc9a0bde66`. Exact-head final qualification remains before the phase can merge.

@@ -1,0 +1,26 @@
+{
+  "schema": "420-exchange-v14-handoff-v13.7",
+  "status": "IN_QUALIFICATION",
+  "scope": "V14_UI_HANDOFF_QUALIFICATION",
+  "model": "Final V13 integration qualification proving that the V14 UI can consume one coherent read contract across snapshot, history, live-stream and public API policy surfaces.",
+  "slos": {
+    "maxCanonicalLagBlocks": 3,
+    "maxLiveStreamLagSeconds": 30
+  },
+  "qualification": [
+    "canonical client schema/package is explicit and versioned as 14.0",
+    "indexer, snapshot and live-stream heads never lead canonical chain head",
+    "all read heads remain within three blocks of canonical head",
+    "stream freshness remains within thirty seconds",
+    "reorg replacement drills bind distinct old/new record IDs",
+    "replacement historical lookup resolves the replacement record",
+    "handoff identity is deterministic and changes with canonical-head context",
+    "V14 is prohibited from inventing protocol state outside V13 read surfaces"
+  ],
+  "implementation": {
+    "handoff_reference": "contracts/src/exchange/ExchangeV14Handoff420.sol",
+    "qualification_test": "contracts/test/ExchangeV14Handoff420.t.sol",
+    "client_schema": "contracts/config/exchange/v14-client-schema.json"
+  },
+  "closeout": "after exact-head qualification, reconcile PR #333 with latest main and merge V13"
+}

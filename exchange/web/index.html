@@ -37,9 +37,9 @@
 
       <section class="hero-card" aria-labelledby="shell-heading">
         <div>
-          <p class="eyebrow">V14.2 design system</p>
-          <h2 id="shell-heading">One visual language for every Exchange surface.</h2>
-          <p class="muted">Protocol meaning is centralized into shared semantic states. Layout can evolve later without changing what canonical, stale, reorged, replaced, degraded, route-health or settlement-health states mean.</p>
+          <p class="eyebrow">V14.4 markets overview</p>
+          <h2 id="shell-heading">Read-only market discovery from qualified V13 snapshots.</h2>
+          <p class="muted">Search, sort and inspect last price, rolling change, volume, liquidity, best bid/ask, route health, settlement health and freshness before transaction surfaces are enabled.</p>
         </div>
         <dl class="runtime-grid">
           <div><dt>Site</dt><dd id="site-origin">—</dd></div>
@@ -55,48 +55,59 @@
 
   <template id="markets-template">
     <div class="section-heading">
-      <div><p class="eyebrow">V14.2 component gallery</p><h2>Exchange design primitives</h2></div>
-      <span class="section-kicker">Shared by later V14 screens</span>
+      <div>
+        <p class="eyebrow">V14.4</p>
+        <h2>Markets</h2>
+      </div>
+      <span id="market-source" class="section-kicker">Loading market source…</span>
     </div>
 
-    <div class="component-grid">
-      <article class="component-card">
-        <h3>Protocol status</h3>
-        <p class="muted">Status is always communicated by label + symbol, never color alone.</p>
-        <div id="status-gallery" class="status-row"></div>
-      </article>
+    <div class="market-toolbar">
+      <label>
+        <span class="label">Search markets</span>
+        <input id="market-search" type="search" placeholder="420, ETH, market ID…" autocomplete="off" />
+      </label>
+      <label>
+        <span class="label">Sort</span>
+        <select id="market-sort">
+          <option value="symbol:asc">Market · A–Z</option>
+          <option value="lastPrice:desc">Last price · high first</option>
+          <option value="change:desc">Change · high first</option>
+          <option value="volume:desc">Volume · high first</option>
+          <option value="liquidity:desc">Liquidity · high first</option>
+        </select>
+      </label>
+      <label class="watch-toggle">
+        <input id="watch-only" type="checkbox" />
+        <span>Watchlist only</span>
+      </label>
+    </div>
 
-      <article class="component-card">
-        <h3>Controls</h3>
-        <div class="button-row">
-          <button class="button-primary" type="button">Primary action</button>
-          <button type="button">Secondary</button>
-          <button class="button-danger" type="button">Destructive</button>
-        </div>
-        <div class="form-grid">
-          <label><span class="label">Market</span><select><option>420 / USD</option></select></label>
-          <label><span class="label">Amount</span><input value="4.20" inputmode="decimal" /></label>
-        </div>
-      </article>
+    <div id="market-summary" class="market-summary" aria-live="polite"></div>
 
-      <article class="component-card">
-        <h3>Market table</h3>
-        <div class="table-wrap">
-          <table class="exchange-table">
-            <thead><tr><th>Market</th><th>Last</th><th>Status</th></tr></thead>
-            <tbody>
-              <tr><td>420 / USD</td><td class="numeric">4.20</td><td id="table-status"></td></tr>
-              <tr><td>420 / ETH</td><td class="numeric">—</td><td id="table-stale"></td></tr>
-            </tbody>
-          </table>
-        </div>
-      </article>
+    <div class="table-wrap market-table-wrap">
+      <table class="exchange-table market-table">
+        <thead>
+          <tr>
+            <th><span class="sr-only">Watchlist</span>★</th>
+            <th>Market</th>
+            <th>Last</th>
+            <th>Change</th>
+            <th>Bid / Ask</th>
+            <th>Volume</th>
+            <th>Liquidity</th>
+            <th>Route</th>
+            <th>Settlement</th>
+            <th>Freshness</th>
+          </tr>
+        </thead>
+        <tbody id="market-rows"></tbody>
+      </table>
+    </div>
 
-      <article class="component-card">
-        <h3>Loading + empty/error semantics</h3>
-        <div class="skeleton" aria-label="Loading market data"></div>
-        <div class="empty-state"><strong>No qualified records yet.</strong><p>Empty is distinct from unavailable.</p></div>
-      </article>
+    <div id="market-empty" class="empty-state" hidden>
+      <strong>No markets match this view.</strong>
+      <p>Change the search, sort, or watchlist filter. Market state is never synthesized to fill an empty result.</p>
     </div>
   </template>
 

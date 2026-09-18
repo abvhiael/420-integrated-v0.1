@@ -231,7 +231,7 @@ Qualification:
 - 420 Integrated Qualification #4228
 - 420Docs Qualification #1913
 
-## V14.3 — V13 client SDK + data access layer — IN QUALIFICATION
+## V14.3 — V13 client SDK + data access layer — QUALIFIED
 
 Deliverables:
 - [x] implement V14 read client against the qualified V13 public surfaces
@@ -269,22 +269,44 @@ Acceptance:
 - reconnect resumes from the last delivered stream sequence
 - no V14.3 read surface adds execution, custody, mint, burn or settlement authority
 
-## V14.4 — Markets overview
+Qualification:
+- exact head `df828c9edc825543719af0faa798f08d5bed165b`
+- 420Exchange Web Verification #41
+- 420 Integrated Qualification #4242
+- 420Docs Qualification #1923
+
+## V14.4 — Markets overview — IN QUALIFICATION
 
 Deliverables:
-- searchable/sortable market list
-- market status
-- last price
-- 24h/rolling change where derivable from qualified snapshots
-- volume and liquidity summaries
-- best bid/ask where available
-- route/settlement-health badges
-- freshness indicator
-- watchlist/favorites stored locally without protocol authority
+- [x] build searchable market list over V13-compatible snapshot data
+- [x] add deterministic sorting by market, last price, rolling change, quote volume and liquidity
+- [x] derive rolling change only from snapshot open + last-trade values
+- [x] display last price, best bid/ask, quote volume and liquidity
+- [x] display route health and settlement health independently
+- [x] display canonical/stale/degraded freshness state explicitly
+- [x] add local-only watchlist/favorites with no protocol authority
+- [x] add watchlist-only filter
+- [x] add explicit demo-data mode when no live V13 API is configured
+- [x] ensure demo fixtures are never presented as live/canonical production state
+- [x] preserve responsive market identity, price and health visibility on narrow screens
+- [x] add executable search/sort/freshness/watchlist qualification tests
+
+Implementation:
+- `exchange/web/core/markets.js`
+- `exchange/web/app.js`
+- `exchange/web/index.html`
+- `exchange/web/styles.css`
+- `exchange/web/fixtures/markets.json`
+- `exchange/web/test/markets.test.js`
+- `exchange/web/v14.4-qualification.json`
 
 Acceptance:
-- every displayed value maps to a V13 source field
-- stale data is visibly marked
+- every displayed value maps to a V13-compatible snapshot field or deterministic derivation
+- stale/degraded data is visibly marked and never silently canonicalized
+- route and settlement health remain independent
+- local watchlists do not mutate protocol state
+- market search does not steal input focus by rebuilding the full view
+- untrusted market labels are rendered as text rather than executable HTML
 - market list remains usable on narrow screens
 
 ## V14.5 — Market detail + charting
@@ -481,6 +503,6 @@ Release gate:
 
 **Now:** V14 — Exchange Web UI. V13 is merged and closed.
 
-**Current step:** V14.3 — V13 client SDK + data access layer — in qualification.
+**Current step:** V14.4 — Markets overview — in qualification.
 
 **V14 completion target:** a production-qualified Exchange UI at `exchange.420integrated.org`, backed by V13 read surfaces and the qualified V1–V12 Exchange execution stack.

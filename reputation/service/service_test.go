@@ -30,6 +30,12 @@ func (f fakeReviews) Create(r model.Review) (model.Review, error) { return r, f.
 func (f fakeReviews) Get(string) (model.Review, error) { return model.Review{}, f.err }
 func (f fakeReviews) Update(r model.Review, _ uint32) (model.Review, error) { return r, f.err }
 func (f fakeReviews) ListBySubject(model.Domain, model.SubjectRef) []model.Review { return nil }
+func (f fakeReviews) CreateResponse(r model.Response) (model.Response, error) { return r, f.err }
+func (f fakeReviews) GetResponse(string) (model.Response, error) { return model.Response{}, f.err }
+func (f fakeReviews) UpdateResponse(r model.Response, _ uint32) (model.Response, error) { return r, f.err }
+
+type fakeDelegations struct{ allowed bool; err error }
+func (f fakeDelegations) CanActFor(context.Context, model.SubjectRef, model.SubjectRef) (bool, error) { return f.allowed, f.err }
 
 type fakeInteractions struct {
 	evidence interactions.Evidence
@@ -53,6 +59,7 @@ func validDeps() Dependencies {
 			ActiveSignals:  3,
 		}},
 		Reviews: fakeReviews{},
+		Delegations: fakeDelegations{allowed:true},
 		Interactions: fakeInteractions{evidence: interactions.Evidence{
 			Kind:        interactions.KindP2PTransaction,
 			EvidenceRef: "evidence-1",
@@ -75,6 +82,7 @@ func TestNewRequiresAllDependencies(t *testing.T) {
 		{"trust", func(d *Dependencies) { d.Trust = nil }},
 		{"reviews", func(d *Dependencies) { d.Reviews = nil }},
 		{"interactions", func(d *Dependencies) { d.Interactions = nil }},
+		{"delegations", func(d *Dependencies) { d.Delegations = nil }},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

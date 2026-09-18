@@ -6,8 +6,8 @@ The Bundler Network is not custody, wallet authorization, consensus, settlement 
 
 ## GEN-11 status
 
-- **GEN-11.0 — architecture + executable invariant baseline — ACTIVE**
-- GEN-11.1 — core bundler runtime/service scaffold — pending
+- **GEN-11.0 — architecture + executable invariant baseline — COMPLETE**
+- **GEN-11.1 — core bundler runtime/service scaffold — IN QUALIFICATION**
 - GEN-11.2 — canonical UserOperation model + hashing — pending
 - GEN-11.3 — public Bundler RPC API — pending
 - GEN-11.4 — deterministic validation + simulation engine — pending
@@ -55,4 +55,28 @@ Freeze service identity `420/service/bundler/v1`, define the non-custodial/non-a
 
 GEN-11.0 is complete when the service boundary, invariant catalogue, UserOperation identity requirements, provider-neutrality requirements and machine-readable Genesis configuration are committed and the repository qualification workflows pass on the exact branch head.
 
-GEN-11.1 then begins the production runtime scaffold: configuration, lifecycle, chain identity, EntryPoint discovery, execution-RPC dependency qualification, health/readiness, graceful shutdown and structured logging.
+GEN-11.0 is fully qualified on exact head `d9853d5d0d1f13950d47e8e8cfe1262a4e32929d` with 420 Integrated Qualification #4138, 420Docs Qualification #1848 and Solidity Contracts #2608 all passing.
+
+## GEN-11.1 — core bundler runtime/service scaffold
+
+Implemented the first production runtime under `bundler/runtime` and entrypoint `bundler/cmd/bundler420`.
+
+The runtime is configured with an explicit chain ID, execution-RPC endpoint and EntryPoint address. Startup qualification fails closed unless the execution dependency reports the configured chain, deployed bytecode exists at the configured EntryPoint and the latest block timestamp is sufficiently recent. A process can therefore be live while still refusing readiness when it is connected to the wrong network, an undeployed/misconfigured EntryPoint, a stale execution endpoint or an unavailable dependency.
+
+Public runtime probes expose only `/healthz` and `/readyz` at this phase. Both identify the service as noncanonical; health explicitly reports that the Bundler is non-custodial and has no wallet-authorization authority. Readiness records the qualified chain, EntryPoint and observed execution-head time but does not claim inclusion or finality.
+
+The execution probe uses bounded JSON-RPC responses and supports `eth_chainId`, `eth_getCode` and `eth_getBlockByNumber` for startup qualification. Configuration reuses the repository's hardened public-target validation boundary so unsafe literal loopback/private RPC targets fail closed. Graceful SIGINT/SIGTERM shutdown and bounded HTTP server timeouts are wired into the production command.
+
+Required environment:
+
+- `BUNDLER_CHAIN_ID`
+- `BUNDLER_EXECUTION_RPC`
+- `BUNDLER_ENTRY_POINT`
+
+Optional environment:
+
+- `BUNDLER_LISTEN_ADDR` (default `:8423`)
+- `BUNDLER_REQUEST_TIMEOUT` (default `5s`)
+- `BUNDLER_MAX_HEAD_AGE` (default `2m`)
+
+GEN-11.1 is complete when all repository qualification workflows pass on one exact head containing this runtime scaffold.

@@ -25,6 +25,8 @@ type ReviewRepository interface {
 	CreateResponse(model.Response) (model.Response, error)
 	GetResponse(string) (model.Response, error)
 	UpdateResponse(model.Response, uint32) (model.Response, error)
+	CreateModeration(model.ModerationRecord) (model.ModerationRecord, error)
+	ListModeration(string) []model.ModerationRecord
 }
 
 type InteractionVerifier interface {
@@ -37,6 +39,7 @@ type Dependencies struct {
 	Reviews      ReviewRepository
 	Interactions InteractionVerifier
 	Delegations  DelegationAuthorizer
+	Moderators   ModeratorAuthorizer
 }
 
 type Service struct {
@@ -45,6 +48,7 @@ type Service struct {
 	reviews      ReviewRepository
 	interactions InteractionVerifier
 	delegations  DelegationAuthorizer
+	moderators   ModeratorAuthorizer
 }
 
 func New(deps Dependencies) (*Service, error) {
@@ -63,12 +67,16 @@ func New(deps Dependencies) (*Service, error) {
 	if deps.Delegations == nil {
 		return nil, errors.New("reputation service requires response delegation authorizer")
 	}
+	if deps.Moderators == nil {
+		return nil, errors.New("reputation service requires moderation authorizer")
+	}
 	return &Service{
 		subjects:     deps.Subjects,
 		trust:        deps.Trust,
 		reviews:      deps.Reviews,
 		interactions: deps.Interactions,
 		delegations:  deps.Delegations,
+		moderators:   deps.Moderators,
 	}, nil
 }
 

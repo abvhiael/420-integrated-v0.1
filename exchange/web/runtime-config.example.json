@@ -15,7 +15,11 @@
     "streamUrl": "wss://api.example.invalid/exchange/stream",
     "transport": "websocket-or-sse",
     "schemaMajor": 14,
-    "schemaMinor": 0
+    "schemaMinor": 0,
+    "marketSubjects": [
+      "0xmarket-subject-id-1",
+      "0xmarket-subject-id-2"
+    ]
   },
   "features": {
     "markets": true,

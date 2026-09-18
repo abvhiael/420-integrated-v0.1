@@ -222,3 +222,8 @@ label { display: grid; gap: 7px; }
 .orders-grid { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(320px,.8fr); gap:var(--space-4); margin-top:var(--space-5); margin-bottom:var(--space-5); }
 .orders-table-wrap { margin-top:var(--space-4); }
 @media (max-width:900px) { .orders-grid { grid-template-columns:1fr; } }
+
+.bridge-grid { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(320px,.8fr); gap:var(--space-4); margin-top:var(--space-5); margin-bottom:var(--space-5); }
+.bridge-health { margin:var(--space-4) 0; }
+.bridge-table-wrap { margin-top:var(--space-4); }
+@media (max-width:900px) { .bridge-grid { grid-template-columns:1fr; } }

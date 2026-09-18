@@ -39,6 +39,15 @@ func (f *fakeReviewService) GetResponse(context.Context, string) (model.Response
 func (f *fakeReviewService) UpdateResponse(context.Context, service.UpdateResponseInput, time.Time) (model.Response, error) {
 	return model.Response{ReviewID:"review-1", Subject:f.review.Subject, Actor:f.review.Subject, BodyRef:"storage://response-2", Version:2, CreatedAt:f.review.CreatedAt, UpdatedAt:f.review.UpdatedAt.Add(time.Minute)}, nil
 }
+func (f *fakeReviewService) ReportReview(context.Context, service.ReportReviewInput, time.Time) (model.ModerationRecord, error) {
+	return model.ModerationRecord{ID:"mod-1", ReviewID:"review-1", Action:model.ModerationReport, Reason:model.ReasonSpam, Actor:model.SubjectRef{Type:"PROFILE",ID:"reporter-1"}, PreviousState:model.ReviewActive, ResultState:model.ReviewActive, State:model.ModerationOpen, Version:1, CreatedAt:f.review.CreatedAt}, nil
+}
+func (f *fakeReviewService) ModerateReview(context.Context, service.ModerateReviewInput, time.Time) (model.ModerationRecord, error) {
+	return model.ModerationRecord{ID:"mod-2", ReviewID:"review-1", Action:model.ModerationHide, Reason:model.ReasonSpam, Actor:model.SubjectRef{Type:"PROFILE",ID:"moderator-1"}, PreviousState:model.ReviewActive, ResultState:model.ReviewHidden, State:model.ModerationHidden, Version:1, CreatedAt:f.review.CreatedAt}, nil
+}
+func (f *fakeReviewService) ListModeration(context.Context, string) ([]model.ModerationRecord, error) {
+	return []model.ModerationRecord{{ID:"mod-1", ReviewID:"review-1", Action:model.ModerationReport, Reason:model.ReasonSpam, Actor:model.SubjectRef{Type:"PROFILE",ID:"reporter-1"}, PreviousState:model.ReviewActive, ResultState:model.ReviewActive, State:model.ModerationOpen, Version:1, CreatedAt:f.review.CreatedAt}}, nil
+}
 
 func testReview() model.Review {
 	now := time.Date(2026,9,18,3,0,0,0,time.UTC)
@@ -150,4 +159,34 @@ func TestResponseRoutesRequireIdempotencyOnWrites(t *testing.T) {
 	res = httptest.NewRecorder()
 	server.Handler().ServeHTTP(res,req)
 	if res.Code != http.StatusOK { t.Fatalf("update response code=%d body=%s",res.Code,res.Body.String()) }
+}
+
+
+func TestModerationRoutesRequireIdempotency(t *testing.T) {
+	fake := &fakeReviewService{review:testReview()}
+	server,_ := New(fake)
+
+	report := []byte(`{"moderationId":"mod-1","actorType":"PROFILE","actorId":"reporter-1","reason":"SPAM"}`)
+	req := httptest.NewRequest(http.MethodPost,"/v1/reviews/review-1/report",bytes.NewReader(report))
+	res := httptest.NewRecorder()
+	server.Handler().ServeHTTP(res,req)
+	if res.Code != http.StatusBadRequest { t.Fatalf("report without idempotency code=%d",res.Code) }
+
+	req = httptest.NewRequest(http.MethodPost,"/v1/reviews/review-1/report",bytes.NewReader(report))
+	req.Header.Set("Idempotency-Key","report-1")
+	res = httptest.NewRecorder()
+	server.Handler().ServeHTTP(res,req)
+	if res.Code != http.StatusCreated { t.Fatalf("report code=%d body=%s",res.Code,res.Body.String()) }
+
+	action := []byte(`{"moderationId":"mod-2","actorType":"PROFILE","actorId":"moderator-1","action":"HIDE","reason":"SPAM"}`)
+	req = httptest.NewRequest(http.MethodPost,"/v1/reviews/review-1/moderation",bytes.NewReader(action))
+	req.Header.Set("Idempotency-Key","mod-2")
+	res = httptest.NewRecorder()
+	server.Handler().ServeHTTP(res,req)
+	if res.Code != http.StatusCreated { t.Fatalf("moderation code=%d body=%s",res.Code,res.Body.String()) }
+
+	req = httptest.NewRequest(http.MethodGet,"/v1/reviews/review-1/moderation",nil)
+	res = httptest.NewRecorder()
+	server.Handler().ServeHTTP(res,req)
+	if res.Code != http.StatusOK { t.Fatalf("moderation list code=%d",res.Code) }
 }

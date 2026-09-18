@@ -1,0 +1,22 @@
+[
+  {
+    "settlementId":"demo-settlement-1",
+    "routeId":"demo-eth-420-in",
+    "state":"PROVEN",
+    "txHash":"0xdemo",
+    "attestationId":"demo-attestation",
+    "proofId":"demo-proof",
+    "retryable":false,
+    "active":true,
+    "demo":true
+  },
+  {
+    "settlementId":"demo-settlement-2",
+    "routeId":"demo-eth-420-in",
+    "state":"FAILED",
+    "retryable":true,
+    "failureReason":"demo verifier timeout",
+    "active":false,
+    "demo":true
+  }
+]

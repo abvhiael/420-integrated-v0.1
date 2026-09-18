@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/420integrated/420-integrated/bundler/gasestimation"
 	"github.com/420integrated/420-integrated/bundler/mempool"
 	"github.com/420integrated/420-integrated/bundler/simulation"
 	"github.com/420integrated/420-integrated/bundler/userop"
@@ -50,6 +51,14 @@ type fakeValidator struct {
 func (f fakeValidator) ValidateAndSimulate(context.Context,userop.PackedUserOperation,time.Time)(simulation.Evidence,error){
 	if f.err!=nil { return simulation.Evidence{},f.err }
 	return f.evidence,nil
+}
+
+type fakeGasEstimator struct {
+	estimate gasestimation.Estimate
+	err error
+}
+func (f fakeGasEstimator) Estimate(context.Context,userop.PackedUserOperation,string)(gasestimation.Estimate,error){
+	return f.estimate,f.err
 }
 
 type fakeAdmissionPool struct {
@@ -139,18 +148,36 @@ func TestBoundaryBackendAdmitsValidatedOperationAndReturnsCanonicalHash(t *testi
 		EntryPoint:"0x1111111111111111111111111111111111111111",
 		Validator:fakeValidator{evidence:simulation.Evidence{UserOpHash:hash,ExecutionSucceeded:true}},
 		Mempool:fakeAdmissionPool{result:mempool.AddResult{Hash:hash}},
+		GasEstimator:fakeGasEstimator{estimate:gasestimation.Estimate{
+			PreVerificationGas:"0x5208",VerificationGasLimit:"0x10000",CallGasLimit:"0x20000",
+		}},
 	}
 	h,_:=NewHandler(b)
 	send:=call(t,h,map[string]any{"jsonrpc":"2.0","id":1,"method":"eth_sendUserOperation","params":[]any{rpcFixture(),b.EntryPoint}})
 	if send["result"]!=hash { t.Fatalf("unexpected send result: %v",send) }
 
 	estimate:=call(t,h,map[string]any{"jsonrpc":"2.0","id":2,"method":"eth_estimateUserOperationGas","params":[]any{rpcFixture(),b.EntryPoint}})
-	errObj:=estimate["error"].(map[string]any)
-	if int(errObj["code"].(float64))!=-32504 { t.Fatalf("unexpected estimate boundary error: %v",estimate) }
+	if _,ok:=estimate["error"]; ok { t.Fatalf("unexpected estimate error: %v",estimate) }
+	estimateResult,ok:=estimate["result"].(map[string]any)
+	if !ok || estimateResult["callGasLimit"]!="0x20000" { t.Fatalf("unexpected estimate result: %v",estimate) }
 
 	receipt:=call(t,h,map[string]any{"jsonrpc":"2.0","id":3,"method":"eth_getUserOperationReceipt","params":[]any{hash}})
 	errObj=receipt["error"].(map[string]any)
 	if int(errObj["code"].(float64))!=-32505 { t.Fatalf("unexpected receipt boundary error: %v",receipt) }
+}
+
+func TestBoundaryBackendMapsGasEstimatorFailure(t *testing.T) {
+	b:=BoundaryBackend{
+		EntryPoint:"0x1111111111111111111111111111111111111111",
+		GasEstimator:fakeGasEstimator{err:errors.New("dependency failed")},
+	}
+	h,_:=NewHandler(b)
+	out:=call(t,h,map[string]any{
+		"jsonrpc":"2.0","id":2,"method":"eth_estimateUserOperationGas",
+		"params":[]any{rpcFixture(),b.EntryPoint},
+	})
+	errObj:=out["error"].(map[string]any)
+	if int(errObj["code"].(float64))!=-32504 { t.Fatalf("unexpected estimation error mapping: %v",out) }
 }
 
 func TestBoundaryBackendRejectsFailedSimulation(t *testing.T) {

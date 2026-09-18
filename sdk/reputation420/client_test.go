@@ -69,9 +69,13 @@ func TestClientSummaryProjectionAndReviewRead(t *testing.T) {
 func TestClientWritesCarryIdempotencyAndTypedBody(t *testing.T) {
 	var sawKey string
 	var sawPath string
+	var sawType string
+	var sawID string
 	var sawBody map[string]any
 	server:=httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter,r *http.Request){
 		sawKey=r.Header.Get("Idempotency-Key")
+		sawType=r.Header.Get("X-420-Subject-Type")
+		sawID=r.Header.Get("X-420-Subject-ID")
 		sawPath=r.URL.Path
 		_ = json.NewDecoder(r.Body).Decode(&sawBody)
 		w.Header().Set("Content-Type","application/json")
@@ -89,6 +93,7 @@ func TestClientWritesCarryIdempotencyAndTypedBody(t *testing.T) {
 	},"idem-1")
 	if err!=nil { t.Fatal(err) }
 	if sawKey!="idem-1" || sawPath!="/v1/reviews" { t.Fatalf("key=%q path=%q",sawKey,sawPath) }
+	if sawType!="PROFILE" || sawID!="buyer-1" { t.Fatalf("principal=%s/%s",sawType,sawID) }
 	if sawBody["subjectId"]!="seller-1" || sawBody["reviewerId"]!="buyer-1" { t.Fatalf("body=%+v",sawBody) }
 
 	if _,err:=client.CreateReview(context.Background(),CreateReviewRequest{},""); err==nil {

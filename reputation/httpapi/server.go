@@ -15,6 +15,7 @@ import (
 
 	"github.com/420integrated/420-integrated/reputation/interactions"
 	"github.com/420integrated/420-integrated/reputation/model"
+	"github.com/420integrated/420-integrated/reputation/projection"
 	"github.com/420integrated/420-integrated/reputation/service"
 )
 
@@ -32,6 +33,7 @@ type ReviewService interface {
 	ModerateReview(context.Context, service.ModerateReviewInput, time.Time) (model.ModerationRecord, error)
 	ListModeration(context.Context, string) ([]model.ModerationRecord, error)
 	ReputationSummary(context.Context, model.Domain, model.SubjectRef) (model.ReputationSummary, error)
+	PublicProjection(context.Context, model.Domain, model.SubjectRef) (projection.Document, error)
 }
 
 type Server struct {
@@ -60,6 +62,7 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("POST /v1/reviews/{reviewId}/moderation", s.moderateReview)
 	mux.HandleFunc("GET /v1/reviews/{reviewId}/moderation", s.listModeration)
 	mux.HandleFunc("GET /v1/reputation/{domain}/{subjectType}/{subjectId}", s.reputationSummary)
+	mux.HandleFunc("GET /v1/reputation/{domain}/{subjectType}/{subjectId}/projection", s.publicProjection)
 	return mux
 }
 
@@ -270,6 +273,16 @@ func (s *Server) reputationSummary(w http.ResponseWriter, r *http.Request) {
 		"summary": summary,
 		"averageRating": summary.AverageRating(),
 	})
+}
+
+func (s *Server) publicProjection(w http.ResponseWriter, r *http.Request) {
+	doc, err := s.service.PublicProjection(
+		r.Context(),
+		model.Domain(strings.ToUpper(strings.TrimSpace(r.PathValue("domain")))),
+		model.SubjectRef{Type:r.PathValue("subjectType"), ID:r.PathValue("subjectId")},
+	)
+	if err != nil { badRequest(w, err); return }
+	writeJSON(w, http.StatusOK, doc)
 }
 
 func readBody(r *http.Request) ([]byte, error) {

@@ -8,5 +8,6 @@ export const ROUTES = Object.freeze([
 ]);
 
 export function routeFor(pathname) {
-  return ROUTES.find((route) => route.path === pathname) ?? ROUTES[0];
+  const safe = typeof pathname === 'string' && pathname.startsWith('/') && !pathname.includes('\\') ? pathname : '/';
+  return ROUTES.find((route) => route.path === safe) ?? ROUTES[0];
 }

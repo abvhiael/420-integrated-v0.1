@@ -4,15 +4,6 @@ V13 turns the hardened execution and bridge state from V1–V12 into determinist
 
 ## V13.1 — Canonical market-data/event schema — QUALIFIED
 
-- [x] define stable market, trade, order, liquidity, bridge and fee event domains
-- [x] bind every indexed record to chain id, block number, block hash, transaction hash and log index
-- [x] define schema-versioned canonical identifiers for markets, assets, routes, adapters and orders
-- [x] prohibit indexer-generated authority or silent mutation of canonical fields
-- [x] establish reorg-safe record identity and replacement semantics
-- [x] define OBSERVED/CANONICAL/ORPHANED/FINALIZED canonicality states
-- [x] define versioned derived-record identity binding source set and aggregation window
-- [x] add executable qualification for idempotence, reorg separation and malformed provenance
-
 Qualification:
 - exact head `7246c8f03e4a3b31d3f6ac86f1a8c9c791202409`
 - Solidity Contracts #2588
@@ -26,18 +17,6 @@ Implementation:
 
 ## V13.2 — Deterministic indexer core — QUALIFIED
 
-- [x] ingest V13.1 record envelopes with deterministic validation
-- [x] idempotent replay by record/provenance identity
-- [x] reject conflicting replay under the same record ID
-- [x] canonical block-hash tracking by chain and height
-- [x] monotonic canonical checkpoint persistence
-- [x] monotonic finalized checkpoint persistence
-- [x] bounded rollback on reorg
-- [x] prohibit rollback across finalized head
-- [x] clear rolled-back canonical block claims so replacement branches can be indexed
-- [x] preserve explicit ORPHANED and FINALIZED record lifecycle states
-- [x] add executable qualification for replay, checkpoint and reorg recovery behavior
-
 Qualification:
 - exact head `4dc287f42115d274e9e2bbf302b49cf2f77dd1bc`
 - Solidity Contracts #2597
@@ -49,31 +28,38 @@ Implementation:
 - `contracts/test/ExchangeDeterministicIndexer420.t.sol`
 - `contracts/config/exchange/indexer-v13.2.json`
 
-## V13.3 — Market snapshots — IN QUALIFICATION
+## V13.3 — Market snapshots — QUALIFIED
 
-- [x] project market configuration/status hashes
-- [x] project best bid/ask when order-book data is available
-- [x] project last trade and rolling OHLCV
-- [x] project base/quote volume and liquidity
-- [x] project route-health and settlement-health state
-- [x] bind snapshot identity to market + source-set hash + aggregation version + window
-- [x] retain prior same-window derivations across reorg replacement
-- [x] reject crossed books, invalid OHLCV and stale windows
-- [x] enforce zeroed trade/book fields when those data classes are unavailable
-- [x] add executable qualification for replay, replacement and validation semantics
+Qualification:
+- exact head `3120c733c1859508d8b56cffc7ecbf2d9bc2dc82`
+- Solidity Contracts #2607
+- 420 Integrated Qualification #4131
+- 420Docs Qualification #1841
 
 Implementation:
 - `contracts/src/exchange/ExchangeMarketSnapshot420.sol`
 - `contracts/test/ExchangeMarketSnapshot420.t.sol`
 - `contracts/config/exchange/market-snapshots-v13.3.json`
 
-## V13.4 — Historical query API
+## V13.4 — Historical query API — IN QUALIFICATION
 
-- trades, fills, orders and cancellations
-- liquidity events
-- bridge deposits/withdrawals and route state
-- fee-routing history
-- cursor pagination and deterministic sort order
+- [x] index trades, fills, orders and cancellations
+- [x] index liquidity events
+- [x] index bridge deposits/withdrawals and route state
+- [x] index fee-routing history
+- [x] append-only record identity with duplicate rejection
+- [x] active/inactive lifecycle for canonical versus orphaned history
+- [x] bounded pagination with 100-record maximum
+- [x] query-bound cursor identity
+- [x] reject cursor reuse across different filters
+- [x] deterministic result order in canonical index insertion order
+- [x] retain inactive/orphaned history for explicit lookup
+- [x] add executable qualification for pagination, filtering and reorg visibility
+
+Implementation:
+- `contracts/src/exchange/ExchangeHistoricalQuery420.sol`
+- `contracts/test/ExchangeHistoricalQuery420.t.sol`
+- `contracts/config/exchange/historical-query-v13.4.json`
 
 ## V13.5 — Live market-data stream
 

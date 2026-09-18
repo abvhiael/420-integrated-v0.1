@@ -162,7 +162,7 @@ func TestBoundaryBackendAdmitsValidatedOperationAndReturnsCanonicalHash(t *testi
 	if !ok || estimateResult["callGasLimit"]!="0x20000" { t.Fatalf("unexpected estimate result: %v",estimate) }
 
 	receipt:=call(t,h,map[string]any{"jsonrpc":"2.0","id":3,"method":"eth_getUserOperationReceipt","params":[]any{hash}})
-	errObj=receipt["error"].(map[string]any)
+	errObj:=receipt["error"].(map[string]any)
 	if int(errObj["code"].(float64))!=-32505 { t.Fatalf("unexpected receipt boundary error: %v",receipt) }
 }
 

@@ -23,6 +23,10 @@ type Submitter interface {
 	Submit(context.Context,string,userop.PackedUserOperation)(string,error)
 }
 
+type SubmissionRecorder interface {
+	RecordSubmission(string,string,string,time.Time) error
+}
+
 type Config struct {
 	EntryPoint string
 	MaxOperations int
@@ -46,6 +50,7 @@ type Builder struct {
 	pool Pool
 	validator Validator
 	submitter Submitter
+	recorder SubmissionRecorder
 }
 
 func New(cfg Config,pool Pool,validator Validator,submitter Submitter)(*Builder,error){
@@ -53,6 +58,10 @@ func New(cfg Config,pool Pool,validator Validator,submitter Submitter)(*Builder,
 	if cfg.MaxOperations<=0 { return nil,errors.New("max bundle operations must be positive") }
 	if pool==nil || validator==nil || submitter==nil { return nil,errors.New("pool, validator and submitter are required") }
 	return &Builder{cfg:cfg,pool:pool,validator:validator,submitter:submitter},nil
+}
+
+func (b *Builder) SetSubmissionRecorder(recorder SubmissionRecorder) {
+	b.recorder=recorder
 }
 
 func (b *Builder) SubmitNext(ctx context.Context,now time.Time)(Result,error){
@@ -71,6 +80,12 @@ func (b *Builder) SubmitNext(ctx context.Context,now time.Time)(Result,error){
 		if err!=nil {
 			result.Failed=append(result.Failed,entry.Hash)
 			continue
+		}
+		if b.recorder!=nil {
+			if err:=b.recorder.RecordSubmission(entry.Hash,txHash,b.cfg.EntryPoint,now.UTC()); err!=nil {
+				result.Failed=append(result.Failed,entry.Hash)
+				continue
+			}
 		}
 		b.pool.Remove(entry.Hash)
 		result.Submitted=append(result.Submitted,Submitted{

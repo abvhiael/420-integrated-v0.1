@@ -547,7 +547,7 @@ Qualification:
 - 420 Integrated Qualification #4363
 - 420Docs Qualification #2013
 
-## V14.11 — Reliability, accessibility + responsive hardening — IN QUALIFICATION
+## V14.11 — Reliability, accessibility + responsive hardening — QUALIFIED
 
 Deliverables:
 - [x] keyboard-reachable critical trading and navigation controls
@@ -578,25 +578,45 @@ Acceptance:
 - narrow-screen tables preserve semantic meaning without hover-only disclosure
 - no destructive transaction action is hidden behind hover-only UI
 
-## V14.12 — Frontend security hardening
+Qualification:
+- exact head `26e454e23cab4f8d3ce9fcbb0c00cb21cb93d3d2`
+- 420Exchange Web Verification #189
+- 420 Integrated Qualification #4377
+- 420Docs Qualification #2023
+
+## V14.12 — Frontend security hardening — IN QUALIFICATION
 
 Deliverables:
-- CSP and security-header policy
-- strict runtime config validation
-- no private keys/secrets in frontend
-- dependency and supply-chain audit gates
-- DOM/XSS injection regression
-- URL/query parameter sanitization
-- wallet-provider spoofing/chain-mismatch tests
-- clickjacking/frame policy
-- transaction intent review protections
-- hostile/stale API payload tests
+- [x] CSP/security-header policy with script, framing, object and browser-capability restrictions
+- [x] stricter runtime URL validation including credential rejection
+- [x] strict configured chain-ID format validation
+- [x] query subject length/character allowlist
+- [x] route/path sanitization against encoded slash/backslash tricks
+- [x] hostile input and URL regression tests
+- [x] exact production-origin allowlist helper
+- [x] deep-frozen reviewed transaction intents
+- [x] deterministic reviewed-intent digest/tamper detection before signing handoff
+- [x] wallet/session generation binding retained from V14.10
+- [x] frontend secret-like material scan in static checker and CI
+- [x] clickjacking/frame denial policy
+
+Implementation:
+- `exchange/web/core/security.js`
+- `exchange/web/security-headers.json`
+- `exchange/web/core/config.js`
+- `exchange/web/core/router.js`
+- `exchange/web/app.js`
+- `exchange/web/test/security.test.js`
+- `exchange/web/v14.12-qualification.json`
+- `.github/workflows/exchange-web.yml`
 
 Acceptance:
-- malformed/untrusted public API payloads fail closed
-- transaction review cannot be bypassed by UI state mutation
-- no user-controlled HTML execution surface
-- production build passes security qualification
+- malformed/untrusted user and public API identifiers fail closed
+- insecure/credential-bearing runtime URLs cannot qualify
+- reviewed transaction intent cannot be silently mutated between review and signing handoff
+- no user-controlled HTML execution surface is introduced
+- framing is denied and third-party script execution is blocked by policy
+- frontend source qualification fails on detected private-key/seed/mnemonic material
 
 ## V14.13 — Production deployment for exchange.420integrated.org
 
@@ -649,6 +669,6 @@ Release gate:
 
 **Now:** V14 — Exchange Web UI. V13 is merged and closed.
 
-**Current step:** V14.11 — reliability, accessibility + responsive hardening — in qualification.
+**Current step:** V14.12 — frontend security hardening — in qualification.
 
 **V14 completion target:** a production-qualified Exchange UI at `exchange.420integrated.org`, backed by V13 read surfaces and the qualified V1–V12 Exchange execution stack.

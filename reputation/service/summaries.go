@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/420integrated/420-integrated/reputation/model"
+	"github.com/420integrated/420-integrated/reputation/projection"
 )
 
 func (s *Service) ReputationSummary(ctx context.Context, domain model.Domain, subject model.SubjectRef) (model.ReputationSummary, error) {
@@ -98,4 +99,13 @@ func (s *Service) ReputationSummary(ctx context.Context, domain model.Domain, su
 		out.UpdatedAt = time.Time{}
 	}
 	return out, nil
+}
+
+
+func (s *Service) PublicProjection(ctx context.Context, domain model.Domain, subject model.SubjectRef) (projection.Document, error) {
+	summary, err := s.ReputationSummary(ctx, domain, subject)
+	if err != nil {
+		return projection.Document{}, err
+	}
+	return (projection.Projector{}).FromSummary(summary)
 }

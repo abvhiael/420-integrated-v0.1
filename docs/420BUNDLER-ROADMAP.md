@@ -9,8 +9,8 @@ The Bundler Network is not custody, wallet authorization, consensus, settlement 
 - **GEN-11.0 — architecture + executable invariant baseline — COMPLETE**
 - **GEN-11.1 — core bundler runtime/service scaffold — COMPLETE**
 - **GEN-11.2 — canonical UserOperation model + hashing — COMPLETE**
-- **GEN-11.3 — public Bundler RPC API — IN QUALIFICATION**
-- GEN-11.4 — deterministic validation + simulation engine — pending
+- **GEN-11.3 — public Bundler RPC API — COMPLETE**
+- **GEN-11.4 — deterministic validation + simulation engine — IN QUALIFICATION**
 - GEN-11.5 — bounded UserOperation mempool — pending
 - GEN-11.6 — bundle construction + EntryPoint submission — pending
 - GEN-11.7 — gas + fee estimation — pending
@@ -125,3 +125,18 @@ The API returns standard JSON-RPC parse/request/method/parameter/internal error 
 GEN-11.3 intentionally does not fabricate later-phase behavior. The production boundary backend exposes the configured EntryPoint immediately, while admission returns `-32500` until the validation/mempool path exists, gas estimation returns `-32504` until GEN-11.7, and receipt tracking returns `-32505` until GEN-11.9. Later phases replace those backend methods without changing the public transport contract.
 
 GEN-11.3 is complete when all repository qualification workflows pass on one exact head containing this RPC boundary.
+
+
+## GEN-11.4 — deterministic validation + simulation engine
+
+Added `bundler/simulation` and wired it into the production `eth_sendUserOperation` boundary ahead of GEN-11.5 mempool admission.
+
+The engine first re-validates the GEN-11.2 canonical UserOperation and derives the exact local `EntryPoint420.getUserOpHash()` equivalent. It then simulates the canonical `handleOp(PackedUserOperation420)` call using the same selector and ABI tuple layout already used by 420Wallet.
+
+Simulation is pinned to immutable execution evidence rather than a moving `latest` reference: the simulator reads the current execution block number/hash/timestamp, then performs `eth_call` against that exact block tag. Successful evidence records chain ID, EntryPoint, UserOperation hash, block number, block hash and observed block time. Missing, stale, future-dated or malformed snapshot evidence fails closed.
+
+A reverted `eth_call`, malformed `handleOp` result, or a valid simulation whose returned execution-success flag is false rejects the operation. Simulation does not mutate canonical chain state and its evidence is explicitly admission evidence rather than finality evidence.
+
+The public RPC boundary now runs this validation/simulation gate before any future admission. A failed simulation returns Bundler error `-32502`. A successful simulation still returns `-32500` because GEN-11.5 mempool admission is not yet implemented; GEN-11.4 deliberately cannot pretend an operation was accepted.
+
+GEN-11.4 is complete when all repository qualification workflows pass on one exact head containing the deterministic simulator and production RPC gate.

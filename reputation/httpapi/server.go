@@ -40,13 +40,21 @@ type Server struct {
 	service ReviewService
 	now     func() time.Time
 	idem    *idempotencyStore
+	auth    Authenticator
 }
 
 func New(svc ReviewService) (*Server, error) {
+	return NewWithAuthenticator(svc, HeaderAuthenticator{})
+}
+
+func NewWithAuthenticator(svc ReviewService, auth Authenticator) (*Server, error) {
 	if svc == nil {
 		return nil, errors.New("reputation review HTTP service is required")
 	}
-	return &Server{service: svc, now: time.Now, idem: newIdempotencyStore()}, nil
+	if auth == nil {
+		return nil, errors.New("reputation authenticator is required")
+	}
+	return &Server{service: svc, now: time.Now, idem: newIdempotencyStore(), auth:auth}, nil
 }
 
 func (s *Server) Handler() http.Handler {
@@ -126,6 +134,8 @@ func (s *Server) create(w http.ResponseWriter, r *http.Request) {
 	}
 	var req createRequest
 	if err := decodeStrict(body, &req); err != nil { badRequest(w, err); return }
+	claimed := model.SubjectRef{Type:req.ReviewerType, ID:req.ReviewerID}
+	if err := requirePrincipal(r, s.auth, claimed); err != nil { unauthorized(w, err); return }
 	review, err := s.service.CreateReview(r.Context(), service.CreateReviewInput{
 		ID: req.ReviewID,
 		Domain: model.Domain(strings.ToUpper(strings.TrimSpace(req.Domain))),
@@ -174,6 +184,8 @@ func (s *Server) update(w http.ResponseWriter, r *http.Request) {
 	}
 	var req updateRequest
 	if err := decodeStrict(body, &req); err != nil { badRequest(w, err); return }
+	claimed := model.SubjectRef{Type:req.ActorType, ID:req.ActorID}
+	if err := requirePrincipal(r, s.auth, claimed); err != nil { unauthorized(w, err); return }
 	review, err := s.service.UpdateReview(r.Context(), service.UpdateReviewInput{
 		ReviewID:r.PathValue("reviewId"), ExpectedVersion:req.ExpectedVersion,
 		Actor:model.SubjectRef{Type:req.ActorType, ID:req.ActorID},
@@ -191,6 +203,8 @@ func (s *Server) createResponse(w http.ResponseWriter, r *http.Request) {
 	if replay, ok, err := s.idem.Get(r.Header.Get("Idempotency-Key"), fp); err != nil { badRequest(w, err); return } else if ok { writeRaw(w, replay.Status, replay.Body); return }
 	var req responseRequest
 	if err := decodeStrict(body, &req); err != nil { badRequest(w, err); return }
+	claimed := model.SubjectRef{Type:req.ActorType, ID:req.ActorID}
+	if err := requirePrincipal(r, s.auth, claimed); err != nil { unauthorized(w, err); return }
 	response, err := s.service.CreateResponse(r.Context(), service.CreateResponseInput{
 		ReviewID:r.PathValue("reviewId"), Actor:model.SubjectRef{Type:req.ActorType, ID:req.ActorID}, BodyRef:req.BodyRef,
 	}, s.now().UTC())
@@ -212,6 +226,8 @@ func (s *Server) updateResponse(w http.ResponseWriter, r *http.Request) {
 	if replay, ok, err := s.idem.Get(r.Header.Get("Idempotency-Key"), fp); err != nil { badRequest(w, err); return } else if ok { writeRaw(w, replay.Status, replay.Body); return }
 	var req responseRequest
 	if err := decodeStrict(body, &req); err != nil { badRequest(w, err); return }
+	claimed := model.SubjectRef{Type:req.ActorType, ID:req.ActorID}
+	if err := requirePrincipal(r, s.auth, claimed); err != nil { unauthorized(w, err); return }
 	response, err := s.service.UpdateResponse(r.Context(), service.UpdateResponseInput{
 		ReviewID:r.PathValue("reviewId"), Actor:model.SubjectRef{Type:req.ActorType, ID:req.ActorID},
 		BodyRef:req.BodyRef, ExpectedVersion:req.ExpectedVersion,
@@ -228,6 +244,8 @@ func (s *Server) reportReview(w http.ResponseWriter, r *http.Request) {
 	if replay, ok, err := s.idem.Get(r.Header.Get("Idempotency-Key"), fp); err != nil { badRequest(w, err); return } else if ok { writeRaw(w, replay.Status, replay.Body); return }
 	var req reportRequest
 	if err := decodeStrict(body, &req); err != nil { badRequest(w, err); return }
+	claimed := model.SubjectRef{Type:req.ActorType, ID:req.ActorID}
+	if err := requirePrincipal(r, s.auth, claimed); err != nil { unauthorized(w, err); return }
 	record, err := s.service.ReportReview(r.Context(), service.ReportReviewInput{
 		ID:req.ModerationID, ReviewID:r.PathValue("reviewId"), Actor:model.SubjectRef{Type:req.ActorType, ID:req.ActorID},
 		Reason:model.ModerationReason(strings.ToUpper(strings.TrimSpace(req.Reason))), BodyRef:req.BodyRef,
@@ -244,6 +262,8 @@ func (s *Server) moderateReview(w http.ResponseWriter, r *http.Request) {
 	if replay, ok, err := s.idem.Get(r.Header.Get("Idempotency-Key"), fp); err != nil { badRequest(w, err); return } else if ok { writeRaw(w, replay.Status, replay.Body); return }
 	var req moderationRequest
 	if err := decodeStrict(body, &req); err != nil { badRequest(w, err); return }
+	claimed := model.SubjectRef{Type:req.ActorType, ID:req.ActorID}
+	if err := requirePrincipal(r, s.auth, claimed); err != nil { unauthorized(w, err); return }
 	record, err := s.service.ModerateReview(r.Context(), service.ModerateReviewInput{
 		ID:req.ModerationID, ReviewID:r.PathValue("reviewId"), Actor:model.SubjectRef{Type:req.ActorType, ID:req.ActorID},
 		Action:model.ModerationAction(strings.ToUpper(strings.TrimSpace(req.Action))),
@@ -309,6 +329,10 @@ func fingerprint(route string, body []byte) string {
 
 func badRequest(w http.ResponseWriter, err error) {
 	writeJSON(w, http.StatusBadRequest, map[string]string{"error":err.Error()})
+}
+
+func unauthorized(w http.ResponseWriter, err error) {
+	writeJSON(w, http.StatusUnauthorized, map[string]string{"error":err.Error()})
 }
 
 func writeJSON(w http.ResponseWriter, status int, value any) {

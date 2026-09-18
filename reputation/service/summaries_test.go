@@ -34,6 +34,8 @@ func (s summaryReviews) GetResponse(id string)(model.Response,error){
 func (s summaryReviews) UpdateResponse(r model.Response,_ uint32)(model.Response,error){ return r,nil }
 func (s summaryReviews) CreateModeration(r model.ModerationRecord)(model.ModerationRecord,error){ return r,nil }
 func (s summaryReviews) ListModeration(id string) []model.ModerationRecord { return s.moderation[id] }
+func (s summaryReviews) FindByVerifiedInteraction(string) (model.Review, bool) { return model.Review{}, false }
+func (s summaryReviews) CountByAuthorSince(model.SubjectRef, time.Time) uint64 { return 0 }
 
 type errSummaryNotFound struct{}
 func (errSummaryNotFound) Error() string { return "not found" }
@@ -53,7 +55,7 @@ func TestReputationSummaryCountsOnlyVisibleRatings(t *testing.T) {
 	svc,err:=New(Dependencies{
 		Subjects:fakeSubjects{}, Trust:fakeTrust{}, Reviews:repo,
 		Interactions:fakeInteractions{}, Delegations:fakeDelegations{allowed:true},
-		Moderators:fakeModerators{allowed:true},
+		Moderators:fakeModerators{allowed:true}, AbuseGuard:fakeAbuseGuard{},
 	})
 	if err!=nil { t.Fatal(err) }
 	got,err:=svc.ReputationSummary(context.Background(),model.DomainClassifieds,subject)

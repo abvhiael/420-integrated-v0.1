@@ -73,7 +73,7 @@ func TestIdempotencyKeyCannotBeReusedForDifferentRequest(t *testing.T) {
 		req.Header.Set("Idempotency-Key","same")
 		res := httptest.NewRecorder()
 		server.Handler().ServeHTTP(res,req)
-		if body == second && res.Code != http.StatusBadRequest { t.Fatalf("code=%d",res.Code) }
+		if bytes.Equal(body, second) && res.Code != http.StatusBadRequest { t.Fatalf("code=%d",res.Code) }
 	}
 }
 

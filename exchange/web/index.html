@@ -169,6 +169,53 @@
     </div>
   </template>
 
+  <template id="swap-template">
+    <div class="section-heading">
+      <div><p class="eyebrow">V14.6</p><h2>Swap</h2></div>
+      <span id="swap-source" class="section-kicker">Loading quote…</span>
+    </div>
+
+    <div class="swap-grid">
+      <section class="component-card">
+        <h3 id="swap-market">Market</h3>
+        <div class="detail-stats">
+          <div><span class="label">Exact input</span><strong id="swap-amount-in">—</strong></div>
+          <div><span class="label">Gross output</span><strong id="swap-gross-out">—</strong></div>
+          <div><span class="label">Exchange fee</span><strong id="swap-fee">—</strong></div>
+          <div><span class="label">Net output</span><strong id="swap-net-out">—</strong></div>
+          <div><span class="label">Final minimum</span><strong id="swap-min-out">—</strong></div>
+        </div>
+
+        <div class="form-grid">
+          <label><span class="label">Recipient</span><input id="swap-recipient" placeholder="0x…" autocomplete="off" /></label>
+          <label><span class="label">Slippage %</span><input id="swap-slippage" type="number" min="0" max="50" step="0.1" value="1" /></label>
+        </div>
+
+        <div class="status-row swap-health">
+          <span id="swap-route-health"></span>
+          <span id="swap-settlement-health"></span>
+          <span class="status-pill">State: <strong id="swap-lifecycle">quoted</strong></span>
+        </div>
+
+        <h3>Route</h3>
+        <ol id="swap-route" class="route-list"></ol>
+        <button id="swap-review" class="button-primary" type="button">Review swap</button>
+      </section>
+
+      <section id="swap-review-panel" class="component-card" hidden>
+        <h3>Transaction review</h3>
+        <dl class="review-grid">
+          <div><dt>Intent</dt><dd id="swap-review-kind">—</dd></div>
+          <div><dt>Recipient</dt><dd id="swap-review-recipient">—</dd></div>
+          <div><dt>Route commitment</dt><dd id="swap-review-route" class="hash">—</dd></div>
+          <div><dt>Minimum received</dt><dd id="swap-review-final-min">—</dd></div>
+        </dl>
+        <p class="muted">Signing remains fail-closed until V14.10 wallet/session integration is qualified. This review cannot submit a transaction by itself.</p>
+        <button id="swap-submit" type="button" disabled>Wallet integration required · V14.10</button>
+      </section>
+    </div>
+  </template>
+
   <template id="gated-template">
     <div class="empty-state">
       <strong id="gated-title">Feature gated</strong>

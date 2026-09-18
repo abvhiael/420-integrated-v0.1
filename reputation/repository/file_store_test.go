@@ -155,3 +155,30 @@ func TestOpenRejectsCorruptOrUnsupportedSnapshot(t *testing.T) {
 		t.Fatal("expected unsupported schema rejection")
 	}
 }
+
+
+func TestResponsePersistsAndVersions(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "reviews.json")
+	store, err := OpenFileStore(path)
+	if err != nil { t.Fatal(err) }
+	if _, err := store.Create(sampleReview()); err != nil { t.Fatal(err) }
+	now := time.Date(2026, 9, 18, 4, 0, 0, 0, time.UTC)
+	response := model.Response{
+		ReviewID:"review-1",
+		Subject:model.SubjectRef{Type:"PROFILE", ID:"seller-1"},
+		Actor:model.SubjectRef{Type:"PROFILE", ID:"seller-1"},
+		BodyRef:"storage://response-1",
+		Version:1, CreatedAt:now, UpdatedAt:now,
+	}
+	if _, err := store.CreateResponse(response); err != nil { t.Fatal(err) }
+	if _, err := store.CreateResponse(response); !errors.Is(err, ErrExists) { t.Fatalf("expected one response per review, got %v", err) }
+	response.BodyRef = "storage://response-2"
+	response.Version = 2
+	response.UpdatedAt = now.Add(time.Minute)
+	if _, err := store.UpdateResponse(response, 1); err != nil { t.Fatal(err) }
+	reopened, err := OpenFileStore(path)
+	if err != nil { t.Fatal(err) }
+	got, err := reopened.GetResponse("review-1")
+	if err != nil { t.Fatal(err) }
+	if got.Version != 2 || got.BodyRef != "storage://response-2" { t.Fatalf("unexpected response: %+v", got) }
+}

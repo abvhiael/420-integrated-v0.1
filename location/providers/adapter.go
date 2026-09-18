@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"strings"
+
+	"github.com/420integrated/420-integrated/location/geo"
 )
 
 type Adapter struct {
@@ -61,13 +63,13 @@ func (a *Adapter) Lookup(ctx context.Context, query PlaceLookupQuery) ([]PlaceCa
 	return validateCandidates(a.provider.Name(), out)
 }
 
-func (a *Adapter) Route(ctx context.Context, req RouteRequest) (route interface{}, provenance Provenance, err error) {
+func (a *Adapter) Route(ctx context.Context, req RouteRequest) (geo.Route, Provenance, error) {
 	r, p, err := a.provider.Route(ctx, req)
 	if err != nil {
-		return nil, Provenance{}, err
+		return geo.Route{}, Provenance{}, err
 	}
 	if err := r.Validate(); err != nil {
-		return nil, Provenance{}, &ProviderError{Kind: ErrorMalformedResult, Provider: a.provider.Name(), Message: err.Error()}
+		return geo.Route{}, Provenance{}, &ProviderError{Kind: ErrorMalformedResult, Provider: a.provider.Name(), Message: err.Error()}
 	}
 	if err := p.Validate(); err != nil {
 		return nil, Provenance{}, &ProviderError{Kind: ErrorMalformedResult, Provider: a.provider.Name(), Message: err.Error()}

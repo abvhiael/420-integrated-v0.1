@@ -11,8 +11,8 @@ The Bundler Network is not custody, wallet authorization, consensus, settlement 
 - **GEN-11.2 — canonical UserOperation model + hashing — COMPLETE**
 - **GEN-11.3 — public Bundler RPC API — COMPLETE**
 - **GEN-11.4 — deterministic validation + simulation engine — COMPLETE**
-- **GEN-11.5 — bounded UserOperation mempool — IN QUALIFICATION**
-- GEN-11.6 — bundle construction + EntryPoint submission — pending
+- **GEN-11.5 — bounded UserOperation mempool — COMPLETE**
+- **GEN-11.6 — bundle construction + EntryPoint submission — IN QUALIFICATION**
 - GEN-11.7 — gas + fee estimation — pending
 - GEN-11.8 — Paymaster integration boundary — pending
 - GEN-11.9 — receipts + lifecycle tracking — pending
@@ -168,3 +168,29 @@ Snapshots are deterministic: admission time is primary ordering and canonical ha
 `eth_sendUserOperation` now returns the canonical UserOperation hash only after local validation/simulation succeeds and the operation is actually admitted (or is an idempotent duplicate already present). Failed simulation, nonce conflict or capacity rejection never returns an acceptance hash.
 
 GEN-11.5 is complete when all repository qualification workflows pass on one exact head containing the bounded mempool and production admission wiring.
+
+
+## GEN-11.6 — bundle construction + EntryPoint submission
+
+Added `bundler/bundle` and wired a production submission loop into `bundler420`.
+
+The current canonical `EntryPoint420` exposes `handleOp(PackedUserOperation420)` rather than a multi-operation `handleOps` ABI. GEN-11.6 therefore defines a **bundle** as a deterministic bounded local selection of mempool candidates that are processed in stable snapshot order and submitted as individual EntryPoint transactions. It does not invent an unsupported atomic batch contract call.
+
+Before any candidate is submitted, the builder reruns the GEN-11.4 validator/simulator against current chain state. Candidates whose simulation evidence is no longer valid are never submitted. Successful revalidation must reproduce the same canonical UserOperation hash already stored in the mempool.
+
+The execution submitter encodes the exact `handleOp` ABI already shared with simulation and submits through `eth_sendTransaction` from a configured operator account. The Bundler stores no operator private key or wallet signing authority; transaction signing remains with the configured execution-node/operator account.
+
+Required GEN-11.6 environment:
+
+- `BUNDLER_SUBMITTER` — nonzero operator transaction sender address
+
+Optional GEN-11.6 environment:
+
+- `BUNDLER_BUNDLE_MAX_OPERATIONS` — maximum candidates selected per cycle, default `16`
+- `BUNDLER_BUNDLE_INTERVAL` — submission cadence, default `2s`
+
+A successful execution-RPC submission yields an operational transaction hash and removes that UserOperation from the active mempool so it cannot be submitted repeatedly. RPC submission failure leaves the operation in the mempool for a later revalidation/retry cycle. Revalidation failure removes the candidate from current admission state. Neither condition is represented as canonical inclusion or finality; receipt/lifecycle evidence remains GEN-11.9 work.
+
+The builder preserves GEN-11.5 deterministic snapshot order, truncates selection to the configured per-cycle bound, records selected/submitted/rejected/failed counts, and emits only operational logs.
+
+GEN-11.6 is complete when all repository qualification workflows pass on one exact head containing deterministic bundle selection, current-state revalidation, EntryPoint transaction submission and the production submission loop.

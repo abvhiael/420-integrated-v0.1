@@ -252,7 +252,7 @@ The operator surface now exposes campaign app/type/scorer/policy/caps/window/act
 
 **Exit:** production operators can safely inspect and operate Bong Goggles campaigns without contract-console guesswork.
 
-### BG-18.11 — telemetry, accounting + reconciliation — IMPLEMENTED, QUALIFICATION PENDING
+### BG-18.11 — telemetry, accounting + reconciliation — COMPLETE AND QUALIFIED
 
 - deterministic reward-event projector for operational reporting;
 - compare local projections to canonical Contribution Registry, Campaign Registry, Distributor and Pool state;
@@ -271,7 +271,7 @@ Operational accounting now rebuilds deterministically from canonical contributio
 
 **Exit:** reward accounting is reconstructable from canonical events and can be independently reconciled.
 
-### BG-18.12 — production closeout
+### BG-18.12 — production closeout — IMPLEMENTED, RECONCILIATION + FINAL QUALIFICATION PENDING
 
 - end-to-end drills:
   - canonical post → contribution → accrue → reserve → claim → release;
@@ -287,6 +287,13 @@ Operational accounting now rebuilds deterministically from canonical contributio
 - reconcile branch with current `main`;
 - exact-head contract, Bong Goggles, Docs and integrated qualification workflows all green;
 - merge only after exact-head qualification.
+
+Implemented in:
+- `services/bong-goggles-indexer-v1/test/rewardProductionCloseout.test.js`
+- `docs/BONG-GOGGLES-BG-18-RUNBOOK.md`
+- `docs/BONG-GOGGLES-BG-18-DEPLOYMENT-CHECKLIST.md`
+
+Closeout drills now exercise canonical post → contribution → accrue → reserve → release/claim payment, discovery/review accounting, budget-exhaustion failure, duplicate-source abuse signaling and deterministic restart/replay accounting. The production runbook defines campaign activation, claims, abuse response, reconciliation, pause/rollback and the canonical authority boundary. The deployment checklist provides separate testnet, staging and production gates, including actual `RewardReleased` → `RewardClaimed` event-order verification and exact-head CI requirements.
 
 **Exit:** BG-18 is production-configured and merge-ready; proceed to BG-19 full web application/public-facing UI.
 

@@ -111,6 +111,64 @@
     </div>
   </template>
 
+  <template id="market-detail-template">
+    <div class="detail-header">
+      <div>
+        <p class="eyebrow">V14.5 market detail</p>
+        <h2 id="detail-pair">Market</h2>
+        <small id="detail-market-id" class="market-id"></small>
+      </div>
+      <div class="status-row">
+        <span id="detail-status"></span>
+        <span id="detail-route"></span>
+        <span id="detail-settlement"></span>
+      </div>
+    </div>
+
+    <div class="detail-stats">
+      <div><span class="label">Last</span><strong id="detail-last">—</strong></div>
+      <div><span class="label">Bid</span><strong id="detail-bid">—</strong></div>
+      <div><span class="label">Ask</span><strong id="detail-ask">—</strong></div>
+      <div><span class="label">Volume</span><strong id="detail-volume">—</strong></div>
+      <div><span class="label">Liquidity</span><strong id="detail-liquidity">—</strong></div>
+    </div>
+
+    <div class="detail-toolbar">
+      <label>
+        <span class="label">Aggregation window</span>
+        <select id="detail-window">
+          <option value="1h">1 hour</option>
+          <option value="4h">4 hours</option>
+          <option value="1d">1 day</option>
+          <option value="7d">7 days</option>
+        </select>
+      </label>
+      <span id="detail-source" class="section-kicker">Loading source…</span>
+    </div>
+
+    <div class="chart-panel">
+      <svg id="detail-chart" class="ohlcv-chart"></svg>
+    </div>
+
+    <div class="detail-grid">
+      <section class="component-card">
+        <h3>Trade tape</h3>
+        <ul id="trade-tape" class="trade-tape"></ul>
+      </section>
+      <section class="component-card">
+        <h3>Source diagnostics</h3>
+        <p class="muted">Chart and activity records preserve canonical record IDs. Reorged records stay inspectable; replacements do not erase prior evidence.</p>
+      </section>
+    </div>
+
+    <div class="table-wrap">
+      <table class="exchange-table">
+        <thead><tr><th>Record</th><th>Price / close</th><th>Amount / volume</th><th>State</th><th>Replacement</th></tr></thead>
+        <tbody id="detail-activity"></tbody>
+      </table>
+    </div>
+  </template>
+
   <template id="gated-template">
     <div class="empty-state">
       <strong id="gated-title">Feature gated</strong>

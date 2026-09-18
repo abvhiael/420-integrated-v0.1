@@ -2,7 +2,7 @@ import { availability, validateRuntimeConfig } from './core/config.js';
 import { createStatusBadge } from './core/design-system.js';
 import { ExchangeDataLayer } from './core/exchange-data.js';
 import { Watchlist, filterMarkets, freshnessState, normalizeMarket, sortMarkets } from './core/markets.js';
-import { candleGeometry, normalizeCandle, normalizeTrade, reconcileHistory } from './core/market-detail.js';
+import { aggregateTradesToCandles, bucketSecondsForWindow, candleGeometry, normalizeCandle, normalizeTrade, reconcileHistory } from './core/market-detail.js';
 import { ROUTES, routeFor } from './core/router.js';
 
 const state = {
@@ -177,13 +177,11 @@ function drawCandles(svg, candles) {
 
 async function loadDetailHistory(subjectId) {
   if (state.marketSource === 'api' && state.dataLayer) {
-    const [candlesPage,tradesPage] = await Promise.all([
-      state.dataLayer.loadHistory({kind:'LIQUIDITY',subjectId,activeOnly:false,limit:100}),
-      state.dataLayer.loadHistory({kind:'TRADE',subjectId,activeOnly:false,limit:100}),
-    ]);
+    const tradesPage = await state.dataLayer.loadHistory({kind:'TRADE',subjectId,activeOnly:false,limit:100});
+    const trades = tradesPage.records.map(normalizeTrade);
     state.detailHistory = {
-      candles: candlesPage.records.map(normalizeCandle),
-      trades: tradesPage.records.map(normalizeTrade),
+      candles: aggregateTradesToCandles(trades, bucketSecondsForWindow(state.detailWindow)),
+      trades,
       source: 'api',
     };
     return;
@@ -343,7 +341,11 @@ document.addEventListener('change', (event) => {
     refreshMarketView();
   } else if (event.target.id === 'detail-window') {
     state.detailWindow = event.target.value;
-    render();
+    if (state.marketSource === 'api' && state.detailSubjectId) {
+      loadDetailHistory(state.detailSubjectId).then(render).catch((error)=>{ state.bootError=error; render(); });
+    } else {
+      render();
+    }
   }
 });
 

@@ -18,7 +18,7 @@ Appeal resolution preserves the contract's separation-of-duty rule: the case ope
 - fail closed on impossible local transitions or missing prerequisite projections;
 - deterministic snapshot/restore for restart and replay.
 
-### BG-17.2 — report triage + case-opening preparation — IMPLEMENTED, QUALIFICATION PENDING
+### BG-17.2 — report triage + case-opening preparation — COMPLETE AND QUALIFIED
 
 - deterministic report-detail and linked case/evidence/provenance view models;
 - evidence and rationale surfaces expose only canonical hashes/references, never private bodies;
@@ -29,14 +29,15 @@ Appeal resolution preserves the contract's separation-of-duty rule: the case ope
 - prepared intents target `BongGogglesSafetyRegistry420.openCase(reportId, policyVersion)` and remain unsigned/unbroadcast;
 - Wallet confirmation remains mandatory for every canonical write.
 
-### BG-17.3 — case workspace + action preparation — NEXT
+### BG-17.3 — case workspace + action preparation — IMPLEMENTED, QUALIFICATION PENDING
 
-- chronological case timeline;
-- active/latest action visibility;
-- capability-aware action/revocation intent preparation;
-- expiry validation for temporary restrictions;
-- permanent suspension remains unavailable from Bong Goggles;
-- rationale material remains off-chain while only its canonical hash is submitted.
+- case workspace reuses the canonical report/case/action/appeal timeline from BG-17.2;
+- latest and currently active actions are exposed explicitly without becoming authoritative state;
+- apply-action and revoke-action intents require current canonical scope derivation and positive capability checks;
+- temporary interaction/account restrictions require a future expiry at preparation time;
+- permanent account suspension remains unavailable from Bong Goggles and is rejected before intent creation;
+- rationale material remains off-chain; prepared action intents submit only the provided rationale hash;
+- every intent remains unsigned/unbroadcast and requires Wallet confirmation before the canonical contract can mutate state.
 
 ### BG-17.4 — appeals workspace + separation of duty
 
@@ -90,4 +91,4 @@ Appeal resolution preserves the contract's separation-of-duty rule: the case ope
 
 ## Current increment
 
-BG-17.1 is qualified. BG-17.2 is implemented on `feature/bong-goggles-bg17-moderation-ops`; exact-head qualification is pending before advancing to BG-17.3.
+BG-17.1 and BG-17.2 are qualified. BG-17.3 is implemented on `feature/bong-goggles-bg17-moderation-ops`; exact-head qualification is pending before advancing to BG-17.4.

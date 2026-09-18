@@ -1,6 +1,6 @@
 {
   "schema": "420-exchange-web-v14.2",
-  "status": "IN_QUALIFICATION",
+  "status": "QUALIFIED",
   "scope": "DESIGN_SYSTEM_VISUAL_LANGUAGE",
   "semanticStates": [
     "canonical",
@@ -46,6 +46,12 @@
     "visualTokens": "exchange/web/styles.css",
     "componentGallery": "exchange/web/index.html",
     "qualificationTest": "exchange/web/test/design-system.test.js"
+  },
+  "qualification": {
+    "exact_head": "1cd92059562a7df0e053151042a9c6832a5404de",
+    "exchange_web_verification": 21,
+    "integrated_qualification": 4228,
+    "docs_qualification": 1913
   },
   "follow_on": "V14.3 V13 client SDK and data access layer"
 }

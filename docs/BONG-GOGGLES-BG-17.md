@@ -68,7 +68,7 @@ Appeal resolution preserves the contract's separation-of-duty rule: the case ope
 - canonical write intents can expose Wallet confirmation and Explorer links without making local state authoritative;
 - Explorer links resolve to the transaction when known and otherwise to the canonical safety-registry contract surface.
 
-### BG-17.7 — privacy + evidence handling — IMPLEMENTED, QUALIFICATION PENDING
+### BG-17.7 — privacy + evidence handling — COMPLETE AND QUALIFIED
 
 - evidence surfaces are validated as opaque hashes/storage references with content bodies explicitly excluded;
 - moderation telemetry rejects private Messenger/decrypted payload fields rather than attempting to log them;
@@ -77,14 +77,15 @@ Appeal resolution preserves the contract's separation-of-duty rule: the case ope
 - audit exports include only canonical provenance, opaque evidence references and redacted local annotations/metadata;
 - audit exports explicitly omit secrets, tokens, decrypted/private Messenger material and raw payloads.
 
-### BG-17.8 — abuse, concurrency + recovery hardening
+### BG-17.8 — abuse, concurrency + recovery hardening — IMPLEMENTED, QUALIFICATION PENDING
 
-- duplicate-intent and stale-state suppression;
-- concurrent operator conflict detection;
-- canonical/local divergence handling;
-- deterministic replay/restart drills;
-- bounded queue and query load;
-- capability changes invalidate stale local authorization immediately.
+- prepared canonical-write intents receive deterministic checkpoint-bound fingerprints and exact duplicates are suppressed;
+- resource reservations detect concurrent operator write conflicts before Wallet handoff;
+- prepared intents fail closed when the canonical projection checkpoint has advanced;
+- current capability projection is revalidated at execution time so revoked/expired/missing capability invalidates stale local authorization;
+- canonical/local state comparisons surface divergence without mutating the local projection;
+- snapshot restore is verified deterministically for restart/recovery drills;
+- operator queue reads enforce configurable hard limits, preserve total counts and expose truncation explicitly.
 
 ### BG-17.9 — production moderation closeout
 
@@ -97,4 +98,4 @@ Appeal resolution preserves the contract's separation-of-duty rule: the case ope
 
 ## Current increment
 
-BG-17.1 through BG-17.6 are qualified. BG-17.7 is implemented on `feature/bong-goggles-bg17-moderation-ops`; exact-head qualification is pending before advancing to BG-17.8.
+BG-17.1 through BG-17.7 are qualified. BG-17.8 is implemented on `feature/bong-goggles-bg17-moderation-ops`; exact-head qualification is pending before advancing to BG-17.9.

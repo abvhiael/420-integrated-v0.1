@@ -22,6 +22,9 @@ type ReviewRepository interface {
 	Get(string) (model.Review, error)
 	Update(model.Review, uint32) (model.Review, error)
 	ListBySubject(model.Domain, model.SubjectRef) []model.Review
+	CreateResponse(model.Response) (model.Response, error)
+	GetResponse(string) (model.Response, error)
+	UpdateResponse(model.Response, uint32) (model.Response, error)
 }
 
 type InteractionVerifier interface {
@@ -33,6 +36,7 @@ type Dependencies struct {
 	Trust        TrustReader
 	Reviews      ReviewRepository
 	Interactions InteractionVerifier
+	Delegations  DelegationAuthorizer
 }
 
 type Service struct {
@@ -40,6 +44,7 @@ type Service struct {
 	trust        TrustReader
 	reviews      ReviewRepository
 	interactions InteractionVerifier
+	delegations  DelegationAuthorizer
 }
 
 func New(deps Dependencies) (*Service, error) {
@@ -55,11 +60,15 @@ func New(deps Dependencies) (*Service, error) {
 	if deps.Interactions == nil {
 		return nil, errors.New("reputation service requires verified interaction verifier")
 	}
+	if deps.Delegations == nil {
+		return nil, errors.New("reputation service requires response delegation authorizer")
+	}
 	return &Service{
 		subjects:     deps.Subjects,
 		trust:        deps.Trust,
 		reviews:      deps.Reviews,
 		interactions: deps.Interactions,
+		delegations:  deps.Delegations,
 	}, nil
 }
 

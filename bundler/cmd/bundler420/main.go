@@ -12,6 +12,7 @@ import (
 
 	bundle420 "github.com/420integrated/420-integrated/bundler/bundle"
 	gasestimation420 "github.com/420integrated/420-integrated/bundler/gasestimation"
+	lifecycle420 "github.com/420integrated/420-integrated/bundler/lifecycle"
 	mempool420 "github.com/420integrated/420-integrated/bundler/mempool"
 	rpcapi420 "github.com/420integrated/420-integrated/bundler/rpcapi"
 	runtime420 "github.com/420integrated/420-integrated/bundler/runtime"
@@ -61,6 +62,10 @@ func main() {
 		MaxOperations: mustIntOr("BUNDLER_BUNDLE_MAX_OPERATIONS", 16),
 	}, pool, validationEngine, submitter)
 	if err != nil { log.Fatal(err) }
+	lifecycleStore := lifecycle420.NewStore()
+	bundleBuilder.SetSubmissionRecorder(lifecycleStore)
+	lifecycleTracker, err := lifecycle420.NewRPC(cfg.ExecutionRPC, cfg.RequestTimeout, lifecycleStore)
+	if err != nil { log.Fatal(err) }
 	gasEstimator, err := gasestimation420.NewRPC(
 		cfg.ExecutionRPC,
 		os.Getenv("BUNDLER_SUBMITTER"),
@@ -72,6 +77,7 @@ func main() {
 		Validator: validationEngine,
 		Mempool: pool,
 		GasEstimator: gasEstimator,
+		Lifecycle: lifecycleTracker,
 	})
 	if err != nil { log.Fatal(err) }
 	runtimeHandler := svc.Handler()

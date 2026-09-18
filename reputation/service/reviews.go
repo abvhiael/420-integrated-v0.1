@@ -79,6 +79,9 @@ func (s *Service) CreateReview(ctx context.Context, in CreateReviewInput, now ti
 	if err := review.Validate(); err != nil {
 		return model.Review{}, err
 	}
+	if err := s.abuseGuard.CheckCreate(ctx, review, now.UTC()); err != nil {
+		return model.Review{}, err
+	}
 	return s.reviews.Create(review)
 }
 

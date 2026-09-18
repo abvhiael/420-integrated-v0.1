@@ -509,7 +509,7 @@ Qualification:
 - 420 Integrated Qualification #4353
 - 420Docs Qualification #2005
 
-## V14.10 — Wallet/session integration — IN QUALIFICATION
+## V14.10 — Wallet/session integration — QUALIFIED
 
 Deliverables:
 - [x] explicit EIP-1193 connect path suitable for 420Wallet/web wallet providers
@@ -541,23 +541,42 @@ Acceptance:
 - an unconfigured production chain ID fails closed rather than accepting an arbitrary network
 - rejected/disconnected sessions remain recoverable without mutating protocol state
 
-## V14.11 — Reliability, accessibility + responsive hardening
+Qualification:
+- exact head `40d778cf947c94310d0ebab5af64c31e9747f4fc`
+- 420Exchange Web Verification #173
+- 420 Integrated Qualification #4363
+- 420Docs Qualification #2013
+
+## V14.11 — Reliability, accessibility + responsive hardening — IN QUALIFICATION
 
 Deliverables:
-- WCAG-oriented keyboard navigation and focus management
-- screen-reader labels for trading controls and status
-- desktop/tablet/mobile regression matrix
-- slow-network/loading tests
-- disconnect/reconnect tests
-- API 429/503/version mismatch handling
-- stale-data and degraded-mode tests
-- empty-market and no-liquidity states
-- browser compatibility qualification
+- [x] keyboard-reachable critical trading and navigation controls
+- [x] visible focus treatment on scrollable table regions and controls
+- [x] polite/assertive live regions for loading, status and failure announcements
+- [x] explicit online/offline connectivity state
+- [x] API 429 and 503 classification as retryable degraded states
+- [x] API version mismatch classification as blocked/non-retryable
+- [x] safe fail-closed degraded error presentation
+- [x] focus restoration helper for rerendered controls
+- [x] mobile table transformation preserving row/header meaning
+- [x] reduced-motion behavior retained from the design system
+- [x] regression tests for loading, failure, connectivity, focus and responsive semantics
+
+Implementation:
+- `exchange/web/core/reliability.js`
+- `exchange/web/app.js`
+- `exchange/web/index.html`
+- `exchange/web/styles.css`
+- `exchange/web/test/reliability.test.js`
+- `exchange/web/v14.11-qualification.json`
 
 Acceptance:
-- critical trading paths are keyboard operable
+- critical trading paths remain keyboard operable
+- state changes are exposed to assistive technology rather than color alone
+- offline/degraded/API failure states remain understandable and fail safe
+- version mismatch cannot silently fall back to incompatible behavior
+- narrow-screen tables preserve semantic meaning without hover-only disclosure
 - no destructive transaction action is hidden behind hover-only UI
-- degraded API states fail safe and remain understandable
 
 ## V14.12 — Frontend security hardening
 
@@ -630,6 +649,6 @@ Release gate:
 
 **Now:** V14 — Exchange Web UI. V13 is merged and closed.
 
-**Current step:** V14.10 — wallet/session integration — in qualification.
+**Current step:** V14.11 — reliability, accessibility + responsive hardening — in qualification.
 
 **V14 completion target:** a production-qualified Exchange UI at `exchange.420integrated.org`, backed by V13 read surfaces and the qualified V1–V12 Exchange execution stack.

@@ -11,8 +11,12 @@ const required = [
   'runtime-config.example.json',
   'core/config.js',
   'core/router.js',
+  'core/design-system.js',
   'test/config.test.js',
   'test/router.test.js',
+  'test/design-system.test.js',
+  'v14.1-qualification.json',
+  'v14.2-qualification.json',
 ];
 
 for (const relative of required) {
@@ -32,7 +36,7 @@ if (config.api?.schemaMajor !== 14 || config.api?.schemaMinor !== 0) {
 }
 
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
-for (const needle of ['420Exchange', 'app-view', 'app.js']) {
+for (const needle of ['420Exchange', 'app-view', 'app.js', 'status-gallery', 'exchange-table']) {
   if (!html.includes(needle)) throw new Error(`application shell missing marker: ${needle}`);
 }
 
@@ -43,5 +47,13 @@ if (!app.includes("fetch('./runtime-config.json'")) {
 if (!app.includes('validateRuntimeConfig')) {
   throw new Error('application does not validate runtime configuration');
 }
+if (!app.includes('createStatusBadge')) {
+  throw new Error('application does not consume shared V14.2 semantic status components');
+}
 
-console.log('420Exchange V14.1 static qualification passed');
+const styles = fs.readFileSync(path.join(root, 'styles.css'), 'utf8');
+for (const needle of ['--positive:', '--warning:', '--info:', '--danger:', ':focus-visible', '.exchange-status', '.exchange-table']) {
+  if (!styles.includes(needle)) throw new Error(`design system missing token or primitive: ${needle}`);
+}
+
+console.log('420Exchange V14.1/V14.2 static qualification passed');

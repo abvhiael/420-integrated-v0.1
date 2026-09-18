@@ -1,0 +1,120 @@
+{
+  "schema": "420-travel-genesis-v1",
+  "phase": "GEN-SVC-3",
+  "status": "IMPLEMENTATION_BASELINE",
+  "serviceId": "420/service/travel/v1",
+  "name": "420Travel",
+  "authority": "REPLACEABLE_APPLICATION",
+  "genesis_scope": [
+    "DESTINATION_SEARCH",
+    "NEARBY_DISCOVERY",
+    "MAP_LIST_HYBRID",
+    "PLACE_PAGES",
+    "EVENT_DISCOVERY",
+    "TRAVEL_REVIEWS",
+    "SAVED_PLACES",
+    "SAVED_TRIPS",
+    "BUSINESS_CLAIMS",
+    "CANNABIS_AWARE_ATTRIBUTES"
+  ],
+  "deferred_scope": [
+    "420BNB_BOOKING",
+    "DOOBR_TRANSACTION_FLOWS",
+    "DYNAMIC_PRICING",
+    "HOST_ESCROW",
+    "CANCELLATION_SETTLEMENT",
+    "INSURANCE_OR_DAMAGE_DEPOSITS"
+  ],
+  "dependencies": {
+    "location": "420/service/location/v1",
+    "events": "420/service/events/v1",
+    "reputation": "420/service/reputation/v1",
+    "search": "420 Search",
+    "registry": "420 Registry",
+    "verify": "420 Verify",
+    "identity": "420 Identity",
+    "notifications": "420 Notifications"
+  },
+  "destination_search": {
+    "inputs": ["TEXT","REGION","NEAR_POINT","CATEGORY","DATE_RANGE"],
+    "result_types": ["DESTINATION","PLACE","EVENT"],
+    "source_rule": "results are non-authoritative discovery projections with explicit provenance"
+  },
+  "place_page": {
+    "required": ["place_id","name","category","location","source","verification","review_summary"],
+    "optional": ["photos","hours","contact","services","attributes","events","business_claim","metadata_uri"],
+    "review_source": "420Reputation",
+    "place_source": "420Location"
+  },
+  "reviews": {
+    "domain": "TRAVEL",
+    "rating_scale": "1_TO_5",
+    "verified_interactions_supported": true,
+    "review_body_storage": "OFF_CHAIN",
+    "subject_response_supported": true,
+    "moderation_owner": "420Reputation/application moderation",
+    "trust_rule": "objective verified-interaction evidence may reference 420Trust; subjective star ratings are not canonical Trust truth"
+  },
+  "cannabis_attributes": {
+    "examples": [
+      "CANNABIS_FRIENDLY",
+      "ONSITE_CONSUMPTION_RULES",
+      "NEARBY_DISPENSARY",
+      "CANNABIS_EVENT",
+      "GROW_RELATED_ATTRACTION"
+    ],
+    "policy": "attributes are jurisdiction/context metadata, not legal advice or permission"
+  },
+  "trip_collections": {
+    "objects": ["TRIP","SAVED_PLACE","SAVED_EVENT"],
+    "visibility": ["PRIVATE","UNLISTED","PUBLIC"],
+    "payment_authority": false
+  },
+  "business_claims": {
+    "requires_identity": true,
+    "registry_link_supported": true,
+    "verify_link_supported": true,
+    "claim_does_not_create_registry_authority": true,
+    "claim_does_not_create_reputation": true
+  },
+  "bnb_compatibility": {
+    "enabled_at_genesis": false,
+    "reserved_objects": ["PROPERTY","HOST","GUEST","AVAILABILITY","NIGHTLY_PRICE","RESERVATION"],
+    "rule": "schema compatibility only; no booking or settlement authority at Genesis"
+  },
+  "doobr_compatibility": {
+    "enabled_at_genesis": false,
+    "reserved_objects": ["SERVICE_PROVIDER","SERVICE_AREA","DELIVERY_WINDOW","SERVICE_REQUEST"],
+    "rule": "hooks only; no transaction workflow at Genesis"
+  },
+  "ui": {
+    "routes": [
+      "/travel",
+      "/travel/map",
+      "/travel/place/:place_id",
+      "/travel/events",
+      "/travel/trips",
+      "/travel/business/claim"
+    ],
+    "components": [
+      "DESTINATION_SEARCH",
+      "MAP_LIST",
+      "PLACE_CARD",
+      "PLACE_PAGE",
+      "REVIEW_SUMMARY",
+      "REVIEW_COMPOSER",
+      "EVENT_CARD",
+      "TRIP_COLLECTION",
+      "BUSINESS_CLAIM"
+    ]
+  },
+  "qualification_journeys": [
+    "DESTINATION_TO_PLACE",
+    "NEARBY_TO_EVENT",
+    "PLACE_TO_VERIFIED_REVIEW",
+    "BUSINESS_CLAIM_WITH_REGISTRY_PROVENANCE",
+    "PRIVATE_TRIP_NOT_PUBLICLY_INDEXED",
+    "DEFERRED_BNB_FAILS_CLOSED",
+    "DEFERRED_DOOBR_FAILS_CLOSED"
+  ]
+}

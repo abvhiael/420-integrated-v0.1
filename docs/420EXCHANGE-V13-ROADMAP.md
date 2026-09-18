@@ -10,11 +10,6 @@ Qualification:
 - 420 Integrated Qualification #4093
 - 420Docs Qualification #1803
 
-Implementation:
-- `contracts/src/exchange/ExchangeMarketDataTypes420.sol`
-- `contracts/test/ExchangeMarketDataTypes420.t.sol`
-- `contracts/config/exchange/market-data-v13.1.json`
-
 ## V13.2 — Deterministic indexer core — QUALIFIED
 
 Qualification:
@@ -22,11 +17,6 @@ Qualification:
 - Solidity Contracts #2597
 - 420 Integrated Qualification #4114
 - 420Docs Qualification #1824
-
-Implementation:
-- `contracts/src/exchange/ExchangeDeterministicIndexer420.sol`
-- `contracts/test/ExchangeDeterministicIndexer420.t.sol`
-- `contracts/config/exchange/indexer-v13.2.json`
 
 ## V13.3 — Market snapshots — QUALIFIED
 
@@ -36,38 +26,39 @@ Qualification:
 - 420 Integrated Qualification #4131
 - 420Docs Qualification #1841
 
-Implementation:
-- `contracts/src/exchange/ExchangeMarketSnapshot420.sol`
-- `contracts/test/ExchangeMarketSnapshot420.t.sol`
-- `contracts/config/exchange/market-snapshots-v13.3.json`
+## V13.4 — Historical query API — QUALIFIED
 
-## V13.4 — Historical query API — IN QUALIFICATION
-
-- [x] index trades, fills, orders and cancellations
-- [x] index liquidity events
-- [x] index bridge deposits/withdrawals and route state
-- [x] index fee-routing history
-- [x] append-only record identity with duplicate rejection
-- [x] active/inactive lifecycle for canonical versus orphaned history
-- [x] bounded pagination with 100-record maximum
-- [x] query-bound cursor identity
-- [x] reject cursor reuse across different filters
-- [x] deterministic result order in canonical index insertion order
-- [x] retain inactive/orphaned history for explicit lookup
-- [x] add executable qualification for pagination, filtering and reorg visibility
+Qualification:
+- exact head `17a782146c960d64568e1c43a22c198a57e29f63`
+- Solidity Contracts #2610
+- 420 Integrated Qualification #4141
+- 420Docs Qualification #1851
 
 Implementation:
 - `contracts/src/exchange/ExchangeHistoricalQuery420.sol`
 - `contracts/test/ExchangeHistoricalQuery420.t.sol`
 - `contracts/config/exchange/historical-query-v13.4.json`
 
-## V13.5 — Live market-data stream
+## V13.5 — Live market-data stream — IN QUALIFICATION
 
-- websocket/SSE event stream
-- ordered sequence numbers
-- reconnect/resume cursor
-- reorg/replacement notifications
-- heartbeat and freshness metadata
+- [x] define transport-neutral WebSocket/SSE stream semantics
+- [x] generate strictly ordered monotonic sequence numbers
+- [x] define schema-bound reconnect/resume cursor
+- [x] resume strictly after the cursor sequence
+- [x] reject malformed/future cursors
+- [x] define DATA, HEARTBEAT, REORG and REPLACEMENT event kinds
+- [x] carry canonical-head, observed-time and emitted-time metadata
+- [x] expose explicit freshness age from latest emitted event
+- [x] prohibit emission-time regression
+- [x] require reorg notices to identify affected records
+- [x] require replacements to bind distinct old/new record IDs
+- [x] bound resume pages to 100 events
+- [x] add executable qualification for ordering, reconnect, heartbeat and reorg semantics
+
+Implementation:
+- `contracts/src/exchange/ExchangeLiveMarketData420.sol`
+- `contracts/test/ExchangeLiveMarketData420.t.sol`
+- `contracts/config/exchange/live-stream-v13.5.json`
 
 ## V13.6 — Public API hardening
 

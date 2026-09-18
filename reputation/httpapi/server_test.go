@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/420integrated/420-integrated/reputation/model"
+	"github.com/420integrated/420-integrated/reputation/projection"
 	"github.com/420integrated/420-integrated/reputation/service"
 )
 
@@ -58,6 +59,15 @@ func (f *fakeReviewService) ReputationSummary(context.Context, model.Domain, mod
 		RatingDistribution:model.RatingDistribution{Five:1},
 		UpdatedAt:f.review.UpdatedAt,
 	}, nil
+}
+func (f *fakeReviewService) PublicProjection(context.Context, model.Domain, model.SubjectRef) (projection.Document, error) {
+	id,_:=projection.StableID(model.DomainClassifieds,f.review.Subject)
+	return projection.Document{
+		Schema:projection.SchemaVersion,ID:id,Domain:model.DomainClassifieds,Subject:f.review.Subject,
+		PolicyVersion:model.ReputationPolicyVersion,VisibleReviewCount:1,UnverifiedReviewCount:1,
+		RatingDistribution:model.RatingDistribution{Five:1},AverageRating:5,UpdatedAt:f.review.UpdatedAt,
+		Source:"420Reputation derived public projection",Authoritative:false,
+	},nil
 }
 
 func testReview() model.Review {
@@ -215,5 +225,21 @@ func TestReputationSummaryRoute(t *testing.T) {
 	}
 	if !bytes.Contains(res.Body.Bytes(), []byte(model.ReputationPolicyVersion)) {
 		t.Fatalf("summary missing policy version: %s",res.Body.String())
+	}
+}
+
+
+func TestPublicProjectionRoute(t *testing.T) {
+	fake := &fakeReviewService{review:testReview()}
+	server,_ := New(fake)
+	req := httptest.NewRequest(http.MethodGet,"/v1/reputation/CLASSIFIEDS/PROFILE/seller-1/projection",nil)
+	res := httptest.NewRecorder()
+	server.Handler().ServeHTTP(res,req)
+	if res.Code != http.StatusOK { t.Fatalf("projection code=%d body=%s",res.Code,res.Body.String()) }
+	if !bytes.Contains(res.Body.Bytes(), []byte(projection.SchemaVersion)) {
+		t.Fatalf("projection missing schema: %s",res.Body.String())
+	}
+	if bytes.Contains(res.Body.Bytes(), []byte("private-history-not-projected")) {
+		t.Fatalf("projection leaked private review history: %s",res.Body.String())
 	}
 }

@@ -45,7 +45,7 @@ Comments are intentionally not rewardable by default. The Phase 15 games layer e
 
 ## Roadmap
 
-### BG-18.1 — production reward inventory + configuration schema
+### BG-18.1 — production reward inventory + configuration schema — IMPLEMENTED, QUALIFICATION PENDING
 
 - freeze the canonical Bong Goggles app ID and all supported contribution-type IDs;
 - inventory verifier, adapter, Contribution Registry, Campaign Registry, Distributor and Pool dependencies;
@@ -54,6 +54,12 @@ Comments are intentionally not rewardable by default. The Phase 15 games layer e
 - distinguish testnet, staging and production configurations;
 - fail closed on unknown contribution types, missing contracts, zero addresses, invalid windows or unsafe caps;
 - no campaign creation or funding is performed from config parsing alone.
+
+Implemented in:
+- `services/bong-goggles-indexer-v1/src/rewardProductionConfig.js`
+- `services/bong-goggles-indexer-v1/test/rewardProductionConfig.test.js`
+
+The configuration surface freezes the canonical app/contribution ID preimages, inventories the verifier/adapter/shared rewards dependencies, validates `testnet`/`staging`/`production` profiles, fails closed on missing/zero contracts, unknown/duplicate contribution types and unsafe enabled campaign caps/windows, and explicitly performs no campaign creation, funding or activation.
 
 **Exit:** one deterministic configuration surface describes every permitted Bong Goggles reward campaign without creating reward authority in the app layer.
 

@@ -34,6 +34,9 @@ const required = [
   'v14.7-qualification.json',
   'v14.8-qualification.json',
   'v14.9-qualification.json',
+  'v14.10-qualification.json',
+  'core/wallet-session.js',
+  'test/wallet-session.test.js',
   'core/portfolio.js',
   'test/portfolio.test.js',
   'fixtures/portfolio-balances.json',
@@ -140,4 +143,8 @@ const portfolioBalances = JSON.parse(fs.readFileSync(path.join(root, 'fixtures/p
 const portfolioActivity = JSON.parse(fs.readFileSync(path.join(root, 'fixtures/portfolio-activity.json'), 'utf8'));
 if (!Array.isArray(portfolioBalances) || !portfolioBalances.length || portfolioBalances.some((row)=>row.demo !== true)) throw new Error('V14.9 balance fixtures must be explicitly labeled demo');
 if (!Array.isArray(portfolioActivity) || !portfolioActivity.length || portfolioActivity.some((row)=>row.demo !== true)) throw new Error('V14.9 activity fixtures must be explicitly labeled demo');
-console.log('420Exchange V14.1/V14.2/V14.3/V14.4/V14.5/V14.6/V14.7/V14.8/V14.9 static qualification passed');
+const walletSession = fs.readFileSync(path.join(root, 'core/wallet-session.js'), 'utf8');
+for (const needle of ['WalletSession', 'WalletController', 'validateNetwork', 'signingGate', 'buildSigningRequest']) {
+  if (!walletSession.includes(needle)) throw new Error(`V14.10 wallet model missing operation: ${needle}`);
+}
+console.log('420Exchange V14.1/V14.2/V14.3/V14.4/V14.5/V14.6/V14.7/V14.8/V14.9/V14.10 static qualification passed');

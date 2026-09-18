@@ -37,9 +37,9 @@
 
       <section class="hero-card" aria-labelledby="shell-heading">
         <div>
-          <p class="eyebrow">V14.1 foundation</p>
-          <h2 id="shell-heading">Exchange application shell is active.</h2>
-          <p class="muted">This phase establishes routing, runtime configuration, responsive layout, degraded-state handling and CI. Trading features remain gated until their roadmap phases qualify.</p>
+          <p class="eyebrow">V14.2 design system</p>
+          <h2 id="shell-heading">One visual language for every Exchange surface.</h2>
+          <p class="muted">Protocol meaning is centralized into shared semantic states. Layout can evolve later without changing what canonical, stale, reorged, replaced, degraded, route-health or settlement-health states mean.</p>
         </div>
         <dl class="runtime-grid">
           <div><dt>Site</dt><dd id="site-origin">—</dd></div>
@@ -55,12 +55,48 @@
 
   <template id="markets-template">
     <div class="section-heading">
-      <div><p class="eyebrow">Read-only bootstrap</p><h2>Markets</h2></div>
-      <span class="section-kicker">V14.4 feature surface</span>
+      <div><p class="eyebrow">V14.2 component gallery</p><h2>Exchange design primitives</h2></div>
+      <span class="section-kicker">Shared by later V14 screens</span>
     </div>
-    <div class="empty-state">
-      <strong>Market UI is not wired yet.</strong>
-      <p>V14.3 will connect the typed V13 client; V14.4 will render qualified market snapshots here.</p>
+
+    <div class="component-grid">
+      <article class="component-card">
+        <h3>Protocol status</h3>
+        <p class="muted">Status is always communicated by label + symbol, never color alone.</p>
+        <div id="status-gallery" class="status-row"></div>
+      </article>
+
+      <article class="component-card">
+        <h3>Controls</h3>
+        <div class="button-row">
+          <button class="button-primary" type="button">Primary action</button>
+          <button type="button">Secondary</button>
+          <button class="button-danger" type="button">Destructive</button>
+        </div>
+        <div class="form-grid">
+          <label><span class="label">Market</span><select><option>420 / USD</option></select></label>
+          <label><span class="label">Amount</span><input value="4.20" inputmode="decimal" /></label>
+        </div>
+      </article>
+
+      <article class="component-card">
+        <h3>Market table</h3>
+        <div class="table-wrap">
+          <table class="exchange-table">
+            <thead><tr><th>Market</th><th>Last</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>420 / USD</td><td class="numeric">4.20</td><td id="table-status"></td></tr>
+              <tr><td>420 / ETH</td><td class="numeric">—</td><td id="table-stale"></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <article class="component-card">
+        <h3>Loading + empty/error semantics</h3>
+        <div class="skeleton" aria-label="Loading market data"></div>
+        <div class="empty-state"><strong>No qualified records yet.</strong><p>Empty is distinct from unavailable.</p></div>
+      </article>
     </div>
   </template>
 

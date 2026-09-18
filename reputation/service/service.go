@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/420integrated/420-integrated/reputation/interactions"
 	"github.com/420integrated/420-integrated/reputation/model"
@@ -27,6 +28,12 @@ type ReviewRepository interface {
 	UpdateResponse(model.Response, uint32) (model.Response, error)
 	CreateModeration(model.ModerationRecord) (model.ModerationRecord, error)
 	ListModeration(string) []model.ModerationRecord
+	FindByVerifiedInteraction(string) (model.Review, bool)
+	CountByAuthorSince(model.SubjectRef, time.Time) uint64
+}
+
+type ReviewAbuseGuard interface {
+	CheckCreate(context.Context, model.Review, time.Time) error
 }
 
 type InteractionVerifier interface {
@@ -40,6 +47,7 @@ type Dependencies struct {
 	Interactions InteractionVerifier
 	Delegations  DelegationAuthorizer
 	Moderators   ModeratorAuthorizer
+	AbuseGuard   ReviewAbuseGuard
 }
 
 type Service struct {
@@ -49,6 +57,7 @@ type Service struct {
 	interactions InteractionVerifier
 	delegations  DelegationAuthorizer
 	moderators   ModeratorAuthorizer
+	abuseGuard   ReviewAbuseGuard
 }
 
 func New(deps Dependencies) (*Service, error) {
@@ -70,6 +79,9 @@ func New(deps Dependencies) (*Service, error) {
 	if deps.Moderators == nil {
 		return nil, errors.New("reputation service requires moderation authorizer")
 	}
+	if deps.AbuseGuard == nil {
+		return nil, errors.New("reputation service requires anti-Sybil guard")
+	}
 	return &Service{
 		subjects:     deps.Subjects,
 		trust:        deps.Trust,
@@ -77,6 +89,7 @@ func New(deps Dependencies) (*Service, error) {
 		interactions: deps.Interactions,
 		delegations:  deps.Delegations,
 		moderators:   deps.Moderators,
+		abuseGuard:   deps.AbuseGuard,
 	}, nil
 }
 

@@ -33,9 +33,14 @@ func (f fakeReviews) ListBySubject(model.Domain, model.SubjectRef) []model.Revie
 func (f fakeReviews) CreateResponse(r model.Response) (model.Response, error) { return r, f.err }
 func (f fakeReviews) GetResponse(string) (model.Response, error) { return model.Response{}, f.err }
 func (f fakeReviews) UpdateResponse(r model.Response, _ uint32) (model.Response, error) { return r, f.err }
+func (f fakeReviews) CreateModeration(r model.ModerationRecord) (model.ModerationRecord, error) { return r, f.err }
+func (f fakeReviews) ListModeration(string) []model.ModerationRecord { return nil }
 
 type fakeDelegations struct{ allowed bool; err error }
 func (f fakeDelegations) CanActFor(context.Context, model.SubjectRef, model.SubjectRef) (bool, error) { return f.allowed, f.err }
+
+type fakeModerators struct{ allowed bool; err error }
+func (f fakeModerators) CanModerate(context.Context, model.SubjectRef, model.Domain) (bool, error) { return f.allowed, f.err }
 
 type fakeInteractions struct {
 	evidence interactions.Evidence
@@ -60,6 +65,7 @@ func validDeps() Dependencies {
 		}},
 		Reviews: fakeReviews{},
 		Delegations: fakeDelegations{allowed:true},
+		Moderators: fakeModerators{allowed:true},
 		Interactions: fakeInteractions{evidence: interactions.Evidence{
 			Kind:        interactions.KindP2PTransaction,
 			EvidenceRef: "evidence-1",
@@ -83,6 +89,7 @@ func TestNewRequiresAllDependencies(t *testing.T) {
 		{"reviews", func(d *Dependencies) { d.Reviews = nil }},
 		{"interactions", func(d *Dependencies) { d.Interactions = nil }},
 		{"delegations", func(d *Dependencies) { d.Delegations = nil }},
+		{"moderators", func(d *Dependencies) { d.Moderators = nil }},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

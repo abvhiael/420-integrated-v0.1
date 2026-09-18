@@ -20,7 +20,8 @@ func Hash(chainID uint64, entryPoint string, op PackedUserOperation) (string, er
 	if err != nil { return "", err }
 
 	words := make([]byte, 0, 32*11)
-	words = append(words, keccak256([]byte(userOperationDomain))[:]...)
+	domainHash := keccak256([]byte(userOperationDomain))
+	words = append(words, domainHash[:]...)
 	words = append(words, uintWord(new(big.Int).SetUint64(chainID))...)
 	words = append(words, addressWord(entry)...)
 	words = append(words, addressWord(c.Sender)...)

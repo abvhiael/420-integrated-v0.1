@@ -10,6 +10,7 @@ import { bridgeQualification, buildBridgeIntent, canSubmitBridge, normalizeBridg
 import { activityState, explorerHref, mergeActivity, normalizeBalance, portfolioSummary } from './core/portfolio.js';
 import { WalletController, WalletSession, buildSigningRequest, signingGate, validateNetwork } from './core/wallet-session.js';
 import { classifyApiFailure, focusAfterRender, onlineState } from './core/reliability.js';
+import { assertReviewedIntentUnchanged, freezeReviewedIntent, reviewedIntentDigest, sanitizePathname, sanitizeSubjectId } from './core/security.js';
 
 const state = {
   config: null,
@@ -22,7 +23,7 @@ const state = {
   marketSort: 'symbol:asc',
   watchOnly: false,
   watchlist: new Watchlist(globalThis.localStorage),
-  detailSubjectId: new URLSearchParams(window.location.search).get('subject'),
+  detailSubjectId: sanitizeSubjectId(new URLSearchParams(window.location.search).get('subject')),
   detailWindow: '1h',
   detailHistory: null,
   swapQuote: null,
@@ -43,6 +44,7 @@ const state = {
   orderDraftGeneration: null,
   bridgeIntentGeneration: null,
   signingRequest: null,
+  signingIntentDigest: null,
   online: globalThis.navigator?.onLine !== false,
   reliabilityMessage: '',
 };
@@ -97,6 +99,7 @@ function invalidateReviewedIntents() {
   state.orderDraftGeneration=null;
   state.bridgeIntentGeneration=null;
   state.signingRequest=null;
+  state.signingIntentDigest=null;
   if(state.swapQuote){
     state.swapLifecycle=new SwapLifecycle();
     state.swapLifecycle.quoted();
@@ -145,13 +148,18 @@ async function connectOrSwitchWallet() {
 }
 
 function reviewSigningRequest(kind,intent,intentGeneration) {
+  const frozenIntent=freezeReviewedIntent(intent);
+  const digest=reviewedIntentDigest(frozenIntent);
+  assertReviewedIntentUnchanged(frozenIntent,digest);
+  state.signingIntentDigest=digest;
   state.signingRequest=buildSigningRequest({
     session:state.walletSession,
     expectedChainId:state.config?.network?.chainId,
-    intent,
+    intent:frozenIntent,
     intentGeneration,
     kind,
   });
+  assertReviewedIntentUnchanged(state.signingRequest.intent,state.signingIntentDigest);
   return state.signingRequest;
 }
 
@@ -748,7 +756,8 @@ function render() {
 }
 
 function navigate(path) {
-  state.route = routeFor(path);
+  const safePath=sanitizePathname(path);
+  state.route = routeFor(safePath);
   history.pushState({}, '', state.route.path);
   if (state.route.id === 'swap' && !state.swapQuote) {
     loadSwapQuote().then(render).catch((error)=>{ state.bootError=error; render(); });
@@ -856,8 +865,9 @@ window.addEventListener('online',()=>{ state.online=true; state.reliabilityMessa
 window.addEventListener('offline',()=>{ state.online=false; state.reliabilityMessage='You are offline. Existing data may become stale.'; render(); });
 
 window.addEventListener('popstate', () => {
-  state.route = routeFor(window.location.pathname);
-  state.detailSubjectId = new URLSearchParams(window.location.search).get('subject');
+  state.route = routeFor(sanitizePathname(window.location.pathname));
+  try { state.detailSubjectId = sanitizeSubjectId(new URLSearchParams(window.location.search).get('subject')); }
+  catch { state.detailSubjectId = null; }
   render();
 });
 

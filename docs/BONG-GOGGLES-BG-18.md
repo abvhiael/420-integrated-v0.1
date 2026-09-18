@@ -82,7 +82,7 @@ The policy catalog covers exactly the seven canonical verifier classes, keeps CO
 
 **Exit:** each existing contribution class has an explicit production enable/disable policy and verified canonical beneficiary/source semantics.
 
-### BG-18.3 — scorer + eligibility policy profiles — IMPLEMENTED, QUALIFICATION PENDING
+### BG-18.3 — scorer + eligibility policy profiles — COMPLETE AND QUALIFIED
 
 - define replaceable scorer contracts/profiles per contribution class;
 - define optional eligibility-policy contracts for anti-abuse and campaign-specific rules;
@@ -100,7 +100,7 @@ Enabled campaign types now require declared replaceable `IRewardScorer420` profi
 
 **Exit:** every enabled contribution type is mapped to a production scorer and, where needed, a production eligibility policy with deterministic tests.
 
-### BG-18.4 — campaign construction + economic caps
+### BG-18.4 — campaign construction + economic caps — IMPLEMENTED, QUALIFICATION PENDING
 
 - build deterministic campaign-plan generation from the BG-18 configuration;
 - bind every campaign to `APP_ID_BONG_GOGGLES` and exactly one contribution type;
@@ -115,6 +115,12 @@ Enabled campaign types now require declared replaceable `IRewardScorer420` profi
 - reject unsafe relationships such as account cap below contribution cap;
 - campaign activation remains sponsor-controlled through `RewardCampaignRegistry420`;
 - production numeric values live in environment/deployment configuration rather than source-code constants.
+
+Implemented in:
+- `services/bong-goggles-indexer-v1/src/rewardCampaignPlans.js`
+- `services/bong-goggles-indexer-v1/test/rewardCampaignPlans.test.js`
+
+Enabled campaigns now produce deterministic inspection-only `RewardCampaignRegistry420.createCampaign` plans bound to the Bong Goggles app ID plus exactly one canonical contribution type. Plans carry scorer, optional policy, per-contribution cap, per-account cap, total budget and campaign window; preflight rejects app/type tampering, unsafe caps/budget and invalid windows. Campaign creation, funding and activation remain false until canonical sponsor actions occur.
 
 **Exit:** campaign plans can be generated, inspected and validated before any on-chain creation or funding occurs.
 

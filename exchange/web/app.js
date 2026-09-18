@@ -71,7 +71,12 @@ function marketRow(market) {
   watch.append(watchButton);
 
   const name = document.createElement('td');
-  name.innerHTML = `<strong>${market.label}</strong><small class="market-id">${market.marketSubjectId}</small>`;
+  const marketName = document.createElement('strong');
+  marketName.textContent = market.label;
+  const marketId = document.createElement('small');
+  marketId.className = 'market-id';
+  marketId.textContent = market.marketSubjectId;
+  name.append(marketName, marketId);
 
   const last = document.createElement('td');
   last.className = 'numeric';
@@ -107,21 +112,28 @@ function marketRow(market) {
   return tr;
 }
 
-function renderMarkets(fragment) {
-  const rows = fragment.querySelector('#market-rows');
+function refreshMarketView(root = document) {
+  const rows = root.querySelector('#market-rows');
+  if (!rows) return;
   const visible = currentMarkets();
   rows.replaceChildren(...visible.map(marketRow));
-  fragment.querySelector('#market-empty').hidden = visible.length !== 0;
-  fragment.querySelector('#market-search').value = state.marketQuery;
-  fragment.querySelector('#market-sort').value = state.marketSort;
-  fragment.querySelector('#watch-only').checked = state.watchOnly;
-  fragment.querySelector('#market-source').textContent = state.marketSource === 'demo'
+  root.querySelector('#market-empty').hidden = visible.length !== 0;
+  const source = root.querySelector('#market-source');
+  if (source) source.textContent = state.marketSource === 'demo'
     ? 'DEMO DATA · not live market state'
     : state.marketSource === 'api'
       ? 'V13 snapshot data'
       : 'No market source configured';
   const watched = state.watchlist.values().size;
-  fragment.querySelector('#market-summary').textContent = `${visible.length} market${visible.length === 1 ? '' : 's'} shown · ${watched} watched`;
+  const summary = root.querySelector('#market-summary');
+  if (summary) summary.textContent = `${visible.length} market${visible.length === 1 ? '' : 's'} shown · ${watched} watched`;
+}
+
+function renderMarkets(fragment) {
+  fragment.querySelector('#market-search').value = state.marketQuery;
+  fragment.querySelector('#market-sort').value = state.marketSort;
+  fragment.querySelector('#watch-only').checked = state.watchOnly;
+  refreshMarketView(fragment);
 }
 
 function renderView() {
@@ -178,24 +190,24 @@ document.addEventListener('click', (event) => {
   const watch = event.target.closest('[data-watch-market]');
   if (watch) {
     state.watchlist.toggle(watch.dataset.watchMarket);
-    render();
+    refreshMarketView();
   }
 });
 
 document.addEventListener('input', (event) => {
   if (event.target.id === 'market-search') {
     state.marketQuery = event.target.value;
-    render();
+    refreshMarketView();
   }
 });
 
 document.addEventListener('change', (event) => {
   if (event.target.id === 'market-sort') {
     state.marketSort = event.target.value;
-    render();
+    refreshMarketView();
   } else if (event.target.id === 'watch-only') {
     state.watchOnly = event.target.checked;
-    render();
+    refreshMarketView();
   }
 });
 

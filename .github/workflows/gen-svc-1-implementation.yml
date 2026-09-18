@@ -1,0 +1,26 @@
+name: GEN-SVC-1 Implementation
+
+on:
+  pull_request:
+    paths:
+      - 'reputation/**'
+      - '.github/workflows/gen-svc-1-implementation.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'reputation/**'
+      - '.github/workflows/gen-svc-1-implementation.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  reputation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+      - run: go test ./reputation/...
+      - run: go vet ./reputation/...

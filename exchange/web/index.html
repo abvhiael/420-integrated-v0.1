@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="description" content="420Exchange — the trading interface for 420 Integrated." />
+  <title>420Exchange</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="exchange-layout">
+    <aside class="sidebar" aria-label="Exchange navigation">
+      <a class="brand" href="/" data-route="/">
+        <span class="brand-mark">420</span>
+        <span><strong>Exchange</strong><small>Integrated</small></span>
+      </a>
+      <nav id="nav" aria-label="Primary"></nav>
+      <div class="sidebar-note">
+        <span class="status-dot"></span>
+        <span>V13 read surfaces · V14 client</span>
+      </div>
+    </aside>
+
+    <main class="shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">420 Integrated · Finance</p>
+          <h1 id="page-title">Markets</h1>
+          <p id="page-subtitle" class="subtitle">Canonical market data, without invented client state.</p>
+        </div>
+        <div class="topbar-actions">
+          <span id="data-state" class="status-pill" data-state="booting">Booting</span>
+          <button id="connect" type="button" disabled>Wallet connection · V14.10</button>
+        </div>
+      </header>
+
+      <section class="hero-card" aria-labelledby="shell-heading">
+        <div>
+          <p class="eyebrow">V14.1 foundation</p>
+          <h2 id="shell-heading">Exchange application shell is active.</h2>
+          <p class="muted">This phase establishes routing, runtime configuration, responsive layout, degraded-state handling and CI. Trading features remain gated until their roadmap phases qualify.</p>
+        </div>
+        <dl class="runtime-grid">
+          <div><dt>Site</dt><dd id="site-origin">—</dd></div>
+          <div><dt>Network</dt><dd id="network-name">—</dd></div>
+          <div><dt>API schema</dt><dd id="api-schema">—</dd></div>
+          <div><dt>Data mode</dt><dd id="data-mode">—</dd></div>
+        </dl>
+      </section>
+
+      <section id="app-view" class="panel" aria-live="polite"></section>
+    </main>
+  </div>
+
+  <template id="markets-template">
+    <div class="section-heading">
+      <div><p class="eyebrow">Read-only bootstrap</p><h2>Markets</h2></div>
+      <span class="section-kicker">V14.4 feature surface</span>
+    </div>
+    <div class="empty-state">
+      <strong>Market UI is not wired yet.</strong>
+      <p>V14.3 will connect the typed V13 client; V14.4 will render qualified market snapshots here.</p>
+    </div>
+  </template>
+
+  <template id="gated-template">
+    <div class="empty-state">
+      <strong id="gated-title">Feature gated</strong>
+      <p id="gated-copy">This route exists in the stable shell but is disabled until its roadmap phase qualifies.</p>
+    </div>
+  </template>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

@@ -6,6 +6,7 @@ import { aggregateTradesToCandles, bucketSecondsForWindow, candleGeometry, norma
 import { ROUTES, routeFor } from './core/router.js';
 import { SwapLifecycle, buildSwapIntent, canSubmitSwap, normalizeRouteQuote } from './core/swap.js';
 import { buildLimitOrderDraft, canCancelOrder, normalizeOrderRecord, signedPriceFloor, validateFillPrice } from './core/limit-orders.js';
+import { bridgeQualification, buildBridgeIntent, canSubmitBridge, normalizeBridgeRoute, normalizeSettlement, settlementProgress } from './core/bridge.js';
 
 const state = {
   config: null,
@@ -27,6 +28,10 @@ const state = {
   swapSlippageBps: 100,
   orders: [],
   orderDraft: null,
+  bridgeRoutes: [],
+  bridgeSettlements: [],
+  bridgeIntent: null,
+  bridgeRouteId: null,
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -403,6 +408,96 @@ function captureOrderDraft() {
   });
 }
 
+
+async function loadBridgeData() {
+  const [routesResponse,settlementsResponse]=await Promise.all([
+    fetch('./fixtures/bridge-routes.json',{cache:'no-store'}),
+    fetch('./fixtures/bridge-settlements.json',{cache:'no-store'}),
+  ]);
+  if(!routesResponse.ok||!settlementsResponse.ok) throw new Error('bridge fixtures unavailable');
+  state.bridgeRoutes=(await routesResponse.json()).map(normalizeBridgeRoute);
+  state.bridgeSettlements=(await settlementsResponse.json()).map(normalizeSettlement);
+  state.bridgeRouteId=state.bridgeRouteId ?? state.bridgeRoutes[0]?.routeId ?? null;
+}
+
+function selectedBridgeRoute() {
+  return state.bridgeRoutes.find((route)=>route.routeId===state.bridgeRouteId) ?? state.bridgeRoutes[0] ?? null;
+}
+
+function renderBridge(fragment) {
+  const route=selectedBridgeRoute();
+  const source=fragment.querySelector('#bridge-source');
+  source.textContent='DEMO BRIDGE STATE · review only';
+
+  const select=fragment.querySelector('#bridge-route-select');
+  select.replaceChildren(...state.bridgeRoutes.map((item)=>{
+    const option=document.createElement('option');
+    option.value=item.routeId;
+    option.textContent=`${item.sourceChain} → ${item.destinationChain} · ${item.routeId}`;
+    return option;
+  }));
+  if(route) select.value=route.routeId;
+
+  const gate=route?bridgeQualification(route):{ok:false,reason:'missing-route'};
+  fragment.querySelector('#bridge-route-id').textContent=route?.routeId ?? '—';
+  fragment.querySelector('#bridge-asset').textContent=route?.canonicalAsset ?? '—';
+  fragment.querySelector('#bridge-adapter').textContent=route?.adapterId ?? '—';
+  fragment.querySelector('#bridge-verifier').textContent=route?.verifierId ?? '—';
+  fragment.querySelector('#bridge-fee').textContent=formatNumber(route?.bridgeFee ?? null);
+  fragment.querySelector('#bridge-route-status').append(createStatusBadge(document,gate.ok?'routeHealthy':'routeUnhealthy'));
+  fragment.querySelector('#bridge-settlement-status').append(createStatusBadge(document,route?.settlementHealthy?'settlementHealthy':'settlementUnhealthy'));
+  fragment.querySelector('#bridge-availability').textContent=gate.ok?'Qualified':'Unavailable: '+gate.reason;
+
+  const review=fragment.querySelector('#bridge-review');
+  review.addEventListener('click',()=>{
+    try{
+      const amount=fragment.querySelector('#bridge-amount').value;
+      const recipient=fragment.querySelector('#bridge-recipient').value.trim();
+      state.bridgeIntent=buildBridgeIntent(route,{amount,recipient});
+      render();
+    }catch(error){
+      state.bootError=error; render();
+    }
+  });
+
+  const panel=fragment.querySelector('#bridge-review-panel');
+  panel.hidden=!state.bridgeIntent;
+  if(state.bridgeIntent){
+    fragment.querySelector('#bridge-review-kind').textContent=state.bridgeIntent.kind;
+    fragment.querySelector('#bridge-review-route').textContent=state.bridgeIntent.routeId;
+    fragment.querySelector('#bridge-review-asset').textContent=state.bridgeIntent.canonicalAsset;
+    fragment.querySelector('#bridge-review-recipient').textContent=state.bridgeIntent.recipient;
+    fragment.querySelector('#bridge-review-amount').textContent=String(state.bridgeIntent.amount);
+    fragment.querySelector('#bridge-review-fee').textContent=String(state.bridgeIntent.quotedBridgeFee);
+  }
+
+  const submit=fragment.querySelector('#bridge-submit');
+  const submitGate=canSubmitBridge({route,intent:state.bridgeIntent,walletReady:false});
+  submit.disabled=!submitGate.ok;
+  submit.textContent=submitGate.ok?'Submit bridge transaction':'Wallet integration required · V14.10';
+
+  const settlements=fragment.querySelector('#bridge-settlements');
+  settlements.replaceChildren(...state.bridgeSettlements.map((record)=>{
+    const tr=document.createElement('tr');
+    const progress=settlementProgress(record);
+    const values=[
+      record.settlementId,
+      record.state,
+      `${progress.percent}%`,
+      record.attestationId??'—',
+      record.proofId??'—',
+      record.txHash??'—',
+      record.state==='FAILED' ? (record.retryable?'Retry after route revalidation':'Terminal') : '—',
+    ];
+    for(const value of values){
+      const td=document.createElement('td');
+      td.textContent=String(value);
+      tr.append(td);
+    }
+    return tr;
+  }));
+}
+
 function renderView() {
   $('#page-title').textContent = state.route.label;
   const view = $('#app-view');
@@ -449,6 +544,13 @@ function renderView() {
     return;
   }
 
+  if (state.route.id === 'bridge' && availability(state.config, 'bridge')) {
+    const fragment = $('#bridge-template').content.cloneNode(true);
+    renderBridge(fragment);
+    view.append(fragment);
+    return;
+  }
+
   const fragment = $('#gated-template').content.cloneNode(true);
   fragment.querySelector('#gated-title').textContent = `${state.route.label} is roadmap-gated`;
   fragment.querySelector('#gated-copy').textContent =
@@ -471,6 +573,10 @@ function navigate(path) {
   }
   if (state.route.id === 'orders' && !state.orders.length) {
     loadOrders().then(render).catch((error)=>{ state.bootError=error; render(); });
+    return;
+  }
+  if (state.route.id === 'bridge' && !state.bridgeRoutes.length) {
+    loadBridgeData().then(render).catch((error)=>{ state.bootError=error; render(); });
     return;
   }
   render();
@@ -531,6 +637,10 @@ document.addEventListener('change', (event) => {
   } else if (event.target.id === 'swap-slippage') {
     const value=Number(event.target.value);
     state.swapSlippageBps=Number.isFinite(value) ? Math.round(value*100) : 100;
+  } else if (event.target.id === 'bridge-route-select') {
+    state.bridgeRouteId=event.target.value;
+    state.bridgeIntent=null;
+    render();
   }
 });
 
@@ -571,6 +681,7 @@ async function boot() {
     }
     if (state.route.id === 'swap') await loadSwapQuote();
     if (state.route.id === 'orders') await loadOrders();
+    if (state.route.id === 'bridge') await loadBridgeData();
   } catch (error) {
     state.bootError = error;
     state.config = state.config ?? {

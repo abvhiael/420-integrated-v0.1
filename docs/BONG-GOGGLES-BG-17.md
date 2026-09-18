@@ -39,7 +39,7 @@ Appeal resolution preserves the contract's separation-of-duty rule: the case ope
 - rationale material remains off-chain; prepared action intents submit only the provided rationale hash;
 - every intent remains unsigned/unbroadcast and requires Wallet confirmation before the canonical contract can mutate state.
 
-### BG-17.4 — appeals workspace + separation of duty — IMPLEMENTED, QUALIFICATION PENDING
+### BG-17.4 — appeals workspace + separation of duty — COMPLETE AND QUALIFIED
 
 - deterministic pending-appeal workspace links each appeal to its canonical case projection;
 - operator eligibility explicitly reflects the contract separation-of-duty rule before any intent is prepared;
@@ -49,13 +49,15 @@ Appeal resolution preserves the contract's separation-of-duty rule: the case ope
 - local intent state is explicitly non-final and requires canonical `AppealResolved` confirmation;
 - overturned canonical events update the projected case/action presentation to resolved/revoked only after chain confirmation.
 
-### BG-17.5 — emergency hide operations
+### BG-17.5 — emergency hide operations — IMPLEMENTED, QUALIFICATION PENDING
 
-- target-scope derivation and current hide visibility;
-- bounded expiry preparation matching canonical one-day maximum;
-- capability-aware emergency-hide intents;
-- expiry/replay handling;
-- emergency presentation cannot mutate underlying canonical content state.
+- deterministic emergency-hide workspace exposes current active/expired presentation state per canonical scope;
+- target scope is supplied by the canonical `scopeForTarget` derivation path before intent preparation;
+- `hiddenUntil` must be strictly in the future and no more than 86,400 seconds beyond the preparation time;
+- emergency-hide intents require current `ACTION_SAFETY_EMERGENCY_HIDE` capability for the derived scope;
+- prepared intents target `setEmergencyHide(targetType, targetId, subjectAccount, hiddenUntil)` and remain unsigned/unbroadcast behind Wallet confirmation;
+- expiry reconciliation deterministically clears stale local presentation state;
+- emergency-hide presentation never claims to delete, edit or otherwise mutate the underlying canonical content object.
 
 ### BG-17.6 — policy, capability + audit surfaces
 
@@ -93,4 +95,4 @@ Appeal resolution preserves the contract's separation-of-duty rule: the case ope
 
 ## Current increment
 
-BG-17.1 through BG-17.3 are qualified. BG-17.4 is implemented on `feature/bong-goggles-bg17-moderation-ops`; exact-head qualification is pending before advancing to BG-17.5.
+BG-17.1 through BG-17.4 are qualified. BG-17.5 is implemented on `feature/bong-goggles-bg17-moderation-ops`; exact-head qualification is pending before advancing to BG-17.6.

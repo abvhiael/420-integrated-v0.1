@@ -77,7 +77,7 @@ Appeal resolution preserves the contract's separation-of-duty rule: the case ope
 - audit exports include only canonical provenance, opaque evidence references and redacted local annotations/metadata;
 - audit exports explicitly omit secrets, tokens, decrypted/private Messenger material and raw payloads.
 
-### BG-17.8 — abuse, concurrency + recovery hardening — IMPLEMENTED, QUALIFICATION PENDING
+### BG-17.8 — abuse, concurrency + recovery hardening — COMPLETE AND QUALIFIED
 
 - prepared canonical-write intents receive deterministic checkpoint-bound fingerprints and exact duplicates are suppressed;
 - resource reservations detect concurrent operator write conflicts before Wallet handoff;
@@ -87,15 +87,16 @@ Appeal resolution preserves the contract's separation-of-duty rule: the case ope
 - snapshot restore is verified deterministically for restart/recovery drills;
 - operator queue reads enforce configurable hard limits, preserve total counts and expose truncation explicitly.
 
-### BG-17.9 — production moderation closeout
+### BG-17.9 — production moderation closeout — IMPLEMENTED, FINAL QUALIFICATION PENDING
 
-- bounded load/latency qualification;
-- report-to-case, action, appeal and emergency-hide drills;
-- separation-of-duty regression qualification;
-- operator runbook;
-- reconcile phase branch with current `main`;
-- exact-head qualification before merge.
+- bounded load/latency regression exercises 1,000-report ingestion plus bounded queue materialization under conservative CI budgets;
+- end-to-end report → case → action → appeal overturn → emergency-hide drill verifies canonical projection convergence;
+- separation-of-duty regression proves the case opener remains blocked and a distinct capable resolver can prepare Wallet-bound resolution;
+- replay/restart closeout verifies deterministic full-event-stream reconstruction;
+- production operator runbook covers authority boundaries, capability freshness, concurrency, privacy, divergence/recovery and incident escalation;
+- canonical contract signatures were revalidated against the current `BongGogglesSafetyRegistry420` implementation;
+- phase branch must be reconciled against current `main` and all three exact-head qualification workflows must succeed before merge.
 
 ## Current increment
 
-BG-17.1 through BG-17.7 are qualified. BG-17.8 is implemented on `feature/bong-goggles-bg17-moderation-ops`; exact-head qualification is pending before advancing to BG-17.9.
+BG-17.1 through BG-17.8 are qualified. BG-17.9 closeout tests and operator runbook are implemented on `feature/bong-goggles-bg17-moderation-ops`; reconciliation with current `main` and exact-head final qualification remain before the phase can merge.

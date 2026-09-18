@@ -82,11 +82,65 @@ test('Bong Goggles reward adapter emits contribution submitted, not earned', () 
   assert.notEqual(item.kind, 'REWARD_EARNED');
 });
 
-test('earned and payout catalog kinds are reserved but synthetic source events do not emit', () => {
+test('BG-18.7 reward earned notification emits only from canonical RewardAccrued', () => {
   assert.equal(bongGogglesNotificationDescriptor('REWARD_EARNED').topic, 'rewards');
+  const [item] = notificationCandidatesForEvent(log('RewardAccrued', {
+    rewardId:'r1', campaignId:'camp1', contributionId:'c1', beneficiary:'0xBEN', amount:10,
+  }), {
+    rewardState:{ exists:true, rewardId:'r1', campaignId:'camp1', contributionId:'c1', beneficiary:'0xBEN', amount:10 },
+  });
+  assert.equal(item.kind,'REWARD_EARNED');
+  assert.equal(item.recipient,'0xben');
+  assert.equal(item.metadata.rewardState,'ACCRUED');
+  assert.equal(item.metadata.lifecycleStage,'REWARD_EARNED');
+  assert.equal(item.metadata.canTriggerClaim,false);
+  assert.equal(item.metadata.walletDeepLink,'420wallet://rewards/r1');
+  assert.equal(item.metadata.explorerSubject,'r1');
+
+  assert.deepEqual(notificationCandidatesForEvent(log('RewardEarned', { rewardId:'r1' }), {
+    rewardState:{ exists:true, rewardId:'r1', beneficiary:'0xBEN', amount:10 },
+  }), []);
+});
+
+test('BG-18.7 payout notifications distinguish claim confirmation from paid release', () => {
   assert.equal(bongGogglesNotificationDescriptor('REWARD_PAYOUT_UPDATED').topic, 'rewards');
-  assert.deepEqual(notificationCandidatesForEvent(log('RewardEarned', { rewardId: 'r1' }), { rewardState: { exists: true, earned: true, beneficiary: '0xBEN' } }), []);
-  assert.deepEqual(notificationCandidatesForEvent(log('RewardPayoutUpdated', { rewardId: 'r1' }), { rewardState: { exists: true, beneficiary: '0xBEN' } }), []);
+
+  const [claimed] = notificationCandidatesForEvent(log('RewardClaimed', {
+    rewardId:'r1', beneficiary:'0xBEN', amount:10,
+  }, 61), {
+    rewardState:{ exists:true, rewardId:'r1', beneficiary:'0xBEN', amount:10 },
+  });
+  assert.equal(claimed.kind,'REWARD_PAYOUT_UPDATED');
+  assert.equal(claimed.metadata.rewardState,'CLAIMED');
+  assert.equal(claimed.metadata.lifecycleStage,'CLAIM_CONFIRMED');
+  assert.equal(claimed.metadata.canTriggerClaim,false);
+
+  const [paid] = notificationCandidatesForEvent(log('RewardReleased', {
+    rewardId:'r1', campaignId:'camp1', beneficiary:'0xBEN', amount:10,
+  }, 62), {
+    rewardState:{ exists:true, rewardId:'r1', campaignId:'camp1', beneficiary:'0xBEN', amount:10 },
+  });
+  assert.equal(paid.kind,'REWARD_PAYOUT_UPDATED');
+  assert.equal(paid.metadata.rewardState,'PAID');
+  assert.equal(paid.metadata.lifecycleStage,'REWARD_PAID');
+  assert.equal(paid.metadata.walletDeepLink,'420wallet://rewards/r1');
+
+  assert.deepEqual(notificationCandidatesForEvent(log('RewardPayoutUpdated', { rewardId:'r1' }), {
+    rewardState:{ exists:true, rewardId:'r1', beneficiary:'0xBEN' },
+  }), []);
+});
+
+test('BG-18.7 reward notification canonical mismatches fail closed', () => {
+  assert.deepEqual(notificationCandidatesForEvent(log('RewardAccrued', {
+    rewardId:'r1', campaignId:'camp1', contributionId:'c1', beneficiary:'0xOTHER', amount:10,
+  }), {
+    rewardState:{ exists:true, rewardId:'r1', campaignId:'camp1', contributionId:'c1', beneficiary:'0xBEN', amount:10 },
+  }), []);
+  assert.deepEqual(notificationCandidatesForEvent(log('RewardReleased', {
+    rewardId:'r1', campaignId:'wrong', beneficiary:'0xBEN', amount:10,
+  }), {
+    rewardState:{ exists:true, rewardId:'r1', campaignId:'camp1', beneficiary:'0xBEN', amount:10 },
+  }), []);
 });
 
 test('moderation and reward replay remains deterministic and deduplicated', () => {
@@ -99,4 +153,20 @@ test('moderation and reward replay remains deterministic and deduplicated', () =
   };
   assert.equal(pipeline.process(source, state).length, 1);
   assert.equal(pipeline.process(source, state).length, 0);
+});
+
+test('BG-18.7 canonical reward notification replay remains deterministic and deduplicated', () => {
+  const pipeline = new BongGogglesNotificationPipeline();
+  const source = log('RewardAccrued', {
+    rewardId:'r2', campaignId:'camp2', contributionId:'c2', beneficiary:'0xBEN', amount:5,
+  }, 70);
+  const state = {
+    rewardState:{ exists:true, rewardId:'r2', campaignId:'camp2', contributionId:'c2', beneficiary:'0xBEN', amount:5 },
+  };
+  const first=pipeline.process(source,state);
+  const second=pipeline.process(source,state);
+  assert.equal(first.length,1);
+  assert.equal(second.length,0);
+  assert.equal(first[0].metadata.canTriggerClaim,false);
+  assert.equal(first[0].authoritative,false);
 });

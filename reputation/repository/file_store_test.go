@@ -182,3 +182,23 @@ func TestResponsePersistsAndVersions(t *testing.T) {
 	if err != nil { t.Fatal(err) }
 	if got.Version != 2 || got.BodyRef != "storage://response-2" { t.Fatalf("unexpected response: %+v", got) }
 }
+
+
+func TestModerationAuditPersists(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "reviews.json")
+	store, err := OpenFileStore(path)
+	if err != nil { t.Fatal(err) }
+	if _, err := store.Create(sampleReview()); err != nil { t.Fatal(err) }
+	now := time.Date(2026, 9, 18, 5, 0, 0, 0, time.UTC)
+	record := model.ModerationRecord{
+		ID:"mod-1", ReviewID:"review-1", Action:model.ModerationReport, Reason:model.ReasonSpam,
+		Actor:model.SubjectRef{Type:"PROFILE", ID:"reporter-1"}, PreviousState:model.ReviewActive,
+		ResultState:model.ReviewActive, State:model.ModerationOpen, Version:1, CreatedAt:now,
+	}
+	if _, err := store.CreateModeration(record); err != nil { t.Fatal(err) }
+	if _, err := store.CreateModeration(record); !errors.Is(err, ErrExists) { t.Fatalf("expected duplicate moderation rejection, got %v", err) }
+	reopened, err := OpenFileStore(path)
+	if err != nil { t.Fatal(err) }
+	got := reopened.ListModeration("review-1")
+	if len(got) != 1 || got[0].ID != "mod-1" { t.Fatalf("unexpected moderation audit: %+v", got) }
+}

@@ -25,21 +25,29 @@ if (( ${#targets[@]} == 0 )); then echo "EMPTY SHARD $shard" >&2; exit 1; fi
 printf 'Shard %s/%s: %s primary units, %s deployable sources and %s test sources, from %s total primary units\n' \
   "$shard" "$count" "${#targets[@]}" "${#sources[@]}" "${#tests[@]}" "${#all[@]}"
 printf '%s\n' "${targets[@]}" > "../artifacts/contracts/shard-${shard}-targets.txt"
-# Compile every assigned source, test and script, without applying EIP-170 limits
-# to test harnesses and deployment scripts (which are not deployed on-chain).
-# A compiler error still fails the shard.
+# Compile all assigned sources, tests and scripts; compiler errors fail immediately.
 forge build --force "${targets[@]}"
-# Enforce the runtime/initcode size gate separately on the production sources.
-# Never disable the size gate on actual deployable contracts just to make CI green.
+# Enforce deployable runtime/initcode limits on production sources only.
 if (( ${#sources[@]} )); then
   echo "=== DEPLOYABLE SOURCE SIZE CHECK: ${#sources[@]} sources ==="
   forge build --force --sizes "${sources[@]}"
 fi
-# Match one test source at a time to avoid Foundry compiling the entire test tree.
-# Do not ignore failed test subprocesses; aggregate status is a strict AND.
+# Run EVERY assigned test file, even if an earlier file fails, to expose the
+# complete list of failing test files in one CI pass. Never hide the failure:
+# an unsuccessful test subprocess makes the aggregate shard exit nonzero.
+failed_tests=()
 for target in "${tests[@]}"; do
   echo "=== TEST $target ==="
-  forge test --match-path "$target" -vv
-  echo "=== PASSED $target ==="
+  if forge test --match-path "$target" -vv; then
+    echo "=== PASSED $target ==="
+  else
+    failed_tests+=("$target")
+    echo "=== FAILED $target ===" >&2
+  fi
 done
-echo "SHARD $shard COMPLETE: compilation, deployable size checks and assigned tests passed"
+if (( ${#failed_tests[@]} )); then
+  printf 'SHARD %s FAILED: %s/%s assigned test files failed:\n' "$shard" "${#failed_tests[@]}" "${#tests[@]}" >&2
+  printf '  %s\n' "${failed_tests[@]}" >&2
+  exit 1
+fi
+echo "SHARD $shard COMPLETE: compilation, deployable size checks and all assigned tests passed"

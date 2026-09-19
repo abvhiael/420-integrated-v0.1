@@ -1,7 +1,7 @@
 {
   "schema": "420-public-service-readiness-v1",
   "serviceId": "420/service/wallet/v1",
-  "status": "W14_4_EXTENSION_LIVE_DAPP_QUALIFIER_IMPLEMENTED",
+  "status": "W14_5_GENESIS_APP_CATALOG_RECONCILED",
   "genesisRequired": true,
   "productionDomainAssigned": false,
   "domainAssignmentBlocksImplementation": false,
@@ -40,5 +40,16 @@
     "workflow": ".github/workflows/wallet-extension-live-dapp.yml",
     "evidenceSchema": "420-wallet-extension-live-dapp-qualification-v1",
     "executedAgainstOfficialTestnet": false
+  },
+  "appCatalog": {
+    "phase": "W14.5",
+    "catalogue": "wallet/web/core/genesis-app-catalog.js",
+    "canonicalServiceIdSource": "contracts/src/libraries/ServiceIds420.sol",
+    "verifiedManifestRequired": true,
+    "unresolvedNamedProducts": [
+      "420 Exchange: no distinct canonical service ID",
+      "420 Commerce: no distinct canonical service ID",
+      "420 Grow: no canonical service ID"
+    ]
   }
 }

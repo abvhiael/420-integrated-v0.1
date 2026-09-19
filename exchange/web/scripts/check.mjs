@@ -38,6 +38,9 @@ const required = [
   'v14.11-qualification.json',
   'v14.12-qualification.json',
   'v14.13-qualification.json',
+  'v14.14-qualification.json',
+  'core/release-qualification.js',
+  'test/release-qualification.test.js',
   'scripts/build.mjs',
   'test/deployment.test.js',
   'core/security.js',
@@ -198,4 +201,10 @@ for (const needle of ['EXCHANGE_CHAIN_ID','EXCHANGE_RPC_URL','EXCHANGE_API_BASE_
 }
 const v1413 = JSON.parse(fs.readFileSync(path.join(root, 'v14.13-qualification.json'), 'utf8'));
 if (v1413.productionOrigin !== 'https://exchange.420integrated.org') throw new Error('V14.13 production origin drift');
-console.log('420Exchange V14.1/V14.2/V14.3/V14.4/V14.5/V14.6/V14.7/V14.8/V14.9/V14.10/V14.11/V14.12/V14.13 static qualification passed');
+const releaseQualification = fs.readFileSync(path.join(root, 'core/release-qualification.js'), 'utf8');
+for (const needle of ['GENESIS_RELEASE_DRILLS','PERFORMANCE_BUDGETS','BROWSER_MATRIX','releaseGate','qualifiedReleaseState']) {
+  if (!releaseQualification.includes(needle)) throw new Error(`V14.14 release qualification missing marker: ${needle}`);
+}
+const v1414 = JSON.parse(fs.readFileSync(path.join(root, 'v14.14-qualification.json'), 'utf8'));
+if (!Array.isArray(v1414.operationalReleaseGates) || v1414.operationalReleaseGates.length < 5) throw new Error('V14.14 operational release gates incomplete');
+console.log('420Exchange V14.1/V14.2/V14.3/V14.4/V14.5/V14.6/V14.7/V14.8/V14.9/V14.10/V14.11/V14.12/V14.13/V14.14 static qualification passed');

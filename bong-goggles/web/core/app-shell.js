@@ -1,5 +1,6 @@
 import {navigationItems,resolveRoute,routeAccess} from './routes.js';
 import {card,emptyState,canonicalHandoffs,escapeHtml,skeleton} from './design-system.js';
+import {renderProfileView,renderRelationshipLists} from './profile-ui.js';
 
 function navMarkup(items,activeId,placement){
   return `<nav class="app-nav app-nav--${placement}" aria-label="${placement==='mobile'?'Primary mobile':'Primary'}">
@@ -10,7 +11,44 @@ function navMarkup(items,activeId,placement){
   </nav>`;
 }
 
-function routePlaceholder(route,access){
+function routePlaceholder(route,access,{profileProjection=null,relationshipProjection=null,relationshipCollection=null,viewer=null,walletView=null}={}){
+  if(route.id==='profile'){
+    return renderProfileView({
+      profile:profileProjection,
+      relationship:relationshipProjection,
+      viewer,
+      walletView
+    });
+  }
+  if(route.id==='friends'){
+    if(!access.allowed){
+      return card({
+        eyebrow:'Read-only mode',
+        title:'Friends requires 420Wallet',
+        body:'<p>Connect 420Wallet on the configured network to view account-scoped social graph lists.</p>'
+      });
+    }
+    if(!relationshipCollection){
+      return card({
+        eyebrow:'Canonical projection',
+        title:'Friends',
+        body:emptyState({
+          title:'Relationship projection unavailable',
+          message:'The browser will not synthesize friends/followers/following state. A qualified indexer transport must supply the canonical projection.'
+        })
+      });
+    }
+    return card({
+      eyebrow:'Canonical social graph',
+      title:'Friends',
+      body:renderRelationshipLists({
+        viewer,
+        relationships:relationshipCollection.relationships??[],
+        profiles:relationshipCollection.profiles??[],
+        list:'friends'
+      })
+    });
+  }
   if(!access.allowed){
     return card({
       eyebrow:'Read-only mode',
@@ -35,7 +73,10 @@ export function renderApplicationShell({
   appOrigin='https://bonggoggles.420integrated.org',
   walletHref=null,
   explorerHref=null,
-  announcement=null
+  announcement=null,
+  profileProjection=null,
+  relationshipProjection=null,
+  relationshipCollection=null
 }={}){
   const route=resolveRoute(pathname);
   const access=routeAccess(route,{
@@ -51,7 +92,7 @@ export function renderApplicationShell({
     ?card({title:'Loading Bong Goggles',body:skeleton({lines:4})})
     :route.id==='not-found'
       ?card({title:'Page not found',body:emptyState({title:'404',message:'That Bong Goggles route does not exist.'})})
-      :routePlaceholder(route,access);
+      :routePlaceholder(route,access,{profileProjection,relationshipProjection,relationshipCollection,viewer:walletView?.account??null,walletView});
 
   return `<div class="app-shell" data-route="${escapeHtml(route.id)}">
     <header class="app-header">

@@ -100,7 +100,7 @@ BG-19.2 now discovers only the qualified `is420Wallet` EIP-1193 provider, suppor
 
 **Exit:** users can safely enter, leave and recover sessions while every write remains constrained by canonical Wallet/session policy.
 
-### BG-19.3 — design system, navigation + responsive application shell — IMPLEMENTED, QUALIFICATION PENDING
+### BG-19.3 — design system, navigation + responsive application shell — COMPLETE AND QUALIFIED
 
 Build the reusable visual/application foundation.
 
@@ -127,7 +127,7 @@ BG-19.3 establishes the shared application shell and route contract for Home, Pr
 
 **Exit:** every later feature can be implemented without inventing one-off navigation, modal, loading or authority patterns.
 
-### BG-19.4 — profiles, relationships + social graph UI
+### BG-19.4 — profiles, relationships + social graph UI — IMPLEMENTED, QUALIFICATION PENDING
 
 Expose the qualified profile and relationship model.
 
@@ -144,7 +144,20 @@ Expose the qualified profile and relationship model.
 - deterministic refresh after write confirmation;
 - no optimistic relationship state that survives a canonical rejection.
 
-**Exit:** profile and social-graph behavior is complete, canonical and usable across desktop/mobile.
+Implemented in:
+- `bong-goggles/web/core/profile-social.js`
+- `bong-goggles/web/core/profile-ui.js`
+- `bong-goggles/web/test/profile-social.test.js`
+- `bong-goggles/web/core/app-shell.js`
+- `bong-goggles/web/styles.css`
+
+BG-19.4 mirrors the qualified contracts rather than inventing a browser-side relationship model. Profile projections preserve account/profile/status/type/hash/media metadata when supplied canonically. Relationship state supports symmetric friendship, directional follows, approval-pending friend/follow requests, block direction, scoped mute state and the contract's block side effects. Action availability is derived from current canonical relationship state plus Wallet/session write authority. Blocking suppresses ordinary friend/follow actions, incoming requests expose accept/decline, outgoing requests expose cancel, and inactive profiles disable new relationship creation.
+
+Friends/followers/following/blocked/muted collections are deterministic projections and are never persisted as a second source of truth. Post-write state uses explicit canonical refresh semantics: optimistic state is not retained when the refreshed projection disagrees.
+
+The repository's Bong Goggles indexer currently materializes profile and relationship records but does not expose a dedicated browser HTTP profile/relationship endpoint module. BG-19.4 therefore fails closed when that projection is unavailable rather than manufacturing relationship state in the browser. The UI integration is ready to consume the qualified projection transport when exposed by the deployment/application service layer.
+
+**Exit:** profile and social-graph presentation/actions are implemented against the canonical model; browser state fails closed when the qualified projection transport is unavailable.
 
 ### BG-19.5 — home feed, publishing, interactions, media + stories
 

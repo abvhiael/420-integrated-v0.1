@@ -95,6 +95,49 @@ func (s *Service) Update(ctx context.Context,event model.Event,expectedVersion u
 	return s.events.Update(event,expectedVersion)
 }
 
+var ErrInvalidTransition = errors.New("invalid event lifecycle transition")
+var ErrTerminalStatus = errors.New("event lifecycle state is terminal")
+
+func CanTransition(from,to model.Status) bool {
+	switch from {
+	case model.StatusDraft:
+		return to==model.StatusScheduled || to==model.StatusCancelled
+	case model.StatusScheduled:
+		return to==model.StatusLive || to==model.StatusCancelled
+	case model.StatusLive:
+		return to==model.StatusEnded || to==model.StatusCancelled
+	case model.StatusEnded,model.StatusCancelled:
+		return false
+	default:
+		return false
+	}
+}
+
+func (s *Service) Transition(ctx context.Context,id string,to model.Status,expectedVersion uint32,reason string)(model.Event,error){
+	current,err:=s.events.Get(id)
+	if err!=nil { return model.Event{},err }
+	if err:=s.authorizer.AuthorizeOrganizer(ctx,current.Organizer); err!=nil { return model.Event{},err }
+	if current.Status==model.StatusEnded || current.Status==model.StatusCancelled {
+		return model.Event{},ErrTerminalStatus
+	}
+	if !model.ValidStatus(to) || !CanTransition(current.Status,to) {
+		return model.Event{},ErrInvalidTransition
+	}
+	if current.Version!=expectedVersion {
+		return model.Event{},errors.New("event lifecycle version conflict")
+	}
+	now:=s.now().UTC()
+	if !now.After(current.UpdatedAt){ now=current.UpdatedAt.Add(time.Nanosecond) }
+	next:=model.CloneEvent(current)
+	next.Status=to
+	next.Version=expectedVersion+1
+	next.UpdatedAt=now
+	next.LifecycleHistory=append(next.LifecycleHistory,model.TransitionRecord{
+		From:current.Status,To:to,Reason:strings.TrimSpace(reason),OccurredAt:now,
+	})
+	return s.events.Update(next,expectedVersion)
+}
+
 func (s *Service) ListByOrganizer(_ context.Context,organizer locationmodel.SubjectRef)[]model.Event {
 	return s.events.ListByOrganizer(organizer)
 }

@@ -1,46 +1,48 @@
 # 420AI recovery roadmap
 
-Status: **ACTIVE RECOVERY PROGRAM**
+Last reconciled: **2026-09-19**, against draft [PR #348](https://github.com/abvhiael/420-integrated-v0.1/pull/348), branch `ai-compute-recovery-v1`. Baseline for CI claims: `d987c1bf7ac5ae2f932e4e0d4ab3a6af4778b517` (12 of 12 PR-triggered workflows successful). This roadmap update is a later commit and requires its own checks.
 
-This roadmap tracks repository-level recovery from partially implemented 420AI architecture to a Genesis-qualified, testnet-operable application stack.
+**Program status: ACTIVE — foundations 1–5 implemented and CI-qualified; phase 6 partially implemented; phase 7/testnet and paid-AI qualification not complete.** PR #348 remains draft and unmerged. Distinguish: **implemented** = source/tests exist; **CI-qualified** = the specified commit's automated workflows passed; **testnet-qualified** = real independently approved deployment and evidence passed full end-to-end checks. CI cannot certify a live deployment, actual Wallet consent, finality, a running model, asset movement or production security.
 
-## AI-RECOVERY-1 — On-chain architecture recovery — COMPLETE
+## Finished: AI-RECOVERY-1 through 5 (repository/CI scope)
 
-Restored mature AI authorization/policy/deployment/request/result/router modules, ComputeMarket contracts and AI/Compute bridge without duplicating model or version authority; added contract tests and maps.
+| Phase | Completed foundation | Qualification boundary |
+| --- | --- | --- |
+| **1 — Architecture recovery** | Mature AI authorization, policy, model deployment, request/result/router modules, ComputeMarket contracts, AI↔Compute adapter, contract tests and canonical model/version authority. | Contract-level implementation; real deployment, economic flows and full verification remain phases 6–7. |
+| **2 — Genesis address reconciliation** | Preserved canonical AI predeploy authority; removed conflicting fixed allocations; updated registry resolution, address verification and Wallet collision checks. | Deployment/registry/bytecode manifests must still be independently verified on testnet. |
+| **3 — Provider runtime foundation** | `420-ai-provider/` control plane, canonical reconciliation, provider eligibility, bounded metering, commitment/manifest checks and non-custodial transaction interfaces. | Not a deployed GPU/model inference service or independently qualified signer. |
+| **4 — Read API / Indexer / discovery** | Typed `420-ai-api/` read surfaces, AI/Compute Indexer projections and Developer Hub discovery with canonical-versus-derived read separation. | Hosted API, independent RPC hydration and live deployment validation remain open. |
+| **5 — AI web read-only shell** | `ai/web/` responsive model/provider/job discovery, wallet identity/network checks, request-draft review and observational operator views. | Not a deployed/qualified paid-request UI; state-changing actions remain disabled. |
 
-## AI-RECOVERY-2 — Genesis address reconciliation — COMPLETE
+## Current position: AI-RECOVERY-6 — production integration (IN PROGRESS)
 
-Step 6.2 remains the physical predeploy authority. Conflicting newer fixed allocations were removed and routers/factories made registry-resolved; the address verifier and Wallet collision checks were updated.
+The **current engineering work package is 6.4.2: connect independently proven deposit, explicit payer authorization and unique per-job Vault reservation through a governance-bound funding adapter**. The native deposit and signed funding preflight readers are implemented and CI-qualified, but they are read-only; escrow funding must remain disabled until their missing on-chain security guarantees are enforced. See [phase 6 integration details](AI-RECOVERY-6-PRODUCTION-INTEGRATION.md), [6.4 Vault reconciliation](AI-RECOVERY-6-4-VAULT-RECONCILIATION.md), [6.4.1 testnet qualification](AI-RECOVERY-6-4-1-TESTNET-QUALIFICATION.md), [6.4.2 deposit provenance](AI-RECOVERY-6-4-2-FUNDING-PROVENANCE.md), and [6.4.2 signed preflight](AI-RECOVERY-6-4-2-SIGNED-FUNDING-PREFLIGHT.md).
 
-## AI-RECOVERY-3 — Provider/runtime control plane — COMPLETE / CI QUALIFIED
+| Work package | Implemented and CI-qualified | Remaining before completion |
+| --- | --- | --- |
+| **6.1 — Provider transactions** | `qualified-transactions.ts` canonical job/provider/spend preflight and externally injected transaction port with unit tests. | Independently authorized operator signer/executor, canonical receipt/finality verification, durable idempotent recovery after output commit and receipt-submission failure; live execution proof. |
+| **6.2 — Canonical RPC** | `canonical-rpc.ts` confirmation-pinned ABI hydration for AI/Compute contracts, identity/state/chain and basic reorg rejection with tests. | Independently trusted registry/deployment/address/bytecode resolution, chain finality policy, qualified executor integration and malicious-RPC/reorg testing. |
+| **6.3 — Private payload / inference** | `private-payload.ts` job/provider-bound AES-256-GCM opaque payload adapter, expiry/commitment/access checks and unit tests. | Authenticated production object store/KMS and client key-release policy, signed model/deployment manifests, real compatible inference backend, authorized output retrieval and private E2E testnet flow. |
+| **6.4.1 — Vault evidence** | `vault-reconciliation.ts` exact escrow/obligation/payment read-only gate; `vault-rpc-evidence.ts` pinned RPC/bytecode/receipt/event reader; adversarial mock tests; `qualify-vault-testnet.ts` read-only qualification command. | Independently approved real deployment manifests, chain/finality and registry evidence, real receipts/deposits/claims, reorg and malicious-RPC qualification; a CLOSED escrow alone never proves payout. |
+| **6.4.2 — Funding authorization (CURRENT)** | `vault-deposit-evidence.ts` checks a native deposit's payer, approved Vault, amount, successful receipt, unique authentic event and pinned history. `vault-funding-intent.ts` verifies EOA EIP-712 job-scoped intent plus deposit and matching RESERVED native obligation; adversarial tests pass. | **Next:** governance-bound on-chain adapter; independently verifiable Wallet approval; atomic, durable consumption of nonce, deposit hash and obligation across jobs; deposit-to-obligation provenance and unique exact per-job balance reservation; authorized `confirmVaultFunding`; failure/replay tests. Existing preflight does *not* prove Wallet UI consent, deposit allocation or custody authorization. ERC-1271 and ERC-20 require separate qualified paths. |
+| **6.4.3 — Settlement, claims and refunds** | Existing escrow entitlement transitions and Vault primitives; read-only payout evidence can check exact claimed obligation and canonical withdrawal. | Authorized/idempotent actual provider claim, separate payer refund/cancellation route and obligation, partial charge/unused-balance rules, exact recipient/asset proof, dispute holds and testnet failure/retry/reorg tests. Escrow `release`/`refund` do not themselves transfer funds. |
+| **6.4.4 — Funding-to-payment E2E** | No completed live integrated test evidenced. | Real Wallet approval → deposit → uniquely reserved obligation → escrow funding → service → authorized final claim or refund with independently verified balances/receipts. |
+| **6.5 — Trust / outcome verification** | AI/Compute protocol foundations exist; no production-qualified independent verifier integration demonstrated. | Policy/model/version/receipt-bound independent 420Trust verification, verifier authority, challenge/dispute/appeal, settlement hold and outcome-to-claim/refund gate; tests and testnet proof. |
+| **6.6 — User/operator integration** | AI Web/read API and runtime shells compile and pass their workflow checks. | Wallet-confirmed write paths, provider supervision/metrics/secret management, safe pending/retry/reorg UX, operational runbooks, public-site integration and live qualification. |
 
-`420-ai-provider/` supplies canonical reconciliation, provider eligibility, bounded metering, payload/result commitments, runtime/manifest checks and non-custodial external transaction ports. This is a control-plane foundation, not yet a deployed inference service.
+**Do not substitute a matching deposit event, EIP-712 signature, RESERVED obligation, escrow FUNDED/CLOSED state or mock receipt for actual deposit ownership, unique allocation, authorized custody movement or final payment.** The source of truth for funding/settlement is an audited, governance-scoped on-chain route plus independently verified real transaction evidence. Keep paid requests, automatic settlement and privileged browser writes disabled until qualified.
 
-## AI-RECOVERY-4 — Derived API, Indexer projection and service discovery — COMPLETE / CI QUALIFIED
+## Remaining implementation sequence (can begin before a running testnet)
 
-`420-ai-api/`, Indexer AI/Compute views and Developer Hub service discovery provide typed, non-authoritative model/provider/job/history read surfaces. Indexed discovery is distinct from canonical current-state reads. Concrete hosted API and direct-RPC hydration deployments remain AI-RECOVERY-6/7 work.
+1. **Finish 6.4.2:** specify and implement the governance-bound native funding adapter and its explicit Wallet authorization flow; prove atomic job/deposit/nonce/obligation uniqueness and exact collateral reservation in Solidity and adversarial tests. Do not grant broad arbitrary-recipient Vault authority. Add ERC-20 and contract-wallet support only as separately scoped, tested paths.
+2. **Finish 6.4.3–6.4.4 logic:** implement separately authorized provider payout and payer refund/cancellation, immutable references, partial-charge handling, dispute gates, replays, stuck-tx recovery and reconciliation. Prepare deterministic local integration fixtures without calling them testnet qualification.
+3. **Finish 6.1–6.3 and 6.5:** production signer/receipt/retry path, independently pinned canonical deployments, authenticated storage/KMS and real inference, then independent verification and dispute decisions.
+4. **Finish 6.6:** Wallet-approved AI job writes, lifecycle/funding/verification UI and operator controls, with feature gates default-off until security review and integration proof.
 
-## AI-RECOVERY-5 — ai.420integrated.org UI — COMPLETE / CI QUALIFIED (READ-ONLY GENESIS SHELL)
+## AI-RECOVERY-7 — testnet deployment, independent qualification and release (PLANNED)
 
-`ai/web/` supplies the responsive web shell, model/provider/job discovery, wallet identity/network checks, request draft review and observational operator surfaces. The dedicated AI Web and all eleven companion workflow runs passed at `3e789a2ea568781801d357a9814b44d314bd0c78`. There is no claim of deployed `ai.420integrated.org` or enabled payment/job submission. Canonical write actions remain fail-closed until phase 6 qualifies the necessary adapters.
+A running chain is essential to *qualify* the above, not to start implementing it. On an independently approved pinned testnet deployment, verify contract addresses, runtime code hashes, registry bindings, chain finality policy and signed manifests. Exercise the entire user-approved flow: Wallet → deposit and obligation → AI/Compute request and match → provider private inference → output commit and single receipt → independent verification/dispute → **actual** provider claim or separately authorized payer refund. Check real recipient balances and canonical event/receipt evidence. Repeat underfunding, duplicate/cross-job use, expired consent, invalid input/model, failed signer, storage denial, settlement/retry failure, cancellation, dispute and reorg. Complete external security/audit and operational rollback/drain checks before paid launch or declaring recovery done.
 
-## AI-RECOVERY-6 — Production adapters and verification/settlement integration — IN PROGRESS
+## Completion and merge gate
 
-See `docs/AI-RECOVERY-6-PRODUCTION-INTEGRATION.md` for implementation details and acceptance criteria.
-
-- **6.1 External provider transaction adapter:** implementation committed; checks canonical provider/job/request state and spend before advancing Compute state and submitting one final receipt; dedicated unit tests added; fresh CI qualification pending. External qualified signer and receipt verification are still required.
-- **6.2 Canonical RPC reader and qualified executor:** registry/deployment discovery, exact ABI hydration, confirmed receipts, finality/reorg/authorization — pending.
-- **6.3 Storage/private payload and model serving:** encrypted, authenticated delivery, signed manifests, real backend and compatibility gates — pending.
-- **6.4 Vault funding and settlement:** real asset movement, idempotent settlement/refund, beneficiary derivation — pending.
-- **6.5 Trust evidence and verification:** profile-bound proofs, verifier authorization, dispute gates — pending.
-- **6.6 Wallet write flow and operator reliability:** request/funding/binding UI, retry reconciliation, telemetry and supervision — pending.
-
-Do not enable `features.writes`, claim paid job operability, or call phase 6 complete until all six integrations have passed E2E qualification.
-
-## AI-RECOVERY-7 — Testnet deployment and end-to-end qualification — PLANNED
-
-Deploy contract/service manifests, worker, API and UI; qualify Wallet -> AI request -> Compute -> provider -> verification -> settlement/refund; run failure/reorg/security drills, fuzz/invariant expansion and release qualification. No testnet/mainnet deployment is implied by passing repository CI.
-
-## Completion definition
-
-420AI recovery is complete only when canonical on-chain state, provider runtime, read API, user UI, private data transport, qualified signer, model backend, Vault/Trust adapters and deployed testnet agree on identities, permissions and lifecycle semantics, and the full user flow is validated end to end.
+Keep PR #348 draft while the live-payment and security-critical integrations are missing. A fresh CI green result for this documentation or a code commit establishes only its tested repository state. Mark a work package complete only with linked implementation, adversarial tests, approved deployment and independent testnet evidence where relevant; mark the overall AI recovery complete only after the full authenticated, privately served, independently verified and correctly settled user lifecycle is demonstrated end to end. Do not enable paid AI or infer production readiness from the completed foundation phases.

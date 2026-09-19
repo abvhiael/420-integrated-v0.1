@@ -258,3 +258,52 @@ export function encodeInitiateOutbound({
   ].join('');
   return functionSelector(signature) + head + recipient + extraData;
 }
+
+
+export function encodeAllowance(owner, spender) {
+  return functionSelector('allowance(address,address)') + addressWord(owner) + addressWord(spender);
+}
+
+export function encodeCanSwap(principal, marketId, amountRaw) {
+  return functionSelector('canSwap(address,bytes32,uint256)') + addressWord(principal) + bytes32Word(marketId) + uintWord(amountRaw);
+}
+
+export function encodeCanPlaceLimitOrder(principal, marketId, amountRaw) {
+  return functionSelector('canPlaceLimitOrder(address,bytes32,uint256)') + addressWord(principal) + bytes32Word(marketId) + uintWord(amountRaw);
+}
+
+export function encodeCanBridgeWithdraw(principal, assetId, amountRaw) {
+  return functionSelector('canBridgeWithdraw(address,bytes32,uint256)') + addressWord(principal) + bytes32Word(assetId) + uintWord(amountRaw);
+}
+
+export function decodeUint256(value) {
+  const hex = rawHex(value, 'uint256 result');
+  if (hex.length < 64) throw new Error('invalid uint256 result');
+  return BigInt('0x' + hex.slice(-64));
+}
+
+export function decodeBool(value) {
+  return decodeUint256(value) !== 0n;
+}
+
+export function decodeRevertData(value) {
+  let hex;
+  try { hex = rawHex(value, 'revert data'); } catch { return { kind:'UNKNOWN', selector:null, message:null, data:value ?? null }; }
+  if (hex.length < 8) return { kind:'UNKNOWN', selector:null, message:null, data:'0x'+hex };
+  const selector='0x'+hex.slice(0,8);
+  if(selector==='0x08c379a0' && hex.length >= 8 + 64*3){
+    try{
+      const payload=hex.slice(8);
+      const offset=Number(BigInt('0x'+payload.slice(0,64)));
+      const lenIndex=offset*2;
+      const len=Number(BigInt('0x'+payload.slice(lenIndex,lenIndex+64)));
+      const strHex=payload.slice(lenIndex+64,lenIndex+64+len*2);
+      const bytes=Uint8Array.from(strHex.match(/../g)?.map(x=>parseInt(x,16))??[]);
+      return {kind:'ERROR_STRING',selector,message:new TextDecoder().decode(bytes),data:'0x'+hex};
+    }catch{}
+  }
+  if(selector==='0x4e487b71' && hex.length >= 72){
+    return {kind:'PANIC',selector,message:'panic code 0x'+hex.slice(-64),data:'0x'+hex};
+  }
+  return {kind:'CUSTOM_ERROR',selector,message:null,data:'0x'+hex};
+}

@@ -72,7 +72,7 @@ func (a *Adapter) Route(ctx context.Context, req RouteRequest) (geo.Route, Prove
 		return geo.Route{}, Provenance{}, &ProviderError{Kind: ErrorMalformedResult, Provider: a.provider.Name(), Message: err.Error()}
 	}
 	if err := p.Validate(); err != nil {
-		return nil, Provenance{}, &ProviderError{Kind: ErrorMalformedResult, Provider: a.provider.Name(), Message: err.Error()}
+		return geo.Route{}, Provenance{}, &ProviderError{Kind: ErrorMalformedResult, Provider: a.provider.Name(), Message: err.Error()}
 	}
 	return r, p, nil
 }

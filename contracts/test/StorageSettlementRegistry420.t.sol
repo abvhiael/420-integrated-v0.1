@@ -85,7 +85,15 @@ contract StorageSettlementRegistry420Test {
         bytes32 schemeId;
     }
 
+    // Keep deployment, mutable fixture configuration and test execution in separate
+    // internal compilation scopes: the full Env return tuple otherwise stays live
+    // alongside multiple external constructor arguments in the IR optimizer.
     function setup() internal returns (Env memory e) {
+        _deployRegistries(e);
+        _configureRegistries(e);
+    }
+
+    function _deployRegistries(Env memory e) private {
         e.caps = new MockStorageSettlementCaps420();
         e.auth = new ResourceAuthorization420(address(e.caps));
         e.providers = new ResourceProviderRegistry420(address(e.auth));
@@ -100,7 +108,9 @@ contract StorageSettlementRegistry420Test {
         e.agreements = new StorageAgreementRegistry420(address(e.auth), address(e.offers), address(e.nodes), address(e.providers), address(e.schemes), address(e.commitments), address(e.capacity));
         e.settlements = new StorageSettlementRegistry420(address(e.agreements), address(e.proofs));
         e.vault = new MockStorageSettlementVault420();
+    }
 
+    function _configureRegistries(Env memory e) private {
         e.providerId = keccak256("settlement-provider");
         e.nodeId = keccak256("settlement-node");
         e.offerId = keccak256("settlement-offer");
@@ -120,18 +130,31 @@ contract StorageSettlementRegistry420Test {
     function activateAgreement(Env memory e) internal returns (bytes32 agreementId, bytes32 commitmentId, uint64 startTime, uint64 endTime) {
         startTime = uint64(block.timestamp + 1 hours);
         endTime = uint64(startTime + 24 hours);
+        agreementId = _proposeSettlementAgreement(e, startTime, endTime);
+        commitmentId = _registerSettlementCommitment(e, startTime, endTime);
+        _reserveAndActivate(e, agreementId, commitmentId, endTime);
+    }
+
+    function _proposeSettlementAgreement(Env memory e, uint64 startTime, uint64 endTime) private returns (bytes32 agreementId) {
         vm.prank(CONSUMER);
         agreementId = e.agreements.proposeAgreement(
             e.offerId, keccak256("object"), keccak256("content-root"), keccak256("manifest"),
             keccak256("standard"), keccak256("repair"), e.schemeId, 4_000,
             startTime, endTime, 6 hours, 1, 1, 1
         );
+    }
+
+    function _registerSettlementCommitment(Env memory e, uint64 startTime, uint64 endTime) private returns (bytes32 commitmentId) {
         commitmentId = keccak256("settlement-commitment");
         vm.prank(PROVIDER);
         e.commitments.registerCommitment(commitmentId, e.nodeId, e.schemeId, keccak256("content-root"), keccak256("replica-root"), 4_000, startTime, endTime, keccak256("meta"));
+    }
+
+    function _reserveAndActivate(Env memory e, bytes32 agreementId, bytes32 commitmentId, uint64 endTime) private {
         vm.prank(PROVIDER);
         bytes32 reservationId = e.capacity.reserveCapacity(e.nodeId, agreementId, 4_000, endTime);
-        vm.prank(PROVIDER); e.agreements.activateAgreement(agreementId, commitmentId, reservationId);
+        vm.prank(PROVIDER);
+        e.agreements.activateAgreement(agreementId, commitmentId, reservationId);
     }
 
     function openAndFund(Env memory e, bytes32 agreementId) internal returns (bytes32 settlementId) {

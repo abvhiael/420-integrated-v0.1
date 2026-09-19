@@ -94,3 +94,79 @@ func TestReadyFailsClosed(t *testing.T){
 	if err!=nil{t.Fatal(err)}
 	if err:=s.Ready(context.Background());err==nil{t.Fatal("expected readiness failure")}
 }
+
+
+func TestLifecycleHappyPathAndHistory(t *testing.T){
+	s,repo,_:=newService(t)
+	e:=baseEvent(); e.Version=1; e.CreatedAt=s.now(); e.UpdatedAt=e.CreatedAt
+	repo.event=e
+	s.now=func()time.Time{return e.UpdatedAt.Add(time.Minute)}
+	scheduled,err:=s.Transition(context.Background(),e.ID,model.StatusScheduled,1,"publish")
+	if err!=nil{t.Fatal(err)}
+	if scheduled.Status!=model.StatusScheduled||scheduled.Version!=2||len(scheduled.LifecycleHistory)!=1{t.Fatalf("scheduled=%+v",scheduled)}
+	if scheduled.LifecycleHistory[0].From!=model.StatusDraft||scheduled.LifecycleHistory[0].To!=model.StatusScheduled||scheduled.LifecycleHistory[0].Reason!="publish"{t.Fatalf("history=%+v",scheduled.LifecycleHistory)}
+	s.now=func()time.Time{return scheduled.UpdatedAt.Add(time.Minute)}
+	live,err:=s.Transition(context.Background(),e.ID,model.StatusLive,2,"doors open")
+	if err!=nil{t.Fatal(err)}
+	s.now=func()time.Time{return live.UpdatedAt.Add(time.Minute)}
+	ended,err:=s.Transition(context.Background(),e.ID,model.StatusEnded,3,"complete")
+	if err!=nil{t.Fatal(err)}
+	if ended.Status!=model.StatusEnded||len(ended.LifecycleHistory)!=3{t.Fatalf("ended=%+v",ended)}
+}
+
+func TestCancellationPreservesEventAndHistory(t *testing.T){
+	s,repo,_:=newService(t)
+	e:=baseEvent(); e.Status=model.StatusScheduled; e.Version=4; e.CreatedAt=s.now(); e.UpdatedAt=e.CreatedAt
+	repo.event=e
+	s.now=func()time.Time{return e.UpdatedAt.Add(time.Minute)}
+	cancelled,err:=s.Transition(context.Background(),e.ID,model.StatusCancelled,4,"weather")
+	if err!=nil{t.Fatal(err)}
+	if cancelled.ID!=e.ID||cancelled.Title!=e.Title||cancelled.Status!=model.StatusCancelled{t.Fatalf("cancelled=%+v",cancelled)}
+	if len(cancelled.LifecycleHistory)!=1||cancelled.LifecycleHistory[0].Reason!="weather"{t.Fatalf("history=%+v",cancelled.LifecycleHistory)}
+	got,err:=s.Get(context.Background(),e.ID);if err!=nil{t.Fatal(err)}
+	if got.Status!=model.StatusCancelled{t.Fatalf("got=%+v",got)}
+}
+
+func TestInvalidLifecycleJumpsFailClosed(t *testing.T){
+	cases:=[]struct{from,to model.Status}{
+		{model.StatusDraft,model.StatusLive},
+		{model.StatusDraft,model.StatusEnded},
+		{model.StatusScheduled,model.StatusEnded},
+		{model.StatusLive,model.StatusScheduled},
+	}
+	for _,tc:=range cases{
+		t.Run(string(tc.from)+"_to_"+string(tc.to),func(t *testing.T){
+			s,repo,_:=newService(t)
+			e:=baseEvent();e.Status=tc.from;e.Version=1;e.CreatedAt=s.now();e.UpdatedAt=e.CreatedAt;repo.event=e
+			_,err:=s.Transition(context.Background(),e.ID,tc.to,1,"")
+			if !errors.Is(err,ErrInvalidTransition){t.Fatalf("err=%v",err)}
+		})
+	}
+}
+
+func TestTerminalStatesCannotTransition(t *testing.T){
+	for _,status:=range []model.Status{model.StatusEnded,model.StatusCancelled}{
+		t.Run(string(status),func(t *testing.T){
+			s,repo,_:=newService(t)
+			e:=baseEvent();e.Status=status;e.Version=1;e.CreatedAt=s.now();e.UpdatedAt=e.CreatedAt;repo.event=e
+			_,err:=s.Transition(context.Background(),e.ID,model.StatusCancelled,1,"")
+			if !errors.Is(err,ErrTerminalStatus){t.Fatalf("err=%v",err)}
+		})
+	}
+}
+
+func TestTransitionRequiresCanonicalOrganizerAuthorization(t *testing.T){
+	s,repo,a:=newService(t)
+	e:=baseEvent();e.Version=1;e.CreatedAt=s.now();e.UpdatedAt=e.CreatedAt;repo.event=e
+	a.err=errors.New("denied")
+	_,err:=s.Transition(context.Background(),e.ID,model.StatusScheduled,1,"")
+	if err==nil{t.Fatal("expected authorization error")}
+	if a.calls!=1{t.Fatalf("auth calls=%d",a.calls)}
+}
+
+func TestTransitionRejectsStaleVersion(t *testing.T){
+	s,repo,_:=newService(t)
+	e:=baseEvent();e.Version=5;e.CreatedAt=s.now();e.UpdatedAt=e.CreatedAt;repo.event=e
+	_,err:=s.Transition(context.Background(),e.ID,model.StatusScheduled,4,"")
+	if err==nil{t.Fatal("expected version conflict")}
+}

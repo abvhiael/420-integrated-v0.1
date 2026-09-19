@@ -158,7 +158,7 @@ BG-16 integrates the production Bong Goggles application with the existing 420No
 - **BG-17.1 through BG-17.9 — COMPLETE AND QUALIFIED**
 - merge commit: `0612b39f017ad26092378e4292b61ec13adc172f`
 
-## Phase 18 — rewards production configuration — COMPLETE AND QUALIFIED, merge-ready PR #344
+## Phase 18 — rewards production configuration — COMPLETE AND QUALIFIED, merged PR #344
 
 Branch: `feature/bong-goggles-bg18-rewards-config`
 
@@ -167,7 +167,7 @@ Detailed roadmap: `docs/BONG-GOGGLES-BG-18.md`
 - **BG-18.1 through BG-18.12 — COMPLETE AND QUALIFIED**
 - branch reconciled with current `main`
 - exact-head Bong Goggles, Solidity, Docs and Integrated qualification green at `618447c778eabe51a960f02c83b7fb9dba5b2f14`
-- PR #344 is the BG-18 merge vehicle
+- PR #344 merged to `main` at `db6dcb12b79af6c8afc5b15a6fd9ace28bb938fc`
 
 BG-18 productionizes the existing Bong Goggles reward verifier/adapter against the shared 420 rewards stack. It configures contribution enablement, scorers/policies, campaigns, caps, funding, accrual/claims, notifications, abuse hardening, operator surfaces and canonical accounting without creating a second reward ledger.
 
@@ -203,7 +203,7 @@ Planned increments:
 
 ## Current position
 
-**BG-18 is complete, reconciled and qualified in PR #344. Next implementation phase after merge: BG-19 full web application/public-facing UI.**
+**BG-18 is complete, reconciled, qualified and merged in PR #344. Current work moves to BG-19 full web application/public-facing UI.**
 
 Critical path:
 

@@ -158,3 +158,14 @@ Do not assign either set of contracts to those addresses until one canonical mig
 7. Genesis verification scripts and tests.
 
 The safest design direction is to preserve only one physical contract at each frozen address and make non-predeploy mature routers/adapters registry-resolved, consistent with the newer policy that implementations/adapters remain registry-resolved. This audit does not silently choose which historical freeze wins; that requires an explicit Genesis architecture amendment and migration record.
+
+
+## AI-RECOVERY-2 resolution
+
+The Genesis address conflict identified above is now resolved on the recovery branch by making `contracts/config/system-addresses.json` the sole physical predeploy authority for `0x0420-0x043c`.
+
+The later canonical-address catalogue no longer reallocates those addresses to newer routers/factories. Non-predeploy mature components are explicitly registry-resolved. The verifier now cross-checks the Step 6.2 system map, deployment manifest, predeploy plan and Native AI Genesis map.
+
+The Wallet's collided assumptions for SmartAccountFactory420 at `0x0420` and CapabilityRegistry420 at `0x0421` were removed as part of the same reconciliation.
+
+See `docs/AI-RECOVERY-2-GENESIS-ADDRESS-RECONCILIATION.md`.

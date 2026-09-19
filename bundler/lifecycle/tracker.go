@@ -49,6 +49,10 @@ func (s *Store) RecordSubmission(userOpHash,txHash,entryPoint string,submittedAt
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	hash:=strings.ToLower(userOpHash)
+	if pending,ok:=s.pending[hash]; ok {
+		if pending.EntryPoint!=strings.ToLower(entryPoint) { return errors.New("submission completion EntryPoint mismatch") }
+		if submittedAt.UTC().Before(pending.StartedAt) { return errors.New("submission completion predates intent") }
+	}
 	if existing,ok:=s.submissions[hash]; ok && existing.TransactionHash!=strings.ToLower(txHash) {
 		return errors.New("conflicting submission transaction")
 	}

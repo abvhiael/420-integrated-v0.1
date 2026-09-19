@@ -94,7 +94,7 @@ export async function verifyNativeFundingPreflight420(
   if (!same(escrow.jobId, intent.jobId) || escrow.state !== 'NONE') throw new Error('job escrow already funded or mismatched');
   if (!same(obligation.obligationId, intent.obligationId) || !same(obligation.vaultRef, intent.vaultRef)
     || !same(obligation.sourceRef, intent.fundingRef) || obligation.state !== 'RESERVED'
-    || !same(checkedAddress(obligation.asset), ZERO_ADDRESS)
+    || !same(getAddress(obligation.asset), ZERO_ADDRESS)
     || !same(checkedAddress(obligation.beneficiary), beneficiary) || obligation.amount420 !== intent.amount420) {
     throw new Error('dedicated native funding obligation does not match intent');
   }

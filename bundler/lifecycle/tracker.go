@@ -89,6 +89,12 @@ func (r *RPC) GetReceipt(ctx context.Context,userOpHash string)(Receipt,bool,err
 	if strings.ToLower(rawReceipt.TransactionHash)!=sub.TransactionHash { return Receipt{},false,errors.New("receipt transaction hash mismatch") }
 	if rawReceipt.Status!="0x1" { return Receipt{},false,errors.New("EntryPoint transaction reverted") }
 	if _,err:=parseQuantity(rawReceipt.BlockNumber); err!=nil { return Receipt{},false,errors.New("malformed receipt block number") }
+	var canonicalBlock *rpcBlock
+	if err:=r.call(ctx,"eth_getBlockByNumber",[]any{rawReceipt.BlockNumber,false},&canonicalBlock); err!=nil { return Receipt{},false,err }
+	if canonicalBlock==nil { return Receipt{},false,nil }
+	if !hash32(canonicalBlock.Hash) || strings.ToLower(canonicalBlock.Hash)!=strings.ToLower(rawReceipt.BlockHash) {
+		return Receipt{},false,nil
+	}
 
 	matchCount:=0
 	success:=false
@@ -113,6 +119,9 @@ func (r *RPC) GetReceipt(ctx context.Context,userOpHash string)(Receipt,bool,err
 
 type rpcRequest struct { JSONRPC string `json:"jsonrpc"`; ID int `json:"id"`; Method string `json:"method"`; Params any `json:"params"` }
 type rpcResponse struct { Result json.RawMessage `json:"result"`; Error *struct{Code int `json:"code"`; Message string `json:"message"`} `json:"error"` }
+type rpcBlock struct {
+	Hash string `json:"hash"`
+}
 type rpcReceipt struct {
 	TransactionHash string `json:"transactionHash"`
 	BlockHash string `json:"blockHash"`

@@ -48,7 +48,7 @@ Qualification: all exact-head AI Provider, Solidity, Integrated, Docs, Wallet We
 
 Exit condition: a safe reconstructable off-chain provider control plane exists without embedding wallet/private-key authority.
 
-## AI-RECOVERY-4 — Derived API, Indexer projection and service discovery — IN PROGRESS
+## AI-RECOVERY-4 — Derived API, Indexer projection and service discovery — IMPLEMENTED / QUALIFICATION IN PROGRESS
 
 Goals:
 - stable AI read API for user-facing clients;

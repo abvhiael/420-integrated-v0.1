@@ -117,3 +117,44 @@ The website UI should be built as a separate application/client phase after cont
 8. build the `ai.420integrated.org` web client;
 9. add deployment manifests and testnet smoke tests;
 10. complete end-to-end testnet qualification from Wallet -> AI request -> ComputeMarket -> provider -> verification -> settlement.
+
+
+## Critical Genesis address reconciliation blocker
+
+The recovery audit also uncovered a separate pre-existing Genesis address conflict that must be resolved before this work is merged or deployed.
+
+The older Native AI Genesis configuration and frozen 420AI V1 architecture reserve:
+
+- `0x...042f` — `AIProviderRegistry`
+- `0x...0430` — `AIModelRegistry`
+- `0x...0431` — `AIJobManager`
+- `0x...0432` — `AIJobEscrow`
+- `0x...0433` — `AIReputationRegistry`
+
+Those bindings are still repeated by `config/ai-genesis.json`, both system-address manifests, the deployment manifest, the predeploy plan, protocol configuration, release-candidate artifacts, and the hardened AI contracts (including the AIJobEscrow -> AIJobManager binding).
+
+A later `contracts/config/genesis-canonical-addresses.json` freeze assigns the same address range to different discovery anchors:
+
+- `0x...042f` — `TokenFactory420`
+- `0x...0430` — `AIRouter420`
+- `0x...0431` — `ResourceRouter420`
+- `0x...0432` — `ComputeRouter420`
+- `0x...0433` — `TreasuryRouter420`
+
+That file states `addressReuseForbidden: true`, but its verifier only checks duplicates within the newer canonical-address file. It does not cross-check the older Genesis/predeploy/system-address manifests.
+
+This is therefore a repository-wide Genesis reconciliation issue, not an AIComputeAdapter issue.
+
+### Required resolution before merge/deployment
+
+Do not assign either set of contracts to those addresses until one canonical migration decision is made and encoded consistently across:
+
+1. canonical-address registry;
+2. legacy system-address/predeploy manifests;
+3. AI Genesis configuration;
+4. contract hard-coded dependencies;
+5. ProtocolRegistry discovery;
+6. release-candidate artifacts;
+7. Genesis verification scripts and tests.
+
+The safest design direction is to preserve only one physical contract at each frozen address and make non-predeploy mature routers/adapters registry-resolved, consistent with the newer policy that implementations/adapters remain registry-resolved. This audit does not silently choose which historical freeze wins; that requires an explicit Genesis architecture amendment and migration record.

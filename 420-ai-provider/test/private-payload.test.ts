@@ -47,8 +47,12 @@ test('rejects unauthorized, expired and oversized input', async () => {
   await assert.rejects(adapter().get(`420ai:private:v1:${objectId}`), /access denied/);
   allow = true;
   now = 3000;
-  await assert.rejects(adapter().get(`420ai:private:v1:${objectId}`), /expired/);
-  now = 1000;
+  try {
+    // An expired capability is rejected synchronously when the adapter is constructed.
+    assert.throws(() => adapter(), /expired/);
+  } finally {
+    now = 1000;
+  }
   assert.throws(() => new PrivatePayload420({jobId,providerId,expectedInputCommitment:bytesCommitment420(input),maxBytes:0,expiresAtMs:3000},store,keys,access,()=>now), /size limit/);
 });
 test('encrypts output under unpredictable opaque object reference; rejects unsupported content types', async () => {

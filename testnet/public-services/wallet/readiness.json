@@ -1,7 +1,7 @@
 {
   "schema": "420-public-service-readiness-v1",
   "serviceId": "420/service/wallet/v1",
-  "status": "IMPLEMENTATION_PROFILE_ESTABLISHED",
+  "status": "W14_1_DEPLOYMENT_INVENTORY_ESTABLISHED",
   "genesisRequired": true,
   "productionDomainAssigned": false,
   "domainAssignmentBlocksImplementation": false,
@@ -17,5 +17,12 @@
     "clientImplementationComplete": false,
     "securityHardeningComplete": false,
     "productionDeploymentComplete": false
-  }
+  },
+  "deploymentInventory": "wallet/deployment-inventory.json",
+  "liveTestnetReady": false,
+  "blockers": [
+    "official public testnet manifest missing",
+    "wallet canonical anchors conflict with frozen system-address assignments",
+    "EntryPoint420 production implementation binding pending"
+  ]
 }

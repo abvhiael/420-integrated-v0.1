@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/420integrated/420-integrated/bundler/mempool"
+	"github.com/420integrated/420-integrated/bundler/reputation"
 	"github.com/420integrated/420-integrated/bundler/simulation"
 	"github.com/420integrated/420-integrated/bundler/userop"
 )
@@ -67,4 +68,23 @@ func TestPeerCapacityMapsTo429(t *testing.T){
 	p:=&fakePool{err:mempool.ErrFull}
 	h,_:=NewHandler(420,"0x1111111111111111111111111111111111111111",fakeValidator{},p)
 	if w:=post(t,h,envelope(t,fixture()));w.Code!=http.StatusTooManyRequests{t.Fatalf("status %d",w.Code)}
+}
+
+
+func TestInboundPeerTemporaryBackoffAfterFailures(t *testing.T){
+	p:=&fakePool{}
+	h,_:=NewHandler(420,"0x1111111111111111111111111111111111111111",fakeValidator{},p)
+	g,_:=reputation.New(reputation.Config{
+		Window:time.Minute,MaxRequestsPerSource:10,MaxFailuresPerSource:2,
+		MaxRequestsPerSender:10,Backoff:2*time.Minute,MaxEntries:16,
+	})
+	h.SetGuard(g)
+	now:=time.Unix(1000,0)
+	h.SetNow(func()time.Time{return now})
+	bad:=envelope(t,fixture())
+	bad.UserOpHash="0x"+strings.Repeat("ff",32)
+	if w:=post(t,h,bad);w.Code!=http.StatusBadRequest{t.Fatalf("first failure status %d",w.Code)}
+	if w:=post(t,h,bad);w.Code!=http.StatusBadRequest{t.Fatalf("second failure status %d",w.Code)}
+	if w:=post(t,h,envelope(t,fixture()));w.Code!=http.StatusTooManyRequests{t.Fatalf("backoff status %d",w.Code)}
+	if p.adds!=0{t.Fatalf("rate-limited source reached pool: %d",p.adds)}
 }

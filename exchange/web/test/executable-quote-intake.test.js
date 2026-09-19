@@ -8,6 +8,8 @@ const runtime={deployment:{status:'RESOLVED',environment:'testnet'},network:{cha
 const request={account,recipient,tokenIn,tokenOut,amountInRaw:'1000000000000000000',minimumOutputRaw:'4000000'};
 const response={schema:'420-exchange-executable-swap-quote-v1',marketSource:'api',demo:false,fixture:false,quoteId:id(99),chainId:'0x420',account,observedAt:1000,expiresAt:1050,reviewedIntent:{kind:'EXACT_INPUT_PATH',recipient,routeCommitment:id(900),hops:[{marketId:id(10),outputToken:tokenOut}]},execution:{mode:'ERC20_TO_ERC20',tokenIn,recipient,amountInRaw:request.amountInRaw,minFinalAmountOutRaw:'4100000',expectedPathHash:id(900),hops:[{marketId:id(10),routeId:id(11),tokenOut,minAmountOutRaw:'4100000',routeData:'0x'}]},tokens:{input:{address:tokenIn,decimals:18,symbol:'BOB',verified:true},output:{address:tokenOut,decimals:6,symbol:'ARRR',verified:true}}};
 const validate=(changes={},req=request,rt=runtime,nowSeconds=1010)=>validateExecutableSwapQuote({runtime:rt,request:req,response:{...response,...changes},nowSeconds});
+const transport=(override={})=>async()=>({ok:true,redirected:false,url:runtime.api.executableQuoteUrl,headers:{get:()=> 'application/json; charset=utf-8'},json:async()=>structuredClone(response),...override});
+const fetchCandidate=(overrides={})=>fetchExecutableSwapReview({runtime,request,nowSeconds:1010,readNowSeconds:()=>1011,fetchImpl:transport(),...overrides});
 test('projects matching quote as review candidate only, never authorization to send',()=>{
  const result=validate();
  assert.equal(result.status,'REVIEW_CANDIDATE_ONLY');assert.equal(result.projection.amountIn,'1');assert.equal(result.projection.minimumOutput,'4.1');
@@ -25,14 +27,25 @@ test('rejects unqualified, stale, wrong wallet, chain and altered trade requests
 test('no endpoint and invalid cross-origin or insecure endpoints fail before HTTP',async()=>{
  let calls=0;const fetchImpl=()=>{calls++;throw Error('unexpected network call');};
  for(const api of [{...runtime.api,executableQuoteUrl:null},{...runtime.api,executableQuoteUrl:'http://quotes.example.invalid/exchange/executable-swap-quote'},{...runtime.api,executableQuoteUrl:'https://other.example.invalid/exchange/executable-swap-quote'},{...runtime.api,executableQuoteUrl:'https://quotes.example.invalid/exchange/executable-swap-quote?demo=1'}]){
-  await assert.rejects(fetchExecutableSwapReview({runtime:{...runtime,api},request,nowSeconds:1010,fetchImpl}),error=>error.name==='QuoteIntakeError');
+  await assert.rejects(fetchCandidate({runtime:{...runtime,api},fetchImpl}),error=>error.name==='QuoteIntakeError');
  }
  assert.equal(calls,0);
 });
 test('configured quote transport sends exact request, refuses non-JSON and does not sign',async()=>{
- let seen;const fetchImpl=async(url,options)=>{seen={url,options};return {ok:true,headers:{get:()=> 'application/json; charset=utf-8'},json:async()=>structuredClone(response)};};
- const result=await fetchExecutableSwapReview({runtime,request,nowSeconds:1010,fetchImpl});
+ let seen;const fetchImpl=async(url,options)=>{seen={url,options};return transport()();};
+ const result=await fetchCandidate({fetchImpl});
  assert.equal(result.status,'REVIEW_CANDIDATE_ONLY');assert.equal(seen.options.method,'POST');assert.equal(seen.options.credentials,'omit');assert.equal(seen.options.cache,'no-store');
  assert.deepEqual(JSON.parse(seen.options.body),{schema:'420-exchange-swap-quote-request-v1',...request});
- await assert.rejects(fetchExecutableSwapReview({runtime,request,nowSeconds:1010,fetchImpl:async()=>({ok:true,headers:{get:()=> 'text/html'},json:async()=>response})}),error=>error.code==='UNQUALIFIED_RESPONSE');
+ await assert.rejects(fetchCandidate({fetchImpl:transport({headers:{get:()=> 'text/html'}})}),error=>error.code==='UNQUALIFIED_RESPONSE');
+});
+test('quote expiring or becoming stale while HTTP or JSON is pending fails at receipt',async()=>{
+ await assert.rejects(fetchCandidate({readNowSeconds:()=>1050}),error=>error.code==='STALE_QUOTE');
+ await assert.rejects(fetchCandidate({readNowSeconds:()=>1031}),error=>error.code==='STALE_QUOTE');
+ await assert.rejects(fetchCandidate({readNowSeconds:()=>1009}),error=>error.code==='CLOCK_UNAVAILABLE');
+ await assert.rejects(fetchCandidate({readNowSeconds:()=>NaN}),error=>error.code==='CLOCK_UNAVAILABLE');
+ await assert.rejects(fetchCandidate({readNowSeconds:()=>{throw Error('no clock');}}),error=>error.code==='CLOCK_UNAVAILABLE');
+});
+test('redirected or endpoint-substituted replies are rejected even when JSON is valid',async()=>{
+ await assert.rejects(fetchCandidate({fetchImpl:transport({redirected:true})}),error=>error.code==='ENDPOINT_CHANGED');
+ await assert.rejects(fetchCandidate({fetchImpl:transport({url:'https://other.example.invalid/executable-swap-quote'})}),error=>error.code==='ENDPOINT_CHANGED');
 });

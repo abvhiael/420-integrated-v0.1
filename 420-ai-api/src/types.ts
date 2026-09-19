@@ -1,6 +1,6 @@
 export type Hex32 = `0x${string}`;
 export type Address420 = `0x${string}`;
-export type ProjectionSource420 = 'indexer' | 'rpc';
+export type ProjectionSource420 = 'indexer' | 'rpc' | 'hybrid';
 
 export interface ProjectionMeta420 {
   authoritative: false;

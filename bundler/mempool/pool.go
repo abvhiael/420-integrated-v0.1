@@ -201,3 +201,44 @@ func replacementFeeSufficient(oldFee,newFee *big.Int,bumpBps uint64)bool{
 	if required.Cmp(minPlusOne)<0{required=minPlusOne}
 	return newFee.Cmp(required)>=0
 }
+
+
+func (p *Pool) Restore(entries []Entry,now time.Time) error {
+	if now.IsZero(){return errors.New("restore time is required")}
+	byHash:=make(map[string]Entry,len(entries))
+	bySenderNonce:=make(map[string]string,len(entries))
+	perSender:=map[string]int{}
+	for _,entry:=range entries{
+		if !entry.ExpiresAt.After(now){continue}
+		if entry.AdmittedAt.IsZero() || entry.ExpiresAt.IsZero() || entry.ExpiresAt.Before(entry.AdmittedAt){
+			return errors.New("invalid mempool recovery timestamps")
+		}
+		canonical,err:=entry.Operation.Canonicalize()
+		if err!=nil{return fmt.Errorf("invalid recovered UserOperation: %w",err)}
+		h:=strings.ToLower(entry.Hash)
+		if !validHash(h){return errors.New("invalid recovered UserOperation hash")}
+		if strings.ToLower(entry.Evidence.UserOpHash)!=h || !entry.Evidence.ExecutionSucceeded{
+			return errors.New("invalid recovered simulation evidence")
+		}
+		expected,err:=userop.Hash(entry.Evidence.ChainID,entry.Evidence.EntryPoint,entry.Operation)
+		if err!=nil || strings.ToLower(expected)!=h{return errors.New("recovered evidence does not match UserOperation")}
+		if _,ok:=byHash[h];ok{return errors.New("duplicate recovered UserOperation hash")}
+		sender:=strings.ToLower(entry.Operation.Sender)
+		nonceKey:=senderNonceKey(sender,canonical.Nonce.String())
+		if _,ok:=bySenderNonce[nonceKey];ok{return errors.New("duplicate recovered sender nonce")}
+		if len(byHash)>=p.cfg.MaxOperations{return ErrFull}
+		if perSender[sender]>=p.cfg.MaxPerSender{return ErrSenderLimit}
+		entry.Hash=h
+		entry.AdmittedAt=entry.AdmittedAt.UTC()
+		entry.ExpiresAt=entry.ExpiresAt.UTC()
+		byHash[h]=entry
+		bySenderNonce[nonceKey]=h
+		perSender[sender]++
+	}
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.byHash=byHash
+	p.bySenderNonce=bySenderNonce
+	p.perSender=perSender
+	return nil
+}

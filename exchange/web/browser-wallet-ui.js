@@ -13,15 +13,32 @@ export function executionSurfaceGate({runtime,source,canonicalBindings=false}={}
   if(!canonicalBindings)return {ok:false,reason:'CANONICAL_EXECUTION_BINDINGS_MISSING'};
   return {ok:true,reason:null};
 }
+// A resolved deployment or an attached wallet cannot make demo-backed V14 forms executable.
+// This status is informational; only a separate, authenticated, reviewed V15 request may
+// eventually reach the controller's preflight and wallet methods.
+export function browserExecutionReadiness({runtime=null,connected=false,verifiedQuote=false,canonicalReview=false}={}){
+  if(runtime?.deployment?.status!=='RESOLVED'||runtime?.deployment?.environment!=='testnet')return {ready:false,reason:'Verified testnet deployment unavailable'};
+  if(!connected)return {ready:false,reason:'Connect a wallet to review a transaction'};
+  if(!verifiedQuote)return {ready:false,reason:'Live executable quote unavailable; display and fixture data cannot authorize trading'};
+  if(!canonicalReview)return {ready:false,reason:'Canonical transaction review and preflight not connected to these controls'};
+  // This UI is deliberately locked even if callers claim the prerequisites are present.
+  return {ready:false,reason:'Browser execution remains disabled pending live operational qualification'};
+}
 export function mountWalletUI({documentRef=globalThis.document,windowRef=globalThis.window,ethereum=globalThis.ethereum,loadRuntime=()=>fetch('./runtime-config.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('Runtime configuration unavailable');return r.json();})}={}){
   if(!documentRef?.querySelector||!windowRef?.addEventListener)throw Error('Browser document and window required');
   const connect=documentRef.querySelector('#connect');if(!connect)throw Error('Exchange wallet control unavailable');
-  const panel=documentRef.createElement('div');panel.id='v15-wallet-selection';panel.style.cssText='display:flex;flex-direction:column;gap:4px;max-width:260px';
+  const panel=documentRef.createElement('div');panel.id='v15-wallet-selection';panel.style.cssText='display:flex;flex-direction:column;gap:4px;max-width:300px';
   const caption=documentRef.createElement('label');caption.htmlFor='v15-wallet-provider';caption.textContent='Wallet provider';
   const select=documentRef.createElement('select');select.id='v15-wallet-provider';select.setAttribute('aria-label','Select a wallet provider');
   const message=documentRef.createElement('small');message.id='v15-wallet-message';message.setAttribute('role','status');message.textContent='Wallet discovery available; trading not yet enabled.';
-  panel.append(caption,select,message);connect.parentElement?.insertBefore(panel,connect);
+  const readiness=documentRef.createElement('small');readiness.id='v15-execution-readiness';readiness.setAttribute('role','status');readiness.textContent='Verified testnet deployment unavailable';
+  panel.append(caption,select,message,readiness);connect.parentElement?.insertBefore(panel,connect);
   const context={runtime:null,controller:null,pending:false,disposed:false};
+  function updateReadiness(){
+    if(context.disposed)return;
+    const connected=Boolean(context.controller?.wallet?.session?.account);
+    readiness.textContent='Trading disabled · '+browserExecutionReadiness({runtime:context.runtime,connected}).reason;
+  }
   function lockExecution(root=documentRef){
     for(const id of V15_EXECUTION_CONTROL_IDS){const button=root.querySelector?.('#'+id);if(!button)continue;
       button.disabled=true;if(button.textContent!=='Testnet execution not qualified')button.textContent='Testnet execution not qualified';button.title=EXECUTION_BLOCK_REASON;
@@ -37,31 +54,33 @@ export function mountWalletUI({documentRef=globalThis.document,windowRef=globalT
     select.value=candidates.some(wallet=>wallet.id===previous)?previous:'';
     if(candidates.length===1)select.value=candidates[0].id;select.disabled=!candidates.length;
     if(!context.controller?.wallet){connect.textContent=candidates.length?'Connect wallet':'Wallet unavailable';connect.disabled=!candidates.length;}
+    updateReadiness();
   }
   function onState(event){if(context.disposed)return;
     if(event.type==='wallets-discovered')renderChoices();
     if(event.type==='wallet-connected'){message.textContent='Connected '+event.account.slice(0,6)+'…'+event.account.slice(-4)+' · trading disabled pending testnet qualification';connect.textContent='Wallet connected';connect.disabled=false;}
-    if(event.type==='wallet-invalidated'){message.textContent='Wallet changed: '+event.reason+'. Reconnect and review again.';connect.textContent='Reconnect wallet';connect.disabled=false;}
+    if(event.type==='wallet-invalidated'){message.textContent='Wallet changed: '+event.reason+'. Reconnect and review again.';connect.textContent='Reconnect wallet';connect.disabled=false;lockExecution();}
+    updateReadiness();
   }
   function intercept(event){const button=event.target?.closest?.('#connect, #swap-submit, #order-sign, #bridge-submit, [data-cancel-order]');if(!button)return;
     event.preventDefault();event.stopImmediatePropagation();
-    if(button.id!=='connect'){lockExecution();message.textContent=EXECUTION_BLOCK_REASON;return;}
+    if(button.id!=='connect'){lockExecution();message.textContent=EXECUTION_BLOCK_REASON;updateReadiness();return;}
     if(context.pending||context.disposed||!context.controller)return;
     if(!select.value){message.textContent='Select the wallet to connect.';return;}
     context.pending=true;connect.disabled=true;message.textContent='Requesting wallet connection…';
-    context.controller.connect({ethereum,selectedId:select.value}).catch(e=>{if(!context.disposed)message.textContent=String(e?.message??'Wallet connection failed');}).finally(()=>{context.pending=false;if(!context.disposed)connect.disabled=false;});
+    context.controller.connect({ethereum,selectedId:select.value}).catch(e=>{if(!context.disposed)message.textContent=String(e?.message??'Wallet connection failed');}).finally(()=>{context.pending=false;if(!context.disposed){connect.disabled=false;updateReadiness();}});
   }
   documentRef.addEventListener('click',intercept,true);
   const view=documentRef.querySelector('#app-view');
   // Observe only top-level view replacement: changing a button label must not trigger an observer feedback loop.
   const observer=typeof MutationObserver==='function'?new MutationObserver(()=>lockExecution()):null;
-  if(view&&observer)observer.observe(view,{childList:true});lockExecution();
+  if(view&&observer)observer.observe(view,{childList:true});lockExecution();updateReadiness();
   Promise.resolve().then(loadRuntime).then(runtime=>{if(context.disposed)return;
-    context.runtime=runtime;context.controller=new BrowserExecutionController({runtime,onState,onInvalidate:()=>lockExecution()});
-    context.controller.listen(windowRef,ethereum);renderChoices();
-  }).catch(e=>{if(!context.disposed){message.textContent=String(e?.message??'Wallet unavailable');connect.disabled=true;}});
+    context.runtime=runtime;context.controller=new BrowserExecutionController({runtime,onState,onInvalidate:()=>{lockExecution();updateReadiness();}});
+    context.controller.listen(windowRef,ethereum);renderChoices();updateReadiness();
+  }).catch(e=>{if(!context.disposed){message.textContent=String(e?.message??'Wallet unavailable');connect.disabled=true;updateReadiness();}});
   windowRef.addEventListener('pagehide',dispose,{once:true});
   function dispose(){if(context.disposed)return;context.disposed=true;observer?.disconnect();context.controller?.dispose();documentRef.removeEventListener('click',intercept,true);windowRef.removeEventListener('pagehide',dispose);}
-  return {dispose,lockExecution,renderChoices,context};
+  return {dispose,lockExecution,renderChoices,updateReadiness,context};
 }
 if(typeof document!=='undefined'&&document.querySelector('#connect'))mountWalletUI();

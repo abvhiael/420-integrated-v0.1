@@ -124,6 +124,10 @@ contract AIProviderRegistry is SystemAccess, I420System {
         return p.exists && p.state == ProviderState.ACTIVE && p.stakeRef != bytes32(0);
     }
 
+    function getProvider(bytes32 providerId) external view returns (Provider memory) {
+        return _get(providerId);
+    }
+
     function _register(
         bytes32 providerId,
         address operatorAccount,

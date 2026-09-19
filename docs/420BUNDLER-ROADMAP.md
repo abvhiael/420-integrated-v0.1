@@ -17,8 +17,8 @@ The Bundler Network is not custody, wallet authorization, consensus, settlement 
 - **GEN-11.8 — Paymaster integration boundary — COMPLETE**
 - **GEN-11.9 — receipts + lifecycle tracking — COMPLETE**
 - **GEN-11.10 — multi-bundler propagation — COMPLETE**
-- **GEN-11.11 — reputation + anti-abuse controls — IN QUALIFICATION**
-- GEN-11.12 — replacement + nonce hardening — pending
+- **GEN-11.11 — reputation + anti-abuse controls — COMPLETE**
+- **GEN-11.12 — replacement + nonce hardening — IN QUALIFICATION**
 - GEN-11.13 — failure isolation + reorg/restart recovery — pending
 - GEN-11.14 — persistence + audit trail — pending
 - GEN-11.15 — 420Wallet integration + provider fallback — pending
@@ -364,3 +364,48 @@ The guard does not relax any GEN-11.10 rule. Every non-rate-limited peer operati
 This preserves BUNDLER-INV-005, BUNDLER-INV-010, BUNDLER-INV-011 and BUNDLER-INV-015 while ensuring the multi-bundler network has a bounded operational response to malformed floods and repeated invalid submissions.
 
 GEN-11.11 is complete when all repository qualification workflows pass on one exact head containing bounded reputation state, source/sender quotas, temporary backoff and peer-ingress integration.
+
+
+## GEN-11.12 — replacement + nonce hardening
+
+GEN-11.12 upgrades the bounded mempool from conflict-only sender/nonce handling to deterministic replacement.
+
+UserOperation identity remains the full canonical sender + uint256 nonce + UserOperation hash. The Bundler never collapses or truncates the nonce before conflict detection, so independent nonce lanes encoded in the high 192 bits remain distinct.
+
+For two different UserOperation hashes with the same sender and exact nonce, the later operation is admitted only as an explicit replacement when its execution-relevant `maxFeePerGas` is sufficiently higher than the currently admitted operation.
+
+The replacement fee is derived from the same field used by the canonical `EntryPoint420` cost calculation:
+
+- `maxFeePerGas = uint128(uint256(userOp.gasFees))`
+- equivalently, the low 128 bits of `gasFees`
+
+Genesis does not invent an independent priority-fee rule because the current EntryPoint contract does not use the high 128 bits when calculating maximum or actual UserOperation gas cost.
+
+Default replacement rule:
+
+- `BUNDLER_REPLACEMENT_BUMP_BPS=1000`
+- replacement requires at least a 10% increase in `maxFeePerGas`
+- integer rounding is upward
+- every replacement must increase the fee by at least one wei, including a zero/tiny-fee incumbent
+
+The bump is configurable up to 10,000 basis points. Invalid settings fail startup through mempool configuration validation.
+
+A successful replacement is atomic under the mempool lock:
+
+- the old hash is removed
+- the new hash, operation and fresh simulation evidence replace it
+- total mempool size does not increase
+- per-sender occupancy does not increase
+- the sender+nonce index points only to the new hash
+- the original admission timestamp is preserved
+- the original expiry timestamp is preserved
+
+Preserving admission/expiry prevents replacement from refreshing TTL or gaining a queue-position advantage. Bundle selection therefore remains stable under fee replacement until GEN-11.18 defines the explicit Genesis ordering/economic policy boundary.
+
+An insufficient bump returns deterministic Bundler error `-32503` with `replacement fee bump insufficient`. Peer propagation treats an underpriced replacement as a deterministic sender/nonce conflict and may count repeated abuse against the GEN-11.11 temporary source reputation boundary.
+
+Every candidate replacement still has to pass the complete local validation/simulation path before the mempool considers replacement. Fee improvement therefore cannot bypass account authorization, Paymaster validation, chain/EntryPoint binding or simulation freshness.
+
+This preserves BUNDLER-INV-006 and BUNDLER-INV-007: stale evidence cannot silently remain eligible, and sender/nonce conflicts/replacements produce one unambiguous active mempool entry.
+
+GEN-11.12 is complete when all repository qualification workflows pass on one exact head containing atomic fee-bumped replacement, full-nonce conflict identity, queue/TTL preservation and deterministic public/peer rejection semantics.

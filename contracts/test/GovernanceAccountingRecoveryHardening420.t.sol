@@ -4,6 +4,8 @@ pragma solidity ^0.8.24;
 import "../src/bridge/BridgeAccountingRegistry.sol";
 import "../src/interfaces/genesis/Types420.sol";
 
+interface VmAccountingRecovery420 { function warp(uint256) external; }
+
 contract AccountingProtocolRegistryMock420 {
     mapping(bytes32 => Types420.ContractRef) private refs;
 
@@ -68,6 +70,7 @@ contract UnauthorizedAccountingCaller420 {
 
 /// @notice V12.6.7 governance, accounting, registry and recovery hardening.
 contract GovernanceAccountingRecoveryHardening420Test {
+    VmAccountingRecovery420 constant vm = VmAccountingRecovery420(address(uint160(uint256(keccak256("hevm cheat code")))));
     bytes32 private constant ACCOUNTING_ID = keccak256("420/APP/420BRIDGE/ACCOUNTING_REGISTRY");
     bytes32 private constant GOV_ID = keccak256("420/APP/GOVERNANCE_AUTHORITY");
     bytes32 private constant ASSETS_ID = keccak256("420/APP/CANONICAL_ASSET_REGISTRY");
@@ -149,13 +152,13 @@ contract GovernanceAccountingRecoveryHardening420Test {
     }
 
     function testNewerEvidenceRecoversUnhealthyState() public {
-        uint64 first = uint64(block.timestamp > 1 ? block.timestamp - 1 : block.timestamp);
+        uint64 first = uint64(block.timestamp);
         accounting.applyReconciliation(ASSET, 4_200, 4_199, first, keccak256("unhealthy"));
         (,,,, bool initialHealthy) = accounting.reconciliations(ASSET);
         require(!initialHealthy, "initial mismatch healthy");
 
-        uint64 second = first + 1;
-        if (second > block.timestamp) second = uint64(block.timestamp);
+        vm.warp(uint256(first) + 1);
+        uint64 second = uint64(block.timestamp);
         require(second > first, "test requires newer timestamp");
         bytes32 recoveryEvidence = keccak256("recovery");
         accounting.applyReconciliation(ASSET, 4_200, 4_200, second, recoveryEvidence);

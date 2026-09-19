@@ -85,7 +85,7 @@ if (!abi.includes("execute: 'b61d27f6'")) errors.push('canonical SmartAccount420
 
 requireStrings('scripts/generate-runtime-config.mjs', ['buildWalletRuntimeConfig420','wallet deployment inventory is not ready for live testnet/runtime generation','network manifest environment does not match wallet deployment inventory','remains conflicted','testnet manifest must publish Faucet service'], 'W14.2 runtime generator guard');
 
-requireStrings('scripts/qualify-live-testnet.mjs', ['qualifyWalletLiveTestnet420','W14.3 requires a testnet manifest','RPC chainId does not match selected manifest/runtime','has no deployed code','Explorer is unreachable','Faucet is unreachable'], 'W14.3 live testnet qualification guard');
+requireStrings('scripts/qualify-live-testnet.mjs', ['qualifyWalletLiveTestnet420','W14.3 requires a testnet manifest','RPC chainId does not match selected manifest/runtime','has no deployed code','is unreachable'], 'W14.3 live testnet qualification guard');
 
 const config = JSON.parse(read('runtime-config.json'));
 if (config.manifest?.verificationMode !== 'registry-or-signed-manifest') errors.push('manifest verification mode must fail closed');

@@ -11,6 +11,8 @@ const required = [
   'runtime-config.example.json',
   'core/config.js',
   'core/deployment.js',
+  'core/abi.js',
+  'core/execution.js',
   'core/router.js',
   'core/design-system.js',
   'core/exchange-client.js',
@@ -20,6 +22,7 @@ const required = [
   'core/exchange-data.js',
   'test/config.test.js',
   'test/deployment-binding.test.js',
+  'test/execution.test.js',
   'test/router.test.js',
   'test/design-system.test.js',
   'test/exchange-client.test.js',
@@ -42,6 +45,7 @@ const required = [
   'v14.13-qualification.json',
   'v14.14-qualification.json',
   'v15.1-qualification.json',
+  'v15.2-qualification.json',
   'core/release-qualification.js',
   'test/release-qualification.test.js',
   'scripts/build.mjs',
@@ -223,4 +227,20 @@ const v151 = JSON.parse(fs.readFileSync(path.join(root, 'v15.1-qualification.jso
 if (v151.scope !== 'TESTNET_DEPLOYMENT_CATALOGUE_RUNTIME_BINDING') throw new Error('V15.1 qualification scope drift');
 if (!buildScript.includes('EXCHANGE_DEPLOYMENT_MANIFEST') || !buildScript.includes('bindExchangeRuntime')) throw new Error('V15.1 artifact builder is not bound to deployment manifest support');
 
-console.log('420Exchange V14.1 through V14.14 + V15.1 static qualification passed');
+const abi = fs.readFileSync(path.join(root, 'core/abi.js'), 'utf8');
+for (const needle of ['keccak256','functionSelector','encodeSwapExactInputPath','encodeCancelOrder','encodeInitiateOutbound']) {
+  if (!abi.includes(needle)) throw new Error(`V15.2 ABI layer missing marker: ${needle}`);
+}
+const execution = fs.readFileSync(path.join(root, 'core/execution.js'), 'utf8');
+for (const needle of ['buildSwapTransaction','buildLimitOrderTypedData','buildLimitOrderCancelTransaction','buildBridgeQualificationCall','buildBridgeOutboundTransaction']) {
+  if (!execution.includes(needle)) throw new Error(`V15.2 execution layer missing operation: ${needle}`);
+}
+const v152 = JSON.parse(fs.readFileSync(path.join(root, 'v15.2-qualification.json'), 'utf8'));
+if (v152.scope !== 'TRANSACTION_BUILDER_DEPLOYED_CONTRACT_BINDING') throw new Error('V15.2 qualification scope drift');
+if (!REQUIRED_EXCHANGE_CONTRACTS_MARKER()) throw new Error('V15.2 GatewayRouter420 deployment binding missing');
+
+console.log('420Exchange V14.1 through V14.14 + V15.1 + V15.2 static qualification passed');
+
+function REQUIRED_EXCHANGE_CONTRACTS_MARKER() {
+  return deploymentBinding.includes('GatewayRouter420');
+}

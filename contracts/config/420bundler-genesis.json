@@ -1,0 +1,42 @@
+{
+  "schema": "420-bundler-genesis-v1",
+  "phase": "GEN-11.0",
+  "class": "GENESIS_ACCOUNT_ABSTRACTION_INFRASTRUCTURE",
+  "serviceId": "420/service/bundler/v1",
+  "contractsRequired": false,
+  "custodial": false,
+  "purpose": "Provider-neutral UserOperation intake, validation, simulation, bundling, submission and lifecycle tracking for 420 smart accounts without becoming wallet authorization, custody, settlement or finality authority.",
+  "authority": {
+    "canAuthorizeWalletActions": false,
+    "canForgeUserOperations": false,
+    "canCustodyUserFunds": false,
+    "canDetermineFinality": false,
+    "canGrantPaymasterSponsorship": false,
+    "entryPointAndAccountValidationRemainAuthoritative": true,
+    "alternativeBundlersAllowed": true
+  },
+  "admission": {
+    "localValidationRequired": true,
+    "deterministicSimulationRequired": true,
+    "peerPropagationBypassesValidation": false,
+    "senderNonceConflictsFailDeterministically": true,
+    "staleSimulationMayRemainAdmitted": false
+  },
+  "availability": {
+    "singleBundlerRequired": false,
+    "walletProviderFallbackRequiredAtGenesis": true,
+    "bundlerFailureBlocksCanonicalProtocol": false,
+    "restartMayFabricateInclusion": false
+  },
+  "privacy": {
+    "storesWalletPrivateKeys": false,
+    "storesRecoverySecrets": false,
+    "publicStatusIsNonCanonical": true
+  },
+  "invariants": [
+    "BUNDLER-INV-001", "BUNDLER-INV-002", "BUNDLER-INV-003", "BUNDLER-INV-004",
+    "BUNDLER-INV-005", "BUNDLER-INV-006", "BUNDLER-INV-007", "BUNDLER-INV-008",
+    "BUNDLER-INV-009", "BUNDLER-INV-010", "BUNDLER-INV-011", "BUNDLER-INV-012",
+    "BUNDLER-INV-013", "BUNDLER-INV-014", "BUNDLER-INV-015", "BUNDLER-INV-016"
+  ]
+}

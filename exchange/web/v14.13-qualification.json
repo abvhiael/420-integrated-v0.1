@@ -1,9 +1,9 @@
 {
-  "schema":"420-exchange-web-v14.13",
-  "status":"IN_QUALIFICATION",
-  "scope":"PRODUCTION_DEPLOYMENT",
-  "productionOrigin":"https://exchange.420integrated.org",
-  "invariants":[
+  "schema": "420-exchange-web-v14.13",
+  "status": "QUALIFIED",
+  "scope": "PRODUCTION_DEPLOYMENT",
+  "productionOrigin": "https://exchange.420integrated.org",
+  "invariants": [
     "deployment artifact is deterministic from source plus explicit runtime deployment variables",
     "production deployment fails closed when chain, RPC, Explorer, API or stream configuration is absent",
     "custom domain is pinned through CNAME",
@@ -13,15 +13,15 @@
     "runtime configuration is generated at deploy time rather than embedding repository secrets",
     "rollback restores a previously qualified artifact without changing protocol state"
   ],
-  "implementation":{
-    "buildScript":"exchange/web/scripts/build.mjs",
-    "buildMetadata":"dist/build-meta.json",
-    "deploymentManifest":"dist/deployment-manifest.json",
-    "deploymentWorkflow":".github/workflows/exchange-web-deploy.yml",
-    "rollbackRunbook":"docs/420EXCHANGE-WEB-DEPLOYMENT-V14.13.md",
-    "qualificationTest":"exchange/web/test/deployment.test.js"
+  "implementation": {
+    "buildScript": "exchange/web/scripts/build.mjs",
+    "buildMetadata": "dist/build-meta.json",
+    "deploymentManifest": "dist/deployment-manifest.json",
+    "deploymentWorkflow": ".github/workflows/exchange-web-deploy.yml",
+    "rollbackRunbook": "docs/420EXCHANGE-WEB-DEPLOYMENT-V14.13.md",
+    "qualificationTest": "exchange/web/test/deployment.test.js"
   },
-  "operationalGates":[
+  "operationalGates": [
     "configure production chain ID",
     "configure production RPC URL",
     "configure production Explorer URL",
@@ -29,5 +29,11 @@
     "configure V13 WebSocket/SSE stream URL",
     "configure DNS/hosting provider for exchange.420integrated.org"
   ],
-  "follow_on":"V14.14 end-to-end Genesis qualification and release"
+  "follow_on": "V14.14 end-to-end Genesis qualification and release",
+  "qualification": {
+    "exact_head": "c07762415195bb059eb18b5d648eba8f67b53fda",
+    "exchange_web_verification": 221,
+    "integrated_qualification": 4409,
+    "docs_qualification": 2053
+  }
 }

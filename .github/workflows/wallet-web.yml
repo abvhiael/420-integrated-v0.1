@@ -4,10 +4,22 @@ on:
   push:
     paths:
       - "wallet/web/**"
+      - "wallet/deployment-inventory.json"
+      - "contracts/config/420wallet-genesis.json"
+      - "contracts/config/genesis-canonical-addresses.json"
+      - "config/system-addresses.json"
+      - "developer-hub/manifests/**"
+      - "scripts/verify-wallet-w14-1.py"
       - ".github/workflows/wallet-web.yml"
   pull_request:
     paths:
       - "wallet/web/**"
+      - "wallet/deployment-inventory.json"
+      - "contracts/config/420wallet-genesis.json"
+      - "contracts/config/genesis-canonical-addresses.json"
+      - "config/system-addresses.json"
+      - "developer-hub/manifests/**"
+      - "scripts/verify-wallet-w14-1.py"
       - ".github/workflows/wallet-web.yml"
   workflow_dispatch:
 
@@ -21,6 +33,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: W14.1 deployment inventory qualification
+        run: python3 scripts/verify-wallet-w14-1.py
       - name: Static wallet checks
         working-directory: wallet/web
         run: npm run check

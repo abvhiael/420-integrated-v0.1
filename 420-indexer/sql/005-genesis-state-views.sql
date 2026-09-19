@@ -12,6 +12,15 @@ select
     e.fields->>'routeId',
     e.fields->>'messageId',
     e.fields->>'requestId',
+    e.fields->>'jobId',
+    e.fields->>'providerId',
+    e.fields->>'modelId',
+    e.fields->>'modelVersionId',
+    e.fields->>'deploymentId',
+    e.fields->>'receiptId',
+    e.fields->>'matchId',
+    e.fields->>'resourceId',
+    e.fields->>'offerId',
     e.fields->>'rightId',
     e.fields->>'assetId'
   ) as object_key,
@@ -67,3 +76,18 @@ select * from idx_protocol_latest_object_state where protocol = '420Rights';
 
 create or replace view idx_randomness_state as
 select * from idx_protocol_latest_object_state where protocol = '420Randomness';
+
+
+create or replace view idx_ai_state as
+select * from idx_protocol_latest_object_state
+where protocol in ('420AI','AIProviderRegistry','AIModelRegistry','AIJobManager','AIJobEscrow','AIReputationRegistry');
+
+create or replace view idx_compute_state as
+select * from idx_protocol_latest_object_state
+where protocol in ('420ComputeMarket','ComputeProviderRegistry420','ComputeRequestRegistry420','ComputeMatch420','ComputeJobRegistry420','ComputeReceiptRegistry420');
+
+create or replace view idx_ai_job_events as
+select *
+from idx_protocol_object_events
+where protocol in ('420AI','AIJobManager')
+  and coalesce(fields->>'jobId', object_key) is not null;

@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 const root=path.resolve(import.meta.dirname,'..');
-for(const relative of ['core/browser-execution-controller.js','test/browser-execution-controller.test.js','core/canonical-execution-inputs.js','test/canonical-execution-inputs.test.js','v15.11-qualification.json']) {
+for(const relative of ['core/browser-execution-controller.js','test/browser-execution-controller.test.js','core/canonical-execution-inputs.js','test/canonical-execution-inputs.test.js','core/reviewed-execution-bridge.js','test/reviewed-execution-bridge.test.js','v15.11-qualification.json']) {
  if(!fs.existsSync(path.join(root,relative))) throw new Error(`V15.11 missing ${relative}`);
 }
 const code=fs.readFileSync(path.join(root,'core/browser-execution-controller.js'),'utf8');
@@ -13,7 +13,7 @@ for(const marker of ['requireCanonicalContext','prepareCanonicalSwap','prepareCa
  if(!inputs.includes(marker)) throw new Error(`V15.11 canonical input adapter missing ${marker}`);
 }
 const record=JSON.parse(fs.readFileSync(path.join(root,'v15.11-qualification.json'),'utf8'));
-if(record.browserIntegrationStatus!=='BLOCKED_CANONICAL_CONTROLS_UNWIRED'||record.genesisReleaseStatus!=='BLOCKED'||record.browserEvidence!==null||record.liveTransactionEvidence!==null) {
+if(record.browserIntegrationStatus!=='PARTIAL_WALLET_SELECTION_MOUNTED_EXECUTION_LOCKED'||record.genesisReleaseStatus!=='BLOCKED'||record.browserEvidence!==null||record.liveTransactionEvidence!==null) {
  throw new Error('V15.11 must not claim executable browser or Genesis qualification without real evidence');
 }
 console.log('420Exchange V15.11 wallet/UI and canonical-input repository checks passed; live browser execution and Genesis remain blocked');

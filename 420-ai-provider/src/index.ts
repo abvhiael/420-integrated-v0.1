@@ -9,3 +9,4 @@ export * from './types.js';
 export * from './vault-reconciliation.js';
 export * from './vault-rpc-evidence.js';
 export * from './vault-deposit-evidence.js';
+export * from './vault-funding-intent.js';

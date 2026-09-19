@@ -39,9 +39,10 @@ type Receipt struct {
 type Store struct {
 	mu sync.RWMutex
 	submissions map[string]Submission
+	pending map[string]PendingSubmission
 }
 
-func NewStore()*Store { return &Store{submissions:map[string]Submission{}} }
+func NewStore()*Store { return &Store{submissions:map[string]Submission{},pending:map[string]PendingSubmission{}} }
 
 func (s *Store) RecordSubmission(userOpHash,txHash,entryPoint string,submittedAt time.Time) error {
 	if !hash32(userOpHash) || !hash32(txHash) || !address(entryPoint) || submittedAt.IsZero() { return errors.New("invalid submission evidence") }
@@ -54,6 +55,7 @@ func (s *Store) RecordSubmission(userOpHash,txHash,entryPoint string,submittedAt
 	s.submissions[hash]=Submission{
 		UserOpHash:hash,TransactionHash:strings.ToLower(txHash),EntryPoint:strings.ToLower(entryPoint),SubmittedAt:submittedAt.UTC(),
 	}
+	delete(s.pending,hash)
 	return nil
 }
 

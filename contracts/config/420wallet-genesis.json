@@ -72,8 +72,8 @@
   },
   "clientRoadmap": {
     "web": "GENESIS",
-    "browserExtension": "GENESIS_PLUS",
-    "mobile": "POST_GENESIS",
+    "browserExtension": "GENESIS",
+    "mobile": "GENESIS_RELEASE_BLOCKED_DEVICE_QUALIFICATION",
     "desktop": "POST_GENESIS_POWER_USER"
   },
   "invariants": [
@@ -87,5 +87,6 @@
     "WALLET-INV-008: Developer Hub, guides, specifications, white papers, SDK/API documentation, contract references and security documentation are first-class wallet navigation targets.",
     "WALLET-INV-009: A compromised, deprecated or revoked ecosystem destination can be marked unsafe without changing the underlying wallet account or protocol authority.",
     "WALLET-INV-010: Browser extension, mobile and desktop clients may later reuse the same Wallet Core account, capability, recovery and session semantics without creating separate identities."
-  ]
+  ],
+  "deploymentInventory": "wallet/deployment-inventory.json"
 }

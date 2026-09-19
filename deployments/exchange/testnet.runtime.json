@@ -21,7 +21,8 @@
     "ExchangeMarketRegistry420": null,
     "ExchangeRouteRegistry420": null,
     "ExchangeOracleGuard420": null,
-    "ExchangeEmergencyControl420": null
+    "ExchangeEmergencyControl420": null,
+    "GatewayRouter420": null
   },
   "marketSubjects": [],
   "evidence": {

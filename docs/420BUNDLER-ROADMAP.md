@@ -18,8 +18,8 @@ The Bundler Network is not custody, wallet authorization, consensus, settlement 
 - **GEN-11.9 — receipts + lifecycle tracking — COMPLETE**
 - **GEN-11.10 — multi-bundler propagation — COMPLETE**
 - **GEN-11.11 — reputation + anti-abuse controls — COMPLETE**
-- **GEN-11.12 — replacement + nonce hardening — IN QUALIFICATION**
-- GEN-11.13 — failure isolation + reorg/restart recovery — pending
+- **GEN-11.12 — replacement + nonce hardening — COMPLETE**
+- **GEN-11.13 — failure isolation + reorg/restart recovery — IN QUALIFICATION**
 - GEN-11.14 — persistence + audit trail — pending
 - GEN-11.15 — 420Wallet integration + provider fallback — pending
 - GEN-11.16 — 420Status + observability integration — pending
@@ -409,3 +409,69 @@ Every candidate replacement still has to pass the complete local validation/simu
 This preserves BUNDLER-INV-006 and BUNDLER-INV-007: stale evidence cannot silently remain eligible, and sender/nonce conflicts/replacements produce one unambiguous active mempool entry.
 
 GEN-11.12 is complete when all repository qualification workflows pass on one exact head containing atomic fee-bumped replacement, full-nonce conflict identity, queue/TTL preservation and deterministic public/peer rejection semantics.
+
+
+## GEN-11.13 — failure isolation + reorg/restart recovery
+
+GEN-11.13 hardens the Bundler around the two places where operational failure can otherwise create ambiguous or unsafe behavior: the transition from a locally valid UserOperation to an accepted execution transaction, and the transition from an observed transaction receipt to a currently canonical inclusion.
+
+### Submission failure isolation
+
+The lifecycle store now supports an explicit submission-intent state.
+
+Before the Bundler calls the execution RPC, it records a pending submission intent containing:
+
+- canonical UserOperation hash
+- configured EntryPoint
+- submission start time
+
+The bundle builder consults lifecycle state before every send. If the same UserOperation is already pending or has a recorded transaction, the active mempool copy is removed from submission eligibility and is not blindly sent again.
+
+If the execution RPC call fails, the pending intent is aborted and the UserOperation remains eligible for a later revalidation/retry cycle.
+
+If the execution RPC accepts a transaction, the Bundler completes the intent with the returned transaction hash. The completion must match the original EntryPoint and cannot predate the recorded intent.
+
+Most importantly, if the execution RPC accepted the transaction but lifecycle completion then fails, the operation is removed from the active mempool and reported as operationally failed rather than retained for automatic resubmission. This closes the GEN-11.9 ambiguity where an already-sent operation could otherwise be retransmitted after a recorder fault.
+
+### Reorg-aware receipt reconciliation
+
+`eth_getUserOperationReceipt` no longer trusts a transaction receipt's block hash in isolation.
+
+After obtaining a receipt, the lifecycle tracker independently queries:
+
+- `eth_getBlockByNumber(receipt.blockNumber, false)`
+
+The receipt is treated as currently included only when the canonical block returned for that height has exactly the same block hash as the transaction receipt.
+
+If:
+
+- the block no longer exists,
+- the canonical block hash differs,
+- or the canonical block response is malformed,
+
+the Bundler does not claim current inclusion. A block-hash mismatch is treated as reorg/orphan evidence and the receipt result downgrades to not currently included rather than fabricating finality.
+
+The existing `UserOperationHandled` topic/hash/EntryPoint/event validation still applies after the canonical-block check.
+
+### Restart reconstruction boundary
+
+The lifecycle store now exposes validated recovery snapshots containing:
+
+- unresolved pending submission intents
+- completed submission bindings
+
+Recovery restore is fail-closed. It rejects malformed hashes, invalid EntryPoints, zero timestamps, duplicate records, and any UserOperation represented simultaneously as pending and submitted.
+
+This gives a restarted Bundler a deterministic state-reconstruction primitive while preserving the phase boundary: **GEN-11.13 defines what state must be reconstructed and how it is validated; GEN-11.14 supplies durable persistence and the audit trail that automatically feeds this recovery surface.**
+
+Recovered pending/submitted state is operational evidence only. It does not claim inclusion or finality and does not bypass canonical receipt reconciliation.
+
+This phase directly strengthens:
+
+- **BUNDLER-INV-003** — finality remains chain-derived.
+- **BUNDLER-INV-008** — dependency/recorder failures cannot justify unsafe local state mutation or blind resend.
+- **BUNDLER-INV-012** — lifecycle evidence remains operational until matched to canonical chain evidence.
+- **BUNDLER-INV-013** — restart/recovery state is reconstructable and cannot fabricate admission/inclusion/finality.
+- **BUNDLER-INV-015** — malformed recovery and RPC evidence fails closed.
+
+GEN-11.13 is complete when all repository qualification workflows pass on one exact head containing submission-intent isolation, duplicate-send suppression, canonical-block reorg checking and validated recovery snapshot/restore primitives.

@@ -6,7 +6,8 @@
   "scripts": {
     "test": "node --test test/*.test.js",
     "check": "node scripts/check.mjs",
-    "build": "node scripts/build.mjs"
+    "build": "node scripts/build.mjs",
+    "release:qualify": "EXCHANGE_DEPLOYMENT_MODE=qualification npm run build && npm test"
   },
   "engines": {
     "node": ">=22"

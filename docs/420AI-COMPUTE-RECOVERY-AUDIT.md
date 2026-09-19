@@ -169,3 +169,12 @@ The later canonical-address catalogue no longer reallocates those addresses to n
 The Wallet's collided assumptions for SmartAccountFactory420 at `0x0420` and CapabilityRegistry420 at `0x0421` were removed as part of the same reconciliation.
 
 See `docs/AI-RECOVERY-2-GENESIS-ADDRESS-RECONCILIATION.md`.
+
+
+## AI-RECOVERY-3 provider/runtime layer
+
+The recovery branch now includes `420-ai-provider/`, a typed off-chain provider control plane with canonical AI/Compute reconciliation, provider-manifest validation, payload/result commitment enforcement, pluggable inference/payload ports, bounded metering, non-authoritative API projections, and an external provider transaction boundary.
+
+It intentionally does not store provider private keys and does not self-authorize verification or settlement.
+
+See `docs/AI-RECOVERY-3-PROVIDER-RUNTIME.md`.

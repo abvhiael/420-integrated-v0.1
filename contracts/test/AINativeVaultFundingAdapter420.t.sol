@@ -93,18 +93,18 @@ contract AINativeVaultFundingAdapter420Test is Test {
     function testAtomicFundingDepositsReservesAndConfirmsExactAmount() public {
         fund(JOB, NONCE);
         VaultAccounting420.Obligation memory o = accounting.getObligation(adapter.obligationForJob(JOB));
-        assertEq(o.exists, true);
-        assertEq(o.vaultId, VAULT_ID);
-        assertEq(o.asset, address(0));
-        assertEq(o.beneficiary, BENEFICIARY);
+        assertEq(o.exists ? uint256(1) : 0, 1);
+        assertEq(uint256(o.vaultId), uint256(VAULT_ID));
+        assertEq(uint256(uint160(o.asset)), 0);
+        assertEq(uint256(uint160(o.beneficiary)), uint256(uint160(BENEFICIARY)));
         assertEq(o.amount, 1 ether);
-        assertEq(o.state, 1);
-        assertEq(o.sourceRef, keccak256(abi.encode(block.chainid, address(adapter), JOB, PAYER, NONCE)));
+        assertEq(uint256(o.state), 1);
+        assertEq(uint256(o.sourceRef), uint256(keccak256(abi.encode(block.chainid, address(adapter), JOB, PAYER, NONCE))));
         assertEq(address(vault).balance, 1 ether);
         assertEq(address(adapter).balance, 0);
         assertEq(escrow.funded(JOB), 1 ether);
-        assertEq(adapter.consumedJob(JOB), true);
-        assertEq(adapter.consumedNonce(PAYER, NONCE), true);
+        assertEq(adapter.consumedJob(JOB) ? uint256(1) : 0, 1);
+        assertEq(adapter.consumedNonce(PAYER, NONCE) ? uint256(1) : 0, 1);
     }
     function testRejectsOtherPayerAndReusedJobOrNonce() public {
         vm.prank(OTHER);
@@ -120,21 +120,21 @@ contract AINativeVaultFundingAdapter420Test is Test {
     }
     function testVaultFailureRollsBackDepositAndNonce() public {
         vault.setReject(true);
-        vm.prank(PAYER); vm.expectRevert();
+        vm.prank(PAYER); vm.expectRevert(bytes("vault reservation rejected"));
         adapter.fundNative{value: 1 ether}(JOB, PROVIDER_ID, NONCE);
         assertEq(address(vault).balance, 0);
         assertEq(address(adapter).balance, 0);
-        assertEq(adapter.consumedJob(JOB), false);
-        assertEq(adapter.consumedNonce(PAYER, NONCE), false);
+        assertEq(adapter.consumedJob(JOB) ? uint256(1) : 0, 0);
+        assertEq(adapter.consumedNonce(PAYER, NONCE) ? uint256(1) : 0, 0);
         vault.setReject(false); fund(JOB, NONCE);
     }
     function testEscrowFailureRollsBackVaultReservationAndDeposit() public {
         escrow.setReject(true);
-        vm.prank(PAYER); vm.expectRevert();
+        vm.prank(PAYER); vm.expectRevert(bytes("escrow rejected"));
         adapter.fundNative{value: 1 ether}(JOB, PROVIDER_ID, NONCE);
         assertEq(address(vault).balance, 0);
-        assertEq(adapter.consumedJob(JOB), false);
-        assertEq(adapter.consumedNonce(PAYER, NONCE), false);
+        assertEq(adapter.consumedJob(JOB) ? uint256(1) : 0, 0);
+        assertEq(adapter.consumedNonce(PAYER, NONCE) ? uint256(1) : 0, 0);
         assertEq(escrow.funded(JOB), 0);
         escrow.setReject(false); fund(JOB, NONCE);
     }
@@ -142,7 +142,7 @@ contract AINativeVaultFundingAdapter420Test is Test {
         vm.prank(PAYER);
         vm.expectRevert(AINativeVaultFundingAdapter420.InvalidFunding.selector);
         adapter.fundNative{value: 11 ether}(JOB, PROVIDER_ID, NONCE);
-        vm.prank(PAYER); vm.expectRevert();
+        vm.prank(PAYER); vm.expectRevert(AINativeVaultFundingAdapter420.UnqualifiedProvider.selector);
         adapter.fundNative{value: 1 ether}(JOB, keccak256("missing provider"), NONCE);
         assertEq(address(vault).balance, 0);
     }

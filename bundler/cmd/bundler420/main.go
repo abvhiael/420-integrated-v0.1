@@ -86,7 +86,13 @@ func main(){
  }))
  mux.Handle("/peer/v1/user-operation",peerHandler)
  mux.Handle("/",rpcHandler)
- server:=&http.Server{Addr:cfg.ListenAddr,Handler:mux,ReadHeaderTimeout:5*time.Second}
+ boundedHandler,err:=runtime420.LimitConcurrent(mux,mustIntOr("BUNDLER_MAX_CONCURRENT_REQUESTS",64))
+ if err!=nil{log.Fatal(err)}
+ server:=&http.Server{
+  Addr:cfg.ListenAddr,Handler:boundedHandler,ReadHeaderTimeout:5*time.Second,
+  ReadTimeout:10*time.Second,WriteTimeout:cfg.RequestTimeout+15*time.Second,
+  IdleTimeout:30*time.Second,MaxHeaderBytes:16<<10,
+ }
  errCh:=make(chan error,1)
  go func(){errCh<-server.ListenAndServe()}()
  bundleCtx,bundleCancel:=context.WithCancel(context.Background())

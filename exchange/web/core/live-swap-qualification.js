@@ -53,6 +53,17 @@ export async function qualifyLiveTestnetSwap({
   const account=accounts?.[0];
   if(typeof account!=='string') throw new LiveSwapQualificationError('TEST_ACCOUNT_UNAVAILABLE','testnet provider exposes no account');
 
+  for(const check of allowanceChecks){
+    if(String(check?.owner??'').toLowerCase()!==account.toLowerCase()){
+      throw new LiveSwapQualificationError('ALLOWANCE_OWNER_MISMATCH','allowance check owner must be the live testnet account');
+    }
+  }
+  for(const check of authorizationChecks){
+    if(String(check?.principal??'').toLowerCase()!==account.toLowerCase()){
+      throw new LiveSwapQualificationError('AUTHORIZATION_PRINCIPAL_MISMATCH','authorization principal must be the live testnet account');
+    }
+  }
+
   const transaction=buildSwapTransaction({runtime,account,reviewedIntent,execution});
   const preflight=await preflightExchangeTransaction({
     provider,transaction,runtime,freshness,allowanceChecks,authorizationChecks,staticCalls,
@@ -99,6 +110,17 @@ export async function qualifyLiveTestnetSwap({
     if(reached(latest.rpc.state,targetState)){
       if(exchangeClient&&latest.indexed.conflicts.length){
         throw new LiveSwapQualificationError('INDEXER_CONFLICT','V13 reconciliation conflicts with canonical RPC evidence',{
+          txHash:submission.txHash,
+          lifecycle:latest,
+          observations,
+        });
+      }
+      if(exchangeClient&&!latest.indexed.reconciled){
+        if(attempt<maxAttempts){
+          await sleep(pollIntervalMs);
+          continue;
+        }
+        throw new LiveSwapQualificationError('INDEXER_TIMEOUT','V13 did not reconcile the finalized swap before qualification timeout',{
           txHash:submission.txHash,
           lifecycle:latest,
           observations,

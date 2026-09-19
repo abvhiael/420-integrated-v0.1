@@ -12,10 +12,10 @@ contract ContentEntitlementInvariantHandler {
 
     constructor(HighCountryGamingBridge420 bridge_) { bridge = bridge_; }
 
-    function stepProbeUngatedCore(uint64 playerId) external view {
+    // Foundry only selects non-view/non-pure functions as invariant fuzz targets.
+    function stepProbeUngatedCore(uint64 playerId) external {
         require(!bridge.entitlementMayModifyCoreBalance(), "core balance affected");
         require(!bridge.coreGameplayRequiresEntitlement(), "core gameplay gated");
-        // Calls against the absent entitlement must not grant restricted content.
         require(
             !bridge.hasScopedEntitlement(
                 playerId,

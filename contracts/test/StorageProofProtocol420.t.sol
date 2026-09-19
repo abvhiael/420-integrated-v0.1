@@ -12,7 +12,7 @@ import "../src/resource/StorageProofSchemeRegistry420.sol";
 import "../src/resource/StorageCommitmentRegistry420.sol";
 import "../src/resource/StorageProofRegistry420.sol";
 
-interface VmStorageProof420 { function prank(address) external; function warp(uint256) external; }
+interface VmStorageProof420 { function prank(address) external; function warp(uint256) external; function expectRevert(bytes4) external; function getBlockTimestamp() external view returns (uint256); }
 
 contract MockStorageProofCaps420 is ICapabilityRegistry420 {
     mapping(bytes32 => bool) internal ok;
@@ -122,13 +122,16 @@ contract StorageProofProtocol420Test {
         Env memory e = setup();
         bytes32 commitmentId = keccak256("commitment-2");
         registerCommitment(e, commitmentId);
-        uint64 challengeEpoch = uint64(block.timestamp);
+        uint64 challengeEpoch = uint64(vm.getBlockTimestamp());
         (bool invalid,) = address(e.proofs).call(abi.encodeWithSelector(e.proofs.submitProof.selector, commitmentId, keccak256("bad-challenge"), challengeEpoch, bytes("invalid")));
         require(!invalid, "invalid proof accepted");
         require(!e.proofs.challengeConsumed(commitmentId, keccak256("bad-challenge")), "failed proof consumed challenge");
-        vm.warp(block.timestamp + 301);
-        (bool late,) = address(e.proofs).call(abi.encodeWithSelector(e.proofs.submitProof.selector, commitmentId, keccak256("late-challenge"), challengeEpoch, bytes("valid-proof")));
-        require(!late, "late proof accepted");
+        uint256 deadline = uint256(challengeEpoch) + uint256(e.schemes.getScheme(e.schemeId).maxProofDelay);
+        vm.warp(deadline + 1);
+        require(vm.getBlockTimestamp() > deadline, "warp did not pass proof deadline");
+        vm.expectRevert(StorageProofRegistry420.ProofTooLate.selector);
+        e.proofs.submitProof(commitmentId, keccak256("late-challenge"), challengeEpoch, bytes("valid-proof"));
+        require(!e.proofs.challengeConsumed(commitmentId, keccak256("late-challenge")), "late proof consumed challenge");
     }
 
     function testSchemeOrNodeSuspensionStopsProofAcceptance() public {

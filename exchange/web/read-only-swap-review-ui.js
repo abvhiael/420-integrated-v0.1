@@ -26,7 +26,7 @@ export function readOnlyReviewLines(candidate){
     `Route commitment: ${p.expectedPathHash}`,
     ...p.hops.map((hop,index)=>`Hop ${index+1}: market ${hop.marketId}, route ${hop.routeId}, output token ${hop.tokenOut}`),
     `Wallet: ${context.account} · chain: ${context.chainId}`,
-    `Router: ${p.envelope.to} · transaction fingerprint: ${p.envelope.fingerprint}`,
+    `Router: ${p.envelope.to} · transaction fingerprint: ${p.envelope.transactionFingerprint}`,
     `Quote expires (Unix seconds): ${context.expiresAt}`,
     'Wallet signing and transaction submission remain disabled.',
   ]);

@@ -14,6 +14,7 @@ export const REQUIRED_EXCHANGE_CONTRACTS = Object.freeze([
   'ExchangeRouteRegistry420',
   'ExchangeOracleGuard420',
   'ExchangeEmergencyControl420',
+  'ExchangeAuthorization420',
   'GatewayRouter420',
 ]);
 

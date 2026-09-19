@@ -199,6 +199,7 @@ func TestBoundaryBackendMapsMempoolConflictsAndCapacity(t *testing.T) {
 	hash:="0x"+strings.Repeat("11",32)
 	cases:=[]struct{name string; poolErr error; code int}{
 		{"nonce-conflict",mempool.ErrNonceConflict,-32503},
+		{"underpriced-replacement",mempool.ErrReplacementUnderpriced,-32503},
 		{"full",mempool.ErrFull,-32506},
 		{"sender-limit",mempool.ErrSenderLimit,-32506},
 	}

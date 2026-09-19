@@ -2,28 +2,32 @@
   "schema": "420-exchange-web-v15.11",
   "scope": "BROWSER_EXECUTION_INTEGRATION",
   "repositoryStatus": "IMPLEMENTED_PENDING_EXACT_HEAD_CI",
-  "browserIntegrationStatus": "BLOCKED_APP_JS_NOT_WIRED",
+  "browserIntegrationStatus": "BLOCKED_CANONICAL_CONTROLS_UNWIRED",
   "operationalStatus": "BLOCKED_UNRESOLVED_DEPLOYMENT_AND_REAL_WALLET_MATRIX",
   "implementation": {
     "controller": "exchange/web/core/browser-execution-controller.js",
-    "tests": "exchange/web/test/browser-execution-controller.test.js",
+    "walletUI": "exchange/web/browser-wallet-ui.js",
+    "walletUITests": "exchange/web/test/browser-wallet-ui.test.js",
+    "canonicalInputAdapter": "exchange/web/core/canonical-execution-inputs.js",
+    "canonicalInputTests": "exchange/web/test/canonical-execution-inputs.test.js",
+    "controllerTests": "exchange/web/test/browser-execution-controller.test.js",
     "runbook": "docs/420EXCHANGE-V15.11-BROWSER-EXECUTION.md"
   },
-  "qualifiedInUnitTests": [
-    "explicit EIP-6963 wallet selection instead of silently selecting an extension",
-    "provider listener cleanup on wallet replacement and disposal",
-    "account or chain event invalidates reviewed wallet generation",
-    "resolved testnet runtime required for sending or signing",
-    "missing canonical review and qualification block wallet prompts"
+  "repositoryScope": [
+    "mounted browser wallet selector with explicit multiwallet choice and connection invalidation",
+    "V15 wallet controller supports verified-session preflight and guarded submission APIs",
+    "canonical-input adapter prepares raw-unit swap, bridge, limit-order and maker-only cancellation envelopes from explicitly supplied qualified execution records",
+    "quote freshness, chain, wallet, route, decimal raw-unit and fixture provenance rejection have mocked unit tests",
+    "legacy V14 submission and signing buttons remain explicitly disabled"
   ],
   "releaseBlockers": [
-    "exchange/web/app.js still connects through globalThis.ethereum directly; mount controller and render wallet selector",
-    "browser swap controls currently use demo quotes and a V14 display-only signing request, not an executable V15.2 raw-unit transaction",
-    "limit-order form has symbol and presentation amounts rather than canonical token address/raw units and V15 EIP-712 signing payload",
-    "bridge page uses demo route fixtures and does not provide externally sourced proof or destination settlement tracking",
-    "cancel-order button has no execution handler",
-    "resolve and verify real testnet deployments, then run live browser/device matrix and V15.6-V15.8 drills"
+    "Exchange API only exposes V13 display snapshots/history; no authenticated live executable quote/binding endpoint is verified",
+    "exchange/web/app.js still creates a separate legacy wallet session; unify actual application state and replace legacy review-only handlers",
+    "UI controls do not yet acquire canonical raw-unit executable payloads or invoke the guarded submission/signing controller",
+    "on-chain preflight results and verified contract bytecode are not retained for a resolved live testnet deployment",
+    "real browser-wallet matrix, live swap/order/bridge drills, beneficiary reconciliation, operator/security signoffs missing"
   ],
+  "provenanceLimit": "Adapter provenance fields are untrusted bookkeeping and cannot authenticate an API response or prove on-chain state; live source authentication, contract verification and preflight remain mandatory",
   "browserEvidence": null,
   "liveTransactionEvidence": null,
   "genesisReleaseStatus": "BLOCKED"

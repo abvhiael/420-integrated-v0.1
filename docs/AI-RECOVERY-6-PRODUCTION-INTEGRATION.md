@@ -1,8 +1,8 @@
 # AI-RECOVERY-6 — production integration and settlement qualification
 
-Status: **IN PROGRESS — 6.1 external provider transaction adapter implemented; broader phase not qualified**
+Status: **IN PROGRESS — 6.1 qualified; 6.2 canonical RPC hydration implemented, CI pending; broader phase not qualified**
 
-## 6.1 External provider transaction boundary (implemented; CI pending)
+## 6.1 External provider transaction boundary (qualified)
 
 `420-ai-provider/src/qualified-transactions.ts` supplies `QualifiedProviderTransactions420`, a `ProviderTransactionPort420` implementation. It delegates execution to an injected `QualifiedComputeExecutor420` and does not own signer secrets, send raw transactions, or take custody of user funds.
 
@@ -16,9 +16,13 @@ Receipt submission derives `canonicalReceiptId` using the actual on-chain Comput
 
 A RUNNING job that has successfully committed its output but failed to submit its receipt must not be executed a second time just because a worker attempt returned an error. Resume by reading canonical ComputeJobRegistry state and receipt head, then submitting the *same* commitment-bound receipt, not a new output. Existing `AIProviderRuntime420.process()` currently returns WAIT for any job no longer RUNNING; a separate persisted, privacy-safe receipt-reconciliation path is required before production. Do not mark this adapter production-ready or enable paid requests until that path has qualified.
 
-## 6.2 Canonical RPC and qualified executor (pending)
+## 6.2 Canonical RPC and qualified executor (partially implemented; CI pending)
 
-Implement network-bound deployment/ProtocolRegistry resolution, ABI-exact `getCanonicalWork` hydration, provider/compute operator comparison, verified block/receipt/finality semantics, reorg handling, and a qualified external signer service. Resolve every non-predeploy router and Compute contract through the authoritative registry or verified deployment manifest, not the conflicting historical `0x0420` address assignments.
+`420-ai-provider/src/canonical-rpc.ts` now provides `CanonicalRPCState420`, a read-only `CanonicalStatePort420` implementation with ABI-exact reads for AIJobManager, AIProviderRegistry, ComputeJobRegistry420, ComputeRequestRegistry420, and ComputeProviderRegistry420. All reads use the same confirmation-pinned block; it rejects an unexpected chain ID, insufficient confirmation depth, missing identities, mismatched job/request/provider/operator bindings, unverified Compute addresses, and a block-hash change during hydration. Frozen AI predeploy addresses remain 0x042f and 0x0431.
+
+The caller must supply Compute addresses **already verified** using ProtocolRegistry or a signed deployment manifest. This adapter does not resolve or authenticate the registry itself, verify bytecode identity, prove finality under a consensus-specific policy, or run an external signer. Those are remaining 6.2 exit gates. A confirmation-depth block-hash check is defense in depth, not a standalone finality proof.
+
+Implement network-bound deployment/ProtocolRegistry resolution and a qualified signer service with independently verified receipt/finality/reorg evidence before enabling operator transactions.
 
 ## 6.3 Storage/private-payload transport and model serving (pending)
 

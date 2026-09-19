@@ -109,9 +109,9 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter,r *http.Request){
 	admitted,err:=h.pool.Add(env.UserOperation,evidence,now)
 	if err!=nil{
 		switch {
-		case errors.Is(err,mempool.ErrNonceConflict):
+		case errors.Is(err,mempool.ErrReplacementUnderpriced),errors.Is(err,mempool.ErrNonceConflict):
 			if h.guard!=nil{h.guard.Failure(source,now)}
-			http.Error(w,"peer nonce conflict",http.StatusConflict)
+			http.Error(w,"peer nonce conflict or underpriced replacement",http.StatusConflict)
 		case errors.Is(err,mempool.ErrFull),errors.Is(err,mempool.ErrSenderLimit):
 			http.Error(w,"peer admission capacity exceeded",http.StatusTooManyRequests)
 		default:

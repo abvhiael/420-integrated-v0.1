@@ -10,9 +10,32 @@ import { GenomeRegistry } from "../../../src/highcountry/genetics/GenomeRegistry
 import { RandomnessCoordinator } from "../../../src/highcountry/random/RandomnessCoordinator.sol";
 import { BreedingEngine } from "../../../src/highcountry/breeding/BreedingEngine.sol";
 import { GenesisRoots } from "../../../src/highcountry/types/HighCountryTypes.sol";
+import { InvariantTarget420 } from "../../helpers/InvariantTarget420.sol";
 import { MockCapabilityRegistry } from "../mocks/MockCapabilityRegistry.sol";
 
-contract BreedingRandomnessInvariantTest {
+/// @notice Exercise unauthorized replay attempts without allowing the invariant fuzzer to
+/// call arbitrary revert-prone entrypoints on the unrelated deployed registries.
+contract BreedingRandomnessInvariantHandler {
+    RandomnessCoordinator private immutable randomness;
+    BreedingEngine private immutable breeding;
+    bytes32 private immutable requestId;
+
+    constructor(RandomnessCoordinator randomness_, BreedingEngine breeding_, bytes32 requestId_) {
+        randomness = randomness_;
+        breeding = breeding_;
+        requestId = requestId_;
+    }
+
+    function stepAttemptRefill(bytes32 entropy_) external {
+        address(randomness).call(abi.encodeWithSelector(randomness.fulfill.selector, requestId, entropy_));
+    }
+
+    function stepAttemptRefinalize() external {
+        address(breeding).call(abi.encodeWithSelector(breeding.finalizeBreeding.selector, uint64(1)));
+    }
+}
+
+contract BreedingRandomnessInvariantTest is InvariantTarget420 {
     MockCapabilityRegistry private caps;
     HighCountryAuthorization private auth;
     GenesisRegistry private genesis;
@@ -60,6 +83,7 @@ contract BreedingRandomnessInvariantTest {
         breeding.requestBreeding(eventId, parentA, parentB, childId, lineId, metadataHash);
         randomness.fulfill(requestId, entropy);
         breeding.finalizeBreeding(eventId);
+        targetContract(address(new BreedingRandomnessInvariantHandler(randomness, breeding, requestId)));
     }
 
     function invariant_HC_INV_BREEDING_014_RequestConsumedOnce() public view {

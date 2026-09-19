@@ -51,7 +51,7 @@ requireStrings('core/batch-execution.js', [
   'sendPreparedSmartAccountBatch','prepared batch calldata changed after simulation','prepared batch transaction envelope changed after simulation','prepared batch authorization epoch changed',
   'eth_call','eth_estimateGas','eth_sendTransaction','owner changed after batch simulation','authorization epoch changed after batch simulation','reverted atomically; no batch call was committed'
 ], 'guarded batch execution/hardening control');
-requireStrings('core/capabilities.js', ['0x0000000000000000000000000000000000000421','SESSION_EXECUTE_CAPABILITY_420','readActiveGrantId','readCapabilityAuthorization'], 'capability inspection guard');
+requireStrings('core/capabilities.js', ['boundCapabilityRegistry420','SESSION_EXECUTE_CAPABILITY_420','readActiveGrantId','readCapabilityAuthorization'], 'capability inspection guard');
 requireStrings('core/session-management.js', ['8d08b1a4','5ae7ab32','388c930c','d557e335','fdb3c749','authorizationEpoch','post-confirmation verification'], 'session administration guard');
 
 const sessionExecution = requireStrings('core/session-execution.js', ['efff7e19','d86f2b3c','SESSION_EXECUTE_CAPABILITY_420','readActiveGrantId','readCapabilityAuthorization','authorizationEpoch','nonce lane','wallet authority contract','broadcastReady: false','EntryPoint420'], 'session execution preflight guard');
@@ -93,7 +93,8 @@ if (config.features?.delegatedCapabilities !== false) errors.push('general deleg
 if (config.features?.recoveryManagement !== true) errors.push('qualified recovery management UI must remain enabled');
 if (config.features?.batchExecutionUi !== true || config.features?.batchExecution !== true) errors.push('qualified guarded batch execution UI and broadcast must remain enabled');
 if (config.features?.passkeys !== false) errors.push('passkeys must remain disabled until their dedicated milestone qualifies');
-if (config.smartAccount?.factoryAddress !== '0x0000000000000000000000000000000000000420') errors.push('wallet must use frozen canonical SmartAccountFactory420 address');
+if (config.smartAccount?.factoryAddress === '0x0000000000000000000000000000000000000420') errors.push('wallet must not treat RewardController 0x0420 as SmartAccountFactory420');
+if (config.smartAccount?.factoryAddress != null) errors.push('checked-in wallet config must leave SmartAccountFactory420 registry/manifest-resolved');
 
 if (errors.length) {
   console.error(JSON.stringify({ pass: false, errors }, null, 2));

@@ -1,33 +1,55 @@
 {
   "schema": "420-exchange-web-v15.11",
   "scope": "BROWSER_EXECUTION_INTEGRATION",
-  "repositoryStatus": "IMPLEMENTED_PENDING_EXACT_HEAD_CI",
-  "browserIntegrationStatus": "PARTIAL_WALLET_SELECTION_MOUNTED_EXECUTION_LOCKED",
-  "operationalStatus": "BLOCKED_UNRESOLVED_DEPLOYMENT_AND_REAL_WALLET_MATRIX",
+  "repositoryStatus": "IMPLEMENTED_PARTIAL_BROWSER_REVIEW_EXACT_HEAD_CI_REQUIRED",
+  "browserIntegrationStatus": "WALLET_SELECTION_AND_READ_ONLY_SWAP_REVIEW_MOUNTED_EXECUTION_LOCKED",
+  "operationalStatus": "BLOCKED_UNVERIFIED_EXECUTABLE_QUOTE_DEPLOYMENT_AND_REAL_WALLET_MATRIX",
+  "roadmap": "docs/420EXCHANGE-STATUS-ROADMAP.md",
   "implementation": {
     "controller": "exchange/web/core/browser-execution-controller.js",
     "walletUi": "exchange/web/browser-wallet-ui.js",
     "canonicalInputs": "exchange/web/core/canonical-execution-inputs.js",
     "reviewedExecutionBridge": "exchange/web/core/reviewed-execution-bridge.js",
-    "tests": ["exchange/web/test/browser-execution-controller.test.js", "exchange/web/test/browser-wallet-ui.test.js", "exchange/web/test/canonical-execution-inputs.test.js", "exchange/web/test/reviewed-execution-bridge.test.js"],
+    "boundSwapReview": "exchange/web/core/bound-swap-review.js",
+    "humanReadableReview": "exchange/web/core/human-readable-review.js",
+    "executableQuoteIntake": "exchange/web/core/executable-quote-intake.js",
+    "quoteReviewSession": "exchange/web/core/quote-review-session.js",
+    "readOnlySwapReviewUi": "exchange/web/read-only-swap-review-ui.js",
+    "tests": [
+      "exchange/web/test/browser-execution-controller.test.js",
+      "exchange/web/test/browser-wallet-ui.test.js",
+      "exchange/web/test/canonical-execution-inputs.test.js",
+      "exchange/web/test/reviewed-execution-bridge.test.js",
+      "exchange/web/test/bound-swap-review.test.js",
+      "exchange/web/test/human-readable-review.test.js",
+      "exchange/web/test/executable-quote-intake.test.js",
+      "exchange/web/test/quote-review-session.test.js",
+      "exchange/web/test/read-only-swap-review-ui.test.js"
+    ],
     "runbook": "docs/420EXCHANGE-V15.11-BROWSER-EXECUTION.md"
   },
+  "repositoryEvidence": {
+    "baselineCommit": "50ca04c0e5ecd5b702806aa30546485276db64a8",
+    "baselineWebWorkflowRun": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/35469241756",
+    "baselineWebWorkflowConclusion": "success",
+    "note": "A successful prior-head web workflow is not a test result for subsequent documentation/code commits or live deployment."
+  },
   "qualifiedInUnitTests": [
-    "explicit EIP-6963 wallet selection instead of silently selecting an extension",
-    "provider listener cleanup on wallet replacement and disposal",
-    "account or chain event invalidates reviewed wallet generation",
-    "resolved testnet runtime required for sending or signing",
-    "missing canonical review and qualification block wallet prompts",
-    "canonical raw-unit transaction inputs reject demo fixtures and malformed route identifiers",
-    "reviewed transaction fingerprints reject unconfirmed, changed, expired and wallet-switched requests"
+    "explicit wallet selection and generation-based invalidation",
+    "canonical raw-unit transaction construction and exact review fingerprints",
+    "swap quote request/response validation and receipt-time expiry checks",
+    "late response, wallet change and superseded request invalidation",
+    "read-only browser swap review and legacy execution button lockdown"
   ],
   "releaseBlockers": [
-    "browser transaction form controls still disabled; integrate with canonical execution requests after trusted quote retrieval",
-    "authenticated live executable-quote endpoint and quote-to-reviewed-field binding absent",
-    "real testnet contract code, runtime and live on-chain preflight not yet qualified",
-    "limit-order UI needs live qualification and EIP-712 order lifecycle wiring",
-    "bridge UI needs live route proof, destination settlement and beneficiary tracking",
-    "execute real browser/device wallet matrix and V15.6-V15.8 live drills"
+    "real DOM, accessibility and browser/device wallet acceptance evidence missing",
+    "review panel displayed envelope field names require real-browser verification",
+    "authenticated operator-approved executable quote producer, anti-replay and on-chain-qualified provenance absent",
+    "verified testnet deployment, contract code, runtime, balances/allowances and live preflight absent",
+    "browser swap transaction confirmation, submission and lifecycle not qualified",
+    "limit-order signing, publication, fill and maker cancellation browser flows not qualified",
+    "bridge proof, destination finality, beneficiary payout and reconciliation not qualified",
+    "V15.6-V15.8 real testnet drills, indexer/fee reconciliation and independent operator/security signoffs outstanding"
   ],
   "browserEvidence": null,
   "liveTransactionEvidence": null,

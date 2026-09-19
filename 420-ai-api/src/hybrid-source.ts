@@ -44,7 +44,7 @@ export class HybridAIReadSource420 implements AIReadSource420 {
   ): Promise<T[]> {
     const meta = await this.meta();
     const rows = await Promise.all(ids.map(read));
-    return rows.filter((row): row is Omit<T, 'meta'> => row !== null).map((row) => ({ ...row, meta } as T));
+    return rows.flatMap((row) => row === null ? [] : [{ ...row, meta } as T]);
   }
 
   async providers(input: Parameters<AIReadSource420['providers']>[0]) {

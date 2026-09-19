@@ -39,7 +39,7 @@ The BG-19 client must not:
 
 ## Detailed roadmap
 
-### BG-19.1 — web application foundation + runtime contract — IMPLEMENTED, QUALIFICATION PENDING
+### BG-19.1 — web application foundation + runtime contract — COMPLETE AND QUALIFIED
 
 Build the production frontend workspace and runtime boundary.
 
@@ -73,7 +73,7 @@ BG-19.1 follows the repository's existing Wallet/Exchange web convention: depend
 
 **Exit:** a production-buildable shell starts deterministically against testnet/staging/production configuration and fails closed on unsafe configuration.
 
-### BG-19.2 — Wallet, Identity, passkey + session UX
+### BG-19.2 — Wallet, Identity, passkey + session UX — IMPLEMENTED, QUALIFICATION PENDING
 
 Integrate qualified account/session infrastructure.
 
@@ -88,6 +88,15 @@ Integrate qualified account/session infrastructure.
 - handle rejected, replaced, reverted and pending transactions;
 - never persist private keys, seed phrases, raw signing material or unrestricted bearer capabilities;
 - include secure sign-out / local-session clear behavior.
+
+Implemented in:
+- `bong-goggles/web/core/wallet-session.js`
+- `bong-goggles/web/core/transaction-intent.js`
+- `bong-goggles/web/test/wallet-session.test.js`
+- `bong-goggles/web/app.js`
+- `bong-goggles/web/styles.css`
+
+BG-19.2 now discovers only the qualified `is420Wallet` EIP-1193 provider, supports explicit connect and secure local sign-out, tracks `accountsChanged`, `chainChanged` and disconnect lifecycle events, blocks state-changing UX on the wrong chain, keeps anonymous browsing read-only, and exposes secure 420Wallet handoffs for passkey and delegated-session management. Session presentation explicitly represents active/expired/revoked state without turning application state into capability authority. Canonical writes are represented as reviewable, non-authoritative Wallet intents and remain pending until a canonical receipt confirms or reverts them; user rejection can never become local success. Bong Goggles stores no private key, seed phrase or raw signing material.
 
 **Exit:** users can safely enter, leave and recover sessions while every write remains constrained by canonical Wallet/session policy.
 

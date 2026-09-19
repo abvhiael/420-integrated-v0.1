@@ -38,33 +38,33 @@ export class HybridAIReadSource420 implements AIReadSource420 {
     };
   }
 
-  private async hydrate<T extends { meta: ProjectionMeta420 }>(
+  private async hydrate<T>(
     ids: Hex32[],
-    read: (id: Hex32) => Promise<Omit<T, 'meta'> | null>
-  ): Promise<T[]> {
+    read: (id: Hex32) => Promise<T | null>
+  ): Promise<Array<T & { meta: ProjectionMeta420 }>> {
     const meta = await this.meta();
     const rows = await Promise.all(ids.map(read));
-    return rows.flatMap((row) => row === null ? [] : [{ ...row, meta } as T]);
+    return rows.flatMap((row) => row === null ? [] : [{ ...row, meta }]);
   }
 
   async providers(input: Parameters<AIReadSource420['providers']>[0]) {
     const page = await this.index.providerIds(input);
-    return { items: await this.hydrate<AIProviderDto420>(page.ids, (id) => this.canonical.provider(id)), nextCursor: page.nextCursor };
+    return { items: await this.hydrate(page.ids, (id) => this.canonical.provider(id)), nextCursor: page.nextCursor };
   }
 
   async models(input: Parameters<AIReadSource420['models']>[0]) {
     const page = await this.index.modelIds(input);
-    return { items: await this.hydrate<AIModelDto420>(page.ids, (id) => this.canonical.model(id)), nextCursor: page.nextCursor };
+    return { items: await this.hydrate(page.ids, (id) => this.canonical.model(id)), nextCursor: page.nextCursor };
   }
 
   async modelVersions(input: Parameters<AIReadSource420['modelVersions']>[0]) {
     const page = await this.index.modelVersionIds(input);
-    return { items: await this.hydrate<AIModelVersionDto420>(page.ids, (id) => this.canonical.modelVersion(id)), nextCursor: page.nextCursor };
+    return { items: await this.hydrate(page.ids, (id) => this.canonical.modelVersion(id)), nextCursor: page.nextCursor };
   }
 
   async jobs(input: Parameters<AIReadSource420['jobs']>[0]) {
     const page = await this.index.jobIds(input);
-    return { items: await this.hydrate<AIJobDto420>(page.ids, (id) => this.canonical.job(id)), nextCursor: page.nextCursor };
+    return { items: await this.hydrate(page.ids, (id) => this.canonical.job(id)), nextCursor: page.nextCursor };
   }
 
   async job(jobId: Hex32) {

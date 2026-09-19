@@ -41,9 +41,10 @@ func TestSubmitterRejectsUntrustedSendAcknowledgments(t *testing.T){
   t.Run(body[:min(len(body),24)],func(t *testing.T){
    server:=httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter,r *http.Request){w.Header().Set("Content-Type","application/json");_,_=w.Write([]byte(body))}))
    defer server.Close()
-   sender,err:=NewRPCSubmitter(server.URL,"0x2222222222222222222222222222222222222222",time.Second)
-   if err!=nil{t.Fatal(err)}
-   _,err=sender.Submit(context.Background(),"0x1111111111111111111111111111111111111111",op("0x2222222222222222222222222222222222222222","0x1"))
+   // A local test fixture is injected directly. Public production construction
+   // remains guarded by ValidateProbeURL and rejects loopback endpoints.
+   sender:=&RPCSubmitter{url:server.URL,from:"0x2222222222222222222222222222222222222222",client:&http.Client{Timeout:time.Second}}
+   _,err:=sender.Submit(context.Background(),"0x1111111111111111111111111111111111111111",op("0x2222222222222222222222222222222222222222","0x1"))
    if !errors.Is(err,ErrAmbiguousSubmission){t.Fatalf("expected ambiguous acknowledgment, got %v",err)}
   })
  }

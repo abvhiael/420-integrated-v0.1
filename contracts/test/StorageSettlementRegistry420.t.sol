@@ -85,13 +85,12 @@ contract StorageSettlementRegistry420Test {
         bytes32 schemeId;
     }
 
-    // A single storage reference replaces the 18-field memory Env return and
-    // avoids carrying the entire fixture aggregate through inlined test calls.
-    // Foundry restores test-contract state between tests.
+    // Foundry invokes setUp once for each test; keeping setup outside the test
+    // methods avoids inlining the 18-field fixture deployment into each body.
     Env private env;
 
-    function setup() internal returns (Env storage e) {
-        e = env;
+    function setUp() public {
+        Env storage e = env;
         _deployRegistries(e);
         _configureRegistries(e);
     }
@@ -167,7 +166,7 @@ contract StorageSettlementRegistry420Test {
     }
 
     function testBatchedReservationFullyFundsExactQuotedAmount() public {
-        Env storage e = setup();
+        Env storage e = env;
         (bytes32 agreementId,,,) = activateAgreement(e);
         bytes32 settlementId = openAndFund(e, agreementId);
         StorageSettlementRegistry420.Settlement memory s = e.settlements.getSettlement(settlementId);
@@ -178,7 +177,7 @@ contract StorageSettlementRegistry420Test {
     }
 
     function testVerifiedCanonicalProofReleasesOnlyItsWindow() public {
-        Env storage e = setup();
+        Env storage e = env;
         (bytes32 agreementId, bytes32 commitmentId,,) = activateAgreement(e);
         bytes32 settlementId = openAndFund(e, agreementId);
         (uint64 epoch,) = e.settlements.windowTiming(settlementId, 0);
@@ -192,7 +191,7 @@ contract StorageSettlementRegistry420Test {
     }
 
     function testWrongChallengeCannotReleaseEscrow() public {
-        Env storage e = setup();
+        Env storage e = env;
         (bytes32 agreementId, bytes32 commitmentId,,) = activateAgreement(e);
         bytes32 settlementId = openAndFund(e, agreementId);
         (uint64 epoch,) = e.settlements.windowTiming(settlementId, 0);
@@ -204,7 +203,7 @@ contract StorageSettlementRegistry420Test {
     }
 
     function testMissedProofWindowRefundsAfterDeadlineOnly() public {
-        Env storage e = setup();
+        Env storage e = env;
         (bytes32 agreementId,,,) = activateAgreement(e);
         bytes32 settlementId = openAndFund(e, agreementId);
         (, uint64 deadline) = e.settlements.windowTiming(settlementId, 0);
@@ -219,7 +218,7 @@ contract StorageSettlementRegistry420Test {
     }
 
     function testPartialFundingCannotEarnAndCanAbortAfterStart() public {
-        Env storage e = setup();
+        Env storage e = env;
         (bytes32 agreementId,, uint64 startTime,) = activateAgreement(e);
         vm.prank(CONSUMER);
         bytes32 settlementId = e.settlements.openSettlement(agreementId, address(e.vault), address(0));

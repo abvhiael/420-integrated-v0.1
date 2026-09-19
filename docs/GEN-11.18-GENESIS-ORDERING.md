@@ -6,7 +6,7 @@ Status: implementation present on `feature/gen11-0-bundler-network-v1`; qualific
 
 The Bundler selects from the locally admitted, unexpired UserOperation mempool in ascending `AdmittedAt` order, breaking equal-time ties by the lowercase canonical UserOperation hash. Selection sorts the **entire** snapshot before applying `BUNDLER_BUNDLE_MAX_OPERATIONS` (default 16). The timestamp is retained on qualified fee replacement, preventing a replacement from acquiring a new queue position. The policy is implemented by `bundler/ordering/policy.go` and enforced in `bundler/bundle/builder.go`, independent of a mempool implementation's iteration order.
 
-`BUNDLER_ORDERING_POLICY` is optional. An absent value or `fifo-v1` selects the published policy; unrecognized values must fail at startup. Fee bidding, sponsor identity, operator identity, sender identity, peer source, token holdings, staking or preferential lanes do **not** affect Genesis selection priority. No hidden operator allowlist or private priority lane is part of the Genesis contract.
+The production Bundler currently uses the fixed `fifo-v1` default; there is **no production environment-variable override for ordering**. The builder configuration accepts only an empty value (normalized to `fifo-v1`) or explicit `fifo-v1` and rejects all other policies. Fee bidding, sponsor identity, operator identity, sender identity, peer source, token holdings, staking or preferential lanes do **not** affect Genesis selection priority. No hidden operator allowlist or private priority lane is part of the Genesis contract.
 
 ## Economic and authority boundaries
 

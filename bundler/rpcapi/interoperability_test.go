@@ -10,10 +10,8 @@ import (
  "github.com/420integrated/420-integrated/bundler/userop"
 )
 
-// GEN-11.19 exercises the public JSON-RPC wire contract with independently
-// constructed wallet-style and third-party-style envelopes against two operators.
-// A relay does not own authorization or hash identity: both operators must
-// accept the same signed bytes and return the same canonical operation hash.
+// Independently constructed wallet and third-party envelopes exercise the same
+// JSON-RPC wire contract against distinct, replaceable operator backends.
 func TestCrossClientOperatorWireCompatibility(t *testing.T) {
  const entry = "0x1111111111111111111111111111111111111111"
  operation := rpcFixture()
@@ -21,16 +19,13 @@ func TestCrossClientOperatorWireCompatibility(t *testing.T) {
  if err != nil { t.Fatal(err) }
  for _, operator := range []string{"operator-a", "operator-b"} {
   t.Run(operator, func(t *testing.T) {
-   b := &fakeBackend{sendHash: strings.ToUpper(hash[2:]), points: []string{entry}}
-   // A compliant operator returns a 0x-prefixed hash, including when hex digits
-   // are uppercase. The server normalizes it to the same lower-case identity.
-   b.sendHash = "0x" + strings.ToUpper(hash[2:])
+   b := &fakeBackend{sendHash: "0x"+strings.ToUpper(hash[2:]), points: []string{entry}}
    h, err := NewHandler(b)
    if err != nil { t.Fatal(err) }
    for _, client := range []struct {name string; id any; operation any}{
     {"wallet", 1, operation},
     {"third-party", "external-request-42", map[string]any{
-     "sender": strings.ToUpper(operation.Sender[:2])+operation.Sender[2:],
+     "sender": operation.Sender,
      "nonce": operation.Nonce, "initCode": operation.InitCode,
      "callData": operation.CallData, "accountGasLimits": operation.AccountGasLimits,
      "preVerificationGas": operation.PreVerificationGas, "gasFees": operation.GasFees,

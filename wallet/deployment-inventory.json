@@ -1,0 +1,104 @@
+{
+  "schema": "420-wallet-deployment-inventory-v1",
+  "phase": "W14.1",
+  "status": "BLOCKED_PENDING_CANONICAL_NETWORK_AND_ADDRESS_RECONCILIATION",
+  "readyForLiveTestnet": false,
+  "sourceOfTruth": {
+    "networkManifest": "developer-hub/manifests/testnet.json",
+    "networkManifestStatus": "MISSING_OFFICIAL_PUBLIC_TESTNET_MANIFEST",
+    "walletGenesisProfile": "contracts/config/420wallet-genesis.json",
+    "canonicalAddressRegistry": "contracts/config/genesis-canonical-addresses.json",
+    "legacySystemAddressRegistry": "config/system-addresses.json",
+    "conflictPolicy": "FAIL_CLOSED"
+  },
+  "network": {
+    "environment": "testnet",
+    "expectedChainId": "420",
+    "rpcHttp": null,
+    "rpcWebSocket": null,
+    "explorerUrl": null,
+    "faucetUrl": null,
+    "ecosystemManifestUrl": null,
+    "status": "BLOCKED_OFFICIAL_TESTNET_MANIFEST"
+  },
+  "walletAuthority": {
+    "entryPoint420": {
+      "address": "0x000000000000000000000000000000000000041f",
+      "source": "contracts/config/genesis-canonical-addresses.json#reserved:entry-point",
+      "status": "RESERVED_PENDING_PRODUCTION_IMPLEMENTATION"
+    },
+    "smartAccountFactory420": {
+      "address": "0x0000000000000000000000000000000000000420",
+      "source": "contracts/config/genesis-canonical-addresses.json#smart-account-factory",
+      "status": "FROZEN_BUT_CONFLICTED"
+    },
+    "capabilityRegistry420": {
+      "address": "0x0000000000000000000000000000000000000421",
+      "source": "contracts/config/genesis-canonical-addresses.json#capability-registry",
+      "status": "FROZEN_BUT_CONFLICTED"
+    },
+    "protocolRegistry": {
+      "address": "0x0000000000000000000000000000000000000422",
+      "source": "contracts/config/genesis-canonical-addresses.json#protocol-registry",
+      "status": "FROZEN_BUT_CONFLICTED"
+    },
+    "names420": {
+      "address": "0x0000000000000000000000000000000000000423",
+      "source": "contracts/config/genesis-canonical-addresses.json#names",
+      "status": "FROZEN_BUT_CONFLICTED"
+    },
+    "identity420": {
+      "address": "0x0000000000000000000000000000000000000424",
+      "source": "contracts/config/genesis-canonical-addresses.json#identity",
+      "status": "FROZEN_BUT_CONFLICTED"
+    }
+  },
+  "conflicts": [
+    {
+      "address": "0x0000000000000000000000000000000000000420",
+      "canonicalWalletAssignment": "SmartAccountFactory420.sol",
+      "legacySystemAssignment": "RewardController",
+      "resolution": "REQUIRED_BEFORE_LIVE_TESTNET"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000421",
+      "canonicalWalletAssignment": "CapabilityRegistry420.sol",
+      "legacySystemAssignment": "AttentionTreasury",
+      "resolution": "REQUIRED_BEFORE_LIVE_TESTNET"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000422",
+      "canonicalWalletAssignment": "ProtocolRegistry.sol",
+      "legacySystemAssignment": "DevelopmentTreasury",
+      "resolution": "REQUIRED_BEFORE_LIVE_TESTNET"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000423",
+      "canonicalWalletAssignment": "Names420.sol",
+      "legacySystemAssignment": "ValidatorRegistry",
+      "resolution": "REQUIRED_BEFORE_LIVE_TESTNET"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000424",
+      "canonicalWalletAssignment": "Identity420.sol",
+      "legacySystemAssignment": "ProtocolReserve",
+      "resolution": "REQUIRED_BEFORE_LIVE_TESTNET"
+    }
+  ],
+  "releaseGates": {
+    "officialTestnetManifestPublished": false,
+    "canonicalAddressConflictResolved": false,
+    "entryPointProductionBytecodeBound": false,
+    "rpcChainIdentityQualified": false,
+    "canonicalWalletContractsHaveCode": false,
+    "faucetAndExplorerPublished": false,
+    "walletRuntimeConfigGenerated": false
+  },
+  "rules": [
+    "Do not invent or hard-code public testnet endpoints.",
+    "Do not promote local.example.json values into testnet.",
+    "Do not bind wallet runtime to a conflicted address.",
+    "A chain ID alone is insufficient proof of network identity.",
+    "Every live Wallet deployment must bind to one validated environment manifest and one reconciled canonical address set."
+  ]
+}

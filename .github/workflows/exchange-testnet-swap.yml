@@ -1,0 +1,69 @@
+name: 420Exchange Testnet Swap Qualification
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_state:
+        description: Required lifecycle target
+        required: true
+        default: FINALIZED
+        type: choice
+        options:
+          - CONFIRMED
+          - SAFE
+          - FINALIZED
+      min_confirmations:
+        description: Minimum confirmations before CONFIRMED
+        required: true
+        default: "2"
+
+permissions:
+  contents: read
+
+jobs:
+  qualify-live-swap:
+    runs-on: ubuntu-latest
+    environment: exchange-testnet
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Verify Exchange web before live drill
+        working-directory: exchange/web
+        run: |
+          npm run check
+          npm test
+
+      - name: Materialize testnet qualification inputs
+        shell: bash
+        env:
+          EXCHANGE_TESTNET_MANIFEST_JSON: ${{ secrets.EXCHANGE_TESTNET_MANIFEST_JSON }}
+          EXCHANGE_TESTNET_SWAP_FIXTURE_JSON: ${{ secrets.EXCHANGE_TESTNET_SWAP_FIXTURE_JSON }}
+        run: |
+          set -euo pipefail
+          test -n "$EXCHANGE_TESTNET_MANIFEST_JSON"
+          test -n "$EXCHANGE_TESTNET_SWAP_FIXTURE_JSON"
+          umask 077
+          printf '%s' "$EXCHANGE_TESTNET_MANIFEST_JSON" > "$RUNNER_TEMP/exchange-testnet-manifest.json"
+          printf '%s' "$EXCHANGE_TESTNET_SWAP_FIXTURE_JSON" > "$RUNNER_TEMP/exchange-testnet-swap.json"
+
+      - name: Run live testnet swap qualification
+        working-directory: exchange/web
+        env:
+          EXCHANGE_TESTNET_MANIFEST: ${{ runner.temp }}/exchange-testnet-manifest.json
+          EXCHANGE_TESTNET_SWAP_FIXTURE: ${{ runner.temp }}/exchange-testnet-swap.json
+          EXCHANGE_TESTNET_EVIDENCE_OUT: ${{ runner.temp }}/exchange-v15.6-live-evidence.json
+          EXCHANGE_TESTNET_TARGET_STATE: ${{ inputs.target_state }}
+          EXCHANGE_TESTNET_MIN_CONFIRMATIONS: ${{ inputs.min_confirmations }}
+          GITHUB_SHA: ${{ github.sha }}
+        run: node scripts/live-swap-qualify.mjs
+
+      - name: Upload sanitized V15.6 evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: 420exchange-v15.6-live-swap-${{ github.sha }}
+          path: ${{ runner.temp }}/exchange-v15.6-live-evidence.json
+          if-no-files-found: error
+          retention-days: 90

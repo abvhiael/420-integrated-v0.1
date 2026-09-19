@@ -1,0 +1,25 @@
+{
+  "schema": "420-exchange-web-v15.8",
+  "scope": "LIVE_TESTNET_BRIDGE_LIFECYCLE_QUALIFICATION",
+  "repositoryStatus": "IMPLEMENTED_PENDING_CI",
+  "operationalStatus": "PENDING_LIVE_TESTNET_DRILL",
+  "implementation": {
+    "core": "exchange/web/core/live-bridge-qualification.js",
+    "tests": "exchange/web/test/live-bridge-qualification.test.js",
+    "runner": "exchange/web/scripts/live-bridge-qualify.mjs",
+    "workflow": ".github/workflows/exchange-testnet-bridge.yml",
+    "runbook": "docs/420EXCHANGE-V15.8-LIVE-BRIDGE.md"
+  },
+  "invariants": [
+    "both source and destination deployment manifests must be resolved and testnet-only",
+    "source and destination chains must differ",
+    "outbound transaction must be preflighted, submitted and finalized with the expected gateway event",
+    "adapter proof must be sourced externally and bound to the finalized source message",
+    "inbound acceptance must be independently simulated, submitted and finalized with the expected gateway event",
+    "proof metadata is not a substitute for on-chain adapter verification",
+    "source submission or finality alone is never presented as destination settlement",
+    "real testnet funds may move only through protected manually dispatched workflow"
+  ],
+  "operationalEvidence": null,
+  "followOn": "V15.9 wallet/browser execution compatibility and V15.10 Genesis closeout"
+}

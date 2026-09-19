@@ -1,0 +1,62 @@
+{
+  "schema": "420-exchange-live-swap-fixture-v15.6",
+  "environment": "testnet",
+  "chainId": "0x420",
+  "subjectId": "REPLACE_WITH_V13_MARKET_SUBJECT",
+  "targetState": "FINALIZED",
+  "minConfirmations": 2,
+  "maxAttempts": 60,
+  "pollIntervalMs": 5000,
+  "reviewedIntent": {
+    "kind": "EXACT_INPUT_PATH",
+    "inputToken": "0x1111111111111111111111111111111111111111",
+    "recipient": "0x2222222222222222222222222222222222222222",
+    "routeCommitment": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "hops": [
+      {
+        "marketId": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "outputToken": "0x3333333333333333333333333333333333333333"
+      }
+    ]
+  },
+  "execution": {
+    "mode": "ERC20_TO_ERC20",
+    "tokenIn": "0x1111111111111111111111111111111111111111",
+    "recipient": "0x2222222222222222222222222222222222222222",
+    "amountInRaw": "1000000000000000000",
+    "minFinalAmountOutRaw": "1",
+    "expectedPathHash": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "hops": [
+      {
+        "marketId": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "routeId": "0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "tokenOut": "0x3333333333333333333333333333333333333333",
+        "minAmountOutRaw": "1",
+        "routeData": "0x"
+      }
+    ]
+  },
+  "freshness": {
+    "observedAt": 1,
+    "expiresAt": 4102444800,
+    "nowSeconds": 1,
+    "maxAgeSeconds": null
+  },
+  "allowanceChecks": [
+    {
+      "token": "0x1111111111111111111111111111111111111111",
+      "owner": "0x2222222222222222222222222222222222222222",
+      "spender": "0x4444444444444444444444444444444444444444",
+      "requiredAmountRaw": "1000000000000000000"
+    }
+  ],
+  "authorizationChecks": [
+    {
+      "principal": "0x2222222222222222222222222222222222222222",
+      "action": "SWAP",
+      "subjectId": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "amountRaw": "1000000000000000000"
+    }
+  ],
+  "staticCalls": []
+}

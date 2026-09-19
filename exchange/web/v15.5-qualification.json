@@ -1,0 +1,22 @@
+{
+  "schema": "420-exchange-web-v15.5",
+  "status": "IMPLEMENTED_PENDING_CI",
+  "scope": "TRANSACTION_RECEIPT_FINALITY_V13_RECONCILIATION",
+  "invariants": [
+    "wallet submission is never equivalent to inclusion or confirmation",
+    "receipt block hash must match the canonical block at receipt height",
+    "receipt status zero remains reverted",
+    "safe and finalized heads are stronger than confirmation-count heuristics",
+    "dropped transactions are not guessed to be replaced",
+    "V13 history remains authoritative for Exchange application activity canonicality",
+    "V13 orphaned and replacement records are retained during reconciliation",
+    "RPC and V13 disagreement is surfaced explicitly instead of silently normalized",
+    "absence of V13 indexing is UNINDEXED rather than fabricated success or failure"
+  ],
+  "implementation": {
+    "lifecycle": "exchange/web/core/transaction-lifecycle.js",
+    "qualificationTest": "exchange/web/test/transaction-lifecycle.test.js",
+    "runbook": "docs/420EXCHANGE-V15.5-TRANSACTION-LIFECYCLE.md"
+  },
+  "followOn": "V15.6 live/testnet swap execution qualification"
+}

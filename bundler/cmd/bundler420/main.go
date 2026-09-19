@@ -52,6 +52,7 @@ func main() {
 		MaxOperations: mustIntOr("BUNDLER_MEMPOOL_MAX_OPERATIONS", 4096),
 		MaxPerSender: mustIntOr("BUNDLER_MEMPOOL_MAX_PER_SENDER", 16),
 		TTL: mustDurationOr("BUNDLER_MEMPOOL_TTL", 10*time.Minute),
+		ReplacementBumpBps: uint64(mustIntOr("BUNDLER_REPLACEMENT_BUMP_BPS", 1000)),
 	})
 	if err != nil { log.Fatal(err) }
 	submitter, err := bundle420.NewRPCSubmitter(

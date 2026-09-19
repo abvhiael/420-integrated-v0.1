@@ -7,12 +7,26 @@ function esc(value){
     .replaceAll("'",'&#39;');
 }
 
+// URLs are a separate trust boundary from HTML escaping. Only explicit HTTPS
+// canonical handoffs may leave Bong Goggles; no script, data or relative URLs.
+export function safeExternalHref(value){
+  if(typeof value!=='string'||value.length>2048||/[\u0000-\u0020\u007f\\]/.test(value))return null;
+  try{
+    const url=new URL(value);
+    if(url.protocol!=='https:'||!url.hostname||url.username||url.password)return null;
+    return url.href;
+  }catch{return null;}
+}
+
 export function button({label,action,variant='primary',disabled=false,type='button'}={}){
   return `<button type="${esc(type)}" class="ui-button ui-button--${esc(variant)}" data-action="${esc(action)}" ${disabled?'disabled':''}>${esc(label)}</button>`;
 }
 
 export function linkButton({label,href='#',variant='secondary',attrs=''}={}){
-  return `<a class="ui-button ui-button--${esc(variant)}" href="${esc(href)}" ${attrs}>${esc(label)}</a>`;
+  const safe=safeExternalHref(href);
+  if(!safe)return `<span class="ui-button ui-button--${esc(variant)}" aria-disabled="true">${esc(label)}</span>`;
+  // Callers cannot inject arbitrary attributes or override rel/target.
+  return `<a class="ui-button ui-button--${esc(variant)}" href="${esc(safe)}" rel="noopener noreferrer" target="_blank">${esc(label)}</a>`;
 }
 
 export function card({title,body='',eyebrow='',footer='',className=''}={}){
@@ -43,8 +57,8 @@ export function tabs(items=[],activeId){
 
 export function canonicalHandoffs({walletHref,explorerHref}={}){
   return `<div class="canonical-handoffs" aria-label="Canonical tools">
-    ${walletHref?linkButton({label:'Open 420Wallet',href:walletHref,attrs:'rel="noopener noreferrer"'}):''}
-    ${explorerHref?linkButton({label:'View in 420Explorer',href:explorerHref,variant:'ghost',attrs:'rel="noopener noreferrer"'}):''}
+    ${walletHref?linkButton({label:'Open 420Wallet',href:walletHref}):''}
+    ${explorerHref?linkButton({label:'View in 420Explorer',href:explorerHref,variant:'ghost'}):''}
   </div>`;
 }
 

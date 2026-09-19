@@ -31,7 +31,7 @@ function assertHttps(value,label,{ws=false}={}){
 }
 
 clean();
-for(const file of ['index.html','app.js','browser-wallet-ui.js','styles.css']) copy(file);
+for(const file of ['index.html','app.js','browser-wallet-ui.js','read-only-swap-review-ui.js','styles.css']) copy(file);
 copyDir('core');
 copyDir('fixtures');
 // Load the wallet selector before the legacy V14 app's bubbling click handlers.
@@ -100,7 +100,7 @@ const buildMeta={
 };
 fs.writeFileSync(path.join(dist,'build-meta.json'),JSON.stringify(buildMeta,null,2)+'\n');
 
-const immutable=['app.js','browser-wallet-ui.js','styles.css'];
+const immutable=['app.js','browser-wallet-ui.js','read-only-swap-review-ui.js','styles.css'];
 const manifest={
   schema:'420-exchange-deployment-artifact-v14.13',
   sourceSha:sha,

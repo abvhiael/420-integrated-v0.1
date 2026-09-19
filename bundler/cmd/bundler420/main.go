@@ -7,12 +7,14 @@ import (
 	"os"
 	"os/signal"
 	"strconv"
+	"strings"
 	"syscall"
 	"time"
 
 	bundle420 "github.com/420integrated/420-integrated/bundler/bundle"
 	gasestimation420 "github.com/420integrated/420-integrated/bundler/gasestimation"
 	lifecycle420 "github.com/420integrated/420-integrated/bundler/lifecycle"
+	peer420 "github.com/420integrated/420-integrated/bundler/peer"
 	mempool420 "github.com/420integrated/420-integrated/bundler/mempool"
 	rpcapi420 "github.com/420integrated/420-integrated/bundler/rpcapi"
 	runtime420 "github.com/420integrated/420-integrated/bundler/runtime"
@@ -66,6 +68,16 @@ func main() {
 	bundleBuilder.SetSubmissionRecorder(lifecycleStore)
 	lifecycleTracker, err := lifecycle420.NewRPC(cfg.ExecutionRPC, cfg.RequestTimeout, lifecycleStore)
 	if err != nil { log.Fatal(err) }
+
+	peerHandler, err := peer420.NewHandler(cfg.ChainID, cfg.EntryPoint, validationEngine, pool)
+	if err != nil { log.Fatal(err) }
+	peerBroadcaster, err := peer420.NewBroadcaster(
+		cfg.ChainID,
+		cfg.EntryPoint,
+		csvEnv("BUNDLER_PEERS"),
+		cfg.RequestTimeout,
+	)
+	if err != nil { log.Fatal(err) }
 	gasEstimator, err := gasestimation420.NewRPC(
 		cfg.ExecutionRPC,
 		os.Getenv("BUNDLER_SUBMITTER"),
@@ -78,12 +90,14 @@ func main() {
 		Mempool: pool,
 		GasEstimator: gasEstimator,
 		Lifecycle: lifecycleTracker,
+		Propagator: peerBroadcaster,
 	})
 	if err != nil { log.Fatal(err) }
 	runtimeHandler := svc.Handler()
 	mux := http.NewServeMux()
 	mux.Handle("/healthz", runtimeHandler)
 	mux.Handle("/readyz", runtimeHandler)
+	mux.Handle("/peer/v1/user-operation", peerHandler)
 	mux.Handle("/", rpcHandler)
 
 	server := &http.Server{
@@ -169,4 +183,16 @@ func runBundleLoop(ctx context.Context,builder bundleSubmitter,interval,timeout 
 			}
 		}
 	}
+}
+
+
+func csvEnv(name string) []string {
+	raw:=strings.TrimSpace(os.Getenv(name))
+	if raw=="" { return nil }
+	parts:=strings.Split(raw,",")
+	out:=make([]string,0,len(parts))
+	for _,part:=range parts {
+		if v:=strings.TrimSpace(part); v!="" { out=append(out,v) }
+	}
+	return out
 }

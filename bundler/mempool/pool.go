@@ -3,6 +3,7 @@ package mempool
 import (
 	"errors"
 	"fmt"
+	"math/big"
 	"sort"
 	"strings"
 	"sync"
@@ -16,12 +17,14 @@ var (
 	ErrFull = errors.New("UserOperation mempool is full")
 	ErrSenderLimit = errors.New("sender UserOperation limit reached")
 	ErrNonceConflict = errors.New("sender nonce already has a different UserOperation")
+	ErrReplacementUnderpriced = errors.New("replacement maxFeePerGas bump is insufficient")
 )
 
 type Config struct {
 	MaxOperations int
 	MaxPerSender int
 	TTL time.Duration
+	ReplacementBumpBps uint64
 }
 
 func (c Config) Validate() error {
@@ -29,6 +32,7 @@ func (c Config) Validate() error {
 	if c.MaxPerSender <= 0 { return errors.New("mempool max per sender must be positive") }
 	if c.MaxPerSender > c.MaxOperations { return errors.New("mempool max per sender cannot exceed total capacity") }
 	if c.TTL <= 0 { return errors.New("mempool TTL must be positive") }
+	if c.ReplacementBumpBps > 10000 { return errors.New("replacement bump cannot exceed 10000 bps") }
 	return nil
 }
 
@@ -55,6 +59,7 @@ type Pool struct {
 }
 
 func New(cfg Config)(*Pool,error){
+	if cfg.ReplacementBumpBps==0 { cfg.ReplacementBumpBps=1000 }
 	if err:=cfg.Validate(); err!=nil { return nil,err }
 	return &Pool{
 		cfg:cfg,
@@ -87,7 +92,23 @@ func (p *Pool) Add(op userop.PackedUserOperation,evidence simulation.Evidence,no
 		p.removeLocked(existing)
 	}
 	if existingHash,ok:=p.bySenderNonce[nonceKey]; ok && existingHash!=hash {
-		return AddResult{},ErrNonceConflict
+		existing,exists:=p.byHash[existingHash]
+		if !exists { return AddResult{},ErrNonceConflict }
+		oldFee,err:=maxFeePerGas(existing.Operation)
+		if err!=nil { return AddResult{},ErrNonceConflict }
+		newFee,err:=maxFeePerGas(op)
+		if err!=nil { return AddResult{},ErrNonceConflict }
+		if !replacementFeeSufficient(oldFee,newFee,p.cfg.ReplacementBumpBps) {
+			return AddResult{},ErrReplacementUnderpriced
+		}
+		delete(p.byHash,existing.Hash)
+		entry:=Entry{
+			Hash:hash,Operation:op,Evidence:evidence,
+			AdmittedAt:existing.AdmittedAt,ExpiresAt:existing.ExpiresAt,
+		}
+		p.byHash[hash]=entry
+		p.bySenderNonce[nonceKey]=hash
+		return AddResult{Hash:hash,Replaced:true},nil
 	}
 	if len(p.byHash)>=p.cfg.MaxOperations { return AddResult{},ErrFull }
 	if p.perSender[sender]>=p.cfg.MaxPerSender { return AddResult{},ErrSenderLimit }
@@ -161,4 +182,22 @@ func validHash(v string) bool {
 	if len(v)!=66 || !strings.HasPrefix(v,"0x") { return false }
 	for _,c:=range v[2:] { if !strings.ContainsRune("0123456789abcdef",c) { return false } }
 	return true
+}
+
+
+func maxFeePerGas(op userop.PackedUserOperation)(*big.Int,error){
+	canonical,err:=op.Canonicalize()
+	if err!=nil{return nil,err}
+	return new(big.Int).SetBytes(canonical.GasFees[16:]),nil
+}
+
+func replacementFeeSufficient(oldFee,newFee *big.Int,bumpBps uint64)bool{
+	if oldFee==nil || newFee==nil{return false}
+	scale:=new(big.Int).SetUint64(10000+bumpBps)
+	required:=new(big.Int).Mul(new(big.Int).Set(oldFee),scale)
+	required.Add(required,big.NewInt(9999))
+	required.Div(required,big.NewInt(10000))
+	minPlusOne:=new(big.Int).Add(new(big.Int).Set(oldFee),big.NewInt(1))
+	if required.Cmp(minPlusOne)<0{required=minPlusOne}
+	return newFee.Cmp(required)>=0
 }

@@ -1,5 +1,5 @@
 import { normalizeAddress, normalizeBytes32 } from './abi.js';
-import { inspectCapabilityGrant, CANONICAL_CAPABILITY_REGISTRY_420 } from './capabilities.js';
+import { inspectCapabilityGrant, boundCapabilityRegistry420 } from './capabilities.js';
 
 const SELECTOR_CREATE_GAS_SPONSOR_GRANT = '297945e0';
 const SELECTOR_REVOKE_CAPABILITY_GRANT = 'be737654';
@@ -26,9 +26,7 @@ function assertOwnerBoundary(controller, smartAccountState) {
   if (!smartAccountState.controllerIsOwner || normalizeAddress(smartAccountState.owner) !== owner) {
     throw new Error('connected controller is not the on-chain SmartAccount420 owner');
   }
-  if (normalizeAddress(smartAccountState.capabilityRegistry) !== CANONICAL_CAPABILITY_REGISTRY_420) {
-    throw new Error('SmartAccount420 is not bound to the canonical CapabilityRegistry420');
-  }
+  boundCapabilityRegistry420(smartAccountState);
   return owner;
 }
 function encodeCreateGasSponsorGrant(request) {

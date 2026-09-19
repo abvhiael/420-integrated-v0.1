@@ -10,8 +10,9 @@ await mkdir(out,{recursive:true});
 const example=JSON.parse(await readFile(resolve(root,'runtime-config.example.json'),'utf8'));
 validateRuntimeConfig(example);
 
-for(const item of ['index.html','app.js','styles.css','settings.css','core']){
+for(const item of ['index.html','app.js','styles.css','settings.css','core','_headers']){
   await cp(resolve(root,item),resolve(out,item),{recursive:true});
 }
+// Example config makes the ordinary CI artifact illustrative, NEVER a deployable candidate.
 await writeFile(resolve(out,'runtime-config.json'),JSON.stringify(example,null,2)+'\n');
-console.log('Bong Goggles web build created dist/');
+console.log('Bong Goggles web build created dist/ (example config; NOT a release artifact)');

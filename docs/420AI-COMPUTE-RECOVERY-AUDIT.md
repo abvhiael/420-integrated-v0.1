@@ -178,3 +178,12 @@ The recovery branch now includes `420-ai-provider/`, a typed off-chain provider 
 It intentionally does not store provider private keys and does not self-authorize verification or settlement.
 
 See `docs/AI-RECOVERY-3-PROVIDER-RUNTIME.md`.
+
+
+## AI-RECOVERY-4 derived API and Indexer layer
+
+The recovery branch now includes `420-ai-api/`, AI/Compute Indexer projections, and Developer Hub discovery of the AI service endpoint.
+
+The preferred read architecture uses Indexer projections for discovery/history and direct canonical reads for current object hydration, with explicit non-authoritative provenance and chain/freshness checks.
+
+See `docs/AI-RECOVERY-4-READ-API.md` and `docs/420AI-RECOVERY-ROADMAP.md`.

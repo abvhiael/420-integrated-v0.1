@@ -2,32 +2,33 @@
   "schema": "420-exchange-web-v15.11",
   "scope": "BROWSER_EXECUTION_INTEGRATION",
   "repositoryStatus": "IMPLEMENTED_PENDING_EXACT_HEAD_CI",
-  "browserIntegrationStatus": "BLOCKED_CANONICAL_CONTROLS_UNWIRED",
+  "browserIntegrationStatus": "PARTIAL_WALLET_SELECTION_MOUNTED_EXECUTION_LOCKED",
   "operationalStatus": "BLOCKED_UNRESOLVED_DEPLOYMENT_AND_REAL_WALLET_MATRIX",
   "implementation": {
     "controller": "exchange/web/core/browser-execution-controller.js",
-    "walletUI": "exchange/web/browser-wallet-ui.js",
-    "walletUITests": "exchange/web/test/browser-wallet-ui.test.js",
-    "canonicalInputAdapter": "exchange/web/core/canonical-execution-inputs.js",
-    "canonicalInputTests": "exchange/web/test/canonical-execution-inputs.test.js",
-    "controllerTests": "exchange/web/test/browser-execution-controller.test.js",
+    "walletUi": "exchange/web/browser-wallet-ui.js",
+    "canonicalInputs": "exchange/web/core/canonical-execution-inputs.js",
+    "reviewedExecutionBridge": "exchange/web/core/reviewed-execution-bridge.js",
+    "tests": ["exchange/web/test/browser-execution-controller.test.js", "exchange/web/test/browser-wallet-ui.test.js", "exchange/web/test/canonical-execution-inputs.test.js", "exchange/web/test/reviewed-execution-bridge.test.js"],
     "runbook": "docs/420EXCHANGE-V15.11-BROWSER-EXECUTION.md"
   },
-  "repositoryScope": [
-    "mounted browser wallet selector with explicit multiwallet choice and connection invalidation",
-    "V15 wallet controller supports verified-session preflight and guarded submission APIs",
-    "canonical-input adapter prepares raw-unit swap, bridge, limit-order and maker-only cancellation envelopes from explicitly supplied qualified execution records",
-    "quote freshness, chain, wallet, route, decimal raw-unit and fixture provenance rejection have mocked unit tests",
-    "legacy V14 submission and signing buttons remain explicitly disabled"
+  "qualifiedInUnitTests": [
+    "explicit EIP-6963 wallet selection instead of silently selecting an extension",
+    "provider listener cleanup on wallet replacement and disposal",
+    "account or chain event invalidates reviewed wallet generation",
+    "resolved testnet runtime required for sending or signing",
+    "missing canonical review and qualification block wallet prompts",
+    "canonical raw-unit transaction inputs reject demo fixtures and malformed route identifiers",
+    "reviewed transaction fingerprints reject unconfirmed, changed, expired and wallet-switched requests"
   ],
   "releaseBlockers": [
-    "Exchange API only exposes V13 display snapshots/history; no authenticated live executable quote/binding endpoint is verified",
-    "exchange/web/app.js still creates a separate legacy wallet session; unify actual application state and replace legacy review-only handlers",
-    "UI controls do not yet acquire canonical raw-unit executable payloads or invoke the guarded submission/signing controller",
-    "on-chain preflight results and verified contract bytecode are not retained for a resolved live testnet deployment",
-    "real browser-wallet matrix, live swap/order/bridge drills, beneficiary reconciliation, operator/security signoffs missing"
+    "browser transaction form controls still disabled; integrate with canonical execution requests after trusted quote retrieval",
+    "authenticated live executable-quote endpoint and quote-to-reviewed-field binding absent",
+    "real testnet contract code, runtime and live on-chain preflight not yet qualified",
+    "limit-order UI needs live qualification and EIP-712 order lifecycle wiring",
+    "bridge UI needs live route proof, destination settlement and beneficiary tracking",
+    "execute real browser/device wallet matrix and V15.6-V15.8 live drills"
   ],
-  "provenanceLimit": "Adapter provenance fields are untrusted bookkeeping and cannot authenticate an API response or prove on-chain state; live source authentication, contract verification and preflight remain mandatory",
   "browserEvidence": null,
   "liveTransactionEvidence": null,
   "genesisReleaseStatus": "BLOCKED"

@@ -1,0 +1,57 @@
+name: 420 Wallet Live Testnet Qualification
+
+on:
+  workflow_dispatch:
+    inputs:
+      manifest_path:
+        description: "Official testnet network manifest path"
+        required: true
+        default: "developer-hub/manifests/testnet.json"
+      runtime_path:
+        description: "Generated Wallet runtime config path"
+        required: true
+        default: "wallet/web/runtime-config.generated.json"
+      minimum_block_number:
+        description: "Minimum acceptable testnet block height"
+        required: true
+        default: "1"
+
+jobs:
+  qualify-wallet-testnet:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: W14.1 deployment inventory qualification
+        run: python3 scripts/verify-wallet-w14-1.py
+
+      - name: Wallet Web regression
+        working-directory: wallet/web
+        run: |
+          npm run check
+          npm test
+
+      - name: Run W14.3 live testnet qualification
+        working-directory: wallet/web
+        run: |
+          mkdir -p ../../artifacts/wallet
+          npm run qualify:testnet -- \
+            --manifest "../../${{ inputs.manifest_path }}" \
+            --inventory "../deployment-inventory.json" \
+            --runtime "../../${{ inputs.runtime_path }}" \
+            --minimumBlockNumber "${{ inputs.minimum_block_number }}" \
+            --output "../../artifacts/wallet/w14.3-live-testnet.json"
+
+      - name: Upload W14.3 qualification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wallet-w14-3-live-testnet
+          path: artifacts/wallet/w14.3-live-testnet.json
+          if-no-files-found: warn

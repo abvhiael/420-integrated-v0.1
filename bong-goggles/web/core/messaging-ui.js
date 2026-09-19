@@ -10,7 +10,7 @@ export function renderInbox({viewer=null,inbox=null,walletView=null}={}){
 }
 
 export function renderThread({viewer=null,conversation=null,envelopes=[],walletView=null,serviceReady=false,currentEligibility=false,deviceReady=false,epochCurrent=false}={}){
- const status=messagingPresentationState({connected:walletView?.connected===true,serviceReady,currentEligibility,deviceReady,epochCurrent});
+ const status=messagingPresentationState({connected:walletView?.connected===true,serviceReady,eligible:currentEligibility,deviceReady,epochCurrent});
  if(status!=='ready')return card({title:'Private conversation',body:emptyState({title:status.replaceAll('-',' '),message:'Private message content remains unavailable until the current Messenger, block-policy, device and epoch checks pass.'})});
  if(!conversation)return card({title:'Conversation unavailable',body:emptyState({title:'Canonical conversation missing',message:'No conversation was supplied by the qualified messaging service.'})});
  const thread=normalizeThread({conversation,viewer,envelopes,currentEligibility,deviceReady,epochCurrent});

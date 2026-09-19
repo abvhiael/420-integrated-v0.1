@@ -28,7 +28,7 @@ func NewRPCSubmitter(rawURL,from string,timeout time.Duration)(*RPCSubmitter,err
 	if err:=statussecurity.ValidateProbeURL(rawURL); err!=nil { return nil,fmt.Errorf("execution rpc: %w",err) }
 	if !address(from) { return nil,errors.New("valid submitter address is required") }
 	if timeout<=0 { return nil,errors.New("request timeout must be positive") }
-	return &RPCSubmitter{url:rawURL,from:strings.ToLower(from),client:&http.Client{Timeout:timeout}},nil
+	return &RPCSubmitter{url:rawURL,from:strings.ToLower(from),client:&http.Client{Timeout:timeout,CheckRedirect:func(*http.Request,[]*http.Request)error{return errors.New("execution rpc redirects are not allowed")}}},nil
 }
 
 type rpcRequest struct {
@@ -39,6 +39,8 @@ type rpcRequest struct {
 }
 
 type rpcResponse struct {
+	JSONRPC string `json:"jsonrpc"`
+	ID json.RawMessage `json:"id"`
 	Result json.RawMessage `json:"result"`
 	Error *struct{
 		Code int `json:"code"`
@@ -56,17 +58,21 @@ func (s *RPCSubmitter) Submit(ctx context.Context,entryPoint string,op userop.Pa
 	if err!=nil { return "",err }
 	req.Header.Set("Content-Type","application/json")
 	resp,err:=s.client.Do(req)
-	if err!=nil { return "",err }
+	if err!=nil { return "",ambiguousSubmission(err) }
 	defer resp.Body.Close()
-	if resp.StatusCode!=http.StatusOK { return "",fmt.Errorf("rpc status %d",resp.StatusCode) }
+	if resp.StatusCode!=http.StatusOK { return "",ambiguousSubmission(fmt.Errorf("rpc status %d",resp.StatusCode)) }
 	raw,err:=io.ReadAll(io.LimitReader(resp.Body,maxRPCResponseBytes+1))
-	if err!=nil { return "",err }
-	if len(raw)>maxRPCResponseBytes { return "",errors.New("rpc response too large") }
+	if err!=nil { return "",ambiguousSubmission(err) }
+	if len(raw)>maxRPCResponseBytes { return "",ambiguousSubmission(errors.New("rpc response too large")) }
 	var decoded rpcResponse
-	if err:=json.Unmarshal(raw,&decoded); err!=nil { return "",errors.New("malformed rpc response") }
-	if decoded.Error!=nil { return "",fmt.Errorf("rpc error %d: %s",decoded.Error.Code,decoded.Error.Message) }
+	if err:=json.Unmarshal(raw,&decoded); err!=nil { return "",ambiguousSubmission(errors.New("malformed rpc response")) }
+	if decoded.JSONRPC!="2.0" || string(decoded.ID)!="1" {return "",ambiguousSubmission(errors.New("execution rpc response identity mismatch"))}
+	if decoded.Error!=nil {
+		if len(decoded.Result)!=0 && string(decoded.Result)!="null" {return "",ambiguousSubmission(errors.New("execution rpc returned both error and result"))}
+		return "",fmt.Errorf("rpc error %d: %s",decoded.Error.Code,decoded.Error.Message)
+	}
 	var hash string
-	if err:=json.Unmarshal(decoded.Result,&hash); err!=nil || !hash32(hash) { return "",errors.New("invalid transaction hash") }
+	if err:=json.Unmarshal(decoded.Result,&hash); err!=nil || !hash32(hash) { return "",ambiguousSubmission(errors.New("invalid transaction hash")) }
 	return strings.ToLower(hash),nil
 }
 

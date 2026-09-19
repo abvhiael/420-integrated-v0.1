@@ -14,6 +14,7 @@ const required = [
   'core/abi.js',
   'core/execution.js',
   'core/preflight.js',
+  'core/wallet-execution.js',
   'core/router.js',
   'core/design-system.js',
   'core/exchange-client.js',
@@ -25,6 +26,7 @@ const required = [
   'test/deployment-binding.test.js',
   'test/execution.test.js',
   'test/preflight.test.js',
+  'test/wallet-execution.test.js',
   'test/router.test.js',
   'test/design-system.test.js',
   'test/exchange-client.test.js',
@@ -49,6 +51,7 @@ const required = [
   'v15.1-qualification.json',
   'v15.2-qualification.json',
   'v15.3-qualification.json',
+  'v15.4-qualification.json',
   'core/release-qualification.js',
   'test/release-qualification.test.js',
   'scripts/build.mjs',
@@ -250,7 +253,17 @@ const v153 = JSON.parse(fs.readFileSync(path.join(root, 'v15.3-qualification.jso
 if (v153.scope !== 'PREFLIGHT_SIMULATION_AUTHORIZATION_GAS') throw new Error('V15.3 qualification scope drift');
 if (!deploymentBinding.includes('ExchangeAuthorization420')) throw new Error('V15.3 ExchangeAuthorization420 deployment binding missing');
 
-console.log('420Exchange V14.1 through V14.14 + V15.1 + V15.2 + V15.3 static qualification passed');
+const walletExecution = fs.readFileSync(path.join(root, 'core/wallet-execution.js'), 'utf8');
+for (const needle of ['submitPreflightedTransaction','signQualifiedLimitOrder','walletTransactionGate','walletTypedDataGate','eth_sendTransaction','eth_signTypedData_v4']) {
+  if (!walletExecution.includes(needle)) throw new Error(`V15.4 wallet execution missing operation: ${needle}`);
+}
+for (const needle of ['transactionFingerprint','preflightLimitOrderSigning']) {
+  if (!preflight.includes(needle)) throw new Error(`V15.4 preflight evidence missing operation: ${needle}`);
+}
+const v154 = JSON.parse(fs.readFileSync(path.join(root, 'v15.4-qualification.json'), 'utf8'));
+if (v154.scope !== 'EIP1193_SIGNING_AND_TRANSACTION_SUBMISSION') throw new Error('V15.4 qualification scope drift');
+
+console.log('420Exchange V14.1 through V14.14 + V15.1 + V15.2 + V15.3 + V15.4 static qualification passed');
 
 function REQUIRED_EXCHANGE_CONTRACTS_MARKER() {
   return deploymentBinding.includes('GatewayRouter420');

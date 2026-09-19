@@ -92,7 +92,15 @@ func (b *Builder) SubmitNext(ctx context.Context,now time.Time)(Result,error){
 		}
 		txHash,err:=b.submitter.Submit(ctx,b.cfg.EntryPoint,entry.Operation)
 		if err!=nil {
-			if b.recorder!=nil { b.recorder.AbortSubmission(entry.Hash) }
+			if errors.Is(err,ErrAmbiguousSubmission) {
+				// The transaction may already be accepted. Keep the durable
+				// pending intent so a restart cannot resend it automatically.
+				b.pool.Remove(entry.Hash)
+			} else if b.recorder!=nil {
+				// An explicit execution-RPC rejection is safe to retry after
+				// current-state revalidation; no transaction was accepted.
+				b.recorder.AbortSubmission(entry.Hash)
+			}
 			result.Failed=append(result.Failed,entry.Hash)
 			continue
 		}

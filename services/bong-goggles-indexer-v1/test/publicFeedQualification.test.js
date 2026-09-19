@@ -48,7 +48,7 @@ test('no readers, wrong chain, missing hash, noncanonical/reorged hash, unfinali
 });
 
 test('public feed denies missing, boolean, contradictory, stale or thrown policy evidence',async()=>{
-  for(const eligibility of [undefined,true,{...allow,authorActive:false},{...allow,objectId:h('6')},{...allow,indexedBlockHash:h('7')},{...allow,moderationPermits:false},{...allow,anonymousPermits:false},{...allow,policyVersion:''}]) {
+  for(const eligibility of [null,true,{...allow,authorActive:false},{...allow,objectId:h('6')},{...allow,indexedBlockHash:h('7')},{...allow,moderationPermits:false},{...allow,anonymousPermits:false},{...allow,policyVersion:''}]) {
     const {deps}=setup({eligibility});const response=await route(deps);
     assert.equal(response.status,200);assert.deepEqual(response.body.data.items,[]);
   }

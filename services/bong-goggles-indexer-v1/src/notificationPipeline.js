@@ -397,6 +397,88 @@ export function notificationCandidatesForEvent(log, state = {}) {
           sourceKey: args.sourceKey ?? rewardContribution.sourceKey ?? null,
           contributionType: args.contributionType ?? rewardContribution.contributionType ?? null,
           rewardState: rewardContribution.status ?? 'SUBMITTED',
+          lifecycleStage: 'CONTRIBUTION_SUBMITTED',
+          bongGogglesDeepLink: `bong-goggles://rewards/contributions/${args.contributionId}`,
+          explorerSubject: args.contributionId,
+          canTriggerClaim: false,
+        },
+      }));
+      break;
+    }
+    case 'RewardAccrued': {
+      const reward = required(state.rewardState, 'canonical reward state');
+      if (reward.exists === false) break;
+      if (reward.rewardId !== args.rewardId || reward.contributionId !== args.contributionId || reward.campaignId !== args.campaignId) break;
+      if (lower(reward.beneficiary) !== lower(args.beneficiary)) break;
+      if (Number(reward.amount) !== Number(args.amount)) break;
+      add(candidate(log, {
+        recipient: reward.beneficiary,
+        actor: null,
+        kind: 'REWARD_EARNED',
+        topic: 'rewards',
+        subjectId: args.rewardId,
+        metadata: {
+          rewardId: args.rewardId,
+          campaignId: args.campaignId,
+          contributionId: args.contributionId,
+          amount: args.amount,
+          rewardState: 'ACCRUED',
+          lifecycleStage: 'REWARD_EARNED',
+          bongGogglesDeepLink: `bong-goggles://rewards/${args.rewardId}`,
+          walletDeepLink: `420wallet://rewards/${args.rewardId}`,
+          explorerSubject: args.rewardId,
+          canTriggerClaim: false,
+        },
+      }));
+      break;
+    }
+    case 'RewardClaimed': {
+      const reward = required(state.rewardState, 'canonical reward state');
+      if (reward.exists === false) break;
+      if (reward.rewardId !== args.rewardId) break;
+      if (lower(reward.beneficiary) !== lower(args.beneficiary)) break;
+      if (Number(reward.amount) !== Number(args.amount)) break;
+      add(candidate(log, {
+        recipient: reward.beneficiary,
+        actor: null,
+        kind: 'REWARD_PAYOUT_UPDATED',
+        topic: 'rewards',
+        subjectId: args.rewardId,
+        metadata: {
+          rewardId: args.rewardId,
+          amount: args.amount,
+          rewardState: 'CLAIMED',
+          lifecycleStage: 'CLAIM_CONFIRMED',
+          bongGogglesDeepLink: `bong-goggles://rewards/${args.rewardId}`,
+          walletDeepLink: `420wallet://rewards/${args.rewardId}`,
+          explorerSubject: args.rewardId,
+          canTriggerClaim: false,
+        },
+      }));
+      break;
+    }
+    case 'RewardReleased': {
+      const reward = required(state.rewardState, 'canonical reward state');
+      if (reward.exists === false) break;
+      if (reward.rewardId !== args.rewardId || reward.campaignId !== args.campaignId) break;
+      if (lower(reward.beneficiary) !== lower(args.beneficiary)) break;
+      if (Number(reward.amount) !== Number(args.amount)) break;
+      add(candidate(log, {
+        recipient: reward.beneficiary,
+        actor: null,
+        kind: 'REWARD_PAYOUT_UPDATED',
+        topic: 'rewards',
+        subjectId: args.rewardId,
+        metadata: {
+          rewardId: args.rewardId,
+          campaignId: args.campaignId,
+          amount: args.amount,
+          rewardState: 'PAID',
+          lifecycleStage: 'REWARD_PAID',
+          bongGogglesDeepLink: `bong-goggles://rewards/${args.rewardId}`,
+          walletDeepLink: `420wallet://rewards/${args.rewardId}`,
+          explorerSubject: args.rewardId,
+          canTriggerClaim: false,
         },
       }));
       break;

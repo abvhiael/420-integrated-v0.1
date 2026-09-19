@@ -11,6 +11,7 @@ test('status diagnostic validates exact indexer envelope, chain and finality',()
  assert.equal(validateIndexerStatusEnvelope({apiVersion:'v1',data:{...status,authoritative:true}},chainId),null);
  assert.equal(validateIndexerStatusEnvelope({apiVersion:'v1',data:{...status,indexedHead:'-1'}},chainId),null);
  assert.equal(validateIndexerStatusEnvelope({apiVersion:'v1',data:{...status,finality:{...status.finality,mode:'untrusted'}}},chainId),null);
+ assert.equal(validateIndexerStatusEnvelope({apiVersion:'v1',data:{...status,finality:{...status.finality,mode:'safe'}}},chainId),null);
 });
 test('status reader sends existing route with configured chain ID and validates data',async()=>{
  let called=0;
@@ -32,6 +33,6 @@ test('superseded responses never reappear',async()=>{
  assert.equal(second.status,'ready');assert.equal((await first).status,'stale');
 });
 test('explicit invalidation suppresses response',async()=>{
- let release;const reader=createIndexerStatusReader({chainId,service:{request:()=>new Promise(resolve=>release=resolve)}}});
+ let release;const reader=createIndexerStatusReader({chainId,service:{request:()=>new Promise(resolve=>release=resolve)}});
  const first=reader.read();reader.invalidate();release({ok:true,data:envelope});assert.equal((await first).status,'stale');
 });

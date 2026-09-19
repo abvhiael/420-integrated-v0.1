@@ -147,3 +147,14 @@ body{background:var(--bg);color:var(--text)}
   .feed-object__header{grid-template-columns:auto minmax(0,1fr)}
   .feed-label{grid-column:2}
 }
+
+.community-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.community-card{display:grid;gap:7px;padding:14px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface-2);color:var(--text);text-decoration:none}
+.community-card:hover{border-color:#4b4b4b;transform:translateY(-1px)}
+.community-card small{color:var(--muted);overflow-wrap:anywhere}
+.community-detail{display:grid;gap:16px}
+.community-detail .actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.community-detail .ui-empty{margin-top:6px}
+@media(max-width:620px){
+  .community-grid{grid-template-columns:1fr}
+}

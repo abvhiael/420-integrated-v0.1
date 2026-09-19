@@ -159,7 +159,7 @@ The repository's Bong Goggles indexer currently materializes profile and relatio
 
 **Exit:** profile and social-graph presentation/actions are implemented against the canonical model; browser state fails closed when the qualified projection transport is unavailable.
 
-### BG-19.5 — home feed, publishing, interactions, media + stories — IMPLEMENTED, QUALIFICATION PENDING
+### BG-19.5 — home feed, publishing, interactions, media + stories — COMPLETE AND QUALIFIED
 
 Build the central social experience.
 
@@ -193,7 +193,7 @@ As with BG-19.4, the repository's indexer currently contains deterministic proje
 
 **Exit:** the primary feed/composer/interaction/media/story web surfaces are implemented against canonical semantics, with pending-vs-confirmed behavior enforced and projection/deployment gaps failed closed instead of guessed.
 
-### BG-19.6 — pages, groups + events application surfaces
+### BG-19.6 — pages, groups + events application surfaces — IMPLEMENTED, QUALIFICATION PENDING
 
 Expose community primitives from the qualified backend.
 
@@ -208,7 +208,22 @@ Expose community primitives from the qualified backend.
 - canonical links and degraded-state behavior;
 - no synthetic invitations or permissions not supported by contracts.
 
-**Exit:** Pages, Groups and Events are first-class web experiences rather than hidden backend capabilities.
+Implemented in:
+- `bong-goggles/web/core/community.js`
+- `bong-goggles/web/core/community-ui.js`
+- `bong-goggles/web/test/community.test.js`
+- `bong-goggles/web/core/app-shell.js`
+- `bong-goggles/web/styles.css`
+
+BG-19.6 mirrors `BongGogglesCommunityRegistry420` and the qualified community indexer reducers. Page, Group, GroupMember, Event and RSVP projections are normalized as canonical presentation records. Page actions are owner-gated. Group actions reflect OPEN, APPROVAL_REQUIRED and DISABLED join policies; pending membership exposes cancellation/leave semantics through the contract-supported removal primitive; active membership and owner roles are displayed from canonical state only. Private Groups fail closed unless the current canonical member state is ACTIVE. Blocked owner/member relationships suppress Group and Event actions.
+
+Event presentation preserves host type, visibility, schedule and current RSVP state. PUBLIC and GROUP_ONLY events may expose RSVP controls only when the current canonical policy permits them; INVITE_ONLY events do not manufacture an invitation flow because the current contract does not define one. RSVP is explicitly labeled as canonical intent rather than attendance proof.
+
+`/pages`, `/groups` and `/events` now render either canonical directories or detail views when supplied. Group details include a qualified group-feed handoff surface for the feed/indexer layer. Directories filter inactive records and sort Events chronologically. Post-write refresh replaces presentation state from canonical projections and never preserves optimistic membership or RSVP state as truth.
+
+The repository still lacks a dedicated browser HTTP controller for these materialized community projections and BG-19 runtime config still does not carry canonical deployment bindings. The browser therefore fails closed when community projection transport is unavailable and prepares only qualified Wallet intents for supported `BongGogglesCommunityRegistry420` calls.
+
+**Exit:** Pages, Groups and Events are implemented as first-class web surfaces with canonical membership, visibility and RSVP semantics, while unsupported invitation/permission behavior remains absent rather than synthesized.
 
 ### BG-19.7 — private messaging web client
 

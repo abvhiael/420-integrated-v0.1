@@ -2,6 +2,7 @@ import {navigationItems,resolveRoute,routeAccess} from './routes.js';
 import {card,emptyState,canonicalHandoffs,escapeHtml,skeleton} from './design-system.js';
 import {renderProfileView,renderRelationshipLists} from './profile-ui.js';
 import {renderComposer,renderFeed,renderStories} from './feed-ui.js';
+import {renderCommunityRoute} from './community-ui.js';
 
 function navMarkup(items,activeId,placement){
   return `<nav class="app-nav app-nav--${placement}" aria-label="${placement==='mobile'?'Primary mobile':'Primary'}">
@@ -12,13 +13,30 @@ function navMarkup(items,activeId,placement){
   </nav>`;
 }
 
-function routePlaceholder(route,access,{profileProjection=null,relationshipProjection=null,relationshipCollection=null,viewer=null,walletView=null,feedProjection=null,storyProjection=null,publication=null,upload=null}={}){
+function routePlaceholder(route,access,{profileProjection=null,relationshipProjection=null,relationshipCollection=null,viewer=null,walletView=null,feedProjection=null,storyProjection=null,publication=null,upload=null,communityProjection=null}={}){
   if(route.id==='home'){
     return `<div class="home-surface">
       ${renderStories({items:storyProjection??[]})}
       ${renderComposer({walletView,publication,upload})}
       ${renderFeed({page:feedProjection})}
     </div>`;
+  }
+  if(['pages','groups','events'].includes(route.id)){
+    const bucket=communityProjection?.[route.id]??null;
+    const detail=communityProjection?.detail?.[route.id]??null;
+    const member=communityProjection?.member??null;
+    const rsvp=communityProjection?.rsvp??null;
+    const blocked=communityProjection?.blocked===true;
+    return renderCommunityRoute({
+      kind:route.id,
+      records:bucket,
+      detail,
+      member,
+      rsvp,
+      viewer,
+      walletView,
+      blocked
+    });
   }
   if(route.id==='profile'){
     return renderProfileView({
@@ -88,7 +106,8 @@ export function renderApplicationShell({
   feedProjection=null,
   storyProjection=null,
   publication=null,
-  upload=null
+  upload=null,
+  communityProjection=null
 }={}){
   const route=resolveRoute(pathname);
   const access=routeAccess(route,{
@@ -104,7 +123,7 @@ export function renderApplicationShell({
     ?card({title:'Loading Bong Goggles',body:skeleton({lines:4})})
     :route.id==='not-found'
       ?card({title:'Page not found',body:emptyState({title:'404',message:'That Bong Goggles route does not exist.'})})
-      :routePlaceholder(route,access,{profileProjection,relationshipProjection,relationshipCollection,viewer:walletView?.account??null,walletView,feedProjection,storyProjection,publication,upload});
+      :routePlaceholder(route,access,{profileProjection,relationshipProjection,relationshipCollection,viewer:walletView?.account??null,walletView,feedProjection,storyProjection,publication,upload,communityProjection});
 
   return `<div class="app-shell" data-route="${escapeHtml(route.id)}">
     <header class="app-header">

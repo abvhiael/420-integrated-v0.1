@@ -34,7 +34,7 @@ export async function routePublicFeedHttp({ method, requestUrl, getView, canShow
   if (typeof getView !== 'function' || typeof canShowPublicObject !== 'function') return fail(503, 'unavailable');
   try {
     const view = await getView();
-    if (!view || !(view.feeds instanceof Map) || !(view.socialObjects instanceof Map) || !(view.profiles instanceof Map) || !view.checkpoint || typeof view.checkpoint.indexedBlock !== 'string' || !/^[0-9]+$/.test(view.checkpoint.indexedBlock)) return fail(503, 'unavailable');
+    if (!view || !(view.feeds instanceof Map) || !(view.socialObjects instanceof Map) || !(view.profiles instanceof Map) || !view.checkpoint || !Number.isSafeInteger(view.checkpoint.indexedBlock) || view.checkpoint.indexedBlock < 0 || !Number.isSafeInteger(view.checkpoint.chainId) || view.checkpoint.chainId <= 0) return fail(503, 'unavailable');
     const entries = view.feeds.get('DISCOVER:*');
     if (!Array.isArray(entries)) return fail(503, 'unavailable');
     const items = [];

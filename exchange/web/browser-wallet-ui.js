@@ -1,5 +1,6 @@
 import { BrowserExecutionController } from './core/browser-execution-controller.js';
 import { discoverWalletProviders } from './core/wallet-compatibility.js';
+import { mountReadOnlySwapReview } from './read-only-swap-review-ui.js';
 
 // Browser integration is wallet-only until the page supplies canonical V15 execution inputs.
 export const V15_EXECUTION_CONTROL_IDS=Object.freeze(['swap-submit','order-sign','bridge-submit']);
@@ -33,7 +34,7 @@ export function mountWalletUI({documentRef=globalThis.document,windowRef=globalT
   const message=documentRef.createElement('small');message.id='v15-wallet-message';message.setAttribute('role','status');message.textContent='Wallet discovery available; trading not yet enabled.';
   const readiness=documentRef.createElement('small');readiness.id='v15-execution-readiness';readiness.setAttribute('role','status');readiness.textContent='Verified testnet deployment unavailable';
   panel.append(caption,select,message,readiness);connect.parentElement?.insertBefore(panel,connect);
-  const context={runtime:null,controller:null,pending:false,disposed:false};
+  const context={runtime:null,controller:null,quoteSurface:null,pending:false,disposed:false};
   function updateReadiness(){
     if(context.disposed)return;
     const connected=Boolean(context.controller?.wallet?.session?.account);
@@ -58,29 +59,37 @@ export function mountWalletUI({documentRef=globalThis.document,windowRef=globalT
   }
   function onState(event){if(context.disposed)return;
     if(event.type==='wallets-discovered')renderChoices();
-    if(event.type==='wallet-connected'){message.textContent='Connected '+event.account.slice(0,6)+'…'+event.account.slice(-4)+' · trading disabled pending testnet qualification';connect.textContent='Wallet connected';connect.disabled=false;}
-    if(event.type==='wallet-invalidated'){message.textContent='Wallet changed: '+event.reason+'. Reconnect and review again.';connect.textContent='Reconnect wallet';connect.disabled=false;lockExecution();}
-    updateReadiness();
+    if(event.type==='wallet-connected'){message.textContent='Connected '+event.account.slice(0,6)+'…'+event.account.slice(-4)+' · trading disabled pending testnet qualification';connect.textContent='Wallet connected';connect.disabled=false;context.quoteSurface?.clear('Wallet connected; request a new read-only quote.');}
+    if(event.type==='wallet-invalidated'){message.textContent='Wallet changed: '+event.reason+'. Reconnect and review again.';connect.textContent='Reconnect wallet';connect.disabled=false;context.quoteSurface?.clear('Wallet changed; quote review invalidated.');lockExecution();}
+    context.quoteSurface?.refresh();updateReadiness();
   }
   function intercept(event){const button=event.target?.closest?.('#connect, #swap-submit, #order-sign, #bridge-submit, [data-cancel-order]');if(!button)return;
     event.preventDefault();event.stopImmediatePropagation();
     if(button.id!=='connect'){lockExecution();message.textContent=EXECUTION_BLOCK_REASON;updateReadiness();return;}
     if(context.pending||context.disposed||!context.controller)return;
     if(!select.value){message.textContent='Select the wallet to connect.';return;}
+    context.quoteSurface?.clear('Wallet reconnecting; quote review invalidated.');
     context.pending=true;connect.disabled=true;message.textContent='Requesting wallet connection…';
     context.controller.connect({ethereum,selectedId:select.value}).catch(e=>{if(!context.disposed)message.textContent=String(e?.message??'Wallet connection failed');}).finally(()=>{context.pending=false;if(!context.disposed){connect.disabled=false;updateReadiness();}});
   }
   documentRef.addEventListener('click',intercept,true);
   const view=documentRef.querySelector('#app-view');
   // Observe only top-level view replacement: changing a button label must not trigger an observer feedback loop.
-  const observer=typeof MutationObserver==='function'?new MutationObserver(()=>lockExecution()):null;
+  const observer=typeof MutationObserver==='function'?new MutationObserver(()=>{
+    lockExecution();
+    if(context.quoteSurface){
+      if(context.quoteSurface.panel.parentElement!==view)context.quoteSurface.clear('Swap view replaced; review invalidated.');
+      context.quoteSurface.refresh();
+    }
+  }):null;
   if(view&&observer)observer.observe(view,{childList:true});lockExecution();updateReadiness();
   Promise.resolve().then(loadRuntime).then(runtime=>{if(context.disposed)return;
-    context.runtime=runtime;context.controller=new BrowserExecutionController({runtime,onState,onInvalidate:()=>{lockExecution();updateReadiness();}});
-    context.controller.listen(windowRef,ethereum);renderChoices();updateReadiness();
+    context.runtime=runtime;context.controller=new BrowserExecutionController({runtime,onState,onInvalidate:()=>{context.quoteSurface?.clear('Wallet invalidated; review cleared.');lockExecution();updateReadiness();}});
+    context.quoteSurface=mountReadOnlySwapReview({documentRef,controller:context.controller});
+    context.controller.listen(windowRef,ethereum);renderChoices();context.quoteSurface.refresh();updateReadiness();
   }).catch(e=>{if(!context.disposed){message.textContent=String(e?.message??'Wallet unavailable');connect.disabled=true;updateReadiness();}});
   windowRef.addEventListener('pagehide',dispose,{once:true});
-  function dispose(){if(context.disposed)return;context.disposed=true;observer?.disconnect();context.controller?.dispose();documentRef.removeEventListener('click',intercept,true);windowRef.removeEventListener('pagehide',dispose);}
+  function dispose(){if(context.disposed)return;context.disposed=true;observer?.disconnect();context.quoteSurface?.dispose();context.controller?.dispose();documentRef.removeEventListener('click',intercept,true);windowRef.removeEventListener('pagehide',dispose);}
   return {dispose,lockExecution,renderChoices,updateReadiness,context};
 }
 if(typeof document!=='undefined'&&document.querySelector('#connect'))mountWalletUI();

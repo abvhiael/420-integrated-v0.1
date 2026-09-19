@@ -76,6 +76,8 @@ func main(){
   GasEstimator:gasEstimator,Lifecycle:lifecycleTracker,Propagator:peerBroadcaster,
  })
  if err!=nil{log.Fatal(err)}
+ browserRPC,err:=rpcapi420.BrowserCORS(rpcHandler,csvEnv("BUNDLER_CORS_ORIGINS"))
+ if err!=nil{log.Fatal(err)}
  runtimeHandler:=svc.Handler()
  mux:=http.NewServeMux()
  mux.Handle("/healthz",runtimeHandler)
@@ -85,7 +87,7 @@ func main(){
   return metrics.Snapshot(now,svc.Ready(),cfg.ChainID,cfg.EntryPoint,pool.Len(now))
  }))
  mux.Handle("/peer/v1/user-operation",peerHandler)
- mux.Handle("/",rpcHandler)
+ mux.Handle("/",browserRPC)
  boundedHandler,err:=runtime420.LimitConcurrent(mux,mustIntOr("BUNDLER_MAX_CONCURRENT_REQUESTS",64))
  if err!=nil{log.Fatal(err)}
  server:=&http.Server{

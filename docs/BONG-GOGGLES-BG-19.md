@@ -127,7 +127,7 @@ BG-19.3 establishes the shared application shell and route contract for Home, Pr
 
 **Exit:** every later feature can be implemented without inventing one-off navigation, modal, loading or authority patterns.
 
-### BG-19.4 — profiles, relationships + social graph UI — IMPLEMENTED, QUALIFICATION PENDING
+### BG-19.4 — profiles, relationships + social graph UI — COMPLETE AND QUALIFIED
 
 Expose the qualified profile and relationship model.
 
@@ -159,7 +159,7 @@ The repository's Bong Goggles indexer currently materializes profile and relatio
 
 **Exit:** profile and social-graph presentation/actions are implemented against the canonical model; browser state fails closed when the qualified projection transport is unavailable.
 
-### BG-19.5 — home feed, publishing, interactions, media + stories
+### BG-19.5 — home feed, publishing, interactions, media + stories — IMPLEMENTED, QUALIFICATION PENDING
 
 Build the central social experience.
 
@@ -178,7 +178,20 @@ Build the central social experience.
 - pending transaction/publication state clearly distinguished from canonical publication;
 - blocked/inactive/withdrawn content removed or degraded according to current canonical state.
 
-**Exit:** a user can complete the primary Bong Goggles loop: open feed → publish → interact → see canonical result.
+Implemented in:
+- `bong-goggles/web/core/feed-publishing.js`
+- `bong-goggles/web/core/feed-ui.js`
+- `bong-goggles/web/test/feed-publishing.test.js`
+- `bong-goggles/web/core/app-shell.js`
+- `bong-goggles/web/styles.css`
+
+BG-19.5 mirrors the qualified feed/social-object/media contracts. Feed pages are normalized from canonical/indexed projections, filter non-active objects, retain deterministic cursor/freshness metadata and never promote browser-local objects into canonical state. Composer drafts distinguish POST, COMMENT, STORY, REPOST and QUOTE_POST semantics and map them to the qualified `BongGogglesSocialObjectRegistry420` actions. Reaction/comment/repost/quote/tag intents map only to qualified contract operations. Pending Wallet submission is explicitly non-canonical; rejected and reverted states remain distinct; only a refreshed canonical projection marks publication confirmed.
+
+The home route now includes a story strip, composer and feed surface. Media presentation is keyed by qualified media roots and upload UX has explicit preparing/uploading/verifying/registering/ready/failed states. The browser does not treat raw upload success as publication authority: a media root is usable only after the qualified storage/media registration path resolves it.
+
+As with BG-19.4, the repository's indexer currently contains deterministic projector/materialized-feed logic but not a dedicated browser-facing HTTP feed controller module. The BG-19.5 client therefore fails closed when no qualified feed projection is supplied rather than inventing feed entries or cursors locally. Likewise, contract addresses/ABI deployment bindings are not currently part of the BG-19 runtime config, so this phase prepares and presents canonical action intent semantics without embedding duplicate or guessed deployment authority in the client.
+
+**Exit:** the primary feed/composer/interaction/media/story web surfaces are implemented against canonical semantics, with pending-vs-confirmed behavior enforced and projection/deployment gaps failed closed instead of guessed.
 
 ### BG-19.6 — pages, groups + events application surfaces
 

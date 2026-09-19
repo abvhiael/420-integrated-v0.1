@@ -118,3 +118,32 @@ body{background:var(--bg);color:var(--text)}
   .profile-summary__text{padding-top:32px}
   .profile-actions{grid-column:1/-1;padding-top:0;justify-content:flex-start}
 }
+
+.home-surface{display:grid;gap:18px}
+.stories{display:flex;gap:12px;overflow:auto;padding:4px 2px 8px}
+.story{display:grid;gap:6px;justify-items:center;min-width:72px;border:0;background:transparent;color:var(--text);cursor:pointer}
+.story .profile-avatar{width:58px;height:58px;border:2px solid #3a3a3a}
+.story small{max-width:72px;overflow:hidden;text-overflow:ellipsis}
+.composer{display:grid;gap:14px}
+.composer__head{display:flex;justify-content:space-between;gap:12px}
+.composer-row{display:grid;grid-template-columns:minmax(0,1fr) 180px;gap:12px}
+.field{display:grid;gap:6px;color:var(--muted);font-size:.82rem}
+.field textarea,.field select{width:100%;border:1px solid var(--line);border-radius:10px;background:#101010;color:var(--text);padding:11px;font:inherit}
+.upload-state{display:grid;align-content:start;gap:5px;padding:10px;border:1px solid var(--line);border-radius:10px;background:#101010}
+.upload-state span,.upload-state small{color:var(--muted);font-size:.76rem}
+.feed-list{display:grid;gap:14px}
+.feed-object{border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);overflow:hidden}
+.feed-object__header{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line)}
+.feed-object__header small{display:block;color:var(--muted)}
+.feed-label{font-size:.7rem;letter-spacing:.08em;color:var(--muted)}
+.feed-object__body{padding:16px;line-height:1.55}
+.feed-object__body code{font-size:.72rem;overflow-wrap:anywhere}
+.media-placeholder{padding:26px;border:1px dashed var(--line);border-radius:12px;background:#111;color:var(--muted);text-align:center}
+.provenance{color:var(--muted);font-size:.8rem;overflow-wrap:anywhere}
+.feed-actions{display:flex;flex-wrap:wrap;gap:8px;padding:10px 12px;border-top:1px solid var(--line)}
+.feed-freshness{color:var(--muted);font-size:.75rem;text-align:center}
+@media(max-width:620px){
+  .composer-row{grid-template-columns:1fr}
+  .feed-object__header{grid-template-columns:auto minmax(0,1fr)}
+  .feed-label{grid-column:2}
+}

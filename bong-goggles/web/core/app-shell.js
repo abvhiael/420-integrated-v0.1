@@ -1,6 +1,7 @@
 import {navigationItems,resolveRoute,routeAccess} from './routes.js';
 import {card,emptyState,canonicalHandoffs,escapeHtml,skeleton} from './design-system.js';
 import {renderProfileView,renderRelationshipLists} from './profile-ui.js';
+import {renderComposer,renderFeed,renderStories} from './feed-ui.js';
 
 function navMarkup(items,activeId,placement){
   return `<nav class="app-nav app-nav--${placement}" aria-label="${placement==='mobile'?'Primary mobile':'Primary'}">
@@ -11,7 +12,14 @@ function navMarkup(items,activeId,placement){
   </nav>`;
 }
 
-function routePlaceholder(route,access,{profileProjection=null,relationshipProjection=null,relationshipCollection=null,viewer=null,walletView=null}={}){
+function routePlaceholder(route,access,{profileProjection=null,relationshipProjection=null,relationshipCollection=null,viewer=null,walletView=null,feedProjection=null,storyProjection=null,publication=null,upload=null}={}){
+  if(route.id==='home'){
+    return `<div class="home-surface">
+      ${renderStories({items:storyProjection??[]})}
+      ${renderComposer({walletView,publication,upload})}
+      ${renderFeed({page:feedProjection})}
+    </div>`;
+  }
   if(route.id==='profile'){
     return renderProfileView({
       profile:profileProjection,
@@ -76,7 +84,11 @@ export function renderApplicationShell({
   announcement=null,
   profileProjection=null,
   relationshipProjection=null,
-  relationshipCollection=null
+  relationshipCollection=null,
+  feedProjection=null,
+  storyProjection=null,
+  publication=null,
+  upload=null
 }={}){
   const route=resolveRoute(pathname);
   const access=routeAccess(route,{
@@ -92,7 +104,7 @@ export function renderApplicationShell({
     ?card({title:'Loading Bong Goggles',body:skeleton({lines:4})})
     :route.id==='not-found'
       ?card({title:'Page not found',body:emptyState({title:'404',message:'That Bong Goggles route does not exist.'})})
-      :routePlaceholder(route,access,{profileProjection,relationshipProjection,relationshipCollection,viewer:walletView?.account??null,walletView});
+      :routePlaceholder(route,access,{profileProjection,relationshipProjection,relationshipCollection,viewer:walletView?.account??null,walletView,feedProjection,storyProjection,publication,upload});
 
   return `<div class="app-shell" data-route="${escapeHtml(route.id)}">
     <header class="app-header">

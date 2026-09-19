@@ -1,0 +1,61 @@
+name: 420 Wallet Extension Live dApp Qualification
+
+on:
+  workflow_dispatch:
+    inputs:
+      manifest_path:
+        description: "Official testnet network manifest path"
+        required: true
+        default: "developer-hub/manifests/testnet.json"
+      runtime_path:
+        description: "Generated Wallet runtime config path"
+        required: true
+        default: "wallet/web/runtime-config.generated.json"
+      extension_config_path:
+        description: "Live extension config path"
+        required: true
+        default: "wallet/extension/live-testnet-config.json"
+      minimum_block_number:
+        description: "Minimum acceptable testnet block height"
+        required: true
+        default: "1"
+
+jobs:
+  qualify-extension-live-dapp:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Extension package qualification
+        working-directory: wallet/extension
+        run: node scripts/check-release.mjs
+
+      - name: Wallet regression qualification
+        working-directory: wallet/web
+        run: |
+          npm run check
+          npm test
+
+      - name: Run W14.4 live dApp qualification
+        run: |
+          mkdir -p artifacts/wallet
+          node wallet/extension/scripts/qualify-live-dapp.mjs \
+            --manifest "${{ inputs.manifest_path }}" \
+            --inventory "wallet/deployment-inventory.json" \
+            --runtime "${{ inputs.runtime_path }}" \
+            --extensionConfig "${{ inputs.extension_config_path }}" \
+            --minimumBlockNumber "${{ inputs.minimum_block_number }}" \
+            --output "artifacts/wallet/w14.4-extension-live-dapp.json"
+
+      - name: Upload W14.4 qualification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wallet-w14-4-extension-live-dapp
+          path: artifacts/wallet/w14.4-extension-live-dapp.json
+          if-no-files-found: warn

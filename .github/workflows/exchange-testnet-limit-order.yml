@@ -1,0 +1,51 @@
+name: 420Exchange Testnet Limit Order Qualification
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify-live-limit-order:
+    runs-on: ubuntu-latest
+    environment: exchange-testnet
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Verify repository qualification
+        working-directory: exchange/web
+        run: |
+          npm run check
+          npm test
+      - name: Materialize protected testnet inputs
+        shell: bash
+        env:
+          MANIFEST: ${{ secrets.EXCHANGE_TESTNET_MANIFEST_JSON }}
+          FIXTURE: ${{ secrets.EXCHANGE_TESTNET_ORDER_FIXTURE_JSON }}
+        run: |
+          set -euo pipefail
+          test -n "$MANIFEST"
+          test -n "$FIXTURE"
+          umask 077
+          printf '%s' "$MANIFEST" > "$RUNNER_TEMP/exchange-testnet-manifest.json"
+          printf '%s' "$FIXTURE" > "$RUNNER_TEMP/exchange-limit-order.json"
+      - name: Run real testnet partial-fill/cancel drill
+        working-directory: exchange/web
+        env:
+          EXCHANGE_TESTNET_MANIFEST: ${{ runner.temp }}/exchange-testnet-manifest.json
+          EXCHANGE_TESTNET_ORDER_FIXTURE: ${{ runner.temp }}/exchange-limit-order.json
+          EXCHANGE_TESTNET_MAKER_RPC_URL: ${{ secrets.EXCHANGE_TESTNET_MAKER_RPC_URL }}
+          EXCHANGE_TESTNET_FILLER_RPC_URL: ${{ secrets.EXCHANGE_TESTNET_FILLER_RPC_URL }}
+          EXCHANGE_TESTNET_EVIDENCE_OUT: ${{ runner.temp }}/exchange-v15.7-live-evidence.json
+          GITHUB_SHA: ${{ github.sha }}
+        run: node scripts/live-limit-order-qualify.mjs
+      - name: Upload sanitized qualification evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: 420exchange-v15.7-live-limit-order-${{ github.sha }}
+          path: ${{ runner.temp }}/exchange-v15.7-live-evidence.json
+          if-no-files-found: error
+          retention-days: 90

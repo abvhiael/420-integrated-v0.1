@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { Interface, getAddress } from 'ethers';
+import { Interface } from 'ethers';
 import { VaultRPCEvidence420 } from '../src/vault-rpc-evidence.js';
 
 const id=(n:string)=>`0x${n.repeat(64)}` as `0x${string}`;
@@ -25,11 +25,11 @@ function fixture() {
   async getTransactionReceipt(){return receipt;},
   async getBlock(){return {hash:blockHash};}
  };
- // Exercise the receipt-verification implementation in isolation, supplying already-validated
- // deployment and pinned-block prerequisites. These fixtures do NOT qualify open() or a live RPC.
+ // Receipt-verification-only fixture with the deployment and pinned-block prerequisites
+ // stubbed. This is not a replacement for open() tests or a real RPC integration test.
  const reader=Object.assign(Object.create(VaultRPCEvidence420.prototype),{
   rpc,config:{vaultRef,fromBlock:0},addresses:{vault,accounting},height:10,
-  vault:{async executedOperation(){return true;}},
+  vaultContract:{async executedOperation(){return true;}},
   async assertCanonical(){return;},
   async obligation(){return {obligationId:obligation,vaultRef,sourceRef:id('6'),asset,beneficiary,amount420:42n,state:'CLAIMED'};}
  }) as VaultRPCEvidence420;

@@ -3,6 +3,7 @@ import {card,emptyState,canonicalHandoffs,escapeHtml,skeleton} from './design-sy
 import {renderProfileView,renderRelationshipLists} from './profile-ui.js';
 import {renderComposer,renderFeed,renderStories} from './feed-ui.js';
 import {renderCommunityRoute} from './community-ui.js';
+import {renderMessagingRoute} from './messaging-ui.js';
 
 function navMarkup(items,activeId,placement){
   return `<nav class="app-nav app-nav--${placement}" aria-label="${placement==='mobile'?'Primary mobile':'Primary'}">
@@ -13,7 +14,7 @@ function navMarkup(items,activeId,placement){
   </nav>`;
 }
 
-function routePlaceholder(route,access,{profileProjection=null,relationshipProjection=null,relationshipCollection=null,viewer=null,walletView=null,feedProjection=null,storyProjection=null,publication=null,upload=null,communityProjection=null}={}){
+function routePlaceholder(route,access,{profileProjection=null,relationshipProjection=null,relationshipCollection=null,viewer=null,walletView=null,feedProjection=null,storyProjection=null,publication=null,upload=null,communityProjection=null,messagingProjection=null}={}){
   if(route.id==='home'){
     return `<div class="home-surface">
       ${renderStories({items:storyProjection??[]})}
@@ -21,109 +22,49 @@ function routePlaceholder(route,access,{profileProjection=null,relationshipProje
       ${renderFeed({page:feedProjection})}
     </div>`;
   }
+  if(route.id==='messages'){
+    if(!access.allowed)return card({eyebrow:'Read-only mode',title:'Messages require 420Wallet',body:'<p>Connect 420Wallet on the configured network to access private conversations.</p>'});
+    return renderMessagingRoute({viewer,walletView,projection:messagingProjection});
+  }
   if(['pages','groups','events'].includes(route.id)){
     const bucket=communityProjection?.[route.id]??null;
     const detail=communityProjection?.detail?.[route.id]??null;
     const member=communityProjection?.member??null;
     const rsvp=communityProjection?.rsvp??null;
     const blocked=communityProjection?.blocked===true;
-    return renderCommunityRoute({
-      kind:route.id,
-      records:bucket,
-      detail,
-      member,
-      rsvp,
-      viewer,
-      walletView,
-      blocked
-    });
+    return renderCommunityRoute({kind:route.id,records:bucket,detail,member,rsvp,viewer,walletView,blocked});
   }
   if(route.id==='profile'){
-    return renderProfileView({
-      profile:profileProjection,
-      relationship:relationshipProjection,
-      viewer,
-      walletView
-    });
+    return renderProfileView({profile:profileProjection,relationship:relationshipProjection,viewer,walletView});
   }
   if(route.id==='friends'){
     if(!access.allowed){
-      return card({
-        eyebrow:'Read-only mode',
-        title:'Friends requires 420Wallet',
-        body:'<p>Connect 420Wallet on the configured network to view account-scoped social graph lists.</p>'
-      });
+      return card({eyebrow:'Read-only mode',title:'Friends requires 420Wallet',body:'<p>Connect 420Wallet on the configured network to view account-scoped social graph lists.</p>'});
     }
     if(!relationshipCollection){
-      return card({
-        eyebrow:'Canonical projection',
-        title:'Friends',
-        body:emptyState({
-          title:'Relationship projection unavailable',
-          message:'The browser will not synthesize friends/followers/following state. A qualified indexer transport must supply the canonical projection.'
-        })
-      });
+      return card({eyebrow:'Canonical projection',title:'Friends',body:emptyState({title:'Relationship projection unavailable',message:'The browser will not synthesize friends/followers/following state. A qualified indexer transport must supply the canonical projection.'})});
     }
-    return card({
-      eyebrow:'Canonical social graph',
-      title:'Friends',
-      body:renderRelationshipLists({
-        viewer,
-        relationships:relationshipCollection.relationships??[],
-        profiles:relationshipCollection.profiles??[],
-        list:'friends'
-      })
-    });
+    return card({eyebrow:'Canonical social graph',title:'Friends',body:renderRelationshipLists({viewer,relationships:relationshipCollection.relationships??[],profiles:relationshipCollection.profiles??[],list:'friends'})});
   }
   if(!access.allowed){
-    return card({
-      eyebrow:'Read-only mode',
-      title:`${route.label} requires 420Wallet`,
-      body:`<p>Connect 420Wallet on the configured 420 network to access this area. Public Bong Goggles browsing remains available.</p>`
-    });
+    return card({eyebrow:'Read-only mode',title:`${route.label} requires 420Wallet`,body:`<p>Connect 420Wallet on the configured 420 network to access this area. Public Bong Goggles browsing remains available.</p>`});
   }
-  return card({
-    eyebrow:'BG-19 web application',
-    title:route.label,
-    body:emptyState({
-      title:`${route.label} surface ready`,
-      message:'The reusable application shell is active. Feature-specific data and actions are implemented in later BG-19 increments.'
-    })
-  });
+  return card({eyebrow:'BG-19 web application',title:route.label,body:emptyState({title:`${route.label} surface ready`,message:'The reusable application shell is active. Feature-specific data and actions are implemented in later BG-19 increments.'})});
 }
 
 export function renderApplicationShell({
-  pathname='/',
-  walletView=null,
-  bootstrapState='ready',
-  appOrigin='https://bonggoggles.420integrated.org',
-  walletHref=null,
-  explorerHref=null,
-  announcement=null,
-  profileProjection=null,
-  relationshipProjection=null,
-  relationshipCollection=null,
-  feedProjection=null,
-  storyProjection=null,
-  publication=null,
-  upload=null,
-  communityProjection=null
+  pathname='/',walletView=null,bootstrapState='ready',appOrigin='https://bonggoggles.420integrated.org',walletHref=null,explorerHref=null,announcement=null,
+  profileProjection=null,relationshipProjection=null,relationshipCollection=null,feedProjection=null,storyProjection=null,publication=null,upload=null,communityProjection=null,messagingProjection=null
 }={}){
   const route=resolveRoute(pathname);
-  const access=routeAccess(route,{
-    connected:walletView?.connected===true,
-    supportedNetwork:walletView?.supportedNetwork!==false
-  });
-  const nav=navigationItems({
-    connected:walletView?.connected===true,
-    supportedNetwork:walletView?.supportedNetwork!==false
-  });
+  const access=routeAccess(route,{connected:walletView?.connected===true,supportedNetwork:walletView?.supportedNetwork!==false});
+  const nav=navigationItems({connected:walletView?.connected===true,supportedNetwork:walletView?.supportedNetwork!==false});
   const degraded=bootstrapState==='degraded'||bootstrapState==='unsupported-network';
   const content=bootstrapState==='loading'
     ?card({title:'Loading Bong Goggles',body:skeleton({lines:4})})
     :route.id==='not-found'
       ?card({title:'Page not found',body:emptyState({title:'404',message:'That Bong Goggles route does not exist.'})})
-      :routePlaceholder(route,access,{profileProjection,relationshipProjection,relationshipCollection,viewer:walletView?.account??null,walletView,feedProjection,storyProjection,publication,upload,communityProjection});
+      :routePlaceholder(route,access,{profileProjection,relationshipProjection,relationshipCollection,viewer:walletView?.account??null,walletView,feedProjection,storyProjection,publication,upload,communityProjection,messagingProjection});
 
   return `<div class="app-shell" data-route="${escapeHtml(route.id)}">
     <header class="app-header">
@@ -144,18 +85,11 @@ export function renderApplicationShell({
         ${canonicalHandoffs({walletHref,explorerHref})}
       </aside>
       <main class="app-content" id="main-content" tabindex="-1">
-        <div class="route-heading">
-          <p class="eyebrow">${escapeHtml(route.id==='not-found'?'Navigation':access.mode)}</p>
-          <h1>${escapeHtml(route.label)}</h1>
-        </div>
+        <div class="route-heading"><p class="eyebrow">${escapeHtml(route.id==='not-found'?'Navigation':access.mode)}</p><h1>${escapeHtml(route.label)}</h1></div>
         ${content}
       </main>
       <aside class="app-rail" aria-label="Application status">
-        ${card({
-          eyebrow:'Authority',
-          title:'Canonical state',
-          body:`<p>Bong Goggles presents indexed and canonical state. 420Wallet remains the approval boundary for writes.</p><dl class="mini-grid"><div><dt>Network</dt><dd>${escapeHtml(walletView?.chainId??'—')}</dd></div><div><dt>Session</dt><dd>${escapeHtml(walletView?.sessionState??'none')}</dd></div></dl>`
-        })}
+        ${card({eyebrow:'Authority',title:'Canonical state',body:`<p>Bong Goggles presents indexed and canonical state. 420Wallet remains the approval boundary for writes.</p><dl class="mini-grid"><div><dt>Network</dt><dd>${escapeHtml(walletView?.chainId??'—')}</dd></div><div><dt>Session</dt><dd>${escapeHtml(walletView?.sessionState??'none')}</dd></div></dl>`})}
       </aside>
     </div>
     ${navMarkup(nav.filter(item=>['home','discover','messages','notifications','profile'].includes(item.id)),route.id,'mobile')}
@@ -164,9 +98,9 @@ export function renderApplicationShell({
 
 export function navigateWithoutReload(event,{windowObject=window,onNavigate}={}){
   const anchor=event.target?.closest?.('a[data-route]');
-  if(!anchor) return false;
+  if(!anchor)return false;
   const url=new URL(anchor.href,windowObject.location.href);
-  if(url.origin!==windowObject.location.origin) return false;
+  if(url.origin!==windowObject.location.origin)return false;
   event.preventDefault();
   windowObject.history.pushState({},'',url.pathname);
   onNavigate?.(url.pathname);

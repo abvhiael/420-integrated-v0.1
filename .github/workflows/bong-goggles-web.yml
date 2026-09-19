@@ -4,10 +4,14 @@ on:
   push:
     paths:
       - "bong-goggles/web/**"
+      - "services/bong-goggles-indexer-v1/src/publicFeedHttp.js"
+      - "services/bong-goggles-indexer-v1/test/publicFeedHttp.test.js"
       - ".github/workflows/bong-goggles-web.yml"
   pull_request:
     paths:
       - "bong-goggles/web/**"
+      - "services/bong-goggles-indexer-v1/src/publicFeedHttp.js"
+      - "services/bong-goggles-indexer-v1/test/publicFeedHttp.test.js"
       - ".github/workflows/bong-goggles-web.yml"
   workflow_dispatch:
 
@@ -27,6 +31,9 @@ jobs:
       - name: Web unit tests
         working-directory: bong-goggles/web
         run: npm test
+      - name: Public social feed HTTP route regression tests
+        working-directory: services/bong-goggles-indexer-v1
+        run: node --test test/publicFeedHttp.test.js
       - name: Production shell build
         working-directory: bong-goggles/web
         run: npm run build

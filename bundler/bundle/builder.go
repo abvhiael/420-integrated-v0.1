@@ -72,18 +72,23 @@ func (b *Builder) SetSubmissionRecorder(recorder SubmissionRecorder) { b.recorde
 
 func (b *Builder) SubmitNext(ctx context.Context,now time.Time)(Result,error){
  if now.IsZero() { return Result{},errors.New("submission time is required") }
+ if err:=ctx.Err();err!=nil{return Result{},err}
  // Enforce the published policy even if a future Pool implementation returns
  // a fee-sorted or peer-dependent snapshot. Sorting precedes truncation.
  snapshot,err:=ordering.Select(b.pool.Snapshot(now),b.cfg.MaxOperations,b.cfg.OrderingPolicy)
  if err!=nil{return Result{},err}
  result:=Result{Selected:len(snapshot)}
  for _,entry:=range snapshot {
+  // A dependency can ignore cancellation. Never start a fresh operation once
+  // the caller's deadline has passed; leave unattempted entries in the pool.
+  if err:=ctx.Err();err!=nil{return result,err}
   if b.recorder!=nil && b.recorder.HasSubmissionOrPending(entry.Hash) {
    b.pool.Remove(entry.Hash)
    result.Failed=append(result.Failed,entry.Hash)
    continue
   }
   evidence,err:=b.validator.ValidateAndSimulate(ctx,entry.Operation,now)
+  if ctxErr:=ctx.Err();ctxErr!=nil{return result,ctxErr}
   if err!=nil || evidence.UserOpHash!=entry.Hash {
    b.pool.Remove(entry.Hash)
    result.Rejected=append(result.Rejected,entry.Hash)
@@ -95,9 +100,15 @@ func (b *Builder) SubmitNext(ctx context.Context,now time.Time)(Result,error){
     continue
    }
   }
+  if ctxErr:=ctx.Err();ctxErr!=nil {
+   // No send has been attempted. Revert this intent; the operation remains
+   // eligible for a later fresh validation cycle.
+   if b.recorder!=nil { b.recorder.AbortSubmission(entry.Hash) }
+   return result,ctxErr
+  }
   txHash,err:=b.submitter.Submit(ctx,b.cfg.EntryPoint,entry.Operation)
   if err!=nil {
-   if errors.Is(err,ErrAmbiguousSubmission) {
+   if errors.Is(err,ErrAmbiguousSubmission) || ctx.Err()!=nil {
     // An accepted transaction may be unacknowledged; preserve durable intent.
     b.pool.Remove(entry.Hash)
    } else if b.recorder!=nil {
@@ -105,6 +116,7 @@ func (b *Builder) SubmitNext(ctx context.Context,now time.Time)(Result,error){
     b.recorder.AbortSubmission(entry.Hash)
    }
    result.Failed=append(result.Failed,entry.Hash)
+   if ctxErr:=ctx.Err();ctxErr!=nil{return result,ctxErr}
    continue
   }
   if b.recorder!=nil {

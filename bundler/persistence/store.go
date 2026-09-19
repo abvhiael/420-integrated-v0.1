@@ -57,13 +57,14 @@ func Open(dir string,pool *mempool.Pool,life *lifecycle.Store,now time.Time)(*St
 
 func (s *Store) Add(op userop.PackedUserOperation,evidence simulation.Evidence,now time.Time)(mempool.AddResult,error){
 	s.mu.Lock();defer s.mu.Unlock()
+	before:=s.pool.Snapshot(now)
 	result,err:=s.pool.Add(op,evidence,now)
 	if err!=nil{return result,err}
-	if err:=s.persistLocked(now);err!=nil{return mempool.AddResult{},err}
 	kind:="mempool_admitted"
 	if result.Duplicate{kind="mempool_duplicate"}
 	if result.Replaced{kind="mempool_replaced"}
-	if err:=s.auditLocked(now,kind,result.Hash,"","");err!=nil{return mempool.AddResult{},err}
+	if err:=s.persistLocked(now);err!=nil{_ = s.pool.Restore(before,now);return mempool.AddResult{},err}
+	if err:=s.auditLocked(now,kind,result.Hash,"","");err!=nil{_ = s.pool.Restore(before,now);_ = s.persistLocked(now);return mempool.AddResult{},err}
 	return result,nil
 }
 
@@ -72,36 +73,42 @@ func (s *Store) Get(hash string,now time.Time)(mempool.Entry,bool){ return s.poo
 
 func (s *Store) Remove(hash string) bool {
 	s.mu.Lock();defer s.mu.Unlock()
+	now:=time.Now().UTC()
+	before:=s.pool.Snapshot(now)
 	removed:=s.pool.Remove(hash)
 	if !removed{return false}
-	now:=time.Now().UTC()
-	if err:=s.persistLocked(now);err!=nil{return false}
-	if err:=s.auditLocked(now,"mempool_removed",strings.ToLower(hash),"","");err!=nil{return false}
+	if err:=s.persistLocked(now);err!=nil{_ = s.pool.Restore(before,now);return false}
+	if err:=s.auditLocked(now,"mempool_removed",strings.ToLower(hash),"","");err!=nil{_ = s.pool.Restore(before,now);_ = s.persistLocked(now);return false}
 	return true
 }
 
 func (s *Store) BeginSubmission(hash,entryPoint string,at time.Time) error {
 	s.mu.Lock();defer s.mu.Unlock()
+	before:=s.lifecycle.SnapshotRecovery()
 	if err:=s.lifecycle.BeginSubmission(hash,entryPoint,at);err!=nil{return err}
-	if err:=s.persistLocked(at);err!=nil{return err}
-	return s.auditLocked(at,"submission_started",strings.ToLower(hash),"","")
+	if err:=s.persistLocked(at);err!=nil{_ = s.lifecycle.RestoreRecovery(before);return err}
+	if err:=s.auditLocked(at,"submission_started",strings.ToLower(hash),"","");err!=nil{_ = s.lifecycle.RestoreRecovery(before);_ = s.persistLocked(at);return err}
+	return nil
 }
 
 func (s *Store) AbortSubmission(hash string){
 	s.mu.Lock();defer s.mu.Unlock()
-	s.lifecycle.AbortSubmission(hash)
 	now:=time.Now().UTC()
-	_ = s.persistLocked(now)
-	_ = s.auditLocked(now,"submission_aborted",strings.ToLower(hash),"","")
+	before:=s.lifecycle.SnapshotRecovery()
+	s.lifecycle.AbortSubmission(hash)
+	if err:=s.persistLocked(now);err!=nil{_ = s.lifecycle.RestoreRecovery(before);return}
+	if err:=s.auditLocked(now,"submission_aborted",strings.ToLower(hash),"","");err!=nil{_ = s.lifecycle.RestoreRecovery(before);_ = s.persistLocked(now)}
 }
 
 func (s *Store) HasSubmissionOrPending(hash string) bool { return s.lifecycle.HasSubmissionOrPending(hash) }
 
 func (s *Store) RecordSubmission(hash,txHash,entryPoint string,at time.Time) error {
 	s.mu.Lock();defer s.mu.Unlock()
+	before:=s.lifecycle.SnapshotRecovery()
 	if err:=s.lifecycle.RecordSubmission(hash,txHash,entryPoint,at);err!=nil{return err}
-	if err:=s.persistLocked(at);err!=nil{return err}
-	return s.auditLocked(at,"submission_recorded",strings.ToLower(hash),strings.ToLower(txHash),"")
+	if err:=s.persistLocked(at);err!=nil{_ = s.lifecycle.RestoreRecovery(before);return err}
+	if err:=s.auditLocked(at,"submission_recorded",strings.ToLower(hash),strings.ToLower(txHash),"");err!=nil{_ = s.lifecycle.RestoreRecovery(before);_ = s.persistLocked(at);return err}
+	return nil
 }
 
 func (s *Store) LifecycleStore()*lifecycle.Store{return s.lifecycle}
@@ -145,15 +152,17 @@ func (s *Store) persistLocked(now time.Time) error {
 }
 
 func (s *Store) auditLocked(at time.Time,kind,hash,tx,detail string) error {
-	s.sequence++
-	record:=AuditRecord{Version:1,Sequence:s.sequence,Time:at.UTC(),Type:kind,UserOpHash:hash,TransactionHash:tx,Detail:detail}
+	next:=s.sequence+1
+	record:=AuditRecord{Version:1,Sequence:next,Time:at.UTC(),Type:kind,UserOpHash:hash,TransactionHash:tx,Detail:detail}
 	raw,err:=json.Marshal(record)
 	if err!=nil{return err}
 	f,err:=os.OpenFile(s.auditPath,os.O_CREATE|os.O_WRONLY|os.O_APPEND,0o600)
 	if err!=nil{return err}
 	defer f.Close()
 	if _,err=f.Write(append(raw,'\n'));err!=nil{return err}
-	return f.Sync()
+	if err:=f.Sync();err!=nil{return err}
+	s.sequence=next
+	return nil
 }
 
 func (s *Store) scanAudit() error {

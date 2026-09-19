@@ -1,0 +1,33 @@
+{
+  "schema": "420-exchange-web-v14.8",
+  "status": "QUALIFIED",
+  "scope": "BRIDGE_CROSS_CHAIN_SETTLEMENT_UI",
+  "protocolDependency": "V11 canonical bridge qualification + existing hardened 420Bridge execution controls",
+  "invariants": [
+    "bridge route selection requires current live Exchange/420Bridge qualification",
+    "canonical asset identity must remain bound to the local Exchange representation",
+    "route activity, direction enablement, adapter binding and verifier configuration are independently enforced",
+    "provenance hash must equal the current Exchange verification hash",
+    "paused or settlement-unhealthy routes are visible but cannot submit",
+    "bridge intent preserves route, asset, adapter, verifier, direction, amount and recipient identity",
+    "attestation and proof identifiers remain visible in settlement provenance",
+    "failed settlements remain inspectable and retry guidance never invents settlement authority",
+    "wallet-unavailable state disables bridge submission",
+    "demo bridge records are explicitly labeled and cannot be mistaken for live canonical state"
+  ],
+  "implementation": {
+    "bridgeModel": "exchange/web/core/bridge.js",
+    "bridgeView": "exchange/web/app.js",
+    "template": "exchange/web/index.html",
+    "routeFixture": "exchange/web/fixtures/bridge-routes.json",
+    "settlementFixture": "exchange/web/fixtures/bridge-settlements.json",
+    "qualificationTest": "exchange/web/test/bridge.test.js"
+  },
+  "follow_on": "V14.9 portfolio, balances and activity",
+  "qualification": {
+    "exact_head": "ee77d9f7de16e96b70f472d2fc9777b5424db3db",
+    "exchange_web_verification": 138,
+    "integrated_qualification": 4333,
+    "docs_qualification": 1988
+  }
+}

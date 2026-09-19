@@ -1,0 +1,29 @@
+{
+  "schema": "420-exchange-web-v14.5",
+  "status": "QUALIFIED",
+  "scope": "MARKET_DETAIL_CHARTING",
+  "invariants": [
+    "market detail identity is selected by canonical marketSubjectId",
+    "OHLCV chart geometry is a deterministic projection of V13-compatible history inputs",
+    "inactive/orphaned candles do not contribute to the canonical chart domain",
+    "reorged records remain inspectable rather than deleted",
+    "replacement links preserve old and new record identity",
+    "trade tape records are de-duplicated by canonical recordId",
+    "route health, settlement health and freshness remain independently visible",
+    "demo history is visibly labeled and never represented as live production history"
+  ],
+  "implementation": {
+    "detailModel": "exchange/web/core/market-detail.js",
+    "detailView": "exchange/web/app.js",
+    "template": "exchange/web/index.html",
+    "fixtures": "exchange/web/fixtures/market-detail.json",
+    "qualificationTest": "exchange/web/test/market-detail.test.js"
+  },
+  "follow_on": "V14.6 swap and market execution UI",
+  "qualification": {
+    "exact_head": "c82494c1406299dced3fc630f55a60d518113c45",
+    "exchange_web_verification": 84,
+    "integrated_qualification": 4291,
+    "docs_qualification": 1956
+  }
+}

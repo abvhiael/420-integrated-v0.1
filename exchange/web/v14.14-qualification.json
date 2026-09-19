@@ -1,0 +1,43 @@
+{
+  "schema":"420-exchange-web-v14.14",
+  "status":"IN_QUALIFICATION",
+  "scope":"GENESIS_E2E_RELEASE",
+  "repositoryReleaseTarget":"PR #345",
+  "invariants":[
+    "market browse, swap review, limit-order review and bridge review compose qualified V14 primitives",
+    "wallet account or network changes invalidate prior reviewed transaction generations",
+    "stale, degraded and unsupported API states fail safe",
+    "reorg/replacement semantics remain represented by the V13/V14 store and history model",
+    "mobile/browser support matrix is explicit",
+    "static asset performance budgets are explicit and testable",
+    "repository qualification is distinct from production-live DNS/API/testnet operational qualification",
+    "final merge requires exact-head Exchange Web, Integrated and Docs qualification",
+    "final merge requires reconciliation with latest main"
+  ],
+  "performanceBudgets":{
+    "htmlBytes":100000,
+    "javascriptBytes":300000,
+    "cssBytes":200000,
+    "totalStaticBytes":1000000
+  },
+  "browserMatrix":[
+    "Chrome current-2",
+    "Edge current-2",
+    "Firefox current-2",
+    "Safari current-2",
+    "iOS Safari current-2",
+    "Android Chrome current-2"
+  ],
+  "operationalReleaseGates":[
+    "live/testnet swap transaction drill",
+    "live/testnet limit-order create/fill/cancel drill",
+    "live/testnet bridge lifecycle drill",
+    "public exchange.420integrated.org DNS/TLS/header verification",
+    "production chain/RPC/Explorer/API/stream configuration"
+  ],
+  "implementation":{
+    "releaseModel":"exchange/web/core/release-qualification.js",
+    "qualificationTest":"exchange/web/test/release-qualification.test.js",
+    "releaseRunbook":"docs/420EXCHANGE-GENESIS-RELEASE-V14.14.md"
+  }
+}

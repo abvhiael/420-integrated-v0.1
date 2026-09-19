@@ -1,0 +1,30 @@
+{
+  "schema": "420-exchange-web-runtime-v14.1",
+  "site": {
+    "name": "420Exchange",
+    "productionOrigin": "https://exchange.420integrated.org"
+  },
+  "network": {
+    "name": "420 Integrated",
+    "chainId": null,
+    "rpcUrl": null,
+    "explorerUrl": null
+  },
+  "api": {
+    "baseUrl": null,
+    "streamUrl": null,
+    "transport": "websocket-or-sse",
+    "schemaMajor": 14,
+    "schemaMinor": 0,
+    "marketSubjects": []
+  },
+  "features": {
+    "markets": true,
+    "marketDetail": true,
+    "swap": true,
+    "limitOrders": true,
+    "bridge": true,
+    "portfolio": true,
+    "walletConnection": true
+  }
+}

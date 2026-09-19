@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="description" content="420Exchange — the trading interface for 420 Integrated." />
+  <title>420Exchange</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="exchange-layout">
+    <aside class="sidebar" aria-label="Exchange navigation">
+      <a class="brand" href="/" data-route="/">
+        <span class="brand-mark">420</span>
+        <span><strong>Exchange</strong><small>Integrated</small></span>
+      </a>
+      <nav id="nav" aria-label="Primary"></nav>
+      <div class="sidebar-note">
+        <span class="status-dot"></span>
+        <span>V13 read surfaces · V14 client</span>
+      </div>
+    </aside>
+
+    <main class="shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">420 Integrated · Finance</p>
+          <h1 id="page-title">Markets</h1>
+          <p id="page-subtitle" class="subtitle">Canonical market data, without invented client state.</p>
+        </div>
+        <div class="topbar-actions">
+          <span id="data-state" class="status-pill" data-state="booting">Booting</span>
+          <button id="connect" type="button">Connect wallet</button>
+        </div>
+      </header>
+
+      <section class="hero-card" aria-labelledby="shell-heading">
+        <div>
+          <p class="eyebrow">V14.4 markets overview</p>
+          <h2 id="shell-heading">Read-only market discovery from qualified V13 snapshots.</h2>
+          <p class="muted">Search, sort and inspect last price, rolling change, volume, liquidity, best bid/ask, route health, settlement health and freshness before transaction surfaces are enabled.</p>
+        </div>
+        <dl class="runtime-grid">
+          <div><dt>Site</dt><dd id="site-origin">—</dd></div>
+          <div><dt>Network</dt><dd id="network-name">—</dd></div>
+          <div><dt>API schema</dt><dd id="api-schema">—</dd></div>
+          <div><dt>Data mode</dt><dd id="data-mode">—</dd></div>
+        </dl>
+      </section>
+
+      <section id="app-view" class="panel" aria-live="polite"></section>
+    </main>
+  </div>
+
+  <template id="markets-template">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">V14.4</p>
+        <h2>Markets</h2>
+      </div>
+      <span id="market-source" class="section-kicker">Loading market source…</span>
+    </div>
+
+    <div class="market-toolbar">
+      <label>
+        <span class="label">Search markets</span>
+        <input id="market-search" type="search" placeholder="420, ETH, market ID…" autocomplete="off" />
+      </label>
+      <label>
+        <span class="label">Sort</span>
+        <select id="market-sort">
+          <option value="symbol:asc">Market · A–Z</option>
+          <option value="lastPrice:desc">Last price · high first</option>
+          <option value="change:desc">Change · high first</option>
+          <option value="volume:desc">Volume · high first</option>
+          <option value="liquidity:desc">Liquidity · high first</option>
+        </select>
+      </label>
+      <label class="watch-toggle">
+        <input id="watch-only" type="checkbox" />
+        <span>Watchlist only</span>
+      </label>
+    </div>
+
+    <div id="market-summary" class="market-summary" aria-live="polite"></div>
+
+    <div class="table-wrap market-table-wrap">
+      <table class="exchange-table market-table">
+        <thead>
+          <tr>
+            <th><span class="sr-only">Watchlist</span>★</th>
+            <th>Market</th>
+            <th>Last</th>
+            <th>Change</th>
+            <th>Bid / Ask</th>
+            <th>Volume</th>
+            <th>Liquidity</th>
+            <th>Route</th>
+            <th>Settlement</th>
+            <th>Freshness</th>
+          </tr>
+        </thead>
+        <tbody id="market-rows"></tbody>
+      </table>
+    </div>
+
+    <div id="market-empty" class="empty-state" hidden>
+      <strong>No markets match this view.</strong>
+      <p>Change the search, sort, or watchlist filter. Market state is never synthesized to fill an empty result.</p>
+    </div>
+  </template>
+
+  <template id="market-detail-template">
+    <div class="detail-header">
+      <div>
+        <p class="eyebrow">V14.5 market detail</p>
+        <h2 id="detail-pair">Market</h2>
+        <small id="detail-market-id" class="market-id"></small>
+      </div>
+      <div class="status-row">
+        <span id="detail-status"></span>
+        <span id="detail-route"></span>
+        <span id="detail-settlement"></span>
+      </div>
+    </div>
+
+    <div class="detail-stats">
+      <div><span class="label">Last</span><strong id="detail-last">—</strong></div>
+      <div><span class="label">Bid</span><strong id="detail-bid">—</strong></div>
+      <div><span class="label">Ask</span><strong id="detail-ask">—</strong></div>
+      <div><span class="label">Volume</span><strong id="detail-volume">—</strong></div>
+      <div><span class="label">Liquidity</span><strong id="detail-liquidity">—</strong></div>
+    </div>
+
+    <div class="detail-toolbar">
+      <label>
+        <span class="label">Aggregation window</span>
+        <select id="detail-window">
+          <option value="1h">1 hour</option>
+          <option value="4h">4 hours</option>
+          <option value="1d">1 day</option>
+          <option value="7d">7 days</option>
+        </select>
+      </label>
+      <span id="detail-source" class="section-kicker">Loading source…</span>
+    </div>
+
+    <div class="chart-panel">
+      <svg id="detail-chart" class="ohlcv-chart"></svg>
+    </div>
+
+    <div class="detail-grid">
+      <section class="component-card">
+        <h3>Trade tape</h3>
+        <ul id="trade-tape" class="trade-tape"></ul>
+      </section>
+      <section class="component-card">
+        <h3>Source diagnostics</h3>
+        <p class="muted">Chart and activity records preserve canonical record IDs. Reorged records stay inspectable; replacements do not erase prior evidence.</p>
+      </section>
+    </div>
+
+    <div class="table-wrap" tabindex="0" role="region" aria-label="Scrollable data table">
+      <table class="exchange-table">
+        <thead><tr><th>Record</th><th>Price / close</th><th>Amount / volume</th><th>State</th><th>Replacement</th></tr></thead>
+        <tbody id="detail-activity"></tbody>
+      </table>
+    </div>
+  </template>
+
+  <template id="swap-template">
+    <div class="section-heading">
+      <div><p class="eyebrow">V14.6</p><h2>Swap</h2></div>
+      <span id="swap-source" class="section-kicker">Loading quote…</span>
+    </div>
+
+    <div class="swap-grid">
+      <section class="component-card">
+        <h3 id="swap-market">Market</h3>
+        <div class="detail-stats">
+          <div><span class="label">Exact input</span><strong id="swap-amount-in">—</strong></div>
+          <div><span class="label">Gross output</span><strong id="swap-gross-out">—</strong></div>
+          <div><span class="label">Exchange fee</span><strong id="swap-fee">—</strong></div>
+          <div><span class="label">Net output</span><strong id="swap-net-out">—</strong></div>
+          <div><span class="label">Final minimum</span><strong id="swap-min-out">—</strong></div>
+        </div>
+
+        <div class="form-grid">
+          <label><span class="label">Recipient</span><input id="swap-recipient" placeholder="0x…" autocomplete="off" /></label>
+          <label><span class="label">Slippage %</span><input id="swap-slippage" type="number" min="0" max="50" step="0.1" value="1" /></label>
+        </div>
+
+        <div class="status-row swap-health">
+          <span id="swap-route-health"></span>
+          <span id="swap-settlement-health"></span>
+          <span class="status-pill">State: <strong id="swap-lifecycle">quoted</strong></span>
+        </div>
+
+        <h3>Route</h3>
+        <ol id="swap-route" class="route-list"></ol>
+        <button id="swap-review" class="button-primary" type="button">Review swap</button>
+      </section>
+
+      <section id="swap-review-panel" class="component-card" hidden>
+        <h3>Transaction review</h3>
+        <dl class="review-grid">
+          <div><dt>Intent</dt><dd id="swap-review-kind">—</dd></div>
+          <div><dt>Recipient</dt><dd id="swap-review-recipient">—</dd></div>
+          <div><dt>Route commitment</dt><dd id="swap-review-route" class="hash">—</dd></div>
+          <div><dt>Minimum received</dt><dd id="swap-review-final-min">—</dd></div>
+        </dl>
+        <p class="muted">Signing is bound to the current wallet account, configured Exchange network, and this reviewed intent. Account or network changes invalidate the draft before signing.</p>
+        <button id="swap-submit" type="button" disabled>Wallet integration required · V14.10</button>
+      </section>
+    </div>
+  </template>
+
+  <template id="orders-template">
+    <div class="section-heading">
+      <div><p class="eyebrow">V14.7</p><h2>Limit orders</h2></div>
+      <span id="orders-source" class="section-kicker">Loading orders…</span>
+    </div>
+
+    <div class="orders-grid">
+      <section class="component-card">
+        <h3>Create order</h3>
+        <div class="form-grid">
+          <label><span class="label">Maker</span><input id="order-maker" placeholder="0x…" /></label>
+          <label><span class="label">Recipient</span><input id="order-recipient" placeholder="0x…" /></label>
+          <label><span class="label">Sell token</span><input id="order-sell-token" /></label>
+          <label><span class="label">Buy token</span><input id="order-buy-token" /></label>
+          <label><span class="label">Sell amount</span><input id="order-sell-amount" type="number" min="0" step="any" /></label>
+          <label><span class="label">Minimum total net buy</span><input id="order-min-buy" type="number" min="0" step="any" /></label>
+          <label><span class="label">Primary market</span><input id="order-primary-market" /></label>
+          <label><span class="label">Nonce</span><input id="order-nonce" type="number" min="0" step="1" value="0" /></label>
+          <label><span class="label">Expiry (unix seconds)</span><input id="order-expiry" type="number" min="0" step="1" /></label>
+          <label class="watch-toggle"><input id="order-partial" type="checkbox" /><span>Allow partial fills</span></label>
+        </div>
+        <button id="order-review" class="button-primary" type="button">Review signed order</button>
+      </section>
+
+      <section id="order-review-panel" class="component-card" hidden>
+        <h3>Signing review</h3>
+        <dl class="review-grid">
+          <div><dt>Maker</dt><dd id="order-review-maker">—</dd></div>
+          <div><dt>Pair</dt><dd id="order-review-pair">—</dd></div>
+          <div><dt>Sell amount</dt><dd id="order-review-amount">—</dd></div>
+          <div><dt>Minimum total net buy</dt><dd id="order-review-min">—</dd></div>
+          <div><dt>Signed price floor</dt><dd id="order-review-floor">—</dd></div>
+          <div><dt>Nonce</dt><dd id="order-review-nonce">—</dd></div>
+          <div><dt>Expiry</dt><dd id="order-review-expiry">—</dd></div>
+          <div><dt>Partial fills</dt><dd id="order-review-partial">—</dd></div>
+        </dl>
+        <p class="muted">The reviewed V10 payload is bound to the current wallet account and network. Account or network changes invalidate this review before signing.</p>
+        <button id="order-sign" type="button" disabled>Connect wallet to sign</button>
+      </section>
+    </div>
+
+    <div class="table-wrap orders-table-wrap" tabindex="0" role="region" aria-label="Scrollable orders table">
+      <table class="exchange-table">
+        <thead><tr><th>Order hash</th><th>Sell</th><th>Minimum buy</th><th>State</th><th>Transaction</th><th>Action</th></tr></thead>
+        <tbody id="orders-body"></tbody>
+      </table>
+    </div>
+  </template>
+
+  <template id="bridge-template">
+    <div class="section-heading">
+      <div><p class="eyebrow">V14.8</p><h2>Bridge</h2></div>
+      <span id="bridge-source" class="section-kicker">Loading bridge state…</span>
+    </div>
+
+    <div class="bridge-grid">
+      <section class="component-card">
+        <h3>Cross-chain route</h3>
+        <label>
+          <span class="label">Qualified route</span>
+          <select id="bridge-route-select"></select>
+        </label>
+
+        <div class="detail-stats">
+          <div><span class="label">Route</span><strong id="bridge-route-id">—</strong></div>
+          <div><span class="label">Canonical asset</span><strong id="bridge-asset">—</strong></div>
+          <div><span class="label">Adapter</span><strong id="bridge-adapter">—</strong></div>
+          <div><span class="label">Verifier</span><strong id="bridge-verifier">—</strong></div>
+          <div><span class="label">Bridge fee</span><strong id="bridge-fee">—</strong></div>
+        </div>
+
+        <div class="status-row bridge-health">
+          <span id="bridge-route-status"></span>
+          <span id="bridge-settlement-status"></span>
+          <span id="bridge-availability" class="status-pill"></span>
+        </div>
+
+        <div class="form-grid">
+          <label><span class="label">Amount</span><input id="bridge-amount" type="number" min="0" step="any" /></label>
+          <label><span class="label">Recipient</span><input id="bridge-recipient" placeholder="0x…" /></label>
+        </div>
+        <button id="bridge-review" class="button-primary" type="button">Review bridge</button>
+      </section>
+
+      <section id="bridge-review-panel" class="component-card" hidden>
+        <h3>Bridge review</h3>
+        <dl class="review-grid">
+          <div><dt>Intent</dt><dd id="bridge-review-kind">—</dd></div>
+          <div><dt>Route</dt><dd id="bridge-review-route">—</dd></div>
+          <div><dt>Canonical asset</dt><dd id="bridge-review-asset">—</dd></div>
+          <div><dt>Recipient</dt><dd id="bridge-review-recipient">—</dd></div>
+          <div><dt>Amount</dt><dd id="bridge-review-amount">—</dd></div>
+          <div><dt>Quoted bridge fee</dt><dd id="bridge-review-fee">—</dd></div>
+        </dl>
+        <p class="muted">Submission requires the reviewed bridge intent, current wallet account, configured Exchange network, and a still-qualified bridge route. Account or network changes invalidate this review.</p>
+        <button id="bridge-submit" type="button" disabled>Wallet integration required · V14.10</button>
+      </section>
+    </div>
+
+    <div class="table-wrap bridge-table-wrap" tabindex="0" role="region" aria-label="Scrollable bridge settlement table">
+      <table class="exchange-table">
+        <thead><tr><th>Settlement</th><th>State</th><th>Progress</th><th>Attestation</th><th>Proof</th><th>Transaction</th><th>Guidance</th></tr></thead>
+        <tbody id="bridge-settlements"></tbody>
+      </table>
+    </div>
+  </template>
+
+  <template id="portfolio-template">
+    <div class="section-heading">
+      <div><p class="eyebrow">V14.9</p><h2>Portfolio</h2></div>
+      <span id="portfolio-source" class="section-kicker">Loading portfolio…</span>
+    </div>
+
+    <div class="detail-stats">
+      <div><span class="label">Assets</span><strong id="portfolio-assets">—</strong></div>
+      <div><span class="label">Canonical assets</span><strong id="portfolio-canonical-assets">—</strong></div>
+      <div><span class="label">Total locked units</span><strong id="portfolio-locked">—</strong></div>
+    </div>
+
+    <section>
+      <h3>Balances</h3>
+      <div id="portfolio-balances" class="balance-grid"></div>
+    </section>
+
+    <section class="portfolio-section">
+      <h3>Open orders</h3>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="Scrollable data table">
+        <table class="exchange-table">
+          <thead><tr><th>Order hash</th><th>Sell</th><th>Minimum buy</th><th>State</th></tr></thead>
+          <tbody id="portfolio-orders"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="portfolio-section">
+      <h3>Unified activity</h3>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="Scrollable data table">
+        <table class="exchange-table">
+          <thead><tr><th>Kind</th><th>Amount</th><th>State</th><th>Fee</th><th>Transaction</th><th>Provenance</th></tr></thead>
+          <tbody id="portfolio-activity"></tbody>
+        </table>
+      </div>
+      <p class="muted">Balances are read-only canonical source records. Activity keeps reorged and replacement history visible; no portfolio valuation is synthesized without a qualified price source.</p>
+    </section>
+  </template>
+
+  <section id="wallet-status-panel" class="wallet-status-panel" aria-live="polite" hidden></section>
+
+  <template id="gated-template">
+    <div class="empty-state">
+      <strong id="gated-title">Feature gated</strong>
+      <p id="gated-copy">This route exists in the stable shell but is disabled until its roadmap phase qualifies.</p>
+    </div>
+  </template>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

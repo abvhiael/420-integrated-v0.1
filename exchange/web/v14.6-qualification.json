@@ -1,0 +1,36 @@
+{
+  "schema": "420-exchange-web-v14.6",
+  "status": "QUALIFIED",
+  "scope": "SWAP_MARKET_EXECUTION_UI",
+  "protocolDependencies": [
+    "V6 exact-input atomic routing",
+    "V7 oracle-bound execution",
+    "V9 retained fee settlement"
+  ],
+  "invariants": [
+    "swap drafts are exact-input paths with 1-4 bounded hops",
+    "every hop carries a nonzero minimum output",
+    "final minimum output is independent and net after retained Exchange fee",
+    "retained Exchange fee is represented once on final realized output",
+    "route health and settlement health gate submission independently",
+    "expired quotes fail closed and cannot be submitted",
+    "transaction review preserves route commitment and complete hop parameters",
+    "UI never reports confirmation before canonical transaction confirmation",
+    "wallet-unavailable state disables submission rather than simulating signing",
+    "demo quotes are explicitly labeled and cannot be mistaken for executable production quotes"
+  ],
+  "implementation": {
+    "swapModel": "exchange/web/core/swap.js",
+    "swapView": "exchange/web/app.js",
+    "template": "exchange/web/index.html",
+    "fixture": "exchange/web/fixtures/swap-quote.json",
+    "qualificationTest": "exchange/web/test/swap.test.js"
+  },
+  "follow_on": "V14.7 limit-order UI",
+  "qualification": {
+    "exact_head": "ea615cbfb1049c93662d619801eb60f1aa766897",
+    "exchange_web_verification": 102,
+    "integrated_qualification": 4306,
+    "docs_qualification": 1967
+  }
+}

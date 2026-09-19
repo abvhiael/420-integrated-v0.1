@@ -1,0 +1,57 @@
+{
+  "schema": "420-exchange-web-v14.2",
+  "status": "QUALIFIED",
+  "scope": "DESIGN_SYSTEM_VISUAL_LANGUAGE",
+  "semanticStates": [
+    "canonical",
+    "finalized",
+    "stale",
+    "reorg",
+    "replacement",
+    "degraded",
+    "routeHealthy",
+    "routeUnhealthy",
+    "settlementHealthy",
+    "settlementUnhealthy"
+  ],
+  "primitives": [
+    "typography",
+    "spacing",
+    "surface",
+    "card",
+    "table",
+    "form-control",
+    "button",
+    "badge",
+    "dialog",
+    "empty-state",
+    "error-state",
+    "skeleton",
+    "hash",
+    "amount",
+    "timestamp"
+  ],
+  "invariants": [
+    "protocol state meaning is centralized rather than screen-specific",
+    "semantic status is communicated by text and symbol, never color alone",
+    "unknown protocol status fails closed",
+    "reorg and replacement are distinct visible states",
+    "route health and settlement health are represented independently",
+    "interactive controls expose visible keyboard focus",
+    "touch targets remain usable at narrow viewport sizes",
+    "future Exchange screens consume shared primitives instead of redefining status terminology"
+  ],
+  "implementation": {
+    "semanticContract": "exchange/web/core/design-system.js",
+    "visualTokens": "exchange/web/styles.css",
+    "componentGallery": "exchange/web/index.html",
+    "qualificationTest": "exchange/web/test/design-system.test.js"
+  },
+  "qualification": {
+    "exact_head": "1cd92059562a7df0e053151042a9c6832a5404de",
+    "exchange_web_verification": 21,
+    "integrated_qualification": 4228,
+    "docs_qualification": 1913
+  },
+  "follow_on": "V14.3 V13 client SDK and data access layer"
+}

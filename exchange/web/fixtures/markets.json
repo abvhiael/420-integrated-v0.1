@@ -1,0 +1,40 @@
+[
+  {
+    "marketSubjectId": "demo-420-usd",
+    "snapshotId": "demo-snapshot-420-usd",
+    "marketLabel": "420 / USD",
+    "baseSymbol": "420",
+    "quoteSymbol": "USD",
+    "canonicality": "canonical",
+    "lastTradePrice": "4.20",
+    "open": "4.00",
+    "baseVolume": "1000",
+    "quoteVolume": "4200",
+    "liquidity": "9000",
+    "bestBid": "4.19",
+    "bestAsk": "4.21",
+    "routeHealthy": true,
+    "settlementHealthy": true,
+    "observedAt": 0,
+    "demo": true
+  },
+  {
+    "marketSubjectId": "demo-420-eth",
+    "snapshotId": "demo-snapshot-420-eth",
+    "marketLabel": "420 / ETH",
+    "baseSymbol": "420",
+    "quoteSymbol": "ETH",
+    "canonicality": "canonical",
+    "lastTradePrice": "0.001",
+    "open": "0.0011",
+    "baseVolume": "500",
+    "quoteVolume": "0.5",
+    "liquidity": "200",
+    "bestBid": "0.0009",
+    "bestAsk": "0.0011",
+    "routeHealthy": false,
+    "settlementHealthy": true,
+    "observedAt": 0,
+    "demo": true
+  }
+]

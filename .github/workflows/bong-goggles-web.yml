@@ -1,0 +1,36 @@
+name: Bong Goggles Web Verification
+
+on:
+  push:
+    paths:
+      - "bong-goggles/web/**"
+      - ".github/workflows/bong-goggles-web.yml"
+  pull_request:
+    paths:
+      - "bong-goggles/web/**"
+      - ".github/workflows/bong-goggles-web.yml"
+  workflow_dispatch:
+
+jobs:
+  verify-bong-goggles-web:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Static web checks
+        working-directory: bong-goggles/web
+        run: npm run check
+      - name: Web unit tests
+        working-directory: bong-goggles/web
+        run: npm test
+      - name: Production shell build
+        working-directory: bong-goggles/web
+        run: npm run build
+      - name: Frontend secret scan
+        working-directory: bong-goggles/web
+        run: |
+          ! grep -RniE 'BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY|mnemonic[[:space:]]*[:=]|seed[_ -]?phrase[[:space:]]*[:=]|private[_-]?key[[:space:]]*[:=]'             --exclude-dir=dist             --exclude-dir=test             .

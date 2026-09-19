@@ -1,0 +1,21 @@
+{
+  "schema": "420-exchange-web-v15.1",
+  "status": "IMPLEMENTED_PENDING_CI",
+  "scope": "TESTNET_DEPLOYMENT_CATALOGUE_RUNTIME_BINDING",
+  "invariants": [
+    "official testnet values are never fabricated before deployment",
+    "the checked-in testnet runtime remains unresolved until deployment evidence exists",
+    "resolved runtime binding requires one explicit chain identity",
+    "required Exchange contract addresses must be nonzero EVM addresses",
+    "RPC, Explorer and API endpoints must use HTTPS",
+    "the Exchange stream endpoint must use HTTPS or WSS",
+    "unresolved deployment metadata cannot become an executable Exchange runtime"
+  ],
+  "implementation": {
+    "deploymentManifest": "deployments/exchange/testnet.runtime.json",
+    "runtimeBinding": "exchange/web/core/deployment.js",
+    "qualificationTest": "exchange/web/test/deployment-binding.test.js",
+    "runbook": "docs/420EXCHANGE-V15.1-TESTNET-BINDING.md"
+  },
+  "followOn": "V15.2 Exchange transaction builder and deployed-contract binding"
+}

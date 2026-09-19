@@ -1,0 +1,30 @@
+{
+  "schema": "420-exchange-web-v15.11",
+  "scope": "BROWSER_EXECUTION_INTEGRATION",
+  "repositoryStatus": "IMPLEMENTED_PENDING_EXACT_HEAD_CI",
+  "browserIntegrationStatus": "BLOCKED_APP_JS_NOT_WIRED",
+  "operationalStatus": "BLOCKED_UNRESOLVED_DEPLOYMENT_AND_REAL_WALLET_MATRIX",
+  "implementation": {
+    "controller": "exchange/web/core/browser-execution-controller.js",
+    "tests": "exchange/web/test/browser-execution-controller.test.js",
+    "runbook": "docs/420EXCHANGE-V15.11-BROWSER-EXECUTION.md"
+  },
+  "qualifiedInUnitTests": [
+    "explicit EIP-6963 wallet selection instead of silently selecting an extension",
+    "provider listener cleanup on wallet replacement and disposal",
+    "account or chain event invalidates reviewed wallet generation",
+    "resolved testnet runtime required for sending or signing",
+    "missing canonical review and qualification block wallet prompts"
+  ],
+  "releaseBlockers": [
+    "exchange/web/app.js still connects through globalThis.ethereum directly; mount controller and render wallet selector",
+    "browser swap controls currently use demo quotes and a V14 display-only signing request, not an executable V15.2 raw-unit transaction",
+    "limit-order form has symbol and presentation amounts rather than canonical token address/raw units and V15 EIP-712 signing payload",
+    "bridge page uses demo route fixtures and does not provide externally sourced proof or destination settlement tracking",
+    "cancel-order button has no execution handler",
+    "resolve and verify real testnet deployments, then run live browser/device matrix and V15.6-V15.8 drills"
+  ],
+  "browserEvidence": null,
+  "liveTransactionEvidence": null,
+  "genesisReleaseStatus": "BLOCKED"
+}

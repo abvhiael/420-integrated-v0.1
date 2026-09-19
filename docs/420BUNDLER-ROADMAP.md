@@ -19,8 +19,8 @@ The Bundler Network is not custody, wallet authorization, consensus, settlement 
 - **GEN-11.10 — multi-bundler propagation — COMPLETE**
 - **GEN-11.11 — reputation + anti-abuse controls — COMPLETE**
 - **GEN-11.12 — replacement + nonce hardening — COMPLETE**
-- **GEN-11.13 — failure isolation + reorg/restart recovery — IN QUALIFICATION**
-- GEN-11.14 — persistence + audit trail — pending
+- **GEN-11.13 — failure isolation + reorg/restart recovery — COMPLETE**
+- **GEN-11.14 — persistence + audit trail — IN QUALIFICATION**
 - GEN-11.15 — 420Wallet integration + provider fallback — pending
 - GEN-11.16 — 420Status + observability integration — pending
 - GEN-11.17 — security hardening + hostile dependency isolation — pending
@@ -475,3 +475,119 @@ This phase directly strengthens:
 - **BUNDLER-INV-015** — malformed recovery and RPC evidence fails closed.
 
 GEN-11.13 is complete when all repository qualification workflows pass on one exact head containing submission-intent isolation, duplicate-send suppression, canonical-block reorg checking and validated recovery snapshot/restore primitives.
+
+
+## GEN-11.14 — persistence + audit trail
+
+GEN-11.14 makes the GEN-11.13 recovery model durable and auditable.
+
+### Durable state
+
+The production Bundler now opens a persistence store at:
+
+- `BUNDLER_DATA_DIR`
+- default: `./data/bundler`
+
+The store persists:
+
+- active bounded mempool entries
+- their exact signed `PackedUserOperation420`
+- simulation evidence
+- original admission and expiry timestamps
+- unresolved submission intents
+- completed UserOperation → transaction bindings
+
+State is written as versioned JSON to `state.json`.
+
+Every state update uses a same-directory temporary file, flushes file contents with `fsync`, atomically renames the temporary file over the live snapshot, and attempts to sync the containing directory. This prevents a partial JSON write from being treated as a valid recovery snapshot.
+
+Startup fails closed when the persisted state is malformed, exceeds the bounded state-file size, uses an unsupported version, or cannot be reconstructed safely.
+
+### Validated mempool reconstruction
+
+`mempool.Pool.Restore` rebuilds the in-memory hash index, sender+full-nonce index and per-sender counters from persisted entries.
+
+Recovered entries must still satisfy:
+
+- unexpired TTL at restart time
+- valid admission/expiry timestamps
+- canonical UserOperation encoding
+- valid canonical UserOperation hash
+- successful simulation evidence
+- exact evidence hash/domain binding
+- no duplicate hash
+- no duplicate sender+full-nonce identity
+- configured total capacity
+- configured per-sender capacity
+
+Expired entries are discarded during reconstruction rather than silently extending their TTL.
+
+The original admission and expiry timestamps are preserved, so restart cannot refresh queue position or lifetime.
+
+### Persistence-backed runtime wiring
+
+The durable store is now the production mempool boundary used by:
+
+- public `eth_sendUserOperation` admission
+- peer UserOperation admission
+- bundle candidate snapshots
+- bundle removal
+- submission-intent recording
+- submission completion
+
+This ensures state-changing Bundler paths all pass through the persistence layer rather than maintaining a second untracked in-memory copy.
+
+### Rollback on persistence failure
+
+A successful in-memory mutation is not allowed to remain authoritative when the corresponding durable write fails.
+
+Before a state-changing operation, the persistence layer takes the minimum recovery snapshot required to undo the mutation. If state-file persistence or audit append fails, the previous in-memory state is restored and the durable snapshot is rewritten to that previous state.
+
+This applies to:
+
+- mempool admission/replacement
+- mempool removal
+- submission-intent creation
+- submission-intent abort
+- submission completion
+
+This is especially important for submission removal: a UserOperation cannot be considered safely removed in RAM while the durable snapshot still says it is eligible, which could otherwise permit a restart to resurrect and resend it.
+
+### Append-only audit trail
+
+Every durable operational transition is appended to `audit.jsonl` as a versioned JSON record containing:
+
+- monotonically increasing sequence number
+- UTC timestamp
+- transition type
+- UserOperation hash where applicable
+- transaction hash where applicable
+- optional detail field
+
+Current transition vocabulary includes:
+
+- `mempool_admitted`
+- `mempool_duplicate`
+- `mempool_replaced`
+- `mempool_removed`
+- `submission_started`
+- `submission_aborted`
+- `submission_recorded`
+
+Audit appends are flushed with `fsync`.
+
+On restart the audit file is scanned with a bounded line size. Startup rejects malformed records, unsupported versions, missing/duplicate sequence positions, zero timestamps or empty transition types. The next sequence resumes from the last valid record.
+
+The audit trail is operational evidence. It does not claim canonical inclusion, settlement or finality. Chain-derived receipt reconciliation from GEN-11.13 remains authoritative for those claims.
+
+GEN-11.14 directly strengthens:
+
+- **BUNDLER-INV-006** — stale recovered admission does not silently survive TTL.
+- **BUNDLER-INV-007** — sender/nonce identity remains unambiguous across restart.
+- **BUNDLER-INV-008** — persistence failure rolls back operational mutation rather than producing ambiguous resend state.
+- **BUNDLER-INV-012** — durable lifecycle state remains operational evidence only.
+- **BUNDLER-INV-013** — restart state is actually reconstructable from durable, validated evidence.
+- **BUNDLER-INV-015** — malformed/corrupt persistence input fails closed.
+- **BUNDLER-INV-016** — state transitions are now operator-auditable.
+
+GEN-11.14 is complete when all repository qualification workflows pass on one exact head containing durable mempool/lifecycle persistence, crash-safe atomic state writes, validated restart reconstruction, rollback-on-write-failure semantics and the append-only audit trail.

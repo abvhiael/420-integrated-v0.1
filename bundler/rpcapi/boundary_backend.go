@@ -61,6 +61,8 @@ func (b BoundaryBackend) SendUserOperation(ctx context.Context,op userop.PackedU
 	admitted,err:=b.Mempool.Add(op,evidence,now)
 	if err!=nil {
 		switch {
+		case errors.Is(err,mempool.ErrReplacementUnderpriced):
+			return "",&Error{Code:-32503,Message:"replacement fee bump insufficient"}
 		case errors.Is(err,mempool.ErrNonceConflict):
 			return "",&Error{Code:-32503,Message:"sender nonce conflict"}
 		case errors.Is(err,mempool.ErrFull),errors.Is(err,mempool.ErrSenderLimit):

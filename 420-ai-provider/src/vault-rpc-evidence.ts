@@ -13,8 +13,10 @@ const VAULT_ABI = [
   'function executedOperation(bytes32) view returns (bool)',
   'event Withdrawal(bytes32 indexed operationId,address indexed asset,address indexed recipient,uint256 amount)'
 ];
-const WITHDRAWAL = new Interface(VAULT_ABI).getEvent('Withdrawal')!;
-const CLAIMED = new Interface(ACCOUNTING_ABI).getEvent('ObligationClaimed')!;
+const withdrawalInterface = new Interface(VAULT_ABI);
+const claimInterface = new Interface(ACCOUNTING_ABI);
+const WITHDRAWAL = withdrawalInterface.getEvent('Withdrawal')!;
+const CLAIMED = claimInterface.getEvent('ObligationClaimed')!;
 const ESCROW_STATES = ['NONE','FUNDED','CLAIMABLE','REFUNDABLE','CLOSED'] as const;
 const OBLIGATION_STATES = ['NONE','RESERVED','CLAIMABLE','CLAIMED','CANCELLED'] as const;
 const ZERO32 = `0x${'00'.repeat(32)}`;
@@ -23,7 +25,7 @@ const eq = (a: string,b: string): boolean => a.toLowerCase() === b.toLowerCase()
 function id(value: string): Hex32 { if (!B32.test(value) || eq(value,ZERO32)) throw new Error('invalid Vault evidence identifier'); return value.toLowerCase() as Hex32; }
 function address(value: string): string { const a=getAddress(value); if (a === '0x0000000000000000000000000000000000000000') throw new Error('zero Vault deployment address'); return a; }
 
-/** Addresses AND runtime bytecode hashes must be obtained from an independently approved deployment manifest. */
+/** Addresses and expected runtime bytecode hashes must come from an independently approved deployment manifest. */
 export interface VaultRPCEvidenceConfig420 {
   chainId: bigint;
   confirmations: number;
@@ -37,17 +39,17 @@ export interface VaultRPCEvidenceConfig420 {
   accountingCodeHash: Hex32;
 }
 
-/** Immutable snapshot. A fresh reader is required after a reorg, with every read rechecking its pinned block. */
+/** Immutable confirmed-block snapshot. A fresh reader is required after reorganization. */
 export class VaultRPCEvidence420 implements VaultEvidenceReader420 {
-  private readonly escrow: Contract;
-  private readonly vault: Contract;
-  private readonly accounting: Contract;
+  private readonly escrowContract: Contract;
+  private readonly vaultContract: Contract;
+  private readonly accountingContract: Contract;
   private readonly addresses: {escrow:string;vault:string;accounting:string};
   private constructor(readonly rpc: JsonRpcProvider, readonly config: VaultRPCEvidenceConfig420, readonly height: number, readonly blockHash: string) {
     this.addresses={escrow:address(config.escrowAddress),vault:address(config.vaultAddress),accounting:address(config.accountingAddress)};
-    this.escrow=new Contract(this.addresses.escrow,ESCROW_ABI,rpc);
-    this.vault=new Contract(this.addresses.vault,VAULT_ABI,rpc);
-    this.accounting=new Contract(this.addresses.accounting,ACCOUNTING_ABI,rpc);
+    this.escrowContract=new Contract(this.addresses.escrow,ESCROW_ABI,rpc);
+    this.vaultContract=new Contract(this.addresses.vault,VAULT_ABI,rpc);
+    this.accountingContract=new Contract(this.addresses.accounting,ACCOUNTING_ABI,rpc);
   }
   static async open(rpc: JsonRpcProvider, config: VaultRPCEvidenceConfig420): Promise<VaultRPCEvidence420> {
     id(config.vaultRef); id(config.escrowCodeHash); id(config.vaultCodeHash); id(config.accountingCodeHash);
@@ -69,7 +71,7 @@ export class VaultRPCEvidence420 implements VaultEvidenceReader420 {
       const code=await rpc.getCode(a,height);
       if (code==='0x' || !eq(keccak256(code),expected)) throw new Error('Vault deployment bytecode mismatch');
     }
-    const [vaultRef,accountingAddress]=await Promise.all([reader.vault.vaultId({blockTag:height}),reader.vault.accounting({blockTag:height})]);
+    const [vaultRef,accountingAddress]=await Promise.all([reader.vaultContract.vaultId({blockTag:height}),reader.vaultContract.accounting({blockTag:height})]);
     if (!eq(vaultRef,config.vaultRef) || !eq(accountingAddress,reader.addresses.accounting)) throw new Error('Vault deployment binding mismatch');
     await reader.assertCanonical();
     return reader;
@@ -82,17 +84,16 @@ export class VaultRPCEvidence420 implements VaultEvidenceReader420 {
   }
   async escrow(jobId: Hex32): Promise<VaultEscrowSnapshot420> {
     id(jobId); await this.assertCanonical();
-    const e=await this.escrowContract().escrows(jobId,{blockTag:this.height});
+    const e=await this.escrowContract.escrows(jobId,{blockTag:this.height});
     const state=ESCROW_STATES[Number(e.state)];
     if (!state) throw new Error('unknown Vault escrow state');
     const snapshot: VaultEscrowSnapshot420={jobId,payer:e.payer,beneficiary:e.beneficiary,providerId:e.providerId,vaultRef:e.vaultRef,fundingRef:e.fundingRef,settlementRef:e.settlementRef,amount420:e.amount,state};
     await this.assertCanonical();
     return snapshot;
   }
-  private escrowContract(): Contract { return this.escrow; }
   async obligation(obligationId: Hex32): Promise<VaultObligationSnapshot420> {
     id(obligationId); await this.assertCanonical();
-    const o=await this.accounting.getObligation(obligationId,{blockTag:this.height});
+    const o=await this.accountingContract.getObligation(obligationId,{blockTag:this.height});
     const state=OBLIGATION_STATES[Number(o.state)];
     if (!o.exists || !state || !eq(o.vaultId,this.config.vaultRef)) throw new Error('Vault obligation missing or bound to a different vault');
     const snapshot: VaultObligationSnapshot420={obligationId,vaultRef:o.vaultId,sourceRef:o.sourceRef,asset:o.asset,beneficiary:o.beneficiary,amount420:o.amount,state};
@@ -112,12 +113,12 @@ export class VaultRPCEvidence420 implements VaultEvidenceReader420 {
     const withdrawals=receipt.logs.filter(l=>eq(l.address,this.addresses.vault) && eq(l.topics[0]??'',WITHDRAWAL.topicHash) && eq(l.topics[1]??'',operationId));
     const claims=receipt.logs.filter(l=>eq(l.address,this.addresses.accounting) && eq(l.topics[0]??'',CLAIMED.topicHash));
     if (withdrawals.length!==1 || claims.length!==1) throw new Error('Vault payout missing unique matching claim/withdrawal pair');
-    const withdrawal=new Interface(VAULT_ABI).parseLog(withdrawals[0]);
-    const claim=new Interface(ACCOUNTING_ABI).parseLog(claims[0]);
+    const withdrawal=withdrawalInterface.parseLog(withdrawals[0]);
+    const claim=claimInterface.parseLog(claims[0]);
     if (!withdrawal || !claim || withdrawal.name!=='Withdrawal' || claim.name!=='ObligationClaimed' || withdrawal.args.amount!==claim.args.amount || withdrawal.args.amount<=0n) throw new Error('Vault payout events disagree');
     const obligationId=id(claim.args.obligationId);
     const o=await this.obligation(obligationId);
-    if (o.state!=='CLAIMED' || !eq(o.asset,withdrawal.args.asset) || !eq(o.beneficiary,withdrawal.args.recipient) || o.amount420!==withdrawal.args.amount || !(await this.vault.executedOperation(operationId,{blockTag:this.height}))) throw new Error('Vault payout does not match claimed obligation');
+    if (o.state!=='CLAIMED' || !eq(o.asset,withdrawal.args.asset) || !eq(o.beneficiary,withdrawal.args.recipient) || o.amount420!==withdrawal.args.amount || !(await this.vaultContract.executedOperation(operationId,{blockTag:this.height}))) throw new Error('Vault payout does not match claimed obligation');
     await this.assertCanonical();
     return {operationId,vaultRef:this.config.vaultRef,obligationId,asset:o.asset,recipient:o.beneficiary,amount420:o.amount420,txHash:receipt.hash as Hex32,canonical:true,withdrawalAndClaimProven:true};
   }

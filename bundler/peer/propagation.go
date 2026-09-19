@@ -137,17 +137,23 @@ func (b *Broadcaster) Broadcast(ctx context.Context,op userop.PackedUserOperatio
 	if err!=nil{return 0,err}
 	env:=Envelope{ChainID:b.chainID,EntryPoint:b.entryPoint,UserOpHash:strings.ToLower(hash),UserOperation:op}
 	payload,err:=json.Marshal(env);if err!=nil{return 0,err}
-	successes:=0
+	type outcome struct{accepted bool}
+	results:=make(chan outcome,len(b.peers))
 	for _,base:=range b.peers{
-		req,err:=http.NewRequestWithContext(ctx,http.MethodPost,base+"/peer/v1/user-operation",bytes.NewReader(payload))
-		if err!=nil{continue}
-		req.Header.Set("Content-Type","application/json")
-		resp,err:=b.client.Do(req)
-		if err!=nil{continue}
-		_,_=io.Copy(io.Discard,io.LimitReader(resp.Body,4096))
-		resp.Body.Close()
-		if resp.StatusCode==http.StatusAccepted{successes++}
+		base:=base
+		go func(){
+			req,err:=http.NewRequestWithContext(ctx,http.MethodPost,base+"/peer/v1/user-operation",bytes.NewReader(payload))
+			if err!=nil{results<-outcome{};return}
+			req.Header.Set("Content-Type","application/json")
+			resp,err:=b.client.Do(req)
+			if err!=nil{results<-outcome{};return}
+			_,_=io.Copy(io.Discard,io.LimitReader(resp.Body,4096))
+			resp.Body.Close()
+			results<-outcome{accepted:resp.StatusCode==http.StatusAccepted}
+		}()
 	}
+	successes:=0
+	for range b.peers{if (<-results).accepted{successes++}}
 	if successes==0{return 0,errors.New("no peer accepted UserOperation")}
 	return successes,nil
 }

@@ -39,7 +39,7 @@ The BG-19 client must not:
 
 ## Detailed roadmap
 
-### BG-19.1 — web application foundation + runtime contract
+### BG-19.1 — web application foundation + runtime contract — IMPLEMENTED, QUALIFICATION PENDING
 
 Build the production frontend workspace and runtime boundary.
 
@@ -53,6 +53,23 @@ Build the production frontend workspace and runtime boundary.
 - add error boundary, global async error handling and structured client telemetry with privacy redaction;
 - define CSP-compatible asset/runtime rules;
 - add CI for build, typecheck, lint and web unit tests.
+
+Implemented in:
+- `bong-goggles/web/package.json`
+- `bong-goggles/web/runtime-config.example.json`
+- `bong-goggles/web/core/runtime-config.js`
+- `bong-goggles/web/core/services.js`
+- `bong-goggles/web/core/bootstrap.js`
+- `bong-goggles/web/core/telemetry.js`
+- `bong-goggles/web/app.js`
+- `bong-goggles/web/index.html`
+- `bong-goggles/web/styles.css`
+- `bong-goggles/web/scripts/check.mjs`
+- `bong-goggles/web/scripts/build.mjs`
+- `bong-goggles/web/test/runtime.test.js`
+- `.github/workflows/bong-goggles-web.yml`
+
+BG-19.1 follows the repository's existing Wallet/Exchange web convention: dependency-light Node 22 qualification plus browser-native ES modules and a deterministic static build. Runtime configuration is versioned and fail-closed, production requires the canonical Bong Goggles host and HTTPS service origins, typed service clients centralize external calls, bootstrap state explicitly distinguishes loading/ready/degraded/unsupported-network/maintenance, telemetry recursively redacts sensitive fields, the HTML shell carries a restrictive CSP, and dedicated Web Verification CI checks static invariants, tests, build output and frontend secret leakage.
 
 **Exit:** a production-buildable shell starts deterministically against testnet/staging/production configuration and fails closed on unsafe configuration.
 

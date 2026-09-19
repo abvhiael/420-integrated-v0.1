@@ -31,9 +31,16 @@ function assertHttps(value,label,{ws=false}={}){
 }
 
 clean();
-for(const file of ['index.html','app.js','styles.css']) copy(file);
+for(const file of ['index.html','app.js','browser-wallet-ui.js','styles.css']) copy(file);
 copyDir('core');
 copyDir('fixtures');
+// Load the wallet selector before the legacy V14 app's bubbling click handlers.
+// Execution buttons remain fail-closed until canonical V15 builders are bound.
+const htmlPath=path.join(dist,'index.html');
+const html=fs.readFileSync(htmlPath,'utf8');
+const marker='<script type="module" src="./app.js"></script>';
+if(html.split(marker).length!==2) throw new Error('Exchange app entrypoint missing or duplicated');
+fs.writeFileSync(htmlPath,html.replace(marker,'<script type="module" src="./browser-wallet-ui.js"></script>\n  '+marker));
 
 const template=JSON.parse(fs.readFileSync(path.join(root,'runtime-config.json'),'utf8'));
 const deploymentManifestPath=process.env.EXCHANGE_DEPLOYMENT_MANIFEST;
@@ -93,7 +100,7 @@ const buildMeta={
 };
 fs.writeFileSync(path.join(dist,'build-meta.json'),JSON.stringify(buildMeta,null,2)+'\n');
 
-const immutable=['app.js','styles.css'];
+const immutable=['app.js','browser-wallet-ui.js','styles.css'];
 const manifest={
   schema:'420-exchange-deployment-artifact-v14.13',
   sourceSha:sha,

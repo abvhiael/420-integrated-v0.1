@@ -16,6 +16,7 @@ const required = [
   'core/preflight.js',
   'core/wallet-execution.js',
   'core/transaction-lifecycle.js',
+  'core/live-swap-qualification.js',
   'core/router.js',
   'core/design-system.js',
   'core/exchange-client.js',
@@ -29,6 +30,7 @@ const required = [
   'test/preflight.test.js',
   'test/wallet-execution.test.js',
   'test/transaction-lifecycle.test.js',
+  'test/live-swap-qualification.test.js',
   'test/router.test.js',
   'test/design-system.test.js',
   'test/exchange-client.test.js',
@@ -55,6 +57,7 @@ const required = [
   'v15.3-qualification.json',
   'v15.4-qualification.json',
   'v15.5-qualification.json',
+  'v15.6-qualification.json',
   'core/release-qualification.js',
   'test/release-qualification.test.js',
   'scripts/build.mjs',
@@ -273,7 +276,19 @@ for (const needle of ['inspectTransactionLifecycle','normalizeReceipt','reconcil
 const v155 = JSON.parse(fs.readFileSync(path.join(root, 'v15.5-qualification.json'), 'utf8'));
 if (v155.scope !== 'TRANSACTION_RECEIPT_FINALITY_V13_RECONCILIATION') throw new Error('V15.5 qualification scope drift');
 
-console.log('420Exchange V14.1 through V14.14 + V15.1 + V15.2 + V15.3 + V15.4 + V15.5 static qualification passed');
+const liveSwap = fs.readFileSync(path.join(root, 'core/live-swap-qualification.js'), 'utf8');
+for (const needle of ['qualifyLiveTestnetSwap','TESTNET_RUNTIME_REQUIRED','INDEXER_CONFLICT','INDEXER_TIMEOUT','FINALIZED']) {
+  if (!liveSwap.includes(needle)) throw new Error(`V15.6 live swap qualification missing marker: ${needle}`);
+}
+const liveSwapRunner = fs.readFileSync(path.join(root, 'scripts/live-swap-qualify.mjs'), 'utf8');
+for (const needle of ['EXCHANGE_TESTNET_MANIFEST','EXCHANGE_TESTNET_SWAP_FIXTURE','v15.6-live-evidence.json','Math.floor(Date.now()/1000)']) {
+  if (!liveSwapRunner.includes(needle)) throw new Error(`V15.6 operational runner missing marker: ${needle}`);
+}
+const v156 = JSON.parse(fs.readFileSync(path.join(root, 'v15.6-qualification.json'), 'utf8'));
+if (v156.scope !== 'LIVE_TESTNET_SWAP_EXECUTION_QUALIFICATION') throw new Error('V15.6 qualification scope drift');
+if (v156.operationalStatus !== 'PENDING_LIVE_TESTNET_DRILL') throw new Error('V15.6 repository CI must not claim live testnet qualification');
+
+console.log('420Exchange V14.1 through V14.14 + V15.1 + V15.2 + V15.3 + V15.4 + V15.5 + V15.6 static qualification passed');
 
 function REQUIRED_EXCHANGE_CONTRACTS_MARKER() {
   return deploymentBinding.includes('GatewayRouter420');

@@ -6,6 +6,7 @@ const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..')
 const required = [
   'index.html','app.js','ui-v1.js','apps-page.js','recovery-ui.js','session-execution-ui.js','batch-execution-ui.js','styles.css','apps.css','runtime-config.json',
   'core/abi.js','core/accounts.js','core/apps.js','core/batch-execution.js','core/capabilities.js','core/capability-management.js','core/session-management.js','core/session-execution.js','core/entrypoint-transport.js','core/recovery.js','core/recovery-management.js','core/config.js','core/deployment.js','core/execution.js','core/portfolio.js','core/provider.js','core/provider-lifecycle.js','core/services.js','core/send.js','core/passkeys.js','core/passkey-metadata.js','core/keccak.js','core/passkey-envelope.js','core/passkey-p256-browser.js',
+  'scripts/generate-runtime-config.mjs','test/runtime-config-generator.test.js',
   'test/core.test.js','test/apps.test.js','test/execution.test.js','test/batch-execution.test.js','test/batch-execution-ui.test.js','test/capabilities.test.js','test/capability-management.test.js','test/session-management.test.js','test/session-execution.test.js','test/entrypoint-transport.test.js','test/recovery.test.js','test/recovery-management.test.js','test/recovery-ui.test.js','test/session-execution-ui.test.js','test/ui-v1.test.js','test/send.test.js','test/provider-lifecycle.test.js','test/ui-hardening.test.js','test/session-hardening.test.js','test/passkeys.test.js','test/passkey-metadata.test.js','test/passkey-envelope.test.js','test/passkey-p256-browser.test.js',
 ];
 
@@ -81,6 +82,8 @@ if (passkeyEnvelope.includes('privateKey') || passkeyEnvelope.includes('localSto
 const abi = read('core/abi.js');
 if (!abi.includes("createAccount: '4003f6ba'")) errors.push('canonical SmartAccountFactory420 createAccount selector missing');
 if (!abi.includes("execute: 'b61d27f6'")) errors.push('canonical SmartAccount420 execute selector missing');
+
+requireStrings('scripts/generate-runtime-config.mjs', ['buildWalletRuntimeConfig420','wallet deployment inventory is not ready for live testnet/runtime generation','network manifest environment does not match wallet deployment inventory','wallet authority smartAccountFactory420 remains conflicted','testnet manifest must publish Faucet service'], 'W14.2 runtime generator guard');
 
 const config = JSON.parse(read('runtime-config.json'));
 if (config.manifest?.verificationMode !== 'registry-or-signed-manifest') errors.push('manifest verification mode must fail closed');

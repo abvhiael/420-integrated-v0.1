@@ -33,7 +33,12 @@ func TestMonthlySkipsMissingDay(t *testing.T){
  e:=eventAt(t,"America/Regina",2026,1,31,18,0)
  got,err:=Expand(e,Rule{Frequency:Monthly,Interval:1,Count:3},e.StartAt,e.StartAt.AddDate(0,5,0))
  if err!=nil{t.Fatal(err)}
- if len(got)!=3||got[0].StartAt.Month()!=time.January||got[1].StartAt.Month()!=time.March||got[2].StartAt.Month()!=time.May{t.Fatalf("got=%+v",got)}
+ loc,err:=time.LoadLocation(e.Timezone);if err!=nil{t.Fatal(err)}
+ if len(got)!=3{t.Fatalf("got=%+v",got)}
+ for i,want:=range []time.Month{time.January,time.March,time.May}{
+  local:=got[i].StartAt.In(loc)
+  if local.Month()!=want || local.Day()!=31 || local.Hour()!=18 {t.Fatalf("occurrence %d local=%s; got=%+v",i,local,got)}
+ }
 }
 
 func TestDSTMaintainsWallClock(t *testing.T){

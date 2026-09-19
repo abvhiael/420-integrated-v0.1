@@ -624,7 +624,7 @@ Qualification:
 - 420 Integrated Qualification #4396
 - 420Docs Qualification #2041
 
-## V14.13 — Production deployment for exchange.420integrated.org — IN QUALIFICATION
+## V14.13 — Production deployment for exchange.420integrated.org — QUALIFIED
 
 Deliverables:
 - [x] deterministic production artifact builder
@@ -662,30 +662,47 @@ Acceptance:
 - rollback can restore a previously qualified artifact without changing protocol state
 - public `exchange.420integrated.org` HTTPS/TLS/header verification remains an operational V14.13/V14.14 release gate until hosting/DNS values are configured
 
-## V14.14 — End-to-end Genesis qualification + release
+Qualification:
+- exact head `c07762415195bb059eb18b5d648eba8f67b53fda`
+- 420Exchange Web Verification #221
+- 420 Integrated Qualification #4409
+- 420Docs Qualification #2053
+
+## V14.14 — End-to-end Genesis qualification + release — IN QUALIFICATION
 
 Deliverables:
-- live/testnet end-to-end market browse
-- swap execution drill
-- limit-order create/fill/cancel drill
-- bridge lifecycle drill
-- reconnect/resume drill
-- stale API/freshness drill
-- reorg/replacement drill
-- wallet/network-change drill
-- mobile/browser qualification evidence
-- performance budgets
-- final exact-head CI qualification
-- reconcile with latest `main`
-- merge V14
-- production deployment qualification for `exchange.420integrated.org`
+- [x] repository-level market browse integration drill
+- [x] swap review + wallet signing gate integration drill
+- [x] limit-order review-integrity drill
+- [x] bridge route/intent review integration drill
+- [x] wallet account/network generation invalidation drill
+- [x] stale/degraded/API-version failure drill
+- [x] V13/V14 reorg/replacement behavior carried into release matrix
+- [x] browser support matrix
+- [x] explicit static asset performance budgets
+- [x] repository-vs-production-live release-state distinction
+- [x] Genesis release runbook and merge sequence
+- [ ] final exact-head CI qualification
+- [ ] reconcile with latest `main`
+- [ ] exact-head CI after reconciliation
+- [ ] merge V14 PR #345
+- [ ] live/testnet swap execution drill
+- [ ] live/testnet limit-order create/fill/cancel drill
+- [ ] live/testnet bridge lifecycle drill
+- [ ] public production DNS/TLS/header/browser qualification
+
+Implementation:
+- `exchange/web/core/release-qualification.js`
+- `exchange/web/test/release-qualification.test.js`
+- `exchange/web/v14.14-qualification.json`
+- `docs/420EXCHANGE-GENESIS-RELEASE-V14.14.md`
 
 Release gate:
-- all required V14 CI green on exact head
+- repository code requires exact-head Exchange Web, Integrated and Docs qualification
+- final branch must be reconciled with latest `main` and requalified before merge
 - no unresolved critical/high security defects
-- V13 client/API parity intact
-- production domain serves the exact qualified build
-- Exchange UI is ready for Genesis/testnet use
+- V13 client/API parity remains intact
+- production-live status is not claimed until live network/API/DNS/browser/testnet operational gates are complete
 
 ---
 
@@ -693,6 +710,6 @@ Release gate:
 
 **Now:** V14 — Exchange Web UI. V13 is merged and closed.
 
-**Current step:** V14.13 — production deployment — in qualification.
+**Current step:** V14.14 — Genesis end-to-end qualification + release — in qualification.
 
 **V14 completion target:** a production-qualified Exchange UI at `exchange.420integrated.org`, backed by V13 read surfaces and the qualified V1–V12 Exchange execution stack.

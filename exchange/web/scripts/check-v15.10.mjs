@@ -1,0 +1,14 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import {assessGenesisCloseout,CLOSEOUT_GATES} from '../core/genesis-closeout.js';
+const root=path.resolve(import.meta.dirname,'..');
+const repo=path.resolve(root,'..','..');
+const read=p=>JSON.parse(fs.readFileSync(path.join(root,p),'utf8'));
+const record=read('v15.10-qualification.json');
+if(record.schema!=='420-exchange-web-v15.10'||record.operationalStatus!=='BLOCKED_PENDING_LIVE_EVIDENCE') throw new Error('V15.10 must not claim operational qualification from repository CI');
+const manifest=JSON.parse(fs.readFileSync(path.join(repo,'deployments/exchange/testnet.runtime.json'),'utf8'));
+const qualifications={v156:read('v15.6-qualification.json'),v157:read('v15.7-qualification.json'),v158:read('v15.8-qualification.json'),v159:read('v15.9-qualification.json')};
+const assessment=assessGenesisCloseout({manifest,qualifications});
+if(assessment.status!=='BLOCKED'||assessment.blocked.length!==CLOSEOUT_GATES.length) throw new Error('V15.10 no-evidence baseline must fail closed on every operational gate');
+for(const p of ['core/genesis-closeout.js','test/genesis-closeout.test.js','scripts/genesis-closeout.mjs']) if(!fs.existsSync(path.join(root,p))) throw new Error(`Missing V15.10 file: ${p}`);
+console.log('420Exchange V15.10 repository gate passed; Genesis live closeout correctly BLOCKED without evidence');

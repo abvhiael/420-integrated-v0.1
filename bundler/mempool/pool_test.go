@@ -48,7 +48,7 @@ func TestAdmissionDuplicateAndNonceConflict(t *testing.T){
 	conflict:=op
 	conflict.CallData="0x5678"
 	_,err=pool.Add(conflict,evidenceFor(t,conflict,now),now.Add(2*time.Second))
-	if !errors.Is(err,ErrNonceConflict) { t.Fatalf("expected nonce conflict, got %v",err) }
+	if !errors.Is(err,ErrReplacementUnderpriced) { t.Fatalf("expected underpriced replacement, got %v",err) }
 }
 
 func TestBoundsAndTTL(t *testing.T){

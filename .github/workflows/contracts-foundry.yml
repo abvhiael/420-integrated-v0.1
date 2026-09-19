@@ -14,14 +14,16 @@ on:
       - ".github/workflows/contracts-foundry.yml"
   workflow_dispatch:
 
+# Full Solidity compilation can be lengthy. A follow-up commit must not terminate an
+# in-flight qualification run before it can report its actual compiler result.
 concurrency:
   group: solidity-contracts-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   foundry:
-    continue-on-error: true
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     permissions:
       contents: read
     env:

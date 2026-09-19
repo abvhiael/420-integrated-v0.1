@@ -271,7 +271,7 @@ Operational accounting now rebuilds deterministically from canonical contributio
 
 **Exit:** reward accounting is reconstructable from canonical events and can be independently reconciled.
 
-### BG-18.12 — production closeout — IMPLEMENTED AND RECONCILED, FINAL QUALIFICATION PENDING
+### BG-18.12 — production closeout — COMPLETE AND QUALIFIED
 
 - end-to-end drills:
   - canonical post → contribution → accrue → reserve → claim → release;
@@ -305,4 +305,4 @@ The recommended implementation sequence is:
 
 ## Definition of done
 
-BG-18 is complete only when Bong Goggles can participate in the shared 420 reward economy with configured campaigns, bounded economics, canonical accrual/claim state, accurate notifications, replay/abuse resistance, operational accounting and a production runbook — without Bong Goggles becoming a separate reward ledger, mint, treasury or payout authority.
+BG-18 is complete. Bong Goggles can participate in the shared 420 reward economy with configured campaigns, bounded economics, canonical accrual/claim state, accurate notifications, replay/abuse resistance, operational accounting and a production runbook — without Bong Goggles becoming a separate reward ledger, mint, treasury or payout authority.

@@ -88,7 +88,7 @@ func TestRouteAndTileValidation(t *testing.T){
 	a,_:=NewAdapter(p)
 	r,prov,err:=a.Route(context.Background(),RouteRequest{})
 	if err!=nil { t.Fatal(err) }
-	if r==nil || prov.Provider!="demo" { t.Fatalf("route=%v prov=%+v",r,prov) }
+	if len(r.Points)!=2 || prov.Provider!="demo" { t.Fatalf("route=%v prov=%+v",r,prov) }
 	tile,err:=a.Tile(context.Background(),TileRequest{Z:1,X:1,Y:1})
 	if err!=nil { t.Fatal(err) }
 	if tile.ContentType!="image/png" || len(tile.Data)!=3 { t.Fatalf("tile=%+v",tile) }

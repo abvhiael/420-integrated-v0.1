@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/420integrated/420-integrated/events/model"
+	locationmodel "github.com/420integrated/420-integrated/location/model"
 )
 
 type EventRepository interface {
@@ -14,13 +15,13 @@ type EventRepository interface {
 	Create(model.Event)(model.Event,error)
 	Get(string)(model.Event,error)
 	Update(model.Event,uint32)(model.Event,error)
-	ListByOrganizer(model.SubjectRef)[]model.Event
+	ListByOrganizer(locationmodel.SubjectRef)[]model.Event
 }
 
 type PlaceReader interface { Ready(context.Context) error }
 type OrganizerAuthorizer interface {
 	Ready(context.Context) error
-	AuthorizeOrganizer(context.Context,model.SubjectRef) error
+	AuthorizeOrganizer(context.Context,locationmodel.SubjectRef) error
 }
 
 type Dependencies struct {
@@ -94,6 +95,6 @@ func (s *Service) Update(ctx context.Context,event model.Event,expectedVersion u
 	return s.events.Update(event,expectedVersion)
 }
 
-func (s *Service) ListByOrganizer(_ context.Context,organizer model.SubjectRef)[]model.Event {
+func (s *Service) ListByOrganizer(_ context.Context,organizer locationmodel.SubjectRef)[]model.Event {
 	return s.events.ListByOrganizer(organizer)
 }

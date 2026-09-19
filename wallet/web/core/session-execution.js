@@ -1,7 +1,7 @@
 import { normalizeAddress, normalizeBytes32 } from './abi.js';
 import { normalizeCallData, normalizeNativeValue } from './execution.js';
 import {
-  CANONICAL_CAPABILITY_REGISTRY_420,
+  boundCapabilityRegistry420,
   SESSION_EXECUTE_CAPABILITY_420,
   inspectCapabilityGrant,
   readActiveGrantId,
@@ -48,9 +48,7 @@ function tokenSpend(data) {
 }
 function assertSessionState(smartAccountState, sessionKey) {
   if (!smartAccountState?.deployed) throw new Error('SmartAccount420 must be deployed before session execution preparation');
-  if (normalizeAddress(smartAccountState.capabilityRegistry) !== CANONICAL_CAPABILITY_REGISTRY_420) {
-    throw new Error('SmartAccount420 is not bound to the canonical CapabilityRegistry420');
-  }
+  boundCapabilityRegistry420(smartAccountState);
   const key = normalizeAddress(sessionKey);
   if (key === normalizeAddress(smartAccountState.owner)) throw new Error('owner is not a delegated session signer');
   return key;

@@ -1,0 +1,14 @@
+{
+  "schemaVersion":"420-ai-web-v1",
+  "network":{"name":"420 Integrated","chainId":null},
+  "services":{"ai":null,"explorer":null},
+  "contracts":{
+    "AIProviderRegistry":"0x000000000000000000000000000000000000042f",
+    "AIModelRegistry":"0x0000000000000000000000000000000000000430",
+    "AIJobManager":"0x0000000000000000000000000000000000000431",
+    "AIJobEscrow":"0x0000000000000000000000000000000000000432",
+    "AIReputationRegistry":"0x0000000000000000000000000000000000000433",
+    "ProtocolRegistry":"0x0000000000000000000000000000000000000434"
+  },
+  "features":{"writes":false,"providerConsole":true,"jobHistory":true}
+}

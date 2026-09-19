@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { inspectCapabilityGrant, CANONICAL_CAPABILITY_REGISTRY_420 } from '../core/capabilities.js';
+import { inspectCapabilityGrant } from '../core/capabilities.js';
 
 const account = '0x3333333333333333333333333333333333333333';
 const principal = '0x7777777777777777777777777777777777777777';
@@ -8,6 +8,7 @@ const componentId = `0x${'11'.repeat(32)}`;
 const capabilityId = `0x${'22'.repeat(32)}`;
 const scopeHash = `0x${'33'.repeat(32)}`;
 const grantId = `0x${'44'.repeat(32)}`;
+const registry = '0x8888888888888888888888888888888888888888';
 const word = (hex) => hex.replace(/^0x/, '').padStart(64, '0');
 const uintWord = (n) => BigInt(n).toString(16).padStart(64, '0');
 
@@ -41,7 +42,7 @@ function providerFor({ component = componentId, revoked = false } = {}) {
 const smartAccountState = {
   deployed: true,
   smartAccount: account,
-  capabilityRegistry: CANONICAL_CAPABILITY_REGISTRY_420,
+  capabilityRegistry: registry,
 };
 
 test('capability inspection decodes canonical grant and usage state', async () => {
@@ -68,10 +69,16 @@ test('capability inspection marks grants from another component as foreign', asy
   assert.equal(inspection.belongsToAccount, false);
 });
 
-test('capability inspection fails closed on noncanonical registry binding', async () => {
+test('capability inspection accepts the registry bound by the deployed SmartAccount420', async () => {
+  const alternate = { ...smartAccountState, capabilityRegistry: '0x9999999999999999999999999999999999999999' };
+  const inspection = await inspectCapabilityGrant(providerFor(), alternate, grantId);
+  assert.equal(inspection.registry, alternate.capabilityRegistry);
+});
+
+test('capability inspection fails closed on zero registry binding', async () => {
   await assert.rejects(
-    inspectCapabilityGrant(providerFor(), { ...smartAccountState, capabilityRegistry: '0x9999999999999999999999999999999999999999' }, grantId),
-    /canonical CapabilityRegistry420/,
+    inspectCapabilityGrant(providerFor(), { ...smartAccountState, capabilityRegistry: '0x0000000000000000000000000000000000000000' }, grantId),
+    /binding is zero/,
   );
 });
 

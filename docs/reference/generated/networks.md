@@ -47,6 +47,7 @@ Network manifests are environment-scoped discovery records. A chain ID alone is 
 
 #### Service discovery
 
+- `ai` → `http://127.0.0.1:4206`
 - `explorer` → `http://127.0.0.1:4201`
 - `faucet` → `http://127.0.0.1:4205`
 - `indexer` → `http://127.0.0.1:4202`

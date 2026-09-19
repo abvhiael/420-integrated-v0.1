@@ -141,6 +141,10 @@ contract AIJobManager is SystemAccess, I420System {
         }
     }
 
+    function getJob(bytes32 jobId) external view returns (Job memory) {
+        return _get(jobId);
+    }
+
     function bindComputeAdapter(address adapter) external onlyGovernance {
         if (computeAdapterBound) revert AdapterAlreadyBound();
         if (adapter == address(0)) revert ZeroAddress();

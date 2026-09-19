@@ -68,7 +68,7 @@ export function validateNetworkManifest420(input) {
   }
 
   const services = object420(manifest.services, 'services');
-  assertOnlyKeys420(services, new Set(['explorer', 'indexer', 'verify', 'status', 'faucet']), 'services');
+  assertOnlyKeys420(services, new Set(['explorer', 'indexer', 'verify', 'status', 'faucet', 'ai']), 'services');
   for (const [name, endpoint] of Object.entries(services)) uri420(endpoint, `services.${name}`);
   assert420(!(network.environment === 'mainnet' && Object.hasOwn(services, 'faucet')), 'mainnet manifest must not expose a faucet');
 

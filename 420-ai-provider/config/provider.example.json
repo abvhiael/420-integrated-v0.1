@@ -1,0 +1,29 @@
+{
+  "schema": "420-ai-provider-config-v1",
+  "network": {
+    "chainId": null,
+    "rpcUrl": null,
+    "protocolRegistry": "0x0000000000000000000000000000000000000434"
+  },
+  "providerId": null,
+  "computeProviderId": null,
+  "unitPrice420": null,
+  "manifestPath": "./provider-manifest.json",
+  "payloadTransport": {
+    "driver": "external",
+    "endpoint": null
+  },
+  "inferenceBackend": {
+    "driver": "external",
+    "endpoint": null
+  },
+  "transactionAdapter": {
+    "driver": "external",
+    "endpoint": null
+  },
+  "security": {
+    "daemonStoresPrivateKeys": false,
+    "requireHttpsOutsideLocalhost": true,
+    "rawPayloadLogging": false
+  }
+}

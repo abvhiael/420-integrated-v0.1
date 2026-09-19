@@ -2,109 +2,45 @@
 
 Status: **ACTIVE RECOVERY PROGRAM**
 
-This roadmap tracks the repository-level recovery from a partially implemented 420AI architecture to a Genesis-qualified, testnet-operable application stack.
+This roadmap tracks repository-level recovery from partially implemented 420AI architecture to a Genesis-qualified, testnet-operable application stack.
 
 ## AI-RECOVERY-1 — On-chain architecture recovery — COMPLETE
 
-Delivered:
-- missing mature 420AI authorization/policy/deployment/request/result/router/interface modules;
-- full 420 ComputeMarket contract stack;
-- AI-to-Compute adapter;
-- duplicate model/version registry avoidance;
-- recovery integration tests;
-- contract-map reconciliation.
-
-Exit condition: missing architecture-named on-chain surfaces restored without creating parallel canonical state.
+Restored mature AI authorization/policy/deployment/request/result/router modules, ComputeMarket contracts and AI/Compute bridge without duplicating model or version authority; added contract tests and maps.
 
 ## AI-RECOVERY-2 — Genesis address reconciliation — COMPLETE
 
-Delivered:
-- Step 6.2 system address map made sole physical predeploy authority;
-- conflicting later canonical allocations removed;
-- newer routers/factories classified as registry-resolved;
-- verifier expanded across system map, deployment manifest, predeploy plan and Native AI Genesis;
-- Wallet SmartAccountFactory/CapabilityRegistry hard-coded collisions removed;
-- regression qualification green.
+Step 6.2 remains the physical predeploy authority. Conflicting newer fixed allocations were removed and routers/factories made registry-resolved; the address verifier and Wallet collision checks were updated.
 
-Exit condition: one physical contract per frozen Genesis address and no conflicting address authority.
+## AI-RECOVERY-3 — Provider/runtime control plane — COMPLETE / CI QUALIFIED
 
-## AI-RECOVERY-3 — Provider/runtime control plane — COMPLETE
+`420-ai-provider/` supplies canonical reconciliation, provider eligibility, bounded metering, payload/result commitments, runtime/manifest checks and non-custodial external transaction ports. This is a control-plane foundation, not yet a deployed inference service.
 
-Delivered:
-- `420-ai-provider/` runtime;
-- provider manifests and commitments;
-- canonical AI/Compute reconciliation;
-- provider eligibility and constraint checks;
-- MATCHED -> ACCEPTED -> RUNNING progression;
-- payload commitment verification;
-- pluggable inference and storage ports;
-- deterministic result/execution-manifest commitments;
-- bounded metering and receipt submission;
-- external signer/transaction boundary;
-- readiness/status surface;
-- dedicated CI gate.
+## AI-RECOVERY-4 — Derived API, Indexer projection and service discovery — COMPLETE / CI QUALIFIED
 
-Qualification: all exact-head AI Provider, Solidity, Integrated, Docs, Wallet Web, Wallet Extension and Wallet Mobile suites passed.
+`420-ai-api/`, Indexer AI/Compute views and Developer Hub service discovery provide typed, non-authoritative model/provider/job/history read surfaces. Indexed discovery is distinct from canonical current-state reads. Concrete hosted API and direct-RPC hydration deployments remain AI-RECOVERY-6/7 work.
 
-Exit condition: a safe reconstructable off-chain provider control plane exists without embedding wallet/private-key authority.
+## AI-RECOVERY-5 — ai.420integrated.org UI — COMPLETE / CI QUALIFIED (READ-ONLY GENESIS SHELL)
 
-## AI-RECOVERY-4 — Derived API, Indexer projection and service discovery — QUALIFIED
+`ai/web/` supplies the responsive web shell, model/provider/job discovery, wallet identity/network checks, request draft review and observational operator surfaces. The dedicated AI Web and all eleven companion workflow runs passed at `3e789a2ea568781801d357a9814b44d314bd0c78`. There is no claim of deployed `ai.420integrated.org` or enabled payment/job submission. Canonical write actions remain fail-closed until phase 6 qualifies the necessary adapters.
 
-Goals:
-- stable AI read API for user-facing clients;
-- provider/model/job discovery projections;
-- job lifecycle/history projection;
-- canonical source references and freshness metadata;
-- explicit non-authoritative semantics;
-- service-manifest discovery for AI API endpoints;
-- read adapter boundary that can use 420Indexer and direct RPC fallback;
-- pagination/filter validation;
-- health/readiness semantics suitable for `ai.420integrated.org`;
-- dedicated tests/CI.
+## AI-RECOVERY-6 — Production adapters and verification/settlement integration — IN PROGRESS
 
-This phase must not create a second mutable source of job/provider/model truth.
+See `docs/AI-RECOVERY-6-PRODUCTION-INTEGRATION.md` for implementation details and acceptance criteria.
 
-## AI-RECOVERY-5 — ai.420integrated.org user interface — IMPLEMENTED / QUALIFICATION IN PROGRESS
+- **6.1 External provider transaction adapter:** implementation committed; checks canonical provider/job/request state and spend before advancing Compute state and submitting one final receipt; dedicated unit tests added; fresh CI qualification pending. External qualified signer and receipt verification are still required.
+- **6.2 Canonical RPC reader and qualified executor:** registry/deployment discovery, exact ABI hydration, confirmed receipts, finality/reorg/authorization — pending.
+- **6.3 Storage/private payload and model serving:** encrypted, authenticated delivery, signed manifests, real backend and compatibility gates — pending.
+- **6.4 Vault funding and settlement:** real asset movement, idempotent settlement/refund, beneficiary derivation — pending.
+- **6.5 Trust evidence and verification:** profile-bound proofs, verifier authorization, dispute gates — pending.
+- **6.6 Wallet write flow and operator reliability:** request/funding/binding UI, retry reconciliation, telemetry and supervision — pending.
 
-Planned:
-- Wallet connection and network discovery;
-- model/provider browser;
-- request creation/funding flow;
-- prompt/private payload handoff;
-- job state timeline;
-- result/evidence/verification display;
-- spend/settlement/refund presentation;
-- job history/disputes;
-- provider operator dashboard.
-
-The UI will consume AI-RECOVERY-4 APIs and canonical Wallet-authorized write paths.
-
-## AI-RECOVERY-6 — Production adapters and verification/settlement integration — PLANNED
-
-Planned:
-- RPC/Indexer canonical state adapter for provider runtime;
-- provider transaction signer adapter;
-- 420Storage/420Gateway payload adapter;
-- concrete model/GPU serving backend(s);
-- encrypted payload transport;
-- Vault settlement adapter;
-- 420Trust evidence adapter;
-- production verifier implementations;
-- telemetry/process supervision.
+Do not enable `features.writes`, claim paid job operability, or call phase 6 complete until all six integrations have passed E2E qualification.
 
 ## AI-RECOVERY-7 — Testnet deployment and end-to-end qualification — PLANNED
 
-Planned:
-- deployment/service manifests;
-- provider node deployment;
-- API deployment;
-- UI deployment;
-- Wallet -> AI -> Compute -> provider -> verification -> settlement/refund smoke;
-- failure/recovery drills;
-- fuzz/invariant expansion;
-- security review;
-- public testnet release evidence.
+Deploy contract/service manifests, worker, API and UI; qualify Wallet -> AI request -> Compute -> provider -> verification -> settlement/refund; run failure/reorg/security drills, fuzz/invariant expansion and release qualification. No testnet/mainnet deployment is implied by passing repository CI.
 
 ## Completion definition
 
-420AI recovery is complete only when the on-chain protocols, provider runtime, derived API, user UI, production adapters and testnet deployment all agree on canonical identities and lifecycle semantics, and the complete user flow is qualified end to end.
+420AI recovery is complete only when canonical on-chain state, provider runtime, read API, user UI, private data transport, qualified signer, model backend, Vault/Trust adapters and deployed testnet agree on identities, permissions and lifecycle semantics, and the full user flow is validated end to end.

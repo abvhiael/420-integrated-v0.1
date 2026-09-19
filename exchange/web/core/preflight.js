@@ -244,3 +244,68 @@ export async function preflightExchangeTransaction({
     gasEstimate,
   });
 }
+
+
+export async function preflightLimitOrderSigning({
+  provider,
+  runtime,
+  account,
+  order,
+  allowanceSpender,
+  nowSeconds,
+} = {}) {
+  if (runtime?.deployment?.status !== 'RESOLVED') {
+    throw new ExchangePreflightError('DEPLOYMENT_UNRESOLVED', 'Exchange deployment is not resolved');
+  }
+  const expectedChainId = normalizeChainId(runtime.network?.chainId);
+  const actualChainId = normalizeChainId(await request(provider, 'eth_chainId'));
+  if (actualChainId !== expectedChainId) {
+    throw new ExchangePreflightError('CHAIN_MISMATCH', 'RPC chain mismatch', { expectedChainId, actualChainId });
+  }
+  validAddress(account, 'limit-order account');
+  validAddress(order?.sellToken, 'limit-order sellToken');
+  validBytes32(order?.marketId, 'limit-order marketId');
+  const sellAmount = rawUint(order?.sellAmountRaw, 'limit-order sell amount');
+  if (sellAmount <= 0n) throw new ExchangePreflightError('INVALID_CHECK', 'limit-order sell amount must be positive');
+  const expiry = Number(order?.expiry);
+  const now = Number(nowSeconds);
+  if (!Number.isFinite(expiry) || !Number.isFinite(now) || now >= expiry) {
+    throw new ExchangePreflightError('STALE_INTENT', 'limit order is expired or expiry cannot be verified');
+  }
+
+  const settlement = validAddress(allowanceSpender ?? runtime.contracts?.ExchangeLimitOrderSettlement420, 'limit-order allowance spender');
+  const allowance = await checkAllowance({
+    provider,
+    token:order.sellToken,
+    owner:account,
+    spender:settlement,
+    requiredAmountRaw:sellAmount,
+  });
+  if (!allowance.ok) {
+    throw new ExchangePreflightError('INSUFFICIENT_ALLOWANCE', 'limit-order token allowance is insufficient', { allowance });
+  }
+
+  const authorizationContract = validAddress(runtime.contracts?.ExchangeAuthorization420, 'ExchangeAuthorization420');
+  const authorization = await checkAuthorization({
+    provider,
+    authorizationContract,
+    principal:account,
+    action:'LIMIT_ORDER',
+    subjectId:order.marketId,
+    amountRaw:sellAmount,
+  });
+  if (!authorization.ok) {
+    throw new ExchangePreflightError('UNAUTHORIZED', 'authorization denied: LIMIT_ORDER', { authorization });
+  }
+
+  return Object.freeze({
+    ok:true,
+    kind:'LIMIT_ORDER',
+    account:String(account).toLowerCase(),
+    chainId:actualChainId,
+    allowance,
+    authorization,
+    checkedAt:now,
+    expiry,
+  });
+}

@@ -15,6 +15,8 @@ export function validateDeploymentCandidate(input,{expectedEnvironment}={}){
   if(url.username||url.password||url.search||url.hash)throw new Error(`${key} must not contain credentials, query or fragment`);
   if(LOCAL_HOSTS.has(url.hostname)||url.hostname==='example'||url.hostname.endsWith('.example')||url.hostname.endsWith('.invalid')||url.hostname.endsWith('.test'))throw new Error(`${key} points to a placeholder or local host`);
  }
+ if(!config.features||typeof config.features!=='object'||Array.isArray(config.features))throw new Error('feature flags must be an object');
+ for(const [key,value] of Object.entries(config.features))if(!/^[a-z][a-z0-9]{0,39}$/i.test(key)||typeof value!=='boolean')throw new Error('deployment feature flags must be named booleans only');
  if(config.maintenance!==true&&expectedEnvironment==='production')throw new Error('production candidate must start in maintenance until release gates are verified');
  return config;
 }

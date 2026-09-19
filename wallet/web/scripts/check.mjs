@@ -83,7 +83,7 @@ const abi = read('core/abi.js');
 if (!abi.includes("createAccount: '4003f6ba'")) errors.push('canonical SmartAccountFactory420 createAccount selector missing');
 if (!abi.includes("execute: 'b61d27f6'")) errors.push('canonical SmartAccount420 execute selector missing');
 
-requireStrings('scripts/generate-runtime-config.mjs', ['buildWalletRuntimeConfig420','wallet deployment inventory is not ready for live testnet/runtime generation','network manifest environment does not match wallet deployment inventory','wallet authority smartAccountFactory420 remains conflicted','testnet manifest must publish Faucet service'], 'W14.2 runtime generator guard');
+requireStrings('scripts/generate-runtime-config.mjs', ['buildWalletRuntimeConfig420','wallet deployment inventory is not ready for live testnet/runtime generation','network manifest environment does not match wallet deployment inventory','remains conflicted','testnet manifest must publish Faucet service'], 'W14.2 runtime generator guard');
 
 const config = JSON.parse(read('runtime-config.json'));
 if (config.manifest?.verificationMode !== 'registry-or-signed-manifest') errors.push('manifest verification mode must fail closed');

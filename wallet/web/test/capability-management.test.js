@@ -9,7 +9,7 @@ import {
 const owner = '0x1111111111111111111111111111111111111111';
 const account = '0x3333333333333333333333333333333333333333';
 const sponsor = '0x7777777777777777777777777777777777777777';
-const registry = '0x0000000000000000000000000000000000000421';
+const registry = '0x8888888888888888888888888888888888888888';
 const operation = `0x${'12'.repeat(32)}`;
 const grantId = `0x${'34'.repeat(32)}`;
 const txHash = `0x${'ab'.repeat(32)}`;
@@ -74,14 +74,14 @@ test('gas sponsor grant send re-simulates before explicit provider approval', as
   assert.deepEqual(calls, ['eth_call', 'eth_estimateGas', 'eth_sendTransaction']);
 });
 
-test('capability management fails closed for non-owner controllers or non-canonical registries', async () => {
+test('capability management fails closed for non-owner controllers or zero registry bindings', async () => {
   const provider = { request: async () => { throw new Error('should not reach provider'); } };
   await assert.rejects(
     prepareGasSponsorGrantCreation(provider, '0x2222222222222222222222222222222222222222', smartAccountState, request),
     /not the on-chain.*owner/i,
   );
   await assert.rejects(
-    prepareGasSponsorGrantCreation(provider, owner, { ...smartAccountState, capabilityRegistry: '0x4444444444444444444444444444444444444444' }, request),
-    /canonical CapabilityRegistry420/,
+    prepareGasSponsorGrantCreation(provider, owner, { ...smartAccountState, capabilityRegistry: '0x0000000000000000000000000000000000000000' }, request),
+    /binding is zero/,
   );
 });

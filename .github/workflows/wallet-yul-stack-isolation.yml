@@ -12,10 +12,6 @@ jobs:
   isolate:
     runs-on: ubuntu-latest
     timeout-minutes: 110
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [0, 1, 2, 3, 4, 5, 6, 7]
     defaults:
       run:
         working-directory: contracts
@@ -26,12 +22,12 @@ jobs:
       - uses: foundry-rs/foundry-toolchain@v1
         with:
           version: stable
-      - name: Find failing compilation unit within shard
-        env:
-          SHARD: ${{ matrix.shard }}
+      - name: Find failing compilation unit within shard 3
         shell: bash
         run: |
+          set +e
           set -uo pipefail
+          SHARD=3
           mapfile -t all < <(find test -type f -name '*.sol' | LC_ALL=C sort)
           files=()
           for i in "${!all[@]}"; do
@@ -43,8 +39,8 @@ jobs:
             echo "ISOLATION BEGIN: ${#files[@]} targets (first ${files[0]})"
             forge build --force "${files[@]}" > /tmp/forge-yul-log.txt 2>&1
             rc=$?
-            tail -n 18 /tmp/forge-yul-log.txt
-            if grep -q 'Yul exception:.*stack\|too deep in the stack' /tmp/forge-yul-log.txt; then return 88; fi
+            tail -n 24 /tmp/forge-yul-log.txt
+            if grep -Eq 'Yul exception:.*stack|too deep in the stack' /tmp/forge-yul-log.txt; then return 88; fi
             if (( rc != 0 )); then echo "NON-YUL COMPILATION FAILURE rc=$rc"; return "$rc"; fi
             return 0
           }

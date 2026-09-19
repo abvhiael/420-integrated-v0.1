@@ -61,10 +61,12 @@ export class CanonicalRPCState420 implements CanonicalStatePort420 {
     if (!c.exists || a.computeJobId.toLowerCase() !== computeJobId.toLowerCase()) throw new Error('canonical AI/Compute job mismatch');
     const [p,r,cp] = await Promise.all([providers.getProvider(a.providerId,options),crequests.getRequest(c.requestId,options),cproviders.getProvider(c.providerId,options)]);
     if (!p.exists || !r.exists || !cp.exists || p.computeProviderRef.toLowerCase() !== c.providerId.toLowerCase() || a.computeRequestId.toLowerCase() !== c.requestId.toLowerCase() || r.requester.toLowerCase() !== a.requester.toLowerCase() || cp.operatorAccount.toLowerCase() !== p.operatorAccount.toLowerCase()) throw new Error('canonical identity/request/operator binding mismatch');
+    const providerState = state(PROVIDER_STATES,p.state);
+    if (providerState === 'NONE') throw new Error('canonical provider is not registered');
     const after = await this.rpc.getBlock(height);
     if (!after?.hash || after.hash !== block.hash) throw new Error('canonical block reorganization detected');
     return {
-      provider: {providerId:id(a.providerId),operatorAccount:address(p.operatorAccount) as `0x${string}`,settlementAccount:address(p.settlementAccount) as `0x${string}`,stakeRef:p.stakeRef,computeProviderRef:p.computeProviderRef,state:state(PROVIDER_STATES,p.state)},
+      provider: {providerId:id(a.providerId),operatorAccount:address(p.operatorAccount) as `0x${string}`,settlementAccount:address(p.settlementAccount) as `0x${string}`,stakeRef:p.stakeRef,computeProviderRef:p.computeProviderRef,state:providerState},
       aiJob: {jobId:aiJobId,requester:address(a.requester) as `0x${string}`,modelVersionId:id(a.modelVersionId),workloadClass:a.workloadClass,requestHash:a.requestHash,privacyPolicyId:a.privacyPolicyId,verificationProfileId:a.verificationProfileId,maxSpend420:a.maxSpend,deadline:Number(a.deadline),computeRequestId:a.computeRequestId,computeJobId:a.computeJobId,providerId:a.providerId,state:state(AI_STATES,a.status) as CanonicalWork420['aiJob']['state']},
       computeJob: {jobId:computeJobId,requestId:c.requestId,providerId:c.providerId,resourceId:c.resourceId,state:state(COMPUTE_STATES,c.state) as CanonicalWork420['computeJob']['state'],outputCommitment:c.outputCommitment,resultManifestHash:c.resultManifestHash},
       computeRequest: {requestId:c.requestId,requester:address(r.requester) as `0x${string}`,workloadClass:r.workloadClass,inputCommitment:r.inputCommitment,maxSpend420:r.maxSpend420,fundedAmount420:r.fundedAmount,deadline:Number(r.deadline),privacyPolicyId:r.privacyPolicyId,verificationProfileId:r.verificationProfileId}

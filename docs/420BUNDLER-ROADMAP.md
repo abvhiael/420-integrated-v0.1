@@ -16,8 +16,8 @@ The Bundler Network is not custody, wallet authorization, consensus, settlement 
 - **GEN-11.7 — gas + fee estimation — COMPLETE**
 - **GEN-11.8 — Paymaster integration boundary — COMPLETE**
 - **GEN-11.9 — receipts + lifecycle tracking — COMPLETE**
-- **GEN-11.10 — multi-bundler propagation — IN QUALIFICATION**
-- GEN-11.11 — reputation + anti-abuse controls — pending
+- **GEN-11.10 — multi-bundler propagation — COMPLETE**
+- **GEN-11.11 — reputation + anti-abuse controls — IN QUALIFICATION**
 - GEN-11.12 — replacement + nonce hardening — pending
 - GEN-11.13 — failure isolation + reorg/restart recovery — pending
 - GEN-11.14 — persistence + audit trail — pending
@@ -320,3 +320,47 @@ This phase preserves the core Genesis invariants:
 GEN-11.10 intentionally does not introduce peer reputation, quotas, bans or abuse scoring; those controls belong to GEN-11.11.
 
 GEN-11.10 is complete when all repository qualification workflows pass on one exact head containing bounded peer ingress, best-effort outbound fan-out and independent local revalidation at every receiving Bundler.
+
+
+## GEN-11.11 — reputation + anti-abuse controls
+
+Added `bundler/reputation` and connected it to the GEN-11.10 peer-ingress boundary.
+
+The Genesis reputation layer is deliberately operational and temporary. It does not create protocol identity, stake authority, permanent bans, execution authorization, consensus weight or canonical reputation. Its only purpose is to bound resource consumption by hostile or malfunctioning peer traffic before that traffic can repeatedly consume simulation and mempool resources.
+
+The guard maintains bounded in-memory accounting for:
+
+- the actual transport source IP derived from `RemoteAddr`
+- the UserOperation sender address
+
+Forwarded client headers are not trusted as peer identity.
+
+For each accounting window the guard enforces:
+
+- maximum requests per transport source
+- maximum requests per UserOperation sender across sources
+- maximum validation/admission failures per transport source
+- temporary source backoff after abuse thresholds are reached
+- a hard cap on remembered source/sender records with oldest-entry eviction
+- automatic pruning and expiry of inactive reputation state
+
+Production defaults:
+
+- `BUNDLER_REPUTATION_WINDOW=1m`
+- `BUNDLER_REPUTATION_MAX_REQUESTS_PER_SOURCE=120`
+- `BUNDLER_REPUTATION_MAX_FAILURES_PER_SOURCE=20`
+- `BUNDLER_REPUTATION_MAX_REQUESTS_PER_SENDER=60`
+- `BUNDLER_REPUTATION_BACKOFF=5m`
+- `BUNDLER_REPUTATION_MAX_ENTRIES=8192`
+
+All values are configurable and startup fails closed for invalid combinations, including a failure threshold greater than the source-request limit.
+
+Peer requests accrue failure reputation when they present an invalid chain/EntryPoint domain, malformed UserOperation, canonical hash mismatch, failed local validation/simulation or deterministic sender/nonce conflict. Local mempool capacity exhaustion is not treated as peer misconduct.
+
+Once a source is in backoff, further peer ingress from that source returns HTTP `429 Too Many Requests` before simulation or mempool admission. Per-sender quota exhaustion likewise returns HTTP 429. Penalties expire automatically; GEN-11.11 does not create a permanent blacklist.
+
+The guard does not relax any GEN-11.10 rule. Every non-rate-limited peer operation still passes canonical hash verification, local GEN-11.4/11.8 validation and the local GEN-11.5 mempool rules. A good reputation cannot bypass validation, and a bad reputation cannot alter canonical account or chain state.
+
+This preserves BUNDLER-INV-005, BUNDLER-INV-010, BUNDLER-INV-011 and BUNDLER-INV-015 while ensuring the multi-bundler network has a bounded operational response to malformed floods and repeated invalid submissions.
+
+GEN-11.11 is complete when all repository qualification workflows pass on one exact head containing bounded reputation state, source/sender quotas, temporary backoff and peer-ingress integration.

@@ -6,7 +6,6 @@ import (
  "errors"
  "sort"
  "strings"
- "time"
 
  "github.com/420integrated/420-integrated/bundler/mempool"
 )
@@ -37,11 +36,3 @@ func Select(entries []mempool.Entry, max int, policy string) ([]mempool.Entry, e
  if len(selected)>max { selected=selected[:max] }
  return selected,nil
 }
-
-// Earlier is a deterministic audit helper for two observed candidates.
-func Earlier(a,b mempool.Entry) bool {
- if a.AdmittedAt.Equal(b.AdmittedAt) { return strings.ToLower(a.Hash)<strings.ToLower(b.Hash) }
- return a.AdmittedAt.Before(b.AdmittedAt)
-}
-
-var _ = time.Time{} // Retain explicit UTC-compatible timestamp representation.

@@ -22,6 +22,19 @@ const (
 	StatusCancelled Status = "CANCELLED"
 )
 
+type TransitionRecord struct {
+	From      Status
+	To        Status
+	Reason    string
+	OccurredAt time.Time
+}
+
+func (r TransitionRecord) Validate() error {
+	if !ValidStatus(r.From) || !ValidStatus(r.To) { return errors.New("event lifecycle history status is invalid") }
+	if r.OccurredAt.IsZero() { return errors.New("event lifecycle history timestamp is required") }
+	return nil
+}
+
 type Visibility string
 const (
 	VisibilityPublic              Visibility = "PUBLIC"
@@ -54,6 +67,7 @@ type Event struct {
 	Version         uint32
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
+	LifecycleHistory []TransitionRecord
 }
 
 func ValidStatus(v Status) bool {
@@ -87,6 +101,12 @@ func (e Event) Validate() error {
 	if e.Version==0 { return errors.New("event version is required") }
 	if e.CreatedAt.IsZero() || e.UpdatedAt.IsZero() { return errors.New("event timestamps are required") }
 	if e.UpdatedAt.Before(e.CreatedAt) { return errors.New("event updated time cannot precede created time") }
+	last:=e.CreatedAt
+	for _,record:=range e.LifecycleHistory {
+		if err:=record.Validate(); err!=nil { return err }
+		if record.OccurredAt.Before(last) { return errors.New("event lifecycle history is not chronological") }
+		last=record.OccurredAt
+	}
 	return nil
 }
 
@@ -95,6 +115,7 @@ func CloneEvent(in Event) Event {
 	out.Tags=append([]string(nil),in.Tags...)
 	out.AgeRestrictions=append([]string(nil),in.AgeRestrictions...)
 	out.MediaAssetIDs=append([]string(nil),in.MediaAssetIDs...)
+	out.LifecycleHistory=append([]TransitionRecord(nil),in.LifecycleHistory...)
 	return out
 }
 

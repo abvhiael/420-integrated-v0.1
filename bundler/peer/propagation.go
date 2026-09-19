@@ -13,6 +13,7 @@ import (
 
 	statussecurity "github.com/420integrated/420-integrated/status/security"
 	"github.com/420integrated/420-integrated/bundler/mempool"
+	"github.com/420integrated/420-integrated/bundler/reputation"
 	"github.com/420integrated/420-integrated/bundler/simulation"
 	"github.com/420integrated/420-integrated/bundler/userop"
 )
@@ -40,6 +41,7 @@ type Handler struct {
 	entryPoint string
 	validator Validator
 	pool Pool
+	guard *reputation.Guard
 	now func()time.Time
 }
 
@@ -51,6 +53,7 @@ func NewHandler(chainID uint64,entryPoint string,validator Validator,pool Pool)(
 }
 
 func (h *Handler) SetNow(now func()time.Time){ h.now=now }
+func (h *Handler) SetGuard(guard *reputation.Guard){ h.guard=guard }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter,r *http.Request){
 	if r.Method!=http.MethodPost{
@@ -68,23 +71,38 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter,r *http.Request){
 		http.Error(w,"invalid peer envelope",http.StatusBadRequest)
 		return
 	}
+	now:=time.Now().UTC()
+	if h.now!=nil{now=h.now().UTC()}
+	source,sourceErr:=reputation.SourceKey(r.RemoteAddr)
 	if env.ChainID!=h.chainID || !strings.EqualFold(env.EntryPoint,h.entryPoint){
+		if h.guard!=nil && sourceErr==nil{h.guard.Failure(source,now)}
 		http.Error(w,"peer domain mismatch",http.StatusConflict)
 		return
 	}
 	if _,err:=env.UserOperation.Canonicalize();err!=nil{
+		if h.guard!=nil && sourceErr==nil{h.guard.Failure(source,now)}
 		http.Error(w,"invalid UserOperation",http.StatusBadRequest)
 		return
 	}
+	if h.guard!=nil{
+		if sourceErr!=nil{
+			http.Error(w,"invalid peer source",http.StatusBadRequest)
+			return
+		}
+		if err:=h.guard.Allow(source,env.UserOperation.Sender,now);err!=nil{
+			http.Error(w,"peer temporarily rate limited",http.StatusTooManyRequests)
+			return
+		}
+	}
 	expected,err:=userop.Hash(h.chainID,h.entryPoint,env.UserOperation)
 	if err!=nil || !hash32(env.UserOpHash) || strings.ToLower(expected)!=strings.ToLower(env.UserOpHash){
+		if h.guard!=nil{h.guard.Failure(source,now)}
 		http.Error(w,"peer UserOperation hash mismatch",http.StatusBadRequest)
 		return
 	}
-	now:=time.Now().UTC()
-	if h.now!=nil{now=h.now().UTC()}
 	evidence,err:=h.validator.ValidateAndSimulate(r.Context(),env.UserOperation,now)
 	if err!=nil{
+		if h.guard!=nil{h.guard.Failure(source,now)}
 		http.Error(w,"peer UserOperation rejected",http.StatusUnprocessableEntity)
 		return
 	}
@@ -92,6 +110,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter,r *http.Request){
 	if err!=nil{
 		switch {
 		case errors.Is(err,mempool.ErrNonceConflict):
+			if h.guard!=nil{h.guard.Failure(source,now)}
 			http.Error(w,"peer nonce conflict",http.StatusConflict)
 		case errors.Is(err,mempool.ErrFull),errors.Is(err,mempool.ErrSenderLimit):
 			http.Error(w,"peer admission capacity exceeded",http.StatusTooManyRequests)

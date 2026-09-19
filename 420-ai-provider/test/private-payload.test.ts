@@ -25,7 +25,8 @@ function provisionInput(bytes: Uint8Array, id = objectId) {
   const nonce = randomBytes(12);
   const cipher = createCipheriv('aes-256-gcm', key, nonce);
   cipher.setAAD(Buffer.from(['420-ai-private-object-v1', jobId, providerId, id, 'input'].join('|')));
-  stored.set(id, Buffer.concat([Buffer.from([1]), nonce, cipher.getAuthTag(), cipher.update(bytes), cipher.final()]));
+  const ciphertext = Buffer.concat([cipher.update(bytes), cipher.final()]);
+  stored.set(id, Buffer.concat([Buffer.from([1]), nonce, cipher.getAuthTag(), ciphertext]));
 }
 
 test('decrypts authenticated job-bound input and validates canonical commitment', async () => {

@@ -1,7 +1,7 @@
 import type { AIReadSource420 } from './types.js';
 
 export class FallbackAIReadSource420 implements AIReadSource420 {
-  readonly source = 'indexer' as const;
+  readonly source = 'hybrid' as const;
 
   constructor(
     readonly primary: AIReadSource420,

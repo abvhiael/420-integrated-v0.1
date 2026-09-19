@@ -33,7 +33,20 @@ contract MockCasinoSettlementRisk420 { bool public released; function releaseExp
 contract MockCasinoSettlementVault420 {
     bytes32 public immutable vaultId; address public immutable asset; bool public resolved; uint256 public payout;
     constructor(bytes32 vaultId_, address asset_) { vaultId = vaultId_; asset = asset_; }
-    function resolveWager(bytes32, uint256 grossPayout) external { require(!resolved, "resolved"); resolved = true; payout = grossPayout; }
+    // Match BankrollVault420.resolveWager's three-value return ABI, even though
+    // SettlementEngine420 does not consume the values. A void mock return can
+    // cause a high-level typed call to revert during returndata decoding.
+    function resolveWager(bytes32, uint256 grossPayout)
+        external
+        returns (uint256 stake, uint256 stakeAbsorbed, uint256 bankrollOutflow)
+    {
+        require(!resolved, "resolved");
+        resolved = true;
+        payout = grossPayout;
+        stake = 100 ether;
+        stakeAbsorbed = grossPayout < stake ? stake - grossPayout : 0;
+        bankrollOutflow = grossPayout > stake ? grossPayout - stake : 0;
+    }
 }
 contract MockCasinoSettlementEconomics420 { bool public finalized; function finalizeWagerFees(bytes32, BetTypes420.TerminalOutcome) external { require(!finalized, "finalized"); finalized = true; } }
 

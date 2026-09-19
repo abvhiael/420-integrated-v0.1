@@ -4,6 +4,7 @@ pragma solidity ^0.8.24;
 import { HighCountrySessionAccess420 } from "../../../src/highcountry/player/HighCountrySessionAccess420.sol";
 import { IHighCountryAuthorization } from "../../../src/highcountry/interfaces/IHighCountryAuthorization.sol";
 import { AuthorizationRequest } from "../../../src/highcountry/types/HighCountryTypes.sol";
+import { InvariantTarget420 } from "../../helpers/InvariantTarget420.sol";
 
 contract MockHCAuthorizationPA4 is IHighCountryAuthorization {
     function capabilityRegistry() external pure returns (address) { return address(1); }
@@ -16,7 +17,21 @@ contract RoutineTargetPA4 {
     function sensitive(uint256) external {}
 }
 
-contract ProgressiveSessionAccessInvariantTest {
+/// @notice Fuzz unrelated policy entries without rewriting the explicitly configured
+/// routine/unknown selector pair that the invariants hold fixed.
+contract ProgressiveSessionAccessHandlerPA4 {
+    HighCountrySessionAccess420 private immutable sessionAccess;
+    address private constant UNRELATED_TARGET = address(0xBEEF);
+
+    constructor(HighCountrySessionAccess420 sessionAccess_) { sessionAccess = sessionAccess_; }
+
+    function stepSetUnrelatedRoutine(bytes4 selector, bool allowed) external {
+        if (selector == bytes4(0)) return;
+        sessionAccess.setRoutineCall(UNRELATED_TARGET, selector, allowed);
+    }
+}
+
+contract ProgressiveSessionAccessInvariantTest is InvariantTarget420 {
     HighCountrySessionAccess420 private sessionAccess;
     RoutineTargetPA4 private target;
 
@@ -24,6 +39,7 @@ contract ProgressiveSessionAccessInvariantTest {
         sessionAccess = new HighCountrySessionAccess420(address(new MockHCAuthorizationPA4()));
         target = new RoutineTargetPA4();
         sessionAccess.setRoutineCall(address(target), target.routine.selector, true);
+        targetContract(address(new ProgressiveSessionAccessHandlerPA4(sessionAccess)));
     }
 
     function invariant_HC_INV_ACCESS_024_SessionScopeCannotSpendNative420() public view {

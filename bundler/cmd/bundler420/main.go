@@ -15,6 +15,7 @@ import (
 	gasestimation420 "github.com/420integrated/420-integrated/bundler/gasestimation"
 	lifecycle420 "github.com/420integrated/420-integrated/bundler/lifecycle"
 	peer420 "github.com/420integrated/420-integrated/bundler/peer"
+	reputation420 "github.com/420integrated/420-integrated/bundler/reputation"
 	mempool420 "github.com/420integrated/420-integrated/bundler/mempool"
 	rpcapi420 "github.com/420integrated/420-integrated/bundler/rpcapi"
 	runtime420 "github.com/420integrated/420-integrated/bundler/runtime"
@@ -69,8 +70,18 @@ func main() {
 	lifecycleTracker, err := lifecycle420.NewRPC(cfg.ExecutionRPC, cfg.RequestTimeout, lifecycleStore)
 	if err != nil { log.Fatal(err) }
 
+	reputationGuard, err := reputation420.New(reputation420.Config{
+		Window: mustDurationOr("BUNDLER_REPUTATION_WINDOW", time.Minute),
+		MaxRequestsPerSource: mustIntOr("BUNDLER_REPUTATION_MAX_REQUESTS_PER_SOURCE", 120),
+		MaxFailuresPerSource: mustIntOr("BUNDLER_REPUTATION_MAX_FAILURES_PER_SOURCE", 20),
+		MaxRequestsPerSender: mustIntOr("BUNDLER_REPUTATION_MAX_REQUESTS_PER_SENDER", 60),
+		Backoff: mustDurationOr("BUNDLER_REPUTATION_BACKOFF", 5*time.Minute),
+		MaxEntries: mustIntOr("BUNDLER_REPUTATION_MAX_ENTRIES", 8192),
+	})
+	if err != nil { log.Fatal(err) }
 	peerHandler, err := peer420.NewHandler(cfg.ChainID, cfg.EntryPoint, validationEngine, pool)
 	if err != nil { log.Fatal(err) }
+	peerHandler.SetGuard(reputationGuard)
 	peerBroadcaster, err := peer420.NewBroadcaster(
 		cfg.ChainID,
 		cfg.EntryPoint,

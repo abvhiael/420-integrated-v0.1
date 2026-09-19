@@ -30,6 +30,9 @@ jobs:
       - name: Production shell build
         working-directory: bong-goggles/web
         run: npm run build
+      - name: BG-19.13 static asset and accessibility qualification
+        working-directory: bong-goggles/web
+        run: node scripts/qualify-web.mjs
       - name: Frontend secret scan
         working-directory: bong-goggles/web
         run: |

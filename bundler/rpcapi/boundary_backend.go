@@ -31,12 +31,17 @@ type LifecycleTracker interface {
 	GetReceipt(context.Context,string)(lifecycle.Receipt,bool,error)
 }
 
+type Propagator interface {
+	Broadcast(context.Context,userop.PackedUserOperation)(int,error)
+}
+
 type BoundaryBackend struct {
 	EntryPoint string
 	Validator Validator
 	Mempool AdmissionPool
 	GasEstimator GasEstimator
 	Lifecycle LifecycleTracker
+	Propagator Propagator
 	Now func() time.Time
 }
 
@@ -63,6 +68,9 @@ func (b BoundaryBackend) SendUserOperation(ctx context.Context,op userop.PackedU
 		default:
 			return "",errors.New("mempool admission failed")
 		}
+	}
+	if !admitted.Duplicate && b.Propagator!=nil {
+		_,_ = b.Propagator.Broadcast(ctx,op)
 	}
 	return admitted.Hash,nil
 }

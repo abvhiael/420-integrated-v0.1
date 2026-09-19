@@ -1,0 +1,15 @@
+{
+  "name": "@420integrated/bong-goggles-web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "check": "node scripts/check.mjs",
+    "build": "node scripts/build.mjs",
+    "qualify": "npm run check && npm test && npm run build"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

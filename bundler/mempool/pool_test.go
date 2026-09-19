@@ -2,6 +2,8 @@ package mempool
 
 import (
 	"errors"
+	"fmt"
+	"math/big"
 	"strings"
 	"testing"
 	"time"
@@ -103,4 +105,54 @@ func TestAdmissionRequiresCanonicalOperationAndMatchingSuccessfulEvidence(t *tes
 	ev=evidenceFor(t,op,now)
 	ev.UserOpHash="0x"+strings.Repeat("ff",32)
 	if _,err:=pool.Add(op,ev,now); err==nil { t.Fatal("mismatched simulation evidence admitted") }
+}
+
+
+func gasFees(maxFee uint64) string {
+	high:=strings.Repeat("00",16)
+	low:=fmt.Sprintf("%032x",maxFee)
+	return "0x"+high+low
+}
+
+func TestReplacementRequiresFeeBumpAndPreservesQueuePosition(t *testing.T){
+	now:=time.Date(2026,9,18,20,0,0,0,time.UTC)
+	pool,_:=New(Config{MaxOperations:4,MaxPerSender:2,TTL:time.Minute,ReplacementBumpBps:1000})
+	sender:="0x2222222222222222222222222222222222222222"
+	original:=fixture("0x1",sender)
+	original.GasFees=gasFees(100)
+	first,err:=pool.Add(original,evidenceFor(t,original,now),now)
+	if err!=nil || first.Replaced{t.Fatalf("original add: %+v %v",first,err)}
+
+	underpriced:=original
+	underpriced.CallData="0x5678"
+	underpriced.GasFees=gasFees(109)
+	if _,err:=pool.Add(underpriced,evidenceFor(t,underpriced,now.Add(10*time.Second)),now.Add(10*time.Second));!errors.Is(err,ErrReplacementUnderpriced){
+		t.Fatalf("expected underpriced replacement, got %v",err)
+	}
+
+	replacement:=underpriced
+	replacement.GasFees=gasFees(110)
+	result,err:=pool.Add(replacement,evidenceFor(t,replacement,now.Add(20*time.Second)),now.Add(20*time.Second))
+	if err!=nil || !result.Replaced{t.Fatalf("replacement add: %+v %v",result,err)}
+	if pool.Len(now.Add(20*time.Second))!=1{t.Fatalf("replacement changed pool size")}
+	items:=pool.Snapshot(now.Add(20*time.Second))
+	if len(items)!=1{t.Fatalf("snapshot len %d",len(items))}
+	if !items[0].AdmittedAt.Equal(now){t.Fatalf("replacement changed admission order: %v",items[0].AdmittedAt)}
+	if !items[0].ExpiresAt.Equal(now.Add(time.Minute)){t.Fatalf("replacement refreshed TTL: %v",items[0].ExpiresAt)}
+	if items[0].Hash!=result.Hash{t.Fatalf("old hash remained active")}
+}
+
+func TestReplacementUsesEntryPointMaxFeeLow128Bits(t *testing.T){
+	op:=fixture("0x1","0x2222222222222222222222222222222222222222")
+	op.GasFees="0x"+strings.Repeat("ff",16)+fmt.Sprintf("%032x",uint64(420))
+	fee,err:=maxFeePerGas(op)
+	if err!=nil{t.Fatal(err)}
+	if fee.Uint64()!=420{t.Fatalf("max fee=%s",fee)}
+}
+
+func TestReplacementMinimumIncrementProtectsZeroAndTinyFees(t *testing.T){
+	if replacementFeeSufficient(big.NewInt(0),big.NewInt(0),1000){t.Fatal("zero-fee self replacement accepted")}
+	if !replacementFeeSufficient(big.NewInt(0),big.NewInt(1),1000){t.Fatal("zero fee could not be bumped by one")}
+	if replacementFeeSufficient(big.NewInt(1),big.NewInt(1),1000){t.Fatal("same tiny fee accepted")}
+	if !replacementFeeSufficient(big.NewInt(1),big.NewInt(2),1000){t.Fatal("tiny fee +1 rejected")}
 }

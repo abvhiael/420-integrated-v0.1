@@ -120,7 +120,7 @@ contract AINativeVaultFundingAdapter420Test is Test {
     }
     function testVaultFailureRollsBackDepositAndNonce() public {
         vault.setReject(true);
-        vm.prank(PAYER); vm.expectRevert(bytes("vault reservation rejected"));
+        vm.prank(PAYER); vm.expectRevert(bytes4(0x08c379a0)); // Error(string): vault reservation rejected
         adapter.fundNative{value: 1 ether}(JOB, PROVIDER_ID, NONCE);
         assertEq(address(vault).balance, 0);
         assertEq(address(adapter).balance, 0);
@@ -130,7 +130,7 @@ contract AINativeVaultFundingAdapter420Test is Test {
     }
     function testEscrowFailureRollsBackVaultReservationAndDeposit() public {
         escrow.setReject(true);
-        vm.prank(PAYER); vm.expectRevert(bytes("escrow rejected"));
+        vm.prank(PAYER); vm.expectRevert(bytes4(0x08c379a0)); // Error(string): escrow rejected
         adapter.fundNative{value: 1 ether}(JOB, PROVIDER_ID, NONCE);
         assertEq(address(vault).balance, 0);
         assertEq(adapter.consumedJob(JOB) ? uint256(1) : 0, 0);

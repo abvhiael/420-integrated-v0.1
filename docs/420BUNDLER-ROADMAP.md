@@ -15,8 +15,8 @@ The Bundler Network is not custody, wallet authorization, consensus, settlement 
 - **GEN-11.6 — bundle construction + EntryPoint submission — COMPLETE**
 - **GEN-11.7 — gas + fee estimation — COMPLETE**
 - **GEN-11.8 — Paymaster integration boundary — COMPLETE**
-- **GEN-11.9 — receipts + lifecycle tracking — IN QUALIFICATION**
-- GEN-11.10 — multi-bundler propagation — pending
+- **GEN-11.9 — receipts + lifecycle tracking — COMPLETE**
+- **GEN-11.10 — multi-bundler propagation — IN QUALIFICATION**
 - GEN-11.11 — reputation + anti-abuse controls — pending
 - GEN-11.12 — replacement + nonce hardening — pending
 - GEN-11.13 — failure isolation + reorg/restart recovery — pending
@@ -271,3 +271,52 @@ GEN-11.9 intentionally does not claim finality. `included` means canonical recei
 The submission recorder is attached to the bundle builder before active mempool removal, so a successfully submitted operation is not silently discarded without lifecycle evidence. If lifecycle evidence cannot be recorded, the operation remains in the active pool and the cycle reports failure rather than fabricating a successful tracked submission.
 
 GEN-11.9 is complete when all repository qualification workflows pass on one exact head containing submission tracking, canonical receipt/event reconciliation and the public receipt RPC implementation.
+
+
+## GEN-11.10 — multi-bundler propagation
+
+Added `bundler/peer` and wired provider-neutral peer propagation into the production Bundler runtime.
+
+Each Bundler may be configured with up to 32 peer base URLs through:
+
+- `BUNDLER_PEERS` — comma-separated peer base URLs
+
+Outbound propagation occurs only after a UserOperation has passed the local GEN-11.4/11.8 validation path and has been admitted to the local GEN-11.5 mempool. Exact duplicate local submissions are not repropagated.
+
+Peer transport uses a separate internal protocol endpoint:
+
+- `POST /peer/v1/user-operation`
+
+The peer envelope binds:
+
+- chain ID
+- configured EntryPoint
+- canonical UserOperation hash
+- full signed `PackedUserOperation420`
+
+An inbound peer operation never bypasses local admission. The receiving Bundler independently:
+
+1. validates the peer chain and EntryPoint domain;
+2. canonicalizes the UserOperation;
+3. recomputes the canonical UserOperation hash locally;
+4. reruns the full local validation/simulation path, including the GEN-11.8 Paymaster boundary;
+5. applies the local bounded mempool conflict/capacity rules.
+
+Only after those checks does the receiving Bundler return HTTP `202 Accepted`.
+
+Peer-received UserOperations are deliberately **not rebroadcast**. This creates a one-hop propagation primitive for Genesis and prevents propagation loops/amplification while multi-peer topology remains operator-configurable. A wallet or originating Bundler may independently submit to multiple compatible operators.
+
+Outbound propagation is bounded and concurrent rather than serial: all configured peers are contacted in parallel under the request context and configured HTTP timeout. One failing or unavailable peer cannot block use of another peer. Propagation is best-effort; failure by every configured peer does not revoke or invalidate the already-completed local admission.
+
+Peer inputs are bounded to 1 MiB, peer count is capped at 32, configured URLs reuse the hardened external-target URL validation boundary, and response bodies are drained only through a small bounded reader.
+
+This phase preserves the core Genesis invariants:
+
+- BUNDLER-INV-005 — peer propagation never bypasses local validation/simulation.
+- BUNDLER-INV-010 — one Bundler/operator failure cannot prevent use of another compatible operator.
+- BUNDLER-INV-011 — alternative Bundler clients/operators remain permitted.
+- BUNDLER-INV-015 — peer inputs and dependencies remain untrusted and bounded.
+
+GEN-11.10 intentionally does not introduce peer reputation, quotas, bans or abuse scoring; those controls belong to GEN-11.11.
+
+GEN-11.10 is complete when all repository qualification workflows pass on one exact head containing bounded peer ingress, best-effort outbound fan-out and independent local revalidation at every receiving Bundler.

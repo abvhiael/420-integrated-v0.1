@@ -24,11 +24,21 @@ function txAddress(value, label) {
 function bytes32(value, label) {
   try { bytes32Word(value); return value; } catch { throw new Error(`invalid ${label}`); }
 }
-function rawAmount(value, label) {
+function rawAmount(value, label, bits = 256) {
   try {
-    const word = uintWord(value);
-    if (BigInt(value) <= 0n) throw new Error('zero');
-    return { word, value: BigInt(value).toString(10) };
+    const n = BigInt(value);
+    uintWord(n, bits);
+    if (n <= 0n) throw new Error('zero');
+    return n.toString(10);
+  } catch {
+    throw new Error(`invalid ${label}`);
+  }
+}
+function rawUint(value, label, bits = 256) {
+  try {
+    const n = BigInt(value);
+    uintWord(n, bits);
+    return n.toString(10);
   } catch {
     throw new Error(`invalid ${label}`);
   }
@@ -57,11 +67,12 @@ export function buildSwapTransaction({ runtime, account, reviewedIntent, executi
   if (!MODES.includes(mode)) throw new Error('unsupported swap execution mode');
 
   const tokenIn = txAddress(execution?.tokenIn, 'swap tokenIn');
+  if (reviewedIntent.inputToken?.startsWith('0x') && !sameAddress(reviewedIntent.inputToken, tokenIn)) throw new Error('swap input token changed after review');
   const recipient = txAddress(execution?.recipient, 'swap recipient');
   if (!sameAddress(recipient, reviewedIntent.recipient)) throw new Error('swap recipient changed after review');
 
-  const amountInRaw = rawAmount(execution?.amountInRaw, 'swap raw input amount').value;
-  const minFinalAmountOutRaw = rawAmount(execution?.minFinalAmountOutRaw, 'swap raw minimum output').value;
+  const amountInRaw = rawAmount(execution?.amountInRaw, 'swap raw input amount');
+  const minFinalAmountOutRaw = rawAmount(execution?.minFinalAmountOutRaw, 'swap raw minimum output');
   const expectedPathHash = bytes32(execution?.expectedPathHash, 'swap path hash');
 
   if (reviewedIntent.routeCommitment && !sameId(expectedPathHash, reviewedIntent.routeCommitment)) {
@@ -77,7 +88,7 @@ export function buildSwapTransaction({ runtime, account, reviewedIntent, executi
     const marketId = bytes32(hop.marketId, `swap hop ${index} marketId`);
     const routeId = bytes32(hop.routeId, `swap hop ${index} routeId`);
     const tokenOut = txAddress(hop.tokenOut, `swap hop ${index} tokenOut`);
-    const minAmountOutRaw = rawAmount(hop.minAmountOutRaw, `swap hop ${index} raw minimum output`).value;
+    const minAmountOutRaw = rawAmount(hop.minAmountOutRaw, `swap hop ${index} raw minimum output`);
     if (reviewed.marketId?.startsWith('0x') && !sameId(reviewed.marketId, marketId)) throw new Error(`swap hop ${index} market changed after review`);
     if (reviewed.outputToken?.startsWith('0x') && !sameAddress(reviewed.outputToken, tokenOut)) throw new Error(`swap hop ${index} output token changed after review`);
     return { marketId, routeId, tokenOut, minAmountOutRaw, routeData: hop.routeData ?? '0x' };
@@ -107,12 +118,12 @@ export function buildLimitOrderTypedData({ runtime, reviewedOrder, execution }) 
     maker: txAddress(execution?.maker, 'limit order maker'),
     sellToken: txAddress(execution?.sellToken, 'limit order sellToken'),
     buyToken: txAddress(execution?.buyToken, 'limit order buyToken'),
-    sellAmountRaw: rawAmount(execution?.sellAmountRaw, 'limit order raw sell amount').value,
-    minBuyAmountRaw: rawAmount(execution?.minBuyAmountRaw, 'limit order raw minimum buy amount').value,
+    sellAmountRaw: rawAmount(execution?.sellAmountRaw, 'limit order raw sell amount', 128),
+    minBuyAmountRaw: rawAmount(execution?.minBuyAmountRaw, 'limit order raw minimum buy amount', 128),
     recipient: txAddress(execution?.recipient, 'limit order recipient'),
     marketId: bytes32(execution?.marketId, 'limit order marketId'),
-    nonce: BigInt(execution?.nonce).toString(10),
-    expiry: BigInt(execution?.expiry).toString(10),
+    nonce: rawUint(execution?.nonce, 'limit order nonce'),
+    expiry: rawUint(execution?.expiry, 'limit order expiry', 64),
     allowPartial: execution?.allowPartial === true,
   });
 
@@ -207,7 +218,7 @@ export function buildBridgeOutboundTransaction({ runtime, account, reviewedInten
   if (reviewedIntent.routeId?.startsWith('0x') && !sameId(reviewedIntent.routeId, routeId)) throw new Error('bridge route changed after review');
   if (reviewedIntent.exchangeAssetId?.startsWith('0x') && !sameId(reviewedIntent.exchangeAssetId, assetId)) throw new Error('bridge asset changed after review');
 
-  const amountRaw = rawAmount(execution?.amountRaw, 'bridge raw amount').value;
+  const amountRaw = rawAmount(execution?.amountRaw, 'bridge raw amount');
   const feeValueWei = execution?.feeValueWei === undefined ? 0n : BigInt(execution.feeValueWei);
   if (feeValueWei < 0n) throw new Error('invalid bridge fee value');
 

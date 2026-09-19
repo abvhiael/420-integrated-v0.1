@@ -3,6 +3,7 @@ import {createBongGogglesServices} from './core/services.js';
 import {deriveBootstrapState} from './core/bootstrap.js';
 import {createTelemetrySink} from './core/telemetry.js';
 import {discover420Wallet,WalletSessionController420,buildWalletHandoffUrl} from './core/wallet-session.js';
+import {renderApplicationShell,navigateWithoutReload} from './core/app-shell.js';
 
 const root=document.querySelector('#app');
 const telemetry=createTelemetrySink({emit:(event)=>console.info('[bg-web]',event)});
@@ -105,12 +106,25 @@ function renderCurrent(message=null){
     config:runtimeConfig,
     connectedChainId:walletView?.chainId??null
   });
-  render({
-    state:bootstrap.state,
-    detail:message??(bootstrap.state==='maintenance'
-      ?'Bong Goggles is temporarily in maintenance mode.'
-      :'Application foundation loaded. Wallet/session authority is enforced through 420Wallet.')
+  if(bootstrap.state==='maintenance'){
+    render({state:bootstrap.state,detail:'Bong Goggles is temporarily in maintenance mode.'});
+    return;
+  }
+  const walletHref=runtimeConfig
+    ?buildWalletHandoffUrl(runtimeConfig.walletUrl,{action:'connect',returnUrl:window.location.href})
+    :null;
+  const explorerHref=runtimeConfig?.explorerUrl??null;
+  root.dataset.state=bootstrap.state;
+  root.innerHTML=renderApplicationShell({
+    pathname:window.location.pathname,
+    walletView,
+    bootstrapState:bootstrap.state,
+    appOrigin:runtimeConfig.appOrigin,
+    walletHref,
+    explorerHref,
+    announcement:message
   });
+  bindWalletActions();
 }
 
 async function start(){
@@ -140,5 +154,9 @@ async function start(){
 
 window.addEventListener('error',(event)=>telemetry.event('window_error',{message:event.message}));
 window.addEventListener('unhandledrejection',(event)=>telemetry.event('unhandled_rejection',{reason:String(event.reason)}));
+root.addEventListener('click',(event)=>{
+  navigateWithoutReload(event,{windowObject:window,onNavigate:()=>renderCurrent()});
+});
+window.addEventListener('popstate',()=>renderCurrent());
 window.addEventListener('beforeunload',()=>walletController?.destroy());
 start();

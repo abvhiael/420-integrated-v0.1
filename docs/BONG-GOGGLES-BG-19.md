@@ -73,7 +73,7 @@ BG-19.1 follows the repository's existing Wallet/Exchange web convention: depend
 
 **Exit:** a production-buildable shell starts deterministically against testnet/staging/production configuration and fails closed on unsafe configuration.
 
-### BG-19.2 — Wallet, Identity, passkey + session UX — IMPLEMENTED, QUALIFICATION PENDING
+### BG-19.2 — Wallet, Identity, passkey + session UX — COMPLETE AND QUALIFIED
 
 Integrate qualified account/session infrastructure.
 
@@ -100,7 +100,7 @@ BG-19.2 now discovers only the qualified `is420Wallet` EIP-1193 provider, suppor
 
 **Exit:** users can safely enter, leave and recover sessions while every write remains constrained by canonical Wallet/session policy.
 
-### BG-19.3 — design system, navigation + responsive application shell
+### BG-19.3 — design system, navigation + responsive application shell — IMPLEMENTED, QUALIFICATION PENDING
 
 Build the reusable visual/application foundation.
 
@@ -114,6 +114,16 @@ Build the reusable visual/application foundation.
 - loading/degraded/offline visual language;
 - route-level permission/session guards;
 - consistent Explorer/Wallet handoff components for canonical state and transaction inspection.
+
+Implemented in:
+- `bong-goggles/web/core/routes.js`
+- `bong-goggles/web/core/design-system.js`
+- `bong-goggles/web/core/app-shell.js`
+- `bong-goggles/web/test/app-shell.test.js`
+- `bong-goggles/web/app.js`
+- `bong-goggles/web/styles.css`
+
+BG-19.3 establishes the shared application shell and route contract for Home, Profile, Friends, Messages, Notifications, Discover, Groups, Pages, Events, Games, Rewards and Settings. Navigation access is derived from current Wallet/network state instead of inventing permissions, private routes fail closed into read-only presentation, and public routes remain accessible without authentication. The shell now provides desktop side navigation, mobile bottom navigation, a responsive content column, canonical Wallet/Explorer handoffs, route headings, status rail and explicit degraded-network/service banners. Reusable cards, buttons, tabs, toasts, skeletons, empty/error states and canonical handoff components are defined centrally. Keyboard focus, reduced-motion and forced-colors behavior are included at the system level.
 
 **Exit:** every later feature can be implemented without inventing one-off navigation, modal, loading or authority patterns.
 

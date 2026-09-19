@@ -122,12 +122,12 @@ contract AIComputeRecovery420Test is Test {
         computeJobs.markVerified(computeJobId);
         adapter.sync(AI_JOB_ID);
         AIJobManager.Job memory ai = aiJobs.getJob(AI_JOB_ID);
-        assertEq(uint8(ai.status), uint8(AIJobManager.Status.VERIFIED));
-        assertEq(ai.computeRequestId, REQUEST_ID);
-        assertEq(ai.computeJobId, computeJobId);
-        assertEq(ai.providerId, AI_PROVIDER_ID);
-        assertEq(ai.resultHash, keccak256("output"));
-        assertEq(ai.resultManifestHash, keccak256("result-manifest"));
+        assertEq(uint256(uint8(ai.status)), uint256(uint8(AIJobManager.Status.VERIFIED)));
+        assertEq(uint256(ai.computeRequestId), uint256(REQUEST_ID));
+        assertEq(uint256(ai.computeJobId), uint256(computeJobId));
+        assertEq(uint256(ai.providerId), uint256(AI_PROVIDER_ID));
+        assertEq(uint256(ai.resultHash), uint256(keccak256("output")));
+        assertEq(uint256(ai.resultManifestHash), uint256(keccak256("result-manifest")));
     }
     function testAdapterRejectsComputeRequestThatBroadensSpend() public {
         bytes32 badId = keccak256("bad-request");

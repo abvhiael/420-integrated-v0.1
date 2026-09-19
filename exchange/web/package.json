@@ -5,10 +5,11 @@
   "type": "module",
   "scripts": {
     "test": "node --test test/*.test.js",
-    "check": "node scripts/check.mjs",
+    "check": "node scripts/check.mjs && node scripts/check-v15.7.mjs",
     "build": "node scripts/build.mjs",
     "release:qualify": "EXCHANGE_DEPLOYMENT_MODE=qualification npm run build && npm test",
-    "qualify:swap:testnet": "node scripts/live-swap-qualify.mjs"
+    "qualify:swap:testnet": "node scripts/live-swap-qualify.mjs",
+    "qualify:limit-order:testnet": "node scripts/live-limit-order-qualify.mjs"
   },
   "engines": {
     "node": ">=22"

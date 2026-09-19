@@ -15,6 +15,7 @@ test('loads and discovers the local DEVHUB manifest', async () => {
   assert.equal(network.nativeCurrency.symbol, '420');
   assert.equal(network.rpc.http[0], 'http://127.0.0.1:8545');
   assert.equal(network.service('indexer'), 'http://127.0.0.1:4202');
+  assert.equal(network.service('ai'), 'http://127.0.0.1:4206');
   assert.equal(network.contract('Registry420').address, '0x0000000000000000000000000000000000000420');
   assert.equal(network.canRequestFaucet, true);
   assert.equal(network.isProduction, false);

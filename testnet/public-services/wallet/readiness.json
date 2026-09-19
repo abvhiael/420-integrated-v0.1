@@ -1,7 +1,7 @@
 {
   "schema": "420-public-service-readiness-v1",
   "serviceId": "420/service/wallet/v1",
-  "status": "W14_1_DEPLOYMENT_INVENTORY_ESTABLISHED",
+  "status": "W14_3_LIVE_TESTNET_QUALIFIER_IMPLEMENTED",
   "genesisRequired": true,
   "productionDomainAssigned": false,
   "domainAssignmentBlocksImplementation": false,
@@ -23,6 +23,14 @@
   "blockers": [
     "official public testnet manifest missing",
     "wallet canonical anchors conflict with frozen system-address assignments",
-    "EntryPoint420 production implementation binding pending"
-  ]
+    "EntryPoint420 production implementation binding pending",
+    "W14.3 live qualification has not yet executed against an official testnet"
+  ],
+  "liveQualification": {
+    "phase": "W14.3",
+    "qualifier": "wallet/web/scripts/qualify-live-testnet.mjs",
+    "workflow": ".github/workflows/wallet-live-testnet.yml",
+    "evidenceSchema": "420-wallet-live-testnet-qualification-v1",
+    "executedAgainstOfficialTestnet": false
+  }
 }

@@ -1,10 +1,9 @@
 // Package httpapi defines the versioned, read-only public GEN-SVC-2 API.
-// Private records are never serialized; mutation and authorization stay in their canonical services.
+// Private records are never serialized; mutations remain with canonical services.
 package httpapi
 
 import (
  "encoding/json"
- "errors"
  "net/http"
  "strconv"
  "time"
@@ -18,10 +17,9 @@ import (
 const Version = "v1"
 
 type Places interface { ListAll() []locationmodel.Place }
-type Events interface { ListAll() []eventmodel.Event }
 
-// Server takes an explicit canonical event source and an explicitly rebuilt
-// discovery snapshot. A caller must rebuild discovery after canonical updates.
+// Discovery is explicitly rebuilt by the application when canonical event
+// data changes. HTTP and its SDK never become a lifecycle authority.
 type Server struct {
  Places Places
  Events eventdiscovery.Source
@@ -49,11 +47,8 @@ func reject(w http.ResponseWriter,status int,message string){reply(w,status,apiE
 func (s Server) places(w http.ResponseWriter,r *http.Request){
  if s.Places==nil {reject(w,http.StatusServiceUnavailable,"place source unavailable");return}
  if len(r.URL.Query())!=0 {reject(w,http.StatusBadRequest,"unsupported places parameters");return}
- records:=s.Places.ListAll()
- // Filter before enforcing the public response cap: private records never
- // consume public pagination quota or enter a response model.
  public:=make([]locationmodel.Place,0)
- for _,p:=range records {if p.Visibility==locationmodel.VisibilityPublic {public=append(public,p)}}
+ for _,p:=range s.Places.ListAll() {if p.Visibility==locationmodel.VisibilityPublic {public=append(public,p)}}
  view,err:=locationuikit.Build(public)
  if err!=nil {reject(w,http.StatusUnprocessableEntity,"place projection unavailable");return}
  reply(w,http.StatusOK,envelope[locationuikit.View]{Version:Version,Data:view})
@@ -62,7 +57,6 @@ func (s Server) places(w http.ResponseWriter,r *http.Request){
 func (s Server) events(w http.ResponseWriter,r *http.Request){
  if s.Events==nil||s.Discovery==nil {reject(w,http.StatusServiceUnavailable,"event source unavailable");return}
  values:=r.URL.Query()
- if len(values)>5 {reject(w,http.StatusBadRequest,"unsupported events parameters");return}
  for key,all:=range values {
   switch key {case "from","to","limit","offset","placeId": default:reject(w,http.StatusBadRequest,"unsupported events parameter");return}
   if len(all)!=1 {reject(w,http.StatusBadRequest,"duplicate events parameter");return}
@@ -80,7 +74,3 @@ func (s Server) events(w http.ResponseWriter,r *http.Request){
  if err!=nil {reject(w,http.StatusUnprocessableEntity,"event projection unavailable");return}
  reply(w,http.StatusOK,envelope[eventuikit.View]{Version:Version,Data:view})
 }
-
-// Keep the source interfaces structural; neither HTTP nor an SDK is a
-// separate canonical lifecycle authority.
-var _ = errors.New

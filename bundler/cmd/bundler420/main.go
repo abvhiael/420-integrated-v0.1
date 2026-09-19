@@ -14,6 +14,7 @@ import (
 	bundle420 "github.com/420integrated/420-integrated/bundler/bundle"
 	gasestimation420 "github.com/420integrated/420-integrated/bundler/gasestimation"
 	lifecycle420 "github.com/420integrated/420-integrated/bundler/lifecycle"
+	persistence420 "github.com/420integrated/420-integrated/bundler/persistence"
 	peer420 "github.com/420integrated/420-integrated/bundler/peer"
 	reputation420 "github.com/420integrated/420-integrated/bundler/reputation"
 	mempool420 "github.com/420integrated/420-integrated/bundler/mempool"
@@ -55,6 +56,14 @@ func main() {
 		ReplacementBumpBps: uint64(mustIntOr("BUNDLER_REPLACEMENT_BUMP_BPS", 1000)),
 	})
 	if err != nil { log.Fatal(err) }
+	lifecycleStore := lifecycle420.NewStore()
+	durableStore, err := persistence420.Open(
+		envOr("BUNDLER_DATA_DIR", "./data/bundler"),
+		pool,
+		lifecycleStore,
+		time.Now().UTC(),
+	)
+	if err != nil { log.Fatal(err) }
 	submitter, err := bundle420.NewRPCSubmitter(
 		cfg.ExecutionRPC,
 		os.Getenv("BUNDLER_SUBMITTER"),
@@ -64,10 +73,9 @@ func main() {
 	bundleBuilder, err := bundle420.New(bundle420.Config{
 		EntryPoint: cfg.EntryPoint,
 		MaxOperations: mustIntOr("BUNDLER_BUNDLE_MAX_OPERATIONS", 16),
-	}, pool, validationEngine, submitter)
+	}, durableStore, validationEngine, submitter)
 	if err != nil { log.Fatal(err) }
-	lifecycleStore := lifecycle420.NewStore()
-	bundleBuilder.SetSubmissionRecorder(lifecycleStore)
+	bundleBuilder.SetSubmissionRecorder(durableStore)
 	lifecycleTracker, err := lifecycle420.NewRPC(cfg.ExecutionRPC, cfg.RequestTimeout, lifecycleStore)
 	if err != nil { log.Fatal(err) }
 
@@ -80,7 +88,7 @@ func main() {
 		MaxEntries: mustIntOr("BUNDLER_REPUTATION_MAX_ENTRIES", 8192),
 	})
 	if err != nil { log.Fatal(err) }
-	peerHandler, err := peer420.NewHandler(cfg.ChainID, cfg.EntryPoint, validationEngine, pool)
+	peerHandler, err := peer420.NewHandler(cfg.ChainID, cfg.EntryPoint, validationEngine, durableStore)
 	if err != nil { log.Fatal(err) }
 	peerHandler.SetGuard(reputationGuard)
 	peerBroadcaster, err := peer420.NewBroadcaster(
@@ -99,7 +107,7 @@ func main() {
 	rpcHandler, err := rpcapi420.NewHandler(rpcapi420.BoundaryBackend{
 		EntryPoint: cfg.EntryPoint,
 		Validator: validationEngine,
-		Mempool: pool,
+		Mempool: durableStore,
 		GasEstimator: gasEstimator,
 		Lifecycle: lifecycleTracker,
 		Propagator: peerBroadcaster,

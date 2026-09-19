@@ -1,0 +1,41 @@
+name: 420 AI Web
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "ai/web/**"
+      - ".github/workflows/ai-web.yml"
+  pull_request:
+    paths:
+      - "ai/web/**"
+      - ".github/workflows/ai-web.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ai-web-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-ai-web:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Static qualification
+        working-directory: ai/web
+        run: npm run check
+      - name: Unit tests
+        working-directory: ai/web
+        run: npm test
+      - name: Authority boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -RniE 'privateKey|mnemonic|seedPhrase|eth_sendRawTransaction' ai/web
+          grep -Rni '"writes":false' ai/web/runtime-config.json
+          grep -Rni 'non-authoritative' ai/web

@@ -81,3 +81,55 @@ func TestSubmitNextDropsInvalidButRetainsRPCFailure(t *testing.T){
 	if len(result.Failed)!=1 || result.Failed[0]!=pool.items[1].Hash { t.Fatalf("RPC failure not retained: %+v",result) }
 	if len(pool.removed)!=1 || pool.removed[0]!=pool.items[0].Hash { t.Fatalf("failed submission was removed: %v",pool.removed) }
 }
+
+
+type fakeRecorder struct {
+	pending map[string]bool
+	recordErr bool
+	beginErr bool
+}
+func (r *fakeRecorder) BeginSubmission(hash,_ string,_ time.Time) error {
+	if r.beginErr{return errors.New("begin failed")}
+	if r.pending==nil{r.pending=map[string]bool{}}
+	r.pending[hash]=true
+	return nil
+}
+func (r *fakeRecorder) AbortSubmission(hash string){if r.pending!=nil{delete(r.pending,hash)}}
+func (r *fakeRecorder) HasSubmissionOrPending(hash string) bool {return r.pending!=nil && r.pending[hash]}
+func (r *fakeRecorder) RecordSubmission(hash,_,_ string,_ time.Time) error {
+	if r.recordErr{return errors.New("record failed")}
+	if r.pending!=nil{delete(r.pending,hash)}
+	return nil
+}
+
+func TestSubmitNextDoesNotResubmitPendingOperation(t *testing.T){
+	now:=time.Date(2026,9,18,21,0,0,0,time.UTC)
+	a:=op("0x2222222222222222222222222222222222222222","0x1")
+	e:=entry(t,a,now)
+	pool:=&fakePool{items:[]mempool.Entry{e}}
+	sub:=&fakeSubmitter{fails:map[string]bool{}}
+	rec:=&fakeRecorder{pending:map[string]bool{e.Hash:true}}
+	builder,_:=New(Config{EntryPoint:"0x1111111111111111111111111111111111111111",MaxOperations:4},pool,fakeValidator{invalid:map[string]bool{}},sub)
+	builder.SetSubmissionRecorder(rec)
+	result,err:=builder.SubmitNext(context.Background(),now)
+	if err!=nil{t.Fatal(err)}
+	if len(sub.order)!=0{t.Fatalf("pending operation was resubmitted: %v",sub.order)}
+	if len(pool.removed)!=1 || pool.removed[0]!=e.Hash{t.Fatalf("pending op not removed from active pool: %v",pool.removed)}
+	if len(result.Failed)!=1 || result.Failed[0]!=e.Hash{t.Fatalf("pending op not isolated: %+v",result)}
+}
+
+func TestRecordFailureAfterAcceptedSendDoesNotRemainActive(t *testing.T){
+	now:=time.Date(2026,9,18,21,0,0,0,time.UTC)
+	a:=op("0x2222222222222222222222222222222222222222","0x1")
+	e:=entry(t,a,now)
+	pool:=&fakePool{items:[]mempool.Entry{e}}
+	sub:=&fakeSubmitter{fails:map[string]bool{}}
+	rec:=&fakeRecorder{recordErr:true}
+	builder,_:=New(Config{EntryPoint:"0x1111111111111111111111111111111111111111",MaxOperations:4},pool,fakeValidator{invalid:map[string]bool{}},sub)
+	builder.SetSubmissionRecorder(rec)
+	result,err:=builder.SubmitNext(context.Background(),now)
+	if err!=nil{t.Fatal(err)}
+	if len(sub.order)!=1{t.Fatalf("expected one submit attempt, got %v",sub.order)}
+	if len(pool.removed)!=1 || pool.removed[0]!=e.Hash{t.Fatalf("accepted send stayed active: %v",pool.removed)}
+	if len(result.Failed)!=1{t.Fatalf("recording failure not isolated: %+v",result)}
+}

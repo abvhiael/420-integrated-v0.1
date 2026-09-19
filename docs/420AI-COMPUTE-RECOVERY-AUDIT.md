@@ -187,3 +187,12 @@ The recovery branch now includes `420-ai-api/`, AI/Compute Indexer projections, 
 The preferred read architecture uses Indexer projections for discovery/history and direct canonical reads for current object hydration, with explicit non-authoritative provenance and chain/freshness checks.
 
 See `docs/AI-RECOVERY-4-READ-API.md` and `docs/420AI-RECOVERY-ROADMAP.md`.
+
+
+## AI-RECOVERY-5 web client
+
+The recovery branch now includes `ai/web/`, a deployable static 420AI client for `ai.420integrated.org`. It consumes the non-authoritative read layer, connects an injected wallet for identity/network binding, exposes model/provider/job/operator views, and prepares bounded AI request intents.
+
+Canonical writes remain fail-closed until the Wallet transaction adapter and funding/Compute integration are qualified.
+
+See `docs/AI-RECOVERY-5-WEB-CLIENT.md`.

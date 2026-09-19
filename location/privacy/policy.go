@@ -72,18 +72,18 @@ func (Policy) CanUseExactCoordinates(place model.Place) bool {
 }
 
 func (Policy) CanReverseGeocode(place model.Place) bool {
-	return Policy{}.CanUseExactCoordinates(place)
+	return (Policy{}).CanUseExactCoordinates(place)
 }
 
 func (Policy) CanPublicProximitySearch(place model.Place) bool {
-	return Policy{}.CanUseExactCoordinates(place)
+	return (Policy{}).CanUseExactCoordinates(place)
 }
 
 func (Policy) RedactError(err error, place *model.Place) error {
 	if err == nil {
 		return nil
 	}
-	if place == nil || Policy{}.CanUseExactCoordinates(*place) {
+	if place == nil || (Policy{}).CanUseExactCoordinates(*place) {
 		return err
 	}
 	msg := strings.ToLower(err.Error())

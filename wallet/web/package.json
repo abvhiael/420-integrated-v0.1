@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "test": "node --test test/*.test.js",
-    "check": "node scripts/check-qualified.mjs && node scripts/check-passkey-runtime.mjs"
+    "check": "node scripts/check-qualified.mjs && node scripts/check-passkey-runtime.mjs",
+    "generate:runtime": "node scripts/generate-runtime-config.mjs"
   },
   "engines": {
     "node": ">=22"

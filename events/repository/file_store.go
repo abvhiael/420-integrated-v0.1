@@ -12,6 +12,7 @@ import (
 	"sync"
 
 	"github.com/420integrated/420-integrated/events/model"
+	locationmodel "github.com/420integrated/420-integrated/location/model"
 )
 
 const schemaVersion="420-events-store-v1"
@@ -84,7 +85,7 @@ func (s *FileStore) ListAll() []model.Event {
 	return out
 }
 
-func (s *FileStore) ListByOrganizer(organizer model.SubjectRef) []model.Event {
+func (s *FileStore) ListByOrganizer(organizer locationmodel.SubjectRef) []model.Event {
 	s.mu.RLock(); defer s.mu.RUnlock()
 	out:=[]model.Event{}
 	for _,event:=range s.items {

@@ -5,6 +5,7 @@ on:
     paths:
       - 'location/**'
       - 'events/**'
+      - 'genesis/svc2/**'
       - 'sdk/location420/**'
       - 'sdk/events420/**'
       - '.github/workflows/gen-svc-2-implementation.yml'
@@ -13,6 +14,7 @@ on:
     paths:
       - 'location/**'
       - 'events/**'
+      - 'genesis/svc2/**'
       - 'sdk/location420/**'
       - 'sdk/events420/**'
       - '.github/workflows/gen-svc-2-implementation.yml'
@@ -28,5 +30,5 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: '1.23.x'
-      - run: go test ./location/...
-      - run: go vet ./location/...
+      - run: go test ./location/... ./events/... ./genesis/svc2/...
+      - run: go vet ./location/... ./events/... ./genesis/svc2/...

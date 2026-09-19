@@ -41,7 +41,12 @@ contract BetCasinoSolvencyConvergence420Test {
         for (uint256 i=0;i<versions.length;++i) require(s.risk.reservedByGame(VAULT,versions[i])==100 ether,"game reserve");
     }
     function testAccountingRejectsAggregateCasinoOverReservationEvenWhenRiskProfileAllowsIt() public {
-        Suite memory s=_deploy(); bytes32[8] memory versions=_versions(); for(uint256 i=0;i<versions.length;++i) _reserve(s,versions[i],i+100,100 ether); _reserve(s,DICE_V1,999,100 ether); require(s.accounting.availableForNewRisk(VAULT)==0,"fully protected"); vm.expectRevert(VaultAccounting420.Insolvent.selector); _reserve(s,CRASH_V1,1000,1 ether); require(s.risk.reservedByVault(VAULT)==900 ether,"risk leak"); require(s.accounting.getVault(VAULT).activeReservedLiability==900 ether,"accounting leak");
+        Suite memory s=_deploy(); bytes32[8] memory versions=_versions(); for(uint256 i=0;i<versions.length;++i) _reserve(s,versions[i],i+100,100 ether); _reserve(s,DICE_V1,999,100 ether); require(s.accounting.availableForNewRisk(VAULT)==0,"fully protected");
+        // expectRevert applies to the next external call, not to an internal helper's post-call assertion.
+        bytes32 rejectedWagerId = keccak256(abi.encode("casino/convergence/solvency-wager", CRASH_V1, uint256(1000)));
+        vm.expectRevert(VaultAccounting420.Insolvent.selector);
+        s.risk.reserveExposure(rejectedWagerId,VAULT,CRASH_V1,RISK_PROFILE,100 ether,101 ether,bytes32(0));
+        require(s.risk.reservedByVault(VAULT)==900 ether,"risk leak"); require(s.accounting.getVault(VAULT).activeReservedLiability==900 ether,"accounting leak");
     }
     function testReleaseAndSettlementPreserveSharedVaultConservation() public {
         Suite memory s=_deploy(); bytes32[8] memory versions=_versions(); bytes32[8] memory wagers; for(uint256 i=0;i<versions.length;++i) wagers[i]=_reserve(s,versions[i],i+200,100 ether); uint256 released=s.risk.releaseExposure(wagers[7]); require(released==100 ether,"release"); require(s.risk.reservedByVault(VAULT)==700 ether,"risk release"); require(s.accounting.getVault(VAULT).activeReservedLiability==700 ether,"accounting release"); require(s.accounting.availableForNewRisk(VAULT)==200 ether,"available restored"); int256 pnl=s.accounting.recordWagerSettlement(VAULT,100 ether,0); require(pnl==int256(100 ether),"pnl"); VaultAccounting420.VaultState memory state=s.accounting.getVault(VAULT); require(state.totalAssets==1_100 ether,"assets"); require(state.activeReservedLiability==700 ether,"others disturbed"); require(state.safetyReserve==100 ether,"safety"); require(state.realizedPnl==int256(100 ether),"realized"); require(s.accounting.availableForNewRisk(VAULT)==300 ether,"post available");

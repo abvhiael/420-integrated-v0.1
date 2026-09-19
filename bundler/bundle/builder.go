@@ -24,6 +24,9 @@ type Submitter interface {
 }
 
 type SubmissionRecorder interface {
+	BeginSubmission(string,string,time.Time) error
+	AbortSubmission(string)
+	HasSubmissionOrPending(string) bool
 	RecordSubmission(string,string,string,time.Time) error
 }
 
@@ -70,19 +73,32 @@ func (b *Builder) SubmitNext(ctx context.Context,now time.Time)(Result,error){
 	if len(snapshot)>b.cfg.MaxOperations { snapshot=snapshot[:b.cfg.MaxOperations] }
 	result:=Result{Selected:len(snapshot)}
 	for _,entry:=range snapshot {
+		if b.recorder!=nil && b.recorder.HasSubmissionOrPending(entry.Hash) {
+			b.pool.Remove(entry.Hash)
+			result.Failed=append(result.Failed,entry.Hash)
+			continue
+		}
 		evidence,err:=b.validator.ValidateAndSimulate(ctx,entry.Operation,now)
 		if err!=nil || evidence.UserOpHash!=entry.Hash {
 			b.pool.Remove(entry.Hash)
 			result.Rejected=append(result.Rejected,entry.Hash)
 			continue
 		}
+		if b.recorder!=nil {
+			if err:=b.recorder.BeginSubmission(entry.Hash,b.cfg.EntryPoint,now.UTC()); err!=nil {
+				result.Failed=append(result.Failed,entry.Hash)
+				continue
+			}
+		}
 		txHash,err:=b.submitter.Submit(ctx,b.cfg.EntryPoint,entry.Operation)
 		if err!=nil {
+			if b.recorder!=nil { b.recorder.AbortSubmission(entry.Hash) }
 			result.Failed=append(result.Failed,entry.Hash)
 			continue
 		}
 		if b.recorder!=nil {
 			if err:=b.recorder.RecordSubmission(entry.Hash,txHash,b.cfg.EntryPoint,now.UTC()); err!=nil {
+				b.pool.Remove(entry.Hash)
 				result.Failed=append(result.Failed,entry.Hash)
 				continue
 			}

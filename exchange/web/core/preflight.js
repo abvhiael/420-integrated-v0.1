@@ -7,6 +7,7 @@ import {
   encodeCanPlaceLimitOrder,
   encodeCanSwap,
   functionSelector,
+  keccak256,
 } from './abi.js';
 import { normalizeChainId } from './wallet-session.js';
 
@@ -80,6 +81,20 @@ function rawUint(value, label) {
   } catch {
     throw new ExchangePreflightError('INVALID_CHECK', `invalid ${label}`);
   }
+}
+
+export function transactionFingerprint(transaction) {
+  if (!transaction?.request || !transaction?.chainId) throw new ExchangePreflightError('INVALID_TRANSACTION', 'transaction envelope required');
+  const request = transaction.request;
+  const canonical = [
+    String(transaction.kind ?? ''),
+    normalizeChainId(transaction.chainId),
+    String(request.from ?? '').toLowerCase(),
+    String(request.to ?? '').toLowerCase(),
+    String(request.data ?? '').toLowerCase(),
+    String(request.value ?? '0x0').toLowerCase(),
+  ].join('|');
+  return keccak256(canonical);
 }
 
 export function freshnessGate({ observedAt, expiresAt, nowSeconds, maxAgeSeconds = null } = {}) {
@@ -219,6 +234,8 @@ export async function preflightExchangeTransaction({
     ok:true,
     kind:transaction.kind,
     chainId:actualChainId,
+    account:String(transaction.request.from).toLowerCase(),
+    transactionFingerprint:transactionFingerprint(transaction),
     freshness:freshnessResult,
     allowances:Object.freeze(allowances),
     authorizations:Object.freeze(authorizations),

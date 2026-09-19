@@ -63,7 +63,7 @@ function assertInventoryAuthority420(inventory) {
 function assertLiveInventoryReady420(inventory, environment) {
   assert420(inventory?.schema === '420-wallet-deployment-inventory-v1', 'unsupported wallet deployment inventory schema');
   assert420(inventory?.network?.environment === environment, 'wallet deployment inventory environment does not match manifest');
-  assert420(String(inventory?.network?.expectedChainId) === String(inventory?.network?.expectedChainId || ''), 'wallet deployment inventory chain id missing');
+  assert420(typeof inventory?.network?.expectedChainId === 'string' && /^[1-9][0-9]*$/.test(inventory.network.expectedChainId), 'wallet deployment inventory chain id missing or invalid');
 
   if (!LIVE_ENVIRONMENTS.has(environment)) return;
 
@@ -86,9 +86,8 @@ export function buildWalletRuntimeConfig420({ manifest, inventory, baseConfig, m
   assert420(expectedChainId.length > 0, 'wallet deployment inventory expected chain id missing');
   assert420(validatedManifest.network.chainId === expectedChainId, 'network manifest chain id does not match wallet deployment inventory');
 
-  if (LIVE_ENVIRONMENTS.has(environment)) {
-    assertLiveInventoryReady420(inventory, environment);
-  }
+  assert420(inventory?.network?.environment === environment, 'network manifest environment does not match wallet deployment inventory');
+  if (LIVE_ENVIRONMENTS.has(environment)) assertLiveInventoryReady420(inventory, environment);
 
   const authority = assertInventoryAuthority420(inventory);
   const rpcUrl = validatedManifest.rpc.http[0];

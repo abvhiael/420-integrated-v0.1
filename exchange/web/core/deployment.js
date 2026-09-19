@@ -14,6 +14,7 @@ export const REQUIRED_EXCHANGE_CONTRACTS = Object.freeze([
   'ExchangeRouteRegistry420',
   'ExchangeOracleGuard420',
   'ExchangeEmergencyControl420',
+  'GatewayRouter420',
 ]);
 
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';

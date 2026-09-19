@@ -20,7 +20,9 @@ func TestCanonicalRecurrenceSurvivesRepositoryRestart(t *testing.T){
  got,err:=ExpandEvent(saved,e.StartAt,e.StartAt.AddDate(0,0,5));if err!=nil{t.Fatal(err)}
  if len(got)!=3||!got[1].Cancelled||got[0].Cancelled||got[2].Cancelled{t.Fatalf("expanded=%+v",got)}
  got[1].Cancelled=false
- if saved.Recurrence.Cancelled[0]!=cancelled{t.Fatal("expansion mutated canonical schedule")}
+ // JSON persistence reconstructs time.Time values; compare their instants,
+ // not Go's == operator, which also compares location/monotonic metadata.
+ if !saved.Recurrence.Cancelled[0].Equal(cancelled){t.Fatal("expansion mutated canonical schedule")}
 }
 
 func TestRecurrenceDeepCloneAndInvalidRules(t *testing.T){

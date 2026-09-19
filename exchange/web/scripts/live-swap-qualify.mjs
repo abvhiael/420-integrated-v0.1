@@ -69,7 +69,7 @@ const evidence=await qualifyLiveTestnetSwap({
   runtime,
   reviewedIntent:fixture.reviewedIntent,
   execution:fixture.execution,
-  freshness:fixture.freshness,
+  freshness:fixture.freshness ? {...fixture.freshness,nowSeconds:Math.floor(Date.now()/1000)} : null,
   allowanceChecks:fixture.allowanceChecks??[],
   authorizationChecks:fixture.authorizationChecks??[],
   staticCalls:fixture.staticCalls??[],

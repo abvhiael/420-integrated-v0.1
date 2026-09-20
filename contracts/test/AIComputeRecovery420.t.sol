@@ -86,13 +86,8 @@ contract AIComputeRecovery420Test is Test {
         matches = new ComputeMatch420(address(auth), address(offers), address(requests), address(resources));
         caps.set(address(matches), ComputeIds420.COMPONENT_COMPUTE, ComputeIds420.ACTION_ACCEPT_MATCH, auth.scopeRequest(REQUEST_ID), 100, true);
         matchId = matches.canonicalMatchId(REQUEST_ID, OFFER_ID);
-        vm.prank(USER);
-        uint256 quote = matches.acceptMatch(matchId, REQUEST_ID, OFFER_ID, 10);
-        assertEq(quote, 50);
         computeJobs = new ComputeJobRegistry420(address(auth), address(matches), address(providers), address(requests));
         computeJobId = computeJobs.canonicalJobId(matchId);
-        vm.prank(USER);
-        computeJobs.createJob(computeJobId, matchId);
         aiProviders = new AIProviderRegistry(address(this));
         vm.prank(PROVIDER);
         aiProviders.registerProvider(AI_PROVIDER_ID, PROVIDER, PROVIDER, keccak256("ai-provider-manifest"), keccak256("ai-stake"), COMPUTE_PROVIDER_ID);
@@ -107,8 +102,16 @@ contract AIComputeRecovery420Test is Test {
         aiJobs.confirmFunding(AI_JOB_ID, keccak256("funding"), 100);
     }
     function testEndToEndAIJobBindsAndSynchronizesComputeLifecycle() public {
+        // Both requests must be FUNDED when the requester first binds them.
+        // Accepting the Compute match advances its request to MATCHED, so that
+        // action must follow bindComputeRequest rather than precede it in setUp.
         vm.prank(USER);
         adapter.bindComputeRequest(AI_JOB_ID, REQUEST_ID);
+        vm.prank(USER);
+        uint256 quote = matches.acceptMatch(matchId, REQUEST_ID, OFFER_ID, 10);
+        assertEq(quote, 50);
+        vm.prank(USER);
+        computeJobs.createJob(computeJobId, matchId);
         vm.prank(USER);
         adapter.bindComputeMatch(AI_JOB_ID, matchId, computeJobId, AI_PROVIDER_ID);
         vm.prank(PROVIDER);
@@ -128,6 +131,14 @@ contract AIComputeRecovery420Test is Test {
         assertEq(uint256(ai.providerId), uint256(AI_PROVIDER_ID));
         assertEq(uint256(ai.resultHash), uint256(keccak256("output")));
         assertEq(uint256(ai.resultManifestHash), uint256(keccak256("result-manifest")));
+    }
+    function testCannotBindAlreadyMatchedComputeRequest() public {
+        vm.prank(USER);
+        uint256 quote = matches.acceptMatch(matchId, REQUEST_ID, OFFER_ID, 10);
+        assertEq(quote, 50);
+        vm.prank(USER);
+        vm.expectRevert(AIComputeAdapter420.IncompatibleComputeState.selector);
+        adapter.bindComputeRequest(AI_JOB_ID, REQUEST_ID);
     }
     function testAdapterRejectsComputeRequestThatBroadensSpend() public {
         bytes32 badId = keccak256("bad-request");

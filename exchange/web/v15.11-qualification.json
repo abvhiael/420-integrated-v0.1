@@ -41,6 +41,9 @@
     "artifactCheckWorkflowCommit": "d6294db8479c9be9e1dc187d9b8a66b55c4387dd",
     "artifactCheckWorkflowRun": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/35485424930",
     "artifactCheckWorkflowConclusion": "success",
+    "metadataReconciliationCommit": "4a39e8dc49949200f3ab144aee905e06ad5b013a",
+    "metadataReconciliationWorkflowRun": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/35485465896",
+    "metadataReconciliationWorkflowConclusion": "success",
     "artifactEvidenceScope": "QUALIFICATION_MODE_CI_BUILD_AND_STATIC_BUNDLE_ASSERTIONS_ONLY_NOT_REAL_BROWSER_OR_DEPLOYMENT",
     "note": "An earlier successful workflow is not evidence for a later head. CI build assertions do not establish runtime browser acceptance, real wallet/device behavior, testnet execution, or live deployment."
   },

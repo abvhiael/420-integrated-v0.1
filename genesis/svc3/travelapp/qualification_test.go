@@ -11,9 +11,8 @@ import (
  locationui "github.com/420integrated/420-integrated/location/uikit"
 )
 
-// TestGenesisTravelRouteQualification encodes the actual Genesis UI boundary:
-// read-only public discovery/events are usable; incomplete or transactional
-// journeys are never presented as working or allowed to mutate state.
+// TestGenesisTravelRouteQualification verifies public discovery and place
+// journeys without promoting a private venue, review or booking authority.
 func TestGenesisTravelRouteQualification(t *testing.T) {
  reader := &stubPublicReader{
   places: locationui.View{Items: []locationui.Item{{ID: "venue-visible", Name: "Public venue", Kind: locationui.KindArea, City: "Regina"}}},
@@ -29,10 +28,11 @@ func TestGenesisTravelRouteQualification(t *testing.T) {
   required string
   forbidden string
  }{
-  {"/travel", http.StatusOK, "Public venue", "Confidential event"},
+  {"/travel?destination=Regina", http.StatusOK, "href=\"/travel/place/venue-visible\"", "Confidential event"},
   {"/travel/events", http.StatusOK, "Public event", "Confidential event"},
-  {"/travel/map", http.StatusServiceUnavailable, "not available yet", "Public venue"},
-  {"/travel/place/venue-visible", http.StatusServiceUnavailable, "not available yet", "Public venue"},
+  {"/travel/map?destination=Regina", http.StatusOK, "Public event", "Confidential event"},
+  {"/travel/place/venue-visible", http.StatusOK, "Public venue", "Confidential event"},
+  {"/travel/place/venue-hidden", http.StatusNotFound, "404", "Confidential event"},
   {"/travel/trips", http.StatusServiceUnavailable, "not available yet", "Confidential event"},
   {"/travel/business/claim", http.StatusServiceUnavailable, "not available yet", "Public venue"},
   {"/travel/booking", http.StatusNotFound, "404", "Public venue"},

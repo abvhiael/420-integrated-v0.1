@@ -6,6 +6,17 @@
 - `matrix.go` checks up to 16 endpoints individually without treating one success as success for the set.
 - `domain.go` adds an **explicit expected-chain and EntryPoint check** against a 420 Bundler operator's `/readyz`, reporting individual wire/domain outcomes. An external implementation without `/readyz` needs a separately implemented and documented chain-identity adapter; a successful read-only wire check does **not** establish chain identity.
 - `domain_test.go` covers matching domain, wrong chain, wrong EntryPoint, not-ready and offline operators, and a mixed two-endpoint matrix. These are scripted local fixtures, not independent operators.
+- `bundler/cmd/bundler-interop420` is a read-only JSON-reporting runner. Example (replace all placeholders with actual qualified values):
+
+```sh
+go run ./bundler/cmd/bundler-interop420 \
+  -chain-id 420 \
+  -entry-point 0x1111111111111111111111111111111111111111 \
+  -endpoint https://operator-a.example/rpc \
+  -endpoint https://operator-b.example/rpc > operator-domain-report.json
+```
+
+The example EntryPoint, chain and endpoint domains are **illustrative**, not published live service configuration. The command exits 0 when every endpoint passes both wire and domain checks, 1 when any endpoint fails qualification, and 2 for invalid invocation or report-encoding errors. The report does not attest to operator identity, third-party client compatibility, browser CORS or signed-transaction acceptance.
 
 ## External acceptance record — required before claiming GEN-11.19 complete
 

@@ -33,8 +33,8 @@ func TestPublicDiscoveryRendersOnlyPublicProjection(t *testing.T){
  result:=serveTravel(reader)
  if result.Code!=http.StatusOK {t.Fatalf("status %d: %s",result.Code,result.Body.String())}
  body:=result.Body.String()
- for _,want:=range []string{"Public &amp; Green","Festival &lt;Live&gt;","Approximate location","Saskatchewan"}{if !strings.Contains(body,want){t.Errorf("missing %q: %s",want,body)}}
- for _,secret:=range []string{"Hidden event","not-public","venue-1"}{if strings.Contains(body,secret){t.Errorf("unexpected private reference %q",secret)}}
+ for _,want:=range []string{"Public &amp; Green","Festival &lt;Live&gt;","Approximate location","Saskatchewan","href=\"/travel/place/venue-1\""}{if !strings.Contains(body,want){t.Errorf("missing %q: %s",want,body)}}
+ for _,secret:=range []string{"Hidden event","not-public"}{if strings.Contains(body,secret){t.Errorf("unexpected private reference %q",secret)}}
  if reader.query.Limit!=100 || reader.query.From.IsZero() || !reader.query.To.After(reader.query.From) {t.Fatalf("invalid bounded event query: %+v",reader.query)}
 }
 func TestPublicDiscoveryEmptyAndUnavailable(t *testing.T){

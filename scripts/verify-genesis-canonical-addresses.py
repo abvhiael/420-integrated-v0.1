@@ -5,6 +5,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 ADDRESS_FILE = ROOT / "contracts/config/genesis-canonical-addresses.json"
 MAP_FILE = ROOT / "contracts/config/genesis-dapp-contract-map.json"
+SYSTEM_FILE = ROOT / "config/system-addresses.json"
+BRIDGE_FILE = ROOT / "config/swap-bridge-extension-addresses.json"
+WALLET_INVENTORY_FILE = ROOT / "wallet/deployment-inventory.json"
 
 errors = []
 addresses = json.loads(ADDRESS_FILE.read_text())
@@ -64,6 +67,36 @@ for key in [
     if policy.get(key) is not True:
         errors.append(f"canonical address policy must enforce {key}")
 
+# W14.6: the Names reservation must not collide with either historical system
+# allocations or the proposed bridge extension, even when neither appears in
+# the canonical anchors list. A reservation is NOT proof of on-chain deployment.
+names = next((a for a in anchors if a.get("id") == "names"), None)
+legacy_system = json.loads(SYSTEM_FILE.read_text())
+bridge_extension = json.loads(BRIDGE_FILE.read_text())
+wallet_inventory = json.loads(WALLET_INVENTORY_FILE.read_text())
+if not names or names.get("contract") != "Names420.sol":
+    errors.append("canonical Names420 anchor is missing")
+else:
+    names_address = names.get("address", "").lower()
+    occupied = {
+        entry.get("address", "").lower(): entry.get("name")
+        for registry in (legacy_system, bridge_extension)
+        for entry in registry.get("assignments", [])
+    }
+    if names_address in occupied:
+        errors.append(f"Names420 reservation collides with {occupied[names_address]} at {names_address}")
+    if occupied and names_address <= max(occupied):
+        errors.append("Names420 reservation must follow recorded system and bridge allocations")
+    lower = int(legacy_system.get("reserved_range", {}).get("start", "0x0"), 16)
+    upper = int(legacy_system.get("reserved_range", {}).get("end", "0x0"), 16)
+    if not 0 <= lower <= int(names_address, 16) <= upper:
+        errors.append("Names420 reservation falls outside the system reserved range")
+    inventory_names = wallet_inventory.get("walletAuthority", {}).get("names420", {})
+    if inventory_names.get("address", "").lower() != names_address:
+        errors.append("Wallet Names420 inventory does not match canonical address reservation")
+    if wallet_inventory.get("readyForLiveTestnet") is True and "PENDING" in inventory_names.get("status", ""):
+        errors.append("Names420 reservation cannot be promoted to live runtime before deployment qualification")
+
 if errors:
     print(json.dumps({"pass": False, "errors": errors}, indent=2))
     raise SystemExit(1)
@@ -75,4 +108,5 @@ print(json.dumps({
     "reservedAddresses": len(reserved),
     "smartAccountFactory": factory["address"],
     "entryPointReservation": entry_point["address"],
+    "namesReservation": names["address"],
 }, indent=2))

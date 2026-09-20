@@ -43,8 +43,8 @@ contract AINativePartialSettlementPlan420Test is Test {
             makePlan(100, 37, keccak256("another-decision"), JOB);
         AINativePartialSettlementPlan420.Plan memory differentJob =
             makePlan(100, 37, DECISION, keccak256("another-job"));
-        assertEq(a.settlementRef, same.settlementRef);
-        assertEq(a.providerClaimOperation, same.providerClaimOperation);
+        assertEq(uint256(a.settlementRef), uint256(same.settlementRef));
+        assertEq(uint256(a.providerClaimOperation), uint256(same.providerClaimOperation));
         require(a.settlementRef != differentDecision.settlementRef
             && a.settlementRef != differentJob.settlementRef, "reused settlement reference");
         require(a.providerObligation != differentDecision.providerObligation

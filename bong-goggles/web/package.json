@@ -8,7 +8,10 @@
     "check": "node scripts/check.mjs",
     "build": "node scripts/build.mjs",
     "package:deployment": "node scripts/package-deployment.mjs",
-    "qualify": "npm run check && npm test && npm run build"
+    "qualify": "npm run check && npm test && npm run build && node scripts/qualify-web.mjs"
+  },
+  "dependencies": {
+    "sharp": "0.34.3"
   },
   "engines": {
     "node": ">=22"

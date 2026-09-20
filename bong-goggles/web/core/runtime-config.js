@@ -9,7 +9,7 @@ function httpsUrl(value,field,{allowLocalhost=false}={}){
   const text=requiredString(value,field);
   const url=new URL(text);
   const local=allowLocalhost && ['localhost','127.0.0.1','::1'].includes(url.hostname);
-  if(url.protocol!=='https:' && !local) throw new Error(`${field} must use https`);
+  if(url.protocol!=='https:' && !(local&&url.protocol==='http:')) throw new Error(`${field} must use https`);
   return url.toString().replace(/\/$/,'');
 }
 
@@ -22,6 +22,16 @@ export function validateRuntimeConfig(input){
   if(!Number.isSafeInteger(chainId)||chainId<=0) throw new Error('chainId must be a positive safe integer');
 
   const allowLocalhost=environment!=='production';
+  const features=Object.freeze({...input.features});
+  const socialEnabled=features.publicDiscoverFeed===true;
+  const socialApiUrl=input.socialApiUrl==null?null:httpsUrl(input.socialApiUrl,'socialApiUrl',{allowLocalhost});
+  if(socialEnabled&&!socialApiUrl) throw new Error('qualified socialApiUrl required for publicDiscoverFeed');
+  if(socialApiUrl){
+    const u=new URL(socialApiUrl);
+    if(u.username||u.password||u.search||u.hash||u.pathname!=='/')throw new Error('socialApiUrl must be an origin without credentials, path or query');
+    if(socialApiUrl===httpsUrl(input.appOrigin,'appOrigin',{allowLocalhost})||
+      socialApiUrl===httpsUrl(input.indexerUrl,'indexerUrl',{allowLocalhost}))throw new Error('socialApiUrl must be independently deployed');
+  }
   const config={
     schema:'bg-web-runtime-v1',
     environment,
@@ -34,8 +44,9 @@ export function validateRuntimeConfig(input){
     notificationsUrl:httpsUrl(input.notificationsUrl,'notificationsUrl',{allowLocalhost}),
     walletUrl:httpsUrl(input.walletUrl,'walletUrl',{allowLocalhost}),
     explorerUrl:httpsUrl(input.explorerUrl,'explorerUrl',{allowLocalhost}),
+    socialApiUrl,
     maintenance:input.maintenance===true,
-    features:Object.freeze({...input.features}),
+    features,
     authoritative:false,
   };
 

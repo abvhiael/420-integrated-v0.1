@@ -1,0 +1,14 @@
+# BG-19.19 — scoped social reads (first increment; incomplete)
+
+This branch adds `services/bong-goggles-indexer-v1/src/scopedSocialRead.js` and its regression tests. It is a **non-listening, non-deployed server-side read guard**, not a live authenticated endpoint or production authorization implementation. It does not change the BG-19.17 ingress, which remains restricted to the anonymous DISCOVER sample.
+
+The guard requires injected independently qualified Wallet/Identity session verification, canonical finalized checkpoint verification, viewer-bound projection, and per-record *current* audience, membership, block and moderation authorization. It rejects absent, expired, revoked, changed or wrong-chain sessions, stale/reorged/unfinalized checkpoints, unrecognized read classes, oversized pages and unauthorized records. It derives the viewer from the verified session, never a caller-supplied account. It re-verifies the session after asynchronous reads. Returning any unauthorized record fails the entire request rather than leaking a partial page. The adapter's `publicDto` field is only a placeholder: **no production deployment may return raw/materialized records or trust a source-provided `publicDto` field**. Before ingress, implement a separately reviewed strict DTO allowlist for each route and test private-field rejection.
+
+## Remaining BG-19.19 work
+
+1. Qualify and connect a real Wallet/Identity session verifier with signed challenge, expiry, revocation, domain, replay and cross-account checks. Never treat an address or browser cookie by itself as proof of identity.
+2. Connect independently verified finalized canonical-chain state and current audience, relationship, membership and moderation policy providers. Test changing entitlements during a request.
+3. Build versioned HTTP endpoints for HOME/FRIENDS/FOLLOWING, account-scoped profiles and relationship lists and membership-scoped community reads. Enforce session and current per-record policy on every page; define strict response DTO allowlists, redaction and no-store semantics.
+4. Implement authenticated transport protections: HTTPS ingress, session binding, CSRF/credential handling, origin and cache policy, rate limits, privacy-safe logging and session-change invalidation. BG-19.17 anonymous ingress must not be reused to accept cookies or bearer credentials.
+5. Implement signed, snapshot-bound public DISCOVER and scoped-feed cursors with deterministic order, real hasMore, cursor expiry and revalidation after reorg or policy withdrawal. Existing DISCOVER `hasMore:false` is **a sample marker, not qualified pagination**.
+6. Run real testnet/staging multi-account and browser integration, negative privacy tests, revocation/reorg drills and CI at the exact PR head before closing this milestone. Maintain production feature flags off until the preceding BG-19.16/17 deployment gates are signed off.

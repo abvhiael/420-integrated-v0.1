@@ -6,17 +6,15 @@ import (
 )
 
 // HandlerWithIntegratedJourneys retains the previous entrypoint. For an
-// explicitly configured, durable trip-sharing environment use
-// HandlerWithQualifiedJourneys. Neither constructor provisions dependencies.
+// explicitly configured trip-sharing environment use HandlerWithQualifiedJourneys.
 func HandlerWithIntegratedJourneys(reader PublicReader,reviews TravelReviewReader,users TravelUserDependencies)http.Handler {
  return HandlerWithQualifiedJourneys(reader,reviews,users,TripSharing{})
 }
 
 // HandlerWithQualifiedJourneys composes the public map, authenticated trip
-// editing and business-claim submission, optional unlisted sharing, and
-// trusted Reputation review reads. An absent adapter never creates an
-// authenticated or verified fallback. The caller must inject separately
-// qualified Identity, repositories, publication and Reputation services.
+// editing, owner-facing share controls, business claim submission and trusted
+// Reputation review reads. The caller must independently qualify its injected
+// Identity, repositories, publication and Reputation services.
 func HandlerWithQualifiedJourneys(reader PublicReader,reviews TravelReviewReader,users TravelUserDependencies,shares TripSharing)http.Handler {
  private:=HandlerWithTripSharing(reader,users,shares)
  publicReviews:=HandlerWithReviewReader(reader,reviews)
@@ -24,6 +22,9 @@ func HandlerWithQualifiedJourneys(reader PublicReader,reviews TravelReviewReader
   if r.URL.Path=="/travel/map" {
    if r.Method!=http.MethodGet {w.Header().Set("Allow","GET");http.Error(w,"method not allowed",http.StatusMethodNotAllowed);return}
    serveTravelNearbyMap(w,r,reader);return
+  }
+  if r.URL.Path=="/travel/trips" && r.Method==http.MethodGet && users.Identity!=nil {
+   serveQualifiedTripList(w,r,users,shares);return
   }
   if reviews!=nil && strings.HasPrefix(r.URL.Path,"/travel/place/") {
    publicReviews.ServeHTTP(w,r);return

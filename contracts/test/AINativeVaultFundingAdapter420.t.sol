@@ -13,6 +13,7 @@ contract MockNativeJobManager420 {
     function getJob(bytes32 id) external view returns (AIJobManager.Job memory) { return _jobs[id]; }
 }
 contract MockNativeEscrow420 {
+    error FundingRejected();
     address public immutable AI_JOB_MANAGER;
     address public vaultAdapter;
     bool public vaultAdapterBound;
@@ -22,7 +23,7 @@ contract MockNativeEscrow420 {
     function bindVaultAdapter(address adapter_) external { vaultAdapter = adapter_; vaultAdapterBound = true; }
     function setReject(bool reject_) external { rejectFunding = reject_; }
     function confirmVaultFunding(bytes32 id, address, bytes32, address, bytes32, bytes32, uint256 amount) external {
-        require(msg.sender == vaultAdapter && !rejectFunding, "escrow rejected");
+        if (msg.sender != vaultAdapter || rejectFunding) revert FundingRejected();
         funded[id] = amount;
     }
 }
@@ -38,6 +39,7 @@ contract MockNativeAccounting420 {
     }
 }
 contract MockNativeVault420 {
+    error ReservationRejected();
     bytes32 public immutable vaultId;
     MockNativeAccounting420 public accounting;
     address public registry = address(0xA1);
@@ -49,8 +51,8 @@ contract MockNativeVault420 {
     function depositNative() external payable { require(msg.value > 0, "empty deposit"); }
     function createObligation(bytes32 op, bytes32 obligationId, address asset, address beneficiary,
         uint256 amount, bytes32, bytes32 sourceRef) external {
-        require(!rejectObligation && !operations[op] && asset == address(0)
-            && address(this).balance >= amount, "vault reservation rejected");
+        if (rejectObligation || operations[op] || asset != address(0)
+            || address(this).balance < amount) revert ReservationRejected();
         operations[op] = true;
         accounting.record(obligationId, vaultId, beneficiary, amount, sourceRef);
     }
@@ -120,7 +122,7 @@ contract AINativeVaultFundingAdapter420Test is Test {
     }
     function testVaultFailureRollsBackDepositAndNonce() public {
         vault.setReject(true);
-        vm.prank(PAYER); vm.expectRevert(bytes4(0x08c379a0)); // Error(string): vault reservation rejected
+        vm.prank(PAYER); vm.expectRevert(MockNativeVault420.ReservationRejected.selector);
         adapter.fundNative{value: 1 ether}(JOB, PROVIDER_ID, NONCE);
         assertEq(address(vault).balance, 0);
         assertEq(address(adapter).balance, 0);
@@ -130,9 +132,11 @@ contract AINativeVaultFundingAdapter420Test is Test {
     }
     function testEscrowFailureRollsBackVaultReservationAndDeposit() public {
         escrow.setReject(true);
-        vm.prank(PAYER); vm.expectRevert(bytes4(0x08c379a0)); // Error(string): escrow rejected
+        vm.prank(PAYER); vm.expectRevert(MockNativeEscrow420.FundingRejected.selector);
         adapter.fundNative{value: 1 ether}(JOB, PROVIDER_ID, NONCE);
         assertEq(address(vault).balance, 0);
+        assertEq(address(adapter).balance, 0);
+        assertEq(accounting.getObligation(adapter.obligationForJob(JOB)).exists ? uint256(1) : 0, 0);
         assertEq(adapter.consumedJob(JOB) ? uint256(1) : 0, 0);
         assertEq(adapter.consumedNonce(PAYER, NONCE) ? uint256(1) : 0, 0);
         assertEq(escrow.funded(JOB), 0);
@@ -142,9 +146,14 @@ contract AINativeVaultFundingAdapter420Test is Test {
         vm.prank(PAYER);
         vm.expectRevert(AINativeVaultFundingAdapter420.InvalidFunding.selector);
         adapter.fundNative{value: 11 ether}(JOB, PROVIDER_ID, NONCE);
-        vm.prank(PAYER); vm.expectRevert(AINativeVaultFundingAdapter420.UnqualifiedProvider.selector);
+        vm.prank(PAYER); vm.expectRevert(AIProviderRegistry.ProviderNotFound.selector);
         adapter.fundNative{value: 1 ether}(JOB, keccak256("missing provider"), NONCE);
+        providers.setActive(PROVIDER_ID, false);
+        vm.prank(PAYER); vm.expectRevert(AINativeVaultFundingAdapter420.UnqualifiedProvider.selector);
+        adapter.fundNative{value: 1 ether}(JOB, PROVIDER_ID, NONCE);
         assertEq(address(vault).balance, 0);
+        assertEq(adapter.consumedJob(JOB) ? uint256(1) : 0, 0);
+        assertEq(adapter.consumedNonce(PAYER, NONCE) ? uint256(1) : 0, 0);
     }
     function testRejectsDirectTransfers() public {
         vm.prank(PAYER);

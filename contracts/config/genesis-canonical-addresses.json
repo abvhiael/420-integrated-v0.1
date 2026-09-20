@@ -13,7 +13,7 @@
     {"id":"smart-account-factory","contract":"SmartAccountFactory420.sol","address":"0x0000000000000000000000000000000000000420","role":"canonical smart-account factory"},
     {"id":"capability-registry","contract":"CapabilityRegistry420.sol","address":"0x0000000000000000000000000000000000000421","role":"canonical wallet capability authority"},
     {"id":"protocol-registry","contract":"ProtocolRegistry.sol","address":"0x0000000000000000000000000000000000000422","role":"canonical protocol and service discovery root"},
-    {"id":"names","contract":"Names420.sol","address":"0x0000000000000000000000000000000000000423","role":"canonical 420 Names registry"},
+    {"id":"names","contract":"Names420.sol","address":"0x0000000000000000000000000000000000000445","role":"canonical 420 Names registry; reserved after legacy system and swap/bridge extension allocations; pending verified Genesis deployment"},
     {"id":"identity","contract":"Identity420.sol","address":"0x0000000000000000000000000000000000000424","role":"canonical identity registry"},
     {"id":"interop-router","contract":"InteropRouter420.sol","address":"0x0000000000000000000000000000000000000425","role":"canonical interoperability router"},
     {"id":"randomness-router","contract":"RandomnessRouter420.sol","address":"0x0000000000000000000000000000000000000426","role":"canonical randomness routing root"},

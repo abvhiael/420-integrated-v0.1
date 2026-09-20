@@ -79,7 +79,7 @@ contract AINativeSplitRealVault420Test is Test {
         assertEq(PAYER.balance, 0);
         (,,,,,,,AIJobEscrow.EscrowState state) = escrow.escrows(JOB);
         assertEq(uint256(state), uint256(AIJobEscrow.EscrowState.FUNDED));
-        assertFalse(adapter.splitJob(JOB));
+        assertEq(adapter.splitJob(JOB) ? uint256(1) : uint256(0), 0);
     }
 
     function testRealVaultConservesAndClaimsBothLegs() public {

@@ -48,7 +48,7 @@ func HandlerWithReader(reader PublicReader) http.Handler {
    ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
    defer cancel()
    now := time.Now().UTC()
-   feed, err := consumers.Load(ctx, reader, sdk.EventQuery{From: now, To: now.Add(30*24*time.Hour), Limit: 100})
+   feed, err := loadPublicDiscovery(ctx, reader, sdk.EventQuery{From: now, To: now.Add(30*24*time.Hour), Limit: 100})
    if err != nil { data = pageData{State: "error", Message: "Discovery is temporarily unavailable"} } else if len(feed.Travel) == 0 { data = pageData{State: "empty", Message: "No public places found"} } else { data = pageData{State: "ready", Venues: feed.Travel} }
   }
   w.Header().Set("Content-Type", "text/html; charset=utf-8")

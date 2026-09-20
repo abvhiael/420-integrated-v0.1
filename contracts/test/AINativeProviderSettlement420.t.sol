@@ -19,6 +19,7 @@ contract SettlementManagerMock420 {
     function getJob(bytes32 id) external view returns (AIJobManager.Job memory) { return jobs[id]; }
 }
 contract SettlementEscrowMock420 {
+    error MockCloseRejected();
     address public immutable AI_JOB_MANAGER;
     address public settlementAdapter;
     bool public settlementAdapterBound;
@@ -38,7 +39,8 @@ contract SettlementEscrowMock420 {
         escrows[job].state = AIJobEscrow.EscrowState.CLAIMABLE;
     }
     function release(bytes32 job, address payable recipient) external {
-        require(msg.sender == settlementAdapter && !rejectClose, "close rejected");
+        require(msg.sender == settlementAdapter, "not bound");
+        if (rejectClose) revert MockCloseRejected();
         require(escrows[job].state == AIJobEscrow.EscrowState.CLAIMABLE
             && escrows[job].beneficiary == recipient, "wrong recipient");
         escrows[job].state = AIJobEscrow.EscrowState.CLOSED;
@@ -57,6 +59,7 @@ contract SettlementAccountingMock420 {
     }
 }
 contract SettlementVaultMock420 {
+    error MockClaimRejected();
     bytes32 public immutable vaultId;
     SettlementAccountingMock420 public accounting;
     bool public rejectClaim;
@@ -70,7 +73,8 @@ contract SettlementVaultMock420 {
         accounting.setState(obligationId, 2);
     }
     function claim(bytes32 operation, bytes32 obligationId) external {
-        require(!rejectClaim && !executedOperation[operation], "claim rejected");
+        if (rejectClaim) revert MockClaimRejected();
+        require(!executedOperation[operation], "claim replay");
         VaultAccounting420.Obligation memory o = accounting.getObligation(obligationId);
         require(o.state == 2 && address(this).balance >= o.amount, "not claimable");
         executedOperation[operation] = true;
@@ -95,7 +99,10 @@ contract SettlementFundingMock420 {
         obligationForJob[jobId] = obligationId;
     }
 }
-contract RejectNativePayment420 { receive() external payable { revert("receiver rejected"); } }
+contract RejectNativePayment420 {
+    error NativePaymentRejected();
+    receive() external payable { revert NativePaymentRejected(); }
+}
 
 contract AINativeProviderSettlement420Test is Test {
     bytes32 constant JOB = keccak256("settlement-job");
@@ -170,7 +177,7 @@ contract AINativeProviderSettlement420Test is Test {
     }
     function testClaimFailureRollsBackReleaseAndEscrow() public {
         vault.setRejectClaim(true);
-        vm.expectRevert(bytes4(0x08c379a0));
+        vm.expectRevert(SettlementVaultMock420.MockClaimRejected.selector);
         settlement.payProvider(JOB, DECISION);
         assertEq(uint256(state()), uint256(AIJobEscrow.EscrowState.FUNDED));
         assertEq(uint256(accounting.getObligation(obligationId).state), 1);
@@ -180,7 +187,7 @@ contract AINativeProviderSettlement420Test is Test {
     }
     function testEscrowCallbackFailureRollsBackNativePayment() public {
         escrow.setRejectClose(true);
-        vm.expectRevert(bytes4(0x08c379a0));
+        vm.expectRevert(SettlementEscrowMock420.MockCloseRejected.selector);
         settlement.payProvider(JOB, DECISION);
         assertEq(BENEFICIARY.balance, 0);
         assertEq(address(vault).balance, AMOUNT);
@@ -193,7 +200,7 @@ contract AINativeProviderSettlement420Test is Test {
         RejectNativePayment420 rejecting = new RejectNativePayment420();
         escrow.seed(JOB, PAYER, address(rejecting), PROVIDER, VAULT, FUNDING, AMOUNT);
         accounting.setBeneficiary(obligationId, address(rejecting));
-        vm.expectRevert(bytes4(0x08c379a0));
+        vm.expectRevert(RejectNativePayment420.NativePaymentRejected.selector);
         settlement.payProvider(JOB, DECISION);
         assertEq(address(vault).balance, AMOUNT);
         assertEq(uint256(state()), uint256(AIJobEscrow.EscrowState.FUNDED));

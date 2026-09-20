@@ -72,6 +72,14 @@ jobs:
         run: python3 scripts/test-wallet-w14-7-4-candidate.py
       - name: W14.7.4 source-consumer inventory regression tests
         run: python3 scripts/test-wallet-w14-7-4-consumers.py
+      - name: W14.7.4 inventory current tracked source references (non-release evidence)
+        run: python3 scripts/audit-wallet-w14-7-4-consumers.py > w14-7-4-legacy-consumers.json
+      - name: Upload W14.7.4 source-consumer inventory
+        uses: actions/upload-artifact@v4
+        with:
+          name: w14-7-4-legacy-consumers
+          path: w14-7-4-legacy-consumers.json
+          retention-days: 14
       - name: Static wallet checks
         working-directory: wallet/web
         run: npm run check

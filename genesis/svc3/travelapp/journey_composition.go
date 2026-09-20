@@ -17,13 +17,14 @@ func HandlerWithIntegratedJourneys(reader PublicReader,reviews TravelReviewReade
 func HandlerWithQualifiedJourneys(reader PublicReader,reviews TravelReviewReader,users TravelUserDependencies,shares TripSharing)http.Handler {
  private:=HandlerWithTripSharing(reader,users,shares)
  publicReviews:=HandlerWithReviewReader(reader,reviews)
+ saveReady:=reader!=nil&&users.Identity!=nil
+ if _,ok:=users.Trips.(EditableTripRepository);!ok {saveReady=false}
  return http.HandlerFunc(func(w http.ResponseWriter,r *http.Request){
   if r.URL.Path=="/travel/save" {serveSaveCatalog(w,r,reader,users);return}
   if strings.HasPrefix(r.URL.Path,"/travel/save/") {
-   // The opt-in save handler delegates other paths back here. Only its own
-   // path is dispatched, avoiding a recursive route loop.
    HandlerWithSaveToTrip(reader,reviews,users,shares).ServeHTTP(w,r);return
   }
+  r=withSaveLinks(r,saveReady)
   if r.URL.Path=="/travel/map" {
    if r.Method!=http.MethodGet {w.Header().Set("Allow","GET");http.Error(w,"method not allowed",http.StatusMethodNotAllowed);return}
    serveTravelNearbyMap(w,r,reader);return

@@ -1,7 +1,7 @@
 {
   "schema": "420-public-service-readiness-v1",
   "serviceId": "420/service/wallet/v1",
-  "status": "W14_3_LIVE_TESTNET_QUALIFIER_IMPLEMENTED",
+  "status": "W14_5_GENESIS_APP_CATALOG_RECONCILED",
   "genesisRequired": true,
   "productionDomainAssigned": false,
   "domainAssignmentBlocksImplementation": false,
@@ -24,7 +24,8 @@
     "official public testnet manifest missing",
     "wallet canonical anchors conflict with frozen system-address assignments",
     "EntryPoint420 production implementation binding pending",
-    "W14.3 live qualification has not yet executed against an official testnet"
+    "W14.3 live Wallet qualification has not yet executed against an official testnet",
+    "W14.4 extension live dApp qualification has not yet executed against an official testnet"
   ],
   "liveQualification": {
     "phase": "W14.3",
@@ -32,5 +33,23 @@
     "workflow": ".github/workflows/wallet-live-testnet.yml",
     "evidenceSchema": "420-wallet-live-testnet-qualification-v1",
     "executedAgainstOfficialTestnet": false
+  },
+  "extensionLiveQualification": {
+    "phase": "W14.4",
+    "qualifier": "wallet/extension/scripts/qualify-live-dapp.mjs",
+    "workflow": ".github/workflows/wallet-extension-live-dapp.yml",
+    "evidenceSchema": "420-wallet-extension-live-dapp-qualification-v1",
+    "executedAgainstOfficialTestnet": false
+  },
+  "appCatalog": {
+    "phase": "W14.5",
+    "catalogue": "wallet/web/core/genesis-app-catalog.js",
+    "canonicalServiceIdSource": "contracts/src/libraries/ServiceIds420.sol",
+    "verifiedManifestRequired": true,
+    "unresolvedNamedProducts": [
+      "420 Exchange: no distinct canonical service ID",
+      "420 Commerce: no distinct canonical service ID",
+      "420 Grow: no canonical service ID"
+    ]
   }
 }

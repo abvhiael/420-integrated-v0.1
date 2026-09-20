@@ -5,7 +5,7 @@ import { loadVerifiedApps } from '../apps-page.js';
 
 test('app catalog includes expected core ecosystem gateways and metadata', () => {
   const ids = APP_SERVICES.map((app) => app.id);
-  for (const id of ['swap', 'explorer', 'ai', 'registry', 'names', 'identity', 'search', 'appstore', 'bridge', 'stake', 'governance', 'town', 'developers']) {
+  for (const id of ['swap', 'pay', 'explorer', 'ai', 'compute', 'registry', 'names', 'identity', 'search', 'appstore', 'analytics', 'verify', 'notifications', 'bridge', 'stake', 'governance', 'messenger', 'grants', 'launchpad', 'resource', 'rights', 'attention', 'cannaseur', 'status']) {
     assert.ok(ids.includes(id), `missing app ${id}`);
   }
   assert.equal(APP_SERVICES.find((app) => app.id === 'swap').featured, true);
@@ -13,8 +13,8 @@ test('app catalog includes expected core ecosystem gateways and metadata', () =>
 
 test('app filtering supports category and free-text search without changing trust state', () => {
   const apps = buildAppCatalog(APP_SERVICES.map((app) => ({ ...app, available: app.id === 'swap', url: app.id === 'swap' ? 'https://swap.example/' : null })));
-  assert.deepEqual(filterAppCatalog(apps, { category: 'defi' }).map((app) => app.id), ['swap', 'bridge', 'stake']);
-  assert.deepEqual(filterAppCatalog(apps, { query: 'governance' }).map((app) => app.id), ['governance']);
+  assert.deepEqual(filterAppCatalog(apps, { category: 'finance' }).map((app) => app.id), ['treasury', 'grants', 'launchpad', 'token', 'market', 'swap', 'pay', 'bridge', 'stake']);
+  assert.deepEqual(filterAppCatalog(apps, { query: 'governance' }).map((app) => app.id), ['arbitration', 'rights', 'governance']);
   assert.equal(apps.find((app) => app.id === 'swap').verified, true);
   assert.equal(apps.find((app) => app.id === 'bridge').verified, false);
 });

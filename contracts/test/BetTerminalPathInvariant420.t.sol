@@ -12,6 +12,7 @@ interface VmBetTerminalPath420 {
     function prank(address) external;
     function warp(uint256) external;
     function expectRevert(bytes4) external;
+    function expectRevert(bytes calldata) external;
 }
 
 contract MockCapabilityRegistryTerminal420 is ICapabilityRegistry420 {
@@ -84,10 +85,18 @@ contract MockTerminalVault420 {
         asset = asset_;
     }
 
-    function resolveWager(bytes32, uint256 grossPayout) external {
+    // The production BankrollVault420.resolveWager ABI returns three uint256 values.
+    // Match that ABI even when the SettlementEngine does not use the returned amounts.
+    function resolveWager(bytes32, uint256 grossPayout)
+        external returns (uint256 stake, uint256 stakeAbsorbed, uint256 bankrollOutflow)
+    {
         require(!resolved, "resolved");
         resolved = true;
         payout = grossPayout;
+        stake = 100 ether;
+        uint256 stakeReturned = grossPayout < stake ? grossPayout : stake;
+        stakeAbsorbed = stake - stakeReturned;
+        bankrollOutflow = grossPayout > stake ? grossPayout - stake : 0;
     }
 }
 
@@ -253,7 +262,11 @@ contract BetTerminalPathInvariant420Test {
         _haltSettlement(s);
 
         vm.prank(SETTLER);
-        vm.expectRevert(SettlementEngine420.EmergencyHalted.selector);
+        vm.expectRevert(abi.encodeWithSelector(
+            SettlementEngine420.EmergencyHalted.selector,
+            BetTypes420.EmergencyDomain.SETTLEMENT_HOLD,
+            SETTLEMENT_PROFILE
+        ));
         s.engine.settle(WAGER, BetTypes420.TerminalOutcome.WIN, 500 ether);
         require(!s.registry.settlementExists(WAGER), "hold settled wager");
 
@@ -298,7 +311,7 @@ contract BetTerminalPathInvariant420Test {
         vm.warp(s.deadline);
 
         vm.prank(RESCUER);
-        vm.expectRevert(bytes4(keccak256("Error(string)")));
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "economics"));
         s.engine.voidExpired(WAGER);
 
         require(!s.registry.settlementExists(WAGER), "registry partially committed");

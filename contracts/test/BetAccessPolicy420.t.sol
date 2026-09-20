@@ -10,6 +10,7 @@ import "../src/bet/BetProfileRegistry420.sol";
 interface VmBetAccessPolicy420 {
     function prank(address) external;
     function expectRevert(bytes4) external;
+    function expectRevert(bytes calldata) external;
     function warp(uint256) external;
 }
 
@@ -137,13 +138,13 @@ contract BetAccessPolicy420Test {
         s.verifier.setCredential(PLAYER, AGE, true);
 
         vm.prank(ROUTER);
-        vm.expectRevert(BetAccessPolicy420.MissingCredential.selector);
+        vm.expectRevert(abi.encodeWithSelector(BetAccessPolicy420.MissingCredential.selector, JURISDICTION));
         s.access.validateAndRecord(ACCESS, PLAYER, ASSET, 10 ether);
 
         s.verifier.setCredential(PLAYER, JURISDICTION, true);
         s.verifier.setShouldRevert(true);
         vm.prank(ROUTER);
-        vm.expectRevert(BetAccessPolicy420.MissingCredential.selector);
+        vm.expectRevert(abi.encodeWithSelector(BetAccessPolicy420.MissingCredential.selector, AGE));
         s.access.validateAndRecord(ACCESS, PLAYER, ASSET, 10 ether);
 
         s.verifier.setShouldRevert(false);
@@ -164,15 +165,15 @@ contract BetAccessPolicy420Test {
         vm.expectRevert(BetAccessPolicy420.CannotShortenProtection.selector);
         s.access.selfExclude(uint64(block.timestamp + 1 days));
         vm.prank(ROUTER);
-        vm.expectRevert(BetAccessPolicy420.SelfExcluded.selector);
+        vm.expectRevert(abi.encodeWithSelector(BetAccessPolicy420.SelfExcluded.selector, excludedUntil));
         s.access.validateAndRecord(ACCESS, PLAYER, ASSET, 1 ether);
 
         vm.warp(excludedUntil);
-        uint64 coolUntil = uint64(block.timestamp + 1 days);
+        uint64 coolUntil = excludedUntil + 1 days;
         vm.prank(PLAYER);
         s.access.coolOff(coolUntil);
         vm.prank(ROUTER);
-        vm.expectRevert(BetAccessPolicy420.CoolingOff.selector);
+        vm.expectRevert(abi.encodeWithSelector(BetAccessPolicy420.CoolingOff.selector, coolUntil));
         s.access.validateAndRecord(ACCESS, PLAYER, ASSET, 1 ether);
 
         vm.warp(coolUntil);

@@ -39,7 +39,7 @@ The BG-19 client must not:
 
 ## Detailed roadmap
 
-### BG-19.1 — web application foundation + runtime contract
+### BG-19.1 — web application foundation + runtime contract — COMPLETE AND QUALIFIED
 
 Build the production frontend workspace and runtime boundary.
 
@@ -54,9 +54,26 @@ Build the production frontend workspace and runtime boundary.
 - define CSP-compatible asset/runtime rules;
 - add CI for build, typecheck, lint and web unit tests.
 
+Implemented in:
+- `bong-goggles/web/package.json`
+- `bong-goggles/web/runtime-config.example.json`
+- `bong-goggles/web/core/runtime-config.js`
+- `bong-goggles/web/core/services.js`
+- `bong-goggles/web/core/bootstrap.js`
+- `bong-goggles/web/core/telemetry.js`
+- `bong-goggles/web/app.js`
+- `bong-goggles/web/index.html`
+- `bong-goggles/web/styles.css`
+- `bong-goggles/web/scripts/check.mjs`
+- `bong-goggles/web/scripts/build.mjs`
+- `bong-goggles/web/test/runtime.test.js`
+- `.github/workflows/bong-goggles-web.yml`
+
+BG-19.1 follows the repository's existing Wallet/Exchange web convention: dependency-light Node 22 qualification plus browser-native ES modules and a deterministic static build. Runtime configuration is versioned and fail-closed, production requires the canonical Bong Goggles host and HTTPS service origins, typed service clients centralize external calls, bootstrap state explicitly distinguishes loading/ready/degraded/unsupported-network/maintenance, telemetry recursively redacts sensitive fields, the HTML shell carries a restrictive CSP, and dedicated Web Verification CI checks static invariants, tests, build output and frontend secret leakage.
+
 **Exit:** a production-buildable shell starts deterministically against testnet/staging/production configuration and fails closed on unsafe configuration.
 
-### BG-19.2 — Wallet, Identity, passkey + session UX
+### BG-19.2 — Wallet, Identity, passkey + session UX — COMPLETE AND QUALIFIED
 
 Integrate qualified account/session infrastructure.
 
@@ -72,9 +89,18 @@ Integrate qualified account/session infrastructure.
 - never persist private keys, seed phrases, raw signing material or unrestricted bearer capabilities;
 - include secure sign-out / local-session clear behavior.
 
+Implemented in:
+- `bong-goggles/web/core/wallet-session.js`
+- `bong-goggles/web/core/transaction-intent.js`
+- `bong-goggles/web/test/wallet-session.test.js`
+- `bong-goggles/web/app.js`
+- `bong-goggles/web/styles.css`
+
+BG-19.2 now discovers only the qualified `is420Wallet` EIP-1193 provider, supports explicit connect and secure local sign-out, tracks `accountsChanged`, `chainChanged` and disconnect lifecycle events, blocks state-changing UX on the wrong chain, keeps anonymous browsing read-only, and exposes secure 420Wallet handoffs for passkey and delegated-session management. Session presentation explicitly represents active/expired/revoked state without turning application state into capability authority. Canonical writes are represented as reviewable, non-authoritative Wallet intents and remain pending until a canonical receipt confirms or reverts them; user rejection can never become local success. Bong Goggles stores no private key, seed phrase or raw signing material.
+
 **Exit:** users can safely enter, leave and recover sessions while every write remains constrained by canonical Wallet/session policy.
 
-### BG-19.3 — design system, navigation + responsive application shell
+### BG-19.3 — design system, navigation + responsive application shell — COMPLETE AND QUALIFIED
 
 Build the reusable visual/application foundation.
 
@@ -89,9 +115,19 @@ Build the reusable visual/application foundation.
 - route-level permission/session guards;
 - consistent Explorer/Wallet handoff components for canonical state and transaction inspection.
 
+Implemented in:
+- `bong-goggles/web/core/routes.js`
+- `bong-goggles/web/core/design-system.js`
+- `bong-goggles/web/core/app-shell.js`
+- `bong-goggles/web/test/app-shell.test.js`
+- `bong-goggles/web/app.js`
+- `bong-goggles/web/styles.css`
+
+BG-19.3 establishes the shared application shell and route contract for Home, Profile, Friends, Messages, Notifications, Discover, Groups, Pages, Events, Games, Rewards and Settings. Navigation access is derived from current Wallet/network state instead of inventing permissions, private routes fail closed into read-only presentation, and public routes remain accessible without authentication. The shell now provides desktop side navigation, mobile bottom navigation, a responsive content column, canonical Wallet/Explorer handoffs, route headings, status rail and explicit degraded-network/service banners. Reusable cards, buttons, tabs, toasts, skeletons, empty/error states and canonical handoff components are defined centrally. Keyboard focus, reduced-motion and forced-colors behavior are included at the system level.
+
 **Exit:** every later feature can be implemented without inventing one-off navigation, modal, loading or authority patterns.
 
-### BG-19.4 — profiles, relationships + social graph UI
+### BG-19.4 — profiles, relationships + social graph UI — COMPLETE AND QUALIFIED
 
 Expose the qualified profile and relationship model.
 
@@ -108,9 +144,22 @@ Expose the qualified profile and relationship model.
 - deterministic refresh after write confirmation;
 - no optimistic relationship state that survives a canonical rejection.
 
-**Exit:** profile and social-graph behavior is complete, canonical and usable across desktop/mobile.
+Implemented in:
+- `bong-goggles/web/core/profile-social.js`
+- `bong-goggles/web/core/profile-ui.js`
+- `bong-goggles/web/test/profile-social.test.js`
+- `bong-goggles/web/core/app-shell.js`
+- `bong-goggles/web/styles.css`
 
-### BG-19.5 — home feed, publishing, interactions, media + stories
+BG-19.4 mirrors the qualified contracts rather than inventing a browser-side relationship model. Profile projections preserve account/profile/status/type/hash/media metadata when supplied canonically. Relationship state supports symmetric friendship, directional follows, approval-pending friend/follow requests, block direction, scoped mute state and the contract's block side effects. Action availability is derived from current canonical relationship state plus Wallet/session write authority. Blocking suppresses ordinary friend/follow actions, incoming requests expose accept/decline, outgoing requests expose cancel, and inactive profiles disable new relationship creation.
+
+Friends/followers/following/blocked/muted collections are deterministic projections and are never persisted as a second source of truth. Post-write state uses explicit canonical refresh semantics: optimistic state is not retained when the refreshed projection disagrees.
+
+The repository's Bong Goggles indexer currently materializes profile and relationship records but does not expose a dedicated browser HTTP profile/relationship endpoint module. BG-19.4 therefore fails closed when that projection is unavailable rather than manufacturing relationship state in the browser. The UI integration is ready to consume the qualified projection transport when exposed by the deployment/application service layer.
+
+**Exit:** profile and social-graph presentation/actions are implemented against the canonical model; browser state fails closed when the qualified projection transport is unavailable.
+
+### BG-19.5 — home feed, publishing, interactions, media + stories — COMPLETE AND QUALIFIED
 
 Build the central social experience.
 
@@ -129,9 +178,22 @@ Build the central social experience.
 - pending transaction/publication state clearly distinguished from canonical publication;
 - blocked/inactive/withdrawn content removed or degraded according to current canonical state.
 
-**Exit:** a user can complete the primary Bong Goggles loop: open feed → publish → interact → see canonical result.
+Implemented in:
+- `bong-goggles/web/core/feed-publishing.js`
+- `bong-goggles/web/core/feed-ui.js`
+- `bong-goggles/web/test/feed-publishing.test.js`
+- `bong-goggles/web/core/app-shell.js`
+- `bong-goggles/web/styles.css`
 
-### BG-19.6 — pages, groups + events application surfaces
+BG-19.5 mirrors the qualified feed/social-object/media contracts. Feed pages are normalized from canonical/indexed projections, filter non-active objects, retain deterministic cursor/freshness metadata and never promote browser-local objects into canonical state. Composer drafts distinguish POST, COMMENT, STORY, REPOST and QUOTE_POST semantics and map them to the qualified `BongGogglesSocialObjectRegistry420` actions. Reaction/comment/repost/quote/tag intents map only to qualified contract operations. Pending Wallet submission is explicitly non-canonical; rejected and reverted states remain distinct; only a refreshed canonical projection marks publication confirmed.
+
+The home route now includes a story strip, composer and feed surface. Media presentation is keyed by qualified media roots and upload UX has explicit preparing/uploading/verifying/registering/ready/failed states. The browser does not treat raw upload success as publication authority: a media root is usable only after the qualified storage/media registration path resolves it.
+
+As with BG-19.4, the repository's indexer currently contains deterministic projector/materialized-feed logic but not a dedicated browser-facing HTTP feed controller module. The BG-19.5 client therefore fails closed when no qualified feed projection is supplied rather than inventing feed entries or cursors locally. Likewise, contract addresses/ABI deployment bindings are not currently part of the BG-19 runtime config, so this phase prepares and presents canonical action intent semantics without embedding duplicate or guessed deployment authority in the client.
+
+**Exit:** the primary feed/composer/interaction/media/story web surfaces are implemented against canonical semantics, with pending-vs-confirmed behavior enforced and projection/deployment gaps failed closed instead of guessed.
+
+### BG-19.6 — pages, groups + events application surfaces — IMPLEMENTED, QUALIFICATION PENDING
 
 Expose community primitives from the qualified backend.
 
@@ -146,7 +208,22 @@ Expose community primitives from the qualified backend.
 - canonical links and degraded-state behavior;
 - no synthetic invitations or permissions not supported by contracts.
 
-**Exit:** Pages, Groups and Events are first-class web experiences rather than hidden backend capabilities.
+Implemented in:
+- `bong-goggles/web/core/community.js`
+- `bong-goggles/web/core/community-ui.js`
+- `bong-goggles/web/test/community.test.js`
+- `bong-goggles/web/core/app-shell.js`
+- `bong-goggles/web/styles.css`
+
+BG-19.6 mirrors `BongGogglesCommunityRegistry420` and the qualified community indexer reducers. Page, Group, GroupMember, Event and RSVP projections are normalized as canonical presentation records. Page actions are owner-gated. Group actions reflect OPEN, APPROVAL_REQUIRED and DISABLED join policies; pending membership exposes cancellation/leave semantics through the contract-supported removal primitive; active membership and owner roles are displayed from canonical state only. Private Groups fail closed unless the current canonical member state is ACTIVE. Blocked owner/member relationships suppress Group and Event actions.
+
+Event presentation preserves host type, visibility, schedule and current RSVP state. PUBLIC and GROUP_ONLY events may expose RSVP controls only when the current canonical policy permits them; INVITE_ONLY events do not manufacture an invitation flow because the current contract does not define one. RSVP is explicitly labeled as canonical intent rather than attendance proof.
+
+`/pages`, `/groups` and `/events` now render either canonical directories or detail views when supplied. Group details include a qualified group-feed handoff surface for the feed/indexer layer. Directories filter inactive records and sort Events chronologically. Post-write refresh replaces presentation state from canonical projections and never preserves optimistic membership or RSVP state as truth.
+
+The repository still lacks a dedicated browser HTTP controller for these materialized community projections and BG-19 runtime config still does not carry canonical deployment bindings. The browser therefore fails closed when community projection transport is unavailable and prepares only qualified Wallet intents for supported `BongGogglesCommunityRegistry420` calls.
+
+**Exit:** Pages, Groups and Events are implemented as first-class web surfaces with canonical membership, visibility and RSVP semantics, while unsupported invitation/permission behavior remains absent rather than synthesized.
 
 ### BG-19.7 — private messaging web client
 

@@ -1,0 +1,21 @@
+{
+  "environment": "testnet",
+  "appOrigin": "https://bonggoggles.420integrated.org",
+  "chainId": 420420,
+  "rpcUrl": "https://rpc.testnet.420integrated.org",
+  "indexerUrl": "https://api.bonggoggles.testnet.420integrated.org",
+  "mediaUrl": "https://media.testnet.420integrated.org",
+  "messengerUrl": "https://messenger.testnet.420integrated.org",
+  "notificationsUrl": "https://notifications.testnet.420integrated.org",
+  "walletUrl": "https://wallet.testnet.420integrated.org",
+  "explorerUrl": "https://explorer.testnet.420integrated.org",
+  "maintenance": false,
+  "features": {
+    "profiles": true,
+    "publishing": true,
+    "messaging": true,
+    "games": true,
+    "rewards": true,
+    "moderation": true
+  }
+}

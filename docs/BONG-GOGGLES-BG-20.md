@@ -1,0 +1,19 @@
+# BG-20 — operational launch hardening (pre-launch preparation)
+
+**Status:** BG-20.1–20.5 deterministic evidence gates and regression suites committed to PR #350. **Not launched, not approved for a canary, not production-ready.** These operator-facing modules are deliberately not imported into the browser, deployed or connected to Cloudflare; passing CI never authenticates evidence, verifies live state or grants authority. BG-19 closeout remains a prerequisite for a real staging trial and launch. Private ingress and unqualified features stay disabled. The intended eventual Cloudflare origin is `https://bonggoggles.420integrated.org`; DNS, project binding, deployment and live routes are not established by this roadmap.
+
+## Implemented preparatory increments
+
+1. **BG-20.1 — fail-closed canary assessment:** `bong-goggles/web/core/operational-rollout.js` compares deployment identity and externally evidenced BG-19 approval, rollback readiness, traffic observations and SLO/safety thresholds. Outputs `blocked`, `rollback_required`, or `hold_for_operator`, never automatic promotion.
+2. **BG-20.2 — privacy-safe observability:** `bong-goggles/web/core/operational-observability.js` validates bounded pre-aggregated server metrics without personal identifiers or freeform labels, rejects missing/stale samples, and returns fixed-code alerts. The trusted collector, retention enforcement and real pager are not supplied by this evaluator. See [BG-20.2 handoff](BONG-GOGGLES-BG-20-2-OBSERVABILITY.md).
+3. **BG-20.3 — recovery evidence gate:** `bong-goggles/web/core/operational-recovery.js` checks recorded artifact/config/policy/rollback identity, backup attestations and five separate recovery scenarios; it performs no restores or live drills. See [BG-20.3 handoff](BONG-GOGGLES-BG-20-3-RECOVERY.md).
+4. **BG-20.4 — controlled staging evidence:** `bong-goggles/web/core/controlled-canary.js` binds sequential collector windows to an exact staged release and combines existing safety, SLO and recovery checks. It rejects production inputs and cannot modify traffic or enable a release. See [BG-20.4 handoff](BONG-GOGGLES-BG-20-4-CONTROLLED-CANARY.md).
+5. **BG-20.5 — operational readiness gate:** `bong-goggles/web/core/launch-operations.js` checks recorded desktop/mobile accessibility, abuse response, incident and on-call drills, backup retention, dependency/security review, degraded-service behavior and rollback rehearsal. It rejects missing/stale or self-approved evidence and never returns launch or traffic authorization. See [BG-20.5 handoff](BONG-GOGGLES-BG-20-5-LAUNCH-OPERATIONS.md).
+
+## Outstanding qualification and release boundaries
+
+**BG-19:** Complete independent Wallet/Identity session/revocation and audience/moderation authorization, qualified private-feed HTTP transport, real API deployment, browser denial/withdrawal/reorg journeys, accessibility/performance, operator approval and rollback drill. The BG-19.19 HTTP adapter remains disabled by default; a source-code test cannot establish readiness.
+
+**BG-20:** Independently verify Cloudflare staging deployment and immutable artifact, genuine privacy-safe server collection/alert paging, real backup and rollback drills, staged fault injections/canary observations, and desktop/mobile accessibility and incident-response exercises. Verify evidence provenance and on-call acknowledgment. Production release requires a separate authorized decision bound to an exact production build; a passing staging assessment does not approve production.
+
+**Merge and website:** Resolve all current PR #350 GitHub test-merge conflicts and qualify the final reconciled head before a separately authorized merge into `main`. After BG-20 code closeout and merge, build out the existing Bong Goggles user-facing UI/branding for the planned Cloudflare custom domain. No automatic promotion, merge or deployment is authorized by this roadmap.

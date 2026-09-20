@@ -149,7 +149,7 @@ contract AINativePayerRefund420Test is Test {
         assertEq(address(vault).balance, 0);
         assertEq(uint256(accounting.getObligation(original).state), 4);
         VaultAccounting420.Obligation memory o = accounting.getObligation(refundId());
-        assertEq(o.beneficiary, PAYER);
+        assertEq(uint256(uint160(o.beneficiary)), uint256(uint160(PAYER)));
         assertEq(o.amount, AMOUNT);
         assertEq(uint256(o.state), 3);
         assertEq(uint256(state()), uint256(AIJobEscrow.EscrowState.CLOSED));

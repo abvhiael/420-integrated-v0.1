@@ -77,7 +77,9 @@ contract AINativeSplitAdversarial420Test is AINativeSplitProtocol420Test {
         bytes32 originalObligation = _original();
         bytes32 claimOperation = keccak256("unprivileged-claim");
         vm.prank(PAYER);
-        vm.expectRevert(AssetVault420.Unauthorized.selector);
+        // The original funding obligation is RESERVED, not CLAIMABLE. Vault.claim
+        // validates obligation state before evaluating caller authorization.
+        vm.expectRevert(VaultAccounting420.InvalidObligationState.selector);
         vault.claim(claimOperation, originalObligation);
         _assertNoSettlement();
     }

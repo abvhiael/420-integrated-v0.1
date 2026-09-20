@@ -20,7 +20,6 @@ concurrency:
 
 jobs:
   foundry:
-    continue-on-error: true
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -64,7 +63,6 @@ jobs:
               | sed 's#^contracts/##' \
               | sort -u || true
           )
-
           for src in "${ADAPTER_FILES[@]}"; do
             base="$(basename "$src" .sol)"
             candidate="test/${base}.t.sol"
@@ -72,7 +70,6 @@ jobs:
               ADAPTER_TESTS+=("$candidate")
             fi
           done
-
           if ((${#ADAPTER_TESTS[@]})); then
             mapfile -t ADAPTER_TESTS < <(printf '%s\n' "${ADAPTER_TESTS[@]}" | sort -u)
             printf '%s\n' "${ADAPTER_TESTS[@]}" | tee artifacts/contracts/pr-adapter-targets.txt
@@ -86,6 +83,50 @@ jobs:
             echo 'PR_ADAPTER_MODE=false' >> "$GITHUB_ENV"
             : > artifacts/contracts/pr-adapter-targets.txt
           fi
+
+          # Only AI/Compute Solidity changes qualify for the scoped path. An unrelated
+          # Solidity source/test change requires the existing full-repository path.
+          if git diff --name-only "$BASE_SHA" "$HEAD_SHA" \
+            | grep -Eq '^contracts/(src/(ai|compute)/|test/(AI|Compute)[^/]*\.t\.sol$)' \
+            && ! git diff --name-only "$BASE_SHA" "$HEAD_SHA" \
+              | grep -E '^contracts/(src/|test/)' \
+              | grep -Ev '^contracts/(src/(ai|compute)/|test/(AI|Compute)[^/]*\.t\.sol$)' \
+              | grep -q .; then
+            echo 'PR_AI_MODE=true' >> "$GITHUB_ENV"
+            printf '%s\n' 'test/AIComputeRecovery420.t.sol' 'test/AINativeVaultFundingAdapter420.t.sol' \
+              | tee artifacts/contracts/pr-ai-targets.txt
+          else
+            echo 'PR_AI_MODE=false' >> "$GITHUB_ENV"
+            : > artifacts/contracts/pr-ai-targets.txt
+          fi
+
+      - name: PR AI/Compute scoped build qualification
+        if: github.event_name == 'pull_request' && env.PR_ADAPTER_MODE != 'true' && env.PR_AI_MODE == 'true'
+        working-directory: contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ../artifacts/contracts
+          : > ../artifacts/contracts/foundry-build.txt
+          while IFS= read -r target; do
+            [ -n "$target" ] || continue
+            echo "=== SCOPED AI BUILD $target ===" | tee -a ../artifacts/contracts/foundry-build.txt
+            forge build "$target" --sizes 2>&1 | tee -a ../artifacts/contracts/foundry-build.txt
+          done < ../artifacts/contracts/pr-ai-targets.txt
+
+      - name: PR AI/Compute scoped tests
+        if: github.event_name == 'pull_request' && env.PR_ADAPTER_MODE != 'true' && env.PR_AI_MODE == 'true'
+        working-directory: contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ../artifacts/contracts
+          : > ../artifacts/contracts/foundry-tests.txt
+          while IFS= read -r target; do
+            [ -n "$target" ] || continue
+            echo "=== SCOPED AI TEST $target ===" | tee -a ../artifacts/contracts/foundry-tests.txt
+            forge test --match-path "$target" -vvv 2>&1 | tee -a ../artifacts/contracts/foundry-tests.txt
+          done < ../artifacts/contracts/pr-ai-targets.txt
 
       - name: PR adapter build qualification
         if: github.event_name == 'pull_request' && env.PR_ADAPTER_MODE == 'true'
@@ -116,14 +157,13 @@ jobs:
             forge clean
             forge test --match-path "$target" -vvv 2>&1 | tee -a ../artifacts/contracts/foundry-tests.txt
           done <<< "$PR_ADAPTER_TARGETS"
-
           echo "=== BRIDGE SHARED SMOKE ===" | tee -a ../artifacts/contracts/foundry-tests.txt
           forge clean
           forge test --match-path test/BridgeGenesisIntegration420.t.sol -vvv 2>&1 \
             | tee -a ../artifacts/contracts/foundry-tests.txt
 
       - name: Full PR build
-        if: github.event_name == 'pull_request' && env.PR_ADAPTER_MODE != 'true'
+        if: github.event_name == 'pull_request' && env.PR_ADAPTER_MODE != 'true' && env.PR_AI_MODE != 'true'
         working-directory: contracts
         run: |
           mkdir -p ../artifacts/contracts
@@ -131,7 +171,7 @@ jobs:
           forge build --sizes 2>&1 | tee ../artifacts/contracts/foundry-build.txt
 
       - name: Full PR tests
-        if: github.event_name == 'pull_request' && env.PR_ADAPTER_MODE != 'true'
+        if: github.event_name == 'pull_request' && env.PR_ADAPTER_MODE != 'true' && env.PR_AI_MODE != 'true'
         working-directory: contracts
         run: |
           mkdir -p ../artifacts/contracts
@@ -164,6 +204,7 @@ jobs:
             artifacts/contracts/foundry-tests.txt
             artifacts/contracts/pr-changed-files.txt
             artifacts/contracts/pr-adapter-targets.txt
+            artifacts/contracts/pr-ai-targets.txt
           if-no-files-found: warn
           retention-days: 30
 

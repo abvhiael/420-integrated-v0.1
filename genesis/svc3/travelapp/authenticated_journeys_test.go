@@ -30,7 +30,8 @@ func TestAuthenticatedTripsE2EIsolationAndCSRF(t *testing.T){
  if response:=getPrivate(unauth,"/travel/trips");response.Code!=http.StatusUnauthorized {t.Fatalf("anonymous GET status %d",response.Code)}
  if response:=getPrivate(handler,"/travel/trips");response.Code!=http.StatusOK||!strings.Contains(response.Body.String(),"Create trip"){t.Fatalf("authenticated GET: %d %s",response.Code,response.Body.String())}
  form:=url.Values{"title":{"private plan"},"visibility":{"PRIVATE"},"csrf_token":{token},"owner_id":{"bob"}}
- if response:=postPrivate(handler,"/travel/trips",form,"https://example.com");response.Code!=http.StatusForbidden {t.Fatalf("cross-origin mutation status %d",response.Code)}
+ if response:=postPrivate(handler,"/travel/trips",form,"https://evil.example");response.Code!=http.StatusForbidden {t.Fatalf("cross-origin mutation status %d",response.Code)}
+ if response:=postPrivate(handler,"/travel/trips",form,"https://example.com");response.Code!=http.StatusForbidden {t.Fatalf("cross-scheme mutation status %d",response.Code)}
  form.Set("csrf_token","forged")
  if response:=postPrivate(handler,"/travel/trips",form,"");response.Code!=http.StatusForbidden {t.Fatalf("forged CSRF status %d",response.Code)}
  form.Set("csrf_token",token)

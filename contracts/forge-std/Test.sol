@@ -10,6 +10,7 @@ interface Vm {
     function warp(uint256 newTimestamp) external;
     function sign(uint256 privateKey, bytes32 digest) external returns (uint8 v, bytes32 r, bytes32 s);
     function deal(address account, uint256 newBalance) external;
+    function etch(address target, bytes calldata newRuntimeBytecode) external;
 }
 
 abstract contract Test {

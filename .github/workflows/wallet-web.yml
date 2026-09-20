@@ -7,6 +7,7 @@ on:
       - "wallet/deployment-inventory.json"
       - "contracts/config/420wallet-genesis.json"
       - "contracts/config/genesis-canonical-addresses.json"
+      - "contracts/config/w14-7-4-global-address-reconciliation.json"
       - "config/system-addresses.json"
       - "developer-hub/manifests/**"
       - "scripts/verify-wallet-w14-1.py"
@@ -16,6 +17,8 @@ on:
       - "scripts/test-wallet-w14-7-2-predeploy.py"
       - "scripts/verify-wallet-w14-7-3-genesis.py"
       - "scripts/test-wallet-w14-7-3-genesis.py"
+      - "scripts/verify-wallet-w14-7-4-candidate.py"
+      - "scripts/test-wallet-w14-7-4-candidate.py"
       - ".github/workflows/wallet-web.yml"
   pull_request:
     paths:
@@ -23,6 +26,7 @@ on:
       - "wallet/deployment-inventory.json"
       - "contracts/config/420wallet-genesis.json"
       - "contracts/config/genesis-canonical-addresses.json"
+      - "contracts/config/w14-7-4-global-address-reconciliation.json"
       - "config/system-addresses.json"
       - "developer-hub/manifests/**"
       - "scripts/verify-wallet-w14-1.py"
@@ -32,6 +36,8 @@ on:
       - "scripts/test-wallet-w14-7-2-predeploy.py"
       - "scripts/verify-wallet-w14-7-3-genesis.py"
       - "scripts/test-wallet-w14-7-3-genesis.py"
+      - "scripts/verify-wallet-w14-7-4-candidate.py"
+      - "scripts/test-wallet-w14-7-4-candidate.py"
       - ".github/workflows/wallet-web.yml"
   workflow_dispatch:
 
@@ -56,6 +62,10 @@ jobs:
         run: python3 scripts/test-wallet-w14-7-2-predeploy.py
       - name: W14.7.3 synthetic Genesis image integrity regression tests
         run: python3 scripts/test-wallet-w14-7-3-genesis.py
+      - name: W14.7.4 proposed global namespace validator
+        run: python3 scripts/verify-wallet-w14-7-4-candidate.py
+      - name: W14.7.4 synthetic global namespace regression tests
+        run: python3 scripts/test-wallet-w14-7-4-candidate.py
       - name: Static wallet checks
         working-directory: wallet/web
         run: npm run check

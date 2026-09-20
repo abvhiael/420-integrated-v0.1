@@ -25,6 +25,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
+      - name: Install web build dependencies
+        working-directory: bong-goggles/web
+        run: npm install --no-audit --no-fund
       - name: Static web checks
         working-directory: bong-goggles/web
         run: npm run check
@@ -43,4 +46,4 @@ jobs:
       - name: Frontend secret scan
         working-directory: bong-goggles/web
         run: |
-          ! grep -RniE 'BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY|mnemonic[[:space:]]*[:=]|seed[_ -]?phrase[[:space:]]*[:=]|private[_-]?key[[:space:]]*[:=]'             --exclude-dir=dist             --exclude-dir=test             .
+          ! grep -RniE 'BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY|mnemonic[[:space:]]*[:=]|seed[_ -]?phrase[[:space:]]*[:=]|private[_-]?key[[:space:]]*[:=]' --exclude-dir=dist --exclude-dir=node_modules --exclude-dir=test .

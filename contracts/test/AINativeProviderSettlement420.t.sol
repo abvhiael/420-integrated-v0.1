@@ -60,6 +60,7 @@ contract SettlementAccountingMock420 {
 }
 contract SettlementVaultMock420 {
     error MockClaimRejected();
+    error MockReceiverRejected();
     bytes32 public immutable vaultId;
     SettlementAccountingMock420 public accounting;
     bool public rejectClaim;
@@ -80,7 +81,7 @@ contract SettlementVaultMock420 {
         executedOperation[operation] = true;
         accounting.setState(obligationId, 3);
         (bool ok,) = payable(o.beneficiary).call{value: o.amount}("");
-        require(ok, "receiver rejected");
+        if (!ok) revert MockReceiverRejected();
     }
     receive() external payable {}
 }
@@ -200,7 +201,7 @@ contract AINativeProviderSettlement420Test is Test {
         RejectNativePayment420 rejecting = new RejectNativePayment420();
         escrow.seed(JOB, PAYER, address(rejecting), PROVIDER, VAULT, FUNDING, AMOUNT);
         accounting.setBeneficiary(obligationId, address(rejecting));
-        vm.expectRevert(RejectNativePayment420.NativePaymentRejected.selector);
+        vm.expectRevert(SettlementVaultMock420.MockReceiverRejected.selector);
         settlement.payProvider(JOB, DECISION);
         assertEq(address(vault).balance, AMOUNT);
         assertEq(uint256(state()), uint256(AIJobEscrow.EscrowState.FUNDED));

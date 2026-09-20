@@ -13,8 +13,9 @@ for(const marker of ['requireCanonicalContext','prepareCanonicalSwap','prepareCa
  if(!inputs.includes(marker)) throw new Error(`V15.11 canonical input adapter missing ${marker}`);
 }
 const record=JSON.parse(fs.readFileSync(path.join(root,'v15.11-qualification.json'),'utf8'));
-// This is an exact, read-only implementation state; accepting it is NOT an execution approval.
-if(record.browserIntegrationStatus!=='WALLET_SELECTION_AND_READ_ONLY_SWAP_REVIEW_MOUNTED_EXECUTION_LOCKED'||
+// V14/V15 source consolidation and an acceptance *attempt* are not real-wallet/browser qualification.
+// Preserve the read-only, null-evidence, and blocked-Genesis gates until independent evidence exists.
+if(record.browserIntegrationStatus!=='V15_WALLET_SESSION_AUTHORITY_V14_READ_ONLY_BROWSER_ACCEPTANCE_PENDING'||
    record.repositoryStatus!=='IMPLEMENTED_PARTIAL_BROWSER_REVIEW_EXACT_HEAD_CI_REQUIRED'||
    record.operationalStatus!=='BLOCKED_UNVERIFIED_EXECUTABLE_QUOTE_DEPLOYMENT_AND_REAL_WALLET_MATRIX'||
    record.genesisReleaseStatus!=='BLOCKED'||

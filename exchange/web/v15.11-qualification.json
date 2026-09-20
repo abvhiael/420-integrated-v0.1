@@ -46,17 +46,24 @@
     "metadataReconciliationWorkflowRun": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/35485465896",
     "metadataReconciliationWorkflowConclusion": "success",
     "artifactEvidenceScope": "QUALIFICATION_MODE_CI_BUILD_AND_STATIC_BUNDLE_ASSERTIONS_ONLY_NOT_REAL_BROWSER_OR_DEPLOYMENT",
-    "note": "An earlier successful workflow is not evidence for a later head. CI build assertions do not establish runtime browser acceptance, real wallet/device behavior, testnet execution, or live deployment."
+    "note": "A prior-head successful workflow is not evidence for a later head. CI Chromium with simulated providers is not real wallet/device or deployed-preview acceptance, live transaction qualification or release authorization."
   },
   "browserAcceptanceAttempt": {
-    "browser": "Chromium headless on GitHub Actions ubuntu-latest; version recorded by runner if executed",
-    "wallet": "SIMULATED_EIP1193_TWO_INJECTED_PROVIDERS_NOT_REAL_EXTENSION_OR_DEVICE",
-    "preview": "QUALIFICATION_MODE_LOCAL_HTTP_BUILT_ARTIFACT_NOT_CLOUDFLARE",
-    "harnessCommit": "2d3cf54804d0c3f45e23337875064e1f39a7bee4",
-    "workflowRun": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/35486257681",
-    "lastObservedStatus": "QUEUED_NO_RUNNER_ASSIGNED",
-    "results": null,
-    "evidenceArtifactPattern": "exchange-pre02-chromium-${GITHUB_SHA}"
+    "browser": "Chromium 153.0.8010.12 headless on GitHub Actions Linux using Playwright",
+    "wallet": "TWO_SIMULATED_EIP1193_INJECTED_PROVIDERS_NOT_REAL_EXTENSION_OR_DEVICE",
+    "preview": "QUALIFICATION_MODE_LOCAL_HTTP_BUILT_ARTIFACT_NOT_DEPLOYED_CLOUDFLARE",
+    "testedCommit": "d31b8a700088fbfade39148b219774b4b4eeaa4e",
+    "workflowRun": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/35487226959",
+    "evidenceArtifact": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/35487226959/artifacts/10598625123",
+    "lastObservedStatus": "SIMULATED_CHROMIUM_ACCEPTANCE_PASSED_ALL_FIVE_CASES",
+    "results": [
+      {"case": "explicit wallet selection and single V15 connect; V14 request containment and execution lockdown", "result": "PASS"},
+      {"case": "provider replacement invalidates old session and disconnects old listeners", "result": "PASS"},
+      {"case": "delayed response from superseded provider cannot restore wallet authority", "result": "PASS"},
+      {"case": "account and chain change invalidate wallet session and leave execution locked", "result": "PASS"},
+      {"case": "navigation and input changes clear stale read-only quote review; execution remains locked", "result": "PASS"}
+    ],
+    "releaseQualification": "NOT_QUALIFIED_REAL_EXTENSION_DEVICE_BROWSER_MATRIX_DEPLOYED_PREVIEW_AND_LIVE_CHAIN_UNTESTED"
   },
   "qualifiedInUnitTests": [
     "explicit wallet selection and generation-based invalidation",
@@ -68,10 +75,9 @@
     "qualification-mode deployable artifact entrypoint, source revision and legacy execution lockdown assertions"
   ],
   "releaseBlockers": [
-    "Chromium acceptance run pending, Firefox/WebKit and accessibility acceptance unverified",
-    "actual wallet extension/device, provider choice and delayed connection browser evidence missing",
-    "deployed preview browser evidence missing; local built-preview CI is not deployed Cloudflare",
-    "review panel displayed envelope field names require real-browser verification with qualified quote",
+    "real wallet-extension and device acceptance, Firefox/WebKit matrix and accessibility testing remain unverified despite passing simulated Chromium scenarios",
+    "deployed Cloudflare preview browser acceptance evidence missing; local built-preview CI is not deployed Cloudflare",
+    "review panel envelope and quote provenance require real-browser verification with qualified executable quote",
     "authenticated operator-approved executable quote producer, anti-replay and on-chain-qualified provenance absent",
     "verified testnet deployment, contract code, runtime, balances/allowances and live preflight absent",
     "browser swap transaction confirmation, submission and lifecycle not qualified",

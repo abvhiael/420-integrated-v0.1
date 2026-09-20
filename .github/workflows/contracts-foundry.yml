@@ -19,12 +19,12 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # W14.5 has ~762 Solidity files and the single full-tree compilation has
-  # repeatedly been terminated by GitHub's runner before Solc can report a
-  # result. Compile every primary unit and execute every test in bounded shards
-  # instead. All sixteen shards are required; no continue-on-error.
+  # Every PR must qualify the complete Solidity source and test inventory in
+  # bounded shards. A monolithic ~762-file build can be killed by the runner
+  # before solc produces a result. Do not restrict this job to a branch name.
+  # All 16 shards are required: no continue-on-error and no early fail-fast.
   pr-shards:
-    if: github.event_name == 'pull_request' && github.head_ref == 'wallet-w14-5-app-catalog-reconciliation'
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     strategy:
@@ -58,14 +58,16 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
 
+  # Preserve the existing main/push qualification and Decision #10 fixture.
+  # Pull requests must not also run the monolithic build in this job.
   foundry:
-    if: github.event_name != 'pull_request' || github.head_ref != 'wallet-w14-5-app-catalog-reconciliation'
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 90
     permissions:
       contents: read
     env:
-      FOUNDRY_PROFILE: ${{ github.event_name == 'pull_request' && 'pr' || 'ci' }}
+      FOUNDRY_PROFILE: ci
     steps:
       - uses: actions/checkout@v4
         with:
@@ -83,97 +85,7 @@ jobs:
           cast --version
           forge config
 
-      - name: Discover PR Solidity qualification scope
-        if: github.event_name == 'pull_request'
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p artifacts/contracts
-          BASE_SHA='${{ github.event.pull_request.base.sha }}'
-          HEAD_SHA='${{ github.event.pull_request.head.sha }}'
-          git diff --name-only "$BASE_SHA" "$HEAD_SHA" | tee artifacts/contracts/pr-changed-files.txt
-          mapfile -t ADAPTER_FILES < <(
-            git diff --name-only "$BASE_SHA" "$HEAD_SHA" \
-              | grep -E '^contracts/src/bridge/adapters/[^/]+BridgeAdapter420\.sol$' \
-              | sort -u || true
-          )
-          mapfile -t ADAPTER_TESTS < <(
-            git diff --name-only "$BASE_SHA" "$HEAD_SHA" \
-              | grep -E '^contracts/test/[^/]+BridgeAdapter420\.t\.sol$' \
-              | sed 's#^contracts/##' \
-              | sort -u || true
-          )
-          for src in "${ADAPTER_FILES[@]}"; do
-            base="$(basename "$src" .sol)"
-            candidate="test/${base}.t.sol"
-            if [ -f "contracts/$candidate" ]; then ADAPTER_TESTS+=("$candidate"); fi
-          done
-          if ((${#ADAPTER_TESTS[@]})); then
-            mapfile -t ADAPTER_TESTS < <(printf '%s\n' "${ADAPTER_TESTS[@]}" | sort -u)
-            printf '%s\n' "${ADAPTER_TESTS[@]}" | tee artifacts/contracts/pr-adapter-targets.txt
-            echo 'PR_ADAPTER_MODE=true' >> "$GITHUB_ENV"
-            {
-              echo 'PR_ADAPTER_TARGETS<<EOF'
-              printf '%s\n' "${ADAPTER_TESTS[@]}"
-              echo 'EOF'
-            } >> "$GITHUB_ENV"
-          else
-            echo 'PR_ADAPTER_MODE=false' >> "$GITHUB_ENV"
-            : > artifacts/contracts/pr-adapter-targets.txt
-          fi
-
-      - name: PR adapter build qualification
-        if: github.event_name == 'pull_request' && env.PR_ADAPTER_MODE == 'true'
-        working-directory: contracts
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p ../artifacts/contracts
-          : > ../artifacts/contracts/foundry-build.txt
-          while IFS= read -r target; do
-            [ -n "$target" ] || continue
-            echo "=== BUILD $target ===" | tee -a ../artifacts/contracts/foundry-build.txt
-            forge clean
-            forge build "$target" --sizes 2>&1 | tee -a ../artifacts/contracts/foundry-build.txt
-          done <<< "$PR_ADAPTER_TARGETS"
-
-      - name: PR adapter tests
-        if: github.event_name == 'pull_request' && env.PR_ADAPTER_MODE == 'true'
-        working-directory: contracts
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p ../artifacts/contracts
-          : > ../artifacts/contracts/foundry-tests.txt
-          while IFS= read -r target; do
-            [ -n "$target" ] || continue
-            echo "=== TEST $target ===" | tee -a ../artifacts/contracts/foundry-tests.txt
-            forge clean
-            forge test --match-path "$target" -vvv 2>&1 | tee -a ../artifacts/contracts/foundry-tests.txt
-          done <<< "$PR_ADAPTER_TARGETS"
-          echo "=== BRIDGE SHARED SMOKE ===" | tee -a ../artifacts/contracts/foundry-tests.txt
-          forge clean
-          forge test --match-path test/BridgeGenesisIntegration420.t.sol -vvv 2>&1 \
-            | tee -a ../artifacts/contracts/foundry-tests.txt
-
-      - name: Full PR build
-        if: github.event_name == 'pull_request' && env.PR_ADAPTER_MODE != 'true'
-        working-directory: contracts
-        run: |
-          mkdir -p ../artifacts/contracts
-          set -o pipefail
-          forge build --sizes 2>&1 | tee ../artifacts/contracts/foundry-build.txt
-
-      - name: Full PR tests
-        if: github.event_name == 'pull_request' && env.PR_ADAPTER_MODE != 'true'
-        working-directory: contracts
-        run: |
-          mkdir -p ../artifacts/contracts
-          set -o pipefail
-          forge test -vvv 2>&1 | tee ../artifacts/contracts/foundry-tests.txt
-
       - name: Full main build
-        if: github.event_name != 'pull_request'
         working-directory: contracts
         run: |
           mkdir -p ../artifacts/contracts
@@ -181,7 +93,6 @@ jobs:
           forge build --force --sizes 2>&1 | tee ../artifacts/contracts/foundry-build.txt
 
       - name: Full main tests
-        if: github.event_name != 'pull_request'
         working-directory: contracts
         run: |
           mkdir -p ../artifacts/contracts
@@ -196,13 +107,10 @@ jobs:
           path: |
             artifacts/contracts/foundry-build.txt
             artifacts/contracts/foundry-tests.txt
-            artifacts/contracts/pr-changed-files.txt
-            artifacts/contracts/pr-adapter-targets.txt
           if-no-files-found: warn
           retention-days: 30
 
       - name: Decision #10 deploy/seed harness
-        if: github.event_name != 'pull_request'
         working-directory: contracts
         run: |
           mkdir -p ../artifacts/contracts
@@ -228,7 +136,6 @@ jobs:
           ' ../artifacts/contracts/creative-kernel-v1.fixture.json
 
       - name: Upload Decision #10 fixture manifest
-        if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
           name: creative-kernel-v1-fixture
@@ -236,7 +143,6 @@ jobs:
           if-no-files-found: error
 
       - name: Coverage
-        if: github.event_name != 'pull_request'
         continue-on-error: true
         working-directory: contracts
         run: FOUNDRY_PROFILE=coverage forge coverage --ir-minimum --report summary

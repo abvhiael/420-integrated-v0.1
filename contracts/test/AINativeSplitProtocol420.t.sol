@@ -7,7 +7,7 @@ import "../src/ai/AINativeVaultFundingAdapter420.sol";
 import "./Vault420.t.sol";
 
 /// @notice 6.4.3.6 integration: real manager, escrow, funding adapter and Vault.
-/// @dev Use the actual manager runtime at its escrow-mandated 0x0431 system address.
+/// @dev The production manager and escrow require each other at canonical system addresses.
 contract AINativeSplitProtocol420Test is Test {
     bytes32 constant VAULT_ID = keccak256("ai-split-protocol-vault");
     bytes32 constant JOB = keccak256("ai-split-protocol-job");
@@ -37,10 +37,12 @@ contract AINativeSplitProtocol420Test is Test {
     }
 
     function setUp() public {
-        AIJobManager implementation = new AIJobManager(address(this));
-        vm.etch(address(0x431), address(implementation).code);
+        AIJobManager managerImplementation = new AIJobManager(address(this));
+        vm.etch(address(0x431), address(managerImplementation).code);
         manager = AIJobManager(address(0x431));
-        escrow = new AIJobEscrow(address(this));
+        AIJobEscrow escrowImplementation = new AIJobEscrow(address(this));
+        vm.etch(address(0x432), address(escrowImplementation).code);
+        escrow = AIJobEscrow(payable(address(0x432)));
         providers = new AIProviderRegistry(address(this));
         caps = new MockCapabilityRegistryVault420();
         auth = new VaultAuthorization420(address(caps));

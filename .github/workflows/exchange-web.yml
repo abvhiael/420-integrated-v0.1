@@ -27,6 +27,14 @@ jobs:
       - name: Exchange web unit tests
         working-directory: exchange/web
         run: npm test
+      - name: Build and verify PRE-02 deployable browser artifact (qualification only)
+        working-directory: exchange/web
+        env:
+          EXCHANGE_DEPLOYMENT_MODE: qualification
+          EXCHANGE_BUILD_SHA: ${{ github.sha }}
+        run: |
+          npm run build
+          node scripts/verify-pre02-artifact.mjs
       - name: Frontend secret scan
         working-directory: exchange/web
         run: |

@@ -1,0 +1,30 @@
+name: AI Native Partial Qualification
+
+on:
+  pull_request:
+    paths:
+      - "contracts/src/ai/AINativePartialSettlementPlan420.sol"
+      - "contracts/test/AINativePartialSettlementPlan420.t.sol"
+      - ".github/workflows/ai-native-partial-qualification.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ai-native-partial-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Build partial split planner and test harness
+        working-directory: contracts
+        run: forge build test/AINativePartialSettlementPlan420.t.sol --sizes
+      - name: Test partial conservation, binding and invalid splits
+        working-directory: contracts
+        run: forge test --match-path test/AINativePartialSettlementPlan420.t.sol -vvv

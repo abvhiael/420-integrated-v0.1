@@ -85,8 +85,7 @@ contract AINativeSplitSettlement420Test is Test {
         assertEq(uint256(accounting.getObligation(original).state), 4);
         VaultAccounting420.Obligation memory provider = accounting.getObligation(escrow.providerObligation());
         VaultAccounting420.Obligation memory payer = accounting.getObligation(escrow.payerObligation());
-        assertEq(uint256(provider.beneficiary), uint256(uint160(PROVIDER)));
-        assertEq(uint256(payer.beneficiary), uint256(uint160(PAYER)));
+        require(provider.beneficiary == PROVIDER && payer.beneficiary == PAYER, "wrong split beneficiary");
         assertEq(provider.amount, EARNED);
         assertEq(payer.amount, AMOUNT - EARNED);
         assertEq(uint256(provider.state), 3);

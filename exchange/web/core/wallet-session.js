@@ -78,42 +78,79 @@ export class WalletController {
     this.provider=provider;
     this.expectedChainId=expectedChainId;
     this.session=new WalletSession();
+    this.disposed=false;
+    this.connectionEpoch=0;
+    this.providerListeners=[];
+  }
+  assertActive(epoch){
+    if(this.disposed||epoch!==this.connectionEpoch){
+      const error=new Error('wallet connection superseded or disposed');
+      error.code='STALE_CONNECT';
+      throw error;
+    }
   }
   async connect(){
+    if(this.disposed) throw new Error('wallet controller disposed');
+    const epoch=++this.connectionEpoch;
     this.session.connecting();
     try{
       const accounts=await this.provider.request({method:'eth_requestAccounts'});
+      this.assertActive(epoch);
       const chainId=await this.provider.request({method:'eth_chainId'});
+      this.assertActive(epoch);
       const account=accounts?.[0];
       this.session.connected({account,chainId});
       const gate=validateNetwork(this.session,this.expectedChainId);
       if(!gate.ok && gate.reason==='chain-mismatch') this.session.wrongChain(chainId);
       return this.session;
     }catch(error){
-      this.session.failed(error);
+      if(!this.disposed&&epoch===this.connectionEpoch)this.session.failed(error);
       throw error;
     }
   }
   async switchChain(){
+    if(this.disposed) throw new Error('wallet controller disposed');
+    const epoch=this.connectionEpoch;
     const chainId=normalizeChainId(required(this.expectedChainId,'expectedChainId'));
     await this.provider.request({method:'wallet_switchEthereumChain',params:[{chainId}]});
+    this.assertActive(epoch);
     this.session.chainChanged(chainId,chainId);
     return this.session;
   }
   bind({onInvalidate}={}){
+    if(this.disposed) throw new Error('wallet controller disposed');
+    this.unbind();
     if(typeof this.provider.on!=='function') return;
-    this.provider.on('accountsChanged',(accounts)=>{
+    const subscribe=(name,handler)=>{
+      this.provider.on(name,handler);
+      this.providerListeners.push(()=>this.provider.removeListener?.(name,handler));
+    };
+    subscribe('accountsChanged',(accounts)=>{
+      if(this.disposed)return;
+      ++this.connectionEpoch;
       this.session.accountChanged(accounts?.[0]??null);
       onInvalidate?.('account-change');
     });
-    this.provider.on('chainChanged',(chainId)=>{
+    subscribe('chainChanged',(chainId)=>{
+      if(this.disposed)return;
+      ++this.connectionEpoch;
       this.session.chainChanged(chainId,this.expectedChainId);
       onInvalidate?.('chain-change');
     });
-    this.provider.on('disconnect',()=>{
+    subscribe('disconnect',()=>{
+      if(this.disposed)return;
+      ++this.connectionEpoch;
       this.session.disconnected();
       onInvalidate?.('disconnect');
     });
+  }
+  unbind(){for(const off of this.providerListeners.splice(0))off();}
+  dispose(){
+    if(this.disposed)return;
+    this.disposed=true;
+    ++this.connectionEpoch;
+    this.unbind();
+    this.session.disconnected();
   }
 }
 

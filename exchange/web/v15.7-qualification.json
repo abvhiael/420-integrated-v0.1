@@ -1,0 +1,29 @@
+{
+  "schema": "420-exchange-web-v15.7",
+  "repositoryStatus": "IMPLEMENTED_PENDING_CI",
+  "operationalStatus": "PENDING_LIVE_TESTNET_DRILL",
+  "scope": "LIVE_TESTNET_LIMIT_ORDER_SIGN_FILL_CANCEL",
+  "invariants": [
+    "only a resolved testnet deployment may run the drill",
+    "limit-order creation is an EIP-712 signature, not a fabricated on-chain creation transaction",
+    "maker and filler are separately validated against their active EIP-1193 provider account and chain",
+    "partial fill is strictly positive and less than signed sell amount",
+    "fillOrder uses exact signed order, uint128 fill amount, signature, path hash and bounded hop array",
+    "fill and cancel each require preflight and canonical finalized receipts",
+    "on-chain order hash and exact filledSellAmount are read after fill",
+    "only the maker cancels the remaining unfilled amount",
+    "on-chain cancelledOrder and preserved filled amount are verified after cancellation",
+    "no private key, mnemonic or signature is emitted in live evidence",
+    "repository CI never claims an actual live testnet drill occurred"
+  ],
+  "implementation": {
+    "abiAndState": "exchange/web/core/limit-order-execution.js",
+    "orchestration": "exchange/web/core/live-limit-order-qualification.js",
+    "runner": "exchange/web/scripts/live-limit-order-qualify.mjs",
+    "workflow": ".github/workflows/exchange-testnet-limit-order.yml",
+    "test": "exchange/web/test/limit-order-execution.test.js",
+    "runbook": "docs/420EXCHANGE-V15.7-LIVE-LIMIT-ORDERS.md"
+  },
+  "operationalEvidence": null,
+  "followOn": "V15.8 live/testnet bridge lifecycle qualification"
+}

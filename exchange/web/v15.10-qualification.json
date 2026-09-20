@@ -1,0 +1,24 @@
+{
+  "schema": "420-exchange-web-v15.10",
+  "scope": "GENESIS_TESTNET_CLOSEOUT",
+  "repositoryStatus": "IMPLEMENTED_PENDING_CI",
+  "operationalStatus": "BLOCKED_PENDING_LIVE_EVIDENCE",
+  "blockers": [
+    "Real resolved and independently verified V15.1 testnet deployment is missing",
+    "V15.6 live swap finality and indexer artifact is missing",
+    "V15.7 live maker-signed fill and cancellation artifact is missing",
+    "V15.8 live source/proof/destination artifact and beneficiary settlement proof are missing",
+    "V15.9 browser provider selector and real user-initiated execution are not integrated into app.js",
+    "Real desktop/mobile and multi-wallet browser matrix has not been executed",
+    "Live V13 read API and reorg/indexer integration not independently signed off",
+    "Independent security review and operator release/rollback signoff not supplied"
+  ],
+  "implementation": {
+    "gate": "exchange/web/core/genesis-closeout.js",
+    "cli": "exchange/web/scripts/genesis-closeout.mjs",
+    "tests": "exchange/web/test/genesis-closeout.test.js",
+    "staticCheck": "exchange/web/scripts/check-v15.10.mjs",
+    "runbook": "docs/420EXCHANGE-V15.10-GENESIS-TESTNET-CLOSEOUT.md"
+  },
+  "interpretation": "Passing GitHub PR checks demonstrates repository behavior, not Genesis/testnet release readiness. Never promote this record without externally verified operational artifacts and human operator/security approvals."
+}

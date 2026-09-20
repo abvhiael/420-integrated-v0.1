@@ -1,0 +1,19 @@
+{
+  "schema": "420-exchange-web-v15.9",
+  "scope": "WALLET_BROWSER_EXECUTION_COMPATIBILITY",
+  "repositoryStatus": "IMPLEMENTED_PENDING_CI",
+  "browserIntegrationStatus": "PENDING_PROVIDER_SELECTION_UI_AND_LIVE_EXECUTION_WIRING",
+  "operationalStatus": "PENDING_REAL_BROWSER_WALLET_MATRIX",
+  "coverage": ["EIP-1193 injected provider discovery", "EIP-6963 announcement deduplication", "multiple-wallet explicit selection gate", "connected-account and expected-chain inspection", "account-chain-disconnect-session drift fail-closed gates", "existing V15.4 transaction and typed-data execution tests"],
+  "browserMatrix": [
+    {"browser":"Chrome desktop", "wallet":"MetaMask extension", "status":"NOT_RUN"},
+    {"browser":"Firefox desktop", "wallet":"MetaMask extension", "status":"NOT_RUN"},
+    {"browser":"Brave desktop", "wallet":"injected EIP-1193 wallet", "status":"NOT_RUN"},
+    {"browser":"Safari iOS", "wallet":"wallet in-app browser", "status":"NOT_RUN"},
+    {"browser":"Chrome Android", "wallet":"wallet in-app browser", "status":"NOT_RUN"},
+    {"browser":"Chrome desktop", "wallet":"multiple installed wallets", "status":"NOT_RUN"}
+  ],
+  "limitations": ["Browser app currently binds globalThis.ethereum and does not expose explicit multi-wallet selection", "V15.2-V15.8 execution modules are not yet wired through actual browser form controls", "Mocked EIP-1193 tests do not establish MetaMask/Brave/Safari/mobile compatibility", "Resolved testnet and V15.6-V15.8 operational drills remain pending"],
+  "implementation": {"providerCompatibility":"exchange/web/core/wallet-compatibility.js", "unitTests":"exchange/web/test/wallet-compatibility.test.js", "runbook":"docs/420EXCHANGE-V15.9-WALLET-BROWSER-COMPATIBILITY.md"},
+  "followOn":"V15.10 Genesis testnet closeout; do not mark operationally qualified without browser and testnet execution evidence"
+}

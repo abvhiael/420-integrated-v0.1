@@ -1,0 +1,23 @@
+{
+  "schema": "420-exchange-web-v15.4",
+  "status": "IMPLEMENTED_PENDING_CI",
+  "scope": "EIP1193_SIGNING_AND_TRANSACTION_SUBMISSION",
+  "invariants": [
+    "wallet submission requires successful V15.3 preflight evidence",
+    "preflight evidence is bound to an exact Keccak-256 transaction fingerprint",
+    "session generation, account and chain must remain stable through wallet approval",
+    "live eth_chainId and eth_accounts are re-read before privileged wallet methods",
+    "eth_sendTransaction receives the exact preflighted request plus the qualified gas estimate",
+    "wallet transaction hashes must be canonical 32-byte hashes",
+    "limit orders require allowance, expiry and ExchangeAuthorization420 qualification before EIP-712 signing",
+    "eth_signTypedData_v4 receives the exact V15.2 typed-data payload",
+    "wallet/provider errors remain distinct from Exchange protocol simulation errors"
+  ],
+  "implementation": {
+    "walletExecution": "exchange/web/core/wallet-execution.js",
+    "preflight": "exchange/web/core/preflight.js",
+    "qualificationTest": "exchange/web/test/wallet-execution.test.js",
+    "runbook": "docs/420EXCHANGE-V15.4-WALLET-EXECUTION.md"
+  },
+  "followOn": "V15.5 transaction lifecycle, receipt/finality tracking and V13 reconciliation"
+}

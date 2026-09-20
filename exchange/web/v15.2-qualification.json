@@ -1,0 +1,22 @@
+{
+  "schema": "420-exchange-web-v15.2",
+  "status": "IMPLEMENTED_PENDING_CI",
+  "scope": "TRANSACTION_BUILDER_DEPLOYED_CONTRACT_BINDING",
+  "invariants": [
+    "transaction construction requires a resolved V15.1 deployment",
+    "floating-point presentation amounts are never converted into contract units",
+    "swap calldata binds exact router address, path hash, route ids, raw amounts and hop data",
+    "reviewed canonical identifiers cannot mutate before transaction construction",
+    "limit orders use the exact ExchangeLimitOrderSettlement420 EIP-712 domain and structure",
+    "only the maker can construct cancelOrder calldata",
+    "ExchangeBridgeQualification420 is read-only qualification authority and never a bridge execution target",
+    "outbound bridge execution targets canonical GatewayRouter420"
+  ],
+  "implementation": {
+    "abi": "exchange/web/core/abi.js",
+    "transactionBuilder": "exchange/web/core/execution.js",
+    "qualificationTest": "exchange/web/test/execution.test.js",
+    "runbook": "docs/420EXCHANGE-V15.2-TRANSACTION-BUILDER.md"
+  },
+  "followOn": "V15.3 preflight simulation, allowance/authorization checks and revert decoding"
+}

@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { bindExchangeRuntime } from '../core/deployment.js';
 
 const root=path.resolve(path.dirname(new URL(import.meta.url).pathname),'..');
 const dist=path.join(root,'dist');
@@ -30,47 +31,60 @@ function assertHttps(value,label,{ws=false}={}){
 }
 
 clean();
-for(const file of ['index.html','app.js','styles.css','branding.css']) copy(file);
+for(const file of ['index.html','app.js','browser-wallet-ui.js','read-only-swap-review-ui.js','styles.css','branding.css']) copy(file);
 copyDir('core');
 copyDir('fixtures');
 copyDir('assets');
-
-// Preserve the approved artwork as an asset and integrate it into the built shell.
-// Keep the original index.html untouched to avoid changing runtime templates or route hooks.
+// Load the V15 wallet selector before the V14 read-only display application.
+// Execution buttons remain fail-closed until separately qualified.
+const htmlPath=path.join(dist,'index.html');
+const html=fs.readFileSync(htmlPath,'utf8');
+const marker='<script type="module" src="./app.js"></script>';
+if(html.split(marker).length!==2) throw new Error('Exchange app entrypoint missing or duplicated');
+let builtHtml=html.replace(marker,'<script type="module" src="./browser-wallet-ui.js"></script>\n  '+marker);
+// Preserve the approved artwork and existing shell route hooks while adding branding.
 const logo='assets/83898904-fde8-4614-89ae-478db91d5fad.jpg';
 if(!fs.existsSync(path.join(dist,logo))) throw new Error(`approved 420Exchange logo missing: ${logo}`);
-const indexPath=path.join(dist,'index.html');
-let html=fs.readFileSync(indexPath,'utf8');
 const oldBrand='<span class="brand-mark">420</span>\n        <span><strong>Exchange</strong><small>Integrated</small></span>';
-if(!html.includes(oldBrand)) throw new Error('Exchange brand insertion point changed; review shell before deploying');
-html=html.replace(oldBrand,`<img class="exchange-brand-logo" src="./${logo}" alt="420Exchange — Cannabis. Powers Progress" width="400" height="400" />\n        <span class="exchange-brand-label">420 Integrated · Exchange</span>`);
+if(!builtHtml.includes(oldBrand)) throw new Error('Exchange brand insertion point changed; review shell before deploying');
+builtHtml=builtHtml.replace(oldBrand,`<img class="exchange-brand-logo" src="./${logo}" alt="420Exchange — Cannabis. Powers Progress" width="400" height="400" />\n        <span class="exchange-brand-label">420 Integrated · Exchange</span>`);
 const styleAnchor='<link rel="stylesheet" href="./styles.css" />';
-if(!html.includes(styleAnchor)) throw new Error('Exchange stylesheet insertion point changed');
-html=html.replace(styleAnchor,`${styleAnchor}\n  <link rel="stylesheet" href="./branding.css" />`);
-fs.writeFileSync(indexPath,html);
+if(!builtHtml.includes(styleAnchor)) throw new Error('Exchange stylesheet insertion point changed');
+builtHtml=builtHtml.replace(styleAnchor,`${styleAnchor}\n  <link rel="stylesheet" href="./branding.css" />`);
+fs.writeFileSync(htmlPath,builtHtml);
 
 const template=JSON.parse(fs.readFileSync(path.join(root,'runtime-config.json'),'utf8'));
-const runtime={
-  ...template,
-  network:{
-    ...template.network,
-    chainId:requiredEnv('EXCHANGE_CHAIN_ID'),
-    rpcUrl:requiredEnv('EXCHANGE_RPC_URL'),
-    explorerUrl:requiredEnv('EXCHANGE_EXPLORER_URL'),
-  },
-  api:{
-    ...template.api,
-    baseUrl:requiredEnv('EXCHANGE_API_BASE_URL'),
-    streamUrl:requiredEnv('EXCHANGE_STREAM_URL'),
-    marketSubjects:(process.env.EXCHANGE_MARKET_SUBJECTS||'').split(',').map(x=>x.trim()).filter(Boolean),
+const deploymentManifestPath=process.env.EXCHANGE_DEPLOYMENT_MANIFEST;
+let runtime;
+if(deploymentManifestPath){
+  const absoluteManifest=path.isAbsolute(deploymentManifestPath)
+    ? deploymentManifestPath
+    : path.resolve(root,deploymentManifestPath);
+  const deployment=JSON.parse(fs.readFileSync(absoluteManifest,'utf8'));
+  runtime=bindExchangeRuntime(template,deployment);
+}else{
+  runtime={
+    ...template,
+    network:{
+      ...template.network,
+      chainId:requiredEnv('EXCHANGE_CHAIN_ID'),
+      rpcUrl:requiredEnv('EXCHANGE_RPC_URL'),
+      explorerUrl:requiredEnv('EXCHANGE_EXPLORER_URL'),
+    },
+    api:{
+      ...template.api,
+      baseUrl:requiredEnv('EXCHANGE_API_BASE_URL'),
+      streamUrl:requiredEnv('EXCHANGE_STREAM_URL'),
+      marketSubjects:(process.env.EXCHANGE_MARKET_SUBJECTS||'').split(',').map(x=>x.trim()).filter(Boolean),
+    }
+  };
+  if(qualification){
+    runtime.network.chainId=runtime.network.chainId||'0x1a4';
+    runtime.network.rpcUrl=runtime.network.rpcUrl||'https://rpc.example.invalid';
+    runtime.network.explorerUrl=runtime.network.explorerUrl||'https://explorer.example.invalid';
+    runtime.api.baseUrl=runtime.api.baseUrl||'https://api.example.invalid/exchange';
+    runtime.api.streamUrl=runtime.api.streamUrl||'wss://api.example.invalid/exchange/stream';
   }
-};
-if(qualification){
-  runtime.network.chainId=runtime.network.chainId||'0x1a4';
-  runtime.network.rpcUrl=runtime.network.rpcUrl||'https://rpc.example.invalid';
-  runtime.network.explorerUrl=runtime.network.explorerUrl||'https://explorer.example.invalid';
-  runtime.api.baseUrl=runtime.api.baseUrl||'https://api.example.invalid/exchange';
-  runtime.api.streamUrl=runtime.api.streamUrl||'wss://api.example.invalid/exchange/stream';
 }
 assertHttps(runtime.network.rpcUrl,'RPC URL');
 assertHttps(runtime.network.explorerUrl,'Explorer URL');
@@ -93,10 +107,11 @@ const buildMeta={
   productionOrigin:'https://exchange.420integrated.org',
   clientSchema:'14.0',
   runtimeConfigured:Boolean(runtime.network.chainId&&runtime.network.rpcUrl&&runtime.api.baseUrl&&runtime.api.streamUrl),
+  deploymentBinding:runtime.deployment??null,
 };
 fs.writeFileSync(path.join(dist,'build-meta.json'),JSON.stringify(buildMeta,null,2)+'\n');
 
-const immutable=['app.js','styles.css'];
+const immutable=['app.js','browser-wallet-ui.js','read-only-swap-review-ui.js','styles.css','branding.css',logo];
 const manifest={
   schema:'420-exchange-deployment-artifact-v14.13',
   sourceSha:sha,

@@ -1,0 +1,22 @@
+{
+  "schema": "420-exchange-web-v15.3",
+  "status": "IMPLEMENTED_PENDING_CI",
+  "scope": "PREFLIGHT_SIMULATION_AUTHORIZATION_GAS",
+  "invariants": [
+    "runtime, transaction and live RPC chain IDs must match exactly",
+    "expired or stale reviewed intents cannot advance to signing",
+    "allowance checks use explicit canonical spender targets rather than guessed router approval",
+    "ExchangeAuthorization420 is a required deployed contract and canonical capability authority",
+    "policy/static reads must pass before transaction simulation",
+    "eth_call simulates the exact V15.2 transaction request",
+    "known Exchange custom reverts are decoded without inventing unknown meanings",
+    "eth_estimateGas must succeed with a positive hex result before signing"
+  ],
+  "implementation": {
+    "preflight": "exchange/web/core/preflight.js",
+    "abi": "exchange/web/core/abi.js",
+    "qualificationTest": "exchange/web/test/preflight.test.js",
+    "runbook": "docs/420EXCHANGE-V15.3-PREFLIGHT.md"
+  },
+  "followOn": "V15.4 real EIP-1193 signing and transaction submission"
+}

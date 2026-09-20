@@ -1,0 +1,13 @@
+# GEN-11.19 — cross-client and operator interoperability
+
+Status: implementation committed; exact-head qualification and live multi-operator acceptance remain separate gates.
+
+The public Bundler JSON-RPC contract is shared by 420Wallet and independent clients: `eth_supportedEntryPoints`, `eth_sendUserOperation`, `eth_estimateUserOperationGas`, and `eth_getUserOperationReceipt`. All clients must send the canonical nine-field packed UserOperation envelope. Operation hashes are scoped to chain ID and EntryPoint, and receipts are operational observations until checked against canonical execution-chain evidence.
+
+The reusable, read-only Go probe at [bundler/interoperability/probe.go](https://github.com/abvhiael/420-integrated-v0.1/blob/feature/gen11-0-bundler-network-v1/bundler/interoperability/probe.go) qualifies a candidate operator's HTTP/JSON-RPC envelope, expected EntryPoint, and `null` result for an unknown operation. It does not submit operations, accept a reported inclusion as chain authority, or require an operator controlled by 420 Integrated. See [interoperability tests](https://github.com/abvhiael/420-integrated-v0.1/blob/feature/gen11-0-bundler-network-v1/bundler/interoperability/probe_test.go) and the existing [cross-client RPC tests](https://github.com/abvhiael/420-integrated-v0.1/blob/feature/gen11-0-bundler-network-v1/bundler/rpcapi/interoperability_test.go).
+
+420Wallet's [Bundler transport](https://github.com/abvhiael/420-integrated-v0.1/blob/feature/gen11-0-bundler-network-v1/wallet/web/core/bundler-transport.js) can qualify alternative configured operators before sending. Once a signed operation has been sent, a timeout or ambiguous acknowledgment must **not** cause automatic cross-operator rebroadcast: reconcile lifecycle and chain evidence first. Operator failure does not change account authorization, revoke a signed operation, or grant canonical inclusion.
+
+The Genesis EntryPoint420 uses its project-specific `handleOp` ABI and packed operation/hash domain. Compatibility with general ERC-4337 deployments is **not** implied by matching JSON-RPC method names. An independent operator must implement this exact chain, EntryPoint, and UserOperation contract. This phase's tests are deterministic in-process conformance checks, not live external-provider certification.
+
+Remaining acceptance: pass all applicable CI on the exact GEN-11.19 head; verify an independent deployed client/operator against an explicitly configured chain and EntryPoint, including real send, read-only receipt polling, canonical receipt verification and transport-failure recovery. These live tests require actual independent operator endpoints and qualified deployment credentials; the repository tests do not claim they occurred.

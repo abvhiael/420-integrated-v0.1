@@ -12,13 +12,13 @@ func HandlerWithIntegratedJourneys(reader PublicReader,reviews TravelReviewReade
 }
 
 // HandlerWithQualifiedJourneys composes the public map, authenticated trip
-// editing, owner-facing share controls, business claim submission and trusted
-// Reputation review reads. The caller must independently qualify its injected
-// Identity, repositories, publication and Reputation services.
+// editing and saving, owner-facing share controls, business claims and trusted
+// Reputation reads. Dependencies must be independently qualified by the caller.
 func HandlerWithQualifiedJourneys(reader PublicReader,reviews TravelReviewReader,users TravelUserDependencies,shares TripSharing)http.Handler {
  private:=HandlerWithTripSharing(reader,users,shares)
  publicReviews:=HandlerWithReviewReader(reader,reviews)
  return http.HandlerFunc(func(w http.ResponseWriter,r *http.Request){
+  if r.URL.Path=="/travel/save" {serveSaveCatalog(w,r,reader,users);return}
   if strings.HasPrefix(r.URL.Path,"/travel/save/") {
    // The opt-in save handler delegates other paths back here. Only its own
    // path is dispatched, avoiding a recursive route loop.

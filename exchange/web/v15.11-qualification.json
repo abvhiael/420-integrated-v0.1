@@ -2,7 +2,7 @@
   "schema": "420-exchange-web-v15.11",
   "scope": "BROWSER_EXECUTION_INTEGRATION",
   "repositoryStatus": "IMPLEMENTED_PARTIAL_BROWSER_REVIEW_EXACT_HEAD_CI_REQUIRED",
-  "browserIntegrationStatus": "WALLET_SELECTION_AND_READ_ONLY_SWAP_REVIEW_MOUNTED_EXECUTION_LOCKED",
+  "browserIntegrationStatus": "V15_WALLET_SESSION_AUTHORITY_V14_READ_ONLY_BROWSER_ACCEPTANCE_PENDING",
   "operationalStatus": "BLOCKED_UNVERIFIED_EXECUTABLE_QUOTE_DEPLOYMENT_AND_REAL_WALLET_MATRIX",
   "roadmap": "docs/420EXCHANGE-STATUS-ROADMAP.md",
   "implementation": {
@@ -30,6 +30,7 @@
     ],
     "artifactCheck": "exchange/web/scripts/verify-pre02-artifact.mjs",
     "artifactWorkflow": ".github/workflows/exchange-web.yml",
+    "chromiumAcceptanceHarness": "exchange/web/scripts/pre02-chromium-acceptance.mjs",
     "runbook": "docs/420EXCHANGE-V15.11-BROWSER-EXECUTION.md"
   },
   "repositoryEvidence": {
@@ -47,6 +48,16 @@
     "artifactEvidenceScope": "QUALIFICATION_MODE_CI_BUILD_AND_STATIC_BUNDLE_ASSERTIONS_ONLY_NOT_REAL_BROWSER_OR_DEPLOYMENT",
     "note": "An earlier successful workflow is not evidence for a later head. CI build assertions do not establish runtime browser acceptance, real wallet/device behavior, testnet execution, or live deployment."
   },
+  "browserAcceptanceAttempt": {
+    "browser": "Chromium headless on GitHub Actions ubuntu-latest; version recorded by runner if executed",
+    "wallet": "SIMULATED_EIP1193_TWO_INJECTED_PROVIDERS_NOT_REAL_EXTENSION_OR_DEVICE",
+    "preview": "QUALIFICATION_MODE_LOCAL_HTTP_BUILT_ARTIFACT_NOT_CLOUDFLARE",
+    "harnessCommit": "2d3cf54804d0c3f45e23337875064e1f39a7bee4",
+    "workflowRun": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/35486257681",
+    "lastObservedStatus": "QUEUED_NO_RUNNER_ASSIGNED",
+    "results": null,
+    "evidenceArtifactPattern": "exchange-pre02-chromium-${GITHUB_SHA}"
+  },
   "qualifiedInUnitTests": [
     "explicit wallet selection and generation-based invalidation",
     "canonical raw-unit transaction construction and exact review fingerprints",
@@ -57,8 +68,10 @@
     "qualification-mode deployable artifact entrypoint, source revision and legacy execution lockdown assertions"
   ],
   "releaseBlockers": [
-    "real DOM, accessibility and browser/device wallet acceptance evidence missing",
-    "review panel displayed envelope field names require real-browser verification",
+    "Chromium acceptance run pending, Firefox/WebKit and accessibility acceptance unverified",
+    "actual wallet extension/device, provider choice and delayed connection browser evidence missing",
+    "deployed preview browser evidence missing; local built-preview CI is not deployed Cloudflare",
+    "review panel displayed envelope field names require real-browser verification with qualified quote",
     "authenticated operator-approved executable quote producer, anti-replay and on-chain-qualified provenance absent",
     "verified testnet deployment, contract code, runtime, balances/allowances and live preflight absent",
     "browser swap transaction confirmation, submission and lifecycle not qualified",

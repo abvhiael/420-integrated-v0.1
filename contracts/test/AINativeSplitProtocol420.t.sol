@@ -6,9 +6,8 @@ import "../src/ai/AINativeSplitSettlement420.sol";
 import "../src/ai/AINativeVaultFundingAdapter420.sol";
 import "./Vault420.t.sol";
 
-/// @notice GEN 6.4.3.6: actual job manager, escrow, funding adapter and Vault contracts.
-/// @dev The manager has a fixed 0x0431 system address in AIJobEscrow; etch its real
-/// runtime bytecode there. No mock manager, escrow, funding adapter or Vault is used.
+/// @notice 6.4.3.6 integration: real manager, escrow, funding adapter and Vault.
+/// @dev Use the actual manager runtime at its escrow-mandated 0x0431 system address.
 contract AINativeSplitProtocol420Test is Test {
     bytes32 constant VAULT_ID = keccak256("ai-split-protocol-vault");
     bytes32 constant JOB = keccak256("ai-split-protocol-job");
@@ -39,7 +38,7 @@ contract AINativeSplitProtocol420Test is Test {
 
     function setUp() public {
         AIJobManager implementation = new AIJobManager(address(this));
-        vm.etch(AIJobEscrow(payable(address(0x432))).AI_JOB_MANAGER(), address(implementation).code);
+        vm.etch(address(0x431), address(implementation).code);
         manager = AIJobManager(address(0x431));
         escrow = new AIJobEscrow(address(this));
         providers = new AIProviderRegistry(address(this));
@@ -74,7 +73,7 @@ contract AINativeSplitProtocol420Test is Test {
         providers.activate(PROVIDER_ID);
         vm.deal(PAYER, TOTAL);
         vm.prank(PAYER);
-        manager.createRequest(JOB, keccak256("model"), keccak256("text"), keccak256("request"),
+        manager.createRequest(JOB, keccak256("model"), AIIds420.WORKLOAD_TEXT, keccak256("request"),
             bytes32(0), bytes32(0), TOTAL, uint64(block.timestamp + 1 days));
         vm.prank(PAYER);
         funding.fundNative{value: TOTAL}(JOB, PROVIDER_ID, NONCE);
@@ -86,9 +85,7 @@ contract AINativeSplitProtocol420Test is Test {
         manager.verifyResult(JOB);
     }
 
-    function _original() internal view returns (bytes32) {
-        return funding.obligationForJob(JOB);
-    }
+    function _original() internal view returns (bytes32) { return funding.obligationForJob(JOB); }
 
     function _assertFunded() internal view {
         assertEq(uint256(manager.getJob(JOB).status), uint256(AIJobManager.Status.VERIFIED));

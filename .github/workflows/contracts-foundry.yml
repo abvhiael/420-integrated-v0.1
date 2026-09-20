@@ -94,6 +94,7 @@ jobs:
               | grep -q .; then
             echo 'PR_AI_MODE=true' >> "$GITHUB_ENV"
             printf '%s\n' 'test/AIComputeRecovery420.t.sol' 'test/AINativeVaultFundingAdapter420.t.sol' \
+              'test/AINativeProviderSettlement420.t.sol' \
               | tee artifacts/contracts/pr-ai-targets.txt
           else
             echo 'PR_AI_MODE=false' >> "$GITHUB_ENV"

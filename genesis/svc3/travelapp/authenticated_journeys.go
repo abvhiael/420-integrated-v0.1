@@ -56,7 +56,8 @@ func authenticated(r *http.Request,identity TravelIdentity)(VerifiedSession,erro
 func allowPrivateMutation(r *http.Request,session VerifiedSession)bool {
  if origin:=r.Header.Get("Origin");origin!="" {
   parsed,err:=url.Parse(origin)
-  if err!=nil||parsed.Host!=r.Host||!(parsed.Scheme=="https"||(parsed.Scheme=="http"&&(r.TLS==nil))) {return false}
+  expectedScheme:="http";if r.TLS!=nil {expectedScheme="https"}
+  if err!=nil||parsed.Scheme!=expectedScheme||parsed.Host!=r.Host||parsed.User!=nil||parsed.RawQuery!=""||parsed.Fragment!=""||parsed.Path!="" {return false}
  }
  if len(session.CSRFToken)<32||len(r.PostFormValue("csrf_token"))!=len(session.CSRFToken){return false}
  return subtle.ConstantTimeCompare([]byte(r.PostFormValue("csrf_token")),[]byte(session.CSRFToken))==1

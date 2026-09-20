@@ -140,7 +140,7 @@ contract AINativeProviderSettlement420Test is Test {
         assertEq(address(vault).balance, 0);
         assertEq(uint256(accounting.getObligation(obligationId).state), 3);
         assertEq(uint256(state()), uint256(AIJobEscrow.EscrowState.CLOSED));
-        assertTrue(settlement.settledJob(JOB));
+        assertEq(settlement.settledJob(JOB), true);
     }
     function testUnauthorizedAndReplayReject() public {
         vm.prank(PAYER);
@@ -174,7 +174,7 @@ contract AINativeProviderSettlement420Test is Test {
         settlement.payProvider(JOB, DECISION);
         assertEq(uint256(state()), uint256(AIJobEscrow.EscrowState.FUNDED));
         assertEq(uint256(accounting.getObligation(obligationId).state), 1);
-        assertFalse(settlement.settledJob(JOB));
+        assertEq(settlement.settledJob(JOB), false);
         vault.setRejectClaim(false);
         settlement.payProvider(JOB, DECISION);
     }

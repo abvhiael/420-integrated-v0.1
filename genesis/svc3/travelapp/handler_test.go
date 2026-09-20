@@ -14,17 +14,15 @@ func TestTravelShell(t *testing.T) {
  if got := response.Header().Get("Content-Type"); got != "text/html; charset=utf-8" { t.Fatalf("content type = %q", got) }
  if got := response.Header().Get("Cache-Control"); got != "no-store" { t.Fatalf("cache control = %q", got) }
  body := response.Body.String()
- for _, text := range []string{"420Travel", "Discovery is not connected yet", "420BnB booking and DOOBR transactions are unavailable", "href=\"/travel/map\"", "href=\"/travel/events\"", "href=\"/travel/trips\"", "href=\"/travel/business/claim\"", "href=\"#main\"", "aria-current=\"page\""} {
+ for _, text := range []string{"420Travel", "Discovery is not connected yet", "420BnB booking and DOOBR transactions are unavailable", "href=\"/travel/map\"", "href=\"/travel/events\"", "href=\"/travel/trips\"", "href=\"/travel/business/claim\"", "href=\"#main\"", "aria-current=\"page\"", "Find places"} {
   if !strings.Contains(body, text) { t.Errorf("shell missing %q", text) }
  }
 }
 
-func TestPlannedRoutesAreUnavailableNotFictitiouslyFunctional(t *testing.T) {
- for _, tc := range []struct{path, heading, current string}{
-  {"/travel/map", "Explore the map", "map"},
-  {"/travel/trips", "Your trips", "trips"},
-  {"/travel/business/claim", "Claim a business", "claim"},
-  {"/travel/place/public-id_1", "Place details", "place"},
+func TestProtectedRoutesUnavailableWithoutIdentityIntegration(t *testing.T) {
+ for _, tc := range []struct{path, heading string}{
+  {"/travel/trips", "Your trips"},
+  {"/travel/business/claim", "Claim a business"},
  } {
   t.Run(tc.path, func(t *testing.T) {
    response := httptest.NewRecorder()
@@ -35,7 +33,7 @@ func TestPlannedRoutesAreUnavailableNotFictitiouslyFunctional(t *testing.T) {
     if !strings.Contains(body, text) { t.Errorf("%s missing %q", tc.path, text) }
    }
    if strings.Contains(body, "Discovery is not connected yet") { t.Fatal("placeholder incorrectly rendered discovery data") }
-   if tc.current != "place" && !strings.Contains(body, "aria-current=\"page\"") {t.Fatal("active navigation state missing")}
+   if !strings.Contains(body, "aria-current=\"page\"") {t.Fatal("active navigation state missing")}
    if response.Header().Get("Cache-Control") != "no-store" { t.Fatal("missing no-store") }
   })
  }

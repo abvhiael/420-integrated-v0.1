@@ -34,7 +34,7 @@ func TestNearbyMapFailsClosedWithoutPublicReader(t *testing.T){
  if w.Code!=http.StatusServiceUnavailable {t.Fatalf("reader absent: %d",w.Code)}
  w=httptest.NewRecorder();handler.ServeHTTP(w,httptest.NewRequest(http.MethodPost,"/travel/map",nil))
  if w.Code!=http.StatusMethodNotAllowed {t.Fatalf("mutation enabled: %d",w.Code)}
- source:=&stubPublicReader{err:errors.New("backend private details")}
+ source:=&stubPublicReader{placesErr:errors.New("backend private details")}
  w=httptest.NewRecorder();HandlerWithNearbyMap(source).ServeHTTP(w,httptest.NewRequest(http.MethodGet,"/travel/map",nil))
  if w.Code!=http.StatusBadGateway||strings.Contains(w.Body.String(),"backend private details") {t.Fatalf("backend failure disclosed: %d %s",w.Code,w.Body.String())}
 }

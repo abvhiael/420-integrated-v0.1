@@ -170,7 +170,7 @@ contract AINativeProviderSettlement420Test is Test {
     }
     function testClaimFailureRollsBackReleaseAndEscrow() public {
         vault.setRejectClaim(true);
-        vm.expectRevert(abi.encodeWithSignature("Error(string)", "claim rejected"));
+        vm.expectRevert(bytes4(0x08c379a0));
         settlement.payProvider(JOB, DECISION);
         assertEq(uint256(state()), uint256(AIJobEscrow.EscrowState.FUNDED));
         assertEq(uint256(accounting.getObligation(obligationId).state), 1);
@@ -180,7 +180,7 @@ contract AINativeProviderSettlement420Test is Test {
     }
     function testEscrowCallbackFailureRollsBackNativePayment() public {
         escrow.setRejectClose(true);
-        vm.expectRevert(abi.encodeWithSignature("Error(string)", "close rejected"));
+        vm.expectRevert(bytes4(0x08c379a0));
         settlement.payProvider(JOB, DECISION);
         assertEq(BENEFICIARY.balance, 0);
         assertEq(address(vault).balance, AMOUNT);
@@ -193,7 +193,7 @@ contract AINativeProviderSettlement420Test is Test {
         RejectNativePayment420 rejecting = new RejectNativePayment420();
         escrow.seed(JOB, PAYER, address(rejecting), PROVIDER, VAULT, FUNDING, AMOUNT);
         accounting.setBeneficiary(obligationId, address(rejecting));
-        vm.expectRevert(abi.encodeWithSignature("Error(string)", "receiver rejected"));
+        vm.expectRevert(bytes4(0x08c379a0));
         settlement.payProvider(JOB, DECISION);
         assertEq(address(vault).balance, AMOUNT);
         assertEq(uint256(state()), uint256(AIJobEscrow.EscrowState.FUNDED));

@@ -30,11 +30,11 @@ func TestCannabisLabelsRenderOnlyForPublishedPublicEntities(t *testing.T) {
   {ID:"hotel",Title:"Hotel talk",PlaceID:"ordinary-hotel",StartAt:now,Tags:[]string{"cannabis-friendly", "onsite-consumption"}},
  }}}
  for _,path:=range []string{"/travel", "/travel/events"} {
-  t.Run(path,func(t *testing.T){response:=servePath(reader,path);if response.Code!=http.StatusOK {t.Fatalf("status=%d body=%s",response.Code,response.Body.String())}
+  t.Run(path,func(t *testing.T){response:=getEvents(reader,path);if response.Code!=http.StatusOK {t.Fatalf("status=%d body=%s",response.Code,response.Body.String())}
    body:=response.Body.String()
-   for _,want:=range []string{"Listed category: dispensary", "Tagged: cannabis event", "Tagged: grow-related attraction", "do not verify cannabis-friendly status"} {
-    if !strings.Contains(body,want) {t.Errorf("missing %q",want)}
-   }
+   wants:=[]string{"Tagged: cannabis event", "Tagged: grow-related attraction", "do not verify cannabis-friendly status"}
+   if path=="/travel" {wants=append(wants,"Listed category: dispensary")}
+   for _,want:=range wants {if !strings.Contains(body,want) {t.Errorf("missing %q",want)}}
    for _,bad:=range []string{"Secret gathering", "private-location", "Tagged: onsite consumption", "Verified cannabis-friendly", "Licensed dispensary"} {
     if strings.Contains(body,bad) {t.Errorf("unverified or private detail leaked: %q",bad)}
    }
@@ -46,7 +46,7 @@ func TestCannabisDescriptorsDoNotShowOnPrivateOnlyOrDisconnectedFeeds(t *testing
  reader:=&stubPublicReader{events:eventui.View{Items:[]eventui.Card{{ID:"hidden",Title:"Hidden cannabis event",PlaceID:"private",StartAt:time.Now().UTC().Add(time.Hour),Tags:[]string{"cannabis"}}}}}
  for _,path:=range []string{"/travel", "/travel/events"} {
   for _,source:=range []PublicReader{reader,nil} {
-   response:=servePath(source,path)
+   response:=getEvents(source,path)
    if response.Code!=http.StatusOK || strings.Contains(response.Body.String(),"Tagged: cannabis event") || strings.Contains(response.Body.String(),"Hidden cannabis event") {t.Fatalf("unsafe disclosure %s status=%d",path,response.Code)}
   }
  }

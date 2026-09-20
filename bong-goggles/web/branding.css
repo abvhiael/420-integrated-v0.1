@@ -2,8 +2,8 @@
 body{background:radial-gradient(circle at 50% 0%,#194431 0%,#091610 55%,#07100c 100%);color:var(--text)}
 .app-header{background:rgba(7,26,17,.96);border-bottom:1px solid #32614c;box-shadow:0 5px 22px #0003}
 .brand{gap:12px;min-width:0}
-/* Use the exact approved PNG committed to the web root. Preserve app-shell authority logic. */
-.brand__mark{display:block;width:58px;height:58px;flex:none;overflow:hidden;border-radius:12px;background:#fff url('/bong-goggles-logo.png') center / contain no-repeat;border:2px solid #426a4e;box-shadow:0 2px 14px #0005;font-size:0;color:transparent}
+/* Render the exact approved mascot, optimized from the source PNG during the build. */
+.brand__mark{display:block;width:58px;height:58px;flex:none;overflow:hidden;border-radius:12px;background:#fff url('/bong-goggles-header-256.webp') center / contain no-repeat;border:2px solid #426a4e;box-shadow:0 2px 14px #0005;font-size:0;color:transparent}
 .brand strong{color:#f5fff7;font-size:1.12rem;letter-spacing:.01em}
 .brand small{color:#a9dac0}
 .app-nav__item:hover,.app-nav__item[aria-current="page"]{background:#1c4330;color:#eaffef}
@@ -18,4 +18,4 @@ body{background:radial-gradient(circle at 50% 0%,#194431 0%,#091610 55%,#07100c 
 .system-banner--info{background:#173b31;border-color:#407761}
 .app-nav--mobile{background:rgba(7,26,17,.97)}
 @media(max-width:760px){.brand__mark{width:44px;height:44px;border-radius:10px}.brand strong{font-size:1rem}.app-header{gap:8px}.app-nav__item[aria-current="page"]{box-shadow:inset 0 3px 0 var(--brand-green)}}
-@media(forced-colors:active){.brand__mark{border:1px solid CanvasText}.app-nav__item[aria-current="page"]{outline:2px solid Highlight}}
+@media(forced-colors:active){.brand__mark{border:1px solid CanvasText;font-size:.75rem;color:CanvasText;background-image:none}.app-nav__item[aria-current="page"]{outline:2px solid Highlight}}

@@ -20,6 +20,14 @@ contract AINativePartialSettlementPlan420Test is Test {
             ORIGINAL, decision, PAYER, PROVIDER, amount, earned);
     }
 
+    // vm.expectRevert observes a revert in a deeper external call, not a pure
+    // internal library call executing at the test's own call depth.
+    function makePlanExternal(uint256 amount, uint256 earned, bytes32 decision, bytes32 job)
+        external pure returns (AINativePartialSettlementPlan420.Plan memory)
+    {
+        return makePlan(amount, earned, decision, job);
+    }
+
     function testExactConservationAndDistinctOperations() public pure {
         AINativePartialSettlementPlan420.Plan memory p = makePlan(100, 37, DECISION, JOB);
         assertEq(p.providerAmount, 37);
@@ -53,19 +61,19 @@ contract AINativePartialSettlementPlan420Test is Test {
 
     function testRejectsZeroAndFullEarnedAmounts() public {
         vm.expectRevert(AINativePartialSettlementPlan420.InvalidSplit.selector);
-        makePlan(100, 0, DECISION, JOB);
+        this.makePlanExternal(100, 0, DECISION, JOB);
         vm.expectRevert(AINativePartialSettlementPlan420.InvalidSplit.selector);
-        makePlan(100, 100, DECISION, JOB);
+        this.makePlanExternal(100, 100, DECISION, JOB);
         vm.expectRevert(AINativePartialSettlementPlan420.InvalidSplit.selector);
-        makePlan(100, 101, DECISION, JOB);
+        this.makePlanExternal(100, 101, DECISION, JOB);
         vm.expectRevert(AINativePartialSettlementPlan420.InvalidSplit.selector);
-        makePlan(1, 1, DECISION, JOB);
+        this.makePlanExternal(1, 1, DECISION, JOB);
     }
 
     function testRejectsMissingDecisionAndJob() public {
         vm.expectRevert(AINativePartialSettlementPlan420.InvalidSplit.selector);
-        makePlan(100, 37, bytes32(0), JOB);
+        this.makePlanExternal(100, 37, bytes32(0), JOB);
         vm.expectRevert(AINativePartialSettlementPlan420.InvalidSplit.selector);
-        makePlan(100, 37, DECISION, bytes32(0));
+        this.makePlanExternal(100, 37, DECISION, bytes32(0));
     }
 }

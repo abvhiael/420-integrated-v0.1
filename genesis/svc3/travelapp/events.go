@@ -20,6 +20,7 @@ type travelEvent struct {
  PlaceURL string
  City string
  Region string
+ Attributes []string
 }
 
 func serveTravelEvents(w http.ResponseWriter, r *http.Request, reader PublicReader) {
@@ -52,7 +53,7 @@ func serveTravelEvents(w http.ResponseWriter, r *http.Request, reader PublicRead
  data.Events=make([]travelEvent,0,len(feed.Calendar))
  for _,event:=range feed.Calendar {
   if event.StartAt.Before(from)||!event.StartAt.Before(to) {continue}
-  item:=travelEvent{Title:event.Title,StartAt:event.StartAt}
+  item:=travelEvent{Title:event.Title,StartAt:event.StartAt,Attributes:cannabisEventLabels(event.Tags)}
   if event.PlaceID!="" {
    place,ok:=byID[event.PlaceID]
    if !ok {continue} // A removed/private venue must not be inferred from the event.

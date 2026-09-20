@@ -140,7 +140,7 @@ contract AINativeProviderSettlement420Test is Test {
         assertEq(address(vault).balance, 0);
         assertEq(uint256(accounting.getObligation(obligationId).state), 3);
         assertEq(uint256(state()), uint256(AIJobEscrow.EscrowState.CLOSED));
-        assertEq(settlement.settledJob(JOB), true);
+        assertEq(settlement.settledJob(JOB) ? uint256(1) : uint256(0), 1);
     }
     function testUnauthorizedAndReplayReject() public {
         vm.prank(PAYER);
@@ -170,17 +170,17 @@ contract AINativeProviderSettlement420Test is Test {
     }
     function testClaimFailureRollsBackReleaseAndEscrow() public {
         vault.setRejectClaim(true);
-        vm.expectRevert();
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "claim rejected"));
         settlement.payProvider(JOB, DECISION);
         assertEq(uint256(state()), uint256(AIJobEscrow.EscrowState.FUNDED));
         assertEq(uint256(accounting.getObligation(obligationId).state), 1);
-        assertEq(settlement.settledJob(JOB), false);
+        assertEq(settlement.settledJob(JOB) ? uint256(1) : uint256(0), 0);
         vault.setRejectClaim(false);
         settlement.payProvider(JOB, DECISION);
     }
     function testEscrowCallbackFailureRollsBackNativePayment() public {
         escrow.setRejectClose(true);
-        vm.expectRevert();
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "close rejected"));
         settlement.payProvider(JOB, DECISION);
         assertEq(BENEFICIARY.balance, 0);
         assertEq(address(vault).balance, AMOUNT);
@@ -193,7 +193,7 @@ contract AINativeProviderSettlement420Test is Test {
         RejectNativePayment420 rejecting = new RejectNativePayment420();
         escrow.seed(JOB, PAYER, address(rejecting), PROVIDER, VAULT, FUNDING, AMOUNT);
         accounting.setBeneficiary(obligationId, address(rejecting));
-        vm.expectRevert();
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "receiver rejected"));
         settlement.payProvider(JOB, DECISION);
         assertEq(address(vault).balance, AMOUNT);
         assertEq(uint256(state()), uint256(AIJobEscrow.EscrowState.FUNDED));

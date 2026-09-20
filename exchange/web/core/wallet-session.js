@@ -83,7 +83,11 @@ export class WalletController {
     this.providerListeners=[];
   }
   assertActive(epoch){
-    if(this.disposed||epoch!==this.connectionEpoch) throw new Error('wallet connection superseded or disposed');
+    if(this.disposed||epoch!==this.connectionEpoch){
+      const error=new Error('wallet connection superseded or disposed');
+      error.code='STALE_CONNECT';
+      throw error;
+    }
   }
   async connect(){
     if(this.disposed) throw new Error('wallet controller disposed');

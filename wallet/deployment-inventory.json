@@ -1,6 +1,6 @@
 {
   "schema": "420-wallet-deployment-inventory-v1",
-  "phase": "W14.1",
+  "phase": "W14.6",
   "status": "BLOCKED_PENDING_CANONICAL_NETWORK_AND_ADDRESS_RECONCILIATION",
   "readyForLiveTestnet": false,
   "sourceOfTruth": {
@@ -43,9 +43,9 @@
       "status": "FROZEN_BUT_CONFLICTED"
     },
     "names420": {
-      "address": "0x0000000000000000000000000000000000000423",
+      "address": "0x0000000000000000000000000000000000000445",
       "source": "contracts/config/genesis-canonical-addresses.json#names",
-      "status": "FROZEN_BUT_CONFLICTED"
+      "status": "RESERVED_PENDING_GENESIS_DEPLOYMENT_AND_CHAIN_VERIFICATION"
     },
     "identity420": {
       "address": "0x0000000000000000000000000000000000000424",
@@ -73,12 +73,6 @@
       "resolution": "REQUIRED_BEFORE_LIVE_TESTNET"
     },
     {
-      "address": "0x0000000000000000000000000000000000000423",
-      "canonicalWalletAssignment": "Names420.sol",
-      "legacySystemAssignment": "ValidatorRegistry",
-      "resolution": "REQUIRED_BEFORE_LIVE_TESTNET"
-    },
-    {
       "address": "0x0000000000000000000000000000000000000424",
       "canonicalWalletAssignment": "Identity420.sol",
       "legacySystemAssignment": "ProtocolReserve",
@@ -98,6 +92,7 @@
     "Do not invent or hard-code public testnet endpoints.",
     "Do not promote local.example.json values into testnet.",
     "Do not bind wallet runtime to a conflicted address.",
+    "0x0000000000000000000000000000000000000445 is a Names420 Genesis reservation, not evidence of on-chain deployment or verified bytecode.",
     "A chain ID alone is insufficient proof of network identity.",
     "Every live Wallet deployment must bind to one validated environment manifest and one reconciled canonical address set."
   ]

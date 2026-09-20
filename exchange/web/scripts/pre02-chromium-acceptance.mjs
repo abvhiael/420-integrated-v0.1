@@ -36,6 +36,7 @@ async function fixture(page){
         if(method==='eth_sendTransaction'||method.startsWith('eth_sign')||method.startsWith('personal_sign'))throw Error('unexpected signing/submission');
         throw Error('unexpected provider request: '+method);
       },on(type,fn){if(!events.has(type))events.set(type,new Set());events.get(type).add(fn);},removeListener(type,fn){events.get(type)?.delete(fn);},emit(type,data){for(const fn of events.get(type)||[])fn(data);},setAccount(next){currentAccount=next;this.emit('accountsChanged',[next]);},setChain(next){chain=next;this.emit('chainChanged',next);},delayNextConnect(){deferred=true;},resolveConnect(){if(typeof deferred==='function'){const resolve=deferred;deferred=null;resolve([currentAccount]);}},listenerCount(){return [...events.values()].reduce((n,set)=>n+set.size,0)} };
+    };
     const first=create('mock-one',accountA),second=create('mock-two',accountB);
     window.__pre02={first,second,accountA,accountB};
     Object.defineProperty(window,'ethereum',{configurable:true,value:{providers:[first,second]}});

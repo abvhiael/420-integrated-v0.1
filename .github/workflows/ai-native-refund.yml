@@ -1,0 +1,28 @@
+name: AI Native Refund Qualification
+
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/ai/**'
+      - 'contracts/test/AI*.t.sol'
+      - '.github/workflows/ai-native-refund.yml'
+  workflow_dispatch:
+
+jobs:
+  refund:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Compile full payer refund test and dependencies
+        working-directory: contracts
+        run: forge build test/AINativePayerRefund420.t.sol --sizes
+      - name: Full payer refund and rollback tests
+        working-directory: contracts
+        run: forge test --match-path test/AINativePayerRefund420.t.sol -vvv

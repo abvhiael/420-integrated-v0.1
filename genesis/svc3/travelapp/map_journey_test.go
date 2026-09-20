@@ -13,7 +13,8 @@ import (
 func TestNearbyMapOnlyPublishesExactPinsAndFilters(t *testing.T){
  lat,lon:=50.45,-104.61
  place:=locationui.Item{ID:"public-pin",Name:"Public pin",Kind:locationui.KindPin,Latitude:&lat,Longitude:&lon,City:"Regina",Category:"venue"}
- coarse:=locationui.Item{ID:"approx-area",Name:"Coarse area",Kind:locationui.KindArea,City:"Regina",Category:"venue",Latitude:&lat,Longitude:&lon}
+ // Approximate places are supplied without coordinates by the public API.
+ coarse:=locationui.Item{ID:"approx-area",Name:"Coarse area",Kind:locationui.KindArea,City:"Regina",Category:"venue"}
  source:=&stubPublicReader{places:locationui.View{Items:[]locationui.Item{place,coarse}}}
  handler:=HandlerWithNearbyMap(source)
  request:=func(url string)*httptest.ResponseRecorder{w:=httptest.NewRecorder();handler.ServeHTTP(w,httptest.NewRequest(http.MethodGet,url,nil));return w}
@@ -26,6 +27,10 @@ func TestNearbyMapOnlyPublishesExactPinsAndFilters(t *testing.T){
  if got:=request("/travel/map?destination="+strings.Repeat("a",81));got.Code!=http.StatusBadRequest {t.Fatalf("invalid filter status %d",got.Code)}
  source.places=locationui.View{}
  if got:=request("/travel/map");got.Code!=http.StatusOK||strings.Contains(got.Body.String(),"Public pin") {t.Fatalf("withdrawn listing still visible: %d %s",got.Code,got.Body.String())}
+ // A malformed public projection containing precise coordinates for an area
+ // must fail closed rather than display or silently convert it to a pin.
+ source.places=locationui.View{Items:[]locationui.Item{{ID:"bad-area",Name:"Bad area",Kind:locationui.KindArea,City:"Regina",Latitude:&lat}}}
+ if got:=request("/travel/map");got.Code!=http.StatusBadGateway||strings.Contains(got.Body.String(),"Bad area") {t.Fatalf("malformed area projection leaked: %d %s",got.Code,got.Body.String())}
 }
 
 func TestNearbyMapFailsClosedWithoutPublicReader(t *testing.T){

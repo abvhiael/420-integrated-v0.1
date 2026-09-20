@@ -11,7 +11,8 @@ var saveCatalogTemplate=template.Must(template.New("saveCatalog").Parse(`<!docty
 
 func serveSaveCatalog(w http.ResponseWriter,r *http.Request,reader PublicReader,users TravelUserDependencies){
  if r.Method!=http.MethodGet{w.Header().Set("Allow","GET");http.Error(w,"method not allowed",http.StatusMethodNotAllowed);return}
- if users.Identity==nil||users.Trips==nil||reader==nil{http.Error(w,"saving unavailable",http.StatusServiceUnavailable);return}
+ _,editable:=users.Trips.(EditableTripRepository)
+ if users.Identity==nil||!editable||reader==nil{http.Error(w,"saving unavailable",http.StatusServiceUnavailable);return}
  if _,err:=authenticated(r,users.Identity);err!=nil{http.Error(w,"authentication required",http.StatusUnauthorized);return}
  feed,err:=publicJourneyFeed(r,reader);if err!=nil{http.Error(w,"public discovery unavailable",http.StatusBadGateway);return}
  page:=saveCatalogPage{}

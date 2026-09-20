@@ -8,6 +8,7 @@
   "implementation": {
     "controller": "exchange/web/core/browser-execution-controller.js",
     "walletUi": "exchange/web/browser-wallet-ui.js",
+    "legacyDisplayApp": "exchange/web/app.js",
     "canonicalInputs": "exchange/web/core/canonical-execution-inputs.js",
     "reviewedExecutionBridge": "exchange/web/core/reviewed-execution-bridge.js",
     "boundSwapReview": "exchange/web/core/bound-swap-review.js",
@@ -24,22 +25,33 @@
       "exchange/web/test/human-readable-review.test.js",
       "exchange/web/test/executable-quote-intake.test.js",
       "exchange/web/test/quote-review-session.test.js",
-      "exchange/web/test/read-only-swap-review-ui.test.js"
+      "exchange/web/test/read-only-swap-review-ui.test.js",
+      "exchange/web/test/pre02-v14-readonly-authority.test.js"
     ],
+    "artifactCheck": "exchange/web/scripts/verify-pre02-artifact.mjs",
+    "artifactWorkflow": ".github/workflows/exchange-web.yml",
     "runbook": "docs/420EXCHANGE-V15.11-BROWSER-EXECUTION.md"
   },
   "repositoryEvidence": {
     "baselineCommit": "50ca04c0e5ecd5b702806aa30546485276db64a8",
     "baselineWebWorkflowRun": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/35469241756",
     "baselineWebWorkflowConclusion": "success",
-    "note": "A successful prior-head web workflow is not a test result for subsequent documentation/code commits or live deployment."
+    "v14SessionRemovalCommit": "dd2f246aa26740cb361e8a5be450ff578ff8f31f",
+    "v14IsolationRegressionCommit": "41121f4912a0397ea329c9585bc054aed6bea4d2",
+    "artifactCheckWorkflowCommit": "d6294db8479c9be9e1dc187d9b8a66b55c4387dd",
+    "artifactCheckWorkflowRun": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/35485424930",
+    "artifactCheckWorkflowConclusion": "success",
+    "artifactEvidenceScope": "QUALIFICATION_MODE_CI_BUILD_AND_STATIC_BUNDLE_ASSERTIONS_ONLY_NOT_REAL_BROWSER_OR_DEPLOYMENT",
+    "note": "An earlier successful workflow is not evidence for a later head. CI build assertions do not establish runtime browser acceptance, real wallet/device behavior, testnet execution, or live deployment."
   },
   "qualifiedInUnitTests": [
     "explicit wallet selection and generation-based invalidation",
     "canonical raw-unit transaction construction and exact review fingerprints",
     "swap quote request/response validation and receipt-time expiry checks",
     "late response, wallet change and superseded request invalidation",
-    "read-only browser swap review and legacy execution button lockdown"
+    "read-only browser swap review and legacy execution button lockdown",
+    "V14 display app no longer creates a wallet session or prepares signing requests; V15 owns the browser wallet connection",
+    "qualification-mode deployable artifact entrypoint, source revision and legacy execution lockdown assertions"
   ],
   "releaseBlockers": [
     "real DOM, accessibility and browser/device wallet acceptance evidence missing",

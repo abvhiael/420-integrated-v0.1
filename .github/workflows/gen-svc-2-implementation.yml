@@ -1,0 +1,34 @@
+name: GEN-SVC-2 Implementation
+
+on:
+  pull_request:
+    paths:
+      - 'location/**'
+      - 'events/**'
+      - 'genesis/svc2/**'
+      - 'sdk/location420/**'
+      - 'sdk/events420/**'
+      - '.github/workflows/gen-svc-2-implementation.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'location/**'
+      - 'events/**'
+      - 'genesis/svc2/**'
+      - 'sdk/location420/**'
+      - 'sdk/events420/**'
+      - '.github/workflows/gen-svc-2-implementation.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  location-events:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+      - run: go test ./location/... ./events/... ./genesis/svc2/...
+      - run: go vet ./location/... ./events/... ./genesis/svc2/...

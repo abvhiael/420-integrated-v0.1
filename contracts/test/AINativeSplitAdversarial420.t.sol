@@ -74,9 +74,11 @@ contract AINativeSplitAdversarial420Test is AINativeSplitProtocol420Test {
     }
 
     function testUnprivilegedCallerCannotClaimReservedOriginal() public {
+        bytes32 originalObligation = _original();
+        bytes32 claimOperation = keccak256("unprivileged-claim");
         vm.prank(PAYER);
         vm.expectRevert(AssetVault420.Unauthorized.selector);
-        vault.claim(keccak256("unprivileged-claim"), _original());
+        vault.claim(claimOperation, originalObligation);
         _assertNoSettlement();
     }
 }

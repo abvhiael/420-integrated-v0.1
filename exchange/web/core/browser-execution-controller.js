@@ -46,6 +46,9 @@ export class BrowserExecutionController {
   }
   unbind() {
     for(const off of this.providerListeners.splice(0)) off();
+    // The prior wallet must not finish an in-flight request or retain a connected
+    // session after its provider is superseded by the selected V15 provider.
+    this.wallet?.dispose();
     this.wallet=null;this.selection=null;this.generation++;
   }
   async connect({ethereum=null,selectedId=null}={}) {

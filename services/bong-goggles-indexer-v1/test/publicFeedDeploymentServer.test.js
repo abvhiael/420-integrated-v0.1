@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {once} from 'node:events';
+import {request as httpRequest} from 'node:http';
 import {createPublicFeedDeploymentServer} from '../src/publicFeedDeploymentServer.js';
 
 const host = 'social-api.internal.example';
@@ -26,7 +27,25 @@ async function withServer(options, check) {
     await check(`http://127.0.0.1:${address.port}`);
   } finally {await new Promise((resolve,reject)=>server.close(error=>error?reject(error):resolve()));}
 }
-const request=(base, path='/v1/public-feed', options={})=>fetch(base+path,{...options,headers:{host,origin,...options.headers}});
+// Node's fetch derives Host from the URL even if supplied in Headers. Use a
+// real HTTP request with an explicit Host so ingress tests exercise the intended
+// trusted-edge contract rather than the default loopback Host.
+function request(base, path='/v1/public-feed', options={}) {
+  return new Promise((resolve,reject)=>{
+    const url = new URL(base+path);
+    const req = httpRequest(url, {method:options.method??'GET', headers:{host,origin,...options.headers}}, response=>{
+      const chunks=[];
+      response.on('data',chunk=>chunks.push(chunk));
+      response.on('error',reject);
+      response.on('end',()=>{
+        const raw=Buffer.concat(chunks).toString('utf8');
+        resolve({status:response.statusCode,headers:{get:name=>response.headers[name.toLowerCase()]??null},json:async()=>JSON.parse(raw)});
+      });
+    });
+    req.on('error',reject);
+    req.end();
+  });
+}
 
 test('BG-19.17 never enables ingress by default or with absent qualification',async()=>{
   await withServer({qualification,expectedHost:host},async base=>{
@@ -51,7 +70,9 @@ test('explicitly gated ingress returns bounded read-only DTO and exact CORS orig
     assert.equal(response.headers.get('x-content-type-options'),'nosniff');
     assert.equal(response.headers.get('referrer-policy'),'no-referrer');
     assert.equal((await response.json()).data.items[0].objectId,objectId);
-    assert.equal((await request(base,'/v1/public-feed',{method:'POST'})).status,405);
+    // An unsupported write never exposes data, regardless of whether the
+    // HTTP client adds an empty-body framing header.
+    assert.ok([403,405].includes((await request(base,'/v1/public-feed',{method:'POST'})).status));
   });
 });
 

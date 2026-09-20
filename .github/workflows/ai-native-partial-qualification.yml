@@ -6,8 +6,10 @@ on:
       - "contracts/src/ai/AINativePartialSettlementPlan420.sol"
       - "contracts/src/ai/AINativeSplitSettlement420.sol"
       - "contracts/src/ai/AIJobEscrow.sol"
+      - "contracts/src/vault/**"
       - "contracts/test/AINativePartialSettlementPlan420.t.sol"
       - "contracts/test/AINativeSplitSettlement420.t.sol"
+      - "contracts/test/AINativeSplitRealVault420.t.sol"
       - ".github/workflows/ai-native-partial-qualification.yml"
   workflow_dispatch:
 
@@ -25,13 +27,15 @@ jobs:
       - uses: foundry-rs/foundry-toolchain@v1
         with:
           version: stable
-      - name: Build partial planner and atomic settlement
+      - name: Build partial planner atomic settlement and real-Vault harness
         working-directory: contracts
         run: |
           forge build test/AINativePartialSettlementPlan420.t.sol --sizes
           forge build test/AINativeSplitSettlement420.t.sol --sizes
-      - name: Test planner and atomic two-recipient settlement
+          forge build test/AINativeSplitRealVault420.t.sol --sizes
+      - name: Test planner atomic settlement and real-Vault accounting
         working-directory: contracts
         run: |
           forge test --match-path test/AINativePartialSettlementPlan420.t.sol -vvv
           forge test --match-path test/AINativeSplitSettlement420.t.sol -vvv
+          forge test --match-path test/AINativeSplitRealVault420.t.sol -vvv

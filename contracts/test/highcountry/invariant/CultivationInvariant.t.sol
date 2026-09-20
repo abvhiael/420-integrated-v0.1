@@ -10,6 +10,7 @@ import { GenomeRegistry } from "../../../src/highcountry/genetics/GenomeRegistry
 import { PlantRegistry } from "../../../src/highcountry/cultivation/PlantRegistry.sol";
 import { CultivationEngine } from "../../../src/highcountry/cultivation/CultivationEngine.sol";
 import { GenesisRoots } from "../../../src/highcountry/types/HighCountryTypes.sol";
+import { InvariantTarget420 } from "../../helpers/InvariantTarget420.sol";
 import { MockCapabilityRegistry } from "../mocks/MockCapabilityRegistry.sol";
 
 interface VmHC6Invariant { function warp(uint256) external; }
@@ -24,7 +25,30 @@ contract MockLandRegistryHC6Invariant {
     function regionIdOf(uint64 parcelId) external view returns (uint16) { return _parcels[parcelId].regionId; }
 }
 
-contract CultivationInvariantTest {
+/// @notice Probe the sealed phenotype and full parcel through bounded mutation attempts.
+/// Direct fuzz calls into finalized GenesisRegistry are unrelated to these invariants.
+contract CultivationInvariantHandler {
+    CultivationEngine private immutable cultivation;
+    PlantRegistry private immutable plants;
+    bytes32 private immutable genomeId;
+    constructor(CultivationEngine cultivation_, PlantRegistry plants_, bytes32 genomeId_) {
+        cultivation = cultivation_; plants = plants_; genomeId = genomeId_;
+    }
+    function stepAttemptSealedEnvironment(uint16 temperature, uint16 humidity) external {
+        CultivationEngine.EnvironmentSnapshot memory env = CultivationEngine.EnvironmentSnapshot({
+            temperature: temperature, humidity: humidity, light: 7000, water: 6000, nutrients: 6000, airflow: 5000
+        });
+        (bool ok,) = address(cultivation).call(abi.encodeWithSelector(cultivation.updateEnvironment.selector, uint64(2), env));
+        require(!ok, "sealed environment accepted update");
+    }
+    function stepAttemptOverCapacity(uint64 id) external {
+        if (id == 0 || id == 1 || id == 2) return;
+        (bool ok,) = address(plants).call(abi.encodeWithSelector(plants.registerPlant.selector, id, genomeId, address(this), uint64(21)));
+        require(!ok, "over-capacity plant accepted");
+    }
+}
+
+contract CultivationInvariantTest is InvariantTarget420 {
     VmHC6Invariant private constant vm = VmHC6Invariant(address(uint160(uint256(keccak256("hevm cheat code")))));
     MockCapabilityRegistry private caps;
     HighCountryAuthorization private auth;
@@ -49,6 +73,7 @@ contract CultivationInvariantTest {
         _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_REGISTER, bytes32(uint256(2)), keccak256("hc6:inv:p2:create")); _grant(address(this), ModuleIds.CULTIVATION_ENGINE, ActionIds.CULTIVATION_UPDATE, bytes32(uint256(2)), keccak256("hc6:inv:p2:env")); _grant(address(this), ModuleIds.CULTIVATION_ENGINE, ActionIds.PHENOTYPE_EXPRESS, bytes32(uint256(2)), keccak256("hc6:inv:p2:express")); plants.registerPlant(2, genomeId, address(this), 21);
         CultivationEngine.EnvironmentSnapshot memory env = CultivationEngine.EnvironmentSnapshot({temperature:1800,humidity:3500,light:9500,water:3000,nutrients:8500,airflow:1500}); (expectedStress, expectedQuality) = cultivation.deriveScores(env); cultivation.updateEnvironment(2, env); expressionHash = cultivation.expressPhenotype(2, genomeId, rulesetId);
         CultivationEngine.EnvironmentSnapshot memory replacement = CultivationEngine.EnvironmentSnapshot({temperature:2400,humidity:6000,light:7000,water:6000,nutrients:6000,airflow:5000}); (bool changed,) = address(cultivation).call(abi.encodeWithSelector(cultivation.updateEnvironment.selector, uint64(2), replacement)); require(!changed, "HC-INV-CULTIVATION-017 setup: sealed environment changed");
+        targetContract(address(new CultivationInvariantHandler(cultivation, plants, genomeId)));
     }
 
     function invariant_HC_INV_CULTIVATION_016_LifecycleIdentityAndCapacityStayConserved() public view {

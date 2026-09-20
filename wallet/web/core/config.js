@@ -1,3 +1,5 @@
+import { GENESIS_APP_SERVICES } from './genesis-app-catalog.js';
+
 export const DEFAULT_NETWORK = Object.freeze({
   name: '420 Integrated',
   chainId: null,
@@ -5,18 +7,7 @@ export const DEFAULT_NETWORK = Object.freeze({
   explorerUrl: null,
 });
 
-export const CORE_SERVICES = Object.freeze([
-  { id: 'search', name: '420 Search', serviceId: '420/service/search/v1' },
-  { id: 'appstore', name: '420 AppStore', serviceId: '420/service/appstore/v1' },
-  { id: 'ai', name: '420 AI', serviceId: '420/service/ai/v1' },
-  { id: 'token', name: '420 Token', serviceId: '420/service/token/v1' },
-  { id: 'explorer', name: '420 Explorer', serviceId: '420/service/explorer/v1' },
-  { id: 'swap', name: '420 Swap', serviceId: '420/service/swap/v1' },
-  { id: 'bridge', name: '420 Bridge', serviceId: '420/service/bridge/v1' },
-  { id: 'stake', name: '420 Stake', serviceId: '420/service/stake/v1' },
-  { id: 'governance', name: '420 Governance', serviceId: '420/service/governance/v1' },
-  { id: 'developers', name: 'Developer Hub', serviceId: '420/service/developers/v1' },
-]);
+export const CORE_SERVICES = GENESIS_APP_SERVICES;
 
 function optionalAddress(value, label) {
   if (value == null) return;

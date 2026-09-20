@@ -16,12 +16,52 @@ on:
 
 concurrency:
   group: solidity-contracts-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
-  foundry:
-    continue-on-error: true
+  # W14.5 has ~762 Solidity files and the single full-tree compilation has
+  # repeatedly been terminated by GitHub's runner before Solc can report a
+  # result. Compile every primary unit and execute every test in bounded shards
+  # instead. All sixteen shards are required; no continue-on-error.
+  pr-shards:
+    if: github.event_name == 'pull_request' && github.head_ref == 'wallet-w14-5-app-catalog-reconciliation'
     runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+    permissions:
+      contents: read
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Compile assigned Solidity sources and run assigned tests
+        working-directory: contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ../artifacts/contracts
+          bash scripts/qualify-foundry-shard.sh '${{ matrix.shard }}' '16' 2>&1 | tee '../artifacts/contracts/shard-${{ matrix.shard }}.log'
+      - name: Upload per-shard diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: foundry-pr-shard-${{ matrix.shard }}-${{ github.sha }}
+          path: |
+            artifacts/contracts/shard-${{ matrix.shard }}.log
+            artifacts/contracts/shard-${{ matrix.shard }}-targets.txt
+          if-no-files-found: warn
+          retention-days: 30
+
+  foundry:
+    if: github.event_name != 'pull_request' || github.head_ref != 'wallet-w14-5-app-catalog-reconciliation'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
     permissions:
       contents: read
     env:
@@ -52,7 +92,6 @@ jobs:
           BASE_SHA='${{ github.event.pull_request.base.sha }}'
           HEAD_SHA='${{ github.event.pull_request.head.sha }}'
           git diff --name-only "$BASE_SHA" "$HEAD_SHA" | tee artifacts/contracts/pr-changed-files.txt
-
           mapfile -t ADAPTER_FILES < <(
             git diff --name-only "$BASE_SHA" "$HEAD_SHA" \
               | grep -E '^contracts/src/bridge/adapters/[^/]+BridgeAdapter420\.sol$' \
@@ -64,15 +103,11 @@ jobs:
               | sed 's#^contracts/##' \
               | sort -u || true
           )
-
           for src in "${ADAPTER_FILES[@]}"; do
             base="$(basename "$src" .sol)"
             candidate="test/${base}.t.sol"
-            if [ -f "contracts/$candidate" ]; then
-              ADAPTER_TESTS+=("$candidate")
-            fi
+            if [ -f "contracts/$candidate" ]; then ADAPTER_TESTS+=("$candidate"); fi
           done
-
           if ((${#ADAPTER_TESTS[@]})); then
             mapfile -t ADAPTER_TESTS < <(printf '%s\n' "${ADAPTER_TESTS[@]}" | sort -u)
             printf '%s\n' "${ADAPTER_TESTS[@]}" | tee artifacts/contracts/pr-adapter-targets.txt
@@ -116,7 +151,6 @@ jobs:
             forge clean
             forge test --match-path "$target" -vvv 2>&1 | tee -a ../artifacts/contracts/foundry-tests.txt
           done <<< "$PR_ADAPTER_TARGETS"
-
           echo "=== BRIDGE SHARED SMOKE ===" | tee -a ../artifacts/contracts/foundry-tests.txt
           forge clean
           forge test --match-path test/BridgeGenesisIntegration420.t.sol -vvv 2>&1 \

@@ -85,7 +85,17 @@ contract StorageSettlementRegistry420Test {
         bytes32 schemeId;
     }
 
-    function setup() internal returns (Env memory e) {
+    // Foundry invokes setUp once for each test; keeping setup outside the test
+    // methods avoids inlining the 18-field fixture deployment into each body.
+    Env private env;
+
+    function setUp() public {
+        Env storage e = env;
+        _deployRegistries(e);
+        _configureRegistries(e);
+    }
+
+    function _deployRegistries(Env storage e) private {
         e.caps = new MockStorageSettlementCaps420();
         e.auth = new ResourceAuthorization420(address(e.caps));
         e.providers = new ResourceProviderRegistry420(address(e.auth));
@@ -100,7 +110,9 @@ contract StorageSettlementRegistry420Test {
         e.agreements = new StorageAgreementRegistry420(address(e.auth), address(e.offers), address(e.nodes), address(e.providers), address(e.schemes), address(e.commitments), address(e.capacity));
         e.settlements = new StorageSettlementRegistry420(address(e.agreements), address(e.proofs));
         e.vault = new MockStorageSettlementVault420();
+    }
 
+    function _configureRegistries(Env storage e) private {
         e.providerId = keccak256("settlement-provider");
         e.nodeId = keccak256("settlement-node");
         e.offerId = keccak256("settlement-offer");
@@ -117,31 +129,44 @@ contract StorageSettlementRegistry420Test {
         vm.prank(GOVERNOR); e.schemes.registerScheme(e.schemeId, address(e.verifier), StorageProofIds420.PROOF_AVAILABILITY_WINDOW, keccak256("proof-spec"), 300);
     }
 
-    function activateAgreement(Env memory e) internal returns (bytes32 agreementId, bytes32 commitmentId, uint64 startTime, uint64 endTime) {
+    function activateAgreement(Env storage e) internal returns (bytes32 agreementId, bytes32 commitmentId, uint64 startTime, uint64 endTime) {
         startTime = uint64(block.timestamp + 1 hours);
         endTime = uint64(startTime + 24 hours);
+        agreementId = _proposeSettlementAgreement(e, startTime, endTime);
+        commitmentId = _registerSettlementCommitment(e, startTime, endTime);
+        _reserveAndActivate(e, agreementId, commitmentId, endTime);
+    }
+
+    function _proposeSettlementAgreement(Env storage e, uint64 startTime, uint64 endTime) private returns (bytes32 agreementId) {
         vm.prank(CONSUMER);
         agreementId = e.agreements.proposeAgreement(
             e.offerId, keccak256("object"), keccak256("content-root"), keccak256("manifest"),
             keccak256("standard"), keccak256("repair"), e.schemeId, 4_000,
             startTime, endTime, 6 hours, 1, 1, 1
         );
+    }
+
+    function _registerSettlementCommitment(Env storage e, uint64 startTime, uint64 endTime) private returns (bytes32 commitmentId) {
         commitmentId = keccak256("settlement-commitment");
         vm.prank(PROVIDER);
         e.commitments.registerCommitment(commitmentId, e.nodeId, e.schemeId, keccak256("content-root"), keccak256("replica-root"), 4_000, startTime, endTime, keccak256("meta"));
-        vm.prank(PROVIDER);
-        bytes32 reservationId = e.capacity.reserveCapacity(e.nodeId, agreementId, 4_000, endTime);
-        vm.prank(PROVIDER); e.agreements.activateAgreement(agreementId, commitmentId, reservationId);
     }
 
-    function openAndFund(Env memory e, bytes32 agreementId) internal returns (bytes32 settlementId) {
+    function _reserveAndActivate(Env storage e, bytes32 agreementId, bytes32 commitmentId, uint64 endTime) private {
+        vm.prank(PROVIDER);
+        bytes32 reservationId = e.capacity.reserveCapacity(e.nodeId, agreementId, 4_000, endTime);
+        vm.prank(PROVIDER);
+        e.agreements.activateAgreement(agreementId, commitmentId, reservationId);
+    }
+
+    function openAndFund(Env storage e, bytes32 agreementId) internal returns (bytes32 settlementId) {
         vm.prank(CONSUMER); settlementId = e.settlements.openSettlement(agreementId, address(e.vault), address(0));
         e.settlements.reserveWindows(settlementId, 0, 2);
         e.settlements.reserveWindows(settlementId, 2, 2);
     }
 
     function testBatchedReservationFullyFundsExactQuotedAmount() public {
-        Env memory e = setup();
+        Env storage e = env;
         (bytes32 agreementId,,,) = activateAgreement(e);
         bytes32 settlementId = openAndFund(e, agreementId);
         StorageSettlementRegistry420.Settlement memory s = e.settlements.getSettlement(settlementId);
@@ -152,7 +177,7 @@ contract StorageSettlementRegistry420Test {
     }
 
     function testVerifiedCanonicalProofReleasesOnlyItsWindow() public {
-        Env memory e = setup();
+        Env storage e = env;
         (bytes32 agreementId, bytes32 commitmentId,,) = activateAgreement(e);
         bytes32 settlementId = openAndFund(e, agreementId);
         (uint64 epoch,) = e.settlements.windowTiming(settlementId, 0);
@@ -166,7 +191,7 @@ contract StorageSettlementRegistry420Test {
     }
 
     function testWrongChallengeCannotReleaseEscrow() public {
-        Env memory e = setup();
+        Env storage e = env;
         (bytes32 agreementId, bytes32 commitmentId,,) = activateAgreement(e);
         bytes32 settlementId = openAndFund(e, agreementId);
         (uint64 epoch,) = e.settlements.windowTiming(settlementId, 0);
@@ -178,7 +203,7 @@ contract StorageSettlementRegistry420Test {
     }
 
     function testMissedProofWindowRefundsAfterDeadlineOnly() public {
-        Env memory e = setup();
+        Env storage e = env;
         (bytes32 agreementId,,,) = activateAgreement(e);
         bytes32 settlementId = openAndFund(e, agreementId);
         (, uint64 deadline) = e.settlements.windowTiming(settlementId, 0);
@@ -193,7 +218,7 @@ contract StorageSettlementRegistry420Test {
     }
 
     function testPartialFundingCannotEarnAndCanAbortAfterStart() public {
-        Env memory e = setup();
+        Env storage e = env;
         (bytes32 agreementId,, uint64 startTime,) = activateAgreement(e);
         vm.prank(CONSUMER);
         bytes32 settlementId = e.settlements.openSettlement(agreementId, address(e.vault), address(0));

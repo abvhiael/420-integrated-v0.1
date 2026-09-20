@@ -9,6 +9,7 @@ import { GuestProfileMigration, IGrowerProfileMigration } from "../../../src/hig
 import { ActionIds } from "../../../src/highcountry/constants/ActionIds.sol";
 import { ModuleIds } from "../../../src/highcountry/constants/ModuleIds.sol";
 import { MockCapabilityRegistry } from "../mocks/MockCapabilityRegistry.sol";
+import { InvariantTarget420 } from "../../helpers/InvariantTarget420.sol";
 
 contract MockGrowerProfilesPAInvariant is IGrowerProfileMigration {
     GrowerProfile private _profile;
@@ -19,7 +20,28 @@ contract MockGrowerProfilesPAInvariant is IGrowerProfileMigration {
     }
 }
 
-contract ProgressiveAccessInvariantTest {
+/// @notice Fuzz attempted reclaims of the existing migration while keeping the
+/// established fixture and its capability registry outside unrestricted mutation.
+contract ProgressiveAccessInvariantHandler {
+    GuestProfileMigration private immutable migration;
+    bytes32 private immutable source;
+    bytes32 private immutable manifestRoot;
+
+    constructor(GuestProfileMigration migration_, bytes32 source_, bytes32 manifestRoot_) {
+        migration = migration_;
+        source = source_;
+        manifestRoot = manifestRoot_;
+    }
+
+    function stepAttemptReclaim(uint32 version) external {
+        (bool succeeded,) = address(migration).call(
+            abi.encodeWithSelector(migration.claimProfile.selector, source, uint64(9), manifestRoot, version)
+        );
+        require(!succeeded, "existing profile claim replaced");
+    }
+}
+
+contract ProgressiveAccessInvariantTest is InvariantTarget420 {
     HighCountryAccessPolicy private policy;
     GuestProfileMigration private migration;
     MockCapabilityRegistry private caps;
@@ -46,21 +68,14 @@ contract ProgressiveAccessInvariantTest {
         caps.setGrant(keccak256("hc-pa:inv:grant"), grant, 0);
 
         manifestRoot = migration.migrationLeaf(
-            source,
-            objectId,
-            GuestProfileMigration.CanonicalObjectKind.SIGNIFICANT_ACHIEVEMENT,
-            payloadHash,
-            1
+            source, objectId, GuestProfileMigration.CanonicalObjectKind.SIGNIFICANT_ACHIEVEMENT, payloadHash, 1
         );
         migration.claimProfile(source, 9, manifestRoot, 1);
         bytes32[] memory proof = new bytes32[](0);
         consumedKey = migration.consumeObject(
-            source,
-            objectId,
-            GuestProfileMigration.CanonicalObjectKind.SIGNIFICANT_ACHIEVEMENT,
-            payloadHash,
-            proof
+            source, objectId, GuestProfileMigration.CanonicalObjectKind.SIGNIFICANT_ACHIEVEMENT, payloadHash, proof
         );
+        targetContract(address(new ProgressiveAccessInvariantHandler(migration, source, manifestRoot)));
     }
 
     function invariant_HC_INV_ACCESS_019_CoreGameplayNeverRequiresWallet() public view {

@@ -111,7 +111,7 @@ contract ExchangeLimitOrderStateMachineHardeningV12Test is ExchangeLimitOrderSet
         assertEq(buyToken.balanceOf(maker) - beforeBuy, 4);
     }
 
-    function testFailedDownstreamTransferRollsBackFillAndNonceBinding() public {
+    function testDownstreamTransferFailureRollsBackFillAndNonceBinding() public {
         ExchangeLimitOrderSettlement420.LimitOrder memory order = _order(107, true);
         bytes memory signature = _sign(order, MAKER_PK);
         ExchangeAtomicRouter420.Hop[] memory hops = _hops();

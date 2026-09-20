@@ -1,9 +1,8 @@
-import { normalizeAddress } from './core/abi.js';
 import { createQualifiedNamesSend420 } from './core/names-guided-send.js';
 
 const $ = (selector) => document.querySelector(selector);
 const ADDRESS = /^0x[0-9a-fA-F]{40}$/;
-const sameRequest = (a, b) => a && b && a.target === b.target && a.value === b.value && a.data === b.data;
+const sameRequest = (a, b) => Boolean(a && b && a.target === b.target && a.value === b.value && a.data === b.data);
 function currentRequest() {
   return { target: $('#execute-target').value.trim().toLowerCase(), value: $('#execute-value').value.trim(), data: $('#execute-data').value.trim().toLowerCase() };
 }
@@ -19,8 +18,16 @@ function installNamesSend() {
   const preview = $('#send-preview');
   const clear = (notice) => {
     generation += 1;
+    const discard = Boolean(prepared);
     prepared = null;
     client = null;
+    if (discard) {
+      for (const [selector, value] of [['#execute-target', ''], ['#execute-value', '0'], ['#execute-data', '0x']]) {
+        const input = $(selector);
+        input.value = value;
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    }
     if (notice && preview) preview.textContent = notice;
   };
   for (const input of ['#send-recipient', '#send-amount', '#send-asset']) {
@@ -34,7 +41,7 @@ function installNamesSend() {
   const error = (cause) => { clear(cause?.message || '420 Names resolution failed'); };
   prepare.addEventListener('click', async (event) => {
     const raw = recipient.value.trim();
-    if (ADDRESS.test(raw)) { clear(); return; } // Existing address-based send handler remains authoritative.
+    if (ADDRESS.test(raw)) { clear(); return; }
     event.preventDefault(); event.stopImmediatePropagation();
     if (busy) return;
     clear();
@@ -48,28 +55,30 @@ function installNamesSend() {
       const config = await response.json();
       if (!globalThis.ethereum?.request) throw new Error('Connect an EIP-1193 wallet before resolving a 420 Name');
       const provider = { request: (method, params = []) => globalThis.ethereum.request({ method, params }) };
-      const expectedChain = BigInt(config.network?.chainId);
-      if (BigInt(await provider.request('eth_chainId')) !== expectedChain) throw new Error('Wrong network for 420 Names');
       const nextClient = createQualifiedNamesSend420({
         provider, config,
         confirm: ({ name, recipient: address, recheck }) => globalThis.confirm?.(
           `${recheck ? 'Reconfirm' : 'Confirm'} 420 Name ${name}\nFull on-chain recipient address:\n${address}\nSend only if you recognize and trust this address.`
         ) === true,
       });
+      if (BigInt(await provider.request('eth_chainId')) !== BigInt(config.network.chainId)) throw new Error('Wrong network for 420 Names');
       const assetOption = $('#send-asset').selectedIndex;
       const tracked = config.trackedAssets || [];
       const asset = assetOption === 0 ? { kind: 'native', symbol: '420', decimals: 18 } :
         tracked[assetOption - 1] && { kind: 'erc20', ...tracked[assetOption - 1] };
       if (!asset) throw new Error('Selected asset is unavailable');
-      const result = await nextClient.prepare({ recipient: raw, amount: $('#send-amount').value, asset });
-      if (generation !== snapshot || recipient.value.trim() !== raw) throw new Error('Send details changed during name resolution');
-      prepared = result;
-      client = nextClient;
+      const amount = $('#send-amount').value;
+      const result = await nextClient.prepare({ recipient: raw, amount, asset });
+      if (generation !== snapshot || recipient.value.trim() !== raw || $('#send-amount').value !== amount || $('#send-asset').selectedIndex !== assetOption) {
+        throw new Error('Send details changed during name resolution');
+      }
       const fields = [$('#execute-target'), $('#execute-value'), $('#execute-data')];
       for (const [index, value] of [result.request.target, result.request.value, result.request.data].entries()) {
         fields[index].value = value;
         fields[index].dispatchEvent(new Event('input', { bubbles: true }));
       }
+      prepared = result; // Set only after all three fields have been updated.
+      client = nextClient;
       if (preview) preview.textContent = `${result.name} → ${result.verified.recipient} · ${result.summary.amount} ${result.summary.symbol}. Verify the full address, then simulate. Name will be rechecked before execution.`;
       $('#simulate-execution')?.focus();
     } catch (cause) { error(cause); }
@@ -91,7 +100,7 @@ function installNamesSend() {
         if (generation !== snapshot || !prepared || !sameRequest(currentRequest(), prepared.request)) throw new Error('Send details changed during 420 Name verification');
         replay = selector;
         button.disabled = false;
-        button.click(); // Delegate simulation/signing to the existing SmartAccount owner handler.
+        button.click(); // Existing SmartAccount owner handler handles mandatory simulation and signing.
         replay = null;
       } catch (cause) { error(cause); }
       finally { replay = null; busy = false; }

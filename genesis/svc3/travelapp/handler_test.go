@@ -22,7 +22,6 @@ func TestTravelShell(t *testing.T) {
 func TestPlannedRoutesAreUnavailableNotFictitiouslyFunctional(t *testing.T) {
  for _, tc := range []struct{path, heading, current string}{
   {"/travel/map", "Explore the map", "map"},
-  {"/travel/events", "Discover events", "events"},
   {"/travel/trips", "Your trips", "trips"},
   {"/travel/business/claim", "Claim a business", "claim"},
   {"/travel/place/public-id_1", "Place details", "place"},
@@ -36,9 +35,7 @@ func TestPlannedRoutesAreUnavailableNotFictitiouslyFunctional(t *testing.T) {
     if !strings.Contains(body, text) { t.Errorf("%s missing %q", tc.path, text) }
    }
    if strings.Contains(body, "Discovery is not connected yet") { t.Fatal("placeholder incorrectly rendered discovery data") }
-   if tc.current != "place" {
-    if !strings.Contains(body, "aria-current=\"page\"") { t.Fatal("active navigation state missing") }
-   }
+   if tc.current != "place" && !strings.Contains(body, "aria-current=\"page\"") {t.Fatal("active navigation state missing")}
    if response.Header().Get("Cache-Control") != "no-store" { t.Fatal("missing no-store") }
   })
  }

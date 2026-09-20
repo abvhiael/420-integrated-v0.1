@@ -41,7 +41,7 @@ contract AINativeProviderSettlement420 {
         governance = governance_;
         manager = AIJobManager(manager_);
         escrow = AIJobEscrow(escrow_);
-        funding = AINativeVaultFundingAdapter420(funding_);
+        funding = AINativeVaultFundingAdapter420(payable(funding_));
         vault = AssetVault420(vault_);
         accounting = vault.accounting();
         vaultRef = vaultRef_;

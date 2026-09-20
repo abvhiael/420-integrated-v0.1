@@ -1,0 +1,35 @@
+{
+  "schema": "420-exchange-testnet-runtime-v15.1",
+  "environment": "testnet",
+  "status": "UNRESOLVED_UNTIL_DEPLOYMENT",
+  "network": {
+    "name": "420 Integrated Testnet",
+    "chainId": null,
+    "rpcUrl": null,
+    "explorerUrl": null
+  },
+  "services": {
+    "exchangeApiUrl": null,
+    "exchangeStreamUrl": null
+  },
+  "contracts": {
+    "ExchangeAtomicRouter420": null,
+    "ExchangeLimitOrderSettlement420": null,
+    "ExchangeBridgeQualification420": null,
+    "Wrapped420": null,
+    "ExchangeAssetRegistry420": null,
+    "ExchangeMarketRegistry420": null,
+    "ExchangeRouteRegistry420": null,
+    "ExchangeOracleGuard420": null,
+    "ExchangeEmergencyControl420": null,
+    "ExchangeAuthorization420": null,
+    "GatewayRouter420": null
+  },
+  "marketSubjects": [],
+  "evidence": {
+    "deploymentCommit": null,
+    "deploymentBlock": null,
+    "deploymentTransactionHashes": [],
+    "verifiedCodeHashes": {}
+  }
+}

@@ -10,6 +10,13 @@ const required = [
   'runtime-config.json',
   'runtime-config.example.json',
   'core/config.js',
+  'core/deployment.js',
+  'core/abi.js',
+  'core/execution.js',
+  'core/preflight.js',
+  'core/wallet-execution.js',
+  'core/transaction-lifecycle.js',
+  'core/live-swap-qualification.js',
   'core/router.js',
   'core/design-system.js',
   'core/exchange-client.js',
@@ -18,6 +25,12 @@ const required = [
   'core/exchange-cache.js',
   'core/exchange-data.js',
   'test/config.test.js',
+  'test/deployment-binding.test.js',
+  'test/execution.test.js',
+  'test/preflight.test.js',
+  'test/wallet-execution.test.js',
+  'test/transaction-lifecycle.test.js',
+  'test/live-swap-qualification.test.js',
   'test/router.test.js',
   'test/design-system.test.js',
   'test/exchange-client.test.js',
@@ -39,6 +52,12 @@ const required = [
   'v14.12-qualification.json',
   'v14.13-qualification.json',
   'v14.14-qualification.json',
+  'v15.1-qualification.json',
+  'v15.2-qualification.json',
+  'v15.3-qualification.json',
+  'v15.4-qualification.json',
+  'v15.5-qualification.json',
+  'v15.6-qualification.json',
   'core/release-qualification.js',
   'test/release-qualification.test.js',
   'scripts/build.mjs',
@@ -207,4 +226,70 @@ for (const needle of ['GENESIS_RELEASE_DRILLS','PERFORMANCE_BUDGETS','BROWSER_MA
 }
 const v1414 = JSON.parse(fs.readFileSync(path.join(root, 'v14.14-qualification.json'), 'utf8'));
 if (!Array.isArray(v1414.operationalReleaseGates) || v1414.operationalReleaseGates.length < 5) throw new Error('V14.14 operational release gates incomplete');
-console.log('420Exchange V14.1/V14.2/V14.3/V14.4/V14.5/V14.6/V14.7/V14.8/V14.9/V14.10/V14.11/V14.12/V14.13/V14.14 static qualification passed');
+
+const deploymentBinding = fs.readFileSync(path.join(root, 'core/deployment.js'), 'utf8');
+for (const needle of ['EXCHANGE_TESTNET_SCHEMA','REQUIRED_EXCHANGE_CONTRACTS','inspectExchangeTestnetDeployment','bindExchangeRuntime','UNRESOLVED_UNTIL_DEPLOYMENT']) {
+  if (!deploymentBinding.includes(needle)) throw new Error(`V15.1 deployment binding missing marker: ${needle}`);
+}
+const repoRoot = path.resolve(root, '..', '..');
+const testnetManifest = JSON.parse(fs.readFileSync(path.join(repoRoot, 'deployments/exchange/testnet.runtime.json'), 'utf8'));
+if (testnetManifest.schema !== '420-exchange-testnet-runtime-v15.1') throw new Error('V15.1 testnet manifest schema drift');
+if (testnetManifest.status !== 'UNRESOLVED_UNTIL_DEPLOYMENT') throw new Error('V15.1 checked-in testnet manifest must remain unresolved until deployment evidence exists');
+const v151 = JSON.parse(fs.readFileSync(path.join(root, 'v15.1-qualification.json'), 'utf8'));
+if (v151.scope !== 'TESTNET_DEPLOYMENT_CATALOGUE_RUNTIME_BINDING') throw new Error('V15.1 qualification scope drift');
+if (!buildScript.includes('EXCHANGE_DEPLOYMENT_MANIFEST') || !buildScript.includes('bindExchangeRuntime')) throw new Error('V15.1 artifact builder is not bound to deployment manifest support');
+
+const abi = fs.readFileSync(path.join(root, 'core/abi.js'), 'utf8');
+for (const needle of ['keccak256','functionSelector','encodeSwapExactInputPath','encodeCancelOrder','encodeInitiateOutbound']) {
+  if (!abi.includes(needle)) throw new Error(`V15.2 ABI layer missing marker: ${needle}`);
+}
+const execution = fs.readFileSync(path.join(root, 'core/execution.js'), 'utf8');
+for (const needle of ['buildSwapTransaction','buildLimitOrderTypedData','buildLimitOrderCancelTransaction','buildBridgeQualificationCall','buildBridgeOutboundTransaction']) {
+  if (!execution.includes(needle)) throw new Error(`V15.2 execution layer missing operation: ${needle}`);
+}
+const v152 = JSON.parse(fs.readFileSync(path.join(root, 'v15.2-qualification.json'), 'utf8'));
+if (v152.scope !== 'TRANSACTION_BUILDER_DEPLOYED_CONTRACT_BINDING') throw new Error('V15.2 qualification scope drift');
+if (!REQUIRED_EXCHANGE_CONTRACTS_MARKER()) throw new Error('V15.2 GatewayRouter420 deployment binding missing');
+
+const preflight = fs.readFileSync(path.join(root, 'core/preflight.js'), 'utf8');
+for (const needle of ['preflightExchangeTransaction','checkAllowance','checkAuthorization','freshnessGate','classifyExchangeRevert','eth_estimateGas']) {
+  if (!preflight.includes(needle)) throw new Error(`V15.3 preflight layer missing operation: ${needle}`);
+}
+const v153 = JSON.parse(fs.readFileSync(path.join(root, 'v15.3-qualification.json'), 'utf8'));
+if (v153.scope !== 'PREFLIGHT_SIMULATION_AUTHORIZATION_GAS') throw new Error('V15.3 qualification scope drift');
+if (!deploymentBinding.includes('ExchangeAuthorization420')) throw new Error('V15.3 ExchangeAuthorization420 deployment binding missing');
+
+const walletExecution = fs.readFileSync(path.join(root, 'core/wallet-execution.js'), 'utf8');
+for (const needle of ['submitPreflightedTransaction','signQualifiedLimitOrder','walletTransactionGate','walletTypedDataGate','eth_sendTransaction','eth_signTypedData_v4']) {
+  if (!walletExecution.includes(needle)) throw new Error(`V15.4 wallet execution missing operation: ${needle}`);
+}
+for (const needle of ['transactionFingerprint','preflightLimitOrderSigning']) {
+  if (!preflight.includes(needle)) throw new Error(`V15.4 preflight evidence missing operation: ${needle}`);
+}
+const v154 = JSON.parse(fs.readFileSync(path.join(root, 'v15.4-qualification.json'), 'utf8'));
+if (v154.scope !== 'EIP1193_SIGNING_AND_TRANSACTION_SUBMISSION') throw new Error('V15.4 qualification scope drift');
+
+const lifecycle = fs.readFileSync(path.join(root, 'core/transaction-lifecycle.js'), 'utf8');
+for (const needle of ['inspectTransactionLifecycle','normalizeReceipt','reconcileIndexedActivity','inspectAndReconcileTransaction','eth_getTransactionReceipt','eth_getBlockByNumber']) {
+  if (!lifecycle.includes(needle)) throw new Error(`V15.5 lifecycle layer missing operation: ${needle}`);
+}
+const v155 = JSON.parse(fs.readFileSync(path.join(root, 'v15.5-qualification.json'), 'utf8'));
+if (v155.scope !== 'TRANSACTION_RECEIPT_FINALITY_V13_RECONCILIATION') throw new Error('V15.5 qualification scope drift');
+
+const liveSwap = fs.readFileSync(path.join(root, 'core/live-swap-qualification.js'), 'utf8');
+for (const needle of ['qualifyLiveTestnetSwap','TESTNET_RUNTIME_REQUIRED','INDEXER_CONFLICT','INDEXER_TIMEOUT','FINALIZED']) {
+  if (!liveSwap.includes(needle)) throw new Error(`V15.6 live swap qualification missing marker: ${needle}`);
+}
+const liveSwapRunner = fs.readFileSync(path.join(root, 'scripts/live-swap-qualify.mjs'), 'utf8');
+for (const needle of ['EXCHANGE_TESTNET_MANIFEST','EXCHANGE_TESTNET_SWAP_FIXTURE','v15.6-live-evidence.json','Math.floor(Date.now()/1000)']) {
+  if (!liveSwapRunner.includes(needle)) throw new Error(`V15.6 operational runner missing marker: ${needle}`);
+}
+const v156 = JSON.parse(fs.readFileSync(path.join(root, 'v15.6-qualification.json'), 'utf8'));
+if (v156.scope !== 'LIVE_TESTNET_SWAP_EXECUTION_QUALIFICATION') throw new Error('V15.6 qualification scope drift');
+if (v156.operationalStatus !== 'PENDING_LIVE_TESTNET_DRILL') throw new Error('V15.6 repository CI must not claim live testnet qualification');
+
+console.log('420Exchange V14.1 through V14.14 + V15.1 + V15.2 + V15.3 + V15.4 + V15.5 + V15.6 static qualification passed');
+
+function REQUIRED_EXCHANGE_CONTRACTS_MARKER() {
+  return deploymentBinding.includes('GatewayRouter420');
+}

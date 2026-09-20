@@ -1,0 +1,27 @@
+{
+  "schema": "420-exchange-web-v15.6",
+  "repositoryStatus": "IMPLEMENTED_PENDING_CI",
+  "operationalStatus": "PENDING_LIVE_TESTNET_DRILL",
+  "scope": "LIVE_TESTNET_SWAP_EXECUTION_QUALIFICATION",
+  "invariants": [
+    "V15.6 composes the real V15.2 transaction builder, V15.3 preflight, V15.4 submission and V15.5 lifecycle",
+    "only a resolved testnet deployment may run the live drill",
+    "the runner accepts no private key, seed phrase or mnemonic",
+    "live execution requires an explicitly provisioned disposable testnet account",
+    "the preferred operational target is FINALIZED rather than wallet submission or receipt presence",
+    "canonical inclusion block hash parity is mandatory",
+    "V13 TRADE and FEE_ROUTING reconciliation must not conflict with RPC evidence",
+    "repository CI cannot claim that a live swap occurred",
+    "sanitized evidence must bind the live result to the exact source SHA"
+  ],
+  "implementation": {
+    "orchestration": "exchange/web/core/live-swap-qualification.js",
+    "runner": "exchange/web/scripts/live-swap-qualify.mjs",
+    "workflow": ".github/workflows/exchange-testnet-swap.yml",
+    "fixtureExample": "exchange/web/fixtures/live-swap-v15.6.example.json",
+    "qualificationTest": "exchange/web/test/live-swap-qualification.test.js",
+    "runbook": "docs/420EXCHANGE-V15.6-LIVE-SWAP.md"
+  },
+  "operationalEvidence": null,
+  "followOn": "V15.7 live/testnet limit-order create/fill/cancel qualification"
+}

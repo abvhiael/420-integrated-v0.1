@@ -1,0 +1,19 @@
+# BG-19.18 — Public DISCOVER browser binding (partial; disabled by default)
+
+The home route now has an opt-in browser reader for the **anonymous public DISCOVER** sample. The connection is disabled unless a validated runtime config explicitly sets `features.publicDiscoverFeed: true` and supplies a separate `socialApiUrl` origin. Neither setting proves deployment qualification; operators MUST NOT enable the flag until BG-19.16/19.17 live canonical, policy, HTTPS, origin/CORS, rate-limit, incident and smoke-test gates are signed off. No social API domain or live deployment has been verified by this code change.
+
+## Implemented
+
+- `bong-goggles/web/core/public-discover-feed.js`: credentials-omitting `GET /v1/public-feed?feedClass=DISCOVER&limit=20` to an explicit HTTPS (non-production localhost exception) social API origin. No tokens, cookies, account ID, wallet session or write actions are used. Requests use `no-store`, no referrer, AbortController and generation checks. Server failures/invalid responses and revoked items fail closed.
+- Response validation accepts only the `bg-social-read-v1` projection with explicit `DISCOVER`, non-authoritative, `hasMore:false`, bounded item count, snapshot number and an exact safe-field plain `POST` DTO. It rejects private audiences, duplicates, unexpected fields, malformed IDs and unqualified media/content. Hashes are shown as hashes; they are **not** decoded post text or permission evidence.
+- `bong-goggles/web/core/runtime-config.js`: optional `socialApiUrl` must be an origin without credentials/path/query and distinct from both application and indexer origins; enabling requires the explicit URL. Production URLs require HTTPS.
+- `bong-goggles/web/app.js`: home route passes validated response into existing feed UI; clears previous items before fetching, and clears them on unavailability or route change. Refresh on return to home, foreground and every 15 seconds while visible. A browser refresh is **not instantaneous withdrawal**: operators must enforce short-lived, non-cacheable responses, server-side current-state decisions and bounded withdrawal latency; the current server only supports sampled public posts.
+- `bong-goggles/web/test/public-discover-feed.test.js`: disabled default, URL rejection, anonymous request shape, response schema, privacy redaction, withdrawal, failure, and request invalidation tests.
+
+## Remaining BG-19.18 and launch gates
+
+1. Finish BG-19.16 live independently qualified canonical snapshot and social/moderation/audience readers, including emergency-hides, deletions, reorgs and policy-unavailability tests.
+2. Finish BG-19.17 HTTPS ingress, DNS/TLS, restricted network, shared rate limiting, real service deployment, redacted telemetry and operator/security approval. Record the actual qualified production/testnet social API origin; do not guess it.
+3. After deployment, **manually and automatically run real-browser smoke tests**: valid public post visible; private/blocked/deleted/reorged posts absent; withdrawal promptly removes a previously visible post; rejected origin and CORS fail closed; offline, timeout, invalid response, restart and multiple-tab failures clear the feed. Verify that no credentials travel to the anonymous API and no private content persists in browser caches or DOM after a failed refresh.
+4. Extend the server payload and independently qualified content/media resolver before rendering post bodies or imagery. The current DTO has `contentHash` only; no plaintext or media URLs are inferred from it. `hasMore:false` is a bounded sample, **not** a pagination guarantee. Full feeds, viewer-specific reads and pagination belong in BG-19.19.
+5. Keep `features.publicDiscoverFeed` **off** until the above evidence is linked in the deployment record. The current commit is a repository implementation, not proof of live integration or an end-to-end production launch.

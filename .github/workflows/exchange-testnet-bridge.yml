@@ -1,0 +1,56 @@
+name: 420Exchange Testnet Bridge Qualification
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify-live-bridge:
+    runs-on: ubuntu-latest
+    environment: exchange-testnet
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Verify Exchange repository qualification
+        working-directory: exchange/web
+        run: |
+          npm run check
+          npm test
+      - name: Materialize protected testnet inputs
+        shell: bash
+        env:
+          SOURCE_MANIFEST: ${{ secrets.EXCHANGE_TESTNET_MANIFEST_JSON }}
+          DESTINATION_MANIFEST: ${{ secrets.EXCHANGE_TESTNET_DESTINATION_MANIFEST_JSON }}
+          BRIDGE_FIXTURE: ${{ secrets.EXCHANGE_TESTNET_BRIDGE_FIXTURE_JSON }}
+        run: |
+          set -euo pipefail
+          test -n "$SOURCE_MANIFEST"
+          test -n "$DESTINATION_MANIFEST"
+          test -n "$BRIDGE_FIXTURE"
+          umask 077
+          printf '%s' "$SOURCE_MANIFEST" > "$RUNNER_TEMP/exchange-bridge-source.json"
+          printf '%s' "$DESTINATION_MANIFEST" > "$RUNNER_TEMP/exchange-bridge-destination.json"
+          printf '%s' "$BRIDGE_FIXTURE" > "$RUNNER_TEMP/exchange-bridge-fixture.json"
+      - name: Run finalized source/proof/destination drill
+        working-directory: exchange/web
+        env:
+          EXCHANGE_TESTNET_MANIFEST: ${{ runner.temp }}/exchange-bridge-source.json
+          EXCHANGE_TESTNET_DESTINATION_MANIFEST: ${{ runner.temp }}/exchange-bridge-destination.json
+          EXCHANGE_TESTNET_BRIDGE_FIXTURE: ${{ runner.temp }}/exchange-bridge-fixture.json
+          EXCHANGE_TESTNET_SOURCE_SIGNER_RPC_URL: ${{ secrets.EXCHANGE_TESTNET_SOURCE_SIGNER_RPC_URL }}
+          EXCHANGE_TESTNET_DESTINATION_SIGNER_RPC_URL: ${{ secrets.EXCHANGE_TESTNET_DESTINATION_SIGNER_RPC_URL }}
+          EXCHANGE_TESTNET_PROOF_URL: ${{ secrets.EXCHANGE_TESTNET_PROOF_URL }}
+          EXCHANGE_TESTNET_EVIDENCE_OUT: ${{ runner.temp }}/exchange-v15.8-live-evidence.json
+          GITHUB_SHA: ${{ github.sha }}
+        run: node scripts/live-bridge-qualify.mjs
+      - name: Upload sanitized bridge evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: 420exchange-v15.8-live-bridge-${{ github.sha }}
+          path: ${{ runner.temp }}/exchange-v15.8-live-evidence.json
+          if-no-files-found: error
+          retention-days: 90

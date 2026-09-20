@@ -1,0 +1,7 @@
+# Bong Goggles BG-19 integration follow-up — qualified read boundary
+
+BG-19.15 packaging passed CI but the live product journeys remain blocked. This increment introduces `bong-goggles/web/core/qualified-read.js` and `bong-goggles/web/test/qualified-read.test.js` as an opt-in transport boundary. It requires a qualified, versioned service binding, explicit safe path, response validator and current Wallet session for private reads. It aborts superseded requests and discards data after account/network changes. It never invents endpoint paths, authorization, canonical records or transaction success.
+
+**Not yet integrated:** `app.js` currently constructs service clients without qualifying an endpoint-specific binding or loading route projections. No repository-verified deployed browser HTTP endpoint/schema was established in this increment, so no hardcoded feed/profile URL, simulated projection, credential or optimistic write was added. The adapter's unit tests are not a substitute for production integration tests.
+
+Next execution gates: identify the real deployment-owned route and response contract for one public/read-only projection; add a strict validator and authenticated scope if account-specific; wire read/abort/invalidation into the shell with loading/error/empty states; verify session change and canonical refresh in a real browser; then expand to write intents and other routes. Do not present BG-19 as launch-ready until BG-19.14/15 release evidence is complete. PR #350 remains unmerged pending that work.

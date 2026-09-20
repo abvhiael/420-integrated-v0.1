@@ -1,6 +1,7 @@
 export const MARKET_SORTS = Object.freeze(['symbol','lastPrice','change','volume','liquidity']);
 
 function number(value) {
+  if (value === null || value === undefined || value === '') return null;
   const parsed = typeof value === 'number' ? value : Number(value);
   return Number.isFinite(parsed) ? parsed : null;
 }

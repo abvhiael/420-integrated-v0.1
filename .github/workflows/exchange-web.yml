@@ -27,6 +27,31 @@ jobs:
       - name: Exchange web unit tests
         working-directory: exchange/web
         run: npm test
+      - name: Build and verify PRE-02 deployable browser artifact (qualification only)
+        working-directory: exchange/web
+        env:
+          EXCHANGE_DEPLOYMENT_MODE: qualification
+          EXCHANGE_BUILD_SHA: ${{ github.sha }}
+        run: |
+          npm run build
+          node scripts/verify-pre02-artifact.mjs
+      - name: Install Chromium browser test runner
+        working-directory: exchange/web
+        run: |
+          npm install --no-save --package-lock=false playwright
+          npx playwright install --with-deps chromium
+      - name: PRE-02 built-preview Chromium acceptance (simulated EIP-1193 only)
+        working-directory: exchange/web
+        env:
+          EXCHANGE_BUILD_SHA: ${{ github.sha }}
+        run: node scripts/pre02-chromium-acceptance.mjs
+      - name: Preserve PRE-02 browser acceptance evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exchange-pre02-chromium-${{ github.sha }}
+          path: exchange/web/acceptance-evidence/pre02-chromium.json
+          if-no-files-found: warn
       - name: Frontend secret scan
         working-directory: exchange/web
         run: |

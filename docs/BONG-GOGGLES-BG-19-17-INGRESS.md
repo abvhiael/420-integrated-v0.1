@@ -1,0 +1,19 @@
+# BG-19.17 — social public-feed deployment ingress (partial; not deployed)
+
+**Phase status:** repository ingress code and Node HTTP regression tests implemented on PR #350. Public serving remains OFF, and no verified deployed social API, HTTPS edge or operator sign-off is claimed.
+
+## Implemented
+
+`services/bong-goggles-indexer-v1/src/publicFeedDeploymentServer.js` exports `createPublicFeedDeploymentServer`. It returns an unbound Node HTTP server and never calls `listen()`. Its default is disabled. Enabling requires `enabled: true`, a valid exact internal `expectedHost`, and the server-side `createPublicFeedQualification()` dependency pair with `configured === true`. The qualification object by itself does **not** certify the injected live readers. The response is the bounded read-only `/v1/public-feed` DISCOVER sample, never a private feed, a content resolver, or a write API.
+
+Ingress checks include exact Host, exact production web Origin when supplied, exact CORS allow-origin, no authorization/cookies/proxy-user headers, no request body, bounded URL/header/response sizes, an upstream deadline, no-store/no-referrer/nosniff, limited per-peer fixed-window throttling and minimal redacted 403/429/503 errors. Real HTTP tests cover disabled-by-default, missing qualification, public DTO, rejection cases, throttling, upstream failure, timeout and response-size limits.
+
+## Hard launch blockers / operator handoff
+
+1. **BG-19.16 evidence:** wire independently reviewed canonical-chain and current social/moderation/audience readers into `createPublicFeedQualification`; verify source ownership, policy version, reorg/finality/freshness, author lifecycle, withdrawals, moderation emergency hides, and data leak tests on live indexed testnet state. The current object and policy reader interfaces are NOT an independently audited implementation. A mock, Boolean policy, `configured: true`, or unit test is not permission to deploy.
+2. **Edge and host:** provision a real, separately identified social-projection domain, authoritative DNS, trusted HTTPS termination/certificate, exact internal Host routing and firewall/private networking so the Node HTTP listener cannot be reached directly. Edge must reject unknown hosts and credential-bearing requests and strip untrusted forwarding headers. Never interpret client-supplied `X-Forwarded-Proto`, `X-Forwarded-For`, or `X-Forwarded-User` as proof of TLS, identity or a trusted source.
+3. **Shared abuse protection:** configure distributed IP/origin rate limits, request concurrency limits, upstream timeouts/cancellation, request/response byte quotas, log/metric cardinality bounds, privacy-redacted access logs and an operator-owned readiness probe. The in-process fixed-window limiter is defense-in-depth only; it is not distributed or restart-persistent. A timeout returns a failure to the client but does not cancel asynchronous upstream work by itself.
+4. **Deployment evidence:** identify exact environment, chain ID, checkpoint/finality and policy version; capture deployed commit and package hash, DNS/TLS proof, endpoint contract, access-control/CORS verification, alerting, smoke tests (including reorg, unavailable policy, moderation withdrawal, over-limit and foreign-origin probes), rollback drill and operator/security approval. Do not publish a browser runtime social API origin before this is verified.
+5. **Browser expansion:** after server qualification and live deployment, proceed to BG-19.18 with a separately validated social API origin, strict response validation, failure and revocation handling and browser tests. A hash-only payload is not decoded content and `hasMore:false` is not qualified pagination.
+
+**Not done:** provisioning or operating the service, DNS, TLS, live canonical/moderation readers, independently verified HTTP ingress, actual public endpoint access or deployment readiness. Continue to fail closed and keep public serving disabled.

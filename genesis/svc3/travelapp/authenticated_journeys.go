@@ -64,15 +64,15 @@ func allowPrivateMutation(r *http.Request,session VerifiedSession)bool {
 }
 func randomTravelID()(string,error){var b [16]byte;if _,err:=rand.Read(b[:]);err!=nil{return "",err};return hex.EncodeToString(b[:]),nil}
 
-// HandlerWithUserDependencies provides injectable E2E journeys. The public
-// Handler() does NOT enable them until real session, durable repository,
-// provenance and operational security adapters are deployed and qualified.
+// HandlerWithUserDependencies enables each private journey only when its own
+// trusted dependencies are present. Claims may remain disabled while Trips is
+// configured; missing Identity disables both. Default Handler() enables neither.
 func HandlerWithUserDependencies(reader PublicReader,deps TravelUserDependencies)http.Handler {
  public:=HandlerWithReader(reader)
  return http.HandlerFunc(func(w http.ResponseWriter,r *http.Request){
   if r.URL.Path!="/travel/trips"&&r.URL.Path!="/travel/business/claim" {public.ServeHTTP(w,r);return}
   if r.Method!=http.MethodGet&&r.Method!=http.MethodPost {w.Header().Set("Allow","GET, POST");http.Error(w,"method not allowed",http.StatusMethodNotAllowed);return}
-  if deps.Identity==nil||deps.Trips==nil||deps.Claims==nil {public.ServeHTTP(w,r);return}
+  if deps.Identity==nil || (r.URL.Path=="/travel/trips" && deps.Trips==nil) || (r.URL.Path=="/travel/business/claim" && deps.Claims==nil) {public.ServeHTTP(w,r);return}
   session,err:=authenticated(r,deps.Identity)
   if err!=nil {http.Error(w,"authentication required",http.StatusUnauthorized);return}
   if r.URL.Path=="/travel/trips" {serveAuthenticatedTrips(w,r,session,deps.Trips);return}

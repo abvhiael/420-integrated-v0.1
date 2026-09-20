@@ -29,11 +29,14 @@ func renderPublicReviews(w http.ResponseWriter,status int,page publicReviewPage)
  w.WriteHeader(status);_=publicReviewsTemplate.Execute(w,page)
 }
 
-// HandlerWithReviewReader adds a read-only reputation journey. The default
-// Handler() does not enable it until a real 420Reputation adapter is configured.
+// HandlerWithReviewReader exposes the actual place -> verified review link
+// only when a trusted review adapter is injected; otherwise it preserves the
+// default public page without a broken/false review affordance.
 func HandlerWithReviewReader(reader PublicReader,reviews TravelReviewReader)http.Handler {
  base:=HandlerWithReader(reader)
+ if reviews==nil{return base}
  mux:=http.NewServeMux()
+ mux.HandleFunc("GET /travel/place/{place_id}",func(w http.ResponseWriter,r *http.Request){servePublicPlaceWithReviews(w,r,reader,true)})
  mux.HandleFunc("/travel/place/{place_id}/reviews",func(w http.ResponseWriter,r *http.Request){ServePublicTravelReviews(w,r,reader,reviews)})
  mux.Handle("/",base)
  return mux

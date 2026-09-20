@@ -19,3 +19,38 @@ body{background:radial-gradient(circle at 50% 0%,#194431 0%,#091610 55%,#07100c 
 .app-nav--mobile{background:rgba(7,26,17,.97)}
 @media(max-width:760px){.brand__mark{width:44px;height:44px;border-radius:10px}.brand strong{font-size:1rem}.app-header{gap:8px}.app-nav__item[aria-current="page"]{box-shadow:inset 0 3px 0 var(--brand-green)}}
 @media(forced-colors:active){.brand__mark{border:1px solid CanvasText;font-size:.75rem;color:CanvasText;background-image:none}.app-nav__item[aria-current="page"]{outline:2px solid Highlight}}
+
+/* BG-WEB-2.1: presentation-only responsive homepage and navigation polish. */
+.app-layout{width:min(1480px,100%);grid-template-columns:208px minmax(0,1fr) 262px;gap:clamp(16px,2vw,30px);padding:clamp(16px,2.2vw,32px)}
+.app-header{padding:10px clamp(16px,2vw,32px)}
+.app-sidebar,.app-rail{top:92px}
+.app-nav--desktop{padding:12px;border:1px solid #254537;border-radius:20px;background:linear-gradient(180deg,#102a1f,#0c2118);box-shadow:0 12px 34px #0002}
+.app-nav--desktop .app-nav__item{min-height:46px;padding:10px 13px;font-weight:550;transition:background-color .15s ease,color .15s ease}
+.app-nav__item>span:first-child{display:inline-grid;place-items:center;flex:none;width:25px;height:25px;border-radius:8px;background:#ffffff0a;font-size:1rem}
+.app-nav__item[aria-current="page"]{background:linear-gradient(90deg,#285e43,#1b4330);color:#fff;box-shadow:inset 3px 0 0 #80df9b}
+.app-nav__item.is-locked:not([aria-current="page"]){opacity:.65}
+.canonical-handoffs{margin-top:12px;gap:9px}
+.canonical-handoffs a{min-height:42px;display:flex;align-items:center;justify-content:center;text-align:center;border-radius:11px}
+.app-content{max-width:860px;width:100%;margin:0 auto}
+.route-heading{display:grid;gap:4px;margin-bottom:22px;padding:4px 0 2px}
+.route-heading h1{font-weight:800;letter-spacing:-.045em;font-size:clamp(2.1rem,4vw,3.2rem);line-height:1.1}
+.route-heading .eyebrow{font-weight:750;letter-spacing:.18em}
+.home-surface{gap:20px}
+.home-surface>.ui-card,.home-surface>.composer,.home-surface>.feed-list{min-width:0}
+.home-surface .composer,.home-surface .feed-object,.home-surface>.ui-card{border-radius:20px;box-shadow:0 14px 36px #0002}
+.home-surface .composer{padding:clamp(16px,2vw,24px);background:linear-gradient(140deg,#143227,#10241b 70%)}
+.home-surface .composer h2{font-size:1.3rem;letter-spacing:-.02em}
+.home-surface textarea{min-height:90px;resize:vertical;line-height:1.55}
+.home-surface .field textarea:focus-visible,.home-surface .field select:focus-visible{outline:2px solid var(--brand-yellow);outline-offset:2px}
+.home-surface .feed-list{gap:16px}
+.home-surface .feed-object__header{padding:16px 18px}
+.home-surface .feed-object__body{padding:18px;overflow-wrap:anywhere}
+.home-surface .ui-empty{padding:clamp(22px,3vw,36px);border-color:#3c6954;background:#112b20}
+.app-rail .ui-card{border-radius:18px;background:linear-gradient(180deg,#11271d,#10221a);box-shadow:0 12px 30px #0002}
+.app-rail .ui-card h2{letter-spacing:-.01em}
+.system-banner--info{line-height:1.45;border-left:4px solid var(--brand-green)}
+@media(max-width:1100px){.app-layout{grid-template-columns:198px minmax(0,1fr)}.app-rail{display:none}}
+@media(max-width:760px){.app-header{padding:10px 14px}.app-layout{display:block;padding:18px 14px calc(98px + env(safe-area-inset-bottom))}.app-sidebar{display:none}.route-heading{margin-bottom:18px}.route-heading h1{font-size:2.15rem}.home-surface{gap:16px}.home-surface .composer{padding:16px}.app-nav--mobile{padding:7px 6px calc(8px + env(safe-area-inset-bottom));background:rgba(8,30,19,.97);border-top:1px solid #36634b;box-shadow:0 -8px 28px #0006}.app-nav--mobile .app-nav__item{min-width:0;gap:4px;font-size:.68rem;font-weight:600}.app-nav--mobile .app-nav__item>span:first-child{width:27px;height:27px;font-size:1.15rem}.app-nav--mobile .app-nav__item[aria-current="page"]{border-radius:12px;box-shadow:inset 0 3px 0 #80df9b}}
+@media(max-width:380px){.account-chip{max-width:100px}.app-nav--mobile .app-nav__item{font-size:.61rem;padding:6px 2px}.brand strong{font-size:.9rem}}
+@media(prefers-reduced-motion:reduce){.app-nav--desktop .app-nav__item{transition:none}}
+@media(forced-colors:active){.app-nav--desktop,.app-rail .ui-card,.home-surface .composer{border:1px solid CanvasText}.app-nav__item[aria-current="page"]{outline:2px solid Highlight;box-shadow:none}}

@@ -31,16 +31,27 @@ function assertHttps(value,label,{ws=false}={}){
 }
 
 clean();
-for(const file of ['index.html','app.js','browser-wallet-ui.js','read-only-swap-review-ui.js','styles.css']) copy(file);
+for(const file of ['index.html','app.js','browser-wallet-ui.js','read-only-swap-review-ui.js','styles.css','branding.css']) copy(file);
 copyDir('core');
 copyDir('fixtures');
-// Load the wallet selector before the legacy V14 app's bubbling click handlers.
-// Execution buttons remain fail-closed until canonical V15 builders are bound.
+copyDir('assets');
+// Load the V15 wallet selector before the V14 read-only display application.
+// Execution buttons remain fail-closed until separately qualified.
 const htmlPath=path.join(dist,'index.html');
 const html=fs.readFileSync(htmlPath,'utf8');
 const marker='<script type="module" src="./app.js"></script>';
 if(html.split(marker).length!==2) throw new Error('Exchange app entrypoint missing or duplicated');
-fs.writeFileSync(htmlPath,html.replace(marker,'<script type="module" src="./browser-wallet-ui.js"></script>\n  '+marker));
+let builtHtml=html.replace(marker,'<script type="module" src="./browser-wallet-ui.js"></script>\n  '+marker);
+// Preserve the approved artwork and existing shell route hooks while adding branding.
+const logo='assets/83898904-fde8-4614-89ae-478db91d5fad.jpg';
+if(!fs.existsSync(path.join(dist,logo))) throw new Error(`approved 420Exchange logo missing: ${logo}`);
+const oldBrand='<span class="brand-mark">420</span>\n        <span><strong>Exchange</strong><small>Integrated</small></span>';
+if(!builtHtml.includes(oldBrand)) throw new Error('Exchange brand insertion point changed; review shell before deploying');
+builtHtml=builtHtml.replace(oldBrand,`<img class="exchange-brand-logo" src="./${logo}" alt="420Exchange — Cannabis. Powers Progress" width="400" height="400" />\n        <span class="exchange-brand-label">420 Integrated · Exchange</span>`);
+const styleAnchor='<link rel="stylesheet" href="./styles.css" />';
+if(!builtHtml.includes(styleAnchor)) throw new Error('Exchange stylesheet insertion point changed');
+builtHtml=builtHtml.replace(styleAnchor,`${styleAnchor}\n  <link rel="stylesheet" href="./branding.css" />`);
+fs.writeFileSync(htmlPath,builtHtml);
 
 const template=JSON.parse(fs.readFileSync(path.join(root,'runtime-config.json'),'utf8'));
 const deploymentManifestPath=process.env.EXCHANGE_DEPLOYMENT_MANIFEST;
@@ -100,7 +111,7 @@ const buildMeta={
 };
 fs.writeFileSync(path.join(dist,'build-meta.json'),JSON.stringify(buildMeta,null,2)+'\n');
 
-const immutable=['app.js','browser-wallet-ui.js','read-only-swap-review-ui.js','styles.css'];
+const immutable=['app.js','browser-wallet-ui.js','read-only-swap-review-ui.js','styles.css','branding.css',logo];
 const manifest={
   schema:'420-exchange-deployment-artifact-v14.13',
   sourceSha:sha,

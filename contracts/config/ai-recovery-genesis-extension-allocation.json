@@ -1,22 +1,16 @@
 {
-  "schema": "420-ai-recovery-genesis-extension-allocation-v1",
-  "status": "CANDIDATE_PENDING_NAMESPACE_WIDE_VALIDATION_AND_GENESIS_APPROVAL",
-  "authoritative_for": "proposed extension slot ownership only; not deployment, not an amendment to the frozen Step 6.2 system map",
-  "frozen_system_source": "contracts/config/system-addresses.json",
-  "other_reservations": [
-    {"source": "config/swap-bridge-extension-addresses.json", "range": "0x043c..0x0444", "status": "CANDIDATE_WITH_EXISTING_0x043c_CONSENSUS_COLLISION_MUST_BE_REBASED"},
-    {"source": "contracts/config/genesis-canonical-addresses.json", "name": "Names420", "address": "0x0000000000000000000000000000000000000445", "status": "RESERVED_PENDING_RECONCILIATION_WITH_FROZEN_0x0435"},
-    {"source": "contracts/config/wallet-authority-address-reconciliation.json", "range": "0x0446..0x0449", "status": "EXISTING_WALLET_CANDIDATES_NOT_FROZEN"}
+  "schema":"420-ai-recovery-genesis-extension-allocation-v1",
+  "status":"CANDIDATE_PENDING_NAMESPACE_WIDE_VALIDATION_AND_GENESIS_APPROVAL",
+  "authoritative_for":"proposed extension slot ownership only; no fixed Step 6.2 predeploys, live deployment or governance publication",
+  "frozen_system_source":"contracts/config/system-addresses.json",
+  "prior_claims":[
+    {"source":"config/swap-bridge-extension-addresses.json","note":"0x043c BridgeAssetRegistry candidate retired in favor of 0x045e because ConsensusSystemCall420 is frozen at 0x043c; 0x0443 GatewayRouter420 candidate retired in favor of proposed 0x044e"},
+    {"source":"contracts/config/genesis-canonical-addresses.json","name":"Names420","frozen":"0x0000000000000000000000000000000000000435","retired_hold":"0x0000000000000000000000000000000000000445"},
+    {"source":"contracts/config/wallet-authority-address-reconciliation.json","candidates":"0x0446..0x0447","note":"ProtocolRegistry 0x0434 and Identity420 0x0436 remain frozen; 0x0448..0x0449 duplicate proposals retired"}
   ],
-  "candidate_extension_start": "0x000000000000000000000000000000000000044a",
-  "allocation_policy": {
-    "preserve_frozen_system_assignments": true,
-    "do_not_allocate_over_reserved_or_candidate_addresses": true,
-    "do_not_move_existing_AI_predeploys": true,
-    "do_not_deploy_or_publish_until_all_manifests_and_chain_evidence_agree": true,
-    "registry_resolved_routers_do_not_require_frozen_predeploy_addresses": true
-  },
-  "proposals": [
+  "candidate_extension_start":"0x000000000000000000000000000000000000044a",
+  "allocation_policy":{"preserve_frozen_system_assignments":true,"do_not_allocate_over_reserved_or_candidate_addresses":true,"do_not_move_existing_AI_predeploys":true,"do_not_deploy_or_publish_until_all_manifests_and_chain_evidence_agree":true,"registry_resolved_routers_do_not_require_frozen_predeploy_addresses":true},
+  "proposals":[
     {"contract":"InteropRouter420.sol","address":"0x000000000000000000000000000000000000044a"},
     {"contract":"RandomnessRouter420.sol","address":"0x000000000000000000000000000000000000044b"},
     {"contract":"OracleRouter420.sol","address":"0x000000000000000000000000000000000000044c"},
@@ -38,11 +32,5 @@
     {"contract":"MessengerRouter420.sol","address":"0x000000000000000000000000000000000000045c"},
     {"contract":"CommonsRouter420.sol","address":"0x000000000000000000000000000000000000045d"}
   ],
-  "genesis_approval": {
-    "approved": false,
-    "required": "explicit repository governance decision and full namespace collision-free cross-manifest qualification",
-    "deployment_addresses_verified": false,
-    "runtime_code_hashes_verified": false,
-    "registry_publications_verified": false
-  }
+  "genesis_approval":{"approved":false,"required":"explicit governance decision and successful combined-branch namespace, deployment, runtime and Wallet qualification","deployment_addresses_verified":false,"runtime_code_hashes_verified":false,"registry_publications_verified":false}
 }

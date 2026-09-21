@@ -111,17 +111,17 @@ contract BongGogglesFeedIndexSurface420Test {
 
     function testCursorBindsViewerFeedSnapshotPositionAndRanker() public {
         BongGogglesFeedIndexSurface420.CursorContext memory a = BongGogglesFeedIndexSurface420.CursorContext(
-            BOB,
-            BongGogglesFeedIndexSurface420.FeedClass.HOME,
-            BongGogglesFeedIndexSurface420.FeedMode.RANKED,
-            100,
-            7,
-            keccak256("ranker-a")
+            BOB, BongGogglesFeedIndexSurface420.FeedClass.HOME, BongGogglesFeedIndexSurface420.FeedMode.RANKED,
+            100, 7, keccak256("ranker-a")
         );
-        BongGogglesFeedIndexSurface420.CursorContext memory b = a;
-        b.position = 8;
+        // Assigning one memory struct to another aliases its storage in memory;
+        // construct separate values to test the digest's input binding.
+        BongGogglesFeedIndexSurface420.CursorContext memory b = BongGogglesFeedIndexSurface420.CursorContext(
+            BOB, BongGogglesFeedIndexSurface420.FeedClass.HOME, BongGogglesFeedIndexSurface420.FeedMode.RANKED,
+            100, 8, keccak256("ranker-a")
+        );
         require(surface.cursorDigest(a) != surface.cursorDigest(b), "cursor position not bound");
-        b = a;
+        b.position = 7;
         b.rankerId = keccak256("ranker-b");
         require(surface.cursorDigest(a) != surface.cursorDigest(b), "cursor ranker not bound");
     }

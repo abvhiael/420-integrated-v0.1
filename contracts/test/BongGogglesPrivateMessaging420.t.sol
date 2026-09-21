@@ -109,15 +109,17 @@ contract BongGogglesPrivateMessaging420Test {
     }
 
     function testDirectContextRequiresActiveMessengerConversationAndMessagePolicy() public {
+        // Alice and Bob are friends, so the policy permits them; the missing conversation alone must fail.
         vm.prank(ALICE);
         vm.expectRevert(BongGogglesPrivateMessaging420.ConversationUnavailable.selector);
-        privateMessaging.bindDirectContext(ALICE, CAROL, bytes32(uint256(1)), keccak256("epoch/bad"));
+        privateMessaging.bindDirectContext(ALICE, BOB, bytes32(uint256(1)), keccak256("epoch/bad"));
 
         vm.prank(ALICE);
         bytes32 carolConversation = conversations.request(ALICE, CAROL, keccak256("bg/carol"));
         vm.prank(CAROL);
         conversations.accept(carolConversation, CAROL);
 
+        // Alice and Carol have a valid conversation but are not friends: isolate message policy denial.
         vm.prank(ALICE);
         vm.expectRevert(BongGogglesPrivateMessaging420.MessagePolicyDenied.selector);
         privateMessaging.bindDirectContext(ALICE, CAROL, carolConversation, keccak256("epoch/carol"));

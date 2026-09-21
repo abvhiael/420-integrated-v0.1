@@ -1,0 +1,79 @@
+name: Wallet Yul stack isolation
+
+on:
+  push:
+    branches:
+      - wallet-w14-5-app-catalog-reconciliation
+    paths:
+      - .github/workflows/wallet-yul-stack-isolation.yml
+  workflow_dispatch:
+
+jobs:
+  isolate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 110
+    defaults:
+      run:
+        working-directory: contracts
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Find failing compilation unit within shard 3
+        shell: bash
+        run: |
+          set -euo pipefail
+          SHARD=3
+          mapfile -t all < <(find test -type f -name '*.sol' | LC_ALL=C sort)
+          files=()
+          for i in "${!all[@]}"; do
+            if (( i % 8 == SHARD )); then files+=("${all[$i]}"); fi
+          done
+          printf 'Shard %s: testing %s of %s test units\n' "$SHARD" "${#files[@]}" "${#all[@]}"
+          if ((${#files[@]} == 0)); then exit 0; fi
+          compile() {
+            echo "ISOLATION BEGIN: ${#files[@]} targets (first ${files[0]})"
+            # Keep errexit enabled for the rest of the script, but capture a failed
+            # compiler invocation instead of aborting before printing diagnostics.
+            if forge build --force "${files[@]}" > /tmp/forge-yul-log.txt 2>&1; then
+              rc=0
+            else
+              rc=$?
+            fi
+            printf 'FORGE BUILD EXIT CODE: %s\n' "$rc"
+            tail -n 50 /tmp/forge-yul-log.txt
+            if (( rc == 0 )); then return 0; fi
+            if grep -Eiq 'Yul exception|stack too deep|too deep in the stack' /tmp/forge-yul-log.txt; then
+              echo 'YUL STACK FAILURE DETECTED'
+              return 88
+            fi
+            echo "NON-YUL COMPILATION FAILURE rc=$rc"
+            return "$rc"
+          }
+          if compile; then
+            echo 'SHARD CLEAN'
+            exit 0
+          else
+            rc=$?
+          fi
+          if (( rc != 88 )); then echo "FAILURE UNRELATED TO YUL rc=$rc"; exit "$rc"; fi
+          while ((${#files[@]} > 1)); do
+            half=$(( (${#files[@]} + 1) / 2 ))
+            left=("${files[@]:0:half}")
+            right=("${files[@]:half}")
+            files=("${left[@]}")
+            if compile; then rc=0; else rc=$?; fi
+            if (( rc == 88 )); then echo 'YUL FAILURE IN LEFT HALF'; continue; fi
+            if (( rc != 0 )); then echo "UNEXPECTED LEFT HALF FAILURE rc=$rc"; exit "$rc"; fi
+            files=("${right[@]}")
+            if compile; then rc=0; else rc=$?; fi
+            if (( rc == 88 )); then echo 'YUL FAILURE IN RIGHT HALF'; continue; fi
+            if (( rc != 0 )); then echo "UNEXPECTED RIGHT HALF FAILURE rc=$rc"; exit "$rc"; fi
+            echo 'YUL FAILURE IS COMPOSITIONAL; both halves compiled without the original exception'
+            exit 1
+          done
+          echo "ISOLATED YUL FAILING COMPILATION UNIT: ${files[0]}"
+          exit 1

@@ -1,0 +1,24 @@
+{
+  "schema": "420-w14-7-genesis-address-migration-candidates-v1",
+  "status": "PROPOSAL_ONLY_NOT_FROZEN_NOT_DEPLOYED",
+  "policy": {
+    "freezeExistingSystemAllocations": "0x0420..0x043c",
+    "preserveNames420Reservation": "0x0445",
+    "doNotActivateUntilAtomicRegistryPredeployManifestAndWalletMigration": true,
+    "doNotEnableWalletRuntime": true
+  },
+  "blockingOtherRegistryClaims": [
+    {"address":"0x043c","system":"ConsensusSystemCall420","bridgeCandidate":"BridgeAssetRegistry","action":"REBASE_BRIDGE_CANDIDATE_BEFORE_FREEZE"},
+    {"address":"0x0435","systemAndPredeploy":"Names420","canonicalNamesReservation":"0x0445","action":"MIGRATE_SYSTEM_MIRROR_PREDEPLOY_DEPLOYMENT_AND_STORAGE_REFERENCES_TO_0x0445"},
+    {"address":"0x0434","systemAndPredeploy":"ProtocolRegistry","proposedCanonical":"0x0448","action":"MIGRATE_ALL_LEGACY_PLACEMENT_REFERENCES_TO_0x0448"},
+    {"address":"0x0436","systemAndPredeploy":"Identity420","proposedCanonical":"0x0449","action":"MIGRATE_ALL_LEGACY_PLACEMENT_REFERENCES_TO_0x0449"}
+  ],
+  "proposedWalletAuthorities": [
+    {"id":"smart-account-factory","from":"0x0420","to":"0x0446","status":"CANDIDATE"},
+    {"id":"capability-registry","from":"0x0421","to":"0x0447","status":"CANDIDATE"},
+    {"id":"protocol-registry","from":"0x0422","legacyPredeploy":"0x0434","to":"0x0448","status":"CANDIDATE"},
+    {"id":"identity","from":"0x0424","legacyPredeploy":"0x0436","to":"0x0449","status":"CANDIDATE"}
+  ],
+  "notYetRebased": ["interop-router","randomness-router","oracle-router","swap-executor","bridge-gateway","bridge-router","stake","governance","payment-router","settlement-router","token-factory","ai-router","resource-router","compute-router","treasury-router","vault-router","rights-router","launchpad-router","grants-router","attention-router","pulse-router","messenger-router","commons-router"],
+  "releaseGates": {"globalMapApproved":false,"legacySystemMigrationReviewed":false,"allAnchorsCollisionFree":false,"predeployAndManifestUpdated":false,"storageAndRuntimeArtifactsVerified":false,"officialTestnetManifestPublished":false,"onChainBytecodeVerified":false,"readyForLiveTestnet":false}
+}

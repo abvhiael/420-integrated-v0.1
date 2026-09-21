@@ -34,16 +34,36 @@
     "usesRegistryOrSignedManifest": true,
     "hardCodedUnverifiedServiceUrlsForbidden": true,
     "coreDestinations": [
-      "420 Search",
-      "420 AppStore",
-      "420 AI",
-      "420 Token",
+      "420 Registry",
       "420 Explorer",
+      "420 Search",
+      "420 Analytics",
+      "420 AppStore",
+      "420 Verify",
+      "420 Notifications",
+      "420 Names",
+      "420 Identity",
+      "420 Arbitration",
+      "420 Commons",
+      "420 Pulse",
+      "420 Messenger",
+      "420 Treasury",
+      "420 Grants",
+      "420 Launchpad",
+      "420 Token",
+      "420 Resource Protocol",
+      "420 Market",
+      "420 Rights",
       "420 Swap",
+      "420 Pay",
       "420 Bridge",
       "420 Stake",
       "420 Governance",
-      "Developer Hub"
+      "420 AI",
+      "420 Compute",
+      "420 Attention",
+      "420 Cannaseur",
+      "420 Status"
     ],
     "developerResources": [
       "Developer Hub",
@@ -57,6 +77,11 @@
       "Testnet Faucet",
       "Source Repositories",
       "Security and Audit Documentation"
+    ],
+    "catalogSource": "wallet/web/core/genesis-app-catalog.js",
+    "canonicalServiceIdSource": "contracts/src/libraries/ServiceIds420.sol",
+    "nonCanonicalNavigation": [
+      "Developer Hub"
     ]
   },
   "authorizationBoundary": {
@@ -72,8 +97,8 @@
   },
   "clientRoadmap": {
     "web": "GENESIS",
-    "browserExtension": "GENESIS_PLUS",
-    "mobile": "POST_GENESIS",
+    "browserExtension": "GENESIS",
+    "mobile": "GENESIS_RELEASE_BLOCKED_DEVICE_QUALIFICATION",
     "desktop": "POST_GENESIS_POWER_USER"
   },
   "invariants": [
@@ -87,5 +112,6 @@
     "WALLET-INV-008: Developer Hub, guides, specifications, white papers, SDK/API documentation, contract references and security documentation are first-class wallet navigation targets.",
     "WALLET-INV-009: A compromised, deprecated or revoked ecosystem destination can be marked unsafe without changing the underlying wallet account or protocol authority.",
     "WALLET-INV-010: Browser extension, mobile and desktop clients may later reuse the same Wallet Core account, capability, recovery and session semantics without creating separate identities."
-  ]
+  ],
+  "deploymentInventory": "wallet/deployment-inventory.json"
 }

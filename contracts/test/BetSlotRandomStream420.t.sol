@@ -51,15 +51,16 @@ contract BetSlotRandomStream420Test {
 
     function testInvalidInputsFailClosed() public {
         SlotRandomStream420 stream = new SlotRandomStream420();
+        bytes32 basePhase = stream.BASE_PHASE();
 
         vm.expectRevert(SlotRandomStream420.InvalidRoot.selector);
-        stream.draw(bytes32(0), WAGER, GAME_V1, RULESET, stream.BASE_PHASE(), 0, 0);
+        stream.draw(bytes32(0), WAGER, GAME_V1, RULESET, basePhase, 0, 0);
 
         vm.expectRevert(SlotRandomStream420.InvalidPhase.selector);
         stream.draw(ROOT, WAGER, GAME_V1, RULESET, keccak256("unknown"), 0, 0);
 
         vm.expectRevert(SlotRandomStream420.InvalidStripLength.selector);
-        stream.reelStop(ROOT, WAGER, GAME_V1, RULESET, stream.BASE_PHASE(), 0, 0, 0);
+        stream.reelStop(ROOT, WAGER, GAME_V1, RULESET, basePhase, 0, 0, 0);
     }
 
     function testFuzzDrawRemainsDeterministic(uint256 seed) public {

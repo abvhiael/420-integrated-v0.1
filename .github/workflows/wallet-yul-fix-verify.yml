@@ -1,0 +1,25 @@
+name: Wallet storage settlement Yul fix verification
+on:
+  push:
+    branches: [wallet-w14-5-app-catalog-reconciliation]
+    paths:
+      - contracts/test/StorageSettlementRegistry420.t.sol
+      - .github/workflows/wallet-yul-fix-verify.yml
+  workflow_dispatch:
+jobs:
+  storage-settlement:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Build isolated settlement compilation unit
+        working-directory: contracts
+        run: forge build --force test/StorageSettlementRegistry420.t.sol --sizes
+      - name: Run settlement behavioral tests
+        working-directory: contracts
+        run: forge test --match-path test/StorageSettlementRegistry420.t.sol -vvv

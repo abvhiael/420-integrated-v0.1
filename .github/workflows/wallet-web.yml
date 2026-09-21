@@ -4,10 +4,52 @@ on:
   push:
     paths:
       - "wallet/web/**"
+      - "wallet/deployment-inventory.json"
+      - "contracts/config/420wallet-genesis.json"
+      - "contracts/config/genesis-canonical-addresses.json"
+      - "contracts/config/w14-7-4-global-address-reconciliation.json"
+      - "contracts/config/predeploy/**"
+      - "contracts/artifacts/**"
+      - "config/system-addresses.json"
+      - "developer-hub/manifests/**"
+      - "scripts/verify-wallet-w14-1.py"
+      - "scripts/verify-wallet-w14-7-1-namespace.py"
+      - "scripts/test-wallet-w14-7-1-namespace.py"
+      - "scripts/generate-genesis-predeploys.py"
+      - "scripts/test-wallet-w14-7-2-predeploy.py"
+      - "scripts/verify-wallet-w14-7-3-genesis.py"
+      - "scripts/test-wallet-w14-7-3-genesis.py"
+      - "scripts/verify-wallet-w14-7-4-candidate.py"
+      - "scripts/test-wallet-w14-7-4-candidate.py"
+      - "scripts/audit-wallet-w14-7-4-consumers.py"
+      - "scripts/test-wallet-w14-7-4-consumers.py"
+      - "scripts/verify-wallet-w14-7-5-preflight.py"
+      - "scripts/test-wallet-w14-7-5-preflight.py"
       - ".github/workflows/wallet-web.yml"
   pull_request:
     paths:
       - "wallet/web/**"
+      - "wallet/deployment-inventory.json"
+      - "contracts/config/420wallet-genesis.json"
+      - "contracts/config/genesis-canonical-addresses.json"
+      - "contracts/config/w14-7-4-global-address-reconciliation.json"
+      - "contracts/config/predeploy/**"
+      - "contracts/artifacts/**"
+      - "config/system-addresses.json"
+      - "developer-hub/manifests/**"
+      - "scripts/verify-wallet-w14-1.py"
+      - "scripts/verify-wallet-w14-7-1-namespace.py"
+      - "scripts/test-wallet-w14-7-1-namespace.py"
+      - "scripts/generate-genesis-predeploys.py"
+      - "scripts/test-wallet-w14-7-2-predeploy.py"
+      - "scripts/verify-wallet-w14-7-3-genesis.py"
+      - "scripts/test-wallet-w14-7-3-genesis.py"
+      - "scripts/verify-wallet-w14-7-4-candidate.py"
+      - "scripts/test-wallet-w14-7-4-candidate.py"
+      - "scripts/audit-wallet-w14-7-4-consumers.py"
+      - "scripts/test-wallet-w14-7-4-consumers.py"
+      - "scripts/verify-wallet-w14-7-5-preflight.py"
+      - "scripts/test-wallet-w14-7-5-preflight.py"
       - ".github/workflows/wallet-web.yml"
   workflow_dispatch:
 
@@ -21,6 +63,41 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: W14.1 deployment inventory qualification
+        run: python3 scripts/verify-wallet-w14-1.py
+      - name: W14.7.1 synthetic namespace regression tests
+        run: python3 scripts/test-wallet-w14-7-1-namespace.py
+      - name: W14.7.2 synthetic predeploy artifact regression tests
+        run: python3 scripts/test-wallet-w14-7-2-predeploy.py
+      - name: W14.7.3 synthetic Genesis image integrity regression tests
+        run: python3 scripts/test-wallet-w14-7-3-genesis.py
+      - name: W14.7.4 proposed global namespace validator
+        run: python3 scripts/verify-wallet-w14-7-4-candidate.py
+      - name: W14.7.4 synthetic global namespace regression tests
+        run: python3 scripts/test-wallet-w14-7-4-candidate.py
+      - name: W14.7.4 source-consumer inventory regression tests
+        run: python3 scripts/test-wallet-w14-7-4-consumers.py
+      - name: W14.7.4 inventory current tracked source references (non-release evidence)
+        run: python3 scripts/audit-wallet-w14-7-4-consumers.py > w14-7-4-legacy-consumers.json
+      - name: Upload W14.7.4 source-consumer inventory
+        uses: actions/upload-artifact@v4
+        with:
+          name: w14-7-4-legacy-consumers
+          path: w14-7-4-legacy-consumers.json
+          retention-days: 14
+      - name: W14.7.5 synthetic predeploy qualification regressions
+        run: python3 scripts/test-wallet-w14-7-5-preflight.py
+      - name: W14.7.5 report real predeploy build/storage blockers (NOT release qualification)
+        run: python3 scripts/verify-wallet-w14-7-5-preflight.py --output w14-7-5-predeploy-blockers.json
+      - name: Upload W14.7.5 predeploy blocker inventory
+        uses: actions/upload-artifact@v4
+        with:
+          name: w14-7-5-predeploy-blockers
+          path: w14-7-5-predeploy-blockers.json
+          retention-days: 14
       - name: Static wallet checks
         working-directory: wallet/web
         run: npm run check

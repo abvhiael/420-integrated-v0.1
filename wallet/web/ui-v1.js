@@ -1,5 +1,6 @@
 import './recovery-ui.js';
 import './apps-page.js';
+import './names-send-ui.js';
 import { buildSendExecution } from './core/send.js';
 import { installFailClosedBrowserLifecycle } from './core/provider-lifecycle.js';
 

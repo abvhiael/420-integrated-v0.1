@@ -1,0 +1,40 @@
+name: Wallet Yul source isolation
+on:
+  push:
+    branches: [wallet-w14-5-app-catalog-reconciliation]
+    paths: [.github/workflows/wallet-yul-source-isolation.yml]
+  workflow_dispatch:
+jobs:
+  compile-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - src/resource/StorageAgreementRegistry420.sol
+          - src/resource/StorageSettlementRegistry420.sol
+          - src/resource/StorageCommitmentRegistry420.sol
+          - src/resource/StorageProofRegistry420.sol
+          - src/resource/StorageCapacityRegistry420.sol
+          - test/StorageSettlementRegistry420.t.sol
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Compile isolated source
+        working-directory: contracts
+        shell: bash
+        run: |
+          set -uo pipefail
+          echo 'TARGET: ${{ matrix.target }}'
+          forge build --force '${{ matrix.target }}' 2>&1 | tee /tmp/isolation.log
+          rc=${PIPESTATUS[0]}
+          if ((rc != 0)); then
+            echo 'FAILED TARGET: ${{ matrix.target }}'
+            exit "$rc"
+          fi
+          echo 'PASSED TARGET: ${{ matrix.target }}'

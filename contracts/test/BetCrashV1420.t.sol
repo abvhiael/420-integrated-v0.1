@@ -39,7 +39,7 @@ contract BetCrashV1420Test {
 
     function testCanonicalBindingSurface() public view { require(keccak256(bytes(crash.systemName())) == keccak256("CrashV1420"), "name"); require(crash.protocolVersion() == 1, "version"); require(crash.gameId() == GAME && crash.gameVersionId() == GAME_V1 && crash.rulesetId() == RULESET, "binding"); }
     function testRejectsAutoCashoutAtOrBelowOneX() public { vm.expectRevert(CrashV1420.InvalidParams.selector); crash.hashParams(CrashV1420.Params({autoCashoutBps:10_000})); }
-    function testRejectsAutoCashoutAboveCrashSafetyCeiling() public { vm.expectRevert(CrashV1420.InvalidParams.selector); crash.hashParams(CrashV1420.Params({autoCashoutBps:crash.MAX_CRASH_BPS()+1})); }
+    function testRejectsAutoCashoutAboveCrashSafetyCeiling() public { uint64 aboveCeiling = crash.MAX_CRASH_BPS() + 1; vm.expectRevert(CrashV1420.InvalidParams.selector); crash.hashParams(CrashV1420.Params({autoCashoutBps:aboveCeiling})); }
     function testCrashPointIsDeterministicAndRootBound() public view { bytes32 wagerId=keccak256("det"); uint64 a=crash.deriveCrashPoint(wagerId,keccak256("a")); require(a==crash.deriveCrashPoint(wagerId,keccak256("a")),"det"); require(a>=crash.BPS()&&a<=crash.MAX_CRASH_BPS(),"bounds"); }
 
     function testManualOnlySessionIsDisabledBecauseRandomnessIsPublic() public {

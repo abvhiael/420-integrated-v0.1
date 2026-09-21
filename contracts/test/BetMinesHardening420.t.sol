@@ -125,7 +125,8 @@ contract BetMinesHardening420Test {
         for (uint8 i = 25; i < 32; ++i) leaves[i] = keccak256(abi.encode("420.MINES.HARDENING.PAD", i));
     }
     function _root(bytes32[32] memory leaves) private pure returns (bytes32) {
-        bytes32[32] memory nodes = leaves;
+        bytes32[32] memory nodes;
+        for (uint256 i = 0; i < 32; ++i) nodes[i] = leaves[i];
         uint256 width = 32;
         while (width > 1) {
             for (uint256 i = 0; i < width; i += 2) nodes[i / 2] = _pair(nodes[i], nodes[i + 1]);
@@ -135,7 +136,8 @@ contract BetMinesHardening420Test {
     }
     function _proof(bytes32[32] memory leaves, uint8 index) private pure returns (bytes32[] memory proof) {
         proof = new bytes32[](5);
-        bytes32[32] memory nodes = leaves;
+        bytes32[32] memory nodes;
+        for (uint256 i = 0; i < 32; ++i) nodes[i] = leaves[i];
         uint256 width = 32;
         uint256 idx = index;
         for (uint256 level = 0; level < 5; ++level) {

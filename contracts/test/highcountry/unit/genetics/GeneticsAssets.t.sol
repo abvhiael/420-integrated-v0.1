@@ -46,8 +46,8 @@ contract GeneticsAssetsTest {
     }
 
     function testSeedLotIsTransferableAndKeepsGenomeProvenance() public {
-        _grant(ModuleIds.SEED_REGISTRY, ActionIds.SEED_REGISTER, bytes32(uint256(1)), keccak256("seed:create"));
-        _grant(ModuleIds.SEED_REGISTRY, ActionIds.SEED_TRANSFER, bytes32(uint256(1)), keccak256("seed:transfer"));
+        _grantAmount(ModuleIds.SEED_REGISTRY, ActionIds.SEED_REGISTER, bytes32(uint256(1)), keccak256("seed:create"), 42);
+        _grantAmount(ModuleIds.SEED_REGISTRY, ActionIds.SEED_TRANSFER, bytes32(uint256(1)), keccak256("seed:transfer"), 42);
         seeds.registerSeedLot(1, genomeId, 9, address(this), 42, keccak256("seed:meta"));
         seeds.transfer(1, address(0xBEEF));
         SeedRegistry.SeedLot memory lot = seeds.getSeedLot(1);
@@ -56,7 +56,7 @@ contract GeneticsAssetsTest {
     }
 
     function testCloneIsTransferableAndTracksCanonicalMother() public {
-        _grant(ModuleIds.MOTHER_REGISTRY, ActionIds.MOTHER_REGISTER, bytes32(uint256(77)), keccak256("clone:mother:create"));
+        _grantAmount(ModuleIds.MOTHER_REGISTRY, ActionIds.MOTHER_REGISTER, bytes32(uint256(77)), keccak256("clone:mother:create"), 4);
         mothers.registerMother(77, genomeId, address(this), 4, keccak256("clone:mother:meta"));
         _grant(ModuleIds.CLONE_REGISTRY, ActionIds.CLONE_REGISTER, bytes32(uint256(2)), keccak256("clone:create"));
         _grant(ModuleIds.CLONE_REGISTRY, ActionIds.CLONE_TRANSFER, bytes32(uint256(2)), keccak256("clone:transfer"));
@@ -75,7 +75,7 @@ contract GeneticsAssetsTest {
         bytes32 otherGenome = keccak256("asset:other-genome");
         _grant(ModuleIds.GENOME_REGISTRY, ActionIds.GENOME_REGISTER, otherGenome, keccak256("asset:other-genome:grant"));
         genomes.registerGenome(otherGenome, keccak256("asset:other-line"), keccak256("asset:other-meta"), _loci2());
-        _grant(ModuleIds.MOTHER_REGISTRY, ActionIds.MOTHER_REGISTER, bytes32(uint256(78)), keccak256("clone:mismatch:mother"));
+        _grantAmount(ModuleIds.MOTHER_REGISTRY, ActionIds.MOTHER_REGISTER, bytes32(uint256(78)), keccak256("clone:mismatch:mother"), 4);
         mothers.registerMother(78, otherGenome, address(this), 4, keccak256("clone:mismatch:mother:meta"));
         _grant(ModuleIds.CLONE_REGISTRY, ActionIds.CLONE_REGISTER, bytes32(uint256(21)), keccak256("clone:mismatch"));
         (bool mismatchOk,) = address(clones).call(abi.encodeWithSelector(clones.registerClone.selector, 21, genomeId, 78, address(this), keccak256("mismatch")));
@@ -83,8 +83,8 @@ contract GeneticsAssetsTest {
     }
 
     function testMotherHasFiniteCuttingBudgetAndRetires() public {
-        _grant(ModuleIds.MOTHER_REGISTRY, ActionIds.MOTHER_REGISTER, bytes32(uint256(3)), keccak256("mother:create"));
-        _grant(ModuleIds.MOTHER_REGISTRY, ActionIds.MOTHER_CONSUME_CUTTING, bytes32(uint256(3)), keccak256("mother:cut"));
+        _grantAmount(ModuleIds.MOTHER_REGISTRY, ActionIds.MOTHER_REGISTER, bytes32(uint256(3)), keccak256("mother:create"), 2);
+        _grantAmount(ModuleIds.MOTHER_REGISTRY, ActionIds.MOTHER_CONSUME_CUTTING, bytes32(uint256(3)), keccak256("mother:cut"), 1);
         mothers.registerMother(3, genomeId, address(this), 2, keccak256("mother:meta"));
         mothers.consumeCutting(3);
         mothers.consumeCutting(3);
@@ -106,12 +106,16 @@ contract GeneticsAssetsTest {
     }
 
     function _grant(bytes32 moduleId, bytes32 actionId, bytes32 scopeHash, bytes32 grantId) private {
+        _grantAmount(moduleId, actionId, scopeHash, grantId, 0);
+    }
+
+    function _grantAmount(bytes32 moduleId, bytes32 actionId, bytes32 scopeHash, bytes32 grantId, uint256 amount) private {
         ICapabilityRegistry420.CapabilityGrant memory grant = ICapabilityRegistry420.CapabilityGrant({
             principal: address(this), componentId: moduleId, capabilityId: actionId, scopeHash: scopeHash,
             perCallLimit: 0, periodLimit: 0, periodSeconds: 0, validFrom: 0,
             validUntil: uint64(block.timestamp + 1 days), revoked: false
         });
-        caps.setGrant(grantId, grant, 0);
+        caps.setGrant(grantId, grant, amount);
     }
 
     function _loci() private pure returns (bytes32[28] memory loci) {

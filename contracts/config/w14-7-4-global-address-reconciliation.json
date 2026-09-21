@@ -1,0 +1,71 @@
+{
+  "schema": "420-w14-7-4-global-address-reconciliation-v1",
+  "status": "CANDIDATE_REQUIRES_GLOBAL_MIGRATION_AND_APPROVAL_NOT_ACTIVE",
+  "scope": "Genesis system, Wallet, identity, names, bridges, routers and economic/consensus predeploys",
+  "policy": {
+    "retainImmutableSystemSlots": "0x0420..0x0433 and 0x043c",
+    "legacyAppSlotException": "0x0434..0x043b currently marked frozen in system-addresses-v4; moving their eight applications requires replacing that freeze declaration and all consumers atomically before adopting this candidate",
+    "retiredLegacySlots": "0x0434..0x043b remain unallocated/tombstoned, never repurposed during migration",
+    "entryPoint": "0x041f reserved; not a deployed code assertion",
+    "namesReservation": "0x0445; not a deployed code assertion",
+    "existingNetworkMigration": "NOT_AUTHORIZED: compare published manifests and live state before any migration; do not silently move a deployed contract",
+    "switchingRule": "Candidate must not be read by live clients or qualified as canonical until every registry, artifact, genesis alloc, storage reference, runtime consumer, network manifest and chain verification agrees",
+    "walletReadyForLiveTestnet": false
+  },
+  "preservedSystemAssignments": [
+    ["RewardController","0x0420"],["AttentionTreasury","0x0421"],["DevelopmentTreasury","0x0422"],["ValidatorRegistry","0x0423"],["ProtocolReserve","0x0424"],["CommunityValidatorReserve","0x0425"],["CommunityRewardReserve","0x0426"],["FounderVestingRegistry","0x0427"],["RandomnessRegistry","0x0428"],["GovernanceTimelock","0x0429"],["PublicDistributionVault","0x042a"],["GenesisDEXFactory","0x042b"],["PublicBatchAuction","0x042c"],["TWAPOracle","0x042d"],["ValidatorBootstrapReserve","0x042e"],["AIProviderRegistry","0x042f"],["AIModelRegistry","0x0430"],["AIJobManager","0x0431"],["AIJobEscrow","0x0432"],["AIReputationRegistry","0x0433"],["ConsensusSystemCall420","0x043c"]
+  ],
+  "migratedExistingPredeploys": [
+    {"name":"ProtocolRegistry","from":"0x0434","to":"0x0448","canonicalId":"protocol-registry"},
+    {"name":"Names420","from":"0x0435","to":"0x0445","canonicalId":"names"},
+    {"name":"Identity420","from":"0x0436","to":"0x0449","canonicalId":"identity"},
+    {"name":"Governance420","from":"0x0437","to":"0x044a","canonicalId":"governance"},
+    {"name":"VerifiedGateway420","from":"0x0438","to":"0x044b","canonicalId":"bridge-gateway"},
+    {"name":"ApprovedQuoteAssetRegistry","from":"0x0439","to":"0x044c"},
+    {"name":"Stake420","from":"0x043a","to":"0x044d","canonicalId":"stake"},
+    {"name":"CannaseurCampaignRegistry","from":"0x043b","to":"0x044e"}
+  ],
+  "canonicalAuthorities": [
+    ["smart-account-factory","SmartAccountFactory420","0x0446"],
+    ["capability-registry","CapabilityRegistry420","0x0447"],
+    ["protocol-registry","ProtocolRegistry","0x0448"],
+    ["names","Names420","0x0445"],
+    ["identity","Identity420","0x0449"],
+    ["interop-router","InteropRouter420","0x044f"],
+    ["randomness-router","RandomnessRouter420","0x0450"],
+    ["oracle-router","OracleRouter420","0x0451"],
+    ["swap-executor","CanonicalSwapExecutor420","0x0452"],
+    ["bridge-gateway","VerifiedGateway420","0x044b"],
+    ["bridge-router","GatewayRouter420","0x0443"],
+    ["stake","Stake420","0x044d"],
+    ["governance","Governance420","0x044a"],
+    ["payment-router","PaymentRouter420","0x0453"],
+    ["settlement-router","SettlementRouter420","0x0454"],
+    ["token-factory","TokenFactory420","0x0455"],
+    ["ai-router","AIRouter420","0x0456"],
+    ["resource-router","ResourceRouter420","0x0457"],
+    ["compute-router","ComputeRouter420","0x0458"],
+    ["treasury-router","TreasuryRouter420","0x0459"],
+    ["vault-router","VaultRouter420","0x045a"],
+    ["rights-router","RightsRouter420","0x045b"],
+    ["launchpad-router","LaunchpadRouter420","0x045c"],
+    ["grants-router","GrantRouter420","0x045d"],
+    ["attention-router","AttentionRouter420","0x045e"],
+    ["pulse-router","PulseRouter420","0x045f"],
+    ["messenger-router","MessengerRouter420","0x0460"],
+    ["commons-router","CommonsRouter420","0x0461"]
+  ],
+  "bridgeCandidates": [
+    ["BridgeAssetRegistry","0x0462"],
+    ["CADCBridgeIntegration","0x043d"],
+    ["CanonicalMarketRegistry","0x043e"],
+    ["PermissionlessDEXFactory","0x043f"],
+    ["BridgeRouteRegistry","0x0440"],
+    ["BridgeRiskManager","0x0441"],
+    ["BridgeTransferRegistry","0x0442"],
+    ["GatewayRouter420","0x0443"],
+    ["BridgeAccountingRegistry","0x0444"]
+  ],
+  "legacyFreezeExceptionsRequired": ["ProtocolRegistry@0x0434","Names420@0x0435","Identity420@0x0436","Governance420@0x0437","VerifiedGateway420@0x0438","ApprovedQuoteAssetRegistry@0x0439","Stake420@0x043a","CannaseurCampaignRegistry@0x043b"],
+  "outstanding": ["Approval and replacement of the legacy application freeze declaration","Audit all hard-coded address consumers including bridge and consensus integrations","Update system registries, canonical registry, bridge assignments, predeploy plan, deployment manifest and wallet inventory atomically","Recompile and recompute source-bound runtime hashes, explicit constructor storage and genesis allocation","Verify official testnet has not already deployed immutable contracts at migrating slots","Run global namespace validator on actual registries and validate all release candidates against deployed network"]
+}

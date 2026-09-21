@@ -1,0 +1,48 @@
+name: Wallet Yul function isolation
+on:
+  push:
+    branches: [wallet-w14-5-app-catalog-reconciliation]
+    paths: [.github/workflows/wallet-yul-function-isolation.yml]
+  workflow_dispatch:
+jobs:
+  compile-function:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        function: [setup, activateAgreement, openAndFund, testBatchedReservationFullyFundsExactQuotedAmount, testVerifiedCanonicalProofReleasesOnlyItsWindow, testWrongChallengeCannotReleaseEscrow, testMissedProofWindowRefundsAfterDeadlineOnly, testPartialFundingCannotEarnAndCanAbortAfterStart]
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Stub one test-harness function and compile
+        working-directory: contracts
+        env:
+          FUNCTION: ${{ matrix.function }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import os, pathlib, re
+          path = pathlib.Path('test/StorageSettlementRegistry420.t.sol')
+          text = path.read_text()
+          func = os.environ['FUNCTION']
+          match = re.search(r'\bfunction\s+' + re.escape(func) + r'\s*\(', text)
+          assert match, func
+          start = text.index('{', match.end())
+          depth = 1
+          end = start + 1
+          while depth:
+              if text[end] == '{': depth += 1
+              elif text[end] == '}': depth -= 1
+              end += 1
+          path.write_text(text[:start] + '{ revert("diagnostic stub"); }' + text[end:])
+          print('STUBBED:', func)
+          PY
+          forge build --force test/StorageSettlementRegistry420.t.sol 2>&1 | tee /tmp/compile.log
+          rc=${PIPESTATUS[0]}
+          if ((rc == 0)); then echo 'YUL FAILURE REMOVED BY STUB: ${{ matrix.function }}'; else echo 'YUL FAILURE PERSISTS WITH STUB: ${{ matrix.function }}'; fi
+          exit "$rc"

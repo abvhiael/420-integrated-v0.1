@@ -1,0 +1,40 @@
+{
+  "schema": "420-wallet-authority-address-reconciliation-v1",
+  "status": "BLOCKED_GLOBAL_GENESIS_ADDRESS_REBASE_REQUIRED",
+  "scope": "Genesis address authority and Wallet release qualification; candidate addresses are not deployed contracts",
+  "policy": {
+    "preserveFrozenConsensusAndEconomicPredeploys": true,
+    "doNotTreatReservationAsDeployment": true,
+    "doNotPublishWalletRuntimeUntilAllCanonicalAnchorsAreCollisionFree": true,
+    "failClosedOnMissingManifestOrBytecodeAttestation": true
+  },
+  "recordedAllocations": {
+    "frozenSystem": "config/system-addresses.json (0x0420..0x043c)",
+    "systemMirror": "contracts/config/system-addresses.json",
+    "legacyPredeploy": "contracts/config/predeploy/predeploy-plan.json",
+    "legacyDeploymentManifest": "contracts/config/deployment-manifest.json",
+    "swapBridgeCandidates": "config/swap-bridge-extension-addresses.json (0x043c..0x0444; 0x043c also conflicts with frozen ConsensusSystemCall420)",
+    "names420NewReservation": "0x0000000000000000000000000000000000000445"
+  },
+  "walletAuthorityCandidates": [
+    {"id":"smart-account-factory","contract":"SmartAccountFactory420.sol","legacyCanonicalAddress":"0x0000000000000000000000000000000000000420","frozenSystemOccupant":"RewardController","candidateAddress":"0x0000000000000000000000000000000000000446","status":"CANDIDATE_NOT_FROZEN_NOT_DEPLOYED"},
+    {"id":"capability-registry","contract":"CapabilityRegistry420.sol","legacyCanonicalAddress":"0x0000000000000000000000000000000000000421","frozenSystemOccupant":"AttentionTreasury","candidateAddress":"0x0000000000000000000000000000000000000447","status":"CANDIDATE_NOT_FROZEN_NOT_DEPLOYED"},
+    {"id":"protocol-registry","contract":"ProtocolRegistry.sol","legacyCanonicalAddress":"0x0000000000000000000000000000000000000422","frozenSystemOccupant":"DevelopmentTreasury","existingDifferentPredeployAddress":"0x0000000000000000000000000000000000000434","candidateAddress":"0x0000000000000000000000000000000000000448","status":"CANDIDATE_DEPENDS_ON_LEGACY_PREDEPLOY_REBASE"},
+    {"id":"identity","contract":"Identity420.sol","legacyCanonicalAddress":"0x0000000000000000000000000000000000000424","frozenSystemOccupant":"ProtocolReserve","existingDifferentPredeployAddress":"0x0000000000000000000000000000000000000436","candidateAddress":"0x0000000000000000000000000000000000000449","status":"CANDIDATE_DEPENDS_ON_LEGACY_PREDEPLOY_REBASE"}
+  ],
+  "additionalBlockingInconsistencies": [
+    "Canonical Genesis anchors other than these four also reuse frozen 0x0425..0x043b system addresses for different contracts: a four-address-only patch cannot make the canonical namespace collision-free.",
+    "Legacy system and predeploy manifests still assign ProtocolRegistry at 0x0434, Names420 at 0x0435 and Identity420 at 0x0436; these contradict proposed canonical authority at 0x0448, 0x0445 and 0x0449 respectively.",
+    "The candidate swap/bridge map assigns BridgeAssetRegistry to 0x043c, which the frozen system registry already assigns to ConsensusSystemCall420.",
+    "The Genesis predeploy plan does not currently include SmartAccountFactory420 or CapabilityRegistry420 placements or verified initialization/code artifacts.",
+    "Earlier tests verify internal inventory consistency but do not establish a complete collision-free Genesis allocation or live chain deployment."
+  ],
+  "requiredAtomicReconciliation": [
+    "Approve one namespace-wide authoritative address map; preserve consensus/economic slots unless the underlying consensus design is deliberately migrated.",
+    "Rebase every conflicting canonical Genesis anchor, not only the four Wallet entries, while avoiding bridge candidates and system slots; reserve Wallet candidate addresses only after full-set validation.",
+    "Update both system-registry copies and the extended swap/bridge registry to remove contradictory authoritative assignments, including the 0x043c collision; preserve auditable supersession of earlier frozen entries.",
+    "Update canonical anchors, the Genesis predeploy plan, deployment manifest, initializer and runtime code-hash manifests, embedded contract address constants and genesis alloc generator as one reviewed change.",
+    "Reconcile Wallet deployment inventory against the final canonical map and keep readyForLiveTestnet false until the official chain manifest, predeploy bytecode, RPC chain identity and actual on-chain code are verified."
+  ],
+  "readyForLiveTestnet": false
+}

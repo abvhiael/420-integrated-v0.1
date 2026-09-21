@@ -37,9 +37,9 @@ func (c PublicDeploymentConfig) Validate() error {
 func NewPublicDeploymentHandler(c PublicDeploymentConfig)(http.Handler,error){
  if err:=c.Validate();err!=nil{return nil,err}
  raw:=strings.TrimSpace(c.PublicServiceURL)
- if raw=="" {return WithPublicReadiness(HandlerWithNearbyMap(nil),nil),nil}
+ if raw=="" {return WithPublicReadiness(WithPublicJSON(HandlerWithNearbyMap(nil),nil),nil),nil}
  reader:=sdk.Client{BaseURL:raw,HTTP:&http.Client{Timeout:4*time.Second}}
- return WithPublicReadiness(HandlerWithNearbyMap(reader),reader),nil
+ return WithPublicReadiness(WithPublicJSON(HandlerWithNearbyMap(reader),reader),reader),nil
 }
 
 // WithPublicReadiness probes the actual public projection on every readiness

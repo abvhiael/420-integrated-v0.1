@@ -1,0 +1,25 @@
+{
+  "schema":"420-wallet-deployment-inventory-v1",
+  "phase":"W14.6-AI-RECOVERY-RECONCILIATION",
+  "status":"BLOCKED_PENDING_OFFICIAL_NETWORK_AND_DEPLOYMENT_EVIDENCE",
+  "readyForLiveTestnet":false,
+  "sourceOfTruth":{"networkManifest":"developer-hub/manifests/testnet.json","networkManifestStatus":"MISSING_OFFICIAL_PUBLIC_TESTNET_MANIFEST","walletGenesisProfile":"contracts/config/420wallet-genesis.json","canonicalAddressRegistry":"contracts/config/genesis-canonical-addresses.json","frozenSystemAddressRegistry":"contracts/config/system-addresses.json","extensionAllocation":"contracts/config/ai-recovery-genesis-extension-allocation.json","conflictPolicy":"FAIL_CLOSED"},
+  "network":{"environment":"testnet","expectedChainId":"420","rpcHttp":null,"rpcWebSocket":null,"explorerUrl":null,"faucetUrl":null,"ecosystemManifestUrl":null,"status":"BLOCKED_OFFICIAL_TESTNET_MANIFEST"},
+  "walletAuthority":{
+    "entryPoint420":{"address":"0x000000000000000000000000000000000000041f","source":"contracts/config/genesis-canonical-addresses.json#reserved:entry-point","status":"RESERVED_PENDING_PRODUCTION_IMPLEMENTATION"},
+    "smartAccountFactory420":{"address":"0x0000000000000000000000000000000000000446","source":"contracts/config/wallet-authority-address-reconciliation.json#walletAuthorityCandidates","status":"CANDIDATE_NOT_FROZEN_NOT_DEPLOYED"},
+    "capabilityRegistry420":{"address":"0x0000000000000000000000000000000000000447","source":"contracts/config/wallet-authority-address-reconciliation.json#walletAuthorityCandidates","status":"CANDIDATE_NOT_FROZEN_NOT_DEPLOYED"},
+    "protocolRegistry":{"address":"0x0000000000000000000000000000000000000434","source":"contracts/config/system-addresses.json#ProtocolRegistry","status":"FROZEN_PENDING_CHAIN_VERIFICATION"},
+    "names420":{"address":"0x0000000000000000000000000000000000000435","source":"contracts/config/system-addresses.json#Names420","status":"FROZEN_PENDING_CHAIN_VERIFICATION"},
+    "identity420":{"address":"0x0000000000000000000000000000000000000436","source":"contracts/config/system-addresses.json#Identity420","status":"FROZEN_PENDING_CHAIN_VERIFICATION"}
+  },
+  "supersededAddressClaims":[
+    {"contract":"SmartAccountFactory420","address":"0x0000000000000000000000000000000000000420","frozenOwner":"RewardController"},
+    {"contract":"CapabilityRegistry420","address":"0x0000000000000000000000000000000000000421","frozenOwner":"AttentionTreasury"},
+    {"contract":"ProtocolRegistry","address":"0x0000000000000000000000000000000000000422","frozenOwner":"DevelopmentTreasury"},
+    {"contract":"Identity420","address":"0x0000000000000000000000000000000000000424","frozenOwner":"ProtocolReserve"},
+    {"contract":"Names420","address":"0x0000000000000000000000000000000000000445","status":"RETIRED_DUPLICATE_FROZEN_0x0435"}
+  ],
+  "releaseGates":{"officialTestnetManifestPublished":false,"canonicalAddressConflictResolved":false,"entryPointProductionBytecodeBound":false,"rpcChainIdentityQualified":false,"canonicalWalletContractsHaveCode":false,"faucetAndExplorerPublished":false,"walletRuntimeConfigGenerated":false},
+  "rules":["No invented public testnet endpoints or deployment receipts.","Do not publish Wallet runtime or enable writes for unverified candidate addresses.","The frozen system map owns 0x0434 ProtocolRegistry, 0x0435 Names420 and 0x0436 Identity420.","A reservation or candidate is not deployed code; verify chain ID, actual bytecode, governance and code hash before activation."]
+}

@@ -56,9 +56,7 @@ Network manifests are environment-scoped discovery records. A chain ID alone is 
 
 #### Manifest contract hints
 
-- `Registry420` → `0x0000000000000000000000000000000000000420`; source `deployment-manifest`, version `local-example`
-
-Manifest contract entries are discovery hints scoped to this manifest. Canonical deployment publication remains DOC-10.8 and requires approved/verified deployment evidence.
+_No contract hints declared._
 
 ## devnet
 

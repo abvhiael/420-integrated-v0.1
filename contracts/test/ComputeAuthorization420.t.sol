@@ -74,10 +74,20 @@ contract ComputeAuthorization420Test {
         bytes32 scope = authorization.scopeRequest(REQUEST_A);
         require(!authorization.isAuthorized(PAYER, bytes32(uint256(999)), scope, 0), "unknown action");
         require(!authorization.isAuthorized(PAYER, authorization.ACTION_CREATE_REQUEST(), scope, 0), "ungranted actor");
-        vm.expectRevert(ComputeAuthorization420.UnknownAction.selector);
-        authorization.requireAuthorized(PAYER, bytes32(uint256(999)), scope, 0);
-        vm.expectRevert(ComputeAuthorization420.Unauthorized.selector);
-        authorization.requireAuthorized(PAYER, authorization.ACTION_CREATE_REQUEST(), scope, 0);
+        // Explicit STATICCALL tests the exact on-chain revert payload, avoiding
+        // expectRevert's next-external-call interception for a view adapter.
+        (bool knownActionOk, bytes memory unknownReason) = address(authorization).staticcall(
+            abi.encodeCall(authorization.requireAuthorized, (PAYER, bytes32(uint256(999)), scope, 0))
+        );
+        require(!knownActionOk, "unknown action accepted");
+        require(keccak256(unknownReason) == keccak256(abi.encodeWithSelector(ComputeAuthorization420.UnknownAction.selector)),
+            "wrong unknown-action revert");
+        (bool missingGrantOk, bytes memory unauthorizedReason) = address(authorization).staticcall(
+            abi.encodeCall(authorization.requireAuthorized, (PAYER, authorization.ACTION_CREATE_REQUEST(), scope, 0))
+        );
+        require(!missingGrantOk, "missing grant accepted");
+        require(keccak256(unauthorizedReason) == keccak256(abi.encodeWithSelector(ComputeAuthorization420.Unauthorized.selector)),
+            "wrong unauthorized revert");
     }
 
     function testUnrelatedComponentNeverAuthorizesCompute() public {

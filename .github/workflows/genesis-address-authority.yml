@@ -1,0 +1,24 @@
+name: Genesis Address Authority
+on:
+  pull_request:
+    paths:
+      - 'contracts/config/system-addresses.json'
+      - 'config/system-addresses.json'
+      - 'contracts/config/genesis-canonical-addresses.json'
+      - 'config/swap-bridge-extension-addresses.json'
+      - 'wallet/deployment-inventory.json'
+      - 'scripts/verify-genesis-canonical-addresses.py'
+      - '.github/workflows/genesis-address-authority.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  cross-manifest-authority:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fail on conflicting frozen owner and unverified Wallet or bridge claims
+        run: python scripts/verify-genesis-canonical-addresses.py

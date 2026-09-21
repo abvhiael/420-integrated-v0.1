@@ -4,6 +4,5 @@
   "nativeCurrency":{"name":"420","symbol":"420","decimals":18},
   "rpc":{"http":["http://127.0.0.1:8545"],"websocket":["ws://127.0.0.1:8545"]},
   "services":{"explorer":"http://127.0.0.1:4201","indexer":"http://127.0.0.1:4202","verify":"http://127.0.0.1:4203","status":"http://127.0.0.1:4204","faucet":"http://127.0.0.1:4205","ai":"http://127.0.0.1:4206"},
-  "contracts":{"ProtocolRegistry":{"address":null,"frozenSystemAllocation":"0x0000000000000000000000000000000000000434","source":"contracts/config/system-addresses.json","version":"local-example","deploymentVerified":false}},
-  "warning":"An allocation is not proof of contract deployment. Resolve and attest the actual local ProtocolRegistry address and code hash before enabling service discovery. 0x0420 is frozen for RewardController, not Registry420."
+  "contracts":{}
 }

@@ -12,7 +12,7 @@ await mkdir(out,{recursive:true});
 const example=JSON.parse(await readFile(resolve(root,'runtime-config.example.json'),'utf8'));
 validateRuntimeConfig(example);
 
-for(const item of ['index.html','app.js','styles.css','settings.css','branding.css','core','_headers']){
+for(const item of ['index.html','app.js','styles.css','settings.css','branding.css','feed-branding.css','core','_headers']){
   await cp(resolve(root,item),resolve(out,item),{recursive:true});
 }
 // The exact approved PNG stays in the source tree as the master; do not publish

@@ -1,11 +1,18 @@
 name: Genesis Address Authority
 on:
+  push:
+    branches:
+      - 'fix/genesis-address-authority-main-20260920'
+    paths:
+      - 'contracts/config/**'
+      - 'config/**'
+      - 'wallet/deployment-inventory.json'
+      - 'scripts/verify-genesis-canonical-addresses.py'
+      - '.github/workflows/genesis-address-authority.yml'
   pull_request:
     paths:
-      - 'contracts/config/system-addresses.json'
-      - 'config/system-addresses.json'
-      - 'contracts/config/genesis-canonical-addresses.json'
-      - 'config/swap-bridge-extension-addresses.json'
+      - 'contracts/config/**'
+      - 'config/**'
       - 'wallet/deployment-inventory.json'
       - 'scripts/verify-genesis-canonical-addresses.py'
       - '.github/workflows/genesis-address-authority.yml'

@@ -1,0 +1,89 @@
+name: Genesis Address Authority
+on:
+  push:
+    branches:
+      - 'fix/genesis-address-authority-main-20260920'
+    paths:
+      - 'contracts/config/**'
+      - 'config/**'
+      - 'wallet/deployment-inventory.json'
+      - 'scripts/verify-genesis-canonical-addresses.py'
+      - 'scripts/verify-genesis-predeploy-authority.py'
+      - 'scripts/verify-wallet-w14-7-1-namespace.py'
+      - 'scripts/test-wallet-w14-7-1-namespace.py'
+      - 'scripts/audit-wallet-w14-7-4-consumers.py'
+      - 'scripts/test-wallet-w14-7-4-consumers.py'
+      - '.github/workflows/genesis-address-authority.yml'
+  pull_request:
+    paths:
+      - 'contracts/config/**'
+      - 'config/**'
+      - 'wallet/deployment-inventory.json'
+      - 'scripts/verify-genesis-canonical-addresses.py'
+      - 'scripts/verify-genesis-predeploy-authority.py'
+      - 'scripts/verify-wallet-w14-7-1-namespace.py'
+      - 'scripts/test-wallet-w14-7-1-namespace.py'
+      - '.github/workflows/genesis-address-authority.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: genesis-address-authority-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  cross-manifest-authority:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check canonical frozen owners and proposed application claims
+        run: python scripts/verify-genesis-canonical-addresses.py
+      - name: Check physical predeploy/deployment parity and reject retired claims
+        run: python scripts/verify-genesis-predeploy-authority.py
+      - name: Validate actual current frozen namespace and unapproved candidates
+        run: python scripts/verify-wallet-w14-7-1-namespace.py
+      - name: W14.7.1 actual-authority namespace regression fixtures
+        run: python scripts/test-wallet-w14-7-1-namespace.py
+      - name: W14.7.4 historical-claim regression tests
+        run: python scripts/test-wallet-w14-7-4-consumers.py
+      - name: W14.7.4 source-consumer inventory (evidence, not active-address attestation)
+        run: python scripts/audit-wallet-w14-7-4-consumers.py > address-consumer-inventory.json
+      - name: Upload address-consumer inventory
+        uses: actions/upload-artifact@v4
+        with:
+          name: address-consumers-${{ github.sha }}
+          path: address-consumer-inventory.json
+          retention-days: 30
+  full-foundry-pr-inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Compile assigned Solidity sources and run assigned tests (current main full inventory)
+        working-directory: contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ../artifacts/contracts
+          bash scripts/qualify-foundry-shard.sh '${{ matrix.shard }}' '16' 2>&1 | tee '../artifacts/contracts/address-shard-${{ matrix.shard }}.log'
+      - name: Upload per-shard diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: address-foundry-shard-${{ matrix.shard }}-${{ github.sha }}
+          path: |
+            artifacts/contracts/address-shard-${{ matrix.shard }}.log
+            artifacts/contracts/shard-${{ matrix.shard }}-targets.txt
+          if-no-files-found: warn
+          retention-days: 30

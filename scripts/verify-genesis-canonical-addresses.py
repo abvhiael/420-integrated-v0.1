@@ -1,112 +1,125 @@
 #!/usr/bin/env python3
+"""Fail closed when a proposed Genesis address conflicts with frozen Step 6.2 owners."""
 import json
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-ADDRESS_FILE = ROOT / "contracts/config/genesis-canonical-addresses.json"
-MAP_FILE = ROOT / "contracts/config/genesis-dapp-contract-map.json"
-SYSTEM_FILE = ROOT / "config/system-addresses.json"
-BRIDGE_FILE = ROOT / "config/swap-bridge-extension-addresses.json"
-WALLET_INVENTORY_FILE = ROOT / "wallet/deployment-inventory.json"
 
-errors = []
-addresses = json.loads(ADDRESS_FILE.read_text())
-contract_map = json.loads(MAP_FILE.read_text())
+def load(path):
+    return json.loads((ROOT / path).read_text(encoding='utf-8'))
 
-if addresses.get("schema") != "420-genesis-canonical-addresses-v1":
-    errors.append("unexpected canonical address schema")
-if addresses.get("status") != "FROZEN_FOR_GENESIS":
-    errors.append("canonical addresses must be frozen for genesis")
+def address(value):
+    if not isinstance(value, str) or len(value) != 42 or not value.startswith('0x'):
+        raise ValueError(f'invalid address: {value!r}')
+    int(value[2:], 16)
+    return value.lower()
 
-anchors = addresses.get("anchors", [])
-reserved = addresses.get("reserved", [])
-if not anchors:
-    errors.append("canonical anchor list is empty")
+def verify():
+    errors = []
+    system = load('contracts/config/system-addresses.json')
+    mirrored = load('config/system-addresses.json')
+    canonical = load('contracts/config/genesis-canonical-addresses.json')
+    bridge = load('config/swap-bridge-extension-addresses.json')
+    wallet = load('wallet/deployment-inventory.json')
+    dapps = load('contracts/config/genesis-dapp-contract-map.json')
+    if system != mirrored:
+        errors.append('contracts/config and config frozen system maps differ')
+    if system.get('status') != 'FROZEN_STEP6_2' or canonical.get('status') != 'FROZEN_FOR_GENESIS':
+        errors.append('unexpected frozen map or canonical classification')
+    if canonical.get('authoritative_predeploy_map') != 'contracts/config/system-addresses.json':
+        errors.append('canonical record must reference frozen predeploy map')
+    frozen_by_address = {}
+    frozen_by_name = {}
+    for entry in system['assignments']:
+        name, slot = entry['name'], address(entry['address'])
+        if slot in frozen_by_address or name in frozen_by_name:
+            errors.append(f'duplicate frozen assignment: {name}@{slot}')
+        frozen_by_address[slot], frozen_by_name[name] = name, slot
+    if frozen_by_name.get('ConsensusSystemCall420') != address('0x043c'.replace('0x','0x' + '0'*36)):
+        errors.append('ConsensusSystemCall420 must retain frozen 0x043c')
+    if frozen_by_name.get('ProtocolRegistry') != '0x' + '0'*36 + '0434':
+        errors.append('ProtocolRegistry must retain frozen 0x0434')
+    if frozen_by_name.get('Names420') != '0x' + '0'*36 + '0435':
+        errors.append('Names420 must retain frozen 0x0435')
+    if frozen_by_name.get('Identity420') != '0x' + '0'*36 + '0436':
+        errors.append('Identity420 must retain frozen 0x0436')
+    mapped = {file for app in dapps['apps'] for file in app.get('contracts', [])}
+    seen = set()
+    anchors_by_name = {}
+    for item in canonical['anchors']:
+        name = item['contract'].removesuffix('.sol')
+        slot = address(item['address'])
+        if slot in seen or name in anchors_by_name:
+            errors.append(f'duplicate canonical anchor: {name}@{slot}')
+        seen.add(slot)
+        anchors_by_name[name] = slot
+        if frozen_by_name.get(name) != slot:
+            errors.append(f'canonical fixed anchor {name}@{slot} conflicts with frozen Step 6.2 owner')
+        if item['contract'] not in mapped:
+            errors.append(f'canonical anchor missing from Genesis contract map: {item["contract"]}')
+    if anchors_by_name.get('ProtocolRegistry') != frozen_by_name.get('ProtocolRegistry'):
+        errors.append('canonical ProtocolRegistry anchor missing or invalid')
+    if anchors_by_name.get('Names420') != frozen_by_name.get('Names420'):
+        errors.append('canonical Names420 anchor missing or invalid')
+    claimed = dict(frozen_by_address)
+    for item in canonical.get('registry_resolved', []):
+        name = item['contract'].removesuffix('.sol')
+        if 'address' in item or name in frozen_by_name:
+            errors.append(f'registry-resolved {name} cannot assert a fixed predeploy')
+        if item['contract'] not in mapped:
+            errors.append(f'registry-resolved app missing from Genesis contract map: {name}')
+    retired = set()
+    for item in canonical.get('reserved', []):
+        slot = address(item['address'])
+        if item.get('status') == 'RETIRED_NOT_DEPLOYABLE':
+            retired.add(slot)
+        elif slot in claimed:
+            errors.append(f'canonical reservation {item["id"]} overlaps {claimed[slot]}')
+        else:
+            claimed[slot] = 'reserved:' + item['id']
+    if address('0x' + '0'*36 + '041f') not in claimed:
+        errors.append('EntryPoint reservation 0x041f missing')
+    for item in bridge['assignments']:
+        slot, name = address(item['address']), item['name']
+        if slot in claimed or slot in retired:
+            errors.append(f'bridge candidate {name}@{slot} overlaps {claimed.get(slot, "retired reservation")}')
+        else:
+            claimed[slot] = name
+        if name == 'GatewayRouter420':
+            errors.append('registry-resolved GatewayRouter420 cannot claim a fixed bridge candidate')
+    retired_bridge = {(item['name'], address(item['address'])) for item in bridge.get('retired', [])}
+    if ('BridgeAssetRegistry','0x' + '0'*36 + '043c') not in retired_bridge:
+        errors.append('historical 0x043c BridgeAssetRegistry collision must be retired explicitly')
+    if ('GatewayRouter420','0x' + '0'*36 + '0443') not in retired_bridge:
+        errors.append('historical 0x0443 duplicate bridge router proposal must be retired explicitly')
+    authority = wallet.get('walletAuthority', {})
+    expected = {'protocolRegistry':'ProtocolRegistry','names420':'Names420','identity420':'Identity420'}
+    for key, owner in expected.items():
+        value = authority.get(key, {})
+        if address(value.get('address')) != frozen_by_name.get(owner):
+            errors.append(f'Wallet {key} must reference frozen {owner} owner')
+        if value.get('deploymentVerified') is True and not wallet.get('releaseGates', {}).get('canonicalWalletContractsHaveCode'):
+            errors.append(f'Wallet {key} claims verified deployment without release gate')
+    for key in ('smartAccountFactory420','capabilityRegistry420'):
+        value = authority.get(key, {})
+        if value.get('address') is not None:
+            errors.append(f'Wallet {key} must not expose unverified runtime address')
+        candidate = value.get('candidateAddress')
+        if candidate is not None:
+            slot = address(candidate)
+            if slot in claimed or slot in retired:
+                errors.append(f'Wallet {key} candidate {slot} collides with {claimed.get(slot,"retired reservation")}')
+            else:
+                claimed[slot] = key
+    if wallet.get('readyForLiveTestnet') is not False:
+        errors.append('Wallet may not be released without deployment and network qualification')
+    return sorted(set(errors))
 
-all_addresses = []
-for entry in anchors + reserved:
-    address = entry.get("address", "")
-    if not isinstance(address, str) or len(address) != 42 or not address.startswith("0x"):
-        errors.append(f"invalid address for {entry.get('id')}: {address}")
-        continue
+if __name__ == '__main__':
     try:
-        int(address[2:], 16)
-    except ValueError:
-        errors.append(f"non-hex address for {entry.get('id')}: {address}")
-    all_addresses.append(address.lower())
-
-if len(all_addresses) != len(set(all_addresses)):
-    errors.append("canonical/reserved address collision detected")
-
-factory = next((a for a in anchors if a.get("id") == "smart-account-factory"), None)
-if not factory or factory.get("address", "").lower() != "0x0000000000000000000000000000000000000420":
-    errors.append("SmartAccountFactory420 canonical address must be 0x0000000000000000000000000000000000000420")
-
-entry_point = next((a for a in reserved if a.get("id") == "entry-point"), None)
-if not entry_point or entry_point.get("address", "").lower() != "0x000000000000000000000000000000000000041f":
-    errors.append("EntryPoint reservation missing or changed")
-
-mapped_contracts = {
-    contract
-    for app in contract_map.get("apps", [])
-    for contract in app.get("contracts", [])
-}
-for anchor in anchors:
-    contract = anchor.get("contract")
-    if contract not in mapped_contracts:
-        errors.append(f"canonical anchor contract is not in genesis contract map: {contract}")
-
-policy = addresses.get("policy", {})
-for key in [
-    "freezeOnlyDiscoveryAuthorityAnchors",
-    "frontendsReceiveNoCanonicalContractAddress",
-    "implementationsAdaptersTemplatesRemainRegistryResolved",
-    "addressReuseForbidden",
-    "codeAtFrozenAddressMustMatchGenesisManifest",
-]:
-    if policy.get(key) is not True:
-        errors.append(f"canonical address policy must enforce {key}")
-
-# W14.6: the Names reservation must not collide with either historical system
-# allocations or the proposed bridge extension, even when neither appears in
-# the canonical anchors list. A reservation is NOT proof of on-chain deployment.
-names = next((a for a in anchors if a.get("id") == "names"), None)
-legacy_system = json.loads(SYSTEM_FILE.read_text())
-bridge_extension = json.loads(BRIDGE_FILE.read_text())
-wallet_inventory = json.loads(WALLET_INVENTORY_FILE.read_text())
-if not names or names.get("contract") != "Names420.sol":
-    errors.append("canonical Names420 anchor is missing")
-else:
-    names_address = names.get("address", "").lower()
-    occupied = {
-        entry.get("address", "").lower(): entry.get("name")
-        for registry in (legacy_system, bridge_extension)
-        for entry in registry.get("assignments", [])
-    }
-    if names_address in occupied:
-        errors.append(f"Names420 reservation collides with {occupied[names_address]} at {names_address}")
-    if occupied and names_address <= max(occupied):
-        errors.append("Names420 reservation must follow recorded system and bridge allocations")
-    lower = int(legacy_system.get("reserved_range", {}).get("start", "0x0"), 16)
-    upper = int(legacy_system.get("reserved_range", {}).get("end", "0x0"), 16)
-    if not 0 <= lower <= int(names_address, 16) <= upper:
-        errors.append("Names420 reservation falls outside the system reserved range")
-    inventory_names = wallet_inventory.get("walletAuthority", {}).get("names420", {})
-    if inventory_names.get("address", "").lower() != names_address:
-        errors.append("Wallet Names420 inventory does not match canonical address reservation")
-    if wallet_inventory.get("readyForLiveTestnet") is True and "PENDING" in inventory_names.get("status", ""):
-        errors.append("Names420 reservation cannot be promoted to live runtime before deployment qualification")
-
-if errors:
-    print(json.dumps({"pass": False, "errors": errors}, indent=2))
-    raise SystemExit(1)
-
-print(json.dumps({
-    "pass": True,
-    "schema": addresses["schema"],
-    "frozenAnchors": len(anchors),
-    "reservedAddresses": len(reserved),
-    "smartAccountFactory": factory["address"],
-    "entryPointReservation": entry_point["address"],
-    "namesReservation": names["address"],
-}, indent=2))
+        failures = verify()
+    except (OSError, KeyError, ValueError, TypeError) as exc:
+        failures = [f'address validation error: {exc}']
+    print(json.dumps({'pass': not failures, 'errors': failures}, indent=2))
+    sys.exit(bool(failures))

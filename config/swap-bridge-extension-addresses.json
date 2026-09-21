@@ -1,42 +1,20 @@
 {
-  "schema": "420-swap-bridge-extension-addresses-v1",
-  "status": "CANDIDATE_PENDING_FREEZE",
-  "assignments": [
-    {
-      "address": "0x000000000000000000000000000000000000043c",
-      "name": "BridgeAssetRegistry"
-    },
-    {
-      "address": "0x000000000000000000000000000000000000043d",
-      "name": "CADCBridgeIntegration"
-    },
-    {
-      "address": "0x000000000000000000000000000000000000043e",
-      "name": "CanonicalMarketRegistry"
-    },
-    {
-      "address": "0x000000000000000000000000000000000000043f",
-      "name": "PermissionlessDEXFactory"
-    },
-    {
-      "address": "0x0000000000000000000000000000000000000440",
-      "name": "BridgeRouteRegistry"
-    },
-    {
-      "address": "0x0000000000000000000000000000000000000441",
-      "name": "BridgeRiskManager"
-    },
-    {
-      "address": "0x0000000000000000000000000000000000000442",
-      "name": "BridgeTransferRegistry"
-    },
-    {
-      "address": "0x0000000000000000000000000000000000000443",
-      "name": "GatewayRouter420"
-    },
-    {
-      "address": "0x0000000000000000000000000000000000000444",
-      "name": "BridgeAccountingRegistry"
-    }
-  ]
+  "schema":"420-swap-bridge-extension-addresses-v1",
+  "status":"CANDIDATE_PENDING_FREEZE",
+  "authoritativeFrozenMap":"contracts/config/system-addresses.json",
+  "assignments":[
+    {"address":"0x000000000000000000000000000000000000043d","name":"CADCBridgeIntegration"},
+    {"address":"0x000000000000000000000000000000000000043e","name":"CanonicalMarketRegistry"},
+    {"address":"0x000000000000000000000000000000000000043f","name":"PermissionlessDEXFactory"},
+    {"address":"0x0000000000000000000000000000000000000440","name":"BridgeRouteRegistry"},
+    {"address":"0x0000000000000000000000000000000000000441","name":"BridgeRiskManager"},
+    {"address":"0x0000000000000000000000000000000000000442","name":"BridgeTransferRegistry"},
+    {"address":"0x0000000000000000000000000000000000000444","name":"BridgeAccountingRegistry"}
+  ],
+  "unallocated":[{"name":"BridgeAssetRegistry","status":"PENDING_GLOBAL_COLLISION_INVENTORY_NOT_DEPLOYED","reason":"No safe new fixed address established; 0x045e is claimed by a separate obsolete W14.7.4 candidate and must not be silently reused. Registry-resolved deployment remains possible after verification and governance publication."}],
+  "retired":[
+    {"address":"0x000000000000000000000000000000000000043c","name":"BridgeAssetRegistry","status":"RETIRED_NOT_DEPLOYABLE","reason":"0x043c is frozen for ConsensusSystemCall420"},
+    {"address":"0x0000000000000000000000000000000000000443","name":"GatewayRouter420","status":"RETIRED_NOT_DEPLOYABLE","reason":"Registry-resolved application router; no fixed Genesis predeploy claim"}
+  ],
+  "publicationRule":"Candidates are not frozen addresses, deployment receipts, verified code hashes or active ProtocolRegistry entries; deploy independently and publish only after verification and authorized governance registration."
 }

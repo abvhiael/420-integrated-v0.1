@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+"""W14.1/W14.6 Wallet inventory checks after Step 6.2 frozen-owner reconciliation."""
 import json
 import pathlib
 import sys
@@ -6,137 +7,68 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 errors = []
 
-
-def load(path):
-    p = ROOT / path
-    if not p.exists():
-        errors.append(f"missing {path}")
-        return {}
+def load(name):
     try:
-        return json.loads(p.read_text())
-    except Exception as exc:
-        errors.append(f"invalid json {path}: {exc}")
+        return json.loads((ROOT / name).read_text(encoding='utf-8'))
+    except (OSError, ValueError) as exc:
+        errors.append(f'{name}: {exc}')
         return {}
 
-
-inventory = load("wallet/deployment-inventory.json")
-canonical = load("contracts/config/genesis-canonical-addresses.json")
-system = load("config/system-addresses.json")
-bridge = load("config/swap-bridge-extension-addresses.json")
-wallet = load("contracts/config/420wallet-genesis.json")
-
-if inventory.get("schema") != "420-wallet-deployment-inventory-v1":
-    errors.append("unexpected wallet deployment inventory schema")
-if inventory.get("phase") not in ("W14.1", "W14.6"):
-    errors.append("wallet deployment inventory phase must identify W14.1 or W14.6")
-if inventory.get("readyForLiveTestnet") is not False:
-    errors.append("wallet must fail closed until official testnet and address gates are satisfied")
-
-source = inventory.get("sourceOfTruth", {})
-if source.get("conflictPolicy") != "FAIL_CLOSED":
-    errors.append("wallet deployment conflict policy must fail closed")
-if source.get("canonicalAddressRegistry") != "contracts/config/genesis-canonical-addresses.json":
-    errors.append("wallet canonical address source drift")
-if source.get("networkManifest") != "developer-hub/manifests/testnet.json":
-    errors.append("wallet testnet manifest target drift")
-
-network = inventory.get("network", {})
-if network.get("environment") != "testnet":
-    errors.append("wallet network inventory must target testnet")
-if network.get("expectedChainId") != "420":
-    errors.append("expected 420 chain id missing")
-for key in ["rpcHttp", "rpcWebSocket", "explorerUrl", "faucetUrl", "ecosystemManifestUrl"]:
+inventory = load('wallet/deployment-inventory.json')
+canonical = load('contracts/config/genesis-canonical-addresses.json')
+system = load('contracts/config/system-addresses.json')
+bridge = load('config/swap-bridge-extension-addresses.json')
+wallet = load('contracts/config/420wallet-genesis.json')
+if inventory.get('schema') != '420-wallet-deployment-inventory-v1' or inventory.get('phase') not in ('W14.1', 'W14.6'):
+    errors.append('invalid Wallet inventory schema/phase')
+if inventory.get('readyForLiveTestnet') is not False:
+    errors.append('Wallet live testnet must remain disabled')
+source = inventory.get('sourceOfTruth', {})
+if source.get('conflictPolicy') != 'FAIL_CLOSED' or source.get('canonicalAddressRegistry') != 'contracts/config/genesis-canonical-addresses.json':
+    errors.append('Wallet authority source/policy drift')
+if source.get('networkManifest') != 'developer-hub/manifests/testnet.json':
+    errors.append('Wallet testnet manifest source drift')
+network = inventory.get('network', {})
+if network.get('environment') != 'testnet' or network.get('expectedChainId') != '420' or network.get('status') != 'BLOCKED_OFFICIAL_TESTNET_MANIFEST':
+    errors.append('Wallet network must remain blocked on official testnet manifest')
+for key in ('rpcHttp','rpcWebSocket','explorerUrl','faucetUrl','ecosystemManifestUrl'):
     if network.get(key) is not None:
-        errors.append(f"{key} must remain null until an official testnet manifest exists")
-if network.get("status") != "BLOCKED_OFFICIAL_TESTNET_MANIFEST":
-    errors.append("network status must expose missing official testnet manifest")
+        errors.append(f'Wallet unqualified network hint: {key}')
+if (ROOT / 'developer-hub/manifests/testnet.json').exists():
+    errors.append('Official testnet manifest exists; requalify blocked Wallet inventory')
 
-if (ROOT / source.get("networkManifest", "")).exists():
-    errors.append("official testnet manifest now exists; blocked inventory must be reconciled before qualification")
-
-anchors = {item.get("id"): item for item in canonical.get("anchors", [])}
-reserved = {item.get("id"): item for item in canonical.get("reserved", [])}
-authority = inventory.get("walletAuthority", {})
-expected = {
-    "smartAccountFactory420": ("smart-account-factory", "SmartAccountFactory420.sol"),
-    "capabilityRegistry420": ("capability-registry", "CapabilityRegistry420.sol"),
-    "protocolRegistry": ("protocol-registry", "ProtocolRegistry.sol"),
-    "names420": ("names", "Names420.sol"),
-    "identity420": ("identity", "Identity420.sol"),
-}
-for inventory_key, (anchor_id, contract) in expected.items():
-    item = authority.get(inventory_key, {})
-    anchor = anchors.get(anchor_id)
-    if not anchor:
-        errors.append(f"canonical anchor missing: {anchor_id}")
-        continue
-    if anchor.get("contract") != contract:
-        errors.append(f"canonical anchor contract drift: {anchor_id}")
-    if item.get("address") != anchor.get("address"):
-        errors.append(f"wallet deployment inventory address drift: {inventory_key}")
-    if inventory_key == "names420" and inventory.get("phase") == "W14.6":
-        if item.get("status") != "RESERVED_PENDING_GENESIS_DEPLOYMENT_AND_CHAIN_VERIFICATION":
-            errors.append("Names420 relocation must remain undeployed and unverified")
-    elif item.get("status") != "FROZEN_BUT_CONFLICTED":
-        errors.append(f"{inventory_key} must remain conflicted until system-address reconciliation")
-
-entrypoint = authority.get("entryPoint420", {})
-entrypoint_source = reserved.get("entry-point", {})
-if entrypoint.get("address") != entrypoint_source.get("address"):
-    errors.append("EntryPoint420 reserved address drift")
-if entrypoint.get("status") != "RESERVED_PENDING_PRODUCTION_IMPLEMENTATION":
-    errors.append("EntryPoint420 production binding status drift")
-
-system_by_address = {item.get("address", "").lower(): item.get("name") for item in system.get("assignments", [])}
-bridge_by_address = {item.get("address", "").lower(): item.get("name") for item in bridge.get("assignments", [])}
-conflicts = {item.get("address", "").lower(): item for item in inventory.get("conflicts", [])}
-for inventory_key, (anchor_id, _) in expected.items():
-    anchor = anchors.get(anchor_id, {})
-    address = str(anchor.get("address", "")).lower()
-    legacy = system_by_address.get(address)
-    if inventory_key == "names420" and inventory.get("phase") == "W14.6":
-        if address != "0x0000000000000000000000000000000000000445":
-            errors.append("Names420 planned reservation drifted from 0x0445")
-        if legacy or bridge_by_address.get(address):
-            errors.append("Names420 0x0445 collides with system or bridge allocation")
-        if address in conflicts or "0x0000000000000000000000000000000000000423" in conflicts:
-            errors.append("obsolete Names420 collision must not remain in inventory")
-        continue
-    if not legacy:
-        errors.append(f"expected frozen system-address collision not recorded for {anchor_id}")
-        continue
-    conflict = conflicts.get(address)
-    if not conflict:
-        errors.append(f"wallet deployment collision missing from inventory: {address}")
-        continue
-    if conflict.get("legacySystemAssignment") != legacy:
-        errors.append(f"legacy system assignment drift at {address}")
-    if conflict.get("canonicalWalletAssignment") != anchor.get("contract"):
-        errors.append(f"canonical wallet assignment drift at {address}")
-    if conflict.get("resolution") != "REQUIRED_BEFORE_LIVE_TESTNET":
-        errors.append(f"collision must block live testnet at {address}")
-
-gates = inventory.get("releaseGates", {})
-for key in [
-    "officialTestnetManifestPublished", "canonicalAddressConflictResolved",
-    "entryPointProductionBytecodeBound", "rpcChainIdentityQualified",
-    "canonicalWalletContractsHaveCode", "faucetAndExplorerPublished",
-    "walletRuntimeConfigGenerated",
-]:
-    if gates.get(key) is not False:
-        errors.append(f"unresolved release gate unexpectedly true: {key}")
-
-if wallet.get("deploymentInventory") != "wallet/deployment-inventory.json":
-    errors.append("420wallet genesis profile must reference wallet deployment inventory")
-
-if errors:
-    print(json.dumps({"pass": False, "phase": inventory.get("phase"), "errors": errors}, indent=2))
-    sys.exit(1)
-
-print(json.dumps({
-    "pass": True,
-    "phase": inventory.get("phase"),
-    "inventoryEstablished": True,
-    "readyForLiveTestnet": False,
-    "blockers": ["official public testnet manifest missing", "other wallet anchors collide with frozen system-address assignments", "EntryPoint420 production implementation binding pending"]
-}, indent=2))
+anchors = {item['contract'].removesuffix('.sol'):item['address'].lower() for item in canonical.get('anchors', [])}
+resolved = {item['contract'].removesuffix('.sol'):item for item in canonical.get('registry_resolved', [])}
+frozen = {item['name']:item['address'].lower() for item in system.get('assignments', [])}
+authority = inventory.get('walletAuthority', {})
+for key, name in (('protocolRegistry','ProtocolRegistry'),('names420','Names420'),('identity420','Identity420')):
+    entry = authority.get(key, {})
+    actual = entry.get('address')
+    if not isinstance(actual, str) or actual.lower() != frozen.get(name) or anchors.get(name) != frozen.get(name):
+        errors.append(f'Wallet {key} does not reference fixed Step 6.2 owner {name}')
+    if entry.get('deploymentVerified') is not False or entry.get('status') != 'FROZEN_SYSTEM_NOT_CHAIN_VERIFIED':
+        errors.append(f'Wallet {key} falsely advertises deployment')
+for key, name in (('smartAccountFactory420','SmartAccountFactory420'),('capabilityRegistry420','CapabilityRegistry420')):
+    entry = authority.get(key, {})
+    if name not in resolved or name in anchors or entry.get('address') is not None:
+        errors.append(f'Wallet {key} must remain registry-resolved without a live address')
+    if entry.get('deploymentVerified') is not False or entry.get('status') != 'CANDIDATE_NOT_DEPLOYED_NOT_GENESIS_APPROVED':
+        errors.append(f'Wallet {key} candidate falsely promoted')
+    candidate = entry.get('candidateAddress')
+    if candidate not in ('0x0000000000000000000000000000000000000446','0x0000000000000000000000000000000000000447'):
+        errors.append(f'Wallet {key} candidate was silently reassigned')
+    elif candidate.lower() in {x['address'].lower() for x in system.get('assignments', []) + bridge.get('assignments', [])}:
+        errors.append(f'Wallet {key} candidate collides with system/bridge claim')
+entry = authority.get('entryPoint420', {})
+reserved = {i['id']:i for i in canonical.get('reserved', [])}
+if entry.get('address') != reserved.get('entry-point', {}).get('address') or entry.get('status') != 'RESERVED_PENDING_PRODUCTION_IMPLEMENTATION':
+    errors.append('EntryPoint pending reservation drift')
+if '0x0000000000000000000000000000000000000445' not in {x['address'] for x in canonical.get('reserved', []) if x.get('status') == 'RETIRED_NOT_DEPLOYABLE'}:
+    errors.append('duplicate Names 0x0445 proposal must remain explicitly retired')
+for key in ('officialTestnetManifestPublished','canonicalAddressConflictResolved','entryPointProductionBytecodeBound','rpcChainIdentityQualified','canonicalWalletContractsHaveCode','faucetAndExplorerPublished','walletRuntimeConfigGenerated','registryPublicationGovernanceVerified'):
+    if inventory.get('releaseGates', {}).get(key) is not False:
+        errors.append(f'Wallet release gate unexpectedly true/missing: {key}')
+if wallet.get('deploymentInventory') != 'wallet/deployment-inventory.json':
+    errors.append('Wallet genesis profile inventory reference drift')
+print(json.dumps({'pass':not errors,'phase':inventory.get('phase'),'readyForLiveTestnet':False,'errors':errors}, indent=2))
+sys.exit(bool(errors))

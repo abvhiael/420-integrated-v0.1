@@ -1,99 +1,27 @@
 {
-  "schema": "420-wallet-deployment-inventory-v1",
-  "phase": "W14.6",
-  "status": "BLOCKED_PENDING_CANONICAL_NETWORK_AND_ADDRESS_RECONCILIATION",
-  "readyForLiveTestnet": false,
-  "sourceOfTruth": {
-    "networkManifest": "developer-hub/manifests/testnet.json",
-    "networkManifestStatus": "MISSING_OFFICIAL_PUBLIC_TESTNET_MANIFEST",
-    "walletGenesisProfile": "contracts/config/420wallet-genesis.json",
-    "canonicalAddressRegistry": "contracts/config/genesis-canonical-addresses.json",
-    "legacySystemAddressRegistry": "config/system-addresses.json",
-    "conflictPolicy": "FAIL_CLOSED"
+  "schema":"420-wallet-deployment-inventory-v1",
+  "phase":"W14.6",
+  "status":"BLOCKED_PENDING_CANONICAL_NETWORK_AND_ADDRESS_RECONCILIATION",
+  "readyForLiveTestnet":false,
+  "sourceOfTruth":{"networkManifest":"developer-hub/manifests/testnet.json","networkManifestStatus":"MISSING_OFFICIAL_PUBLIC_TESTNET_MANIFEST","walletGenesisProfile":"contracts/config/420wallet-genesis.json","canonicalAddressRegistry":"contracts/config/genesis-canonical-addresses.json","legacySystemAddressRegistry":"contracts/config/system-addresses.json","conflictPolicy":"FAIL_CLOSED"},
+  "network":{"environment":"testnet","expectedChainId":"420","rpcHttp":null,"rpcWebSocket":null,"explorerUrl":null,"faucetUrl":null,"ecosystemManifestUrl":null,"status":"BLOCKED_OFFICIAL_TESTNET_MANIFEST"},
+  "walletAuthority":{
+    "entryPoint420":{"address":"0x000000000000000000000000000000000000041f","source":"contracts/config/genesis-canonical-addresses.json#reserved:entry-point","status":"RESERVED_PENDING_PRODUCTION_IMPLEMENTATION","deploymentVerified":false},
+    "smartAccountFactory420":{"address":null,"candidateAddress":"0x0000000000000000000000000000000000000446","source":"contracts/config/genesis-canonical-addresses.json#registry_resolved:smart-account-factory","status":"CANDIDATE_NOT_DEPLOYED_NOT_GENESIS_APPROVED","deploymentVerified":false},
+    "capabilityRegistry420":{"address":null,"candidateAddress":"0x0000000000000000000000000000000000000447","source":"contracts/config/genesis-canonical-addresses.json#registry_resolved:capability-registry","status":"CANDIDATE_NOT_DEPLOYED_NOT_GENESIS_APPROVED","deploymentVerified":false},
+    "protocolRegistry":{"address":"0x0000000000000000000000000000000000000434","source":"contracts/config/system-addresses.json#ProtocolRegistry","status":"FROZEN_SYSTEM_NOT_CHAIN_VERIFIED","deploymentVerified":false},
+    "names420":{"address":"0x0000000000000000000000000000000000000435","source":"contracts/config/system-addresses.json#Names420","status":"FROZEN_SYSTEM_NOT_CHAIN_VERIFIED","deploymentVerified":false},
+    "identity420":{"address":"0x0000000000000000000000000000000000000436","source":"contracts/config/system-addresses.json#Identity420","status":"FROZEN_SYSTEM_NOT_CHAIN_VERIFIED","deploymentVerified":false}
   },
-  "network": {
-    "environment": "testnet",
-    "expectedChainId": "420",
-    "rpcHttp": null,
-    "rpcWebSocket": null,
-    "explorerUrl": null,
-    "faucetUrl": null,
-    "ecosystemManifestUrl": null,
-    "status": "BLOCKED_OFFICIAL_TESTNET_MANIFEST"
-  },
-  "walletAuthority": {
-    "entryPoint420": {
-      "address": "0x000000000000000000000000000000000000041f",
-      "source": "contracts/config/genesis-canonical-addresses.json#reserved:entry-point",
-      "status": "RESERVED_PENDING_PRODUCTION_IMPLEMENTATION"
-    },
-    "smartAccountFactory420": {
-      "address": "0x0000000000000000000000000000000000000420",
-      "source": "contracts/config/genesis-canonical-addresses.json#smart-account-factory",
-      "status": "FROZEN_BUT_CONFLICTED"
-    },
-    "capabilityRegistry420": {
-      "address": "0x0000000000000000000000000000000000000421",
-      "source": "contracts/config/genesis-canonical-addresses.json#capability-registry",
-      "status": "FROZEN_BUT_CONFLICTED"
-    },
-    "protocolRegistry": {
-      "address": "0x0000000000000000000000000000000000000422",
-      "source": "contracts/config/genesis-canonical-addresses.json#protocol-registry",
-      "status": "FROZEN_BUT_CONFLICTED"
-    },
-    "names420": {
-      "address": "0x0000000000000000000000000000000000000445",
-      "source": "contracts/config/genesis-canonical-addresses.json#names",
-      "status": "RESERVED_PENDING_GENESIS_DEPLOYMENT_AND_CHAIN_VERIFICATION"
-    },
-    "identity420": {
-      "address": "0x0000000000000000000000000000000000000424",
-      "source": "contracts/config/genesis-canonical-addresses.json#identity",
-      "status": "FROZEN_BUT_CONFLICTED"
-    }
-  },
-  "conflicts": [
-    {
-      "address": "0x0000000000000000000000000000000000000420",
-      "canonicalWalletAssignment": "SmartAccountFactory420.sol",
-      "legacySystemAssignment": "RewardController",
-      "resolution": "REQUIRED_BEFORE_LIVE_TESTNET"
-    },
-    {
-      "address": "0x0000000000000000000000000000000000000421",
-      "canonicalWalletAssignment": "CapabilityRegistry420.sol",
-      "legacySystemAssignment": "AttentionTreasury",
-      "resolution": "REQUIRED_BEFORE_LIVE_TESTNET"
-    },
-    {
-      "address": "0x0000000000000000000000000000000000000422",
-      "canonicalWalletAssignment": "ProtocolRegistry.sol",
-      "legacySystemAssignment": "DevelopmentTreasury",
-      "resolution": "REQUIRED_BEFORE_LIVE_TESTNET"
-    },
-    {
-      "address": "0x0000000000000000000000000000000000000424",
-      "canonicalWalletAssignment": "Identity420.sol",
-      "legacySystemAssignment": "ProtocolReserve",
-      "resolution": "REQUIRED_BEFORE_LIVE_TESTNET"
-    }
+  "retiredClaims":[
+    {"address":"0x0000000000000000000000000000000000000420","former":"SmartAccountFactory420","frozenOwner":"RewardController"},
+    {"address":"0x0000000000000000000000000000000000000421","former":"CapabilityRegistry420","frozenOwner":"AttentionTreasury"},
+    {"address":"0x0000000000000000000000000000000000000422","former":"ProtocolRegistry","frozenOwner":"DevelopmentTreasury"},
+    {"address":"0x0000000000000000000000000000000000000424","former":"Identity420","frozenOwner":"ProtocolReserve"},
+    {"address":"0x0000000000000000000000000000000000000445","former":"Names420","frozenOwnerAddress":"0x0000000000000000000000000000000000000435"},
+    {"address":"0x0000000000000000000000000000000000000448","former":"second ProtocolRegistry","frozenOwnerAddress":"0x0000000000000000000000000000000000000434"},
+    {"address":"0x0000000000000000000000000000000000000449","former":"second Identity420","frozenOwnerAddress":"0x0000000000000000000000000000000000000436"}
   ],
-  "releaseGates": {
-    "officialTestnetManifestPublished": false,
-    "canonicalAddressConflictResolved": false,
-    "entryPointProductionBytecodeBound": false,
-    "rpcChainIdentityQualified": false,
-    "canonicalWalletContractsHaveCode": false,
-    "faucetAndExplorerPublished": false,
-    "walletRuntimeConfigGenerated": false
-  },
-  "rules": [
-    "Do not invent or hard-code public testnet endpoints.",
-    "Do not promote local.example.json values into testnet.",
-    "Do not bind wallet runtime to a conflicted address.",
-    "0x0000000000000000000000000000000000000445 is a Names420 Genesis reservation, not evidence of on-chain deployment or verified bytecode.",
-    "A chain ID alone is insufficient proof of network identity.",
-    "Every live Wallet deployment must bind to one validated environment manifest and one reconciled canonical address set."
-  ]
+  "releaseGates":{"officialTestnetManifestPublished":false,"canonicalAddressConflictResolved":false,"entryPointProductionBytecodeBound":false,"rpcChainIdentityQualified":false,"canonicalWalletContractsHaveCode":false,"faucetAndExplorerPublished":false,"walletRuntimeConfigGenerated":false,"registryPublicationGovernanceVerified":false},
+  "rules":["Do not invent or hard-code public testnet endpoints.","Do not promote local.example.json values into testnet.","Frozen Step 6.2 allocations are not evidence of live deployment; verify chain ID, bytecode, runtime hash and predeploy manifest before use.","0x0446 and 0x0447 are unapproved Wallet candidates, not populated Genesis predeploys or published ProtocolRegistry entries.","Retired proposals must never be re-used as active authority without a new allocation review.","No live wallet runtime bind to an unverified or conflicted address.","An independently deployed service is active only after a receipt, runtime code hash and authorized ProtocolRegistry publication."]
 }

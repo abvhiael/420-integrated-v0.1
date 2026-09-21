@@ -26,6 +26,9 @@ type VancouverParkPayload struct {
  Neighbourhood string `json:"neighbourhood"`
  RawRecordSHA256 string `json:"raw_record_sha256"`
  NormalizedSHA256 string `json:"normalized_sha256"`
+ // Exact Go-serialized preimage of NormalizedSHA256. Private retention MUST
+ // preserve these bytes, not reserialize the presentation payload as a substitute.
+ NormalizedBytes json.RawMessage `json:"normalized_bytes"`
 }
 
 type vancouverRawPark struct {
@@ -36,11 +39,9 @@ type vancouverRawPark struct {
  GoogleMapDest *struct {Lon *float64 `json:"lon"`;Lat *float64 `json:"lat"`} `json:"googlemapdest"`
 }
 
-// MapVancouverParksRaw accepts the *actual* parks JSON export's top-level array
-// and raw parkid/googlemapdest schema. The caller must independently retain and
-// qualify the complete acquisition; this function does not assert completeness.
-// All records are validated before a batch can be staged. Neither mapping nor
-// retention is approval, canonical application, or public publication.
+// MapVancouverParksRaw accepts the observed parks JSON export's top-level array.
+// Caller must independently retain and qualify the acquisition; this function
+// does not assert completeness or provide publication authority.
 func MapVancouverParksRaw(raw []byte, acquisitionID, revision string, retrievedAt time.Time)(VancouverParksBatch,[]VancouverParkPayload,error){
  empty:=VancouverParksBatch{}
  if len(raw)==0||len(raw)>32<<20||strings.TrimSpace(acquisitionID)==""||strings.TrimSpace(revision)==""||retrievedAt.IsZero(){return empty,nil,ErrInvalid}
@@ -64,7 +65,7 @@ func MapVancouverParksRaw(raw []byte, acquisitionID, revision string, retrievedA
   normalized,err:=json.Marshal(struct{ParkID,Name string;Latitude,Longitude float64}{park.ParkID,park.Name,park.Latitude,park.Longitude});if err!=nil{return empty,nil,err}
   rawHash:=sha256.Sum256(record);normHash:=sha256.Sum256(normalized)
   batch.Parks=append(batch.Parks,park)
-  payloads=append(payloads,VancouverParkPayload{CanonicalCandidateID:"vancouver-park:"+parkID,SourceParkID:parkID,Name:park.Name,Latitude:lat,Longitude:lon,Official:*row.Official==1,Neighbourhood:row.Neighbourhood,RawRecordSHA256:hex.EncodeToString(rawHash[:]),NormalizedSHA256:hex.EncodeToString(normHash[:])})
+  payloads=append(payloads,VancouverParkPayload{CanonicalCandidateID:"vancouver-park:"+parkID,SourceParkID:parkID,Name:park.Name,Latitude:lat,Longitude:lon,Official:*row.Official==1,Neighbourhood:row.Neighbourhood,RawRecordSHA256:hex.EncodeToString(rawHash[:]),NormalizedSHA256:hex.EncodeToString(normHash[:]),NormalizedBytes:append(json.RawMessage(nil),normalized...)})
  }
  return batch,payloads,nil
 }

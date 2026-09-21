@@ -17,12 +17,12 @@ import (
  placerepo "github.com/420integrated/420-integrated/location/repository"
 )
 
-// Config requires existing snapshots from the authorized publisher. Merely
-// creating empty stores is not a valid deployment data-source configuration.
+// Config requires existing snapshots from the authorized publisher. SourceID
+// identifies the operator-configured data source; it is NOT proof of provenance.
 type Config struct {
  PlacesPath string
  EventsPath string
- SourceID string // operator-managed provenance identifier, not proof of publication
+ SourceID string
 }
 
 func existingSnapshot(path string) (string, error) {
@@ -34,39 +34,45 @@ func existingSnapshot(path string) (string, error) {
  return absolute,nil
 }
 
-// NewHandler accepts only existing, validated canonical snapshots. This is a
-// single-process read-only deployment; all writes belong to an independently
-// qualified canonical publisher, not to this HTTP process.
+// NewHandler rejects missing/unreadable canonical repositories at startup.
+// The publisher owns and updates the snapshots; this process exposes no writes.
+// Loading new snapshots on each request avoids serving stale in-memory data
+// after a publisher atomically replaces a canonical snapshot.
 func NewHandler(config Config)(http.Handler,error){
  if strings.TrimSpace(config.SourceID)=="" {return nil,errors.New("SVC2_PUBLICATION_SOURCE is required")}
  placesPath,err:=existingSnapshot(config.PlacesPath);if err!=nil{return nil,fmt.Errorf("places: %w",err)}
  eventsPath,err:=existingSnapshot(config.EventsPath);if err!=nil{return nil,fmt.Errorf("events: %w",err)}
  if placesPath==eventsPath{return nil,errors.New("places and events snapshots must differ")}
- places,err:=placerepo.OpenFileStore(placesPath);if err!=nil{return nil,fmt.Errorf("load canonical places: %w",err)}
- events,err:=eventrepo.OpenFileStore(eventsPath);if err!=nil{return nil,fmt.Errorf("load canonical events: %w",err)}
- // Construct a new discovery index for each event request: there is never a
- // stale shared index after an event publication/cancellation or time rollover.
- // The index is rebuilt for the exact requested interval; the existing HTTP
- // API remains the authority for query parsing and error responses.
+ load:=func()(*placerepo.FileStore,*eventrepo.FileStore,error){
+  if _,err:=existingSnapshot(placesPath);err!=nil{return nil,nil,err}
+  if _,err:=existingSnapshot(eventsPath);err!=nil{return nil,nil,err}
+  places,err:=placerepo.OpenFileStore(placesPath);if err!=nil{return nil,nil,err}
+  events,err:=eventrepo.OpenFileStore(eventsPath);if err!=nil{return nil,nil,err}
+  return places,events,nil
+ }
+ if _,_,err:=load();err!=nil{return nil,fmt.Errorf("load canonical snapshots: %w",err)}
  return http.HandlerFunc(func(w http.ResponseWriter,r *http.Request){
   w.Header().Set("Cache-Control","no-store")
   w.Header().Set("X-Content-Type-Options","nosniff")
-  if _,err:=existingSnapshot(placesPath);err!=nil {http.Error(w,"public feed unavailable",http.StatusServiceUnavailable);return}
-  if _,err:=existingSnapshot(eventsPath);err!=nil {http.Error(w,"public feed unavailable",http.StatusServiceUnavailable);return}
+  places,events,err:=load();if err!=nil {http.Error(w,"public feed unavailable",http.StatusServiceUnavailable);return}
   if r.URL.Path=="/readyz" {
    if r.Method!=http.MethodGet {w.Header().Set("Allow","GET");http.Error(w,"method not allowed",http.StatusMethodNotAllowed);return}
-   // Check both public projections, not just that their files exist.
-   if _,err:=placerepo.OpenFileStore(placesPath);err!=nil {http.Error(w,"public feed unavailable",http.StatusServiceUnavailable);return}
-   if _,err:=eventrepo.OpenFileStore(eventsPath);err!=nil {http.Error(w,"public feed unavailable",http.StatusServiceUnavailable);return}
    w.Header().Set("Content-Type","text/plain; charset=utf-8")
-   _,_=w.Write([]byte("public projection storage available; publication not independently verified\n"));return
+   _,_=w.Write([]byte("canonical snapshots readable; publication provenance requires independent verification\n"));return
   }
   index:=discovery.New()
   if r.URL.Path=="/v1/events"&&r.Method==http.MethodGet {
    from,errFrom:=time.Parse(time.RFC3339,r.URL.Query().Get("from"))
    to,errTo:=time.Parse(time.RFC3339,r.URL.Query().Get("to"))
    if errFrom==nil&&errTo==nil {
-    if err:=index.Rebuild(events,from,to);err!=nil {httpapi.Server{Places:places,Events:events,Discovery:index}.Handler().ServeHTTP(w,r);return}
+    if err:=index.Rebuild(events,from,to);err!=nil {
+     // Invalid windows are rejected by the existing API. Any failure on an
+     // otherwise valid window must not silently return an empty 200 response.
+     if from.IsZero()||to.IsZero()||to.Before(from)||to.Sub(from)>discovery.MaxWindow {
+      httpapi.Server{Places:places,Events:events,Discovery:index}.Handler().ServeHTTP(w,r);return
+     }
+     http.Error(w,"public event discovery unavailable",http.StatusServiceUnavailable);return
+    }
    }
   }
   httpapi.Server{Places:places,Events:events,Discovery:index}.Handler().ServeHTTP(w,r)

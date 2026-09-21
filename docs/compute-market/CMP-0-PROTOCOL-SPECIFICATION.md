@@ -4,7 +4,7 @@ Status: DRAFT — implementation foundation; not production-qualified. Baseline:
 
 ## Authority and compatibility
 
-This document refines, but does not supersede, [`docs/420-COMPUTE-MARKET-V1-ARCHITECTURE.md`](../420-COMPUTE-MARKET-V1-ARCHITECTURE.md), including CMP-INV-001–030. Frozen V1 governs canonical on-chain state if labels or orchestration differ. CMP-0 creates no fixed Genesis predeploy, active registry entry, deployable contract, custody privilege or assertion of production readiness. ComputeMarket contracts become registry-resolved applications only after deployment, code-hash verification and authorized publication against the current frozen system-address map. Do not reference retired AI-RECOVERY branches as authority.
+This document refines, but does not supersede, [frozen ComputeMarket V1 architecture](../420-COMPUTE-MARKET-V1-ARCHITECTURE.md), including CMP-INV-001–030. Frozen V1 governs canonical on-chain state if labels or orchestration differ. CMP-0 creates no fixed Genesis predeploy, active registry entry, deployable contract, custody privilege or assertion of production readiness. ComputeMarket contracts become registry-resolved applications only after deployment, code-hash verification and authorized publication against the current frozen system-address map. Do not reference retired AI-RECOVERY branches as authority.
 
 ## Scope, authority and actors
 
@@ -18,7 +18,12 @@ This document refines, but does not supersede, [`docs/420-COMPUTE-MARKET-V1-ARCH
 - **CMP-0.4 — Signed execution manifests:** [canonical payload and request-bound EIP-712 authorization](CMP-0.4-SIGNED-EXECUTION-MANIFEST.md). Fail-closed signer/nonce/capability checks, immutable executable and resource-policy commitments, worker checks and off-chain secret boundaries.
 - **CMP-0.5 — Provider, node and resource identity:** [distinct canonical identities, permanent parentage, eligibility and acceptance snapshots](CMP-0.5-PROVIDER-NODE-RESOURCE-IDENTITY.md). Operator grants, endpoint/capability revisions and suspension do not redirect already accepted economic entitlements.
 - **CMP-0.6 — Offers, requests and matching:** [dual authorization, versioned constraints, atomic capacity/funding checks and immutable accepted match](CMP-0.6-OFFERS-REQUESTS-AND-MATCHING.md). Matching service proposals are non-authoritative; paid execution requires an eligible concrete resource and a bounded, funded commitment.
-- **CMP-0.7–0.12:** authorized job lifecycle; Vault funding/settlement; receipts/verification; dispute/privacy/security; client/node/AI integrations; exact-head qualification and closeout. Each phase must be source grounded, separately classified as specification versus executable implementation, and preserve frozen V1 invariants.
+- **CMP-0.7 — Authorized job lifecycle:** [named actor/capability/guard/evidence/event transition matrix and exceptional paths](CMP-0.7-AUTHORIZED-JOB-LIFECYCLE.md). Canonical normal/exceptional states, bounded attempts, nonterminal dispute resolution, terminal-state protection, real Vault refund boundary and replay-safe settlement are distinct from off-chain scheduler observations.
+- **CMP-0.8 — Vault funding, settlement and payer refunds:** authorized obligation/custody adapter, exactly-once entitlements and real payer withdrawal/claim reconciliation.
+- **CMP-0.9 — Receipts and verification:** signed attempts/metering, evidence commitments, versioned objective verifier policies and bounded correctness-to-entitlement gating.
+- **CMP-0.10 — Dispute, privacy and security:** evidence/challenge/appeal deadlines, objectively scoped slash, emergency and confidential payload boundaries.
+- **CMP-0.11 — Client, node and 420AI integration:** provider-neutral, capability-scoped SDK/UI/operator integration after concrete source-boundary verification.
+- **CMP-0.12 — Qualification and closeout:** independent executable schema/hash/signature vectors, all frozen invariant-to-test evidence, real end-to-end funded/verified/settled/refunded jobs, latest-main reconciliation and exact-head full repository qualification. Each phase must be source grounded and classified as specification versus executable implementation; drafting a phase is not completion of the runtime gate.
 
 ## Canonical state and authorization
 

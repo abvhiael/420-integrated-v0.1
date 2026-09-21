@@ -9,6 +9,8 @@ on:
       - 'wallet/deployment-inventory.json'
       - 'scripts/verify-genesis-canonical-addresses.py'
       - 'scripts/verify-genesis-predeploy-authority.py'
+      - 'scripts/verify-wallet-w14-7-1-namespace.py'
+      - 'scripts/test-wallet-w14-7-1-namespace.py'
       - 'scripts/audit-wallet-w14-7-4-consumers.py'
       - 'scripts/test-wallet-w14-7-4-consumers.py'
       - '.github/workflows/genesis-address-authority.yml'
@@ -19,6 +21,8 @@ on:
       - 'wallet/deployment-inventory.json'
       - 'scripts/verify-genesis-canonical-addresses.py'
       - 'scripts/verify-genesis-predeploy-authority.py'
+      - 'scripts/verify-wallet-w14-7-1-namespace.py'
+      - 'scripts/test-wallet-w14-7-1-namespace.py'
       - '.github/workflows/genesis-address-authority.yml'
   workflow_dispatch:
 permissions:
@@ -38,6 +42,10 @@ jobs:
         run: python scripts/verify-genesis-canonical-addresses.py
       - name: Check physical predeploy/deployment parity and reject retired claims
         run: python scripts/verify-genesis-predeploy-authority.py
+      - name: Validate actual current frozen namespace and unapproved candidates
+        run: python scripts/verify-wallet-w14-7-1-namespace.py
+      - name: W14.7.1 actual-authority namespace regression fixtures
+        run: python scripts/test-wallet-w14-7-1-namespace.py
       - name: W14.7.4 historical-claim regression tests
         run: python scripts/test-wallet-w14-7-4-consumers.py
       - name: W14.7.4 source-consumer inventory (evidence, not active-address attestation)

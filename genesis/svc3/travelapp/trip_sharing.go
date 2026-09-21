@@ -36,8 +36,11 @@ type TripSharing struct {
 }
 func (s TripSharing) now()time.Time {if s.Now!=nil{return s.Now().UTC()};return time.Now().UTC()}
 func (s TripSharing) Issue(ctx context.Context,owner,id string)(string,error){
- if s.Trips==nil||s.Grants==nil||authorizedTripOwner(owner)!=nil||!validPlaceID(id){return "",ErrTripShareUnavailable}
+ if s.Trips==nil||s.Grants==nil||s.Published==nil||authorizedTripOwner(owner)!=nil||!validPlaceID(id){return "",ErrTripShareUnavailable}
  t,err:=s.Trips.GetOwned(ctx,owner,id);if err!=nil{return "",err};if t.Visibility!=TripUnlisted{return "",ErrTripShareUnavailable}
+ // A grant must not be created when an upstream item has already been
+ // withdrawn or current publication cannot be verified. Resolve rechecks.
+ if err=s.Published.VerifyPublishedTrip(ctx,t);err!=nil{return "",ErrTripShareUnavailable}
  var secret [32]byte;if _,err=rand.Read(secret[:]);err!=nil{return "",ErrTripShareUnavailable}
  token:=hex.EncodeToString(secret[:]);sum:=sha256.Sum256([]byte(token))
  if err=s.Grants.Issue(ctx,owner,id,hex.EncodeToString(sum[:]),s.now().Add(7*24*time.Hour));err!=nil{return "",ErrTripShareUnavailable}
@@ -79,7 +82,7 @@ func HandlerWithTripSharing(reader PublicReader,deps TravelUserDependencies,shar
   const prefix="/travel/trips/"
   if !strings.HasPrefix(r.URL.Path,prefix)||(!strings.HasSuffix(r.URL.Path,"/share")&&!strings.HasSuffix(r.URL.Path,"/revoke-shares")){base.ServeHTTP(w,r);return}
   if r.Method!=http.MethodPost{w.Header().Set("Allow","POST");http.Error(w,"method not allowed",http.StatusMethodNotAllowed);return}
-  if deps.Identity==nil||shares.Trips==nil||shares.Grants==nil{http.Error(w,"sharing unavailable",http.StatusServiceUnavailable);return}
+  if deps.Identity==nil||shares.Trips==nil||shares.Grants==nil||shares.Published==nil{http.Error(w,"sharing unavailable",http.StatusServiceUnavailable);return}
   session,err:=authenticated(r,deps.Identity);if err!=nil{http.Error(w,"authentication required",http.StatusUnauthorized);return}
   r.Body=http.MaxBytesReader(w,r.Body,4096);if err:=r.ParseForm();err!=nil{http.Error(w,"invalid form",http.StatusBadRequest);return}
   if !allowPrivateMutation(r,session){http.Error(w,"invalid request token",http.StatusForbidden);return}

@@ -1,0 +1,15 @@
+{
+  "approved_master": "assets/brand/420travel-logo.png",
+  "master_sha256": "aa29f083ea4042b873f8a9da0931e69e12e0a6ad7270465b3743f99a3cb24014",
+  "master_dimensions": [
+    1254,
+    1254
+  ],
+  "icon_source_crop_xyxy": [
+    0,
+    0,
+    1254,
+    868
+  ],
+  "derivation": "Crops and resizes only; no regenerated or replacement artwork"
+}

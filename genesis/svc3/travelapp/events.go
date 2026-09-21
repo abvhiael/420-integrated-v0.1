@@ -12,8 +12,9 @@ import (
 )
 
 // travelEvent holds only published event fields and the matching public venue.
-// Neither raw event/place IDs nor canonical private records are rendered.
+// IDs are rendered only in links to the authenticated trip picker when enabled.
 type travelEvent struct {
+ ID string
  Title string
  StartAt time.Time
  PlaceName string
@@ -24,7 +25,7 @@ type travelEvent struct {
 }
 
 func serveTravelEvents(w http.ResponseWriter, r *http.Request, reader PublicReader) {
- data := pageData{Route:"events", Heading:"Discover events", State:"disconnected", Message:"Events are not connected yet"}
+ data := pageData{Route:"events", Heading:"Discover events", State:"disconnected", Message:"Events are not connected yet",SaveAvailable:saveLinksAvailable(r)}
  data.Date = r.URL.Query().Get("date")
  data.Destination = strings.TrimSpace(r.URL.Query().Get("destination"))
  now := time.Now().UTC()
@@ -41,7 +42,7 @@ func serveTravelEvents(w http.ResponseWriter, r *http.Request, reader PublicRead
   if from.Before(now) {from=now}
   to=day.Add(24*time.Hour)
   if ceiling:=now.Add(30*24*time.Hour);to.After(ceiling) {to=ceiling}
-  if !to.After(from) {data.State="invalid"; data.Message="Invalid event filters"; renderPage(w,http.StatusBadRequest,data);return}
+  if !to.After(from) {data.State="invalid";data.Message="Invalid event filters";renderPage(w,http.StatusBadRequest,data);return}
  }
  if reader==nil {renderPage(w,http.StatusOK,data);return}
  ctx,cancel:=context.WithTimeout(r.Context(),5*time.Second)
@@ -54,6 +55,7 @@ func serveTravelEvents(w http.ResponseWriter, r *http.Request, reader PublicRead
  for _,event:=range feed.Calendar {
   if event.StartAt.Before(from)||!event.StartAt.Before(to) {continue}
   item:=travelEvent{Title:event.Title,StartAt:event.StartAt,Attributes:cannabisEventLabels(event.Tags)}
+  if validPlaceID(event.ID) { item.ID=event.ID }
   if event.PlaceID!="" {
    place,ok:=byID[event.PlaceID]
    if !ok {continue} // A removed/private venue must not be inferred from the event.

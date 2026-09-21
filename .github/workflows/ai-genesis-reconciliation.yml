@@ -5,10 +5,12 @@ on:
       - 'contracts/config/**'
       - 'config/**'
       - 'wallet/**'
+      - 'developer-hub/manifests/local.example.json'
       - 'ai/web/runtime-config.json'
       - 'scripts/verify-ai-genesis-reconciliation.py'
       - 'scripts/verify-genesis-canonical-addresses.py'
       - 'scripts/verify-ai-recovery-extension-allocation.py'
+      - 'scripts/verify-wallet-ai-address-references.py'
       - '.github/workflows/ai-genesis-reconciliation.yml'
   workflow_dispatch:
 permissions:
@@ -27,3 +29,5 @@ jobs:
         run: python scripts/verify-ai-genesis-reconciliation.py
       - name: Check canonical, retired, Wallet, bridge and extension namespace collision inventory
         run: python scripts/verify-ai-recovery-extension-allocation.py
+      - name: Check Wallet inventory, AI client and Developer Hub references
+        run: python scripts/verify-wallet-ai-address-references.py

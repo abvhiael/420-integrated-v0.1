@@ -5,8 +5,8 @@ import (
  "crypto/sha256"
  "encoding/hex"
  "encoding/json"
- "errors"
  "fmt"
+ "math"
  "strings"
  "time"
 )
@@ -35,16 +35,14 @@ type VancouverParksBatch struct {
  Parks []VancouverPark `json:"parks"`
 }
 
-// CandidateIntake intentionally exposes no approval, canonical mutation or
-// generation-promotion operation. A GuardedLedger can implement this method;
-// a missing or untrusted deployment source grant fails closed in its verifier.
+// CandidateIntake exposes no approval, canonical mutation or generation
+// promotion. A GuardedLedger can implement it, with independently provisioned
+// source policy. A nil or untrusted source grant fails closed.
 type CandidateIntake interface { ImportCandidate(context.Context,Candidate) error }
 
-// StageVancouverParks accepts only a bounded fully identified batch, validates
-// every row BEFORE any staging and never sends partial/missing batches as
-// deletions. Idempotency and source/ID conflicts are enforced by the ledger.
-// This phase intentionally stages candidate digests only; private normalized
-// payloads must be retained and bound separately before canonical approval.
+// StageVancouverParks stages pending candidates only. All rows are validated
+// before staging; incomplete batches are never interpreted as deletions. This
+// does not retain canonical payloads or constitute publish-ready evidence.
 func StageVancouverParks(ctx context.Context, intake CandidateIntake, batch VancouverParksBatch) (int,error) {
  if intake==nil || batch.Dataset!="parks" || strings.TrimSpace(batch.AcquisitionID)=="" || strings.TrimSpace(batch.Revision)=="" || batch.RetrievedAt.IsZero() || len(batch.Parks)==0 || len(batch.Parks)>1000 {return 0,ErrInvalid}
  seen:=make(map[string]bool,len(batch.Parks))
@@ -52,7 +50,7 @@ func StageVancouverParks(ctx context.Context, intake CandidateIntake, batch Vanc
  for _,p:=range batch.Parks {
   id:=strings.TrimSpace(p.ParkID)
   name:=strings.TrimSpace(p.Name)
-  if id=="" || id!=p.ParkID || strings.ContainsAny(id,"/\\\n\r\t") || name=="" || p.Latitude<49.0 || p.Latitude>49.4 || p.Longitude< -123.35 || p.Longitude> -122.9 || seen[id] {return 0,ErrInvalid}
+  if id=="" || id!=p.ParkID || strings.ContainsAny(id,"/\\\n\r\t") || name=="" || math.IsNaN(p.Latitude) || math.IsNaN(p.Longitude) || math.IsInf(p.Latitude,0) || math.IsInf(p.Longitude,0) || p.Latitude<49.0 || p.Latitude>49.4 || p.Longitude< -123.35 || p.Longitude> -122.9 || seen[id] {return 0,ErrInvalid}
   seen[id]=true
   raw,err:=json.Marshal(p);if err!=nil{return 0,err}
   rawHash:=sha256.Sum256(raw)
@@ -60,7 +58,7 @@ func StageVancouverParks(ctx context.Context, intake CandidateIntake, batch Vanc
   normHash:=sha256.Sum256(normalized)
   c:=Candidate{ID:"vancouver-park:"+id,Kind:Place,Source:SourceEvidence{
    Namespace:VancouverParksNamespace,RecordID:id,Revision:batch.Revision,ManifestID:batch.AcquisitionID,
-   TermsRef:"https://vancouver.ca/your-government/open-government-licence.aspx",
+   TermsRef:"https://vancouver.ca/open-government-licence",
    AttributionRef:"https://opendata.vancouver.ca/explore/dataset/parks/",
    RetrievedAt:batch.RetrievedAt,PayloadSHA256:hex.EncodeToString(rawHash[:]),
   },NormalizedSHA256:hex.EncodeToString(normHash[:]),ExpectedVersion:0}
@@ -74,5 +72,3 @@ func StageVancouverParks(ctx context.Context, intake CandidateIntake, batch Vanc
  }
  return count,nil
 }
-
-var _ = errors.Is // errors are intentionally returned without public error bodies

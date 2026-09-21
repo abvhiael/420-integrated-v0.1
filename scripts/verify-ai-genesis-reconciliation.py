@@ -26,6 +26,7 @@ def check():
     predeploy = entries_by_name(read('contracts/config/predeploy/predeploy-plan.json')['predeploys'], 'name')
     ai = {name: value.lower() for name, value in read('config/ai-genesis.json')['interfaces'].items()}
     canonical = read('contracts/config/genesis-canonical-addresses.json')
+    web = read('ai/web/runtime-config.json')
     fixed = {value: name for name, value in system.items()}
     if system != legacy:
         problems.append('two frozen system-address registries differ')
@@ -36,12 +37,26 @@ def check():
     for name, addr in ai.items():
         if system.get(name) != addr:
             problems.append(f'AI interface {name} does not match frozen system address {system.get(name)}')
+    for name, addr in {**ai, 'ProtocolRegistry': system['ProtocolRegistry']}.items():
+        configured = web.get('contracts', {}).get(name)
+        if not isinstance(configured, str) or configured.lower() != addr:
+            problems.append(f'AI web {name} is not bound to frozen address {addr}')
+    if web.get('features', {}).get('writes') is not False:
+        problems.append('AI web writes must remain disabled before deployment qualification')
+    canonical_names = set()
+    canonical_addresses = set()
     for entry in canonical['anchors']:
         name = entry['contract'].removesuffix('.sol')
         addr = entry['address'].lower()
+        if name in canonical_names or addr in canonical_addresses:
+            problems.append(f'duplicate canonical anchor name or address: {name} {addr}')
+        canonical_names.add(name)
+        canonical_addresses.add(addr)
         frozen_owner = fixed.get(addr)
         if frozen_owner and frozen_owner != name:
             problems.append(f'canonical {name} at {addr} collides with frozen {frozen_owner}')
+        if name in system and system[name] != addr:
+            problems.append(f'canonical {name} moved from frozen {system[name]} to {addr}')
     for name, addr in ai.items():
         for entry in canonical['anchors']:
             if entry['address'].lower() == addr and entry['contract'].removesuffix('.sol') != name:

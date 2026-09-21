@@ -1,0 +1,23 @@
+# 368.2 — Vancouver parks uploaded export: schema and private onboarding
+
+Status: **user-supplied export inspected; local private normalized package generated; actual acquisition provenance, independently confirmed completeness and publication authority NOT verified**. Event intake is separate. Do not publish or grant source trust based on this record.
+
+## Uploaded file and inspection
+
+The user supplied `parks.json` as a JSON top-level array. Local inspection of the uploaded bytes yielded **95,858 bytes**, SHA-256 `805e9174d9a960544874147d8706664a89accd808df40300ebb6d11cf3b93f7b`, **218 records** with **218 distinct parkid values**, 22 distinct `neighbourhoodname` values, all 218 records with `googlemapdest.lat` and `.lon`, and no coordinate outside the bounded importer check (latitude 49.0–49.4, longitude -123.35 to -122.9). `official` was 1 in 200 records and 0 in 18; do not treat `official=0` as a validated public park. Raw field names present in every row: `parkid`, `name`, `official`, `advisories`, `specialfeatures`, `facilities`, `washrooms`, `streetnumber`, `streetname`, `ewstreet`, `nsstreet`, `neighbourhoodname`, `neighbourhoodurl`, `hectare`, `googlemapdest`. Nullable fields: `ewstreet` (2), `nsstreet` (5). `parkid` is an integer in this export; mapping to a decimal source ID must preserve identifiers without repurposing their order as identity. The mapper does not infer claims about amenities from `Y`/`N` flags or link to Google Maps.
+
+**Completeness limitation:** A user-supplied file is not independent proof of a complete current municipal export. No trusted export retrieval timestamp, official server checksum/total, City boundary polygon or actual acquisition credentials are embedded in the uploaded JSON. The 22 source neighbourhood labels and coordinate envelope show distribution but do not prove all Vancouver parks are present or each coordinate lies inside Vancouver's municipal boundary. Source revision is the exact raw-file SHA-256 pending independent acquisition review; do not invent a download date or claim an approved source manifest.
+
+## Implementation and private retention
+
+[`genesis/svc2/publisher/vancouver_parks_raw.go`](../genesis/svc2/publisher/vancouver_parks_raw.go) parses the observed top-level JSON array, maps `parkid` to source ID, `googlemapdest.lat/lon` to location coordinates and `name` to normalized display name, retaining `official` and `neighbourhoodname` in a private normalized payload record. The mapper validates every input row and returns a full batch or an error; `StageVancouverParks` is a **separate pending-review-only step** guarded by an independently provisioned `SourceVerifier`. A mapper result neither installs a grant nor records an approval. Row digests in the private payload package must be reconciled to the Go mapper's canonical JSON hashing before approval.
+
+A private ZIP generated from this specific user upload contains unmodified `raw/parks.json`, `private/normalized_records.jsonl`, and `private/acquisition_manifest.json`. It was produced in the model working environment and **not committed to the repository or uploaded to public HTTP storage**. Its normalized record digests use Python JSON serialization, not a verified byte-for-byte Go canonical digest; those are not approval-ready artifacts. Secure operator storage, retention and source licence review remain separate.
+
+## Next release gates
+
+1. Independently retrieve/confirm the official unfiltered City of Vancouver `parks` export through the qualified channel; record official dataset URL, download timestamp, exact raw byte digest and any authoritative server count/revision. Reconcile against the uploaded 218 rows and investigate discrepancies instead of treating missing rows as deletions.
+2. Qualify the City of Vancouver open-data licence for actual downstream commercial reuse, preserve exact attribution and terms evidence in operator-controlled source manifest, and provision an actual independent source grant. The dataset page and licence alone are not a publisher grant.
+3. Retain verified Go-canonical normalized payload bytes with acquisition provenance in operator-controlled storage and connect digests to pending-only candidate intake; test revocations, ID collision, batch failure and dataset refresh before any canonical writes.
+4. Independently verify municipal boundaries if advertising coverage. The bounding box used for fail-closed parsing is NOT a jurisdictional polygon.
+5. Keep private import, approved canonical application, paired publication generations, public endpoint, and 420Travel disconnected until their respective earlier gates pass.

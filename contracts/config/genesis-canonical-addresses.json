@@ -35,7 +35,7 @@
     {"id":"vault-router","contract":"VaultRouter420.sol"},
     {"id":"rights-router","contract":"RightsRouter420.sol"},
     {"id":"launchpad-router","contract":"LaunchpadRouter420.sol"},
-    {"id":"grants-router","contract":"GrantsRouter420.sol"},
+    {"id":"grants-router","contract":"GrantRouter420.sol"},
     {"id":"attention-router","contract":"AttentionRouter420.sol"},
     {"id":"pulse-router","contract":"PulseRouter420.sol"},
     {"id":"messenger-router","contract":"MessengerRouter420.sol"},

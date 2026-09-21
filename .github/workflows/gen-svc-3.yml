@@ -6,6 +6,9 @@ on:
       - 'config/420travel-genesis.json'
       - 'docs/genesis-services/GEN-SVC-3-TRAVEL.md'
       - 'scripts/validate-gen-svc-3.py'
+      - 'genesis/svc3/**'
+      - 'cmd/420travel/**'
+      - 'go.mod'
       - '.github/workflows/gen-svc-3.yml'
   push:
     branches: [main]
@@ -13,6 +16,9 @@ on:
       - 'config/420travel-genesis.json'
       - 'docs/genesis-services/GEN-SVC-3-TRAVEL.md'
       - 'scripts/validate-gen-svc-3.py'
+      - 'genesis/svc3/**'
+      - 'cmd/420travel/**'
+      - 'go.mod'
       - '.github/workflows/gen-svc-3.yml'
 
 permissions:
@@ -27,3 +33,13 @@ jobs:
         with:
           python-version: '3.12'
       - run: python3 scripts/validate-gen-svc-3.py
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Travel shell tests
+        run: go test ./genesis/svc3/... ./cmd/420travel/...
+      - name: Travel shell static analysis
+        run: go vet ./genesis/svc3/... ./cmd/420travel/...
+      - name: Travel server build
+        run: go build -o /tmp/420travel ./cmd/420travel

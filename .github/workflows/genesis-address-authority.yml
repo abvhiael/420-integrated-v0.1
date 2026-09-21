@@ -8,6 +8,7 @@ on:
       - 'config/**'
       - 'wallet/deployment-inventory.json'
       - 'scripts/verify-genesis-canonical-addresses.py'
+      - 'scripts/verify-genesis-predeploy-authority.py'
       - '.github/workflows/genesis-address-authority.yml'
   pull_request:
     paths:
@@ -15,6 +16,7 @@ on:
       - 'config/**'
       - 'wallet/deployment-inventory.json'
       - 'scripts/verify-genesis-canonical-addresses.py'
+      - 'scripts/verify-genesis-predeploy-authority.py'
       - '.github/workflows/genesis-address-authority.yml'
   workflow_dispatch:
 permissions:
@@ -27,5 +29,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Fail on conflicting frozen owner and unverified Wallet or bridge claims
+      - name: Check canonical frozen owners and proposed application claims
         run: python scripts/verify-genesis-canonical-addresses.py
+      - name: Check physical predeploy/deployment parity and reject retired claims
+        run: python scripts/verify-genesis-predeploy-authority.py

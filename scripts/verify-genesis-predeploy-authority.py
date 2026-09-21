@@ -21,7 +21,9 @@ def verify():
     wallet=load('wallet/deployment-inventory.json')
     archived=load('contracts/config/w14-7-4-global-address-reconciliation.json')
     frozen={x['name']:norm(x['address']) for x in system['assignments']}
-    if len(frozen)!=len(system['assignments']): errors.append('duplicate frozen system name')
+    frozen_by_slot={slot:name for name,slot in frozen.items()}
+    if len(frozen)!=len(system['assignments']) or len(frozen_by_slot)!=len(frozen):
+        errors.append('duplicate frozen system owner or address')
     for label,entries in (('predeploy-plan',plan['predeploys']),('deployment-manifest',deployment['contracts'])):
         actual={x['name']:norm(x['address']) for x in entries}
         if len(actual)!=len(entries): errors.append(f'{label}: duplicate names')
@@ -35,8 +37,13 @@ def verify():
     for name,address in fixed_by_name.items():
         if frozen.get(name)!=address: errors.append(f'canonical fixed {name}@{address} not in authoritative predeploy map')
     active=set(frozen.values())
-    active.update(norm(x['address']) for x in bridge['assignments'])
-    active.update(norm(x['address']) for x in canonical['reserved'] if x['status']!='RETIRED_NOT_DEPLOYABLE')
+    bridge_active={norm(x['address']) for x in bridge['assignments']}
+    if active & bridge_active:
+        errors.append(f'bridge candidate overlaps frozen predeploy: {sorted(active & bridge_active)}')
+    active.update(bridge_active)
+    other_reserved={norm(x['address']) for x in canonical['reserved'] if x['status']!='RETIRED_NOT_DEPLOYABLE'}
+    if active & other_reserved: errors.append(f'canonical reservation overlaps an assigned address: {sorted(active & other_reserved)}')
+    active.update(other_reserved)
     for key in ('smartAccountFactory420','capabilityRegistry420'):
         claim=wallet['walletAuthority'][key]
         if claim.get('address') is not None or claim.get('deploymentVerified') is not False:
@@ -44,9 +51,19 @@ def verify():
         proposed=norm(claim['candidateAddress'])
         if proposed in active: errors.append(f'{key}: candidate collides at {proposed}')
         active.add(proposed)
-    retired={norm(x['address']) for x in bridge.get('retired',[])}
-    retired.update(norm(x['address']) for x in canonical.get('reserved',[]) if x['status']=='RETIRED_NOT_DEPLOYABLE')
-    if active & retired: errors.append(f'active allocation reuses retired slot(s): {sorted(active & retired)}')
+    # A retired *claim* at 0x043c does NOT retire ConsensusSystemCall420's frozen slot.
+    # Only disallow reusing a retired proposal when no other frozen owner already owns it.
+    for item in bridge.get('retired',[]):
+        slot,name=norm(item['address']),item['name']
+        if frozen_by_slot.get(slot)==name:
+            errors.append(f'bridge incorrectly retired frozen system owner {name}@{slot}')
+        if slot in bridge_active:
+            errors.append(f'bridge active assignment reuses retired claim {name}@{slot}')
+        if slot not in frozen_by_slot and slot in active:
+            errors.append(f'active candidate reuses retired bridge proposal {name}@{slot}')
+    for item in canonical.get('reserved',[]):
+        if item['status']=='RETIRED_NOT_DEPLOYABLE' and norm(item['address']) in active:
+            errors.append(f'active assignment reuses retired canonical reservation {item["id"]}')
     if archived.get('status')=='FROZEN_FOR_GENESIS' or archived.get('policy',{}).get('walletReadyForLiveTestnet') is True:
         errors.append('obsolete W14.7.4 migration artifact promoted to authority')
     for item in archived.get('migratedExistingPredeploys',[]):

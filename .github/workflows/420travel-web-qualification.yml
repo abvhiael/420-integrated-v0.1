@@ -3,12 +3,16 @@ on:
   pull_request:
     paths:
       - 'web/travel/**'
+      - 'functions/_travel-public.js'
+      - 'functions/travel/api/v1/**'
       - '.github/workflows/420travel-web-qualification.yml'
   push:
     branches:
       - feature/gen-svc-3-travel-implementation
     paths:
       - 'web/travel/**'
+      - 'functions/_travel-public.js'
+      - 'functions/travel/api/v1/**'
       - '.github/workflows/420travel-web-qualification.yml'
   workflow_dispatch:
 permissions:
@@ -28,3 +32,5 @@ jobs:
           PY
       - name: Validate public preview markup, assets and service gates
         run: python3 web/travel/check_site.py
+      - name: Verify narrowly scoped public Pages routes
+        run: node --experimental-default-type=module web/travel/test-public-route.mjs

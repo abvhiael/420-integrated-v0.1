@@ -76,7 +76,7 @@ func WithPublicJSON(next http.Handler, reader PublicReader) http.Handler {
    for _,venue:=range feed.Travel {
     place:=venue.Place
     if !validPlaceID(place.ID) || term!=""&&!matchesDestination(place,term) {continue}
-    response.Places=append(response.Places,publicJSONPlace{ID:place.ID,Name:place.Name,Category:place.Category,City:place.City,Region:place.Region,Country:place.Country,Approximate:place.Kind==locationui.KindArea})
+    response.Places=append(response.Places,publicJSONPlace{ID:place.ID,Name:place.Name,Category:string(place.Category),City:place.City,Region:place.Region,Country:place.Country,Approximate:place.Kind==locationui.KindArea})
    }
    if len(response.Places)>0 {response.State="ready"}
   } else {

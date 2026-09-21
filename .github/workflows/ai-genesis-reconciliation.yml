@@ -1,0 +1,23 @@
+name: AI Genesis Address Reconciliation
+on:
+  pull_request:
+    paths:
+      - 'contracts/config/**'
+      - 'config/ai-genesis.json'
+      - 'config/system-addresses.json'
+      - 'ai/web/runtime-config.json'
+      - 'scripts/verify-ai-genesis-reconciliation.py'
+      - '.github/workflows/ai-genesis-reconciliation.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  frozen-address-consistency:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check AI predeploy identities and canonical collisions
+        run: python scripts/verify-ai-genesis-reconciliation.py

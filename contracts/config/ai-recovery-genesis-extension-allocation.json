@@ -1,0 +1,48 @@
+{
+  "schema": "420-ai-recovery-genesis-extension-allocation-v1",
+  "status": "CANDIDATE_PENDING_NAMESPACE_WIDE_VALIDATION_AND_GENESIS_APPROVAL",
+  "authoritative_for": "proposed extension slot ownership only; not deployment, not an amendment to the frozen Step 6.2 system map",
+  "frozen_system_source": "contracts/config/system-addresses.json",
+  "other_reservations": [
+    {"source": "config/swap-bridge-extension-addresses.json", "range": "0x043c..0x0444", "status": "CANDIDATE_WITH_EXISTING_0x043c_CONSENSUS_COLLISION_MUST_BE_REBASED"},
+    {"source": "contracts/config/genesis-canonical-addresses.json", "name": "Names420", "address": "0x0000000000000000000000000000000000000445", "status": "RESERVED_PENDING_RECONCILIATION_WITH_FROZEN_0x0435"},
+    {"source": "contracts/config/wallet-authority-address-reconciliation.json", "range": "0x0446..0x0449", "status": "EXISTING_WALLET_CANDIDATES_NOT_FROZEN"}
+  ],
+  "candidate_extension_start": "0x000000000000000000000000000000000000044a",
+  "allocation_policy": {
+    "preserve_frozen_system_assignments": true,
+    "do_not_allocate_over_reserved_or_candidate_addresses": true,
+    "do_not_move_existing_AI_predeploys": true,
+    "do_not_deploy_or_publish_until_all_manifests_and_chain_evidence_agree": true,
+    "registry_resolved_routers_do_not_require_frozen_predeploy_addresses": true
+  },
+  "proposals": [
+    {"contract":"InteropRouter420.sol","address":"0x000000000000000000000000000000000000044a"},
+    {"contract":"RandomnessRouter420.sol","address":"0x000000000000000000000000000000000000044b"},
+    {"contract":"OracleRouter420.sol","address":"0x000000000000000000000000000000000000044c"},
+    {"contract":"CanonicalSwapExecutor420.sol","address":"0x000000000000000000000000000000000000044d"},
+    {"contract":"GatewayRouter420.sol","address":"0x000000000000000000000000000000000000044e"},
+    {"contract":"PaymentRouter420.sol","address":"0x000000000000000000000000000000000000044f"},
+    {"contract":"SettlementRouter420.sol","address":"0x0000000000000000000000000000000000000450"},
+    {"contract":"TokenFactory420.sol","address":"0x0000000000000000000000000000000000000451"},
+    {"contract":"AIRouter420.sol","address":"0x0000000000000000000000000000000000000452"},
+    {"contract":"ResourceRouter420.sol","address":"0x0000000000000000000000000000000000000453"},
+    {"contract":"ComputeRouter420.sol","address":"0x0000000000000000000000000000000000000454"},
+    {"contract":"TreasuryRouter420.sol","address":"0x0000000000000000000000000000000000000455"},
+    {"contract":"VaultRouter420.sol","address":"0x0000000000000000000000000000000000000456"},
+    {"contract":"RightsRouter420.sol","address":"0x0000000000000000000000000000000000000457"},
+    {"contract":"LaunchpadRouter420.sol","address":"0x0000000000000000000000000000000000000458"},
+    {"contract":"GrantsRouter420.sol","address":"0x0000000000000000000000000000000000000459"},
+    {"contract":"AttentionRouter420.sol","address":"0x000000000000000000000000000000000000045a"},
+    {"contract":"PulseRouter420.sol","address":"0x000000000000000000000000000000000000045b"},
+    {"contract":"MessengerRouter420.sol","address":"0x000000000000000000000000000000000000045c"},
+    {"contract":"CommonsRouter420.sol","address":"0x000000000000000000000000000000000000045d"}
+  ],
+  "genesis_approval": {
+    "approved": false,
+    "required": "explicit repository governance decision and full namespace collision-free cross-manifest qualification",
+    "deployment_addresses_verified": false,
+    "runtime_code_hashes_verified": false,
+    "registry_publications_verified": false
+  }
+}

@@ -2,6 +2,8 @@ package publisher
 
 import (
  "context"
+ "crypto/sha256"
+ "encoding/hex"
  "encoding/json"
  "errors"
  "strings"
@@ -20,7 +22,17 @@ func TestMapVancouverRawExportAndPrivateRetention(t *testing.T){
  encoded,err:=json.Marshal(records);if err!=nil{t.Fatal(err)};if !strings.Contains(string(encoded),"Rosemont Park"){t.Fatal("normalized private payload not serializable")}
  sink:=&parksIntake{};n,err:=StageVancouverParks(context.Background(),sink,batch)
  if err!=nil||n!=2||len(sink.records)!=2{t.Fatalf("pending-only staging: %d %v",n,err)}
- for i,c:=range sink.records{if c.NormalizedSHA256!=records[i].NormalizedSHA256{t.Fatal("retained payload digest does not match candidate")}}
+ for i,c:=range sink.records{
+  if c.NormalizedSHA256!=records[i].NormalizedSHA256{t.Fatal("retained payload digest does not match candidate")}
+  digest:=sha256.Sum256(records[i].NormalizedBytes)
+  if hex.EncodeToString(digest[:])!=c.NormalizedSHA256 {t.Fatal("retained Go normalized bytes do not hash to candidate digest")}
+  var preimage struct{ParkID,Name string;Latitude,Longitude float64}
+  if err:=json.Unmarshal(records[i].NormalizedBytes,&preimage);err!=nil||preimage.ParkID!=batch.Parks[i].ParkID||preimage.Name!=batch.Parks[i].Name||preimage.Latitude!=batch.Parks[i].Latitude||preimage.Longitude!=batch.Parks[i].Longitude {t.Fatal("retained preimage does not roundtrip")}
+ }
+ // JSON-encoded private retention must preserve the exact hash preimage.
+ var saved []VancouverParkPayload
+ if err:=json.Unmarshal(encoded,&saved);err!=nil{t.Fatal(err)}
+ for i:=range saved {digest:=sha256.Sum256(saved[i].NormalizedBytes);if hex.EncodeToString(digest[:])!=sink.records[i].NormalizedSHA256{t.Fatal("retained payload changed across persistence serialization")}}
 }
 func TestMapVancouverRawExportRejectsBadSchemaBeforeStaging(t *testing.T){
  cases:=[]string{

@@ -26,7 +26,7 @@
     {"contract":"VaultRouter420.sol","address":"0x0000000000000000000000000000000000000456"},
     {"contract":"RightsRouter420.sol","address":"0x0000000000000000000000000000000000000457"},
     {"contract":"LaunchpadRouter420.sol","address":"0x0000000000000000000000000000000000000458"},
-    {"contract":"GrantsRouter420.sol","address":"0x0000000000000000000000000000000000000459"},
+    {"contract":"GrantRouter420.sol","address":"0x0000000000000000000000000000000000000459"},
     {"contract":"AttentionRouter420.sol","address":"0x000000000000000000000000000000000000045a"},
     {"contract":"PulseRouter420.sol","address":"0x000000000000000000000000000000000000045b"},
     {"contract":"MessengerRouter420.sol","address":"0x000000000000000000000000000000000000045c"},

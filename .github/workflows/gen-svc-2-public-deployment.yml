@@ -4,6 +4,7 @@ on:
     paths:
       - 'cmd/420svc2-public/**'
       - 'genesis/svc2/deployment/**'
+      - 'genesis/svc2/publisher/**'
       - 'genesis/svc2/httpapi/**'
       - 'events/**'
       - 'location/**'
@@ -14,6 +15,7 @@ on:
     paths:
       - 'cmd/420svc2-public/**'
       - 'genesis/svc2/deployment/**'
+      - 'genesis/svc2/publisher/**'
       - '.github/workflows/gen-svc-2-public-deployment.yml'
   workflow_dispatch:
 permissions:
@@ -27,7 +29,7 @@ jobs:
         with:
           go-version-file: go.mod
           cache: false
-      - name: Canonical public API and deployment tests
+      - name: Canonical public API, publisher authority and deployment tests
         run: go test ./genesis/svc2/... ./location/... ./events/... ./cmd/420svc2-public/...
       - name: Static analysis
         run: go vet ./genesis/svc2/... ./location/... ./events/... ./cmd/420svc2-public/...

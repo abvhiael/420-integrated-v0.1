@@ -7,13 +7,12 @@ import (
 
 type saveLinksContextKey struct{}
 
-// Public listing pages may advertise a trip picker only in an explicitly
-// composed, authenticated-capable Travel deployment. The public-only binary
-// does not expose save links. The picker itself independently authenticates
-// and the eventual POST rechecks the live public projection and session CSRF.
-func withSaveLinks(r *http.Request, users TravelUserDependencies, reader PublicReader) *http.Request {
- _, editable := users.Trips.(EditableTripRepository)
- if reader == nil || users.Identity == nil || !editable { return r }
+// Public listing pages advertise the trip picker only when a qualified Travel
+// composition has a public reader, independently verified Identity and an
+// editable owner-scoped trip repository. The picker itself authenticates and
+// the eventual POST checks live publication and session CSRF independently.
+func withSaveLinks(r *http.Request, enabled bool) *http.Request {
+ if !enabled { return r }
  return r.WithContext(context.WithValue(r.Context(),saveLinksContextKey{},true))
 }
 

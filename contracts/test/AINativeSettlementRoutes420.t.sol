@@ -27,9 +27,9 @@ contract AINativeSettlementRoutes420Test is AINativeSplitProtocol420Test {
         assertEq(uint256(manager.getJob(JOB).status), uint256(AIJobManager.Status.SETTLED));
         assertEq(uint256(accounting.getObligation(_original()).state), 3);
         _assertTerminal(TOTAL, 0);
-        vm.expectRevert(AINativeSplitSettlement420.RefundInvalidJob.selector);
+        vm.expectRevert(AINativeSplitSettlement420.RefundReplay.selector);
         settlement.refundPayer(JOB, keccak256("different-refund"));
-        vm.expectRevert(AINativeSplitSettlement420.SplitInvalidJob.selector);
+        vm.expectRevert(AINativeSplitSettlement420.SplitReplay.selector);
         settlement.settleSplit(JOB, keccak256("different-split"), EARNED);
         _assertTerminal(TOTAL, 0);
     }
@@ -64,7 +64,7 @@ contract AINativeSettlementRoutes420Test is AINativeSplitProtocol420Test {
     }
 
     function testInvalidSplitBoundariesLeaveOriginalReserved() public {
-        vm.expectRevert(AINativeSplitSettlement420.SplitInvalidJob.selector);
+        vm.expectRevert(AINativeSplitSettlement420.SplitReplay.selector);
         settlement.settleSplit(bytes32(0), DECISION, EARNED);
         vm.expectRevert();
         settlement.settleSplit(JOB, DECISION, 0);

@@ -5,8 +5,8 @@ import type { NativeSettlementEvidence420, NativeSettlementExpected420, NativeSe
 import type { Hex32 } from '../src/types.js';
 
 const id = (n: number) => `0x${n.toString(16).padStart(64, '0')}` as Hex32;
-const payer = '0x000000000000000000000000000000000000bEEF';
-const provider = '0x000000000000000000000000000000000000D00D';
+const payer = '0x000000000000000000000000000000000000beef';
+const provider = '0x000000000000000000000000000000000000d00d';
 const native = '0x0000000000000000000000000000000000000000';
 function fixture(route: NativeSettlementRoute420) {
   const split = route === 'PARTIAL_SPLIT';

@@ -1,0 +1,17 @@
+{
+  "schema":"420-ai-recovery-registry-deployment-plan-v1",
+  "status":"CANDIDATE_NO_NETWORK_DEPLOYMENTS_NO_REGISTRY_PUBLICATIONS",
+  "allocationSource":"contracts/config/ai-recovery-genesis-extension-allocation.json",
+  "authoritativeFrozenMap":"contracts/config/system-addresses.json",
+  "canonicalAddressMap":"contracts/config/genesis-canonical-addresses.json",
+  "registry":{"contract":"ProtocolRegistry.sol","frozenAddress":"0x0000000000000000000000000000000000000434","deploymentVerified":false,"governanceAuthorityVerified":false},
+  "deploymentPolicy":{"genesisPredeploy":false,"implementationAddressesAreCandidateOnly":true,"deploymentMode":"NORMAL_CREATE_OR_CREATE2_WITH_INDEPENDENT_NONCE_AND_CODEHASH_ATTESTATION","mustRejectFrozenOrReservedAddress":true,"publishVia":"ProtocolRegistry.publishRegisteredService","requireGovernanceApproval":true,"requireRuntimeCodeHashAndSignedManifest":true,"requireReadbackByServiceIdVersionChainAndBytecode":true,"doNotEnablePaidAiOrWalletWrites":true},
+  "sourcesOfCandidateContracts":["contracts/config/ai-recovery-genesis-extension-allocation.json#proposals","contracts/config/wallet-authority-address-reconciliation.json#walletAuthorityCandidates","config/swap-bridge-extension-addresses.json#assignments"],
+  "reservedNeverDeploy":["0x000000000000000000000000000000000000041f","0x0000000000000000000000000000000000000443","0x0000000000000000000000000000000000000445","0x0000000000000000000000000000000000000448","0x0000000000000000000000000000000000000449"],
+  "network":null,
+  "deployedImplementations":[],
+  "governancePublicationTransactions":[],
+  "qualifiedRegistryReadbacks":[],
+  "approvedForGenesis":false,
+  "readyForLiveTestnet":false
+}

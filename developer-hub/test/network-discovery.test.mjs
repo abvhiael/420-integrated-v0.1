@@ -4,7 +4,7 @@ import { discoverNetwork420, loadNetworkManifest420, NetworkManifestError420, va
 
 const localManifestUrl = new URL('../manifests/local.example.json', import.meta.url);
 
-test('loads and discovers the local DEVHUB manifest', async () => {
+test('loads and discovers the local DEVHUB manifest without inventing deployed registry', async () => {
   const manifest = await loadNetworkManifest420(localManifestUrl);
   const network = discoverNetwork420(manifest);
   assert.equal(network.schemaVersion, '1.0.0');
@@ -16,7 +16,8 @@ test('loads and discovers the local DEVHUB manifest', async () => {
   assert.equal(network.rpc.http[0], 'http://127.0.0.1:8545');
   assert.equal(network.service('indexer'), 'http://127.0.0.1:4202');
   assert.equal(network.service('ai'), 'http://127.0.0.1:4206');
-  assert.equal(network.contract('Registry420').address, '0x0000000000000000000000000000000000000420');
+  assert.equal(network.contract('ProtocolRegistry'), null);
+  assert.equal(network.contract('Registry420'), null);
   assert.equal(network.canRequestFaucet, true);
   assert.equal(network.isProduction, false);
 });
@@ -38,7 +39,7 @@ test('rejects malformed chain identity, addresses, and endpoints', async () => {
   assert.throws(() => validateNetworkManifest420({ ...manifest, network: { ...manifest.network, chainId: '0' } }), /chainId/);
   assert.throws(() => validateNetworkManifest420({
     ...manifest,
-    contracts: { Registry420: { ...manifest.contracts.Registry420, address: '0x1234' } }
+    contracts: { ProtocolRegistry: { address: '0x1234', source: 'genesis', version: 'local-example' } }
   }), /address is invalid/);
   assert.throws(() => validateNetworkManifest420({
     ...manifest,

@@ -6,6 +6,7 @@ import (
  "errors"
  "fmt"
  "sync"
+ "time"
 )
 
 // AuditCheckpoint is an independent, monotonic, access-controlled store. It MUST

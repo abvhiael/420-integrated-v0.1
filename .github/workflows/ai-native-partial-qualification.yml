@@ -15,6 +15,7 @@ on:
       - "contracts/test/AINativeSplitRealVault420.t.sol"
       - "contracts/test/AINativeSplitProtocol420.t.sol"
       - "contracts/test/AINativeSplitAdversarial420.t.sol"
+      - "contracts/test/AINativeSettlementRoutes420.t.sol"
       - ".github/workflows/ai-native-partial-qualification.yml"
   workflow_dispatch:
 
@@ -40,6 +41,7 @@ jobs:
           forge build test/AINativeSplitRealVault420.t.sol --sizes
           forge build test/AINativeSplitProtocol420.t.sol --sizes
           forge build test/AINativeSplitAdversarial420.t.sol --sizes
+          forge build test/AINativeSettlementRoutes420.t.sol --sizes
       - name: Test planner settlement real Vault protocol and adversarial rollback
         working-directory: contracts
         run: |
@@ -48,3 +50,4 @@ jobs:
           forge test --match-path test/AINativeSplitRealVault420.t.sol -vvv
           forge test --match-path test/AINativeSplitProtocol420.t.sol -vvv
           forge test --match-path test/AINativeSplitAdversarial420.t.sol -vvv
+          forge test --match-path test/AINativeSettlementRoutes420.t.sol -vvv

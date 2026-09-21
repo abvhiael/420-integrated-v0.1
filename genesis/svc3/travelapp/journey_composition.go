@@ -32,6 +32,15 @@ func HandlerWithQualifiedJourneys(reader PublicReader,reviews TravelReviewReader
   if r.URL.Path=="/travel/trips" && r.Method==http.MethodGet && users.Identity!=nil {
    serveQualifiedTripList(w,r,users,shares);return
   }
+  // Only a bare trip ID uses the saved-item cards. Share actions and the
+  // explicit advanced editor continue through the existing private handler.
+  const tripPrefix="/travel/trips/"
+  if strings.HasPrefix(r.URL.Path,tripPrefix) && r.URL.Query().Get("mode")!="details" {
+   id:=strings.TrimPrefix(r.URL.Path,tripPrefix)
+   if validPlaceID(id) {
+    HandlerWithSavedTripItems(reader,reviews,users,shares).ServeHTTP(w,r);return
+   }
+  }
   if reviews!=nil && strings.HasPrefix(r.URL.Path,"/travel/place/") {
    publicReviews.ServeHTTP(w,r);return
   }

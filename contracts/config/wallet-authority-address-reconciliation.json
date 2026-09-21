@@ -1,0 +1,21 @@
+{
+  "schema": "420-wallet-authority-address-reconciliation-v2",
+  "status": "CANDIDATE_PENDING_GENESIS_DEPLOYMENT_APPROVAL",
+  "authoritativeFrozenMap": "contracts/config/system-addresses.json",
+  "policy": {"preserveFrozenSystemAssignments": true, "doNotTreatReservationAsDeployment": true, "noBrowserWritesBeforeLiveQualification": true},
+  "walletAuthorityCandidates": [
+    {"id":"smart-account-factory", "contract":"SmartAccountFactory420.sol", "candidateAddress":"0x0000000000000000000000000000000000000446", "status":"CANDIDATE_NOT_FROZEN_NOT_DEPLOYED"},
+    {"id":"capability-registry", "contract":"CapabilityRegistry420.sol", "candidateAddress":"0x0000000000000000000000000000000000000447", "status":"CANDIDATE_NOT_FROZEN_NOT_DEPLOYED"}
+  ],
+  "frozenAuthorityReferences": [
+    {"id":"protocol-registry", "contract":"ProtocolRegistry.sol", "address":"0x0000000000000000000000000000000000000434", "source":"contracts/config/system-addresses.json", "status":"FROZEN_SYSTEM_ALLOCATION_NOT_ATTESTED_DEPLOYED"},
+    {"id":"identity", "contract":"Identity420.sol", "address":"0x0000000000000000000000000000000000000436", "source":"contracts/config/system-addresses.json", "status":"FROZEN_SYSTEM_ALLOCATION_NOT_ATTESTED_DEPLOYED"},
+    {"id":"names", "contract":"Names420.sol", "address":"0x0000000000000000000000000000000000000435", "source":"contracts/config/system-addresses.json", "status":"FROZEN_SYSTEM_ALLOCATION_NOT_ATTESTED_DEPLOYED"}
+  ],
+  "retiredProposals": [
+    {"contract":"ProtocolRegistry.sol", "address":"0x0000000000000000000000000000000000000448", "reason":"duplicate of frozen ProtocolRegistry 0x0434"},
+    {"contract":"Identity420.sol", "address":"0x0000000000000000000000000000000000000449", "reason":"duplicate of frozen Identity420 0x0436"},
+    {"contract":"Names420.sol", "address":"0x0000000000000000000000000000000000000445", "reason":"duplicate of frozen Names420 0x0435; prior Wallet candidate 0x0445 held for review, not live authority"}
+  ],
+  "readyForLiveTestnet": false
+}

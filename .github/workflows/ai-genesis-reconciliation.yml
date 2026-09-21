@@ -3,10 +3,12 @@ on:
   pull_request:
     paths:
       - 'contracts/config/**'
-      - 'config/ai-genesis.json'
-      - 'config/system-addresses.json'
+      - 'config/**'
+      - 'wallet/**'
       - 'ai/web/runtime-config.json'
       - 'scripts/verify-ai-genesis-reconciliation.py'
+      - 'scripts/verify-genesis-canonical-addresses.py'
+      - 'scripts/verify-ai-recovery-extension-allocation.py'
       - '.github/workflows/ai-genesis-reconciliation.yml'
   workflow_dispatch:
 permissions:
@@ -19,5 +21,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Check AI predeploy identities and canonical collisions
+      - name: Check canonical anchor against frozen Step 6.2 and deployment/predeploy inventories
+        run: python scripts/verify-genesis-canonical-addresses.py
+      - name: Check AI funding and service references against frozen authority
         run: python scripts/verify-ai-genesis-reconciliation.py
+      - name: Check canonical, retired, Wallet, bridge and extension namespace collision inventory
+        run: python scripts/verify-ai-recovery-extension-allocation.py

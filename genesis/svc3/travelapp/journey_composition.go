@@ -20,6 +20,12 @@ func HandlerWithQualifiedJourneys(reader PublicReader,reviews TravelReviewReader
  saveReady:=reader!=nil&&users.Identity!=nil
  if _,ok:=users.Trips.(EditableTripRepository);!ok {saveReady=false}
  return http.HandlerFunc(func(w http.ResponseWriter,r *http.Request){
+  // Issue links only via authenticated POST; never offer a GET that can
+  // retrieve or re-display a previous bearer token.
+  const tripPrefix="/travel/trips/"
+  if strings.HasPrefix(r.URL.Path,tripPrefix) && strings.HasSuffix(r.URL.Path,"/share") {
+   serveIssuedShareLink(w,r,users,shares);return
+  }
   if r.URL.Path=="/travel/save" {serveSaveCatalog(w,r,reader,users);return}
   if strings.HasPrefix(r.URL.Path,"/travel/save/") {
    HandlerWithSaveToTrip(reader,reviews,users,shares).ServeHTTP(w,r);return
@@ -34,7 +40,6 @@ func HandlerWithQualifiedJourneys(reader PublicReader,reviews TravelReviewReader
   }
   // Only a bare trip ID uses the saved-item cards. Share actions and the
   // explicit advanced editor continue through the existing private handler.
-  const tripPrefix="/travel/trips/"
   if strings.HasPrefix(r.URL.Path,tripPrefix) && r.URL.Query().Get("mode")!="details" {
    id:=strings.TrimPrefix(r.URL.Path,tripPrefix)
    if validPlaceID(id) {

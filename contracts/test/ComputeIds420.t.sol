@@ -24,24 +24,31 @@ contract ComputeIds420Test {
         return ComputeIds420.attemptId(chainId, unitId, nonce);
     }
 
+    // A try/catch surrounding a caller-side revert can pass despite a successful call.
+    // Inspect the exact target call and its revert selector instead.
+    function _rejectUnit(uint256 chainId, ComputeIds420.WorkUnitV1 memory p) private view {
+        (bool ok, bytes memory errorData) = address(this).staticcall(abi.encodeCall(this.derive, (chainId, p)));
+        require(!ok && errorData.length >= 4, "invalid unit input accepted");
+        bytes4 selector;
+        assembly { selector := mload(add(errorData, 32)) }
+        require(selector == ComputeIds420.InvalidComputeIdentity.selector, "wrong unit rejection");
+    }
+
+    function _rejectAttempt(uint256 chainId, bytes32 unit, uint64 nonce) private view {
+        (bool ok, bytes memory errorData) = address(this).staticcall(abi.encodeCall(this.deriveAttempt, (chainId, unit, nonce)));
+        require(!ok && errorData.length >= 4, "invalid attempt input accepted");
+        bytes4 selector;
+        assembly { selector := mload(add(errorData, 32)) }
+        require(selector == ComputeIds420.InvalidComputeIdentity.selector, "wrong attempt rejection");
+    }
+
     function testWorkUnitStandardAbiOrderAndStability() public pure {
         ComputeIds420.WorkUnitV1 memory p = _plan();
-        bytes32 expected = keccak256(
-            abi.encode(
-                keccak256("420Integrated.ComputeMarket.WorkUnit.v1"),
-                uint256(420),
-                uint32(1),
-                p.jobId,
-                p.manifestHash,
-                p.partitionSchemeId,
-                p.partitionSchemeVersion,
-                p.partitionPlanHash,
-                p.partitionCount,
-                p.replicationFactor,
-                p.partitionIndex,
-                p.replicaIndex
-            )
-        );
+        bytes32 expected = keccak256(abi.encode(
+            keccak256("420Integrated.ComputeMarket.WorkUnit.v1"), uint256(420), uint32(1),
+            p.jobId, p.manifestHash, p.partitionSchemeId, p.partitionSchemeVersion,
+            p.partitionPlanHash, p.partitionCount, p.replicationFactor, p.partitionIndex, p.replicaIndex
+        ));
         bytes32 actual = ComputeIds420.workUnitId(420, p);
         require(actual == expected, "unit abi encoding differs");
         require(actual == ComputeIds420.workUnitId(420, p), "unit not stable");
@@ -67,48 +74,40 @@ contract ComputeIds420Test {
         bytes32 unit = ComputeIds420.workUnitId(420, _plan());
         bytes32 first = ComputeIds420.attemptId(420, unit, 1);
         bytes32 second = ComputeIds420.attemptId(420, unit, 2);
-        bytes32 expected = keccak256(
-            abi.encode(keccak256("420Integrated.ComputeMarket.WorkAttempt.v1"), uint256(420), uint32(1), unit, uint64(1))
-        );
+        bytes32 expected = keccak256(abi.encode(
+            keccak256("420Integrated.ComputeMarket.WorkAttempt.v1"), uint256(420), uint32(1), unit, uint64(1)
+        ));
         require(first == expected && first != second, "attempt encoding/collision");
         require(unit == ComputeIds420.workUnitId(420, _plan()), "retry changed payable unit");
     }
 
-    function testRejectInvalidWorkUnitInputs() public {
+    function testRejectInvalidWorkUnitInputs() public view {
         ComputeIds420.WorkUnitV1 memory p = _plan();
-        try this.derive(0, p) returns (bytes32) { revert("zero chain accepted"); } catch {}
+        _rejectUnit(0, p);
         p.jobId = bytes32(0);
-        try this.derive(420, p) returns (bytes32) { revert("zero job accepted"); } catch {}
-        p = _plan();
-        p.manifestHash = bytes32(0);
-        try this.derive(420, p) returns (bytes32) { revert("zero manifest accepted"); } catch {}
-        p = _plan();
-        p.partitionSchemeId = bytes32(0);
-        try this.derive(420, p) returns (bytes32) { revert("zero scheme accepted"); } catch {}
-        p = _plan();
-        p.partitionSchemeVersion = 0;
-        try this.derive(420, p) returns (bytes32) { revert("zero scheme version accepted"); } catch {}
-        p = _plan();
-        p.partitionPlanHash = bytes32(0);
-        try this.derive(420, p) returns (bytes32) { revert("zero plan accepted"); } catch {}
-        p = _plan();
-        p.partitionCount = 0;
-        try this.derive(420, p) returns (bytes32) { revert("zero partitions accepted"); } catch {}
-        p = _plan();
-        p.replicationFactor = 0;
-        try this.derive(420, p) returns (bytes32) { revert("zero replicas accepted"); } catch {}
-        p = _plan();
-        p.partitionIndex = p.partitionCount;
-        try this.derive(420, p) returns (bytes32) { revert("partition out of bounds accepted"); } catch {}
-        p = _plan();
-        p.replicaIndex = p.replicationFactor;
-        try this.derive(420, p) returns (bytes32) { revert("replica out of bounds accepted"); } catch {}
+        _rejectUnit(420, p);
+        p = _plan(); p.manifestHash = bytes32(0);
+        _rejectUnit(420, p);
+        p = _plan(); p.partitionSchemeId = bytes32(0);
+        _rejectUnit(420, p);
+        p = _plan(); p.partitionSchemeVersion = 0;
+        _rejectUnit(420, p);
+        p = _plan(); p.partitionPlanHash = bytes32(0);
+        _rejectUnit(420, p);
+        p = _plan(); p.partitionCount = 0;
+        _rejectUnit(420, p);
+        p = _plan(); p.replicationFactor = 0;
+        _rejectUnit(420, p);
+        p = _plan(); p.partitionIndex = p.partitionCount;
+        _rejectUnit(420, p);
+        p = _plan(); p.replicaIndex = p.replicationFactor;
+        _rejectUnit(420, p);
     }
 
-    function testRejectInvalidAttemptInputs() public {
+    function testRejectInvalidAttemptInputs() public view {
         bytes32 unit = ComputeIds420.workUnitId(420, _plan());
-        try this.deriveAttempt(0, unit, 1) returns (bytes32) { revert("zero chain accepted"); } catch {}
-        try this.deriveAttempt(420, bytes32(0), 1) returns (bytes32) { revert("zero unit accepted"); } catch {}
-        try this.deriveAttempt(420, unit, 0) returns (bytes32) { revert("zero nonce accepted"); } catch {}
+        _rejectAttempt(0, unit, 1);
+        _rejectAttempt(420, bytes32(0), 1);
+        _rejectAttempt(420, unit, 0);
     }
 }

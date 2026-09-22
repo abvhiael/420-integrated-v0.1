@@ -67,6 +67,9 @@ contract ComputePolicyRegistry420Test {
     }
 
     function testUnknownPolicyInvalidBoundsKindAndCrossPolicy() public {
+        // Resolve external getters before vm.prank: each prank applies to only the next external call.
+        bytes32 pricingKind = registry.KIND_PRICING();
+        bytes32 verificationKind = registry.KIND_VERIFICATION();
         (bool ok, bytes memory failure) = address(registry).staticcall(abi.encodeCall(registry.policy, (POLICY_A, uint32(1))));
         require(!ok && _selector(failure) == ComputePolicyRegistry420.UnknownPolicy.selector, "unknown revision readable");
         vm.prank(GOVERNANCE);
@@ -75,16 +78,16 @@ contract ComputePolicyRegistry420Test {
         require(!ok && _selector(failure) == ComputePolicyRegistry420.UnsupportedKind.selector, "unsupported policy kind");
         vm.prank(GOVERNANCE);
         (ok, failure) = address(registry).call(abi.encodeCall(registry.publish,
-            (POLICY_A, registry.KIND_PRICING(), TERMS_A, SCHEMA, 0, 5, 10)));
+            (POLICY_A, pricingKind, TERMS_A, SCHEMA, 0, 5, 10)));
         require(!ok && _selector(failure) == ComputePolicyRegistry420.InvalidPolicy.selector, "invalid bounds allowed");
-        _publish(POLICY_A, registry.KIND_PRICING(), TERMS_A, 60, 5, 10);
-        _publish(POLICY_B, registry.KIND_PRICING(), TERMS_A, 60, 5, 10);
+        _publish(POLICY_A, pricingKind, TERMS_A, 60, 5, 10);
+        _publish(POLICY_B, pricingKind, TERMS_A, 60, 5, 10);
         bytes32 first = registry.commitment(POLICY_A, 1);
         require(first != registry.commitment(POLICY_B, 1), "policy ID not bound");
-        require(!registry.isAcceptable(POLICY_B, 1, registry.KIND_PRICING(), first, 1, 1, 1), "cross-policy replay");
+        require(!registry.isAcceptable(POLICY_B, 1, pricingKind, first, 1, 1, 1), "cross-policy replay");
         vm.prank(GOVERNANCE);
         (ok, failure) = address(registry).call(abi.encodeCall(registry.publish,
-            (POLICY_A, registry.KIND_VERIFICATION(), TERMS_B, SCHEMA, 60, 5, 10)));
+            (POLICY_A, verificationKind, TERMS_B, SCHEMA, 60, 5, 10)));
         require(!ok && _selector(failure) == ComputePolicyRegistry420.InvalidPolicy.selector, "kind rebinding");
     }
 }

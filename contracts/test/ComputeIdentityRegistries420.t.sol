@@ -18,6 +18,8 @@ contract ComputeIdentityRegistries420Test {
     ComputeResourceRegistry420 private r;
     bytes32 private constant HASH_A = keccak256("manifest/a");
     bytes32 private constant HASH_B = keccak256("manifest/b");
+    bytes32 private constant CLASS_CPU = keccak256("CPU_GENERAL");
+    bytes32 private constant CLASS_GPU_INFERENCE = keccak256("GPU_INFERENCE");
 
     function setUp() public {
         p = new ComputeProviderRegistry420(GOV);
@@ -38,7 +40,7 @@ contract ComputeIdentityRegistries420Test {
     }
     function _resource(address actor, bytes32 nodeId) private returns (bytes32 id) {
         vm.prank(actor);
-        id = r.register(nodeId, r.GPU_INFERENCE(), HASH_A, HASH_B, HASH_A, 8);
+        id = r.register(nodeId, CLASS_GPU_INFERENCE, HASH_A, HASH_B, HASH_A, 8);
         vm.prank(actor);
         r.activate(id);
     }
@@ -62,7 +64,7 @@ contract ComputeIdentityRegistries420Test {
         (bool ok,) = address(n).call(abi.encodeCall(n.register, (alice, HASH_A, HASH_B, uint64(block.timestamp + 100))));
         require(!ok, "foreign provider registered node");
         vm.prank(BOB);
-        (ok,) = address(r).call(abi.encodeCall(r.register, (nodeId, r.CPU_GENERAL(), HASH_A, HASH_B, HASH_A, 3)));
+        (ok,) = address(r).call(abi.encodeCall(r.register, (nodeId, CLASS_CPU, HASH_A, HASH_B, HASH_A, 3)));
         require(!ok, "foreign provider registered resource");
         require(n.node(nodeId).providerId == alice && p.isActive(bob), "canonical parent changed");
         require(n.nextSerial() == 1 && r.nextSerial() == 0, "failed registration consumed identity");
@@ -107,7 +109,7 @@ contract ComputeIdentityRegistries420Test {
         (bool ok,) = address(r).call(abi.encodeCall(r.register, (nodeId, bytes32(uint256(999)), HASH_A, HASH_B, HASH_A, 1)));
         require(!ok, "unknown compute class accepted");
         vm.prank(ALICE);
-        (ok,) = address(r).call(abi.encodeCall(r.register, (nodeId, r.CPU_GENERAL(), HASH_A, HASH_B, HASH_A, 0)));
+        (ok,) = address(r).call(abi.encodeCall(r.register, (nodeId, CLASS_CPU, HASH_A, HASH_B, HASH_A, 0)));
         require(!ok && r.nextSerial() == 0, "zero capacity accepted");
         (ok,) = address(n).staticcall(abi.encodeCall(n.deriveId, (uint64(0), providerId)));
         require(!ok, "zero node serial accepted");

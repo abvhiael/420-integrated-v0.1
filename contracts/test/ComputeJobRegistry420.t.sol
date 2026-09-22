@@ -169,7 +169,7 @@ contract ComputeJobRegistry420Test {
             (id, uint64(5), VERIFIER, DECISION, true)));
         require(!ok && registry.job(id).revision == 6, "stale decision changed job");
     }
-    function testFailedDecisionDoesNotReleaseSettlement() public {
+    function testRejectedVerificationCannotReleaseSettlement() public {
         evidence.allowAll();
         bytes32 id = _create();
         _fund(id);

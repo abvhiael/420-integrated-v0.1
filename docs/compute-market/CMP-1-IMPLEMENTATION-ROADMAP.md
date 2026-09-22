@@ -1,15 +1,97 @@
-# CMP-1 — Executable ComputeMarket foundation
+# CMP-1 — Core smart contracts
 
-Status: **IN PROGRESS — implementation, not market deployment**. Base: merge of [CMP-0 documentation milestone](CMP-0-PROTOCOL-SPECIFICATION.md) via PR #367. The [frozen V1 architecture](../420-COMPUTE-MARKET-V1-ARCHITECTURE.md) and [CMP-0.12 qualification register](CMP-0.12-QUALIFICATION-AND-CLOSEOUT.md) control acceptance. Do not reinstate retired recovery branches as authority, assign a fixed Genesis predeploy, activate a registry entry before deployed codehash verification and authorized publication, or treat successful generic CI as funded-market proof.
+**Controlling scope: the original user-provided five-slice application roadmap, restored without renumbering.** Build the on-chain foundation. None of the five slices is complete solely because other ComputeMarket foundation contracts or generic repository CI passed.
 
-## Implementation increments and exact boundary
+## CMP-1.1 — ComputeJobRegistry
 
-- **CMP-1.1 — Canonical typed IDs and vectors:** `contracts/src/compute/ComputeIds420.sol` enforces CMP-0.3 domain-separated standard ABI unit/attempt derivation and invalid-input rejection; `contracts/test/ComputeIds420.t.sol` contains initial Foundry cases. Baseline commit `73335150e18602d140e494a314b0bdfc36a5a1f5` passed Solidity Contracts #3021, 420Docs #2667, and 420 Integrated #5283. Independently generated cross-language bytes/Keccak vectors, an authoritative registry allocating monotonic nonces and production deployment remain **OPEN**.
-- **CMP-1.2 — Object-scoped authorization:** `contracts/src/compute/ComputeAuthorization420.sol` implements versioned, kind-separated provider/node/resource/request/match/attempt/job scope hashes and a closed action allowlist, forwarding actor/action/scope/amount to the actual shared `ICapabilityRegistry420.isAuthorized` interface. `contracts/test/ComputeAuthorization420.t.sol` exercises shared `CapabilityRegistry420` grants, cross-object/role isolation, per-call amount, revocation, expiration and missing authority. Exact-head commit `652188c2630782de9b16e9a419776cb26b42d038` passed Solidity Contracts #3026, 420Docs #2675 and 420 Integrated #5291. **Boundary:** this read-only contract neither issues/consumes grants nor validates EOA/ERC-1271 signatures or canonical object parentage. Future state-changing callers must establish the actor, registry state and accepted match, consume appropriate finite grants through the capability component authority, and separately enforce deadline, cap, payer and beneficiary constraints. No user-controlled principal parameter alone may authorize a mutation.
-- **CMP-1.3 — Versioned policy foundation:** `contracts/src/compute/ComputePolicyRegistry420.sol` adds governance-timelock-only, append-only policy revisions with supported policy-kind allowlist, immutable terms/schema hashes, maximum duration/units/spend, domain- and registry-bound exact commitments, and a separate new-acceptance pause. `contracts/test/ComputePolicyRegistry420.t.sol` covers unauthorized publication, immutable old revisions, stale/current revision admission, wrong-kind/wrong-policy/replaced commitment, invalid policies, pause/resume and bound overrun. Exact-head commit `9d76a792afa8ca43bd011be5da08cba9c8e764f5` passed Solidity Contracts #3031, 420Docs #2681, and 420 Integrated #5297. **Boundary:** these are immutable *records*, not implemented price formulas, privacy guarantees, objective verifier execution or accepted job snapshots; matching and verification consumers must store exact accepted revision/commitment and apply independently qualified interpretation. Common bounds are conservative admission ceilings, not identical semantic formulas across all policy kinds. Previous commitments remain readable when current admission is paused.
-- **CMP-1.4 — Provider/node/resource identity foundation (IN PROGRESS; exact-head qualification PENDING):** `contracts/src/compute/ComputeProviderRegistry420.sol`, `ComputeNodeRegistry420.sol`, `ComputeResourceRegistry420.sol` allocate separate chain-/registry-/tag-bound monotonic IDs per CMP-0.5, preserve immutable node/provider and resource/node/provider ancestry, append snapshots of canonical revisions, gate operator-initiated updates against `msg.sender`, suspend admissions on material updates, and propagate provider/node status and node endpoint expiry to resource availability. `contracts/test/ComputeIdentityRegistries420.t.sol` exercises initial derivation, cross-provider rejection, expiry, revision history, suspension, retirement and invalid resource claims. Provider enrollment is **self-registration only** and ACTIVE is a **governance administrative flag**, NOT verified stake/security compliance; node operator is restricted to its active provider operator (no delegated key authentication), and endpoints/hardware/capacity are self-declared hashes/claims. These registries do not yet consume scoped CapabilityRegistry grants, validate signed endpoint/manifest proofs, verify external attestation/stake or prevent double-booked capacity. `isAvailable` means only that the local administrative/expiry/ancestry gates pass, **not** that a resource is verified or safe for paid matching. This increment adds no ProtocolRegistry publication or fixed address. Do not treat these records as fully eligible compute-market offers until independent CMP-0.5 security/policy, authorized provisioning, signed operator and reservation controls are implemented and qualified.
-- **CMP-1.5 — Foundation qualification:** pin typed fixtures in two independent languages, test all source-appropriate frozen CMP invariants, add missing scoped mutation capabilities and signed registry enrollment/updates, run dedicated Foundry and relevant application gates, reconcile current `main`, and qualify the exact final head. Mark later-layer requirements (request/match, payer-isolated Vault, receipts, verifier, worker, dispute, SDK/UI, AI adapter and funded end-to-end) explicitly OPEN for later CMP increments.
+Responsibilities:
 
-## Branch and release rule
+- create jobs
+- update lifecycle state
+- record manifest hash
+- record workload type
+- record input/output commitments
+- associate job owner
+- associate assigned workers
+- record verifier decisions
 
-Keep CMP-1 changes isolated from the merged CMP-0 specification. A `forge build`/`forge test` result on the exact CMP-1 source and explicit CI workflow evidence are necessary for executable phase gates; a documentation check or unrelated Go build is insufficient. No production-ready declaration or merge on an untested implementation head. Phase records must distinguish source created, test committed, test executed/passed, integration evidenced and deployed/registered runtime.
+## CMP-1.2 — ComputeEscrow
+
+Job owners deposit $420 before work begins.
+
+Implement:
+
+```
+deposit
+reserve
+release
+refund
+partial release
+timeout refund
+dispute freeze
+slash redistribution
+```
+
+No worker should perform paid computation against an unfunded job.
+
+**Architecture compatibility gate:** reconcile this originally named ComputeEscrow responsibility with the frozen V1 architecture and CMP-0.8's requirement to use the authorized registered 420Vault custody/accounting route, payer-isolated balances and real payer withdrawals. Do not create a second unrestricted escrow, silently alter the original functional requirements, or declare this slice complete without real deposit/reservation/settlement/refund evidence.
+
+## CMP-1.3 — ComputeWorkerRegistry
+
+Workers register:
+
+```
+worker address
+node public key
+supported architectures
+CPU classes
+GPU classes
+VRAM
+memory
+storage
+network capabilities
+software capabilities
+jurisdiction metadata (optional)
+reputation
+stake
+status
+```
+
+Never trust the self-reported hardware alone. Capabilities must eventually be benchmarked or attested.
+
+## CMP-1.4 — ComputeVerifierRegistry
+
+Separate workers from verification authorities.
+
+Verifier classes could include:
+
+```
+independent verifier
+job-owner verifier
+protocol verifier
+oracle verifier
+TEE verifier
+committee verifier
+```
+
+## CMP-1.5 — ComputeStake
+
+Require worker/verifier collateral.
+
+Provide:
+
+```
+stake()
+unstake()
+requestExit()
+slash()
+reward()
+```
+
+Include an exit delay so bad workers cannot submit fraudulent work and immediately withdraw.
+
+## Reconciliation of the unapproved replacement implementation
+
+The prior version of this file incorrectly redefined CMP-1.1–1.5 as typed IDs, read-only authorization, policy revisions, provider/node/resource identity and foundation qualification. Subsequent work added CMP-1.6–1.8 identity snapshot, guard and history components. Those are **not** the five agreed CMP-1 deliverables and their passing tests cannot be used to mark the actual five slices complete. Prior sources, commits, CI evidence and closeout documents remain in the draft PR as historical, unapproved-scope work pending explicit disposition; do not silently relabel, delete, merge or promote them as replacements for the original five contracts.
+
+**Current acceptance status for the five agreed CMP-1 slices in PR #369: NOT IMPLEMENTED/NOT QUALIFIED as those deliverables.** Inventory existing shared Vault, registry, staking and governance components before implementation to reuse authoritative systems without inventing new custody or privileges. Maintain the frozen system-address map, provider-neutral architecture and registry publication gates; reconcile any apparent conflict with the original roadmap explicitly instead of changing its goals or sequence. Keep PR #369 draft and unmerged, and qualify each actual contract and the exact final head before any closeout. No CMP-1.6 or later slices are authorized by this roadmap.

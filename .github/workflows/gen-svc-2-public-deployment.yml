@@ -1,0 +1,37 @@
+name: GEN-SVC-2 Public Deployment
+on:
+  pull_request:
+    paths:
+      - 'cmd/420svc2-public/**'
+      - 'genesis/svc2/deployment/**'
+      - 'genesis/svc2/publisher/**'
+      - 'genesis/svc2/httpapi/**'
+      - 'events/**'
+      - 'location/**'
+      - '.github/workflows/gen-svc-2-public-deployment.yml'
+  push:
+    branches:
+      - feature/gen-svc-2-public-deployment
+    paths:
+      - 'cmd/420svc2-public/**'
+      - 'genesis/svc2/deployment/**'
+      - 'genesis/svc2/publisher/**'
+      - '.github/workflows/gen-svc-2-public-deployment.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Canonical public API, publisher authority and deployment tests
+        run: go test ./genesis/svc2/... ./location/... ./events/... ./cmd/420svc2-public/...
+      - name: Static analysis
+        run: go vet ./genesis/svc2/... ./location/... ./events/... ./cmd/420svc2-public/...
+      - name: Build standalone service
+        run: go build ./cmd/420svc2-public

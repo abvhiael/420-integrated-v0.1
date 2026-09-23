@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
 
-/// @notice CMP-1.1 canonical job record. Does not custody funds, select matches,
-///         attest hardware, verify execution, or pay workers.
-/// @dev The immutable evidence authorities must be audited canonical adapters;
-///      an arbitrary callback or a mock is NOT production funding/verification proof.
+/// @notice Authoritative request check required before job creation.
+interface IComputeJobRequestEvidence420 {
+    function validRequest(bytes32 requestId, address owner, bytes32 requestCommitment, bytes32 manifestHash,
+        bytes32 workloadType, bytes32 inputCommitment, bytes32 outputSchemaCommitment, uint64 deadline)
+        external view returns (bool);
+}
 interface IComputeJobFundingEvidence420 {
     function funded(bytes32 jobId, address owner, bytes32 fundingRef) external view returns (bool);
 }
@@ -24,10 +26,11 @@ interface IComputeJobSettlementEvidence420 {
     function settled(bytes32 jobId, bytes32 verificationRef, bytes32 settlementRef) external view returns (bool);
 }
 
+/// @notice CMP-1.1 job record and bounded lifecycle. Does not custody funds,
+/// attest execution, choose matches/verifiers or pay workers.
 contract ComputeJobRegistry420 {
     enum Status { NONE, CREATED, FUNDED, MATCHED, ACCEPTED, RUNNING, RESULT_COMMITTED, VERIFIED, SETTLED,
         CANCELLED, EXPIRED, FAILED, DISPUTED, REFUNDED }
-
     struct Job {
         address owner;
         bytes32 requestId;
@@ -49,8 +52,8 @@ contract ComputeJobRegistry420 {
         uint64 revision;
         Status status;
     }
-
     bytes32 private constant JOB_DOMAIN = keccak256("420/COMPUTE/JOB/V1");
+    IComputeJobRequestEvidence420 public immutable requestEvidence;
     IComputeJobFundingEvidence420 public immutable fundingEvidence;
     IComputeJobMatchEvidence420 public immutable matchEvidence;
     IComputeJobWorkerEvidence420 public immutable workerEvidence;
@@ -59,14 +62,12 @@ contract ComputeJobRegistry420 {
     uint64 public nextJobNonce;
     mapping(bytes32 => Job) private jobs;
     mapping(bytes32 => bool) public requestUsed;
-
     error BadInput();
     error UnknownJob();
     error WrongState();
     error StaleRevision();
     error Unauthorized();
     error UnprovenEvidence();
-
     event JobCreated(bytes32 indexed jobId, bytes32 indexed requestId, address indexed owner, bytes32 manifestHash,
         bytes32 workloadType, bytes32 inputCommitment, bytes32 outputSchemaCommitment);
     event JobTransition(bytes32 indexed jobId, Status indexed previous, Status indexed current,
@@ -75,9 +76,11 @@ contract ComputeJobRegistry420 {
     event ResultRecorded(bytes32 indexed jobId, bytes32 resultCommitment);
     event VerifierDecision(bytes32 indexed jobId, address indexed verifier, bytes32 decisionRef, bool approved);
 
-    constructor(address funding_, address match_, address worker_, address verification_, address settlement_) {
-        if (funding_.code.length == 0 || match_.code.length == 0 || worker_.code.length == 0
-            || verification_.code.length == 0 || settlement_.code.length == 0) revert BadInput();
+    constructor(address request_, address funding_, address match_, address worker_, address verification_, address settlement_) {
+        if (request_.code.length == 0 || funding_.code.length == 0 || match_.code.length == 0
+            || worker_.code.length == 0 || verification_.code.length == 0 || settlement_.code.length == 0)
+            revert BadInput();
+        requestEvidence = IComputeJobRequestEvidence420(request_);
         fundingEvidence = IComputeJobFundingEvidence420(funding_);
         matchEvidence = IComputeJobMatchEvidence420(match_);
         workerEvidence = IComputeJobWorkerEvidence420(worker_);
@@ -91,13 +94,15 @@ contract ComputeJobRegistry420 {
         return record;
     }
 
-    /// @notice Owner is the authenticated caller; request/manifest validation remains
-    ///         subject to future canonical request and signed-manifest adapters.
+    /// @notice Request is checked against immutable on-chain authority before a job ID is allocated.
+    /// The separate signed off-chain manifest/payer authorization remains a production gate.
     function createJob(bytes32 requestId, bytes32 requestCommitment, bytes32 manifestHash, bytes32 workloadType,
         bytes32 inputCommitment, bytes32 outputSchemaCommitment, uint64 deadline) external returns (bytes32 jobId) {
         if (requestId == 0 || requestCommitment == 0 || manifestHash == 0 || workloadType == 0
             || inputCommitment == 0 || outputSchemaCommitment == 0 || deadline <= block.timestamp
             || requestUsed[requestId]) revert BadInput();
+        if (!requestEvidence.validRequest(requestId, msg.sender, requestCommitment, manifestHash, workloadType,
+                inputCommitment, outputSchemaCommitment, deadline)) revert UnprovenEvidence();
         uint64 nonce = ++nextJobNonce;
         jobId = keccak256(abi.encode(JOB_DOMAIN, block.chainid, address(this), nonce, requestId));
         Job storage j = jobs[jobId];
@@ -122,7 +127,6 @@ contract ComputeJobRegistry420 {
         j.fundingRef = fundingRef;
         _transition(jobId, j, Status.FUNDED, fundingRef);
     }
-
     function recordMatch(bytes32 jobId, uint64 expectedRevision, bytes32 matchId) external {
         Job storage j = _guard(jobId, expectedRevision, Status.FUNDED);
         if (msg.sender != j.owner) revert Unauthorized();
@@ -130,7 +134,6 @@ contract ComputeJobRegistry420 {
         j.matchId = matchId;
         _transition(jobId, j, Status.MATCHED, matchId);
     }
-
     function recordAcceptance(bytes32 jobId, uint64 expectedRevision, bytes32 acceptanceRef) external {
         Job storage j = _guard(jobId, expectedRevision, Status.MATCHED);
         if (msg.sender != address(matchEvidence) || acceptanceRef == 0
@@ -138,7 +141,6 @@ contract ComputeJobRegistry420 {
         j.acceptanceRef = acceptanceRef;
         _transition(jobId, j, Status.ACCEPTED, acceptanceRef);
     }
-
     function assignWorker(bytes32 jobId, uint64 expectedRevision, address worker, bytes32 assignmentRef) external {
         Job storage j = _guard(jobId, expectedRevision, Status.ACCEPTED);
         if (msg.sender != address(workerEvidence) || worker == address(0) || assignmentRef == 0
@@ -148,7 +150,6 @@ contract ComputeJobRegistry420 {
         _transition(jobId, j, Status.RUNNING, assignmentRef);
         emit WorkerAssigned(jobId, worker, assignmentRef);
     }
-
     function recordResult(bytes32 jobId, uint64 expectedRevision, bytes32 resultCommitment) external {
         Job storage j = _guard(jobId, expectedRevision, Status.RUNNING);
         if (msg.sender != j.worker || resultCommitment == 0
@@ -157,7 +158,6 @@ contract ComputeJobRegistry420 {
         _transition(jobId, j, Status.RESULT_COMMITTED, resultCommitment);
         emit ResultRecorded(jobId, resultCommitment);
     }
-
     function recordVerification(bytes32 jobId, uint64 expectedRevision, address verifier, bytes32 decisionRef,
         bool approved) external {
         Job storage j = _guard(jobId, expectedRevision, Status.RESULT_COMMITTED);
@@ -169,7 +169,6 @@ contract ComputeJobRegistry420 {
         _transition(jobId, j, approved ? Status.VERIFIED : Status.FAILED, decisionRef);
         emit VerifierDecision(jobId, verifier, decisionRef, approved);
     }
-
     function recordSettlement(bytes32 jobId, uint64 expectedRevision, bytes32 settlementRef) external {
         Job storage j = _guard(jobId, expectedRevision, Status.VERIFIED);
         if (msg.sender != address(settlementEvidence) || settlementRef == 0
@@ -177,9 +176,7 @@ contract ComputeJobRegistry420 {
         j.settlementRef = settlementRef;
         _transition(jobId, j, Status.SETTLED, settlementRef);
     }
-
-    /// @dev No generic setter or speculative cancellation/refund: those require
-    ///      authoritative CMP-1.2 custody and later dispute/expiry evidence.
+    /// @dev Exceptional custody-dependent transitions remain blocked until separately qualified.
     function _guard(bytes32 jobId, uint64 expectedRevision, Status expected) private view returns (Job storage j) {
         j = jobs[jobId];
         if (j.status == Status.NONE) revert UnknownJob();
@@ -188,7 +185,6 @@ contract ComputeJobRegistry420 {
         if (block.timestamp > j.deadline && expected != Status.RESULT_COMMITTED && expected != Status.VERIFIED)
             revert BadInput();
     }
-
     function _transition(bytes32 jobId, Job storage j, Status next, bytes32 evidenceRef) private {
         Status prior = j.status;
         uint64 revision = j.revision;

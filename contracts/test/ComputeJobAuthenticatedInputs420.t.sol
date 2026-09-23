@@ -85,8 +85,10 @@ contract ComputeJobAuthenticatedInputs420Test {
         bytes32 nodeId = nodes.register(providerId, MANIFEST, keccak256("endpoint"), uint64(block.timestamp + 3 days));
         vm.prank(WORKER);
         nodes.activate(nodeId);
+        bytes32 computeClass = resources.GPU_INFERENCE();
+        // vm.prank applies to the next external call: resolve the class before impersonating WORKER.
         vm.prank(WORKER);
-        resourceId = resources.register(nodeId, resources.GPU_INFERENCE(), MANIFEST, keccak256("runtime"),
+        resourceId = resources.register(nodeId, computeClass, MANIFEST, keccak256("runtime"),
             keccak256("advertised-capabilities"), 8);
         vm.prank(WORKER);
         resources.activate(resourceId);

@@ -85,8 +85,11 @@ contract ComputeJobSignedCustodyMatchWorkerIntegration420Test {
             uint64(block.timestamp + 3 days));
         vm.prank(OPERATOR);
         nodes.activate(nodeId);
+        // Evaluate the external getter before the one-shot prank; otherwise
+        // the getter consumes OPERATOR and register() sees this test contract.
+        bytes32 computeClass = resources.GPU_INFERENCE();
         vm.prank(OPERATOR);
-        resourceId = resources.register(nodeId, resources.GPU_INFERENCE(), MANIFEST,
+        resourceId = resources.register(nodeId, computeClass, MANIFEST,
             keccak256("runtime"), keccak256("capabilities"), 8);
         vm.prank(OPERATOR);
         resources.activate(resourceId);

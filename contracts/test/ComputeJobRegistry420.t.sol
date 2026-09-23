@@ -2,15 +2,19 @@
 pragma solidity ^0.8.24;
 
 import "../src/compute/ComputeJobRegistry420.sol";
+import "../src/compute/ComputeJobRequestAuthority420.sol";
 
 interface VmJob420 {
     function prank(address) external;
     function warp(uint256) external;
 }
 
-/// @dev TEST-ONLY stand-in: these flags are NOT real Vault, match, receipt or verifier evidence.
-contract JobEvidenceFixture420 is IComputeJobFundingEvidence420, IComputeJobMatchEvidence420,
-    IComputeJobWorkerEvidence420, IComputeJobVerificationEvidence420, IComputeJobSettlementEvidence420 {
+/// @dev TEST-ONLY stand-in: these flags are NOT actual payer, Vault, match,
+/// worker receipt or verifier evidence. Never deploy as an admitted authority.
+contract JobEvidenceFixture420 is IComputeJobRequestEvidence420, IComputeJobFundingEvidence420,
+    IComputeJobMatchEvidence420, IComputeJobWorkerEvidence420,
+    IComputeJobVerificationEvidence420, IComputeJobSettlementEvidence420 {
+    bool public enableRequest = true;
     bool public enableFunding;
     bool public enableMatch;
     bool public enableAcceptance;
@@ -19,6 +23,7 @@ contract JobEvidenceFixture420 is IComputeJobFundingEvidence420, IComputeJobMatc
     bool public enableVerification;
     bool public enableSettlement;
     function allowAll() external {
+        enableRequest = true;
         enableFunding = true;
         enableMatch = true;
         enableAcceptance = true;
@@ -27,6 +32,9 @@ contract JobEvidenceFixture420 is IComputeJobFundingEvidence420, IComputeJobMatc
         enableVerification = true;
         enableSettlement = true;
     }
+    function denyRequest() external { enableRequest = false; }
+    function validRequest(bytes32, address, bytes32, bytes32, bytes32, bytes32, bytes32, uint64)
+        external view returns (bool) { return enableRequest; }
     function funded(bytes32, address, bytes32) external view returns (bool) { return enableFunding; }
     function matched(bytes32, bytes32, bytes32, bytes32) external view returns (bool) { return enableMatch; }
     function accepted(bytes32, bytes32, bytes32) external view returns (bool) { return enableAcceptance; }
@@ -61,7 +69,7 @@ contract ComputeJobRegistry420Test {
     function setUp() public {
         evidence = new JobEvidenceFixture420();
         registry = new ComputeJobRegistry420(address(evidence), address(evidence), address(evidence),
-            address(evidence), address(evidence));
+            address(evidence), address(evidence), address(evidence));
     }
     function _create() private returns (bytes32 id) {
         vm.prank(OWNER);
@@ -105,6 +113,39 @@ contract ComputeJobRegistry420Test {
             (REQUEST, REQUEST_COMMITMENT, MANIFEST, WORKLOAD, INPUT, OUTPUT_SCHEMA, uint64(block.timestamp + 1 days))));
         require(!ok && registry.nextJobNonce() == 1, "reused request consumed nonce");
     }
+    function testRequestDenialStopsCreationWithoutNonceConsumption() public {
+        evidence.denyRequest();
+        vm.prank(OWNER);
+        (bool ok,) = address(registry).call(abi.encodeCall(registry.createJob,
+            (REQUEST, REQUEST_COMMITMENT, MANIFEST, WORKLOAD, INPUT, OUTPUT_SCHEMA, uint64(block.timestamp + 1 days))));
+        require(!ok && registry.nextJobNonce() == 0 && !registry.requestUsed(REQUEST), "unproven request created job");
+    }
+    function testCanonicalOnchainRequestRejectsForgeryAndCrossOwnerReuse() public {
+        ComputeJobRequestAuthority420 authority = new ComputeJobRequestAuthority420();
+        ComputeJobRegistry420 actual = new ComputeJobRegistry420(address(authority), address(evidence),
+            address(evidence), address(evidence), address(evidence), address(evidence));
+        vm.prank(OWNER);
+        bytes32 requestId = authority.registerRequest(MANIFEST, WORKLOAD, INPUT, OUTPUT_SCHEMA,
+            uint64(block.timestamp + 1 days));
+        ComputeJobRequestAuthority420.Request memory request_ = authority.getRequest(requestId);
+        vm.prank(FOREIGN);
+        (bool ok,) = address(actual).call(abi.encodeCall(actual.createJob,
+            (requestId, request_.requestCommitment, MANIFEST, WORKLOAD, INPUT, OUTPUT_SCHEMA, request_.deadline)));
+        require(!ok, "foreign requester created job");
+        vm.prank(OWNER);
+        (ok,) = address(actual).call(abi.encodeCall(actual.createJob,
+            (requestId, request_.requestCommitment, MANIFEST, WORKLOAD, INPUT, keccak256("changed schema"), request_.deadline)));
+        require(!ok, "changed output commitment accepted");
+        vm.prank(OWNER);
+        (ok,) = address(actual).call(abi.encodeCall(actual.createJob,
+            (requestId, bytes32(uint256(44)), MANIFEST, WORKLOAD, INPUT, OUTPUT_SCHEMA, request_.deadline)));
+        require(!ok, "forged request revision accepted");
+        vm.prank(OWNER);
+        bytes32 jobId = actual.createJob(requestId, request_.requestCommitment, MANIFEST, WORKLOAD,
+            INPUT, OUTPUT_SCHEMA, request_.deadline);
+        require(jobId != bytes32(0) && actual.job(jobId).requestId == requestId, "canonical request rejected");
+        require(actual.nextJobNonce() == 1 && actual.requestUsed(requestId), "failed attempt consumed request");
+    }
     function testFundingMustBeProvenAndCannotBeSkipped() public {
         bytes32 id = _create();
         vm.prank(OWNER);
@@ -126,12 +167,7 @@ contract ComputeJobRegistry420Test {
     function testFullEvidenceBoundLifecycleAndImmutableBindings() public {
         evidence.allowAll();
         bytes32 id = _create();
-        _fund(id);
-        _match(id);
-        _accept(id);
-        _assign(id);
-        _result(id);
-        _verify(id, true, VERIFIER);
+        _fund(id); _match(id); _accept(id); _assign(id); _result(id); _verify(id, true, VERIFIER);
         vm.prank(address(evidence));
         registry.recordSettlement(id, 7, SETTLEMENT);
         ComputeJobRegistry420.Job memory j = registry.job(id);
@@ -146,8 +182,7 @@ contract ComputeJobRegistry420Test {
     function testWrongActorsStaleRevisionAndSelfVerificationFailClosed() public {
         evidence.allowAll();
         bytes32 id = _create();
-        _fund(id);
-        _match(id);
+        _fund(id); _match(id);
         vm.prank(OWNER);
         (bool ok,) = address(registry).call(abi.encodeCall(registry.recordAcceptance, (id, uint64(3), ACCEPTANCE)));
         require(!ok, "owner impersonated match adapter");
@@ -169,29 +204,23 @@ contract ComputeJobRegistry420Test {
             (id, uint64(5), VERIFIER, DECISION, true)));
         require(!ok && registry.job(id).revision == 6, "stale decision changed job");
     }
-    function testRejectedVerificationCannotReleaseSettlement() public {
+    function testRejectedDecisionDoesNotReleaseSettlement() public {
         evidence.allowAll();
         bytes32 id = _create();
-        _fund(id);
-        _match(id);
-        _accept(id);
-        _assign(id);
-        _result(id);
-        _verify(id, false, VERIFIER);
-        require(registry.job(id).status == ComputeJobRegistry420.Status.FAILED, "failed decision state");
+        _fund(id); _match(id); _accept(id); _assign(id); _result(id); _verify(id, false, VERIFIER);
+        require(registry.job(id).status == ComputeJobRegistry420.Status.FAILED, "rejected decision state");
         vm.prank(address(evidence));
         (bool ok,) = address(registry).call(abi.encodeCall(registry.recordSettlement, (id, uint64(7), SETTLEMENT)));
-        require(!ok, "failed job settled");
+        require(!ok, "rejected job settled");
     }
     function testExpiredJobCannotStart() public {
         evidence.allowAll();
         bytes32 id = _create();
-        _fund(id);
-        _match(id);
-        _accept(id);
+        _fund(id); _match(id); _accept(id);
         vm.warp(block.timestamp + 1 days + 1);
         vm.prank(address(evidence));
-        (bool ok,) = address(registry).call(abi.encodeCall(registry.assignWorker, (id, uint64(4), WORKER, ASSIGNMENT)));
+        (bool ok,) = address(registry).call(abi.encodeCall(registry.assignWorker,
+            (id, uint64(4), WORKER, ASSIGNMENT)));
         require(!ok && registry.job(id).status == ComputeJobRegistry420.Status.ACCEPTED, "expired paid start");
     }
 }

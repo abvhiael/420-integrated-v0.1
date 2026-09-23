@@ -68,18 +68,22 @@ contract ComputeJobCanonicalCapability420Test {
     function testUnregisteredComponentUnauthorizedIssuerAndExpiry() public {
         bytes32 jobId = keccak256("bounded-job");
         bytes32 action = auth.ACTION_ACCEPT_MATCH();
+        bytes32 component = auth.COMPONENT_COMPUTE();
+        bytes32 scope = auth.scopeJob(jobId);
         bytes32 grantId = _grant(jobId, action, 4, uint64(block.timestamp + 10));
         vm.prank(UNAUTHORIZED_ISSUER);
         (bool ok,) = address(registry).call(abi.encodeCall(registry.revokeGrant, (grantId)));
         require(!ok, "foreign issuer revoked grant");
+        // Resolve all external getters before vm.prank: an external getter inside
+        // abi.encodeCall arguments would consume the one-shot spoofed caller.
         vm.prank(UNAUTHORIZED_ISSUER);
         (ok,) = address(registry).call(abi.encodeCall(registry.createGrant,
-            (keccak256("foreign-grant"), OPERATOR, auth.COMPONENT_COMPUTE(), action,
-             auth.scopeJob(jobId), uint256(0), uint256(0), uint64(0), uint64(block.timestamp),
+            (keccak256("foreign-grant"), OPERATOR, component, action,
+             scope, uint256(0), uint256(0), uint64(0), uint64(block.timestamp),
              uint64(block.timestamp + 10))));
         require(!ok, "foreign issuer granted compute permission");
         vm.warp(block.timestamp + 11);
-        require(!auth.isAuthorized(OPERATOR, action, auth.scopeJob(jobId), 0),
+        require(!auth.isAuthorized(OPERATOR, action, scope, 0),
             "expired canonical grant authorized");
     }
 }

@@ -22,6 +22,7 @@ contract ComputeJobPayerCustody420 is IComputeJobFundingEvidence420 {
     }
 
     ComputeJobSignedRequestAuthority420 public immutable requests;
+    address public immutable deploymentAuthority;
     ComputeJobRegistry420 public jobs;
     mapping(bytes32 => Reservation) private _reservations;
     uint256 public totalReserved;
@@ -39,12 +40,14 @@ contract ComputeJobPayerCustody420 is IComputeJobFundingEvidence420 {
     constructor(address signedRequestAuthority) {
         if (signedRequestAuthority.code.length == 0) revert InvalidCustody();
         requests = ComputeJobSignedRequestAuthority420(signedRequestAuthority);
+        deploymentAuthority = msg.sender;
     }
 
-    /// @dev One-time binding avoids circular constructor dependencies. There is
-    /// no privileged method that can create funding receipts without payment.
+    /// @dev Deployer-only, one-time binding prevents an outsider from binding
+    /// a different registry to this custody instance before intended setup.
     function bindJobs(address jobRegistry) external {
-        if (address(jobs) != address(0) || jobRegistry.code.length == 0) revert InvalidCustody();
+        if (msg.sender != deploymentAuthority || address(jobs) != address(0)
+            || jobRegistry.code.length == 0) revert InvalidCustody();
         ComputeJobRegistry420 candidate = ComputeJobRegistry420(jobRegistry);
         if (address(candidate.fundingEvidence()) != address(this)
             || address(candidate.requestEvidence()) != address(requests)) revert InvalidCustody();

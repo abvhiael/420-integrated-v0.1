@@ -53,7 +53,19 @@ contract MediaJobMarket420 is SystemAccess, I420System {
         Status status;
     }
 
+    struct CreateParams {
+        bytes32 jobId;
+        bytes32 streamId;
+        bytes32 jobKind;
+        bytes32 capabilityId;
+        bytes32 slaPolicyId;
+        bytes32 inputRef;
+        uint256 maxSpend;
+        uint64 deadline;
+    }
+
     mapping(bytes32 => Job) public jobs;
+    mapping(bytes32 => bytes32) public reservedOperatorId;
 
     address public operatorRegistry;
     address public slaRegistry;
@@ -73,9 +85,11 @@ contract MediaJobMarket420 is SystemAccess, I420System {
     error InvalidSLA();
     error DependenciesAlreadyBound();
     error MissingAttestation();
+    error OperatorReserved();
 
     event DependenciesBound(address indexed operatorRegistry, address indexed slaRegistry, address indexed settlement);
     event JobCreated(bytes32 indexed jobId, address indexed requester, bytes32 indexed capabilityId, bytes32 streamId, bytes32 jobKind, bytes32 slaPolicyId, uint256 maxSpend, uint64 deadline);
+    event JobAssigned(bytes32 indexed jobId, bytes32 indexed operatorId);
     event JobFunded(bytes32 indexed jobId, bytes32 fundingRef, uint256 amount);
     event JobAccepted(bytes32 indexed jobId, bytes32 indexed operatorId, address indexed operatorAccount);
     event JobStatusChanged(bytes32 indexed jobId, Status previousStatus, Status nextStatus);
@@ -107,34 +121,63 @@ contract MediaJobMarket420 is SystemAccess, I420System {
         uint256 maxSpend,
         uint64 deadline
     ) external {
-        if (!dependenciesBound) revert InvalidJob();
-        if (jobId == bytes32(0) || jobKind == bytes32(0) || capabilityId == bytes32(0) || inputRef == bytes32(0) || maxSpend == 0) revert InvalidJob();
-        if (jobs[jobId].status != Status.NONE) revert JobExists();
-        if (deadline <= block.timestamp) revert InvalidDeadline();
-        if (slaPolicyId != bytes32(0) && !IMediaSLAJobs420(slaRegistry).isActive(slaPolicyId)) revert InvalidSLA();
+        CreateParams memory p = CreateParams(jobId, streamId, jobKind, capabilityId, slaPolicyId, inputRef, maxSpend, deadline);
+        _createJob(p, bytes32(0));
+    }
 
-        jobs[jobId] = Job({
-            requester: msg.sender,
-            streamId: streamId,
-            jobKind: jobKind,
-            capabilityId: capabilityId,
-            slaPolicyId: slaPolicyId,
-            inputRef: inputRef,
-            outputRef: bytes32(0),
-            operatorId: bytes32(0),
-            fundingRef: bytes32(0),
-            maxSpend: maxSpend,
-            fundedAmount: 0,
-            deadline: deadline,
-            status: Status.CREATED
-        });
-        emit JobCreated(jobId, msg.sender, capabilityId, streamId, jobKind, slaPolicyId, maxSpend, deadline);
+    function createAssignedJob(
+        bytes32 jobId,
+        bytes32 streamId,
+        bytes32 jobKind,
+        bytes32 capabilityId,
+        bytes32 slaPolicyId,
+        bytes32 inputRef,
+        uint256 maxSpend,
+        uint64 deadline,
+        bytes32 operatorId
+    ) external {
+        if (operatorId == bytes32(0)) revert InvalidOperator();
+        _requireOperational(operatorId, capabilityId);
+        CreateParams memory p = CreateParams(jobId, streamId, jobKind, capabilityId, slaPolicyId, inputRef, maxSpend, deadline);
+        _createJob(p, operatorId);
+    }
+
+    function _requireOperational(bytes32 operatorId, bytes32 capabilityId) private view {
+        if (!dependenciesBound) revert InvalidOperator();
+        if (!IMediaOperatorJobs420(operatorRegistry).isOperationalFor(operatorId, capabilityId)) revert InvalidOperator();
+    }
+
+    function _createJob(CreateParams memory p, bytes32 operatorId) private {
+        if (!dependenciesBound) revert InvalidJob();
+        if (p.jobId == bytes32(0) || p.jobKind == bytes32(0) || p.capabilityId == bytes32(0) || p.inputRef == bytes32(0) || p.maxSpend == 0) revert InvalidJob();
+        if (jobs[p.jobId].status != Status.NONE) revert JobExists();
+        if (p.deadline <= block.timestamp) revert InvalidDeadline();
+        if (p.slaPolicyId != bytes32(0) && !IMediaSLAJobs420(slaRegistry).isActive(p.slaPolicyId)) revert InvalidSLA();
+
+        Job storage j = jobs[p.jobId];
+        j.requester = msg.sender;
+        j.streamId = p.streamId;
+        j.jobKind = p.jobKind;
+        j.capabilityId = p.capabilityId;
+        j.slaPolicyId = p.slaPolicyId;
+        j.inputRef = p.inputRef;
+        j.maxSpend = p.maxSpend;
+        j.deadline = p.deadline;
+        j.status = Status.CREATED;
+
+        if (operatorId != bytes32(0)) {
+            reservedOperatorId[p.jobId] = operatorId;
+            emit JobAssigned(p.jobId, operatorId);
+        }
+        emit JobCreated(p.jobId, msg.sender, p.capabilityId, p.streamId, p.jobKind, p.slaPolicyId, p.maxSpend, p.deadline);
     }
 
     function acceptJob(bytes32 jobId, bytes32 operatorId) external {
         Job storage j = _get(jobId);
         if (j.status != Status.CREATED) revert InvalidTransition();
         if (block.timestamp > j.deadline) revert InvalidDeadline();
+        bytes32 reserved = reservedOperatorId[jobId];
+        if (reserved != bytes32(0) && reserved != operatorId) revert OperatorReserved();
         IMediaOperatorJobs420 registry = IMediaOperatorJobs420(operatorRegistry);
         if (!registry.isOperationalFor(operatorId, j.capabilityId)) revert InvalidOperator();
         address operatorAccount = registry.operatorAccountOf(operatorId);

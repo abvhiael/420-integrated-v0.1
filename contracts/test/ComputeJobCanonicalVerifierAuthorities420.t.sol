@@ -202,7 +202,8 @@ contract ComputeJobCanonicalVerifierAuthorities420Test {
         require(!ok && auth.isAuthorized(verifier, action, scope, 0),
             "outsider revoked verifier grant");
         ComputeJobIndependentVerification420.Verdict memory v = _verdict(id, 71);
-        (ok, bytes32 decisionRef) = _submit(v);
+        bytes32 decisionRef;
+        (ok, decisionRef) = _submit(v);
         require(ok && jobs.job(id).status == ComputeJobRegistry420.Status.VERIFIED
             && verification.verified(id, v.resultCommitment, verifier, decisionRef, true)
             && custody.totalReserved() == 3 ether, "canonical verified job or payer custody failed");

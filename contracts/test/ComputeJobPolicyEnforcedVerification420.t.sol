@@ -69,8 +69,9 @@ contract ComputeJobPolicyEnforcedVerification420Test {
         verification.bindJobs(address(jobs));
         verification.setApprovedProfile(PROFILE, true);
         registry.transferComponentRegistrar(GOV);
+        bytes32 component = auth.COMPONENT_COMPUTE();
         vm.prank(GOV);
-        registry.registerProtocolComponent(auth.COMPONENT_COMPUTE(), ISSUER);
+        registry.registerProtocolComponent(component, ISSUER);
         vm.prank(OPERATOR);
         bytes32 providerId = providers.register(MANIFEST, keccak256("security"), OPERATOR);
         vm.prank(GOV);

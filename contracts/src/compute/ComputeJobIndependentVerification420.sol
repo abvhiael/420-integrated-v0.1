@@ -5,9 +5,8 @@ import "./ComputeJobRegistry420.sol";
 import "./ComputeJobAcceptedMatch420.sol";
 import "./ComputeAuthorization420.sol";
 
-/// @notice Independently authorized, domain-bound verifier verdict evidence for one committed job result.
-/// @dev Authenticity and separation of duties do not prove the numerical correctness of a computation.
-///      Profile eligibility and the target network's component-grant authority require separate qualification.
+/// @notice Signed verifier verdict primitive. For production, deploy the policy-enforced subclass.
+/// @dev Signatures and distinct wallet addresses alone do not prove beneficial-owner independence.
 contract ComputeJobIndependentVerification420 is IComputeJobVerificationEvidence420 {
     bytes32 public constant DOMAIN_TYPEHASH = keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)");
     bytes32 public constant VERDICT_TYPEHASH = keccak256("ComputeVerdict(bytes32 jobId,bytes32 requestId,bytes32 manifestHash,bytes32 matchId,bytes32 assignmentRef,bytes32 resultCommitment,address verifier,bytes32 profileId,bool approved,uint64 expectedRevision,uint64 expiry,uint256 nonce)");
@@ -62,7 +61,6 @@ contract ComputeJobIndependentVerification420 is IComputeJobVerificationEvidence
         bindingAdmin = msg.sender;
     }
 
-    /// @dev One-time wiring; the same registry must own the matched-resource evidence.
     function bindJobs(address jobs_) external {
         if (msg.sender != bindingAdmin || address(jobs) != address(0) || jobs_.code.length == 0)
             revert Unauthorized();
@@ -73,7 +71,6 @@ contract ComputeJobIndependentVerification420 is IComputeJobVerificationEvidence
         jobs = candidate;
     }
 
-    /// @dev Deployment authority must approve a real verifier policy/profile, never a test-only blanket profile.
     function setApprovedProfile(bytes32 profileId, bool approved) external {
         if (msg.sender != bindingAdmin) revert Unauthorized();
         if (profileId == bytes32(0)) revert InvalidEvidence();
@@ -92,10 +89,9 @@ contract ComputeJobIndependentVerification420 is IComputeJobVerificationEvidence
         return keccak256(abi.encodePacked("\x19\x01", domainSeparator(), structHash));
     }
 
-    /// @notice Record one independent verdict and advance the registry atomically.
-    /// @dev Anyone may relay a signature; only the named verifier may authorize its contents.
+    /// @notice Production subclass MUST enforce canonical-controller appointment before this transition.
     function submitVerdict(Verdict calldata v, bytes calldata signature)
-        external returns (bytes32 decisionRef) {
+        public virtual returns (bytes32 decisionRef) {
         if (address(jobs) == address(0) || v.verifier == address(0)
             || v.profileId == bytes32(0) || !approvedProfile[v.profileId]
             || v.expiry < block.timestamp || usedNonce[v.verifier][v.nonce]

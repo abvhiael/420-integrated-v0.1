@@ -12,8 +12,7 @@ interface VmComputeIntegrated420 {
     function warp(uint256 time) external;
 }
 
-/// @dev Test-only capability fixture. This does not constitute deployment qualification
-/// of the canonical CapabilityRegistry registrar, component and grant lifecycle.
+/// @dev Test-only grants do not qualify production capability registration.
 contract IntegratedComputeGrants420 {
     mapping(bytes32 => bool) private grants;
     function grant(address who, bytes32 component, bytes32 action, bytes32 scope) external {
@@ -77,7 +76,6 @@ contract ComputeJobSignedCustodyMatchWorkerIntegration420Test {
         custody.bindJobs(address(jobs));
         matches.bindJobs(address(jobs));
         workers.bindJobs(address(jobs));
-
         vm.prank(OPERATOR);
         bytes32 providerId = providers.register(MANIFEST, keccak256("security"), OPERATOR);
         vm.prank(GOV);
@@ -109,9 +107,10 @@ contract ComputeJobSignedCustodyMatchWorkerIntegration420Test {
                 maxSpend: ceiling, nonce: nonce
             });
         bytes32 digest = requests.authorizationDigest(a);
+        bytes memory ownerSignature = _signature(OWNER_KEY, digest);
+        bytes memory payerSignature = _signature(PAYER_KEY, digest);
         vm.prank(owner);
-        bytes32 requestId = requests.registerSignedRequest(a,
-            _signature(OWNER_KEY, digest), _signature(PAYER_KEY, digest));
+        bytes32 requestId = requests.registerSignedRequest(a, ownerSignature, payerSignature);
         vm.prank(owner);
         id = jobs.createJob(requestId, requestId, MANIFEST, WORKLOAD, INPUT, OUTPUT, a.deadline);
     }

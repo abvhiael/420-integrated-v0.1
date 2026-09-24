@@ -26,7 +26,9 @@ contract VaultAuthorization420 is I420System {
         return keccak256(abi.encode(vaultId, asset, recipient, actionClass));
     }
 
-    function isAuthorized(address principal, bytes32 vaultId, bytes32 actionId, uint256 amount) external view returns (bool) {
+    /// @dev Virtual so a dedicated Vault may add a permanent, narrower policy on TOP of
+    /// the shared registry's grant check. Generic Vault semantics remain unchanged.
+    function isAuthorized(address principal, bytes32 vaultId, bytes32 actionId, uint256 amount) public view virtual returns (bool) {
         return capabilityRegistry.isAuthorized(
             principal,
             VaultIds420.COMPONENT_VAULT,
@@ -43,7 +45,7 @@ contract VaultAuthorization420 is I420System {
         address asset,
         address recipient,
         uint256 amount
-    ) external view returns (bool) {
+    ) public view virtual returns (bool) {
         return capabilityRegistry.isAuthorized(
             principal,
             VaultIds420.COMPONENT_VAULT,

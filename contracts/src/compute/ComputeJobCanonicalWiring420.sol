@@ -4,10 +4,9 @@ pragma solidity ^0.8.24;
 import "./ComputeJobIntegerProfileVerification420.sol";
 import "./ComputeJobPayerCustody420.sol";
 
-/// @notice Immutable, chain-specific audit record of an intended CMP-1.1.4 deployment.
-/// @dev This does NOT deploy, register, publish, or certify an installation. Governance must
-/// independently verify the configured addresses, runtime code hashes, off-chain identity
-/// reviews, capability registrar and authorized grants before considering production use.
+/// @notice Immutable, chain-specific audit record of an intended CMP-1.1.4 installation.
+/// @dev Does not deploy, publish or certify an installation. Runtime code hashes must
+/// be independently reviewed before their expected values are supplied here.
 contract ComputeJobCanonicalWiring420 {
     ComputeJobRegistry420 public immutable canonicalJobs;
     ComputeJobIntegerProfileVerification420 public immutable canonicalVerification;
@@ -20,7 +19,6 @@ contract ComputeJobCanonicalWiring420 {
     bytes32 public immutable expectedJobCodeHash;
     bytes32 public immutable expectedVerificationCodeHash;
     bytes32 public immutable expectedPolicyCodeHash;
-
     error InvalidWiring();
 
     constructor(address jobs_, address verification_, address policy_,
@@ -44,35 +42,29 @@ contract ComputeJobCanonicalWiring420 {
         assertWiring();
     }
 
-    /// @notice Recheck all immutable canonical references and mutable role/profile gates.
-    /// A role rotation or policy-epoch change fails closed until a new reviewed record is made.
+    /// @notice Recheck code hashes, one-time bindings, upstream dependencies, profile and roles.
+    /// @dev An authority rotation or policy-epoch change fails closed.
     function assertWiring() public view {
         ComputeJobRegistry420 j = canonicalJobs;
         ComputeJobIntegerProfileVerification420 v = canonicalVerification;
         ComputeVerifierIndependencePolicy420 p = canonicalPolicy;
+        ComputeJobAcceptedMatch420 m = ComputeJobAcceptedMatch420(address(j.matchEvidence()));
+        ComputeJobMatchedWorkerEvidence420 w = ComputeJobMatchedWorkerEvidence420(address(j.workerEvidence()));
+        ComputeJobPayerCustody420 c = ComputeJobPayerCustody420(payable(address(j.fundingEvidence())));
         if (block.chainid != expectedChainId || address(j).codehash != expectedJobCodeHash
             || address(v).codehash != expectedVerificationCodeHash
             || address(p).codehash != expectedPolicyCodeHash
             || address(j.verificationEvidence()) != address(v)
-            || address(v.jobs()) != address(j)
-            || address(v.independencePolicy()) != address(p)
+            || address(v.jobs()) != address(j) || address(v.independencePolicy()) != address(p)
             || !v.approvedProfile(v.PROFILE_ID())
-            || address(v.matches()) != address(j.matchEvidence())
-            || address(v.authorization()) == address(0)
-            || address(v.matches().authorization()) != address(v.authorization())
-            || address(j.requestEvidence()) == address(0)
-            || address(j.fundingEvidence()) == address(0)
-            || address(j.workerEvidence()) == address(0)
-            || address(j.settlementEvidence()) == address(0)
-            || address(j.matchEvidence().jobs()) != address(j)
-            || address(j.workerEvidence().jobs()) != address(j)
-            || address(j.workerEvidence().matches()) != address(j.matchEvidence())
-            || address(j.workerEvidence().authorization()) != address(v.authorization())
-            || address(j.fundingEvidence().jobs()) != address(j)
-            || address(j.fundingEvidence().requests()) != address(j.requestEvidence())
-            || p.governance() != expectedGovernance
-            || p.identityAttestor() != expectedAttestor
-            || p.verifierSelector() != expectedSelector
-            || p.policyEpoch() != expectedPolicyEpoch) revert InvalidWiring();
+            || address(v.matches()) != address(m) || address(v.authorization()) == address(0)
+            || address(m.authorization()) != address(v.authorization())
+            || address(m.jobs()) != address(j) || address(w.jobs()) != address(j)
+            || address(w.matches()) != address(m) || address(w.authorization()) != address(v.authorization())
+            || address(c.jobs()) != address(j) || address(c.requests()) != address(j.requestEvidence())
+            || address(j.requestEvidence()) == address(0) || address(j.settlementEvidence()) == address(0)
+            || p.governance() != expectedGovernance || p.identityAttestor() != expectedAttestor
+            || p.verifierSelector() != expectedSelector || p.policyEpoch() != expectedPolicyEpoch)
+            revert InvalidWiring();
     }
 }

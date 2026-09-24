@@ -12,6 +12,7 @@ on:
       - 'testnet/public-services/explorer/**'
       - 'scripts/verify-420indexer.py'
       - 'scripts/verify-explorer-indexer-consumer.py'
+      - 'scripts/exp-0-1-1-inventory.py'
       - '.github/workflows/420indexer.yml'
   push:
     branches:
@@ -26,6 +27,7 @@ on:
       - 'testnet/public-services/explorer/**'
       - 'scripts/verify-420indexer.py'
       - 'scripts/verify-explorer-indexer-consumer.py'
+      - 'scripts/exp-0-1-1-inventory.py'
       - '.github/workflows/420indexer.yml'
 
 jobs:
@@ -47,6 +49,8 @@ jobs:
           --health-retries 5
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
@@ -74,3 +78,13 @@ jobs:
         run: python scripts/verify-420indexer.py
       - name: Verify 420Explorer shared-indexer consumer contract
         run: python scripts/verify-explorer-indexer-consumer.py
+      - name: EXP-0.1.1 pinned-tree exhaustive inventory
+        if: always()
+        run: python scripts/exp-0-1-1-inventory.py --commit 95a83a961286701b6e8c064de1deccad10f41fd7
+      - name: Upload EXP-0.1.1 full-tree and candidate evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp-0-1-1-pinned-tree-inventory
+          path: exp-0-1-1-evidence/
+          if-no-files-found: error

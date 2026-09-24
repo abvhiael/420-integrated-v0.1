@@ -18,7 +18,7 @@ contract CMPVaultAuthorization420 is VaultAuthorization420 {
     address public immutable deployer;
     address public boundVault;
     address public fundingAdapter;
-    bool public sealed;
+    bool public configurationSealed;
 
     error InvalidCMPBinding();
     event CMPVaultBound(address indexed vault);
@@ -34,7 +34,7 @@ contract CMPVaultAuthorization420 is VaultAuthorization420 {
     }
 
     function bindVault(address vault_) external {
-        if (msg.sender != deployer || sealed || boundVault != address(0)
+        if (msg.sender != deployer || configurationSealed || boundVault != address(0)
             || vault_.code.length == 0) revert InvalidCMPBinding();
         AssetVault420 candidate = AssetVault420(payable(vault_));
         if (candidate.vaultId() != cmpVaultId || address(candidate.authorization()) != address(this))
@@ -44,7 +44,7 @@ contract CMPVaultAuthorization420 is VaultAuthorization420 {
     }
 
     function bindFunding(address funding_) external {
-        if (msg.sender != deployer || sealed || fundingAdapter != address(0)
+        if (msg.sender != deployer || configurationSealed || fundingAdapter != address(0)
             || boundVault == address(0) || funding_.code.length == 0) revert InvalidCMPBinding();
         ComputeEscrowFunding420 candidate = ComputeEscrowFunding420(payable(funding_));
         if (address(candidate.vault()) != boundVault || candidate.vaultId() != cmpVaultId
@@ -55,9 +55,9 @@ contract CMPVaultAuthorization420 is VaultAuthorization420 {
 
     /// @notice No method exists to rotate the Vault, funding adapter, or policy after sealing.
     function seal() external {
-        if (msg.sender != deployer || sealed || boundVault == address(0)
+        if (msg.sender != deployer || configurationSealed || boundVault == address(0)
             || fundingAdapter == address(0)) revert InvalidCMPBinding();
-        sealed = true;
+        configurationSealed = true;
         emit CMPPolicySealed(boundVault, fundingAdapter);
     }
 
@@ -66,7 +66,7 @@ contract CMPVaultAuthorization420 is VaultAuthorization420 {
     function isAuthorized(address principal, bytes32 vaultId, bytes32 actionId, uint256 amount)
         public view override returns (bool)
     {
-        if (!sealed || msg.sender != boundVault || vaultId != cmpVaultId
+        if (!configurationSealed || msg.sender != boundVault || vaultId != cmpVaultId
             || principal != fundingAdapter) return false;
         if (actionId != VaultIds420.ACTION_CREATE_OBLIGATION
             && actionId != VaultIds420.ACTION_RELEASE_OBLIGATION) return false;

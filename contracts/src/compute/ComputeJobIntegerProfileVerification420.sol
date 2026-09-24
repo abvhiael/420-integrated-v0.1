@@ -18,6 +18,7 @@ contract ComputeJobIntegerProfileVerification420 is ComputeJobPolicyEnforcedVeri
     bytes32 public constant OUTPUT_DOMAIN = keccak256("420/CMP/OUTPUT/INTEGER_SUM_OF_SQUARES/V1");
     bytes32 public constant OUTPUT_SCHEMA = keccak256("420/CMP/SCHEMA/UINT256_SUM_OF_SQUARES/V1");
     bytes32 public constant EVIDENCE_DOMAIN = keccak256("420/CMP/EVALUATION/INTEGER_SUM_OF_SQUARES/V1");
+    bytes32 public constant APPOINTMENT_DOMAIN = keccak256("420/CMP/VERIFIER/APPOINTMENT/V1");
     bytes32 private constant RESULT_DOMAIN = keccak256("420/COMPUTE/STRICT_RESULT/V1");
     uint64 public constant MAX_ELEMENT = 1_000_000_000;
 
@@ -33,6 +34,7 @@ contract ComputeJobIntegerProfileVerification420 is ComputeJobPolicyEnforcedVeri
         uint256 expectedOutput;
         bool approved;
         bool exists;
+        bytes32 appointmentRef;
     }
 
     mapping(bytes32 => Evaluation) private _evaluationByDecision;
@@ -59,6 +61,15 @@ contract ComputeJobIntegerProfileVerification420 is ComputeJobPolicyEnforcedVeri
 
     function outputHash(uint256 value) public pure returns (bytes32) {
         return keccak256(abi.encode(OUTPUT_DOMAIN, value));
+    }
+
+    /// @notice Reproduce the exact appointment snapshot included in evaluated evidence.
+    /// @dev Binding the appointment does not make a self-asserted controller ID independent.
+    function appointmentHash(bytes32 jobId) public view returns (bytes32) {
+        ComputeVerifierIndependencePolicy420.Appointment memory a = independencePolicy.appointment(jobId);
+        if (!a.active || a.verifier == address(0) || a.profileId != PROFILE_ID
+            || a.evidenceHash == bytes32(0)) revert InvalidEvidence();
+        return keccak256(abi.encode(APPOINTMENT_DOMAIN, address(independencePolicy), jobId, a));
     }
 
     /// @notice Independently evaluate a committed worker output and submit the signed verdict.
@@ -90,19 +101,23 @@ contract ComputeJobIntegerProfileVerification420 is ComputeJobPolicyEnforcedVeri
         uint256 expected = expectedResult(values);
         bool correct = claimedOutput == expected;
         if (v.approved != correct) revert InvalidEvidence();
-        // A signed verdict is bound to the exact result and profile. Evidence is deterministically
-        // committed to the verdict digest, including the independently recomputed expected value.
+        bytes32 appointmentRef = appointmentHash(v.jobId);
+        ComputeVerifierIndependencePolicy420.Appointment memory ap = independencePolicy.appointment(v.jobId);
+        if (ap.verifier != v.verifier || ap.profileId != v.profileId) revert InvalidEvidence();
+        // Bind the signed decision to the canonical input, assigned result preimage,
+        // independent arithmetic and the *specific* appointment snapshot at submission.
         bytes32 digest = verdictDigest(v);
         evidenceRef = keccak256(abi.encode(EVIDENCE_DOMAIN, digest, v.jobId,
-            j.inputCommitment, committed, workerOutputHash, receiptHash, claimedOutput, expected, correct));
+            j.inputCommitment, committed, workerOutputHash, receiptHash, claimedOutput,
+            expected, correct, appointmentRef));
         if (evidenceRef == bytes32(0) || _evaluationByDecision[digest].exists) revert InvalidEvidence();
-        // This call enforces appointed verifier independence, canonical capability and signature.
-        // A revert rolls back the evaluation record and all state changes atomically.
+        // This call enforces current controller eligibility, capability and signature.
+        // A revert rolls back the decision and evaluation atomically.
         decisionRef = super.submitVerdict(v, signature);
         if (decisionRef != digest) revert InvalidEvidence();
         _evaluationByDecision[decisionRef] = Evaluation(decisionRef, evidenceRef, v.jobId,
             j.inputCommitment, committed, workerOutputHash, receiptHash, claimedOutput,
-            expected, correct, true);
+            expected, correct, true, appointmentRef);
         emit IntegerEvaluationRecorded(v.jobId, decisionRef, evidenceRef, correct);
     }
 

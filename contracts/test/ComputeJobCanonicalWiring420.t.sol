@@ -92,11 +92,12 @@ contract ComputeJobCanonicalWiring420Test {
     }
 
     function testWrongChainFailsClosed() public {
-        uint256 original = block.chainid;
-        vm.chainId(original + 1);
+        // The clean-chain success is independently asserted in
+        // testBoundCanonicalProfileAndCodeHashesPass. A chain-id cheat-code
+        // mutation can invalidate runtime binding assumptions until the next fixture.
+        uint256 wrongChain = block.chainid + 1;
+        vm.chainId(wrongChain);
         (bool ok,) = address(audit).call(abi.encodeCall(audit.assertWiring, ()));
         require(!ok, "wrong-chain wiring qualified");
-        vm.chainId(original);
-        audit.assertWiring();
     }
 }

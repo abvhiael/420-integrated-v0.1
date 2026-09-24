@@ -20,6 +20,13 @@ contract AssetVault420 is I420System {
     VaultAccounting420 public immutable accounting;
     address public immutable registrationCreator;
 
+    // This protection is enforced by the Vault itself, not by the funding adapter or
+    // the mutable capability issuer. The creator of a payer-safety obligation is its
+    // immutable controller. A future generic Vault grant cannot authorize another
+    // principal to release or cancel that obligation.
+    bytes32 public constant CMP_PAYER_SAFETY_TYPE = keccak256("420/CMP/PAYER-SAFETY/V1");
+    mapping(bytes32 => address) public payerSafetyController;
+
     mapping(bytes32 => bool) public executedOperation;
     uint256 private _entered;
 
@@ -33,11 +40,13 @@ contract AssetVault420 is I420System {
     error WrongVaultRegistration();
     error UnexpectedTokenDelta();
     error Reentrancy();
+    error ProtectedPayerSafetyObligation();
 
     event NativeDeposited(address indexed from, uint256 amount);
     event TokenDeposited(address indexed token, address indexed from, uint256 amount);
     event Withdrawal(bytes32 indexed operationId, address indexed asset, address indexed recipient, uint256 amount);
     event ObligationOperation(bytes32 indexed operationId, bytes32 indexed obligationId, bytes32 actionId);
+    event PayerSafetyControllerBound(bytes32 indexed obligationId, address indexed controller);
 
     constructor(
         bytes32 vaultId_,
@@ -122,12 +131,17 @@ contract AssetVault420 is I420System {
         if (!authorization.isAuthorized(msg.sender, vaultId, VaultIds420.ACTION_CREATE_OBLIGATION, amount)) revert Unauthorized();
         _consume(operationId);
         accounting.createObligation(vaultId, obligationId, asset, beneficiary, amount, obligationType, sourceRef);
+        if (obligationType == CMP_PAYER_SAFETY_TYPE) {
+            payerSafetyController[obligationId] = msg.sender;
+            emit PayerSafetyControllerBound(obligationId, msg.sender);
+        }
         emit ObligationOperation(operationId, obligationId, VaultIds420.ACTION_CREATE_OBLIGATION);
     }
 
     function releaseObligation(bytes32 operationId, bytes32 obligationId) external nonReentrant {
         _requireActiveOrWindingDown();
         if (!authorization.isAuthorized(msg.sender, vaultId, VaultIds420.ACTION_RELEASE_OBLIGATION, 0)) revert Unauthorized();
+        _requirePayerSafetyController(obligationId);
         _consume(operationId);
         accounting.releaseObligation(vaultId, obligationId);
         emit ObligationOperation(operationId, obligationId, VaultIds420.ACTION_RELEASE_OBLIGATION);
@@ -136,6 +150,7 @@ contract AssetVault420 is I420System {
     function cancelObligation(bytes32 operationId, bytes32 obligationId) external nonReentrant {
         _requireActiveOrWindingDown();
         if (!authorization.isAuthorized(msg.sender, vaultId, VaultIds420.ACTION_CANCEL_OBLIGATION, 0)) revert Unauthorized();
+        _requirePayerSafetyController(obligationId);
         _consume(operationId);
         accounting.cancelObligation(vaultId, obligationId);
         emit ObligationOperation(operationId, obligationId, VaultIds420.ACTION_CANCEL_OBLIGATION);
@@ -156,6 +171,11 @@ contract AssetVault420 is I420System {
     function canClose() external view returns (bool) {
         _requireRegistered();
         return accounting.canClose(vaultId);
+    }
+
+    function _requirePayerSafetyController(bytes32 obligationId) private view {
+        address controller = payerSafetyController[obligationId];
+        if (controller != address(0) && msg.sender != controller) revert ProtectedPayerSafetyObligation();
     }
 
     function _recordNativeDeposit() private {

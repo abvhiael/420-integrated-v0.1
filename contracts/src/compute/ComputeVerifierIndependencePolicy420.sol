@@ -79,8 +79,11 @@ contract ComputeVerifierIndependencePolicy420 {
     function appoint(bytes32 jobId, address verifier, bytes32 profileId,
         address owner, address payer, address operator, bytes32 evidenceHash, uint64 validUntil) external {
         if (msg.sender != verifierSelector) revert Unauthorized();
-        if (jobId == bytes32(0) || profileId == bytes32(0) || evidenceHash == bytes32(0)
-            || verifier == owner || verifier == payer || verifier == operator || validUntil <= block.timestamp
+        // A job can have only one live appointment. Replacing it requires a recorded
+        // governance/selector revocation, even if the former appointment has expired.
+        if (appointments[jobId].active || jobId == bytes32(0) || profileId == bytes32(0)
+            || evidenceHash == bytes32(0) || verifier == owner || verifier == payer
+            || verifier == operator || validUntil <= block.timestamp
             || suspendedControllerAccount[verifier]) revert InvalidEvidence();
         // Fail closed without CURRENT independent-controller attestations for all parties.
         bytes32 v = _controller(verifier);

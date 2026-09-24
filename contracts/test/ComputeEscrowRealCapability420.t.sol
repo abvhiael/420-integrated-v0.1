@@ -16,8 +16,8 @@ interface VmEscrowRealCaps420 {
 }
 
 /// @notice CMP-1.2.1.2: real capability registry, real Vault and two independently signed payers.
-/// @dev These tests do NOT establish that a deployed registrar or component authority cannot issue
-/// a future hostile grant. The final test demonstrates that such an issuance is a real risk.
+/// @dev The Vault must reject third-party mutation of payer safety obligations even if a
+/// component authority deliberately grants the attacker ordinary RELEASE and CANCEL rights.
 contract ComputeEscrowRealCapability420Test {
     VmEscrowRealCaps420 private constant vm = VmEscrowRealCaps420(address(uint160(uint256(keccak256("hevm cheat code")))));
     bytes32 private constant VAULT_ID = keccak256("cmp/vault/real-capabilities/1");
@@ -119,6 +119,9 @@ contract ComputeEscrowRealCapability420Test {
         require(accounting.getObligation(funding.credit(a).obligationId).beneficiary == payerA
             && accounting.getObligation(funding.credit(b).obligationId).beneficiary == payerB,
             "incorrect immutable refund beneficiaries");
+        require(vault.payerSafetyController(funding.credit(a).obligationId) == address(funding)
+            && vault.payerSafetyController(funding.credit(b).obligationId) == address(funding),
+            "safety controllers not bound at Vault creation");
     }
 
     function testRealRegistryRejectsOutsiderGrantIssuanceAndVaultSpending() public {
@@ -142,16 +145,63 @@ contract ComputeEscrowRealCapability420Test {
             && accounting.getObligation(obligation).state == 1, "unauthorized payer safety spend");
     }
 
-    function testAuthorizedGrantExpansionIsUnsafeAndMustBlockDeployment() public {
-        (bytes32 a,) = _fundPair();
-        bytes32 obligation = funding.credit(a).obligationId;
-        // This contract deliberately retains protocol-component grant authority in this fixture.
-        // The actual registry allows that authority to issue RELEASE for an arbitrary principal.
+    function testNewGenericGrantsCannotReleaseOrCancelEitherPayersSafety() public {
+        (bytes32 a, bytes32 b) = _fundPair();
+        bytes32 first = funding.credit(a).obligationId;
+        bytes32 second = funding.credit(b).obligationId;
+        // The actual component authority issues both grants to an unrelated principal.
+        // Even this authorized grant expansion must not override Vault-level obligation ownership.
         _grant(outsider, VaultIds420.ACTION_RELEASE_OBLIGATION);
+        _grant(outsider, VaultIds420.ACTION_CANCEL_OBLIGATION);
+        require(auth.isAuthorized(outsider, VAULT_ID, VaultIds420.ACTION_RELEASE_OBLIGATION, 0)
+            && auth.isAuthorized(outsider, VAULT_ID, VaultIds420.ACTION_CANCEL_OBLIGATION, 0),
+            "hostile grants not active");
+        bytes32 releaseOpA = keccak256("hostile-release-a");
+        bytes32 cancelOpA = keccak256("hostile-cancel-a");
+        bytes32 releaseOpB = keccak256("hostile-release-b");
+        bytes32 cancelOpB = keccak256("hostile-cancel-b");
         vm.prank(outsider);
-        vault.releaseObligation(keccak256("hostile-release"), obligation);
-        require(accounting.getObligation(obligation).state == 2
-            && !funding.funded(a, vm.addr(OWNER_A_KEY), a), "hostile grant risk not reproduced");
-        // This test's success documents a DEPLOYMENT BLOCKER, not a safe production configuration.
+        (bool releaseA,) = address(vault).call(abi.encodeCall(vault.releaseObligation, (releaseOpA, first)));
+        vm.prank(outsider);
+        (bool cancelA,) = address(vault).call(abi.encodeCall(vault.cancelObligation, (cancelOpA, first)));
+        vm.prank(outsider);
+        (bool releaseB,) = address(vault).call(abi.encodeCall(vault.releaseObligation, (releaseOpB, second)));
+        vm.prank(outsider);
+        (bool cancelB,) = address(vault).call(abi.encodeCall(vault.cancelObligation, (cancelOpB, second)));
+        VaultAccounting420.AssetAccounting memory amounts = accounting.getAccounting(VAULT_ID, address(0));
+        require(!releaseA && !cancelA && !releaseB && !cancelB, "generic grant bypassed payer-safety controller");
+        require(!vault.executedOperation(releaseOpA) && !vault.executedOperation(cancelOpA)
+            && !vault.executedOperation(releaseOpB) && !vault.executedOperation(cancelOpB),
+            "reverted unauthorized operation consumed nonce");
+        require(accounting.getObligation(first).state == 1 && accounting.getObligation(second).state == 1
+            && amounts.reserved == 5 ether && amounts.claimable == 0
+            && amounts.recordedBalance == 5 ether && address(vault).balance == 5 ether
+            && funding.funded(a, vm.addr(OWNER_A_KEY), a)
+            && funding.funded(b, vm.addr(OWNER_B_KEY), b), "payer liabilities changed after hostile grants");
+    }
+
+    function testGenericGrantStillWorksForUnprotectedObligations() public {
+        _grant(outsider, VaultIds420.ACTION_CREATE_OBLIGATION);
+        _grant(outsider, VaultIds420.ACTION_RELEASE_OBLIGATION);
+        _grant(outsider, VaultIds420.ACTION_CANCEL_OBLIGATION);
+        vm.deal(outsider, 10 ether);
+        vm.prank(outsider);
+        vault.depositNative{value: 2 ether}();
+        bytes32 releaseId = keccak256("ordinary-release");
+        bytes32 cancelId = keccak256("ordinary-cancel");
+        vm.prank(outsider);
+        vault.createObligation(keccak256("create-ordinary-release"), releaseId,
+            address(0), outsider, 1 ether, keccak256("OTHER"), keccak256("source"));
+        vm.prank(outsider);
+        vault.releaseObligation(keccak256("release-ordinary"), releaseId);
+        vm.prank(outsider);
+        vault.createObligation(keccak256("create-ordinary-cancel"), cancelId,
+            address(0), outsider, 1 ether, keccak256("OTHER"), keccak256("source"));
+        vm.prank(outsider);
+        vault.cancelObligation(keccak256("cancel-ordinary"), cancelId);
+        require(accounting.getObligation(releaseId).state == 2
+            && accounting.getObligation(cancelId).state == 4
+            && vault.payerSafetyController(releaseId) == address(0),
+            "unprotected Vault semantics changed");
     }
 }

@@ -1,0 +1,26 @@
+# CMP-1.1 — ComputeJobRegistry implementation and qualification
+
+Authority: the original CMP-1 implementation roadmap. PR #370 remains CMP-1.1 and is draft; green CI is not production deployment approval.
+
+## Registry and CMP-1.1.1 signed request authority
+
+`ComputeJobRegistry420.sol` binds an authorized owner and one-use request to immutable manifest/workload/input/output commitments. It checks evidence endpoints at the guarded versioned transitions. Original `ComputeJobRegistry420.t.sol` fixtures exercise the state machine, not economic correctness.
+
+`ComputeJobSignedRequestAuthority420.sol` provides an EIP-712 domain-bound request signed by BOTH the authenticated owner and named payer; it binds exact request fields, authorization expiry, the payer, positive maximum spend, and owner-specific nonce. The registry must be configured with this signed authority, rather than the old unsigned `ComputeJobRequestAuthority420.sol`, for paid execution. The authority exposes immutable `fundingTerms(requestId)`. `ComputeJobSignedRequestAuthority420.t.sol` tests valid authorization; altered owner, manifest, workload, payer and spending limit; omitted payer consent; expiry; duplicate submission and creation; and chain/verifying-contract replay. Signing authenticates a hash commitment to off-chain manifest bytes; it does not attest the contents or worker capability.
+
+## CMP-1.1.2 payer-specific funding and custody evidence
+
+`ComputeJobPayerCustody420.sol` is the **limited native-$420 custody source** for a registry whose `requestEvidence` is the signed authority and whose `fundingEvidence` is this custody contract. Bind that registry once using `bindJobs`; the binder verifies both configured evidence endpoints. An unbound custody contract cannot admit payments. `reserve(jobId)` requires a live CREATED job, its signed request, exact owner/request commitment/manifest/deadline, unexpired funding terms, a positive native transfer submitted **by the signed payer**, and `msg.value <= maxSpend`. It stores one reservation per job, with `refundRecipient` fixed to that payer, an exact actual transfer amount, immutable maximum and deadline, and increments `totalReserved`. There is no privileged synthetic-funding operation and no pooled balance transfer from another owner. `fundingRef` is the job ID and `funded(jobId,owner,fundingRef)` is true only for that specific live reservation while the contract has funds to back total reservations. `ComputeJobRegistry.recordFunding` checks that evidence at the CREATED-to-FUNDED transition.
+
+`ComputeJobPayerCustody420.t.sol` covers a payer-origin native transfer and registry transition, unauthorized/zero-value funding, maximum spending limit, cross-job/cross-owner proof reuse, duplicate reservation, independently accounted jobs, unbound and expired jobs, early/third-party refund rejection, original-payer-only expiry refund, and refund replay rejection. The existing `ComputeJobVaultReservationEvidence420.sol` remains **unadmitted**, because pooled legacy Vault accounting cannot establish payer-specific provenance. It MUST NOT be substituted as production proof.
+
+**Important custody boundary:** native coins are held by this specific source. `refundExpiredUnmatched` sends the original amount only to the original payer, only after the deadline and only while the job remains CREATED or FUNDED, with checks-effects-interactions and a reentrancy lock. A matched or running job cannot withdraw via this route. No payment release, refund of matched/failed/disputed jobs, settlement, per-attempt billing or general-purpose escrow has been implemented. Thus the contract is a qualification candidate for **payer deposit and isolated reservation evidence**, NOT a complete production `ComputeEscrow`. Funds belonging to later-stage jobs stay locked until CMP-1.2 supplies independently qualified custody-safe terminal transitions. Do not activate live paid matching with this contract alone.
+
+## Remaining release gates
+
+1. CMP-1.2: canonical escrow settlement, final-spend enforcement, cancellation, failed and disputed-job refunds, timeouts and recipient policy, reentrancy/insolvency qualification, and reconciliation to existing Vault economic authorities. The signed maximum presently bounds **the transferred reservation**, but downstream payment logic must also obey it.
+2. CMP-1.3: authoritative accepted-match and locked worker/provider/node/resource/attempt, independently authenticated execution result receipts and replay protection.
+3. CMP-1.4: independent verifier selection and approved profile, signed job/attempt/result/nonce/expiry-bound verdicts, and conflict-of-interest controls.
+4. Before merge or production publication: qualify the exact reconciled head against current `main`, and run end-to-end hostile tests of all authoritative adapters including failure, expiry and dispute custody paths. No production deployment or settlement authorization on the strength of registry-local CI alone.
+
+**Qualification record:** CMP-1.1.2 code and focused tests are committed on PR #370; refer to the required Solidity Contracts, 420 Integrated Qualification and 420Docs checks on the final head for the actual test result. Do not infer success from a previous SHA. The PR remains draft and unmerged.

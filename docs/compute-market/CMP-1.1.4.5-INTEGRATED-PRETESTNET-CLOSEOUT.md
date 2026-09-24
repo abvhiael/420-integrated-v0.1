@@ -1,0 +1,46 @@
+# CMP-1.1.4.5 — integrated pre-testnet qualification and closeout
+
+**Status: pre-testnet acceptance record committed; qualification of this exact head requires new successful Solidity Contracts, 420 Integrated Qualification and 420Docs runs. No testnet or production installation is claimed.** This is a narrow `INTEGER_SUM_OF_SQUARES/V1` verifier-adapter gate, not a declaration that all of CMP-1.1, ComputeEscrow or generic compute is complete. Keep PR #370 draft, unmerged, and paid production work disabled.
+
+## Scope and executable acceptance evidence
+
+The canonical path must consist of a dual-signed owner/payer EIP-712 request bound to owner, actual payer, unique nonce, network, manifest, exact four-integer input and output schema, deadline and positive maximum spend; an actual payer-origin, job-isolated native reserve; an accepted operator/resource match; a worker-origin committed result and unique receipt; a verifier selected for the same job/profile after attestation and explicit controller-conflict checks; a signed and independently recomputed profile verdict; and the canonical registry's version-checked `RESULT_COMMITTED -> VERIFIED` (correct answer) or `RESULT_COMMITTED -> FAILED` (incorrect committed answer) transition. The verifier must be the profile-evaluating policy-enforced endpoint, never the signature-only primitive. The record is a **code/test integration**, not a deployed-network audit.
+
+The following existing executable Foundry suites form the end-to-end acceptance set. Inspect actual `=== TEST ... ===`, `[PASS]` and `=== PASSED ... ===` lines in the Solidity CI shard diagnostics; success of a workflow which skipped these tests is insufficient.
+
+| Boundary | Executable suite | Evidence required |
+| --- | --- | --- |
+| Owner/payer authorization and replay | `contracts/test/ComputeJobSignedRequestAuthority420.t.sol` | Both signatures, exact scope, expiry, duplicate nonce, changed domain/chain/contract rejection. |
+| Actual funding and isolation | `contracts/test/ComputeJobPayerCustody420.t.sol` | Signed payer transfer, exact isolated reserve, maximum spend, refund recipient, no unrelated job funding. |
+| Accepted match and worker receipt | `contracts/test/ComputeJobAcceptedMatchWorker420.t.sol`, `contracts/test/ComputeJobSignedCustodyMatchWorkerIntegration420.t.sol` | Canonical resource/operator/attempt and authenticated result receipt; no cross-job reuse. |
+| Signed hostile verdicts | `contracts/test/ComputeJobIntegerProfileHostile420.t.sol` | Wrong verdict fields, replay, changed chain/signature/receipt, no nonce consumption or job/custody mutation on rejection. |
+| Independent appointment | `contracts/test/ComputeJobVerifierIndependenceGate420.t.sol` | No appointment, unapproved selector, shared-controller approval; stale, withdrawn or rotated identity fails before nonce consumption. |
+| Reproducible positive/negative output and cross-job binding | `contracts/test/ComputeJobProfileEvidenceIntegrity420.t.sol` | `[3,4,5,12] -> 194` approved and `195` denied, correct job state, output/input/result/receipt/appointment/verdict/evidence refs, isolation of both jobs' reserves on hostile substitutions. |
+| Canonical implementation and fail-closed installation configuration | `contracts/test/ComputeJobCanonicalWiring420.t.sol` | Correct immutable registry and profile adapter pointers; wrong code hash, signature-only adapter, disabled profile, authority drift or chain mismatch rejected. |
+
+`contracts/test/ComputeJobProfileEvidenceIntegrity420.t.sol` is the **integrated fixture**: its `_makeJob` constructs signed authorization, job, payer-native transfer, funding transition, accepted match, worker receipt, capability grant and controller-checked verifier appointment before the good/incorrect/cross-job verdict tests. The independent evidence-reference computation in `testKnownGoodEvidenceReproducesEveryCommitmentAndAppointment` and negative counterpart is the 1.1.4.5 reference transcript. Record output 194 as `VERIFIED`, output 195 with signed `approved=false` as `FAILED`, and full 3-ether reserve still held per job; neither outcome proves payment settlement. The separate wiring suite checks what this fixture itself cannot: a mismatched registry/verifier/hash/profile/chain must not be admitted as canonical. Re-run the set together against the identical qualified commit.
+
+## Hostile-state and accounting gate
+
+Every rejected verdict or receipt must leave the target job at `RESULT_COMMITTED`, preserve `decisionForJob == 0`, leave the relevant verifier nonce unused and leave payer custody `totalReserved` unchanged; submission of a subsequent canonical correct verdict must still be possible. An incorrect **committed** result with an authentic signed negative verdict is allowed to record `FAILED`, but cannot move funds. Both positive and negative decisions must bind exact owner, payer, match, result, receipt, approved profile, verifier, appointment, network, adapter and nonce. Compare the fixture evidence hash with an independently reconstructed hash and require an exact match, not merely a nonzero result.
+
+## Requalification procedure and CI ledger
+
+1. Identify the PR's actual `head.sha` using PR #370 metadata; do not substitute a previous passing SHA or the synthetic PR merge ref.
+2. Retrieve the three pull-request-triggered workflow runs **for that exact head SHA**: Solidity Contracts, 420 Integrated Qualification and 420Docs Qualification. All must have `status=completed` and `conclusion=success`. Inspect all sixteen Solidity shards, including the specific shard that ran each acceptance suite above. A newly committed closeout document invalidates a prior SHA's CI as evidence for the current head.
+3. Record the exact head SHA and workflow run IDs/links, confirm execution of the accepted and rejected 194/195 fixtures, and investigate any missing test rather than inferring coverage from compilation. If CI is still pending, mark this record `PENDING` and do not close the pre-testnet gate.
+4. Reconcile against current `main` and repeat the complete suite on the **reconciled merge candidate** before eventual PR merge. The previous green head does not qualify new conflict resolutions or changes made after this document.
+
+**Earlier passing baseline only (not evidence for this document's final SHA):** PR head `91b4d91bda924d5642b8009a3697c6cb2c4daac0`; [Solidity Contracts #3117](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/35965464227), [420 Integrated Qualification #5384](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/35965464273), [420Docs #2768](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/35965464269) all succeeded. A dedicated final-head ledger must be attached before marking 1.1.4.5 pre-testnet green.
+
+**Current final-head ledger:** HEAD: `PENDING POST-DOCUMENT COMMIT CI`; Solidity Contracts run/result: `PENDING`; 420 Integrated Qualification run/result: `PENDING`; 420Docs run/result: `PENDING`; executed acceptance-suite log confirmation: `PENDING`.
+
+## Limits, unresolved production decisions and deferred network acceptance
+
+- The profile proves one bounded deterministic four-integer computation. Neither on-chain verdict signatures nor these tests prove the correctness of arbitrary GPU inference, AI tasks or remotely executed workloads.
+- Test controller IDs and synthetic policy appointments do not prove real beneficial-controller independence. Operational attestor/selector/key-custody separation, controller and affiliate checks, confidential off-chain evidence custody, conflict challenges/recusal/appeals and actual appointed verifier records require independently reviewed operational proof.
+- Verify canonical addresses, independently reviewed runtime code hashes, correct chain/network and target deployment receipts, fixed/reserved Genesis address-map compatibility, canonical registry publication, authority/capability grants and `assertWiring()` **on the running testnet**. The local audit fixture and test-only `SettlementDeny` are not deployable production acceptance evidence.
+- The current profile policy's live `approvedProfile` and signed request's authorization-expiry checks can affect later verification or historical eligibility. Before real-money activation, define and test explicit historical-verdict validity, late-verification, revocation/challenge and cancellation rules; a previously recorded decision must not silently become permission to pay.
+- CMP-1.2 still must qualify actual settlement, maximum-final-spend, worker release, timeout, failure/dispute refunds and independent native-custody conservation before any paid-job activation. A `VERIFIED` or `FAILED` registry state is **not** a payout or refundable terminal state in the current adapter.
+
+**Release disposition:** on passing exact-head CI and log coverage, mark `CMP-1.1.4.5 PRE-TESTNET QUALIFIED` only. Do not mark 1.1.4 fully production qualified, CMP-1.1 complete, PR #370 merge-ready, production settlement enabled, or proceed to CMP-1.2 merely on these verifier-stage checks. Preserve the five-slice CMP-1 roadmap and any independently outstanding CMP-1.1 release gates.

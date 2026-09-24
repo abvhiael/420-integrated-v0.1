@@ -1,0 +1,15 @@
+# CMP-1.1.3 — accepted match, worker assignment, result provenance
+
+## Branch qualification: PASSED on 99f90fdc7fc63fda76ee2b7d72529e6ee610d238
+
+The exact commit passed all three required PR workflows: Solidity Contracts #3083 (https://github.com/abvhiael/420-integrated-v0.1/actions/runs/35907394519), 420 Integrated Qualification #5350 (https://github.com/abvhiael/420-integrated-v0.1/actions/runs/35907394392), and 420Docs Qualification #2734 (https://github.com/abvhiael/420-integrated-v0.1/actions/runs/35907394269). Solidity's formerly failing shards 0 and 4 cleared in #3083 after correcting the one-shot prank fixture setup. These results qualify the CMP-1.1.3 implementation and test coverage **on that branch commit**, not a future modification or merge candidate.
+
+## Authoritative evidence and coverage
+
+Configure `ComputeJobSignedRequestAuthority420`, `ComputeJobPayerCustody420`, `ComputeJobAcceptedMatch420`, and `ComputeJobMatchedWorkerEvidence420` against the same `ComputeJobRegistry420`. The owner may propose one match only for an actually funded signed job. Snapshot the provider/node/resource revision and registered operator; require that operator's job-scoped `ACTION_ACCEPT_MATCH`, `ACTION_EXECUTE_ATTEMPT`, and `ACTION_SUBMIT_RECEIPT` grants for acceptance, assignment, and result commitment respectively. Bind the result to job, request, manifest, match, acceptance, resource, assignment and attempt. Do not admit unsigned request, pooled Vault funding or an older permissive worker gateway.
+
+`ComputeJobAcceptedMatchWorker420.t.sol` exercises match/worker state edges with test-only funding and grants. `ComputeJobSignedCustodyMatchWorkerIntegration420.t.sol` exercises signed requests and real native payer deposits through isolated funding, match, assignment and worker receipt; it rejects unauthorized/unfunded and over-limit deposits, cross-job evidence reuse and altered resource revisions, and tests isolated unmatched payer refunds. `ComputeJobCanonicalCapability420.t.sol` tests actual shared `CapabilityRegistry420` component registration, scope isolation, foreign grant/revocation denial, revocation and expiry. The integrated graph keeps verification and settlement fail-closed.
+
+## Outstanding release gates (not a blocker to starting CMP-1.1.4 development)
+
+The canonical capability tests use their own registrar and grants; no specific target network's deployed registrar, designated compute-component authority, grant policy, deployment addresses or code hashes have yet been checked. Verify those against the actual deployment and never publish unrestricted/test-only grants. Reconcile PR #370 against current `main` and rerun required tests on the exact reconciled SHA before merge. Neither authenticated worker submission nor green branch CI proves real execution, correct output, independent verification or an entitlement to payment. CMP-1.1.4 must qualify verifier provenance; CMP-1.2 and CMP-1.3 retain settlement/custody and capacity/metering/attestation responsibilities. No live paid matching or payout is authorized by this branch qualification alone.

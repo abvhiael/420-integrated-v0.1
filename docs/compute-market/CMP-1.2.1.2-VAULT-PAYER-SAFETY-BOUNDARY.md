@@ -1,0 +1,21 @@
+# CMP-1.2.1.2 — Vault-side payer-safety controller boundary
+
+Status: implementation and adversarial Foundry regression committed on draft PR #371; exact-head named-suite log and complete CI qualification must be checked separately. No deployed Vault, live payer deposit, payout, refund, or settlement is qualified by this change.
+
+## On-chain enforcement
+
+`contracts/src/vault/AssetVault420.sol` binds `payerSafetyController[obligationId]` to the *original `msg.sender` of `createObligation`* when the obligation type is `keccak256("420/CMP/PAYER-SAFETY/V1")`, the same obligation type emitted by `ComputeEscrowFunding420`. Binding occurs only after the canonical accounting contract successfully creates the obligation and reverts atomically with that creation on failure. Obligation IDs cannot be recreated after cancellation or claim because canonical accounting tracks uniqueness. There is no setter or generic grant-based override of the controller. For CMP funding, the original controller is the funding adapter, not the payer, grant issuer, Vault creator, verifier, provider or scheduler.
+
+The actual Vault `releaseObligation` and `cancelObligation` entry points now require BOTH the normal Vault-scoped action capability AND that `msg.sender` is the immutable recorded controller whenever a protected payer-safety obligation is targeted. The controller check runs before consuming an operation ID or mutating accounting. A future generic RELEASE or CANCEL capability issued by the component authority to a third party cannot override the obligation-specific controller. Ordinary Vault obligations with no protected controller retain the old capability-based semantics. There is no claim-path bypass of pending obligations: `claim` still requires an obligation to have lawfully become claimable.
+
+## Adversarial test coverage
+
+`contracts/test/ComputeEscrowRealCapability420.t.sol` uses the real `CapabilityRegistry420`, authorization, Vault, accounting and registered Vault configuration. The strengthened scenario funds two distinct signed payers through `ComputeEscrowFunding420`, has the real component authority grant an unrelated principal both generic RELEASE and CANCEL, confirms the grants actually authorize that principal at the capability layer, then sends *direct calls to the Vault* targeting both payer safety obligations. Each call must revert, each operation ID remain unused, each safety obligation remain pending, the original funding evidence remain true, and the full native balance and reserved/claimable totals remain unchanged. A separate ordinary-obligation regression proves existing generic Vault operations remain functional.
+
+## Boundaries and mandatory subsequent work
+
+This change solves the specific **generic-grant release/cancel bypass of already-created CMP payer-safety obligations** at the Vault boundary. It does NOT make the broad grant issuer generally unable to issue other capabilities or prevent unrelated principals from creating obligations against truly free, non-CMP Vault deposits or withdrawing unencumbered free balance. Those authorities must still be constrained by a dedicated Vault and an audited operational grant policy. Do not claim that generic Vault-wide grants are intrinsically immutable or exclusive.
+
+The current `ComputeEscrowFunding420` has no release/cancel/refund methods, so the protected obligation is intentionally **locked pending the separately qualified, authorized payer refund and settlement implementation**. Do not bypass the restriction by adding an administrator-controlled mutable controller or delegating blanket release/cancel to a settlement operator. Later lawful release or atomic cancel-and-split must execute through the original controller after independently proven job, economic and dispute gates, or through a distinct fully qualified Vault-side obligation-specific delegation design that does not allow a generic grant to override payer safety. Funded deployment remains blocked until a tested refund exit exists; PR #371 remains draft and unmerged.
+
+The source changes and tests must pass full exact-commit Solidity, Integrated and Docs CI. Record the named-suite job-log results when GitHub publishes them. A workflow being queued/running is not a passing test.

@@ -70,8 +70,9 @@ contract ComputeJobIntegerProfileVerification420Test {
         verification.bindJobs(address(jobs));
         verification.setApprovedProfile(verification.PROFILE_ID(), true);
         registry.transferComponentRegistrar(GOV);
+        bytes32 component = auth.COMPONENT_COMPUTE();
         vm.prank(GOV);
-        registry.registerProtocolComponent(auth.COMPONENT_COMPUTE(), ISSUER);
+        registry.registerProtocolComponent(component, ISSUER);
         vm.prank(OPERATOR);
         bytes32 providerId = providers.register(MANIFEST, keccak256("security"), OPERATOR);
         vm.prank(GOV);
@@ -80,8 +81,9 @@ contract ComputeJobIntegerProfileVerification420Test {
         bytes32 nodeId = nodes.register(providerId, MANIFEST, keccak256("endpoint"), uint64(block.timestamp + 3 days));
         vm.prank(OPERATOR);
         nodes.activate(nodeId);
+        bytes32 gpu = resources.GPU_INFERENCE();
         vm.prank(OPERATOR);
-        resourceId = resources.register(nodeId, resources.GPU_INFERENCE(), MANIFEST,
+        resourceId = resources.register(nodeId, gpu, MANIFEST,
             keccak256("integer-execution-runtime"), keccak256("integer-profile-capability"), 8);
         vm.prank(OPERATOR);
         resources.activate(resourceId);

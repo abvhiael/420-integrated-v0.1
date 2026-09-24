@@ -273,6 +273,8 @@ contract ComputeJobVerifierIndependenceGate420Test {
             "wrong profile qualified by appointment");
         require(!policy.eligible(jobId, verifier, profile, owner, payer, verifier),
             "wrong canonical operator qualified");
-        _deny(50); // prove rejection below by first withdrawing canonical payer
+        require(_submit(50), "original valid appointment did not survive rejected replacement");
+        require(jobs.job(jobId).status == ComputeJobRegistry420.Status.VERIFIED,
+            "valid verdict under original appointment not recorded");
     }
 }

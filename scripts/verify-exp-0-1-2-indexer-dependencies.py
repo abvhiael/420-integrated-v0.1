@@ -58,7 +58,7 @@ def main() -> None:
         found_methods.update(re.findall(r'func\s+\(c\s+\*Client\)\s+(\w+)\s*\(', text))
         if 'http.MethodPost' in text or 'http.MethodPut' in text or 'http.MethodDelete' in text:
             errors.append(f'{name}: mutating HTTP method found')
-    # Constructor and generic get are not Indexed resource reads.
+    # Constructor and generic get are not indexed resource reads.
     unexpected = found_methods - set(READS) - {'get'}
     if unexpected:
         errors.append(f'new client read/operation needs mapping: {sorted(unexpected)}')
@@ -69,8 +69,8 @@ def main() -> None:
         text = files[client_file]
         if re.search(r'func\s+\(c\s+\*Client\)\s+' + method + r'\s*\(', text) is None:
             errors.append(f'{client_file}: missing {method}')
-        if f'GET {route}' not in server:
-            errors.append(f'Indexer's registered GET route missing: {route}')
+        if f'mux.HandleFunc("GET {route}"' not in server:
+            errors.append(f'Indexer GET route registration missing: {route}')
         service_text = (SERVICE / SERVICE_FILES[interface]).read_text()
         if f'type {interface} interface' not in service_text:
             errors.append(f'missing interface {interface}')

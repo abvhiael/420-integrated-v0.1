@@ -101,9 +101,13 @@ contract ComputeJobIntegerProfileVerification420Test {
         return abi.encodePacked(r, s, v);
     }
     function _grant(address actor, bytes32 jobId, bytes32 action, uint256 n) private {
+        // Foundry's vm.prank affects only the next external call. Resolve registry
+        // arguments first so the designated issuer, not this fixture, creates the grant.
+        bytes32 component = auth.COMPONENT_COMPUTE();
+        bytes32 scope = auth.scopeJob(jobId);
         vm.prank(ISSUER);
         registry.createGrant(keccak256(abi.encode(jobId, action, n)), actor,
-            auth.COMPONENT_COMPUTE(), action, auth.scopeJob(jobId), 0, 0, 0, uint64(block.timestamp), 0);
+            component, action, scope, 0, 0, 0, uint64(block.timestamp), 0);
     }
     function _resultJob(uint256 n, uint256 output) private returns (bytes32 id, bytes32 receipt) {
         ComputeJobSignedRequestAuthority420.Authorization memory a =
@@ -135,13 +139,15 @@ contract ComputeJobIntegerProfileVerification420Test {
         vm.prank(OPERATOR);
         workers.acceptAssignment(id, resourceId, 4);
         receipt = keccak256(abi.encode("actual-worker-receipt", n));
+        bytes32 outputCommitment = verification.outputHash(output);
         vm.prank(OPERATOR);
-        bytes32 result = workers.commitResult(id, receipt, verification.outputHash(output));
+        bytes32 result = workers.commitResult(id, receipt, outputCommitment);
         vm.prank(OPERATOR);
         jobs.recordResult(id, 5, result);
         _grant(verifier, id, auth.ACTION_VERIFY_RESULT(), n * 10 + 4);
+        bytes32 profile = verification.PROFILE_ID();
         vm.prank(SELECTOR);
-        policy.appoint(id, verifier, verification.PROFILE_ID(), owner, payer, OPERATOR,
+        policy.appoint(id, verifier, profile, owner, payer, OPERATOR,
             keccak256(abi.encode("reviewed-appointment", n)), uint64(block.timestamp + 100));
     }
     function _verdict(bytes32 id, uint256 n, bool approved) private view

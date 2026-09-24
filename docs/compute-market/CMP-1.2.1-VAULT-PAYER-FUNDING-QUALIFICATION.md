@@ -1,6 +1,6 @@
 # CMP-1.2.1 — Signed-payer, Vault-backed funding and isolation
 
-Status: executable funding candidate committed on draft PR #371. Do not mark qualified until the exact-head Solidity, Integrated and Docs checks and the named suite's log confirm execution and passing results. No paid-job activation, settlement, post-match refund or deployable canonical registry publication is authorized.
+Status: CMP-1.2.1.1 named-suite log evidence CONFIRMED against implementation head `0d2c01195bd0a8d0b12823cf14c2a40c48f727e2` (five tests passed, zero failed or skipped); Solidity, Integrated and Docs workflows for that implementation head all passed. This documentation update creates a subsequent branch commit whose own CI status must be checked separately. Remaining CMP-1.2.1 operational grant/governance and deployment checks are NOT qualified. No paid-job activation, settlement, post-match refund or deployable canonical registry publication is authorized.
 
 ## Implemented contract boundary
 
@@ -17,3 +17,18 @@ The domain-separated safety ID binds chain, adapter, Vault address and ID, and j
 `contracts/test/ComputeEscrowFunding420.t.sol` uses actual `AssetVault420`, `VaultRegistry420`, `VaultAccounting420`, `VaultAuthorization420`, signed-request authority and job registry, with test-only capability grants. Positive: two independent signed owner/payer pairs transfer funds into the **same** real Vault, obtain distinct pending original-payer obligations, and `recordFunding` accepts only each job's exact live credit; check exact payer, Vault, recorded balance, reserved, claimable and free-balance changes. Negative: wrong payer, zero/over-cap/duplicate deposits; missing adapter CREATE permission rolls back payer transfer and Vault accounting atomically; outsider release/cancel/withdraw, premature claim, wrong owner/job/ref and expired/unbound requests reject without unauthorized monetary effects.
 
 Test-only capability mocks prove contract call paths, **not** deployed governance/grant issuance; no test in this increment proves release, partial payout, refunds, dispute finality or slash redistribution. CI success cannot upgrade these claims. Follow CMP-1.2.2 for accepted quote and beneficiary reservation and CMP-1.2.3–1.2.8 for earned-entitlement/settlement/refund/dispute and hostile liability conservation. Testnet gate: verify registered deployment, code hashes, exact dual-signed payer approvals and real native balance/obligation evidence before any funded execution.
+
+## CMP-1.2.1.1 — exact-run named funding suite evidence (2026-09-24)
+
+**Evidence gate: COMPLETE for the implementation commit below; this is not the full CMP-1.2.1 operational or deployment qualification.** Checked the actual GitHub Actions job log, not just the workflow conclusion.
+
+- Implemented PR head tested: `0d2c01195bd0a8d0b12823cf14c2a40c48f727e2` ([implementation commit](https://github.com/abvhiael/420-integrated-v0.1/commit/0d2c01195bd0a8d0b12823cf14c2a40c48f727e2)); PR #371's CI checkout used synthetic merge commit `32c33e0c082919f9928ed93d00307eb64665e782` into baseline `main` `95a83a961286701b6e8c064de1deccad10f41fd7`.
+- Named suite: `contracts/test/ComputeEscrowFunding420.t.sol:ComputeEscrowFunding420Test`, located under `=== TEST test/ComputeEscrowFunding420.t.sol ===` in [Solidity Contracts #3125 — shard 15 job log](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/36039001661/job/107770027346). Explicit Foundry result: `Suite result: ok. 5 passed; 0 failed; 0 skipped`, followed by `=== PASSED test/ComputeEscrowFunding420.t.sol ===`. [Shard 15 diagnostics artifact](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/36039001661/artifacts/10826203742).
+- Positive case **PASS**: `testTwoPayersReceiveDistinctRealVaultBackedSafetyObligations`.
+- Negative case **PASS**: `testWrongPayerOverCapZeroAndDuplicateFundingRevertWithoutVaultMutation`.
+- Negative case **PASS**: `testWithoutScopedVaultCreatePermissionFundingRevertsAtomically`.
+- Negative case **PASS**: `testOutsiderCannotReleaseCancelClaimOrWithdrawPayerSafetyDeposit`.
+- Negative case **PASS**: `testExpiredUnboundAndWrongFundingReferenceFailClosed`.
+- Associated three successful workflow results for the same implementation head: [Solidity Contracts #3125](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/36039001661), [420 Integrated Qualification #5393](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/36039001549), [420Docs Qualification #2777](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/36039001662).
+
+**Scope and remaining gates:** The five passing Foundry cases demonstrate the enumerated local contract paths with actual Vault and accounting instances but test-only grants. They do not prove production grant issuance/exclusivity, runtime deployment/code hashes, settlement, refunds, dispute resolution or paid-job activation. Any new implementation change must receive its own exact-commit suite evidence. The CI results listed above apply to `0d2c011` and its specified PR synthetic merge, not automatically to the documentation commit that records this evidence.

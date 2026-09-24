@@ -19,7 +19,7 @@ contract HostileSettlementDeny420 is IComputeJobSettlementEvidence420 {
     function settled(bytes32, bytes32, bytes32) external pure returns (bool) { return false; }
 }
 
-/// @notice 1.1.4.1: hostile submissions against the REAL signed request, payer reserve,
+/// @notice 1.1.4.1: hostile submissions against signed request, payer reserve,
 /// authorized match, assigned worker receipt, attested appointment and evaluated verdict path.
 contract ComputeJobIntegerProfileHostile420Test {
     VmIntegerHostile420 private constant vm = VmIntegerHostile420(address(uint160(uint256(keccak256("hevm cheat code")))));
@@ -193,7 +193,7 @@ contract ComputeJobIntegerProfileHostile420Test {
             if (k == 5) v.resultCommitment = keccak256("wrong-result");
             if (k == 6) v.expectedRevision++;
             if (k == 7) v.verifier = owner;
-            if (k == 8) v.approved = false; // correct result cannot be rejected
+            if (k == 8) v.approved = false;
             if (k == 9) sig = _signature(OWNER_KEY, verification.verdictDigest(v));
             require(!_submit(v, sig, values, 194, receipt), "hostile verdict admitted");
             _unchanged(k);
@@ -211,6 +211,9 @@ contract ComputeJobIntegerProfileHostile420Test {
         require(!_submit(v, _signature(VERIFIER_KEY, verification.verdictDigest(v)), values, 194, receipt),
             "expired verdict admitted");
         _unchanged(21);
+        // The worker's result commitment is also chain-bound. Check the hostile chain
+        // independently of the positive/replay path so a chain switch cannot obscure why
+        // a canonical verdict is accepted or rejected.
         v = _verdict(22);
         bytes memory signedForOriginalChain = _signature(VERIFIER_KEY, verification.verdictDigest(v));
         uint256 originalChain = block.chainid;
@@ -218,11 +221,19 @@ contract ComputeJobIntegerProfileHostile420Test {
         require(!_submit(v, signedForOriginalChain, values, 194, receipt), "cross-chain replay admitted");
         _unchanged(22);
         vm.chainId(originalChain);
-        require(_submit(v, signedForOriginalChain, values, 194, receipt),
-            "original-domain signed verdict rejected");
-        require(!_submit(v, signedForOriginalChain, values, 194, receipt), "duplicate verdict admitted");
-        require(verification.usedNonce(verifier, 22) && verification.decisionForJob(jobId) != bytes32(0),
+        require(!verification.usedNonce(verifier, 22), "cross-chain rejection consumed nonce");
+        require(verification.decisionForJob(jobId) == bytes32(0), "cross-chain rejection stored decision");
+        require(custody.totalReserved() == 3 ether, "cross-chain rejection changed reserve");
+    }
+    function testCanonicalSignatureAcceptanceAndDuplicateRejection() public {
+        ComputeJobIndependentVerification420.Verdict memory v = _verdict(23);
+        bytes memory sig = _signature(VERIFIER_KEY, verification.verdictDigest(v));
+        require(_submit(v, sig, values, 194, receipt), "original-domain signed verdict rejected");
+        require(!_submit(v, sig, values, 194, receipt), "duplicate verdict admitted");
+        require(verification.usedNonce(verifier, 23) && verification.decisionForJob(jobId) != bytes32(0),
             "accepted verdict not consumed exactly once");
+        require(jobs.job(jobId).status == ComputeJobRegistry420.Status.VERIFIED,
+            "valid signed verdict did not transition job");
         require(custody.totalReserved() == 3 ether, "replay changed reserve");
     }
     function testProfileInputOutputReceiptAndSignatureOnlyBypassFailClosed() public {

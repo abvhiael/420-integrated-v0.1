@@ -7,12 +7,9 @@ import "../vault/AssetVault420.sol";
 import "../vault/VaultAccounting420.sol";
 import "../vault/VaultRegistry420.sol";
 
-/// @notice CMP-1.2.1 funding admission only. This is NOT a settlement or withdrawal authority.
-/// @dev A new ComputeJobRegistry420 must bind this instance as fundingEvidence at construction;
-/// legacy ComputeJobPayerCustody420 deposits are never imported or treated as Vault assets.
-/// Funding is atomic: real signed-payer native funds enter the registered Vault AND become
-/// reserved by a unique, pending, payer-beneficiary safety obligation in the same transaction.
-/// Subsequent obligations, payouts, cancellation and refunds require separately qualified CMP-1.2 code.
+/// @notice CMP-1.2.1 funding admission and narrowly bounded expired/unmatched payer exit.
+/// @dev This is NOT worker settlement or arbitrary Vault withdrawal authority. The dedicated
+/// CMP policy may allow this adapter CREATE and RELEASE only; CANCEL/WITHDRAW remain forbidden.
 contract ComputeEscrowFunding420 is IComputeJobFundingEvidence420 {
     struct Credit {
         bytes32 requestId;
@@ -23,9 +20,11 @@ contract ComputeEscrowFunding420 is IComputeJobFundingEvidence420 {
         uint64 deadline;
         bytes32 obligationId;
         bool exists;
+        bool refunded;
     }
 
     bytes32 private constant SAFETY_DOMAIN = keccak256("420/CMP/ESCROW/PAYER-SAFETY/V1");
+    bytes32 private constant REFUND_DOMAIN = keccak256("420/CMP/ESCROW/EXPIRED-UNMATCHED-REFUND/V1");
     bytes32 public constant PAYER_SAFETY_TYPE = keccak256("420/CMP/PAYER-SAFETY/V1");
     ComputeJobSignedRequestAuthority420 public immutable requests;
     AssetVault420 public immutable vault;
@@ -43,6 +42,7 @@ contract ComputeEscrowFunding420 is IComputeJobFundingEvidence420 {
     error AlreadyFunded();
     event FundingBound(bytes32 indexed jobId, bytes32 indexed requestId, address indexed payer,
         uint256 amount, uint256 maximumSpend, bytes32 vaultId, bytes32 safetyObligationId);
+    event UnmatchedRefundClaimable(bytes32 indexed jobId, address indexed payer, bytes32 indexed obligationId, uint256 amount);
 
     constructor(address signedRequests, address registeredVault) {
         if (signedRequests.code.length == 0 || registeredVault.code.length == 0) revert InvalidFunding();
@@ -56,7 +56,6 @@ contract ComputeEscrowFunding420 is IComputeJobFundingEvidence420 {
         deploymentAuthority = msg.sender;
     }
 
-    /// @dev Deployment authority binds only the intended registry, exactly once.
     function bindJobs(address jobRegistry) external {
         if (msg.sender != deploymentAuthority || address(jobs) != address(0)
             || jobRegistry.code.length == 0) revert InvalidFunding();
@@ -67,9 +66,6 @@ contract ComputeEscrowFunding420 is IComputeJobFundingEvidence420 {
         jobs = candidate;
     }
 
-    /// @notice Signed payer deposits native 420 directly through this adapter, never from pooled credits.
-    /// @dev Vault must grant this adapter CREATE_OBLIGATION only for the intended CMP Vault and
-    /// operationally exclude other writers/withdrawers. The pending obligation is *not* claimable.
     function fund(bytes32 jobId) external payable returns (bytes32 fundingRef) {
         if (entered || address(jobs) == address(0) || msg.value == 0) revert InvalidFunding();
         entered = true;
@@ -90,8 +86,6 @@ contract ComputeEscrowFunding420 is IComputeJobFundingEvidence420 {
         bytes32 obligationId = safetyObligationId(jobId);
         uint256 oldBalance = address(vault).balance;
         VaultAccounting420.AssetAccounting memory oldAccounting = accounting.getAccounting(vaultId, address(0));
-        // Every already admitted CMP credit must remain encumbered; unrelated free balances
-        // are never accepted as funding evidence for another job.
         if (oldAccounting.reserved < totalFunded || oldAccounting.recordedBalance < totalFunded
             || oldBalance < totalFunded) revert InvalidFunding();
         vault.depositNative{value: msg.value}();
@@ -108,11 +102,44 @@ contract ComputeEscrowFunding420 is IComputeJobFundingEvidence420 {
             || !o.exists || o.state != 1 || o.vaultId != vaultId || o.asset != address(0)
             || o.beneficiary != payer || o.amount != msg.value || o.sourceRef != jobId
             || o.obligationType != PAYER_SAFETY_TYPE) revert InvalidFunding();
-        _credits[jobId] = Credit(j.requestId, j.owner, payer, msg.value, cap, j.deadline, obligationId, true);
+        _credits[jobId] = Credit(j.requestId, j.owner, payer, msg.value, cap, j.deadline, obligationId, true, false);
         totalFunded += msg.value;
         emit FundingBound(jobId, j.requestId, payer, msg.value, cap, vaultId, obligationId);
         entered = false;
         return jobId;
+    }
+
+    /// @notice Anyone may trigger a refund solely to the ORIGINAL payer when the original
+    /// job has expired without a match or worker execution. No owner/provider/authority may
+    /// substitute a recipient or refund a job with accepted work. Claim requires payer caller.
+    /// @dev EVM rollback preserves pending obligation and credit on any failed Vault release.
+    function refundExpiredUnmatched(bytes32 jobId) external returns (bytes32 obligationId) {
+        if (entered || address(jobs) == address(0)) revert InvalidFunding();
+        entered = true;
+        Credit storage c = _credits[jobId];
+        if (!c.exists || c.refunded || c.payer == address(0) || c.obligationId != safetyObligationId(jobId)
+            || block.timestamp <= c.deadline) revert InvalidFunding();
+        ComputeJobRegistry420.Job memory j = jobs.job(jobId);
+        if (j.owner != c.owner || j.requestId != c.requestId || j.deadline != c.deadline
+            || (j.status != ComputeJobRegistry420.Status.CREATED
+                && j.status != ComputeJobRegistry420.Status.FUNDED)) revert InvalidFunding();
+        VaultAccounting420.Obligation memory beforeO = accounting.getObligation(c.obligationId);
+        if (!beforeO.exists || beforeO.state != 1 || beforeO.vaultId != vaultId
+            || beforeO.asset != address(0) || beforeO.beneficiary != c.payer
+            || beforeO.amount != c.deposited || beforeO.sourceRef != jobId
+            || beforeO.obligationType != PAYER_SAFETY_TYPE) revert InvalidFunding();
+        vault.releaseObligation(
+            keccak256(abi.encode(REFUND_DOMAIN, block.chainid, address(this), address(vault), vaultId, jobId)),
+            c.obligationId
+        );
+        VaultAccounting420.Obligation memory afterO = accounting.getObligation(c.obligationId);
+        if (afterO.state != 2 || afterO.beneficiary != c.payer || afterO.amount != c.deposited)
+            revert InvalidFunding();
+        c.refunded = true;
+        totalFunded -= c.deposited;
+        emit UnmatchedRefundClaimable(jobId, c.payer, c.obligationId, c.deposited);
+        entered = false;
+        return c.obligationId;
     }
 
     function safetyObligationId(bytes32 jobId) public view returns (bytes32) {
@@ -121,13 +148,12 @@ contract ComputeEscrowFunding420 is IComputeJobFundingEvidence420 {
 
     function credit(bytes32 jobId) external view returns (Credit memory) { return _credits[jobId]; }
 
-    /// @notice True only for the *same* job's actual, still-pending, Vault-backed payer obligation.
     function funded(bytes32 jobId, address owner, bytes32 fundingRef) external view returns (bool) {
         Credit storage c = _credits[jobId];
-        if (address(jobs) == address(0) || !c.exists || fundingRef != jobId || jobId == bytes32(0)
-            || c.owner != owner || owner == address(0) || c.payer == address(0)
-            || c.requestId == bytes32(0) || c.deposited == 0 || c.deposited > c.maximumSpend
-            || c.obligationId != safetyObligationId(jobId)) return false;
+        if (address(jobs) == address(0) || !c.exists || c.refunded || fundingRef != jobId
+            || jobId == bytes32(0) || c.owner != owner || owner == address(0)
+            || c.payer == address(0) || c.requestId == bytes32(0) || c.deposited == 0
+            || c.deposited > c.maximumSpend || c.obligationId != safetyObligationId(jobId)) return false;
         VaultRegistry420.Vault memory registration = vaultRegistry.getVault(vaultId);
         if (registration.vaultAddress != address(vault)) return false;
         VaultAccounting420.Obligation memory o = accounting.getObligation(c.obligationId);

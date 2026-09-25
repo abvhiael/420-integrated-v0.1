@@ -2,6 +2,7 @@
 pragma solidity ^0.8.24;
 
 import "../src/compute/ComputeEscrowFunding420.sol";
+import "../src/compute/ComputeJobPayerCustody420.sol";
 import "../src/vault/VaultAuthorization420.sol";
 import "../src/vault/VaultPolicyRegistry420.sol";
 import "../src/vault/VaultIds420.sol";
@@ -216,4 +217,75 @@ contract ComputeEscrowFunding420Test {
         (ok,) = address(unbound).call{value: 1 ether}(abi.encodeCall(unbound.fund, (id)));
         require(!ok && address(unbound).balance == 0, "unbound adapter accepted funds");
     }
+
+    function testRefundInvalidatesFundingEvidenceAndReplayFailsClosed() public {
+        bytes32 id = _job(7, 5 ether, OWNER_A_KEY, PAYER_A_KEY);
+        _fund(id, payerA, 3 ether);
+        require(funding.funded(id, ownerA, id), "funding evidence missing before refund");
+
+        caps.setAllowed(address(funding), VaultIds420.COMPONENT_VAULT,
+            VaultIds420.ACTION_RELEASE_OBLIGATION, auth.scopeForVault(VAULT_ID), true);
+        vm.warp(uint256(jobs.job(id).deadline) + 1);
+
+        bytes32 obligationId = funding.refundExpiredUnmatched(id);
+        require(obligationId == funding.credit(id).obligationId, "wrong refunded obligation");
+        require(!funding.funded(id, ownerA, id), "refunded credit remained fundable");
+        require(funding.totalFunded() == 0, "refunded credit remained reserved aggregate");
+
+        (bool ok,) = address(funding).call(abi.encodeCall(funding.refundExpiredUnmatched, (id)));
+        require(!ok, "refund replay accepted");
+
+        VaultAccounting420.Obligation memory o = accounting.getObligation(obligationId);
+        require(o.state == 2 && o.beneficiary == payerA && o.amount == 3 ether,
+            "refund did not preserve exact payer claim");
+    }
+
+    function testWrongOwnerJobAndFundingReferenceCannotReuseCredit() public {
+        bytes32 first = _job(8, 6 ether, OWNER_A_KEY, PAYER_A_KEY);
+        bytes32 second = _job(9, 6 ether, OWNER_B_KEY, PAYER_B_KEY);
+        _fund(first, payerA, 2 ether);
+
+        require(funding.funded(first, ownerA, first), "canonical funding proof missing");
+        require(!funding.funded(first, ownerB, first), "wrong owner reused funding proof");
+        require(!funding.funded(second, ownerB, first), "cross-job funding proof reused");
+        require(!funding.funded(first, ownerA, second), "wrong funding reference accepted");
+        require(!funding.funded(first, ownerA, bytes32(0)), "zero funding reference accepted");
+
+        vm.prank(ownerB);
+        (bool ok,) = address(jobs).call(abi.encodeCall(jobs.recordFunding, (second, uint64(1), first)));
+        require(!ok && jobs.job(second).status == ComputeJobRegistry420.Status.CREATED,
+            "registry accepted foreign funding proof");
+    }
+
+    function testUnsolicitedVaultSurplusCannotFabricateJobCredit() public {
+        bytes32 id = _job(10, 4 ether, OWNER_A_KEY, PAYER_A_KEY);
+        vm.prank(attacker);
+        vault.depositNative{value: 7 ether}();
+
+        VaultAccounting420.AssetAccounting memory a = accounting.getAccounting(VAULT_ID, address(0));
+        require(address(vault).balance == 7 ether && a.recordedBalance == 7 ether
+            && a.reserved == 0 && accounting.freeBalance(VAULT_ID, address(0)) == 7 ether,
+            "donor surplus fixture invalid");
+        require(funding.totalFunded() == 0 && !funding.funded(id, ownerA, id),
+            "unattributed Vault surplus fabricated payer credit");
+
+        vm.prank(ownerA);
+        (bool ok,) = address(jobs).call(abi.encodeCall(jobs.recordFunding, (id, uint64(1), id)));
+        require(!ok && jobs.job(id).status == ComputeJobRegistry420.Status.CREATED,
+            "registry admitted donor balance as funding evidence");
+    }
+
+    function testLegacyCustodyBalanceIsNeverImportedAsVaultFunding() public {
+        bytes32 id = _job(11, 4 ether, OWNER_A_KEY, PAYER_A_KEY);
+        ComputeJobPayerCustody420 legacy = new ComputeJobPayerCustody420(address(requests));
+        vm.deal(address(legacy), 9 ether);
+
+        require(address(legacy).balance == 9 ether, "legacy balance fixture missing");
+        require(address(vault).balance == 0 && funding.totalFunded() == 0,
+            "legacy custody balance migrated into CMP Vault");
+        ComputeEscrowFunding420.Credit memory cr = funding.credit(id);
+        require(!cr.exists && !funding.funded(id, ownerA, id),
+            "legacy custody balance fabricated current credit");
+    }
+
 }

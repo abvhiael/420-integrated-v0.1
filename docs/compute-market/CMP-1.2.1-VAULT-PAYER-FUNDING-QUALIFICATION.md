@@ -93,3 +93,12 @@ Associated exact-head workflows:
 CMP-1.2.1.2 is therefore closed for **repository-level implementation and deployment-realistic qualification**: the real capability semantics have been audited, the generic-grant bypass has a non-bypassable CMP-specific on-chain fence, the dedicated Vault topology is one-way sealed, two-payer conservation and hostile authority expansion are tested, unsolicited surplus cannot be stolen through the CMP policy, and an emergency freeze/wind-down path coexists with a reachable original-payer refund.
 
 The following remain outside CMP-1.2.1.2 and are **not** implied by this closeout: actual chain/network deployment; deployed addresses and transaction hashes; runtime code-hash and immutable-configuration attestation; live grant IDs/limits/expiry/revocation inventory; testnet funding transactions; ProtocolRegistry publication; accepted-price reservation; provider entitlement/payout; post-match cancellation/refunds; disputes; slashing; and production activation. Those are handled by CMP-1.2.2+ and specifically the live deployment/testnet gate in CMP-1.2.9.
+
+
+## CMP-1.2.1.3 — funding lifecycle integrity and provenance
+
+**Status: QUALIFICATION CANDIDATE pending exact-head CI.** Implementation/test head currently extends `ComputeEscrowFunding420Test` with explicit proof that refunded credits cannot remain valid or replay, owner/job/reference evidence cannot be reused, unsolicited Vault surplus cannot fabricate a payer credit, and historical `ComputeJobPayerCustody420` balance is never imported into the new Vault-backed funding ledger.
+
+Acceptance criteria and exact named tests are recorded in [`CMP-1.2.1.3-FUNDING-LIFECYCLE-INTEGRITY.md`](CMP-1.2.1.3-FUNDING-LIFECYCLE-INTEGRITY.md).
+
+This step remains inside CMP-1.2.1 canonical payer funding. It does not authorize accepted-price reservation, provider settlement, matched-job refund economics, dispute/slash paths, or live network deployment. CMP-1.2.9 remains the deployment/testnet evidence gate.

@@ -15,8 +15,7 @@ interface VmFencedCMP420 {
     function warp(uint256 timestamp) external;
 }
 
-/// @notice Production-class capability-registry behavior with CMP-only fixed policy.
-/// @dev Local Foundry deployment is not an actual external testnet deployment.
+/// @notice Real capability registry, sealed CMP authorization, real Vault and signed payer exits.
 contract ComputeEscrowFencedCapability420Test {
     VmFencedCMP420 private constant vm = VmFencedCMP420(address(uint160(uint256(keccak256("hevm cheat code")))));
     bytes32 private constant ID = keccak256("cmp/dedicated/vault/authorization/v1");
@@ -24,7 +23,6 @@ contract ComputeEscrowFencedCapability420Test {
     uint256 private constant PAYER_A = 0xBEEF;
     uint256 private constant OWNER_B = 0xA11CF;
     uint256 private constant PAYER_B = 0xCAFE;
-
     CapabilityRegistry420 private caps;
     CMPVaultAuthorization420 private policy;
     VaultRegistry420 private registry;
@@ -79,15 +77,12 @@ contract ComputeEscrowFencedCapability420Test {
     function _job(uint256 nonce, uint256 ownerKey, uint256 payerKey) private returns (bytes32 id) {
         address owner = vm.addr(ownerKey);
         address payer = vm.addr(payerKey);
-        ComputeJobSignedRequestAuthority420.Authorization memory a =
-            ComputeJobSignedRequestAuthority420.Authorization({
-                owner: owner, payer: payer, manifestHash: keccak256("manifest"),
-                workloadType: keccak256("gpu"), inputCommitment: keccak256("input"),
-                outputSchemaCommitment: keccak256("output"),
-                deadline: uint64(block.timestamp + 1 days),
-                authorizationExpiry: uint64(block.timestamp + 2 days),
-                maxSpend: 5 ether, nonce: nonce
-            });
+        ComputeJobSignedRequestAuthority420.Authorization memory a = ComputeJobSignedRequestAuthority420.Authorization({
+            owner: owner, payer: payer, manifestHash: keccak256("manifest"),
+            workloadType: keccak256("gpu"), inputCommitment: keccak256("input"),
+            outputSchemaCommitment: keccak256("output"), deadline: uint64(block.timestamp + 1 days),
+            authorizationExpiry: uint64(block.timestamp + 2 days), maxSpend: 5 ether, nonce: nonce
+        });
         bytes32 digest = requests.authorizationDigest(a);
         (uint8 ov, bytes32 or_, bytes32 os) = vm.sign(ownerKey, digest);
         (uint8 pv, bytes32 pr, bytes32 ps) = vm.sign(payerKey, digest);
@@ -135,10 +130,10 @@ contract ComputeEscrowFencedCapability420Test {
         _grant(rogue, VaultIds420.ACTION_WITHDRAW);
         require(caps.isAuthorized(rogue, VaultIds420.COMPONENT_VAULT,
             VaultIds420.ACTION_RELEASE_OBLIGATION, policy.scopeForVault(ID), 0),
-            "did not prove hostile shared grant exists");
+            "hostile shared grant not active");
         _tryRogueSpend(first);
         _tryRogueSpend(second);
-        require(policy.sealed() && address(vault.authorization()) == address(policy)
+        require(policy.configurationSealed() && address(vault.authorization()) == address(policy)
             && policy.boundVault() == address(vault) && policy.fundingAdapter() == address(funding),
             "policy topology not sealed");
         require(accounting.getObligation(first).state == 1
@@ -188,7 +183,7 @@ contract ComputeEscrowFencedCapability420Test {
         vault.claim(keccak256("payer-claim"), first);
         require(payerA.balance == beforePayer + 2 ether && accounting.getObligation(first).state == 3
             && accounting.getObligation(second).state == 1 && address(vault).balance == 3 ether,
-            "wrong exact payer transfer or second payer affected");
+            "wrong payer transfer or second payer affected");
         vm.prank(rogue);
         (bool replay,) = address(funding).call(abi.encodeCall(funding.refundExpiredUnmatched, (a)));
         require(!replay, "duplicate refund accepted");
@@ -212,7 +207,8 @@ contract ComputeEscrowFencedCapability420Test {
         caps.revokeGrant(releaseGrant);
         vm.warp(uint256(jobs.job(a).deadline) + 1);
         (ok,) = address(funding).call(abi.encodeCall(funding.refundExpiredUnmatched, (a)));
-        require(!ok && !funding.credit(a).refunded && accounting.getObligation(funding.credit(a).obligationId).state == 1,
+        require(!ok && !funding.credit(a).refunded
+            && accounting.getObligation(funding.credit(a).obligationId).state == 1,
             "CMP policy ignored shared RELEASE grant");
     }
 }

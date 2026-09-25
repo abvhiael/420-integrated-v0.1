@@ -34,6 +34,7 @@ contract ComputeEscrowFencedCapability420Test {
     address private payerA;
     address private payerB;
     address private rogue;
+    uint256 private nextGrantNonce;
 
     function setUp() public {
         payerA = vm.addr(PAYER_A);
@@ -70,7 +71,9 @@ contract ComputeEscrowFencedCapability420Test {
     }
 
     function _grant(address principal, bytes32 action) private {
-        caps.createGrant(keccak256(abi.encode("fenced-grant", principal, action)), principal,
+        // A revoked grant ID remains permanently consumed in the real CapabilityRegistry420.
+        // Re-authorizing the same principal/action must use a fresh globally unique ID.
+        caps.createGrant(keccak256(abi.encode("fenced-grant", principal, action, nextGrantNonce++)), principal,
             VaultIds420.COMPONENT_VAULT, action, policy.scopeForVault(ID), 0, 0, 0, 0, 0);
     }
 
@@ -150,9 +153,12 @@ contract ComputeEscrowFencedCapability420Test {
         bytes32 safety = funding.credit(a).obligationId;
         caps.updateProtocolComponentAuthority(VaultIds420.COMPONENT_VAULT, rogue);
         caps.transferComponentRegistrar(rogue);
+        // Compute the scope before vm.prank: an external view call in the arguments would
+        // otherwise consume the one-shot prank before the actual createGrant call.
+        bytes32 scope = policy.scopeForVault(ID);
         vm.prank(rogue);
         caps.createGrant(keccak256("rotated-grant"), rogue, VaultIds420.COMPONENT_VAULT,
-            VaultIds420.ACTION_RELEASE_OBLIGATION, policy.scopeForVault(ID), 0, 0, 0, 0, 0);
+            VaultIds420.ACTION_RELEASE_OBLIGATION, scope, 0, 0, 0, 0, 0);
         _tryRogueSpend(safety);
         require(accounting.getObligation(safety).state == 1, "rotated registrar spent payer deposit");
         require(!policy.isAuthorized(rogue, keccak256("other-vault"),

@@ -12,16 +12,18 @@ import "./ComputeEscrowFunding420.sol";
 /// @dev Bind the newly created Vault and funding adapter exactly once, then seal BEFORE
 /// admitting funds. Only the current funding contract may create a payer safety obligation
 /// or release it through its independently guarded expired/unmatched refund function.
-/// No direct cancel/withdraw/route claim/delegated claim is allowed in this version.
+/// Registry lifecycle calls may freeze/unfreeze/wind down/close only through separately
+/// scoped shared capabilities. They never gain obligation or withdrawal authority.
 contract CMPVaultAuthorization420 is VaultAuthorization420 {
     bytes32 public immutable cmpVaultId;
     address public immutable deployer;
     address public boundVault;
+    address public boundRegistry;
     address public fundingAdapter;
     bool public configurationSealed;
 
     error InvalidCMPBinding();
-    event CMPVaultBound(address indexed vault);
+    event CMPVaultBound(address indexed vault, address indexed registry);
     event CMPFundingBound(address indexed funding);
     event CMPPolicySealed(address indexed vault, address indexed funding);
 
@@ -37,15 +39,18 @@ contract CMPVaultAuthorization420 is VaultAuthorization420 {
         if (msg.sender != deployer || configurationSealed || boundVault != address(0)
             || vault_.code.length == 0) revert InvalidCMPBinding();
         AssetVault420 candidate = AssetVault420(payable(vault_));
-        if (candidate.vaultId() != cmpVaultId || address(candidate.authorization()) != address(this))
-            revert InvalidCMPBinding();
+        address registry_ = address(candidate.registry());
+        if (candidate.vaultId() != cmpVaultId || address(candidate.authorization()) != address(this)
+            || registry_.code.length == 0) revert InvalidCMPBinding();
         boundVault = vault_;
-        emit CMPVaultBound(vault_);
+        boundRegistry = registry_;
+        emit CMPVaultBound(vault_, registry_);
     }
 
     function bindFunding(address funding_) external {
         if (msg.sender != deployer || configurationSealed || fundingAdapter != address(0)
-            || boundVault == address(0) || funding_.code.length == 0) revert InvalidCMPBinding();
+            || boundVault == address(0) || boundRegistry == address(0)
+            || funding_.code.length == 0) revert InvalidCMPBinding();
         ComputeEscrowFunding420 candidate = ComputeEscrowFunding420(payable(funding_));
         if (address(candidate.vault()) != boundVault || candidate.vaultId() != cmpVaultId
             || address(candidate.jobs()) == address(0)) revert InvalidCMPBinding();
@@ -53,24 +58,39 @@ contract CMPVaultAuthorization420 is VaultAuthorization420 {
         emit CMPFundingBound(funding_);
     }
 
-    /// @notice No method exists to rotate the Vault, funding adapter, or policy after sealing.
+    /// @notice No method exists to rotate the Vault, registry, funding adapter, or policy after sealing.
     function seal() external {
         if (msg.sender != deployer || configurationSealed || boundVault == address(0)
-            || fundingAdapter == address(0)) revert InvalidCMPBinding();
+            || boundRegistry == address(0) || fundingAdapter == address(0)) revert InvalidCMPBinding();
         configurationSealed = true;
         emit CMPPolicySealed(boundVault, fundingAdapter);
     }
 
-    /// @dev Registry authorization is checked AFTER the immutable CMP restrictions.
-    /// Registry/administrative actions are denied for now; no grant can broaden this set.
+    /// @dev Shared registry authorization is checked only AFTER the immutable CMP restrictions.
+    /// Asset-moving calls must originate from the bound Vault and use the funding adapter.
+    /// Lifecycle calls must originate from the bound VaultRegistry and are limited to state
+    /// transitions; a lifecycle grant cannot be repurposed into payer-credit authority.
     function isAuthorized(address principal, bytes32 vaultId, bytes32 actionId, uint256 amount)
         public view override returns (bool)
     {
-        if (!configurationSealed || msg.sender != boundVault || vaultId != cmpVaultId
-            || principal != fundingAdapter) return false;
-        if (actionId != VaultIds420.ACTION_CREATE_OBLIGATION
-            && actionId != VaultIds420.ACTION_RELEASE_OBLIGATION) return false;
-        return super.isAuthorized(principal, vaultId, actionId, amount);
+        if (!configurationSealed || vaultId != cmpVaultId) return false;
+
+        if (msg.sender == boundVault) {
+            if (principal != fundingAdapter) return false;
+            if (actionId != VaultIds420.ACTION_CREATE_OBLIGATION
+                && actionId != VaultIds420.ACTION_RELEASE_OBLIGATION) return false;
+            return super.isAuthorized(principal, vaultId, actionId, amount);
+        }
+
+        if (msg.sender == boundRegistry) {
+            if (actionId != VaultIds420.ACTION_FREEZE
+                && actionId != VaultIds420.ACTION_UNFREEZE
+                && actionId != VaultIds420.ACTION_BEGIN_WIND_DOWN
+                && actionId != VaultIds420.ACTION_CLOSE) return false;
+            return super.isAuthorized(principal, vaultId, actionId, amount);
+        }
+
+        return false;
     }
 
     function isRouteAuthorized(address, bytes32, bytes32, address, address, uint256)

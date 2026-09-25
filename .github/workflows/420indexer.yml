@@ -37,6 +37,10 @@ on:
       - 'explorer/**'
       - 'docs/audit/EXP-0.1.2-indexer-dependency-reconciliation.md'
       - 'docs/audit/EXP-0.1.3-contract-abi-address-reconciliation.md'
+      - 'docs/audit/EXP-0.2.1-genesis-capability-matrix.json'
+      - 'docs/audit/EXP-0.2.1-required-capability-reconciliation.md'
+      - 'docs/audit/EXP-0.2.2-user-workflow-matrix.json'
+      - 'docs/audit/EXP-0.2.2-user-workflow-reconciliation.md'
       - 'config/420indexer-v1.json'
       - 'config/system-addresses.json'
       - 'config/genesis-applications.json'
@@ -50,6 +54,8 @@ on:
       - 'scripts/exp-0-1-1-inventory.py'
       - 'scripts/verify-exp-0-1-2-indexer-dependencies.py'
       - 'scripts/verify-exp-0-1-3-contract-dependencies.py'
+      - 'scripts/verify-exp-0-2-1-capability-matrix.py'
+      - 'scripts/verify-exp-0-2-2-user-workflows.py'
       - '.github/workflows/420indexer.yml'
 
 jobs:

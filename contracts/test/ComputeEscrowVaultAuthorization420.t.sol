@@ -138,10 +138,18 @@ contract ComputeEscrowVaultAuthorization420Test {
         (bool fundingRelease,) = address(funding).call(abi.encodeCall(funding.release,
             (vault, keccak256("funding-release"), A)));
         require(!fundingRelease, "funding adapter gained release authority");
-        controller.release(vault, keccak256("authorized-controller-release"), A);
-        require(accounting.getObligation(A).state == 2 && accounting.getObligation(B).state == 1,
-            "bound controller capability path failed");
-        // This fixture controller has NO real lifecycle policy: its release is a proof of
-        // authorization plumbing ONLY and is explicitly NOT a qualified refund route.
+        // Vault payer-safety controller is bound to the original obligation creator (funding).
+        // The distinct generic controller's policy grant is intentionally insufficient to
+        // release this payer safety obligation: a lawful refund requires the separately
+        // qualified CMP funding-adapter exit path, never arbitrary controller release.
+        bytes32 controllerOp = keccak256("authorized-controller-release");
+        (bool controllerRelease,) = address(controller).call(abi.encodeCall(controller.release,
+            (vault, controllerOp, A)));
+        require(!controllerRelease && !vault.executedOperation(controllerOp)
+            && accounting.getObligation(A).state == 1
+            && accounting.getObligation(B).state == 1
+            && accounting.getAccounting(ID, address(0)).reserved == 5 ether
+            && address(vault).balance == 5 ether,
+            "generic controller overrode immutable payer safety binding");
     }
 }

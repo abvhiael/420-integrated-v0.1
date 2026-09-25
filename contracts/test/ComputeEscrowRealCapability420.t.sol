@@ -126,10 +126,12 @@ contract ComputeEscrowRealCapability420Test {
 
     function testRealRegistryRejectsOutsiderGrantIssuanceAndVaultSpending() public {
         (bytes32 a,) = _fundPair();
+        // Evaluate external lookups before one-shot prank so outsider, not this test, calls the registry.
+        bytes32 scope = auth.scopeForVault(VAULT_ID);
         vm.prank(outsider);
         (bool issued,) = address(caps).call(abi.encodeCall(caps.createGrant,
             (keccak256("outsider"), outsider, VaultIds420.COMPONENT_VAULT,
-            VaultIds420.ACTION_RELEASE_OBLIGATION, auth.scopeForVault(VAULT_ID), 0, 0, 0, 0, 0)));
+            VaultIds420.ACTION_RELEASE_OBLIGATION, scope, 0, 0, 0, 0, 0)));
         require(!issued, "non-authority issued grant");
         bytes32 obligation = funding.credit(a).obligationId;
         vm.prank(outsider);

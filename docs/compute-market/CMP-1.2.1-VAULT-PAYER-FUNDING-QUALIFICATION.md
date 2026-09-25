@@ -97,8 +97,8 @@ The following remain outside CMP-1.2.1.2 and are **not** implied by this closeou
 
 ## CMP-1.2.1.3 — funding lifecycle integrity and provenance
 
-**Status: QUALIFICATION CANDIDATE pending exact-head CI.** Implementation/test head currently extends `ComputeEscrowFunding420Test` with explicit proof that refunded credits cannot remain valid or replay, owner/job/reference evidence cannot be reused, unsolicited Vault surplus cannot fabricate a payer credit, and historical `ComputeJobPayerCustody420` balance is never imported into the new Vault-backed funding ledger.
+**Status: COMPLETE within repository-level scope.** Exact qualified implementation/test head: `e88d5f5f8c5724ec84ff3074dd9c8fd72796eb44`. `ComputeEscrowFunding420Test` proves that refunded credits cannot remain valid or replay, owner/job/reference evidence cannot be reused, unsolicited Vault surplus cannot fabricate a payer credit, and historical `ComputeJobPayerCustody420` balance is never imported into the new Vault-backed funding ledger.
 
-Acceptance criteria and exact named tests are recorded in [`CMP-1.2.1.3-FUNDING-LIFECYCLE-INTEGRITY.md`](CMP-1.2.1.3-FUNDING-LIFECYCLE-INTEGRITY.md).
+Acceptance criteria and exact named tests are recorded in [`CMP-1.2.1.3-FUNDING-LIFECYCLE-INTEGRITY.md`](CMP-1.2.1.3-FUNDING-LIFECYCLE-INTEGRITY.md). Exact-head evidence: Solidity Contracts run `36173406491` succeeded with all 16 PR shards green; funding shard 2 job `108198785353` reports **9 passed / 0 failed / 0 skipped**; fenced-capability shard 1 job `108198785251` reports **6 / 0 / 0**; real-capability shard 3 job `108198785380` reports **4 / 0 / 0**; Vault-authorization shard 4 job `108198785250` reports **3 / 0 / 0**. 420 Integrated Qualification run `36173406567` and 420Docs Qualification run `36173406361` both succeeded.
 
 This step remains inside CMP-1.2.1 canonical payer funding. It does not authorize accepted-price reservation, provider settlement, matched-job refund economics, dispute/slash paths, or live network deployment. CMP-1.2.9 remains the deployment/testnet evidence gate.

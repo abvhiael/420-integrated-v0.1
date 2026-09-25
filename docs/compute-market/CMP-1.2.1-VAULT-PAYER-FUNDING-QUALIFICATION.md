@@ -1,6 +1,6 @@
 # CMP-1.2.1 — Signed-payer, Vault-backed funding and isolation
 
-Status: CMP-1.2.1.1 named-suite log evidence CONFIRMED against implementation head `0d2c01195bd0a8d0b12823cf14c2a40c48f727e2` (five tests passed, zero failed or skipped); Solidity, Integrated and Docs workflows for that implementation head all passed. The following documentation head `098c22a0553ddfede49858f5474c92718a6060e5` also passed all three workflow gates (see CMP-1.2.1.2 below). Remaining CMP-1.2.1 operational grant/governance and deployment checks are NOT qualified. No paid-job activation, settlement, post-match refund or deployable canonical registry publication is authorized.
+Status: CMP-1.2.1.1 named-suite log evidence is CONFIRMED against implementation head `0d2c01195bd0a8d0b12823cf14c2a40c48f727e2`. CMP-1.2.1.2 is **COMPLETE within repository-level scope** against exact implementation head `0e32c4dee3b86d2432c8d4e890fc69fc8129a963`: the dedicated CMP Vault authorization fence, payer-safety controller boundary, hostile real-capability tests, donor-surplus isolation, lifecycle freeze/wind-down path, and expired-unmatched original-payer refund all passed exact-head Solidity/Integrated/Docs qualification. Actual network deployment, runtime-address/code-hash attestation, live grant inventory, transaction evidence, and testnet publication remain deferred to CMP-1.2.9. No paid-job settlement, accepted-price reservation, dispute payout, slash redistribution, or production activation is authorized by this closeout.
 
 ## Implemented contract boundary
 
@@ -50,3 +50,46 @@ Test-only capability mocks prove contract call paths, **not** deployed governanc
 ## CMP-1.2.1.2 — real capability fixture and actionable blocking finding
 
 See [`CMP-1.2.1.2-REAL-CAPABILITY-GRANT-AUDIT.md`](CMP-1.2.1.2-REAL-CAPABILITY-GRANT-AUDIT.md) and `contracts/test/ComputeEscrowRealCapability420.t.sol` for the real-registry two-payer fixture, unauthorized outsider checks, and reproducible authorized grant-expansion risk. The original mock-only proof does **not** establish an enforceable CMP-specific Vault grant boundary. A separately qualified on-chain grant fence **and an authorized refund exit** must be demonstrated before operating a funded CMP Vault. Follow the linked audit's exact-run and deployment evidence gates; this entry is not a claim that the new suite or an actual deployment has passed.
+
+
+## CMP-1.2.1.2 — repository-level closeout (2026-09-25)
+
+**Status: COMPLETE within repository-level scope.** Exact implementation head: `0e32c4dee3b86d2432c8d4e890fc69fc8129a963` on draft PR #371, based on `main` merge commit `95a83a961286701b6e8c064de1deccad10f41fd7`. This closeout supersedes the earlier OPEN operational disposition above for repository qualification only. It does not claim a live-chain deployment.
+
+### Closed security findings
+
+- The original generic `VaultAuthorization420` grant-expansion finding remains valid as an adversarial baseline, but it is no longer the intended CMP custody topology.
+- `CMPVaultAuthorization420` now provides a dedicated, sealed CMP Vault authorization boundary. Shared capability grants are necessary but cannot broaden the protected Vault beyond the CMP policy's own principal/action restrictions.
+- The policy binds the exact Vault, its registry, and funding adapter before sealing. Vault-originating asset-moving authorization is limited to the bound funding adapter's CREATE and RELEASE paths; CANCEL, generic/route WITHDRAW, delegated CLAIM, and arbitrary third-party obligation control remain denied.
+- Registry-originating lifecycle authorization is separately limited to FREEZE, UNFREEZE, BEGIN_WIND_DOWN, and CLOSE and still requires the matching shared capability. Lifecycle authority does not imply payer-credit release, cancellation, withdrawal, or claim authority.
+- `AssetVault420` binds the payer-safety controller at obligation creation. A later generic RELEASE/CANCEL grant to another principal cannot mutate a protected payer-safety obligation.
+- Expired unmatched jobs have a tested release-to-claimable path that preserves the immutable original payer as beneficiary, rejects premature and replayed refunds, and preserves the other payer's backing.
+- Unsolicited donor/free balance is tested as non-capturable by a hostile withdrawal grant through the dedicated CMP policy.
+- ACTIVE→FROZEN blocks new funding; FROZEN→WINDING_DOWN remains capability-gated; WINDING_DOWN preserves the exact expired-unmatched payer exit.
+
+### Exact-head named-suite evidence
+
+Solidity Contracts #3148 completed successfully for exact head `0e32c4dee3b86d2432c8d4e890fc69fc8129a963`; all 16 PR shards completed successfully.
+
+- `contracts/test/ComputeEscrowFencedCapability420.t.sol:ComputeEscrowFencedCapability420Test` — shard 1 job `107936762366`: **6 passed; 0 failed; 0 skipped**.
+  - `testDonorSurplusCannotBeCapturedByHostileWithdrawalGrant`
+  - `testExpiredUnmatchedRefundIsExactClaimableThenPaidToOriginalPayer`
+  - `testLifecycleFreezeStopsAdmissionAndWindingDownPreservesPayerExit`
+  - `testMissingSharedGrantStillDeniesFundingAndRefund`
+  - `testRegistrarRotationAndOtherVaultScopeCannotOverrideSealedPolicy`
+  - `testSealedPolicyRejectsCompetingGrantsAndConservesTwoPayers`
+- `contracts/test/ComputeEscrowRealCapability420.t.sol:ComputeEscrowRealCapability420Test` — shard 3 job `107936762465`: **4 passed; 0 failed; 0 skipped**. This remains the real-registry generic-Vault adversarial baseline and confirms why the dedicated fence is necessary.
+- `contracts/test/ComputeEscrowVaultAuthorization420.t.sol:ComputeEscrowVaultAuthorization420Test` — shard 4 job `107936762632`: **3 passed; 0 failed; 0 skipped**.
+- `contracts/test/ComputeEscrowFunding420.t.sol:ComputeEscrowFunding420Test` — shard 2 job `107936762593`: **5 passed; 0 failed; 0 skipped**; the original CMP-1.2.1.1 funding evidence remains green after the later authorization/refund changes.
+
+Associated exact-head workflows:
+
+- Solidity Contracts #3148 — https://github.com/abvhiael/420-integrated-v0.1/actions/runs/36091354852 — success.
+- 420 Integrated Qualification #5428 — https://github.com/abvhiael/420-integrated-v0.1/actions/runs/36091354863 — success.
+- 420Docs Qualification #2811 — https://github.com/abvhiael/420-integrated-v0.1/actions/runs/36091354859 — success.
+
+### Qualification boundary
+
+CMP-1.2.1.2 is therefore closed for **repository-level implementation and deployment-realistic qualification**: the real capability semantics have been audited, the generic-grant bypass has a non-bypassable CMP-specific on-chain fence, the dedicated Vault topology is one-way sealed, two-payer conservation and hostile authority expansion are tested, unsolicited surplus cannot be stolen through the CMP policy, and an emergency freeze/wind-down path coexists with a reachable original-payer refund.
+
+The following remain outside CMP-1.2.1.2 and are **not** implied by this closeout: actual chain/network deployment; deployed addresses and transaction hashes; runtime code-hash and immutable-configuration attestation; live grant IDs/limits/expiry/revocation inventory; testnet funding transactions; ProtocolRegistry publication; accepted-price reservation; provider entitlement/payout; post-match cancellation/refunds; disputes; slashing; and production activation. Those are handled by CMP-1.2.2+ and specifically the live deployment/testnet gate in CMP-1.2.9.

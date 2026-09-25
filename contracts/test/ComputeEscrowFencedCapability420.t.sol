@@ -137,8 +137,8 @@ contract ComputeEscrowFencedCapability420Test {
         _tryRogueSpend(first);
         _tryRogueSpend(second);
         require(policy.configurationSealed() && address(vault.authorization()) == address(policy)
-            && policy.boundVault() == address(vault) && policy.fundingAdapter() == address(funding),
-            "policy topology not sealed");
+            && policy.boundVault() == address(vault) && policy.boundRegistry() == address(registry)
+            && policy.fundingAdapter() == address(funding), "policy topology not sealed");
         require(accounting.getObligation(first).state == 1
             && accounting.getObligation(second).state == 1
             && accounting.freeBalance(ID, address(0)) == 0
@@ -216,5 +216,59 @@ contract ComputeEscrowFencedCapability420Test {
         require(!ok && !funding.credit(a).refunded
             && accounting.getObligation(funding.credit(a).obligationId).state == 1,
             "CMP policy ignored shared RELEASE grant");
+    }
+
+    function testDonorSurplusCannotBeCapturedByHostileWithdrawalGrant() public {
+        (bytes32 a, bytes32 b) = _fundPair();
+        vm.deal(address(this), 1 ether);
+        vault.depositNative{value: 1 ether}();
+        require(accounting.freeBalance(ID, address(0)) == 1 ether
+            && accounting.getAccounting(ID, address(0)).reserved == 5 ether
+            && address(vault).balance == 6 ether, "donor surplus setup failed");
+
+        _grant(rogue, VaultIds420.ACTION_WITHDRAW);
+        vm.prank(rogue);
+        (bool withdrawn,) = address(vault).call(abi.encodeCall(vault.withdraw,
+            (keccak256("surplus-withdraw"), address(0), rogue, 1 ether)));
+        require(!withdrawn && accounting.freeBalance(ID, address(0)) == 1 ether
+            && address(vault).balance == 6 ether
+            && funding.funded(a, vm.addr(OWNER_A), a)
+            && funding.funded(b, vm.addr(OWNER_B), b),
+            "hostile grant captured donor surplus or changed payer backing");
+    }
+
+    function testLifecycleFreezeStopsAdmissionAndWindingDownPreservesPayerExit() public {
+        (bytes32 a, bytes32 b) = _fundPair();
+        bytes32 first = funding.credit(a).obligationId;
+        bytes32 second = funding.credit(b).obligationId;
+
+        _grant(address(this), VaultIds420.ACTION_FREEZE);
+        _grant(address(this), VaultIds420.ACTION_BEGIN_WIND_DOWN);
+        registry.setState(ID, VaultRegistry420.VaultState.FROZEN);
+        require(registry.vaultState(ID) == VaultRegistry420.VaultState.FROZEN,
+            "authorized freeze did not execute");
+
+        bytes32 blocked = _job(3, OWNER_A, PAYER_A);
+        uint256 beforePayer = payerA.balance;
+        vm.prank(payerA);
+        (bool admitted,) = address(funding).call{value: 1 ether}(abi.encodeCall(funding.fund, (blocked)));
+        require(!admitted && payerA.balance == beforePayer && address(vault).balance == 5 ether,
+            "frozen Vault admitted new payer funds");
+
+        registry.setState(ID, VaultRegistry420.VaultState.WINDING_DOWN);
+        require(registry.vaultState(ID) == VaultRegistry420.VaultState.WINDING_DOWN,
+            "authorized wind-down did not execute");
+
+        vm.warp(uint256(jobs.job(a).deadline) + 1);
+        funding.refundExpiredUnmatched(a);
+        uint256 beforeClaim = payerA.balance;
+        vm.prank(payerA);
+        vault.claim(keccak256("wind-down-payer-claim"), first);
+        require(payerA.balance == beforeClaim + 2 ether
+            && accounting.getObligation(first).state == 3
+            && accounting.getObligation(second).state == 1
+            && address(vault).balance == 3 ether
+            && funding.funded(b, vm.addr(OWNER_B), b),
+            "wind-down refund violated payer isolation");
     }
 }

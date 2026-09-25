@@ -1,6 +1,6 @@
 # CMP-1.2.1.3 — Funding lifecycle integrity and provenance closeout
 
-Status: **qualification candidate** on draft PR #371. This substep closes the remaining repository-level evidence for CMP-1.2.1 canonical payer funding without introducing CMP-1.2.2 accepted-price reservation or later settlement economics.
+Status: **COMPLETE within repository-level scope** on draft PR #371. Exact qualified implementation/test head: `e88d5f5f8c5724ec84ff3074dd9c8fd72796eb44`. This substep closes the remaining repository-level evidence for CMP-1.2.1 canonical payer funding without introducing CMP-1.2.2 accepted-price reservation or later settlement economics.
 
 ## Scope
 
@@ -34,6 +34,34 @@ The exact-head qualification gate requires the named suite log with explicit pas
 
 ## Qualification boundary
 
-CMP-1.2.1.3 may be marked COMPLETE only after exact-head CI confirms the expanded funding suite and the existing CMP escrow regression suites remain green.
+CMP-1.2.1.3 is **COMPLETE within repository-level scope** because exact-head CI at `e88d5f5f8c5724ec84ff3074dd9c8fd72796eb44` confirms the expanded funding suite and existing CMP escrow regression suites remain green.
 
-Actual deployed addresses, transaction hashes, runtime code hashes, live grant inventory, network funding, and ProtocolRegistry publication are intentionally outside this step and remain CMP-1.2.9.
+## Exact-head qualification evidence
+
+- Solidity Contracts run `36173406491` — **success**, all 16 PR shards successful.
+- Funding suite, shard 2 job `108198785353`: `ComputeEscrowFunding420Test` — **9 passed; 0 failed; 0 skipped**.
+  - `testExpiredUnboundAndWrongFundingReferenceFailClosed`
+  - `testLegacyCustodyBalanceIsNeverImportedAsVaultFunding`
+  - `testOutsiderCannotReleaseCancelClaimOrWithdrawPayerSafetyDeposit`
+  - `testRefundInvalidatesFundingEvidenceAndReplayFailsClosed`
+  - `testTwoPayersReceiveDistinctRealVaultBackedSafetyObligations`
+  - `testUnsolicitedVaultSurplusCannotFabricateJobCredit`
+  - `testWithoutScopedVaultCreatePermissionFundingRevertsAtomically`
+  - `testWrongOwnerJobAndFundingReferenceCannotReuseCredit`
+  - `testWrongPayerOverCapZeroAndDuplicateFundingRevertWithoutVaultMutation`
+- Dedicated fenced-capability suite, shard 1 job `108198785251`: **6 passed; 0 failed; 0 skipped**.
+- Real-capability regression suite, shard 3 job `108198785380`: **4 passed; 0 failed; 0 skipped**.
+- Vault-authorization regression suite, shard 4 job `108198785250`: **3 passed; 0 failed; 0 skipped**.
+- 420 Integrated Qualification run `36173406567` — **success**.
+- 420Docs Qualification run `36173406361` — **success**.
+
+Run links:
+- https://github.com/abvhiael/420-integrated-v0.1/actions/runs/36173406491
+- https://github.com/abvhiael/420-integrated-v0.1/actions/runs/36173406567
+- https://github.com/abvhiael/420-integrated-v0.1/actions/runs/36173406361
+- Funding shard: https://github.com/abvhiael/420-integrated-v0.1/actions/runs/36173406491/job/108198785353
+- Fenced shard: https://github.com/abvhiael/420-integrated-v0.1/actions/runs/36173406491/job/108198785251
+- Real-capability shard: https://github.com/abvhiael/420-integrated-v0.1/actions/runs/36173406491/job/108198785380
+- Vault-authorization shard: https://github.com/abvhiael/420-integrated-v0.1/actions/runs/36173406491/job/108198785250
+
+Actual deployed addresses, transaction hashes, runtime code hashes, live grant inventory, network funding, and ProtocolRegistry publication are intentionally outside this step and remain CMP-1.2.9. Accepted-price reservation and all later payout/settlement economics begin at CMP-1.2.2.

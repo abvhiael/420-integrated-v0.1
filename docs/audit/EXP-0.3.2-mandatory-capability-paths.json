@@ -854,5 +854,12 @@
     "implemented_source": 6,
     "partial_source": 4,
     "orphaned_paths": 0
+  },
+  "scope_resolution": {
+    "id": "EXP-SCOPE-CONFLICT-001",
+    "decision": "EXP-SCOPE-RESOLUTION-B",
+    "milestone": "EXP-0.3.8",
+    "outcome": "No governance implementation path is required because governance is not a mandatory dedicated Explorer Genesis view.",
+    "evidence": "docs/audit/EXP-0.3.8-governance-scope-decision.json"
   }
 }

@@ -37,10 +37,15 @@
         ]
       },
       "explorer_service": {
-        "path": "explorer/service/service.go",
+        "path": "explorer/service/blockviews.go",
         "operations": [
           "BlockPage",
           "BlockDetail"
+        ],
+        "additional_path": "explorer/service/service.go",
+        "additional_operations": [
+          "Blocks",
+          "Block"
         ]
       },
       "indexer_client": {
@@ -214,7 +219,7 @@
           "ReceiptDetail",
           "TransactionDetail"
         ],
-        "additional_path": "explorer/service/service.go",
+        "additional_path": "explorer/service/blockviews.go",
         "additional_operations": [
           "BlockDetail"
         ]
@@ -695,7 +700,10 @@
         "path": "explorer/service/registryviews.go",
         "operations": [
           "Registry",
-          "RegistryService",
+          "RegistryService"
+        ],
+        "additional_path": "explorer/service/service.go",
+        "additional_operations": [
           "ServiceVersion"
         ]
       },

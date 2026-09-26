@@ -30,6 +30,8 @@ on:
       - 'docs/audit/EXP-0.3.4-qualification-status-reconciliation.md'
       - 'docs/audit/EXP-0.3.5-nonblocking-scope-exclusions.json'
       - 'docs/audit/EXP-0.3.5-nonblocking-scope-reconciliation.md'
+      - 'docs/audit/EXP-0.3.6-scope-conflict-resolution-register.json'
+      - 'docs/audit/EXP-0.3.6-scope-conflict-reconciliation.md'
       - 'config/420indexer-v1.json'
       - 'config/system-addresses.json'
       - 'config/genesis-applications.json'
@@ -54,6 +56,7 @@ on:
       - 'scripts/verify-exp-0-3-3-acceptance-tests.py'
       - 'scripts/verify-exp-0-3-4-status-freeze.py'
       - 'scripts/verify-exp-0-3-5-nonblocking-exclusions.py'
+      - 'scripts/verify-exp-0-3-6-scope-conflicts.py'
       - '.github/workflows/420indexer.yml'
   push:
     branches:
@@ -86,6 +89,8 @@ on:
       - 'docs/audit/EXP-0.3.4-qualification-status-reconciliation.md'
       - 'docs/audit/EXP-0.3.5-nonblocking-scope-exclusions.json'
       - 'docs/audit/EXP-0.3.5-nonblocking-scope-reconciliation.md'
+      - 'docs/audit/EXP-0.3.6-scope-conflict-resolution-register.json'
+      - 'docs/audit/EXP-0.3.6-scope-conflict-reconciliation.md'
       - 'config/420indexer-v1.json'
       - 'config/system-addresses.json'
       - 'config/genesis-applications.json'
@@ -110,6 +115,7 @@ on:
       - 'scripts/verify-exp-0-3-3-acceptance-tests.py'
       - 'scripts/verify-exp-0-3-4-status-freeze.py'
       - 'scripts/verify-exp-0-3-5-nonblocking-exclusions.py'
+      - 'scripts/verify-exp-0-3-6-scope-conflicts.py'
       - '.github/workflows/420indexer.yml'
 
 jobs:
@@ -186,6 +192,8 @@ jobs:
         run: python scripts/verify-exp-0-3-4-status-freeze.py
       - name: EXP-0.3.5 optional and post-Genesis exclusions
         run: python scripts/verify-exp-0-3-5-nonblocking-exclusions.py
+      - name: EXP-0.3.6 scope-conflict resolution register
+        run: python scripts/verify-exp-0-3-6-scope-conflicts.py
       - name: EXP-0.1.1 pinned-tree exhaustive inventory
         if: always()
         run: python scripts/exp-0-1-1-inventory.py --commit 95a83a961286701b6e8c064de1deccad10f41fd7
@@ -279,4 +287,11 @@ jobs:
         with:
           name: exp-0-3-5-nonblocking-scope-exclusions
           path: exp-0-3-5-evidence/
+          if-no-files-found: error
+      - name: Upload EXP-0.3.6 scope-conflict evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp-0-3-6-scope-conflict-resolution-register
+          path: exp-0-3-6-evidence/
           if-no-files-found: error

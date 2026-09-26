@@ -179,3 +179,21 @@ Exact-head evidence:
 Full qualification record: [`CMP-1.2.5-PAYER-REFUND-QUALIFICATION.md`](CMP-1.2.5-PAYER-REFUND-QUALIFICATION.md).
 
 Challenge/dispute holds and contested-liability resolution remain CMP-1.2.6; hostile solvency/reentrancy/privilege hardening remains CMP-1.2.7; live deployment/testnet evidence remains CMP-1.2.9.
+
+
+## CMP-1.2.6 — dispute holds, adjudication and contested liabilities
+
+**Status: COMPLETE within repository-level scope.** Exact qualified implementation/test head: `5175a9c3293fd0e7959c0d5747c3d56b35b7e4c2`.
+
+The repository now proves a finite fixed-price dispute path with an immutable accepted policy, pending-liability hold, scoped independent adjudication, bounded appeal, provider-win resume, payer-win reallocation to the original payer, fail-closed timeout, withdrawal, direct-Vault bypass resistance and cross-payer isolation.
+
+Exact-head evidence:
+
+- Solidity Contracts run `36273468230` — **success**, all 16 shards green.
+- `ComputeVerifiedEntitlement420Test` — shard 1 job `108491645128`: **31 passed / 0 failed / 0 skipped**.
+- 420 Integrated Qualification run `36273468271` — **success**.
+- 420Docs Qualification run `36273468412` — **success**.
+
+Full qualification record: [`CMP-1.2.6-DISPUTE-HOLDS-QUALIFICATION.md`](CMP-1.2.6-DISPUTE-HOLDS-QUALIFICATION.md).
+
+Hostile solvency/reentrancy/privilege hardening remains CMP-1.2.7; full real E2E fixtures remain CMP-1.2.8; live deployment/testnet evidence remains CMP-1.2.9.

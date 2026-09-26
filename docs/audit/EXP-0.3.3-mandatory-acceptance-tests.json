@@ -1,0 +1,668 @@
+{
+  "schema": "420explorer-exp-0.3.3-mandatory-acceptance-tests-v1",
+  "milestone": "EXP-0.3.3",
+  "title": "Mandatory Genesis capability acceptance-test mapping",
+  "baseline": {
+    "main_commit": "c7cb5f4dac07eb9416cac4a11eeee31b6efb10f0",
+    "requirement_inventory": "docs/audit/EXP-0.3.1-authoritative-genesis-requirements.json",
+    "implementation_paths": "docs/audit/EXP-0.3.2-mandatory-capability-paths.json",
+    "gap_register": "docs/audit/EXP-0.2.5-genesis-gap-register.json",
+    "acceptance_map": "docs/audit/EXP-0.2.6-genesis-acceptance-criteria.json"
+  },
+  "qualification_meaning": "complete_acceptance_path means a mandatory view has concrete current automated-test evidence plus explicit later qualification procedures and owners for evidence that source CI cannot prove. It does not mean the capability, workflow, runtime, deployment, or Genesis acceptance criterion has passed.",
+  "entries": [
+    {
+      "id": "EXP-TEST-001",
+      "requirement_id": "EXP-REQ-VIEW-001",
+      "capability_id": "EXP-CAP-001",
+      "path_id": "EXP-PATH-001",
+      "name": "block",
+      "mapping_status": "complete_acceptance_path",
+      "capability_status": "implemented_source",
+      "current_automated_tests": [
+        {
+          "path": "explorer/service/blockviews_test.go",
+          "tests": [
+            "TestBlockPagePreservesSnapshotAndFinality",
+            "TestBlockPageRejectsBlockBeyondSnapshot",
+            "TestBlockDetailNavigationUsesIndexedHeight",
+            "TestBlockDetailDoesNotAdvertiseNextPastIndexedHeight"
+          ],
+          "coverage": "snapshot/finality preservation, bounds and detail navigation"
+        },
+        {
+          "path": "indexer/api/backend_test.go",
+          "tests": [
+            "TestStoreBackendPinsSnapshotAcrossPages"
+          ],
+          "coverage": "snapshot-pinned block pagination"
+        },
+        {
+          "path": "indexer/api/server_test.go",
+          "tests": [
+            "TestBlocksRejectsOversizedPage"
+          ],
+          "coverage": "block API negative validation"
+        }
+      ],
+      "later_qualification_tests": [
+        {
+          "owner": "EXP-1",
+          "procedure": "Compare representative indexed block number/hash/parent/timestamp and head/safe/finalized classification against the approved canonical testnet source, including reorg handling above finality."
+        },
+        {
+          "owner": "EXP-4",
+          "procedure": "Navigate recent and historical block views in the deployed Explorer and verify finality labels, logs and navigation against API responses."
+        },
+        {
+          "owner": "EXP-7",
+          "procedure": "Run production-equivalent live required-view probes against the exact release candidate."
+        }
+      ],
+      "gap_findings": [
+        "EXP-FIND-002",
+        "EXP-FIND-003",
+        "EXP-FIND-004",
+        "EXP-FIND-009"
+      ],
+      "acceptance_criteria": [
+        "AC-1",
+        "AC-2",
+        "AC-3"
+      ],
+      "later_owners": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-4",
+        "EXP-7",
+        "EXP-8"
+      ]
+    },
+    {
+      "id": "EXP-TEST-002",
+      "requirement_id": "EXP-REQ-VIEW-002",
+      "capability_id": "EXP-CAP-002",
+      "path_id": "EXP-PATH-002",
+      "name": "transaction",
+      "mapping_status": "complete_acceptance_path",
+      "capability_status": "implemented_source",
+      "current_automated_tests": [
+        {
+          "path": "explorer/service/transactionviews_test.go",
+          "tests": [
+            "TestTransactionDetailIncludesReceiptLogsAndFinality",
+            "TestTransactionDetailLabelsRevertedReceipt",
+            "TestTransactionDetailRejectsReceiptIndexMismatch",
+            "TestTransactionDetailRejectsBlockMismatch",
+            "TestTransactionDetailRejectsLogProvenanceMismatch"
+          ],
+          "coverage": "transaction/receipt/log/finality composition and provenance failure cases"
+        },
+        {
+          "path": "indexer/api/server_test.go",
+          "tests": [
+            "TestExtendedReadEndpoints"
+          ],
+          "coverage": "transaction and receipt API authority boundary"
+        },
+        {
+          "path": "explorer/indexerclient/client_test.go",
+          "tests": [
+            "TestExplorerConsumesIndexerAPIOnly"
+          ],
+          "coverage": "Explorer consumes shared Indexer transaction/receipt routes"
+        }
+      ],
+      "later_qualification_tests": [
+        {
+          "owner": "EXP-2",
+          "procedure": "Implement and test authoritative actual-fee fields, including known fee vectors and edge/zero cases; verify API serialization."
+        },
+        {
+          "owner": "EXP-4",
+          "procedure": "Verify deployed transaction UI shows hash, provenance, success/revert, finality, logs, value and actual fee distinctly."
+        },
+        {
+          "owner": "EXP-7",
+          "procedure": "Compare representative deployed transaction and receipt fields with canonical target-network evidence."
+        }
+      ],
+      "gap_findings": [
+        "EXP-FIND-002",
+        "EXP-FIND-003",
+        "EXP-FIND-004",
+        "EXP-FIND-008"
+      ],
+      "acceptance_criteria": [
+        "AC-1",
+        "AC-2",
+        "AC-5"
+      ],
+      "later_owners": [
+        "EXP-2",
+        "EXP-4",
+        "EXP-7",
+        "EXP-8"
+      ]
+    },
+    {
+      "id": "EXP-TEST-003",
+      "requirement_id": "EXP-REQ-VIEW-003",
+      "capability_id": "EXP-CAP-003",
+      "path_id": "EXP-PATH-003",
+      "name": "receipt/logs",
+      "mapping_status": "complete_acceptance_path",
+      "capability_status": "partial_source",
+      "current_automated_tests": [
+        {
+          "path": "explorer/service/transactionviews_test.go",
+          "tests": [
+            "TestTransactionDetailIncludesReceiptLogsAndFinality",
+            "TestReceiptDetailMirrorsTransactionDetail",
+            "TestTransactionDetailRejectsLogProvenanceMismatch"
+          ],
+          "coverage": "receipt/log composition, transaction linkage and log provenance"
+        },
+        {
+          "path": "indexer/api/server_test.go",
+          "tests": [
+            "TestExtendedReadEndpoints"
+          ],
+          "coverage": "receipt and block-log read endpoints preserve non-authority boundary"
+        },
+        {
+          "path": "indexer/store/file_test.go",
+          "tests": [
+            "TestFileStorePersistsBundleAndCheckpointAcrossRestart",
+            "TestFileStoreResetClearsAllRebuildableStateAndSurvivesRestart"
+          ],
+          "coverage": "receipt/log durable projection and rebuild/reset behavior"
+        }
+      ],
+      "later_qualification_tests": [
+        {
+          "owner": "EXP-2",
+          "procedure": "Exercise receipt/log APIs with representative successful, reverted, contract-creation and multi-log transactions and compare all provenance fields to canonical records."
+        },
+        {
+          "owner": "EXP-4",
+          "procedure": "Implement/verify complete raw log topic values and data rendering, including empty/multiple topic cases and navigation links."
+        },
+        {
+          "owner": "EXP-7",
+          "procedure": "Run live receipt/log witnesses on the deployed Explorer against the exact release candidate."
+        }
+      ],
+      "gap_findings": [
+        "EXP-FIND-002",
+        "EXP-FIND-003",
+        "EXP-FIND-004",
+        "EXP-FIND-010"
+      ],
+      "acceptance_criteria": [
+        "AC-1",
+        "AC-2",
+        "AC-5",
+        "AC-7"
+      ],
+      "later_owners": [
+        "EXP-2",
+        "EXP-3",
+        "EXP-4",
+        "EXP-7",
+        "EXP-8"
+      ]
+    },
+    {
+      "id": "EXP-TEST-004",
+      "requirement_id": "EXP-REQ-VIEW-004",
+      "capability_id": "EXP-CAP-004",
+      "path_id": "EXP-PATH-004",
+      "name": "address",
+      "mapping_status": "complete_acceptance_path",
+      "capability_status": "implemented_source",
+      "current_automated_tests": [
+        {
+          "path": "explorer/service/addressviews_test.go",
+          "tests": [
+            "TestAddressViewValidatesSnapshotAndMembership",
+            "TestAddressViewRejectsInvalidAddress"
+          ],
+          "coverage": "address history membership, snapshot bounds and invalid-address rejection"
+        },
+        {
+          "path": "indexer/store/address_test.go",
+          "tests": [],
+          "coverage": "address-index storage/query coverage"
+        },
+        {
+          "path": "explorer/api/server_test.go",
+          "tests": [],
+          "coverage": "Explorer API route suite includes address view handling"
+        }
+      ],
+      "later_qualification_tests": [
+        {
+          "owner": "EXP-2",
+          "procedure": "Probe representative address histories with incoming/outgoing/native/contract-creation transactions and verify snapshot/finality metadata against Indexer/canonical records."
+        },
+        {
+          "owner": "EXP-4",
+          "procedure": "Verify deployed address history direction, counterparty, value and navigation behavior."
+        },
+        {
+          "owner": "EXP-7",
+          "procedure": "Run address-view witnesses against the release-candidate deployment."
+        }
+      ],
+      "gap_findings": [
+        "EXP-FIND-002",
+        "EXP-FIND-003",
+        "EXP-FIND-004"
+      ],
+      "acceptance_criteria": [
+        "AC-1",
+        "AC-5"
+      ],
+      "later_owners": [
+        "EXP-2",
+        "EXP-4",
+        "EXP-7",
+        "EXP-8"
+      ]
+    },
+    {
+      "id": "EXP-TEST-005",
+      "requirement_id": "EXP-REQ-VIEW-005",
+      "capability_id": "EXP-CAP-005",
+      "path_id": "EXP-PATH-005",
+      "name": "contract",
+      "mapping_status": "complete_acceptance_path",
+      "capability_status": "implemented_source",
+      "current_automated_tests": [
+        {
+          "path": "explorer/service/contractviews_test.go",
+          "tests": [
+            "TestContractDetailPresentsRuntimeCode",
+            "TestContractDetailRejectsAddressMismatch"
+          ],
+          "coverage": "runtime bytecode/code hash/deployment presentation and address mismatch failure"
+        },
+        {
+          "path": "explorer/api/server_test.go",
+          "tests": [],
+          "coverage": "Explorer contract route/API validation"
+        },
+        {
+          "path": "indexer/store/file_test.go",
+          "tests": [],
+          "coverage": "rebuildable store regression suite covers auxiliary indexed state"
+        }
+      ],
+      "later_qualification_tests": [
+        {
+          "owner": "EXP-3",
+          "procedure": "Compare deployed runtime bytecode/hash and deployment provenance with canonical target-network reads; verify metadata cannot override runtime truth."
+        },
+        {
+          "owner": "EXP-4",
+          "procedure": "Verify deployed contract view renders address, deployment transaction/block, runtime bytecode and code hash and handles unknown/non-contract addresses."
+        },
+        {
+          "owner": "EXP-7",
+          "procedure": "Execute contract-view witnesses against release-candidate deployment."
+        }
+      ],
+      "gap_findings": [
+        "EXP-FIND-002",
+        "EXP-FIND-003",
+        "EXP-FIND-004"
+      ],
+      "acceptance_criteria": [
+        "AC-1",
+        "AC-4",
+        "AC-5"
+      ],
+      "later_owners": [
+        "EXP-2",
+        "EXP-3",
+        "EXP-4",
+        "EXP-7",
+        "EXP-8"
+      ]
+    },
+    {
+      "id": "EXP-TEST-006",
+      "requirement_id": "EXP-REQ-VIEW-006",
+      "capability_id": "EXP-CAP-006",
+      "path_id": "EXP-PATH-006",
+      "name": "token/asset activity",
+      "mapping_status": "complete_acceptance_path",
+      "capability_status": "partial_source",
+      "current_automated_tests": [
+        {
+          "path": "explorer/service/assetviews_test.go",
+          "tests": [
+            "TestAssetActivityValidatesSnapshotAndFilters",
+            "TestAssetActivityRejectsUnrelatedAddress"
+          ],
+          "coverage": "snapshot bounds, asset/address filtering and membership rejection"
+        },
+        {
+          "path": "explorer/api/assets_test.go",
+          "tests": [],
+          "coverage": "Explorer asset activity HTTP view"
+        },
+        {
+          "path": "indexer/api/assets_test.go",
+          "tests": [
+            "TestAssetTransfersPinsCheckpointAndBoundsRows",
+            "TestAssetTransfersHTTPRoute"
+          ],
+          "coverage": "Indexer asset snapshot bounds and HTTP route"
+        },
+        {
+          "path": "indexer/store/assets_test.go",
+          "tests": [],
+          "coverage": "asset-transfer storage/reorg regression coverage"
+        }
+      ],
+      "later_qualification_tests": [
+        {
+          "owner": "EXP-3",
+          "procedure": "Qualify supported native/token decoder vectors and provenance against representative canonical logs/transactions."
+        },
+        {
+          "owner": "EXP-4",
+          "procedure": "Expose and test required user-facing asset/address filters and verify transfer rendering/navigation for supported asset kinds."
+        },
+        {
+          "owner": "EXP-7",
+          "procedure": "Run live asset-transfer witnesses and compare displayed records to canonical transaction/log evidence."
+        }
+      ],
+      "gap_findings": [
+        "EXP-FIND-002",
+        "EXP-FIND-003",
+        "EXP-FIND-004"
+      ],
+      "acceptance_criteria": [
+        "AC-5"
+      ],
+      "later_owners": [
+        "EXP-2",
+        "EXP-3",
+        "EXP-4",
+        "EXP-7",
+        "EXP-8"
+      ]
+    },
+    {
+      "id": "EXP-TEST-007",
+      "requirement_id": "EXP-REQ-VIEW-007",
+      "capability_id": "EXP-CAP-007",
+      "path_id": "EXP-PATH-007",
+      "name": "validator",
+      "mapping_status": "complete_acceptance_path",
+      "capability_status": "partial_source",
+      "current_automated_tests": [
+        {
+          "path": "explorer/service/consensusviews_test.go",
+          "tests": [
+            "TestConsensusView",
+            "TestConsensusViewRejectsProposerOutsideCommittee"
+          ],
+          "coverage": "validator/committee/proposer/QC projection and invalid proposer membership"
+        },
+        {
+          "path": "explorer/api/server_test.go",
+          "tests": [],
+          "coverage": "Explorer consensus HTTP route coverage"
+        },
+        {
+          "path": "indexer/api/server_test.go",
+          "tests": [],
+          "coverage": "Indexer API authority-boundary regression suite"
+        }
+      ],
+      "later_qualification_tests": [
+        {
+          "owner": "EXP-1",
+          "procedure": "Wire and qualify the deployed Indexer ConsensusProvider with representative active validator/seat/proposer/QC data and provider-unavailable failure behavior."
+        },
+        {
+          "owner": "EXP-2",
+          "procedure": "Implement and test authoritative historical block-to-producer attribution, including finality/reorg provenance."
+        },
+        {
+          "owner": "EXP-4",
+          "procedure": "Verify deployed validator/committee/proposer UI and historical producer links."
+        },
+        {
+          "owner": "EXP-7",
+          "procedure": "Compare live consensus/validator presentation to canonical consensus source on the exact release candidate."
+        }
+      ],
+      "gap_findings": [
+        "EXP-FIND-002",
+        "EXP-FIND-003",
+        "EXP-FIND-007",
+        "EXP-FIND-009"
+      ],
+      "acceptance_criteria": [
+        "AC-3",
+        "AC-5",
+        "AC-6"
+      ],
+      "later_owners": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-4",
+        "EXP-7",
+        "EXP-8"
+      ]
+    },
+    {
+      "id": "EXP-TEST-008",
+      "requirement_id": "EXP-REQ-VIEW-008",
+      "capability_id": "EXP-CAP-008",
+      "path_id": "EXP-PATH-008",
+      "name": "epoch/rotation",
+      "mapping_status": "complete_acceptance_path",
+      "capability_status": "partial_source",
+      "current_automated_tests": [
+        {
+          "path": "explorer/service/consensusviews_test.go",
+          "tests": [
+            "TestConsensusView",
+            "TestConsensusViewRejectsProposerOutsideCommittee"
+          ],
+          "coverage": "epoch/rotation boundary calculations and consensus projection validation"
+        },
+        {
+          "path": "explorer/api/server_test.go",
+          "tests": [],
+          "coverage": "Explorer consensus endpoint route coverage"
+        }
+      ],
+      "later_qualification_tests": [
+        {
+          "owner": "EXP-1",
+          "procedure": "Exercise live epoch and rotation boundary transitions using canonical consensus data and verify deployed provider wiring."
+        },
+        {
+          "owner": "EXP-2",
+          "procedure": "Probe /v1/consensus for current slot, epoch, rotation, boundary counters, checkpoints and invalid/unavailable provider cases."
+        },
+        {
+          "owner": "EXP-4",
+          "procedure": "Verify deployed epoch/rotation UI at ordinary and boundary slots."
+        },
+        {
+          "owner": "EXP-7",
+          "procedure": "Run live consensus witnesses on the release candidate."
+        }
+      ],
+      "gap_findings": [
+        "EXP-FIND-002",
+        "EXP-FIND-003",
+        "EXP-FIND-007"
+      ],
+      "acceptance_criteria": [
+        "AC-3",
+        "AC-5",
+        "AC-6"
+      ],
+      "later_owners": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-4",
+        "EXP-7",
+        "EXP-8"
+      ]
+    },
+    {
+      "id": "EXP-TEST-009",
+      "requirement_id": "EXP-REQ-VIEW-009",
+      "capability_id": "EXP-CAP-009",
+      "path_id": "EXP-PATH-009",
+      "name": "protocol service/version",
+      "mapping_status": "complete_acceptance_path",
+      "capability_status": "implemented_source",
+      "current_automated_tests": [
+        {
+          "path": "indexer/api/backend_test.go",
+          "tests": [
+            "TestStoreBackendExposesRegistryVersion"
+          ],
+          "coverage": "Registry service/version projection"
+        },
+        {
+          "path": "indexer/api/server_test.go",
+          "tests": [
+            "TestExtendedReadEndpoints"
+          ],
+          "coverage": "version endpoint and canonical-authority boundary"
+        },
+        {
+          "path": "indexer/decoder/catalog_test.go",
+          "tests": [],
+          "coverage": "Registry catalog/version-history decoder regression coverage"
+        }
+      ],
+      "later_qualification_tests": [
+        {
+          "owner": "EXP-3",
+          "procedure": "Build descriptors from pinned artifacts and exercise known version/profile/deprecation vectors; verify target-network ProtocolRegistry runtime code at frozen 0x0000000000000000000000000000000000000434."
+        },
+        {
+          "owner": "EXP-5",
+          "procedure": "Compare direct canonical Registry service/version reads and authorized publications to 420Indexer projections, including active, historical, deprecated and unknown cases."
+        },
+        {
+          "owner": "EXP-7",
+          "procedure": "Run deployed Explorer Registry view witnesses against exact release-candidate publications."
+        }
+      ],
+      "gap_findings": [
+        "EXP-FIND-002",
+        "EXP-FIND-003",
+        "EXP-FIND-005",
+        "EXP-FIND-006"
+      ],
+      "acceptance_criteria": [
+        "AC-4",
+        "AC-5",
+        "AC-6"
+      ],
+      "later_owners": [
+        "EXP-3",
+        "EXP-5",
+        "EXP-7",
+        "EXP-8"
+      ]
+    },
+    {
+      "id": "EXP-TEST-010",
+      "requirement_id": "EXP-REQ-VIEW-010",
+      "capability_id": "EXP-CAP-010",
+      "path_id": "EXP-PATH-010",
+      "name": "network status",
+      "mapping_status": "complete_acceptance_path",
+      "capability_status": "implemented_source",
+      "current_automated_tests": [
+        {
+          "path": "explorer/service/service_test.go",
+          "tests": [
+            "TestNetworkStatusHealthy",
+            "TestNetworkStatusFailsClosedOnWrongChain",
+            "TestNetworkStatusSurfacesStaleAndDegraded",
+            "TestNetworkStatusRejectsImpossibleFinalityOrdering"
+          ],
+          "coverage": "healthy/wrong-chain/stale/degraded/inconsistent status"
+        },
+        {
+          "path": "explorer/api/readiness_test.go",
+          "tests": [],
+          "coverage": "readiness HTTP behavior"
+        },
+        {
+          "path": "explorer/api/operational_test.go",
+          "tests": [
+            "TestStatusWrongChainIsCriticalAndNotRetryable",
+            "TestStatusStaleProvidesRetryGuidance",
+            "TestStatusDegradedProvidesMachineReadableWarning",
+            "TestStatusInconsistentFinalityIsCritical"
+          ],
+          "coverage": "machine-readable operational failure handling"
+        },
+        {
+          "path": "indexer/api/server_test.go",
+          "tests": [
+            "TestHealthEndpointNeverClaimsCanonicalAuthority"
+          ],
+          "coverage": "Indexer health authority boundary"
+        }
+      ],
+      "later_qualification_tests": [
+        {
+          "owner": "EXP-1",
+          "procedure": "Bind Indexer to approved chain ID 420 canonical source and prove head/safe/finalized ordering and freshness against target-network data."
+        },
+        {
+          "owner": "EXP-6",
+          "procedure": "Exercise stale, degraded, inconsistent, wrong-chain and upstream-unavailable conditions in production-equivalent deployment and verify fail-closed behavior/observability."
+        },
+        {
+          "owner": "EXP-7",
+          "procedure": "Probe deployed /v1/status and /v1/ready with recorded target-network endpoint identity and release-candidate configuration."
+        }
+      ],
+      "gap_findings": [
+        "EXP-FIND-002",
+        "EXP-FIND-003",
+        "EXP-FIND-004"
+      ],
+      "acceptance_criteria": [
+        "AC-2",
+        "AC-6",
+        "AC-7"
+      ],
+      "later_owners": [
+        "EXP-2",
+        "EXP-6",
+        "EXP-7",
+        "EXP-8"
+      ]
+    }
+  ],
+  "summary": {
+    "mandatory_required_views": 10,
+    "complete_acceptance_paths": 10,
+    "source_test_mapped": 10,
+    "implemented_source": 6,
+    "partial_source": 4,
+    "orphaned_test_paths": 0,
+    "fully_genesis_accepted": 0
+  }
+}

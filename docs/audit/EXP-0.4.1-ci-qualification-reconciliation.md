@@ -1,6 +1,6 @@
 # EXP-0.4.1 — CI and qualification-workflow inventory
 
-**Status:** implementation complete; exact-head qualification required.
+**Status:** QUALIFIED at repository scope; final closeout head requalification required after evidence recording.
 
 ## Objective
 
@@ -44,3 +44,18 @@ The machine-readable inventory expands these into 20 concrete mechanisms and rec
 ## Scope boundary
 
 EXP-0.4.1 inventories and qualifies the CI/qualification machinery itself. It does **not** close any of the ten remaining Genesis-blocking findings, qualify a deployment, run the manual live workflow, or promote any Genesis acceptance criterion to satisfied.
+
+
+## Exact-head qualification evidence
+
+The corrected implementation head `388a5ba873efc9381d11975f8963b3532f287b58` passed the complete required qualification set:
+
+- 420Indexer #604 — run `36268479103` — success.
+- 420Docs Qualification #2909 — run `36268479095` — success.
+- 420 Integrated Qualification #5526 — run `36268479127` — success.
+- EXP-0.4.1 evidence artifact `10914652783`.
+- Evidence digest: `sha256:3e9cddc0fd2111f75c2456c4491faaeac032f3cf761b5d009d82529922846750`.
+
+The first attempt exposed only an EXP-0.4.1 verifier assertion defect: a supporting-authority label containing the words `live_authority` was incorrectly treated as the exact live-authority designation. All retained EXP-0.1–0.3 checks were green in that run. The assertion was corrected to compare the exact authority value and the complete suite was rerun successfully.
+
+Because adding this evidence changes the repository SHA, the resulting final closeout head is requalified before EXP-0.4.1 is marked COMPLETE.

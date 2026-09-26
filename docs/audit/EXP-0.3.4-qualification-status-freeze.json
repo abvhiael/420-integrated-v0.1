@@ -28,8 +28,8 @@
     "deployment_pending": 1,
     "runtime_unverified": 2,
     "optional_unimplemented": 2,
-    "scope_decision_required": 1,
-    "post_genesis": 2
+    "post_genesis": 2,
+    "scope_decision_required": 0
   },
   "entries": [
     {
@@ -1783,35 +1783,6 @@
       "genesis_qualified": false
     },
     {
-      "requirement_id": "EXP-REQ-SCOPE-001",
-      "name": "governance view",
-      "category": "scope_decision",
-      "classification": "scope_decision_required",
-      "frozen_status": "scope_decision_required",
-      "status_scope": "scope decision unresolved",
-      "evidence_refs": [
-        "config/genesis-applications.json",
-        "contracts/config/420explorer-genesis.json",
-        "docs/audit/EXP-0.2.1-genesis-capability-matrix.json",
-        "docs/audit/EXP-0.2.5-genesis-gap-register.json"
-      ],
-      "dependency_refs": [],
-      "finding_refs": [
-        "EXP-FIND-001"
-      ],
-      "later_qualification_owners": [
-        "EXP-0.3",
-        "EXP-0.3.6",
-        "EXP-0.3.8"
-      ],
-      "acceptance_criteria": [
-        "AC-5",
-        "AC-10"
-      ],
-      "promotion_gate": "Cannot advance until conflicting authoritative scope sources are explicitly reconciled and all dependent matrices are updated consistently.",
-      "genesis_qualified": false
-    },
-    {
       "requirement_id": "EXP-REQ-POST-001",
       "name": "staking/reward-specific activity view",
       "category": "post_genesis_enhancement",
@@ -1861,7 +1832,7 @@
     "No entry is Genesis-qualified at EXP-0.3.4; AC-1 through AC-10 remain unverified."
   ],
   "summary": {
-    "requirements": 65,
+    "requirements": 64,
     "genesis_qualified": 0,
     "acceptance_criteria_satisfied": 0,
     "status_counts": {
@@ -1871,8 +1842,17 @@
       "deployment_pending": 1,
       "runtime_unverified": 2,
       "optional_unimplemented": 2,
-      "scope_decision_required": 1,
-      "post_genesis": 2
+      "post_genesis": 2,
+      "scope_decision_required": 0
     }
-  }
+  },
+  "resolved_scope_decisions": [
+    {
+      "id": "EXP-SCOPE-CONFLICT-001",
+      "decision": "EXP-SCOPE-RESOLUTION-B",
+      "milestone": "EXP-0.3.8",
+      "outcome": "governance removed from active requirement status ledger",
+      "evidence": "docs/audit/EXP-0.3.8-governance-scope-decision.json"
+    }
+  ]
 }

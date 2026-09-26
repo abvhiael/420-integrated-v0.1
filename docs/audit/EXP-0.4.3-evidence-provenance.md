@@ -69,3 +69,17 @@ Qualified implementation head: `1a9ba8d0c81e9e8fe2f35655ddd5235dd6ab2f8f`
 - Digest `sha256:3370b78c68cd05be90fb74d7d5b55d71d5f00ed3e464c3174802b7021a0544e4`.
 
 Recording this event changes the branch head. EXP-0.4.3 is not finally COMPLETE until the resulting closeout head reruns the same required gates successfully.
+
+
+## Exact-head qualification evidence
+
+Qualified implementation head: `1a9ba8d0c81e9e8fe2f35655ddd5235dd6ab2f8f`
+
+- 420Indexer #614 — run `36273730986` — success.
+- 420Docs Qualification #2934 — run `36273730968` — success.
+- 420 Integrated Qualification #5551 — run `36273731020` — success.
+- Repository jobs: production dependencies `108492433189`, offline core `108492433295`, pinned-Geth Engine `108492433316`, fault matrix `108492433374` — all success.
+- EXP-0.4.3 artifact `10916835141`.
+- Digest `sha256:3370b78c68cd05be90fb74d7d5b55d71d5f00ed3e464c3174802b7021a0544e4`.
+
+No source/integration event is promoted to runtime, deployment, live-network or Genesis qualification by this record. The audit record itself changes the branch SHA, so the cumulative branch is requalified before EXP-0.4.3 is marked COMPLETE.

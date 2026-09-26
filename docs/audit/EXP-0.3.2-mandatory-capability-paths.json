@@ -835,6 +835,7 @@
         "Live target-network binding/freshness remains unverified until production-equivalent deployment."
       ],
       "later_owners": [
+        "EXP-1",
         "EXP-2",
         "EXP-6",
         "EXP-7",

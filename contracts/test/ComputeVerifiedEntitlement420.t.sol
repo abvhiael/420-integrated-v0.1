@@ -51,6 +51,27 @@ contract ReentrantCMPBeneficiary420 {
     }
 }
 
+
+contract RejectingCMPBeneficiary420 {
+    ComputeVerifiedEntitlement420 public entitlements;
+    bytes32 public jobId;
+    uint64 public revision;
+
+    function configure(ComputeVerifiedEntitlement420 entitlements_, bytes32 jobId_, uint64 revision_) external {
+        entitlements = entitlements_;
+        jobId = jobId_;
+        revision = revision_;
+    }
+
+    function claimProvider() external {
+        entitlements.claimProvider(jobId, revision);
+    }
+
+    receive() external payable {
+        revert("reject native payout");
+    }
+}
+
 contract ComputeVerifiedEntitlement420Test {
     VmVerifiedEntitlement420 private constant vm =
         VmVerifiedEntitlement420(address(uint160(uint256(keccak256("hevm cheat code")))));

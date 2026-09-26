@@ -79,7 +79,7 @@ def main():
     if by.get("EXP-CI-001",{}).get("authority")!="authoritative_for_repository_source_scope": errors.append("primary source authority drift")
     if by.get("EXP-CI-002",{}).get("authority")!="authoritative_for_executed_live_witness_scope": errors.append("live authority drift")
     for wid in ("EXP-CI-003","EXP-CI-004","EXP-CI-005","EXP-CI-006"):
-        if "live_authority" in by.get(wid,{}).get("authority",""): errors.append(f"{wid}: supporting workflow mislabeled live authority")
+        if by.get(wid,{}).get("authority")=="authoritative_for_executed_live_witness_scope": errors.append(f"{wid}: supporting workflow mislabeled live authority")
     summary=inv.get("summary",{})
     if summary.get("workflow_count")!=6 or summary.get("mechanism_count")!=20: errors.append("summary count drift")
     if summary.get("primary_source_gate")!="EXP-CI-001" or summary.get("live_gate")!="EXP-CI-002": errors.append("summary gate identity drift")

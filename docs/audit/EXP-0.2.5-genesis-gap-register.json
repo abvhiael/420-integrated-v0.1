@@ -14,46 +14,44 @@
     {
       "id": "EXP-FIND-001",
       "classification": "Documentation gap",
-      "severity": "high",
-      "title": "Governance display scope is unresolved",
-      "description": "The frozen Genesis application purpose includes governance, while the dedicated Explorer Genesis profile does not include a governance view in requiredViews.",
+      "severity": "low",
+      "title": "Governance display scope decision resolved",
+      "description": "EXP-0.3.8 selected EXP-SCOPE-RESOLUTION-B: governance is descriptive ecosystem subject matter, not a mandatory dedicated 420Explorer Genesis view.",
       "affected": [
         "config/genesis-applications.json",
         "contracts/config/420explorer-genesis.json",
-        "docs/audit/EXP-0.2.1-genesis-capability-matrix.json"
+        "docs/audit/EXP-0.3.8-governance-scope-decision.json"
       ],
       "evidence": [
-        "EXP-CAP-019 is classified scope_decision_required and no Explorer governance API/view was established."
+        "config/genesis-applications.json no longer names governance in the frozen Explorer purpose.",
+        "contracts/config/420explorer-genesis.json continues to omit governance from requiredViews.",
+        "EXP-0.3.8 records the repository-owner scope decision and atomic reconciliation."
       ],
-      "root_cause": "Two authoritative scope descriptions use different levels of specificity and no explicit decision reconciles them.",
+      "root_cause": "Resolved: the broad application-purpose wording was more general than the dedicated Explorer Genesis required-view contract.",
       "consequences": [
-        "Final Genesis scope cannot be frozen defensibly while the conflict remains.",
-        "Implementing or omitting governance display without a decision could either expand scope silently or miss an intended requirement."
+        "No active Genesis consequence remains from the former governance wording ambiguity.",
+        "The record is retained only as historical audit evidence of the resolved scope conflict."
       ],
       "dependencies": [
-        "EXP-0.2.1 capability matrix"
+        "EXP-0.3.8 authoritative scope decision"
       ],
       "prerequisite_work": [
-        "authoritative product/Genesis scope decision"
+        "Completed by EXP-0.3.8: authoritative scope decision and atomic reconciliation."
       ],
       "remediation": [
-        "Record an explicit decision stating whether governance display is required for Explorer Genesis.",
-        "Update the dedicated profile and capability/workflow matrices consistently if the decision changes required scope."
+        "Completed by EXP-0.3.8 through authoritative source reconciliation."
       ],
       "tests": [
-        "fail-closed scope verifier must detect any profile/matrix drift",
-        "documentation qualification after the decision"
+        "EXP-0.3.8 fail-closed scope-resolution verifier",
+        "retained qualification gates"
       ],
       "later_owner": [
-        "EXP-0.2.6",
-        "EXP-0.2.8"
+        "resolved_by_EXP-0.3.8"
       ],
-      "acceptance_criteria": [
-        "AC-5",
-        "AC-10"
-      ],
-      "genesis_blocking": true,
-      "blocking_rationale": "Blocks final scope/qualification closeout, not because governance display is already proven mandatory, but because Genesis requirements may not remain ambiguous."
+      "acceptance_criteria": [],
+      "genesis_blocking": false,
+      "blocking_rationale": "Resolved in EXP-0.3.8; retained as historical audit evidence and no longer blocks Genesis.",
+      "resolution_status": "resolved"
     },
     {
       "id": "EXP-FIND-002",

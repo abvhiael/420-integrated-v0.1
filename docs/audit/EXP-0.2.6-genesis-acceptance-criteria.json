@@ -160,11 +160,9 @@
       ],
       "verification_method": [
         "Execute every workflow classified as required by the frozen Explorer Genesis scope through the actual frontend and API.",
-        "Resolve the governance-scope ambiguity before freezing the final workflow set.",
         "Verify navigation, search, status/error handling and cross-resource links with representative target-network data."
       ],
       "required_evidence": [
-        "resolved authoritative governance-view scope decision",
         "workflow-by-workflow pass evidence for the final required set",
         "fee inspection implementation evidence",
         "historical validator-produced block attribution evidence",
@@ -173,7 +171,6 @@
         "production-equivalent browser/UI evidence"
       ],
       "blocking_findings": [
-        "EXP-FIND-001",
         "EXP-FIND-003",
         "EXP-FIND-007",
         "EXP-FIND-008",
@@ -183,7 +180,8 @@
       "source_anchors": [
         "docs/audit/EXP-0.2.1-genesis-capability-matrix.json",
         "docs/audit/EXP-0.2.2-user-workflow-matrix.json",
-        "contracts/config/420explorer-genesis.json"
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.3.8-governance-scope-decision.json"
       ]
     },
     {
@@ -341,17 +339,15 @@
       "required_evidence": [
         "complete AC-1 through AC-9 evidence index",
         "closed Genesis-blocking finding register",
-        "resolved governance-scope decision",
         "exact release-candidate qualification runs and artifact digests",
         "final acceptance checklist with no mandatory criterion left unverified",
         "final qualification/closeout record"
       ],
-      "blocking_findings": [
-        "EXP-FIND-001"
-      ],
+      "blocking_findings": [],
       "source_anchors": [
         "docs/audit/EXP-0.2.5-genesis-gap-register.json",
-        "contracts/config/420explorer-genesis.json"
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.3.8-governance-scope-decision.json"
       ]
     }
   ],

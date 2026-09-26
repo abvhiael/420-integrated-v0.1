@@ -1,0 +1,1858 @@
+{
+  "schema": "420explorer-exp-0.3.4-qualification-status-freeze-v1",
+  "milestone": "EXP-0.3.4",
+  "title": "420Explorer Genesis qualification-status freeze",
+  "baseline": {
+    "main_commit": "c7cb5f4dac07eb9416cac4a11eeee31b6efb10f0",
+    "requirement_inventory": "docs/audit/EXP-0.3.1-authoritative-genesis-requirements.json",
+    "implementation_paths": "docs/audit/EXP-0.3.2-mandatory-capability-paths.json",
+    "acceptance_tests": "docs/audit/EXP-0.3.3-mandatory-acceptance-tests.json",
+    "dependency_readiness": "docs/audit/EXP-0.2.4-dependency-readiness-matrix.json",
+    "gap_register": "docs/audit/EXP-0.2.5-genesis-gap-register.json",
+    "acceptance_map": "docs/audit/EXP-0.2.6-genesis-acceptance-criteria.json"
+  },
+  "allowed_statuses": [
+    "source_qualified",
+    "implemented_source",
+    "partial_source",
+    "deployment_pending",
+    "runtime_unverified",
+    "optional_unimplemented",
+    "post_genesis",
+    "scope_decision_required"
+  ],
+  "frozen_status_counts": {
+    "implemented_source": 6,
+    "partial_source": 4,
+    "source_qualified": 47,
+    "deployment_pending": 1,
+    "runtime_unverified": 2,
+    "optional_unimplemented": 2,
+    "post_genesis": 2,
+    "scope_decision_required": 0
+  },
+  "entries": [
+    {
+      "requirement_id": "EXP-REQ-VIEW-001",
+      "name": "block",
+      "category": "required_view",
+      "classification": "mandatory_genesis",
+      "frozen_status": "implemented_source",
+      "status_scope": "source implementation present",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "explorer/api/server.go",
+        "explorer/service/service.go",
+        "explorer/indexerclient/client.go",
+        "docs/audit/EXP-0.3.2-mandatory-capability-paths.json",
+        "docs/audit/EXP-0.3.3-mandatory-acceptance-tests.json",
+        "docs/audit/EXP-0.2.5-genesis-gap-register.json"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [
+        "EXP-FIND-002",
+        "EXP-FIND-003",
+        "EXP-FIND-004",
+        "EXP-FIND-009"
+      ],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-4",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-1",
+        "AC-2",
+        "AC-3"
+      ],
+      "promotion_gate": "May advance only after mapped later qualification procedures execute successfully on the applicable exact release candidate and mapped blocking findings are resolved.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-VIEW-002",
+      "name": "transaction",
+      "category": "required_view",
+      "classification": "mandatory_genesis",
+      "frozen_status": "implemented_source",
+      "status_scope": "source implementation present",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "explorer/api/server.go",
+        "explorer/service/transactionviews.go",
+        "explorer/indexerclient/client.go",
+        "docs/audit/EXP-0.3.2-mandatory-capability-paths.json",
+        "docs/audit/EXP-0.3.3-mandatory-acceptance-tests.json",
+        "docs/audit/EXP-0.2.5-genesis-gap-register.json"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [
+        "EXP-FIND-002",
+        "EXP-FIND-003",
+        "EXP-FIND-004",
+        "EXP-FIND-008"
+      ],
+      "later_qualification_owners": [
+        "EXP-2",
+        "EXP-4",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-1",
+        "AC-2",
+        "AC-5"
+      ],
+      "promotion_gate": "May advance only after mapped later qualification procedures execute successfully on the applicable exact release candidate and mapped blocking findings are resolved.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-VIEW-003",
+      "name": "receipt/logs",
+      "category": "required_view",
+      "classification": "mandatory_genesis",
+      "frozen_status": "partial_source",
+      "status_scope": "source implementation partial",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "explorer/api/server.go",
+        "explorer/service/transactionviews.go",
+        "explorer/indexerclient/client.go",
+        "docs/audit/EXP-0.3.2-mandatory-capability-paths.json",
+        "docs/audit/EXP-0.3.3-mandatory-acceptance-tests.json",
+        "docs/audit/EXP-0.2.5-genesis-gap-register.json"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [
+        "EXP-FIND-002",
+        "EXP-FIND-003",
+        "EXP-FIND-004",
+        "EXP-FIND-010"
+      ],
+      "later_qualification_owners": [
+        "EXP-2",
+        "EXP-3",
+        "EXP-4",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-1",
+        "AC-2",
+        "AC-5",
+        "AC-7"
+      ],
+      "promotion_gate": "May advance only after the recorded source/feature gaps are remediated, mapped tests pass, and later runtime/deployment evidence is produced.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-VIEW-004",
+      "name": "address",
+      "category": "required_view",
+      "classification": "mandatory_genesis",
+      "frozen_status": "implemented_source",
+      "status_scope": "source implementation present",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "explorer/api/server.go",
+        "explorer/service/addressviews.go",
+        "explorer/indexerclient/address.go",
+        "docs/audit/EXP-0.3.2-mandatory-capability-paths.json",
+        "docs/audit/EXP-0.3.3-mandatory-acceptance-tests.json",
+        "docs/audit/EXP-0.2.5-genesis-gap-register.json"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [
+        "EXP-FIND-002",
+        "EXP-FIND-003",
+        "EXP-FIND-004"
+      ],
+      "later_qualification_owners": [
+        "EXP-2",
+        "EXP-4",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-1",
+        "AC-5"
+      ],
+      "promotion_gate": "May advance only after mapped later qualification procedures execute successfully on the applicable exact release candidate and mapped blocking findings are resolved.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-VIEW-005",
+      "name": "contract",
+      "category": "required_view",
+      "classification": "mandatory_genesis",
+      "frozen_status": "implemented_source",
+      "status_scope": "source implementation present",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "explorer/api/server.go",
+        "explorer/service/contractviews.go",
+        "explorer/indexerclient/contract.go",
+        "docs/audit/EXP-0.3.2-mandatory-capability-paths.json",
+        "docs/audit/EXP-0.3.3-mandatory-acceptance-tests.json",
+        "docs/audit/EXP-0.2.5-genesis-gap-register.json"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [
+        "EXP-FIND-002",
+        "EXP-FIND-003",
+        "EXP-FIND-004"
+      ],
+      "later_qualification_owners": [
+        "EXP-2",
+        "EXP-3",
+        "EXP-4",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-1",
+        "AC-4",
+        "AC-5"
+      ],
+      "promotion_gate": "May advance only after mapped later qualification procedures execute successfully on the applicable exact release candidate and mapped blocking findings are resolved.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-VIEW-006",
+      "name": "token/asset activity",
+      "category": "required_view",
+      "classification": "mandatory_genesis",
+      "frozen_status": "partial_source",
+      "status_scope": "source implementation partial",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "explorer/api/server.go",
+        "explorer/service/assetviews.go",
+        "explorer/indexerclient/assets.go",
+        "docs/audit/EXP-0.3.2-mandatory-capability-paths.json",
+        "docs/audit/EXP-0.3.3-mandatory-acceptance-tests.json",
+        "docs/audit/EXP-0.2.5-genesis-gap-register.json"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [
+        "EXP-FIND-002",
+        "EXP-FIND-003",
+        "EXP-FIND-004"
+      ],
+      "later_qualification_owners": [
+        "EXP-2",
+        "EXP-3",
+        "EXP-4",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-5"
+      ],
+      "promotion_gate": "May advance only after the recorded source/feature gaps are remediated, mapped tests pass, and later runtime/deployment evidence is produced.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-VIEW-007",
+      "name": "validator",
+      "category": "required_view",
+      "classification": "mandatory_genesis",
+      "frozen_status": "partial_source",
+      "status_scope": "source implementation partial",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "explorer/api/server.go",
+        "explorer/service/consensusviews.go",
+        "explorer/indexerclient/consensus.go",
+        "docs/audit/EXP-0.3.2-mandatory-capability-paths.json",
+        "docs/audit/EXP-0.3.3-mandatory-acceptance-tests.json",
+        "docs/audit/EXP-0.2.5-genesis-gap-register.json"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [
+        "EXP-FIND-002",
+        "EXP-FIND-003",
+        "EXP-FIND-007",
+        "EXP-FIND-009"
+      ],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-4",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-3",
+        "AC-5",
+        "AC-6"
+      ],
+      "promotion_gate": "May advance only after the recorded source/feature gaps are remediated, mapped tests pass, and later runtime/deployment evidence is produced.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-VIEW-008",
+      "name": "epoch/rotation",
+      "category": "required_view",
+      "classification": "mandatory_genesis",
+      "frozen_status": "partial_source",
+      "status_scope": "source implementation partial",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "explorer/api/server.go",
+        "explorer/service/consensusviews.go",
+        "explorer/indexerclient/consensus.go",
+        "docs/audit/EXP-0.3.2-mandatory-capability-paths.json",
+        "docs/audit/EXP-0.3.3-mandatory-acceptance-tests.json",
+        "docs/audit/EXP-0.2.5-genesis-gap-register.json"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [
+        "EXP-FIND-002",
+        "EXP-FIND-003",
+        "EXP-FIND-007"
+      ],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-4",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-3",
+        "AC-5",
+        "AC-6"
+      ],
+      "promotion_gate": "May advance only after the recorded source/feature gaps are remediated, mapped tests pass, and later runtime/deployment evidence is produced.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-VIEW-009",
+      "name": "protocol service/version",
+      "category": "required_view",
+      "classification": "mandatory_genesis",
+      "frozen_status": "implemented_source",
+      "status_scope": "source implementation present",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "explorer/api/server.go",
+        "explorer/service/registryviews.go",
+        "explorer/indexerclient/registry.go",
+        "docs/audit/EXP-0.3.2-mandatory-capability-paths.json",
+        "docs/audit/EXP-0.3.3-mandatory-acceptance-tests.json",
+        "docs/audit/EXP-0.2.5-genesis-gap-register.json"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [
+        "EXP-FIND-002",
+        "EXP-FIND-003",
+        "EXP-FIND-005",
+        "EXP-FIND-006"
+      ],
+      "later_qualification_owners": [
+        "EXP-3",
+        "EXP-5",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-4",
+        "AC-5",
+        "AC-6"
+      ],
+      "promotion_gate": "May advance only after mapped later qualification procedures execute successfully on the applicable exact release candidate and mapped blocking findings are resolved.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-VIEW-010",
+      "name": "network status",
+      "category": "required_view",
+      "classification": "mandatory_genesis",
+      "frozen_status": "implemented_source",
+      "status_scope": "source implementation present",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "explorer/api/server.go",
+        "explorer/service/service.go",
+        "explorer/indexerclient/client.go",
+        "docs/audit/EXP-0.3.2-mandatory-capability-paths.json",
+        "docs/audit/EXP-0.3.3-mandatory-acceptance-tests.json",
+        "docs/audit/EXP-0.2.5-genesis-gap-register.json"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [
+        "EXP-FIND-002",
+        "EXP-FIND-003",
+        "EXP-FIND-004"
+      ],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-6",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-2",
+        "AC-6",
+        "AC-7"
+      ],
+      "promotion_gate": "May advance only after mapped later qualification procedures execute successfully on the applicable exact release candidate and mapped blocking findings are resolved.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-APP-001",
+      "name": "GENESIS_USER_APP classification",
+      "category": "application_identity",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "config/genesis-applications.json"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-8",
+        "AC-10"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-APP-002",
+      "name": "Explorer-specific contracts not required",
+      "category": "application_identity",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.1.3-contract-abi-address-reconciliation.md"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-3",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-4",
+        "AC-10"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-APP-003",
+      "name": "Explorer is not canonical state authority",
+      "category": "authority_boundary",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "explorer/service/service.go"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-2",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-2",
+        "AC-7",
+        "AC-10"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-SRC-001",
+      "name": "420Indexer chain index",
+      "category": "source_dependency",
+      "classification": "mandatory_genesis",
+      "frozen_status": "deployment_pending",
+      "status_scope": "deployment evidence pending",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "explorer/cmd/explorer420/main.go",
+        "explorer/indexerclient/client.go",
+        "docs/audit/EXP-0.1.2-indexer-dependency-reconciliation.md",
+        "docs/audit/EXP-0.2.4-dependency-readiness-matrix.json",
+        "docs/audit/EXP-0.2.5-genesis-gap-register.json"
+      ],
+      "dependency_refs": [
+        "EXP-DEP-001"
+      ],
+      "finding_refs": [
+        "EXP-FIND-002"
+      ],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-2",
+        "AC-3",
+        "AC-6"
+      ],
+      "promotion_gate": "May advance only after a real non-placeholder deployment exists and the required live endpoint/runtime evidence passes.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-SRC-002",
+      "name": "No direct execution RPC ingestion",
+      "category": "authority_boundary",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "explorer/cmd/explorer420/main.go",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-2",
+        "AC-3",
+        "AC-7"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-SRC-003",
+      "name": "Consensus projection source",
+      "category": "source_dependency",
+      "classification": "mandatory_genesis",
+      "frozen_status": "runtime_unverified",
+      "status_scope": "runtime evidence unverified",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "explorer/service/consensusviews.go",
+        "explorer/indexerclient/consensus.go",
+        "docs/audit/EXP-0.2.4-dependency-readiness-matrix.json",
+        "docs/audit/EXP-0.2.5-genesis-gap-register.json"
+      ],
+      "dependency_refs": [
+        "EXP-DEP-008"
+      ],
+      "finding_refs": [
+        "EXP-FIND-007"
+      ],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-3",
+        "AC-5",
+        "AC-6"
+      ],
+      "promotion_gate": "May advance only after target-network runtime identity, provider wiring/provenance, and mapped live qualification evidence pass.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-SRC-004",
+      "name": "Registry-backed protocol discovery",
+      "category": "source_dependency",
+      "classification": "mandatory_genesis",
+      "frozen_status": "runtime_unverified",
+      "status_scope": "runtime evidence unverified",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "explorer/service/registryviews.go",
+        "explorer/indexerclient/registry.go",
+        "docs/audit/EXP-0.2.4-dependency-readiness-matrix.json",
+        "docs/audit/EXP-0.2.5-genesis-gap-register.json"
+      ],
+      "dependency_refs": [
+        "EXP-DEP-005",
+        "EXP-DEP-007"
+      ],
+      "finding_refs": [
+        "EXP-FIND-005",
+        "EXP-FIND-006"
+      ],
+      "later_qualification_owners": [
+        "EXP-3",
+        "EXP-5",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-4",
+        "AC-5",
+        "AC-6"
+      ],
+      "promotion_gate": "May advance only after target-network runtime identity, provider wiring/provenance, and mapped live qualification evidence pass.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-SRC-005",
+      "name": "420 Names display enrichment",
+      "category": "optional_integration",
+      "classification": "optional_integration",
+      "frozen_status": "optional_unimplemented",
+      "status_scope": "optional integration not observed",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json",
+        "docs/audit/EXP-0.2.4-dependency-readiness-matrix.json"
+      ],
+      "dependency_refs": [
+        "EXP-DEP-009"
+      ],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "post-Genesis"
+      ],
+      "acceptance_criteria": [],
+      "promotion_gate": "Optional; may advance only if explicitly implemented and qualified, but absence must not block core Genesis scope.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-SRC-006",
+      "name": "420 Identity public display enrichment",
+      "category": "optional_integration",
+      "classification": "optional_integration",
+      "frozen_status": "optional_unimplemented",
+      "status_scope": "optional integration not observed",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json",
+        "docs/audit/EXP-0.2.4-dependency-readiness-matrix.json"
+      ],
+      "dependency_refs": [
+        "EXP-DEP-010"
+      ],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "post-Genesis"
+      ],
+      "acceptance_criteria": [],
+      "promotion_gate": "Optional; may advance only if explicitly implemented and qualified, but absence must not block core Genesis scope.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-IDX-001",
+      "name": "Indexer service identity",
+      "category": "indexer_consumer",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "explorer/cmd/explorer420/main.go",
+        "explorer/indexerclient/client.go"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-2",
+        "AC-3",
+        "AC-6"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-IDX-002",
+      "name": "Indexer API version v1",
+      "category": "indexer_consumer",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "explorer/indexerclient/client.go",
+        "docs/audit/EXP-0.1.2-indexer-dependency-reconciliation.md"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-2",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-6"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-IDX-003",
+      "name": "Required chain ID 420",
+      "category": "indexer_consumer",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "explorer/service/service.go",
+        "explorer/indexerclient/client.go"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-6",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-2",
+        "AC-3",
+        "AC-7"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-IDX-004",
+      "name": "independentChainIngestion",
+      "category": "authority_boundary",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-3",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-2",
+        "AC-3",
+        "AC-4",
+        "AC-7"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-IDX-005",
+      "name": "independentCheckpointStore",
+      "category": "authority_boundary",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-3",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-2",
+        "AC-3",
+        "AC-4",
+        "AC-7"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-IDX-006",
+      "name": "independentReorgEngine",
+      "category": "authority_boundary",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-3",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-2",
+        "AC-3",
+        "AC-4",
+        "AC-7"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-IDX-007",
+      "name": "independentProtocolDecoderRegistry",
+      "category": "authority_boundary",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-3",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-2",
+        "AC-3",
+        "AC-4",
+        "AC-7"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-IDX-008",
+      "name": "Fail closed on canonical-authority claim",
+      "category": "authority_boundary",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "explorer/service/service.go",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-2",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-2",
+        "AC-7"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-END-001",
+      "name": "/v1/health",
+      "category": "required_endpoint",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "explorer/indexerclient/client.go"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-2",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-2",
+        "AC-6"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-END-002",
+      "name": "/v1/blocks",
+      "category": "required_endpoint",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "explorer/indexerclient/client.go"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-2",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-1",
+        "AC-6"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-END-003",
+      "name": "/v1/blocks/{number}",
+      "category": "required_endpoint",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "explorer/indexerclient/client.go"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-2",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-1",
+        "AC-6"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-END-004",
+      "name": "/v1/transactions/{hash}",
+      "category": "required_endpoint",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "explorer/indexerclient/client.go"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-2",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-1",
+        "AC-6"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-END-005",
+      "name": "/v1/receipts/{hash}",
+      "category": "required_endpoint",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "explorer/indexerclient/client.go"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-2",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-1",
+        "AC-6"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-END-006",
+      "name": "/v1/blocks/{number}/logs",
+      "category": "required_endpoint",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "explorer/indexerclient/client.go"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-2",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-1",
+        "AC-6"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-END-007",
+      "name": "/v1/services/{service}/versions/{version}",
+      "category": "required_endpoint",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "explorer/indexerclient/client.go"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-2",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-4",
+        "AC-6"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-ING-001",
+      "name": "canonicalKey",
+      "category": "indexing_rule",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "indexer/model/model.go",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-6",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-2",
+        "AC-3"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-ING-002",
+      "name": "tracksHeadSafeFinalizedSeparately",
+      "category": "indexing_rule",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "indexer/model/model.go",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-6",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-2",
+        "AC-3"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-ING-003",
+      "name": "reorgsAllowedOnlyAboveFinality",
+      "category": "indexing_rule",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "indexer/model/model.go",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-6",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-3",
+        "AC-7"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-ING-004",
+      "name": "finalizedHistoryImmutable",
+      "category": "indexing_rule",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "indexer/model/model.go",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-6",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-3",
+        "AC-7"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-ING-005",
+      "name": "rebuildableFromChain",
+      "category": "indexing_rule",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "indexer/model/model.go",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-6",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-3",
+        "AC-8"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-ING-006",
+      "name": "databaseIsNonCanonical",
+      "category": "indexing_rule",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "indexer/model/model.go",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-6",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-2",
+        "AC-3",
+        "AC-7"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-ING-007",
+      "name": "implementedBy",
+      "category": "indexing_rule",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "indexer/model/model.go",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-6",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-3",
+        "AC-6"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-VER-001",
+      "name": "showRuntimeCodeHash",
+      "category": "contract_verification_boundary",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "explorer/service/contractviews.go",
+        "docs/audit/EXP-0.1.3-contract-abi-address-reconciliation.md"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-3",
+        "EXP-4",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-4",
+        "AC-5"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-VER-002",
+      "name": "showRegistryServiceAndVersion",
+      "category": "contract_verification_boundary",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "explorer/service/contractviews.go",
+        "docs/audit/EXP-0.1.3-contract-abi-address-reconciliation.md"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-3",
+        "EXP-4",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-4",
+        "AC-5"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-VER-003",
+      "name": "showManifestCommitmentWhenRegistered",
+      "category": "contract_verification_boundary",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "explorer/service/contractviews.go",
+        "docs/audit/EXP-0.1.3-contract-abi-address-reconciliation.md"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-3",
+        "EXP-4",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-4",
+        "AC-5"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-VER-004",
+      "name": "verifiedSourceIsPresentationMetadata",
+      "category": "contract_verification_boundary",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "explorer/service/contractviews.go",
+        "docs/audit/EXP-0.1.3-contract-abi-address-reconciliation.md"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-3",
+        "EXP-4",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-4",
+        "AC-7"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-VER-005",
+      "name": "sourceVerificationCannotOverrideRuntimeBytecode",
+      "category": "contract_verification_boundary",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "explorer/service/contractviews.go",
+        "docs/audit/EXP-0.1.3-contract-abi-address-reconciliation.md"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-3",
+        "EXP-4",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-4",
+        "AC-7"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-INV-001",
+      "name": "EXP-INV-001",
+      "category": "invariant",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-3",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-4",
+        "AC-10"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-INV-002",
+      "name": "EXP-INV-002",
+      "category": "invariant",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-2",
+        "AC-3"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-INV-003",
+      "name": "EXP-INV-003",
+      "category": "invariant",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-2",
+        "AC-3"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-INV-004",
+      "name": "EXP-INV-004",
+      "category": "invariant",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-3",
+        "AC-7"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-INV-005",
+      "name": "EXP-INV-005",
+      "category": "invariant",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-3",
+        "AC-8"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-INV-006",
+      "name": "EXP-INV-006",
+      "category": "invariant",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-3",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-4",
+        "AC-7"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-INV-007",
+      "name": "EXP-INV-007",
+      "category": "invariant",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-4",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-5",
+        "AC-7"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-INV-008",
+      "name": "EXP-INV-008",
+      "category": "invariant",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-6",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-7",
+        "AC-8"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-INV-009",
+      "name": "EXP-INV-009",
+      "category": "invariant",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-6",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-7"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-INV-010",
+      "name": "EXP-INV-010",
+      "category": "invariant",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-2",
+        "EXP-6",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-2",
+        "AC-6",
+        "AC-7"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-INV-011",
+      "name": "EXP-INV-011",
+      "category": "invariant",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-1",
+        "AC-2"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-INV-012",
+      "name": "EXP-INV-012",
+      "category": "invariant",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-6",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-7"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-INV-013",
+      "name": "EXP-INV-013",
+      "category": "invariant",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-3",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-2",
+        "AC-3",
+        "AC-4",
+        "AC-7"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-ADDR-001",
+      "name": "Frozen system-address maps must match",
+      "category": "address_authority",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "config/system-addresses.json",
+        "contracts/config/system-addresses.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json",
+        "docs/audit/EXP-0.2.4-dependency-readiness-matrix.json"
+      ],
+      "dependency_refs": [
+        "EXP-DEP-006"
+      ],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-3",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-4",
+        "AC-10"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-ADDR-002",
+      "name": "Explorer owns no fixed Genesis address",
+      "category": "address_authority",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "config/system-addresses.json",
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.1.3-contract-abi-address-reconciliation.md"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-3",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-4",
+        "AC-10"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-ADDR-003",
+      "name": "ProtocolRegistry fixed address",
+      "category": "address_authority",
+      "classification": "mandatory_genesis",
+      "frozen_status": "source_qualified",
+      "status_scope": "source/configuration qualification",
+      "evidence_refs": [
+        "config/system-addresses.json",
+        "contracts/config/system-addresses.json",
+        "explorer/service/registryviews.go",
+        "docs/audit/EXP-0.2.4-dependency-readiness-matrix.json"
+      ],
+      "dependency_refs": [
+        "EXP-DEP-005"
+      ],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "EXP-3",
+        "EXP-5",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-4",
+        "AC-6"
+      ],
+      "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-POST-001",
+      "name": "staking/reward-specific activity view",
+      "category": "post_genesis_enhancement",
+      "classification": "post_genesis_enhancement",
+      "frozen_status": "post_genesis",
+      "status_scope": "post-Genesis scope",
+      "evidence_refs": [
+        "docs/audit/EXP-0.2.5-genesis-gap-register.json"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "post-Genesis"
+      ],
+      "acceptance_criteria": [],
+      "promotion_gate": "Outside current core Genesis scope; status may change only through an explicit authoritative scope decision.",
+      "genesis_qualified": false
+    },
+    {
+      "requirement_id": "EXP-REQ-POST-002",
+      "name": "420 Verify-backed source presentation",
+      "category": "post_genesis_enhancement",
+      "classification": "post_genesis_enhancement",
+      "frozen_status": "post_genesis",
+      "status_scope": "post-Genesis scope",
+      "evidence_refs": [
+        "docs/audit/EXP-0.2.5-genesis-gap-register.json"
+      ],
+      "dependency_refs": [],
+      "finding_refs": [],
+      "later_qualification_owners": [
+        "post-Genesis"
+      ],
+      "acceptance_criteria": [],
+      "promotion_gate": "Outside current core Genesis scope; status may change only through an explicit authoritative scope decision.",
+      "genesis_qualified": false
+    }
+  ],
+  "freeze_rules": [
+    "Each authoritative EXP-0.3.1 requirement has exactly one frozen current status.",
+    "implemented_source and source_qualified describe source evidence only and must never be interpreted as deployed, live-qualified, or Genesis-qualified.",
+    "partial_source cannot be promoted until its recorded implementation/qualification gaps are resolved.",
+    "deployment_pending cannot be promoted from placeholder readiness records, source files, frozen addresses, or CI alone.",
+    "runtime_unverified cannot be promoted without target-network runtime/provenance evidence.",
+    "optional_unimplemented and post_genesis items are non-blocking unless authoritative scope explicitly changes.",
+    "scope_decision_required remains blocking for EXP-0 scope closeout until authoritative sources are reconciled.",
+    "No entry is Genesis-qualified at EXP-0.3.4; AC-1 through AC-10 remain unverified."
+  ],
+  "summary": {
+    "requirements": 64,
+    "genesis_qualified": 0,
+    "acceptance_criteria_satisfied": 0,
+    "status_counts": {
+      "implemented_source": 6,
+      "partial_source": 4,
+      "source_qualified": 47,
+      "deployment_pending": 1,
+      "runtime_unverified": 2,
+      "optional_unimplemented": 2,
+      "post_genesis": 2,
+      "scope_decision_required": 0
+    }
+  },
+  "resolved_scope_decisions": [
+    {
+      "id": "EXP-SCOPE-CONFLICT-001",
+      "decision": "EXP-SCOPE-RESOLUTION-B",
+      "milestone": "EXP-0.3.8",
+      "outcome": "governance removed from active requirement status ledger",
+      "evidence": "docs/audit/EXP-0.3.8-governance-scope-decision.json"
+    }
+  ]
+}

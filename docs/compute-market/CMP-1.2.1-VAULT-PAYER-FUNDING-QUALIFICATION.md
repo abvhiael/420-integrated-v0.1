@@ -142,3 +142,22 @@ Exact-head evidence:
 Full qualification record: [`CMP-1.2.3-VERIFIED-ENTITLEMENT-QUALIFICATION.md`](CMP-1.2.3-VERIFIED-ENTITLEMENT-QUALIFICATION.md).
 
 This closeout is repository-level only and covers the current fixed-price single-assignment entitlement model. Provider liability split, claimability and actual external payout are CMP-1.2.4; payer residual refunds/failure/expiry remain CMP-1.2.5; challenge/dispute/slash economics remain CMP-1.2.6; generalized multi-unit/retry/partial-unit settlement remains outside this narrow closeout; live deployment/testnet evidence remains CMP-1.2.9.
+
+
+## CMP-1.2.4 — provider claim and actual Vault payout
+
+**Status: COMPLETE within repository-level scope.** Exact qualified implementation/test head: `a7b9ab20cb7e108cf0b85d95cd3bbc707ccdc0e3`.
+
+The repository now converts a CMP-1.2.3 verified entitlement into a real provider claim using an atomic Vault liability split: the original whole-deposit payer-safety obligation is cancelled and replaced by one provider obligation for the exact verified earning plus, when applicable, one separate payer-residual obligation for the unused balance. The provider side is released to claimable state and externally paid only to the beneficiary frozen at accepted matching. The canonical job reaches `SETTLED` only after successful Vault transfer and exact accounting reconciliation. The payer residual remains pending and is deliberately not refunded by 1.2.4.
+
+Exact-head evidence:
+
+- Solidity Contracts run `36261381017` — **success**, all 16 PR shards green.
+- `ComputeVerifiedEntitlement420Test` — shard 0 job `108458859438`: **15 passed / 0 failed / 0 skipped**.
+- Seven new CMP-1.2.4 cases prove provider/residual split, actual beneficiary payout, replay/wrong-beneficiary rejection, verification-profile revocation gates, two-payer isolation, atomic rollback on missing release authority, and exact-funded/no-residual settlement.
+- 420 Integrated Qualification run `36261380960` — **success**.
+- 420Docs Qualification run `36261380906` — **success**.
+
+Full qualification record: [`CMP-1.2.4-PROVIDER-PAYOUT-QUALIFICATION.md`](CMP-1.2.4-PROVIDER-PAYOUT-QUALIFICATION.md).
+
+This closeout is repository-level only. Payer residual refunds plus cancellation/expiry/failure refund economics remain CMP-1.2.5; dispute/challenge/slash handling remains CMP-1.2.6; live deployment/testnet evidence remains CMP-1.2.9.

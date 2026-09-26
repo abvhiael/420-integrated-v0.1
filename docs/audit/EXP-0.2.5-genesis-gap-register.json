@@ -1,0 +1,679 @@
+{
+  "schema": "420explorer-exp-0.2.5-genesis-gap-register-v1",
+  "milestone": "EXP-0.2.5",
+  "title": "Genesis blocker and qualification-gap register",
+  "classification_definitions": {
+    "Genesis blocker": "A required capability, dependency, security control, or operational guarantee that is absent or demonstrably defective.",
+    "Qualification gap": "An implemented capability that lacks sufficient evidence, testing, or verification.",
+    "Integration gap": "A missing or incomplete connection to an independently required Genesis component.",
+    "Documentation gap": "Missing, inaccurate, obsolete, or incomplete documentation.",
+    "Operational risk": "An infrastructure, reliability, performance, or recovery concern requiring qualification.",
+    "Post-Genesis enhancement": "A desirable capability that is not required for the agreed Genesis scope."
+  },
+  "findings": [
+    {
+      "id": "EXP-FIND-001",
+      "classification": "Documentation gap",
+      "severity": "high",
+      "title": "Governance display scope is unresolved",
+      "description": "The frozen Genesis application purpose includes governance, while the dedicated Explorer Genesis profile does not include a governance view in requiredViews.",
+      "affected": [
+        "config/genesis-applications.json",
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.1-genesis-capability-matrix.json"
+      ],
+      "evidence": [
+        "EXP-CAP-019 is classified scope_decision_required and no Explorer governance API/view was established."
+      ],
+      "root_cause": "Two authoritative scope descriptions use different levels of specificity and no explicit decision reconciles them.",
+      "consequences": [
+        "Final Genesis scope cannot be frozen defensibly while the conflict remains.",
+        "Implementing or omitting governance display without a decision could either expand scope silently or miss an intended requirement."
+      ],
+      "dependencies": [
+        "EXP-0.2.1 capability matrix"
+      ],
+      "prerequisite_work": [
+        "authoritative product/Genesis scope decision"
+      ],
+      "remediation": [
+        "Record an explicit decision stating whether governance display is required for Explorer Genesis.",
+        "Update the dedicated profile and capability/workflow matrices consistently if the decision changes required scope."
+      ],
+      "tests": [
+        "fail-closed scope verifier must detect any profile/matrix drift",
+        "documentation qualification after the decision"
+      ],
+      "later_owner": [
+        "EXP-0.2.6",
+        "EXP-0.2.8"
+      ],
+      "acceptance_criteria": [
+        "AC-5",
+        "AC-10"
+      ],
+      "genesis_blocking": true,
+      "blocking_rationale": "Blocks final scope/qualification closeout, not because governance display is already proven mandatory, but because Genesis requirements may not remain ambiguous."
+    },
+    {
+      "id": "EXP-FIND-002",
+      "classification": "Qualification gap",
+      "severity": "high",
+      "title": "420Indexer has no qualified deployed testnet endpoint",
+      "description": "Indexer source and CI are implemented/tested, but its readiness fixture still uses URL REPLACE and PENDING_TESTNET_DEPLOYMENT.",
+      "affected": [
+        "testnet/public-services/indexer/readiness.json",
+        "config/420indexer-v1.json",
+        "docs/audit/EXP-0.1.2-indexer-runtime-topology-addendum.md"
+      ],
+      "evidence": [
+        "EXP-DEP-001: source implemented_and_tested; deployment pending_deployment; live qualification unverified."
+      ],
+      "root_cause": "Deployment-stage work has not supplied a real testnet service endpoint and live witness evidence.",
+      "consequences": [
+        "Explorer cannot prove that all 13 required Indexer routes and providers are available on the target network.",
+        "Accurate live chain/finality/Registry/consensus presentation cannot be established."
+      ],
+      "dependencies": [
+        "canonical chain/RPC source",
+        "420Indexer runtime packaging"
+      ],
+      "prerequisite_work": [
+        "official testnet network/runtime configuration"
+      ],
+      "remediation": [
+        "Deploy the qualified Indexer API on the target testnet.",
+        "Publish the endpoint in authoritative runtime configuration/readiness evidence.",
+        "Exercise all Explorer-required routes with representative data."
+      ],
+      "tests": [
+        "live /v1/health chain-id/finality probe",
+        "all 13 Explorer-required route probes",
+        "representative block/transaction/receipt/log/address/asset/contract/consensus/Registry reads"
+      ],
+      "later_owner": [
+        "EXP-1",
+        "EXP-7"
+      ],
+      "acceptance_criteria": [
+        "AC-2",
+        "AC-3",
+        "AC-6"
+      ],
+      "genesis_blocking": true,
+      "blocking_rationale": "The shared Indexer is mandatory for every core Explorer data path; source CI cannot substitute for deployed service qualification."
+    },
+    {
+      "id": "EXP-FIND-003",
+      "classification": "Qualification gap",
+      "severity": "high",
+      "title": "Explorer backend and frontend are not deployed or live-qualified",
+      "description": "Explorer backend/frontend readiness records still use placeholder URLs and pending deployment status despite implemented source.",
+      "affected": [
+        "testnet/public-services/explorer/readiness.json",
+        ".github/workflows/explorer-live-testnet.yml",
+        "explorer/cmd/explorer420/main.go",
+        "explorer/web/static/app.js"
+      ],
+      "evidence": [
+        "EXP-DEP-002 and EXP-DEP-003 remain pending_deployment/live unverified."
+      ],
+      "root_cause": "Production-equivalent testnet deployment and end-to-end qualification have not been completed.",
+      "consequences": [
+        "Genesis-required workflows cannot be demonstrated through the actual deployed application.",
+        "Configuration, routing, browser presentation and failure handling remain unproven in deployment."
+      ],
+      "dependencies": [
+        "EXP-FIND-002",
+        "official testnet manifest/configuration"
+      ],
+      "prerequisite_work": [
+        "qualified Indexer endpoint",
+        "deployment environment"
+      ],
+      "remediation": [
+        "Deploy Explorer backend and frontend to production-equivalent testnet endpoints.",
+        "Replace readiness placeholders with authoritative URLs only after deployment evidence exists.",
+        "Run the live validator with concrete witnesses."
+      ],
+      "tests": [
+        "explorer-live-testnet workflow",
+        "required-view navigation and API tests against deployed URLs",
+        "wrong-chain/stale/degraded presentation tests"
+      ],
+      "later_owner": [
+        "EXP-4",
+        "EXP-7"
+      ],
+      "acceptance_criteria": [
+        "AC-1",
+        "AC-5",
+        "AC-6",
+        "AC-8"
+      ],
+      "genesis_blocking": true,
+      "blocking_rationale": "A Genesis user application cannot be qualified solely from local source/CI when its required deployed workflows remain unexecuted."
+    },
+    {
+      "id": "EXP-FIND-004",
+      "classification": "Qualification gap",
+      "severity": "high",
+      "title": "Canonical testnet RPC/node binding is unverified",
+      "description": "Indexer source supports chain ID 420, wrong-chain rejection and canonical/finality tracking, but the official runtime RPC/node source has not been identified and live-qualified in the Explorer evidence.",
+      "affected": [
+        "config/420indexer-v1.json",
+        "testnet/public-services/indexer/readiness.json",
+        "docs/architecture/infrastructure/420indexer.md"
+      ],
+      "evidence": [
+        "EXP-DEP-004: source implemented; deployment and live qualification unverified."
+      ],
+      "root_cause": "No authoritative target-network runtime binding/evidence is present in the audited Explorer readiness chain.",
+      "consequences": [
+        "A deployed Indexer could be pointed at the wrong or incomplete network source.",
+        "Chain identity, finality and canonical data correspondence cannot be demonstrated end-to-end."
+      ],
+      "dependencies": [
+        "official testnet node/RPC infrastructure"
+      ],
+      "prerequisite_work": [
+        "testnet network manifest/configuration"
+      ],
+      "remediation": [
+        "Bind Indexer to the approved testnet RPC/node source.",
+        "Record chain ID, endpoint identity and supported canonical/finality methods.",
+        "Preserve wrong-chain fail-closed behavior."
+      ],
+      "tests": [
+        "chain ID 420 probe",
+        "wrong-chain negative test",
+        "head/safe/finalized consistency probe",
+        "receipt/log/block provenance comparison"
+      ],
+      "later_owner": [
+        "EXP-1",
+        "EXP-7"
+      ],
+      "acceptance_criteria": [
+        "AC-2",
+        "AC-3"
+      ],
+      "genesis_blocking": true,
+      "blocking_rationale": "Accurate Explorer data depends on a qualified canonical upstream; implementation of an RPC adapter is insufficient evidence of correct deployed binding."
+    },
+    {
+      "id": "EXP-FIND-005",
+      "classification": "Integration gap",
+      "severity": "high",
+      "title": "ProtocolRegistry live deployment and publication are unverified",
+      "description": "ProtocolRegistry source and frozen address authority exist, but Explorer qualification does not yet prove target-network runtime code or authorized service publications at the frozen address.",
+      "affected": [
+        "config/system-addresses.json",
+        "contracts/config/system-addresses.json",
+        "contracts/src/apps/ProtocolRegistry.sol",
+        "explorer/service/registryviews.go",
+        "docs/apps/registry/architecture.md"
+      ],
+      "evidence": [
+        "EXP-DEP-005: implemented source; deployment/live qualification unverified."
+      ],
+      "root_cause": "Frozen address configuration has not yet been paired with target-network bytecode, code-hash and publication evidence.",
+      "consequences": [
+        "Protocol service/version views could show stale or incomplete projection data.",
+        "Explorer cannot prove that displayed application implementations correspond to canonical Registry state."
+      ],
+      "dependencies": [
+        "ProtocolRegistry deployment",
+        "governance-authorized Registry publication",
+        "420Indexer Registry ingestion"
+      ],
+      "prerequisite_work": [
+        "qualified target network",
+        "deployed Registry code"
+      ],
+      "remediation": [
+        "Verify code at 0x0000000000000000000000000000000000000434 on the target network.",
+        "Record runtime code hash and Registry version/publication evidence.",
+        "Cross-check direct canonical reads against Indexer projections."
+      ],
+      "tests": [
+        "eth_getCode/runtime hash check",
+        "direct getService/getServiceVersion comparisons",
+        "active/deprecated publication cases",
+        "unknown service/version fail-closed case"
+      ],
+      "later_owner": [
+        "EXP-3",
+        "EXP-5",
+        "EXP-7"
+      ],
+      "acceptance_criteria": [
+        "AC-4",
+        "AC-6"
+      ],
+      "genesis_blocking": true,
+      "blocking_rationale": "Protocol service/version is a mandatory Genesis view and its canonical Registry dependency must be operational and correct."
+    },
+    {
+      "id": "EXP-FIND-006",
+      "classification": "Integration gap",
+      "severity": "high",
+      "title": "Registry ABI/descriptor runtime provenance is not qualified",
+      "description": "Registry/event source definitions exist, but the artifact-backed descriptor build and live historical/version decoding seam are not qualified against deployed Registry provenance.",
+      "affected": [
+        "docs/audit/EXP-0.1.3-contract-abi-address-reconciliation.md",
+        "420-indexer/src/abi-manifest.ts",
+        "indexer/decoder/catalog.go",
+        "indexer/decoder/registry.go"
+      ],
+      "evidence": [
+        "EXP-DEP-007 remains source_present/live unverified; EXP-0.1.3 explicitly defers artifact-backed descriptor and live Registry event provenance."
+      ],
+      "root_cause": "Build-time ABI/descriptor inputs and runtime Registry event provenance have not been bound into release evidence.",
+      "consequences": [
+        "Decoded service/version or protocol metadata could be incomplete or mismatched to deployed code.",
+        "Historical decoding cannot yet be trusted as release-qualified."
+      ],
+      "dependencies": [
+        "EXP-FIND-005",
+        "compiled ABI artifacts",
+        "420Indexer decoder pipeline"
+      ],
+      "prerequisite_work": [
+        "qualified deployed Registry",
+        "release descriptor artifacts"
+      ],
+      "remediation": [
+        "Produce and pin required ABI/descriptor artifacts for the release path.",
+        "Bind descriptors to deployed Registry/runtime hashes and service versions.",
+        "Record historical version decoding evidence."
+      ],
+      "tests": [
+        "descriptor build from pinned artifacts",
+        "known ServiceVersionPublished/ServiceRegistrationProfilePublished vectors",
+        "historical version/deprecation decoding against target network"
+      ],
+      "later_owner": [
+        "EXP-3",
+        "EXP-7"
+      ],
+      "acceptance_criteria": [
+        "AC-4"
+      ],
+      "genesis_blocking": true,
+      "blocking_rationale": "Required protocol service/version presentation depends on correct Registry-version decoding and provenance."
+    },
+    {
+      "id": "EXP-FIND-007",
+      "classification": "Integration gap",
+      "severity": "high",
+      "title": "Deployed consensus/validator provider wiring is unverified",
+      "description": "Consensus interfaces and views exist in source, but the audited deployment evidence does not prove that the live Indexer server wires a consensus provider with representative validator/epoch/rotation data.",
+      "affected": [
+        "explorer/service/consensusviews.go",
+        "explorer/indexerclient/consensus.go",
+        "indexer/api/server.go",
+        "testnet/public-services/explorer/readiness.json",
+        "docs/audit/EXP-0.1.2-indexer-runtime-topology-addendum.md"
+      ],
+      "evidence": [
+        "EXP-DEP-008: implemented source; deployment/live qualification unverified."
+      ],
+      "root_cause": "Source route/interface existence has not been paired with deployed backend/provider composition evidence.",
+      "consequences": [
+        "Mandatory validator and epoch/rotation views may be unavailable or empty despite source-level route coverage."
+      ],
+      "dependencies": [
+        "420Indexer deployment",
+        "consensus data provider"
+      ],
+      "prerequisite_work": [
+        "EXP-FIND-002",
+        "qualified consensus upstream"
+      ],
+      "remediation": [
+        "Wire and deploy the Indexer consensus provider.",
+        "Demonstrate populated consensus responses and Explorer rendering on target testnet."
+      ],
+      "tests": [
+        "/v1/consensus live probe",
+        "epoch/rotation boundary fixtures",
+        "representative validator/committee/proposer-seat data",
+        "provider-unavailable fail-closed case"
+      ],
+      "later_owner": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-7"
+      ],
+      "acceptance_criteria": [
+        "AC-3",
+        "AC-5",
+        "AC-6"
+      ],
+      "genesis_blocking": true,
+      "blocking_rationale": "Validator and epoch/rotation are explicitly mandatory Genesis views."
+    },
+    {
+      "id": "EXP-FIND-008",
+      "classification": "Genesis blocker",
+      "severity": "high",
+      "title": "Actual transaction fee inspection is incomplete",
+      "description": "The transaction workflow exposes gasUsed but not effective gas price or a computed actual native fee.",
+      "affected": [
+        "explorer/service/transactionviews.go",
+        "indexer/model/model.go",
+        "explorer/web/static/app.js",
+        "docs/audit/EXP-0.2.2-user-workflow-matrix.json"
+      ],
+      "evidence": [
+        "EXP-WF-003 is partial_source and gap_requires_implementation."
+      ],
+      "root_cause": "The inspected transaction/receipt presentation model lacks the effective gas-price/fee inputs required to calculate the actual fee.",
+      "consequences": [
+        "Users cannot verify the actual cost of a transaction from Explorer.",
+        "The transaction-inspection workflow described by the audit is incomplete."
+      ],
+      "dependencies": [
+        "Indexer transaction/receipt model",
+        "Explorer transaction presentation"
+      ],
+      "prerequisite_work": [
+        "define authoritative fee fields for the 420 execution model"
+      ],
+      "remediation": [
+        "Expose the appropriate effective gas price or authoritative fee value through Indexer/Explorer models.",
+        "Render gas used and actual fee distinctly."
+      ],
+      "tests": [
+        "known gasUsed × effectiveGasPrice vector or protocol-equivalent fee vector",
+        "zero/edge fee cases",
+        "API serialization test",
+        "UI fee rendering test"
+      ],
+      "later_owner": [
+        "EXP-2",
+        "EXP-4"
+      ],
+      "acceptance_criteria": [
+        "AC-1",
+        "AC-5"
+      ],
+      "genesis_blocking": true,
+      "blocking_rationale": "EXP-0.2.2 records fee inspection as a required workflow with an implementation gap, so the workflow cannot be qualified until the missing fee data is implemented."
+    },
+    {
+      "id": "EXP-FIND-009",
+      "classification": "Genesis blocker",
+      "severity": "high",
+      "title": "Historical validator-produced block attribution is absent",
+      "description": "The current block record lacks proposer/validator identity, and Explorer cannot trace a historical block to the validator/proposer that produced it.",
+      "affected": [
+        "indexer/model/model.go",
+        "explorer/service/consensusviews.go",
+        "explorer/web/static/app.js",
+        "docs/audit/EXP-0.2.2-user-workflow-matrix.json"
+      ],
+      "evidence": [
+        "EXP-WF-008 is not_observed and gap_requires_implementation."
+      ],
+      "root_cause": "Historical block provenance and consensus status are modeled separately without a block-to-producer field/mapping in the inspected path.",
+      "consequences": [
+        "Users cannot verify block production attribution through the required validator/block workflow."
+      ],
+      "dependencies": [
+        "canonical consensus/block provenance",
+        "Indexer block model"
+      ],
+      "prerequisite_work": [
+        "define authoritative historical producer identity source"
+      ],
+      "remediation": [
+        "Add historical producer/proposer provenance to the Indexer model/API.",
+        "Expose and link producer identity in Explorer block/consensus views."
+      ],
+      "tests": [
+        "block-to-producer model/API fixtures",
+        "reorg/finality provenance case",
+        "UI producer link test",
+        "testnet comparison with canonical consensus data"
+      ],
+      "later_owner": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-4"
+      ],
+      "acceptance_criteria": [
+        "AC-1",
+        "AC-3",
+        "AC-5"
+      ],
+      "genesis_blocking": true,
+      "blocking_rationale": "The user-workflow matrix explicitly marks validator-produced block inspection as an implementation gap tied to mandatory block and validator capabilities."
+    },
+    {
+      "id": "EXP-FIND-010",
+      "classification": "Genesis blocker",
+      "severity": "medium",
+      "title": "Raw contract event inspection is incomplete in the user interface",
+      "description": "The current event presentation exposes log provenance and topic count but does not present full topic values and log data needed for complete raw event inspection.",
+      "affected": [
+        "explorer/web/static/app.js",
+        "explorer/service/transactionviews.go",
+        "indexer/model/model.go",
+        "docs/audit/EXP-0.2.2-user-workflow-matrix.json"
+      ],
+      "evidence": [
+        "EXP-WF-013 is partial_source; its limitations state that the web table does not display topic values/data."
+      ],
+      "root_cause": "The frontend renders a summarized log table rather than the complete indexed log payload.",
+      "consequences": [
+        "Users cannot independently inspect the full raw event payload through the current Explorer UI.",
+        "ABI-decoded semantics cannot be validated against visible raw topics/data."
+      ],
+      "dependencies": [
+        "receipt/log Indexer records",
+        "Explorer transaction/block presentation"
+      ],
+      "prerequisite_work": [
+        "none beyond existing raw log DTO availability"
+      ],
+      "remediation": [
+        "Render full log topics and data in transaction/block event views with safe formatting and navigation.",
+        "Keep ABI-decoded labels secondary to raw provenance."
+      ],
+      "tests": [
+        "multi-topic log rendering",
+        "empty/data-heavy log cases",
+        "HTML/script-like untrusted bytes rendered safely",
+        "raw UI values compared with API/indexed record"
+      ],
+      "later_owner": [
+        "EXP-2",
+        "EXP-4"
+      ],
+      "acceptance_criteria": [
+        "AC-1",
+        "AC-5",
+        "AC-7"
+      ],
+      "genesis_blocking": true,
+      "blocking_rationale": "Receipt/logs is a mandatory Genesis view and EXP-0.2.2 identifies event inspection as only partially implemented."
+    },
+    {
+      "id": "EXP-FIND-011",
+      "classification": "Operational risk",
+      "severity": "high",
+      "title": "Production-equivalent recovery and degraded-state behavior remain unqualified",
+      "description": "Source tests cover Indexer recovery/reorg/finality behavior, but the Explorer audit has no production-equivalent runtime evidence for restart, upstream outage, indexing delay, incomplete synchronization, or live reorg handling.",
+      "affected": [
+        "testnet/public-services/indexer/readiness.json",
+        "testnet/public-services/explorer/readiness.json",
+        "config/420indexer-v1.json",
+        ".github/workflows/explorer-live-testnet.yml"
+      ],
+      "evidence": [
+        "EXP-0.2.4 keeps all mandatory runtime dependencies live-unverified; the audit requires deployment-stage resilience evidence distinct from source tests."
+      ],
+      "root_cause": "No qualified production-equivalent Explorer/Indexer deployment exists yet on which to execute operational recovery scenarios.",
+      "consequences": [
+        "Stale or incomplete data could be served incorrectly under real outages/restarts if deployment behavior diverges from source-level tests."
+      ],
+      "dependencies": [
+        "EXP-FIND-002",
+        "EXP-FIND-003",
+        "EXP-FIND-004"
+      ],
+      "prerequisite_work": [
+        "production-equivalent testnet deployment"
+      ],
+      "remediation": [
+        "Execute restart/resume, RPC outage, stale-data, provider failure and bounded reorg scenarios against deployed services.",
+        "Record recovery time, status/finality presentation and fail-closed behavior."
+      ],
+      "tests": [
+        "Indexer restart/resume on deployed persistence",
+        "RPC outage/degraded response",
+        "catch-up after lag",
+        "non-finalized reorg repair",
+        "finalized-conflict fail closed",
+        "Explorer readiness/status transitions"
+      ],
+      "later_owner": [
+        "EXP-6",
+        "EXP-7"
+      ],
+      "acceptance_criteria": [
+        "AC-3",
+        "AC-7",
+        "AC-8"
+      ],
+      "genesis_blocking": true,
+      "blocking_rationale": "Operational consistency and recoverability are explicit Genesis acceptance requirements; existing unit/integration CI is not deployment evidence."
+    },
+    {
+      "id": "EXP-FIND-012",
+      "classification": "Post-Genesis enhancement",
+      "severity": "low",
+      "title": "Staking/reward-specific Explorer activity view is not implemented",
+      "description": "No dedicated staking/reward activity route or view was observed.",
+      "affected": [
+        "explorer/api/server.go",
+        "explorer/web/static/app.js",
+        "explorer/service/consensusviews.go",
+        "docs/audit/EXP-0.2.2-user-workflow-matrix.json"
+      ],
+      "evidence": [
+        "EXP-WF-012 is not_observed; the dedicated Genesis profile does not list staking/reward history as a requiredView."
+      ],
+      "root_cause": "The agreed core Explorer profile focuses on validator/epoch/rotation status rather than staking/reward history.",
+      "consequences": [
+        "Users cannot inspect staking/reward history as a first-class Explorer workflow."
+      ],
+      "dependencies": [
+        "Stake420/validator protocol data",
+        "Indexer staking/reward projection if later added"
+      ],
+      "prerequisite_work": [
+        "future product scope decision"
+      ],
+      "remediation": [
+        "If prioritized post-Genesis, define canonical staking/reward data model and add Indexer/API/UI support."
+      ],
+      "tests": [
+        "protocol-specific staking/reward fixtures",
+        "validator/account linkage",
+        "UI history/filtering"
+      ],
+      "later_owner": [
+        "post-Genesis"
+      ],
+      "acceptance_criteria": [],
+      "genesis_blocking": false,
+      "blocking_rationale": "Not present in the dedicated Genesis requiredViews; the audit explicitly says optional ecosystem capabilities must not automatically block Genesis."
+    },
+    {
+      "id": "EXP-FIND-013",
+      "classification": "Post-Genesis enhancement",
+      "severity": "low",
+      "title": "Names and Identity label enrichments are absent",
+      "description": "No direct 420 Names or 420 Identity label lookup path was established for Explorer.",
+      "affected": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.1-genesis-capability-matrix.json"
+      ],
+      "evidence": [
+        "EXP-CAP-013 and EXP-CAP-014 are optional_display_enrichment; EXP-DEP-009 and EXP-DEP-010 are not required for Genesis."
+      ],
+      "root_cause": "The dedicated profile intentionally classifies these integrations as optional presentation enrichment.",
+      "consequences": [
+        "Raw addresses remain less human-readable but retain complete canonical provenance."
+      ],
+      "dependencies": [
+        "420 Names",
+        "420 Identity"
+      ],
+      "prerequisite_work": [
+        "qualified owning protocols if later enabled"
+      ],
+      "remediation": [
+        "Optional post-Genesis label integration preserving raw addresses and public-data boundaries."
+      ],
+      "tests": [
+        "label/raw-address coexistence",
+        "missing/malicious label handling",
+        "privacy boundary tests"
+      ],
+      "later_owner": [
+        "post-Genesis"
+      ],
+      "acceptance_criteria": [],
+      "genesis_blocking": false,
+      "blocking_rationale": "Explicitly optional in the dedicated Explorer Genesis profile."
+    },
+    {
+      "id": "EXP-FIND-014",
+      "classification": "Post-Genesis enhancement",
+      "severity": "low",
+      "title": "Verified-source presentation integration is not established",
+      "description": "Explorer currently presents runtime code/code hash but does not provide a 420 Verify-backed verified-source/ABI presentation workflow.",
+      "affected": [
+        "docs/audit/EXP-0.1.3-contract-abi-address-reconciliation.md",
+        "contracts/config/420explorer-genesis.json",
+        "config/genesis-applications.json"
+      ],
+      "evidence": [
+        "EXP-CAP-015 keeps Explorer's own verdict engine out of scope; EXP-DEP-011 marks Verify metadata optional."
+      ],
+      "root_cause": "Source verification is owned by the separate 420 Verify application and is not required for raw Explorer contract inspection.",
+      "consequences": [
+        "Users must use the owning verification service for reproducible source-verification verdicts."
+      ],
+      "dependencies": [
+        "420 Verify"
+      ],
+      "prerequisite_work": [
+        "qualified Verify metadata/public interface if later displayed"
+      ],
+      "remediation": [
+        "Optionally surface verified-source metadata while preserving runtime bytecode as authority and linking to the owning verifier."
+      ],
+      "tests": [
+        "verified/unverified metadata cases",
+        "runtime-code mismatch fail closed",
+        "unsafe metadata/link sanitization"
+      ],
+      "later_owner": [
+        "post-Genesis"
+      ],
+      "acceptance_criteria": [],
+      "genesis_blocking": false,
+      "blocking_rationale": "The Explorer profile treats verified-source data as presentation metadata and does not require Explorer to own verification."
+    }
+  ],
+  "rules": {
+    "no_speculative_blockers": "A finding may be Genesis-blocking only when grounded in an agreed required capability/workflow/dependency, an explicit final-scope decision requirement, or an explicit Genesis operational acceptance criterion.",
+    "optional_features": "Optional display enrichments and post-Genesis features must not block core Genesis qualification.",
+    "unverified_not_failed": "Missing runtime evidence is classified as unverified/qualification or operational gap rather than a demonstrated implementation failure unless source evidence proves the capability absent."
+  }
+}

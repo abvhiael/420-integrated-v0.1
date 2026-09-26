@@ -440,11 +440,21 @@ contract ComputeVerifiedEntitlement420 is IComputeJobSettlementEvidence420 {
         pr.payoutRef = payoutRef;
         pr.paid = true;
         totalPayerRefundPaid += pr.amount;
-        vault.releaseObligation(
-            keccak256(abi.encode(REFUND_CLAIM_DOMAIN, block.chainid, address(this),
-                jobId, pr.claimRef, pr.obligationId, uint8(1))),
-            pr.obligationId
-        );
+
+        VaultAccounting420.Obligation memory pendingRefund =
+            accounting.getObligation(pr.obligationId);
+        if (pendingRefund.obligationType == funding.PAYER_SAFETY_TYPE()) {
+            (bytes32 releasedId, address releasedPayer, uint256 releasedAmount) =
+                funding.releasePreparedTerminalRefund(jobId, pr.claimRef);
+            if (releasedId != pr.obligationId || releasedPayer != pr.payer
+                || releasedAmount != pr.amount) revert InvalidEntitlement();
+        } else {
+            vault.releaseObligation(
+                keccak256(abi.encode(REFUND_CLAIM_DOMAIN, block.chainid, address(this),
+                    jobId, pr.claimRef, pr.obligationId, uint8(1))),
+                pr.obligationId
+            );
+        }
         vault.claim(payoutRef, pr.obligationId);
 
         VaultAccounting420.Obligation memory paidObligation =

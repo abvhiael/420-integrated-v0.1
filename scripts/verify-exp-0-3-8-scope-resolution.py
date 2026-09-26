@@ -64,7 +64,7 @@ def main():
     if not gap: errors.append("EXP-FIND-001 historical record missing")
     else:
         if gap.get("genesis_blocking") is not False: errors.append("EXP-FIND-001 remains Genesis-blocking")
-        if gap.get("severity")!="resolved": errors.append("EXP-FIND-001 is not marked resolved")
+        if gap.get("resolution_status")!="resolved": errors.append("EXP-FIND-001 is not marked resolved")
         if gap.get("acceptance_criteria")!=[]: errors.append("resolved EXP-FIND-001 still maps to active acceptance criteria")
 
     ac_by={x.get("id"):x for x in d["acs"].get("criteria",[])}

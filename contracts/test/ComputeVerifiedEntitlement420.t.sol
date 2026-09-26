@@ -298,7 +298,7 @@ contract ComputeVerifiedEntitlement420Test {
             "entitlement moved funds or falsely settled job");
     }
 
-    function testFailedVerificationCannotCreateProviderEarning() public {
+    function testNegativeVerificationCannotCreateProviderEarning() public {
         (bytes32 id, bytes32 receipt) = _resultJob(2, OWNER_A_KEY, PAYER_A_KEY, 4 ether, 195);
         _verify(id, receipt, 2, 195, false);
         require(jobs.job(id).status == ComputeJobRegistry420.Status.FAILED,

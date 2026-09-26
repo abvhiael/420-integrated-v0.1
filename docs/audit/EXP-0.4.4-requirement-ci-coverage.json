@@ -98,7 +98,20 @@
       ],
       "promotion_gate": "May advance only after mapped later qualification procedures execute successfully on the applicable exact release candidate and mapped blocking findings are resolved.",
       "coverage_class": "functional_plus_model_plus_future",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-4",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-1",
+        "EXP-4",
+        "EXP-7"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-VIEW-002",
@@ -172,7 +185,19 @@
       ],
       "promotion_gate": "May advance only after mapped later qualification procedures execute successfully on the applicable exact release candidate and mapped blocking findings are resolved.",
       "coverage_class": "functional_plus_model_plus_future",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-2",
+        "EXP-4",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-2",
+        "EXP-4",
+        "EXP-7"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-VIEW-003",
@@ -249,7 +274,20 @@
       ],
       "promotion_gate": "May advance only after the recorded source/feature gaps are remediated, mapped tests pass, and later runtime/deployment evidence is produced.",
       "coverage_class": "functional_plus_model_plus_future",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-2",
+        "EXP-3",
+        "EXP-4",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-2",
+        "EXP-4",
+        "EXP-7"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-VIEW-004",
@@ -321,7 +359,19 @@
       ],
       "promotion_gate": "May advance only after mapped later qualification procedures execute successfully on the applicable exact release candidate and mapped blocking findings are resolved.",
       "coverage_class": "functional_plus_model_plus_future",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-2",
+        "EXP-4",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-2",
+        "EXP-4",
+        "EXP-7"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-VIEW-005",
@@ -396,7 +446,20 @@
       ],
       "promotion_gate": "May advance only after mapped later qualification procedures execute successfully on the applicable exact release candidate and mapped blocking findings are resolved.",
       "coverage_class": "functional_plus_model_plus_future",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-2",
+        "EXP-3",
+        "EXP-4",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-3",
+        "EXP-4",
+        "EXP-7"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-VIEW-006",
@@ -470,7 +533,20 @@
       ],
       "promotion_gate": "May advance only after the recorded source/feature gaps are remediated, mapped tests pass, and later runtime/deployment evidence is produced.",
       "coverage_class": "functional_plus_model_plus_future",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-2",
+        "EXP-3",
+        "EXP-4",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-3",
+        "EXP-4",
+        "EXP-7"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-VIEW-007",
@@ -550,7 +626,21 @@
       ],
       "promotion_gate": "May advance only after the recorded source/feature gaps are remediated, mapped tests pass, and later runtime/deployment evidence is produced.",
       "coverage_class": "functional_plus_model_plus_future",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-4",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-4",
+        "EXP-7"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-VIEW-008",
@@ -628,7 +718,21 @@
       ],
       "promotion_gate": "May advance only after the recorded source/feature gaps are remediated, mapped tests pass, and later runtime/deployment evidence is produced.",
       "coverage_class": "functional_plus_model_plus_future",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-4",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-4",
+        "EXP-7"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-VIEW-009",
@@ -702,7 +806,19 @@
       ],
       "promotion_gate": "May advance only after mapped later qualification procedures execute successfully on the applicable exact release candidate and mapped blocking findings are resolved.",
       "coverage_class": "functional_plus_model_plus_future",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-3",
+        "EXP-5",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-3",
+        "EXP-5",
+        "EXP-7"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-VIEW-010",
@@ -779,7 +895,20 @@
       ],
       "promotion_gate": "May advance only after mapped later qualification procedures execute successfully on the applicable exact release candidate and mapped blocking findings are resolved.",
       "coverage_class": "functional_plus_model_plus_future",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-6",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-1",
+        "EXP-6",
+        "EXP-7"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-APP-001",
@@ -854,7 +983,16 @@
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-7",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-7",
+        "EXP-8"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-APP-002",
@@ -932,7 +1070,16 @@
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-3",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-3",
+        "EXP-8"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-APP-003",
@@ -967,7 +1114,8 @@
       "future_qualification_owners": [
         "EXP-2",
         "EXP-6",
-        "EXP-8"
+        "EXP-8",
+        "EXP-1"
       ],
       "future_qualification_procedures": [
         {
@@ -1019,11 +1167,25 @@
       "missing_evidence_layers": [
         "explorer_service_api_runtime",
         "security_operations_recovery",
-        "exact_release_candidate_genesis_closeout"
+        "exact_release_candidate_genesis_closeout",
+        "blockchain_data_integrity_runtime"
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-2",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-1",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "cross_owner_procedure_owners": [
+        "EXP-1"
+      ]
     },
     {
       "requirement_id": "EXP-REQ-SRC-001",
@@ -1120,7 +1282,18 @@
       ],
       "promotion_gate": "May advance only after a real non-placeholder deployment exists and the required live endpoint/runtime evidence passes.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-1",
+        "EXP-7"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-SRC-002",
@@ -1211,7 +1384,17 @@
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-1",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-1",
+        "EXP-6"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-SRC-003",
@@ -1250,7 +1433,8 @@
         "EXP-1",
         "EXP-2",
         "EXP-7",
-        "EXP-8"
+        "EXP-8",
+        "EXP-4"
       ],
       "future_qualification_procedures": [
         {
@@ -1303,11 +1487,26 @@
         "blockchain_data_integrity_runtime",
         "explorer_service_api_runtime",
         "deployment_live_network",
-        "exact_release_candidate_genesis_closeout"
+        "exact_release_candidate_genesis_closeout",
+        "deployed_ui_workflow"
       ],
       "promotion_gate": "May advance only after target-network runtime identity, provider wiring/provenance, and mapped live qualification evidence pass.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-1",
+        "EXP-4",
+        "EXP-7"
+      ],
+      "cross_owner_procedure_owners": [
+        "EXP-4"
+      ]
     },
     {
       "requirement_id": "EXP-REQ-SRC-004",
@@ -1347,7 +1546,8 @@
         "EXP-3",
         "EXP-5",
         "EXP-7",
-        "EXP-8"
+        "EXP-8",
+        "EXP-4"
       ],
       "future_qualification_procedures": [
         {
@@ -1405,11 +1605,26 @@
         "contract_registry_runtime",
         "ecosystem_integration",
         "deployment_live_network",
-        "exact_release_candidate_genesis_closeout"
+        "exact_release_candidate_genesis_closeout",
+        "deployed_ui_workflow"
       ],
       "promotion_gate": "May advance only after target-network runtime identity, provider wiring/provenance, and mapped live qualification evidence pass.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-3",
+        "EXP-5",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-3",
+        "EXP-4",
+        "EXP-7"
+      ],
+      "cross_owner_procedure_owners": [
+        "EXP-4"
+      ]
     },
     {
       "requirement_id": "EXP-REQ-IDX-001",
@@ -1502,7 +1717,17 @@
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-1",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-1",
+        "EXP-7"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-IDX-002",
@@ -1563,7 +1788,16 @@
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-2",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-7"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-IDX-003",
@@ -1660,7 +1894,19 @@
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-6",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-1",
+        "EXP-6"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-IDX-004",
@@ -1774,7 +2020,19 @@
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-1",
+        "EXP-3",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-1",
+        "EXP-3",
+        "EXP-6"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-IDX-005",
@@ -1888,7 +2146,19 @@
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-1",
+        "EXP-3",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-1",
+        "EXP-3",
+        "EXP-6"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-IDX-006",
@@ -2002,7 +2272,19 @@
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-1",
+        "EXP-3",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-1",
+        "EXP-3",
+        "EXP-6"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-IDX-007",
@@ -2118,7 +2400,19 @@
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-1",
+        "EXP-3",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-1",
+        "EXP-3",
+        "EXP-6"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-IDX-008",
@@ -2152,7 +2446,8 @@
       "future_qualification_owners": [
         "EXP-2",
         "EXP-6",
-        "EXP-8"
+        "EXP-8",
+        "EXP-1"
       ],
       "future_qualification_procedures": [
         {
@@ -2189,11 +2484,24 @@
       "missing_evidence_layers": [
         "explorer_service_api_runtime",
         "security_operations_recovery",
-        "exact_release_candidate_genesis_closeout"
+        "exact_release_candidate_genesis_closeout",
+        "blockchain_data_integrity_runtime"
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-2",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-1",
+        "EXP-6"
+      ],
+      "cross_owner_procedure_owners": [
+        "EXP-1"
+      ]
     },
     {
       "requirement_id": "EXP-REQ-END-001",
@@ -2227,7 +2535,8 @@
       "future_qualification_owners": [
         "EXP-2",
         "EXP-7",
-        "EXP-8"
+        "EXP-8",
+        "EXP-1"
       ],
       "future_qualification_procedures": [
         {
@@ -2264,11 +2573,24 @@
       "missing_evidence_layers": [
         "explorer_service_api_runtime",
         "deployment_live_network",
-        "exact_release_candidate_genesis_closeout"
+        "exact_release_candidate_genesis_closeout",
+        "blockchain_data_integrity_runtime"
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-2",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-1",
+        "EXP-7"
+      ],
+      "cross_owner_procedure_owners": [
+        "EXP-1"
+      ]
     },
     {
       "requirement_id": "EXP-REQ-END-002",
@@ -2343,7 +2665,17 @@
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-2",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-2",
+        "EXP-7"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-END-003",
@@ -2418,7 +2750,17 @@
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-2",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-2",
+        "EXP-7"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-END-004",
@@ -2493,7 +2835,17 @@
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-2",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-2",
+        "EXP-7"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-END-005",
@@ -2568,7 +2920,17 @@
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-2",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-2",
+        "EXP-7"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-END-006",
@@ -2643,7 +3005,17 @@
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-2",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-2",
+        "EXP-7"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-END-007",
@@ -2677,7 +3049,8 @@
       "future_qualification_owners": [
         "EXP-2",
         "EXP-7",
-        "EXP-8"
+        "EXP-8",
+        "EXP-3"
       ],
       "future_qualification_procedures": [
         {
@@ -2719,11 +3092,24 @@
       "missing_evidence_layers": [
         "explorer_service_api_runtime",
         "deployment_live_network",
-        "exact_release_candidate_genesis_closeout"
+        "exact_release_candidate_genesis_closeout",
+        "contract_registry_runtime"
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-2",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-3",
+        "EXP-7"
+      ],
+      "cross_owner_procedure_owners": [
+        "EXP-3"
+      ]
     },
     {
       "requirement_id": "EXP-REQ-ING-001",
@@ -2802,7 +3188,17 @@
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-1",
+        "EXP-6",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-1"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-ING-002",
@@ -2882,7 +3278,17 @@
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-1",
+        "EXP-6",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-1"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-ING-003",
@@ -2961,7 +3367,18 @@
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-1",
+        "EXP-6",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-1",
+        "EXP-6"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-ING-004",
@@ -3040,7 +3457,18 @@
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-1",
+        "EXP-6",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-1",
+        "EXP-6"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-ING-005",
@@ -3119,7 +3547,18 @@
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-1",
+        "EXP-6",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-1",
+        "EXP-7"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-ING-006",
@@ -3214,7 +3653,18 @@
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-1",
+        "EXP-6",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-1",
+        "EXP-6"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-ING-007",
@@ -3291,7 +3741,18 @@
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-1",
+        "EXP-6",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-1",
+        "EXP-7"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-VER-001",
@@ -3373,7 +3834,18 @@
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-3",
+        "EXP-4",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-3",
+        "EXP-4"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-VER-002",
@@ -3458,7 +3930,18 @@
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-3",
+        "EXP-4",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-3",
+        "EXP-4"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-VER-003",
@@ -3543,7 +4026,18 @@
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-3",
+        "EXP-4",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-3",
+        "EXP-4"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-VER-004",
@@ -3628,7 +4122,18 @@
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-3",
+        "EXP-4",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-3",
+        "EXP-6"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-VER-005",
@@ -3712,7 +4217,18 @@
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-3",
+        "EXP-4",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-3",
+        "EXP-6"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-INV-001",
@@ -3790,7 +4306,16 @@
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-3",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-3",
+        "EXP-8"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-INV-002",
@@ -3867,7 +4392,16 @@
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-1"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-INV-003",
@@ -3945,7 +4479,16 @@
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-1"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-INV-004",
@@ -4022,7 +4565,17 @@
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-1",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-1",
+        "EXP-6"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-INV-005",
@@ -4058,7 +4611,8 @@
       "future_qualification_owners": [
         "EXP-1",
         "EXP-6",
-        "EXP-8"
+        "EXP-8",
+        "EXP-7"
       ],
       "future_qualification_procedures": [
         {
@@ -4095,11 +4649,24 @@
       "missing_evidence_layers": [
         "blockchain_data_integrity_runtime",
         "security_operations_recovery",
-        "exact_release_candidate_genesis_closeout"
+        "exact_release_candidate_genesis_closeout",
+        "deployment_live_network"
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-1",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-1",
+        "EXP-7"
+      ],
+      "cross_owner_procedure_owners": [
+        "EXP-7"
+      ]
     },
     {
       "requirement_id": "EXP-REQ-INV-006",
@@ -4181,7 +4748,17 @@
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-3",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-3",
+        "EXP-6"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-INV-007",
@@ -4256,7 +4833,17 @@
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-4",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-4",
+        "EXP-6"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-INV-008",
@@ -4333,7 +4920,17 @@
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-6",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-6",
+        "EXP-7"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-INV-009",
@@ -4390,7 +4987,15 @@
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-6",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-6"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-INV-010",
@@ -4429,7 +5034,8 @@
         "EXP-2",
         "EXP-6",
         "EXP-7",
-        "EXP-8"
+        "EXP-8",
+        "EXP-1"
       ],
       "future_qualification_procedures": [
         {
@@ -4482,11 +5088,26 @@
         "explorer_service_api_runtime",
         "security_operations_recovery",
         "deployment_live_network",
-        "exact_release_candidate_genesis_closeout"
+        "exact_release_candidate_genesis_closeout",
+        "blockchain_data_integrity_runtime"
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-2",
+        "EXP-6",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-1",
+        "EXP-7",
+        "EXP-6"
+      ],
+      "cross_owner_procedure_owners": [
+        "EXP-1"
+      ]
     },
     {
       "requirement_id": "EXP-REQ-INV-011",
@@ -4563,7 +5184,17 @@
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-2",
+        "EXP-1"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-INV-012",
@@ -4622,7 +5253,15 @@
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-6",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-6"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-INV-013",
@@ -4738,7 +5377,19 @@
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-1",
+        "EXP-3",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-1",
+        "EXP-3",
+        "EXP-6"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-ADDR-001",
@@ -4818,7 +5469,17 @@
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-3",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-3",
+        "EXP-8"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-ADDR-002",
@@ -4896,7 +5557,16 @@
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-3",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-3",
+        "EXP-8"
+      ],
+      "cross_owner_procedure_owners": []
     },
     {
       "requirement_id": "EXP-REQ-ADDR-003",
@@ -4980,7 +5650,18 @@
       ],
       "promotion_gate": "May advance only when any applicable runtime/deployment acceptance evidence is produced; source qualification alone must not be relabeled as deployment, live, or Genesis qualification.",
       "coverage_class": "model_plus_future_procedure",
-      "orphan": false
+      "orphan": false,
+      "authoritative_later_owners": [
+        "EXP-3",
+        "EXP-5",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "procedure_owners": [
+        "EXP-3",
+        "EXP-7"
+      ],
+      "cross_owner_procedure_owners": []
     }
   ],
   "summary": {
@@ -4997,7 +5678,18 @@
       "deployment_pending": 1,
       "runtime_unverified": 2
     },
-    "genesis_qualified_requirements": 0
+    "genesis_qualified_requirements": 0,
+    "requirements_with_cross_owner_procedures": 8,
+    "cross_owner_requirement_ids": [
+      "EXP-REQ-APP-003",
+      "EXP-REQ-SRC-003",
+      "EXP-REQ-SRC-004",
+      "EXP-REQ-IDX-008",
+      "EXP-REQ-END-001",
+      "EXP-REQ-END-007",
+      "EXP-REQ-INV-005",
+      "EXP-REQ-INV-010"
+    ]
   },
   "rules": [
     "Every mandatory requirement must have at least one current automated audit/CI gate.",
@@ -5006,5 +5698,6 @@
     "Required-view functional test files must exist in the repository and remain mapped by EXP-0.3.3.",
     "Missing runtime/deployment/live/release evidence is preserved through future owner layers rather than silently waived.",
     "Zero mandatory requirements may be orphaned."
-  ]
+  ],
+  "ownership_rule": "Direct later_qualification_owners come from EXP-0.3.1. Procedure owners come from EXP-0.3.7/AC verification paths. Coverage ownership is their union; additional procedure owners are supporting qualification owners and do not rewrite the authoritative requirement owner field."
 }

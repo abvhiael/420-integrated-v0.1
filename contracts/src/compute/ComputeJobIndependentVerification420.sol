@@ -2,7 +2,7 @@
 pragma solidity ^0.8.24;
 
 import "./ComputeJobRegistry420.sol";
-import "./ComputeJobAcceptedMatch420.sol";
+import "./IComputeAcceptedMatchRuntime420.sol";
 import "./ComputeAuthorization420.sol";
 
 /// @notice Signed verifier verdict primitive. For production, deploy the policy-enforced subclass.
@@ -39,7 +39,7 @@ contract ComputeJobIndependentVerification420 is IComputeJobVerificationEvidence
     }
 
     ComputeJobRegistry420 public jobs;
-    ComputeJobAcceptedMatch420 public immutable matches;
+    IComputeAcceptedMatchRuntime420 public immutable matches;
     ComputeAuthorization420 public immutable authorization;
     address public immutable bindingAdmin;
     mapping(bytes32 => bool) public approvedProfile;
@@ -56,7 +56,7 @@ contract ComputeJobIndependentVerification420 is IComputeJobVerificationEvidence
 
     constructor(address matches_, address authorization_) {
         if (matches_.code.length == 0 || authorization_.code.length == 0) revert InvalidEvidence();
-        matches = ComputeJobAcceptedMatch420(matches_);
+        matches = IComputeAcceptedMatchRuntime420(matches_);
         authorization = ComputeAuthorization420(authorization_);
         bindingAdmin = msg.sender;
     }
@@ -67,7 +67,7 @@ contract ComputeJobIndependentVerification420 is IComputeJobVerificationEvidence
         ComputeJobRegistry420 candidate = ComputeJobRegistry420(jobs_);
         if (address(candidate.verificationEvidence()) != address(this)
             || address(candidate.matchEvidence()) != address(matches)
-            || address(matches.jobs()) != jobs_) revert InvalidEvidence();
+            || matches.jobs() != jobs_) revert InvalidEvidence();
         jobs = candidate;
     }
 
@@ -103,9 +103,10 @@ contract ComputeJobIndependentVerification420 is IComputeJobVerificationEvidence
             || j.assignmentRef != v.assignmentRef || j.resultCommitment != v.resultCommitment
             || v.resultCommitment == bytes32(0) || j.owner == v.verifier || j.worker == v.verifier)
             revert InvalidEvidence();
-        ComputeJobAcceptedMatch420.Match memory m = matches.getMatch(v.matchId);
-        if (!m.exists || m.jobId != v.jobId || m.operator == v.verifier || m.owner == v.verifier)
-            revert Unauthorized();
+        (bytes32 matchJobId, address matchOwner, address matchOperator, bool matchExists) =
+            matches.matchParties(v.matchId);
+        if (!matchExists || matchJobId != v.jobId || matchOperator == v.verifier
+            || matchOwner == v.verifier) revert Unauthorized();
         if (!authorization.isAuthorized(v.verifier, authorization.ACTION_VERIFY_RESULT(),
             authorization.scopeJob(v.jobId), 0)) revert Unauthorized();
         decisionRef = verdictDigest(v);

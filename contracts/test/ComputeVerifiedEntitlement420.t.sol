@@ -122,11 +122,16 @@ contract ComputeVerifiedEntitlement420Test {
         verification.bindJobs(address(jobs));
         verification.setApprovedProfile(verification.PROFILE_ID(), true);
         entitlements.bindJobs(address(jobs));
+        funding.bindSettlement(address(entitlements));
 
         vaultPolicy.bindVault(address(vault));
         vaultPolicy.bindFunding(address(funding));
+        vaultPolicy.bindSettlement(address(entitlements));
         _grantVault(address(funding), VaultIds420.ACTION_CREATE_OBLIGATION);
         _grantVault(address(funding), VaultIds420.ACTION_RELEASE_OBLIGATION);
+        _grantVault(address(funding), VaultIds420.ACTION_CANCEL_OBLIGATION);
+        _grantVault(address(entitlements), VaultIds420.ACTION_RELEASE_OBLIGATION);
+        _grantVault(address(entitlements), VaultIds420.ACTION_CLAIM);
         vaultPolicy.seal();
 
         vm.prank(OPERATOR);
@@ -415,6 +420,157 @@ contract ComputeVerifiedEntitlement420Test {
         require(!ok && entitlements.entitlementForJob(id) == bytes32(0)
             && funding.totalFunded() == 4 ether,
             "stale verifier identity created economic entitlement");
+    }
+
+    function _makeClaimable(bytes32 id) private returns (ComputeVerifiedEntitlement420.ProviderClaim memory pc) {
+        _finalize(id, 3 ether);
+        uint64 revision = jobs.job(id).revision;
+        vm.prank(SETTLER);
+        entitlements.createProviderClaim(id, revision);
+        pc = entitlements.providerClaim(id);
+    }
+
+    function testProviderClaimSplitsSafetyIntoClaimableProviderAndPendingPayerResidual() public {
+        bytes32 id = _verifiedJob(11, OWNER_A_KEY, PAYER_A_KEY, 4 ether);
+        bytes32 safety = funding.credit(id).obligationId;
+        ComputeVerifiedEntitlement420.ProviderClaim memory pc = _makeClaimable(id);
+
+        ComputeEscrowFunding420.Credit memory credit = funding.credit(id);
+        VaultAccounting420.Obligation memory original = accounting.getObligation(safety);
+        VaultAccounting420.Obligation memory provider = accounting.getObligation(pc.providerObligationId);
+        VaultAccounting420.Obligation memory residual = accounting.getObligation(pc.payerResidualObligationId);
+        VaultAccounting420.AssetAccounting memory a = accounting.getAccounting(VAULT_ID, address(0));
+
+        require(credit.allocated && credit.earnedAllocated == 3 ether
+            && credit.providerObligationId == pc.providerObligationId
+            && credit.payerResidualObligationId == pc.payerResidualObligationId,
+            "funding split not recorded");
+        require(original.state == 4 && provider.state == 2 && residual.state == 1,
+            "liability states incorrect");
+        require(provider.beneficiary == BENEFICIARY && provider.amount == 3 ether
+            && residual.beneficiary == payerA && residual.amount == 1 ether,
+            "split beneficiaries or amounts incorrect");
+        require(a.recordedBalance == 4 ether && a.reserved == 1 ether
+            && a.claimable == 3 ether && address(vault).balance == 4 ether
+            && jobs.job(id).status == ComputeJobRegistry420.Status.VERIFIED,
+            "claimability moved funds or settled early");
+    }
+
+    function testProviderClaimPaysExactBeneficiaryAndSettlesJob() public {
+        bytes32 id = _verifiedJob(12, OWNER_A_KEY, PAYER_A_KEY, 4 ether);
+        ComputeVerifiedEntitlement420.ProviderClaim memory pc = _makeClaimable(id);
+        uint256 before = BENEFICIARY.balance;
+        uint64 revision = jobs.job(id).revision;
+        vm.prank(BENEFICIARY);
+        bytes32 payoutRef = entitlements.claimProvider(id, revision);
+
+        VaultAccounting420.Obligation memory provider = accounting.getObligation(pc.providerObligationId);
+        VaultAccounting420.Obligation memory residual = accounting.getObligation(pc.payerResidualObligationId);
+        require(BENEFICIARY.balance == before + 3 ether && provider.state == 3
+            && residual.state == 1 && residual.beneficiary == payerA && residual.amount == 1 ether,
+            "provider payout or payer residual incorrect");
+        require(jobs.job(id).status == ComputeJobRegistry420.Status.SETTLED
+            && jobs.job(id).settlementRef == payoutRef
+            && entitlements.totalProviderPaid() == 3 ether
+            && address(vault).balance == 1 ether,
+            "job not settled on actual payout");
+    }
+
+    function testWrongBeneficiaryAndReplayCannotDoublePay() public {
+        bytes32 id = _verifiedJob(13, OWNER_A_KEY, PAYER_A_KEY, 4 ether);
+        ComputeVerifiedEntitlement420.ProviderClaim memory pc = _makeClaimable(id);
+        uint64 revision = jobs.job(id).revision;
+        uint256 beforeVault = address(vault).balance;
+
+        vm.prank(NEW_BENEFICIARY);
+        (bool wrong,) = address(entitlements).call(
+            abi.encodeCall(entitlements.claimProvider, (id, revision)));
+        require(!wrong && address(vault).balance == beforeVault
+            && accounting.getObligation(pc.providerObligationId).state == 2,
+            "wrong beneficiary consumed provider claim");
+
+        vm.prank(BENEFICIARY);
+        entitlements.claimProvider(id, revision);
+        uint256 paidBalance = BENEFICIARY.balance;
+        vm.prank(BENEFICIARY);
+        (bool replay,) = address(entitlements).call(
+            abi.encodeCall(entitlements.claimProvider, (id, uint64(8))));
+        require(!replay && BENEFICIARY.balance == paidBalance
+            && entitlements.totalProviderPaid() == 3 ether,
+            "provider claim replay paid twice");
+    }
+
+    function testRevokedProfileBlocksClaimCreationAndPayout() public {
+        bytes32 id = _verifiedJob(14, OWNER_A_KEY, PAYER_A_KEY, 4 ether);
+        _finalize(id, 3 ether);
+        verification.setApprovedProfile(verification.PROFILE_ID(), false);
+        vm.prank(SETTLER);
+        (bool createOk,) = address(entitlements).call(
+            abi.encodeCall(entitlements.createProviderClaim, (id, uint64(7))));
+        require(!createOk && !funding.credit(id).allocated,
+            "revoked profile allowed liability split");
+
+        verification.setApprovedProfile(verification.PROFILE_ID(), true);
+        vm.prank(SETTLER);
+        entitlements.createProviderClaim(id, 7);
+        verification.setApprovedProfile(verification.PROFILE_ID(), false);
+        vm.prank(BENEFICIARY);
+        (bool payoutOk,) = address(entitlements).call(
+            abi.encodeCall(entitlements.claimProvider, (id, uint64(7))));
+        require(!payoutOk && accounting.getObligation(
+            entitlements.providerClaim(id).providerObligationId).state == 2,
+            "revoked profile allowed external payout");
+    }
+
+    function testTwoPayerPayoutIsolationPreservesOtherBacking() public {
+        bytes32 first = _verifiedJob(15, OWNER_A_KEY, PAYER_A_KEY, 4 ether);
+        bytes32 second = _verifiedJob(16, OWNER_B_KEY, PAYER_B_KEY, 4 ether);
+        _makeClaimable(first);
+        bytes32 secondSafety = funding.credit(second).obligationId;
+        uint64 revision = jobs.job(first).revision;
+        vm.prank(BENEFICIARY);
+        entitlements.claimProvider(first, revision);
+
+        require(accounting.getObligation(secondSafety).state == 1
+            && funding.funded(second, ownerB, second)
+            && address(vault).balance == 5 ether
+            && accounting.getAccounting(VAULT_ID, address(0)).reserved == 5 ether,
+            "first provider payout consumed second payer backing");
+    }
+
+    function testMissingSettlementReleaseGrantRollsBackSafetySplit() public {
+        bytes32 id = _verifiedJob(17, OWNER_A_KEY, PAYER_A_KEY, 4 ether);
+        _finalize(id, 3 ether);
+        bytes32 safety = funding.credit(id).obligationId;
+        bytes32 scope = vaultPolicy.scopeForVault(VAULT_ID);
+        bytes32 grantId = caps.activeGrantId(address(entitlements), VaultIds420.COMPONENT_VAULT,
+            VaultIds420.ACTION_RELEASE_OBLIGATION, scope);
+        caps.revokeGrant(grantId);
+
+        vm.prank(SETTLER);
+        (bool ok,) = address(entitlements).call(
+            abi.encodeCall(entitlements.createProviderClaim, (id, uint64(7))));
+        require(!ok && !funding.credit(id).allocated
+            && accounting.getObligation(safety).state == 1
+            && accounting.getAccounting(VAULT_ID, address(0)).reserved == 4 ether
+            && accounting.getAccounting(VAULT_ID, address(0)).claimable == 0
+            && address(vault).balance == 4 ether,
+            "failed provider release stranded split liability");
+    }
+
+    function testExactFundedPayoutCreatesNoResidual() public {
+        bytes32 id = _verifiedJob(18, OWNER_A_KEY, PAYER_A_KEY, 3 ether);
+        ComputeVerifiedEntitlement420.ProviderClaim memory pc = _makeClaimable(id);
+        require(pc.payerResidualObligationId == bytes32(0),
+            "exact funded job created payer residual");
+        uint64 revision = jobs.job(id).revision;
+        vm.prank(BENEFICIARY);
+        entitlements.claimProvider(id, revision);
+        require(address(vault).balance == 0
+            && accounting.getAccounting(VAULT_ID, address(0)).reserved == 0
+            && accounting.getAccounting(VAULT_ID, address(0)).claimable == 0
+            && jobs.job(id).status == ComputeJobRegistry420.Status.SETTLED,
+            "exact funded payout left liability");
     }
 
     function testAcceptedBeneficiaryCannotBeRedirectedAfterVerification() public {

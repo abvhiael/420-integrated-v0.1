@@ -10,8 +10,9 @@ import "./ComputeEscrowFunding420.sol";
 /// not the generic VaultAuthorization420. Shared registry grants are necessary but NEVER
 /// sufficient: even its component authority cannot bypass the sealed CMP allowlist.
 /// @dev Bind the newly created Vault and funding adapter exactly once, then seal BEFORE
-/// admitting funds. Only the current funding contract may create a payer safety obligation
-/// or release it through its independently guarded expired/unmatched refund function.
+/// admitting funds. The funding contract exclusively creates payer-backed obligations and
+/// controls the protected safety obligation; an optional pre-seal settlement adapter may only
+/// release provider claims and execute their immutable-beneficiary claim transfer.
 /// Registry lifecycle calls may freeze/unfreeze/wind down/close only through separately
 /// scoped shared capabilities. They never gain obligation or withdrawal authority.
 contract CMPVaultAuthorization420 is VaultAuthorization420 {
@@ -20,11 +21,13 @@ contract CMPVaultAuthorization420 is VaultAuthorization420 {
     address public boundVault;
     address public boundRegistry;
     address public fundingAdapter;
+    address public settlementAdapter;
     bool public configurationSealed;
 
     error InvalidCMPBinding();
     event CMPVaultBound(address indexed vault, address indexed registry);
     event CMPFundingBound(address indexed funding);
+    event CMPSettlementBound(address indexed settlement);
     event CMPPolicySealed(address indexed vault, address indexed funding);
 
     constructor(address sharedCapabilities, bytes32 dedicatedVaultId)
@@ -58,7 +61,15 @@ contract CMPVaultAuthorization420 is VaultAuthorization420 {
         emit CMPFundingBound(funding_);
     }
 
-    /// @notice No method exists to rotate the Vault, registry, funding adapter, or policy after sealing.
+    function bindSettlement(address settlement_) external {
+        if (msg.sender != deployer || configurationSealed || settlementAdapter != address(0)
+            || fundingAdapter == address(0) || settlement_.code.length == 0
+            || settlement_ == fundingAdapter) revert InvalidCMPBinding();
+        settlementAdapter = settlement_;
+        emit CMPSettlementBound(settlement_);
+    }
+
+    /// @notice No method exists to rotate the Vault, registry, funding adapter, settlement adapter, or policy after sealing.
     function seal() external {
         if (msg.sender != deployer || configurationSealed || boundVault == address(0)
             || boundRegistry == address(0) || fundingAdapter == address(0)) revert InvalidCMPBinding();
@@ -76,10 +87,18 @@ contract CMPVaultAuthorization420 is VaultAuthorization420 {
         if (!configurationSealed || vaultId != cmpVaultId) return false;
 
         if (msg.sender == boundVault) {
-            if (principal != fundingAdapter) return false;
-            if (actionId != VaultIds420.ACTION_CREATE_OBLIGATION
-                && actionId != VaultIds420.ACTION_RELEASE_OBLIGATION) return false;
-            return super.isAuthorized(principal, vaultId, actionId, amount);
+            if (principal == fundingAdapter) {
+                if (actionId != VaultIds420.ACTION_CREATE_OBLIGATION
+                    && actionId != VaultIds420.ACTION_RELEASE_OBLIGATION
+                    && actionId != VaultIds420.ACTION_CANCEL_OBLIGATION) return false;
+                return super.isAuthorized(principal, vaultId, actionId, amount);
+            }
+            if (principal == settlementAdapter && settlementAdapter != address(0)) {
+                if (actionId != VaultIds420.ACTION_RELEASE_OBLIGATION
+                    && actionId != VaultIds420.ACTION_CLAIM) return false;
+                return super.isAuthorized(principal, vaultId, actionId, amount);
+            }
+            return false;
         }
 
         if (msg.sender == boundRegistry) {

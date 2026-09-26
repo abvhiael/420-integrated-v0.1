@@ -842,8 +842,8 @@
   "summary": {
     "mandatory_required_views": 10,
     "complete_source_paths": 10,
-    "implemented_source": 5,
-    "partial_source": 5,
+    "implemented_source": 6,
+    "partial_source": 4,
     "orphaned_paths": 0
   }
 }

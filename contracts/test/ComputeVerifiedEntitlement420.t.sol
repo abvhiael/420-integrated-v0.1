@@ -641,7 +641,7 @@ contract ComputeVerifiedEntitlement420Test {
             "settled residual refund reopened job or paid wrong amount");
     }
 
-    function testFailedVerificationRefundsFullPayerAndTransitionsRefunded() public {
+    function testNegativeVerificationRefundsFullPayerAndTransitionsRefunded() public {
         (bytes32 id, bytes32 receipt) = _resultJob(20, OWNER_A_KEY, PAYER_A_KEY, 4 ether, 195);
         _verify(id, receipt, 20, 195, false);
         require(jobs.job(id).status == ComputeJobRegistry420.Status.FAILED,

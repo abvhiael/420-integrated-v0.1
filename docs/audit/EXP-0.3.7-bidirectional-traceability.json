@@ -5371,128 +5371,9 @@
         "docs/audit/EXP-0.2.6-genesis-acceptance-criteria.json"
       ],
       "trace_complete": true
-    },
-    {
-      "requirement_id": "EXP-REQ-SCOPE-001",
-      "name": "governance view",
-      "category": "scope_decision",
-      "classification": "scope_decision_required",
-      "current_status": "scope_decision_required",
-      "implementation_path_ref": null,
-      "implementation_paths": [
-        "config/genesis-applications.json",
-        "contracts/config/420explorer-genesis.json",
-        "docs/audit/EXP-0.2.1-genesis-capability-matrix.json",
-        "docs/audit/EXP-0.2.5-genesis-gap-register.json"
-      ],
-      "blocking_finding_refs": [
-        "EXP-FIND-001"
-      ],
-      "remediation_milestones": [
-        "EXP-0.3.8"
-      ],
-      "acceptance_test_trace": {
-        "kind": "acceptance_criterion_verification_path",
-        "test_map_id": null,
-        "current_test_files": [],
-        "later_qualification_procedures": [
-          {
-            "owner": "EXP-4",
-            "procedure": "Execute every workflow classified as required by the frozen Explorer Genesis scope through the actual frontend and API.",
-            "acceptance_criterion": "AC-5"
-          },
-          {
-            "owner": "EXP-4",
-            "procedure": "Resolve the governance-scope ambiguity before freezing the final workflow set.",
-            "acceptance_criterion": "AC-5"
-          },
-          {
-            "owner": "EXP-4",
-            "procedure": "Verify navigation, search, status/error handling and cross-resource links with representative target-network data.",
-            "acceptance_criterion": "AC-5"
-          },
-          {
-            "owner": "EXP-8",
-            "procedure": "Consolidate the immutable evidence for AC-1 through AC-9 against the exact release candidate.",
-            "acceptance_criterion": "AC-10"
-          },
-          {
-            "owner": "EXP-8",
-            "procedure": "Confirm every Genesis-blocking finding is resolved and every mandatory acceptance criterion is satisfied.",
-            "acceptance_criterion": "AC-10"
-          },
-          {
-            "owner": "EXP-8",
-            "procedure": "Reconcile final implementation, scope, dependency state, tests and deployment evidence with the authoritative Genesis profile.",
-            "acceptance_criterion": "AC-10"
-          }
-        ]
-      },
-      "acceptance_criteria": [
-        "AC-5",
-        "AC-10"
-      ],
-      "required_evidence": [
-        "resolved authoritative governance-view scope decision",
-        "workflow-by-workflow pass evidence for the final required set",
-        "fee inspection implementation evidence",
-        "historical validator-produced block attribution evidence",
-        "event/log inspection qualification evidence",
-        "consensus/validator live workflow evidence",
-        "production-equivalent browser/UI evidence",
-        "complete AC-1 through AC-9 evidence index",
-        "closed Genesis-blocking finding register",
-        "resolved governance-scope decision",
-        "exact release-candidate qualification runs and artifact digests",
-        "final acceptance checklist with no mandatory criterion left unverified",
-        "final qualification/closeout record"
-      ],
-      "evidence_refs": [
-        "config/genesis-applications.json",
-        "contracts/config/420explorer-genesis.json",
-        "docs/audit/EXP-0.2.1-genesis-capability-matrix.json",
-        "docs/audit/EXP-0.2.5-genesis-gap-register.json",
-        "docs/audit/EXP-0.3.4-qualification-status-freeze.json",
-        "docs/audit/EXP-0.2.6-genesis-acceptance-criteria.json"
-      ],
-      "trace_complete": true
     }
   ],
   "reverse_blocker_traces": [
-    {
-      "finding_id": "EXP-FIND-001",
-      "title": "Governance display scope is unresolved",
-      "classification": "Documentation gap",
-      "genesis_blocking": true,
-      "affected_requirement_ids": [
-        "EXP-REQ-SCOPE-001"
-      ],
-      "remediation_milestones": [
-        "EXP-4",
-        "EXP-8",
-        "EXP-0.3.8"
-      ],
-      "acceptance_criteria": [
-        "AC-5",
-        "AC-10"
-      ],
-      "required_evidence": [
-        "resolved authoritative governance-view scope decision",
-        "workflow-by-workflow pass evidence for the final required set",
-        "fee inspection implementation evidence",
-        "historical validator-produced block attribution evidence",
-        "event/log inspection qualification evidence",
-        "consensus/validator live workflow evidence",
-        "production-equivalent browser/UI evidence",
-        "complete AC-1 through AC-9 evidence index",
-        "closed Genesis-blocking finding register",
-        "resolved governance-scope decision",
-        "exact release-candidate qualification runs and artifact digests",
-        "final acceptance checklist with no mandatory criterion left unverified",
-        "final qualification/closeout record"
-      ],
-      "orphaned": false
-    },
     {
       "finding_id": "EXP-FIND-002",
       "title": "420Indexer has no qualified deployed testnet endpoint",
@@ -5919,14 +5800,14 @@
     "Non-view mandatory requirements may use acceptance-criterion verification methods as their required later test path when no dedicated view test map applies.",
     "Every Genesis-blocking finding must trace backward to at least one affected requirement, at least one remediation milestone, its acceptance criteria, and required evidence.",
     "Every finding→requirement reference must be reciprocated by the requirement's blocking_finding_refs.",
-    "The governance scope conflict is traceable but remains unresolved; EXP-FIND-001 must route to EXP-0.3.8 and continue blocking final EXP-0 closeout.",
-    "Traceability completeness does not mean findings are resolved or acceptance criteria are satisfied."
+    "Traceability completeness does not mean findings are resolved or acceptance criteria are satisfied.",
+    "Resolved scope decisions are recorded separately and are not counted as active mandatory requirements or Genesis blockers."
   ],
   "summary": {
     "mandatory_requirements": 60,
-    "scope_decision_requirements": 1,
-    "traced_requirements": 61,
-    "genesis_blocking_findings": 11,
+    "scope_decision_requirements": 0,
+    "traced_requirements": 60,
+    "genesis_blocking_findings": 10,
     "orphaned_mandatory_requirements": 0,
     "orphaned_genesis_blockers": 0,
     "acceptance_criteria_covered": [
@@ -5967,6 +5848,16 @@
         "explicit record for any skipped/non-applicable test with accepted rationale",
         "no unresolved regression against the release candidate"
       ]
+    }
+  ],
+  "resolved_scope_decisions": [
+    {
+      "id": "EXP-SCOPE-CONFLICT-001",
+      "decision": "EXP-SCOPE-RESOLUTION-B",
+      "milestone": "EXP-0.3.8",
+      "retired_requirement_id": "EXP-REQ-SCOPE-001",
+      "resolved_finding_id": "EXP-FIND-001",
+      "evidence": "docs/audit/EXP-0.3.8-governance-scope-decision.json"
     }
   ]
 }

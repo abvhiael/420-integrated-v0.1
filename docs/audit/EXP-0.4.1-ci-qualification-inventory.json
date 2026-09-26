@@ -41,7 +41,7 @@
         "python -m json.tool readiness/config files",
         "python scripts/verify-420indexer.py",
         "python scripts/verify-explorer-indexer-consumer.py",
-        "EXP-0.1.2 through EXP-0.4.2 verifier chain",
+        "EXP-0.1.2 through EXP-0.4.3 verifier chain",
         "python scripts/exp-0-1-1-inventory.py --commit 95a83a961286701b6e8c064de1deccad10f41fd7"
       ],
       "evidence": [
@@ -410,7 +410,8 @@
         "verify-exp-0-3-7-traceability.py",
         "verify-exp-0-3-8-scope-resolution.py",
         "verify-exp-0-4-1-ci-inventory.py",
-        "verify-exp-0-4-2-historical-closeouts.py"
+        "verify-exp-0-4-2-historical-closeouts.py",
+        "verify-exp-0-4-3-evidence-ledger.py"
       ],
       "scope": "audit/static reconciliation"
     },

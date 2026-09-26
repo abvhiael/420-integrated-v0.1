@@ -14,7 +14,7 @@
     {
       "id": "EXP-FIND-001",
       "classification": "Documentation gap",
-      "severity": "resolved",
+      "severity": "low",
       "title": "Governance display scope decision resolved",
       "description": "EXP-0.3.8 selected EXP-SCOPE-RESOLUTION-B: governance is descriptive ecosystem subject matter, not a mandatory dedicated 420Explorer Genesis view.",
       "affected": [
@@ -28,11 +28,16 @@
         "EXP-0.3.8 records the repository-owner scope decision and atomic reconciliation."
       ],
       "root_cause": "Resolved: the broad application-purpose wording was more general than the dedicated Explorer Genesis required-view contract.",
-      "consequences": [],
+      "consequences": [
+        "No active Genesis consequence remains from the former governance wording ambiguity.",
+        "The record is retained only as historical audit evidence of the resolved scope conflict."
+      ],
       "dependencies": [
         "EXP-0.3.8 authoritative scope decision"
       ],
-      "prerequisite_work": [],
+      "prerequisite_work": [
+        "Completed by EXP-0.3.8: authoritative scope decision and atomic reconciliation."
+      ],
       "remediation": [
         "Completed by EXP-0.3.8 through authoritative source reconciliation."
       ],
@@ -40,10 +45,13 @@
         "EXP-0.3.8 fail-closed scope-resolution verifier",
         "retained qualification gates"
       ],
-      "later_owner": [],
+      "later_owner": [
+        "resolved_by_EXP-0.3.8"
+      ],
       "acceptance_criteria": [],
       "genesis_blocking": false,
-      "blocking_rationale": "Resolved in EXP-0.3.8; retained as historical audit evidence and no longer blocks Genesis."
+      "blocking_rationale": "Resolved in EXP-0.3.8; retained as historical audit evidence and no longer blocks Genesis.",
+      "resolution_status": "resolved"
     },
     {
       "id": "EXP-FIND-002",

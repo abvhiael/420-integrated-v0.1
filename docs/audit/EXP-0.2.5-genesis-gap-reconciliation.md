@@ -22,8 +22,8 @@ Every finding includes a unique ID, severity, exact affected paths/components, e
 
 The current register contains 14 findings:
 
-- 3 Genesis blockers;
-- 3 qualification gaps;
+- 2 Genesis blockers;
+- 4 qualification gaps;
 - 3 integration gaps;
 - 1 documentation gap;
 - 1 operational risk;
@@ -35,10 +35,10 @@ The blocker set is intentionally narrow and grounded in EXP-0.2.2 rather than ma
 
 1. **EXP-FIND-008 — transaction fee inspection incomplete.** The Explorer exposes gas used but not effective gas price or an actual fee value.
 2. **EXP-FIND-009 — historical validator-produced block attribution absent.** Current block records cannot be traced to the historical proposer/validator.
-3. **EXP-FIND-010 — raw event inspection incomplete.** The UI does not expose full topic values and log data for complete raw event review.
 
 ### Required qualification/deployment gaps
 
+- **EXP-FIND-010** — raw event inspection is partial and requires later qualification; EXP-0.2.2 did not mark it as a confirmed implementation gap;
 - **EXP-FIND-002** — no qualified deployed 420Indexer testnet endpoint;
 - **EXP-FIND-003** — Explorer backend/frontend remain undeployed and live-unqualified;
 - **EXP-FIND-004** — official canonical RPC/node binding remains unverified.
@@ -90,7 +90,7 @@ The register also preserves the audit rule that **unverified is not failed**. La
 2. every finding uses one of the six audit classifications;
 3. every finding has severity, affected components, evidence, root cause, consequences, dependencies, prerequisites, remediation, tests, owner and blocker rationale;
 4. every referenced repository path exists;
-5. the three EXP-0.2.2 implementation gaps remain represented as Genesis blockers;
+5. the two EXP-0.2.2 core implementation gaps remain represented as Genesis blockers, while the partial event workflow remains a qualification gap;
 6. governance ambiguity remains a documentation/scope blocker until authoritative sources agree;
 7. mandatory undeployed dependencies remain qualification/integration gaps rather than being claimed live;
 8. Names/Identity/Verify and staking/reward enhancement findings remain non-blocking;

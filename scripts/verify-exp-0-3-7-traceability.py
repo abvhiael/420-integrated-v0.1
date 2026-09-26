@@ -31,9 +31,9 @@ def main():
     fwd=l.get("forward_requirement_traces",[])
     fwd_by={x["requirement_id"]:x for x in fwd}
     if len(mandatory)!=60: errors.append(f"authoritative mandatory count drift: {len(mandatory)}")
-    if len(scope)!=1: errors.append(f"scope decision count drift: {len(scope)}")
-    if len(fwd)!=61 or len(fwd_by)!=61: errors.append("forward trace count/uniqueness drift")
-    if set(fwd_by)!=(set(mandatory)|set(scope)): errors.append("forward trace requirement set mismatch")
+    if len(scope)!=0: errors.append(f"scope decision count drift: {len(scope)}")
+    if len(fwd)!=60 or len(fwd_by)!=60: errors.append("forward trace count/uniqueness drift")
+    if set(fwd_by)!=set(mandatory): errors.append("forward trace requirement set mismatch")
 
     valid_owner=re.compile(r"^EXP-(?:0\.3\.8|[1-8])$")
     for rid,r in mandatory.items():
@@ -58,16 +58,16 @@ def main():
             if not q or at.get("test_map_id")!=q.get("id"): errors.append(f"{rid}: dedicated test trace mismatch")
         if t.get("trace_complete") is not True: errors.append(f"{rid}: trace_complete false")
 
-    gov=fwd_by.get("EXP-REQ-SCOPE-001",{})
-    if gov.get("current_status")!="scope_decision_required": errors.append("governance status drift")
-    if "EXP-0.3.8" not in gov.get("remediation_milestones",[]): errors.append("governance not routed to EXP-0.3.8")
-    if set(gov.get("acceptance_criteria",[]))!={"AC-5","AC-10"}: errors.append("governance AC mapping drift")
+    if "EXP-REQ-SCOPE-001" in fwd_by: errors.append("retired governance requirement remains traced as active")
+    resolved_scope=l.get("resolved_scope_decisions",[])
+    if len(resolved_scope)!=1 or resolved_scope[0].get("decision")!="EXP-SCOPE-RESOLUTION-B":
+        errors.append("resolved governance scope decision missing from traceability ledger")
 
     blockers=[g for g in gaps.get("findings",[]) if g.get("genesis_blocking") is True]
-    if len(blockers)!=11: errors.append(f"Genesis blocker count drift: {len(blockers)}")
+    if len(blockers)!=10: errors.append(f"Genesis blocker count drift: {len(blockers)}")
     rev=l.get("reverse_blocker_traces",[])
     rev_by={x["finding_id"]:x for x in rev}
-    if len(rev)!=11 or len(rev_by)!=11: errors.append("reverse blocker trace count/uniqueness drift")
+    if len(rev)!=10 or len(rev_by)!=10: errors.append("reverse blocker trace count/uniqueness drift")
     if set(rev_by)!={g["id"] for g in blockers}: errors.append("reverse blocker ID set mismatch")
 
     for g in blockers:
@@ -102,16 +102,16 @@ def main():
         covered.add("AC-9")
     if covered!={f"AC-{i}" for i in range(1,11)}: errors.append(f"AC coverage incomplete: {sorted(covered)}")
 
-    # Governance conflict must remain unresolved in 0.3.6.
+    # EXP-0.3.8 must have resolved the registered governance conflict.
     cs=conflicts.get("conflicts",[])
-    if len(cs)!=1 or cs[0].get("status")!="unresolved" or cs[0].get("requirement_id")!="EXP-REQ-SCOPE-001":
-        errors.append("governance conflict state drift")
+    if len(cs)!=1 or cs[0].get("status")!="resolved" or cs[0].get("selected_resolution")!="EXP-SCOPE-RESOLUTION-B":
+        errors.append("governance conflict is not resolved by EXP-0.3.8")
 
     summary=l.get("summary",{})
     if summary.get("mandatory_requirements")!=60: errors.append("summary mandatory count drift")
-    if summary.get("scope_decision_requirements")!=1: errors.append("summary scope count drift")
-    if summary.get("traced_requirements")!=61: errors.append("summary traced count drift")
-    if summary.get("genesis_blocking_findings")!=11: errors.append("summary blocker count drift")
+    if summary.get("scope_decision_requirements")!=0: errors.append("summary scope count drift")
+    if summary.get("traced_requirements")!=60: errors.append("summary traced count drift")
+    if summary.get("genesis_blocking_findings")!=10: errors.append("summary blocker count drift")
     if summary.get("orphaned_mandatory_requirements")!=0: errors.append("orphaned mandatory requirement count nonzero")
     if summary.get("orphaned_genesis_blockers")!=0: errors.append("orphaned Genesis blocker count nonzero")
     if summary.get("global_acceptance_traces")!=1: errors.append("global acceptance trace count drift")

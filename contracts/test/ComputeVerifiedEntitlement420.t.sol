@@ -1268,6 +1268,45 @@ contract ComputeVerifiedEntitlement420Test {
         _assertNativeSolvent();
     }
 
+
+    function testRejectedNativeProviderTransferRollsBackSettlementAndAccounting() public {
+        RejectingCMPBeneficiary420 rejector = new RejectingCMPBeneficiary420();
+        vm.prank(OPERATOR);
+        providers.update(providerId, keccak256("provider-rejecting"),
+            keccak256("security-rejecting"), address(rejector));
+        vm.prank(OPERATOR);
+        offerId = offers.publish(resourceId, PRICING_POLICY, 1, 3 ether,
+            uint64(block.timestamp + 12 hours));
+
+        bytes32 id = _verifiedJob(47, OWNER_A_KEY, PAYER_A_KEY, 4 ether);
+        ComputeVerifiedEntitlement420.ProviderClaim memory pc = _makeClaimable(id);
+        require(pc.beneficiary == address(rejector),
+            "accepted beneficiary did not freeze rejecting contract");
+        _matureProviderClaim(id);
+
+        rejector.configure(entitlements, id, jobs.job(id).revision);
+        uint256 beforeVault = address(vault).balance;
+        VaultAccounting420.AssetAccounting memory beforeA =
+            accounting.getAccounting(VAULT_ID, address(0));
+
+        (bool ok,) = address(rejector).call(
+            abi.encodeCall(rejector.claimProvider, ())
+        );
+        VaultAccounting420.AssetAccounting memory afterA =
+            accounting.getAccounting(VAULT_ID, address(0));
+
+        require(!ok && !entitlements.providerClaim(id).paid
+            && jobs.job(id).status == ComputeJobRegistry420.Status.VERIFIED
+            && accounting.getObligation(pc.providerObligationId).state == 1
+            && address(vault).balance == beforeVault
+            && afterA.recordedBalance == beforeA.recordedBalance
+            && afterA.reserved == beforeA.reserved
+            && afterA.claimable == beforeA.claimable
+            && afterA.released == beforeA.released,
+            "failed native transfer did not fully roll back settlement");
+        _assertNativeSolvent();
+    }
+
     function testTwoPayerMixedSettlementAndRefundRemainExactlySolvent() public {
         bytes32 paidJob = _verifiedJob(45, OWNER_A_KEY, PAYER_A_KEY, 4 ether);
         bytes32 refundJob = _acceptedJob(46, OWNER_B_KEY, PAYER_B_KEY, 4 ether);

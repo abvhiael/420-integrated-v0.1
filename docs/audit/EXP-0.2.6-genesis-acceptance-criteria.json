@@ -1,0 +1,364 @@
+{
+  "schema": "420explorer-exp-0.2.6-genesis-acceptance-criteria-v1",
+  "milestone": "EXP-0.2.6",
+  "title": "Genesis acceptance-criteria ownership and evidence map",
+  "status_vocabulary": [
+    "unverified",
+    "satisfied"
+  ],
+  "status_rule": "Acceptance criteria remain unverified until every required evidence item has been produced against the exact release candidate and all Genesis-blocking findings mapped to that criterion are resolved. EXP-0.2.6 does not mark any criterion satisfied.",
+  "final_decision_authority": "EXP-8",
+  "criteria": [
+    {
+      "id": "AC-1",
+      "question": "Can a user independently inspect and verify the supported blockchain transactions, blocks, and addresses?",
+      "current_status": "unverified",
+      "primary_owner": "EXP-2",
+      "supporting_owners": [
+        "EXP-4",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "verification_method": [
+        "Execute block, transaction, receipt/log and address API correctness tests against representative canonical fixtures.",
+        "Exercise the corresponding user workflows through the production-equivalent Explorer frontend.",
+        "Compare displayed chain ID, block hash, transaction/receipt provenance, values and finality with authoritative target-network data."
+      ],
+      "required_evidence": [
+        "passing core Explorer API/service tests on the exact release candidate",
+        "production-equivalent block/transaction/address workflow evidence",
+        "authoritative-chain comparison witnesses for representative successful and failed transactions",
+        "evidence that transaction fees and historical block-producer attribution required by the agreed workflows are implemented and rendered",
+        "raw event/log inspectability evidence for the mandatory receipt/logs view"
+      ],
+      "blocking_findings": [
+        "EXP-FIND-003",
+        "EXP-FIND-008",
+        "EXP-FIND-009",
+        "EXP-FIND-010"
+      ],
+      "source_anchors": [
+        "docs/audit/EXP-0.2.2-user-workflow-matrix.json",
+        "explorer/api/server.go",
+        "explorer/web/static/app.js"
+      ]
+    },
+    {
+      "id": "AC-2",
+      "question": "Does the Explorer retrieve and display accurate information from the authoritative 420 Integrated network?",
+      "current_status": "unverified",
+      "primary_owner": "EXP-1",
+      "supporting_owners": [
+        "EXP-2",
+        "EXP-3",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "verification_method": [
+        "Bind 420Indexer to the approved chain-420 RPC/node source and reject wrong-chain sources.",
+        "Compare indexed blocks, transactions, receipts/logs, finality and Registry-derived records with canonical upstream data.",
+        "Verify Explorer fails closed or clearly reports stale, degraded, wrong-chain or inconsistent data."
+      ],
+      "required_evidence": [
+        "authoritative target-network RPC/node identity and chain ID 420 evidence",
+        "live Indexer health/finality/freshness evidence",
+        "canonical-vs-indexed comparison witnesses",
+        "wrong-chain and stale/degraded negative-test evidence",
+        "Explorer presentation evidence preserving canonical provenance"
+      ],
+      "blocking_findings": [
+        "EXP-FIND-002",
+        "EXP-FIND-004"
+      ],
+      "source_anchors": [
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json",
+        "docs/audit/EXP-0.2.4-dependency-readiness-matrix.json",
+        "contracts/config/420explorer-genesis.json"
+      ]
+    },
+    {
+      "id": "AC-3",
+      "question": "Are all required data-ingestion and indexing processes operational, consistent, and recoverable?",
+      "current_status": "unverified",
+      "primary_owner": "EXP-1",
+      "supporting_owners": [
+        "EXP-6",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "verification_method": [
+        "Run 420Indexer against the target network through startup synchronization, catch-up and steady-state ingestion.",
+        "Exercise restart/resume, RPC outage, lag, provider failure, non-finalized reorg repair, finalized-conflict fail-closed and full-rebuild scenarios.",
+        "Verify consensus/validator projections are populated and consistent with the canonical consensus source."
+      ],
+      "required_evidence": [
+        "deployed Indexer endpoint and runtime composition evidence",
+        "restart/resume and checkpoint persistence results",
+        "non-finalized reorg and finalized-conflict evidence",
+        "full rebuild evidence",
+        "consensus/validator provider wiring and representative data evidence",
+        "staleness/degraded-state measurements and status output"
+      ],
+      "blocking_findings": [
+        "EXP-FIND-002",
+        "EXP-FIND-004",
+        "EXP-FIND-007",
+        "EXP-FIND-009",
+        "EXP-FIND-011"
+      ],
+      "source_anchors": [
+        "testnet/public-services/indexer/readiness.json",
+        "docs/audit/EXP-0.1.2-indexer-runtime-topology-addendum.md",
+        "docs/audit/EXP-0.2.4-dependency-readiness-matrix.json"
+      ]
+    },
+    {
+      "id": "AC-4",
+      "question": "Are the required smart contract addresses, ABIs, registry references, and protocol integrations correct?",
+      "current_status": "unverified",
+      "primary_owner": "EXP-3",
+      "supporting_owners": [
+        "EXP-5",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "verification_method": [
+        "Verify frozen system-address assignments against target-network runtime code without changing the frozen map.",
+        "Verify ProtocolRegistry code at 0x0000000000000000000000000000000000000434 and authorized service/version publications.",
+        "Bind ABI/decoder descriptors to compiled release artifacts and deployed Registry/runtime provenance.",
+        "Compare Indexer Registry projections with direct canonical Registry reads."
+      ],
+      "required_evidence": [
+        "matching frozen system-address maps",
+        "target-network ProtocolRegistry runtime bytecode/code-hash evidence",
+        "authorized service/version publication evidence",
+        "pinned ABI/descriptor artifacts and hashes",
+        "historical/current Registry decoding test evidence",
+        "direct Registry vs Indexer projection comparison"
+      ],
+      "blocking_findings": [
+        "EXP-FIND-005",
+        "EXP-FIND-006"
+      ],
+      "source_anchors": [
+        "config/system-addresses.json",
+        "contracts/config/system-addresses.json",
+        "docs/audit/EXP-0.1.3-contract-abi-address-reconciliation.md"
+      ]
+    },
+    {
+      "id": "AC-5",
+      "question": "Are all Genesis-required user-facing workflows functional?",
+      "current_status": "unverified",
+      "primary_owner": "EXP-4",
+      "supporting_owners": [
+        "EXP-2",
+        "EXP-3",
+        "EXP-5",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "verification_method": [
+        "Execute every workflow classified as required by the frozen Explorer Genesis scope through the actual frontend and API.",
+        "Resolve the governance-scope ambiguity before freezing the final workflow set.",
+        "Verify navigation, search, status/error handling and cross-resource links with representative target-network data."
+      ],
+      "required_evidence": [
+        "resolved authoritative governance-view scope decision",
+        "workflow-by-workflow pass evidence for the final required set",
+        "fee inspection implementation evidence",
+        "historical validator-produced block attribution evidence",
+        "event/log inspection qualification evidence",
+        "consensus/validator live workflow evidence",
+        "production-equivalent browser/UI evidence"
+      ],
+      "blocking_findings": [
+        "EXP-FIND-001",
+        "EXP-FIND-003",
+        "EXP-FIND-007",
+        "EXP-FIND-008",
+        "EXP-FIND-009",
+        "EXP-FIND-010"
+      ],
+      "source_anchors": [
+        "docs/audit/EXP-0.2.1-genesis-capability-matrix.json",
+        "docs/audit/EXP-0.2.2-user-workflow-matrix.json",
+        "contracts/config/420explorer-genesis.json"
+      ]
+    },
+    {
+      "id": "AC-6",
+      "question": "Are the backend APIs, frontend, indexing services, and supporting infrastructure integrated and tested?",
+      "current_status": "unverified",
+      "primary_owner": "EXP-7",
+      "supporting_owners": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-4",
+        "EXP-5",
+        "EXP-8"
+      ],
+      "verification_method": [
+        "Deploy the qualified Indexer, Explorer backend and Explorer frontend as one production-equivalent stack.",
+        "Exercise all mandatory Explorer-to-Indexer routes and required Registry/consensus provider paths end-to-end.",
+        "Run browser/API integration suites and failure-mode tests against the deployed stack."
+      ],
+      "required_evidence": [
+        "non-placeholder Indexer/backend/frontend deployment URLs",
+        "successful all-required-route probe evidence",
+        "Registry and consensus integration witnesses",
+        "end-to-end frontend/API/browser results",
+        "degraded/wrong-chain/provider-unavailable behavior evidence"
+      ],
+      "blocking_findings": [
+        "EXP-FIND-002",
+        "EXP-FIND-003",
+        "EXP-FIND-005",
+        "EXP-FIND-007"
+      ],
+      "source_anchors": [
+        "testnet/public-services/explorer/readiness.json",
+        "testnet/public-services/indexer/readiness.json",
+        ".github/workflows/explorer-live-testnet.yml"
+      ]
+    },
+    {
+      "id": "AC-7",
+      "question": "Are relevant security, data integrity, and operational risks addressed?",
+      "current_status": "unverified",
+      "primary_owner": "EXP-6",
+      "supporting_owners": [
+        "EXP-2",
+        "EXP-3",
+        "EXP-4",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "verification_method": [
+        "Run security review/tests over public API input validation, metadata rendering, secrets/configuration, browser handling and infrastructure exposure.",
+        "Verify canonical-authority, finality and fail-closed invariants under malformed, stale, wrong-chain and inconsistent inputs.",
+        "Exercise production-equivalent recovery and degraded-state scenarios."
+      ],
+      "required_evidence": [
+        "security test/review record for the exact release candidate",
+        "unsafe/untrusted metadata and log rendering tests",
+        "wrong-chain/stale/inconsistent fail-closed evidence",
+        "runtime restart/outage/reorg recovery evidence",
+        "resolved high/critical security findings or documented non-blocking disposition"
+      ],
+      "blocking_findings": [
+        "EXP-FIND-010",
+        "EXP-FIND-011"
+      ],
+      "source_anchors": [
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json",
+        "docs/audit/EXP-0.2.5-genesis-gap-register.json"
+      ]
+    },
+    {
+      "id": "AC-8",
+      "question": "Are the deployment procedures complete and reproducible?",
+      "current_status": "unverified",
+      "primary_owner": "EXP-7",
+      "supporting_owners": [
+        "EXP-6",
+        "EXP-8"
+      ],
+      "verification_method": [
+        "Build and deploy the production-equivalent Explorer/Indexer stack from documented, version-pinned procedures.",
+        "Verify environment variables, network configuration, service URLs, startup order, persistence and rollback/recovery instructions.",
+        "Repeat deployment from a clean environment and compare resulting service identity/configuration."
+      ],
+      "required_evidence": [
+        "version-pinned deployment procedure",
+        "complete environment/configuration inventory without unresolved placeholders",
+        "clean-environment deployment transcript",
+        "deployed service identity/readiness evidence",
+        "recovery/rollback procedure evidence"
+      ],
+      "blocking_findings": [
+        "EXP-FIND-003",
+        "EXP-FIND-011"
+      ],
+      "source_anchors": [
+        "testnet/public-services/explorer/readiness.json",
+        "testnet/public-services/indexer/readiness.json"
+      ]
+    },
+    {
+      "id": "AC-9",
+      "question": "Are all required test suites passing against the exact release candidate?",
+      "current_status": "unverified",
+      "primary_owner": "EXP-8",
+      "supporting_owners": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-3",
+        "EXP-4",
+        "EXP-5",
+        "EXP-6",
+        "EXP-7"
+      ],
+      "verification_method": [
+        "Freeze the release-candidate commit and enumerate every required unit, integration, security, deployment and end-to-end suite.",
+        "Execute every required suite against that exact commit and required external/runtime environment.",
+        "Record pass, fail, skipped and environment-blocked results without substituting earlier-head evidence."
+      ],
+      "required_evidence": [
+        "exact release-candidate commit SHA",
+        "complete required-test inventory",
+        "exact commands/workflow run IDs",
+        "successful results for every mandatory suite",
+        "explicit record for any skipped/non-applicable test with accepted rationale",
+        "no unresolved regression against the release candidate"
+      ],
+      "blocking_findings": [],
+      "source_anchors": [
+        "docs/audit/EXP-0.2.5-genesis-gap-register.json",
+        ".github/workflows/420indexer.yml"
+      ]
+    },
+    {
+      "id": "AC-10",
+      "question": "Is there sufficient recorded evidence to support the final Genesis qualification decision?",
+      "current_status": "unverified",
+      "primary_owner": "EXP-8",
+      "supporting_owners": [
+        "EXP-0",
+        "EXP-1",
+        "EXP-2",
+        "EXP-3",
+        "EXP-4",
+        "EXP-5",
+        "EXP-6",
+        "EXP-7"
+      ],
+      "verification_method": [
+        "Consolidate the immutable evidence for AC-1 through AC-9 against the exact release candidate.",
+        "Confirm every Genesis-blocking finding is resolved and every mandatory acceptance criterion is satisfied.",
+        "Reconcile final implementation, scope, dependency state, tests and deployment evidence with the authoritative Genesis profile."
+      ],
+      "required_evidence": [
+        "complete AC-1 through AC-9 evidence index",
+        "closed Genesis-blocking finding register",
+        "resolved governance-scope decision",
+        "exact release-candidate qualification runs and artifact digests",
+        "final acceptance checklist with no mandatory criterion left unverified",
+        "final qualification/closeout record"
+      ],
+      "blocking_findings": [
+        "EXP-FIND-001"
+      ],
+      "source_anchors": [
+        "docs/audit/EXP-0.2.5-genesis-gap-register.json",
+        "contracts/config/420explorer-genesis.json"
+      ]
+    }
+  ],
+  "invariants": [
+    "Every acceptance criterion must remain unverified until its complete required evidence exists against the applicable exact release candidate.",
+    "A passing source-level CI suite does not by itself satisfy a runtime, deployment, integration, security or end-to-end acceptance criterion.",
+    "Post-Genesis enhancement findings do not block satisfaction of core Genesis acceptance criteria unless the authoritative Genesis scope is explicitly changed.",
+    "EXP-8 is the only milestone authorized by this map to mark the final Genesis acceptance checklist satisfied."
+  ]
+}

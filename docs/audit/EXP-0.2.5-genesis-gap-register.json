@@ -672,7 +672,7 @@
     }
   ],
   "rules": {
-    "no_speculative_blockers": "A finding may be Genesis-blocking only when grounded in an agreed required capability/workflow/dependency, an explicit final-scope decision requirement, or an explicit Genesis operational acceptance criterion.",
+    "no_speculative_blockers": "Do not create speculative Genesis blockers. A finding may be Genesis-blocking only when grounded in an agreed required capability/workflow/dependency, an explicit final-scope decision requirement, or an explicit Genesis operational acceptance criterion.",
     "optional_features": "Optional display enrichments and post-Genesis features must not block core Genesis qualification.",
     "unverified_not_failed": "Missing runtime evidence is classified as unverified/qualification or operational gap rather than a demonstrated implementation failure unless source evidence proves the capability absent."
   }

@@ -245,6 +245,50 @@ contract ComputeEscrowFunding420 is IComputeJobFundingEvidence420 {
         return (c.obligationId, c.payer, c.deposited);
     }
 
+    /// @notice Release the original protected payer-safety obligation for an already
+    /// prepared unsuccessful terminal refund. Only the bound settlement adapter may request
+    /// this, but the funding adapter performs the Vault release because it is the immutable
+    /// payer-safety controller. The caller is expected to claim atomically in the same tx.
+    function releasePreparedTerminalRefund(bytes32 jobId, bytes32 refundRef)
+        external returns (bytes32 obligationId, address payer, uint256 amount)
+    {
+        if (entered || msg.sender != settlementAdapter || refundRef == bytes32(0)
+            || address(jobs) == address(0)) revert InvalidFunding();
+        entered = true;
+        Credit storage c = _credits[jobId];
+        ComputeJobRegistry420.Job memory j = jobs.job(jobId);
+        if (!c.exists || c.refunded || c.allocated || c.payer == address(0)
+            || c.obligationId != safetyObligationId(jobId)
+            || (j.status != ComputeJobRegistry420.Status.CANCELLED
+                && j.status != ComputeJobRegistry420.Status.EXPIRED
+                && j.status != ComputeJobRegistry420.Status.FAILED))
+            revert InvalidFunding();
+
+        VaultAccounting420.Obligation memory beforeO = accounting.getObligation(c.obligationId);
+        if (!beforeO.exists || beforeO.state != 1 || beforeO.vaultId != vaultId
+            || beforeO.asset != address(0) || beforeO.beneficiary != c.payer
+            || beforeO.amount != c.deposited || beforeO.sourceRef != jobId
+            || beforeO.obligationType != PAYER_SAFETY_TYPE) revert InvalidFunding();
+
+        vault.releaseObligation(
+            keccak256(abi.encode(TERMINAL_REFUND_DOMAIN, block.chainid, address(this),
+                address(vault), vaultId, jobId, refundRef)),
+            c.obligationId
+        );
+
+        VaultAccounting420.Obligation memory afterO = accounting.getObligation(c.obligationId);
+        if (afterO.state != 2 || afterO.beneficiary != c.payer || afterO.amount != c.deposited)
+            revert InvalidFunding();
+
+        c.refunded = true;
+        totalFunded -= c.deposited;
+        obligationId = c.obligationId;
+        payer = c.payer;
+        amount = c.deposited;
+        emit TerminalRefundClaimable(jobId, refundRef, payer, obligationId, amount);
+        entered = false;
+    }
+
     /// @notice Resolve a payer-winning dispute by replacing only this job's still-pending
     /// provider/residual liabilities with one pending original-payer refund obligation.
     function reallocateDisputedToPayer(bytes32 jobId, bytes32 disputeRef)

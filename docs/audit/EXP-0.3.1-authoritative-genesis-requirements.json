@@ -329,6 +329,7 @@
         "explorer/indexerclient/client.go"
       ],
       "later_qualification_owners": [
+        "EXP-1",
         "EXP-2",
         "EXP-6",
         "EXP-7",

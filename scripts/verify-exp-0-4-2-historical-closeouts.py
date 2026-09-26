@@ -54,7 +54,7 @@ def main():
  entries=freeze.get("entries",[])
  if any(e.get("genesis_qualified") is not False for e in entries): errors.append("status freeze contains Genesis-qualified requirement")
  criteria=acs.get("criteria",[])
- if any(c.get("status")!="unverified" for c in criteria): errors.append("acceptance criterion promoted before later phases")
+ if any(c.get("current_status")!="unverified" for c in criteria): errors.append("acceptance criterion promoted before later phases")
  # Summary must exactly match classifications and cannot accept broad/live claims.
  counts={k:sum(1 for r in records if r.get("classification")==k) for k in ALLOWED}
  s=inv.get("summary",{})
@@ -70,7 +70,7 @@ def main():
   if by[rid]["classification"]!="insufficient_provenance": errors.append(f"{rid}: test mechanism improperly promoted")
  if by["EXP-HIST-004"]["classification"]!="scope_changed": errors.append("user-facing broad qualified copy not scope-changed")
  EVIDENCE.mkdir(exist_ok=True)
- out={"schema":"exp-0.4.2-evidence-v1","milestone":"EXP-0.4.2","records":len(records),"classifications":counts,"current_genesis_blockers":len(blockers),"genesis_qualified_requirements":sum(1 for e in entries if e.get("genesis_qualified")),"acceptance_criteria_unverified":sum(1 for c in criteria if c.get("status")=="unverified"),"errors":errors,"pass":not errors}
+ out={"schema":"exp-0.4.2-evidence-v1","milestone":"EXP-0.4.2","records":len(records),"classifications":counts,"current_genesis_blockers":len(blockers),"genesis_qualified_requirements":sum(1 for e in entries if e.get("genesis_qualified")),"acceptance_criteria_unverified":sum(1 for c in criteria if c.get("current_status")=="unverified"),"errors":errors,"pass":not errors}
  (EVIDENCE/"summary.json").write_text(json.dumps(out,indent=2)+"\n",encoding="utf-8")
  with (EVIDENCE/"historical-closeouts.tsv").open("w",encoding="utf-8",newline="") as fh:
   w=csv.writer(fh,delimiter="\t"); w.writerow(["id","kind","classification","current_scope","claim"])

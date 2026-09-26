@@ -1638,6 +1638,91 @@
       "notes": []
     },
     {
+      "id": "EXP-REQ-ADDR-001",
+      "category": "address_authority",
+      "name": "Frozen system-address maps must match",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "config/system-addresses.json",
+        "selector": "entire document mirrored by contracts/config/system-addresses.json"
+      },
+      "statement": "The two frozen system-address maps must remain structurally identical and authoritative for fixed Genesis predeploy identity.",
+      "implementation_paths": [
+        "config/system-addresses.json",
+        "contracts/config/system-addresses.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "later_qualification_owners": [
+        "EXP-3",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-4",
+        "AC-10"
+      ],
+      "current_status": "source_qualified",
+      "notes": [
+        "Frozen address assignment is configuration authority, not target-network deployment proof."
+      ]
+    },
+    {
+      "id": "EXP-REQ-ADDR-002",
+      "category": "address_authority",
+      "name": "Explorer owns no fixed Genesis address",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "config/system-addresses.json",
+        "selector": "assignments contains no 420Explorer/Explorer entry"
+      },
+      "statement": "420Explorer must not own a fixed Genesis system address or Explorer-specific predeploy.",
+      "implementation_paths": [
+        "config/system-addresses.json",
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.1.3-contract-abi-address-reconciliation.md"
+      ],
+      "later_qualification_owners": [
+        "EXP-3",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-4",
+        "AC-10"
+      ],
+      "current_status": "source_qualified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-ADDR-003",
+      "category": "address_authority",
+      "name": "ProtocolRegistry fixed address",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "config/system-addresses.json",
+        "selector": "assignments[name=\"ProtocolRegistry\"].address"
+      },
+      "statement": "ProtocolRegistry fixed Genesis identity must remain 0x0000000000000000000000000000000000000434.",
+      "implementation_paths": [
+        "config/system-addresses.json",
+        "contracts/config/system-addresses.json",
+        "explorer/service/registryviews.go"
+      ],
+      "later_qualification_owners": [
+        "EXP-3",
+        "EXP-5",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-4",
+        "AC-6"
+      ],
+      "current_status": "source_qualified",
+      "notes": [
+        "Target-network runtime code/publication remains a later qualification gate."
+      ]
+    },
+    {
       "id": "EXP-REQ-SCOPE-001",
       "category": "scope_decision",
       "name": "governance view",

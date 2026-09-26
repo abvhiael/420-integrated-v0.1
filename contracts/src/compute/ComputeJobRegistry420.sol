@@ -249,7 +249,8 @@ contract ComputeJobRegistry420 {
         if (j.status == Status.NONE) revert UnknownJob();
         if (j.status != expected) revert WrongState();
         if (j.revision != expectedRevision) revert StaleRevision();
-        if (block.timestamp > j.deadline && expected != Status.RESULT_COMMITTED && expected != Status.VERIFIED)
+        if (block.timestamp > j.deadline && expected != Status.RESULT_COMMITTED
+            && expected != Status.VERIFIED && expected != Status.DISPUTED)
             revert BadInput();
     }
     function _transition(bytes32 jobId, Job storage j, Status next, bytes32 evidenceRef) private {

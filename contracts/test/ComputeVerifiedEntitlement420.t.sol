@@ -12,6 +12,7 @@ interface VmVerifiedEntitlement420 {
     function sign(uint256 key, bytes32 digest) external returns (uint8, bytes32, bytes32);
     function deal(address account, uint256 amount) external;
     function prank(address caller) external;
+    function warp(uint256 timestamp) external;
 }
 
 contract ComputeVerifiedEntitlement420Test {
@@ -182,6 +183,47 @@ contract ComputeVerifiedEntitlement420Test {
     function _signature(uint256 key, bytes32 digest) private returns (bytes memory) {
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(key, digest);
         return abi.encodePacked(r, s, v);
+    }
+
+    function _acceptedJob(uint256 nonce, uint256 ownerKey, uint256 payerKey,
+        uint256 fundedAmount) private returns (bytes32 id)
+    {
+        address owner = vm.addr(ownerKey);
+        address payer = vm.addr(payerKey);
+        ComputeJobSignedRequestAuthority420.Authorization memory a =
+            ComputeJobSignedRequestAuthority420.Authorization({
+                owner: owner,
+                payer: payer,
+                manifestHash: MANIFEST,
+                workloadType: verification.WORKLOAD_TYPE(),
+                inputCommitment: verification.inputHash(values),
+                outputSchemaCommitment: verification.OUTPUT_SCHEMA(),
+                deadline: uint64(block.timestamp + 1 days),
+                authorizationExpiry: uint64(block.timestamp + 2 days),
+                maxSpend: 5 ether,
+                nonce: nonce
+            });
+        bytes32 digest = requests.authorizationDigest(a);
+        bytes memory ownerSig = _signature(ownerKey, digest);
+        bytes memory payerSig = _signature(payerKey, digest);
+        vm.prank(owner);
+        bytes32 requestId = requests.registerSignedRequest(a, ownerSig, payerSig);
+        vm.prank(owner);
+        id = jobs.createJob(requestId, requestId, MANIFEST, a.workloadType,
+            a.inputCommitment, a.outputSchemaCommitment, a.deadline);
+        vm.prank(payer);
+        funding.fund{value: fundedAmount}(id);
+        vm.prank(owner);
+        jobs.recordFunding(id, 1, id);
+        vm.prank(owner);
+        bytes32 matchId = matches.propose(id, resourceId, offerId);
+        vm.prank(owner);
+        jobs.recordMatch(id, 2, matchId);
+        _grant(OPERATOR, id, auth.ACTION_ACCEPT_MATCH(), 3 ether);
+        vm.prank(OPERATOR);
+        matches.acceptMatch(id, 3);
+        require(jobs.job(id).status == ComputeJobRegistry420.Status.ACCEPTED,
+            "accepted fixture failed");
     }
 
     function _resultJob(uint256 nonce, uint256 ownerKey, uint256 payerKey,
@@ -571,6 +613,157 @@ contract ComputeVerifiedEntitlement420Test {
             && accounting.getAccounting(VAULT_ID, address(0)).claimable == 0
             && jobs.job(id).status == ComputeJobRegistry420.Status.SETTLED,
             "exact funded payout left liability");
+    }
+
+    function testSettledUnderBudgetResidualRefundPaysOriginalPayerWithoutReopeningJob() public {
+        bytes32 id = _verifiedJob(19, OWNER_A_KEY, PAYER_A_KEY, 4 ether);
+        _makeClaimable(id);
+        uint64 providerRevision = jobs.job(id).revision;
+        vm.prank(BENEFICIARY);
+        entitlements.claimProvider(id, providerRevision);
+        require(jobs.job(id).status == ComputeJobRegistry420.Status.SETTLED,
+            "provider settlement missing");
+
+        uint256 payerBefore = payerA.balance;
+        entitlements.createSettledResidualRefundClaim(id);
+        ComputeVerifiedEntitlement420.PayerRefund memory refund = entitlements.payerRefund(id);
+        require(refund.residual && refund.payer == payerA && refund.amount == 1 ether
+            && accounting.getObligation(refund.obligationId).state == 2,
+            "residual refund not claimable");
+
+        uint64 settledRevision = jobs.job(id).revision;
+        vm.prank(payerA);
+        entitlements.claimPayerRefund(id, settledRevision);
+        require(payerA.balance == payerBefore + 1 ether
+            && jobs.job(id).status == ComputeJobRegistry420.Status.SETTLED
+            && address(vault).balance == 0
+            && entitlements.totalPayerRefundPaid() == 1 ether,
+            "settled residual refund reopened job or paid wrong amount");
+    }
+
+    function testFailedVerificationRefundsFullPayerAndTransitionsRefunded() public {
+        (bytes32 id, bytes32 receipt) = _resultJob(20, OWNER_A_KEY, PAYER_A_KEY, 4 ether, 195);
+        _verify(id, receipt, 20, 195, false);
+        require(jobs.job(id).status == ComputeJobRegistry420.Status.FAILED,
+            "failed fixture missing");
+        uint256 payerBefore = payerA.balance;
+        entitlements.createTerminalRefundClaim(id);
+        ComputeVerifiedEntitlement420.PayerRefund memory refund = entitlements.payerRefund(id);
+        require(!refund.residual && refund.payer == payerA && refund.amount == 4 ether
+            && accounting.getObligation(refund.obligationId).state == 2
+            && entitlements.totalProviderPaid() == 0,
+            "failed job refund claim incorrect");
+
+        uint64 revision = jobs.job(id).revision;
+        vm.prank(payerA);
+        entitlements.claimPayerRefund(id, revision);
+        require(payerA.balance == payerBefore + 4 ether
+            && jobs.job(id).status == ComputeJobRegistry420.Status.REFUNDED
+            && address(vault).balance == 0,
+            "failed job did not refund payer exactly");
+    }
+
+    function testRequesterCancellationBeforeRunningRefundsAndOutsiderCannotCancel() public {
+        bytes32 id = _acceptedJob(21, OWNER_A_KEY, PAYER_A_KEY, 4 ether);
+        vm.prank(NEW_BENEFICIARY);
+        (bool outsider,) = address(jobs).call(
+            abi.encodeCall(jobs.recordCancellation, (id, uint64(4))));
+        require(!outsider && jobs.job(id).status == ComputeJobRegistry420.Status.ACCEPTED,
+            "outsider cancelled payer job");
+
+        vm.prank(ownerA);
+        jobs.recordCancellation(id, 4);
+        require(jobs.job(id).status == ComputeJobRegistry420.Status.CANCELLED,
+            "owner cancellation failed");
+        entitlements.createTerminalRefundClaim(id);
+        uint64 revision = jobs.job(id).revision;
+        uint256 before = payerA.balance;
+        vm.prank(payerA);
+        entitlements.claimPayerRefund(id, revision);
+        require(payerA.balance == before + 4 ether
+            && jobs.job(id).status == ComputeJobRegistry420.Status.REFUNDED,
+            "cancelled job refund failed");
+    }
+
+    function testAcceptedExpiryIsPermissionlessDeadlineProvenAndRefundable() public {
+        bytes32 id = _acceptedJob(22, OWNER_A_KEY, PAYER_A_KEY, 4 ether);
+        vm.prank(NEW_BENEFICIARY);
+        (bool early,) = address(jobs).call(
+            abi.encodeCall(jobs.recordExpiry, (id, uint64(4))));
+        require(!early && jobs.job(id).status == ComputeJobRegistry420.Status.ACCEPTED,
+            "early expiry admitted");
+
+        vm.warp(uint256(jobs.job(id).deadline) + 1);
+        vm.prank(NEW_BENEFICIARY);
+        jobs.recordExpiry(id, 4);
+        require(jobs.job(id).status == ComputeJobRegistry420.Status.EXPIRED,
+            "permissionless deadline expiry failed");
+
+        entitlements.createTerminalRefundClaim(id);
+        uint64 revision = jobs.job(id).revision;
+        uint256 before = payerA.balance;
+        vm.prank(payerA);
+        entitlements.claimPayerRefund(id, revision);
+        require(payerA.balance == before + 4 ether
+            && jobs.job(id).status == ComputeJobRegistry420.Status.REFUNDED,
+            "expired accepted job refund failed");
+    }
+
+    function testWrongPayerAndRefundReplayCannotDoublePay() public {
+        bytes32 id = _acceptedJob(23, OWNER_A_KEY, PAYER_A_KEY, 4 ether);
+        vm.prank(ownerA);
+        jobs.recordCancellation(id, 4);
+        entitlements.createTerminalRefundClaim(id);
+        uint64 revision = jobs.job(id).revision;
+
+        vm.prank(payerB);
+        (bool wrong,) = address(entitlements).call(
+            abi.encodeCall(entitlements.claimPayerRefund, (id, revision)));
+        require(!wrong && address(vault).balance == 4 ether,
+            "wrong payer consumed refund");
+
+        vm.prank(payerA);
+        entitlements.claimPayerRefund(id, revision);
+        uint256 paid = payerA.balance;
+        vm.prank(payerA);
+        (bool replay,) = address(entitlements).call(
+            abi.encodeCall(entitlements.claimPayerRefund, (id, uint64(revision + 1))));
+        require(!replay && payerA.balance == paid
+            && entitlements.totalPayerRefundPaid() == 4 ether,
+            "refund replay paid twice");
+    }
+
+    function testTwoPayerTerminalRefundIsolationPreservesOtherSafetyObligation() public {
+        bytes32 first = _acceptedJob(24, OWNER_A_KEY, PAYER_A_KEY, 4 ether);
+        bytes32 second = _acceptedJob(25, OWNER_B_KEY, PAYER_B_KEY, 4 ether);
+        bytes32 secondSafety = funding.credit(second).obligationId;
+        vm.prank(ownerA);
+        jobs.recordCancellation(first, 4);
+        entitlements.createTerminalRefundClaim(first);
+        uint64 revision = jobs.job(first).revision;
+        vm.prank(payerA);
+        entitlements.claimPayerRefund(first, revision);
+
+        require(accounting.getObligation(secondSafety).state == 1
+            && funding.funded(second, ownerB, second)
+            && address(vault).balance == 4 ether
+            && accounting.getAccounting(VAULT_ID, address(0)).reserved == 4 ether,
+            "first refund consumed second payer backing");
+    }
+
+    function testRunningJobCannotBeCancelledOrExpiredByRefundPath() public {
+        (bytes32 id,) = _resultJob(26, OWNER_A_KEY, PAYER_A_KEY, 4 ether, 194);
+        require(jobs.job(id).status == ComputeJobRegistry420.Status.RESULT_COMMITTED,
+            "result fixture missing");
+        vm.prank(ownerA);
+        (bool cancelOk,) = address(jobs).call(
+            abi.encodeCall(jobs.recordCancellation, (id, uint64(6))));
+        require(!cancelOk, "post-execution cancellation admitted");
+
+        vm.warp(uint256(jobs.job(id).deadline) + 1);
+        (bool expiryOk,) = address(jobs).call(
+            abi.encodeCall(jobs.recordExpiry, (id, uint64(6))));
+        require(!expiryOk, "post-result expiry preempted verification");
     }
 
     function testAcceptedBeneficiaryCannotBeRedirectedAfterVerification() public {

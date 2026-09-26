@@ -2,7 +2,7 @@
 pragma solidity ^0.8.24;
 
 import "./ComputeJobRegistry420.sol";
-import "./ComputeJobAcceptedMatch420.sol";
+import "./IComputeAcceptedMatchRuntime420.sol";
 
 /// @notice Strict assignment/receipt evidence requiring the exact accepted
 /// resource and operator, with a unique attempt and authenticated submission.
@@ -23,7 +23,7 @@ contract ComputeJobMatchedWorkerEvidence420 is IComputeJobWorkerEvidence420 {
         bool exists;
     }
     ComputeJobRegistry420 public jobs;
-    ComputeJobAcceptedMatch420 public immutable matches;
+    IComputeAcceptedMatchRuntime420 public immutable matches;
     ComputeAuthorization420 public immutable authorization;
     address public immutable bindingAdmin;
     mapping(bytes32 => Assignment) private _assignments;
@@ -35,7 +35,7 @@ contract ComputeJobMatchedWorkerEvidence420 is IComputeJobWorkerEvidence420 {
 
     constructor(address matches_, address authorization_) {
         if (matches_.code.length == 0 || authorization_.code.length == 0) revert InvalidEvidence();
-        matches = ComputeJobAcceptedMatch420(matches_);
+        matches = IComputeAcceptedMatchRuntime420(matches_);
         authorization = ComputeAuthorization420(authorization_);
         bindingAdmin = msg.sender;
     }
@@ -46,7 +46,7 @@ contract ComputeJobMatchedWorkerEvidence420 is IComputeJobWorkerEvidence420 {
         ComputeJobRegistry420 candidate = ComputeJobRegistry420(jobs_);
         if (address(candidate.workerEvidence()) != address(this)
             || address(candidate.matchEvidence()) != address(matches)
-            || address(matches.jobs()) != jobs_) revert InvalidEvidence();
+            || matches.jobs() != jobs_) revert InvalidEvidence();
         jobs = candidate;
     }
 

@@ -12,7 +12,7 @@ import "./IComputeAcceptedMatchRuntime420.sol";
 /// @dev Acceptance freezes a provider-derived beneficiary and a deterministic native-$420
 /// ceiling that is bounded by BOTH the signed payer maximum and that job's actual Vault-backed credit.
 /// This contract does not release funds or create provider earnings.
-contract ComputeAcceptedPriceMatch420 is IComputeJobMatchEvidence420, IComputeAcceptedMatchRuntime420 {
+contract ComputeAcceptedPriceMatch420 is IComputeJobMatchEvidence420 {
     bytes32 private constant MATCH_DOMAIN = keccak256("420/COMPUTE/PRICED_MATCH/V1");
     bytes32 private constant PRICE_DOMAIN = keccak256("420/COMPUTE/ACCEPTED_PRICE/V1");
     bytes32 private constant ACCEPT_DOMAIN = keccak256("420/COMPUTE/PRICED_ACCEPTANCE/V1");

@@ -102,3 +102,25 @@ The following remain outside CMP-1.2.1.2 and are **not** implied by this closeou
 Acceptance criteria and exact named tests are recorded in [`CMP-1.2.1.3-FUNDING-LIFECYCLE-INTEGRITY.md`](CMP-1.2.1.3-FUNDING-LIFECYCLE-INTEGRITY.md). Exact-head evidence: Solidity Contracts run `36173406491` succeeded with all 16 PR shards green; funding shard 2 job `108198785353` reports **9 passed / 0 failed / 0 skipped**; fenced-capability shard 1 job `108198785251` reports **6 / 0 / 0**; real-capability shard 3 job `108198785380` reports **4 / 0 / 0**; Vault-authorization shard 4 job `108198785250` reports **3 / 0 / 0**. 420 Integrated Qualification run `36173406567` and 420Docs Qualification run `36173406361` both succeeded.
 
 This step remains inside CMP-1.2.1 canonical payer funding. It does not authorize accepted-price reservation, provider settlement, matched-job refund economics, dispute/slash paths, or live network deployment. CMP-1.2.9 remains the deployment/testnet evidence gate.
+
+
+## CMP-1.2.2 — accepted-price reservation and spending limits
+
+**Status: COMPLETE within repository-level scope.** Exact qualified implementation/test head: `4933beb6284dfbf93aea8e827719b2960d0226f4`.
+
+The repository-level acceptance-price boundary is now executable. `ComputeOfferRegistry420` publishes immutable fixed native-$420 offer terms bound to the exact provider/resource revisions and provider-derived settlement beneficiary. `ComputeAcceptedPriceMatch420` requires the exact real `ComputeEscrowFunding420` adapter and bound job registry, then refuses acceptance unless the fixed quote fits both the payer's signed `maxSpend` and that job's actual Vault-backed credit. The accepted amount is also passed into the scoped `ACTION_ACCEPT_MATCH` capability check. One unique price reservation is frozen per job before the job reaches `ACCEPTED`; acceptance does not release funds or create provider earnings.
+
+Exact-head evidence:
+
+- Solidity Contracts run `36197680782` — **success**, all 16 PR shards green.
+- `ComputeAcceptedPriceMatch420Test` — shard 2 job `108279547002`: **7 passed / 0 failed / 0 skipped**.
+- `ComputeEscrowFunding420Test` — shard 5 job `108279546978`: **9 / 0 / 0**.
+- `ComputeEscrowFencedCapability420Test` — shard 4 job `108279547063`: **6 / 0 / 0**.
+- 420 Integrated Qualification run `36197680589` — **success**.
+- 420Docs Qualification run `36197680701` — **success**.
+
+The new suite proves the accepted quote cannot exceed signed payer authority or actual job-specific funded credit; donor/free Vault surplus cannot make an underfunded job acceptable; capability amount limits apply to the quote; cancelled offers and stale resource revisions cannot consume a reservation; later provider changes cannot rewrite an accepted beneficiary or price; wrong offer/resource bindings fail closed; and accepted price/match evidence cannot replay across jobs.
+
+Full qualification record: [`CMP-1.2.2-ACCEPTED-PRICE-RESERVATION-QUALIFICATION.md`](CMP-1.2.2-ACCEPTED-PRICE-RESERVATION-QUALIFICATION.md).
+
+This closeout is repository-level only. Verified provider earnings begin at CMP-1.2.3; provider payout at CMP-1.2.4; later refund/dispute/solvency work remains CMP-1.2.5–1.2.7; live deployment/testnet evidence remains CMP-1.2.9.

@@ -1,0 +1,865 @@
+{
+  "schema": "420explorer-exp-0.3.2-mandatory-capability-paths-v1",
+  "milestone": "EXP-0.3.2",
+  "title": "Mandatory Genesis capability implementation-path reconciliation",
+  "baseline": {
+    "main_commit": "c7cb5f4dac07eb9416cac4a11eeee31b6efb10f0",
+    "exp_0_3_1_inventory": "docs/audit/EXP-0.3.1-authoritative-genesis-requirements.json",
+    "dedicated_profile": "contracts/config/420explorer-genesis.json"
+  },
+  "qualification_meaning": "A complete_source_path proves that every mandatory required view has a concrete repository path from frontend/API through Explorer service and 420Indexer projection to a named canonical authority. It does not mean the capability is feature-complete, deployed, live-qualified, or Genesis-qualified.",
+  "paths": [
+    {
+      "id": "EXP-PATH-001",
+      "requirement_id": "EXP-REQ-VIEW-001",
+      "capability_id": "EXP-CAP-001",
+      "name": "block",
+      "source_path_status": "complete_source_path",
+      "capability_status": "implemented_source",
+      "frontend": {
+        "route": "#/blocks and #/blocks/{number}",
+        "path": "explorer/web/static/app.js",
+        "functions": [
+          "blocks",
+          "blockDetail",
+          "blockTable"
+        ]
+      },
+      "explorer_api": {
+        "routes": [
+          "GET /v1/blocks",
+          "GET /v1/blocks/{number}"
+        ],
+        "path": "explorer/api/server.go",
+        "handlers": [
+          "handleBlocks",
+          "handleBlock"
+        ]
+      },
+      "explorer_service": {
+        "path": "explorer/service/blockviews.go",
+        "operations": [
+          "BlockPage",
+          "BlockDetail"
+        ],
+        "additional_path": "explorer/service/service.go",
+        "additional_operations": [
+          "Blocks",
+          "Block"
+        ]
+      },
+      "indexer_client": {
+        "path": "explorer/indexerclient/client.go",
+        "operations": [
+          "Blocks",
+          "Block",
+          "BlockLogs"
+        ],
+        "routes": [
+          "/v1/blocks",
+          "/v1/blocks/{number}",
+          "/v1/blocks/{number}/logs"
+        ]
+      },
+      "indexer_api": {
+        "path": "indexer/api/server.go",
+        "routes": [
+          "GET /v1/blocks",
+          "GET /v1/blocks/{number}",
+          "GET /v1/blocks/{number}/logs"
+        ]
+      },
+      "indexer_projection": {
+        "paths": [
+          "indexer/api/backend.go",
+          "indexer/store/file.go",
+          "indexer/model/model.go"
+        ],
+        "models": [
+          "BlockRecord",
+          "LogRecord",
+          "ChainCheckpoint"
+        ]
+      },
+      "canonical_authority": "canonical execution chain block/header/log data plus consensus-owned finality projected through 420Indexer",
+      "authority_evidence": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "known_gaps": [
+        "Historical validator/proposer attribution is not present in BlockRecord; tracked separately under validator workflow/findings."
+      ],
+      "later_owners": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-4",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-1",
+        "AC-2",
+        "AC-3"
+      ]
+    },
+    {
+      "id": "EXP-PATH-002",
+      "requirement_id": "EXP-REQ-VIEW-002",
+      "capability_id": "EXP-CAP-002",
+      "name": "transaction",
+      "source_path_status": "complete_source_path",
+      "capability_status": "implemented_source",
+      "frontend": {
+        "route": "#/transactions/{hash}",
+        "path": "explorer/web/static/app.js",
+        "functions": [
+          "transactionDetail"
+        ]
+      },
+      "explorer_api": {
+        "routes": [
+          "GET /v1/transactions/{hash}"
+        ],
+        "path": "explorer/api/server.go",
+        "handlers": [
+          "handleTransaction"
+        ]
+      },
+      "explorer_service": {
+        "path": "explorer/service/transactionviews.go",
+        "operations": [
+          "TransactionDetail"
+        ]
+      },
+      "indexer_client": {
+        "path": "explorer/indexerclient/client.go",
+        "operations": [
+          "Transaction",
+          "Receipt",
+          "Block"
+        ],
+        "routes": [
+          "/v1/transactions/{hash}",
+          "/v1/receipts/{hash}",
+          "/v1/blocks/{number}"
+        ]
+      },
+      "indexer_api": {
+        "path": "indexer/api/server.go",
+        "routes": [
+          "GET /v1/transactions/{hash}",
+          "GET /v1/receipts/{hash}",
+          "GET /v1/blocks/{number}"
+        ]
+      },
+      "indexer_projection": {
+        "paths": [
+          "indexer/api/backend.go",
+          "indexer/store/file.go",
+          "indexer/model/model.go"
+        ],
+        "models": [
+          "TransactionRecord",
+          "ReceiptRecord",
+          "BlockRecord"
+        ]
+      },
+      "canonical_authority": "canonical transaction, receipt and containing-block provenance from the execution chain",
+      "authority_evidence": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "known_gaps": [
+        "Actual fee calculation/display remains a Genesis blocker because the current records expose gasUsed but not effective gas price/authoritative fee."
+      ],
+      "later_owners": [
+        "EXP-2",
+        "EXP-4",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-1",
+        "AC-2",
+        "AC-5"
+      ]
+    },
+    {
+      "id": "EXP-PATH-003",
+      "requirement_id": "EXP-REQ-VIEW-003",
+      "capability_id": "EXP-CAP-003",
+      "name": "receipt/logs",
+      "source_path_status": "complete_source_path",
+      "capability_status": "partial_source",
+      "frontend": {
+        "route": "#/transactions/{hash} and #/blocks/{number}",
+        "path": "explorer/web/static/app.js",
+        "functions": [
+          "transactionDetail",
+          "blockDetail",
+          "logTable"
+        ]
+      },
+      "explorer_api": {
+        "routes": [
+          "GET /v1/receipts/{hash}",
+          "GET /v1/transactions/{hash}",
+          "GET /v1/blocks/{number}"
+        ],
+        "path": "explorer/api/server.go",
+        "handlers": [
+          "handleReceipt",
+          "handleTransaction",
+          "handleBlock"
+        ]
+      },
+      "explorer_service": {
+        "path": "explorer/service/transactionviews.go",
+        "operations": [
+          "ReceiptDetail",
+          "TransactionDetail"
+        ],
+        "additional_path": "explorer/service/blockviews.go",
+        "additional_operations": [
+          "BlockDetail"
+        ]
+      },
+      "indexer_client": {
+        "path": "explorer/indexerclient/client.go",
+        "operations": [
+          "Receipt",
+          "BlockLogs",
+          "Transaction",
+          "Block"
+        ],
+        "routes": [
+          "/v1/receipts/{hash}",
+          "/v1/blocks/{number}/logs",
+          "/v1/transactions/{hash}",
+          "/v1/blocks/{number}"
+        ]
+      },
+      "indexer_api": {
+        "path": "indexer/api/server.go",
+        "routes": [
+          "GET /v1/receipts/{hash}",
+          "GET /v1/blocks/{number}/logs",
+          "GET /v1/transactions/{hash}",
+          "GET /v1/blocks/{number}"
+        ]
+      },
+      "indexer_projection": {
+        "paths": [
+          "indexer/api/backend.go",
+          "indexer/store/file.go",
+          "indexer/model/model.go"
+        ],
+        "models": [
+          "ReceiptRecord",
+          "LogRecord",
+          "TransactionRecord",
+          "BlockRecord"
+        ]
+      },
+      "canonical_authority": "canonical execution receipt/log records identified by chain ID, block hash, transaction hash and log index",
+      "authority_evidence": [
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "known_gaps": [
+        "Current UI log table shows log index, emitting address, transaction and topic count but not full topic values/data; EXP-0.2.5 preserves this as a Genesis-relevant qualification gap."
+      ],
+      "later_owners": [
+        "EXP-2",
+        "EXP-3",
+        "EXP-4",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-1",
+        "AC-2",
+        "AC-5",
+        "AC-7"
+      ]
+    },
+    {
+      "id": "EXP-PATH-004",
+      "requirement_id": "EXP-REQ-VIEW-004",
+      "capability_id": "EXP-CAP-004",
+      "name": "address",
+      "source_path_status": "complete_source_path",
+      "capability_status": "implemented_source",
+      "frontend": {
+        "route": "#/addresses/{address}",
+        "path": "explorer/web/static/app.js",
+        "functions": [
+          "addressDetail",
+          "addressTxTable"
+        ]
+      },
+      "explorer_api": {
+        "routes": [
+          "GET /v1/addresses/{address}"
+        ],
+        "path": "explorer/api/server.go",
+        "handlers": [
+          "handleAddress"
+        ]
+      },
+      "explorer_service": {
+        "path": "explorer/service/addressviews.go",
+        "operations": [
+          "Address"
+        ]
+      },
+      "indexer_client": {
+        "path": "explorer/indexerclient/address.go",
+        "operations": [
+          "AddressTransactions"
+        ],
+        "routes": [
+          "/v1/transactions?address=..."
+        ]
+      },
+      "indexer_api": {
+        "path": "indexer/api/server.go",
+        "routes": [
+          "GET /v1/transactions?address=..."
+        ],
+        "additional_path": "indexer/api/address.go"
+      },
+      "indexer_projection": {
+        "paths": [
+          "indexer/api/address.go",
+          "indexer/store/file.go",
+          "indexer/model/model.go"
+        ],
+        "models": [
+          "AddressTransactionPage",
+          "TransactionRecord",
+          "ChainCheckpoint"
+        ]
+      },
+      "canonical_authority": "canonical transaction provenance projected into snapshot-pinned address history; Explorer does not infer canonical balances",
+      "authority_evidence": [
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "known_gaps": [
+        "Address view is transaction-history oriented and does not claim balances or holdings."
+      ],
+      "later_owners": [
+        "EXP-2",
+        "EXP-4",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-1",
+        "AC-5"
+      ]
+    },
+    {
+      "id": "EXP-PATH-005",
+      "requirement_id": "EXP-REQ-VIEW-005",
+      "capability_id": "EXP-CAP-005",
+      "name": "contract",
+      "source_path_status": "complete_source_path",
+      "capability_status": "implemented_source",
+      "frontend": {
+        "route": "#/contracts/{address}",
+        "path": "explorer/web/static/app.js",
+        "functions": [
+          "contractDetail"
+        ]
+      },
+      "explorer_api": {
+        "routes": [
+          "GET /v1/contracts/{address}"
+        ],
+        "path": "explorer/api/server.go",
+        "handlers": [
+          "handleContract"
+        ]
+      },
+      "explorer_service": {
+        "path": "explorer/service/contractviews.go",
+        "operations": [
+          "ContractDetail"
+        ]
+      },
+      "indexer_client": {
+        "path": "explorer/indexerclient/contract.go",
+        "operations": [
+          "Contract"
+        ],
+        "routes": [
+          "/v1/contracts/{address}"
+        ]
+      },
+      "indexer_api": {
+        "path": "indexer/api/server.go",
+        "routes": [
+          "GET /v1/contracts/{address}"
+        ],
+        "additional_path": "indexer/api/contracts.go"
+      },
+      "indexer_projection": {
+        "paths": [
+          "indexer/api/contracts.go",
+          "indexer/store/file.go",
+          "indexer/model/contract.go"
+        ],
+        "models": [
+          "ContractRecord"
+        ]
+      },
+      "canonical_authority": "deployed runtime bytecode and canonical deployment provenance; Registry metadata may enrich but cannot override runtime code",
+      "authority_evidence": [
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json",
+        "docs/audit/EXP-0.1.3-contract-abi-address-reconciliation.md"
+      ],
+      "known_gaps": [
+        "Global search sends any 20-byte value to the address route rather than resolving contract type first; raw contract route itself is implemented."
+      ],
+      "later_owners": [
+        "EXP-2",
+        "EXP-3",
+        "EXP-4",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-1",
+        "AC-4",
+        "AC-5"
+      ]
+    },
+    {
+      "id": "EXP-PATH-006",
+      "requirement_id": "EXP-REQ-VIEW-006",
+      "capability_id": "EXP-CAP-006",
+      "name": "token/asset activity",
+      "source_path_status": "complete_source_path",
+      "capability_status": "partial_source",
+      "frontend": {
+        "route": "#/assets",
+        "path": "explorer/web/static/app.js",
+        "functions": [
+          "assets",
+          "assetTable"
+        ]
+      },
+      "explorer_api": {
+        "routes": [
+          "GET /v1/assets/activity"
+        ],
+        "path": "explorer/api/server.go",
+        "handlers": [
+          "handleAssetActivity"
+        ]
+      },
+      "explorer_service": {
+        "path": "explorer/service/assetviews.go",
+        "operations": [
+          "AssetActivity"
+        ]
+      },
+      "indexer_client": {
+        "path": "explorer/indexerclient/assets.go",
+        "operations": [
+          "AssetTransfers"
+        ],
+        "routes": [
+          "/v1/asset-transfers"
+        ]
+      },
+      "indexer_api": {
+        "path": "indexer/api/server.go",
+        "routes": [
+          "GET /v1/asset-transfers"
+        ],
+        "additional_path": "indexer/api/backend.go"
+      },
+      "indexer_projection": {
+        "paths": [
+          "indexer/api/backend.go",
+          "indexer/store/file.go",
+          "indexer/model/assets.go"
+        ],
+        "models": [
+          "AssetTransferPage",
+          "AssetTransferRecord",
+          "ChainCheckpoint"
+        ]
+      },
+      "canonical_authority": "canonical-source transactions and logs decoded into rebuildable native/token movement projections",
+      "authority_evidence": [
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "known_gaps": [
+        "Explorer API supports assetKey/address filters but current frontend only requests recent transfers without exposing those filters; supported live decoder coverage remains unqualified."
+      ],
+      "later_owners": [
+        "EXP-2",
+        "EXP-3",
+        "EXP-4",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-5"
+      ]
+    },
+    {
+      "id": "EXP-PATH-007",
+      "requirement_id": "EXP-REQ-VIEW-007",
+      "capability_id": "EXP-CAP-007",
+      "name": "validator",
+      "source_path_status": "complete_source_path",
+      "capability_status": "partial_source",
+      "frontend": {
+        "route": "#/consensus",
+        "path": "explorer/web/static/app.js",
+        "functions": [
+          "consensus",
+          "checkpointTable"
+        ]
+      },
+      "explorer_api": {
+        "routes": [
+          "GET /v1/consensus"
+        ],
+        "path": "explorer/api/server.go",
+        "handlers": [
+          "handleConsensus"
+        ]
+      },
+      "explorer_service": {
+        "path": "explorer/service/consensusviews.go",
+        "operations": [
+          "Consensus"
+        ]
+      },
+      "indexer_client": {
+        "path": "explorer/indexerclient/consensus.go",
+        "operations": [
+          "Consensus"
+        ],
+        "routes": [
+          "/v1/consensus"
+        ]
+      },
+      "indexer_api": {
+        "path": "indexer/api/server.go",
+        "routes": [
+          "GET /v1/consensus"
+        ],
+        "additional_path": "indexer/api/backend.go"
+      },
+      "indexer_projection": {
+        "paths": [
+          "indexer/api/backend.go",
+          "indexer/model/consensus.go"
+        ],
+        "models": [
+          "ConsensusStatus",
+          "ConsensusProposer",
+          "ConsensusQC",
+          "ConsensusCheckpoint"
+        ]
+      },
+      "canonical_authority": "consensus-owned validator/seat/proposer/QC/finality state projected through a configured Indexer ConsensusProvider",
+      "authority_evidence": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "known_gaps": [
+        "Source provider seam exists but deployed provider wiring/live representative data remain unverified.",
+        "Historical block-to-validator attribution is absent and remains a Genesis blocker tracked separately."
+      ],
+      "later_owners": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-4",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-3",
+        "AC-5",
+        "AC-6"
+      ]
+    },
+    {
+      "id": "EXP-PATH-008",
+      "requirement_id": "EXP-REQ-VIEW-008",
+      "capability_id": "EXP-CAP-008",
+      "name": "epoch/rotation",
+      "source_path_status": "complete_source_path",
+      "capability_status": "partial_source",
+      "frontend": {
+        "route": "#/consensus",
+        "path": "explorer/web/static/app.js",
+        "functions": [
+          "consensus"
+        ]
+      },
+      "explorer_api": {
+        "routes": [
+          "GET /v1/consensus"
+        ],
+        "path": "explorer/api/server.go",
+        "handlers": [
+          "handleConsensus"
+        ]
+      },
+      "explorer_service": {
+        "path": "explorer/service/consensusviews.go",
+        "operations": [
+          "Consensus"
+        ]
+      },
+      "indexer_client": {
+        "path": "explorer/indexerclient/consensus.go",
+        "operations": [
+          "Consensus"
+        ],
+        "routes": [
+          "/v1/consensus"
+        ]
+      },
+      "indexer_api": {
+        "path": "indexer/api/server.go",
+        "routes": [
+          "GET /v1/consensus"
+        ],
+        "additional_path": "indexer/api/backend.go"
+      },
+      "indexer_projection": {
+        "paths": [
+          "indexer/api/backend.go",
+          "indexer/model/consensus.go"
+        ],
+        "models": [
+          "ConsensusStatus"
+        ]
+      },
+      "canonical_authority": "consensus-owned slot/epoch/rotation schedule and checkpoint state projected through 420Indexer",
+      "authority_evidence": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "known_gaps": [
+        "Deployed consensus provider wiring and boundary/live data remain unverified."
+      ],
+      "later_owners": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-4",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-3",
+        "AC-5",
+        "AC-6"
+      ]
+    },
+    {
+      "id": "EXP-PATH-009",
+      "requirement_id": "EXP-REQ-VIEW-009",
+      "capability_id": "EXP-CAP-009",
+      "name": "protocol service/version",
+      "source_path_status": "complete_source_path",
+      "capability_status": "implemented_source",
+      "frontend": {
+        "route": "#/registry, #/registry/{serviceId}, #/registry/{serviceId}/versions/{version}",
+        "path": "explorer/web/static/app.js",
+        "functions": [
+          "registry",
+          "registryService",
+          "registryVersion",
+          "registryTable",
+          "registryVersionsTable"
+        ]
+      },
+      "explorer_api": {
+        "routes": [
+          "GET /v1/services",
+          "GET /v1/services/{service}",
+          "GET /v1/services/{service}/versions/{version}"
+        ],
+        "path": "explorer/api/server.go",
+        "handlers": [
+          "handleServices",
+          "handleService",
+          "handleServiceVersion"
+        ]
+      },
+      "explorer_service": {
+        "path": "explorer/service/registryviews.go",
+        "operations": [
+          "Registry",
+          "RegistryService"
+        ],
+        "additional_path": "explorer/service/service.go",
+        "additional_operations": [
+          "ServiceVersion"
+        ]
+      },
+      "indexer_client": {
+        "path": "explorer/indexerclient/registry.go",
+        "operations": [
+          "Services",
+          "Service"
+        ],
+        "additional_path": "explorer/indexerclient/client.go",
+        "additional_operations": [
+          "ServiceVersion"
+        ],
+        "routes": [
+          "/v1/services",
+          "/v1/services/{service}",
+          "/v1/services/{service}/versions/{version}"
+        ]
+      },
+      "indexer_api": {
+        "path": "indexer/api/server.go",
+        "routes": [
+          "GET /v1/services",
+          "GET /v1/services/{service}",
+          "GET /v1/services/{service}/versions/{version}"
+        ],
+        "additional_path": "indexer/api/backend.go"
+      },
+      "indexer_projection": {
+        "paths": [
+          "indexer/api/backend.go",
+          "indexer/decoder/catalog.go",
+          "indexer/decoder/registry.go"
+        ],
+        "models": [
+          "ServiceSummary",
+          "ServiceVersion",
+          "Catalog"
+        ]
+      },
+      "canonical_authority": "canonical ProtocolRegistry contract state and version/publication history; Indexer catalog is a rebuildable non-authoritative projection",
+      "authority_evidence": [
+        "config/system-addresses.json",
+        "contracts/src/apps/ProtocolRegistry.sol",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "known_gaps": [
+        "Target-network ProtocolRegistry runtime code/publications and ABI/descriptor provenance remain unverified integration gates."
+      ],
+      "later_owners": [
+        "EXP-3",
+        "EXP-5",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-4",
+        "AC-5",
+        "AC-6"
+      ]
+    },
+    {
+      "id": "EXP-PATH-010",
+      "requirement_id": "EXP-REQ-VIEW-010",
+      "capability_id": "EXP-CAP-010",
+      "name": "network status",
+      "source_path_status": "complete_source_path",
+      "capability_status": "implemented_source",
+      "frontend": {
+        "route": "#/status plus network pill/overview",
+        "path": "explorer/web/static/app.js",
+        "functions": [
+          "statusPage",
+          "statusDetails",
+          "refreshNetworkPill",
+          "overview"
+        ]
+      },
+      "explorer_api": {
+        "routes": [
+          "GET /v1/status",
+          "GET /v1/ready"
+        ],
+        "path": "explorer/api/server.go",
+        "handlers": [
+          "handleStatus",
+          "handleReady"
+        ]
+      },
+      "explorer_service": {
+        "path": "explorer/service/service.go",
+        "operations": [
+          "NetworkStatus"
+        ]
+      },
+      "indexer_client": {
+        "path": "explorer/indexerclient/client.go",
+        "operations": [
+          "Health"
+        ],
+        "routes": [
+          "/v1/health"
+        ]
+      },
+      "indexer_api": {
+        "path": "indexer/api/server.go",
+        "routes": [
+          "GET /v1/health"
+        ],
+        "additional_path": "indexer/api/backend.go"
+      },
+      "indexer_projection": {
+        "paths": [
+          "indexer/api/backend.go",
+          "indexer/store/file.go",
+          "indexer/model/model.go"
+        ],
+        "models": [
+          "Health",
+          "ChainCheckpoint"
+        ]
+      },
+      "canonical_authority": "target network identity and canonical upstream chain/finality state; health is descriptive projection only",
+      "authority_evidence": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "known_gaps": [
+        "Live target-network binding/freshness remains unverified until production-equivalent deployment."
+      ],
+      "later_owners": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-6",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-2",
+        "AC-6",
+        "AC-7"
+      ]
+    }
+  ],
+  "summary": {
+    "mandatory_required_views": 10,
+    "complete_source_paths": 10,
+    "implemented_source": 6,
+    "partial_source": 4,
+    "orphaned_paths": 0
+  },
+  "scope_resolution": {
+    "id": "EXP-SCOPE-CONFLICT-001",
+    "decision": "EXP-SCOPE-RESOLUTION-B",
+    "milestone": "EXP-0.3.8",
+    "outcome": "No governance implementation path is required because governance is not a mandatory dedicated Explorer Genesis view.",
+    "evidence": "docs/audit/EXP-0.3.8-governance-scope-decision.json"
+  }
+}

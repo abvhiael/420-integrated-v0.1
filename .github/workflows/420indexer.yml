@@ -20,6 +20,22 @@ on:
       - 'docs/audit/EXP-0.2.5-genesis-gap-reconciliation.md'
       - 'docs/audit/EXP-0.2.6-genesis-acceptance-criteria.json'
       - 'docs/audit/EXP-0.2.6-genesis-acceptance-reconciliation.md'
+      - 'docs/audit/EXP-0.3.1-authoritative-genesis-requirements.json'
+      - 'docs/audit/EXP-0.3.1-authoritative-genesis-reconciliation.md'
+      - 'docs/audit/EXP-0.3.2-mandatory-capability-paths.json'
+      - 'docs/audit/EXP-0.3.2-mandatory-capability-path-reconciliation.md'
+      - 'docs/audit/EXP-0.3.3-mandatory-acceptance-tests.json'
+      - 'docs/audit/EXP-0.3.3-mandatory-acceptance-test-reconciliation.md'
+      - 'docs/audit/EXP-0.3.4-qualification-status-freeze.json'
+      - 'docs/audit/EXP-0.3.4-qualification-status-reconciliation.md'
+      - 'docs/audit/EXP-0.3.5-nonblocking-scope-exclusions.json'
+      - 'docs/audit/EXP-0.3.5-nonblocking-scope-reconciliation.md'
+      - 'docs/audit/EXP-0.3.6-scope-conflict-resolution-register.json'
+      - 'docs/audit/EXP-0.3.6-scope-conflict-reconciliation.md'
+      - 'docs/audit/EXP-0.3.7-bidirectional-traceability.json'
+      - 'docs/audit/EXP-0.3.7-bidirectional-traceability-reconciliation.md'
+      - 'docs/audit/EXP-0.3.8-governance-scope-decision.json'
+      - 'docs/audit/EXP-0.3.8-governance-scope-reconciliation.md'
       - 'config/420indexer-v1.json'
       - 'config/system-addresses.json'
       - 'config/genesis-applications.json'
@@ -39,6 +55,14 @@ on:
       - 'scripts/verify-exp-0-2-4-dependency-readiness.py'
       - 'scripts/verify-exp-0-2-5-genesis-gaps.py'
       - 'scripts/verify-exp-0-2-6-genesis-acceptance.py'
+      - 'scripts/verify-exp-0-3-1-authoritative-requirements.py'
+      - 'scripts/verify-exp-0-3-2-capability-paths.py'
+      - 'scripts/verify-exp-0-3-3-acceptance-tests.py'
+      - 'scripts/verify-exp-0-3-4-status-freeze.py'
+      - 'scripts/verify-exp-0-3-5-nonblocking-exclusions.py'
+      - 'scripts/verify-exp-0-3-6-scope-conflicts.py'
+      - 'scripts/verify-exp-0-3-7-traceability.py'
+      - 'scripts/verify-exp-0-3-8-scope-resolution.py'
       - '.github/workflows/420indexer.yml'
   push:
     branches:
@@ -61,6 +85,22 @@ on:
       - 'docs/audit/EXP-0.2.5-genesis-gap-reconciliation.md'
       - 'docs/audit/EXP-0.2.6-genesis-acceptance-criteria.json'
       - 'docs/audit/EXP-0.2.6-genesis-acceptance-reconciliation.md'
+      - 'docs/audit/EXP-0.3.1-authoritative-genesis-requirements.json'
+      - 'docs/audit/EXP-0.3.1-authoritative-genesis-reconciliation.md'
+      - 'docs/audit/EXP-0.3.2-mandatory-capability-paths.json'
+      - 'docs/audit/EXP-0.3.2-mandatory-capability-path-reconciliation.md'
+      - 'docs/audit/EXP-0.3.3-mandatory-acceptance-tests.json'
+      - 'docs/audit/EXP-0.3.3-mandatory-acceptance-test-reconciliation.md'
+      - 'docs/audit/EXP-0.3.4-qualification-status-freeze.json'
+      - 'docs/audit/EXP-0.3.4-qualification-status-reconciliation.md'
+      - 'docs/audit/EXP-0.3.5-nonblocking-scope-exclusions.json'
+      - 'docs/audit/EXP-0.3.5-nonblocking-scope-reconciliation.md'
+      - 'docs/audit/EXP-0.3.6-scope-conflict-resolution-register.json'
+      - 'docs/audit/EXP-0.3.6-scope-conflict-reconciliation.md'
+      - 'docs/audit/EXP-0.3.7-bidirectional-traceability.json'
+      - 'docs/audit/EXP-0.3.7-bidirectional-traceability-reconciliation.md'
+      - 'docs/audit/EXP-0.3.8-governance-scope-decision.json'
+      - 'docs/audit/EXP-0.3.8-governance-scope-reconciliation.md'
       - 'config/420indexer-v1.json'
       - 'config/system-addresses.json'
       - 'config/genesis-applications.json'
@@ -80,6 +120,14 @@ on:
       - 'scripts/verify-exp-0-2-4-dependency-readiness.py'
       - 'scripts/verify-exp-0-2-5-genesis-gaps.py'
       - 'scripts/verify-exp-0-2-6-genesis-acceptance.py'
+      - 'scripts/verify-exp-0-3-1-authoritative-requirements.py'
+      - 'scripts/verify-exp-0-3-2-capability-paths.py'
+      - 'scripts/verify-exp-0-3-3-acceptance-tests.py'
+      - 'scripts/verify-exp-0-3-4-status-freeze.py'
+      - 'scripts/verify-exp-0-3-5-nonblocking-exclusions.py'
+      - 'scripts/verify-exp-0-3-6-scope-conflicts.py'
+      - 'scripts/verify-exp-0-3-7-traceability.py'
+      - 'scripts/verify-exp-0-3-8-scope-resolution.py'
       - '.github/workflows/420indexer.yml'
 
 jobs:
@@ -146,6 +194,22 @@ jobs:
         run: python scripts/verify-exp-0-2-5-genesis-gaps.py
       - name: EXP-0.2.6 Genesis acceptance criteria ownership map
         run: python scripts/verify-exp-0-2-6-genesis-acceptance.py
+      - name: EXP-0.3.1 authoritative Genesis requirement inventory
+        run: python scripts/verify-exp-0-3-1-authoritative-requirements.py
+      - name: EXP-0.3.2 mandatory capability implementation paths
+        run: python scripts/verify-exp-0-3-2-capability-paths.py
+      - name: EXP-0.3.3 mandatory capability acceptance-test mapping
+        run: python scripts/verify-exp-0-3-3-acceptance-tests.py
+      - name: EXP-0.3.4 qualification-status freeze
+        run: python scripts/verify-exp-0-3-4-status-freeze.py
+      - name: EXP-0.3.5 optional and post-Genesis exclusions
+        run: python scripts/verify-exp-0-3-5-nonblocking-exclusions.py
+      - name: EXP-0.3.6 scope-conflict resolution register
+        run: python scripts/verify-exp-0-3-6-scope-conflicts.py
+      - name: EXP-0.3.7 bidirectional Genesis traceability
+        run: python scripts/verify-exp-0-3-7-traceability.py
+      - name: EXP-0.3.8 governance scope resolution
+        run: python scripts/verify-exp-0-3-8-scope-resolution.py
       - name: EXP-0.1.1 pinned-tree exhaustive inventory
         if: always()
         run: python scripts/exp-0-1-1-inventory.py --commit 95a83a961286701b6e8c064de1deccad10f41fd7
@@ -204,4 +268,60 @@ jobs:
         with:
           name: exp-0-2-6-genesis-acceptance
           path: exp-0-2-6-evidence/
+          if-no-files-found: error
+      - name: Upload EXP-0.3.1 authoritative requirement evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp-0-3-1-authoritative-genesis-requirements
+          path: exp-0-3-1-evidence/
+          if-no-files-found: error
+      - name: Upload EXP-0.3.2 capability path evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp-0-3-2-mandatory-capability-paths
+          path: exp-0-3-2-evidence/
+          if-no-files-found: error
+      - name: Upload EXP-0.3.3 acceptance-test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp-0-3-3-mandatory-acceptance-tests
+          path: exp-0-3-3-evidence/
+          if-no-files-found: error
+      - name: Upload EXP-0.3.4 qualification-status evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp-0-3-4-qualification-status-freeze
+          path: exp-0-3-4-evidence/
+          if-no-files-found: error
+      - name: Upload EXP-0.3.5 exclusion evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp-0-3-5-nonblocking-scope-exclusions
+          path: exp-0-3-5-evidence/
+          if-no-files-found: error
+      - name: Upload EXP-0.3.6 scope-conflict evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp-0-3-6-scope-conflict-resolution-register
+          path: exp-0-3-6-evidence/
+          if-no-files-found: error
+      - name: Upload EXP-0.3.7 traceability evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp-0-3-7-bidirectional-traceability
+          path: exp-0-3-7-evidence/
+          if-no-files-found: error
+      - name: Upload EXP-0.3.8 scope-resolution evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp-0-3-8-governance-scope-resolution
+          path: exp-0-3-8-evidence/
           if-no-files-found: error

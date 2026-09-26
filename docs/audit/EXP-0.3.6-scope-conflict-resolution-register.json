@@ -1,0 +1,142 @@
+{
+  "schema": "420explorer-exp-0.3.6-scope-conflict-resolution-register-v1",
+  "milestone": "EXP-0.3.6",
+  "title": "420Explorer scope-conflict resolution register",
+  "baseline": {
+    "main_commit": "c7cb5f4dac07eb9416cac4a11eeee31b6efb10f0",
+    "capability_matrix": "docs/audit/EXP-0.2.1-genesis-capability-matrix.json",
+    "gap_register": "docs/audit/EXP-0.2.5-genesis-gap-register.json",
+    "acceptance_map": "docs/audit/EXP-0.2.6-genesis-acceptance-criteria.json",
+    "requirement_inventory": "docs/audit/EXP-0.3.1-authoritative-genesis-requirements.json",
+    "status_freeze": "docs/audit/EXP-0.3.4-qualification-status-freeze.json",
+    "exclusion_matrix": "docs/audit/EXP-0.3.5-nonblocking-scope-exclusions.json"
+  },
+  "conflicts": [
+    {
+      "id": "EXP-SCOPE-CONFLICT-001",
+      "subject": "governance view",
+      "capability_id": "EXP-CAP-019",
+      "finding_id": "EXP-FIND-001",
+      "requirement_id": "EXP-REQ-SCOPE-001",
+      "acceptance_criteria": [
+        "AC-5",
+        "AC-10"
+      ],
+      "status": "resolved",
+      "genesis_blocking": false,
+      "source_a": {
+        "path": "config/genesis-applications.json",
+        "selector": "apps[name=\"420 Explorer\"].purpose",
+        "value": "Blocks, transactions, contracts, validators, assets, finality",
+        "interpretation": "The frozen Explorer application-purpose wording has been reconciled and no longer names governance."
+      },
+      "source_b": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "requiredViews",
+        "value": [
+          "block",
+          "transaction",
+          "receipt/logs",
+          "address",
+          "contract",
+          "token/asset activity",
+          "validator",
+          "epoch/rotation",
+          "protocol service/version",
+          "network status"
+        ],
+        "interpretation": "Dedicated Explorer Genesis profile omits a governance requiredView."
+      },
+      "implementation_observation": {
+        "status": "not_observed",
+        "evidence": [
+          "docs/audit/EXP-0.2.1-genesis-capability-matrix.json",
+          "docs/audit/EXP-0.3.2-mandatory-capability-paths.json"
+        ],
+        "statement": "No dedicated Explorer governance API/view was established in the qualified required-view path set."
+      },
+      "decision_authority": {
+        "owner": "authoritative 420 Integrated Genesis/product scope decision",
+        "repository_owner_action_required": false,
+        "decision_record_required": false,
+        "rationale": "The conflict is between two authoritative scope descriptions; source inspection cannot legitimately choose one by inference."
+      },
+      "admissible_resolutions": [
+        {
+          "id": "EXP-SCOPE-RESOLUTION-A",
+          "label": "Governance view is mandatory for Explorer Genesis",
+          "resulting_classification": "mandatory_genesis",
+          "required_actions": [
+            "Add governance to contracts/config/420explorer-genesis.json requiredViews.",
+            "Reclassify EXP-CAP-019 as mandatory_genesis and define concrete Explorer/Indexer implementation path.",
+            "Add governance workflow/API/UI/data-source requirements and acceptance tests.",
+            "Update EXP-FIND-001 from unresolved scope conflict to the resulting implementation/runtime findings until satisfied.",
+            "Update EXP-REQ-SCOPE-001 into a mandatory required-view requirement or replace it with an equivalent stable mandatory requirement.",
+            "Update EXP-0.3.4 frozen status and remove governance from scope_decision_required.",
+            "Update AC-5 and AC-10 evidence requirements for the new mandatory view.",
+            "Qualify all new source/runtime/deployment work before final EXP-0 closeout."
+          ],
+          "prohibited_shortcut": "Do not mark governance mandatory without adding a real implementation/test/qualification path."
+        },
+        {
+          "id": "EXP-SCOPE-RESOLUTION-B",
+          "label": "Governance wording is descriptive ecosystem scope, not a mandatory Explorer Genesis view",
+          "resulting_classification": "not_required_as_dedicated_view",
+          "required_actions": [
+            "Amend config/genesis-applications.json purpose wording or add an explicit scope note so it no longer implies a required dedicated governance view.",
+            "Retire EXP-CAP-019 scope_decision_required classification without adding governance to requiredViews.",
+            "Close EXP-FIND-001 with the recorded authoritative decision.",
+            "Retire or supersede EXP-REQ-SCOPE-001 and update EXP-0.3.4 frozen status.",
+            "Remove EXP-FIND-001 from AC-5 and AC-10 blocking_findings only after the authoritative sources agree.",
+            "Re-run all retained EXP-0 qualification gates."
+          ],
+          "prohibited_shortcut": "Do not simply delete the blocker while config/genesis-applications.json still names governance ambiguously."
+        }
+      ],
+      "atomic_reconciliation_manifest": [
+        "config/genesis-applications.json",
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.1-genesis-capability-matrix.json",
+        "docs/audit/EXP-0.2.2-user-workflow-matrix.json",
+        "docs/audit/EXP-0.2.5-genesis-gap-register.json",
+        "docs/audit/EXP-0.2.6-genesis-acceptance-criteria.json",
+        "docs/audit/EXP-0.3.1-authoritative-genesis-requirements.json",
+        "docs/audit/EXP-0.3.2-mandatory-capability-paths.json",
+        "docs/audit/EXP-0.3.3-mandatory-acceptance-tests.json",
+        "docs/audit/EXP-0.3.4-qualification-status-freeze.json",
+        "docs/audit/EXP-0.3.5-nonblocking-scope-exclusions.json",
+        "docs/audit/EXP-0.3.6-scope-conflict-resolution-register.json"
+      ],
+      "current_closeout_rule": "The governance scope conflict is resolved by EXP-0.3.8. Final EXP-0 closeout remains subject to all other Genesis-blocking findings and acceptance criteria.",
+      "next_resolution_owner": null,
+      "selected_resolution": "EXP-SCOPE-RESOLUTION-B",
+      "resolution_record": "docs/audit/EXP-0.3.8-governance-scope-decision.json",
+      "resolution_milestone": "EXP-0.3.8",
+      "resolution_statement": "Governance is descriptive ecosystem subject matter and is not a mandatory dedicated 420Explorer Genesis view.",
+      "resolved_effects": [
+        "config/genesis-applications.json no longer names governance in the Explorer purpose.",
+        "contracts/config/420explorer-genesis.json remains authoritative for the mandatory requiredViews set and continues to omit governance.",
+        "EXP-CAP-019 and EXP-REQ-SCOPE-001 are retired from active scope.",
+        "EXP-FIND-001 is retained as resolved historical evidence and is non-blocking.",
+        "AC-5 and AC-10 no longer list EXP-FIND-001 as a blocker."
+      ]
+    }
+  ],
+  "rules": [
+    "Every authoritative scope conflict must appear exactly once in this register.",
+    "A conflict may be marked resolved only by an explicit authoritative decision record and complete atomic reconciliation.",
+    "Resolution must reconcile every file in the conflict's atomic_reconciliation_manifest.",
+    "No scope_decision_required item may be silently reclassified as optional, post-Genesis, or mandatory.",
+    "A resolved conflict must no longer have contradictory authoritative source values.",
+    "Only unresolved conflicts with genesis_blocking=true block final EXP-0/Genesis scope closeout.",
+    "EXP-0.3.6 qualification means the conflict-management mechanism is complete and fail-closed; it does not mean the product-scope conflict itself has been decided."
+  ],
+  "summary": {
+    "conflicts": 1,
+    "unresolved": 0,
+    "resolved": 1,
+    "genesis_blocking": 0,
+    "admissible_resolution_paths": 2,
+    "final_exp0_closeout_blocked": false
+  }
+}

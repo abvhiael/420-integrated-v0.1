@@ -505,8 +505,7 @@
       "expected_result": "User can correlate a generic transaction with a Registry-published service implementation without Explorer claiming application-specific execution semantics.",
       "limitations": [
         "No application-specific transaction decoder is established by the current Explorer view.",
-        "Live Registry publication and ecosystem end-to-end witnesses remain unqualified.",
-        "Governance remains a separate unresolved scope decision from EXP-0.2.1."
+        "Live Registry publication and ecosystem end-to-end witnesses remain unqualified."
       ],
       "capability_ids": [
         "EXP-CAP-002",
@@ -818,5 +817,11 @@
         "production-equivalent troubleshooting exercise"
       ]
     }
-  ]
+  ],
+  "scope_resolution": {
+    "id": "EXP-SCOPE-CONFLICT-001",
+    "decision": "EXP-SCOPE-RESOLUTION-B",
+    "milestone": "EXP-0.3.8",
+    "outcome": "No dedicated governance workflow is required for Explorer Genesis."
+  }
 }

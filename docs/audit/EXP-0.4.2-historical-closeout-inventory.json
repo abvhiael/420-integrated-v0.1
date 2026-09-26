@@ -2,7 +2,7 @@
   "schema": "420explorer-exp-0.4.2-historical-closeout-inventory-v1",
   "milestone": "EXP-0.4.2",
   "title": "420Explorer historical qualification and closeout inventory",
-  "status": "implementation_complete_exact_head_qualification_required",
+  "status": "qualified_repository_scope",
   "baseline": {
     "exp_0_4_1_head": "6307f04f4efaf9dff4f911897c04e7032984eefa",
     "pr": 376
@@ -419,5 +419,35 @@
     "broad_genesis_qualification_claims_accepted": 0,
     "current_executed_live_explorer_closeouts": 0,
     "remaining_genesis_blockers": 10
+  },
+  "qualification": {
+    "qualified_head": "7e97fd4fb472f42e91dde45e1d6a808dddf9bc56",
+    "runs": [
+      {
+        "workflow": "420Indexer",
+        "run_number": 609,
+        "run_id": 36271531639,
+        "conclusion": "success"
+      },
+      {
+        "workflow": "420Docs Qualification",
+        "run_number": 2927,
+        "run_id": 36271531648,
+        "conclusion": "success"
+      },
+      {
+        "workflow": "420 Integrated Qualification",
+        "run_number": 5544,
+        "run_id": 36271531693,
+        "conclusion": "success"
+      }
+    ],
+    "evidence_artifact": {
+      "id": 10915817634,
+      "name": "exp-0-4-2-historical-closeout-inventory",
+      "digest": "sha256:32c88290fc1a95f4bac35225ca94d73b98999c4d91b04b8e93be74e048c676d5"
+    },
+    "scope": "historical qualification/closeout interpretation and provenance classification only",
+    "note": "Recording this evidence changes the branch head. The resulting cumulative head must rerun before later-step qualification."
   }
 }

@@ -161,3 +161,21 @@ Exact-head evidence:
 Full qualification record: [`CMP-1.2.4-PROVIDER-PAYOUT-QUALIFICATION.md`](CMP-1.2.4-PROVIDER-PAYOUT-QUALIFICATION.md).
 
 This closeout is repository-level only. Payer residual refunds plus cancellation/expiry/failure refund economics remain CMP-1.2.5; dispute/challenge/slash handling remains CMP-1.2.6; live deployment/testnet evidence remains CMP-1.2.9.
+
+
+## CMP-1.2.5 — cancellation, expiry, failure and payer refunds
+
+**Status: COMPLETE within repository-level scope.** Exact qualified implementation/test head: `9a9be3a55d824231cebf3f6d87ec08261c19f4a4`.
+
+The repository now proves requester-only pre-execution cancellation, permissionless deadline expiry before execution, negative-verification failure with zero provider earning, full original-payer refund for unsuccessful terminal jobs, and separate under-budget residual refund after successful settlement without reopening `SETTLED`.
+
+Exact-head evidence:
+
+- Solidity Contracts run `36264877005` — **success**, all 16 PR shards green.
+- `ComputeVerifiedEntitlement420Test` — shard 0 job `108467527776`: **22 passed / 0 failed / 0 skipped**.
+- 420 Integrated Qualification run `36264876973` — **success**.
+- 420Docs Qualification run `36264877087` — **success**.
+
+Full qualification record: [`CMP-1.2.5-PAYER-REFUND-QUALIFICATION.md`](CMP-1.2.5-PAYER-REFUND-QUALIFICATION.md).
+
+Challenge/dispute holds and contested-liability resolution remain CMP-1.2.6; hostile solvency/reentrancy/privilege hardening remains CMP-1.2.7; live deployment/testnet evidence remains CMP-1.2.9.

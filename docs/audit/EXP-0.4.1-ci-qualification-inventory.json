@@ -2,7 +2,7 @@
   "schema": "420explorer-exp-0.4.1-ci-qualification-inventory-v1",
   "milestone": "EXP-0.4.1",
   "title": "420Explorer CI and qualification mechanism inventory",
-  "status": "implementation_complete_exact_head_qualification_required",
+  "status": "qualified_repository_scope",
   "baseline": {
     "branch_from": "main",
     "main_merge_sha": "304cb61286c94f72d0b05e32e5f713b9d68bc450"
@@ -525,5 +525,34 @@
     "explorer_specific_live_workflows": 1,
     "primary_source_gate": "EXP-CI-001",
     "live_gate": "EXP-CI-002"
+  },
+  "qualification": {
+    "qualified_head": "388a5ba873efc9381d11975f8963b3532f287b58",
+    "runs": [
+      {
+        "workflow": "420Indexer",
+        "run_number": 604,
+        "run_id": 36268479103,
+        "conclusion": "success"
+      },
+      {
+        "workflow": "420Docs Qualification",
+        "run_number": 2909,
+        "run_id": 36268479095,
+        "conclusion": "success"
+      },
+      {
+        "workflow": "420 Integrated Qualification",
+        "run_number": 5526,
+        "run_id": 36268479127,
+        "conclusion": "success"
+      }
+    ],
+    "evidence_artifact": {
+      "id": 10914652783,
+      "name": "exp-0-4-1-ci-qualification-inventory",
+      "digest": "sha256:3e9cddc0fd2111f75c2456c4491faaeac032f3cf761b5d009d82529922846750"
+    },
+    "note": "This record captures the first successful exact-head qualification. Because recording this evidence changes the repository head, the final closeout head must rerun and pass the same required gates."
   }
 }

@@ -2,7 +2,7 @@
   "schema": "420explorer-exp-0.4.4-requirement-ci-coverage-v1",
   "milestone": "EXP-0.4.4",
   "title": "420Explorer mandatory requirement-to-CI and future qualification coverage",
-  "status": "implementation_complete_exact_head_qualification_required",
+  "status": "qualified_repository_scope",
   "baseline": {
     "exp_0_4_3_closeout_head": "1c379c81c12fd49a72009cc09215944d91b5456e",
     "pr": 376
@@ -5699,5 +5699,48 @@
     "Missing runtime/deployment/live/release evidence is preserved through future owner layers rather than silently waived.",
     "Zero mandatory requirements may be orphaned."
   ],
-  "ownership_rule": "Direct later_qualification_owners come from EXP-0.3.1. Procedure owners come from EXP-0.3.7/AC verification paths. Coverage ownership is their union; additional procedure owners are supporting qualification owners and do not rewrite the authoritative requirement owner field."
+  "ownership_rule": "Direct later_qualification_owners come from EXP-0.3.1. Procedure owners come from EXP-0.3.7/AC verification paths. Coverage ownership is their union; additional procedure owners are supporting qualification owners and do not rewrite the authoritative requirement owner field.",
+  "qualification": {
+    "qualified_head": "dc62883dd3984d6b5f31aaceae67cf5a5add67f3",
+    "runs": [
+      {
+        "workflow": "420Indexer",
+        "run_number": 622,
+        "run_id": 36278689801,
+        "job_ids": [
+          108506258456
+        ],
+        "conclusion": "success"
+      },
+      {
+        "workflow": "420Docs Qualification",
+        "run_number": 2949,
+        "run_id": 36278689884,
+        "job_ids": [
+          108506293531
+        ],
+        "conclusion": "success"
+      },
+      {
+        "workflow": "420 Integrated Qualification",
+        "run_number": 5566,
+        "run_id": 36278689806,
+        "job_ids": [
+          108506283848,
+          108506283926,
+          108506283941,
+          108506284032
+        ],
+        "conclusion": "success"
+      }
+    ],
+    "evidence_artifact": {
+      "id": 10918150912,
+      "name": "exp-0-4-4-requirement-ci-coverage",
+      "digest": "sha256:bdd4325235ff48b3b4dc9f3db54be4abaccb392a15b582ff75958774b91be98f"
+    },
+    "scope": "mandatory requirement-to-current-CI and future qualification coverage accounting only",
+    "first_attempt_note": "The first implementation head exposed eight cross-cutting procedure owners present in EXP-0.3.7 acceptance paths but absent from direct requirement later_qualification_owners. The coverage model was corrected to preserve direct owners, procedure owners and their union without rewriting the authoritative requirement inventory.",
+    "note": "Recording this evidence changes the branch head; the resulting exact head must rerun all retained gates before EXP-0.4.4 is marked COMPLETE."
+  }
 }

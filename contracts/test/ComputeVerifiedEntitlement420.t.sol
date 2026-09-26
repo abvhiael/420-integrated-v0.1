@@ -1077,6 +1077,201 @@ contract ComputeVerifiedEntitlement420Test {
             "first payer dispute consumed or held second payer backing");
     }
 
+
+    function _assertNativeSolvent() private view {
+        VaultAccounting420.AssetAccounting memory a =
+            accounting.getAccounting(VAULT_ID, address(0));
+        require(a.recordedBalance == address(vault).balance,
+            "recorded/native balance mismatch");
+        require(a.reserved + a.claimable <= a.recordedBalance,
+            "encumbered liabilities exceed recorded balance");
+    }
+
+    function testHostileGrantsCannotExpandSealedCMPVaultAuthority() public {
+        bytes32 id = _verifiedJob(40, OWNER_A_KEY, PAYER_A_KEY, 4 ether);
+        ComputeVerifiedEntitlement420.ProviderClaim memory pc = _makeClaimable(id);
+        bytes32 scope = vaultPolicy.scopeForVault(VAULT_ID);
+
+        _grantVault(OUTSIDER, VaultIds420.ACTION_CREATE_OBLIGATION);
+        _grantVault(OUTSIDER, VaultIds420.ACTION_RELEASE_OBLIGATION);
+        _grantVault(OUTSIDER, VaultIds420.ACTION_CANCEL_OBLIGATION);
+        _grantVault(OUTSIDER, VaultIds420.ACTION_WITHDRAW);
+        _grantVault(OUTSIDER, VaultIds420.ACTION_CLAIM);
+        caps.createGrant(keccak256(abi.encode("rogue-route", grantNonce++)), OUTSIDER,
+            VaultIds420.COMPONENT_VAULT, VaultIds420.ACTION_WITHDRAW,
+            vaultPolicy.scopeForRoute(VAULT_ID, address(0), OUTSIDER, VaultIds420.ACTION_WITHDRAW),
+            0, 0, 0, 0, 0);
+
+        require(caps.isAuthorized(OUTSIDER, VaultIds420.COMPONENT_VAULT,
+            VaultIds420.ACTION_RELEASE_OBLIGATION, scope, 0),
+            "hostile release grant not installed");
+
+        vm.deal(OUTSIDER, 1 ether);
+        vm.prank(OUTSIDER);
+        vault.depositNative{value: 1 ether}();
+        _assertNativeSolvent();
+
+        vm.prank(OUTSIDER);
+        (bool createOk,) = address(vault).call(abi.encodeCall(vault.createObligation, (
+            keccak256("rogue-create"), keccak256("rogue-obligation"), address(0),
+            OUTSIDER, 1 ether, keccak256("rogue"), id
+        )));
+        vm.prank(OUTSIDER);
+        (bool releaseOk,) = address(vault).call(
+            abi.encodeCall(vault.releaseObligation,
+                (keccak256("rogue-release"), pc.providerObligationId)));
+        vm.prank(OUTSIDER);
+        (bool cancelOk,) = address(vault).call(
+            abi.encodeCall(vault.cancelObligation,
+                (keccak256("rogue-cancel"), pc.providerObligationId)));
+        vm.prank(OUTSIDER);
+        (bool withdrawOk,) = address(vault).call(
+            abi.encodeCall(vault.withdraw,
+                (keccak256("rogue-withdraw"), address(0), OUTSIDER, 1 ether)));
+
+        require(!createOk && !releaseOk && !cancelOk && !withdrawOk,
+            "sealed CMP policy admitted hostile grant expansion");
+        require(accounting.getObligation(pc.providerObligationId).state == 1
+            && accounting.freeBalance(VAULT_ID, address(0)) == 1 ether,
+            "hostile grant mutated payer liability or donor surplus");
+        _assertNativeSolvent();
+    }
+
+    function testDonorSurplusCannotBackOrIncreaseJobSpecificLiability() public {
+        vm.deal(OUTSIDER, 5 ether);
+        vm.prank(OUTSIDER);
+        vault.depositNative{value: 5 ether}();
+        require(accounting.freeBalance(VAULT_ID, address(0)) == 5 ether,
+            "donor surplus not recorded as free");
+
+        bytes32 id = _verifiedJob(41, OWNER_A_KEY, PAYER_A_KEY, 4 ether);
+        bytes32 ref = _finalize(id, 3 ether);
+        ComputeVerifiedEntitlement420.Entitlement memory e = entitlements.entitlement(ref);
+        require(e.fundedAmount == 4 ether && e.earnedAmount == 3 ether
+            && funding.credit(id).deposited == 4 ether,
+            "donor surplus enlarged authenticated payer credit");
+        _makeClaimable(id);
+        require(accounting.freeBalance(VAULT_ID, address(0)) == 5 ether,
+            "liability split consumed donor surplus");
+        _assertNativeSolvent();
+    }
+
+    function testFrozenVaultBlocksPayoutWithoutMutatingHeldLiabilityThenRecovers() public {
+        bytes32 id = _verifiedJob(42, OWNER_A_KEY, PAYER_A_KEY, 4 ether);
+        ComputeVerifiedEntitlement420.ProviderClaim memory pc = _makeClaimable(id);
+        _matureProviderClaim(id);
+
+        _grantVault(address(this), VaultIds420.ACTION_FREEZE);
+        _grantVault(address(this), VaultIds420.ACTION_UNFREEZE);
+        vaultRegistry.setState(VAULT_ID, VaultRegistry420.VaultState.FROZEN);
+
+        uint256 beforeVault = address(vault).balance;
+        vm.prank(BENEFICIARY);
+        (bool frozenOk,) = address(entitlements).call(
+            abi.encodeCall(entitlements.claimProvider, (id, jobs.job(id).revision)));
+        require(!frozenOk && !entitlements.providerClaim(id).paid
+            && accounting.getObligation(pc.providerObligationId).state == 1
+            && jobs.job(id).status == ComputeJobRegistry420.Status.VERIFIED
+            && address(vault).balance == beforeVault,
+            "frozen payout mutated held liability");
+
+        vaultRegistry.setState(VAULT_ID, VaultRegistry420.VaultState.ACTIVE);
+        vm.prank(BENEFICIARY);
+        entitlements.claimProvider(id, jobs.job(id).revision);
+        require(jobs.job(id).status == ComputeJobRegistry420.Status.SETTLED
+            && accounting.getObligation(pc.providerObligationId).state == 3,
+            "unfreeze did not restore lawful payout");
+        _assertNativeSolvent();
+    }
+
+    function testWindingDownAllowsExistingSettlementButCannotCloseWithLiability() public {
+        bytes32 id = _verifiedJob(43, OWNER_A_KEY, PAYER_A_KEY, 4 ether);
+        ComputeVerifiedEntitlement420.ProviderClaim memory pc = _makeClaimable(id);
+        _matureProviderClaim(id);
+
+        _grantVault(address(this), VaultIds420.ACTION_BEGIN_WIND_DOWN);
+        _grantVault(address(this), VaultIds420.ACTION_CLOSE);
+        vaultRegistry.setState(VAULT_ID, VaultRegistry420.VaultState.WINDING_DOWN);
+
+        (bool closeEarly,) = address(vaultRegistry).call(
+            abi.encodeCall(vaultRegistry.setState,
+                (VAULT_ID, VaultRegistry420.VaultState.CLOSED)));
+        require(!closeEarly && accounting.getObligation(pc.providerObligationId).state == 1,
+            "vault closed with pending CMP liability");
+
+        vm.prank(BENEFICIARY);
+        entitlements.claimProvider(id, jobs.job(id).revision);
+        require(jobs.job(id).status == ComputeJobRegistry420.Status.SETTLED
+            && accounting.getObligation(pc.providerObligationId).state == 3
+            && vaultRegistry.vaultState(VAULT_ID) == VaultRegistry420.VaultState.WINDING_DOWN,
+            "winding-down settlement failed or changed lifecycle");
+
+        (bool closeResidual,) = address(vaultRegistry).call(
+            abi.encodeCall(vaultRegistry.setState,
+                (VAULT_ID, VaultRegistry420.VaultState.CLOSED)));
+        require(!closeResidual,
+            "vault closed while payer residual remained reserved");
+        _assertNativeSolvent();
+    }
+
+    function testReentrantBeneficiaryCannotDoubleClaimOrReenterSettlement() public {
+        ReentrantCMPBeneficiary420 attacker = new ReentrantCMPBeneficiary420();
+        vm.prank(OPERATOR);
+        providers.update(providerId, keccak256("provider-reentrant"),
+            keccak256("security-reentrant"), address(attacker));
+        vm.prank(OPERATOR);
+        offerId = offers.publish(resourceId, PRICING_POLICY, 1, 3 ether,
+            uint64(block.timestamp + 12 hours));
+
+        bytes32 id = _verifiedJob(44, OWNER_A_KEY, PAYER_A_KEY, 4 ether);
+        ComputeVerifiedEntitlement420.ProviderClaim memory pc = _makeClaimable(id);
+        require(pc.beneficiary == address(attacker),
+            "accepted beneficiary did not freeze callback contract");
+        _matureProviderClaim(id);
+
+        attacker.configure(vault, entitlements, id, pc.providerObligationId,
+            jobs.job(id).revision);
+        uint256 before = address(attacker).balance;
+        attacker.claimProvider();
+
+        require(attacker.attempted()
+            && !attacker.reentrantVaultClaimSucceeded()
+            && !attacker.reentrantSettlementSucceeded(),
+            "reentrant callback escaped Vault or settlement lock");
+        require(address(attacker).balance == before + 3 ether
+            && entitlements.totalProviderPaid() == 3 ether
+            && accounting.getObligation(pc.providerObligationId).state == 3
+            && jobs.job(id).status == ComputeJobRegistry420.Status.SETTLED,
+            "outer payout was not exactly once");
+        _assertNativeSolvent();
+    }
+
+    function testTwoPayerMixedSettlementAndRefundRemainExactlySolvent() public {
+        bytes32 paidJob = _verifiedJob(45, OWNER_A_KEY, PAYER_A_KEY, 4 ether);
+        bytes32 refundJob = _acceptedJob(46, OWNER_B_KEY, PAYER_B_KEY, 4 ether);
+        _makeClaimable(paidJob);
+        _matureProviderClaim(paidJob);
+
+        vm.prank(ownerB);
+        jobs.recordCancellation(refundJob, 4);
+        entitlements.createTerminalRefundClaim(refundJob);
+
+        vm.prank(BENEFICIARY);
+        entitlements.claimProvider(paidJob, jobs.job(paidJob).revision);
+        vm.prank(payerB);
+        entitlements.claimPayerRefund(refundJob, jobs.job(refundJob).revision);
+
+        VaultAccounting420.AssetAccounting memory a =
+            accounting.getAccounting(VAULT_ID, address(0));
+        require(jobs.job(paidJob).status == ComputeJobRegistry420.Status.SETTLED
+            && jobs.job(refundJob).status == ComputeJobRegistry420.Status.REFUNDED
+            && address(vault).balance == 1 ether
+            && a.recordedBalance == 1 ether && a.reserved == 1 ether
+            && a.claimable == 0 && accounting.freeBalance(VAULT_ID, address(0)) == 0,
+            "mixed payer terminal paths violated exact solvency");
+        _assertNativeSolvent();
+    }
+
     function testAcceptedBeneficiaryCannotBeRedirectedAfterVerification() public {
         bytes32 id = _verifiedJob(10, OWNER_A_KEY, PAYER_A_KEY, 4 ether);
         vm.prank(OPERATOR);

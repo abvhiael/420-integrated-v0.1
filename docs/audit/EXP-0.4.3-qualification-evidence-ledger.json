@@ -2,7 +2,7 @@
   "schema": "420explorer-exp-0.4.3-qualification-evidence-ledger-v1",
   "milestone": "EXP-0.4.3",
   "title": "420Explorer exact-head qualification evidence provenance ledger",
-  "status": "qualified_repository_scope_initial_head_recorded",
+  "status": "qualified_repository_scope",
   "baseline": {
     "pr": 376,
     "base_sha": "304cb61286c94f72d0b05e32e5f713b9d68bc450",
@@ -1236,5 +1236,41 @@
     "genesis_qualified_events": 0,
     "current_genesis_blockers": 10,
     "current_acceptance_criteria_unverified": 10
+  },
+  "qualification": {
+    "qualified_head": "1a9ba8d0c81e9e8fe2f35655ddd5235dd6ab2f8f",
+    "runs": [
+      {
+        "workflow": "420Indexer",
+        "run_number": 614,
+        "run_id": 36273730986,
+        "conclusion": "success"
+      },
+      {
+        "workflow": "420Docs Qualification",
+        "run_number": 2934,
+        "run_id": 36273730968,
+        "conclusion": "success"
+      },
+      {
+        "workflow": "420 Integrated Qualification",
+        "run_number": 5551,
+        "run_id": 36273731020,
+        "conclusion": "success",
+        "job_ids": [
+          108492433189,
+          108492433295,
+          108492433316,
+          108492433374
+        ]
+      }
+    ],
+    "evidence_artifact": {
+      "id": 10916835141,
+      "name": "exp-0-4-3-qualification-evidence-ledger",
+      "digest": "sha256:3370b78c68cd05be90fb74d7d5b55d71d5f00ed3e464c3174802b7021a0544e4"
+    },
+    "scope": "exact-head provenance ledger and qualification-level discipline only",
+    "note": "Recording this evidence changes the branch head. The resulting cumulative head must rerun before EXP-0.4.3 is finally closed and before EXP-0.4.4 qualification."
   }
 }

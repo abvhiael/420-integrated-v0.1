@@ -21,11 +21,21 @@ contract ComputeEscrowFunding420 is IComputeJobFundingEvidence420 {
         bytes32 obligationId;
         bool exists;
         bool refunded;
+        bool allocated;
+        uint256 earnedAllocated;
+        bytes32 providerObligationId;
+        bytes32 payerResidualObligationId;
     }
 
     bytes32 private constant SAFETY_DOMAIN = keccak256("420/CMP/ESCROW/PAYER-SAFETY/V1");
     bytes32 private constant REFUND_DOMAIN = keccak256("420/CMP/ESCROW/EXPIRED-UNMATCHED-REFUND/V1");
+    bytes32 private constant TERMINAL_REFUND_DOMAIN = keccak256("420/CMP/ESCROW/TERMINAL-REFUND/V1");
+    bytes32 private constant SPLIT_DOMAIN = keccak256("420/CMP/ESCROW/VERIFIED-SPLIT/V1");
+    bytes32 private constant PROVIDER_DOMAIN = keccak256("420/CMP/ESCROW/PROVIDER-CLAIM/V1");
+    bytes32 private constant RESIDUAL_DOMAIN = keccak256("420/CMP/ESCROW/PAYER-RESIDUAL/V1");
     bytes32 public constant PAYER_SAFETY_TYPE = keccak256("420/CMP/PAYER-SAFETY/V1");
+    bytes32 public constant PROVIDER_CLAIM_TYPE = keccak256("420/CMP/PROVIDER-CLAIM/V1");
+    bytes32 public constant PAYER_RESIDUAL_TYPE = keccak256("420/CMP/PAYER-RESIDUAL/V1");
     ComputeJobSignedRequestAuthority420 public immutable requests;
     AssetVault420 public immutable vault;
     VaultRegistry420 public immutable vaultRegistry;
@@ -33,6 +43,7 @@ contract ComputeEscrowFunding420 is IComputeJobFundingEvidence420 {
     bytes32 public immutable vaultId;
     address public immutable deploymentAuthority;
     ComputeJobRegistry420 public jobs;
+    address public settlementAdapter;
     uint256 public totalFunded;
     mapping(bytes32 => Credit) private _credits;
     bool private entered;
@@ -43,6 +54,12 @@ contract ComputeEscrowFunding420 is IComputeJobFundingEvidence420 {
     event FundingBound(bytes32 indexed jobId, bytes32 indexed requestId, address indexed payer,
         uint256 amount, uint256 maximumSpend, bytes32 vaultId, bytes32 safetyObligationId);
     event UnmatchedRefundClaimable(bytes32 indexed jobId, address indexed payer, bytes32 indexed obligationId, uint256 amount);
+    event SettlementAdapterBound(address indexed settlement);
+    event VerifiedLiabilitySplit(bytes32 indexed jobId, bytes32 indexed entitlementRef,
+        bytes32 indexed providerObligationId, bytes32 payerResidualObligationId,
+        address beneficiary, uint256 earnedAmount, uint256 residualAmount);
+    event TerminalRefundClaimable(bytes32 indexed jobId, bytes32 indexed refundRef,
+        address indexed payer, bytes32 obligationId, uint256 amount);
 
     constructor(address signedRequests, address registeredVault) {
         if (signedRequests.code.length == 0 || registeredVault.code.length == 0) revert InvalidFunding();
@@ -64,6 +81,14 @@ contract ComputeEscrowFunding420 is IComputeJobFundingEvidence420 {
             || address(candidate.requestEvidence()) != address(requests)) revert InvalidFunding();
         _requireVaultActive();
         jobs = candidate;
+    }
+
+    function bindSettlement(address settlement_) external {
+        if (msg.sender != deploymentAuthority || settlementAdapter != address(0)
+            || address(jobs) == address(0) || settlement_.code.length == 0
+            || address(jobs.settlementEvidence()) != settlement_) revert InvalidFunding();
+        settlementAdapter = settlement_;
+        emit SettlementAdapterBound(settlement_);
     }
 
     function fund(bytes32 jobId) external payable returns (bytes32 fundingRef) {
@@ -102,11 +127,136 @@ contract ComputeEscrowFunding420 is IComputeJobFundingEvidence420 {
             || !o.exists || o.state != 1 || o.vaultId != vaultId || o.asset != address(0)
             || o.beneficiary != payer || o.amount != msg.value || o.sourceRef != jobId
             || o.obligationType != PAYER_SAFETY_TYPE) revert InvalidFunding();
-        _credits[jobId] = Credit(j.requestId, j.owner, payer, msg.value, cap, j.deadline, obligationId, true, false);
+        _credits[jobId] = Credit({
+            requestId: j.requestId,
+            owner: j.owner,
+            payer: payer,
+            deposited: msg.value,
+            maximumSpend: cap,
+            deadline: j.deadline,
+            obligationId: obligationId,
+            exists: true,
+            refunded: false,
+            allocated: false,
+            earnedAllocated: 0,
+            providerObligationId: bytes32(0),
+            payerResidualObligationId: bytes32(0)
+        });
         totalFunded += msg.value;
         emit FundingBound(jobId, j.requestId, payer, msg.value, cap, vaultId, obligationId);
         entered = false;
         return jobId;
+    }
+
+    function allocateVerifiedEarning(bytes32 jobId, bytes32 entitlementRef,
+        address beneficiary, uint256 earnedAmount)
+        external returns (bytes32 providerObligationId, bytes32 payerResidualObligationId)
+    {
+        if (entered || msg.sender != settlementAdapter || entitlementRef == bytes32(0)
+            || beneficiary == address(0) || earnedAmount == 0) revert InvalidFunding();
+        entered = true;
+        Credit storage c = _credits[jobId];
+        ComputeJobRegistry420.Job memory j = jobs.job(jobId);
+        if (!c.exists || c.refunded || c.allocated || j.status != ComputeJobRegistry420.Status.VERIFIED
+            || c.obligationId != safetyObligationId(jobId)
+            || earnedAmount > c.deposited || earnedAmount > c.maximumSpend) revert InvalidFunding();
+
+        VaultAccounting420.Obligation memory safety = accounting.getObligation(c.obligationId);
+        VaultAccounting420.AssetAccounting memory beforeA = accounting.getAccounting(vaultId, address(0));
+        uint256 beforeBalance = address(vault).balance;
+        if (!safety.exists || safety.state != 1 || safety.vaultId != vaultId
+            || safety.asset != address(0) || safety.beneficiary != c.payer
+            || safety.amount != c.deposited || safety.sourceRef != jobId
+            || safety.obligationType != PAYER_SAFETY_TYPE) revert InvalidFunding();
+
+        providerObligationId = keccak256(abi.encode(PROVIDER_DOMAIN, block.chainid,
+            address(this), address(vault), vaultId, jobId, entitlementRef, beneficiary, earnedAmount));
+        uint256 residual = c.deposited - earnedAmount;
+        if (residual != 0) {
+            payerResidualObligationId = keccak256(abi.encode(RESIDUAL_DOMAIN, block.chainid,
+                address(this), address(vault), vaultId, jobId, entitlementRef, c.payer, residual));
+        }
+
+        vault.cancelObligation(
+            keccak256(abi.encode(SPLIT_DOMAIN, block.chainid, address(this), vaultId, jobId, entitlementRef, uint8(1))),
+            c.obligationId
+        );
+        vault.createObligation(
+            keccak256(abi.encode(SPLIT_DOMAIN, block.chainid, address(this), vaultId, jobId, entitlementRef, uint8(2))),
+            providerObligationId, address(0), beneficiary, earnedAmount, PROVIDER_CLAIM_TYPE, entitlementRef
+        );
+        if (residual != 0) {
+            vault.createObligation(
+                keccak256(abi.encode(SPLIT_DOMAIN, block.chainid, address(this), vaultId, jobId, entitlementRef, uint8(3))),
+                payerResidualObligationId, address(0), c.payer, residual, PAYER_RESIDUAL_TYPE, entitlementRef
+            );
+        }
+
+        VaultAccounting420.Obligation memory provider = accounting.getObligation(providerObligationId);
+        VaultAccounting420.AssetAccounting memory afterA = accounting.getAccounting(vaultId, address(0));
+        if (provider.state != 1 || provider.beneficiary != beneficiary
+            || provider.amount != earnedAmount || provider.sourceRef != entitlementRef
+            || provider.obligationType != PROVIDER_CLAIM_TYPE
+            || beforeBalance != address(vault).balance
+            || beforeA.recordedBalance != afterA.recordedBalance
+            || beforeA.reserved != afterA.reserved
+            || beforeA.claimable != afterA.claimable) revert InvalidFunding();
+        if (residual != 0) {
+            VaultAccounting420.Obligation memory payerResidual = accounting.getObligation(payerResidualObligationId);
+            if (payerResidual.state != 1 || payerResidual.beneficiary != c.payer
+                || payerResidual.amount != residual || payerResidual.sourceRef != entitlementRef
+                || payerResidual.obligationType != PAYER_RESIDUAL_TYPE) revert InvalidFunding();
+        }
+
+        c.allocated = true;
+        c.earnedAllocated = earnedAmount;
+        c.providerObligationId = providerObligationId;
+        c.payerResidualObligationId = payerResidualObligationId;
+        totalFunded -= c.deposited;
+        emit VerifiedLiabilitySplit(jobId, entitlementRef, providerObligationId,
+            payerResidualObligationId, beneficiary, earnedAmount, residual);
+        entered = false;
+    }
+
+    /// @notice The bound settlement adapter may convert a fully unearned terminal job's
+    /// original payer-safety obligation into a payer claim. No recipient is caller-supplied.
+    function releaseTerminalRefund(bytes32 jobId, bytes32 refundRef)
+        external returns (bytes32 obligationId, address payer, uint256 amount)
+    {
+        if (entered || msg.sender != settlementAdapter || refundRef == bytes32(0)
+            || address(jobs) == address(0)) revert InvalidFunding();
+        entered = true;
+        Credit storage c = _credits[jobId];
+        ComputeJobRegistry420.Job memory j = jobs.job(jobId);
+        if (!c.exists || c.refunded || c.allocated || c.payer == address(0)
+            || c.obligationId != safetyObligationId(jobId)
+            || (j.status != ComputeJobRegistry420.Status.CANCELLED
+                && j.status != ComputeJobRegistry420.Status.EXPIRED
+                && j.status != ComputeJobRegistry420.Status.FAILED))
+            revert InvalidFunding();
+
+        VaultAccounting420.Obligation memory beforeO = accounting.getObligation(c.obligationId);
+        if (!beforeO.exists || beforeO.state != 1 || beforeO.vaultId != vaultId
+            || beforeO.asset != address(0) || beforeO.beneficiary != c.payer
+            || beforeO.amount != c.deposited || beforeO.sourceRef != jobId
+            || beforeO.obligationType != PAYER_SAFETY_TYPE) revert InvalidFunding();
+
+        vault.releaseObligation(
+            keccak256(abi.encode(TERMINAL_REFUND_DOMAIN, block.chainid, address(this),
+                address(vault), vaultId, jobId, refundRef)),
+            c.obligationId
+        );
+        VaultAccounting420.Obligation memory afterO = accounting.getObligation(c.obligationId);
+        if (afterO.state != 2 || afterO.beneficiary != c.payer || afterO.amount != c.deposited)
+            revert InvalidFunding();
+
+        c.refunded = true;
+        totalFunded -= c.deposited;
+        obligationId = c.obligationId;
+        payer = c.payer;
+        amount = c.deposited;
+        emit TerminalRefundClaimable(jobId, refundRef, payer, obligationId, amount);
+        entered = false;
     }
 
     /// @notice Anyone may trigger a refund solely to the ORIGINAL payer when the original
@@ -117,7 +267,7 @@ contract ComputeEscrowFunding420 is IComputeJobFundingEvidence420 {
         if (entered || address(jobs) == address(0)) revert InvalidFunding();
         entered = true;
         Credit storage c = _credits[jobId];
-        if (!c.exists || c.refunded || c.payer == address(0) || c.obligationId != safetyObligationId(jobId)
+        if (!c.exists || c.refunded || c.allocated || c.payer == address(0) || c.obligationId != safetyObligationId(jobId)
             || block.timestamp <= c.deadline) revert InvalidFunding();
         ComputeJobRegistry420.Job memory j = jobs.job(jobId);
         if (j.owner != c.owner || j.requestId != c.requestId || j.deadline != c.deadline
@@ -150,7 +300,7 @@ contract ComputeEscrowFunding420 is IComputeJobFundingEvidence420 {
 
     function funded(bytes32 jobId, address owner, bytes32 fundingRef) external view returns (bool) {
         Credit storage c = _credits[jobId];
-        if (address(jobs) == address(0) || !c.exists || c.refunded || fundingRef != jobId
+        if (address(jobs) == address(0) || !c.exists || c.refunded || c.allocated || fundingRef != jobId
             || jobId == bytes32(0) || c.owner != owner || owner == address(0)
             || c.payer == address(0) || c.requestId == bytes32(0) || c.deposited == 0
             || c.deposited > c.maximumSpend || c.obligationId != safetyObligationId(jobId)) return false;

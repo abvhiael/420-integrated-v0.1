@@ -4,6 +4,7 @@ pragma solidity ^0.8.24;
 import "./ComputeJobRegistry420.sol";
 import "./ComputeResourceRegistry420.sol";
 import "./ComputeAuthorization420.sol";
+import "./IComputeAcceptedMatchRuntime420.sol";
 
 /// @notice An explicit owner-proposed, resource-operator-accepted match.
 /// @dev This is an admission/identity record, not metering, hardware attestation,
@@ -109,6 +110,13 @@ contract ComputeJobAcceptedMatch420 is IComputeJobMatchEvidence420 {
         return m.exists && m.jobId == jobId && matchForJob[jobId] == matchId
             && m.acceptanceRef != bytes32(0) && m.acceptanceRef == acceptanceRef
             && m.resourceId == resourceId && m.operator == operator && _eligible(m);
+    }
+
+    function matchParties(bytes32 matchId)
+        external view returns (bytes32 jobId, address owner, address operator, bool exists)
+    {
+        Match storage m = _matches[matchId];
+        return (m.jobId, m.owner, m.operator, m.exists);
     }
 
     function getMatch(bytes32 matchId) external view returns (Match memory m) {

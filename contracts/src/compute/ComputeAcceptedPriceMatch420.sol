@@ -6,6 +6,7 @@ import "./ComputeResourceRegistry420.sol";
 import "./ComputeAuthorization420.sol";
 import "./ComputeOfferRegistry420.sol";
 import "./ComputeEscrowFunding420.sol";
+import "./IComputeAcceptedMatchRuntime420.sol";
 
 /// @notice CMP-1.2.2 canonical accepted match with atomic fixed-price reservation.
 /// @dev Acceptance freezes a provider-derived beneficiary and a deterministic native-$420
@@ -188,6 +189,13 @@ contract ComputeAcceptedPriceMatch420 is IComputeJobMatchEvidence420 {
             && m.acceptanceRef != bytes32(0) && m.acceptanceRef == acceptanceRef
             && m.resourceId == resourceId && m.operator == operator
             && m.priceReservationRef != bytes32(0) && _resourceStillEligible(m);
+    }
+
+    function matchParties(bytes32 matchId)
+        external view returns (bytes32 jobId, address owner, address operator, bool exists)
+    {
+        Match storage m = _matches[matchId];
+        return (m.jobId, m.owner, m.operator, m.exists);
     }
 
     function getMatch(bytes32 matchId) external view returns (Match memory m) {

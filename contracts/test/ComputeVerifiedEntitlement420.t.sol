@@ -486,10 +486,28 @@ contract ComputeVerifiedEntitlement420Test {
     function _matureProviderClaim(bytes32 id) private {
         ComputeVerifiedEntitlement420.ProviderClaim memory pc = entitlements.providerClaim(id);
         vm.warp(uint256(pc.createdAt) + uint256(matches.CHALLENGE_WINDOW()) + 1);
+        require(disputes.providerReleaseAllowed(id), "stage: provider release finality");
+        bytes32 vaultScope = vaultPolicy.scopeForVault(VAULT_ID);
+        require(caps.isAuthorized(address(entitlements), VaultIds420.COMPONENT_VAULT,
+            VaultIds420.ACTION_RELEASE_OBLIGATION, vaultScope, 0),
+            "stage: settlement release grant");
+        require(caps.isAuthorized(address(entitlements), VaultIds420.COMPONENT_VAULT,
+            VaultIds420.ACTION_CLAIM, vaultScope, 3 ether),
+            "stage: settlement claim grant");
     }
 
     function _grantAdjudicator(address actor, bytes32 id) private {
         _grant(actor, id, auth.ACTION_ADJUDICATE(), 0);
+        require(auth.isAuthorized(actor, auth.ACTION_ADJUDICATE(), auth.scopeJob(id), 0),
+            "stage: adjudicator capability");
+        ComputeJobRegistry420.Job memory j = jobs.job(id);
+        bytes32 priceRef = matches.priceReservationForJob(id);
+        ComputeAcceptedPriceMatch420.PriceReservation memory p =
+            matches.priceReservation(priceRef);
+        (, , address operator, bool exists) = matches.matchParties(j.matchId);
+        require(exists && policy.independentFromParties(
+            actor, j.owner, p.payer, operator, j.verifier
+        ), "stage: adjudicator independence");
     }
 
     function _openPayerDispute(bytes32 id, bytes32 salt) private returns (bytes32 disputeId) {

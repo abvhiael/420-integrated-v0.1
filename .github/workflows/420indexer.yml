@@ -8,6 +8,18 @@ on:
       - 'explorer/**'
       - 'docs/audit/EXP-0.1.2-indexer-dependency-reconciliation.md'
       - 'docs/audit/EXP-0.1.3-contract-abi-address-reconciliation.md'
+      - 'docs/audit/EXP-0.2.1-genesis-capability-matrix.json'
+      - 'docs/audit/EXP-0.2.1-required-capability-reconciliation.md'
+      - 'docs/audit/EXP-0.2.2-user-workflow-matrix.json'
+      - 'docs/audit/EXP-0.2.2-user-workflow-reconciliation.md'
+      - 'docs/audit/EXP-0.2.3-canonical-authority-matrix.json'
+      - 'docs/audit/EXP-0.2.3-canonical-authority-reconciliation.md'
+      - 'docs/audit/EXP-0.2.4-dependency-readiness-matrix.json'
+      - 'docs/audit/EXP-0.2.4-dependency-readiness-reconciliation.md'
+      - 'docs/audit/EXP-0.2.5-genesis-gap-register.json'
+      - 'docs/audit/EXP-0.2.5-genesis-gap-reconciliation.md'
+      - 'docs/audit/EXP-0.2.6-genesis-acceptance-criteria.json'
+      - 'docs/audit/EXP-0.2.6-genesis-acceptance-reconciliation.md'
       - 'config/420indexer-v1.json'
       - 'config/system-addresses.json'
       - 'config/genesis-applications.json'
@@ -21,6 +33,12 @@ on:
       - 'scripts/exp-0-1-1-inventory.py'
       - 'scripts/verify-exp-0-1-2-indexer-dependencies.py'
       - 'scripts/verify-exp-0-1-3-contract-dependencies.py'
+      - 'scripts/verify-exp-0-2-1-capability-matrix.py'
+      - 'scripts/verify-exp-0-2-2-user-workflows.py'
+      - 'scripts/verify-exp-0-2-3-canonical-authority.py'
+      - 'scripts/verify-exp-0-2-4-dependency-readiness.py'
+      - 'scripts/verify-exp-0-2-5-genesis-gaps.py'
+      - 'scripts/verify-exp-0-2-6-genesis-acceptance.py'
       - '.github/workflows/420indexer.yml'
   push:
     branches:
@@ -31,6 +49,18 @@ on:
       - 'explorer/**'
       - 'docs/audit/EXP-0.1.2-indexer-dependency-reconciliation.md'
       - 'docs/audit/EXP-0.1.3-contract-abi-address-reconciliation.md'
+      - 'docs/audit/EXP-0.2.1-genesis-capability-matrix.json'
+      - 'docs/audit/EXP-0.2.1-required-capability-reconciliation.md'
+      - 'docs/audit/EXP-0.2.2-user-workflow-matrix.json'
+      - 'docs/audit/EXP-0.2.2-user-workflow-reconciliation.md'
+      - 'docs/audit/EXP-0.2.3-canonical-authority-matrix.json'
+      - 'docs/audit/EXP-0.2.3-canonical-authority-reconciliation.md'
+      - 'docs/audit/EXP-0.2.4-dependency-readiness-matrix.json'
+      - 'docs/audit/EXP-0.2.4-dependency-readiness-reconciliation.md'
+      - 'docs/audit/EXP-0.2.5-genesis-gap-register.json'
+      - 'docs/audit/EXP-0.2.5-genesis-gap-reconciliation.md'
+      - 'docs/audit/EXP-0.2.6-genesis-acceptance-criteria.json'
+      - 'docs/audit/EXP-0.2.6-genesis-acceptance-reconciliation.md'
       - 'config/420indexer-v1.json'
       - 'config/system-addresses.json'
       - 'config/genesis-applications.json'
@@ -44,6 +74,12 @@ on:
       - 'scripts/exp-0-1-1-inventory.py'
       - 'scripts/verify-exp-0-1-2-indexer-dependencies.py'
       - 'scripts/verify-exp-0-1-3-contract-dependencies.py'
+      - 'scripts/verify-exp-0-2-1-capability-matrix.py'
+      - 'scripts/verify-exp-0-2-2-user-workflows.py'
+      - 'scripts/verify-exp-0-2-3-canonical-authority.py'
+      - 'scripts/verify-exp-0-2-4-dependency-readiness.py'
+      - 'scripts/verify-exp-0-2-5-genesis-gaps.py'
+      - 'scripts/verify-exp-0-2-6-genesis-acceptance.py'
       - '.github/workflows/420indexer.yml'
 
 jobs:
@@ -98,6 +134,18 @@ jobs:
         run: python scripts/verify-exp-0-1-2-indexer-dependencies.py
       - name: EXP-0.1.3 contract ABI and frozen-address dependency reconciliation
         run: python scripts/verify-exp-0-1-3-contract-dependencies.py
+      - name: EXP-0.2.1 required Genesis capability matrix
+        run: python scripts/verify-exp-0-2-1-capability-matrix.py
+      - name: EXP-0.2.2 Genesis user-workflow acceptance matrix
+        run: python scripts/verify-exp-0-2-2-user-workflows.py
+      - name: EXP-0.2.3 canonical data and authority requirements
+        run: python scripts/verify-exp-0-2-3-canonical-authority.py
+      - name: EXP-0.2.4 dependency readiness matrix
+        run: python scripts/verify-exp-0-2-4-dependency-readiness.py
+      - name: EXP-0.2.5 Genesis blocker and qualification-gap register
+        run: python scripts/verify-exp-0-2-5-genesis-gaps.py
+      - name: EXP-0.2.6 Genesis acceptance criteria ownership map
+        run: python scripts/verify-exp-0-2-6-genesis-acceptance.py
       - name: EXP-0.1.1 pinned-tree exhaustive inventory
         if: always()
         run: python scripts/exp-0-1-1-inventory.py --commit 95a83a961286701b6e8c064de1deccad10f41fd7
@@ -114,4 +162,46 @@ jobs:
         with:
           name: exp-0-1-3-pinned-contract-dependencies
           path: exp-0-1-3-evidence/
+          if-no-files-found: error
+      - name: Upload EXP-0.2.1 capability matrix evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp-0-2-1-genesis-capability-matrix
+          path: exp-0-2-1-evidence/
+          if-no-files-found: error
+      - name: Upload EXP-0.2.2 user-workflow evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp-0-2-2-user-workflow-matrix
+          path: exp-0-2-2-evidence/
+          if-no-files-found: error
+      - name: Upload EXP-0.2.3 canonical authority evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp-0-2-3-canonical-authority
+          path: exp-0-2-3-evidence/
+          if-no-files-found: error
+      - name: Upload EXP-0.2.4 dependency readiness evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp-0-2-4-dependency-readiness
+          path: exp-0-2-4-evidence/
+          if-no-files-found: error
+      - name: Upload EXP-0.2.5 Genesis gap evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp-0-2-5-genesis-gap-register
+          path: exp-0-2-5-evidence/
+          if-no-files-found: error
+      - name: Upload EXP-0.2.6 Genesis acceptance evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp-0-2-6-genesis-acceptance
+          path: exp-0-2-6-evidence/
           if-no-files-found: error

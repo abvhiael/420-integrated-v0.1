@@ -1,0 +1,822 @@
+{
+  "schema": "420explorer-exp-0.2.2-user-workflow-matrix-v1",
+  "milestone": "EXP-0.2.2",
+  "title": "Genesis user-workflow acceptance matrix",
+  "baseline": {
+    "exp_0_2_1_head": "5705fe4db1ab0fd93ce3f1a5b96ee55954782bdb",
+    "predecessor_matrix": "docs/audit/EXP-0.2.1-genesis-capability-matrix.json",
+    "audit_source": "Part 2.8 practical user scenarios"
+  },
+  "status_vocabulary": {
+    "source_support": [
+      "supported_source",
+      "partial_source",
+      "not_observed"
+    ],
+    "runtime": [
+      "unverified"
+    ],
+    "execution_claim": [
+      "not_runtime_qualified"
+    ],
+    "acceptance": [
+      "mapped_to_later_gate",
+      "gap_requires_implementation"
+    ]
+  },
+  "workflows": [
+    {
+      "id": "EXP-WF-001",
+      "name": "verify receipt of a native 420 transfer",
+      "source_support": "supported_source",
+      "runtime_status": "unverified",
+      "execution_claim": "not_runtime_qualified",
+      "acceptance_status": "mapped_to_later_gate",
+      "objective": "Confirm that a native 420 value transfer was included, executed successfully, and reached the expected destination on the expected chain.",
+      "prerequisites": [
+        "transaction hash for the transfer",
+        "qualified 420Indexer data for the target network"
+      ],
+      "user_path": [
+        "search the 32-byte transaction hash",
+        "open the transaction detail view",
+        "compare from/to/valueWei with the expected transfer",
+        "confirm receipt status SUCCESS",
+        "confirm block/finality and chain provenance"
+      ],
+      "expected_result": "Transaction view shows the indexed sender, recipient, native value, successful receipt status, containing block and finality.",
+      "limitations": [
+        "No live deployment or representative transfer has been qualified in EXP-0.2.2.",
+        "Explorer is a projection and does not become settlement authority.",
+        "The transaction presentation currently does not expose fee calculation."
+      ],
+      "capability_ids": [
+        "EXP-CAP-002",
+        "EXP-CAP-003",
+        "EXP-CAP-010"
+      ],
+      "explorer_routes": [
+        "#/transactions/{hash}"
+      ],
+      "explorer_api": [
+        "/v1/transactions/{hash}"
+      ],
+      "evidence": [
+        "explorer/web/static/app.js",
+        "explorer/service/transactionviews.go",
+        "explorer/api/server.go"
+      ],
+      "later_owner": [
+        "EXP-2",
+        "EXP-4",
+        "EXP-7"
+      ],
+      "required_tests": [
+        "API transaction/receipt provenance tests",
+        "UI transaction lookup and native-value rendering test",
+        "testnet witness comparing displayed transfer with authoritative chain data"
+      ]
+    },
+    {
+      "id": "EXP-WF-002",
+      "name": "confirm success or failure of a transaction",
+      "source_support": "supported_source",
+      "runtime_status": "unverified",
+      "execution_claim": "not_runtime_qualified",
+      "acceptance_status": "mapped_to_later_gate",
+      "objective": "Determine whether an indexed transaction executed successfully or reverted and whether its containing block is head, safe or finalized.",
+      "prerequisites": [
+        "transaction hash",
+        "indexed receipt and containing block"
+      ],
+      "user_path": [
+        "search transaction hash",
+        "inspect status label",
+        "inspect finality",
+        "inspect logs and block provenance"
+      ],
+      "expected_result": "Receipt status 1 is presented as SUCCESS, status 0 as REVERTED, with indexed block finality.",
+      "limitations": [
+        "Pending transactions are not represented by the current indexed transaction model.",
+        "Runtime correctness against the target network remains unverified."
+      ],
+      "capability_ids": [
+        "EXP-CAP-002",
+        "EXP-CAP-003"
+      ],
+      "explorer_routes": [
+        "#/transactions/{hash}"
+      ],
+      "explorer_api": [
+        "/v1/transactions/{hash}",
+        "/v1/receipts/{hash}"
+      ],
+      "evidence": [
+        "explorer/service/transactionviews.go",
+        "explorer/web/static/app.js",
+        "indexer/model/model.go"
+      ],
+      "later_owner": [
+        "EXP-2",
+        "EXP-4",
+        "EXP-7"
+      ],
+      "required_tests": [
+        "success receipt fixture",
+        "reverted receipt fixture",
+        "finality rendering test",
+        "live/testnet successful and reverted witness"
+      ]
+    },
+    {
+      "id": "EXP-WF-003",
+      "name": "inspect transaction fees",
+      "source_support": "partial_source",
+      "runtime_status": "unverified",
+      "execution_claim": "not_runtime_qualified",
+      "acceptance_status": "gap_requires_implementation",
+      "objective": "Determine the gas consumed and actual transaction fee paid.",
+      "prerequisites": [
+        "transaction hash",
+        "receipt execution data",
+        "effective gas price or equivalent fee inputs"
+      ],
+      "user_path": [
+        "open transaction detail",
+        "inspect gas usage",
+        "inspect fee fields when implemented"
+      ],
+      "expected_result": "User can distinguish gas used from the actual native fee and verify the fee calculation.",
+      "limitations": [
+        "Current ReceiptSummary exposes gasUsed only.",
+        "Transaction/receipt models inspected for this milestone do not expose gasPrice, effectiveGasPrice or a computed fee.",
+        "The current UI therefore cannot satisfy the full fee-inspection workflow."
+      ],
+      "capability_ids": [
+        "EXP-CAP-002",
+        "EXP-CAP-003"
+      ],
+      "explorer_routes": [
+        "#/transactions/{hash}"
+      ],
+      "explorer_api": [
+        "/v1/transactions/{hash}"
+      ],
+      "evidence": [
+        "explorer/service/transactionviews.go",
+        "indexer/model/model.go",
+        "explorer/web/static/app.js"
+      ],
+      "later_owner": [
+        "EXP-2",
+        "EXP-4"
+      ],
+      "required_tests": [
+        "fee-field model/API tests after implementation",
+        "known gasUsed × effectiveGasPrice calculation vector",
+        "UI fee rendering test"
+      ]
+    },
+    {
+      "id": "EXP-WF-004",
+      "name": "review wallet activity",
+      "source_support": "partial_source",
+      "runtime_status": "unverified",
+      "execution_claim": "not_runtime_qualified",
+      "acceptance_status": "mapped_to_later_gate",
+      "objective": "Review public transaction activity associated with a wallet address.",
+      "prerequisites": [
+        "20-byte address",
+        "indexed address transaction history"
+      ],
+      "user_path": [
+        "search the address",
+        "open address view",
+        "review inbound/outbound transaction history, counterparties and value",
+        "follow transactions or blocks for detail"
+      ],
+      "expected_result": "Address page lists indexed transaction history with direction, counterparty, native value and snapshot/finality metadata.",
+      "limitations": [
+        "Current address view is transaction-history oriented; it does not establish wallet balances or token holdings.",
+        "Viewing an address confers no wallet/private-key authority.",
+        "Runtime accuracy remains unverified."
+      ],
+      "capability_ids": [
+        "EXP-CAP-004"
+      ],
+      "explorer_routes": [
+        "#/addresses/{address}"
+      ],
+      "explorer_api": [
+        "/v1/addresses/{address}"
+      ],
+      "evidence": [
+        "explorer/web/static/app.js",
+        "explorer/service/addressviews.go",
+        "explorer/api/server.go"
+      ],
+      "later_owner": [
+        "EXP-2",
+        "EXP-4",
+        "EXP-7"
+      ],
+      "required_tests": [
+        "address-history direction tests",
+        "invalid-address tests",
+        "UI address-history test",
+        "testnet address-history witness"
+      ]
+    },
+    {
+      "id": "EXP-WF-005",
+      "name": "locate and examine a smart contract",
+      "source_support": "partial_source",
+      "runtime_status": "unverified",
+      "execution_claim": "not_runtime_qualified",
+      "acceptance_status": "mapped_to_later_gate",
+      "objective": "Locate a deployed contract and inspect its indexed deployment and runtime-code facts.",
+      "prerequisites": [
+        "contract address or a Registry/deployment link that resolves to it"
+      ],
+      "user_path": [
+        "navigate to a contract link or direct contract route",
+        "inspect deployment transaction/block, code hash and runtime bytecode",
+        "follow deployment transaction where useful"
+      ],
+      "expected_result": "Contract detail presents indexed deployment provenance, runtime code, code hash and chain ID.",
+      "limitations": [
+        "Global search treats every 20-byte value as an address route and does not identify contract type before navigation.",
+        "No verified-source/ABI verdict is produced by Explorer itself.",
+        "Live contract data remains unverified."
+      ],
+      "capability_ids": [
+        "EXP-CAP-005",
+        "EXP-CAP-009"
+      ],
+      "explorer_routes": [
+        "#/contracts/{address}"
+      ],
+      "explorer_api": [
+        "/v1/contracts/{address}"
+      ],
+      "evidence": [
+        "explorer/web/static/app.js",
+        "explorer/service/contractviews.go",
+        "explorer/api/server.go"
+      ],
+      "later_owner": [
+        "EXP-2",
+        "EXP-3",
+        "EXP-4",
+        "EXP-7"
+      ],
+      "required_tests": [
+        "contract-detail API tests",
+        "contract-route UI test",
+        "search/type-resolution acceptance test if global contract search is required",
+        "testnet deployed-contract witness"
+      ]
+    },
+    {
+      "id": "EXP-WF-006",
+      "name": "verify a contract deployment",
+      "source_support": "supported_source",
+      "runtime_status": "unverified",
+      "execution_claim": "not_runtime_qualified",
+      "acceptance_status": "mapped_to_later_gate",
+      "objective": "Correlate a deployed contract address with its creation transaction, block provenance and indexed runtime code.",
+      "prerequisites": [
+        "deployed contract address",
+        "indexed deployment transaction and contract record"
+      ],
+      "user_path": [
+        "open contract detail",
+        "record deployment transaction and block/hash",
+        "follow deployment transaction",
+        "confirm receipt created-contract address and successful status",
+        "compare code hash/runtime code"
+      ],
+      "expected_result": "Contract and transaction views provide mutually traceable deployment provenance and runtime code facts.",
+      "limitations": [
+        "This does not by itself prove source verification, compiler provenance or Registry publication.",
+        "Live deployment evidence remains a later qualification gate."
+      ],
+      "capability_ids": [
+        "EXP-CAP-002",
+        "EXP-CAP-003",
+        "EXP-CAP-005"
+      ],
+      "explorer_routes": [
+        "#/contracts/{address}",
+        "#/transactions/{hash}"
+      ],
+      "explorer_api": [
+        "/v1/contracts/{address}",
+        "/v1/transactions/{hash}"
+      ],
+      "evidence": [
+        "explorer/web/static/app.js",
+        "explorer/service/contractviews.go",
+        "explorer/service/transactionviews.go"
+      ],
+      "later_owner": [
+        "EXP-2",
+        "EXP-3",
+        "EXP-4",
+        "EXP-7"
+      ],
+      "required_tests": [
+        "contract creation receipt fixture",
+        "cross-view deployment provenance test",
+        "testnet deployment transaction/code witness"
+      ]
+    },
+    {
+      "id": "EXP-WF-007",
+      "name": "track token transfers",
+      "source_support": "partial_source",
+      "runtime_status": "unverified",
+      "execution_claim": "not_runtime_qualified",
+      "acceptance_status": "mapped_to_later_gate",
+      "objective": "Review indexed token/asset transfer activity and follow each transfer to its transaction and participants.",
+      "prerequisites": [
+        "qualified asset-transfer projection"
+      ],
+      "user_path": [
+        "open asset activity",
+        "review asset key/kind/token ID/amount/from/to",
+        "follow transaction or address links"
+      ],
+      "expected_result": "Asset activity lists indexed transfers with asset identity, amount, participants and transaction provenance.",
+      "limitations": [
+        "Current web page requests recent transfers without exposing assetKey/address filters even though the API accepts them.",
+        "Supported token-standard coverage and live decoder correctness remain unqualified."
+      ],
+      "capability_ids": [
+        "EXP-CAP-006"
+      ],
+      "explorer_routes": [
+        "#/assets"
+      ],
+      "explorer_api": [
+        "/v1/assets/activity"
+      ],
+      "evidence": [
+        "explorer/web/static/app.js",
+        "explorer/service/assetviews.go",
+        "explorer/indexerclient/assets.go"
+      ],
+      "later_owner": [
+        "EXP-2",
+        "EXP-3",
+        "EXP-4",
+        "EXP-7"
+      ],
+      "required_tests": [
+        "ERC-20/721/1155 or supported-asset projection vectors",
+        "asset/address filter API tests",
+        "UI transfer navigation test",
+        "representative testnet transfer witnesses"
+      ]
+    },
+    {
+      "id": "EXP-WF-008",
+      "name": "inspect validator-produced blocks",
+      "source_support": "not_observed",
+      "runtime_status": "unverified",
+      "execution_claim": "not_runtime_qualified",
+      "acceptance_status": "gap_requires_implementation",
+      "objective": "Identify which validator/proposer produced a specific block and inspect that block.",
+      "prerequisites": [
+        "block producer/proposer identity attached to block provenance or a reliable block-to-consensus mapping"
+      ],
+      "user_path": [
+        "open block",
+        "inspect producer/proposer identity",
+        "follow producer/validator detail or consensus context"
+      ],
+      "expected_result": "A block can be traced to the validator/proposer responsible for producing it.",
+      "limitations": [
+        "Current BlockRecord has no proposer/validator field.",
+        "Consensus view exposes scheduled proposer information but the inspected Explorer source does not bind a historical block to a producer.",
+        "The workflow cannot currently be claimed implemented."
+      ],
+      "capability_ids": [
+        "EXP-CAP-001",
+        "EXP-CAP-007",
+        "EXP-CAP-008"
+      ],
+      "explorer_routes": [
+        "#/blocks/{number}",
+        "#/consensus"
+      ],
+      "explorer_api": [
+        "/v1/blocks/{number}",
+        "/v1/consensus"
+      ],
+      "evidence": [
+        "indexer/model/model.go",
+        "explorer/web/static/app.js",
+        "explorer/service/consensusviews.go"
+      ],
+      "later_owner": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-4"
+      ],
+      "required_tests": [
+        "historical block-producer provenance model test",
+        "block-to-validator API test",
+        "UI producer link test",
+        "testnet comparison with consensus authority"
+      ]
+    },
+    {
+      "id": "EXP-WF-009",
+      "name": "investigate a failed contract interaction",
+      "source_support": "partial_source",
+      "runtime_status": "unverified",
+      "execution_claim": "not_runtime_qualified",
+      "acceptance_status": "mapped_to_later_gate",
+      "objective": "Inspect a reverted contract transaction, its call input, receipt status, block/finality and emitted logs.",
+      "prerequisites": [
+        "failed transaction hash",
+        "indexed receipt/block/log data"
+      ],
+      "user_path": [
+        "search transaction",
+        "confirm REVERTED status",
+        "inspect destination, input, gas used, finality and any logs",
+        "follow destination address/contract context"
+      ],
+      "expected_result": "User can establish that the call reverted and inspect the raw indexed context around the failure.",
+      "limitations": [
+        "No revert reason or decoded function call is exposed by the inspected Explorer presentation model.",
+        "No ABI-aware diagnostic explanation is currently established."
+      ],
+      "capability_ids": [
+        "EXP-CAP-002",
+        "EXP-CAP-003",
+        "EXP-CAP-005"
+      ],
+      "explorer_routes": [
+        "#/transactions/{hash}"
+      ],
+      "explorer_api": [
+        "/v1/transactions/{hash}"
+      ],
+      "evidence": [
+        "explorer/service/transactionviews.go",
+        "explorer/web/static/app.js",
+        "indexer/model/model.go"
+      ],
+      "later_owner": [
+        "EXP-2",
+        "EXP-3",
+        "EXP-4"
+      ],
+      "required_tests": [
+        "reverted contract-call fixture",
+        "raw input/log provenance test",
+        "decoded-error tests if later implemented",
+        "testnet failed-interaction witness"
+      ]
+    },
+    {
+      "id": "EXP-WF-010",
+      "name": "confirm an ecosystem application transaction",
+      "source_support": "partial_source",
+      "runtime_status": "unverified",
+      "execution_claim": "not_runtime_qualified",
+      "acceptance_status": "mapped_to_later_gate",
+      "objective": "Determine that a transaction interacted with an implementation published for a 420 ecosystem service and inspect the transaction outcome.",
+      "prerequisites": [
+        "transaction hash",
+        "qualified Registry service/version projection",
+        "published implementation address"
+      ],
+      "user_path": [
+        "open transaction",
+        "identify destination address",
+        "resolve relevant Registry service/version",
+        "compare implementation address",
+        "confirm receipt/finality"
+      ],
+      "expected_result": "User can correlate a generic transaction with a Registry-published service implementation without Explorer claiming application-specific execution semantics.",
+      "limitations": [
+        "No application-specific transaction decoder is established by the current Explorer view.",
+        "Live Registry publication and ecosystem end-to-end witnesses remain unqualified.",
+        "Governance remains a separate unresolved scope decision from EXP-0.2.1."
+      ],
+      "capability_ids": [
+        "EXP-CAP-002",
+        "EXP-CAP-003",
+        "EXP-CAP-009"
+      ],
+      "explorer_routes": [
+        "#/transactions/{hash}",
+        "#/registry/{serviceId}"
+      ],
+      "explorer_api": [
+        "/v1/transactions/{hash}",
+        "/v1/services/{service}"
+      ],
+      "evidence": [
+        "explorer/web/static/app.js",
+        "explorer/service/transactionviews.go",
+        "explorer/service/registryviews.go"
+      ],
+      "later_owner": [
+        "EXP-3",
+        "EXP-5",
+        "EXP-7"
+      ],
+      "required_tests": [
+        "Registry implementation correlation fixture",
+        "ecosystem transaction provenance test",
+        "representative application transaction witness"
+      ]
+    },
+    {
+      "id": "EXP-WF-011",
+      "name": "verify an on-chain payment",
+      "source_support": "partial_source",
+      "runtime_status": "unverified",
+      "execution_claim": "not_runtime_qualified",
+      "acceptance_status": "mapped_to_later_gate",
+      "objective": "Verify publicly visible transfer facts for a transaction asserted by another application to represent an on-chain payment.",
+      "prerequisites": [
+        "payment transaction hash and expected payer/payee/value or asset facts"
+      ],
+      "user_path": [
+        "open transaction and/or asset transfer record",
+        "compare participants and value/amount",
+        "confirm receipt status and finality",
+        "cross-check application-specific payment semantics outside Explorer where required"
+      ],
+      "expected_result": "Explorer confirms the generic on-chain transfer and execution facts that are publicly indexed.",
+      "limitations": [
+        "Explorer does not infer that a generic transfer satisfies an application-specific invoice, escrow or settlement rule.",
+        "Payment-protocol semantics require the owning application/protocol and later ecosystem integration evidence."
+      ],
+      "capability_ids": [
+        "EXP-CAP-002",
+        "EXP-CAP-003",
+        "EXP-CAP-006"
+      ],
+      "explorer_routes": [
+        "#/transactions/{hash}",
+        "#/assets"
+      ],
+      "explorer_api": [
+        "/v1/transactions/{hash}",
+        "/v1/assets/activity"
+      ],
+      "evidence": [
+        "explorer/web/static/app.js",
+        "explorer/service/transactionviews.go",
+        "explorer/service/assetviews.go"
+      ],
+      "later_owner": [
+        "EXP-2",
+        "EXP-5",
+        "EXP-7"
+      ],
+      "required_tests": [
+        "native payment transfer witness",
+        "token payment transfer witness where applicable",
+        "ecosystem payment correlation test"
+      ]
+    },
+    {
+      "id": "EXP-WF-012",
+      "name": "review publicly available staking or reward activity",
+      "source_support": "not_observed",
+      "runtime_status": "unverified",
+      "execution_claim": "not_runtime_qualified",
+      "acceptance_status": "gap_requires_implementation",
+      "objective": "Inspect public staking lifecycle or reward activity associated with validators/accounts.",
+      "prerequisites": [
+        "indexed staking/reward records or clearly identifiable protocol events"
+      ],
+      "user_path": [
+        "open staking/reward activity view or relevant validator/address history",
+        "inspect public bond/reward/lifecycle records",
+        "follow source transactions/events"
+      ],
+      "expected_result": "User can distinguish staking state/reward activity from generic transfers and trace it to protocol provenance.",
+      "limitations": [
+        "Current Explorer API and web routes inspected for EXP-0.2.2 contain no staking/reward-specific view.",
+        "Consensus status is not a staking/reward history.",
+        "Generic address or asset history is insufficient to claim the requested workflow."
+      ],
+      "capability_ids": [
+        "EXP-CAP-004",
+        "EXP-CAP-006",
+        "EXP-CAP-007"
+      ],
+      "explorer_routes": [],
+      "explorer_api": [],
+      "evidence": [
+        "explorer/api/server.go",
+        "explorer/web/static/app.js",
+        "explorer/service/consensusviews.go"
+      ],
+      "later_owner": [
+        "EXP-2",
+        "EXP-3",
+        "EXP-5",
+        "EXP-4"
+      ],
+      "required_tests": [
+        "staking/reward source-model tests after implementation",
+        "validator/account linkage tests",
+        "UI activity workflow test",
+        "testnet staking/reward witness"
+      ]
+    },
+    {
+      "id": "EXP-WF-013",
+      "name": "examine contract events",
+      "source_support": "partial_source",
+      "runtime_status": "unverified",
+      "execution_claim": "not_runtime_qualified",
+      "acceptance_status": "mapped_to_later_gate",
+      "objective": "Inspect logs emitted by a transaction or block and trace them to emitting addresses and transaction provenance.",
+      "prerequisites": [
+        "indexed logs for a block/transaction"
+      ],
+      "user_path": [
+        "open transaction or block",
+        "review emitted log rows",
+        "follow emitting address or transaction",
+        "inspect full event payload when later presentation supports it"
+      ],
+      "expected_result": "User can identify the log index, emitting address, transaction and existence/number of topics for indexed logs.",
+      "limitations": [
+        "Current web table shows topic count rather than topic values and does not render log data.",
+        "No ABI-decoded event name/arguments are established in the inspected Explorer UI."
+      ],
+      "capability_ids": [
+        "EXP-CAP-001",
+        "EXP-CAP-003",
+        "EXP-CAP-005"
+      ],
+      "explorer_routes": [
+        "#/transactions/{hash}",
+        "#/blocks/{number}"
+      ],
+      "explorer_api": [
+        "/v1/transactions/{hash}",
+        "/v1/blocks/{number}"
+      ],
+      "evidence": [
+        "explorer/web/static/app.js",
+        "explorer/service/transactionviews.go",
+        "indexer/model/model.go"
+      ],
+      "later_owner": [
+        "EXP-2",
+        "EXP-3",
+        "EXP-4"
+      ],
+      "required_tests": [
+        "raw log provenance fixture",
+        "topic/data rendering test after implementation",
+        "decoded-event tests where supported",
+        "testnet emitted-event witness"
+      ]
+    },
+    {
+      "id": "EXP-WF-014",
+      "name": "confirm an application's published contract address",
+      "source_support": "supported_source",
+      "runtime_status": "unverified",
+      "execution_claim": "not_runtime_qualified",
+      "acceptance_status": "mapped_to_later_gate",
+      "objective": "Use the Registry projection to identify an active/historical service implementation and inspect its contract record.",
+      "prerequisites": [
+        "service identifier",
+        "qualified Registry service/version projection"
+      ],
+      "user_path": [
+        "open Registry",
+        "select service",
+        "inspect active/latest versions and implementation address",
+        "open implementation contract",
+        "compare code hash and activation provenance"
+      ],
+      "expected_result": "Registry view exposes versioned published implementation addresses and links them to contract detail.",
+      "limitations": [
+        "Indexer/Explorer projection is not Registry authority.",
+        "Live Registry address, event ingestion and deployment publication remain later qualification requirements."
+      ],
+      "capability_ids": [
+        "EXP-CAP-005",
+        "EXP-CAP-009",
+        "EXP-CAP-012"
+      ],
+      "explorer_routes": [
+        "#/registry/{serviceId}",
+        "#/registry/{serviceId}/versions/{version}",
+        "#/contracts/{address}"
+      ],
+      "explorer_api": [
+        "/v1/services/{service}",
+        "/v1/services/{service}/versions/{version}",
+        "/v1/contracts/{address}"
+      ],
+      "evidence": [
+        "explorer/web/static/app.js",
+        "explorer/service/registryviews.go",
+        "docs/audit/EXP-0.1.3-contract-abi-address-reconciliation.md"
+      ],
+      "later_owner": [
+        "EXP-3",
+        "EXP-4",
+        "EXP-5",
+        "EXP-7"
+      ],
+      "required_tests": [
+        "Registry version-history fixture",
+        "active implementation linkage test",
+        "contract-link UI test",
+        "live Registry publication witness"
+      ]
+    },
+    {
+      "id": "EXP-WF-015",
+      "name": "use Explorer data during troubleshooting or development",
+      "source_support": "supported_source",
+      "runtime_status": "unverified",
+      "execution_claim": "not_runtime_qualified",
+      "acceptance_status": "mapped_to_later_gate",
+      "objective": "Use status, block, transaction, address, contract, Registry, asset and consensus views to diagnose public chain/application activity.",
+      "prerequisites": [
+        "known chain identifiers/resources or search input",
+        "available qualified Indexer/Explorer services"
+      ],
+      "user_path": [
+        "check Explorer status for wrong-chain/stale/degraded conditions",
+        "search block/transaction/address as applicable",
+        "inspect provenance/finality",
+        "follow Registry/contract/asset/consensus links for context"
+      ],
+      "expected_result": "Developer can obtain read-only indexed diagnostics while seeing chain/finality/freshness provenance and explicit service failures.",
+      "limitations": [
+        "Current global search recognizes only decimal block numbers, 32-byte transaction hashes and 20-byte addresses.",
+        "API documentation and live deployment/reliability qualification are later milestones.",
+        "Explorer data remains non-canonical projection data."
+      ],
+      "capability_ids": [
+        "EXP-CAP-001",
+        "EXP-CAP-002",
+        "EXP-CAP-003",
+        "EXP-CAP-004",
+        "EXP-CAP-005",
+        "EXP-CAP-006",
+        "EXP-CAP-007",
+        "EXP-CAP-008",
+        "EXP-CAP-009",
+        "EXP-CAP-010"
+      ],
+      "explorer_routes": [
+        "#/status",
+        "#/blocks/{number}",
+        "#/transactions/{hash}",
+        "#/addresses/{address}",
+        "#/contracts/{address}",
+        "#/registry",
+        "#/assets",
+        "#/consensus"
+      ],
+      "explorer_api": [
+        "/v1/status",
+        "/v1/blocks/{number}",
+        "/v1/transactions/{hash}",
+        "/v1/addresses/{address}",
+        "/v1/contracts/{address}",
+        "/v1/services",
+        "/v1/assets/activity",
+        "/v1/consensus"
+      ],
+      "evidence": [
+        "explorer/web/static/app.js",
+        "explorer/api/server.go",
+        "explorer/service/service.go"
+      ],
+      "later_owner": [
+        "EXP-2",
+        "EXP-4",
+        "EXP-6",
+        "EXP-7"
+      ],
+      "required_tests": [
+        "search routing tests",
+        "status failure-mode tests",
+        "cross-resource navigation tests",
+        "production-equivalent troubleshooting exercise"
+      ]
+    }
+  ]
+}

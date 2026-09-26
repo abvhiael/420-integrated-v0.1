@@ -1,0 +1,411 @@
+{
+  "schema": "420explorer-exp-0.2.1-capability-matrix-v1",
+  "milestone": "EXP-0.2.1",
+  "title": "Required Genesis capability matrix",
+  "baseline": {
+    "main_merge_commit": "0b35683920e126d9507658e2fff47e9aeea13fdd",
+    "predecessor": "EXP-0.1",
+    "genesis_profile": "contracts/config/420explorer-genesis.json",
+    "frozen_application_decision": "config/genesis-applications.json"
+  },
+  "classifications": [
+    "mandatory_genesis",
+    "shared_supporting_dependency",
+    "optional_display_enrichment",
+    "post_genesis_enhancement",
+    "explicitly_out_of_scope",
+    "scope_decision_required"
+  ],
+  "status_vocabulary": {
+    "implementation": [
+      "implemented_source",
+      "partial_source",
+      "not_observed",
+      "not_applicable"
+    ],
+    "runtime": [
+      "unverified",
+      "pending_deployment",
+      "not_applicable"
+    ],
+    "qualification": [
+      "inventory_classified",
+      "requires_later_qualification",
+      "scope_decision_required"
+    ]
+  },
+  "capabilities": [
+    {
+      "id": "EXP-CAP-001",
+      "name": "block",
+      "classification": "mandatory_genesis",
+      "implementation_status": "implemented_source",
+      "runtime_status": "unverified",
+      "qualification_status": "requires_later_qualification",
+      "explorer_api": [
+        "/v1/blocks",
+        "/v1/blocks/{number}"
+      ],
+      "indexer_dependencies": [
+        "/v1/blocks",
+        "/v1/blocks/{number}",
+        "/v1/blocks/{number}/logs"
+      ],
+      "evidence": [
+        "explorer/api/server.go",
+        "explorer/service/service.go",
+        "explorer/indexerclient/client.go"
+      ],
+      "notes": "Paged block and block-detail presentation with chain/provenance checks; live data correctness remains unverified."
+    },
+    {
+      "id": "EXP-CAP-002",
+      "name": "transaction",
+      "classification": "mandatory_genesis",
+      "implementation_status": "implemented_source",
+      "runtime_status": "unverified",
+      "qualification_status": "requires_later_qualification",
+      "explorer_api": [
+        "/v1/transactions/{hash}"
+      ],
+      "indexer_dependencies": [
+        "/v1/transactions/{hash}",
+        "/v1/receipts/{hash}"
+      ],
+      "evidence": [
+        "explorer/api/server.go",
+        "explorer/service/service.go",
+        "explorer/indexerclient/client.go"
+      ],
+      "notes": "Transaction detail is reconciled with receipt provenance in the service layer."
+    },
+    {
+      "id": "EXP-CAP-003",
+      "name": "receipt/logs",
+      "classification": "mandatory_genesis",
+      "implementation_status": "implemented_source",
+      "runtime_status": "unverified",
+      "qualification_status": "requires_later_qualification",
+      "explorer_api": [
+        "/v1/receipts/{hash}",
+        "/v1/blocks/{number}"
+      ],
+      "indexer_dependencies": [
+        "/v1/receipts/{hash}",
+        "/v1/blocks/{number}/logs"
+      ],
+      "evidence": [
+        "explorer/api/server.go",
+        "explorer/service/service.go",
+        "explorer/indexerclient/client.go"
+      ],
+      "notes": "Receipts have a direct Explorer route; block logs are included in block detail rather than exposed by a dedicated Explorer log endpoint."
+    },
+    {
+      "id": "EXP-CAP-004",
+      "name": "address",
+      "classification": "mandatory_genesis",
+      "implementation_status": "implemented_source",
+      "runtime_status": "unverified",
+      "qualification_status": "requires_later_qualification",
+      "explorer_api": [
+        "/v1/addresses/{address}"
+      ],
+      "indexer_dependencies": [
+        "/v1/transactions?address=&limit="
+      ],
+      "evidence": [
+        "explorer/api/server.go",
+        "explorer/service/addressviews.go",
+        "explorer/indexerclient/address.go"
+      ],
+      "notes": "Address history is an indexed transaction projection; no canonical balance claim is inferred by this matrix."
+    },
+    {
+      "id": "EXP-CAP-005",
+      "name": "contract",
+      "classification": "mandatory_genesis",
+      "implementation_status": "implemented_source",
+      "runtime_status": "unverified",
+      "qualification_status": "requires_later_qualification",
+      "explorer_api": [
+        "/v1/contracts/{address}"
+      ],
+      "indexer_dependencies": [
+        "/v1/contracts/{address}"
+      ],
+      "evidence": [
+        "explorer/api/server.go",
+        "explorer/service/contractviews.go",
+        "explorer/indexerclient/contract.go"
+      ],
+      "notes": "Displays indexed runtime bytecode/code hash and deployment provenance; does not itself perform source verification."
+    },
+    {
+      "id": "EXP-CAP-006",
+      "name": "token/asset activity",
+      "classification": "mandatory_genesis",
+      "implementation_status": "implemented_source",
+      "runtime_status": "unverified",
+      "qualification_status": "requires_later_qualification",
+      "explorer_api": [
+        "/v1/assets/activity"
+      ],
+      "indexer_dependencies": [
+        "/v1/asset-transfers?assetKey=&address=&limit="
+      ],
+      "evidence": [
+        "explorer/api/server.go",
+        "explorer/service/assetviews.go",
+        "explorer/indexerclient/assets.go"
+      ],
+      "notes": "Indexed transfer activity only; later qualification must determine supported asset semantics and representative data."
+    },
+    {
+      "id": "EXP-CAP-007",
+      "name": "validator",
+      "classification": "mandatory_genesis",
+      "implementation_status": "implemented_source",
+      "runtime_status": "unverified",
+      "qualification_status": "requires_later_qualification",
+      "explorer_api": [
+        "/v1/consensus"
+      ],
+      "indexer_dependencies": [
+        "/v1/consensus"
+      ],
+      "evidence": [
+        "explorer/api/server.go",
+        "explorer/service/consensusviews.go",
+        "explorer/indexerclient/consensus.go"
+      ],
+      "notes": "Validator/committee information is presented through the consensus projection; deployed backend wiring is unverified."
+    },
+    {
+      "id": "EXP-CAP-008",
+      "name": "epoch/rotation",
+      "classification": "mandatory_genesis",
+      "implementation_status": "implemented_source",
+      "runtime_status": "unverified",
+      "qualification_status": "requires_later_qualification",
+      "explorer_api": [
+        "/v1/consensus"
+      ],
+      "indexer_dependencies": [
+        "/v1/consensus"
+      ],
+      "evidence": [
+        "explorer/api/server.go",
+        "explorer/service/consensusviews.go",
+        "explorer/indexerclient/consensus.go"
+      ],
+      "notes": "Epoch and rotation boundaries are derived from indexed consensus status; live correctness remains unverified."
+    },
+    {
+      "id": "EXP-CAP-009",
+      "name": "protocol service/version",
+      "classification": "mandatory_genesis",
+      "implementation_status": "implemented_source",
+      "runtime_status": "unverified",
+      "qualification_status": "requires_later_qualification",
+      "explorer_api": [
+        "/v1/services",
+        "/v1/services/{service}",
+        "/v1/services/{service}/versions/{version}"
+      ],
+      "indexer_dependencies": [
+        "/v1/services",
+        "/v1/services/{service}",
+        "/v1/services/{service}/versions/{version}"
+      ],
+      "evidence": [
+        "explorer/api/server.go",
+        "explorer/service/registryviews.go",
+        "explorer/service/service.go",
+        "explorer/indexerclient/registry.go",
+        "explorer/indexerclient/client.go"
+      ],
+      "notes": "Registry-backed projection only; live Registry deployment/publication is a later qualification gate."
+    },
+    {
+      "id": "EXP-CAP-010",
+      "name": "network status",
+      "classification": "mandatory_genesis",
+      "implementation_status": "implemented_source",
+      "runtime_status": "unverified",
+      "qualification_status": "requires_later_qualification",
+      "explorer_api": [
+        "/v1/status",
+        "/v1/ready"
+      ],
+      "indexer_dependencies": [
+        "/v1/health"
+      ],
+      "evidence": [
+        "explorer/api/server.go",
+        "explorer/service/service.go",
+        "explorer/indexerclient/client.go"
+      ],
+      "notes": "Surfaces chain ID, indexed/safe/finalized heights, staleness, degraded state and finality-order consistency."
+    },
+    {
+      "id": "EXP-CAP-011",
+      "name": "420Indexer /v1 read dependency",
+      "classification": "shared_supporting_dependency",
+      "implementation_status": "implemented_source",
+      "runtime_status": "pending_deployment",
+      "qualification_status": "requires_later_qualification",
+      "explorer_api": [],
+      "indexer_dependencies": [
+        "/v1/health",
+        "/v1/blocks",
+        "/v1/blocks/{number}",
+        "/v1/transactions/{hash}",
+        "/v1/receipts/{hash}",
+        "/v1/blocks/{number}/logs",
+        "/v1/services/{service}/versions/{version}",
+        "/v1/transactions?address=&limit=",
+        "/v1/asset-transfers?assetKey=&address=&limit=",
+        "/v1/contracts/{address}",
+        "/v1/consensus",
+        "/v1/services",
+        "/v1/services/{service}"
+      ],
+      "evidence": [
+        "docs/audit/EXP-0.1.2-indexer-dependency-reconciliation.md",
+        "testnet/public-services/explorer/readiness.json"
+      ],
+      "notes": "Required shared projection service. Source route coverage is reconciled; live serving topology and data remain later gates."
+    },
+    {
+      "id": "EXP-CAP-012",
+      "name": "420Registry-backed protocol discovery",
+      "classification": "shared_supporting_dependency",
+      "implementation_status": "implemented_source",
+      "runtime_status": "unverified",
+      "qualification_status": "requires_later_qualification",
+      "explorer_api": [
+        "/v1/services",
+        "/v1/services/{service}",
+        "/v1/services/{service}/versions/{version}"
+      ],
+      "indexer_dependencies": [
+        "/v1/services",
+        "/v1/services/{service}",
+        "/v1/services/{service}/versions/{version}"
+      ],
+      "evidence": [
+        "docs/audit/EXP-0.1.3-contract-abi-address-reconciliation.md",
+        "contracts/src/apps/ProtocolRegistry.sol",
+        "indexer/decoder/catalog.go"
+      ],
+      "notes": "Explorer consumes the Indexer projection; it does not invoke Registry write paths or own Registry state."
+    },
+    {
+      "id": "EXP-CAP-013",
+      "name": "420 Names labels",
+      "classification": "optional_display_enrichment",
+      "implementation_status": "not_observed",
+      "runtime_status": "unverified",
+      "qualification_status": "inventory_classified",
+      "explorer_api": [],
+      "indexer_dependencies": [],
+      "evidence": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.1.2-indexer-dependency-reconciliation.md"
+      ],
+      "notes": "Dedicated Genesis profile explicitly calls naming optional display enrichment. Absence does not block core Explorer Genesis scope."
+    },
+    {
+      "id": "EXP-CAP-014",
+      "name": "420 Identity public labels",
+      "classification": "optional_display_enrichment",
+      "implementation_status": "not_observed",
+      "runtime_status": "unverified",
+      "qualification_status": "inventory_classified",
+      "explorer_api": [],
+      "indexer_dependencies": [],
+      "evidence": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.1.2-indexer-dependency-reconciliation.md"
+      ],
+      "notes": "Dedicated Genesis profile explicitly calls identity optional public display enrichment. Absence does not block core Explorer Genesis scope."
+    },
+    {
+      "id": "EXP-CAP-015",
+      "name": "Explorer verified-source submission or verdict engine",
+      "classification": "explicitly_out_of_scope",
+      "implementation_status": "not_observed",
+      "runtime_status": "not_applicable",
+      "qualification_status": "inventory_classified",
+      "explorer_api": [],
+      "indexer_dependencies": [],
+      "evidence": [
+        "docs/audit/EXP-0.1.3-contract-abi-address-reconciliation.md",
+        "config/genesis-applications.json"
+      ],
+      "notes": "420 Verify is the separate Genesis reproducible-build verifier. Explorer may present verification metadata but does not become the verification authority."
+    },
+    {
+      "id": "EXP-CAP-016",
+      "name": "Explorer transaction signing or contract writes",
+      "classification": "explicitly_out_of_scope",
+      "implementation_status": "not_observed",
+      "runtime_status": "not_applicable",
+      "qualification_status": "inventory_classified",
+      "explorer_api": [],
+      "indexer_dependencies": [],
+      "evidence": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.1.3-contract-abi-address-reconciliation.md"
+      ],
+      "notes": "Explorer is read-only observability infrastructure and gains no custody or execution authority."
+    },
+    {
+      "id": "EXP-CAP-017",
+      "name": "Explorer-specific Genesis smart contract",
+      "classification": "explicitly_out_of_scope",
+      "implementation_status": "not_applicable",
+      "runtime_status": "not_applicable",
+      "qualification_status": "inventory_classified",
+      "explorer_api": [],
+      "indexer_dependencies": [],
+      "evidence": [
+        "contracts/config/420explorer-genesis.json",
+        "config/genesis-applications.json",
+        "docs/audit/EXP-0.1.3-contract-abi-address-reconciliation.md"
+      ],
+      "notes": "Both authoritative Genesis sources classify Explorer as contract-free."
+    },
+    {
+      "id": "EXP-CAP-018",
+      "name": "independent Explorer RPC ingestion/checkpoint/reorg/decoder pipeline",
+      "classification": "explicitly_out_of_scope",
+      "implementation_status": "not_applicable",
+      "runtime_status": "not_applicable",
+      "qualification_status": "inventory_classified",
+      "explorer_api": [],
+      "indexer_dependencies": [],
+      "evidence": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.1.2-indexer-dependency-reconciliation.md"
+      ],
+      "notes": "Explicitly prohibited by EXP-INV-013 and the Genesis profile."
+    },
+    {
+      "id": "EXP-CAP-019",
+      "name": "governance view",
+      "classification": "scope_decision_required",
+      "implementation_status": "not_observed",
+      "runtime_status": "unverified",
+      "qualification_status": "scope_decision_required",
+      "explorer_api": [],
+      "indexer_dependencies": [],
+      "evidence": [
+        "config/genesis-applications.json",
+        "contracts/config/420explorer-genesis.json"
+      ],
+      "notes": "Frozen application purpose names governance, but the dedicated Explorer profile does not list governance in requiredViews. EXP-0 must resolve this inconsistency before final scope closeout; EXP-0.2.1 records it without guessing."
+    }
+  ]
+}

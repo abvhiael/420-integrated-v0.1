@@ -391,21 +391,21 @@
         "docs/audit/EXP-0.1.2-indexer-dependency-reconciliation.md"
       ],
       "notes": "Explicitly prohibited by EXP-INV-013 and the Genesis profile."
-    },
+    }
+  ],
+  "resolved_scope_decisions": [
     {
-      "id": "EXP-CAP-019",
-      "name": "governance view",
-      "classification": "scope_decision_required",
-      "implementation_status": "not_observed",
-      "runtime_status": "unverified",
-      "qualification_status": "scope_decision_required",
-      "explorer_api": [],
-      "indexer_dependencies": [],
+      "id": "EXP-SCOPE-CONFLICT-001",
+      "decision": "EXP-SCOPE-RESOLUTION-B",
+      "subject": "governance view",
+      "outcome": "not_required_as_dedicated_view",
+      "decision_milestone": "EXP-0.3.8",
       "evidence": [
         "config/genesis-applications.json",
-        "contracts/config/420explorer-genesis.json"
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.3.8-governance-scope-decision.json"
       ],
-      "notes": "Frozen application purpose names governance, but the dedicated Explorer profile does not list governance in requiredViews. EXP-0 must resolve this inconsistency before final scope closeout; EXP-0.2.1 records it without guessing."
+      "statement": "Governance is descriptive ecosystem subject matter and is not a mandatory dedicated 420Explorer Genesis view."
     }
   ]
 }

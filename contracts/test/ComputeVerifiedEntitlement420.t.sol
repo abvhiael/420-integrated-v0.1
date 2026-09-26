@@ -32,6 +32,9 @@ contract ComputeVerifiedEntitlement420Test {
     address private constant GOV = address(0x420);
     address private constant ATTESTOR = address(0x1002);
     address private constant SELECTOR = address(0x1003);
+    address private constant ADJUDICATOR_A = address(0xAD01);
+    address private constant ADJUDICATOR_B = address(0xAD02);
+    address private constant OUTSIDER = address(0xBAD1);
 
     bytes32 private constant VAULT_ID = keccak256("cmp/verified-entitlement/vault/v1");
     bytes32 private constant MANIFEST = keccak256("cmp-verified-entitlement-manifest");
@@ -53,6 +56,7 @@ contract ComputeVerifiedEntitlement420Test {
     ComputeJobMatchedWorkerEvidence420 private workers;
     ComputeVerifierIndependencePolicy420 private policy;
     ComputeJobIntegerProfileVerification420 private verification;
+    ComputeDisputeResolution420 private disputes;
     ComputeVerifiedEntitlement420 private entitlements;
     ComputeJobRegistry420 private jobs;
 
@@ -112,8 +116,10 @@ contract ComputeVerifiedEntitlement420Test {
         policy = new ComputeVerifierIndependencePolicy420(GOV, ATTESTOR, SELECTOR);
         verification = new ComputeJobIntegerProfileVerification420(
             address(matches), address(auth), address(policy));
+        disputes = new ComputeDisputeResolution420(
+            address(matches), address(auth), address(policy));
         entitlements = new ComputeVerifiedEntitlement420(
-            address(matches), address(auth), address(verification));
+            address(matches), address(auth), address(verification), address(disputes));
         jobs = new ComputeJobRegistry420(address(requests), address(funding), address(matches),
             address(workers), address(verification), address(entitlements));
 
@@ -123,6 +129,8 @@ contract ComputeVerifiedEntitlement420Test {
         verification.bindJobs(address(jobs));
         verification.setApprovedProfile(verification.PROFILE_ID(), true);
         entitlements.bindJobs(address(jobs));
+        disputes.bindEntitlements(address(entitlements));
+        disputes.bindJobs(address(jobs));
         funding.bindSettlement(address(entitlements));
 
         vaultPolicy.bindVault(address(vault));
@@ -160,6 +168,9 @@ contract ComputeVerifiedEntitlement420Test {
         _attest(payerB, keccak256("payer-b"));
         _attest(OPERATOR, keccak256("operator"));
         _attest(verifier, keccak256("verifier"));
+        _attest(ADJUDICATOR_A, keccak256("adjudicator-a"));
+        _attest(ADJUDICATOR_B, keccak256("adjudicator-b"));
+        _attest(OUTSIDER, keccak256("outsider"));
     }
 
     function _grantVault(address principal, bytes32 action) private {
@@ -472,6 +483,24 @@ contract ComputeVerifiedEntitlement420Test {
         pc = entitlements.providerClaim(id);
     }
 
+    function _matureProviderClaim(bytes32 id) private {
+        ComputeVerifiedEntitlement420.ProviderClaim memory pc = entitlements.providerClaim(id);
+        vm.warp(uint256(pc.createdAt) + uint256(matches.CHALLENGE_WINDOW()) + 1);
+    }
+
+    function _grantAdjudicator(address actor, bytes32 id) private {
+        _grant(actor, id, auth.ACTION_ADJUDICATE(), 0);
+    }
+
+    function _openPayerDispute(bytes32 id, bytes32 salt) private returns (bytes32 disputeId) {
+        address payer = funding.credit(id).payer;
+        vm.prank(payer);
+        disputeId = disputes.openDispute(
+            id, jobs.job(id).revision, keccak256(abi.encode("ground", salt)),
+            keccak256(abi.encode("evidence", salt))
+        );
+    }
+
     function testProviderClaimSplitsSafetyIntoClaimableProviderAndPendingPayerResidual() public {
         bytes32 id = _verifiedJob(11, OWNER_A_KEY, PAYER_A_KEY, 4 ether);
         bytes32 safety = funding.credit(id).obligationId;
@@ -487,20 +516,21 @@ contract ComputeVerifiedEntitlement420Test {
             && credit.providerObligationId == pc.providerObligationId
             && credit.payerResidualObligationId == pc.payerResidualObligationId,
             "funding split not recorded");
-        require(original.state == 4 && provider.state == 2 && residual.state == 1,
+        require(original.state == 4 && provider.state == 1 && residual.state == 1,
             "liability states incorrect");
         require(provider.beneficiary == BENEFICIARY && provider.amount == 3 ether
             && residual.beneficiary == payerA && residual.amount == 1 ether,
             "split beneficiaries or amounts incorrect");
-        require(a.recordedBalance == 4 ether && a.reserved == 1 ether
-            && a.claimable == 3 ether && address(vault).balance == 4 ether
+        require(a.recordedBalance == 4 ether && a.reserved == 4 ether
+            && a.claimable == 0 && address(vault).balance == 4 ether
             && jobs.job(id).status == ComputeJobRegistry420.Status.VERIFIED,
-            "claimability moved funds or settled early");
+            "pending claim moved funds or settled early");
     }
 
     function testProviderClaimPaysExactBeneficiaryAndSettlesJob() public {
         bytes32 id = _verifiedJob(12, OWNER_A_KEY, PAYER_A_KEY, 4 ether);
         ComputeVerifiedEntitlement420.ProviderClaim memory pc = _makeClaimable(id);
+        _matureProviderClaim(id);
         uint256 before = BENEFICIARY.balance;
         uint64 revision = jobs.job(id).revision;
         vm.prank(BENEFICIARY);
@@ -528,9 +558,10 @@ contract ComputeVerifiedEntitlement420Test {
         (bool wrong,) = address(entitlements).call(
             abi.encodeCall(entitlements.claimProvider, (id, revision)));
         require(!wrong && address(vault).balance == beforeVault
-            && accounting.getObligation(pc.providerObligationId).state == 2,
+            && accounting.getObligation(pc.providerObligationId).state == 1,
             "wrong beneficiary consumed provider claim");
 
+        _matureProviderClaim(id);
         vm.prank(BENEFICIARY);
         entitlements.claimProvider(id, revision);
         uint256 paidBalance = BENEFICIARY.balance;
@@ -560,7 +591,7 @@ contract ComputeVerifiedEntitlement420Test {
         (bool payoutOk,) = address(entitlements).call(
             abi.encodeCall(entitlements.claimProvider, (id, uint64(7))));
         require(!payoutOk && accounting.getObligation(
-            entitlements.providerClaim(id).providerObligationId).state == 2,
+            entitlements.providerClaim(id).providerObligationId).state == 1,
             "revoked profile allowed external payout");
     }
 
@@ -569,6 +600,7 @@ contract ComputeVerifiedEntitlement420Test {
         bytes32 second = _verifiedJob(16, OWNER_B_KEY, PAYER_B_KEY, 4 ether);
         _makeClaimable(first);
         bytes32 secondSafety = funding.credit(second).obligationId;
+        _matureProviderClaim(first);
         uint64 revision = jobs.job(first).revision;
         vm.prank(BENEFICIARY);
         entitlements.claimProvider(first, revision);
@@ -580,24 +612,24 @@ contract ComputeVerifiedEntitlement420Test {
             "first provider payout consumed second payer backing");
     }
 
-    function testMissingSettlementReleaseGrantRollsBackSafetySplit() public {
+    function testMissingSettlementReleaseGrantCannotEscapePendingHold() public {
         bytes32 id = _verifiedJob(17, OWNER_A_KEY, PAYER_A_KEY, 4 ether);
-        _finalize(id, 3 ether);
-        bytes32 safety = funding.credit(id).obligationId;
+        ComputeVerifiedEntitlement420.ProviderClaim memory pc = _makeClaimable(id);
+        _matureProviderClaim(id);
         bytes32 scope = vaultPolicy.scopeForVault(VAULT_ID);
         bytes32 grantId = caps.activeGrantId(address(entitlements), VaultIds420.COMPONENT_VAULT,
             VaultIds420.ACTION_RELEASE_OBLIGATION, scope);
         caps.revokeGrant(grantId);
 
-        vm.prank(SETTLER);
+        vm.prank(BENEFICIARY);
         (bool ok,) = address(entitlements).call(
-            abi.encodeCall(entitlements.createProviderClaim, (id, uint64(7))));
-        require(!ok && !funding.credit(id).allocated
-            && accounting.getObligation(safety).state == 1
+            abi.encodeCall(entitlements.claimProvider, (id, jobs.job(id).revision)));
+        require(!ok && !entitlements.providerClaim(id).paid
+            && accounting.getObligation(pc.providerObligationId).state == 1
             && accounting.getAccounting(VAULT_ID, address(0)).reserved == 4 ether
             && accounting.getAccounting(VAULT_ID, address(0)).claimable == 0
             && address(vault).balance == 4 ether,
-            "failed provider release stranded split liability");
+            "missing release authority escaped pending provider hold");
     }
 
     function testExactFundedPayoutCreatesNoResidual() public {
@@ -605,6 +637,7 @@ contract ComputeVerifiedEntitlement420Test {
         ComputeVerifiedEntitlement420.ProviderClaim memory pc = _makeClaimable(id);
         require(pc.payerResidualObligationId == bytes32(0),
             "exact funded job created payer residual");
+        _matureProviderClaim(id);
         uint64 revision = jobs.job(id).revision;
         vm.prank(BENEFICIARY);
         entitlements.claimProvider(id, revision);
@@ -618,6 +651,7 @@ contract ComputeVerifiedEntitlement420Test {
     function testSettledUnderBudgetResidualRefundPaysOriginalPayerWithoutReopeningJob() public {
         bytes32 id = _verifiedJob(19, OWNER_A_KEY, PAYER_A_KEY, 4 ether);
         _makeClaimable(id);
+        _matureProviderClaim(id);
         uint64 providerRevision = jobs.job(id).revision;
         vm.prank(BENEFICIARY);
         entitlements.claimProvider(id, providerRevision);
@@ -628,7 +662,7 @@ contract ComputeVerifiedEntitlement420Test {
         entitlements.createSettledResidualRefundClaim(id);
         ComputeVerifiedEntitlement420.PayerRefund memory refund = entitlements.payerRefund(id);
         require(refund.residual && refund.payer == payerA && refund.amount == 1 ether
-            && accounting.getObligation(refund.obligationId).state == 2,
+            && accounting.getObligation(refund.obligationId).state == 1,
             "residual refund not claimable");
 
         uint64 settledRevision = jobs.job(id).revision;
@@ -650,7 +684,7 @@ contract ComputeVerifiedEntitlement420Test {
         entitlements.createTerminalRefundClaim(id);
         ComputeVerifiedEntitlement420.PayerRefund memory refund = entitlements.payerRefund(id);
         require(!refund.residual && refund.payer == payerA && refund.amount == 4 ether
-            && accounting.getObligation(refund.obligationId).state == 2
+            && accounting.getObligation(refund.obligationId).state == 1
             && entitlements.totalProviderPaid() == 0,
             "failed job refund claim incorrect");
 

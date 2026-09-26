@@ -4,6 +4,7 @@ pragma solidity ^0.8.24;
 import "./ComputeJobRegistry420.sol";
 import "./ComputeAcceptedPriceMatch420.sol";
 import "./ComputeAuthorization420.sol";
+import "./ComputeJobIntegerProfileVerification420.sol";
 
 /// @notice CMP-1.2.3 verified earning ledger for the fixed-price paid-compute path.
 /// @dev Converts one VERIFIED job into one immutable provider entitlement record.
@@ -37,6 +38,7 @@ contract ComputeVerifiedEntitlement420 is IComputeJobSettlementEvidence420 {
     ComputeJobRegistry420 public jobs;
     ComputeAcceptedPriceMatch420 public immutable matches;
     ComputeAuthorization420 public immutable authorization;
+    ComputeJobIntegerProfileVerification420 public immutable verification;
     address public immutable bindingAdmin;
 
     mapping(bytes32 => Entitlement) private _entitlements;
@@ -56,11 +58,12 @@ contract ComputeVerifiedEntitlement420 is IComputeJobSettlementEvidence420 {
         bytes32 verificationRef
     );
 
-    constructor(address matches_, address authorization_) {
-        if (matches_.code.length == 0 || authorization_.code.length == 0)
-            revert InvalidEntitlement();
+    constructor(address matches_, address authorization_, address verification_) {
+        if (matches_.code.length == 0 || authorization_.code.length == 0
+            || verification_.code.length == 0) revert InvalidEntitlement();
         matches = ComputeAcceptedPriceMatch420(matches_);
         authorization = ComputeAuthorization420(authorization_);
+        verification = ComputeJobIntegerProfileVerification420(verification_);
         bindingAdmin = msg.sender;
     }
 
@@ -70,7 +73,9 @@ contract ComputeVerifiedEntitlement420 is IComputeJobSettlementEvidence420 {
         ComputeJobRegistry420 candidate = ComputeJobRegistry420(jobs_);
         if (address(candidate.settlementEvidence()) != address(this)
             || address(candidate.matchEvidence()) != address(matches)
-            || address(matches.jobs()) != jobs_) revert InvalidEntitlement();
+            || address(candidate.verificationEvidence()) != address(verification)
+            || address(matches.jobs()) != jobs_
+            || address(verification.jobs()) != jobs_) revert InvalidEntitlement();
         jobs = candidate;
         emit JobsBound(jobs_);
     }
@@ -89,13 +94,27 @@ contract ComputeVerifiedEntitlement420 is IComputeJobSettlementEvidence420 {
             || j.resultCommitment == bytes32(0)
             || j.verifier == address(0)) revert InvalidEntitlement();
 
-        if (!jobs.verificationEvidence().verified(
+        if (!verification.verified(
             jobId, j.resultCommitment, j.verifier, j.verificationRef, true
         )) revert InvalidEntitlement();
+        ComputeJobIndependentVerification420.Decision memory d = verification.decision(j.verificationRef);
+        ComputeJobIntegerProfileVerification420.Evaluation memory evaluation =
+            verification.evaluation(j.verificationRef);
+        if (!d.exists || !d.approved || d.jobId != jobId || d.verifier != j.verifier
+            || d.resultCommitment != j.resultCommitment || !evaluation.exists
+            || !evaluation.approved || evaluation.jobId != jobId
+            || evaluation.workerResultCommitment != j.resultCommitment
+            || evaluation.evidenceRef == bytes32(0)) revert InvalidEntitlement();
 
         bytes32 priceRef = matches.priceReservationForJob(jobId);
         if (priceRef == bytes32(0)) revert InvalidEntitlement();
         ComputeAcceptedPriceMatch420.PriceReservation memory p = matches.priceReservation(priceRef);
+
+        (, , address operator, bool matchExists) = matches.matchParties(j.matchId);
+        if (!matchExists || operator == address(0)
+            || !verification.independencePolicy().eligible(
+                jobId, j.verifier, d.profileId, j.owner, p.payer, operator
+            )) revert InvalidEntitlement();
 
         uint256 earned = p.acceptedAmount;
         if (!p.exists || p.jobId != jobId || p.matchId != j.matchId

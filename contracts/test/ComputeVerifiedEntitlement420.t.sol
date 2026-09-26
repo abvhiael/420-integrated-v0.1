@@ -512,9 +512,10 @@ contract ComputeVerifiedEntitlement420Test {
 
     function _openPayerDispute(bytes32 id, bytes32 salt) private returns (bytes32 disputeId) {
         address payer = funding.credit(id).payer;
+        uint64 revision = jobs.job(id).revision;
         vm.prank(payer);
         disputeId = disputes.openDispute(
-            id, jobs.job(id).revision, keccak256(abi.encode("ground", salt)),
+            id, revision, keccak256(abi.encode("ground", salt)),
             keccak256(abi.encode("evidence", salt))
         );
     }
@@ -639,9 +640,10 @@ contract ComputeVerifiedEntitlement420Test {
             VaultIds420.ACTION_RELEASE_OBLIGATION, scope);
         caps.revokeGrant(grantId);
 
+        uint64 blockedRevision = jobs.job(id).revision;
         vm.prank(BENEFICIARY);
         (bool ok,) = address(entitlements).call(
-            abi.encodeCall(entitlements.claimProvider, (id, jobs.job(id).revision)));
+            abi.encodeCall(entitlements.claimProvider, (id, blockedRevision)));
         require(!ok && !entitlements.providerClaim(id).paid
             && accounting.getObligation(pc.providerObligationId).state == 1
             && accounting.getAccounting(VAULT_ID, address(0)).reserved == 4 ether
@@ -831,9 +833,10 @@ contract ComputeVerifiedEntitlement420Test {
         require(!directOk && accounting.getObligation(pc.providerObligationId).state == 1,
             "beneficiary bypassed dispute gate through Vault");
 
+        uint64 earlyRevision = jobs.job(id).revision;
         vm.prank(BENEFICIARY);
         (bool earlyOk,) = address(entitlements).call(
-            abi.encodeCall(entitlements.claimProvider, (id, jobs.job(id).revision)));
+            abi.encodeCall(entitlements.claimProvider, (id, earlyRevision)));
         require(!earlyOk && !entitlements.providerClaim(id).paid
             && jobs.job(id).status == ComputeJobRegistry420.Status.VERIFIED,
             "provider paid before challenge window finality");
@@ -863,8 +866,9 @@ contract ComputeVerifiedEntitlement420Test {
             "provider-win finality changed liability before payout");
 
         uint256 before = BENEFICIARY.balance;
+        uint64 providerWinRevision = jobs.job(id).revision;
         vm.prank(BENEFICIARY);
-        entitlements.claimProvider(id, jobs.job(id).revision);
+        entitlements.claimProvider(id, providerWinRevision);
         require(BENEFICIARY.balance == before + 3 ether
             && jobs.job(id).status == ComputeJobRegistry420.Status.SETTLED
             && accounting.getObligation(pc.providerObligationId).state == 3,
@@ -894,8 +898,9 @@ contract ComputeVerifiedEntitlement420Test {
             "payer-win resolution did not preserve exact payer-backed liability");
 
         uint256 before = payerA.balance;
+        uint64 payerWinRevision = jobs.job(id).revision;
         vm.prank(payerA);
-        entitlements.claimPayerRefund(id, jobs.job(id).revision);
+        entitlements.claimPayerRefund(id, payerWinRevision);
         require(payerA.balance == before + 4 ether
             && jobs.job(id).status == ComputeJobRegistry420.Status.REFUNDED
             && address(vault).balance == 0,
@@ -930,8 +935,9 @@ contract ComputeVerifiedEntitlement420Test {
             && disputes.providerReleaseAllowed(id),
             "appeal did not overturn same held entitlement");
 
+        uint64 appealWinRevision = jobs.job(id).revision;
         vm.prank(BENEFICIARY);
-        entitlements.claimProvider(id, jobs.job(id).revision);
+        entitlements.claimProvider(id, appealWinRevision);
         require(jobs.job(id).status == ComputeJobRegistry420.Status.SETTLED
             && entitlements.totalProviderPaid() == 3 ether,
             "appeal-final provider entitlement did not settle once");
@@ -966,16 +972,18 @@ contract ComputeVerifiedEntitlement420Test {
         _makeClaimable(id);
         _matureProviderClaim(id);
 
+        uint64 lateRevision = jobs.job(id).revision;
         vm.prank(payerA);
         (bool lateOk,) = address(disputes).call(
             abi.encodeCall(disputes.openDispute, (
-                id, jobs.job(id).revision, keccak256("late-ground"), keccak256("late-evidence")
+                id, lateRevision, keccak256("late-ground"), keccak256("late-evidence")
             )));
         require(!lateOk && disputes.disputeForJob(id) == bytes32(0),
             "expired challenge opened a case");
 
+        uint64 unchallengedRevision = jobs.job(id).revision;
         vm.prank(BENEFICIARY);
-        entitlements.claimProvider(id, jobs.job(id).revision);
+        entitlements.claimProvider(id, unchallengedRevision);
         require(jobs.job(id).status == ComputeJobRegistry420.Status.SETTLED,
             "unchallenged final claim did not settle");
     }
@@ -1008,8 +1016,9 @@ contract ComputeVerifiedEntitlement420Test {
             && disputes.providerReleaseAllowed(id)
             && accounting.getObligation(pc.providerObligationId).state == 1,
             "withdrawal did not release original held entitlement");
+        uint64 withdrawnRevision = jobs.job(id).revision;
         vm.prank(BENEFICIARY);
-        entitlements.claimProvider(id, jobs.job(id).revision);
+        entitlements.claimProvider(id, withdrawnRevision);
         require(jobs.job(id).status == ComputeJobRegistry420.Status.SETTLED
             && entitlements.totalProviderPaid() == 3 ether,
             "withdrawn case duplicated or lost provider entitlement");

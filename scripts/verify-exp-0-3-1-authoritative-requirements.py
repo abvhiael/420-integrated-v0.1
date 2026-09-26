@@ -53,8 +53,8 @@ def main():
 
     reqs = inv.get("requirements", [])
     ids = [r.get("id") for r in reqs]
-    if len(reqs) != 65:
-        errors.append(f"expected 65 requirements, found {len(reqs)}")
+    if len(reqs) != 64:
+        errors.append(f"expected 64 active requirements after EXP-0.3.8 scope resolution, found {len(reqs)}")
     if len(ids) != len(set(ids)):
         errors.append("duplicate requirement id")
 
@@ -63,7 +63,7 @@ def main():
         "mandatory_genesis": 60,
         "optional_integration": 2,
         "post_genesis_enhancement": 2,
-        "scope_decision_required": 1,
+        "scope_decision_required": 0,
     }
     if counts != expected_counts:
         errors.append(f"classification count drift: {counts}")
@@ -238,15 +238,17 @@ def main():
         if by_id.get(rid, {}).get("classification") != "post_genesis_enhancement":
             errors.append(f"{rid}: post-Genesis classification drift")
 
-    # Governance conflict must remain explicit while the two sources disagree.
+    # EXP-0.3.8 resolved the governance ambiguity via Resolution B.
     governance_in_purpose = "governance" in purpose.lower()
     governance_required = "governance" in {str(v).lower() for v in required_views}
-    scope = by_id.get("EXP-REQ-SCOPE-001", {})
-    if governance_in_purpose and not governance_required:
-        if scope.get("classification") != "scope_decision_required" or scope.get("current_status") != "scope_decision_required":
-            errors.append("governance source conflict not preserved")
-    else:
-        errors.append("governance authoritative-source relationship changed; EXP-0.3.1 requires reconciliation")
+    scope = by_id.get("EXP-REQ-SCOPE-001")
+    if governance_in_purpose or governance_required:
+        errors.append("governance scope was reintroduced after EXP-0.3.8 Resolution B")
+    if scope is not None:
+        errors.append("retired governance scope requirement remains active")
+    resolved = inv.get("resolved_scope_decisions", [])
+    if len(resolved) != 1 or resolved[0].get("decision") != "EXP-SCOPE-RESOLUTION-B":
+        errors.append("EXP-0.3.8 resolved scope decision record missing")
 
     EVIDENCE.mkdir(exist_ok=True)
     summary = {

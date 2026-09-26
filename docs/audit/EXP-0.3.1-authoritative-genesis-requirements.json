@@ -1,0 +1,1721 @@
+{
+  "schema": "420explorer-exp-0.3.1-authoritative-genesis-requirements-v1",
+  "milestone": "EXP-0.3.1",
+  "title": "Authoritative 420Explorer Genesis requirement inventory",
+  "baseline_main_commit": "c7cb5f4dac07eb9416cac4a11eeee31b6efb10f0",
+  "authoritative_sources": [
+    "contracts/config/420explorer-genesis.json",
+    "config/genesis-applications.json",
+    "config/system-addresses.json",
+    "contracts/config/system-addresses.json",
+    "docs/audit/EXP-0.2.1-genesis-capability-matrix.json",
+    "docs/audit/EXP-0.2.2-user-workflow-matrix.json",
+    "docs/audit/EXP-0.2.5-genesis-gap-register.json",
+    "docs/audit/EXP-0.2.6-genesis-acceptance-criteria.json"
+  ],
+  "classification_vocabulary": [
+    "mandatory_genesis",
+    "optional_integration",
+    "post_genesis_enhancement",
+    "scope_decision_required"
+  ],
+  "status_vocabulary": [
+    "implemented_source",
+    "partial_source",
+    "source_qualified",
+    "deployment_pending",
+    "runtime_unverified",
+    "optional_unimplemented",
+    "post_genesis",
+    "scope_decision_required"
+  ],
+  "requirements": [
+    {
+      "id": "EXP-REQ-VIEW-001",
+      "category": "required_view",
+      "name": "block",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "requiredViews contains \"block\""
+      },
+      "statement": "420Explorer must provide the \"block\" Genesis view.",
+      "implementation_paths": [
+        "explorer/api/server.go",
+        "explorer/service/service.go",
+        "explorer/indexerclient/client.go"
+      ],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-4",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-1",
+        "AC-2",
+        "AC-3"
+      ],
+      "current_status": "implemented_source",
+      "notes": [
+        "EXP-0.2 capability: EXP-CAP-001"
+      ]
+    },
+    {
+      "id": "EXP-REQ-VIEW-002",
+      "category": "required_view",
+      "name": "transaction",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "requiredViews contains \"transaction\""
+      },
+      "statement": "420Explorer must provide the \"transaction\" Genesis view.",
+      "implementation_paths": [
+        "explorer/api/server.go",
+        "explorer/service/transactionviews.go",
+        "explorer/indexerclient/client.go"
+      ],
+      "later_qualification_owners": [
+        "EXP-2",
+        "EXP-4",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-1",
+        "AC-2",
+        "AC-5"
+      ],
+      "current_status": "implemented_source",
+      "notes": [
+        "EXP-0.2 capability: EXP-CAP-002"
+      ]
+    },
+    {
+      "id": "EXP-REQ-VIEW-003",
+      "category": "required_view",
+      "name": "receipt/logs",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "requiredViews contains \"receipt/logs\""
+      },
+      "statement": "420Explorer must provide the \"receipt/logs\" Genesis view.",
+      "implementation_paths": [
+        "explorer/api/server.go",
+        "explorer/service/transactionviews.go",
+        "explorer/indexerclient/client.go"
+      ],
+      "later_qualification_owners": [
+        "EXP-2",
+        "EXP-3",
+        "EXP-4",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-1",
+        "AC-2",
+        "AC-5",
+        "AC-7"
+      ],
+      "current_status": "partial_source",
+      "notes": [
+        "EXP-0.2 capability: EXP-CAP-003"
+      ]
+    },
+    {
+      "id": "EXP-REQ-VIEW-004",
+      "category": "required_view",
+      "name": "address",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "requiredViews contains \"address\""
+      },
+      "statement": "420Explorer must provide the \"address\" Genesis view.",
+      "implementation_paths": [
+        "explorer/api/server.go",
+        "explorer/service/addressviews.go",
+        "explorer/indexerclient/address.go"
+      ],
+      "later_qualification_owners": [
+        "EXP-2",
+        "EXP-4",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-1",
+        "AC-5"
+      ],
+      "current_status": "implemented_source",
+      "notes": [
+        "EXP-0.2 capability: EXP-CAP-004"
+      ]
+    },
+    {
+      "id": "EXP-REQ-VIEW-005",
+      "category": "required_view",
+      "name": "contract",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "requiredViews contains \"contract\""
+      },
+      "statement": "420Explorer must provide the \"contract\" Genesis view.",
+      "implementation_paths": [
+        "explorer/api/server.go",
+        "explorer/service/contractviews.go",
+        "explorer/indexerclient/contract.go"
+      ],
+      "later_qualification_owners": [
+        "EXP-2",
+        "EXP-3",
+        "EXP-4",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-1",
+        "AC-4",
+        "AC-5"
+      ],
+      "current_status": "implemented_source",
+      "notes": [
+        "EXP-0.2 capability: EXP-CAP-005"
+      ]
+    },
+    {
+      "id": "EXP-REQ-VIEW-006",
+      "category": "required_view",
+      "name": "token/asset activity",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "requiredViews contains \"token/asset activity\""
+      },
+      "statement": "420Explorer must provide the \"token/asset activity\" Genesis view.",
+      "implementation_paths": [
+        "explorer/api/server.go",
+        "explorer/service/assetviews.go",
+        "explorer/indexerclient/assets.go"
+      ],
+      "later_qualification_owners": [
+        "EXP-2",
+        "EXP-3",
+        "EXP-4",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-5"
+      ],
+      "current_status": "partial_source",
+      "notes": [
+        "EXP-0.2 capability: EXP-CAP-006"
+      ]
+    },
+    {
+      "id": "EXP-REQ-VIEW-007",
+      "category": "required_view",
+      "name": "validator",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "requiredViews contains \"validator\""
+      },
+      "statement": "420Explorer must provide the \"validator\" Genesis view.",
+      "implementation_paths": [
+        "explorer/api/server.go",
+        "explorer/service/consensusviews.go",
+        "explorer/indexerclient/consensus.go"
+      ],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-4",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-3",
+        "AC-5",
+        "AC-6"
+      ],
+      "current_status": "partial_source",
+      "notes": [
+        "EXP-0.2 capability: EXP-CAP-007"
+      ]
+    },
+    {
+      "id": "EXP-REQ-VIEW-008",
+      "category": "required_view",
+      "name": "epoch/rotation",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "requiredViews contains \"epoch/rotation\""
+      },
+      "statement": "420Explorer must provide the \"epoch/rotation\" Genesis view.",
+      "implementation_paths": [
+        "explorer/api/server.go",
+        "explorer/service/consensusviews.go",
+        "explorer/indexerclient/consensus.go"
+      ],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-4",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-3",
+        "AC-5",
+        "AC-6"
+      ],
+      "current_status": "partial_source",
+      "notes": [
+        "EXP-0.2 capability: EXP-CAP-008"
+      ]
+    },
+    {
+      "id": "EXP-REQ-VIEW-009",
+      "category": "required_view",
+      "name": "protocol service/version",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "requiredViews contains \"protocol service/version\""
+      },
+      "statement": "420Explorer must provide the \"protocol service/version\" Genesis view.",
+      "implementation_paths": [
+        "explorer/api/server.go",
+        "explorer/service/registryviews.go",
+        "explorer/indexerclient/registry.go"
+      ],
+      "later_qualification_owners": [
+        "EXP-3",
+        "EXP-5",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-4",
+        "AC-5",
+        "AC-6"
+      ],
+      "current_status": "implemented_source",
+      "notes": [
+        "EXP-0.2 capability: EXP-CAP-009"
+      ]
+    },
+    {
+      "id": "EXP-REQ-VIEW-010",
+      "category": "required_view",
+      "name": "network status",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "requiredViews contains \"network status\""
+      },
+      "statement": "420Explorer must provide the \"network status\" Genesis view.",
+      "implementation_paths": [
+        "explorer/api/server.go",
+        "explorer/service/service.go",
+        "explorer/indexerclient/client.go"
+      ],
+      "later_qualification_owners": [
+        "EXP-2",
+        "EXP-6",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-2",
+        "AC-6",
+        "AC-7"
+      ],
+      "current_status": "implemented_source",
+      "notes": [
+        "EXP-0.2 capability: EXP-CAP-010"
+      ]
+    },
+    {
+      "id": "EXP-REQ-APP-001",
+      "category": "application_identity",
+      "name": "GENESIS_USER_APP classification",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "class"
+      },
+      "statement": "420Explorer is a GENESIS_USER_APP and its frontend remains non-consensus-critical.",
+      "implementation_paths": [
+        "contracts/config/420explorer-genesis.json",
+        "config/genesis-applications.json"
+      ],
+      "later_qualification_owners": [
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-8",
+        "AC-10"
+      ],
+      "current_status": "source_qualified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-APP-002",
+      "category": "application_identity",
+      "name": "Explorer-specific contracts not required",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "contractsRequired"
+      },
+      "statement": "420Explorer must require no Explorer-specific Genesis contract.",
+      "implementation_paths": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.1.3-contract-abi-address-reconciliation.md"
+      ],
+      "later_qualification_owners": [
+        "EXP-3",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-4",
+        "AC-10"
+      ],
+      "current_status": "source_qualified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-APP-003",
+      "category": "authority_boundary",
+      "name": "Explorer is not canonical state authority",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "canonicalStateAuthority"
+      },
+      "statement": "420Explorer must not claim canonical protocol state authority.",
+      "implementation_paths": [
+        "contracts/config/420explorer-genesis.json",
+        "explorer/service/service.go"
+      ],
+      "later_qualification_owners": [
+        "EXP-2",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-2",
+        "AC-7",
+        "AC-10"
+      ],
+      "current_status": "source_qualified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-SRC-001",
+      "category": "source_dependency",
+      "name": "420Indexer chain index",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "sources.chainIndex"
+      },
+      "statement": "Explorer indexed chain data must come from the 420Indexer /v1 read API.",
+      "implementation_paths": [
+        "explorer/cmd/explorer420/main.go",
+        "explorer/indexerclient/client.go",
+        "docs/audit/EXP-0.1.2-indexer-dependency-reconciliation.md"
+      ],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-2",
+        "AC-3",
+        "AC-6"
+      ],
+      "current_status": "deployment_pending",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-SRC-002",
+      "category": "authority_boundary",
+      "name": "No direct execution RPC ingestion",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "sources.directExecutionRpcIngestion"
+      },
+      "statement": "Explorer must not ingest execution RPC directly as an independent chain-indexing path.",
+      "implementation_paths": [
+        "contracts/config/420explorer-genesis.json",
+        "explorer/cmd/explorer420/main.go",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-2",
+        "AC-3",
+        "AC-7"
+      ],
+      "current_status": "source_qualified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-SRC-003",
+      "category": "source_dependency",
+      "name": "Consensus projection source",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "sources.consensus"
+      },
+      "statement": "Explorer consensus/finality data must be presented from qualified 420Indexer consensus projections.",
+      "implementation_paths": [
+        "explorer/service/consensusviews.go",
+        "explorer/indexerclient/consensus.go"
+      ],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-3",
+        "AC-5",
+        "AC-6"
+      ],
+      "current_status": "runtime_unverified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-SRC-004",
+      "category": "source_dependency",
+      "name": "Registry-backed protocol discovery",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "sources.protocolDiscovery"
+      },
+      "statement": "Protocol service/version discovery must use the 420Indexer Registry-backed projection.",
+      "implementation_paths": [
+        "explorer/service/registryviews.go",
+        "explorer/indexerclient/registry.go"
+      ],
+      "later_qualification_owners": [
+        "EXP-3",
+        "EXP-5",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-4",
+        "AC-5",
+        "AC-6"
+      ],
+      "current_status": "runtime_unverified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-SRC-005",
+      "category": "optional_integration",
+      "name": "420 Names display enrichment",
+      "classification": "optional_integration",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "sources.optionalNaming"
+      },
+      "statement": "420 Names may enrich presentation but must not replace canonical address/protocol identity.",
+      "implementation_paths": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "later_qualification_owners": [
+        "post-Genesis"
+      ],
+      "acceptance_criteria": [],
+      "current_status": "optional_unimplemented",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-SRC-006",
+      "category": "optional_integration",
+      "name": "420 Identity public display enrichment",
+      "classification": "optional_integration",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "sources.optionalIdentity"
+      },
+      "statement": "420 Identity may enrich public presentation but must not replace canonical identity/address records.",
+      "implementation_paths": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "later_qualification_owners": [
+        "post-Genesis"
+      ],
+      "acceptance_criteria": [],
+      "current_status": "optional_unimplemented",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-IDX-001",
+      "category": "indexer_consumer",
+      "name": "Indexer service identity",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "indexerConsumer.service"
+      },
+      "statement": "Explorer must consume the 420Indexer service.",
+      "implementation_paths": [
+        "explorer/cmd/explorer420/main.go",
+        "explorer/indexerclient/client.go"
+      ],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-2",
+        "AC-3",
+        "AC-6"
+      ],
+      "current_status": "source_qualified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-IDX-002",
+      "category": "indexer_consumer",
+      "name": "Indexer API version v1",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "indexerConsumer.apiVersion"
+      },
+      "statement": "Explorer must consume the v1 Indexer API contract.",
+      "implementation_paths": [
+        "explorer/indexerclient/client.go",
+        "docs/audit/EXP-0.1.2-indexer-dependency-reconciliation.md"
+      ],
+      "later_qualification_owners": [
+        "EXP-2",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-6"
+      ],
+      "current_status": "source_qualified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-IDX-003",
+      "category": "indexer_consumer",
+      "name": "Required chain ID 420",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "indexerConsumer.requiredChainId"
+      },
+      "statement": "Explorer must require chain ID 420 and fail closed on wrong-network data.",
+      "implementation_paths": [
+        "explorer/service/service.go",
+        "explorer/indexerclient/client.go"
+      ],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-6",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-2",
+        "AC-3",
+        "AC-7"
+      ],
+      "current_status": "source_qualified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-IDX-004",
+      "category": "authority_boundary",
+      "name": "independentChainIngestion",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "indexerConsumer.independentChainIngestion"
+      },
+      "statement": "Explorer must not implement independent chain ingestion.",
+      "implementation_paths": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-3",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-2",
+        "AC-3",
+        "AC-4",
+        "AC-7"
+      ],
+      "current_status": "source_qualified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-IDX-005",
+      "category": "authority_boundary",
+      "name": "independentCheckpointStore",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "indexerConsumer.independentCheckpointStore"
+      },
+      "statement": "Explorer must not implement an independent checkpoint store.",
+      "implementation_paths": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-3",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-2",
+        "AC-3",
+        "AC-4",
+        "AC-7"
+      ],
+      "current_status": "source_qualified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-IDX-006",
+      "category": "authority_boundary",
+      "name": "independentReorgEngine",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "indexerConsumer.independentReorgEngine"
+      },
+      "statement": "Explorer must not implement an independent reorg engine.",
+      "implementation_paths": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-3",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-2",
+        "AC-3",
+        "AC-4",
+        "AC-7"
+      ],
+      "current_status": "source_qualified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-IDX-007",
+      "category": "authority_boundary",
+      "name": "independentProtocolDecoderRegistry",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "indexerConsumer.independentProtocolDecoderRegistry"
+      },
+      "statement": "Explorer must not implement an independent protocol decoder registry.",
+      "implementation_paths": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-3",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-2",
+        "AC-3",
+        "AC-4",
+        "AC-7"
+      ],
+      "current_status": "source_qualified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-IDX-008",
+      "category": "authority_boundary",
+      "name": "Fail closed on canonical-authority claim",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "indexerConsumer.failClosedOnCanonicalAuthorityClaim"
+      },
+      "statement": "Explorer must fail closed if the Indexer claims canonical authority.",
+      "implementation_paths": [
+        "explorer/service/service.go",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "later_qualification_owners": [
+        "EXP-2",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-2",
+        "AC-7"
+      ],
+      "current_status": "source_qualified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-END-001",
+      "category": "required_endpoint",
+      "name": "/v1/health",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "indexerConsumer.requiredEndpoints contains \"/v1/health\""
+      },
+      "statement": "The Explorer Indexer consumer contract must support /v1/health.",
+      "implementation_paths": [
+        "explorer/indexerclient/client.go"
+      ],
+      "later_qualification_owners": [
+        "EXP-2",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-2",
+        "AC-6"
+      ],
+      "current_status": "source_qualified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-END-002",
+      "category": "required_endpoint",
+      "name": "/v1/blocks",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "indexerConsumer.requiredEndpoints contains \"/v1/blocks\""
+      },
+      "statement": "The Explorer Indexer consumer contract must support /v1/blocks.",
+      "implementation_paths": [
+        "explorer/indexerclient/client.go"
+      ],
+      "later_qualification_owners": [
+        "EXP-2",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-1",
+        "AC-6"
+      ],
+      "current_status": "source_qualified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-END-003",
+      "category": "required_endpoint",
+      "name": "/v1/blocks/{number}",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "indexerConsumer.requiredEndpoints contains \"/v1/blocks/{number}\""
+      },
+      "statement": "The Explorer Indexer consumer contract must support /v1/blocks/{number}.",
+      "implementation_paths": [
+        "explorer/indexerclient/client.go"
+      ],
+      "later_qualification_owners": [
+        "EXP-2",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-1",
+        "AC-6"
+      ],
+      "current_status": "source_qualified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-END-004",
+      "category": "required_endpoint",
+      "name": "/v1/transactions/{hash}",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "indexerConsumer.requiredEndpoints contains \"/v1/transactions/{hash}\""
+      },
+      "statement": "The Explorer Indexer consumer contract must support /v1/transactions/{hash}.",
+      "implementation_paths": [
+        "explorer/indexerclient/client.go"
+      ],
+      "later_qualification_owners": [
+        "EXP-2",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-1",
+        "AC-6"
+      ],
+      "current_status": "source_qualified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-END-005",
+      "category": "required_endpoint",
+      "name": "/v1/receipts/{hash}",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "indexerConsumer.requiredEndpoints contains \"/v1/receipts/{hash}\""
+      },
+      "statement": "The Explorer Indexer consumer contract must support /v1/receipts/{hash}.",
+      "implementation_paths": [
+        "explorer/indexerclient/client.go"
+      ],
+      "later_qualification_owners": [
+        "EXP-2",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-1",
+        "AC-6"
+      ],
+      "current_status": "source_qualified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-END-006",
+      "category": "required_endpoint",
+      "name": "/v1/blocks/{number}/logs",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "indexerConsumer.requiredEndpoints contains \"/v1/blocks/{number}/logs\""
+      },
+      "statement": "The Explorer Indexer consumer contract must support /v1/blocks/{number}/logs.",
+      "implementation_paths": [
+        "explorer/indexerclient/client.go"
+      ],
+      "later_qualification_owners": [
+        "EXP-2",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-1",
+        "AC-6"
+      ],
+      "current_status": "source_qualified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-END-007",
+      "category": "required_endpoint",
+      "name": "/v1/services/{service}/versions/{version}",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "indexerConsumer.requiredEndpoints contains \"/v1/services/{service}/versions/{version}\""
+      },
+      "statement": "The Explorer Indexer consumer contract must support /v1/services/{service}/versions/{version}.",
+      "implementation_paths": [
+        "explorer/indexerclient/client.go"
+      ],
+      "later_qualification_owners": [
+        "EXP-2",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-4",
+        "AC-6"
+      ],
+      "current_status": "source_qualified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-ING-001",
+      "category": "indexing_rule",
+      "name": "canonicalKey",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "indexing.canonicalKey"
+      },
+      "statement": "Indexed canonical identity must be keyed by chain ID and block hash.",
+      "implementation_paths": [
+        "indexer/model/model.go",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-6",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-2",
+        "AC-3"
+      ],
+      "current_status": "source_qualified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-ING-002",
+      "category": "indexing_rule",
+      "name": "tracksHeadSafeFinalizedSeparately",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "indexing.tracksHeadSafeFinalizedSeparately"
+      },
+      "statement": "Head, safe and finalized states must be tracked separately.",
+      "implementation_paths": [
+        "indexer/model/model.go",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-6",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-2",
+        "AC-3"
+      ],
+      "current_status": "source_qualified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-ING-003",
+      "category": "indexing_rule",
+      "name": "reorgsAllowedOnlyAboveFinality",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "indexing.reorgsAllowedOnlyAboveFinality"
+      },
+      "statement": "Reorg repair may rewrite only non-finalized history.",
+      "implementation_paths": [
+        "indexer/model/model.go",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-6",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-3",
+        "AC-7"
+      ],
+      "current_status": "source_qualified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-ING-004",
+      "category": "indexing_rule",
+      "name": "finalizedHistoryImmutable",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "indexing.finalizedHistoryImmutable"
+      },
+      "statement": "Finalized indexed history must remain immutable absent explicit chain-level finality failure handling.",
+      "implementation_paths": [
+        "indexer/model/model.go",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-6",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-3",
+        "AC-7"
+      ],
+      "current_status": "source_qualified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-ING-005",
+      "category": "indexing_rule",
+      "name": "rebuildableFromChain",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "indexing.rebuildableFromChain"
+      },
+      "statement": "The Explorer index must be rebuildable from canonical sources.",
+      "implementation_paths": [
+        "indexer/model/model.go",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-6",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-3",
+        "AC-8"
+      ],
+      "current_status": "source_qualified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-ING-006",
+      "category": "indexing_rule",
+      "name": "databaseIsNonCanonical",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "indexing.databaseIsNonCanonical"
+      },
+      "statement": "Indexer database contents must remain explicitly non-canonical.",
+      "implementation_paths": [
+        "indexer/model/model.go",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-6",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-2",
+        "AC-3",
+        "AC-7"
+      ],
+      "current_status": "source_qualified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-ING-007",
+      "category": "indexing_rule",
+      "name": "implementedBy",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "indexing.implementedBy"
+      },
+      "statement": "Indexing responsibility belongs to 420Indexer, not Explorer.",
+      "implementation_paths": [
+        "indexer/model/model.go",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-6",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-3",
+        "AC-6"
+      ],
+      "current_status": "source_qualified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-VER-001",
+      "category": "contract_verification_boundary",
+      "name": "showRuntimeCodeHash",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "contractVerification.showRuntimeCodeHash"
+      },
+      "statement": "Contract views must show runtime code hash.",
+      "implementation_paths": [
+        "explorer/service/contractviews.go",
+        "docs/audit/EXP-0.1.3-contract-abi-address-reconciliation.md"
+      ],
+      "later_qualification_owners": [
+        "EXP-3",
+        "EXP-4",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-4",
+        "AC-5"
+      ],
+      "current_status": "source_qualified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-VER-002",
+      "category": "contract_verification_boundary",
+      "name": "showRegistryServiceAndVersion",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "contractVerification.showRegistryServiceAndVersion"
+      },
+      "statement": "Contract/protocol views must expose Registry service/version where applicable.",
+      "implementation_paths": [
+        "explorer/service/contractviews.go",
+        "docs/audit/EXP-0.1.3-contract-abi-address-reconciliation.md"
+      ],
+      "later_qualification_owners": [
+        "EXP-3",
+        "EXP-4",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-4",
+        "AC-5"
+      ],
+      "current_status": "source_qualified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-VER-003",
+      "category": "contract_verification_boundary",
+      "name": "showManifestCommitmentWhenRegistered",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "contractVerification.showManifestCommitmentWhenRegistered"
+      },
+      "statement": "Registered components must expose manifest commitment when available.",
+      "implementation_paths": [
+        "explorer/service/contractviews.go",
+        "docs/audit/EXP-0.1.3-contract-abi-address-reconciliation.md"
+      ],
+      "later_qualification_owners": [
+        "EXP-3",
+        "EXP-4",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-4",
+        "AC-5"
+      ],
+      "current_status": "source_qualified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-VER-004",
+      "category": "contract_verification_boundary",
+      "name": "verifiedSourceIsPresentationMetadata",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "contractVerification.verifiedSourceIsPresentationMetadata"
+      },
+      "statement": "Verified-source information is presentation metadata, not execution authority.",
+      "implementation_paths": [
+        "explorer/service/contractviews.go",
+        "docs/audit/EXP-0.1.3-contract-abi-address-reconciliation.md"
+      ],
+      "later_qualification_owners": [
+        "EXP-3",
+        "EXP-4",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-4",
+        "AC-7"
+      ],
+      "current_status": "source_qualified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-VER-005",
+      "category": "contract_verification_boundary",
+      "name": "sourceVerificationCannotOverrideRuntimeBytecode",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "contractVerification.sourceVerificationCannotOverrideRuntimeBytecode"
+      },
+      "statement": "Source-verification metadata must never override deployed runtime bytecode.",
+      "implementation_paths": [
+        "explorer/service/contractviews.go",
+        "docs/audit/EXP-0.1.3-contract-abi-address-reconciliation.md"
+      ],
+      "later_qualification_owners": [
+        "EXP-3",
+        "EXP-4",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-4",
+        "AC-7"
+      ],
+      "current_status": "source_qualified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-INV-001",
+      "category": "invariant",
+      "name": "EXP-INV-001",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "invariants entry EXP-INV-001"
+      },
+      "statement": "420Explorer owns no canonical protocol state and requires no Explorer-specific Genesis contract.",
+      "implementation_paths": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "later_qualification_owners": [
+        "EXP-3",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-4",
+        "AC-10"
+      ],
+      "current_status": "source_qualified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-INV-002",
+      "category": "invariant",
+      "name": "EXP-INV-002",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "invariants entry EXP-INV-002"
+      },
+      "statement": "Explorer records are projections of chain, consensus and registered protocol state; conflicts resolve in favor of canonical chain data.",
+      "implementation_paths": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-2",
+        "AC-3"
+      ],
+      "current_status": "source_qualified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-INV-003",
+      "category": "invariant",
+      "name": "EXP-INV-003",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "invariants entry EXP-INV-003"
+      },
+      "statement": "Head, safe and finalized states are displayed distinctly and are never collapsed into one confirmation status.",
+      "implementation_paths": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-2",
+        "AC-3"
+      ],
+      "current_status": "source_qualified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-INV-004",
+      "category": "invariant",
+      "name": "EXP-INV-004",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "invariants entry EXP-INV-004"
+      },
+      "statement": "Reorg repair may rewrite only non-finalized indexed history; finalized history is immutable absent an explicit chain-level finality failure procedure.",
+      "implementation_paths": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-3",
+        "AC-7"
+      ],
+      "current_status": "source_qualified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-INV-005",
+      "category": "invariant",
+      "name": "EXP-INV-005",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "invariants entry EXP-INV-005"
+      },
+      "statement": "The complete Explorer index can be rebuilt from supported nodes/RPC, receipts, logs, consensus metadata and registry reads through 420Indexer without trusting the hosted Explorer database.",
+      "implementation_paths": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-3",
+        "AC-8"
+      ],
+      "current_status": "source_qualified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-INV-006",
+      "category": "invariant",
+      "name": "EXP-INV-006",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "invariants entry EXP-INV-006"
+      },
+      "statement": "Contract decoding uses runtime bytecode and versioned 420Registry commitments projected by 420Indexer; labels and verified-source metadata cannot change execution truth.",
+      "implementation_paths": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "later_qualification_owners": [
+        "EXP-3",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-4",
+        "AC-7"
+      ],
+      "current_status": "source_qualified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-INV-007",
+      "category": "invariant",
+      "name": "EXP-INV-007",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "invariants entry EXP-INV-007"
+      },
+      "statement": "420 Names and 420 Identity labels are display enrichments only and never replace the underlying address or canonical identity record.",
+      "implementation_paths": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "later_qualification_owners": [
+        "EXP-4",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-5",
+        "AC-7"
+      ],
+      "current_status": "source_qualified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-INV-008",
+      "category": "invariant",
+      "name": "EXP-INV-008",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "invariants entry EXP-INV-008"
+      },
+      "statement": "Explorer failure or unavailability cannot prevent direct wallet, RPC, contract or protocol interaction.",
+      "implementation_paths": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "later_qualification_owners": [
+        "EXP-6",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-7",
+        "AC-8"
+      ],
+      "current_status": "source_qualified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-INV-009",
+      "category": "invariant",
+      "name": "EXP-INV-009",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "invariants entry EXP-INV-009"
+      },
+      "statement": "Explorer operators gain no custody, smart-account execution, governance, bridge, validator or token-transfer authority.",
+      "implementation_paths": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "later_qualification_owners": [
+        "EXP-6",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-7"
+      ],
+      "current_status": "source_qualified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-INV-010",
+      "category": "invariant",
+      "name": "EXP-INV-010",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "invariants entry EXP-INV-010"
+      },
+      "statement": "Public APIs/indexers are replaceable and must expose chain identifiers and indexed/finalized heights so clients can detect stale or wrong-network data.",
+      "implementation_paths": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "later_qualification_owners": [
+        "EXP-2",
+        "EXP-6",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-2",
+        "AC-6",
+        "AC-7"
+      ],
+      "current_status": "source_qualified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-INV-011",
+      "category": "invariant",
+      "name": "EXP-INV-011",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "invariants entry EXP-INV-011"
+      },
+      "statement": "Transaction, receipt, event and balance presentation must remain traceable to canonical block hashes and chain ID.",
+      "implementation_paths": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-1",
+        "AC-2"
+      ],
+      "current_status": "source_qualified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-INV-012",
+      "category": "invariant",
+      "name": "EXP-INV-012",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "invariants entry EXP-INV-012"
+      },
+      "statement": "Privacy-sensitive off-chain payloads are not made canonical merely because a hash, commitment or transaction reference is visible in Explorer.",
+      "implementation_paths": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "later_qualification_owners": [
+        "EXP-6",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-7"
+      ],
+      "current_status": "source_qualified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-INV-013",
+      "category": "invariant",
+      "name": "EXP-INV-013",
+      "classification": "mandatory_genesis",
+      "authoritative_source": {
+        "path": "contracts/config/420explorer-genesis.json",
+        "selector": "invariants entry EXP-INV-013"
+      },
+      "statement": "420Explorer consumes 420Indexer for indexed chain/protocol data and MUST NOT implement an independent RPC ingestion, checkpoint, reorg or protocol-decoder pipeline.",
+      "implementation_paths": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "later_qualification_owners": [
+        "EXP-1",
+        "EXP-3",
+        "EXP-6",
+        "EXP-8"
+      ],
+      "acceptance_criteria": [
+        "AC-2",
+        "AC-3",
+        "AC-4",
+        "AC-7"
+      ],
+      "current_status": "source_qualified",
+      "notes": []
+    },
+    {
+      "id": "EXP-REQ-SCOPE-001",
+      "category": "scope_decision",
+      "name": "governance view",
+      "classification": "scope_decision_required",
+      "authoritative_source": {
+        "path": "config/genesis-applications.json",
+        "selector": "apps[name=\"420 Explorer\"].purpose contains \"governance\""
+      },
+      "statement": "The frozen application purpose names governance, but the dedicated Explorer profile does not list a governance requiredView; this must remain an explicit scope decision until reconciled.",
+      "implementation_paths": [
+        "config/genesis-applications.json",
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.1-genesis-capability-matrix.json",
+        "docs/audit/EXP-0.2.5-genesis-gap-register.json"
+      ],
+      "later_qualification_owners": [
+        "EXP-0.3",
+        "EXP-0.3.6",
+        "EXP-0.3.8"
+      ],
+      "acceptance_criteria": [
+        "AC-5",
+        "AC-10"
+      ],
+      "current_status": "scope_decision_required",
+      "notes": [
+        "Do not silently add or remove a governance view in EXP-0.3.1."
+      ]
+    },
+    {
+      "id": "EXP-REQ-POST-001",
+      "category": "post_genesis_enhancement",
+      "name": "staking/reward-specific activity view",
+      "classification": "post_genesis_enhancement",
+      "authoritative_source": {
+        "path": "docs/audit/EXP-0.2.5-genesis-gap-register.json",
+        "selector": "EXP-FIND-012"
+      },
+      "statement": "A dedicated staking/reward activity workflow is non-blocking and outside the agreed core requiredViews unless scope is explicitly changed.",
+      "implementation_paths": [
+        "docs/audit/EXP-0.2.5-genesis-gap-register.json"
+      ],
+      "later_qualification_owners": [
+        "post-Genesis"
+      ],
+      "acceptance_criteria": [],
+      "current_status": "post_genesis",
+      "notes": [
+        "Validator and epoch/rotation required views remain mandatory; this entry concerns dedicated staking/reward history only."
+      ]
+    },
+    {
+      "id": "EXP-REQ-POST-002",
+      "category": "post_genesis_enhancement",
+      "name": "420 Verify-backed source presentation",
+      "classification": "post_genesis_enhancement",
+      "authoritative_source": {
+        "path": "docs/audit/EXP-0.2.5-genesis-gap-register.json",
+        "selector": "EXP-FIND-014"
+      },
+      "statement": "A 420 Verify-backed source-verification presentation integration is non-blocking for raw contract inspection unless scope is explicitly changed.",
+      "implementation_paths": [
+        "docs/audit/EXP-0.2.5-genesis-gap-register.json"
+      ],
+      "later_qualification_owners": [
+        "post-Genesis"
+      ],
+      "acceptance_criteria": [],
+      "current_status": "post_genesis",
+      "notes": []
+    }
+  ],
+  "scope_rules": [
+    "Every dedicated-profile requiredView is mandatory Genesis scope.",
+    "Dedicated-profile Indexer consumer, indexing, verification-boundary and invariant requirements are mandatory even when they are architectural rather than user-visible.",
+    "420 Names and 420 Identity are optional display enrichments and cannot block core Genesis qualification.",
+    "Post-Genesis enhancements cannot become mandatory without an explicit authoritative scope change.",
+    "The governance-view conflict remains scope_decision_required until the broad frozen application purpose and dedicated Explorer profile are explicitly reconciled.",
+    "Frozen system-address assignments are authority/configuration evidence, not proof of target-network deployment."
+  ]
+}

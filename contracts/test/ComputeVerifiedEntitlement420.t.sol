@@ -239,10 +239,11 @@ contract ComputeVerifiedEntitlement420Test {
         require(recordOk, "stage: canonical result record");
 
         _grant(verifier, id, auth.ACTION_VERIFY_RESULT(), 0);
+        bytes32 profileId = verification.PROFILE_ID();
         vm.prank(SELECTOR);
         (bool appointmentOk,) = address(policy).call(
             abi.encodeCall(policy.appoint, (
-                id, verifier, verification.PROFILE_ID(), owner, payer, OPERATOR,
+                id, verifier, profileId, owner, payer, OPERATOR,
                 keccak256(abi.encode("appointment", nonce)), uint64(block.timestamp + 1 days)
             )));
         require(appointmentOk, "stage: verifier appointment");

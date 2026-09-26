@@ -22,13 +22,13 @@
         "AC-5",
         "AC-10"
       ],
-      "status": "unresolved",
-      "genesis_blocking": true,
+      "status": "resolved",
+      "genesis_blocking": false,
       "source_a": {
         "path": "config/genesis-applications.json",
         "selector": "apps[name=\"420 Explorer\"].purpose",
-        "value": "Blocks, transactions, contracts, validators, assets, governance, finality",
-        "interpretation": "Broad frozen application-purpose wording explicitly names governance."
+        "value": "Blocks, transactions, contracts, validators, assets, finality",
+        "interpretation": "The frozen Explorer application-purpose wording has been reconciled and no longer names governance."
       },
       "source_b": {
         "path": "contracts/config/420explorer-genesis.json",
@@ -57,8 +57,8 @@
       },
       "decision_authority": {
         "owner": "authoritative 420 Integrated Genesis/product scope decision",
-        "repository_owner_action_required": true,
-        "decision_record_required": true,
+        "repository_owner_action_required": false,
+        "decision_record_required": false,
         "rationale": "The conflict is between two authoritative scope descriptions; source inspection cannot legitimately choose one by inference."
       },
       "admissible_resolutions": [
@@ -107,25 +107,36 @@
         "docs/audit/EXP-0.3.5-nonblocking-scope-exclusions.json",
         "docs/audit/EXP-0.3.6-scope-conflict-resolution-register.json"
       ],
-      "current_closeout_rule": "EXP-0.3.6 may qualify the conflict register and fail-closed reconciliation mechanism while this conflict remains unresolved; final EXP-0/Genesis scope closeout must remain blocked until one admissible resolution is explicitly recorded and reconciled.",
-      "next_resolution_owner": "EXP-0.3.8"
+      "current_closeout_rule": "The governance scope conflict is resolved by EXP-0.3.8. Final EXP-0 closeout remains subject to all other Genesis-blocking findings and acceptance criteria.",
+      "next_resolution_owner": null,
+      "selected_resolution": "EXP-SCOPE-RESOLUTION-B",
+      "resolution_record": "docs/audit/EXP-0.3.8-governance-scope-decision.json",
+      "resolution_milestone": "EXP-0.3.8",
+      "resolution_statement": "Governance is descriptive ecosystem subject matter and is not a mandatory dedicated 420Explorer Genesis view.",
+      "resolved_effects": [
+        "config/genesis-applications.json no longer names governance in the Explorer purpose.",
+        "contracts/config/420explorer-genesis.json remains authoritative for the mandatory requiredViews set and continues to omit governance.",
+        "EXP-CAP-019 and EXP-REQ-SCOPE-001 are retired from active scope.",
+        "EXP-FIND-001 is retained as resolved historical evidence and is non-blocking.",
+        "AC-5 and AC-10 no longer list EXP-FIND-001 as a blocker."
+      ]
     }
   ],
   "rules": [
     "Every authoritative scope conflict must appear exactly once in this register.",
-    "A conflict may be marked resolved only by an explicit authoritative decision record; repository evidence alone cannot infer the decision.",
+    "A conflict may be marked resolved only by an explicit authoritative decision record and complete atomic reconciliation.",
     "Resolution must reconcile every file in the conflict's atomic_reconciliation_manifest.",
     "No scope_decision_required item may be silently reclassified as optional, post-Genesis, or mandatory.",
     "A resolved conflict must no longer have contradictory authoritative source values.",
-    "While any conflict remains unresolved and genesis_blocking=true, final EXP-0/Genesis scope closeout must remain blocked.",
+    "Only unresolved conflicts with genesis_blocking=true block final EXP-0/Genesis scope closeout.",
     "EXP-0.3.6 qualification means the conflict-management mechanism is complete and fail-closed; it does not mean the product-scope conflict itself has been decided."
   ],
   "summary": {
     "conflicts": 1,
-    "unresolved": 1,
-    "resolved": 0,
-    "genesis_blocking": 1,
+    "unresolved": 0,
+    "resolved": 1,
+    "genesis_blocking": 0,
     "admissible_resolution_paths": 2,
-    "final_exp0_closeout_blocked": true
+    "final_exp0_closeout_blocked": false
   }
 }

@@ -1724,36 +1724,6 @@
       ]
     },
     {
-      "id": "EXP-REQ-SCOPE-001",
-      "category": "scope_decision",
-      "name": "governance view",
-      "classification": "scope_decision_required",
-      "authoritative_source": {
-        "path": "config/genesis-applications.json",
-        "selector": "apps[name=\"420 Explorer\"].purpose contains \"governance\""
-      },
-      "statement": "The frozen application purpose names governance, but the dedicated Explorer profile does not list a governance requiredView; this must remain an explicit scope decision until reconciled.",
-      "implementation_paths": [
-        "config/genesis-applications.json",
-        "contracts/config/420explorer-genesis.json",
-        "docs/audit/EXP-0.2.1-genesis-capability-matrix.json",
-        "docs/audit/EXP-0.2.5-genesis-gap-register.json"
-      ],
-      "later_qualification_owners": [
-        "EXP-0.3",
-        "EXP-0.3.6",
-        "EXP-0.3.8"
-      ],
-      "acceptance_criteria": [
-        "AC-5",
-        "AC-10"
-      ],
-      "current_status": "scope_decision_required",
-      "notes": [
-        "Do not silently add or remove a governance view in EXP-0.3.1."
-      ]
-    },
-    {
       "id": "EXP-REQ-POST-001",
       "category": "post_genesis_enhancement",
       "name": "staking/reward-specific activity view",
@@ -1803,5 +1773,20 @@
     "Post-Genesis enhancements cannot become mandatory without an explicit authoritative scope change.",
     "The governance-view conflict remains scope_decision_required until the broad frozen application purpose and dedicated Explorer profile are explicitly reconciled.",
     "Frozen system-address assignments are authority/configuration evidence, not proof of target-network deployment."
+  ],
+  "resolved_scope_decisions": [
+    {
+      "id": "EXP-SCOPE-CONFLICT-001",
+      "subject": "governance view",
+      "decision": "EXP-SCOPE-RESOLUTION-B",
+      "decision_milestone": "EXP-0.3.8",
+      "outcome": "not_required_as_dedicated_view",
+      "evidence": [
+        "config/genesis-applications.json",
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.3.8-governance-scope-decision.json"
+      ],
+      "statement": "Governance is not part of the mandatory dedicated Explorer Genesis required-view set."
+    }
   ]
 }

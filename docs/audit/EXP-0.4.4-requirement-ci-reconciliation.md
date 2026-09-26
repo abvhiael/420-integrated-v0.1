@@ -1,6 +1,6 @@
 # EXP-0.4.4 — mandatory requirement-to-CI coverage reconciliation
 
-**Status:** implementation complete; exact-head qualification required.
+**Status:** QUALIFIED at repository scope; final cumulative requalification required after evidence recording.
 
 ## Objective
 
@@ -59,3 +59,20 @@ The coverage model now preserves three distinct fields:
 - `future_qualification_owners` — the union used for coverage accounting.
 
 This does not rewrite the authoritative requirement inventory. It records cross-cutting supporting ownership without dropping valid later procedures or inventing direct ownership.
+
+
+## Exact-head qualification evidence
+
+Qualified implementation head: `dc62883dd3984d6b5f31aaceae67cf5a5add67f3`
+
+- 420Indexer #622 — run `36278689801`, job `108506258456` — success.
+- 420Docs Qualification #2949 — run `36278689884`, job `108506293531` — success.
+- 420 Integrated Qualification #5566 — run `36278689806` — success.
+  - offline-core `108506283848`
+  - fault-matrix `108506283926`
+  - pinned-Geth Engine `108506283941`
+  - production-dependencies `108506284032`
+- EXP-0.4.4 evidence artifact `10918150912`.
+- Digest `sha256:bdd4325235ff48b3b4dc9f3db54be4abaccb392a15b582ff75958774b91be98f`.
+
+The evidence-recording commit changes the branch SHA. The complete retained qualification suite is rerun on that resulting exact head before EXP-0.4.4 is marked COMPLETE.

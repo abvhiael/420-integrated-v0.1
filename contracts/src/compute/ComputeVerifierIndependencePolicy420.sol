@@ -118,6 +118,33 @@ contract ComputeVerifierIndependencePolicy420 {
 
     function appointment(bytes32 jobId) external view returns (Appointment memory) { return appointments[jobId]; }
 
+    /// @notice Generic current-controller independence check for dispute adjudicators.
+    /// @dev This does not appoint or authorize the candidate; callers must separately enforce
+    /// the accepted dispute role/capability. It only proves current controller separation.
+    function independentFromParties(address candidate, address owner, address payer,
+        address operator, address verifier) external view returns (bool)
+    {
+        if (candidate == address(0) || candidate == owner || candidate == payer
+            || candidate == operator || candidate == verifier
+            || suspendedControllerAccount[candidate]) return false;
+        bytes32 cc = _currentController(candidate);
+        bytes32 oc = _currentController(owner);
+        bytes32 pc = _currentController(payer);
+        bytes32 wc = _currentController(operator);
+        bytes32 vc = _currentController(verifier);
+        return cc != bytes32(0) && oc != bytes32(0) && pc != bytes32(0)
+            && wc != bytes32(0) && vc != bytes32(0)
+            && cc != oc && cc != pc && cc != wc && cc != vc;
+    }
+
+    function _currentController(address account) private view returns (bytes32 controllerId) {
+        Identity storage i = identities[account];
+        if (account == address(0) || suspendedControllerAccount[account] || !i.active
+            || i.controllerId == bytes32(0) || i.evidenceHash == bytes32(0)
+            || i.validUntil < block.timestamp) return bytes32(0);
+        return i.controllerId;
+    }
+
     function _controller(address account) private view returns (bytes32 controllerId) {
         Identity storage i = identities[account];
         if (!i.active || i.controllerId == bytes32(0) || i.evidenceHash == bytes32(0)

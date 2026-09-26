@@ -1150,7 +1150,8 @@ contract ComputeVerifiedEntitlement420Test {
         require(e.fundedAmount == 4 ether && e.earnedAmount == 3 ether
             && funding.credit(id).deposited == 4 ether,
             "donor surplus enlarged authenticated payer credit");
-        _makeClaimable(id);
+        vm.prank(SETTLER);
+        entitlements.createProviderClaim(id, jobs.job(id).revision);
         require(accounting.freeBalance(VAULT_ID, address(0)) == 5 ether,
             "liability split consumed donor surplus");
         _assertNativeSolvent();

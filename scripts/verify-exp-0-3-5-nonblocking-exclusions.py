@@ -72,16 +72,16 @@ def main():
   if sources.get("optionalIdentity")!="420 Identity public display enrichment": errors.append("optionalIdentity source drift")
 
   protected=m.get("protected_scope_decisions",[])
-  if len(protected)!=1 or protected[0].get("requirement_id")!="EXP-REQ-SCOPE-001": errors.append("protected governance decision missing")
-  gov=req_by.get("EXP-REQ-SCOPE-001")
+  if protected: errors.append("no unresolved protected scope decisions should remain after EXP-0.3.8")
+  if req_by.get("EXP-REQ-SCOPE-001") is not None: errors.append("retired governance requirement remains active")
   gov_gap=gap_by.get("EXP-FIND-001")
-  if not gov or gov.get("classification")!="scope_decision_required" or gov.get("current_status")!="scope_decision_required":
-    errors.append("governance requirement no longer scope_decision_required")
-  if not gov_gap or gov_gap.get("genesis_blocking") is not True: errors.append("governance finding no longer Genesis-blocking")
-  if "EXP-REQ-SCOPE-001" in {x.get("requirement_id") for x in xs}: errors.append("governance was incorrectly excluded")
+  if not gov_gap or gov_gap.get("genesis_blocking") is not False: errors.append("resolved governance finding is not non-blocking")
+  if "EXP-REQ-SCOPE-001" in {x.get("requirement_id") for x in xs}: errors.append("governance was incorrectly converted into an exclusion")
+  resolved=m.get("resolved_scope_decisions",[])
+  if len(resolved)!=1 or resolved[0].get("decision")!="EXP-SCOPE-RESOLUTION-B": errors.append("resolved governance decision missing")
 
   s=m.get("summary",{})
-  expected={"excluded_entries":4,"optional_integrations":2,"post_genesis_enhancements":2,"excluded_genesis_blockers":0,"protected_scope_decisions":1}
+  expected={"excluded_entries":4,"optional_integrations":2,"post_genesis_enhancements":2,"excluded_genesis_blockers":0,"protected_scope_decisions":0}
   if s!=expected: errors.append(f"summary drift: {s}")
 
   EVIDENCE.mkdir(exist_ok=True)

@@ -5931,14 +5931,42 @@
     "orphaned_genesis_blockers": 0,
     "acceptance_criteria_covered": [
       "AC-1",
-      "AC-10",
       "AC-2",
       "AC-3",
       "AC-4",
       "AC-5",
       "AC-6",
       "AC-7",
-      "AC-8"
-    ]
-  }
+      "AC-8",
+      "AC-9",
+      "AC-10"
+    ],
+    "global_acceptance_traces": 1
+  },
+  "global_acceptance_traces": [
+    {
+      "acceptance_criterion": "AC-9",
+      "scope": "global release-candidate test completeness",
+      "primary_owner": "EXP-8",
+      "supporting_owners": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-3",
+        "EXP-4",
+        "EXP-5",
+        "EXP-6",
+        "EXP-7"
+      ],
+      "requirement_binding": "global_not_single_requirement",
+      "rationale": "AC-9 verifies the complete required-test inventory and exact release-candidate execution across all mandatory requirements; assigning it to one requirement would be misleading.",
+      "required_evidence": [
+        "exact release-candidate commit SHA",
+        "complete required-test inventory",
+        "exact commands/workflow run IDs",
+        "successful results for every mandatory suite",
+        "explicit record for any skipped/non-applicable test with accepted rationale",
+        "no unresolved regression against the release candidate"
+      ]
+    }
+  ]
 }

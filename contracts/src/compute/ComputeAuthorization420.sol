@@ -22,6 +22,7 @@ contract ComputeAuthorization420 is I420System {
     bytes32 public constant ACTION_SUBMIT_RECEIPT = keccak256("420/COMPUTE/ACTION/SUBMIT_RECEIPT/V1");
     bytes32 public constant ACTION_VERIFY_RESULT = keccak256("420/COMPUTE/ACTION/VERIFY_RESULT/V1");
     bytes32 public constant ACTION_CHALLENGE = keccak256("420/COMPUTE/ACTION/CHALLENGE/V1");
+    bytes32 public constant ACTION_ADJUDICATE = keccak256("420/COMPUTE/ACTION/ADJUDICATE/V1");
     bytes32 public constant ACTION_SETTLE = keccak256("420/COMPUTE/ACTION/SETTLE/V1");
 
     bytes32 private constant _SCOPE_DOMAIN = keccak256("420/COMPUTE/CAPABILITY/SCOPE/V1");
@@ -100,6 +101,7 @@ contract ComputeAuthorization420 is I420System {
             || actionId == ACTION_CREATE_REQUEST || actionId == ACTION_AUTHORIZE_FUNDING
             || actionId == ACTION_ACCEPT_MATCH || actionId == ACTION_EXECUTE_ATTEMPT
             || actionId == ACTION_SUBMIT_RECEIPT || actionId == ACTION_VERIFY_RESULT
-            || actionId == ACTION_CHALLENGE || actionId == ACTION_SETTLE;
+            || actionId == ACTION_CHALLENGE || actionId == ACTION_ADJUDICATE
+            || actionId == ACTION_SETTLE;
     }
 }

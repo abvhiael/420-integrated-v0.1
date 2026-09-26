@@ -19,7 +19,7 @@ def main():
   if l.get("schema")!="420explorer-exp-0.3.4-qualification-status-freeze-v1": errors.append("schema drift")
   if l.get("milestone")!="EXP-0.3.4": errors.append("milestone drift")
   entries=l.get("entries",[])
-  if len(entries)!=65: errors.append(f"expected 65 entries, found {len(entries)}")
+  if len(entries)!=64: errors.append(f"expected 64 active entries after EXP-0.3.8, found {len(entries)}")
   by={e["requirement_id"]:e for e in entries}
   if len(by)!=len(entries): errors.append("duplicate requirement in freeze")
   req_by={r["id"]:r for r in req.get("requirements",[])}
@@ -32,8 +32,8 @@ def main():
     if not e.get("promotion_gate"): errors.append(f"{rid}: promotion gate missing")
     for rel in e.get("evidence_refs",[]):
       if not (ROOT/rel).exists(): errors.append(f"{rid}: missing evidence ref {rel}")
-  expected={"source_qualified":47,"implemented_source":6,"partial_source":4,"deployment_pending":1,"runtime_unverified":2,"optional_unimplemented":2,"post_genesis":2,"scope_decision_required":1}
-  counts={}
+  expected={"source_qualified":47,"implemented_source":6,"partial_source":4,"deployment_pending":1,"runtime_unverified":2,"optional_unimplemented":2,"post_genesis":2,"scope_decision_required":0}
+  counts={k:0 for k in expected}
   for e in entries: counts[e["frozen_status"]]=counts.get(e["frozen_status"],0)+1
   if counts!=expected: errors.append(f"status counts drift: {counts}")
   if l.get("frozen_status_counts")!=expected: errors.append("ledger count summary drift")
@@ -51,8 +51,11 @@ def main():
   for rid in ("EXP-REQ-POST-001","EXP-REQ-POST-002"):
     if by[rid]["frozen_status"]!="post_genesis": errors.append(f"{rid}: post-Genesis status drift")
   explorer=next(a for a in apps["apps"] if a["name"]=="420 Explorer")
-  conflict="governance" in explorer.get("purpose","").lower() and "governance" not in [str(x).lower() for x in profile.get("requiredViews",[])]
-  if conflict and by["EXP-REQ-SCOPE-001"]["frozen_status"]!="scope_decision_required": errors.append("governance conflict not frozen")
+  if "governance" in explorer.get("purpose","").lower() or "governance" in [str(x).lower() for x in profile.get("requiredViews",[])]:
+    errors.append("governance scope reintroduced after EXP-0.3.8")
+  if "EXP-REQ-SCOPE-001" in by: errors.append("retired governance requirement remains in active freeze")
+  resolved=l.get("resolved_scope_decisions",[])
+  if len(resolved)!=1 or resolved[0].get("decision")!="EXP-SCOPE-RESOLUTION-B": errors.append("resolved scope decision missing from freeze")
   if any(c.get("current_status")!="unverified" for c in acs.get("criteria",[])): errors.append("an acceptance criterion is no longer unverified")
   rules=" ".join(l.get("freeze_rules",[])).lower()
   for token in ("source_qualified","deployment_pending","runtime_unverified","genesis-qualified"):

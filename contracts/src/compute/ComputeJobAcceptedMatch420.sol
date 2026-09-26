@@ -9,7 +9,7 @@ import "./IComputeAcceptedMatchRuntime420.sol";
 /// @notice An explicit owner-proposed, resource-operator-accepted match.
 /// @dev This is an admission/identity record, not metering, hardware attestation,
 /// capacity reservation, or evidence that a computation has completed.
-contract ComputeJobAcceptedMatch420 is IComputeJobMatchEvidence420, IComputeAcceptedMatchRuntime420 {
+contract ComputeJobAcceptedMatch420 is IComputeJobMatchEvidence420 {
     bytes32 private constant MATCH_DOMAIN = keccak256("420/COMPUTE/ACCEPTED_MATCH/V1");
     bytes32 private constant ACCEPT_DOMAIN = keccak256("420/COMPUTE/ACCEPTANCE/V1");
 

@@ -96,15 +96,7 @@
       "promotion_rule": "May be added post-Genesis after qualified Verify metadata/provenance integration; it becomes mandatory only through an explicit authoritative Genesis scope change."
     }
   ],
-  "protected_scope_decisions": [
-    {
-      "requirement_id": "EXP-REQ-SCOPE-001",
-      "name": "governance view",
-      "status": "scope_decision_required",
-      "genesis_blocking": true,
-      "reason": "Governance is not classified optional or post-Genesis. Conflicting authoritative descriptions remain unresolved, so EXP-0.3.5 must not downgrade or exclude it."
-    }
-  ],
+  "protected_scope_decisions": [],
   "rules": [
     "Only entries explicitly classified optional_integration or post_genesis_enhancement may appear in this exclusion matrix.",
     "Excluded entries must have genesis_blocking=false and no core AC-1 through AC-10 mapping.",
@@ -119,6 +111,15 @@
     "optional_integrations": 2,
     "post_genesis_enhancements": 2,
     "excluded_genesis_blockers": 0,
-    "protected_scope_decisions": 1
-  }
+    "protected_scope_decisions": 0
+  },
+  "resolved_scope_decisions": [
+    {
+      "id": "EXP-SCOPE-CONFLICT-001",
+      "decision": "EXP-SCOPE-RESOLUTION-B",
+      "milestone": "EXP-0.3.8",
+      "outcome": "Governance is not a dedicated required view; this is a resolved scope decision, not an optional/post-Genesis exclusion.",
+      "evidence": "docs/audit/EXP-0.3.8-governance-scope-decision.json"
+    }
+  ]
 }

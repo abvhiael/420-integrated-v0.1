@@ -16,6 +16,12 @@ contract ComputeAcceptedPriceMatch420 is IComputeJobMatchEvidence420 {
     bytes32 private constant MATCH_DOMAIN = keccak256("420/COMPUTE/PRICED_MATCH/V1");
     bytes32 private constant PRICE_DOMAIN = keccak256("420/COMPUTE/ACCEPTED_PRICE/V1");
     bytes32 private constant ACCEPT_DOMAIN = keccak256("420/COMPUTE/PRICED_ACCEPTANCE/V1");
+    bytes32 public constant DISPUTE_POLICY_ID = keccak256("420/CMP/DISPUTE/FIXED-PRICE/V1");
+    uint32 public constant DISPUTE_POLICY_VERSION = 1;
+    uint64 public constant CHALLENGE_WINDOW = 1 hours;
+    uint64 public constant RESPONSE_WINDOW = 1 hours;
+    uint64 public constant DECISION_WINDOW = 1 hours;
+    uint64 public constant APPEAL_WINDOW = 1 hours;
 
     struct Match {
         bytes32 jobId;
@@ -49,6 +55,12 @@ contract ComputeAcceptedPriceMatch420 is IComputeJobMatchEvidence420 {
         uint256 acceptedAmount;
         uint256 fundedAmount;
         uint256 payerMaximum;
+        bytes32 disputePolicyId;
+        uint32 disputePolicyVersion;
+        uint64 challengeWindow;
+        uint64 responseWindow;
+        uint64 decisionWindow;
+        uint64 appealWindow;
         uint64 acceptedAt;
         bool exists;
     }
@@ -152,13 +164,15 @@ contract ComputeAcceptedPriceMatch420 is IComputeJobMatchEvidence420 {
         bytes32 priceRef = keccak256(abi.encode(PRICE_DOMAIN, block.chainid, address(this),
             jobId, matchId, m.offerId, c.payer, o.providerId, o.resourceId, o.resourceRevision,
             o.settlementAccount, o.pricingPolicyId, o.pricingVersion, o.fixedPrice,
-            c.deposited, c.maximumSpend));
+            c.deposited, c.maximumSpend, DISPUTE_POLICY_ID, DISPUTE_POLICY_VERSION,
+            CHALLENGE_WINDOW, RESPONSE_WINDOW, DECISION_WINDOW, APPEAL_WINDOW));
         if (_prices[priceRef].exists || priceReservationForJob[jobId] != bytes32(0)) revert InvalidPrice();
 
         _prices[priceRef] = PriceReservation(jobId, matchId, m.offerId, m.requestId, m.owner,
             c.payer, o.providerId, o.resourceId, o.resourceRevision, o.settlementAccount,
             o.pricingPolicyId, o.pricingVersion, o.fixedPrice, c.deposited, c.maximumSpend,
-            uint64(block.timestamp), true);
+            DISPUTE_POLICY_ID, DISPUTE_POLICY_VERSION, CHALLENGE_WINDOW, RESPONSE_WINDOW,
+            DECISION_WINDOW, APPEAL_WINDOW, uint64(block.timestamp), true);
         priceReservationForJob[jobId] = priceRef;
         m.priceReservationRef = priceRef;
 

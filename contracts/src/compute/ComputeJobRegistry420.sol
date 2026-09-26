@@ -214,6 +214,22 @@ contract ComputeJobRegistry420 {
     /// @notice Unsuccessful terminal dispositions become REFUNDED only after the bound settlement
     /// adapter proves an actual payer transfer. SETTLED jobs keep SETTLED while unused residual
     /// refunds are recorded separately by the settlement adapter.
+    function recordDispute(bytes32 jobId, uint64 expectedRevision, bytes32 disputeRef) external {
+        Job storage j = _guard(jobId, expectedRevision, Status.VERIFIED);
+        if (msg.sender != address(settlementEvidence) || disputeRef == bytes32(0))
+            revert Unauthorized();
+        _transition(jobId, j, Status.DISPUTED, disputeRef);
+    }
+
+    function recordDisputeResolution(bytes32 jobId, uint64 expectedRevision,
+        bytes32 resolutionRef, bool providerWins) external
+    {
+        Job storage j = _guard(jobId, expectedRevision, Status.DISPUTED);
+        if (msg.sender != address(settlementEvidence) || resolutionRef == bytes32(0))
+            revert Unauthorized();
+        _transition(jobId, j, providerWins ? Status.VERIFIED : Status.FAILED, resolutionRef);
+    }
+
     function recordRefund(bytes32 jobId, uint64 expectedRevision, bytes32 refundRef) external {
         Job storage j = jobs[jobId];
         if (j.status == Status.NONE) revert UnknownJob();
@@ -227,7 +243,7 @@ contract ComputeJobRegistry420 {
         _transition(jobId, j, Status.REFUNDED, refundRef);
     }
 
-    /// @dev DISPUTED and post-execution cancellation/expiry remain blocked until separately qualified.
+    /// @dev Post-execution cancellation/expiry remain blocked; disputes use the named guarded path above.
     function _guard(bytes32 jobId, uint64 expectedRevision, Status expected) private view returns (Job storage j) {
         j = jobs[jobId];
         if (j.status == Status.NONE) revert UnknownJob();

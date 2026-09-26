@@ -46,3 +46,16 @@ A requirement that has a passing audit verifier is not automatically functionall
 ## Scope boundary
 
 EXP-0.4.4 qualifies coverage accounting and orphan prevention. It does not implement missing fee/event/validator functionality, deploy services, execute the live-testnet validator, or close any of the ten current Genesis blockers.
+
+
+## Cross-cutting procedure ownership reconciliation
+
+The first exact-head verifier identified eight requirements where an acceptance-criterion verification procedure names a supporting owner that is not present in that requirement's direct `later_qualification_owners` list.
+
+The coverage model now preserves three distinct fields:
+
+- `authoritative_later_owners` — the direct owner set from EXP-0.3.1;
+- `procedure_owners` — owners of concrete procedures inherited from EXP-0.3.7 / the acceptance map;
+- `future_qualification_owners` — the union used for coverage accounting.
+
+This does not rewrite the authoritative requirement inventory. It records cross-cutting supporting ownership without dropping valid later procedures or inventing direct ownership.

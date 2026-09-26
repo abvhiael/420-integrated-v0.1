@@ -124,3 +124,21 @@ The new suite proves the accepted quote cannot exceed signed payer authority or 
 Full qualification record: [`CMP-1.2.2-ACCEPTED-PRICE-RESERVATION-QUALIFICATION.md`](CMP-1.2.2-ACCEPTED-PRICE-RESERVATION-QUALIFICATION.md).
 
 This closeout is repository-level only. Verified provider earnings begin at CMP-1.2.3; provider payout at CMP-1.2.4; later refund/dispute/solvency work remains CMP-1.2.5–1.2.7; live deployment/testnet evidence remains CMP-1.2.9.
+
+
+## CMP-1.2.3 — verified earnings / unique provider entitlement ledger
+
+**Status: COMPLETE within repository-level scope.** Exact qualified implementation/test head: `d5366cb06727f1c0f849b792bbfa1c0037066dfb`.
+
+`ComputeVerifiedEntitlement420` now converts one objectively verified fixed-price paid-compute job into exactly one immutable provider earning entitlement. The entitlement binds the exact job/request/match, accepted price reservation, payer, provider/resource, frozen beneficiary, pricing policy/version, result, verifier and verification decision; its earned amount cannot exceed the accepted/funded/payer ceilings. Finalization revalidates the approved objective profile and current verifier-independence/controller state, so a historical `VERIFIED` status alone cannot mint earnings after profile revocation or controller withdrawal. Entitlement creation does not move Vault funds and deliberately leaves the job un-`SETTLED`.
+
+Exact-head evidence:
+
+- Solidity Contracts run `36220578024` — **success**, all 16 PR shards green.
+- `ComputeVerifiedEntitlement420Test` — shard 0 job `108344948354`: **8 passed / 0 failed / 0 skipped**.
+- 420 Integrated Qualification run `36220577982` — **success**.
+- 420Docs Qualification run `36220577998` — **success**.
+
+Full qualification record: [`CMP-1.2.3-VERIFIED-ENTITLEMENT-QUALIFICATION.md`](CMP-1.2.3-VERIFIED-ENTITLEMENT-QUALIFICATION.md).
+
+This closeout is repository-level only and covers the current fixed-price single-assignment entitlement model. Provider liability split, claimability and actual external payout are CMP-1.2.4; payer residual refunds/failure/expiry remain CMP-1.2.5; challenge/dispute/slash economics remain CMP-1.2.6; generalized multi-unit/retry/partial-unit settlement remains outside this narrow closeout; live deployment/testnet evidence remains CMP-1.2.9.

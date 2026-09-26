@@ -800,6 +800,228 @@ contract ComputeVerifiedEntitlement420Test {
         require(!expiryOk, "post-result expiry preempted verification");
     }
 
+    function testProviderCannotBypassChallengeGateThroughDirectVaultClaim() public {
+        bytes32 id = _verifiedJob(27, OWNER_A_KEY, PAYER_A_KEY, 4 ether);
+        ComputeVerifiedEntitlement420.ProviderClaim memory pc = _makeClaimable(id);
+        require(accounting.getObligation(pc.providerObligationId).state == 1
+            && accounting.getAccounting(VAULT_ID, address(0)).claimable == 0,
+            "provider obligation escaped pending state");
+
+        vm.prank(BENEFICIARY);
+        (bool directOk,) = address(vault).call(
+            abi.encodeCall(vault.claim, (keccak256("direct-bypass"), pc.providerObligationId)));
+        require(!directOk && accounting.getObligation(pc.providerObligationId).state == 1,
+            "beneficiary bypassed dispute gate through Vault");
+
+        vm.prank(BENEFICIARY);
+        (bool earlyOk,) = address(entitlements).call(
+            abi.encodeCall(entitlements.claimProvider, (id, jobs.job(id).revision)));
+        require(!earlyOk && !entitlements.providerClaim(id).paid
+            && jobs.job(id).status == ComputeJobRegistry420.Status.VERIFIED,
+            "provider paid before challenge window finality");
+    }
+
+    function testTimelyPayerChallengeHoldsSpecificProviderLiabilityUntilProviderWinFinality() public {
+        bytes32 id = _verifiedJob(28, OWNER_A_KEY, PAYER_A_KEY, 4 ether);
+        ComputeVerifiedEntitlement420.ProviderClaim memory pc = _makeClaimable(id);
+        bytes32 disputeId = _openPayerDispute(id, keccak256("provider-win"));
+        require(jobs.job(id).status == ComputeJobRegistry420.Status.DISPUTED
+            && disputes.activeHold(id)
+            && accounting.getObligation(pc.providerObligationId).state == 1,
+            "timely challenge did not hold pending provider liability");
+
+        vm.prank(BENEFICIARY);
+        disputes.respond(disputeId, keccak256("provider-response"));
+        _grantAdjudicator(ADJUDICATOR_A, id);
+        vm.prank(ADJUDICATOR_A);
+        disputes.decide(disputeId, true, keccak256("provider-wins"));
+        ComputeDisputeResolution420.DisputeCase memory dc = disputes.caseOf(disputeId);
+        vm.warp(uint256(dc.appealDeadline) + 1);
+        disputes.finalize(disputeId);
+
+        require(jobs.job(id).status == ComputeJobRegistry420.Status.VERIFIED
+            && !disputes.activeHold(id) && disputes.providerReleaseAllowed(id)
+            && accounting.getObligation(pc.providerObligationId).state == 1,
+            "provider-win finality changed liability before payout");
+
+        uint256 before = BENEFICIARY.balance;
+        vm.prank(BENEFICIARY);
+        entitlements.claimProvider(id, jobs.job(id).revision);
+        require(BENEFICIARY.balance == before + 3 ether
+            && jobs.job(id).status == ComputeJobRegistry420.Status.SETTLED
+            && accounting.getObligation(pc.providerObligationId).state == 3,
+            "final provider win did not settle exact held earning");
+    }
+
+    function testPayerWinReallocatesOnlyContestedJobToFullOriginalPayerRefund() public {
+        bytes32 id = _verifiedJob(29, OWNER_A_KEY, PAYER_A_KEY, 4 ether);
+        ComputeVerifiedEntitlement420.ProviderClaim memory pc = _makeClaimable(id);
+        bytes32 disputeId = _openPayerDispute(id, keccak256("payer-win"));
+
+        vm.prank(BENEFICIARY);
+        disputes.respond(disputeId, keccak256("provider-response"));
+        _grantAdjudicator(ADJUDICATOR_A, id);
+        vm.prank(ADJUDICATOR_A);
+        disputes.decide(disputeId, false, keccak256("payer-wins"));
+        ComputeDisputeResolution420.DisputeCase memory dc = disputes.caseOf(disputeId);
+        vm.warp(uint256(dc.appealDeadline) + 1);
+        disputes.finalize(disputeId);
+
+        ComputeVerifiedEntitlement420.PayerRefund memory refund = entitlements.payerRefund(id);
+        require(jobs.job(id).status == ComputeJobRegistry420.Status.FAILED
+            && accounting.getObligation(pc.providerObligationId).state == 4
+            && accounting.getObligation(pc.payerResidualObligationId).state == 4
+            && refund.payer == payerA && refund.amount == 4 ether
+            && accounting.getObligation(refund.obligationId).state == 1,
+            "payer-win resolution did not preserve exact payer-backed liability");
+
+        uint256 before = payerA.balance;
+        vm.prank(payerA);
+        entitlements.claimPayerRefund(id, jobs.job(id).revision);
+        require(payerA.balance == before + 4 ether
+            && jobs.job(id).status == ComputeJobRegistry420.Status.REFUNDED
+            && address(vault).balance == 0,
+            "payer-win refund did not transfer exact original payer balance");
+    }
+
+    function testAppealUsesDifferentIndependentAdjudicatorAndOverturnsUnreleasedDecision() public {
+        bytes32 id = _verifiedJob(30, OWNER_A_KEY, PAYER_A_KEY, 4 ether);
+        ComputeVerifiedEntitlement420.ProviderClaim memory pc = _makeClaimable(id);
+        bytes32 disputeId = _openPayerDispute(id, keccak256("appeal"));
+
+        vm.prank(BENEFICIARY);
+        disputes.respond(disputeId, keccak256("provider-response"));
+        _grantAdjudicator(ADJUDICATOR_A, id);
+        _grantAdjudicator(ADJUDICATOR_B, id);
+        vm.prank(ADJUDICATOR_A);
+        disputes.decide(disputeId, false, keccak256("initial-payer-win"));
+
+        vm.prank(BENEFICIARY);
+        disputes.appeal(disputeId, keccak256("provider-appeal"));
+        vm.prank(ADJUDICATOR_A);
+        (bool sameOk,) = address(disputes).call(
+            abi.encodeCall(disputes.decideAppeal,
+                (disputeId, true, keccak256("same-adjudicator"))));
+        require(!sameOk, "initial adjudicator decided own appeal");
+
+        vm.prank(ADJUDICATOR_B);
+        disputes.decideAppeal(disputeId, true, keccak256("appeal-provider-win"));
+        disputes.finalize(disputeId);
+        require(jobs.job(id).status == ComputeJobRegistry420.Status.VERIFIED
+            && accounting.getObligation(pc.providerObligationId).state == 1
+            && disputes.providerReleaseAllowed(id),
+            "appeal did not overturn same held entitlement");
+
+        vm.prank(BENEFICIARY);
+        entitlements.claimProvider(id, jobs.job(id).revision);
+        require(jobs.job(id).status == ComputeJobRegistry420.Status.SETTLED
+            && entitlements.totalProviderPaid() == 3 ether,
+            "appeal-final provider entitlement did not settle once");
+    }
+
+    function testUnauthorizedOrInterestedAdjudicatorCannotResolveHeldCase() public {
+        bytes32 id = _verifiedJob(31, OWNER_A_KEY, PAYER_A_KEY, 4 ether);
+        ComputeVerifiedEntitlement420.ProviderClaim memory pc = _makeClaimable(id);
+        bytes32 disputeId = _openPayerDispute(id, keccak256("bad-adjudicator"));
+        vm.prank(BENEFICIARY);
+        disputes.respond(disputeId, keccak256("response"));
+
+        vm.prank(OUTSIDER);
+        (bool outsiderOk,) = address(disputes).call(
+            abi.encodeCall(disputes.decide,
+                (disputeId, true, keccak256("unauthorized"))));
+        require(!outsiderOk, "ungranted adjudicator resolved case");
+
+        _grantAdjudicator(OPERATOR, id);
+        vm.prank(OPERATOR);
+        (bool interestedOk,) = address(disputes).call(
+            abi.encodeCall(disputes.decide,
+                (disputeId, true, keccak256("interested"))));
+        require(!interestedOk && disputes.activeHold(id)
+            && jobs.job(id).status == ComputeJobRegistry420.Status.DISPUTED
+            && accounting.getObligation(pc.providerObligationId).state == 1,
+            "provider-controlled adjudicator escaped independence gate");
+    }
+
+    function testExpiredChallengeCannotReopenAndUnchallengedClaimSettlesAfterWindow() public {
+        bytes32 id = _verifiedJob(32, OWNER_A_KEY, PAYER_A_KEY, 4 ether);
+        _makeClaimable(id);
+        _matureProviderClaim(id);
+
+        vm.prank(payerA);
+        (bool lateOk,) = address(disputes).call(
+            abi.encodeCall(disputes.openDispute, (
+                id, jobs.job(id).revision, keccak256("late-ground"), keccak256("late-evidence")
+            )));
+        require(!lateOk && disputes.disputeForJob(id) == bytes32(0),
+            "expired challenge opened a case");
+
+        vm.prank(BENEFICIARY);
+        entitlements.claimProvider(id, jobs.job(id).revision);
+        require(jobs.job(id).status == ComputeJobRegistry420.Status.SETTLED,
+            "unchallenged final claim did not settle");
+    }
+
+    function testDisputeTimeoutFailsClosedToPayerInsteadOfAutomaticProviderPayment() public {
+        bytes32 id = _verifiedJob(33, OWNER_A_KEY, PAYER_A_KEY, 4 ether);
+        ComputeVerifiedEntitlement420.ProviderClaim memory pc = _makeClaimable(id);
+        bytes32 disputeId = _openPayerDispute(id, keccak256("timeout"));
+        ComputeDisputeResolution420.DisputeCase memory dc = disputes.caseOf(disputeId);
+        vm.warp(uint256(dc.decisionDeadline) + 1);
+        disputes.timeout(disputeId);
+
+        ComputeVerifiedEntitlement420.PayerRefund memory refund = entitlements.payerRefund(id);
+        require(jobs.job(id).status == ComputeJobRegistry420.Status.FAILED
+            && !entitlements.providerClaim(id).paid
+            && accounting.getObligation(pc.providerObligationId).state == 4
+            && refund.payer == payerA && refund.amount == 4 ether
+            && accounting.getObligation(refund.obligationId).state == 1,
+            "timeout defaulted to provider or lost payer backing");
+    }
+
+    function testWithdrawnChallengeReleasesSamePendingProviderEntitlementWithoutDuplication() public {
+        bytes32 id = _verifiedJob(34, OWNER_A_KEY, PAYER_A_KEY, 4 ether);
+        ComputeVerifiedEntitlement420.ProviderClaim memory pc = _makeClaimable(id);
+        bytes32 disputeId = _openPayerDispute(id, keccak256("withdraw"));
+        vm.prank(payerA);
+        disputes.withdraw(disputeId);
+
+        require(jobs.job(id).status == ComputeJobRegistry420.Status.VERIFIED
+            && disputes.providerReleaseAllowed(id)
+            && accounting.getObligation(pc.providerObligationId).state == 1,
+            "withdrawal did not release original held entitlement");
+        vm.prank(BENEFICIARY);
+        entitlements.claimProvider(id, jobs.job(id).revision);
+        require(jobs.job(id).status == ComputeJobRegistry420.Status.SETTLED
+            && entitlements.totalProviderPaid() == 3 ether,
+            "withdrawn case duplicated or lost provider entitlement");
+    }
+
+    function testDisputeAndPayerWinRemainIsolatedAcrossTwoPayers() public {
+        bytes32 first = _verifiedJob(35, OWNER_A_KEY, PAYER_A_KEY, 4 ether);
+        bytes32 second = _verifiedJob(36, OWNER_B_KEY, PAYER_B_KEY, 4 ether);
+        ComputeVerifiedEntitlement420.ProviderClaim memory firstPc = _makeClaimable(first);
+        ComputeVerifiedEntitlement420.ProviderClaim memory secondPc = _makeClaimable(second);
+        bytes32 disputeId = _openPayerDispute(first, keccak256("two-payer"));
+
+        vm.prank(BENEFICIARY);
+        disputes.respond(disputeId, keccak256("response"));
+        _grantAdjudicator(ADJUDICATOR_A, first);
+        vm.prank(ADJUDICATOR_A);
+        disputes.decide(disputeId, false, keccak256("payer-a-win"));
+        ComputeDisputeResolution420.DisputeCase memory dc = disputes.caseOf(disputeId);
+        vm.warp(uint256(dc.appealDeadline) + 1);
+        disputes.finalize(disputeId);
+
+        require(accounting.getObligation(firstPc.providerObligationId).state == 4
+            && accounting.getObligation(secondPc.providerObligationId).state == 1
+            && jobs.job(second).status == ComputeJobRegistry420.Status.VERIFIED
+            && !disputes.activeHold(second)
+            && address(vault).balance == 8 ether
+            && accounting.getAccounting(VAULT_ID, address(0)).reserved == 8 ether,
+            "first payer dispute consumed or held second payer backing");
+    }
+
     function testAcceptedBeneficiaryCannotBeRedirectedAfterVerification() public {
         bytes32 id = _verifiedJob(10, OWNER_A_KEY, PAYER_A_KEY, 4 ether);
         vm.prank(OPERATOR);

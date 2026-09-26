@@ -453,10 +453,10 @@
     },
     {
       "id": "EXP-FIND-010",
-      "classification": "Genesis blocker",
+      "classification": "Qualification gap",
       "severity": "medium",
       "title": "Raw contract event inspection is incomplete in the user interface",
-      "description": "The current event presentation exposes log provenance and topic count but does not present full topic values and log data needed for complete raw event inspection.",
+      "description": "The current event presentation exposes log provenance and topic count, but complete raw topic/data presentation has not been qualified as sufficient for the mandatory receipt/logs view.",
       "affected": [
         "explorer/web/static/app.js",
         "explorer/service/transactionviews.go",
@@ -464,9 +464,9 @@
         "docs/audit/EXP-0.2.2-user-workflow-matrix.json"
       ],
       "evidence": [
-        "EXP-WF-013 is partial_source; its limitations state that the web table does not display topic values/data."
+        "EXP-WF-013 is partial_source and mapped_to_later_gate; its limitations state that the web table does not display topic values/data."
       ],
-      "root_cause": "The frontend renders a summarized log table rather than the complete indexed log payload.",
+      "root_cause": "The frontend currently summarizes indexed logs, and the accepted workflow matrix leaves complete raw event presentation for a later qualification gate rather than marking it as a confirmed implementation blocker.",
       "consequences": [
         "Users cannot independently inspect the full raw event payload through the current Explorer UI.",
         "ABI-decoded semantics cannot be validated against visible raw topics/data."
@@ -498,7 +498,7 @@
         "AC-7"
       ],
       "genesis_blocking": true,
-      "blocking_rationale": "Receipt/logs is a mandatory Genesis view and EXP-0.2.2 identifies event inspection as only partially implemented."
+      "blocking_rationale": "Receipt/logs is a mandatory Genesis view, so event inspectability must be qualified before final Genesis closeout; however EXP-0.2.2 did not classify this workflow as gap_requires_implementation, so 0.2.5 must preserve it as a qualification gap rather than invent a source blocker."
     },
     {
       "id": "EXP-FIND-011",

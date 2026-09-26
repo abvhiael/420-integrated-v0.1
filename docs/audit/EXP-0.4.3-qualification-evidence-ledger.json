@@ -2,7 +2,7 @@
   "schema": "420explorer-exp-0.4.3-qualification-evidence-ledger-v1",
   "milestone": "EXP-0.4.3",
   "title": "420Explorer exact-head qualification evidence provenance ledger",
-  "status": "implementation_complete_exact_head_qualification_required",
+  "status": "qualified_repository_scope_initial_head_recorded",
   "baseline": {
     "pr": 376,
     "base_sha": "304cb61286c94f72d0b05e32e5f713b9d68bc450",
@@ -1151,17 +1151,85 @@
       "limitations": [
         "no live closeout invented"
       ]
+    },
+    {
+      "id": "EXP-PROV-017",
+      "milestone": "EXP-0.4.3",
+      "pr": 376,
+      "branch": "audit/exp-0-4-1-ci-qualification-inventory-20260926",
+      "base_sha": "304cb61286c94f72d0b05e32e5f713b9d68bc450",
+      "qualified_head": "1a9ba8d0c81e9e8fe2f35655ddd5235dd6ab2f8f",
+      "runs": [
+        {
+          "workflow": "420Indexer",
+          "run_id": 36273730986,
+          "job_ids": [
+            108492373617
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-001"
+        },
+        {
+          "workflow": "420Docs Qualification",
+          "run_id": 36273730968,
+          "job_ids": [
+            108492375629
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-002"
+        },
+        {
+          "workflow": "420 Integrated Qualification",
+          "run_id": 36273731020,
+          "job_ids": [
+            108492433189,
+            108492433295,
+            108492433316,
+            108492433374
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-003"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 10916835141,
+          "name": "exp-0-4-3-qualification-evidence-ledger",
+          "digest": "sha256:3370b78c68cd05be90fb74d7d5b55d71d5f00ed3e464c3174802b7021a0544e4"
+        }
+      ],
+      "evidence_scope": [
+        "exact-head qualification evidence provenance ledger and promotion discipline"
+      ],
+      "evidence_layers": [
+        "source_qualified",
+        "integration_qualified"
+      ],
+      "requirement_scope": [
+        "qualification provenance for EXP-0.1 through EXP-0.4.3"
+      ],
+      "finding_scope": [
+        "10 current blockers protected from evidence overpromotion"
+      ],
+      "acceptance_scope": [
+        "AC-1..AC-10 remain unverified"
+      ],
+      "applicability": "current_authoritative",
+      "reproducible": true,
+      "limitations": [
+        "records provenance only; no runtime, deployment, live-network, or Genesis qualification"
+      ]
     }
   ],
   "summary": {
-    "event_count": 16,
-    "exact_head_events": 16,
-    "events_with_run_ids": 16,
-    "events_with_job_ids": 16,
-    "events_with_artifact_ids": 16,
-    "events_with_complete_artifact_digests": 15,
-    "source_qualified_events": 16,
-    "integration_qualified_events": 11,
+    "event_count": 17,
+    "exact_head_events": 17,
+    "events_with_run_ids": 17,
+    "events_with_job_ids": 17,
+    "events_with_artifact_ids": 17,
+    "events_with_complete_artifact_digests": 16,
+    "source_qualified_events": 17,
+    "integration_qualified_events": 12,
     "runtime_qualified_events": 0,
     "deployment_qualified_events": 0,
     "live_network_qualified_events": 0,

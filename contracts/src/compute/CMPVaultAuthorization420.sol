@@ -28,7 +28,7 @@ contract CMPVaultAuthorization420 is VaultAuthorization420 {
     event CMPVaultBound(address indexed vault, address indexed registry);
     event CMPFundingBound(address indexed funding);
     event CMPSettlementBound(address indexed settlement);
-    event CMPPolicySealed(address indexed vault, address indexed funding);
+    event CMPPolicySealed(address indexed vault, address indexed funding, address indexed settlement);
 
     constructor(address sharedCapabilities, bytes32 dedicatedVaultId)
         VaultAuthorization420(sharedCapabilities)
@@ -64,7 +64,9 @@ contract CMPVaultAuthorization420 is VaultAuthorization420 {
     function bindSettlement(address settlement_) external {
         if (msg.sender != deployer || configurationSealed || settlementAdapter != address(0)
             || fundingAdapter == address(0) || settlement_.code.length == 0
-            || settlement_ == fundingAdapter) revert InvalidCMPBinding();
+            || settlement_ == fundingAdapter
+            || ComputeEscrowFunding420(payable(fundingAdapter)).settlementAdapter() != settlement_)
+            revert InvalidCMPBinding();
         settlementAdapter = settlement_;
         emit CMPSettlementBound(settlement_);
     }
@@ -74,7 +76,7 @@ contract CMPVaultAuthorization420 is VaultAuthorization420 {
         if (msg.sender != deployer || configurationSealed || boundVault == address(0)
             || boundRegistry == address(0) || fundingAdapter == address(0)) revert InvalidCMPBinding();
         configurationSealed = true;
-        emit CMPPolicySealed(boundVault, fundingAdapter);
+        emit CMPPolicySealed(boundVault, fundingAdapter, settlementAdapter);
     }
 
     /// @dev Shared registry authorization is checked only AFTER the immutable CMP restrictions.

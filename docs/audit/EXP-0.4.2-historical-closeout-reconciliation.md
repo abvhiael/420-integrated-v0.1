@@ -1,6 +1,6 @@
 # EXP-0.4.2 — historical qualification and closeout reconciliation
 
-**Status:** implementation complete; exact-head qualification required.
+**Status:** QUALIFIED at repository scope.
 
 ## Objective
 
@@ -57,3 +57,18 @@ The absence of a disposition is a verifier failure. Historical evidence may supp
 ## Scope boundary
 
 EXP-0.4.2 qualifies the historical-closeout inventory and the interpretation rules for old qualification language. It does not modify Explorer functionality, run the manual live-testnet validator, close a Genesis blocker, or satisfy an acceptance criterion.
+
+
+## Exact-head qualification evidence
+
+Qualified head: `7e97fd4fb472f42e91dde45e1d6a808dddf9bc56`
+
+- 420Indexer #609 — run `36271531639` — success.
+- 420Docs Qualification #2927 — run `36271531648` — success.
+- 420 Integrated Qualification #5544 — run `36271531693` — success.
+- EXP-0.4.2 evidence artifact `10915817634`.
+- Digest `sha256:32c88290fc1a95f4bac35225ca94d73b98999c4d91b04b8e93be74e048c676d5`.
+
+The first implementation run failed only because the new verifier read the acceptance-map field as `status` instead of the authoritative `current_status`. The retained EXP-0.2.6 gate remained green and demonstrated that all ten criteria were still unverified. The new verifier was corrected and the entire exact-head suite passed.
+
+EXP-0.4.2 is therefore complete at repository scope. It establishes interpretation/provenance discipline for historical qualification language and does not close runtime, deployment, live-network or Genesis blockers.

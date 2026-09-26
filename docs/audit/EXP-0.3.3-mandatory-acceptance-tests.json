@@ -665,5 +665,12 @@
     "partial_source": 4,
     "orphaned_test_paths": 0,
     "fully_genesis_accepted": 0
+  },
+  "scope_resolution": {
+    "id": "EXP-SCOPE-CONFLICT-001",
+    "decision": "EXP-SCOPE-RESOLUTION-B",
+    "milestone": "EXP-0.3.8",
+    "outcome": "No governance acceptance-test entry is required for the dedicated Explorer Genesis view set.",
+    "evidence": "docs/audit/EXP-0.3.8-governance-scope-decision.json"
   }
 }

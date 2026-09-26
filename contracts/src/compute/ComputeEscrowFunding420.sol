@@ -29,6 +29,7 @@ contract ComputeEscrowFunding420 is IComputeJobFundingEvidence420 {
 
     bytes32 private constant SAFETY_DOMAIN = keccak256("420/CMP/ESCROW/PAYER-SAFETY/V1");
     bytes32 private constant REFUND_DOMAIN = keccak256("420/CMP/ESCROW/EXPIRED-UNMATCHED-REFUND/V1");
+    bytes32 private constant TERMINAL_REFUND_DOMAIN = keccak256("420/CMP/ESCROW/TERMINAL-REFUND/V1");
     bytes32 private constant SPLIT_DOMAIN = keccak256("420/CMP/ESCROW/VERIFIED-SPLIT/V1");
     bytes32 private constant PROVIDER_DOMAIN = keccak256("420/CMP/ESCROW/PROVIDER-CLAIM/V1");
     bytes32 private constant RESIDUAL_DOMAIN = keccak256("420/CMP/ESCROW/PAYER-RESIDUAL/V1");
@@ -57,6 +58,8 @@ contract ComputeEscrowFunding420 is IComputeJobFundingEvidence420 {
     event VerifiedLiabilitySplit(bytes32 indexed jobId, bytes32 indexed entitlementRef,
         bytes32 indexed providerObligationId, bytes32 payerResidualObligationId,
         address beneficiary, uint256 earnedAmount, uint256 residualAmount);
+    event TerminalRefundClaimable(bytes32 indexed jobId, bytes32 indexed refundRef,
+        address indexed payer, bytes32 obligationId, uint256 amount);
 
     constructor(address signedRequests, address registeredVault) {
         if (signedRequests.code.length == 0 || registeredVault.code.length == 0) revert InvalidFunding();
@@ -212,6 +215,47 @@ contract ComputeEscrowFunding420 is IComputeJobFundingEvidence420 {
         totalFunded -= c.deposited;
         emit VerifiedLiabilitySplit(jobId, entitlementRef, providerObligationId,
             payerResidualObligationId, beneficiary, earnedAmount, residual);
+        entered = false;
+    }
+
+    /// @notice The bound settlement adapter may convert a fully unearned terminal job's
+    /// original payer-safety obligation into a payer claim. No recipient is caller-supplied.
+    function releaseTerminalRefund(bytes32 jobId, bytes32 refundRef)
+        external returns (bytes32 obligationId, address payer, uint256 amount)
+    {
+        if (entered || msg.sender != settlementAdapter || refundRef == bytes32(0)
+            || address(jobs) == address(0)) revert InvalidFunding();
+        entered = true;
+        Credit storage c = _credits[jobId];
+        ComputeJobRegistry420.Job memory j = jobs.job(jobId);
+        if (!c.exists || c.refunded || c.allocated || c.payer == address(0)
+            || c.obligationId != safetyObligationId(jobId)
+            || (j.status != ComputeJobRegistry420.Status.CANCELLED
+                && j.status != ComputeJobRegistry420.Status.EXPIRED
+                && j.status != ComputeJobRegistry420.Status.FAILED))
+            revert InvalidFunding();
+
+        VaultAccounting420.Obligation memory beforeO = accounting.getObligation(c.obligationId);
+        if (!beforeO.exists || beforeO.state != 1 || beforeO.vaultId != vaultId
+            || beforeO.asset != address(0) || beforeO.beneficiary != c.payer
+            || beforeO.amount != c.deposited || beforeO.sourceRef != jobId
+            || beforeO.obligationType != PAYER_SAFETY_TYPE) revert InvalidFunding();
+
+        vault.releaseObligation(
+            keccak256(abi.encode(TERMINAL_REFUND_DOMAIN, block.chainid, address(this),
+                address(vault), vaultId, jobId, refundRef)),
+            c.obligationId
+        );
+        VaultAccounting420.Obligation memory afterO = accounting.getObligation(c.obligationId);
+        if (afterO.state != 2 || afterO.beneficiary != c.payer || afterO.amount != c.deposited)
+            revert InvalidFunding();
+
+        c.refunded = true;
+        totalFunded -= c.deposited;
+        obligationId = c.obligationId;
+        payer = c.payer;
+        amount = c.deposited;
+        emit TerminalRefundClaimable(jobId, refundRef, payer, obligationId, amount);
         entered = false;
     }
 

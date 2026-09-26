@@ -2,6 +2,7 @@
 pragma solidity ^0.8.24;
 
 import "./ComputeJobRegistry420.sol";
+import "./ComputeJobAcceptedMatch420.sol";
 import "./IComputeAcceptedMatchRuntime420.sol";
 import "./ComputeAuthorization420.sol";
 

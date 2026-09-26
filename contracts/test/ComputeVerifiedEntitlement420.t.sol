@@ -198,9 +198,10 @@ contract ComputeVerifiedEntitlement420Test {
                 nonce: nonce
             });
         bytes32 digest = requests.authorizationDigest(a);
+        bytes memory ownerSig = _signature(ownerKey, digest);
+        bytes memory payerSig = _signature(payerKey, digest);
         vm.prank(owner);
-        bytes32 requestId = requests.registerSignedRequest(
-            a, _signature(ownerKey, digest), _signature(payerKey, digest));
+        bytes32 requestId = requests.registerSignedRequest(a, ownerSig, payerSig);
 
         vm.prank(owner);
         id = jobs.createJob(requestId, requestId, MANIFEST, a.workloadType,
@@ -270,8 +271,9 @@ contract ComputeVerifiedEntitlement420Test {
 
     function _finalize(bytes32 id, uint256 amount) private returns (bytes32 ref) {
         _grant(SETTLER, id, auth.ACTION_SETTLE(), amount);
+        uint64 revision = jobs.job(id).revision;
         vm.prank(SETTLER);
-        ref = entitlements.finalizeVerifiedEarning(id, jobs.job(id).revision);
+        ref = entitlements.finalizeVerifiedEarning(id, revision);
     }
 
     function testVerifiedFixedPriceCreatesOneImmutableEntitlementWithoutVaultMovement() public {
@@ -302,9 +304,10 @@ contract ComputeVerifiedEntitlement420Test {
         require(jobs.job(id).status == ComputeJobRegistry420.Status.FAILED,
             "negative objective verdict not recorded");
         _grant(SETTLER, id, auth.ACTION_SETTLE(), 3 ether);
+        uint64 revision = jobs.job(id).revision;
         vm.prank(SETTLER);
         (bool ok,) = address(entitlements).call(
-            abi.encodeCall(entitlements.finalizeVerifiedEarning, (id, jobs.job(id).revision)));
+            abi.encodeCall(entitlements.finalizeVerifiedEarning, (id, revision)));
         require(!ok && entitlements.entitlementForJob(id) == bytes32(0)
             && entitlements.totalVerifiedEarned() == 0 && funding.totalFunded() == 4 ether,
             "failed verification created earnings");

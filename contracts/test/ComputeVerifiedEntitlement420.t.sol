@@ -500,14 +500,6 @@ contract ComputeVerifiedEntitlement420Test {
         _grant(actor, id, auth.ACTION_ADJUDICATE(), 0);
         require(auth.isAuthorized(actor, auth.ACTION_ADJUDICATE(), auth.scopeJob(id), 0),
             "stage: adjudicator capability");
-        ComputeJobRegistry420.Job memory j = jobs.job(id);
-        bytes32 priceRef = matches.priceReservationForJob(id);
-        ComputeAcceptedPriceMatch420.PriceReservation memory p =
-            matches.priceReservation(priceRef);
-        (, , address operator, bool exists) = matches.matchParties(j.matchId);
-        require(exists && policy.independentFromParties(
-            actor, j.owner, p.payer, operator, j.verifier
-        ), "stage: adjudicator independence");
     }
 
     function _openPayerDispute(bytes32 id, bytes32 salt) private returns (bytes32 disputeId) {

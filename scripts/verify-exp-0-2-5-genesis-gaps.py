@@ -50,7 +50,6 @@ def main():
     required_blockers={
       "EXP-FIND-008":"inspect transaction fees",
       "EXP-FIND-009":"inspect validator-produced blocks",
-      "EXP-FIND-010":"examine contract events",
     }
     for fid,name in required_blockers.items():
         f=by[fid]; w=wf_by.get(name,{})
@@ -58,6 +57,13 @@ def main():
             errors.append(f"{fid}: required implementation gap no longer blocker")
         if w.get("acceptance_status")!="gap_requires_implementation":
             errors.append(f"{fid}: source workflow no longer marked implementation gap")
+
+    event=by["EXP-FIND-010"]
+    event_wf=wf_by.get("examine contract events",{})
+    if event["classification"]!="Qualification gap" or event["genesis_blocking"] is not True:
+        errors.append("EXP-FIND-010: partial event workflow must remain a Genesis-relevant qualification gap")
+    if event_wf.get("acceptance_status")!="mapped_to_later_gate":
+        errors.append("EXP-FIND-010: source workflow acceptance status drifted")
 
     # Governance ambiguity must remain explicit until sources reconcile.
     gov=[c for c in cap.get("capabilities",[]) if c.get("name")=="governance view"]
@@ -85,8 +91,8 @@ def main():
 
     counts={c:sum(f["classification"]==c for f in findings) for c in CLASSIFICATIONS}
     expected_counts={
-      "Genesis blocker":3,
-      "Qualification gap":3,
+      "Genesis blocker":2,
+      "Qualification gap":4,
       "Integration gap":3,
       "Documentation gap":1,
       "Operational risk":1,

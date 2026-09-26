@@ -19,6 +19,10 @@ contract ComputeVerifiedEntitlement420 is IComputeJobSettlementEvidence420 {
         keccak256("420/COMPUTE/PROVIDER_CLAIM/FIXED/V1");
     bytes32 private constant PAYOUT_DOMAIN =
         keccak256("420/COMPUTE/PROVIDER_PAYOUT/FIXED/V1");
+    bytes32 private constant REFUND_CLAIM_DOMAIN =
+        keccak256("420/COMPUTE/PAYER_REFUND_CLAIM/V1");
+    bytes32 private constant REFUND_PAYOUT_DOMAIN =
+        keccak256("420/COMPUTE/PAYER_REFUND_PAYOUT/V1");
 
     struct ProviderClaim {
         bytes32 jobId;
@@ -29,6 +33,18 @@ contract ComputeVerifiedEntitlement420 is IComputeJobSettlementEvidence420 {
         bytes32 payoutRef;
         address beneficiary;
         uint256 amount;
+        bool claimable;
+        bool paid;
+    }
+
+    struct PayerRefund {
+        bytes32 jobId;
+        bytes32 obligationId;
+        bytes32 claimRef;
+        bytes32 payoutRef;
+        address payer;
+        uint256 amount;
+        bool residual;
         bool claimable;
         bool paid;
     }
@@ -67,9 +83,11 @@ contract ComputeVerifiedEntitlement420 is IComputeJobSettlementEvidence420 {
 
     mapping(bytes32 => Entitlement) private _entitlements;
     mapping(bytes32 => ProviderClaim) private _providerClaims;
+    mapping(bytes32 => PayerRefund) private _payerRefunds;
     mapping(bytes32 => bytes32) public entitlementForJob;
     uint256 public totalVerifiedEarned;
     uint256 public totalProviderPaid;
+    uint256 public totalPayerRefundPaid;
     bool private entered;
 
     error InvalidEntitlement();
@@ -81,6 +99,10 @@ contract ComputeVerifiedEntitlement420 is IComputeJobSettlementEvidence420 {
         address beneficiary, uint256 amount);
     event ProviderPaid(bytes32 indexed jobId, bytes32 indexed entitlementRef,
         bytes32 indexed providerObligationId, bytes32 payoutRef, address beneficiary, uint256 amount);
+    event PayerRefundClaimable(bytes32 indexed jobId, bytes32 indexed obligationId,
+        bytes32 indexed claimRef, address payer, uint256 amount, bool residual);
+    event PayerRefundPaid(bytes32 indexed jobId, bytes32 indexed obligationId,
+        bytes32 indexed payoutRef, address payer, uint256 amount, bool residual);
 
     event VerifiedEntitlementFinalized(
         bytes32 indexed jobId,
@@ -329,6 +351,122 @@ contract ComputeVerifiedEntitlement420 is IComputeJobSettlementEvidence420 {
         emit ProviderPaid(jobId, pc.entitlementRef, pc.providerObligationId,
             payoutRef, pc.beneficiary, pc.amount);
         entered = false;
+    }
+
+    function createTerminalRefundClaim(bytes32 jobId) external returns (bytes32 claimRef) {
+        if (entered || _payerRefunds[jobId].claimable) revert InvalidEntitlement();
+        entered = true;
+        ComputeJobRegistry420.Job memory j = jobs.job(jobId);
+        if (j.status != ComputeJobRegistry420.Status.CANCELLED
+            && j.status != ComputeJobRegistry420.Status.EXPIRED
+            && j.status != ComputeJobRegistry420.Status.FAILED) revert InvalidEntitlement();
+        if (entitlementForJob[jobId] != bytes32(0) || _providerClaims[jobId].claimable)
+            revert InvalidEntitlement();
+
+        claimRef = keccak256(abi.encode(REFUND_CLAIM_DOMAIN, block.chainid, address(this),
+            jobId, j.requestId, j.status, j.revision, false));
+        (bytes32 obligationId, address payer, uint256 amount) =
+            funding.releaseTerminalRefund(jobId, claimRef);
+        VaultAccounting420.Obligation memory o = accounting.getObligation(obligationId);
+        if (!o.exists || o.state != 2 || o.vaultId != vaultId || o.asset != address(0)
+            || o.beneficiary != payer || o.amount != amount || amount == 0)
+            revert InvalidEntitlement();
+
+        _payerRefunds[jobId] = PayerRefund(
+            jobId, obligationId, claimRef, bytes32(0), payer, amount, false, true, false
+        );
+        emit PayerRefundClaimable(jobId, obligationId, claimRef, payer, amount, false);
+        entered = false;
+    }
+
+    function createSettledResidualRefundClaim(bytes32 jobId)
+        external returns (bytes32 claimRef)
+    {
+        if (entered || _payerRefunds[jobId].claimable) revert InvalidEntitlement();
+        entered = true;
+        ComputeJobRegistry420.Job memory j = jobs.job(jobId);
+        ProviderClaim storage pc = _providerClaims[jobId];
+        if (j.status != ComputeJobRegistry420.Status.SETTLED || !pc.claimable || !pc.paid
+            || pc.payerResidualObligationId == bytes32(0)) revert InvalidEntitlement();
+
+        VaultAccounting420.Obligation memory beforeO =
+            accounting.getObligation(pc.payerResidualObligationId);
+        if (!beforeO.exists || beforeO.state != 1 || beforeO.vaultId != vaultId
+            || beforeO.asset != address(0) || beforeO.amount == 0
+            || beforeO.obligationType != funding.PAYER_RESIDUAL_TYPE()) revert InvalidEntitlement();
+
+        claimRef = keccak256(abi.encode(REFUND_CLAIM_DOMAIN, block.chainid, address(this),
+            jobId, pc.entitlementRef, pc.payerResidualObligationId, beforeO.beneficiary,
+            beforeO.amount, true));
+        vault.releaseObligation(claimRef, pc.payerResidualObligationId);
+        VaultAccounting420.Obligation memory afterO =
+            accounting.getObligation(pc.payerResidualObligationId);
+        if (afterO.state != 2 || afterO.beneficiary != beforeO.beneficiary
+            || afterO.amount != beforeO.amount) revert InvalidEntitlement();
+
+        _payerRefunds[jobId] = PayerRefund(
+            jobId, pc.payerResidualObligationId, claimRef, bytes32(0),
+            beforeO.beneficiary, beforeO.amount, true, true, false
+        );
+        emit PayerRefundClaimable(jobId, pc.payerResidualObligationId, claimRef,
+            beforeO.beneficiary, beforeO.amount, true);
+        entered = false;
+    }
+
+    function claimPayerRefund(bytes32 jobId, uint64 expectedRevision)
+        external returns (bytes32 payoutRef)
+    {
+        if (entered) revert InvalidEntitlement();
+        PayerRefund storage pr = _payerRefunds[jobId];
+        if (!pr.claimable || pr.paid || msg.sender != pr.payer) revert Unauthorized();
+        ComputeJobRegistry420.Job memory j = jobs.job(jobId);
+        if (j.revision != expectedRevision) revert InvalidEntitlement();
+        bool settledResidual = pr.residual && j.status == ComputeJobRegistry420.Status.SETTLED;
+        bool unsuccessful = !pr.residual && (
+            j.status == ComputeJobRegistry420.Status.CANCELLED
+            || j.status == ComputeJobRegistry420.Status.EXPIRED
+            || j.status == ComputeJobRegistry420.Status.FAILED
+        );
+        if (!settledResidual && !unsuccessful) revert InvalidEntitlement();
+
+        entered = true;
+        uint256 payerBefore = pr.payer.balance;
+        uint256 vaultBefore = address(vault).balance;
+        VaultAccounting420.AssetAccounting memory beforeA =
+            accounting.getAccounting(vaultId, address(0));
+
+        payoutRef = keccak256(abi.encode(REFUND_PAYOUT_DOMAIN, block.chainid, address(this),
+            jobId, pr.claimRef, pr.obligationId, pr.payer, pr.amount, pr.residual));
+        pr.payoutRef = payoutRef;
+        pr.paid = true;
+        totalPayerRefundPaid += pr.amount;
+        vault.claim(payoutRef, pr.obligationId);
+
+        VaultAccounting420.Obligation memory paidObligation =
+            accounting.getObligation(pr.obligationId);
+        VaultAccounting420.AssetAccounting memory afterA =
+            accounting.getAccounting(vaultId, address(0));
+        if (paidObligation.state != 3 || paidObligation.beneficiary != pr.payer
+            || paidObligation.amount != pr.amount
+            || pr.payer.balance != payerBefore + pr.amount
+            || address(vault).balance != vaultBefore - pr.amount
+            || afterA.recordedBalance != beforeA.recordedBalance - pr.amount
+            || afterA.claimable != beforeA.claimable - pr.amount
+            || afterA.released != beforeA.released + pr.amount) revert InvalidEntitlement();
+
+        if (unsuccessful) jobs.recordRefund(jobId, expectedRevision, payoutRef);
+        emit PayerRefundPaid(jobId, pr.obligationId, payoutRef, pr.payer, pr.amount, pr.residual);
+        entered = false;
+    }
+
+    function payerRefund(bytes32 jobId) external view returns (PayerRefund memory pr) {
+        pr = _payerRefunds[jobId];
+        if (!pr.claimable) revert InvalidEntitlement();
+    }
+
+    function refunded(bytes32 jobId, bytes32 refundRef) external view returns (bool) {
+        PayerRefund storage pr = _payerRefunds[jobId];
+        return pr.claimable && pr.paid && pr.payoutRef == refundRef && refundRef != bytes32(0);
     }
 
     function providerClaim(bytes32 jobId) external view returns (ProviderClaim memory pc) {

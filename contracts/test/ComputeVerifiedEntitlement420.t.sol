@@ -221,18 +221,31 @@ contract ComputeVerifiedEntitlement420Test {
         _grant(OPERATOR, id, auth.ACTION_EXECUTE_ATTEMPT(), 0);
         _grant(OPERATOR, id, auth.ACTION_SUBMIT_RECEIPT(), 0);
         vm.prank(OPERATOR);
-        workers.acceptAssignment(id, resourceId, 4);
+        (bool assignmentOk,) = address(workers).call(
+            abi.encodeCall(workers.acceptAssignment, (id, resourceId, uint64(4))));
+        require(assignmentOk, "stage: worker assignment");
 
         receipt = keccak256(abi.encode("receipt", nonce));
+        bytes32 outputHash = verification.outputHash(output);
         vm.prank(OPERATOR);
-        bytes32 result = workers.commitResult(id, receipt, verification.outputHash(output));
+        (bool commitOk, bytes memory commitData) = address(workers).call(
+            abi.encodeCall(workers.commitResult, (id, receipt, outputHash)));
+        require(commitOk, "stage: worker result commit");
+        bytes32 result = abi.decode(commitData, (bytes32));
+
         vm.prank(OPERATOR);
-        jobs.recordResult(id, 5, result);
+        (bool recordOk,) = address(jobs).call(
+            abi.encodeCall(jobs.recordResult, (id, uint64(5), result)));
+        require(recordOk, "stage: canonical result record");
 
         _grant(verifier, id, auth.ACTION_VERIFY_RESULT(), 0);
         vm.prank(SELECTOR);
-        policy.appoint(id, verifier, verification.PROFILE_ID(), owner, payer, OPERATOR,
-            keccak256(abi.encode("appointment", nonce)), uint64(block.timestamp + 1 days));
+        (bool appointmentOk,) = address(policy).call(
+            abi.encodeCall(policy.appoint, (
+                id, verifier, verification.PROFILE_ID(), owner, payer, OPERATOR,
+                keccak256(abi.encode("appointment", nonce)), uint64(block.timestamp + 1 days)
+            )));
+        require(appointmentOk, "stage: verifier appointment");
     }
 
     function _verify(bytes32 id, bytes32 receipt, uint256 nonce, uint256 output, bool approved)
@@ -256,7 +269,10 @@ contract ComputeVerifiedEntitlement420Test {
             });
         decisionRef = verification.verdictDigest(v);
         bytes memory sig = _signature(VERIFIER_KEY, decisionRef);
-        verification.submitEvaluatedVerdict(v, sig, values, output, receipt);
+        (bool verificationOk,) = address(verification).call(
+            abi.encodeCall(verification.submitEvaluatedVerdict,
+                (v, sig, values, output, receipt)));
+        require(verificationOk, "stage: objective verification");
     }
 
     function _verifiedJob(uint256 nonce, uint256 ownerKey, uint256 payerKey, uint256 fundedAmount)

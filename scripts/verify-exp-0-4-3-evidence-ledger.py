@@ -25,11 +25,11 @@ def main():
   if not p.get("commands") or not p.get("layers"): errors.append(f"{pid}: incomplete profile")
   if any(x not in LAYERS for x in p.get("layers",[])): errors.append(f"{pid}: invalid layer")
  events=l.get("events",[])
- if len(events)!=16: errors.append(f"event count drift: {len(events)}")
+ if len(events)!=17: errors.append(f"event count drift: {len(events)}")
  ids=[e.get("id") for e in events]
  if len(ids)!=len(set(ids)) or any(not x for x in ids): errors.append("event IDs missing/duplicate")
  milestones=[e.get("milestone") for e in events]
- expected=["EXP-0.1.1-0.1.3","EXP-0.2.1-0.2.2","EXP-0.2.3","EXP-0.2.4","EXP-0.2.5","EXP-0.2.6","EXP-0.3.1","EXP-0.3.2","EXP-0.3.3","EXP-0.3.4","EXP-0.3.5","EXP-0.3.6","EXP-0.3.7","EXP-0.3.8","EXP-0.4.1","EXP-0.4.2"]
+ expected=["EXP-0.1.1-0.1.3","EXP-0.2.1-0.2.2","EXP-0.2.3","EXP-0.2.4","EXP-0.2.5","EXP-0.2.6","EXP-0.3.1","EXP-0.3.2","EXP-0.3.3","EXP-0.3.4","EXP-0.3.5","EXP-0.3.6","EXP-0.3.7","EXP-0.3.8","EXP-0.4.1","EXP-0.4.2","EXP-0.4.3"]
  if milestones!=expected: errors.append("milestone provenance sequence drift")
  for e in events:
   eid=e.get("id","<missing>")
@@ -65,8 +65,8 @@ def main():
  if not e42 or e42.get("qualified_head")!=q.get("qualified_head"): errors.append("EXP-0.4.2 qualified head provenance drift")
  summary=l.get("summary",{})
  expected_summary={
-  "event_count":16,"exact_head_events":16,"events_with_run_ids":16,"events_with_job_ids":16,"events_with_artifact_ids":16,
-  "events_with_complete_artifact_digests":15,"source_qualified_events":16,"integration_qualified_events":11,
+  "event_count":17,"exact_head_events":17,"events_with_run_ids":17,"events_with_job_ids":17,"events_with_artifact_ids":17,
+  "events_with_complete_artifact_digests":16,"source_qualified_events":17,"integration_qualified_events":12,
   "runtime_qualified_events":0,"deployment_qualified_events":0,"live_network_qualified_events":0,"genesis_qualified_events":0,
   "current_genesis_blockers":10,"current_acceptance_criteria_unverified":10
  }

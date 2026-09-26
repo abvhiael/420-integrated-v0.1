@@ -15,6 +15,42 @@ interface VmVerifiedEntitlement420 {
     function warp(uint256 timestamp) external;
 }
 
+
+contract ReentrantCMPBeneficiary420 {
+    AssetVault420 public vault;
+    ComputeVerifiedEntitlement420 public entitlements;
+    bytes32 public jobId;
+    bytes32 public obligationId;
+    uint64 public revision;
+    bool public attempted;
+    bool public reentrantVaultClaimSucceeded;
+    bool public reentrantSettlementSucceeded;
+
+    function configure(AssetVault420 vault_, ComputeVerifiedEntitlement420 entitlements_,
+        bytes32 jobId_, bytes32 obligationId_, uint64 revision_) external
+    {
+        vault = vault_;
+        entitlements = entitlements_;
+        jobId = jobId_;
+        obligationId = obligationId_;
+        revision = revision_;
+    }
+
+    function claimProvider() external {
+        entitlements.claimProvider(jobId, revision);
+    }
+
+    receive() external payable {
+        attempted = true;
+        (reentrantVaultClaimSucceeded,) = address(vault).call(
+            abi.encodeCall(vault.claim, (keccak256("cmp/reentrant/direct-vault"), obligationId))
+        );
+        (reentrantSettlementSucceeded,) = address(entitlements).call(
+            abi.encodeCall(entitlements.claimProvider, (jobId, revision))
+        );
+    }
+}
+
 contract ComputeVerifiedEntitlement420Test {
     VmVerifiedEntitlement420 private constant vm =
         VmVerifiedEntitlement420(address(uint160(uint256(keccak256("hevm cheat code")))));

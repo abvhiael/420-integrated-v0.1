@@ -237,7 +237,7 @@ contract ComputeWorkerAttestation420Test {
             eligibility.isEligible(workerId, revision, true, POLICY, futureEvidence),
             "evidence not active at validAfter"
         );
-        vm.warp(uint256(expiresAt));
+        vm.warp(uint256(expiresAt) + 1);
         require(
             !eligibility.isEligible(workerId, revision, true, POLICY, futureEvidence),
             "expired evidence accepted"

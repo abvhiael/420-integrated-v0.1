@@ -18,7 +18,13 @@
       "reports indexed head safe and finalized heights",
       "reports schema and decoder versions",
       "provides deterministic pagination for fixed snapshots",
-      "preserves source provenance for derived records"
+      "preserves source provenance for derived records",
+      "requires qualified consensus status source before runtime startup",
+      "projects active validator seats and scheduled proposer from consensus-owned state",
+      "rejects invalid finalized safe head ordering",
+      "rejects proposer seats outside the active committee",
+      "rejects sub-quorum consensus QCs",
+      "returns consensus data as a non-authoritative projection"
     ],
     "qualification_evidence": {
       "wrong_chain": "IMPLEMENTED_AND_TESTED",

@@ -73,7 +73,7 @@ func run() error {
 	}
 
 	client := indexerrpc.NewClient(rpcURL, 15*time.Second)
-	engine := ingest.New(420, version.Schema, client, durable)
+	engine := ingest.New(420, version.Schema, client, durable).WithProducerAttributor(consensusProvider)
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()

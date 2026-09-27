@@ -1,7 +1,7 @@
 {
   "schema": "420-testnet-indexer-readiness-v1",
   "service": "420Indexer",
-  "status": "EXP_1_4_DEPLOYABLE_RUNTIME_QUALIFICATION",
+  "status": "EXP_1_5_CONSENSUS_PROVIDER_QUALIFICATION",
   "backend": {
     "url": "REPLACE",
     "deployment_status": "DEPLOYABLE_RUNTIME_QUALIFIED_LIVE_TESTNET_PENDING",
@@ -38,7 +38,11 @@
       "deployment_manifest": "IMPLEMENTED",
       "health_probe": "IMPLEMENTED",
       "graceful_shutdown": "IMPLEMENTED",
-      "periodic_catchup": "IMPLEMENTED"
+      "periodic_catchup": "IMPLEMENTED",
+      "consensus_provider_projection": "IMPLEMENTED_AND_TESTED",
+      "consensus_provider_runtime_wiring": "IMPLEMENTED_AND_TESTED",
+      "consensus_provider_unavailable_fail_closed": "IMPLEMENTED_AND_TESTED",
+      "consensus_provider_invalid_state_fail_closed": "IMPLEMENTED_AND_TESTED"
     },
     "runtime": {
       "command": "./indexer/cmd/indexer420",
@@ -49,11 +53,15 @@
       "persistent_store": "/var/lib/420indexer/index.json",
       "graceful_shutdown": true,
       "periodic_catchup": true,
-      "initial_catchup_fail_closed": true
+      "initial_catchup_fail_closed": true,
+      "consensus_provider": "indexer/consensusview.Provider",
+      "consensus_status_path": "/var/lib/420consensus/status.json",
+      "consensus_startup_qualification": true,
+      "consensus_live_binding_qualified": false
     },
     "live_deployment": {
       "qualified": false,
-      "blocker": "testnet infrastructure and approved RPC endpoints remain unprovisioned/placeholders",
+      "blocker": "testnet infrastructure, approved RPC endpoints, and approved live consensus status source remain unprovisioned/placeholders",
       "infrastructure_inventory": "testnet/infrastructure/inventory.json",
       "endpoint_inventory": "testnet/services/endpoints.json"
     }

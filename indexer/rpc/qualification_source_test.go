@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -49,7 +50,7 @@ func TestQualificationSourceExercisesRealRPCAndRejectsRuntimeDivergence(t *testi
 	defer srv.Close()
 
 	client:=NewClient(srv.URL,time.Second)
-	source:=NewQualificationSource(t.Context(),client,420,"v1")
+	source:=NewQualificationSource(context.Background(),client,420,"v1")
 	reqs:=Requirements{RequiredChainID:420,ExpectedGenesisHash:"0xgenesis",MaxHeadAge:2*time.Minute,Now:now}
 
 	if v,err:=Validate(source,reqs);err!=nil || !v.Healthy { t.Fatalf("healthy runtime source rejected: %+v err=%v",v,err) }

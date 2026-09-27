@@ -1,0 +1,86 @@
+{
+  "schema": "420explorer-exp-1.2-rpc-binding-v1",
+  "milestone": "EXP-1.2",
+  "title": "420Explorer canonical RPC/node binding qualification",
+  "predecessor": {
+    "milestone": "EXP-1.1",
+    "qualified_head": "8267f458c6b27108c2675958c2c698f3ece9e6fc",
+    "indexer_run": 36342644755,
+    "docs_run": 36342644801,
+    "integrated_run": 36342644765
+  },
+  "qualification_scope": "repository and runtime-binding implementation qualification; live endpoint promotion remains blocked until a provisioned approved testnet RPC exists",
+  "authority": {
+    "network_launch": "testnet/config/launch.json",
+    "execution_genesis": "testnet/genesis/execution-genesis.json",
+    "consensus_genesis": "testnet/genesis/consensus-genesis.json",
+    "public_endpoints": "testnet/services/endpoints.json",
+    "indexer_contract": "config/420indexer-v1.json"
+  },
+  "required_identity": {
+    "chain_id": 420,
+    "execution_genesis_sha256": "65c8efba297009c02dc7ec424f777ba7131f5677a1e11135765ed05de3d06f7e",
+    "consensus_genesis_sha256": "83da87ffbfbf0ed42a199a99b805c36fb33cd7947cb17bfad73689085531dc9d",
+    "genesis_block_hash_status": "PENDING_TESTNET_GENESIS_FREEZE_AND_RUNTIME_OBSERVATION"
+  },
+  "source_validation": {
+    "implementation": "indexer/rpc/source.go",
+    "tests": "indexer/rpc/source_test.go",
+    "required_checks": [
+      "eth_chainId equals 420",
+      "genesis block record is block 0 with non-empty hash",
+      "expected genesis hash must match once frozen",
+      "head/safe/finalized records remain on chain 420",
+      "head/safe/finalized hashes are non-empty",
+      "finalized <= safe <= head",
+      "head freshness remains within configured maximum age",
+      "malformed or unavailable source reads fail closed"
+    ],
+    "fail_closed_errors": [
+      "ErrWrongChain",
+      "ErrGenesisMismatch",
+      "ErrFinalityOrdering",
+      "ErrStaleSource",
+      "ErrSourceIdentity"
+    ]
+  },
+  "current_binding_state": {
+    "approved_concrete_rpc": null,
+    "public_endpoint_inventory_status": "PLACEHOLDER",
+    "infrastructure_status": "UNPROVISIONED",
+    "chain_id_collision_preflight": "PENDING",
+    "live_binding_qualified": false,
+    "runtime_binding_implementation_qualified": false
+  },
+  "promotion_rules": [
+    "no REPLACE/PLACEHOLDER endpoint may become an approved runtime binding",
+    "a real RPC must be marked provisioned/approved in testnet authority before live qualification",
+    "the runtime source must pass chain ID, genesis, finality ordering and freshness checks",
+    "genesis identity must be tied to the frozen testnet genesis before live-network promotion",
+    "EXP-1.2 completion does not qualify the deployed Indexer endpoint; EXP-1.4 owns deployed Indexer qualification"
+  ],
+  "acceptance_evidence": [
+    "Go unit tests for healthy source",
+    "wrong-chain negative test",
+    "genesis-mismatch negative test",
+    "impossible finality ordering negative test",
+    "stale-head negative test",
+    "malformed-source negative test",
+    "cross-chain finality negative test",
+    "retained EXP-1.2 verifier",
+    "full retained Indexer/Docs/Integrated exact-head CI"
+  ],
+  "blocker_impact": {
+    "finding": "EXP-FIND-004",
+    "repository_binding_layer": "resolvable_by_EXP-1.2",
+    "live_binding_layer": "remains_open_until_real_testnet_RPC_and_EXP-7_revalidation"
+  },
+  "summary": {
+    "rpc_binding_implementation_complete": true,
+    "live_rpc_binding_complete": false,
+    "deployment_qualified": false,
+    "live_network_qualified": false,
+    "genesis_qualified": false,
+    "next_step": "EXP-1.3"
+  }
+}

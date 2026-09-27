@@ -2,7 +2,7 @@
   "schema": "420explorer-exp-0.4.7-canonical-qualification-ledger-v1",
   "milestone": "EXP-0.4.7",
   "title": "420Explorer canonical downstream qualification ledger",
-  "status": "implementation_complete_exact_head_qualification_required",
+  "status": "qualified_repository_scope_pending_final_recording_head_requalification",
   "baseline": {
     "exp_0_4_6_final_closeout_head": "298f73b99b384704a3231e5dfdfebef0bff3faab",
     "pull_request": 376,
@@ -6071,5 +6071,48 @@
     "global_acceptance_criteria": [
       "AC-9"
     ]
+  },
+  "qualification": {
+    "qualified_head": "74ac28b63eef424fbda36f4767ecda9ed72adffa",
+    "runs": [
+      {
+        "workflow": "420Indexer",
+        "run_number": 639,
+        "run_id": 36289925450,
+        "job_ids": [
+          108537922752
+        ],
+        "conclusion": "success"
+      },
+      {
+        "workflow": "420Docs Qualification",
+        "run_number": 2971,
+        "run_id": 36289925480,
+        "job_ids": [
+          108538009623
+        ],
+        "conclusion": "success"
+      },
+      {
+        "workflow": "420 Integrated Qualification",
+        "run_number": 5588,
+        "run_id": 36289925472,
+        "job_ids": [
+          108537952238,
+          108537952247,
+          108537952287,
+          108537952293
+        ],
+        "conclusion": "success"
+      }
+    ],
+    "evidence_artifact": {
+      "id": 10922101258,
+      "name": "exp-0-4-7-canonical-qualification-ledger",
+      "digest": "sha256:2c51d42bc7446eb87103429c7a13ce4f76cdc75f1968781a7b9afb8ecca5355c"
+    },
+    "scope": "canonical downstream requirement/blocker/acceptance/evidence-freshness and promotion-state ledger only",
+    "first_attempt_note": "The first verifier treated AC-9, the global exact-release-candidate test-inventory criterion, as orphaned because it intentionally has no direct requirement IDs. The ledger/verifier were corrected to model AC-9 explicitly as a global criterion without weakening orphan detection for any other AC.",
+    "note": "Recording this evidence changes the branch head. The resulting exact head must rerun all retained qualification gates before EXP-0.4.7 is marked COMPLETE."
   }
 }

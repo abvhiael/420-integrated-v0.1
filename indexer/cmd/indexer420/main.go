@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/420integrated/420-integrated/indexer/api"
+	"github.com/420integrated/420-integrated/indexer/consensusview"
 	"github.com/420integrated/420-integrated/indexer/ingest"
 	indexerrpc "github.com/420integrated/420-integrated/indexer/rpc"
 	"github.com/420integrated/420-integrated/indexer/store"
@@ -32,6 +33,8 @@ type startup struct {
 	HTTPAddr      string `json:"httpAddr"`
 	PollInterval  string `json:"pollInterval"`
 	Rebuild       bool   `json:"rebuild"`
+	ConsensusStatusPath string `json:"consensusStatusPath"`
+	ConsensusQualified bool `json:"consensusQualified"`
 }
 
 func main() {
@@ -52,10 +55,14 @@ func run() error {
 	if err != nil { return err }
 
 	rebuild := os.Getenv("INDEXER_REBUILD") == "1"
+	consensusStatusPath := os.Getenv("INDEXER_CONSENSUS_STATUS_PATH")
+	consensusProvider, err := newConsensusProvider(consensusStatusPath)
+	if err != nil { return err }
 	out, _ := json.Marshal(startup{
 		Service: "420Indexer", Status: "EXP_1_4_RUNTIME", ChainID: 420,
 		RPCConfigured: true, StorePath: storePath, HTTPAddr: httpAddr,
 		PollInterval: pollInterval.String(), Rebuild: rebuild,
+		ConsensusStatusPath: consensusStatusPath, ConsensusQualified: true,
 	})
 	fmt.Println(string(out))
 
@@ -75,7 +82,7 @@ func run() error {
 	// configured canonical source has passed validation and the first catch-up.
 	if err := engine.CatchUp(ctx); err != nil { return fmt.Errorf("initial catch-up: %w", err) }
 
-	backend := api.NewStoreBackend(durable, nil)
+	backend := api.NewStoreBackend(durable, nil).WithConsensusProvider(consensusProvider)
 	server := &http.Server{
 		Addr:              httpAddr,
 		Handler:           api.NewServer(backend).Handler(),
@@ -110,6 +117,14 @@ func run() error {
 			}
 		}
 	}
+}
+
+func newConsensusProvider(path string) (*consensusview.Provider, error) {
+	if path == "" { return nil, errors.New("INDEXER_CONSENSUS_STATUS_PATH is required") }
+	provider, err := consensusview.New(path)
+	if err != nil { return nil, fmt.Errorf("consensus provider: %w", err) }
+	if _, err := provider.Consensus(); err != nil { return nil, fmt.Errorf("consensus provider qualification: %w", err) }
+	return provider, nil
 }
 
 func parsePollInterval(raw string) (time.Duration, error) {

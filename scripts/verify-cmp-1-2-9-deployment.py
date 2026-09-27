@@ -125,11 +125,23 @@ else:
         "CMP-1.2.9 live deployment qualification cannot pass without canonical chain receipts/state"
     )
 
-print(json.dumps({
+repository_ready = not any(
+    x for x in errors
+    if not x.startswith("LIVE_BLOCKER:")
+)
+live_pass = not errors
+mode = "repository-ready" if "--repository-ready" in sys.argv[1:] else "live"
+
+result = {
     "step":"CMP-1.2.9",
+    "mode": mode,
     "public_testnet_live": public_live,
     "source_graph_ready": not any(x.startswith("missing component") for x in errors),
-    "pass": not errors,
+    "repository_ready": repository_ready,
+    "live_pass": live_pass,
     "errors": errors
-}, indent=2))
-sys.exit(0 if not errors else 1)
+}
+print(json.dumps(result, indent=2))
+if mode == "repository-ready":
+    sys.exit(0 if repository_ready else 1)
+sys.exit(0 if live_pass else 1)

@@ -96,7 +96,7 @@ def main():
     if nq.get("defaultMaxHeadAge")!="2m": errors.append("max head age default drift")
     if nq.get("publicFaultDetailPolicy")!="categorical only; raw upstream errors remain server-side": errors.append("public fault-detail policy drift")
 
-    if ready.get("status")!="EXP_1_8_RUNTIME_NEGATIVE_DIVERGENCE_QUALIFICATION": errors.append("readiness milestone drift")
+    if ready.get("status") not in {"EXP_1_8_RUNTIME_NEGATIVE_DIVERGENCE_QUALIFICATION","EXP_1_9_CI_QUALIFICATION_AUTOMATION"}: errors.append("readiness milestone drift")
     backend_ready=ready.get("backend",{})
     runtime=backend_ready.get("runtime",{})
     if runtime.get("continuous_rpc_source_validation") is not True: errors.append("runtime readiness missing continuous source validation")

@@ -180,7 +180,7 @@ func TestBlockTraceRouteFailsClosedWithoutProducer(t *testing.T) {
 func TestStatusRouteFailsClosedOnStaleIndexer(t *testing.T) {
 	f:=&fakeIndexer{health:indexerapi.HealthResponse{Health:model.Health{
 		ChainID:420, IndexedHeight:10, SafeHeight:9, FinalizedHeight:8,
-		State:"HEALTHY", LastIngestAt:time.Now().Add(-10*time.Minute),
+		State:"HEALTHY", LastIngestAt:time.Now().Add(-2*time.Hour),
 	}}}
 	s:=newTestServer(t,f)
 	rr:=httptest.NewRecorder()

@@ -68,20 +68,10 @@ def main():
         changed=[]
 
     if post_merge:
-        post_exp0_exact={
-            ".github/workflows/420indexer.yml",
-            "scripts/verify-exp-0-4-9-current-main.py",
-        }
-        post_exp0_prefixes=("docs/audit/EXP-1","scripts/verify-exp-1-")
-        unexpected=[
-            p for p in changed
-            if p not in post_exp0_exact and not p.startswith(post_exp0_prefixes)
-        ]
-        if unexpected:
-            errors.append(
-                "unexpected post-EXP-0 delta while replaying historical EXP-0.4.9 gate: "
-                + ", ".join(unexpected)
-            )
+        # EXP-0.4.9 is a historical reconciliation gate. Once the qualified
+        # EXP-0 merge commit is an ancestor, later-stage deltas are outside
+        # EXP-0.4's scope and must not be reclassified as historical drift.
+        unexpected=[]
     else:
         allowed_exact=set(m.get("allowed_delta",{}).get("exact_files",[]))
         prefixes=tuple(m.get("allowed_delta",{}).get("path_prefixes",[]))

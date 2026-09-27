@@ -1,12 +1,14 @@
 package main
 
 import (
+	"errors"
 	"path/filepath"
 	"testing"
 	"time"
 
 	"github.com/420integrated/420-integrated/consensus/storage"
 	ctypes "github.com/420integrated/420-integrated/consensus/types"
+	indexerrpc "github.com/420integrated/420-integrated/indexer/rpc"
 )
 
 func TestParsePollIntervalDefaults(t *testing.T) {
@@ -60,5 +62,30 @@ func TestNewConsensusProviderAcceptsQualifiedState(t *testing.T) {
 	if err != nil { t.Fatal(err) }
 	if status.ChainID != 420 || status.ActiveValidatorCount != 15 || !status.LatestQC.Certified {
 		t.Fatalf("unexpected consensus qualification: %+v", status)
+	}
+}
+
+
+func TestParseMaxHeadAgeDefaultsAndValidates(t *testing.T) {
+	got,err:=parseMaxHeadAge("")
+	if err!=nil { t.Fatal(err) }
+	if got!=2*time.Minute { t.Fatalf("unexpected default %s",got) }
+	got,err=parseMaxHeadAge("90s")
+	if err!=nil || got!=90*time.Second { t.Fatalf("unexpected configured max age %s err=%v",got,err) }
+	for _,raw:=range []string{"banana","500ms"} {
+		if _,err:=parseMaxHeadAge(raw);err==nil{t.Fatalf("expected max-head-age rejection for %q",raw)}
+	}
+}
+
+func TestRuntimeRPCIssueClassification(t *testing.T) {
+	cases:=[]struct{err error; want string}{
+		{indexerrpc.ErrWrongChain,"RPC_WRONG_CHAIN"},
+		{indexerrpc.ErrGenesisMismatch,"RPC_GENESIS_MISMATCH"},
+		{indexerrpc.ErrFinalityOrdering,"RPC_FINALITY_DIVERGENCE"},
+		{indexerrpc.ErrStaleSource,"RPC_SOURCE_STALE"},
+		{errors.New("transport unavailable"),"RPC_SOURCE_INVALID"},
+	}
+	for _,tc:=range cases {
+		if got:=runtimeRPCIssue(tc.err);got!=tc.want{t.Fatalf("issue(%v)=%s want %s",tc.err,got,tc.want)}
 	}
 }

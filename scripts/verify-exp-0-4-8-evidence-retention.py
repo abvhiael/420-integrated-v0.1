@@ -45,7 +45,7 @@ def main():
   if len(x.get("runs",[]))!=3: errors.append(f"{x.get('milestone')}: expected three retained workflows")
   names={r.get("workflow") for r in x.get("runs",[])}
   if names!={"420Indexer","420Docs Qualification","420 Integrated Qualification"}: errors.append(f"{x.get('milestone')}: workflow set drift")
-  if any(r.get("conclusion")!="success" or not isinstance(r.get("run_id"),int) for r in x.get("runs",[])): errors.append(f"{x.get('milestone')}: invalid run provenance")
+  if any(r.get("conclusion")!="success" or not isinstance(r.get("run_id"),int) or not r.get("job_ids") or not all(isinstance(j,int) for j in r.get("job_ids",[])) for r in x.get("runs",[])): errors.append(f"{x.get('milestone')}: invalid run/job provenance")
   a=x.get("artifact",{})
   if not isinstance(a.get("id"),int) or not a.get("name") or not DIG.match(a.get("digest","")): errors.append(f"{x.get('milestone')}: artifact provenance incomplete")
  profiles=m.get("replay_profiles",[])

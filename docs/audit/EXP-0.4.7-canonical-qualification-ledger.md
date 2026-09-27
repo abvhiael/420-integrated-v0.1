@@ -24,7 +24,7 @@ For every mandatory requirement the ledger records current frozen status, blocke
 
 For every active blocker it records owners, AC links, remediation/test obligations, current-open freshness, and the conditions required before the blocker can be closed.
 
-For every AC it records ownership, mapped requirements/blockers, present repository evidence, missing release evidence, freshness, and satisfaction prerequisites.
+For every AC it records ownership, mapped requirements/blockers, present repository evidence, missing release evidence, freshness, and satisfaction prerequisites. AC-9 is explicitly modeled as a global exact-release-candidate test-inventory criterion: it intentionally has no direct requirement or blocker IDs and is not an orphan.
 
 ## Freshness model
 

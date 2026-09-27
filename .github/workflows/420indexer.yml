@@ -63,6 +63,15 @@ on:
       - 'docs/audit/EXP-1.7-cross-layer-traceability.json'
       - 'docs/audit/EXP-1.7-cross-layer-traceability.md'
       - 'scripts/verify-exp-1-7-cross-layer-traceability.py'
+      - 'docs/audit/EXP-1.8-runtime-negative-divergence.json'
+      - 'docs/audit/EXP-1.8-runtime-negative-divergence.md'
+      - 'scripts/verify-exp-1-8-runtime-negative-divergence.py'
+      - 'indexer/api/backend.go'
+      - 'indexer/api/backend_test.go'
+      - 'indexer/cmd/indexer420/main.go'
+      - 'indexer/cmd/indexer420/main_test.go'
+      - 'indexer/rpc/qualification_source.go'
+      - 'indexer/rpc/qualification_source_test.go'
       - 'explorer/service/blockviews.go'
       - 'explorer/service/blockviews_test.go'
       - 'explorer/api/server.go'
@@ -358,6 +367,10 @@ jobs:
         run: go vet ./explorer/...
       - name: EXP-1.7 cross-layer traceability
         run: python scripts/verify-exp-1-7-cross-layer-traceability.py
+      - name: EXP-1.8 runtime negative and divergence qualification
+        run: python scripts/verify-exp-1-8-runtime-negative-divergence.py
+      - name: Build EXP-1.8 Indexer runtime binary
+        run: go build ./indexer/cmd/indexer420
       - name: EXP-0.1.1 pinned-tree exhaustive inventory
         if: always()
         run: python scripts/exp-0-1-1-inventory.py --commit 95a83a961286701b6e8c064de1deccad10f41fd7
@@ -595,4 +608,12 @@ jobs:
         with:
           name: exp-1-7-cross-layer-traceability
           path: exp-1-7-evidence/
+          if-no-files-found: error
+
+      - name: Upload EXP-1.8 runtime negative/divergence evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp-1-8-runtime-negative-divergence
+          path: exp-1-8-evidence/
           if-no-files-found: error

@@ -2,7 +2,7 @@
   "schema": "420explorer-exp-0.4.10-final-exp-0-closeout-v1",
   "milestone": "EXP-0.4.10",
   "title": "420Explorer EXP-0 final audit reconciliation closeout",
-  "status": "implementation_complete_exact_head_qualification_required",
+  "status": "implementation_qualified_final_evidence_recording_required",
   "baseline": {
     "exp_0_4_9_final_qualified_head": "4d477e57ba178a90a8724217c919051a26222d53",
     "current_main_sha": "304cb61286c94f72d0b05e32e5f713b9d68bc450",
@@ -80,5 +80,36 @@
     "unverified_acceptance_criteria": 10,
     "unresolved_scope_conflicts": 0,
     "next_stage": "EXP-1"
+  },
+  "implementation_qualification": {
+    "qualified_head": "6f2dadd73905c0e56b34c1c9704aec6b1fda57d1",
+    "420Indexer": {
+      "run_number": 669,
+      "run_id": 36338189591,
+      "job_id": 108672976758,
+      "conclusion": "success"
+    },
+    "420Docs_Qualification": {
+      "run_number": 3005,
+      "run_id": 36338189575,
+      "job_id": 108672976513,
+      "conclusion": "success"
+    },
+    "420_Integrated_Qualification": {
+      "run_number": 5622,
+      "run_id": 36338189623,
+      "conclusion": "success",
+      "jobs": {
+        "production-dependencies": 108672976476,
+        "offline-core": 108672976510,
+        "geth-engine": 108672976554,
+        "fault-matrix": 108672976556
+      }
+    },
+    "EXP_0_4_10_evidence_artifact": {
+      "id": 10937643633,
+      "digest": "sha256:1ef3b05cd85c10d888b6ad110e4e166d5f6919e9ebe6e372edf7b3583dd7a3d7"
+    },
+    "dedicated_verifier": "success"
   }
 }

@@ -98,5 +98,24 @@
     "quorumRule": "floor(2*N/3)+1",
     "providerUnavailableBehavior": "FAIL_CLOSED_AT_STARTUP_AND_503_AT_READ_BOUNDARY",
     "liveBindingStatus": "BLOCKED_PENDING_PROVISIONED_APPROVED_CONSENSUS_RUNTIME"
+  },
+  "historicalProducerAttribution": {
+    "authority": "consensus-owned produced-block history; Indexer projection only",
+    "lookupKey": "execution block hash",
+    "projectedFields": [
+      "consensusSlot",
+      "producerSeat",
+      "proposerRank",
+      "consensusBlockRoot",
+      "certified"
+    ],
+    "requireForNonGenesisBlocksWhenProviderConfigured": true,
+    "rejectDuplicateExecutionHashes": true,
+    "rejectDuplicateCanonicalSlots": true,
+    "rejectMissingConsensusBlockRoot": true,
+    "rejectInvalidProposerRank": true,
+    "reorgPolicy": "preflight complete replacement branch producer attribution before local rollback; orphan attribution removed with orphan block",
+    "productionProvider": "indexer/consensusview.Provider",
+    "liveHistoryBindingStatus": "BLOCKED_PENDING_PROVISIONED_APPROVED_CONSENSUS_HISTORY"
   }
 }

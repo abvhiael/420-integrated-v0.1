@@ -99,6 +99,8 @@ async function blockDetail(number) {
   const b = view.block || view;
   const logs = view.logs || [];
   const nav = view.navigation || {};
+  const trace = view.trace || {};
+  const producer = b.producer || {};
   app.innerHTML = title(`Block ${number}`, b.finality || '') + stats([
     ['Number', b.number], ['Finality', b.finality], ['Logs', view.logCount ?? logs.length], ['Timestamp', unixTime(b.timestamp)]
   ]) + `<div class="panel">${detailRows([
@@ -106,7 +108,17 @@ async function blockDetail(number) {
     ['Parent hash', mono(b.parentHash), true],
     ['Chain ID', b.chainId],
     ['Schema', b.schemaVersion]
-  ])}</div>` + `<div class="pager">${nav.previous !== null && nav.previous !== undefined ? link(`#/blocks/${nav.previous}`, `← block ${nav.previous}`) : '<span></span>'}${nav.next !== null && nav.next !== undefined ? link(`#/blocks/${nav.next}`, `block ${nav.next} →`) : '<span></span>'}</div>` + `<div class="panel"><h3>Logs</h3>${logTable(logs)}</div>`;
+  ])}</div>` + (b.number === 0 ? '' : `<div class="panel"><h3>Consensus provenance</h3>${detailRows([
+    ['Consensus slot', trace.consensusSlot ?? producer.consensusSlot],
+    ['Producer seat', trace.producerSeat ?? producer.producerSeat],
+    ['Proposer rank', trace.proposerRank ?? producer.proposerRank],
+    ['Consensus block root', mono(trace.consensusBlockRoot ?? producer.consensusBlockRoot), true],
+    ['Certified', (trace.certified ?? producer.certified) ? 'yes' : 'no'],
+    ['Execution authority', trace.executionAuthority || 'node420 canonical execution block'],
+    ['Consensus authority', trace.consensusAuthority || 'fourtwentyd consensus-produced block history'],
+    ['Projection authority', trace.projectionAuthority || '420Indexer derived projection'],
+    ['Canonical authority', trace.canonicalAuthority === true ? 'yes' : 'no']
+  ])}</div>`) + `<div class="pager">${nav.previous !== null && nav.previous !== undefined ? link(`#/blocks/${nav.previous}`, `← block ${nav.previous}`) : '<span></span>'}${nav.next !== null && nav.next !== undefined ? link(`#/blocks/${nav.next}`, `block ${nav.next} →`) : '<span></span>'}</div>` + `<div class="panel"><h3>Logs</h3>${logTable(logs)}</div>`;
 }
 
 function logTable(logs) {

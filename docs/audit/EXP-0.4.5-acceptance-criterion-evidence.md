@@ -1,6 +1,6 @@
 # EXP-0.4.5 — acceptance-criterion evidence reconciliation
 
-**Status:** implementation complete; exact-head qualification required.
+**Status:** qualified at repository scope; final evidence-recording head requalification required.
 
 ## Purpose
 
@@ -40,3 +40,20 @@ EXP-0.4.5 is qualified only when the verifier proves:
 6. all ten criteria remain unsatisfied/unverified at the current audit stage;
 7. no criterion is orphaned;
 8. repository evidence is explicitly scoped below runtime/deployment/live/Genesis evidence.
+
+
+## Exact-head implementation qualification
+
+Qualified implementation head: `9a694d5d000dc2e295569d291bf3753c40555b94`
+
+- 420Indexer #627 — run `36284316348`, job `108522044299` — success.
+- 420Docs Qualification #2955 — run `36284316363`, job `108522060810` — success.
+- 420 Integrated Qualification #5572 — run `36284316378` — success.
+  - fault matrix `108522158307` — success.
+  - offline core `108522158410` — success.
+  - pinned-Geth Engine `108522158457` — success.
+  - production dependencies `108522158486` — success.
+- EXP-0.4.5 artifact `10920122006`.
+- Digest `sha256:b2dc17bf9f64fa5f48b05e42b3914ba4db197371025f77f760871b314e135374`.
+
+The implementation head therefore qualifies the AC evidence reconciliation at repository scope. This evidence recording changes the branch SHA, so a final exact-head rerun is required before EXP-0.4.5 is marked COMPLETE.

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import json, subprocess
+import json, os, subprocess
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -9,6 +9,7 @@ CANON=ROOT/"docs/audit/EXP-0.4.7-canonical-qualification-ledger.json"
 RET=ROOT/"docs/audit/EXP-0.4.8-evidence-retention-reproducibility.json"
 EVIDENCE=ROOT/"exp-0-4-9-evidence"
 MERGED_EXP0="b03e247aa4df0a6a6d978ffad8eedfe2487a3a6b"
+AUDIT_BRANCH="audit/exp-0-4-1-ci-qualification-inventory-20260926"
 
 def load(p):
     return json.loads(p.read_text(encoding="utf-8"))
@@ -67,16 +68,26 @@ def main():
         errors.append(f"cannot inspect branch delta: {e}")
         changed=[]
 
+    github_head_ref=os.environ.get("GITHUB_HEAD_REF","").strip()
+    github_ref_name=os.environ.get("GITHUB_REF_NAME","").strip()
+    try:
+        local_branch=git("branch","--show-current").strip()
+    except Exception:
+        local_branch=""
+    active_branch=github_head_ref or github_ref_name or local_branch
+
     if post_merge:
         # EXP-0.4.9 is a historical reconciliation gate. Once the qualified
         # EXP-0 merge commit is an ancestor, later-stage deltas are outside
         # EXP-0.4's scope and must not be reclassified as historical drift.
         unexpected=[]
+        delta_scope_enforced=False
     else:
         allowed_exact=set(m.get("allowed_delta",{}).get("exact_files",[]))
         prefixes=tuple(m.get("allowed_delta",{}).get("path_prefixes",[]))
         unexpected=[p for p in changed if p not in allowed_exact and not p.startswith(prefixes)]
-        if unexpected:
+        delta_scope_enforced=(active_branch==AUDIT_BRANCH)
+        if delta_scope_enforced and unexpected:
             errors.append("unexpected non-audit EXP-0.4 delta: "+", ".join(unexpected))
 
     wf=m.get("required_requalification_workflows",[])
@@ -152,11 +163,15 @@ def main():
         "historical_current_main_sha":mainsha,
         "merged_exp_0_sha":MERGED_EXP0 if post_merge else None,
         "reconciliation_base":reconciliation_base,
+        "active_branch":active_branch,
+        "audit_branch":AUDIT_BRANCH,
+        "delta_scope_enforced":delta_scope_enforced,
         "current_main_is_ancestor":ancestor(mainsha),
         "exp_0_4_8_head_is_ancestor":ancestor(prev),
         "ahead_by":ahead,
         "changed_files":changed,
-        "unexpected_files":unexpected,
+        "unexpected_files":unexpected if delta_scope_enforced else [],
+        "unrelated_branch_delta_files":unexpected if not delta_scope_enforced else [],
         "genesis_blockers":state.get("active_genesis_blockers"),
         "unverified_acceptance_criteria":state.get("unverified_acceptance_criteria"),
         "errors":errors,

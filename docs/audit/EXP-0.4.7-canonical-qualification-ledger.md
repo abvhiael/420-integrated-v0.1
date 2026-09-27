@@ -4,35 +4,26 @@
 
 ## Purpose
 
-EXP-0.4.7 creates one canonical crosswalk for the current 420Explorer qualification state. It does not replace the underlying EXP-0.2/0.3/0.4 authorities; it reconciles them so later stages cannot promote a requirement by reading only a favorable subset of historical evidence.
+EXP-0.4.7 provides the repository's single canonical crosswalk of mandatory requirements, active Genesis blockers, acceptance criteria, current exact-head repository evidence, missing later evidence, and promotion gates.
 
-## Canonical contents
+It reconciles rather than replaces the authoritative EXP-0.2/0.3/0.4 source records.
 
-The ledger contains:
+## Canonical populations
 
-- all 60 mandatory Genesis requirements and their frozen/current source status;
-- current CI/model/functional-test coverage;
-- future qualification owners and procedures;
-- missing runtime/deployment/live/release-candidate evidence layers;
-- all mapped Genesis blockers;
-- all AC-1 through AC-10 mappings and evidence state;
-- the latest cumulatively requalified repository head;
-- explicit layer booleans preventing source evidence from being relabeled as runtime, deployment, live-network, or Genesis evidence;
-- the stale-evidence precedence established by EXP-0.4.6.
-
-## Current canonical state
-
-- 60 mandatory requirements.
-- 47 source-qualified, 6 implemented-source, 4 partial-source, 1 deployment-pending, 2 runtime-unverified.
-- 0 Genesis-qualified requirements.
+- 60 mandatory Genesis requirements.
 - 10 active Genesis blockers.
-- 10 unverified acceptance criteria.
+- 10 acceptance criteria.
+- 0 Genesis-qualified requirements.
 - 0 satisfied acceptance criteria.
-- No runtime-, deployment-, live-network-, or Genesis-qualified requirement is asserted.
-- Latest cumulatively requalified repository evidence before this milestone: `298f73b99b384704a3231e5dfdfebef0bff3faab`.
+- 0 unresolved scope conflicts.
+- 0 runtime-, deployment-, live-network-, or Genesis-qualified provenance events.
+
+Each requirement entry records its authoritative status, AC links, blocker links, missing evidence layers, future owners, promotion gate, current model gates and functional test files. Current repository evidence is anchored to the final cumulatively requalified EXP-0.4.6 head `298f73b99b384704a3231e5dfdfebef0bff3faab`.
+
+## Global acceptance semantics
+
+AC-9 is intentionally global: it is the exact-release-candidate mandatory test inventory and therefore has no direct mandatory requirement links. It is not orphaned. AC-1 through AC-8 and AC-10 retain direct requirement mappings.
 
 ## Promotion discipline
 
-A requirement may advance only through the procedures and evidence layers already assigned to it. A green repository workflow proves the repository layer only. Historical `QUALIFIED` or `COMPLETE` wording is constrained by its recorded scope and by the EXP-0.4.6 disposition.
-
-Final Genesis promotion requires the exact release candidate, closure of all applicable blockers, complete mandatory suites, and AC satisfaction under EXP-8.
+No repository/source qualification may self-promote into runtime, deployment, live-network or Genesis qualification. Historical `QUALIFIED` and `COMPLETE` claims are constrained by EXP-0.4.6. Promotion requires the mapped later procedures and evidence layers, closure of applicable blockers, and exact release-candidate closeout under EXP-8.

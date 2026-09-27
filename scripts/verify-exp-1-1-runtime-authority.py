@@ -118,8 +118,11 @@ def main():
         fail(errors, "Indexer improperly claims canonical authority")
 
     backend = ready.get("backend", {})
-    if backend.get("url") != "REPLACE" or backend.get("deployment_status") != "PENDING_TESTNET_DEPLOYMENT":
+    deployment_status = backend.get("deployment_status")
+    if backend.get("url") != "REPLACE" or deployment_status not in {"PENDING_TESTNET_DEPLOYMENT", "DEPLOYABLE_RUNTIME_QUALIFIED_LIVE_TESTNET_PENDING"}:
         fail(errors, "Indexer readiness deployment state changed without qualification reconciliation")
+    if deployment_status == "DEPLOYABLE_RUNTIME_QUALIFIED_LIVE_TESTNET_PENDING" and backend.get("live_deployment", {}).get("qualified") is not False:
+        fail(errors, "Indexer live deployment overpromoted")
 
     sources = explorer.get("sources", {})
     consumer = explorer.get("indexerConsumer", {})

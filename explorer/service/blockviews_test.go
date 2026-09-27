@@ -29,6 +29,9 @@ func TestBlockPagePreservesSnapshotAndFinality(t *testing.T) {
 	if page.Blocks[0].Finality != model.FinalityHead || page.Blocks[1].Finality != model.FinalitySafe || page.Blocks[2].Finality != model.FinalityFinalized {
 		t.Fatalf("finality labels changed: %+v", page.Blocks)
 	}
+	if page.Blocks[0].Producer == nil || page.Blocks[0].Producer.ConsensusBlockRoot != "0xc12" || page.Blocks[0].Producer.ProducerSeat != 1 {
+		t.Fatalf("producer provenance dropped from block page: %+v", page.Blocks[0])
+	}
 }
 
 func TestBlockPageRejectsBlockBeyondSnapshot(t *testing.T) {

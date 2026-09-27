@@ -80,6 +80,5 @@ contract ComputeRouter420 is I420System, ICompute420 {
     function systemName() external pure returns (string memory) { return "ComputeRouter420"; }
     function protocolVersion() external pure returns (uint32) { return 1; }
 
-    receive() external payable { revert InvalidComponent(); }
-    fallback() external payable { revert InvalidComponent(); }
+    fallback() external { revert InvalidComponent(); }
 }

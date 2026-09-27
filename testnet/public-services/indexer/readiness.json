@@ -1,7 +1,7 @@
 {
   "schema": "420-testnet-indexer-readiness-v1",
   "service": "420Indexer",
-  "status": "EXP_1_7_CROSS_LAYER_TRACEABILITY_QUALIFICATION",
+  "status": "EXP_1_8_RUNTIME_NEGATIVE_DIVERGENCE_QUALIFICATION",
   "backend": {
     "url": "REPLACE",
     "deployment_status": "DEPLOYABLE_RUNTIME_QUALIFIED_LIVE_TESTNET_PENDING",
@@ -33,7 +33,12 @@
       "preserves execution block hash to consensus block root linkage through Indexer and Explorer",
       "renders consensus slot producer seat/rank certification and authority provenance on block detail",
       "fails closed on missing or malformed producer provenance for non-genesis block detail",
-      "exposes non-authoritative block cross-layer trace API"
+      "exposes non-authoritative block cross-layer trace API",
+      "revalidates chain identity genesis identity finality ordering and head freshness on every poll",
+      "degrades public health on runtime RPC consensus or catch-up failure",
+      "clears runtime degradation only after a fully qualified successful poll",
+      "returns fail-closed Explorer operational states for wrong-chain stale degraded and inconsistent data",
+      "preserves local state on finalized conflict and preflight producer divergence"
     ],
     "qualification_evidence": {
       "wrong_chain": "IMPLEMENTED_AND_TESTED",
@@ -67,7 +72,18 @@
       "explorer_block_producer_trace_projection": "IMPLEMENTED_AND_TESTED",
       "explorer_cross_layer_trace_api": "IMPLEMENTED_AND_TESTED",
       "explorer_missing_trace_fail_closed": "IMPLEMENTED_AND_TESTED",
-      "explorer_trace_ui_rendering": "IMPLEMENTED"
+      "explorer_trace_ui_rendering": "IMPLEMENTED",
+      "continuous_rpc_source_validation": "IMPLEMENTED_AND_TESTED",
+      "runtime_poll_fault_health_latch": "IMPLEMENTED_AND_TESTED",
+      "runtime_poll_recovery_clear": "IMPLEMENTED_AND_TESTED",
+      "runtime_fault_codes_secret_safe": "IMPLEMENTED_AND_TESTED",
+      "explorer_wrong_chain_fail_closed": "IMPLEMENTED_AND_TESTED",
+      "explorer_stale_fail_closed": "IMPLEMENTED_AND_TESTED",
+      "explorer_degraded_fail_closed": "IMPLEMENTED_AND_TESTED",
+      "explorer_inconsistent_finality_fail_closed": "IMPLEMENTED_AND_TESTED",
+      "consensus_provider_unavailable_fail_closed_runtime": "IMPLEMENTED_AND_TESTED",
+      "reorg_finalized_conflict_no_mutation": "IMPLEMENTED_AND_TESTED",
+      "reorg_missing_producer_no_mutation": "IMPLEMENTED_AND_TESTED"
     },
     "runtime": {
       "command": "./indexer/cmd/indexer420",
@@ -89,11 +105,17 @@
       "historical_producer_live_binding_qualified": false,
       "explorer_trace_endpoint": "/v1/blocks/{number}/trace",
       "explorer_trace_canonical_authority": false,
-      "cross_layer_live_witness_qualified": false
+      "cross_layer_live_witness_qualified": false,
+      "continuous_rpc_source_validation": true,
+      "max_head_age": "2m default via INDEXER_MAX_HEAD_AGE",
+      "expected_genesis_hash_env": "INDEXER_EXPECTED_GENESIS_HASH",
+      "runtime_health_fault_latch": true,
+      "runtime_fault_detail_public": "categorical only",
+      "live_fault_injection_qualified": false
     },
     "live_deployment": {
       "qualified": false,
-      "blocker": "testnet infrastructure, approved RPC endpoints, approved live consensus produced-block history, and live cross-layer comparison witnesses remain unprovisioned/placeholders",
+      "blocker": "testnet infrastructure and approved live execution/consensus sources remain unprovisioned; production-equivalent live fault injection remains pending",
       "infrastructure_inventory": "testnet/infrastructure/inventory.json",
       "endpoint_inventory": "testnet/services/endpoints.json"
     }

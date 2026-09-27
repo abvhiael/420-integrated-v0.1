@@ -78,18 +78,20 @@ func (p *Provider) ProducerForBlock(executionHash string) (model.BlockProducer, 
 	if err != nil { return model.BlockProducer{}, false, err }
 	if !ok { return model.BlockProducer{}, false, ErrUnavailable }
 	var found *storage.ProducedBlockStatus
+	seenHash := map[string]bool{}
+	seenSlot := map[uint64]bool{}
 	for i := range st.ProducedBlocks {
 		rec := &st.ProducedBlocks[i]
-		if strings.ToLower(strings.TrimSpace(rec.ExecutionBlockHash)) != executionHash { continue }
-		if found != nil { return model.BlockProducer{}, false, fmt.Errorf("%w: duplicate producer attribution for %s", ErrInvalidStatus, executionHash) }
-		found = rec
+		hash := strings.ToLower(strings.TrimSpace(rec.ExecutionBlockHash))
+		if hash == "" { return model.BlockProducer{}, false, fmt.Errorf("%w: historical execution block hash missing", ErrInvalidStatus) }
+		if rec.ConsensusBlockRoot == "" { return model.BlockProducer{}, false, fmt.Errorf("%w: consensus block root missing for %s", ErrInvalidStatus, hash) }
+		if rec.ProposerRank > 2 { return model.BlockProducer{}, false, fmt.Errorf("%w: proposer rank %d invalid", ErrInvalidStatus, rec.ProposerRank) }
+		if seenHash[hash] { return model.BlockProducer{}, false, fmt.Errorf("%w: duplicate producer attribution for %s", ErrInvalidStatus, hash) }
+		if seenSlot[rec.Slot] { return model.BlockProducer{}, false, fmt.Errorf("%w: duplicate canonical produced-block slot %d", ErrInvalidStatus, rec.Slot) }
+		seenHash[hash], seenSlot[rec.Slot] = true, true
+		if hash == executionHash { found = rec }
 	}
 	if found == nil { return model.BlockProducer{}, false, nil }
-	if found.ConsensusBlockRoot == "" { return model.BlockProducer{}, false, fmt.Errorf("%w: consensus block root missing for %s", ErrInvalidStatus, executionHash) }
-	if found.ProposerRank > 2 { return model.BlockProducer{}, false, fmt.Errorf("%w: proposer rank %d invalid", ErrInvalidStatus, found.ProposerRank) }
-	if len(st.ActiveSeats) > 0 && !containsSeat(st.ActiveSeats, found.ProducerSeat) {
-		return model.BlockProducer{}, false, fmt.Errorf("%w: producer seat %d outside active committee snapshot", ErrInvalidStatus, found.ProducerSeat)
-	}
 	return model.BlockProducer{
 		ConsensusSlot: found.Slot,
 		ProducerSeat: found.ProducerSeat,

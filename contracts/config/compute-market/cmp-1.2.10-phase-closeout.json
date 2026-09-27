@@ -1,0 +1,48 @@
+{
+  "schema": "cmp-1.2.10-phase-closeout-v1",
+  "step": "CMP-1.2.10",
+  "status": "REPOSITORY_RECONCILIATION_COMPLETE_RELEASE_BLOCKED",
+  "reconciled_main": "304cb61286c94f72d0b05e32e5f713b9d68bc450",
+  "reconciliation_commit": "cc42be007f5a2aa5adc830152247565d6a0b6346",
+  "repository_scope": {
+    "CMP-1.2.0": "DESIGN_BASELINE_COMPLETE_SUPERSEDED_BY_LATER_EXECUTABLE_EVIDENCE",
+    "CMP-1.2.1": "COMPLETE_REPOSITORY_SCOPE",
+    "CMP-1.2.2": "COMPLETE_REPOSITORY_SCOPE",
+    "CMP-1.2.3": "COMPLETE_REPOSITORY_SCOPE",
+    "CMP-1.2.4": "COMPLETE_REPOSITORY_SCOPE",
+    "CMP-1.2.5": "COMPLETE_REPOSITORY_SCOPE",
+    "CMP-1.2.6": "COMPLETE_REPOSITORY_SCOPE",
+    "CMP-1.2.7": "COMPLETE_REPOSITORY_SCOPE",
+    "CMP-1.2.8": "COMPLETE_REPOSITORY_SCOPE",
+    "CMP-1.2.9": "REPOSITORY_DEPLOYMENT_READY_LIVE_BLOCKED",
+    "CMP-1.2.10": "RECONCILIATION_CLOSEOUT_READY"
+  },
+  "original_compute_escrow_requirements": {
+    "deposit": "QUALIFIED_REPOSITORY_SCOPE",
+    "reserve": "QUALIFIED_REPOSITORY_SCOPE",
+    "release": "QUALIFIED_REPOSITORY_SCOPE",
+    "refund": "QUALIFIED_REPOSITORY_SCOPE",
+    "partial_release": "QUALIFIED_REPOSITORY_SCOPE",
+    "timeout_refund": "QUALIFIED_REPOSITORY_SCOPE",
+    "dispute_freeze": "QUALIFIED_REPOSITORY_SCOPE",
+    "slash_redistribution": "FAIL_CLOSED_PENDING_CMP_1_5_STAKE"
+  },
+  "release_blockers": [
+    {
+      "id": "CMP-1.2.9-LIVE",
+      "reason": "Canonical public/authorized testnet is not live; deployment addresses, receipts, runtime hashes, live grants, Registry publication and real funded/settled/refunded transactions are unavailable.",
+      "verifier": "python3 scripts/verify-cmp-1-2-9-deployment.py"
+    },
+    {
+      "id": "CMP-1.5-STAKE-SLASH",
+      "reason": "Original slash redistribution requirement may only redistribute separately backed and objectively forfeited CMP-1.5 stake/collateral, never payer escrow. CMP-1.5 stake source/adjudication is not yet qualified."
+    }
+  ],
+  "forbidden_closeout_claims": [
+    "CMP-1.2 production ready",
+    "CMP-1.2 live testnet qualified",
+    "stake slashing operational",
+    "slash redistribution implemented from payer deposits",
+    "ProtocolRegistry live publication proven"
+  ]
+}

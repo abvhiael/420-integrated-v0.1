@@ -1343,6 +1343,189 @@ contract ComputeVerifiedEntitlement420Test {
         _assertNativeSolvent();
     }
 
+
+    function testE2ERealFundedVerifiedSettledAndResidualRefundTranscript() public {
+        uint256 providerBefore = BENEFICIARY.balance;
+        uint256 payerBefore = payerA.balance;
+
+        bytes32 id = _verifiedJob(50, OWNER_A_KEY, PAYER_A_KEY, 4 ether);
+        ComputeJobRegistry420.Job memory verifiedJob = jobs.job(id);
+        ComputeEscrowFunding420.Credit memory fundedCredit = funding.credit(id);
+        VaultAccounting420.AssetAccounting memory verifiedAccounting =
+            accounting.getAccounting(VAULT_ID, address(0));
+        require(verifiedJob.status == ComputeJobRegistry420.Status.VERIFIED
+            && verifiedJob.matchId != bytes32(0)
+            && verifiedJob.assignmentRef != bytes32(0)
+            && verifiedJob.resultCommitment != bytes32(0)
+            && verifiedJob.verificationRef != bytes32(0)
+            && fundedCredit.payer == payerA
+            && fundedCredit.deposited == 4 ether
+            && address(vault).balance == 4 ether
+            && verifiedAccounting.recordedBalance == 4 ether
+            && verifiedAccounting.reserved == 4 ether
+            && verifiedAccounting.claimable == 0,
+            "e2e success path did not reach backed VERIFIED state");
+
+        ComputeVerifiedEntitlement420.ProviderClaim memory pc = _makeClaimable(id);
+        require(accounting.getObligation(pc.providerObligationId).state == 1
+            && accounting.getObligation(pc.payerResidualObligationId).state == 1
+            && accounting.getObligation(pc.providerObligationId).beneficiary == BENEFICIARY
+            && accounting.getObligation(pc.payerResidualObligationId).beneficiary == payerA,
+            "e2e success path did not freeze provider and payer liabilities");
+
+        _matureProviderClaim(id);
+        uint64 providerRevision = jobs.job(id).revision;
+        vm.prank(BENEFICIARY);
+        bytes32 payoutRef = entitlements.claimProvider(id, providerRevision);
+        require(payoutRef != bytes32(0)
+            && jobs.job(id).status == ComputeJobRegistry420.Status.SETTLED
+            && accounting.getObligation(pc.providerObligationId).state == 3
+            && accounting.getObligation(pc.payerResidualObligationId).state == 1
+            && BENEFICIARY.balance == providerBefore + 3 ether
+            && address(vault).balance == 1 ether,
+            "e2e provider payout transcript incorrect");
+
+        entitlements.createSettledResidualRefundClaim(id);
+        uint64 residualRevision = jobs.job(id).revision;
+        vm.prank(payerA);
+        bytes32 residualPayout = entitlements.claimPayerRefund(id, residualRevision);
+        VaultAccounting420.AssetAccounting memory finalAccounting =
+            accounting.getAccounting(VAULT_ID, address(0));
+        require(residualPayout != bytes32(0)
+            && jobs.job(id).status == ComputeJobRegistry420.Status.SETTLED
+            && accounting.getObligation(pc.payerResidualObligationId).state == 3
+            && payerA.balance == payerBefore - 4 ether + 1 ether
+            && address(vault).balance == 0
+            && finalAccounting.recordedBalance == 0
+            && finalAccounting.reserved == 0
+            && finalAccounting.claimable == 0
+            && entitlements.totalProviderPaid() == 3 ether
+            && entitlements.totalPayerRefundPaid() == 1 ether,
+            "e2e residual refund did not close exact liabilities");
+
+        vm.prank(BENEFICIARY);
+        (bool providerReplay,) = address(entitlements).call(
+            abi.encodeCall(entitlements.claimProvider, (id, providerRevision)));
+        vm.prank(payerA);
+        (bool refundReplay,) = address(entitlements).call(
+            abi.encodeCall(entitlements.claimPayerRefund, (id, residualRevision)));
+        require(!providerReplay && !refundReplay && address(vault).balance == 0,
+            "e2e terminal payout replay changed custody");
+    }
+
+    function testE2ERealNegativeVerificationToFullOriginalPayerRefundTranscript() public {
+        uint256 payerBefore = payerA.balance;
+        (bytes32 id, bytes32 receipt) =
+            _resultJob(51, OWNER_A_KEY, PAYER_A_KEY, 4 ether, 195);
+        require(jobs.job(id).status == ComputeJobRegistry420.Status.RESULT_COMMITTED
+            && address(vault).balance == 4 ether
+            && accounting.getAccounting(VAULT_ID, address(0)).reserved == 4 ether,
+            "e2e failure path not fully funded before verification");
+
+        _verify(id, receipt, 51, 195, false);
+        require(jobs.job(id).status == ComputeJobRegistry420.Status.FAILED
+            && entitlements.entitlementForJob(id) == bytes32(0)
+            && entitlements.totalProviderPaid() == 0,
+            "negative verification created economic success");
+
+        entitlements.createTerminalRefundClaim(id);
+        ComputeVerifiedEntitlement420.PayerRefund memory pr = entitlements.payerRefund(id);
+        require(pr.payer == payerA && pr.amount == 4 ether
+            && accounting.getObligation(pr.obligationId).state == 1,
+            "failed job did not preserve original-payer refund liability");
+
+        uint64 revision = jobs.job(id).revision;
+        vm.prank(payerA);
+        bytes32 refundPayout = entitlements.claimPayerRefund(id, revision);
+        VaultAccounting420.AssetAccounting memory a =
+            accounting.getAccounting(VAULT_ID, address(0));
+        require(refundPayout != bytes32(0)
+            && jobs.job(id).status == ComputeJobRegistry420.Status.REFUNDED
+            && payerA.balance == payerBefore
+            && accounting.getObligation(pr.obligationId).state == 3
+            && address(vault).balance == 0
+            && a.recordedBalance == 0 && a.reserved == 0 && a.claimable == 0
+            && entitlements.totalProviderPaid() == 0
+            && entitlements.totalPayerRefundPaid() == 4 ether,
+            "e2e failed-verification refund transcript incorrect");
+    }
+
+    function testE2ERealAcceptedCancellationToOriginalPayerRefundTranscript() public {
+        uint256 payerBefore = payerA.balance;
+        bytes32 id = _acceptedJob(52, OWNER_A_KEY, PAYER_A_KEY, 4 ether);
+        ComputeJobRegistry420.Job memory accepted = jobs.job(id);
+        require(accepted.status == ComputeJobRegistry420.Status.ACCEPTED
+            && accepted.assignmentRef == bytes32(0)
+            && accepted.resultCommitment == bytes32(0)
+            && accepted.verificationRef == bytes32(0)
+            && address(vault).balance == 4 ether
+            && accounting.getAccounting(VAULT_ID, address(0)).reserved == 4 ether,
+            "e2e cancellation fixture already crossed execution boundary");
+
+        vm.prank(ownerA);
+        jobs.recordCancellation(id, accepted.revision);
+        require(jobs.job(id).status == ComputeJobRegistry420.Status.CANCELLED,
+            "requester cancellation not recorded");
+
+        entitlements.createTerminalRefundClaim(id);
+        ComputeVerifiedEntitlement420.PayerRefund memory pr = entitlements.payerRefund(id);
+        uint64 refundRevision = jobs.job(id).revision;
+        vm.prank(payerA);
+        entitlements.claimPayerRefund(id, refundRevision);
+        require(jobs.job(id).status == ComputeJobRegistry420.Status.REFUNDED
+            && payerA.balance == payerBefore
+            && accounting.getObligation(pr.obligationId).state == 3
+            && address(vault).balance == 0
+            && accounting.getAccounting(VAULT_ID, address(0)).recordedBalance == 0,
+            "e2e cancelled job did not refund exact original payer");
+
+        vm.prank(ownerA);
+        (bool reopen,) = address(jobs).call(
+            abi.encodeCall(jobs.recordFunding, (id, jobs.job(id).revision, id)));
+        require(!reopen && jobs.job(id).status == ComputeJobRegistry420.Status.REFUNDED,
+            "e2e terminal cancellation/refund reopened");
+    }
+
+    function testE2ERealDisputedProviderClaimPayerWinAndRefundTranscript() public {
+        uint256 payerBefore = payerA.balance;
+        bytes32 id = _verifiedJob(53, OWNER_A_KEY, PAYER_A_KEY, 4 ether);
+        ComputeVerifiedEntitlement420.ProviderClaim memory pc = _makeClaimable(id);
+        bytes32 disputeId = _openPayerDispute(id, keccak256("e2e-payer-win"));
+        require(jobs.job(id).status == ComputeJobRegistry420.Status.DISPUTED
+            && disputes.activeHold(id)
+            && accounting.getObligation(pc.providerObligationId).state == 1,
+            "e2e dispute did not hold provider liability");
+
+        vm.prank(BENEFICIARY);
+        disputes.respond(disputeId, keccak256("e2e-provider-response"));
+        _grantAdjudicator(ADJUDICATOR_A, id);
+        vm.prank(ADJUDICATOR_A);
+        disputes.decide(disputeId, false, keccak256("e2e-payer-decision"));
+        ComputeDisputeResolution420.DisputeCase memory dc = disputes.caseOf(disputeId);
+        vm.warp(uint256(dc.appealDeadline) + 1);
+        disputes.finalize(disputeId);
+
+        ComputeVerifiedEntitlement420.PayerRefund memory pr = entitlements.payerRefund(id);
+        require(jobs.job(id).status == ComputeJobRegistry420.Status.FAILED
+            && accounting.getObligation(pc.providerObligationId).state == 4
+            && accounting.getObligation(pc.payerResidualObligationId).state == 4
+            && pr.payer == payerA && pr.amount == 4 ether
+            && accounting.getObligation(pr.obligationId).state == 1
+            && entitlements.totalProviderPaid() == 0,
+            "e2e payer-win dispute did not reallocate exact liability");
+
+        uint64 refundRevision = jobs.job(id).revision;
+        vm.prank(payerA);
+        entitlements.claimPayerRefund(id, refundRevision);
+        require(jobs.job(id).status == ComputeJobRegistry420.Status.REFUNDED
+            && payerA.balance == payerBefore
+            && accounting.getObligation(pr.obligationId).state == 3
+            && address(vault).balance == 0
+            && accounting.getAccounting(VAULT_ID, address(0)).recordedBalance == 0
+            && entitlements.totalPayerRefundPaid() == 4 ether,
+            "e2e dispute refund did not finish exact payer path");
+    }
+
     function testAcceptedBeneficiaryCannotBeRedirectedAfterVerification() public {
         bytes32 id = _verifiedJob(10, OWNER_A_KEY, PAYER_A_KEY, 4 ether);
         vm.prank(OPERATOR);

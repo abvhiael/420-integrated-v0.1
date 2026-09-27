@@ -4452,7 +4452,9 @@
       "canonical_sources": [
         "docs/audit/EXP-0.2.6-genesis-acceptance-criteria.json",
         "docs/audit/EXP-0.4.5-acceptance-criterion-evidence.json"
-      ]
+      ],
+      "linkage_scope": "direct_requirement_and_or_blocker_links",
+      "orphaned": false
     },
     {
       "acceptance_criterion": "AC-2",
@@ -4631,7 +4633,9 @@
       "canonical_sources": [
         "docs/audit/EXP-0.2.6-genesis-acceptance-criteria.json",
         "docs/audit/EXP-0.4.5-acceptance-criterion-evidence.json"
-      ]
+      ],
+      "linkage_scope": "direct_requirement_and_or_blocker_links",
+      "orphaned": false
     },
     {
       "acceptance_criterion": "AC-3",
@@ -4815,7 +4819,9 @@
       "canonical_sources": [
         "docs/audit/EXP-0.2.6-genesis-acceptance-criteria.json",
         "docs/audit/EXP-0.4.5-acceptance-criterion-evidence.json"
-      ]
+      ],
+      "linkage_scope": "direct_requirement_and_or_blocker_links",
+      "orphaned": false
     },
     {
       "acceptance_criterion": "AC-4",
@@ -4994,7 +5000,9 @@
       "canonical_sources": [
         "docs/audit/EXP-0.2.6-genesis-acceptance-criteria.json",
         "docs/audit/EXP-0.4.5-acceptance-criterion-evidence.json"
-      ]
+      ],
+      "linkage_scope": "direct_requirement_and_or_blocker_links",
+      "orphaned": false
     },
     {
       "acceptance_criterion": "AC-5",
@@ -5191,7 +5199,9 @@
       "canonical_sources": [
         "docs/audit/EXP-0.2.6-genesis-acceptance-criteria.json",
         "docs/audit/EXP-0.4.5-acceptance-criterion-evidence.json"
-      ]
+      ],
+      "linkage_scope": "direct_requirement_and_or_blocker_links",
+      "orphaned": false
     },
     {
       "acceptance_criterion": "AC-6",
@@ -5373,7 +5383,9 @@
       "canonical_sources": [
         "docs/audit/EXP-0.2.6-genesis-acceptance-criteria.json",
         "docs/audit/EXP-0.4.5-acceptance-criterion-evidence.json"
-      ]
+      ],
+      "linkage_scope": "direct_requirement_and_or_blocker_links",
+      "orphaned": false
     },
     {
       "acceptance_criterion": "AC-7",
@@ -5555,7 +5567,9 @@
       "canonical_sources": [
         "docs/audit/EXP-0.2.6-genesis-acceptance-criteria.json",
         "docs/audit/EXP-0.4.5-acceptance-criterion-evidence.json"
-      ]
+      ],
+      "linkage_scope": "direct_requirement_and_or_blocker_links",
+      "orphaned": false
     },
     {
       "acceptance_criterion": "AC-8",
@@ -5687,7 +5701,9 @@
       "canonical_sources": [
         "docs/audit/EXP-0.2.6-genesis-acceptance-criteria.json",
         "docs/audit/EXP-0.4.5-acceptance-criterion-evidence.json"
-      ]
+      ],
+      "linkage_scope": "direct_requirement_and_or_blocker_links",
+      "orphaned": false
     },
     {
       "acceptance_criterion": "AC-9",
@@ -5847,7 +5863,10 @@
       "canonical_sources": [
         "docs/audit/EXP-0.2.6-genesis-acceptance-criteria.json",
         "docs/audit/EXP-0.4.5-acceptance-criterion-evidence.json"
-      ]
+      ],
+      "linkage_scope": "global_exact_release_candidate_test_inventory",
+      "orphaned": false,
+      "linkage_note": "AC-9 intentionally has no direct mandatory requirement or blocker IDs; it qualifies the complete required test inventory against the exact release candidate and therefore applies globally."
     },
     {
       "acceptance_criterion": "AC-10",
@@ -6014,7 +6033,9 @@
       "canonical_sources": [
         "docs/audit/EXP-0.2.6-genesis-acceptance-criteria.json",
         "docs/audit/EXP-0.4.5-acceptance-criterion-evidence.json"
-      ]
+      ],
+      "linkage_scope": "direct_requirement_and_or_blocker_links",
+      "orphaned": false
     }
   ],
   "historical_evidence_guard": {
@@ -6040,9 +6061,15 @@
     "ac_requirement_links": 144,
     "orphan_requirements": 0,
     "orphan_blockers": 0,
-    "orphan_acceptance_criteria": 1,
+    "orphan_acceptance_criteria": 0,
     "promoted_requirements": 0,
     "satisfied_acceptance_criteria": 0,
-    "genesis_ready": false
+    "genesis_ready": false,
+    "acceptance_criteria_without_direct_requirement_links": [
+      "AC-9"
+    ],
+    "global_acceptance_criteria": [
+      "AC-9"
+    ]
   }
 }

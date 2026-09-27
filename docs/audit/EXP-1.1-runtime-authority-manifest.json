@@ -193,10 +193,53 @@
     "EXP_1_6": "implement and qualify historical block-producer attribution"
   },
   "summary": {
-    "runtime_target_contract_qualified": false,
+    "runtime_target_contract_qualified": true,
     "deployment_qualified": false,
     "live_network_qualified": false,
     "genesis_qualified": false,
-    "next_step": "EXP-1.2"
+    "next_step": "EXP-1.2",
+    "final_evidence_head_requalification_required": true
+  },
+  "status": "COMPLETE_PENDING_FINAL_EXACT_HEAD_REQUALIFICATION",
+  "implementation_qualification": {
+    "qualified_head": "620a50e4f039b08ac65cc15c4e4406ca1ce7bc0f",
+    "workflows": {
+      "420Indexer": {
+        "run_number": 682,
+        "run_id": 36340706393,
+        "job_id": 108680096155,
+        "conclusion": "success"
+      },
+      "420Docs Qualification": {
+        "run_number": 3018,
+        "run_id": 36340706375,
+        "job_id": 108680097990,
+        "conclusion": "success"
+      },
+      "420 Integrated Qualification": {
+        "run_number": 5635,
+        "run_id": 36340706374,
+        "conclusion": "success",
+        "jobs": {
+          "fault-matrix": 108680098367,
+          "geth-engine": 108680098502,
+          "offline-core": 108680098518,
+          "production-dependencies": 108680098546
+        }
+      }
+    },
+    "evidence_artifact": {
+      "id": 10938842860,
+      "name": "exp-1-1-runtime-authority",
+      "digest": "sha256:418532def2e01939953a956116a13c8ae42a69b59335d443a7610d80c7b9a2d2"
+    },
+    "retained_verifier": "success",
+    "qualification_limitations": [
+      "repository/runtime-target-contract scope only",
+      "chain-ID collision preflight remains pending",
+      "RPC endpoints remain placeholders and infrastructure remains unprovisioned",
+      "consensus launch-ceremony fields remain unresolved",
+      "no deployment, live-network or Genesis promotion"
+    ]
   }
 }

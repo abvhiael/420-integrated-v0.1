@@ -1,6 +1,6 @@
 # EXP-0.4.7 — canonical qualification ledger
 
-**Status:** implementation complete; exact-head qualification required.
+**Status:** qualified at repository scope; final evidence-recording head requalification required.
 
 ## Purpose
 
@@ -35,3 +35,22 @@ Historical `COMPLETE` or `QUALIFIED` records remain scoped by EXP-0.4.6 and cann
 ## Promotion discipline
 
 No requirement can move to Genesis-qualified and no AC can move to satisfied merely because source CI is green. Promotion requires its recorded later procedures, mapped blocker resolution, applicable runtime/deployment/live evidence, and final exact-release-candidate EXP-8 closeout.
+
+
+## Exact-head implementation qualification
+
+Qualified implementation head: `74ac28b63eef424fbda36f4767ecda9ed72adffa`
+
+- 420Indexer #639 — run `36289925450`, job `108537922752` — success.
+- 420Docs Qualification #2971 — run `36289925480`, job `108538009623` — success.
+- 420 Integrated Qualification #5588 — run `36289925472` — success.
+  - fault-matrix `108537952238` — success.
+  - offline-core `108537952247` — success.
+  - production-dependencies `108537952287` — success.
+  - geth-engine `108537952293` — success.
+- EXP-0.4.7 artifact `10922101258`.
+- Digest `sha256:2c51d42bc7446eb87103429c7a13ce4f76cdc75f1968781a7b9afb8ecca5355c`.
+
+The first implementation attempt exposed a semantic error in the new verifier: AC-9 intentionally has no direct requirement IDs because it globally qualifies the exact release-candidate test inventory. The corrected ledger explicitly records that global linkage while retaining fail-closed orphan detection for all other criteria.
+
+This evidence recording changes the branch SHA, so a final exact-head retained-suite rerun is required before EXP-0.4.7 is marked COMPLETE.

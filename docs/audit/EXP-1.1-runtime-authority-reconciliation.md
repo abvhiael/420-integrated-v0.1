@@ -1,6 +1,6 @@
 # EXP-1.1 — runtime authority and target-network baseline
 
-**Status:** implementation complete; exact-head qualification required.
+**Status:** implementation-head qualified; final evidence-recording head requalification required.
 
 EXP-1.1 establishes the repository-authoritative runtime target contract that later EXP-1 steps must use. It intentionally does **not** convert unresolved testnet infrastructure into live evidence.
 
@@ -34,3 +34,22 @@ The approved topology contract requires at least three public RPC nodes, one arc
 ## Handoff
 
 EXP-1.2 may now bind 420Indexer to a concrete approved node/RPC source, but it must fail until the candidate chain identity is actually frozen and the source can be tied to the pinned genesis identity. EXP-1.1 itself is complete when its fail-closed verifier and the complete retained repository qualification suite pass on the exact implementation head.
+
+## Implementation-head qualification
+
+Qualified implementation head: `620a50e4f039b08ac65cc15c4e4406ca1ce7bc0f`.
+
+- 420Indexer #682 — run `36340706393`, job `108680096155` — SUCCESS
+- 420Docs Qualification #3018 — run `36340706375`, job `108680097990` — SUCCESS
+- 420 Integrated Qualification #5635 — run `36340706374` — SUCCESS
+- fault-matrix job `108680098367` — SUCCESS
+- geth-engine job `108680098502` — SUCCESS
+- offline-core job `108680098518` — SUCCESS
+- production-dependencies job `108680098546` — SUCCESS
+- dedicated EXP-1.1 runtime-authority verifier — SUCCESS
+- evidence artifact `10938842860`
+- evidence digest `sha256:418532def2e01939953a956116a13c8ae42a69b59335d443a7610d80c7b9a2d2`
+
+The implementation head is qualified for **repository/runtime-target-contract scope only**. It deliberately preserves the unresolved chain-ID collision preflight, placeholder RPC endpoints, unprovisioned infrastructure, and unresolved consensus ceremony fields as blockers to deployment/live promotion.
+
+This qualification evidence is now recorded in-repository. The resulting evidence-recording head must pass the full retained Indexer, Docs and Integrated qualification suites before EXP-1.1 is considered fully complete.

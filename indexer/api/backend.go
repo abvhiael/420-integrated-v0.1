@@ -34,7 +34,7 @@ type RuntimeHealth struct {
 
 func NewRuntimeHealth() *RuntimeHealth { return &RuntimeHealth{} }
 func (h *RuntimeHealth) MarkHealthy() { if h==nil{return}; h.mu.Lock(); h.issue=""; h.issueAt=time.Time{}; h.mu.Unlock() }
-func (h *RuntimeHealth) MarkFailure(err error) { if h==nil{return}; h.mu.Lock(); if err==nil { h.issue=""; h.issueAt=time.Time{} } else { h.issue=err.Error(); h.issueAt=time.Now().UTC() }; h.mu.Unlock() }
+func (h *RuntimeHealth) MarkFailure(issue string) { if h==nil{return}; h.mu.Lock(); h.issue=strings.TrimSpace(issue); if h.issue=="" { h.issueAt=time.Time{} } else { h.issueAt=time.Now().UTC() }; h.mu.Unlock() }
 func (h *RuntimeHealth) snapshot() (string, time.Time) { if h==nil{return "",time.Time{}}; h.mu.RLock(); defer h.mu.RUnlock(); return h.issue,h.issueAt }
 
 type StoreBackend struct { store ReadStore; catalog *decoder.Catalog; consensus ConsensusProvider; runtimeHealth *RuntimeHealth }

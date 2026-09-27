@@ -117,5 +117,18 @@
     "reorgPolicy": "preflight complete replacement branch producer attribution before local rollback; orphan attribution removed with orphan block",
     "productionProvider": "indexer/consensusview.Provider",
     "liveHistoryBindingStatus": "BLOCKED_PENDING_PROVISIONED_APPROVED_CONSENSUS_HISTORY"
+  },
+  "crossLayerTraceability": {
+    "authority": "execution and consensus remain canonical in their owning subsystems; Indexer/Explorer are projections only",
+    "executionIdentity": "chainId + execution block hash",
+    "consensusIdentity": "consensus slot + consensus block root",
+    "joinSource": "BlockRecord.producer from consensus-owned produced-block history",
+    "explorerTraceEndpoint": "/v1/blocks/{number}/trace",
+    "explorerBlockDetailCarriesTrace": true,
+    "requireProducerForNonGenesisExplorerBlockDetail": true,
+    "rejectMissingConsensusRoot": true,
+    "rejectInvalidProposerRank": true,
+    "canonicalAuthority": false,
+    "liveCrossLayerWitnessStatus": "BLOCKED_PENDING_PROVISIONED_APPROVED_TESTNET_EXECUTION_AND_CONSENSUS_SOURCES"
   }
 }

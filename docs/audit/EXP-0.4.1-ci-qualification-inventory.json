@@ -1,0 +1,568 @@
+{
+  "schema": "420explorer-exp-0.4.1-ci-qualification-inventory-v1",
+  "milestone": "EXP-0.4.1",
+  "title": "420Explorer CI and qualification mechanism inventory",
+  "status": "qualified_repository_scope",
+  "baseline": {
+    "branch_from": "main",
+    "main_merge_sha": "304cb61286c94f72d0b05e32e5f713b9d68bc450"
+  },
+  "rules": [
+    "A green source or repository workflow is not deployment or live-network evidence.",
+    "A workflow artifact created with if: always() is evidence only for steps that actually executed successfully; artifact existence is not a pass claim.",
+    "Manual workflows qualify only the exact inputs, target environment and commit recorded by their run.",
+    "Historical pinned-tree inventory is retained audit evidence and does not prove the mutable current tree.",
+    "Explorer Genesis qualification requires exact-head provenance and the later runtime/deployment/live evidence mapped by EXP-0.3."
+  ],
+  "workflows": [
+    {
+      "id": "EXP-CI-001",
+      "name": "420Indexer",
+      "path": ".github/workflows/420indexer.yml",
+      "status": "active",
+      "role": "primary_explorer_source_and_integration_gate",
+      "authority": "authoritative_for_repository_source_scope",
+      "triggers": [
+        "pull_request:path_filtered",
+        "push:main:path_filtered"
+      ],
+      "environment": [
+        "ubuntu-latest",
+        "postgres:16",
+        "go from go.mod",
+        "node 22"
+      ],
+      "commands": [
+        "go test ./indexer/...",
+        "go vet ./indexer/...",
+        "npm install --no-audit --no-fund && npm test (working-directory 420-indexer)",
+        "go test ./explorer/...",
+        "go vet ./explorer/...",
+        "python -m json.tool readiness/config files",
+        "python scripts/verify-420indexer.py",
+        "python scripts/verify-explorer-indexer-consumer.py",
+        "EXP-0.1.2 through EXP-0.4.10 verifier chain",
+        "python scripts/exp-0-1-1-inventory.py --commit 95a83a961286701b6e8c064de1deccad10f41fd7"
+      ],
+      "evidence": [
+        "exp-0-1-1 through exp-0-3-8 artifacts"
+      ],
+      "qualification_scope": [
+        "source",
+        "static integration",
+        "audit reconciliation",
+        "shared Indexer consumer boundary"
+      ],
+      "exclusions": [
+        "does not prove deployed Indexer",
+        "does not prove deployed Explorer",
+        "does not prove target-network RPC binding",
+        "does not prove live Registry/consensus providers"
+      ],
+      "finding_refs": [
+        "EXP-FIND-002",
+        "EXP-FIND-004",
+        "EXP-FIND-005",
+        "EXP-FIND-006",
+        "EXP-FIND-007",
+        "EXP-FIND-008",
+        "EXP-FIND-009",
+        "EXP-FIND-010"
+      ],
+      "acceptance_refs": [
+        "AC-1",
+        "AC-2",
+        "AC-3",
+        "AC-4",
+        "AC-5",
+        "AC-6",
+        "AC-7",
+        "AC-9",
+        "AC-10"
+      ]
+    },
+    {
+      "id": "EXP-CI-002",
+      "name": "420Explorer Live Testnet Validation",
+      "path": ".github/workflows/explorer-live-testnet.yml",
+      "status": "active_manual",
+      "role": "explorer_live_deployment_gate",
+      "authority": "authoritative_for_executed_live_witness_scope",
+      "triggers": [
+        "workflow_dispatch"
+      ],
+      "environment": [
+        "user-supplied explorer_url",
+        "expected chain id",
+        "optional block/transaction/address/service/asset witnesses"
+      ],
+      "commands": [
+        "go test ./explorer/cmd/explorerlivevalidate",
+        "go run ./explorer/cmd/explorerlivevalidate | tee explorer-live-evidence.json"
+      ],
+      "evidence": [
+        "explorer-live-testnet-evidence"
+      ],
+      "qualification_scope": [
+        "live Explorer service",
+        "chain identity",
+        "provenance headers",
+        "optional representative witness paths"
+      ],
+      "exclusions": [
+        "not automatically run on PR",
+        "does not establish live status until invoked against approved deployment"
+      ],
+      "finding_refs": [
+        "EXP-FIND-003",
+        "EXP-FIND-004",
+        "EXP-FIND-005",
+        "EXP-FIND-007",
+        "EXP-FIND-011"
+      ],
+      "acceptance_refs": [
+        "AC-1",
+        "AC-2",
+        "AC-3",
+        "AC-4",
+        "AC-5",
+        "AC-6",
+        "AC-8",
+        "AC-10"
+      ]
+    },
+    {
+      "id": "EXP-CI-003",
+      "name": "420 Integrated Qualification",
+      "path": ".github/workflows/qualification.yml",
+      "status": "active",
+      "role": "repository_regression_gate",
+      "authority": "supporting_not_explorer_live_authority",
+      "triggers": [
+        "pull_request",
+        "push:main",
+        "workflow_dispatch"
+      ],
+      "environment": [
+        "ubuntu-latest",
+        "go 1.23.x",
+        "pinned Geth build"
+      ],
+      "commands": [
+        "go test ./...",
+        "go build ./consensus/cmd/fourtwentyd",
+        "go build ./execution/cmd/node420",
+        "bash ./scripts/install-production-deps.sh",
+        "make build",
+        "bash ./scripts/build-node420-upstream.sh",
+        "go build -o bin/engine-live-smoke ./integration/cmd/engine-live-smoke",
+        "bash ./scripts/live-engine-smoke.sh",
+        "python3 scripts/run-fault-matrix.py",
+        "python3 scripts/run-soak.py --slots 120 --slot-ms 35"
+      ],
+      "evidence": [
+        "GitHub Actions run/job conclusions"
+      ],
+      "qualification_scope": [
+        "repository regression",
+        "core builds",
+        "production-tag dependencies",
+        "Engine smoke",
+        "fault/soak"
+      ],
+      "exclusions": [
+        "not Explorer deployment evidence",
+        "not Explorer target-network evidence"
+      ],
+      "finding_refs": [
+        "EXP-FIND-011"
+      ],
+      "acceptance_refs": [
+        "AC-7",
+        "AC-9",
+        "AC-10"
+      ]
+    },
+    {
+      "id": "EXP-CI-004",
+      "name": "420Docs Qualification",
+      "path": ".github/workflows/docs-qualify.yml",
+      "status": "active",
+      "role": "documentation_and_audit_consistency_gate",
+      "authority": "supporting_documentation_authority",
+      "triggers": [
+        "pull_request:path_filtered",
+        "push:main:path_filtered",
+        "workflow_dispatch"
+      ],
+      "environment": [
+        "ubuntu-latest",
+        "python 3.12",
+        "requirements-docs.txt"
+      ],
+      "commands": [
+        "pip install -r requirements-docs.txt",
+        "python scripts/qualify-documentation.py"
+      ],
+      "evidence": [
+        "GitHub Actions run/job conclusions"
+      ],
+      "qualification_scope": [
+        "documentation structure",
+        "generated/reference consistency",
+        "audit document integration"
+      ],
+      "exclusions": [
+        "not source runtime evidence",
+        "not deployment evidence"
+      ],
+      "finding_refs": [],
+      "acceptance_refs": [
+        "AC-10"
+      ]
+    },
+    {
+      "id": "EXP-CI-005",
+      "name": "Genesis Address Authority",
+      "path": ".github/workflows/genesis-address-authority.yml",
+      "status": "active_conditional",
+      "role": "shared_address_authority_regression_gate",
+      "authority": "supporting_when_address_or_config_authority_is_touched",
+      "triggers": [
+        "pull_request:path_filtered",
+        "workflow_dispatch",
+        "push:special-maintenance-branch"
+      ],
+      "environment": [
+        "python 3.12",
+        "Foundry stable",
+        "16 shards"
+      ],
+      "commands": [
+        "python scripts/verify-genesis-canonical-addresses.py",
+        "python scripts/verify-genesis-predeploy-authority.py",
+        "python scripts/verify-wallet-w14-7-1-namespace.py",
+        "python scripts/test-wallet-w14-7-1-namespace.py",
+        "python scripts/test-wallet-w14-7-4-consumers.py",
+        "python scripts/audit-wallet-w14-7-4-consumers.py > address-consumer-inventory.json",
+        "bash scripts/qualify-foundry-shard.sh <shard> 16"
+      ],
+      "evidence": [
+        "address-consumers-${github.sha}",
+        "address-foundry-shard-*"
+      ],
+      "qualification_scope": [
+        "frozen address ownership",
+        "predeploy parity",
+        "historical claim regressions",
+        "Solidity inventory"
+      ],
+      "exclusions": [
+        "not an Explorer functional gate",
+        "does not prove Registry runtime publication"
+      ],
+      "finding_refs": [
+        "EXP-FIND-005"
+      ],
+      "acceptance_refs": [
+        "AC-4",
+        "AC-9",
+        "AC-10"
+      ]
+    },
+    {
+      "id": "EXP-CI-006",
+      "name": "420 Integrated Testnet RC",
+      "path": ".github/workflows/testnet-rc.yml",
+      "status": "active_manual",
+      "role": "network_release_candidate_supporting_gate",
+      "authority": "supporting_network_rc_evidence",
+      "triggers": [
+        "workflow_dispatch"
+      ],
+      "environment": [
+        "go 1.23.x",
+        "build-essential",
+        "python3",
+        "real 15-node execution/consensus pairs"
+      ],
+      "commands": [
+        "bash ./scripts/install-production-deps.sh",
+        "bash ./scripts/build-node420-upstream.sh",
+        "make build",
+        "bash ./scripts/live-engine-smoke.sh",
+        "bash ./scripts/prepare-real-devnet15.sh",
+        "python3 scripts/run-real-devnet15.py --seconds 90 --consensus-transport devnet-tcp",
+        "python3 scripts/run-fault-matrix.py",
+        "python3 scripts/run-soak.py --slots 420 --slot-ms 35",
+        "python3 scripts/build-testnet-rc.py",
+        "python3 scripts/check-release-evidence.py"
+      ],
+      "evidence": [
+        "420-integrated-testnet-rc1",
+        "release/evidence/*.json",
+        "qualification/*.json"
+      ],
+      "qualification_scope": [
+        "network RC",
+        "Engine",
+        "real devnet",
+        "fault/restart",
+        "soak",
+        "release checksums"
+      ],
+      "exclusions": [
+        "not Explorer-specific live validation",
+        "does not substitute for EXP-CI-002"
+      ],
+      "finding_refs": [
+        "EXP-FIND-004",
+        "EXP-FIND-011"
+      ],
+      "acceptance_refs": [
+        "AC-2",
+        "AC-3",
+        "AC-7",
+        "AC-8",
+        "AC-9",
+        "AC-10"
+      ]
+    }
+  ],
+  "mechanisms": [
+    {
+      "id": "EXP-QM-001",
+      "parent": "EXP-CI-001",
+      "name": "Go Indexer tests",
+      "command": "go test ./indexer/...",
+      "scope": "source/integration"
+    },
+    {
+      "id": "EXP-QM-002",
+      "parent": "EXP-CI-001",
+      "name": "Go Indexer vet",
+      "command": "go vet ./indexer/...",
+      "scope": "static"
+    },
+    {
+      "id": "EXP-QM-003",
+      "parent": "EXP-CI-001",
+      "name": "TypeScript 420Indexer tests",
+      "command": "npm test",
+      "working_directory": "420-indexer",
+      "dependency": "postgres:16",
+      "scope": "source/integration"
+    },
+    {
+      "id": "EXP-QM-004",
+      "parent": "EXP-CI-001",
+      "name": "Explorer consumer tests",
+      "command": "go test ./explorer/...",
+      "scope": "source/integration"
+    },
+    {
+      "id": "EXP-QM-005",
+      "parent": "EXP-CI-001",
+      "name": "Explorer vet",
+      "command": "go vet ./explorer/...",
+      "scope": "static"
+    },
+    {
+      "id": "EXP-QM-006",
+      "parent": "EXP-CI-001",
+      "name": "Readiness JSON validation",
+      "command": "python -m json.tool",
+      "scope": "configuration syntax"
+    },
+    {
+      "id": "EXP-QM-007",
+      "parent": "EXP-CI-001",
+      "name": "GEN-11.1 readiness verifier",
+      "command": "python scripts/verify-420indexer.py",
+      "scope": "static readiness contract"
+    },
+    {
+      "id": "EXP-QM-008",
+      "parent": "EXP-CI-001",
+      "name": "Explorer shared-indexer consumer verifier",
+      "command": "python scripts/verify-explorer-indexer-consumer.py",
+      "scope": "source boundary"
+    },
+    {
+      "id": "EXP-QM-009",
+      "parent": "EXP-CI-001",
+      "name": "Retained EXP reconciliation verifier chain",
+      "command_group": [
+        "verify-exp-0-1-2-indexer-dependencies.py",
+        "verify-exp-0-1-3-contract-dependencies.py",
+        "verify-exp-0-2-1-capability-matrix.py",
+        "verify-exp-0-2-2-user-workflows.py",
+        "verify-exp-0-2-3-canonical-authority.py",
+        "verify-exp-0-2-4-dependency-readiness.py",
+        "verify-exp-0-2-5-genesis-gaps.py",
+        "verify-exp-0-2-6-genesis-acceptance.py",
+        "verify-exp-0-3-1-authoritative-requirements.py",
+        "verify-exp-0-3-2-capability-paths.py",
+        "verify-exp-0-3-3-acceptance-tests.py",
+        "verify-exp-0-3-4-status-freeze.py",
+        "verify-exp-0-3-5-nonblocking-exclusions.py",
+        "verify-exp-0-3-6-scope-conflicts.py",
+        "verify-exp-0-3-7-traceability.py",
+        "verify-exp-0-3-8-scope-resolution.py",
+        "verify-exp-0-4-1-ci-inventory.py",
+        "verify-exp-0-4-2-historical-closeouts.py",
+        "verify-exp-0-4-3-evidence-ledger.py",
+        "verify-exp-0-4-4-requirement-ci-coverage.py",
+        "scripts/verify-exp-0-4-5-acceptance-evidence.py",
+        "scripts/verify-exp-0-4-6-historical-contradictions.py",
+        "scripts/verify-exp-0-4-7-canonical-ledger.py",
+        "scripts/verify-exp-0-4-8-evidence-retention.py",
+        "scripts/verify-exp-0-4-9-current-main.py",
+        "scripts/verify-exp-0-4-10-final-exp-0-closeout.py"
+      ],
+      "scope": "audit/static reconciliation"
+    },
+    {
+      "id": "EXP-QM-010",
+      "parent": "EXP-CI-001",
+      "name": "Pinned-tree exhaustive inventory",
+      "command": "python scripts/exp-0-1-1-inventory.py --commit 95a83a961286701b6e8c064de1deccad10f41fd7",
+      "scope": "historical pinned-tree inventory",
+      "always": true,
+      "claim_rule": "artifact/run success does not make this a current-tree inventory"
+    },
+    {
+      "id": "EXP-QM-011",
+      "parent": "EXP-CI-002",
+      "name": "Live validator unit tests",
+      "command": "go test ./explorer/cmd/explorerlivevalidate",
+      "scope": "validator source"
+    },
+    {
+      "id": "EXP-QM-012",
+      "parent": "EXP-CI-002",
+      "name": "Live Explorer validation",
+      "command": "go run ./explorer/cmd/explorerlivevalidate",
+      "scope": "live target environment"
+    },
+    {
+      "id": "EXP-QM-013",
+      "parent": "EXP-CI-003",
+      "name": "Offline core",
+      "command_group": [
+        "go test ./...",
+        "go build ./consensus/cmd/fourtwentyd",
+        "go build ./execution/cmd/node420"
+      ],
+      "scope": "repository regression"
+    },
+    {
+      "id": "EXP-QM-014",
+      "parent": "EXP-CI-003",
+      "name": "Production dependencies",
+      "command": "bash ./scripts/install-production-deps.sh",
+      "scope": "production-tag build/tests"
+    },
+    {
+      "id": "EXP-QM-015",
+      "parent": "EXP-CI-003",
+      "name": "Pinned Geth Engine smoke",
+      "command_group": [
+        "bash ./scripts/build-node420-upstream.sh",
+        "go build -o bin/engine-live-smoke ./integration/cmd/engine-live-smoke",
+        "bash ./scripts/live-engine-smoke.sh"
+      ],
+      "scope": "Engine integration"
+    },
+    {
+      "id": "EXP-QM-016",
+      "parent": "EXP-CI-003",
+      "name": "Fault and soak",
+      "command_group": [
+        "python3 scripts/run-fault-matrix.py",
+        "python3 scripts/run-soak.py --slots 120 --slot-ms 35"
+      ],
+      "scope": "repository resilience"
+    },
+    {
+      "id": "EXP-QM-017",
+      "parent": "EXP-CI-004",
+      "name": "Documentation qualification",
+      "command": "python scripts/qualify-documentation.py",
+      "scope": "documentation/audit consistency"
+    },
+    {
+      "id": "EXP-QM-018",
+      "parent": "EXP-CI-005",
+      "name": "Cross-manifest address authority",
+      "command_group": [
+        "verify-genesis-canonical-addresses.py",
+        "verify-genesis-predeploy-authority.py",
+        "verify-wallet-w14-7-1-namespace.py",
+        "test-wallet-w14-7-1-namespace.py",
+        "test-wallet-w14-7-4-consumers.py"
+      ],
+      "scope": "address authority"
+    },
+    {
+      "id": "EXP-QM-019",
+      "parent": "EXP-CI-005",
+      "name": "16-shard Foundry inventory",
+      "command": "bash scripts/qualify-foundry-shard.sh <shard> 16",
+      "scope": "Solidity full inventory"
+    },
+    {
+      "id": "EXP-QM-020",
+      "parent": "EXP-CI-006",
+      "name": "Network RC qualification",
+      "command_group": [
+        "production deps",
+        "pinned Geth",
+        "Engine smoke",
+        "15 real pairs",
+        "fault/restart",
+        "420-slot soak",
+        "RC build/checksum/evidence"
+      ],
+      "scope": "network release candidate"
+    }
+  ],
+  "summary": {
+    "workflow_count": 6,
+    "mechanism_count": 20,
+    "automatic_pr_workflows": 4,
+    "manual_live_or_rc_workflows": 2,
+    "explorer_specific_live_workflows": 1,
+    "primary_source_gate": "EXP-CI-001",
+    "live_gate": "EXP-CI-002"
+  },
+  "qualification": {
+    "qualified_head": "6307f04f4efaf9dff4f911897c04e7032984eefa",
+    "runs": [
+      {
+        "workflow": "420Indexer",
+        "run_number": 605,
+        "run_id": 36270684529,
+        "conclusion": "success"
+      },
+      {
+        "workflow": "420Docs Qualification",
+        "run_number": 2920,
+        "run_id": 36270684374,
+        "conclusion": "success"
+      },
+      {
+        "workflow": "420 Integrated Qualification",
+        "run_number": 5537,
+        "run_id": 36270684493,
+        "conclusion": "success"
+      }
+    ],
+    "evidence_artifact": {
+      "id": 10915107733,
+      "name": "exp-0-4-1-ci-qualification-inventory",
+      "digest": "sha256:e662530385ca54357a53327828e3908b04421f968ec7a547090091d32a330f90"
+    },
+    "note": "Final EXP-0.4.1 closeout head. The inventory is maintained cumulatively as later EXP-0.4 verifiers are added to the retained 420Indexer chain; each later exact head reruns EXP-0.4.1."
+  }
+}

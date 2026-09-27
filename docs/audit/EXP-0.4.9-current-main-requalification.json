@@ -1,0 +1,145 @@
+{
+  "schema": "420explorer-exp-0.4.9-current-main-requalification-v1",
+  "milestone": "EXP-0.4.9",
+  "title": "420Explorer current-main reconciliation and exact-head requalification",
+  "status": "qualified_repository_scope_pending_final_recording_head_requalification",
+  "baseline": {
+    "exp_0_4_8_final_qualified_head": "a9a5e640069d3ecaedc3c29d73bc8dcf064af505",
+    "pr": 376,
+    "exp_0_4_start_main_sha": "304cb61286c94f72d0b05e32e5f713b9d68bc450"
+  },
+  "current_main_snapshot": {
+    "ref": "main",
+    "sha": "304cb61286c94f72d0b05e32e5f713b9d68bc450",
+    "merge_base_sha": "304cb61286c94f72d0b05e32e5f713b9d68bc450",
+    "observed_relation": "audit_branch_ahead_of_main",
+    "observed_ahead_by_before_0_4_9_changes": 85,
+    "observed_behind_by": 0,
+    "current_main_changed_since_exp_0_4_start": false
+  },
+  "reconciliation_rules": [
+    "The recorded current main commit must be an ancestor of the exact qualification head.",
+    "The EXP-0.4.8 final qualified head must remain an ancestor of the exact qualification head.",
+    "No commit from current main may be missing from the qualification head.",
+    "EXP-0.4 branch changes since current main must remain confined to Explorer audit records, EXP-0.4 verifier scripts and the retained 420Indexer qualification workflow.",
+    "The retained verifier chain must include EXP-0.4.1 through EXP-0.4.9 in order.",
+    "Current-main reconciliation does not promote runtime, deployment, live-network or Genesis state.",
+    "The exact requalification head must pass 420Indexer, 420Docs Qualification and all four 420 Integrated Qualification jobs."
+  ],
+  "allowed_delta": {
+    "exact_files": [
+      ".github/workflows/420indexer.yml"
+    ],
+    "path_prefixes": [
+      "docs/audit/EXP-0.4.",
+      "scripts/verify-exp-0-4-"
+    ],
+    "rationale": "EXP-0.4 is an audit/evidence reconciliation stage; no product/runtime source change is required for current-main requalification."
+  },
+  "required_requalification_workflows": [
+    {
+      "name": "420Indexer",
+      "path": ".github/workflows/420indexer.yml",
+      "scope": "primary Explorer/Indexer source, integration and retained audit verifier chain"
+    },
+    {
+      "name": "420Docs Qualification",
+      "path": ".github/workflows/docs-qualify.yml",
+      "scope": "documentation and audit consistency"
+    },
+    {
+      "name": "420 Integrated Qualification",
+      "path": ".github/workflows/qualification.yml",
+      "required_jobs": [
+        "offline-core",
+        "production-dependencies",
+        "geth-engine",
+        "fault-matrix"
+      ],
+      "scope": "supporting full-repository regression"
+    }
+  ],
+  "retained_authorities": [
+    "docs/audit/EXP-0.4.7-canonical-qualification-ledger.json",
+    "docs/audit/EXP-0.4.8-evidence-retention-reproducibility.json",
+    "docs/audit/EXP-0.4.1-ci-qualification-inventory.json"
+  ],
+  "current_qualification_state": {
+    "mandatory_requirements": 60,
+    "active_genesis_blockers": 10,
+    "acceptance_criteria": 10,
+    "unverified_acceptance_criteria": 10,
+    "genesis_qualified_requirements": 0,
+    "runtime_qualified_events": 0,
+    "deployment_qualified_events": 0,
+    "live_network_qualified_events": 0,
+    "genesis_qualified_events": 0,
+    "genesis_ready": false
+  },
+  "promotion_boundary": "EXP-0.4.9 proves repository reconciliation and exact-head regression against the current main ancestry only. It does not close later runtime/deployment/live Genesis requirements.",
+  "summary": {
+    "current_main_reconciled": true,
+    "current_main_behind_commits": 0,
+    "current_main_changed_since_exp_0_4_start": false,
+    "exp_0_4_8_head_retained": true,
+    "product_runtime_files_changed_by_exp_0_4": false,
+    "required_workflows": 3,
+    "required_integrated_jobs": 4,
+    "genesis_blockers_remaining": 10,
+    "unverified_acceptance_criteria": 10,
+    "genesis_ready": false
+  },
+  "qualification": {
+    "qualified_head": "b984f978e24721163241683c5561146fe3712dd2",
+    "current_main_sha": "304cb61286c94f72d0b05e32e5f713b9d68bc450",
+    "current_main_relation": {
+      "ahead_by": 90,
+      "behind_by": 0,
+      "merge_base_sha": "304cb61286c94f72d0b05e32e5f713b9d68bc450"
+    },
+    "runs": [
+      {
+        "workflow": "420Indexer",
+        "run_number": 662,
+        "run_id": 36335007750,
+        "job_ids": [
+          108664069317
+        ],
+        "conclusion": "success"
+      },
+      {
+        "workflow": "420Docs Qualification",
+        "run_number": 2998,
+        "run_id": 36335007754,
+        "job_ids": [
+          108664121649
+        ],
+        "conclusion": "success"
+      },
+      {
+        "workflow": "420 Integrated Qualification",
+        "run_number": 5615,
+        "run_id": 36335007831,
+        "job_ids": [
+          108664248592,
+          108664248654,
+          108664248718,
+          108664248736
+        ],
+        "conclusion": "success"
+      }
+    ],
+    "evidence_artifact": {
+      "id": 10936173702,
+      "name": "exp-0-4-9-current-main-requalification",
+      "digest": "sha256:641ca96c3dbe0099c6d84b71a66711be545197a9b422fb938434697c12976988"
+    },
+    "scope": "current-main ancestry reconciliation and exact-head repository requalification only",
+    "limitations": [
+      "does not establish runtime, deployment, live-network or Genesis qualification",
+      "does not resolve any of the ten active Genesis blockers",
+      "does not satisfy AC-1 through AC-10"
+    ],
+    "note": "Recording this evidence changes the branch head. The resulting exact head must rerun all retained qualification gates before EXP-0.4.9 is marked COMPLETE."
+  }
+}

@@ -1,0 +1,453 @@
+{
+  "schema": "420explorer-exp-0.4.2-historical-closeout-inventory-v1",
+  "milestone": "EXP-0.4.2",
+  "title": "420Explorer historical qualification and closeout inventory",
+  "status": "qualified_repository_scope",
+  "baseline": {
+    "exp_0_4_1_head": "6307f04f4efaf9dff4f911897c04e7032984eefa",
+    "pr": 376
+  },
+  "classification_values": [
+    "current_and_applicable",
+    "historical_supporting_evidence",
+    "superseded",
+    "scope_changed",
+    "runtime_evidence_expired",
+    "cannot_reproduce",
+    "insufficient_provenance"
+  ],
+  "rules": [
+    "Historical evidence never promotes a current requirement beyond the scope that evidence actually proved.",
+    "QUALIFIED_INDEXER_API_CONSUMER means only the Explorer-to-Indexer source/consumer boundary is qualified; it is not deployment, live-network, or Genesis qualification.",
+    "A smoke/validator program capable of emitting QUALIFIED is a test mechanism, not evidence that a deployment was actually qualified.",
+    "Repository source qualification remains applicable only when its exact-head provenance and scope are retained or the relevant gate is rerun on a later exact head.",
+    "Live/runtime evidence is environment-bound and cannot be inferred from source CI or placeholder readiness files.",
+    "The EXP-0.3 authoritative status freeze and gap register govern current promotion semantics: zero mandatory requirements are Genesis-qualified and ten Genesis-blocking findings remain."
+  ],
+  "records": [
+    {
+      "id": "EXP-HIST-001",
+      "kind": "implementation_closeout",
+      "claim": "GEN-11.1 first-consumer integration: 420Explorer complete / consumer gate QUALIFIED_INDEXER_API_CONSUMER",
+      "sources": [
+        "indexer/STATUS.md",
+        "testnet/public-services/indexer/readiness.json",
+        "scripts/verify-420indexer.py",
+        "scripts/verify-explorer-indexer-consumer.py"
+      ],
+      "original_scope": "Explorer source/client boundary consumes shared 420Indexer /v1 and disables independent ingestion/checkpoint/reorg/decoder paths.",
+      "classification": "current_and_applicable",
+      "current_scope": "source_consumer_boundary_only",
+      "provenance": {
+        "type": "repository_source_and_retained_ci",
+        "exact_head_required_for_current_use": true
+      },
+      "does_not_prove": [
+        "Indexer deployment",
+        "Explorer deployment",
+        "live target network",
+        "Registry runtime publication",
+        "consensus provider wiring",
+        "Genesis readiness"
+      ],
+      "superseded_by": [],
+      "applicable_to": [
+        "EXP-REQ-IDX-001",
+        "EXP-REQ-IDX-002",
+        "EXP-REQ-INV-001"
+      ],
+      "note": "Narrow consumer qualification remains valid as source evidence and is actively rechecked by 420Indexer CI."
+    },
+    {
+      "id": "EXP-HIST-002",
+      "kind": "architecture_statement",
+      "claim": "420Explorer is already qualified as an Indexer API consumer",
+      "sources": [
+        "docs/architecture/infrastructure/420indexer.md"
+      ],
+      "original_scope": "Architecture-level Indexer consumer qualification.",
+      "classification": "current_and_applicable",
+      "current_scope": "source_consumer_boundary_only",
+      "provenance": {
+        "type": "documentation_backed_by_retained_consumer_verifier",
+        "exact_head_required_for_current_use": true
+      },
+      "does_not_prove": [
+        "deployment",
+        "live network",
+        "overall Explorer qualification",
+        "Genesis readiness"
+      ],
+      "superseded_by": [
+        "EXP-0.3 status discipline"
+      ],
+      "applicable_to": [
+        "EXP-REQ-IDX-001",
+        "EXP-REQ-IDX-002"
+      ]
+    },
+    {
+      "id": "EXP-HIST-003",
+      "kind": "runtime_metadata_label",
+      "claim": "Explorer /v1/capabilities reports QUALIFIED_INDEXER_API_CONSUMER",
+      "sources": [
+        "explorer/api/server.go",
+        "explorer/cmd/explorer420/main.go"
+      ],
+      "original_scope": "Runtime metadata identifying the intended qualified consumer contract.",
+      "classification": "current_and_applicable",
+      "current_scope": "consumer_contract_label_only",
+      "provenance": {
+        "type": "source_label_backed_by_unit_and_consumer_tests",
+        "exact_head_required_for_current_use": true
+      },
+      "does_not_prove": [
+        "that this binary is deployed",
+        "that an observed endpoint is this exact binary",
+        "live target qualification",
+        "Genesis readiness"
+      ],
+      "superseded_by": [],
+      "applicable_to": [
+        "EXP-REQ-IDX-001"
+      ]
+    },
+    {
+      "id": "EXP-HIST-004",
+      "kind": "user_facing_copy",
+      "claim": "Qualified, read-only visibility into chain, protocol, asset & consensus state.",
+      "sources": [
+        "explorer/web/static/index.html"
+      ],
+      "original_scope": "User-facing product copy predating the current formal status ledger.",
+      "classification": "scope_changed",
+      "current_scope": "presentation_copy_not_qualification_evidence",
+      "provenance": {
+        "type": "source_text_only",
+        "exact_head_required_for_current_use": false
+      },
+      "does_not_prove": [
+        "any acceptance criterion",
+        "deployment",
+        "runtime correctness",
+        "Genesis readiness"
+      ],
+      "superseded_by": [
+        "docs/audit/EXP-0.3.4-qualification-status-freeze.json",
+        "docs/audit/EXP-0.2.5-genesis-gap-register.json"
+      ],
+      "applicable_to": [],
+      "note": "The word qualified is broader than the current evidence model; treat as historical/presentation wording only."
+    },
+    {
+      "id": "EXP-HIST-005",
+      "kind": "conditional_smoke_contract",
+      "claim": "EXP-7.1 smoke emits status QUALIFIED after required checks pass.",
+      "sources": [
+        "explorer/cmd/explorersmoke/main.go",
+        "explorer/deploy/README.md"
+      ],
+      "original_scope": "A smoke-test program's success label.",
+      "classification": "insufficient_provenance",
+      "current_scope": "test_mechanism_not_executed_closeout",
+      "provenance": {
+        "type": "source_available_no_retained_executed_target_evidence_in_current_closeout",
+        "exact_head_required_for_current_use": true
+      },
+      "does_not_prove": [
+        "that EXP-7.1 was run against an approved deployment",
+        "target URL identity",
+        "live Registry/consensus witnesses",
+        "Genesis readiness"
+      ],
+      "superseded_by": [
+        ".github/workflows/explorer-live-testnet.yml"
+      ],
+      "applicable_to": []
+    },
+    {
+      "id": "EXP-HIST-006",
+      "kind": "live_validator_contract",
+      "claim": "EXP-7.2 live validator can produce a passing report for a supplied Explorer URL.",
+      "sources": [
+        "explorer/cmd/explorerlivevalidate/main.go",
+        ".github/workflows/explorer-live-testnet.yml"
+      ],
+      "original_scope": "Manual environment-bound live witness mechanism.",
+      "classification": "insufficient_provenance",
+      "current_scope": "live_test_mechanism_available_but_no_current_approved_run",
+      "provenance": {
+        "type": "manual_workflow_requires_target_inputs_and_run_id",
+        "exact_head_required_for_current_use": true
+      },
+      "does_not_prove": [
+        "current live deployment qualification until executed",
+        "future environment state",
+        "Genesis readiness"
+      ],
+      "superseded_by": [],
+      "applicable_to": []
+    },
+    {
+      "id": "EXP-HIST-007",
+      "kind": "readiness_record",
+      "claim": "Explorer backend is INDEXER_CONSUMER_IMPLEMENTED_PENDING_DEPLOYMENT and frontend is PENDING.",
+      "sources": [
+        "testnet/public-services/explorer/readiness.json"
+      ],
+      "original_scope": "Deployment-readiness state.",
+      "classification": "current_and_applicable",
+      "current_scope": "deployment_pending_authority",
+      "provenance": {
+        "type": "current_repository_readiness_record",
+        "exact_head_required_for_current_use": true
+      },
+      "does_not_prove": [
+        "deployment",
+        "live qualification"
+      ],
+      "superseded_by": [],
+      "applicable_to": [
+        "EXP-FIND-003"
+      ],
+      "note": "This record actively prevents older source-qualified wording from being interpreted as deployment evidence."
+    },
+    {
+      "id": "EXP-HIST-008",
+      "kind": "readiness_record",
+      "claim": "420Indexer backend URL is REPLACE / PENDING_TESTNET_DEPLOYMENT while Explorer consumer gate is source-qualified.",
+      "sources": [
+        "testnet/public-services/indexer/readiness.json"
+      ],
+      "original_scope": "Indexer source/readiness qualification separated from deployment.",
+      "classification": "current_and_applicable",
+      "current_scope": "source_qualified_deployment_pending",
+      "provenance": {
+        "type": "current_repository_readiness_record",
+        "exact_head_required_for_current_use": true
+      },
+      "does_not_prove": [
+        "Indexer deployment",
+        "canonical target RPC binding",
+        "live Explorer qualification"
+      ],
+      "superseded_by": [],
+      "applicable_to": [
+        "EXP-FIND-002",
+        "EXP-FIND-004"
+      ]
+    },
+    {
+      "id": "EXP-HIST-009",
+      "kind": "audit_closeout",
+      "claim": "EXP-0.1 source inventory/dependency/address reconciliation completed and qualified within source-inventory scope.",
+      "sources": [
+        "docs/audit/EXP-0.1.1-complete-inventory-reconciliation.md",
+        "docs/audit/EXP-0.1.2-indexer-dependency-reconciliation.md",
+        "docs/audit/EXP-0.1.3-contract-abi-address-reconciliation.md"
+      ],
+      "original_scope": "Pinned-tree and source dependency/contract inventory.",
+      "classification": "historical_supporting_evidence",
+      "current_scope": "retained_source_inventory_baseline",
+      "provenance": {
+        "type": "retained_verifiers_and_pinned_tree_artifacts",
+        "exact_head_required_for_current_use": false
+      },
+      "does_not_prove": [
+        "current mutable tree completeness by itself",
+        "runtime",
+        "deployment",
+        "Genesis readiness"
+      ],
+      "superseded_by": [
+        "EXP-0.3 authoritative requirement and status ledgers"
+      ],
+      "applicable_to": [
+        "EXP-0 inventory provenance"
+      ]
+    },
+    {
+      "id": "EXP-HIST-010",
+      "kind": "audit_exact_head_qualification",
+      "claim": "EXP-0.2.1 through EXP-0.2.6 exact-head qualification records.",
+      "sources": [
+        "PR #373",
+        "docs/audit/EXP-0.2.1-required-capability-reconciliation.md",
+        "docs/audit/EXP-0.2.6-genesis-acceptance-reconciliation.md"
+      ],
+      "original_scope": "Capability/workflow/authority/readiness/gap/acceptance-model qualification.",
+      "classification": "current_and_applicable",
+      "current_scope": "audit_model_and_classification_only",
+      "provenance": {
+        "type": "exact_head_workflow_runs_and_artifacts",
+        "pr": 373,
+        "exact_head_required_for_current_use": true
+      },
+      "does_not_prove": [
+        "live workflows",
+        "data correctness against target network",
+        "UI completeness",
+        "Genesis readiness"
+      ],
+      "superseded_by": [
+        "EXP-0.3 atomic reconciliation where fields changed"
+      ],
+      "applicable_to": [
+        "EXP-0.2 artifacts"
+      ]
+    },
+    {
+      "id": "EXP-HIST-011",
+      "kind": "audit_exact_head_qualification",
+      "claim": "EXP-0.3.1 through EXP-0.3.8 exact-head qualification records.",
+      "sources": [
+        "PR #375",
+        "docs/audit/EXP-0.3.1-authoritative-genesis-requirements.json",
+        "docs/audit/EXP-0.3.8-governance-scope-decision.json"
+      ],
+      "original_scope": "Authoritative requirements, paths, tests, status, exclusions, conflict resolution and traceability.",
+      "classification": "current_and_applicable",
+      "current_scope": "authoritative_scope_and_status_model",
+      "provenance": {
+        "type": "exact_head_workflow_runs_and_artifacts",
+        "pr": 375,
+        "final_qualified_head": "3bc8e7656ea0a23afe0e5e3aa6e360b63cfbf508",
+        "exact_head_required_for_current_use": true
+      },
+      "does_not_prove": [
+        "ten remaining blockers resolved",
+        "AC-1 through AC-10 satisfied",
+        "deployment",
+        "live Genesis readiness"
+      ],
+      "superseded_by": [],
+      "applicable_to": [
+        "60 mandatory Genesis requirements",
+        "10 current Genesis-blocking findings",
+        "AC-1..AC-10"
+      ]
+    },
+    {
+      "id": "EXP-HIST-012",
+      "kind": "audit_exact_head_qualification",
+      "claim": "EXP-0.4.1 CI and qualification mechanism inventory qualified at repository scope.",
+      "sources": [
+        "PR #376",
+        "docs/audit/EXP-0.4.1-ci-qualification-inventory.json",
+        "docs/audit/EXP-0.4.1-ci-qualification-reconciliation.md"
+      ],
+      "original_scope": "Qualification machinery inventory and authority boundaries.",
+      "classification": "current_and_applicable",
+      "current_scope": "qualification_mechanism_inventory",
+      "provenance": {
+        "type": "exact_head_workflow_runs_and_artifact",
+        "pr": 376,
+        "qualified_head": "6307f04f4efaf9dff4f911897c04e7032984eefa",
+        "exact_head_required_for_current_use": true
+      },
+      "does_not_prove": [
+        "deployment",
+        "live network",
+        "Genesis readiness"
+      ],
+      "superseded_by": [],
+      "applicable_to": [
+        "EXP-0.4 evidence governance"
+      ]
+    },
+    {
+      "id": "EXP-HIST-013",
+      "kind": "genesis_profile_claim",
+      "claim": "420Explorer qualifies the GEN-11.1 first-consumer gate when automated consumer-boundary tests pass.",
+      "sources": [
+        "docs/420EXPLORER.md"
+      ],
+      "original_scope": "Definition of the first-consumer source qualification condition.",
+      "classification": "current_and_applicable",
+      "current_scope": "source_consumer_boundary_definition",
+      "provenance": {
+        "type": "normative_profile_document_plus_retained_verifier",
+        "exact_head_required_for_current_use": true
+      },
+      "does_not_prove": [
+        "deployment",
+        "live environment",
+        "full Explorer Genesis qualification"
+      ],
+      "superseded_by": [],
+      "applicable_to": [
+        "EXP-REQ-IDX-001",
+        "EXP-REQ-IDX-002"
+      ]
+    },
+    {
+      "id": "EXP-HIST-014",
+      "kind": "absence_of_closeout",
+      "claim": "No retained executed live Explorer deployment closeout is present in the current authoritative audit evidence.",
+      "sources": [
+        ".github/workflows/explorer-live-testnet.yml",
+        "testnet/public-services/explorer/readiness.json",
+        "docs/audit/EXP-0.2.5-genesis-gap-register.json"
+      ],
+      "original_scope": "Negative evidence / current state.",
+      "classification": "current_and_applicable",
+      "current_scope": "live_qualification_absent",
+      "provenance": {
+        "type": "current_readiness_and_gap_register",
+        "exact_head_required_for_current_use": true
+      },
+      "does_not_prove": [],
+      "superseded_by": [],
+      "applicable_to": [
+        "EXP-FIND-003",
+        "EXP-FIND-004",
+        "EXP-FIND-005",
+        "EXP-FIND-007",
+        "EXP-FIND-011"
+      ]
+    }
+  ],
+  "summary": {
+    "record_count": 14,
+    "current_and_applicable": 10,
+    "historical_supporting_evidence": 1,
+    "superseded": 0,
+    "scope_changed": 1,
+    "runtime_evidence_expired": 0,
+    "cannot_reproduce": 0,
+    "insufficient_provenance": 2,
+    "broad_genesis_qualification_claims_accepted": 0,
+    "current_executed_live_explorer_closeouts": 0,
+    "remaining_genesis_blockers": 10
+  },
+  "qualification": {
+    "qualified_head": "7e97fd4fb472f42e91dde45e1d6a808dddf9bc56",
+    "runs": [
+      {
+        "workflow": "420Indexer",
+        "run_number": 609,
+        "run_id": 36271531639,
+        "conclusion": "success"
+      },
+      {
+        "workflow": "420Docs Qualification",
+        "run_number": 2927,
+        "run_id": 36271531648,
+        "conclusion": "success"
+      },
+      {
+        "workflow": "420 Integrated Qualification",
+        "run_number": 5544,
+        "run_id": 36271531693,
+        "conclusion": "success"
+      }
+    ],
+    "evidence_artifact": {
+      "id": 10915817634,
+      "name": "exp-0-4-2-historical-closeout-inventory",
+      "digest": "sha256:32c88290fc1a95f4bac35225ca94d73b98999c4d91b04b8e93be74e048c676d5"
+    },
+    "scope": "historical qualification/closeout interpretation and provenance classification only",
+    "note": "Recording this evidence changes the branch head. The resulting cumulative head must rerun before later-step qualification."
+  }
+}

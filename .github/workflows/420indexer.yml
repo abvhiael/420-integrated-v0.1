@@ -36,6 +36,34 @@ on:
       - 'docs/audit/EXP-0.3.7-bidirectional-traceability-reconciliation.md'
       - 'docs/audit/EXP-0.3.8-governance-scope-decision.json'
       - 'docs/audit/EXP-0.3.8-governance-scope-reconciliation.md'
+      - 'docs/audit/EXP-0.4.1-ci-qualification-inventory.json'
+      - 'docs/audit/EXP-0.4.1-ci-qualification-reconciliation.md'
+      - 'docs/audit/EXP-0.4.2-historical-closeout-inventory.json'
+      - 'docs/audit/EXP-0.4.2-historical-closeout-reconciliation.md'
+      - 'docs/audit/EXP-0.4.3-qualification-evidence-ledger.json'
+      - 'docs/audit/EXP-0.4.3-evidence-provenance.md'
+      - 'docs/audit/EXP-0.4.4-requirement-ci-coverage.json'
+      - 'docs/audit/EXP-0.4.4-requirement-ci-reconciliation.md'
+      - 'docs/audit/EXP-0.4.5-acceptance-criterion-evidence.json'
+      - 'docs/audit/EXP-0.4.5-acceptance-criterion-evidence.md'
+      - 'docs/audit/EXP-0.4.6-historical-contradiction-reconciliation.json'
+      - 'docs/audit/EXP-0.4.6-historical-contradiction-reconciliation.md'
+      - 'docs/audit/EXP-0.4.7-canonical-qualification-ledger.json'
+      - 'docs/audit/EXP-0.4.7-canonical-qualification-ledger.md'
+      - 'docs/audit/EXP-0.4.8-evidence-retention-reproducibility.json'
+      - 'docs/audit/EXP-0.4.8-evidence-retention-reproducibility.md'
+      - 'docs/audit/EXP-0.4.9-current-main-requalification.json'
+      - 'docs/audit/EXP-0.4.9-current-main-requalification.md'
+      - 'docs/audit/EXP-0.4.10-final-exp-0-closeout.json'
+      - 'docs/audit/EXP-0.4.10-final-exp-0-closeout.md'
+      - 'docs/audit/EXP-0.4.4-requirement-ci-coverage.json'
+      - 'docs/audit/EXP-0.4.4-requirement-ci-reconciliation.md'
+      - 'docs/audit/EXP-0.4.3-qualification-evidence-ledger.json'
+      - 'docs/audit/EXP-0.4.3-evidence-provenance.md'
+      - 'docs/audit/EXP-0.4.2-historical-closeout-inventory.json'
+      - 'docs/audit/EXP-0.4.2-historical-closeout-reconciliation.md'
+      - 'docs/audit/EXP-0.4.1-ci-qualification-inventory.json'
+      - 'docs/audit/EXP-0.4.1-ci-qualification-reconciliation.md'
       - 'config/420indexer-v1.json'
       - 'config/system-addresses.json'
       - 'config/genesis-applications.json'
@@ -63,6 +91,20 @@ on:
       - 'scripts/verify-exp-0-3-6-scope-conflicts.py'
       - 'scripts/verify-exp-0-3-7-traceability.py'
       - 'scripts/verify-exp-0-3-8-scope-resolution.py'
+      - 'scripts/verify-exp-0-4-1-ci-inventory.py'
+      - 'scripts/verify-exp-0-4-2-historical-closeouts.py'
+      - 'scripts/verify-exp-0-4-3-evidence-ledger.py'
+      - 'scripts/verify-exp-0-4-4-requirement-ci-coverage.py'
+      - 'scripts/verify-exp-0-4-5-acceptance-evidence.py'
+      - 'scripts/verify-exp-0-4-6-historical-contradictions.py'
+      - 'scripts/verify-exp-0-4-7-canonical-ledger.py'
+      - 'scripts/verify-exp-0-4-8-evidence-retention.py'
+      - 'scripts/verify-exp-0-4-9-current-main.py'
+      - 'scripts/verify-exp-0-4-10-final-exp-0-closeout.py'
+      - 'scripts/verify-exp-0-4-4-requirement-ci-coverage.py'
+      - 'scripts/verify-exp-0-4-3-evidence-ledger.py'
+      - 'scripts/verify-exp-0-4-2-historical-closeouts.py'
+      - 'scripts/verify-exp-0-4-1-ci-inventory.py'
       - '.github/workflows/420indexer.yml'
   push:
     branches:
@@ -210,6 +252,26 @@ jobs:
         run: python scripts/verify-exp-0-3-7-traceability.py
       - name: EXP-0.3.8 governance scope resolution
         run: python scripts/verify-exp-0-3-8-scope-resolution.py
+      - name: EXP-0.4.1 CI and qualification-workflow inventory
+        run: python scripts/verify-exp-0-4-1-ci-inventory.py
+      - name: EXP-0.4.2 historical qualification and closeout inventory
+        run: python scripts/verify-exp-0-4-2-historical-closeouts.py
+      - name: EXP-0.4.3 exact-head qualification evidence provenance ledger
+        run: python scripts/verify-exp-0-4-3-evidence-ledger.py
+      - name: EXP-0.4.4 mandatory requirement-to-CI coverage reconciliation
+        run: python scripts/verify-exp-0-4-4-requirement-ci-coverage.py
+      - name: EXP-0.4.5 acceptance-criterion evidence reconciliation
+        run: python scripts/verify-exp-0-4-5-acceptance-evidence.py
+      - name: EXP-0.4.6 historical contradiction and stale-evidence reconciliation
+        run: python scripts/verify-exp-0-4-6-historical-contradictions.py
+      - name: EXP-0.4.7 canonical qualification ledger
+        run: python scripts/verify-exp-0-4-7-canonical-ledger.py
+      - name: EXP-0.4.8 evidence retention and reproducibility
+        run: python scripts/verify-exp-0-4-8-evidence-retention.py
+      - name: EXP-0.4.9 current-main reconciliation and requalification
+        run: python scripts/verify-exp-0-4-9-current-main.py
+      - name: EXP-0.4.10 final EXP-0 closeout
+        run: python scripts/verify-exp-0-4-10-final-exp-0-closeout.py
       - name: EXP-0.1.1 pinned-tree exhaustive inventory
         if: always()
         run: python scripts/exp-0-1-1-inventory.py --commit 95a83a961286701b6e8c064de1deccad10f41fd7
@@ -324,4 +386,74 @@ jobs:
         with:
           name: exp-0-3-8-governance-scope-resolution
           path: exp-0-3-8-evidence/
+          if-no-files-found: error
+      - name: Upload EXP-0.4.1 CI inventory evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp-0-4-1-ci-qualification-inventory
+          path: exp-0-4-1-evidence/
+          if-no-files-found: error
+      - name: Upload EXP-0.4.2 historical closeout evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp-0-4-2-historical-closeout-inventory
+          path: exp-0-4-2-evidence/
+          if-no-files-found: error
+      - name: Upload EXP-0.4.3 qualification provenance evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp-0-4-3-qualification-evidence-ledger
+          path: exp-0-4-3-evidence/
+          if-no-files-found: error
+      - name: Upload EXP-0.4.4 requirement CI coverage evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp-0-4-4-requirement-ci-coverage
+          path: exp-0-4-4-evidence/
+          if-no-files-found: error
+      - name: Upload EXP-0.4.5 acceptance-criterion evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp-0-4-5-acceptance-criterion-evidence
+          path: exp-0-4-5-evidence/
+          if-no-files-found: error
+      - name: Upload EXP-0.4.6 historical contradiction evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp-0-4-6-historical-contradictions
+          path: exp-0-4-6-evidence/
+          if-no-files-found: error
+      - name: Upload EXP-0.4.7 canonical qualification ledger evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp-0-4-7-canonical-qualification-ledger
+          path: exp-0-4-7-evidence/
+          if-no-files-found: error
+      - name: Upload EXP-0.4.8 evidence retention and reproducibility
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp-0-4-8-evidence-retention-reproducibility
+          path: exp-0-4-8-evidence/
+          if-no-files-found: error
+      - name: Upload EXP-0.4.9 current-main requalification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp-0-4-9-current-main-requalification
+          path: exp-0-4-9-evidence/
+          if-no-files-found: error
+      - name: Upload EXP-0.4.10 final EXP-0 closeout evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp-0-4-10-final-exp-0-closeout
+          path: exp-0-4-10-evidence/
           if-no-files-found: error

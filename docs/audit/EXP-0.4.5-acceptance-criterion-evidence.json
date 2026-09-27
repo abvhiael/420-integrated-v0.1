@@ -1,0 +1,2163 @@
+{
+  "schema": "420explorer-exp-0.4.5-acceptance-criterion-evidence-v1",
+  "milestone": "EXP-0.4.5",
+  "title": "420Explorer AC-1 through AC-10 evidence reconciliation",
+  "status": "qualified_repository_scope_pending_final_recording_head_requalification",
+  "baseline": {
+    "exp_0_4_4_final_head": "0458043bea57f37b0593b48429c788e6f77146dc",
+    "acceptance_map": "docs/audit/EXP-0.2.6-genesis-acceptance-criteria.json",
+    "blocker_register": "docs/audit/EXP-0.2.5-genesis-gap-register.json",
+    "traceability": "docs/audit/EXP-0.3.7-bidirectional-traceability.json",
+    "provenance": "docs/audit/EXP-0.4.3-qualification-evidence-ledger.json",
+    "requirement_coverage": "docs/audit/EXP-0.4.4-requirement-ci-coverage.json"
+  },
+  "evidence_semantics": {
+    "present_repository_evidence": "Evidence that exists today for source/model/integration qualification. It is not automatically release-candidate, deployment or live-network evidence.",
+    "missing_release_evidence": "Acceptance evidence still absent or not yet qualified against the exact release candidate/environment required by the criterion.",
+    "mapped_blocking_findings": "Current Genesis blockers whose resolution is a prerequisite for satisfying this criterion."
+  },
+  "rules": [
+    "AC-1 through AC-10 must each appear exactly once.",
+    "Current status must remain identical to the authoritative EXP-0.2.6 acceptance map.",
+    "All currently mapped Genesis blockers must be reproduced exactly.",
+    "All mandatory requirements that reference an AC must be mapped to it.",
+    "Repository/source evidence must not be relabeled as runtime, deployment, live-network or Genesis acceptance evidence.",
+    "No AC may be marked satisfied while its required evidence is missing or any mapped blocker remains open.",
+    "AC-9 and AC-10 require exact release-candidate evidence and cannot be satisfied by historical exact-head milestone runs."
+  ],
+  "qualification_profiles": [
+    "EXP-QP-001",
+    "EXP-QP-002",
+    "EXP-QP-003"
+  ],
+  "source_evidence_basis": [
+    "EXP-0.2.6 acceptance ownership/evidence map",
+    "EXP-0.3.4 qualification-status freeze",
+    "EXP-0.3.7 bidirectional traceability",
+    "EXP-0.4.3 exact-head qualification provenance ledger",
+    "EXP-0.4.4 mandatory requirement-to-CI coverage ledger"
+  ],
+  "criteria": [
+    {
+      "acceptance_criterion": "AC-1",
+      "question": "Can a user independently inspect and verify the supported blockchain transactions, blocks, and addresses?",
+      "current_status": "unverified",
+      "primary_owner": "EXP-2",
+      "supporting_owners": [
+        "EXP-4",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "phase_evidence_layers": [
+        "explorer_service_api_runtime",
+        "deployed_ui_workflow",
+        "deployment_live_network",
+        "release_candidate_closeout"
+      ],
+      "mapped_mandatory_requirements": [
+        "EXP-REQ-VIEW-001",
+        "EXP-REQ-VIEW-002",
+        "EXP-REQ-VIEW-003",
+        "EXP-REQ-VIEW-004",
+        "EXP-REQ-VIEW-005",
+        "EXP-REQ-END-002",
+        "EXP-REQ-END-003",
+        "EXP-REQ-END-004",
+        "EXP-REQ-END-005",
+        "EXP-REQ-END-006",
+        "EXP-REQ-INV-011"
+      ],
+      "mapped_blocking_findings": [
+        "EXP-FIND-003",
+        "EXP-FIND-008",
+        "EXP-FIND-009",
+        "EXP-FIND-010"
+      ],
+      "mapped_blocking_finding_titles": [
+        {
+          "id": "EXP-FIND-003",
+          "title": "Explorer backend and frontend are not deployed or live-qualified",
+          "owners": [
+            "EXP-4",
+            "EXP-7"
+          ]
+        },
+        {
+          "id": "EXP-FIND-008",
+          "title": "Actual transaction fee inspection is incomplete",
+          "owners": [
+            "EXP-2",
+            "EXP-4"
+          ]
+        },
+        {
+          "id": "EXP-FIND-009",
+          "title": "Historical validator-produced block attribution is absent",
+          "owners": [
+            "EXP-1",
+            "EXP-2",
+            "EXP-4"
+          ]
+        },
+        {
+          "id": "EXP-FIND-010",
+          "title": "Raw contract event inspection is incomplete in the user interface",
+          "owners": [
+            "EXP-2",
+            "EXP-4"
+          ]
+        }
+      ],
+      "verification_method": [
+        "Execute block, transaction, receipt/log and address API correctness tests against representative canonical fixtures.",
+        "Exercise the corresponding user workflows through the production-equivalent Explorer frontend.",
+        "Compare displayed chain ID, block hash, transaction/receipt provenance, values and finality with authoritative target-network data."
+      ],
+      "required_evidence": [
+        "passing core Explorer API/service tests on the exact release candidate",
+        "production-equivalent block/transaction/address workflow evidence",
+        "authoritative-chain comparison witnesses for representative successful and failed transactions",
+        "evidence that transaction fees and historical block-producer attribution required by the agreed workflows are implemented and rendered",
+        "raw event/log inspectability evidence for the mandatory receipt/logs view"
+      ],
+      "present_repository_evidence": [
+        {
+          "kind": "authoritative_acceptance_definition",
+          "scope": "repository_model",
+          "refs": [
+            "docs/audit/EXP-0.2.6-genesis-acceptance-criteria.json"
+          ]
+        },
+        {
+          "kind": "requirement_and_blocker_traceability",
+          "scope": "repository_model",
+          "refs": [
+            "docs/audit/EXP-0.3.7-bidirectional-traceability.json",
+            "docs/audit/EXP-0.2.5-genesis-gap-register.json"
+          ]
+        },
+        {
+          "kind": "exact_head_repository_qualification_provenance",
+          "scope": "source_and_integration_only",
+          "refs": [
+            "docs/audit/EXP-0.4.3-qualification-evidence-ledger.json"
+          ]
+        },
+        {
+          "kind": "requirement_ci_coverage",
+          "scope": "source_and_mapping_only",
+          "refs": [
+            "docs/audit/EXP-0.4.4-requirement-ci-coverage.json"
+          ]
+        },
+        {
+          "kind": "current_functional_test_files",
+          "scope": "repository_source_tests",
+          "refs": [
+            "explorer/service/blockviews_test.go",
+            "indexer/api/backend_test.go",
+            "indexer/api/server_test.go",
+            "explorer/service/transactionviews_test.go",
+            "explorer/indexerclient/client_test.go",
+            "indexer/store/file_test.go",
+            "explorer/service/addressviews_test.go",
+            "indexer/store/address_test.go",
+            "explorer/api/server_test.go",
+            "explorer/service/contractviews_test.go"
+          ]
+        },
+        {
+          "kind": "current_model_verifiers",
+          "scope": "repository_model",
+          "refs": [
+            "scripts/verify-exp-0-3-1-authoritative-requirements.py",
+            "scripts/verify-exp-0-3-4-status-freeze.py",
+            "scripts/verify-exp-0-3-7-traceability.py",
+            "scripts/verify-exp-0-3-3-acceptance-tests.py"
+          ]
+        }
+      ],
+      "missing_release_evidence": [
+        {
+          "evidence": "passing core Explorer API/service tests on the exact release candidate",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-2",
+            "EXP-4",
+            "EXP-7",
+            "EXP-8"
+          ]
+        },
+        {
+          "evidence": "production-equivalent block/transaction/address workflow evidence",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-2",
+            "EXP-4",
+            "EXP-7",
+            "EXP-8"
+          ]
+        },
+        {
+          "evidence": "authoritative-chain comparison witnesses for representative successful and failed transactions",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-2",
+            "EXP-4",
+            "EXP-7",
+            "EXP-8"
+          ]
+        },
+        {
+          "evidence": "evidence that transaction fees and historical block-producer attribution required by the agreed workflows are implemented and rendered",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-2",
+            "EXP-4",
+            "EXP-7",
+            "EXP-8"
+          ]
+        },
+        {
+          "evidence": "raw event/log inspectability evidence for the mandatory receipt/logs view",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-2",
+            "EXP-4",
+            "EXP-7",
+            "EXP-8"
+          ]
+        }
+      ],
+      "current_functional_test_files": [
+        "explorer/service/blockviews_test.go",
+        "indexer/api/backend_test.go",
+        "indexer/api/server_test.go",
+        "explorer/service/transactionviews_test.go",
+        "explorer/indexerclient/client_test.go",
+        "indexer/store/file_test.go",
+        "explorer/service/addressviews_test.go",
+        "indexer/store/address_test.go",
+        "explorer/api/server_test.go",
+        "explorer/service/contractviews_test.go"
+      ],
+      "current_model_verifiers": [
+        "scripts/verify-exp-0-3-1-authoritative-requirements.py",
+        "scripts/verify-exp-0-3-4-status-freeze.py",
+        "scripts/verify-exp-0-3-7-traceability.py",
+        "scripts/verify-exp-0-3-3-acceptance-tests.py"
+      ],
+      "satisfaction_rule": "May become satisfied only after every required evidence item is produced against the same exact release candidate and all mapped Genesis-blocking findings are resolved.",
+      "ac_satisfied": false,
+      "orphaned": false
+    },
+    {
+      "acceptance_criterion": "AC-2",
+      "question": "Does the Explorer retrieve and display accurate information from the authoritative 420 Integrated network?",
+      "current_status": "unverified",
+      "primary_owner": "EXP-1",
+      "supporting_owners": [
+        "EXP-2",
+        "EXP-3",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "phase_evidence_layers": [
+        "blockchain_data_integrity_runtime",
+        "explorer_service_api_runtime",
+        "contract_registry_runtime",
+        "deployment_live_network",
+        "release_candidate_closeout"
+      ],
+      "mapped_mandatory_requirements": [
+        "EXP-REQ-VIEW-001",
+        "EXP-REQ-VIEW-002",
+        "EXP-REQ-VIEW-003",
+        "EXP-REQ-VIEW-010",
+        "EXP-REQ-APP-003",
+        "EXP-REQ-SRC-001",
+        "EXP-REQ-SRC-002",
+        "EXP-REQ-IDX-001",
+        "EXP-REQ-IDX-003",
+        "EXP-REQ-IDX-004",
+        "EXP-REQ-IDX-005",
+        "EXP-REQ-IDX-006",
+        "EXP-REQ-IDX-007",
+        "EXP-REQ-IDX-008",
+        "EXP-REQ-END-001",
+        "EXP-REQ-ING-001",
+        "EXP-REQ-ING-002",
+        "EXP-REQ-ING-006",
+        "EXP-REQ-INV-002",
+        "EXP-REQ-INV-003",
+        "EXP-REQ-INV-010",
+        "EXP-REQ-INV-011",
+        "EXP-REQ-INV-013"
+      ],
+      "mapped_blocking_findings": [
+        "EXP-FIND-002",
+        "EXP-FIND-004"
+      ],
+      "mapped_blocking_finding_titles": [
+        {
+          "id": "EXP-FIND-002",
+          "title": "420Indexer has no qualified deployed testnet endpoint",
+          "owners": [
+            "EXP-1",
+            "EXP-7"
+          ]
+        },
+        {
+          "id": "EXP-FIND-004",
+          "title": "Canonical testnet RPC/node binding is unverified",
+          "owners": [
+            "EXP-1",
+            "EXP-7"
+          ]
+        }
+      ],
+      "verification_method": [
+        "Bind 420Indexer to the approved chain-420 RPC/node source and reject wrong-chain sources.",
+        "Compare indexed blocks, transactions, receipts/logs, finality and Registry-derived records with canonical upstream data.",
+        "Verify Explorer fails closed or clearly reports stale, degraded, wrong-chain or inconsistent data."
+      ],
+      "required_evidence": [
+        "authoritative target-network RPC/node identity and chain ID 420 evidence",
+        "live Indexer health/finality/freshness evidence",
+        "canonical-vs-indexed comparison witnesses",
+        "wrong-chain and stale/degraded negative-test evidence",
+        "Explorer presentation evidence preserving canonical provenance"
+      ],
+      "present_repository_evidence": [
+        {
+          "kind": "authoritative_acceptance_definition",
+          "scope": "repository_model",
+          "refs": [
+            "docs/audit/EXP-0.2.6-genesis-acceptance-criteria.json"
+          ]
+        },
+        {
+          "kind": "requirement_and_blocker_traceability",
+          "scope": "repository_model",
+          "refs": [
+            "docs/audit/EXP-0.3.7-bidirectional-traceability.json",
+            "docs/audit/EXP-0.2.5-genesis-gap-register.json"
+          ]
+        },
+        {
+          "kind": "exact_head_repository_qualification_provenance",
+          "scope": "source_and_integration_only",
+          "refs": [
+            "docs/audit/EXP-0.4.3-qualification-evidence-ledger.json"
+          ]
+        },
+        {
+          "kind": "requirement_ci_coverage",
+          "scope": "source_and_mapping_only",
+          "refs": [
+            "docs/audit/EXP-0.4.4-requirement-ci-coverage.json"
+          ]
+        },
+        {
+          "kind": "current_functional_test_files",
+          "scope": "repository_source_tests",
+          "refs": [
+            "explorer/service/blockviews_test.go",
+            "indexer/api/backend_test.go",
+            "indexer/api/server_test.go",
+            "explorer/service/transactionviews_test.go",
+            "explorer/indexerclient/client_test.go",
+            "indexer/store/file_test.go",
+            "explorer/service/service_test.go",
+            "explorer/api/readiness_test.go",
+            "explorer/api/operational_test.go"
+          ]
+        },
+        {
+          "kind": "current_model_verifiers",
+          "scope": "repository_model",
+          "refs": [
+            "scripts/verify-exp-0-3-1-authoritative-requirements.py",
+            "scripts/verify-exp-0-3-4-status-freeze.py",
+            "scripts/verify-exp-0-3-7-traceability.py",
+            "scripts/verify-exp-0-3-3-acceptance-tests.py"
+          ]
+        }
+      ],
+      "missing_release_evidence": [
+        {
+          "evidence": "authoritative target-network RPC/node identity and chain ID 420 evidence",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-1",
+            "EXP-2",
+            "EXP-3",
+            "EXP-7",
+            "EXP-8"
+          ]
+        },
+        {
+          "evidence": "live Indexer health/finality/freshness evidence",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-1",
+            "EXP-2",
+            "EXP-3",
+            "EXP-7",
+            "EXP-8"
+          ]
+        },
+        {
+          "evidence": "canonical-vs-indexed comparison witnesses",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-1",
+            "EXP-2",
+            "EXP-3",
+            "EXP-7",
+            "EXP-8"
+          ]
+        },
+        {
+          "evidence": "wrong-chain and stale/degraded negative-test evidence",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-1",
+            "EXP-2",
+            "EXP-3",
+            "EXP-7",
+            "EXP-8"
+          ]
+        },
+        {
+          "evidence": "Explorer presentation evidence preserving canonical provenance",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-1",
+            "EXP-2",
+            "EXP-3",
+            "EXP-7",
+            "EXP-8"
+          ]
+        }
+      ],
+      "current_functional_test_files": [
+        "explorer/service/blockviews_test.go",
+        "indexer/api/backend_test.go",
+        "indexer/api/server_test.go",
+        "explorer/service/transactionviews_test.go",
+        "explorer/indexerclient/client_test.go",
+        "indexer/store/file_test.go",
+        "explorer/service/service_test.go",
+        "explorer/api/readiness_test.go",
+        "explorer/api/operational_test.go"
+      ],
+      "current_model_verifiers": [
+        "scripts/verify-exp-0-3-1-authoritative-requirements.py",
+        "scripts/verify-exp-0-3-4-status-freeze.py",
+        "scripts/verify-exp-0-3-7-traceability.py",
+        "scripts/verify-exp-0-3-3-acceptance-tests.py"
+      ],
+      "satisfaction_rule": "May become satisfied only after every required evidence item is produced against the same exact release candidate and all mapped Genesis-blocking findings are resolved.",
+      "ac_satisfied": false,
+      "orphaned": false
+    },
+    {
+      "acceptance_criterion": "AC-3",
+      "question": "Are all required data-ingestion and indexing processes operational, consistent, and recoverable?",
+      "current_status": "unverified",
+      "primary_owner": "EXP-1",
+      "supporting_owners": [
+        "EXP-6",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "phase_evidence_layers": [
+        "blockchain_data_integrity_runtime",
+        "security_operations_recovery",
+        "deployment_live_network",
+        "release_candidate_closeout"
+      ],
+      "mapped_mandatory_requirements": [
+        "EXP-REQ-VIEW-001",
+        "EXP-REQ-VIEW-007",
+        "EXP-REQ-VIEW-008",
+        "EXP-REQ-SRC-001",
+        "EXP-REQ-SRC-002",
+        "EXP-REQ-SRC-003",
+        "EXP-REQ-IDX-001",
+        "EXP-REQ-IDX-003",
+        "EXP-REQ-IDX-004",
+        "EXP-REQ-IDX-005",
+        "EXP-REQ-IDX-006",
+        "EXP-REQ-IDX-007",
+        "EXP-REQ-ING-001",
+        "EXP-REQ-ING-002",
+        "EXP-REQ-ING-003",
+        "EXP-REQ-ING-004",
+        "EXP-REQ-ING-005",
+        "EXP-REQ-ING-006",
+        "EXP-REQ-ING-007",
+        "EXP-REQ-INV-002",
+        "EXP-REQ-INV-003",
+        "EXP-REQ-INV-004",
+        "EXP-REQ-INV-005",
+        "EXP-REQ-INV-013"
+      ],
+      "mapped_blocking_findings": [
+        "EXP-FIND-002",
+        "EXP-FIND-004",
+        "EXP-FIND-007",
+        "EXP-FIND-009",
+        "EXP-FIND-011"
+      ],
+      "mapped_blocking_finding_titles": [
+        {
+          "id": "EXP-FIND-002",
+          "title": "420Indexer has no qualified deployed testnet endpoint",
+          "owners": [
+            "EXP-1",
+            "EXP-7"
+          ]
+        },
+        {
+          "id": "EXP-FIND-004",
+          "title": "Canonical testnet RPC/node binding is unverified",
+          "owners": [
+            "EXP-1",
+            "EXP-7"
+          ]
+        },
+        {
+          "id": "EXP-FIND-007",
+          "title": "Deployed consensus/validator provider wiring is unverified",
+          "owners": [
+            "EXP-1",
+            "EXP-2",
+            "EXP-7"
+          ]
+        },
+        {
+          "id": "EXP-FIND-009",
+          "title": "Historical validator-produced block attribution is absent",
+          "owners": [
+            "EXP-1",
+            "EXP-2",
+            "EXP-4"
+          ]
+        },
+        {
+          "id": "EXP-FIND-011",
+          "title": "Production-equivalent recovery and degraded-state behavior remain unqualified",
+          "owners": [
+            "EXP-6",
+            "EXP-7"
+          ]
+        }
+      ],
+      "verification_method": [
+        "Run 420Indexer against the target network through startup synchronization, catch-up and steady-state ingestion.",
+        "Exercise restart/resume, RPC outage, lag, provider failure, non-finalized reorg repair, finalized-conflict fail-closed and full-rebuild scenarios.",
+        "Verify consensus/validator projections are populated and consistent with the canonical consensus source."
+      ],
+      "required_evidence": [
+        "deployed Indexer endpoint and runtime composition evidence",
+        "restart/resume and checkpoint persistence results",
+        "non-finalized reorg and finalized-conflict evidence",
+        "full rebuild evidence",
+        "consensus/validator provider wiring and representative data evidence",
+        "staleness/degraded-state measurements and status output"
+      ],
+      "present_repository_evidence": [
+        {
+          "kind": "authoritative_acceptance_definition",
+          "scope": "repository_model",
+          "refs": [
+            "docs/audit/EXP-0.2.6-genesis-acceptance-criteria.json"
+          ]
+        },
+        {
+          "kind": "requirement_and_blocker_traceability",
+          "scope": "repository_model",
+          "refs": [
+            "docs/audit/EXP-0.3.7-bidirectional-traceability.json",
+            "docs/audit/EXP-0.2.5-genesis-gap-register.json"
+          ]
+        },
+        {
+          "kind": "exact_head_repository_qualification_provenance",
+          "scope": "source_and_integration_only",
+          "refs": [
+            "docs/audit/EXP-0.4.3-qualification-evidence-ledger.json"
+          ]
+        },
+        {
+          "kind": "requirement_ci_coverage",
+          "scope": "source_and_mapping_only",
+          "refs": [
+            "docs/audit/EXP-0.4.4-requirement-ci-coverage.json"
+          ]
+        },
+        {
+          "kind": "current_functional_test_files",
+          "scope": "repository_source_tests",
+          "refs": [
+            "explorer/service/blockviews_test.go",
+            "indexer/api/backend_test.go",
+            "indexer/api/server_test.go",
+            "explorer/service/consensusviews_test.go",
+            "explorer/api/server_test.go"
+          ]
+        },
+        {
+          "kind": "current_model_verifiers",
+          "scope": "repository_model",
+          "refs": [
+            "scripts/verify-exp-0-3-1-authoritative-requirements.py",
+            "scripts/verify-exp-0-3-4-status-freeze.py",
+            "scripts/verify-exp-0-3-7-traceability.py",
+            "scripts/verify-exp-0-3-3-acceptance-tests.py"
+          ]
+        }
+      ],
+      "missing_release_evidence": [
+        {
+          "evidence": "deployed Indexer endpoint and runtime composition evidence",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-1",
+            "EXP-6",
+            "EXP-7",
+            "EXP-8"
+          ]
+        },
+        {
+          "evidence": "restart/resume and checkpoint persistence results",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-1",
+            "EXP-6",
+            "EXP-7",
+            "EXP-8"
+          ]
+        },
+        {
+          "evidence": "non-finalized reorg and finalized-conflict evidence",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-1",
+            "EXP-6",
+            "EXP-7",
+            "EXP-8"
+          ]
+        },
+        {
+          "evidence": "full rebuild evidence",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-1",
+            "EXP-6",
+            "EXP-7",
+            "EXP-8"
+          ]
+        },
+        {
+          "evidence": "consensus/validator provider wiring and representative data evidence",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-1",
+            "EXP-6",
+            "EXP-7",
+            "EXP-8"
+          ]
+        },
+        {
+          "evidence": "staleness/degraded-state measurements and status output",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-1",
+            "EXP-6",
+            "EXP-7",
+            "EXP-8"
+          ]
+        }
+      ],
+      "current_functional_test_files": [
+        "explorer/service/blockviews_test.go",
+        "indexer/api/backend_test.go",
+        "indexer/api/server_test.go",
+        "explorer/service/consensusviews_test.go",
+        "explorer/api/server_test.go"
+      ],
+      "current_model_verifiers": [
+        "scripts/verify-exp-0-3-1-authoritative-requirements.py",
+        "scripts/verify-exp-0-3-4-status-freeze.py",
+        "scripts/verify-exp-0-3-7-traceability.py",
+        "scripts/verify-exp-0-3-3-acceptance-tests.py"
+      ],
+      "satisfaction_rule": "May become satisfied only after every required evidence item is produced against the same exact release candidate and all mapped Genesis-blocking findings are resolved.",
+      "ac_satisfied": false,
+      "orphaned": false
+    },
+    {
+      "acceptance_criterion": "AC-4",
+      "question": "Are the required smart contract addresses, ABIs, registry references, and protocol integrations correct?",
+      "current_status": "unverified",
+      "primary_owner": "EXP-3",
+      "supporting_owners": [
+        "EXP-5",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "phase_evidence_layers": [
+        "contract_registry_runtime",
+        "ecosystem_integration",
+        "deployment_live_network",
+        "release_candidate_closeout"
+      ],
+      "mapped_mandatory_requirements": [
+        "EXP-REQ-VIEW-005",
+        "EXP-REQ-VIEW-009",
+        "EXP-REQ-APP-002",
+        "EXP-REQ-SRC-004",
+        "EXP-REQ-IDX-004",
+        "EXP-REQ-IDX-005",
+        "EXP-REQ-IDX-006",
+        "EXP-REQ-IDX-007",
+        "EXP-REQ-END-007",
+        "EXP-REQ-VER-001",
+        "EXP-REQ-VER-002",
+        "EXP-REQ-VER-003",
+        "EXP-REQ-VER-004",
+        "EXP-REQ-VER-005",
+        "EXP-REQ-INV-001",
+        "EXP-REQ-INV-006",
+        "EXP-REQ-INV-013",
+        "EXP-REQ-ADDR-001",
+        "EXP-REQ-ADDR-002",
+        "EXP-REQ-ADDR-003"
+      ],
+      "mapped_blocking_findings": [
+        "EXP-FIND-005",
+        "EXP-FIND-006"
+      ],
+      "mapped_blocking_finding_titles": [
+        {
+          "id": "EXP-FIND-005",
+          "title": "ProtocolRegistry live deployment and publication are unverified",
+          "owners": [
+            "EXP-3",
+            "EXP-5",
+            "EXP-7"
+          ]
+        },
+        {
+          "id": "EXP-FIND-006",
+          "title": "Registry ABI/descriptor runtime provenance is not qualified",
+          "owners": [
+            "EXP-3",
+            "EXP-7"
+          ]
+        }
+      ],
+      "verification_method": [
+        "Verify frozen system-address assignments against target-network runtime code without changing the frozen map.",
+        "Verify ProtocolRegistry code at 0x0000000000000000000000000000000000000434 and authorized service/version publications.",
+        "Bind ABI/decoder descriptors to compiled release artifacts and deployed Registry/runtime provenance.",
+        "Compare Indexer Registry projections with direct canonical Registry reads."
+      ],
+      "required_evidence": [
+        "matching frozen system-address maps",
+        "target-network ProtocolRegistry runtime bytecode/code-hash evidence",
+        "authorized service/version publication evidence",
+        "pinned ABI/descriptor artifacts and hashes",
+        "historical/current Registry decoding test evidence",
+        "direct Registry vs Indexer projection comparison"
+      ],
+      "present_repository_evidence": [
+        {
+          "kind": "authoritative_acceptance_definition",
+          "scope": "repository_model",
+          "refs": [
+            "docs/audit/EXP-0.2.6-genesis-acceptance-criteria.json"
+          ]
+        },
+        {
+          "kind": "requirement_and_blocker_traceability",
+          "scope": "repository_model",
+          "refs": [
+            "docs/audit/EXP-0.3.7-bidirectional-traceability.json",
+            "docs/audit/EXP-0.2.5-genesis-gap-register.json"
+          ]
+        },
+        {
+          "kind": "exact_head_repository_qualification_provenance",
+          "scope": "source_and_integration_only",
+          "refs": [
+            "docs/audit/EXP-0.4.3-qualification-evidence-ledger.json"
+          ]
+        },
+        {
+          "kind": "requirement_ci_coverage",
+          "scope": "source_and_mapping_only",
+          "refs": [
+            "docs/audit/EXP-0.4.4-requirement-ci-coverage.json"
+          ]
+        },
+        {
+          "kind": "current_functional_test_files",
+          "scope": "repository_source_tests",
+          "refs": [
+            "explorer/service/contractviews_test.go",
+            "explorer/api/server_test.go",
+            "indexer/store/file_test.go",
+            "indexer/api/backend_test.go",
+            "indexer/api/server_test.go",
+            "indexer/decoder/catalog_test.go"
+          ]
+        },
+        {
+          "kind": "current_model_verifiers",
+          "scope": "repository_model",
+          "refs": [
+            "scripts/verify-exp-0-3-1-authoritative-requirements.py",
+            "scripts/verify-exp-0-3-4-status-freeze.py",
+            "scripts/verify-exp-0-3-7-traceability.py",
+            "scripts/verify-exp-0-3-3-acceptance-tests.py"
+          ]
+        }
+      ],
+      "missing_release_evidence": [
+        {
+          "evidence": "matching frozen system-address maps",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-3",
+            "EXP-5",
+            "EXP-7",
+            "EXP-8"
+          ]
+        },
+        {
+          "evidence": "target-network ProtocolRegistry runtime bytecode/code-hash evidence",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-3",
+            "EXP-5",
+            "EXP-7",
+            "EXP-8"
+          ]
+        },
+        {
+          "evidence": "authorized service/version publication evidence",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-3",
+            "EXP-5",
+            "EXP-7",
+            "EXP-8"
+          ]
+        },
+        {
+          "evidence": "pinned ABI/descriptor artifacts and hashes",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-3",
+            "EXP-5",
+            "EXP-7",
+            "EXP-8"
+          ]
+        },
+        {
+          "evidence": "historical/current Registry decoding test evidence",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-3",
+            "EXP-5",
+            "EXP-7",
+            "EXP-8"
+          ]
+        },
+        {
+          "evidence": "direct Registry vs Indexer projection comparison",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-3",
+            "EXP-5",
+            "EXP-7",
+            "EXP-8"
+          ]
+        }
+      ],
+      "current_functional_test_files": [
+        "explorer/service/contractviews_test.go",
+        "explorer/api/server_test.go",
+        "indexer/store/file_test.go",
+        "indexer/api/backend_test.go",
+        "indexer/api/server_test.go",
+        "indexer/decoder/catalog_test.go"
+      ],
+      "current_model_verifiers": [
+        "scripts/verify-exp-0-3-1-authoritative-requirements.py",
+        "scripts/verify-exp-0-3-4-status-freeze.py",
+        "scripts/verify-exp-0-3-7-traceability.py",
+        "scripts/verify-exp-0-3-3-acceptance-tests.py"
+      ],
+      "satisfaction_rule": "May become satisfied only after every required evidence item is produced against the same exact release candidate and all mapped Genesis-blocking findings are resolved.",
+      "ac_satisfied": false,
+      "orphaned": false
+    },
+    {
+      "acceptance_criterion": "AC-5",
+      "question": "Are all Genesis-required user-facing workflows functional?",
+      "current_status": "unverified",
+      "primary_owner": "EXP-4",
+      "supporting_owners": [
+        "EXP-2",
+        "EXP-3",
+        "EXP-5",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "phase_evidence_layers": [
+        "deployed_ui_workflow",
+        "explorer_service_api_runtime",
+        "contract_registry_runtime",
+        "ecosystem_integration",
+        "deployment_live_network",
+        "release_candidate_closeout"
+      ],
+      "mapped_mandatory_requirements": [
+        "EXP-REQ-VIEW-002",
+        "EXP-REQ-VIEW-003",
+        "EXP-REQ-VIEW-004",
+        "EXP-REQ-VIEW-005",
+        "EXP-REQ-VIEW-006",
+        "EXP-REQ-VIEW-007",
+        "EXP-REQ-VIEW-008",
+        "EXP-REQ-VIEW-009",
+        "EXP-REQ-SRC-003",
+        "EXP-REQ-SRC-004",
+        "EXP-REQ-VER-001",
+        "EXP-REQ-VER-002",
+        "EXP-REQ-VER-003",
+        "EXP-REQ-INV-007"
+      ],
+      "mapped_blocking_findings": [
+        "EXP-FIND-003",
+        "EXP-FIND-007",
+        "EXP-FIND-008",
+        "EXP-FIND-009",
+        "EXP-FIND-010"
+      ],
+      "mapped_blocking_finding_titles": [
+        {
+          "id": "EXP-FIND-003",
+          "title": "Explorer backend and frontend are not deployed or live-qualified",
+          "owners": [
+            "EXP-4",
+            "EXP-7"
+          ]
+        },
+        {
+          "id": "EXP-FIND-007",
+          "title": "Deployed consensus/validator provider wiring is unverified",
+          "owners": [
+            "EXP-1",
+            "EXP-2",
+            "EXP-7"
+          ]
+        },
+        {
+          "id": "EXP-FIND-008",
+          "title": "Actual transaction fee inspection is incomplete",
+          "owners": [
+            "EXP-2",
+            "EXP-4"
+          ]
+        },
+        {
+          "id": "EXP-FIND-009",
+          "title": "Historical validator-produced block attribution is absent",
+          "owners": [
+            "EXP-1",
+            "EXP-2",
+            "EXP-4"
+          ]
+        },
+        {
+          "id": "EXP-FIND-010",
+          "title": "Raw contract event inspection is incomplete in the user interface",
+          "owners": [
+            "EXP-2",
+            "EXP-4"
+          ]
+        }
+      ],
+      "verification_method": [
+        "Execute every workflow classified as required by the frozen Explorer Genesis scope through the actual frontend and API.",
+        "Verify navigation, search, status/error handling and cross-resource links with representative target-network data."
+      ],
+      "required_evidence": [
+        "workflow-by-workflow pass evidence for the final required set",
+        "fee inspection implementation evidence",
+        "historical validator-produced block attribution evidence",
+        "event/log inspection qualification evidence",
+        "consensus/validator live workflow evidence",
+        "production-equivalent browser/UI evidence"
+      ],
+      "present_repository_evidence": [
+        {
+          "kind": "authoritative_acceptance_definition",
+          "scope": "repository_model",
+          "refs": [
+            "docs/audit/EXP-0.2.6-genesis-acceptance-criteria.json"
+          ]
+        },
+        {
+          "kind": "requirement_and_blocker_traceability",
+          "scope": "repository_model",
+          "refs": [
+            "docs/audit/EXP-0.3.7-bidirectional-traceability.json",
+            "docs/audit/EXP-0.2.5-genesis-gap-register.json"
+          ]
+        },
+        {
+          "kind": "exact_head_repository_qualification_provenance",
+          "scope": "source_and_integration_only",
+          "refs": [
+            "docs/audit/EXP-0.4.3-qualification-evidence-ledger.json"
+          ]
+        },
+        {
+          "kind": "requirement_ci_coverage",
+          "scope": "source_and_mapping_only",
+          "refs": [
+            "docs/audit/EXP-0.4.4-requirement-ci-coverage.json"
+          ]
+        },
+        {
+          "kind": "current_functional_test_files",
+          "scope": "repository_source_tests",
+          "refs": [
+            "explorer/service/transactionviews_test.go",
+            "indexer/api/server_test.go",
+            "explorer/indexerclient/client_test.go",
+            "indexer/store/file_test.go",
+            "explorer/service/addressviews_test.go",
+            "indexer/store/address_test.go",
+            "explorer/api/server_test.go",
+            "explorer/service/contractviews_test.go",
+            "explorer/service/assetviews_test.go",
+            "explorer/api/assets_test.go",
+            "indexer/api/assets_test.go",
+            "indexer/store/assets_test.go",
+            "explorer/service/consensusviews_test.go",
+            "indexer/api/backend_test.go",
+            "indexer/decoder/catalog_test.go"
+          ]
+        },
+        {
+          "kind": "current_model_verifiers",
+          "scope": "repository_model",
+          "refs": [
+            "scripts/verify-exp-0-3-1-authoritative-requirements.py",
+            "scripts/verify-exp-0-3-4-status-freeze.py",
+            "scripts/verify-exp-0-3-7-traceability.py",
+            "scripts/verify-exp-0-3-3-acceptance-tests.py"
+          ]
+        }
+      ],
+      "missing_release_evidence": [
+        {
+          "evidence": "workflow-by-workflow pass evidence for the final required set",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-4",
+            "EXP-2",
+            "EXP-3",
+            "EXP-5",
+            "EXP-7",
+            "EXP-8"
+          ]
+        },
+        {
+          "evidence": "fee inspection implementation evidence",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-4",
+            "EXP-2",
+            "EXP-3",
+            "EXP-5",
+            "EXP-7",
+            "EXP-8"
+          ]
+        },
+        {
+          "evidence": "historical validator-produced block attribution evidence",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-4",
+            "EXP-2",
+            "EXP-3",
+            "EXP-5",
+            "EXP-7",
+            "EXP-8"
+          ]
+        },
+        {
+          "evidence": "event/log inspection qualification evidence",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-4",
+            "EXP-2",
+            "EXP-3",
+            "EXP-5",
+            "EXP-7",
+            "EXP-8"
+          ]
+        },
+        {
+          "evidence": "consensus/validator live workflow evidence",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-4",
+            "EXP-2",
+            "EXP-3",
+            "EXP-5",
+            "EXP-7",
+            "EXP-8"
+          ]
+        },
+        {
+          "evidence": "production-equivalent browser/UI evidence",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-4",
+            "EXP-2",
+            "EXP-3",
+            "EXP-5",
+            "EXP-7",
+            "EXP-8"
+          ]
+        }
+      ],
+      "current_functional_test_files": [
+        "explorer/service/transactionviews_test.go",
+        "indexer/api/server_test.go",
+        "explorer/indexerclient/client_test.go",
+        "indexer/store/file_test.go",
+        "explorer/service/addressviews_test.go",
+        "indexer/store/address_test.go",
+        "explorer/api/server_test.go",
+        "explorer/service/contractviews_test.go",
+        "explorer/service/assetviews_test.go",
+        "explorer/api/assets_test.go",
+        "indexer/api/assets_test.go",
+        "indexer/store/assets_test.go",
+        "explorer/service/consensusviews_test.go",
+        "indexer/api/backend_test.go",
+        "indexer/decoder/catalog_test.go"
+      ],
+      "current_model_verifiers": [
+        "scripts/verify-exp-0-3-1-authoritative-requirements.py",
+        "scripts/verify-exp-0-3-4-status-freeze.py",
+        "scripts/verify-exp-0-3-7-traceability.py",
+        "scripts/verify-exp-0-3-3-acceptance-tests.py"
+      ],
+      "satisfaction_rule": "May become satisfied only after every required evidence item is produced against the same exact release candidate and all mapped Genesis-blocking findings are resolved.",
+      "ac_satisfied": false,
+      "orphaned": false
+    },
+    {
+      "acceptance_criterion": "AC-6",
+      "question": "Are the backend APIs, frontend, indexing services, and supporting infrastructure integrated and tested?",
+      "current_status": "unverified",
+      "primary_owner": "EXP-7",
+      "supporting_owners": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-4",
+        "EXP-5",
+        "EXP-8"
+      ],
+      "phase_evidence_layers": [
+        "deployment_live_network",
+        "blockchain_data_integrity_runtime",
+        "explorer_service_api_runtime",
+        "deployed_ui_workflow",
+        "ecosystem_integration",
+        "release_candidate_closeout"
+      ],
+      "mapped_mandatory_requirements": [
+        "EXP-REQ-VIEW-007",
+        "EXP-REQ-VIEW-008",
+        "EXP-REQ-VIEW-009",
+        "EXP-REQ-VIEW-010",
+        "EXP-REQ-SRC-001",
+        "EXP-REQ-SRC-003",
+        "EXP-REQ-SRC-004",
+        "EXP-REQ-IDX-001",
+        "EXP-REQ-IDX-002",
+        "EXP-REQ-END-001",
+        "EXP-REQ-END-002",
+        "EXP-REQ-END-003",
+        "EXP-REQ-END-004",
+        "EXP-REQ-END-005",
+        "EXP-REQ-END-006",
+        "EXP-REQ-END-007",
+        "EXP-REQ-ING-007",
+        "EXP-REQ-INV-010",
+        "EXP-REQ-ADDR-003"
+      ],
+      "mapped_blocking_findings": [
+        "EXP-FIND-002",
+        "EXP-FIND-003",
+        "EXP-FIND-005",
+        "EXP-FIND-007"
+      ],
+      "mapped_blocking_finding_titles": [
+        {
+          "id": "EXP-FIND-002",
+          "title": "420Indexer has no qualified deployed testnet endpoint",
+          "owners": [
+            "EXP-1",
+            "EXP-7"
+          ]
+        },
+        {
+          "id": "EXP-FIND-003",
+          "title": "Explorer backend and frontend are not deployed or live-qualified",
+          "owners": [
+            "EXP-4",
+            "EXP-7"
+          ]
+        },
+        {
+          "id": "EXP-FIND-005",
+          "title": "ProtocolRegistry live deployment and publication are unverified",
+          "owners": [
+            "EXP-3",
+            "EXP-5",
+            "EXP-7"
+          ]
+        },
+        {
+          "id": "EXP-FIND-007",
+          "title": "Deployed consensus/validator provider wiring is unverified",
+          "owners": [
+            "EXP-1",
+            "EXP-2",
+            "EXP-7"
+          ]
+        }
+      ],
+      "verification_method": [
+        "Deploy the qualified Indexer, Explorer backend and Explorer frontend as one production-equivalent stack.",
+        "Exercise all mandatory Explorer-to-Indexer routes and required Registry/consensus provider paths end-to-end.",
+        "Run browser/API integration suites and failure-mode tests against the deployed stack."
+      ],
+      "required_evidence": [
+        "non-placeholder Indexer/backend/frontend deployment URLs",
+        "successful all-required-route probe evidence",
+        "Registry and consensus integration witnesses",
+        "end-to-end frontend/API/browser results",
+        "degraded/wrong-chain/provider-unavailable behavior evidence"
+      ],
+      "present_repository_evidence": [
+        {
+          "kind": "authoritative_acceptance_definition",
+          "scope": "repository_model",
+          "refs": [
+            "docs/audit/EXP-0.2.6-genesis-acceptance-criteria.json"
+          ]
+        },
+        {
+          "kind": "requirement_and_blocker_traceability",
+          "scope": "repository_model",
+          "refs": [
+            "docs/audit/EXP-0.3.7-bidirectional-traceability.json",
+            "docs/audit/EXP-0.2.5-genesis-gap-register.json"
+          ]
+        },
+        {
+          "kind": "exact_head_repository_qualification_provenance",
+          "scope": "source_and_integration_only",
+          "refs": [
+            "docs/audit/EXP-0.4.3-qualification-evidence-ledger.json"
+          ]
+        },
+        {
+          "kind": "requirement_ci_coverage",
+          "scope": "source_and_mapping_only",
+          "refs": [
+            "docs/audit/EXP-0.4.4-requirement-ci-coverage.json"
+          ]
+        },
+        {
+          "kind": "current_functional_test_files",
+          "scope": "repository_source_tests",
+          "refs": [
+            "explorer/service/consensusviews_test.go",
+            "explorer/api/server_test.go",
+            "indexer/api/server_test.go",
+            "indexer/api/backend_test.go",
+            "indexer/decoder/catalog_test.go",
+            "explorer/service/service_test.go",
+            "explorer/api/readiness_test.go",
+            "explorer/api/operational_test.go"
+          ]
+        },
+        {
+          "kind": "current_model_verifiers",
+          "scope": "repository_model",
+          "refs": [
+            "scripts/verify-exp-0-3-1-authoritative-requirements.py",
+            "scripts/verify-exp-0-3-4-status-freeze.py",
+            "scripts/verify-exp-0-3-7-traceability.py",
+            "scripts/verify-exp-0-3-3-acceptance-tests.py"
+          ]
+        }
+      ],
+      "missing_release_evidence": [
+        {
+          "evidence": "non-placeholder Indexer/backend/frontend deployment URLs",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-7",
+            "EXP-1",
+            "EXP-2",
+            "EXP-4",
+            "EXP-5",
+            "EXP-8"
+          ]
+        },
+        {
+          "evidence": "successful all-required-route probe evidence",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-7",
+            "EXP-1",
+            "EXP-2",
+            "EXP-4",
+            "EXP-5",
+            "EXP-8"
+          ]
+        },
+        {
+          "evidence": "Registry and consensus integration witnesses",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-7",
+            "EXP-1",
+            "EXP-2",
+            "EXP-4",
+            "EXP-5",
+            "EXP-8"
+          ]
+        },
+        {
+          "evidence": "end-to-end frontend/API/browser results",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-7",
+            "EXP-1",
+            "EXP-2",
+            "EXP-4",
+            "EXP-5",
+            "EXP-8"
+          ]
+        },
+        {
+          "evidence": "degraded/wrong-chain/provider-unavailable behavior evidence",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-7",
+            "EXP-1",
+            "EXP-2",
+            "EXP-4",
+            "EXP-5",
+            "EXP-8"
+          ]
+        }
+      ],
+      "current_functional_test_files": [
+        "explorer/service/consensusviews_test.go",
+        "explorer/api/server_test.go",
+        "indexer/api/server_test.go",
+        "indexer/api/backend_test.go",
+        "indexer/decoder/catalog_test.go",
+        "explorer/service/service_test.go",
+        "explorer/api/readiness_test.go",
+        "explorer/api/operational_test.go"
+      ],
+      "current_model_verifiers": [
+        "scripts/verify-exp-0-3-1-authoritative-requirements.py",
+        "scripts/verify-exp-0-3-4-status-freeze.py",
+        "scripts/verify-exp-0-3-7-traceability.py",
+        "scripts/verify-exp-0-3-3-acceptance-tests.py"
+      ],
+      "satisfaction_rule": "May become satisfied only after every required evidence item is produced against the same exact release candidate and all mapped Genesis-blocking findings are resolved.",
+      "ac_satisfied": false,
+      "orphaned": false
+    },
+    {
+      "acceptance_criterion": "AC-7",
+      "question": "Are relevant security, data integrity, and operational risks addressed?",
+      "current_status": "unverified",
+      "primary_owner": "EXP-6",
+      "supporting_owners": [
+        "EXP-2",
+        "EXP-3",
+        "EXP-4",
+        "EXP-7",
+        "EXP-8"
+      ],
+      "phase_evidence_layers": [
+        "security_operations_recovery",
+        "explorer_service_api_runtime",
+        "contract_registry_runtime",
+        "deployed_ui_workflow",
+        "deployment_live_network",
+        "release_candidate_closeout"
+      ],
+      "mapped_mandatory_requirements": [
+        "EXP-REQ-VIEW-003",
+        "EXP-REQ-VIEW-010",
+        "EXP-REQ-APP-003",
+        "EXP-REQ-SRC-002",
+        "EXP-REQ-IDX-003",
+        "EXP-REQ-IDX-004",
+        "EXP-REQ-IDX-005",
+        "EXP-REQ-IDX-006",
+        "EXP-REQ-IDX-007",
+        "EXP-REQ-IDX-008",
+        "EXP-REQ-ING-003",
+        "EXP-REQ-ING-004",
+        "EXP-REQ-ING-006",
+        "EXP-REQ-VER-004",
+        "EXP-REQ-VER-005",
+        "EXP-REQ-INV-004",
+        "EXP-REQ-INV-006",
+        "EXP-REQ-INV-007",
+        "EXP-REQ-INV-008",
+        "EXP-REQ-INV-009",
+        "EXP-REQ-INV-010",
+        "EXP-REQ-INV-012",
+        "EXP-REQ-INV-013"
+      ],
+      "mapped_blocking_findings": [
+        "EXP-FIND-010",
+        "EXP-FIND-011"
+      ],
+      "mapped_blocking_finding_titles": [
+        {
+          "id": "EXP-FIND-010",
+          "title": "Raw contract event inspection is incomplete in the user interface",
+          "owners": [
+            "EXP-2",
+            "EXP-4"
+          ]
+        },
+        {
+          "id": "EXP-FIND-011",
+          "title": "Production-equivalent recovery and degraded-state behavior remain unqualified",
+          "owners": [
+            "EXP-6",
+            "EXP-7"
+          ]
+        }
+      ],
+      "verification_method": [
+        "Run security review/tests over public API input validation, metadata rendering, secrets/configuration, browser handling and infrastructure exposure.",
+        "Verify canonical-authority, finality and fail-closed invariants under malformed, stale, wrong-chain and inconsistent inputs.",
+        "Exercise production-equivalent recovery and degraded-state scenarios."
+      ],
+      "required_evidence": [
+        "security test/review record for the exact release candidate",
+        "unsafe/untrusted metadata and log rendering tests",
+        "wrong-chain/stale/inconsistent fail-closed evidence",
+        "runtime restart/outage/reorg recovery evidence",
+        "resolved high/critical security findings or documented non-blocking disposition"
+      ],
+      "present_repository_evidence": [
+        {
+          "kind": "authoritative_acceptance_definition",
+          "scope": "repository_model",
+          "refs": [
+            "docs/audit/EXP-0.2.6-genesis-acceptance-criteria.json"
+          ]
+        },
+        {
+          "kind": "requirement_and_blocker_traceability",
+          "scope": "repository_model",
+          "refs": [
+            "docs/audit/EXP-0.3.7-bidirectional-traceability.json",
+            "docs/audit/EXP-0.2.5-genesis-gap-register.json"
+          ]
+        },
+        {
+          "kind": "exact_head_repository_qualification_provenance",
+          "scope": "source_and_integration_only",
+          "refs": [
+            "docs/audit/EXP-0.4.3-qualification-evidence-ledger.json"
+          ]
+        },
+        {
+          "kind": "requirement_ci_coverage",
+          "scope": "source_and_mapping_only",
+          "refs": [
+            "docs/audit/EXP-0.4.4-requirement-ci-coverage.json"
+          ]
+        },
+        {
+          "kind": "current_functional_test_files",
+          "scope": "repository_source_tests",
+          "refs": [
+            "explorer/service/transactionviews_test.go",
+            "indexer/api/server_test.go",
+            "indexer/store/file_test.go",
+            "explorer/service/service_test.go",
+            "explorer/api/readiness_test.go",
+            "explorer/api/operational_test.go"
+          ]
+        },
+        {
+          "kind": "current_model_verifiers",
+          "scope": "repository_model",
+          "refs": [
+            "scripts/verify-exp-0-3-1-authoritative-requirements.py",
+            "scripts/verify-exp-0-3-4-status-freeze.py",
+            "scripts/verify-exp-0-3-7-traceability.py",
+            "scripts/verify-exp-0-3-3-acceptance-tests.py"
+          ]
+        }
+      ],
+      "missing_release_evidence": [
+        {
+          "evidence": "security test/review record for the exact release candidate",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-6",
+            "EXP-2",
+            "EXP-3",
+            "EXP-4",
+            "EXP-7",
+            "EXP-8"
+          ]
+        },
+        {
+          "evidence": "unsafe/untrusted metadata and log rendering tests",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-6",
+            "EXP-2",
+            "EXP-3",
+            "EXP-4",
+            "EXP-7",
+            "EXP-8"
+          ]
+        },
+        {
+          "evidence": "wrong-chain/stale/inconsistent fail-closed evidence",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-6",
+            "EXP-2",
+            "EXP-3",
+            "EXP-4",
+            "EXP-7",
+            "EXP-8"
+          ]
+        },
+        {
+          "evidence": "runtime restart/outage/reorg recovery evidence",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-6",
+            "EXP-2",
+            "EXP-3",
+            "EXP-4",
+            "EXP-7",
+            "EXP-8"
+          ]
+        },
+        {
+          "evidence": "resolved high/critical security findings or documented non-blocking disposition",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-6",
+            "EXP-2",
+            "EXP-3",
+            "EXP-4",
+            "EXP-7",
+            "EXP-8"
+          ]
+        }
+      ],
+      "current_functional_test_files": [
+        "explorer/service/transactionviews_test.go",
+        "indexer/api/server_test.go",
+        "indexer/store/file_test.go",
+        "explorer/service/service_test.go",
+        "explorer/api/readiness_test.go",
+        "explorer/api/operational_test.go"
+      ],
+      "current_model_verifiers": [
+        "scripts/verify-exp-0-3-1-authoritative-requirements.py",
+        "scripts/verify-exp-0-3-4-status-freeze.py",
+        "scripts/verify-exp-0-3-7-traceability.py",
+        "scripts/verify-exp-0-3-3-acceptance-tests.py"
+      ],
+      "satisfaction_rule": "May become satisfied only after every required evidence item is produced against the same exact release candidate and all mapped Genesis-blocking findings are resolved.",
+      "ac_satisfied": false,
+      "orphaned": false
+    },
+    {
+      "acceptance_criterion": "AC-8",
+      "question": "Are the deployment procedures complete and reproducible?",
+      "current_status": "unverified",
+      "primary_owner": "EXP-7",
+      "supporting_owners": [
+        "EXP-6",
+        "EXP-8"
+      ],
+      "phase_evidence_layers": [
+        "deployment_live_network",
+        "security_operations_recovery",
+        "release_candidate_closeout"
+      ],
+      "mapped_mandatory_requirements": [
+        "EXP-REQ-APP-001",
+        "EXP-REQ-ING-005",
+        "EXP-REQ-INV-005",
+        "EXP-REQ-INV-008"
+      ],
+      "mapped_blocking_findings": [
+        "EXP-FIND-003",
+        "EXP-FIND-011"
+      ],
+      "mapped_blocking_finding_titles": [
+        {
+          "id": "EXP-FIND-003",
+          "title": "Explorer backend and frontend are not deployed or live-qualified",
+          "owners": [
+            "EXP-4",
+            "EXP-7"
+          ]
+        },
+        {
+          "id": "EXP-FIND-011",
+          "title": "Production-equivalent recovery and degraded-state behavior remain unqualified",
+          "owners": [
+            "EXP-6",
+            "EXP-7"
+          ]
+        }
+      ],
+      "verification_method": [
+        "Build and deploy the production-equivalent Explorer/Indexer stack from documented, version-pinned procedures.",
+        "Verify environment variables, network configuration, service URLs, startup order, persistence and rollback/recovery instructions.",
+        "Repeat deployment from a clean environment and compare resulting service identity/configuration."
+      ],
+      "required_evidence": [
+        "version-pinned deployment procedure",
+        "complete environment/configuration inventory without unresolved placeholders",
+        "clean-environment deployment transcript",
+        "deployed service identity/readiness evidence",
+        "recovery/rollback procedure evidence"
+      ],
+      "present_repository_evidence": [
+        {
+          "kind": "authoritative_acceptance_definition",
+          "scope": "repository_model",
+          "refs": [
+            "docs/audit/EXP-0.2.6-genesis-acceptance-criteria.json"
+          ]
+        },
+        {
+          "kind": "requirement_and_blocker_traceability",
+          "scope": "repository_model",
+          "refs": [
+            "docs/audit/EXP-0.3.7-bidirectional-traceability.json",
+            "docs/audit/EXP-0.2.5-genesis-gap-register.json"
+          ]
+        },
+        {
+          "kind": "exact_head_repository_qualification_provenance",
+          "scope": "source_and_integration_only",
+          "refs": [
+            "docs/audit/EXP-0.4.3-qualification-evidence-ledger.json"
+          ]
+        },
+        {
+          "kind": "requirement_ci_coverage",
+          "scope": "source_and_mapping_only",
+          "refs": [
+            "docs/audit/EXP-0.4.4-requirement-ci-coverage.json"
+          ]
+        },
+        {
+          "kind": "current_model_verifiers",
+          "scope": "repository_model",
+          "refs": [
+            "scripts/verify-exp-0-3-1-authoritative-requirements.py",
+            "scripts/verify-exp-0-3-4-status-freeze.py",
+            "scripts/verify-exp-0-3-7-traceability.py"
+          ]
+        }
+      ],
+      "missing_release_evidence": [
+        {
+          "evidence": "version-pinned deployment procedure",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-7",
+            "EXP-6",
+            "EXP-8"
+          ]
+        },
+        {
+          "evidence": "complete environment/configuration inventory without unresolved placeholders",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-7",
+            "EXP-6",
+            "EXP-8"
+          ]
+        },
+        {
+          "evidence": "clean-environment deployment transcript",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-7",
+            "EXP-6",
+            "EXP-8"
+          ]
+        },
+        {
+          "evidence": "deployed service identity/readiness evidence",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-7",
+            "EXP-6",
+            "EXP-8"
+          ]
+        },
+        {
+          "evidence": "recovery/rollback procedure evidence",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-7",
+            "EXP-6",
+            "EXP-8"
+          ]
+        }
+      ],
+      "current_functional_test_files": [],
+      "current_model_verifiers": [
+        "scripts/verify-exp-0-3-1-authoritative-requirements.py",
+        "scripts/verify-exp-0-3-4-status-freeze.py",
+        "scripts/verify-exp-0-3-7-traceability.py"
+      ],
+      "satisfaction_rule": "May become satisfied only after every required evidence item is produced against the same exact release candidate and all mapped Genesis-blocking findings are resolved.",
+      "ac_satisfied": false,
+      "orphaned": false
+    },
+    {
+      "acceptance_criterion": "AC-9",
+      "question": "Are all required test suites passing against the exact release candidate?",
+      "current_status": "unverified",
+      "primary_owner": "EXP-8",
+      "supporting_owners": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-3",
+        "EXP-4",
+        "EXP-5",
+        "EXP-6",
+        "EXP-7"
+      ],
+      "phase_evidence_layers": [
+        "release_candidate_closeout",
+        "blockchain_data_integrity_runtime",
+        "explorer_service_api_runtime",
+        "contract_registry_runtime",
+        "deployed_ui_workflow",
+        "ecosystem_integration",
+        "security_operations_recovery",
+        "deployment_live_network"
+      ],
+      "mapped_mandatory_requirements": [],
+      "mapped_blocking_findings": [],
+      "mapped_blocking_finding_titles": [],
+      "verification_method": [
+        "Freeze the release-candidate commit and enumerate every required unit, integration, security, deployment and end-to-end suite.",
+        "Execute every required suite against that exact commit and required external/runtime environment.",
+        "Record pass, fail, skipped and environment-blocked results without substituting earlier-head evidence."
+      ],
+      "required_evidence": [
+        "exact release-candidate commit SHA",
+        "complete required-test inventory",
+        "exact commands/workflow run IDs",
+        "successful results for every mandatory suite",
+        "explicit record for any skipped/non-applicable test with accepted rationale",
+        "no unresolved regression against the release candidate"
+      ],
+      "present_repository_evidence": [
+        {
+          "kind": "authoritative_acceptance_definition",
+          "scope": "repository_model",
+          "refs": [
+            "docs/audit/EXP-0.2.6-genesis-acceptance-criteria.json"
+          ]
+        },
+        {
+          "kind": "requirement_and_blocker_traceability",
+          "scope": "repository_model",
+          "refs": [
+            "docs/audit/EXP-0.3.7-bidirectional-traceability.json",
+            "docs/audit/EXP-0.2.5-genesis-gap-register.json"
+          ]
+        },
+        {
+          "kind": "exact_head_repository_qualification_provenance",
+          "scope": "source_and_integration_only",
+          "refs": [
+            "docs/audit/EXP-0.4.3-qualification-evidence-ledger.json"
+          ]
+        },
+        {
+          "kind": "requirement_ci_coverage",
+          "scope": "source_and_mapping_only",
+          "refs": [
+            "docs/audit/EXP-0.4.4-requirement-ci-coverage.json"
+          ]
+        }
+      ],
+      "missing_release_evidence": [
+        {
+          "evidence": "exact release-candidate commit SHA",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-8",
+            "EXP-1",
+            "EXP-2",
+            "EXP-3",
+            "EXP-4",
+            "EXP-5",
+            "EXP-6",
+            "EXP-7"
+          ]
+        },
+        {
+          "evidence": "complete required-test inventory",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-8",
+            "EXP-1",
+            "EXP-2",
+            "EXP-3",
+            "EXP-4",
+            "EXP-5",
+            "EXP-6",
+            "EXP-7"
+          ]
+        },
+        {
+          "evidence": "exact commands/workflow run IDs",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-8",
+            "EXP-1",
+            "EXP-2",
+            "EXP-3",
+            "EXP-4",
+            "EXP-5",
+            "EXP-6",
+            "EXP-7"
+          ]
+        },
+        {
+          "evidence": "successful results for every mandatory suite",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-8",
+            "EXP-1",
+            "EXP-2",
+            "EXP-3",
+            "EXP-4",
+            "EXP-5",
+            "EXP-6",
+            "EXP-7"
+          ]
+        },
+        {
+          "evidence": "explicit record for any skipped/non-applicable test with accepted rationale",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-8",
+            "EXP-1",
+            "EXP-2",
+            "EXP-3",
+            "EXP-4",
+            "EXP-5",
+            "EXP-6",
+            "EXP-7"
+          ]
+        },
+        {
+          "evidence": "no unresolved regression against the release candidate",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-8",
+            "EXP-1",
+            "EXP-2",
+            "EXP-3",
+            "EXP-4",
+            "EXP-5",
+            "EXP-6",
+            "EXP-7"
+          ]
+        }
+      ],
+      "current_functional_test_files": [],
+      "current_model_verifiers": [],
+      "satisfaction_rule": "May become satisfied only after every required evidence item is produced against the same exact release candidate and all mapped Genesis-blocking findings are resolved.",
+      "ac_satisfied": false,
+      "orphaned": false
+    },
+    {
+      "acceptance_criterion": "AC-10",
+      "question": "Is there sufficient recorded evidence to support the final Genesis qualification decision?",
+      "current_status": "unverified",
+      "primary_owner": "EXP-8",
+      "supporting_owners": [
+        "EXP-0",
+        "EXP-1",
+        "EXP-2",
+        "EXP-3",
+        "EXP-4",
+        "EXP-5",
+        "EXP-6",
+        "EXP-7"
+      ],
+      "phase_evidence_layers": [
+        "release_candidate_closeout",
+        "audit_evidence_governance",
+        "blockchain_data_integrity_runtime",
+        "explorer_service_api_runtime",
+        "contract_registry_runtime",
+        "deployed_ui_workflow",
+        "ecosystem_integration",
+        "security_operations_recovery",
+        "deployment_live_network"
+      ],
+      "mapped_mandatory_requirements": [
+        "EXP-REQ-APP-001",
+        "EXP-REQ-APP-002",
+        "EXP-REQ-APP-003",
+        "EXP-REQ-INV-001",
+        "EXP-REQ-ADDR-001",
+        "EXP-REQ-ADDR-002"
+      ],
+      "mapped_blocking_findings": [],
+      "mapped_blocking_finding_titles": [],
+      "verification_method": [
+        "Consolidate the immutable evidence for AC-1 through AC-9 against the exact release candidate.",
+        "Confirm every Genesis-blocking finding is resolved and every mandatory acceptance criterion is satisfied.",
+        "Reconcile final implementation, scope, dependency state, tests and deployment evidence with the authoritative Genesis profile."
+      ],
+      "required_evidence": [
+        "complete AC-1 through AC-9 evidence index",
+        "closed Genesis-blocking finding register",
+        "exact release-candidate qualification runs and artifact digests",
+        "final acceptance checklist with no mandatory criterion left unverified",
+        "final qualification/closeout record"
+      ],
+      "present_repository_evidence": [
+        {
+          "kind": "authoritative_acceptance_definition",
+          "scope": "repository_model",
+          "refs": [
+            "docs/audit/EXP-0.2.6-genesis-acceptance-criteria.json"
+          ]
+        },
+        {
+          "kind": "requirement_and_blocker_traceability",
+          "scope": "repository_model",
+          "refs": [
+            "docs/audit/EXP-0.3.7-bidirectional-traceability.json",
+            "docs/audit/EXP-0.2.5-genesis-gap-register.json"
+          ]
+        },
+        {
+          "kind": "exact_head_repository_qualification_provenance",
+          "scope": "source_and_integration_only",
+          "refs": [
+            "docs/audit/EXP-0.4.3-qualification-evidence-ledger.json"
+          ]
+        },
+        {
+          "kind": "requirement_ci_coverage",
+          "scope": "source_and_mapping_only",
+          "refs": [
+            "docs/audit/EXP-0.4.4-requirement-ci-coverage.json"
+          ]
+        },
+        {
+          "kind": "current_model_verifiers",
+          "scope": "repository_model",
+          "refs": [
+            "scripts/verify-exp-0-3-1-authoritative-requirements.py",
+            "scripts/verify-exp-0-3-4-status-freeze.py",
+            "scripts/verify-exp-0-3-7-traceability.py"
+          ]
+        }
+      ],
+      "missing_release_evidence": [
+        {
+          "evidence": "complete AC-1 through AC-9 evidence index",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-8",
+            "EXP-0",
+            "EXP-1",
+            "EXP-2",
+            "EXP-3",
+            "EXP-4",
+            "EXP-5",
+            "EXP-6",
+            "EXP-7"
+          ]
+        },
+        {
+          "evidence": "closed Genesis-blocking finding register",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-8",
+            "EXP-0",
+            "EXP-1",
+            "EXP-2",
+            "EXP-3",
+            "EXP-4",
+            "EXP-5",
+            "EXP-6",
+            "EXP-7"
+          ]
+        },
+        {
+          "evidence": "exact release-candidate qualification runs and artifact digests",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-8",
+            "EXP-0",
+            "EXP-1",
+            "EXP-2",
+            "EXP-3",
+            "EXP-4",
+            "EXP-5",
+            "EXP-6",
+            "EXP-7"
+          ]
+        },
+        {
+          "evidence": "final acceptance checklist with no mandatory criterion left unverified",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-8",
+            "EXP-0",
+            "EXP-1",
+            "EXP-2",
+            "EXP-3",
+            "EXP-4",
+            "EXP-5",
+            "EXP-6",
+            "EXP-7"
+          ]
+        },
+        {
+          "evidence": "final qualification/closeout record",
+          "status": "missing_or_not_release_candidate_qualified",
+          "owners": [
+            "EXP-8",
+            "EXP-0",
+            "EXP-1",
+            "EXP-2",
+            "EXP-3",
+            "EXP-4",
+            "EXP-5",
+            "EXP-6",
+            "EXP-7"
+          ]
+        }
+      ],
+      "current_functional_test_files": [],
+      "current_model_verifiers": [
+        "scripts/verify-exp-0-3-1-authoritative-requirements.py",
+        "scripts/verify-exp-0-3-4-status-freeze.py",
+        "scripts/verify-exp-0-3-7-traceability.py"
+      ],
+      "satisfaction_rule": "May become satisfied only after every required evidence item is produced against the same exact release candidate and all mapped Genesis-blocking findings are resolved.",
+      "ac_satisfied": false,
+      "orphaned": false
+    }
+  ],
+  "summary": {
+    "acceptance_criteria": 10,
+    "unverified": 10,
+    "satisfied": 0,
+    "criteria_with_blockers": 8,
+    "criteria_without_individual_blockers": [
+      "AC-9",
+      "AC-10"
+    ],
+    "total_blocker_links": 26,
+    "mandatory_requirement_links": 144,
+    "orphaned_criteria": 0,
+    "current_genesis_blockers": 10,
+    "genesis_ready": false
+  },
+  "qualification": {
+    "qualified_head": "9a694d5d000dc2e295569d291bf3753c40555b94",
+    "runs": [
+      {
+        "workflow": "420Indexer",
+        "run_number": 627,
+        "run_id": 36284316348,
+        "job_ids": [
+          108522044299
+        ],
+        "conclusion": "success"
+      },
+      {
+        "workflow": "420Docs Qualification",
+        "run_number": 2955,
+        "run_id": 36284316363,
+        "job_ids": [
+          108522060810
+        ],
+        "conclusion": "success"
+      },
+      {
+        "workflow": "420 Integrated Qualification",
+        "run_number": 5572,
+        "run_id": 36284316378,
+        "job_ids": [
+          108522158307,
+          108522158410,
+          108522158457,
+          108522158486
+        ],
+        "conclusion": "success"
+      }
+    ],
+    "evidence_artifact": {
+      "id": 10920122006,
+      "name": "exp-0-4-5-acceptance-criterion-evidence",
+      "digest": "sha256:b2dc17bf9f64fa5f48b05e42b3914ba4db197371025f77f760871b314e135374"
+    },
+    "scope": "AC-1 through AC-10 evidence accounting, blocker/requirement ownership and missing-evidence reconciliation only",
+    "note": "Recording this evidence changes the branch head. The resulting head must rerun all retained qualification gates before EXP-0.4.5 is marked COMPLETE."
+  }
+}

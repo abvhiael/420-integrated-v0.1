@@ -65,3 +65,39 @@ func TestFileStoreResetClearsAllRebuildableStateAndSurvivesRestart(t *testing.T)
 	if err != nil { t.Fatal(err) }
 	if len(logs) != 0 { t.Fatalf("logs survived reset: %d", len(logs)) }
 }
+
+
+func TestCanonicalBlockKeyUsesChainAndHash(t *testing.T) {
+	key, err := CanonicalBlockKey(420, "0xABC")
+	if err != nil { t.Fatal(err) }
+	if key != "420:0xabc" { t.Fatalf("unexpected canonical key %q", key) }
+	if _, err := CanonicalBlockKey(0, "0xabc"); err == nil { t.Fatal("expected zero-chain rejection") }
+	if _, err := CanonicalBlockKey(420, ""); err == nil { t.Fatal("expected empty-hash rejection") }
+}
+
+func TestFileStoreRejectsFinalizedOverwrite(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "indexer.json")
+	s, err := NewFileStore(path)
+	if err != nil { t.Fatal(err) }
+	finalized := model.BlockRecord{ChainID:420, Number:2, Hash:"0xfinal", Finality:model.FinalityFinalized}
+	if err := s.PutBlock(finalized); err != nil { t.Fatal(err) }
+	if err := s.PutBlock(model.BlockRecord{ChainID:420, Number:2, Hash:"0xother", Finality:model.FinalityHead}); err == nil {
+		t.Fatal("expected finalized overwrite rejection")
+	}
+	got, ok, err := s.Block(2)
+	if err != nil || !ok || got.Hash != "0xfinal" { t.Fatalf("finalized block mutated: %+v ok=%v err=%v", got, ok, err) }
+}
+
+func TestFileStoreRejectsRollbackBelowFinalizedCheckpoint(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "indexer.json")
+	s, err := NewFileStore(path)
+	if err != nil { t.Fatal(err) }
+	for n := uint64(0); n <= 3; n++ {
+		finality := model.FinalityHead
+		if n <= 2 { finality = model.FinalityFinalized }
+		if err := s.PutBlock(model.BlockRecord{ChainID:420, Number:n, Hash:"0x"+string(rune('a'+n)), Finality:finality}); err != nil { t.Fatal(err) }
+	}
+	if err := s.SaveCheckpoint(model.ChainCheckpoint{ChainID:420, IndexedHeight:3, IndexedHash:"0xd", SafeHeight:3, SafeHash:"0xd", FinalizedHeight:2, FinalizedHash:"0xc"}); err != nil { t.Fatal(err) }
+	if err := s.DeleteBlocksAbove(1); err == nil { t.Fatal("expected rollback below finality rejection") }
+	if _, ok, _ := s.Block(3); !ok { t.Fatal("store changed despite rejected rollback") }
+}

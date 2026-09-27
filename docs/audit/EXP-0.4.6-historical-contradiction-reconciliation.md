@@ -1,6 +1,6 @@
 # EXP-0.4.6 — historical contradiction and stale-evidence reconciliation
 
-**Status:** implementation complete; exact-head qualification required.
+**Status:** qualified at repository scope; final evidence-recording head requalification required.
 
 ## Purpose
 
@@ -39,3 +39,16 @@ This reconciliation intentionally keeps:
 - 0 Genesis-qualified events.
 
 EXP-0.4.6 qualifies evidence interpretation only; it does not remediate those later-stage gaps.
+
+
+## Exact-head implementation qualification
+
+Qualified implementation head: `e82501616062ff08c2789ec24518f5433bbd99c4`
+
+- 420Indexer #631 — run `36285249197` — success.
+- 420Docs Qualification #2961 — run `36285249160` — success.
+- 420 Integrated Qualification #5578 — run `36285249040` — success.
+- EXP-0.4.6 artifact `10919822778`.
+- Digest `sha256:cb01481456cb587ddfce280c2cd8ef2ff231cbb5e693851f1158e1cad699592c`.
+
+All retained repository gates passed on the implementation head. Because this evidence record changes the branch SHA, the new cumulative head must pass the retained suite once more before EXP-0.4.6 is marked COMPLETE.

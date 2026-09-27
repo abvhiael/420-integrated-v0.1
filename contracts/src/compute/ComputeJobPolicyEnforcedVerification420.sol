@@ -26,12 +26,12 @@ contract ComputeJobPolicyEnforcedVerification420 is ComputeJobIndependentVerific
     {
         if (address(jobs) == address(0)) revert InvalidEvidence();
         ComputeJobRegistry420.Job memory j = jobs.job(v.jobId);
-        ComputeJobAcceptedMatch420.Match memory m = matches.getMatch(j.matchId);
-        if (!m.exists || m.jobId != v.jobId || m.operator == address(0)) revert InvalidEvidence();
+        (bytes32 matchJobId,, address matchOperator, bool matchExists) = matches.matchParties(j.matchId);
+        if (!matchExists || matchJobId != v.jobId || matchOperator == address(0)) revert InvalidEvidence();
         (address payer, uint256 maxSpend) = IComputeJobPayerTerms420(address(jobs.requestEvidence()))
             .fundingTerms(j.requestId);
         if (payer == address(0) || maxSpend == 0 || !independencePolicy.eligible(
-                v.jobId, v.verifier, v.profileId, j.owner, payer, m.operator)) revert Unauthorized();
+                v.jobId, v.verifier, v.profileId, j.owner, payer, matchOperator)) revert Unauthorized();
         return super.submitVerdict(v, signature);
     }
 }

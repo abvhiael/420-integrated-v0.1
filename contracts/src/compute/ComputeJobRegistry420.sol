@@ -25,6 +25,9 @@ interface IComputeJobVerificationEvidence420 {
 interface IComputeJobSettlementEvidence420 {
     function settled(bytes32 jobId, bytes32 verificationRef, bytes32 settlementRef) external view returns (bool);
 }
+interface IComputeJobRefundEvidence420 {
+    function refunded(bytes32 jobId, bytes32 refundRef) external view returns (bool);
+}
 
 /// @notice CMP-1.1 job record and bounded lifecycle. Does not custody funds,
 /// attest execution, choose matches/verifiers or pay workers.
@@ -53,6 +56,8 @@ contract ComputeJobRegistry420 {
         Status status;
     }
     bytes32 private constant JOB_DOMAIN = keccak256("420/COMPUTE/JOB/V1");
+    bytes32 private constant CANCEL_DOMAIN = keccak256("420/COMPUTE/JOB/CANCEL/V1");
+    bytes32 private constant EXPIRY_DOMAIN = keccak256("420/COMPUTE/JOB/EXPIRY/V1");
     IComputeJobRequestEvidence420 public immutable requestEvidence;
     IComputeJobFundingEvidence420 public immutable fundingEvidence;
     IComputeJobMatchEvidence420 public immutable matchEvidence;
@@ -176,13 +181,76 @@ contract ComputeJobRegistry420 {
         j.settlementRef = settlementRef;
         _transition(jobId, j, Status.SETTLED, settlementRef);
     }
-    /// @dev Exceptional custody-dependent transitions remain blocked until separately qualified.
+
+    /// @notice Requester-controlled cancellation before irrevocable execution.
+    /// @dev RUNNING and later states are intentionally excluded from this V1 repository path.
+    function recordCancellation(bytes32 jobId, uint64 expectedRevision) external returns (bytes32 cancellationRef) {
+        Job storage j = jobs[jobId];
+        if (j.status == Status.NONE) revert UnknownJob();
+        if (j.revision != expectedRevision) revert StaleRevision();
+        if (msg.sender != j.owner) revert Unauthorized();
+        if (j.status != Status.FUNDED && j.status != Status.MATCHED && j.status != Status.ACCEPTED)
+            revert WrongState();
+        cancellationRef = keccak256(abi.encode(
+            CANCEL_DOMAIN, block.chainid, address(this), jobId, j.requestId, expectedRevision, msg.sender
+        ));
+        _transition(jobId, j, Status.CANCELLED, cancellationRef);
+    }
+
+    /// @notice Permissionless canonical deadline expiry before execution begins.
+    function recordExpiry(bytes32 jobId, uint64 expectedRevision) external returns (bytes32 expiryRef) {
+        Job storage j = jobs[jobId];
+        if (j.status == Status.NONE) revert UnknownJob();
+        if (j.revision != expectedRevision) revert StaleRevision();
+        if (block.timestamp <= j.deadline) revert BadInput();
+        if (j.status != Status.FUNDED && j.status != Status.MATCHED && j.status != Status.ACCEPTED)
+            revert WrongState();
+        expiryRef = keccak256(abi.encode(
+            EXPIRY_DOMAIN, block.chainid, address(this), jobId, j.requestId, expectedRevision, j.deadline
+        ));
+        _transition(jobId, j, Status.EXPIRED, expiryRef);
+    }
+
+    /// @notice Unsuccessful terminal dispositions become REFUNDED only after the bound settlement
+    /// adapter proves an actual payer transfer. SETTLED jobs keep SETTLED while unused residual
+    /// refunds are recorded separately by the settlement adapter.
+    function recordDispute(bytes32 jobId, uint64 expectedRevision, bytes32 disputeRef) external {
+        Job storage j = _guard(jobId, expectedRevision, Status.VERIFIED);
+        if (msg.sender != address(settlementEvidence) || disputeRef == bytes32(0))
+            revert Unauthorized();
+        _transition(jobId, j, Status.DISPUTED, disputeRef);
+    }
+
+    function recordDisputeResolution(bytes32 jobId, uint64 expectedRevision,
+        bytes32 resolutionRef, bool providerWins) external
+    {
+        Job storage j = _guard(jobId, expectedRevision, Status.DISPUTED);
+        if (msg.sender != address(settlementEvidence) || resolutionRef == bytes32(0))
+            revert Unauthorized();
+        _transition(jobId, j, providerWins ? Status.VERIFIED : Status.FAILED, resolutionRef);
+    }
+
+    function recordRefund(bytes32 jobId, uint64 expectedRevision, bytes32 refundRef) external {
+        Job storage j = jobs[jobId];
+        if (j.status == Status.NONE) revert UnknownJob();
+        if (j.revision != expectedRevision) revert StaleRevision();
+        if (msg.sender != address(settlementEvidence) || refundRef == bytes32(0)) revert Unauthorized();
+        if (j.status != Status.CANCELLED && j.status != Status.EXPIRED && j.status != Status.FAILED)
+            revert WrongState();
+        if (!IComputeJobRefundEvidence420(address(settlementEvidence)).refunded(jobId, refundRef))
+            revert UnprovenEvidence();
+        j.settlementRef = refundRef;
+        _transition(jobId, j, Status.REFUNDED, refundRef);
+    }
+
+    /// @dev Post-execution cancellation/expiry remain blocked; disputes use the named guarded path above.
     function _guard(bytes32 jobId, uint64 expectedRevision, Status expected) private view returns (Job storage j) {
         j = jobs[jobId];
         if (j.status == Status.NONE) revert UnknownJob();
         if (j.status != expected) revert WrongState();
         if (j.revision != expectedRevision) revert StaleRevision();
-        if (block.timestamp > j.deadline && expected != Status.RESULT_COMMITTED && expected != Status.VERIFIED)
+        if (block.timestamp > j.deadline && expected != Status.RESULT_COMMITTED
+            && expected != Status.VERIFIED && expected != Status.DISPUTED)
             revert BadInput();
     }
     function _transition(bytes32 jobId, Job storage j, Status next, bytes32 evidenceRef) private {

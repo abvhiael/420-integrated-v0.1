@@ -124,3 +124,154 @@ The new suite proves the accepted quote cannot exceed signed payer authority or 
 Full qualification record: [`CMP-1.2.2-ACCEPTED-PRICE-RESERVATION-QUALIFICATION.md`](CMP-1.2.2-ACCEPTED-PRICE-RESERVATION-QUALIFICATION.md).
 
 This closeout is repository-level only. Verified provider earnings begin at CMP-1.2.3; provider payout at CMP-1.2.4; later refund/dispute/solvency work remains CMP-1.2.5–1.2.7; live deployment/testnet evidence remains CMP-1.2.9.
+
+
+## CMP-1.2.3 — verified earnings / unique provider entitlement ledger
+
+**Status: COMPLETE within repository-level scope.** Exact qualified implementation/test head: `d5366cb06727f1c0f849b792bbfa1c0037066dfb`.
+
+`ComputeVerifiedEntitlement420` now converts one objectively verified fixed-price paid-compute job into exactly one immutable provider earning entitlement. The entitlement binds the exact job/request/match, accepted price reservation, payer, provider/resource, frozen beneficiary, pricing policy/version, result, verifier and verification decision; its earned amount cannot exceed the accepted/funded/payer ceilings. Finalization revalidates the approved objective profile and current verifier-independence/controller state, so a historical `VERIFIED` status alone cannot mint earnings after profile revocation or controller withdrawal. Entitlement creation does not move Vault funds and deliberately leaves the job un-`SETTLED`.
+
+Exact-head evidence:
+
+- Solidity Contracts run `36220578024` — **success**, all 16 PR shards green.
+- `ComputeVerifiedEntitlement420Test` — shard 0 job `108344948354`: **8 passed / 0 failed / 0 skipped**.
+- 420 Integrated Qualification run `36220577982` — **success**.
+- 420Docs Qualification run `36220577998` — **success**.
+
+Full qualification record: [`CMP-1.2.3-VERIFIED-ENTITLEMENT-QUALIFICATION.md`](CMP-1.2.3-VERIFIED-ENTITLEMENT-QUALIFICATION.md).
+
+This closeout is repository-level only and covers the current fixed-price single-assignment entitlement model. Provider liability split, claimability and actual external payout are CMP-1.2.4; payer residual refunds/failure/expiry remain CMP-1.2.5; challenge/dispute/slash economics remain CMP-1.2.6; generalized multi-unit/retry/partial-unit settlement remains outside this narrow closeout; live deployment/testnet evidence remains CMP-1.2.9.
+
+
+## CMP-1.2.4 — provider claim and actual Vault payout
+
+**Status: COMPLETE within repository-level scope.** Exact qualified implementation/test head: `a7b9ab20cb7e108cf0b85d95cd3bbc707ccdc0e3`.
+
+The repository now converts a CMP-1.2.3 verified entitlement into a real provider claim using an atomic Vault liability split: the original whole-deposit payer-safety obligation is cancelled and replaced by one provider obligation for the exact verified earning plus, when applicable, one separate payer-residual obligation for the unused balance. The provider side is released to claimable state and externally paid only to the beneficiary frozen at accepted matching. The canonical job reaches `SETTLED` only after successful Vault transfer and exact accounting reconciliation. The payer residual remains pending and is deliberately not refunded by 1.2.4.
+
+Exact-head evidence:
+
+- Solidity Contracts run `36261381017` — **success**, all 16 PR shards green.
+- `ComputeVerifiedEntitlement420Test` — shard 0 job `108458859438`: **15 passed / 0 failed / 0 skipped**.
+- Seven new CMP-1.2.4 cases prove provider/residual split, actual beneficiary payout, replay/wrong-beneficiary rejection, verification-profile revocation gates, two-payer isolation, atomic rollback on missing release authority, and exact-funded/no-residual settlement.
+- 420 Integrated Qualification run `36261380960` — **success**.
+- 420Docs Qualification run `36261380906` — **success**.
+
+Full qualification record: [`CMP-1.2.4-PROVIDER-PAYOUT-QUALIFICATION.md`](CMP-1.2.4-PROVIDER-PAYOUT-QUALIFICATION.md).
+
+This closeout is repository-level only. Payer residual refunds plus cancellation/expiry/failure refund economics remain CMP-1.2.5; dispute/challenge/slash handling remains CMP-1.2.6; live deployment/testnet evidence remains CMP-1.2.9.
+
+
+## CMP-1.2.5 — cancellation, expiry, failure and payer refunds
+
+**Status: COMPLETE within repository-level scope.** Exact qualified implementation/test head: `9a9be3a55d824231cebf3f6d87ec08261c19f4a4`.
+
+The repository now proves requester-only pre-execution cancellation, permissionless deadline expiry before execution, negative-verification failure with zero provider earning, full original-payer refund for unsuccessful terminal jobs, and separate under-budget residual refund after successful settlement without reopening `SETTLED`.
+
+Exact-head evidence:
+
+- Solidity Contracts run `36264877005` — **success**, all 16 PR shards green.
+- `ComputeVerifiedEntitlement420Test` — shard 0 job `108467527776`: **22 passed / 0 failed / 0 skipped**.
+- 420 Integrated Qualification run `36264876973` — **success**.
+- 420Docs Qualification run `36264877087` — **success**.
+
+Full qualification record: [`CMP-1.2.5-PAYER-REFUND-QUALIFICATION.md`](CMP-1.2.5-PAYER-REFUND-QUALIFICATION.md).
+
+Challenge/dispute holds and contested-liability resolution remain CMP-1.2.6; hostile solvency/reentrancy/privilege hardening remains CMP-1.2.7; live deployment/testnet evidence remains CMP-1.2.9.
+
+
+## CMP-1.2.6 — dispute holds, adjudication and contested liabilities
+
+**Status: COMPLETE within repository-level scope.** Exact qualified implementation/test head: `5175a9c3293fd0e7959c0d5747c3d56b35b7e4c2`.
+
+The repository now proves a finite fixed-price dispute path with an immutable accepted policy, pending-liability hold, scoped independent adjudication, bounded appeal, provider-win resume, payer-win reallocation to the original payer, fail-closed timeout, withdrawal, direct-Vault bypass resistance and cross-payer isolation.
+
+Exact-head evidence:
+
+- Solidity Contracts run `36273468230` — **success**, all 16 shards green.
+- `ComputeVerifiedEntitlement420Test` — shard 1 job `108491645128`: **31 passed / 0 failed / 0 skipped**.
+- 420 Integrated Qualification run `36273468271` — **success**.
+- 420Docs Qualification run `36273468412` — **success**.
+
+Full qualification record: [`CMP-1.2.6-DISPUTE-HOLDS-QUALIFICATION.md`](CMP-1.2.6-DISPUTE-HOLDS-QUALIFICATION.md).
+
+Hostile solvency/reentrancy/privilege hardening remains CMP-1.2.7; full real E2E fixtures remain CMP-1.2.8; live deployment/testnet evidence remains CMP-1.2.9.
+
+
+## CMP-1.2.7 — solvency, reentrancy and privilege hardening
+
+**Status: COMPLETE within repository-level scope.** Exact qualified implementation/test head: `618c461df376294440239d1b0ce7d5e236871bd4`.
+
+The repository now proves integrated hostile-accounting behavior across the dedicated CMP Vault topology: exact native solvency, donor-surplus isolation, sealed-policy privilege containment, failed-transfer atomic rollback, malicious-beneficiary reentrancy resistance, frozen/winding-down lifecycle safety, mixed two-payer terminal-path conservation, and continued replay/wrong-recipient/cross-job isolation.
+
+Exact-head evidence:
+
+- Solidity Contracts run `36282026678` — **success**, all 16 shards green.
+- `ComputeVerifiedEntitlement420Test` — shard 1 job `108515562827`: **38 passed / 0 failed / 0 skipped**.
+- 420 Integrated Qualification run `36282026679` — **success**.
+- 420Docs Qualification run `36282026669` — **success**.
+
+Full qualification record: [`CMP-1.2.7-SOLVENCY-REENTRANCY-PRIVILEGE-QUALIFICATION.md`](CMP-1.2.7-SOLVENCY-REENTRANCY-PRIVILEGE-QUALIFICATION.md).
+
+Full real end-to-end fixtures remain CMP-1.2.8; deployment/testnet evidence remains CMP-1.2.9; final phase reconciliation remains CMP-1.2.10.
+
+
+## CMP-1.2.8 — real end-to-end escrow lifecycle qualification
+
+**Status: COMPLETE within repository-level scope.** Exact qualified implementation/test head: `4e803611a6b10e69878c16e1c471287310ba4820`.
+
+The repository now proves integrated real-contract escrow transcripts for: funded -> matched -> accepted -> executed -> verified -> provider paid -> payer residual refunded; negative verification -> FAILED -> full original-payer refund -> REFUNDED; pre-execution cancellation -> full original-payer refund; and disputed provider claim -> independent payer-win adjudication -> exact original-payer refund.
+
+Exact-head evidence:
+
+- Solidity Contracts run `36289652122` — **success**, all 16 shards green.
+- `ComputeVerifiedEntitlement420Test` — shard 1 job `108539068671`: **42 passed / 0 failed / 0 skipped**.
+- 420 Integrated Qualification run `36289652114` — **success**.
+- 420Docs Qualification run `36289652117` — **success**.
+
+Full qualification record: [`CMP-1.2.8-END-TO-END-ESCROW-QUALIFICATION.md`](CMP-1.2.8-END-TO-END-ESCROW-QUALIFICATION.md).
+
+Live testnet deployment/address/code-hash/registry evidence remains CMP-1.2.9. Final phase reconciliation and release closeout remains CMP-1.2.10.
+
+
+## CMP-1.2.9 — testnet deployment and live-chain qualification
+
+**Status: REPOSITORY DEPLOYMENT PACKAGE COMPLETE; LIVE QUALIFICATION BLOCKED.**
+
+Repository-controlled deployment readiness now includes a non-custodial `ComputeRouter420` discovery anchor, `ICompute420`, ProtocolRegistry publication topology tests, a fail-closed live evidence manifest, and a machine-checkable deployment verifier.
+
+Canonical discovery uses `keccak256("420/service/compute-market/v1")` from `ServiceIds420.sol`. The Registry publication target is the deployed read-only router; the router binds the qualified component graph and grants no custody or execution authority.
+
+Live COMPLETE is blocked because repository network authority still states `public_testnet_live=false` and real public endpoints are not configured. No deployment addresses, transaction hashes, runtime code hashes, live grant inventory, canonical Registry publication receipt, or real native-$420 funded/settled/refunded testnet transactions are available to verify.
+
+Full status record: [`CMP-1.2.9-TESTNET-DEPLOYMENT-QUALIFICATION.md`](CMP-1.2.9-TESTNET-DEPLOYMENT-QUALIFICATION.md).
+
+Do not mark CMP-1.2.9 or the overall CMP-1.2 phase COMPLETE until `python3 scripts/verify-cmp-1-2-9-deployment.py` passes in default/live mode against canonical chain evidence.
+
+
+## CMP-1.2.10 — phase reconciliation and release closeout
+
+**Status: COMPLETE WITHIN REPOSITORY QUALIFICATION SCOPE; LIVE/RELEASE QUALIFICATION BLOCKED BY CMP-1.2.9 AND CMP-1.5 STAKE-SLASH PREREQUISITES.**
+
+Latest `main` `b03e247aa4df0a6a6d978ffad8eedfe2487a3a6b` was explicitly reconciled into this CMP branch at merge commit `ee5e97bd9cc322e0794e2c57a4523035370788be`; the branch is behind current `main` by **0 commits** at the recorded reconciliation point.
+
+The final reconciliation confirms repository-level qualification for the current fixed-price, single-assignment native-$420 escrow path through CMP-1.2.8, and repository deployment readiness for CMP-1.2.9. It preserves two explicit release blockers:
+
+1. **CMP-1.2.9-LIVE** — the canonical public/authorized testnet is not live, so deployed addresses, receipts, runtime hashes, live grants, Registry publication and real funded/settled/refunded transaction evidence do not exist yet.
+2. **CMP-1.5-STAKE-SLASH** — the original `slash redistribution` roadmap item may only redistribute separately backed and objectively forfeited CMP-1.5 stake/collateral. It remains fail-closed and must never be sourced from payer deposits.
+
+Full closeout: [`CMP-1.2.10-PHASE-RECONCILIATION-AND-CLOSEOUT.md`](CMP-1.2.10-PHASE-RECONCILIATION-AND-CLOSEOUT.md).
+
+Machine-readable authority: `contracts/config/compute-market/cmp-1.2.10-phase-closeout.json`.
+
+Closeout verifier: `python3 scripts/verify-cmp-1-2-10-closeout.py`.
+
+Do not label CMP-1.2 live/production release complete until both blockers are independently satisfied.
+
+
+### CMP-1.2.10 exact-head retained qualification evidence
+
+Implementation/evidence head `b2b3ee9fb1322b09669325f84eafd6689e6d866e` passed the full retained suite: Solidity Contracts `36342887946` (16/16 shards), Genesis Address Authority `36342888001` (cross-manifest authority + 16/16 full-inventory shards), 420 Integrated Qualification `36342888290` (all four jobs), 420Docs Qualification `36342888026`, and 420Indexer `36342888155`. The final evidence-recording head must rerun these retained gates before merge.
+
+This closes CMP-1.2 for repository qualification scope only. CMP-1.2.9-LIVE and CMP-1.5-STAKE-SLASH remain explicit release prerequisites and do not become synthetic completion evidence.

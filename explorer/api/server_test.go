@@ -174,3 +174,49 @@ func TestBlockTraceRouteFailsClosedWithoutProducer(t *testing.T) {
 	s.Handler().ServeHTTP(rr,httptest.NewRequest(http.MethodGet,"/v1/blocks/7/trace",nil))
 	if rr.Code==http.StatusOK { t.Fatalf("expected failure, body=%s",rr.Body.String()) }
 }
+
+
+func TestStatusRouteFailsClosedOnStaleIndexer(t *testing.T) {
+	f:=&fakeIndexer{health:indexerapi.HealthResponse{Health:model.Health{
+		ChainID:420, IndexedHeight:10, SafeHeight:9, FinalizedHeight:8,
+		State:"HEALTHY", LastIngestAt:time.Now().Add(-10*time.Minute),
+	}}}
+	s:=newTestServer(t,f)
+	rr:=httptest.NewRecorder()
+	s.Handler().ServeHTTP(rr,httptest.NewRequest(http.MethodGet,"/v1/status",nil))
+	if rr.Code!=http.StatusServiceUnavailable { t.Fatalf("status=%d body=%s",rr.Code,rr.Body.String()) }
+	if !contains(rr.Body.String(),"INDEXER_STALE") { t.Fatalf("stale issue code missing: %s",rr.Body.String()) }
+}
+
+func TestStatusRouteFailsClosedOnRuntimeDegradation(t *testing.T) {
+	now:=time.Now()
+	f:=&fakeIndexer{health:indexerapi.HealthResponse{Health:model.Health{
+		ChainID:420, IndexedHeight:10, SafeHeight:9, FinalizedHeight:8,
+		State:"DEGRADED", LastIngestAt:now, RuntimeIssue:"INGEST_CATCHUP_FAILED",
+	}}}
+	s:=newTestServer(t,f)
+	rr:=httptest.NewRecorder()
+	s.Handler().ServeHTTP(rr,httptest.NewRequest(http.MethodGet,"/v1/status",nil))
+	if rr.Code!=http.StatusServiceUnavailable { t.Fatalf("status=%d body=%s",rr.Code,rr.Body.String()) }
+	if !contains(rr.Body.String(),"INDEXER_DEGRADED") { t.Fatalf("degraded issue code missing: %s",rr.Body.String()) }
+}
+
+func TestReadyRouteFailsClosedOnInconsistentFinality(t *testing.T) {
+	now:=time.Now()
+	f:=&fakeIndexer{health:indexerapi.HealthResponse{Health:model.Health{
+		ChainID:420, IndexedHeight:10, SafeHeight:11, FinalizedHeight:8,
+		State:"HEALTHY", LastIngestAt:now,
+	}}}
+	s:=newTestServer(t,f)
+	rr:=httptest.NewRecorder()
+	s.Handler().ServeHTTP(rr,httptest.NewRequest(http.MethodGet,"/v1/ready",nil))
+	if rr.Code!=http.StatusServiceUnavailable { t.Fatalf("status=%d body=%s",rr.Code,rr.Body.String()) }
+	if !contains(rr.Body.String(),"INCONSISTENT_FINALITY") { t.Fatalf("inconsistent-finality issue missing: %s",rr.Body.String()) }
+}
+
+func TestConsensusRouteFailsClosedWhenProviderUnavailable(t *testing.T) {
+	s:=newTestServer(t,&fakeIndexer{})
+	rr:=httptest.NewRecorder()
+	s.Handler().ServeHTTP(rr,httptest.NewRequest(http.MethodGet,"/v1/consensus",nil))
+	if rr.Code==http.StatusOK { t.Fatalf("consensus route unexpectedly succeeded: %s",rr.Body.String()) }
+}

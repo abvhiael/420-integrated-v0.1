@@ -86,4 +86,6 @@ type Health struct {
 	DecoderSet      string    `json:"decoderSet"`
 	State           string    `json:"state"`
 	LastIngestAt    time.Time `json:"lastIngestAt"`
+	RuntimeIssue    string     `json:"runtimeIssue,omitempty"`
+	RuntimeIssueAt  *time.Time `json:"runtimeIssueAt,omitempty"`
 }

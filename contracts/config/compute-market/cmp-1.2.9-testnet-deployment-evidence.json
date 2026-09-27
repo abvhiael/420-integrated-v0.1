@@ -1,0 +1,227 @@
+{
+  "schema": "cmp-1.2.9-testnet-deployment-evidence-v1",
+  "status": "BLOCKED_LIVE_TESTNET_NOT_AVAILABLE",
+  "service_id": "420/service/compute-market/v1",
+  "service_id_keccak_source": "contracts/src/libraries/ServiceIds420.sol",
+  "canonical_registry_source": "contracts/src/apps/ProtocolRegistry.sol",
+  "expected_protocol_registry_address": "0x0000000000000000000000000000000000000434",
+  "deployment_network": {
+    "name": null,
+    "chain_id": null,
+    "rpc_url": null,
+    "genesis_hash": null,
+    "head_block": null,
+    "finalized_block": null,
+    "public_testnet_live": false
+  },
+  "discovery": {
+    "implementation_role": "ComputeRouter420",
+    "implementation_address": null,
+    "deployment_tx": null,
+    "deployment_block": null,
+    "runtime_code_hash": null,
+    "component_graph_hash": null,
+    "metadata_hash": null,
+    "manifest_hash": null,
+    "dependency_root": null,
+    "interface_hash": null,
+    "registry_publish_tx": null,
+    "registry_version": null,
+    "registry_active": null
+  },
+  "components": [
+    {
+      "role": "ComputeRouter420",
+      "source": "contracts/src/compute/ComputeRouter420.sol",
+      "address": null,
+      "deployment_tx": null,
+      "deployment_block": null,
+      "runtime_code_hash": null
+    },
+    {
+      "role": "ComputeJobRegistry420",
+      "source": "contracts/src/compute/ComputeJobRegistry420.sol",
+      "address": null,
+      "deployment_tx": null,
+      "deployment_block": null,
+      "runtime_code_hash": null
+    },
+    {
+      "role": "ComputeEscrowFunding420",
+      "source": "contracts/src/compute/ComputeEscrowFunding420.sol",
+      "address": null,
+      "deployment_tx": null,
+      "deployment_block": null,
+      "runtime_code_hash": null
+    },
+    {
+      "role": "ComputeAcceptedPriceMatch420",
+      "source": "contracts/src/compute/ComputeAcceptedPriceMatch420.sol",
+      "address": null,
+      "deployment_tx": null,
+      "deployment_block": null,
+      "runtime_code_hash": null
+    },
+    {
+      "role": "ComputeJobMatchedWorkerEvidence420",
+      "source": "contracts/src/compute/ComputeJobMatchedWorkerEvidence420.sol",
+      "address": null,
+      "deployment_tx": null,
+      "deployment_block": null,
+      "runtime_code_hash": null
+    },
+    {
+      "role": "ComputeJobIntegerProfileVerification420",
+      "source": "contracts/src/compute/ComputeJobIntegerProfileVerification420.sol",
+      "address": null,
+      "deployment_tx": null,
+      "deployment_block": null,
+      "runtime_code_hash": null
+    },
+    {
+      "role": "ComputeDisputeResolution420",
+      "source": "contracts/src/compute/ComputeDisputeResolution420.sol",
+      "address": null,
+      "deployment_tx": null,
+      "deployment_block": null,
+      "runtime_code_hash": null
+    },
+    {
+      "role": "ComputeVerifiedEntitlement420",
+      "source": "contracts/src/compute/ComputeVerifiedEntitlement420.sol",
+      "address": null,
+      "deployment_tx": null,
+      "deployment_block": null,
+      "runtime_code_hash": null
+    },
+    {
+      "role": "ComputeProviderRegistry420",
+      "source": "contracts/src/compute/ComputeProviderRegistry420.sol",
+      "address": null,
+      "deployment_tx": null,
+      "deployment_block": null,
+      "runtime_code_hash": null
+    },
+    {
+      "role": "ComputeNodeRegistry420",
+      "source": "contracts/src/compute/ComputeNodeRegistry420.sol",
+      "address": null,
+      "deployment_tx": null,
+      "deployment_block": null,
+      "runtime_code_hash": null
+    },
+    {
+      "role": "ComputeResourceRegistry420",
+      "source": "contracts/src/compute/ComputeResourceRegistry420.sol",
+      "address": null,
+      "deployment_tx": null,
+      "deployment_block": null,
+      "runtime_code_hash": null
+    },
+    {
+      "role": "ComputeOfferRegistry420",
+      "source": "contracts/src/compute/ComputeOfferRegistry420.sol",
+      "address": null,
+      "deployment_tx": null,
+      "deployment_block": null,
+      "runtime_code_hash": null
+    },
+    {
+      "role": "ComputeAuthorization420",
+      "source": "contracts/src/compute/ComputeAuthorization420.sol",
+      "address": null,
+      "deployment_tx": null,
+      "deployment_block": null,
+      "runtime_code_hash": null
+    },
+    {
+      "role": "ComputeJobSignedRequestAuthority420",
+      "source": "contracts/src/compute/ComputeJobSignedRequestAuthority420.sol",
+      "address": null,
+      "deployment_tx": null,
+      "deployment_block": null,
+      "runtime_code_hash": null
+    },
+    {
+      "role": "ComputeVerifierIndependencePolicy420",
+      "source": "contracts/src/compute/ComputeVerifierIndependencePolicy420.sol",
+      "address": null,
+      "deployment_tx": null,
+      "deployment_block": null,
+      "runtime_code_hash": null
+    },
+    {
+      "role": "CMPVaultAuthorization420",
+      "source": "contracts/src/compute/CMPVaultAuthorization420.sol",
+      "address": null,
+      "deployment_tx": null,
+      "deployment_block": null,
+      "runtime_code_hash": null
+    },
+    {
+      "role": "AssetVault420",
+      "source": "contracts/src/vault/AssetVault420.sol",
+      "address": null,
+      "deployment_tx": null,
+      "deployment_block": null,
+      "runtime_code_hash": null
+    },
+    {
+      "role": "VaultRegistry420",
+      "source": "contracts/src/vault/VaultRegistry420.sol",
+      "address": null,
+      "deployment_tx": null,
+      "deployment_block": null,
+      "runtime_code_hash": null
+    },
+    {
+      "role": "VaultAccounting420",
+      "source": "contracts/src/vault/VaultAccounting420.sol",
+      "address": null,
+      "deployment_tx": null,
+      "deployment_block": null,
+      "runtime_code_hash": null
+    },
+    {
+      "role": "VaultPolicyRegistry420",
+      "source": "contracts/src/vault/VaultPolicyRegistry420.sol",
+      "address": null,
+      "deployment_tx": null,
+      "deployment_block": null,
+      "runtime_code_hash": null
+    },
+    {
+      "role": "CapabilityRegistry420",
+      "source": "contracts/src/system/CapabilityRegistry420.sol",
+      "address": null,
+      "deployment_tx": null,
+      "deployment_block": null,
+      "runtime_code_hash": null
+    }
+  ],
+  "grants": [],
+  "live_transactions": {
+    "funding_tx": null,
+    "provider_payout_tx": null,
+    "payer_residual_refund_tx": null,
+    "failed_job_refund_tx": null,
+    "cancelled_job_refund_tx": null,
+    "dispute_refund_tx": null
+  },
+  "required_assertions": {
+    "dedicated_cmp_vault_registered_active": false,
+    "cmp_vault_policy_sealed": false,
+    "funding_adapter_bound": false,
+    "settlement_adapter_bound": false,
+    "router_graph_matches_manifest": false,
+    "runtime_hashes_verified": false,
+    "grants_inventory_verified": false,
+    "hostile_grant_expansion_denied": false,
+    "protocol_registry_publication_verified": false,
+    "funded_success_path_reconciled": false,
+    "failed_refund_path_reconciled": false,
+    "cancelled_refund_path_reconciled": false,
+    "dispute_refund_path_reconciled": false
+  },
+  "blocker": "Repository public-testnet authority states public_testnet_live=false and no real public endpoints are configured. Populate only from canonical live-chain receipts/state."
+}

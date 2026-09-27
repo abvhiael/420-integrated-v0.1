@@ -13,7 +13,7 @@ if cfg.get("canonicalStateAuthority") is not False: errors.append("authority")
 if cfg.get("ingestion", {}).get("requiredChainId") != 420: errors.append("chain id")
 if cfg.get("reorgPolicy", {}).get("rewriteFinalized") is not False: errors.append("finalized rewrite")
 if ready.get("service") != "420Indexer": errors.append("readiness service")
-if ready.get("status") not in {"GEN11_1F_QUALIFICATION", "EXP_1_4_DEPLOYABLE_RUNTIME_QUALIFICATION", "EXP_1_5_CONSENSUS_PROVIDER_QUALIFICATION", "EXP_1_6_HISTORICAL_PRODUCER_ATTRIBUTION_QUALIFICATION", "EXP_1_7_CROSS_LAYER_TRACEABILITY_QUALIFICATION"}: errors.append("readiness status")
+if ready.get("status") not in {"GEN11_1F_QUALIFICATION", "EXP_1_4_DEPLOYABLE_RUNTIME_QUALIFICATION", "EXP_1_5_CONSENSUS_PROVIDER_QUALIFICATION", "EXP_1_6_HISTORICAL_PRODUCER_ATTRIBUTION_QUALIFICATION", "EXP_1_7_CROSS_LAYER_TRACEABILITY_QUALIFICATION", "EXP_1_8_RUNTIME_NEGATIVE_DIVERGENCE_QUALIFICATION"}: errors.append("readiness status")
 if ready.get("authority", {}).get("canonical_state") is not False: errors.append("readiness authority")
 deployment_status = ready.get("backend", {}).get("deployment_status")
 if deployment_status not in {"PENDING_TESTNET_DEPLOYMENT", "DEPLOYABLE_RUNTIME_QUALIFIED_LIVE_TESTNET_PENDING"}:

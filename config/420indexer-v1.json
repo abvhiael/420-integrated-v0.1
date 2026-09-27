@@ -130,5 +130,33 @@
     "rejectInvalidProposerRank": true,
     "canonicalAuthority": false,
     "liveCrossLayerWitnessStatus": "BLOCKED_PENDING_PROVISIONED_APPROVED_TESTNET_EXECUTION_AND_CONSENSUS_SOURCES"
+  },
+  "runtimeNegativeQualification": {
+    "continuousRpcSourceValidation": true,
+    "validationFrequency": "every configured poll before catch-up",
+    "startupFailClosed": true,
+    "requiredChainId": 420,
+    "expectedGenesisHashEnv": "INDEXER_EXPECTED_GENESIS_HASH",
+    "maxHeadAgeEnv": "INDEXER_MAX_HEAD_AGE",
+    "defaultMaxHeadAge": "2m",
+    "validates": [
+      "chain id",
+      "genesis identity",
+      "head/safe/finalized hashes",
+      "finality ordering",
+      "head freshness"
+    ],
+    "runtimeFaultCodes": [
+      "RPC_WRONG_CHAIN",
+      "RPC_GENESIS_MISMATCH",
+      "RPC_FINALITY_DIVERGENCE",
+      "RPC_SOURCE_STALE",
+      "RPC_SOURCE_INVALID",
+      "CONSENSUS_PROVIDER_UNAVAILABLE",
+      "INGEST_CATCHUP_FAILED"
+    ],
+    "publicFaultDetailPolicy": "categorical only; raw upstream errors remain server-side",
+    "recoveryRule": "clear degraded runtime latch only after qualified RPC source, qualified consensus provider, and successful catch-up",
+    "liveFaultInjectionStatus": "BLOCKED_PENDING_PROVISIONED_TESTNET"
   }
 }

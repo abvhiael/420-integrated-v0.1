@@ -91,6 +91,7 @@ on:
       - 'scripts/verify-exp-0-4-4-requirement-ci-coverage.py'
       - 'scripts/verify-exp-0-4-5-acceptance-evidence.py'
       - 'scripts/verify-exp-0-4-6-historical-contradictions.py'
+      - 'scripts/verify-exp-0-4-7-canonical-qualification-ledger.py'
       - 'scripts/verify-exp-0-4-7-canonical-ledger.py'
       - 'scripts/verify-exp-0-4-4-requirement-ci-coverage.py'
       - 'scripts/verify-exp-0-4-3-evidence-ledger.py'

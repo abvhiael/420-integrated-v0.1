@@ -67,5 +67,20 @@
     "liveBindingStatus": "BLOCKED_PENDING_PROVISIONED_APPROVED_TESTNET_RPC",
     "publicEndpointInventory": "testnet/services/endpoints.json",
     "launchAuthority": "testnet/config/launch.json"
+  },
+  "canonicalIndexingInvariants": {
+    "canonicalBlockIdentity": "chainId:blockHash",
+    "heightIsMutableAboveFinality": true,
+    "trackHeadSeparately": true,
+    "trackSafeSeparately": true,
+    "trackFinalizedSeparately": true,
+    "rollbackAboveFinality": true,
+    "finalizedHistoryImmutable": true,
+    "databaseIsCanonicalAuthority": false,
+    "canonicalSourceOverridesUncheckpointedDatabaseRows": true,
+    "cleanRebuildRequired": true,
+    "interruptedRebuildRecoveryRequired": true,
+    "checkpointAdvancesAfterBundlePersistence": true,
+    "finalizedRollbackBehavior": "FAIL_CLOSED"
   }
 }

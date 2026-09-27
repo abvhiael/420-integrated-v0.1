@@ -1,0 +1,41 @@
+# EXP-0.4.6 — historical contradiction and stale-evidence reconciliation
+
+**Status:** implementation complete; exact-head qualification required.
+
+## Purpose
+
+EXP-0.4.6 prevents old but retained Explorer records from silently overriding the current EXP-0.3/0.4 authority model. Historical files remain in the repository for auditability; each potentially misleading claim receives an explicit current disposition.
+
+## Disposition model
+
+- **superseded_by** — a later explicit authority changed the current meaning.
+- **historical_only** — valid only as historical/presentation/future guidance, not current qualification evidence.
+- **still_applicable** — still correct when read within its recorded narrow scope.
+- **requires_requalification** — a mechanism or environment-bound claim must be executed again on the applicable exact head/environment before it can support current qualification.
+
+## Key reconciliations
+
+The retained EXP-0.3.5 sentence saying governance remains `scope_decision_required/genesis-blocking` is preserved but superseded by EXP-0.3.8 Resolution B. Governance is no longer an active Explorer Genesis blocker.
+
+The broad UI sentence “Qualified, read-only visibility…” remains presentation copy only. It cannot override the status freeze, blocker register, or AC evidence ledger.
+
+`QUALIFIED_INDEXER_API_CONSUMER` remains valid only for the Explorer→Indexer source/consumer boundary. It does not prove either service is deployed or live-qualified.
+
+The Indexer and Explorer readiness files still contain `REPLACE` URLs/pending deployment state. Those placeholders are current negative evidence, not stale data to be ignored.
+
+The smoke/live validators remain useful test mechanisms, but their ability to emit `QUALIFIED` does not establish a current approved live run.
+
+The frozen system-address maps remain authoritative: ProtocolRegistry is `0x...0434`, ConsensusSystemCall420 is `0x...043c`, and historical candidate aliases may not override them.
+
+## Current state preserved
+
+This reconciliation intentionally keeps:
+
+- 10 current Genesis blockers;
+- 10 unverified acceptance criteria;
+- 0 runtime-qualified events;
+- 0 deployment-qualified events;
+- 0 live-network-qualified events;
+- 0 Genesis-qualified events.
+
+EXP-0.4.6 qualifies evidence interpretation only; it does not remediate those later-stage gaps.

@@ -2,7 +2,7 @@
   "schema": "420explorer-exp-0.4.8-evidence-retention-reproducibility-v1",
   "milestone": "EXP-0.4.8",
   "title": "420Explorer evidence retention and reproducibility manifest",
-  "status": "implementation_complete_exact_head_qualification_required",
+  "status": "qualified_repository_scope_pending_final_recording_head_requalification",
   "baseline": {
     "exp_0_4_7_final_qualified_head": "c3b2d13d74ffed8be15edcecd144bc88959e5ab1",
     "pr": 376,
@@ -358,5 +358,52 @@
     "fabricated_evidence": 0,
     "runtime_or_live_claims_created": 0,
     "genesis_ready": false
+  },
+  "qualification": {
+    "qualified_head": "a54fcc9e562b77c43b2a1e5185e99cb7fc15511e",
+    "runs": [
+      {
+        "workflow": "420Indexer",
+        "run_number": 656,
+        "run_id": 36299759221,
+        "job_ids": [
+          108565121774
+        ],
+        "conclusion": "success"
+      },
+      {
+        "workflow": "420Docs Qualification",
+        "run_number": 2992,
+        "run_id": 36299759222,
+        "job_ids": [
+          108565123153
+        ],
+        "conclusion": "success"
+      },
+      {
+        "workflow": "420 Integrated Qualification",
+        "run_number": 5609,
+        "run_id": 36299759355,
+        "job_ids": [
+          108565123907,
+          108565123943,
+          108565123948,
+          108565123956
+        ],
+        "conclusion": "success"
+      }
+    ],
+    "evidence_artifact": {
+      "id": 10924919734,
+      "name": "exp-0-4-8-evidence-retention-reproducibility",
+      "digest": "sha256:2a9fc26cfbb084d9c33b3140c9290721ba3f49e9b99e1a7ca3ef7342e78d9784"
+    },
+    "scope": "repository-resident evidence retention, historical provenance integrity and replayability only",
+    "limitations": [
+      "does not make GitHub Actions artifacts permanent",
+      "does not reconstruct the one historical missing artifact digest",
+      "does not create runtime, deployment, live-network or Genesis qualification"
+    ],
+    "note": "Recording this evidence changes the branch head. The resulting exact head must rerun all retained qualification gates before EXP-0.4.8 is marked COMPLETE."
   }
 }

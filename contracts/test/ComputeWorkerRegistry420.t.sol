@@ -59,10 +59,11 @@ contract ComputeWorkerRegistry420Test {
         vm.prank(OPERATOR);
         nodes.activate(nodeId);
 
+        bytes32 gpuClass = resources.GPU_INFERENCE();
         vm.prank(OPERATOR);
         resourceId = resources.register(
             nodeId,
-            resources.GPU_INFERENCE(),
+            gpuClass,
             HARDWARE,
             RUNTIME,
             RESOURCE_CAP,

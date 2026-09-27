@@ -32,6 +32,7 @@ type BlockRecord struct {
 	ParentHash    string   `json:"parentHash"`
 	Timestamp     uint64   `json:"timestamp"`
 	Finality      Finality `json:"finality"`
+	Producer      *BlockProducer `json:"producer,omitempty"`
 	SchemaVersion string   `json:"schemaVersion"`
 }
 

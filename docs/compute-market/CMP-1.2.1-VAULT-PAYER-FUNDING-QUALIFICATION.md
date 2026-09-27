@@ -248,3 +248,23 @@ Live COMPLETE is blocked because repository network authority still states `publ
 Full status record: [`CMP-1.2.9-TESTNET-DEPLOYMENT-QUALIFICATION.md`](CMP-1.2.9-TESTNET-DEPLOYMENT-QUALIFICATION.md).
 
 Do not mark CMP-1.2.9 or the overall CMP-1.2 phase COMPLETE until `python3 scripts/verify-cmp-1-2-9-deployment.py` passes in default/live mode against canonical chain evidence.
+
+
+## CMP-1.2.10 — phase reconciliation and release closeout
+
+**Status: REPOSITORY RECONCILIATION COMPLETE; LIVE/RELEASE QUALIFICATION BLOCKED BY CMP-1.2.9 AND CMP-1.5 STAKE-SLASH PREREQUISITES.**
+
+Current `main` `304cb61286c94f72d0b05e32e5f713b9d68bc450` was explicitly reconciled into this CMP branch at merge commit `cc42be007f5a2aa5adc830152247565d6a0b6346`; the branch is behind current `main` by **0 commits** at the recorded reconciliation point.
+
+The final reconciliation confirms repository-level qualification for the current fixed-price, single-assignment native-$420 escrow path through CMP-1.2.8, and repository deployment readiness for CMP-1.2.9. It preserves two explicit release blockers:
+
+1. **CMP-1.2.9-LIVE** — the canonical public/authorized testnet is not live, so deployed addresses, receipts, runtime hashes, live grants, Registry publication and real funded/settled/refunded transaction evidence do not exist yet.
+2. **CMP-1.5-STAKE-SLASH** — the original `slash redistribution` roadmap item may only redistribute separately backed and objectively forfeited CMP-1.5 stake/collateral. It remains fail-closed and must never be sourced from payer deposits.
+
+Full closeout: [`CMP-1.2.10-PHASE-RECONCILIATION-AND-CLOSEOUT.md`](CMP-1.2.10-PHASE-RECONCILIATION-AND-CLOSEOUT.md).
+
+Machine-readable authority: `contracts/config/compute-market/cmp-1.2.10-phase-closeout.json`.
+
+Closeout verifier: `python3 scripts/verify-cmp-1-2-10-closeout.py`.
+
+Do not label CMP-1.2 live/production release complete until both blockers are independently satisfied.

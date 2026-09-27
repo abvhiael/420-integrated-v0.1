@@ -35,7 +35,11 @@ def main():
  if stale_rule not in gov35.get("rules",[]): errors.append("expected retained pre-resolution governance statement not found")
  if gov38.get("decision")!="EXP-SCOPE-RESOLUTION-B" or gov38.get("outcome")!="not_required_as_dedicated_view": errors.append("current governance authority drift")
  if by.get("EXP-CONTRA-001",{}).get("classification")!="superseded_by": errors.append("stale governance claim not superseded")
- if idx.get("backend",{}).get("url")!="REPLACE" or idx.get("backend",{}).get("deployment_status")!="PENDING_TESTNET_DEPLOYMENT": errors.append("Indexer placeholder/deployment state drift")
+ deployment_status=idx.get("backend",{}).get("deployment_status")
+ if idx.get("backend",{}).get("url")!="REPLACE" or deployment_status not in {"PENDING_TESTNET_DEPLOYMENT","DEPLOYABLE_RUNTIME_QUALIFIED_LIVE_TESTNET_PENDING"}:
+  errors.append("Indexer placeholder/deployment state drift")
+ if deployment_status=="DEPLOYABLE_RUNTIME_QUALIFIED_LIVE_TESTNET_PENDING" and idx.get("backend",{}).get("live_deployment",{}).get("qualified") is not False:
+  errors.append("Indexer live deployment overpromotion")
  if exp.get("backend",{}).get("url")!="REPLACE" or exp.get("frontend",{}).get("url")!="REPLACE": errors.append("Explorer placeholder state drift")
  if idx.get("consumer_gates",{}).get("420Explorer")!="QUALIFIED_INDEXER_API_CONSUMER": errors.append("consumer gate drift")
  if "Qualified, read-only visibility" not in UI.read_text(encoding="utf-8"): errors.append("broad UI qualified copy no longer present; reconcile record")

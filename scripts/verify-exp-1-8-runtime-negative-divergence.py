@@ -57,7 +57,7 @@ def main():
 
     for token in ["RuntimeIssue","RuntimeIssueAt"]:
         if token not in model: errors.append(f"health runtime evidence missing: {token}")
-    for token in ["type RuntimeHealth struct","MarkHealthy","MarkFailure(issue string)","WithRuntimeHealth","State="DEGRADED""]:
+    for token in ["type RuntimeHealth struct","MarkHealthy","MarkFailure(issue string)","WithRuntimeHealth",'State="DEGRADED"']:
         if token not in backend: errors.append(f"runtime health latch missing: {token}")
 
     for token in [

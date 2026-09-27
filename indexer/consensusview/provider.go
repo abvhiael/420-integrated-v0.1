@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/420integrated/420-integrated/consensus/storage"
 	ctypes "github.com/420integrated/420-integrated/consensus/types"
@@ -67,4 +68,33 @@ func (p *Provider) Consensus() (model.ConsensusStatus, error) {
 		Safe: model.ConsensusCheckpoint{Slot: st.Safe.Slot, Root: rootString(st.Safe.Root)},
 		Finalized: model.ConsensusCheckpoint{Slot: st.Finalized.Slot, Root: rootString(st.Finalized.Root)},
 	}, nil
+}
+
+
+func (p *Provider) ProducerForBlock(executionHash string) (model.BlockProducer, bool, error) {
+	executionHash = strings.ToLower(strings.TrimSpace(executionHash))
+	if executionHash == "" { return model.BlockProducer{}, false, fmt.Errorf("%w: execution block hash required", ErrInvalidStatus) }
+	st, ok, err := p.store.Load()
+	if err != nil { return model.BlockProducer{}, false, err }
+	if !ok { return model.BlockProducer{}, false, ErrUnavailable }
+	var found *storage.ProducedBlockStatus
+	for i := range st.ProducedBlocks {
+		rec := &st.ProducedBlocks[i]
+		if strings.ToLower(strings.TrimSpace(rec.ExecutionBlockHash)) != executionHash { continue }
+		if found != nil { return model.BlockProducer{}, false, fmt.Errorf("%w: duplicate producer attribution for %s", ErrInvalidStatus, executionHash) }
+		found = rec
+	}
+	if found == nil { return model.BlockProducer{}, false, nil }
+	if found.ConsensusBlockRoot == "" { return model.BlockProducer{}, false, fmt.Errorf("%w: consensus block root missing for %s", ErrInvalidStatus, executionHash) }
+	if found.ProposerRank > 2 { return model.BlockProducer{}, false, fmt.Errorf("%w: proposer rank %d invalid", ErrInvalidStatus, found.ProposerRank) }
+	if len(st.ActiveSeats) > 0 && !containsSeat(st.ActiveSeats, found.ProducerSeat) {
+		return model.BlockProducer{}, false, fmt.Errorf("%w: producer seat %d outside active committee snapshot", ErrInvalidStatus, found.ProducerSeat)
+	}
+	return model.BlockProducer{
+		ConsensusSlot: found.Slot,
+		ProducerSeat: found.ProducerSeat,
+		ProposerRank: found.ProposerRank,
+		ConsensusBlockRoot: found.ConsensusBlockRoot,
+		Certified: found.Certified,
+	}, true, nil
 }

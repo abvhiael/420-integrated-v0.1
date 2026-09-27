@@ -215,3 +215,21 @@ Exact-head evidence:
 Full qualification record: [`CMP-1.2.7-SOLVENCY-REENTRANCY-PRIVILEGE-QUALIFICATION.md`](CMP-1.2.7-SOLVENCY-REENTRANCY-PRIVILEGE-QUALIFICATION.md).
 
 Full real end-to-end fixtures remain CMP-1.2.8; deployment/testnet evidence remains CMP-1.2.9; final phase reconciliation remains CMP-1.2.10.
+
+
+## CMP-1.2.8 — real end-to-end escrow lifecycle qualification
+
+**Status: COMPLETE within repository-level scope.** Exact qualified implementation/test head: `4e803611a6b10e69878c16e1c471287310ba4820`.
+
+The repository now proves integrated real-contract escrow transcripts for: funded -> matched -> accepted -> executed -> verified -> provider paid -> payer residual refunded; negative verification -> FAILED -> full original-payer refund -> REFUNDED; pre-execution cancellation -> full original-payer refund; and disputed provider claim -> independent payer-win adjudication -> exact original-payer refund.
+
+Exact-head evidence:
+
+- Solidity Contracts run `36289652122` — **success**, all 16 shards green.
+- `ComputeVerifiedEntitlement420Test` — shard 1 job `108539068671`: **42 passed / 0 failed / 0 skipped**.
+- 420 Integrated Qualification run `36289652114` — **success**.
+- 420Docs Qualification run `36289652117` — **success**.
+
+Full qualification record: [`CMP-1.2.8-END-TO-END-ESCROW-QUALIFICATION.md`](CMP-1.2.8-END-TO-END-ESCROW-QUALIFICATION.md).
+
+Live testnet deployment/address/code-hash/registry evidence remains CMP-1.2.9. Final phase reconciliation and release closeout remains CMP-1.2.10.

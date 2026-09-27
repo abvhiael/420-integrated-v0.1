@@ -88,10 +88,27 @@ func (e *Engine) Repair(ctx context.Context, remoteHead uint64) error {
 	if err != nil { return err }
 	if err := RequireRollback(cp.FinalizedHeight, ancestor); err != nil { return err }
 
-	if err := e.store.DeleteBlocksAbove(ancestor); err != nil { return fmt.Errorf("rollback above %d: %w", ancestor, err) }
 	ancestorBlock, exists, err := e.store.Block(ancestor)
 	if err != nil { return err }
-	if !exists { return fmt.Errorf("ancestor block %d missing after rollback", ancestor) }
+	if !exists { return fmt.Errorf("ancestor block %d missing before rollback", ancestor) }
+
+	// Validate the complete replacement branch before mutating local state.
+	// This includes historical producer attribution so an unavailable or
+	// contradictory consensus ledger cannot leave the index partially rolled back.
+	bundles := make([]indexerrpc.Bundle, 0, remoteHead-ancestor)
+	parentHash := ancestorBlock.Hash
+	for h := ancestor + 1; h <= remoteHead; h++ {
+		if err := ctx.Err(); err != nil { return err }
+		bundle, err := e.source.BundleByNumber(ctx, e.chainID, h, model.FinalityHead, e.schemaVersion)
+		if err != nil { return fmt.Errorf("replay preflight fetch block %d: %w", h, err) }
+		if bundle.Block.Number != h { return fmt.Errorf("remote returned block %d for requested %d", bundle.Block.Number, h) }
+		if bundle.Block.ParentHash != parentHash { return fmt.Errorf("non-contiguous replay at block %d", h) }
+		if err := e.attributeProducer(&bundle.Block); err != nil { return fmt.Errorf("replay producer attribution at block %d: %w", h, err) }
+		bundles = append(bundles, bundle)
+		parentHash = bundle.Block.Hash
+	}
+
+	if err := e.store.DeleteBlocksAbove(ancestor); err != nil { return fmt.Errorf("rollback above %d: %w", ancestor, err) }
 
 	cp.IndexedHeight = ancestor
 	cp.IndexedHash = ancestorBlock.Hash
@@ -99,14 +116,8 @@ func (e *Engine) Repair(ctx context.Context, remoteHead uint64) error {
 	cp.UpdatedAt = time.Now().UTC()
 	if err := e.store.SaveCheckpoint(cp); err != nil { return fmt.Errorf("save rollback checkpoint: %w", err) }
 
-	parentHash := ancestorBlock.Hash
-	for h := ancestor + 1; h <= remoteHead; h++ {
-		if err := ctx.Err(); err != nil { return err }
-		bundle, err := e.source.BundleByNumber(ctx, e.chainID, h, model.FinalityHead, e.schemaVersion)
-		if err != nil { return fmt.Errorf("replay fetch block %d: %w", h, err) }
-		if bundle.Block.Number != h { return fmt.Errorf("remote returned block %d for requested %d", bundle.Block.Number, h) }
-		if bundle.Block.ParentHash != parentHash { return fmt.Errorf("non-contiguous replay at block %d", h) }
-		if err := e.attributeProducer(&bundle.Block); err != nil { return fmt.Errorf("replay producer attribution at block %d: %w", h, err) }
+	for _, bundle := range bundles {
+		h := bundle.Block.Number
 		if err := e.store.PutBundle(bundle.Block, bundle.Transactions, bundle.Receipts, bundle.Logs); err != nil {
 			return fmt.Errorf("replay persist block %d: %w", h, err)
 		}
@@ -116,7 +127,6 @@ func (e *Engine) Repair(ctx context.Context, remoteHead uint64) error {
 		cp.IndexedHeight, cp.IndexedHash = h, bundle.Block.Hash
 		cp.UpdatedAt = time.Now().UTC()
 		if err := e.store.SaveCheckpoint(cp); err != nil { return fmt.Errorf("replay checkpoint block %d: %w", h, err) }
-		parentHash = bundle.Block.Hash
 	}
 	return nil
 }

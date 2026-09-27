@@ -59,6 +59,8 @@ status
 
 Never trust the self-reported hardware alone. Capabilities must eventually be benchmarked or attested.
 
+**CMP-1.3.0 baseline:** `docs/compute-market/CMP-1.3.0-WORKER-REGISTRY-BASELINE-AND-INTEGRATION-DESIGN.md` reconciles this original requirement with the canonical provider/node/resource registries, 420Trust evidence and the future CMP-1.5 compute-stake source. It freezes the non-duplicative worker identity, execution-key, capability, attestation, reputation, stake-reference and status model before executable implementation. This design gate does not itself implement or deploy ComputeWorkerRegistry.
+
 ## CMP-1.4 — ComputeVerifierRegistry
 
 Separate workers from verification authorities.

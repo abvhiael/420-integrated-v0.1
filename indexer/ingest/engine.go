@@ -45,7 +45,7 @@ func (e *Engine) WithProducerAttributor(a ProducerAttributor) *Engine { e.produc
 
 func (e *Engine) attributeProducer(block *model.BlockRecord) error {
 	if block.Number == 0 { return nil }
-	if e.producerAttributor == nil { return errors.New("historical producer attributor required") }
+	if e.producerAttributor == nil { return nil }
 	producer, ok, err := e.producerAttributor.ProducerForBlock(block.Hash)
 	if err != nil { return err }
 	if !ok { return fmt.Errorf("historical producer attribution missing for block %d %s", block.Number, block.Hash) }

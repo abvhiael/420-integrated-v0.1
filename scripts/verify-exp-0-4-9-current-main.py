@@ -6,7 +6,7 @@ M=ROOT/"docs/audit/EXP-0.4.9-current-main-requalification.json"
 CI=ROOT/"docs/audit/EXP-0.4.1-ci-qualification-inventory.json"
 CANON=ROOT/"docs/audit/EXP-0.4.7-canonical-qualification-ledger.json"
 RET=ROOT/"docs/audit/EXP-0.4.8-evidence-retention-reproducibility.json"
-EVIDENCE=ROOT/"exp-0-4-9-evidence"
+EVIDENCE=ROOT/"exp-0-4-9-evidence"\nMERGED_EXP0="b03e247aa4df0a6a6d978ffad8eedfe2487a3a6b"
 def load(p): return json.loads(p.read_text(encoding="utf-8"))
 def git(*args):
  p=subprocess.run(["git",*args],cwd=ROOT,text=True,capture_output=True)
@@ -30,12 +30,12 @@ def main():
  if not ancestor(mainsha): errors.append("recorded current main is not an ancestor of HEAD")
  if not ancestor(prev): errors.append("EXP-0.4.8 final qualified head is not an ancestor of HEAD")
  try:
-  ahead=int(git("rev-list","--count",f"{mainsha}..HEAD"))
+  ahead=int(git("rev-list","--count",f"{reconciliation_base}..HEAD"))
  except Exception as e:
   errors.append(f"cannot calculate ahead count: {e}"); ahead=-1
- if ahead < m.get("current_main_snapshot",{}).get("observed_ahead_by_before_0_4_9_changes",0): errors.append("ahead count regressed below observed snapshot")
+ if not post_merge and ahead < m.get("current_main_snapshot",{}).get("observed_ahead_by_before_0_4_9_changes",0): errors.append("ahead count regressed below observed snapshot")
  try:
-  changed=[x for x in git("diff","--name-only",f"{mainsha}..HEAD").splitlines() if x]
+  changed=[x for x in git("diff","--name-only",f"{reconciliation_base}..HEAD").splitlines() if x]
  except Exception as e:
   errors.append(f"cannot inspect branch delta: {e}"); changed=[]
  allowed_exact=set(m.get("allowed_delta",{}).get("exact_files",[]))
@@ -77,7 +77,7 @@ def main():
  if s.get("product_runtime_files_changed_by_exp_0_4") is not False: errors.append("runtime/product delta incorrectly asserted")
  if s.get("genesis_ready") is not False: errors.append("premature Genesis readiness")
  EVIDENCE.mkdir(exist_ok=True)
- out={"schema":"exp-0.4.9-evidence-v1","milestone":"EXP-0.4.9","head":git("rev-parse","HEAD"),"current_main_sha":mainsha,"current_main_is_ancestor":ancestor(mainsha),"exp_0_4_8_head_is_ancestor":ancestor(prev),"ahead_by":ahead,"changed_files":changed,"unexpected_files":unexpected,"genesis_blockers":state.get("active_genesis_blockers"),"unverified_acceptance_criteria":state.get("unverified_acceptance_criteria"),"errors":errors,"pass":not errors}
+ out={"schema":"exp-0.4.9-evidence-v1","milestone":"EXP-0.4.9","head":git("rev-parse","HEAD"),"historical_current_main_sha":mainsha,"merged_exp_0_sha":MERGED_EXP0 if post_merge else None,"reconciliation_base":reconciliation_base,"current_main_is_ancestor":ancestor(mainsha),"exp_0_4_8_head_is_ancestor":ancestor(prev),"ahead_by":ahead,"changed_files":changed,"unexpected_files":unexpected,"genesis_blockers":state.get("active_genesis_blockers"),"unverified_acceptance_criteria":state.get("unverified_acceptance_criteria"),"errors":errors,"pass":not errors}
  (EVIDENCE/"summary.json").write_text(json.dumps(out,indent=2)+"\n",encoding="utf-8")
  (EVIDENCE/"current-main-delta.json").write_text(json.dumps({"base":mainsha,"head":git("rev-parse","HEAD"),"ahead_by":ahead,"files":changed},indent=2)+"\n",encoding="utf-8")
  print(json.dumps(out,indent=2))

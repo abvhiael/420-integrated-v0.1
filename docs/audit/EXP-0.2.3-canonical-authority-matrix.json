@@ -1,0 +1,259 @@
+{
+  "schema": "420explorer-exp-0.2.3-canonical-authority-v1",
+  "milestone": "EXP-0.2.3",
+  "title": "Canonical data and authority requirements",
+  "predecessor": [
+    "EXP-0.2.1",
+    "EXP-0.2.2"
+  ],
+  "authorities": [
+    {
+      "id": "EXP-AUTH-001",
+      "domain": "chain inclusion and execution truth",
+      "canonical_authority": "420 Integrated canonical execution/consensus state",
+      "explorer_role": "derived presentation",
+      "indexer_role": "rebuildable projection",
+      "requirements": [
+        "preserve chainId",
+        "preserve canonical block hash",
+        "trace transaction, receipt and logs to the same block provenance",
+        "never infer success from transaction hash alone"
+      ],
+      "conflict_resolution": "canonical chain state wins; Explorer/Indexer projection is stale, degraded or incorrect until reconciled",
+      "evidence": [
+        "contracts/config/420explorer-genesis.json",
+        "explorer/service/service.go",
+        "explorer/service/transactionviews.go",
+        "indexer/model/model.go",
+        "docs/architecture/chain/transactions.md"
+      ]
+    },
+    {
+      "id": "EXP-AUTH-002",
+      "domain": "head safe finalized status",
+      "canonical_authority": "420 consensus/finality state",
+      "explorer_role": "display distinct projected finality classes",
+      "indexer_role": "project head/safe/finalized checkpoints",
+      "requirements": [
+        "head, safe and finalized remain distinct",
+        "finalizedHeight <= safeHeight <= indexed/head height",
+        "finalized history is not rewritten by ordinary Explorer/Indexer repair"
+      ],
+      "conflict_resolution": "fail closed on inconsistent finality ordering; do not collapse statuses",
+      "evidence": [
+        "contracts/config/420explorer-genesis.json",
+        "explorer/service/service.go",
+        "indexer/model/model.go"
+      ]
+    },
+    {
+      "id": "EXP-AUTH-003",
+      "domain": "fixed Genesis system addresses",
+      "canonical_authority": "frozen system-address maps",
+      "explorer_role": "read/display only",
+      "indexer_role": "project deployed code/events without reassigning addresses",
+      "requirements": [
+        "config/system-addresses.json and contracts/config/system-addresses.json remain identical",
+        "Explorer owns no reserved address",
+        "fixed predeploys are not replaced by candidate or Registry-resolved application addresses"
+      ],
+      "conflict_resolution": "frozen address map wins for fixed predeploy identity",
+      "evidence": [
+        "config/system-addresses.json",
+        "contracts/config/system-addresses.json",
+        "docs/audit/EXP-0.1.3-contract-abi-address-reconciliation.md"
+      ]
+    },
+    {
+      "id": "EXP-AUTH-004",
+      "domain": "Registry-resolved application implementations",
+      "canonical_authority": "ProtocolRegistry canonical contract state",
+      "explorer_role": "present versioned Registry projections",
+      "indexer_role": "project Registry service/version history with provenance",
+      "requirements": [
+        "preserve service ID, version, active state and implementation provenance",
+        "do not treat unpublished candidate address as active",
+        "security-sensitive clients may recheck direct canonical Registry state"
+      ],
+      "conflict_resolution": "canonical ProtocolRegistry state wins over Explorer/Indexer cache or documentation",
+      "evidence": [
+        "contracts/config/420explorer-genesis.json",
+        "explorer/service/registryviews.go",
+        "docs/apps/registry/architecture.md",
+        "docs/apps/registry/developer/api.md"
+      ]
+    },
+    {
+      "id": "EXP-AUTH-005",
+      "domain": "Indexer database and checkpoints",
+      "canonical_authority": "canonical chain plus owning protocol state",
+      "explorer_role": "consumer only",
+      "indexer_role": "rebuildable non-canonical storage/projection",
+      "requirements": [
+        "databaseIsNonCanonical remains true",
+        "Explorer implements no independent checkpoint store",
+        "Explorer implements no independent ingestion or reorg engine",
+        "derived projections may be discarded/rebuilt"
+      ],
+      "conflict_resolution": "rebuild/reconcile projection from canonical sources; never promote database contents to authority",
+      "evidence": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.1.2-indexer-dependency-reconciliation.md",
+        "docs/architecture/infrastructure/420indexer.md"
+      ]
+    },
+    {
+      "id": "EXP-AUTH-006",
+      "domain": "contract runtime identity and decoding",
+      "canonical_authority": "deployed runtime bytecode plus canonical deployment provenance; Registry commitments for registered version metadata",
+      "explorer_role": "display code hash/runtime code/decoded metadata",
+      "indexer_role": "version-aware derived decoder projection",
+      "requirements": [
+        "verified-source metadata cannot override runtime bytecode",
+        "labels cannot change execution truth",
+        "decoder output retains original chain/log provenance and Registry version provenance"
+      ],
+      "conflict_resolution": "runtime bytecode and canonical chain provenance win over labels, source claims or decoded metadata",
+      "evidence": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.1.3-contract-abi-address-reconciliation.md",
+        "indexer/decoder/dispatch.go"
+      ]
+    },
+    {
+      "id": "EXP-AUTH-007",
+      "domain": "Names and Identity labels",
+      "canonical_authority": "underlying address plus owning Names/Identity protocol state",
+      "explorer_role": "optional display enrichment",
+      "indexer_role": "optional derived lookup/projection",
+      "requirements": [
+        "labels never replace the underlying address",
+        "absence of label does not make address invalid",
+        "label disagreement cannot change transaction/contract provenance"
+      ],
+      "conflict_resolution": "display raw address and canonical owning-protocol facts; treat enrichment as secondary",
+      "evidence": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/architecture/protocols/registry-names-identity-420is.md",
+        "docs/audit/EXP-0.2.1-genesis-capability-matrix.json"
+      ]
+    },
+    {
+      "id": "EXP-AUTH-008",
+      "domain": "transaction settlement and payment meaning",
+      "canonical_authority": "canonical transaction/receipt plus owning payment/escrow/application protocol",
+      "explorer_role": "present generic transfer/execution facts",
+      "indexer_role": "project transaction, receipt and asset events",
+      "requirements": [
+        "Explorer may show success/revert, participants, value and assets",
+        "Explorer must not infer invoice, escrow or application settlement semantics from a generic transfer alone"
+      ],
+      "conflict_resolution": "owning protocol/application settlement rules win; Explorer remains evidentiary presentation only",
+      "evidence": [
+        "docs/audit/EXP-0.2.2-user-workflow-matrix.json",
+        "explorer/service/transactionviews.go",
+        "docs/architecture/chain/transactions.md"
+      ]
+    },
+    {
+      "id": "EXP-AUTH-009",
+      "domain": "staking, validator and reward authority",
+      "canonical_authority": "consensus plus Stake420/validator protocol state as applicable",
+      "explorer_role": "read-only presentation",
+      "indexer_role": "derived validator/consensus/staking projections",
+      "requirements": [
+        "Explorer gains no validator or staking mutation authority",
+        "consensus status is not automatically staking/reward history",
+        "missing staking/reward view remains a workflow gap rather than inferred data"
+      ],
+      "conflict_resolution": "consensus and Stake420/validator protocol state win",
+      "evidence": [
+        "contracts/config/420explorer-genesis.json",
+        "config/genesis-applications.json",
+        "docs/audit/EXP-0.2.2-user-workflow-matrix.json"
+      ]
+    },
+    {
+      "id": "EXP-AUTH-010",
+      "domain": "governance authority",
+      "canonical_authority": "Governance420/timelock and canonical chain state",
+      "explorer_role": "no mutation authority; governance display scope remains unresolved under EXP-0",
+      "indexer_role": "derived projection if/when required",
+      "requirements": [
+        "Explorer operators gain no governance authority",
+        "EXP-0.2.1 governance scope conflict remains explicit until resolved",
+        "no governance result may be synthesized from Explorer-local state"
+      ],
+      "conflict_resolution": "Governance420/timelock canonical state wins",
+      "evidence": [
+        "contracts/config/420explorer-genesis.json",
+        "config/genesis-applications.json",
+        "docs/audit/EXP-0.2.1-genesis-capability-matrix.json",
+        "config/system-addresses.json"
+      ]
+    },
+    {
+      "id": "EXP-AUTH-011",
+      "domain": "wallet, custody and execution authority",
+      "canonical_authority": "user-controlled wallet/Smart Account and owning protocol contracts",
+      "explorer_role": "read-only public observability",
+      "indexer_role": "read-only derived infrastructure",
+      "requirements": [
+        "Explorer cannot sign",
+        "Explorer cannot hold custody",
+        "Explorer cannot grant permissions",
+        "Explorer failure cannot block direct wallet/RPC/protocol interaction"
+      ],
+      "conflict_resolution": "wallet/account/protocol authority is independent of Explorer availability",
+      "evidence": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/architecture/trust-boundary-model.md",
+        "config/genesis-applications.json"
+      ]
+    },
+    {
+      "id": "EXP-AUTH-012",
+      "domain": "privacy-sensitive off-chain data",
+      "canonical_authority": "owning private/off-chain system and explicit on-chain commitments only where applicable",
+      "explorer_role": "display only public on-chain references/commitments",
+      "indexer_role": "must not promote private payloads to canonical state",
+      "requirements": [
+        "a hash or commitment visible on-chain does not make the underlying private payload public/canonical",
+        "Explorer must not imply possession or verification of hidden payloads"
+      ],
+      "conflict_resolution": "only the explicit public chain commitment is in Explorer scope",
+      "evidence": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/architecture/trust-boundary-model.md"
+      ]
+    },
+    {
+      "id": "EXP-AUTH-013",
+      "domain": "service health and wrong-network/staleness detection",
+      "canonical_authority": "target network identity plus authoritative upstream chain/protocol sources",
+      "explorer_role": "fail-closed diagnostic presentation",
+      "indexer_role": "expose chain ID, indexed/safe/finalized heights, ingest time and health state",
+      "requirements": [
+        "required chain ID is 420",
+        "wrong chain must not be presented as ready",
+        "stale/degraded/inconsistent Indexer must not be presented as healthy canonical truth",
+        "clients can see indexed/finalized heights"
+      ],
+      "conflict_resolution": "return degraded/not-ready state rather than silently serving contradictory data as qualified",
+      "evidence": [
+        "contracts/config/420explorer-genesis.json",
+        "explorer/service/service.go",
+        "indexer/model/model.go"
+      ]
+    }
+  ],
+  "global_invariants": [
+    "Explorer is never canonical protocol authority.",
+    "Indexer is never canonical protocol authority.",
+    "Derived data conflicts resolve toward canonical chain/consensus or the owning protocol contract.",
+    "Fixed Genesis predeploy identity comes from the frozen system-address map.",
+    "Registry-resolved application identity comes from canonical ProtocolRegistry state, not candidate documentation.",
+    "Presentation metadata, labels, source verification and decoded fields cannot override runtime execution truth.",
+    "Explorer must remain independently replaceable and unavailable without blocking canonical protocol interaction."
+  ]
+}

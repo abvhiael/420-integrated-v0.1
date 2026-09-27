@@ -1,0 +1,81 @@
+{
+  "schema": "420explorer-exp-0.3.8-governance-scope-decision-v1",
+  "milestone": "EXP-0.3.8",
+  "title": "420Explorer governance scope decision and atomic reconciliation",
+  "status": "resolved",
+  "conflict_id": "EXP-SCOPE-CONFLICT-001",
+  "decision": "EXP-SCOPE-RESOLUTION-B",
+  "subject": "governance view",
+  "outcome": "not_required_as_dedicated_view",
+  "authoritative_statement": "Governance is descriptive ecosystem subject matter and is not a mandatory dedicated 420Explorer Genesis view.",
+  "decision_authority": {
+    "authority": "repository owner / 420 Integrated Genesis product authority",
+    "instruction": "Proceed to EXP-0.3.8 and complete all tasks required to fully qualify the step.",
+    "application": "The registered Resolution B path is applied because the dedicated Explorer Genesis profile is the specific required-view contract and no governance implementation path was established."
+  },
+  "rationale": [
+    "contracts/config/420explorer-genesis.json is the dedicated Explorer Genesis profile and enumerates the ten mandatory requiredViews.",
+    "No dedicated Explorer governance API/view or required-view implementation path exists in the qualified EXP-0.3.2 path set.",
+    "Resolution B reconciles the broader application-purpose wording to the dedicated profile without silently expanding mandatory Genesis scope.",
+    "The decision does not classify governance as optional or post-Genesis; it states that no dedicated governance view is required by Explorer Genesis."
+  ],
+  "source_reconciliation": {
+    "application_purpose": {
+      "path": "config/genesis-applications.json",
+      "final_value": "Blocks, transactions, contracts, validators, assets, finality"
+    },
+    "dedicated_profile": {
+      "path": "contracts/config/420explorer-genesis.json",
+      "governance_required": false,
+      "required_view_count": 10
+    }
+  },
+  "retired_active_records": [
+    "EXP-CAP-019",
+    "EXP-REQ-SCOPE-001"
+  ],
+  "resolved_historical_records": [
+    "EXP-FIND-001"
+  ],
+  "acceptance_effects": {
+    "removed_blocker_from": [
+      "AC-5",
+      "AC-10"
+    ],
+    "acceptance_criteria_satisfied_by_this_step": [],
+    "note": "EXP-0.3.8 resolves only the governance scope ambiguity; all remaining acceptance criteria and blockers retain their existing status."
+  },
+  "atomic_reconciliation_manifest": [
+    "config/genesis-applications.json",
+    "contracts/config/420explorer-genesis.json",
+    "docs/audit/EXP-0.2.1-genesis-capability-matrix.json",
+    "docs/audit/EXP-0.2.2-user-workflow-matrix.json",
+    "docs/audit/EXP-0.2.5-genesis-gap-register.json",
+    "docs/audit/EXP-0.2.6-genesis-acceptance-criteria.json",
+    "docs/audit/EXP-0.3.1-authoritative-genesis-requirements.json",
+    "docs/audit/EXP-0.3.2-mandatory-capability-paths.json",
+    "docs/audit/EXP-0.3.3-mandatory-acceptance-tests.json",
+    "docs/audit/EXP-0.3.4-qualification-status-freeze.json",
+    "docs/audit/EXP-0.3.5-nonblocking-scope-exclusions.json",
+    "docs/audit/EXP-0.3.6-scope-conflict-resolution-register.json",
+    "docs/audit/EXP-0.3.7-bidirectional-traceability.json"
+  ],
+  "expected_post_resolution_state": {
+    "active_mandatory_requirements": 60,
+    "active_scope_decision_requirements": 0,
+    "active_requirements_total": 64,
+    "active_genesis_blocking_findings": 10,
+    "unresolved_scope_conflicts": 0,
+    "resolved_scope_conflicts": 1,
+    "final_exp0_scope_closeout_blocked_by_governance": false
+  },
+  "completion_conditions": [
+    "All authoritative scope sources agree that governance is not a mandatory dedicated Explorer Genesis view.",
+    "The active governance capability and scope-decision requirement are retired.",
+    "EXP-FIND-001 remains available as resolved non-blocking historical evidence.",
+    "AC-5 and AC-10 no longer list EXP-FIND-001 as a blocker.",
+    "All atomic reconciliation manifest files are internally consistent.",
+    "The EXP-0.3.8 verifier and every retained Explorer/Indexer/repository qualification gate pass on the exact same head."
+  ],
+  "scope_boundary": "This step resolves the governance scope conflict only. It does not satisfy unrelated runtime, deployment, workflow, security, recovery, or final Genesis acceptance criteria."
+}

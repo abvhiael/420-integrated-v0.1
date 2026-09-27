@@ -1,0 +1,273 @@
+{
+  "schema": "420explorer-exp-0.2.4-dependency-readiness-v1",
+  "milestone": "EXP-0.2.4",
+  "title": "Explorer Genesis dependency readiness matrix",
+  "status_dimensions": {
+    "source": [
+      "implemented_and_tested",
+      "implemented_source",
+      "source_present",
+      "not_observed",
+      "not_applicable"
+    ],
+    "deployment": [
+      "deployed",
+      "pending_deployment",
+      "unverified",
+      "not_applicable"
+    ],
+    "live_qualification": [
+      "qualified",
+      "unverified",
+      "not_applicable"
+    ]
+  },
+  "dependencies": [
+    {
+      "id": "EXP-DEP-001",
+      "name": "420Indexer /v1 read service",
+      "required_for_genesis": true,
+      "dependency_class": "shared_runtime",
+      "source_status": "implemented_and_tested",
+      "deployment_status": "pending_deployment",
+      "live_qualification": "unverified",
+      "evidence": [
+        "testnet/public-services/indexer/readiness.json",
+        "config/420indexer-v1.json",
+        "docs/audit/EXP-0.1.2-indexer-dependency-reconciliation.md"
+      ],
+      "readiness_basis": [
+        "Indexer qualification evidence marks core ingestion/read API implemented and tested",
+        "Explorer consumer gate is qualified at source/CI boundary"
+      ],
+      "remaining_gates": [
+        "publish real testnet Indexer URL",
+        "prove deployed server exposes all Explorer-required capability routes",
+        "prove chain ID/finality/freshness on live endpoint",
+        "provide representative indexed data"
+      ]
+    },
+    {
+      "id": "EXP-DEP-002",
+      "name": "Explorer backend service",
+      "required_for_genesis": true,
+      "dependency_class": "application_runtime",
+      "source_status": "implemented_and_tested",
+      "deployment_status": "pending_deployment",
+      "live_qualification": "unverified",
+      "evidence": [
+        "testnet/public-services/explorer/readiness.json",
+        ".github/workflows/explorer-live-testnet.yml",
+        "docs/audit/EXP-0.1.2-indexer-runtime-topology-addendum.md"
+      ],
+      "readiness_basis": [
+        "Explorer source and consumer tests exist",
+        "live validator workflow exists"
+      ],
+      "remaining_gates": [
+        "replace backend URL placeholder",
+        "deploy against qualified Indexer endpoint",
+        "run live testnet validator with concrete witnesses"
+      ]
+    },
+    {
+      "id": "EXP-DEP-003",
+      "name": "Explorer frontend/public URL",
+      "required_for_genesis": true,
+      "dependency_class": "application_runtime",
+      "source_status": "implemented_source",
+      "deployment_status": "pending_deployment",
+      "live_qualification": "unverified",
+      "evidence": [
+        "testnet/public-services/explorer/readiness.json",
+        "explorer/web/static/app.js",
+        ".github/workflows/explorer-live-testnet.yml"
+      ],
+      "readiness_basis": [
+        "frontend source implements required views",
+        "readiness fixture marks frontend PENDING"
+      ],
+      "remaining_gates": [
+        "publish production-equivalent testnet URL",
+        "exercise all required views against deployed backend",
+        "verify labels/finality/failure presentation"
+      ]
+    },
+    {
+      "id": "EXP-DEP-004",
+      "name": "canonical chain/RPC source for 420Indexer",
+      "required_for_genesis": true,
+      "dependency_class": "canonical_upstream",
+      "source_status": "implemented_source",
+      "deployment_status": "unverified",
+      "live_qualification": "unverified",
+      "evidence": [
+        "config/420indexer-v1.json",
+        "testnet/public-services/indexer/readiness.json",
+        "docs/architecture/infrastructure/420indexer.md"
+      ],
+      "readiness_basis": [
+        "Indexer source supports required chain ID, checkpoints, rebuild and wrong-chain rejection"
+      ],
+      "remaining_gates": [
+        "identify official qualified testnet RPC/node source",
+        "prove runtime chain ID 420",
+        "prove head/safe/finalized and receipt/log availability"
+      ]
+    },
+    {
+      "id": "EXP-DEP-005",
+      "name": "ProtocolRegistry canonical contract",
+      "required_for_genesis": true,
+      "dependency_class": "canonical_protocol",
+      "source_status": "implemented_source",
+      "deployment_status": "unverified",
+      "live_qualification": "unverified",
+      "evidence": [
+        "config/system-addresses.json",
+        "contracts/src/apps/ProtocolRegistry.sol",
+        "docs/apps/registry/architecture.md",
+        "docs/audit/EXP-0.1.3-contract-abi-address-reconciliation.md"
+      ],
+      "readiness_basis": [
+        "source exists and frozen system address is 0x0000000000000000000000000000000000000434",
+        "Registry is canonical discovery authority"
+      ],
+      "remaining_gates": [
+        "verify code exists at frozen address on target network",
+        "verify runtime code hash",
+        "verify authorized Registry publications needed by Explorer",
+        "exercise direct canonical reads against Indexer projection"
+      ]
+    },
+    {
+      "id": "EXP-DEP-006",
+      "name": "frozen Genesis system-address authority",
+      "required_for_genesis": true,
+      "dependency_class": "configuration_authority",
+      "source_status": "source_present",
+      "deployment_status": "not_applicable",
+      "live_qualification": "unverified",
+      "evidence": [
+        "config/system-addresses.json",
+        "contracts/config/system-addresses.json",
+        "docs/audit/EXP-0.2.3-canonical-authority-matrix.json"
+      ],
+      "readiness_basis": [
+        "two source maps match and freeze ProtocolRegistry/Names/Identity/Governance/Stake/consensus assignments"
+      ],
+      "remaining_gates": [
+        "verify target-network predeploy/code identity before treating addresses as live deployments"
+      ]
+    },
+    {
+      "id": "EXP-DEP-007",
+      "name": "Registry ABI/descriptor provenance for Indexer decoding",
+      "required_for_genesis": true,
+      "dependency_class": "build_and_decode",
+      "source_status": "source_present",
+      "deployment_status": "not_applicable",
+      "live_qualification": "unverified",
+      "evidence": [
+        "docs/audit/EXP-0.1.3-contract-abi-address-reconciliation.md",
+        "contracts/src/apps/ProtocolRegistry.sol",
+        "contracts/src/libraries/ServiceIds420.sol"
+      ],
+      "readiness_basis": [
+        "contract/event definitions and service IDs exist in source",
+        "EXP-0.1.3 recorded artifact/descriptor boundary"
+      ],
+      "remaining_gates": [
+        "produce/verify required compiled ABI artifacts for release path",
+        "bind decoder descriptors to deployed Registry/runtime provenance",
+        "test live historical/version decoding"
+      ]
+    },
+    {
+      "id": "EXP-DEP-008",
+      "name": "consensus/validator projection source",
+      "required_for_genesis": true,
+      "dependency_class": "shared_runtime",
+      "source_status": "implemented_source",
+      "deployment_status": "unverified",
+      "live_qualification": "unverified",
+      "evidence": [
+        "docs/audit/EXP-0.1.2-indexer-dependency-reconciliation.md",
+        "testnet/public-services/explorer/readiness.json",
+        "explorer/service/consensusviews.go"
+      ],
+      "readiness_basis": [
+        "Explorer and Indexer consensus interfaces exist in source",
+        "required consensus fields are declared"
+      ],
+      "remaining_gates": [
+        "prove deployed Indexer backend wires consensus provider",
+        "prove representative epoch/rotation/validator data",
+        "historical block-producer attribution remains a separate implementation gap from EXP-0.2.2"
+      ]
+    },
+    {
+      "id": "EXP-DEP-009",
+      "name": "420 Names display enrichment",
+      "required_for_genesis": false,
+      "dependency_class": "optional_enrichment",
+      "source_status": "not_observed",
+      "deployment_status": "unverified",
+      "live_qualification": "unverified",
+      "evidence": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.1-genesis-capability-matrix.json"
+      ],
+      "readiness_basis": [
+        "profile explicitly marks Names optional"
+      ],
+      "remaining_gates": [
+        "none for core Explorer Genesis qualification",
+        "if enabled, verify owning protocol deployment and never replace raw address"
+      ]
+    },
+    {
+      "id": "EXP-DEP-010",
+      "name": "420 Identity public-label enrichment",
+      "required_for_genesis": false,
+      "dependency_class": "optional_enrichment",
+      "source_status": "not_observed",
+      "deployment_status": "unverified",
+      "live_qualification": "unverified",
+      "evidence": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.2.1-genesis-capability-matrix.json"
+      ],
+      "readiness_basis": [
+        "profile explicitly marks Identity optional"
+      ],
+      "remaining_gates": [
+        "none for core Explorer Genesis qualification",
+        "if enabled, restrict to public display data and preserve raw address/provenance"
+      ]
+    },
+    {
+      "id": "EXP-DEP-011",
+      "name": "verified-source metadata / 420 Verify integration",
+      "required_for_genesis": false,
+      "dependency_class": "optional_enrichment",
+      "source_status": "not_observed",
+      "deployment_status": "unverified",
+      "live_qualification": "unverified",
+      "evidence": [
+        "contracts/config/420explorer-genesis.json",
+        "docs/audit/EXP-0.1.3-contract-abi-address-reconciliation.md",
+        "config/genesis-applications.json"
+      ],
+      "readiness_basis": [
+        "Explorer profile permits verified-source presentation metadata but does not make it execution authority"
+      ],
+      "remaining_gates": [
+        "none for raw contract inspection",
+        "if integrated, verify metadata provenance and ensure runtime bytecode remains authoritative"
+      ]
+    }
+  ],
+  "genesis_blocking_rule": "Only dependencies with required_for_genesis=true may block core Explorer Genesis readiness; optional enrichment absence must not block.",
+  "no_promotion_rule": "No dependency may be marked deployed or live-qualified solely from source files, frozen addresses, unit tests, CI qualification, or placeholder readiness records."
+}

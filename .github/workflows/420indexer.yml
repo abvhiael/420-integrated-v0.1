@@ -51,6 +51,11 @@ on:
       - 'docs/audit/EXP-1.3-canonical-indexing-invariants.json'
       - 'docs/audit/EXP-1.3-canonical-indexing-invariants.md'
       - 'scripts/verify-exp-1-3-canonical-indexing.py'
+      - 'docs/audit/EXP-1.4-indexer-runtime.json'
+      - 'docs/audit/EXP-1.4-indexer-runtime.md'
+      - 'scripts/verify-exp-1-4-indexer-runtime.py'
+      - 'docker/Dockerfile.420indexer'
+      - 'deployments/indexer/**'
       - 'indexer/store/**'
       - 'indexer/ingest/**'
       - 'indexer/reorg/**'
@@ -306,6 +311,10 @@ jobs:
         run: python scripts/verify-exp-1-2-rpc-binding.py
       - name: EXP-1.3 canonical indexing invariants
         run: python scripts/verify-exp-1-3-canonical-indexing.py
+      - name: EXP-1.4 deployable Indexer runtime
+        run: python scripts/verify-exp-1-4-indexer-runtime.py
+      - name: Build EXP-1.4 Indexer runtime binary
+        run: go build ./indexer/cmd/indexer420
       - name: EXP-0.1.1 pinned-tree exhaustive inventory
         if: always()
         run: python scripts/exp-0-1-1-inventory.py --commit 95a83a961286701b6e8c064de1deccad10f41fd7
@@ -511,4 +520,12 @@ jobs:
         with:
           name: exp-1-3-canonical-indexing
           path: exp-1-3-evidence/
+          if-no-files-found: error
+
+      - name: Upload EXP-1.4 runtime evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp-1-4-indexer-runtime
+          path: exp-1-4-evidence/
           if-no-files-found: error

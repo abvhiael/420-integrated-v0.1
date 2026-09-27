@@ -36,3 +36,35 @@ func TestConsensusProjectionRejectsBadQC(t *testing.T) {
 	p, _ := New(path)
 	if _, err := p.Consensus(); err == nil { t.Fatal("expected sub-quorum QC rejection") }
 }
+
+
+func TestConsensusProjectionRejectsImpossibleFinality(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "consensus.json")
+	store := storage.NewFileStore(path)
+	seats := make([]uint16, 15); for i := range seats { seats[i] = uint16(i) }
+	if err := store.Save(storage.Status{
+		Head: ctypes.Checkpoint{Slot:10}, Safe: ctypes.Checkpoint{Slot:11}, Finalized: ctypes.Checkpoint{Slot:9},
+		NextSlot:12, ActiveSeats:seats,
+		ScheduledProposer:storage.ProposerStatus{Slot:12,Primary:0,Fallback1:1,Fallback2:2},
+	}); err != nil { t.Fatal(err) }
+	p, _ := New(path)
+	if _, err := p.Consensus(); err == nil { t.Fatal("expected finality-order rejection") }
+}
+
+func TestConsensusProjectionRejectsProposerOutsideCommittee(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "consensus.json")
+	store := storage.NewFileStore(path)
+	seats := make([]uint16, 15); for i := range seats { seats[i] = uint16(i) }
+	if err := store.Save(storage.Status{
+		NextSlot:1, ActiveSeats:seats,
+		ScheduledProposer:storage.ProposerStatus{Slot:1,Primary:0,Fallback1:1,Fallback2:99},
+	}); err != nil { t.Fatal(err) }
+	p, _ := New(path)
+	if _, err := p.Consensus(); err == nil { t.Fatal("expected proposer-outside-committee rejection") }
+}
+
+func TestConsensusProjectionUnavailableWhenStateMissing(t *testing.T) {
+	p, err := New(filepath.Join(t.TempDir(), "missing.json"))
+	if err != nil { t.Fatal(err) }
+	if _, err := p.Consensus(); err == nil { t.Fatal("expected unavailable consensus status") }
+}

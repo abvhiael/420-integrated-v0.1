@@ -57,6 +57,12 @@ on:
       - 'docs/audit/EXP-1.5-consensus-provider.json'
       - 'docs/audit/EXP-1.5-consensus-provider.md'
       - 'scripts/verify-exp-1-5-consensus-provider.py'
+      - 'docs/audit/EXP-1.6-historical-producer-attribution.json'
+      - 'docs/audit/EXP-1.6-historical-producer-attribution.md'
+      - 'scripts/verify-exp-1-6-historical-producer.py'
+      - 'indexer/model/**'
+      - 'indexer/consensusview/**'
+      - 'consensus/storage/**'
       - 'docker/Dockerfile.420indexer'
       - 'deployments/indexer/**'
       - 'indexer/store/**'
@@ -330,6 +336,10 @@ jobs:
           mkdir -p /tmp/420consensus
           printf '{}\n' > /tmp/420consensus/status.json
           docker compose -f deployments/indexer/docker-compose.yml config >/dev/null
+      - name: EXP-1.6 historical block producer attribution
+        run: python scripts/verify-exp-1-6-historical-producer.py
+      - name: Build EXP-1.6 Indexer runtime binary
+        run: go build ./indexer/cmd/indexer420
       - name: EXP-0.1.1 pinned-tree exhaustive inventory
         if: always()
         run: python scripts/exp-0-1-1-inventory.py --commit 95a83a961286701b6e8c064de1deccad10f41fd7
@@ -551,4 +561,12 @@ jobs:
         with:
           name: exp-1-5-consensus-provider
           path: exp-1-5-evidence/
+          if-no-files-found: error
+
+      - name: Upload EXP-1.6 historical producer evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp-1-6-historical-producer
+          path: exp-1-6-evidence/
           if-no-files-found: error

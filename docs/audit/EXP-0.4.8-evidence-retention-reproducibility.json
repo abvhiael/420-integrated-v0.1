@@ -398,11 +398,11 @@
       "name": "exp-0-4-8-evidence-retention-reproducibility",
       "digest": "sha256:2a9fc26cfbb084d9c33b3140c9290721ba3f49e9b99e1a7ca3ef7342e78d9784"
     },
-    "scope": "repository-resident evidence retention, historical provenance integrity and replayability only",
+    "scope": "evidence retention, exact-head provenance preservation and replayability semantics only",
     "limitations": [
-      "does not make GitHub Actions artifacts permanent",
-      "does not reconstruct the one historical missing artifact digest",
-      "does not create runtime, deployment, live-network or Genesis qualification"
+      "repository/source and integration scope only",
+      "does not create runtime, deployment, live-network or Genesis qualification",
+      "does not resolve the ten active Genesis blockers or satisfy any acceptance criterion"
     ],
     "note": "Recording this evidence changes the branch head. The resulting exact head must rerun all retained qualification gates before EXP-0.4.8 is marked COMPLETE."
   }

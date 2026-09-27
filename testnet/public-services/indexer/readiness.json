@@ -1,10 +1,10 @@
 {
   "schema": "420-testnet-indexer-readiness-v1",
   "service": "420Indexer",
-  "status": "GEN11_1F_QUALIFICATION",
+  "status": "EXP_1_4_DEPLOYABLE_RUNTIME_QUALIFICATION",
   "backend": {
     "url": "REPLACE",
-    "deployment_status": "PENDING_TESTNET_DEPLOYMENT",
+    "deployment_status": "DEPLOYABLE_RUNTIME_QUALIFIED_LIVE_TESTNET_PENDING",
     "required_checks": [
       "rejects wrong-chain RPC sources",
       "indexes blocks by canonical hash and chain id",
@@ -32,7 +32,30 @@
       "fixed_snapshot_pagination": "IMPLEMENTED_AND_TESTED",
       "restart_reorg_integration_fixture": "IMPLEMENTED",
       "production_http_read_api": "IMPLEMENTED_AND_TESTED",
-      "first_consumer_420explorer": "IMPLEMENTED_PENDING_FINAL_CI"
+      "first_consumer_420explorer": "IMPLEMENTED_PENDING_FINAL_CI",
+      "long_running_http_runtime": "IMPLEMENTED_AND_TESTED",
+      "production_container_image": "IMPLEMENTED",
+      "deployment_manifest": "IMPLEMENTED",
+      "health_probe": "IMPLEMENTED",
+      "graceful_shutdown": "IMPLEMENTED",
+      "periodic_catchup": "IMPLEMENTED"
+    },
+    "runtime": {
+      "command": "./indexer/cmd/indexer420",
+      "container": "docker/Dockerfile.420indexer",
+      "deployment_manifest": "deployments/indexer/docker-compose.yml",
+      "http_api": "/v1",
+      "health_endpoint": "/v1/health",
+      "persistent_store": "/var/lib/420indexer/index.json",
+      "graceful_shutdown": true,
+      "periodic_catchup": true,
+      "initial_catchup_fail_closed": true
+    },
+    "live_deployment": {
+      "qualified": false,
+      "blocker": "testnet infrastructure and approved RPC endpoints remain unprovisioned/placeholders",
+      "infrastructure_inventory": "testnet/infrastructure/inventory.json",
+      "endpoint_inventory": "testnet/services/endpoints.json"
     }
   },
   "consumer_gates": {

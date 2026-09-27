@@ -158,5 +158,23 @@
     "publicFaultDetailPolicy": "categorical only; raw upstream errors remain server-side",
     "recoveryRule": "clear degraded runtime latch only after qualified RPC source, qualified consensus provider, and successful catch-up",
     "liveFaultInjectionStatus": "BLOCKED_PENDING_PROVISIONED_TESTNET"
+  },
+  "qualificationAutomation": {
+    "milestone": "EXP-1.9",
+    "exactHeadExpression": "github.event.pull_request.head.sha || github.sha",
+    "requiredAutomaticGates": [
+      "420Indexer",
+      "420Docs Qualification",
+      "420 Integrated Qualification"
+    ],
+    "dedicatedWorkflow": "EXP-1.9 CI Qualification Automation",
+    "exactCheckoutAssertionRequired": true,
+    "concurrencyCancellationRequired": true,
+    "contentsPermission": "read",
+    "retainedExp1Range": "EXP-1.1..EXP-1.9",
+    "evidenceArtifact": "exp-1-9-ci-qualification-automation",
+    "evidenceRetentionDays": 7,
+    "liveDeploymentEvidenceRequired": false,
+    "liveDeploymentQualified": false
   }
 }

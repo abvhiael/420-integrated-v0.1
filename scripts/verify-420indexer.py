@@ -13,9 +13,14 @@ if cfg.get("canonicalStateAuthority") is not False: errors.append("authority")
 if cfg.get("ingestion", {}).get("requiredChainId") != 420: errors.append("chain id")
 if cfg.get("reorgPolicy", {}).get("rewriteFinalized") is not False: errors.append("finalized rewrite")
 if ready.get("service") != "420Indexer": errors.append("readiness service")
-if ready.get("status") != "GEN11_1F_QUALIFICATION": errors.append("readiness status")
+if ready.get("status") not in {"GEN11_1F_QUALIFICATION", "EXP_1_4_DEPLOYABLE_RUNTIME_QUALIFICATION"}: errors.append("readiness status")
 if ready.get("authority", {}).get("canonical_state") is not False: errors.append("readiness authority")
-if ready.get("backend", {}).get("deployment_status") != "PENDING_TESTNET_DEPLOYMENT": errors.append("deployment status")
+deployment_status = ready.get("backend", {}).get("deployment_status")
+if deployment_status not in {"PENDING_TESTNET_DEPLOYMENT", "DEPLOYABLE_RUNTIME_QUALIFIED_LIVE_TESTNET_PENDING"}:
+    errors.append("deployment status")
+if deployment_status == "DEPLOYABLE_RUNTIME_QUALIFIED_LIVE_TESTNET_PENDING":
+    if ready.get("backend", {}).get("live_deployment", {}).get("qualified") is not False:
+        errors.append("live deployment overpromotion")
 
 required_consumers = {"420Explorer", "420Search", "420Analytics", "420Notifications", "420Status"}
 if not required_consumers.issubset(set(cfg.get("consumers", []))): errors.append("consumers")

@@ -53,5 +53,19 @@
     "IDX-INV-010",
     "IDX-INV-011",
     "IDX-INV-012"
-  ]
+  ],
+  "sourceQualification": {
+    "requiredChainId": 420,
+    "requireGenesisIdentity": true,
+    "expectedGenesisHashSource": "EXP-1.2 approved runtime binding record after testnet genesis is frozen",
+    "requireHeadSafeFinalized": true,
+    "requireFinalityOrdering": "finalized <= safe <= head",
+    "maxHeadAgeDefaultSeconds": 120,
+    "rejectMissingHashes": true,
+    "rejectCrossChainRecords": true,
+    "rejectMalformedSource": true,
+    "liveBindingStatus": "BLOCKED_PENDING_PROVISIONED_APPROVED_TESTNET_RPC",
+    "publicEndpointInventory": "testnet/services/endpoints.json",
+    "launchAuthority": "testnet/config/launch.json"
+  }
 }

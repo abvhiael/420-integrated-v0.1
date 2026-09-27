@@ -41,9 +41,10 @@ def main():
   if not (ROOT/p).exists(): errors.append(f"missing retained authority {p}")
  qm=next((x for x in ci.get("mechanisms",[]) if x.get("id")=="EXP-QM-009"),{})
  cmds=qm.get("command_group",[])
+ norm=[str(x) if str(x).startswith("scripts/") else "scripts/"+str(x) for x in cmds]
  required=[f"scripts/verify-exp-0-4-{i}-" for i in range(1,11)]
  for prefix in required:
-  if not any(str(x).startswith(prefix) for x in cmds): errors.append(f"retained verifier missing for {prefix}")
+  if not any(x.startswith(prefix) for x in norm): errors.append(f"retained verifier missing for {prefix}")
  s=m.get("summary",{})
  if s.get("exp_0_ready_for_closeout") is not True or s.get("exp_0_complete") is not False: errors.append("pre-closeout summary drift")
  if s.get("genesis_ready") is not False or s.get("next_stage")!="EXP-1": errors.append("handoff/readiness drift")

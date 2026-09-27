@@ -2,7 +2,7 @@
   "schema": "420explorer-exp-0.4.6-historical-contradiction-reconciliation-v1",
   "milestone": "EXP-0.4.6",
   "title": "420Explorer historical contradiction and stale-evidence reconciliation",
-  "status": "implementation_complete_exact_head_qualification_required",
+  "status": "qualified_repository_scope_pending_final_recording_head_requalification",
   "baseline": {
     "exp_0_4_5_final_head": "b54d9f7eeb6010b30350f796bfb195d9929f08b5",
     "pr": 376
@@ -251,5 +251,47 @@
     "historical_qualified_claims_promoted_to_genesis": 0,
     "current_genesis_blockers": 10,
     "current_unverified_acceptance_criteria": 10
+  },
+  "qualification": {
+    "qualified_head": "e82501616062ff08c2789ec24518f5433bbd99c4",
+    "runs": [
+      {
+        "workflow": "420Indexer",
+        "run_number": 631,
+        "run_id": 36285249197,
+        "job_ids": [
+          108524668014
+        ],
+        "conclusion": "success"
+      },
+      {
+        "workflow": "420Docs Qualification",
+        "run_number": 2961,
+        "run_id": 36285249160,
+        "job_ids": [
+          108524701360
+        ],
+        "conclusion": "success"
+      },
+      {
+        "workflow": "420 Integrated Qualification",
+        "run_number": 5578,
+        "run_id": 36285249040,
+        "job_ids": [
+          108524821587,
+          108524821663,
+          108524821684,
+          108524821688
+        ],
+        "conclusion": "success"
+      }
+    ],
+    "evidence_artifact": {
+      "id": 10919822778,
+      "name": "exp-0-4-6-historical-contradictions",
+      "digest": "sha256:cb01481456cb587ddfce280c2cd8ef2ff231cbb5e693851f1158e1cad699592c"
+    },
+    "scope": "historical evidence reconciliation only",
+    "note": "Evidence recording changes the branch head; final exact-head requalification is required."
   }
 }

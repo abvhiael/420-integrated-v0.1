@@ -1,0 +1,355 @@
+{
+  "schema": "420explorer-exp-0.4.8-evidence-retention-reproducibility-v1",
+  "milestone": "EXP-0.4.8",
+  "title": "420Explorer evidence retention and reproducibility manifest",
+  "status": "implementation_complete_exact_head_qualification_required",
+  "baseline": {
+    "exp_0_4_7_final_qualified_head": "c3b2d13d74ffed8be15edcecd144bc88959e5ab1",
+    "pr": 376,
+    "provenance_ledger": "docs/audit/EXP-0.4.3-qualification-evidence-ledger.json",
+    "canonical_ledger": "docs/audit/EXP-0.4.7-canonical-qualification-ledger.json",
+    "ci_inventory": "docs/audit/EXP-0.4.1-ci-qualification-inventory.json"
+  },
+  "retention_semantics": {
+    "repository_records": "Durable through Git history and sufficient to preserve the claimed evidence meaning, exact SHA, command/workflow identity and promotion limits.",
+    "action_artifacts": "Ephemeral external evidence. Artifact IDs/digests are retained here, but continued GitHub artifact availability is not assumed.",
+    "action_run_job_ids": "External provenance pointers; useful for audit while retained by GitHub but not the sole source of qualification meaning.",
+    "artifact_digest": "Integrity witness when historically recorded. A missing historical digest must remain explicitly unavailable and must never be reconstructed or guessed.",
+    "reproducibility": "Means the repository retains enough source, workflow/verifier identity, exact-head provenance and replay instructions to rerun the applicable qualification class; it does not mean an expired historical artifact can be byte-for-byte recovered."
+  },
+  "policies": [
+    "No qualification claim may depend solely on continued availability of a GitHub Actions artifact.",
+    "Every retained qualification event must name an exact commit and at least one successful run provenance pointer.",
+    "Every current EXP-0.4 closeout from 0.4.3 onward must retain an artifact digest.",
+    "Historical missing digests are fail-closed: preserve the missing state and use replay rather than fabrication.",
+    "Replay of repository qualification must use the workflow/verifier definitions from the target commit or a documented current-equivalent verifier chain; results qualify the replayed head, not the historical head.",
+    "Live/deployment evidence requires the original environment inputs or a new approved environment-bound execution; repository replay cannot substitute for it.",
+    "Final Genesis evidence must eventually be copied into repository-resident closeout records under EXP-8 in addition to external CI artifacts."
+  ],
+  "repository_retained_records": [
+    "docs/audit/EXP-0.4.1-ci-qualification-inventory.json",
+    "docs/audit/EXP-0.4.2-historical-closeout-inventory.json",
+    "docs/audit/EXP-0.4.3-qualification-evidence-ledger.json",
+    "docs/audit/EXP-0.4.4-requirement-ci-coverage.json",
+    "docs/audit/EXP-0.4.5-acceptance-criterion-evidence.json",
+    "docs/audit/EXP-0.4.6-historical-contradiction-reconciliation.json",
+    "docs/audit/EXP-0.4.7-canonical-qualification-ledger.json"
+  ],
+  "historical_provenance_rollup": {
+    "event_count": 17,
+    "exact_head_events": 17,
+    "events_with_run_ids": 17,
+    "events_with_job_ids": 17,
+    "events_with_artifact_ids": 17,
+    "events_with_complete_artifact_digests": 16,
+    "known_missing_digest_events": [
+      {
+        "id": "EXP-PROV-001",
+        "milestone": "EXP-0.1.1-0.1.3",
+        "qualified_head": "30ea2f5bfe434e92ec36c0f1dbfda60b2ec425f7",
+        "artifact_ids": [
+          10839658932
+        ],
+        "disposition": "historical_digest_unavailable_not_invented",
+        "replayable": true
+      }
+    ]
+  },
+  "final_closeouts": [
+    {
+      "milestone": "EXP-0.4.3",
+      "head": "1c379c81c12fd49a72009cc09215944d91b5456e",
+      "runs": [
+        {
+          "workflow": "420Indexer",
+          "run_number": 617,
+          "run_id": 36278183961,
+          "job_ids": [
+            108504849681,
+            108504849733,
+            108504849785,
+            108504849806
+          ],
+          "conclusion": "success"
+        },
+        {
+          "workflow": "420Docs Qualification",
+          "run_number": 2937,
+          "run_id": 36278183955,
+          "job_ids": [],
+          "conclusion": "success"
+        },
+        {
+          "workflow": "420 Integrated Qualification",
+          "run_number": 5554,
+          "run_id": 36278183925,
+          "job_ids": [
+            108504849681,
+            108504849733,
+            108504849785,
+            108504849806
+          ],
+          "conclusion": "success"
+        }
+      ],
+      "artifact": {
+        "id": 10917985622,
+        "name": "exp-0-4-3-qualification-evidence-ledger",
+        "digest": "sha256:b1821fb231c79873f0b9208538d13331a4cf775c74fb3e2907b9bd020218c8fa"
+      }
+    },
+    {
+      "milestone": "EXP-0.4.4",
+      "head": "0458043bea57f37b0593b48429c788e6f77146dc",
+      "runs": [
+        {
+          "workflow": "420Indexer",
+          "run_number": 623,
+          "run_id": 36278926545,
+          "job_ids": [],
+          "conclusion": "success"
+        },
+        {
+          "workflow": "420Docs Qualification",
+          "run_number": 2950,
+          "run_id": 36278926536,
+          "job_ids": [],
+          "conclusion": "success"
+        },
+        {
+          "workflow": "420 Integrated Qualification",
+          "run_number": 5567,
+          "run_id": 36278926515,
+          "job_ids": [
+            108506912455,
+            108506912516,
+            108506912546,
+            108506912551
+          ],
+          "conclusion": "success"
+        }
+      ],
+      "artifact": {
+        "id": 10917763577,
+        "name": "exp-0-4-4-requirement-ci-coverage",
+        "digest": "sha256:62b7262f5c7f3237bbed74f2a86f33649a84cffc33ff02445cd68df35907b84e"
+      }
+    },
+    {
+      "milestone": "EXP-0.4.5",
+      "head": "b54d9f7eeb6010b30350f796bfb195d9929f08b5",
+      "runs": [
+        {
+          "workflow": "420Indexer",
+          "run_number": 628,
+          "run_id": 36284668215,
+          "job_ids": [],
+          "conclusion": "success"
+        },
+        {
+          "workflow": "420Docs Qualification",
+          "run_number": 2958,
+          "run_id": 36284668208,
+          "job_ids": [],
+          "conclusion": "success"
+        },
+        {
+          "workflow": "420 Integrated Qualification",
+          "run_number": 5575,
+          "run_id": 36284668243,
+          "job_ids": [
+            108523032981,
+            108523033095,
+            108523033107,
+            108523033137
+          ],
+          "conclusion": "success"
+        }
+      ],
+      "artifact": {
+        "id": 10919544807,
+        "name": "exp-0-4-5-acceptance-criterion-evidence",
+        "digest": "sha256:ee1606fbb40637c66861555c4e581e272613efa4dd40b4f0bdd62efdd9faaf0c"
+      }
+    },
+    {
+      "milestone": "EXP-0.4.6",
+      "head": "298f73b99b384704a3231e5dfdfebef0bff3faab",
+      "runs": [
+        {
+          "workflow": "420Indexer",
+          "run_number": 634,
+          "run_id": 36289473062,
+          "job_ids": [
+            108536654031
+          ],
+          "conclusion": "success"
+        },
+        {
+          "workflow": "420Docs Qualification",
+          "run_number": 2964,
+          "run_id": 36289473077,
+          "job_ids": [
+            108536654148
+          ],
+          "conclusion": "success"
+        },
+        {
+          "workflow": "420 Integrated Qualification",
+          "run_number": 5581,
+          "run_id": 36289473085,
+          "job_ids": [
+            108536653990,
+            108536654059,
+            108536654064,
+            108536654066
+          ],
+          "conclusion": "success"
+        }
+      ],
+      "artifact": {
+        "id": 10921382561,
+        "name": "exp-0-4-6-historical-contradictions",
+        "digest": "sha256:816d9cc142f270ce853779e0a5b89f0c3e2dbd003089c06d2bbf0dd0cc6fb225"
+      }
+    },
+    {
+      "milestone": "EXP-0.4.7",
+      "head": "c3b2d13d74ffed8be15edcecd144bc88959e5ab1",
+      "runs": [
+        {
+          "workflow": "420Indexer",
+          "run_number": 651,
+          "run_id": 36292859272,
+          "job_ids": [
+            108546136287
+          ],
+          "conclusion": "success"
+        },
+        {
+          "workflow": "420Docs Qualification",
+          "run_number": 2987,
+          "run_id": 36292859268,
+          "job_ids": [
+            108546136410
+          ],
+          "conclusion": "success"
+        },
+        {
+          "workflow": "420 Integrated Qualification",
+          "run_number": 5604,
+          "run_id": 36292859269,
+          "job_ids": [
+            108546136431,
+            108546136493,
+            108546136541,
+            108546136557
+          ],
+          "conclusion": "success"
+        }
+      ],
+      "artifact": {
+        "id": 10922782987,
+        "name": "exp-0-4-7-canonical-qualification-ledger",
+        "digest": "sha256:5d324512484183c48e7ecf70415ef3ab0b0718bfdede139b6267f2e00efab90d"
+      }
+    }
+  ],
+  "replay_profiles": [
+    {
+      "id": "EXP-REPLAY-001",
+      "name": "Primary Explorer/Indexer repository qualification",
+      "workflow": ".github/workflows/420indexer.yml",
+      "exact_head_required": true,
+      "commands": [
+        "go test ./indexer/...",
+        "go vet ./indexer/...",
+        "cd 420-indexer && npm install --no-audit --no-fund && npm test",
+        "go test ./explorer/...",
+        "go vet ./explorer/...",
+        "run retained EXP verifier chain through EXP-0.4.8"
+      ],
+      "environment": [
+        "Go version from go.mod",
+        "Node 22",
+        "PostgreSQL 16 for TypeScript Indexer tests"
+      ],
+      "evidence_output": "exp-0-4-8-evidence/",
+      "qualification_scope": "repository source/integration/audit only"
+    },
+    {
+      "id": "EXP-REPLAY-002",
+      "name": "Integrated repository regression",
+      "workflow": ".github/workflows/qualification.yml",
+      "exact_head_required": true,
+      "commands": [
+        "offline-core",
+        "production-dependencies",
+        "pinned Geth Engine",
+        "fault matrix and soak"
+      ],
+      "environment": [
+        "ubuntu-latest",
+        "Go 1.23.x",
+        "pinned Geth build"
+      ],
+      "evidence_output": "GitHub run/job conclusions",
+      "qualification_scope": "supporting repository regression only"
+    },
+    {
+      "id": "EXP-REPLAY-003",
+      "name": "Documentation qualification",
+      "workflow": ".github/workflows/docs-qualify.yml",
+      "exact_head_required": true,
+      "commands": [
+        "python scripts/qualify-documentation.py"
+      ],
+      "environment": [
+        "Python 3.12",
+        "requirements-docs.txt"
+      ],
+      "evidence_output": "GitHub run/job conclusion",
+      "qualification_scope": "documentation/audit consistency"
+    },
+    {
+      "id": "EXP-REPLAY-004",
+      "name": "Explorer live environment validation",
+      "workflow": ".github/workflows/explorer-live-testnet.yml",
+      "exact_head_required": true,
+      "commands": [
+        "go test ./explorer/cmd/explorerlivevalidate",
+        "go run ./explorer/cmd/explorerlivevalidate"
+      ],
+      "environment": [
+        "approved explorer_url",
+        "expected chain id",
+        "representative witnesses"
+      ],
+      "evidence_output": "explorer-live-testnet-evidence",
+      "qualification_scope": "only the executed approved live environment",
+      "current_execution_state": "not_executed_for_current_genesis_closeout"
+    }
+  ],
+  "reproducibility_checks": {
+    "repository_records_exist": true,
+    "workflow_definitions_exist": true,
+    "verifier_chain_retained": true,
+    "historical_exact_heads_retained": true,
+    "final_closeout_digests_retained": true,
+    "external_artifact_permanence_required": false,
+    "missing_historical_digest_fabricated": false,
+    "live_environment_reproducibility_requires_new_execution": true
+  },
+  "summary": {
+    "provenance_events": 17,
+    "final_closeouts_recorded": 5,
+    "final_closeouts_with_digests": 5,
+    "known_historical_missing_artifact_digests": 1,
+    "replay_profiles": 4,
+    "repository_retained_records": 7,
+    "unreconciled_retention_gaps": 0,
+    "fabricated_evidence": 0,
+    "runtime_or_live_claims_created": 0,
+    "genesis_ready": false
+  }
+}

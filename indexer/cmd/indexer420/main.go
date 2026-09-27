@@ -82,7 +82,9 @@ func run() error {
 	// configured canonical source has passed validation and the first catch-up.
 	if err := engine.CatchUp(ctx); err != nil { return fmt.Errorf("initial catch-up: %w", err) }
 
-	backend := api.NewStoreBackend(durable, nil).WithConsensusProvider(consensusProvider)
+	runtimeHealth := api.NewRuntimeHealth()
+	runtimeHealth.MarkHealthy()
+	backend := api.NewStoreBackend(durable, nil).WithConsensusProvider(consensusProvider).WithRuntimeHealth(runtimeHealth)
 	server := &http.Server{
 		Addr:              httpAddr,
 		Handler:           api.NewServer(backend).Handler(),
@@ -109,12 +111,19 @@ func run() error {
 			if ok && err != nil { return fmt.Errorf("http server: %w", err) }
 			return nil
 		case <-ticker.C:
-			if err := engine.CatchUp(ctx); err != nil {
-				// Preserve the last known indexed state and keep the read API
-				// available. Source/finality conflicts are reflected by the
-				// indexer core and will fail closed rather than rewrite history.
-				fmt.Fprintf(os.Stderr, "420Indexer catch-up failed: %v\n", err)
+			if _, err := consensusProvider.Consensus(); err != nil {
+				runtimeHealth.MarkFailure("CONSENSUS_PROVIDER_UNAVAILABLE")
+				fmt.Fprintf(os.Stderr, "420Indexer consensus qualification failed: %v\n", err)
+				continue
 			}
+			if err := engine.CatchUp(ctx); err != nil {
+				// Preserve the last known indexed state, but explicitly degrade
+				// runtime health until a subsequent qualified poll succeeds.
+				runtimeHealth.MarkFailure("INGEST_CATCHUP_FAILED")
+				fmt.Fprintf(os.Stderr, "420Indexer catch-up failed: %v\n", err)
+				continue
+			}
+			runtimeHealth.MarkHealthy()
 		}
 	}
 }

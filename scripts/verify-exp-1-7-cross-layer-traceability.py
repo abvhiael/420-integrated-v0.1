@@ -120,7 +120,7 @@ def main():
     if trace.get("canonicalAuthority") is not False:
         errors.append("trace authority overpromoted")
 
-    if ready.get("status")!="EXP_1_7_CROSS_LAYER_TRACEABILITY_QUALIFICATION":
+    if ready.get("status") not in {"EXP_1_7_CROSS_LAYER_TRACEABILITY_QUALIFICATION","EXP_1_8_RUNTIME_NEGATIVE_DIVERGENCE_QUALIFICATION"}:
         errors.append("readiness milestone drift")
     backend=ready.get("backend",{})
     runtime=backend.get("runtime",{})

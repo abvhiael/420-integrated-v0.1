@@ -214,6 +214,10 @@ on:
       - 'scripts/verify-exp-0-3-8-scope-resolution.py'
       - '.github/workflows/420indexer.yml'
 
+concurrency:
+  group: 420indexer-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   qualify:
     runs-on: ubuntu-latest

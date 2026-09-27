@@ -72,3 +72,60 @@ func TestRestartThenRepairsNonFinalizedForkDeterministically(t *testing.T) {
 		t.Fatalf("unexpected repaired checkpoint: %+v", cp)
 	}
 }
+
+
+func TestInterruptedBundleWriteRecoversFromCanonicalSource(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "indexer.json")
+	source := integrationSource{bundles: map[uint64]indexerrpc.Bundle{
+		0: bundle(0, "g", ""), 1: bundle(1, "a1", "g"), 2: bundle(2, "a2", "a1"), 3: bundle(3, "a3", "a2"),
+	}, head: 1, safe: 1, finalized: 0}
+	s, err := store.NewFileStore(path)
+	if err != nil { t.Fatal(err) }
+	if err := New(420, "420-indexer-v1", source, s).CatchUp(context.Background()); err != nil { t.Fatal(err) }
+
+	// Simulate a crash after a non-canonical bundle write at height 2 but before checkpoint advancement.
+	stale := bundle(2, "stale2", "a1")
+	if err := s.PutBundle(stale.Block, stale.Transactions, stale.Receipts, stale.Logs); err != nil { t.Fatal(err) }
+	cpBefore, ok, err := s.Checkpoint()
+	if err != nil || !ok || cpBefore.IndexedHeight != 1 { t.Fatalf("checkpoint advanced unexpectedly: %+v ok=%v err=%v", cpBefore, ok, err) }
+
+	reopened, err := store.NewFileStore(path)
+	if err != nil { t.Fatal(err) }
+	full := integrationSource{bundles: map[uint64]indexerrpc.Bundle{
+		0: bundle(0, "g", ""), 1: bundle(1, "a1", "g"), 2: bundle(2, "a2", "a1"), 3: bundle(3, "a3", "a2"),
+	}, head: 3, safe: 2, finalized: 1}
+	if err := New(420, "420-indexer-v1", full, reopened).CatchUp(context.Background()); err != nil { t.Fatal(err) }
+	b2, ok, err := reopened.Block(2)
+	if err != nil || !ok || b2.Hash != "a2" { t.Fatalf("canonical replay did not replace stale DB row: %+v ok=%v err=%v", b2, ok, err) }
+	cp, ok, err := reopened.Checkpoint()
+	if err != nil || !ok || cp.IndexedHeight != 3 || cp.IndexedHash != "a3" { t.Fatalf("unexpected recovered checkpoint: %+v ok=%v err=%v", cp, ok, err) }
+}
+
+func TestCleanResetRebuildProducesSameCanonicalHistory(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "indexer.json")
+	source := integrationSource{bundles: map[uint64]indexerrpc.Bundle{
+		0: bundle(0, "g", ""), 1: bundle(1, "a1", "g"), 2: bundle(2, "a2", "a1"), 3: bundle(3, "a3", "a2"),
+	}, head: 3, safe: 2, finalized: 1}
+	s, err := store.NewFileStore(path)
+	if err != nil { t.Fatal(err) }
+	if err := New(420, "420-indexer-v1", source, s).CatchUp(context.Background()); err != nil { t.Fatal(err) }
+	before, _, _ := s.Checkpoint()
+
+	if err := s.Reset(); err != nil { t.Fatal(err) }
+	reopened, err := store.NewFileStore(path)
+	if err != nil { t.Fatal(err) }
+	if err := New(420, "420-indexer-v1", source, reopened).CatchUp(context.Background()); err != nil { t.Fatal(err) }
+	after, ok, err := reopened.Checkpoint()
+	if err != nil || !ok { t.Fatalf("rebuilt checkpoint missing: ok=%v err=%v", ok, err) }
+	if before.IndexedHeight != after.IndexedHeight || before.IndexedHash != after.IndexedHash ||
+		before.SafeHeight != after.SafeHeight || before.SafeHash != after.SafeHash ||
+		before.FinalizedHeight != after.FinalizedHeight || before.FinalizedHash != after.FinalizedHash {
+		t.Fatalf("rebuild diverged: before=%+v after=%+v", before, after)
+	}
+	for n := uint64(0); n <= 3; n++ {
+		b, ok, err := reopened.Block(n)
+		if err != nil || !ok || b.Hash != source.bundles[n].Block.Hash {
+			t.Fatalf("rebuilt block %d mismatch: %+v ok=%v err=%v", n, b, ok, err)
+		}
+	}
+}

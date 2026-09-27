@@ -104,4 +104,5 @@ func TestRepairFailsClosedWhenCanonicalForkProducerMissing(t *testing.T) {
 	src := &fakeSource{blocks:map[uint64]model.BlockRecord{0:block(0,"h0",""),1:block(1,"h1","h0"),2:block(2,"h2","h1"),3:block(3,"new3","h2")}}
 	e := New(420,"v1",src,s).WithProducerAttributor(producerAttributor{})
 	if err := e.Repair(context.Background(),3); err == nil { t.Fatal("expected missing replay attribution failure") }
+	if b, ok, _ := s.Block(3); !ok || b.Hash != "old3" { t.Fatalf("store mutated before producer preflight completed: %+v", b) }
 }

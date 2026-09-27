@@ -233,3 +233,18 @@ Exact-head evidence:
 Full qualification record: [`CMP-1.2.8-END-TO-END-ESCROW-QUALIFICATION.md`](CMP-1.2.8-END-TO-END-ESCROW-QUALIFICATION.md).
 
 Live testnet deployment/address/code-hash/registry evidence remains CMP-1.2.9. Final phase reconciliation and release closeout remains CMP-1.2.10.
+
+
+## CMP-1.2.9 — testnet deployment and live-chain qualification
+
+**Status: REPOSITORY DEPLOYMENT PACKAGE COMPLETE; LIVE QUALIFICATION BLOCKED.**
+
+Repository-controlled deployment readiness now includes a non-custodial `ComputeRouter420` discovery anchor, `ICompute420`, ProtocolRegistry publication topology tests, a fail-closed live evidence manifest, and a machine-checkable deployment verifier.
+
+Canonical discovery uses `keccak256("420/service/compute-market/v1")` from `ServiceIds420.sol`. The Registry publication target is the deployed read-only router; the router binds the qualified component graph and grants no custody or execution authority.
+
+Live COMPLETE is blocked because repository network authority still states `public_testnet_live=false` and real public endpoints are not configured. No deployment addresses, transaction hashes, runtime code hashes, live grant inventory, canonical Registry publication receipt, or real native-$420 funded/settled/refunded testnet transactions are available to verify.
+
+Full status record: [`CMP-1.2.9-TESTNET-DEPLOYMENT-QUALIFICATION.md`](CMP-1.2.9-TESTNET-DEPLOYMENT-QUALIFICATION.md).
+
+Do not mark CMP-1.2.9 or the overall CMP-1.2 phase COMPLETE until `python3 scripts/verify-cmp-1-2-9-deployment.py` passes in default/live mode against canonical chain evidence.

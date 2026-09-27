@@ -41,3 +41,12 @@ type ConsensusStatus struct {
 	Safe                 ConsensusCheckpoint `json:"safe"`
 	Finalized            ConsensusCheckpoint `json:"finalized"`
 }
+
+
+type BlockProducer struct {
+	ConsensusSlot      uint64 `json:"consensusSlot"`
+	ProducerSeat       uint16 `json:"producerSeat"`
+	ProposerRank       uint8  `json:"proposerRank"`
+	ConsensusBlockRoot string `json:"consensusBlockRoot"`
+	Certified          bool   `json:"certified"`
+}

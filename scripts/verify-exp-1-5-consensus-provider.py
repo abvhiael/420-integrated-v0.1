@@ -75,7 +75,7 @@ def main():
     if cq.get("requireStatusAtStartup") is not True: errors.append("startup qualification disabled")
     if cq.get("providerUnavailableBehavior")!="FAIL_CLOSED_AT_STARTUP_AND_503_AT_READ_BOUNDARY": errors.append("provider unavailable behavior drift")
 
-    if ready.get("status") not in {"EXP_1_5_CONSENSUS_PROVIDER_QUALIFICATION","EXP_1_6_HISTORICAL_PRODUCER_ATTRIBUTION_QUALIFICATION"}: errors.append("readiness milestone drift")
+    if ready.get("status") not in {"EXP_1_5_CONSENSUS_PROVIDER_QUALIFICATION","EXP_1_6_HISTORICAL_PRODUCER_ATTRIBUTION_QUALIFICATION","EXP_1_7_CROSS_LAYER_TRACEABILITY_QUALIFICATION"}: errors.append("readiness milestone drift")
     runtime=ready.get("backend",{}).get("runtime",{})
     if runtime.get("consensus_provider")!="indexer/consensusview.Provider": errors.append("runtime provider drift")
     if runtime.get("consensus_startup_qualification") is not True: errors.append("runtime startup qualification drift")

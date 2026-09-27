@@ -1,0 +1,1276 @@
+{
+  "schema": "420explorer-exp-0.4.3-qualification-evidence-ledger-v1",
+  "milestone": "EXP-0.4.3",
+  "title": "420Explorer exact-head qualification evidence provenance ledger",
+  "status": "qualified_repository_scope",
+  "baseline": {
+    "pr": 376,
+    "base_sha": "304cb61286c94f72d0b05e32e5f713b9d68bc450",
+    "pre_0_4_3_head": "0e0b6a35557e9e90a7b697903c8abeebcdfedebd"
+  },
+  "qualification_layers": {
+    "source_qualified": "Repository source/static checks passed on the recorded exact head.",
+    "integration_qualified": "Cross-component repository/integration checks passed on the recorded exact head.",
+    "runtime_qualified": "A production-equivalent runtime composition was executed and evidenced on the recorded exact head/environment.",
+    "deployment_qualified": "The intended deployed service identity/configuration was verified and evidenced.",
+    "live_network_qualified": "Approved live/testnet endpoint and representative witnesses were verified.",
+    "genesis_qualified": "All applicable acceptance criteria and blockers are closed on the exact release candidate."
+  },
+  "promotion_rules": [
+    "source_qualified does not imply runtime_qualified, deployment_qualified, live_network_qualified, or genesis_qualified",
+    "integration_qualified does not imply deployment or live-network qualification",
+    "artifact existence never substitutes for successful verifier/job conclusions",
+    "historical exact-head evidence remains evidence for its recorded scope but current promotion requires current authoritative ledgers and applicable later gates",
+    "Genesis qualification requires an exact release-candidate closeout and cannot be inferred from any single prior event"
+  ],
+  "qualification_profiles": {
+    "EXP-QP-001": {
+      "name": "Explorer/Indexer exact-head repository qualification",
+      "commands": [
+        "go test ./indexer/...",
+        "go vet ./indexer/...",
+        "npm test (420-indexer)",
+        "go test ./explorer/...",
+        "go vet ./explorer/...",
+        "readiness/config validation",
+        "retained EXP verifier chain",
+        "pinned-tree EXP-0.1.1 inventory"
+      ],
+      "layers": [
+        "source_qualified",
+        "integration_qualified"
+      ]
+    },
+    "EXP-QP-002": {
+      "name": "Documentation qualification",
+      "commands": [
+        "pip install -r requirements-docs.txt",
+        "python scripts/qualify-documentation.py"
+      ],
+      "layers": [
+        "source_qualified"
+      ]
+    },
+    "EXP-QP-003": {
+      "name": "Repository qualification",
+      "commands": [
+        "go test ./...",
+        "core binary builds",
+        "production dependency checks",
+        "pinned Geth Engine smoke",
+        "fault matrix",
+        "120-slot soak"
+      ],
+      "layers": [
+        "source_qualified",
+        "integration_qualified"
+      ]
+    }
+  },
+  "events": [
+    {
+      "id": "EXP-PROV-001",
+      "milestone": "EXP-0.1.1-0.1.3",
+      "pr": 372,
+      "branch": "audit/exp-0-1-1-complete-inventory-20260924",
+      "base_sha": "95a83a961286701b6e8c064de1deccad10f41fd7",
+      "qualified_head": "30ea2f5bfe434e92ec36c0f1dbfda60b2ec425f7",
+      "runs": [
+        {
+          "workflow": "420Indexer",
+          "run_id": 36075628271,
+          "job_ids": [
+            107886065975
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-001"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 10839658932,
+          "name": "exp-0-1-3-pinned-contract-dependencies",
+          "digest": null,
+          "provenance_status": "artifact_id_retained_digest_not_recorded_in_pr_closeout"
+        }
+      ],
+      "evidence_scope": [
+        "pinned-tree inventory",
+        "Explorer→Indexer source dependency inventory",
+        "contract/ABI/address source dependency inventory"
+      ],
+      "evidence_layers": [
+        "source_qualified"
+      ],
+      "requirement_scope": [
+        "EXP-0 inventory baseline"
+      ],
+      "finding_scope": [],
+      "acceptance_scope": [],
+      "applicability": "historical_supporting_evidence",
+      "reproducible": true,
+      "limitations": [
+        "source-level only",
+        "does not prove runtime, deployment, live network, or Genesis readiness"
+      ]
+    },
+    {
+      "id": "EXP-PROV-002",
+      "milestone": "EXP-0.2.1-0.2.2",
+      "pr": 373,
+      "branch": "audit/exp-0-2-1-genesis-capability-matrix-20260924",
+      "base_sha": "0b35683920e126d9507658e2fff47e9aeea13fdd",
+      "qualified_head": "9adb4fe5e9f7f4d6b9c7c832cf5e4781bab38dd0",
+      "runs": [
+        {
+          "workflow": "420Indexer",
+          "run_id": 36172696537,
+          "job_ids": [
+            108195831254
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-001"
+        },
+        {
+          "workflow": "420Docs Qualification",
+          "run_id": 36172696275,
+          "job_ids": [
+            108196015913
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-002"
+        },
+        {
+          "workflow": "420 Integrated Qualification",
+          "run_id": 36172696357,
+          "job_ids": [
+            108196065302,
+            108196065357,
+            108196065918,
+            108196065944
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-003"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 10881417628,
+          "name": "exp-0-2-1-genesis-capability-matrix",
+          "digest": "sha256:ce52eaeebd84ef9cd648c02e15d2b754394226929cb04ea8c1f1032b621c244a"
+        },
+        {
+          "id": 10880818063,
+          "name": "exp-0-2-2-user-workflow-matrix",
+          "digest": "sha256:5754fc557989ace3ea4c49e91da9ffd0a66a6a4e76e118b41bd222bff52eaf6a"
+        }
+      ],
+      "evidence_scope": [
+        "Genesis capability classification",
+        "user-workflow acceptance mapping"
+      ],
+      "evidence_layers": [
+        "source_qualified"
+      ],
+      "requirement_scope": [
+        "ten required views",
+        "15 user workflows"
+      ],
+      "finding_scope": [
+        "source and later runtime gaps"
+      ],
+      "acceptance_scope": [],
+      "applicability": "current_model_supporting_evidence",
+      "reproducible": true,
+      "limitations": [
+        "no live/testnet execution",
+        "no Genesis readiness claim"
+      ]
+    },
+    {
+      "id": "EXP-PROV-003",
+      "milestone": "EXP-0.2.3",
+      "pr": 373,
+      "branch": "audit/exp-0-2-1-genesis-capability-matrix-20260924",
+      "base_sha": "0b35683920e126d9507658e2fff47e9aeea13fdd",
+      "qualified_head": "151b8a75e9b12fd2864c3e2726f19e735b02369d",
+      "runs": [
+        {
+          "workflow": "420Indexer",
+          "run_id": 36197486135,
+          "job_ids": [
+            108276532430
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-001"
+        },
+        {
+          "workflow": "420Docs Qualification",
+          "run_id": 36197486041,
+          "job_ids": [
+            108276672875
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-002"
+        },
+        {
+          "workflow": "420 Integrated Qualification",
+          "run_id": 36197485980,
+          "job_ids": [
+            108276644767,
+            108276644879,
+            108276644901,
+            108276645050
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-003"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 10890309586,
+          "name": "exp-0-2-3-canonical-authority",
+          "digest": "sha256:3962af473be3579c2b5cf51821cc52ba0a3702f166de1b7133d288daf6198f5d"
+        }
+      ],
+      "evidence_scope": [
+        "13 canonical-data and authority domains"
+      ],
+      "evidence_layers": [
+        "source_qualified"
+      ],
+      "requirement_scope": [
+        "authority model"
+      ],
+      "finding_scope": [],
+      "acceptance_scope": [],
+      "applicability": "current_model_supporting_evidence",
+      "reproducible": true,
+      "limitations": [
+        "not live data correctness"
+      ]
+    },
+    {
+      "id": "EXP-PROV-004",
+      "milestone": "EXP-0.2.4",
+      "pr": 373,
+      "branch": "audit/exp-0-2-1-genesis-capability-matrix-20260924",
+      "base_sha": "0b35683920e126d9507658e2fff47e9aeea13fdd",
+      "qualified_head": "4d0f7a9f8a59e80da5a04a835cd8c2f8c729025c",
+      "runs": [
+        {
+          "workflow": "420Indexer",
+          "run_id": 36199607734,
+          "job_ids": [
+            108283155154
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-001"
+        },
+        {
+          "workflow": "420Docs Qualification",
+          "run_id": 36199607718,
+          "job_ids": [
+            108283181094
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-002"
+        },
+        {
+          "workflow": "420 Integrated Qualification",
+          "run_id": 36199607725,
+          "job_ids": [
+            108283294474,
+            108283294643,
+            108283294760,
+            108283294823
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-003"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 10891143289,
+          "name": "exp-0-2-4-dependency-readiness",
+          "digest": "sha256:daf292c565d8a6bde1551673191e63525fd32dcfb5d7a917b4edbe88cf0e48ae"
+        }
+      ],
+      "evidence_scope": [
+        "dependency readiness classification"
+      ],
+      "evidence_layers": [
+        "source_qualified"
+      ],
+      "requirement_scope": [
+        "mandatory and optional dependencies"
+      ],
+      "finding_scope": [
+        "EXP-FIND-002",
+        "EXP-FIND-003",
+        "EXP-FIND-004",
+        "EXP-FIND-005",
+        "EXP-FIND-006",
+        "EXP-FIND-007"
+      ],
+      "acceptance_scope": [
+        "AC-1",
+        "AC-2",
+        "AC-3",
+        "AC-4",
+        "AC-5",
+        "AC-6",
+        "AC-8"
+      ],
+      "applicability": "current_model_supporting_evidence",
+      "reproducible": true,
+      "limitations": [
+        "pending deployment/live qualification remains unpromoted"
+      ]
+    },
+    {
+      "id": "EXP-PROV-005",
+      "milestone": "EXP-0.2.5",
+      "pr": 373,
+      "branch": "audit/exp-0-2-1-genesis-capability-matrix-20260924",
+      "base_sha": "0b35683920e126d9507658e2fff47e9aeea13fdd",
+      "qualified_head": "023cdc716bee5297406f7d5d03eb00e31d0410bd",
+      "runs": [
+        {
+          "workflow": "420Indexer",
+          "run_id": 36217065908,
+          "job_ids": [
+            108335024094
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-001"
+        },
+        {
+          "workflow": "420Docs Qualification",
+          "run_id": 36217065977,
+          "job_ids": [
+            108335024690
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-002"
+        },
+        {
+          "workflow": "420 Integrated Qualification",
+          "run_id": 36217065916,
+          "job_ids": [
+            108335100181,
+            108335100247,
+            108335100273,
+            108335100297
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-003"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 10897452776,
+          "name": "exp-0-2-5-genesis-gap-register",
+          "digest": "sha256:b934dab173db1bb4919c05c40aedbc742957b204cb16d566f2c7ff134dc7005b"
+        }
+      ],
+      "evidence_scope": [
+        "Genesis blocker and qualification-gap classification"
+      ],
+      "evidence_layers": [
+        "source_qualified"
+      ],
+      "requirement_scope": [
+        "gap-linked requirements"
+      ],
+      "finding_scope": [
+        "EXP-FIND-001..EXP-FIND-014 historical set"
+      ],
+      "acceptance_scope": [
+        "AC-1..AC-10 mappings"
+      ],
+      "applicability": "current_model_supporting_evidence",
+      "reproducible": true,
+      "limitations": [
+        "qualifies the register, not remediation"
+      ]
+    },
+    {
+      "id": "EXP-PROV-006",
+      "milestone": "EXP-0.2.6",
+      "pr": 373,
+      "branch": "audit/exp-0-2-1-genesis-capability-matrix-20260924",
+      "base_sha": "0b35683920e126d9507658e2fff47e9aeea13fdd",
+      "qualified_head": "3dc6e048e2e919eb18fae2f6983cc390a7a94112",
+      "runs": [
+        {
+          "workflow": "420Indexer",
+          "run_id": 36217714046,
+          "job_ids": [
+            108336913093
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-001"
+        },
+        {
+          "workflow": "420Docs Qualification",
+          "run_id": 36217714058,
+          "job_ids": [
+            108336966533
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-002"
+        },
+        {
+          "workflow": "420 Integrated Qualification",
+          "run_id": 36217714070,
+          "job_ids": [
+            108336945103,
+            108336945125,
+            108336945188,
+            108336945197
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-003"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 10896994158,
+          "name": "exp-0-2-6-genesis-acceptance",
+          "digest": "sha256:82239af18a34ab1ea715824b4ac14fdf7493aa2bfd052b18b4e23d1e02b15e75"
+        }
+      ],
+      "evidence_scope": [
+        "AC-1 through AC-10 ownership/evidence map"
+      ],
+      "evidence_layers": [
+        "source_qualified"
+      ],
+      "requirement_scope": [
+        "Genesis acceptance model"
+      ],
+      "finding_scope": [
+        "mapped Genesis blockers"
+      ],
+      "acceptance_scope": [
+        "AC-1",
+        "AC-2",
+        "AC-3",
+        "AC-4",
+        "AC-5",
+        "AC-6",
+        "AC-7",
+        "AC-8",
+        "AC-9",
+        "AC-10"
+      ],
+      "applicability": "current_model_supporting_evidence",
+      "reproducible": true,
+      "limitations": [
+        "all criteria remain unverified"
+      ]
+    },
+    {
+      "id": "EXP-PROV-007",
+      "milestone": "EXP-0.3.1",
+      "pr": 375,
+      "branch": "audit/exp-0-3-1-authoritative-genesis-requirements-20260926",
+      "base_sha": "c7cb5f4dac07eb9416cac4a11eeee31b6efb10f0",
+      "qualified_head": "6a789ac84265c5ad573e37286bde3e4b37fd43a6",
+      "runs": [
+        {
+          "workflow": "420Indexer",
+          "run_id": 36218521573,
+          "job_ids": [
+            108339219192
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-001"
+        },
+        {
+          "workflow": "420Docs Qualification",
+          "run_id": 36218521511,
+          "job_ids": [
+            108339219174
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-002"
+        },
+        {
+          "workflow": "420 Integrated Qualification",
+          "run_id": 36218521490,
+          "job_ids": [
+            108339219067,
+            108339219202,
+            108339219215,
+            108339219273
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-003"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 10898281751,
+          "name": "exp-0-3-1-authoritative-genesis-requirements",
+          "digest": "sha256:4de42cab148930c7ebd0abb244891cc0834c57469178fcde9fd09d164d570545"
+        }
+      ],
+      "evidence_scope": [
+        "authoritative Genesis requirement inventory"
+      ],
+      "evidence_layers": [
+        "source_qualified"
+      ],
+      "requirement_scope": [
+        "65 historical entries / 60 mandatory after 0.3.8 reconciliation"
+      ],
+      "finding_scope": [
+        "linked blockers"
+      ],
+      "acceptance_scope": [
+        "mapped ACs"
+      ],
+      "applicability": "current_authoritative_ancestry",
+      "reproducible": true,
+      "limitations": [
+        "scope/status inventory only"
+      ]
+    },
+    {
+      "id": "EXP-PROV-008",
+      "milestone": "EXP-0.3.2",
+      "pr": 375,
+      "branch": "audit/exp-0-3-1-authoritative-genesis-requirements-20260926",
+      "base_sha": "c7cb5f4dac07eb9416cac4a11eeee31b6efb10f0",
+      "qualified_head": "0918ffc71c841e5f9fd7220f6ac969e4cff85c54",
+      "runs": [
+        {
+          "workflow": "420Indexer",
+          "run_id": 36220836355,
+          "job_ids": [
+            108345667823
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-001"
+        },
+        {
+          "workflow": "420Docs Qualification",
+          "run_id": 36220836354,
+          "job_ids": [
+            108345667845
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-002"
+        },
+        {
+          "workflow": "420 Integrated Qualification",
+          "run_id": 36220836347,
+          "job_ids": [
+            108345703326,
+            108345703387,
+            108345703388,
+            108345703407
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-003"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 10899331665,
+          "name": "exp-0-3-2-mandatory-capability-paths",
+          "digest": "sha256:2480f2f43752ac068c7ddb931fc75a8e7f81c19368503855893ff46f495c3af4"
+        }
+      ],
+      "evidence_scope": [
+        "ten mandatory view implementation paths"
+      ],
+      "evidence_layers": [
+        "source_qualified",
+        "integration_qualified"
+      ],
+      "requirement_scope": [
+        "10 mandatory required views"
+      ],
+      "finding_scope": [
+        "later feature/runtime gaps"
+      ],
+      "acceptance_scope": [
+        "mapped ACs"
+      ],
+      "applicability": "current_authoritative_ancestry",
+      "reproducible": true,
+      "limitations": [
+        "path completeness is not live or Genesis qualification"
+      ]
+    },
+    {
+      "id": "EXP-PROV-009",
+      "milestone": "EXP-0.3.3",
+      "pr": 375,
+      "branch": "audit/exp-0-3-1-authoritative-genesis-requirements-20260926",
+      "base_sha": "c7cb5f4dac07eb9416cac4a11eeee31b6efb10f0",
+      "qualified_head": "82b75c103451668ef3aae231c684f564aa92d552",
+      "runs": [
+        {
+          "workflow": "420Indexer",
+          "run_id": 36221533270,
+          "job_ids": [
+            108347596826
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-001"
+        },
+        {
+          "workflow": "420Docs Qualification",
+          "run_id": 36221533282,
+          "job_ids": [
+            108347684402
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-002"
+        },
+        {
+          "workflow": "420 Integrated Qualification",
+          "run_id": 36221533394,
+          "job_ids": [
+            108347968692,
+            108347968750,
+            108347968773,
+            108347968829
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-003"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 10899605299,
+          "name": "exp-0-3-3-mandatory-acceptance-tests",
+          "digest": "sha256:a436df954b17e846408d17b7d042b32dc25aebdce6bb8b45756228cefccbea69"
+        }
+      ],
+      "evidence_scope": [
+        "acceptance-test mapping for mandatory views"
+      ],
+      "evidence_layers": [
+        "source_qualified"
+      ],
+      "requirement_scope": [
+        "10 mandatory required views"
+      ],
+      "finding_scope": [
+        "later runtime/deployment owners"
+      ],
+      "acceptance_scope": [
+        "mapped ACs"
+      ],
+      "applicability": "current_authoritative_ancestry",
+      "reproducible": true,
+      "limitations": [
+        "mapped procedures need later execution"
+      ]
+    },
+    {
+      "id": "EXP-PROV-010",
+      "milestone": "EXP-0.3.4",
+      "pr": 375,
+      "branch": "audit/exp-0-3-1-authoritative-genesis-requirements-20260926",
+      "base_sha": "c7cb5f4dac07eb9416cac4a11eeee31b6efb10f0",
+      "qualified_head": "95c7d866d864a2c68ce90e992e4dccf2e2180030",
+      "runs": [
+        {
+          "workflow": "420Indexer",
+          "run_id": 36261250908,
+          "job_ids": [
+            108457371101
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-001"
+        },
+        {
+          "workflow": "420Docs Qualification",
+          "run_id": 36261250955,
+          "job_ids": [
+            108457373103
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-002"
+        },
+        {
+          "workflow": "420 Integrated Qualification",
+          "run_id": 36261250925,
+          "job_ids": [
+            108457371901,
+            108457372051,
+            108457372065,
+            108457372114
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-003"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 10912671787,
+          "name": "exp-0-3-4-qualification-status-freeze",
+          "digest": "sha256:9f626fc2716619e6b6a560bb31459402cae0c65b9bab0447172d4ee7706bae0a"
+        }
+      ],
+      "evidence_scope": [
+        "qualification-status freeze"
+      ],
+      "evidence_layers": [
+        "source_qualified"
+      ],
+      "requirement_scope": [
+        "all authoritative requirements"
+      ],
+      "finding_scope": [
+        "promotion blockers"
+      ],
+      "acceptance_scope": [
+        "AC-1..AC-10 remain unverified"
+      ],
+      "applicability": "current_authoritative_ancestry",
+      "reproducible": true,
+      "limitations": [
+        "zero Genesis-qualified requirements"
+      ]
+    },
+    {
+      "id": "EXP-PROV-011",
+      "milestone": "EXP-0.3.5",
+      "pr": 375,
+      "branch": "audit/exp-0-3-1-authoritative-genesis-requirements-20260926",
+      "base_sha": "c7cb5f4dac07eb9416cac4a11eeee31b6efb10f0",
+      "qualified_head": "54fe54d03c2f9c26ad42780815d852e5a4513036",
+      "runs": [
+        {
+          "workflow": "420Indexer",
+          "run_id": 36262010222,
+          "job_ids": [
+            108459513965
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-001"
+        },
+        {
+          "workflow": "420Docs Qualification",
+          "run_id": 36262010211,
+          "job_ids": [
+            108459516055
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-002"
+        },
+        {
+          "workflow": "420 Integrated Qualification",
+          "run_id": 36262010200,
+          "job_ids": [
+            108459557374,
+            108459557500,
+            108459557580,
+            108459557666
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-003"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 10912472147,
+          "name": "exp-0-3-5-nonblocking-scope-exclusions",
+          "digest": "sha256:f8096e89f0845db65953a2b001793655158eab289c897312e0ee6a8d661ab67c"
+        }
+      ],
+      "evidence_scope": [
+        "optional/post-Genesis exclusion discipline"
+      ],
+      "evidence_layers": [
+        "source_qualified"
+      ],
+      "requirement_scope": [
+        "4 excluded entries"
+      ],
+      "finding_scope": [
+        "non-blocking findings"
+      ],
+      "acceptance_scope": [],
+      "applicability": "current_authoritative_ancestry",
+      "reproducible": true,
+      "limitations": [
+        "does not promote exclusions to mandatory"
+      ]
+    },
+    {
+      "id": "EXP-PROV-012",
+      "milestone": "EXP-0.3.6",
+      "pr": 375,
+      "branch": "audit/exp-0-3-1-authoritative-genesis-requirements-20260926",
+      "base_sha": "c7cb5f4dac07eb9416cac4a11eeee31b6efb10f0",
+      "qualified_head": "d32d65ead2169d091524a1bfa40f5b4b0d6c2e9d",
+      "runs": [
+        {
+          "workflow": "420Indexer",
+          "run_id": 36262685650,
+          "job_ids": [
+            108461383795
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-001"
+        },
+        {
+          "workflow": "420Docs Qualification",
+          "run_id": 36262685658,
+          "job_ids": [
+            108461423237
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-002"
+        },
+        {
+          "workflow": "420 Integrated Qualification",
+          "run_id": 36262685745,
+          "job_ids": [
+            108461445531,
+            108461445596,
+            108461445637,
+            108461445665
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-003"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 10912343198,
+          "name": "exp-0-3-6-scope-conflict-resolution-register",
+          "digest": "sha256:d907ec3a184fd814460368792d360867807d6145059a43b18750281d1be0c08d"
+        }
+      ],
+      "evidence_scope": [
+        "scope-conflict register"
+      ],
+      "evidence_layers": [
+        "source_qualified"
+      ],
+      "requirement_scope": [
+        "governance scope decision chain"
+      ],
+      "finding_scope": [
+        "EXP-FIND-001 historical"
+      ],
+      "acceptance_scope": [
+        "AC-5",
+        "AC-10"
+      ],
+      "applicability": "historical_supporting_evidence",
+      "reproducible": true,
+      "limitations": [
+        "conflict later resolved by EXP-0.3.8"
+      ]
+    },
+    {
+      "id": "EXP-PROV-013",
+      "milestone": "EXP-0.3.7",
+      "pr": 375,
+      "branch": "audit/exp-0-3-1-authoritative-genesis-requirements-20260926",
+      "base_sha": "c7cb5f4dac07eb9416cac4a11eeee31b6efb10f0",
+      "qualified_head": "14192ec433d45bcfda5044ba07a4c1b25255ac5b",
+      "runs": [
+        {
+          "workflow": "420Indexer",
+          "run_id": 36264003842,
+          "job_ids": [
+            108465064030
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-001"
+        },
+        {
+          "workflow": "420Docs Qualification",
+          "run_id": 36264003822,
+          "job_ids": [
+            108465104447
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-002"
+        },
+        {
+          "workflow": "420 Integrated Qualification",
+          "run_id": 36264003832,
+          "job_ids": [
+            108465160108,
+            108465160223,
+            108465160289,
+            108465160316
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-003"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 10912334553,
+          "name": "exp-0-3-7-bidirectional-traceability",
+          "digest": "sha256:9f8086017ff3be16208549d38212eabd7363c60c3b49cc16dfbfcf92f15bff13"
+        }
+      ],
+      "evidence_scope": [
+        "bidirectional requirement/finding/milestone/AC traceability"
+      ],
+      "evidence_layers": [
+        "source_qualified"
+      ],
+      "requirement_scope": [
+        "60 mandatory plus historical governance decision requirement"
+      ],
+      "finding_scope": [
+        "11 then-current blockers"
+      ],
+      "acceptance_scope": [
+        "AC-1",
+        "AC-2",
+        "AC-3",
+        "AC-4",
+        "AC-5",
+        "AC-6",
+        "AC-7",
+        "AC-8",
+        "AC-9",
+        "AC-10"
+      ],
+      "applicability": "current_authoritative_ancestry",
+      "reproducible": true,
+      "limitations": [
+        "blocker/status counts reconciled by EXP-0.3.8"
+      ]
+    },
+    {
+      "id": "EXP-PROV-014",
+      "milestone": "EXP-0.3.8",
+      "pr": 375,
+      "branch": "audit/exp-0-3-1-authoritative-genesis-requirements-20260926",
+      "base_sha": "c7cb5f4dac07eb9416cac4a11eeee31b6efb10f0",
+      "qualified_head": "3bc8e7656ea0a23afe0e5e3aa6e360b63cfbf508",
+      "runs": [
+        {
+          "workflow": "420Indexer",
+          "run_id": 36265721531,
+          "job_ids": [
+            108469882754
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-001"
+        },
+        {
+          "workflow": "420Docs Qualification",
+          "run_id": 36265721588,
+          "job_ids": [
+            108469883252
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-002"
+        },
+        {
+          "workflow": "420 Integrated Qualification",
+          "run_id": 36265721573,
+          "job_ids": [
+            108469883157,
+            108469883261,
+            108469883307,
+            108469883324
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-003"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 10913526950,
+          "name": "exp-0-3-8-governance-scope-resolution",
+          "digest": "sha256:c5765cd4757bf6ac3685f5361a7d61250b9569a828c6e19361eb9c7074b797bb"
+        }
+      ],
+      "evidence_scope": [
+        "governance scope decision and atomic reconciliation"
+      ],
+      "evidence_layers": [
+        "source_qualified",
+        "integration_qualified"
+      ],
+      "requirement_scope": [
+        "60 mandatory current requirements"
+      ],
+      "finding_scope": [
+        "10 current Genesis blockers"
+      ],
+      "acceptance_scope": [
+        "AC-1..AC-10 unverified"
+      ],
+      "applicability": "current_authoritative",
+      "reproducible": true,
+      "limitations": [
+        "does not resolve remaining blockers"
+      ]
+    },
+    {
+      "id": "EXP-PROV-015",
+      "milestone": "EXP-0.4.1",
+      "pr": 376,
+      "branch": "audit/exp-0-4-1-ci-qualification-inventory-20260926",
+      "base_sha": "304cb61286c94f72d0b05e32e5f713b9d68bc450",
+      "qualified_head": "6307f04f4efaf9dff4f911897c04e7032984eefa",
+      "runs": [
+        {
+          "workflow": "420Indexer",
+          "run_id": 36270684529,
+          "job_ids": [
+            108483922341
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-001"
+        },
+        {
+          "workflow": "420Docs Qualification",
+          "run_id": 36270684374,
+          "job_ids": [
+            108483922037
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-002"
+        },
+        {
+          "workflow": "420 Integrated Qualification",
+          "run_id": 36270684493,
+          "job_ids": [
+            108483922272,
+            108483922415,
+            108483922433,
+            108483922459
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-003"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 10915107733,
+          "name": "exp-0-4-1-ci-qualification-inventory",
+          "digest": "sha256:e662530385ca54357a53327828e3908b04421f968ec7a547090091d32a330f90"
+        }
+      ],
+      "evidence_scope": [
+        "CI/qualification mechanism inventory"
+      ],
+      "evidence_layers": [
+        "source_qualified",
+        "integration_qualified"
+      ],
+      "requirement_scope": [
+        "qualification machinery"
+      ],
+      "finding_scope": [],
+      "acceptance_scope": [
+        "AC-9",
+        "AC-10 evidence discipline"
+      ],
+      "applicability": "current_authoritative",
+      "reproducible": true,
+      "limitations": [
+        "not deployment/live evidence"
+      ]
+    },
+    {
+      "id": "EXP-PROV-016",
+      "milestone": "EXP-0.4.2",
+      "pr": 376,
+      "branch": "audit/exp-0-4-1-ci-qualification-inventory-20260926",
+      "base_sha": "304cb61286c94f72d0b05e32e5f713b9d68bc450",
+      "qualified_head": "7e97fd4fb472f42e91dde45e1d6a808dddf9bc56",
+      "runs": [
+        {
+          "workflow": "420Indexer",
+          "run_id": 36271531639,
+          "job_ids": [
+            108486296219
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-001"
+        },
+        {
+          "workflow": "420Docs Qualification",
+          "run_id": 36271531648,
+          "job_ids": [
+            108486296379
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-002"
+        },
+        {
+          "workflow": "420 Integrated Qualification",
+          "run_id": 36271531693,
+          "job_ids": [
+            108486385464,
+            108486385541,
+            108486385563,
+            108486385571
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-003"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 10915817634,
+          "name": "exp-0-4-2-historical-closeout-inventory",
+          "digest": "sha256:32c88290fc1a95f4bac35225ca94d73b98999c4d91b04b8e93be74e048c676d5"
+        }
+      ],
+      "evidence_scope": [
+        "historical qualification/closeout provenance interpretation"
+      ],
+      "evidence_layers": [
+        "source_qualified",
+        "integration_qualified"
+      ],
+      "requirement_scope": [
+        "historical claim discipline"
+      ],
+      "finding_scope": [
+        "10 current blockers protected from historical overpromotion"
+      ],
+      "acceptance_scope": [
+        "AC-1..AC-10 remain unverified"
+      ],
+      "applicability": "current_authoritative",
+      "reproducible": true,
+      "limitations": [
+        "no live closeout invented"
+      ]
+    },
+    {
+      "id": "EXP-PROV-017",
+      "milestone": "EXP-0.4.3",
+      "pr": 376,
+      "branch": "audit/exp-0-4-1-ci-qualification-inventory-20260926",
+      "base_sha": "304cb61286c94f72d0b05e32e5f713b9d68bc450",
+      "qualified_head": "1a9ba8d0c81e9e8fe2f35655ddd5235dd6ab2f8f",
+      "runs": [
+        {
+          "workflow": "420Indexer",
+          "run_id": 36273730986,
+          "job_ids": [
+            108492373617
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-001"
+        },
+        {
+          "workflow": "420Docs Qualification",
+          "run_id": 36273730968,
+          "job_ids": [
+            108492375629
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-002"
+        },
+        {
+          "workflow": "420 Integrated Qualification",
+          "run_id": 36273731020,
+          "job_ids": [
+            108492433189,
+            108492433295,
+            108492433316,
+            108492433374
+          ],
+          "conclusion": "success",
+          "qualification_profile": "EXP-QP-003"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 10916835141,
+          "name": "exp-0-4-3-qualification-evidence-ledger",
+          "digest": "sha256:3370b78c68cd05be90fb74d7d5b55d71d5f00ed3e464c3174802b7021a0544e4"
+        }
+      ],
+      "evidence_scope": [
+        "exact-head qualification evidence provenance ledger and promotion discipline"
+      ],
+      "evidence_layers": [
+        "source_qualified",
+        "integration_qualified"
+      ],
+      "requirement_scope": [
+        "qualification provenance for EXP-0.1 through EXP-0.4.3"
+      ],
+      "finding_scope": [
+        "10 current blockers protected from evidence overpromotion"
+      ],
+      "acceptance_scope": [
+        "AC-1..AC-10 remain unverified"
+      ],
+      "applicability": "current_authoritative",
+      "reproducible": true,
+      "limitations": [
+        "records provenance only; no runtime, deployment, live-network, or Genesis qualification"
+      ]
+    }
+  ],
+  "summary": {
+    "event_count": 17,
+    "exact_head_events": 17,
+    "events_with_run_ids": 17,
+    "events_with_job_ids": 17,
+    "events_with_artifact_ids": 17,
+    "events_with_complete_artifact_digests": 16,
+    "source_qualified_events": 17,
+    "integration_qualified_events": 12,
+    "runtime_qualified_events": 0,
+    "deployment_qualified_events": 0,
+    "live_network_qualified_events": 0,
+    "genesis_qualified_events": 0,
+    "current_genesis_blockers": 10,
+    "current_acceptance_criteria_unverified": 10
+  },
+  "qualification": {
+    "qualified_head": "1a9ba8d0c81e9e8fe2f35655ddd5235dd6ab2f8f",
+    "runs": [
+      {
+        "workflow": "420Indexer",
+        "run_number": 614,
+        "run_id": 36273730986,
+        "conclusion": "success"
+      },
+      {
+        "workflow": "420Docs Qualification",
+        "run_number": 2934,
+        "run_id": 36273730968,
+        "conclusion": "success"
+      },
+      {
+        "workflow": "420 Integrated Qualification",
+        "run_number": 5551,
+        "run_id": 36273731020,
+        "conclusion": "success",
+        "job_ids": [
+          108492433189,
+          108492433295,
+          108492433316,
+          108492433374
+        ]
+      }
+    ],
+    "evidence_artifact": {
+      "id": 10916835141,
+      "name": "exp-0-4-3-qualification-evidence-ledger",
+      "digest": "sha256:3370b78c68cd05be90fb74d7d5b55d71d5f00ed3e464c3174802b7021a0544e4"
+    },
+    "scope": "exact-head provenance ledger and qualification-level discipline only",
+    "note": "Recording this evidence changes the branch head. The resulting cumulative head must rerun before EXP-0.4.3 is finally closed and before EXP-0.4.4 qualification."
+  }
+}

@@ -2,7 +2,7 @@
   "schema": "420explorer-exp-0.4.7-canonical-qualification-ledger-v1",
   "milestone": "EXP-0.4.7",
   "title": "420Explorer canonical qualification ledger",
-  "status": "implementation_complete_exact_head_qualification_required",
+  "status": "qualified_repository_scope_pending_final_recording_head_requalification",
   "baseline": {
     "exp_0_4_6_final_qualified_head": "298f73b99b384704a3231e5dfdfebef0bff3faab",
     "pr": 376,
@@ -6862,5 +6862,53 @@
     "promoted_requirements": 0,
     "satisfied_acceptance_criteria": 0,
     "genesis_ready": false
+  },
+  "qualification": {
+    "qualified_head": "dae98752645b416e359f20c81cc814a937bd52dd",
+    "runs": [
+      {
+        "workflow": "420Indexer",
+        "run_number": 648,
+        "run_id": 36292497908,
+        "job_ids": [
+          108545143461
+        ],
+        "conclusion": "success"
+      },
+      {
+        "workflow": "420Docs Qualification",
+        "run_number": 2984,
+        "run_id": 36292497879,
+        "job_ids": [
+          108545144676
+        ],
+        "conclusion": "success"
+      },
+      {
+        "workflow": "420 Integrated Qualification",
+        "run_number": 5601,
+        "run_id": 36292497884,
+        "job_ids": [
+          108545145373,
+          108545145386,
+          108545145423,
+          108545145433
+        ],
+        "conclusion": "success"
+      }
+    ],
+    "evidence_artifact": {
+      "id": 10923190695,
+      "name": "exp-0-4-7-canonical-qualification-ledger",
+      "digest": "sha256:d8e622d65b0498f5387bc0fb573fac74a0adfe17b6341f7a4697a8ca400476bb"
+    },
+    "scope": "canonical repository qualification crosswalk for requirements, blockers, ACs, evidence freshness and promotion gates",
+    "limitations": [
+      "repository/source and integration scope only",
+      "does not resolve any of the ten active Genesis blockers",
+      "does not satisfy any AC",
+      "does not prove runtime, deployment, live-network or Genesis qualification"
+    ],
+    "note": "Recording this evidence changes the branch head. The resulting head must rerun all retained qualification gates before EXP-0.4.7 is marked COMPLETE."
   }
 }

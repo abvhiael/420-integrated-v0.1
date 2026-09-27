@@ -89,7 +89,7 @@ def main():
     if hp.get("requireForNonGenesisBlocksWhenProviderConfigured") is not True: errors.append("producer requirement disabled")
     if hp.get("reorgPolicy","").startswith("preflight complete replacement branch") is not True: errors.append("reorg producer policy drift")
 
-    if ready.get("status") not in {"EXP_1_6_HISTORICAL_PRODUCER_ATTRIBUTION_QUALIFICATION","EXP_1_7_CROSS_LAYER_TRACEABILITY_QUALIFICATION"}: errors.append("readiness milestone drift")
+    if ready.get("status") not in {"EXP_1_6_HISTORICAL_PRODUCER_ATTRIBUTION_QUALIFICATION","EXP_1_7_CROSS_LAYER_TRACEABILITY_QUALIFICATION","EXP_1_8_RUNTIME_NEGATIVE_DIVERGENCE_QUALIFICATION"}: errors.append("readiness milestone drift")
     br=ready.get("backend",{})
     rr=br.get("runtime",{})
     if rr.get("historical_producer_source")!="consensus/storage.Status.produced_blocks": errors.append("runtime historical source drift")

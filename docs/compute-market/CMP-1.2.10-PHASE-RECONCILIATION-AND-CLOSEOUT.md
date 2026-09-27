@@ -1,15 +1,15 @@
 # CMP-1.2.10 — Phase reconciliation and release closeout
 
-Status: **REPOSITORY RECONCILIATION COMPLETE; CMP-1.2 RELEASE BLOCKED BY LIVE DEPLOYMENT AND CMP-1.5 STAKE-SLASH PREREQUISITES.**
+Status: **COMPLETE WITHIN REPOSITORY QUALIFICATION SCOPE; CMP-1.2 LIVE/PRODUCTION RELEASE REMAINS BLOCKED BY LIVE DEPLOYMENT AND CMP-1.5 STAKE-SLASH PREREQUISITES.**
 
 This step is the final reconciliation gate for the original CMP-1.2 ComputeEscrow deliverable. It reconciles the implementation history, current `main`, the original roadmap requirements, repository qualification evidence and the remaining operational/cross-phase gates. It does not convert an unavailable live network or an unimplemented stake-slashing source into synthetic evidence.
 
 ## Current-main reconciliation
 
-The CMP branch was reconciled with current `main`:
+The CMP branch was reconciled with the latest `main` after the Explorer EXP-0 merge:
 
-- reconciled `main`: `304cb61286c94f72d0b05e32e5f713b9d68bc450`;
-- reconciliation commit: `cc42be007f5a2aa5adc830152247565d6a0b6346`;
+- reconciled `main`: `b03e247aa4df0a6a6d978ffad8eedfe2487a3a6b`;
+- reconciliation commit: `ee5e97bd9cc322e0794e2c57a4523035370788be`;
 - post-reconciliation comparison: branch ahead of `main`, **behind by 0 commits**.
 
 The reconciliation used GitHub's clean merge result for the current PR and preserved both histories. No frozen system-address assignment was replaced by the CMP branch.
@@ -28,7 +28,7 @@ The reconciliation used GitHub's clean merge result for the current PR and prese
 | CMP-1.2.7 | Complete within repository scope: solvency, reentrancy, privilege and hostile-accounting hardening. |
 | CMP-1.2.8 | Complete within repository scope: integrated real-contract fixed-price native-$420 E2E success/refund/dispute transcripts. |
 | CMP-1.2.9 | Repository deployment package complete; live testnet qualification blocked because the canonical public/authorized testnet is not live. |
-| CMP-1.2.10 | Reconciliation/closeout complete once exact-head CI for this record is green. |
+| CMP-1.2.10 | **Complete within repository scope.** Latest-main reconciliation and retained exact-head qualification are green; live/release blockers remain separately recorded. |
 
 ## Original ComputeEscrow requirement reconciliation
 
@@ -96,7 +96,7 @@ If the public testnet becomes live, the verifier deliberately fails until CMP-1.
 
 ## Release disposition
 
-**CMP-1.2.10 repository reconciliation step: qualified subject to exact-head CI evidence recorded below.**
+**CMP-1.2.10 repository reconciliation step: COMPLETE within repository qualification scope.**
 
 **CMP-1.2 overall repository escrow implementation: qualified for the current fixed-price, single-assignment native-$420 scope, excluding the separately gated stake-slash path.**
 
@@ -106,4 +106,14 @@ Do not claim production readiness, live Registry publication, live funded settle
 
 ## Exact-head CI evidence
 
-Pending final exact-head qualification after this closeout record and ledger update. The final evidence commit must be requalified after workflow IDs are recorded.
+The reconciled implementation/evidence head `b2b3ee9fb1322b09669325f84eafd6689e6d866e` completed the retained qualification suite successfully before this final evidence-recording commit:
+
+- Solidity Contracts run `36342887946` — **success**; all **16/16 PR shards** successful.
+- Genesis Address Authority run `36342888001` — **success**; cross-manifest authority plus all **16/16 full Foundry inventory shards** successful.
+- 420 Integrated Qualification run `36342888290` — **success**; `offline-core`, `production-dependencies`, `geth-engine`, and `fault-matrix` all successful.
+- 420Docs Qualification run `36342888026` — **success**.
+- 420Indexer run `36342888155` — **success**.
+
+The Indexer regression initially exposed a retained Explorer EXP-0.4 verifier that incorrectly applied its audit-only delta whitelist to unrelated feature PRs. The verifier was corrected so the whitelist remains strict on the canonical Explorer audit branch while unrelated branches execute the retained state/regression checks without misclassifying their own product files as Explorer audit drift. The corrected exact head above passed 420Indexer.
+
+Because this closeout record itself changes the branch head, the resulting evidence-recording head must receive one final exact-head retained qualification cycle before merge. No live/production claim is authorized by that final CI pass.

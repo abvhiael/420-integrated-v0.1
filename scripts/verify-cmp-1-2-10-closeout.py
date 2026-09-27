@@ -14,8 +14,8 @@ p=json.loads(P.read_text())
 errors=[]
 
 if e.get("schema")!="cmp-1.2.10-phase-closeout-v1": errors.append("unexpected closeout schema")
-if e.get("reconciled_main")!="304cb61286c94f72d0b05e32e5f713b9d68bc450": errors.append("unexpected reconciled main")
-if e.get("reconciliation_commit")!="cc42be007f5a2aa5adc830152247565d6a0b6346": errors.append("unexpected reconciliation commit")
+if e.get("reconciled_main")!="b03e247aa4df0a6a6d978ffad8eedfe2487a3a6b": errors.append("unexpected reconciled main")
+if e.get("reconciliation_commit")!="ee5e97bd9cc322e0794e2c57a4523035370788be": errors.append("unexpected reconciliation commit")
 
 for f in (D0,D9,LEDGER,ROADMAP):
     if not f.is_file(): errors.append("missing required closeout source: "+str(f.relative_to(ROOT)))
@@ -42,6 +42,8 @@ for step in [f"CMP-1.2.{i}" for i in range(1,9)]:
         errors.append(step+" repository status not complete")
 if scope.get("CMP-1.2.9")!="REPOSITORY_DEPLOYMENT_READY_LIVE_BLOCKED":
     errors.append("1.2.9 live blocker status not preserved")
+if scope.get("CMP-1.2.10")!="COMPLETE_REPOSITORY_SCOPE":
+    errors.append("1.2.10 repository closeout not complete")
 
 req=e.get("original_compute_escrow_requirements",{})
 for k in ("deposit","reserve","release","refund","partial_release","timeout_refund","dispute_freeze"):

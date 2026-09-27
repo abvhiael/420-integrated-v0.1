@@ -291,7 +291,7 @@
       "name": "exp-0-4-6-historical-contradictions",
       "digest": "sha256:cb01481456cb587ddfce280c2cd8ef2ff231cbb5e693851f1158e1cad699592c"
     },
-    "scope": "historical evidence reconciliation only",
-    "note": "Evidence recording changes the branch head; final exact-head requalification is required."
+    "scope": "historical contradiction and stale-evidence interpretation only",
+    "note": "Recording this evidence changes the branch head. The resulting exact head must rerun all retained qualification gates before EXP-0.4.6 is marked COMPLETE."
   }
 }

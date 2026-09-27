@@ -1,7 +1,7 @@
 {
   "schema": "420-testnet-indexer-readiness-v1",
   "service": "420Indexer",
-  "status": "EXP_1_5_CONSENSUS_PROVIDER_QUALIFICATION",
+  "status": "EXP_1_6_HISTORICAL_PRODUCER_ATTRIBUTION_QUALIFICATION",
   "backend": {
     "url": "REPLACE",
     "deployment_status": "DEPLOYABLE_RUNTIME_QUALIFIED_LIVE_TESTNET_PENDING",
@@ -24,7 +24,12 @@
       "rejects invalid finalized safe head ordering",
       "rejects proposer seats outside the active committee",
       "rejects sub-quorum consensus QCs",
-      "returns consensus data as a non-authoritative projection"
+      "returns consensus data as a non-authoritative projection",
+      "requires historical consensus-produced block attribution for every non-genesis block in production",
+      "rejects duplicate execution-hash or canonical-slot producer history",
+      "preflights replacement-fork producer attribution before reorg mutation",
+      "persists consensus slot, producer seat/rank, consensus root and certification on canonical block records",
+      "removes orphan producer attribution with orphan block during rollback"
     ],
     "qualification_evidence": {
       "wrong_chain": "IMPLEMENTED_AND_TESTED",
@@ -48,7 +53,13 @@
       "consensus_provider_projection": "IMPLEMENTED_AND_TESTED",
       "consensus_provider_runtime_wiring": "IMPLEMENTED_AND_TESTED",
       "consensus_provider_unavailable_fail_closed": "IMPLEMENTED_AND_TESTED",
-      "consensus_provider_invalid_state_fail_closed": "IMPLEMENTED_AND_TESTED"
+      "consensus_provider_invalid_state_fail_closed": "IMPLEMENTED_AND_TESTED",
+      "historical_block_producer_projection": "IMPLEMENTED_AND_TESTED",
+      "historical_producer_missing_fail_closed": "IMPLEMENTED_AND_TESTED",
+      "historical_producer_duplicate_history_rejection": "IMPLEMENTED_AND_TESTED",
+      "historical_producer_reorg_replacement": "IMPLEMENTED_AND_TESTED",
+      "historical_producer_reorg_preflight_no_mutation": "IMPLEMENTED_AND_TESTED",
+      "historical_producer_persistence": "IMPLEMENTED_AND_TESTED"
     },
     "runtime": {
       "command": "./indexer/cmd/indexer420",
@@ -63,11 +74,15 @@
       "consensus_provider": "indexer/consensusview.Provider",
       "consensus_status_path": "/var/lib/420consensus/status.json",
       "consensus_startup_qualification": true,
-      "consensus_live_binding_qualified": false
+      "consensus_live_binding_qualified": false,
+      "historical_producer_source": "consensus/storage.Status.produced_blocks",
+      "historical_producer_lookup": "execution block hash",
+      "historical_producer_required_in_production": true,
+      "historical_producer_live_binding_qualified": false
     },
     "live_deployment": {
       "qualified": false,
-      "blocker": "testnet infrastructure, approved RPC endpoints, and approved live consensus status source remain unprovisioned/placeholders",
+      "blocker": "testnet infrastructure, approved RPC endpoints, and approved live consensus produced-block history remain unprovisioned/placeholders",
       "infrastructure_inventory": "testnet/infrastructure/inventory.json",
       "endpoint_inventory": "testnet/services/endpoints.json"
     }

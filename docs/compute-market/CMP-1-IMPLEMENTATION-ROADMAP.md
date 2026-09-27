@@ -61,6 +61,10 @@ Never trust the self-reported hardware alone. Capabilities must eventually be be
 
 **CMP-1.3.0 baseline:** `docs/compute-market/CMP-1.3.0-WORKER-REGISTRY-BASELINE-AND-INTEGRATION-DESIGN.md` reconciles this original requirement with the canonical provider/node/resource registries, 420Trust evidence and the future CMP-1.5 compute-stake source. It freezes the non-duplicative worker identity, execution-key, capability, attestation, reputation, stake-reference and status model before executable implementation. This design gate does not itself implement or deploy ComputeWorkerRegistry.
 
+**CMP-1.3.1 worker identity/lifecycle core:** qualified at exact head `505851b33cf4ac3f81d030269c1bae16ac661f18`. It implements permanent provider/node/resource ancestry, execution-key possession proof, revisioned capability-profile commitments, exact resource-revision binding, fail-closed parent eligibility, key rotation, suspension, retirement and historical reconstruction.
+
+**CMP-1.3.2 trusted capability attestation:** `docs/compute-market/CMP-1.3.2-WORKER-ATTESTATION-QUALIFICATION.md` adds a separate provider-neutral attestation authority and admission composition so self-reported worker capability cannot satisfy policies that require independent evidence. Evidence is exact-revision/profile/key/resource bound, expiry/revocation/policy guarded, replay resistant, and grants no unrelated authority.
+
 ## CMP-1.4 — ComputeVerifierRegistry
 
 Separate workers from verification authorities.

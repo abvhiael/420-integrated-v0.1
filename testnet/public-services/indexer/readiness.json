@@ -1,7 +1,7 @@
 {
   "schema": "420-testnet-indexer-readiness-v1",
   "service": "420Indexer",
-  "status": "EXP_1_8_RUNTIME_NEGATIVE_DIVERGENCE_QUALIFICATION",
+  "status": "EXP_1_9_CI_QUALIFICATION_AUTOMATION",
   "backend": {
     "url": "REPLACE",
     "deployment_status": "DEPLOYABLE_RUNTIME_QUALIFIED_LIVE_TESTNET_PENDING",
@@ -38,7 +38,12 @@
       "degrades public health on runtime RPC consensus or catch-up failure",
       "clears runtime degradation only after a fully qualified successful poll",
       "returns fail-closed Explorer operational states for wrong-chain stale degraded and inconsistent data",
-      "preserves local state on finalized conflict and preflight producer divergence"
+      "preserves local state on finalized conflict and preflight producer divergence",
+      "pins 420Indexer 420Docs and 420 Integrated pull-request qualification to the PR head SHA",
+      "asserts the checked-out SHA before qualification commands execute",
+      "cancels superseded PR qualification runs through workflow concurrency",
+      "retains EXP-1.1 through EXP-1.9 verifier coverage in the primary Indexer gate",
+      "emits exact-head EXP-1.9 qualification evidence with explicit retention"
     ],
     "qualification_evidence": {
       "wrong_chain": "IMPLEMENTED_AND_TESTED",
@@ -83,7 +88,15 @@
       "explorer_inconsistent_finality_fail_closed": "IMPLEMENTED_AND_TESTED",
       "consensus_provider_unavailable_fail_closed_runtime": "IMPLEMENTED_AND_TESTED",
       "reorg_finalized_conflict_no_mutation": "IMPLEMENTED_AND_TESTED",
-      "reorg_missing_producer_no_mutation": "IMPLEMENTED_AND_TESTED"
+      "reorg_missing_producer_no_mutation": "IMPLEMENTED_AND_TESTED",
+      "primary_indexer_exact_head_checkout": "IMPLEMENTED",
+      "docs_exact_head_checkout": "IMPLEMENTED",
+      "integrated_exact_head_checkout": "IMPLEMENTED",
+      "exact_head_assertions": "IMPLEMENTED",
+      "pr_concurrency_cancellation": "IMPLEMENTED",
+      "read_only_workflow_permissions": "IMPLEMENTED",
+      "exp_1_1_through_1_9_retained_automation": "IMPLEMENTED",
+      "exp_1_9_evidence_artifact": "IMPLEMENTED"
     },
     "runtime": {
       "command": "./indexer/cmd/indexer420",
@@ -111,7 +124,10 @@
       "expected_genesis_hash_env": "INDEXER_EXPECTED_GENESIS_HASH",
       "runtime_health_fault_latch": true,
       "runtime_fault_detail_public": "categorical only",
-      "live_fault_injection_qualified": false
+      "live_fault_injection_qualified": false,
+      "qualification_automation_milestone": "EXP-1.9",
+      "qualification_exact_head_required": true,
+      "qualification_live_network_claim": false
     },
     "live_deployment": {
       "qualified": false,

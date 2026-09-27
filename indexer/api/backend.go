@@ -3,6 +3,8 @@ package api
 import (
 	"errors"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/420integrated/420-integrated/indexer/decoder"
 	"github.com/420integrated/420-integrated/indexer/model"
@@ -24,11 +26,39 @@ var (
 	ErrConsensusQueryUnavailable = errors.New("consensus query unavailable")
 )
 
-type StoreBackend struct { store ReadStore; catalog *decoder.Catalog; consensus ConsensusProvider }
+type RuntimeHealth struct {
+	mu sync.RWMutex
+	issue string
+	issueAt time.Time
+}
+
+func NewRuntimeHealth() *RuntimeHealth { return &RuntimeHealth{} }
+func (h *RuntimeHealth) MarkHealthy() { if h==nil{return}; h.mu.Lock(); h.issue=""; h.issueAt=time.Time{}; h.mu.Unlock() }
+func (h *RuntimeHealth) MarkFailure(err error) { if h==nil{return}; h.mu.Lock(); if err==nil { h.issue=""; h.issueAt=time.Time{} } else { h.issue=err.Error(); h.issueAt=time.Now().UTC() }; h.mu.Unlock() }
+func (h *RuntimeHealth) snapshot() (string, time.Time) { if h==nil{return "",time.Time{}}; h.mu.RLock(); defer h.mu.RUnlock(); return h.issue,h.issueAt }
+
+type StoreBackend struct { store ReadStore; catalog *decoder.Catalog; consensus ConsensusProvider; runtimeHealth *RuntimeHealth }
 func NewStoreBackend(store ReadStore, catalog *decoder.Catalog) *StoreBackend { if catalog == nil { catalog = decoder.NewCatalog() }; return &StoreBackend{store: store, catalog: catalog} }
 func (b *StoreBackend) WithConsensusProvider(provider ConsensusProvider) *StoreBackend { b.consensus = provider; return b }
+func (b *StoreBackend) WithRuntimeHealth(runtimeHealth *RuntimeHealth) *StoreBackend { b.runtimeHealth = runtimeHealth; return b }
 func (b *StoreBackend) Consensus() (model.ConsensusStatus, error) { if b.consensus == nil { return model.ConsensusStatus{}, ErrConsensusQueryUnavailable }; return b.consensus.Consensus() }
-func (b *StoreBackend) Health() (model.Health, error) { cp, ok, err := b.store.Checkpoint(); if err != nil { return model.Health{}, err }; if !ok { return model.Health{State:"EMPTY"}, nil }; return model.Health{ChainID:cp.ChainID, IndexedHeight:cp.IndexedHeight, SafeHeight:cp.SafeHeight, FinalizedHeight:cp.FinalizedHeight, SchemaVersion:cp.SchemaVersion, State:"HEALTHY", LastIngestAt:cp.UpdatedAt}, nil }
+func (b *StoreBackend) Health() (model.Health, error) {
+	cp, ok, err := b.store.Checkpoint()
+	if err != nil { return model.Health{}, err }
+	if !ok {
+		issue, at := b.runtimeHealth.snapshot()
+		h := model.Health{State:"EMPTY", RuntimeIssue:issue}
+		if !at.IsZero() { t:=at; h.RuntimeIssueAt=&t; h.State="DEGRADED" }
+		return h,nil
+	}
+	h := model.Health{ChainID:cp.ChainID, IndexedHeight:cp.IndexedHeight, SafeHeight:cp.SafeHeight, FinalizedHeight:cp.FinalizedHeight, SchemaVersion:cp.SchemaVersion, State:"HEALTHY", LastIngestAt:cp.UpdatedAt}
+	if issue, at := b.runtimeHealth.snapshot(); issue != "" {
+		h.State="DEGRADED"
+		h.RuntimeIssue=issue
+		if !at.IsZero() { t:=at; h.RuntimeIssueAt=&t }
+	}
+	return h,nil
+}
 func (b *StoreBackend) Block(number uint64) (model.BlockRecord, bool, error) { return b.store.Block(number) }
 func (b *StoreBackend) Transaction(hash string) (model.TransactionRecord, bool, error) { return b.store.Transaction(hash) }
 func (b *StoreBackend) Receipt(hash string) (model.ReceiptRecord, bool, error) { return b.store.Receipt(hash) }

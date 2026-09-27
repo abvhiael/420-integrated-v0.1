@@ -1,0 +1,202 @@
+{
+  "schema": "420explorer-exp-1.1-runtime-authority-v1",
+  "milestone": "EXP-1.1",
+  "title": "420Explorer runtime authority and target-network baseline",
+  "baseline": {
+    "merged_exp_0_main": "b03e247aa4df0a6a6d978ffad8eedfe2487a3a6b",
+    "exp_0_status": "complete_repository_audit_scope"
+  },
+  "qualification_scope": "repository-qualified runtime target contract; no deployment or live-network promotion",
+  "target_network": {
+    "name": "420 Integrated Testnet",
+    "slug": "420-testnet",
+    "chain_id": 420,
+    "network_id": 420,
+    "chain_id_launch_status": "CANDIDATE_PENDING_COLLISION_PREFLIGHT",
+    "network_id_status": "TESTNET_DEFAULT_NOT_CONSTITUTIONAL",
+    "release_channel": "TESTNET_RC",
+    "release_version": "0.1.0-rc1",
+    "public_state": "S5-PUBLIC_PREP",
+    "public_launch_authorized": false,
+    "launch_authority": "testnet/config/launch.json",
+    "public_state_authority": "testnet/public/state.json"
+  },
+  "genesis_identity": {
+    "execution": {
+      "path": "testnet/genesis/execution-genesis.json",
+      "sha256": "65c8efba297009c02dc7ec424f777ba7131f5677a1e11135765ed05de3d06f7e",
+      "chain_id": 420
+    },
+    "consensus": {
+      "path": "testnet/genesis/consensus-genesis.json",
+      "sha256": "83da87ffbfbf0ed42a199a99b805c36fb33cd7947cb17bfad73689085531dc9d",
+      "chain_id": 420,
+      "slot_seconds": 12,
+      "slots_per_epoch": 420,
+      "epochs_per_rotation": 42,
+      "active_committee_size": 15
+    },
+    "checksum_authority": "testnet/genesis/SHA256SUMS.txt",
+    "unresolved_ceremony_fields": [
+      "consensus-genesis.json genesis_time",
+      "consensus-genesis.json rotation_seed.value"
+    ],
+    "runtime_promotion_rule": "exact genesis checksums must match and ceremony placeholders must be resolved before live-network promotion"
+  },
+  "approved_runtime_topology": {
+    "execution_source_role": "420Indexer consumes approved 420-testnet execution RPC/node infrastructure",
+    "consensus_source_role": "420Indexer consumes the qualified consensus provider; Explorer consumes only Indexer projections",
+    "public_rpc_minimum": 3,
+    "archive_rpc_minimum": 1,
+    "indexer_instances_minimum": 1,
+    "endpoint_inventory": "testnet/services/endpoints.json",
+    "infrastructure_inventory": "testnet/infrastructure/inventory.json",
+    "endpoint_state": "UNRESOLVED_PLACEHOLDERS",
+    "infrastructure_state": "UNPROVISIONED",
+    "endpoint_promotion_rule": "a concrete RPC endpoint is authoritative only after launch authority marks it provisioned/approved and EXP-1.2 records identity evidence"
+  },
+  "finality_semantics": {
+    "track_head": true,
+    "track_safe": true,
+    "track_finalized": true,
+    "display_separately": true,
+    "ordering_invariant": "finalized <= safe <= head",
+    "reorg_rule": "only non-finalized indexed history may be rewritten",
+    "finalized_conflict_behavior": "FAIL_CLOSED_DEGRADED",
+    "sources": [
+      "config/420indexer-v1.json",
+      "contracts/config/420explorer-genesis.json"
+    ]
+  },
+  "indexer_runtime_contract": {
+    "service": "420Indexer",
+    "class": "SHARED_NON_AUTHORITATIVE_INFRASTRUCTURE",
+    "required_chain_id": 420,
+    "canonical_state_authority": false,
+    "readiness": "testnet/public-services/indexer/readiness.json",
+    "current_deployment_status": "PENDING_TESTNET_DEPLOYMENT",
+    "current_backend_url": "REPLACE",
+    "runtime_configuration": "config/420indexer-v1.json",
+    "live_promotion_blocked": true
+  },
+  "explorer_authority_boundaries": {
+    "chain_index_source": "420Indexer /v1 read API",
+    "required_chain_id": 420,
+    "direct_execution_rpc_ingestion": false,
+    "independent_chain_ingestion": false,
+    "independent_checkpoint_store": false,
+    "independent_reorg_engine": false,
+    "independent_protocol_decoder_registry": false,
+    "fail_closed_on_indexer_canonical_authority_claim": true,
+    "implementation_evidence": [
+      "explorer/cmd/explorer420/main.go",
+      "explorer/indexerclient/client.go",
+      "contracts/config/420explorer-genesis.json"
+    ]
+  },
+  "configuration_reconciliation": [
+    {
+      "path": "testnet/config/launch.json",
+      "role": "network/release/topology authority",
+      "authoritative_for": [
+        "network name",
+        "chain-id launch status",
+        "network id",
+        "release channel",
+        "minimum topology"
+      ],
+      "must_not_be_overridden_by": [
+        "service readiness",
+        "Explorer environment"
+      ]
+    },
+    {
+      "path": "testnet/genesis/execution-genesis.json",
+      "role": "execution genesis candidate",
+      "authoritative_for": [
+        "execution chainId",
+        "execution genesis content"
+      ],
+      "digest_source": "testnet/genesis/SHA256SUMS.txt"
+    },
+    {
+      "path": "testnet/genesis/consensus-genesis.json",
+      "role": "consensus genesis candidate",
+      "authoritative_for": [
+        "consensus chain_id",
+        "slot/epoch/rotation parameters",
+        "committee size"
+      ],
+      "digest_source": "testnet/genesis/SHA256SUMS.txt"
+    },
+    {
+      "path": "testnet/services/endpoints.json",
+      "role": "public endpoint publication inventory",
+      "current_state": "PLACEHOLDER",
+      "promotion_rule": "placeholder values are never runtime evidence"
+    },
+    {
+      "path": "testnet/infrastructure/inventory.json",
+      "role": "node/service provisioning inventory",
+      "current_state": "PLANNED/UNPROVISIONED",
+      "promotion_rule": "unprovisioned nodes are never runtime evidence"
+    },
+    {
+      "path": "config/420indexer-v1.json",
+      "role": "Indexer behavioral runtime contract",
+      "authoritative_for": [
+        "requiredChainId",
+        "finality tracking",
+        "wrong-chain rejection",
+        "reorg policy",
+        "provenance rules"
+      ]
+    },
+    {
+      "path": "testnet/public-services/indexer/readiness.json",
+      "role": "Indexer deployment/readiness publication",
+      "current_state": "PENDING_TESTNET_DEPLOYMENT",
+      "promotion_rule": "REPLACE/PENDING records must remain non-live evidence"
+    },
+    {
+      "path": "contracts/config/420explorer-genesis.json",
+      "role": "Explorer Genesis consumer/authority-boundary contract",
+      "authoritative_for": [
+        "requiredChainId",
+        "Indexer-only chain source",
+        "no independent ingestion/checkpoint/reorg/decoder paths"
+      ]
+    },
+    {
+      "path": "explorer/cmd/explorer420/main.go",
+      "role": "Explorer runtime configuration implementation",
+      "authoritative_for": [
+        "EXPLORER_INDEXER_URL requirement",
+        "EXPLORER_CHAIN_ID default/enforcement"
+      ]
+    }
+  ],
+  "fail_closed_rules": [
+    "chain ID mismatch between launch, execution genesis, consensus genesis, Indexer contract or Explorer contract fails EXP-1.1",
+    "genesis checksum mismatch fails EXP-1.1",
+    "a placeholder or unprovisioned RPC endpoint cannot be classified as approved/runtime-qualified",
+    "Indexer readiness REPLACE/PENDING_TESTNET_DEPLOYMENT cannot be promoted to deployment/live evidence",
+    "Explorer may not acquire a direct RPC ingestion, independent checkpoint, reorg or decoder path",
+    "Indexer claiming canonical state authority fails Explorer consumption",
+    "public/live promotion is blocked while chain-ID collision preflight or genesis ceremony fields remain unresolved"
+  ],
+  "handoff": {
+    "EXP_1_2": "bind 420Indexer to a concrete approved RPC/node source and prove chain/genesis/finality identity",
+    "EXP_1_3": "runtime-qualify canonical indexing/reorg/rebuild invariants",
+    "EXP_1_4": "deploy and qualify the 420Indexer endpoint",
+    "EXP_1_5": "qualify the consensus provider",
+    "EXP_1_6": "implement and qualify historical block-producer attribution"
+  },
+  "summary": {
+    "runtime_target_contract_qualified": false,
+    "deployment_qualified": false,
+    "live_network_qualified": false,
+    "genesis_qualified": false,
+    "next_step": "EXP-1.2"
+  }
+}

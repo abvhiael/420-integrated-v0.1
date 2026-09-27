@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import json, subprocess
+import json, os, subprocess
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 M=ROOT/"docs/audit/EXP-0.4.9-current-main-requalification.json"
@@ -7,6 +7,7 @@ CI=ROOT/"docs/audit/EXP-0.4.1-ci-qualification-inventory.json"
 CANON=ROOT/"docs/audit/EXP-0.4.7-canonical-qualification-ledger.json"
 RET=ROOT/"docs/audit/EXP-0.4.8-evidence-retention-reproducibility.json"
 EVIDENCE=ROOT/"exp-0-4-9-evidence"
+AUDIT_BRANCH="audit/exp-0-4-1-ci-qualification-inventory-20260926"
 def load(p): return json.loads(p.read_text(encoding="utf-8"))
 def git(*args):
  p=subprocess.run(["git",*args],cwd=ROOT,text=True,capture_output=True)
@@ -41,7 +42,21 @@ def main():
  allowed_exact=set(m.get("allowed_delta",{}).get("exact_files",[]))
  prefixes=tuple(m.get("allowed_delta",{}).get("path_prefixes",[]))
  unexpected=[p for p in changed if p not in allowed_exact and not p.startswith(prefixes)]
- if unexpected: errors.append("unexpected non-audit EXP-0.4 delta: "+", ".join(unexpected))
+ # The allowed-delta rule describes changes authored by the dedicated EXP-0.4 audit
+ # branch. 420Indexer is a retained repository-wide workflow, so this verifier also
+ # executes on unrelated PRs. In that context, the feature branch's own product
+ # changes are not EXP-0.4 changes and must not be rejected as audit-scope drift.
+ # Keep the whitelist strict on the canonical audit branch itself.
+ github_head_ref=os.environ.get("GITHUB_HEAD_REF","").strip()
+ github_ref_name=os.environ.get("GITHUB_REF_NAME","").strip()
+ try:
+  local_branch=git("branch","--show-current").strip()
+ except Exception:
+  local_branch=""
+ active_branch=github_head_ref or github_ref_name or local_branch
+ delta_scope_enforced=(active_branch==AUDIT_BRANCH)
+ if delta_scope_enforced and unexpected:
+  errors.append("unexpected non-audit EXP-0.4 delta: "+", ".join(unexpected))
  wf=m.get("required_requalification_workflows",[])
  if [x.get("name") for x in wf]!=["420Indexer","420Docs Qualification","420 Integrated Qualification"]: errors.append("required workflow set/order drift")
  for x in wf:
@@ -77,7 +92,7 @@ def main():
  if s.get("product_runtime_files_changed_by_exp_0_4") is not False: errors.append("runtime/product delta incorrectly asserted")
  if s.get("genesis_ready") is not False: errors.append("premature Genesis readiness")
  EVIDENCE.mkdir(exist_ok=True)
- out={"schema":"exp-0.4.9-evidence-v1","milestone":"EXP-0.4.9","head":git("rev-parse","HEAD"),"current_main_sha":mainsha,"current_main_is_ancestor":ancestor(mainsha),"exp_0_4_8_head_is_ancestor":ancestor(prev),"ahead_by":ahead,"changed_files":changed,"unexpected_files":unexpected,"genesis_blockers":state.get("active_genesis_blockers"),"unverified_acceptance_criteria":state.get("unverified_acceptance_criteria"),"errors":errors,"pass":not errors}
+ out={"schema":"exp-0.4.9-evidence-v1","milestone":"EXP-0.4.9","head":git("rev-parse","HEAD"),"current_main_sha":mainsha,"current_main_is_ancestor":ancestor(mainsha),"exp_0_4_8_head_is_ancestor":ancestor(prev),"ahead_by":ahead,"active_branch":active_branch,"audit_branch":AUDIT_BRANCH,"delta_scope_enforced":delta_scope_enforced,"changed_files":changed,"unexpected_files":unexpected if delta_scope_enforced else [],"unrelated_branch_delta_files":unexpected if not delta_scope_enforced else [],"genesis_blockers":state.get("active_genesis_blockers"),"unverified_acceptance_criteria":state.get("unverified_acceptance_criteria"),"errors":errors,"pass":not errors}
  (EVIDENCE/"summary.json").write_text(json.dumps(out,indent=2)+"\n",encoding="utf-8")
  (EVIDENCE/"current-main-delta.json").write_text(json.dumps({"base":mainsha,"head":git("rev-parse","HEAD"),"ahead_by":ahead,"files":changed},indent=2)+"\n",encoding="utf-8")
  print(json.dumps(out,indent=2))

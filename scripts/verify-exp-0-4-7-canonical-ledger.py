@@ -79,6 +79,12 @@ def main():
  if s.get("orphan_requirements")!=0: errors.append("orphan requirements")
  if s.get("orphan_blockers")!=0: errors.append("orphan blockers")
  if s.get("orphan_acceptance_criteria")!=0: errors.append("orphan ACs")
+ if s.get("acceptance_criteria_without_direct_requirement_links")!=["AC-9"]: errors.append("global AC linkage drift")
+ if s.get("global_acceptance_criteria")!=["AC-9"]: errors.append("global AC classification drift")
+ if ab.get("AC-9",{}).get("linkage_scope")!="global_exact_release_candidate_test_inventory": errors.append("AC-9 global linkage semantics missing")
+ for cid,e in ab.items():
+  if e.get("orphaned") is not False: errors.append(f"{cid}: orphan flag drift")
+  if cid!="AC-9" and not e.get("mapped_mandatory_requirements"): errors.append(f"{cid}: unexpectedly lacks direct requirement links")
  if s.get("promoted_requirements")!=0 or s.get("satisfied_acceptance_criteria")!=0 or s.get("genesis_ready") is not False: errors.append("premature promotion in summary")
  EVIDENCE.mkdir(exist_ok=True)
  out={"schema":"exp-0.4.7-evidence-v1","milestone":"EXP-0.4.7","requirements":len(rb),"blockers":len(fb),"acceptance_criteria":len(ab),"requirement_blocker_links":sum(len(e.get("blocking_findings",[])) for e in rb.values()),"requirement_ac_links":sum(len(e.get("acceptance_criteria",[])) for e in rb.values()),"ac_blocker_links":sum(len(e.get("mapped_blocking_findings",[])) for e in ab.values()),"ac_requirement_links":sum(len(e.get("mapped_mandatory_requirements",[])) for e in ab.values()),"errors":errors,"pass":not errors}

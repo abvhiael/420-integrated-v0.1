@@ -1,0 +1,255 @@
+{
+  "schema": "420explorer-exp-0.4.6-historical-contradiction-reconciliation-v1",
+  "milestone": "EXP-0.4.6",
+  "title": "420Explorer historical contradiction and stale-evidence reconciliation",
+  "status": "implementation_complete_exact_head_qualification_required",
+  "baseline": {
+    "exp_0_4_5_final_head": "b54d9f7eeb6010b30350f796bfb195d9929f08b5",
+    "pr": 376
+  },
+  "classification_vocabulary": [
+    "superseded_by",
+    "historical_only",
+    "still_applicable",
+    "requires_requalification"
+  ],
+  "authority_precedence": [
+    "EXP-0.3.8 explicit scope resolution overrides pre-resolution governance state.",
+    "EXP-0.3 authoritative requirement/status artifacts govern current scope and promotion state.",
+    "EXP-0.4.5 governs current acceptance-evidence interpretation.",
+    "Frozen system-address maps govern current fixed-address authority.",
+    "Current readiness files are authoritative negative deployment evidence until replaced by qualified deployment records."
+  ],
+  "rules": [
+    "Historical evidence is preserved; it is not deleted merely because later authority supersedes its status meaning.",
+    "A historical statement may remain true for its original commit/scope while being historical_only for current qualification.",
+    "Words such as qualified or COMPLETE are interpreted only within their recorded evidence scope.",
+    "Placeholder readiness records cannot be promoted into deployed/live evidence.",
+    "A test mechanism capable of emitting QUALIFIED is not evidence of an executed qualified environment.",
+    "Current EXP-0.3/0.4 authority wins any contradiction with stale governance, status, address, deployment or qualification wording."
+  ],
+  "records": [
+    {
+      "id": "EXP-CONTRA-001",
+      "subject": "pre-resolution governance blocker wording",
+      "sources": [
+        "docs/audit/EXP-0.3.5-nonblocking-scope-exclusions.json"
+      ],
+      "observed_claim": "Governance remains outside this exclusion set and stays scope_decision_required/genesis-blocking until explicitly resolved.",
+      "classification": "superseded_by",
+      "current_authority": [
+        "docs/audit/EXP-0.3.8-governance-scope-decision.json",
+        "docs/audit/EXP-0.3.6-scope-conflict-resolution-register.json"
+      ],
+      "current_interpretation": "Governance scope was explicitly resolved by EXP-0.3.8 Resolution B; it is not an active dedicated-view requirement or Genesis blocker.",
+      "superseded_by": [
+        "EXP-0.3.8"
+      ],
+      "requires_requalification": false
+    },
+    {
+      "id": "EXP-CONTRA-002",
+      "subject": "pre-decision governance conflict-management closeout",
+      "sources": [
+        "docs/audit/EXP-0.3.6-scope-conflict-resolution-register.json"
+      ],
+      "observed_claim": "EXP-0.3.6 qualification proves the conflict-management mechanism, not that product scope had been decided.",
+      "classification": "historical_only",
+      "current_authority": [
+        "docs/audit/EXP-0.3.8-governance-scope-decision.json"
+      ],
+      "current_interpretation": "Correct historical statement for the 0.3.6 head; the conflict has since been decided and reconciled by 0.3.8.",
+      "superseded_by": [
+        "EXP-0.3.8"
+      ],
+      "requires_requalification": false
+    },
+    {
+      "id": "EXP-CONTRA-003",
+      "subject": "broad user-facing Qualified Explorer copy",
+      "sources": [
+        "explorer/web/static/index.html"
+      ],
+      "observed_claim": "Qualified, read-only visibility into chain, protocol, asset & consensus state.",
+      "classification": "historical_only",
+      "current_authority": [
+        "docs/audit/EXP-0.3.4-qualification-status-freeze.json",
+        "docs/audit/EXP-0.4.5-acceptance-criterion-evidence.json"
+      ],
+      "current_interpretation": "Presentation copy is not qualification evidence. Zero mandatory requirements and zero ACs are Genesis-qualified/satisfied.",
+      "superseded_by": [
+        "EXP-0.3.4 status discipline",
+        "EXP-0.4.5 evidence accounting"
+      ],
+      "requires_requalification": false
+    },
+    {
+      "id": "EXP-CONTRA-004",
+      "subject": "EXP-7.1 smoke QUALIFIED result semantics",
+      "sources": [
+        "explorer/deploy/README.md",
+        "explorer/cmd/explorersmoke/main.go"
+      ],
+      "observed_claim": "A successful smoke run emits status QUALIFIED.",
+      "classification": "requires_requalification",
+      "current_authority": [
+        "docs/audit/EXP-0.4.2-historical-closeout-inventory.json",
+        "docs/audit/EXP-0.4.5-acceptance-criterion-evidence.json"
+      ],
+      "current_interpretation": "This is a test mechanism. It proves deployment smoke scope only when executed against an approved exact-head deployment with retained run/environment evidence.",
+      "superseded_by": [],
+      "requires_requalification": true
+    },
+    {
+      "id": "EXP-CONTRA-005",
+      "subject": "EXP-7.2 live validator availability",
+      "sources": [
+        "explorer/deploy/README.md",
+        "explorer/cmd/explorerlivevalidate/main.go",
+        ".github/workflows/explorer-live-testnet.yml"
+      ],
+      "observed_claim": "The live validator can produce a passing report for a supplied Explorer URL.",
+      "classification": "requires_requalification",
+      "current_authority": [
+        "docs/audit/EXP-0.4.2-historical-closeout-inventory.json",
+        "docs/audit/EXP-0.4.5-acceptance-criterion-evidence.json"
+      ],
+      "current_interpretation": "Availability of the validator is not live evidence. A current approved environment-bound run is still required.",
+      "superseded_by": [],
+      "requires_requalification": true
+    },
+    {
+      "id": "EXP-CONTRA-006",
+      "subject": "QUALIFIED_INDEXER_API_CONSUMER labels",
+      "sources": [
+        "indexer/STATUS.md",
+        "testnet/public-services/indexer/readiness.json",
+        "explorer/api/server.go",
+        "docs/420EXPLORER.md"
+      ],
+      "observed_claim": "420Explorer is QUALIFIED_INDEXER_API_CONSUMER / qualifies the GEN-11.1 first-consumer gate.",
+      "classification": "still_applicable",
+      "current_authority": [
+        "docs/audit/EXP-0.4.2-historical-closeout-inventory.json",
+        "docs/audit/EXP-0.4.4-requirement-ci-coverage.json"
+      ],
+      "current_interpretation": "Still valid only for the source/client consumer boundary; it does not prove Indexer deployment, Explorer deployment, live network, or Genesis readiness.",
+      "superseded_by": [],
+      "requires_requalification": false
+    },
+    {
+      "id": "EXP-CONTRA-007",
+      "subject": "Indexer testnet readiness placeholder",
+      "sources": [
+        "testnet/public-services/indexer/readiness.json"
+      ],
+      "observed_claim": "Backend URL remains REPLACE and deployment_status PENDING_TESTNET_DEPLOYMENT.",
+      "classification": "still_applicable",
+      "current_authority": [
+        "docs/audit/EXP-0.2.5-genesis-gap-register.json",
+        "docs/audit/EXP-0.4.5-acceptance-criterion-evidence.json"
+      ],
+      "current_interpretation": "Current negative evidence: Indexer deployment/live qualification remains pending and EXP-FIND-002 remains open.",
+      "superseded_by": [],
+      "requires_requalification": true
+    },
+    {
+      "id": "EXP-CONTRA-008",
+      "subject": "Explorer backend/frontend readiness placeholders",
+      "sources": [
+        "testnet/public-services/explorer/readiness.json"
+      ],
+      "observed_claim": "Backend/frontend URLs remain REPLACE with pending deployment statuses.",
+      "classification": "still_applicable",
+      "current_authority": [
+        "docs/audit/EXP-0.2.5-genesis-gap-register.json",
+        "docs/audit/EXP-0.4.5-acceptance-criterion-evidence.json"
+      ],
+      "current_interpretation": "Current negative evidence: Explorer production-equivalent deployment/live qualification is still absent and EXP-FIND-003 remains open.",
+      "superseded_by": [],
+      "requires_requalification": true
+    },
+    {
+      "id": "EXP-CONTRA-009",
+      "subject": "frozen system-address authority versus historical candidate aliases",
+      "sources": [
+        "config/system-addresses.json",
+        "contracts/config/system-addresses.json",
+        "docs/audit/EXP-0.1.3-contract-abi-address-reconciliation.md"
+      ],
+      "observed_claim": "Current maps freeze ProtocolRegistry at 0x0434 and ConsensusSystemCall420 at 0x043c; 0x043c is not an Explorer, bridge or Registry alias.",
+      "classification": "still_applicable",
+      "current_authority": [
+        "config/system-addresses.json",
+        "contracts/config/system-addresses.json"
+      ],
+      "current_interpretation": "The two frozen maps are current authority. Any historical candidate/router/bridge claim conflicting with these assignments is superseded and must not be reused.",
+      "superseded_by": [
+        "420-system-addresses-v4 FROZEN_STEP6_2"
+      ],
+      "requires_requalification": false
+    },
+    {
+      "id": "EXP-CONTRA-010",
+      "subject": "qualified Explorer destination in getting-started guidance",
+      "sources": [
+        "docs/apps/explorer/getting-started.md"
+      ],
+      "observed_claim": "Open the qualified Explorer destination from a canonical release channel.",
+      "classification": "historical_only",
+      "current_authority": [
+        "testnet/public-services/explorer/readiness.json",
+        "docs/audit/EXP-0.4.5-acceptance-criterion-evidence.json"
+      ],
+      "current_interpretation": "This is future/operational guidance for a qualified deployment, not evidence that such a deployment currently exists.",
+      "superseded_by": [],
+      "requires_requalification": true
+    },
+    {
+      "id": "EXP-CONTRA-011",
+      "subject": "qualified Indexer wording in architecture/deployment docs",
+      "sources": [
+        "docs/architecture/infrastructure/420indexer.md",
+        "explorer/deploy/README.md"
+      ],
+      "observed_claim": "The Explorer consumes a qualified Indexer/API source.",
+      "classification": "still_applicable",
+      "current_authority": [
+        "docs/audit/EXP-0.4.2-historical-closeout-inventory.json",
+        "testnet/public-services/indexer/readiness.json"
+      ],
+      "current_interpretation": "Qualified refers to retained source/consumer correctness unless and until deployment/live evidence is produced; the current readiness endpoint remains placeholder/pending.",
+      "superseded_by": [],
+      "requires_requalification": false
+    },
+    {
+      "id": "EXP-CONTRA-012",
+      "subject": "historical exact-head COMPLETE claims versus current Genesis state",
+      "sources": [
+        "docs/audit/EXP-0.4.3-qualification-evidence-ledger.json",
+        "docs/audit/EXP-0.4.5-acceptance-criterion-evidence.json"
+      ],
+      "observed_claim": "Prior EXP milestones have exact-head COMPLETE/qualified records.",
+      "classification": "still_applicable",
+      "current_authority": [
+        "docs/audit/EXP-0.4.3-qualification-evidence-ledger.json",
+        "docs/audit/EXP-0.4.5-acceptance-criterion-evidence.json"
+      ],
+      "current_interpretation": "Those records remain valid for their scoped repository evidence only. They do not override ten open Genesis blockers, ten unverified ACs, or the absence of runtime/deployment/live qualification.",
+      "superseded_by": [],
+      "requires_requalification": false
+    }
+  ],
+  "summary": {
+    "records": 12,
+    "superseded_by": 1,
+    "historical_only": 3,
+    "still_applicable": 6,
+    "requires_requalification": 2,
+    "stale_governance_claims_promoted": 0,
+    "placeholder_deployments_promoted": 0,
+    "historical_qualified_claims_promoted_to_genesis": 0,
+    "current_genesis_blockers": 10,
+    "current_unverified_acceptance_criteria": 10
+  }
+}

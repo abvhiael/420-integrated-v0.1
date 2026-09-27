@@ -1,0 +1,144 @@
+{
+  "schema": "420explorer-exp-1-evidence-schema-v1",
+  "title": "420Explorer EXP-1 runtime qualification evidence schema",
+  "required": [
+    "milestone",
+    "head_sha",
+    "chain_id",
+    "network_identity",
+    "execution_source",
+    "indexer_identity",
+    "consensus_source",
+    "observed_at_utc",
+    "commands_or_workflows",
+    "witnesses",
+    "result",
+    "artifact_digest"
+  ],
+  "fields": {
+    "milestone": {
+      "type": "string",
+      "pattern": "^EXP-1\\.[0-9]+$"
+    },
+    "head_sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "chain_id": {
+      "type": "integer",
+      "const": 420
+    },
+    "network_identity": {
+      "type": "object",
+      "required": [
+        "network_name",
+        "network_slug",
+        "execution_genesis_sha256",
+        "consensus_genesis_sha256"
+      ],
+      "properties": {
+        "network_name": {
+          "type": "string"
+        },
+        "network_slug": {
+          "type": "string"
+        },
+        "execution_genesis_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "consensus_genesis_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "execution_source": {
+      "type": "object",
+      "required": [
+        "identity",
+        "endpoint",
+        "qualification_level"
+      ],
+      "properties": {
+        "identity": {
+          "type": "string"
+        },
+        "endpoint": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "qualification_level": {
+          "enum": [
+            "repository",
+            "runtime",
+            "deployment",
+            "live-network"
+          ]
+        }
+      }
+    },
+    "indexer_identity": {
+      "type": "object",
+      "required": [
+        "service",
+        "version_or_commit",
+        "endpoint"
+      ],
+      "properties": {
+        "service": {
+          "const": "420Indexer"
+        },
+        "version_or_commit": {
+          "type": "string"
+        },
+        "endpoint": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "consensus_source": {
+      "type": "object"
+    },
+    "observed_at_utc": {
+      "type": "string"
+    },
+    "commands_or_workflows": {
+      "type": "array",
+      "minItems": 1
+    },
+    "witnesses": {
+      "type": "array"
+    },
+    "result": {
+      "enum": [
+        "pass",
+        "fail",
+        "blocked"
+      ]
+    },
+    "artifact_digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  },
+  "promotion_rules": {
+    "repository": "source/configuration consistency only",
+    "runtime": "requires concrete source identity and runtime witness evidence",
+    "deployment": "requires provisioned non-placeholder endpoint/service identity",
+    "live_network": "requires approved public/testnet endpoint and representative live witnesses",
+    "genesis": "not available in EXP-1; final Genesis promotion belongs to EXP-8"
+  },
+  "fail_closed": [
+    "missing required field invalidates evidence",
+    "chain_id must equal 420",
+    "placeholder endpoints cannot satisfy deployment/live-network evidence",
+    "artifact digest is mandatory for retained evidence",
+    "all evidence is exact-head scoped"
+  ]
+}

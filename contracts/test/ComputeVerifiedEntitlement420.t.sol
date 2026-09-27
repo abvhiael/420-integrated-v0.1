@@ -1479,9 +1479,10 @@ contract ComputeVerifiedEntitlement420Test {
             && accounting.getAccounting(VAULT_ID, address(0)).recordedBalance == 0,
             "e2e cancelled job did not refund exact original payer");
 
+        uint64 terminalRevision = jobs.job(id).revision;
         vm.prank(ownerA);
         (bool reopen,) = address(jobs).call(
-            abi.encodeCall(jobs.recordFunding, (id, jobs.job(id).revision, id)));
+            abi.encodeCall(jobs.recordFunding, (id, terminalRevision, id)));
         require(!reopen && jobs.job(id).status == ComputeJobRegistry420.Status.REFUNDED,
             "e2e terminal cancellation/refund reopened");
     }

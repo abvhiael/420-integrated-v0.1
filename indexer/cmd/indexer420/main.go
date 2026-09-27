@@ -22,6 +22,7 @@ import (
 const (
 	defaultHTTPAddr = ":8420"
 	defaultPollInterval = 12 * time.Second
+	defaultMaxHeadAge = 2 * time.Minute
 )
 
 type startup struct {
@@ -35,6 +36,8 @@ type startup struct {
 	Rebuild       bool   `json:"rebuild"`
 	ConsensusStatusPath string `json:"consensusStatusPath"`
 	ConsensusQualified bool `json:"consensusQualified"`
+	MaxHeadAge string `json:"maxHeadAge"`
+	ExpectedGenesisHashConfigured bool `json:"expectedGenesisHashConfigured"`
 }
 
 func main() {
@@ -53,6 +56,9 @@ func run() error {
 
 	pollInterval, err := parsePollInterval(os.Getenv("INDEXER_POLL_INTERVAL"))
 	if err != nil { return err }
+	maxHeadAge, err := parseMaxHeadAge(os.Getenv("INDEXER_MAX_HEAD_AGE"))
+	if err != nil { return err }
+	expectedGenesisHash := os.Getenv("INDEXER_EXPECTED_GENESIS_HASH")
 
 	rebuild := os.Getenv("INDEXER_REBUILD") == "1"
 	consensusStatusPath := os.Getenv("INDEXER_CONSENSUS_STATUS_PATH")
@@ -63,6 +69,7 @@ func run() error {
 		RPCConfigured: true, StorePath: storePath, HTTPAddr: httpAddr,
 		PollInterval: pollInterval.String(), Rebuild: rebuild,
 		ConsensusStatusPath: consensusStatusPath, ConsensusQualified: true,
+		MaxHeadAge: maxHeadAge.String(), ExpectedGenesisHashConfigured: expectedGenesisHash != "",
 	})
 	fmt.Println(string(out))
 
@@ -78,8 +85,11 @@ func run() error {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
 
-	// Fail closed on startup: do not expose a ready HTTP service until the
-	// configured canonical source has passed validation and the first catch-up.
+	// Fail closed on startup: validate runtime RPC identity/finality/freshness
+	// before exposing HTTP, then complete the first deterministic catch-up.
+	if _, err := indexerrpc.Validate(indexerrpc.NewQualificationSource(ctx, client, 420, version.Schema), indexerrpc.Requirements{RequiredChainID:420, ExpectedGenesisHash:expectedGenesisHash, MaxHeadAge:maxHeadAge, Now:time.Now().UTC()}); err != nil {
+		return fmt.Errorf("initial runtime source qualification: %w", err)
+	}
 	if err := engine.CatchUp(ctx); err != nil { return fmt.Errorf("initial catch-up: %w", err) }
 
 	runtimeHealth := api.NewRuntimeHealth()
@@ -111,6 +121,11 @@ func run() error {
 			if ok && err != nil { return fmt.Errorf("http server: %w", err) }
 			return nil
 		case <-ticker.C:
+			if _, err := indexerrpc.Validate(indexerrpc.NewQualificationSource(ctx, client, 420, version.Schema), indexerrpc.Requirements{RequiredChainID:420, ExpectedGenesisHash:expectedGenesisHash, MaxHeadAge:maxHeadAge, Now:time.Now().UTC()}); err != nil {
+				runtimeHealth.MarkFailure(runtimeRPCIssue(err))
+				fmt.Fprintf(os.Stderr, "420Indexer runtime source qualification failed: %v\n", err)
+				continue
+			}
 			if _, err := consensusProvider.Consensus(); err != nil {
 				runtimeHealth.MarkFailure("CONSENSUS_PROVIDER_UNAVAILABLE")
 				fmt.Fprintf(os.Stderr, "420Indexer consensus qualification failed: %v\n", err)
@@ -134,6 +149,24 @@ func newConsensusProvider(path string) (*consensusview.Provider, error) {
 	if err != nil { return nil, fmt.Errorf("consensus provider: %w", err) }
 	if _, err := provider.Consensus(); err != nil { return nil, fmt.Errorf("consensus provider qualification: %w", err) }
 	return provider, nil
+}
+
+func runtimeRPCIssue(err error) string {
+	switch {
+	case errors.Is(err, indexerrpc.ErrWrongChain): return "RPC_WRONG_CHAIN"
+	case errors.Is(err, indexerrpc.ErrGenesisMismatch): return "RPC_GENESIS_MISMATCH"
+	case errors.Is(err, indexerrpc.ErrFinalityOrdering): return "RPC_FINALITY_DIVERGENCE"
+	case errors.Is(err, indexerrpc.ErrStaleSource): return "RPC_SOURCE_STALE"
+	default: return "RPC_SOURCE_INVALID"
+	}
+}
+
+func parseMaxHeadAge(raw string) (time.Duration,error) {
+	if raw=="" { return defaultMaxHeadAge,nil }
+	d,err:=time.ParseDuration(raw)
+	if err!=nil { return 0,fmt.Errorf("INDEXER_MAX_HEAD_AGE: %w",err) }
+	if d<time.Second { return 0,errors.New("INDEXER_MAX_HEAD_AGE must be at least 1s") }
+	return d,nil
 }
 
 func parsePollInterval(raw string) (time.Duration, error) {

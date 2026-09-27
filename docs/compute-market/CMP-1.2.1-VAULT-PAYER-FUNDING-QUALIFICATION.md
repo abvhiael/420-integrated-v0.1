@@ -197,3 +197,21 @@ Exact-head evidence:
 Full qualification record: [`CMP-1.2.6-DISPUTE-HOLDS-QUALIFICATION.md`](CMP-1.2.6-DISPUTE-HOLDS-QUALIFICATION.md).
 
 Hostile solvency/reentrancy/privilege hardening remains CMP-1.2.7; full real E2E fixtures remain CMP-1.2.8; live deployment/testnet evidence remains CMP-1.2.9.
+
+
+## CMP-1.2.7 — solvency, reentrancy and privilege hardening
+
+**Status: COMPLETE within repository-level scope.** Exact qualified implementation/test head: `618c461df376294440239d1b0ce7d5e236871bd4`.
+
+The repository now proves integrated hostile-accounting behavior across the dedicated CMP Vault topology: exact native solvency, donor-surplus isolation, sealed-policy privilege containment, failed-transfer atomic rollback, malicious-beneficiary reentrancy resistance, frozen/winding-down lifecycle safety, mixed two-payer terminal-path conservation, and continued replay/wrong-recipient/cross-job isolation.
+
+Exact-head evidence:
+
+- Solidity Contracts run `36282026678` — **success**, all 16 shards green.
+- `ComputeVerifiedEntitlement420Test` — shard 1 job `108515562827`: **38 passed / 0 failed / 0 skipped**.
+- 420 Integrated Qualification run `36282026679` — **success**.
+- 420Docs Qualification run `36282026669` — **success**.
+
+Full qualification record: [`CMP-1.2.7-SOLVENCY-REENTRANCY-PRIVILEGE-QUALIFICATION.md`](CMP-1.2.7-SOLVENCY-REENTRANCY-PRIVILEGE-QUALIFICATION.md).
+
+Full real end-to-end fixtures remain CMP-1.2.8; deployment/testnet evidence remains CMP-1.2.9; final phase reconciliation remains CMP-1.2.10.

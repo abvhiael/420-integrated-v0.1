@@ -13,5 +13,6 @@ ENV INDEXER_STORE_PATH=/var/lib/420indexer/index.json
 ENV INDEXER_CONSENSUS_STATUS_PATH=/var/lib/420consensus/status.json
 ENV INDEXER_HTTP_ADDR=:8420
 ENV INDEXER_POLL_INTERVAL=12s
+ENV INDEXER_MAX_HEAD_AGE=2m
 VOLUME ["/var/lib/420indexer"]
 ENTRYPOINT ["/usr/local/bin/indexer420"]

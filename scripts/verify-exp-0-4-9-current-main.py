@@ -29,6 +29,8 @@ def main():
  if m.get("baseline",{}).get("exp_0_4_start_main_sha")!=mainsha: errors.append("main changed since EXP-0.4 start")
  if not ancestor(mainsha): errors.append("recorded current main is not an ancestor of HEAD")
  if not ancestor(prev): errors.append("EXP-0.4.8 final qualified head is not an ancestor of HEAD")
+ post_merge = ancestor(MERGED_EXP0)
+ reconciliation_base = MERGED_EXP0 if post_merge else mainsha
  try:
   ahead=int(git("rev-list","--count",f"{reconciliation_base}..HEAD"))
  except Exception as e:

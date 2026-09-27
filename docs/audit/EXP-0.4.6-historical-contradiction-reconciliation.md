@@ -52,3 +52,20 @@ Qualified implementation head: `e82501616062ff08c2789ec24518f5433bbd99c4`
 - Digest `sha256:cb01481456cb587ddfce280c2cd8ef2ff231cbb5e693851f1158e1cad699592c`.
 
 All retained repository gates passed on the implementation head. Because this evidence record changes the branch SHA, the new cumulative head must pass the retained suite once more before EXP-0.4.6 is marked COMPLETE.
+
+
+## Exact-head implementation qualification
+
+Qualified implementation head: `e82501616062ff08c2789ec24518f5433bbd99c4`
+
+- 420Indexer #631 — run `36285249197`, job `108524668014` — success.
+- 420Docs Qualification #2961 — run `36285249160`, job `108524701360` — success.
+- 420 Integrated Qualification #5578 — run `36285249040` — success.
+  - geth-engine `108524821587` — success.
+  - offline-core `108524821663` — success.
+  - fault-matrix `108524821684` — success.
+  - production-dependencies `108524821688` — success.
+- EXP-0.4.6 artifact `10919822778`.
+- Digest `sha256:cb01481456cb587ddfce280c2cd8ef2ff231cbb5e693851f1158e1cad699592c`.
+
+This proves the stale-evidence reconciliation at repository scope only. The evidence recording changes the branch SHA, so the resulting head must be requalified before EXP-0.4.6 is marked COMPLETE.

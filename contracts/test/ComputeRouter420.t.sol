@@ -9,6 +9,27 @@ contract RouterComponentStub420 {
     function ping() external pure returns (bytes4) { return this.ping.selector; }
 }
 
+contract ComputeRouterFactory420 {
+    function deploy(
+        address jobs,
+        address funding,
+        address matches,
+        address workers,
+        address verification,
+        address disputes,
+        address settlement,
+        address providers,
+        address nodes,
+        address resources,
+        address offers
+    ) external returns (address) {
+        return address(new ComputeRouter420(
+            jobs, funding, matches, workers, verification, disputes, settlement,
+            providers, nodes, resources, offers
+        ));
+    }
+}
+
 contract ComputeRouter420Test {
     function _stub() private returns (address) {
         return address(new RouterComponentStub420());
@@ -51,18 +72,22 @@ contract ComputeRouter420Test {
 
     function testRouterRejectsEOAOrZeroComponent() public {
         RouterComponentStub420 s = new RouterComponentStub420();
+        ComputeRouterFactory420 factory = new ComputeRouterFactory420();
         address a = address(s);
-        try new ComputeRouter420(
-            address(0), a, a, a, a, a, a, a, a, a, a
-        ) returns (ComputeRouter420) {
-            revert("zero component accepted");
-        } catch {}
 
-        try new ComputeRouter420(
-            address(0xBEEF), a, a, a, a, a, a, a, a, a, a
-        ) returns (ComputeRouter420) {
-            revert("non-code component accepted");
-        } catch {}
+        (bool zeroOk,) = address(factory).call(
+            abi.encodeCall(factory.deploy, (
+                address(0), a, a, a, a, a, a, a, a, a, a
+            ))
+        );
+        require(!zeroOk, "zero component accepted");
+
+        (bool eoaOk,) = address(factory).call(
+            abi.encodeCall(factory.deploy, (
+                address(0xBEEF), a, a, a, a, a, a, a, a, a, a
+            ))
+        );
+        require(!eoaOk, "non-code component accepted");
     }
 
     function testProtocolRegistryPublishesRouterWithRuntimeCodeHash() public {

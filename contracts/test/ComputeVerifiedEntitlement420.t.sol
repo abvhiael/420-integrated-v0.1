@@ -1171,8 +1171,9 @@ contract ComputeVerifiedEntitlement420Test {
         require(e.fundedAmount == 4 ether && e.earnedAmount == 3 ether
             && funding.credit(id).deposited == 4 ether,
             "donor surplus enlarged authenticated payer credit");
+        uint64 donorClaimRevision = jobs.job(id).revision;
         vm.prank(SETTLER);
-        entitlements.createProviderClaim(id, jobs.job(id).revision);
+        entitlements.createProviderClaim(id, donorClaimRevision);
         require(accounting.freeBalance(VAULT_ID, address(0)) == 5 ether,
             "liability split consumed donor surplus");
         _assertNativeSolvent();
@@ -1188,9 +1189,10 @@ contract ComputeVerifiedEntitlement420Test {
         vaultRegistry.setState(VAULT_ID, VaultRegistry420.VaultState.FROZEN);
 
         uint256 beforeVault = address(vault).balance;
+        uint64 frozenRevision = jobs.job(id).revision;
         vm.prank(BENEFICIARY);
         (bool frozenOk,) = address(entitlements).call(
-            abi.encodeCall(entitlements.claimProvider, (id, jobs.job(id).revision)));
+            abi.encodeCall(entitlements.claimProvider, (id, frozenRevision)));
         require(!frozenOk && !entitlements.providerClaim(id).paid
             && accounting.getObligation(pc.providerObligationId).state == 1
             && jobs.job(id).status == ComputeJobRegistry420.Status.VERIFIED
@@ -1198,8 +1200,9 @@ contract ComputeVerifiedEntitlement420Test {
             "frozen payout mutated held liability");
 
         vaultRegistry.setState(VAULT_ID, VaultRegistry420.VaultState.ACTIVE);
+        uint64 unfrozenRevision = jobs.job(id).revision;
         vm.prank(BENEFICIARY);
-        entitlements.claimProvider(id, jobs.job(id).revision);
+        entitlements.claimProvider(id, unfrozenRevision);
         require(jobs.job(id).status == ComputeJobRegistry420.Status.SETTLED
             && accounting.getObligation(pc.providerObligationId).state == 3,
             "unfreeze did not restore lawful payout");
@@ -1221,8 +1224,9 @@ contract ComputeVerifiedEntitlement420Test {
         require(!closeEarly && accounting.getObligation(pc.providerObligationId).state == 1,
             "vault closed with pending CMP liability");
 
+        uint64 windingRevision = jobs.job(id).revision;
         vm.prank(BENEFICIARY);
-        entitlements.claimProvider(id, jobs.job(id).revision);
+        entitlements.claimProvider(id, windingRevision);
         require(jobs.job(id).status == ComputeJobRegistry420.Status.SETTLED
             && accounting.getObligation(pc.providerObligationId).state == 3
             && vaultRegistry.vaultState(VAULT_ID) == VaultRegistry420.VaultState.WINDING_DOWN,
@@ -1241,6 +1245,8 @@ contract ComputeVerifiedEntitlement420Test {
         vm.prank(OPERATOR);
         providers.update(providerId, keccak256("provider-reentrant"),
             keccak256("security-reentrant"), address(attacker));
+        vm.prank(GOV);
+        providers.activate(providerId);
         vm.prank(OPERATOR);
         offerId = offers.publish(resourceId, PRICING_POLICY, 1, 3 ether,
             uint64(block.timestamp + 12 hours));
@@ -1274,6 +1280,8 @@ contract ComputeVerifiedEntitlement420Test {
         vm.prank(OPERATOR);
         providers.update(providerId, keccak256("provider-rejecting"),
             keccak256("security-rejecting"), address(rejector));
+        vm.prank(GOV);
+        providers.activate(providerId);
         vm.prank(OPERATOR);
         offerId = offers.publish(resourceId, PRICING_POLICY, 1, 3 ether,
             uint64(block.timestamp + 12 hours));
@@ -1317,10 +1325,12 @@ contract ComputeVerifiedEntitlement420Test {
         jobs.recordCancellation(refundJob, 4);
         entitlements.createTerminalRefundClaim(refundJob);
 
+        uint64 paidRevision = jobs.job(paidJob).revision;
+        uint64 refundRevision = jobs.job(refundJob).revision;
         vm.prank(BENEFICIARY);
-        entitlements.claimProvider(paidJob, jobs.job(paidJob).revision);
+        entitlements.claimProvider(paidJob, paidRevision);
         vm.prank(payerB);
-        entitlements.claimPayerRefund(refundJob, jobs.job(refundJob).revision);
+        entitlements.claimPayerRefund(refundJob, refundRevision);
 
         VaultAccounting420.AssetAccounting memory a =
             accounting.getAccounting(VAULT_ID, address(0));

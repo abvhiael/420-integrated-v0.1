@@ -101,3 +101,19 @@ func TestFileStoreRejectsRollbackBelowFinalizedCheckpoint(t *testing.T) {
 	if err := s.DeleteBlocksAbove(1); err == nil { t.Fatal("expected rollback below finality rejection") }
 	if _, ok, _ := s.Block(3); !ok { t.Fatal("store changed despite rejected rollback") }
 }
+
+
+func TestFileStorePersistsBlockProducerAttributionAcrossRestart(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "indexer.json")
+	s, err := NewFileStore(path); if err != nil { t.Fatal(err) }
+	block := model.BlockRecord{
+		ChainID:420, Number:12, Hash:"0x12", ParentHash:"0x11",
+		Producer:&model.BlockProducer{ConsensusSlot:100,ProducerSeat:4,ProposerRank:0,ConsensusBlockRoot:"0xc12",Certified:true},
+	}
+	if err := s.PutBundle(block,nil,nil,nil); err != nil { t.Fatal(err) }
+	reopened, err := NewFileStore(path); if err != nil { t.Fatal(err) }
+	got, ok, err := reopened.Block(12); if err != nil || !ok { t.Fatalf("block missing: ok=%v err=%v",ok,err) }
+	if got.Producer == nil || got.Producer.ConsensusSlot != 100 || got.Producer.ProducerSeat != 4 || got.Producer.ConsensusBlockRoot != "0xc12" || !got.Producer.Certified {
+		t.Fatalf("producer attribution not durable: %+v", got)
+	}
+}

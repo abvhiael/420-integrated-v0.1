@@ -92,7 +92,7 @@ func (e *Engine) CatchUp(ctx context.Context) error {
 		}
 		if err := e.core.AcceptBlock(bundle.Block); err != nil {
 			if errors.Is(err, core.ErrParentMismatch) {
-				r := reorg.New(e.chainID, e.schemaVersion, e.source, e.store)
+				r := reorg.New(e.chainID, e.schemaVersion, e.source, e.store).WithProducerAttributor(e.producerAttributor)
 				if repairErr := r.Repair(ctx, head); repairErr != nil { return fmt.Errorf("repair reorg after accept block %d: %w", number, repairErr) }
 				return e.PromoteFinality(ctx)
 			}

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -185,7 +186,7 @@ func TestStatusRouteFailsClosedOnStaleIndexer(t *testing.T) {
 	rr:=httptest.NewRecorder()
 	s.Handler().ServeHTTP(rr,httptest.NewRequest(http.MethodGet,"/v1/status",nil))
 	if rr.Code!=http.StatusServiceUnavailable { t.Fatalf("status=%d body=%s",rr.Code,rr.Body.String()) }
-	if !contains(rr.Body.String(),"INDEXER_STALE") { t.Fatalf("stale issue code missing: %s",rr.Body.String()) }
+	if !strings.Contains(rr.Body.String(),"INDEXER_STALE") { t.Fatalf("stale issue code missing: %s",rr.Body.String()) }
 }
 
 func TestStatusRouteFailsClosedOnRuntimeDegradation(t *testing.T) {
@@ -198,7 +199,7 @@ func TestStatusRouteFailsClosedOnRuntimeDegradation(t *testing.T) {
 	rr:=httptest.NewRecorder()
 	s.Handler().ServeHTTP(rr,httptest.NewRequest(http.MethodGet,"/v1/status",nil))
 	if rr.Code!=http.StatusServiceUnavailable { t.Fatalf("status=%d body=%s",rr.Code,rr.Body.String()) }
-	if !contains(rr.Body.String(),"INDEXER_DEGRADED") { t.Fatalf("degraded issue code missing: %s",rr.Body.String()) }
+	if !strings.Contains(rr.Body.String(),"INDEXER_DEGRADED") { t.Fatalf("degraded issue code missing: %s",rr.Body.String()) }
 }
 
 func TestReadyRouteFailsClosedOnInconsistentFinality(t *testing.T) {
@@ -211,7 +212,7 @@ func TestReadyRouteFailsClosedOnInconsistentFinality(t *testing.T) {
 	rr:=httptest.NewRecorder()
 	s.Handler().ServeHTTP(rr,httptest.NewRequest(http.MethodGet,"/v1/ready",nil))
 	if rr.Code!=http.StatusServiceUnavailable { t.Fatalf("status=%d body=%s",rr.Code,rr.Body.String()) }
-	if !contains(rr.Body.String(),"INCONSISTENT_FINALITY") { t.Fatalf("inconsistent-finality issue missing: %s",rr.Body.String()) }
+	if !strings.Contains(rr.Body.String(),"INCONSISTENT_FINALITY") { t.Fatalf("inconsistent-finality issue missing: %s",rr.Body.String()) }
 }
 
 func TestConsensusRouteFailsClosedWhenProviderUnavailable(t *testing.T) {

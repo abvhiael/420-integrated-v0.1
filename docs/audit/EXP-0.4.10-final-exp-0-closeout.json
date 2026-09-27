@@ -1,0 +1,84 @@
+{
+  "schema": "420explorer-exp-0.4.10-final-exp-0-closeout-v1",
+  "milestone": "EXP-0.4.10",
+  "title": "420Explorer EXP-0 final audit reconciliation closeout",
+  "status": "implementation_complete_exact_head_qualification_required",
+  "baseline": {
+    "exp_0_4_9_final_qualified_head": "4d477e57ba178a90a8724217c919051a26222d53",
+    "current_main_sha": "304cb61286c94f72d0b05e32e5f713b9d68bc450",
+    "pr": 376
+  },
+  "exp_0_stage_state": {
+    "exp_0_1": {
+      "status": "complete",
+      "scope": "repository inventory, ownership, contract/address and implementation-baseline qualification"
+    },
+    "exp_0_2": {
+      "status": "complete",
+      "scope": "Genesis capability/workflow/dependency/gap/acceptance reconciliation"
+    },
+    "exp_0_3": {
+      "status": "complete",
+      "scope": "authoritative Genesis scope, requirements, acceptance tests, status freeze, exclusions, conflicts, traceability and governance scope resolution"
+    },
+    "exp_0_4": {
+      "status": "closing",
+      "scope": "qualification evidence, historical closeouts, provenance, CI coverage, AC evidence, contradiction reconciliation, canonical ledger, retention, current-main reconciliation and final closeout"
+    }
+  },
+  "authoritative_closeout_state": {
+    "mandatory_genesis_requirements": 60,
+    "required_genesis_views": 10,
+    "active_genesis_blockers": 10,
+    "acceptance_criteria": 10,
+    "unverified_acceptance_criteria": 10,
+    "satisfied_acceptance_criteria": 0,
+    "unresolved_scope_conflicts": 0,
+    "genesis_qualified_requirements": 0,
+    "runtime_qualified_events": 0,
+    "deployment_qualified_events": 0,
+    "live_network_qualified_events": 0,
+    "genesis_qualified_events": 0,
+    "governance_scope_decision": "EXP-SCOPE-RESOLUTION-B",
+    "governance_dedicated_view_required": false,
+    "genesis_ready": false
+  },
+  "handoff": {
+    "EXP_1": "Resolve blockchain data integrity/runtime blockers including deployed Indexer endpoint, RPC binding, validator provider and historical attribution.",
+    "EXP_2": "Qualify Explorer service/API runtime semantics including fees, receipts, raw events and attribution surfaces.",
+    "EXP_3": "Qualify ProtocolRegistry deployment/publication plus ABI/descriptor runtime provenance.",
+    "EXP_4": "Qualify deployed Explorer UI workflows and required displays.",
+    "EXP_5": "Qualify ecosystem integrations against deployed dependencies.",
+    "EXP_6": "Qualify security, degraded-state, recovery, performance and operational resilience.",
+    "EXP_7": "Qualify production-equivalent deployment and live-network evidence.",
+    "EXP_8": "Run exact release-candidate qualification, satisfy AC-1 through AC-10, close blockers and perform final Genesis closeout."
+  },
+  "final_closeout_rules": [
+    "EXP-0 is complete only as audit, scope, evidence and repository reconciliation.",
+    "No EXP-0 artifact may be read as runtime, deployment, live-network or Genesis qualification.",
+    "The ten active Genesis blockers remain authoritative until later owners close them with required evidence.",
+    "AC-1 through AC-10 remain unverified until later qualification procedures and exact release-candidate closeout establish satisfaction.",
+    "Governance remains descriptive subject matter but is not a mandatory dedicated Explorer Genesis view.",
+    "The exact EXP-0.4.10 implementation head and the final evidence-recording head must both pass the retained Indexer, Docs and Integrated qualification suites."
+  ],
+  "retained_authorities": [
+    "docs/audit/EXP-0.2.5-genesis-gap-register.json",
+    "docs/audit/EXP-0.2.6-genesis-acceptance-criteria.json",
+    "docs/audit/EXP-0.3.1-authoritative-genesis-requirements.json",
+    "docs/audit/EXP-0.3.4-qualification-status-freeze.json",
+    "docs/audit/EXP-0.3.8-governance-scope-decision.json",
+    "docs/audit/EXP-0.4.3-qualification-evidence-ledger.json",
+    "docs/audit/EXP-0.4.7-canonical-qualification-ledger.json",
+    "docs/audit/EXP-0.4.8-evidence-retention-reproducibility.json",
+    "docs/audit/EXP-0.4.9-current-main-requalification.json"
+  ],
+  "summary": {
+    "exp_0_ready_for_closeout": true,
+    "exp_0_complete": false,
+    "genesis_ready": false,
+    "active_genesis_blockers": 10,
+    "unverified_acceptance_criteria": 10,
+    "unresolved_scope_conflicts": 0,
+    "next_stage": "EXP-1"
+  }
+}

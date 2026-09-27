@@ -215,6 +215,9 @@ contract ComputeWorkerAttestation420Test {
 
     function testExpiryRevocationAndFutureNotBeforeFailClosed() public {
         uint64 revision = workers.worker(workerId).revision;
+        uint256 start = block.timestamp;
+        uint64 validAfter = uint64(start + 1 hours);
+        uint64 expiresAt = uint64(start + 2 hours);
 
         vm.prank(ATTESTER);
         bytes32 futureEvidence = attestations.attest(
@@ -222,19 +225,19 @@ contract ComputeWorkerAttestation420Test {
             revision,
             POLICY,
             EVIDENCE_A,
-            uint64(block.timestamp + 1 hours),
-            uint64(block.timestamp + 2 hours)
+            validAfter,
+            expiresAt
         );
         require(
             !eligibility.isEligible(workerId, revision, true, POLICY, futureEvidence),
             "future-dated evidence active early"
         );
-        vm.warp(block.timestamp + 1 hours);
+        vm.warp(uint256(validAfter));
         require(
             eligibility.isEligible(workerId, revision, true, POLICY, futureEvidence),
             "evidence not active at validAfter"
         );
-        vm.warp(block.timestamp + 1 hours);
+        vm.warp(uint256(expiresAt));
         require(
             !eligibility.isEligible(workerId, revision, true, POLICY, futureEvidence),
             "expired evidence accepted"

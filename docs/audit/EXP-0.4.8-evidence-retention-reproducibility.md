@@ -1,6 +1,6 @@
 # EXP-0.4.8 — evidence retention and reproducibility
 
-**Status:** implementation complete; exact-head qualification required.
+**Status:** qualified at repository scope; final evidence-recording head requalification required.
 
 ## Purpose
 
@@ -34,3 +34,20 @@ An expired Actions artifact is **not** treated as recoverable merely because its
 - 5 final EXP-0.4 closeouts (0.4.3–0.4.7) are copied into this repository-resident manifest with exact heads and complete artifact digests.
 - Four replay profiles define how repository, integrated, docs and live-environment evidence are regenerated.
 - No runtime, deployment, live-network or Genesis qualification is created by this retention milestone.
+
+
+## Exact-head implementation qualification
+
+Qualified implementation head: `a54fcc9e562b77c43b2a1e5185e99cb7fc15511e`
+
+- 420Indexer #656 — run `36299759221`, job `108565121774` — success.
+- 420Docs Qualification #2992 — run `36299759222`, job `108565123153` — success.
+- 420 Integrated Qualification #5609 — run `36299759355` — success.
+  - production-dependencies `108565123907` — success.
+  - geth-engine `108565123943` — success.
+  - offline-core `108565123948` — success.
+  - fault-matrix `108565123956` — success.
+- EXP-0.4.8 artifact `10924919734`.
+- Digest `sha256:2a9fc26cfbb084d9c33b3140c9290721ba3f49e9b99e1a7ca3ef7342e78d9784`.
+
+This qualifies evidence retention and reproducibility at repository scope. The evidence recording changes the branch SHA, so the resulting head must be requalified before EXP-0.4.8 is marked COMPLETE.

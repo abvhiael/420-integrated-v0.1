@@ -95,15 +95,23 @@ func (s *FileStore) Block(number uint64) (model.BlockRecord, bool, error) {
 }
 
 func (s *FileStore) PutBlock(b model.BlockRecord) error {
+	if err := validateBlockRecord(b); err != nil { return err }
 	s.mu.Lock(); defer s.mu.Unlock()
+	if existing, ok := s.data.Blocks[b.Number]; ok {
+		if err := rejectFinalizedOverwrite(existing, b); err != nil { return err }
+	}
 	s.data.Blocks[b.Number] = b
 	return s.persistLocked()
 }
 
 func (s *FileStore) PutBundle(block model.BlockRecord, txs []model.TransactionRecord, receipts []model.ReceiptRecord, logs []model.LogRecord) error {
+	if err := validateBlockRecord(block); err != nil { return err }
 	transfers, err := assets.DecodeBundle(txs, logs)
 	if err != nil { return fmt.Errorf("decode asset transfers for block %d: %w", block.Number, err) }
 	s.mu.Lock(); defer s.mu.Unlock()
+	if existing, ok := s.data.Blocks[block.Number]; ok {
+		if err := rejectFinalizedOverwrite(existing, block); err != nil { return err }
+	}
 	s.data.Blocks[block.Number] = block
 	for _, tx := range txs { s.data.Transactions[strings.ToLower(tx.Hash)] = tx }
 	for _, r := range receipts { s.data.Receipts[strings.ToLower(r.TransactionHash)] = r }
@@ -168,6 +176,7 @@ func (s *FileStore) AssetTransfers(assetKey, address string) ([]model.AssetTrans
 
 func (s *FileStore) DeleteBlocksAbove(number uint64) error {
 	s.mu.Lock(); defer s.mu.Unlock()
+	if err := rejectRollbackBelowFinality(s.data.Checkpoint, number); err != nil { return err }
 	for n := range s.data.Blocks { if n > number { delete(s.data.Blocks, n) } }
 	for h, tx := range s.data.Transactions { if tx.BlockNumber > number { delete(s.data.Transactions, h) } }
 	for h, r := range s.data.Receipts { if r.BlockNumber > number { delete(s.data.Receipts, h) } }

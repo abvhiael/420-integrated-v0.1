@@ -9,6 +9,7 @@ CFG=ROOT/"config/420indexer-v1.json"
 MODEL=ROOT/"indexer/model/model.go"
 BACKEND=ROOT/"indexer/api/backend.go"
 BACKEND_TEST=ROOT/"indexer/api/backend_test.go"
+INDEXER_API_TEST=ROOT/"indexer/api/server_test.go"
 MAIN=ROOT/"indexer/cmd/indexer420/main.go"
 MAIN_TEST=ROOT/"indexer/cmd/indexer420/main_test.go"
 RPC_SOURCE=ROOT/"indexer/rpc/source.go"
@@ -31,7 +32,7 @@ def git(*args):
 
 def main():
     errors=[]
-    required=[REC,READY,CFG,MODEL,BACKEND,BACKEND_TEST,MAIN,MAIN_TEST,RPC_SOURCE,RPC_TEST,QUAL_SOURCE,QUAL_TEST,CONS_TEST,INGEST_TEST,REORG_TEST,EXP_SERVICE_TEST,EXP_BLOCK_TEST,EXP_API_TEST,COMPOSE,ENV,DOCKER]
+    required=[REC,READY,CFG,MODEL,BACKEND,BACKEND_TEST,INDEXER_API_TEST,MAIN,MAIN_TEST,RPC_SOURCE,RPC_TEST,QUAL_SOURCE,QUAL_TEST,CONS_TEST,INGEST_TEST,REORG_TEST,EXP_SERVICE_TEST,EXP_BLOCK_TEST,EXP_API_TEST,COMPOSE,ENV,DOCKER]
     for p in required:
         if not p.exists(): errors.append(f"missing {p.relative_to(ROOT)}")
     if errors:
@@ -47,7 +48,7 @@ def main():
     compose=COMPOSE.read_text()
     env=ENV.read_text()
     docker=DOCKER.read_text()
-    tests="\n".join(p.read_text() for p in [BACKEND_TEST,MAIN_TEST,RPC_TEST,QUAL_TEST,CONS_TEST,INGEST_TEST,REORG_TEST,EXP_SERVICE_TEST,EXP_BLOCK_TEST,EXP_API_TEST])
+    tests="\n".join(p.read_text() for p in [BACKEND_TEST,INDEXER_API_TEST,MAIN_TEST,RPC_TEST,QUAL_TEST,CONS_TEST,INGEST_TEST,REORG_TEST,EXP_SERVICE_TEST,EXP_BLOCK_TEST,EXP_API_TEST])
 
     if rec.get("schema")!="420explorer-exp-1.8-runtime-negative-divergence-v1": errors.append("schema drift")
     if rec.get("milestone")!="EXP-1.8": errors.append("milestone drift")

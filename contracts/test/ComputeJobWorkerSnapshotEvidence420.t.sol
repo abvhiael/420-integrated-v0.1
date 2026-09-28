@@ -17,18 +17,15 @@ contract SnapshotCapabilityRegistryMock420 is ICapabilityRegistry420 {
     bool public allow = true;
     function setAllow(bool allowed) external { allow = allowed; }
 
-    function registerComponent(bytes32, address, bool) external {}
-    function component(bytes32) external pure returns (ComponentView memory out) { return out; }
-    function componentIdForAddress(address) external pure returns (bytes32) { return bytes32(0); }
-    function action(bytes32, bytes32) external pure returns (ActionView memory out) { return out; }
-    function registerAction(bytes32, bytes32, bool) external {}
-    function publishPolicy(bytes32, bytes32, bytes32, bytes32) external pure returns (bytes32) { return bytes32(0); }
-    function policy(bytes32) external pure returns (PolicyView memory out) { return out; }
-    function grantCapability(GrantInput calldata) external pure returns (bytes32) { return bytes32(0); }
-    function grant(bytes32) external pure returns (GrantView memory out) { return out; }
-    function consume(bytes32, uint256, bytes32) external {}
-    function revokeGrant(bytes32, bytes32) external {}
-    function isAuthorized(address, bytes32, bytes32, bytes32, uint256) external view returns (bool) { return allow; }
+    function grant(bytes32) external pure returns (CapabilityGrant memory out) { return out; }
+
+    function isAuthorized(address, bytes32, bytes32, bytes32, uint256)
+        external
+        view
+        returns (bool)
+    {
+        return allow;
+    }
 }
 
 contract SnapshotRequestFundingVerification420 is

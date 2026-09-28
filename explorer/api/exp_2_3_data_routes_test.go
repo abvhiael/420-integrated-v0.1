@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	indexerapi "github.com/420integrated/420-integrated/indexer/api"
 	"github.com/420integrated/420-integrated/indexer/model"
@@ -29,6 +30,15 @@ func (f *exp23Indexer) Contract(context.Context, string) (model.ContractRecord, 
 	return f.contract, nil
 }
 
+func newEXP23Server(t *testing.T, idx *exp23Indexer) *Server {
+	t.Helper()
+	svc, err := explorerservice.New(idx, 420, time.Hour)
+	if err != nil { t.Fatal(err) }
+	s, err := NewServer(svc)
+	if err != nil { t.Fatal(err) }
+	return s
+}
+
 func TestEXP23AddressContractAndAssetRoutes(t *testing.T) {
 	addr := "0x1111111111111111111111111111111111111111"
 	idx := &exp23Indexer{
@@ -47,7 +57,7 @@ func TestEXP23AddressContractAndAssetRoutes(t *testing.T) {
 			ChainID: 420, Address: addr, DeploymentTxHash: "0xtx", DeploymentHash: "0x12", RuntimeCode: "0x6000", CodeHash: "0xcode",
 		},
 	}
-	s := newTestServer(t, idx)
+	s := newEXP23Server(t, idx)
 
 	rr := httptest.NewRecorder()
 	s.Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodGet, "/v1/addresses/"+addr+"?limit=50", nil))
@@ -72,7 +82,7 @@ func TestEXP23AddressContractAndAssetRoutes(t *testing.T) {
 }
 
 func TestEXP23RoutesRejectInvalidInputs(t *testing.T) {
-	s := newTestServer(t, &exp23Indexer{
+	s := newEXP23Server(t, &exp23Indexer{
 		fakeIndexer: &fakeIndexer{},
 		addressPage: indexerapi.AddressTransactionPage{Meta: indexerapi.PageMeta{ChainID: 420}},
 		assetPage: indexerapi.AssetTransferPage{Meta: indexerapi.PageMeta{ChainID: 420}},

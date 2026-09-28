@@ -2,7 +2,7 @@
   "schema": "420explorer-exp-2.1-transaction-fee-api-v1",
   "milestone": "EXP-2.1",
   "title": "Authoritative transaction fee model and API qualification",
-  "status": "qualified_repository_scope_candidate_evidence_recorded_pending_final_head_requalification",
+  "status": "qualified_repository_scope",
   "baseline": {
     "main_commit": "abf37451879531d31cd515519eac79006fe84978",
     "phase_1_merge_commit": "abf37451879531d31cd515519eac79006fe84978",
@@ -106,7 +106,55 @@
       }
     ],
     "candidate_gate_result": "all_triggered_workflows_success",
-    "final_recording_head": null,
-    "final_recording_head_result": "pending_requalification"
+    "evidence_recording_head": "3a66520724fa652e44d01ed09580f7bf8985589b",
+    "evidence_recording_head_result": "all_triggered_workflows_success",
+    "evidence_recording_workflow_runs": [
+      {
+        "name": "420Explorer EXP-2.1",
+        "run_id": 36365630319,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Indexer",
+        "run_id": 36365630324,
+        "conclusion": "success"
+      },
+      {
+        "name": "420 Integrated Qualification",
+        "run_id": 36365630399,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Docs Qualification",
+        "run_id": 36365630329,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.6 Historical Producer Qualification",
+        "run_id": 36365630318,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.7 Cross-Layer Traceability Qualification",
+        "run_id": 36365630315,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.8 Runtime Negative Divergence Qualification",
+        "run_id": 36365630316,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.9 CI Qualification Automation",
+        "run_id": 36365630323,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.10 Phase Closeout Qualification",
+        "run_id": 36365630317,
+        "conclusion": "success"
+      }
+    ],
+    "final_metadata_head_rule": "The commit containing this completed audit record must itself pass the dedicated EXP-2.1 gate, primary 420Indexer qualification, and all triggered retained workflows on its exact SHA. No further evidence-only commit is required after those exact-head runs succeed."
   }
 }

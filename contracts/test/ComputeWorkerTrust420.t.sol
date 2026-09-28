@@ -87,10 +87,11 @@ contract ComputeWorkerTrust420Test {
         vm.prank(OPERATOR);
         nodes.activate(nodeId);
 
+        bytes32 computeClass = resources.CPU_GENERAL();
         vm.prank(OPERATOR);
         resourceId = resources.register(
             nodeId,
-            resources.CPU_GENERAL(),
+            computeClass,
             HARDWARE,
             RUNTIME,
             RESOURCE_CAP,

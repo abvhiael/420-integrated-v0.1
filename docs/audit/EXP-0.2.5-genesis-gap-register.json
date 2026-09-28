@@ -405,7 +405,7 @@
     },
     {
       "id": "EXP-FIND-009",
-      "classification": "Qualification gap",
+      "classification": "Genesis blocker",
       "severity": "high",
       "title": "Historical validator-produced block attribution live qualification pending",
       "description": "Historical producer/proposer provenance is implemented in consensus-owned produced-block history, persisted by 420Indexer, exposed through Explorer block detail and /v1/blocks/{number}/trace, and covered by reorg/finality negative tests. The remaining Genesis blocker is live target-network comparison and production-equivalent workflow evidence.",

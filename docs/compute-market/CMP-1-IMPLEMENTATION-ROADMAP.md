@@ -69,6 +69,8 @@ Never trust the self-reported hardware alone. Capabilities must eventually be be
 
 **CMP-1.3.4 420Trust reputation references:** `docs/compute-market/CMP-1.3.4-WORKER-TRUST-QUALIFICATION.md` integrates policy-scoped canonical 420Trust metrics and immutable worker-revision reputation references without creating a universal score or granting correctness, settlement, stake, slashing, or lifecycle authority. Live Trust state remains authoritative for new admission. Candidate implementation is repository-qualified at exact head `67195b992f7793ac8012af130085bcf0902c23d4`; final evidence-recording-head closeout remains pending.
 
+**CMP-1.3.5 compute-stake binding:** `docs/compute-market/CMP-1.3.5-WORKER-STAKE-BINDING-QUALIFICATION.md` adds a typed, versioned binding to the future CMP-1.5 compute-collateral source. Stake-required admission defaults deny while unbound, rejects validator-stake substitution, reads live worker/policy-specific collateral state, and preserves immutable historical stake references without owning custody or slash authority.
+
 ## CMP-1.4 — ComputeVerifierRegistry
 
 Separate workers from verification authorities.

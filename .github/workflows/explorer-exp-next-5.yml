@@ -1,0 +1,52 @@
+name: 420Explorer EXP-NEXT.5 Final Closeout Readiness
+
+on:
+  pull_request:
+    paths:
+      - 'docs/audit/EXP-NEXT.5-*'
+      - 'docs/audit/EXP-NEXT.4-live-deployment-recovery.json'
+      - 'docs/audit/EXP-0.2.5-genesis-gap-register.json'
+      - 'docs/audit/EXP-0.2.6-genesis-acceptance-criteria.json'
+      - 'docs/audit/EXP-2R.5-authoritative-next-phase-roadmap.json'
+      - 'scripts/verify-exp-next-5-final-closeout.py'
+      - '.github/workflows/explorer-exp-next-5.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  closeout-readiness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Verify EXP-NEXT.5 fail-closed closeout state
+        run: python scripts/verify-exp-next-5-final-closeout.py
+      - name: Retain Explorer tests
+        run: go test ./explorer/...
+      - name: Vet Explorer
+        run: go vet ./explorer/...
+      - name: Retain EXP-NEXT.4 repository readiness
+        run: python scripts/verify-exp-next-4-repository-readiness.py
+      - name: Retain EXP-NEXT.3
+        run: python scripts/verify-exp-next-3-cross-resource-browser.py
+      - name: Retain EXP-NEXT.2
+        run: python scripts/verify-exp-next-2-fee-raw-event-browser.py
+      - name: Upload EXP-NEXT.5 closeout readiness evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp-next-5-closeout-readiness
+          path: exp-next-5-closeout-readiness-evidence/
+          if-no-files-found: error
+          retention-days: 30

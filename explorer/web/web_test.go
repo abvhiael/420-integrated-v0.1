@@ -22,7 +22,7 @@ func TestHandlerServesExplorerShell(t *testing.T) {
 }
 
 func TestHandlerServesStaticAssets(t *testing.T) {
-	for _, path := range []string{"/app.css", "/app.js"} {
+	for _, path := range []string{"/app.css", "/app.js", "/presentation.mjs"} {
 		rr := httptest.NewRecorder()
 		Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodGet, path, nil))
 		if rr.Code != http.StatusOK { t.Fatalf("%s status=%d", path, rr.Code) }
@@ -95,6 +95,26 @@ func TestExplorerScriptContainsAdvancedPresentationViews(t *testing.T) {
 	}
 }
 
+func TestExplorerScriptContainsEXPNEXT2FeeAndRawEventPresentation(t *testing.T) {
+	rr := httptest.NewRecorder()
+	Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodGet, "/app.js", nil))
+	if rr.Code != http.StatusOK { t.Fatalf("status=%d", rr.Code) }
+	body := rr.Body.String()
+	for _, marker := range []string{"renderFeeSummary420", "transactionDetailPresentation420", "inspectableRaw420", "renderRawLogs420", "Raw input", "Raw logs", "transaction-log", "block-log", "data-copy-value"} {
+		if !strings.Contains(body, marker) { t.Fatalf("app.js missing EXP-NEXT.2 marker %q", marker) }
+	}
+	if strings.Contains(body, "eth_get") || strings.Contains(body, "INDEXER_RPC_URL") { t.Fatal("frontend must remain an Indexer/Explorer API consumer") }
+}
+
+func TestExplorerPresentationModuleContainsFailClosedGuards(t *testing.T) {
+	rr := httptest.NewRecorder()
+	Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodGet, "/presentation.mjs", nil))
+	if rr.Code != http.StatusOK { t.Fatalf("status=%d", rr.Code) }
+	body := rr.Body.String()
+	for _, marker := range []string{"actual fee is inconsistent", "transaction and receipt provenance are inconsistent", "log emitting address", "log topic", "log data", "Raw indexed values are primary", "Copy full value"} {
+		if !strings.Contains(body, marker) { t.Fatalf("presentation.mjs missing fail-closed marker %q", marker) }
+	}
+}
 func TestHandlerRejectsMutationMethods(t *testing.T) {
 	rr := httptest.NewRecorder()
 	Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodPost, "/", strings.NewReader("x")))

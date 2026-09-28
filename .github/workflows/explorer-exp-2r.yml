@@ -1,0 +1,78 @@
+name: 420Explorer EXP-2R Reconciliation
+
+on:
+  pull_request:
+    paths:
+      - "docs/audit/EXP-2R*"
+      - "docs/audit/EXP-2.5-raw-call-events.*"
+      - "scripts/verify-exp-2r-post-merge.py"
+      - ".github/workflows/explorer-exp-2r.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Retain EXP-1.6 through EXP-1.10 audit gates
+        run: |
+          set -euo pipefail
+          python3 scripts/verify-exp-1-6-historical-producer.py
+          python3 scripts/verify-exp-1-7-cross-layer-traceability.py
+          python3 scripts/verify-exp-1-8-runtime-negative-divergence.py
+          python3 scripts/verify-exp-1-9-ci-automation.py
+          python3 scripts/verify-exp-1-10-phase-closeout.py
+
+      - name: Retain EXP-2.1 through EXP-2.6 audit gates
+        run: |
+          set -euo pipefail
+          python3 scripts/verify-exp-2-1-transaction-fees.py
+          python3 scripts/verify-exp-2-2-http-routes.py
+          python3 scripts/verify-exp-2-3-data-services.py
+          python3 scripts/verify-exp-2-4-consensus.py
+          python3 scripts/verify-exp-2-5-raw-events.py
+          python3 scripts/verify-exp-2-6-diagnostics-registry.py
+
+      - name: Explorer regression
+        run: go test ./explorer/...
+
+      - name: Explorer vet
+        run: go vet ./explorer/...
+
+      - name: Indexer regression
+        run: go test ./indexer/...
+
+      - name: Indexer vet
+        run: go vet ./indexer/...
+
+      - name: Verify EXP-2R reconciliation record
+        run: python3 scripts/verify-exp-2r-post-merge.py
+
+      - name: Upload EXP-2R evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp-2r-post-merge-reconciliation
+          path: exp-2r-evidence/
+          if-no-files-found: error
+          retention-days: 14

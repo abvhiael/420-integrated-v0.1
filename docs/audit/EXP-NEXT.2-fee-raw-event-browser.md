@@ -15,3 +15,23 @@ EXP-WF-003 and EXP-WF-013 now reference this repository evidence. Live target-ne
 Candidate head `30e9f78dd786b53bb41fd98c84515695bbc3c1a5` passed the dedicated EXP-NEXT.2 browser workflow (run `36470100265`), retained EXP-2.2–2.6 workflows, EXP-1.7/1.8/1.10, 420Indexer, 420Docs and 420 Integrated Qualification. The dedicated artifact is `10990339622` (`exp-next-2-fee-raw-event-browser`).
 
 The commit containing this COMPLETE record is a new qualification target and must itself pass the required exact-head suite before the status is considered effective.
+
+
+## Exact-head evidence recorded before final closeout
+
+Exact branch head `74ca0c80d1d531c5c36afabc6046e5bab22f3e86` passed the complete required suite before this evidence-recording change:
+
+- EXP-NEXT.2 dedicated browser workflow: run `36470761516`, artifact `10991610657`
+- retained EXP-2.5: `36470761655`
+- retained EXP-2.4: `36470761780`
+- retained EXP-2.2: `36470761642`
+- retained EXP-2.3: `36470761432`
+- retained EXP-2.6: `36470761431`
+- EXP-1.7: `36470761527`
+- EXP-1.8: `36470761634`
+- EXP-1.10: `36470761823`
+- 420Indexer: `36470761523`
+- 420Docs: `36470761671`
+- 420 Integrated: `36470761733` (offline-core, geth-engine, production-dependencies and fault-matrix all succeeded)
+
+This evidence-recording change creates a new HEAD. That new exact HEAD must itself pass the dedicated EXP-NEXT.2 workflow and every retained workflow that triggers for it before the COMPLETE status is effective. No pre-evidence SHA may qualify the evidence-recording HEAD.

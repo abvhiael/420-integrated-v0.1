@@ -1,0 +1,77 @@
+{
+  "schema": "420explorer-exp-2.4-consensus-producer-services-v1",
+  "milestone": "EXP-2.4",
+  "title": "Consensus, validator, and historical producer presentation qualification",
+  "status": "implementation_complete_pending_exact_head_ci",
+  "baseline": {
+    "exp_2_3_qualified_head": "5898aa8666ec4ed78cd1e97a3eb4e978318f7ac5"
+  },
+  "findings": [
+    "EXP-FIND-007",
+    "EXP-FIND-009"
+  ],
+  "workflows": [
+    "EXP-WF-008"
+  ],
+  "objective": "Qualify the repository Explorer consensus/validator service and historical block-producer presentation path, including slot/epoch/rotation arithmetic, committee/proposer integrity, checkpoint/QC provenance, authority boundaries, HTTP serialization, and execution-to-consensus producer trace presentation.",
+  "implementation_boundary": {
+    "owns": [
+      "Explorer consensus service validation and derived presentation fields",
+      "Explorer /v1/consensus repository HTTP contract",
+      "Indexer-client canonical-authority rejection for consensus reads",
+      "historical block producer trace presentation and authority labeling",
+      "repository fail-closed handling for malformed consensus projections"
+    ],
+    "does_not_own": [
+      "live consensus source deployment",
+      "canonical consensus authority",
+      "live block-to-producer witness",
+      "deployed UI producer navigation",
+      "target-network validator/committee witness",
+      "Genesis release closeout"
+    ]
+  },
+  "defects_remediated": [
+    "Explorer consensus presentation did not verify current/next-slot continuity",
+    "Explorer consensus presentation did not verify epoch and rotation arithmetic against NextSlot",
+    "Explorer consensus presentation did not verify SlotsPerRotation equals SlotsPerEpoch multiplied by EpochsPerRotation",
+    "Explorer consensus presentation did not require checkpoint roots or certified-QC block provenance",
+    "Explorer consensus presentation did not reject certified QCs beyond the projected head/current slot",
+    "Explorer consensus presentation did not independently enforce a minimum three-seat active committee"
+  ],
+  "acceptance_criteria": [
+    "AC-1 validator/producer Explorer resources expose representative indexed data correctly",
+    "AC-3 consensus/finality/proposer projections preserve internal provenance and ordering",
+    "AC-5 malformed, contradictory, unavailable, or authority-overclaiming consensus data fails closed",
+    "AC-6 repository service/API path is qualified while live target-network evidence remains explicitly deferred",
+    "AC-8 Explorer remains a non-authoritative projection consumer"
+  ],
+  "qualification_tests": [
+    "representative consensus status and derived participation/boundary values",
+    "current/next slot continuity and epoch/rotation arithmetic negatives",
+    "rotation-dimension consistency negative",
+    "checkpoint-root and QC-provenance negatives",
+    "QC signer/quorum and beyond-head negatives",
+    "minimum active committee and proposer membership/collision negatives",
+    "HTTP /v1/consensus serialization/provenance headers and malformed projection failure",
+    "Indexer-client consensus canonical-authority overclaim rejection",
+    "historical block-producer trace authority/provenance preservation",
+    "go test ./explorer/service ./explorer/api ./explorer/indexerclient",
+    "go test ./explorer/...",
+    "go vet ./explorer/..."
+  ],
+  "evidence": {
+    "workflow": ".github/workflows/explorer-exp-2-4.yml",
+    "verifier": "scripts/verify-exp-2-4-consensus.py",
+    "artifact": "exp-2-4-consensus-producer",
+    "exact_head_expression": "github.event.pull_request.head.sha || github.sha"
+  },
+  "scope_boundary": {
+    "deployed_ui_qualified": false,
+    "live_target_network_qualified": false,
+    "live_consensus_source_qualified": false,
+    "live_producer_witness_qualified": false,
+    "canonical_authority": false,
+    "genesis_ready_claim": false
+  }
+}

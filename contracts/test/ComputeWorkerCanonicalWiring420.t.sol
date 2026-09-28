@@ -73,11 +73,11 @@ contract ComputeWorkerCanonicalWiring420Test {
         providers = new ComputeProviderRegistry420(GOV);
         nodes = new ComputeNodeRegistry420(address(providers), GOV);
         resources = new ComputeResourceRegistry420(address(nodes), GOV);
-        workers = new ComputeWorkerRegistry420(address(resources), GOV);
+        authorization = new ComputeAuthorization420(address(new WiringCapabilityRegistryMock420()));
+        workers = new ComputeWorkerRegistry420(address(resources), address(authorization), GOV);
         attestation = new ComputeWorkerAttestation420(address(workers), GOV);
         workerTrust = new ComputeWorkerTrust420(address(workers), address(new WiringTrustMock420()), GOV);
         workerStake = new ComputeWorkerStake420(address(workers), GOV);
-        authorization = new ComputeAuthorization420(address(new WiringCapabilityRegistryMock420()));
         matches = new WiringMatchMock420();
         common = new WiringCommonEvidence420();
 

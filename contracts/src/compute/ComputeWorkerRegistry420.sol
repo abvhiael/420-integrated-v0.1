@@ -4,6 +4,7 @@ pragma solidity ^0.8.24;
 import "../interfaces/I420System.sol";
 import "../accounts/ECDSA420.sol";
 import "./ComputeResourceRegistry420.sol";
+import "./ComputeAuthorization420.sol";
 
 /// @notice Canonical ComputeMarket worker execution identity and lifecycle registry.
 /// @dev A worker is permanently bound to one provider/node/resource ancestry. Registration records
@@ -35,6 +36,7 @@ contract ComputeWorkerRegistry420 is I420System {
     ComputeResourceRegistry420 public immutable resources;
     ComputeNodeRegistry420 public immutable nodes;
     ComputeProviderRegistry420 public immutable providers;
+    ComputeAuthorization420 public immutable authorization;
     address public immutable governanceTimelock;
     uint64 public nextSerial;
 
@@ -63,13 +65,16 @@ contract ComputeWorkerRegistry420 is I420System {
         bytes32 newCommitment
     );
 
-    constructor(address resourceRegistry_, address timelock_) {
-        if (resourceRegistry_ == address(0) || resourceRegistry_.code.length == 0 || timelock_ == address(0)) {
-            revert InvalidIdentity();
-        }
+    constructor(address resourceRegistry_, address authorization_, address timelock_) {
+        if (
+            resourceRegistry_ == address(0) || resourceRegistry_.code.length == 0
+                || authorization_ == address(0) || authorization_.code.length == 0
+                || timelock_ == address(0)
+        ) revert InvalidIdentity();
         resources = ComputeResourceRegistry420(resourceRegistry_);
         nodes = resources.nodes();
         providers = resources.providers();
+        authorization = ComputeAuthorization420(authorization_);
         governanceTimelock = timelock_;
     }
 
@@ -160,8 +165,8 @@ contract ComputeWorkerRegistry420 is I420System {
         if (w.status == Status.NONE) revert InvalidIdentity();
     }
 
-    /// @notice Registers an execution identity under the exact current canonical resource revision.
-    /// @dev The execution signer must prove possession. This proof does not attest hardware correctness.
+    /// @notice Registers an execution identity for the canonical resource/node/provider operator.
+    /// @dev Even the canonical operator requires an explicit exact-worker capability grant.
     function register(
         bytes32 resourceId,
         address executionSigner,
@@ -169,10 +174,51 @@ contract ComputeWorkerRegistry420 is I420System {
         bytes32 jurisdictionHash,
         bytes calldata executionKeyProof
     ) external returns (bytes32 workerId) {
+        return _registerFor(
+            msg.sender,
+            resourceId,
+            executionSigner,
+            capabilityProfileHash,
+            jurisdictionHash,
+            executionKeyProof
+        );
+    }
+
+    /// @notice Delegated registration for the immutable canonical provider/node operator.
+    /// @dev The delegate gains no ownership: the worker.operator remains the canonical operator argument.
+    function registerFor(
+        address operator,
+        bytes32 resourceId,
+        address executionSigner,
+        bytes32 capabilityProfileHash,
+        bytes32 jurisdictionHash,
+        bytes calldata executionKeyProof
+    ) external returns (bytes32 workerId) {
+        return _registerFor(
+            operator,
+            resourceId,
+            executionSigner,
+            capabilityProfileHash,
+            jurisdictionHash,
+            executionKeyProof
+        );
+    }
+
+    function _registerFor(
+        address operator,
+        bytes32 resourceId,
+        address executionSigner,
+        bytes32 capabilityProfileHash,
+        bytes32 jurisdictionHash,
+        bytes calldata executionKeyProof
+    ) private returns (bytes32 workerId) {
         ComputeResourceRegistry420.Resource memory r = resources.resource(resourceId);
         ComputeNodeRegistry420.Node memory n = nodes.node(r.nodeId);
-        if (!resources.isAvailable(resourceId) || !providers.isOperator(r.providerId, msg.sender)
-            || n.providerId != r.providerId || n.operator != msg.sender) revert UnauthorizedOperator();
+        if (
+            operator == address(0) || !resources.isAvailable(resourceId)
+                || !providers.isOperator(r.providerId, operator)
+                || n.providerId != r.providerId || n.operator != operator
+        ) revert UnauthorizedOperator();
         if (executionSigner == address(0) || capabilityProfileHash == bytes32(0) || block.chainid == 0) {
             revert InvalidIdentity();
         }
@@ -181,6 +227,12 @@ contract ComputeWorkerRegistry420 is I420System {
         uint64 serial = nextSerial + 1;
         workerId = deriveId(serial, r.providerId, r.nodeId, resourceId);
         if (_current[workerId].status != Status.NONE) revert InvalidIdentity();
+        _requireCapability(
+            msg.sender,
+            authorization.ACTION_REGISTER_WORKER(),
+            workerId,
+            1
+        );
 
         bytes32 digest = registrationDigest(
             serial,
@@ -188,7 +240,7 @@ contract ComputeWorkerRegistry420 is I420System {
             r.nodeId,
             resourceId,
             r.revision,
-            msg.sender,
+            operator,
             executionSigner,
             capabilityProfileHash,
             jurisdictionHash
@@ -202,7 +254,7 @@ contract ComputeWorkerRegistry420 is I420System {
             providerId: r.providerId,
             nodeId: r.nodeId,
             resourceId: resourceId,
-            operator: msg.sender,
+            operator: operator,
             executionSigner: executionSigner,
             executionKeyCommitment: executionKeyCommitment(executionSigner),
             capabilityProfileHash: capabilityProfileHash,
@@ -214,12 +266,12 @@ contract ComputeWorkerRegistry420 is I420System {
         });
         _current[workerId] = w;
         _history[workerId][1] = w;
-        emit WorkerRegistered(workerId, r.nodeId, resourceId, msg.sender, executionSigner, serial);
+        emit WorkerRegistered(workerId, r.nodeId, resourceId, operator, executionSigner, serial);
     }
 
     function activate(bytes32 workerId) external {
         Worker memory w = worker(workerId);
-        if (msg.sender != w.operator) revert UnauthorizedOperator();
+        _requireCapability(msg.sender, authorization.ACTION_ACTIVATE_WORKER(), workerId, w.revision);
         if (w.status != Status.REGISTERED && w.status != Status.SUSPENDED) revert InvalidState();
         if (!_parentsEligible(w)) revert InvalidState();
         w.status = Status.ACTIVE;
@@ -228,7 +280,7 @@ contract ComputeWorkerRegistry420 is I420System {
 
     function suspend(bytes32 workerId) external {
         Worker memory w = worker(workerId);
-        if (msg.sender != w.operator && msg.sender != governanceTimelock) revert UnauthorizedOperator();
+        _requireCapability(msg.sender, authorization.ACTION_SUSPEND_WORKER(), workerId, w.revision);
         if (w.status != Status.ACTIVE) revert InvalidState();
         w.status = Status.SUSPENDED;
         _commit(workerId, w);
@@ -236,7 +288,7 @@ contract ComputeWorkerRegistry420 is I420System {
 
     function retire(bytes32 workerId) external {
         Worker memory w = worker(workerId);
-        if (msg.sender != w.operator && msg.sender != governanceTimelock) revert UnauthorizedOperator();
+        _requireCapability(msg.sender, authorization.ACTION_RETIRE_WORKER(), workerId, w.revision);
         if (w.status == Status.RETIRED) revert InvalidState();
         w.status = Status.RETIRED;
         _commit(workerId, w);
@@ -246,12 +298,21 @@ contract ComputeWorkerRegistry420 is I420System {
     /// @dev Material capability/jurisdiction changes always suspend fresh paid admission until reactivated.
     function refreshProfile(bytes32 workerId, bytes32 capabilityProfileHash, bytes32 jurisdictionHash) external {
         Worker memory w = worker(workerId);
-        if (msg.sender != w.operator) revert UnauthorizedOperator();
+        _requireCapability(
+            msg.sender,
+            authorization.ACTION_REFRESH_WORKER_PROFILE(),
+            workerId,
+            w.revision
+        );
         if (w.status == Status.RETIRED || capabilityProfileHash == bytes32(0)) revert InvalidState();
 
         ComputeResourceRegistry420.Resource memory r = resources.resource(w.resourceId);
-        if (r.providerId != w.providerId || r.nodeId != w.nodeId || !resources.isAvailable(w.resourceId)
-            || !providers.isOperator(w.providerId, msg.sender)) revert InvalidState();
+        ComputeNodeRegistry420.Node memory n = nodes.node(w.nodeId);
+        if (
+            r.providerId != w.providerId || r.nodeId != w.nodeId || !resources.isAvailable(w.resourceId)
+                || !providers.isOperator(w.providerId, w.operator)
+                || n.providerId != w.providerId || n.operator != w.operator
+        ) revert InvalidState();
 
         w.capabilityProfileHash = capabilityProfileHash;
         w.jurisdictionHash = jurisdictionHash;
@@ -266,9 +327,16 @@ contract ComputeWorkerRegistry420 is I420System {
         external
     {
         Worker memory w = worker(workerId);
-        if (msg.sender != w.operator) revert UnauthorizedOperator();
-        if (w.status == Status.RETIRED || newExecutionSigner == address(0)
-            || newExecutionSigner == w.executionSigner) revert InvalidState();
+        _requireCapability(
+            msg.sender,
+            authorization.ACTION_ROTATE_WORKER_EXECUTION_KEY(),
+            workerId,
+            w.revision
+        );
+        if (
+            w.status == Status.RETIRED || newExecutionSigner == address(0)
+                || newExecutionSigner == w.executionSigner
+        ) revert InvalidState();
 
         bytes32 digest = rotationDigest(workerId, newExecutionSigner);
         if (ECDSA420.tryRecover(digest, executionKeyProof) != newExecutionSigner) {
@@ -279,6 +347,22 @@ contract ComputeWorkerRegistry420 is I420System {
         w.executionKeyCommitment = executionKeyCommitment(newExecutionSigner);
         w.status = Status.SUSPENDED;
         _commit(workerId, w);
+    }
+
+    function _requireCapability(
+        address principal,
+        bytes32 actionId,
+        bytes32 workerId,
+        uint64 workerRevision
+    ) private view {
+        if (
+            !authorization.isAuthorized(
+                principal,
+                actionId,
+                authorization.scopeWorker(workerId, workerRevision),
+                0
+            )
+        ) revert UnauthorizedOperator();
     }
 
     /// @notice Exact-current eligibility for new admission. Later CMP-1.3 slices add attestation/stake predicates.

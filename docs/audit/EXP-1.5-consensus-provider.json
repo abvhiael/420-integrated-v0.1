@@ -1,0 +1,62 @@
+{
+  "schema": "420explorer-exp-1.5-consensus-provider-v1",
+  "milestone": "EXP-1.5",
+  "title": "Consensus provider integration qualification",
+  "scope": "production Indexer wiring and deterministic qualification of the consensus-owned status projection; live consensus deployment remains blocked until approved testnet infrastructure exists",
+  "predecessor": {
+    "exp_1_4_candidate_head": "e90971d19164b8f94d2373df73f301d2eedc70cd",
+    "exact_head_ci_note": "EXP-1.4 exact-head CI did not emit for the final reconciliation commit; EXP-1.5 exact-head qualification must re-run retained EXP-1.4 and EXP-1.5 gates together"
+  },
+  "authority": {
+    "canonical_consensus_owner": "consensus subsystem",
+    "indexer_canonical_authority": false,
+    "provider": "indexer/consensusview.Provider",
+    "storage_source": "consensus/storage.FileStore",
+    "api_route": "GET /v1/consensus"
+  },
+  "requirements": {
+    "runtime_provider_wired": true,
+    "required_status_path": true,
+    "startup_provider_qualification": true,
+    "finality_order_validation": true,
+    "active_seat_uniqueness": true,
+    "minimum_active_seats": true,
+    "scheduled_proposer_committee_membership": true,
+    "proposer_fallback_distinctness": true,
+    "qc_quorum_validation": true,
+    "missing_provider_fail_closed": true,
+    "invalid_provider_fail_closed": true,
+    "api_non_authoritative_projection": true,
+    "deployment_mount_read_only": true
+  },
+  "deployment": {
+    "env": "INDEXER_CONSENSUS_STATUS_PATH",
+    "container_path": "/var/lib/420consensus/status.json",
+    "compose_host_source": "INDEXER_CONSENSUS_STATUS_DIR",
+    "live_binding_qualified": false,
+    "blocker": "approved live consensus status source and testnet infrastructure are not yet provisioned"
+  },
+  "tests": [
+    "TestConsensusProjection",
+    "TestConsensusProjectionRejectsBadQC",
+    "TestConsensusProjectionRejectsImpossibleFinality",
+    "TestConsensusProjectionRejectsProposerOutsideCommittee",
+    "TestConsensusProjectionUnavailableWhenStateMissing",
+    "TestNewConsensusProviderRejectsMissingPath",
+    "TestNewConsensusProviderRejectsUnavailableState",
+    "TestNewConsensusProviderAcceptsQualifiedState"
+  ],
+  "acceptance": {
+    "production_wiring_complete": true,
+    "deterministic_provider_validation_complete": true,
+    "deployment_contract_complete": true,
+    "live_consensus_binding_complete": false,
+    "exact_head_ci_required": true
+  },
+  "summary": {
+    "repository_consensus_provider_qualified": true,
+    "live_network_qualified": false,
+    "genesis_qualified": false,
+    "next_step": "EXP-1.6"
+  }
+}

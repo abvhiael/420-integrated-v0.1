@@ -65,7 +65,8 @@
         "docs/audit/EXP-0.1.2-indexer-runtime-topology-addendum.md"
       ],
       "evidence": [
-        "EXP-DEP-001: source implemented_and_tested; deployment pending_deployment; live qualification unverified."
+        "EXP-DEP-001: source implemented_and_tested; deployment pending_deployment; live qualification unverified.",
+        "EXP-1.4 through EXP-1.10 qualify the deployable Indexer runtime and API; no approved live testnet endpoint exists yet."
       ],
       "root_cause": "Deployment-stage work has not supplied a real testnet service endpoint and live witness evidence.",
       "consequences": [
@@ -99,7 +100,11 @@
         "AC-6"
       ],
       "genesis_blocking": true,
-      "blocking_rationale": "The shared Indexer is mandatory for every core Explorer data path; source CI cannot substitute for deployed service qualification."
+      "blocking_rationale": "The shared Indexer is mandatory for every core Explorer data path; source CI cannot substitute for deployed service qualification.",
+      "exp_1_disposition": "REPOSITORY_RUNTIME_PACKAGING_AND_API_QUALIFIED_LIVE_ENDPOINT_PENDING",
+      "post_exp_1_remaining_owners": [
+        "EXP-7"
+      ]
     },
     {
       "id": "EXP-FIND-003",
@@ -164,7 +169,8 @@
         "docs/architecture/infrastructure/420indexer.md"
       ],
       "evidence": [
-        "EXP-DEP-004: source implemented; deployment and live qualification unverified."
+        "EXP-DEP-004: source implemented; deployment and live qualification unverified.",
+        "EXP-1.2 and EXP-1.8 qualify chain/genesis/finality/freshness validation and fail-closed runtime behavior; approved live RPC binding remains pending."
       ],
       "root_cause": "No authoritative target-network runtime binding/evidence is present in the audited Explorer readiness chain.",
       "consequences": [
@@ -197,7 +203,11 @@
         "AC-3"
       ],
       "genesis_blocking": true,
-      "blocking_rationale": "Accurate Explorer data depends on a qualified canonical upstream; implementation of an RPC adapter is insufficient evidence of correct deployed binding."
+      "blocking_rationale": "Accurate Explorer data depends on a qualified canonical upstream; implementation of an RPC adapter is insufficient evidence of correct deployed binding.",
+      "exp_1_disposition": "RPC_BINDING_CONTRACT_AND_CONTINUOUS_VALIDATION_QUALIFIED_LIVE_BINDING_PENDING",
+      "post_exp_1_remaining_owners": [
+        "EXP-7"
+      ]
     },
     {
       "id": "EXP-FIND-005",
@@ -315,7 +325,8 @@
         "docs/audit/EXP-0.1.2-indexer-runtime-topology-addendum.md"
       ],
       "evidence": [
-        "EXP-DEP-008: implemented source; deployment/live qualification unverified."
+        "EXP-DEP-008: implemented source; deployment/live qualification unverified.",
+        "EXP-1.5 through EXP-1.8 qualify production consensus-provider wiring, validator projection and fail-closed behavior; live consensus witness remains pending."
       ],
       "root_cause": "Source route/interface existence has not been paired with deployed backend/provider composition evidence.",
       "consequences": [
@@ -350,7 +361,12 @@
         "AC-6"
       ],
       "genesis_blocking": true,
-      "blocking_rationale": "Validator and epoch/rotation are explicitly mandatory Genesis views."
+      "blocking_rationale": "Validator and epoch/rotation are explicitly mandatory Genesis views.",
+      "exp_1_disposition": "PRODUCTION_PROVIDER_WIRING_AND_NEGATIVE_BEHAVIOR_QUALIFIED_LIVE_CONSENSUS_SOURCE_PENDING",
+      "post_exp_1_remaining_owners": [
+        "EXP-2",
+        "EXP-7"
+      ]
     },
     {
       "id": "EXP-FIND-008",
@@ -404,8 +420,8 @@
       "id": "EXP-FIND-009",
       "classification": "Genesis blocker",
       "severity": "high",
-      "title": "Historical validator-produced block attribution is absent",
-      "description": "The current block record lacks proposer/validator identity, and Explorer cannot trace a historical block to the validator/proposer that produced it.",
+      "title": "Historical validator-produced block attribution live qualification pending",
+      "description": "Historical producer/proposer provenance is implemented in consensus-owned produced-block history, persisted by 420Indexer, exposed through Explorer block detail and /v1/blocks/{number}/trace, and covered by reorg/finality negative tests. The remaining Genesis blocker is live target-network comparison and production-equivalent workflow evidence.",
       "affected": [
         "indexer/model/model.go",
         "explorer/service/consensusviews.go",
@@ -413,28 +429,30 @@
         "docs/audit/EXP-0.2.2-user-workflow-matrix.json"
       ],
       "evidence": [
-        "EXP-WF-008 is not_observed and gap_requires_implementation."
+        "EXP-1.6 repository historical producer attribution qualified.",
+        "EXP-1.7 execution-to-consensus traceability and Explorer rendering qualified.",
+        "EXP-1.8 malformed/missing provenance and reorg/finality negative behavior qualified.",
+        "Live canonical consensus comparison remains pending provisioned testnet."
       ],
-      "root_cause": "Historical block provenance and consensus status are modeled separately without a block-to-producer field/mapping in the inspected path.",
+      "root_cause": "Repository implementation gap was remediated in EXP-1.6/1.7; approved live consensus/execution sources are not yet provisioned for target-network witness qualification.",
       "consequences": [
-        "Users cannot verify block production attribution through the required validator/block workflow."
+        "Genesis acceptance cannot yet rely on a live block-to-producer witness from the approved target network."
       ],
       "dependencies": [
-        "canonical consensus/block provenance",
-        "Indexer block model"
+        "approved canonical execution source",
+        "approved canonical consensus source",
+        "deployed Indexer/Explorer"
       ],
       "prerequisite_work": [
-        "define authoritative historical producer identity source"
+        "provision approved testnet execution and consensus sources"
       ],
       "remediation": [
-        "Add historical producer/proposer provenance to the Indexer model/API.",
-        "Expose and link producer identity in Explorer block/consensus views."
+        "Run live block-to-producer comparison against canonical consensus data.",
+        "Exercise the deployed Explorer producer/trace workflow on the exact release candidate."
       ],
       "tests": [
-        "block-to-producer model/API fixtures",
-        "reorg/finality provenance case",
-        "UI producer link test",
-        "testnet comparison with canonical consensus data"
+        "live block-to-producer canonical comparison",
+        "deployed Explorer producer trace workflow"
       ],
       "later_owner": [
         "EXP-1",
@@ -447,7 +465,13 @@
         "AC-5"
       ],
       "genesis_blocking": true,
-      "blocking_rationale": "The user-workflow matrix explicitly marks validator-produced block inspection as an implementation gap tied to mandatory block and validator capabilities."
+      "blocking_rationale": "Repository attribution is now implemented and qualified, but Genesis still requires live target-network and deployed workflow evidence.",
+      "exp_1_disposition": "REPOSITORY_IMPLEMENTATION_FULLY_REMEDIATED_LIVE_WITNESS_PENDING",
+      "post_exp_1_remaining_owners": [
+        "EXP-2",
+        "EXP-4",
+        "EXP-7"
+      ]
     },
     {
       "id": "EXP-FIND-010",

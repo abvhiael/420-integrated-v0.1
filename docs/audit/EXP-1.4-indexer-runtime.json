@@ -1,0 +1,50 @@
+{
+  "schema": "420explorer-exp-1.4-indexer-runtime-v1",
+  "milestone": "EXP-1.4",
+  "predecessor": {
+    "milestone": "EXP-1.3",
+    "qualified_head": "5d5067b5ac842a48a9f49b75e642dfb35a68d287",
+    "indexer_run": 36344684019,
+    "docs_run": 36344684006,
+    "integrated_run": 36344684011
+  },
+  "scope": "deployable runtime packaging and deterministic service qualification; live testnet promotion blocked until approved infrastructure and RPC exist",
+  "requirements": {
+    "persistent_service": true,
+    "http_api": true,
+    "periodic_catchup": true,
+    "initial_fail_closed": true,
+    "graceful_shutdown": true,
+    "persistent_volume": true,
+    "container_image": true,
+    "deployment_manifest": true,
+    "health_probe": true,
+    "restart_policy": true
+  },
+  "files": [
+    "indexer/cmd/indexer420/main.go",
+    "indexer/cmd/indexer420/main_test.go",
+    "docker/Dockerfile.420indexer",
+    "deployments/indexer/docker-compose.yml",
+    "deployments/indexer/indexer.env.example",
+    "testnet/public-services/indexer/readiness.json"
+  ],
+  "live_state": {
+    "deployed": false,
+    "backend_url": "REPLACE",
+    "infrastructure_status": "UNPROVISIONED",
+    "rpc_status": "PLACEHOLDER",
+    "live_runtime_qualified": false
+  },
+  "acceptance": {
+    "deployable_runtime_complete": true,
+    "live_deployment_complete": false,
+    "exact_head_ci_required": true
+  },
+  "summary": {
+    "runtime_package_qualified": true,
+    "live_network_qualified": false,
+    "genesis_qualified": false,
+    "next_step": "EXP-1.5"
+  }
+}

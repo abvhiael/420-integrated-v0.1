@@ -1,0 +1,89 @@
+{
+  "schema": "420explorer-exp-1.6-historical-producer-attribution-v1",
+  "milestone": "EXP-1.6",
+  "title": "Historical block-producer attribution qualification",
+  "predecessor": {
+    "qualified_head": "5589fe360a606b05211c53cf5162d1c4cbbd76b2",
+    "indexer_run": 36354380927,
+    "indexer_job": 108719051038,
+    "docs_run": 36354380918,
+    "integrated_run": 36354380904,
+    "genesis_address_run": 36354380917,
+    "exp_1_5_artifact_id": 10942609328,
+    "exp_1_5_artifact_digest": "sha256:f22b59a5c81d75e19cf9cdb7bdf9ff28631eaab5aa0a7310131acb07f452fd92"
+  },
+  "authority": {
+    "canonical_owner": "consensus subsystem",
+    "historical_source": "consensus/storage.Status.produced_blocks",
+    "execution_join_key": "execution block hash",
+    "indexer_canonical_authority": false,
+    "no_execution_coinbase_inference": true,
+    "no_schedule_only_inference": true
+  },
+  "projection": {
+    "record": "indexer/model.BlockRecord.producer",
+    "fields": [
+      "consensusSlot",
+      "producerSeat",
+      "proposerRank",
+      "consensusBlockRoot",
+      "certified"
+    ],
+    "durable": true,
+    "api_exposure": "existing block endpoints return producer provenance inline"
+  },
+  "invariants": {
+    "duplicate_execution_hash_rejected": true,
+    "duplicate_canonical_slot_rejected": true,
+    "missing_consensus_root_rejected": true,
+    "proposer_rank_range": "0..2",
+    "missing_attribution_for_non_genesis_block_with_configured_provider": "FAIL_CLOSED",
+    "historical_committee_membership_not_revalidated_against_current_committee": true
+  },
+  "reorg": {
+    "preflight_entire_replacement_branch_before_mutation": true,
+    "producer_attribution_preflighted": true,
+    "orphan_attribution_removed_with_orphan_block": true,
+    "replacement_attribution_written_with_replayed_block": true,
+    "finalized_conflict_behavior": "unchanged fail-closed"
+  },
+  "production": {
+    "provider": "indexer/consensusview.Provider",
+    "ingest_wiring": "ingest.Engine.WithProducerAttributor(consensusProvider)",
+    "consensus_status_path_env": "INDEXER_CONSENSUS_STATUS_PATH",
+    "live_history_binding_qualified": false,
+    "blocker": "approved live consensus produced-block history and testnet infrastructure are not yet provisioned"
+  },
+  "tests": [
+    "TestProducerForBlockReturnsHistoricalAttribution",
+    "TestProducerForBlockRejectsDuplicateAttribution",
+    "TestProducerForBlockRejectsInvalidRank",
+    "TestCatchUpAttachesHistoricalProducerAttribution",
+    "TestCatchUpFailsClosedWhenHistoricalProducerMissing",
+    "TestRepairReplacesProducerAttributionWithCanonicalFork",
+    "TestRepairFailsClosedWhenCanonicalForkProducerMissing",
+    "TestFileStorePersistsBlockProducerAttributionAcrossRestart"
+  ],
+  "acceptance": {
+    "consensus_owned_historical_source_implemented": true,
+    "canonical_block_projection_implemented": true,
+    "production_ingest_wiring_implemented": true,
+    "missing_history_fail_closed": true,
+    "reorg_preflight_and_replacement_implemented": true,
+    "durable_restart_provenance_implemented": true,
+    "exact_head_ci_required": true,
+    "live_history_binding_complete": false
+  },
+  "blocker_reconciliation": {
+    "finding": "EXP-FIND-009",
+    "source_implementation_gap": "REMEDIATED_BY_EXP_1_6",
+    "live_network_evidence": "PENDING_PROVISIONED_TESTNET",
+    "genesis_blocker_may_close": "only after later live/deployment evidence proves the approved consensus history source"
+  },
+  "summary": {
+    "repository_historical_producer_attribution_qualified_candidate": true,
+    "live_network_qualified": false,
+    "genesis_ready": false,
+    "next_step": "EXP-1.7"
+  }
+}

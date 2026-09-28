@@ -32,6 +32,7 @@ type BlockRecord struct {
 	ParentHash    string   `json:"parentHash"`
 	Timestamp     uint64   `json:"timestamp"`
 	Finality      Finality `json:"finality"`
+	Producer      *BlockProducer `json:"producer,omitempty"`
 	SchemaVersion string   `json:"schemaVersion"`
 }
 
@@ -85,4 +86,6 @@ type Health struct {
 	DecoderSet      string    `json:"decoderSet"`
 	State           string    `json:"state"`
 	LastIngestAt    time.Time `json:"lastIngestAt"`
+	RuntimeIssue    string     `json:"runtimeIssue,omitempty"`
+	RuntimeIssueAt  *time.Time `json:"runtimeIssueAt,omitempty"`
 }

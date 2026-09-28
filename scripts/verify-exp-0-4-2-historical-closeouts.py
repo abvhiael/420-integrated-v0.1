@@ -37,7 +37,7 @@ def main():
  # Current source must retain the narrow labels and pending deployment truth.
  source_checks={
   "indexer/STATUS.md":["QUALIFIED_INDEXER_API_CONSUMER","Testnet deployment URL/service probes remain deployment-stage work"],
-  "testnet/public-services/indexer/readiness.json":["QUALIFIED_INDEXER_API_CONSUMER","PENDING_TESTNET_DEPLOYMENT","REPLACE"],
+  "testnet/public-services/indexer/readiness.json":["QUALIFIED_INDEXER_API_CONSUMER","REPLACE"],
   "explorer/api/server.go":["QUALIFIED_INDEXER_API_CONSUMER"],
   "explorer/cmd/explorer420/main.go":["EXP-6.2","QUALIFIED_INDEXER_API_CONSUMER"],
   "explorer/cmd/explorersmoke/main.go":["EXP-7.1","QUALIFIED"],
@@ -48,6 +48,16 @@ def main():
   txt=(ROOT/p).read_text(encoding="utf-8")
   for n in needles:
    if n not in txt: errors.append(f"{p}: expected historical/current marker missing: {n}")
+
+ # The live deployment gate may evolve from the original pending marker to a
+ # later deployable-runtime-qualified-but-live-pending state. Preserve the
+ # historical meaning rather than requiring the obsolete literal.
+ indexer_ready=load(ROOT/"testnet/public-services/indexer/readiness.json")
+ deployment_status=indexer_ready.get("backend",{}).get("deployment_status")
+ if deployment_status not in {"PENDING_TESTNET_DEPLOYMENT","DEPLOYABLE_RUNTIME_QUALIFIED_LIVE_TESTNET_PENDING"}:
+  errors.append(f"testnet/public-services/indexer/readiness.json: unexpected deployment status {deployment_status}")
+ if deployment_status=="DEPLOYABLE_RUNTIME_QUALIFIED_LIVE_TESTNET_PENDING" and indexer_ready.get("backend",{}).get("live_deployment",{}).get("qualified") is not False:
+  errors.append("testnet/public-services/indexer/readiness.json: live deployment overpromoted")
  # Current authoritative status discipline.
  blockers=[f for f in gaps.get("findings",[]) if f.get("genesis_blocking")]
  if len(blockers)!=10: errors.append(f"expected 10 current Genesis blockers, got {len(blockers)}")

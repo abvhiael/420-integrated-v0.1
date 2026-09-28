@@ -1,0 +1,88 @@
+{
+  "schema": "420explorer-exp-1.7-cross-layer-traceability-v1",
+  "milestone": "EXP-1.7",
+  "title": "Cross-layer execution-consensus-Indexer-Explorer traceability qualification",
+  "predecessor": {
+    "exp_1_6_qualified_head": "89b4deed40e7f8857813b92fc0c39f97db88c51b",
+    "exp_1_6_workflow_run": 36357480637,
+    "exp_1_6_job": 108727975933,
+    "exp_1_6_artifact_id": 10944393695,
+    "exp_1_6_artifact_digest": "sha256:dc11502c11d26efeb365ec13af54dc7a0d0b726baec1efd45001420988ebbbf0",
+    "indexer_run": 36357480563,
+    "docs_run": 36357480595,
+    "integrated_run": 36357480675
+  },
+  "trace_chain": {
+    "execution_authority": "node420 canonical execution block",
+    "consensus_authority": "fourtwentyd consensus-produced block history",
+    "indexer_role": "derived non-authoritative projection",
+    "explorer_role": "presentation-only non-authoritative consumer",
+    "execution_identity": "chainId + execution block hash",
+    "consensus_identity": "consensus slot + consensus block root",
+    "join": "BlockRecord.producer historical consensus provenance"
+  },
+  "implementation": {
+    "block_summary_preserves_producer": true,
+    "block_detail_embeds_trace": true,
+    "trace_endpoint": "GET /v1/blocks/{number}/trace",
+    "ui_renders_trace": true,
+    "trace_fields": [
+      "executionBlockHash",
+      "consensusBlockRoot",
+      "consensusSlot",
+      "producerSeat",
+      "proposerRank",
+      "certified",
+      "finality",
+      "schemaVersion",
+      "canonicalAuthority",
+      "executionAuthority",
+      "consensusAuthority",
+      "projectionAuthority"
+    ]
+  },
+  "invariants": {
+    "non_genesis_missing_producer": "FAIL_CLOSED",
+    "missing_consensus_root": "FAIL_CLOSED",
+    "proposer_rank_outside_0_to_2": "FAIL_CLOSED",
+    "genesis_producer_optional": true,
+    "explorer_canonical_authority": false,
+    "indexer_canonical_authority": false
+  },
+  "tests": [
+    "TestBlockDetailPreservesCrossLayerTrace",
+    "TestBlockDetailFailsClosedWithoutHistoricalProducer",
+    "TestBlockTraceRejectsMalformedProducerProvenance",
+    "TestGenesisBlockDetailAllowsNoProducerTrace",
+    "TestBlockTraceRoute",
+    "TestBlockTraceRouteFailsClosedWithoutProducer",
+    "TestBlockDetailRoute"
+  ],
+  "live_boundary": {
+    "qualified": false,
+    "blocker": "approved live testnet execution and consensus sources plus cross-layer comparison witnesses remain unprovisioned",
+    "no_live_claim": true
+  },
+  "acceptance": {
+    "service_trace_projection_complete": true,
+    "api_trace_route_complete": true,
+    "block_detail_trace_complete": true,
+    "ui_trace_rendering_complete": true,
+    "malformed_or_missing_trace_fail_closed": true,
+    "authority_separation_preserved": true,
+    "exact_head_ci_required": true,
+    "live_cross_layer_witness_complete": false
+  },
+  "blocker_reconciliation": {
+    "finding": "EXP-FIND-009",
+    "repository_traceability_gap": "REMEDIATED_BY_EXP_1_6_AND_EXP_1_7",
+    "user_visible_rendering_gap": "REMEDIATED_BY_EXP_1_7",
+    "live_network_evidence": "PENDING_PROVISIONED_TESTNET"
+  },
+  "summary": {
+    "repository_cross_layer_traceability_qualified_candidate": true,
+    "live_network_qualified": false,
+    "genesis_ready": false,
+    "next_step": "EXP-1.8"
+  }
+}

@@ -46,6 +46,7 @@ if backend.get("independent_chain_ingestion") is not False: errors.append("readi
 if indexer_ready.get("consumer_gates", {}).get("420Explorer") not in {
     "IMPLEMENTED_PENDING_CI",
     "QUALIFIED_INDEXER_API_CONSUMER",
+    "QUALIFIED_INDEXER_API_CONSUMER_EXACT_HEAD",
 }:
     errors.append("indexer consumer gate")
 

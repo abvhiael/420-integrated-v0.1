@@ -50,3 +50,45 @@ func TestStoreBackendExposesRegistryVersion(t *testing.T) {
 	if err != nil { t.Fatal(err) }
 	if record.Implementation != "0x420" || record.Version != 1 { t.Fatalf("unexpected service version: %+v", record) }
 }
+
+
+func TestRuntimeHealthDegradesAndRecoversWithoutLosingCheckpoint(t *testing.T) {
+	now := time.Now().UTC()
+	store := memoryReadStore{cp:model.ChainCheckpoint{
+		ChainID:420, IndexedHeight:100, IndexedHash:"0x100",
+		SafeHeight:99, FinalizedHeight:98, SchemaVersion:"v1", UpdatedAt:now,
+	}}
+	runtime := NewRuntimeHealth()
+	b := NewStoreBackend(store,nil).WithRuntimeHealth(runtime)
+
+	h,err:=b.Health()
+	if err!=nil { t.Fatal(err) }
+	if h.State!="HEALTHY" || h.RuntimeIssue!="" { t.Fatalf("unexpected initial health: %+v",h) }
+
+	runtime.MarkFailure("INGEST_CATCHUP_FAILED")
+	h,err=b.Health()
+	if err!=nil { t.Fatal(err) }
+	if h.State!="DEGRADED" || h.RuntimeIssue!="INGEST_CATCHUP_FAILED" || h.RuntimeIssueAt==nil {
+		t.Fatalf("runtime fault not surfaced: %+v",h)
+	}
+	if h.IndexedHeight!=100 || h.SafeHeight!=99 || h.FinalizedHeight!=98 {
+		t.Fatalf("last known checkpoint lost during degradation: %+v",h)
+	}
+
+	runtime.MarkHealthy()
+	h,err=b.Health()
+	if err!=nil { t.Fatal(err) }
+	if h.State!="HEALTHY" || h.RuntimeIssue!="" || h.RuntimeIssueAt!=nil {
+		t.Fatalf("runtime health did not recover: %+v",h)
+	}
+}
+
+func TestRuntimeHealthExposesCategoricalIssueOnly(t *testing.T) {
+	store := memoryReadStore{cp:model.ChainCheckpoint{ChainID:420,UpdatedAt:time.Now().UTC()}}
+	runtime:=NewRuntimeHealth()
+	runtime.MarkFailure("CONSENSUS_PROVIDER_UNAVAILABLE")
+	h,err:=NewStoreBackend(store,nil).WithRuntimeHealth(runtime).Health()
+	if err!=nil { t.Fatal(err) }
+	if h.RuntimeIssue!="CONSENSUS_PROVIDER_UNAVAILABLE" { t.Fatalf("unexpected runtime issue: %+v",h) }
+	if contains(h.RuntimeIssue,"http") || contains(h.RuntimeIssue,"@") { t.Fatalf("runtime issue leaked endpoint detail: %q",h.RuntimeIssue) }
+}

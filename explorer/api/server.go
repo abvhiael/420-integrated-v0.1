@@ -37,6 +37,7 @@ func (s *Server) routes(){
 	s.mux.HandleFunc("GET /v1/services/{service}/versions/{version}",s.handleServiceVersion)
 	s.mux.HandleFunc("GET /v1/assets/activity",s.handleAssetActivity)
 	s.mux.HandleFunc("GET /v1/consensus",s.handleConsensus)
+	s.mux.HandleFunc("/v1/",func(w http.ResponseWriter,r *http.Request){writeError(w,http.StatusNotFound,"unknown API route")})
 	s.mux.Handle("/", explorerweb.Handler())
 }
 func (s *Server) handleHealth(w http.ResponseWriter,r *http.Request){writeJSON(w,http.StatusOK,healthResponse{Service:"420Explorer",Status:"LIVE",CanonicalAuthority:false,DataSource:"420Indexer"})}

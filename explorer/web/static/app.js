@@ -236,14 +236,15 @@ async function assets() {
   params.set('limit','50');
   const view = await api(`/v1/assets/activity?${params.toString()}`);
   const transfers = view.transfers || [];
+  const qualifiedTransfers = assetTransfersPresentation420(transfers);
   app.innerHTML = title('Asset activity', `${view.transferCount ?? transfers.length} recent transfers`) + stats([
     ['Snapshot',view.meta?.snapshotHeight],['Safe',view.meta?.safeHeight],['Finalized',view.meta?.finalizedHeight],['Transfers',view.transferCount ?? transfers.length]
-  ]) + `<div class="panel"><p class="muted">Native and token movement projected from qualified indexed transactions and logs.</p>${assetTable(transfers)}</div>`;
+  ]) + `<div class="panel"><p class="muted">Native and token movement projected from qualified indexed transactions and logs.</p>${assetTable(qualifiedTransfers)}</div>`;
 }
 
-function assetTable(transfers) {
-  if (!transfers.length) return '<p class="muted">No indexed asset transfers available.</p>';
-  return `<div class="table-wrap"><table><thead><tr><th>Block</th><th>Asset</th><th>Kind</th><th>Token ID</th><th>Amount</th><th>From</th><th>To</th><th>Tx</th></tr></thead><tbody>${transfers.map(t => `<tr><td>${link(`#/blocks/${t.blockNumber}`,t.blockNumber)}</td><td title="${esc(t.assetKey)}">${mono(short(t.assetKey,14,8))}</td><td><span class="badge">${esc(String(t.assetKind || '').toUpperCase())}</span></td><td>${t.tokenId ? mono(t.tokenId) : '—'}</td><td>${mono(t.amount)}</td><td>${t.from ? link(`#/addresses/${t.from}`,short(t.from)) : '—'}</td><td>${t.to ? link(`#/addresses/${t.to}`,short(t.to)) : '—'}</td><td>${link(`#/transactions/${t.transactionHash}`,short(t.transactionHash))}</td></tr>`).join('')}</tbody></table></div>`;
+function assetTable(rows) {
+  if (!rows.length) return '<p class="muted">No indexed asset transfers available.</p>';
+  return `<div class="table-wrap"><table><thead><tr><th>Block</th><th>Asset</th><th>Kind</th><th>Token ID</th><th>Amount</th><th>From</th><th>To</th><th>Tx</th></tr></thead><tbody>${rows.map(({t,label,blockLink,txLink,fromLink,toLink}) => `<tr><td>${blockLink}</td><td title="${label}">${label}</td><td><span class="badge">${esc(String(t.assetKind || '').toUpperCase())}</span></td><td>${t.tokenId ? mono(t.tokenId) : '—'}</td><td>${mono(t.amount)}</td><td>${fromLink}</td><td>${toLink}</td><td>${txLink}</td></tr>`).join('')}</tbody></table></div>`;
 }
 
 async function consensus() {
@@ -260,7 +261,7 @@ async function consensus() {
     ['Epochs per rotation',c.epochsPerRotation],
     ['Slots until rotation boundary',c.slotsUntilRotationBoundary]
   ])}</div>` + `<div class="panel"><h3>Scheduled proposer · slot ${fmt(proposer.slot)}</h3>${detailRows([
-    ['Primary seat',mono(proposer.primary),true],['Fallback 1',mono(proposer.fallback1),true],['Fallback 2',mono(proposer.fallback2),true]
+    ['Primary seat',routeLink420(['consensus',proposer.slot],`seat ${proposer.primary}`),true],['Fallback 1',routeLink420(['consensus',proposer.slot],`seat ${proposer.fallback1}`),true],['Fallback 2',routeLink420(['consensus',proposer.slot],`seat ${proposer.fallback2}`),true]
   ])}</div>` + `<div class="panel"><h3>Latest quorum certificate</h3>${detailRows([
     ['Certified',statusBadge(Boolean(qc.certified),'CERTIFIED','NOT CERTIFIED'),true],
     ['Slot',qc.slot],['Signers',qc.signers],['Quorum threshold',qc.quorum],['Block root',mono(qc.blockRoot),true],['Parent root',mono(qc.parentRoot),true]
@@ -272,7 +273,8 @@ function checkpointTable(c) {
 }
 
 function statusDetails(s) {
-  return stats([
+  const diagnostic = diagnosticPresentation420(s);
+  return diagnostic.banner + stats([
     ['State',s.indexerState],['Chain',s.chainId],['Head',s.headHeight],['Safe',s.safeHeight],['Finalized',s.finalizedHeight],['Ingest age',s.ingestAgeSeconds != null ? `${s.ingestAgeSeconds}s` : '—'],['Safe lag',s.safeLag],['Finalized lag',s.finalizedLag]
   ]) + `<div class="panel">${detailRows([
     ['Ready',statusBadge(Boolean(s.ready),'READY','NOT READY'),true],

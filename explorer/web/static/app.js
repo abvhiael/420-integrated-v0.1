@@ -147,7 +147,7 @@ async function transactionDetail(hash) {
     ['Value (wei)', mono(qualified.raw.valueWei), true],
     ['Created contract', created ? link(`#/contracts/${created}`, created) : '—', true],
     ['Raw input', inspectableRaw420(qualified.raw.input, 'transaction input', 'transaction-input'), true]
-  ])}</div>` + `<div class="panel"><h3>Raw logs</h3>${logTable(logs,'transaction-log')}</div>`;
+  ])}</div>` + `<div class="panel"><h3>Raw logs</h3>${logTable(logs)}</div>`;
 }
 
 async function addressDetail(address) {

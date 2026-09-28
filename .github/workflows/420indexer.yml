@@ -69,6 +69,10 @@ on:
       - 'docs/audit/EXP-1.9-ci-qualification-automation.json'
       - 'docs/audit/EXP-1.9-ci-qualification-automation.md'
       - 'scripts/verify-exp-1-9-ci-automation.py'
+      - 'docs/audit/EXP-1.10-phase-closeout.json'
+      - 'docs/audit/EXP-1.10-phase-closeout.md'
+      - 'scripts/verify-exp-1-10-phase-closeout.py'
+      - '.github/workflows/explorer-exp-1-10.yml'
       - '.github/workflows/docs-qualify.yml'
       - '.github/workflows/qualification.yml'
       - '.github/workflows/explorer-exp-1-9.yml'
@@ -239,6 +243,10 @@ on:
       - 'docs/audit/EXP-1.9-ci-qualification-automation.json'
       - 'docs/audit/EXP-1.9-ci-qualification-automation.md'
       - 'scripts/verify-exp-1-9-ci-automation.py'
+      - 'docs/audit/EXP-1.10-phase-closeout.json'
+      - 'docs/audit/EXP-1.10-phase-closeout.md'
+      - 'scripts/verify-exp-1-10-phase-closeout.py'
+      - '.github/workflows/explorer-exp-1-10.yml'
       - '.github/workflows/docs-qualify.yml'
       - '.github/workflows/qualification.yml'
       - '.github/workflows/explorer-exp-1-9.yml'
@@ -393,6 +401,8 @@ jobs:
         run: go build ./indexer/cmd/indexer420
       - name: EXP-1.9 CI and qualification automation
         run: python scripts/verify-exp-1-9-ci-automation.py
+      - name: EXP-1.10 final EXP-1 phase closeout
+        run: python scripts/verify-exp-1-10-phase-closeout.py
       - name: EXP-0.1.1 pinned-tree exhaustive inventory
         if: always()
         run: python scripts/exp-0-1-1-inventory.py --commit 95a83a961286701b6e8c064de1deccad10f41fd7
@@ -648,3 +658,12 @@ jobs:
           path: exp-1-9-evidence/
           if-no-files-found: error
           retention-days: 7
+
+      - name: Upload EXP-1.10 phase closeout evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp-1-10-phase-closeout
+          path: exp-1-10-evidence/
+          if-no-files-found: error
+          retention-days: 14

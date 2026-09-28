@@ -33,3 +33,31 @@ test('API rejects mutation methods before proxying', async () => {
   const response = await worker.fetch(new Request('https://explorer.420integrated.org/v1/status',{method:'POST'}), env);
   assert.equal(response.status, 405);
 });
+
+test('API proxy preserves path/query, strips credentials and disables caching', async () => {
+  const originalFetch = globalThis.fetch;
+  let seen;
+  globalThis.fetch = async (request) => {
+    seen = request;
+    return new Response(JSON.stringify({ready:true}), {
+      status:200,
+      headers:{'content-type':'application/json','set-cookie':'should-not-pass'}
+    });
+  };
+  try {
+    const env = { EXPLORER_ORIGIN:'https://origin.example/base', ASSETS:{fetch:async()=>new Response('unused')} };
+    const request = new Request('https://explorer.420integrated.org/v1/status?probe=1', {
+      headers:{authorization:'Bearer no',cookie:'session=no'}
+    });
+    const response = await worker.fetch(request, env);
+    assert.equal(response.status, 200);
+    assert.equal(seen.url, 'https://origin.example/base/v1/status?probe=1');
+    assert.equal(seen.headers.get('authorization'), null);
+    assert.equal(seen.headers.get('cookie'), null);
+    assert.equal(seen.headers.get('x-420-edge'), 'cloudflare-worker');
+    assert.equal(response.headers.get('cache-control'), 'no-store');
+    assert.equal(response.headers.get('set-cookie'), null);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});

@@ -1,4 +1,5 @@
 import { inspectableRaw420, renderFeeSummary420, renderRawLogs420, transactionDetailPresentation420 } from './presentation.mjs';
+import { addressHistoryPresentation420, assetTransfersPresentation420, contractPresentation420, diagnosticPresentation420, producerPresentation420, registryServicePresentation420, routeLink420 } from './workflow-presentation.mjs';
 const app = document.querySelector('#route-content');
 const networkPill = document.querySelector('#network-pill');
 const searchForm = document.querySelector('#global-search');
@@ -102,6 +103,7 @@ async function blockDetail(number) {
   const nav = view.navigation || {};
   const trace = view.trace || {};
   const producer = b.producer || {};
+  const producerView = producerPresentation420(view);
   app.innerHTML = title(`Block ${number}`, b.finality || '') + stats([
     ['Number', b.number], ['Finality', b.finality], ['Logs', view.logCount ?? logs.length], ['Timestamp', unixTime(b.timestamp)]
   ]) + `<div class="panel">${detailRows([
@@ -110,15 +112,16 @@ async function blockDetail(number) {
     ['Chain ID', b.chainId],
     ['Schema', b.schemaVersion]
   ])}</div>` + (b.number === 0 ? '' : `<div class="panel"><h3>Consensus provenance</h3>${detailRows([
-    ['Consensus slot', trace.consensusSlot ?? producer.consensusSlot],
-    ['Producer seat', trace.producerSeat ?? producer.producerSeat],
-    ['Proposer rank', trace.proposerRank ?? producer.proposerRank],
-    ['Consensus block root', mono(trace.consensusBlockRoot ?? producer.consensusBlockRoot), true],
+    ['Consensus slot', producerView.consensusLink, true],
+    ['Producer seat', producerView.seat],
+    ['Proposer rank', producerView.rank],
+    ['Consensus block root', mono(producerView.root), true],
     ['Certified', (trace.certified ?? producer.certified) ? 'yes' : 'no'],
     ['Execution authority', trace.executionAuthority || 'node420 canonical execution block'],
     ['Consensus authority', trace.consensusAuthority || 'fourtwentyd consensus-produced block history'],
     ['Projection authority', trace.projectionAuthority || '420Indexer derived projection'],
-    ['Canonical authority', trace.canonicalAuthority === true ? 'yes' : 'no']
+    ['Canonical authority', trace.canonicalAuthority === true ? 'yes' : 'no'],
+    ['Consensus context', producerView.consensusLink, true]
   ])}</div>`) + `<div class="pager">${nav.previous !== null && nav.previous !== undefined ? link(`#/blocks/${nav.previous}`, `← block ${nav.previous}`) : '<span></span>'}${nav.next !== null && nav.next !== undefined ? link(`#/blocks/${nav.next}`, `block ${nav.next} →`) : '<span></span>'}</div>` + `<div class="panel"><h3>Raw logs</h3>${logTable(logs,'block-log')}</div>`;
 }
 

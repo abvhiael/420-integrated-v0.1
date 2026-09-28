@@ -1,6 +1,6 @@
 # CMP-1.3.3 — canonical capability detail and admission predicates
 
-Status: **CANDIDATE QUALIFIED; final evidence-recording head qualification pending.**
+Status: **COMPLETE — candidate and final evidence-recording heads qualified.**
 
 CMP-1.3.3 resolves the remaining opacity in the CMP-1.3.1 worker capability commitment. The worker record continues to carry one immutable-per-revision `capabilityProfileHash`, while this step publishes a bounded canonical preimage and deterministic matching predicates for new admission.
 
@@ -136,3 +136,18 @@ Repository qualification on that exact candidate head:
 - 420Docs Qualification #3159 — run `36363277886` — **SUCCESS**.
 
 This evidence qualifies the executable CMP-1.3.3 candidate. The documentation update recording that evidence creates a distinct final evidence-recording head; applicable retained exact-head qualification must pass on that new head before CMP-1.3.3 is marked COMPLETE.
+
+
+## Final evidence-recording-head closeout
+
+Final evidence-recording head:
+
+`bed8e60287eee5403e023ab8dad30e4a6fa90b82`
+
+Retained qualification on that exact head:
+
+- Solidity Contracts #3239 — run `36364782485` — **SUCCESS**, all 16 PR shards passed;
+- 420 Integrated Qualification #5778 — run `36364782517` — **SUCCESS**;
+- 420Docs Qualification #3161 — run `36364782494` — **SUCCESS**.
+
+CMP-1.3.3 is therefore repository-qualified and COMPLETE.

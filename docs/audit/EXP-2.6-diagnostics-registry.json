@@ -1,0 +1,75 @@
+{
+  "schema": "420explorer-exp-2.6-diagnostics-registry-contracts-v1",
+  "milestone": "EXP-2.6",
+  "title": "Operational diagnostics and Registry/service-version contract qualification",
+  "status": "implementation_complete_pending_exact_head_ci",
+  "baseline": {
+    "exp_2_5_qualified_head": "78ca89dd5302b1655a7a0592bf79473783db2f59"
+  },
+  "workflows": [
+    "EXP-WF-014",
+    "EXP-WF-015"
+  ],
+  "objective": "Qualify the repository troubleshooting and protocol/version surfaces used by developers and operators: status/readiness/capabilities diagnostics plus Registry service/version provenance and error handling.",
+  "implementation_boundary": {
+    "owns": [
+      "NetworkStatus propagation of Indexer runtimeIssue/runtimeIssueAt",
+      "status/readiness fail-closed diagnostic serialization",
+      "capabilities advertisement of troubleshooting and Registry endpoints",
+      "direct Registry service-version identity/provenance validation",
+      "Registry active-version/implementation consistency validation",
+      "Indexer-client canonical-authority rejection for service-version reads"
+    ],
+    "does_not_own": [
+      "global-search frontend routing",
+      "deployed browser cross-resource navigation",
+      "live Registry publication",
+      "target-network troubleshooting exercises",
+      "production recovery qualification",
+      "canonical Registry authority",
+      "Genesis release closeout"
+    ]
+  },
+  "defects_remediated": [
+    "Explorer NetworkStatus omitted the Indexer's categorical runtime issue and issue timestamp, reducing troubleshooting provenance",
+    "direct service-version reads trusted returned service/version identity without checking it matched the request",
+    "direct service-version reads did not reject missing activation provenance or impossible deprecation state",
+    "Registry service detail did not prove activeVersion and implementation matched an active historical version"
+  ],
+  "acceptance_criteria": [
+    "status and readiness preserve chain/finality/freshness/runtime diagnostic provenance and fail closed",
+    "capabilities advertise the qualified troubleshooting and Registry API contracts",
+    "service-version lookup fails closed on identity, activation, or deprecation inconsistencies",
+    "Registry service detail fails closed when active-version or implementation linkage contradicts history",
+    "Explorer remains a non-authoritative 420Indexer consumer"
+  ],
+  "qualification_tests": [
+    "runtimeIssue/runtimeIssueAt propagation through service status",
+    "status and ready degraded responses include machine-readable issue plus Indexer runtime detail",
+    "capabilities include status/ready/services/service/version endpoints",
+    "service-version service-ID mismatch rejection",
+    "service-version requested-version mismatch rejection",
+    "missing implementation/activation-hash rejection",
+    "invalid deprecation ordering rejection",
+    "active-plus-deprecated contradiction rejection",
+    "Registry active-version/history and implementation/history mismatch rejection",
+    "Indexer client canonical-authority overclaim rejection for service-version reads",
+    "go test ./explorer/service ./explorer/api ./explorer/indexerclient",
+    "go test ./explorer/...",
+    "go vet ./explorer/..."
+  ],
+  "evidence": {
+    "workflow": ".github/workflows/explorer-exp-2-6.yml",
+    "verifier": "scripts/verify-exp-2-6-diagnostics-registry.py",
+    "artifact": "exp-2-6-diagnostics-registry",
+    "exact_head_expression": "github.event.pull_request.head.sha || github.sha"
+  },
+  "scope_boundary": {
+    "deployed_ui_qualified": false,
+    "live_target_network_qualified": false,
+    "live_registry_publication_qualified": false,
+    "production_recovery_qualified": false,
+    "canonical_authority": false,
+    "genesis_ready_claim": false
+  }
+}

@@ -101,7 +101,7 @@ func transactionFixture() *fakeIndexer {
 		tx: model.TransactionRecord{ChainID: 420, BlockNumber: 7, BlockHash: "0xblock", Hash: "0xtx", Index: 1, From: "0xfrom", To: "0xto"},
 		receipt: model.ReceiptRecord{ChainID: 420, BlockNumber: 7, BlockHash: "0xblock", TransactionHash: "0xtx", TransactionIndex: 1, Status: 1, GasUsed: 21000, EffectiveGasPriceWei: "1000000000", ActualFeeWei: "21000000000000"},
 		block: model.BlockRecord{ChainID: 420, Number: 7, Hash: "0xblock", Finality: model.FinalityFinalized},
-		logs: []model.LogRecord{{ChainID: 420, BlockNumber: 7, BlockHash: "0xblock", TransactionHash: "0xtx", TransactionIndex: 1, LogIndex: 0, Address: "0xcontract"}},
+		logs: []model.LogRecord{{ChainID: 420, BlockNumber: 7, BlockHash: "0xblock", TransactionHash: "0xtx", TransactionIndex: 1, LogIndex: 0, Address: "0x3333333333333333333333333333333333333333"}},
 	}
 }
 

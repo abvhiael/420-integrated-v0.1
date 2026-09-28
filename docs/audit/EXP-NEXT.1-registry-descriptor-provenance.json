@@ -2,7 +2,7 @@
   "schema": "420explorer-exp-next-1-registry-descriptor-provenance-v1",
   "step": "EXP-NEXT.1",
   "title": "Registry ABI/descriptor release provenance",
-  "status": "IMPLEMENTED_PENDING_EXACT_HEAD_QUALIFICATION",
+  "status": "COMPLETE",
   "canonical_roadmap": "docs/audit/EXP-2R.5-authoritative-next-phase-roadmap.json",
   "current_main_base": "eb417aea38f454c2c01b672e0d566e0da17a87bd",
   "implementation_summary": [
@@ -32,11 +32,54 @@
     "historical activation/deprecation catalogue tests"
   ],
   "scope": {
-    "repository_descriptor_provenance_qualified": false,
+    "repository_descriptor_provenance_qualified": true,
     "live_registry_publication_qualified": false,
     "target_network_code_witness_qualified": false,
     "canonical_authority": false,
     "genesis_ready_claim": false
   },
-  "final_qualification": null
+  "final_qualification": {
+    "qualified_candidate_head": "1c3cdec09f9eb0aad00505f20bf1821fe7d2e752",
+    "candidate_exact_head_requalification": "success",
+    "workflows": [
+      {
+        "name": "420Explorer EXP-NEXT.1 Registry Descriptor Provenance",
+        "run_id": 36467204422,
+        "conclusion": "success",
+        "artifact_id": 10990170625
+      },
+      {
+        "name": "420Indexer",
+        "run_id": 36467204419,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Indexer",
+        "run_id": 36467204440,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Docs Qualification",
+        "run_id": 36467204530,
+        "conclusion": "success"
+      },
+      {
+        "name": "420 Integrated Qualification",
+        "run_id": 36467204533,
+        "conclusion": "success"
+      }
+    ],
+    "integrated_jobs": [
+      "fault-matrix",
+      "offline-core",
+      "production-dependencies",
+      "geth-engine"
+    ],
+    "completion_record_policy": "This COMPLETE record is valid only after the exact PR head containing this record passes the dedicated EXP-NEXT.1 workflow and the retained workflow set. The exact final head is the Git commit containing this record; workflow checkout verifies github.event.pull_request.head.sha exactly. No further evidence-only commit is required after that COMPLETE head is green.",
+    "limitations": [
+      "No live ProtocolRegistry deployment/publication is qualified.",
+      "No target-network eth_getCode/runtime witness is qualified.",
+      "No deployed Explorer UI or Genesis readiness claim is made."
+    ]
+  }
 }

@@ -160,7 +160,7 @@
     "liveFaultInjectionStatus": "BLOCKED_PENDING_PROVISIONED_TESTNET"
   },
   "qualificationAutomation": {
-    "milestone": "EXP-1.9",
+    "milestone": "EXP-1.10",
     "exactHeadExpression": "github.event.pull_request.head.sha || github.sha",
     "requiredAutomaticGates": [
       "420Indexer",
@@ -171,8 +171,8 @@
     "exactCheckoutAssertionRequired": true,
     "concurrencyCancellationRequired": true,
     "contentsPermission": "read",
-    "retainedExp1Range": "EXP-1.1..EXP-1.9",
-    "evidenceArtifact": "exp-1-9-ci-qualification-automation",
+    "retainedExp1Range": "EXP-1.1..EXP-1.10",
+    "evidenceArtifact": "exp-1-10-phase-closeout",
     "evidenceRetentionDays": 7,
     "liveDeploymentEvidenceRequired": false,
     "liveDeploymentQualified": false,
@@ -181,5 +181,37 @@
       "pull_request",
       "push:main"
     ]
+  },
+  "exp1PhaseCloseout": {
+    "phase": "EXP-1",
+    "scope": "blockchain data integrity runtime and repository qualification",
+    "repositoryScopeComplete": true,
+    "liveNetworkComplete": false,
+    "genesisComplete": false,
+    "milestonesRequired": [
+      "EXP-1.1",
+      "EXP-1.2",
+      "EXP-1.3",
+      "EXP-1.4",
+      "EXP-1.5",
+      "EXP-1.6",
+      "EXP-1.7",
+      "EXP-1.8",
+      "EXP-1.9",
+      "EXP-1.10"
+    ],
+    "findingDispositions": {
+      "EXP-FIND-002": "repository runtime qualified; live endpoint transferred to EXP-7",
+      "EXP-FIND-004": "RPC binding/validation contract qualified; approved live binding transferred to EXP-7",
+      "EXP-FIND-007": "production consensus-provider wiring qualified; live consensus witness transferred to EXP-2/EXP-7",
+      "EXP-FIND-009": "repository implementation remediated; live canonical/deployed workflow witness transferred to EXP-2/EXP-4/EXP-7"
+    },
+    "acceptanceBoundary": {
+      "AC-2": "repository/runtime contribution complete; live target-network evidence pending",
+      "AC-3": "repository/runtime contribution complete; deployed operational evidence pending",
+      "AC-1": "historical producer source contribution complete; broader Explorer acceptance pending",
+      "AC-5": "historical producer source/UI trace contribution complete; deployed workflows pending",
+      "AC-6": "Indexer/Explorer repository integration contribution complete; production-equivalent deployed stack pending"
+    }
   }
 }

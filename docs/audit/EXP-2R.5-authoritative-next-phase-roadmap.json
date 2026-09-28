@@ -1,12 +1,14 @@
 {
   "schema": "420explorer-authoritative-post-exp2-roadmap-v1",
   "title": "420Explorer authoritative post-EXP-2 remediation roadmap",
-  "status": "candidate_pending_EXP-2R_exact_head_qualification",
+  "status": "AUTHORITATIVE_POST_MERGE_ROADMAP",
   "provenance": {
     "planning_baseline_sha": "52a162612257122d4c6b6e2ab9e8bc163d1d5f6f",
     "explicitly_new_numbering": true,
     "historical_EXP_2_7_through_EXP_2_10_recovered": false,
-    "rule": "EXP-NEXT identifiers are new authoritative post-merge identifiers and do not claim to reproduce the lost EXP-2.7–EXP-2.10 roadmap."
+    "rule": "EXP-NEXT identifiers are new authoritative post-merge identifiers and do not claim to reproduce the lost EXP-2.7–EXP-2.10 roadmap.",
+    "exp_2r_qualified_candidate_head": "77d1476454c314b5170e411e951883575b6d8ce5",
+    "activation_condition": "Authoritative after the EXP-2R COMPLETE record head itself passes exact-head qualification."
   },
   "sequence": [
     {

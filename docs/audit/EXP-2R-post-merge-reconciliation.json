@@ -2,7 +2,7 @@
   "schema": "420explorer-exp-2r-post-merge-reconciliation-v1",
   "milestone": "EXP-2R",
   "title": "Phase 2 Post-Merge Reconciliation",
-  "status": "candidate_pending_exact_head_requalification",
+  "status": "COMPLETE",
   "baseline": {
     "current_main": "52a162612257122d4c6b6e2ab9e8bc163d1d5f6f",
     "pr_381_final_head": "26a06117c7662c0f8986a2f7b505d5180d3121ea",
@@ -365,6 +365,64 @@
     }
   ],
   "final_scope": {
+    "deployed_ui_qualified": false,
+    "live_target_network_qualified": false,
+    "canonical_authority": false,
+    "genesis_ready_claim": false
+  },
+  "final_qualification": {
+    "qualified_candidate_head": "77d1476454c314b5170e411e951883575b6d8ce5",
+    "candidate_exact_head_requalification": "success",
+    "candidate_workflows": [
+      {
+        "name": "420Explorer EXP-2R Reconciliation",
+        "run_id": 36463988626,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Indexer",
+        "run_id": 36463988602,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Docs Qualification",
+        "run_id": 36463988463,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.9 CI Qualification Automation",
+        "run_id": 36463988600,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.10 Phase Closeout Qualification",
+        "run_id": 36463988372,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.1",
+        "run_id": 36463988519,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.5",
+        "run_id": 36463988516,
+        "conclusion": "success"
+      },
+      {
+        "name": "420 Integrated Qualification",
+        "run_id": 36463988666,
+        "conclusion": "success"
+      }
+    ],
+    "integrated_jobs": [
+      "offline-core",
+      "production-dependencies",
+      "fault-matrix",
+      "geth-engine"
+    ],
+    "completion_record_policy": "This COMPLETE record is accepted only after the exact PR head containing it passes the required retained qualification suite. No further evidence-only commit is required after that COMPLETE head is green.",
+    "scope": "repository_reconciliation_only",
     "deployed_ui_qualified": false,
     "live_target_network_qualified": false,
     "canonical_authority": false,

@@ -1,0 +1,93 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-1.3.8.CloseoutLedger.v1",
+  "scope": "CMP-1.3 ComputeWorkerRegistry repository closeout",
+  "branch": "feature/cmp-1-3-worker-registry",
+  "live_release": false,
+  "repository_closeout_candidate": true,
+  "substeps": {
+    "1.3.0": {
+      "status": "repository-qualified design baseline",
+      "artifact": "docs/compute-market/CMP-1.3.0-WORKER-REGISTRY-BASELINE-AND-INTEGRATION-DESIGN.md"
+    },
+    "1.3.1": {
+      "status": "complete",
+      "qualified_head": "505851b33cf4ac3f81d030269c1bae16ac661f18",
+      "artifact": "contracts/src/compute/ComputeWorkerRegistry420.sol"
+    },
+    "1.3.2": {
+      "status": "implemented and retained in phase closeout",
+      "artifact": "contracts/src/compute/ComputeWorkerAttestation420.sol"
+    },
+    "1.3.3": {
+      "status": "complete",
+      "candidate_head": "4d0ccd94c7160cc40d5a737620c679c70da41c96",
+      "final_evidence_head": "bed8e60287eee5403e023ab8dad30e4a6fa90b82"
+    },
+    "1.3.4": {
+      "status": "historical evidence head had cancelled Integrated run; superseded by CMP-1.3.8 exact-head phase qualification",
+      "candidate_head": "67195b992f7793ac8012af130085bcf0902c23d4",
+      "historical_evidence_head": "ba11ab000f819e7d34408536ef58cf6ef20b5692"
+    },
+    "1.3.5": {
+      "status": "final evidence head qualified",
+      "candidate_head": "a8d54383da6f4da775fbed86c2c1d85597961791",
+      "final_evidence_head": "4d95792fc8fd0a144ef484294927bc5936de2cd5"
+    },
+    "1.3.6": {
+      "status": "final evidence head qualified",
+      "candidate_head": "ad5a411421b852ab1786a6ef9e0f646d9605082e",
+      "final_evidence_head": "56523d6a869fd1730b6c94607861df2ae70e7db0"
+    },
+    "1.3.7": {
+      "status": "repository package qualified; live deployment blocked",
+      "candidate_head": "c7dc959d19c798ff587edf1da9106a81ae772e7a",
+      "live_blockers": [
+        "canonical public testnet unavailable",
+        "live CMP-1.5 compute-stake source unavailable",
+        "no truthful deployed address/tx/block/runtime-hash/ProtocolRegistry publication evidence"
+      ]
+    }
+  },
+  "required_components": [
+    "contracts/src/compute/ComputeWorkerRegistry420.sol",
+    "contracts/src/compute/ComputeWorkerAttestation420.sol",
+    "contracts/src/compute/ComputeWorkerCapabilityProfile420.sol",
+    "contracts/src/compute/ComputeWorkerCapabilityEligibility420.sol",
+    "contracts/src/compute/ComputeWorkerTrust420.sol",
+    "contracts/src/compute/ComputeWorkerStake420.sol",
+    "contracts/src/compute/ComputeJobWorkerSnapshotEvidence420.sol",
+    "contracts/src/compute/ComputeWorkerCanonicalWiring420.sol"
+  ],
+  "required_tests": [
+    "contracts/test/ComputeWorkerRegistry420.t.sol",
+    "contracts/test/ComputeWorkerAttestation420.t.sol",
+    "contracts/test/ComputeWorkerCapabilityProfile420.t.sol",
+    "contracts/test/ComputeWorkerTrust420.t.sol",
+    "contracts/test/ComputeWorkerStake420.t.sol",
+    "contracts/test/ComputeJobWorkerSnapshotEvidence420.t.sol",
+    "contracts/test/ComputeWorkerCanonicalWiring420.t.sol"
+  ],
+  "invariants": {
+    "CMP-INV-002": "covered",
+    "CMP-INV-003": "covered",
+    "CMP-INV-004": "covered",
+    "CMP-INV-005": "covered",
+    "CMP-INV-007": "covered",
+    "CMP-INV-008": "covered",
+    "CMP-INV-019": "covered",
+    "CMP-INV-020": "covered",
+    "CMP-INV-021": "covered by fail-closed typed stake binding; live slash authority remains CMP-1.5",
+    "CMP-INV-022": "covered by fail-closed typed stake binding; live slash authority remains CMP-1.5",
+    "CMP-INV-023": "covered",
+    "CMP-INV-026": "covered",
+    "CMP-INV-028": "covered",
+    "CMP-INV-029": "covered",
+    "CMP-INV-030": "covered"
+  },
+  "external_release_blockers": [
+    "CMP-1.5 compute collateral custody/stake/exit/slash/reward implementation",
+    "canonical public testnet deployment",
+    "runtime code-hash and deployed graph verification",
+    "governance-authorized ProtocolRegistry publication"
+  ]
+}

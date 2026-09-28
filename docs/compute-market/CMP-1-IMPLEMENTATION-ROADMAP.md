@@ -75,6 +75,8 @@ Never trust the self-reported hardware alone. Capabilities must eventually be be
 
 **CMP-1.3.7 deployment/publication qualification:** `docs/compute-market/CMP-1.3.7-WORKER-DEPLOYMENT-QUALIFICATION.md` pins the exact WorkerRegistry job/admission graph, runtime code hashes, chain/governance bindings, and fail-closed live evidence required before ProtocolRegistry publication. Repository readiness is independently qualifiable; live qualification remains blocked until canonical testnet deployment and the CMP-1.5 compute-stake source exist.
 
+**CMP-1.3.8 phase reconciliation and repository closeout:** `docs/compute-market/CMP-1.3.8-WORKER-REGISTRY-CLOSEOUT.md` reconciles 1.3.0–1.3.7, freezes the retained source/test/invariant ledger, explicitly supersedes the incomplete historical 1.3.4 evidence-head closeout through a new whole-phase exact-head qualification, and separates repository completion from live deployment/CMP-1.5 release blockers.
+
 ## CMP-1.4 — ComputeVerifierRegistry
 
 Separate workers from verification authorities.

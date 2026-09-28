@@ -72,7 +72,12 @@ func TestEXP23AddressContractAndAssetRoutes(t *testing.T) {
 }
 
 func TestEXP23RoutesRejectInvalidInputs(t *testing.T) {
-	s := newTestServer(t, &fakeIndexer{})
+	s := newTestServer(t, &exp23Indexer{
+		fakeIndexer: &fakeIndexer{},
+		addressPage: indexerapi.AddressTransactionPage{Meta: indexerapi.PageMeta{ChainID: 420}},
+		assetPage: indexerapi.AssetTransferPage{Meta: indexerapi.PageMeta{ChainID: 420}},
+		contract: model.ContractRecord{ChainID: 420},
+	})
 	cases := []string{
 		"/v1/addresses/0xnope",
 		"/v1/addresses/0x1111111111111111111111111111111111111111?limit=251",

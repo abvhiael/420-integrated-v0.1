@@ -41,7 +41,7 @@ def main():
  if deployment_status=="DEPLOYABLE_RUNTIME_QUALIFIED_LIVE_TESTNET_PENDING" and idx.get("backend",{}).get("live_deployment",{}).get("qualified") is not False:
   errors.append("Indexer live deployment overpromotion")
  if exp.get("backend",{}).get("url")!="REPLACE" or exp.get("frontend",{}).get("url")!="REPLACE": errors.append("Explorer placeholder state drift")
- if idx.get("consumer_gates",{}).get("420Explorer")!="QUALIFIED_INDEXER_API_CONSUMER": errors.append("consumer gate drift")
+ if idx.get("consumer_gates",{}).get("420Explorer") not in {"QUALIFIED_INDEXER_API_CONSUMER","QUALIFIED_INDEXER_API_CONSUMER_EXACT_HEAD"}: errors.append("consumer gate drift")
  if "Qualified, read-only visibility" not in UI.read_text(encoding="utf-8"): errors.append("broad UI qualified copy no longer present; reconcile record")
  if sysa!=csysa: errors.append("frozen system-address maps differ")
  assigns={x["name"]:x["address"] for x in sysa.get("assignments",[])}

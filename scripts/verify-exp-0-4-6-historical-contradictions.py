@@ -42,7 +42,10 @@ def main():
   errors.append("Indexer live deployment overpromotion")
  if exp.get("backend",{}).get("url")!="REPLACE" or exp.get("frontend",{}).get("url")!="REPLACE": errors.append("Explorer placeholder state drift")
  if idx.get("consumer_gates",{}).get("420Explorer") not in {"QUALIFIED_INDEXER_API_CONSUMER","QUALIFIED_INDEXER_API_CONSUMER_EXACT_HEAD"}: errors.append("consumer gate drift")
- if "Qualified, read-only visibility" not in UI.read_text(encoding="utf-8"): errors.append("broad UI qualified copy no longer present; reconcile record")
+ ui_text=UI.read_text(encoding="utf-8")
+ if "Qualified, read-only visibility" in ui_text: errors.append("stale broad UI qualification copy was reintroduced")
+ for marker in ("read-only network intelligence","Read-only · non-canonical projection","DATA AUTHORITY"):
+  if marker not in ui_text: errors.append(f"current UI authority copy missing: {marker}")
  if sysa!=csysa: errors.append("frozen system-address maps differ")
  assigns={x["name"]:x["address"] for x in sysa.get("assignments",[])}
  if assigns.get("ProtocolRegistry")!="0x0000000000000000000000000000000000000434": errors.append("ProtocolRegistry address drift")

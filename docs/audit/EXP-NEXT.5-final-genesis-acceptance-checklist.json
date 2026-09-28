@@ -1,0 +1,66 @@
+{
+  "schema": "420explorer-exp-next-5-final-genesis-acceptance-checklist-v1",
+  "step": "EXP-NEXT.5",
+  "title": "Final Genesis acceptance and release closeout",
+  "status": "NOT_YET_COMPLETE",
+  "decision": "NO_GO",
+  "dependency": {
+    "required": "EXP-NEXT.4 COMPLETE",
+    "observed": "NOT_YET_COMPLETE",
+    "evidence": "docs/audit/EXP-NEXT.4-live-deployment-recovery.json"
+  },
+  "exact_release_candidate": {
+    "frozen": false,
+    "sha": null,
+    "reason": "EXP-NEXT.4 production-equivalent deployment/live/recovery qualification is not complete; no Genesis release candidate can be frozen yet."
+  },
+  "acceptance_criteria": [
+    {
+      "id": "AC-1",
+      "status": "unverified"
+    },
+    {
+      "id": "AC-2",
+      "status": "unverified"
+    },
+    {
+      "id": "AC-3",
+      "status": "unverified"
+    },
+    {
+      "id": "AC-4",
+      "status": "unverified"
+    },
+    {
+      "id": "AC-5",
+      "status": "unverified"
+    },
+    {
+      "id": "AC-6",
+      "status": "unverified"
+    },
+    {
+      "id": "AC-7",
+      "status": "unverified"
+    },
+    {
+      "id": "AC-8",
+      "status": "unverified"
+    },
+    {
+      "id": "AC-9",
+      "status": "unverified"
+    },
+    {
+      "id": "AC-10",
+      "status": "unverified"
+    }
+  ],
+  "exit_criteria": {
+    "no_mandatory_criterion_unverified": false,
+    "no_genesis_blocker_unresolved": false,
+    "exact_release_candidate_and_deployed_stack_fully_evidenced": false,
+    "final_supported_scope_recorded": true
+  },
+  "supported_scope": "Repository implementation/readiness evidence may be retained, but no Genesis-ready, live-network-qualified, deployment-qualified, or canonical-authority claim is supported until EXP-NEXT.4 and all mandatory acceptance evidence are complete."
+}

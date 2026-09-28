@@ -50,6 +50,7 @@ contract SnapshotMatchMock420 is IComputeJobMatchEvidence420, IComputeAcceptedMa
     address public operator;
     bytes32 public matchId;
     bytes32 public acceptanceRef;
+    mapping(bytes32 => bytes32) public acceptanceForJob;
 
     function configure(address jobs_, bytes32 resourceId_, address operator_) external {
         jobs = jobs_;
@@ -65,28 +66,30 @@ contract SnapshotMatchMock420 is IComputeJobMatchEvidence420, IComputeAcceptedMa
         return candidateMatchId == matchId && matchId != bytes32(0);
     }
 
-    function accepted(bytes32, bytes32 candidateMatchId, bytes32 candidateAcceptanceRef)
+    function accepted(bytes32 jobId, bytes32 candidateMatchId, bytes32 candidateAcceptanceRef)
         external
         view
         returns (bool)
     {
+        bytes32 expectedAcceptance = acceptanceForJob[jobId];
         return candidateMatchId == matchId
-            && candidateAcceptanceRef == acceptanceRef
-            && acceptanceRef != bytes32(0);
+            && candidateAcceptanceRef == expectedAcceptance
+            && expectedAcceptance != bytes32(0);
     }
 
     function authorizedResource(
-        bytes32,
+        bytes32 jobId,
         bytes32 candidateMatchId,
         bytes32 candidateAcceptanceRef,
         bytes32 candidateResourceId,
         address candidateOperator
     ) external view returns (bool) {
+        bytes32 expectedAcceptance = acceptanceForJob[jobId];
         return candidateMatchId == matchId
-            && candidateAcceptanceRef == acceptanceRef
+            && candidateAcceptanceRef == expectedAcceptance
             && candidateResourceId == resourceId
             && candidateOperator == operator
-            && acceptanceRef != bytes32(0);
+            && expectedAcceptance != bytes32(0);
     }
 
     function matchParties(bytes32 candidateMatchId)
@@ -101,6 +104,7 @@ contract SnapshotMatchMock420 is IComputeJobMatchEvidence420, IComputeAcceptedMa
 
     function acceptIntoJob(bytes32 jobId, uint64 expectedRevision, bytes32 acceptanceRef_) external {
         acceptanceRef = acceptanceRef_;
+        acceptanceForJob[jobId] = acceptanceRef_;
         ComputeJobRegistry420(jobs).recordAcceptance(jobId, expectedRevision, acceptanceRef_);
     }
 }

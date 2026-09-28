@@ -1,0 +1,73 @@
+{
+  "schema": "420explorer-exp-next-4-live-deployment-recovery-v1",
+  "step": "EXP-NEXT.4",
+  "title": "Production-equivalent deployment, live integration and recovery qualification",
+  "status": "NOT_YET_COMPLETE",
+  "canonical_roadmap": "docs/audit/EXP-2R.5-authoritative-next-phase-roadmap.json",
+  "base_dependency_head": "987bdfcab512b313afebf999295c68d64cb2eddc",
+  "main_at_start": "f437378664059a51f854d45bf48594930f070f6f",
+  "dependency_state": {
+    "EXP-NEXT.1": "COMPLETE_IN_BRANCH_HISTORY",
+    "EXP-NEXT.2": "COMPLETE_IN_BRANCH_HISTORY",
+    "EXP-NEXT.3": "COMPLETE_AT_BASE_HEAD"
+  },
+  "repository_gap_analysis": {
+    "satisfied": [
+      "deployable 420Indexer runtime/container and deployment manifest exist",
+      "deployable 420Explorer runtime/container exists",
+      "repository recovery/reorg/finality failure behavior has deterministic tests",
+      "repository Explorer mandatory route, fee/event, consensus/producer and cross-resource workflows are qualified",
+      "manual live Explorer validator exists"
+    ],
+    "partial": [
+      "live workflow exists but did not previously pin the exact release candidate on workflow_dispatch",
+      "repository recovery fixtures prove logic but are not production-equivalent deployed recovery evidence"
+    ],
+    "blocking": [
+      "testnet/services/endpoints.json contains only placeholder public endpoints",
+      "testnet/infrastructure/inventory.json is PLANNED with all required nodes/services UNPROVISIONED",
+      "420Indexer readiness explicitly says live deployment is unqualified and approved execution/consensus sources remain unprovisioned",
+      "420Explorer backend/frontend readiness URLs are REPLACE and deployment status remains pending",
+      "no approved live chain-420 RPC/genesis identity witness is committed",
+      "no approved live consensus-provider witness is committed",
+      "no live ProtocolRegistry runtime code/hash/publication witness is committed",
+      "no production-equivalent restart/outage/reorg/rebuild transcript exists",
+      "no non-placeholder deployed Explorer/Indexer endpoints exist to exercise browser/live route qualification"
+    ]
+  },
+  "canonical_completion_conditions": {
+    "all_genesis_blocking_live_deployment_recovery_findings_closed": false,
+    "production_equivalent_end_to_end_workflows_pass_exact_release_candidate": false
+  },
+  "scope": {
+    "repository_preparation_can_be_qualified": true,
+    "production_equivalent_deployment_qualified": false,
+    "live_network_qualified": false,
+    "recovery_deployment_qualified": false,
+    "canonical_authority": false,
+    "genesis_ready_claim": false
+  },
+  "blockers": [
+    {
+      "id": "EXP-NEXT.4-B1",
+      "kind": "external_infrastructure",
+      "detail": "Approved target-network execution and consensus sources are not provisioned."
+    },
+    {
+      "id": "EXP-NEXT.4-B2",
+      "kind": "external_infrastructure",
+      "detail": "Indexer and Explorer production-equivalent endpoint inventories are placeholders/unprovisioned."
+    },
+    {
+      "id": "EXP-NEXT.4-B3",
+      "kind": "live_evidence",
+      "detail": "Canonical Registry, consensus, block/transaction/receipt/log and producer witnesses cannot be collected without B1/B2."
+    },
+    {
+      "id": "EXP-NEXT.4-B4",
+      "kind": "live_recovery",
+      "detail": "Restart/resume, outage, stale/provider failure, bounded reorg, finalized-conflict and rebuild exercises cannot be production-equivalent without a deployed stack."
+    }
+  ],
+  "completion_policy": "This record MUST remain NOT_YET_COMPLETE until non-placeholder approved infrastructure is provisioned and all canonical live/deployment/recovery tests pass against one exact release-candidate SHA. Repository CI or synthetic fixtures cannot satisfy those live conditions."
+}

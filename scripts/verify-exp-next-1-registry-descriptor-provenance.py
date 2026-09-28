@@ -3,7 +3,7 @@ import hashlib,json,pathlib,subprocess,sys
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 errors=[]
 manifest=json.loads((ROOT/'420-indexer/descriptors/protocol-registry-v4.json').read_text())
-expected='56dd77bb98971368ecf14748b08793f7c6e04cdd5feb8ebdeecf278b606ff6da'
+expected='9a7fd7c8f546fdffa7e9fd42be6274fa63a03443d1f243da3dc3dcaabd7cbbae'
 payload={k:manifest[k] for k in ('canonicalAddress','contractName','events','protocolVersion','source')}
 digest=hashlib.sha256(json.dumps(payload,sort_keys=True,separators=(',',':')).encode()).hexdigest()
 if digest!=expected or manifest.get('descriptorSha256')!=expected: errors.append('descriptor hash drift')

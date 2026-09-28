@@ -514,7 +514,8 @@
         "docs/audit/EXP-0.2.2-user-workflow-matrix.json"
       ],
       "evidence": [
-        "EXP-WF-013 is partial_source and mapped_to_later_gate; its limitations state that the web table does not display topic values/data."
+        "EXP-WF-013 is partial_source and mapped_to_later_gate; its limitations state that the web table does not display topic values/data.",
+        "EXP-2.5 qualifies complete raw transaction input/value and log topic/data presentation with fail-closed validation at repository service/API scope."
       ],
       "root_cause": "The frontend currently summarizes indexed logs, and the accepted workflow matrix leaves complete raw event presentation for a later qualification gate rather than marking it as a confirmed implementation blocker.",
       "consequences": [
@@ -548,7 +549,17 @@
         "AC-7"
       ],
       "genesis_blocking": true,
-      "blocking_rationale": "Receipt/logs is a mandatory Genesis view, so event inspectability must be qualified before final Genesis closeout; however EXP-0.2.2 did not classify this workflow as gap_requires_implementation, so 0.2.5 must preserve it as a qualification gap rather than invent a source blocker."
+      "blocking_rationale": "Receipt/logs is a mandatory Genesis view, so event inspectability must be qualified before final Genesis closeout; however EXP-0.2.2 did not classify this workflow as gap_requires_implementation, so 0.2.5 must preserve it as a qualification gap rather than invent a source blocker.",
+      "exp_2_5_disposition": "REPOSITORY_RAW_CALL_AND_EVENT_INSPECTION_QUALIFIED_DEPLOYED_UI_PENDING",
+      "exp_2_5_evidence": [
+        "docs/audit/EXP-2.5-raw-call-events.json",
+        "explorer/service/eventviews.go",
+        "explorer/service/exp_2_5_raw_events_test.go",
+        "explorer/api/exp_2_5_raw_events_test.go"
+      ],
+      "post_exp_2_5_remaining_owners": [
+        "EXP-4"
+      ]
     },
     {
       "id": "EXP-FIND-011",

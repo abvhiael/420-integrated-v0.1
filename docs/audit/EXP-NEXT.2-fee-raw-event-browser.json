@@ -2,7 +2,7 @@
   "schema": "420explorer-exp-next-2-fee-raw-event-browser-v1",
   "step": "EXP-NEXT.2",
   "title": "Transaction-fee and raw-event browser presentation",
-  "status": "IMPLEMENTED_PENDING_EXACT_HEAD_QUALIFICATION",
+  "status": "COMPLETE",
   "canonical_roadmap": "docs/audit/EXP-2R.5-authoritative-next-phase-roadmap.json",
   "current_main_base": "f437378664059a51f854d45bf48594930f070f6f",
   "dependencies": {
@@ -53,12 +53,90 @@
     "Created-contract address was linked directly from API data without presentation-layer address validation."
   ],
   "scope": {
-    "repository_browser_presentation_qualified": false,
+    "repository_browser_presentation_qualified": true,
     "live_target_network_fee_witness_qualified": false,
     "abi_decoded_semantics_qualified": false,
     "production_deployment_qualified": false,
     "canonical_authority": false,
     "genesis_ready_claim": false
   },
-  "final_qualification": null
+  "final_qualification": {
+    "qualified_candidate_head": "30e9f78dd786b53bb41fd98c84515695bbc3c1a5",
+    "candidate_exact_head_requalification": "success",
+    "dedicated_workflow": {
+      "name": "420Explorer EXP-NEXT.2 Fee and Raw Event Browser",
+      "run_id": 36470100265,
+      "conclusion": "success",
+      "artifact_id": 10990339622
+    },
+    "retained_workflows": [
+      {
+        "name": "420Explorer EXP-2.2",
+        "run_id": 36470100038,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.3",
+        "run_id": 36470100020,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.4",
+        "run_id": 36470100137,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.5",
+        "run_id": 36470099954,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.6",
+        "run_id": 36470100263,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.7 Cross-Layer Traceability Qualification",
+        "run_id": 36470100216,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.8 Runtime Negative Divergence Qualification",
+        "run_id": 36470100017,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.10 Phase Closeout Qualification",
+        "run_id": 36470100186,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Indexer",
+        "run_id": 36470099934,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Docs Qualification",
+        "run_id": 36470100155,
+        "conclusion": "success"
+      },
+      {
+        "name": "420 Integrated Qualification",
+        "run_id": 36470099978,
+        "conclusion": "success"
+      }
+    ],
+    "integrated_jobs": [
+      "production-dependencies",
+      "fault-matrix",
+      "offline-core",
+      "geth-engine"
+    ],
+    "completion_record_policy": "This COMPLETE record is valid only after the exact PR head containing it passes the dedicated EXP-NEXT.2 workflow and the retained workflow set. The exact final head is the Git commit containing this record; no older SHA may qualify it. No further evidence-only commit is required after that COMPLETE head is green.",
+    "limitations": [
+      "No live target-network fee witness is qualified.",
+      "No ABI-decoded semantic correctness beyond separately qualified decoder work is claimed.",
+      "No production deployment or Genesis closeout is qualified."
+    ]
+  }
 }

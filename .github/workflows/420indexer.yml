@@ -3,6 +3,9 @@ name: 420Indexer
 on:
   pull_request:
     paths:
+      - 'docs/audit/EXP-2R*'
+      - 'scripts/verify-exp-2r-post-merge.py'
+      - '.github/workflows/explorer-exp-2r.yml'
       - 'indexer/**'
       - '420-indexer/**'
       - 'explorer/**'

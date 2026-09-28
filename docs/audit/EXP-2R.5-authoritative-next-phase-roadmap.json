@@ -1,0 +1,295 @@
+{
+  "schema": "420explorer-authoritative-post-exp2-roadmap-v1",
+  "title": "420Explorer authoritative post-EXP-2 remediation roadmap",
+  "status": "AUTHORITATIVE_POST_MERGE_ROADMAP",
+  "provenance": {
+    "planning_baseline_sha": "52a162612257122d4c6b6e2ab9e8bc163d1d5f6f",
+    "explicitly_new_numbering": true,
+    "historical_EXP_2_7_through_EXP_2_10_recovered": false,
+    "rule": "EXP-NEXT identifiers are new authoritative post-merge identifiers and do not claim to reproduce the lost EXP-2.7–EXP-2.10 roadmap.",
+    "exp_2r_qualified_candidate_head": "77d1476454c314b5170e411e951883575b6d8ce5",
+    "activation_condition": "Authoritative after the EXP-2R COMPLETE record head itself passes exact-head qualification."
+  },
+  "sequence": [
+    {
+      "id": "EXP-NEXT.1",
+      "title": "Registry ABI/descriptor release provenance",
+      "objective": "Close the remaining repository-side Registry descriptor/protocol-decoding provenance gap without claiming live Registry authority.",
+      "exact_baseline_sha": "52a162612257122d4c6b6e2ab9e8bc163d1d5f6f",
+      "dependencies": [
+        "EXP-2R COMPLETE",
+        "EXP-2.6 repository Registry contracts retained"
+      ],
+      "concrete_implementation_tasks": [
+        "Inventory the exact ABI/descriptor inputs used by 420Indexer Registry decoding and Explorer protocol/version presentation.",
+        "Replace any implicit or source-only descriptor assumptions with deterministic pinned artifact/descriptor inputs suitable for release qualification.",
+        "Record descriptor hashes and the source contract/artifact/version relationships that produced them.",
+        "Prove current and historical Registry version/event decoding against deterministic fixtures representing activation, replacement and deprecation.",
+        "Keep direct canonical Registry reads and Indexer projections explicitly distinct; repository fixtures may model the canonical side but do not establish live target-network publication."
+      ],
+      "required_tests": [
+        "descriptor build reproducibility test from pinned repository inputs",
+        "known ServiceVersionPublished and registration-profile vectors",
+        "historical version/activation/deprecation decoding tests",
+        "descriptor/runtime identity mismatch rejection",
+        "full indexer decoder regression",
+        "full Explorer Registry/service-version regression"
+      ],
+      "negative_fail_closed_cases": [
+        "missing descriptor artifact",
+        "descriptor hash drift",
+        "service/version identity mismatch",
+        "implementation mismatch",
+        "activation/deprecation provenance contradiction",
+        "attempt to treat Indexer projection as canonical Registry authority"
+      ],
+      "exact_head_ci_requirements": [
+        "Dedicated exact-head workflow.",
+        "Run relevant Indexer decoder tests, Explorer Registry tests and retained EXP-2.6 verifier on the final evidence-recording head.",
+        "Evidence commit itself must pass; stop after the COMPLETE head is green."
+      ],
+      "audit_evidence_artifacts": [
+        "new dedicated audit JSON/MD for EXP-NEXT.1",
+        "pinned descriptor manifest with hashes",
+        "workflow artifact containing exact head and test summary"
+      ],
+      "explicit_scope_exclusions": [
+        "live ProtocolRegistry deployment/publication",
+        "target-network eth_getCode witness",
+        "deployed Explorer UI",
+        "Genesis readiness"
+      ],
+      "completion_conditions": [
+        "All release-path descriptor inputs are deterministic and pinned.",
+        "Historical/current Registry decoding is repository-qualified.",
+        "No authority-overclaim remains.",
+        "Final evidence-recording head passes required exact-head CI."
+      ]
+    },
+    {
+      "id": "EXP-NEXT.2",
+      "title": "Transaction-fee and raw-event browser presentation",
+      "objective": "Complete the repository frontend workflows whose backing service/API data was qualified in EXP-2.1 and EXP-2.5.",
+      "exact_baseline_sha": "52a162612257122d4c6b6e2ab9e8bc163d1d5f6f",
+      "dependencies": [
+        "EXP-NEXT.1 or an explicitly independent reconciled branch",
+        "EXP-2.1 retained",
+        "EXP-2.5 retained"
+      ],
+      "concrete_implementation_tasks": [
+        "Render gas used, effective gas price and actual fee as distinct transaction fields with exact integer-safe formatting.",
+        "Render raw transaction input/value for failed-call inspection without hiding canonical raw values behind decoded labels.",
+        "Render complete event emitting address, log index, all topics and raw data on transaction/block event views.",
+        "Preserve block hash, transaction hash, chain and log-position provenance in the UI.",
+        "Add safe long-hex presentation/copy affordances without truncating the underlying inspectable value.",
+        "Update workflow evidence for EXP-WF-003 and EXP-WF-013."
+      ],
+      "required_tests": [
+        "known fee-vector UI rendering test",
+        "zero-fee and large-value rendering tests",
+        "reverted transaction raw-input rendering test",
+        "multi-topic/raw-data event rendering test",
+        "empty raw-data rendering test",
+        "cross-view transaction/block event consistency test",
+        "frontend route/render regression"
+      ],
+      "negative_fail_closed_cases": [
+        "missing or inconsistent fee provenance",
+        "malformed topic/data/address received by presentation layer",
+        "unsafe HTML/script-like untrusted values",
+        "silent clipping that changes inspectable raw value",
+        "decoded label presented as authoritative when raw data disagrees"
+      ],
+      "exact_head_ci_requirements": [
+        "Dedicated exact-head browser/frontend workflow.",
+        "Retain EXP-2.1, EXP-2.5 and Explorer service/API verifiers.",
+        "Run repository frontend tests on final evidence-recording head."
+      ],
+      "audit_evidence_artifacts": [
+        "new dedicated audit JSON/MD for EXP-NEXT.2",
+        "browser/render test evidence",
+        "exact-head workflow artifact"
+      ],
+      "explicit_scope_exclusions": [
+        "live target-network fee witness",
+        "ABI-decoded semantic correctness beyond any separately qualified decoder",
+        "production deployment",
+        "Genesis closeout"
+      ],
+      "completion_conditions": [
+        "Fee and raw-event workflows are complete in repository UI source/tests.",
+        "Unsafe/malformed presentation cases fail closed.",
+        "Final evidence-recording head passes exact-head CI."
+      ]
+    },
+    {
+      "id": "EXP-NEXT.3",
+      "title": "Consensus/producer and cross-resource browser workflow closeout",
+      "objective": "Finish repository UI navigation and security coverage for producer/validator, Registry, contract, address, asset and troubleshooting workflows.",
+      "exact_baseline_sha": "52a162612257122d4c6b6e2ab9e8bc163d1d5f6f",
+      "dependencies": [
+        "EXP-NEXT.2 COMPLETE",
+        "EXP-2.3/2.4/2.6 retained"
+      ],
+      "concrete_implementation_tasks": [
+        "Render historical producer/proposer provenance in block detail using the already-qualified repository trace data.",
+        "Provide deterministic navigation from producer/validator context to block/consensus detail without inventing canonical identity.",
+        "Qualify Registry service/version to implementation-contract navigation.",
+        "Qualify address, asset-transfer, contract-deployment and troubleshooting cross-resource navigation required by the frozen workflow matrix.",
+        "Add explicit unsafe/untrusted metadata, link and raw-log rendering security tests.",
+        "Reconcile workflow matrix dispositions so repository UI work is marked complete while live evidence remains pending."
+      ],
+      "required_tests": [
+        "historical block-producer UI fixture",
+        "validator/consensus boundary navigation tests",
+        "Registry implementation-to-contract navigation test",
+        "address/asset/contract cross-resource tests",
+        "wrong-chain/stale/degraded diagnostic rendering tests",
+        "unsafe metadata/link/log rendering tests",
+        "full frontend regression"
+      ],
+      "negative_fail_closed_cases": [
+        "missing producer trace",
+        "consensus/execution provenance mismatch",
+        "Registry implementation mismatch",
+        "malicious label/metadata/link content",
+        "wrong-chain or stale data shown without degraded state",
+        "projection labeled as canonical authority"
+      ],
+      "exact_head_ci_requirements": [
+        "Dedicated exact-head UI/workflow workflow.",
+        "Retain EXP-2.3, EXP-2.4 and EXP-2.6 verifiers plus frontend regression.",
+        "Final COMPLETE evidence commit must itself pass."
+      ],
+      "audit_evidence_artifacts": [
+        "new dedicated audit JSON/MD for EXP-NEXT.3",
+        "workflow-matrix reconciliation record",
+        "security/rendering evidence artifact"
+      ],
+      "explicit_scope_exclusions": [
+        "live canonical producer witness",
+        "deployed consensus-provider proof",
+        "production availability/SLA",
+        "Genesis readiness"
+      ],
+      "completion_conditions": [
+        "All mandatory repository-side browser workflows have deterministic tests.",
+        "Security rendering cases fail closed.",
+        "Live/deployment obligations remain explicitly deferred.",
+        "Final evidence-recording head passes exact-head CI."
+      ]
+    },
+    {
+      "id": "EXP-NEXT.4",
+      "title": "Production-equivalent deployment, live integration and recovery qualification",
+      "objective": "Qualify the already-built Explorer/Indexer stack against approved target-network infrastructure and production-equivalent deployment conditions.",
+      "exact_baseline_sha": "52a162612257122d4c6b6e2ab9e8bc163d1d5f6f",
+      "dependencies": [
+        "EXP-NEXT.1–EXP-NEXT.3 repository work COMPLETE",
+        "approved target-network execution and consensus sources",
+        "deployable Indexer/Explorer artifacts"
+      ],
+      "concrete_implementation_tasks": [
+        "Deploy qualified 420Indexer and 420Explorer backend/frontend to non-placeholder production-equivalent endpoints.",
+        "Bind Indexer to approved chain ID 420 execution source and approved consensus provider.",
+        "Verify ProtocolRegistry runtime code/hash and authorized service/version publication.",
+        "Exercise every required Explorer-to-Indexer route with representative data.",
+        "Compare indexed block/transaction/receipt/log/Registry/consensus data to approved canonical sources.",
+        "Run restart/resume, RPC outage, stale-data, provider-unavailable, bounded reorg and rebuild scenarios.",
+        "Record live block-to-producer and fee/event workflow witnesses."
+      ],
+      "required_tests": [
+        "live /v1/health chain/finality/freshness probe",
+        "all mandatory route probes",
+        "wrong-chain negative test",
+        "canonical-vs-indexed comparison witnesses",
+        "live Registry direct-vs-projection comparison",
+        "live consensus/provider witness",
+        "restart/resume/reorg/rebuild recovery exercises",
+        "browser end-to-end workflow suite"
+      ],
+      "negative_fail_closed_cases": [
+        "wrong chain ID",
+        "stale/finality divergence",
+        "Registry code/publication mismatch",
+        "consensus provider unavailable or contradictory",
+        "RPC outage",
+        "non-finalized reorg",
+        "finalized-history conflict",
+        "placeholder or unverified deployment URL"
+      ],
+      "exact_head_ci_requirements": [
+        "Pin exact release-candidate SHA and deployed artifact identity.",
+        "All live qualification records must identify exact candidate and endpoints.",
+        "Any candidate change invalidates prior exact-head qualification."
+      ],
+      "audit_evidence_artifacts": [
+        "deployment manifest with non-placeholder endpoints",
+        "live validation transcript/artifacts",
+        "recovery qualification record",
+        "canonical-source witness index"
+      ],
+      "explicit_scope_exclusions": [
+        "No mainnet/Genesis-ready claim until final acceptance closeout.",
+        "No canonical authority assigned to Explorer or Indexer."
+      ],
+      "completion_conditions": [
+        "All Genesis-blocking deployment/live/recovery findings are closed or explicitly dispositioned by authoritative criteria.",
+        "Production-equivalent end-to-end workflows pass on the exact release candidate."
+      ]
+    },
+    {
+      "id": "EXP-NEXT.5",
+      "title": "Final Genesis acceptance and release closeout",
+      "objective": "Make the final evidence-based Genesis qualification decision for 420Explorer without carrying unresolved mandatory criteria.",
+      "exact_baseline_sha": "52a162612257122d4c6b6e2ab9e8bc163d1d5f6f",
+      "dependencies": [
+        "EXP-NEXT.4 COMPLETE",
+        "all mandatory AC-1 through AC-9 evidence available"
+      ],
+      "concrete_implementation_tasks": [
+        "Freeze exact release-candidate SHA and complete required-test inventory.",
+        "Reconcile every mandatory requirement, workflow, finding and acceptance criterion to final evidence.",
+        "Verify all Genesis-blocking findings are closed.",
+        "Record workflow run IDs, commands, artifact digests and any explicit non-applicable rationale.",
+        "Publish final AC-1 through AC-10 evidence index and closeout record.",
+        "Do not infer readiness from repository implementation alone."
+      ],
+      "required_tests": [
+        "complete retained qualification suite",
+        "exact release-candidate repository tests",
+        "production-equivalent live/deployment qualification",
+        "security and recovery qualification",
+        "final evidence-ledger consistency verifier"
+      ],
+      "negative_fail_closed_cases": [
+        "any mandatory acceptance criterion remains unverified",
+        "any Genesis blocker remains open",
+        "evidence from a different SHA is substituted",
+        "missing artifact/run provenance",
+        "repository-only evidence used to claim live qualification"
+      ],
+      "exact_head_ci_requirements": [
+        "Final closeout commit itself must pass the complete mandatory suite.",
+        "No further evidence-only commit after the green COMPLETE head unless substantive content changes."
+      ],
+      "audit_evidence_artifacts": [
+        "final Genesis acceptance checklist",
+        "AC-1 through AC-10 evidence index",
+        "closed blocker register",
+        "release-candidate qualification manifest"
+      ],
+      "explicit_scope_exclusions": [
+        "Optional post-Genesis staking/reward-specific view",
+        "optional Names/Identity enrichment",
+        "optional 420 Verify presentation integration unless separately promoted by authoritative scope decision"
+      ],
+      "completion_conditions": [
+        "No mandatory criterion remains unverified.",
+        "No Genesis-blocking finding remains unresolved.",
+        "Exact release candidate and deployed stack are fully evidenced.",
+        "Final closeout record explicitly states the supported qualification scope."
+      ]
+    }
+  ]
+}

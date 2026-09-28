@@ -1,0 +1,431 @@
+{
+  "schema": "420explorer-exp-2r-post-merge-reconciliation-v1",
+  "milestone": "EXP-2R",
+  "title": "Phase 2 Post-Merge Reconciliation",
+  "status": "COMPLETE",
+  "baseline": {
+    "current_main": "52a162612257122d4c6b6e2ab9e8bc163d1d5f6f",
+    "pr_381_final_head": "26a06117c7662c0f8986a2f7b505d5180d3121ea",
+    "pr_381": 381,
+    "pr_381_branch": "audit/exp-2-1-transaction-fees-20260927",
+    "branch_tree_matches_merged_main": true
+  },
+  "rules": {
+    "no_feature_changes_during_reconciliation": true,
+    "preserve_previously_qualified_evidence": true,
+    "exact_head_required": true,
+    "fail_closed": true,
+    "repository_scope_distinct_from_live_deployment": true,
+    "canonical_authority_overclaim_forbidden": true,
+    "old_roadmap_numbering_must_not_be_invented": true
+  },
+  "original_roadmap_recovery": {
+    "source_conversation": "https://chatgpt.com/c/6ab95720-6b10-83e8-960d-e4056971616e",
+    "recovered_with_confidence": {
+      "phase": "EXP-2 — Core Explorer services and APIs",
+      "scope": "Qualify Explorer block, transaction, receipt, address, asset/token, contract, consensus and related repository service/API behavior, including schemas, pagination, validation, error handling, representative indexed data and fail-closed behavior.",
+      "milestones": {
+        "EXP-2.1": "transaction fee model/API",
+        "EXP-2.2": "HTTP/API route contracts",
+        "EXP-2.3": "core data services"
+      }
+    },
+    "not_recovered": [
+      "EXP-2.4 original definition",
+      "EXP-2.5 original definition",
+      "EXP-2.6 original definition",
+      "EXP-2.7 original definition",
+      "EXP-2.8 original definition",
+      "EXP-2.9 original definition",
+      "EXP-2.10 original definition"
+    ],
+    "repository_search_result": "No default-branch files define EXP-2.7 through EXP-2.10. Commit-search hits were unrelated historical GEN-10.2/EXP-7.2 or substring collisions and do not establish the lost roadmap.",
+    "conclusion": "Do not continue with historical-looking EXP-2.7 numbering. Current repository EXP-2.4 through EXP-2.6 remain valid reconstructed qualified milestones, but they are not represented as proof of the lost original ordering."
+  },
+  "merged_inventory": {
+    "audits": [
+      "docs/audit/EXP-2.1-transaction-fee-api-qualification.json",
+      "docs/audit/EXP-2.1-transaction-fee-api-qualification.md",
+      "docs/audit/EXP-2.2-http-route-contracts.json",
+      "docs/audit/EXP-2.2-http-route-contracts.md",
+      "docs/audit/EXP-2.3-data-services.json",
+      "docs/audit/EXP-2.3-data-services.md",
+      "docs/audit/EXP-2.4-consensus-producer.json",
+      "docs/audit/EXP-2.4-consensus-producer.md",
+      "docs/audit/EXP-2.5-raw-call-events.json",
+      "docs/audit/EXP-2.5-raw-call-events.md",
+      "docs/audit/EXP-2.6-diagnostics-registry.json",
+      "docs/audit/EXP-2.6-diagnostics-registry.md"
+    ],
+    "workflows": [
+      ".github/workflows/explorer-exp-2-1.yml",
+      ".github/workflows/explorer-exp-2-2.yml",
+      ".github/workflows/explorer-exp-2-3.yml",
+      ".github/workflows/explorer-exp-2-4.yml",
+      ".github/workflows/explorer-exp-2-5.yml",
+      ".github/workflows/explorer-exp-2-6.yml"
+    ],
+    "verifiers": [
+      "scripts/verify-exp-2-1-transaction-fees.py",
+      "scripts/verify-exp-2-2-http-routes.py",
+      "scripts/verify-exp-2-3-data-services.py",
+      "scripts/verify-exp-2-4-consensus.py",
+      "scripts/verify-exp-2-5-raw-events.py",
+      "scripts/verify-exp-2-6-diagnostics-registry.py"
+    ],
+    "milestone_specific_tests": [
+      "explorer/api/exp_2_2_contract_test.go",
+      "explorer/api/exp_2_3_data_routes_test.go",
+      "explorer/api/exp_2_4_consensus_test.go",
+      "explorer/api/exp_2_5_raw_events_test.go",
+      "explorer/api/exp_2_6_diagnostics_registry_test.go",
+      "explorer/indexerclient/exp_2_3_client_test.go",
+      "explorer/indexerclient/exp_2_4_consensus_test.go",
+      "explorer/indexerclient/exp_2_6_registry_client_test.go",
+      "explorer/service/exp_2_3_data_contract_test.go",
+      "explorer/service/exp_2_4_consensus_test.go",
+      "explorer/service/exp_2_5_raw_events_test.go",
+      "explorer/service/exp_2_6_diagnostics_registry_test.go"
+    ]
+  },
+  "milestone_reconciliation": {
+    "EXP-2.1": {
+      "repository_status": "qualified_repository_scope",
+      "evidence": "docs/audit/EXP-2.1-transaction-fee-api-qualification.json",
+      "remaining_scope": [
+        "deployed UI fee rendering",
+        "live target-network fee witness",
+        "final Genesis release closeout"
+      ]
+    },
+    "EXP-2.2": {
+      "repository_status": "COMPLETE",
+      "evidence_recording_head": "6f82da84ba9a2b077ffb125049d6eb2501246e62",
+      "remaining_scope": [
+        "deployed UI",
+        "live target-network",
+        "Registry runtime authority"
+      ]
+    },
+    "EXP-2.3": {
+      "repository_status": "COMPLETE",
+      "evidence_recording_head": "6bcda461dc1795f2327d2bca3a3e8d8232aeb4d2",
+      "remaining_scope": [
+        "deployed UI",
+        "live target-network",
+        "runtime Registry/dependency witnesses"
+      ]
+    },
+    "EXP-2.4": {
+      "repository_status": "COMPLETE",
+      "evidence_recording_head": "f403a994863ba49bc4ca4fd3ad0e45ed459967f5",
+      "remaining_scope": [
+        "deployed consensus witness",
+        "live block-to-producer comparison",
+        "deployed UI producer/validator workflow"
+      ]
+    },
+    "EXP-2.5": {
+      "repository_status": "COMPLETE_after_EXP-2R_reconciliation",
+      "final_exact_head": "26a06117c7662c0f8986a2f7b505d5180d3121ea",
+      "final_run_id": 36455530414,
+      "remaining_scope": [
+        "deployed UI raw event rendering",
+        "optional ABI-decoded diagnostics",
+        "live target-network witnesses"
+      ]
+    },
+    "EXP-2.6": {
+      "repository_status": "COMPLETE",
+      "evidence_recording_head": "c0b40a61b95192627fd21fabfe7349ecda5a4360",
+      "remaining_scope": [
+        "live Registry publication",
+        "deployed troubleshooting workflows",
+        "production recovery"
+      ]
+    }
+  },
+  "repository_scope_remaining_after_pr_381": [
+    {
+      "id": "EXP-REM-REPO-001",
+      "source_finding": "EXP-FIND-006",
+      "title": "Registry ABI/descriptor release provenance",
+      "why_remaining": "Pinned artifact-backed descriptor provenance and release-path historical decoding are not yet qualified against the release contract.",
+      "owner": "new roadmap EXP-NEXT.1"
+    },
+    {
+      "id": "EXP-REM-REPO-002",
+      "source_findings": [
+        "EXP-FIND-008",
+        "EXP-FIND-010"
+      ],
+      "title": "Frontend fee and raw-event rendering",
+      "why_remaining": "Repository service/API data is qualified, but browser presentation still does not complete fee inspection or full topic/data inspection.",
+      "owner": "new roadmap EXP-NEXT.2"
+    },
+    {
+      "id": "EXP-REM-REPO-003",
+      "source_findings": [
+        "EXP-FIND-009"
+      ],
+      "title": "Frontend producer/validator trace workflow and cross-resource navigation",
+      "why_remaining": "Producer provenance is repository-qualified below the UI, but final browser workflow qualification remains.",
+      "owner": "new roadmap EXP-NEXT.3"
+    },
+    {
+      "id": "EXP-REM-REPO-004",
+      "source_acceptance": [
+        "AC-7"
+      ],
+      "title": "Release-scope unsafe rendering/security regression coverage",
+      "why_remaining": "Final release evidence still requires explicit unsafe/untrusted metadata and log-rendering tests on the frontend surfaces added above.",
+      "owner": "new roadmap EXP-NEXT.3"
+    }
+  ],
+  "non_repository_handoffs": [
+    "qualified deployed 420Indexer endpoint",
+    "production Explorer deployment",
+    "approved live chain/RPC binding",
+    "live ProtocolRegistry code/publication provenance",
+    "deployed consensus provider witness",
+    "live block-to-producer comparison",
+    "production-equivalent restart/outage/reorg recovery",
+    "exact release-candidate Genesis closeout"
+  ],
+  "blocker_determination": {
+    "new_merged_code_defect_found": false,
+    "reconciliation_defect_found": true,
+    "reconciliation_defect": "EXP-2.5 stale audit status only",
+    "phase_2_repository_backend_service_api_blockers_remaining": 0,
+    "remaining_repository_work_is_next_phase_descriptor_and_frontend_scope": true,
+    "live_deployment_genesis_blockers_remain": true
+  },
+  "steps": [
+    {
+      "id": "EXP-2R.1",
+      "objective": "Inventory every merged EXP-2 audit artifact, test, verifier and workflow on current main.",
+      "exact_baseline_sha": "52a162612257122d4c6b6e2ab9e8bc163d1d5f6f",
+      "dependencies": [],
+      "implementation_tasks": [
+        "Enumerate EXP-2.1 through EXP-2.6 audit records.",
+        "Enumerate milestone workflows/verifiers/tests.",
+        "Confirm current main equals PR #381 merge commit."
+      ],
+      "required_tests": [
+        "EXP-2R verifier inventory assertions"
+      ],
+      "negative_fail_closed_cases": [
+        "Missing expected audit/workflow/verifier/test fails reconciliation."
+      ],
+      "exact_head_ci_requirements": [
+        "Run EXP-2R workflow on PR exact head."
+      ],
+      "audit_evidence_artifacts": [
+        "docs/audit/EXP-2R-post-merge-reconciliation.json"
+      ],
+      "scope_exclusions": [
+        "No feature changes.",
+        "No live/deployment claims."
+      ],
+      "completion_conditions": [
+        "Inventory is complete and verifier passes on final exact head."
+      ]
+    },
+    {
+      "id": "EXP-2R.2",
+      "objective": "Reconcile EXP-2.1 through EXP-2.6 audit states against exact-head evidence and correct stale evidence bookkeeping.",
+      "exact_baseline_sha": "52a162612257122d4c6b6e2ab9e8bc163d1d5f6f",
+      "dependencies": [
+        "EXP-2R.1"
+      ],
+      "implementation_tasks": [
+        "Confirm later retained runs for EXP-2.5.",
+        "Record PR #381 final-head evidence.",
+        "Confirm merge-tree equivalence.",
+        "Mark EXP-2.5 COMPLETE without broadening scope."
+      ],
+      "required_tests": [
+        "Run all EXP-2.1 through EXP-2.6 verifiers.",
+        "Run Explorer regression and vet."
+      ],
+      "negative_fail_closed_cases": [
+        "Any missing exact-head evidence prevents COMPLETE.",
+        "Any scope flag claiming deployed/live/canonical/Genesis status fails."
+      ],
+      "exact_head_ci_requirements": [
+        "All reconciliation checks execute on final PR head."
+      ],
+      "audit_evidence_artifacts": [
+        "docs/audit/EXP-2.5-raw-call-events.json",
+        "docs/audit/EXP-2.5-raw-call-events.md",
+        "docs/audit/EXP-2R-post-merge-reconciliation.json"
+      ],
+      "scope_exclusions": [
+        "No implementation rework solely to rewrite history."
+      ],
+      "completion_conditions": [
+        "Stale status is corrected and retained qualification remains green."
+      ]
+    },
+    {
+      "id": "EXP-2R.3",
+      "objective": "Reconcile requirement, gap, workflow and acceptance ownership after PR #381.",
+      "exact_baseline_sha": "52a162612257122d4c6b6e2ab9e8bc163d1d5f6f",
+      "dependencies": [
+        "EXP-2R.2"
+      ],
+      "implementation_tasks": [
+        "Re-read EXP-0.2.2/0.2.5/0.2.6.",
+        "Re-read EXP-0.3 traceability, EXP-0.4 ledger and EXP-1 closeout.",
+        "Map completed Phase-2 work to remaining owners.",
+        "Keep repository and live/deployment obligations separate."
+      ],
+      "required_tests": [
+        "Verifier checks required source records exist and scope boundaries remain explicit."
+      ],
+      "negative_fail_closed_cases": [
+        "No live blocker may be silently marked repository-complete.",
+        "No optional post-Genesis item may be promoted to Genesis blocker without authority."
+      ],
+      "exact_head_ci_requirements": [
+        "EXP-2R verifier executes on final exact head."
+      ],
+      "audit_evidence_artifacts": [
+        "docs/audit/EXP-2R-post-merge-reconciliation.json"
+      ],
+      "scope_exclusions": [
+        "No target-network deployment.",
+        "No UI feature implementation in reconciliation."
+      ],
+      "completion_conditions": [
+        "Every known blocker has an owner or explicit post-Genesis disposition."
+      ]
+    },
+    {
+      "id": "EXP-2R.4",
+      "objective": "Determine exactly which repository-scope requirements remain unsatisfied after PR #381.",
+      "exact_baseline_sha": "52a162612257122d4c6b6e2ab9e8bc163d1d5f6f",
+      "dependencies": [
+        "EXP-2R.3"
+      ],
+      "implementation_tasks": [
+        "Separate backend/service/API completeness from descriptor provenance, frontend workflow work and live deployment.",
+        "Record whether any concrete merged-code defect exists."
+      ],
+      "required_tests": [
+        "No feature test required unless a concrete merged-code defect is found.",
+        "Reconciliation verifier validates blocker classification."
+      ],
+      "negative_fail_closed_cases": [
+        "Unknown ownership remains blocking to roadmap closeout.",
+        "Deployment-only evidence cannot satisfy repository tests and vice versa."
+      ],
+      "exact_head_ci_requirements": [
+        "Classification record must be present on exact head."
+      ],
+      "audit_evidence_artifacts": [
+        "docs/audit/EXP-2R-post-merge-reconciliation.json"
+      ],
+      "scope_exclusions": [
+        "No feature changes absent a concrete defect."
+      ],
+      "completion_conditions": [
+        "Repository remaining-work list and non-repository handoff list are explicit."
+      ]
+    },
+    {
+      "id": "EXP-2R.5",
+      "objective": "Publish a new authoritative post-merge roadmap without pretending to recover lost EXP-2.7–EXP-2.10 numbering.",
+      "exact_baseline_sha": "52a162612257122d4c6b6e2ab9e8bc163d1d5f6f",
+      "dependencies": [
+        "EXP-2R.4"
+      ],
+      "implementation_tasks": [
+        "Record original-roadmap recovery limits.",
+        "Publish new EXP-NEXT identifiers with objectives, dependencies, tasks, tests, fail-closed cases, exact-head CI, evidence, exclusions and completion conditions."
+      ],
+      "required_tests": [
+        "Roadmap schema/field completeness verifier."
+      ],
+      "negative_fail_closed_cases": [
+        "Any historical-looking EXP-2.7–2.10 claim fails unless primary evidence is added."
+      ],
+      "exact_head_ci_requirements": [
+        "Roadmap verifier passes on final exact head."
+      ],
+      "audit_evidence_artifacts": [
+        "docs/audit/EXP-2R.5-authoritative-next-phase-roadmap.json"
+      ],
+      "scope_exclusions": [
+        "Does not retroactively rename completed milestones."
+      ],
+      "completion_conditions": [
+        "New roadmap is complete, explicit and exact-head qualified."
+      ]
+    }
+  ],
+  "final_scope": {
+    "deployed_ui_qualified": false,
+    "live_target_network_qualified": false,
+    "canonical_authority": false,
+    "genesis_ready_claim": false
+  },
+  "final_qualification": {
+    "qualified_candidate_head": "77d1476454c314b5170e411e951883575b6d8ce5",
+    "candidate_exact_head_requalification": "success",
+    "candidate_workflows": [
+      {
+        "name": "420Explorer EXP-2R Reconciliation",
+        "run_id": 36463988626,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Indexer",
+        "run_id": 36463988602,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Docs Qualification",
+        "run_id": 36463988463,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.9 CI Qualification Automation",
+        "run_id": 36463988600,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.10 Phase Closeout Qualification",
+        "run_id": 36463988372,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.1",
+        "run_id": 36463988519,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.5",
+        "run_id": 36463988516,
+        "conclusion": "success"
+      },
+      {
+        "name": "420 Integrated Qualification",
+        "run_id": 36463988666,
+        "conclusion": "success"
+      }
+    ],
+    "integrated_jobs": [
+      "offline-core",
+      "production-dependencies",
+      "fault-matrix",
+      "geth-engine"
+    ],
+    "completion_record_policy": "This COMPLETE record is accepted only after the exact PR head containing it passes the required retained qualification suite. No further evidence-only commit is required after that COMPLETE head is green.",
+    "scope": "repository_reconciliation_only",
+    "deployed_ui_qualified": false,
+    "live_target_network_qualified": false,
+    "canonical_authority": false,
+    "genesis_ready_claim": false
+  }
+}

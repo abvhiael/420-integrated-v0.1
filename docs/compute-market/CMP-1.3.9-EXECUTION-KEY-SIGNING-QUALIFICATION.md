@@ -1,6 +1,6 @@
 # CMP-1.3.9 — Independent execution-key authorization and replay-safe worker signing
 
-Status: **IMPLEMENTATION CANDIDATE — exact-head qualification pending**
+Status: **CANDIDATE GREEN — evidence-recording head requalification pending**
 
 ## Canonical definition
 
@@ -208,17 +208,32 @@ The canonical roadmap assigns the final release-candidate wiring/runtime-hash/pu
 
 ## Qualification evidence
 
-Candidate exact SHA: **PENDING**
+Candidate exact SHA: `b36a713e4ebb8dc2a73fa9f59bbde7aaccaa2bac`
 
-Required exact-head gates:
+Candidate qualification:
+
+- Solidity Contracts #3262 — **SUCCESS**, all 16/16 `pr-shards` successful. The aggregate `foundry` wrapper was skipped by workflow design and is not counted as a passing gate.
+- 420 Integrated Qualification #5879 — **SUCCESS**:
+  - `offline-core` — success
+  - `production-dependencies` — success
+  - `fault-matrix` — success
+  - `geth-engine` — success
+- 420Docs Qualification #3262 — **SUCCESS**.
+
+A prior candidate head `26a65180b5a5bb0e09a48bea5c4f8d8cf3545760` failed Solidity Contracts #3261 in two newly-added replay tests. Root cause was a test harness error in `_acceptedJob()`: one-shot `vm.prank(OWNER)` was consumed by the external `matchEvidence.matchId()` getter during Solidity argument evaluation, so `jobs.recordMatch` correctly saw the test contract and reverted `Unauthorized`. The fix resolves `matchId` before the prank; no production authorization check was weakened.
+
+Current `main` at evidence recording: `f437378664059a51f854d45bf48594930f070f6f`.
+PR #389 remains stacked on qualified CMP-1.3.8 base `25321f2af15b02d2940704225b854c5d33984111` and was mergeable when this evidence was recorded.
+
+Required final exact-head gates after this evidence commit:
 
 - Solidity Contracts, all required PR shards;
 - 420 Integrated Qualification;
 - 420Docs Qualification;
-- any additional workflow triggered for the exact head;
+- any additional workflow triggered for the exact evidence head;
 - no failed/cancelled/missing required gate may be treated as passing.
 
-After candidate qualification is recorded in this file, the resulting evidence-recording head must be requalified before COMPLETE.
+The candidate results above qualify only `b36a713e4ebb8dc2a73fa9f59bbde7aaccaa2bac`. This evidence update creates a new branch head and that new SHA must itself pass the retained suite before COMPLETE.
 
 ## Completion
 

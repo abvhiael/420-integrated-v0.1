@@ -1,5 +1,5 @@
 import { inspectableRaw420, renderFeeSummary420, renderRawLogs420, transactionDetailPresentation420 } from './presentation.mjs';
-import { addressHistoryPresentation420, assetTransfersPresentation420, contractPresentation420, diagnosticPresentation420, producerPresentation420, registryServicePresentation420, routeLink420 } from './workflow-presentation.mjs';
+import { addressHistoryPresentation420, assetTransfersPresentation420, contractPresentation420, diagnosticPresentation420, producerPresentation420, registryServicePresentation420, registryVersionPresentation420, routeLink420 } from './workflow-presentation.mjs';
 const app = document.querySelector('#route-content');
 const networkPill = document.querySelector('#network-pill');
 const searchForm = document.querySelector('#global-search');
@@ -217,10 +217,11 @@ function registryVersionsTable(versions) {
 
 async function registryVersion(serviceId, version) {
   const v = await api(`/v1/services/${encodeURIComponent(serviceId)}/versions/${encodeURIComponent(version)}`);
+  const registryVersionView = registryVersionPresentation420(v, serviceId, version);
   app.innerHTML = title(`${v.serviceId} · v${v.version}`, v.active ? 'active' : 'historical') + stats([
     ['Version',v.version],['Active',v.active ? 'yes':'no'],['Activated block',v.activatedBlock],['Deprecated block',v.deprecatedBlock || '—']
   ]) + `<div class="panel">${detailRows([
-    ['Implementation', v.implementation ? link(`#/contracts/${v.implementation}`,v.implementation) : '—', true],
+    ['Implementation', registryVersionView.implementationLink, true],
     ['Code hash', mono(v.codeHash), true],
     ['Metadata hash', mono(v.metadataHash), true],
     ['Manifest hash', mono(v.manifestHash), true],
@@ -265,7 +266,7 @@ async function consensus() {
   ])}</div>` + `<div class="panel"><h3>Latest quorum certificate</h3>${detailRows([
     ['Certified',statusBadge(Boolean(qc.certified),'CERTIFIED','NOT CERTIFIED'),true],
     ['Slot',qc.slot],['Signers',qc.signers],['Quorum threshold',qc.quorum],['Block root',mono(qc.blockRoot),true],['Parent root',mono(qc.parentRoot),true]
-  ])}</div>` + `<div class="panel"><h3>Finality checkpoints</h3>${checkpointTable(c)}</div>` + `<div class="panel"><h3>Active seats</h3><div class="seat-list">${seats.map(seat => `<span class="seat">${esc(seat)}</span>`).join('') || '<span class="muted">No active seats reported.</span>'}</div></div>`;
+  ])}</div>` + `<div class="panel"><h3>Finality checkpoints</h3>${checkpointTable(c)}</div>` + `<div class="panel"><h3>Active seats</h3><div class="seat-list">${seats.map(seat => routeLink420(['consensus',c.currentSlot],`seat ${seat}`)).join('') || '<span class="muted">No active seats reported.</span>'}</div></div>`;
 }
 
 function checkpointTable(c) {

@@ -1,4 +1,4 @@
-import { inspectableRaw420, renderRawLogs420, transactionDetailPresentation420 } from './presentation.mjs';
+import { inspectableRaw420, renderFeeSummary420, renderRawLogs420, transactionDetailPresentation420 } from './presentation.mjs';
 const app = document.querySelector('#route-content');
 const networkPill = document.querySelector('#network-pill');
 const searchForm = document.querySelector('#global-search');
@@ -137,11 +137,8 @@ async function transactionDetail(hash) {
     ['Block', qualified.blockNumber],
     ['Index', qualified.transactionIndex],
     ['Status', receipt.statusLabel ?? receipt.status],
-    ['Gas used', qualified.fee.gasUsed],
-    ['Effective gas price (wei)', qualified.fee.effectiveGasPriceWei],
-    ['Actual fee (wei)', qualified.fee.actualFeeWei],
     ['Finality', view.finality]
-  ]) + `<div class="panel">${detailRows([
+  ]) + renderFeeSummary420(receipt) + `<div class="panel">${detailRows([
     ['Hash', inspectableRaw420(qualified.txHash, 'transaction hash', 'transaction-hash'), true],
     ['Block hash', inspectableRaw420(qualified.blockHash, 'block hash', 'transaction-block-hash'), true],
     ['Chain ID', qualified.chainId],

@@ -137,6 +137,90 @@
       "No live target-network fee witness is qualified.",
       "No ABI-decoded semantic correctness beyond separately qualified decoder work is claimed.",
       "No production deployment or Genesis closeout is qualified."
-    ]
+    ],
+    "evidence_recording_input_head": "74ca0c80d1d531c5c36afabc6046e5bab22f3e86",
+    "evidence_recording_input_head_result": "all_required_exact_head_workflows_success",
+    "evidence_recording_input_workflows": [
+      {
+        "name": "420Explorer EXP-NEXT.2 Fee and Raw Event Browser",
+        "run_id": 36470761516,
+        "conclusion": "success",
+        "artifact_id": 10991610657
+      },
+      {
+        "name": "420Explorer EXP-2.5",
+        "run_id": 36470761655,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.4",
+        "run_id": 36470761780,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.7 Cross-Layer Traceability Qualification",
+        "run_id": 36470761527,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.2",
+        "run_id": 36470761642,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.10 Phase Closeout Qualification",
+        "run_id": 36470761823,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.8 Runtime Negative Divergence Qualification",
+        "run_id": 36470761634,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Indexer",
+        "run_id": 36470761523,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Docs Qualification",
+        "run_id": 36470761671,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.3",
+        "run_id": 36470761432,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.6",
+        "run_id": 36470761431,
+        "conclusion": "success"
+      },
+      {
+        "name": "420 Integrated Qualification",
+        "run_id": 36470761733,
+        "conclusion": "success"
+      }
+    ],
+    "evidence_recording_input_integrated_jobs": [
+      {
+        "name": "offline-core",
+        "conclusion": "success"
+      },
+      {
+        "name": "geth-engine",
+        "conclusion": "success"
+      },
+      {
+        "name": "production-dependencies",
+        "conclusion": "success"
+      },
+      {
+        "name": "fault-matrix",
+        "conclusion": "success"
+      }
+    ],
+    "final_head_rule": "The commit created by recording the 74ca0c80 evidence above is a new qualification target. EXP-NEXT.2 is COMPLETE only after that exact PR head passes the dedicated EXP-NEXT.2 workflow and all retained workflows that trigger for it; missing/skipped/cancelled required checks do not qualify the step."
   }
 }

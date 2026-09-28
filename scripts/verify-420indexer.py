@@ -44,7 +44,7 @@ for key in expected_evidence:
     if not str(evidence.get(key, "")).startswith("IMPLEMENTED"):
         errors.append(f"qualification evidence: {key}")
 
-if ready.get("consumer_gates", {}).get("420Explorer") != "QUALIFIED_INDEXER_API_CONSUMER":
+if ready.get("consumer_gates", {}).get("420Explorer") not in {"QUALIFIED_INDEXER_API_CONSUMER","QUALIFIED_INDEXER_API_CONSUMER_EXACT_HEAD"}:
     errors.append("explorer consumer gate")
 
 print(json.dumps({"pass": not errors, "errors": errors}, indent=2))

@@ -285,8 +285,9 @@ contract ComputeJobWorkerSnapshotEvidence420Test {
         );
         vm.prank(OWNER);
         jobs.recordFunding(id, 1, keccak256(abi.encode("funding", seed)));
+        bytes32 acceptedMatchId = matchEvidence.matchId();
         vm.prank(OWNER);
-        jobs.recordMatch(id, 2, matchEvidence.matchId());
+        jobs.recordMatch(id, 2, acceptedMatchId);
         matchEvidence.acceptIntoJob(id, 3, keccak256(abi.encode("acceptance", seed)));
     }
 

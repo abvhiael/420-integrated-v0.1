@@ -175,6 +175,17 @@
         "fee-field model/API tests after implementation",
         "known gasUsed × effectiveGasPrice calculation vector",
         "UI fee rendering test"
+      ],
+      "exp_next_2_repository_disposition": "REPOSITORY_BROWSER_FEE_PRESENTATION_QUALIFIED_PENDING_LIVE_DEPLOYMENT",
+      "exp_next_2_evidence": [
+        "explorer/web/static/app.js",
+        "explorer/web/static/presentation.mjs",
+        "explorer/web/presentation.test.mjs",
+        "docs/audit/EXP-NEXT.2-fee-raw-event-browser.json"
+      ],
+      "post_exp_next_2_remaining_owners": [
+        "EXP-NEXT.4",
+        "EXP-NEXT.5"
       ]
     },
     {
@@ -762,6 +773,17 @@
       "post_exp_2_5_remaining_owners": [
         "EXP-3",
         "EXP-4"
+      ],
+      "exp_next_2_repository_disposition": "REPOSITORY_BROWSER_RAW_EVENT_PRESENTATION_QUALIFIED_PENDING_LIVE_DEPLOYMENT",
+      "exp_next_2_evidence": [
+        "explorer/web/static/app.js",
+        "explorer/web/static/presentation.mjs",
+        "explorer/web/presentation.test.mjs",
+        "docs/audit/EXP-NEXT.2-fee-raw-event-browser.json"
+      ],
+      "post_exp_next_2_remaining_owners": [
+        "EXP-NEXT.4",
+        "EXP-NEXT.5"
       ]
     },
     {

@@ -7,6 +7,7 @@ import {
   diagnosticPresentation420,
   producerPresentation420,
   registryServicePresentation420,
+  registryVersionPresentation420,
   routeLink420
 } from './static/workflow-presentation.mjs';
 
@@ -59,6 +60,14 @@ test('Registry implementation must match active history before contract navigati
   assert.match(p.implementationLink,new RegExp(a(2)));
   assert.throws(()=>registryServicePresentation420({...v,implementation:a(9)}),/implementation mismatch/);
   assert.throws(()=>registryServicePresentation420({...v,activeVersion:1}),/not active in history/);
+});
+
+test('Registry version identity is rechecked before implementation contract navigation',()=>{
+  const v={serviceId:'420Registry',version:2,implementation:a(2),active:true};
+  const p=registryVersionPresentation420(v,'420Registry','2');
+  assert.match(p.implementationLink,new RegExp(a(2)));
+  assert.throws(()=>registryVersionPresentation420({...v,serviceId:'420Other'},'420Registry','2'),/identity mismatch/);
+  assert.throws(()=>registryVersionPresentation420({...v,implementation:'javascript:alert(1)'},'420Registry','2'),/implementation/);
 });
 
 test('address history produces deterministic transaction block and counterparty links',()=>{

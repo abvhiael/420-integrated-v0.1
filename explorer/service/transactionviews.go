@@ -19,6 +19,8 @@ type TransactionSummary struct {
 	Index       uint64 `json:"index"`
 	From        string `json:"from"`
 	To          string `json:"to,omitempty"`
+	ValueWei    string `json:"valueWei,omitempty"`
+	Input       string `json:"input,omitempty"`
 }
 
 // ReceiptSummary exposes indexed execution outcome data without treating the
@@ -43,7 +45,7 @@ type ReceiptSummary struct {
 type TransactionDetailView struct {
 	Transaction TransactionSummary `json:"transaction"`
 	Receipt     ReceiptSummary     `json:"receipt"`
-	Logs        []model.LogRecord  `json:"logs"`
+	Logs        []RawLogView       `json:"logs"`
 	LogCount    int                `json:"logCount"`
 	Finality    model.Finality     `json:"finality"`
 }
@@ -53,12 +55,21 @@ type TransactionDetailView struct {
 type ReceiptDetailView struct {
 	Receipt     ReceiptSummary     `json:"receipt"`
 	Transaction TransactionSummary `json:"transaction"`
-	Logs        []model.LogRecord  `json:"logs"`
+	Logs        []RawLogView       `json:"logs"`
 	LogCount    int                `json:"logCount"`
 	Finality    model.Finality     `json:"finality"`
 }
 
-func transactionSummary(tx model.TransactionRecord) TransactionSummary {
+func transactionSummary(tx model.TransactionRecord) (TransactionSummary, error) {
+	if strings.TrimSpace(tx.ValueWei) != "" {
+		value, ok := new(big.Int).SetString(strings.TrimSpace(tx.ValueWei), 10)
+		if !ok || value.Sign() < 0 {
+			return TransactionSummary{}, errors.New("420Indexer returned transaction with invalid value")
+		}
+	}
+	if err := validateRawHexBytes(tx.Input, "transaction input", -1, true); err != nil {
+		return TransactionSummary{}, err
+	}
 	return TransactionSummary{
 		ChainID:     tx.ChainID,
 		BlockNumber: tx.BlockNumber,
@@ -67,7 +78,9 @@ func transactionSummary(tx model.TransactionRecord) TransactionSummary {
 		Index:       tx.Index,
 		From:        tx.From,
 		To:          tx.To,
-	}
+		ValueWei:    tx.ValueWei,
+		Input:       tx.Input,
+	}, nil
 }
 
 func receiptSummary(receipt model.ReceiptRecord) (ReceiptSummary, error) {
@@ -152,11 +165,15 @@ func (s *Service) TransactionDetail(ctx context.Context, hash string) (Transacti
 
 	receiptView, err := receiptSummary(receipt)
 	if err != nil { return TransactionDetailView{}, err }
+	txView, err := transactionSummary(tx)
+	if err != nil { return TransactionDetailView{}, err }
+	logViews, err := rawLogViews(logs)
+	if err != nil { return TransactionDetailView{}, err }
 
 	return TransactionDetailView{
-		Transaction: transactionSummary(tx),
+		Transaction: txView,
 		Receipt:     receiptView,
-		Logs:        logs,
+		Logs:        logViews,
 		LogCount:    len(logs),
 		Finality:    block.Finality,
 	}, nil

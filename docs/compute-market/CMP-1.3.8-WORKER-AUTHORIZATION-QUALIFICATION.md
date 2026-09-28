@@ -1,6 +1,6 @@
 # CMP-1.3.8 — Mutation-time capability authorization and delegated worker authority qualification
 
-Status: **IMPLEMENTATION CANDIDATE — exact-head CI/evidence pending**
+Status: **CANDIDATE GREEN — evidence-recording head requalification pending**
 
 ## Canonical definition
 
@@ -151,18 +151,22 @@ The canonical roadmap assigns final release-candidate hash/wiring/publication re
 
 ## Qualification evidence
 
-Exact implementation/evidence SHA: **PENDING**
+Candidate implementation SHA: `b4b8b4963ec0f773f7cbe36c05cea6a7c371c06e`
 
-Required retained exact-head checks before COMPLETE:
+Candidate exact-head qualification:
 
-- dedicated WorkerRegistry authorization/adversarial Foundry coverage;
-- retained Solidity Contracts qualification;
-- 420 Integrated Qualification;
-- 420Docs Qualification;
-- any other workflow triggered by the exact final head must be inspected and may not be skipped/cancelled/failed.
+- Solidity Contracts #3256 — **SUCCESS**, 16/16 `pr-shards` successful. The workflow's aggregate `foundry` wrapper was intentionally skipped by workflow design and is not counted as a passing gate; the 16 shard jobs are the retained Solidity gate.
+- 420 Integrated Qualification #5856 — **SUCCESS**:
+  - fault-matrix — success
+  - production-dependencies — success
+  - offline-core — success
+  - geth-engine — success
+- 420Docs Qualification #3239 — **SUCCESS**
 
-If this document is updated with exact run IDs/SHA, that update creates a new head and the retained suite must be rerun on that new head.
+Current `main` remained `f437378664059a51f854d45bf48594930f070f6f` after candidate CI. The candidate branch was 0 commits behind main, so no reconciliation commit was required before evidence recording.
+
+This evidence update creates a new branch head. Per qualification discipline, the full retained suite must run again on the exact evidence-recording head before the step can be marked COMPLETE.
 
 ## Completion
 
-**NOT YET COMPLETE** until the evidence-recording exact head passes all retained qualification gates.
+**NOT YET COMPLETE** until the evidence-recording exact head passes all retained qualification gates. Final exact-head SHA and final run IDs will be recorded durably in PR #386 closeout evidence without changing the qualified tree.

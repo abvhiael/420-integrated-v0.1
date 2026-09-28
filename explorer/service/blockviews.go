@@ -56,7 +56,7 @@ type BlockTraceView struct {
 type BlockDetailView struct {
 	Block      BlockSummary      `json:"block"`
 	Trace      *BlockTraceView   `json:"trace,omitempty"`
-	Logs       []model.LogRecord `json:"logs"`
+	Logs       []RawLogView      `json:"logs"`
 	LogCount   int               `json:"logCount"`
 	Navigation BlockNavigation   `json:"navigation"`
 }
@@ -161,11 +161,13 @@ func (s *Service) BlockDetail(ctx context.Context, number uint64) (BlockDetailVi
 
 	trace, err := traceFromBlock(view.Block)
 	if err != nil { return BlockDetailView{}, err }
+	logViews, err := rawLogViews(view.Logs)
+	if err != nil { return BlockDetailView{}, err }
 
 	return BlockDetailView{
 		Block:      summaryFromBlock(view.Block),
 		Trace:      trace,
-		Logs:       view.Logs,
+		Logs:       logViews,
 		LogCount:   len(view.Logs),
 		Navigation: nav,
 	}, nil

@@ -131,8 +131,8 @@ async function transactionDetail(hash) {
   const tx = view.transaction || {};
   const receipt = view.receipt || {};
   const logs = view.logs || [];
-  const created = receipt.contractAddress;
   const qualified = transactionDetailPresentation420(view);
+  const created = qualified.contractAddress;
   app.innerHTML = title('Transaction', receipt.statusLabel || '') + stats([
     ['Block', qualified.blockNumber],
     ['Index', qualified.transactionIndex],

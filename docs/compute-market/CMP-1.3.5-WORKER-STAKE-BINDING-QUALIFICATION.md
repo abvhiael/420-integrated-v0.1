@@ -1,6 +1,6 @@
 # CMP-1.3.5 — compute-stake source binding and fail-closed worker collateral admission
 
-Status: **IMPLEMENTATION COMPLETE; exact-head repository qualification required before COMPLETE.**
+Status: **CANDIDATE QUALIFIED; final evidence-recording head qualification pending.**
 
 CMP-1.3.5 implements the worker-registry side of the frozen CMP-1.5 integration boundary. It does **not** implement collateral custody, staking, unstaking, exit requests, rewards, or slashing. Those remain CMP-1.5.
 
@@ -120,3 +120,18 @@ CMP-1.3.5 is complete only after the exact candidate head passes:
 - 420Docs Qualification.
 
 The exact candidate SHA and run evidence must then be recorded, followed by retained exact-head qualification of the evidence-recording head before final closeout.
+
+
+## Candidate qualification evidence
+
+Candidate exact head:
+
+`a8d54383da6f4da775fbed86c2c1d85597961791`
+
+Repository qualification on that exact candidate head:
+
+- Solidity Contracts #3243 — run `36374057005` — **SUCCESS**, all 16 PR shards passed;
+- 420 Integrated Qualification #5799 — run `36374057067` — **SUCCESS**, including offline-core, production-dependencies, fault-matrix, and geth-engine;
+- 420Docs Qualification #3182 — run `36374057092` — **SUCCESS**.
+
+This qualifies the executable CMP-1.3.5 candidate. The documentation update recording that evidence creates a distinct final evidence-recording head; applicable retained exact-head qualification must pass on that new head before CMP-1.3.5 is marked COMPLETE.

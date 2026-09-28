@@ -61,6 +61,29 @@ export function transactionRawPresentation420(tx) {
   return {valueWei, input};
 }
 
+export function transactionDetailPresentation420(view) {
+  const tx = view?.transaction ?? {};
+  const receipt = view?.receipt ?? {};
+  const raw = transactionRawPresentation420(tx);
+  const fee = feePresentation420(receipt);
+  const txChain = decimalString420(tx.chainId, 'transaction chain id');
+  const receiptChain = decimalString420(receipt.chainId, 'receipt chain id');
+  const txBlock = decimalString420(tx.blockNumber, 'transaction block number');
+  const receiptBlock = decimalString420(receipt.blockNumber, 'receipt block number');
+  const txIndex = decimalString420(tx.index, 'transaction index');
+  const receiptIndex = decimalString420(receipt.transactionIndex, 'receipt transaction index');
+  const txHash = hash420(tx.hash, 'transaction hash');
+  const receiptTxHash = hash420(receipt.transactionHash, 'receipt transaction hash');
+  const txBlockHash = hash420(tx.blockHash, 'transaction block hash');
+  const receiptBlockHash = hash420(receipt.blockHash, 'receipt block hash');
+  if (txChain !== receiptChain || txBlock !== receiptBlock || txIndex !== receiptIndex ||
+      txHash.toLowerCase() !== receiptTxHash.toLowerCase() ||
+      txBlockHash.toLowerCase() !== receiptBlockHash.toLowerCase()) {
+    throw new PresentationError420('transaction and receipt provenance are inconsistent');
+  }
+  return {raw, fee, chainId:txChain, blockNumber:txBlock, transactionIndex:txIndex, txHash, blockHash:txBlockHash};
+}
+
 export function validateRawLog420(log) {
   const chainId = decimalString420(log?.chainId, 'log chain id');
   const blockNumber = decimalString420(log?.blockNumber, 'log block number');

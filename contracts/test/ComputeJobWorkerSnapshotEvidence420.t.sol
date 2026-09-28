@@ -165,10 +165,9 @@ contract ComputeJobWorkerSnapshotEvidence420Test {
         providers = new ComputeProviderRegistry420(GOV);
         nodes = new ComputeNodeRegistry420(address(providers), GOV);
         resources = new ComputeResourceRegistry420(address(nodes), GOV);
-        workers = new ComputeWorkerRegistry420(address(resources), GOV);
-
         capabilities = new SnapshotCapabilityRegistryMock420();
         authorization = new ComputeAuthorization420(address(capabilities));
+        workers = new ComputeWorkerRegistry420(address(resources), address(authorization), GOV);
         commonEvidence = new SnapshotRequestFundingVerification420();
         matchEvidence = new SnapshotMatchMock420();
         admission = new SnapshotAdmissionMock420();

@@ -326,7 +326,8 @@
       ],
       "evidence": [
         "EXP-DEP-008: implemented source; deployment/live qualification unverified.",
-        "EXP-1.5 through EXP-1.8 qualify production consensus-provider wiring, validator projection and fail-closed behavior; live consensus witness remains pending."
+        "EXP-1.5 through EXP-1.8 qualify production consensus-provider wiring, validator projection and fail-closed behavior; live consensus witness remains pending.",
+        "EXP-2.4 qualifies Explorer consensus slot/epoch/rotation arithmetic, committee/proposer integrity, checkpoint/QC provenance, HTTP serialization, and Indexer-client authority rejection at repository scope."
       ],
       "root_cause": "Source route/interface existence has not been paired with deployed backend/provider composition evidence.",
       "consequences": [
@@ -365,6 +366,16 @@
       "exp_1_disposition": "PRODUCTION_PROVIDER_WIRING_AND_NEGATIVE_BEHAVIOR_QUALIFIED_LIVE_CONSENSUS_SOURCE_PENDING",
       "post_exp_1_remaining_owners": [
         "EXP-2",
+        "EXP-7"
+      ],
+      "exp_2_4_disposition": "REPOSITORY_CONSENSUS_PRESENTATION_AND_FAIL_CLOSED_VALIDATION_QUALIFIED_LIVE_SOURCE_PENDING",
+      "exp_2_4_evidence": [
+        "docs/audit/EXP-2.4-consensus-producer.json",
+        "explorer/service/exp_2_4_consensus_test.go",
+        "explorer/api/exp_2_4_consensus_test.go",
+        "explorer/indexerclient/exp_2_4_consensus_test.go"
+      ],
+      "post_exp_2_4_remaining_owners": [
         "EXP-7"
       ]
     },
@@ -439,7 +450,8 @@
         "EXP-1.6 repository historical producer attribution qualified.",
         "EXP-1.7 execution-to-consensus traceability and Explorer rendering qualified.",
         "EXP-1.8 malformed/missing provenance and reorg/finality negative behavior qualified.",
-        "Live canonical consensus comparison remains pending provisioned testnet."
+        "Live canonical consensus comparison remains pending provisioned testnet.",
+        "EXP-2.4 retains and qualifies execution-to-consensus producer trace presentation with explicit non-authoritative authority labels."
       ],
       "root_cause": "Repository implementation gap was remediated in EXP-1.6/1.7; approved live consensus/execution sources are not yet provisioned for target-network witness qualification.",
       "consequences": [
@@ -476,6 +488,15 @@
       "exp_1_disposition": "REPOSITORY_IMPLEMENTATION_FULLY_REMEDIATED_LIVE_WITNESS_PENDING",
       "post_exp_1_remaining_owners": [
         "EXP-2",
+        "EXP-4",
+        "EXP-7"
+      ],
+      "exp_2_4_disposition": "REPOSITORY_PRODUCER_TRACE_PRESENTATION_QUALIFIED_LIVE_AND_DEPLOYED_UI_WITNESSES_PENDING",
+      "exp_2_4_evidence": [
+        "docs/audit/EXP-2.4-consensus-producer.json",
+        "explorer/service/exp_2_4_consensus_test.go"
+      ],
+      "post_exp_2_4_remaining_owners": [
         "EXP-4",
         "EXP-7"
       ]

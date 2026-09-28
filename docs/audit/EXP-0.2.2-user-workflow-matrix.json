@@ -476,6 +476,16 @@
         "block-to-validator API test",
         "UI producer link test",
         "testnet comparison with consensus authority"
+      ],
+      "exp_2_4_repository_disposition": "REPOSITORY_VALIDATOR_PRODUCER_PRESENTATION_QUALIFIED_DEPLOYED_UI_AND_LIVE_WITNESS_PENDING",
+      "exp_2_4_evidence": [
+        "docs/audit/EXP-2.4-consensus-producer.json",
+        "explorer/service/exp_2_4_consensus_test.go",
+        "explorer/api/exp_2_4_consensus_test.go"
+      ],
+      "post_exp_2_4_remaining_owners": [
+        "EXP-4",
+        "EXP-7"
       ]
     },
     {

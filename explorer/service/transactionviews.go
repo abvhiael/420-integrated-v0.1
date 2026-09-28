@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"math/big"
 	"strings"
 
 	"github.com/420integrated/420-integrated/indexer/model"
@@ -30,8 +31,10 @@ type ReceiptSummary struct {
 	TransactionIndex uint64 `json:"transactionIndex"`
 	Status           uint64 `json:"status"`
 	StatusLabel      string `json:"statusLabel"`
-	GasUsed          uint64 `json:"gasUsed"`
-	ContractAddress  string `json:"contractAddress,omitempty"`
+	GasUsed              uint64 `json:"gasUsed"`
+	EffectiveGasPriceWei string `json:"effectiveGasPriceWei"`
+	ActualFeeWei         string `json:"actualFeeWei"`
+	ContractAddress      string `json:"contractAddress,omitempty"`
 }
 
 // TransactionDetailView combines the transaction, execution receipt and only
@@ -67,7 +70,19 @@ func transactionSummary(tx model.TransactionRecord) TransactionSummary {
 	}
 }
 
-func receiptSummary(receipt model.ReceiptRecord) ReceiptSummary {
+func receiptSummary(receipt model.ReceiptRecord) (ReceiptSummary, error) {
+	price, ok := new(big.Int).SetString(strings.TrimSpace(receipt.EffectiveGasPriceWei), 10)
+	if !ok || price.Sign() < 0 {
+		return ReceiptSummary{}, errors.New("420Indexer returned receipt without valid effective gas price")
+	}
+	actual, ok := new(big.Int).SetString(strings.TrimSpace(receipt.ActualFeeWei), 10)
+	if !ok || actual.Sign() < 0 {
+		return ReceiptSummary{}, errors.New("420Indexer returned receipt without valid actual fee")
+	}
+	expected := new(big.Int).Mul(new(big.Int).SetUint64(receipt.GasUsed), price)
+	if expected.Cmp(actual) != 0 {
+		return ReceiptSummary{}, errors.New("420Indexer returned receipt with inconsistent actual fee")
+	}
 	label := "UNKNOWN"
 	switch receipt.Status {
 	case 0:
@@ -83,9 +98,11 @@ func receiptSummary(receipt model.ReceiptRecord) ReceiptSummary {
 		TransactionIndex: receipt.TransactionIndex,
 		Status:           receipt.Status,
 		StatusLabel:      label,
-		GasUsed:          receipt.GasUsed,
-		ContractAddress:  receipt.ContractAddress,
-	}
+		GasUsed:              receipt.GasUsed,
+		EffectiveGasPriceWei: receipt.EffectiveGasPriceWei,
+		ActualFeeWei:         receipt.ActualFeeWei,
+		ContractAddress:      receipt.ContractAddress,
+	}, nil
 }
 
 // TransactionDetail composes an Explorer transaction resource exclusively
@@ -133,9 +150,12 @@ func (s *Service) TransactionDetail(ctx context.Context, hash string) (Transacti
 		logs = append(logs, log)
 	}
 
+	receiptView, err := receiptSummary(receipt)
+	if err != nil { return TransactionDetailView{}, err }
+
 	return TransactionDetailView{
 		Transaction: transactionSummary(tx),
-		Receipt:     receiptSummary(receipt),
+		Receipt:     receiptView,
 		Logs:        logs,
 		LogCount:    len(logs),
 		Finality:    block.Finality,

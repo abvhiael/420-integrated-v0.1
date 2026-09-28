@@ -82,12 +82,13 @@ export function transactionDetailPresentation420(view) {
   const receiptTxHash = hash420(receipt.transactionHash, 'receipt transaction hash');
   const txBlockHash = hash420(tx.blockHash, 'transaction block hash');
   const receiptBlockHash = hash420(receipt.blockHash, 'receipt block hash');
+  const contractAddress = receipt.contractAddress ? address420(receipt.contractAddress, 'created contract address') : '';
   if (txChain !== receiptChain || txBlock !== receiptBlock || txIndex !== receiptIndex ||
       txHash.toLowerCase() !== receiptTxHash.toLowerCase() ||
       txBlockHash.toLowerCase() !== receiptBlockHash.toLowerCase()) {
     throw new PresentationError420('transaction and receipt provenance are inconsistent');
   }
-  return {raw, fee, chainId:txChain, blockNumber:txBlock, transactionIndex:txIndex, txHash, blockHash:txBlockHash};
+  return {raw, fee, chainId:txChain, blockNumber:txBlock, transactionIndex:txIndex, txHash, blockHash:txBlockHash, contractAddress};
 }
 
 export function validateRawLog420(log) {

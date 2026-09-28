@@ -31,6 +31,24 @@ func (s *Service) Consensus(ctx context.Context) (ConsensusView, error) {
 	if status.SlotsPerEpoch == 0 || status.SlotsPerRotation == 0 || status.EpochsPerRotation == 0 {
 		return ConsensusView{}, errors.New("420Indexer returned invalid consensus dimensions")
 	}
+	if status.SlotsPerEpoch > ^uint64(0)/status.EpochsPerRotation || status.SlotsPerEpoch*status.EpochsPerRotation != status.SlotsPerRotation {
+		return ConsensusView{}, errors.New("420Indexer returned inconsistent consensus rotation dimensions")
+	}
+	if !(status.CurrentSlot == 0 && status.NextSlot == 0) && status.NextSlot != status.CurrentSlot+1 {
+		return ConsensusView{}, errors.New("420Indexer returned inconsistent current/next slot")
+	}
+	if status.Epoch != status.NextSlot/status.SlotsPerEpoch || status.SlotInEpoch != status.NextSlot%status.SlotsPerEpoch {
+		return ConsensusView{}, errors.New("420Indexer returned inconsistent epoch position")
+	}
+	if status.Rotation != status.NextSlot/status.SlotsPerRotation || status.SlotInRotation != status.NextSlot%status.SlotsPerRotation {
+		return ConsensusView{}, errors.New("420Indexer returned inconsistent rotation position")
+	}
+	if status.Head.Root == "" || status.Safe.Root == "" || status.Finalized.Root == "" {
+		return ConsensusView{}, errors.New("420Indexer returned consensus checkpoint without root")
+	}
+	if status.ActiveValidatorCount < 3 {
+		return ConsensusView{}, errors.New("420Indexer returned fewer than three active validators")
+	}
 	if status.ScheduledProposer.Slot != status.NextSlot {
 		return ConsensusView{}, errors.New("420Indexer returned proposer schedule for wrong slot")
 	}
@@ -50,6 +68,12 @@ func (s *Service) Consensus(ctx context.Context) (ConsensusView, error) {
 		return ConsensusView{}, errors.New("420Indexer returned colliding proposer schedule")
 	}
 	if status.LatestQC.Certified {
+		if status.LatestQC.BlockRoot == "" || status.LatestQC.ParentRoot == "" {
+			return ConsensusView{}, errors.New("420Indexer returned certified QC without block provenance")
+		}
+		if status.LatestQC.Slot > status.Head.Slot || status.LatestQC.Slot > status.CurrentSlot {
+			return ConsensusView{}, errors.New("420Indexer returned QC beyond consensus head")
+		}
 		if status.LatestQC.Quorum <= 0 || status.LatestQC.Signers < status.LatestQC.Quorum || status.LatestQC.Signers > status.ActiveValidatorCount {
 			return ConsensusView{}, errors.New("420Indexer returned invalid QC participation")
 		}

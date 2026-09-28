@@ -225,6 +225,17 @@
         "invalid-address tests",
         "UI address-history test",
         "testnet address-history witness"
+      ],
+      "exp_2_3_repository_disposition": "REPOSITORY_SERVICE_AND_API_QUALIFIED_LIVE_UI_AND_DEPENDENCY_WITNESSES_PENDING",
+      "exp_2_3_evidence": [
+        "docs/audit/EXP-2.3-data-services.json",
+        "explorer/service/exp_2_3_data_contract_test.go",
+        "explorer/api/exp_2_3_data_routes_test.go",
+        "explorer/indexerclient/exp_2_3_client_test.go"
+      ],
+      "post_exp_2_3_remaining_owners": [
+        "EXP-4",
+        "EXP-7"
       ]
     },
     {
@@ -275,6 +286,18 @@
         "contract-route UI test",
         "search/type-resolution acceptance test if global contract search is required",
         "testnet deployed-contract witness"
+      ],
+      "exp_2_3_repository_disposition": "REPOSITORY_SERVICE_AND_API_QUALIFIED_LIVE_UI_AND_DEPENDENCY_WITNESSES_PENDING",
+      "exp_2_3_evidence": [
+        "docs/audit/EXP-2.3-data-services.json",
+        "explorer/service/exp_2_3_data_contract_test.go",
+        "explorer/api/exp_2_3_data_routes_test.go",
+        "explorer/indexerclient/exp_2_3_client_test.go"
+      ],
+      "post_exp_2_3_remaining_owners": [
+        "EXP-3",
+        "EXP-4",
+        "EXP-7"
       ]
     },
     {
@@ -329,6 +352,18 @@
         "contract creation receipt fixture",
         "cross-view deployment provenance test",
         "testnet deployment transaction/code witness"
+      ],
+      "exp_2_3_repository_disposition": "REPOSITORY_SERVICE_AND_API_QUALIFIED_LIVE_UI_AND_DEPENDENCY_WITNESSES_PENDING",
+      "exp_2_3_evidence": [
+        "docs/audit/EXP-2.3-data-services.json",
+        "explorer/service/exp_2_3_data_contract_test.go",
+        "explorer/api/exp_2_3_data_routes_test.go",
+        "explorer/indexerclient/exp_2_3_client_test.go"
+      ],
+      "post_exp_2_3_remaining_owners": [
+        "EXP-3",
+        "EXP-4",
+        "EXP-7"
       ]
     },
     {
@@ -377,6 +412,18 @@
         "asset/address filter API tests",
         "UI transfer navigation test",
         "representative testnet transfer witnesses"
+      ],
+      "exp_2_3_repository_disposition": "REPOSITORY_SERVICE_AND_API_QUALIFIED_LIVE_UI_AND_DEPENDENCY_WITNESSES_PENDING",
+      "exp_2_3_evidence": [
+        "docs/audit/EXP-2.3-data-services.json",
+        "explorer/service/exp_2_3_data_contract_test.go",
+        "explorer/api/exp_2_3_data_routes_test.go",
+        "explorer/indexerclient/exp_2_3_client_test.go"
+      ],
+      "post_exp_2_3_remaining_owners": [
+        "EXP-3",
+        "EXP-4",
+        "EXP-7"
       ]
     },
     {
@@ -429,6 +476,16 @@
         "block-to-validator API test",
         "UI producer link test",
         "testnet comparison with consensus authority"
+      ],
+      "exp_2_4_repository_disposition": "REPOSITORY_VALIDATOR_PRODUCER_PRESENTATION_QUALIFIED_DEPLOYED_UI_AND_LIVE_WITNESS_PENDING",
+      "exp_2_4_evidence": [
+        "docs/audit/EXP-2.4-consensus-producer.json",
+        "explorer/service/exp_2_4_consensus_test.go",
+        "explorer/api/exp_2_4_consensus_test.go"
+      ],
+      "post_exp_2_4_remaining_owners": [
+        "EXP-4",
+        "EXP-7"
       ]
     },
     {
@@ -480,6 +537,16 @@
         "raw input/log provenance test",
         "decoded-error tests if later implemented",
         "testnet failed-interaction witness"
+      ],
+      "exp_2_5_repository_disposition": "REPOSITORY_FAILED_CALL_RAW_CONTEXT_QUALIFIED_DECODED_DIAGNOSTICS_AND_DEPLOYED_UI_PENDING",
+      "exp_2_5_evidence": [
+        "docs/audit/EXP-2.5-raw-call-events.json",
+        "explorer/service/exp_2_5_raw_events_test.go",
+        "explorer/api/exp_2_5_raw_events_test.go"
+      ],
+      "post_exp_2_5_remaining_owners": [
+        "EXP-3",
+        "EXP-4"
       ]
     },
     {
@@ -684,6 +751,17 @@
         "topic/data rendering test after implementation",
         "decoded-event tests where supported",
         "testnet emitted-event witness"
+      ],
+      "exp_2_5_repository_disposition": "REPOSITORY_RAW_EVENT_PAYLOAD_INSPECTION_QUALIFIED_DEPLOYED_UI_AND_OPTIONAL_DECODED_SEMANTICS_PENDING",
+      "exp_2_5_evidence": [
+        "docs/audit/EXP-2.5-raw-call-events.json",
+        "explorer/service/eventviews.go",
+        "explorer/service/exp_2_5_raw_events_test.go",
+        "explorer/api/exp_2_5_raw_events_test.go"
+      ],
+      "post_exp_2_5_remaining_owners": [
+        "EXP-3",
+        "EXP-4"
       ]
     },
     {
@@ -741,6 +819,19 @@
         "active implementation linkage test",
         "contract-link UI test",
         "live Registry publication witness"
+      ],
+      "exp_2_6_repository_disposition": "REPOSITORY_REGISTRY_SERVICE_VERSION_PROVENANCE_QUALIFIED_LIVE_PUBLICATION_AND_UI_PENDING",
+      "exp_2_6_evidence": [
+        "docs/audit/EXP-2.6-diagnostics-registry.json",
+        "explorer/service/exp_2_6_diagnostics_registry_test.go",
+        "explorer/api/exp_2_6_diagnostics_registry_test.go",
+        "explorer/indexerclient/exp_2_6_registry_client_test.go"
+      ],
+      "post_exp_2_6_remaining_owners": [
+        "EXP-3",
+        "EXP-4",
+        "EXP-5",
+        "EXP-7"
       ]
     },
     {
@@ -815,6 +906,17 @@
         "status failure-mode tests",
         "cross-resource navigation tests",
         "production-equivalent troubleshooting exercise"
+      ],
+      "exp_2_6_repository_disposition": "REPOSITORY_TROUBLESHOOTING_STATUS_AND_PROTOCOL_LOOKUP_QUALIFIED_UI_RECOVERY_AND_LIVE_WITNESSES_PENDING",
+      "exp_2_6_evidence": [
+        "docs/audit/EXP-2.6-diagnostics-registry.json",
+        "explorer/service/exp_2_6_diagnostics_registry_test.go",
+        "explorer/api/exp_2_6_diagnostics_registry_test.go"
+      ],
+      "post_exp_2_6_remaining_owners": [
+        "EXP-4",
+        "EXP-6",
+        "EXP-7"
       ]
     }
   ],

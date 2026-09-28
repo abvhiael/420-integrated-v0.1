@@ -44,9 +44,11 @@ func (s *Service) Address(ctx context.Context, address string, limit uint32) (Ad
 	reader, ok := s.indexer.(addressIndexerReader)
 	if !ok { return AddressView{}, errors.New("420Indexer address query capability unavailable") }
 	if limit == 0 { limit = 50 }
+	if limit > 250 { return AddressView{}, errors.New("address history limit exceeds 250") }
 	page, err := reader.AddressTransactions(ctx, normalized, limit)
 	if err != nil { return AddressView{}, err }
 	if err := s.requireRecordChain(page.Meta.ChainID); err != nil { return AddressView{}, err }
+	if page.CanonicalAuthority { return AddressView{}, errors.New("420Indexer address response claimed canonical authority") }
 	if !strings.EqualFold(page.Address, normalized) {
 		return AddressView{}, errors.New("420Indexer returned address history for a different address")
 	}

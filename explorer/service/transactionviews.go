@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"math/big"
 	"strings"
 
 	"github.com/420integrated/420-integrated/indexer/model"
@@ -18,6 +19,8 @@ type TransactionSummary struct {
 	Index       uint64 `json:"index"`
 	From        string `json:"from"`
 	To          string `json:"to,omitempty"`
+	ValueWei    string `json:"valueWei,omitempty"`
+	Input       string `json:"input,omitempty"`
 }
 
 // ReceiptSummary exposes indexed execution outcome data without treating the
@@ -30,8 +33,10 @@ type ReceiptSummary struct {
 	TransactionIndex uint64 `json:"transactionIndex"`
 	Status           uint64 `json:"status"`
 	StatusLabel      string `json:"statusLabel"`
-	GasUsed          uint64 `json:"gasUsed"`
-	ContractAddress  string `json:"contractAddress,omitempty"`
+	GasUsed              uint64 `json:"gasUsed"`
+	EffectiveGasPriceWei string `json:"effectiveGasPriceWei"`
+	ActualFeeWei         string `json:"actualFeeWei"`
+	ContractAddress      string `json:"contractAddress,omitempty"`
 }
 
 // TransactionDetailView combines the transaction, execution receipt and only
@@ -40,7 +45,7 @@ type ReceiptSummary struct {
 type TransactionDetailView struct {
 	Transaction TransactionSummary `json:"transaction"`
 	Receipt     ReceiptSummary     `json:"receipt"`
-	Logs        []model.LogRecord  `json:"logs"`
+	Logs        []RawLogView       `json:"logs"`
 	LogCount    int                `json:"logCount"`
 	Finality    model.Finality     `json:"finality"`
 }
@@ -50,12 +55,21 @@ type TransactionDetailView struct {
 type ReceiptDetailView struct {
 	Receipt     ReceiptSummary     `json:"receipt"`
 	Transaction TransactionSummary `json:"transaction"`
-	Logs        []model.LogRecord  `json:"logs"`
+	Logs        []RawLogView       `json:"logs"`
 	LogCount    int                `json:"logCount"`
 	Finality    model.Finality     `json:"finality"`
 }
 
-func transactionSummary(tx model.TransactionRecord) TransactionSummary {
+func transactionSummary(tx model.TransactionRecord) (TransactionSummary, error) {
+	if strings.TrimSpace(tx.ValueWei) != "" {
+		value, ok := new(big.Int).SetString(strings.TrimSpace(tx.ValueWei), 10)
+		if !ok || value.Sign() < 0 {
+			return TransactionSummary{}, errors.New("420Indexer returned transaction with invalid value")
+		}
+	}
+	if err := validateRawHexBytes(tx.Input, "transaction input", -1, true); err != nil {
+		return TransactionSummary{}, err
+	}
 	return TransactionSummary{
 		ChainID:     tx.ChainID,
 		BlockNumber: tx.BlockNumber,
@@ -64,10 +78,24 @@ func transactionSummary(tx model.TransactionRecord) TransactionSummary {
 		Index:       tx.Index,
 		From:        tx.From,
 		To:          tx.To,
-	}
+		ValueWei:    tx.ValueWei,
+		Input:       tx.Input,
+	}, nil
 }
 
-func receiptSummary(receipt model.ReceiptRecord) ReceiptSummary {
+func receiptSummary(receipt model.ReceiptRecord) (ReceiptSummary, error) {
+	price, ok := new(big.Int).SetString(strings.TrimSpace(receipt.EffectiveGasPriceWei), 10)
+	if !ok || price.Sign() < 0 {
+		return ReceiptSummary{}, errors.New("420Indexer returned receipt without valid effective gas price")
+	}
+	actual, ok := new(big.Int).SetString(strings.TrimSpace(receipt.ActualFeeWei), 10)
+	if !ok || actual.Sign() < 0 {
+		return ReceiptSummary{}, errors.New("420Indexer returned receipt without valid actual fee")
+	}
+	expected := new(big.Int).Mul(new(big.Int).SetUint64(receipt.GasUsed), price)
+	if expected.Cmp(actual) != 0 {
+		return ReceiptSummary{}, errors.New("420Indexer returned receipt with inconsistent actual fee")
+	}
 	label := "UNKNOWN"
 	switch receipt.Status {
 	case 0:
@@ -83,9 +111,11 @@ func receiptSummary(receipt model.ReceiptRecord) ReceiptSummary {
 		TransactionIndex: receipt.TransactionIndex,
 		Status:           receipt.Status,
 		StatusLabel:      label,
-		GasUsed:          receipt.GasUsed,
-		ContractAddress:  receipt.ContractAddress,
-	}
+		GasUsed:              receipt.GasUsed,
+		EffectiveGasPriceWei: receipt.EffectiveGasPriceWei,
+		ActualFeeWei:         receipt.ActualFeeWei,
+		ContractAddress:      receipt.ContractAddress,
+	}, nil
 }
 
 // TransactionDetail composes an Explorer transaction resource exclusively
@@ -133,10 +163,17 @@ func (s *Service) TransactionDetail(ctx context.Context, hash string) (Transacti
 		logs = append(logs, log)
 	}
 
+	receiptView, err := receiptSummary(receipt)
+	if err != nil { return TransactionDetailView{}, err }
+	txView, err := transactionSummary(tx)
+	if err != nil { return TransactionDetailView{}, err }
+	logViews, err := rawLogViews(logs)
+	if err != nil { return TransactionDetailView{}, err }
+
 	return TransactionDetailView{
-		Transaction: transactionSummary(tx),
-		Receipt:     receiptSummary(receipt),
-		Logs:        logs,
+		Transaction: txView,
+		Receipt:     receiptView,
+		Logs:        logViews,
 		LogCount:    len(logs),
 		Finality:    block.Finality,
 	}, nil

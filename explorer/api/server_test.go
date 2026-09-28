@@ -99,9 +99,9 @@ func TestBlocksRouteReturnsPresentationPage(t *testing.T) {
 func transactionFixture() *fakeIndexer {
 	return &fakeIndexer{
 		tx: model.TransactionRecord{ChainID: 420, BlockNumber: 7, BlockHash: "0xblock", Hash: "0xtx", Index: 1, From: "0xfrom", To: "0xto"},
-		receipt: model.ReceiptRecord{ChainID: 420, BlockNumber: 7, BlockHash: "0xblock", TransactionHash: "0xtx", TransactionIndex: 1, Status: 1, GasUsed: 21000},
+		receipt: model.ReceiptRecord{ChainID: 420, BlockNumber: 7, BlockHash: "0xblock", TransactionHash: "0xtx", TransactionIndex: 1, Status: 1, GasUsed: 21000, EffectiveGasPriceWei: "1000000000", ActualFeeWei: "21000000000000"},
 		block: model.BlockRecord{ChainID: 420, Number: 7, Hash: "0xblock", Finality: model.FinalityFinalized},
-		logs: []model.LogRecord{{ChainID: 420, BlockNumber: 7, BlockHash: "0xblock", TransactionHash: "0xtx", TransactionIndex: 1, LogIndex: 0, Address: "0xcontract"}},
+		logs: []model.LogRecord{{ChainID: 420, BlockNumber: 7, BlockHash: "0xblock", TransactionHash: "0xtx", TransactionIndex: 1, LogIndex: 0, Address: "0x3333333333333333333333333333333333333333"}},
 	}
 }
 
@@ -112,7 +112,7 @@ func TestTransactionRoute(t *testing.T) {
 	if rr.Code != http.StatusOK { t.Fatalf("status=%d body=%s", rr.Code, rr.Body.String()) }
 	var got explorerservice.TransactionDetailView
 	if err := json.Unmarshal(rr.Body.Bytes(), &got); err != nil { t.Fatal(err) }
-	if got.Transaction.Hash != "0xtx" || got.Receipt.StatusLabel != "SUCCESS" || got.LogCount != 1 || got.Finality != model.FinalityFinalized { t.Fatalf("unexpected tx detail: %+v", got) }
+	if got.Transaction.Hash != "0xtx" || got.Receipt.StatusLabel != "SUCCESS" || got.Receipt.EffectiveGasPriceWei != "1000000000" || got.Receipt.ActualFeeWei != "21000000000000" || got.LogCount != 1 || got.Finality != model.FinalityFinalized { t.Fatalf("unexpected tx detail: %+v", got) }
 }
 
 func TestReceiptRoute(t *testing.T) {
@@ -126,7 +126,7 @@ func TestReceiptRoute(t *testing.T) {
 }
 
 func TestServiceVersionRoute(t *testing.T) {
-	f := &fakeIndexer{service: decoder.ServiceVersion{ServiceID: "420/service/explorer/v1", Version: 2}}
+	f := &fakeIndexer{service: decoder.ServiceVersion{ServiceID: "420/service/explorer/v1", Version: 2, Implementation: "0x420", ActivatedBlock: 7, ActivatedHash: "0x07"}}
 	s := newTestServer(t, f)
 	rr := httptest.NewRecorder()
 	s.Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodGet, "/v1/services/420%2Fservice%2Fexplorer%2Fv1/versions/2", nil))

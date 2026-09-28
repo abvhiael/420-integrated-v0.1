@@ -1,0 +1,43 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-1.3.DeferredCloseoutDraft.v1",
+  "scope": "Preserved unnumbered ComputeWorkerRegistry closeout material",
+  "authorized_substep": null,
+  "live_release": false,
+  "repository_closeout_candidate": false,
+  "reason": "Originally mis-numbered as CMP-1.3.8; preserved without assigning a roadmap number until the authoritative CMP-1.3.8-CMP-1.3.16 definitions are recovered.",
+  "substeps_already_implemented": [
+    "1.3.0",
+    "1.3.1",
+    "1.3.2",
+    "1.3.3",
+    "1.3.4",
+    "1.3.5",
+    "1.3.6",
+    "1.3.7"
+  ],
+  "required_components": [
+    "contracts/src/compute/ComputeWorkerRegistry420.sol",
+    "contracts/src/compute/ComputeWorkerAttestation420.sol",
+    "contracts/src/compute/ComputeWorkerCapabilityProfile420.sol",
+    "contracts/src/compute/ComputeWorkerCapabilityEligibility420.sol",
+    "contracts/src/compute/ComputeWorkerTrust420.sol",
+    "contracts/src/compute/ComputeWorkerStake420.sol",
+    "contracts/src/compute/ComputeJobWorkerSnapshotEvidence420.sol",
+    "contracts/src/compute/ComputeWorkerCanonicalWiring420.sol"
+  ],
+  "required_tests": [
+    "contracts/test/ComputeWorkerRegistry420.t.sol",
+    "contracts/test/ComputeWorkerAttestation420.t.sol",
+    "contracts/test/ComputeWorkerCapabilityProfile420.t.sol",
+    "contracts/test/ComputeWorkerTrust420.t.sol",
+    "contracts/test/ComputeWorkerStake420.t.sol",
+    "contracts/test/ComputeJobWorkerSnapshotEvidence420.t.sol",
+    "contracts/test/ComputeWorkerCanonicalWiring420.t.sol"
+  ],
+  "external_release_blockers": [
+    "CMP-1.5 compute collateral custody/stake/exit/slash/reward implementation",
+    "canonical public testnet deployment",
+    "runtime code-hash and deployed graph verification",
+    "governance-authorized ProtocolRegistry publication"
+  ]
+}

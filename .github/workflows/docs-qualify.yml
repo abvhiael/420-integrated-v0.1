@@ -153,5 +153,5 @@ jobs:
       - name: Verify CMP-1.3 deployment package readiness
         run: python scripts/verify-cmp-1-3-7-deployment.py --repository-ready
 
-      - name: Verify CMP-1.3 phase closeout ledger
-        run: python scripts/verify-cmp-1-3-8-closeout.py
+      - name: Verify preserved CMP-1.3 deferred closeout draft
+        run: python scripts/verify-cmp-1-3-deferred-closeout.py

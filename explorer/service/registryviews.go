@@ -58,5 +58,22 @@ func (s *Service) RegistryService(ctx context.Context, serviceID string) (Servic
 		previous = version.Version
 	}
 	if previous != record.LatestVersion { return ServiceRegistryView{}, errors.New("420Indexer latest registry version does not match history") }
+	if record.ActiveVersion != 0 {
+		var active *decoder.ServiceVersion
+		for i := range record.Versions {
+			if record.Versions[i].Version == record.ActiveVersion {
+				active = &record.Versions[i]
+				break
+			}
+		}
+		if active == nil || !active.Active {
+			return ServiceRegistryView{}, errors.New("420Indexer active registry version is not active in history")
+		}
+		if !strings.EqualFold(active.Implementation, record.Implementation) {
+			return ServiceRegistryView{}, errors.New("420Indexer active registry implementation does not match history")
+		}
+	} else if strings.TrimSpace(record.Implementation) != "" {
+		return ServiceRegistryView{}, errors.New("420Indexer registry service has implementation without active version")
+	}
 	return ServiceRegistryView{ServiceID: record.ServiceID, LatestVersion: record.LatestVersion, ActiveVersion: record.ActiveVersion, Implementation: record.Implementation, Versions: record.Versions, VersionCount: len(record.Versions)}, nil
 }

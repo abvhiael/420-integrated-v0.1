@@ -218,3 +218,14 @@ Therefore:
 - the mistakenly created closeout work is preserved under `CMP-1.3-DEFERRED-CLOSEOUT-DRAFT.md`;
 - no later CMP-1.3 step should be marked complete until its authoritative original definition is recovered.
 
+
+
+## 2026-09-28 audit-authorized continuation
+
+The historical literal CMP-1.3.8–CMP-1.3.16 text remains unrecovered. The repository owner therefore directed a fresh audit of current `main` and authorized a **new authoritative** continuation based on actual remaining gaps.
+
+The new roadmap is recorded in:
+- `docs/compute-market/CMP-1-IMPLEMENTATION-ROADMAP.md`;
+- `docs/compute-market/CMP-1.3.8-1.3.16-WORKER-REGISTRY-GAP-AUDIT.md`.
+
+This is not a claim that the missing historical text was recovered. The evidence-backed mapping of CMP-1.3.0–CMP-1.3.7 above remains historical fact. The deferred closeout draft is now assigned as input to the new CMP-1.3.16 closeout step.

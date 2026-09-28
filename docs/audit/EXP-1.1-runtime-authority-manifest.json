@@ -198,9 +198,11 @@
     "live_network_qualified": false,
     "genesis_qualified": false,
     "next_step": "EXP-1.2",
-    "final_evidence_head_requalification_required": true
+    "final_evidence_head_requalification_required": false,
+    "closeout_reconciled_by": "EXP-1.10",
+    "closeout_exact_head_required": true
   },
-  "status": "COMPLETE_PENDING_FINAL_EXACT_HEAD_REQUALIFICATION",
+  "status": "COMPLETE_REPOSITORY_SCOPE",
   "implementation_qualification": {
     "qualified_head": "620a50e4f039b08ac65cc15c4e4406ca1ce7bc0f",
     "workflows": {

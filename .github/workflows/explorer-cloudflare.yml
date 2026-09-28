@@ -40,6 +40,11 @@ jobs:
         run: node --check explorer/cloudflare/src/worker.mjs
       - name: Test Cloudflare edge behavior
         run: node --test explorer/cloudflare/test/*.test.mjs
+      - name: Validate Wrangler project and static-asset bundle
+        working-directory: explorer/cloudflare
+        run: |
+          npm install --no-audit --no-fund
+          npx wrangler deploy --dry-run --outdir /tmp/420explorer-worker
       - name: Test Explorer
         run: go test ./explorer/...
       - name: Vet Explorer

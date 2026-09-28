@@ -19,7 +19,7 @@ func TestConsensusView(t *testing.T) {
 		ActiveValidatorCount:15, ActiveSeats:seats,
 		ScheduledProposer:model.ConsensusProposer{Slot:842,Primary:1,Fallback1:2,Fallback2:3},
 		LatestQC:model.ConsensusQC{Slot:841,BlockRoot:"0xabc",ParentRoot:"0xdef",Signers:11,Quorum:11,Certified:true},
-		Head:model.ConsensusCheckpoint{Slot:841}, Safe:model.ConsensusCheckpoint{Slot:840}, Finalized:model.ConsensusCheckpoint{Slot:839},
+		Head:model.ConsensusCheckpoint{Slot:841,Root:"0xhead"}, Safe:model.ConsensusCheckpoint{Slot:840,Root:"0xsafe"}, Finalized:model.ConsensusCheckpoint{Slot:839,Root:"0xfinalized"},
 	}}
 	svc,err:=New(idx,420,time.Minute); if err!=nil { t.Fatal(err) }
 	view,err:=svc.Consensus(context.Background()); if err!=nil { t.Fatal(err) }

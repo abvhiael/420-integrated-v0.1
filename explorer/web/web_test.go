@@ -100,7 +100,7 @@ func TestExplorerScriptContainsEXPNEXT2FeeAndRawEventPresentation(t *testing.T) 
 	Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodGet, "/app.js", nil))
 	if rr.Code != http.StatusOK { t.Fatalf("status=%d", rr.Code) }
 	body := rr.Body.String()
-	for _, marker := range []string{"renderFeeSummary420", "transactionDetailPresentation420", "inspectableRaw420", "renderRawLogs420", "Raw input", "Raw logs", "transaction-log", "block-log", "data-copy-value"} {
+	for _, marker := range []string{"renderFeeSummary420", "transactionDetailPresentation420", "inspectableRaw420", "renderRawLogs420", "Raw input", "Raw logs", "logTable(logs)", "block-log", "data-copy-value"} {
 		if !strings.Contains(body, marker) { t.Fatalf("app.js missing EXP-NEXT.2 marker %q", marker) }
 	}
 	if strings.Contains(body, "eth_get") || strings.Contains(body, "INDEXER_RPC_URL") { t.Fatal("frontend must remain an Indexer/Explorer API consumer") }

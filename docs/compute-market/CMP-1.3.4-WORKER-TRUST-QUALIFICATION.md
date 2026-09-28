@@ -1,6 +1,6 @@
 # CMP-1.3.4 — 420Trust reputation references and policy-scoped admission
 
-Status: **IMPLEMENTATION COMPLETE; exact-head repository qualification required before COMPLETE.**
+Status: **CANDIDATE QUALIFIED; final evidence-recording head qualification pending.**
 
 CMP-1.3.4 integrates ComputeWorkerRegistry with canonical 420Trust evidence without creating a universal reputation score or a second reputation ledger.
 
@@ -126,3 +126,18 @@ CMP-1.3.4 is complete only after the exact candidate head passes:
 - 420Docs Qualification.
 
 The exact candidate SHA and run evidence must then be recorded, followed by retained exact-head qualification of the evidence-recording head before final closeout.
+
+
+## Candidate qualification evidence
+
+Candidate exact head:
+
+`67195b992f7793ac8012af130085bcf0902c23d4`
+
+Repository qualification on that exact candidate head:
+
+- Solidity Contracts #3241 — run `36366864365` — **SUCCESS**, all 16 PR shards passed;
+- 420 Integrated Qualification #5785 — run `36366864488` — **SUCCESS**, including offline-core, production-dependencies, fault-matrix, and geth-engine;
+- 420Docs Qualification #3168 — run `36366864345` — **SUCCESS**.
+
+This qualifies the executable CMP-1.3.4 candidate. The documentation update recording that evidence creates a distinct final evidence-recording head; applicable retained exact-head qualification must pass on that new head before CMP-1.3.4 is marked COMPLETE.

@@ -70,14 +70,15 @@
       "sources": [
         "explorer/web/static/index.html"
       ],
-      "observed_claim": "Qualified, read-only visibility into chain, protocol, asset & consensus state.",
+      "observed_claim": "Historical UI copy stated: Qualified, read-only visibility into chain, protocol, asset & consensus state.",
       "classification": "historical_only",
       "current_authority": [
         "docs/audit/EXP-0.3.4-qualification-status-freeze.json",
         "docs/audit/EXP-0.4.5-acceptance-criterion-evidence.json"
       ],
-      "current_interpretation": "Presentation copy is not qualification evidence. Zero mandatory requirements and zero ACs are Genesis-qualified/satisfied.",
+      "current_interpretation": "The historical broad qualification copy has been removed from the branded Explorer shell. Current UI copy identifies the product as read-only network intelligence and explicitly states that 420Explorer is a non-canonical projection; repository audit evidence, not presentation copy, governs qualification status.",
       "superseded_by": [
+        "420Explorer branded UI authority copy",
         "EXP-0.3.4 status discipline",
         "EXP-0.4.5 evidence accounting"
       ],

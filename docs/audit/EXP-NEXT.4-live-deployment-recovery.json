@@ -69,5 +69,101 @@
       "detail": "Restart/resume, outage, stale/provider failure, bounded reorg, finalized-conflict and rebuild exercises cannot be production-equivalent without a deployed stack."
     }
   ],
-  "completion_policy": "This record MUST remain NOT_YET_COMPLETE until non-placeholder approved infrastructure is provisioned and all canonical live/deployment/recovery tests pass against one exact release-candidate SHA. Repository CI or synthetic fixtures cannot satisfy those live conditions."
+  "completion_policy": "This record MUST remain NOT_YET_COMPLETE until non-placeholder approved infrastructure is provisioned and all canonical live/deployment/recovery tests pass against one exact release-candidate SHA. Repository CI or synthetic fixtures cannot satisfy those live conditions.",
+  "repository_readiness_qualification": {
+    "candidate_head": "e970f723017c0e1f1fe23fdcb0378853583ae3fd",
+    "exact_head_result": "success",
+    "dedicated_workflow": {
+      "name": "420Explorer EXP-NEXT.4 Repository Readiness",
+      "run_id": 36478286176,
+      "conclusion": "success",
+      "artifact_id": 10995735271
+    },
+    "retained_workflows": [
+      {
+        "name": "420Explorer EXP-2.2",
+        "run_id": 36478286174,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.3",
+        "run_id": 36478286175,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.4",
+        "run_id": 36478286173,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.5",
+        "run_id": 36478286191,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.6",
+        "run_id": 36478286128,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-NEXT.2 Fee and Raw Event Browser",
+        "run_id": 36478286149,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-NEXT.3 Cross Resource Browser",
+        "run_id": 36478286157,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.7 Cross-Layer Traceability Qualification",
+        "run_id": 36478286141,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.8 Runtime Negative Divergence Qualification",
+        "run_id": 36478286233,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.10 Phase Closeout Qualification",
+        "run_id": 36478286133,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Docs Qualification",
+        "run_id": 36478286163,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Indexer",
+        "run_id": 36478286210,
+        "conclusion": "success"
+      },
+      {
+        "name": "420 Integrated Qualification",
+        "run_id": 36478286135,
+        "conclusion": "success"
+      }
+    ],
+    "integrated_jobs": [
+      {
+        "name": "geth-engine",
+        "conclusion": "success"
+      },
+      {
+        "name": "production-dependencies",
+        "conclusion": "success"
+      },
+      {
+        "name": "fault-matrix",
+        "conclusion": "success"
+      },
+      {
+        "name": "offline-core",
+        "conclusion": "success"
+      }
+    ],
+    "evidence_recording_policy": "This repository-readiness evidence does not make EXP-NEXT.4 COMPLETE. The commit containing this evidence is a new repository-readiness qualification target and must itself pass the same exact-head retained suite. Live/deployment/recovery completion still requires the canonical non-placeholder production-equivalent workflow."
+  }
 }

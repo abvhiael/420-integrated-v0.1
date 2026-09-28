@@ -16,7 +16,7 @@ func TestTransactionDetailIncludesReceiptLogsAndFinality(t *testing.T) {
 		receipt: model.ReceiptRecord{ChainID: 420, BlockNumber: 9, BlockHash: "0xblock", TransactionHash: "0xtx", TransactionIndex: 2, Status: 1, GasUsed: 42000, EffectiveGasPriceWei: "1000000000", ActualFeeWei: "42000000000000"},
 		block: model.BlockRecord{ChainID: 420, Number: 9, Hash: "0xblock", Finality: model.FinalitySafe},
 		logs: []model.LogRecord{
-			{ChainID: 420, BlockNumber: 9, BlockHash: "0xblock", TransactionHash: "0xtx", TransactionIndex: 2, LogIndex: 0, Address: "0xcontract"},
+			{ChainID: 420, BlockNumber: 9, BlockHash: "0xblock", TransactionHash: "0xtx", TransactionIndex: 2, LogIndex: 0, Address: "0x3333333333333333333333333333333333333333"},
 			{ChainID: 420, BlockNumber: 9, BlockHash: "0xblock", TransactionHash: "0xother", TransactionIndex: 3, LogIndex: 1},
 		},
 	}
@@ -25,7 +25,7 @@ func TestTransactionDetailIncludesReceiptLogsAndFinality(t *testing.T) {
 	if err != nil { t.Fatal(err) }
 	if detail.Transaction.Hash != "0xtx" || detail.Receipt.StatusLabel != "SUCCESS" { t.Fatalf("unexpected detail: %+v", detail) }
 	if detail.Finality != model.FinalitySafe { t.Fatalf("finality=%s", detail.Finality) }
-	if detail.LogCount != 1 || len(detail.Logs) != 1 || detail.Logs[0].Address != "0xcontract" { t.Fatalf("unexpected logs: %+v", detail.Logs) }
+	if detail.LogCount != 1 || len(detail.Logs) != 1 || detail.Logs[0].Address != "0x3333333333333333333333333333333333333333" { t.Fatalf("unexpected logs: %+v", detail.Logs) }
 }
 
 func TestTransactionDetailLabelsRevertedReceipt(t *testing.T) {

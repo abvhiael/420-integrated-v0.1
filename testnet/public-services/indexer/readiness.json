@@ -43,7 +43,8 @@
       "asserts the checked-out SHA before qualification commands execute",
       "cancels superseded PR qualification runs through workflow concurrency",
       "retains EXP-1.1 through EXP-1.9 verifier coverage in the primary Indexer gate",
-      "emits exact-head EXP-1.9 qualification evidence with explicit retention"
+      "emits exact-head EXP-1.9 qualification evidence with explicit retention",
+      "reruns EXP-1.9 qualification automatically after merge to main"
     ],
     "qualification_evidence": {
       "wrong_chain": "IMPLEMENTED_AND_TESTED",
@@ -96,7 +97,8 @@
       "pr_concurrency_cancellation": "IMPLEMENTED",
       "read_only_workflow_permissions": "IMPLEMENTED",
       "exp_1_1_through_1_9_retained_automation": "IMPLEMENTED",
-      "exp_1_9_evidence_artifact": "IMPLEMENTED"
+      "exp_1_9_evidence_artifact": "IMPLEMENTED",
+      "post_merge_main_qualification_trigger": "IMPLEMENTED"
     },
     "runtime": {
       "command": "./indexer/cmd/indexer420",
@@ -127,7 +129,8 @@
       "live_fault_injection_qualified": false,
       "qualification_automation_milestone": "EXP-1.9",
       "qualification_exact_head_required": true,
-      "qualification_live_network_claim": false
+      "qualification_live_network_claim": false,
+      "qualification_post_merge_required": true
     },
     "live_deployment": {
       "qualified": false,

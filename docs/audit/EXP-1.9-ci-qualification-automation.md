@@ -8,6 +8,8 @@ The three required retained gates—420Indexer, 420Docs Qualification, and 420 I
 
 This removes ambiguity around GitHub's synthetic pull-request merge ref. A green qualification result therefore proves the workflow ran against the exact candidate commit identified by the PR head.
 
+The primary 420Indexer gate and the dedicated EXP-1.9 automation gate also trigger on qualifying changes pushed to `main`, providing automatic post-merge requalification rather than stopping at PR evidence.
+
 ## Queue and permission controls
 
 All required PR gates use concurrency groups with `cancel-in-progress: true`, so superseded candidate SHAs do not remain authoritative qualification surfaces. The workflows use read-only repository contents permission for qualification.

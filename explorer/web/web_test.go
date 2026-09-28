@@ -12,7 +12,7 @@ func TestHandlerServesExplorerShell(t *testing.T) {
 	Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodGet, "/", nil))
 	if rr.Code != http.StatusOK { t.Fatalf("status=%d body=%s", rr.Code, rr.Body.String()) }
 	body := rr.Body.String()
-	if !strings.Contains(body, "420Explorer") || !strings.Contains(body, "global-search") {
+	if !strings.Contains(body, "420Explorer") || !strings.Contains(body, "global-search") || !strings.Contains(body, "420 INTEGRATED") || !strings.Contains(body, "brand-mark.svg") {
 		t.Fatalf("unexpected shell body: %s", body)
 	}
 	if got := rr.Header().Get("Content-Security-Policy"); !strings.Contains(got, "connect-src 'self'") {
@@ -22,7 +22,7 @@ func TestHandlerServesExplorerShell(t *testing.T) {
 }
 
 func TestHandlerServesStaticAssets(t *testing.T) {
-	for _, path := range []string{"/app.css", "/app.js", "/presentation.mjs", "/workflow-presentation.mjs"} {
+	for _, path := range []string{"/app.css", "/app.js", "/presentation.mjs", "/workflow-presentation.mjs", "/brand-mark.svg"} {
 		rr := httptest.NewRecorder()
 		Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodGet, path, nil))
 		if rr.Code != http.StatusOK { t.Fatalf("%s status=%d", path, rr.Code) }

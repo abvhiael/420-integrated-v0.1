@@ -1,0 +1,23 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "420-integrated-explorer",
+  "main": "src/worker.mjs",
+  "compatibility_date": "2026-09-28",
+  "workers_dev": true,
+  "preview_urls": true,
+  "assets": {
+    "directory": "../web/static",
+    "binding": "ASSETS",
+    "run_worker_first": ["/v1/*"],
+    "not_found_handling": "single-page-application"
+  },
+  "routes": [
+    {
+      "pattern": "explorer.420integrated.org",
+      "custom_domain": true
+    }
+  ],
+  "observability": {
+    "enabled": true
+  }
+}

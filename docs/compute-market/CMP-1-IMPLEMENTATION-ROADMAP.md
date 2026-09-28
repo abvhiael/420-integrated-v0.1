@@ -73,6 +73,8 @@ Never trust the self-reported hardware alone. Capabilities must eventually be be
 
 **CMP-1.3.6 accepted-job worker snapshot:** `docs/compute-market/CMP-1.3.6-WORKER-SNAPSHOT-QUALIFICATION.md` adds a strict job worker-evidence adapter that admits only an exact eligible worker revision against the accepted resource/operator and freezes worker execution identity, capability, Trust, and stake-reference context for the running job. Later worker/resource/policy changes block new admission but cannot rewrite the accepted historical snapshot. Candidate implementation is repository-qualified at exact head `ad5a411421b852ab1786a6ef9e0f646d9605082e`; final evidence-recording-head closeout remains pending.
 
+**CMP-1.3.7 deployment/publication qualification:** `docs/compute-market/CMP-1.3.7-WORKER-DEPLOYMENT-QUALIFICATION.md` pins the exact WorkerRegistry job/admission graph, runtime code hashes, chain/governance bindings, and fail-closed live evidence required before ProtocolRegistry publication. Repository readiness is independently qualifiable; live qualification remains blocked until canonical testnet deployment and the CMP-1.5 compute-stake source exist.
+
 ## CMP-1.4 — ComputeVerifierRegistry
 
 Separate workers from verification authorities.

@@ -1,0 +1,51 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-1.3.7.DeploymentEvidence.v1",
+  "status": "LIVE_BLOCKED",
+  "repository_ready": true,
+  "live_qualified": false,
+  "network": {
+    "chain_id": null,
+    "network_name": null,
+    "rpc_evidence_block": null,
+    "rpc_evidence_block_hash": null
+  },
+  "governance": {
+    "timelock": null,
+    "publication_transaction": null
+  },
+  "protocol_registry": {
+    "address": "0x0000000000000000000000000000000000000434",
+    "publication_complete": false,
+    "service_entries": []
+  },
+  "components": {
+    "ComputeJobRegistry420": {"address": null, "deployment_tx": null, "deployment_block": null, "runtime_code_hash": null},
+    "ComputeJobWorkerSnapshotEvidence420": {"address": null, "deployment_tx": null, "deployment_block": null, "runtime_code_hash": null},
+    "ComputeWorkerRegistry420": {"address": null, "deployment_tx": null, "deployment_block": null, "runtime_code_hash": null},
+    "ComputeWorkerAttestation420": {"address": null, "deployment_tx": null, "deployment_block": null, "runtime_code_hash": null},
+    "ComputeWorkerTrust420": {"address": null, "deployment_tx": null, "deployment_block": null, "runtime_code_hash": null},
+    "ComputeWorkerStake420": {"address": null, "deployment_tx": null, "deployment_block": null, "runtime_code_hash": null},
+    "ComputeWorkerCanonicalWiring420": {"address": null, "deployment_tx": null, "deployment_block": null, "runtime_code_hash": null}
+  },
+  "bindings": {
+    "graph_hash": null,
+    "jobs_worker_evidence": null,
+    "jobs_match_evidence": null,
+    "worker_evidence_workers": null,
+    "worker_evidence_attestation": null,
+    "worker_evidence_trust": null,
+    "worker_evidence_stake": null,
+    "worker_evidence_authorization": null,
+    "worker_evidence_matches": null
+  },
+  "release_gates": {
+    "cmp_1_3_1_worker_identity": true,
+    "cmp_1_3_2_attestation": true,
+    "cmp_1_3_3_capability_profile": true,
+    "cmp_1_3_4_trust": true,
+    "cmp_1_3_5_stake_binding": true,
+    "cmp_1_3_6_worker_snapshot": true,
+    "cmp_1_5_compute_stake_live_source": false,
+    "public_testnet_live": false
+  }
+}

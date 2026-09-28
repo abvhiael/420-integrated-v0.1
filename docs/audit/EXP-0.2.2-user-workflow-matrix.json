@@ -225,6 +225,17 @@
         "invalid-address tests",
         "UI address-history test",
         "testnet address-history witness"
+      ],
+      "exp_2_3_repository_disposition": "REPOSITORY_SERVICE_AND_API_QUALIFIED_LIVE_UI_AND_DEPENDENCY_WITNESSES_PENDING",
+      "exp_2_3_evidence": [
+        "docs/audit/EXP-2.3-data-services.json",
+        "explorer/service/exp_2_3_data_contract_test.go",
+        "explorer/api/exp_2_3_data_routes_test.go",
+        "explorer/indexerclient/exp_2_3_client_test.go"
+      ],
+      "post_exp_2_3_remaining_owners": [
+        "EXP-4",
+        "EXP-7"
       ]
     },
     {
@@ -275,6 +286,18 @@
         "contract-route UI test",
         "search/type-resolution acceptance test if global contract search is required",
         "testnet deployed-contract witness"
+      ],
+      "exp_2_3_repository_disposition": "REPOSITORY_SERVICE_AND_API_QUALIFIED_LIVE_UI_AND_DEPENDENCY_WITNESSES_PENDING",
+      "exp_2_3_evidence": [
+        "docs/audit/EXP-2.3-data-services.json",
+        "explorer/service/exp_2_3_data_contract_test.go",
+        "explorer/api/exp_2_3_data_routes_test.go",
+        "explorer/indexerclient/exp_2_3_client_test.go"
+      ],
+      "post_exp_2_3_remaining_owners": [
+        "EXP-3",
+        "EXP-4",
+        "EXP-7"
       ]
     },
     {
@@ -329,6 +352,18 @@
         "contract creation receipt fixture",
         "cross-view deployment provenance test",
         "testnet deployment transaction/code witness"
+      ],
+      "exp_2_3_repository_disposition": "REPOSITORY_SERVICE_AND_API_QUALIFIED_LIVE_UI_AND_DEPENDENCY_WITNESSES_PENDING",
+      "exp_2_3_evidence": [
+        "docs/audit/EXP-2.3-data-services.json",
+        "explorer/service/exp_2_3_data_contract_test.go",
+        "explorer/api/exp_2_3_data_routes_test.go",
+        "explorer/indexerclient/exp_2_3_client_test.go"
+      ],
+      "post_exp_2_3_remaining_owners": [
+        "EXP-3",
+        "EXP-4",
+        "EXP-7"
       ]
     },
     {
@@ -377,6 +412,18 @@
         "asset/address filter API tests",
         "UI transfer navigation test",
         "representative testnet transfer witnesses"
+      ],
+      "exp_2_3_repository_disposition": "REPOSITORY_SERVICE_AND_API_QUALIFIED_LIVE_UI_AND_DEPENDENCY_WITNESSES_PENDING",
+      "exp_2_3_evidence": [
+        "docs/audit/EXP-2.3-data-services.json",
+        "explorer/service/exp_2_3_data_contract_test.go",
+        "explorer/api/exp_2_3_data_routes_test.go",
+        "explorer/indexerclient/exp_2_3_client_test.go"
+      ],
+      "post_exp_2_3_remaining_owners": [
+        "EXP-3",
+        "EXP-4",
+        "EXP-7"
       ]
     },
     {

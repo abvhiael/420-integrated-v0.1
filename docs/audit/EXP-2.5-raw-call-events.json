@@ -2,7 +2,7 @@
   "schema": "420explorer-exp-2.5-raw-call-event-inspection-v1",
   "milestone": "EXP-2.5",
   "title": "Raw transaction call and contract-event inspection qualification",
-  "status": "qualified_candidate_recorded_pending_evidence_head_requalification",
+  "status": "COMPLETE",
   "baseline": {
     "exp_2_4_qualified_head": "4009d9ab687a61f689fbf6a9d4faf3a818a2a21b"
   },
@@ -143,5 +143,69 @@
       }
     ],
     "exact_head_policy": "The evidence-recording commit must itself pass the exact-head EXP-2.5 and retained qualification suite before the milestone is marked COMPLETE."
+  },
+  "reconciliation": {
+    "reconciled_by": "EXP-2R",
+    "reason": "The EXP-2.5 audit record remained at qualified_candidate_recorded_pending_evidence_head_requalification after later exact-head qualification had already completed.",
+    "evidence_chain": [
+      {
+        "head": "0db5f76d4038a03ae19a0a64e7c294203ec95919",
+        "workflow": "420Explorer EXP-2.5",
+        "run_id": 36384004251,
+        "conclusion": "success",
+        "role": "qualified_candidate"
+      },
+      {
+        "head": "78ca89dd5302b1655a7a0592bf79473783db2f59",
+        "workflow": "420Explorer EXP-2.5",
+        "run_id": 36384607389,
+        "conclusion": "success",
+        "role": "later_exact_head_retention"
+      },
+      {
+        "head": "c0b40a61b95192627fd21fabfe7349ecda5a4360",
+        "workflow": "420Explorer EXP-2.5",
+        "run_id": 36454719177,
+        "conclusion": "success",
+        "role": "EXP-2.6_final_evidence_head_retention"
+      },
+      {
+        "head": "26a06117c7662c0f8986a2f7b505d5180d3121ea",
+        "workflow": "420Explorer EXP-2.5",
+        "run_id": 36455530414,
+        "conclusion": "success",
+        "role": "PR_381_final_exact_head"
+      }
+    ],
+    "merge_commit": "52a162612257122d4c6b6e2ab9e8bc163d1d5f6f",
+    "merge_tree_equivalence": {
+      "qualified_pr_head": "26a06117c7662c0f8986a2f7b505d5180d3121ea",
+      "merge_commit": "52a162612257122d4c6b6e2ab9e8bc163d1d5f6f",
+      "compare_files_changed": 0,
+      "conclusion": "merge commit adds only the merge node; no file-tree differences from the fully qualified PR head"
+    }
+  },
+  "final_qualification": {
+    "evidence_recording_head": "26a06117c7662c0f8986a2f7b505d5180d3121ea",
+    "exact_head_requalification": "success",
+    "dedicated_workflow": {
+      "name": "420Explorer EXP-2.5",
+      "run_id": 36455530414,
+      "conclusion": "success"
+    },
+    "retained_by_later_milestone_heads": [
+      {
+        "head": "c0b40a61b95192627fd21fabfe7349ecda5a4360",
+        "run_id": 36454719177,
+        "conclusion": "success"
+      },
+      {
+        "head": "26a06117c7662c0f8986a2f7b505d5180d3121ea",
+        "run_id": 36455530414,
+        "conclusion": "success"
+      }
+    ],
+    "scope": "repository_scope_only",
+    "genesis_ready_claim": false
   }
 }

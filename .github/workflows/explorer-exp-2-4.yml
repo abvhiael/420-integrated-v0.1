@@ -1,0 +1,44 @@
+name: 420Explorer EXP-2.4
+
+on:
+  pull_request:
+    paths:
+      - "explorer/**"
+      - "docs/audit/EXP-2.4-consensus-producer.*"
+      - "docs/audit/EXP-0.2.5-genesis-gap-register.json"
+      - "docs/audit/EXP-0.2.2-user-workflow-matrix.json"
+      - "scripts/verify-exp-2-4-consensus.py"
+      - ".github/workflows/explorer-exp-2-4.yml"
+  workflow_dispatch:
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification head
+        shell: bash
+        run: |
+          set -euo pipefail
+          expected="${{ github.event.pull_request.head.sha || github.sha }}"
+          actual="$(git rev-parse HEAD)"
+          test "$actual" = "$expected"
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Test EXP-2.4 consensus and producer contracts
+        run: go test ./explorer/service ./explorer/api ./explorer/indexerclient
+      - name: Full Explorer regression
+        run: go test ./explorer/...
+      - name: Vet Explorer
+        run: go vet ./explorer/...
+      - name: Verify EXP-2.4 qualification record
+        run: python3 scripts/verify-exp-2-4-consensus.py
+      - name: Upload EXP-2.4 evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp-2-4-consensus-producer
+          path: exp-2-4-evidence/
+          retention-days: 14

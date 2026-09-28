@@ -72,9 +72,11 @@ type NetworkStatus struct {
 	SchemaVersion    string    `json:"schemaVersion"`
 	DecoderSet       string    `json:"decoderSet"`
 	IndexerState     string    `json:"indexerState"`
-	LastIngestAt     time.Time `json:"lastIngestAt"`
-	IngestAgeSeconds uint64    `json:"ingestAgeSeconds"`
-	WrongChain       bool      `json:"wrongChain"`
+	LastIngestAt     time.Time  `json:"lastIngestAt"`
+	IngestAgeSeconds uint64     `json:"ingestAgeSeconds"`
+	RuntimeIssue     string     `json:"runtimeIssue,omitempty"`
+	RuntimeIssueAt   *time.Time `json:"runtimeIssueAt,omitempty"`
+	WrongChain       bool       `json:"wrongChain"`
 	Stale            bool      `json:"stale"`
 	Degraded         bool      `json:"degraded"`
 	Consistent       bool      `json:"consistent"`
@@ -105,6 +107,8 @@ func (s *Service) NetworkStatus(ctx context.Context) (NetworkStatus, error) {
 		IndexerState:     h.State,
 		LastIngestAt:     h.LastIngestAt,
 		IngestAgeSeconds: uint64(age / time.Second),
+		RuntimeIssue:     h.RuntimeIssue,
+		RuntimeIssueAt:   h.RuntimeIssueAt,
 		WrongChain:       h.ChainID != s.requiredChainID,
 		Stale:            h.LastIngestAt.IsZero() || age > s.staleAfter,
 		Degraded:         state != "READY" && state != "HEALTHY" && state != "OK",
@@ -202,7 +206,27 @@ func (s *Service) Transaction(ctx context.Context, hash string) (TransactionView
 }
 
 func (s *Service) ServiceVersion(ctx context.Context, serviceID string, version uint32) (decoder.ServiceVersion, error) {
-	return s.indexer.ServiceVersion(ctx, serviceID, version)
+	id := strings.TrimSpace(serviceID)
+	if id == "" || version == 0 {
+		return decoder.ServiceVersion{}, errors.New("service id and non-zero version required")
+	}
+	record, err := s.indexer.ServiceVersion(ctx, id, version)
+	if err != nil {
+		return decoder.ServiceVersion{}, err
+	}
+	if !strings.EqualFold(strings.TrimSpace(record.ServiceID), id) || record.Version != version {
+		return decoder.ServiceVersion{}, errors.New("420Indexer returned service version inconsistent with request")
+	}
+	if strings.TrimSpace(record.Implementation) == "" || strings.TrimSpace(record.ActivatedHash) == "" {
+		return decoder.ServiceVersion{}, errors.New("420Indexer returned service version without activation provenance")
+	}
+	if record.DeprecatedBlock != 0 && record.DeprecatedBlock < record.ActivatedBlock {
+		return decoder.ServiceVersion{}, errors.New("420Indexer returned service version with invalid deprecation provenance")
+	}
+	if record.Active && record.DeprecatedBlock != 0 {
+		return decoder.ServiceVersion{}, errors.New("420Indexer returned active service version with deprecation provenance")
+	}
+	return record, nil
 }
 
 func (s *Service) requireRecordChain(chainID uint64) error {

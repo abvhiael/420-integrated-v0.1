@@ -29,7 +29,7 @@ func TestClientChainIDAndBundle(t *testing.T) {
 			}})
 		case "eth_getTransactionReceipt":
 			json.NewEncoder(w).Encode(map[string]interface{}{"jsonrpc":"2.0","id":req.ID,"result":map[string]interface{}{
-				"transactionHash":"0xt1","transactionIndex":"0x0","blockHash":"0xb1","blockNumber":"0x1","status":"0x1","gasUsed":"0x5208","contractAddress":"",
+				"transactionHash":"0xt1","transactionIndex":"0x0","blockHash":"0xb1","blockNumber":"0x1","status":"0x1","gasUsed":"0x5208","effectiveGasPrice":"0x3b9aca00","contractAddress":"",
 				"logs":[]map[string]interface{}{{"address":"0xccc","topics":[]string{"0xtopic"},"data":"0x","blockNumber":"0x1","blockHash":"0xb1","transactionHash":"0xt1","transactionIndex":"0x0","logIndex":"0x0"}},
 			}})
 		default:
@@ -50,6 +50,7 @@ func TestClientChainIDAndBundle(t *testing.T) {
 		t.Fatalf("unexpected bundle: %+v", bundle)
 	}
 	if bundle.Logs[0].BlockHash != "0xb1" || bundle.Receipts[0].Status != 1 { t.Fatalf("provenance lost: %+v %+v", bundle.Logs[0], bundle.Receipts[0]) }
+	if bundle.Receipts[0].EffectiveGasPriceWei != "1000000000" || bundle.Receipts[0].ActualFeeWei != "21000000000000" { t.Fatalf("fee provenance lost: %+v", bundle.Receipts[0]) }
 
 	safe, err := c.SafeBlock(context.Background(), 420, "v1")
 	if err != nil { t.Fatal(err) }

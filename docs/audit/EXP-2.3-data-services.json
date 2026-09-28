@@ -1,0 +1,72 @@
+{
+  "schema": "420explorer-exp-2.3-address-contract-asset-services-v1",
+  "milestone": "EXP-2.3",
+  "title": "Address, contract, and asset data-service qualification",
+  "status": "implementation_complete_pending_exact_head_ci",
+  "baseline": {
+    "exp_2_2_qualified_head": "23a1a8a28a53013ad0c7543ea9c27f71e1fd7ec7"
+  },
+  "objective": "Qualify the remaining core Explorer repository service/API slice for address history, contract deployment/runtime-code facts, and native/token asset-transfer activity while preserving snapshot provenance, filter integrity, bounded reads, and the non-authoritative 420Indexer boundary.",
+  "workflow_owners": [
+    "EXP-WF-004",
+    "EXP-WF-005",
+    "EXP-WF-006",
+    "EXP-WF-007"
+  ],
+  "implementation_boundary": {
+    "owns": [
+      "address-history service invariants and HTTP serialization",
+      "contract deployment/runtime-code service invariants and HTTP serialization",
+      "asset-transfer service invariants, filter provenance, and HTTP serialization",
+      "Indexer-client canonical-authority rejection for address/contract/asset reads",
+      "cross-view contract creation transaction/receipt/contract provenance",
+      "representative ERC-20/ERC-721/ERC-1155 projection preservation"
+    ],
+    "does_not_own": [
+      "wallet balances or holdings",
+      "verified source/compiler provenance",
+      "live Registry publication",
+      "frontend filters/navigation",
+      "live target-network witnesses",
+      "token decoder correctness owned by EXP-3",
+      "Genesis-ready release qualification"
+    ]
+  },
+  "defects_remediated": [
+    "address service accepted direct limits above the shared 250-record API bound",
+    "address service did not independently reject an Indexer canonical-authority claim",
+    "unfiltered asset reads did not prove that the Indexer honored the requested empty asset/address filters"
+  ],
+  "acceptance_criteria": [
+    "AC-1 representative address, contract, and asset API resources serialize indexed provenance correctly",
+    "AC-5 repository service semantics preserve chain/snapshot/filter/deployment provenance and fail closed on mismatches",
+    "AC-7 malformed, over-bounded, wrong-chain, unrelated, or authority-overclaiming data is rejected",
+    "AC-8 Explorer remains a non-authoritative consumer of 420Indexer"
+  ],
+  "qualification_tests": [
+    "address valid/invalid input, snapshot, membership, wrong-chain, authority, and <=250 bound",
+    "contract address, chain, deployment provenance, runtime-code formatting, and byte-count presentation",
+    "transaction receipt contractAddress cross-linked to contract deployment transaction/block provenance",
+    "asset snapshot, exact filter echo, address membership, amount, position, provenance, authority, and <=250 bound",
+    "representative ERC-20/ERC-721/ERC-1155 identity preservation",
+    "Explorer HTTP address/contract/asset representative serialization and invalid input rejection",
+    "Indexer-client authority-claim rejection on address/contract/asset routes",
+    "go test ./explorer/service ./explorer/api ./explorer/indexerclient",
+    "go test ./explorer/...",
+    "go vet ./explorer/..."
+  ],
+  "evidence": {
+    "workflow": ".github/workflows/explorer-exp-2-3.yml",
+    "verifier": "scripts/verify-exp-2-3-data-services.py",
+    "artifact": "exp-2-3-data-services",
+    "exact_head_expression": "github.event.pull_request.head.sha || github.sha"
+  },
+  "scope_boundary": {
+    "deployed_ui_qualified": false,
+    "live_target_network_qualified": false,
+    "token_decoder_qualified": false,
+    "registry_runtime_qualified": false,
+    "canonical_authority": false,
+    "genesis_ready_claim": false
+  }
+}

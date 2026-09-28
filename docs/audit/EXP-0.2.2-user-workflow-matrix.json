@@ -247,6 +247,17 @@
       "post_exp_2_3_remaining_owners": [
         "EXP-4",
         "EXP-7"
+      ],
+      "exp_next_3_repository_disposition": "REPOSITORY_BROWSER_CROSS_RESOURCE_WORKFLOW_QUALIFIED_LIVE_DEPLOYMENT_PENDING",
+      "exp_next_3_evidence": [
+        "explorer/web/static/app.js",
+        "explorer/web/static/workflow-presentation.mjs",
+        "explorer/web/workflow-presentation.test.mjs",
+        "docs/audit/EXP-NEXT.3-cross-resource-browser.json"
+      ],
+      "post_exp_next_3_remaining_owners": [
+        "EXP-NEXT.4",
+        "EXP-NEXT.5"
       ]
     },
     {
@@ -309,6 +320,17 @@
         "EXP-3",
         "EXP-4",
         "EXP-7"
+      ],
+      "exp_next_3_repository_disposition": "REPOSITORY_BROWSER_CROSS_RESOURCE_WORKFLOW_QUALIFIED_LIVE_DEPLOYMENT_PENDING",
+      "exp_next_3_evidence": [
+        "explorer/web/static/app.js",
+        "explorer/web/static/workflow-presentation.mjs",
+        "explorer/web/workflow-presentation.test.mjs",
+        "docs/audit/EXP-NEXT.3-cross-resource-browser.json"
+      ],
+      "post_exp_next_3_remaining_owners": [
+        "EXP-NEXT.4",
+        "EXP-NEXT.5"
       ]
     },
     {
@@ -375,6 +397,17 @@
         "EXP-3",
         "EXP-4",
         "EXP-7"
+      ],
+      "exp_next_3_repository_disposition": "REPOSITORY_BROWSER_CROSS_RESOURCE_WORKFLOW_QUALIFIED_LIVE_DEPLOYMENT_PENDING",
+      "exp_next_3_evidence": [
+        "explorer/web/static/app.js",
+        "explorer/web/static/workflow-presentation.mjs",
+        "explorer/web/workflow-presentation.test.mjs",
+        "docs/audit/EXP-NEXT.3-cross-resource-browser.json"
+      ],
+      "post_exp_next_3_remaining_owners": [
+        "EXP-NEXT.4",
+        "EXP-NEXT.5"
       ]
     },
     {
@@ -435,6 +468,17 @@
         "EXP-3",
         "EXP-4",
         "EXP-7"
+      ],
+      "exp_next_3_repository_disposition": "REPOSITORY_BROWSER_CROSS_RESOURCE_WORKFLOW_QUALIFIED_LIVE_DEPLOYMENT_PENDING",
+      "exp_next_3_evidence": [
+        "explorer/web/static/app.js",
+        "explorer/web/static/workflow-presentation.mjs",
+        "explorer/web/workflow-presentation.test.mjs",
+        "docs/audit/EXP-NEXT.3-cross-resource-browser.json"
+      ],
+      "post_exp_next_3_remaining_owners": [
+        "EXP-NEXT.4",
+        "EXP-NEXT.5"
       ]
     },
     {
@@ -497,6 +541,17 @@
       "post_exp_2_4_remaining_owners": [
         "EXP-4",
         "EXP-7"
+      ],
+      "exp_next_3_repository_disposition": "REPOSITORY_BROWSER_CROSS_RESOURCE_WORKFLOW_QUALIFIED_LIVE_DEPLOYMENT_PENDING",
+      "exp_next_3_evidence": [
+        "explorer/web/static/app.js",
+        "explorer/web/static/workflow-presentation.mjs",
+        "explorer/web/workflow-presentation.test.mjs",
+        "docs/audit/EXP-NEXT.3-cross-resource-browser.json"
+      ],
+      "post_exp_next_3_remaining_owners": [
+        "EXP-NEXT.4",
+        "EXP-NEXT.5"
       ]
     },
     {
@@ -612,6 +667,17 @@
         "Registry implementation correlation fixture",
         "ecosystem transaction provenance test",
         "representative application transaction witness"
+      ],
+      "exp_next_3_repository_disposition": "REPOSITORY_BROWSER_CROSS_RESOURCE_WORKFLOW_QUALIFIED_LIVE_DEPLOYMENT_PENDING",
+      "exp_next_3_evidence": [
+        "explorer/web/static/app.js",
+        "explorer/web/static/workflow-presentation.mjs",
+        "explorer/web/workflow-presentation.test.mjs",
+        "docs/audit/EXP-NEXT.3-cross-resource-browser.json"
+      ],
+      "post_exp_next_3_remaining_owners": [
+        "EXP-NEXT.4",
+        "EXP-NEXT.5"
       ]
     },
     {
@@ -663,6 +729,17 @@
         "native payment transfer witness",
         "token payment transfer witness where applicable",
         "ecosystem payment correlation test"
+      ],
+      "exp_next_3_repository_disposition": "REPOSITORY_BROWSER_CROSS_RESOURCE_WORKFLOW_QUALIFIED_LIVE_DEPLOYMENT_PENDING",
+      "exp_next_3_evidence": [
+        "explorer/web/static/app.js",
+        "explorer/web/static/workflow-presentation.mjs",
+        "explorer/web/workflow-presentation.test.mjs",
+        "docs/audit/EXP-NEXT.3-cross-resource-browser.json"
+      ],
+      "post_exp_next_3_remaining_owners": [
+        "EXP-NEXT.4",
+        "EXP-NEXT.5"
       ]
     },
     {
@@ -854,6 +931,17 @@
         "EXP-4",
         "EXP-5",
         "EXP-7"
+      ],
+      "exp_next_3_repository_disposition": "REPOSITORY_BROWSER_CROSS_RESOURCE_WORKFLOW_QUALIFIED_LIVE_DEPLOYMENT_PENDING",
+      "exp_next_3_evidence": [
+        "explorer/web/static/app.js",
+        "explorer/web/static/workflow-presentation.mjs",
+        "explorer/web/workflow-presentation.test.mjs",
+        "docs/audit/EXP-NEXT.3-cross-resource-browser.json"
+      ],
+      "post_exp_next_3_remaining_owners": [
+        "EXP-NEXT.4",
+        "EXP-NEXT.5"
       ]
     },
     {
@@ -939,6 +1027,17 @@
         "EXP-4",
         "EXP-6",
         "EXP-7"
+      ],
+      "exp_next_3_repository_disposition": "REPOSITORY_BROWSER_CROSS_RESOURCE_WORKFLOW_QUALIFIED_LIVE_DEPLOYMENT_PENDING",
+      "exp_next_3_evidence": [
+        "explorer/web/static/app.js",
+        "explorer/web/static/workflow-presentation.mjs",
+        "explorer/web/workflow-presentation.test.mjs",
+        "docs/audit/EXP-NEXT.3-cross-resource-browser.json"
+      ],
+      "post_exp_next_3_remaining_owners": [
+        "EXP-NEXT.4",
+        "EXP-NEXT.5"
       ]
     }
   ],

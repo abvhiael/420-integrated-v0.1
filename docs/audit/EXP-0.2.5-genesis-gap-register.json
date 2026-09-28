@@ -91,6 +91,7 @@
         "representative block/transaction/receipt/log/address/asset/contract/consensus/Registry reads"
       ],
       "later_owner": [
+        "EXP-1",
         "EXP-7"
       ],
       "acceptance_criteria": [
@@ -100,7 +101,10 @@
       ],
       "genesis_blocking": true,
       "blocking_rationale": "The shared Indexer is mandatory for every core Explorer data path; source CI cannot substitute for deployed service qualification.",
-      "exp_1_disposition": "REPOSITORY_RUNTIME_PACKAGING_AND_API_QUALIFIED_LIVE_ENDPOINT_PENDING"
+      "exp_1_disposition": "REPOSITORY_RUNTIME_PACKAGING_AND_API_QUALIFIED_LIVE_ENDPOINT_PENDING",
+      "post_exp_1_remaining_owners": [
+        "EXP-7"
+      ]
     },
     {
       "id": "EXP-FIND-003",
@@ -191,6 +195,7 @@
         "receipt/log/block provenance comparison"
       ],
       "later_owner": [
+        "EXP-1",
         "EXP-7"
       ],
       "acceptance_criteria": [
@@ -199,7 +204,10 @@
       ],
       "genesis_blocking": true,
       "blocking_rationale": "Accurate Explorer data depends on a qualified canonical upstream; implementation of an RPC adapter is insufficient evidence of correct deployed binding.",
-      "exp_1_disposition": "RPC_BINDING_CONTRACT_AND_CONTINUOUS_VALIDATION_QUALIFIED_LIVE_BINDING_PENDING"
+      "exp_1_disposition": "RPC_BINDING_CONTRACT_AND_CONTINUOUS_VALIDATION_QUALIFIED_LIVE_BINDING_PENDING",
+      "post_exp_1_remaining_owners": [
+        "EXP-7"
+      ]
     },
     {
       "id": "EXP-FIND-005",
@@ -343,6 +351,7 @@
         "provider-unavailable fail-closed case"
       ],
       "later_owner": [
+        "EXP-1",
         "EXP-2",
         "EXP-7"
       ],
@@ -353,7 +362,11 @@
       ],
       "genesis_blocking": true,
       "blocking_rationale": "Validator and epoch/rotation are explicitly mandatory Genesis views.",
-      "exp_1_disposition": "PRODUCTION_PROVIDER_WIRING_AND_NEGATIVE_BEHAVIOR_QUALIFIED_LIVE_CONSENSUS_SOURCE_PENDING"
+      "exp_1_disposition": "PRODUCTION_PROVIDER_WIRING_AND_NEGATIVE_BEHAVIOR_QUALIFIED_LIVE_CONSENSUS_SOURCE_PENDING",
+      "post_exp_1_remaining_owners": [
+        "EXP-2",
+        "EXP-7"
+      ]
     },
     {
       "id": "EXP-FIND-008",
@@ -442,9 +455,9 @@
         "deployed Explorer producer trace workflow"
       ],
       "later_owner": [
+        "EXP-1",
         "EXP-2",
-        "EXP-4",
-        "EXP-7"
+        "EXP-4"
       ],
       "acceptance_criteria": [
         "AC-1",
@@ -453,7 +466,12 @@
       ],
       "genesis_blocking": true,
       "blocking_rationale": "Repository attribution is now implemented and qualified, but Genesis still requires live target-network and deployed workflow evidence.",
-      "exp_1_disposition": "REPOSITORY_IMPLEMENTATION_FULLY_REMEDIATED_LIVE_WITNESS_PENDING"
+      "exp_1_disposition": "REPOSITORY_IMPLEMENTATION_FULLY_REMEDIATED_LIVE_WITNESS_PENDING",
+      "post_exp_1_remaining_owners": [
+        "EXP-2",
+        "EXP-4",
+        "EXP-7"
+      ]
     },
     {
       "id": "EXP-FIND-010",

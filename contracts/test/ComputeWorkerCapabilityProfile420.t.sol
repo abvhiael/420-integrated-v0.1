@@ -274,8 +274,9 @@ contract ComputeWorkerCapabilityProfile420Test {
         require(profiles.matches(workerId, oldRevision, oldReq), "old profile unavailable");
 
         ComputeWorkerCapabilityProfile420.ProfileInput memory p2 = _profileV2();
+        bytes32 p2Hash = profiles.profileCommitment(p2);
         vm.prank(OPERATOR);
-        workers.refreshProfile(workerId, profiles.profileCommitment(p2), bytes32(0));
+        workers.refreshProfile(workerId, p2Hash, bytes32(0));
         vm.prank(OPERATOR);
         workers.activate(workerId);
 

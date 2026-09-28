@@ -67,6 +67,24 @@ export function registryServicePresentation420(view) {
   };
 }
 
+
+export function registryVersionPresentation420(version, requestedServiceId, requestedVersion) {
+  const serviceId=String(version?.serviceId ?? '');
+  const versionNumber=decimalString420(version?.version,'Registry version');
+  if (serviceId !== String(requestedServiceId) || versionNumber !== String(requestedVersion)) {
+    throw new PresentationError420('Registry version identity mismatch');
+  }
+  const implementation=String(version?.implementation ?? '');
+  if (!implementation) throw new PresentationError420('Registry version implementation is missing');
+  address420(implementation,'Registry version implementation');
+  return {
+    serviceId,
+    version:versionNumber,
+    implementation,
+    implementationLink:routeLink420(['contracts',implementation],implementation)
+  };
+}
+
 export function contractPresentation420(view, requestedAddress) {
   const c=view?.contract ?? {};
   const address=address420(c.address || requestedAddress,'contract address');

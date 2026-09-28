@@ -24,6 +24,15 @@ type QCStatus struct {
 	Signers    int    `json:"signers"`
 }
 
+type ProducedBlockStatus struct {
+	Slot               uint64 `json:"slot"`
+	ExecutionBlockHash string `json:"execution_block_hash"`
+	ConsensusBlockRoot string `json:"consensus_block_root"`
+	ProducerSeat       uint16 `json:"producer_seat"`
+	ProposerRank       uint8  `json:"proposer_rank"`
+	Certified          bool   `json:"certified"`
+}
+
 type Status struct {
 	Head             ctypes.Checkpoint `json:"head"`
 	Safe             ctypes.Checkpoint `json:"safe"`
@@ -32,6 +41,7 @@ type Status struct {
 	ActiveSeats      []uint16          `json:"active_seats,omitempty"`
 	ScheduledProposer ProposerStatus   `json:"scheduled_proposer"`
 	LatestQC         QCStatus          `json:"latest_qc"`
+	ProducedBlocks   []ProducedBlockStatus `json:"produced_blocks,omitempty"`
 	LastQCMessage    string            `json:"last_qc_message,omitempty"`
 }
 

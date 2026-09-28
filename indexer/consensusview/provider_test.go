@@ -36,3 +36,112 @@ func TestConsensusProjectionRejectsBadQC(t *testing.T) {
 	p, _ := New(path)
 	if _, err := p.Consensus(); err == nil { t.Fatal("expected sub-quorum QC rejection") }
 }
+
+
+func TestConsensusProjectionRejectsImpossibleFinality(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "consensus.json")
+	store := storage.NewFileStore(path)
+	seats := make([]uint16, 15); for i := range seats { seats[i] = uint16(i) }
+	if err := store.Save(storage.Status{
+		Head: ctypes.Checkpoint{Slot:10}, Safe: ctypes.Checkpoint{Slot:11}, Finalized: ctypes.Checkpoint{Slot:9},
+		NextSlot:12, ActiveSeats:seats,
+		ScheduledProposer:storage.ProposerStatus{Slot:12,Primary:0,Fallback1:1,Fallback2:2},
+	}); err != nil { t.Fatal(err) }
+	p, _ := New(path)
+	if _, err := p.Consensus(); err == nil { t.Fatal("expected finality-order rejection") }
+}
+
+func TestConsensusProjectionRejectsProposerOutsideCommittee(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "consensus.json")
+	store := storage.NewFileStore(path)
+	seats := make([]uint16, 15); for i := range seats { seats[i] = uint16(i) }
+	if err := store.Save(storage.Status{
+		NextSlot:1, ActiveSeats:seats,
+		ScheduledProposer:storage.ProposerStatus{Slot:1,Primary:0,Fallback1:1,Fallback2:99},
+	}); err != nil { t.Fatal(err) }
+	p, _ := New(path)
+	if _, err := p.Consensus(); err == nil { t.Fatal("expected proposer-outside-committee rejection") }
+}
+
+func TestConsensusProjectionUnavailableWhenStateMissing(t *testing.T) {
+	p, err := New(filepath.Join(t.TempDir(), "missing.json"))
+	if err != nil { t.Fatal(err) }
+	if _, err := p.Consensus(); err == nil { t.Fatal("expected unavailable consensus status") }
+}
+
+
+func TestProducerForBlockReturnsHistoricalAttribution(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "consensus.json")
+	store := storage.NewFileStore(path)
+	seats := make([]uint16, 15); for i := range seats { seats[i] = uint16(i) }
+	if err := store.Save(storage.Status{
+		NextSlot:10, ActiveSeats:seats,
+		ScheduledProposer:storage.ProposerStatus{Slot:10,Primary:1,Fallback1:2,Fallback2:3},
+		ProducedBlocks:[]storage.ProducedBlockStatus{{Slot:9,ExecutionBlockHash:"0xAbC",ConsensusBlockRoot:"0xroot",ProducerSeat:2,ProposerRank:1,Certified:true}},
+	}); err != nil { t.Fatal(err) }
+	p, _ := New(path)
+	got, ok, err := p.ProducerForBlock("0xabc")
+	if err != nil || !ok { t.Fatalf("producer lookup failed: ok=%v err=%v", ok, err) }
+	if got.ConsensusSlot != 9 || got.ProducerSeat != 2 || got.ProposerRank != 1 || got.ConsensusBlockRoot != "0xroot" || !got.Certified {
+		t.Fatalf("unexpected attribution: %+v", got)
+	}
+}
+
+func TestProducerForBlockRejectsDuplicateAttribution(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "consensus.json")
+	store := storage.NewFileStore(path)
+	seats := make([]uint16, 15); for i := range seats { seats[i] = uint16(i) }
+	if err := store.Save(storage.Status{
+		NextSlot:10, ActiveSeats:seats,
+		ScheduledProposer:storage.ProposerStatus{Slot:10,Primary:1,Fallback1:2,Fallback2:3},
+		ProducedBlocks:[]storage.ProducedBlockStatus{
+			{Slot:8,ExecutionBlockHash:"0xabc",ConsensusBlockRoot:"0xr1",ProducerSeat:1,ProposerRank:0},
+			{Slot:9,ExecutionBlockHash:"0xABC",ConsensusBlockRoot:"0xr2",ProducerSeat:2,ProposerRank:0},
+		},
+	}); err != nil { t.Fatal(err) }
+	p, _ := New(path)
+	if _, _, err := p.ProducerForBlock("0xabc"); err == nil { t.Fatal("expected duplicate attribution rejection") }
+}
+
+func TestProducerForBlockRejectsInvalidRank(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "consensus.json")
+	store := storage.NewFileStore(path)
+	seats := make([]uint16, 15); for i := range seats { seats[i] = uint16(i) }
+	if err := store.Save(storage.Status{
+		NextSlot:10, ActiveSeats:seats,
+		ScheduledProposer:storage.ProposerStatus{Slot:10,Primary:1,Fallback1:2,Fallback2:3},
+		ProducedBlocks:[]storage.ProducedBlockStatus{{Slot:9,ExecutionBlockHash:"0xabc",ConsensusBlockRoot:"0xr",ProducerSeat:1,ProposerRank:3}},
+	}); err != nil { t.Fatal(err) }
+	p, _ := New(path)
+	if _, _, err := p.ProducerForBlock("0xabc"); err == nil { t.Fatal("expected invalid rank rejection") }
+}
+
+
+func TestProducerForBlockRejectsDuplicateCanonicalSlot(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "consensus.json")
+	store := storage.NewFileStore(path)
+	seats := make([]uint16,15); for i:=range seats { seats[i]=uint16(i) }
+	if err:=store.Save(storage.Status{
+		NextSlot:12, ActiveSeats:seats,
+		ScheduledProposer:storage.ProposerStatus{Slot:12,Primary:1,Fallback1:2,Fallback2:3},
+		ProducedBlocks:[]storage.ProducedBlockStatus{
+			{Slot:9,ExecutionBlockHash:"0xaaa",ConsensusBlockRoot:"0xra",ProducerSeat:1},
+			{Slot:9,ExecutionBlockHash:"0xbbb",ConsensusBlockRoot:"0xrb",ProducerSeat:2},
+		},
+	});err!=nil{t.Fatal(err)}
+	p,_:=New(path)
+	if _,_,err:=p.ProducerForBlock("0xaaa");err==nil{t.Fatal("expected duplicate canonical slot rejection")}
+}
+
+func TestProducerForBlockRejectsMissingConsensusRoot(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "consensus.json")
+	store := storage.NewFileStore(path)
+	seats := make([]uint16,15); for i:=range seats { seats[i]=uint16(i) }
+	if err:=store.Save(storage.Status{
+		NextSlot:12, ActiveSeats:seats,
+		ScheduledProposer:storage.ProposerStatus{Slot:12,Primary:1,Fallback1:2,Fallback2:3},
+		ProducedBlocks:[]storage.ProducedBlockStatus{{Slot:9,ExecutionBlockHash:"0xaaa",ProducerSeat:1}},
+	});err!=nil{t.Fatal(err)}
+	p,_:=New(path)
+	if _,_,err:=p.ProducerForBlock("0xaaa");err==nil{t.Fatal("expected missing consensus root rejection")}
+}

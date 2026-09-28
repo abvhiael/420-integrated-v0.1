@@ -1,0 +1,93 @@
+{
+  "schema": "420explorer-exp-1.9-ci-qualification-automation-v1",
+  "milestone": "EXP-1.9",
+  "title": "CI and qualification automation",
+  "predecessor": {
+    "exp_1_8_qualified_head": "1df16a6cf81dfcd7c7bb88b326ec644629dd50dd",
+    "exp_1_8_workflow_run": 36359751318,
+    "exp_1_8_job": 108734431693,
+    "exp_1_8_artifact_id": 10944779201,
+    "exp_1_8_artifact_digest": "sha256:c894379b8499ee64cbc3592c7fc8d900a478a753270dac3675bbeac25a3dc1a9",
+    "retained_indexer_run": 36359751331,
+    "docs_run": 36359751311,
+    "integrated_run": 36359751343
+  },
+  "required_gates": [
+    {
+      "workflow": "420Indexer",
+      "path": ".github/workflows/420indexer.yml",
+      "exact_head_checkout": true,
+      "exact_head_assertion": true,
+      "concurrency_cancel_in_progress": true,
+      "contents_permission": "read",
+      "retained_exp1_verifiers": "EXP-1.1..EXP-1.9",
+      "artifact": "exp-1-9-ci-qualification-automation",
+      "automatic_triggers": [
+        "pull_request:path_filtered",
+        "push:main:path_filtered"
+      ]
+    },
+    {
+      "workflow": "420Docs Qualification",
+      "path": ".github/workflows/docs-qualify.yml",
+      "exact_head_checkout": true,
+      "exact_head_assertion": true,
+      "concurrency_cancel_in_progress": true,
+      "contents_permission": "read"
+    },
+    {
+      "workflow": "420 Integrated Qualification",
+      "path": ".github/workflows/qualification.yml",
+      "exact_head_checkout_all_jobs": true,
+      "exact_head_assertion_all_jobs": true,
+      "concurrency_cancel_in_progress": true,
+      "contents_permission": "read"
+    }
+  ],
+  "dedicated_gate": {
+    "workflow": "EXP-1.9 CI Qualification Automation",
+    "path": ".github/workflows/explorer-exp-1-9.yml",
+    "exact_head_checkout": true,
+    "exact_head_assertion": true,
+    "retained_exp1_verifiers": "EXP-1.1..EXP-1.9",
+    "evidence_artifact": "exp-1-9-ci-qualification-automation-dedicated",
+    "retention_days": 7,
+    "automatic_triggers": [
+      "pull_request",
+      "push:main"
+    ]
+  },
+  "automation_rules": [
+    "pull-request qualification executes the PR head SHA, not the synthetic merge ref",
+    "workflow execution fails immediately if checked-out HEAD differs from the expected event SHA",
+    "superseded PR runs are cancelled by concurrency groups",
+    "required qualification workflows have contents: read permissions only",
+    "primary Indexer CI retains EXP-1.1 through EXP-1.9 qualification gates",
+    "EXP-1.9 evidence records the exact git HEAD used by the verifier",
+    "source CI does not claim live deployment or target-network qualification"
+  ],
+  "acceptance": {
+    "primary_indexer_exact_head_complete": true,
+    "docs_exact_head_complete": true,
+    "integrated_exact_head_complete": true,
+    "exact_sha_assertions_complete": true,
+    "concurrency_automation_complete": true,
+    "least_privilege_contents_read_complete": true,
+    "retained_exp1_automation_complete": true,
+    "dedicated_exp_1_9_gate_complete": true,
+    "evidence_retention_complete": true,
+    "live_network_qualification_complete": false,
+    "exact_head_ci_required": true,
+    "post_merge_qualification_complete": true
+  },
+  "live_boundary": {
+    "qualified": false,
+    "reason": "EXP-1.9 automates repository qualification only; live testnet qualification remains a separate deployment gate"
+  },
+  "summary": {
+    "repository_ci_automation_qualified_candidate": true,
+    "live_network_qualified": false,
+    "genesis_ready": false,
+    "next_step": "EXP-1.10"
+  }
+}

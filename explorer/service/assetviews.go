@@ -38,8 +38,8 @@ func (s *Service) AssetActivity(ctx context.Context, assetKey, address string, l
 	if err != nil { return AssetActivityView{}, err }
 	if err := s.requireRecordChain(page.Meta.ChainID); err != nil { return AssetActivityView{}, err }
 	if page.CanonicalAuthority { return AssetActivityView{}, errors.New("420Indexer asset response claimed canonical authority") }
-	if assetKey != "" && !strings.EqualFold(page.AssetKey, assetKey) { return AssetActivityView{}, errors.New("420Indexer returned asset activity for a different asset") }
-	if address != "" && !strings.EqualFold(page.Address, address) { return AssetActivityView{}, errors.New("420Indexer returned asset activity for a different address") }
+	if !strings.EqualFold(page.AssetKey, assetKey) { return AssetActivityView{}, errors.New("420Indexer returned asset activity for a different asset filter") }
+	if !strings.EqualFold(page.Address, address) { return AssetActivityView{}, errors.New("420Indexer returned asset activity for a different address filter") }
 	for _, transfer := range page.Transfers {
 		if err := s.requireRecordChain(transfer.ChainID); err != nil { return AssetActivityView{}, err }
 		if transfer.BlockNumber > page.Meta.SnapshotHeight { return AssetActivityView{}, errors.New("420Indexer returned asset transfer beyond snapshot") }

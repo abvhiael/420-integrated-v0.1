@@ -53,5 +53,165 @@
     "IDX-INV-010",
     "IDX-INV-011",
     "IDX-INV-012"
-  ]
+  ],
+  "sourceQualification": {
+    "requiredChainId": 420,
+    "requireGenesisIdentity": true,
+    "expectedGenesisHashSource": "EXP-1.2 approved runtime binding record after testnet genesis is frozen",
+    "requireHeadSafeFinalized": true,
+    "requireFinalityOrdering": "finalized <= safe <= head",
+    "maxHeadAgeDefaultSeconds": 120,
+    "rejectMissingHashes": true,
+    "rejectCrossChainRecords": true,
+    "rejectMalformedSource": true,
+    "liveBindingStatus": "BLOCKED_PENDING_PROVISIONED_APPROVED_TESTNET_RPC",
+    "publicEndpointInventory": "testnet/services/endpoints.json",
+    "launchAuthority": "testnet/config/launch.json"
+  },
+  "canonicalIndexingInvariants": {
+    "canonicalBlockIdentity": "chainId:blockHash",
+    "heightIsMutableAboveFinality": true,
+    "trackHeadSeparately": true,
+    "trackSafeSeparately": true,
+    "trackFinalizedSeparately": true,
+    "rollbackAboveFinality": true,
+    "finalizedHistoryImmutable": true,
+    "databaseIsCanonicalAuthority": false,
+    "canonicalSourceOverridesUncheckpointedDatabaseRows": true,
+    "cleanRebuildRequired": true,
+    "interruptedRebuildRecoveryRequired": true,
+    "checkpointAdvancesAfterBundlePersistence": true,
+    "finalizedRollbackBehavior": "FAIL_CLOSED"
+  },
+  "consensusQualification": {
+    "authority": "consensus-owned; Indexer projection only",
+    "requiredChainId": 420,
+    "runtimeProvider": "indexer/consensusview.Provider",
+    "runtimeStatusPathEnv": "INDEXER_CONSENSUS_STATUS_PATH",
+    "requireStatusAtStartup": true,
+    "requireFinalityOrdering": "finalized <= safe <= head",
+    "requireUniqueActiveSeats": true,
+    "minimumActiveSeats": 3,
+    "requireScheduledProposerInActiveCommittee": true,
+    "requireDistinctPrimaryAndFallbacks": true,
+    "requireQCQuorum": true,
+    "quorumRule": "floor(2*N/3)+1",
+    "providerUnavailableBehavior": "FAIL_CLOSED_AT_STARTUP_AND_503_AT_READ_BOUNDARY",
+    "liveBindingStatus": "BLOCKED_PENDING_PROVISIONED_APPROVED_CONSENSUS_RUNTIME"
+  },
+  "historicalProducerAttribution": {
+    "authority": "consensus-owned produced-block history; Indexer projection only",
+    "lookupKey": "execution block hash",
+    "projectedFields": [
+      "consensusSlot",
+      "producerSeat",
+      "proposerRank",
+      "consensusBlockRoot",
+      "certified"
+    ],
+    "requireForNonGenesisBlocksWhenProviderConfigured": true,
+    "rejectDuplicateExecutionHashes": true,
+    "rejectDuplicateCanonicalSlots": true,
+    "rejectMissingConsensusBlockRoot": true,
+    "rejectInvalidProposerRank": true,
+    "reorgPolicy": "preflight complete replacement branch producer attribution before local rollback; orphan attribution removed with orphan block",
+    "productionProvider": "indexer/consensusview.Provider",
+    "liveHistoryBindingStatus": "BLOCKED_PENDING_PROVISIONED_APPROVED_CONSENSUS_HISTORY"
+  },
+  "crossLayerTraceability": {
+    "authority": "execution and consensus remain canonical in their owning subsystems; Indexer/Explorer are projections only",
+    "executionIdentity": "chainId + execution block hash",
+    "consensusIdentity": "consensus slot + consensus block root",
+    "joinSource": "BlockRecord.producer from consensus-owned produced-block history",
+    "explorerTraceEndpoint": "/v1/blocks/{number}/trace",
+    "explorerBlockDetailCarriesTrace": true,
+    "requireProducerForNonGenesisExplorerBlockDetail": true,
+    "rejectMissingConsensusRoot": true,
+    "rejectInvalidProposerRank": true,
+    "canonicalAuthority": false,
+    "liveCrossLayerWitnessStatus": "BLOCKED_PENDING_PROVISIONED_APPROVED_TESTNET_EXECUTION_AND_CONSENSUS_SOURCES"
+  },
+  "runtimeNegativeQualification": {
+    "continuousRpcSourceValidation": true,
+    "validationFrequency": "every configured poll before catch-up",
+    "startupFailClosed": true,
+    "requiredChainId": 420,
+    "expectedGenesisHashEnv": "INDEXER_EXPECTED_GENESIS_HASH",
+    "maxHeadAgeEnv": "INDEXER_MAX_HEAD_AGE",
+    "defaultMaxHeadAge": "2m",
+    "validates": [
+      "chain id",
+      "genesis identity",
+      "head/safe/finalized hashes",
+      "finality ordering",
+      "head freshness"
+    ],
+    "runtimeFaultCodes": [
+      "RPC_WRONG_CHAIN",
+      "RPC_GENESIS_MISMATCH",
+      "RPC_FINALITY_DIVERGENCE",
+      "RPC_SOURCE_STALE",
+      "RPC_SOURCE_INVALID",
+      "CONSENSUS_PROVIDER_UNAVAILABLE",
+      "INGEST_CATCHUP_FAILED"
+    ],
+    "publicFaultDetailPolicy": "categorical only; raw upstream errors remain server-side",
+    "recoveryRule": "clear degraded runtime latch only after qualified RPC source, qualified consensus provider, and successful catch-up",
+    "liveFaultInjectionStatus": "BLOCKED_PENDING_PROVISIONED_TESTNET"
+  },
+  "qualificationAutomation": {
+    "milestone": "EXP-1.10",
+    "exactHeadExpression": "github.event.pull_request.head.sha || github.sha",
+    "requiredAutomaticGates": [
+      "420Indexer",
+      "420Docs Qualification",
+      "420 Integrated Qualification"
+    ],
+    "dedicatedWorkflow": "EXP-1.9 CI Qualification Automation",
+    "exactCheckoutAssertionRequired": true,
+    "concurrencyCancellationRequired": true,
+    "contentsPermission": "read",
+    "retainedExp1Range": "EXP-1.1..EXP-1.10",
+    "evidenceArtifact": "exp-1-10-phase-closeout",
+    "evidenceRetentionDays": 7,
+    "liveDeploymentEvidenceRequired": false,
+    "liveDeploymentQualified": false,
+    "postMergeQualificationRequired": true,
+    "automaticTriggers": [
+      "pull_request",
+      "push:main"
+    ]
+  },
+  "exp1PhaseCloseout": {
+    "phase": "EXP-1",
+    "scope": "blockchain data integrity runtime and repository qualification",
+    "repositoryScopeComplete": true,
+    "liveNetworkComplete": false,
+    "genesisComplete": false,
+    "milestonesRequired": [
+      "EXP-1.1",
+      "EXP-1.2",
+      "EXP-1.3",
+      "EXP-1.4",
+      "EXP-1.5",
+      "EXP-1.6",
+      "EXP-1.7",
+      "EXP-1.8",
+      "EXP-1.9",
+      "EXP-1.10"
+    ],
+    "findingDispositions": {
+      "EXP-FIND-002": "repository runtime qualified; live endpoint transferred to EXP-7",
+      "EXP-FIND-004": "RPC binding/validation contract qualified; approved live binding transferred to EXP-7",
+      "EXP-FIND-007": "production consensus-provider wiring qualified; live consensus witness transferred to EXP-2/EXP-7",
+      "EXP-FIND-009": "repository implementation remediated; live canonical/deployed workflow witness transferred to EXP-2/EXP-4/EXP-7"
+    },
+    "acceptanceBoundary": {
+      "AC-2": "repository/runtime contribution complete; live target-network evidence pending",
+      "AC-3": "repository/runtime contribution complete; deployed operational evidence pending",
+      "AC-1": "historical producer source contribution complete; broader Explorer acceptance pending",
+      "AC-5": "historical producer source/UI trace contribution complete; deployed workflows pending",
+      "AC-6": "Indexer/Explorer repository integration contribution complete; production-equivalent deployed stack pending"
+    }
+  }
 }

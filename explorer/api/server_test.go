@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -67,7 +68,7 @@ func TestStatusRouteFailsClosedOnWrongChain(t *testing.T) {
 func TestBlockDetailRoute(t *testing.T) {
 	f := &fakeIndexer{
 		health: indexerapi.HealthResponse{Health: model.Health{ChainID: 420, IndexedHeight: 8}},
-		block: model.BlockRecord{ChainID: 420, Number: 7, Hash: "0xblock", ParentHash: "0xparent", Finality: model.FinalitySafe},
+		block: model.BlockRecord{ChainID: 420, Number: 7, Hash: "0xblock", ParentHash: "0xparent", Finality: model.FinalitySafe, SchemaVersion:"v1", Producer:&model.BlockProducer{ConsensusSlot:70,ProducerSeat:5,ProposerRank:1,ConsensusBlockRoot:"0xcblock",Certified:true}},
 		logs: []model.LogRecord{{ChainID: 420, BlockNumber: 7, BlockHash: "0xblock", TransactionHash: "0xtx"}},
 	}
 	s := newTestServer(t, f)
@@ -77,6 +78,7 @@ func TestBlockDetailRoute(t *testing.T) {
 	var got explorerservice.BlockDetailView
 	if err := json.Unmarshal(rr.Body.Bytes(), &got); err != nil { t.Fatal(err) }
 	if got.Block.Number != 7 || got.Block.Finality != model.FinalitySafe || got.LogCount != 1 { t.Fatalf("unexpected block detail: %+v", got) }
+	if got.Trace == nil || got.Trace.ExecutionBlockHash != "0xblock" || got.Trace.ConsensusBlockRoot != "0xcblock" || got.Trace.ProducerSeat != 5 { t.Fatalf("unexpected cross-layer trace: %+v", got.Trace) }
 	if got.Navigation.Previous == nil || *got.Navigation.Previous != 6 || got.Navigation.Next == nil || *got.Navigation.Next != 8 { t.Fatalf("unexpected navigation: %+v", got.Navigation) }
 }
 
@@ -97,9 +99,9 @@ func TestBlocksRouteReturnsPresentationPage(t *testing.T) {
 func transactionFixture() *fakeIndexer {
 	return &fakeIndexer{
 		tx: model.TransactionRecord{ChainID: 420, BlockNumber: 7, BlockHash: "0xblock", Hash: "0xtx", Index: 1, From: "0xfrom", To: "0xto"},
-		receipt: model.ReceiptRecord{ChainID: 420, BlockNumber: 7, BlockHash: "0xblock", TransactionHash: "0xtx", TransactionIndex: 1, Status: 1, GasUsed: 21000},
+		receipt: model.ReceiptRecord{ChainID: 420, BlockNumber: 7, BlockHash: "0xblock", TransactionHash: "0xtx", TransactionIndex: 1, Status: 1, GasUsed: 21000, EffectiveGasPriceWei: "1000000000", ActualFeeWei: "21000000000000"},
 		block: model.BlockRecord{ChainID: 420, Number: 7, Hash: "0xblock", Finality: model.FinalityFinalized},
-		logs: []model.LogRecord{{ChainID: 420, BlockNumber: 7, BlockHash: "0xblock", TransactionHash: "0xtx", TransactionIndex: 1, LogIndex: 0, Address: "0xcontract"}},
+		logs: []model.LogRecord{{ChainID: 420, BlockNumber: 7, BlockHash: "0xblock", TransactionHash: "0xtx", TransactionIndex: 1, LogIndex: 0, Address: "0x3333333333333333333333333333333333333333"}},
 	}
 }
 
@@ -110,7 +112,7 @@ func TestTransactionRoute(t *testing.T) {
 	if rr.Code != http.StatusOK { t.Fatalf("status=%d body=%s", rr.Code, rr.Body.String()) }
 	var got explorerservice.TransactionDetailView
 	if err := json.Unmarshal(rr.Body.Bytes(), &got); err != nil { t.Fatal(err) }
-	if got.Transaction.Hash != "0xtx" || got.Receipt.StatusLabel != "SUCCESS" || got.LogCount != 1 || got.Finality != model.FinalityFinalized { t.Fatalf("unexpected tx detail: %+v", got) }
+	if got.Transaction.Hash != "0xtx" || got.Receipt.StatusLabel != "SUCCESS" || got.Receipt.EffectiveGasPriceWei != "1000000000" || got.Receipt.ActualFeeWei != "21000000000000" || got.LogCount != 1 || got.Finality != model.FinalityFinalized { t.Fatalf("unexpected tx detail: %+v", got) }
 }
 
 func TestReceiptRoute(t *testing.T) {
@@ -124,7 +126,7 @@ func TestReceiptRoute(t *testing.T) {
 }
 
 func TestServiceVersionRoute(t *testing.T) {
-	f := &fakeIndexer{service: decoder.ServiceVersion{ServiceID: "420/service/explorer/v1", Version: 2}}
+	f := &fakeIndexer{service: decoder.ServiceVersion{ServiceID: "420/service/explorer/v1", Version: 2, Implementation: "0x420", ActivatedBlock: 7, ActivatedHash: "0x07"}}
 	s := newTestServer(t, f)
 	rr := httptest.NewRecorder()
 	s.Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodGet, "/v1/services/420%2Fservice%2Fexplorer%2Fv1/versions/2", nil))
@@ -146,4 +148,76 @@ func TestBlockRejectInvalidNumber(t *testing.T) {
 	rr := httptest.NewRecorder()
 	s.Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodGet, "/v1/blocks/not-a-number", nil))
 	if rr.Code != http.StatusBadRequest { t.Fatalf("status=%d body=%s", rr.Code, rr.Body.String()) }
+}
+
+
+func TestBlockTraceRoute(t *testing.T) {
+	f := &fakeIndexer{
+		block:model.BlockRecord{ChainID:420,Number:7,Hash:"0xblock",Finality:model.FinalitySafe,SchemaVersion:"v1",
+			Producer:&model.BlockProducer{ConsensusSlot:70,ProducerSeat:5,ProposerRank:1,ConsensusBlockRoot:"0xcblock",Certified:true}},
+	}
+	s:=newTestServer(t,f)
+	rr:=httptest.NewRecorder()
+	s.Handler().ServeHTTP(rr,httptest.NewRequest(http.MethodGet,"/v1/blocks/7/trace",nil))
+	if rr.Code!=http.StatusOK { t.Fatalf("status=%d body=%s",rr.Code,rr.Body.String()) }
+	var got explorerservice.BlockTraceView
+	if err:=json.Unmarshal(rr.Body.Bytes(),&got);err!=nil{t.Fatal(err)}
+	if got.ExecutionBlockHash!="0xblock" || got.ConsensusBlockRoot!="0xcblock" || got.ConsensusSlot!=70 || got.ProducerSeat!=5 || got.ProposerRank!=1 || !got.Certified {
+		t.Fatalf("unexpected trace: %+v",got)
+	}
+	if got.CanonicalAuthority { t.Fatal("trace overpromoted canonical authority") }
+}
+
+func TestBlockTraceRouteFailsClosedWithoutProducer(t *testing.T) {
+	f:=&fakeIndexer{block:model.BlockRecord{ChainID:420,Number:7,Hash:"0xblock"}}
+	s:=newTestServer(t,f)
+	rr:=httptest.NewRecorder()
+	s.Handler().ServeHTTP(rr,httptest.NewRequest(http.MethodGet,"/v1/blocks/7/trace",nil))
+	if rr.Code==http.StatusOK { t.Fatalf("expected failure, body=%s",rr.Body.String()) }
+}
+
+
+func TestStatusRouteFailsClosedOnStaleIndexer(t *testing.T) {
+	f:=&fakeIndexer{health:indexerapi.HealthResponse{Health:model.Health{
+		ChainID:420, IndexedHeight:10, SafeHeight:9, FinalizedHeight:8,
+		State:"HEALTHY", LastIngestAt:time.Now().Add(-2*time.Hour),
+	}}}
+	s:=newTestServer(t,f)
+	rr:=httptest.NewRecorder()
+	s.Handler().ServeHTTP(rr,httptest.NewRequest(http.MethodGet,"/v1/status",nil))
+	if rr.Code!=http.StatusServiceUnavailable { t.Fatalf("status=%d body=%s",rr.Code,rr.Body.String()) }
+	if !strings.Contains(rr.Body.String(),"INDEXER_STALE") { t.Fatalf("stale issue code missing: %s",rr.Body.String()) }
+}
+
+func TestStatusRouteFailsClosedOnRuntimeDegradation(t *testing.T) {
+	now:=time.Now()
+	f:=&fakeIndexer{health:indexerapi.HealthResponse{Health:model.Health{
+		ChainID:420, IndexedHeight:10, SafeHeight:9, FinalizedHeight:8,
+		State:"DEGRADED", LastIngestAt:now, RuntimeIssue:"INGEST_CATCHUP_FAILED",
+	}}}
+	s:=newTestServer(t,f)
+	rr:=httptest.NewRecorder()
+	s.Handler().ServeHTTP(rr,httptest.NewRequest(http.MethodGet,"/v1/status",nil))
+	if rr.Code!=http.StatusServiceUnavailable { t.Fatalf("status=%d body=%s",rr.Code,rr.Body.String()) }
+	if !strings.Contains(rr.Body.String(),"INDEXER_DEGRADED") { t.Fatalf("degraded issue code missing: %s",rr.Body.String()) }
+}
+
+func TestReadyRouteFailsClosedOnInconsistentFinality(t *testing.T) {
+	now:=time.Now()
+	f:=&fakeIndexer{health:indexerapi.HealthResponse{Health:model.Health{
+		ChainID:420, IndexedHeight:10, SafeHeight:11, FinalizedHeight:8,
+		State:"HEALTHY", LastIngestAt:now,
+	}}}
+	s:=newTestServer(t,f)
+	rr:=httptest.NewRecorder()
+	s.Handler().ServeHTTP(rr,httptest.NewRequest(http.MethodGet,"/v1/ready",nil))
+	if rr.Code!=http.StatusServiceUnavailable { t.Fatalf("status=%d body=%s",rr.Code,rr.Body.String()) }
+	if !strings.Contains(rr.Body.String(),"INCONSISTENT_FINALITY") { t.Fatalf("inconsistent-finality issue missing: %s",rr.Body.String()) }
+}
+
+func TestConsensusRouteFailsClosedWhenProviderUnavailable(t *testing.T) {
+	s:=newTestServer(t,&fakeIndexer{})
+	rr:=httptest.NewRecorder()
+	s.Handler().ServeHTTP(rr,httptest.NewRequest(http.MethodGet,"/v1/consensus",nil))
+	if rr.Code==http.StatusOK { t.Fatalf("consensus route unexpectedly succeeded: %s",rr.Body.String()) }
 }

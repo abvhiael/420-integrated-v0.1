@@ -24,16 +24,33 @@ type Store interface {
 	PutBundle(model.BlockRecord, []model.TransactionRecord, []model.ReceiptRecord, []model.LogRecord) error
 }
 
+type ProducerAttributor interface {
+	ProducerForBlock(string) (model.BlockProducer, bool, error)
+}
+
 type Engine struct {
 	chainID       uint64
 	schemaVersion string
 	source        Source
 	store         Store
 	core          *core.Indexer
+	producerAttributor ProducerAttributor
 }
 
 func New(chainID uint64, schemaVersion string, source Source, store Store) *Engine {
 	return &Engine{chainID: chainID, schemaVersion: schemaVersion, source: source, store: store, core: core.New(chainID, schemaVersion, store)}
+}
+
+func (e *Engine) WithProducerAttributor(a ProducerAttributor) *Engine { e.producerAttributor = a; return e }
+
+func (e *Engine) attributeProducer(block *model.BlockRecord) error {
+	if block.Number == 0 { return nil }
+	if e.producerAttributor == nil { return nil }
+	producer, ok, err := e.producerAttributor.ProducerForBlock(block.Hash)
+	if err != nil { return err }
+	if !ok { return fmt.Errorf("historical producer attribution missing for block %d %s", block.Number, block.Hash) }
+	block.Producer = &producer
+	return nil
 }
 
 // CatchUp ingests sequential canonical blocks through the current RPC head.
@@ -53,12 +70,13 @@ func (e *Engine) CatchUp(ctx context.Context) error {
 		bundle, err := e.source.BundleByNumber(ctx, e.chainID, number, model.FinalityHead, e.schemaVersion)
 		if err != nil { return fmt.Errorf("fetch block %d: %w", number, err) }
 		if bundle.Block.Number != number { return fmt.Errorf("rpc returned block %d for requested %d", bundle.Block.Number, number) }
+		if err := e.attributeProducer(&bundle.Block); err != nil { return fmt.Errorf("attribute block %d producer: %w", number, err) }
 		if number > 0 {
 			parent, ok, err := e.store.Block(number - 1)
 			if err != nil { return err }
 			if hasCP || number > start {
 				if !ok || parent.Hash != bundle.Block.ParentHash {
-					r := reorg.New(e.chainID, e.schemaVersion, e.source, e.store)
+					r := reorg.New(e.chainID, e.schemaVersion, e.source, e.store).WithProducerAttributor(e.producerAttributor)
 					if err := r.Repair(ctx, head); err != nil { return fmt.Errorf("repair reorg at block %d: %w", number, err) }
 					return e.PromoteFinality(ctx)
 				}
@@ -74,7 +92,7 @@ func (e *Engine) CatchUp(ctx context.Context) error {
 		}
 		if err := e.core.AcceptBlock(bundle.Block); err != nil {
 			if errors.Is(err, core.ErrParentMismatch) {
-				r := reorg.New(e.chainID, e.schemaVersion, e.source, e.store)
+				r := reorg.New(e.chainID, e.schemaVersion, e.source, e.store).WithProducerAttributor(e.producerAttributor)
 				if repairErr := r.Repair(ctx, head); repairErr != nil { return fmt.Errorf("repair reorg after accept block %d: %w", number, repairErr) }
 				return e.PromoteFinality(ctx)
 			}

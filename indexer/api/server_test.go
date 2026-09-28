@@ -2,6 +2,7 @@ package api
 
 import (
 	"net/http/httptest"
+	"time"
 	"testing"
 
 	"github.com/420integrated/420-integrated/indexer/decoder"
@@ -18,7 +19,7 @@ func (fakeBackend) Transaction(hash string) (model.TransactionRecord, bool, erro
 	return model.TransactionRecord{ChainID: 420, BlockNumber: 12, BlockHash: "0xblock", Hash: hash, Index: 0}, true, nil
 }
 func (fakeBackend) Receipt(hash string) (model.ReceiptRecord, bool, error) {
-	return model.ReceiptRecord{ChainID: 420, BlockNumber: 12, BlockHash: "0xblock", TransactionHash: hash, Status: 1}, true, nil
+	return model.ReceiptRecord{ChainID: 420, BlockNumber: 12, BlockHash: "0xblock", TransactionHash: hash, Status: 1, GasUsed: 21000, EffectiveGasPriceWei: "1000000000", ActualFeeWei: "21000000000000"}, true, nil
 }
 func (fakeBackend) LogsByBlock(number uint64) ([]model.LogRecord, error) {
 	return []model.LogRecord{{ChainID: 420, BlockNumber: number, BlockHash: "0xblock", TransactionHash: "0xtx", LogIndex: 0}}, nil
@@ -58,4 +59,46 @@ func TestExtendedReadEndpoints(t *testing.T) {
 func contains(s, sub string) bool {
 	for i := 0; i+len(sub) <= len(s); i++ { if s[i:i+len(sub)] == sub { return true } }
 	return false
+}
+
+
+type runtimeDegradedBackend struct{ fakeBackend }
+func (runtimeDegradedBackend) Health() (model.Health,error) {
+	now:=time.Now().UTC()
+	return model.Health{
+		ChainID:420, IndexedHeight:12, SafeHeight:11, FinalizedHeight:10,
+		State:"DEGRADED", LastIngestAt:now, RuntimeIssue:"RPC_SOURCE_STALE", RuntimeIssueAt:&now,
+	},nil
+}
+
+func TestHealthEndpointSurfacesCategoricalRuntimeDegradation(t *testing.T) {
+	r:=httptest.NewRequest("GET","/v1/health",nil)
+	w:=httptest.NewRecorder()
+	NewServer(runtimeDegradedBackend{}).Handler().ServeHTTP(w,r)
+	if w.Code!=200 { t.Fatalf("unexpected status %d",w.Code) }
+	body:=w.Body.String()
+	if !contains(body,`"state":"DEGRADED"`) || !contains(body,`"runtimeIssue":"RPC_SOURCE_STALE"`) {
+		t.Fatalf("runtime degradation missing: %s",body)
+	}
+	if !contains(body,`"canonicalAuthority":false`) { t.Fatalf("authority boundary missing: %s",body) }
+}
+
+func TestConsensusEndpointFailsClosedWhenProviderUnavailable(t *testing.T) {
+	r:=httptest.NewRequest("GET","/v1/consensus",nil)
+	w:=httptest.NewRecorder()
+	NewServer(fakeBackend{}).Handler().ServeHTTP(w,r)
+	if w.Code!=503 { t.Fatalf("expected 503, got %d body=%s",w.Code,w.Body.String()) }
+	if !contains(w.Body.String(),`"canonicalAuthority":false`) { t.Fatalf("authority boundary missing: %s",w.Body.String()) }
+}
+
+
+func TestReceiptEndpointSerializesActualFeeFields(t *testing.T) {
+	r := httptest.NewRequest("GET", "/v1/receipts/0xtx", nil)
+	w := httptest.NewRecorder()
+	NewServer(fakeBackend{}).Handler().ServeHTTP(w, r)
+	if w.Code != 200 { t.Fatalf("unexpected status %d", w.Code) }
+	body := w.Body.String()
+	if !contains(body, `"effectiveGasPriceWei":"1000000000"`) || !contains(body, `"actualFeeWei":"21000000000000"`) {
+		t.Fatalf("fee serialization missing: %s", body)
+	}
 }

@@ -13,10 +13,10 @@ func TestTransactionDetailIncludesReceiptLogsAndFinality(t *testing.T) {
 	idx := &fakeIndexer{
 		health: indexerapi.HealthResponse{Health: model.Health{ChainID: 420, State: "READY", LastIngestAt: time.Now()}},
 		tx: model.TransactionRecord{ChainID: 420, BlockNumber: 9, BlockHash: "0xblock", Hash: "0xtx", Index: 2, From: "0xfrom", To: "0xto"},
-		receipt: model.ReceiptRecord{ChainID: 420, BlockNumber: 9, BlockHash: "0xblock", TransactionHash: "0xtx", TransactionIndex: 2, Status: 1, GasUsed: 42000},
+		receipt: model.ReceiptRecord{ChainID: 420, BlockNumber: 9, BlockHash: "0xblock", TransactionHash: "0xtx", TransactionIndex: 2, Status: 1, GasUsed: 42000, EffectiveGasPriceWei: "1000000000", ActualFeeWei: "42000000000000"},
 		block: model.BlockRecord{ChainID: 420, Number: 9, Hash: "0xblock", Finality: model.FinalitySafe},
 		logs: []model.LogRecord{
-			{ChainID: 420, BlockNumber: 9, BlockHash: "0xblock", TransactionHash: "0xtx", TransactionIndex: 2, LogIndex: 0, Address: "0xcontract"},
+			{ChainID: 420, BlockNumber: 9, BlockHash: "0xblock", TransactionHash: "0xtx", TransactionIndex: 2, LogIndex: 0, Address: "0x3333333333333333333333333333333333333333"},
 			{ChainID: 420, BlockNumber: 9, BlockHash: "0xblock", TransactionHash: "0xother", TransactionIndex: 3, LogIndex: 1},
 		},
 	}
@@ -25,13 +25,13 @@ func TestTransactionDetailIncludesReceiptLogsAndFinality(t *testing.T) {
 	if err != nil { t.Fatal(err) }
 	if detail.Transaction.Hash != "0xtx" || detail.Receipt.StatusLabel != "SUCCESS" { t.Fatalf("unexpected detail: %+v", detail) }
 	if detail.Finality != model.FinalitySafe { t.Fatalf("finality=%s", detail.Finality) }
-	if detail.LogCount != 1 || len(detail.Logs) != 1 || detail.Logs[0].Address != "0xcontract" { t.Fatalf("unexpected logs: %+v", detail.Logs) }
+	if detail.LogCount != 1 || len(detail.Logs) != 1 || detail.Logs[0].Address != "0x3333333333333333333333333333333333333333" { t.Fatalf("unexpected logs: %+v", detail.Logs) }
 }
 
 func TestTransactionDetailLabelsRevertedReceipt(t *testing.T) {
 	idx := &fakeIndexer{
 		tx: model.TransactionRecord{ChainID: 420, BlockNumber: 1, BlockHash: "0xb", Hash: "0xt", Index: 0},
-		receipt: model.ReceiptRecord{ChainID: 420, BlockNumber: 1, BlockHash: "0xb", TransactionHash: "0xt", TransactionIndex: 0, Status: 0},
+		receipt: model.ReceiptRecord{ChainID: 420, BlockNumber: 1, BlockHash: "0xb", TransactionHash: "0xt", TransactionIndex: 0, Status: 0, EffectiveGasPriceWei: "0", ActualFeeWei: "0"},
 		block: model.BlockRecord{ChainID: 420, Number: 1, Hash: "0xb", Finality: model.FinalityFinalized},
 	}
 	svc, _ := New(idx, 420, time.Minute)
@@ -73,11 +73,56 @@ func TestTransactionDetailRejectsLogProvenanceMismatch(t *testing.T) {
 func TestReceiptDetailMirrorsTransactionDetail(t *testing.T) {
 	idx := &fakeIndexer{
 		tx: model.TransactionRecord{ChainID: 420, BlockNumber: 2, BlockHash: "0xb", Hash: "0xt", Index: 0},
-		receipt: model.ReceiptRecord{ChainID: 420, BlockNumber: 2, BlockHash: "0xb", TransactionHash: "0xt", TransactionIndex: 0, Status: 1},
+		receipt: model.ReceiptRecord{ChainID: 420, BlockNumber: 2, BlockHash: "0xb", TransactionHash: "0xt", TransactionIndex: 0, Status: 1, GasUsed: 21000, EffectiveGasPriceWei: "2000000000", ActualFeeWei: "42000000000000"},
 		block: model.BlockRecord{ChainID: 420, Number: 2, Hash: "0xb", Finality: model.FinalityHead},
 	}
 	svc, _ := New(idx, 420, time.Minute)
 	detail, err := svc.ReceiptDetail(context.Background(), "0xt")
 	if err != nil { t.Fatal(err) }
 	if detail.Receipt.TransactionHash != "0xt" || detail.Transaction.Hash != "0xt" || detail.Finality != model.FinalityHead { t.Fatalf("unexpected receipt detail: %+v", detail) }
+}
+
+
+func TestTransactionDetailExposesAuthoritativeActualFee(t *testing.T) {
+	idx := &fakeIndexer{
+		tx: model.TransactionRecord{ChainID: 420, BlockNumber: 3, BlockHash: "0xb", Hash: "0xt", Index: 0},
+		receipt: model.ReceiptRecord{ChainID: 420, BlockNumber: 3, BlockHash: "0xb", TransactionHash: "0xt", TransactionIndex: 0, Status: 1, GasUsed: 21000, EffectiveGasPriceWei: "1000000000", ActualFeeWei: "21000000000000"},
+		block: model.BlockRecord{ChainID: 420, Number: 3, Hash: "0xb", Finality: model.FinalityFinalized},
+	}
+	svc, _ := New(idx, 420, time.Minute)
+	detail, err := svc.TransactionDetail(context.Background(), "0xt")
+	if err != nil { t.Fatal(err) }
+	if detail.Receipt.EffectiveGasPriceWei != "1000000000" || detail.Receipt.ActualFeeWei != "21000000000000" {
+		t.Fatalf("unexpected fee fields: %+v", detail.Receipt)
+	}
+}
+
+func TestTransactionDetailSupportsZeroFee(t *testing.T) {
+	idx := &fakeIndexer{
+		tx: model.TransactionRecord{ChainID: 420, BlockNumber: 4, BlockHash: "0xb", Hash: "0xt", Index: 0},
+		receipt: model.ReceiptRecord{ChainID: 420, BlockNumber: 4, BlockHash: "0xb", TransactionHash: "0xt", TransactionIndex: 0, Status: 1, GasUsed: 0, EffectiveGasPriceWei: "0", ActualFeeWei: "0"},
+		block: model.BlockRecord{ChainID: 420, Number: 4, Hash: "0xb"},
+	}
+	svc, _ := New(idx, 420, time.Minute)
+	if _, err := svc.TransactionDetail(context.Background(), "0xt"); err != nil { t.Fatal(err) }
+}
+
+func TestTransactionDetailRejectsInconsistentActualFee(t *testing.T) {
+	idx := &fakeIndexer{
+		tx: model.TransactionRecord{ChainID: 420, BlockNumber: 6, BlockHash: "0xb", Hash: "0xt", Index: 0},
+		receipt: model.ReceiptRecord{ChainID: 420, BlockNumber: 6, BlockHash: "0xb", TransactionHash: "0xt", TransactionIndex: 0, Status: 1, GasUsed: 21000, EffectiveGasPriceWei: "1000000000", ActualFeeWei: "1"},
+		block: model.BlockRecord{ChainID: 420, Number: 6, Hash: "0xb"},
+	}
+	svc, _ := New(idx, 420, time.Minute)
+	if _, err := svc.TransactionDetail(context.Background(), "0xt"); err == nil { t.Fatal("expected inconsistent actual fee to fail closed") }
+}
+
+func TestTransactionDetailRejectsMissingEffectiveGasPrice(t *testing.T) {
+	idx := &fakeIndexer{
+		tx: model.TransactionRecord{ChainID: 420, BlockNumber: 6, BlockHash: "0xb", Hash: "0xt", Index: 0},
+		receipt: model.ReceiptRecord{ChainID: 420, BlockNumber: 6, BlockHash: "0xb", TransactionHash: "0xt", TransactionIndex: 0, Status: 1, GasUsed: 21000},
+		block: model.BlockRecord{ChainID: 420, Number: 6, Hash: "0xb"},
+	}
+	svc, _ := New(idx, 420, time.Minute)
+	if _, err := svc.TransactionDetail(context.Background(), "0xt"); err == nil { t.Fatal("expected missing effective gas price to fail closed") }
 }

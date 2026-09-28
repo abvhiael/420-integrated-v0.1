@@ -65,7 +65,8 @@
         "docs/audit/EXP-0.1.2-indexer-runtime-topology-addendum.md"
       ],
       "evidence": [
-        "EXP-DEP-001: source implemented_and_tested; deployment pending_deployment; live qualification unverified."
+        "EXP-DEP-001: source implemented_and_tested; deployment pending_deployment; live qualification unverified.",
+        "EXP-1.4 through EXP-1.10 qualify the deployable Indexer runtime and API; no approved live testnet endpoint exists yet."
       ],
       "root_cause": "Deployment-stage work has not supplied a real testnet service endpoint and live witness evidence.",
       "consequences": [
@@ -99,7 +100,11 @@
         "AC-6"
       ],
       "genesis_blocking": true,
-      "blocking_rationale": "The shared Indexer is mandatory for every core Explorer data path; source CI cannot substitute for deployed service qualification."
+      "blocking_rationale": "The shared Indexer is mandatory for every core Explorer data path; source CI cannot substitute for deployed service qualification.",
+      "exp_1_disposition": "REPOSITORY_RUNTIME_PACKAGING_AND_API_QUALIFIED_LIVE_ENDPOINT_PENDING",
+      "post_exp_1_remaining_owners": [
+        "EXP-7"
+      ]
     },
     {
       "id": "EXP-FIND-003",
@@ -164,7 +169,8 @@
         "docs/architecture/infrastructure/420indexer.md"
       ],
       "evidence": [
-        "EXP-DEP-004: source implemented; deployment and live qualification unverified."
+        "EXP-DEP-004: source implemented; deployment and live qualification unverified.",
+        "EXP-1.2 and EXP-1.8 qualify chain/genesis/finality/freshness validation and fail-closed runtime behavior; approved live RPC binding remains pending."
       ],
       "root_cause": "No authoritative target-network runtime binding/evidence is present in the audited Explorer readiness chain.",
       "consequences": [
@@ -197,7 +203,11 @@
         "AC-3"
       ],
       "genesis_blocking": true,
-      "blocking_rationale": "Accurate Explorer data depends on a qualified canonical upstream; implementation of an RPC adapter is insufficient evidence of correct deployed binding."
+      "blocking_rationale": "Accurate Explorer data depends on a qualified canonical upstream; implementation of an RPC adapter is insufficient evidence of correct deployed binding.",
+      "exp_1_disposition": "RPC_BINDING_CONTRACT_AND_CONTINUOUS_VALIDATION_QUALIFIED_LIVE_BINDING_PENDING",
+      "post_exp_1_remaining_owners": [
+        "EXP-7"
+      ]
     },
     {
       "id": "EXP-FIND-005",
@@ -315,7 +325,9 @@
         "docs/audit/EXP-0.1.2-indexer-runtime-topology-addendum.md"
       ],
       "evidence": [
-        "EXP-DEP-008: implemented source; deployment/live qualification unverified."
+        "EXP-DEP-008: implemented source; deployment/live qualification unverified.",
+        "EXP-1.5 through EXP-1.8 qualify production consensus-provider wiring, validator projection and fail-closed behavior; live consensus witness remains pending.",
+        "EXP-2.4 qualifies Explorer consensus slot/epoch/rotation arithmetic, committee/proposer integrity, checkpoint/QC provenance, HTTP serialization, and Indexer-client authority rejection at repository scope."
       ],
       "root_cause": "Source route/interface existence has not been paired with deployed backend/provider composition evidence.",
       "consequences": [
@@ -350,14 +362,29 @@
         "AC-6"
       ],
       "genesis_blocking": true,
-      "blocking_rationale": "Validator and epoch/rotation are explicitly mandatory Genesis views."
+      "blocking_rationale": "Validator and epoch/rotation are explicitly mandatory Genesis views.",
+      "exp_1_disposition": "PRODUCTION_PROVIDER_WIRING_AND_NEGATIVE_BEHAVIOR_QUALIFIED_LIVE_CONSENSUS_SOURCE_PENDING",
+      "post_exp_1_remaining_owners": [
+        "EXP-2",
+        "EXP-7"
+      ],
+      "exp_2_4_disposition": "REPOSITORY_CONSENSUS_PRESENTATION_AND_FAIL_CLOSED_VALIDATION_QUALIFIED_LIVE_SOURCE_PENDING",
+      "exp_2_4_evidence": [
+        "docs/audit/EXP-2.4-consensus-producer.json",
+        "explorer/service/exp_2_4_consensus_test.go",
+        "explorer/api/exp_2_4_consensus_test.go",
+        "explorer/indexerclient/exp_2_4_consensus_test.go"
+      ],
+      "post_exp_2_4_remaining_owners": [
+        "EXP-7"
+      ]
     },
     {
       "id": "EXP-FIND-008",
       "classification": "Genesis blocker",
       "severity": "high",
       "title": "Actual transaction fee inspection is incomplete",
-      "description": "The transaction workflow exposes gasUsed but not effective gas price or a computed actual native fee.",
+      "description": "Indexer and Explorer service/API fee fields are implemented by EXP-2.1; the remaining Genesis blocker is deployed UI rendering and end-to-end workflow qualification.",
       "affected": [
         "explorer/service/transactionviews.go",
         "indexer/model/model.go",
@@ -365,9 +392,12 @@
         "docs/audit/EXP-0.2.2-user-workflow-matrix.json"
       ],
       "evidence": [
-        "EXP-WF-003 is partial_source and gap_requires_implementation."
+        "EXP-WF-003 originated as partial_source and gap_requires_implementation.",
+        "EXP-2.1 adds receipt effectiveGasPriceWei and actualFeeWei from canonical JSON-RPC receipt data using overflow-safe integer arithmetic.",
+        "EXP-2.1 validates fee consistency in Explorer transaction/receipt presentation and serializes both fields through Indexer and Explorer APIs.",
+        "Deployed UI fee rendering remains owned by EXP-4."
       ],
-      "root_cause": "The inspected transaction/receipt presentation model lacks the effective gas-price/fee inputs required to calculate the actual fee.",
+      "root_cause": "Repository service/API fee-model gap remediated in EXP-2.1; deployed presentation remains unqualified.",
       "consequences": [
         "Users cannot verify the actual cost of a transaction from Explorer.",
         "The transaction-inspection workflow described by the audit is incomplete."
@@ -380,8 +410,8 @@
         "define authoritative fee fields for the 420 execution model"
       ],
       "remediation": [
-        "Expose the appropriate effective gas price or authoritative fee value through Indexer/Explorer models.",
-        "Render gas used and actual fee distinctly."
+        "Completed by EXP-2.1: expose effective gas price and computed actual native fee through Indexer/Explorer models and APIs.",
+        "Render gas used and actual fee distinctly in the deployed Explorer UI and qualify the user workflow."
       ],
       "tests": [
         "known gasUsed × effectiveGasPrice vector or protocol-equivalent fee vector",
@@ -398,14 +428,18 @@
         "AC-5"
       ],
       "genesis_blocking": true,
-      "blocking_rationale": "EXP-0.2.2 records fee inspection as a required workflow with an implementation gap, so the workflow cannot be qualified until the missing fee data is implemented."
+      "blocking_rationale": "EXP-0.2.2 records fee inspection as a required workflow with an implementation gap, so the workflow cannot be qualified until the missing fee data is implemented.",
+      "exp_2_disposition": "REPOSITORY_FEE_MODEL_AND_API_IMPLEMENTATION_QUALIFIED_UI_WORKFLOW_PENDING",
+      "post_exp_2_remaining_owners": [
+        "EXP-4"
+      ]
     },
     {
       "id": "EXP-FIND-009",
       "classification": "Genesis blocker",
       "severity": "high",
-      "title": "Historical validator-produced block attribution is absent",
-      "description": "The current block record lacks proposer/validator identity, and Explorer cannot trace a historical block to the validator/proposer that produced it.",
+      "title": "Historical validator-produced block attribution live qualification pending",
+      "description": "Historical producer/proposer provenance is implemented in consensus-owned produced-block history, persisted by 420Indexer, exposed through Explorer block detail and /v1/blocks/{number}/trace, and covered by reorg/finality negative tests. The remaining Genesis blocker is live target-network comparison and production-equivalent workflow evidence.",
       "affected": [
         "indexer/model/model.go",
         "explorer/service/consensusviews.go",
@@ -413,28 +447,31 @@
         "docs/audit/EXP-0.2.2-user-workflow-matrix.json"
       ],
       "evidence": [
-        "EXP-WF-008 is not_observed and gap_requires_implementation."
+        "EXP-1.6 repository historical producer attribution qualified.",
+        "EXP-1.7 execution-to-consensus traceability and Explorer rendering qualified.",
+        "EXP-1.8 malformed/missing provenance and reorg/finality negative behavior qualified.",
+        "Live canonical consensus comparison remains pending provisioned testnet.",
+        "EXP-2.4 retains and qualifies execution-to-consensus producer trace presentation with explicit non-authoritative authority labels."
       ],
-      "root_cause": "Historical block provenance and consensus status are modeled separately without a block-to-producer field/mapping in the inspected path.",
+      "root_cause": "Repository implementation gap was remediated in EXP-1.6/1.7; approved live consensus/execution sources are not yet provisioned for target-network witness qualification.",
       "consequences": [
-        "Users cannot verify block production attribution through the required validator/block workflow."
+        "Genesis acceptance cannot yet rely on a live block-to-producer witness from the approved target network."
       ],
       "dependencies": [
-        "canonical consensus/block provenance",
-        "Indexer block model"
+        "approved canonical execution source",
+        "approved canonical consensus source",
+        "deployed Indexer/Explorer"
       ],
       "prerequisite_work": [
-        "define authoritative historical producer identity source"
+        "provision approved testnet execution and consensus sources"
       ],
       "remediation": [
-        "Add historical producer/proposer provenance to the Indexer model/API.",
-        "Expose and link producer identity in Explorer block/consensus views."
+        "Run live block-to-producer comparison against canonical consensus data.",
+        "Exercise the deployed Explorer producer/trace workflow on the exact release candidate."
       ],
       "tests": [
-        "block-to-producer model/API fixtures",
-        "reorg/finality provenance case",
-        "UI producer link test",
-        "testnet comparison with canonical consensus data"
+        "live block-to-producer canonical comparison",
+        "deployed Explorer producer trace workflow"
       ],
       "later_owner": [
         "EXP-1",
@@ -447,7 +484,22 @@
         "AC-5"
       ],
       "genesis_blocking": true,
-      "blocking_rationale": "The user-workflow matrix explicitly marks validator-produced block inspection as an implementation gap tied to mandatory block and validator capabilities."
+      "blocking_rationale": "Repository attribution is now implemented and qualified, but Genesis still requires live target-network and deployed workflow evidence.",
+      "exp_1_disposition": "REPOSITORY_IMPLEMENTATION_FULLY_REMEDIATED_LIVE_WITNESS_PENDING",
+      "post_exp_1_remaining_owners": [
+        "EXP-2",
+        "EXP-4",
+        "EXP-7"
+      ],
+      "exp_2_4_disposition": "REPOSITORY_PRODUCER_TRACE_PRESENTATION_QUALIFIED_LIVE_AND_DEPLOYED_UI_WITNESSES_PENDING",
+      "exp_2_4_evidence": [
+        "docs/audit/EXP-2.4-consensus-producer.json",
+        "explorer/service/exp_2_4_consensus_test.go"
+      ],
+      "post_exp_2_4_remaining_owners": [
+        "EXP-4",
+        "EXP-7"
+      ]
     },
     {
       "id": "EXP-FIND-010",
@@ -462,7 +514,8 @@
         "docs/audit/EXP-0.2.2-user-workflow-matrix.json"
       ],
       "evidence": [
-        "EXP-WF-013 is partial_source and mapped_to_later_gate; its limitations state that the web table does not display topic values/data."
+        "EXP-WF-013 is partial_source and mapped_to_later_gate; its limitations state that the web table does not display topic values/data.",
+        "EXP-2.5 qualifies complete raw transaction input/value and log topic/data presentation with fail-closed validation at repository service/API scope."
       ],
       "root_cause": "The frontend currently summarizes indexed logs, and the accepted workflow matrix leaves complete raw event presentation for a later qualification gate rather than marking it as a confirmed implementation blocker.",
       "consequences": [
@@ -496,7 +549,17 @@
         "AC-7"
       ],
       "genesis_blocking": true,
-      "blocking_rationale": "Receipt/logs is a mandatory Genesis view, so event inspectability must be qualified before final Genesis closeout; however EXP-0.2.2 did not classify this workflow as gap_requires_implementation, so 0.2.5 must preserve it as a qualification gap rather than invent a source blocker."
+      "blocking_rationale": "Receipt/logs is a mandatory Genesis view, so event inspectability must be qualified before final Genesis closeout; however EXP-0.2.2 did not classify this workflow as gap_requires_implementation, so 0.2.5 must preserve it as a qualification gap rather than invent a source blocker.",
+      "exp_2_5_disposition": "REPOSITORY_RAW_CALL_AND_EVENT_INSPECTION_QUALIFIED_DEPLOYED_UI_PENDING",
+      "exp_2_5_evidence": [
+        "docs/audit/EXP-2.5-raw-call-events.json",
+        "explorer/service/eventviews.go",
+        "explorer/service/exp_2_5_raw_events_test.go",
+        "explorer/api/exp_2_5_raw_events_test.go"
+      ],
+      "post_exp_2_5_remaining_owners": [
+        "EXP-4"
+      ]
     },
     {
       "id": "EXP-FIND-011",

@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/420integrated/420-integrated/consensus/storage"
 	ctypes "github.com/420integrated/420-integrated/consensus/types"
@@ -67,4 +68,35 @@ func (p *Provider) Consensus() (model.ConsensusStatus, error) {
 		Safe: model.ConsensusCheckpoint{Slot: st.Safe.Slot, Root: rootString(st.Safe.Root)},
 		Finalized: model.ConsensusCheckpoint{Slot: st.Finalized.Slot, Root: rootString(st.Finalized.Root)},
 	}, nil
+}
+
+
+func (p *Provider) ProducerForBlock(executionHash string) (model.BlockProducer, bool, error) {
+	executionHash = strings.ToLower(strings.TrimSpace(executionHash))
+	if executionHash == "" { return model.BlockProducer{}, false, fmt.Errorf("%w: execution block hash required", ErrInvalidStatus) }
+	st, ok, err := p.store.Load()
+	if err != nil { return model.BlockProducer{}, false, err }
+	if !ok { return model.BlockProducer{}, false, ErrUnavailable }
+	var found *storage.ProducedBlockStatus
+	seenHash := map[string]bool{}
+	seenSlot := map[uint64]bool{}
+	for i := range st.ProducedBlocks {
+		rec := &st.ProducedBlocks[i]
+		hash := strings.ToLower(strings.TrimSpace(rec.ExecutionBlockHash))
+		if hash == "" { return model.BlockProducer{}, false, fmt.Errorf("%w: historical execution block hash missing", ErrInvalidStatus) }
+		if rec.ConsensusBlockRoot == "" { return model.BlockProducer{}, false, fmt.Errorf("%w: consensus block root missing for %s", ErrInvalidStatus, hash) }
+		if rec.ProposerRank > 2 { return model.BlockProducer{}, false, fmt.Errorf("%w: proposer rank %d invalid", ErrInvalidStatus, rec.ProposerRank) }
+		if seenHash[hash] { return model.BlockProducer{}, false, fmt.Errorf("%w: duplicate producer attribution for %s", ErrInvalidStatus, hash) }
+		if seenSlot[rec.Slot] { return model.BlockProducer{}, false, fmt.Errorf("%w: duplicate canonical produced-block slot %d", ErrInvalidStatus, rec.Slot) }
+		seenHash[hash], seenSlot[rec.Slot] = true, true
+		if hash == executionHash { found = rec }
+	}
+	if found == nil { return model.BlockProducer{}, false, nil }
+	return model.BlockProducer{
+		ConsensusSlot: found.Slot,
+		ProducerSeat: found.ProducerSeat,
+		ProposerRank: found.ProposerRank,
+		ConsensusBlockRoot: found.ConsensusBlockRoot,
+		Certified: found.Certified,
+	}, true, nil
 }

@@ -1,0 +1,189 @@
+{
+  "schema": "420explorer-exp-2.2-http-route-contracts-v1",
+  "milestone": "EXP-2.2",
+  "title": "Explorer HTTP/API route-contract qualification",
+  "status": "COMPLETE",
+  "baseline": {
+    "exp_2_1_qualified_head": "b0d21dd6247be9274b248f2b1f239bf5a533b601"
+  },
+  "objective": "Qualify the 420Explorer HTTP/API server contract for core status, block, transaction/receipt, and ProtocolRegistry service/version routes, including complete route discovery, bounded pagination, provenance headers, representative response serialization, and fail-closed invalid/unsupported API behavior.",
+  "implementation_boundary": {
+    "owns": [
+      "Explorer HTTP route registration and capability discovery contract",
+      "network status/readiness HTTP presentation",
+      "block list/detail/trace HTTP routing",
+      "transaction and receipt HTTP routing",
+      "ProtocolRegistry service/version HTTP routing",
+      "HTTP pagination-input validation",
+      "API-vs-SPA routing isolation and JSON failure behavior"
+    ],
+    "does_not_own": [
+      "canonical chain authority",
+      "live target-network deployment",
+      "Registry runtime/code-hash qualification",
+      "frontend workflow qualification",
+      "post-Genesis application-specific interpretation"
+    ]
+  },
+  "defects_remediated": [
+    "capabilities endpoint omitted registered block-detail and service/service-version routes",
+    "block-list HTTP limit had no explicit upper bound",
+    "unknown or unsupported /v1 requests could fall through to the SPA catch-all instead of failing as JSON API requests"
+  ],
+  "acceptance_criteria": [
+    "AC-1 core Explorer API routes serialize representative indexed data correctly",
+    "AC-5 Explorer presentation/API semantics expose provenance and fail closed on invalid requests",
+    "AC-7 malformed or unsupported API requests do not produce misleading successful web content",
+    "AC-8 operational/API boundaries remain explicit and non-authoritative"
+  ],
+  "route_contract": [
+    "/v1/health",
+    "/v1/ready",
+    "/v1/status",
+    "/v1/blocks",
+    "/v1/blocks/{number}",
+    "/v1/blocks/{number}/trace",
+    "/v1/transactions/{hash}",
+    "/v1/receipts/{hash}",
+    "/v1/addresses/{address}",
+    "/v1/contracts/{address}",
+    "/v1/services",
+    "/v1/services/{service}",
+    "/v1/services/{service}/versions/{version}",
+    "/v1/assets/activity",
+    "/v1/consensus"
+  ],
+  "tests_required": [
+    "capabilities endpoint exactly advertises the qualified route set",
+    "network status representative and wrong-chain/stale/degraded negative routes",
+    "block list/detail/trace representative serialization",
+    "block-list invalid and >250 limit rejection",
+    "transaction/receipt representative serialization including EXP-2.1 fee fields",
+    "service-version representative serialization",
+    "unknown /v1 route JSON 404",
+    "unsupported API method cannot fall through to SPA",
+    "go test ./explorer/api ./explorer/service",
+    "go test ./explorer/...",
+    "go vet ./explorer/..."
+  ],
+  "evidence": {
+    "workflow": ".github/workflows/explorer-exp-2-2.yml",
+    "verifier": "scripts/verify-exp-2-2-http-routes.py",
+    "artifact": "exp-2-2-http-route-contracts",
+    "exact_head_expression": "github.event.pull_request.head.sha || github.sha"
+  },
+  "scope_boundary": {
+    "deployed_ui_qualified": false,
+    "live_target_network_qualified": false,
+    "registry_runtime_qualified": false,
+    "canonical_authority": false,
+    "genesis_ready_claim": false
+  },
+  "qualification_evidence": {
+    "qualified_candidate_head": "64bd20d7a464eb5322061025dfb68b3e77a2314e",
+    "dedicated_workflow": {
+      "name": "420Explorer EXP-2.2",
+      "run_id": 36367001996,
+      "conclusion": "success"
+    },
+    "retained_workflows": [
+      {
+        "name": "420Explorer EXP-2.1",
+        "conclusion": "success"
+      },
+      {
+        "name": "420Docs Qualification",
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.6 Historical Producer Qualification",
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.7 Cross-Layer Traceability Qualification",
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.8 Runtime Negative Divergence Qualification",
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.9 CI Qualification Automation",
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.10 Phase Closeout Qualification",
+        "conclusion": "success"
+      },
+      {
+        "name": "420Indexer",
+        "run_id": 36367001966,
+        "conclusion": "success"
+      },
+      {
+        "name": "420 Integrated Qualification",
+        "run_id": 36367001937,
+        "conclusion": "success"
+      }
+    ],
+    "exact_head_policy": "The audit-recording commit must itself pass the retained exact-head qualification suite before EXP-2.2 is marked COMPLETE."
+  },
+  "final_qualification": {
+    "evidence_recording_head": "6f82da84ba9a2b077ffb125049d6eb2501246e62",
+    "exact_head_requalification": "success",
+    "dedicated_workflow": {
+      "name": "420Explorer EXP-2.2",
+      "run_id": 36367316910,
+      "conclusion": "success"
+    },
+    "retained_workflows": [
+      {
+        "name": "420Explorer EXP-2.1",
+        "run_id": 36367316892,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Docs Qualification",
+        "run_id": 36367317055,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.6 Historical Producer Qualification",
+        "run_id": 36367316919,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.7 Cross-Layer Traceability Qualification",
+        "run_id": 36367316935,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.8 Runtime Negative Divergence Qualification",
+        "run_id": 36367316873,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.9 CI Qualification Automation",
+        "run_id": 36367316918,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.10 Phase Closeout Qualification",
+        "run_id": 36367316944,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Indexer",
+        "run_id": 36367316798,
+        "conclusion": "success"
+      },
+      {
+        "name": "420 Integrated Qualification",
+        "run_id": 36367316784,
+        "conclusion": "success"
+      }
+    ],
+    "scope": "repository_scope_only",
+    "genesis_ready_claim": false
+  }
+}

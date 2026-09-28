@@ -1,0 +1,29 @@
+services:
+  indexer420:
+    build:
+      context: ../..
+      dockerfile: docker/Dockerfile.420indexer
+    restart: unless-stopped
+    environment:
+      INDEXER_RPC_URL: ${INDEXER_RPC_URL:?set INDEXER_RPC_URL to an approved 420 testnet RPC}
+      INDEXER_CONSENSUS_STATUS_PATH: /var/lib/420consensus/status.json
+      INDEXER_STORE_PATH: /var/lib/420indexer/index.json
+      INDEXER_HTTP_ADDR: :8420
+      INDEXER_POLL_INTERVAL: ${INDEXER_POLL_INTERVAL:-12s}
+      INDEXER_MAX_HEAD_AGE: ${INDEXER_MAX_HEAD_AGE:-2m}
+      INDEXER_EXPECTED_GENESIS_HASH: ${INDEXER_EXPECTED_GENESIS_HASH:-}
+      INDEXER_REBUILD: ${INDEXER_REBUILD:-0}
+    ports:
+      - "${INDEXER_HTTP_PORT:-8420}:8420"
+    volumes:
+      - indexer420-data:/var/lib/420indexer
+      - ${INDEXER_CONSENSUS_STATUS_DIR:?set INDEXER_CONSENSUS_STATUS_DIR to the approved consensus status directory}:/var/lib/420consensus:ro
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8420/v1/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  indexer420-data:

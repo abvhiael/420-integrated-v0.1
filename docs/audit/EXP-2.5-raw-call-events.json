@@ -1,0 +1,147 @@
+{
+  "schema": "420explorer-exp-2.5-raw-call-event-inspection-v1",
+  "milestone": "EXP-2.5",
+  "title": "Raw transaction call and contract-event inspection qualification",
+  "status": "qualified_candidate_recorded_pending_evidence_head_requalification",
+  "baseline": {
+    "exp_2_4_qualified_head": "4009d9ab687a61f689fbf6a9d4faf3a818a2a21b"
+  },
+  "findings": [
+    "EXP-FIND-010"
+  ],
+  "workflows": [
+    "EXP-WF-009",
+    "EXP-WF-013"
+  ],
+  "objective": "Qualify Explorer repository service/API presentation of raw transaction call context and complete receipt/block log payloads, preserving indexed provenance while failing closed on malformed populated value/input/topic/data/address fields.",
+  "implementation_boundary": {
+    "owns": [
+      "transaction valueWei and raw input presentation",
+      "stable raw log/event presentation DTO",
+      "complete topic values and raw data serialization",
+      "transaction/block raw-event provenance validation",
+      "malformed raw input/topic/data/address fail-closed behavior",
+      "reverted transaction raw-context API presentation"
+    ],
+    "does_not_own": [
+      "ABI-decoded function names or revert reasons",
+      "ABI-decoded event labels or arguments",
+      "deployed browser rendering of raw event payloads",
+      "live target-network event witnesses",
+      "verified-source or compiler provenance",
+      "Genesis release closeout"
+    ]
+  },
+  "defects_remediated": [
+    "Explorer TransactionSummary omitted indexed valueWei and input fields required for raw failed-call inspection",
+    "Explorer transaction/block detail exposed raw model.LogRecord directly without a stable presentation contract",
+    "Explorer did not fail closed on malformed populated raw transaction input, log address, topic, or data fields"
+  ],
+  "acceptance_criteria": [
+    "AC-1 transaction/receipt/log repository APIs expose complete raw indexed context",
+    "AC-5 raw call and event presentation preserves block/transaction/log provenance",
+    "AC-7 malformed populated raw payloads fail closed rather than being presented as inspectable chain data",
+    "AC-8 Explorer remains a non-authoritative projection consumer and raw values remain primary to future decoded labels"
+  ],
+  "qualification_tests": [
+    "reverted transaction preserves status, raw calldata, and valueWei",
+    "multi-topic event preserves every topic value and raw data",
+    "empty raw data is preserved",
+    "malformed transaction input fails closed",
+    "negative/invalid valueWei fails closed",
+    "malformed topic length/hex fails closed",
+    "malformed odd-length log data fails closed",
+    "malformed populated log address fails closed",
+    "block detail uses the same validated raw event presentation",
+    "Explorer HTTP transaction and block APIs serialize raw call/event fields",
+    "go test ./explorer/service ./explorer/api",
+    "go test ./explorer/...",
+    "go vet ./explorer/..."
+  ],
+  "evidence": {
+    "workflow": ".github/workflows/explorer-exp-2-5.yml",
+    "verifier": "scripts/verify-exp-2-5-raw-events.py",
+    "artifact": "exp-2-5-raw-call-events",
+    "exact_head_expression": "github.event.pull_request.head.sha || github.sha"
+  },
+  "scope_boundary": {
+    "deployed_ui_qualified": false,
+    "live_target_network_qualified": false,
+    "abi_decoding_qualified": false,
+    "revert_reason_decoding_qualified": false,
+    "verified_source_qualified": false,
+    "canonical_authority": false,
+    "genesis_ready_claim": false
+  },
+  "qualification_evidence": {
+    "qualified_candidate_head": "0db5f76d4038a03ae19a0a64e7c294203ec95919",
+    "dedicated_workflow": {
+      "name": "420Explorer EXP-2.5",
+      "run_id": 36384004251,
+      "conclusion": "success"
+    },
+    "retained_workflows": [
+      {
+        "name": "420Explorer EXP-2.4",
+        "run_id": 36384004157,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.3",
+        "run_id": 36384003988,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.2",
+        "run_id": 36384004091,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.1",
+        "run_id": 36384004231,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Docs Qualification",
+        "run_id": 36384004235,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.6 Historical Producer Qualification",
+        "run_id": 36384003975,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.7 Cross-Layer Traceability Qualification",
+        "run_id": 36384004162,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.8 Runtime Negative Divergence Qualification",
+        "run_id": 36384004254,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.9 CI Qualification Automation",
+        "run_id": 36384004233,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.10 Phase Closeout Qualification",
+        "run_id": 36384004038,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Indexer",
+        "run_id": 36384004419,
+        "conclusion": "success"
+      },
+      {
+        "name": "420 Integrated Qualification",
+        "run_id": 36384004101,
+        "conclusion": "success"
+      }
+    ],
+    "exact_head_policy": "The evidence-recording commit must itself pass the exact-head EXP-2.5 and retained qualification suite before the milestone is marked COMPLETE."
+  }
+}

@@ -32,6 +32,7 @@ type BlockRecord struct {
 	ParentHash    string   `json:"parentHash"`
 	Timestamp     uint64   `json:"timestamp"`
 	Finality      Finality `json:"finality"`
+	Producer      *BlockProducer `json:"producer,omitempty"`
 	SchemaVersion string   `json:"schemaVersion"`
 }
 
@@ -57,8 +58,10 @@ type ReceiptRecord struct {
 	TransactionHash  string `json:"transactionHash"`
 	TransactionIndex uint64 `json:"transactionIndex"`
 	Status           uint64 `json:"status"`
-	GasUsed          uint64 `json:"gasUsed"`
-	ContractAddress  string `json:"contractAddress,omitempty"`
+	GasUsed              uint64 `json:"gasUsed"`
+	EffectiveGasPriceWei string `json:"effectiveGasPriceWei"`
+	ActualFeeWei         string `json:"actualFeeWei"`
+	ContractAddress      string `json:"contractAddress,omitempty"`
 }
 
 // LogRecord preserves the complete chain/log location required for deterministic identity.
@@ -85,4 +88,6 @@ type Health struct {
 	DecoderSet      string    `json:"decoderSet"`
 	State           string    `json:"state"`
 	LastIngestAt    time.Time `json:"lastIngestAt"`
+	RuntimeIssue    string     `json:"runtimeIssue,omitempty"`
+	RuntimeIssueAt  *time.Time `json:"runtimeIssueAt,omitempty"`
 }

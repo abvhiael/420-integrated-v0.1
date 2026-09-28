@@ -1,0 +1,54 @@
+name: 420Explorer EXP-2.1
+
+on:
+  pull_request:
+    paths:
+      - 'indexer/model/**'
+      - 'indexer/rpc/**'
+      - 'indexer/api/**'
+      - 'explorer/service/**'
+      - 'explorer/api/**'
+      - 'docs/audit/EXP-0.2.5-genesis-gap-register.json'
+      - 'docs/audit/EXP-2.1-transaction-fee-api-qualification.*'
+      - 'scripts/verify-exp-2-1-transaction-fees.py'
+      - '.github/workflows/explorer-exp-2-1.yml'
+      - '.github/workflows/420indexer.yml'
+
+concurrency:
+  group: explorer-exp-2-1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Test fee vectors and Explorer API semantics
+        run: go test ./indexer/rpc ./indexer/api ./explorer/service ./explorer/api
+      - name: Full Indexer and Explorer regression
+        run: go test ./indexer/... ./explorer/...
+      - name: Vet Indexer and Explorer
+        run: go vet ./indexer/... ./explorer/...
+      - name: EXP-2.1 transaction fee API qualification
+        run: python scripts/verify-exp-2-1-transaction-fees.py
+      - name: Upload EXP-2.1 qualification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp-2-1-transaction-fee-api
+          path: exp-2-1-evidence/
+          if-no-files-found: error
+          retention-days: 14

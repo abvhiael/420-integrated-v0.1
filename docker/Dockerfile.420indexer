@@ -1,0 +1,18 @@
+FROM golang:1.24-alpine AS build
+WORKDIR /src
+COPY go.mod ./
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build -trimpath -ldflags="-s -w" -o /out/indexer420 ./indexer/cmd/indexer420
+
+FROM alpine:3.22
+RUN addgroup -S indexer && adduser -S -G indexer indexer && mkdir -p /var/lib/420indexer /var/lib/420consensus && chown -R indexer:indexer /var/lib/420indexer /var/lib/420consensus
+COPY --from=build /out/indexer420 /usr/local/bin/indexer420
+USER indexer
+EXPOSE 8420
+ENV INDEXER_STORE_PATH=/var/lib/420indexer/index.json
+ENV INDEXER_CONSENSUS_STATUS_PATH=/var/lib/420consensus/status.json
+ENV INDEXER_HTTP_ADDR=:8420
+ENV INDEXER_POLL_INTERVAL=12s
+ENV INDEXER_MAX_HEAD_AGE=2m
+VOLUME ["/var/lib/420indexer"]
+ENTRYPOINT ["/usr/local/bin/indexer420"]

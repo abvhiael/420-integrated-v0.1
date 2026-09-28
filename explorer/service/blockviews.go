@@ -18,6 +18,7 @@ type BlockSummary struct {
 	ParentHash    string         `json:"parentHash"`
 	Timestamp     uint64         `json:"timestamp"`
 	Finality      model.Finality `json:"finality"`
+	Producer      *model.BlockProducer `json:"producer,omitempty"`
 	SchemaVersion string         `json:"schemaVersion"`
 }
 
@@ -37,9 +38,25 @@ type BlockNavigation struct {
 
 // BlockDetailView is the Explorer block-detail resource. LogCount is derived
 // from the exact block-scoped log collection returned by 420Indexer.
+type BlockTraceView struct {
+	ExecutionBlockHash   string         `json:"executionBlockHash"`
+	ConsensusBlockRoot   string         `json:"consensusBlockRoot"`
+	ConsensusSlot        uint64         `json:"consensusSlot"`
+	ProducerSeat         uint16         `json:"producerSeat"`
+	ProposerRank         uint8          `json:"proposerRank"`
+	Certified            bool           `json:"certified"`
+	Finality             model.Finality `json:"finality"`
+	SchemaVersion        string         `json:"schemaVersion"`
+	CanonicalAuthority   bool           `json:"canonicalAuthority"`
+	ExecutionAuthority   string         `json:"executionAuthority"`
+	ConsensusAuthority   string         `json:"consensusAuthority"`
+	ProjectionAuthority  string         `json:"projectionAuthority"`
+}
+
 type BlockDetailView struct {
 	Block      BlockSummary      `json:"block"`
-	Logs       []model.LogRecord `json:"logs"`
+	Trace      *BlockTraceView   `json:"trace,omitempty"`
+	Logs       []RawLogView      `json:"logs"`
 	LogCount   int               `json:"logCount"`
 	Navigation BlockNavigation   `json:"navigation"`
 }
@@ -52,6 +69,7 @@ func summaryFromBlock(block model.BlockRecord) BlockSummary {
 		ParentHash:    block.ParentHash,
 		Timestamp:     block.Timestamp,
 		Finality:      block.Finality,
+		Producer:      block.Producer,
 		SchemaVersion: block.SchemaVersion,
 	}
 }
@@ -79,6 +97,38 @@ func (s *Service) BlockPage(ctx context.Context, limit uint32, cursor string) (B
 // BlockDetail composes block, logs and navigation from the shared indexer.
 // The health read is used only to bound presentation navigation; it does not
 // make Explorer an authority for chain head/finality.
+func traceFromBlock(block model.BlockRecord) (*BlockTraceView, error) {
+	if block.Number == 0 { return nil, nil }
+	if block.Producer == nil { return nil, errors.New("420Indexer returned block without historical producer provenance") }
+	p := block.Producer
+	if p.ConsensusBlockRoot == "" { return nil, errors.New("420Indexer returned producer provenance without consensus block root") }
+	if p.ProposerRank > 2 { return nil, errors.New("420Indexer returned invalid proposer rank") }
+	return &BlockTraceView{
+		ExecutionBlockHash:block.Hash,
+		ConsensusBlockRoot:p.ConsensusBlockRoot,
+		ConsensusSlot:p.ConsensusSlot,
+		ProducerSeat:p.ProducerSeat,
+		ProposerRank:p.ProposerRank,
+		Certified:p.Certified,
+		Finality:block.Finality,
+		SchemaVersion:block.SchemaVersion,
+		CanonicalAuthority:false,
+		ExecutionAuthority:"node420 canonical execution block",
+		ConsensusAuthority:"fourtwentyd consensus-produced block history",
+		ProjectionAuthority:"420Indexer derived projection",
+	}, nil
+}
+
+func (s *Service) BlockTrace(ctx context.Context, number uint64) (BlockTraceView, error) {
+	view, err := s.Block(ctx, number)
+	if err != nil { return BlockTraceView{}, err }
+	if view.Block.Hash == "" { return BlockTraceView{}, errors.New("420Indexer returned block without canonical hash") }
+	trace, err := traceFromBlock(view.Block)
+	if err != nil { return BlockTraceView{}, err }
+	if trace == nil { return BlockTraceView{}, errors.New("genesis block has no validator producer attribution") }
+	return *trace, nil
+}
+
 func (s *Service) BlockDetail(ctx context.Context, number uint64) (BlockDetailView, error) {
 	view, err := s.Block(ctx, number)
 	if err != nil {
@@ -109,9 +159,15 @@ func (s *Service) BlockDetail(ctx context.Context, number uint64) (BlockDetailVi
 		nav.Next = &next
 	}
 
+	trace, err := traceFromBlock(view.Block)
+	if err != nil { return BlockDetailView{}, err }
+	logViews, err := rawLogViews(view.Logs)
+	if err != nil { return BlockDetailView{}, err }
+
 	return BlockDetailView{
 		Block:      summaryFromBlock(view.Block),
-		Logs:       view.Logs,
+		Trace:      trace,
+		Logs:       logViews,
 		LogCount:   len(view.Logs),
 		Navigation: nav,
 	}, nil

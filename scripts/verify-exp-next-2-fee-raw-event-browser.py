@@ -17,7 +17,7 @@ matrix=json.loads(read("docs/audit/EXP-0.2.2-user-workflow-matrix.json"))
 audit=json.loads(read("docs/audit/EXP-NEXT.2-fee-raw-event-browser.json"))
 required_app=[
  "renderFeeSummary420","transactionDetailPresentation420","inspectableRaw420","renderRawLogs420",
- "Raw input","Raw logs","transaction-log","block-log","data-copy-value"
+ "Raw input","Raw logs","logTable(logs)","block-log","data-copy-value"
 ]
 for token in required_app:
     if token not in app: errors.append("app.js missing "+token)

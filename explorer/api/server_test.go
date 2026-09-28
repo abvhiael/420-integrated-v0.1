@@ -126,7 +126,7 @@ func TestReceiptRoute(t *testing.T) {
 }
 
 func TestServiceVersionRoute(t *testing.T) {
-	f := &fakeIndexer{service: decoder.ServiceVersion{ServiceID: "420/service/explorer/v1", Version: 2}}
+	f := &fakeIndexer{service: decoder.ServiceVersion{ServiceID: "420/service/explorer/v1", Version: 2, Implementation: "0x420", ActivatedBlock: 7, ActivatedHash: "0x07"}}
 	s := newTestServer(t, f)
 	rr := httptest.NewRecorder()
 	s.Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodGet, "/v1/services/420%2Fservice%2Fexplorer%2Fv1/versions/2", nil))

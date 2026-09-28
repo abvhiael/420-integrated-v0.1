@@ -23,6 +23,20 @@ on:
       - 'config/420indexer-v1.json'
       - 'testnet/public-services/indexer/readiness.json'
 
+
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/420indexer.yml'
+      - '.github/workflows/docs-qualify.yml'
+      - '.github/workflows/qualification.yml'
+      - '.github/workflows/explorer-exp-1-9.yml'
+      - 'scripts/verify-exp-1-9-ci-automation.py'
+      - 'docs/audit/EXP-1.9-ci-qualification-automation.*'
+      - 'config/420indexer-v1.json'
+      - 'testnet/public-services/indexer/readiness.json'
+
 concurrency:
   group: exp-1-9-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true

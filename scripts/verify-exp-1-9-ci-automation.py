@@ -105,6 +105,16 @@ def main():
         if token not in dedicated:
             errors.append(f"dedicated EXP-1.9 evidence automation missing: {token}")
 
+    if "push:" not in dedicated or "- main" not in dedicated:
+        errors.append("dedicated EXP-1.9 post-merge main trigger missing")
+    for token in [
+        "docs/audit/EXP-1.9-ci-qualification-automation.json",
+        "scripts/verify-exp-1-9-ci-automation.py",
+        ".github/workflows/explorer-exp-1-9.yml",
+    ]:
+        if indexer.count(token) < 2:
+            errors.append(f"420Indexer PR/main trigger coverage missing: {token}")
+
     qa=cfg.get("qualificationAutomation",{})
     if qa.get("milestone")!="EXP-1.9": errors.append("qualification automation config milestone drift")
     if qa.get("exactHeadExpression")!="github.event.pull_request.head.sha || github.sha":
@@ -119,6 +129,10 @@ def main():
         errors.append("retained EXP-1 range drift")
     if qa.get("evidenceRetentionDays")!=7:
         errors.append("evidence retention drift")
+    if qa.get("postMergeQualificationRequired") is not True:
+        errors.append("post-merge qualification requirement disabled")
+    if qa.get("automaticTriggers")!=["pull_request","push:main"]:
+        errors.append("qualification automatic trigger contract drift")
     if qa.get("liveDeploymentQualified") is not False:
         errors.append("live deployment overpromoted")
 
@@ -175,6 +189,7 @@ def main():
         "contents_permission":"read",
         "retained_exp1_range":"EXP-1.1..EXP-1.9",
         "evidence_retention_days":7,
+        "post_merge_main_qualification":True,
         "live_network_qualified":False,
         "errors":errors,
         "pass":not errors,

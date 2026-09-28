@@ -2,7 +2,7 @@
   "schema": "420explorer-exp-2.5-raw-call-event-inspection-v1",
   "milestone": "EXP-2.5",
   "title": "Raw transaction call and contract-event inspection qualification",
-  "status": "implementation_complete_pending_exact_head_ci",
+  "status": "qualified_candidate_recorded_pending_evidence_head_requalification",
   "baseline": {
     "exp_2_4_qualified_head": "4009d9ab687a61f689fbf6a9d4faf3a818a2a21b"
   },
@@ -72,5 +72,76 @@
     "verified_source_qualified": false,
     "canonical_authority": false,
     "genesis_ready_claim": false
+  },
+  "qualification_evidence": {
+    "qualified_candidate_head": "0db5f76d4038a03ae19a0a64e7c294203ec95919",
+    "dedicated_workflow": {
+      "name": "420Explorer EXP-2.5",
+      "run_id": 36384004251,
+      "conclusion": "success"
+    },
+    "retained_workflows": [
+      {
+        "name": "420Explorer EXP-2.4",
+        "run_id": 36384004157,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.3",
+        "run_id": 36384003988,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.2",
+        "run_id": 36384004091,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.1",
+        "run_id": 36384004231,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Docs Qualification",
+        "run_id": 36384004235,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.6 Historical Producer Qualification",
+        "run_id": 36384003975,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.7 Cross-Layer Traceability Qualification",
+        "run_id": 36384004162,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.8 Runtime Negative Divergence Qualification",
+        "run_id": 36384004254,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.9 CI Qualification Automation",
+        "run_id": 36384004233,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.10 Phase Closeout Qualification",
+        "run_id": 36384004038,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Indexer",
+        "run_id": 36384004419,
+        "conclusion": "success"
+      },
+      {
+        "name": "420 Integrated Qualification",
+        "run_id": 36384004101,
+        "conclusion": "success"
+      }
+    ],
+    "exact_head_policy": "The evidence-recording commit must itself pass the exact-head EXP-2.5 and retained qualification suite before the milestone is marked COMPLETE."
   }
 }

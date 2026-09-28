@@ -65,7 +65,7 @@ Never trust the self-reported hardware alone. Capabilities must eventually be be
 
 **CMP-1.3.2 trusted capability attestation:** `docs/compute-market/CMP-1.3.2-WORKER-ATTESTATION-QUALIFICATION.md` adds a separate provider-neutral attestation authority and admission composition so self-reported worker capability cannot satisfy policies that require independent evidence. Evidence is exact-revision/profile/key/resource bound, expiry/revocation/policy guarded, replay resistant, and grants no unrelated authority.
 
-**CMP-1.3.3 canonical capability detail:** `docs/compute-market/CMP-1.3.3-CAPABILITY-PROFILE-QUALIFICATION.md` binds the worker's capability commitment to bounded canonical architecture/CPU/GPU/software sets, VRAM/memory/storage/network scalars and storage/network/runtime commitments. New-admission matching is exact-revision and resource-bounded, and trusted-hardware policies compose the CMP-1.3.2 attestation gate.
+**CMP-1.3.3 canonical capability detail:** `docs/compute-market/CMP-1.3.3-CAPABILITY-PROFILE-QUALIFICATION.md` binds the worker's capability commitment to bounded canonical architecture/CPU/GPU/software sets, VRAM/memory/storage/network scalars and storage/network/runtime commitments. New-admission matching is exact-revision and resource-bounded, and trusted-hardware policies compose the CMP-1.3.2 attestation gate. Candidate implementation is repository-qualified at exact head `4d0ccd94c7160cc40d5a737620c679c70da41c96`; final evidence-recording-head closeout remains pending.
 
 ## CMP-1.4 — ComputeVerifierRegistry
 

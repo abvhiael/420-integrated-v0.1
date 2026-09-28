@@ -1,0 +1,150 @@
+{
+  "schema": "420explorer-exp-next-5-final-closeout-v1",
+  "step": "EXP-NEXT.5",
+  "title": "Final Genesis acceptance and release closeout",
+  "status": "NOT_YET_COMPLETE",
+  "decision": "NO_GO",
+  "canonical_roadmap": "docs/audit/EXP-2R.5-authoritative-next-phase-roadmap.json",
+  "base_dependency_head": "0b2ad24ed493013b699e9c498c4d6daf2e7a3f2e",
+  "dependency_state": {
+    "EXP-NEXT.4": "NOT_YET_COMPLETE",
+    "mandatory_acceptance_evidence": "INCOMPLETE"
+  },
+  "requirements_reconciled": {
+    "exact_release_candidate_frozen": false,
+    "complete_required_test_inventory": true,
+    "all_mandatory_requirements_reconciled": true,
+    "all_genesis_blocking_findings_closed": false,
+    "run_and_artifact_provenance_complete": false,
+    "ac_1_through_ac_10_index_published": true,
+    "final_closeout_record_published": true
+  },
+  "repository_implementation": [
+    "Final Genesis acceptance checklist added.",
+    "AC-1 through AC-10 evidence index added.",
+    "Final Genesis blocker register added and cross-checked against authoritative gap register.",
+    "Release-candidate qualification manifest added in fail-closed UNFROZEN state.",
+    "Complete required-test inventory added.",
+    "Exact-head closeout-readiness verifier/workflow added."
+  ],
+  "canonical_blockers": [
+    "EXP-NEXT.4 is NOT_YET_COMPLETE.",
+    "AC-1 through AC-10 remain unverified in the authoritative acceptance map.",
+    "Genesis-blocking findings EXP-FIND-002 through EXP-FIND-011 (excluding EXP-FIND-001) remain authoritative blockers.",
+    "No exact Genesis release-candidate SHA may be frozen until live/deployment/recovery qualification is complete.",
+    "Production-equivalent live/deployment/security/recovery evidence and final artifact/run provenance are incomplete."
+  ],
+  "completion_conditions": {
+    "no_mandatory_criterion_unverified": false,
+    "no_genesis_blocker_unresolved": false,
+    "exact_release_candidate_and_deployed_stack_fully_evidenced": false,
+    "supported_scope_explicit": true
+  },
+  "scope_exclusions": [
+    "Optional post-Genesis staking/reward-specific view",
+    "optional Names/Identity enrichment",
+    "optional 420 Verify presentation integration unless separately promoted by authoritative scope decision"
+  ],
+  "completion_policy": "EXP-NEXT.5 can become COMPLETE only after EXP-NEXT.4 is COMPLETE, every mandatory AC is satisfied against one exact release candidate, every Genesis blocker is evidenced closed, the complete mandatory suite passes on the final closeout commit, and no repository-only evidence is substituted for live/deployment qualification.",
+  "repository_closeout_readiness_qualification": {
+    "candidate_head": "f7432ebef28748d13c0e007bcf85a551d4630d3b",
+    "candidate_exact_head_result": "success",
+    "dedicated_workflow": {
+      "name": "420Explorer EXP-NEXT.5 Final Closeout Readiness",
+      "run_id": 36484400183,
+      "conclusion": "success",
+      "artifact_id": 10998825348
+    },
+    "retained_workflows": [
+      {
+        "name": "420Explorer EXP-NEXT.4 Repository Readiness",
+        "run_id": 36484400104,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-NEXT.3 Cross Resource Browser",
+        "run_id": 36484400143,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-NEXT.2 Fee and Raw Event Browser",
+        "run_id": 36484400153,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.2",
+        "run_id": 36484400138,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.3",
+        "run_id": 36484400127,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.4",
+        "run_id": 36484400233,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.5",
+        "run_id": 36484400149,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.6",
+        "run_id": 36484400350,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.7 Cross-Layer Traceability Qualification",
+        "run_id": 36484400575,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.8 Runtime Negative Divergence Qualification",
+        "run_id": 36484400456,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.10 Phase Closeout Qualification",
+        "run_id": 36484400193,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Indexer",
+        "run_id": 36484400364,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Docs Qualification",
+        "run_id": 36484400152,
+        "conclusion": "success"
+      },
+      {
+        "name": "420 Integrated Qualification",
+        "run_id": 36484400144,
+        "conclusion": "success"
+      }
+    ],
+    "integrated_jobs": [
+      {
+        "name": "fault-matrix",
+        "conclusion": "success"
+      },
+      {
+        "name": "geth-engine",
+        "conclusion": "success"
+      },
+      {
+        "name": "offline-core",
+        "conclusion": "success"
+      },
+      {
+        "name": "production-dependencies",
+        "conclusion": "success"
+      }
+    ],
+    "evidence_recording_policy": "This qualification proves only the correctness of the fail-closed EXP-NEXT.5 NO-GO/NOT_YET_COMPLETE repository closeout state. Recording this evidence creates a new SHA that must itself pass the same exact-head suite. It does not satisfy EXP-NEXT.4, any unverified AC, or Genesis readiness."
+  }
+}

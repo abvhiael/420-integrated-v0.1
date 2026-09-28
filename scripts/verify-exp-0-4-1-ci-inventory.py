@@ -20,8 +20,8 @@ def main():
     if inv.get("schema")!="420explorer-exp-0.4.1-ci-qualification-inventory-v1": errors.append("schema drift")
     if inv.get("milestone")!="EXP-0.4.1": errors.append("milestone drift")
     wfs=inv.get("workflows",[]); mechs=inv.get("mechanisms",[])
-    if len(wfs)!=6: errors.append(f"workflow count drift: {len(wfs)}")
-    if len(mechs)!=20: errors.append(f"mechanism count drift: {len(mechs)}")
+    if len(wfs)!=7: errors.append(f"workflow count drift: {len(wfs)}")
+    if len(mechs)!=21: errors.append(f"mechanism count drift: {len(mechs)}")
     for key,rows in (("workflow",wfs),("mechanism",mechs)):
         ids=[x.get("id") for x in rows]
         if any(not x for x in ids) or len(ids)!=len(set(ids)): errors.append(f"{key} IDs missing/duplicate")
@@ -33,6 +33,7 @@ def main():
       "EXP-CI-004":".github/workflows/docs-qualify.yml",
       "EXP-CI-005":".github/workflows/genesis-address-authority.yml",
       "EXP-CI-006":".github/workflows/testnet-rc.yml",
+      "EXP-CI-007":".github/workflows/explorer-exp-next-4.yml",
     }
     if set(by)!=set(expected): errors.append("workflow ID set drift")
     texts={}
@@ -54,8 +55,9 @@ def main():
         ],"EXP-CI-001",errors)
     if "EXP-CI-002" in texts:
         require_text(texts["EXP-CI-002"],[
-          "name: 420Explorer Live Testnet Validation","workflow_dispatch:","go test ./explorer/cmd/explorerlivevalidate",
-          "go run ./explorer/cmd/explorerlivevalidate | tee explorer-live-evidence.json","name: explorer-live-testnet-evidence"
+          "name: 420Explorer Live Testnet Validation","workflow_dispatch:","release_candidate_sha","ref: ${{ inputs.release_candidate_sha }}",
+          "go test ./explorer/cmd/explorerlivevalidate","verify-exp-next-4-live-preflight.py",
+          "go run ./explorer/cmd/explorerlivevalidate | tee exp-next-4-live-evidence/explorer-live-evidence.json","name: exp-next-4-live-deployment-recovery"
         ],"EXP-CI-002",errors)
     if "EXP-CI-003" in texts:
         require_text(texts["EXP-CI-003"],[
@@ -75,13 +77,18 @@ def main():
           "name: 420 Integrated Testnet RC","workflow_dispatch:","python3 scripts/run-real-devnet15.py --seconds 90 --consensus-transport devnet-tcp",
           "python3 scripts/run-soak.py --slots 420 --slot-ms 35","python3 scripts/build-testnet-rc.py","python3 scripts/check-release-evidence.py"
         ],"EXP-CI-006",errors)
+    if "EXP-CI-007" in texts:
+        require_text(texts["EXP-CI-007"],[
+          "name: 420Explorer EXP-NEXT.4 Repository Readiness","verify-exp-next-4-repository-readiness.py",
+          "go test ./explorer/cmd/explorerlivevalidate","go test ./explorer/...","go vet ./explorer/...","npm test"
+        ],"EXP-CI-007",errors)
 
     if by.get("EXP-CI-001",{}).get("authority")!="authoritative_for_repository_source_scope": errors.append("primary source authority drift")
     if by.get("EXP-CI-002",{}).get("authority")!="authoritative_for_executed_live_witness_scope": errors.append("live authority drift")
-    for wid in ("EXP-CI-003","EXP-CI-004","EXP-CI-005","EXP-CI-006"):
+    for wid in ("EXP-CI-003","EXP-CI-004","EXP-CI-005","EXP-CI-006","EXP-CI-007"):
         if by.get(wid,{}).get("authority")=="authoritative_for_executed_live_witness_scope": errors.append(f"{wid}: supporting workflow mislabeled live authority")
     summary=inv.get("summary",{})
-    if summary.get("workflow_count")!=6 or summary.get("mechanism_count")!=20: errors.append("summary count drift")
+    if summary.get("workflow_count")!=7 or summary.get("mechanism_count")!=21: errors.append("summary count drift")
     if summary.get("primary_source_gate")!="EXP-CI-001" or summary.get("live_gate")!="EXP-CI-002": errors.append("summary gate identity drift")
 
     EVIDENCE.mkdir(exist_ok=True)

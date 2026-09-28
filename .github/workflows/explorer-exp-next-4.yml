@@ -1,0 +1,59 @@
+name: 420Explorer EXP-NEXT.4 Repository Readiness
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/explorer-live-testnet.yml'
+      - '.github/workflows/explorer-exp-next-4.yml'
+      - 'scripts/verify-exp-next-4-live-preflight.py'
+      - 'scripts/verify-exp-next-4-repository-readiness.py'
+      - 'docs/audit/EXP-NEXT.4-*'
+      - 'docs/audit/templates/EXP-NEXT.4-*'
+      - 'testnet/services/endpoints.json'
+      - 'testnet/infrastructure/inventory.json'
+      - 'testnet/public-services/indexer/readiness.json'
+      - 'testnet/public-services/explorer/readiness.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify-repository-readiness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify EXP-NEXT.4 repository readiness and blockers
+        run: python scripts/verify-exp-next-4-repository-readiness.py
+      - name: Test live Explorer validator
+        run: go test ./explorer/cmd/explorerlivevalidate
+      - name: Retain Explorer regression
+        run: go test ./explorer/...
+      - name: Vet Explorer
+        run: go vet ./explorer/...
+      - name: Retain TypeScript Indexer and recovery qualification
+        working-directory: 420-indexer
+        run: |
+          npm install --no-audit --no-fund
+          npm test
+      - name: Upload repository readiness evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp-next-4-repository-readiness
+          path: exp-next-4-repository-evidence/
+          if-no-files-found: error
+          retention-days: 30

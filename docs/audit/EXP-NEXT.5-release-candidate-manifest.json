@@ -1,0 +1,19 @@
+{
+  "schema": "420explorer-exp-next-5-release-candidate-qualification-manifest-v1",
+  "status": "UNFROZEN",
+  "releaseCandidateSha": null,
+  "deployedStackIdentity": null,
+  "productionEquivalent": false,
+  "requiredTestInventoryFrozen": false,
+  "workflowRuns": [],
+  "artifactDigests": [],
+  "liveDeploymentEvidence": null,
+  "recoveryEvidence": null,
+  "securityEvidence": null,
+  "decision": "NO_GO",
+  "blockers": [
+    "EXP-NEXT.4 is NOT_YET_COMPLETE",
+    "AC-1 through AC-10 remain unverified",
+    "Genesis blocker register remains OPEN"
+  ]
+}

@@ -1,0 +1,94 @@
+name: 420Explorer Cloudflare
+
+on:
+  pull_request:
+    paths:
+      - 'explorer/web/**'
+      - 'explorer/cloudflare/**'
+      - '.github/workflows/explorer-cloudflare.yml'
+  workflow_dispatch:
+    inputs:
+      deploy_production:
+        description: Deploy explorer.420integrated.org after qualification
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify branded Explorer assets
+        run: |
+          test -s explorer/web/static/brand-mark.svg
+          grep -q '420 INTEGRATED' explorer/web/static/index.html
+          grep -q '#273B9C' explorer/web/static/app.css
+          grep -q '#45B84A' explorer/web/static/app.css
+      - name: Check Cloudflare Worker syntax
+        run: node --check explorer/cloudflare/src/worker.mjs
+      - name: Test Cloudflare edge behavior
+        run: node --test explorer/cloudflare/test/*.test.mjs
+      - name: Validate Wrangler project and static-asset bundle
+        working-directory: explorer/cloudflare
+        run: |
+          npm install --no-audit --no-fund
+          npx wrangler deploy --dry-run --outdir /tmp/420explorer-worker
+      - name: Test Explorer
+        run: go test ./explorer/...
+      - name: Vet Explorer
+        run: go vet ./explorer/...
+
+  deploy:
+    if: github.event_name == 'workflow_dispatch' && inputs.deploy_production == true
+    needs: qualify
+    runs-on: ubuntu-latest
+    environment: explorer-production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Require Cloudflare deployment secrets
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN"
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+      - name: Install pinned project dependencies
+        working-directory: explorer/cloudflare
+        run: npm install --no-audit --no-fund
+      - name: Publish Explorer origin when configured
+        if: ${{ secrets.EXPLORER_ORIGIN != '' }}
+        working-directory: explorer/cloudflare
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          EXPLORER_ORIGIN: ${{ secrets.EXPLORER_ORIGIN }}
+        run: |
+          case "$EXPLORER_ORIGIN" in
+            https://*) ;;
+            *) echo "EXPLORER_ORIGIN must use https" >&2; exit 1 ;;
+          esac
+          printf '%s' "$EXPLORER_ORIGIN" | npx wrangler secret put EXPLORER_ORIGIN
+      - name: Note static-only deployment mode
+        if: ${{ secrets.EXPLORER_ORIGIN == '' }}
+        run: echo "Deploying branded Explorer shell without backend origin; /v1/* will fail closed with 503 until EXPLORER_ORIGIN is configured."
+      - name: Deploy explorer.420integrated.org
+        working-directory: explorer/cloudflare
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx wrangler deploy

@@ -1,0 +1,39 @@
+{
+  "schema": "420explorer-exp-next-4-recovery-evidence-v1",
+  "status": "UNEXECUTED_TEMPLATE",
+  "releaseCandidateSha": "REPLACE_WITH_EXACT_SHA",
+  "environment": "production-equivalent",
+  "scenarios": {
+    "restart_resume": {
+      "status": "pending",
+      "evidence": ""
+    },
+    "rpc_outage": {
+      "status": "pending",
+      "evidence": ""
+    },
+    "stale_data": {
+      "status": "pending",
+      "evidence": ""
+    },
+    "provider_unavailable": {
+      "status": "pending",
+      "evidence": ""
+    },
+    "bounded_reorg": {
+      "status": "pending",
+      "evidence": ""
+    },
+    "finalized_conflict": {
+      "status": "pending",
+      "evidence": ""
+    },
+    "rebuild": {
+      "status": "pending",
+      "evidence": ""
+    }
+  },
+  "startedAt": null,
+  "completedAt": null,
+  "operator": null
+}

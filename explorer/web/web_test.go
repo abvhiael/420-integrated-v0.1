@@ -12,7 +12,7 @@ func TestHandlerServesExplorerShell(t *testing.T) {
 	Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodGet, "/", nil))
 	if rr.Code != http.StatusOK { t.Fatalf("status=%d body=%s", rr.Code, rr.Body.String()) }
 	body := rr.Body.String()
-	if !strings.Contains(body, "420Explorer") || !strings.Contains(body, "global-search") {
+	if !strings.Contains(body, "420Explorer") || !strings.Contains(body, "global-search") || !strings.Contains(body, "420 INTEGRATED") || !strings.Contains(body, "brand-mark.svg") {
 		t.Fatalf("unexpected shell body: %s", body)
 	}
 	if got := rr.Header().Get("Content-Security-Policy"); !strings.Contains(got, "connect-src 'self'") {
@@ -22,7 +22,7 @@ func TestHandlerServesExplorerShell(t *testing.T) {
 }
 
 func TestHandlerServesStaticAssets(t *testing.T) {
-	for _, path := range []string{"/app.css", "/app.js"} {
+	for _, path := range []string{"/app.css", "/app.js", "/presentation.mjs", "/workflow-presentation.mjs", "/brand-mark.svg"} {
 		rr := httptest.NewRecorder()
 		Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodGet, path, nil))
 		if rr.Code != http.StatusOK { t.Fatalf("%s status=%d", path, rr.Code) }
@@ -92,6 +92,44 @@ func TestExplorerScriptContainsAdvancedPresentationViews(t *testing.T) {
 	}
 	if strings.Contains(body, "eth_get") || strings.Contains(body, "INDEXER_RPC_URL") {
 		t.Fatal("frontend must not introduce direct RPC access")
+	}
+}
+
+func TestExplorerScriptContainsEXPNEXT2FeeAndRawEventPresentation(t *testing.T) {
+	rr := httptest.NewRecorder()
+	Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodGet, "/app.js", nil))
+	if rr.Code != http.StatusOK { t.Fatalf("status=%d", rr.Code) }
+	body := rr.Body.String()
+	for _, marker := range []string{"renderFeeSummary420", "transactionDetailPresentation420", "inspectableRaw420", "renderRawLogs420", "Raw input", "Raw logs", "logTable(logs)", "block-log", "data-copy-value"} {
+		if !strings.Contains(body, marker) { t.Fatalf("app.js missing EXP-NEXT.2 marker %q", marker) }
+	}
+	if strings.Contains(body, "eth_get") || strings.Contains(body, "INDEXER_RPC_URL") { t.Fatal("frontend must remain an Indexer/Explorer API consumer") }
+}
+
+func TestExplorerPresentationModuleContainsFailClosedGuards(t *testing.T) {
+	rr := httptest.NewRecorder()
+	Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodGet, "/presentation.mjs", nil))
+	if rr.Code != http.StatusOK { t.Fatalf("status=%d", rr.Code) }
+	body := rr.Body.String()
+	for _, marker := range []string{"actual fee is inconsistent", "transaction and receipt provenance are inconsistent", "log emitting address", "log topic", "log data", "Raw indexed values are primary", "Copy full value"} {
+		if !strings.Contains(body, marker) { t.Fatalf("presentation.mjs missing fail-closed marker %q", marker) }
+	}
+}
+
+func TestExplorerScriptContainsEXPNEXT3CrossResourceWorkflow(t *testing.T) {
+	rr := httptest.NewRecorder()
+	Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodGet, "/app.js", nil))
+	if rr.Code != http.StatusOK { t.Fatalf("status=%d", rr.Code) }
+	body := rr.Body.String()
+	for _, marker := range []string{"producerPresentation420", "registryServicePresentation420", "addressHistoryPresentation420", "assetTransfersPresentation420", "contractPresentation420", "diagnosticPresentation420", "Consensus context"} {
+		if !strings.Contains(body, marker) { t.Fatalf("app.js missing EXP-NEXT.3 marker %q", marker) }
+	}
+	rr = httptest.NewRecorder()
+	Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodGet, "/workflow-presentation.mjs", nil))
+	if rr.Code != http.StatusOK { t.Fatalf("workflow module status=%d", rr.Code) }
+	module := rr.Body.String()
+	for _, marker := range []string{"historical producer trace is incomplete", "Registry implementation mismatch", "ready status contradicts degraded diagnostics", "Explorer projection cannot claim canonical authority"} {
+		if !strings.Contains(module, marker) { t.Fatalf("workflow-presentation.mjs missing fail-closed marker %q", marker) }
 	}
 }
 

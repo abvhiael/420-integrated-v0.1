@@ -1,0 +1,68 @@
+name: 420Explorer EXP-NEXT.2 Fee and Raw Event Browser
+
+on:
+  pull_request:
+    paths:
+      - 'explorer/web/**'
+      - 'explorer/service/**'
+      - 'explorer/api/**'
+      - 'docs/audit/EXP-NEXT.2-*'
+      - 'docs/audit/EXP-0.2.2-user-workflow-matrix.json'
+      - 'docs/audit/EXP-2R.5-authoritative-next-phase-roadmap.json'
+      - 'scripts/verify-exp-next-2-fee-raw-event-browser.py'
+      - 'scripts/verify-exp-2-1-transaction-fees.py'
+      - 'scripts/verify-exp-2-5-raw-events.py'
+      - 'scripts/verify-exp-next-1-registry-descriptor-provenance.py'
+      - '.github/workflows/explorer-exp-next-2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax-check browser modules
+        run: |
+          node --check explorer/web/static/presentation.mjs
+          cp explorer/web/static/app.js /tmp/explorer-app.mjs
+          node --check /tmp/explorer-app.mjs
+      - name: Run executable browser presentation tests
+        run: node --test explorer/web/presentation.test.mjs
+      - name: Run Explorer web regression
+        run: go test ./explorer/web
+      - name: Run full Explorer regression
+        run: go test ./explorer/...
+      - name: Vet Explorer
+        run: go vet ./explorer/...
+      - name: Retain EXP-2.1 transaction-fee qualification
+        run: python scripts/verify-exp-2-1-transaction-fees.py
+      - name: Retain EXP-2.5 raw-call/event qualification
+        run: python scripts/verify-exp-2-5-raw-events.py
+      - name: Retain EXP-NEXT.1 descriptor provenance
+        run: python scripts/verify-exp-next-1-registry-descriptor-provenance.py
+      - name: Verify EXP-NEXT.2 browser presentation
+        run: python scripts/verify-exp-next-2-fee-raw-event-browser.py
+      - name: Upload EXP-NEXT.2 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp-next-2-fee-raw-event-browser
+          path: exp-next-2-evidence/
+          if-no-files-found: error
+          retention-days: 14

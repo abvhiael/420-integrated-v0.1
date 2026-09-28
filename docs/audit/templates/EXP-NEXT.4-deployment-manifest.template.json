@@ -1,0 +1,22 @@
+{
+  "schema": "420explorer-exp-next-4-deployment-manifest-v1",
+  "status": "UNPROVISIONED_TEMPLATE",
+  "releaseCandidateSha": "REPLACE_WITH_EXACT_SHA",
+  "productionEquivalent": false,
+  "chainId": 420,
+  "explorerUrl": "REPLACE_WITH_HTTPS_EXPLORER_URL",
+  "indexerUrl": "REPLACE_WITH_HTTPS_INDEXER_URL",
+  "canonicalRpcUrl": "REPLACE_WITH_APPROVED_HTTPS_RPC_URL",
+  "consensusWitnessUrl": "REPLACE_WITH_APPROVED_HTTPS_CONSENSUS_WITNESS_URL",
+  "protocolRegistry": {
+    "address": "REPLACE_WITH_DEPLOYED_REGISTRY_ADDRESS",
+    "codeHash": "REPLACE_WITH_DEPLOYED_REGISTRY_CODE_HASH"
+  },
+  "artifactIdentity": {
+    "indexerImageDigest": "REPLACE_WITH_DIGEST",
+    "explorerImageDigest": "REPLACE_WITH_DIGEST",
+    "nodeClientRevision": "REPLACE_WITH_REVISION"
+  },
+  "deployedAt": "REPLACE_WITH_RFC3339",
+  "operatorEvidence": "REPLACE_WITH_IMMUTABLE_EVIDENCE_REFERENCE"
+}

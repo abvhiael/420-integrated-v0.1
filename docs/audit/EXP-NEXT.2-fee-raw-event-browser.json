@@ -1,0 +1,226 @@
+{
+  "schema": "420explorer-exp-next-2-fee-raw-event-browser-v1",
+  "step": "EXP-NEXT.2",
+  "title": "Transaction-fee and raw-event browser presentation",
+  "status": "COMPLETE",
+  "canonical_roadmap": "docs/audit/EXP-2R.5-authoritative-next-phase-roadmap.json",
+  "current_main_base": "f437378664059a51f854d45bf48594930f070f6f",
+  "dependencies": {
+    "EXP-NEXT.1": "MERGED_ON_BASE",
+    "EXP-2.1": "RETAINED",
+    "EXP-2.5": "RETAINED"
+  },
+  "implementation_summary": [
+    "Render gas used, effective gas price and actual fee as distinct exact integer fields using decimal-string/BigInt validation.",
+    "Render transaction value and complete raw calldata without decoded labels replacing canonical raw values.",
+    "Render complete block/transaction raw events with chain ID, block number/hash, transaction hash/index, log index, emitting address, every topic and raw data.",
+    "Use one deterministic event renderer for block and transaction views so cross-view raw-event presentation cannot drift.",
+    "Provide full-value code boxes and clipboard affordances without ellipsis or underlying-value truncation.",
+    "Fail closed in the presentation layer on malformed addresses, hashes, topics/data, unsafe integer values, fee inconsistency and transaction/receipt provenance contradiction.",
+    "Update EXP-WF-003 and EXP-WF-013 repository evidence without claiming deployed/live qualification."
+  ],
+  "important_files": [
+    "explorer/web/static/app.js",
+    "explorer/web/static/presentation.mjs",
+    "explorer/web/static/app.css",
+    "explorer/web/static/index.html",
+    "explorer/web/presentation.test.mjs",
+    "explorer/web/web_test.go",
+    "docs/audit/EXP-0.2.2-user-workflow-matrix.json",
+    "scripts/verify-exp-next-2-fee-raw-event-browser.py",
+    ".github/workflows/explorer-exp-next-2.yml"
+  ],
+  "required_tests": [
+    "known fee-vector UI rendering",
+    "zero-fee and large-value exact rendering",
+    "reverted transaction raw-input/value rendering",
+    "multi-topic/raw-data event rendering",
+    "empty raw-data rendering",
+    "cross-view transaction/block event consistency",
+    "malformed address/topic/data fail-closed cases",
+    "unsafe HTML/untrusted value escaping",
+    "fee/provenance inconsistency rejection",
+    "long raw value no-truncation/copy preservation",
+    "frontend route/render regression",
+    "retained EXP-2.1 verifier",
+    "retained EXP-2.5 verifier",
+    "full Explorer Go regression and vet"
+  ],
+  "security_findings_remediated": [
+    "Browser previously summarized log topic count instead of exposing raw topic/data provenance.",
+    "Browser did not independently reject malformed raw event values before building presentation links/markup.",
+    "Transaction fee fields qualified in the API were not rendered in the browser.",
+    "Created-contract address was linked directly from API data without presentation-layer address validation."
+  ],
+  "scope": {
+    "repository_browser_presentation_qualified": true,
+    "live_target_network_fee_witness_qualified": false,
+    "abi_decoded_semantics_qualified": false,
+    "production_deployment_qualified": false,
+    "canonical_authority": false,
+    "genesis_ready_claim": false
+  },
+  "final_qualification": {
+    "qualified_candidate_head": "30e9f78dd786b53bb41fd98c84515695bbc3c1a5",
+    "candidate_exact_head_requalification": "success",
+    "dedicated_workflow": {
+      "name": "420Explorer EXP-NEXT.2 Fee and Raw Event Browser",
+      "run_id": 36470100265,
+      "conclusion": "success",
+      "artifact_id": 10990339622
+    },
+    "retained_workflows": [
+      {
+        "name": "420Explorer EXP-2.2",
+        "run_id": 36470100038,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.3",
+        "run_id": 36470100020,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.4",
+        "run_id": 36470100137,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.5",
+        "run_id": 36470099954,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.6",
+        "run_id": 36470100263,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.7 Cross-Layer Traceability Qualification",
+        "run_id": 36470100216,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.8 Runtime Negative Divergence Qualification",
+        "run_id": 36470100017,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.10 Phase Closeout Qualification",
+        "run_id": 36470100186,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Indexer",
+        "run_id": 36470099934,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Docs Qualification",
+        "run_id": 36470100155,
+        "conclusion": "success"
+      },
+      {
+        "name": "420 Integrated Qualification",
+        "run_id": 36470099978,
+        "conclusion": "success"
+      }
+    ],
+    "integrated_jobs": [
+      "production-dependencies",
+      "fault-matrix",
+      "offline-core",
+      "geth-engine"
+    ],
+    "completion_record_policy": "This COMPLETE record is valid only after the exact PR head containing it passes the dedicated EXP-NEXT.2 workflow and the retained workflow set. The exact final head is the Git commit containing this record; no older SHA may qualify it. No further evidence-only commit is required after that COMPLETE head is green.",
+    "limitations": [
+      "No live target-network fee witness is qualified.",
+      "No ABI-decoded semantic correctness beyond separately qualified decoder work is claimed.",
+      "No production deployment or Genesis closeout is qualified."
+    ],
+    "evidence_recording_input_head": "74ca0c80d1d531c5c36afabc6046e5bab22f3e86",
+    "evidence_recording_input_head_result": "all_required_exact_head_workflows_success",
+    "evidence_recording_input_workflows": [
+      {
+        "name": "420Explorer EXP-NEXT.2 Fee and Raw Event Browser",
+        "run_id": 36470761516,
+        "conclusion": "success",
+        "artifact_id": 10991610657
+      },
+      {
+        "name": "420Explorer EXP-2.5",
+        "run_id": 36470761655,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.4",
+        "run_id": 36470761780,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.7 Cross-Layer Traceability Qualification",
+        "run_id": 36470761527,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.2",
+        "run_id": 36470761642,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.10 Phase Closeout Qualification",
+        "run_id": 36470761823,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.8 Runtime Negative Divergence Qualification",
+        "run_id": 36470761634,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Indexer",
+        "run_id": 36470761523,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Docs Qualification",
+        "run_id": 36470761671,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.3",
+        "run_id": 36470761432,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.6",
+        "run_id": 36470761431,
+        "conclusion": "success"
+      },
+      {
+        "name": "420 Integrated Qualification",
+        "run_id": 36470761733,
+        "conclusion": "success"
+      }
+    ],
+    "evidence_recording_input_integrated_jobs": [
+      {
+        "name": "offline-core",
+        "conclusion": "success"
+      },
+      {
+        "name": "geth-engine",
+        "conclusion": "success"
+      },
+      {
+        "name": "production-dependencies",
+        "conclusion": "success"
+      },
+      {
+        "name": "fault-matrix",
+        "conclusion": "success"
+      }
+    ],
+    "final_head_rule": "The commit created by recording the 74ca0c80 evidence above is a new qualification target. EXP-NEXT.2 is COMPLETE only after that exact PR head passes the dedicated EXP-NEXT.2 workflow and all retained workflows that trigger for it; missing/skipped/cancelled required checks do not qualify the step."
+  }
+}

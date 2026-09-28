@@ -1,0 +1,79 @@
+{
+  "schema": "420explorer-exp-next-5-required-test-inventory-v1",
+  "status": "INCOMPLETE_ENVIRONMENT_BLOCKED",
+  "releaseCandidateSha": null,
+  "exactCandidateFrozen": false,
+  "suites": [
+    {
+      "id": "T-REPO-EXPLORER",
+      "name": "complete Explorer retained qualification suite",
+      "required": true,
+      "current_state": "repository-qualified",
+      "final_requirement": "rerun on final frozen release candidate"
+    },
+    {
+      "id": "T-REPO-INDEXER",
+      "name": "420Indexer retained qualification",
+      "required": true,
+      "current_state": "repository-qualified",
+      "final_requirement": "rerun on final frozen release candidate"
+    },
+    {
+      "id": "T-REPO-INTEGRATED",
+      "name": "420 Integrated qualification",
+      "required": true,
+      "current_state": "repository-qualified",
+      "final_requirement": "rerun on final frozen release candidate"
+    },
+    {
+      "id": "T-REGISTRY",
+      "name": "Registry descriptor/runtime provenance",
+      "required": true,
+      "current_state": "repository descriptor qualified; live runtime pending",
+      "final_requirement": "deployed Registry code/hash/publication and direct-vs-projection witness"
+    },
+    {
+      "id": "T-LIVE-DEPLOY",
+      "name": "production-equivalent deployment qualification",
+      "required": true,
+      "current_state": "blocked",
+      "final_requirement": "non-placeholder approved Explorer/Indexer endpoints and exact deployed artifact identity"
+    },
+    {
+      "id": "T-LIVE-ROUTES",
+      "name": "mandatory route/browser end-to-end suite",
+      "required": true,
+      "current_state": "blocked",
+      "final_requirement": "all mandatory routes and workflows on deployed exact candidate"
+    },
+    {
+      "id": "T-LIVE-CANONICAL",
+      "name": "canonical-vs-indexed live comparison",
+      "required": true,
+      "current_state": "blocked",
+      "final_requirement": "approved chain-420 block/tx/receipt/log/Registry/consensus witnesses"
+    },
+    {
+      "id": "T-SECURITY",
+      "name": "security and hostile rendering/fail-closed qualification",
+      "required": true,
+      "current_state": "repository-qualified; deployment evidence pending",
+      "final_requirement": "exact candidate plus production-equivalent negative cases"
+    },
+    {
+      "id": "T-RECOVERY",
+      "name": "restart/outage/stale/provider/reorg/finalized-conflict/rebuild recovery",
+      "required": true,
+      "current_state": "repository fixtures qualified; live blocked",
+      "final_requirement": "production-equivalent recovery transcript"
+    },
+    {
+      "id": "T-EVIDENCE",
+      "name": "final evidence-ledger consistency verifier",
+      "required": true,
+      "current_state": "closeout-readiness verifier implemented",
+      "final_requirement": "rerun after all ACs/blockers are closed on frozen release candidate"
+    }
+  ],
+  "no_skip_rule": "A required suite that is blocked, skipped, cancelled, missing, or executed on a different SHA is not passing."
+}

@@ -1,3 +1,5 @@
+import { inspectableRaw420, renderFeeSummary420, renderRawLogs420, transactionDetailPresentation420 } from './presentation.mjs';
+import { addressHistoryPresentation420, assetTransfersPresentation420, contractPresentation420, diagnosticPresentation420, producerPresentation420, registryServicePresentation420, registryVersionPresentation420, routeLink420 } from './workflow-presentation.mjs';
 const app = document.querySelector('#route-content');
 const networkPill = document.querySelector('#network-pill');
 const searchForm = document.querySelector('#global-search');
@@ -101,6 +103,7 @@ async function blockDetail(number) {
   const nav = view.navigation || {};
   const trace = view.trace || {};
   const producer = b.producer || {};
+  const producerView = producerPresentation420(view);
   app.innerHTML = title(`Block ${number}`, b.finality || '') + stats([
     ['Number', b.number], ['Finality', b.finality], ['Logs', view.logCount ?? logs.length], ['Timestamp', unixTime(b.timestamp)]
   ]) + `<div class="panel">${detailRows([
@@ -109,21 +112,21 @@ async function blockDetail(number) {
     ['Chain ID', b.chainId],
     ['Schema', b.schemaVersion]
   ])}</div>` + (b.number === 0 ? '' : `<div class="panel"><h3>Consensus provenance</h3>${detailRows([
-    ['Consensus slot', trace.consensusSlot ?? producer.consensusSlot],
-    ['Producer seat', trace.producerSeat ?? producer.producerSeat],
-    ['Proposer rank', trace.proposerRank ?? producer.proposerRank],
-    ['Consensus block root', mono(trace.consensusBlockRoot ?? producer.consensusBlockRoot), true],
+    ['Consensus slot', producerView.consensusLink, true],
+    ['Producer seat', producerView.seat],
+    ['Proposer rank', producerView.rank],
+    ['Consensus block root', mono(producerView.root), true],
     ['Certified', (trace.certified ?? producer.certified) ? 'yes' : 'no'],
     ['Execution authority', trace.executionAuthority || 'node420 canonical execution block'],
     ['Consensus authority', trace.consensusAuthority || 'fourtwentyd consensus-produced block history'],
     ['Projection authority', trace.projectionAuthority || '420Indexer derived projection'],
-    ['Canonical authority', trace.canonicalAuthority === true ? 'yes' : 'no']
-  ])}</div>`) + `<div class="pager">${nav.previous !== null && nav.previous !== undefined ? link(`#/blocks/${nav.previous}`, `← block ${nav.previous}`) : '<span></span>'}${nav.next !== null && nav.next !== undefined ? link(`#/blocks/${nav.next}`, `block ${nav.next} →`) : '<span></span>'}</div>` + `<div class="panel"><h3>Logs</h3>${logTable(logs)}</div>`;
+    ['Canonical authority', trace.canonicalAuthority === true ? 'yes' : 'no'],
+    ['Consensus context', producerView.consensusLink, true]
+  ])}</div>`) + `<div class="pager">${nav.previous !== null && nav.previous !== undefined ? link(`#/blocks/${nav.previous}`, `← block ${nav.previous}`) : '<span></span>'}${nav.next !== null && nav.next !== undefined ? link(`#/blocks/${nav.next}`, `block ${nav.next} →`) : '<span></span>'}</div>` + `<div class="panel"><h3>Raw logs</h3>${logTable(logs,'block-log')}</div>`;
 }
 
-function logTable(logs) {
-  if (!logs.length) return '<p class="muted">No logs indexed for this resource.</p>';
-  return `<div class="table-wrap"><table><thead><tr><th>Log</th><th>Address</th><th>Transaction</th><th>Topics</th></tr></thead><tbody>${logs.map(l => `<tr><td>${fmt(l.logIndex)}</td><td>${l.address ? link(`#/addresses/${l.address}`,short(l.address)) : '—'}</td><td>${l.transactionHash ? link(`#/transactions/${l.transactionHash}`,short(l.transactionHash)) : '—'}</td><td>${fmt(l.topics?.length ?? 0)}</td></tr>`).join('')}</tbody></table></div>`;
+function logTable(logs, prefix='logs') {
+  return `<div class="raw-event-list">${renderRawLogs420(logs, prefix)}</div>`;
 }
 
 async function transactionDetail(hash) {
@@ -131,51 +134,53 @@ async function transactionDetail(hash) {
   const tx = view.transaction || {};
   const receipt = view.receipt || {};
   const logs = view.logs || [];
-  const created = receipt.contractAddress;
+  const qualified = transactionDetailPresentation420(view);
+  const created = qualified.contractAddress;
   app.innerHTML = title('Transaction', receipt.statusLabel || '') + stats([
-    ['Block', tx.blockNumber], ['Index', tx.index], ['Status', receipt.statusLabel ?? receipt.status], ['Gas used', receipt.gasUsed], ['Finality', view.finality]
-  ]) + `<div class="panel">${detailRows([
-    ['Hash', mono(tx.hash || hash), true],
-    ['Block hash', mono(tx.blockHash), true],
+    ['Block', qualified.blockNumber],
+    ['Index', qualified.transactionIndex],
+    ['Status', receipt.statusLabel ?? receipt.status],
+    ['Finality', view.finality]
+  ]) + renderFeeSummary420(receipt) + `<div class="panel">${detailRows([
+    ['Hash', inspectableRaw420(qualified.txHash, 'transaction hash', 'transaction-hash'), true],
+    ['Block hash', inspectableRaw420(qualified.blockHash, 'block hash', 'transaction-block-hash'), true],
+    ['Chain ID', qualified.chainId],
     ['From', tx.from ? link(`#/addresses/${tx.from}`, tx.from) : '—', true],
     ['To', tx.to ? link(`#/addresses/${tx.to}`, tx.to) : 'contract creation', true],
-    ['Value (wei)', mono(tx.valueWei || '0'), true],
+    ['Value (wei)', mono(qualified.raw.valueWei), true],
     ['Created contract', created ? link(`#/contracts/${created}`, created) : '—', true],
-    ['Input', tx.input ? `<div class="codebox mono">${esc(tx.input)}</div>` : '—', true]
-  ])}</div>` + `<div class="panel"><h3>Logs</h3>${logTable(logs)}</div>`;
+    ['Raw input', inspectableRaw420(qualified.raw.input, 'transaction input', 'transaction-input'), true]
+  ])}</div>` + `<div class="panel"><h3>Raw logs</h3>${logTable(logs)}</div>`;
 }
 
 async function addressDetail(address) {
   const view = await api(`/v1/addresses/${encodeURIComponent(address)}?limit=50`);
   const txs = view.transactions || [];
   const normalized = view.address || address;
+  const qualifiedRows = addressHistoryPresentation420(txs, normalized);
   app.innerHTML = title('Address', `${view.txCount ?? txs.length} indexed transactions`) + `<div class="panel">${detailRows([
     ['Address', mono(normalized), true],
     ['Snapshot height', view.meta?.snapshotHeight],
     ['Safe height', view.meta?.safeHeight],
     ['Finalized height', view.meta?.finalizedHeight]
-  ])}</div>` + `<div class="panel"><h3>Transaction history</h3>${addressTxTable(txs, normalized)}</div>`;
+  ])}</div>` + `<div class="panel"><h3>Transaction history</h3>${addressTxTable(qualifiedRows)}</div>`;
 }
 
-function addressTxTable(txs, address) {
-  if (!txs.length) return '<p class="muted">No indexed transaction history for this address.</p>';
-  const addr = String(address).toLowerCase();
-  return `<div class="table-wrap"><table><thead><tr><th>Hash</th><th>Block</th><th>Direction</th><th>Counterparty</th><th>Value (wei)</th></tr></thead><tbody>${txs.map(tx => {
-    const from = String(tx.from || '').toLowerCase();
-    const outgoing = from === addr;
-    const counterparty = outgoing ? tx.to : tx.from;
-    return `<tr><td>${link(`#/transactions/${tx.hash}`,short(tx.hash))}</td><td>${link(`#/blocks/${tx.blockNumber}`,tx.blockNumber)}</td><td><span class="badge ${outgoing?'badge-out':'badge-in'}">${outgoing?'OUT':'IN'}</span></td><td>${counterparty ? link(`#/addresses/${counterparty}`,short(counterparty)) : 'contract creation'}</td><td>${mono(tx.valueWei || '0')}</td></tr>`;
-  }).join('')}</tbody></table></div>`;
+function addressTxTable(rows) {
+  if (!rows.length) return '<p class="muted">No indexed transaction history for this address.</p>';
+  return `<div class="table-wrap"><table><thead><tr><th>Hash</th><th>Block</th><th>Direction</th><th>Counterparty</th><th>Value (wei)</th></tr></thead><tbody>${rows.map(({tx,outgoing,counterparty,txLink,blockLink}) => `<tr><td>${txLink}</td><td>${blockLink}</td><td><span class="badge ${outgoing?'badge-out':'badge-in'}">${outgoing?'OUT':'IN'}</span></td><td>${counterparty ? routeLink420(['addresses',counterparty],short(counterparty)) : 'contract creation'}</td><td>${mono(tx.valueWei || '0')}</td></tr>`).join('')}</tbody></table></div>`;
 }
 
 async function contractDetail(address) {
   const view = await api(`/v1/contracts/${encodeURIComponent(address)}`);
   const c = view.contract || {};
+  const cross = contractPresentation420(view, address);
   app.innerHTML = title('Contract', view.hasRuntimeCode ? 'runtime code indexed' : 'no runtime code') + stats([
     ['Deployment block',c.deploymentBlockNumber],['Runtime bytes',view.runtimeCodeBytes],['Has runtime code',view.hasRuntimeCode ? 'yes':'no'],['Chain',c.chainId]
   ]) + `<div class="panel">${detailRows([
     ['Address', mono(c.address || address), true],
-    ['Deployment transaction', c.deploymentTxHash ? link(`#/transactions/${c.deploymentTxHash}`,c.deploymentTxHash) : '—', true],
+    ['Deployment transaction', cross.deploymentTxLink, true],
+    ['Deployment block', cross.deploymentBlockLink, true],
     ['Deployment block hash', mono(c.deploymentHash), true],
     ['Code hash', mono(c.codeHash), true],
     ['Schema', c.schemaVersion]
@@ -196,11 +201,12 @@ async function registry() {
 async function registryService(serviceId) {
   const view = await api(`/v1/services/${encodeURIComponent(serviceId)}`);
   const versions = view.versions || [];
+  const registryView = registryServicePresentation420(view);
   app.innerHTML = title(view.serviceId || serviceId, `${versions.length} published version${versions.length===1?'':'s'}`) + stats([
     ['Latest version',view.latestVersion],['Active version',view.activeVersion || 'none'],['Versions',view.versionCount ?? versions.length],['Implementation',view.implementation ? short(view.implementation) : '—']
   ]) + `<div class="panel">${detailRows([
     ['Service ID', mono(view.serviceId || serviceId), true],
-    ['Active implementation', view.implementation ? link(`#/contracts/${view.implementation}`,view.implementation) : '—', true]
+    ['Active implementation', registryView.implementationLink, true]
   ])}</div>` + `<div class="panel"><h3>Version history</h3>${registryVersionsTable(versions)}</div>`;
 }
 
@@ -211,10 +217,11 @@ function registryVersionsTable(versions) {
 
 async function registryVersion(serviceId, version) {
   const v = await api(`/v1/services/${encodeURIComponent(serviceId)}/versions/${encodeURIComponent(version)}`);
+  const registryVersionView = registryVersionPresentation420(v, serviceId, version);
   app.innerHTML = title(`${v.serviceId} · v${v.version}`, v.active ? 'active' : 'historical') + stats([
     ['Version',v.version],['Active',v.active ? 'yes':'no'],['Activated block',v.activatedBlock],['Deprecated block',v.deprecatedBlock || '—']
   ]) + `<div class="panel">${detailRows([
-    ['Implementation', v.implementation ? link(`#/contracts/${v.implementation}`,v.implementation) : '—', true],
+    ['Implementation', registryVersionView.implementationLink, true],
     ['Code hash', mono(v.codeHash), true],
     ['Metadata hash', mono(v.metadataHash), true],
     ['Manifest hash', mono(v.manifestHash), true],
@@ -230,14 +237,15 @@ async function assets() {
   params.set('limit','50');
   const view = await api(`/v1/assets/activity?${params.toString()}`);
   const transfers = view.transfers || [];
+  const qualifiedTransfers = assetTransfersPresentation420(transfers);
   app.innerHTML = title('Asset activity', `${view.transferCount ?? transfers.length} recent transfers`) + stats([
     ['Snapshot',view.meta?.snapshotHeight],['Safe',view.meta?.safeHeight],['Finalized',view.meta?.finalizedHeight],['Transfers',view.transferCount ?? transfers.length]
-  ]) + `<div class="panel"><p class="muted">Native and token movement projected from qualified indexed transactions and logs.</p>${assetTable(transfers)}</div>`;
+  ]) + `<div class="panel"><p class="muted">Native and token movement projected from qualified indexed transactions and logs.</p>${assetTable(qualifiedTransfers)}</div>`;
 }
 
-function assetTable(transfers) {
-  if (!transfers.length) return '<p class="muted">No indexed asset transfers available.</p>';
-  return `<div class="table-wrap"><table><thead><tr><th>Block</th><th>Asset</th><th>Kind</th><th>Token ID</th><th>Amount</th><th>From</th><th>To</th><th>Tx</th></tr></thead><tbody>${transfers.map(t => `<tr><td>${link(`#/blocks/${t.blockNumber}`,t.blockNumber)}</td><td title="${esc(t.assetKey)}">${mono(short(t.assetKey,14,8))}</td><td><span class="badge">${esc(String(t.assetKind || '').toUpperCase())}</span></td><td>${t.tokenId ? mono(t.tokenId) : '—'}</td><td>${mono(t.amount)}</td><td>${t.from ? link(`#/addresses/${t.from}`,short(t.from)) : '—'}</td><td>${t.to ? link(`#/addresses/${t.to}`,short(t.to)) : '—'}</td><td>${link(`#/transactions/${t.transactionHash}`,short(t.transactionHash))}</td></tr>`).join('')}</tbody></table></div>`;
+function assetTable(rows) {
+  if (!rows.length) return '<p class="muted">No indexed asset transfers available.</p>';
+  return `<div class="table-wrap"><table><thead><tr><th>Block</th><th>Asset</th><th>Kind</th><th>Token ID</th><th>Amount</th><th>From</th><th>To</th><th>Tx</th></tr></thead><tbody>${rows.map(({t,label,blockLink,txLink,fromLink,toLink}) => `<tr><td>${blockLink}</td><td title="${label}">${label}</td><td><span class="badge">${esc(String(t.assetKind || '').toUpperCase())}</span></td><td>${t.tokenId ? mono(t.tokenId) : '—'}</td><td>${mono(t.amount)}</td><td>${fromLink}</td><td>${toLink}</td><td>${txLink}</td></tr>`).join('')}</tbody></table></div>`;
 }
 
 async function consensus() {
@@ -254,11 +262,11 @@ async function consensus() {
     ['Epochs per rotation',c.epochsPerRotation],
     ['Slots until rotation boundary',c.slotsUntilRotationBoundary]
   ])}</div>` + `<div class="panel"><h3>Scheduled proposer · slot ${fmt(proposer.slot)}</h3>${detailRows([
-    ['Primary seat',mono(proposer.primary),true],['Fallback 1',mono(proposer.fallback1),true],['Fallback 2',mono(proposer.fallback2),true]
+    ['Primary seat',routeLink420(['consensus',proposer.slot],`seat ${proposer.primary}`),true],['Fallback 1',routeLink420(['consensus',proposer.slot],`seat ${proposer.fallback1}`),true],['Fallback 2',routeLink420(['consensus',proposer.slot],`seat ${proposer.fallback2}`),true]
   ])}</div>` + `<div class="panel"><h3>Latest quorum certificate</h3>${detailRows([
     ['Certified',statusBadge(Boolean(qc.certified),'CERTIFIED','NOT CERTIFIED'),true],
     ['Slot',qc.slot],['Signers',qc.signers],['Quorum threshold',qc.quorum],['Block root',mono(qc.blockRoot),true],['Parent root',mono(qc.parentRoot),true]
-  ])}</div>` + `<div class="panel"><h3>Finality checkpoints</h3>${checkpointTable(c)}</div>` + `<div class="panel"><h3>Active seats</h3><div class="seat-list">${seats.map(seat => `<span class="seat">${esc(seat)}</span>`).join('') || '<span class="muted">No active seats reported.</span>'}</div></div>`;
+  ])}</div>` + `<div class="panel"><h3>Finality checkpoints</h3>${checkpointTable(c)}</div>` + `<div class="panel"><h3>Active seats</h3><div class="seat-list">${seats.map(seat => routeLink420(['consensus',c.currentSlot],`seat ${seat}`)).join('') || '<span class="muted">No active seats reported.</span>'}</div></div>`;
 }
 
 function checkpointTable(c) {
@@ -266,7 +274,8 @@ function checkpointTable(c) {
 }
 
 function statusDetails(s) {
-  return stats([
+  const diagnostic = diagnosticPresentation420(s);
+  return diagnostic.banner + stats([
     ['State',s.indexerState],['Chain',s.chainId],['Head',s.headHeight],['Safe',s.safeHeight],['Finalized',s.finalizedHeight],['Ingest age',s.ingestAgeSeconds != null ? `${s.ingestAgeSeconds}s` : '—'],['Safe lag',s.safeLag],['Finalized lag',s.finalizedLag]
   ]) + `<div class="panel">${detailRows([
     ['Ready',statusBadge(Boolean(s.ready),'READY','NOT READY'),true],
@@ -332,3 +341,18 @@ searchForm.addEventListener('submit', event => {
 window.addEventListener('hashchange', route);
 refreshNetworkPill();
 route();
+
+document.addEventListener('click', async event => {
+  const button = event.target.closest?.('[data-copy-value]');
+  if (!button) return;
+  const raw = button.dataset.copyValue ?? '';
+  try {
+    if (!navigator.clipboard?.writeText) throw new Error('clipboard unavailable');
+    await navigator.clipboard.writeText(raw);
+    const original = button.textContent;
+    button.textContent = 'Copied';
+    setTimeout(() => { button.textContent = original; }, 1200);
+  } catch {
+    button.textContent = 'Copy unavailable';
+  }
+});

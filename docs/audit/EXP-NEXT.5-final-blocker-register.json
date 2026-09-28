@@ -1,0 +1,19 @@
+{
+  "schema": "420explorer-exp-next-5-final-blocker-register-v1",
+  "status": "OPEN",
+  "source": "docs/audit/EXP-0.2.5-genesis-gap-register.json",
+  "unresolved_genesis_blockers": [
+    "EXP-FIND-002",
+    "EXP-FIND-003",
+    "EXP-FIND-004",
+    "EXP-FIND-005",
+    "EXP-FIND-006",
+    "EXP-FIND-007",
+    "EXP-FIND-008",
+    "EXP-FIND-009",
+    "EXP-FIND-010",
+    "EXP-FIND-011"
+  ],
+  "closure_rule": "Every Genesis-blocking finding must be evidenced closed against the same exact release candidate and applicable production-equivalent environment before this register may become CLOSED.",
+  "current_disposition": "Repository implementation has remediated several source/UI gaps, but live deployment, canonical-source, Registry, consensus, producer, and recovery witnesses remain outstanding through EXP-NEXT.4."
+}

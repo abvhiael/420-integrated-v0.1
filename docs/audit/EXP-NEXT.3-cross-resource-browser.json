@@ -1,0 +1,224 @@
+{
+  "schema": "420explorer-exp-next-3-cross-resource-browser-v1",
+  "step": "EXP-NEXT.3",
+  "title": "Consensus/producer and cross-resource browser workflow closeout",
+  "status": "COMPLETE",
+  "canonical_roadmap": "docs/audit/EXP-2R.5-authoritative-next-phase-roadmap.json",
+  "base_dependency_head": "f660db960b46a47215ed11bcbd0a8d79b6be8e98",
+  "main_at_branch_creation": "f437378664059a51f854d45bf48594930f070f6f",
+  "dependency_note": "EXP-NEXT.2 is fully qualified at base_dependency_head but PR #385 was not merged when this branch was created; this branch intentionally preserves that qualified dependency rather than rebuilding from an older main.",
+  "dependencies": {
+    "EXP-NEXT.2": "QUALIFIED_BASE_HEAD",
+    "EXP-2.3": "RETAINED",
+    "EXP-2.4": "RETAINED",
+    "EXP-2.6": "RETAINED"
+  },
+  "implementation_summary": [
+    "Fail closed on missing or contradictory historical producer trace data before rendering block producer provenance.",
+    "Provide deterministic block-to-consensus navigation and consensus-seat context without treating seat identifiers as canonical identity.",
+    "Revalidate Registry active-version/implementation linkage before rendering contract navigation.",
+    "Validate address-history, asset-transfer and contract-deployment resource identifiers before generating internal links.",
+    "Render explicit wrong-chain, stale, degraded and inconsistent diagnostic states and reject ready/degraded contradictions.",
+    "Escape hostile asset/metadata labels and reject malformed internal resource identifiers.",
+    "Reconcile frozen workflow-matrix repository UI dispositions while leaving live/deployment witnesses pending."
+  ],
+  "important_files": [
+    "explorer/web/static/workflow-presentation.mjs",
+    "explorer/web/workflow-presentation.test.mjs",
+    "explorer/web/static/app.js",
+    "explorer/web/static/app.css",
+    "explorer/web/web_test.go",
+    "docs/audit/EXP-0.2.2-user-workflow-matrix.json",
+    "scripts/verify-exp-next-3-cross-resource-browser.py",
+    ".github/workflows/explorer-exp-next-3.yml"
+  ],
+  "required_tests": [
+    "historical block-producer UI fixture",
+    "validator/consensus boundary navigation",
+    "Registry implementation-to-contract navigation",
+    "address/asset/contract cross-resource navigation",
+    "wrong-chain/stale/degraded/inconsistent diagnostic rendering",
+    "unsafe metadata/link/log rendering",
+    "missing producer trace negative",
+    "consensus/execution provenance mismatch negative",
+    "Registry implementation mismatch negative",
+    "projection canonical-authority overclaim negative",
+    "full frontend regression",
+    "retained EXP-2.3/2.4/2.6 and EXP-NEXT.2 verifiers"
+  ],
+  "scope": {
+    "repository_cross_resource_browser_workflows_qualified": true,
+    "live_canonical_producer_witness_qualified": false,
+    "deployed_consensus_provider_proof_qualified": false,
+    "production_availability_sla_qualified": false,
+    "canonical_authority": false,
+    "genesis_ready_claim": false
+  },
+  "final_qualification": {
+    "qualified_candidate_head": "f64228faab3218bb50f6ba4b1b42b77cda9d3b85",
+    "candidate_exact_head_requalification": "success",
+    "dedicated_workflow": {
+      "name": "420Explorer EXP-NEXT.3 Cross Resource Browser",
+      "run_id": 36474436338,
+      "conclusion": "success",
+      "artifact_id": 10992649147
+    },
+    "retained_workflows": [
+      {
+        "name": "420Explorer EXP-2.2",
+        "run_id": 36474436487,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.3",
+        "run_id": 36474436197,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.4",
+        "run_id": 36474436270,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.5",
+        "run_id": 36474436111,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.6",
+        "run_id": 36474436259,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-NEXT.2 Fee and Raw Event Browser",
+        "run_id": 36474436421,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.7 Cross-Layer Traceability Qualification",
+        "run_id": 36474436441,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.8 Runtime Negative Divergence Qualification",
+        "run_id": 36474436201,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.10 Phase Closeout Qualification",
+        "run_id": 36474436356,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Indexer",
+        "run_id": 36474436561,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Docs Qualification",
+        "run_id": 36474436121,
+        "conclusion": "success"
+      },
+      {
+        "name": "420 Integrated Qualification",
+        "run_id": 36474436526,
+        "conclusion": "success"
+      }
+    ],
+    "integrated_jobs": [
+      {
+        "name": "geth-engine",
+        "conclusion": "success"
+      },
+      {
+        "name": "production-dependencies",
+        "conclusion": "success"
+      },
+      {
+        "name": "offline-core",
+        "conclusion": "success"
+      },
+      {
+        "name": "fault-matrix",
+        "conclusion": "success"
+      }
+    ],
+    "final_head_rule": "The commit created by recording this candidate evidence is a new qualification target. EXP-NEXT.3 is COMPLETE only after that exact evidence-recording PR head passes the dedicated EXP-NEXT.3 workflow and the retained required workflows. No earlier SHA may qualify the evidence-recording commit.",
+    "limitations": [
+      "No live canonical producer witness is qualified.",
+      "No deployed consensus-provider proof is qualified.",
+      "No production availability/SLA is qualified.",
+      "No Genesis readiness claim is made."
+    ],
+    "evidence_recording_head": "46fcffbff915a3f2b761037bb03fe9fc6928a954",
+    "evidence_recording_exact_head_requalification": "success",
+    "evidence_recording_workflows": [
+      {
+        "name": "420Explorer EXP-2.5",
+        "run_id": 36475968376,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.6",
+        "run_id": 36475968457,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.4",
+        "run_id": 36475968362,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-NEXT.3 Cross Resource Browser",
+        "run_id": 36475968391,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Docs Qualification",
+        "run_id": 36475968511,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-NEXT.2 Fee and Raw Event Browser",
+        "run_id": 36475968390,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.2",
+        "run_id": 36475968388,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.3",
+        "run_id": 36475968484,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.7 Cross-Layer Traceability Qualification",
+        "run_id": 36475968386,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.8 Runtime Negative Divergence Qualification",
+        "run_id": 36475968499,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.10 Phase Closeout Qualification",
+        "run_id": 36475968442,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Indexer",
+        "run_id": 36475968407,
+        "conclusion": "success"
+      },
+      {
+        "name": "420 Integrated Qualification",
+        "run_id": 36475968382,
+        "conclusion": "success"
+      }
+    ],
+    "complete_record_policy": "This COMPLETE record is effective only if the exact commit containing it also passes the dedicated EXP-NEXT.3 workflow and the full retained required suite. If this record changes, the new SHA must be requalified."
+  }
+}

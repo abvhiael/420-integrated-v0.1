@@ -69,3 +69,8 @@ Qualified implementation head: `e82501616062ff08c2789ec24518f5433bbd99c4`
 - Digest `sha256:cb01481456cb587ddfce280c2cd8ef2ff231cbb5e693851f1158e1cad699592c`.
 
 This proves the stale-evidence reconciliation at repository scope only. The evidence recording changes the branch SHA, so the resulting head must be requalified before EXP-0.4.6 is marked COMPLETE.
+
+
+## Branded Explorer UI reconciliation
+
+The bespoke 420 Integrated Explorer removes the historical broad user-facing phrase `Qualified, read-only visibility...`. Current presentation instead identifies the Explorer as read-only network intelligence and explicitly states that it is a non-canonical projection. EXP-CONTRA-003 remains retained as historical evidence; the verifier now fails if the stale broad qualification wording is reintroduced or if the current authority disclaimer disappears.

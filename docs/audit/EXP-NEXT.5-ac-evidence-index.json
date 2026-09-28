@@ -1,0 +1,123 @@
+{
+  "schema": "420explorer-exp-next-5-ac-evidence-index-v1",
+  "status": "INCOMPLETE",
+  "authoritative_acceptance_map": "docs/audit/EXP-0.2.6-genesis-acceptance-criteria.json",
+  "evidence_semantics": "Repository-only evidence is not promoted to live/deployment/Genesis acceptance evidence.",
+  "criteria": {
+    "AC-1": {
+      "status": "unverified",
+      "repository_evidence": [
+        "EXP-NEXT.2",
+        "EXP-NEXT.3"
+      ],
+      "missing": [
+        "production-equivalent block/transaction/address workflows",
+        "authoritative-chain successful/failed transaction witnesses"
+      ]
+    },
+    "AC-2": {
+      "status": "unverified",
+      "repository_evidence": [
+        "EXP-1 runtime validation",
+        "EXP-NEXT.4 live preflight harness"
+      ],
+      "missing": [
+        "approved chain-420 RPC identity",
+        "live Indexer health/finality/freshness",
+        "canonical-vs-indexed witnesses"
+      ]
+    },
+    "AC-3": {
+      "status": "unverified",
+      "repository_evidence": [
+        "Indexer recovery tests",
+        "EXP-NEXT.4 recovery evidence contract"
+      ],
+      "missing": [
+        "deployed restart/resume",
+        "RPC outage",
+        "provider failure",
+        "bounded reorg",
+        "finalized conflict",
+        "full rebuild"
+      ]
+    },
+    "AC-4": {
+      "status": "unverified",
+      "repository_evidence": [
+        "EXP-NEXT.1 Registry descriptor provenance"
+      ],
+      "missing": [
+        "target-network ProtocolRegistry runtime/code hash",
+        "authorized publication",
+        "direct Registry-vs-projection live comparison"
+      ]
+    },
+    "AC-5": {
+      "status": "unverified",
+      "repository_evidence": [
+        "EXP-NEXT.2",
+        "EXP-NEXT.3"
+      ],
+      "missing": [
+        "production-equivalent browser/UI workflow evidence",
+        "live consensus/producer workflow evidence"
+      ]
+    },
+    "AC-6": {
+      "status": "unverified",
+      "repository_evidence": [
+        "deployable Explorer/Indexer artifacts",
+        "EXP-NEXT.4 exact-candidate live harness"
+      ],
+      "missing": [
+        "non-placeholder deployed URLs",
+        "all-route deployed probes",
+        "Registry/consensus live integration"
+      ]
+    },
+    "AC-7": {
+      "status": "unverified",
+      "repository_evidence": [
+        "hostile rendering tests",
+        "wrong-chain/stale/degraded repository tests"
+      ],
+      "missing": [
+        "production-equivalent recovery/degraded-state security evidence"
+      ]
+    },
+    "AC-8": {
+      "status": "unverified",
+      "repository_evidence": [
+        "version-pinned deployment procedures/templates"
+      ],
+      "missing": [
+        "placeholder-free environment inventory",
+        "clean-environment deployment transcript",
+        "deployed service identity",
+        "recovery/rollback deployment evidence"
+      ]
+    },
+    "AC-9": {
+      "status": "unverified",
+      "repository_evidence": [
+        "retained exact-head repository suites"
+      ],
+      "missing": [
+        "one frozen release candidate",
+        "all live/deployment/security/E2E suites on that same SHA"
+      ]
+    },
+    "AC-10": {
+      "status": "unverified",
+      "repository_evidence": [
+        "this closeout reconciliation"
+      ],
+      "missing": [
+        "complete AC-1 through AC-9 evidence index",
+        "closed Genesis blocker register",
+        "final exact release-candidate artifact/run manifest"
+      ]
+    }
+  }
+}

@@ -92,26 +92,35 @@
         "workflow_dispatch"
       ],
       "environment": [
-        "user-supplied explorer_url",
-        "expected chain id",
-        "optional block/transaction/address/service/asset witnesses"
+        "exact user-supplied release_candidate_sha",
+        "non-placeholder Explorer and Indexer HTTPS URLs",
+        "approved canonical RPC URL",
+        "approved independent consensus witness URL",
+        "immutable deployment manifest and recovery evidence URLs",
+        "ProtocolRegistry deployment address and expected code hash",
+        "expected chain id and optional representative block/transaction/address/service/asset witnesses"
       ],
       "commands": [
+        "exact-SHA checkout assertion",
         "go test ./explorer/cmd/explorerlivevalidate",
-        "go run ./explorer/cmd/explorerlivevalidate | tee explorer-live-evidence.json"
+        "python scripts/verify-exp-next-4-live-preflight.py",
+        "go run ./explorer/cmd/explorerlivevalidate | tee exp-next-4-live-evidence/explorer-live-evidence.json"
       ],
       "evidence": [
-        "explorer-live-testnet-evidence"
+        "exp-next-4-live-deployment-recovery"
       ],
       "qualification_scope": [
-        "live Explorer service",
-        "chain identity",
-        "provenance headers",
-        "optional representative witness paths"
+        "exact release-candidate live Explorer/Indexer deployment",
+        "chain identity and canonical block comparison",
+        "ProtocolRegistry runtime/code-hash witness",
+        "independent consensus witness comparison",
+        "mandatory Explorer route validation",
+        "production-equivalent recovery evidence contract"
       ],
       "exclusions": [
         "not automatically run on PR",
-        "does not establish live status until invoked against approved deployment"
+        "does not establish live status until invoked against approved non-placeholder deployment",
+        "does not assign canonical authority to Explorer or Indexer"
       ],
       "finding_refs": [
         "EXP-FIND-003",
@@ -327,6 +336,65 @@
         "AC-9",
         "AC-10"
       ]
+    },
+    {
+      "id": "EXP-CI-007",
+      "name": "420Explorer EXP-NEXT.4 Repository Readiness",
+      "path": ".github/workflows/explorer-exp-next-4.yml",
+      "status": "active",
+      "role": "exp_next_4_repository_readiness_and_blocker_gate",
+      "authority": "supporting_repository_readiness_not_live_authority",
+      "triggers": [
+        "pull_request:path_filtered",
+        "workflow_dispatch"
+      ],
+      "environment": [
+        "ubuntu-latest",
+        "go from go.mod",
+        "node 22"
+      ],
+      "commands": [
+        "python scripts/verify-exp-next-4-repository-readiness.py",
+        "go test ./explorer/cmd/explorerlivevalidate",
+        "go test ./explorer/...",
+        "go vet ./explorer/...",
+        "npm install --no-audit --no-fund && npm test (working-directory 420-indexer)"
+      ],
+      "evidence": [
+        "exp-next-4-repository-readiness"
+      ],
+      "qualification_scope": [
+        "EXP-NEXT.4 repository preparation",
+        "live-gate contract",
+        "retained Explorer regression",
+        "retained Indexer recovery fixtures",
+        "authoritative external blocker detection"
+      ],
+      "exclusions": [
+        "not deployment evidence",
+        "not live-network evidence",
+        "not production-equivalent recovery evidence"
+      ],
+      "finding_refs": [
+        "EXP-FIND-002",
+        "EXP-FIND-003",
+        "EXP-FIND-004",
+        "EXP-FIND-005",
+        "EXP-FIND-007",
+        "EXP-FIND-009",
+        "EXP-FIND-011"
+      ],
+      "acceptance_refs": [
+        "AC-1",
+        "AC-2",
+        "AC-3",
+        "AC-4",
+        "AC-5",
+        "AC-6",
+        "AC-7",
+        "AC-8",
+        "AC-10"
+      ]
     }
   ],
   "mechanisms": [
@@ -525,12 +593,24 @@
         "RC build/checksum/evidence"
       ],
       "scope": "network release candidate"
+    },
+    {
+      "id": "EXP-QM-021",
+      "parent": "EXP-CI-007",
+      "name": "EXP-NEXT.4 repository readiness and live-blocker contract",
+      "command_group": [
+        "verify-exp-next-4-repository-readiness.py",
+        "Explorer live-validator tests",
+        "Explorer regression/vet",
+        "420Indexer TypeScript recovery suite"
+      ],
+      "scope": "repository readiness / blocker integrity"
     }
   ],
   "summary": {
-    "workflow_count": 6,
-    "mechanism_count": 20,
-    "automatic_pr_workflows": 4,
+    "workflow_count": 7,
+    "mechanism_count": 21,
+    "automatic_pr_workflows": 5,
     "manual_live_or_rc_workflows": 2,
     "explorer_specific_live_workflows": 1,
     "primary_source_gate": "EXP-CI-001",

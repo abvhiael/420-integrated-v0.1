@@ -32,8 +32,9 @@ type rpcReceipt struct {
 	BlockHash        string   `json:"blockHash"`
 	BlockNumber      string   `json:"blockNumber"`
 	Status           string   `json:"status"`
-	GasUsed          string   `json:"gasUsed"`
-	ContractAddress  string   `json:"contractAddress"`
+	GasUsed           string   `json:"gasUsed"`
+	EffectiveGasPrice string   `json:"effectiveGasPrice"`
+	ContractAddress   string   `json:"contractAddress"`
 	Logs             []rpcLog `json:"logs"`
 }
 
@@ -63,6 +64,18 @@ func hexQuantityDecimal(v string) (string, error) {
 	return n.String(), nil
 }
 
+func receiptFeeWei(gasUsed uint64, effectiveGasPrice string) (string, string, error) {
+	if strings.TrimSpace(effectiveGasPrice) == "" {
+		return "", "", fmt.Errorf("receipt effectiveGasPrice missing")
+	}
+	priceWei, err := hexQuantityDecimal(effectiveGasPrice)
+	if err != nil { return "", "", fmt.Errorf("invalid receipt effectiveGasPrice: %w", err) }
+	price, ok := new(big.Int).SetString(priceWei, 10)
+	if !ok || price.Sign() < 0 { return "", "", fmt.Errorf("invalid receipt effectiveGasPrice") }
+	fee := new(big.Int).Mul(new(big.Int).SetUint64(gasUsed), price)
+	return priceWei, fee.String(), nil
+}
+
 func (c *Client) BundleByNumber(ctx context.Context, chainID uint64, number uint64, finality model.Finality, schemaVersion string) (Bundle, error) {
 	var raw rpcBlock
 	if err := c.call(ctx, "eth_getBlockByNumber", []interface{}{fmt.Sprintf("0x%x", number), true}, &raw); err != nil { return Bundle{}, err }
@@ -80,7 +93,8 @@ func (c *Client) BundleByNumber(ctx context.Context, chainID uint64, number uint
 		ri, err := parseHexUint64(receipt.TransactionIndex); if err != nil { return Bundle{}, err }
 		status, err := parseHexUint64(receipt.Status); if err != nil { return Bundle{}, err }
 		gas, err := parseHexUint64(receipt.GasUsed); if err != nil { return Bundle{}, err }
-		bundle.Receipts = append(bundle.Receipts, model.ReceiptRecord{ChainID: chainID, BlockNumber: bi, BlockHash: receipt.BlockHash, TransactionHash: receipt.TransactionHash, TransactionIndex: ri, Status: status, GasUsed: gas, ContractAddress: receipt.ContractAddress})
+		effectiveGasPriceWei, actualFeeWei, err := receiptFeeWei(gas, receipt.EffectiveGasPrice); if err != nil { return Bundle{}, err }
+		bundle.Receipts = append(bundle.Receipts, model.ReceiptRecord{ChainID: chainID, BlockNumber: bi, BlockHash: receipt.BlockHash, TransactionHash: receipt.TransactionHash, TransactionIndex: ri, Status: status, GasUsed: gas, EffectiveGasPriceWei: effectiveGasPriceWei, ActualFeeWei: actualFeeWei, ContractAddress: receipt.ContractAddress})
 		for _, lg := range receipt.Logs {
 			lbn, err := parseHexUint64(lg.BlockNumber); if err != nil { return Bundle{}, err }
 			lti, err := parseHexUint64(lg.TransactionIndex); if err != nil { return Bundle{}, err }

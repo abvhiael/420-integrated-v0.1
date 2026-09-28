@@ -1,3 +1,4 @@
+import { inspectableRaw420, renderRawLogs420, transactionDetailPresentation420 } from './presentation.mjs';
 const app = document.querySelector('#route-content');
 const networkPill = document.querySelector('#network-pill');
 const searchForm = document.querySelector('#global-search');
@@ -118,31 +119,38 @@ async function blockDetail(number) {
     ['Consensus authority', trace.consensusAuthority || 'fourtwentyd consensus-produced block history'],
     ['Projection authority', trace.projectionAuthority || '420Indexer derived projection'],
     ['Canonical authority', trace.canonicalAuthority === true ? 'yes' : 'no']
-  ])}</div>`) + `<div class="pager">${nav.previous !== null && nav.previous !== undefined ? link(`#/blocks/${nav.previous}`, `← block ${nav.previous}`) : '<span></span>'}${nav.next !== null && nav.next !== undefined ? link(`#/blocks/${nav.next}`, `block ${nav.next} →`) : '<span></span>'}</div>` + `<div class="panel"><h3>Logs</h3>${logTable(logs)}</div>`;
+  ])}</div>`) + `<div class="pager">${nav.previous !== null && nav.previous !== undefined ? link(`#/blocks/${nav.previous}`, `← block ${nav.previous}`) : '<span></span>'}${nav.next !== null && nav.next !== undefined ? link(`#/blocks/${nav.next}`, `block ${nav.next} →`) : '<span></span>'}</div>` + `<div class="panel"><h3>Raw logs</h3>${logTable(logs,'block-log')}</div>`;
 }
 
-function logTable(logs) {
-  if (!logs.length) return '<p class="muted">No logs indexed for this resource.</p>';
-  return `<div class="table-wrap"><table><thead><tr><th>Log</th><th>Address</th><th>Transaction</th><th>Topics</th></tr></thead><tbody>${logs.map(l => `<tr><td>${fmt(l.logIndex)}</td><td>${l.address ? link(`#/addresses/${l.address}`,short(l.address)) : '—'}</td><td>${l.transactionHash ? link(`#/transactions/${l.transactionHash}`,short(l.transactionHash)) : '—'}</td><td>${fmt(l.topics?.length ?? 0)}</td></tr>`).join('')}</tbody></table></div>`;
+function logTable(logs, prefix='logs') {
+  return `<div class="raw-event-list">${renderRawLogs420(logs, prefix)}</div>`;
 }
 
-async function transactionDetail(hash) {
+async async function transactionDetail(hash) {
   const view = await api(`/v1/transactions/${encodeURIComponent(hash)}`);
   const tx = view.transaction || {};
   const receipt = view.receipt || {};
   const logs = view.logs || [];
   const created = receipt.contractAddress;
+  const qualified = transactionDetailPresentation420(view);
   app.innerHTML = title('Transaction', receipt.statusLabel || '') + stats([
-    ['Block', tx.blockNumber], ['Index', tx.index], ['Status', receipt.statusLabel ?? receipt.status], ['Gas used', receipt.gasUsed], ['Finality', view.finality]
+    ['Block', qualified.blockNumber],
+    ['Index', qualified.transactionIndex],
+    ['Status', receipt.statusLabel ?? receipt.status],
+    ['Gas used', qualified.fee.gasUsed],
+    ['Effective gas price (wei)', qualified.fee.effectiveGasPriceWei],
+    ['Actual fee (wei)', qualified.fee.actualFeeWei],
+    ['Finality', view.finality]
   ]) + `<div class="panel">${detailRows([
-    ['Hash', mono(tx.hash || hash), true],
-    ['Block hash', mono(tx.blockHash), true],
+    ['Hash', inspectableRaw420(qualified.txHash, 'transaction hash', 'transaction-hash'), true],
+    ['Block hash', inspectableRaw420(qualified.blockHash, 'block hash', 'transaction-block-hash'), true],
+    ['Chain ID', qualified.chainId],
     ['From', tx.from ? link(`#/addresses/${tx.from}`, tx.from) : '—', true],
     ['To', tx.to ? link(`#/addresses/${tx.to}`, tx.to) : 'contract creation', true],
-    ['Value (wei)', mono(tx.valueWei || '0'), true],
+    ['Value (wei)', mono(qualified.raw.valueWei), true],
     ['Created contract', created ? link(`#/contracts/${created}`, created) : '—', true],
-    ['Input', tx.input ? `<div class="codebox mono">${esc(tx.input)}</div>` : '—', true]
-  ])}</div>` + `<div class="panel"><h3>Logs</h3>${logTable(logs)}</div>`;
+    ['Raw input', inspectableRaw420(qualified.raw.input, 'transaction input', 'transaction-input'), true]
+  ])}</div>` + `<div class="panel"><h3>Raw logs</h3>${logTable(logs,'transaction-log')}</div>`;
 }
 
 async function addressDetail(address) {
@@ -332,3 +340,18 @@ searchForm.addEventListener('submit', event => {
 window.addEventListener('hashchange', route);
 refreshNetworkPill();
 route();
+
+document.addEventListener('click', async event => {
+  const button = event.target.closest?.('[data-copy-value]');
+  if (!button) return;
+  const raw = button.dataset.copyValue ?? '';
+  try {
+    if (!navigator.clipboard?.writeText) throw new Error('clipboard unavailable');
+    await navigator.clipboard.writeText(raw);
+    const original = button.textContent;
+    button.textContent = 'Copied';
+    setTimeout(() => { button.textContent = original; }, 1200);
+  } catch {
+    button.textContent = 'Copy unavailable';
+  }
+});

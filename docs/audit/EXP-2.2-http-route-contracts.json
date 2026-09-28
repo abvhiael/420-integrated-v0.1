@@ -2,7 +2,7 @@
   "schema": "420explorer-exp-2.2-http-route-contracts-v1",
   "milestone": "EXP-2.2",
   "title": "Explorer HTTP/API route-contract qualification",
-  "status": "qualified_candidate_recorded_pending_evidence_head_requalification",
+  "status": "COMPLETE",
   "baseline": {
     "exp_2_1_qualified_head": "b0d21dd6247be9274b248f2b1f239bf5a533b601"
   },
@@ -127,5 +127,63 @@
       }
     ],
     "exact_head_policy": "The audit-recording commit must itself pass the retained exact-head qualification suite before EXP-2.2 is marked COMPLETE."
+  },
+  "final_qualification": {
+    "evidence_recording_head": "6f82da84ba9a2b077ffb125049d6eb2501246e62",
+    "exact_head_requalification": "success",
+    "dedicated_workflow": {
+      "name": "420Explorer EXP-2.2",
+      "run_id": 36367316910,
+      "conclusion": "success"
+    },
+    "retained_workflows": [
+      {
+        "name": "420Explorer EXP-2.1",
+        "run_id": 36367316892,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Docs Qualification",
+        "run_id": 36367317055,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.6 Historical Producer Qualification",
+        "run_id": 36367316919,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.7 Cross-Layer Traceability Qualification",
+        "run_id": 36367316935,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.8 Runtime Negative Divergence Qualification",
+        "run_id": 36367316873,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.9 CI Qualification Automation",
+        "run_id": 36367316918,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.10 Phase Closeout Qualification",
+        "run_id": 36367316944,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Indexer",
+        "run_id": 36367316798,
+        "conclusion": "success"
+      },
+      {
+        "name": "420 Integrated Qualification",
+        "run_id": 36367316784,
+        "conclusion": "success"
+      }
+    ],
+    "scope": "repository_scope_only",
+    "genesis_ready_claim": false
   }
 }

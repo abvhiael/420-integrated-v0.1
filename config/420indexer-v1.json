@@ -175,6 +175,11 @@
     "evidenceArtifact": "exp-1-9-ci-qualification-automation",
     "evidenceRetentionDays": 7,
     "liveDeploymentEvidenceRequired": false,
-    "liveDeploymentQualified": false
+    "liveDeploymentQualified": false,
+    "postMergeQualificationRequired": true,
+    "automaticTriggers": [
+      "pull_request",
+      "push:main"
+    ]
   }
 }

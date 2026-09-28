@@ -15,6 +15,8 @@ check=load("docs/audit/EXP-NEXT.5-final-genesis-acceptance-checklist.json")
 idx=load("docs/audit/EXP-NEXT.5-ac-evidence-index.json")
 blockers=load("docs/audit/EXP-NEXT.5-final-blocker-register.json")
 manifest=load("docs/audit/EXP-NEXT.5-release-candidate-manifest.json")
+inventory=load("docs/audit/EXP-NEXT.5-required-test-inventory.json")
+closeout=load("docs/audit/EXP-NEXT.5-final-closeout.json")
 
 if next4.get("status")!="NOT_YET_COMPLETE":
     errors.append("EXP-NEXT.4 status changed; EXP-NEXT.5 closeout must be fully re-evaluated")
@@ -26,6 +28,12 @@ if manifest.get("status")!="UNFROZEN" or manifest.get("decision")!="NO_GO":
     errors.append("release-candidate manifest overclaims readiness")
 if manifest.get("productionEquivalent") is not False:
     errors.append("manifest must not claim productionEquivalent")
+if inventory.get("status")!="INCOMPLETE_ENVIRONMENT_BLOCKED" or inventory.get("exactCandidateFrozen") is not False:
+    errors.append("required-test inventory must remain environment-blocked/unfrozen")
+if closeout.get("status")!="NOT_YET_COMPLETE" or closeout.get("decision")!="NO_GO":
+    errors.append("final closeout record must remain NOT_YET_COMPLETE/NO_GO")
+if closeout.get("dependency_state",{}).get("EXP-NEXT.4")!="NOT_YET_COMPLETE":
+    errors.append("final closeout dependency state must preserve EXP-NEXT.4 blocker")
 if blockers.get("status")!="OPEN":
     errors.append("blocker register cannot be CLOSED")
 
@@ -63,7 +71,10 @@ required=[
  "docs/audit/EXP-NEXT.5-final-genesis-acceptance-checklist.json",
  "docs/audit/EXP-NEXT.5-ac-evidence-index.json",
  "docs/audit/EXP-NEXT.5-final-blocker-register.json",
- "docs/audit/EXP-NEXT.5-release-candidate-manifest.json"
+ "docs/audit/EXP-NEXT.5-release-candidate-manifest.json",
+ "docs/audit/EXP-NEXT.5-required-test-inventory.json",
+ "docs/audit/EXP-NEXT.5-final-closeout.json",
+ "docs/audit/EXP-NEXT.5-final-closeout.md"
 ]
 for p in required:
     if not (ROOT/p).exists(): errors.append("missing closeout artifact "+p)
@@ -76,6 +87,8 @@ summary={
  "expNext4Status":next4.get("status"),
  "acceptanceCriteria":{c["id"]:c["current_status"] for c in criteria},
  "unresolvedGenesisBlockers":authoritative_open,
+ "requiredTestInventoryStatus":inventory.get("status"),
+ "closeoutRecordStatus":closeout.get("status"),
  "errors":errors
 }
 (out/"summary.json").write_text(json.dumps(summary,indent=2)+"\n")

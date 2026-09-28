@@ -408,15 +408,8 @@ contract ComputeJobWorkerSnapshotEvidence420 is IComputeJobWorkerEvidence420 {
         ComputeWorkerRegistry420.Worker memory w,
         AdmissionRefs calldata refs
     ) private view returns (bytes32) {
-        return keccak256(
+        bytes32 workerExecutionRef = keccak256(
             abi.encode(
-                SNAPSHOT_DOMAIN,
-                block.chainid,
-                address(this),
-                EXECUTION_SIGNING_POLICY_V1,
-                jobId,
-                j.matchId,
-                j.acceptanceRef,
                 workerId,
                 workerRevision,
                 w.providerId,
@@ -427,13 +420,30 @@ contract ComputeJobWorkerSnapshotEvidence420 is IComputeJobWorkerEvidence420 {
                 w.executionSigner,
                 w.executionKeyCommitment,
                 w.capabilityProfileHash,
-                w.jurisdictionHash,
+                w.jurisdictionHash
+            )
+        );
+        bytes32 admissionRef = keccak256(
+            abi.encode(
                 refs.capabilityPolicyId,
                 refs.capabilityAttestationId,
                 refs.trustPolicyId,
                 refs.trustReference,
                 refs.stakePolicyId,
                 refs.stakeReference
+            )
+        );
+        return keccak256(
+            abi.encode(
+                SNAPSHOT_DOMAIN,
+                block.chainid,
+                address(this),
+                EXECUTION_SIGNING_POLICY_V1,
+                jobId,
+                j.matchId,
+                j.acceptanceRef,
+                workerExecutionRef,
+                admissionRef
             )
         );
     }
@@ -443,7 +453,7 @@ contract ComputeJobWorkerSnapshotEvidence420 is IComputeJobWorkerEvidence420 {
         ComputeJobRegistry420.Job memory j,
         bytes32 workerId,
         uint64 workerRevision,
-        ComputeWorkerRegistry420.Worker memory w,
+        ComputeWorkerRegistry420.Worker memory,
         uint64 expectedJobRevision,
         uint64 attempt,
         bytes32 snapshotCommitment
@@ -460,9 +470,6 @@ contract ComputeJobWorkerSnapshotEvidence420 is IComputeJobWorkerEvidence420 {
                 expectedJobRevision,
                 workerId,
                 workerRevision,
-                w.resourceId,
-                w.resourceRevision,
-                w.executionKeyCommitment,
                 attempt,
                 snapshotCommitment
             )
@@ -490,9 +497,6 @@ contract ComputeJobWorkerSnapshotEvidence420 is IComputeJobWorkerEvidence420 {
                 a.snapshotCommitment,
                 a.workerId,
                 a.workerRevision,
-                a.resourceId,
-                a.resourceRevision,
-                a.executionKeyCommitment,
                 a.attempt,
                 receiptHash,
                 outputHash

@@ -1,6 +1,6 @@
 # CMP-1.3.8 — Mutation-time capability authorization and delegated worker authority qualification
 
-Status: **CANDIDATE GREEN — evidence-recording head requalification pending**
+Status: **COMPLETE**
 
 ## Canonical definition
 
@@ -165,8 +165,20 @@ Candidate exact-head qualification:
 
 Current `main` remained `f437378664059a51f854d45bf48594930f070f6f` after candidate CI. The candidate branch was 0 commits behind main, so no reconciliation commit was required before evidence recording.
 
-This evidence update creates a new branch head. Per qualification discipline, the full retained suite must run again on the exact evidence-recording head before the step can be marked COMPLETE.
+Final evidence-recording SHA: `e66460626828a9b2543df4c399e03a3f50e945e3`
+
+Final exact-head qualification:
+
+- Solidity Contracts #3258 — **SUCCESS**, all 16/16 `pr-shards` successful. The aggregate `foundry` wrapper was skipped by workflow design and is not counted as a passing gate.
+- 420 Integrated Qualification #5859 — **SUCCESS**.
+- 420Docs Qualification #3242 — **SUCCESS**.
+
+Current `main` remained `f437378664059a51f854d45bf48594930f070f6f`; the qualified branch was 0 commits behind main, so no reconciliation commit was required before the final retained-suite run.
+
+Every canonical CMP-1.3.8 exit criterion is satisfied on the exact qualified tree at `e66460626828a9b2543df4c399e03a3f50e945e3`.
 
 ## Completion
 
-**NOT YET COMPLETE** until the evidence-recording exact head passes all retained qualification gates. Final exact-head SHA and final run IDs will be recorded durably in PR #386 closeout evidence without changing the qualified tree.
+**COMPLETE** at exact qualified implementation/evidence tree `e66460626828a9b2543df4c399e03a3f50e945e3`.
+
+This closeout-text commit changes documentation only. Per exact-head discipline, it must itself pass the retained qualification suite before it is used as the branch point for CMP-1.3.9.

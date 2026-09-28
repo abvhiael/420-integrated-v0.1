@@ -236,6 +236,12 @@ on:
       - 'scripts/verify-exp-0-3-7-traceability.py'
       - 'scripts/verify-exp-0-3-8-scope-resolution.py'
       - '.github/workflows/420indexer.yml'
+      - 'docs/audit/EXP-1.9-ci-qualification-automation.json'
+      - 'docs/audit/EXP-1.9-ci-qualification-automation.md'
+      - 'scripts/verify-exp-1-9-ci-automation.py'
+      - '.github/workflows/docs-qualify.yml'
+      - '.github/workflows/qualification.yml'
+      - '.github/workflows/explorer-exp-1-9.yml'
 
 concurrency:
   group: 420indexer-${{ github.event.pull_request.number || github.ref }}

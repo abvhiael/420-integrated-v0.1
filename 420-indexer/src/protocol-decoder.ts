@@ -15,6 +15,7 @@ export interface ProtocolEventDescriptor420 {
   protocol: string;
   eventName: string;
   topic0: Hex;
+  contractAddress?: Hex;
   fields: ProtocolField420[];
 }
 
@@ -62,6 +63,9 @@ export class ProtocolDecoderRegistry420 {
     if (!topic0) return null;
     const descriptor = this.byTopic.get(topic0);
     if (!descriptor) return null;
+    if (descriptor.contractAddress && log.address.toLowerCase() !== descriptor.contractAddress.toLowerCase()) {
+      throw new Error('protocol descriptor contract mismatch: ' + descriptor.protocol + '.' + descriptor.eventName);
+    }
 
     const fields: Record<string, string | bigint | boolean> = {};
     let indexedIndex = 1;

@@ -1,0 +1,85 @@
+{
+  "schema": "420explorer-exp-next-1-registry-descriptor-provenance-v1",
+  "step": "EXP-NEXT.1",
+  "title": "Registry ABI/descriptor release provenance",
+  "status": "COMPLETE",
+  "canonical_roadmap": "docs/audit/EXP-2R.5-authoritative-next-phase-roadmap.json",
+  "current_main_base": "eb417aea38f454c2c01b672e0d566e0da17a87bd",
+  "implementation_summary": [
+    "Pinned deterministic ProtocolRegistry v4 release descriptor for the three Registry history events consumed by the qualified decoder path.",
+    "Bound descriptor identity to frozen ProtocolRegistry address 0x0000000000000000000000000000000000000434, source blob, protocol version and descriptor SHA-256.",
+    "Made contract-address mismatch fail closed in the TypeScript protocol decoder instead of accepting topic0 alone.",
+    "Added known ServiceVersionPublished and registration-profile vectors plus hash/address drift negatives."
+  ],
+  "important_files": [
+    "420-indexer/descriptors/protocol-registry-v4.json",
+    "420-indexer/src/abi-manifest.ts",
+    "420-indexer/src/protocol-decoder.ts",
+    "420-indexer/test/protocol-registry-release-descriptor.test.ts",
+    "scripts/verify-exp-next-1-registry-descriptor-provenance.py",
+    ".github/workflows/explorer-exp-next-1.yml"
+  ],
+  "descriptor": {
+    "sha256": "9a7fd7c8f546fdffa7e9fd42be6274fa63a03443d1f243da3dc3dcaabd7cbbae",
+    "source_blob_sha": "0ad7967d9ac805dd819101955c10233ff3d19325",
+    "protocol_version": 4,
+    "canonical_address": "0x0000000000000000000000000000000000000434"
+  },
+  "retained_requirements": [
+    "full 420Indexer decoder regression",
+    "full Explorer Registry/service-version regression",
+    "retained EXP-2.6 verifier",
+    "historical activation/deprecation catalogue tests"
+  ],
+  "scope": {
+    "repository_descriptor_provenance_qualified": true,
+    "live_registry_publication_qualified": false,
+    "target_network_code_witness_qualified": false,
+    "canonical_authority": false,
+    "genesis_ready_claim": false
+  },
+  "final_qualification": {
+    "qualified_candidate_head": "1c3cdec09f9eb0aad00505f20bf1821fe7d2e752",
+    "candidate_exact_head_requalification": "success",
+    "workflows": [
+      {
+        "name": "420Explorer EXP-NEXT.1 Registry Descriptor Provenance",
+        "run_id": 36467204422,
+        "conclusion": "success",
+        "artifact_id": 10990170625
+      },
+      {
+        "name": "420Indexer",
+        "run_id": 36467204419,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Indexer",
+        "run_id": 36467204440,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Docs Qualification",
+        "run_id": 36467204530,
+        "conclusion": "success"
+      },
+      {
+        "name": "420 Integrated Qualification",
+        "run_id": 36467204533,
+        "conclusion": "success"
+      }
+    ],
+    "integrated_jobs": [
+      "fault-matrix",
+      "offline-core",
+      "production-dependencies",
+      "geth-engine"
+    ],
+    "completion_record_policy": "This COMPLETE record is valid only after the exact PR head containing this record passes the dedicated EXP-NEXT.1 workflow and the retained workflow set. The exact final head is the Git commit containing this record; workflow checkout verifies github.event.pull_request.head.sha exactly. No further evidence-only commit is required after that COMPLETE head is green.",
+    "limitations": [
+      "No live ProtocolRegistry deployment/publication is qualified.",
+      "No target-network eth_getCode/runtime witness is qualified.",
+      "No deployed Explorer UI or Genesis readiness claim is made."
+    ]
+  }
+}

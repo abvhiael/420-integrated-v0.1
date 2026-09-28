@@ -50,7 +50,8 @@
     "infrastructure_status": "UNPROVISIONED",
     "chain_id_collision_preflight": "PENDING",
     "live_binding_qualified": false,
-    "runtime_binding_implementation_qualified": false
+    "runtime_binding_implementation_qualified": true,
+    "closeout_reconciled_by": "EXP-1.10"
   },
   "promotion_rules": [
     "no REPLACE/PLACEHOLDER endpoint may become an approved runtime binding",

@@ -116,7 +116,13 @@ contract SnapshotAdmissionMock420 is
         external view returns (bool) { return allow; }
 
     function isEligible(bytes32, uint64, bytes32, bool, bytes32)
-        external view returns (bool) { return allow; }
+        external
+        view
+        override(IComputeWorkerTrustAdmission420, IComputeWorkerStakeAdmission420)
+        returns (bool)
+    {
+        return allow;
+    }
 }
 
 contract ComputeJobWorkerSnapshotEvidence420Test {

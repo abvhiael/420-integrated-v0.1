@@ -116,7 +116,7 @@ def main():
             errors.append(f"420Indexer PR/main trigger coverage missing: {token}")
 
     qa=cfg.get("qualificationAutomation",{})
-    if qa.get("milestone")!="EXP-1.9": errors.append("qualification automation config milestone drift")
+    if qa.get("milestone") not in {"EXP-1.9","EXP-1.10"}: errors.append("qualification automation config milestone drift")
     if qa.get("exactHeadExpression")!="github.event.pull_request.head.sha || github.sha":
         errors.append("qualification exact-head expression drift")
     if qa.get("exactCheckoutAssertionRequired") is not True:
@@ -125,7 +125,7 @@ def main():
         errors.append("concurrency cancellation requirement disabled")
     if qa.get("contentsPermission")!="read":
         errors.append("qualification permissions drift")
-    if qa.get("retainedExp1Range")!="EXP-1.1..EXP-1.9":
+    if qa.get("retainedExp1Range") not in {"EXP-1.1..EXP-1.9","EXP-1.1..EXP-1.10"}:
         errors.append("retained EXP-1 range drift")
     if qa.get("evidenceRetentionDays")!=7:
         errors.append("evidence retention drift")

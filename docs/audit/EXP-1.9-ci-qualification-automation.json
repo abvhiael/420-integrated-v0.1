@@ -21,7 +21,11 @@
       "concurrency_cancel_in_progress": true,
       "contents_permission": "read",
       "retained_exp1_verifiers": "EXP-1.1..EXP-1.9",
-      "artifact": "exp-1-9-ci-qualification-automation"
+      "artifact": "exp-1-9-ci-qualification-automation",
+      "automatic_triggers": [
+        "pull_request:path_filtered",
+        "push:main:path_filtered"
+      ]
     },
     {
       "workflow": "420Docs Qualification",
@@ -47,7 +51,11 @@
     "exact_head_assertion": true,
     "retained_exp1_verifiers": "EXP-1.1..EXP-1.9",
     "evidence_artifact": "exp-1-9-ci-qualification-automation-dedicated",
-    "retention_days": 7
+    "retention_days": 7,
+    "automatic_triggers": [
+      "pull_request",
+      "push:main"
+    ]
   },
   "automation_rules": [
     "pull-request qualification executes the PR head SHA, not the synthetic merge ref",
@@ -69,7 +77,8 @@
     "dedicated_exp_1_9_gate_complete": true,
     "evidence_retention_complete": true,
     "live_network_qualification_complete": false,
-    "exact_head_ci_required": true
+    "exact_head_ci_required": true,
+    "post_merge_qualification_complete": true
   },
   "live_boundary": {
     "qualified": false,

@@ -157,33 +157,30 @@ async function addressDetail(address) {
   const view = await api(`/v1/addresses/${encodeURIComponent(address)}?limit=50`);
   const txs = view.transactions || [];
   const normalized = view.address || address;
+  const qualifiedRows = addressHistoryPresentation420(txs, normalized);
   app.innerHTML = title('Address', `${view.txCount ?? txs.length} indexed transactions`) + `<div class="panel">${detailRows([
     ['Address', mono(normalized), true],
     ['Snapshot height', view.meta?.snapshotHeight],
     ['Safe height', view.meta?.safeHeight],
     ['Finalized height', view.meta?.finalizedHeight]
-  ])}</div>` + `<div class="panel"><h3>Transaction history</h3>${addressTxTable(txs, normalized)}</div>`;
+  ])}</div>` + `<div class="panel"><h3>Transaction history</h3>${addressTxTable(qualifiedRows)}</div>`;
 }
 
-function addressTxTable(txs, address) {
-  if (!txs.length) return '<p class="muted">No indexed transaction history for this address.</p>';
-  const addr = String(address).toLowerCase();
-  return `<div class="table-wrap"><table><thead><tr><th>Hash</th><th>Block</th><th>Direction</th><th>Counterparty</th><th>Value (wei)</th></tr></thead><tbody>${txs.map(tx => {
-    const from = String(tx.from || '').toLowerCase();
-    const outgoing = from === addr;
-    const counterparty = outgoing ? tx.to : tx.from;
-    return `<tr><td>${link(`#/transactions/${tx.hash}`,short(tx.hash))}</td><td>${link(`#/blocks/${tx.blockNumber}`,tx.blockNumber)}</td><td><span class="badge ${outgoing?'badge-out':'badge-in'}">${outgoing?'OUT':'IN'}</span></td><td>${counterparty ? link(`#/addresses/${counterparty}`,short(counterparty)) : 'contract creation'}</td><td>${mono(tx.valueWei || '0')}</td></tr>`;
-  }).join('')}</tbody></table></div>`;
+function addressTxTable(rows) {
+  if (!rows.length) return '<p class="muted">No indexed transaction history for this address.</p>';
+  return `<div class="table-wrap"><table><thead><tr><th>Hash</th><th>Block</th><th>Direction</th><th>Counterparty</th><th>Value (wei)</th></tr></thead><tbody>${rows.map(({tx,outgoing,counterparty,txLink,blockLink}) => `<tr><td>${txLink}</td><td>${blockLink}</td><td><span class="badge ${outgoing?'badge-out':'badge-in'}">${outgoing?'OUT':'IN'}</span></td><td>${counterparty ? routeLink420(['addresses',counterparty],short(counterparty)) : 'contract creation'}</td><td>${mono(tx.valueWei || '0')}</td></tr>`).join('')}</tbody></table></div>`;
 }
 
 async function contractDetail(address) {
   const view = await api(`/v1/contracts/${encodeURIComponent(address)}`);
   const c = view.contract || {};
+  const cross = contractPresentation420(view, address);
   app.innerHTML = title('Contract', view.hasRuntimeCode ? 'runtime code indexed' : 'no runtime code') + stats([
     ['Deployment block',c.deploymentBlockNumber],['Runtime bytes',view.runtimeCodeBytes],['Has runtime code',view.hasRuntimeCode ? 'yes':'no'],['Chain',c.chainId]
   ]) + `<div class="panel">${detailRows([
     ['Address', mono(c.address || address), true],
-    ['Deployment transaction', c.deploymentTxHash ? link(`#/transactions/${c.deploymentTxHash}`,c.deploymentTxHash) : '—', true],
+    ['Deployment transaction', cross.deploymentTxLink, true],
+    ['Deployment block', cross.deploymentBlockLink, true],
     ['Deployment block hash', mono(c.deploymentHash), true],
     ['Code hash', mono(c.codeHash), true],
     ['Schema', c.schemaVersion]
@@ -204,11 +201,12 @@ async function registry() {
 async function registryService(serviceId) {
   const view = await api(`/v1/services/${encodeURIComponent(serviceId)}`);
   const versions = view.versions || [];
+  const registryView = registryServicePresentation420(view);
   app.innerHTML = title(view.serviceId || serviceId, `${versions.length} published version${versions.length===1?'':'s'}`) + stats([
     ['Latest version',view.latestVersion],['Active version',view.activeVersion || 'none'],['Versions',view.versionCount ?? versions.length],['Implementation',view.implementation ? short(view.implementation) : '—']
   ]) + `<div class="panel">${detailRows([
     ['Service ID', mono(view.serviceId || serviceId), true],
-    ['Active implementation', view.implementation ? link(`#/contracts/${view.implementation}`,view.implementation) : '—', true]
+    ['Active implementation', registryView.implementationLink, true]
   ])}</div>` + `<div class="panel"><h3>Version history</h3>${registryVersionsTable(versions)}</div>`;
 }
 

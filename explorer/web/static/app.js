@@ -126,7 +126,7 @@ function logTable(logs, prefix='logs') {
   return `<div class="raw-event-list">${renderRawLogs420(logs, prefix)}</div>`;
 }
 
-async async function transactionDetail(hash) {
+async function transactionDetail(hash) {
   const view = await api(`/v1/transactions/${encodeURIComponent(hash)}`);
   const tx = view.transaction || {};
   const receipt = view.receipt || {};

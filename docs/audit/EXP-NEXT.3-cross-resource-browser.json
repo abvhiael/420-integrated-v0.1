@@ -1,0 +1,58 @@
+{
+  "schema": "420explorer-exp-next-3-cross-resource-browser-v1",
+  "step": "EXP-NEXT.3",
+  "title": "Consensus/producer and cross-resource browser workflow closeout",
+  "status": "IMPLEMENTED_PENDING_EXACT_HEAD_QUALIFICATION",
+  "canonical_roadmap": "docs/audit/EXP-2R.5-authoritative-next-phase-roadmap.json",
+  "base_dependency_head": "f660db960b46a47215ed11bcbd0a8d79b6be8e98",
+  "main_at_branch_creation": "f437378664059a51f854d45bf48594930f070f6f",
+  "dependency_note": "EXP-NEXT.2 is fully qualified at base_dependency_head but PR #385 was not merged when this branch was created; this branch intentionally preserves that qualified dependency rather than rebuilding from an older main.",
+  "dependencies": {
+    "EXP-NEXT.2": "QUALIFIED_BASE_HEAD",
+    "EXP-2.3": "RETAINED",
+    "EXP-2.4": "RETAINED",
+    "EXP-2.6": "RETAINED"
+  },
+  "implementation_summary": [
+    "Fail closed on missing or contradictory historical producer trace data before rendering block producer provenance.",
+    "Provide deterministic block-to-consensus navigation and consensus-seat context without treating seat identifiers as canonical identity.",
+    "Revalidate Registry active-version/implementation linkage before rendering contract navigation.",
+    "Validate address-history, asset-transfer and contract-deployment resource identifiers before generating internal links.",
+    "Render explicit wrong-chain, stale, degraded and inconsistent diagnostic states and reject ready/degraded contradictions.",
+    "Escape hostile asset/metadata labels and reject malformed internal resource identifiers.",
+    "Reconcile frozen workflow-matrix repository UI dispositions while leaving live/deployment witnesses pending."
+  ],
+  "important_files": [
+    "explorer/web/static/workflow-presentation.mjs",
+    "explorer/web/workflow-presentation.test.mjs",
+    "explorer/web/static/app.js",
+    "explorer/web/static/app.css",
+    "explorer/web/web_test.go",
+    "docs/audit/EXP-0.2.2-user-workflow-matrix.json",
+    "scripts/verify-exp-next-3-cross-resource-browser.py",
+    ".github/workflows/explorer-exp-next-3.yml"
+  ],
+  "required_tests": [
+    "historical block-producer UI fixture",
+    "validator/consensus boundary navigation",
+    "Registry implementation-to-contract navigation",
+    "address/asset/contract cross-resource navigation",
+    "wrong-chain/stale/degraded/inconsistent diagnostic rendering",
+    "unsafe metadata/link/log rendering",
+    "missing producer trace negative",
+    "consensus/execution provenance mismatch negative",
+    "Registry implementation mismatch negative",
+    "projection canonical-authority overclaim negative",
+    "full frontend regression",
+    "retained EXP-2.3/2.4/2.6 and EXP-NEXT.2 verifiers"
+  ],
+  "scope": {
+    "repository_cross_resource_browser_workflows_qualified": false,
+    "live_canonical_producer_witness_qualified": false,
+    "deployed_consensus_provider_proof_qualified": false,
+    "production_availability_sla_qualified": false,
+    "canonical_authority": false,
+    "genesis_ready_claim": false
+  },
+  "final_qualification": null
+}

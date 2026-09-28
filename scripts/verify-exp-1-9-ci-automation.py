@@ -136,7 +136,7 @@ def main():
     if qa.get("liveDeploymentQualified") is not False:
         errors.append("live deployment overpromoted")
 
-    if ready.get("status")!="EXP_1_9_CI_QUALIFICATION_AUTOMATION":
+    if ready.get("status") not in {"EXP_1_9_CI_QUALIFICATION_AUTOMATION","EXP_1_10_PHASE_CLOSEOUT_QUALIFICATION"}:
         errors.append("readiness milestone drift")
     backend=ready.get("backend",{})
     runtime=backend.get("runtime",{})

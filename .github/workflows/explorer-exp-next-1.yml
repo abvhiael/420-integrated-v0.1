@@ -1,0 +1,66 @@
+name: 420Explorer EXP-NEXT.1 Registry Descriptor Provenance
+
+on:
+  pull_request:
+    paths:
+      - '420-indexer/descriptors/protocol-registry-v4.json'
+      - '420-indexer/src/abi-manifest.ts'
+      - '420-indexer/src/protocol-decoder.ts'
+      - '420-indexer/test/protocol-registry-release-descriptor.test.ts'
+      - 'indexer/decoder/**'
+      - 'explorer/service/**'
+      - 'explorer/api/**'
+      - 'explorer/indexerclient/**'
+      - 'docs/audit/EXP-NEXT.1-*'
+      - 'docs/audit/EXP-2R.5-authoritative-next-phase-roadmap.json'
+      - 'scripts/verify-exp-next-1-registry-descriptor-provenance.py'
+      - 'scripts/verify-exp-2-6-diagnostics-registry.py'
+      - '.github/workflows/explorer-exp-next-1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test TypeScript descriptor and decoder suite
+        working-directory: 420-indexer
+        run: |
+          npm install --no-audit --no-fund
+          npm test
+      - name: Full Go Indexer decoder regression
+        run: go test ./indexer/...
+      - name: Vet Go Indexer
+        run: go vet ./indexer/...
+      - name: Full Explorer Registry/service-version regression
+        run: go test ./explorer/...
+      - name: Vet Explorer
+        run: go vet ./explorer/...
+      - name: Retain EXP-2.6 diagnostics and Registry qualification
+        run: python scripts/verify-exp-2-6-diagnostics-registry.py
+      - name: Verify EXP-NEXT.1 release provenance
+        run: python scripts/verify-exp-next-1-registry-descriptor-provenance.py
+      - name: Upload EXP-NEXT.1 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp-next-1-registry-descriptor-provenance
+          path: exp-next-1-evidence/
+          if-no-files-found: error
+          retention-days: 14

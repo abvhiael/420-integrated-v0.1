@@ -51,6 +51,12 @@ export function feePresentation420(receipt) {
   return {gasUsed, effectiveGasPriceWei, actualFeeWei};
 }
 
+export function renderFeeSummary420(receipt) {
+  const fee = feePresentation420(receipt);
+  const row = (label, value) => `<div class="stat"><span class="label">${escapeHtml420(label)}</span><span class="value mono">${escapeHtml420(value)}</span></div>`;
+  return `<div class="grid fee-grid" aria-label="transaction fee details">${row('Gas used',fee.gasUsed)}${row('Effective gas price (wei)',fee.effectiveGasPriceWei)}${row('Actual fee (wei)',fee.actualFeeWei)}</div>`;
+}
+
 export function transactionRawPresentation420(tx) {
   const valueWei = decimalString420(tx?.valueWei ?? '0', 'transaction value');
   const input = rawHex420(tx?.input ?? '', 'transaction input', null, true);

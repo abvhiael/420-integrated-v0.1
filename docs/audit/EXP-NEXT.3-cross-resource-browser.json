@@ -2,7 +2,7 @@
   "schema": "420explorer-exp-next-3-cross-resource-browser-v1",
   "step": "EXP-NEXT.3",
   "title": "Consensus/producer and cross-resource browser workflow closeout",
-  "status": "COMPLETE",
+  "status": "COMPLETE_PENDING_FINAL_EXACT_HEAD_REQUALIFICATION",
   "canonical_roadmap": "docs/audit/EXP-2R.5-authoritative-next-phase-roadmap.json",
   "base_dependency_head": "f660db960b46a47215ed11bcbd0a8d79b6be8e98",
   "main_at_branch_creation": "f437378664059a51f854d45bf48594930f070f6f",
@@ -126,12 +126,24 @@
       }
     ],
     "integrated_jobs": [
-      "offline-core",
-      "fault-matrix",
-      "production-dependencies",
-      "geth-engine"
+      {
+        "name": "geth-engine",
+        "conclusion": "success"
+      },
+      {
+        "name": "production-dependencies",
+        "conclusion": "success"
+      },
+      {
+        "name": "offline-core",
+        "conclusion": "success"
+      },
+      {
+        "name": "fault-matrix",
+        "conclusion": "success"
+      }
     ],
-    "completion_record_policy": "The commit containing this COMPLETE record is a new qualification target. EXP-NEXT.3 is COMPLETE only after that exact PR head passes the dedicated EXP-NEXT.3 workflow and all retained workflows that trigger for it. Missing, skipped or cancelled required checks do not qualify the step. No pre-evidence SHA may qualify the evidence-recording head.",
+    "final_head_rule": "The commit created by recording this candidate evidence is a new qualification target. EXP-NEXT.3 is COMPLETE only after that exact evidence-recording PR head passes the dedicated EXP-NEXT.3 workflow and the retained required workflows. No earlier SHA may qualify the evidence-recording commit.",
     "limitations": [
       "No live canonical producer witness is qualified.",
       "No deployed consensus-provider proof is qualified.",

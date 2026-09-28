@@ -2,7 +2,7 @@
   "schema": "420explorer-exp-2.2-http-route-contracts-v1",
   "milestone": "EXP-2.2",
   "title": "Explorer HTTP/API route-contract qualification",
-  "status": "implementation_complete_pending_exact_head_ci",
+  "status": "qualified_candidate_recorded_pending_evidence_head_requalification",
   "baseline": {
     "exp_2_1_qualified_head": "b0d21dd6247be9274b248f2b1f239bf5a533b601"
   },
@@ -78,5 +78,54 @@
     "registry_runtime_qualified": false,
     "canonical_authority": false,
     "genesis_ready_claim": false
+  },
+  "qualification_evidence": {
+    "qualified_candidate_head": "64bd20d7a464eb5322061025dfb68b3e77a2314e",
+    "dedicated_workflow": {
+      "name": "420Explorer EXP-2.2",
+      "run_id": 36367001996,
+      "conclusion": "success"
+    },
+    "retained_workflows": [
+      {
+        "name": "420Explorer EXP-2.1",
+        "conclusion": "success"
+      },
+      {
+        "name": "420Docs Qualification",
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.6 Historical Producer Qualification",
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.7 Cross-Layer Traceability Qualification",
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.8 Runtime Negative Divergence Qualification",
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.9 CI Qualification Automation",
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.10 Phase Closeout Qualification",
+        "conclusion": "success"
+      },
+      {
+        "name": "420Indexer",
+        "run_id": 36367001966,
+        "conclusion": "success"
+      },
+      {
+        "name": "420 Integrated Qualification",
+        "run_id": 36367001937,
+        "conclusion": "success"
+      }
+    ],
+    "exact_head_policy": "The audit-recording commit must itself pass the retained exact-head qualification suite before EXP-2.2 is marked COMPLETE."
   }
 }

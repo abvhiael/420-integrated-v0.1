@@ -373,7 +373,7 @@
       "classification": "Genesis blocker",
       "severity": "high",
       "title": "Actual transaction fee inspection is incomplete",
-      "description": "The transaction workflow exposes gasUsed but not effective gas price or a computed actual native fee.",
+      "description": "Indexer and Explorer service/API fee fields are implemented by EXP-2.1; the remaining Genesis blocker is deployed UI rendering and end-to-end workflow qualification.",
       "affected": [
         "explorer/service/transactionviews.go",
         "indexer/model/model.go",
@@ -381,9 +381,12 @@
         "docs/audit/EXP-0.2.2-user-workflow-matrix.json"
       ],
       "evidence": [
-        "EXP-WF-003 is partial_source and gap_requires_implementation."
+        "EXP-WF-003 originated as partial_source and gap_requires_implementation.",
+        "EXP-2.1 adds receipt effectiveGasPriceWei and actualFeeWei from canonical JSON-RPC receipt data using overflow-safe integer arithmetic.",
+        "EXP-2.1 validates fee consistency in Explorer transaction/receipt presentation and serializes both fields through Indexer and Explorer APIs.",
+        "Deployed UI fee rendering remains owned by EXP-4."
       ],
-      "root_cause": "The inspected transaction/receipt presentation model lacks the effective gas-price/fee inputs required to calculate the actual fee.",
+      "root_cause": "Repository service/API fee-model gap remediated in EXP-2.1; deployed presentation remains unqualified.",
       "consequences": [
         "Users cannot verify the actual cost of a transaction from Explorer.",
         "The transaction-inspection workflow described by the audit is incomplete."
@@ -396,8 +399,8 @@
         "define authoritative fee fields for the 420 execution model"
       ],
       "remediation": [
-        "Expose the appropriate effective gas price or authoritative fee value through Indexer/Explorer models.",
-        "Render gas used and actual fee distinctly."
+        "Completed by EXP-2.1: expose effective gas price and computed actual native fee through Indexer/Explorer models and APIs.",
+        "Render gas used and actual fee distinctly in the deployed Explorer UI and qualify the user workflow."
       ],
       "tests": [
         "known gasUsed × effectiveGasPrice vector or protocol-equivalent fee vector",
@@ -414,7 +417,11 @@
         "AC-5"
       ],
       "genesis_blocking": true,
-      "blocking_rationale": "EXP-0.2.2 records fee inspection as a required workflow with an implementation gap, so the workflow cannot be qualified until the missing fee data is implemented."
+      "blocking_rationale": "EXP-0.2.2 records fee inspection as a required workflow with an implementation gap, so the workflow cannot be qualified until the missing fee data is implemented.",
+      "exp_2_disposition": "REPOSITORY_FEE_MODEL_AND_API_IMPLEMENTATION_QUALIFIED_UI_WORKFLOW_PENDING",
+      "post_exp_2_remaining_owners": [
+        "EXP-4"
+      ]
     },
     {
       "id": "EXP-FIND-009",

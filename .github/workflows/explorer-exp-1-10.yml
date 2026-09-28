@@ -1,0 +1,107 @@
+name: EXP-1.10 Phase Closeout Qualification
+
+on:
+  pull_request:
+    paths:
+      - 'indexer/**'
+      - 'explorer/**'
+      - 'consensus/storage/**'
+      - 'config/420indexer-v1.json'
+      - 'testnet/public-services/indexer/readiness.json'
+      - 'docs/audit/EXP-0.2.5-genesis-gap-register.json'
+      - 'docs/audit/EXP-0.2.6-genesis-acceptance-criteria.json'
+      - 'docs/audit/EXP-1.1-runtime-authority-manifest.json'
+      - 'docs/audit/EXP-1.2-rpc-binding.json'
+      - 'docs/audit/EXP-1.10-phase-closeout.*'
+      - 'scripts/verify-exp-1-*.py'
+      - '.github/workflows/420indexer.yml'
+      - '.github/workflows/docs-qualify.yml'
+      - '.github/workflows/qualification.yml'
+      - '.github/workflows/explorer-exp-1-10.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'config/420indexer-v1.json'
+      - 'testnet/public-services/indexer/readiness.json'
+      - 'docs/audit/EXP-0.2.5-genesis-gap-register.json'
+      - 'docs/audit/EXP-1.10-phase-closeout.*'
+      - 'scripts/verify-exp-1-10-phase-closeout.py'
+      - '.github/workflows/420indexer.yml'
+      - '.github/workflows/explorer-exp-1-10.yml'
+
+concurrency:
+  group: exp-1-10-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Go test Indexer
+        run: go test ./indexer/...
+      - name: Go vet Indexer
+        run: go vet ./indexer/...
+      - name: Go test Explorer
+        run: go test ./explorer/...
+      - name: Go vet Explorer
+        run: go vet ./explorer/...
+      - name: Retained Indexer readiness contract
+        run: python scripts/verify-420indexer.py
+      - name: Retained EXP-1.1
+        run: python scripts/verify-exp-1-1-runtime-authority.py
+      - name: Retained EXP-1.2
+        run: python scripts/verify-exp-1-2-rpc-binding.py
+      - name: Retained EXP-1.3
+        run: python scripts/verify-exp-1-3-canonical-indexing.py
+      - name: Retained EXP-1.4
+        run: python scripts/verify-exp-1-4-indexer-runtime.py
+      - name: Retained EXP-1.5
+        run: python scripts/verify-exp-1-5-consensus-provider.py
+      - name: Retained EXP-1.6
+        run: python scripts/verify-exp-1-6-historical-producer.py
+      - name: Retained EXP-1.7
+        run: python scripts/verify-exp-1-7-cross-layer-traceability.py
+      - name: Retained EXP-1.8
+        run: python scripts/verify-exp-1-8-runtime-negative-divergence.py
+      - name: Retained EXP-1.9
+        run: python scripts/verify-exp-1-9-ci-automation.py
+      - name: EXP-1.10 final phase closeout
+        run: python scripts/verify-exp-1-10-phase-closeout.py
+      - name: Build production Indexer binary
+        run: go build ./indexer/cmd/indexer420
+      - name: Build production Indexer container
+        run: docker build -f docker/Dockerfile.420indexer -t 420indexer:exp-1.10 .
+      - name: Validate deployment manifest
+        env:
+          INDEXER_RPC_URL: https://rpc.invalid.example
+          INDEXER_CONSENSUS_STATUS_DIR: /tmp/420consensus
+          INDEXER_MAX_HEAD_AGE: 2m
+          INDEXER_EXPECTED_GENESIS_HASH: ""
+        run: |
+          mkdir -p /tmp/420consensus
+          printf '{}\n' > /tmp/420consensus/status.json
+          docker compose -f deployments/indexer/docker-compose.yml config >/dev/null
+      - name: Upload EXP-1.10 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp-1-10-phase-closeout-dedicated
+          path: exp-1-10-evidence/
+          if-no-files-found: error
+          retention-days: 14

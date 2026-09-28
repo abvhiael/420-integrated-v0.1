@@ -3,8 +3,40 @@ name: 420Explorer Live Testnet Validation
 on:
   workflow_dispatch:
     inputs:
+      release_candidate_sha:
+        description: Exact release-candidate Git SHA deployed to the production-equivalent stack
+        required: true
+        type: string
       explorer_url:
-        description: Live 420Explorer testnet base URL
+        description: Non-placeholder live 420Explorer base URL
+        required: true
+        type: string
+      indexer_url:
+        description: Non-placeholder live 420Indexer base URL
+        required: true
+        type: string
+      canonical_rpc_url:
+        description: Approved canonical chain-420 JSON-RPC URL
+        required: true
+        type: string
+      consensus_witness_url:
+        description: Approved independent consensus witness JSON URL
+        required: true
+        type: string
+      deployment_manifest_url:
+        description: Immutable deployment manifest JSON URL for this exact release candidate
+        required: true
+        type: string
+      recovery_evidence_url:
+        description: Immutable recovery qualification JSON URL for this exact release candidate
+        required: true
+        type: string
+      protocol_registry_address:
+        description: Approved ProtocolRegistry deployment address
+        required: true
+        type: string
+      protocol_registry_code_hash:
+        description: Expected deployed ProtocolRegistry code hash
         required: true
         type: string
       expected_chain_id:
@@ -39,15 +71,38 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.release_candidate_sha }}
+          fetch-depth: 0
+      - name: Verify exact release candidate checkout
+        env:
+          EXPECTED_SHA: ${{ inputs.release_candidate_sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
       - name: Test live validator
         run: go test ./explorer/cmd/explorerlivevalidate
-      - name: Validate live testnet Explorer
+      - name: EXP-NEXT.4 live canonical/deployment/recovery preflight
+        env:
+          EXP_NEXT_4_RELEASE_SHA: ${{ inputs.release_candidate_sha }}
+          EXPLORER_LIVE_URL: ${{ inputs.explorer_url }}
+          INDEXER_LIVE_URL: ${{ inputs.indexer_url }}
+          CANONICAL_RPC_URL: ${{ inputs.canonical_rpc_url }}
+          CONSENSUS_WITNESS_URL: ${{ inputs.consensus_witness_url }}
+          DEPLOYMENT_MANIFEST_URL: ${{ inputs.deployment_manifest_url }}
+          RECOVERY_EVIDENCE_URL: ${{ inputs.recovery_evidence_url }}
+          PROTOCOL_REGISTRY_ADDRESS: ${{ inputs.protocol_registry_address }}
+          PROTOCOL_REGISTRY_CODE_HASH: ${{ inputs.protocol_registry_code_hash }}
+          EXPECTED_CHAIN_ID: ${{ inputs.expected_chain_id }}
+        run: python scripts/verify-exp-next-4-live-preflight.py
+      - name: Validate mandatory live Explorer routes
         env:
           EXPLORER_LIVE_URL: ${{ inputs.explorer_url }}
           EXPLORER_EXPECTED_CHAIN_ID: ${{ inputs.expected_chain_id }}
@@ -58,11 +113,32 @@ jobs:
           EXPLORER_LIVE_ASSET_KEY: ${{ inputs.asset_key }}
         run: |
           set -o pipefail
-          go run ./explorer/cmd/explorerlivevalidate | tee explorer-live-evidence.json
-      - name: Upload live validation evidence
+          go run ./explorer/cmd/explorerlivevalidate | tee exp-next-4-live-evidence/explorer-live-evidence.json
+      - name: Record exact live run metadata
+        env:
+          RELEASE_SHA: ${{ inputs.release_candidate_sha }}
+          EXPLORER_URL: ${{ inputs.explorer_url }}
+          INDEXER_URL: ${{ inputs.indexer_url }}
+          RPC_URL: ${{ inputs.canonical_rpc_url }}
+        run: |
+          python - <<'PY'
+          import json,os,pathlib
+          p=pathlib.Path("exp-next-4-live-evidence")
+          p.mkdir(exist_ok=True)
+          (p/"run-metadata.json").write_text(json.dumps({
+            "releaseCandidateSha":os.environ["RELEASE_SHA"],
+            "explorerUrl":os.environ["EXPLORER_URL"],
+            "indexerUrl":os.environ["INDEXER_URL"],
+            "canonicalRpcUrl":os.environ["RPC_URL"],
+            "githubRunId":"${{ github.run_id }}",
+            "githubRunAttempt":"${{ github.run_attempt }}"
+          },indent=2)+"\n")
+          PY
+      - name: Upload EXP-NEXT.4 live qualification evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: explorer-live-testnet-evidence
-          path: explorer-live-evidence.json
-          if-no-files-found: warn
+          name: exp-next-4-live-deployment-recovery
+          path: exp-next-4-live-evidence/
+          if-no-files-found: error
+          retention-days: 30

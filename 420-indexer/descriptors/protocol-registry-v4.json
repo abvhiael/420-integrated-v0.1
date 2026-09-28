@@ -1,0 +1,113 @@
+{
+  "schema": "420-protocol-registry-release-descriptor-v1",
+  "descriptorVersion": 1,
+  "contractName": "ProtocolRegistry",
+  "protocol": "420Registry",
+  "protocolVersion": 4,
+  "canonicalAddress": "0x0000000000000000000000000000000000000434",
+  "source": {
+    "path": "contracts/src/apps/ProtocolRegistry.sol",
+    "gitBlobSha": "0ad7967d9ac805dd819101955c10233ff3d19325"
+  },
+  "events": [
+    {
+      "type": "event",
+      "name": "ServiceVersionPublished",
+      "anonymous": false,
+      "signature": "ServiceVersionPublished(bytes32,uint32,address,bytes32,bytes32,bool)",
+      "topic0": "0x19aa152c2c4c6794d89883e0808ea2365e3f6d5267840423debc9b08db5b3608",
+      "inputs": [
+        {
+          "name": "serviceId",
+          "type": "bytes32",
+          "indexed": true
+        },
+        {
+          "name": "version",
+          "type": "uint32",
+          "indexed": true
+        },
+        {
+          "name": "implementation",
+          "type": "address",
+          "indexed": true
+        },
+        {
+          "name": "codeHash",
+          "type": "bytes32",
+          "indexed": false
+        },
+        {
+          "name": "metadataHash",
+          "type": "bytes32",
+          "indexed": false
+        },
+        {
+          "name": "active",
+          "type": "bool",
+          "indexed": false
+        }
+      ]
+    },
+    {
+      "type": "event",
+      "name": "ServiceRegistrationProfilePublished",
+      "anonymous": false,
+      "signature": "ServiceRegistrationProfilePublished(bytes32,uint32,uint8,bytes32,bytes32,bytes32)",
+      "topic0": "0x19af5a8b78ed7364ffacb8ddf22ac42f4bb67c6d9532cb2b7504781867c550d9",
+      "inputs": [
+        {
+          "name": "serviceId",
+          "type": "bytes32",
+          "indexed": true
+        },
+        {
+          "name": "version",
+          "type": "uint32",
+          "indexed": true
+        },
+        {
+          "name": "componentType",
+          "type": "uint8",
+          "indexed": false
+        },
+        {
+          "name": "manifestHash",
+          "type": "bytes32",
+          "indexed": false
+        },
+        {
+          "name": "dependencyRoot",
+          "type": "bytes32",
+          "indexed": false
+        },
+        {
+          "name": "interfaceHash",
+          "type": "bytes32",
+          "indexed": false
+        }
+      ]
+    },
+    {
+      "type": "event",
+      "name": "ServiceDeprecated",
+      "anonymous": false,
+      "signature": "ServiceDeprecated(bytes32,uint32)",
+      "topic0": "0x63e20a29800a0d1cec5ae14b6dfceb2bc5cbfd523b7225bc649d3819c0f8780a",
+      "inputs": [
+        {
+          "name": "serviceId",
+          "type": "bytes32",
+          "indexed": true
+        },
+        {
+          "name": "version",
+          "type": "uint32",
+          "indexed": true
+        }
+      ]
+    }
+  ],
+  "descriptorSha256": "56dd77bb98971368ecf14748b08793f7c6e04cdd5feb8ebdeecf278b606ff6da",
+  "authority": "repository_descriptor_only_not_live_registry_authority"
+}

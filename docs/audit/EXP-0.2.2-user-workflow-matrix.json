@@ -819,6 +819,19 @@
         "active implementation linkage test",
         "contract-link UI test",
         "live Registry publication witness"
+      ],
+      "exp_2_6_repository_disposition": "REPOSITORY_REGISTRY_SERVICE_VERSION_PROVENANCE_QUALIFIED_LIVE_PUBLICATION_AND_UI_PENDING",
+      "exp_2_6_evidence": [
+        "docs/audit/EXP-2.6-diagnostics-registry.json",
+        "explorer/service/exp_2_6_diagnostics_registry_test.go",
+        "explorer/api/exp_2_6_diagnostics_registry_test.go",
+        "explorer/indexerclient/exp_2_6_registry_client_test.go"
+      ],
+      "post_exp_2_6_remaining_owners": [
+        "EXP-3",
+        "EXP-4",
+        "EXP-5",
+        "EXP-7"
       ]
     },
     {
@@ -893,6 +906,17 @@
         "status failure-mode tests",
         "cross-resource navigation tests",
         "production-equivalent troubleshooting exercise"
+      ],
+      "exp_2_6_repository_disposition": "REPOSITORY_TROUBLESHOOTING_STATUS_AND_PROTOCOL_LOOKUP_QUALIFIED_UI_RECOVERY_AND_LIVE_WITNESSES_PENDING",
+      "exp_2_6_evidence": [
+        "docs/audit/EXP-2.6-diagnostics-registry.json",
+        "explorer/service/exp_2_6_diagnostics_registry_test.go",
+        "explorer/api/exp_2_6_diagnostics_registry_test.go"
+      ],
+      "post_exp_2_6_remaining_owners": [
+        "EXP-4",
+        "EXP-6",
+        "EXP-7"
       ]
     }
   ],

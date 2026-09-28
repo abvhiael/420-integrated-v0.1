@@ -108,6 +108,7 @@ contract ComputeWorkerCanonicalWiring420 {
                 || address(e.jobs()) != address(j)
                 || e.matches().jobs() != address(j)
                 || address(e.workers()) != address(w)
+                || address(w.authorization()) != address(e.authorization())
                 || address(e.attestation()) != address(a)
                 || address(e.workerTrust()) != address(t)
                 || address(e.workerStake()) != address(s)

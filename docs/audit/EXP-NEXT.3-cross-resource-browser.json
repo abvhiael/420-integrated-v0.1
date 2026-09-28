@@ -2,7 +2,7 @@
   "schema": "420explorer-exp-next-3-cross-resource-browser-v1",
   "step": "EXP-NEXT.3",
   "title": "Consensus/producer and cross-resource browser workflow closeout",
-  "status": "IMPLEMENTED_PENDING_EXACT_HEAD_QUALIFICATION",
+  "status": "COMPLETE",
   "canonical_roadmap": "docs/audit/EXP-2R.5-authoritative-next-phase-roadmap.json",
   "base_dependency_head": "f660db960b46a47215ed11bcbd0a8d79b6be8e98",
   "main_at_branch_creation": "f437378664059a51f854d45bf48594930f070f6f",
@@ -47,12 +47,96 @@
     "retained EXP-2.3/2.4/2.6 and EXP-NEXT.2 verifiers"
   ],
   "scope": {
-    "repository_cross_resource_browser_workflows_qualified": false,
+    "repository_cross_resource_browser_workflows_qualified": true,
     "live_canonical_producer_witness_qualified": false,
     "deployed_consensus_provider_proof_qualified": false,
     "production_availability_sla_qualified": false,
     "canonical_authority": false,
     "genesis_ready_claim": false
   },
-  "final_qualification": null
+  "final_qualification": {
+    "qualified_candidate_head": "f64228faab3218bb50f6ba4b1b42b77cda9d3b85",
+    "candidate_exact_head_requalification": "success",
+    "dedicated_workflow": {
+      "name": "420Explorer EXP-NEXT.3 Cross Resource Browser",
+      "run_id": 36474436338,
+      "conclusion": "success",
+      "artifact_id": 10992649147
+    },
+    "retained_workflows": [
+      {
+        "name": "420Explorer EXP-2.2",
+        "run_id": 36474436487,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.3",
+        "run_id": 36474436197,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.4",
+        "run_id": 36474436270,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.5",
+        "run_id": 36474436111,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-2.6",
+        "run_id": 36474436259,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Explorer EXP-NEXT.2 Fee and Raw Event Browser",
+        "run_id": 36474436421,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.7 Cross-Layer Traceability Qualification",
+        "run_id": 36474436441,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.8 Runtime Negative Divergence Qualification",
+        "run_id": 36474436201,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.10 Phase Closeout Qualification",
+        "run_id": 36474436356,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Indexer",
+        "run_id": 36474436561,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Docs Qualification",
+        "run_id": 36474436121,
+        "conclusion": "success"
+      },
+      {
+        "name": "420 Integrated Qualification",
+        "run_id": 36474436526,
+        "conclusion": "success"
+      }
+    ],
+    "integrated_jobs": [
+      "offline-core",
+      "fault-matrix",
+      "production-dependencies",
+      "geth-engine"
+    ],
+    "completion_record_policy": "The commit containing this COMPLETE record is a new qualification target. EXP-NEXT.3 is COMPLETE only after that exact PR head passes the dedicated EXP-NEXT.3 workflow and all retained workflows that trigger for it. Missing, skipped or cancelled required checks do not qualify the step. No pre-evidence SHA may qualify the evidence-recording head.",
+    "limitations": [
+      "No live canonical producer witness is qualified.",
+      "No deployed consensus-provider proof is qualified.",
+      "No production availability/SLA is qualified.",
+      "No Genesis readiness claim is made."
+    ]
+  }
 }

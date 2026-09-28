@@ -537,6 +537,16 @@
         "raw input/log provenance test",
         "decoded-error tests if later implemented",
         "testnet failed-interaction witness"
+      ],
+      "exp_2_5_repository_disposition": "REPOSITORY_FAILED_CALL_RAW_CONTEXT_QUALIFIED_DECODED_DIAGNOSTICS_AND_DEPLOYED_UI_PENDING",
+      "exp_2_5_evidence": [
+        "docs/audit/EXP-2.5-raw-call-events.json",
+        "explorer/service/exp_2_5_raw_events_test.go",
+        "explorer/api/exp_2_5_raw_events_test.go"
+      ],
+      "post_exp_2_5_remaining_owners": [
+        "EXP-3",
+        "EXP-4"
       ]
     },
     {
@@ -741,6 +751,17 @@
         "topic/data rendering test after implementation",
         "decoded-event tests where supported",
         "testnet emitted-event witness"
+      ],
+      "exp_2_5_repository_disposition": "REPOSITORY_RAW_EVENT_PAYLOAD_INSPECTION_QUALIFIED_DEPLOYED_UI_AND_OPTIONAL_DECODED_SEMANTICS_PENDING",
+      "exp_2_5_evidence": [
+        "docs/audit/EXP-2.5-raw-call-events.json",
+        "explorer/service/eventviews.go",
+        "explorer/service/exp_2_5_raw_events_test.go",
+        "explorer/api/exp_2_5_raw_events_test.go"
+      ],
+      "post_exp_2_5_remaining_owners": [
+        "EXP-3",
+        "EXP-4"
       ]
     },
     {

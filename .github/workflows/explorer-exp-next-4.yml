@@ -44,9 +44,11 @@ jobs:
         run: go test ./explorer/...
       - name: Vet Explorer
         run: go vet ./explorer/...
-      - name: Retain Indexer recovery qualification fixtures
+      - name: Retain TypeScript Indexer and recovery qualification
         working-directory: 420-indexer
-        run: node --test --import tsx test/testnet-recovery-qualification.test.ts
+        run: |
+          npm install --no-audit --no-fund
+          npm test
       - name: Upload repository readiness evidence
         if: always()
         uses: actions/upload-artifact@v4

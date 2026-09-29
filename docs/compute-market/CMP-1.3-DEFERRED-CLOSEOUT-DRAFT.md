@@ -1,10 +1,10 @@
 # CMP-1.3 — Deferred closeout draft (unnumbered)
 
-Status: **PRESERVED DRAFT; NOT AN AUTHORIZED CMP-1.3 SUBSTEP.**
+Status: **PRESERVED INPUT FOR AUTHORIZED CMP-1.3.16 CLOSEOUT; NOT YET EXECUTED.**
 
 This document preserves useful repository-closeout work that was incorrectly labeled CMP-1.3.8.
 
-The prior conversation established an authoritative detailed roadmap running from CMP-1.3.0 through CMP-1.3.16. The exact text for CMP-1.3.8 through CMP-1.3.16 is not present in the repository and is not available in the currently recoverable conversation index. Therefore this closeout material must remain unnumbered until the original step definitions are recovered. It must not be used to redefine CMP-1.3.8 or any later authorized step.
+The prior conversation established an authoritative detailed roadmap running from CMP-1.3.0 through CMP-1.3.16. The exact text for CMP-1.3.8 through CMP-1.3.16 is not present in the repository and is not available in the currently recoverable conversation index. On 2026-09-28 the repository owner authorized a fresh audit to create a **new** CMP-1.3.8–CMP-1.3.16 roadmap because the historical literal wording remained unrecoverable. That audit assigns final phase closeout to CMP-1.3.16. This file is preserved as input to that new closeout step; it does not claim CMP-1.3.16 was the lost historical closeout number and it does not itself execute or complete CMP-1.3.16.
 
 ## Preserved closeout work
 
@@ -21,4 +21,4 @@ The draft retains the useful reconciliation logic already produced:
 
 This draft introduces no runtime authority and does not complete, renumber, or supersede any CMP-1.3 roadmap step.
 
-It may be moved into the actual closeout step only after the original CMP-1.3.8–CMP-1.3.16 roadmap text is recovered and the correct closeout number is known.
+The new audit-defined roadmap assigns this material to CMP-1.3.16. When CMP-1.3.16 is executed, reconcile and migrate the useful contents into final closeout evidence. Until then this remains a preserved draft and creates no completion claim.

@@ -9,6 +9,7 @@ import "../src/compute/ComputeWorkerRegistry420.sol";
 import "../src/compute/ComputeWorkerAttestation420.sol";
 import "../src/compute/ComputeWorkerTrust420.sol";
 import "../src/compute/ComputeWorkerStake420.sol";
+import "../src/compute/ComputeWorkerCapacityReservation420.sol";
 import "../src/compute/ComputeAuthorization420.sol";
 import "../src/compute/IComputeAcceptedMatchRuntime420.sol";
 import "../src/interfaces/genesis/ICapabilityRegistry420.sol";
@@ -63,6 +64,7 @@ contract ComputeWorkerCanonicalWiring420Test {
     ComputeWorkerAttestation420 private attestation;
     ComputeWorkerTrust420 private workerTrust;
     ComputeWorkerStake420 private workerStake;
+    ComputeWorkerCapacityReservation420 private capacity;
     ComputeAuthorization420 private authorization;
     WiringMatchMock420 private matches;
     ComputeJobWorkerSnapshotEvidence420 private workerEvidence;
@@ -73,11 +75,12 @@ contract ComputeWorkerCanonicalWiring420Test {
         providers = new ComputeProviderRegistry420(GOV);
         nodes = new ComputeNodeRegistry420(address(providers), GOV);
         resources = new ComputeResourceRegistry420(address(nodes), GOV);
-        workers = new ComputeWorkerRegistry420(address(resources), GOV);
+        authorization = new ComputeAuthorization420(address(new WiringCapabilityRegistryMock420()));
+        workers = new ComputeWorkerRegistry420(address(resources), address(authorization), GOV);
         attestation = new ComputeWorkerAttestation420(address(workers), GOV);
         workerTrust = new ComputeWorkerTrust420(address(workers), address(new WiringTrustMock420()), GOV);
         workerStake = new ComputeWorkerStake420(address(workers), GOV);
-        authorization = new ComputeAuthorization420(address(new WiringCapabilityRegistryMock420()));
+        capacity = new ComputeWorkerCapacityReservation420(address(workers));
         matches = new WiringMatchMock420();
         common = new WiringCommonEvidence420();
 
@@ -87,7 +90,8 @@ contract ComputeWorkerCanonicalWiring420Test {
             address(workers),
             address(attestation),
             address(workerTrust),
-            address(workerStake)
+            address(workerStake),
+            address(capacity)
         );
 
         jobs = new ComputeJobRegistry420(
@@ -101,6 +105,7 @@ contract ComputeWorkerCanonicalWiring420Test {
 
         matches.setJobs(address(jobs));
         workerEvidence.bindJobs(address(jobs));
+        capacity.bindController(address(workerEvidence));
     }
 
     function _hashes() private view returns (ComputeWorkerCanonicalWiring420.CodeHashes memory h) {
@@ -110,7 +115,8 @@ contract ComputeWorkerCanonicalWiring420Test {
             workers: address(workers).codehash,
             attestation: address(attestation).codehash,
             trust: address(workerTrust).codehash,
-            stake: address(workerStake).codehash
+            stake: address(workerStake).codehash,
+            capacity: address(capacity).codehash
         });
     }
 
@@ -121,11 +127,12 @@ contract ComputeWorkerCanonicalWiring420Test {
         address attestation_,
         address trust_,
         address stake_,
+        address capacity_,
         address governance_,
         ComputeWorkerCanonicalWiring420.CodeHashes calldata hashes_
     ) external returns (address deployed) {
         deployed = address(new ComputeWorkerCanonicalWiring420(
-            jobs_, workerEvidence_, workers_, attestation_, trust_, stake_, governance_, hashes_
+            jobs_, workerEvidence_, workers_, attestation_, trust_, stake_, capacity_, governance_, hashes_
         ));
     }
 
@@ -137,6 +144,7 @@ contract ComputeWorkerCanonicalWiring420Test {
             address(attestation),
             address(workerTrust),
             address(workerStake),
+            address(capacity),
             GOV,
             _hashes()
         );
@@ -158,6 +166,7 @@ contract ComputeWorkerCanonicalWiring420Test {
                     address(attestation),
                     address(workerTrust),
                     address(workerStake),
+                    address(capacity),
                     GOV,
                     h
                 )
@@ -178,6 +187,7 @@ contract ComputeWorkerCanonicalWiring420Test {
                     address(attestation),
                     address(workerTrust),
                     address(workerStake),
+                    address(capacity),
                     address(0xBAD),
                     h
                 )
@@ -193,7 +203,8 @@ contract ComputeWorkerCanonicalWiring420Test {
             address(workers),
             address(attestation),
             address(workerTrust),
-            address(workerStake)
+            address(workerStake),
+            address(capacity)
         );
         ComputeWorkerCanonicalWiring420.CodeHashes memory h = _hashes();
         h.workerEvidence = address(unbound).codehash;
@@ -208,6 +219,7 @@ contract ComputeWorkerCanonicalWiring420Test {
                     address(attestation),
                     address(workerTrust),
                     address(workerStake),
+                    address(capacity),
                     GOV,
                     h
                 )

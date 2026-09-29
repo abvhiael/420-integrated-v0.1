@@ -1,0 +1,50 @@
+name: 420Registry REG-AUDIT-1
+
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/interfaces/genesis/IProtocolRegistry420.sol'
+      - 'contracts/src/interfaces/genesis/Types420.sol'
+      - 'contracts/src/apps/ProtocolRegistry.sol'
+      - 'contracts/src/system/GenesisResidentAccess420.sol'
+      - 'contracts/config/interfaces/**'
+      - 'contracts/config/genesis-dapp-contract-map.json'
+      - 'docs/audit/REG-AUDIT-1-*'
+      - 'docs/audit/420REGISTRY-COMPLETE-AUDIT-20260928.*'
+      - 'scripts/verify-reg-audit-1-api-decision.py'
+      - 'scripts/verify-genesis-interface-v1-freeze.py'
+      - '.github/workflows/registry-reg-audit-1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify Genesis interface layer manifest
+        run: python scripts/verify-genesis-interface-layer.py
+      - name: Verify frozen Genesis interface layer
+        run: python scripts/verify-genesis-interface-v1-freeze.py
+      - name: Verify REG-AUDIT-1 authoritative Registry API decision
+        run: python scripts/verify-reg-audit-1-api-decision.py
+      - name: Upload REG-AUDIT-1 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reg-audit-1-api-decision
+          path: reg-audit-1-evidence/
+          if-no-files-found: error
+          retention-days: 30

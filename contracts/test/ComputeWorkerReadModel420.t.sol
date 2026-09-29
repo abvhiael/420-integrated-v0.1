@@ -357,6 +357,7 @@ contract ComputeWorkerReadModel420Test {
 
         bytes32 digest =
             snapshots.assignmentExecutionDigest(jobId, workerId, workerRevision, 4, refs);
+        bytes memory assignmentSignature = _sign(digest);
         vm.prank(RELAYER);
         assignmentRef = snapshots.acceptAssignment(
             jobId,
@@ -364,7 +365,7 @@ contract ComputeWorkerReadModel420Test {
             workerRevision,
             4,
             refs,
-            _sign(digest)
+            assignmentSignature
         );
 
         reads = new ComputeWorkerReadModel420(
@@ -441,6 +442,10 @@ contract ComputeWorkerReadModel420Test {
             reads.capacityUsage(workerId, revision, resourceId, w.resourceRevision);
         require(capacityView.liveWorkerUnits == 1, "worker capacity missing");
         require(capacityView.liveResourceUnits == 1, "resource capacity missing");
+        (bytes32 reservationId, ComputeWorkerCapacityReservation420.Reservation memory reservation) =
+            reads.reservationForJob(jobId);
+        require(reservationId != bytes32(0), "reservation id missing");
+        require(reservation.jobId == jobId && reservation.assignmentRef == assignmentRef, "reservation read mismatch");
 
         ComputeWorkerReadModel420.AttemptIndex memory index = reads.attemptIndex(jobId);
         require(index.rootAssignmentRef == assignmentRef, "root attempt mismatch");
@@ -463,36 +468,26 @@ contract ComputeWorkerReadModel420Test {
         req.requiredSoftwareCapability = SOFTWARE;
         req.minMemoryMiB = 1024;
 
-        ComputeWorkerReadModel420.EligibilityView memory ok = reads.eligibility(
-            workerId,
-            revision,
-            req,
-            true,
-            CAP_POLICY,
-            attestationId,
-            TRUST_POLICY,
-            true,
-            trustReferenceId,
-            STAKE_POLICY,
-            true,
-            stakeReferenceId
-        );
+        ComputeWorkerReadModel420.EligibilityQuery memory query =
+            ComputeWorkerReadModel420.EligibilityQuery({
+                workerId: workerId,
+                workerRevision: revision,
+                requirements: req,
+                requireTrustedAttestation: true,
+                attestationPolicyId: CAP_POLICY,
+                attestationId: attestationId,
+                trustPolicyId: TRUST_POLICY,
+                requireTrustReference: true,
+                trustReferenceId: trustReferenceId,
+                stakePolicyId: STAKE_POLICY,
+                requireStakeReference: true,
+                stakeReferenceId: stakeReferenceId
+            });
+        ComputeWorkerReadModel420.EligibilityView memory ok = reads.eligibility(query);
         require(ok.workerEligible && ok.capabilityEligible && ok.trustEligible && ok.stakeEligible, "valid admission read rejected");
 
-        ComputeWorkerReadModel420.EligibilityView memory stale = reads.eligibility(
-            workerId,
-            revision - 1,
-            req,
-            true,
-            CAP_POLICY,
-            attestationId,
-            TRUST_POLICY,
-            true,
-            trustReferenceId,
-            STAKE_POLICY,
-            true,
-            stakeReferenceId
-        );
+        query.workerRevision = revision - 1;
+        ComputeWorkerReadModel420.EligibilityView memory stale = reads.eligibility(query);
         require(!stale.workerEligible && !stale.capabilityEligible, "stale revision accepted");
 
         vm.prank(address(0xBAD));

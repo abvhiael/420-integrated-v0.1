@@ -1,0 +1,164 @@
+{
+  "schema": "420-registry-complete-audit-v1",
+  "application": "420Registry",
+  "repository": "abvhiael/420-integrated-v0.1",
+  "auditedMainSha": "ac1b9c5a5d7e1b031ea63c210b8c38ac3abee6df",
+  "historicalRegistryPr": {
+    "number": 31,
+    "headSha": "94255bebd8b639c4cb4edaf8caa8a976e170bf85",
+    "mergeCommitSha": "a54ebdb4b6e80352cf901d146d5dd7d198a0d783",
+    "exactHeadHistoricalQualification": "PASS",
+    "note": "Historical evidence only; it is not exact-head qualification for the audited current main or remediation branch."
+  },
+  "canonicalSources": [
+    "contracts/src/apps/ProtocolRegistry.sol",
+    "contracts/config/420registry-genesis.json",
+    "contracts/src/libraries/ServiceIds420.sol",
+    "contracts/src/system/SystemAccess.sol",
+    "contracts/src/interfaces/genesis/IProtocolRegistry420.sol",
+    "contracts/src/system/GenesisResidentAccess420.sol",
+    "contracts/config/interfaces/genesis-interface-layer.json",
+    "contracts/config/interfaces/interface-layer-v1-freeze.json",
+    "config/system-addresses.json",
+    "contracts/config/system-addresses.json",
+    "contracts/config/deployment-manifest.json",
+    "contracts/config/predeploy/predeploy-plan.json",
+    "contracts/config/wallet-authority-address-reconciliation.json",
+    "contracts/test/RegistryGenesis420.t.sol",
+    "contracts/test/RegistryIdentityNames420.t.sol",
+    "docs/apps/registry/architecture.md",
+    "docs/apps/registry/user-guide.md",
+    "docs/apps/registry/developer/index.md",
+    "docs/apps/registry/developer/contracts.md",
+    "docs/developers/registry-and-publishing.md",
+    "docs/architecture/protocols/registry-names-identity-420is.md"
+  ],
+  "blockers": [
+    {
+      "id": "REG-BLK-001",
+      "category": "code/integration",
+      "severity": "release_blocking",
+      "status": "DECISION_FROZEN_IMPLEMENTATION_PENDING",
+      "title": "Frozen Genesis Registry interface is incompatible with ProtocolRegistry runtime ABI",
+      "evidence": [
+        "contracts/src/interfaces/genesis/IProtocolRegistry420.sol",
+        "contracts/src/apps/ProtocolRegistry.sol",
+        "contracts/src/system/GenesisResidentAccess420.sol"
+      ],
+      "requiredResolution": "REG-AUDIT-1 selected direct ProtocolRegistry implementation of frozen IProtocolRegistry420 semantics; REG-AUDIT-2 owns implementation and runtime qualification."
+    },
+    {
+      "id": "REG-BLK-002",
+      "category": "genesis-addressing",
+      "severity": "release_blocking",
+      "status": "OPEN",
+      "title": "Global Genesis address namespace reconciliation is unresolved",
+      "evidence": [
+        "config/system-addresses.json",
+        "contracts/config/system-addresses.json",
+        "contracts/config/wallet-authority-address-reconciliation.json"
+      ],
+      "requiredResolution": "Resolve the namespace atomically across all canonical manifests and consumers; do not patch Registry in isolation."
+    },
+    {
+      "id": "REG-BLK-003",
+      "category": "deployment",
+      "severity": "release_blocking",
+      "status": "OPEN",
+      "title": "No pinned final Registry runtime artifact/code hash and canonical deployed evidence",
+      "evidence": [
+        "contracts/config/predeploy/predeploy-plan.json",
+        "docs/reference/generated/deployments.md"
+      ],
+      "requiredResolution": "Build the exact release candidate, retain runtime artifact/code hash, materialize Genesis storage, and record production-equivalent deployment evidence."
+    },
+    {
+      "id": "REG-BLK-004",
+      "category": "tests/qualification",
+      "severity": "release_blocking",
+      "status": "OPEN",
+      "title": "Current exact-head Registry qualification is absent",
+      "evidence": [
+        "contracts/test/RegistryGenesis420.t.sol",
+        "contracts/config/420registry-genesis.json"
+      ],
+      "requiredResolution": "Complete missing invariant/interface tests and rerun all retained gates against the final evidence-recording SHA."
+    },
+    {
+      "id": "REG-BLK-005",
+      "category": "documentation/evidence",
+      "severity": "release_blocking",
+      "status": "OPEN",
+      "title": "Registry-specific final closeout and canonical generated metadata are incomplete/stale",
+      "evidence": [
+        "docs/reference/generated/contracts.md",
+        "docs/reference/generated/deployments.md",
+        "developer-hub/catalogue/local.example.json",
+        "developer-hub/manifests/local.example.json"
+      ],
+      "requiredResolution": "After API/address/deployment reconciliation, regenerate references and commit exact-head closeout evidence."
+    }
+  ],
+  "invariantStatus": {
+    "REG-INV-001": "COMPLETE",
+    "REG-INV-002": "COMPLETE",
+    "REG-INV-003": "COMPLETE",
+    "REG-INV-004": "COMPLETE",
+    "REG-INV-005": "PARTIAL",
+    "REG-INV-006": "PARTIAL",
+    "REG-INV-007": "PARTIAL",
+    "REG-INV-008": "COMPLETE",
+    "REG-INV-009": "PARTIAL",
+    "REG-INV-010": "PARTIAL",
+    "REG-INV-011": "PARTIAL",
+    "REG-INV-012": "PARTIAL"
+  },
+  "readiness": {
+    "codeComplete": false,
+    "buildComplete": false,
+    "contractComplete": false,
+    "testComplete": false,
+    "documentationComplete": false,
+    "integrationComplete": false,
+    "securityQualified": false,
+    "testnetReady": false,
+    "genesisReady": false,
+    "productionReady": false
+  },
+  "decision": "NO_GO",
+  "remediationSequence": [
+    "REG-AUDIT-1",
+    "REG-AUDIT-2",
+    "REG-AUDIT-3",
+    "REG-AUDIT-4",
+    "REG-AUDIT-5",
+    "REG-AUDIT-6",
+    "REG-AUDIT-7",
+    "REG-AUDIT-8",
+    "REG-AUDIT-9",
+    "REG-AUDIT-10"
+  ],
+  "report": "docs/audit/420REGISTRY-COMPLETE-AUDIT-20260928.md",
+  "remediationStepStatus": {
+    "REG-AUDIT-1": {
+      "title": "authoritative Registry API decision",
+      "status": "COMPLETE",
+      "decision": "A_DIRECT_PROTOCOL_REGISTRY_IMPLEMENTATION",
+      "record": "docs/audit/REG-AUDIT-1-AUTHORITATIVE-REGISTRY-API-DECISION.json",
+      "implementationOwnerStep": "REG-AUDIT-2",
+      "candidateQualifiedSha": "ec7484ed68073a02bb0f87a7c6006e921a3a38e0",
+      "candidateRuns": {
+        "registryDecision": 36510366989,
+        "integrated": 36510367027,
+        "docs": 36510366960
+      },
+      "reconciledQualifiedSha": "7f3158acedd5255b7f927b8cdbccd9b94870881f",
+      "reconciledRuns": {
+        "registryDecision": 36511054370,
+        "docs": 36511054371,
+        "integrated": 36511054406
+      },
+      "nextStep": "REG-AUDIT-2"
+    }
+  }
+}

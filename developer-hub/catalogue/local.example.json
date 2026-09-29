@@ -5,14 +5,15 @@
     {
       "name": "ProtocolRegistry",
       "protocol": "420Registry",
-      "address": "0x0000000000000000000000000000000000000420",
+      "address": "0x0000000000000000000000000000000000000434",
       "source": "genesis",
       "version": "1.0.0",
       "deploymentBlock": 0,
       "artifact": "contracts/out/ProtocolRegistry.sol/ProtocolRegistry.json",
       "interface": "contracts/src/interfaces/IProtocolRegistry.sol",
       "abiSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-      "verified": true
+      "verified": true,
+      "addressAuthority": "contracts/config/genesis-address-namespace.json"
     }
   ]
 }

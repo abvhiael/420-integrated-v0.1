@@ -21,6 +21,7 @@ contract ComputeWorkerCapacityReservation420 {
         bytes32 resourceId;
         uint64 resourceRevision;
         uint64 expectedJobRevision;
+        uint64 deadline;
         uint64 reservedAt;
         uint64 closedAt;
         uint64 revision;
@@ -104,6 +105,41 @@ contract ComputeWorkerCapacityReservation420 {
         return _current[reservationId].status == Status.RESERVED;
     }
 
+    function deriveReservationId(
+        bytes32 jobId,
+        bytes32 assignmentRef,
+        bytes32 workerId,
+        uint64 workerRevision,
+        bytes32 resourceId,
+        uint64 resourceRevision,
+        uint64 expectedJobRevision
+    ) public view returns (bytes32) {
+        if (
+            jobId == bytes32(0)
+                || assignmentRef == bytes32(0)
+                || workerId == bytes32(0)
+                || workerRevision == 0
+                || resourceId == bytes32(0)
+                || resourceRevision == 0
+                || expectedJobRevision == 0
+        ) revert InvalidReservation();
+        return keccak256(
+            abi.encode(
+                RESERVATION_DOMAIN_V1,
+                block.chainid,
+                address(this),
+                jobId,
+                expectedJobRevision,
+                assignmentRef,
+                workerId,
+                workerRevision,
+                resourceId,
+                resourceRevision,
+                uint256(1)
+            )
+        );
+    }
+
     function reserve(
         bytes32 jobId,
         bytes32 assignmentRef,
@@ -146,20 +182,14 @@ contract ComputeWorkerCapacityReservation420 {
                 || liveWorkerUnits[workerId] + units > capacityLimit
         ) revert CapacityExhausted();
 
-        reservationId = keccak256(
-            abi.encode(
-                RESERVATION_DOMAIN_V1,
-                block.chainid,
-                address(this),
-                jobId,
-                expectedJobRevision,
-                assignmentRef,
-                workerId,
-                workerRevision,
-                resourceId,
-                resourceRevision,
-                units
-            )
+        reservationId = deriveReservationId(
+            jobId,
+            assignmentRef,
+            workerId,
+            workerRevision,
+            resourceId,
+            resourceRevision,
+            expectedJobRevision
         );
         if (_current[reservationId].status != Status.NONE) revert InvalidReservation();
 
@@ -171,6 +201,7 @@ contract ComputeWorkerCapacityReservation420 {
             resourceId: resourceId,
             resourceRevision: resourceRevision,
             expectedJobRevision: expectedJobRevision,
+            deadline: deadline,
             reservedAt: uint64(block.timestamp),
             closedAt: 0,
             revision: 1,
@@ -209,9 +240,7 @@ contract ComputeWorkerCapacityReservation420 {
     function expire(bytes32 reservationId, bytes32 transitionRef) external {
         _onlyController();
         Reservation memory r = _current[reservationId];
-        if (r.status != Status.RESERVED || block.timestamp <= r.reservedAt) {
-            // Job-deadline authority is checked by the bound controller; this local guard prevents
-            // same-timestamp reserve/expire churn.
+        if (r.status != Status.RESERVED || block.timestamp <= r.deadline) {
             revert InvalidTransition();
         }
         _transition(reservationId, Status.EXPIRED, transitionRef);

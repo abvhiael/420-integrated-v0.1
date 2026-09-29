@@ -341,6 +341,7 @@ contract ComputeJobWorkerSnapshotEvidence420 is IComputeJobWorkerEvidence420 {
 
         ComputeWorkerRegistry420.Worker memory w =
             _validatedWorker(jobId, j, workerId, workerRevision, refs);
+        if (w.resourceId != root.resourceId || w.operator != root.operator) revert InvalidEvidence();
 
         uint64 attempt = prior.attempt + 1;
         if (attempt == 0 || attempt != attemptCount[jobId] + 1) revert InvalidEvidence();
@@ -578,13 +579,27 @@ contract ComputeJobWorkerSnapshotEvidence420 is IComputeJobWorkerEvidence420 {
         }
 
         if (
-            j.status == ComputeJobRegistry420.Status.EXPIRED
-                || (
-                    j.status == ComputeJobRegistry420.Status.RUNNING
-                        && a.status == AttemptStatus.ACTIVE
-                        && block.timestamp > j.deadline
-                )
+            j.status == ComputeJobRegistry420.Status.RUNNING
+                && a.status == AttemptStatus.ACTIVE
+                && block.timestamp > j.deadline
         ) {
+            capacity.expire(a.reservationId, transitionRef);
+            jobs.recordRunningExpiry(jobId, j.revision, transitionRef);
+            a.closedAt = uint64(block.timestamp);
+            a.transitionRef = transitionRef;
+            a.status = AttemptStatus.EXPIRED;
+            emit WorkerAttemptTransition(
+                jobId,
+                assignmentRef,
+                a.attempt,
+                AttemptStatus.ACTIVE,
+                AttemptStatus.EXPIRED,
+                transitionRef
+            );
+            return;
+        }
+
+        if (j.status == ComputeJobRegistry420.Status.EXPIRED) {
             capacity.expire(a.reservationId, transitionRef);
             return;
         }
@@ -700,22 +715,22 @@ contract ComputeJobWorkerSnapshotEvidence420 is IComputeJobWorkerEvidence420 {
 
         expiryRef = keccak256(
             abi.encode(
-                ATTEMPT_TRANSITION_DOMAIN_V1,
+                CAPACITY_TRANSITION_DOMAIN_V1,
                 block.chainid,
                 address(this),
                 jobId,
-                a.rootAssignmentRef,
                 assignmentRef,
-                a.attempt,
-                AttemptStatus.EXPIRED,
-                expectedJobRevision,
-                a.acceptedDeadline
+                a.reservationId,
+                j.revision,
+                j.status,
+                j.resultCommitment,
+                j.verificationRef,
+                j.settlementRef
             )
         );
 
         capacity.expire(a.reservationId, expiryRef);
         jobs.recordRunningExpiry(jobId, expectedJobRevision, expiryRef);
-
         a.closedAt = uint64(block.timestamp);
         a.transitionRef = expiryRef;
         a.status = AttemptStatus.EXPIRED;

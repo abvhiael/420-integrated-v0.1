@@ -764,4 +764,65 @@ contract ComputeJobWorkerSnapshotEvidence420Test {
         require(jobs.job(thirdJob).status == ComputeJobRegistry420.Status.ACCEPTED, "failed reserve mutated job");
     }
 
+
+    function testCapacityCountersAreIsolatedByWorkerAndSharedByResource() public {
+        _assign(_emptyRefs());
+
+        bytes32 secondWorker = _registerWorker();
+        vm.prank(OPERATOR);
+        workers.activate(secondWorker);
+
+        bytes32 secondJob = _acceptedJob(keccak256("worker-isolation"));
+        _assignJob(secondJob, secondWorker, EXEC_KEY, _emptyRefs());
+
+        require(capacity.liveResourceUnits(resourceId) == 2, "resource aggregate not shared");
+        require(capacity.liveWorkerUnits(workerId) == 1, "worker one counter contaminated");
+        require(capacity.liveWorkerUnits(secondWorker) == 1, "worker two counter wrong");
+    }
+
+    function testCrossRevisionAggregatePreventsCapacityRecreation() public {
+        bytes32 assignmentRef = _assign(_emptyRefs());
+        ComputeJobWorkerSnapshotEvidence420.Assignment memory oldA =
+            workerEvidence.getAssignment(assignmentRef);
+
+        vm.prank(OPERATOR);
+        resources.update(
+            resourceId,
+            HARDWARE,
+            RUNTIME,
+            keccak256("resource-capacity-v2"),
+            1
+        );
+        vm.prank(OPERATOR);
+        resources.activate(resourceId);
+
+        vm.prank(OPERATOR);
+        workers.refreshProfile(workerId, keccak256("worker-capacity-v2"), bytes32(0));
+        vm.prank(OPERATOR);
+        workers.activate(workerId);
+
+        bytes32 secondJob = _acceptedJob(keccak256("cross-revision-capacity"));
+        uint64 newWorkerRevision = workers.worker(workerId).revision;
+        bytes32 digest = workerEvidence.assignmentExecutionDigest(
+            secondJob, workerId, newWorkerRevision, 4, _emptyRefs()
+        );
+        bytes memory signature = _signExecution(EXEC_KEY, digest);
+
+        vm.prank(RELAYER);
+        (bool ok,) = address(workerEvidence).call(
+            abi.encodeCall(
+                workerEvidence.acceptAssignment,
+                (secondJob, workerId, newWorkerRevision, uint64(4), _emptyRefs(), signature)
+            )
+        );
+
+        require(!ok, "resource revision recreated occupied capacity");
+        require(capacity.liveResourceUnits(resourceId) == 1, "aggregate old reservation lost");
+        require(
+            capacity.liveResourceRevisionUnits(resourceId, oldA.resourceRevision) == 1,
+            "old revision counter lost"
+        );
+        require(workerEvidence.assignmentForJob(secondJob) == bytes32(0), "cross-revision overbook assigned");
+    }
+
 }

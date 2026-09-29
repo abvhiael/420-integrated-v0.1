@@ -2,6 +2,7 @@
 pragma solidity ^0.8.24;
 
 import "../src/compute/ComputeWorkerTrust420.sol";
+import "./helpers/ComputeWorkerCapabilityMock420.sol";
 
 interface VmWorkerTrust420 {
     function addr(uint256 privateKey) external returns (address);
@@ -73,7 +74,11 @@ contract ComputeWorkerTrust420Test {
         providers = new ComputeProviderRegistry420(GOV);
         nodes = new ComputeNodeRegistry420(address(providers), GOV);
         resources = new ComputeResourceRegistry420(address(nodes), GOV);
-        workers = new ComputeWorkerRegistry420(address(resources), GOV);
+        ComputeWorkerCapabilityMock420 workerCaps = new ComputeWorkerCapabilityMock420();
+        workerCaps.setAllowPrincipal(OPERATOR, true);
+        workerCaps.setAllowPrincipal(GOV, true);
+        ComputeAuthorization420 workerAuthorization = new ComputeAuthorization420(address(workerCaps));
+        workers = new ComputeWorkerRegistry420(address(resources), address(workerAuthorization), GOV);
         trust = new MockTrust420();
         workerTrust = new ComputeWorkerTrust420(address(workers), address(trust), GOV);
 

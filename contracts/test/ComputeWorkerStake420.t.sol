@@ -2,6 +2,7 @@
 pragma solidity ^0.8.24;
 
 import "../src/compute/ComputeWorkerStake420.sol";
+import "./helpers/ComputeWorkerCapabilityMock420.sol";
 
 interface VmWorkerStake420 {
     function addr(uint256 privateKey) external returns (address);
@@ -80,7 +81,11 @@ contract ComputeWorkerStake420Test {
         providers = new ComputeProviderRegistry420(GOV);
         nodes = new ComputeNodeRegistry420(address(providers), GOV);
         resources = new ComputeResourceRegistry420(address(nodes), GOV);
-        workers = new ComputeWorkerRegistry420(address(resources), GOV);
+        ComputeWorkerCapabilityMock420 workerCaps = new ComputeWorkerCapabilityMock420();
+        workerCaps.setAllowPrincipal(OPERATOR, true);
+        workerCaps.setAllowPrincipal(GOV, true);
+        ComputeAuthorization420 workerAuthorization = new ComputeAuthorization420(address(workerCaps));
+        workers = new ComputeWorkerRegistry420(address(resources), address(workerAuthorization), GOV);
         workerStake = new ComputeWorkerStake420(address(workers), GOV);
         source = new MockComputeStakeSource420();
         validatorStakeLike = new WrongStakeSurface420();

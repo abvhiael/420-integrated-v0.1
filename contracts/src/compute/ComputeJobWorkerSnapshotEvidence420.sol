@@ -61,6 +61,10 @@ contract ComputeJobWorkerSnapshotEvidence420 is IComputeJobWorkerEvidence420 {
         keccak256("420/COMPUTE/WORKER_EXECUTION_RESULT/V1");
     bytes32 public constant CAPACITY_TRANSITION_DOMAIN_V1 =
         keccak256("420/COMPUTE/WORKER_CAPACITY_TRANSITION/V1");
+    bytes32 public constant ATTEMPT_TRANSITION_DOMAIN_V1 =
+        keccak256("420/COMPUTE/WORKER_ATTEMPT_TRANSITION/V1");
+    bytes32 public constant ACCEPTED_CONSTRAINT_DOMAIN_V1 =
+        keccak256("420/COMPUTE/WORKER_ACCEPTED_CONSTRAINT/V1");
 
     struct AdmissionRefs {
         bytes32 capabilityPolicyId;
@@ -70,6 +74,8 @@ contract ComputeJobWorkerSnapshotEvidence420 is IComputeJobWorkerEvidence420 {
         bytes32 stakePolicyId;
         bytes32 stakeReference;
     }
+
+    enum AttemptStatus { NONE, ACTIVE, RESULT_COMMITTED, FAILED, CANCELLED, EXPIRED }
 
     struct Assignment {
         bytes32 jobId;
@@ -89,7 +95,16 @@ contract ComputeJobWorkerSnapshotEvidence420 is IComputeJobWorkerEvidence420 {
         AdmissionRefs admission;
         bytes32 snapshotCommitment;
         bytes32 reservationId;
+        bytes32 rootAssignmentRef;
+        bytes32 previousAttemptRef;
+        bytes32 constraintCommitment;
         uint64 attempt;
+        uint64 acceptedDeadline;
+        uint64 openedAt;
+        uint64 closedAt;
+        uint64 resultCommittedAt;
+        bytes32 transitionRef;
+        AttemptStatus status;
         bytes32 resultCommitment;
         bytes32 receiptHash;
         bool exists;
@@ -106,7 +121,11 @@ contract ComputeJobWorkerSnapshotEvidence420 is IComputeJobWorkerEvidence420 {
     address public immutable bindingAdmin;
 
     mapping(bytes32 => Assignment) private _assignments;
+    /// @notice Latest attempt reference for the job.
     mapping(bytes32 => bytes32) public assignmentForJob;
+    /// @notice Immutable first assignment bound into ComputeJobRegistry420.
+    mapping(bytes32 => bytes32) public rootAssignmentForJob;
+    mapping(bytes32 => uint64) public attemptCount;
     mapping(bytes32 => bool) public usedExecutionAuthorization;
 
     error InvalidEvidence();
@@ -123,6 +142,14 @@ contract ComputeJobWorkerSnapshotEvidence420 is IComputeJobWorkerEvidence420 {
         bytes32 indexed jobId,
         bytes32 indexed assignmentRef,
         bytes32 resultCommitment
+    );
+    event WorkerAttemptTransition(
+        bytes32 indexed jobId,
+        bytes32 indexed assignmentRef,
+        uint64 indexed attempt,
+        AttemptStatus previous,
+        AttemptStatus current,
+        bytes32 transitionRef
     );
 
     constructor(
@@ -174,7 +201,7 @@ contract ComputeJobWorkerSnapshotEvidence420 is IComputeJobWorkerEvidence420 {
         AdmissionRefs calldata refs,
         bytes calldata executionSignature
     ) external returns (bytes32 assignmentRef) {
-        if (address(jobs) == address(0) || assignmentForJob[jobId] != bytes32(0)) {
+        if (address(jobs) == address(0) || rootAssignmentForJob[jobId] != bytes32(0)) {
             revert InvalidEvidence();
         }
 
@@ -185,26 +212,13 @@ contract ComputeJobWorkerSnapshotEvidence420 is IComputeJobWorkerEvidence420 {
                 || j.matchId == bytes32(0)
                 || j.acceptanceRef == bytes32(0)
                 || j.deadline <= block.timestamp
-                || !workers.isEligible(workerId, workerRevision)
         ) revert InvalidEvidence();
 
-        ComputeWorkerRegistry420.Worker memory w = workers.revision(workerId, workerRevision);
-
-        if (!matches.authorizedResource(jobId, j.matchId, j.acceptanceRef, w.resourceId, w.operator)) {
-            revert Unauthorized();
-        }
-        if (
-            !authorization.isAuthorized(
-                w.operator,
-                authorization.ACTION_EXECUTE_ATTEMPT(),
-                authorization.scopeJob(jobId),
-                0
-            )
-        ) revert Unauthorized();
-
-        _requireAdmission(workerId, workerRevision, w, refs);
+        ComputeWorkerRegistry420.Worker memory w =
+            _validatedWorker(jobId, j, workerId, workerRevision, refs);
 
         uint64 attempt = 1;
+        bytes32 constraintCommitment = _acceptedConstraintCommitment(jobId, j);
         bytes32 snapshotCommitment = _snapshotCommitment(jobId, j, workerId, workerRevision, w, refs);
         bytes32 executionDigest = _assignmentExecutionDigest(
             jobId,
@@ -234,8 +248,6 @@ contract ComputeJobWorkerSnapshotEvidence420 is IComputeJobWorkerEvidence420 {
             )
         );
 
-        // Capacity reservation is part of the same transaction as canonical assignment.
-        // Any later failure (including JobRegistry transition failure) reverts the reservation and counters.
         bytes32 reservationId = capacity.reserve(
             jobId,
             assignmentRef,
@@ -265,14 +277,149 @@ contract ComputeJobWorkerSnapshotEvidence420 is IComputeJobWorkerEvidence420 {
             admission: refs,
             snapshotCommitment: snapshotCommitment,
             reservationId: reservationId,
+            rootAssignmentRef: assignmentRef,
+            previousAttemptRef: bytes32(0),
+            constraintCommitment: constraintCommitment,
             attempt: attempt,
+            acceptedDeadline: j.deadline,
+            openedAt: uint64(block.timestamp),
+            closedAt: 0,
+            resultCommittedAt: 0,
+            transitionRef: bytes32(0),
+            status: AttemptStatus.ACTIVE,
+            resultCommitment: bytes32(0),
+            receiptHash: bytes32(0),
+            exists: true
+        });
+        rootAssignmentForJob[jobId] = assignmentRef;
+        assignmentForJob[jobId] = assignmentRef;
+        attemptCount[jobId] = attempt;
+
+        jobs.assignWorker(jobId, expectedJobRevision, w.operator, assignmentRef);
+
+        emit WorkerSnapshotAssigned(
+            jobId,
+            assignmentRef,
+            workerId,
+            workerRevision,
+            snapshotCommitment
+        );
+    }
+
+    /// @notice Starts a new accepted attempt after a signed failure/cancellation of the prior attempt.
+    /// @dev The canonical job remains RUNNING and keeps its immutable root assignment. Retry admission
+    ///      rechecks live worker/admission state while preserving the original accepted job/match constraints.
+    function retryAssignment(
+        bytes32 jobId,
+        bytes32 workerId,
+        uint64 workerRevision,
+        uint64 expectedJobRevision,
+        AdmissionRefs calldata refs,
+        bytes calldata executionSignature
+    ) external returns (bytes32 assignmentRef) {
+        bytes32 rootRef = rootAssignmentForJob[jobId];
+        bytes32 priorRef = assignmentForJob[jobId];
+        if (address(jobs) == address(0) || rootRef == bytes32(0) || priorRef == bytes32(0)) {
+            revert InvalidEvidence();
+        }
+
+        Assignment storage root = _assignments[rootRef];
+        Assignment storage prior = _assignments[priorRef];
+        ComputeJobRegistry420.Job memory j = jobs.job(jobId);
+        if (
+            !root.exists
+                || !prior.exists
+                || (prior.status != AttemptStatus.FAILED && prior.status != AttemptStatus.CANCELLED)
+                || capacity.isLive(prior.reservationId)
+                || j.status != ComputeJobRegistry420.Status.RUNNING
+                || j.revision != expectedJobRevision
+                || j.assignmentRef != rootRef
+                || j.deadline <= block.timestamp
+                || _acceptedConstraintCommitment(jobId, j) != root.constraintCommitment
+                || !_samePolicyRequirements(root.admission, refs)
+        ) revert InvalidEvidence();
+
+        ComputeWorkerRegistry420.Worker memory w =
+            _validatedWorker(jobId, j, workerId, workerRevision, refs);
+
+        uint64 attempt = prior.attempt + 1;
+        if (attempt == 0 || attempt != attemptCount[jobId] + 1) revert InvalidEvidence();
+
+        bytes32 snapshotCommitment = _snapshotCommitment(jobId, j, workerId, workerRevision, w, refs);
+        bytes32 executionDigest = _assignmentExecutionDigest(
+            jobId,
+            j,
+            workerId,
+            workerRevision,
+            w,
+            expectedJobRevision,
+            attempt,
+            snapshotCommitment
+        );
+        if (
+            usedExecutionAuthorization[executionDigest]
+                || ECDSA420.tryRecover(executionDigest, executionSignature) != w.executionSigner
+        ) revert Unauthorized();
+        usedExecutionAuthorization[executionDigest] = true;
+
+        assignmentRef = keccak256(
+            abi.encode(
+                ASSIGNMENT_DOMAIN,
+                block.chainid,
+                address(this),
+                jobId,
+                expectedJobRevision,
+                attempt,
+                snapshotCommitment
+            )
+        );
+        if (_assignments[assignmentRef].exists) revert InvalidEvidence();
+
+        bytes32 reservationId = capacity.reserve(
+            jobId,
+            assignmentRef,
+            workerId,
+            workerRevision,
+            w.resourceId,
+            w.resourceRevision,
+            expectedJobRevision,
+            j.deadline
+        );
+
+        _assignments[assignmentRef] = Assignment({
+            jobId: jobId,
+            matchId: root.matchId,
+            acceptanceRef: root.acceptanceRef,
+            workerId: workerId,
+            workerRevision: workerRevision,
+            providerId: w.providerId,
+            nodeId: w.nodeId,
+            resourceId: w.resourceId,
+            resourceRevision: w.resourceRevision,
+            operator: w.operator,
+            executionSigner: w.executionSigner,
+            executionKeyCommitment: w.executionKeyCommitment,
+            capabilityProfileHash: w.capabilityProfileHash,
+            jurisdictionHash: w.jurisdictionHash,
+            admission: refs,
+            snapshotCommitment: snapshotCommitment,
+            reservationId: reservationId,
+            rootAssignmentRef: rootRef,
+            previousAttemptRef: priorRef,
+            constraintCommitment: root.constraintCommitment,
+            attempt: attempt,
+            acceptedDeadline: root.acceptedDeadline,
+            openedAt: uint64(block.timestamp),
+            closedAt: 0,
+            resultCommittedAt: 0,
+            transitionRef: bytes32(0),
+            status: AttemptStatus.ACTIVE,
             resultCommitment: bytes32(0),
             receiptHash: bytes32(0),
             exists: true
         });
         assignmentForJob[jobId] = assignmentRef;
-
-        jobs.assignWorker(jobId, expectedJobRevision, w.operator, assignmentRef);
+        attemptCount[jobId] = attempt;
 
         emit WorkerSnapshotAssigned(
             jobId,
@@ -295,7 +442,10 @@ contract ComputeJobWorkerSnapshotEvidence420 is IComputeJobWorkerEvidence420 {
             && a.matchId == matchId
             && a.operator == worker
             && a.attempt == 1
+            && a.status == AttemptStatus.ACTIVE
+            && a.rootAssignmentRef == assignmentRef
             && a.snapshotCommitment != bytes32(0)
+            && rootAssignmentForJob[jobId] == assignmentRef
             && assignmentForJob[jobId] == assignmentRef;
     }
 
@@ -314,11 +464,13 @@ contract ComputeJobWorkerSnapshotEvidence420 is IComputeJobWorkerEvidence420 {
 
         if (
             !a.exists
+                || a.status != AttemptStatus.ACTIVE
                 || a.resultCommitment != bytes32(0)
                 || j.status != ComputeJobRegistry420.Status.RUNNING
-                || j.assignmentRef != assignmentRef
+                || j.assignmentRef != a.rootAssignmentRef
                 || receiptHash == bytes32(0)
                 || outputHash == bytes32(0)
+                || block.timestamp > a.acceptedDeadline
         ) revert InvalidEvidence();
 
         if (
@@ -352,6 +504,7 @@ contract ComputeJobWorkerSnapshotEvidence420 is IComputeJobWorkerEvidence420 {
                 jobId,
                 j.requestId,
                 j.manifestHash,
+                a.rootAssignmentRef,
                 assignmentRef,
                 a.snapshotCommitment,
                 a.workerId,
@@ -366,7 +519,20 @@ contract ComputeJobWorkerSnapshotEvidence420 is IComputeJobWorkerEvidence420 {
 
         a.resultCommitment = resultCommitment;
         a.receiptHash = receiptHash;
+        a.resultCommittedAt = uint64(block.timestamp);
+        a.closedAt = uint64(block.timestamp);
+        a.transitionRef = resultCommitment;
+        a.status = AttemptStatus.RESULT_COMMITTED;
+
         emit WorkerSnapshotResultCommitted(jobId, assignmentRef, resultCommitment);
+        emit WorkerAttemptTransition(
+            jobId,
+            assignmentRef,
+            a.attempt,
+            AttemptStatus.ACTIVE,
+            AttemptStatus.RESULT_COMMITTED,
+            resultCommitment
+        );
     }
 
     /// @notice Synchronizes a live capacity reservation against canonical job state.
@@ -413,7 +579,11 @@ contract ComputeJobWorkerSnapshotEvidence420 is IComputeJobWorkerEvidence420 {
 
         if (
             j.status == ComputeJobRegistry420.Status.EXPIRED
-                || (j.status == ComputeJobRegistry420.Status.RUNNING && block.timestamp > j.deadline)
+                || (
+                    j.status == ComputeJobRegistry420.Status.RUNNING
+                        && a.status == AttemptStatus.ACTIVE
+                        && block.timestamp > j.deadline
+                )
         ) {
             capacity.expire(a.reservationId, transitionRef);
             return;
@@ -444,6 +614,121 @@ contract ComputeJobWorkerSnapshotEvidence420 is IComputeJobWorkerEvidence420 {
         );
     }
 
+    function retryExecutionDigest(
+        bytes32 jobId,
+        bytes32 workerId,
+        uint64 workerRevision,
+        uint64 expectedJobRevision,
+        AdmissionRefs calldata refs
+    ) external view returns (bytes32) {
+        bytes32 rootRef = rootAssignmentForJob[jobId];
+        bytes32 priorRef = assignmentForJob[jobId];
+        Assignment storage root = _assignments[rootRef];
+        Assignment storage prior = _assignments[priorRef];
+        if (
+            !root.exists
+                || !prior.exists
+                || (prior.status != AttemptStatus.FAILED && prior.status != AttemptStatus.CANCELLED)
+                || !_samePolicyRequirements(root.admission, refs)
+        ) revert InvalidEvidence();
+
+        ComputeJobRegistry420.Job memory j = jobs.job(jobId);
+        if (
+            j.status != ComputeJobRegistry420.Status.RUNNING
+                || j.revision != expectedJobRevision
+                || j.assignmentRef != rootRef
+                || j.deadline <= block.timestamp
+                || _acceptedConstraintCommitment(jobId, j) != root.constraintCommitment
+        ) revert InvalidEvidence();
+
+        ComputeWorkerRegistry420.Worker memory w = workers.revision(workerId, workerRevision);
+        uint64 attempt = prior.attempt + 1;
+        bytes32 snapshotCommitment = _snapshotCommitment(jobId, j, workerId, workerRevision, w, refs);
+        return _assignmentExecutionDigest(
+            jobId,
+            j,
+            workerId,
+            workerRevision,
+            w,
+            expectedJobRevision,
+            attempt,
+            snapshotCommitment
+        );
+    }
+
+    function attemptTransitionDigest(
+        bytes32 jobId,
+        AttemptStatus target,
+        bytes32 evidenceRef
+    ) external view returns (bytes32) {
+        bytes32 assignmentRef = assignmentForJob[jobId];
+        Assignment storage a = _assignments[assignmentRef];
+        ComputeJobRegistry420.Job memory j = jobs.job(jobId);
+        if (
+            !a.exists
+                || a.status != AttemptStatus.ACTIVE
+                || (target != AttemptStatus.FAILED && target != AttemptStatus.CANCELLED)
+                || evidenceRef == bytes32(0)
+        ) revert InvalidEvidence();
+        return _attemptTransitionDigest(jobId, j, assignmentRef, a, target, evidenceRef);
+    }
+
+    function failAttempt(bytes32 jobId, bytes32 failureRef, bytes calldata executionSignature) external {
+        _closeAttempt(jobId, AttemptStatus.FAILED, failureRef, executionSignature);
+    }
+
+    /// @notice Cancels only the active execution attempt; it does not cancel/refund the canonical job.
+    /// A retry may follow under the unchanged accepted constraints.
+    function cancelAttempt(bytes32 jobId, bytes32 cancellationRef, bytes calldata executionSignature) external {
+        _closeAttempt(jobId, AttemptStatus.CANCELLED, cancellationRef, executionSignature);
+    }
+
+    /// @notice Permissionlessly expires the active attempt and the canonical RUNNING job after deadline.
+    function expireAttempt(bytes32 jobId, uint64 expectedJobRevision) external returns (bytes32 expiryRef) {
+        bytes32 assignmentRef = assignmentForJob[jobId];
+        Assignment storage a = _assignments[assignmentRef];
+        ComputeJobRegistry420.Job memory j = jobs.job(jobId);
+        if (
+            !a.exists
+                || a.status != AttemptStatus.ACTIVE
+                || j.status != ComputeJobRegistry420.Status.RUNNING
+                || j.revision != expectedJobRevision
+                || j.assignmentRef != a.rootAssignmentRef
+                || block.timestamp <= a.acceptedDeadline
+                || !capacity.isLive(a.reservationId)
+        ) revert InvalidEvidence();
+
+        expiryRef = keccak256(
+            abi.encode(
+                ATTEMPT_TRANSITION_DOMAIN_V1,
+                block.chainid,
+                address(this),
+                jobId,
+                a.rootAssignmentRef,
+                assignmentRef,
+                a.attempt,
+                AttemptStatus.EXPIRED,
+                expectedJobRevision,
+                a.acceptedDeadline
+            )
+        );
+
+        capacity.expire(a.reservationId, expiryRef);
+        jobs.recordRunningExpiry(jobId, expectedJobRevision, expiryRef);
+
+        a.closedAt = uint64(block.timestamp);
+        a.transitionRef = expiryRef;
+        a.status = AttemptStatus.EXPIRED;
+        emit WorkerAttemptTransition(
+            jobId,
+            assignmentRef,
+            a.attempt,
+            AttemptStatus.ACTIVE,
+            AttemptStatus.EXPIRED,
+            expiryRef
+        );
+    }
+
     function resultExecutionDigest(bytes32 jobId, bytes32 receiptHash, bytes32 outputHash)
         external
         view
@@ -461,14 +746,21 @@ contract ComputeJobWorkerSnapshotEvidence420 is IComputeJobWorkerEvidence420 {
         view
         returns (bool)
     {
-        Assignment storage a = _assignments[assignmentRef];
-        return a.exists
+        bytes32 latestRef = assignmentForJob[jobId];
+        Assignment storage root = _assignments[assignmentRef];
+        Assignment storage a = _assignments[latestRef];
+        return root.exists
+            && a.exists
+            && root.rootAssignmentRef == assignmentRef
+            && a.rootAssignmentRef == assignmentRef
             && a.jobId == jobId
-            && assignmentForJob[jobId] == assignmentRef
+            && a.status == AttemptStatus.RESULT_COMMITTED
             && a.snapshotCommitment != bytes32(0)
             && resultCommitment != bytes32(0)
             && a.resultCommitment == resultCommitment
-            && a.receiptHash != bytes32(0);
+            && a.receiptHash != bytes32(0)
+            && a.resultCommittedAt != 0
+            && a.resultCommittedAt <= a.acceptedDeadline;
     }
 
     function getAssignment(bytes32 assignmentRef) external view returns (Assignment memory a) {
@@ -518,6 +810,7 @@ contract ComputeJobWorkerSnapshotEvidence420 is IComputeJobWorkerEvidence420 {
                 jobId,
                 j.matchId,
                 j.acceptanceRef,
+                _acceptedConstraintCommitment(jobId, j),
                 workerExecutionRef,
                 admissionRef
             )
@@ -577,6 +870,151 @@ contract ComputeJobWorkerSnapshotEvidence420 is IComputeJobWorkerEvidence420 {
                 receiptHash,
                 outputHash
             )
+        );
+    }
+
+    function _acceptedConstraintCommitment(bytes32 jobId, ComputeJobRegistry420.Job memory j)
+        private
+        view
+        returns (bytes32)
+    {
+        return keccak256(
+            abi.encode(
+                ACCEPTED_CONSTRAINT_DOMAIN_V1,
+                block.chainid,
+                address(this),
+                jobId,
+                j.owner,
+                j.requestId,
+                j.requestCommitment,
+                j.manifestHash,
+                j.workloadType,
+                j.inputCommitment,
+                j.outputSchemaCommitment,
+                j.fundingRef,
+                j.matchId,
+                j.acceptanceRef,
+                j.deadline
+            )
+        );
+    }
+
+    function _validatedWorker(
+        bytes32 jobId,
+        ComputeJobRegistry420.Job memory j,
+        bytes32 workerId,
+        uint64 workerRevision,
+        AdmissionRefs calldata refs
+    ) private view returns (ComputeWorkerRegistry420.Worker memory w) {
+        if (!workers.isEligible(workerId, workerRevision)) revert InvalidEvidence();
+        w = workers.revision(workerId, workerRevision);
+        if (!matches.authorizedResource(jobId, j.matchId, j.acceptanceRef, w.resourceId, w.operator)) {
+            revert Unauthorized();
+        }
+        if (
+            !authorization.isAuthorized(
+                w.operator,
+                authorization.ACTION_EXECUTE_ATTEMPT(),
+                authorization.scopeJob(jobId),
+                0
+            )
+        ) revert Unauthorized();
+        _requireAdmission(workerId, workerRevision, w, refs);
+    }
+
+    function _samePolicyRequirements(AdmissionRefs storage original, AdmissionRefs calldata candidate)
+        private
+        view
+        returns (bool)
+    {
+        return original.capabilityPolicyId == candidate.capabilityPolicyId
+            && original.trustPolicyId == candidate.trustPolicyId
+            && original.stakePolicyId == candidate.stakePolicyId;
+    }
+
+    function _attemptTransitionDigest(
+        bytes32 jobId,
+        ComputeJobRegistry420.Job memory j,
+        bytes32 assignmentRef,
+        Assignment storage a,
+        AttemptStatus target,
+        bytes32 evidenceRef
+    ) private view returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                ATTEMPT_TRANSITION_DOMAIN_V1,
+                block.chainid,
+                address(this),
+                EXECUTION_SIGNING_POLICY_V1,
+                jobId,
+                j.requestId,
+                j.manifestHash,
+                a.rootAssignmentRef,
+                assignmentRef,
+                a.constraintCommitment,
+                a.snapshotCommitment,
+                a.workerId,
+                a.workerRevision,
+                a.executionKeyCommitment,
+                a.attempt,
+                target,
+                evidenceRef
+            )
+        );
+    }
+
+    function _closeAttempt(
+        bytes32 jobId,
+        AttemptStatus target,
+        bytes32 evidenceRef,
+        bytes calldata executionSignature
+    ) private {
+        bytes32 assignmentRef = assignmentForJob[jobId];
+        Assignment storage a = _assignments[assignmentRef];
+        ComputeJobRegistry420.Job memory j = jobs.job(jobId);
+        if (
+            !a.exists
+                || a.status != AttemptStatus.ACTIVE
+                || (target != AttemptStatus.FAILED && target != AttemptStatus.CANCELLED)
+                || evidenceRef == bytes32(0)
+                || j.status != ComputeJobRegistry420.Status.RUNNING
+                || j.assignmentRef != a.rootAssignmentRef
+                || block.timestamp > a.acceptedDeadline
+                || !capacity.isLive(a.reservationId)
+        ) revert InvalidEvidence();
+
+        if (
+            !authorization.isAuthorized(
+                a.operator,
+                authorization.ACTION_EXECUTE_ATTEMPT(),
+                authorization.scopeJob(jobId),
+                0
+            )
+        ) revert Unauthorized();
+
+        bytes32 digest = _attemptTransitionDigest(jobId, j, assignmentRef, a, target, evidenceRef);
+        if (
+            usedExecutionAuthorization[digest]
+                || ECDSA420.tryRecover(digest, executionSignature) != a.executionSigner
+        ) revert Unauthorized();
+        usedExecutionAuthorization[digest] = true;
+
+        if (target == AttemptStatus.FAILED) {
+            capacity.fail(a.reservationId, digest);
+        } else {
+            capacity.release(a.reservationId, digest);
+        }
+
+        a.closedAt = uint64(block.timestamp);
+        a.transitionRef = evidenceRef;
+        a.status = target;
+        emit WorkerAttemptTransition(
+            jobId,
+            assignmentRef,
+            a.attempt,
+            AttemptStatus.ACTIVE,
+            target,
+            evidenceRef
         );
     }
 

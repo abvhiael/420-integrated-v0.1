@@ -187,6 +187,7 @@ contract ComputeWorkerCanonicalWiring420Test {
                     address(attestation),
                     address(workerTrust),
                     address(workerStake),
+                    address(capacity),
                     address(0xBAD),
                     h
                 )

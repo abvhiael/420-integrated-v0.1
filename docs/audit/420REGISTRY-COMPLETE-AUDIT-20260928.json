@@ -38,14 +38,14 @@
       "id": "REG-BLK-001",
       "category": "code/integration",
       "severity": "release_blocking",
-      "status": "IMPLEMENTED_QUALIFICATION_PENDING",
+      "status": "CLOSED",
       "title": "Frozen Genesis Registry interface is incompatible with ProtocolRegistry runtime ABI",
       "evidence": [
         "contracts/src/interfaces/genesis/IProtocolRegistry420.sol",
         "contracts/src/apps/ProtocolRegistry.sol",
         "contracts/src/system/GenesisResidentAccess420.sol"
       ],
-      "requiredResolution": "REG-AUDIT-2 implementation is committed; exact-head build, runtime interface/integration tests, retained CI and final reconciled evidence qualification remain required before closure."
+      "requiredResolution": "Resolved by REG-AUDIT-1/2. ProtocolRegistry directly implements frozen IProtocolRegistry420 v1 and final evidence head a63023f47c992661b22b344e051455a330722e97 passed retained qualification before PR #393 merged as 6c0a70ae020bfa911c57f6148fd585c9036c5f78."
     },
     {
       "id": "REG-BLK-002",
@@ -76,13 +76,13 @@
       "id": "REG-BLK-004",
       "category": "tests/qualification",
       "severity": "release_blocking",
-      "status": "OPEN",
+      "status": "CANDIDATE_QUALIFIED_PENDING_RECONCILIATION",
       "title": "Current exact-head Registry qualification is absent",
       "evidence": [
         "contracts/test/RegistryGenesis420.t.sol",
         "contracts/config/420registry-genesis.json"
       ],
-      "requiredResolution": "Complete missing invariant/interface tests and rerun all retained gates against the final evidence-recording SHA."
+      "requiredResolution": "REG-AUDIT-3 candidate 4773f9d7cf3a60373f6b93116a6b126deaf5524b passed all retained gates, but main advanced afterward. Reconcile the evidence-bearing branch to current main and rerun the retained suite on the exact reconciled evidence head before closure."
     },
     {
       "id": "REG-BLK-005",
@@ -100,18 +100,18 @@
     }
   ],
   "invariantStatus": {
-    "REG-INV-001": "COMPLETE",
-    "REG-INV-002": "COMPLETE",
-    "REG-INV-003": "COMPLETE",
-    "REG-INV-004": "COMPLETE",
-    "REG-INV-005": "PARTIAL",
-    "REG-INV-006": "PARTIAL",
-    "REG-INV-007": "PARTIAL",
-    "REG-INV-008": "COMPLETE",
-    "REG-INV-009": "PARTIAL",
-    "REG-INV-010": "PARTIAL",
-    "REG-INV-011": "PARTIAL",
-    "REG-INV-012": "PARTIAL"
+    "REG-INV-001": "CANDIDATE_QUALIFIED_PENDING_RECONCILIATION",
+    "REG-INV-002": "CANDIDATE_QUALIFIED_PENDING_RECONCILIATION",
+    "REG-INV-003": "CANDIDATE_QUALIFIED_PENDING_RECONCILIATION",
+    "REG-INV-004": "CANDIDATE_QUALIFIED_PENDING_RECONCILIATION",
+    "REG-INV-005": "CANDIDATE_QUALIFIED_PENDING_RECONCILIATION",
+    "REG-INV-006": "CANDIDATE_QUALIFIED_PENDING_RECONCILIATION",
+    "REG-INV-007": "CANDIDATE_QUALIFIED_PENDING_RECONCILIATION",
+    "REG-INV-008": "CANDIDATE_QUALIFIED_PENDING_RECONCILIATION",
+    "REG-INV-009": "CANDIDATE_QUALIFIED_PENDING_RECONCILIATION",
+    "REG-INV-010": "CANDIDATE_QUALIFIED_PENDING_RECONCILIATION",
+    "REG-INV-011": "CANDIDATE_QUALIFIED_PENDING_RECONCILIATION",
+    "REG-INV-012": "CANDIDATE_QUALIFIED_PENDING_RECONCILIATION"
   },
   "readiness": {
     "codeComplete": false,
@@ -162,16 +162,42 @@
     },
     "REG-AUDIT-2": {
       "title": "implement and test the API reconciliation",
-      "status": "IMPLEMENTED_PENDING_EXACT_HEAD_QUALIFICATION",
+      "status": "COMPLETE",
       "record": "docs/audit/REG-AUDIT-2-API-RECONCILIATION-QUALIFICATION.json",
-      "implementation": {
-        "directProtocolRegistryInterface": true,
-        "frozenInterfaceChanged": false,
-        "adapterIntroduced": false,
-        "serviceActivityRead": "isServiceActive(bytes32)",
-        "componentActivityRead": "isActive(bytes32)"
+      "pr": 393,
+      "finalEvidenceHeadSha": "a63023f47c992661b22b344e051455a330722e97",
+      "finalEvidenceRuns": {
+        "registryDecision": 36519077950,
+        "registryApiReconciliation": 36519077956,
+        "docs": 36519077931,
+        "indexer": 36519077959,
+        "integrated": 36519077935,
+        "solidityContracts": 36519078002
       },
+      "mergeCommitSha": "6c0a70ae020bfa911c57f6148fd585c9036c5f78",
       "nextStep": "REG-AUDIT-3"
+    },
+    "REG-AUDIT-3": {
+      "title": "complete REG invariant coverage",
+      "status": "CANDIDATE_QUALIFIED_EVIDENCE_RECORDED_PENDING_RECONCILIATION",
+      "record": "docs/audit/REG-AUDIT-3-INVARIANT-COVERAGE-QUALIFICATION.json",
+      "focusedTest": "contracts/test/RegistryInvariantCoverage420.t.sol",
+      "namedInvariantEvidence": "REG-INV-001..012",
+      "nextStep": "REG-AUDIT-4",
+      "candidateQualifiedSha": "4773f9d7cf3a60373f6b93116a6b126deaf5524b",
+      "candidateBaseSha": "6c0a70ae020bfa911c57f6148fd585c9036c5f78",
+      "candidateRuns": {
+        "registryDecision": 36525288252,
+        "registryApiReconciliation": 36525288318,
+        "registryInvariantCoverage": 36525288262,
+        "solidityContracts": 36525288319,
+        "integrated": 36525288284,
+        "docs": 36525288298,
+        "indexer": 36525288205
+      },
+      "currentMainObservedAfterCandidate": "3758148416e394ad3da0572ef3b39861764a9141",
+      "finalReconciledEvidenceHeadSha": null,
+      "finalRuns": null
     }
   }
 }

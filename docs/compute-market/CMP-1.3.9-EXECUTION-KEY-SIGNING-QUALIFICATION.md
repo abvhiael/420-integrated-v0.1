@@ -1,6 +1,6 @@
 # CMP-1.3.9 — Independent execution-key authorization and replay-safe worker signing
 
-Status: **CANDIDATE GREEN — evidence-recording head requalification pending**
+Status: **COMPLETE — final closeout head requalification pending**
 
 ## Canonical definition
 
@@ -237,7 +237,17 @@ The candidate results above qualify only `b36a713e4ebb8dc2a73fa9f59bbde7aaccaa2b
 
 ## Completion
 
-**NOT YET COMPLETE** until the exact evidence-recording head passes the retained qualification suite and every canonical exit criterion is individually verified.
+The reconciled evidence-recording head `e9a26ac28cace727e191abca8bf417ba8e7e657a` passed the full retained suite:
+
+- 420Docs Qualification #3270 — **SUCCESS**, run ID `36507127784`.
+- 420 Integrated Qualification #5887 — **SUCCESS**, run ID `36507127787`.
+- Solidity Contracts #3266 — **SUCCESS**, run ID `36507127791`, all 16/16 `pr-shards` successful; aggregate `foundry` wrapper skipped by workflow design and not counted as a passing gate.
+
+Every canonical CMP-1.3.9 exit criterion is satisfied on that exact evidence tree, current main remained `ac1b9c5a5d7e1b031ea63c210b8c38ac3abee6df`, and PR #392 remained 0 commits behind main and mergeable.
+
+## Final completion
+
+**COMPLETE**, subject only to requalifying this documentation-only closeout commit as the exact branch point for CMP-1.3.10. No implementation or authorization semantics are changed by this closeout text.
 
 
 ## Current-main reconciliation evidence

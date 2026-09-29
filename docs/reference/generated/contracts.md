@@ -24,7 +24,7 @@ This page is generated from the currently checked-in contract catalogue plus mat
 - Version: `1.0.0`
 - Catalogue provenance: `genesis`
 - Deployment block: `0`
-- Catalogue address: `0x0000000000000000000000000000000000000420` (**local example only**)
+- Catalogue address: `0x0000000000000000000000000000000000000434` (**local example only**)
 - Solidity source: `contracts/src/apps/ProtocolRegistry.sol`
 - Declared artifact: `contracts/out/ProtocolRegistry.sol/ProtocolRegistry.json` (missing)
 - Declared interface: `contracts/src/interfaces/IProtocolRegistry.sol` (missing)

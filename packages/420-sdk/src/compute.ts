@@ -14,7 +14,7 @@ export const COMPUTE_WORKER_READ_MODEL_METHODS_420 = Object.freeze([
   'capabilityCpuClasses(bytes32,uint64)',
   'capabilityGpuClasses(bytes32,uint64)',
   'capabilitySoftware(bytes32,uint64)',
-  'eligibility(bytes32,uint64,(bytes32,bytes32,bytes32,bytes32,bytes32,uint64,uint64,uint64,uint64,bytes32,bytes32,bytes32),bool,bytes32,bytes32,bytes32,bool,bytes32,bytes32,bool,bytes32)',
+  'eligibility((bytes32,uint64,(bytes32,bytes32,bytes32,bytes32,bytes32,uint64,uint64,uint64,uint64,bytes32,bytes32,bytes32),bool,bytes32,bytes32,bytes32,bool,bytes32,bytes32,bool,bytes32))',
   'attestationCore(bytes32)',
   'attestationProvenance(bytes32)',
   'trustReference(bytes32)',

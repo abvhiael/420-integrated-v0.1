@@ -32,7 +32,7 @@ jobs:
           node-version: '22'
       - name: Verify branded Explorer assets
         run: |
-          test -s explorer/web/static/brand-mark.svg
+          test -s explorer/web/static/420explorer-logo.jpg
           grep -q '420 INTEGRATED' explorer/web/static/index.html
           grep -q '#273B9C' explorer/web/static/app.css
           grep -q '#45B84A' explorer/web/static/app.css

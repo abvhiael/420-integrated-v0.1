@@ -1,7 +1,7 @@
 # REG-AUDIT-2 — implement and test the API reconciliation
 
 **Canonical roadmap source:** `docs/audit/420REGISTRY-COMPLETE-AUDIT-20260928.md`  
-**Status:** IMPLEMENTED — exact-head qualification pending final reconciled evidence head  
+**Status:** EVIDENCE RECORDED — final evidence-head requalification pending  
 **PR:** #393
 
 ## Original definition
@@ -119,15 +119,18 @@ REG-AUDIT-2 does not close:
 
 ## Final qualification ledger
 
-This section must be filled with the exact **final evidence-recording SHA** and successful workflow run IDs after reconciliation with current `main`. A previous SHA may not qualify a later evidence commit.
+Candidate exact-head evidence recorded before the evidence-recording commit:
 
-- Exact qualified SHA: **PENDING**
-- Main/base SHA: **PENDING**
-- Solidity Contracts: **PENDING**
-- 420Registry REG-AUDIT-1: **PENDING**
-- 420Registry REG-AUDIT-2: **PENDING**
-- 420 Integrated Qualification: **PENDING**
-- 420Docs Qualification: **PENDING**
+- Candidate qualified SHA: `e7977f52ace126a66624a01ca29c5768252cdc83`
+- Main/base SHA at candidate qualification: `a29fa8bc920ae6cddd1b10be1a2a32dfe8f70bb2`
+- Solidity Contracts: **PASS** — run `36516604212`
+- 420Registry REG-AUDIT-1: **PASS** — run `36516604155`
+- 420Registry REG-AUDIT-2: **PASS** — run `36516604147`
+- 420 Integrated Qualification: **PASS** — run `36516604207`
+- 420Docs Qualification: **PASS** — run `36516604362`
+- 420Indexer: **PASS** — run `36516604159`
+
+Because recording this evidence creates a new commit, the resulting evidence-recording SHA must itself pass the retained qualification suite before REG-AUDIT-2 is marked COMPLETE. Final evidence-head workflow IDs are recorded durably in PR #393 after that exact head completes, avoiding recursive mutation of the qualified commit.
 
 ## Next canonical roadmap step
 

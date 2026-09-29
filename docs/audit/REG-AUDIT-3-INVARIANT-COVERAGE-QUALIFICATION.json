@@ -2,7 +2,7 @@
   "schema": "420-registry-reg-audit-3-qualification-v1",
   "step": "REG-AUDIT-3",
   "title": "complete REG invariant coverage",
-  "status": "CANDIDATE_QUALIFIED_EVIDENCE_RECORDED_PENDING_RECONCILIATION_AND_FINAL_EXACT_HEAD_QUALIFICATION",
+  "status": "COMPLETE",
   "roadmap": "docs/audit/420REGISTRY-COMPLETE-AUDIT-20260928.md",
   "implementation": {
     "canonicalIdCollisionGuard": "CanonicalServiceIdImmutable",
@@ -39,8 +39,8 @@
     "unauthorizedDeprecation": "IMPLEMENTED",
     "canonicalIdDescriptorCollision": "IMPLEMENTED",
     "registrationNonAuthorityRealResident": "IMPLEMENTED",
-    "allTwelveNamedExecutableEvidence": "CANDIDATE_QUALIFIED",
-    "finalExactHeadQualification": "PENDING_RECONCILIATION_AND_EVIDENCE_HEAD_REQUALIFICATION"
+    "allTwelveNamedExecutableEvidence": "COMPLETE",
+    "finalExactHeadQualification": "COMPLETE"
   },
   "evidence": {
     "candidateQualifiedSha": "4773f9d7cf3a60373f6b93116a6b126deaf5524b",
@@ -55,17 +55,18 @@
       "indexer": 36525288205
     },
     "currentMainObservedAfterCandidate": "3758148416e394ad3da0572ef3b39861764a9141",
-    "finalReconciledEvidenceHeadSha": null,
-    "finalReconciledMainBaseSha": null,
+    "finalReconciledEvidenceHeadSha": "942d2ac7f2cc3f37262147b105812db02965f296",
+    "finalReconciledMainBaseSha": "3758148416e394ad3da0572ef3b39861764a9141",
     "finalRuns": {
-      "regAudit1": null,
-      "regAudit2": null,
-      "regAudit3": null,
-      "solidityContracts": null,
-      "integrated": null,
-      "docs": null,
-      "indexer": null
-    }
+      "regAudit1": 36601685224,
+      "regAudit2": 36601685516,
+      "regAudit3": 36601685085,
+      "solidityContracts": 36601685167,
+      "integrated": 36601685108,
+      "docs": 36601685032,
+      "indexer": 36601685162
+    },
+    "note": "The COMPLETE record is committed after qualification of 942d2ac7f2cc3f37262147b105812db02965f296. Because recording completion mutates the branch head, the retained suite is rerun on the resulting evidence-recording head; those rerun IDs are retained in PR metadata to avoid an infinite evidence-commit recursion."
   },
   "limitations": [
     "Genesis address reconciliation remains REG-AUDIT-4.",

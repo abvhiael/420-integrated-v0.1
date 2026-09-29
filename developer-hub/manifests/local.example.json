@@ -11,8 +11,12 @@
     "decimals": 18
   },
   "rpc": {
-    "http": ["http://127.0.0.1:8545"],
-    "websocket": ["ws://127.0.0.1:8545"]
+    "http": [
+      "http://127.0.0.1:8545"
+    ],
+    "websocket": [
+      "ws://127.0.0.1:8545"
+    ]
   },
   "services": {
     "explorer": "http://127.0.0.1:4201",
@@ -23,7 +27,7 @@
   },
   "contracts": {
     "Registry420": {
-      "address": "0x0000000000000000000000000000000000000420",
+      "address": "0x0000000000000000000000000000000000000434",
       "source": "deployment-manifest",
       "version": "local-example"
     }

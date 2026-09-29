@@ -1,0 +1,54 @@
+{
+  "schema": "420-compute-worker-read-model-v1",
+  "descriptorVersion": 1,
+  "contractName": "ComputeWorkerReadModel420",
+  "protocol": "420Compute",
+  "protocolVersion": 1,
+  "deploymentAddress": null,
+  "deploymentAuthority": "repository_descriptor_only_live_publication_deferred_to_CMP-1.3.15",
+  "callerPrivilegesRequired": false,
+  "consumers": [
+    "matcher",
+    "worker-agent",
+    "indexer",
+    "application"
+  ],
+  "methods": [
+    "schemaVersion()",
+    "components()",
+    "domains()",
+    "currentWorker(bytes32)",
+    "workerRevision(bytes32,uint64)",
+    "capabilityProfile(bytes32,uint64)",
+    "capabilityArchitectures(bytes32,uint64)",
+    "capabilityCpuClasses(bytes32,uint64)",
+    "capabilityGpuClasses(bytes32,uint64)",
+    "capabilitySoftware(bytes32,uint64)",
+    "eligibility(bytes32,uint64,(bytes32,bytes32,bytes32,bytes32,bytes32,uint64,uint64,uint64,uint64,bytes32,bytes32,bytes32),bool,bytes32,bytes32,bytes32,bool,bytes32,bytes32,bool,bytes32)",
+    "attestationCore(bytes32)",
+    "attestationProvenance(bytes32)",
+    "trustReference(bytes32)",
+    "stakeReference(bytes32)",
+    "capacityUsage(bytes32,uint64,bytes32,uint64)",
+    "reservationForJob(bytes32)",
+    "attemptIndex(bytes32)",
+    "assignment(bytes32)",
+    "attemptLifecycle(bytes32)"
+  ],
+  "domainSources": {
+    "workerIdentity": "ComputeWorkerRegistry420.IDENTITY_DOMAIN_V1",
+    "capabilityProfile": "ComputeWorkerCapabilityProfile420.PROFILE_DOMAIN_V1",
+    "attestation": "ComputeWorkerAttestation420.ATTESTATION_DOMAIN_V1",
+    "provenance": "ComputeWorkerAttestation420.PROVENANCE_DOMAIN_V1",
+    "trustReference": "ComputeWorkerTrust420.REFERENCE_DOMAIN_V1",
+    "stakeReference": "ComputeWorkerStake420.REFERENCE_DOMAIN_V1",
+    "capacityReservation": "ComputeWorkerCapacityReservation420.RESERVATION_DOMAIN_V1",
+    "executionAccept": "ComputeJobWorkerSnapshotEvidence420.ACCEPT_EXECUTION_DOMAIN_V1",
+    "executionResult": "ComputeJobWorkerSnapshotEvidence420.RESULT_EXECUTION_DOMAIN_V1",
+    "attemptTransition": "ComputeJobWorkerSnapshotEvidence420.ATTEMPT_TRANSITION_DOMAIN_V1",
+    "acceptedConstraint": "ComputeJobWorkerSnapshotEvidence420.ACCEPTED_CONSTRAINT_DOMAIN_V1"
+  },
+  "explicitNonAiCoverage": [
+    "VIDEO_TRANSCODE"
+  ]
+}

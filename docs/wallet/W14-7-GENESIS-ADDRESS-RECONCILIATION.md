@@ -1,12 +1,12 @@
 # W14.7 — Genesis namespace and Wallet authority reconciliation
 
-Status: IN PROGRESS — no address rebinding or verified deployment is claimed by this document.
+Status: **SUPERSEDED HISTORICAL PLANNING RECORD.** No address rebinding or verified deployment is claimed by this document. REG-AUDIT-4 completed the repository address-policy reconciliation in `contracts/config/genesis-address-namespace.json`: the frozen Step 6.2 map is preserved and ProtocolRegistry remains at `0x0000000000000000000000000000000000000434`. The provisional `0x0448` relocation below is retired and non-authoritative.
 
 ## Authority decision
 
 Preserve the frozen system allocation at 0x0420–0x043c, including ConsensusSystemCall420 at 0x043c. Do not silently replace consensus/economics contract code at those addresses. The swap/bridge candidate BridgeAssetRegistry at 0x043c must be reassigned or explicitly removed from the candidate map. The existing canonical application-anchor allocation at 0x0420–0x043b is not a second valid Genesis namespace: many addresses already belong to different frozen system contracts.
 
-## Proposed disjoint allocation (NOT YET AUTHORIZED FOR DEPLOYMENT)
+## Superseded proposed disjoint allocation (HISTORICAL — NOT AUTHORIZED)
 
 - Frozen core predeploys: 0x0420–0x043c, unchanged.
 - Existing bridge candidates: 0x043d–0x0444, pending proof that each is available; the conflicting 0x043c bridge candidate must be reconciled separately.

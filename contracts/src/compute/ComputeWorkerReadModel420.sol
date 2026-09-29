@@ -57,6 +57,21 @@ contract ComputeWorkerReadModel420 is I420System {
         uint64 attemptCount;
     }
 
+    struct EligibilityQuery {
+        bytes32 workerId;
+        uint64 workerRevision;
+        ComputeWorkerCapabilityProfile420.Requirements requirements;
+        bool requireTrustedAttestation;
+        bytes32 attestationPolicyId;
+        bytes32 attestationId;
+        bytes32 trustPolicyId;
+        bool requireTrustReference;
+        bytes32 trustReferenceId;
+        bytes32 stakePolicyId;
+        bool requireStakeReference;
+        bytes32 stakeReferenceId;
+    }
+
     struct EligibilityView {
         bool workerEligible;
         bool capabilityEligible;
@@ -218,46 +233,37 @@ contract ComputeWorkerReadModel420 is I420System {
         return profiles.softwareCapabilities(workerId, revision);
     }
 
-    function eligibility(
-        bytes32 workerId,
-        uint64 workerRevision_,
-        ComputeWorkerCapabilityProfile420.Requirements calldata requirements,
-        bool requireTrustedAttestation,
-        bytes32 attestationPolicyId,
-        bytes32 attestationId,
-        bytes32 trustPolicyId,
-        bool requireTrustReference,
-        bytes32 trustReferenceId,
-        bytes32 stakePolicyId,
-        bool requireStakeReference,
-        bytes32 stakeReferenceId
-    ) external view returns (EligibilityView memory out) {
-        out.workerEligible = workers.isEligible(workerId, workerRevision_);
+    function eligibility(EligibilityQuery calldata q)
+        external
+        view
+        returns (EligibilityView memory out)
+    {
+        out.workerEligible = workers.isEligible(q.workerId, q.workerRevision);
         out.capabilityEligible = capabilityEligibility.isEligible(
-            workerId,
-            workerRevision_,
-            requirements,
-            requireTrustedAttestation,
-            attestationPolicyId,
-            attestationId
+            q.workerId,
+            q.workerRevision,
+            q.requirements,
+            q.requireTrustedAttestation,
+            q.attestationPolicyId,
+            q.attestationId
         );
-        out.trustEligible = trustPolicyId == bytes32(0)
+        out.trustEligible = q.trustPolicyId == bytes32(0)
             ? true
             : workerTrust.isEligible(
-                workerId,
-                workerRevision_,
-                trustPolicyId,
-                requireTrustReference,
-                trustReferenceId
+                q.workerId,
+                q.workerRevision,
+                q.trustPolicyId,
+                q.requireTrustReference,
+                q.trustReferenceId
             );
-        out.stakeEligible = stakePolicyId == bytes32(0)
+        out.stakeEligible = q.stakePolicyId == bytes32(0)
             ? true
             : workerStake.isEligible(
-                workerId,
-                workerRevision_,
-                stakePolicyId,
-                requireStakeReference,
-                stakeReferenceId
+                q.workerId,
+                q.workerRevision,
+                q.stakePolicyId,
+                q.requireStakeReference,
+                q.stakeReferenceId
             );
     }
 

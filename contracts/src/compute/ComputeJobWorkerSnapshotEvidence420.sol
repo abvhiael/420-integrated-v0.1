@@ -5,6 +5,7 @@ import "./ComputeJobRegistry420.sol";
 import "./IComputeAcceptedMatchRuntime420.sol";
 import "./ComputeAuthorization420.sol";
 import "./ComputeWorkerRegistry420.sol";
+import "./ComputeWorkerCapacityReservation420.sol";
 import "../accounts/ECDSA420.sol";
 
 interface IComputeWorkerAttestationAdmission420 {
@@ -58,6 +59,8 @@ contract ComputeJobWorkerSnapshotEvidence420 is IComputeJobWorkerEvidence420 {
         keccak256("420/COMPUTE/WORKER_EXECUTION_ACCEPT/V1");
     bytes32 public constant RESULT_EXECUTION_DOMAIN_V1 =
         keccak256("420/COMPUTE/WORKER_EXECUTION_RESULT/V1");
+    bytes32 public constant CAPACITY_TRANSITION_DOMAIN_V1 =
+        keccak256("420/COMPUTE/WORKER_CAPACITY_TRANSITION/V1");
 
     struct AdmissionRefs {
         bytes32 capabilityPolicyId;
@@ -85,6 +88,7 @@ contract ComputeJobWorkerSnapshotEvidence420 is IComputeJobWorkerEvidence420 {
         bytes32 jurisdictionHash;
         AdmissionRefs admission;
         bytes32 snapshotCommitment;
+        bytes32 reservationId;
         uint64 attempt;
         bytes32 resultCommitment;
         bytes32 receiptHash;
@@ -98,6 +102,7 @@ contract ComputeJobWorkerSnapshotEvidence420 is IComputeJobWorkerEvidence420 {
     IComputeWorkerAttestationAdmission420 public immutable attestation;
     IComputeWorkerTrustAdmission420 public immutable workerTrust;
     IComputeWorkerStakeAdmission420 public immutable workerStake;
+    ComputeWorkerCapacityReservation420 public immutable capacity;
     address public immutable bindingAdmin;
 
     mapping(bytes32 => Assignment) private _assignments;
@@ -126,7 +131,8 @@ contract ComputeJobWorkerSnapshotEvidence420 is IComputeJobWorkerEvidence420 {
         address workers_,
         address attestation_,
         address workerTrust_,
-        address workerStake_
+        address workerStake_,
+        address capacity_
     ) {
         if (matches_.code.length == 0 || authorization_.code.length == 0 || workers_.code.length == 0) {
             revert InvalidEvidence();
@@ -134,6 +140,7 @@ contract ComputeJobWorkerSnapshotEvidence420 is IComputeJobWorkerEvidence420 {
         if (attestation_ != address(0) && attestation_.code.length == 0) revert InvalidEvidence();
         if (workerTrust_ != address(0) && workerTrust_.code.length == 0) revert InvalidEvidence();
         if (workerStake_ != address(0) && workerStake_.code.length == 0) revert InvalidEvidence();
+        if (capacity_.code.length == 0) revert InvalidEvidence();
 
         matches = IComputeAcceptedMatchRuntime420(matches_);
         authorization = ComputeAuthorization420(authorization_);
@@ -141,6 +148,8 @@ contract ComputeJobWorkerSnapshotEvidence420 is IComputeJobWorkerEvidence420 {
         attestation = IComputeWorkerAttestationAdmission420(attestation_);
         workerTrust = IComputeWorkerTrustAdmission420(workerTrust_);
         workerStake = IComputeWorkerStakeAdmission420(workerStake_);
+        capacity = ComputeWorkerCapacityReservation420(capacity_);
+        if (address(capacity.workers()) != workers_) revert InvalidEvidence();
         bindingAdmin = msg.sender;
     }
 
@@ -225,6 +234,19 @@ contract ComputeJobWorkerSnapshotEvidence420 is IComputeJobWorkerEvidence420 {
             )
         );
 
+        // Capacity reservation is part of the same transaction as canonical assignment.
+        // Any later failure (including JobRegistry transition failure) reverts the reservation and counters.
+        bytes32 reservationId = capacity.reserve(
+            jobId,
+            assignmentRef,
+            workerId,
+            workerRevision,
+            w.resourceId,
+            w.resourceRevision,
+            expectedJobRevision,
+            j.deadline
+        );
+
         _assignments[assignmentRef] = Assignment({
             jobId: jobId,
             matchId: j.matchId,
@@ -242,6 +264,7 @@ contract ComputeJobWorkerSnapshotEvidence420 is IComputeJobWorkerEvidence420 {
             jurisdictionHash: w.jurisdictionHash,
             admission: refs,
             snapshotCommitment: snapshotCommitment,
+            reservationId: reservationId,
             attempt: attempt,
             resultCommitment: bytes32(0),
             receiptHash: bytes32(0),
@@ -344,6 +367,59 @@ contract ComputeJobWorkerSnapshotEvidence420 is IComputeJobWorkerEvidence420 {
         a.resultCommitment = resultCommitment;
         a.receiptHash = receiptHash;
         emit WorkerSnapshotResultCommitted(jobId, assignmentRef, resultCommitment);
+    }
+
+    /// @notice Synchronizes a live capacity reservation against canonical job state.
+    /// @dev Anyone may relay this check; only this contract can mutate the reservation engine.
+    function syncCapacity(bytes32 jobId) external {
+        bytes32 assignmentRef = assignmentForJob[jobId];
+        Assignment storage a = _assignments[assignmentRef];
+        if (!a.exists || a.reservationId == bytes32(0) || !capacity.isLive(a.reservationId)) {
+            revert InvalidEvidence();
+        }
+
+        ComputeJobRegistry420.Job memory j = jobs.job(jobId);
+        bytes32 transitionRef = keccak256(
+            abi.encode(
+                CAPACITY_TRANSITION_DOMAIN_V1,
+                block.chainid,
+                address(this),
+                jobId,
+                assignmentRef,
+                a.reservationId,
+                j.revision,
+                j.status,
+                j.resultCommitment,
+                j.verificationRef,
+                j.settlementRef
+            )
+        );
+
+        if (
+            j.status == ComputeJobRegistry420.Status.RESULT_COMMITTED
+                || j.status == ComputeJobRegistry420.Status.VERIFIED
+                || j.status == ComputeJobRegistry420.Status.SETTLED
+                || j.status == ComputeJobRegistry420.Status.DISPUTED
+                || j.status == ComputeJobRegistry420.Status.REFUNDED
+        ) {
+            capacity.release(a.reservationId, transitionRef);
+            return;
+        }
+
+        if (j.status == ComputeJobRegistry420.Status.FAILED) {
+            capacity.fail(a.reservationId, transitionRef);
+            return;
+        }
+
+        if (
+            j.status == ComputeJobRegistry420.Status.EXPIRED
+                || (j.status == ComputeJobRegistry420.Status.RUNNING && block.timestamp > j.deadline)
+        ) {
+            capacity.expire(a.reservationId, transitionRef);
+            return;
+        }
+
+        revert InvalidEvidence();
     }
 
     function assignmentExecutionDigest(

@@ -1,6 +1,6 @@
 # CMP-1.3.12 — Accepted-job worker invariant hardening and attempt lifecycle
 
-Status: **IMPLEMENTED — exact implementation-head qualification pending**
+Status: **COMPLETE — implementation SHA qualified; evidence-only closeout recorded without recursive rerun.**
 
 ## Canonical definition
 
@@ -310,10 +310,24 @@ Before COMPLETE, the exact qualification-relevant implementation SHA must pass:
 
 Per the repository qualification evidence rule, a later documentation-only evidence commit may record the qualified implementation SHA and workflow run IDs without recursively rerunning the full suite. Any qualification-affecting reconciliation or implementation/test/config/workflow/dependency change requires fresh exact-head qualification.
 
-## Candidate evidence
+## Qualified implementation evidence
 
-Pending.
+Qualified implementation SHA:
+
+`844e5141e7763e92c68aa7b459f466bc887f4fd8`
+
+Base/main SHA used for qualification:
+
+`a07e5d018160078ab5f60b3feff9f426bc0c77b0`
+
+Exact-SHA qualification:
+
+- Solidity Contracts #3336 — run `36619855394` — **SUCCESS**, all 16 required PR shards passed; aggregate `foundry` wrapper skipped by workflow design;
+- 420 Integrated Qualification #5973 — run `36619855495` — **SUCCESS**;
+- 420Docs Qualification #3349 — run `36619855470` — **SUCCESS**.
+
+The qualification-relevant implementation SHA above is exactly the PR #405 head that passed the retained suite. The documentation-only evidence commit containing this section does not change contracts, tests, configuration, workflows, dependencies, or substantive CMP-1.3.12 requirements and therefore inherits that implementation qualification under the repository evidence-only rule.
 
 ## Completion
 
-**NOT YET COMPLETE** — implementation and tests are present, but exact-head CI, current-main reconciliation, and durable qualified run evidence remain required.
+**COMPLETE** — every canonical CMP-1.3.12 requirement and exit criterion is implemented and repository-qualified at implementation SHA `844e5141e7763e92c68aa7b459f466bc887f4fd8`. Accepted work is reconstructable across success, failure, retry, cancellation, and expiry without identity or authority drift. Release-candidate code-hash/publication refresh remains correctly deferred to CMP-1.3.15.

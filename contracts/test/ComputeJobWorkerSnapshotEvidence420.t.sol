@@ -710,4 +710,58 @@ contract ComputeJobWorkerSnapshotEvidence420Test {
         require(!ok, "execution signature bypassed operator submit capability");
     }
 
+
+    function testCapacityReservationIsExactRevisionBoundAndReconstructable() public {
+        bytes32 assignmentRef = _assign(_emptyRefs());
+        ComputeJobWorkerSnapshotEvidence420.Assignment memory a =
+            workerEvidence.getAssignment(assignmentRef);
+        ComputeWorkerCapacityReservation420.Reservation memory r =
+            capacity.reservation(a.reservationId);
+        bytes32 expectedId = capacity.deriveReservationId(
+            jobId,
+            assignmentRef,
+            workerId,
+            a.workerRevision,
+            resourceId,
+            a.resourceRevision,
+            4
+        );
+
+        require(a.reservationId == expectedId, "reservation id not reconstructable");
+        require(r.jobId == jobId && r.assignmentRef == assignmentRef, "job/assignment not bound");
+        require(r.workerId == workerId && r.workerRevision == a.workerRevision, "worker revision not bound");
+        require(r.resourceId == resourceId && r.resourceRevision == a.resourceRevision, "resource revision not bound");
+        require(r.units == 1 && r.capacityLimit == 2, "capacity-unit semantics wrong");
+        require(capacity.liveResourceUnits(resourceId) == 1, "resource counter wrong");
+        require(capacity.liveWorkerUnits(workerId) == 1, "worker counter wrong");
+    }
+
+    function testCapacityExhaustionRejectsThirdConcurrentJobAtomically() public {
+        _assign(_emptyRefs());
+        bytes32 secondJob = _acceptedJob(keccak256("capacity-second"));
+        _assignJob(secondJob, workerId, EXEC_KEY, _emptyRefs());
+
+        bytes32 thirdJob = _acceptedJob(keccak256("capacity-third"));
+        uint64 workerRevision = workers.worker(workerId).revision;
+        bytes32 digest = workerEvidence.assignmentExecutionDigest(
+            thirdJob, workerId, workerRevision, 4, _emptyRefs()
+        );
+        bytes memory signature = _signExecution(EXEC_KEY, digest);
+
+        vm.prank(RELAYER);
+        (bool ok,) = address(workerEvidence).call(
+            abi.encodeCall(
+                workerEvidence.acceptAssignment,
+                (thirdJob, workerId, workerRevision, uint64(4), _emptyRefs(), signature)
+            )
+        );
+
+        require(!ok, "oversubscribed third job accepted");
+        require(workerEvidence.assignmentForJob(thirdJob) == bytes32(0), "failed job got assignment");
+        require(capacity.reservationForJob(thirdJob) == bytes32(0), "failed job got reservation");
+        require(capacity.liveResourceUnits(resourceId) == 2, "failed reserve changed resource counter");
+        require(capacity.liveWorkerUnits(workerId) == 2, "failed reserve changed worker counter");
+        require(jobs.job(thirdJob).status == ComputeJobRegistry420.Status.ACCEPTED, "failed reserve mutated job");
+    }
+
 }

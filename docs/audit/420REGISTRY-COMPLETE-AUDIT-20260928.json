@@ -51,14 +51,14 @@
       "id": "REG-BLK-002",
       "category": "genesis-addressing",
       "severity": "release_blocking",
-      "status": "OPEN",
+      "status": "IMPLEMENTED_QUALIFICATION_PENDING",
       "title": "Global Genesis address namespace reconciliation is unresolved",
       "evidence": [
         "config/system-addresses.json",
         "contracts/config/system-addresses.json",
         "contracts/config/wallet-authority-address-reconciliation.json"
       ],
-      "requiredResolution": "Resolve the namespace atomically across all canonical manifests and consumers; do not patch Registry in isolation."
+      "requiredResolution": "REG-AUDIT-4 establishes contracts/config/genesis-address-namespace.json with ProtocolRegistry fixed at 0x0434, aligns mirrors/predeploy/deployment/resident examples, and supersedes historical 0x0448 migration proposals. Exact-head namespace, collision/frozen-range and retained CI qualification remain required before closure."
     },
     {
       "id": "REG-BLK-003",
@@ -208,6 +208,16 @@
       },
       "finalReconciledMainBaseSha": "3758148416e394ad3da0572ef3b39861764a9141",
       "completionNote": "Completion evidence is committed after qualification of the final reconciled head. The retained suite is rerun on the resulting evidence-recording head; those rerun IDs are retained in PR metadata to avoid recursive evidence-only commits."
+    },
+    "REG-AUDIT-4": {
+      "title": "reconcile the Genesis address namespace",
+      "status": "IMPLEMENTED_PENDING_EXACT_HEAD_QUALIFICATION",
+      "record": "docs/audit/REG-AUDIT-4-GENESIS-ADDRESS-NAMESPACE-QUALIFICATION.json",
+      "namespaceAuthority": "contracts/config/genesis-address-namespace.json",
+      "canonicalRegistry": "0x0000000000000000000000000000000000000434",
+      "verifier": "scripts/verify-reg-audit-4-genesis-address-namespace.py",
+      "collisionAudit": "scripts/audit-genesis-address-collisions.py",
+      "nextStep": "REG-AUDIT-5"
     }
   }
 }

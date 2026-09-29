@@ -1,0 +1,113 @@
+{
+  "schema": "420-registry-reg-audit-1-decision-v1",
+  "step": "REG-AUDIT-1",
+  "title": "authoritative Registry API decision",
+  "status": "COMPLETE",
+  "repository": "abvhiael/420-integrated-v0.1",
+  "baselineMainSha": "ac1b9c5a5d7e1b031ea63c210b8c38ac3abee6df",
+  "roadmap": "docs/audit/420REGISTRY-COMPLETE-AUDIT-20260928.md",
+  "decision": {
+    "option": "A",
+    "canonicalAuthorityContract": "contracts/src/apps/ProtocolRegistry.sol",
+    "frozenInterface": "contracts/src/interfaces/genesis/IProtocolRegistry420.sol",
+    "frozenInterfaceSha256": "ba08070073f1237ebae0daf7a22dafcd0b9b9f2da68e63bb52cb58301f564224",
+    "canonicalAdapter": null,
+    "interfaceMigration": null,
+    "implementationOwnerStep": "REG-AUDIT-2"
+  },
+  "identityModel": {
+    "serviceId": {
+      "namespace": "420/service/*",
+      "source": "contracts/src/libraries/ServiceIds420.sol",
+      "purpose": "ecosystem service catalogue and immutable publication history"
+    },
+    "componentId": {
+      "namespace": "420/APP/* or explicitly approved frozen-component identifiers",
+      "sources": [
+        "contracts/src/libraries/GenesisInterfaceIds420.sol",
+        "contracts/src/libraries/AppDependencyIds420.sol"
+      ],
+      "purpose": "Genesis resident dependency resolution"
+    },
+    "implicitConversionAllowed": false
+  },
+  "versionModel": {
+    "serviceRevision": "uint32 sequential publication revision",
+    "componentVersion": "Types420.Version semantic major.minor.patch",
+    "implicitConversionAllowed": false,
+    "supportsVersion": {
+      "requiresActive": true,
+      "sameMajor": true,
+      "compatibleMinor": "registered.minor >= requested.minor",
+      "compatiblePatch": "when minors are equal, registered.patch >= requested.patch"
+    }
+  },
+  "lifecycleModel": {
+    "type": "Types420.Lifecycle",
+    "activeValue": "ACTIVE",
+    "resolveInactive": "fail_closed",
+    "serviceActiveFlagIsComponentLifecycle": false
+  },
+  "authority": {
+    "mutationAuthority": "GovernanceTimelock",
+    "registeredImplementationSelfAuthority": false,
+    "derivedProjectionAuthority": false
+  },
+  "rejectedOptions": {
+    "B": "Rejected: creates a second canonical Registry contract/authority and additional address ownership ambiguity.",
+    "C": "Rejected: frozen v1 semantics are sufficient; a semantic-major migration is unnecessary for this reconciliation."
+  },
+  "outOfScope": [
+    "REG-AUDIT-2 contract implementation",
+    "REG-AUDIT-3 remaining REG invariant tests",
+    "REG-AUDIT-4 Genesis address namespace reconciliation",
+    "REG-AUDIT-5 final artifact/predeploy evidence"
+  ],
+  "exitCriteria": {
+    "exactlyOneApiOwner": true,
+    "frozenV1SemanticsPreserved": true,
+    "noAdapterOwnershipAmbiguity": true,
+    "serviceAndComponentNamespacesSeparated": true,
+    "revisionAndSemverSeparated": true,
+    "implementationDeferredToRegAudit2": true
+  },
+  "evidence": {
+    "candidateQualifiedSha": "ec7484ed68073a02bb0f87a7c6006e921a3a38e0",
+    "candidateRuns": {
+      "registryDecision": 36510366989,
+      "integrated": 36510367027,
+      "docs": 36510366960
+    },
+    "candidateResults": {
+      "registryDecision": "SUCCESS",
+      "integrated": "SUCCESS",
+      "docs": "SUCCESS"
+    },
+    "exactQualifiedShaSource": "The exact final SHA is the Git commit containing this evidence after the retained gates rerun; PR #393 records the literal SHA and final run IDs without creating a new commit.",
+    "completionStatus": "COMPLETE_AFTER_FINAL_CLOSEOUT_HEAD_RERUN",
+    "reconciledQualifiedSha": "7f3158acedd5255b7f927b8cdbccd9b94870881f",
+    "reconciledRuns": {
+      "registryDecision": 36511054370,
+      "docs": 36511054371,
+      "integrated": 36511054406
+    },
+    "reconciledResults": {
+      "registryDecision": "SUCCESS",
+      "docs": "SUCCESS",
+      "integrated": "SUCCESS"
+    }
+  },
+  "exitCriteriaReview": {
+    "exactlyOneApiOwner": "SATISFIED",
+    "frozenV1SemanticsPreserved": "SATISFIED",
+    "noAdapterOwnershipAmbiguity": "SATISFIED",
+    "serviceAndComponentNamespacesSeparated": "SATISFIED",
+    "revisionAndSemverSeparated": "SATISFIED",
+    "implementationDeferredToRegAudit2": "SATISFIED",
+    "dedicatedVerifier": "SATISFIED_ON_CANDIDATE",
+    "frozenInterfaceVerifier": "SATISFIED_ON_CANDIDATE",
+    "integratedQualification": "SATISFIED_ON_CANDIDATE",
+    "docsQualification": "SATISFIED_ON_CANDIDATE",
+    "finalExactHeadRerun": "SATISFIED_ON_RECONCILED_HEAD; REQUIRED AGAIN ON THIS CLOSEOUT RECORD HEAD"
+  }
+}

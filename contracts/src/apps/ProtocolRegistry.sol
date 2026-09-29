@@ -58,6 +58,7 @@ contract ProtocolRegistry is SystemAccess, I420System, IProtocolRegistry420 {
     error InvalidComponentType();
     error ImplementationHasNoCode();
     error CodeHashMismatch();
+    error CanonicalServiceIdImmutable();
     error InvalidComponentId();
     error InvalidLifecycle();
     error UnknownComponent();
@@ -94,6 +95,7 @@ contract ProtocolRegistry is SystemAccess, I420System, IProtocolRegistry420 {
     /// @notice Approves an extension service ID while preserving the frozen Genesis catalog.
     function approveServiceId(bytes32 serviceId, bytes32 descriptorHash) external onlyGovernance {
         if (serviceId == bytes32(0)) revert InvalidServiceId();
+        if (ServiceIds420.isGenesisCanonical(serviceId)) revert CanonicalServiceIdImmutable();
         if (descriptorHash == bytes32(0)) revert InvalidManifest();
         approvedServiceIds[serviceId] = true;
         serviceDescriptorHash[serviceId] = descriptorHash;

@@ -97,3 +97,5 @@ export function createSdk420(input: {
 }
 
 export * from './wallet.js';
+
+export * from './compute.js';

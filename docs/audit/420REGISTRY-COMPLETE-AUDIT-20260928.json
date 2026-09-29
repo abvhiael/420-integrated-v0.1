@@ -76,13 +76,13 @@
       "id": "REG-BLK-004",
       "category": "tests/qualification",
       "severity": "release_blocking",
-      "status": "CANDIDATE_QUALIFIED_PENDING_RECONCILIATION",
+      "status": "CLOSED",
       "title": "Current exact-head Registry qualification is absent",
       "evidence": [
         "contracts/test/RegistryGenesis420.t.sol",
         "contracts/config/420registry-genesis.json"
       ],
-      "requiredResolution": "REG-AUDIT-3 candidate 4773f9d7cf3a60373f6b93116a6b126deaf5524b passed all retained gates, but main advanced afterward. Reconcile the evidence-bearing branch to current main and rerun the retained suite on the exact reconciled evidence head before closure."
+      "requiredResolution": "Closed by REG-AUDIT-3. Exact reconciled head 942d2ac7f2cc3f37262147b105812db02965f296 passed REG-AUDIT-1/2/3, Solidity Contracts (all 16 PR shards), Integrated, Docs, and Indexer retained gates."
     },
     {
       "id": "REG-BLK-005",
@@ -100,18 +100,18 @@
     }
   ],
   "invariantStatus": {
-    "REG-INV-001": "CANDIDATE_QUALIFIED_PENDING_RECONCILIATION",
-    "REG-INV-002": "CANDIDATE_QUALIFIED_PENDING_RECONCILIATION",
-    "REG-INV-003": "CANDIDATE_QUALIFIED_PENDING_RECONCILIATION",
-    "REG-INV-004": "CANDIDATE_QUALIFIED_PENDING_RECONCILIATION",
-    "REG-INV-005": "CANDIDATE_QUALIFIED_PENDING_RECONCILIATION",
-    "REG-INV-006": "CANDIDATE_QUALIFIED_PENDING_RECONCILIATION",
-    "REG-INV-007": "CANDIDATE_QUALIFIED_PENDING_RECONCILIATION",
-    "REG-INV-008": "CANDIDATE_QUALIFIED_PENDING_RECONCILIATION",
-    "REG-INV-009": "CANDIDATE_QUALIFIED_PENDING_RECONCILIATION",
-    "REG-INV-010": "CANDIDATE_QUALIFIED_PENDING_RECONCILIATION",
-    "REG-INV-011": "CANDIDATE_QUALIFIED_PENDING_RECONCILIATION",
-    "REG-INV-012": "CANDIDATE_QUALIFIED_PENDING_RECONCILIATION"
+    "REG-INV-001": "COMPLETE",
+    "REG-INV-002": "COMPLETE",
+    "REG-INV-003": "COMPLETE",
+    "REG-INV-004": "COMPLETE",
+    "REG-INV-005": "COMPLETE",
+    "REG-INV-006": "COMPLETE",
+    "REG-INV-007": "COMPLETE",
+    "REG-INV-008": "COMPLETE",
+    "REG-INV-009": "COMPLETE",
+    "REG-INV-010": "COMPLETE",
+    "REG-INV-011": "COMPLETE",
+    "REG-INV-012": "COMPLETE"
   },
   "readiness": {
     "codeComplete": false,
@@ -179,7 +179,7 @@
     },
     "REG-AUDIT-3": {
       "title": "complete REG invariant coverage",
-      "status": "CANDIDATE_QUALIFIED_EVIDENCE_RECORDED_PENDING_RECONCILIATION",
+      "status": "COMPLETE",
       "record": "docs/audit/REG-AUDIT-3-INVARIANT-COVERAGE-QUALIFICATION.json",
       "focusedTest": "contracts/test/RegistryInvariantCoverage420.t.sol",
       "namedInvariantEvidence": "REG-INV-001..012",
@@ -196,8 +196,18 @@
         "indexer": 36525288205
       },
       "currentMainObservedAfterCandidate": "3758148416e394ad3da0572ef3b39861764a9141",
-      "finalReconciledEvidenceHeadSha": null,
-      "finalRuns": null
+      "finalReconciledEvidenceHeadSha": "942d2ac7f2cc3f37262147b105812db02965f296",
+      "finalRuns": {
+        "registryDecision": 36601685224,
+        "registryApiReconciliation": 36601685516,
+        "registryInvariantCoverage": 36601685085,
+        "solidityContracts": 36601685167,
+        "integrated": 36601685108,
+        "docs": 36601685032,
+        "indexer": 36601685162
+      },
+      "finalReconciledMainBaseSha": "3758148416e394ad3da0572ef3b39861764a9141",
+      "completionNote": "Completion evidence is committed after qualification of the final reconciled head. The retained suite is rerun on the resulting evidence-recording head; those rerun IDs are retained in PR metadata to avoid recursive evidence-only commits."
     }
   }
 }

@@ -1,0 +1,53 @@
+{
+  "schema": "420-registry-reg-audit-2-qualification-v1",
+  "step": "REG-AUDIT-2",
+  "title": "implement and test the API reconciliation",
+  "status": "IMPLEMENTED_PENDING_FINAL_EXACT_HEAD_QUALIFICATION",
+  "roadmap": "docs/audit/420REGISTRY-COMPLETE-AUDIT-20260928.md",
+  "pr": 393,
+  "implementation": {
+    "contract": "contracts/src/apps/ProtocolRegistry.sol",
+    "frozenInterface": "contracts/src/interfaces/genesis/IProtocolRegistry420.sol",
+    "frozenInterfaceChanged": false,
+    "directImplementation": true,
+    "adapterIntroduced": false,
+    "serviceActivityRead": "isServiceActive(bytes32)",
+    "componentActivityRead": "isActive(bytes32)",
+    "componentMutation": [
+      "registerComponent",
+      "setComponentLifecycle"
+    ],
+    "provenanceReads": [
+      "currentComponentRevision",
+      "getComponentRevision"
+    ]
+  },
+  "tests": [
+    "contracts/test/RegistryApiReconciliation420.t.sol",
+    "contracts/test/RegistryGenesis420.t.sol",
+    "contracts/test/RegistryIdentityNames420.t.sol"
+  ],
+  "verifier": "scripts/verify-reg-audit-2-api-reconciliation.py",
+  "workflow": ".github/workflows/registry-reg-audit-2.yml",
+  "exitCriteria": {
+    "directFrozenInterfaceImplementation": "IMPLEMENTED",
+    "runtimeInterfaceTests": "IMPLEMENTED",
+    "codeHashLifecycleVersionMapping": "IMPLEMENTED",
+    "inactiveDeprecatedFailClosed": "IMPLEMENTED",
+    "historicalProvenance": "IMPLEMENTED",
+    "genesisResidentResolution": "IMPLEMENTED",
+    "finalExactHeadQualification": "PENDING"
+  },
+  "evidence": {
+    "qualifiedSha": null,
+    "mainBaseSha": null,
+    "runs": {
+      "solidityContracts": null,
+      "regAudit1": null,
+      "regAudit2": null,
+      "integrated": null,
+      "docs": null
+    }
+  },
+  "nextStep": "REG-AUDIT-3"
+}

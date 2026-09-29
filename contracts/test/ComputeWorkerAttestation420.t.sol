@@ -364,7 +364,7 @@ contract ComputeWorkerAttestation420Test {
             "failed authority escalation mutated worker"
         );
     }
-}
+
     function _claim(
         bytes32 evidenceType,
         uint32 schemaRevision,
@@ -585,4 +585,4 @@ contract ComputeWorkerAttestation420Test {
         );
         require(!ok && attestations.nextEvidenceSerial() == 0, "future issuance accepted");
     }
-
+}

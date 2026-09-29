@@ -1,0 +1,93 @@
+name: 420Registry REG-AUDIT-3
+
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/apps/ProtocolRegistry.sol'
+      - 'contracts/src/apps/Identity420.sol'
+      - 'contracts/src/pay/MerchantRegistry420.sol'
+      - 'contracts/src/libraries/ServiceIds420.sol'
+      - 'contracts/config/420registry-genesis.json'
+      - 'contracts/test/Registry*.t.sol'
+      - 'docs/apps/registry/**'
+      - 'docs/audit/REG-AUDIT-3-*'
+      - 'docs/audit/420REGISTRY-COMPLETE-AUDIT-20260928.*'
+      - 'scripts/verify-reg-audit-3-invariant-coverage.py'
+      - '.github/workflows/registry-reg-audit-3.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: registry-reg-audit-3-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Verify retained REG-AUDIT-1 decision
+        run: python scripts/verify-reg-audit-1-api-decision.py
+      - name: Verify retained REG-AUDIT-2 reconciliation
+        run: python scripts/verify-reg-audit-2-api-reconciliation.py
+      - name: Verify REG-AUDIT-3 invariant evidence
+        run: python scripts/verify-reg-audit-3-invariant-coverage.py
+      - name: Check Registry Solidity formatting
+        working-directory: contracts
+        run: forge fmt --check test/RegistryInvariantCoverage420.t.sol
+      - name: Build Registry invariant and retained suites
+        working-directory: contracts
+        run: |
+          forge build --force --sizes \
+            src/apps/ProtocolRegistry.sol \
+            test/RegistryInvariantCoverage420.t.sol \
+            test/RegistryApiReconciliation420.t.sol \
+            test/RegistryGenesis420.t.sol \
+            test/RegistryIdentityNames420.t.sol
+      - name: Run all twelve named REG invariant tests
+        working-directory: contracts
+        run: forge test --match-path 'test/RegistryInvariantCoverage420.t.sol' -vvv
+      - name: Run retained Registry reconciliation tests
+        working-directory: contracts
+        run: forge test --match-path 'test/RegistryApiReconciliation420.t.sol' -vvv
+      - name: Run retained Registry regression tests
+        working-directory: contracts
+        run: |
+          forge test --match-path 'test/RegistryGenesis420.t.sol' -vvv
+          forge test --match-path 'test/RegistryIdentityNames420.t.sol' -vvv
+      - name: Registry static authority/opcode scan
+        working-directory: contracts
+        run: |
+          set -euo pipefail
+          if grep -nE '\btx\.origin\b|\bselfdestruct\s*\(|\.delegatecall\s*\(' src/apps/ProtocolRegistry.sol; then
+            echo "Forbidden authority/opcode primitive found in ProtocolRegistry.sol" >&2
+            exit 1
+          fi
+          grep -q 'onlyGovernance' src/apps/ProtocolRegistry.sol
+          grep -q 'CanonicalServiceIdImmutable' src/apps/ProtocolRegistry.sol
+      - name: Upload REG-AUDIT-3 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reg-audit-3-invariant-coverage
+          path: reg-audit-3-evidence/
+          if-no-files-found: warn
+          retention-days: 30

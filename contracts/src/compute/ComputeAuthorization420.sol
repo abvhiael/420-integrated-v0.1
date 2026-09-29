@@ -24,6 +24,14 @@ contract ComputeAuthorization420 is I420System {
     bytes32 public constant ACTION_CHALLENGE = keccak256("420/COMPUTE/ACTION/CHALLENGE/V1");
     bytes32 public constant ACTION_ADJUDICATE = keccak256("420/COMPUTE/ACTION/ADJUDICATE/V1");
     bytes32 public constant ACTION_SETTLE = keccak256("420/COMPUTE/ACTION/SETTLE/V1");
+    bytes32 public constant ACTION_REGISTER_WORKER = keccak256("420/COMPUTE/ACTION/REGISTER_WORKER/V1");
+    bytes32 public constant ACTION_ACTIVATE_WORKER = keccak256("420/COMPUTE/ACTION/ACTIVATE_WORKER/V1");
+    bytes32 public constant ACTION_SUSPEND_WORKER = keccak256("420/COMPUTE/ACTION/SUSPEND_WORKER/V1");
+    bytes32 public constant ACTION_RETIRE_WORKER = keccak256("420/COMPUTE/ACTION/RETIRE_WORKER/V1");
+    bytes32 public constant ACTION_REFRESH_WORKER_PROFILE =
+        keccak256("420/COMPUTE/ACTION/REFRESH_WORKER_PROFILE/V1");
+    bytes32 public constant ACTION_ROTATE_WORKER_EXECUTION_KEY =
+        keccak256("420/COMPUTE/ACTION/ROTATE_WORKER_EXECUTION_KEY/V1");
 
     bytes32 private constant _SCOPE_DOMAIN = keccak256("420/COMPUTE/CAPABILITY/SCOPE/V1");
     bytes32 private constant _PROVIDER = keccak256("420/COMPUTE/SCOPE/PROVIDER/V1");
@@ -33,6 +41,7 @@ contract ComputeAuthorization420 is I420System {
     bytes32 private constant _MATCH = keccak256("420/COMPUTE/SCOPE/MATCH/V1");
     bytes32 private constant _ATTEMPT = keccak256("420/COMPUTE/SCOPE/ATTEMPT/V1");
     bytes32 private constant _JOB = keccak256("420/COMPUTE/SCOPE/JOB/V1");
+    bytes32 private constant _WORKER = keccak256("420/COMPUTE/SCOPE/WORKER_REVISION/V1");
 
     error InvalidRegistry();
     error InvalidScope();
@@ -68,6 +77,12 @@ contract ComputeAuthorization420 is I420System {
     function scopeJob(bytes32 jobId) public pure returns (bytes32) {
         return _scope(_JOB, jobId, bytes32(0), bytes32(0));
     }
+    /// @notice Exact-revision WorkerRegistry mutation scope.
+    /// @dev Binding the revision into the scope makes a grant stale automatically after any successful mutation.
+    function scopeWorker(bytes32 workerId, uint64 workerRevision) public pure returns (bytes32) {
+        if (workerId == bytes32(0) || workerRevision == 0) revert InvalidScope();
+        return keccak256(abi.encode(_SCOPE_DOMAIN, _WORKER, workerId, workerRevision));
+    }
 
     function isAuthorized(address principal, bytes32 actionId, bytes32 scopeHash, uint256 amount)
         public view returns (bool)
@@ -102,6 +117,9 @@ contract ComputeAuthorization420 is I420System {
             || actionId == ACTION_ACCEPT_MATCH || actionId == ACTION_EXECUTE_ATTEMPT
             || actionId == ACTION_SUBMIT_RECEIPT || actionId == ACTION_VERIFY_RESULT
             || actionId == ACTION_CHALLENGE || actionId == ACTION_ADJUDICATE
-            || actionId == ACTION_SETTLE;
+            || actionId == ACTION_SETTLE || actionId == ACTION_REGISTER_WORKER
+            || actionId == ACTION_ACTIVATE_WORKER || actionId == ACTION_SUSPEND_WORKER
+            || actionId == ACTION_RETIRE_WORKER || actionId == ACTION_REFRESH_WORKER_PROFILE
+            || actionId == ACTION_ROTATE_WORKER_EXECUTION_KEY;
     }
 }

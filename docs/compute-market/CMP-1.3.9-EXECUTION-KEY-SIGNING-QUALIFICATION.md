@@ -238,3 +238,22 @@ The candidate results above qualify only `b36a713e4ebb8dc2a73fa9f59bbde7aaccaa2b
 ## Completion
 
 **NOT YET COMPLETE** until the exact evidence-recording head passes the retained qualification suite and every canonical exit criterion is individually verified.
+
+
+## Current-main reconciliation evidence
+
+Current main at reconciliation: `ac1b9c5a5d7e1b031ea63c210b8c38ac3abee6df`.
+
+The prior qualified CMP-1.3.8/1.3.9 stack had diverged from current main. Repository comparison showed zero overlapping files between the current-main delta and the 19-file CMP-1.3 stack, so the exact stack was rebuilt on top of current main without discarding main work.
+
+Reconciled candidate SHA: `8ce05a5dc773137885f6242b66f27d95a2a3048d`.
+
+Reconciled exact-head qualification:
+
+- 420Docs Qualification #3269 — **SUCCESS**, run ID `36505345763`.
+- 420 Integrated Qualification #5886 — **SUCCESS**, run ID `36505345822`.
+- Solidity Contracts #3265 — **SUCCESS**, run ID `36505345787`, all 16/16 `pr-shards` successful; aggregate `foundry` wrapper skipped by workflow design and not counted as a passing gate.
+
+PR #392 is the current-main reconciliation PR. Its head was 0 commits behind main and mergeable when this evidence was recorded.
+
+This evidence update creates a new exact head. Per exact-head qualification discipline, that new SHA must pass the retained suite before CMP-1.3.9 is COMPLETE and before CMP-1.3.10 implementation begins.

@@ -1,6 +1,6 @@
 # CMP-1.3.13 — Canonical read model, SDK/client consumption, and off-chain compatibility
 
-Status: **IMPLEMENTED — exact-head qualification pending**
+Status: **COMPLETE — exact implementation SHA qualified; evidence-only closeout recorded without recursive rerun.**
 
 ## Canonical definition
 
@@ -412,10 +412,35 @@ Before COMPLETE, the exact qualification-relevant implementation SHA must pass:
 
 A later documentation-only evidence commit may inherit the qualified implementation SHA under the repository evidence-only rule. Any implementation/test/config/workflow/dependency/substantive-requirement change requires fresh exact-head qualification.
 
-## Candidate evidence
+## Qualified implementation evidence
 
-Pending.
+Qualified implementation SHA:
+
+`17ef0fba5c939aa164de63b909fd3c477f74d373`
+
+Base/main SHA:
+
+`003423ec34e5e0582709ffec3e417eb146538bef`
+
+Current-main reconciliation immediately before closeout:
+
+- current `main` remained exactly `003423ec34e5e0582709ffec3e417eb146538bef`;
+- branch was ahead only and 0 commits behind;
+- no qualification-affecting reconciliation commit was required.
+
+Exact-SHA qualification:
+
+- Solidity Contracts #3342 — run `36628977382` — **SUCCESS**, all 16 required PR shards passed; aggregate `foundry` wrapper skipped by workflow design;
+- 420 Integrated Qualification #5979 — run `36628977470` — **SUCCESS**;
+- 420Docs Qualification #3355 — run `36628977375` — **SUCCESS**;
+- 420 Developer Hub #271 — run `36628977605` — **SUCCESS**;
+- 420Indexer #962 — run `36628977429` — **SUCCESS**;
+- 420Indexer #557 — run `36628977307` — **SUCCESS**.
+
+The earlier Solidity #3341 run targeted pre-final SHA `9b50386571adf7219d4e0040dec0317af1cd5b43` and contained a shard failure. It is intentionally superseded and is not used as qualification evidence for CMP-1.3.13.
+
+The documentation-only evidence commit containing this section does not change contracts, tests, SDK/client behavior, descriptors, workflows, dependencies, or substantive CMP-1.3.13 requirements and therefore inherits the qualified implementation SHA under the repository evidence-only rule.
 
 ## Completion
 
-**NOT YET COMPLETE** — implementation, tests, descriptors, fixtures, and exact-head CI hardening are present; exact-head workflow qualification and final current-main reconciliation remain required.
+**COMPLETE** — every canonical CMP-1.3.13 requirement and exit criterion is satisfied at implementation SHA `17ef0fba5c939aa164de63b909fd3c477f74d373`. External replaceable clients can reconstruct and validate WorkerRegistry admission/execution state from public canonical interfaces without privileged matcher/client assumptions. Live release-candidate deployment/code-hash publication remains correctly deferred to CMP-1.3.15.

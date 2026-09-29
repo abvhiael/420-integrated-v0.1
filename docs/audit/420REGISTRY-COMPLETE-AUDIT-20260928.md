@@ -163,14 +163,14 @@ Risks / gaps:
 | REG-INV-002 sequential versions/history | same | implemented | covered | documented | COMPLETE | add exact-head retained proof |
 | REG-INV-003 strict publication rejects no-code implementation | same | implemented | covered | documented | COMPLETE | none |
 | REG-INV-004 runtime hash derived from deployed code | same | implemented | covered | documented | COMPLETE | none |
-| REG-INV-005 nonzero manifest/interface | same | implemented | partially covered through happy path; zero cases not exhaustively isolated | documented | PARTIAL | add explicit negative tests for zero manifest and zero interface |
-| REG-INV-006 immutable profile commitments per version | same | implemented by write-once sequential version model | history test partial | documented | PARTIAL | add direct immutability/regression assertion |
-| REG-INV-007 GovernanceTimelock only | same | implemented | publication unauthorized case covered | documented | PARTIAL | add unauthorized approval + deprecation cases |
+| REG-INV-005 nonzero manifest/interface | same | implemented | named independent zero-manifest and zero-interface negatives added in REG-AUDIT-3 | documented | IMPLEMENTED_PENDING_QUALIFICATION | exact-head retained proof |
+| REG-INV-006 immutable profile commitments per version | same | implemented by write-once sequential version model | named replacement-at-same-version immutability regression added in REG-AUDIT-3 | documented | IMPLEMENTED_PENDING_QUALIFICATION | exact-head retained proof |
+| REG-INV-007 GovernanceTimelock only | same | implemented | named unauthorized approval, publication and deprecation negatives added in REG-AUDIT-3 | documented | IMPLEMENTED_PENDING_QUALIFICATION | exact-head retained proof |
 | REG-INV-008 deprecation fails closed while preserving history | same | implemented | covered | documented | COMPLETE | none |
-| REG-INV-009 registration grants no ambient authority | same | implementation has no authority-grant path | not directly demonstrated across residents | documented | PARTIAL | add integration test proving registration alone cannot satisfy unrelated authorization |
-| REG-INV-010 projections reconstructable/non-canonical | same | Indexer/Explorer docs/code model this boundary | downstream tests exist | documented | PARTIAL | exact Registry event-to-projection reorg/rebuild qualification still required |
-| REG-INV-011 Registry metadata cannot overwrite domain canonical state | same | Registry stores only Registry fields | adjacent architecture tests | documented | PARTIAL | add direct cross-domain non-authority regression where valuable |
-| REG-INV-012 extension approval cannot alter canonical Genesis ID identity | same | canonical IDs are pure library constants | no explicit test for collision/approval attempt | documented | PARTIAL | add regression proving approval descriptor cannot redefine canonical ID semantics |
+| REG-INV-009 registration grants no ambient authority | same | implementation has no authority-grant path | real MerchantRegistry420 governance seam negative added in REG-AUDIT-3 | documented | IMPLEMENTED_PENDING_QUALIFICATION | exact-head retained proof |
+| REG-INV-010 projections reconstructable/non-canonical | same | Indexer/Explorer docs/code model this boundary | direct Registry event + canonical-read reconstruction evidence added in REG-AUDIT-3 | documented | IMPLEMENTED_PENDING_QUALIFICATION | exact-head retained proof; broader reorg/rebuild remains REG-AUDIT-7 |
+| REG-INV-011 Registry metadata cannot overwrite domain canonical state | same | Registry stores only Registry fields | direct Identity420 domain-state isolation regression added in REG-AUDIT-3 | documented | IMPLEMENTED_PENDING_QUALIFICATION | exact-head retained proof |
+| REG-INV-012 extension approval cannot alter canonical Genesis ID identity | same | canonical IDs are pure library constants and canonical IDs are rejected by extension approval | named canonical-ID descriptor collision negative added in REG-AUDIT-3 | documented | IMPLEMENTED_PENDING_QUALIFICATION | exact-head retained proof |
 | Frozen interface compatibility | interface-layer freeze | incompatible | no implementation compatibility test found | freeze docs exist | BROKEN | choose/implement canonical adapter or compatible Registry implementation without mutating v1 semantics |
 | Canonical Registry address | system-addresses v4 | `0x...0434` in frozen map | repository consistency evidence exists | conflicting examples exist | BLOCKED | resolve namespace-wide Genesis address rebase before final freeze |
 | Compiled runtime artifact/code hash | predeploy plan | source ready only | historical compile CI exists | release proof missing | MISSING | generate/pin exact artifact and runtime hash from final candidate |
@@ -302,6 +302,8 @@ Exit: one authoritative ABI/state model with no ambiguous adapter ownership.
 
 ### REG-AUDIT-2 — implement and test the API reconciliation
 
+**Repository status:** COMPLETE via PR #393; final evidence head `a63023f47c992661b22b344e051455a330722e97`, merged as `6c0a70ae020bfa911c57f6148fd585c9036c5f78`.
+
 After REG-AUDIT-1:
 
 - implement the chosen compatibility layer;
@@ -313,6 +315,8 @@ After REG-AUDIT-1:
 Exit: all Genesis residents can resolve Registry dependencies through the frozen/approved interface.
 
 ### REG-AUDIT-3 — complete REG invariant coverage
+
+**Repository status:** IMPLEMENTED_PENDING_EXACT_HEAD_QUALIFICATION on PR #399.
 
 Add focused negative/integration tests for the currently partial guarantees:
 

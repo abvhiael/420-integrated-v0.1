@@ -26,6 +26,61 @@ export const COMPUTE_WORKER_READ_MODEL_METHODS_420 = Object.freeze([
   'attemptLifecycle(bytes32)'
 ] as const);
 
+export interface ComputeReadComponents420 {
+  readonly workers: Hex420;
+  readonly profiles: Hex420;
+  readonly capabilityEligibility: Hex420;
+  readonly attestation: Hex420;
+  readonly trust: Hex420;
+  readonly stake: Hex420;
+  readonly capacity: Hex420;
+  readonly snapshots: Hex420;
+}
+
+export interface ComputeReadDomains420 {
+  readonly workerIdentity: Hex420;
+  readonly capabilityProfile: Hex420;
+  readonly attestation: Hex420;
+  readonly provenance: Hex420;
+  readonly trustReference: Hex420;
+  readonly stakeReference: Hex420;
+  readonly capacityReservation: Hex420;
+  readonly executionAccept: Hex420;
+  readonly executionResult: Hex420;
+  readonly attemptTransition: Hex420;
+  readonly acceptedConstraint: Hex420;
+}
+
+export interface ComputeCapabilityRequirements420 {
+  readonly requiredResourceComputeClass: Hex420;
+  readonly requiredArchitecture: Hex420;
+  readonly requiredCpuClass: Hex420;
+  readonly requiredGpuClass: Hex420;
+  readonly requiredSoftwareCapability: Hex420;
+  readonly minVramMiB: bigint;
+  readonly minMemoryMiB: bigint;
+  readonly minStorageGiB: bigint;
+  readonly minNetworkMbps: bigint;
+  readonly requiredStorageClassHash: Hex420;
+  readonly requiredNetworkCapabilityHash: Hex420;
+  readonly requiredRuntimeCapabilityHash: Hex420;
+}
+
+export interface ComputeEligibilityQuery420 {
+  readonly workerId: Hex420;
+  readonly workerRevision: bigint;
+  readonly requirements: ComputeCapabilityRequirements420;
+  readonly requireTrustedAttestation: boolean;
+  readonly attestationPolicyId: Hex420;
+  readonly attestationId: Hex420;
+  readonly trustPolicyId: Hex420;
+  readonly requireTrustReference: boolean;
+  readonly trustReferenceId: Hex420;
+  readonly stakePolicyId: Hex420;
+  readonly requireStakeReference: boolean;
+  readonly stakeReferenceId: Hex420;
+}
+
 export interface ComputeWorkerIdentity420 {
   readonly providerId: Hex420;
   readonly nodeId: Hex420;
@@ -120,9 +175,12 @@ export interface ComputeAttemptLifecycle420 {
 }
 
 export interface ComputeWorkerReader420 {
+  schemaVersion(): Promise<number>;
+  components(): Promise<ComputeReadComponents420>;
+  domains(): Promise<ComputeReadDomains420>;
   workerRevision(workerId: Hex420, revision: bigint): Promise<ComputeWorkerIdentity420>;
   capabilityProfile(workerId: Hex420, revision: bigint): Promise<ComputeCapabilityProfile420>;
-  eligibility(query: Readonly<Record<string, unknown>>): Promise<ComputeEligibility420>;
+  eligibility(query: ComputeEligibilityQuery420): Promise<ComputeEligibility420>;
   attestationCore(attestationId: Hex420): Promise<unknown>;
   attestationProvenance(attestationId: Hex420): Promise<unknown>;
   trustReference(referenceId: Hex420): Promise<unknown>;
@@ -201,11 +259,16 @@ export function validateAttemptBundle420(
 }
 
 export interface ComputeWorkerClient420 {
+  descriptor(): Promise<{
+    readonly schemaVersion: 1;
+    readonly components: ComputeReadComponents420;
+    readonly domains: ComputeReadDomains420;
+  }>;
   worker(workerId: Hex420, revision: bigint): Promise<{
     readonly identity: ComputeWorkerIdentity420;
     readonly capability: ComputeCapabilityProfile420;
   }>;
-  admission(query: Readonly<Record<string, unknown>>): Promise<ComputeEligibility420>;
+  admission(query: ComputeEligibilityQuery420): Promise<ComputeEligibility420>;
   attestation(attestationId: Hex420): Promise<{ readonly core: unknown; readonly provenance: unknown }>;
   trust(referenceId: Hex420): Promise<unknown>;
   stake(referenceId: Hex420): Promise<unknown>;
@@ -219,12 +282,23 @@ export interface ComputeWorkerClient420 {
 
 export function createComputeWorkerClient420(reader: ComputeWorkerReader420): ComputeWorkerClient420 {
   return Object.freeze({
+    descriptor: async () => {
+      const schemaVersion = await reader.schemaVersion();
+      if (schemaVersion !== COMPUTE_WORKER_READ_MODEL_VERSION_420) {
+        throw new ComputeReadModelError420('unsupported compute worker read-model schema version');
+      }
+      const components = await reader.components();
+      for (const [key, value] of Object.entries(components)) assertAddress420(value, key);
+      const domains = await reader.domains();
+      for (const [key, value] of Object.entries(domains)) assertBytes32420(value, key);
+      return { schemaVersion: COMPUTE_WORKER_READ_MODEL_VERSION_420, components, domains };
+    },
     worker: async (workerId: Hex420, revision: bigint) => {
       const identity = validateWorkerRevision420(workerId, revision, await reader.workerRevision(workerId, revision));
       const capability = validateCapabilityProfile420(identity, await reader.capabilityProfile(workerId, revision));
       return { identity, capability };
     },
-    admission: (query: Readonly<Record<string, unknown>>) => reader.eligibility(query),
+    admission: (query: ComputeEligibilityQuery420) => reader.eligibility(query),
     attestation: async (attestationId: Hex420) => {
       assertBytes32420(attestationId, 'attestationId');
       return {

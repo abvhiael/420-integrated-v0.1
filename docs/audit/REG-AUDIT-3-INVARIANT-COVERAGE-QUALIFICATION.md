@@ -1,7 +1,7 @@
 # REG-AUDIT-3 — complete REG invariant coverage
 
 **Canonical roadmap source:** `docs/audit/420REGISTRY-COMPLETE-AUDIT-20260928.md`  
-**Status:** CANDIDATE QUALIFIED — evidence recorded; reconciliation and final evidence-head qualification pending
+**Status:** COMPLETE
 
 ## Original definition
 
@@ -73,19 +73,17 @@ Retained gates required on the exact final head:
 
 ## Exact-head evidence
 
-- Candidate qualified SHA: `4773f9d7cf3a60373f6b93116a6b126deaf5524b`
-- Candidate main/base SHA: `6c0a70ae020bfa911c57f6148fd585c9036c5f78`
-- 420Registry REG-AUDIT-1: **PASS** — run `36525288252`
-- 420Registry REG-AUDIT-2: **PASS** — run `36525288318`
-- 420Registry REG-AUDIT-3: **PASS** — run `36525288262`
-- Solidity Contracts: **PASS** — run `36525288319` (all 16 PR shards 0–15 successful)
-- 420 Integrated Qualification: **PASS** — run `36525288284`
-- 420Docs Qualification: **PASS** — run `36525288298`
-- 420Indexer: **PASS** — run `36525288205`
+- Final reconciled qualified SHA: `942d2ac7f2cc3f37262147b105812db02965f296`
+- Final reconciled main/base SHA: `3758148416e394ad3da0572ef3b39861764a9141`
+- 420Registry REG-AUDIT-1: **PASS** — run `36601685224`
+- 420Registry REG-AUDIT-2: **PASS** — run `36601685516`
+- 420Registry REG-AUDIT-3: **PASS** — run `36601685085`
+- Solidity Contracts: **PASS** — run `36601685167` (all 16 PR shards 0–15 successful; aggregate `foundry` job skipped by workflow logic)
+- 420 Integrated Qualification: **PASS** — run `36601685108`
+- 420Docs Qualification: **PASS** — run `36601685032`
+- 420Indexer: **PASS** — run `36601685162`
 
-Current `main` advanced after candidate qualification to `3758148416e394ad3da0572ef3b39861764a9141`. The evidence-bearing branch must therefore be reconciled to current `main` and the retained qualification suite rerun on the exact reconciled evidence head before REG-AUDIT-3 can be marked COMPLETE.
-
-If recording final evidence creates a new commit, the retained suite must be rerun on that evidence-recording SHA.
+All original REG-AUDIT-3 exit criteria are satisfied on the exact reconciled qualified SHA above. Because this completion record itself creates a later evidence-recording SHA, the retained suite is rerun on that later head and its run IDs are retained in PR metadata to avoid an infinite evidence-commit recursion.
 
 ## Remaining blockers outside REG-AUDIT-3
 

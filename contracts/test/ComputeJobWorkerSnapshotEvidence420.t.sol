@@ -11,6 +11,7 @@ interface VmWorkerSnapshot420 {
     function addr(uint256 privateKey) external returns (address);
     function sign(uint256 privateKey, bytes32 digest) external returns (uint8, bytes32, bytes32);
     function prank(address caller) external;
+    function chainId(uint256 newChainId) external;
 }
 
 contract SnapshotCapabilityRegistryMock420 is ICapabilityRegistry420 {
@@ -49,6 +50,7 @@ contract SnapshotMatchMock420 is IComputeJobMatchEvidence420, IComputeAcceptedMa
     address public operator;
     bytes32 public matchId;
     bytes32 public acceptanceRef;
+    mapping(bytes32 => bytes32) public acceptanceForJob;
 
     function configure(address jobs_, bytes32 resourceId_, address operator_) external {
         jobs = jobs_;
@@ -64,28 +66,30 @@ contract SnapshotMatchMock420 is IComputeJobMatchEvidence420, IComputeAcceptedMa
         return candidateMatchId == matchId && matchId != bytes32(0);
     }
 
-    function accepted(bytes32, bytes32 candidateMatchId, bytes32 candidateAcceptanceRef)
+    function accepted(bytes32 jobId, bytes32 candidateMatchId, bytes32 candidateAcceptanceRef)
         external
         view
         returns (bool)
     {
+        bytes32 expectedAcceptance = acceptanceForJob[jobId];
         return candidateMatchId == matchId
-            && candidateAcceptanceRef == acceptanceRef
-            && acceptanceRef != bytes32(0);
+            && candidateAcceptanceRef == expectedAcceptance
+            && expectedAcceptance != bytes32(0);
     }
 
     function authorizedResource(
-        bytes32,
+        bytes32 jobId,
         bytes32 candidateMatchId,
         bytes32 candidateAcceptanceRef,
         bytes32 candidateResourceId,
         address candidateOperator
     ) external view returns (bool) {
+        bytes32 expectedAcceptance = acceptanceForJob[jobId];
         return candidateMatchId == matchId
-            && candidateAcceptanceRef == acceptanceRef
+            && candidateAcceptanceRef == expectedAcceptance
             && candidateResourceId == resourceId
             && candidateOperator == operator
-            && acceptanceRef != bytes32(0);
+            && expectedAcceptance != bytes32(0);
     }
 
     function matchParties(bytes32 candidateMatchId)
@@ -100,6 +104,7 @@ contract SnapshotMatchMock420 is IComputeJobMatchEvidence420, IComputeAcceptedMa
 
     function acceptIntoJob(bytes32 jobId, uint64 expectedRevision, bytes32 acceptanceRef_) external {
         acceptanceRef = acceptanceRef_;
+        acceptanceForJob[jobId] = acceptanceRef_;
         ComputeJobRegistry420(jobs).recordAcceptance(jobId, expectedRevision, acceptanceRef_);
     }
 }
@@ -133,6 +138,8 @@ contract ComputeJobWorkerSnapshotEvidence420Test {
     address private constant OWNER = address(0xB0B);
     address private constant OPERATOR = address(0xA11CE);
     uint256 private constant EXEC_KEY = 0xBEEF;
+    uint256 private constant NEXT_EXEC_KEY = 0xCAFE;
+    address private constant RELAYER = address(0xD311);
 
     bytes32 private constant MANIFEST = keccak256("manifest");
     bytes32 private constant SECURITY = keccak256("security");
@@ -165,10 +172,9 @@ contract ComputeJobWorkerSnapshotEvidence420Test {
         providers = new ComputeProviderRegistry420(GOV);
         nodes = new ComputeNodeRegistry420(address(providers), GOV);
         resources = new ComputeResourceRegistry420(address(nodes), GOV);
-        workers = new ComputeWorkerRegistry420(address(resources), GOV);
-
         capabilities = new SnapshotCapabilityRegistryMock420();
         authorization = new ComputeAuthorization420(address(capabilities));
+        workers = new ComputeWorkerRegistry420(address(resources), address(authorization), GOV);
         commonEvidence = new SnapshotRequestFundingVerification420();
         matchEvidence = new SnapshotMatchMock420();
         admission = new SnapshotAdmissionMock420();
@@ -265,6 +271,30 @@ contract ComputeJobWorkerSnapshotEvidence420Test {
         id = workers.register(resourceId, executionSigner, WORKER_CAP, bytes32(0), proof);
     }
 
+    function _signExecution(uint256 key, bytes32 digest) private returns (bytes memory) {
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(key, digest);
+        return abi.encodePacked(r, s, v);
+    }
+
+    function _acceptedJob(bytes32 seed) private returns (bytes32 id) {
+        vm.prank(OWNER);
+        id = jobs.createJob(
+            keccak256(abi.encode("request", seed)),
+            keccak256(abi.encode("request-commitment", seed)),
+            MANIFEST,
+            keccak256("workload"),
+            keccak256(abi.encode("input", seed)),
+            keccak256("output-schema"),
+            uint64(block.timestamp + 7 days)
+        );
+        vm.prank(OWNER);
+        jobs.recordFunding(id, 1, keccak256(abi.encode("funding", seed)));
+        bytes32 acceptedMatchId = matchEvidence.matchId();
+        vm.prank(OWNER);
+        jobs.recordMatch(id, 2, acceptedMatchId);
+        matchEvidence.acceptIntoJob(id, 3, keccak256(abi.encode("acceptance", seed)));
+    }
+
     function _emptyRefs()
         private
         pure
@@ -291,14 +321,25 @@ contract ComputeJobWorkerSnapshotEvidence420Test {
         returns (bytes32 assignmentRef)
     {
         uint64 workerRevision = workers.worker(workerId).revision;
-        vm.prank(OPERATOR);
+        bytes32 digest =
+            workerEvidence.assignmentExecutionDigest(jobId, workerId, workerRevision, 4, refs);
+        bytes memory signature = _signExecution(EXEC_KEY, digest);
+        vm.prank(RELAYER);
         assignmentRef = workerEvidence.acceptAssignment(
             jobId,
             workerId,
             workerRevision,
             4,
-            refs
+            refs,
+            signature
         );
+    }
+
+    function _commit(bytes32 receiptHash, bytes32 outputHash) private returns (bytes32 resultCommitment) {
+        bytes32 digest = workerEvidence.resultExecutionDigest(jobId, receiptHash, outputHash);
+        bytes memory signature = _signExecution(EXEC_KEY, digest);
+        vm.prank(RELAYER);
+        resultCommitment = workerEvidence.commitResult(jobId, receiptHash, outputHash, signature);
     }
 
     function testAcceptedAssignmentFreezesExactWorkerExecutionSnapshot() public {
@@ -325,7 +366,7 @@ contract ComputeJobWorkerSnapshotEvidence420Test {
         (bool ok,) = address(workerEvidence).call(
             abi.encodeCall(
                 workerEvidence.acceptAssignment,
-                (jobId, workerId, workerRevision, uint64(4), _fullRefs())
+                (jobId, workerId, workerRevision, uint64(4), _fullRefs(), bytes(""))
             )
         );
         require(!ok, "failed admission accepted");
@@ -342,7 +383,7 @@ contract ComputeJobWorkerSnapshotEvidence420Test {
         (bool ok,) = address(workerEvidence).call(
             abi.encodeCall(
                 workerEvidence.acceptAssignment,
-                (jobId, workerId, workerRevision, uint64(4), refs)
+                (jobId, workerId, workerRevision, uint64(4), refs, bytes(""))
             )
         );
         require(!ok && workerEvidence.assignmentForJob(jobId) == bytes32(0), "partial trust ref accepted");
@@ -355,7 +396,7 @@ contract ComputeJobWorkerSnapshotEvidence420Test {
         (bool ok,) = address(workerEvidence).call(
             abi.encodeCall(
                 workerEvidence.acceptAssignment,
-                (jobId, workerId, workerRevision + 1, uint64(4), _emptyRefs())
+                (jobId, workerId, workerRevision + 1, uint64(4), _emptyRefs(), bytes(""))
             )
         );
         require(!ok, "stale/future worker revision accepted");
@@ -367,7 +408,7 @@ contract ComputeJobWorkerSnapshotEvidence420Test {
         (ok,) = address(workerEvidence).call(
             abi.encodeCall(
                 workerEvidence.acceptAssignment,
-                (jobId, workerId, workerRevision, uint64(4), _emptyRefs())
+                (jobId, workerId, workerRevision, uint64(4), _emptyRefs(), bytes(""))
             )
         );
         require(!ok, "unavailable resource accepted");
@@ -399,9 +440,7 @@ contract ComputeJobWorkerSnapshotEvidence420Test {
         vm.prank(OPERATOR);
         resources.suspend(resourceId);
 
-        vm.prank(OPERATOR);
-        bytes32 resultCommitment =
-            workerEvidence.commitResult(jobId, keccak256("receipt"), keccak256("output"));
+        bytes32 resultCommitment = _commit(keccak256("receipt"), keccak256("output"));
 
         require(resultCommitment != bytes32(0), "result not committed");
         vm.prank(OPERATOR);
@@ -422,21 +461,19 @@ contract ComputeJobWorkerSnapshotEvidence420Test {
         (bool ok,) = address(workerEvidence).call(
             abi.encodeCall(
                 workerEvidence.acceptAssignment,
-                (jobId, workerId, workerRevision, uint64(5), _emptyRefs())
+                (jobId, workerId, workerRevision, uint64(5), _emptyRefs(), bytes(""))
             )
         );
         require(!ok, "duplicate assignment accepted");
 
-        vm.prank(OPERATOR);
-        bytes32 resultCommitment =
-            workerEvidence.commitResult(jobId, keccak256("receipt"), keccak256("output"));
+        bytes32 resultCommitment = _commit(keccak256("receipt"), keccak256("output"));
         require(resultCommitment != bytes32(0), "initial result failed");
 
-        vm.prank(OPERATOR);
+        vm.prank(RELAYER);
         (ok,) = address(workerEvidence).call(
             abi.encodeCall(
                 workerEvidence.commitResult,
-                (jobId, keccak256("receipt-2"), keccak256("output-2"))
+                (jobId, keccak256("receipt-2"), keccak256("output-2"), bytes(""))
             )
         );
         require(!ok, "duplicate result accepted");
@@ -451,10 +488,186 @@ contract ComputeJobWorkerSnapshotEvidence420Test {
         (bool ok,) = address(workerEvidence).call(
             abi.encodeCall(
                 workerEvidence.commitResult,
-                (jobId, keccak256("receipt"), keccak256("output"))
+                (jobId, keccak256("receipt"), keccak256("output"), bytes(""))
             )
         );
         require(!ok, "revoked submit authorization ignored");
         require(jobs.job(jobId).status == ComputeJobRegistry420.Status.RUNNING, "job state mutated");
     }
+    function testIndependentExecutionKeyAllowsRelayedAcceptedWorkAndResult() public {
+        ComputeJobWorkerSnapshotEvidence420.AdmissionRefs memory refs = _emptyRefs();
+        uint64 workerRevision = workers.worker(workerId).revision;
+        bytes32 assignmentDigest =
+            workerEvidence.assignmentExecutionDigest(jobId, workerId, workerRevision, 4, refs);
+        bytes memory assignmentSignature = _signExecution(EXEC_KEY, assignmentDigest);
+
+        vm.prank(RELAYER);
+        bytes32 assignmentRef = workerEvidence.acceptAssignment(
+            jobId, workerId, workerRevision, 4, refs, assignmentSignature
+        );
+        require(assignmentRef != bytes32(0), "relayed signed assignment failed");
+
+        bytes32 receiptHash = keccak256("relayed-receipt");
+        bytes32 outputHash = keccak256("relayed-output");
+        bytes32 resultDigest = workerEvidence.resultExecutionDigest(jobId, receiptHash, outputHash);
+        bytes memory resultSignature = _signExecution(EXEC_KEY, resultDigest);
+
+        vm.prank(address(0xFEED));
+        bytes32 result = workerEvidence.commitResult(jobId, receiptHash, outputHash, resultSignature);
+        require(result != bytes32(0), "relayed signed result failed");
+    }
+
+    function testWrongExecutionKeyAndCrossChainReplayFailClosed() public {
+        ComputeJobWorkerSnapshotEvidence420.AdmissionRefs memory refs = _emptyRefs();
+        uint64 workerRevision = workers.worker(workerId).revision;
+        bytes32 digest = workerEvidence.assignmentExecutionDigest(jobId, workerId, workerRevision, 4, refs);
+
+        bytes memory wrongKeySignature = _signExecution(NEXT_EXEC_KEY, digest);
+        vm.prank(RELAYER);
+        (bool ok,) = address(workerEvidence).call(
+            abi.encodeCall(
+                workerEvidence.acceptAssignment,
+                (jobId, workerId, workerRevision, uint64(4), refs, wrongKeySignature)
+            )
+        );
+        require(!ok && workerEvidence.assignmentForJob(jobId) == bytes32(0), "wrong key admitted");
+
+        bytes memory oldChainSignature = _signExecution(EXEC_KEY, digest);
+        uint256 originalChain = block.chainid;
+        vm.chainId(originalChain + 1);
+        vm.prank(RELAYER);
+        (ok,) = address(workerEvidence).call(
+            abi.encodeCall(
+                workerEvidence.acceptAssignment,
+                (jobId, workerId, workerRevision, uint64(4), refs, oldChainSignature)
+            )
+        );
+        vm.chainId(originalChain);
+        require(!ok && workerEvidence.assignmentForJob(jobId) == bytes32(0), "cross-chain replay admitted");
+    }
+
+    function testCrossJobAndCrossWorkerExecutionSignaturesCannotReplay() public {
+        ComputeJobWorkerSnapshotEvidence420.AdmissionRefs memory refs = _emptyRefs();
+        uint64 workerRevision = workers.worker(workerId).revision;
+        bytes32 digest = workerEvidence.assignmentExecutionDigest(jobId, workerId, workerRevision, 4, refs);
+        bytes memory signature = _signExecution(EXEC_KEY, digest);
+
+        bytes32 otherJob = _acceptedJob(keccak256("other-job"));
+        vm.prank(RELAYER);
+        (bool ok,) = address(workerEvidence).call(
+            abi.encodeCall(
+                workerEvidence.acceptAssignment,
+                (otherJob, workerId, workerRevision, uint64(4), refs, signature)
+            )
+        );
+        require(!ok && workerEvidence.assignmentForJob(otherJob) == bytes32(0), "cross-job replay admitted");
+
+        bytes32 otherWorker = _registerWorker();
+        vm.prank(OPERATOR);
+        workers.activate(otherWorker);
+        uint64 otherRevision = workers.worker(otherWorker).revision;
+        vm.prank(RELAYER);
+        (ok,) = address(workerEvidence).call(
+            abi.encodeCall(
+                workerEvidence.acceptAssignment,
+                (jobId, otherWorker, otherRevision, uint64(4), refs, signature)
+            )
+        );
+        require(!ok && workerEvidence.assignmentForJob(jobId) == bytes32(0), "cross-worker replay admitted");
+    }
+
+    function testStaleRevisionAndDuplicateAttemptReplayFailClosed() public {
+        ComputeJobWorkerSnapshotEvidence420.AdmissionRefs memory refs = _emptyRefs();
+        uint64 oldRevision = workers.worker(workerId).revision;
+        bytes32 oldDigest = workerEvidence.assignmentExecutionDigest(jobId, workerId, oldRevision, 4, refs);
+        bytes memory oldSignature = _signExecution(EXEC_KEY, oldDigest);
+
+        vm.prank(OPERATOR);
+        workers.refreshProfile(workerId, keccak256("worker-capability-v3"), bytes32(0));
+        vm.prank(OPERATOR);
+        workers.activate(workerId);
+
+        vm.prank(RELAYER);
+        (bool ok,) = address(workerEvidence).call(
+            abi.encodeCall(
+                workerEvidence.acceptAssignment,
+                (jobId, workerId, oldRevision, uint64(4), refs, oldSignature)
+            )
+        );
+        require(!ok, "stale worker revision signature admitted");
+
+        uint64 currentRevision = workers.worker(workerId).revision;
+        bytes32 freshDigest =
+            workerEvidence.assignmentExecutionDigest(jobId, workerId, currentRevision, 4, refs);
+        bytes memory freshSignature = _signExecution(EXEC_KEY, freshDigest);
+        vm.prank(RELAYER);
+        workerEvidence.acceptAssignment(jobId, workerId, currentRevision, 4, refs, freshSignature);
+
+        vm.prank(RELAYER);
+        (ok,) = address(workerEvidence).call(
+            abi.encodeCall(
+                workerEvidence.acceptAssignment,
+                (jobId, workerId, currentRevision, uint64(5), refs, freshSignature)
+            )
+        );
+        require(!ok, "duplicate attempt replay admitted");
+    }
+
+    function testRotationBlocksRetiredKeyForNewWorkButPreservesFrozenAcceptedKey() public {
+        _assign(_emptyRefs());
+
+        address nextSigner = vm.addr(NEXT_EXEC_KEY);
+        bytes32 rotationDigest = workers.rotationDigest(workerId, nextSigner);
+        bytes memory rotationProof = _signExecution(NEXT_EXEC_KEY, rotationDigest);
+        vm.prank(OPERATOR);
+        workers.rotateExecutionKey(workerId, nextSigner, rotationProof);
+        vm.prank(OPERATOR);
+        workers.activate(workerId);
+
+        bytes32 receiptHash = keccak256("post-rotation-receipt");
+        bytes32 outputHash = keccak256("post-rotation-output");
+        bytes32 resultDigest = workerEvidence.resultExecutionDigest(jobId, receiptHash, outputHash);
+        bytes memory frozenOldKeySignature = _signExecution(EXEC_KEY, resultDigest);
+        vm.prank(RELAYER);
+        bytes32 result =
+            workerEvidence.commitResult(jobId, receiptHash, outputHash, frozenOldKeySignature);
+        require(result != bytes32(0), "rotation rewrote frozen accepted key");
+
+        bytes32 newJob = _acceptedJob(keccak256("post-rotation-job"));
+        uint64 newRevision = workers.worker(workerId).revision;
+        bytes32 newDigest =
+            workerEvidence.assignmentExecutionDigest(newJob, workerId, newRevision, 4, _emptyRefs());
+        bytes memory retiredKeySignature = _signExecution(EXEC_KEY, newDigest);
+        vm.prank(RELAYER);
+        (bool ok,) = address(workerEvidence).call(
+            abi.encodeCall(
+                workerEvidence.acceptAssignment,
+                (newJob, workerId, newRevision, uint64(4), _emptyRefs(), retiredKeySignature)
+            )
+        );
+        require(!ok, "retired execution key authorized new work");
+    }
+
+    function testExecutionKeySignatureDoesNotGrantLifecycleOrSettlementAuthority() public {
+        _assign(_emptyRefs());
+        capabilities.setAllow(false);
+
+        vm.prank(executionSigner);
+        (bool ok,) = address(workers).call(abi.encodeCall(workers.suspend, (workerId)));
+        require(!ok, "execution key gained worker lifecycle authority");
+
+        bytes32 receiptHash = keccak256("blocked-receipt");
+        bytes32 outputHash = keccak256("blocked-output");
+        bytes32 resultDigest = workerEvidence.resultExecutionDigest(jobId, receiptHash, outputHash);
+        bytes memory signature = _signExecution(EXEC_KEY, resultDigest);
+        vm.prank(RELAYER);
+        (ok,) = address(workerEvidence).call(
+            abi.encodeCall(
+                workerEvidence.commitResult,
+                (jobId, receiptHash, outputHash, signature)
+            )
+        );
+        require(!ok, "execution signature bypassed operator submit capability");
+    }
+
 }

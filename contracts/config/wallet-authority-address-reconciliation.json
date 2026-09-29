@@ -1,7 +1,7 @@
 {
   "schema": "420-wallet-authority-address-reconciliation-v1",
-  "status": "BLOCKED_GLOBAL_GENESIS_ADDRESS_REBASE_REQUIRED",
-  "scope": "Genesis address authority and Wallet release qualification; candidate addresses are not deployed contracts",
+  "status": "SUPERSEDED_BY_GENESIS_ADDRESS_NAMESPACE_V1",
+  "scope": "Historical Wallet/Genesis reconciliation evidence only; not active address authority",
   "policy": {
     "preserveFrozenConsensusAndEconomicPredeploys": true,
     "doNotTreatReservationAsDeployment": true,
@@ -17,10 +17,40 @@
     "names420NewReservation": "0x0000000000000000000000000000000000000445"
   },
   "walletAuthorityCandidates": [
-    {"id":"smart-account-factory","contract":"SmartAccountFactory420.sol","legacyCanonicalAddress":"0x0000000000000000000000000000000000000420","frozenSystemOccupant":"RewardController","candidateAddress":"0x0000000000000000000000000000000000000446","status":"CANDIDATE_NOT_FROZEN_NOT_DEPLOYED"},
-    {"id":"capability-registry","contract":"CapabilityRegistry420.sol","legacyCanonicalAddress":"0x0000000000000000000000000000000000000421","frozenSystemOccupant":"AttentionTreasury","candidateAddress":"0x0000000000000000000000000000000000000447","status":"CANDIDATE_NOT_FROZEN_NOT_DEPLOYED"},
-    {"id":"protocol-registry","contract":"ProtocolRegistry.sol","legacyCanonicalAddress":"0x0000000000000000000000000000000000000422","frozenSystemOccupant":"DevelopmentTreasury","existingDifferentPredeployAddress":"0x0000000000000000000000000000000000000434","candidateAddress":"0x0000000000000000000000000000000000000448","status":"CANDIDATE_DEPENDS_ON_LEGACY_PREDEPLOY_REBASE"},
-    {"id":"identity","contract":"Identity420.sol","legacyCanonicalAddress":"0x0000000000000000000000000000000000000424","frozenSystemOccupant":"ProtocolReserve","existingDifferentPredeployAddress":"0x0000000000000000000000000000000000000436","candidateAddress":"0x0000000000000000000000000000000000000449","status":"CANDIDATE_DEPENDS_ON_LEGACY_PREDEPLOY_REBASE"}
+    {
+      "id": "smart-account-factory",
+      "contract": "SmartAccountFactory420.sol",
+      "legacyCanonicalAddress": "0x0000000000000000000000000000000000000420",
+      "frozenSystemOccupant": "RewardController",
+      "candidateAddress": "0x0000000000000000000000000000000000000446",
+      "status": "CANDIDATE_NOT_FROZEN_NOT_DEPLOYED"
+    },
+    {
+      "id": "capability-registry",
+      "contract": "CapabilityRegistry420.sol",
+      "legacyCanonicalAddress": "0x0000000000000000000000000000000000000421",
+      "frozenSystemOccupant": "AttentionTreasury",
+      "candidateAddress": "0x0000000000000000000000000000000000000447",
+      "status": "CANDIDATE_NOT_FROZEN_NOT_DEPLOYED"
+    },
+    {
+      "id": "protocol-registry",
+      "contract": "ProtocolRegistry.sol",
+      "legacyCanonicalAddress": "0x0000000000000000000000000000000000000422",
+      "frozenSystemOccupant": "DevelopmentTreasury",
+      "existingDifferentPredeployAddress": "0x0000000000000000000000000000000000000434",
+      "candidateAddress": "0x0000000000000000000000000000000000000448",
+      "status": "CANDIDATE_DEPENDS_ON_LEGACY_PREDEPLOY_REBASE"
+    },
+    {
+      "id": "identity",
+      "contract": "Identity420.sol",
+      "legacyCanonicalAddress": "0x0000000000000000000000000000000000000424",
+      "frozenSystemOccupant": "ProtocolReserve",
+      "existingDifferentPredeployAddress": "0x0000000000000000000000000000000000000436",
+      "candidateAddress": "0x0000000000000000000000000000000000000449",
+      "status": "CANDIDATE_DEPENDS_ON_LEGACY_PREDEPLOY_REBASE"
+    }
   ],
   "additionalBlockingInconsistencies": [
     "Canonical Genesis anchors other than these four also reuse frozen 0x0425..0x043b system addresses for different contracts: a four-address-only patch cannot make the canonical namespace collision-free.",
@@ -36,5 +66,11 @@
     "Update canonical anchors, the Genesis predeploy plan, deployment manifest, initializer and runtime code-hash manifests, embedded contract address constants and genesis alloc generator as one reviewed change.",
     "Reconcile Wallet deployment inventory against the final canonical map and keep readyForLiveTestnet false until the official chain manifest, predeploy bytecode, RPC chain identity and actual on-chain code are verified."
   ],
-  "readyForLiveTestnet": false
+  "readyForLiveTestnet": false,
+  "supersededBy": "contracts/config/genesis-address-namespace.json",
+  "supersessionDecision": {
+    "protocolRegistry": "0x0000000000000000000000000000000000000434",
+    "policy": "Preserve frozen Step 6.2 predeploy ownership; registry-resolve non-predeploy services.",
+    "note": "Historical 0x0448 ProtocolRegistry relocation candidate is retired and MUST NOT be treated as canonical, deployed, or reserved."
+  }
 }

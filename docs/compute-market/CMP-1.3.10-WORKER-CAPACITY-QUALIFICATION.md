@@ -190,6 +190,20 @@ Before COMPLETE, the exact final head must pass:
 
 After candidate CI passes, candidate SHA/run IDs must be recorded in this file. That evidence-recording commit becomes a new exact head and must itself pass the retained suite before COMPLETE.
 
+## Candidate qualification evidence
+
+Reconciled candidate SHA: `791303dd0e3a784c5ad533f733479acb7646f11d`.
+
+Exact-head qualification on that candidate:
+
+- 420Docs Qualification #3278 — **SUCCESS**, run ID `36510674289`.
+- 420 Integrated Qualification #5898 — **SUCCESS**, run ID `36510674286`.
+- Solidity Contracts #3268 — **SUCCESS**, run ID `36510675104`, all 16/16 `pr-shards` successful; aggregate `foundry` wrapper skipped by workflow design and not counted as a passing gate.
+
+The reconciled candidate was based on main `d99f8a9c5b10d0007a5729ea46802bb58f5b0d56`, was 0 commits behind that base, and the 21 CMP files were verified byte-for-byte identical to the original CMP-1.3.10 branch by Git blob SHA.
+
+After these runs completed, repository `main` advanced again. Therefore these results qualify only `791303dd0e3a784c5ad533f733479acb7646f11d`; final completion requires carrying this evidence head onto current main and rerunning the retained suite on that exact reconciled evidence SHA.
+
 ## Completion
 
-**NOT YET COMPLETE** — implementation and repository evidence exist, but exact-head CI and evidence-head requalification remain required.
+**NOT YET COMPLETE** — candidate CI is green, but final current-main reconciliation and exact-head evidence requalification remain required.

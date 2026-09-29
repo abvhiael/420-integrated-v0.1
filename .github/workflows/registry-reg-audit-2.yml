@@ -1,0 +1,73 @@
+name: 420Registry REG-AUDIT-2
+
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/apps/ProtocolRegistry.sol'
+      - 'contracts/src/interfaces/genesis/IProtocolRegistry420.sol'
+      - 'contracts/src/interfaces/genesis/Types420.sol'
+      - 'contracts/src/system/GenesisResidentAccess420.sol'
+      - 'contracts/test/Registry*.t.sol'
+      - 'docs/apps/registry/**'
+      - 'docs/audit/REG-AUDIT-2-*'
+      - 'docs/audit/REG-AUDIT-1-*'
+      - 'scripts/verify-reg-audit-1-api-decision.py'
+      - 'scripts/verify-reg-audit-2-api-reconciliation.py'
+      - '.github/workflows/registry-reg-audit-2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Verify frozen REG-AUDIT-1 decision
+        run: python scripts/verify-reg-audit-1-api-decision.py
+      - name: Verify REG-AUDIT-2 source and evidence contract
+        run: python scripts/verify-reg-audit-2-api-reconciliation.py
+      - name: Build reconciled Registry
+        working-directory: contracts
+        run: forge build --force --sizes
+      - name: Run focused API reconciliation tests
+        working-directory: contracts
+        run: forge test --match-path 'test/RegistryApiReconciliation420.t.sol' -vvv
+      - name: Run retained Registry tests
+        working-directory: contracts
+        run: |
+          forge test --match-path 'test/RegistryGenesis420.t.sol' -vvv
+          forge test --match-path 'test/RegistryIdentityNames420.t.sol' -vvv
+      - name: Registry static authority/opcode scan
+        working-directory: contracts
+        run: |
+          set -euo pipefail
+          if grep -nE '\btx\.origin\b|\bselfdestruct\s*\(|\.delegatecall\s*\(' src/apps/ProtocolRegistry.sol; then
+            echo "Forbidden authority/opcode primitive found in ProtocolRegistry.sol" >&2
+            exit 1
+          fi
+      - name: Upload REG-AUDIT-2 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reg-audit-2-api-reconciliation
+          path: reg-audit-2-evidence/
+          if-no-files-found: warn
+          retention-days: 30

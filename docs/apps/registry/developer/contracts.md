@@ -6,6 +6,7 @@ Primary contracts/interfaces are `ProtocolRegistry`, frozen `IProtocolRegistry42
 
 The Registry stores current and historical service records plus registration-profile commitments.
 
+- `approveServiceId`: governance-only extension approval; canonical Genesis service IDs are immutable and cannot pass through the extension-approval path.
 - `publishService` / `setService`: legacy governance-only service publication.
 - `publishRegisteredService`: strict code-bearing publication with manifest/interface commitments.
 - `getService`, `getServiceVersion`, `getRegistrationProfile`: service reads/history.

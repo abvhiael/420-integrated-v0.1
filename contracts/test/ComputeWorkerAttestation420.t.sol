@@ -22,6 +22,7 @@ contract ComputeWorkerAttestation420Test {
 
     uint256 private constant EXEC_KEY = 0xBEEF;
     uint256 private constant NEXT_EXEC_KEY = 0xCAFE;
+    uint256 private constant PROVENANCE_KEY = 0xD00D;
 
     bytes32 private constant POLICY = keccak256("trusted-gpu-policy");
     bytes32 private constant SCHEMA = keccak256("benchmark-schema-v1");
@@ -49,10 +50,12 @@ contract ComputeWorkerAttestation420Test {
     bytes32 private workerId;
     address private executionSigner;
     address private nextExecutionSigner;
+    address private provenanceSigner;
 
     function setUp() public {
         executionSigner = vm.addr(EXEC_KEY);
         nextExecutionSigner = vm.addr(NEXT_EXEC_KEY);
+        provenanceSigner = vm.addr(PROVENANCE_KEY);
 
         providers = new ComputeProviderRegistry420(GOV);
         nodes = new ComputeNodeRegistry420(address(providers), GOV);
@@ -90,6 +93,8 @@ contract ComputeWorkerAttestation420Test {
         attestations.publishPolicy(POLICY, benchmarkType, SCHEMA, 7 days);
         vm.prank(GOV);
         attestations.setAttester(POLICY, ATTESTER, true);
+        vm.prank(GOV);
+        attestations.setAttester(POLICY, provenanceSigner, true);
     }
 
     function _sign(uint256 key, bytes32 digest) private returns (bytes memory) {
@@ -358,5 +363,227 @@ contract ComputeWorkerAttestation420Test {
             eligibility.isEligible(workerId, revision, true, POLICY, evidenceId),
             "failed authority escalation mutated worker"
         );
+    }
+
+    function _claim(
+        bytes32 evidenceType,
+        uint32 schemaRevision,
+        bytes32 sourceCommitment,
+        bytes32 evidenceHash,
+        address issuer
+    ) private view returns (ComputeWorkerAttestation420.ProvenanceClaim memory claim) {
+        claim = ComputeWorkerAttestation420.ProvenanceClaim({
+            evidenceType: evidenceType,
+            schemaRevision: schemaRevision,
+            sourceCommitment: sourceCommitment,
+            evidenceHash: evidenceHash,
+            issuedAt: uint64(block.timestamp),
+            validAfter: uint64(block.timestamp),
+            expiresAt: uint64(block.timestamp + 1 days),
+            issuer: issuer
+        });
+    }
+
+    function _signedProvenance(
+        bytes32 subjectWorkerId,
+        uint64 subjectRevision,
+        bytes32 policyId,
+        uint32 policyRevision,
+        ComputeWorkerAttestation420.ProvenanceClaim memory claim,
+        uint256 signerKey
+    ) private returns (bytes32 id) {
+        bytes32 digest = attestations.provenanceDigest(
+            subjectWorkerId, subjectRevision, policyId, policyRevision, claim
+        );
+        bytes memory signature = _sign(signerKey, digest);
+        id = attestations.attestProvenance(
+            subjectWorkerId, subjectRevision, policyId, policyRevision, claim, signature
+        );
+    }
+
+    function testSignedBenchmarkProvenanceIsExplicitAndReconstructable() public {
+        uint64 revision = workers.worker(workerId).revision;
+        ComputeWorkerAttestation420.Policy memory p = attestations.policy(POLICY, 1);
+        bytes32 source = keccak256("ipfs://benchmark-manifest");
+        ComputeWorkerAttestation420.ProvenanceClaim memory claim =
+            _claim(attestations.EVIDENCE_BENCHMARK_V1(), p.schemaRevision, source, EVIDENCE_A, provenanceSigner);
+
+        bytes32 digest = attestations.provenanceDigest(workerId, revision, POLICY, 1, claim);
+        bytes32 id = _signedProvenance(workerId, revision, POLICY, 1, claim, PROVENANCE_KEY);
+        ComputeWorkerAttestation420.Attestation memory a = attestations.attestation(id);
+        ComputeWorkerAttestation420.Provenance memory pr = attestations.provenance(id);
+
+        require(pr.evidenceType == attestations.EVIDENCE_BENCHMARK_V1(), "benchmark type not bound");
+        require(pr.schemaHash == SCHEMA && pr.schemaRevision == 1, "schema not bound");
+        require(pr.sourceCommitment == source && a.evidenceHash == EVIDENCE_A, "source/evidence not bound");
+        require(pr.provenanceDigest == digest, "provenance digest not reconstructable");
+        require(a.attester == provenanceSigner, "issuer not bound");
+        require(pr.authorizationMode == attestations.PROVENANCE_AUTH_ECDSA_V1(), "signature mode not bound");
+        require(pr.signatureHash != bytes32(0), "signature commitment missing");
+        require(
+            eligibility.isEligible(workerId, revision, true, POLICY, id),
+            "signed benchmark provenance rejected"
+        );
+    }
+
+    function testBenchmarkTeeAndInspectionTypesRemainDistinct() public {
+        bytes32 teePolicy = keccak256("tee-policy");
+        bytes32 inspectionPolicy = keccak256("inspection-policy");
+        vm.prank(GOV);
+        attestations.publishPolicyVersioned(
+            teePolicy, attestations.EVIDENCE_TEE_V1(), keccak256("tee-schema-v1"), 7, 2 days
+        );
+        vm.prank(GOV);
+        attestations.publishPolicyVersioned(
+            inspectionPolicy, attestations.EVIDENCE_INSPECTION_V1(), keccak256("inspection-schema-v1"), 11, 2 days
+        );
+        vm.prank(GOV);
+        attestations.setAttester(teePolicy, provenanceSigner, true);
+        vm.prank(GOV);
+        attestations.setAttester(inspectionPolicy, provenanceSigner, true);
+
+        uint64 revision = workers.worker(workerId).revision;
+        ComputeWorkerAttestation420.ProvenanceClaim memory teeClaim =
+            _claim(attestations.EVIDENCE_TEE_V1(), 7, keccak256("tee-source"), keccak256("tee-evidence"), provenanceSigner);
+        ComputeWorkerAttestation420.ProvenanceClaim memory inspectionClaim =
+            _claim(attestations.EVIDENCE_INSPECTION_V1(), 11, keccak256("inspection-source"), keccak256("inspection-evidence"), provenanceSigner);
+
+        bytes32 teeId = _signedProvenance(workerId, revision, teePolicy, 1, teeClaim, PROVENANCE_KEY);
+        bytes32 inspectionId = _signedProvenance(workerId, revision, inspectionPolicy, 1, inspectionClaim, PROVENANCE_KEY);
+
+        require(attestations.provenance(teeId).evidenceType == attestations.EVIDENCE_TEE_V1(), "tee type collapsed");
+        require(
+            attestations.provenance(inspectionId).evidenceType == attestations.EVIDENCE_INSPECTION_V1(),
+            "inspection type collapsed"
+        );
+        require(
+            !eligibility.isEligible(workerId, revision, true, teePolicy, inspectionId),
+            "inspection evidence substituted for tee"
+        );
+        require(
+            !eligibility.isEligible(workerId, revision, true, inspectionPolicy, teeId),
+            "tee evidence substituted for inspection"
+        );
+    }
+
+    function testForgedSignatureWrongTypeAndWrongSchemaFailClosed() public {
+        uint64 revision = workers.worker(workerId).revision;
+        ComputeWorkerAttestation420.Policy memory p = attestations.policy(POLICY, 1);
+        ComputeWorkerAttestation420.ProvenanceClaim memory valid =
+            _claim(attestations.EVIDENCE_BENCHMARK_V1(), p.schemaRevision, keccak256("source"), EVIDENCE_A, provenanceSigner);
+
+        bytes32 digest = attestations.provenanceDigest(workerId, revision, POLICY, 1, valid);
+        bytes memory forged = _sign(EXEC_KEY, digest);
+        (bool ok,) = address(attestations).call(
+            abi.encodeCall(attestations.attestProvenance, (workerId, revision, POLICY, uint32(1), valid, forged))
+        );
+        require(!ok && attestations.nextEvidenceSerial() == 0, "forged provenance accepted");
+
+        ComputeWorkerAttestation420.ProvenanceClaim memory wrongType = valid;
+        wrongType.evidenceType = attestations.EVIDENCE_TEE_V1();
+        bytes memory wrongTypeSig = _sign(
+            PROVENANCE_KEY,
+            attestations.provenanceDigest(workerId, revision, POLICY, 1, wrongType)
+        );
+        (ok,) = address(attestations).call(
+            abi.encodeCall(attestations.attestProvenance, (workerId, revision, POLICY, uint32(1), wrongType, wrongTypeSig))
+        );
+        require(!ok && attestations.nextEvidenceSerial() == 0, "wrong evidence type accepted");
+
+        ComputeWorkerAttestation420.ProvenanceClaim memory wrongSchema = valid;
+        wrongSchema.schemaRevision = p.schemaRevision + 1;
+        bytes memory wrongSchemaSig = _sign(
+            PROVENANCE_KEY,
+            attestations.provenanceDigest(workerId, revision, POLICY, 1, wrongSchema)
+        );
+        (ok,) = address(attestations).call(
+            abi.encodeCall(attestations.attestProvenance, (workerId, revision, POLICY, uint32(1), wrongSchema, wrongSchemaSig))
+        );
+        require(!ok && attestations.nextEvidenceSerial() == 0, "wrong schema revision accepted");
+    }
+
+    function testEvidenceSubstitutionCrossSubjectReuseAndReplayFailClosed() public {
+        uint64 revision = workers.worker(workerId).revision;
+        ComputeWorkerAttestation420.Policy memory p = attestations.policy(POLICY, 1);
+        ComputeWorkerAttestation420.ProvenanceClaim memory claim =
+            _claim(attestations.EVIDENCE_BENCHMARK_V1(), p.schemaRevision, keccak256("source-a"), EVIDENCE_A, provenanceSigner);
+        bytes32 digest = attestations.provenanceDigest(workerId, revision, POLICY, 1, claim);
+        bytes memory signature = _sign(PROVENANCE_KEY, digest);
+
+        ComputeWorkerAttestation420.ProvenanceClaim memory substituted = claim;
+        substituted.sourceCommitment = keccak256("source-b");
+        (bool ok,) = address(attestations).call(
+            abi.encodeCall(attestations.attestProvenance, (workerId, revision, POLICY, uint32(1), substituted, signature))
+        );
+        require(!ok && attestations.nextEvidenceSerial() == 0, "source substitution accepted");
+
+        bytes32 secondWorker = _registerWorker(WORKER_CAP);
+        vm.prank(OPERATOR);
+        workers.activate(secondWorker);
+        uint64 secondRevision = workers.worker(secondWorker).revision;
+        (ok,) = address(attestations).call(
+            abi.encodeCall(attestations.attestProvenance, (secondWorker, secondRevision, POLICY, uint32(1), claim, signature))
+        );
+        require(!ok && attestations.nextEvidenceSerial() == 0, "cross-subject signed evidence reused");
+
+        bytes32 id = attestations.attestProvenance(workerId, revision, POLICY, 1, claim, signature);
+        require(id != bytes32(0), "valid provenance missing");
+        (ok,) = address(attestations).call(
+            abi.encodeCall(attestations.attestProvenance, (workerId, revision, POLICY, uint32(1), claim, signature))
+        );
+        require(!ok && attestations.nextEvidenceSerial() == 1, "signed provenance replay accepted");
+    }
+
+    function testStalePolicyRevokedIssuerAndRevokedEvidenceFailClosed() public {
+        uint64 revision = workers.worker(workerId).revision;
+        ComputeWorkerAttestation420.Policy memory p = attestations.policy(POLICY, 1);
+        ComputeWorkerAttestation420.ProvenanceClaim memory claim =
+            _claim(attestations.EVIDENCE_BENCHMARK_V1(), p.schemaRevision, keccak256("source"), EVIDENCE_A, provenanceSigner);
+        bytes32 id = _signedProvenance(workerId, revision, POLICY, 1, claim, PROVENANCE_KEY);
+        require(eligibility.isEligible(workerId, revision, true, POLICY, id), "baseline provenance rejected");
+
+        vm.prank(GOV);
+        attestations.setAttester(POLICY, provenanceSigner, false);
+        require(!eligibility.isEligible(workerId, revision, true, POLICY, id), "revoked issuer still eligible");
+
+        vm.prank(GOV);
+        attestations.setAttester(POLICY, provenanceSigner, true);
+        vm.prank(GOV);
+        attestations.publishPolicyVersioned(
+            POLICY, attestations.EVIDENCE_BENCHMARK_V1(), keccak256("benchmark-schema-v2"), 2, 3 days
+        );
+        require(!eligibility.isEligible(workerId, revision, true, POLICY, id), "stale policy evidence still eligible");
+
+        bytes memory staleSignature = _sign(
+            PROVENANCE_KEY,
+            attestations.provenanceDigest(workerId, revision, POLICY, 1, claim)
+        );
+        (bool ok,) = address(attestations).call(
+            abi.encodeCall(attestations.attestProvenance, (workerId, revision, POLICY, uint32(1), claim, staleSignature))
+        );
+        require(!ok, "stale policy revision published");
+
+        ComputeWorkerAttestation420.ProvenanceClaim memory current =
+            _claim(attestations.EVIDENCE_BENCHMARK_V1(), 2, keccak256("source-v2"), EVIDENCE_B, provenanceSigner);
+        bytes32 currentId = _signedProvenance(workerId, revision, POLICY, 2, current, PROVENANCE_KEY);
+        vm.prank(provenanceSigner);
+        attestations.revoke(currentId);
+        require(!eligibility.isEligible(workerId, revision, true, POLICY, currentId), "revoked evidence eligible");
+    }
+
+    function testFutureIssuanceIsRejectedWithoutStateMutation() public {
+        uint64 revision = workers.worker(workerId).revision;
+        ComputeWorkerAttestation420.Policy memory p = attestations.policy(POLICY, 1);
+        ComputeWorkerAttestation420.ProvenanceClaim memory claim =
+            _claim(attestations.EVIDENCE_BENCHMARK_V1(), p.schemaRevision, keccak256("future-source"), EVIDENCE_A, provenanceSigner);
+        claim.issuedAt = uint64(block.timestamp + 1);
+        claim.validAfter = claim.issuedAt;
+
+        bytes32 digest = attestations.provenanceDigest(workerId, revision, POLICY, 1, claim);
+        bytes memory signature = _sign(PROVENANCE_KEY, digest);
+        (bool ok,) = address(attestations).call(
+            abi.encodeCall(attestations.attestProvenance, (workerId, revision, POLICY, uint32(1), claim, signature))
+        );
+        require(!ok && attestations.nextEvidenceSerial() == 0, "future issuance accepted");
     }
 }

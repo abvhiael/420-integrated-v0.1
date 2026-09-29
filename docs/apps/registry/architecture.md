@@ -6,7 +6,7 @@ The 420 Registry application reads canonical state from `ProtocolRegistry` and m
 
 ## Service catalogue
 
-Genesis service IDs are frozen through `ServiceIds420`; extension IDs require explicit governance approval and descriptor commitments. Service publication uses sequential `uint32` revisions, preserves version history, and stores registration-profile commitments for component type, manifest hash, dependency root and interface hash.
+Genesis service IDs are frozen through `ServiceIds420`; extension IDs require explicit governance approval and descriptor commitments. Extension approval is forbidden for a canonical Genesis service ID, so an extension descriptor cannot collide with or relabel a frozen canonical identity. Service publication uses sequential `uint32` revisions, preserves version history, and stores registration-profile commitments for component type, manifest hash, dependency root and interface hash.
 
 Service IDs use the `420/service/*` namespace. Service activity is read through `isServiceActive(bytes32)`. The service catalogue must not be inferred from Genesis component IDs.
 

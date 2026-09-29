@@ -30,6 +30,7 @@ Event topics and custom-error selectors are Ethereum Keccak-256 hashes of canoni
 
 | Contract | Error | Canonical signature | Selector |
 | --- | --- | --- | --- |
+| `ProtocolRegistry` | `CanonicalServiceIdImmutable` | `CanonicalServiceIdImmutable()` | `0xe020355f` |
 | `ProtocolRegistry` | `CodeHashMismatch` | `CodeHashMismatch()` | `0x93c44ee6` |
 | `ProtocolRegistry` | `ComponentLifecycleUnchanged` | `ComponentLifecycleUnchanged()` | `0x1f262656` |
 | `ProtocolRegistry` | `ImplementationHasNoCode` | `ImplementationHasNoCode()` | `0x6f778c3a` |
@@ -100,6 +101,9 @@ Source: `contracts/src/apps/ProtocolRegistry.sol`
 - `CodeHashMismatch()`
   - canonical signature: `CodeHashMismatch()`
   - selector: `0x93c44ee6`
+- `CanonicalServiceIdImmutable()`
+  - canonical signature: `CanonicalServiceIdImmutable()`
+  - selector: `0xe020355f`
 - `InvalidComponentId()`
   - canonical signature: `InvalidComponentId()`
   - selector: `0x6b5e0346`

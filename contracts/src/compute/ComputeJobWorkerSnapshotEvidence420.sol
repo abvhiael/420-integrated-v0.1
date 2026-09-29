@@ -259,38 +259,31 @@ contract ComputeJobWorkerSnapshotEvidence420 is IComputeJobWorkerEvidence420 {
             j.deadline
         );
 
-        _assignments[assignmentRef] = Assignment({
-            jobId: jobId,
-            matchId: j.matchId,
-            acceptanceRef: j.acceptanceRef,
-            workerId: workerId,
-            workerRevision: workerRevision,
-            providerId: w.providerId,
-            nodeId: w.nodeId,
-            resourceId: w.resourceId,
-            resourceRevision: w.resourceRevision,
-            operator: w.operator,
-            executionSigner: w.executionSigner,
-            executionKeyCommitment: w.executionKeyCommitment,
-            capabilityProfileHash: w.capabilityProfileHash,
-            jurisdictionHash: w.jurisdictionHash,
-            admission: refs,
-            snapshotCommitment: snapshotCommitment,
-            reservationId: reservationId,
-            rootAssignmentRef: assignmentRef,
-            previousAttemptRef: bytes32(0),
-            constraintCommitment: constraintCommitment,
-            attempt: attempt,
-            acceptedDeadline: j.deadline,
-            openedAt: uint64(block.timestamp),
-            closedAt: 0,
-            resultCommittedAt: 0,
-            transitionRef: bytes32(0),
-            status: AttemptStatus.ACTIVE,
-            resultCommitment: bytes32(0),
-            receiptHash: bytes32(0),
-            exists: true
-        });
+        Assignment storage initial = _assignments[assignmentRef];
+        initial.jobId = jobId;
+        initial.matchId = j.matchId;
+        initial.acceptanceRef = j.acceptanceRef;
+        initial.workerId = workerId;
+        initial.workerRevision = workerRevision;
+        initial.providerId = w.providerId;
+        initial.nodeId = w.nodeId;
+        initial.resourceId = w.resourceId;
+        initial.resourceRevision = w.resourceRevision;
+        initial.operator = w.operator;
+        initial.executionSigner = w.executionSigner;
+        initial.executionKeyCommitment = w.executionKeyCommitment;
+        initial.capabilityProfileHash = w.capabilityProfileHash;
+        initial.jurisdictionHash = w.jurisdictionHash;
+        initial.admission = refs;
+        initial.snapshotCommitment = snapshotCommitment;
+        initial.reservationId = reservationId;
+        initial.rootAssignmentRef = assignmentRef;
+        initial.constraintCommitment = constraintCommitment;
+        initial.attempt = attempt;
+        initial.acceptedDeadline = j.deadline;
+        initial.openedAt = uint64(block.timestamp);
+        initial.status = AttemptStatus.ACTIVE;
+        initial.exists = true;
         rootAssignmentForJob[jobId] = assignmentRef;
         assignmentForJob[jobId] = assignmentRef;
         attemptCount[jobId] = attempt;
@@ -387,38 +380,32 @@ contract ComputeJobWorkerSnapshotEvidence420 is IComputeJobWorkerEvidence420 {
             j.deadline
         );
 
-        _assignments[assignmentRef] = Assignment({
-            jobId: jobId,
-            matchId: root.matchId,
-            acceptanceRef: root.acceptanceRef,
-            workerId: workerId,
-            workerRevision: workerRevision,
-            providerId: w.providerId,
-            nodeId: w.nodeId,
-            resourceId: w.resourceId,
-            resourceRevision: w.resourceRevision,
-            operator: w.operator,
-            executionSigner: w.executionSigner,
-            executionKeyCommitment: w.executionKeyCommitment,
-            capabilityProfileHash: w.capabilityProfileHash,
-            jurisdictionHash: w.jurisdictionHash,
-            admission: refs,
-            snapshotCommitment: snapshotCommitment,
-            reservationId: reservationId,
-            rootAssignmentRef: rootRef,
-            previousAttemptRef: priorRef,
-            constraintCommitment: root.constraintCommitment,
-            attempt: attempt,
-            acceptedDeadline: root.acceptedDeadline,
-            openedAt: uint64(block.timestamp),
-            closedAt: 0,
-            resultCommittedAt: 0,
-            transitionRef: bytes32(0),
-            status: AttemptStatus.ACTIVE,
-            resultCommitment: bytes32(0),
-            receiptHash: bytes32(0),
-            exists: true
-        });
+        Assignment storage nextAttempt = _assignments[assignmentRef];
+        nextAttempt.jobId = jobId;
+        nextAttempt.matchId = root.matchId;
+        nextAttempt.acceptanceRef = root.acceptanceRef;
+        nextAttempt.workerId = workerId;
+        nextAttempt.workerRevision = workerRevision;
+        nextAttempt.providerId = w.providerId;
+        nextAttempt.nodeId = w.nodeId;
+        nextAttempt.resourceId = w.resourceId;
+        nextAttempt.resourceRevision = w.resourceRevision;
+        nextAttempt.operator = w.operator;
+        nextAttempt.executionSigner = w.executionSigner;
+        nextAttempt.executionKeyCommitment = w.executionKeyCommitment;
+        nextAttempt.capabilityProfileHash = w.capabilityProfileHash;
+        nextAttempt.jurisdictionHash = w.jurisdictionHash;
+        nextAttempt.admission = refs;
+        nextAttempt.snapshotCommitment = snapshotCommitment;
+        nextAttempt.reservationId = reservationId;
+        nextAttempt.rootAssignmentRef = rootRef;
+        nextAttempt.previousAttemptRef = priorRef;
+        nextAttempt.constraintCommitment = root.constraintCommitment;
+        nextAttempt.attempt = attempt;
+        nextAttempt.acceptedDeadline = root.acceptedDeadline;
+        nextAttempt.openedAt = uint64(block.timestamp);
+        nextAttempt.status = AttemptStatus.ACTIVE;
+        nextAttempt.exists = true;
         assignmentForJob[jobId] = assignmentRef;
         attemptCount[jobId] = attempt;
 

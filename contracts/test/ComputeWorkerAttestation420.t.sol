@@ -411,14 +411,15 @@ contract ComputeWorkerAttestation420Test {
         bytes32 digest = attestations.provenanceDigest(workerId, revision, POLICY, 1, claim);
         bytes32 id = _signedProvenance(workerId, revision, POLICY, 1, claim, PROVENANCE_KEY);
         ComputeWorkerAttestation420.Attestation memory a = attestations.attestation(id);
+        ComputeWorkerAttestation420.Provenance memory pr = attestations.provenance(id);
 
-        require(a.evidenceType == attestations.EVIDENCE_BENCHMARK_V1(), "benchmark type not bound");
-        require(a.schemaHash == SCHEMA && a.schemaRevision == 1, "schema not bound");
-        require(a.sourceCommitment == source && a.evidenceHash == EVIDENCE_A, "source/evidence not bound");
-        require(a.provenanceDigest == digest, "provenance digest not reconstructable");
+        require(pr.evidenceType == attestations.EVIDENCE_BENCHMARK_V1(), "benchmark type not bound");
+        require(pr.schemaHash == SCHEMA && pr.schemaRevision == 1, "schema not bound");
+        require(pr.sourceCommitment == source && a.evidenceHash == EVIDENCE_A, "source/evidence not bound");
+        require(pr.provenanceDigest == digest, "provenance digest not reconstructable");
         require(a.attester == provenanceSigner, "issuer not bound");
-        require(a.authorizationMode == attestations.PROVENANCE_AUTH_ECDSA_V1(), "signature mode not bound");
-        require(a.signatureHash != bytes32(0), "signature commitment missing");
+        require(pr.authorizationMode == attestations.PROVENANCE_AUTH_ECDSA_V1(), "signature mode not bound");
+        require(pr.signatureHash != bytes32(0), "signature commitment missing");
         require(
             eligibility.isEligible(workerId, revision, true, POLICY, id),
             "signed benchmark provenance rejected"
@@ -450,9 +451,9 @@ contract ComputeWorkerAttestation420Test {
         bytes32 teeId = _signedProvenance(workerId, revision, teePolicy, 1, teeClaim, PROVENANCE_KEY);
         bytes32 inspectionId = _signedProvenance(workerId, revision, inspectionPolicy, 1, inspectionClaim, PROVENANCE_KEY);
 
-        require(attestations.attestation(teeId).evidenceType == attestations.EVIDENCE_TEE_V1(), "tee type collapsed");
+        require(attestations.provenance(teeId).evidenceType == attestations.EVIDENCE_TEE_V1(), "tee type collapsed");
         require(
-            attestations.attestation(inspectionId).evidenceType == attestations.EVIDENCE_INSPECTION_V1(),
+            attestations.provenance(inspectionId).evidenceType == attestations.EVIDENCE_INSPECTION_V1(),
             "inspection type collapsed"
         );
         require(

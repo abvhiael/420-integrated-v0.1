@@ -155,8 +155,15 @@ contract ComputeJobRegistry420 {
         _transition(jobId, j, Status.RUNNING, assignmentRef);
         emit WorkerAssigned(jobId, worker, assignmentRef);
     }
+    /// @notice Records a worker-evidence result that was committed under the accepted attempt deadline.
+    /// @dev The evidence adapter is responsible for proving the result commitment was made on time. This
+    ///      permits a timely committed result to be relayed into canonical state after the wall-clock deadline
+    ///      without allowing new late execution.
     function recordResult(bytes32 jobId, uint64 expectedRevision, bytes32 resultCommitment) external {
-        Job storage j = _guard(jobId, expectedRevision, Status.RUNNING);
+        Job storage j = jobs[jobId];
+        if (j.status == Status.NONE) revert UnknownJob();
+        if (j.status != Status.RUNNING) revert WrongState();
+        if (j.revision != expectedRevision) revert StaleRevision();
         if (msg.sender != j.worker || resultCommitment == 0
             || !workerEvidence.committedResult(jobId, j.assignmentRef, resultCommitment)) revert UnprovenEvidence();
         j.resultCommitment = resultCommitment;
@@ -208,6 +215,20 @@ contract ComputeJobRegistry420 {
         expiryRef = keccak256(abi.encode(
             EXPIRY_DOMAIN, block.chainid, address(this), jobId, j.requestId, expectedRevision, j.deadline
         ));
+        _transition(jobId, j, Status.EXPIRED, expiryRef);
+    }
+
+    /// @notice Canonical expiry for a RUNNING job whose active accepted attempt expired.
+    /// @dev Only the bound worker-evidence adapter may prove this transition. The adapter is responsible
+    ///      for proving there is no timely committed result for the active attempt and for releasing capacity
+    ///      atomically with this transition.
+    function recordRunningExpiry(bytes32 jobId, uint64 expectedRevision, bytes32 expiryRef) external {
+        Job storage j = jobs[jobId];
+        if (j.status == Status.NONE) revert UnknownJob();
+        if (j.status != Status.RUNNING) revert WrongState();
+        if (j.revision != expectedRevision) revert StaleRevision();
+        if (msg.sender != address(workerEvidence) || expiryRef == bytes32(0)) revert Unauthorized();
+        if (block.timestamp <= j.deadline) revert BadInput();
         _transition(jobId, j, Status.EXPIRED, expiryRef);
     }
 

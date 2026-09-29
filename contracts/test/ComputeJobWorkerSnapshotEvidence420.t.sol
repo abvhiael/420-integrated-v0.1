@@ -918,4 +918,281 @@ contract ComputeJobWorkerSnapshotEvidence420Test {
         require(capacity.liveResourceUnits(resourceId) == 1, "unauthorized transition changed counters");
     }
 
+    function _transitionAttempt(
+        bytes32 targetJob,
+        ComputeJobWorkerSnapshotEvidence420.AttemptStatus target,
+        bytes32 evidenceRef,
+        uint256 signingKey
+    ) private {
+        bytes32 digest = workerEvidence.attemptTransitionDigest(targetJob, target, evidenceRef);
+        bytes memory signature = _signExecution(signingKey, digest);
+        vm.prank(RELAYER);
+        if (target == ComputeJobWorkerSnapshotEvidence420.AttemptStatus.FAILED) {
+            workerEvidence.failAttempt(targetJob, evidenceRef, signature);
+        } else {
+            workerEvidence.cancelAttempt(targetJob, evidenceRef, signature);
+        }
+    }
+
+    function _retry(
+        bytes32 targetJob,
+        ComputeJobWorkerSnapshotEvidence420.AdmissionRefs memory refs
+    ) private returns (bytes32 assignmentRef) {
+        uint64 workerRevision = workers.worker(workerId).revision;
+        uint64 jobRevision = jobs.job(targetJob).revision;
+        bytes32 digest =
+            workerEvidence.retryExecutionDigest(targetJob, workerId, workerRevision, jobRevision, refs);
+        bytes memory signature = _signExecution(EXEC_KEY, digest);
+        vm.prank(RELAYER);
+        assignmentRef = workerEvidence.retryAssignment(
+            targetJob,
+            workerId,
+            workerRevision,
+            jobRevision,
+            refs,
+            signature
+        );
+    }
+
+    function testAttemptFailureRetryPreservesRootAndReconstructsHistory() public {
+        bytes32 rootRef = _assign(_emptyRefs());
+        ComputeJobWorkerSnapshotEvidence420.Assignment memory rootBefore =
+            workerEvidence.getAssignment(rootRef);
+        bytes32 firstReservation = rootBefore.reservationId;
+
+        _transitionAttempt(
+            jobId,
+            ComputeJobWorkerSnapshotEvidence420.AttemptStatus.FAILED,
+            keccak256("attempt-one-failure"),
+            EXEC_KEY
+        );
+
+        ComputeJobWorkerSnapshotEvidence420.Assignment memory failed =
+            workerEvidence.getAssignment(rootRef);
+        ComputeJobWorkerSnapshotEvidence420.AttemptLifecycle memory failedLife =
+            workerEvidence.getAttemptLifecycle(rootRef);
+        require(
+            failedLife.status == ComputeJobWorkerSnapshotEvidence420.AttemptStatus.FAILED,
+            "attempt one not failed"
+        );
+        require(
+            failedLife.closedAt != 0 && failedLife.transitionRef != bytes32(0),
+            "failure evidence missing"
+        );
+        require(!capacity.isLive(firstReservation), "failed attempt retained capacity");
+        require(capacity.liveResourceUnits(resourceId) == 0, "failed attempt leaked resource capacity");
+
+        bytes32 retryRef = _retry(jobId, _emptyRefs());
+        ComputeJobWorkerSnapshotEvidence420.Assignment memory retryA =
+            workerEvidence.getAssignment(retryRef);
+        ComputeJobWorkerSnapshotEvidence420.AttemptLifecycle memory rootLife =
+            workerEvidence.getAttemptLifecycle(rootRef);
+        ComputeJobWorkerSnapshotEvidence420.AttemptLifecycle memory retryLife =
+            workerEvidence.getAttemptLifecycle(retryRef);
+
+        require(retryRef != rootRef, "retry reused attempt identity");
+        require(retryA.attempt == 2, "retry attempt number wrong");
+        require(retryLife.rootAssignmentRef == rootRef, "retry root changed");
+        require(retryLife.previousAttemptRef == rootRef, "retry predecessor missing");
+        require(retryLife.constraintCommitment == rootLife.constraintCommitment, "accepted constraints changed");
+        require(retryA.snapshotCommitment != rootBefore.snapshotCommitment || retryA.attempt != rootBefore.attempt,
+            "retry not independently reconstructable");
+        require(workerEvidence.rootAssignmentForJob(jobId) == rootRef, "canonical root rewritten");
+        require(workerEvidence.assignmentForJob(jobId) == retryRef, "latest attempt not advanced");
+        require(workerEvidence.attemptCount(jobId) == 2, "attempt count wrong");
+        require(jobs.job(jobId).assignmentRef == rootRef, "job canonical assignment root rewritten");
+        require(jobs.job(jobId).status == ComputeJobRegistry420.Status.RUNNING, "retry changed job state");
+        require(capacity.isLive(retryA.reservationId), "retry did not consume capacity");
+        require(capacity.reservationForJob(jobId) == retryA.reservationId, "latest reservation not indexed");
+    }
+
+    function testAttemptCancellationRetryCannotDropAcceptedPolicyRequirements() public {
+        bytes32 rootRef = _assign(_fullRefs());
+        _transitionAttempt(
+            jobId,
+            ComputeJobWorkerSnapshotEvidence420.AttemptStatus.CANCELLED,
+            keccak256("attempt-cancelled"),
+            EXEC_KEY
+        );
+
+        ComputeJobWorkerSnapshotEvidence420.Assignment memory cancelled =
+            workerEvidence.getAssignment(rootRef);
+        ComputeJobWorkerSnapshotEvidence420.AttemptLifecycle memory cancelledLife =
+            workerEvidence.getAttemptLifecycle(rootRef);
+        require(
+            cancelledLife.status == ComputeJobWorkerSnapshotEvidence420.AttemptStatus.CANCELLED,
+            "attempt not cancelled"
+        );
+        require(!capacity.isLive(cancelled.reservationId), "cancelled attempt retained capacity");
+
+        uint64 workerRevision = workers.worker(workerId).revision;
+        uint64 jobRevision = jobs.job(jobId).revision;
+        vm.prank(RELAYER);
+        (bool ok,) = address(workerEvidence).call(
+            abi.encodeCall(
+                workerEvidence.retryAssignment,
+                (jobId, workerId, workerRevision, jobRevision, _emptyRefs(), bytes(""))
+            )
+        );
+        require(!ok, "retry dropped accepted policy requirements");
+        require(workerEvidence.assignmentForJob(jobId) == rootRef, "failed retry changed attempt");
+        require(capacity.liveResourceUnits(resourceId) == 0, "failed retry consumed capacity");
+
+        bytes32 retryRef = _retry(jobId, _fullRefs());
+        require(retryRef != rootRef, "valid policy-preserving retry failed");
+    }
+
+    function testWrongAttemptTransitionSignatureAndDuplicateCloseFailClosed() public {
+        bytes32 rootRef = _assign(_emptyRefs());
+        bytes32 failureRef = keccak256("signed-failure");
+        bytes32 digest = workerEvidence.attemptTransitionDigest(
+            jobId,
+            ComputeJobWorkerSnapshotEvidence420.AttemptStatus.FAILED,
+            failureRef
+        );
+        bytes memory wrongSignature = _signExecution(NEXT_EXEC_KEY, digest);
+
+        vm.prank(RELAYER);
+        (bool ok,) = address(workerEvidence).call(
+            abi.encodeCall(workerEvidence.failAttempt, (jobId, failureRef, wrongSignature))
+        );
+        require(!ok, "wrong key closed attempt");
+        require(capacity.liveResourceUnits(resourceId) == 1, "failed signature changed capacity");
+        require(
+            workerEvidence.getAttemptLifecycle(rootRef).status
+                == ComputeJobWorkerSnapshotEvidence420.AttemptStatus.ACTIVE,
+            "failed signature changed attempt"
+        );
+
+        _transitionAttempt(
+            jobId,
+            ComputeJobWorkerSnapshotEvidence420.AttemptStatus.FAILED,
+            failureRef,
+            EXEC_KEY
+        );
+
+        vm.prank(RELAYER);
+        (ok,) = address(workerEvidence).call(
+            abi.encodeCall(workerEvidence.cancelAttempt, (jobId, keccak256("late-cancel"), bytes("")))
+        );
+        require(!ok, "terminal attempt reopened");
+        require(workerEvidence.assignmentForJob(jobId) == rootRef, "duplicate close changed history");
+    }
+
+    function testRunningDeadlineExpiryClosesAttemptJobAndCapacity() public {
+        bytes32 rootRef = _assign(_emptyRefs());
+        ComputeJobWorkerSnapshotEvidence420.Assignment memory a =
+            workerEvidence.getAssignment(rootRef);
+        uint64 deadline = jobs.job(jobId).deadline;
+
+        vm.warp(uint256(deadline) + 1);
+        workerEvidence.syncCapacity(jobId);
+
+        ComputeJobWorkerSnapshotEvidence420.AttemptLifecycle memory expiredLife =
+            workerEvidence.getAttemptLifecycle(rootRef);
+        require(
+            expiredLife.status == ComputeJobWorkerSnapshotEvidence420.AttemptStatus.EXPIRED,
+            "attempt not expired"
+        );
+        require(
+            expiredLife.closedAt != 0 && expiredLife.transitionRef != bytes32(0),
+            "expiry evidence missing"
+        );
+        require(jobs.job(jobId).status == ComputeJobRegistry420.Status.EXPIRED, "job not canonically expired");
+        require(
+            capacity.reservation(a.reservationId).status
+                == ComputeWorkerCapacityReservation420.Status.EXPIRED,
+            "capacity not expired"
+        );
+        require(capacity.liveResourceUnits(resourceId) == 0, "expiry leaked capacity");
+
+        uint64 workerRevision = workers.worker(workerId).revision;
+        vm.prank(RELAYER);
+        (bool ok,) = address(workerEvidence).call(
+            abi.encodeCall(
+                workerEvidence.retryAssignment,
+                (jobId, workerId, workerRevision, uint64(6), _emptyRefs(), bytes(""))
+            )
+        );
+        require(!ok, "expired attempt/job retried");
+    }
+
+    function testTimelyCommittedResultCannotBeCancelledOrExpiredAndRecordsAfterDeadline() public {
+        bytes32 rootRef = _assign(_emptyRefs());
+        bytes32 result = _commit(keccak256("timely-receipt"), keccak256("timely-output"));
+        ComputeJobWorkerSnapshotEvidence420.AttemptLifecycle memory committedLife =
+            workerEvidence.getAttemptLifecycle(rootRef);
+        require(
+            committedLife.status == ComputeJobWorkerSnapshotEvidence420.AttemptStatus.RESULT_COMMITTED,
+            "attempt result status missing"
+        );
+        require(
+            committedLife.resultCommittedAt <= committedLife.acceptedDeadline,
+            "result not timely"
+        );
+
+        vm.prank(RELAYER);
+        (bool ok,) = address(workerEvidence).call(
+            abi.encodeCall(workerEvidence.cancelAttempt, (jobId, keccak256("confiscating-cancel"), bytes("")))
+        );
+        require(!ok, "result-committed attempt cancelled");
+
+        uint64 deadline = jobs.job(jobId).deadline;
+        vm.warp(uint256(deadline) + 1);
+
+        vm.prank(RELAYER);
+        (ok,) = address(workerEvidence).call(
+            abi.encodeCall(workerEvidence.expireAttempt, (jobId, uint64(5)))
+        );
+        require(!ok, "timely result expired after deadline");
+
+        vm.prank(OPERATOR);
+        jobs.recordResult(jobId, 5, result);
+        require(
+            jobs.job(jobId).status == ComputeJobRegistry420.Status.RESULT_COMMITTED,
+            "timely earned result stranded after deadline"
+        );
+
+        workerEvidence.syncCapacity(jobId);
+        require(capacity.liveResourceUnits(resourceId) == 0, "committed result capacity not released");
+    }
+
+    function testRetryAdmissionUsesLivePolicyButCannotRewriteFailedHistory() public {
+        bytes32 rootRef = _assign(_fullRefs());
+        _transitionAttempt(
+            jobId,
+            ComputeJobWorkerSnapshotEvidence420.AttemptStatus.FAILED,
+            keccak256("policy-failure"),
+            EXEC_KEY
+        );
+        ComputeJobWorkerSnapshotEvidence420.Assignment memory before =
+            workerEvidence.getAssignment(rootRef);
+        ComputeJobWorkerSnapshotEvidence420.AttemptLifecycle memory beforeLife =
+            workerEvidence.getAttemptLifecycle(rootRef);
+
+        admission.setAllow(false);
+        uint64 workerRevision = workers.worker(workerId).revision;
+        uint64 jobRevision = jobs.job(jobId).revision;
+        vm.prank(RELAYER);
+        (bool ok,) = address(workerEvidence).call(
+            abi.encodeCall(
+                workerEvidence.retryAssignment,
+                (jobId, workerId, workerRevision, jobRevision, _fullRefs(), bytes(""))
+            )
+        );
+        require(!ok, "retry bypassed live policy");
+
+        ComputeJobWorkerSnapshotEvidence420.Assignment memory afterA =
+            workerEvidence.getAssignment(rootRef);
+        ComputeJobWorkerSnapshotEvidence420.AttemptLifecycle memory afterLife =
+            workerEvidence.getAttemptLifecycle(rootRef);
+        require(afterLife.status == beforeLife.status, "failed historical status rewritten");
+        require(afterA.snapshotCommitment == before.snapshotCommitment, "failed snapshot rewritten");
+        require(
+            afterLife.transitionRef == beforeLife.transitionRef,
+            "failed transition evidence rewritten"
+        );
+        require(workerEvidence.assignmentForJob(jobId) == rootRef, "rejected retry changed active history");
+    }
+
 }

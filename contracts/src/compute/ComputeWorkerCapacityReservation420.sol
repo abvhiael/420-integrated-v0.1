@@ -160,7 +160,12 @@ contract ComputeWorkerCapacityReservation420 {
                 || resourceRevision == 0
                 || expectedJobRevision == 0
                 || deadline <= block.timestamp
-                || reservationForJob[jobId] != bytes32(0)
+        ) revert InvalidReservation();
+
+        bytes32 priorReservationId = reservationForJob[jobId];
+        if (
+            priorReservationId != bytes32(0)
+                && _current[priorReservationId].status == Status.RESERVED
         ) revert InvalidReservation();
 
         // Admission must use the exact current eligible worker revision. Historical reservations remain

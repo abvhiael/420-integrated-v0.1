@@ -875,4 +875,47 @@ contract ComputeJobWorkerSnapshotEvidence420Test {
         require(!ok, "duplicate expiry accepted");
     }
 
+
+    function testVerificationFailureMarksCapacityFailed() public {
+        bytes32 assignmentRef = _assign(_emptyRefs());
+        ComputeJobWorkerSnapshotEvidence420.Assignment memory a =
+            workerEvidence.getAssignment(assignmentRef);
+
+        bytes32 result = _commit(keccak256("capacity-fail-receipt"), keccak256("capacity-fail-output"));
+        vm.prank(OPERATOR);
+        jobs.recordResult(jobId, 5, result);
+
+        commonEvidence.recordDecision(
+            address(jobs),
+            jobId,
+            6,
+            keccak256("verification-failed"),
+            false
+        );
+        require(jobs.job(jobId).status == ComputeJobRegistry420.Status.FAILED, "job not failed");
+
+        workerEvidence.syncCapacity(jobId);
+        ComputeWorkerCapacityReservation420.Reservation memory r =
+            capacity.reservation(a.reservationId);
+        require(r.status == ComputeWorkerCapacityReservation420.Status.FAILED, "reservation not failed");
+        require(capacity.liveResourceUnits(resourceId) == 0, "failed resource capacity retained");
+        require(capacity.liveWorkerUnits(workerId) == 0, "failed worker capacity retained");
+    }
+
+    function testOnlyBoundSnapshotControllerCanMutateReservation() public {
+        bytes32 assignmentRef = _assign(_emptyRefs());
+        ComputeJobWorkerSnapshotEvidence420.Assignment memory a =
+            workerEvidence.getAssignment(assignmentRef);
+
+        (bool ok,) = address(capacity).call(
+            abi.encodeCall(capacity.release, (a.reservationId, keccak256("direct-release")))
+        );
+        require(!ok, "unbound caller released capacity");
+
+        ComputeWorkerCapacityReservation420.Reservation memory r =
+            capacity.reservation(a.reservationId);
+        require(r.status == ComputeWorkerCapacityReservation420.Status.RESERVED, "unauthorized transition mutated");
+        require(capacity.liveResourceUnits(resourceId) == 1, "unauthorized transition changed counters");
+    }
+
 }

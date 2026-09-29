@@ -1,0 +1,54 @@
+name: 420Registry REG-AUDIT-4
+on:
+  pull_request:
+    paths:
+      - 'contracts/config/**'
+      - 'config/**'
+      - 'wallet/deployment-inventory.json'
+      - 'developer-hub/catalogue/local.example.json'
+      - 'developer-hub/manifests/local.example.json'
+      - 'scripts/verify-reg-audit-4-genesis-address-namespace.py'
+      - 'scripts/test-reg-audit-4-genesis-address-namespace.py'
+      - 'scripts/audit-genesis-address-collisions.py'
+      - 'docs/audit/REG-AUDIT-4-GENESIS-ADDRESS-NAMESPACE-QUALIFICATION.*'
+      - 'docs/audit/420REGISTRY-COMPLETE-AUDIT-20260928.*'
+      - '.github/workflows/registry-reg-audit-4.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: registry-reg-audit-4-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify exact qualification head
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Retained REG-AUDIT-1 decision
+        run: python scripts/verify-reg-audit-1-registry-api-decision.py
+      - name: Retained REG-AUDIT-2 API reconciliation
+        run: python scripts/verify-reg-audit-2-api-reconciliation.py
+      - name: Retained REG-AUDIT-3 invariant coverage
+        run: python scripts/verify-reg-audit-3-invariant-coverage.py
+      - name: REG-AUDIT-4 complete namespace authority
+        run: python scripts/verify-reg-audit-4-genesis-address-namespace.py
+      - name: REG-AUDIT-4 adversarial namespace fixtures
+        run: python scripts/test-reg-audit-4-genesis-address-namespace.py
+      - name: Canonical Genesis owner validation
+        run: python scripts/verify-genesis-canonical-addresses.py
+      - name: Predeploy/deployment authority parity
+        run: python scripts/verify-genesis-predeploy-authority.py
+      - name: Current frozen namespace validation
+        run: python scripts/verify-wallet-w14-7-1-namespace.py
+      - name: Current namespace regression fixtures
+        run: python scripts/test-wallet-w14-7-1-namespace.py
+      - name: Active collision/frozen-range audit
+        run: python scripts/audit-genesis-address-collisions.py

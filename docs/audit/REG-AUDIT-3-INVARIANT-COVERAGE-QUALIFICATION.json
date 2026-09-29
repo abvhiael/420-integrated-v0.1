@@ -1,0 +1,77 @@
+{
+  "schema": "420-registry-reg-audit-3-qualification-v1",
+  "step": "REG-AUDIT-3",
+  "title": "complete REG invariant coverage",
+  "status": "CANDIDATE_QUALIFIED_EVIDENCE_RECORDED_PENDING_RECONCILIATION_AND_FINAL_EXACT_HEAD_QUALIFICATION",
+  "roadmap": "docs/audit/420REGISTRY-COMPLETE-AUDIT-20260928.md",
+  "implementation": {
+    "canonicalIdCollisionGuard": "CanonicalServiceIdImmutable",
+    "focusedTest": "contracts/test/RegistryInvariantCoverage420.t.sol",
+    "verifier": "scripts/verify-reg-audit-3-invariant-coverage.py",
+    "workflow": ".github/workflows/registry-reg-audit-3.yml",
+    "realResidentAuthorizationSeam": "MerchantRegistry420.setStatus",
+    "domainIsolationSeam": "Identity420.profiles",
+    "projectionReconstruction": [
+      "ServiceVersionPublished",
+      "ServiceRegistrationProfilePublished",
+      "getService",
+      "getRegistrationProfile"
+    ]
+  },
+  "invariantEvidence": {
+    "REG-INV-001": "test_REG_INV_001_canonical_or_explicit_extension_only",
+    "REG-INV-002": "test_REG_INV_002_versions_are_sequential_and_history_readable",
+    "REG-INV-003": "test_REG_INV_003_genesis_registration_rejects_no_runtime_code",
+    "REG-INV-004": "test_REG_INV_004_runtime_code_hash_is_derived_not_caller_supplied",
+    "REG-INV-005": "test_REG_INV_005_zero_manifest_and_interface_rejected_independently",
+    "REG-INV-006": "test_REG_INV_006_published_profile_is_immutable_for_version",
+    "REG-INV-007": "test_REG_INV_007_only_governance_can_approve_publish_or_deprecate",
+    "REG-INV-008": "test_REG_INV_008_deprecation_fails_closed_and_preserves_history",
+    "REG-INV-009": "test_REG_INV_009_registry_publication_grants_no_real_resident_authority",
+    "REG-INV-010": "test_REG_INV_010_projection_can_reconstruct_from_events_and_reads",
+    "REG-INV-011": "test_REG_INV_011_registry_metadata_cannot_overwrite_identity_state",
+    "REG-INV-012": "test_REG_INV_012_extension_approval_cannot_collide_with_canonical_id"
+  },
+  "exitCriteria": {
+    "zeroManifestInterfaceIndependentRejection": "IMPLEMENTED",
+    "profileImmutability": "IMPLEMENTED",
+    "unauthorizedExtensionApproval": "IMPLEMENTED",
+    "unauthorizedDeprecation": "IMPLEMENTED",
+    "canonicalIdDescriptorCollision": "IMPLEMENTED",
+    "registrationNonAuthorityRealResident": "IMPLEMENTED",
+    "allTwelveNamedExecutableEvidence": "CANDIDATE_QUALIFIED",
+    "finalExactHeadQualification": "PENDING_RECONCILIATION_AND_EVIDENCE_HEAD_REQUALIFICATION"
+  },
+  "evidence": {
+    "candidateQualifiedSha": "4773f9d7cf3a60373f6b93116a6b126deaf5524b",
+    "candidateMainBaseSha": "6c0a70ae020bfa911c57f6148fd585c9036c5f78",
+    "candidateRuns": {
+      "regAudit1": 36525288252,
+      "regAudit2": 36525288318,
+      "regAudit3": 36525288262,
+      "solidityContracts": 36525288319,
+      "integrated": 36525288284,
+      "docs": 36525288298,
+      "indexer": 36525288205
+    },
+    "currentMainObservedAfterCandidate": "3758148416e394ad3da0572ef3b39861764a9141",
+    "finalReconciledEvidenceHeadSha": null,
+    "finalReconciledMainBaseSha": null,
+    "finalRuns": {
+      "regAudit1": null,
+      "regAudit2": null,
+      "regAudit3": null,
+      "solidityContracts": null,
+      "integrated": null,
+      "docs": null,
+      "indexer": null
+    }
+  },
+  "limitations": [
+    "Genesis address reconciliation remains REG-AUDIT-4.",
+    "Final runtime artifact/predeploy evidence remains REG-AUDIT-5.",
+    "Generated catalogue/address cleanup remains REG-AUDIT-6.",
+    "Broader derived-consumer/reorg integration remains REG-AUDIT-7."
+  ],
+  "nextStep": "REG-AUDIT-4"
+}

@@ -1,6 +1,8 @@
 # CMP-1 — Core smart contracts
 
-**Controlling scope: the original user-provided five-slice application roadmap, restored without renumbering.** Build the on-chain foundation. None of the five slices is complete solely because other ComputeMarket foundation contracts or generic repository CI passed.
+**Controlling scope: the original user-provided five-slice application roadmap, restored without renumbering.**
+
+**Qualification evidence rule:** qualification attaches to the exact implementation SHA that changes qualification-relevant contracts, tests, configuration, workflows, dependencies, or substantive requirements. A later evidence-only commit may record that SHA, workflow run IDs, audit notes, and completion status without recursively rerunning the full suite; it must explicitly identify the qualified implementation SHA and must not imply CI ran on the evidence-only SHA. Any later commit capable of changing qualification results requires fresh exact-head qualification. Build the on-chain foundation. None of the five slices is complete solely because other ComputeMarket foundation contracts or generic repository CI passed.
 
 ## CMP-1.1 — ComputeJobRegistry
 
@@ -203,11 +205,11 @@ Required:
 - reconcile historical evidence caveats;
 - verify invariant coverage and authority boundaries;
 - record exact final SHA and workflow run IDs;
-- if evidence recording creates a new head, rerun the retained qualification suite on that exact head;
+- if evidence recording is documentation-only, record and inherit the already-qualified implementation SHA without a recursive rerun; if it changes qualification-relevant implementation, tests, configuration, workflows, dependencies, or substantive requirements, rerun the retained qualification suite on that new exact head;
 - distinguish repository qualification from live deployment claims;
 - migrate/reconcile the useful material in `CMP-1.3-DEFERRED-CLOSEOUT-DRAFT.md` and `cmp-1.3-deferred-closeout-ledger.json` here rather than discarding it.
 
-Exit: CMP-1.3 may be marked COMPLETE only after the exact final evidence-recording head passes the retained qualification suite.
+Exit: CMP-1.3 may be marked COMPLETE only after the exact qualification-relevant implementation head passes the retained qualification suite and the durable closeout record identifies that SHA and its run evidence. A later evidence-only closeout commit inherits that qualified SHA.
 
 **Roadmap provenance:** CMP-1.3.8–CMP-1.3.16 above are a **new authoritative roadmap created from the 2026-09-28 fresh repository audit** requested by the repository owner. They are not represented as recovered text from the unavailable prior conversation. The supporting audit is `docs/compute-market/CMP-1.3.8-1.3.16-WORKER-REGISTRY-GAP-AUDIT.md`.
 

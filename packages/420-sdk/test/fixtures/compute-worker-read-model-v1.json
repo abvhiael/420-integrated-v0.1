@@ -1,0 +1,20 @@
+{
+  "schema": "420-compute-worker-read-model-fixtures-v1",
+  "valid": {
+    "workerId": "0x1717171717171717171717171717171717171717171717171717171717171717",
+    "expectedRevision": "7",
+    "actualRevision": "7",
+    "workloadType": "VIDEO_TRANSCODE",
+    "attemptCount": "2"
+  },
+  "staleRevision": {
+    "workerId": "0x1717171717171717171717171717171717171717171717171717171717171717",
+    "expectedRevision": "6",
+    "actualRevision": "7",
+    "expectedError": "stale or mismatched worker revision"
+  },
+  "invalidReference": {
+    "attestationId": "0x1234",
+    "expectedError": "attestationId must be bytes32 hex"
+  }
+}

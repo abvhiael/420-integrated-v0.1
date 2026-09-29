@@ -49,19 +49,23 @@ contract ComputeWorkerAttestation420 is SystemAccess, I420System {
         bytes32 executionKeyCommitment;
         bytes32 policyId;
         uint32 policyRevision;
+        bytes32 evidenceHash;
+        address attester;
+        uint64 validAfter;
+        uint64 expiresAt;
+        bool revoked;
+        bool exists;
+    }
+
+    struct Provenance {
         bytes32 evidenceType;
         bytes32 schemaHash;
         uint32 schemaRevision;
         bytes32 sourceCommitment;
-        bytes32 evidenceHash;
         bytes32 provenanceDigest;
         bytes32 authorizationMode;
         bytes32 signatureHash;
-        address attester;
         uint64 issuedAt;
-        uint64 validAfter;
-        uint64 expiresAt;
-        bool revoked;
         bool exists;
     }
 
@@ -73,6 +77,7 @@ contract ComputeWorkerAttestation420 is SystemAccess, I420System {
     mapping(bytes32 => bool) public acceptingNew;
     mapping(bytes32 => mapping(address => bool)) public trustedAttester;
     mapping(bytes32 => Attestation) private _attestations;
+    mapping(bytes32 => Provenance) private _provenance;
     mapping(bytes32 => bool) public usedEvidenceCommitment;
     mapping(bytes32 => bool) public usedProvenanceDigest;
 
@@ -213,6 +218,12 @@ contract ComputeWorkerAttestation420 is SystemAccess, I420System {
         if (!a.exists) revert UnknownAttestation();
     }
 
+    function provenance(bytes32 attestationId) public view returns (Provenance memory p) {
+        if (!_attestations[attestationId].exists) revert UnknownAttestation();
+        p = _provenance[attestationId];
+        if (!p.exists) revert UnknownAttestation();
+    }
+
     /// @notice Legacy replay key retained for backwards-compatible reconstruction.
     function evidenceCommitment(
         bytes32 workerId,
@@ -269,28 +280,40 @@ contract ComputeWorkerAttestation420 is SystemAccess, I420System {
 
         Policy memory p = policy(policyId, policyRevision);
         ComputeWorkerRegistry420.Worker memory w = workers.revision(workerId, workerRevision);
-        return keccak256(
+
+        bytes32 subjectCommitment = keccak256(
             abi.encode(
-                PROVENANCE_DOMAIN_V1,
-                block.chainid,
-                address(this),
-                claim.evidenceType,
-                p.schemaHash,
-                claim.schemaRevision,
-                claim.sourceCommitment,
-                claim.evidenceHash,
                 workerId,
                 workerRevision,
                 w.resourceId,
                 w.resourceRevision,
                 w.capabilityProfileHash,
-                w.executionKeyCommitment,
+                w.executionKeyCommitment
+            )
+        );
+        bytes32 claimCommitment = keccak256(
+            abi.encode(
+                claim.evidenceType,
+                p.schemaHash,
+                claim.schemaRevision,
+                claim.sourceCommitment,
+                claim.evidenceHash,
                 policyId,
                 policyRevision,
                 claim.issuedAt,
                 claim.validAfter,
                 claim.expiresAt,
                 claim.issuer
+            )
+        );
+
+        return keccak256(
+            abi.encode(
+                PROVENANCE_DOMAIN_V1,
+                block.chainid,
+                address(this),
+                subjectCommitment,
+                claimCommitment
             )
         );
     }
@@ -428,19 +451,22 @@ contract ComputeWorkerAttestation420 is SystemAccess, I420System {
             executionKeyCommitment: w.executionKeyCommitment,
             policyId: policyId,
             policyRevision: policyRevision,
+            evidenceHash: claim.evidenceHash,
+            attester: claim.issuer,
+            validAfter: claim.validAfter,
+            expiresAt: claim.expiresAt,
+            revoked: false,
+            exists: true
+        });
+        _provenance[attestationId] = Provenance({
             evidenceType: claim.evidenceType,
             schemaHash: p.schemaHash,
             schemaRevision: claim.schemaRevision,
             sourceCommitment: claim.sourceCommitment,
-            evidenceHash: claim.evidenceHash,
             provenanceDigest: digest,
             authorizationMode: authorizationMode,
             signatureHash: signatureHash,
-            attester: claim.issuer,
             issuedAt: claim.issuedAt,
-            validAfter: claim.validAfter,
-            expiresAt: claim.expiresAt,
-            revoked: false,
             exists: true
         });
 
@@ -486,13 +512,14 @@ contract ComputeWorkerAttestation420 is SystemAccess, I420System {
         bytes32 policyId
     ) external view returns (bool) {
         Attestation storage a = _attestations[attestationId];
+        Provenance storage pr = _provenance[attestationId];
         if (
             !a.exists
                 || a.revoked
-                || a.provenanceDigest == bytes32(0)
-                || a.sourceCommitment == bytes32(0)
+                || !pr.exists
+                || pr.provenanceDigest == bytes32(0)
+                || pr.sourceCommitment == bytes32(0)
                 || a.evidenceHash == bytes32(0)
-                || a.issuedAt == 0
                 || policyId == bytes32(0)
                 || a.policyId != policyId
                 || a.workerId != workerId
@@ -514,8 +541,8 @@ contract ComputeWorkerAttestation420 is SystemAccess, I420System {
 
         Policy storage p = _policies[policyId][a.policyRevision];
         return p.exists
-            && a.evidenceType == p.evidenceType
-            && a.schemaHash == p.schemaHash
-            && a.schemaRevision == p.schemaRevision;
+            && pr.evidenceType == p.evidenceType
+            && pr.schemaHash == p.schemaHash
+            && pr.schemaRevision == p.schemaRevision;
     }
 }

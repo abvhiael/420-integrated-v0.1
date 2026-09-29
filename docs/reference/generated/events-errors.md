@@ -31,14 +31,18 @@ Event topics and custom-error selectors are Ethereum Keccak-256 hashes of canoni
 | Contract | Error | Canonical signature | Selector |
 | --- | --- | --- | --- |
 | `ProtocolRegistry` | `CodeHashMismatch` | `CodeHashMismatch()` | `0x93c44ee6` |
+| `ProtocolRegistry` | `ComponentLifecycleUnchanged` | `ComponentLifecycleUnchanged()` | `0x1f262656` |
 | `ProtocolRegistry` | `ImplementationHasNoCode` | `ImplementationHasNoCode()` | `0x6f778c3a` |
+| `ProtocolRegistry` | `InvalidComponentId` | `InvalidComponentId()` | `0x6b5e0346` |
 | `ProtocolRegistry` | `InvalidComponentType` | `InvalidComponentType()` | `0x6a7ed65b` |
 | `ProtocolRegistry` | `InvalidImplementation` | `InvalidImplementation()` | `0x68155f9a` |
+| `ProtocolRegistry` | `InvalidLifecycle` | `InvalidLifecycle()` | `0x18781b51` |
 | `ProtocolRegistry` | `InvalidManifest` | `InvalidManifest()` | `0xe18d5d12` |
 | `ProtocolRegistry` | `InvalidServiceId` | `InvalidServiceId()` | `0xac45f7ce` |
 | `ProtocolRegistry` | `InvalidVersion` | `InvalidVersion()` | `0xa9146eeb` |
 | `ProtocolRegistry` | `ServiceAlreadyInactive` | `ServiceAlreadyInactive()` | `0x6770d4a9` |
 | `ProtocolRegistry` | `UnapprovedServiceId` | `UnapprovedServiceId()` | `0xec12d325` |
+| `ProtocolRegistry` | `UnknownComponent` | `UnknownComponent()` | `0x1e914be6` |
 | `ProtocolRegistry` | `UnknownService` | `UnknownService()` | `0x183f5325` |
 
 ## ProtocolRegistry
@@ -96,6 +100,18 @@ Source: `contracts/src/apps/ProtocolRegistry.sol`
 - `CodeHashMismatch()`
   - canonical signature: `CodeHashMismatch()`
   - selector: `0x93c44ee6`
+- `InvalidComponentId()`
+  - canonical signature: `InvalidComponentId()`
+  - selector: `0x6b5e0346`
+- `InvalidLifecycle()`
+  - canonical signature: `InvalidLifecycle()`
+  - selector: `0x18781b51`
+- `UnknownComponent()`
+  - canonical signature: `UnknownComponent()`
+  - selector: `0x1e914be6`
+- `ComponentLifecycleUnchanged()`
+  - canonical signature: `ComponentLifecycleUnchanged()`
+  - selector: `0x1f262656`
 
 ## Hashing self-check
 

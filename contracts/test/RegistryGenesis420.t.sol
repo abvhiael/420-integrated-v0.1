@@ -105,7 +105,7 @@ contract RegistryGenesis420Test {
         require(registry.getServiceVersion(serviceId, 1).implementation == address(first), "history");
         require(registry.getRegistrationProfile(serviceId, 1).manifestHash == keccak256("m1"), "profile history");
         registry.deprecateService(serviceId);
-        require(!registry.isActive(serviceId), "inactive");
+        require(!registry.isServiceActive(serviceId), "inactive");
         vm.expectRevert(ProtocolRegistry.UnknownService.selector);
         registry.resolveActive(serviceId);
     }

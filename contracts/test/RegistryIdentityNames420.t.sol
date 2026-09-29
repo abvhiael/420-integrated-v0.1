@@ -43,7 +43,7 @@ contract RegistryIdentityNames420Test {
         require(current.version == 2 && current.implementation == implementation2, "current");
         require(previous.version == 1 && previous.implementation == implementation1, "history");
         registry.deprecateService(serviceId);
-        require(!registry.isActive(serviceId), "deprecated");
+        require(!registry.isServiceActive(serviceId), "deprecated");
         require(!registry.getServiceVersion(serviceId, 2).active, "history active");
     }
 

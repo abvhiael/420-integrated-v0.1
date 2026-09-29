@@ -33,8 +33,8 @@ This page is generated from the currently checked-in contract catalogue plus mat
 
 ### NatSpec
 
-- Notice: Canonical discovery and version registry for 420 Integrated protocol services.
-- Developer note: 420Registry records service identity, implementations and immutable version history.
+- Notice: Canonical discovery and version registry for 420 Integrated protocol services and Genesis components.
+- Developer note: Service IDs and Genesis component IDs are intentionally independent namespaces.
 
 ### Public/external source surface
 
@@ -44,14 +44,23 @@ This page is generated from the currently checked-in contract catalogue plus mat
 - `approveServiceId(bytes32 serviceId, bytes32 descriptorHash) external onlyGovernance`
 - `publishService(bytes32 serviceId, address implementation, bytes32 codeHash, bytes32 metadataHash, uint32 version, bool active) external onlyGovernance`
 - `setService(bytes32 serviceId, address implementation, bytes32 codeHash, bytes32 metadataHash, uint32 version, bool active) external onlyGovernance`
-- `publishRegisteredService(bytes32 serviceId, address implementation, bytes32 metadataHash, uint32 version, bool active, ComponentType componentType, bytes32 manifestHash, bytes32 dependencyRoot, bytes32 interfaceHash) external onlyGovernance`
+- `publishRegisteredService(bytes32 serviceId, address implementation, bytes32 metadataHash, uint32 version, bool active, ComponentType componentType_, bytes32 manifestHash, bytes32 dependencyRoot, bytes32 interfaceHash) external onlyGovernance`
 - `deprecateService(bytes32 serviceId) external onlyGovernance`
+- `registerComponent(bytes32 componentId, address implementation, Types420.Version calldata version, Types420.Lifecycle lifecycle) external onlyGovernance`
+- `setComponentLifecycle(bytes32 componentId, Types420.Lifecycle lifecycle) external onlyGovernance`
 - `getService(bytes32 serviceId) external view returns (Service memory)`
 - `getServiceVersion(bytes32 serviceId, uint32 version) external view returns (Service memory)`
 - `getRegistrationProfile(bytes32 serviceId, uint32 version) external view returns (RegistrationProfile memory)`
 - `currentVersion(bytes32 serviceId) external view returns (uint32)`
-- `isActive(bytes32 serviceId) external view returns (bool)`
+- `isServiceActive(bytes32 serviceId) external view returns (bool)`
 - `resolveActive(bytes32 serviceId) external view returns (address implementation, uint32 version)`
+- `component(bytes32 componentId) external view override returns (Types420.ContractRef memory)`
+- `isActive(bytes32 componentId) external view override returns (bool)`
+- `resolve(bytes32 componentId) external view override returns (address implementation)`
+- `runtimeCodeHash(bytes32 componentId) external view override returns (bytes32)`
+- `supportsVersion(bytes32 componentId, Types420.Version calldata requested) external view override returns (bool)`
+- `currentComponentRevision(bytes32 componentId) external view returns (uint32)`
+- `getComponentRevision(bytes32 componentId, uint32 revision) external view returns (Types420.ContractRef memory)`
 
 ### ABI publication status
 

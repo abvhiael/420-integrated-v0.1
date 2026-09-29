@@ -2,7 +2,7 @@
   "schema": "420-registry-reg-audit-2-qualification-v1",
   "step": "REG-AUDIT-2",
   "title": "implement and test the API reconciliation",
-  "status": "IMPLEMENTED_PENDING_FINAL_EXACT_HEAD_QUALIFICATION",
+  "status": "EVIDENCE_RECORDED_PENDING_FINAL_EXACT_HEAD_REQUALIFICATION",
   "roadmap": "docs/audit/420REGISTRY-COMPLETE-AUDIT-20260928.md",
   "pr": 393,
   "implementation": {
@@ -36,18 +36,29 @@
     "inactiveDeprecatedFailClosed": "IMPLEMENTED",
     "historicalProvenance": "IMPLEMENTED",
     "genesisResidentResolution": "IMPLEMENTED",
-    "finalExactHeadQualification": "PENDING"
+    "finalExactHeadQualification": "PENDING_EVIDENCE_HEAD_REQUALIFICATION"
   },
   "evidence": {
-    "qualifiedSha": null,
-    "mainBaseSha": null,
-    "runs": {
+    "candidateQualifiedSha": "e7977f52ace126a66624a01ca29c5768252cdc83",
+    "candidateMainBaseSha": "a29fa8bc920ae6cddd1b10be1a2a32dfe8f70bb2",
+    "candidateRuns": {
+      "solidityContracts": 36516604212,
+      "regAudit1": 36516604155,
+      "regAudit2": 36516604147,
+      "integrated": 36516604207,
+      "docs": 36516604362,
+      "indexer": 36516604159
+    },
+    "finalEvidenceHeadSha": null,
+    "finalEvidenceHeadRuns": {
       "solidityContracts": null,
       "regAudit1": null,
       "regAudit2": null,
       "integrated": null,
-      "docs": null
-    }
+      "docs": null,
+      "indexer": null
+    },
+    "finalEvidenceHeadRecord": "PR #393 body after exact-head requalification; PR metadata is used so recording final run IDs does not mutate the qualified commit SHA."
   },
   "nextStep": "REG-AUDIT-3"
 }

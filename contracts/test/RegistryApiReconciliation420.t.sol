@@ -11,6 +11,7 @@ import "../src/interfaces/genesis/Errors420.sol";
 interface VmRegistryApi420 {
     function prank(address) external;
     function expectRevert(bytes4) external;
+    function expectRevert(bytes calldata) external;
     function etch(address, bytes calldata) external;
 }
 
@@ -179,11 +180,11 @@ contract RegistryApiReconciliation420Test {
         require(resident.resolveRequired(DEPENDENCY_ID) == address(dependency), "dependency resolve");
 
         registry.setComponentLifecycle(DEPENDENCY_ID, Types420.Lifecycle.DEPRECATED);
-        vm.expectRevert(Errors420.InactiveComponent.selector);
+        vm.expectRevert(abi.encodeWithSelector(Errors420.InactiveComponent.selector, DEPENDENCY_ID));
         resident.resolveRequired(DEPENDENCY_ID);
 
         registry.setComponentLifecycle(resident.componentId(), Types420.Lifecycle.DEPRECATED);
-        vm.expectRevert(Errors420.InactiveComponent.selector);
+        vm.expectRevert(abi.encodeWithSelector(Errors420.InactiveComponent.selector, resident.componentId()));
         resident.requireResidentActive();
     }
 
@@ -200,7 +201,7 @@ contract RegistryApiReconciliation420Test {
         );
 
         vm.etch(address(dependency), hex"00");
-        vm.expectRevert(Errors420.InactiveComponent.selector);
+        vm.expectRevert(abi.encodeWithSelector(Errors420.InactiveComponent.selector, DEPENDENCY_ID));
         resident.resolveRequired(DEPENDENCY_ID);
     }
 }

@@ -85,6 +85,30 @@ function reader() {
     calls,
     jobId,
     api: {
+      schemaVersion: async () => 1,
+      components: async () => ({
+        workers: addr(101),
+        profiles: addr(102),
+        capabilityEligibility: addr(103),
+        attestation: addr(104),
+        trust: addr(105),
+        stake: addr(106),
+        capacity: addr(107),
+        snapshots: addr(108)
+      }),
+      domains: async () => ({
+        workerIdentity: b32(201),
+        capabilityProfile: b32(202),
+        attestation: b32(203),
+        provenance: b32(204),
+        trustReference: b32(205),
+        stakeReference: b32(206),
+        capacityReservation: b32(207),
+        executionAccept: b32(208),
+        executionResult: b32(209),
+        attemptTransition: b32(210),
+        acceptedConstraint: b32(211)
+      }),
       workerRevision: async () => identity(),
       capabilityProfile: async () => profile(),
       eligibility: async (query) => {
@@ -123,6 +147,23 @@ test('publishes deterministic canonical read method surface', () => {
   assert.equal(COMPUTE_WORKER_READ_MODEL_METHODS_420[0], 'schemaVersion()');
   assert.ok(COMPUTE_WORKER_READ_MODEL_METHODS_420.includes('attemptLifecycle(bytes32)'));
   assert.equal(new Set(COMPUTE_WORKER_READ_MODEL_METHODS_420).size, COMPUTE_WORKER_READ_MODEL_METHODS_420.length);
+});
+
+
+test('validates schema, component addresses, and domain constants before consumption', async () => {
+  const r = reader();
+  const client = createComputeWorkerClient420(r.api);
+  const descriptor = await client.descriptor();
+  assert.equal(descriptor.schemaVersion, 1);
+  assert.equal(descriptor.components.workers, addr(101));
+  assert.equal(descriptor.domains.acceptedConstraint, b32(211));
+
+  const bad = reader();
+  bad.api.schemaVersion = async () => 2;
+  await assert.rejects(
+    () => createComputeWorkerClient420(bad.api).descriptor(),
+    /unsupported compute worker read-model schema version/
+  );
 });
 
 test('reconstructs exact worker revision and capability profile', async () => {

@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
@@ -191,4 +192,35 @@ test('rejects malformed public reference identifiers', async () => {
   const r = reader();
   const client = createComputeWorkerClient420(r.api);
   await assert.rejects(() => client.attestation('0x1234'), ComputeReadModelError420);
+});
+
+
+test('repository descriptor matches SDK canonical method surface', async () => {
+  const raw = await readFile(new URL('../../../420-indexer/descriptors/compute-worker-read-model-v1.json', import.meta.url), 'utf8');
+  const descriptor = JSON.parse(raw);
+  assert.equal(descriptor.schema, '420-compute-worker-read-model-v1');
+  assert.equal(descriptor.callerPrivilegesRequired, false);
+  assert.deepEqual(descriptor.methods, [...COMPUTE_WORKER_READ_MODEL_METHODS_420]);
+  assert.ok(descriptor.consumers.includes('matcher'));
+  assert.ok(descriptor.consumers.includes('worker-agent'));
+  assert.ok(descriptor.consumers.includes('indexer'));
+  assert.ok(descriptor.consumers.includes('application'));
+  assert.deepEqual(descriptor.explicitNonAiCoverage, ['VIDEO_TRANSCODE']);
+});
+
+test('stale and malformed fixtures remain machine-consumable and fail closed', async () => {
+  const raw = await readFile(new URL('./fixtures/compute-worker-read-model-v1.json', import.meta.url), 'utf8');
+  const fixtures = JSON.parse(raw);
+  const stale = fixtures.staleRevision;
+  assert.throws(
+    () => validateWorkerRevision420(stale.workerId, BigInt(stale.expectedRevision), identity(BigInt(stale.actualRevision))),
+    new RegExp(stale.expectedError)
+  );
+  const r = reader();
+  const client = createComputeWorkerClient420(r.api);
+  await assert.rejects(
+    () => client.attestation(fixtures.invalidReference.attestationId),
+    new RegExp(fixtures.invalidReference.expectedError)
+  );
+  assert.equal(fixtures.valid.workloadType, 'VIDEO_TRANSCODE');
 });

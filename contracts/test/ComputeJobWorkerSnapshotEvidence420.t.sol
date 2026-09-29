@@ -825,4 +825,54 @@ contract ComputeJobWorkerSnapshotEvidence420Test {
         require(workerEvidence.assignmentForJob(secondJob) == bytes32(0), "cross-revision overbook assigned");
     }
 
+
+    function testResultReleaseIsDeterministicReplaySafeAndHistorical() public {
+        bytes32 assignmentRef = _assign(_emptyRefs());
+        ComputeJobWorkerSnapshotEvidence420.Assignment memory a =
+            workerEvidence.getAssignment(assignmentRef);
+
+        bytes32 result = _commit(keccak256("capacity-release-receipt"), keccak256("capacity-release-output"));
+        vm.prank(OPERATOR);
+        jobs.recordResult(jobId, 5, result);
+
+        workerEvidence.syncCapacity(jobId);
+
+        ComputeWorkerCapacityReservation420.Reservation memory current =
+            capacity.reservation(a.reservationId);
+        require(current.status == ComputeWorkerCapacityReservation420.Status.RELEASED, "not released");
+        require(current.revision == 2 && current.closedAt != 0, "release history missing");
+        require(capacity.liveResourceUnits(resourceId) == 0, "resource capacity not released");
+        require(capacity.liveWorkerUnits(workerId) == 0, "worker capacity not released");
+
+        ComputeWorkerCapacityReservation420.Reservation memory beforeR =
+            capacity.revision(a.reservationId, 1);
+        ComputeWorkerCapacityReservation420.Reservation memory afterR =
+            capacity.revision(a.reservationId, 2);
+        require(beforeR.status == ComputeWorkerCapacityReservation420.Status.RESERVED, "reserve history lost");
+        require(afterR.status == ComputeWorkerCapacityReservation420.Status.RELEASED, "release history lost");
+
+        (bool ok,) = address(workerEvidence).call(abi.encodeCall(workerEvidence.syncCapacity, (jobId)));
+        require(!ok, "duplicate release replay accepted");
+        require(capacity.liveResourceUnits(resourceId) == 0, "duplicate release changed counter");
+    }
+
+    function testDeadlineExpiryReleasesCapacityExactlyOnce() public {
+        bytes32 assignmentRef = _assign(_emptyRefs());
+        ComputeJobWorkerSnapshotEvidence420.Assignment memory a =
+            workerEvidence.getAssignment(assignmentRef);
+        uint64 deadline = jobs.job(jobId).deadline;
+
+        vm.warp(uint256(deadline) + 1);
+        workerEvidence.syncCapacity(jobId);
+
+        ComputeWorkerCapacityReservation420.Reservation memory r =
+            capacity.reservation(a.reservationId);
+        require(r.status == ComputeWorkerCapacityReservation420.Status.EXPIRED, "reservation not expired");
+        require(capacity.liveResourceUnits(resourceId) == 0, "expired resource capacity retained");
+        require(capacity.liveWorkerUnits(workerId) == 0, "expired worker capacity retained");
+
+        (bool ok,) = address(workerEvidence).call(abi.encodeCall(workerEvidence.syncCapacity, (jobId)));
+        require(!ok, "duplicate expiry accepted");
+    }
+
 }

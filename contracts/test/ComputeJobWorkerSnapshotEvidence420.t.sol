@@ -969,23 +969,32 @@ contract ComputeJobWorkerSnapshotEvidence420Test {
 
         ComputeJobWorkerSnapshotEvidence420.Assignment memory failed =
             workerEvidence.getAssignment(rootRef);
+        ComputeJobWorkerSnapshotEvidence420.AttemptLifecycle memory failedLife =
+            workerEvidence.getAttemptLifecycle(rootRef);
         require(
-            failed.status == ComputeJobWorkerSnapshotEvidence420.AttemptStatus.FAILED,
+            failedLife.status == ComputeJobWorkerSnapshotEvidence420.AttemptStatus.FAILED,
             "attempt one not failed"
         );
-        require(failed.closedAt != 0 && failed.transitionRef != bytes32(0), "failure evidence missing");
+        require(
+            failedLife.closedAt != 0 && failedLife.transitionRef != bytes32(0),
+            "failure evidence missing"
+        );
         require(!capacity.isLive(firstReservation), "failed attempt retained capacity");
         require(capacity.liveResourceUnits(resourceId) == 0, "failed attempt leaked resource capacity");
 
         bytes32 retryRef = _retry(jobId, _emptyRefs());
         ComputeJobWorkerSnapshotEvidence420.Assignment memory retryA =
             workerEvidence.getAssignment(retryRef);
+        ComputeJobWorkerSnapshotEvidence420.AttemptLifecycle memory rootLife =
+            workerEvidence.getAttemptLifecycle(rootRef);
+        ComputeJobWorkerSnapshotEvidence420.AttemptLifecycle memory retryLife =
+            workerEvidence.getAttemptLifecycle(retryRef);
 
         require(retryRef != rootRef, "retry reused attempt identity");
         require(retryA.attempt == 2, "retry attempt number wrong");
-        require(retryA.rootAssignmentRef == rootRef, "retry root changed");
-        require(retryA.previousAttemptRef == rootRef, "retry predecessor missing");
-        require(retryA.constraintCommitment == rootBefore.constraintCommitment, "accepted constraints changed");
+        require(retryLife.rootAssignmentRef == rootRef, "retry root changed");
+        require(retryLife.previousAttemptRef == rootRef, "retry predecessor missing");
+        require(retryLife.constraintCommitment == rootLife.constraintCommitment, "accepted constraints changed");
         require(retryA.snapshotCommitment != rootBefore.snapshotCommitment || retryA.attempt != rootBefore.attempt,
             "retry not independently reconstructable");
         require(workerEvidence.rootAssignmentForJob(jobId) == rootRef, "canonical root rewritten");
@@ -1008,8 +1017,10 @@ contract ComputeJobWorkerSnapshotEvidence420Test {
 
         ComputeJobWorkerSnapshotEvidence420.Assignment memory cancelled =
             workerEvidence.getAssignment(rootRef);
+        ComputeJobWorkerSnapshotEvidence420.AttemptLifecycle memory cancelledLife =
+            workerEvidence.getAttemptLifecycle(rootRef);
         require(
-            cancelled.status == ComputeJobWorkerSnapshotEvidence420.AttemptStatus.CANCELLED,
+            cancelledLife.status == ComputeJobWorkerSnapshotEvidence420.AttemptStatus.CANCELLED,
             "attempt not cancelled"
         );
         require(!capacity.isLive(cancelled.reservationId), "cancelled attempt retained capacity");
@@ -1048,7 +1059,7 @@ contract ComputeJobWorkerSnapshotEvidence420Test {
         require(!ok, "wrong key closed attempt");
         require(capacity.liveResourceUnits(resourceId) == 1, "failed signature changed capacity");
         require(
-            workerEvidence.getAssignment(rootRef).status
+            workerEvidence.getAttemptLifecycle(rootRef).status
                 == ComputeJobWorkerSnapshotEvidence420.AttemptStatus.ACTIVE,
             "failed signature changed attempt"
         );
@@ -1077,13 +1088,16 @@ contract ComputeJobWorkerSnapshotEvidence420Test {
         vm.warp(uint256(deadline) + 1);
         workerEvidence.syncCapacity(jobId);
 
-        ComputeJobWorkerSnapshotEvidence420.Assignment memory expired =
-            workerEvidence.getAssignment(rootRef);
+        ComputeJobWorkerSnapshotEvidence420.AttemptLifecycle memory expiredLife =
+            workerEvidence.getAttemptLifecycle(rootRef);
         require(
-            expired.status == ComputeJobWorkerSnapshotEvidence420.AttemptStatus.EXPIRED,
+            expiredLife.status == ComputeJobWorkerSnapshotEvidence420.AttemptStatus.EXPIRED,
             "attempt not expired"
         );
-        require(expired.closedAt != 0 && expired.transitionRef != bytes32(0), "expiry evidence missing");
+        require(
+            expiredLife.closedAt != 0 && expiredLife.transitionRef != bytes32(0),
+            "expiry evidence missing"
+        );
         require(jobs.job(jobId).status == ComputeJobRegistry420.Status.EXPIRED, "job not canonically expired");
         require(
             capacity.reservation(a.reservationId).status
@@ -1106,13 +1120,16 @@ contract ComputeJobWorkerSnapshotEvidence420Test {
     function testTimelyCommittedResultCannotBeCancelledOrExpiredAndRecordsAfterDeadline() public {
         bytes32 rootRef = _assign(_emptyRefs());
         bytes32 result = _commit(keccak256("timely-receipt"), keccak256("timely-output"));
-        ComputeJobWorkerSnapshotEvidence420.Assignment memory committed =
-            workerEvidence.getAssignment(rootRef);
+        ComputeJobWorkerSnapshotEvidence420.AttemptLifecycle memory committedLife =
+            workerEvidence.getAttemptLifecycle(rootRef);
         require(
-            committed.status == ComputeJobWorkerSnapshotEvidence420.AttemptStatus.RESULT_COMMITTED,
+            committedLife.status == ComputeJobWorkerSnapshotEvidence420.AttemptStatus.RESULT_COMMITTED,
             "attempt result status missing"
         );
-        require(committed.resultCommittedAt <= committed.acceptedDeadline, "result not timely");
+        require(
+            committedLife.resultCommittedAt <= committedLife.acceptedDeadline,
+            "result not timely"
+        );
 
         vm.prank(RELAYER);
         (bool ok,) = address(workerEvidence).call(
@@ -1150,6 +1167,8 @@ contract ComputeJobWorkerSnapshotEvidence420Test {
         );
         ComputeJobWorkerSnapshotEvidence420.Assignment memory before =
             workerEvidence.getAssignment(rootRef);
+        ComputeJobWorkerSnapshotEvidence420.AttemptLifecycle memory beforeLife =
+            workerEvidence.getAttemptLifecycle(rootRef);
 
         admission.setAllow(false);
         uint64 workerRevision = workers.worker(workerId).revision;
@@ -1165,9 +1184,14 @@ contract ComputeJobWorkerSnapshotEvidence420Test {
 
         ComputeJobWorkerSnapshotEvidence420.Assignment memory afterA =
             workerEvidence.getAssignment(rootRef);
-        require(afterA.status == before.status, "failed historical status rewritten");
+        ComputeJobWorkerSnapshotEvidence420.AttemptLifecycle memory afterLife =
+            workerEvidence.getAttemptLifecycle(rootRef);
+        require(afterLife.status == beforeLife.status, "failed historical status rewritten");
         require(afterA.snapshotCommitment == before.snapshotCommitment, "failed snapshot rewritten");
-        require(afterA.transitionRef == before.transitionRef, "failed transition evidence rewritten");
+        require(
+            afterLife.transitionRef == beforeLife.transitionRef,
+            "failed transition evidence rewritten"
+        );
         require(workerEvidence.assignmentForJob(jobId) == rootRef, "rejected retry changed active history");
     }
 

@@ -5,6 +5,7 @@ import "../src/compute/ComputeJobWorkerSnapshotEvidence420.sol";
 import "../src/compute/ComputeProviderRegistry420.sol";
 import "../src/compute/ComputeNodeRegistry420.sol";
 import "../src/compute/ComputeResourceRegistry420.sol";
+import "../src/compute/ComputeWorkerCapacityReservation420.sol";
 import "../src/interfaces/genesis/ICapabilityRegistry420.sol";
 
 interface VmWorkerSnapshot420 {
@@ -159,6 +160,7 @@ contract ComputeJobWorkerSnapshotEvidence420Test {
     SnapshotMatchMock420 private matchEvidence;
     SnapshotAdmissionMock420 private admission;
     ComputeJobWorkerSnapshotEvidence420 private workerEvidence;
+    ComputeWorkerCapacityReservation420 private capacity;
     ComputeJobRegistry420 private jobs;
 
     bytes32 private resourceId;
@@ -178,6 +180,7 @@ contract ComputeJobWorkerSnapshotEvidence420Test {
         commonEvidence = new SnapshotRequestFundingVerification420();
         matchEvidence = new SnapshotMatchMock420();
         admission = new SnapshotAdmissionMock420();
+        capacity = new ComputeWorkerCapacityReservation420(address(workers));
 
         workerEvidence = new ComputeJobWorkerSnapshotEvidence420(
             address(matchEvidence),
@@ -185,7 +188,8 @@ contract ComputeJobWorkerSnapshotEvidence420Test {
             address(workers),
             address(admission),
             address(admission),
-            address(admission)
+            address(admission),
+            address(capacity)
         );
 
         jobs = new ComputeJobRegistry420(
@@ -228,6 +232,7 @@ contract ComputeJobWorkerSnapshotEvidence420Test {
 
         matchEvidence.configure(address(jobs), resourceId, OPERATOR);
         workerEvidence.bindJobs(address(jobs));
+        capacity.bindController(address(workerEvidence));
 
         vm.prank(OWNER);
         jobId = jobs.createJob(

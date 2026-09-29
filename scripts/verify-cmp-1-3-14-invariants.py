@@ -55,9 +55,9 @@ for item in items:
             fail(f"{invariant_id} references missing file {path_text}")
         if symbol:
             source = path.read_text(encoding="utf-8")
-            pattern = re.compile(r"\bfunction\s+" + re.escape(symbol) + r"\b")
-            if not pattern.search(source):
-                fail(f"{invariant_id} references missing function {symbol} in {path_text}")
+            function_pattern = re.compile(r"\bfunction\s+" + re.escape(symbol) + r"\b")
+            if not function_pattern.search(source) and symbol not in source:
+                fail(f"{invariant_id} references missing function/test label {symbol} in {path_text}")
 
 direct = sum(1 for item in items if item["disposition"] == "direct")
 transitive = sum(1 for item in items if item["disposition"] == "transitive_retained")

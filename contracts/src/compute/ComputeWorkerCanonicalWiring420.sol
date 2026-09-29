@@ -7,6 +7,7 @@ import "./ComputeWorkerRegistry420.sol";
 import "./ComputeWorkerAttestation420.sol";
 import "./ComputeWorkerTrust420.sol";
 import "./ComputeWorkerStake420.sol";
+import "./ComputeWorkerCapacityReservation420.sol";
 
 /// @notice Immutable, chain-specific CMP-1.3 deployment wiring audit record.
 /// @dev This contract does not deploy, publish, upgrade, or grant authority. It only fails closed
@@ -19,6 +20,7 @@ contract ComputeWorkerCanonicalWiring420 {
         bytes32 attestation;
         bytes32 trust;
         bytes32 stake;
+        bytes32 capacity;
     }
 
     ComputeJobRegistry420 public immutable canonicalJobs;
@@ -27,6 +29,7 @@ contract ComputeWorkerCanonicalWiring420 {
     ComputeWorkerAttestation420 public immutable canonicalAttestation;
     ComputeWorkerTrust420 public immutable canonicalTrust;
     ComputeWorkerStake420 public immutable canonicalStake;
+    ComputeWorkerCapacityReservation420 public immutable canonicalCapacity;
     uint256 public immutable expectedChainId;
     address public immutable expectedGovernance;
 
@@ -36,6 +39,7 @@ contract ComputeWorkerCanonicalWiring420 {
     bytes32 public immutable expectedAttestationCodeHash;
     bytes32 public immutable expectedTrustCodeHash;
     bytes32 public immutable expectedStakeCodeHash;
+    bytes32 public immutable expectedCapacityCodeHash;
 
     error InvalidWiring();
 
@@ -46,6 +50,7 @@ contract ComputeWorkerCanonicalWiring420 {
         address attestation_,
         address trust_,
         address stake_,
+        address capacity_,
         address governance_,
         CodeHashes memory hashes_
     ) {
@@ -56,6 +61,7 @@ contract ComputeWorkerCanonicalWiring420 {
                 || attestation_ == address(0)
                 || trust_ == address(0)
                 || stake_ == address(0)
+                || capacity_ == address(0)
                 || governance_ == address(0)
                 || hashes_.jobs == bytes32(0)
                 || hashes_.workerEvidence == bytes32(0)
@@ -63,6 +69,7 @@ contract ComputeWorkerCanonicalWiring420 {
                 || hashes_.attestation == bytes32(0)
                 || hashes_.trust == bytes32(0)
                 || hashes_.stake == bytes32(0)
+                || hashes_.capacity == bytes32(0)
         ) revert InvalidWiring();
 
         canonicalJobs = ComputeJobRegistry420(jobs_);
@@ -71,6 +78,7 @@ contract ComputeWorkerCanonicalWiring420 {
         canonicalAttestation = ComputeWorkerAttestation420(attestation_);
         canonicalTrust = ComputeWorkerTrust420(trust_);
         canonicalStake = ComputeWorkerStake420(stake_);
+        canonicalCapacity = ComputeWorkerCapacityReservation420(capacity_);
         expectedChainId = block.chainid;
         expectedGovernance = governance_;
 
@@ -80,6 +88,7 @@ contract ComputeWorkerCanonicalWiring420 {
         expectedAttestationCodeHash = hashes_.attestation;
         expectedTrustCodeHash = hashes_.trust;
         expectedStakeCodeHash = hashes_.stake;
+        expectedCapacityCodeHash = hashes_.capacity;
 
         assertWiring();
     }
@@ -91,6 +100,7 @@ contract ComputeWorkerCanonicalWiring420 {
         ComputeWorkerAttestation420 a = canonicalAttestation;
         ComputeWorkerTrust420 t = canonicalTrust;
         ComputeWorkerStake420 s = canonicalStake;
+        ComputeWorkerCapacityReservation420 c = canonicalCapacity;
 
         if (
             block.chainid != expectedChainId
@@ -100,6 +110,7 @@ contract ComputeWorkerCanonicalWiring420 {
                 || address(a).codehash != expectedAttestationCodeHash
                 || address(t).codehash != expectedTrustCodeHash
                 || address(s).codehash != expectedStakeCodeHash
+                || address(c).codehash != expectedCapacityCodeHash
         ) revert InvalidWiring();
 
         if (
@@ -112,6 +123,10 @@ contract ComputeWorkerCanonicalWiring420 {
                 || address(e.attestation()) != address(a)
                 || address(e.workerTrust()) != address(t)
                 || address(e.workerStake()) != address(s)
+                || address(e.capacity()) != address(c)
+                || c.controller() != address(e)
+                || address(c.workers()) != address(w)
+                || address(c.resources()) != address(w.resources())
                 || address(e.authorization()) == address(0)
         ) revert InvalidWiring();
 
@@ -142,6 +157,7 @@ contract ComputeWorkerCanonicalWiring420 {
                 address(canonicalAttestation),
                 address(canonicalTrust),
                 address(canonicalStake),
+                address(canonicalCapacity),
                 address(canonicalWorkerEvidence.matches()),
                 address(canonicalWorkerEvidence.authorization()),
                 address(canonicalWorkers.resources()),
@@ -153,7 +169,8 @@ contract ComputeWorkerCanonicalWiring420 {
                 expectedWorkersCodeHash,
                 expectedAttestationCodeHash,
                 expectedTrustCodeHash,
-                expectedStakeCodeHash
+                expectedStakeCodeHash,
+                expectedCapacityCodeHash
             )
         );
     }

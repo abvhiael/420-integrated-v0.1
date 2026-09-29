@@ -13,6 +13,7 @@ interface VmWorkerSnapshot420 {
     function sign(uint256 privateKey, bytes32 digest) external returns (uint8, bytes32, bytes32);
     function prank(address caller) external;
     function chainId(uint256 newChainId) external;
+    function warp(uint256 newTimestamp) external;
 }
 
 contract SnapshotCapabilityRegistryMock420 is ICapabilityRegistry420 {
@@ -43,6 +44,22 @@ contract SnapshotRequestFundingVerification420 is
     function verified(bytes32, bytes32, address, bytes32, bool) external pure returns (bool) { return true; }
     function settled(bytes32, bytes32, bytes32) external pure returns (bool) { return true; }
     function refunded(bytes32, bytes32) external pure returns (bool) { return true; }
+
+    function recordDecision(
+        address jobs_,
+        bytes32 jobId,
+        uint64 expectedRevision,
+        bytes32 decisionRef,
+        bool approved
+    ) external {
+        ComputeJobRegistry420(jobs_).recordVerification(
+            jobId,
+            expectedRevision,
+            address(this),
+            decisionRef,
+            approved
+        );
+    }
 }
 
 contract SnapshotMatchMock420 is IComputeJobMatchEvidence420, IComputeAcceptedMatchRuntime420 {
@@ -221,7 +238,7 @@ contract ComputeJobWorkerSnapshotEvidence420Test {
             HARDWARE,
             RUNTIME,
             RESOURCE_CAP,
-            8
+            2
         );
         vm.prank(OPERATOR);
         resources.activate(resourceId);
@@ -321,18 +338,20 @@ contract ComputeJobWorkerSnapshotEvidence420Test {
         });
     }
 
-    function _assign(ComputeJobWorkerSnapshotEvidence420.AdmissionRefs memory refs)
-        private
-        returns (bytes32 assignmentRef)
-    {
-        uint64 workerRevision = workers.worker(workerId).revision;
+    function _assignJob(
+        bytes32 targetJob,
+        bytes32 targetWorker,
+        uint256 signingKey,
+        ComputeJobWorkerSnapshotEvidence420.AdmissionRefs memory refs
+    ) private returns (bytes32 assignmentRef) {
+        uint64 workerRevision = workers.worker(targetWorker).revision;
         bytes32 digest =
-            workerEvidence.assignmentExecutionDigest(jobId, workerId, workerRevision, 4, refs);
-        bytes memory signature = _signExecution(EXEC_KEY, digest);
+            workerEvidence.assignmentExecutionDigest(targetJob, targetWorker, workerRevision, 4, refs);
+        bytes memory signature = _signExecution(signingKey, digest);
         vm.prank(RELAYER);
         assignmentRef = workerEvidence.acceptAssignment(
-            jobId,
-            workerId,
+            targetJob,
+            targetWorker,
             workerRevision,
             4,
             refs,
@@ -340,11 +359,27 @@ contract ComputeJobWorkerSnapshotEvidence420Test {
         );
     }
 
-    function _commit(bytes32 receiptHash, bytes32 outputHash) private returns (bytes32 resultCommitment) {
-        bytes32 digest = workerEvidence.resultExecutionDigest(jobId, receiptHash, outputHash);
-        bytes memory signature = _signExecution(EXEC_KEY, digest);
+    function _assign(ComputeJobWorkerSnapshotEvidence420.AdmissionRefs memory refs)
+        private
+        returns (bytes32 assignmentRef)
+    {
+        assignmentRef = _assignJob(jobId, workerId, EXEC_KEY, refs);
+    }
+
+    function _commitJob(
+        bytes32 targetJob,
+        uint256 signingKey,
+        bytes32 receiptHash,
+        bytes32 outputHash
+    ) private returns (bytes32 resultCommitment) {
+        bytes32 digest = workerEvidence.resultExecutionDigest(targetJob, receiptHash, outputHash);
+        bytes memory signature = _signExecution(signingKey, digest);
         vm.prank(RELAYER);
-        resultCommitment = workerEvidence.commitResult(jobId, receiptHash, outputHash, signature);
+        resultCommitment = workerEvidence.commitResult(targetJob, receiptHash, outputHash, signature);
+    }
+
+    function _commit(bytes32 receiptHash, bytes32 outputHash) private returns (bytes32 resultCommitment) {
+        resultCommitment = _commitJob(jobId, EXEC_KEY, receiptHash, outputHash);
     }
 
     function testAcceptedAssignmentFreezesExactWorkerExecutionSnapshot() public {

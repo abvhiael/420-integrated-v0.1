@@ -248,10 +248,11 @@ contract ComputeWorkerReadModel420Test {
         vm.prank(OPERATOR);
         nodes.activate(nodeId);
 
+        bytes32 cpuGeneralClass = resources.CPU_GENERAL();
         vm.prank(OPERATOR);
         resourceId = resources.register(
             nodeId,
-            resources.CPU_GENERAL(),
+            cpuGeneralClass,
             keccak256("hardware"),
             keccak256("runtime"),
             keccak256("resource-capability"),
@@ -284,10 +285,11 @@ contract ComputeWorkerReadModel420Test {
         vm.prank(OPERATOR);
         profiles.publish(workerId, workerRevision, p);
 
+        bytes32 benchmarkEvidenceType = attestations.EVIDENCE_BENCHMARK_V1();
         vm.prank(GOV);
         attestations.publishPolicy(
             CAP_POLICY,
-            attestations.EVIDENCE_BENCHMARK_V1(),
+            benchmarkEvidenceType,
             keccak256("benchmark-schema"),
             2 days
         );

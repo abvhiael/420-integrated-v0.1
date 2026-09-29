@@ -70,7 +70,9 @@ if 'import "../src/apps/Identity420.sol";' not in test_src:
 if record.get("step") != "REG-AUDIT-3":
     errors.append("qualification record step mismatch")
 if record.get("exitCriteria", {}).get("allTwelveNamedExecutableEvidence") not in {
-    "IMPLEMENTED_PENDING_EXACT_HEAD_QUALIFICATION", "COMPLETE"
+    "IMPLEMENTED_PENDING_EXACT_HEAD_QUALIFICATION",
+    "CANDIDATE_QUALIFIED",
+    "COMPLETE",
 }:
     errors.append("qualification record does not assert all-twelve named evidence")
 

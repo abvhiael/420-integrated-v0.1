@@ -9,7 +9,7 @@
     "title": "ComputeVerifierRegistry",
     "purpose": "Separate workers from verification authorities."
   },
-  "status": "IMPLEMENTATION_COMPLETE_QUALIFICATION_PENDING",
+  "status": "COMPLETE",
   "existing_components": [
     {
       "source": "contracts/src/compute/ComputeJobVerifierEvidence420.sol",
@@ -296,5 +296,59 @@
       ],
       "disposition": "target architecture name only; later CMP-1.4 implementation must reconcile router responsibilities without treating the name as existing code or deployment."
     }
-  ]
+  ],
+  "qualification": {
+    "qualified_implementation_sha": "ffc0a7263dae3d9787d757f6034e96a258a47fd1",
+    "evidence_only_completion": true,
+    "workflows": [
+      {
+        "name": "Solidity Contracts",
+        "run_number": 3395,
+        "run_id": 36762051196,
+        "conclusion": "success"
+      },
+      {
+        "name": "Genesis Address Authority",
+        "run_number": 229,
+        "run_id": 36762051212,
+        "conclusion": "success"
+      },
+      {
+        "name": "420 Integrated Qualification",
+        "run_number": 6051,
+        "run_id": 36762051509,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Docs Qualification",
+        "run_number": 3427,
+        "run_id": 36762052473,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Indexer",
+        "run_number": 1025,
+        "run_id": 36762051177,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.9 CI Qualification Automation",
+        "run_number": 105,
+        "run_id": 36762051163,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.10 Phase Closeout Qualification",
+        "run_number": 111,
+        "run_id": 36762051305,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Registry REG-AUDIT-4",
+        "run_number": 65,
+        "run_id": 36762051195,
+        "conclusion": "success"
+      }
+    ]
+  }
 }

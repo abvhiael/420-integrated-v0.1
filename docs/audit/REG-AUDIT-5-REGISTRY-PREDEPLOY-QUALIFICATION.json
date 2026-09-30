@@ -1,0 +1,51 @@
+{
+  "schema": "420-registry-reg-audit-5-qualification-v1",
+  "step": "REG-AUDIT-5",
+  "name": "generate final Registry artifact and predeploy state",
+  "canonicalExit": "reproducible Registry predeploy artifact tied to exact source SHA",
+  "implementationStatus": "IMPLEMENTED_PENDING_EXACT_HEAD_QUALIFICATION",
+  "repository": "abvhiael/420-integrated-v0.1",
+  "pr": 409,
+  "canonicalAddress": "0x0000000000000000000000000000000000000434",
+  "governanceTimelock": "0x0000000000000000000000000000000000000429",
+  "source": {
+    "path": "contracts/src/apps/ProtocolRegistry.sol",
+    "gitBlobSha1": "9ab3d53a68b6533978f41e0202e5268f1d615c19"
+  },
+  "compiler": {
+    "solidity": "0.8.24",
+    "evmVersion": "cancun",
+    "optimizer": true,
+    "optimizerRuns": 200,
+    "viaIR": true
+  },
+  "artifact": {
+    "path": "contracts/artifacts/ProtocolRegistry.json",
+    "runtimeCodeHash": "0x9f9e5f794296cf9faf5f8c8d17cd815f3c19c004a158c15cb61b5a29eaacb330",
+    "materializedImmutableReferences": 7
+  },
+  "predeployState": {
+    "path": "contracts/config/predeploy/ProtocolRegistry-predeploy-state.json",
+    "mutableConstructorStorageSlots": 0,
+    "storageRoot": "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421"
+  },
+  "implementationFiles": [
+    "scripts/generate-reg-audit-5-registry-predeploy.py",
+    "scripts/test-reg-audit-5-registry-predeploy.py",
+    ".github/workflows/registry-reg-audit-5.yml",
+    "contracts/artifacts/ProtocolRegistry.json",
+    "contracts/config/predeploy/ProtocolRegistry-predeploy-state.json",
+    "contracts/config/predeploy/predeploy-plan.json",
+    "contracts/config/deployment-manifest.json"
+  ],
+  "exactHeadQualification": {
+    "qualifiedSha": "RECORDED_IN_PR_409_METADATA_AFTER_FINAL_EXACT_HEAD_QUALIFICATION",
+    "finalRunIds": "RECORDED_IN_PR_409_METADATA_AFTER_FINAL_EXACT_HEAD_QUALIFICATION",
+    "rule": "Do not qualify a newer evidence-recording commit using older runs."
+  },
+  "limitations": [
+    "Offline predeploy evidence only; no live-chain deployment is claimed.",
+    "Production-equivalent testnet deployment and eth_getCode/storage verification remain REG-AUDIT-8.",
+    "Generated catalogue/reference metadata cleanup remains REG-AUDIT-6."
+  ]
+}

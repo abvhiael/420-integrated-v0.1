@@ -58,20 +58,21 @@ def load():
         fail("unexpected release-candidate schema")
     return data
 
-def repository_ready(data):
+def repository_ready(data, allow_live=False):
     if data.get("repository_ready") is not True:
         fail("repository_ready must be true")
-    if data.get("live_qualified") is not False:
-        fail("repository package must not claim live qualification")
-    if data.get("status") != "REPOSITORY_READY_LIVE_BLOCKED":
-        fail("release candidate must remain truthfully live-blocked")
+    if not allow_live:
+        if data.get("live_qualified") is not False:
+            fail("repository package must not claim live qualification")
+        if data.get("status") != "REPOSITORY_READY_LIVE_BLOCKED":
+            fail("release candidate must remain truthfully live-blocked")
 
     registry = data.get("protocol_registry", {})
     if registry.get("address") != "0x0000000000000000000000000000000000000434":
         fail("ProtocolRegistry differs from frozen address authority")
     if registry.get("publication_api") != "publishRegisteredService":
         fail("non-canonical ProtocolRegistry publication API")
-    if registry.get("publication_complete") is not False:
+    if not allow_live and registry.get("publication_complete") is not False:
         fail("repository evidence must not fabricate live publication")
 
     rc = data.get("release_candidate", {})
@@ -85,23 +86,25 @@ def repository_ready(data):
         source = item.get("source")
         if not isinstance(source, str) or not (ROOT / source).is_file():
             fail(f"missing source for {item.get('role')}: {source}")
-        for field in ("address", "deployment_tx", "deployment_block", "runtime_code_hash"):
-            if item.get(field) is not None:
-                fail(f"{item['role']}: {field} must remain null until real live evidence exists")
+        if not allow_live:
+            for field in ("address", "deployment_tx", "deployment_block", "runtime_code_hash"):
+                if item.get(field) is not None:
+                    fail(f"{item['role']}: {field} must remain null until real live evidence exists")
 
     bindings = data.get("bindings", {})
     if list(bindings.keys()) != REQUIRED_BINDINGS:
         fail("binding inventory is incomplete or reordered")
-    if any(bindings[k] is not None for k in REQUIRED_BINDINGS):
+    if not allow_live and any(bindings[k] is not None for k in REQUIRED_BINDINGS):
         fail("live binding evidence must remain null before canonical deployment")
 
     deps = data.get("dependency_reconciliation", {})
     if deps.get("cmp_1_5_compute_stake_required_for_stake_required_live_admission") is not True:
         fail("CMP-1.5 dependency not preserved")
-    if deps.get("cmp_1_5_compute_stake_live_source_qualified") is not False:
-        fail("CMP-1.5 live source must remain blocked")
-    if deps.get("public_testnet_available") is not False:
-        fail("public testnet must remain blocked absent evidence")
+    if not allow_live:
+        if deps.get("cmp_1_5_compute_stake_live_source_qualified") is not False:
+            fail("CMP-1.5 live source must remain blocked")
+        if deps.get("public_testnet_available") is not False:
+            fail("public testnet must remain blocked absent evidence")
     if deps.get("no_fixed_genesis_predeploy_allocated") is not True:
         fail("release candidate must not allocate a fixed Genesis predeploy")
     if deps.get("discovery_path") != "ProtocolRegistry":
@@ -115,17 +118,20 @@ def repository_ready(data):
     ):
         if gates.get(step) is not True:
             fail(f"missing prerequisite release gate: {step}")
-    if gates.get("cmp_1_5_compute_stake_live_source") is not False:
-        fail("CMP-1.5 live release gate must remain false")
-    if gates.get("public_testnet_live") is not False:
-        fail("public-testnet live release gate must remain false")
+    if not allow_live:
+        if gates.get("cmp_1_5_compute_stake_live_source") is not False:
+            fail("CMP-1.5 live release gate must remain false")
+        if gates.get("public_testnet_live") is not False:
+            fail("public-testnet live release gate must remain false")
 
     print("CMP-1.3.15 repository release-candidate package: READY")
 
 def live_ready(data):
-    repository_ready(data)
+    repository_ready(data, allow_live=True)
     if data.get("live_qualified") is not True:
         fail("live_qualified is false")
+    if data.get("status") != "LIVE_QUALIFIED":
+        fail("live status is not LIVE_QUALIFIED")
 
     network = data.get("network", {})
     if not isinstance(network.get("chain_id"), int) or network["chain_id"] <= 0:

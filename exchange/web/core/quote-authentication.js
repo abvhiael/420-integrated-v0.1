@@ -39,15 +39,23 @@ async function importEd25519(raw){
 }
 export function normalizeTrustedQuotePolicy(runtime){
   const policy=runtime?.quoteAuthentication;
-  if(!object(policy)||policy.schema!=='420-exchange-quote-auth-policy-v1'||policy.status!=='QUALIFIED_CONFIG'||!Array.isArray(policy.producers)||!policy.producers.length)fail('AUTH_POLICY_UNAVAILABLE','qualified quote producer policy required');
-  const producers=new Map();
+  if(!object(policy)||policy.schema!=='420-exchange-quote-auth-policy-v1'||policy.status!=='QUALIFIED_CONFIG'||!Array.isArray(policy.producers)||!policy.producers.length||!Number.isSafeInteger(policy.maxKeyOverlapSeconds)||policy.maxKeyOverlapSeconds<0||policy.maxKeyOverlapSeconds>86400)fail('AUTH_POLICY_UNAVAILABLE','qualified quote producer policy required');
+  const producers=new Map(),byProducer=new Map();
   for(const producer of policy.producers){
-    if(!object(producer)||!id(producer.producerId)||!id(producer.keyVersion)||producer.algorithm!=='Ed25519'||!b64url(producer.publicKey)||!Number.isSafeInteger(producer.notBefore)||!Number.isSafeInteger(producer.notAfter)||producer.notAfter<=producer.notBefore||!Number.isSafeInteger(producer.revocationEpoch)||producer.revocationEpoch<0||producer.revoked===true)fail('AUTH_POLICY_INVALID','valid active quote producer key required');
+    if(!object(producer)||!id(producer.producerId)||!id(producer.keyVersion)||producer.algorithm!=='Ed25519'||!b64url(producer.publicKey)||!Number.isSafeInteger(producer.notBefore)||!Number.isSafeInteger(producer.notAfter)||producer.notAfter<=producer.notBefore||!Number.isSafeInteger(producer.revocationEpoch)||producer.revocationEpoch<0||typeof producer.revoked!=='boolean')fail('AUTH_POLICY_INVALID','valid quote producer key policy required');
     const key=producer.producerId+'|'+producer.keyVersion;
     if(producers.has(key))fail('AUTH_POLICY_INVALID','duplicate producer key policy');
     producers.set(key,Object.freeze({...producer}));
+    const list=byProducer.get(producer.producerId)??[];list.push(producer);byProducer.set(producer.producerId,list);
   }
-  return Object.freeze({schema:policy.schema,service:policy.service,producers});
+  for(const list of byProducer.values()){
+    const active=list.filter(item=>!item.revoked).sort((a,b)=>a.notBefore-b.notBefore);
+    for(let i=1;i<active.length;i++){
+      const overlap=Math.min(active[i-1].notAfter,active[i].notAfter)-Math.max(active[i-1].notBefore,active[i].notBefore);
+      if(overlap>policy.maxKeyOverlapSeconds)fail('AUTH_POLICY_INVALID','producer key overlap exceeds rotation policy');
+    }
+  }
+  return Object.freeze({schema:policy.schema,service:policy.service,maxKeyOverlapSeconds:policy.maxKeyOverlapSeconds,producers});
 }
 export async function verifyQuoteAuthentication({runtime,quote,prepared,nowSeconds,endpointUrl}={}){
   if(!object(quote)||!object(quote.authentication))fail('UNSIGNED_QUOTE','authenticated quote envelope required');
@@ -55,6 +63,7 @@ export async function verifyQuoteAuthentication({runtime,quote,prepared,nowSecon
   if(auth.schema!=='420-exchange-quote-auth-v1'||auth.algorithm!=='Ed25519'||!id(auth.producerId)||!id(auth.keyVersion)||!b64url(auth.signature)||!/^sha256:[0-9a-f]{64}$/i.test(auth.publicKeyFingerprint)||!bytes32(auth.payloadHash)||!Number.isSafeInteger(auth.revocationEpoch)||auth.revocationEpoch<0)fail('AUTH_ENVELOPE_INVALID','quote authentication envelope is malformed');
   const policy=normalizeTrustedQuotePolicy(runtime),trusted=policy.producers.get(auth.producerId+'|'+auth.keyVersion);
   if(!trusted)fail('UNTRUSTED_PRODUCER','quote producer/key version is not trusted');
+  if(trusted.revoked===true)fail('KEY_REVOKED','quote producer key is revoked');
   if(policy.service!=='420/service/exchange-quote/v1')fail('DOMAIN_MISMATCH','trusted producer policy service domain mismatch');
   if(!Number.isSafeInteger(nowSeconds)||nowSeconds<trusted.notBefore||nowSeconds>=trusted.notAfter)fail('KEY_NOT_ACTIVE','quote producer key is outside its validity window');
   if(auth.revocationEpoch!==trusted.revocationEpoch)fail('KEY_REVOKED','quote key revocation epoch mismatch');

@@ -3,17 +3,56 @@
   "$id": "420-exchange-quote-error-v1",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema","error"],
+  "required": [
+    "schema",
+    "error"
+  ],
   "properties": {
-    "schema": {"const":"420-exchange-quote-error-v1"},
+    "schema": {
+      "const": "420-exchange-quote-error-v1"
+    },
     "error": {
-      "type":"object",
+      "type": "object",
       "additionalProperties": false,
-      "required":["code","message","retryable"],
-      "properties":{
-        "code":{"type":"string"},
-        "message":{"type":"string"},
-        "retryable":{"type":"boolean"}
+      "required": [
+        "code",
+        "message",
+        "retryable"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "enum": [
+            "NOT_FOUND",
+            "RATE_LIMITED",
+            "REQUEST_TOO_LARGE",
+            "MALFORMED_JSON",
+            "MALFORMED_REQUEST",
+            "UNSUPPORTED_SCHEMA",
+            "INVALID_ADDRESS",
+            "INVALID_PAIR",
+            "INVALID_RAW_AMOUNT",
+            "UNSUPPORTED_ROUTE",
+            "INVALID_TOKEN_METADATA",
+            "MINIMUM_OUTPUT_UNMET",
+            "DEPLOYMENT_MISMATCH",
+            "CHAIN_MISMATCH",
+            "STALE_INPUT",
+            "FEE_POLICY_INVALID",
+            "ROUTE_SOURCE_UNAVAILABLE",
+            "CHAIN_SOURCE_UNAVAILABLE",
+            "CLOCK_INVALID",
+            "SERVICE_CONFIG_INVALID",
+            "RESPONSE_TOO_LARGE",
+            "INTERNAL_ERROR"
+          ]
+        },
+        "message": {
+          "type": "string"
+        },
+        "retryable": {
+          "type": "boolean"
+        }
       }
     }
   }

@@ -62,6 +62,8 @@ Every committee member must be:
 - controller-independent from owner, payer and operator;
 - controller-distinct from every other committee member.
 
+The exact owner, payer and operator controller IDs are frozen into the committee record and revalidated when every recomputation vote is cast. Later party-controller drift therefore invalidates new votes rather than silently converting an independent committee into a conflicted one.
+
 Duplicate verifier IDs, duplicate authority addresses and duplicate controller IDs fail closed.
 
 ### Independent recomputation
@@ -120,7 +122,7 @@ Required:
 
 1. affected Compute Solidity compiles;
 2. retained `Compute*.t.sol` suite passes;
-3. dedicated tests cover exact 2-of-3 success, insufficient quorum, split results, duplicate member/controller rejection, missing committee capability, unauthorized committee freeze, voting before result commitment, unauthorized voters, duplicate votes, suspended verifier and post-finalization rejection;
+3. dedicated tests cover exact 2-of-3 success, insufficient quorum, split results, duplicate member/controller rejection, missing committee capability, job-party-controlled selector rejection, unauthorized committee freeze, voting before result commitment, party-controller drift, unauthorized voters, duplicate votes, suspended verifier and post-finalization rejection;
 4. CMP-1.4.6 mechanical verifier passes;
 5. focused Compute Market and Solidity workflows are green on the exact implementation SHA.
 

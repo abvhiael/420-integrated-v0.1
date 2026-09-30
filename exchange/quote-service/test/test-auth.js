@@ -18,7 +18,7 @@ export function testPublicKey(){
 export function testPolicy({vector,revoked=false,keyVersion=TEST_KEY_VERSION,notBefore=900,notAfter=2000,revocationEpoch=TEST_REVOCATION_EPOCH,publicKey=testPublicKey(),producers=null,maxKeyOverlapSeconds=3600}={}){
   return {
     schema:'420-exchange-quote-auth-policy-v1',status:'QUALIFIED_CONFIG',service:'420/service/exchange-quote/v1',
-    endpointOrigin:'https://api.example.invalid',maxKeyOverlapSeconds,
+    endpointUrl:'https://api.example.invalid/executable-swap-quote',maxKeyOverlapSeconds,
     deployment:{deploymentId:vector.deploymentId,manifestHash:vector.manifestHash,router:vector.router,spender:vector.spender},
     producers:producers??[{producerId:TEST_PRODUCER_ID,keyVersion,algorithm:'Ed25519',publicKey,notBefore,notAfter,revocationEpoch,revoked}],
   };

@@ -1,0 +1,398 @@
+{
+  "schema": "420-genesis-address-namespace-v1",
+  "status": "FROZEN_FOR_GENESIS_ADDRESS_AUTHORITY",
+  "decision": "PRESERVE_FROZEN_STEP6_2_PREDEPLOYS_AND_REGISTRY_RESOLVE_NON_PREDEPLOY_SERVICES",
+  "authoritativeSources": {
+    "fixedPredeploys": "contracts/config/system-addresses.json",
+    "canonicalDiscovery": "contracts/config/genesis-canonical-addresses.json",
+    "bridgeCandidates": "config/swap-bridge-extension-addresses.json",
+    "walletInventory": "wallet/deployment-inventory.json"
+  },
+  "reservedRange": {
+    "start": "0x0000000000000000000000000000000000000420",
+    "end": "0x00000000000000000000000000000000000004ff"
+  },
+  "fixedAssignments": [
+    {
+      "name": "RewardController",
+      "address": "0x0000000000000000000000000000000000000420",
+      "purpose": "consensus economics"
+    },
+    {
+      "name": "AttentionTreasury",
+      "address": "0x0000000000000000000000000000000000000421",
+      "purpose": "Cannaseur / Attention issuance and escrow"
+    },
+    {
+      "name": "DevelopmentTreasury",
+      "address": "0x0000000000000000000000000000000000000422",
+      "purpose": "Development allocation"
+    },
+    {
+      "name": "ValidatorRegistry",
+      "address": "0x0000000000000000000000000000000000000423",
+      "purpose": "validator lifecycle execution mirror and bond vault"
+    },
+    {
+      "name": "ProtocolReserve",
+      "address": "0x0000000000000000000000000000000000000424",
+      "purpose": "protocol-owned reserve"
+    },
+    {
+      "name": "CommunityValidatorReserve",
+      "address": "0x0000000000000000000000000000000000000425",
+      "purpose": "validator bond-credit reserve"
+    },
+    {
+      "name": "CommunityRewardReserve",
+      "address": "0x0000000000000000000000000000000000000426",
+      "purpose": "community/testnet reward reserve"
+    },
+    {
+      "name": "FounderVestingRegistry",
+      "address": "0x0000000000000000000000000000000000000427",
+      "purpose": "founder vesting"
+    },
+    {
+      "name": "RandomnessRegistry",
+      "address": "0x0000000000000000000000000000000000000428",
+      "purpose": "randomness commitments/results"
+    },
+    {
+      "name": "GovernanceTimelock",
+      "address": "0x0000000000000000000000000000000000000429",
+      "purpose": "governance execution"
+    },
+    {
+      "name": "PublicDistributionVault",
+      "address": "0x000000000000000000000000000000000000042a",
+      "purpose": "public distribution inventory"
+    },
+    {
+      "name": "GenesisDEXFactory",
+      "address": "0x000000000000000000000000000000000000042b",
+      "purpose": "canonical genesis DEX factory"
+    },
+    {
+      "name": "PublicBatchAuction",
+      "address": "0x000000000000000000000000000000000000042c",
+      "purpose": "daily batch auction"
+    },
+    {
+      "name": "TWAPOracle",
+      "address": "0x000000000000000000000000000000000000042d",
+      "purpose": "canonical 420/approved-stable TWAP"
+    },
+    {
+      "name": "ValidatorBootstrapReserve",
+      "address": "0x000000000000000000000000000000000000042e",
+      "purpose": "bootstrap validator allocation"
+    },
+    {
+      "name": "AIProviderRegistry",
+      "address": "0x000000000000000000000000000000000000042f",
+      "purpose": "420ai provider registry"
+    },
+    {
+      "name": "AIModelRegistry",
+      "address": "0x0000000000000000000000000000000000000430",
+      "purpose": "AI model/version registry"
+    },
+    {
+      "name": "AIJobManager",
+      "address": "0x0000000000000000000000000000000000000431",
+      "purpose": "AI job lifecycle"
+    },
+    {
+      "name": "AIJobEscrow",
+      "address": "0x0000000000000000000000000000000000000432",
+      "purpose": "AI job payment escrow"
+    },
+    {
+      "name": "AIReputationRegistry",
+      "address": "0x0000000000000000000000000000000000000433",
+      "purpose": "AI provider reputation"
+    },
+    {
+      "name": "ProtocolRegistry",
+      "address": "0x0000000000000000000000000000000000000434",
+      "purpose": "Genesis application system contract"
+    },
+    {
+      "name": "Names420",
+      "address": "0x0000000000000000000000000000000000000435",
+      "purpose": "Genesis application system contract"
+    },
+    {
+      "name": "Identity420",
+      "address": "0x0000000000000000000000000000000000000436",
+      "purpose": "Genesis application system contract"
+    },
+    {
+      "name": "Governance420",
+      "address": "0x0000000000000000000000000000000000000437",
+      "purpose": "Genesis application system contract"
+    },
+    {
+      "name": "VerifiedGateway420",
+      "address": "0x0000000000000000000000000000000000000438",
+      "purpose": "Genesis application system contract"
+    },
+    {
+      "name": "ApprovedQuoteAssetRegistry",
+      "address": "0x0000000000000000000000000000000000000439",
+      "purpose": "Genesis application system contract"
+    },
+    {
+      "name": "Stake420",
+      "address": "0x000000000000000000000000000000000000043a",
+      "purpose": "Genesis application system contract"
+    },
+    {
+      "name": "CannaseurCampaignRegistry",
+      "address": "0x000000000000000000000000000000000000043b",
+      "purpose": "Genesis application system contract"
+    },
+    {
+      "name": "ConsensusSystemCall420",
+      "address": "0x000000000000000000000000000000000000043c",
+      "purpose": "native consensus-to-execution system-call gateway"
+    }
+  ],
+  "canonicalRegistry": {
+    "name": "ProtocolRegistry",
+    "address": "0x0000000000000000000000000000000000000434",
+    "canonicalId": "protocol-registry",
+    "status": "FROZEN_GENESIS_PREDEPLOY"
+  },
+  "activeNonPredeployReservations": [
+    {
+      "name": "CADCBridgeIntegration",
+      "address": "0x000000000000000000000000000000000000043d",
+      "status": "CANDIDATE_NOT_DEPLOYED_NOT_FROZEN"
+    },
+    {
+      "name": "CanonicalMarketRegistry",
+      "address": "0x000000000000000000000000000000000000043e",
+      "status": "CANDIDATE_NOT_DEPLOYED_NOT_FROZEN"
+    },
+    {
+      "name": "PermissionlessDEXFactory",
+      "address": "0x000000000000000000000000000000000000043f",
+      "status": "CANDIDATE_NOT_DEPLOYED_NOT_FROZEN"
+    },
+    {
+      "name": "BridgeRouteRegistry",
+      "address": "0x0000000000000000000000000000000000000440",
+      "status": "CANDIDATE_NOT_DEPLOYED_NOT_FROZEN"
+    },
+    {
+      "name": "BridgeRiskManager",
+      "address": "0x0000000000000000000000000000000000000441",
+      "status": "CANDIDATE_NOT_DEPLOYED_NOT_FROZEN"
+    },
+    {
+      "name": "BridgeTransferRegistry",
+      "address": "0x0000000000000000000000000000000000000442",
+      "status": "CANDIDATE_NOT_DEPLOYED_NOT_FROZEN"
+    },
+    {
+      "name": "BridgeAccountingRegistry",
+      "address": "0x0000000000000000000000000000000000000444",
+      "status": "CANDIDATE_NOT_DEPLOYED_NOT_FROZEN"
+    },
+    {
+      "name": "EntryPoint420",
+      "address": "0x000000000000000000000000000000000000041f",
+      "status": "RESERVED_PENDING_PRODUCTION_IMPLEMENTATION"
+    },
+    {
+      "name": "SmartAccountFactory420",
+      "address": "0x0000000000000000000000000000000000000446",
+      "status": "CANDIDATE_NOT_DEPLOYED_NOT_FROZEN"
+    },
+    {
+      "name": "CapabilityRegistry420",
+      "address": "0x0000000000000000000000000000000000000447",
+      "status": "CANDIDATE_NOT_DEPLOYED_NOT_FROZEN"
+    }
+  ],
+  "registryResolved": [
+    {
+      "id": "smart-account-factory",
+      "contract": "SmartAccountFactory420.sol",
+      "status": "UNDEPLOYED_CANDIDATE"
+    },
+    {
+      "id": "capability-registry",
+      "contract": "CapabilityRegistry420.sol",
+      "status": "UNDEPLOYED_CANDIDATE"
+    },
+    {
+      "id": "interop-router",
+      "contract": "InteropRouter420.sol",
+      "status": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS"
+    },
+    {
+      "id": "randomness-router",
+      "contract": "RandomnessRouter420.sol",
+      "status": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS"
+    },
+    {
+      "id": "oracle-router",
+      "contract": "OracleRouter420.sol",
+      "status": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS"
+    },
+    {
+      "id": "swap-executor",
+      "contract": "CanonicalSwapExecutor420.sol",
+      "status": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS"
+    },
+    {
+      "id": "bridge-router",
+      "contract": "GatewayRouter420.sol",
+      "status": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS"
+    },
+    {
+      "id": "payment-router",
+      "contract": "PaymentRouter420.sol",
+      "status": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS"
+    },
+    {
+      "id": "settlement-router",
+      "contract": "SettlementRouter420.sol",
+      "status": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS"
+    },
+    {
+      "id": "token-factory",
+      "contract": "TokenFactory420.sol",
+      "status": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS"
+    },
+    {
+      "id": "ai-router",
+      "contract": "AIRouter420.sol",
+      "status": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS"
+    },
+    {
+      "id": "resource-router",
+      "contract": "ResourceRouter420.sol",
+      "status": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS"
+    },
+    {
+      "id": "compute-router",
+      "contract": "ComputeRouter420.sol",
+      "status": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS"
+    },
+    {
+      "id": "treasury-router",
+      "contract": "TreasuryRouter420.sol",
+      "status": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS"
+    },
+    {
+      "id": "vault-router",
+      "contract": "VaultRouter420.sol",
+      "status": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS"
+    },
+    {
+      "id": "rights-router",
+      "contract": "RightsRouter420.sol",
+      "status": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS"
+    },
+    {
+      "id": "launchpad-router",
+      "contract": "LaunchpadRouter420.sol",
+      "status": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS"
+    },
+    {
+      "id": "grants-router",
+      "contract": "GrantRouter420.sol",
+      "status": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS"
+    },
+    {
+      "id": "attention-router",
+      "contract": "AttentionRouter420.sol",
+      "status": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS"
+    },
+    {
+      "id": "pulse-router",
+      "contract": "PulseRouter420.sol",
+      "status": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS"
+    },
+    {
+      "id": "messenger-router",
+      "contract": "MessengerRouter420.sol",
+      "status": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS"
+    },
+    {
+      "id": "commons-router",
+      "contract": "CommonsRouter420.sol",
+      "status": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS"
+    }
+  ],
+  "retiredClaims": [
+    {
+      "address": "0x0000000000000000000000000000000000000420",
+      "former": "SmartAccountFactory420",
+      "status": "RETIRED_NOT_DEPLOYABLE"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000421",
+      "former": "CapabilityRegistry420",
+      "status": "RETIRED_NOT_DEPLOYABLE"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000422",
+      "former": "ProtocolRegistry",
+      "status": "RETIRED_NOT_DEPLOYABLE"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000424",
+      "former": "Identity420",
+      "status": "RETIRED_NOT_DEPLOYABLE"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000445",
+      "former": "Names420",
+      "status": "RETIRED_NOT_DEPLOYABLE"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000448",
+      "former": "second ProtocolRegistry",
+      "status": "RETIRED_NOT_DEPLOYABLE"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000449",
+      "former": "second Identity420",
+      "status": "RETIRED_NOT_DEPLOYABLE"
+    },
+    {
+      "address": "0x000000000000000000000000000000000000043c",
+      "former": "BridgeAssetRegistry",
+      "status": "RETIRED_NOT_DEPLOYABLE"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000443",
+      "former": "GatewayRouter420",
+      "status": "RETIRED_NOT_DEPLOYABLE"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000445",
+      "former": "names-legacy-wallet-proposal",
+      "status": "RETIRED_NOT_DEPLOYABLE"
+    }
+  ],
+  "supersedes": [
+    "contracts/config/w14-7-address-migration-candidates.json",
+    "contracts/config/w14-7-4-global-address-reconciliation.json",
+    "contracts/config/wallet-authority-address-reconciliation.json"
+  ],
+  "rules": [
+    "ProtocolRegistry has exactly one canonical fixed Genesis address: 0x0000000000000000000000000000000000000434.",
+    "Retired or proposal-only addresses are historical evidence and MUST NOT be treated as active authority.",
+    "Fixed predeploy ownership is defined only by contracts/config/system-addresses.json and its exact mirror config/system-addresses.json.",
+    "Predeploy plan and deployment manifest MUST exactly preserve every fixed assignment.",
+    "Registry-resolved services receive no fixed Genesis address by implication.",
+    "Candidate or reserved addresses are not deployment, code-hash, or ProtocolRegistry publication evidence.",
+    "Any future namespace change requires an atomic update across this authority record, both system mirrors, predeploy/deployment manifests, resident configuration, and examples."
+  ]
+}

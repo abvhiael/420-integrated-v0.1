@@ -21,6 +21,7 @@ contract ComputeIndependentVerifierSelector420 {
     struct Selection {
         bytes32 verifierId;
         uint64 verifierRevision;
+        uint64 jobRevision;
         address verifier;
         bytes32 workloadClass;
         bytes32 profileId;
@@ -53,6 +54,7 @@ contract ComputeIndependentVerifierSelector420 {
         bytes32 indexed verifierId,
         address indexed verifier,
         uint64 verifierRevision,
+        uint64 jobRevision,
         bytes32 workloadClass,
         bytes32 profileId,
         bytes32 verificationPolicyId,
@@ -118,6 +120,7 @@ contract ComputeIndependentVerifierSelector420 {
                 jobId,
                 s.verifierId,
                 s.verifierRevision,
+                s.jobRevision,
                 s.verifier,
                 s.workloadClass,
                 s.profileId,
@@ -191,6 +194,7 @@ contract ComputeIndependentVerifierSelector420 {
         Selection memory next = Selection({
             verifierId: verifierId,
             verifierRevision: verifierRevision,
+            jobRevision: j.revision,
             verifier: v.authority,
             workloadClass: j.workloadType,
             profileId: profileId,
@@ -224,6 +228,7 @@ contract ComputeIndependentVerifierSelector420 {
             verifierId,
             v.authority,
             verifierRevision,
+            j.revision,
             j.workloadType,
             profileId,
             j.verificationPolicyId,

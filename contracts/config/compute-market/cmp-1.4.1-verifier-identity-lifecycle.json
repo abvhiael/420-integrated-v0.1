@@ -1,0 +1,57 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-1.4.1.VerifierIdentityLifecycle.v1",
+  "step": "CMP-1.4.1",
+  "title": "Verifier identity & lifecycle",
+  "canonical_definition": "Register, activate, suspend, rotate and retire verifier identities without granting unrelated authority.",
+  "base_main_sha": "ddf07305444faefa6ce779565b00b185f390822e",
+  "qualification_level": 1,
+  "milestone_relationship": {
+    "level_2_required_now": false,
+    "rationale": "This is the first runtime slice of CMP-1.4. Broader app-specific integration is deferred until verifier identity, classes/capabilities and verification-policy registry converge."
+  },
+  "implementation": {
+    "contract": "contracts/src/compute/ComputeVerifierRegistry420.sol",
+    "test": "contracts/test/ComputeVerifierRegistry420.t.sol",
+    "lifecycle": [
+      "REGISTERED",
+      "ACTIVE",
+      "SUSPENDED",
+      "RETIRED"
+    ],
+    "rotation": "Governance proposes; the new authority must accept; accepted rotation lands SUSPENDED and requires fresh activation.",
+    "identity": "Domain-separated chain/contract/serial verifier ID with exact revision history and current authority reverse lookup."
+  },
+  "authority_boundaries": [
+    "Registration establishes verifier identity only and does not grant verification capability.",
+    "Identity/lifecycle does not assign verifier class, workload capability, profile, appointment, independence, correctness, settlement, custody, stake/slash, governance, worker, validator, bridge or arbitrary-wallet authority.",
+    "Activation is an administrative lifecycle gate, not proof of correctness or independence.",
+    "Suspension blocks current identity eligibility but does not rewrite historical revisions or verdict evidence.",
+    "Retirement is terminal for the verifier identity.",
+    "Rotation cannot silently redirect an active verifier identity: governance proposes, the new authority accepts, and reactivation is explicit."
+  ],
+  "invariants": [
+    "CMP-INV-005",
+    "CMP-INV-016",
+    "CMP-INV-020",
+    "CMP-INV-023",
+    "CMP-INV-025",
+    "CMP-INV-026",
+    "CMP-INV-027",
+    "CMP-INV-030"
+  ],
+  "deployment_publication": {
+    "fixed_genesis_predeploy_created": false,
+    "protocol_registry_publication_claimed": false,
+    "live_deployment_claimed": false
+  },
+  "exit_criteria": [
+    "Verifier identities can be registered with domain-separated IDs and immutable revision history.",
+    "Only governance can activate and retire verifier identities.",
+    "Active verifier authorities can fail-closed suspend themselves; governance can suspend them.",
+    "Rotation requires governance proposal plus acceptance by the new authority and cannot auto-reactivate.",
+    "Retired identities cannot be reactivated or rotated.",
+    "Exact-current identity eligibility fails closed for stale revisions, wrong authorities and non-ACTIVE status.",
+    "No unrelated authority is granted by registration or lifecycle state."
+  ],
+  "status": "IMPLEMENTATION_COMPLETE_QUALIFICATION_PENDING"
+}

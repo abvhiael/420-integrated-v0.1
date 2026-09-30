@@ -73,3 +73,6 @@ jobs:
 
       - name: Retain CMP-1.4 architecture freeze
         run: python scripts/verify-cmp-1-4-0-verifier-architecture.py
+
+      - name: Verify CMP-1.4.1 verifier identity lifecycle
+        run: python scripts/verify-cmp-1-4-1-verifier-lifecycle.py

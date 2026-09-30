@@ -106,7 +106,12 @@
     {
       "name": "ProtocolRegistry",
       "address": "0x0000000000000000000000000000000000000434",
-      "deployment": "GENESIS_SYSTEM_ADDRESS"
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "runtime_artifact": "contracts/artifacts/ProtocolRegistry.json",
+      "runtime_code_hash": "0x9f9e5f794296cf9faf5f8c8d17cd815f3c19c004a158c15cb61b5a29eaacb330",
+      "predeploy_state": "contracts/config/predeploy/ProtocolRegistry-predeploy-state.json",
+      "source_blob_sha1": "9ab3d53a68b6533978f41e0202e5268f1d615c19",
+      "artifact_status": "REG_AUDIT_5_ARTIFACT_READY"
     },
     {
       "name": "Names420",

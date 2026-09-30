@@ -31,9 +31,6 @@ TOOLCHAIN = ROOT / "contracts/config/security/toolchain.json"
 
 REGISTRY_ADDRESS = "0x0000000000000000000000000000000000000434"
 GOVERNANCE_TIMELOCK = "0x0000000000000000000000000000000000000429"
-EMPTY_STORAGE_ROOT = "0x56e81f171bcc55a6ff8345e69d706e0f5d5b0f2f1a7e9f7b7d6a8f5f6e1d2d3"
-# Canonical Ethereum empty trie root is checked dynamically with cast below.
-CANONICAL_EMPTY_TRIE_ROOT = "0x56e81f171bcc55a6ff8345e69d706e0f5d5b0f2f1a7e9f7b7d6a8f5f6e1d2d3"
 
 
 def fail(message):

@@ -36,6 +36,11 @@ on:
       - 'scripts/verify-names-dependency-model.py'
       - 'scripts/generate-names-audit-5-artifact.py'
       - 'scripts/test-names-audit-5-artifact.py'
+      - 'contracts/config/predeploy/storage-init.json'
+      - 'contracts/config/deployment-manifest.json'
+      - 'contracts/config/predeploy/Names420-predeploy-state.json'
+      - 'scripts/test-names-audit-6-genesis-state.py'
+      - 'scripts/generate-names-audit-6-genesis-state.py'
       - 'docs/architecture/decisions/NAMES-AUDIT-2-DEPENDENCY-MODEL.md'
       - '.github/workflows/names-audit.yml'
   pull_request:
@@ -218,6 +223,19 @@ jobs:
             exit 1
           fi
           python scripts/generate-names-audit-5-artifact.py --check
+
+      - name: Generate and verify NAMES-AUDIT-6 deterministic Genesis state
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/generate-names-audit-6-genesis-state.py --write --print
+          python scripts/test-names-audit-6-genesis-state.py
+          git status --porcelain -- contracts/artifacts/Names420.json contracts/config/predeploy/Names420-predeploy-state.json | tee /tmp/names-genesis-status.txt
+          if [ -s /tmp/names-genesis-status.txt ]; then
+            echo "Committed Names420 Genesis materialization/state is missing or stale." >&2
+            exit 1
+          fi
+          python scripts/generate-names-audit-6-genesis-state.py --check
 
       - name: Run Wallet Names integration and management tests
         working-directory: wallet/web

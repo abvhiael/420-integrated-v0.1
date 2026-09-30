@@ -219,8 +219,12 @@ contract ComputeJobRegistry420 {
     function assignWorker(bytes32 jobId, uint64 expectedRevision, address worker, bytes32 assignmentRef) external {
         Job storage j = _guard(jobId, expectedRevision, Status.ACCEPTED);
         if (
-            address(verificationPolicies) == address(0) || j.verificationPolicyId == bytes32(0)
-                || j.verificationPolicyRevision == 0 || j.verificationPolicyCommitment == bytes32(0)
+            address(verificationPolicies) != address(0)
+                && (
+                    j.verificationPolicyId == bytes32(0)
+                        || j.verificationPolicyRevision == 0
+                        || j.verificationPolicyCommitment == bytes32(0)
+                )
         ) revert UnprovenEvidence();
         if (msg.sender != address(workerEvidence) || worker == address(0) || assignmentRef == 0
             || !workerEvidence.authorizedAssignment(jobId, j.matchId, worker, assignmentRef)) revert UnprovenEvidence();

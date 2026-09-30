@@ -1,24 +1,26 @@
-# CMP-1.3 — Deferred closeout draft (unnumbered)
+# CMP-1.3 — Deferred closeout draft (historical migration record)
 
-Status: **PRESERVED INPUT FOR AUTHORIZED CMP-1.3.16 CLOSEOUT; NOT YET EXECUTED.**
+Status: **MIGRATED INTO AUTHORIZED CMP-1.3.16 CLOSEOUT.**
 
-This document preserves useful repository-closeout work that was incorrectly labeled CMP-1.3.8.
+This document preserves the provenance of useful WorkerRegistry phase-closeout work that was originally created under the wrong roadmap number and later held as an unnumbered draft.
 
-The prior conversation established an authoritative detailed roadmap running from CMP-1.3.0 through CMP-1.3.16. The exact text for CMP-1.3.8 through CMP-1.3.16 is not present in the repository and is not available in the currently recoverable conversation index. On 2026-09-28 the repository owner authorized a fresh audit to create a **new** CMP-1.3.8–CMP-1.3.16 roadmap because the historical literal wording remained unrecoverable. That audit assigns final phase closeout to CMP-1.3.16. This file is preserved as input to that new closeout step; it does not claim CMP-1.3.16 was the lost historical closeout number and it does not itself execute or complete CMP-1.3.16.
+The 2026-09-28 repository audit created the current authoritative CMP-1.3.8–CMP-1.3.16 roadmap. That roadmap assigns final WorkerRegistry phase closeout to **CMP-1.3.16**. The useful material formerly held here has now been reconciled into:
 
-## Preserved closeout work
+- `docs/compute-market/CMP-1.3.16-WORKER-REGISTRY-PHASE-CLOSEOUT.md`;
+- `contracts/config/compute-market/cmp-1.3-deferred-closeout-ledger.json`, promoted to the CMP-1.3.16 closeout-ledger schema;
+- `scripts/verify-cmp-1-3-16-closeout.py`.
 
-The draft retains the useful reconciliation logic already produced:
+## Material migrated
 
-- accumulated source/test inventory for implemented WorkerRegistry components;
-- historical qualification caveats, including the cancelled Integrated run on the historical CMP-1.3.4 evidence head;
-- invariant coverage inventory;
-- separation of repository qualification from live deployment/release claims;
-- explicit blockers for canonical public-testnet deployment and live CMP-1.5 compute collateral;
-- machine-readable checks that required source/test files remain present.
+The CMP-1.3.16 closeout retains and reconciles:
 
-## Authority boundary
+- the WorkerRegistry source/test/client/configuration inventory;
+- historical qualification caveats, rather than silently rewriting old evidence;
+- the complete `CMP-INV-001`–`CMP-INV-030` evidence matrix;
+- authority-separation conclusions;
+- the distinction between repository qualification and live deployment/publication;
+- explicit live blockers for canonical public-testnet deployment and the CMP-1.5 compute-collateral dependency.
 
-This draft introduces no runtime authority and does not complete, renumber, or supersede any CMP-1.3 roadmap step.
+## Historical role
 
-The new audit-defined roadmap assigns this material to CMP-1.3.16. When CMP-1.3.16 is executed, reconcile and migrate the useful contents into final closeout evidence. Until then this remains a preserved draft and creates no completion claim.
+This file is no longer an active qualification ledger and does not independently claim phase completion. It remains in the repository so the earlier mis-numbered closeout work and its disposition are auditable rather than deleted or silently repurposed.

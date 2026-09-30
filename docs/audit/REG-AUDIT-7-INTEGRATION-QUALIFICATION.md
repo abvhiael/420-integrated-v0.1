@@ -41,4 +41,24 @@ This step qualifies repository integration/rebuild semantics. It does **not** cl
 - workflow: `.github/workflows/registry-reg-audit-7.yml`
 - machine evidence: `docs/audit/REG-AUDIT-7-INTEGRATION-QUALIFICATION.json`
 
-**Status:** IMPLEMENTED — exact-head CI qualification pending.
+**Status:** EVIDENCE RECORDED — final evidence-head exact-SHA requalification pending.
+
+## Substantive exact-head qualification
+
+Implementation SHA `910638991946eada016ce16445034f7a55ba996c` was zero-behind `main` `04f6200c2ae78db7d15db86b482fa6fa732017a6` and passed all triggered qualification workflows:
+
+- 420Registry REG-AUDIT-7 — `36749500698`;
+- 420 Integrated Qualification — `36749500728`;
+- 420Docs Qualification — `36749500559`;
+- 420Indexer — `36749500564` and `36749500835`;
+- 420Explorer EXP-NEXT.1 Registry Descriptor Provenance — `36749500693`;
+- EXP-1.7 Cross-Layer Traceability Qualification — `36749500521`;
+- EXP-1.8 Runtime Negative Divergence Qualification — `36749500741`;
+- EXP-1.6 Historical Producer Qualification — `36749500748`;
+- EXP-1.10 Phase Closeout Qualification — `36749500647`;
+- 420Explorer EXP-NEXT.2 Fee and Raw Event Browser — `36749500588`;
+- 420Explorer EXP-2.1 — `36749501148`.
+
+The dedicated REG-AUDIT-7 run passed the mechanical roadmap/integration verifier, retained Registry descriptor verifier, Registry/resident Foundry regressions, full Go Indexer tests and vet, Explorer/Search tests and vet, TypeScript Indexer descriptor tests, and Developer Hub tests.
+
+Because recording this durable evidence changes the branch SHA, the retained exact-head suite must run again on the resulting evidence-recording head before REG-AUDIT-7 can be marked COMPLETE.

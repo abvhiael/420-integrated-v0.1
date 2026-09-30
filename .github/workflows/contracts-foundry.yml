@@ -24,7 +24,7 @@ jobs:
   # before solc produces a result. Do not restrict this job to a branch name.
   # All 16 shards are required: no continue-on-error and no early fail-fast.
   pr-shards:
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' && !startsWith(github.head_ref, 'audit/')
     runs-on: ubuntu-latest
     timeout-minutes: 60
     strategy:

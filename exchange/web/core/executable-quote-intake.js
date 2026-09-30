@@ -1,6 +1,7 @@
 import {normalizeChainId} from './wallet-session.js';
 import {prepareCanonicalSwap} from './canonical-execution-inputs.js';
 import {canonicalSwapReview} from './human-readable-review.js';
+import {createQuoteReplayGuard,verifyQuoteAuthentication} from './quote-authentication.js';
 
 export class QuoteIntakeError extends Error {
   constructor(code,message){super(message);this.name='QuoteIntakeError';this.code=code;}
@@ -12,9 +13,11 @@ const raw=v=>typeof v==='string'&&/^[1-9][0-9]*$/.test(v)&&BigInt(v)<(1n<<256n);
 const same=(a,b)=>typeof a==='string'&&typeof b==='string'&&a.toLowerCase()===b.toLowerCase();
 const object=v=>v!==null&&typeof v==='object'&&!Array.isArray(v);
 
-// A transport response is only a REVIEW CANDIDATE. TLS and JSON schema validation
-// do not authenticate the quote provider, establish on-chain qualification, or
-// authorize a browser wallet prompt. This module never returns sourceAuthenticated.
+const DEFAULT_REPLAY_GUARD=createQuoteReplayGuard();
+
+// Transport/schema checks alone produce only REVIEW_CANDIDATE provenance.
+// PRE-05 promotion to AUTHENTICATED_EXECUTION happens only after independent
+// Ed25519 verification against the pinned runtime producer policy.
 export function validateExecutableSwapQuote({runtime,request,response,nowSeconds}={}){
   if(runtime?.deployment?.status!=='RESOLVED'||runtime.deployment.environment!=='testnet')fail('DEPLOYMENT_UNRESOLVED','verified testnet deployment required');
   if(!object(request)||!addr(request.account)||!addr(request.tokenIn)||!addr(request.tokenOut)||!raw(request.amountInRaw))fail('INVALID_REQUEST','explicit account, token pair and positive raw amount required');
@@ -31,13 +34,39 @@ export function validateExecutableSwapQuote({runtime,request,response,nowSeconds
      reviewedIntent.kind!=='EXACT_INPUT_PATH'||!same(reviewedIntent.recipient,request.recipient)||!bytes32(reviewedIntent.routeCommitment)||
      !same(reviewedIntent.routeCommitment,execution.expectedPathHash))fail('QUOTE_REQUEST_MISMATCH','quoted amounts, asset pair, recipient or route differ from request');
   if(request.minimumOutputRaw!==undefined&&(!raw(request.minimumOutputRaw)||BigInt(execution.minFinalAmountOutRaw)<BigInt(request.minimumOutputRaw)))fail('MINIMUM_OUTPUT_MISMATCH','quote violates user minimum output');
-  const provenance={kind:'QUALIFIED_EXECUTION',fixture:false,demo:false,quoteId:response.quoteId,chainId:chain,account:request.account,observedAt:response.observedAt,expiresAt:response.expiresAt};
+  const provenance={kind:'REVIEW_CANDIDATE',fixture:false,demo:false,quoteId:response.quoteId,chainId:chain,account:request.account,observedAt:response.observedAt,expiresAt:response.expiresAt};
   let prepared,projection;
   try{
     prepared=prepareCanonicalSwap({runtime,marketSource:'api',account:request.account,provenance,nowSeconds,reviewedIntent,execution});
     projection=canonicalSwapReview({prepared,execution,tokens,quoteId:response.quoteId,fees:response.fees??null});
   }catch(error){fail('INVALID_QUOTE',`Quote cannot reconstruct a canonical review: ${error.code??error.message}`);}
-  return Object.freeze({status:'REVIEW_CANDIDATE_ONLY',prepared,projection,execution,reviewedIntent,tokens,quoteId:response.quoteId});
+  return Object.freeze({status:'REVIEW_CANDIDATE_ONLY',prepared,projection,execution,reviewedIntent,tokens,quoteId:response.quoteId,response});
+}
+
+export async function authenticateExecutableSwapQuote({runtime,request,response,nowSeconds,endpointUrl,replayGuard=DEFAULT_REPLAY_GUARD}={}){
+  const candidate=validateExecutableSwapQuote({runtime,request,response,nowSeconds});
+  let authentication;
+  try{
+    authentication=await verifyQuoteAuthentication({runtime,quote:response,prepared:candidate.prepared,nowSeconds,endpointUrl});
+  }catch(error){fail(error?.code??'AUTHENTICATION_FAILED',error?.message??'quote authentication failed');}
+  if(!replayGuard?.assertFresh)fail('REPLAY_GUARD_UNAVAILABLE','quote replay guard required');
+  try{replayGuard.assertFresh({quoteId:response.quoteId,replayDomain:response.replayDomain,expiresAt:response.expiresAt,nowSeconds});}
+  catch(error){fail(error?.code??'QUOTE_REPLAYED',error?.message??'quote replay rejected');}
+
+  const provenance={
+    kind:'AUTHENTICATED_EXECUTION',fixture:false,demo:false,quoteId:response.quoteId,chainId:response.chainId,account:request.account,
+    observedAt:response.observedAt,expiresAt:response.expiresAt,authentication,
+  };
+  let prepared,projection;
+  try{
+    prepared=prepareCanonicalSwap({runtime,marketSource:'api',account:request.account,provenance,nowSeconds,reviewedIntent:response.reviewedIntent,execution:response.execution});
+    projection=canonicalSwapReview({prepared,execution:response.execution,tokens:response.tokens,quoteId:response.quoteId,fees:response.fees??null});
+  }catch(error){fail('INVALID_AUTHENTICATED_QUOTE',`Authenticated quote cannot reconstruct canonical review: ${error.code??error.message}`);}
+  if(prepared.transactionFingerprint!==authentication.transactionFingerprint)fail('FINGERPRINT_MISMATCH','authenticated transaction fingerprint changed during preparation');
+  return Object.freeze({
+    status:'TRUSTED_EXECUTION_QUOTE',prepared,projection,execution:response.execution,reviewedIntent:response.reviewedIntent,
+    tokens:response.tokens,quoteId:response.quoteId,authentication,response,
+  });
 }
 
 // An endpoint must be explicitly configured; snapshots, fixture catalogs and
@@ -66,5 +95,5 @@ export async function fetchExecutableSwapReview({runtime,request,nowSeconds,fetc
   try{receivedAt=readNowSeconds();}catch{fail('CLOCK_UNAVAILABLE','quote receipt clock unavailable');}
   if(!Number.isSafeInteger(receivedAt))fail('CLOCK_UNAVAILABLE','valid quote receipt clock required');
   if(Number.isSafeInteger(nowSeconds)&&receivedAt<nowSeconds)fail('CLOCK_UNAVAILABLE','receipt clock precedes quote request');
-  return validateExecutableSwapQuote({runtime,request,response:body,nowSeconds:receivedAt});
+  return authenticateExecutableSwapQuote({runtime,request,response:body,nowSeconds:receivedAt,endpointUrl:url.href});
 }

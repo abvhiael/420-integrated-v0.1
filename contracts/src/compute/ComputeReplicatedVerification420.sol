@@ -298,6 +298,16 @@ contract ComputeReplicatedVerification420 {
         if (resultCommitment == bytes32(0) || recomputationEvidenceHash == bytes32(0))
             revert InvalidCommittee();
 
+        ComputeJobRegistry420.Job memory j = jobs.job(jobId);
+        if (
+            j.status != ComputeJobRegistry420.Status.RESULT_COMMITTED
+                || j.resultCommitment == bytes32(0)
+                || j.verificationPolicyId != c.verificationPolicyId
+                || j.verificationPolicyRevision != c.verificationPolicyRevision
+                || j.verificationPolicyCommitment != c.verificationPolicyCommitment
+                || j.workloadType != c.workloadClass
+        ) revert InvalidCommittee();
+
         Member storage m = _member[jobId][msg.sender];
         if (!m.exists) revert Unauthorized();
         if (m.voted) revert AlreadyVoted();

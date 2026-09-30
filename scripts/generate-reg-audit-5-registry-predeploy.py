@@ -98,7 +98,11 @@ def patch_immutable_runtime(raw):
 def validate_storage_layout(raw):
     layout = raw.get("storageLayout")
     if not isinstance(layout, dict):
-        fail("Foundry artifact missing storageLayout")
+        try:
+            inspected = run("forge", "inspect", CONTRACT, "storage-layout", "--json")
+            layout = json.loads(inspected)
+        except (subprocess.CalledProcessError, json.JSONDecodeError) as exc:
+            fail("compiler storage-layout inspection failed: %s" % exc)
     storage = layout.get("storage")
     if not isinstance(storage, list):
         fail("storageLayout.storage missing")

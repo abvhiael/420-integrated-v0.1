@@ -3,8 +3,8 @@
   "step": "CMP-1.3.16",
   "title": "WorkerRegistry phase closeout, reconciliation, and retained evidence",
   "base_main_sha": "04f6200c2ae78db7d15db86b482fa6fa732017a6",
-  "status": "COMPLETE",
-  "repository_closeout_candidate": false,
+  "status": "QUALIFICATION_PENDING",
+  "repository_closeout_candidate": true,
   "live_release": false,
   "migrated_from_deferred_closeout": true,
   "historical_caveats": {
@@ -145,7 +145,7 @@
       }
     ],
     "evidence_recording_policy": "Evidence-only closeout commits inherit the qualified implementation SHA and do not require recursive full-suite reruns unless they change qualification-relevant contracts, tests, configuration, workflows, dependencies, or substantive requirements.",
-    "note": "CMP-1.3.16 repository closeout complete on the qualified implementation/reconciliation SHA. Live deployment/publication blockers remain."
+    "note": "The durable CMP-1.3.16 closeout document records final qualification and phase completion. This ledger remains the qualification inventory/blocker ledger by design."
   },
   "initial_main_sha": "5a2a273d8d6e0d9ab3428aab80ba0212f7bbb1bc",
   "reconciliation": {

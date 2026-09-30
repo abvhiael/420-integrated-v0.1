@@ -74,8 +74,8 @@ contract Names420AuditTest {
         _commit(names, labelHash, 5, ALICE, duration, salt, ALICE);
         vm.warp(block.timestamp + names.MIN_COMMITMENT_AGE());
 
-        vm.prank(BOB);
         vm.expectRevert(Names420.UnknownCommitment.selector);
+        vm.prank(BOB);
         names.register(labelHash, 5, ALICE, duration, salt);
     }
 
@@ -88,8 +88,8 @@ contract Names420AuditTest {
         _commit(names, labelHash, 5, ALICE, duration, salt, ALICE);
         vm.warp(block.timestamp + names.MAX_COMMITMENT_AGE() + 1);
 
-        vm.prank(ALICE);
         vm.expectRevert(Names420.CommitmentExpired.selector);
+        vm.prank(ALICE);
         names.register(labelHash, 5, ALICE, duration, salt);
     }
 
@@ -98,20 +98,20 @@ contract Names420AuditTest {
         bytes32 salt = keccak256("salt");
         uint64 minDuration = names.MIN_REGISTRATION_PERIOD();
 
-        vm.prank(ALICE);
         vm.expectRevert(Names420.InvalidLabel.selector);
+        vm.prank(ALICE);
         names.register(bytes32(0), 5, ALICE, minDuration, salt);
 
-        vm.prank(ALICE);
         vm.expectRevert(Names420.InvalidLabel.selector);
+        vm.prank(ALICE);
         names.register(keccak256("alice"), 0, ALICE, minDuration, salt);
 
-        vm.prank(ALICE);
         vm.expectRevert(Names420.InvalidOwner.selector);
+        vm.prank(ALICE);
         names.register(keccak256("alice"), 5, address(0), minDuration, salt);
 
-        vm.prank(ALICE);
         vm.expectRevert(Names420.InvalidDuration.selector);
+        vm.prank(ALICE);
         names.register(keccak256("alice"), 5, ALICE, minDuration - 1, salt);
     }
 
@@ -120,16 +120,16 @@ contract Names420AuditTest {
         bytes32 labelHash = keccak256("alice");
         _registerAlice(names, labelHash);
 
-        vm.prank(BOB);
         vm.expectRevert(Names420.NotNameOwner.selector);
+        vm.prank(BOB);
         names.renew(labelHash, names.MIN_REGISTRATION_PERIOD());
 
-        vm.prank(BOB);
         vm.expectRevert(Names420.NotNameOwner.selector);
+        vm.prank(BOB);
         names.setResolution(labelHash, BOB, bytes32(0), bytes32(0));
 
-        vm.prank(BOB);
         vm.expectRevert(Names420.NotNameOwner.selector);
+        vm.prank(BOB);
         names.transferName(labelHash, CAROL);
     }
 
@@ -141,8 +141,8 @@ contract Names420AuditTest {
         vm.prank(ALICE);
         names.transferName(labelHash, BOB);
 
-        vm.prank(CAROL);
         vm.expectRevert(Names420.NotPendingOwner.selector);
+        vm.prank(CAROL);
         names.acceptName(labelHash);
     }
 
@@ -163,12 +163,12 @@ contract Names420AuditTest {
         vm.expectRevert(Names420.NameExpired.selector);
         names.resolve(labelHash);
 
-        vm.prank(ALICE);
         vm.expectRevert(Names420.NameExpired.selector);
+        vm.prank(ALICE);
         names.renew(labelHash, names.MIN_REGISTRATION_PERIOD());
 
-        vm.prank(ALICE);
         vm.expectRevert(Names420.NameExpired.selector);
+        vm.prank(ALICE);
         names.setResolution(labelHash, BOB, bytes32(0), bytes32(0));
     }
 

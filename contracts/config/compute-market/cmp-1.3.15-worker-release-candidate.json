@@ -1,0 +1,100 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-1.3.15.ReleaseCandidate.v1",
+  "status": "REPOSITORY_READY_LIVE_BLOCKED",
+  "repository_ready": true,
+  "live_qualified": false,
+  "historical_package": "contracts/config/compute-market/cmp-1.3.7-worker-deployment-evidence.json",
+  "network": {
+    "chain_id": null,
+    "network_name": null,
+    "rpc_evidence_block": null,
+    "rpc_evidence_block_hash": null
+  },
+  "governance": {
+    "timelock": null,
+    "publication_transaction": null
+  },
+  "protocol_registry": {
+    "address": "0x0000000000000000000000000000000000000434",
+    "publication_api": "publishRegisteredService",
+    "publication_complete": false,
+    "extension_service_ids_require_governance_approval": true,
+    "required_registration_fields": [
+      "implementation",
+      "runtime_code_hash",
+      "metadata_hash",
+      "version",
+      "active",
+      "component_type",
+      "manifest_hash",
+      "dependency_root",
+      "interface_hash"
+    ],
+    "service_entries": []
+  },
+  "release_candidate": {
+    "wiring_contract": "contracts/src/compute/ComputeWorkerReleaseCandidateWiring420.sol",
+    "graph_hash": null,
+    "components": [
+      {"role":"ComputeJobRegistry420","source":"contracts/src/compute/ComputeJobRegistry420.sol","address":null,"deployment_tx":null,"deployment_block":null,"runtime_code_hash":null},
+      {"role":"ComputeJobWorkerSnapshotEvidence420","source":"contracts/src/compute/ComputeJobWorkerSnapshotEvidence420.sol","address":null,"deployment_tx":null,"deployment_block":null,"runtime_code_hash":null},
+      {"role":"ComputeAuthorization420","source":"contracts/src/compute/ComputeAuthorization420.sol","address":null,"deployment_tx":null,"deployment_block":null,"runtime_code_hash":null},
+      {"role":"ComputeWorkerRegistry420","source":"contracts/src/compute/ComputeWorkerRegistry420.sol","address":null,"deployment_tx":null,"deployment_block":null,"runtime_code_hash":null},
+      {"role":"ComputeWorkerCapabilityProfile420","source":"contracts/src/compute/ComputeWorkerCapabilityProfile420.sol","address":null,"deployment_tx":null,"deployment_block":null,"runtime_code_hash":null},
+      {"role":"ComputeWorkerAttestedEligibility420","source":"contracts/src/compute/ComputeWorkerAttestedEligibility420.sol","address":null,"deployment_tx":null,"deployment_block":null,"runtime_code_hash":null},
+      {"role":"ComputeWorkerCapabilityEligibility420","source":"contracts/src/compute/ComputeWorkerCapabilityEligibility420.sol","address":null,"deployment_tx":null,"deployment_block":null,"runtime_code_hash":null},
+      {"role":"ComputeWorkerAttestation420","source":"contracts/src/compute/ComputeWorkerAttestation420.sol","address":null,"deployment_tx":null,"deployment_block":null,"runtime_code_hash":null},
+      {"role":"ComputeWorkerTrust420","source":"contracts/src/compute/ComputeWorkerTrust420.sol","address":null,"deployment_tx":null,"deployment_block":null,"runtime_code_hash":null},
+      {"role":"ComputeWorkerStake420","source":"contracts/src/compute/ComputeWorkerStake420.sol","address":null,"deployment_tx":null,"deployment_block":null,"runtime_code_hash":null},
+      {"role":"ComputeWorkerCapacityReservation420","source":"contracts/src/compute/ComputeWorkerCapacityReservation420.sol","address":null,"deployment_tx":null,"deployment_block":null,"runtime_code_hash":null},
+      {"role":"ComputeWorkerReadModel420","source":"contracts/src/compute/ComputeWorkerReadModel420.sol","address":null,"deployment_tx":null,"deployment_block":null,"runtime_code_hash":null},
+      {"role":"ComputeWorkerReleaseCandidateWiring420","source":"contracts/src/compute/ComputeWorkerReleaseCandidateWiring420.sol","address":null,"deployment_tx":null,"deployment_block":null,"runtime_code_hash":null}
+    ]
+  },
+  "bindings": {
+    "jobs_worker_evidence": null,
+    "jobs_match_evidence": null,
+    "worker_evidence_authorization": null,
+    "worker_registry_authorization": null,
+    "worker_evidence_workers": null,
+    "profiles_workers": null,
+    "attested_eligibility_workers": null,
+    "attested_eligibility_attestation": null,
+    "capability_eligibility_profiles": null,
+    "capability_eligibility_attested_eligibility": null,
+    "worker_evidence_attestation": null,
+    "worker_evidence_trust": null,
+    "worker_evidence_stake": null,
+    "worker_evidence_capacity": null,
+    "capacity_controller": null,
+    "read_model_workers": null,
+    "read_model_profiles": null,
+    "read_model_capability_eligibility": null,
+    "read_model_attestation": null,
+    "read_model_trust": null,
+    "read_model_stake": null,
+    "read_model_capacity": null,
+    "read_model_snapshots": null
+  },
+  "dependency_reconciliation": {
+    "cmp_1_5_compute_stake_required_for_stake_required_live_admission": true,
+    "cmp_1_5_compute_stake_live_source_qualified": false,
+    "validator_stake_is_not_compute_collateral": true,
+    "wallet_balance_is_not_compute_collateral": true,
+    "payer_escrow_is_not_compute_collateral": true,
+    "public_testnet_available": false,
+    "no_fixed_genesis_predeploy_allocated": true,
+    "discovery_path": "ProtocolRegistry"
+  },
+  "release_gates": {
+    "cmp_1_3_8_authorization": true,
+    "cmp_1_3_9_execution_key": true,
+    "cmp_1_3_10_capacity": true,
+    "cmp_1_3_11_provenance": true,
+    "cmp_1_3_12_attempt_lifecycle": true,
+    "cmp_1_3_13_read_model": true,
+    "cmp_1_3_14_invariant_qualification": true,
+    "cmp_1_5_compute_stake_live_source": false,
+    "public_testnet_live": false
+  }
+}

@@ -1,6 +1,6 @@
 # CMP-1.4.3 — Verification policy registry
 
-Status: **IMPLEMENTATION COMPLETE; LEVEL 1 + LEVEL 2 QUALIFICATION PENDING. NO LIVE DEPLOYMENT/PUBLICATION CLAIM.**
+Status: **COMPLETE. LEVEL 1 + LEVEL 2 EXACT-HEAD QUALIFICATION GREEN. NO LIVE DEPLOYMENT/PUBLICATION CLAIM.**
 
 ## Canonical definition
 
@@ -66,4 +66,24 @@ CMP-1.4.3 is COMPLETE only when every criterion in the machine-readable evidence
 
 ## Completion
 
-**NOT YET COMPLETE.** Implementation and evidence artifacts are present; exact-head Level 1 and Level 2 qualification remain pending.
+**COMPLETE.** Exact implementation head `081d2ddab30747ca3a0ba0e6cf90d8b26432d554` passed the required Level 1 and documented Level 2 app-specific integration qualification.
+
+Required results on the exact implementation SHA:
+
+- Compute Market Qualification #11 — run `36787265122` — **success**. This is the Level 2 retained Compute Market integration suite and includes the CMP-1.4.0–1.4.3 mechanical verifiers.
+- Solidity Contracts #3442 — run `36787265123` — **success** using the Compute-only focused path; monolithic repository Foundry shards were skipped.
+
+Additional triggered retained checks on the same implementation SHA:
+
+- Genesis Address Authority #267 — run `36787265102` — success
+- 420Docs Qualification #3525 — run `36787265097` — success
+- 420Indexer #1067 — run `36787265323` — success
+- 420Registry REG-AUDIT-4 #102 — run `36787265214` — success
+
+The immediately preceding implementation head `0b08e9d54cf0dc7f7f5060cc5c8f08d5d04028b2` failed Compute Market Qualification #10 only in the new test fixture: Foundry's one-shot `vm.prank(GOV)` was consumed by the external `KIND_VERIFICATION()` getter before `publish()`. Production authorization correctly rejected the resulting non-governance call. Commit `081d2ddab30747ca3a0ba0e6cf90d8b26432d554` fixes the fixture by resolving the kind before applying the prank; no production authorization or test requirement was weakened.
+
+Level 2 milestone status: **SATISFIED** for CMP-1.4.1 identity/lifecycle + CMP-1.4.2 classes/capabilities + CMP-1.4.3 policy binding.
+
+Level 3 remains intentionally deferred to complete Compute Market phase closeout.
+
+This completion update is evidence-only and references the already-qualified implementation SHA above; it changes no executable code, tests, workflows, dependencies, configuration, interfaces, deployment state, or substantive requirement.

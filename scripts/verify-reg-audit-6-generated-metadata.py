@@ -86,11 +86,11 @@ for label, text in active.items():
             fail(f"{label} retains stale Registry metadata: {stale}")
 
 contracts_text = active["generated contracts"]
-if f"Catalogue address: \`{ADDRESS}\` (**local example only**)" not in contracts_text:
+if f"Catalogue address: `{ADDRESS}` (**local example only**)" not in contracts_text:
     fail("generated contract reference does not visibly retain local-example scope")
-if f"Declared artifact: \`{ARTIFACT_PATH}\` (present)" not in contracts_text:
+if f"Declared artifact: `{ARTIFACT_PATH}` (present)" not in contracts_text:
     fail("generated contract reference does not use retained artifact")
-if f"Declared interface: \`{INTERFACE_PATH}\` (present)" not in contracts_text:
+if f"Declared interface: `{INTERFACE_PATH}` (present)" not in contracts_text:
     fail("generated contract reference does not use frozen interface")
 if "Distributable verified ABI: **YES**" not in contracts_text:
     fail("generated contract reference does not reflect qualified ABI identity")

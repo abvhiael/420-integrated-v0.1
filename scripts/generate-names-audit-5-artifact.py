@@ -184,6 +184,23 @@ def validate_immutables(raw):
     return runtime, normalized, count
 
 
+def validate_plan_freeze_binding(artifact):
+    plan = json.loads(PREDEPLOY_PLAN.read_text(encoding="utf-8"))
+    entries = [e for e in plan.get("predeploys", []) if e.get("name") == CONTRACT]
+    if len(entries) != 1:
+        fail("predeploy plan must contain exactly one Names420 entry")
+    entry = entries[0]
+    expected = {
+        "status": "COMPILER_ARTIFACT_FROZEN",
+        "source_blob_sha1": artifact["sourceBlobSha1"],
+        "compiler_runtime_template_sha256": artifact["compilerRuntimeTemplateSha256"],
+        "artifact_payload_sha256": artifact["artifactPayloadSha256"],
+    }
+    for key, value in expected.items():
+        if entry.get(key) != value:
+            fail("Names420 predeploy artifact binding drift for %s" % key)
+
+
 def canonical_json(obj):
     return json.dumps(obj, indent=2, sort_keys=True) + "\n"
 
@@ -268,6 +285,7 @@ def main(argv=None):
                 fail("committed Names420 artifact missing")
             if OUTPUT_ARTIFACT.read_text(encoding="utf-8") != artifact_text:
                 fail("Names420 artifact is not reproducible from current source/compiler inputs")
+            validate_plan_freeze_binding(artifact)
 
         if args.print_output:
             print("===BEGIN_NAMES420_ARTIFACT===")

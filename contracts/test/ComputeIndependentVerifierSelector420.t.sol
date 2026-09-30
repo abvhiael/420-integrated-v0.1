@@ -248,7 +248,8 @@ contract ComputeIndependentVerifierSelector420Test {
             )
         );
         require(!ok, "shared-controller friendly verifier selected");
-        require(!independence.appointment(jobId).active, "conflicted appointment persisted");
+        ComputeVerifierIndependencePolicy420.Appointment memory a = independence.appointment(jobId);
+        require(!a.active, "conflicted appointment persisted");
     }
 
     function testWrongWorkloadOrSuspendedVerifierFailsClosed() public {
@@ -330,7 +331,9 @@ contract ComputeIndependentVerifierSelector420Test {
         ComputeIndependentVerifierSelector420.Selection memory revoked = selector.selection(jobId);
         require(old.active, "historical selection rewritten");
         require(!revoked.active && revoked.revision == 2, "revocation revision missing");
-        require(!independence.appointment(jobId).active, "appointment remained active");
+        ComputeVerifierIndependencePolicy420.Appointment memory revokedAppointment =
+            independence.appointment(jobId);
+        require(!revokedAppointment.active, "appointment remained active");
 
         address replacementAuthority = address(0xD00F);
         _attest(replacementAuthority, keccak256("replacement-controller"), 7);

@@ -13,6 +13,10 @@ on:
       - ".github/workflows/wallet-extension.yml"
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   verify-wallet-extension:
     if: github.event_name != 'pull_request' || !startsWith(github.head_ref, 'audit/')

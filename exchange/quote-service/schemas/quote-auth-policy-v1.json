@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "420-exchange-quote-auth-policy-v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "status",
+    "service",
+    "endpointUrl",
+    "maxKeyOverlapSeconds",
+    "deployment",
+    "producers"
+  ],
+  "properties": {
+    "schema": {
+      "const": "420-exchange-quote-auth-policy-v1"
+    },
+    "status": {
+      "enum": [
+        "UNRESOLVED",
+        "QUALIFIED_CONFIG"
+      ]
+    },
+    "service": {
+      "const": "420/service/exchange-quote/v1"
+    },
+    "endpointUrl": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "maxKeyOverlapSeconds": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 86400
+    },
+    "deployment": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "producers": {
+      "type": "array"
+    }
+  }
+}

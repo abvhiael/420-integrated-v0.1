@@ -16,13 +16,13 @@ export function createStaticRouteSource({routes=[]}={}){
     }
   };
 }
-export function createStaticChainAdapter({assets=[],feeBps=0,deployment}={}){
+export function createStaticChainAdapter({assets=[],feeBps=0,deployment,chainId=null,observedAt=null}={}){
   const byAddress=new Map(assets.map(asset=>[asset.address.toLowerCase(),structuredClone(asset)]));
   return new class extends ChainStateAdapter {
     async snapshot(request){
       const input=byAddress.get(request.tokenIn),output=byAddress.get(request.tokenOut);
       if(!input||!output)fail('INVALID_TOKEN_METADATA','token metadata unavailable',{status:422});
-      return {assets:{input:structuredClone(input),output:structuredClone(output)},feeBps,deployment:structuredClone(deployment)};
+      return {assets:{input:structuredClone(input),output:structuredClone(output)},feeBps,deployment:structuredClone(deployment),chainId,observedAt};
     }
   };
 }

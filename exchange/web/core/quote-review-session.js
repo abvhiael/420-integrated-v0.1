@@ -45,7 +45,7 @@ export class QuoteReviewSession {
       if(this.disposed||epoch!==this.epoch||controller.signal.aborted)fail('STALE_QUOTE','quote request was replaced or invalidated');
       if(!this.unchanged(session)||!same(candidate?.prepared?.context?.account,session.account)||normalizeChainId(candidate?.prepared?.context?.chainId)!==session.chainId)fail('SESSION_CHANGED','wallet or chain changed while fetching quote');
       const now=this.nowSeconds();
-      if(!Number.isSafeInteger(now)||candidate?.status!=='REVIEW_CANDIDATE_ONLY'||candidate.prepared.context.observedAt>now||now-candidate.prepared.context.observedAt>30||candidate.prepared.context.expiresAt<=now)fail('STALE_QUOTE','quote expired or became stale before display');
+      if(!Number.isSafeInteger(now)||!['REVIEW_CANDIDATE_ONLY','TRUSTED_EXECUTION_QUOTE'].includes(candidate?.status)||candidate.prepared.context.observedAt>now||now-candidate.prepared.context.observedAt>30||candidate.prepared.context.expiresAt<=now)fail('STALE_QUOTE','quote expired or became stale before display');
       this.candidate=Object.freeze({candidate,session,epoch});
       return candidate;
     }catch(error){

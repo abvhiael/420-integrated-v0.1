@@ -117,6 +117,42 @@ test('PRE-03 rejects candidate asset substitution and oversized route before dis
  }
 });
 
+
+test('PRE-03 loading, stale and dependency-failure states remain explicit and fail closed',async()=>{
+ const deferred=()=>{let resolve,reject;const promise=new Promise((res,rej)=>{resolve=res;reject=rej;});return {promise,resolve,reject};};
+
+ // Loading then stale-at-receipt.
+ {
+  const {documentRef,controller}=browserHarness(),work=deferred();
+  const surface=mountReadOnlySwapReview({documentRef,controller,nowSeconds:()=>1060,fetchReview:()=>work.promise});
+  surface.market.value=marketId;await surface.market.emit('change');
+  surface.amount.value='1';await surface.amount.emit('input');
+  surface.minimum.value='4';await surface.minimum.emit('input');
+  surface.recipient.value=recipient;await surface.recipient.emit('input');
+  const pending=surface.panel.querySelector('#v15-quote-review-fetch').emit('click');
+  assert.equal(surface.panel.querySelector('#v15-quote-review-status').attributes['aria-busy'],'true');
+  assert.match(surface.panel.querySelector('#v15-quote-review-status').textContent,/Retrieving/i);
+  work.resolve(structuredClone(review));await pending;
+  assert.equal(surface.panel.querySelector('#v15-quote-review-result').hidden,true);
+  assert.match(surface.panel.querySelector('#v15-quote-review-status').textContent,/stale|expired/i);
+  surface.dispose();
+ }
+
+ // Dependency transport/service failure.
+ {
+  const {documentRef,controller}=browserHarness();
+  const surface=mountReadOnlySwapReview({documentRef,controller,nowSeconds:()=>1010,fetchReview:async()=>{throw Error('quote dependency unavailable');}});
+  surface.market.value=marketId;await surface.market.emit('change');
+  surface.amount.value='1';await surface.amount.emit('input');
+  surface.minimum.value='4';await surface.minimum.emit('input');
+  surface.recipient.value=recipient;await surface.recipient.emit('input');
+  await surface.panel.querySelector('#v15-quote-review-fetch').emit('click');
+  assert.equal(surface.panel.querySelector('#v15-quote-review-result').hidden,true);
+  assert.match(surface.panel.querySelector('#v15-quote-review-status').textContent,/dependency unavailable/i);
+  surface.dispose();
+ }
+});
+
 test('browser entrypoint remains read-only and deployment includes the PRE-03 module',()=>{
  const root=path.resolve(import.meta.dirname,'..');
  const browser=fs.readFileSync(path.join(root,'browser-wallet-ui.js'),'utf8');

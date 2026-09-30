@@ -215,14 +215,8 @@ jobs:
         run: |
           set -euo pipefail
           (cd contracts && forge build src/apps/Names420.sol)
-          python scripts/generate-names-audit-5-artifact.py --write --print
-          python scripts/test-names-audit-5-artifact.py
-          git status --porcelain -- contracts/artifacts/Names420.json | tee /tmp/names-artifact-status.txt
-          if [ -s /tmp/names-artifact-status.txt ]; then
-            echo "Committed Names420 compiler artifact is missing or stale." >&2
-            exit 1
-          fi
           python scripts/generate-names-audit-5-artifact.py --check
+          python scripts/test-names-audit-5-artifact.py
 
       - name: Generate and verify NAMES-AUDIT-6 deterministic Genesis state
         shell: bash

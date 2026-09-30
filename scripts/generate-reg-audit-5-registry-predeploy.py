@@ -99,7 +99,11 @@ def validate_storage_layout(raw):
     layout = raw.get("storageLayout")
     if not isinstance(layout, dict):
         try:
-            inspected = run("forge", "inspect", CONTRACT, "storage-layout", "--json")
+            inspected = subprocess.check_output(
+                ["forge", "inspect", "src/apps/ProtocolRegistry.sol:ProtocolRegistry", "storage-layout", "--json"],
+                cwd=ROOT / "contracts",
+                text=True,
+            ).strip()
             layout = json.loads(inspected)
         except (subprocess.CalledProcessError, json.JSONDecodeError) as exc:
             fail("compiler storage-layout inspection failed: %s" % exc)

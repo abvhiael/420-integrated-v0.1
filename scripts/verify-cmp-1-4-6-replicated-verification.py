@@ -38,6 +38,7 @@ for token in [
 for token in [
     "testFreezeExactIndependentTwoOfThreeCommitteeBeforeExecution",
     "testOnlySelectionAuthorityCanFreezeCommittee",
+    "testJobPartyCannotBeTheDesignatedCommitteeSelectionAuthority",
     "testThresholdDuplicateAndSharedControllerFailClosed",
     "testMissingCommitteeCapabilityFailsClosed",
     "testVotingRequiresCommittedResultAndFrozenMember",

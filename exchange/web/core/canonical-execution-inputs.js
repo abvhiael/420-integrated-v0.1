@@ -17,7 +17,8 @@ const fail=(code,message)=>{throw new CanonicalInputError(code,message);};
 export function requireCanonicalContext({runtime,marketSource,account,provenance,nowSeconds}={}) {
   if(runtime?.deployment?.status!=='RESOLVED'||runtime?.deployment?.environment!=='testnet')fail('DEPLOYMENT_UNRESOLVED','verified testnet deployment required');
   if(marketSource!=='api')fail('FIXTURE_SOURCE','demo and display-only data cannot authorize execution');
-  if(!provenance||provenance.kind!=='QUALIFIED_EXECUTION'||provenance.fixture===true||provenance.demo===true)fail('UNQUALIFIED_SOURCE','qualified execution provenance required');
+  if(!provenance||!['REVIEW_CANDIDATE','AUTHENTICATED_EXECUTION'].includes(provenance.kind)||provenance.fixture===true||provenance.demo===true)fail('UNQUALIFIED_SOURCE','review or authenticated execution provenance required');
+  if(provenance.kind==='AUTHENTICATED_EXECUTION'&&provenance.authentication?.verified!==true)fail('UNQUALIFIED_SOURCE','authenticated execution provenance requires verifier evidence');
   if(!id32(provenance.quoteId)||!Number.isSafeInteger(provenance.observedAt)||!Number.isSafeInteger(provenance.expiresAt))fail('INVALID_PROVENANCE','canonical quote identity and timestamps required');
   if(!Number.isSafeInteger(nowSeconds)||provenance.observedAt>nowSeconds||provenance.expiresAt<=nowSeconds||nowSeconds-provenance.observedAt>30)fail('STALE_QUOTE','execution quote is future-dated, expired or stale');
   if(!address(account))fail('INVALID_ACCOUNT','connected wallet account required');
@@ -25,7 +26,12 @@ export function requireCanonicalContext({runtime,marketSource,account,provenance
   try{chain=normalizeChainId(runtime.network?.chainId);}catch{fail('CHAIN_UNCONFIGURED','canonical network chain ID required');}
   try{if(normalizeChainId(provenance.chainId)!==chain)fail('CHAIN_MISMATCH','quote chain differs from testnet runtime');}catch(error){if(error instanceof CanonicalInputError)throw error;fail('CHAIN_MISMATCH','invalid quote chain');}
   if(!address(provenance.account)||normalizeAccount(provenance.account)!==normalizeAccount(account))fail('ACCOUNT_MISMATCH','quote wallet account changed');
-  return Object.freeze({account:normalizeAccount(account),chainId:chain,quoteId:provenance.quoteId.toLowerCase(),observedAt:provenance.observedAt,expiresAt:provenance.expiresAt});
+  return Object.freeze({
+    account:normalizeAccount(account),chainId:chain,quoteId:provenance.quoteId.toLowerCase(),
+    observedAt:provenance.observedAt,expiresAt:provenance.expiresAt,
+    trustLevel:provenance.kind,
+    authentication:provenance.kind==='AUTHENTICATED_EXECUTION'?Object.freeze({...provenance.authentication}):null,
+  });
 }
 
 function requireRaw(fields){for(const [label,value] of Object.entries(fields))if(!positiveRaw(value))fail('INVALID_RAW_AMOUNT',`${label} must be a positive decimal raw-unit string`);}

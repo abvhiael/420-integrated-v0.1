@@ -31,7 +31,7 @@ export function requireCanonicalContext({runtime,marketSource,account,provenance
     account:normalizeAccount(account),chainId:chain,quoteId:provenance.quoteId.toLowerCase(),
     observedAt:provenance.observedAt,expiresAt:provenance.expiresAt,
     trustLevel:provenance.kind,
-    authentication:provenance.kind==='AUTHENTICATED_EXECUTION'?Object.freeze({...provenance.authentication}):null,
+    authentication:provenance.kind==='AUTHENTICATED_EXECUTION'?provenance.authentication:null,
   });
 }
 

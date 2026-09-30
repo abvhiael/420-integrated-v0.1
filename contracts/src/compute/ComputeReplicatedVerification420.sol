@@ -158,7 +158,10 @@ contract ComputeReplicatedVerification420 {
 
         (address payer, uint256 maxSpend) =
             IComputeReplicatedPayerTerms420(address(jobs.requestEvidence())).fundingTerms(j.requestId);
-        if (payer == address(0) || maxSpend == 0) revert InvalidCommittee();
+        if (
+            payer == address(0) || maxSpend == 0 || selectionAuthority == j.owner
+                || selectionAuthority == payer || selectionAuthority == operator
+        ) revert InvalidCommittee();
 
         bytes32 ownerController = _controller(j.owner);
         bytes32 payerController = _controller(payer);

@@ -1,3 +1,4 @@
+import {isVerifiedQuoteEvidence} from './quote-authentication.js';
 import { normalizeAccount, normalizeChainId } from './wallet-session.js';
 import { buildSwapTransaction, buildLimitOrderTypedData, buildLimitOrderCancelTransaction, buildBridgeOutboundTransaction } from './execution.js';
 import { transactionFingerprint } from './preflight.js';
@@ -18,7 +19,7 @@ export function requireCanonicalContext({runtime,marketSource,account,provenance
   if(runtime?.deployment?.status!=='RESOLVED'||runtime?.deployment?.environment!=='testnet')fail('DEPLOYMENT_UNRESOLVED','verified testnet deployment required');
   if(marketSource!=='api')fail('FIXTURE_SOURCE','demo and display-only data cannot authorize execution');
   if(!provenance||!['REVIEW_CANDIDATE','AUTHENTICATED_EXECUTION'].includes(provenance.kind)||provenance.fixture===true||provenance.demo===true)fail('UNQUALIFIED_SOURCE','review or authenticated execution provenance required');
-  if(provenance.kind==='AUTHENTICATED_EXECUTION'&&provenance.authentication?.verified!==true)fail('UNQUALIFIED_SOURCE','authenticated execution provenance requires verifier evidence');
+  if(provenance.kind==='AUTHENTICATED_EXECUTION'&&!isVerifiedQuoteEvidence(provenance.authentication))fail('UNQUALIFIED_SOURCE','authenticated execution provenance requires cryptographic verifier evidence');
   if(!id32(provenance.quoteId)||!Number.isSafeInteger(provenance.observedAt)||!Number.isSafeInteger(provenance.expiresAt))fail('INVALID_PROVENANCE','canonical quote identity and timestamps required');
   if(!Number.isSafeInteger(nowSeconds)||provenance.observedAt>nowSeconds||provenance.expiresAt<=nowSeconds||nowSeconds-provenance.observedAt>30)fail('STALE_QUOTE','execution quote is future-dated, expired or stale');
   if(!address(account))fail('INVALID_ACCOUNT','connected wallet account required');

@@ -8,6 +8,7 @@ import {createQuoteEngine} from '../src/quote-engine.js';
 import {createStaticChainAdapter,createStaticRouteSource} from '../src/adapters.js';
 import {createFixedWindowRateLimiter} from '../src/rate-limit.js';
 import {createRedactedLogger} from '../src/redaction.js';
+import {testSigner} from './test-auth.js';
 
 const vector=JSON.parse(fs.readFileSync(path.resolve(import.meta.dirname,'../fixtures/pre04-vector-v1.json'),'utf8'));
 function quoteEngine(){
@@ -15,6 +16,7 @@ function quoteEngine(){
   chainId:vector.chainId,router:vector.router,spender:vector.spender,deploymentId:vector.deploymentId,manifestHash:vector.manifestHash,clock:()=>1000,
   routeSource:createStaticRouteSource({routes:[vector.route]}),
   chainAdapter:createStaticChainAdapter({assets:vector.assets,feeBps:vector.feeBps,deployment:{deploymentId:vector.deploymentId,manifestHash:vector.manifestHash},chainId:vector.chainId,observedAt:1000}),
+  signer:testSigner(),
  });
 }
 async function withServer(options,fn){
@@ -25,7 +27,7 @@ test('PRE-04 HTTP POST serves versioned deterministic quote and stable headers',
  await withServer({},async origin=>{
   const res=await fetch(origin+'/executable-swap-quote',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(vector.request)});
   assert.equal(res.status,200);assert.equal(res.headers.get('x-420-exchange-quote-schema'),'1');assert.equal(res.headers.get('cache-control'),'no-store');
-  const body=await res.json();assert.equal(body.quoteId,vector.expected.quoteId);assert.equal(body.schema,'420-exchange-executable-swap-quote-v1');
+  const body=await res.json();assert.equal(body.quoteId,vector.expected.quoteId);assert.equal(body.schema,'420-exchange-executable-swap-quote-v1');assert.equal(body.authentication.algorithm,'Ed25519');
  });
 });
 test('PRE-04 HTTP errors are deterministic for method/path/json/body bounds',async()=>{

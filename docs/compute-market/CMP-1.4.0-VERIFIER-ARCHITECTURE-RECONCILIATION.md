@@ -76,6 +76,14 @@ The repository already contains substantial verifier-related primitives:
 
 The retained test suite already covers signed-verdict replay/expiry/profile rejection, EOA/ERC-1271 signature behavior, appointment revocation, controller conflicts, authority rotation, hostile verdict substitution, deterministic recomputation, canonical wiring and verification-gated entitlement behavior.
 
+### Worker capability attestation boundary
+
+`ComputeWorkerAttestation420` and `ComputeWorkerAttestedEligibility420` are inventoried because they are existing attestation components relevant to the compute graph. They attest/compose worker capability evidence only. They are **not** verifier identity, verifier appointment, result correctness, or settlement authority, and CMP-1.4 must not reinterpret them as such.
+
+### Planned verification router boundary
+
+The frozen V1 architecture and `contracts/config/genesis-dapp-contract-map.json` name `ComputeVerificationRouter420.sol` as a target ComputeMarket surface. No such Solidity source exists on this baseline. CMP-1.4.0 therefore records it as a **planned, not implemented** surface. Later CMP-1.4 work must reconcile its routing responsibilities with the canonical verifier registry/model before implementation; documentation/config naming is not proof of source code, deployment, or publication.
+
 ### Missing before CMP-1.4.0
 
 The repository did not yet have a single authoritative verifier architecture freeze that:

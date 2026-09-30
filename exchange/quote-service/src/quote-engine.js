@@ -8,7 +8,7 @@ export const PRODUCER_SCHEMA='420-exchange-quote-producer-v1';
 
 export function createQuoteEngine({
   chainId,router,spender=router,deploymentId,manifestHash,serviceId='420/service/exchange-quote/v1',
-  routeSource,chainAdapter,maxRouteHops=8,quoteTtlSeconds=30,maxInputAgeSeconds=15,
+  routeSource,chainAdapter,maxRouteHops=8,maxRouteDataBytes=4096,quoteTtlSeconds=30,maxInputAgeSeconds=15,
   clock=()=>Math.floor(Date.now()/1000),
   producer={id:'offline-pre04',keyVersion:'PRE05_PENDING',algorithm:'UNSIGNED_PRE05'},
 }={}){
@@ -24,9 +24,10 @@ export function createQuoteEngine({
     try{[state,plan]=await Promise.all([chainAdapter.snapshot(request),routeSource.quoteExactInput(request,{chainId:canonicalChainId,observedAt})]);}
     catch(error){throw error;}
     if(!state||state.deployment?.deploymentId?.toLowerCase()!==deploymentId.toLowerCase()||state.deployment?.manifestHash?.toLowerCase()!==manifestHash.toLowerCase())fail('DEPLOYMENT_MISMATCH','chain adapter deployment identity mismatch',{status:503});
+    if(state.chainId!==null&&state.chainId!==undefined&&normalizeChainId(state.chainId)!==canonicalChainId)fail('CHAIN_MISMATCH','chain adapter state belongs to another chain',{status:503});
     if(Number.isSafeInteger(state.observedAt)&&(state.observedAt>observedAt||observedAt-state.observedAt>maxInputAgeSeconds))fail('STALE_INPUT','chain/route inputs are stale',{status:503,retryable:true});
     const input=validateAsset(state.assets?.input,request.tokenIn),output=validateAsset(state.assets?.output,request.tokenOut);
-    const route=validateRoutePlan(plan,{tokenIn:request.tokenIn,tokenOut:request.tokenOut,maxHops:maxRouteHops});
+    const route=validateRoutePlan(plan,{tokenIn:request.tokenIn,tokenOut:request.tokenOut,maxHops:maxRouteHops,maxRouteDataBytes});
     if(!Number.isInteger(state.feeBps)||state.feeBps<0||state.feeBps>100)fail('FEE_POLICY_INVALID','exchange fee policy unavailable',{status:503});
     const gross=BigInt(route.grossAmountOutRaw),fee=gross*BigInt(state.feeBps)/10_000n,net=gross-fee;
     if(net<=0n||net<BigInt(request.minimumOutputRaw))fail('MINIMUM_OUTPUT_UNMET','route cannot satisfy requested minimum net output',{status:422});

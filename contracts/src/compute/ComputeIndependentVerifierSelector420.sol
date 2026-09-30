@@ -250,9 +250,14 @@ contract ComputeIndependentVerifierSelector420 {
 
         independencePolicy.revokeAppointment(jobId);
 
-        current.active = false;
-        _selection[jobId] = current;
-        _history[jobId][current.revision] = current;
-        emit SelectionRevoked(jobId, current.verifierId, current.verifier, reasonHash, current.revision);
+        if (current.revision == type(uint64).max) revert SerialExhausted();
+        uint64 newRevision = current.revision + 1;
+        Selection memory revoked = current;
+        revoked.active = false;
+        revoked.revision = newRevision;
+        revoked.evidenceHash = reasonHash;
+        _selection[jobId] = revoked;
+        _history[jobId][newRevision] = revoked;
+        emit SelectionRevoked(jobId, current.verifierId, current.verifier, reasonHash, newRevision);
     }
 }

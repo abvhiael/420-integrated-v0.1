@@ -17,13 +17,19 @@ export class QuoteReviewSession {
   }
   snapshot(){
     if(this.disposed)fail('DISPOSED','quote review session disposed');
-    const wallet=this.controller.wallet,session=wallet?.session;
-    if(this.controller.disposed||!wallet||!session?.account||!session?.chainId||!Number.isSafeInteger(session.generation))fail('WALLET_UNAVAILABLE','connected wallet required for quote review');
-    return {wallet,account:normalizeAccount(session.account),chainId:normalizeChainId(session.chainId),generation:session.generation,controllerGeneration:this.controller.generation};
+    let execution;
+    try{execution=this.controller.captureExecutionContext();}catch(error){fail(error?.code??'WALLET_UNAVAILABLE',error?.message??'connected wallet required for quote review');}
+    return {
+      wallet:execution.wallet,
+      account:normalizeAccount(execution.account),
+      chainId:normalizeChainId(execution.chainId),
+      generation:execution.walletGeneration,
+      controllerGeneration:execution.controllerGeneration,
+      execution,
+    };
   }
   unchanged(original){
-    const current=this.snapshot();
-    return current.wallet===original.wallet&&current.account===original.account&&current.chainId===original.chainId&&current.generation===original.generation&&current.controllerGeneration===original.controllerGeneration;
+    try{this.controller.assertExecutionContext(original.execution);return true;}catch{return false;}
   }
   invalidate(){
     this.epoch++;this.pending?.abort();this.pending=null;this.candidate=null;

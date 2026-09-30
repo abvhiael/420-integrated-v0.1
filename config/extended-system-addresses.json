@@ -1,6 +1,6 @@
 {
   "schema": "420-extended-system-addresses-v1",
-  "note": "Candidate application-system assignments within the already reserved 0x0420-0x04FF range. Existing 0x0420-0x0433 assignments remain unchanged. These new assignments are Step 6 application-layer additions and should be frozen before genesis code placement.",
+  "note": "Historical Step 6 application-layer mirror retained for provenance only. Active fixed assignments are owned by contracts/config/system-addresses.json and the canonical namespace record.",
   "assignments": [
     {
       "address": "0x0000000000000000000000000000000000000434",
@@ -35,5 +35,6 @@
       "name": "CannaseurCampaignRegistry"
     }
   ],
-  "status": "CANDIDATE_STEP6_FREEZE_PENDING"
+  "status": "SUPERSEDED_BY_SYSTEM_ADDRESSES_V4",
+  "authority": "contracts/config/genesis-address-namespace.json"
 }

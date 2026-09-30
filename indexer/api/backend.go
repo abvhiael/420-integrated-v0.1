@@ -2,6 +2,7 @@ package api
 
 import (
 	"errors"
+	"reflect"
 	"strings"
 	"sync"
 	"time"
@@ -37,8 +38,28 @@ func (h *RuntimeHealth) MarkHealthy() { if h==nil{return}; h.mu.Lock(); h.issue=
 func (h *RuntimeHealth) MarkFailure(issue string) { if h==nil{return}; h.mu.Lock(); h.issue=strings.TrimSpace(issue); if h.issue=="" { h.issueAt=time.Time{} } else { h.issueAt=time.Now().UTC() }; h.mu.Unlock() }
 func (h *RuntimeHealth) snapshot() (string, time.Time) { if h==nil{return "",time.Time{}}; h.mu.RLock(); defer h.mu.RUnlock(); return h.issue,h.issueAt }
 
-type StoreBackend struct { store ReadStore; catalog *decoder.Catalog; consensus ConsensusProvider; runtimeHealth *RuntimeHealth }
+var ErrRegistryProjectionMismatch = errors.New("registry projection disagrees with canonical Registry state")
+
+type CanonicalRegistryReader interface {
+	ServiceVersion(serviceID string, version uint32) (decoder.ServiceVersion, error)
+	Service(serviceID string) (decoder.ServiceSummary, error)
+}
+
+type StoreBackend struct {
+	store ReadStore
+	catalogMu sync.RWMutex
+	catalog *decoder.Catalog
+	canonicalRegistry CanonicalRegistryReader
+	consensus ConsensusProvider
+	runtimeHealth *RuntimeHealth
+}
 func NewStoreBackend(store ReadStore, catalog *decoder.Catalog) *StoreBackend { if catalog == nil { catalog = decoder.NewCatalog() }; return &StoreBackend{store: store, catalog: catalog} }
+func (b *StoreBackend) ReplaceRegistryCatalog(catalog *decoder.Catalog) {
+	if catalog == nil { catalog = decoder.NewCatalog() }
+	b.catalogMu.Lock(); b.catalog = catalog; b.catalogMu.Unlock()
+}
+func (b *StoreBackend) WithCanonicalRegistryReader(reader CanonicalRegistryReader) *StoreBackend { b.canonicalRegistry = reader; return b }
+func (b *StoreBackend) registryCatalog() *decoder.Catalog { b.catalogMu.RLock(); defer b.catalogMu.RUnlock(); return b.catalog }
 func (b *StoreBackend) WithConsensusProvider(provider ConsensusProvider) *StoreBackend { b.consensus = provider; return b }
 func (b *StoreBackend) WithRuntimeHealth(runtimeHealth *RuntimeHealth) *StoreBackend { b.runtimeHealth = runtimeHealth; return b }
 func (b *StoreBackend) Consensus() (model.ConsensusStatus, error) { if b.consensus == nil { return model.ConsensusStatus{}, ErrConsensusQueryUnavailable }; return b.consensus.Consensus() }
@@ -63,9 +84,27 @@ func (b *StoreBackend) Block(number uint64) (model.BlockRecord, bool, error) { r
 func (b *StoreBackend) Transaction(hash string) (model.TransactionRecord, bool, error) { return b.store.Transaction(hash) }
 func (b *StoreBackend) Receipt(hash string) (model.ReceiptRecord, bool, error) { return b.store.Receipt(hash) }
 func (b *StoreBackend) LogsByBlock(number uint64) ([]model.LogRecord, error) { return b.store.LogsByBlock(number) }
-func (b *StoreBackend) ServiceVersion(serviceID string, version uint32) (decoder.ServiceVersion, error) { return b.catalog.Version(serviceID, version) }
-func (b *StoreBackend) Service(serviceID string) (decoder.ServiceSummary, error) { return b.catalog.Service(serviceID) }
-func (b *StoreBackend) Services() []decoder.ServiceSummary { return b.catalog.Services() }
+func (b *StoreBackend) ServiceVersion(serviceID string, version uint32) (decoder.ServiceVersion, error) {
+	projected, err := b.registryCatalog().Version(serviceID, version)
+	if err != nil { return decoder.ServiceVersion{}, err }
+	if b.canonicalRegistry != nil {
+		canonical, err := b.canonicalRegistry.ServiceVersion(serviceID, version)
+		if err != nil { return decoder.ServiceVersion{}, err }
+		if !reflect.DeepEqual(projected, canonical) { return decoder.ServiceVersion{}, ErrRegistryProjectionMismatch }
+	}
+	return projected, nil
+}
+func (b *StoreBackend) Service(serviceID string) (decoder.ServiceSummary, error) {
+	projected, err := b.registryCatalog().Service(serviceID)
+	if err != nil { return decoder.ServiceSummary{}, err }
+	if b.canonicalRegistry != nil {
+		canonical, err := b.canonicalRegistry.Service(serviceID)
+		if err != nil { return decoder.ServiceSummary{}, err }
+		if !reflect.DeepEqual(projected, canonical) { return decoder.ServiceSummary{}, ErrRegistryProjectionMismatch }
+	}
+	return projected, nil
+}
+func (b *StoreBackend) Services() []decoder.ServiceSummary { return b.registryCatalog().Services() }
 
 func (b *StoreBackend) AssetTransfers(assetKey, address string, limit uint32) (AssetTransferPage, error) {
 	if limit == 0 || limit > 250 { return AssetTransferPage{}, ErrInvalidCursor }

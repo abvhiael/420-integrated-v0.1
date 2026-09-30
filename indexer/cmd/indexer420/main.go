@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/420integrated/420-integrated/indexer/api"
+	"github.com/420integrated/420-integrated/indexer/decoder"
 	"github.com/420integrated/420-integrated/indexer/consensusview"
 	"github.com/420integrated/420-integrated/indexer/ingest"
 	indexerrpc "github.com/420integrated/420-integrated/indexer/rpc"
@@ -91,10 +92,12 @@ func run() error {
 		return fmt.Errorf("initial runtime source qualification: %w", err)
 	}
 	if err := engine.CatchUp(ctx); err != nil { return fmt.Errorf("initial catch-up: %w", err) }
+	registryCatalog, err := decoder.RebuildProtocolRegistryCatalog420(durable)
+	if err != nil { return fmt.Errorf("initial Registry projection rebuild: %w", err) }
 
 	runtimeHealth := api.NewRuntimeHealth()
 	runtimeHealth.MarkHealthy()
-	backend := api.NewStoreBackend(durable, nil).WithConsensusProvider(consensusProvider).WithRuntimeHealth(runtimeHealth)
+	backend := api.NewStoreBackend(durable, registryCatalog).WithConsensusProvider(consensusProvider).WithRuntimeHealth(runtimeHealth)
 	server := &http.Server{
 		Addr:              httpAddr,
 		Handler:           api.NewServer(backend).Handler(),
@@ -138,6 +141,13 @@ func run() error {
 				fmt.Fprintf(os.Stderr, "420Indexer catch-up failed: %v\n", err)
 				continue
 			}
+			registryCatalog, err := decoder.RebuildProtocolRegistryCatalog420(durable)
+			if err != nil {
+				runtimeHealth.MarkFailure("REGISTRY_PROJECTION_REBUILD_FAILED")
+				fmt.Fprintf(os.Stderr, "420Indexer Registry projection rebuild failed: %v\n", err)
+				continue
+			}
+			backend.ReplaceRegistryCatalog(registryCatalog)
 			runtimeHealth.MarkHealthy()
 		}
 	}

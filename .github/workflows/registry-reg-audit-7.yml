@@ -1,0 +1,79 @@
+name: 420Registry REG-AUDIT-7
+
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/apps/ProtocolRegistry.sol'
+      - 'contracts/src/system/GenesisResidentAccess420.sol'
+      - 'contracts/test/Registry*.t.sol'
+      - '420-indexer/descriptors/protocol-registry-v4.json'
+      - '420-indexer/src/**'
+      - '420-indexer/test/**'
+      - 'indexer/**'
+      - 'explorer/**'
+      - 'search/**'
+      - 'developer-hub/**'
+      - 'contracts/config/420explorer-genesis.json'
+      - 'contracts/config/420search-genesis.json'
+      - 'contracts/config/420appstore-genesis.json'
+      - 'contracts/config/420verify-genesis.json'
+      - 'config/420indexer-v1.json'
+      - 'scripts/verify-reg-audit-7-integration.py'
+      - 'scripts/verify-exp-next-1-registry-descriptor-provenance.py'
+      - 'docs/audit/REG-AUDIT-7-*'
+      - 'docs/audit/EXP-NEXT.1-*'
+      - 'docs/architecture/infrastructure/420indexer.md'
+      - '.github/workflows/registry-reg-audit-7.yml'
+  workflow_dispatch:
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Verify exact qualification head
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Mechanical REG-AUDIT-7 integration verification
+        run: python3 scripts/verify-reg-audit-7-integration.py
+
+      - name: Registry descriptor provenance
+        run: python3 scripts/verify-exp-next-1-registry-descriptor-provenance.py
+
+      - name: Registry and resident Solidity regressions
+        working-directory: contracts
+        run: forge test --match-path 'test/Registry*.t.sol' -vv
+
+      - name: Full Go Indexer integration/regression
+        run: |
+          go test ./indexer/...
+          go vet ./indexer/...
+
+      - name: Explorer and Search projection boundary regression
+        run: |
+          go test ./explorer/... ./search/...
+          go vet ./explorer/... ./search/...
+
+      - name: TypeScript Indexer descriptor/decoder regression
+        working-directory: 420-indexer
+        run: |
+          npm install --no-audit --no-fund
+          npm test
+
+      - name: Developer Hub strict publication regression
+        working-directory: developer-hub
+        run: npm test

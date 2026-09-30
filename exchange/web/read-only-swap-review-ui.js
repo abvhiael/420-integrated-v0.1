@@ -13,13 +13,15 @@ const addRow=(documentRef,dl,label,value,{code=false,key=null}={})=>{
 };
 
 export function readOnlyReviewLines(candidate,entry=null){
-  if(candidate?.status!=='REVIEW_CANDIDATE_ONLY'||!candidate.projection||!candidate.prepared?.context)throw Error('Canonical review candidate required');
+  if(!['REVIEW_CANDIDATE_ONLY','TRUSTED_EXECUTION_QUOTE'].includes(candidate?.status)||!candidate.projection||!candidate.prepared?.context)throw Error('Canonical review candidate required');
   const {projection:p,prepared:{context}}=candidate;
   const fee=p.fees?.status==='DISCLOSED'
     ? `${p.fees.totalFee} ${p.output.symbol} (${p.fees.totalFeeRaw} raw)${p.fees.rateBps===null?'':` · ${p.fees.rateBps} bps`}`
     : 'Unavailable in current candidate schema — execution remains disabled';
   return Object.freeze([
-    'REVIEW CANDIDATE ONLY — transport/schema checked; producer authenticity is not established',
+    candidate.status==='TRUSTED_EXECUTION_QUOTE'
+      ? `AUTHENTICATED EXECUTION QUOTE — producer ${candidate.authentication?.producerId??'unknown'} / key ${candidate.authentication?.keyVersion??'unknown'} verified; execution remains disabled`
+      : 'REVIEW CANDIDATE ONLY — transport/schema checked; producer authenticity is not established',
     entry?.market?`Configured market: ${entry.market.label} · ${entry.market.marketId}`:null,
     `Chain: ${context.chainId}`,
     `Input: ${p.amountIn} ${p.input.symbol} · raw ${p.amountInRaw} · ${p.input.address}`,
@@ -131,7 +133,11 @@ export function mountReadOnlySwapReview({documentRef,controller,fetchReview,nowS
 
   function renderCandidate(candidate,entry){
     result.replaceChildren?.();result.textContent='';
-    const banner=documentRef.createElement('p');banner.className='pre03-source-banner';banner.textContent='REVIEW CANDIDATE ONLY · transport/schema checked · producer authenticity not established · no execution authority';result.append(banner);
+    const banner=documentRef.createElement('p');banner.className='pre03-source-banner';
+    banner.textContent=candidate.status==='TRUSTED_EXECUTION_QUOTE'
+      ? `AUTHENTICATED EXECUTION QUOTE · producer ${candidate.authentication?.producerId??'unknown'} · key ${candidate.authentication?.keyVersion??'unknown'} · execution remains disabled`
+      : 'REVIEW CANDIDATE ONLY · transport/schema checked · producer authenticity not established · no execution authority';
+    result.append(banner);
     const dl=documentRef.createElement('dl');dl.className='pre03-review-grid';
     const p=candidate.projection,context=candidate.prepared.context;
     addRow(documentRef,dl,'Configured market',entry.market.label,{key:'configured-market'});
@@ -179,7 +185,9 @@ export function mountReadOnlySwapReview({documentRef,controller,fetchReview,nowS
       if(disposed||!view.querySelector?.('#swap-review')||panel.parentElement!==view){clear('Review invalidated by navigation');return;}
       session.current();assertCandidateMatchesEntry(candidate,entry);
       currentEntry=entry;renderCandidate(candidate,entry);
-      status.textContent='Read-only candidate received. Review source is not authenticated and no wallet transaction is available.';
+      status.textContent=candidate.status==='TRUSTED_EXECUTION_QUOTE'
+        ? 'Authenticated quote verified. This remains a read-only review; wallet transaction submission is disabled.'
+        : 'Read-only candidate received. Review source is not authenticated and no wallet transaction is available.';
     }catch(error){if(!disposed){result.hidden=true;result.replaceChildren?.();result.textContent='';status.textContent=String(error?.message??'Quote review unavailable');}}
     finally{if(!disposed){status.removeAttribute?.('aria-busy');refresh();}}
   }

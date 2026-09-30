@@ -1,16 +1,17 @@
 {
   "schema": "420-exchange-quote-signer-rotation-v1",
-  "status": "DESIGN_ONLY_PRE04",
+  "status": "PRE05_IMPLEMENTED_POLICY_DRIVEN",
   "activeKeyVersion": null,
   "acceptedKeyVersions": [],
   "overlapSeconds": 0,
-  "privateKeyMaterial": "PROHIBITED",
-  "nextStep": "PRE-05",
+  "privateKeyMaterial": "EXTERNAL_INJECTED_ONLY",
+  "nextStep": "PRE-06",
   "rules": [
-    "PRE-04 stores no private signing key or production secret",
-    "PRE-05 must bind producer identity and key version into the authenticated quote envelope",
-    "rotation must support bounded overlap and explicit revocation",
-    "retired keys must not authenticate newly issued quotes",
-    "quote semantics and replay domain remain stable across key rotation"
+    "production private keys are injected into the service and never committed",
+    "producer identity and key version are signed and must match the pinned browser trust policy",
+    "public-key fingerprint and revocation epoch are checked before accepting a quote",
+    "rotation overlap is bounded by maxKeyOverlapSeconds",
+    "revoked and out-of-window keys fail closed",
+    "quote semantics, replay domain and transaction fingerprint remain stable across key rotation"
   ]
 }

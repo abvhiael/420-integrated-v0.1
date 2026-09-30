@@ -116,6 +116,34 @@
         "ProtocolRegistry publication",
         "generic verifier registry"
       ]
+    },
+    {
+      "source": "contracts/src/compute/ComputeWorkerAttestation420.sol",
+      "role": "worker capability/provenance attestation source",
+      "disposition": "retained_boundary_input_not_verifier_correctness",
+      "authority": [
+        "worker capability evidence/provenance"
+      ],
+      "must_not_claim": [
+        "job-result correctness",
+        "verifier identity",
+        "verifier appointment",
+        "settlement authority"
+      ]
+    },
+    {
+      "source": "contracts/src/compute/ComputeWorkerAttestedEligibility420.sol",
+      "role": "worker admission composition over capability attestation",
+      "disposition": "retained_boundary_input_not_verifier_correctness",
+      "authority": [
+        "worker eligibility composition"
+      ],
+      "must_not_claim": [
+        "job-result correctness",
+        "verifier identity",
+        "verifier appointment",
+        "settlement authority"
+      ]
     }
   ],
   "canonical_model": {
@@ -257,5 +285,16 @@
     "Legacy/test-only and bounded-profile components are not promoted into the canonical general verifier registry.",
     "Retained tests/docs required by later CMP-1.4 work are identified.",
     "Architecture freeze is mechanically verified and qualified on the exact final head."
+  ],
+  "planned_missing_surfaces": [
+    {
+      "source": "contracts/src/compute/ComputeVerificationRouter420.sol",
+      "repository_state": "not_implemented",
+      "evidence": [
+        "docs/420-COMPUTE-MARKET-V1-ARCHITECTURE.md",
+        "contracts/config/genesis-dapp-contract-map.json"
+      ],
+      "disposition": "target architecture name only; later CMP-1.4 implementation must reconcile router responsibilities without treating the name as existing code or deployment."
+    }
   ]
 }

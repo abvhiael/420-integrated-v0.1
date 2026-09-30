@@ -4,9 +4,15 @@ pragma solidity ^0.8.24;
 import "../src/apps/Names420.sol";
 
 interface VmNamesHardening420 {
-    function warp(uint256) external;
-    function prank(address) external;
-    function expectRevert(bytes4) external;
+    function warp(
+        uint256
+    ) external;
+    function prank(
+        address
+    ) external;
+    function expectRevert(
+        bytes4
+    ) external;
 }
 
 contract Names420HardeningTest {
@@ -17,17 +23,26 @@ contract Names420HardeningTest {
     address internal constant BOB = address(0xB0B);
     address internal constant CAROL = address(0xCA401);
 
-    function _boundedDuration(Names420 names, uint64 raw) internal view returns (uint64) {
+    function _boundedDuration(
+        Names420 names,
+        uint64 raw
+    ) internal view returns (uint64) {
         uint64 minDuration = names.MIN_REGISTRATION_PERIOD();
         uint64 maxDuration = names.MAX_REGISTRATION_PERIOD();
         return minDuration + (raw % (maxDuration - minDuration + 1));
     }
 
-    function _boundedLabelLength(Names420 names, uint8 raw) internal view returns (uint8) {
+    function _boundedLabelLength(
+        Names420 names,
+        uint8 raw
+    ) internal view returns (uint8) {
         return uint8(1 + (uint256(raw) % names.MAX_LABEL_LENGTH()));
     }
 
-    function _nonzero(bytes32 value, bytes32 fallbackValue) internal pure returns (bytes32) {
+    function _nonzero(
+        bytes32 value,
+        bytes32 fallbackValue
+    ) internal pure returns (bytes32) {
         return value == bytes32(0) ? fallbackValue : value;
     }
 

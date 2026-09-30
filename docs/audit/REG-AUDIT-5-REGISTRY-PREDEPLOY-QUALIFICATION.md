@@ -102,8 +102,15 @@ Generated catalogue/reference cleanup remains REG-AUDIT-6.
 
 ## Exact-head qualification
 
-The exact qualified commit SHA and final CI run IDs are recorded in PR #409 metadata after the
-evidence-recording head itself passes the retained qualification suite. This avoids creating an
-evidence-only commit after qualification and thereby invalidating the exact-head proof.
+The substantive REG-AUDIT-5 implementation/evidence head `f0a4065a1e685f318f67dc1b737b343451a8e1d0`
+was zero-behind `main` `2a45a2c8847f40b7aa1b27ae4556bf8d547a1f91` and passed the retained exact-head suite,
+including the dedicated REG-AUDIT-5 workflow, Genesis Address Authority, all Solidity PR shards,
+REG-AUDIT-1/3, Integrated Qualification, Docs, Developer Hub, Indexer and Wallet Web.
 
-**Status before final exact-head CI:** IMPLEMENTED — qualification pending.
+Final cleanup removes stale unused constants and changes the dedicated workflow from one-time artifact
+retention behavior to fail-closed drift verification. The cleanup head must itself pass the same retained
+suite. Its exact SHA and final run IDs are retained in PR #409 metadata after qualification; this is the
+repository's established anti-recursion pattern for evidence-only/final-metadata recording.
+
+**Status:** COMPLETE subject to the exact final cleanup head remaining zero-behind and green; PR #409
+metadata is the authoritative final-SHA/run-ID pointer without creating another recursive evidence commit.

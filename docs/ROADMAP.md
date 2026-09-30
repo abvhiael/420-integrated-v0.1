@@ -77,21 +77,21 @@ Native 420 balances, validator registration, Attention rewards, Development Fund
 
 ### Genesis dApp/service status
 
-- **420Indexer** — shared rebuildable projection service implemented and qualified for Genesis consumers.
-- **420RPC** — public RPC/routing/policy layer implemented through its hardening and qualification roadmap.
-- **GEN-10.1 / 420 Wallet** — repository implementation merged through W13. Wallet Core, web, extension and native mobile surfaces are built and qualified. Production Play/TestFlight release remains externally blocked on genuine physical Android/iPhone device evidence.
-- **GEN-10.2 / 420 Explorer** — complete, qualified and merged.
-- **GEN-10.3 / 420 Search** — SEARCH-0 through SEARCH-10 complete, reconciled, qualified and merged. Search now provides the qualified non-authoritative discovery layer over public canonical/protocol sources.
-- **GEN-10.4 / 420 Analytics — CURRENT** — frozen Genesis profile already exists; the next build is the full qualified Analytics consumer/application implementation over canonical public chain and protocol data.
-- **GEN-10.5 / 420 Verify — PENDING** — full verification service/application implementation after Analytics.
-- **GEN-10.6 / 420 AppStore — PENDING** — full Registry-backed catalogue/curation implementation after Verify.
-- **GEN-10.7 / 420 Notifications — PENDING** — full opt-in notification delivery implementation after AppStore.
-- **GEN-10.8 / 420 Status — PENDING** — public network/service-health application closeout after Notifications.
+- **420Indexer** — shared rebuildable projection service implemented and repository-qualified for Genesis consumers; live public-testnet binding/evidence remains deployment-time.
+- **420RPC** — public RPC/routing/policy layer implemented through its hardening and qualification roadmap; final public-testnet endpoint qualification remains deployment-time.
+- **GEN-10.1 / 420 Wallet** — repository implementation merged through W13. Wallet Core, web, extension and native mobile surfaces are built and qualified. Production Play/TestFlight release remains externally blocked on genuine physical Android/iPhone device evidence, and live testnet binding remains deployment-time.
+- **GEN-10.2 / 420 Explorer** — repository implementation complete, qualified and merged; production-equivalent live deployment/recovery qualification remains testnet-gated.
+- **GEN-10.3 / 420 Search** — SEARCH-0 through SEARCH-10 complete, reconciled, qualified and merged. Live deployed Search/Indexer evidence remains testnet-gated.
+- **GEN-10.4 / 420 Analytics** — repository implementation is complete through ANALYTICS-8. The deployable `analytics420` runtime, API, dashboard, metrics, methodology, privacy, reorg/finality/freshness and resource controls are implemented. **Current phase: ANALYTICS-9 / LIVE_QUALIFICATION_READY**; live 420Indexer-backed testnet evidence remains outstanding before ANALYTICS-10 Genesis closeout.
+- **GEN-10.5 / 420 Verify** — VERIFY-0 through VERIFY-10 complete, reconciled, exact-head qualified and merged via PR #303 (merge `1f937b7ef641980cc118336763ba50ffc8f3cc5a`). Public backend/frontend deployment and live testnet endpoint qualification remain operational work.
+- **GEN-10.6 / 420 AppStore** — implementation qualified and merged via PR #305 (merge `202874aa76db333348a50ad7bab6c126d96c7397`). Public backend/frontend deployment and live Registry/Verify/Wallet integration evidence remain testnet-gated.
+- **GEN-10.7 / 420 Notifications** — NOTIFY-0 through NOTIFY-10 implementation/closeout work complete and merged via PR #312 (merge `d0006253ccdda9777f07dcc7bd98daf519f8cd36`). Public service deployment, live Indexer binding and provider delivery/replay/recovery evidence remain operational/testnet work.
+- **GEN-10.8 / 420 Status** — STATUS-0 through STATUS-10 implementation/closeout work complete and merged via PR #325 (merge `f442801cd841ddb275eb5889c846be73093be25c`), with later reconciliation PRs including #332/#336 also merged. Live service probes, public endpoint deployment and production-equivalent incident/recovery evidence remain deployment-time.
 - **420Automation** — shared replaceable infrastructure outside the frozen user-facing Genesis app inventory; continue its own qualification/testnet closeout independently of the GEN-10 application sequence.
 
 Protocol-backed Genesis applications continue through their own contract, deployment and integration gates and are not duplicated as contract-free GEN-10 application builds.
 
-**Current handoff:** begin **GEN-10.4 — 420Analytics**.
+**Current GEN-10 state:** the contract-free Genesis application implementation sequence is repository-built. Remaining work is concentrated in live/public-testnet deployment, environment binding and deployment-specific qualification, plus Wallet physical-device release evidence.
 
 **Deliverable:** usable reference wallet/explorer plus qualified shared Genesis service infrastructure and completed contract-free Genesis application integrations.
 

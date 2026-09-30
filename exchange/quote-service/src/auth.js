@@ -23,8 +23,9 @@ export function canonicalSignedQuotePayload(quote){
 export function signedPayloadBytes(quote){return Buffer.from(canonicalJson(canonicalSignedQuotePayload(quote)),'utf8');}
 export function signedPayloadHash(quote){return '0x'+createHash('sha256').update(signedPayloadBytes(quote)).digest('hex');}
 export function publicKeyFingerprint(publicKey){
-  const der=createPublicKey(publicKey).export({type:'spki',format:'der'});
-  return 'sha256:'+createHash('sha256').update(der).digest('hex');
+  const jwk=createPublicKey(publicKey).export({format:'jwk'});
+  if(typeof jwk.x!=='string')fail('SIGNER_CONFIG_INVALID','Ed25519 public key bytes unavailable',{status:503});
+  return 'sha256:'+createHash('sha256').update(fromB64u(jwk.x)).digest('hex');
 }
 export function createEd25519Signer({producerId,keyVersion:version,privateKey,revocationEpoch=0}={}){
   if(!id(producerId)||!keyVersion(version)||!Number.isSafeInteger(revocationEpoch)||revocationEpoch<0)fail('SIGNER_CONFIG_INVALID','producer/key version/revocation epoch required',{status:503});

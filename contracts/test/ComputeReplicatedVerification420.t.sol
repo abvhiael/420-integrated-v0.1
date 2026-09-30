@@ -473,6 +473,29 @@ contract ComputeReplicatedVerification420Test {
         require(aReached, "same-result threshold not recognized");
     }
 
+
+    function testPartyControllerDriftInvalidatesFrozenCommitteeVotes() public {
+        _freeze2of3();
+        _commitWorkerResult(RESULT_A);
+
+        vm.prank(ATTESTOR);
+        independence.attest(
+            OWNER,
+            keccak256("verifier-controller-1"),
+            keccak256("owner-controller-drift"),
+            uint64(block.timestamp + 1 days)
+        );
+
+        vm.prank(V1);
+        (bool ok,) = address(replicated).call(
+            abi.encodeCall(
+                replicated.submitRecomputation,
+                (jobId, RESULT_A, keccak256("v1-after-party-drift"))
+            )
+        );
+        require(!ok, "party controller drift did not invalidate quorum vote");
+    }
+
     function testMemberCanVoteOnlyOnceAndSuspensionFailsClosed() public {
         _freeze2of3();
         _commitWorkerResult(RESULT_A);

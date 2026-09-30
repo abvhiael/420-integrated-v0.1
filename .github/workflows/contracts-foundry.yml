@@ -16,7 +16,7 @@ on:
 
 concurrency:
   group: solidity-contracts-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   # Every PR must qualify the complete Solidity source and test inventory in

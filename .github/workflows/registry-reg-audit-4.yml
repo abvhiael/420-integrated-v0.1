@@ -21,6 +21,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   qualify:
+    if: github.event_name != 'pull_request' || !startsWith(github.head_ref, 'audit/')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

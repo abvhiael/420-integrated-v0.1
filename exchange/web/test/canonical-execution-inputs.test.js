@@ -5,7 +5,7 @@ const address=n=>'0x'+BigInt(n).toString(16).padStart(40,'0');
 const id=n=>'0x'+BigInt(n).toString(16).padStart(64,'0');
 const runtime={deployment:{status:'RESOLVED',environment:'testnet'},network:{chainId:'0x420'},contracts:{ExchangeAtomicRouter420:address(100),ExchangeLimitOrderSettlement420:address(101),GatewayRouter420:address(102)}};
 const account=address(1);
-const provenance={kind:'QUALIFIED_EXECUTION',fixture:false,demo:false,quoteId:id(99),chainId:'0x420',account,observedAt:1000,expiresAt:1100};
+const provenance={kind:'REVIEW_CANDIDATE',fixture:false,demo:false,quoteId:id(99),chainId:'0x420',account,observedAt:1000,expiresAt:1100};
 const base={runtime,marketSource:'api',account,provenance,nowSeconds:1010};
 const reviewedIntent={kind:'EXACT_INPUT_PATH',recipient:address(2),routeCommitment:id(900),hops:[{marketId:id(10),outputToken:address(4)}]};
 const execution={mode:'ERC20_TO_ERC20',tokenIn:address(3),recipient:address(2),amountInRaw:'100',minFinalAmountOutRaw:'90',expectedPathHash:id(900),hops:[{marketId:id(10),routeId:id(11),tokenOut:address(4),minAmountOutRaw:'90',routeData:'0x'}]};
@@ -13,7 +13,7 @@ const swap=overrides=>prepareCanonicalSwap({...base,reviewedIntent,execution,...
 test('canonical swap preparation derives calldata and fingerprint from reviewed raw-unit inputs',()=>{
  const result=swap();assert.equal(result.kind,'SWAP');assert.equal(result.transaction.kind,'SWAP');assert.equal(result.transaction.request.from,account);assert.match(result.transactionFingerprint,/^0x[0-9a-f]{64}$/);assert.deepEqual(result.freshness,{observedAt:1000,expiresAt:1100});
 });
-test('no fixture, demo, unresolved deployment, unsigned provenance or unconfigured chain qualifies',()=>{
+test('review preparation rejects fixture, demo, unresolved deployment, invalid provenance or unconfigured chain',()=>{
  for(const change of [{marketSource:'demo'},{runtime:{...runtime,deployment:{status:'UNRESOLVED',environment:'testnet'}}},{runtime:{...runtime,deployment:{status:'RESOLVED',environment:'production'}}},{provenance:{...provenance,fixture:true}},{provenance:{...provenance,kind:'DISPLAY_ONLY'}},{provenance:{...provenance,chainId:'0x1'}},{provenance:{...provenance,account:address(2)}}])assert.throws(()=>swap(change),error=>error.name==='CanonicalInputError');
  assert.throws(()=>requireCanonicalContext({...base,provenance:{...provenance,quoteId:'not-a-quote'}}),error=>error.code==='INVALID_PROVENANCE');
 });

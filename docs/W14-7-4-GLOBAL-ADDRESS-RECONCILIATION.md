@@ -1,8 +1,8 @@
 # W14.7.4 — global Genesis address reconciliation
 
-**Status: global collision-free candidate drafted; active registries NOT migrated, freeze exception NOT approved, deployment NOT attested.** PR #358 stays draft. Wallet `readyForLiveTestnet` and `canonicalAddressConflictResolved` remain false. Do not enable send, sponsor, or read the candidate in production runtime.
+**Status: SUPERSEDED HISTORICAL PROPOSAL.** The active repository decision preserves the frozen Step 6.2 predeploy map; `contracts/config/genesis-address-namespace.json` is the namespace authority. The former ProtocolRegistry relocation to `0x0448` is retired and non-authoritative. PR #358 stays draft. Wallet `readyForLiveTestnet` and `canonicalAddressConflictResolved` remain false. Do not enable send, sponsor, or read the candidate in production runtime.
 
-## Decision requiring chain/consensus and cross-app review
+## Historical proposal and supersession
 
 The existing `config/system-addresses.json` and `contracts/config/system-addresses.json` describe `0x0420..0x043b` as unchanged/frozen and fix `ConsensusSystemCall420` at `0x043c`. The canonical Wallet/application registry claims incompatible identities throughout the same range. In particular, its Names420 reservation is `0x0445` but the legacy system and predeploy records put Names420 at `0x0435`. It is impossible to preserve **all** existing frozen application placements while also preserving the Names420 reservation and Wallet destinations `0x0446..0x0449`: two locations for one logical contract or two contracts at one address would result. This is an explicit governance/chain-release decision, not a wallet-only patch.
 

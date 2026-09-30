@@ -18,8 +18,8 @@ export function validateAsset(asset,expectedAddress){
   return Object.freeze({assetId:asset.assetId.toLowerCase(),address:normalizeAddress(asset.address),symbol:asset.symbol,decimals:asset.decimals,verified:true});
 }
 export function validateRoutePlan(plan,{tokenIn,tokenOut,maxHops=8,maxRouteDataBytes=4096}={}){
-  if(!plan||plan.source!=='route-adapter'||!Array.isArray(plan.hops)||plan.hops.length<1||plan.hops.length>maxHops||
-     !raw(plan.grossAmountOutRaw))fail('UNSUPPORTED_ROUTE','qualified route plan required',{status:422});
+  if(!plan||plan.source!=='route-adapter'||!Number.isSafeInteger(plan.observedAt)||plan.observedAt<=0||
+     !Array.isArray(plan.hops)||plan.hops.length<1||plan.hops.length>maxHops||!raw(plan.grossAmountOutRaw))fail('UNSUPPORTED_ROUTE','qualified route plan required',{status:422});
   let current=normalizeAddress(tokenIn);
   const hops=plan.hops.map((hop,index)=>{
     if(!id32(hop.marketId)||!id32(hop.routeId)||!address(hop.tokenIn)||!address(hop.tokenOut)||normalizeAddress(hop.tokenIn)!==current||
@@ -31,5 +31,5 @@ export function validateRoutePlan(plan,{tokenIn,tokenOut,maxHops=8,maxRouteDataB
     return Object.freeze({marketId:hop.marketId.toLowerCase(),routeId:hop.routeId.toLowerCase(),tokenIn:normalizeAddress(hop.tokenIn),tokenOut:current,amountOutRaw:hop.amountOutRaw,minAmountOutRaw:hop.minAmountOutRaw,routeData:hop.routeData.toLowerCase()});
   });
   if(current!==normalizeAddress(tokenOut)||BigInt(plan.grossAmountOutRaw)!==BigInt(hops.at(-1).amountOutRaw))fail('UNSUPPORTED_ROUTE','route output does not match requested asset',{status:422});
-  return Object.freeze({source:'route-adapter',grossAmountOutRaw:plan.grossAmountOutRaw,hops:Object.freeze(hops)});
+  return Object.freeze({source:'route-adapter',observedAt:plan.observedAt,grossAmountOutRaw:plan.grossAmountOutRaw,hops:Object.freeze(hops)});
 }

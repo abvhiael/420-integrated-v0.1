@@ -44,6 +44,7 @@ for token in [
     "testVotingRequiresCommittedResultAndFrozenMember",
     "testTwoOfThreeMatchingRecomputationsReachQuorumExactlyOnce",
     "testSplitVotesNeedThresholdOnSameResult",
+    "testPartyControllerDriftInvalidatesFrozenCommitteeVotes",
     "testMemberCanVoteOnlyOnceAndSuspensionFailsClosed",
     "testCommitteeCannotBeFrozenAfterExecutionBegins"
 ]:

@@ -43,6 +43,17 @@ Historical audit snapshots may retain superseded addresses/paths when explicitly
 
 ## Status
 
-**IMPLEMENTED — exact-head CI qualification pending.**
+**EVIDENCE RECORDED — final evidence-head exact-SHA requalification pending.**
 
-The final exact qualified SHA and retained run IDs are recorded in PR metadata after the evidence-recording head passes all required workflows, following the repository's anti-recursion evidence convention.
+Substantive implementation SHA `1e7d591b00f54e9827fefc680c53bf6f971f3de3` passed the exact-head retained qualification set:
+
+- REG-AUDIT-6: run `36745494895`;
+- 420Docs Qualification: run `36745494968`;
+- 420 Developer Hub: run `36745494775`;
+- 420 Integrated Qualification: run `36745411136`;
+- 420Indexer: run `36745494795`;
+- REG-AUDIT-4: run `36745494881`, which mechanically reran retained REG-AUDIT-1/2/3 coverage.
+
+REG-AUDIT-5 is the already-qualified merged prerequisite at base `da148f2a05b09e6566cc35235646b21dd97d30fd`. REG-AUDIT-6 does not alter Registry Solidity, the retained artifact, or predeploy state; the REG-AUDIT-6 verifier independently rechecks their address/interface/artifact/runtime-hash consistency on the exact candidate.
+
+Because this evidence record itself changes the branch SHA, the complete retained qualification set is rerun on the resulting evidence-recording head. The final exact SHA and final run IDs are retained in PR #414 metadata after that rerun, following the repository's anti-recursion evidence convention.

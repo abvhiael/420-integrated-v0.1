@@ -44,12 +44,58 @@ export class BrowserExecutionController {
     if(typeof target.dispatchEvent==='function' && typeof Event==='function') target.dispatchEvent(new Event('eip6963:requestProvider'));
     return this.discover(ethereum);
   }
-  unbind() {
+  notifyInvalidation(reason,stateType='execution-invalidated') {
+    if(this.disposed)return this.generation;
+    this.generation++;
+    this.onInvalidate(reason);
+    this.onState({type:stateType,reason,generation:this.generation});
+    return this.generation;
+  }
+  invalidateExecution(reason='execution-context-changed') {
+    return this.notifyInvalidation(reason);
+  }
+  unbind(reason=null) {
     for(const off of this.providerListeners.splice(0)) off();
     // The prior wallet must not finish an in-flight request or retain a connected
     // session after its provider is superseded by the selected V15 provider.
     this.wallet?.dispose();
     this.wallet=null;this.selection=null;this.generation++;
+    if(reason&&!this.disposed){
+      this.onInvalidate(reason);
+      this.onState({type:'wallet-invalidated',reason,generation:this.generation});
+    }
+  }
+  replaceRuntime(runtime) {
+    if(this.disposed) throw new BrowserExecutionError('DISPOSED','controller disposed');
+    if(this.runtime===runtime)return this.generation;
+    this.runtime=runtime;
+    // A deployment/runtime replacement changes the execution authority boundary.
+    // Disconnect so the next session is checked against the replacement chain.
+    this.unbind('runtime-replaced');
+    return this.generation;
+  }
+  captureExecutionContext() {
+    if(this.disposed||!this.wallet?.session?.account||!this.wallet?.session?.chainId) {
+      throw new BrowserExecutionError('WALLET_UNAVAILABLE','connect a wallet');
+    }
+    return Object.freeze({
+      wallet:this.wallet,
+      account:normalizeAccount(this.wallet.session.account),
+      chainId:normalizeChainId(this.wallet.session.chainId),
+      walletGeneration:this.wallet.session.generation,
+      controllerGeneration:this.generation,
+      runtime:this.runtime,
+    });
+  }
+  assertExecutionContext(token) {
+    if(!token||this.disposed||this.wallet!==token.wallet||this.runtime!==token.runtime||
+       this.generation!==token.controllerGeneration||
+       this.wallet?.session?.generation!==token.walletGeneration||
+       normalizeAccount(this.wallet?.session?.account??'')!==token.account||
+       normalizeChainId(this.wallet?.session?.chainId??'')!==token.chainId) {
+      throw new BrowserExecutionError('STALE_SESSION','execution context changed after review');
+    }
+    return token;
   }
   async connect({ethereum=null,selectedId=null}={}) {
     if(this.disposed) throw new BrowserExecutionError('DISPOSED','controller disposed');
@@ -60,7 +106,7 @@ export class BrowserExecutionController {
     this.wallet=wallet;this.selection=selected;
     const invalidate=reason=>{
       if(this.disposed||this.wallet!==wallet)return;
-      this.generation++;this.onInvalidate(reason);this.onState({type:'wallet-invalidated',reason});
+      this.notifyInvalidation(reason,'wallet-invalidated');
     };
     for(const [event,change] of [
       ['accountsChanged',accounts=>wallet.session.accountChanged(accounts?.[0]??null)],

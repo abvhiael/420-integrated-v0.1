@@ -3,7 +3,7 @@
   "step": "REG-AUDIT-6",
   "name": "regenerate catalogue/reference metadata",
   "canonicalExit": "no stale Registry address/interface/artifact metadata remains",
-  "status": "IMPLEMENTED_PENDING_EXACT_HEAD_CI",
+  "status": "EVIDENCE_RECORDED_PENDING_FINAL_EXACT_HEAD_REQUALIFICATION",
   "repository": "abvhiael/420-integrated-v0.1",
   "baseMainSha": "da148f2a05b09e6566cc35235646b21dd97d30fd",
   "canonicalRegistry": {
@@ -25,22 +25,27 @@
   },
   "qualification": {
     "exactHeadRule": "All required workflows must pass on the final evidence-recording PR head; skipped, cancelled, missing or older-SHA results do not qualify the step.",
-    "required": [
-      "420Registry REG-AUDIT-6",
-      "420Docs Qualification",
-      "420 Developer Hub",
-      "420 Integrated Qualification",
-      "420Registry REG-AUDIT-1",
-      "420Registry REG-AUDIT-3",
-      "420Registry REG-AUDIT-4",
-      "420Registry REG-AUDIT-5"
-    ],
-    "exactQualifiedSha": "RECORDED_IN_PR_METADATA_AFTER_FINAL_EXACT_HEAD_QUALIFICATION",
-    "runIds": "RECORDED_IN_PR_METADATA_AFTER_FINAL_EXACT_HEAD_QUALIFICATION"
+    "substantiveQualifiedSha": "1e7d591b00f54e9827fefc680c53bf6f971f3de3",
+    "substantiveRunIds": {
+      "regAudit6": 36745494895,
+      "docs": 36745494968,
+      "developerHub": 36745494775,
+      "integrated": 36745411136,
+      "indexer": 36745494795,
+      "regAudit4": 36745494881
+    },
+    "retainedCoverage": {
+      "REG-AUDIT-1/2/3": "executed inside 420Registry REG-AUDIT-4 run 36745494881 on the exact substantive SHA",
+      "REG-AUDIT-5": "merged qualified prerequisite at main parent da148f2a05b09e6566cc35235646b21dd97d30fd; REG-AUDIT-6 changes no Registry Solidity/artifact/predeploy state, and its exact-head verifier rechecks artifact/interface/address/runtime-hash consistency"
+    },
+    "finalEvidenceHead": "RECORDED_IN_PR_414_METADATA_AFTER_FINAL_EXACT_HEAD_REQUALIFICATION",
+    "finalRunIds": "RECORDED_IN_PR_414_METADATA_AFTER_FINAL_EXACT_HEAD_REQUALIFICATION"
   },
   "limitations": [
     "No live deployment is claimed; REG-AUDIT-8 owns production-equivalent testnet deployment evidence.",
     "Historical audit snapshots may retain superseded metadata solely as explicitly historical provenance."
   ],
-  "nextCanonicalStep": "REG-AUDIT-7 — integration/rebuild qualification"
+  "nextCanonicalStep": "REG-AUDIT-7 — integration/rebuild qualification",
+  "pr": 414,
+  "qualificationOnlyPr": 415
 }

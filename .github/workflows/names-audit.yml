@@ -36,6 +36,7 @@ jobs:
     timeout-minutes: 45
     env:
       FOUNDRY_PROFILE: pr
+      FOUNDRY_SPARSE_MODE: true
     steps:
       - uses: actions/checkout@v4
         with:

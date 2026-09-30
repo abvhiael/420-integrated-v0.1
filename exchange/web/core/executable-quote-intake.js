@@ -105,7 +105,7 @@ export async function authenticateExecutableSwapQuote({runtime,request,response,
 // An endpoint must be explicitly configured; snapshots, fixture catalogs and
 // guessed /quote paths are never used as fallbacks. Same-origin HTTPS relative
 // to the configured API base prevents arbitrary endpoint substitution.
-export async function fetchExecutableSwapReview({runtime,request,nowSeconds,fetchImpl=globalThis.fetch,signal,readNowSeconds=()=>Math.floor(Date.now()/1000)}={}){
+export async function fetchExecutableSwapReview({runtime,request,nowSeconds,fetchImpl=globalThis.fetch,signal,readNowSeconds=()=>Math.floor(Date.now()/1000),replayGuard=DEFAULT_REPLAY_GUARD}={}){
   const configured=runtime?.api?.executableQuoteUrl,base=runtime?.api?.baseUrl;
   if(typeof configured!=='string'||typeof base!=='string')fail('ENDPOINT_UNCONFIGURED','live executable quote endpoint is not configured');
   let url,api;
@@ -128,5 +128,5 @@ export async function fetchExecutableSwapReview({runtime,request,nowSeconds,fetc
   try{receivedAt=readNowSeconds();}catch{fail('CLOCK_UNAVAILABLE','quote receipt clock unavailable');}
   if(!Number.isSafeInteger(receivedAt))fail('CLOCK_UNAVAILABLE','valid quote receipt clock required');
   if(Number.isSafeInteger(nowSeconds)&&receivedAt<nowSeconds)fail('CLOCK_UNAVAILABLE','receipt clock precedes quote request');
-  return authenticateExecutableSwapQuote({runtime,request,response:body,nowSeconds:receivedAt,endpointUrl:url.href});
+  return authenticateExecutableSwapQuote({runtime,request,response:body,nowSeconds:receivedAt,endpointUrl:url.href,replayGuard});
 }

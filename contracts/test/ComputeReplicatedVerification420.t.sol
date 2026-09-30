@@ -267,6 +267,39 @@ contract ComputeReplicatedVerification420Test {
         }
     }
 
+
+    function testJobPartyCannotBeTheDesignatedCommitteeSelectionAuthority() public {
+        ComputeIndependentVerifierSelector420 ownerControlledSelector =
+            new ComputeIndependentVerifierSelector420(
+                address(jobs),
+                address(fixture),
+                address(verifierRegistry),
+                address(capabilities),
+                address(independence),
+                OWNER
+            );
+        ComputeReplicatedVerification420 ownerControlledReplicated =
+            new ComputeReplicatedVerification420(address(ownerControlledSelector));
+
+        (bytes32[] memory ids, uint64[] memory revisions) = _committeeIds3();
+        vm.prank(OWNER);
+        (bool ok,) = address(ownerControlledReplicated).call(
+            abi.encodeCall(
+                ownerControlledReplicated.freezeCommittee,
+                (
+                    jobId,
+                    PROFILE,
+                    COMMITTEE_EVIDENCE,
+                    uint16(2),
+                    uint64(block.timestamp + 1 hours),
+                    ids,
+                    revisions
+                )
+            )
+        );
+        require(!ok, "job owner controlled committee selection");
+    }
+
     function testThresholdDuplicateAndSharedControllerFailClosed() public {
         (bytes32[] memory ids, uint64[] memory revisions) = _committeeIds3();
 

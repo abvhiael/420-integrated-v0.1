@@ -17,6 +17,10 @@ contract ComputeReplicatedVerification420 {
         keccak256("420/COMPUTE/REPLICATED_VERIFICATION/VOTE/V1");
     bytes32 public constant QUORUM_DOMAIN =
         keccak256("420/COMPUTE/REPLICATED_VERIFICATION/QUORUM/V1");
+    bytes32 public constant PARTY_SET_DOMAIN =
+        keccak256("420/COMPUTE/REPLICATED_VERIFICATION/PARTIES/V1");
+    bytes32 public constant MEMBER_SET_DOMAIN =
+        keccak256("420/COMPUTE/REPLICATED_VERIFICATION/MEMBERS/V1");
     uint16 public constant MAX_COMMITTEE = 16;
 
     struct Committee {
@@ -37,6 +41,20 @@ contract ComputeReplicatedVerification420 {
         bytes32 quorumResultCommitment;
         bytes32 quorumRef;
         bool exists;
+    }
+
+    struct JobContext {
+        uint64 jobRevision;
+        bytes32 workloadClass;
+        bytes32 verificationPolicyId;
+        uint32 verificationPolicyRevision;
+        bytes32 verificationPolicyCommitment;
+        address owner;
+        address payer;
+        address operator;
+        bytes32 ownerController;
+        bytes32 payerController;
+        bytes32 operatorController;
     }
 
     struct Member {
@@ -143,86 +161,33 @@ contract ComputeReplicatedVerification420 {
             jobId == bytes32(0) || profileId == bytes32(0) || selectionEvidenceHash == bytes32(0)
                 || count < 2 || count > MAX_COMMITTEE || count != verifierRevisions.length
                 || threshold < 2 || threshold > count || validUntil <= block.timestamp
-        ) revert InvalidCommittee();
-        if (_committee[jobId].exists) revert InvalidCommittee();
-
-        ComputeJobRegistry420.Job memory j = jobs.job(jobId);
-        if (
-            j.status != ComputeJobRegistry420.Status.ACCEPTED || j.worker != address(0)
-                || j.acceptanceRef == bytes32(0) || j.verificationPolicyId == bytes32(0)
-                || j.verificationPolicyRevision == 0 || j.verificationPolicyCommitment == bytes32(0)
-                || validUntil > j.deadline
+                || _committee[jobId].exists
         ) revert InvalidCommittee();
 
-        (bytes32 matchJobId, address matchOwner, address operator, bool matchExists) =
-            matches.matchParties(j.matchId);
-        if (!matchExists || matchJobId != jobId || matchOwner != j.owner || operator == address(0))
-            revert InvalidCommittee();
+        JobContext memory ctx = _loadContext(jobId, validUntil);
+        (address[] memory authorities, bytes32[] memory controllers) =
+            _validateMembers(ctx, verifierIds, verifierRevisions);
 
-        (address payer, uint256 maxSpend) =
-            IComputeReplicatedPayerTerms420(address(jobs.requestEvidence())).fundingTerms(j.requestId);
-        if (
-            payer == address(0) || maxSpend == 0 || selectionAuthority == j.owner
-                || selectionAuthority == payer || selectionAuthority == operator
-        ) revert InvalidCommittee();
-
-        bytes32 ownerController = _controller(j.owner);
-        bytes32 payerController = _controller(payer);
-        bytes32 operatorController = _controller(operator);
-        if (
-            ownerController == bytes32(0) || payerController == bytes32(0)
-                || operatorController == bytes32(0)
-        ) revert InvalidCommittee();
-
-        address[] memory authorities = new address[](count);
-        bytes32[] memory controllers = new bytes32[](count);
-
-        for (uint256 i = 0; i < count; ++i) {
-            bytes32 verifierId = verifierIds[i];
-            uint64 verifierRevision = verifierRevisions[i];
-            if (verifierId == bytes32(0) || verifierRevision == 0) revert IneligibleVerifier();
-
-            ComputeVerifierRegistry420.Verifier memory v = verifiers.verifier(verifierId);
-            address authority = v.authority;
-            if (
-                authority == address(0) || v.revision != verifierRevision
-                    || authority == j.owner || authority == payer || authority == operator
-                    || authority == selectionAuthority
-            ) revert IneligibleVerifier();
-
-            if (
-                !capabilities.isCapable(
-                    verifierId,
-                    authority,
-                    verifierRevision,
-                    capabilities.INDEPENDENT_VERIFIER(),
-                    j.workloadType
-                )
-                    || !capabilities.isCapable(
-                        verifierId,
-                        authority,
-                        verifierRevision,
-                        capabilities.COMMITTEE_VERIFIER(),
-                        j.workloadType
-                    )
-            ) revert IneligibleVerifier();
-
-            bytes32 controllerId = _controller(authority);
-            if (
-                controllerId == bytes32(0) || controllerId == ownerController
-                    || controllerId == payerController || controllerId == operatorController
-            ) revert IneligibleVerifier();
-
-            for (uint256 k = 0; k < i; ++k) {
-                if (
-                    verifierIds[k] == verifierId || authorities[k] == authority
-                        || controllers[k] == controllerId
-                ) revert DuplicateMember();
-            }
-
-            authorities[i] = authority;
-            controllers[i] = controllerId;
-        }
+        bytes32 partySetHash = keccak256(
+            abi.encode(
+                PARTY_SET_DOMAIN,
+                ctx.owner,
+                ctx.payer,
+                ctx.operator,
+                ctx.ownerController,
+                ctx.payerController,
+                ctx.operatorController
+            )
+        );
+        bytes32 memberSetHash = keccak256(
+            abi.encode(
+                MEMBER_SET_DOMAIN,
+                verifierIds,
+                verifierRevisions,
+                authorities,
+                controllers
+            )
+        );
 
         committeeRef = keccak256(
             abi.encode(
@@ -230,36 +195,31 @@ contract ComputeReplicatedVerification420 {
                 block.chainid,
                 address(this),
                 jobId,
-                j.revision,
-                j.workloadType,
+                ctx.jobRevision,
+                ctx.workloadClass,
                 profileId,
-                j.verificationPolicyId,
-                j.verificationPolicyRevision,
-                j.verificationPolicyCommitment,
+                ctx.verificationPolicyId,
+                ctx.verificationPolicyRevision,
+                ctx.verificationPolicyCommitment,
                 selectionEvidenceHash,
-                ownerController,
-                payerController,
-                operatorController,
+                partySetHash,
+                memberSetHash,
                 threshold,
-                verifierIds,
-                verifierRevisions,
-                authorities,
-                controllers,
                 validUntil
             )
         );
 
         _committee[jobId] = Committee({
-            jobRevision: j.revision,
-            workloadClass: j.workloadType,
+            jobRevision: ctx.jobRevision,
+            workloadClass: ctx.workloadClass,
             profileId: profileId,
-            verificationPolicyId: j.verificationPolicyId,
-            verificationPolicyRevision: j.verificationPolicyRevision,
-            verificationPolicyCommitment: j.verificationPolicyCommitment,
+            verificationPolicyId: ctx.verificationPolicyId,
+            verificationPolicyRevision: ctx.verificationPolicyRevision,
+            verificationPolicyCommitment: ctx.verificationPolicyCommitment,
             selectionEvidenceHash: selectionEvidenceHash,
-            ownerController: ownerController,
-            payerController: payerController,
-            operatorController: operatorController,
+            ownerController: ctx.ownerController,
+            payerController: ctx.payerController,
+            operatorController: ctx.operatorController,
             threshold: threshold,
             memberCount: uint16(count),
             validUntil: validUntil,
@@ -290,8 +250,118 @@ contract ComputeReplicatedVerification420 {
             profileId,
             threshold,
             uint16(count),
-            j.revision,
+            ctx.jobRevision,
             validUntil
+        );
+    }
+
+    function _loadContext(bytes32 jobId, uint64 validUntil)
+        private view returns (JobContext memory ctx)
+    {
+        ComputeJobRegistry420.Job memory j = jobs.job(jobId);
+        if (
+            j.status != ComputeJobRegistry420.Status.ACCEPTED || j.worker != address(0)
+                || j.acceptanceRef == bytes32(0) || j.verificationPolicyId == bytes32(0)
+                || j.verificationPolicyRevision == 0 || j.verificationPolicyCommitment == bytes32(0)
+                || validUntil > j.deadline
+        ) revert InvalidCommittee();
+
+        (bytes32 matchJobId, address matchOwner, address operator, bool matchExists) =
+            matches.matchParties(j.matchId);
+        if (!matchExists || matchJobId != jobId || matchOwner != j.owner || operator == address(0))
+            revert InvalidCommittee();
+
+        (address payer, uint256 maxSpend) =
+            IComputeReplicatedPayerTerms420(address(jobs.requestEvidence())).fundingTerms(j.requestId);
+        if (
+            payer == address(0) || maxSpend == 0 || selectionAuthority == j.owner
+                || selectionAuthority == payer || selectionAuthority == operator
+        ) revert InvalidCommittee();
+
+        bytes32 ownerController = _controller(j.owner);
+        bytes32 payerController = _controller(payer);
+        bytes32 operatorController = _controller(operator);
+        if (
+            ownerController == bytes32(0) || payerController == bytes32(0)
+                || operatorController == bytes32(0)
+        ) revert InvalidCommittee();
+
+        ctx = JobContext({
+            jobRevision: j.revision,
+            workloadClass: j.workloadType,
+            verificationPolicyId: j.verificationPolicyId,
+            verificationPolicyRevision: j.verificationPolicyRevision,
+            verificationPolicyCommitment: j.verificationPolicyCommitment,
+            owner: j.owner,
+            payer: payer,
+            operator: operator,
+            ownerController: ownerController,
+            payerController: payerController,
+            operatorController: operatorController
+        });
+    }
+
+    function _validateMembers(
+        JobContext memory ctx,
+        bytes32[] calldata verifierIds,
+        uint64[] calldata verifierRevisions
+    ) private view returns (address[] memory authorities, bytes32[] memory controllers) {
+        uint256 count = verifierIds.length;
+        authorities = new address[](count);
+        controllers = new bytes32[](count);
+
+        for (uint256 i = 0; i < count; ++i) {
+            bytes32 verifierId = verifierIds[i];
+            uint64 verifierRevision = verifierRevisions[i];
+            if (verifierId == bytes32(0) || verifierRevision == 0) revert IneligibleVerifier();
+
+            ComputeVerifierRegistry420.Verifier memory v = verifiers.verifier(verifierId);
+            address authority = v.authority;
+            if (
+                authority == address(0) || v.revision != verifierRevision
+                    || authority == ctx.owner || authority == ctx.payer || authority == ctx.operator
+                    || authority == selectionAuthority
+            ) revert IneligibleVerifier();
+
+            if (!_hasCommitteeCapability(verifierId, authority, verifierRevision, ctx.workloadClass))
+                revert IneligibleVerifier();
+
+            bytes32 controllerId = _controller(authority);
+            if (
+                controllerId == bytes32(0) || controllerId == ctx.ownerController
+                    || controllerId == ctx.payerController || controllerId == ctx.operatorController
+            ) revert IneligibleVerifier();
+
+            for (uint256 k = 0; k < i; ++k) {
+                if (
+                    verifierIds[k] == verifierId || authorities[k] == authority
+                        || controllers[k] == controllerId
+                ) revert DuplicateMember();
+            }
+
+            authorities[i] = authority;
+            controllers[i] = controllerId;
+        }
+    }
+
+    function _hasCommitteeCapability(
+        bytes32 verifierId,
+        address authority,
+        uint64 verifierRevision,
+        bytes32 workloadClass
+    ) private view returns (bool) {
+        return capabilities.isCapable(
+            verifierId,
+            authority,
+            verifierRevision,
+            capabilities.INDEPENDENT_VERIFIER(),
+            workloadClass
+        ) && capabilities.isCapable(
+            verifierId,
+            authority,
+            verifierRevision,
+            capabilities.COMMITTEE_VERIFIER(),
+            workloadClass
         );
     }
 
@@ -339,18 +409,10 @@ contract ComputeReplicatedVerification420 {
         ComputeVerifierRegistry420.Verifier memory current = verifiers.verifier(m.verifierId);
         if (
             current.authority != msg.sender || current.revision != m.verifierRevision
-                || !capabilities.isCapable(
+                || !_hasCommitteeCapability(
                     m.verifierId,
                     msg.sender,
                     m.verifierRevision,
-                    capabilities.INDEPENDENT_VERIFIER(),
-                    c.workloadClass
-                )
-                || !capabilities.isCapable(
-                    m.verifierId,
-                    msg.sender,
-                    m.verifierRevision,
-                    capabilities.COMMITTEE_VERIFIER(),
                     c.workloadClass
                 )
                 || _controller(msg.sender) != m.controllerId

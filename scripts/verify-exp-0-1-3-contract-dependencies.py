@@ -119,7 +119,7 @@ def main() -> None:
         errors.append('Explorer-named contract exists; reconcile contract-free ownership')
     # These paths are intentionally NOT required Explorer inputs; record availability
     # without converting an absent generated ABI into a claim of successful verification.
-    optional = ['contracts/out/ProtocolRegistry.sol/ProtocolRegistry.json', 'contracts/src/interfaces/IProtocolRegistry.sol']
+    optional = ['contracts/artifacts/ProtocolRegistry.json', 'contracts/src/interfaces/genesis/IProtocolRegistry420.sol']
     out = {
         'milestone': 'EXP-0.1.3', 'audited_commit': PIN,
         'tree_blob_count': len(tree),

@@ -8,6 +8,7 @@ import { InjectedProvider420 } from './core/provider.js';
 const ZERO32 = `0x${'0'.repeat(64)}`;
 let context = null;
 let busy = false;
+let lifecycleBound = false;
 
 const $ = (selector) => document.querySelector(selector);
 
@@ -132,6 +133,14 @@ async function loadRuntimeConfig() {
   return config;
 }
 
+function invalidateNamesContext(reason) {
+  context = null;
+  setAppState('Reload required', 'idle');
+  setTransactionState('Wallet state changed', reason, 'idle');
+  $('#names-error-recovery').textContent = 'Recovery: reconnect and reload canonical Names state before continuing.';
+  setBusy(false);
+}
+
 async function connectNames() {
   if (!globalThis.ethereum) throw new Error('No injected EIP-1193 wallet found');
   const config = await loadRuntimeConfig();
@@ -148,6 +157,11 @@ async function connectNames() {
   });
   await client.verifySession();
   context = Object.freeze({ config, provider, account, client });
+  if (!lifecycleBound) {
+    provider.on('accountsChanged', () => invalidateNamesContext('The connected wallet account changed.'));
+    provider.on('chainChanged', () => invalidateNamesContext('The connected wallet network changed.'));
+    lifecycleBound = true;
+  }
   $('#names-account').textContent = account;
   $('#names-contract').textContent = client.namesAddress;
   $('#names-network').textContent = config.network.name || config.network.chainId;

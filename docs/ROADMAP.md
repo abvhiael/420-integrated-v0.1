@@ -147,6 +147,12 @@ Open validator qualification, faucet, public dApp deployment, bug bounties, tele
 
 Shared-service and application launch gates are being completed before public exposure. Every public-testnet application must bind to an exact qualified release identity, preserve chain/service provenance, pass its failure drills, and record an explicit go/no-go closeout. Public-testnet promotion requires both the Genesis requirements reconciliation gate and adversarial qualification to pass against the same release lineage.
 
+### Testnet-gated work queue
+
+The following workstreams are repository-implemented but deliberately remain open for production-equivalent/public-testnet evidence. They must not be represented as unfinished greenfield implementation merely because live evidence does not yet exist.
+
+- **GEN-11 / 420 Bundler Network — live operator and release qualification.** GEN-11.0 through GEN-11.20 repository implementation is merged; PR #341 merged at `a57cfb45b73548bc94317528d13b17f6a11ef194`. Remaining GEN-11 work is deployment/testnet-specific: deploy and exercise at least two independently controlled Bundlers on the same verified chain/EntryPoint; qualify live Wallet web/CORS, extension, mobile and native/API paths; prove pre-send fallback and ambiguous-send quarantine/reconciliation; execute wrong-chain/EntryPoint, stale-node, hostile-response, overload, restart, reorg/orphan and unresolved-intent recovery drills; verify `fifo-v1` ordering/economic neutrality under deployed settings; retain actual transaction/block/operator evidence; and perform final exact-release CI/security/deployment signoff. Canonical status and gates are defined in `docs/420BUNDLER-ROADMAP.md` and `docs/GEN-11.20-BUNDLER-CLOSEOUT.md`. Until that live evidence exists, GEN-11 repository implementation remains complete while operational release signoff remains open.
+
 **Deliverable:** stable public 420 testnet tied to a reconciled and adversarially qualified release candidate.
 
 ## 16. Independent audit and launch review

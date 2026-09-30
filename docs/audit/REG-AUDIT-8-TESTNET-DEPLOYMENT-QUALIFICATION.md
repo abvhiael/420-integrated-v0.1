@@ -29,3 +29,19 @@ Expected Registry identity remains `0x0434`, governance `0x0429`, source blob `9
 **NOT YET COMPLETE — external production-equivalent testnet infrastructure and live evidence remain blocking.**
 
 REG-AUDIT-9 must not begin until REG-AUDIT-8 live qualification succeeds and immutable live evidence is committed.
+
+
+## Repository-readiness qualification evidence
+
+Repository-readiness candidate `a8db691c5d0c312ea5e98d775abb9e8732b46d32`, based on `main` `522e98da236a12769bf34fcf0c95f19ff955a69c` and zero commits behind at qualification, passed:
+
+- REG-AUDIT-8 Repository Readiness — run `36756092248`;
+- REG-AUDIT-4 — run `36756092066`;
+- REG-AUDIT-3 — run `36756091988`;
+- REG-AUDIT-1 — run `36756092204`;
+- 420Docs Qualification — run `36756092078`;
+- 420 Integrated Qualification — run `36756092039`.
+
+This proves only repository readiness and preservation of retained Registry/integration invariants. It does **not** satisfy the canonical REG-AUDIT-8 live-testnet exit criterion.
+
+Because this evidence entry changes the branch SHA, the exact-head repository-readiness suite is rerun on the resulting evidence-recording head before this preparation package is merged.

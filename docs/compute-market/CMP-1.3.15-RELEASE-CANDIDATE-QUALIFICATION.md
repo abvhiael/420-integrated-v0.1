@@ -1,6 +1,6 @@
 # CMP-1.3.15 — Release-candidate wiring, publication readiness, and dependency reconciliation
 
-Status: **IMPLEMENTATION QUALIFIED ON PRE-EVIDENCE HEAD; EVIDENCE-RECORDING HEAD REQUALIFICATION PENDING. LIVE DEPLOYMENT/PUBLICATION REMAINS BLOCKED.**
+Status: **COMPLETE — EXACT EVIDENCE-RECORDING HEAD QUALIFIED. LIVE DEPLOYMENT/PUBLICATION REMAINS BLOCKED.**
 
 ## Canonical definition
 
@@ -201,6 +201,20 @@ It was reconciled with then-current `main` `2a45a2c8847f40b7aa1b27ae4556bf8d547a
 
 This evidence proves the implementation state at `979532ca792b3e57c909cb889aa08e1e3cbc236c`. It is not inherited as final qualification for the evidence-recording commit. Per the repository owner's explicit exact-SHA rule, the workflows required by the PR after this evidence update must complete successfully on the new evidence-recording HEAD before CMP-1.3.15 can be marked COMPLETE.
 
+## Evidence-recording-head qualification
+
+The evidence-recording head `8653e105661c15ef66ad2236c467d0e63994cd1c` subsequently passed the complete required workflow set:
+
+- Solidity Contracts #3360 — run `36662815029` — **SUCCESS**, all 16 required PR shards passed; aggregate `foundry` wrapper intentionally skipped by PR workflow design;
+- Genesis Address Authority #197 — run `36662815001` — **SUCCESS**, cross-manifest authority plus all 16 full-foundry inventory shards passed;
+- 420 Integrated Qualification #5997 — run `36662815016` — **SUCCESS**, all four jobs passed;
+- 420Docs Qualification #3373 — run `36662815011` — **SUCCESS**;
+- 420Indexer #980 — run `36662815010` — **SUCCESS**;
+- EXP-1.9 CI Qualification Automation #87 — run `36662815024` — **SUCCESS**;
+- EXP-1.10 Phase Closeout Qualification #93 — run `36662815032` — **SUCCESS**.
+
+PR #408 merged that exact qualified head into `main` at merge commit `5a2a273d8d6e0d9ab3428aab80ba0212f7bbb1bc`.
+
 ## Completion
 
-**NOT YET COMPLETE.** The implementation head passed its complete triggered workflow set and remained reconciled with current `main` at evidence-recording time. This evidence update creates a new HEAD that must itself pass the required exact-head qualification workflows before the exit criterion is satisfied.
+**COMPLETE.** The final CMP-1.3.15 evidence-recording head `8653e105661c15ef66ad2236c467d0e63994cd1c` passed every required exact-head workflow before merge. Repository qualification is complete; live deployment/publication remains truthfully blocked until its external prerequisites exist.

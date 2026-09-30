@@ -1,43 +1,158 @@
 {
-  "schema": "420Integrated.ComputeMarket.CMP-1.3.DeferredCloseoutDraft.v1",
-  "scope": "Preserved unnumbered ComputeWorkerRegistry closeout material",
-  "authorized_substep": null,
+  "schema": "420Integrated.ComputeMarket.CMP-1.3.16.CloseoutLedger.v1",
+  "step": "CMP-1.3.16",
+  "title": "WorkerRegistry phase closeout, reconciliation, and retained evidence",
+  "base_main_sha": "04f6200c2ae78db7d15db86b482fa6fa732017a6",
+  "status": "QUALIFICATION_PENDING",
+  "repository_closeout_candidate": true,
   "live_release": false,
-  "repository_closeout_candidate": false,
-  "reason": "Originally mis-numbered as CMP-1.3.8; preserved without assigning a roadmap number until the authoritative CMP-1.3.8-CMP-1.3.16 definitions are recovered.",
-  "substeps_already_implemented": [
-    "1.3.0",
-    "1.3.1",
-    "1.3.2",
-    "1.3.3",
-    "1.3.4",
-    "1.3.5",
-    "1.3.6",
-    "1.3.7"
+  "migrated_from_deferred_closeout": true,
+  "historical_caveats": {
+    "deferred_draft_migrated": true,
+    "historical_cmp_1_3_7_package_preserved": true,
+    "cmp_1_3_15_repository_qualification_complete": true,
+    "cmp_1_3_15_live_deployment_complete": false
+  },
+  "qualified_prerequisites": [
+    "CMP-1.3.8",
+    "CMP-1.3.9",
+    "CMP-1.3.10",
+    "CMP-1.3.11",
+    "CMP-1.3.12",
+    "CMP-1.3.13",
+    "CMP-1.3.14",
+    "CMP-1.3.15"
   ],
-  "required_components": [
+  "phase_sources": [
+    "contracts/src/compute/ComputeAuthorization420.sol",
     "contracts/src/compute/ComputeWorkerRegistry420.sol",
     "contracts/src/compute/ComputeWorkerAttestation420.sol",
+    "contracts/src/compute/ComputeWorkerAttestedEligibility420.sol",
     "contracts/src/compute/ComputeWorkerCapabilityProfile420.sol",
     "contracts/src/compute/ComputeWorkerCapabilityEligibility420.sol",
     "contracts/src/compute/ComputeWorkerTrust420.sol",
     "contracts/src/compute/ComputeWorkerStake420.sol",
+    "contracts/src/compute/ComputeWorkerCapacityReservation420.sol",
     "contracts/src/compute/ComputeJobWorkerSnapshotEvidence420.sol",
-    "contracts/src/compute/ComputeWorkerCanonicalWiring420.sol"
+    "contracts/src/compute/ComputeWorkerCanonicalWiring420.sol",
+    "contracts/src/compute/ComputeWorkerReadModel420.sol",
+    "contracts/src/compute/ComputeWorkerReleaseCandidateWiring420.sol"
   ],
-  "required_tests": [
+  "retained_tests": [
     "contracts/test/ComputeWorkerRegistry420.t.sol",
+    "contracts/test/ComputeWorkerAuthorization420.t.sol",
     "contracts/test/ComputeWorkerAttestation420.t.sol",
     "contracts/test/ComputeWorkerCapabilityProfile420.t.sol",
     "contracts/test/ComputeWorkerTrust420.t.sol",
     "contracts/test/ComputeWorkerStake420.t.sol",
     "contracts/test/ComputeJobWorkerSnapshotEvidence420.t.sol",
-    "contracts/test/ComputeWorkerCanonicalWiring420.t.sol"
+    "contracts/test/ComputeWorkerCanonicalWiring420.t.sol",
+    "contracts/test/ComputeWorkerReadModel420.t.sol",
+    "contracts/test/ComputeWorkerReleaseCandidateWiring420.t.sol"
+  ],
+  "retained_client_surfaces": [
+    "packages/420-sdk/src/compute.ts",
+    "packages/420-sdk/test/compute-sdk.test.mjs",
+    "420-indexer/descriptors/compute-worker-read-model-v1.json"
+  ],
+  "retained_docs": [
+    "docs/compute-market/CMP-1.3.0-WORKER-REGISTRY-BASELINE-AND-INTEGRATION-DESIGN.md",
+    "docs/compute-market/CMP-1.3.2-WORKER-ATTESTATION-QUALIFICATION.md",
+    "docs/compute-market/CMP-1.3.3-CAPABILITY-PROFILE-QUALIFICATION.md",
+    "docs/compute-market/CMP-1.3.4-WORKER-TRUST-QUALIFICATION.md",
+    "docs/compute-market/CMP-1.3.5-WORKER-STAKE-BINDING-QUALIFICATION.md",
+    "docs/compute-market/CMP-1.3.6-WORKER-SNAPSHOT-QUALIFICATION.md",
+    "docs/compute-market/CMP-1.3.7-WORKER-DEPLOYMENT-QUALIFICATION.md",
+    "docs/compute-market/CMP-1.3.8-WORKER-AUTHORIZATION-QUALIFICATION.md",
+    "docs/compute-market/CMP-1.3.9-EXECUTION-KEY-SIGNING-QUALIFICATION.md",
+    "docs/compute-market/CMP-1.3.10-WORKER-CAPACITY-QUALIFICATION.md",
+    "docs/compute-market/CMP-1.3.11-HARDWARE-PROVENANCE-QUALIFICATION.md",
+    "docs/compute-market/CMP-1.3.12-ACCEPTED-ATTEMPT-LIFECYCLE-QUALIFICATION.md",
+    "docs/compute-market/CMP-1.3.13-CANONICAL-READ-MODEL-QUALIFICATION.md",
+    "docs/compute-market/CMP-1.3.14-CROSS-COMPONENT-INVARIANT-QUALIFICATION.md",
+    "docs/compute-market/CMP-1.3.15-RELEASE-CANDIDATE-QUALIFICATION.md",
+    "docs/compute-market/cmp-1.3.14-invariant-evidence.json",
+    "docs/compute-market/CMP-1.3.8-1.3.16-WORKER-REGISTRY-GAP-AUDIT.md",
+    "docs/compute-market/CMP-1.3-ROADMAP-RECOVERY-MAPPING.md",
+    "docs/compute-market/CMP-1.3-DEFERRED-CLOSEOUT-DRAFT.md"
+  ],
+  "retained_configuration": [
+    "contracts/config/compute-market/cmp-1.3.7-worker-deployment-evidence.json",
+    "contracts/config/compute-market/cmp-1.3.15-worker-release-candidate.json",
+    "contracts/config/compute-market/cmp-1.3-deferred-closeout-ledger.json"
+  ],
+  "invariant_evidence": {
+    "matrix": "docs/compute-market/cmp-1.3.14-invariant-evidence.json",
+    "required_ids": "CMP-INV-001..CMP-INV-030",
+    "authority_separation_verified": true
+  },
+  "authority_boundaries": [
+    "WorkerRegistry lifecycle authority does not imply custody, settlement, verifier, bridge, validator, governance, or arbitrary-wallet authority",
+    "execution-key authority is separate from operator lifecycle authority",
+    "attestation and 420Trust are evidence sources, not job-result correctness or settlement authority",
+    "ComputeWorkerStake420 is a read/binding layer and owns no collateral custody or slashing authority",
+    "capacity reservation owns concurrency accounting only",
+    "ProtocolRegistry publication grants discovery/version authority only"
   ],
   "external_release_blockers": [
-    "CMP-1.5 compute collateral custody/stake/exit/slash/reward implementation",
+    "qualified live CMP-1.5 compute collateral source for stake-required production admission",
     "canonical public testnet deployment",
-    "runtime code-hash and deployed graph verification",
+    "real deployed addresses, transactions, blocks, runtime code hashes, and graph hash",
     "governance-authorized ProtocolRegistry publication"
-  ]
+  ],
+  "qualification": {
+    "exact_final_sha": "82f123e4093095babf9c2f93d870269ece43c804",
+    "workflow_runs": [
+      {
+        "name": "Solidity Contracts",
+        "run_number": 3383,
+        "run_id": 36750528808
+      },
+      {
+        "name": "Genesis Address Authority",
+        "run_number": 218,
+        "run_id": 36750528895
+      },
+      {
+        "name": "420 Integrated Qualification",
+        "run_number": 6030,
+        "run_id": 36750528745
+      },
+      {
+        "name": "420Docs Qualification",
+        "run_number": 3406,
+        "run_id": 36750528945
+      },
+      {
+        "name": "420Indexer",
+        "run_number": 1012,
+        "run_id": 36750528883
+      },
+      {
+        "name": "420Registry REG-AUDIT-4",
+        "run_number": 47,
+        "run_id": 36750528826
+      },
+      {
+        "name": "EXP-1.9 CI Qualification Automation",
+        "run_number": 93,
+        "run_id": 36750528687
+      },
+      {
+        "name": "EXP-1.10 Phase Closeout Qualification",
+        "run_number": 100,
+        "run_id": 36750528767
+      }
+    ],
+    "evidence_recording_policy": "Evidence-only closeout commits inherit the qualified implementation SHA and do not require recursive full-suite reruns unless they change qualification-relevant contracts, tests, configuration, workflows, dependencies, or substantive requirements.",
+    "note": "The durable CMP-1.3.16 closeout document records final qualification and phase completion. This ledger remains the qualification inventory/blocker ledger by design."
+  },
+  "initial_main_sha": "5a2a273d8d6e0d9ab3428aab80ba0212f7bbb1bc",
+  "reconciliation": {
+    "reconciled_head": "bb510047459b0578cfbc6b1d4f5db1a5f0960eeb",
+    "main_sha": "04f6200c2ae78db7d15db86b482fa6fa732017a6",
+    "conflict_status": "clean",
+    "qualification_required": true,
+    "note": "CMP-1.3.16 was rebased onto current main after Registry/genesis/address-authority changes. The seven-file closeout change set remained unchanged in scope and no production WorkerRegistry contract, SDK, indexer, economic, authorization, or deployment descriptor behavior was altered."
+  }
 }

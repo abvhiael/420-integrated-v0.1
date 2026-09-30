@@ -43,5 +43,21 @@
     "no production-equivalent restart/outage/reorg/rebuild derived-consumer transcript is committed"
   ],
   "completionPolicy": "REG-AUDIT-8 MUST remain NOT_YET_COMPLETE until non-placeholder approved production-equivalent testnet infrastructure exists and the dedicated live workflow succeeds for one exact deployed release-candidate SHA. Synthetic/local/CI-only fixtures cannot satisfy this step.",
-  "nextCanonicalStep": "REG-AUDIT-9 — exact-head requalification and closeout"
+  "nextCanonicalStep": "REG-AUDIT-9 — exact-head requalification and closeout",
+  "repositoryReadinessQualification": {
+    "status": "QUALIFIED_PENDING_EVIDENCE_HEAD_RERUN",
+    "substantiveSha": "a8db691c5d0c312ea5e98d775abb9e8732b46d32",
+    "baseMainSha": "522e98da236a12769bf34fcf0c95f19ff955a69c",
+    "behindMain": 0,
+    "runs": {
+      "regAudit8Readiness": 36756092248,
+      "regAudit4": 36756092066,
+      "regAudit3": 36756091988,
+      "regAudit1": 36756092204,
+      "docs": 36756092078,
+      "integrated": 36756092039
+    },
+    "finalEvidenceHead": "PENDING_RERUN",
+    "finalRuns": "PENDING_RERUN"
+  }
 }

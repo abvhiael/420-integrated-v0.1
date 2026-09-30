@@ -33,6 +33,8 @@ required_components = {
     "contracts/src/compute/ComputeVerifierIndependencePolicy420.sol",
     "contracts/src/compute/ComputePolicyRegistry420.sol",
     "contracts/src/compute/ComputeJobCanonicalWiring420.sol",
+    "contracts/src/compute/ComputeWorkerAttestation420.sol",
+    "contracts/src/compute/ComputeWorkerAttestedEligibility420.sol",
 }
 actual_components = {x.get("source") for x in data.get("existing_components", [])}
 if actual_components != required_components:
@@ -41,6 +43,12 @@ if actual_components != required_components:
 for rel in required_components:
     if not (ROOT / rel).is_file():
         fail(f"missing retained source: {rel}")
+
+planned = data.get("planned_missing_surfaces", [])
+if len(planned) != 1 or planned[0].get("source") != "contracts/src/compute/ComputeVerificationRouter420.sol":
+    fail("missing planned ComputeVerificationRouter420 reconciliation")
+if (ROOT / planned[0]["source"]).exists():
+    fail("architecture inventory is stale: planned verification router now exists and must be re-audited")
 
 for key in ("retained_tests", "retained_docs"):
     values = data.get(key)

@@ -193,9 +193,12 @@
       "address": "0x0000000000000000000000000000000000000434",
       "source": "apps/ProtocolRegistry.sol",
       "artifact": "contracts/artifacts/ProtocolRegistry.json",
-      "status": "SOURCE_READY",
-      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
-      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
+      "status": "ARTIFACT_READY",
+      "constructor_strategy": "DIRECT_GENESIS_IMMUTABLE_MATERIALIZATION",
+      "notes": "REG-AUDIT-5: pinned Solidity 0.8.24/Cancun runtime retained; governanceTimelock immutable materialized to 0x0429 from compiler immutableReferences; constructor mutable storage is empty with canonical empty storage root. Live deployment verification remains REG-AUDIT-8.",
+      "runtime_code_hash": "0x9f9e5f794296cf9faf5f8c8d17cd815f3c19c004a158c15cb61b5a29eaacb330",
+      "predeploy_state": "contracts/config/predeploy/ProtocolRegistry-predeploy-state.json",
+      "source_blob_sha1": "9ab3d53a68b6533978f41e0202e5268f1d615c19"
     },
     {
       "name": "Names420",

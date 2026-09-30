@@ -92,7 +92,7 @@ export function buildGenesisDescriptorManifest420(
 }
 
 
-export const PROTOCOL_REGISTRY_DESCRIPTOR_SHA256_420 = '9a7fd7c8f546fdffa7e9fd42be6274fa63a03443d1f243da3dc3dcaabd7cbbae';
+export const PROTOCOL_REGISTRY_DESCRIPTOR_SHA256_420 = '0bb8d571d38eeb66d7b277253cdae65b6b14c7538f95dc809db6818c8a79db81';
 export const PROTOCOL_REGISTRY_ADDRESS_420 = '0x0000000000000000000000000000000000000434' as Hex;
 
 export interface ProtocolRegistryReleaseDescriptorEvent420 extends AbiEvent420 {

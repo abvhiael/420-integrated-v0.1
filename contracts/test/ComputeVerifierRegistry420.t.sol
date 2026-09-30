@@ -122,10 +122,9 @@ contract ComputeVerifierRegistry420Test {
         require(rotated.status == ComputeVerifierRegistry420.Status.SUSPENDED, "rotation auto-activated verifier");
         require(registry.verifierIdForAuthority(VERIFIER_A) == bytes32(0), "old authority remained current");
         require(registry.verifierIdForAuthority(VERIFIER_B) == verifierId, "new authority lookup missing");
-        require(
-            registry.revision(verifierId, beforeRotation.revision).authority == VERIFIER_A,
-            "historical authority rewritten"
-        );
+        ComputeVerifierRegistry420.Verifier memory historical =
+            registry.revision(verifierId, beforeRotation.revision);
+        require(historical.authority == VERIFIER_A, "historical authority rewritten");
 
         vm.prank(GOV);
         registry.activate(verifierId);

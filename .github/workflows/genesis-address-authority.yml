@@ -8,6 +8,9 @@ on:
       - 'config/**'
       - 'wallet/deployment-inventory.json'
       - 'scripts/verify-genesis-canonical-addresses.py'
+      - 'scripts/verify-reg-audit-4-genesis-address-namespace.py'
+      - 'scripts/test-reg-audit-4-genesis-address-namespace.py'
+      - 'scripts/audit-genesis-address-collisions.py'
       - 'scripts/verify-genesis-predeploy-authority.py'
       - 'scripts/verify-wallet-w14-7-1-namespace.py'
       - 'scripts/test-wallet-w14-7-1-namespace.py'
@@ -20,6 +23,9 @@ on:
       - 'config/**'
       - 'wallet/deployment-inventory.json'
       - 'scripts/verify-genesis-canonical-addresses.py'
+      - 'scripts/verify-reg-audit-4-genesis-address-namespace.py'
+      - 'scripts/test-reg-audit-4-genesis-address-namespace.py'
+      - 'scripts/audit-genesis-address-collisions.py'
       - 'scripts/verify-genesis-predeploy-authority.py'
       - 'scripts/verify-wallet-w14-7-1-namespace.py'
       - 'scripts/test-wallet-w14-7-1-namespace.py'
@@ -40,6 +46,12 @@ jobs:
           python-version: '3.12'
       - name: Check canonical frozen owners and proposed application claims
         run: python scripts/verify-genesis-canonical-addresses.py
+      - name: REG-AUDIT-4 complete namespace authority
+        run: python scripts/verify-reg-audit-4-genesis-address-namespace.py
+      - name: REG-AUDIT-4 adversarial namespace regressions
+        run: python scripts/test-reg-audit-4-genesis-address-namespace.py
+      - name: Active namespace collision audit
+        run: python scripts/audit-genesis-address-collisions.py
       - name: Check physical predeploy/deployment parity and reject retired claims
         run: python scripts/verify-genesis-predeploy-authority.py
       - name: Validate actual current frozen namespace and unapproved candidates

@@ -23,6 +23,7 @@ on:
       - 'wallet/web/index.html'
       - 'wallet/web/styles.css'
       - 'wallet/web/scripts/check.mjs'
+      - 'wallet/web/scripts/check-names.mjs'
       - 'wallet/web/test/names-client.test.js'
       - 'wallet/web/test/names-send.test.js'
       - 'wallet/web/test/names-guided-send.test.js'
@@ -198,7 +199,7 @@ jobs:
 
       - name: Run Wallet Names static qualification
         working-directory: wallet/web
-        run: node scripts/check.mjs
+        run: node scripts/check-names.mjs
 
       - name: Names static authority/opcode scan
         working-directory: contracts

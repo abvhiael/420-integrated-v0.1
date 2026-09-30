@@ -15,13 +15,15 @@
     "expiresAt",
     "deployment",
     "replayDomain",
+    "transactionFingerprint",
     "reviewedIntent",
     "execution",
     "tokens",
     "fees",
     "quoteEconomics",
     "builder",
-    "producer"
+    "producer",
+    "authentication"
   ],
   "properties": {
     "schema": {
@@ -264,10 +266,64 @@
           "maxLength": 128
         },
         "algorithm": {
-          "const": "UNSIGNED_PRE05"
+          "enum": [
+            "Ed25519",
+            "UNSIGNED"
+          ]
         },
         "authentication": {
-          "const": "DEFERRED_TO_PRE05"
+          "enum": [
+            "ED25519_PRE05",
+            "UNAUTHENTICATED"
+          ]
+        }
+      }
+    },
+    "transactionFingerprint": {
+      "$ref": "#/$defs/id32"
+    },
+    "authentication": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "algorithm",
+        "producerId",
+        "keyVersion",
+        "publicKeyFingerprint",
+        "revocationEpoch",
+        "payloadHash",
+        "signature"
+      ],
+      "properties": {
+        "schema": {
+          "const": "420-exchange-quote-auth-v1"
+        },
+        "algorithm": {
+          "const": "Ed25519"
+        },
+        "producerId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+        },
+        "keyVersion": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._:-]{1,64}$"
+        },
+        "publicKeyFingerprint": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "revocationEpoch": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "payloadHash": {
+          "$ref": "#/$defs/id32"
+        },
+        "signature": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$"
         }
       }
     }

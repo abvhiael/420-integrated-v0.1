@@ -3,8 +3,8 @@
   "step": "CMP-1.3.16",
   "title": "WorkerRegistry phase closeout, reconciliation, and retained evidence",
   "base_main_sha": "04f6200c2ae78db7d15db86b482fa6fa732017a6",
-  "status": "QUALIFICATION_PENDING",
-  "repository_closeout_candidate": true,
+  "status": "COMPLETE",
+  "repository_closeout_candidate": false,
   "live_release": false,
   "migrated_from_deferred_closeout": true,
   "historical_caveats": {
@@ -101,9 +101,51 @@
     "governance-authorized ProtocolRegistry publication"
   ],
   "qualification": {
-    "exact_final_sha": null,
-    "workflow_runs": [],
-    "note": "Filled in the durable CMP-1.3.16 closeout document after exact-head qualification; this configuration remains a qualification-pending inventory and blocker ledger."
+    "exact_final_sha": "82f123e4093095babf9c2f93d870269ece43c804",
+    "workflow_runs": [
+      {
+        "name": "Solidity Contracts",
+        "run_number": 3383,
+        "run_id": 36750528808
+      },
+      {
+        "name": "Genesis Address Authority",
+        "run_number": 218,
+        "run_id": 36750528895
+      },
+      {
+        "name": "420 Integrated Qualification",
+        "run_number": 6030,
+        "run_id": 36750528745
+      },
+      {
+        "name": "420Docs Qualification",
+        "run_number": 3406,
+        "run_id": 36750528945
+      },
+      {
+        "name": "420Indexer",
+        "run_number": 1012,
+        "run_id": 36750528883
+      },
+      {
+        "name": "420Registry REG-AUDIT-4",
+        "run_number": 47,
+        "run_id": 36750528826
+      },
+      {
+        "name": "EXP-1.9 CI Qualification Automation",
+        "run_number": 93,
+        "run_id": 36750528687
+      },
+      {
+        "name": "EXP-1.10 Phase Closeout Qualification",
+        "run_number": 100,
+        "run_id": 36750528767
+      }
+    ],
+    "evidence_recording_policy": "Evidence-only closeout commits inherit the qualified implementation SHA and do not require recursive full-suite reruns unless they change qualification-relevant contracts, tests, configuration, workflows, dependencies, or substantive requirements.",
+    "note": "CMP-1.3.16 repository closeout complete on the qualified implementation/reconciliation SHA. Live deployment/publication blockers remain."
   },
   "initial_main_sha": "5a2a273d8d6e0d9ab3428aab80ba0212f7bbb1bc",
   "reconciliation": {

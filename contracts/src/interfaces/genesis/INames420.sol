@@ -16,7 +16,14 @@ interface INames420 {
         uint8 labelLength;
     }
 
-    function resolve(bytes32 labelHash) external view returns (Record memory);
-    function reverseResolve(address account) external view returns (bytes32 labelHash);
-    function nameClaimsProfile(bytes32 labelHash, bytes32 profileId) external view returns (bool);
+    function resolve(
+        bytes32 labelHash
+    ) external view returns (Record memory);
+    function reverseResolve(
+        address account
+    ) external view returns (bytes32 labelHash);
+    function nameClaimsProfile(
+        bytes32 labelHash,
+        bytes32 profileId
+    ) external view returns (bool);
 }

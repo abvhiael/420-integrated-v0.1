@@ -176,8 +176,8 @@ Risks / gaps:
 | Compiled runtime artifact/code hash | predeploy plan + REG-AUDIT-5 ledger | pinned ProtocolRegistry runtime retained | reproducible exact-source generation + code-hash check | `contracts/artifacts/ProtocolRegistry.json` | COMPLETE | REG-AUDIT-5 retains runtime hash `0x9f9e5f794296cf9faf5f8c8d17cd815f3c19c004a158c15cb61b5a29eaacb330` from source blob `9ab3d53a68b6533978f41e0202e5268f1d615c19` |
 | Genesis storage initialization | predeploy plan + ProtocolRegistry predeploy state | GovernanceTimelock materialized through compiler immutable references; mutable constructor storage is empty | REG-AUDIT-5 generator/adversarial checks | storage root recorded | COMPLETE | direct-predeploy state is reproducible; live-chain storage verification remains REG-AUDIT-8 |
 | Canonical deployment evidence | deployment/reference docs | no canonical live deployment published | none current | explicitly withheld | BLOCKED | deploy production-equivalent testnet candidate and record receipt/code hash |
-| Current exact-head qualification | audit requirement | historical PR #31 only | PR #31 was green | no current closeout | MISSING | rerun retained suites on final reconciled SHA |
-| Registry-specific closeout | audit requirement | absent | n/a | absent | MISSING | commit exact-head audit/qualification ledger |
+| Current exact-head qualification | audit requirement | REG-AUDIT-5 substantive head `f0a4065a...` qualified | exact-head REG-AUDIT-5 + retained suite green | qualification ledger retained | COMPLETE FOR REG-AUDIT-5 | final cleanup head rerun required; full Registry closeout remains REG-AUDIT-9 |
+| Registry-specific closeout | audit requirement | REG-AUDIT-5 qualification ledger committed | dedicated workflow + retained suite | artifact/state evidence committed | COMPLETE FOR REG-AUDIT-5 | broader final Registry closeout remains REG-AUDIT-9 |
 
 ## REG-AUDIT-5 artifact/predeploy update
 
@@ -251,7 +251,7 @@ Current focused Registry test coverage is useful but does not independently prov
 | Global address map conflict/rebase | unresolved integration/deployment blocker |
 | No canonical final artifact/runtime hash | RESOLVED by REG-AUDIT-5; production-equivalent deployed evidence remains separate |
 | No live production-equivalent deployment evidence | unresolved deployment blocker |
-| Missing exact-current-head Registry closeout | REG-AUDIT-5 exact-head closeout pending final CI on its evidence-recording head |
+| Missing exact-current-head Registry closeout | REG-AUDIT-5 substantive exact-head qualification is complete; final cleanup-head SHA/run IDs are retained in PR #409 metadata after rerun; full Registry closeout remains REG-AUDIT-9 |
 
 ## Documentation audit
 
@@ -347,6 +347,8 @@ Use the existing global address-reconciliation work; do not solve Registry in is
 Exit: one canonical Registry address, with no contradictory authoritative assignment.
 
 ### REG-AUDIT-5 — generate final Registry artifact and predeploy state
+
+**Repository status:** COMPLETE at the substantive qualification layer on PR #409. Source blob `9ab3d53a68b6533978f41e0202e5268f1d615c19` produces retained runtime hash `0x9f9e5f794296cf9faf5f8c8d17cd815f3c19c004a158c15cb61b5a29eaacb330`; the direct-predeploy state records GovernanceTimelock `0x0429` as a compiler-materialized immutable, zero mutable constructor storage, and storage root `0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421`. Substantive exact head `f0a4065a1e685f318f67dc1b737b343451a8e1d0` passed the dedicated REG-AUDIT-5 workflow and retained suite. Final cleanup-head SHA/run IDs are recorded in PR #409 metadata after its rerun to avoid recursive evidence-only commits.
 
 From the exact candidate:
 

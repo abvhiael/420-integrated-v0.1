@@ -1,6 +1,6 @@
 # CMP-1.4.0 — Verifier architecture reconciliation
 
-Status: **IMPLEMENTATION COMPLETE; EXACT-HEAD QUALIFICATION PENDING. NO LIVE DEPLOYMENT/PUBLICATION CLAIM.**
+Status: **COMPLETE. EXACT IMPLEMENTATION HEAD QUALIFIED. NO LIVE DEPLOYMENT/PUBLICATION CLAIM.**
 
 ## Canonical definition
 
@@ -269,4 +269,17 @@ CMP-1.4.0 is COMPLETE only when:
 
 ## Completion
 
-**NOT YET COMPLETE.** Implementation/reconciliation artifacts are present, but exact-head CI qualification and final evidence recording remain pending.
+**COMPLETE.** Exact implementation head `ffc0a7263dae3d9787d757f6034e96a258a47fd1` qualified successfully.
+
+Retained qualification evidence:
+
+- Solidity Contracts #3395 — run `36762051196` — success
+- Genesis Address Authority #229 — run `36762051212` — success
+- 420 Integrated Qualification #6051 — run `36762051509` — success
+- 420Docs Qualification #3427 — run `36762052473` — success
+- 420Indexer #1025 — run `36762051177` — success
+- EXP-1.9 CI Qualification Automation #105 — run `36762051163` — success
+- EXP-1.10 Phase Closeout Qualification #111 — run `36762051305` — success
+- 420Registry REG-AUDIT-4 #65 — run `36762051195` — success
+
+This completion update is evidence-only and inherits the qualification of the exact implementation SHA above; it does not alter runtime code, tests, configuration semantics, workflow logic, dependencies, verifier authority, or deployment/publication state.

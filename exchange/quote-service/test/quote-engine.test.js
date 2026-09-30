@@ -11,7 +11,7 @@ function engine({route=vector.route,assets=vector.assets,feeBps=vector.feeBps,de
   return createQuoteEngine({
     chainId,router:vector.router,spender:vector.spender,deploymentId,manifestHash,maxRouteHops,clock,
     routeSource:createStaticRouteSource({routes:[route]}),
-    chainAdapter:createStaticChainAdapter({assets,feeBps,deployment:{deploymentId:vector.deploymentId,manifestHash:vector.manifestHash},observedAt}),
+    chainAdapter:createStaticChainAdapter({assets,feeBps,deployment:{deploymentId:vector.deploymentId,manifestHash:vector.manifestHash},chainId,observedAt}),
   });
 }
 test('PRE-04 deterministic offline vector emits complete canonical quote',async()=>{
@@ -39,9 +39,11 @@ test('PRE-04 quote output is deterministic for same inputs, source state and clo
   const request=validateRequest(vector.request),a=await engine()(request),b=await engine()(request);
   assert.deepEqual(a,b);
 });
-test('PRE-04 rejects stale chain inputs, deployment mismatch and invalid fee policy',async()=>{
+test('PRE-04 rejects stale/wrong-chain inputs, deployment mismatch and invalid fee policy',async()=>{
   const request=validateRequest(vector.request);
   await assert.rejects(engine({observedAt:900})(request),e=>e.code==='STALE_INPUT');
+  const wrongChainAdapter=createStaticChainAdapter({assets:vector.assets,feeBps:vector.feeBps,deployment:{deploymentId:vector.deploymentId,manifestHash:vector.manifestHash},chainId:'0x421',observedAt:1000});
+  await assert.rejects(createQuoteEngine({chainId:vector.chainId,router:vector.router,spender:vector.spender,deploymentId:vector.deploymentId,manifestHash:vector.manifestHash,clock:()=>1000,routeSource:createStaticRouteSource({routes:[vector.route]}),chainAdapter:wrongChainAdapter})(request),e=>e.code==='CHAIN_MISMATCH');
   await assert.rejects(engine({deploymentId:'0x'+'ff'.repeat(32)})(request),e=>e.code==='DEPLOYMENT_MISMATCH');
   await assert.rejects(engine({feeBps:101})(request),e=>e.code==='FEE_POLICY_INVALID');
 });
@@ -49,6 +51,7 @@ test('PRE-04 rejects unsupported route, oversized route, invalid token metadata 
   const request=validateRequest(vector.request);
   await assert.rejects(engine({route:{...vector.route,tokenOut:'0x'+'99'.repeat(20)}})(request),e=>e.code==='UNSUPPORTED_ROUTE');
   await assert.rejects(engine({route:{...vector.route,hops:[...vector.route.hops,...vector.route.hops,...vector.route.hops]},maxRouteHops:2})(request),e=>e.code==='UNSUPPORTED_ROUTE');
+  await assert.rejects(engine({route:{...vector.route,hops:[{...vector.route.hops[0],routeData:'0x'+'aa'.repeat(5000)}]}})(request),e=>e.code==='UNSUPPORTED_ROUTE');
   await assert.rejects(engine({assets:[{...vector.assets[0],verified:false},vector.assets[1]]})(request),e=>e.code==='INVALID_TOKEN_METADATA');
   await assert.rejects(engine({route:{...vector.route,grossAmountOutRaw:'4000000',hops:[{...vector.route.hops[0],amountOutRaw:'4000000',minAmountOutRaw:'3900000'}]}})(request),e=>e.code==='MINIMUM_OUTPUT_UNMET');
 });

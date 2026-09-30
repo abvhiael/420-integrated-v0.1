@@ -11,7 +11,7 @@ let busy = false;
 
 const $ = (selector) => document.querySelector(selector);
 
-function namesMarkup() {
+export function namesMarkup() {
   return `
     <section id="names-management-panel" class="panel" aria-labelledby="names-management-heading">
       <div class="section-heading">

@@ -1,0 +1,80 @@
+name: 420Registry REG-AUDIT-5
+
+on:
+  pull_request:
+    paths:
+      - "contracts/src/apps/ProtocolRegistry.sol"
+      - "contracts/src/system/SystemAccess.sol"
+      - "contracts/foundry.toml"
+      - "contracts/config/security/toolchain.json"
+      - "contracts/config/predeploy/predeploy-plan.json"
+      - "contracts/artifacts/ProtocolRegistry.json"
+      - "contracts/config/predeploy/ProtocolRegistry-predeploy-state.json"
+      - "scripts/generate-reg-audit-5-registry-predeploy.py"
+      - ".github/workflows/registry-reg-audit-5.yml"
+  workflow_dispatch:
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Verify exact qualification head
+        shell: bash
+        run: |
+          set -euo pipefail
+          EXPECTED="${{ github.event.pull_request.head.sha || github.sha }}"
+          ACTUAL="$(git rev-parse HEAD)"
+          test "$ACTUAL" = "$EXPECTED"
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Verify pinned compiler settings
+        working-directory: contracts
+        run: |
+          set -euo pipefail
+          CONFIG="$(forge config)"
+          grep -q 'solc = "0.8.24"' <<<"$CONFIG" || grep -q 'solc_version = "0.8.24"' <<<"$CONFIG"
+          grep -q 'evm_version = "cancun"' <<<"$CONFIG"
+          grep -q 'optimizer = true' <<<"$CONFIG"
+          grep -q 'optimizer_runs = 200' <<<"$CONFIG"
+          grep -q 'via_ir = true' <<<"$CONFIG"
+
+      - name: Compile exact ProtocolRegistry candidate
+        working-directory: contracts
+        run: forge build --force src/apps/ProtocolRegistry.sol
+
+      - name: Generate and verify canonical Registry predeploy artifact
+        run: |
+          set -euo pipefail
+          python3 scripts/generate-reg-audit-5-registry-predeploy.py --write --print
+          python3 scripts/generate-reg-audit-5-registry-predeploy.py --check
+          STATUS="$(git status --porcelain -- contracts/artifacts/ProtocolRegistry.json contracts/config/predeploy/ProtocolRegistry-predeploy-state.json)"
+          if [ -n "$STATUS" ]; then
+            echo "Committed REG-AUDIT-5 artifact/state do not match reproducible generation:" >&2
+            echo "$STATUS" >&2
+            exit 1
+          fi
+
+      - name: Registry regression tests
+        working-directory: contracts
+        run: |
+          forge test --match-path 'test/Registry*.t.sol' -vv
+
+      - name: Upload generated evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reg-audit-5-${{ github.sha }}
+          path: |
+            contracts/artifacts/ProtocolRegistry.json
+            contracts/config/predeploy/ProtocolRegistry-predeploy-state.json
+          if-no-files-found: warn
+          retention-days: 30

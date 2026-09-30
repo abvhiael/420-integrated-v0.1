@@ -76,3 +76,6 @@ jobs:
 
       - name: Verify CMP-1.4.1 verifier identity lifecycle
         run: python scripts/verify-cmp-1-4-1-verifier-lifecycle.py
+
+      - name: Verify CMP-1.4.2 verifier classes and workload capabilities
+        run: python scripts/verify-cmp-1-4-2-verifier-capabilities.py

@@ -35,7 +35,7 @@ export function validateExecutableSwapQuote({runtime,request,response,nowSeconds
   let prepared,projection;
   try{
     prepared=prepareCanonicalSwap({runtime,marketSource:'api',account:request.account,provenance,nowSeconds,reviewedIntent,execution});
-    projection=canonicalSwapReview({prepared,execution,tokens,quoteId:response.quoteId});
+    projection=canonicalSwapReview({prepared,execution,tokens,quoteId:response.quoteId,fees:response.fees??null});
   }catch(error){fail('INVALID_QUOTE',`Quote cannot reconstruct a canonical review: ${error.code??error.message}`);}
   return Object.freeze({status:'REVIEW_CANDIDATE_ONLY',prepared,projection,execution,reviewedIntent,tokens,quoteId:response.quoteId});
 }

@@ -42,9 +42,9 @@
     "schema": "420-exchange-quote-auth-policy-v1",
     "status": "UNRESOLVED",
     "service": "420/service/exchange-quote/v1",
-    "endpointOrigin": null,
     "deployment": null,
     "producers": [],
-    "maxKeyOverlapSeconds": 3600
+    "maxKeyOverlapSeconds": 3600,
+    "endpointUrl": null
   }
 }

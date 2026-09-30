@@ -173,11 +173,19 @@ Risks / gaps:
 | REG-INV-012 extension approval cannot alter canonical Genesis ID identity | same | canonical IDs are pure library constants and canonical IDs are rejected by extension approval | named canonical-ID descriptor collision negative added in REG-AUDIT-3 | documented | COMPLETE | exact-head retained proof |
 | Frozen interface compatibility | interface-layer freeze | incompatible | no implementation compatibility test found | freeze docs exist | BROKEN | choose/implement canonical adapter or compatible Registry implementation without mutating v1 semantics |
 | Canonical Registry address | system-addresses v4 | `0x...0434` in frozen map | repository consistency evidence exists | conflicting examples exist | BLOCKED | resolve namespace-wide Genesis address rebase before final freeze |
-| Compiled runtime artifact/code hash | predeploy plan | source ready only | historical compile CI exists | release proof missing | MISSING | generate/pin exact artifact and runtime hash from final candidate |
-| Genesis storage initialization | predeploy plan | constructor strategy requires genesis storage materialization | exact Registry storage proof not identified | global tooling exists | PARTIAL | verify Registry constructor/immutable handling in predeploy generation |
+| Compiled runtime artifact/code hash | predeploy plan + REG-AUDIT-5 ledger | pinned ProtocolRegistry runtime retained | reproducible exact-source generation + code-hash check | `contracts/artifacts/ProtocolRegistry.json` | COMPLETE | REG-AUDIT-5 retains runtime hash `0x9f9e5f794296cf9faf5f8c8d17cd815f3c19c004a158c15cb61b5a29eaacb330` from source blob `9ab3d53a68b6533978f41e0202e5268f1d615c19` |
+| Genesis storage initialization | predeploy plan + ProtocolRegistry predeploy state | GovernanceTimelock materialized through compiler immutable references; mutable constructor storage is empty | REG-AUDIT-5 generator/adversarial checks | storage root recorded | COMPLETE | direct-predeploy state is reproducible; live-chain storage verification remains REG-AUDIT-8 |
 | Canonical deployment evidence | deployment/reference docs | no canonical live deployment published | none current | explicitly withheld | BLOCKED | deploy production-equivalent testnet candidate and record receipt/code hash |
 | Current exact-head qualification | audit requirement | historical PR #31 only | PR #31 was green | no current closeout | MISSING | rerun retained suites on final reconciled SHA |
 | Registry-specific closeout | audit requirement | absent | n/a | absent | MISSING | commit exact-head audit/qualification ledger |
+
+## REG-AUDIT-5 artifact/predeploy update
+
+The Registry-scoped final predeploy artifact is now retained at `contracts/artifacts/ProtocolRegistry.json` and is reproducibly generated from ProtocolRegistry source blob `9ab3d53a68b6533978f41e0202e5268f1d615c19` with Solidity 0.8.24/Cancun, optimizer 200 and via-IR. The materialized runtime code hash is `0x9f9e5f794296cf9faf5f8c8d17cd815f3c19c004a158c15cb61b5a29eaacb330`.
+
+For direct Genesis placement, `SystemAccess.governanceTimelock` is a Solidity immutable rather than a mutable storage slot. REG-AUDIT-5 consumes compiler-emitted immutable references and materializes GovernanceTimelock `0x0000000000000000000000000000000000000429` into all seven reported runtime offsets. ProtocolRegistry's constructor writes no mutable storage; its mappings begin empty, with storage root `0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421`. Detailed evidence is retained in `contracts/config/predeploy/ProtocolRegistry-predeploy-state.json` and the REG-AUDIT-5 qualification ledger.
+
+This does not claim a live deployment. Production-equivalent testnet deployment, receipt/block provenance and live `eth_getCode`/storage verification remain REG-AUDIT-8.
 
 ## Integration audit
 
@@ -241,9 +249,9 @@ Current focused Registry test coverage is useful but does not independently prov
 | Legacy publication path lacks strict code/profile checks | accepted design risk only if Genesis flow is proven to exclude it |
 | Frozen `IProtocolRegistry420` / `ProtocolRegistry` mismatch | unresolved vulnerability / release blocker |
 | Global address map conflict/rebase | unresolved integration/deployment blocker |
-| No canonical final artifact/runtime hash | unresolved deployment blocker |
+| No canonical final artifact/runtime hash | RESOLVED by REG-AUDIT-5; production-equivalent deployed evidence remains separate |
 | No live production-equivalent deployment evidence | unresolved deployment blocker |
-| Missing exact-current-head Registry closeout | unresolved qualification blocker |
+| Missing exact-current-head Registry closeout | REG-AUDIT-5 exact-head closeout pending final CI on its evidence-recording head |
 
 ## Documentation audit
 

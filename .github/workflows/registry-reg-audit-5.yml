@@ -58,8 +58,14 @@ jobs:
           python3 scripts/generate-reg-audit-5-registry-predeploy.py --check
           STATUS="$(git status --porcelain -- contracts/artifacts/ProtocolRegistry.json contracts/config/predeploy/ProtocolRegistry-predeploy-state.json)"
           if [ -n "$STATUS" ]; then
-            echo "Committed REG-AUDIT-5 artifact/state do not match reproducible generation:" >&2
-            echo "$STATUS" >&2
+            echo "Retaining exact compiler-generated REG-AUDIT-5 artifact/state on PR branch:"
+            echo "$STATUS"
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add contracts/artifacts/ProtocolRegistry.json contracts/config/predeploy/ProtocolRegistry-predeploy-state.json
+            git commit -m "build(registry): retain REG-AUDIT-5 generated predeploy artifact"
+            git push origin HEAD:${{ github.event.pull_request.head.ref }}
+            echo "Generated files committed; this run intentionally does not qualify the newer commit." >&2
             exit 1
           fi
 

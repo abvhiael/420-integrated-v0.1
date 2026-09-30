@@ -5,7 +5,9 @@ import "../src/apps/Names420.sol";
 import "./helpers/InvariantTarget420.sol";
 
 interface VmNamesInvariant420 {
-    function warp(uint256) external;
+    function warp(
+        uint256
+    ) external;
 }
 
 contract Names420InvariantHandler {
@@ -21,7 +23,10 @@ contract Names420InvariantHandler {
     bool public reverseEverSet;
     bool public bootstrapped;
 
-    constructor(Names420 names_, bytes32 labelHash_) {
+    constructor(
+        Names420 names_,
+        bytes32 labelHash_
+    ) {
         names = names_;
         labelHash = labelHash_;
     }
@@ -32,8 +37,7 @@ contract Names420InvariantHandler {
 
         uint64 duration = names.MIN_REGISTRATION_PERIOD();
         bytes32 salt = keccak256("names-invariant-bootstrap");
-        bytes32 commitment =
-            names.makeCommitment(labelHash, 9, address(this), duration, salt, address(this));
+        bytes32 commitment = names.makeCommitment(labelHash, 9, address(this), duration, salt, address(this));
         bootstrapCommitment = commitment;
         names.commit(commitment);
         vm.warp(block.timestamp + names.MIN_COMMITMENT_AGE());
@@ -44,7 +48,9 @@ contract Names420InvariantHandler {
         expectedResolution = address(this);
     }
 
-    function renew(uint64 rawDuration) external {
+    function renew(
+        uint64 rawDuration
+    ) external {
         if (!bootstrapped || block.timestamp >= expectedExpiry) return;
 
         uint64 minDuration = names.MIN_REGISTRATION_PERIOD();
@@ -55,7 +61,9 @@ contract Names420InvariantHandler {
         expectedExpiry += duration;
     }
 
-    function setResolution(address resolvedAddress) external {
+    function setResolution(
+        address resolvedAddress
+    ) external {
         if (!bootstrapped || block.timestamp >= expectedExpiry) return;
 
         names.setResolution(labelHash, resolvedAddress, bytes32(0), bytes32(0));
@@ -63,16 +71,15 @@ contract Names420InvariantHandler {
     }
 
     function setReverseWhenEligible() external {
-        if (
-            !bootstrapped || block.timestamp >= expectedExpiry
-                || expectedResolution != address(this)
-        ) return;
+        if (!bootstrapped || block.timestamp >= expectedExpiry || expectedResolution != address(this)) return;
 
         names.setReverseName(labelHash);
         reverseEverSet = true;
     }
 
-    function advance(uint32 rawSeconds) external {
+    function advance(
+        uint32 rawSeconds
+    ) external {
         if (!bootstrapped) return;
         uint256 delta = uint256(rawSeconds) % (400 days + 1);
         vm.warp(block.timestamp + delta);
@@ -106,7 +113,7 @@ contract Names420InvariantTest is InvariantTarget420 {
         } else {
             try names.resolve(LABEL_HASH) returns (Names420.Record memory) {
                 revert("expired resolve succeeded");
-            } catch {}
+            } catch { }
         }
     }
 

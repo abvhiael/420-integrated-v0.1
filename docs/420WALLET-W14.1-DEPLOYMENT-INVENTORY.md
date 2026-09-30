@@ -1,5 +1,7 @@
 # 420 Wallet — W14.1 Canonical Deployment Inventory
 
+> **Historical phase record:** later Genesis address reconciliation supersedes the conflicted W14.1 anchor table below. Active repository address authority is `contracts/config/genesis-address-namespace.json`; ProtocolRegistry is fixed at `0x0000000000000000000000000000000000000434`. The older `0x0422` Wallet anchor remains here only as discovery provenance.
+
 ## Status
 
 W14.1 establishes the single machine-readable Wallet deployment inventory at `wallet/deployment-inventory.json` and adds fail-closed qualification in `scripts/verify-wallet-w14-1.py`.

@@ -1,6 +1,35 @@
 name: 420Names audit qualification
 
 on:
+  push:
+    branches:
+      - 'audit/420names-*'
+    paths:
+      - 'contracts/src/apps/Names420.sol'
+      - 'contracts/foundry.toml'
+      - 'contracts/src/interfaces/genesis/INames420.sol'
+      - 'contracts/test/Names420Audit.t.sol'
+      - 'contracts/test/RegistryIdentityNames420.t.sol'
+      - 'contracts/test/Names420DependencyModel.t.sol'
+      - 'contracts/test/Names420Hardening.t.sol'
+      - 'contracts/test/Names420Invariant.t.sol'
+      - 'contracts/config/interfaces/dependency-matrix.json'
+      - 'contracts/config/interfaces/names-dependency-model.json'
+      - 'wallet/web/core/names-client.js'
+      - 'wallet/web/test/names-client.test.js'
+      - 'wallet/web/test/names-management-ui.test.js'
+      - 'wallet/web/test/names-management.test.js'
+      - 'wallet/web/scripts/check.mjs'
+      - 'wallet/web/styles.css'
+      - 'wallet/web/index.html'
+      - 'wallet/web/names-management-ui.js'
+      - 'wallet/web/core/names-management.js'
+      - 'docs/apps/names/**'
+      - 'docs/audit/420NAMES-*'
+      - 'scripts/verify-genesis-interface-layer.py'
+      - 'scripts/verify-names-dependency-model.py'
+      - 'docs/architecture/decisions/NAMES-AUDIT-2-DEPENDENCY-MODEL.md'
+      - '.github/workflows/names-audit.yml'
   pull_request:
     paths:
       - 'contracts/src/apps/Names420.sol'
@@ -39,6 +68,7 @@ concurrency:
 
 jobs:
   qualify:
+    if: github.event_name != 'pull_request' || !startsWith(github.head_ref, 'audit/420names-')
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:

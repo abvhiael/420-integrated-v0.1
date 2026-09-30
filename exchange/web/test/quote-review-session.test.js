@@ -3,7 +3,18 @@ import assert from 'node:assert/strict';
 import {QuoteReviewSession} from '../core/quote-review-session.js';
 const account='0x'+'11'.repeat(20),other='0x'+'22'.repeat(20);
 const request={account,tokenIn:other,tokenOut:other,recipient:account,amountInRaw:'100'};
-const controller=()=>({runtime:{network:{chainId:'0x420'}},generation:4,disposed:false,wallet:{session:{account,chainId:'0x420',generation:2}}});
+const controller=()=>{
+ const wallet={session:{account,chainId:'0x420',generation:2}};
+ const c={runtime:{network:{chainId:'0x420'}},generation:4,disposed:false,wallet};
+ c.captureExecutionContext=()=>Object.freeze({wallet:c.wallet,account:c.wallet.session.account,chainId:c.wallet.session.chainId,walletGeneration:c.wallet.session.generation,controllerGeneration:c.generation,runtime:c.runtime});
+ c.assertExecutionContext=token=>{
+  if(c.disposed||c.wallet!==token.wallet||c.runtime!==token.runtime||c.generation!==token.controllerGeneration||
+     c.wallet.session.generation!==token.walletGeneration||c.wallet.session.account.toLowerCase()!==token.account.toLowerCase()||
+     c.wallet.session.chainId.toLowerCase()!==token.chainId.toLowerCase())throw Object.assign(Error('stale execution context'),{code:'STALE_SESSION'});
+  return token;
+ };
+ return c;
+};
 const candidate=()=>({status:'REVIEW_CANDIDATE_ONLY',prepared:{context:{account,chainId:'0x420',observedAt:1000,expiresAt:1050}}});
 const deferred=()=>{let resolve;const promise=new Promise(r=>{resolve=r;});return {promise,resolve};};
 test('read-only quote candidate is available only while wallet and quote stay fresh',async()=>{

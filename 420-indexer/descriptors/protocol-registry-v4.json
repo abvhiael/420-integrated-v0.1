@@ -7,7 +7,7 @@
   "canonicalAddress": "0x0000000000000000000000000000000000000434",
   "source": {
     "path": "contracts/src/apps/ProtocolRegistry.sol",
-    "gitBlobSha": "0ad7967d9ac805dd819101955c10233ff3d19325"
+    "gitBlobSha": "9ab3d53a68b6533978f41e0202e5268f1d615c19"
   },
   "events": [
     {
@@ -108,6 +108,6 @@
       ]
     }
   ],
-  "descriptorSha256": "9a7fd7c8f546fdffa7e9fd42be6274fa63a03443d1f243da3dc3dcaabd7cbbae",
+  "descriptorSha256": "0bb8d571d38eeb66d7b277253cdae65b6b14c7538f95dc809db6818c8a79db81",
   "authority": "repository_descriptor_only_not_live_registry_authority"
 }

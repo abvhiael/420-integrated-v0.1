@@ -35,7 +35,14 @@ class Node {
 function browserHarness({configured=true}={}){
  const view=new Node('section'),swap=new Node('button');swap.id='swap-review';view.append(swap);
  const documentRef={createElement:tag=>new Node(tag),querySelector:id=>id==='#app-view'?view:null};
- const controller={runtime:{deployment:{status:'RESOLVED',environment:'testnet'},network:{chainId:'0x420'},api:{executableQuoteUrl:configured?'https://api.example.invalid/executable-swap-quote':null}},wallet:{session:{account,chainId:'0x420',generation:1}},generation:1};
+ const wallet={session:{account,chainId:'0x420',generation:1}};
+ const controller={
+  runtime:{deployment:{status:'RESOLVED',environment:'testnet'},network:{chainId:'0x420'},api:{executableQuoteUrl:configured?'https://api.example.invalid/executable-swap-quote':null}},
+  wallet,generation:1,
+  captureExecutionContext(){return Object.freeze({wallet,account,chainId:'0x420',walletGeneration:wallet.session.generation,controllerGeneration:this.generation,runtime:this.runtime});},
+  assertExecutionContext(token){if(token.wallet!==this.wallet||token.controllerGeneration!==this.generation||token.runtime!==this.runtime)throw Object.assign(Error('stale'),{code:'STALE_SESSION'});return token;},
+  invalidateExecution(){this.generation++;},
+ };
  return {view,documentRef,controller};
 }
 test('mounted read-only surface renders a candidate without any wallet send/sign path; input edits clear it',async()=>{
@@ -48,7 +55,9 @@ test('mounted read-only surface renders a candidate without any wallet send/sign
  await surface.panel.querySelector('#v15-quote-review-fetch').emit('click');
  const result=surface.panel.querySelector('#v15-quote-review-result');
  assert.equal(fetches,1);assert.equal(signs,0);assert.equal(result.hidden,false);assert.match(result.textContent,/REVIEW CANDIDATE ONLY/);
+ const generation=controller.generation;
  fields[3].value='2';fields[3].emit('input');
+ assert.ok(controller.generation>generation,'trade input changes advance the central execution generation');
  assert.equal(result.hidden,true);assert.equal(result.textContent,'');assert.throws(()=>surface.session.current());
  surface.dispose();assert.equal(surface.panel.parentElement,null);
 });

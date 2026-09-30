@@ -142,30 +142,25 @@ Audit remediation:
 
 This is a pre-Genesis correction of an internally contradictory frozen interface. It must be reviewed as interface-layer reconciliation because the v1 freeze policy otherwise treats semantic interface changes as versioned changes.
 
-### Canonical dependency-matrix conflict
+### Canonical dependency model — reconciled in NAMES-AUDIT-2
 
-The frozen dependency matrix declares 420Names dependencies on:
+NAMES-AUDIT-2 resolved the stale generic dependency row without expanding Names420 authority.
 
-1. ProtocolRegistry
-2. GovernanceAuthority
-3. PauseRegistry
-4. CapabilityRegistry
-5. SystemSafety
-6. GenesisInitialization
-7. Migration
-8. SignedEnvelope
-9. ReplayProtection
-10. ChainContext
-11. MetadataCommitment
+The canonical direct runtime dependency set for 420Names is now:
 
-The actual contract directly implements only the minimal `SystemAccess` governance-timelock boundary. There is no evidence in `Names420.sol` of the other declared interface-layer dependencies.
+1. GovernanceAuthority
 
-This is **not** repaired automatically because doing so would materially change contract architecture and storage/behavior without an app-specific canonical specification saying how each dependency must apply. The repository must either:
+`Names420` binds that dependency through the nonzero immutable governance timelock in `SystemAccess`. The current Names contract exposes no governance-only name mutation, so this is a system authority identity boundary rather than ambient control over user names.
 
-- implement the declared dependency contract for Names420; or
-- formally amend the dependency matrix with an app-specific architecture decision proving those dependencies are not required.
+The remaining legacy entries were classified in `contracts/config/interfaces/names-dependency-model.json` and the architecture decision `docs/architecture/decisions/NAMES-AUDIT-2-DEPENDENCY-MODEL.md`:
 
-Until reconciled, contract architecture is internally inconsistent.
+- ProtocolRegistry — OPTIONAL_INTEGRATION;
+- GenesisInitialization — REQUIRED_INDIRECT deployment/predeploy concern;
+- ReplayProtection — LOCAL_MECHANISM implemented by commit/reveal consumption;
+- ChainContext — CONSUMER_LAYER;
+- PauseRegistry, CapabilityRegistry, SystemSafety, Migration, SignedEnvelope and MetadataCommitment — not current Names420 runtime dependencies.
+
+The shared Genesis interface inventory remains frozen and available to applications that require those interfaces. This reconciliation changes only the app-specific normative dependency set and prevents unused shared interfaces from becoming unintended authority over 420Names.
 
 ## Application-layer audit
 
@@ -331,17 +326,17 @@ The public testnet manifest/endpoints are also not qualified. Therefore source e
 | two-step transfer | protocol architecture | implemented | retained/audit | docs | COMPLETE | none |
 | clear links on transfer | protocol architecture | implemented | retained | docs | COMPLETE | none |
 | shared `INames420` ABI | frozen interface layer | baseline broken; repaired on audit branch | audit interface regression | developer docs corrected | COMPLETE | merge/review as pre-Genesis interface reconciliation |
-| GovernanceAuthority | dependency matrix | immutable governanceTimelock boundary only | indirect | SystemAccess docs | PARTIAL | reconcile declared interface semantics |
-| ProtocolRegistry dependency | dependency matrix | service reference field only; no explicit dependency interface | no direct dependency test | architectural references | PARTIAL | define/implement or amend matrix |
-| PauseRegistry | dependency matrix | absent | absent | absent app-specific behavior | MISSING | architecture decision + implementation if retained |
-| CapabilityRegistry | dependency matrix | absent | absent | absent app-specific behavior | MISSING | architecture decision + implementation if retained |
-| SystemSafety | dependency matrix | absent | absent | absent app-specific behavior | MISSING | architecture decision + implementation if retained |
-| GenesisInitialization | dependency matrix | constructor/predeploy intent only | no Names storage-init qualification | generic predeploy docs | PARTIAL | reconcile direct-predeploy initialization contract |
-| Migration | dependency matrix | absent | absent | generic interface policy only | MISSING | define version/migration policy or amend matrix |
-| SignedEnvelope | dependency matrix | absent | absent | absent | MISSING | define need or amend matrix |
-| ReplayProtection shared interface | dependency matrix | commit consumption provides local replay control only | tested locally | architecture | PARTIAL | reconcile shared-interface requirement |
-| ChainContext | dependency matrix | no explicit interface | wallet verifies chain externally | client docs | PARTIAL | define on-chain requirement or amend matrix |
-| MetadataCommitment | dependency matrix | absent | absent | absent app-specific behavior | MISSING | define/implement or amend matrix |
+| GovernanceAuthority | dependency matrix + NAMES-AUDIT-2 ADR | immutable nonzero governanceTimelock via SystemAccess | dependency-model test | protocol architecture + ADR | COMPLETE | retain direct boundary |
+| ProtocolRegistry dependency | NAMES-AUDIT-2 classification | optional consumer integration only; no Names420 runtime call | verifier | architecture + ADR | COMPLETE | consumers validate serviceId independently |
+| PauseRegistry | NAMES-AUDIT-2 classification | absent; removed from Names420 runtime matrix | dependency-model verifier | ADR | COMPLETE | NOT_APPLICABLE for current runtime |
+| CapabilityRegistry | NAMES-AUDIT-2 classification | absent; removed from Names420 runtime matrix | dependency-model verifier | ADR | COMPLETE | NOT_APPLICABLE for current runtime |
+| SystemSafety | NAMES-AUDIT-2 classification | absent; removed from Names420 runtime matrix | dependency-model verifier | ADR | COMPLETE | NOT_APPLICABLE for current runtime |
+| GenesisInitialization | NAMES-AUDIT-2 classification | required indirectly at predeploy/deployment layer; not runtime interface | dependency-model verifier | ADR | COMPLETE FOR DEPENDENCY MODEL | implement deterministic state in NAMES-AUDIT-6 |
+| Migration | NAMES-AUDIT-2 classification | absent; removed from Names420 runtime matrix | dependency-model verifier | ADR | COMPLETE | NOT_APPLICABLE for current runtime |
+| SignedEnvelope | NAMES-AUDIT-2 classification | absent; removed from Names420 runtime matrix | dependency-model verifier | ADR | COMPLETE | NOT_APPLICABLE for current runtime |
+| ReplayProtection shared interface | NAMES-AUDIT-2 classification | local committer-bound/consumed commitment mechanism | audit replay tests + verifier | ADR | COMPLETE | shared runtime dependency not required |
+| ChainContext | NAMES-AUDIT-2 classification | consumer-layer Wallet chain verification; no Names runtime signature domain | wallet tests + verifier | ADR | COMPLETE | no runtime dependency |
+| MetadataCommitment | NAMES-AUDIT-2 classification | absent; removed from Names420 runtime matrix | dependency-model verifier | ADR | COMPLETE | NOT_APPLICABLE for current runtime |
 | canonical system address | frozen namespace | 0x0435 consistent across active maps | namespace validators exist | documented | COMPLETE | retain 0x0445 retired |
 | predeploy runtime artifact | predeploy plan | planned path only | indexer fails closed when absent | plan note | MISSING | generate pinned `Names420.json` |
 | runtime code hash | deployment requirements | absent | absent | absent | MISSING | generate/freeze hash |
@@ -363,7 +358,7 @@ The public testnet manifest/endpoints are also not qualified. Therefore source e
 
 - **CODE COMPLETE: NO** — user-facing management application is missing and frozen dependency-layer architecture is unreconciled.
 - **BUILD COMPLETE: NO** — focused audit CI must qualify the exact final head, and required generated deployment artifacts do not yet exist.
-- **CONTRACT COMPLETE: NO** — core naming logic is substantial and the resolver interface defect is repaired, but canonical dependency-matrix obligations remain unresolved.
+- **CONTRACT COMPLETE: NO** — core naming logic and the canonical dependency model are reconciled; contract hardening and later artifact/Genesis qualification remain open.
 - **TEST COMPLETE: NO** — focused unit/integration coverage is improved, but fuzz/invariant hardening, generated-artifact qualification and live integration are not complete.
 - **DOCUMENTATION COMPLETE: NO** — user/developer/security docs exist, but deployment/operator/threat-model/Genesis acceptance documentation remains incomplete.
 - **INTEGRATION COMPLETE: NO** — Wallet/indexer/search source integrations exist; live Registry/network/artifact bindings and the user management application do not.

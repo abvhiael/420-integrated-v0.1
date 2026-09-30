@@ -1,0 +1,16 @@
+{
+  "schema": "420-exchange-quote-signer-rotation-v1",
+  "status": "DESIGN_ONLY_PRE04",
+  "activeKeyVersion": null,
+  "acceptedKeyVersions": [],
+  "overlapSeconds": 0,
+  "privateKeyMaterial": "PROHIBITED",
+  "nextStep": "PRE-05",
+  "rules": [
+    "PRE-04 stores no private signing key or production secret",
+    "PRE-05 must bind producer identity and key version into the authenticated quote envelope",
+    "rotation must support bounded overlap and explicit revocation",
+    "retired keys must not authenticate newly issued quotes",
+    "quote semantics and replay domain remain stable across key rotation"
+  ]
+}

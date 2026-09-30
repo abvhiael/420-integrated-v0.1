@@ -3,6 +3,9 @@ import {createServer} from 'node:http';
 import {readFileSync,mkdirSync,writeFileSync} from 'node:fs';
 import {resolve,sep,extname} from 'node:path';
 import {chromium} from 'playwright';
+import {createQuoteEngine} from '../../quote-service/src/quote-engine.js';
+import {createStaticChainAdapter,createStaticRouteSource} from '../../quote-service/src/adapters.js';
+import {testPublicKey,testSigner,TEST_KEY_VERSION,TEST_PRODUCER_ID,TEST_REVOCATION_EPOCH} from '../../quote-service/test/test-auth.js';
 
 const root=resolve(new URL('../dist/',import.meta.url).pathname);
 const sha=process.env.GITHUB_SHA||process.env.EXCHANGE_BUILD_SHA||'unidentified';
@@ -15,7 +18,8 @@ const origin=`http://127.0.0.1:${server.address().port}`;
 const address=n=>'0x'+BigInt(n).toString(16).padStart(40,'0');
 const id=n=>'0x'+BigInt(n).toString(16).padStart(64,'0');
 const account=address(1),recipient=address(2),tokenIn=address(3),tokenOut=address(4),router=address(100);
-const assetIn=id(100),assetOut=id(101),marketId=id(10),routeId=id(11),quoteId=id(99),pathHash=id(900);
+const assetIn=id(100),assetOut=id(101),marketId=id(10),routeId=id(11);
+const deploymentId=id(500),manifestHash=id(501);
 const runtime={
  schema:'420-exchange-web-runtime-v14.1',
  site:{name:'420Exchange',productionOrigin:'https://exchange.420integrated.org'},
@@ -23,6 +27,12 @@ const runtime={
  api:{baseUrl:'https://api.example.invalid/exchange',executableQuoteUrl:'https://api.example.invalid/exchange/executable-swap-quote',streamUrl:'wss://api.example.invalid/exchange/stream',transport:'websocket-or-sse',schemaMajor:14,schemaMinor:0,marketSubjects:[]},
  deployment:{status:'RESOLVED',environment:'testnet'},
  contracts:{ExchangeAtomicRouter420:router},
+ quoteAuthentication:{
+  schema:'420-exchange-quote-auth-policy-v1',status:'QUALIFIED_CONFIG',service:'420/service/exchange-quote/v1',
+  endpointOrigin:'https://api.example.invalid',maxKeyOverlapSeconds:3600,
+  deployment:{deploymentId,manifestHash,router,spender:router},
+  producers:[{producerId:TEST_PRODUCER_ID,keyVersion:TEST_KEY_VERSION,algorithm:'Ed25519',publicKey:testPublicKey(),notBefore:1,notAfter:4102444800,revocationEpoch:TEST_REVOCATION_EPOCH,revoked:false}],
+ },
  reviewCatalogue:{schema:'420-exchange-review-catalogue-v1',qualification:'QUALIFIED_CONFIG',authority:'METADATA_ONLY',demo:false,fixture:false,chainId:'0x1a4',maxRouteHops:2,
   assets:[
    {assetId:assetIn,address:tokenIn,symbol:'BOB',name:'Bob Token',decimals:18,verified:true,reviewEligible:true},
@@ -42,14 +52,22 @@ async function fixture(page){
   const now=Math.floor(Date.now()/1000);
   assert.equal(body.account,account);assert.equal(body.tokenIn,tokenIn);assert.equal(body.tokenOut,tokenOut);
   assert.equal(body.amountInRaw,'1250000000000000000');assert.equal(body.minimumOutputRaw,'4100000');
-  await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
-   schema:'420-exchange-executable-swap-quote-v1',marketSource:'api',demo:false,fixture:false,quoteId,chainId:'0x1a4',account,
-   observedAt:now,expiresAt:now+60,
-   reviewedIntent:{kind:'EXACT_INPUT_PATH',recipient,routeCommitment:pathHash,hops:[{marketId,outputToken:tokenOut}]},
-   execution:{mode:'ERC20_TO_ERC20',tokenIn,recipient,amountInRaw:body.amountInRaw,minFinalAmountOutRaw:'4200000',expectedPathHash:pathHash,hops:[{marketId,routeId,tokenOut,minAmountOutRaw:'4200000',routeData:'0x'}]},
-   tokens:{input:{address:tokenIn,decimals:18,symbol:'BOB',verified:true},output:{address:tokenOut,decimals:6,symbol:'ARRR',verified:true}},
-   fees:{outputToken:tokenOut,totalFeeRaw:'10000',rateBps:25,components:[{label:'exchange protocol',amountRaw:'10000'}]},
-  })});
+  const routePlan={
+   source:'route-adapter',observedAt:now,tokenIn,tokenOut,grossAmountOutRaw:'5000000',
+   hops:[{marketId,routeId,tokenIn,tokenOut,amountOutRaw:'5000000',minAmountOutRaw:'4200000',routeData:'0x'}],
+  };
+  const assets=[
+   {assetId:assetIn,address:tokenIn,symbol:'BOB',decimals:18,verified:true,tradeEligible:true},
+   {assetId:assetOut,address:tokenOut,symbol:'ARRR',decimals:6,verified:true,tradeEligible:true},
+  ];
+  const engine=createQuoteEngine({
+   chainId:'0x1a4',router,spender:router,deploymentId,manifestHash,clock:()=>now,
+   routeSource:createStaticRouteSource({routes:[routePlan]}),
+   chainAdapter:createStaticChainAdapter({assets,feeBps:25,deployment:{deploymentId,manifestHash},chainId:'0x1a4',observedAt:now}),
+   signer:testSigner(),
+  });
+  const signed=await engine(body);
+  await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(signed)});
  });
  await page.addInitScript(({account})=>{
   const events=new Map();
@@ -95,8 +113,8 @@ try{
   await page.locator('#v15-quote-review-fetch').click();
   const result=page.locator('#v15-quote-review-result');await result.waitFor({state:'visible'});
   let text=await result.innerText();
-  for(const exact of ['REVIEW CANDIDATE ONLY','1.25 BOB','1250000000000000000 raw','4.2 ARRR','4200000 raw','0.01 ARRR','25 bps',recipient,tokenIn,tokenOut,router,quoteId,pathHash])assert.ok(text.includes(exact),exact);
-  assert.match(text,/producer authenticity not established/i);
+  for(const exact of ['AUTHENTICATED EXECUTION QUOTE','1.25 BOB','1250000000000000000 raw','4.1 ARRR','4100000 raw','0.0125 ARRR','25 bps',recipient,tokenIn,tokenOut,router,TEST_PRODUCER_ID,TEST_KEY_VERSION])assert.ok(text.includes(exact),exact);
+  assert.match(text,/authenticated execution quote/i);
   assert.match(text,/signing and transaction submission remain disabled/i);
   await result.locator('.pre03-route-details summary').click();
   text=await result.innerText();

@@ -22,7 +22,7 @@
     "selector_dependency": "contracts/src/compute/ComputeIndependentVerifierSelector420.sol",
     "committee_rule": "Committee is frozen while the job is ACCEPTED and before execution. M is 2..16 and N is 2..M.",
     "capability_rule": "Every member must be the exact ACTIVE verifier revision and hold both INDEPENDENT_VERIFIER and COMMITTEE_VERIFIER capability for the job workload.",
-    "independence_rule": "Verifier controllers must be current, distinct from owner/payer/operator controllers and pairwise distinct across committee members.",
+    "independence_rule": "Verifier controllers and the frozen owner/payer/operator controller identities must remain current; verifier controllers must be distinct from all three party controllers and pairwise distinct across committee members.",
     "recomputation_rule": "One immutable vote per committee member after RESULT_COMMITTED. Each vote binds a nonzero result commitment and nonzero recomputation-evidence commitment.",
     "quorum_rule": "Quorum finalizes only when at least N distinct frozen members attest the same nonzero result commitment. Split results do not aggregate.",
     "authority_rule": "Quorum evidence does not submit a verdict, transition the job to VERIFIED, settle, move Vault funds, choose a beneficiary, slash, or grant authority."
@@ -55,7 +55,7 @@
   "exit_criteria": [
     "A pre-execution committee can be frozen for each job with explicit N-of-M threshold and bounded committee size.",
     "Every committee member is an exact-current ACTIVE verifier with exact independent and committee capability for the workload.",
-    "Controller conflicts with owner/payer/operator and pairwise committee controller collisions fail closed.",
+    "Controller conflicts with owner/payer/operator, pairwise committee controller collisions, and later party-controller drift fail closed for new votes.",
     "Only frozen members may submit one recomputation vote each and only after RESULT_COMMITTED.",
     "Quorum requires N distinct members agreeing on the same result commitment; split results and insufficient quorum do not finalize.",
     "Verifier suspension/staleness, duplicate votes, unauthorized voters and post-finalization votes fail closed.",

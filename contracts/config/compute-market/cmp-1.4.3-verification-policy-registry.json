@@ -1,0 +1,55 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-1.4.3.VerificationPolicyRegistry.v1",
+  "step": "CMP-1.4.3",
+  "title": "Verification policy registry",
+  "canonical_definition": "Bind jobs to exact versioned verification policies before execution.",
+  "base_main_sha": "6715d9fd3747953f298e79527fb9e86588db8d35",
+  "qualification_level": 1,
+  "milestone_relationship": {
+    "level_2_required_now": true,
+    "milestone": "CMP-1.4 identity/classes/policy integration",
+    "rationale": "CMP-1.4.3 changes the shared JobRegistry pre-execution guard and completes the first three verifier slices; the retained full Compute Market suite is the app-specific Level 2 integration gate."
+  },
+  "implementation": {
+    "policy_registry": "contracts/src/compute/ComputePolicyRegistry420.sol",
+    "job_registry": "contracts/src/compute/ComputeJobRegistry420.sol",
+    "test": "contracts/test/ComputeVerificationPolicyBinding420.t.sol",
+    "policy_kind": "KIND_VERIFICATION",
+    "binding": "ACCEPTED job freezes exact policyId/revision/commitment before assignment in a CMP-1.4.3-qualified configuration.",
+    "compatibility": "Historical JobRegistry fixtures without a bound verification policy registry remain legacy-compatible; they are not CMP-1.4.3-qualified for new execution."
+  },
+  "authority_boundaries": [
+    "Policy publication is not a verdict, verifier identity, class/capability grant, appointment, correctness proof, settlement, custody, stake/slash, governance, worker, validator, bridge or arbitrary-wallet authority.",
+    "A bound policy is immutable job provenance; later publication or suspension cannot reinterpret the accepted job.",
+    "The owner may bind only a current accepting KIND_VERIFICATION revision/commitment while the job is ACCEPTED and before execution.",
+    "Binding increments the canonical job revision so stale execution attempts fail closed.",
+    "A CMP-1.4.3-qualified JobRegistry configuration cannot enter RUNNING without a frozen verification policy."
+  ],
+  "invariants": [
+    "CMP-INV-005",
+    "CMP-INV-014",
+    "CMP-INV-016",
+    "CMP-INV-017",
+    "CMP-INV-020",
+    "CMP-INV-025",
+    "CMP-INV-026",
+    "CMP-INV-027",
+    "CMP-INV-030"
+  ],
+  "deployment_publication": {
+    "fixed_genesis_predeploy_created": false,
+    "protocol_registry_publication_claimed": false,
+    "live_deployment_claimed": false
+  },
+  "exit_criteria": [
+    "Existing ComputePolicyRegistry420 KIND_VERIFICATION is reused as the canonical versioned publication authority.",
+    "A job can freeze exact policy ID, revision and commitment only while ACCEPTED and before execution.",
+    "CMP-1.4.3-qualified assignment fails closed until policy binding exists.",
+    "Only current accepting KIND_VERIFICATION revisions with exact commitments may be newly bound.",
+    "Policy binding increments job revision and cannot be repeated or silently replaced.",
+    "Later policy revision/suspension cannot rewrite a previously bound job.",
+    "Policy binding grants no unrelated authority.",
+    "Level 1 and documented Level 2 Compute Market qualification are green on the exact implementation SHA."
+  ],
+  "status": "IMPLEMENTATION_COMPLETE_QUALIFICATION_PENDING"
+}

@@ -40,6 +40,8 @@ No worker should perform paid computation against an unfunded job.
 
 ## CMP-1.3 — ComputeWorkerRegistry
 
+**CMP-1.3 status: COMPLETE WITHIN REPOSITORY QUALIFICATION SCOPE as of CMP-1.3.16. Live deployment/publication remains blocked by the separately recorded CMP-1.5, public-testnet, runtime-evidence and ProtocolRegistry-publication prerequisites.**
+
 Workers register:
 
 ```

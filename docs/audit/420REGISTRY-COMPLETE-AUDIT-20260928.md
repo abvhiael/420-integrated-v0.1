@@ -173,11 +173,19 @@ Risks / gaps:
 | REG-INV-012 extension approval cannot alter canonical Genesis ID identity | same | canonical IDs are pure library constants and canonical IDs are rejected by extension approval | named canonical-ID descriptor collision negative added in REG-AUDIT-3 | documented | COMPLETE | exact-head retained proof |
 | Frozen interface compatibility | interface-layer freeze | incompatible | no implementation compatibility test found | freeze docs exist | BROKEN | choose/implement canonical adapter or compatible Registry implementation without mutating v1 semantics |
 | Canonical Registry address | system-addresses v4 | `0x...0434` in frozen map | repository consistency evidence exists | conflicting examples exist | BLOCKED | resolve namespace-wide Genesis address rebase before final freeze |
-| Compiled runtime artifact/code hash | predeploy plan | source ready only | historical compile CI exists | release proof missing | MISSING | generate/pin exact artifact and runtime hash from final candidate |
-| Genesis storage initialization | predeploy plan | constructor strategy requires genesis storage materialization | exact Registry storage proof not identified | global tooling exists | PARTIAL | verify Registry constructor/immutable handling in predeploy generation |
+| Compiled runtime artifact/code hash | predeploy plan + REG-AUDIT-5 ledger | pinned ProtocolRegistry runtime retained | reproducible exact-source generation + code-hash check | `contracts/artifacts/ProtocolRegistry.json` | COMPLETE | REG-AUDIT-5 retains runtime hash `0x9f9e5f794296cf9faf5f8c8d17cd815f3c19c004a158c15cb61b5a29eaacb330` from source blob `9ab3d53a68b6533978f41e0202e5268f1d615c19` |
+| Genesis storage initialization | predeploy plan + ProtocolRegistry predeploy state | GovernanceTimelock materialized through compiler immutable references; mutable constructor storage is empty | REG-AUDIT-5 generator/adversarial checks | storage root recorded | COMPLETE | direct-predeploy state is reproducible; live-chain storage verification remains REG-AUDIT-8 |
 | Canonical deployment evidence | deployment/reference docs | no canonical live deployment published | none current | explicitly withheld | BLOCKED | deploy production-equivalent testnet candidate and record receipt/code hash |
-| Current exact-head qualification | audit requirement | historical PR #31 only | PR #31 was green | no current closeout | MISSING | rerun retained suites on final reconciled SHA |
-| Registry-specific closeout | audit requirement | absent | n/a | absent | MISSING | commit exact-head audit/qualification ledger |
+| Current exact-head qualification | audit requirement | REG-AUDIT-5 substantive head `f0a4065a...` qualified | exact-head REG-AUDIT-5 + retained suite green | qualification ledger retained | COMPLETE FOR REG-AUDIT-5 | final cleanup head rerun required; full Registry closeout remains REG-AUDIT-9 |
+| Registry-specific closeout | audit requirement | REG-AUDIT-5 qualification ledger committed | dedicated workflow + retained suite | artifact/state evidence committed | COMPLETE FOR REG-AUDIT-5 | broader final Registry closeout remains REG-AUDIT-9 |
+
+## REG-AUDIT-5 artifact/predeploy update
+
+The Registry-scoped final predeploy artifact is now retained at `contracts/artifacts/ProtocolRegistry.json` and is reproducibly generated from ProtocolRegistry source blob `9ab3d53a68b6533978f41e0202e5268f1d615c19` with Solidity 0.8.24/Cancun, optimizer 200 and via-IR. The materialized runtime code hash is `0x9f9e5f794296cf9faf5f8c8d17cd815f3c19c004a158c15cb61b5a29eaacb330`.
+
+For direct Genesis placement, `SystemAccess.governanceTimelock` is a Solidity immutable rather than a mutable storage slot. REG-AUDIT-5 consumes compiler-emitted immutable references and materializes GovernanceTimelock `0x0000000000000000000000000000000000000429` into all seven reported runtime offsets. ProtocolRegistry's constructor writes no mutable storage; its mappings begin empty, with storage root `0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421`. Detailed evidence is retained in `contracts/config/predeploy/ProtocolRegistry-predeploy-state.json` and the REG-AUDIT-5 qualification ledger.
+
+This does not claim a live deployment. Production-equivalent testnet deployment, receipt/block provenance and live `eth_getCode`/storage verification remain REG-AUDIT-8.
 
 ## Integration audit
 
@@ -207,17 +215,13 @@ Current frozen system maps assign:
 
 `ProtocolRegistry = 0x0000000000000000000000000000000000000434`
 
-The repository also contains an explicit reconciliation record:
+REG-AUDIT-4 adopts the repository's later mainline authority decision to preserve the frozen Step 6.2 predeploy map and registry-resolve non-predeploy services. The complete active namespace is recorded in:
 
-`contracts/config/wallet-authority-address-reconciliation.json`
+`contracts/config/genesis-address-namespace.json`
 
-Status:
+The historical Wallet/W14.7 records that proposed moving ProtocolRegistry to `0x0448` are preserved as explicit **SUPERSEDED** evidence and are not active address authority. Both system mirrors, the predeploy plan, deployment manifest, canonical discovery map, Wallet resident configuration and Developer Hub examples now agree on Registry `0x0434`.
 
-`BLOCKED_GLOBAL_GENESIS_ADDRESS_REBASE_REQUIRED`
-
-That record says the current `0x0434` assignment conflicts with later canonical-authority work and must be reconciled atomically across the complete Genesis namespace. It explicitly forbids treating candidate addresses as deployed contracts.
-
-Therefore this audit does **not** rewrite Registry examples to `0x0434` as a final fix. Doing so would merely replace one stale claim with another address that the repository itself says is subject to global reconciliation.
+This address reconciliation does not claim deployed runtime bytecode, storage initialization or live-chain verification; those remain later roadmap gates.
 
 ## Test audit
 
@@ -245,9 +249,9 @@ Current focused Registry test coverage is useful but does not independently prov
 | Legacy publication path lacks strict code/profile checks | accepted design risk only if Genesis flow is proven to exclude it |
 | Frozen `IProtocolRegistry420` / `ProtocolRegistry` mismatch | unresolved vulnerability / release blocker |
 | Global address map conflict/rebase | unresolved integration/deployment blocker |
-| No canonical final artifact/runtime hash | unresolved deployment blocker |
+| No canonical final artifact/runtime hash | RESOLVED by REG-AUDIT-5; production-equivalent deployed evidence remains separate |
 | No live production-equivalent deployment evidence | unresolved deployment blocker |
-| Missing exact-current-head Registry closeout | unresolved qualification blocker |
+| Missing exact-current-head Registry closeout | REG-AUDIT-5 substantive exact-head qualification is complete; final cleanup-head SHA/run IDs are retained in PR #409 metadata after rerun; full Registry closeout remains REG-AUDIT-9 |
 
 ## Documentation audit
 
@@ -331,6 +335,8 @@ Exit: every REG-INV-001..012 has named executable evidence.
 
 ### REG-AUDIT-4 — reconcile the Genesis address namespace
 
+**Repository status:** COMPLETE. Canonical Registry address is `0x0000000000000000000000000000000000000434`; historical `0x0448` relocation proposals are superseded. Reconciled exact head `9baaa5c6e89cf08bf152d36c83477890a41ae727`, based on `main` `76e7f5732247efc091c8842efaecce2b11c6fc61`, passed REG-AUDIT-4, Genesis Address Authority, all Solidity PR shards, Integrated, Docs, Developer Hub, Indexer, Wallet Web, and retained Registry gates under PR #402.
+
 Use the existing global address-reconciliation work; do not solve Registry in isolation.
 
 - approve one collision-free namespace-wide map;
@@ -341,6 +347,8 @@ Use the existing global address-reconciliation work; do not solve Registry in is
 Exit: one canonical Registry address, with no contradictory authoritative assignment.
 
 ### REG-AUDIT-5 — generate final Registry artifact and predeploy state
+
+**Repository status:** COMPLETE at the substantive qualification layer on PR #409. Source blob `9ab3d53a68b6533978f41e0202e5268f1d615c19` produces retained runtime hash `0x9f9e5f794296cf9faf5f8c8d17cd815f3c19c004a158c15cb61b5a29eaacb330`; the direct-predeploy state records GovernanceTimelock `0x0429` as a compiler-materialized immutable, zero mutable constructor storage, and storage root `0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421`. Substantive exact head `f0a4065a1e685f318f67dc1b737b343451a8e1d0` passed the dedicated REG-AUDIT-5 workflow and retained suite. Final cleanup-head SHA/run IDs are recorded in PR #409 metadata after its rerun to avoid recursive evidence-only commits.
 
 From the exact candidate:
 

@@ -62,8 +62,12 @@ def validate(data):
         'launchpad-router','grants-router','attention-router','pulse-router','messenger-router',
         'commons-router'}:
         errors.append('missing or duplicate canonical authority IDs')
-    if data.get('status') != 'CANDIDATE_REQUIRES_GLOBAL_MIGRATION_AND_APPROVAL_NOT_ACTIVE' or data.get('policy', {}).get('walletReadyForLiveTestnet') is not False:
+    status = data.get('status')
+    allowed = {'CANDIDATE_REQUIRES_GLOBAL_MIGRATION_AND_APPROVAL_NOT_ACTIVE', 'SUPERSEDED_HISTORICAL_PROPOSAL_NOT_ACTIVE'}
+    if status not in allowed or data.get('policy', {}).get('walletReadyForLiveTestnet') is not False:
         errors.append('candidate must remain non-authoritative and fail-closed')
+    if status == 'SUPERSEDED_HISTORICAL_PROPOSAL_NOT_ACTIVE' and data.get('supersededBy') != 'contracts/config/genesis-address-namespace.json':
+        errors.append('superseded candidate must name active namespace authority')
     return errors
 
 

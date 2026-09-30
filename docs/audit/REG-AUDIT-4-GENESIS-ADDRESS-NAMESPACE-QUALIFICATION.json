@@ -1,0 +1,120 @@
+{
+  "schema": "420-registry-reg-audit-4-qualification-v1",
+  "step": "REG-AUDIT-4",
+  "title": "reconcile the Genesis address namespace",
+  "status": "COMPLETE",
+  "roadmap": "docs/audit/420REGISTRY-COMPLETE-AUDIT-20260928.md",
+  "originalDefinition": {
+    "purpose": "Use the existing global address-reconciliation work; do not solve Registry in isolation.",
+    "requirements": [
+      "approve one collision-free namespace-wide map",
+      "update mirrors, predeploy plan, deployment manifest, resident configuration and examples atomically",
+      "preserve explicit supersession history",
+      "run collision and frozen-range checks"
+    ],
+    "exit": "one canonical Registry address, with no contradictory authoritative assignment"
+  },
+  "decision": {
+    "canonicalRegistry": "0x0000000000000000000000000000000000000434",
+    "policy": "PRESERVE_FROZEN_STEP6_2_PREDEPLOYS_AND_REGISTRY_RESOLVE_NON_PREDEPLOY_SERVICES",
+    "authority": "contracts/config/genesis-address-namespace.json",
+    "basis": [
+      "config/system-addresses.json",
+      "contracts/config/system-addresses.json",
+      "docs/GENESIS-ADDRESS-AUTHORITY-MAIN-RECONCILIATION.md"
+    ]
+  },
+  "implementation": {
+    "namespaceAuthority": "contracts/config/genesis-address-namespace.json",
+    "mirrors": [
+      "config/system-addresses.json",
+      "contracts/config/system-addresses.json"
+    ],
+    "deployment": [
+      "contracts/config/predeploy/predeploy-plan.json",
+      "contracts/config/deployment-manifest.json"
+    ],
+    "residentConfiguration": [
+      "wallet/deployment-inventory.json",
+      "contracts/config/genesis-canonical-addresses.json",
+      "config/swap-bridge-extension-addresses.json"
+    ],
+    "examples": [
+      "developer-hub/catalogue/local.example.json",
+      "developer-hub/manifests/local.example.json",
+      "docs/reference/generated/contracts.md",
+      "docs/reference/generated/deployments.md"
+    ],
+    "supersededHistory": [
+      "contracts/config/wallet-authority-address-reconciliation.json",
+      "contracts/config/w14-7-address-migration-candidates.json",
+      "contracts/config/w14-7-4-global-address-reconciliation.json",
+      "config/extended-system-addresses.json",
+      "docs/W14-7-4-GLOBAL-ADDRESS-RECONCILIATION.md"
+    ],
+    "verifier": "scripts/verify-reg-audit-4-genesis-address-namespace.py",
+    "adversarialTests": "scripts/test-reg-audit-4-genesis-address-namespace.py",
+    "collisionAudit": "scripts/audit-genesis-address-collisions.py",
+    "workflow": ".github/workflows/registry-reg-audit-4.yml",
+    "retainedGenesisWorkflow": ".github/workflows/genesis-address-authority.yml"
+  },
+  "gapAnalysis": {
+    "satisfiedBeforeStep": [
+      "both active system maps already placed ProtocolRegistry at 0x0434",
+      "predeploy plan and deployment manifest already placed ProtocolRegistry at 0x0434",
+      "canonical discovery anchors and Wallet resident reference already used 0x0434",
+      "bridge map had already retired the 0x043c BridgeAssetRegistry collision and fixed GatewayRouter claim"
+    ],
+    "remediated": [
+      "no single complete namespace authority record",
+      "wallet/global migration artifacts still described 0x0448 ProtocolRegistry relocation as an unresolved candidate",
+      "Developer Hub local examples still used 0x0420 for ProtocolRegistry",
+      "generated references repeated the stale local-example 0x0420 address",
+      "legacy collision auditor was designed to fail against the pre-reconciliation model",
+      "CI did not gate the REG-AUDIT-4 active namespace or adversarial fixtures"
+    ],
+    "notApplicable": [
+      "custody/accounting transfers: address reconciliation moves no funds",
+      "replay/expiry: no signed authorization or nonce-bearing operation is introduced",
+      "runtime code-hash/deployment attestation: owned by REG-AUDIT-5 and later deployment/testnet steps"
+    ]
+  },
+  "exitCriteria": {
+    "collisionFreeNamespace": "COMPLETE",
+    "mirrorsPredeployDeploymentResidentExamplesAtomic": "COMPLETE",
+    "supersessionHistory": "COMPLETE",
+    "collisionAndFrozenRangeChecks": "COMPLETE",
+    "oneCanonicalRegistryAddress": "COMPLETE"
+  },
+  "evidence": {
+    "qualifiedSha": "9baaa5c6e89cf08bf152d36c83477890a41ae727",
+    "mainBaseSha": "76e7f5732247efc091c8842efaecce2b11c6fc61",
+    "pr": 402,
+    "runs": {
+      "regAudit4": 36646631416,
+      "genesisAddressAuthority": 36646631542,
+      "solidityContracts": 36646631526,
+      "docs": 36646631558,
+      "integrated": 36646631449,
+      "registryDecision": 36646631591,
+      "registryInvariantCoverage": 36646631447,
+      "developerHub": 36646631548,
+      "indexer": 36646631496,
+      "walletWeb": 36646631624
+    },
+    "exactHeadQualification": "PASS",
+    "note": "The reconciled implementation head is zero-behind current main and passed the complete retained REG-AUDIT-4 qualification suite. The subsequent evidence-recording head is requalified separately; its run IDs are retained in PR metadata to avoid recursive evidence-only commits."
+  },
+  "limitations": [
+    "This step establishes repository address authority; it does not claim live deployment or runtime code at 0x0434.",
+    "Final Registry runtime artifact/code-hash and predeploy storage evidence remain REG-AUDIT-5.",
+    "Broader generated catalogue/reference cleanup beyond address authority remains REG-AUDIT-6.",
+    "Production-equivalent testnet verification remains REG-AUDIT-8."
+  ],
+  "nextStep": "REG-AUDIT-5",
+  "completion": {
+    "completed": true,
+    "completedAt": "2026-09-29",
+    "exit": "one canonical Registry address, with no contradictory authoritative assignment"
+  }
+}

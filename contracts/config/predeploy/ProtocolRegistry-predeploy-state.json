@@ -1,0 +1,29 @@
+{
+  "address": "0x0000000000000000000000000000000000000434",
+  "constructorMaterialization": {
+    "governanceTimelock": "0x0000000000000000000000000000000000000429",
+    "immutableReferenceCount": 7,
+    "method": "compiler-emitted immutableReferences patched with ABI-encoded constructor address"
+  },
+  "contractName": "ProtocolRegistry",
+  "invariants": [
+    "genesis alloc.code uses materialized deployed runtime bytecode, never creation bytecode",
+    "governanceTimelock is embedded as a Solidity immutable and is not written to storage",
+    "ProtocolRegistry constructor performs no mutable storage writes",
+    "all service/component mappings and extension approvals begin empty",
+    "runtimeCodeHash equals keccak256(materialized deployed runtime bytecode)"
+  ],
+  "limitations": [
+    "This is offline predeploy evidence, not live-chain deployment evidence.",
+    "REG-AUDIT-8 remains responsible for production-equivalent testnet deployment and eth_getCode/storage verification."
+  ],
+  "runtimeArtifact": "contracts/artifacts/ProtocolRegistry.json",
+  "runtimeCodeHash": "0x9f9e5f794296cf9faf5f8c8d17cd815f3c19c004a158c15cb61b5a29eaacb330",
+  "schema": "420-registry-predeploy-state-v1",
+  "sourceBlobSha1": "9ab3d53a68b6533978f41e0202e5268f1d615c19",
+  "status": "REG_AUDIT_5_FINAL_PREDEPLOY_STATE",
+  "storage": {},
+  "storageRoot": "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421",
+  "storageRootBasis": "Ethereum empty Merkle-Patricia storage trie root = keccak256(0x80)",
+  "storageSlotCount": 0
+}

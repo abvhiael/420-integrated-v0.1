@@ -12,7 +12,7 @@ version: current
 > GENERATED FILE - DO NOT EDIT. Regenerate with `python scripts/generate-reference-docs.py`.
 
 Source catalogue: `developer-hub/catalogue/local.example.json`  
-Catalogue SHA-256: `1c99272488959f2cf08e5dac78ee214a633c9b7eea948aaddaed6df81bf8b63b`  
+Catalogue SHA-256: `cb945e89354382492ca8edc40287b7736b4868d3387d5aad389ce4d80d1ae648`  
 Catalogue chain ID: `420`  
 Environment scope: **local example only**
 
@@ -24,7 +24,7 @@ This page is generated from the currently checked-in contract catalogue plus mat
 - Version: `1.0.0`
 - Catalogue provenance: `genesis`
 - Deployment block: `0`
-- Catalogue address: `0x0000000000000000000000000000000000000420` (**local example only**)
+- Catalogue address: `0x0000000000000000000000000000000000000434` (**local example only**)
 - Solidity source: `contracts/src/apps/ProtocolRegistry.sol`
 - Declared artifact: `contracts/out/ProtocolRegistry.sol/ProtocolRegistry.json` (missing)
 - Declared interface: `contracts/src/interfaces/IProtocolRegistry.sol` (missing)

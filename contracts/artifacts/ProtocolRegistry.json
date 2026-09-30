@@ -1,0 +1,1527 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "timelock_",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "serviceId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "descriptorHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "approveServiceId",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "approvedServiceIds",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "componentId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "component",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "componentId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "implementation",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "runtimeCodeHash",
+              "type": "bytes32"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "uint16",
+                  "name": "major",
+                  "type": "uint16"
+                },
+                {
+                  "internalType": "uint16",
+                  "name": "minor",
+                  "type": "uint16"
+                },
+                {
+                  "internalType": "uint16",
+                  "name": "patch",
+                  "type": "uint16"
+                }
+              ],
+              "internalType": "struct Types420.Version",
+              "name": "version",
+              "type": "tuple"
+            },
+            {
+              "internalType": "enum Types420.Lifecycle",
+              "name": "lifecycle",
+              "type": "uint8"
+            }
+          ],
+          "internalType": "struct Types420.ContractRef",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "componentId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "currentComponentRevision",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "serviceId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "currentVersion",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "serviceId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "deprecateService",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "componentId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "revision",
+          "type": "uint32"
+        }
+      ],
+      "name": "getComponentRevision",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "componentId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "implementation",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "runtimeCodeHash",
+              "type": "bytes32"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "uint16",
+                  "name": "major",
+                  "type": "uint16"
+                },
+                {
+                  "internalType": "uint16",
+                  "name": "minor",
+                  "type": "uint16"
+                },
+                {
+                  "internalType": "uint16",
+                  "name": "patch",
+                  "type": "uint16"
+                }
+              ],
+              "internalType": "struct Types420.Version",
+              "name": "version",
+              "type": "tuple"
+            },
+            {
+              "internalType": "enum Types420.Lifecycle",
+              "name": "lifecycle",
+              "type": "uint8"
+            }
+          ],
+          "internalType": "struct Types420.ContractRef",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "serviceId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "version",
+          "type": "uint32"
+        }
+      ],
+      "name": "getRegistrationProfile",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "enum ProtocolRegistry.ComponentType",
+              "name": "componentType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "manifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "dependencyRoot",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "interfaceHash",
+              "type": "bytes32"
+            }
+          ],
+          "internalType": "struct ProtocolRegistry.RegistrationProfile",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "serviceId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getService",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "implementation",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "codeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "metadataHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint32",
+              "name": "version",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "activatedAt",
+              "type": "uint64"
+            },
+            {
+              "internalType": "bool",
+              "name": "active",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct ProtocolRegistry.Service",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "serviceId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "version",
+          "type": "uint32"
+        }
+      ],
+      "name": "getServiceVersion",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "implementation",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "codeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "metadataHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint32",
+              "name": "version",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "activatedAt",
+              "type": "uint64"
+            },
+            {
+              "internalType": "bool",
+              "name": "active",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct ProtocolRegistry.Service",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "governanceTimelock",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "componentId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "isActive",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "serviceId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "isGenesisCanonicalServiceId",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "serviceId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "isServiceActive",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "protocolVersion",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "serviceId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "implementation",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "metadataHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "version",
+          "type": "uint32"
+        },
+        {
+          "internalType": "bool",
+          "name": "active",
+          "type": "bool"
+        },
+        {
+          "internalType": "enum ProtocolRegistry.ComponentType",
+          "name": "componentType_",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "manifestHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "dependencyRoot",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "interfaceHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "publishRegisteredService",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "serviceId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "implementation",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "codeHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "metadataHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "version",
+          "type": "uint32"
+        },
+        {
+          "internalType": "bool",
+          "name": "active",
+          "type": "bool"
+        }
+      ],
+      "name": "publishService",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "componentId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "implementation",
+          "type": "address"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint16",
+              "name": "major",
+              "type": "uint16"
+            },
+            {
+              "internalType": "uint16",
+              "name": "minor",
+              "type": "uint16"
+            },
+            {
+              "internalType": "uint16",
+              "name": "patch",
+              "type": "uint16"
+            }
+          ],
+          "internalType": "struct Types420.Version",
+          "name": "version",
+          "type": "tuple"
+        },
+        {
+          "internalType": "enum Types420.Lifecycle",
+          "name": "lifecycle",
+          "type": "uint8"
+        }
+      ],
+      "name": "registerComponent",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "componentId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "resolve",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "implementation",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "serviceId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "resolveActive",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "implementation",
+          "type": "address"
+        },
+        {
+          "internalType": "uint32",
+          "name": "version",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "componentId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "runtimeCodeHash",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "serviceDescriptorHash",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "componentId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "enum Types420.Lifecycle",
+          "name": "lifecycle",
+          "type": "uint8"
+        }
+      ],
+      "name": "setComponentLifecycle",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "serviceId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "implementation",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "codeHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "metadataHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "version",
+          "type": "uint32"
+        },
+        {
+          "internalType": "bool",
+          "name": "active",
+          "type": "bool"
+        }
+      ],
+      "name": "setService",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "componentId",
+          "type": "bytes32"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint16",
+              "name": "major",
+              "type": "uint16"
+            },
+            {
+              "internalType": "uint16",
+              "name": "minor",
+              "type": "uint16"
+            },
+            {
+              "internalType": "uint16",
+              "name": "patch",
+              "type": "uint16"
+            }
+          ],
+          "internalType": "struct Types420.Version",
+          "name": "requested",
+          "type": "tuple"
+        }
+      ],
+      "name": "supportsVersion",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "systemName",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "componentId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "enum Types420.Lifecycle",
+          "name": "lifecycle",
+          "type": "uint8"
+        }
+      ],
+      "name": "ComponentLifecycleChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "componentId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "implementation",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "runtimeCodeHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "major",
+          "type": "uint16"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "minor",
+          "type": "uint16"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "patch",
+          "type": "uint16"
+        },
+        {
+          "indexed": false,
+          "internalType": "enum Types420.Lifecycle",
+          "name": "lifecycle",
+          "type": "uint8"
+        }
+      ],
+      "name": "ComponentRegistered",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "serviceId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint32",
+          "name": "version",
+          "type": "uint32"
+        }
+      ],
+      "name": "ServiceDeprecated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "serviceId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "descriptorHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "ServiceIdApproved",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "serviceId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint32",
+          "name": "version",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "internalType": "enum ProtocolRegistry.ComponentType",
+          "name": "componentType",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "manifestHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "dependencyRoot",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "interfaceHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "ServiceRegistrationProfilePublished",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "serviceId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint32",
+          "name": "version",
+          "type": "uint32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "implementation",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "codeHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "metadataHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "active",
+          "type": "bool"
+        }
+      ],
+      "name": "ServiceVersionPublished",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "CanonicalServiceIdImmutable",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "CodeHashMismatch",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ComponentLifecycleUnchanged",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ImplementationHasNoCode",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidComponentId",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidComponentType",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidImplementation",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidLifecycle",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidManifest",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidServiceId",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidVersion",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ServiceAlreadyInactive",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "UnapprovedServiceId",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "Unauthorized",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "UnknownComponent",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "UnknownService",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ZeroAddress",
+      "type": "error"
+    }
+  ],
+  "compiler": {
+    "evmVersion": "cancun",
+    "foundryConfigBlobSha1": "f18c965f43b244582f2a4c527e7bad6d23aee929",
+    "optimizer": true,
+    "optimizerRuns": 200,
+    "solidity": "0.8.24",
+    "toolchainConfigBlobSha1": "dd49cb0e07370b01401d63d2fb53683177de8abc",
+    "viaIR": true
+  },
+  "constructor": {
+    "arguments": {
+      "timelock_": "0x0000000000000000000000000000000000000429"
+    },
+    "mutableStorageWrites": 0,
+    "strategy": "DIRECT_GENESIS_PREDEPLOY_IMMUTABLE_MATERIALIZATION"
+  },
+  "contractName": "ProtocolRegistry",
+  "deployedBytecode": "0x60806040526004361015610011575f80fd5b5f3560e01c806301ea642914610f605780630286f08c14610f3657806307dd2e4b14610e855780630f893ff814610e515780632ae9c60014610e365780632d752148146109cd578063316bad8814610e0c5780633b426d3f14610dda5780633cc0fa6214610dab5780635554219e14610ca75780635c23bdf514610bd55780635c36901c14610b985780636c5c82c714610af2578063791c260f14610ab85780637cd75757146109ec5780638206f25e146109cd57806383ef17e71461099d57806393ea85b21461069c578063965f13ab1461066f5780639a1fdd791461062b578063acdabde114610570578063c0ac4b1a14610548578063d553b13a1461037a578063d8d800a214610282578063da47d856146101ef5763de8825ce14610137575f80fd5b346101eb5760403660031901126101eb57610150611021565b5f606061015b6111b4565b82815282602082015282604082015201526004355f52600260205263ffffffff60405f2091165f52602052608060405f206101946111b4565b906101a360ff825416836113e7565b60018101549060208301918252600360028201549160408501928352015491606084019283526101d7604051809551611147565b516020840152516040830152516060820152f35b5f80fd5b346101eb5760203660031901126101eb57610208611356565b506004355f525f60205261027e60405f2060ff6003610225611154565b9260018060a01b0381541684526001810154602085015260028101546040850152015463ffffffff8116606084015267ffffffffffffffff8160201c16608084015260601c16151560a082015260405191829182611080565b0390f35b346101eb5760203660031901126101eb576004357f00000000000000000000000000000000000000000000000000000000000004296001600160a01b0316330361036957805f525f602052600360405f200180549063ffffffff9182811680156103575760ff8260601c16156103455760ff60601b198092168355845f52600160205260405f20905f52602052600360405f20019081541690555416907f63e20a29800a0d1cec5ae14b6dfceb2bc5cbfd523b7225bc649d3819c0f8780a5f80a3005b604051636770d4a960e01b8152600490fd5b60405163183f532560e01b8152600490fd5b6040516282b42960e81b8152600490fd5b346101eb576101203660031901126101eb5760043561039761100b565b9060643563ffffffff8116928382036101eb576084359182151583036101eb5760a4359060078210156101eb5760e4359360c4359361010435929091907f00000000000000000000000000000000000000000000000000000000000004296001600160a01b03163303610369578415610536578515801561052e575b61051c57823b1561050a57823f9283156104f85761043593604435918a6113f3565b61043d6111b4565b9361044883866113e7565b6020850193808552604086019582875260608101848152885f52600260205260405f208a5f5260205260405f2091519060078210156104e4577f19af5a8b78ed7364ffacb8ddf22ac42f4bb67c6d9532cb2b7504781867c550d99860809860039360ff80198754169116178555516001850155516002840155519101556104d26040518095611147565b602084015260408301526060820152a3005b634e487b7160e01b5f52602160045260245ffd5b6040516349e2277360e11b8152600490fd5b6040516337bbc61d60e11b8152600490fd5b6040516370c6ae8960e11b8152600490fd5b508315610413565b604051636a7ed65b60e01b8152600490fd5b346101eb5760203660031901126101eb57602061056660043561160d565b6040519015158152f35b346101eb5760403660031901126101eb57610589611021565b610591611382565b506004355f52600760205263ffffffff60405f2091165f5260205261027e60405f2061061f60ff60046105c2611174565b8454815260018501546001600160a01b0316602082015260028501546040820152936105ec611194565b600382015461ffff908181168352818160101c16602084015260201c166040820152606086015201541660808301611212565b604051918291826110e4565b346101eb575f3660031901126101eb576040517f00000000000000000000000000000000000000000000000000000000000004296001600160a01b03168152602090f35b346101eb5760203660031901126101eb576004355f5260056020526020600260405f200154604051908152f35b346101eb5760c03660031901126101eb576106b561100b565b60603660431901126101eb57600860a43510156101eb577f00000000000000000000000000000000000000000000000000000000000004296001600160a01b03163303610369576004351561098b576001600160a01b03811690811561097957803b1561050a5760a43515610967573f80156104f857610733611174565b600435815282602082015281604082015261074c611194565b6044359161ffff831683036101eb5782825260643561ffff811681036101eb578060208401526084359261ffff841684036101eb57836040820152606083015261079b60a43560808401611212565b6004355f52600660205263ffffffff6107b98160405f2054166113be565b906004355f52600660205260405f2081831663ffffffff19825416179055600560205260405f20845181556001810160018060a01b036020870151166001600160601b0360a01b8254161790556040850151600282015560038101606086015161ffff8151169063ffff000083549265ffff000000006040602085015194015160201b169365ffffffffffff1916179160101b1617179055608085015160088110156104e457600461086b920161133e565b6004355f52600760205260405f2091165f52602052608060405f2092805184556001840160018060a01b036020830151166001600160601b0360a01b8254161790556040810151600285015560038401606082015161ffff8151169082549165ffff00000000604063ffff0000602085015160101b1693015160201b169265ffffffffffff19161717179055015160088110156104e45761ffff94610916869492600486940161133e565b60405196875216602086015216604084015216606082015261093d6080820160a4356110d7565b7fc4e23b37fc2b0348c8002a27cc606888b4e6df6afa4739bff130cba3e9bb6cc760a060043592a3005b6040516318781b5160e01b8152600490fd5b60405163340aafcd60e11b8152600490fd5b6040516335af01a360e11b8152600490fd5b346101eb5760203660031901126101eb576004355f526006602052602063ffffffff60405f205416604051908152f35b346101eb576109ea6109de36611034565b949390939291926111d4565b005b346101eb5760403660031901126101eb576024356004357f00000000000000000000000000000000000000000000000000000000000004296001600160a01b03163303610369578015610aa657610a428161160d565b610a9457811561051c57805f52600360205260405f20600160ff1982541617905560046020528160405f20557f19f6f69425970f336d54db432de56d363cfd40f44016881830c65298b2c4e0c55f80a3005b60405163e020355f60e01b8152600490fd5b604051635622fbe760e11b8152600490fd5b346101eb5760203660031901126101eb57610ad1611382565b506004355f52600560205261027e60405f2061061f60ff60046105c2611174565b346101eb5760403660031901126101eb5761027e610b0e611021565b610b16611356565b506004355f52600160205260405f2063ffffffff8092165f5260205260ff60405f20916003610b43611154565b9360018060a01b03815416855260018101546020860152600281015460408601520154908116606084015267ffffffffffffffff8160201c16608084015260601c16151560a082015260405191829182611080565b346101eb5760203660031901126101eb576004355f52600560205260ff600460405f2001541660088110156104e457602090600260405191148152f35b346101eb576020806003193601126101eb576004355f526005815260405f20610bfc611174565b908054825260018060a01b0391610c63608060ff6004866001870154169588860196875260028101546040870152610c32611194565b600382015461ffff908181168352818160101c168c8401528b1c166040820152606087015201541692019182611212565b8282511615908115610c91575b50610c7f575116604051908152f35b604051630f48a5f360e11b8152600490fd5b90505160088110156104e4576002141584610c70565b346101eb5760403660031901126101eb5760043560243560088110156101eb576001600160a01b037f00000000000000000000000000000000000000000000000000000000000004298116330361036957811561096757825f52600560205260405f209060018201541615610c7f5760040160ff81541660088110156104e4578214610d995781610d5b7f47a9a1f803e87a8aee5ec14a699ed519f2c36458b472b3fd69e2390db079a57a9360209361133e565b835f526007825260405f206006835263ffffffff60405f2054165f528252610d8981600460405f200161133e565b610d9660405180926110d7565ba2005b604051630f93132b60e11b8152600490fd5b346101eb5760203660031901126101eb576004355f526003602052602060ff60405f2054166040519015158152f35b346101eb5760203660031901126101eb576004355f525f602052602063ffffffff600360405f20015416604051908152f35b346101eb5760803660031901126101eb5760603660231901126101eb57602061056660043561121e565b346101eb575f3660031901126101eb57602060405160048152f35b346101eb5760203660031901126101eb576004355f525f602052602060ff600360405f20015460601c166040519015158152f35b346101eb575f3660031901126101eb576040516040810181811067ffffffffffffffff821117610f2257604052601081526020906f50726f746f636f6c526567697374727960801b60208201526040518092602082528251908160208401525f935b828510610f09575050604092505f838284010152601f80199101168101030190f35b8481018201518686016040015293810193859350610ee7565b634e487b7160e01b5f52604160045260245ffd5b346101eb5760203660031901126101eb576004355f526004602052602060405f2054604051908152f35b346101eb5760203660031901126101eb576004355f525f60205260405f20610f86611154565b90600360018060a01b0391828154168452600181015460208501526002810154604085015201549063ffffffff9081831660ff606086019482865267ffffffffffffffff8160201c16608088015260601c161590811560a087015215908115611003575b5061035757604093511691511682519182526020820152f35b905085610fea565b602435906001600160a01b03821682036101eb57565b6024359063ffffffff821682036101eb57565b60c09060031901126101eb57600435906024356001600160a01b03811681036101eb5790604435906064359060843563ffffffff811681036101eb579060a43580151581036101eb5790565b91909160a08060c0830194600180831b038151168452602081015160208501526040810151604085015263ffffffff606082015116606085015267ffffffffffffffff608082015116608085015201511515910152565b9060088210156104e45752565b6111459092919260c0608060e08301958051845260018060a01b036020820151166020850152604081015160408501526060810151604061ffff91828151166060880152826020820151168588015201511660a085015201519101906110d7565b565b9060078210156104e45752565b6040519060c0820182811067ffffffffffffffff821117610f2257604052565b6040519060a0820182811067ffffffffffffffff821117610f2257604052565b604051906060820182811067ffffffffffffffff821117610f2257604052565b604051906080820182811067ffffffffffffffff821117610f2257604052565b94939291907f00000000000000000000000000000000000000000000000000000000000004296001600160a01b0316330361036957611145956113f3565b60088210156104e45752565b5f52600560205260405f20611231611174565b8154815260018201546001600160a01b0390811660208301908152600284015460408401529190611260611194565b926112a1608060ff600460038901549861ffff8a81809c168b52818160101c1660208c015260201c1660408a01526060880198895201541694019384611212565b511615908115611328575b5061132257519080825116602435908282168092036101eb57036113225780602083015116604435908282168092036101eb5781811061131a571491826112fd575b50506112f957600190565b5f90565b81925060400151166064359182168092036101eb57105f806112ee565b505050505f90565b50505f90565b90505160088110156104e457600214155f6112ac565b9060088110156104e45760ff80198354169116179055565b61135e611154565b905f82525f60208301525f60408301525f60608301525f60808301525f60a0830152565b61138a611174565b905f82525f60208301525f60408301526113a2611194565b5f81525f60208201525f604082015260608301525f6080830152565b90600163ffffffff809316019182116113d357565b634e487b7160e01b5f52601160045260245ffd5b60078210156104e45752565b9290949193948315610aa6576114088461160d565b15806115f6575b6115e4576001600160a01b031694851561097957835f526020905f825263ffffffff61144381600360405f200154166113be565b1663ffffffff8216036115d2577f19aa152c2c4c6794d89883e0808ea2365e3f6d5267840423debc9b08db5b36089360609363ffffffff936115bd611486611154565b8b81528a838201528360408201528686168882015267ffffffffffffffff4216608082015284151560a0820152895f525f835260a060405f20916003600180841b03825116936001600160601b03841b948582541617815586830151600182015560408301516002820155019260038a8c840151169161154c8654966bffffffffffffffff00000000948560808801518c1b16906001600160601b0319809a161717815586860151151581549060ff60601b90151560601b169060ff60601b1916179055565b6001885260405f208c8c165f52885260405f2090600180871b03855116908254161781558784015160018201556040840151600282015501938a8c84015116908554926080850151891b169216171783550151151581549060ff60601b90151560601b169060ff60601b1916179055565b604051988952880152151560408701521693a4565b60405163a9146eeb60e01b8152600490fd5b60405163ec12d32560e01b8152600490fd5b50835f52600360205260ff60405f2054161561140f565b7fd8c1d5c8180635b7a34b548933a4c07b9db9d0cf39d4e3369f010450bcd7ae738114908115611e41575b8115611e17575b8115611ded575b8115611dc3575b8115611d99575b8115611d6f575b8115611d45575b8115611d1b575b8115611cf1575b8115611cc7575b8115611c9d575b8115611c73575b8115611c49575b8115611c1f575b8115611bf5575b8115611bcb575b8115611ba1575b8115611b77575b8115611b4d575b8115611b23575b8115611afa575b8115611ad0575b8115611aa6575b8115611a7c575b8115611a52575b8115611a28575b81156119fe575b81156119d4575b81156119aa575b8115611980575b8115611956575b811561192c575b8115611902575b81156118d8575b81156118ae575b8115611884575b811561185a575b8115611830575b8115611806575b81156117dc575b81156117b2575b8115611788575b8115611761575090565b7ff9500dea0268328bbad861c954afcbb865deaade41b4fce63b8dd570ec5e714f91501490565b7f42676b07d6dbe01420317dcb7a108d70189caddf1b9a59f945ca4f0ddf818f2681149150611757565b7f3bc87e417fb5aa878a9368737057521eefb3d62cef55eac10c8c98fd604d6bb081149150611750565b7ffdb0193c34f9f94ed1ae3ade6dd734c6dfae855bcf567b512566883305fa863a81149150611749565b7f15d006833a88dae42a5a4b849fb0a9710f4c26ffe436efbf6c8ec3c6b56ce83181149150611742565b7ff9f6fe160dfca45f308a441af1168bebbedb97164c86a3d164342a58134a92e48114915061173b565b7f80a0bb6293a059d57ccc4b8e31105c1c11759d3224a27a9bc6a335d4fadc97d981149150611734565b7f43a83e790ff2d5bf59b583c5aab6fe36af7a24e350f6dae65af036c18d63bed98114915061172d565b7f1610294d6074500ac4dea34ee4a1a01bc237df0e07724bd7ae26128ce13f45d281149150611726565b7ff7eb34223bbbfc75993efa928d694bd20d0fcd4c847525257956de86732df3ce8114915061171f565b7f8022a5ff6f504ce53f03289567dc832e338cbb1860789511320c33ede2265ecf81149150611718565b7f991cb1389b91d863fc544f44cabf7a6c724baf8c88c96a0a2efad362013688b281149150611711565b7f2e65379bac0b2ab574d2e100dbe4a74b9febfcf05d67591efa14de4337fc5a3b8114915061170a565b7f08560bca25a26d339559455cbaa8d27b8ebad3dadde6dc8dd3758f86258a149a81149150611703565b7f0c457e515460457059cb281892f36fa9277a083be4e54cba2a9aa4469afe6b46811491506116fc565b7fa05eac7c2f364a4ddf7989f78f03235284b8a0eb7aeaf43e18fdf6ee52146517811491506116f5565b7fa98043a10853778e05e09464e9f4aecab70608e7572974d73f2caa93f5a1c83e811491506116ee565b7f07835151dade99d976165b8a8d03443503f691f0491e853a02bd1a9abb1a27d0811491506116e7565b7ffef6f99a887056ff7aa1e565e707b9b5066da9ceb6054e4d73d5086bba4f2115811491506116e0565b7f76b0de4fe89da68b19741e7d8ae6273b3ea40d74f544a0f28511091c6238a879811491506116d9565b7fe318f1acc3d386249f118a8d290ed1fd6fa6c30f3f16350d508184a3f33000f7811491506116d2565b7fc40a249f2e170b318b0e0efc1062ad31c5d3c065a0bff2191cc5949c87909014811491506116cb565b7efde55177664da0712c3835f633721f7972a01c756bfc366748dbbcc7a975cb811491506116c4565b7f6c75149ce4b51ac8c90798f6493e8122b87f3a86323f1a317d146fbe2779aa8c811491506116bd565b7fa8865f0ecd67fe7c12ed3a7f10d4da06130ea8e2bf6a6a8447118f34554d2467811491506116b6565b7f0b6626df1ca42dfaef9c98ff01cc3958aebd36a0a9652f4a2798d1afcf491443811491506116af565b7f393e53be6a08b539bec80ccf09d0592625e4341b031c6d14daa845bfbe01d7d9811491506116a8565b7fa280577a8ee8c74614f5a5b0d8d6237089c2c7ffe015280e74ec23d4465befef811491506116a1565b7f751ebc48e53d9c02e11d6f1b7132e1fd7d7d2dbe7aef3fc3387a12025971df688114915061169a565b7f9b1bbe64065b3d27a0a5ecabbd67952bf6e1ee57563b4baa0a18ae9a432dfb3d81149150611693565b7f3c925caa77f1fdd3fe292edc38e20abca108462e3ca9511bd358efbe10eaf1268114915061168c565b7fd7eef8ac3acb1e2441621b252cd3c2f9b0126544c62f616d15ef5e35c91c306d81149150611685565b7f77aa86b4b5effb6ca86a7064ae6a4ac05a092200b903eb74099bc9c424fb3d978114915061167e565b7fd007d2e537386b70c9e1e2ed1ab14e90a7e8fb3612337a6158ca6bb23df3973f81149150611677565b7f542cb7b8666d448fb16c7361937f802b983139ec2ac8aaf8ade04fce7ec0ddcc81149150611670565b7f96e84ca683666d187aecbfaf212205eeb044003547aad46367f5d3d645cf239881149150611669565b7faee9ad4572025bba3a92d0e05a62b5787fd63b54363e57339a99000486e2ea1b81149150611662565b7f3578be284ef6ce213f91a612abba3d4bc1b6d0760b29840ce5c82b49f20f30e18114915061165b565b7f8ae5fa1b98d427bbdfa29703f43cce1f0007d4b19109b85ce3c361861e241fd881149150611654565b7fca2a201be2db1735e6d176c364f2c12992cadda2f6f0ee978fc53996ade98b388114915061164d565b7f834a2945d7596c24e7a61a1e77648ca846dd43c376a437489fcac29bfe581df581149150611646565b7f41763d4f2d39ec8648a664df632b9a85621edce22553d5eaa42761d1a9b6cce28114915061163f565b7f2a018c7d44d4feee60ef33e9ba98d01546cf82b2e26ca996785d16612cae42f88114915061163856fea2646970667358221220185975c84c3f8bb58b9018913e4117463ac7ab807e7364fa8c2fa57a7c47d5a064736f6c63430008180033",
+  "immutableReferences": {
+    "1642": [
+      {
+        "length": 32,
+        "start": 664
+      },
+      {
+        "length": 32,
+        "start": 982
+      },
+      {
+        "length": 32,
+        "start": 1600
+      },
+      {
+        "length": 32,
+        "start": 1742
+      },
+      {
+        "length": 32,
+        "start": 2565
+      },
+      {
+        "length": 32,
+        "start": 3281
+      },
+      {
+        "length": 32,
+        "start": 4571
+      }
+    ]
+  },
+  "materializedImmutableReferences": [
+    {
+      "immutable_id": "1642",
+      "length": 32,
+      "start": 664
+    },
+    {
+      "immutable_id": "1642",
+      "length": 32,
+      "start": 982
+    },
+    {
+      "immutable_id": "1642",
+      "length": 32,
+      "start": 1600
+    },
+    {
+      "immutable_id": "1642",
+      "length": 32,
+      "start": 1742
+    },
+    {
+      "immutable_id": "1642",
+      "length": 32,
+      "start": 2565
+    },
+    {
+      "immutable_id": "1642",
+      "length": 32,
+      "start": 3281
+    },
+    {
+      "immutable_id": "1642",
+      "length": 32,
+      "start": 4571
+    }
+  ],
+  "predeployAddress": "0x0000000000000000000000000000000000000434",
+  "runtimeCodeBytes": 7841,
+  "runtimeCodeHash": "0x9f9e5f794296cf9faf5f8c8d17cd815f3c19c004a158c15cb61b5a29eaacb330",
+  "schema": "420-registry-predeploy-artifact-v1",
+  "source": "contracts/src/apps/ProtocolRegistry.sol",
+  "sourceBlobSha1": "9ab3d53a68b6533978f41e0202e5268f1d615c19",
+  "status": "REG_AUDIT_5_FINAL_ARTIFACT",
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 49,
+        "contract": "src/apps/ProtocolRegistry.sol:ProtocolRegistry",
+        "label": "_services",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_mapping(t_bytes32,t_struct(Service)34_storage)"
+      },
+      {
+        "astId": 56,
+        "contract": "src/apps/ProtocolRegistry.sol:ProtocolRegistry",
+        "label": "_history",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_mapping(t_bytes32,t_mapping(t_uint32,t_struct(Service)34_storage))"
+      },
+      {
+        "astId": 63,
+        "contract": "src/apps/ProtocolRegistry.sol:ProtocolRegistry",
+        "label": "_profiles",
+        "offset": 0,
+        "slot": "2",
+        "type": "t_mapping(t_bytes32,t_mapping(t_uint32,t_struct(RegistrationProfile)44_storage))"
+      },
+      {
+        "astId": 67,
+        "contract": "src/apps/ProtocolRegistry.sol:ProtocolRegistry",
+        "label": "approvedServiceIds",
+        "offset": 0,
+        "slot": "3",
+        "type": "t_mapping(t_bytes32,t_bool)"
+      },
+      {
+        "astId": 71,
+        "contract": "src/apps/ProtocolRegistry.sol:ProtocolRegistry",
+        "label": "serviceDescriptorHash",
+        "offset": 0,
+        "slot": "4",
+        "type": "t_mapping(t_bytes32,t_bytes32)"
+      },
+      {
+        "astId": 76,
+        "contract": "src/apps/ProtocolRegistry.sol:ProtocolRegistry",
+        "label": "_components",
+        "offset": 0,
+        "slot": "5",
+        "type": "t_mapping(t_bytes32,t_struct(ContractRef)1228_storage)"
+      },
+      {
+        "astId": 80,
+        "contract": "src/apps/ProtocolRegistry.sol:ProtocolRegistry",
+        "label": "_componentRevisions",
+        "offset": 0,
+        "slot": "6",
+        "type": "t_mapping(t_bytes32,t_uint32)"
+      },
+      {
+        "astId": 87,
+        "contract": "src/apps/ProtocolRegistry.sol:ProtocolRegistry",
+        "label": "_componentHistory",
+        "offset": 0,
+        "slot": "7",
+        "type": "t_mapping(t_bytes32,t_mapping(t_uint32,t_struct(ContractRef)1228_storage))"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      },
+      "t_bytes32": {
+        "encoding": "inplace",
+        "label": "bytes32",
+        "numberOfBytes": "32"
+      },
+      "t_enum(ComponentType)21": {
+        "encoding": "inplace",
+        "label": "enum ProtocolRegistry.ComponentType",
+        "numberOfBytes": "1"
+      },
+      "t_enum(Lifecycle)1165": {
+        "encoding": "inplace",
+        "label": "enum Types420.Lifecycle",
+        "numberOfBytes": "1"
+      },
+      "t_mapping(t_bytes32,t_bool)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => bool)",
+        "numberOfBytes": "32",
+        "value": "t_bool"
+      },
+      "t_mapping(t_bytes32,t_bytes32)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => bytes32)",
+        "numberOfBytes": "32",
+        "value": "t_bytes32"
+      },
+      "t_mapping(t_bytes32,t_mapping(t_uint32,t_struct(ContractRef)1228_storage))": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => mapping(uint32 => struct Types420.ContractRef))",
+        "numberOfBytes": "32",
+        "value": "t_mapping(t_uint32,t_struct(ContractRef)1228_storage)"
+      },
+      "t_mapping(t_bytes32,t_mapping(t_uint32,t_struct(RegistrationProfile)44_storage))": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => mapping(uint32 => struct ProtocolRegistry.RegistrationProfile))",
+        "numberOfBytes": "32",
+        "value": "t_mapping(t_uint32,t_struct(RegistrationProfile)44_storage)"
+      },
+      "t_mapping(t_bytes32,t_mapping(t_uint32,t_struct(Service)34_storage))": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => mapping(uint32 => struct ProtocolRegistry.Service))",
+        "numberOfBytes": "32",
+        "value": "t_mapping(t_uint32,t_struct(Service)34_storage)"
+      },
+      "t_mapping(t_bytes32,t_struct(ContractRef)1228_storage)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => struct Types420.ContractRef)",
+        "numberOfBytes": "32",
+        "value": "t_struct(ContractRef)1228_storage"
+      },
+      "t_mapping(t_bytes32,t_struct(Service)34_storage)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => struct ProtocolRegistry.Service)",
+        "numberOfBytes": "32",
+        "value": "t_struct(Service)34_storage"
+      },
+      "t_mapping(t_bytes32,t_uint32)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => uint32)",
+        "numberOfBytes": "32",
+        "value": "t_uint32"
+      },
+      "t_mapping(t_uint32,t_struct(ContractRef)1228_storage)": {
+        "encoding": "mapping",
+        "key": "t_uint32",
+        "label": "mapping(uint32 => struct Types420.ContractRef)",
+        "numberOfBytes": "32",
+        "value": "t_struct(ContractRef)1228_storage"
+      },
+      "t_mapping(t_uint32,t_struct(RegistrationProfile)44_storage)": {
+        "encoding": "mapping",
+        "key": "t_uint32",
+        "label": "mapping(uint32 => struct ProtocolRegistry.RegistrationProfile)",
+        "numberOfBytes": "32",
+        "value": "t_struct(RegistrationProfile)44_storage"
+      },
+      "t_mapping(t_uint32,t_struct(Service)34_storage)": {
+        "encoding": "mapping",
+        "key": "t_uint32",
+        "label": "mapping(uint32 => struct ProtocolRegistry.Service)",
+        "numberOfBytes": "32",
+        "value": "t_struct(Service)34_storage"
+      },
+      "t_struct(ContractRef)1228_storage": {
+        "encoding": "inplace",
+        "label": "struct Types420.ContractRef",
+        "members": [
+          {
+            "astId": 1217,
+            "contract": "src/apps/ProtocolRegistry.sol:ProtocolRegistry",
+            "label": "componentId",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 1219,
+            "contract": "src/apps/ProtocolRegistry.sol:ProtocolRegistry",
+            "label": "implementation",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_address"
+          },
+          {
+            "astId": 1221,
+            "contract": "src/apps/ProtocolRegistry.sol:ProtocolRegistry",
+            "label": "runtimeCodeHash",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 1224,
+            "contract": "src/apps/ProtocolRegistry.sol:ProtocolRegistry",
+            "label": "version",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_struct(Version)1204_storage"
+          },
+          {
+            "astId": 1227,
+            "contract": "src/apps/ProtocolRegistry.sol:ProtocolRegistry",
+            "label": "lifecycle",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_enum(Lifecycle)1165"
+          }
+        ],
+        "numberOfBytes": "160"
+      },
+      "t_struct(RegistrationProfile)44_storage": {
+        "encoding": "inplace",
+        "label": "struct ProtocolRegistry.RegistrationProfile",
+        "members": [
+          {
+            "astId": 37,
+            "contract": "src/apps/ProtocolRegistry.sol:ProtocolRegistry",
+            "label": "componentType",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_enum(ComponentType)21"
+          },
+          {
+            "astId": 39,
+            "contract": "src/apps/ProtocolRegistry.sol:ProtocolRegistry",
+            "label": "manifestHash",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 41,
+            "contract": "src/apps/ProtocolRegistry.sol:ProtocolRegistry",
+            "label": "dependencyRoot",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 43,
+            "contract": "src/apps/ProtocolRegistry.sol:ProtocolRegistry",
+            "label": "interfaceHash",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_bytes32"
+          }
+        ],
+        "numberOfBytes": "128"
+      },
+      "t_struct(Service)34_storage": {
+        "encoding": "inplace",
+        "label": "struct ProtocolRegistry.Service",
+        "members": [
+          {
+            "astId": 23,
+            "contract": "src/apps/ProtocolRegistry.sol:ProtocolRegistry",
+            "label": "implementation",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_address"
+          },
+          {
+            "astId": 25,
+            "contract": "src/apps/ProtocolRegistry.sol:ProtocolRegistry",
+            "label": "codeHash",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 27,
+            "contract": "src/apps/ProtocolRegistry.sol:ProtocolRegistry",
+            "label": "metadataHash",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 29,
+            "contract": "src/apps/ProtocolRegistry.sol:ProtocolRegistry",
+            "label": "version",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_uint32"
+          },
+          {
+            "astId": 31,
+            "contract": "src/apps/ProtocolRegistry.sol:ProtocolRegistry",
+            "label": "activatedAt",
+            "offset": 4,
+            "slot": "3",
+            "type": "t_uint64"
+          },
+          {
+            "astId": 33,
+            "contract": "src/apps/ProtocolRegistry.sol:ProtocolRegistry",
+            "label": "active",
+            "offset": 12,
+            "slot": "3",
+            "type": "t_bool"
+          }
+        ],
+        "numberOfBytes": "128"
+      },
+      "t_struct(Version)1204_storage": {
+        "encoding": "inplace",
+        "label": "struct Types420.Version",
+        "members": [
+          {
+            "astId": 1199,
+            "contract": "src/apps/ProtocolRegistry.sol:ProtocolRegistry",
+            "label": "major",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint16"
+          },
+          {
+            "astId": 1201,
+            "contract": "src/apps/ProtocolRegistry.sol:ProtocolRegistry",
+            "label": "minor",
+            "offset": 2,
+            "slot": "0",
+            "type": "t_uint16"
+          },
+          {
+            "astId": 1203,
+            "contract": "src/apps/ProtocolRegistry.sol:ProtocolRegistry",
+            "label": "patch",
+            "offset": 4,
+            "slot": "0",
+            "type": "t_uint16"
+          }
+        ],
+        "numberOfBytes": "32"
+      },
+      "t_uint16": {
+        "encoding": "inplace",
+        "label": "uint16",
+        "numberOfBytes": "2"
+      },
+      "t_uint32": {
+        "encoding": "inplace",
+        "label": "uint32",
+        "numberOfBytes": "4"
+      },
+      "t_uint64": {
+        "encoding": "inplace",
+        "label": "uint64",
+        "numberOfBytes": "8"
+      }
+    }
+  }
+}

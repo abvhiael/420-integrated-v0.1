@@ -13,44 +13,171 @@
     "registryResolvedComponentsHaveNoFrozenAddress": true
   },
   "anchors": [
-    {"id":"ai-provider-registry","contract":"AIProviderRegistry.sol","address":"0x000000000000000000000000000000000000042f"},
-    {"id":"ai-model-registry","contract":"AIModelRegistry.sol","address":"0x0000000000000000000000000000000000000430"},
-    {"id":"ai-job-manager","contract":"AIJobManager.sol","address":"0x0000000000000000000000000000000000000431"},
-    {"id":"ai-job-escrow","contract":"AIJobEscrow.sol","address":"0x0000000000000000000000000000000000000432"},
-    {"id":"ai-reputation-registry","contract":"AIReputationRegistry.sol","address":"0x0000000000000000000000000000000000000433"},
-    {"id":"protocol-registry","contract":"ProtocolRegistry.sol","address":"0x0000000000000000000000000000000000000434"},
-    {"id":"names","contract":"Names420.sol","address":"0x0000000000000000000000000000000000000435"},
-    {"id":"identity","contract":"Identity420.sol","address":"0x0000000000000000000000000000000000000436"},
-    {"id":"governance","contract":"Governance420.sol","address":"0x0000000000000000000000000000000000000437"},
-    {"id":"bridge-gateway","contract":"VerifiedGateway420.sol","address":"0x0000000000000000000000000000000000000438"},
-    {"id":"stake","contract":"Stake420.sol","address":"0x000000000000000000000000000000000000043a"}
+    {
+      "id": "ai-provider-registry",
+      "contract": "AIProviderRegistry.sol",
+      "address": "0x000000000000000000000000000000000000042f"
+    },
+    {
+      "id": "ai-model-registry",
+      "contract": "AIModelRegistry.sol",
+      "address": "0x0000000000000000000000000000000000000430"
+    },
+    {
+      "id": "ai-job-manager",
+      "contract": "AIJobManager.sol",
+      "address": "0x0000000000000000000000000000000000000431"
+    },
+    {
+      "id": "ai-job-escrow",
+      "contract": "AIJobEscrow.sol",
+      "address": "0x0000000000000000000000000000000000000432"
+    },
+    {
+      "id": "ai-reputation-registry",
+      "contract": "AIReputationRegistry.sol",
+      "address": "0x0000000000000000000000000000000000000433"
+    },
+    {
+      "id": "protocol-registry",
+      "contract": "ProtocolRegistry.sol",
+      "address": "0x0000000000000000000000000000000000000434"
+    },
+    {
+      "id": "names",
+      "contract": "Names420.sol",
+      "address": "0x0000000000000000000000000000000000000435"
+    },
+    {
+      "id": "identity",
+      "contract": "Identity420.sol",
+      "address": "0x0000000000000000000000000000000000000436"
+    },
+    {
+      "id": "governance",
+      "contract": "Governance420.sol",
+      "address": "0x0000000000000000000000000000000000000437"
+    },
+    {
+      "id": "bridge-gateway",
+      "contract": "VerifiedGateway420.sol",
+      "address": "0x0000000000000000000000000000000000000438"
+    },
+    {
+      "id": "stake",
+      "contract": "Stake420.sol",
+      "address": "0x000000000000000000000000000000000000043a"
+    }
   ],
   "registry_resolved": [
-    {"id":"smart-account-factory","contract":"SmartAccountFactory420.sol","status":"UNDEPLOYED_CANDIDATE"},
-    {"id":"capability-registry","contract":"CapabilityRegistry420.sol","status":"UNDEPLOYED_CANDIDATE"},
-    {"id":"interop-router","contract":"InteropRouter420.sol"},
-    {"id":"randomness-router","contract":"RandomnessRouter420.sol"},
-    {"id":"oracle-router","contract":"OracleRouter420.sol"},
-    {"id":"swap-executor","contract":"CanonicalSwapExecutor420.sol"},
-    {"id":"bridge-router","contract":"GatewayRouter420.sol"},
-    {"id":"payment-router","contract":"PaymentRouter420.sol"},
-    {"id":"settlement-router","contract":"SettlementRouter420.sol"},
-    {"id":"token-factory","contract":"TokenFactory420.sol"},
-    {"id":"ai-router","contract":"AIRouter420.sol"},
-    {"id":"resource-router","contract":"ResourceRouter420.sol"},
-    {"id":"compute-router","contract":"ComputeRouter420.sol"},
-    {"id":"treasury-router","contract":"TreasuryRouter420.sol"},
-    {"id":"vault-router","contract":"VaultRouter420.sol"},
-    {"id":"rights-router","contract":"RightsRouter420.sol"},
-    {"id":"launchpad-router","contract":"LaunchpadRouter420.sol"},
-    {"id":"grants-router","contract":"GrantRouter420.sol"},
-    {"id":"attention-router","contract":"AttentionRouter420.sol"},
-    {"id":"pulse-router","contract":"PulseRouter420.sol"},
-    {"id":"messenger-router","contract":"MessengerRouter420.sol"},
-    {"id":"commons-router","contract":"CommonsRouter420.sol"}
+    {
+      "id": "smart-account-factory",
+      "contract": "SmartAccountFactory420.sol",
+      "status": "UNDEPLOYED_CANDIDATE"
+    },
+    {
+      "id": "capability-registry",
+      "contract": "CapabilityRegistry420.sol",
+      "status": "UNDEPLOYED_CANDIDATE"
+    },
+    {
+      "id": "interop-router",
+      "contract": "InteropRouter420.sol"
+    },
+    {
+      "id": "randomness-router",
+      "contract": "RandomnessRouter420.sol"
+    },
+    {
+      "id": "oracle-router",
+      "contract": "OracleRouter420.sol"
+    },
+    {
+      "id": "swap-executor",
+      "contract": "CanonicalSwapExecutor420.sol"
+    },
+    {
+      "id": "bridge-router",
+      "contract": "GatewayRouter420.sol"
+    },
+    {
+      "id": "payment-router",
+      "contract": "PaymentRouter420.sol"
+    },
+    {
+      "id": "settlement-router",
+      "contract": "SettlementRouter420.sol"
+    },
+    {
+      "id": "token-factory",
+      "contract": "TokenFactory420.sol"
+    },
+    {
+      "id": "ai-router",
+      "contract": "AIRouter420.sol"
+    },
+    {
+      "id": "resource-router",
+      "contract": "ResourceRouter420.sol"
+    },
+    {
+      "id": "compute-router",
+      "contract": "ComputeRouter420.sol"
+    },
+    {
+      "id": "treasury-router",
+      "contract": "TreasuryRouter420.sol"
+    },
+    {
+      "id": "vault-router",
+      "contract": "VaultRouter420.sol"
+    },
+    {
+      "id": "rights-router",
+      "contract": "RightsRouter420.sol"
+    },
+    {
+      "id": "launchpad-router",
+      "contract": "LaunchpadRouter420.sol"
+    },
+    {
+      "id": "grants-router",
+      "contract": "GrantRouter420.sol"
+    },
+    {
+      "id": "attention-router",
+      "contract": "AttentionRouter420.sol"
+    },
+    {
+      "id": "pulse-router",
+      "contract": "PulseRouter420.sol"
+    },
+    {
+      "id": "messenger-router",
+      "contract": "MessengerRouter420.sol"
+    },
+    {
+      "id": "commons-router",
+      "contract": "CommonsRouter420.sol"
+    }
   ],
   "reserved": [
-    {"id":"entry-point","address":"0x000000000000000000000000000000000000041f","status":"RESERVED_PENDING_PRODUCTION_IMPLEMENTATION"},
-    {"id":"names-legacy-wallet-proposal","address":"0x0000000000000000000000000000000000000445","status":"RETIRED_NOT_DEPLOYABLE","note":"Historical Wallet reservation only; Names420 fixed system address remains 0x0435"}
+    {
+      "id": "entry-point",
+      "address": "0x000000000000000000000000000000000000041f",
+      "status": "RESERVED_PENDING_PRODUCTION_IMPLEMENTATION"
+    },
+    {
+      "id": "names-legacy-wallet-proposal",
+      "address": "0x0000000000000000000000000000000000000445",
+      "status": "RETIRED_NOT_DEPLOYABLE",
+      "note": "Historical Wallet reservation only; Names420 fixed system address remains 0x0435"
+    }
+  ],
+  "namespace_authority": "contracts/config/genesis-address-namespace.json",
+  "supersedes": [
+    "contracts/config/w14-7-address-migration-candidates.json",
+    "contracts/config/w14-7-4-global-address-reconciliation.json",
+    "contracts/config/wallet-authority-address-reconciliation.json"
   ]
 }

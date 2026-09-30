@@ -118,7 +118,7 @@ Dependencies: PRE-10 data/source contract can be developed in parallel.
 
 ---
 
-### PRE-05 — quote authenticity, provenance and replay protection — TODO / CRITICAL
+### PRE-05 — quote authenticity, provenance and replay protection — COMPLETE
 
 Replace trust flags with verifiable quote provenance.
 
@@ -134,7 +134,7 @@ Required work:
 - define quote revocation/expiry semantics and operator key rollover handling;
 - provide deterministic signing/verification test vectors.
 
-**Exit:** browser/client can independently verify quote origin and exact intent offline; no caller-provided `sourceAuthenticated`/equivalent flag can upgrade trust.
+**Exit:** SATISFIED at implementation SHA `a447e84951bc618961272ba94d78dfff96154ee2`. The quote service emits Ed25519-authenticated canonical envelopes; the browser independently verifies pinned producer/key policy, exact endpoint/deployment/router/account/chain/quote/expiry/replay domain, signed payload hash and the exact reconstructed transaction fingerprint; replay admission is bounded and stateful; revocation, validity windows and bounded key rollover fail closed; unknown/extra execution semantics fail closed; and legacy caller-controlled trust flags were removed from executable review boundaries. Level 1 plus PRE-05 authority-integration milestone qualification passed in 420Exchange Web Verification run `36788581522`. Durable evidence: `docs/420EXCHANGE-PRE-05-QUALIFICATION.md`.
 
 Dependencies: PRE-04.
 

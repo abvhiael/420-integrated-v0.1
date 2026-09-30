@@ -66,6 +66,9 @@ The Wallet shell exposes a **420 Names** navigation target and loads the managem
 
 ## CI scope policy
 
+Superseded Wallet verification runs are cancelled by branch-scoped workflow concurrency, so stale Web/extension/mobile runs cannot continue occupying runners after a newer audit commit exists.
+
+
 For audit PRs, broad Wallet Web/extension/mobile qualification is deferred to Level 3 because those workflows include unrelated release/predeploy/native-mobile work. Their relevant Names Web coverage is retained in the Names-specific Level-1 workflow.
 
 The workflows remain enabled on non-audit PRs, main/push paths where applicable, and manual dispatch.

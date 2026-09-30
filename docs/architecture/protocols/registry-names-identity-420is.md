@@ -72,6 +72,20 @@ A name record contains:
 - expiry;
 - label length.
 
+### Runtime dependency boundary
+
+The canonical direct runtime dependency for `Names420` is **GovernanceAuthority**, represented by the nonzero immutable governance timelock bound through `SystemAccess`. The current Names implementation does not expose a governance-only name mutation; this dependency identifies the system governance boundary without making governance an owner of user names.
+
+Other relationships are deliberately outside the direct runtime dependency matrix:
+
+- `ProtocolRegistry` is an optional consumer integration when a name carries a `serviceId`; the name record does not prove that service is canonical.
+- Genesis initialization is a required deployment/predeploy concern and is qualified through deterministic storage generation rather than a runtime `IGenesisInitializable420` call surface.
+- commit/reveal replay protection is local to Names420 and does not depend on the shared ReplayProtection service.
+- Wallet/client chain checks remain consumer-layer protections.
+- PauseRegistry, CapabilityRegistry, SystemSafety, Migration, SignedEnvelope, and MetadataCommitment are not current Names420 runtime authorities.
+
+The complete classification and rationale are recorded in `docs/architecture/decisions/NAMES-AUDIT-2-DEPENDENCY-MODEL.md` and `contracts/config/interfaces/names-dependency-model.json`.
+
 ### Registration safety
 
 Name registration uses commit/reveal with a domain-separated commitment:

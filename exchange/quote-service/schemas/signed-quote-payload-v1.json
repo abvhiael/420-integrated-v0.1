@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "420-exchange-signed-quote-payload-v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "service",
+    "quote"
+  ],
+  "properties": {
+    "schema": {
+      "const": "420-exchange-signed-quote-payload-v1"
+    },
+    "service": {
+      "const": "420/service/exchange-quote/v1"
+    },
+    "quote": {
+      "type": "object"
+    }
+  }
+}

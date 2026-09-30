@@ -1,0 +1,46 @@
+{
+  "schema": "420-registry-reg-audit-6-qualification-v1",
+  "step": "REG-AUDIT-6",
+  "name": "regenerate catalogue/reference metadata",
+  "canonicalExit": "no stale Registry address/interface/artifact metadata remains",
+  "status": "IMPLEMENTED_PENDING_EXACT_HEAD_CI",
+  "repository": "abvhiael/420-integrated-v0.1",
+  "baseMainSha": "da148f2a05b09e6566cc35235646b21dd97d30fd",
+  "canonicalRegistry": {
+    "address": "0x0000000000000000000000000000000000000434",
+    "artifact": "contracts/artifacts/ProtocolRegistry.json",
+    "interface": "contracts/src/interfaces/genesis/IProtocolRegistry420.sol",
+    "abiSha256": "4f7210da15f19ac787a7e85c45c22b51bfd91e8f4460df6791dfcfacf26b7669",
+    "runtimeCodeHash": "0x9f9e5f794296cf9faf5f8c8d17cd815f3c19c004a158c15cb61b5a29eaacb330"
+  },
+  "requirements": {
+    "developerHubCatalogueRegenerated": true,
+    "localManifestReconciledAndExplicitlyExampleScoped": true,
+    "generatedContractReferenceRegenerated": true,
+    "generatedDeploymentReferenceRegenerated": true,
+    "generatedEventReferenceRegenerated": true,
+    "missingInterfaceReferencesRemovedFromActiveMetadata": true,
+    "examplesRemainNonCanonicalWithoutDeploymentEvidence": true,
+    "mechanicalStaleMetadataVerifierAdded": true
+  },
+  "qualification": {
+    "exactHeadRule": "All required workflows must pass on the final evidence-recording PR head; skipped, cancelled, missing or older-SHA results do not qualify the step.",
+    "required": [
+      "420Registry REG-AUDIT-6",
+      "420Docs Qualification",
+      "420 Developer Hub",
+      "420 Integrated Qualification",
+      "420Registry REG-AUDIT-1",
+      "420Registry REG-AUDIT-3",
+      "420Registry REG-AUDIT-4",
+      "420Registry REG-AUDIT-5"
+    ],
+    "exactQualifiedSha": "RECORDED_IN_PR_METADATA_AFTER_FINAL_EXACT_HEAD_QUALIFICATION",
+    "runIds": "RECORDED_IN_PR_METADATA_AFTER_FINAL_EXACT_HEAD_QUALIFICATION"
+  },
+  "limitations": [
+    "No live deployment is claimed; REG-AUDIT-8 owns production-equivalent testnet deployment evidence.",
+    "Historical audit snapshots may retain superseded metadata solely as explicitly historical provenance."
+  ],
+  "nextCanonicalStep": "REG-AUDIT-7 — integration/rebuild qualification"
+}

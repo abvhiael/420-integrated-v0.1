@@ -14,9 +14,9 @@ function fixture() {
         source: 'genesis',
         version: '1.0.0',
         deploymentBlock: 0,
-        artifact: 'contracts/out/ProtocolRegistry.sol/ProtocolRegistry.json',
-        interface: 'contracts/src/interfaces/IProtocolRegistry.sol',
-        abiSha256: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+        artifact: 'contracts/artifacts/ProtocolRegistry.json',
+        interface: 'contracts/src/interfaces/genesis/IProtocolRegistry420.sol',
+        abiSha256: '4f7210da15f19ac787a7e85c45c22b51bfd91e8f4460df6791dfcfacf26b7669',
         verified: true
       }
     ]
@@ -41,7 +41,7 @@ test('exposes immutable ABI/interface references', () => {
   const catalogue = createContractCatalogue420(fixture());
   const ref = catalogue.getAbiReference('ProtocolRegistry');
   assert.match(ref.artifact, /ProtocolRegistry\.json$/);
-  assert.match(ref.interface, /IProtocolRegistry\.sol$/);
+  assert.match(ref.interface, /IProtocolRegistry420\.sol$/);
   assert.equal(ref.abiSha256.length, 64);
 });
 

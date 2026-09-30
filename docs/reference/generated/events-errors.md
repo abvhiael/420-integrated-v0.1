@@ -12,7 +12,7 @@ version: current
 > GENERATED FILE - DO NOT EDIT. Regenerate with `python scripts/generate-reference-docs.py`.
 
 Publication boundary: `developer-hub/catalogue/local.example.json`  
-Catalogue SHA-256: `cb945e89354382492ca8edc40287b7736b4868d3387d5aad389ce4d80d1ae648`  
+Catalogue SHA-256: `f748e235a756ed24e5e5957ab93c261d61d5bff129d3caf3a8459db2d01d976f`  
 Environment scope: **local example only**
 
 Event topics and custom-error selectors are Ethereum Keccak-256 hashes of canonical ABI signatures. They are published only when the source declaration can be normalized unambiguously. User-defined or otherwise ambiguous parameter types are reported unresolved instead of guessed.

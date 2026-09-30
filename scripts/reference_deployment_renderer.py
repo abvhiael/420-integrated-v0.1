@@ -45,7 +45,7 @@ def render() -> str:
         "| --- | --- | --- | --- | ---: | --- | --- |",
     ]
     for c in contracts:
-        lines.append(f"| `{c.get('name','')}` | `{catalogue.get('chainId','')}` | `{c.get('address','')}` | `{c.get('version','')}` | {c.get('deploymentBlock','')} | `{c.get('source','')}` | catalogue file is `local.example.json`; declared artifact/interface are not checked in and ABI hash is example-grade, so this is not distributable canonical deployment evidence |")
+        lines.append(f"| `{c.get('name','')}` | `{catalogue.get('chainId','')}` | `{c.get('address','')}` | `{c.get('version','')}` | {c.get('deploymentBlock','')} | `{c.get('source','')}` | catalogue file is `local.example.json`; retained artifact/interface and ABI identity are repository-qualified predeploy metadata, but no approved RPC-confirmed deployment evidence exists, so this example is not a canonical network deployment |")
     lines += ["", "## Status by environment", "", "| Environment | Canonical deployment reference |", "| --- | --- |", "| local | unavailable as canonical publication; only example-scoped records are checked in |", "| devnet | unavailable — no approved canonical deployment records checked in |", "| testnet | unavailable — no approved canonical deployment records checked in |", "| mainnet | unavailable — no approved canonical deployment records checked in |", ""]
     return "\n".join(lines)
 

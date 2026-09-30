@@ -12,7 +12,7 @@ version: current
 > GENERATED FILE - DO NOT EDIT. Regenerate with `python scripts/generate-reference-docs.py`.
 
 Source catalogue: `developer-hub/catalogue/local.example.json`  
-Catalogue SHA-256: `cb945e89354382492ca8edc40287b7736b4868d3387d5aad389ce4d80d1ae648`  
+Catalogue SHA-256: `f748e235a756ed24e5e5957ab93c261d61d5bff129d3caf3a8459db2d01d976f`  
 Catalogue chain ID: `420`  
 Environment scope: **local example only**
 
@@ -26,10 +26,10 @@ This page is generated from the currently checked-in contract catalogue plus mat
 - Deployment block: `0`
 - Catalogue address: `0x0000000000000000000000000000000000000434` (**local example only**)
 - Solidity source: `contracts/src/apps/ProtocolRegistry.sol`
-- Declared artifact: `contracts/out/ProtocolRegistry.sol/ProtocolRegistry.json` (missing)
-- Declared interface: `contracts/src/interfaces/IProtocolRegistry.sol` (missing)
-- Declared ABI SHA-256: `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa`
-- Distributable verified ABI: **NO — fail closed**
+- Declared artifact: `contracts/artifacts/ProtocolRegistry.json` (present)
+- Declared interface: `contracts/src/interfaces/genesis/IProtocolRegistry420.sol` (present)
+- Declared ABI SHA-256: `4f7210da15f19ac787a7e85c45c22b51bfd91e8f4460df6791dfcfacf26b7669`
+- Distributable verified ABI: **YES**
 
 ### NatSpec
 
@@ -61,7 +61,3 @@ This page is generated from the currently checked-in contract catalogue plus mat
 - `supportsVersion(bytes32 componentId, Types420.Version calldata requested) external view override returns (bool)`
 - `currentComponentRevision(bytes32 componentId) external view returns (uint32)`
 - `getComponentRevision(bytes32 componentId, uint32 revision) external view returns (Types420.ContractRef memory)`
-
-### ABI publication status
-
-The generated reference does not publish ABI JSON for this entry because declared build artifact is not checked in; declared ABI hash is a placeholder. This is intentional fail-closed behavior, not a missing-documentation workaround.

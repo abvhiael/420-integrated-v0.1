@@ -21,13 +21,13 @@ function catalogue(chainId = 420n, chainIdDecimal = '420') {
   const entry = {
     name: 'ProtocolRegistry',
     protocol: '420Registry',
-    address: '0x0000000000000000000000000000000000000420',
+    address: '0x0000000000000000000000000000000000000434',
     source: 'genesis',
     version: '1.0.0',
     deploymentBlock: 0,
-    artifact: 'contracts/out/ProtocolRegistry.sol/ProtocolRegistry.json',
-    interface: 'contracts/src/interfaces/IProtocolRegistry.sol',
-    abiSha256: 'a'.repeat(64),
+    artifact: 'contracts/artifacts/ProtocolRegistry.json',
+    interface: 'contracts/src/interfaces/genesis/IProtocolRegistry420.sol',
+    abiSha256: '4f7210da15f19ac787a7e85c45c22b51bfd91e8f4460df6791dfcfacf26b7669',
     verified: true
   };
   return {

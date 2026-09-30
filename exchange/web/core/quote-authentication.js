@@ -83,7 +83,11 @@ export async function verifyQuoteAuthentication({runtime,quote,prepared,nowSecon
   if(!same(expectedReplay,quote.replayDomain))fail('REPLAY_DOMAIN_MISMATCH','quote replay domain is invalid');
   const fingerprint=transactionFingerprint(prepared?.transaction);
   if(!bytes32(quote.transactionFingerprint)||!same(quote.transactionFingerprint,fingerprint))fail('FINGERPRINT_MISMATCH','authenticated quote does not bind the reviewed transaction');
-  return Object.freeze({verified:true,producerId:auth.producerId,keyVersion:auth.keyVersion,algorithm:auth.algorithm,payloadHash:auth.payloadHash,transactionFingerprint:fingerprint,replayDomain:quote.replayDomain});
+  return Object.freeze({
+    verified:true,quoteId:quote.quoteId.toLowerCase(),producerId:auth.producerId,keyVersion:auth.keyVersion,algorithm:auth.algorithm,
+    payloadHash:auth.payloadHash,transactionFingerprint:fingerprint,replayDomain:quote.replayDomain,
+    revocationEpoch:auth.revocationEpoch,expiresAt:quote.expiresAt,
+  });
 }
 
 export function createQuoteReplayGuard({maxEntries=2048}={}){

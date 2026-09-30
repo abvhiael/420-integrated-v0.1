@@ -1,6 +1,8 @@
 import {keccak256} from './abi.js';
 import {transactionFingerprint} from './preflight.js';
 
+const VERIFIED_EVIDENCE=new WeakSet();
+
 export class QuoteAuthenticationError extends Error {
   constructor(code,message){super(message);this.name='QuoteAuthenticationError';this.code=code;}
 }
@@ -92,12 +94,16 @@ export async function verifyQuoteAuthentication({runtime,quote,prepared,nowSecon
   if(!same(expectedReplay,quote.replayDomain))fail('REPLAY_DOMAIN_MISMATCH','quote replay domain is invalid');
   const fingerprint=transactionFingerprint(prepared?.transaction);
   if(!bytes32(quote.transactionFingerprint)||!same(quote.transactionFingerprint,fingerprint))fail('FINGERPRINT_MISMATCH','authenticated quote does not bind the reviewed transaction');
-  return Object.freeze({
+  const evidence=Object.freeze({
     verified:true,quoteId:quote.quoteId.toLowerCase(),producerId:auth.producerId,keyVersion:auth.keyVersion,algorithm:auth.algorithm,
     payloadHash:auth.payloadHash,transactionFingerprint:fingerprint,replayDomain:quote.replayDomain,
     revocationEpoch:auth.revocationEpoch,expiresAt:quote.expiresAt,
   });
+  VERIFIED_EVIDENCE.add(evidence);
+  return evidence;
 }
+
+export function isVerifiedQuoteEvidence(value){return Boolean(value&&VERIFIED_EVIDENCE.has(value));}
 
 export function createQuoteReplayGuard({maxEntries=2048}={}){
   const seen=new Map();

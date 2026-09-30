@@ -29,7 +29,10 @@ export function publicKeyFingerprint(publicKey){
 }
 export function createEd25519Signer({producerId,keyVersion:version,privateKey,revocationEpoch=0}={}){
   if(!id(producerId)||!keyVersion(version)||!Number.isSafeInteger(revocationEpoch)||revocationEpoch<0)fail('SIGNER_CONFIG_INVALID','producer/key version/revocation epoch required',{status:503});
-  let key;try{key=createPrivateKey(privateKey);}catch{fail('SIGNER_CONFIG_INVALID','valid Ed25519 private key required',{status:503});}
+  let key;
+  try{
+    key=privateKey?.type==='private'&&privateKey?.asymmetricKeyType==='ed25519'?privateKey:createPrivateKey(privateKey);
+  }catch{fail('SIGNER_CONFIG_INVALID','valid Ed25519 private key required',{status:503});}
   if(key.asymmetricKeyType!=='ed25519')fail('SIGNER_CONFIG_INVALID','Ed25519 signing key required',{status:503});
   const publicKey=createPublicKey(key),fingerprint=publicKeyFingerprint(publicKey);
   return Object.freeze({

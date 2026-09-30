@@ -1,3 +1,4 @@
+import {isVerifiedQuoteEvidence} from './quote-authentication.js';
 import {transactionFingerprint} from './preflight.js';
 import {normalizeAccount,normalizeChainId} from './wallet-session.js';
 
@@ -33,8 +34,8 @@ export function assertExactDisplayedFields(prepared,displayedFields){
 }
 
 export function buildExecutionReview({prepared,session,reviewedFields,authenticationEvidence}={}){
-  if(prepared?.context?.trustLevel!=='AUTHENTICATED_EXECUTION'||prepared.context?.authentication?.verified!==true)fail('SOURCE_UNVERIFIED','verified authenticated execution provenance required');
-  if(!authenticationEvidence||authenticationEvidence.verified!==true||authenticationEvidence.transactionFingerprint!==prepared.transactionFingerprint||authenticationEvidence.quoteId!==prepared.context.quoteId)fail('SOURCE_UNVERIFIED','verifier-produced quote authentication evidence required');
+  if(prepared?.context?.trustLevel!=='AUTHENTICATED_EXECUTION'||!isVerifiedQuoteEvidence(prepared.context?.authentication))fail('SOURCE_UNVERIFIED','verified authenticated execution provenance required');
+  if(!isVerifiedQuoteEvidence(authenticationEvidence)||authenticationEvidence.transactionFingerprint!==prepared.transactionFingerprint||authenticationEvidence.quoteId!==prepared.context.quoteId)fail('SOURCE_UNVERIFIED','cryptographic verifier-produced quote authentication evidence required');
   if(!KINDS.includes(prepared?.kind)||prepared?.transaction?.kind!==prepared.kind||!prepared?.context||!prepared?.reviewedIntent)fail('INVALID_PREPARATION','canonical prepared transaction required');
   if(!session?.account||!session?.chainId||!Number.isSafeInteger(session.generation))fail('SESSION_REQUIRED','connected wallet snapshot required');
   if(!exact(prepared.context.account,normalizeAccount(session.account))||normalizeChainId(prepared.context.chainId)!==normalizeChainId(session.chainId))fail('SESSION_CHANGED','quote account or chain differs from connected wallet');

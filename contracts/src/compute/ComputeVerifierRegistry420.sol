@@ -197,9 +197,9 @@ contract ComputeVerifierRegistry420 is I420System, SystemAccess {
         v.registrationManifestHash = p.newRegistrationManifestHash;
         v.status = Status.SUSPENDED;
         delete _pendingRotation[verifierId];
-        _commit(verifierId, v);
+        uint64 newRevision = _commit(verifierId, v);
 
-        emit RotationAccepted(verifierId, oldAuthority, msg.sender, v.revision);
+        emit RotationAccepted(verifierId, oldAuthority, msg.sender, newRevision);
     }
 
     function retire(bytes32 verifierId) external onlyGovernance {
@@ -226,10 +226,11 @@ contract ComputeVerifierRegistry420 is I420System, SystemAccess {
             && verifierIdForAuthority[authority] == verifierId;
     }
 
-    function _commit(bytes32 verifierId, Verifier memory v) private {
+    function _commit(bytes32 verifierId, Verifier memory v) private returns (uint64 newRevision) {
         Verifier memory old = _current[verifierId];
         if (old.revision == type(uint64).max) revert SerialExhausted();
-        v.revision = old.revision + 1;
+        newRevision = old.revision + 1;
+        v.revision = newRevision;
         bytes32 oldHash = keccak256(abi.encode(old));
         bytes32 newHash = keccak256(abi.encode(v));
         _current[verifierId] = v;

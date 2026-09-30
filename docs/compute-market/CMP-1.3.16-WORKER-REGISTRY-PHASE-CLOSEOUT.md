@@ -220,4 +220,6 @@ This evidence-only closeout update records the already-qualified SHA and run evi
 
 CMP-1.3 repository work is complete. The completed CMP-1.3 lineage is present on `main` at merge baseline `bd00e64e29e74c96b4d89b1254254547767a6851`, which includes the reconciled CMP-1.3.16 closeout and all preceding CMP-1.3 implementation/qualification work.
 
+## Completion
+
 **COMPLETE WITHIN REPOSITORY QUALIFICATION SCOPE.** The exact reconciled implementation/reconciliation head passed the complete retained qualification set, and this durable closeout record identifies that SHA and its run evidence. Live deployment/publication remains blocked by the separately recorded CMP-1.5, public-testnet, runtime-evidence and ProtocolRegistry-publication prerequisites.

@@ -120,9 +120,10 @@ contract Names420AuditTest {
         bytes32 labelHash = keccak256("alice");
         _registerAlice(names, labelHash);
 
+        uint64 minDuration = names.MIN_REGISTRATION_PERIOD();
         vm.expectRevert(Names420.NotNameOwner.selector);
         vm.prank(BOB);
-        names.renew(labelHash, names.MIN_REGISTRATION_PERIOD());
+        names.renew(labelHash, minDuration);
 
         vm.expectRevert(Names420.NotNameOwner.selector);
         vm.prank(BOB);
@@ -163,9 +164,10 @@ contract Names420AuditTest {
         vm.expectRevert(Names420.NameExpired.selector);
         names.resolve(labelHash);
 
+        uint64 minDuration = names.MIN_REGISTRATION_PERIOD();
         vm.expectRevert(Names420.NameExpired.selector);
         vm.prank(ALICE);
-        names.renew(labelHash, names.MIN_REGISTRATION_PERIOD());
+        names.renew(labelHash, minDuration);
 
         vm.expectRevert(Names420.NameExpired.selector);
         vm.prank(ALICE);

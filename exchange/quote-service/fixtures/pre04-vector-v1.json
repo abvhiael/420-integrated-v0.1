@@ -48,7 +48,8 @@
         "minAmountOutRaw": "4200000",
         "routeData": "0x"
       }
-    ]
+    ],
+    "observedAt": 1000
   },
   "feeBps": 25,
   "expected": {

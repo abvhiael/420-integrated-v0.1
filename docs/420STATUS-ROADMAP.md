@@ -14,7 +14,7 @@
 - **STATUS-7 — API + public status feed — COMPLETE**
 - **STATUS-8 — privacy/security + anti-spoofing hardening — COMPLETE**
 - **STATUS-9 — Genesis frontend — COMPLETE**
-- **STATUS-10 — qualification, reconciliation + closeout — IN QUALIFICATION**
+- **STATUS-10 — qualification, reconciliation + closeout — COMPLETE**
 
 ## STATUS-0 — Genesis boundary + executable invariant baseline
 
@@ -124,8 +124,21 @@ The page carries explicit language that operational health is not consensus, set
 
 ## STATUS-10 — qualification, reconciliation + closeout
 
-STATUS-10 is in final qualification. The long-lived STATUS branch was reconciled with current `main` through reconciliation PR #332 before the closeout matrix was added. The reconciliation merge produced head `953580159d95dc44cd6cdd0d4a5164f2eb432ece`; closeout qualification continues on descendants of that reconciled head so no pre-reconciliation result is treated as final evidence.
-
 The dedicated closeout suite under `status/closeout` re-exercises the cross-phase Genesis boundaries together: conflicting source evidence fails closed, component failures remain isolated from canonical network authority, private components and raw free-form observation content stay off public feeds, a restarted service remains unready until it is requalified against fresh dependency evidence, failed dependencies block readiness, SSRF/private-network probe targets fail closed, hostile source identifiers are rejected, and all public presentation remains explicitly noncanonical.
 
-Final closeout requires all repository qualification workflows to pass on one exact final head after the roadmap records qualification evidence. Only that exact qualified head may be merged through PR #325.
+### Closeout record
+
+- Phase PR: **#325** — merged
+- Qualified phase head: `f3fdc952df3e3721530735867e502fb0bb2d23b2`
+- Phase merge commit: `f442801cd841ddb275eb5889c846be73093be25c`
+- 420Docs Qualification run `35278081113` — passed
+- 420 Integrated Qualification run `35278081047` — passed
+- Solidity Contracts run `35278081044` — passed
+- Reconciliation PR #332 — merged, producing reconciliation merge `953580159d95dc44cd6cdd0d4a5164f2eb432ece`
+- Final reconciliation PR #336 — merged, merge `79478ad76f26300b2649031e1baa33e41a6bb6de`
+
+GEN-10.8 repository implementation and closeout are therefore **complete and merged**.
+
+### Post-closeout operational work
+
+Repository closeout does not prove a live public Status deployment. Remaining work is deployment-specific: deploy `status420`, configure real public component probes and qualified dependency endpoints, exercise freshness/conflict/outage/maintenance/incident/recovery behavior against the production-equivalent testnet topology, retain exact-release operational evidence, publish the public Status endpoint, and add/reconcile a dedicated testnet Status readiness record when the live service exists.

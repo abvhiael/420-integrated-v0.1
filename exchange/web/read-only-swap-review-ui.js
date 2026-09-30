@@ -62,7 +62,7 @@ export function mountReadOnlySwapReview({documentRef,controller,fetchReview,nowS
     if(!configured())status.textContent='Executable quote endpoint and verified testnet deployment not configured; trading disabled.';
     else if(!controller.wallet?.session?.account)status.textContent='Connect a wallet to request a read-only quote.';
   }
-  function onChange(){clear('Trade input changed; request a new quote.');}
+  function onChange(){controller.invalidateExecution('trade-input-change');clear('Trade input changed; request a new quote.');}
   for(const input of Object.values(fields))input.addEventListener('input',onChange);
   async function onFetch(){
     clear('Retrieving review candidate…');

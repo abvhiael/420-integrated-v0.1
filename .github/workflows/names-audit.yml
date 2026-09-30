@@ -71,9 +71,9 @@ jobs:
         working-directory: contracts
         run: forge test --match-path 'test/RegistryIdentityNames420.t.sol' -vvv
 
-      - name: Run Wallet Names client tests
+      - name: Run Wallet Names integration tests
         working-directory: wallet/web
-        run: node --test test/names-client.test.js
+        run: node --test test/names-client.test.js test/names-send.test.js test/names-guided-send.test.js
 
       - name: Names static authority/opcode scan
         working-directory: contracts

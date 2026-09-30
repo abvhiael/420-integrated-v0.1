@@ -16,6 +16,7 @@ on:
       - 'contracts/config/interfaces/dependency-matrix.json'
       - 'contracts/config/interfaces/names-dependency-model.json'
       - 'contracts/artifacts/Names420.json'
+      - 'contracts/config/predeploy/predeploy-plan.json'
       - 'wallet/web/core/names-client.js'
       - 'wallet/web/core/names-send.js'
       - 'wallet/web/core/names-guided-send.js'

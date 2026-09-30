@@ -1,6 +1,6 @@
 # CMP-1.3.15 — Release-candidate wiring, publication readiness, and dependency reconciliation
 
-Status: **IMPLEMENTATION COMPLETE; EXACT-HEAD QUALIFICATION PENDING. LIVE DEPLOYMENT/PUBLICATION REMAINS BLOCKED.**
+Status: **IMPLEMENTATION QUALIFIED ON PRE-EVIDENCE HEAD; EVIDENCE-RECORDING HEAD REQUALIFICATION PENDING. LIVE DEPLOYMENT/PUBLICATION REMAINS BLOCKED.**
 
 ## Canonical definition
 
@@ -183,6 +183,24 @@ Skipped aggregate wrappers are acceptable only where workflow design intentional
 
 Per the repository owner's explicit CMP-1.3.15 instruction, if durable evidence recording creates a new commit, the retained qualification suite must be rerun on that new exact evidence-recording HEAD.
 
+## Pre-evidence exact-head qualification evidence
+
+The implementation head immediately preceding this durable evidence update was:
+
+`979532ca792b3e57c909cb889aa08e1e3cbc236c`
+
+It was reconciled with then-current `main` `2a45a2c8847f40b7aa1b27ae4556bf8d547a1f91` (ahead 7, behind 0) and passed the complete set of workflows triggered for that PR head:
+
+- Solidity Contracts #3354 — run `36655684432` — **success**; all 16 required `pr-shards` passed. The aggregate `foundry` wrapper was intentionally skipped by PR workflow design.
+- Genesis Address Authority #191 — run `36655684467` — **success**; `cross-manifest-authority` and all 16 `full-foundry-pr-inventory` shards passed.
+- 420 Integrated Qualification #5991 — run `36655684409` — **success**; `fault-matrix`, `geth-engine`, `production-dependencies`, and `offline-core` passed.
+- 420Docs Qualification #3367 — run `36655684490` — **success**, including the retained invariant/readiness checks and CMP-1.3.15 repository-readiness verifier.
+- 420Indexer #974 — run `36655684502` — **success**.
+- EXP-1.9 CI Qualification Automation #86 — run `36655684406` — **success**.
+- EXP-1.10 Phase Closeout Qualification #92 — run `36655684410` — **success**.
+
+This evidence proves the implementation state at `979532ca792b3e57c909cb889aa08e1e3cbc236c`. It is not inherited as final qualification for the evidence-recording commit. Per the repository owner's explicit exact-SHA rule, the workflows required by the PR after this evidence update must complete successfully on the new evidence-recording HEAD before CMP-1.3.15 can be marked COMPLETE.
+
 ## Completion
 
-**NOT YET COMPLETE.** Implementation is present, but exact-head CI, current-main reconciliation, and durable final run evidence must be completed before the exit criterion is satisfied.
+**NOT YET COMPLETE.** The implementation head passed its complete triggered workflow set and remained reconciled with current `main` at evidence-recording time. This evidence update creates a new HEAD that must itself pass the required exact-head qualification workflows before the exit criterion is satisfied.

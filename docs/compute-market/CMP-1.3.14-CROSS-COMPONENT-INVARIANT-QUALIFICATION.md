@@ -1,6 +1,6 @@
 # CMP-1.3.14 — Cross-component adversarial and invariant qualification
 
-Status: **IMPLEMENTED — exact-head qualification pending**
+Status: **COMPLETE — exact implementation SHA qualified; evidence-only closeout recorded without recursive rerun.**
 
 ## Canonical definition
 
@@ -241,10 +241,33 @@ Any workflow triggered by the changed files is also required to finish successfu
 
 A later documentation-only evidence commit may inherit the qualified implementation SHA under the repository evidence-only rule. Any later implementation/test/config/workflow/dependency/substantive-requirement change requires fresh exact-head qualification.
 
-## Candidate evidence
+## Qualified implementation evidence
 
-Pending.
+Qualified implementation SHA:
+
+`c104211a8dfef83431f2ee2bfcf07c20f2b5380d`
+
+Base/main SHA:
+
+`76e7f5732247efc091c8842efaecce2b11c6fc61`
+
+Current-main reconciliation immediately before closeout:
+
+- current `main` remained exactly `76e7f5732247efc091c8842efaecce2b11c6fc61`;
+- branch was ahead only and 0 commits behind;
+- no qualification-affecting reconciliation commit was required.
+
+Exact-SHA qualification:
+
+- Solidity Contracts #3345 — run `36646566777` — **SUCCESS**, all 16 required PR shards passed; aggregate `foundry` wrapper skipped by workflow design;
+- 420 Integrated Qualification #5982 — run `36646566684` — **SUCCESS**, including `offline-core`, `fault-matrix`, `production-dependencies`, and `geth-engine`;
+- 420Docs Qualification #3358 — run `36646566716` — **SUCCESS**, including `verify-cmp-1-3-14-invariants.py`;
+- 420Indexer #965 — run `36646566713` — **SUCCESS**;
+- EXP-1.9 CI Qualification Automation #82 — run `36646566731` — **SUCCESS**;
+- EXP-1.10 Phase Closeout Qualification #89 — run `36646566782` — **SUCCESS**.
+
+The documentation-only evidence commit containing this section does not change contracts, tests, scripts, workflows, dependencies, configuration, or substantive CMP-1.3.14 requirements and therefore inherits the qualified implementation SHA under the repository evidence-only rule.
 
 ## Completion
 
-**NOT YET COMPLETE** — consolidated invariant evidence, mechanical validation, cross-component adversarial coverage, and fuzz/property coverage are implemented; exact-head CI and final current-main reconciliation remain required.
+**COMPLETE** — every canonical CMP-1.3.14 requirement and exit criterion is satisfied at implementation SHA `c104211a8dfef83431f2ee2bfcf07c20f2b5380d`. All applicable `CMP-INV-001`–`CMP-INV-030` invariants have traceable repository evidence, the complete WorkerRegistry graph has consolidated adversarial and fuzz/property coverage, and authority-separation/failure-atomicity/historical-reconstruction evidence is durably recorded.

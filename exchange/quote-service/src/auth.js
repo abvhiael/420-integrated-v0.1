@@ -22,8 +22,12 @@ export function canonicalSignedQuotePayload(quote){
 }
 export function signedPayloadBytes(quote){return Buffer.from(canonicalJson(canonicalSignedQuotePayload(quote)),'utf8');}
 export function signedPayloadHash(quote){return '0x'+createHash('sha256').update(signedPayloadBytes(quote)).digest('hex');}
+function asPublicKey(key){
+  if(key?.type==='public'&&key?.asymmetricKeyType==='ed25519')return key;
+  return createPublicKey(key);
+}
 export function publicKeyFingerprint(publicKey){
-  const jwk=createPublicKey(publicKey).export({format:'jwk'});
+  const jwk=asPublicKey(publicKey).export({format:'jwk'});
   if(typeof jwk.x!=='string')fail('SIGNER_CONFIG_INVALID','Ed25519 public key bytes unavailable',{status:503});
   return 'sha256:'+createHash('sha256').update(fromB64u(jwk.x)).digest('hex');
 }
@@ -50,7 +54,7 @@ export function createEd25519Signer({producerId,keyVersion:version,privateKey,re
   });
 }
 export function rawPublicKeyBase64Url(publicKey){
-  const key=createPublicKey(publicKey);
+  const key=asPublicKey(publicKey);
   if(key.asymmetricKeyType!=='ed25519')fail('SIGNER_CONFIG_INVALID','Ed25519 public key required',{status:503});
   const jwk=key.export({format:'jwk'});
   return jwk.x;

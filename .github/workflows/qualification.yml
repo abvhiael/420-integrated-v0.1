@@ -5,7 +5,33 @@ on:
   workflow_dispatch:
   push:
     branches: [ main ]
+    paths:
+      - 'consensus/**'
+      - 'execution/**'
+      - 'integration/**'
+      - 'go.mod'
+      - 'go.sum'
+      - 'Makefile'
+      - 'scripts/install-production-deps.sh'
+      - 'scripts/build-node420-upstream.sh'
+      - 'scripts/live-engine-smoke.sh'
+      - 'scripts/run-fault-matrix.py'
+      - 'scripts/run-soak.py'
+      - '.github/workflows/qualification.yml'
   pull_request:
+    paths:
+      - 'consensus/**'
+      - 'execution/**'
+      - 'integration/**'
+      - 'go.mod'
+      - 'go.sum'
+      - 'Makefile'
+      - 'scripts/install-production-deps.sh'
+      - 'scripts/build-node420-upstream.sh'
+      - 'scripts/live-engine-smoke.sh'
+      - 'scripts/run-fault-matrix.py'
+      - 'scripts/run-soak.py'
+      - '.github/workflows/qualification.yml'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}

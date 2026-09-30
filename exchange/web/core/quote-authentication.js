@@ -69,8 +69,8 @@ export async function verifyQuoteAuthentication({runtime,quote,prepared,nowSecon
   if(policy.service!=='420/service/exchange-quote/v1')fail('DOMAIN_MISMATCH','trusted producer policy service domain mismatch');
   if(!Number.isSafeInteger(nowSeconds)||nowSeconds<trusted.notBefore||nowSeconds>=trusted.notAfter)fail('KEY_NOT_ACTIVE','quote producer key is outside its validity window');
   if(auth.revocationEpoch!==trusted.revocationEpoch)fail('KEY_REVOKED','quote key revocation epoch mismatch');
-  const rawKey=decodeB64url(trusted.publicKey),fingerprint='sha256:'+hex(await sha256(rawKey)).slice(2);
-  if(!same(fingerprint,auth.publicKeyFingerprint))fail('KEY_FINGERPRINT_MISMATCH','quote key fingerprint differs from trusted policy');
+  const rawKey=decodeB64url(trusted.publicKey),keyFingerprint='sha256:'+hex(await sha256(rawKey)).slice(2);
+  if(!same(keyFingerprint,auth.publicKeyFingerprint))fail('KEY_FINGERPRINT_MISMATCH','quote key fingerprint differs from trusted policy');
   const payloadBytes=utf8(canonicalJson(signedPayload(quote))),payloadHash=hex(await sha256(payloadBytes));
   if(!same(payloadHash,auth.payloadHash))fail('PAYLOAD_HASH_MISMATCH','authenticated payload hash mismatch');
   const key=await importEd25519(trusted.publicKey);

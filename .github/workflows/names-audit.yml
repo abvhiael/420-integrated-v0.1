@@ -7,11 +7,16 @@ on:
       - 'contracts/src/interfaces/genesis/INames420.sol'
       - 'contracts/test/Names420Audit.t.sol'
       - 'contracts/test/RegistryIdentityNames420.t.sol'
+      - 'contracts/test/Names420DependencyModel.t.sol'
+      - 'contracts/config/interfaces/dependency-matrix.json'
+      - 'contracts/config/interfaces/names-dependency-model.json'
       - 'wallet/web/core/names-client.js'
       - 'wallet/web/test/names-client.test.js'
       - 'docs/apps/names/**'
       - 'docs/audit/420NAMES-*'
       - 'scripts/verify-genesis-interface-layer.py'
+      - 'scripts/verify-names-dependency-model.py'
+      - 'docs/architecture/decisions/NAMES-AUDIT-2-DEPENDENCY-MODEL.md'
       - '.github/workflows/names-audit.yml'
   workflow_dispatch:
 
@@ -54,18 +59,25 @@ jobs:
       - name: Verify Genesis interface-layer inventory
         run: python scripts/verify-genesis-interface-layer.py
 
+      - name: Verify 420Names dependency model
+        run: python scripts/verify-names-dependency-model.py
+
       - name: Check Names Solidity formatting
         working-directory: contracts
-        run: forge fmt --check src/interfaces/genesis/INames420.sol test/Names420Audit.t.sol
+        run: forge fmt --check src/interfaces/genesis/INames420.sol test/Names420Audit.t.sol test/Names420DependencyModel.t.sol
 
       - name: Build Names420 implementation, interface and retained integration suite
         working-directory: contracts
         run: |
-          forge build --force --sizes             src/apps/Names420.sol             src/interfaces/genesis/INames420.sol             test/Names420Audit.t.sol             test/RegistryIdentityNames420.t.sol
+          forge build --force --sizes             src/apps/Names420.sol             src/interfaces/genesis/INames420.sol             test/Names420Audit.t.sol             test/Names420DependencyModel.t.sol             test/RegistryIdentityNames420.t.sol
 
       - name: Run 420Names audit tests
         working-directory: contracts
         run: forge test --match-path 'test/Names420Audit.t.sol' -vvv
+
+      - name: Run 420Names dependency-model tests
+        working-directory: contracts
+        run: forge test --match-path 'test/Names420DependencyModel.t.sol' -vvv
 
       - name: Run retained Registry/Identity/Names integration tests
         working-directory: contracts

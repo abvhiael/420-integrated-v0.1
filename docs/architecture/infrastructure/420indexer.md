@@ -125,6 +125,14 @@ The current implementation includes durable/rebuildable projections for:
 
 Projection writes are subordinate to canonical provenance. Derived balances and protocol views can be discarded and rebuilt when necessary.
 
+## Registry projection rebuild integration
+
+The production `indexer420` runtime rebuilds its ProtocolRegistry service catalogue from the durable store's current canonical block/log history after the initial catch-up and after every subsequent successful catch-up. The rebuild filters the canonical Registry address, validates chain/block/log provenance, decodes only the pinned service-history event set, and constructs a fresh catalogue before atomically replacing the API projection.
+
+This design deliberately favors deterministic rebuild over incremental hidden state. When a non-finalized reorg removes orphaned logs from the durable store, the next Registry rebuild necessarily drops those orphaned service/version records and reconstructs the replacement canonical suffix.
+
+Security-sensitive consumers may additionally supply a direct canonical Registry reader to the Indexer backend. When present, a direct Registry read and the indexed projection must agree exactly; disagreement or direct-read failure is returned as an error instead of serving the derived result. Live target-network binding of that reader remains deployment evidence and is qualified separately.
+
 ## Protocol decoding
 
 Protocol decoding is version-aware and historical.

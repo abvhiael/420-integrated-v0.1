@@ -71,10 +71,11 @@ contract ComputeVerificationPolicyBinding420Test {
     }
 
     function _publish(bytes32 terms) private returns (uint32 revision) {
+        bytes32 verificationKind = policies.KIND_VERIFICATION();
         vm.prank(GOV);
         revision = policies.publish(
             POLICY,
-            policies.KIND_VERIFICATION(),
+            verificationKind,
             terms,
             SCHEMA,
             1 days,

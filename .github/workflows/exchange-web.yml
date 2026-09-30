@@ -52,6 +52,18 @@ jobs:
           name: exchange-pre02-chromium-${{ github.sha }}
           path: exchange/web/acceptance-evidence/pre02-chromium.json
           if-no-files-found: warn
+      - name: PRE-03 metadata-driven read-only Chromium acceptance
+        working-directory: exchange/web
+        env:
+          EXCHANGE_BUILD_SHA: ${{ github.sha }}
+        run: node scripts/pre03-chromium-acceptance.mjs
+      - name: Preserve PRE-03 browser acceptance evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exchange-pre03-chromium-${{ github.sha }}
+          path: exchange/web/acceptance-evidence/pre03-chromium.json
+          if-no-files-found: warn
       - name: Frontend secret scan
         working-directory: exchange/web
         run: |

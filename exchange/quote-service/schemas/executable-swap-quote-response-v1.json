@@ -181,7 +181,7 @@
                 "maxLength": 48
               },
               "amountRaw": {
-                "$ref": "#/$defs/raw"
+                "$ref": "#/$defs/rawZero"
               }
             }
           }

@@ -70,11 +70,11 @@ test('PRE-04 provider-neutral adapters fail closed when dependencies are absent'
     clock:()=>1000,signer:testSigner(),
   })(request),/route outage/);
 });
-test('PRE-04 signer rotation design contains no production key material and defers authentication to PRE-05',()=>{
-  assert.equal(SIGNER_ROTATION_MODEL.status,'DESIGN_ONLY_PRE04');
-  assert.equal(SIGNER_ROTATION_MODEL.activeKeyVersion,null);
-  assert.deepEqual(SIGNER_ROTATION_MODEL.acceptedKeyVersions,[]);
-  assert.match(SIGNER_ROTATION_MODEL.rules.join(' '),/PRE-05/);
+test('PRE-05 signer rotation model is policy-driven and excludes repository private keys',()=>{
+  assert.equal(SIGNER_ROTATION_MODEL.status,'PRE05_IMPLEMENTED_POLICY_DRIVEN');
+  assert.equal(SIGNER_ROTATION_MODEL.privateKeyStorage,'EXTERNAL_INJECTED_SIGNER_ONLY');
+  assert.equal(SIGNER_ROTATION_MODEL.overlap,'BOUNDED_BY_CLIENT_POLICY');
+  assert.equal(SIGNER_ROTATION_MODEL.revocation,'EXPLICIT_EPOCH_AND_REVOKED_FLAG');
 });
 
 test('PRE-05 quote engine refuses to start without an authenticated signer',()=>{

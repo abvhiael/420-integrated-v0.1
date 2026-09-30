@@ -207,17 +207,13 @@ Current frozen system maps assign:
 
 `ProtocolRegistry = 0x0000000000000000000000000000000000000434`
 
-The repository also contains an explicit reconciliation record:
+REG-AUDIT-4 adopts the repository's later mainline authority decision to preserve the frozen Step 6.2 predeploy map and registry-resolve non-predeploy services. The complete active namespace is recorded in:
 
-`contracts/config/wallet-authority-address-reconciliation.json`
+`contracts/config/genesis-address-namespace.json`
 
-Status:
+The historical Wallet/W14.7 records that proposed moving ProtocolRegistry to `0x0448` are preserved as explicit **SUPERSEDED** evidence and are not active address authority. Both system mirrors, the predeploy plan, deployment manifest, canonical discovery map, Wallet resident configuration and Developer Hub examples now agree on Registry `0x0434`.
 
-`BLOCKED_GLOBAL_GENESIS_ADDRESS_REBASE_REQUIRED`
-
-That record says the current `0x0434` assignment conflicts with later canonical-authority work and must be reconciled atomically across the complete Genesis namespace. It explicitly forbids treating candidate addresses as deployed contracts.
-
-Therefore this audit does **not** rewrite Registry examples to `0x0434` as a final fix. Doing so would merely replace one stale claim with another address that the repository itself says is subject to global reconciliation.
+This address reconciliation does not claim deployed runtime bytecode, storage initialization or live-chain verification; those remain later roadmap gates.
 
 ## Test audit
 
@@ -330,6 +326,8 @@ Add focused negative/integration tests for the currently partial guarantees:
 Exit: every REG-INV-001..012 has named executable evidence.
 
 ### REG-AUDIT-4 — reconcile the Genesis address namespace
+
+**Repository status:** COMPLETE. Canonical Registry address is `0x0000000000000000000000000000000000000434`; historical `0x0448` relocation proposals are superseded. Reconciled exact head `9baaa5c6e89cf08bf152d36c83477890a41ae727`, based on `main` `76e7f5732247efc091c8842efaecce2b11c6fc61`, passed REG-AUDIT-4, Genesis Address Authority, all Solidity PR shards, Integrated, Docs, Developer Hub, Indexer, Wallet Web, and retained Registry gates under PR #402.
 
 Use the existing global address-reconciliation work; do not solve Registry in isolation.
 

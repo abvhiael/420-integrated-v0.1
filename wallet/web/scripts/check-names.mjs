@@ -92,7 +92,7 @@ requireStrings('test/names-management.test.js', [
 
 requireStrings('test/names-management-ui.test.js', [
   'canonical lifecycle workflow',
-  'qualified deployment binding',
+  'hard-coded Names deployment',
 ], 'Names management UI regression suite');
 
 if (errors.length) {

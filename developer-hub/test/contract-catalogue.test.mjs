@@ -41,7 +41,7 @@ test('exposes immutable ABI/interface references', () => {
   const catalogue = createContractCatalogue420(fixture());
   const ref = catalogue.getAbiReference('ProtocolRegistry');
   assert.match(ref.artifact, /ProtocolRegistry\.json$/);
-  assert.match(ref.interface, /IProtocolRegistry\.sol$/);
+  assert.match(ref.interface, /IProtocolRegistry420\.sol$/);
   assert.equal(ref.abiSha256.length, 64);
 });
 

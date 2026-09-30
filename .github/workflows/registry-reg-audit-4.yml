@@ -18,7 +18,7 @@ permissions:
   contents: read
 concurrency:
   group: registry-reg-audit-4-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   qualify:
     if: github.event_name != 'pull_request' || !startsWith(github.head_ref, 'audit/')

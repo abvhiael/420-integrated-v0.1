@@ -45,7 +45,7 @@ export function buildExecutionReview({prepared,session,reviewedFields,authentica
   return Object.freeze({
     kind:prepared.kind,account:normalizeAccount(session.account),chainId:normalizeChainId(session.chainId),generation:session.generation,
     transactionFingerprint:fields.transactionFingerprint,reviewedFields:fields,quoteId:prepared.context.quoteId,expiresAt:prepared.context.expiresAt,
-    authentication:Object.freeze({...authenticationEvidence}),
+    authentication:authenticationEvidence,
   });
 }
 

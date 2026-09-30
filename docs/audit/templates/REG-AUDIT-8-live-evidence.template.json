@@ -1,0 +1,92 @@
+{
+  "schema": "420-registry-reg-audit-8-live-evidence-v1",
+  "status": "REPLACE_WITH_LIVE_EVIDENCE_COMPLETE",
+  "releaseCandidateSha": "REPLACE",
+  "environment": "testnet",
+  "chainId": 420,
+  "evidenceSha256": "REPLACE_CANONICAL_DIGEST_EXCLUDING_THIS_FIELD",
+  "registry": {
+    "address": "0x0000000000000000000000000000000000000434",
+    "sourcePath": "contracts/src/apps/ProtocolRegistry.sol",
+    "sourceBlobSha1": "9ab3d53a68b6533978f41e0202e5268f1d615c19",
+    "runtimeCodeHash": "0x9f9e5f794296cf9faf5f8c8d17cd815f3c19c004a158c15cb61b5a29eaacb330",
+    "governanceTimelock": "0x0000000000000000000000000000000000000429",
+    "deploymentMode": "GENESIS_PREDEPLOY"
+  },
+  "deploymentProof": {
+    "genesisBlockHash": "REPLACE",
+    "genesisBlockNumber": "0x0",
+    "codeHashAtGenesis": "0x9f9e5f794296cf9faf5f8c8d17cd815f3c19c004a158c15cb61b5a29eaacb330",
+    "storageRootAtGenesis": "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421",
+    "latestCodeHash": "0x9f9e5f794296cf9faf5f8c8d17cd815f3c19c004a158c15cb61b5a29eaacb330"
+  },
+  "readAssertions": [
+    {
+      "name": "governanceTimelock",
+      "to": "0x0000000000000000000000000000000000000434",
+      "callData": "REPLACE",
+      "expectedResult": "0x0000000000000000000000000000000000000000000000000000000000000429"
+    },
+    {
+      "name": "systemName",
+      "to": "0x0000000000000000000000000000000000000434",
+      "callData": "REPLACE",
+      "expectedResult": "REPLACE"
+    },
+    {
+      "name": "protocolVersion",
+      "to": "0x0000000000000000000000000000000000000434",
+      "callData": "REPLACE",
+      "expectedResult": "REPLACE"
+    },
+    {
+      "name": "currentVersionAfterPublication",
+      "to": "0x0000000000000000000000000000000000000434",
+      "callData": "REPLACE",
+      "expectedResult": "REPLACE"
+    },
+    {
+      "name": "registrationProfileAfterPublication",
+      "to": "0x0000000000000000000000000000000000000434",
+      "callData": "REPLACE",
+      "expectedResult": "REPLACE"
+    },
+    {
+      "name": "historicalVersionAfterDeprecation",
+      "to": "0x0000000000000000000000000000000000000434",
+      "callData": "REPLACE",
+      "expectedResult": "REPLACE"
+    },
+    {
+      "name": "currentInactiveAfterDeprecation",
+      "to": "0x0000000000000000000000000000000000000434",
+      "callData": "REPLACE",
+      "expectedResult": "REPLACE"
+    }
+  ],
+  "strictPublication": {
+    "transactionHash": "REPLACE",
+    "serviceId": "REPLACE_0x32_BYTES",
+    "version": 1,
+    "implementation": "REPLACE_0x20_BYTES",
+    "metadataHash": "REPLACE_0x32_BYTES",
+    "manifestHash": "REPLACE_0x32_BYTES",
+    "dependencyRoot": "REPLACE_0x32_BYTES",
+    "interfaceHash": "REPLACE_0x32_BYTES"
+  },
+  "deprecation": {
+    "transactionHash": "REPLACE",
+    "serviceId": "REPLACE_0x32_BYTES",
+    "version": 1
+  },
+  "derivedConsumers": {
+    "indexerUrl": "REPLACE_WITH_HTTPS_INDEXER",
+    "explorerUrl": "REPLACE_WITH_HTTPS_EXPLORER",
+    "recoveryEvidenceUrl": "REPLACE_WITH_IMMUTABLE_HTTPS_RECOVERY_EVIDENCE"
+  },
+  "operator": {
+    "deploymentDecisionRef": "REPLACE",
+    "governanceExecutionRef": "REPLACE",
+    "notes": "No credentials belong in this evidence file."
+  }
+}

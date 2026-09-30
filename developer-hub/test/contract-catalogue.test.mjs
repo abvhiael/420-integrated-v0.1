@@ -10,7 +10,7 @@ function fixture() {
       {
         name: 'ProtocolRegistry',
         protocol: '420Registry',
-        address: '0x0000000000000000000000000000000000000420',
+        address: '0x0000000000000000000000000000000000000434',
         source: 'genesis',
         version: '1.0.0',
         deploymentBlock: 0,
@@ -31,8 +31,8 @@ test('accepts verified catalogue entries with provenance and ABI identity', () =
 test('resolves contracts by name and normalized address without inventing entries', () => {
   const catalogue = createContractCatalogue420(fixture());
   assert.equal(catalogue.chainId, 420n);
-  assert.equal(catalogue.get('ProtocolRegistry').address, '0x0000000000000000000000000000000000000420');
-  assert.equal(catalogue.getByAddress('0x0000000000000000000000000000000000000420').name, 'ProtocolRegistry');
+  assert.equal(catalogue.get('ProtocolRegistry').address, '0x0000000000000000000000000000000000000434');
+  assert.equal(catalogue.getByAddress('0x0000000000000000000000000000000000000434').name, 'ProtocolRegistry');
   assert.equal(catalogue.get('Missing420'), null);
   assert.equal(catalogue.getByAddress('0x0000000000000000000000000000000000000001'), null);
 });

@@ -42,6 +42,7 @@ test('PRE-04 quote output is deterministic for same inputs, source state and clo
 test('PRE-04 rejects stale/wrong-chain inputs, deployment mismatch and invalid fee policy',async()=>{
   const request=validateRequest(vector.request);
   await assert.rejects(engine({observedAt:900})(request),e=>e.code==='STALE_INPUT');
+  await assert.rejects(engine({route:{...vector.route,observedAt:900}})(request),e=>e.code==='STALE_INPUT');
   const wrongChainAdapter=createStaticChainAdapter({assets:vector.assets,feeBps:vector.feeBps,deployment:{deploymentId:vector.deploymentId,manifestHash:vector.manifestHash},chainId:'0x421',observedAt:1000});
   await assert.rejects(createQuoteEngine({chainId:vector.chainId,router:vector.router,spender:vector.spender,deploymentId:vector.deploymentId,manifestHash:vector.manifestHash,clock:()=>1000,routeSource:createStaticRouteSource({routes:[vector.route]}),chainAdapter:wrongChainAdapter})(request),e=>e.code==='CHAIN_MISMATCH');
   await assert.rejects(engine({deploymentId:'0x'+'ff'.repeat(32)})(request),e=>e.code==='DEPLOYMENT_MISMATCH');

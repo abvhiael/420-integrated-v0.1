@@ -217,4 +217,6 @@ Successful retained qualification runs:
 This evidence-only closeout update records the already-qualified SHA and run evidence and does not alter qualification-relevant implementation, tests, workflow logic, dependencies, or substantive CMP-1.3 requirements.
 
 
+## Completion
+
 **COMPLETE WITHIN REPOSITORY QUALIFICATION SCOPE.** The exact reconciled implementation/reconciliation head passed the complete retained qualification set, and this durable closeout record identifies that SHA and its run evidence. Live deployment/publication remains blocked by the separately recorded CMP-1.5, public-testnet, runtime-evidence and ProtocolRegistry-publication prerequisites.

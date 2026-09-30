@@ -408,6 +408,35 @@ contract ComputeWorkerReadModel420Test {
         return abi.encodePacked(r, s, v);
     }
 
+    function _eligibilityQuery(uint64 revision)
+        private
+        view
+        returns (ComputeWorkerReadModel420.EligibilityQuery memory query)
+    {
+        ComputeWorkerCapabilityProfile420.Requirements memory req;
+        req.requiredResourceComputeClass = resources.CPU_GENERAL();
+        req.requiredArchitecture = ARCH;
+        req.requiredCpuClass = CPU;
+        req.requiredSoftwareCapability = SOFTWARE;
+        req.minMemoryMiB = 1024;
+
+        query = ComputeWorkerReadModel420.EligibilityQuery({
+            workerId: workerId,
+            workerRevision: revision,
+            requirements: req,
+            requireTrustedAttestation: true,
+            attestationPolicyId: CAP_POLICY,
+            attestationId: attestationId,
+            trustPolicyId: TRUST_POLICY,
+            requireTrustReference: true,
+            trustReferenceId: trustReferenceId,
+            stakePolicyId: STAKE_POLICY,
+            requireStakeReference: true,
+            stakeReferenceId: stakeReferenceId
+        });
+    }
+
+
     function testDescriptorAndDomainSurfaceIsVersionedAndCanonical() public view {
         require(reads.schemaVersion() == 1, "wrong schema version");
         require(reads.READ_MODEL_SCHEMA_V1() != bytes32(0), "missing schema id");
@@ -463,28 +492,7 @@ contract ComputeWorkerReadModel420Test {
 
     function testEligibilityIsPublicFailClosedAndStaleRevisionSafe() public {
         uint64 revision = workers.worker(workerId).revision;
-        ComputeWorkerCapabilityProfile420.Requirements memory req;
-        req.requiredResourceComputeClass = resources.CPU_GENERAL();
-        req.requiredArchitecture = ARCH;
-        req.requiredCpuClass = CPU;
-        req.requiredSoftwareCapability = SOFTWARE;
-        req.minMemoryMiB = 1024;
-
-        ComputeWorkerReadModel420.EligibilityQuery memory query =
-            ComputeWorkerReadModel420.EligibilityQuery({
-                workerId: workerId,
-                workerRevision: revision,
-                requirements: req,
-                requireTrustedAttestation: true,
-                attestationPolicyId: CAP_POLICY,
-                attestationId: attestationId,
-                trustPolicyId: TRUST_POLICY,
-                requireTrustReference: true,
-                trustReferenceId: trustReferenceId,
-                stakePolicyId: STAKE_POLICY,
-                requireStakeReference: true,
-                stakeReferenceId: stakeReferenceId
-            });
+        ComputeWorkerReadModel420.EligibilityQuery memory query = _eligibilityQuery(revision);
         ComputeWorkerReadModel420.EligibilityView memory ok = reads.eligibility(query);
         require(ok.workerEligible && ok.capabilityEligible && ok.trustEligible && ok.stakeEligible, "valid admission read rejected");
 
@@ -495,6 +503,57 @@ contract ComputeWorkerReadModel420Test {
         vm.prank(address(0xBAD));
         ComputeWorkerRegistry420.Worker memory publicRead = reads.currentWorker(workerId);
         require(publicRead.revision == revision, "caller-dependent read");
+    }
+
+    function testCrossComponentAdmissionShutdownPreservesAcceptedHistoryAndCapacity() public {
+        uint64 acceptedRevision = reads.assignment(assignmentRef).workerRevision;
+        bytes32 reservationId = reads.assignment(assignmentRef).reservationId;
+        bytes32 snapshotCommitment = reads.assignment(assignmentRef).snapshotCommitment;
+
+        vm.prank(OPERATOR);
+        workers.suspend(workerId);
+        vm.prank(GOV);
+        attestations.setPolicyAcceptance(CAP_POLICY, false);
+        vm.prank(GOV);
+        workerTrust.setPolicyAcceptance(TRUST_POLICY, false);
+        vm.prank(GOV);
+        workerStake.setPolicyAcceptance(STAKE_POLICY, false);
+
+        ComputeWorkerReadModel420.EligibilityView memory closed =
+            reads.eligibility(_eligibilityQuery(acceptedRevision));
+        require(!closed.workerEligible, "suspended worker remained eligible");
+        require(!closed.capabilityEligible, "closed attestation policy remained eligible");
+        require(!closed.trustEligible, "closed Trust policy remained eligible");
+        require(!closed.stakeEligible, "closed stake policy remained eligible");
+
+        ComputeWorkerRegistry420.Worker memory historical =
+            reads.workerRevision(workerId, acceptedRevision);
+        require(historical.status == ComputeWorkerRegistry420.Status.ACTIVE, "historical worker rewritten");
+
+        ComputeJobWorkerSnapshotEvidence420.Assignment memory accepted =
+            reads.assignment(assignmentRef);
+        require(accepted.snapshotCommitment == snapshotCommitment, "accepted snapshot rewritten");
+        require(accepted.workerRevision == acceptedRevision, "accepted revision drifted");
+        require(reads.attestationCore(attestationId).workerRevision == acceptedRevision, "attestation history lost");
+        require(reads.trustReference(trustReferenceId).workerRevision == acceptedRevision, "Trust history lost");
+        require(reads.stakeReference(stakeReferenceId).workerRevision == acceptedRevision, "stake history lost");
+
+        ComputeWorkerCapacityReservation420.Reservation memory reservation =
+            capacity.reservation(reservationId);
+        require(reservation.status == ComputeWorkerCapacityReservation420.Status.RESERVED, "accepted capacity confiscated");
+        require(capacity.liveResourceUnits(resourceId) == 1, "accepted capacity accounting changed");
+    }
+
+    function testFuzzNonCurrentWorkerRevisionNeverQualifies(uint64 candidateRevision) public view {
+        uint64 currentRevision = workers.worker(workerId).revision;
+        if (candidateRevision == currentRevision) candidateRevision = 0;
+
+        ComputeWorkerReadModel420.EligibilityView memory out =
+            reads.eligibility(_eligibilityQuery(candidateRevision));
+        require(!out.workerEligible, "non-current worker revision eligible");
+        require(!out.capabilityEligible, "non-current capability revision eligible");
+        require(!out.trustEligible, "non-current Trust revision eligible");
+        require(!out.stakeEligible, "non-current stake revision eligible");
     }
 
     function testExplicitNonAiWorkloadAcceptedSnapshotIsReconstructable() public view {

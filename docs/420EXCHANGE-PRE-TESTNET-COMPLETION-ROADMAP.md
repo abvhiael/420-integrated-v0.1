@@ -97,7 +97,7 @@ Dependencies: PRE-02.
 
 ---
 
-### PRE-04 — Exchange executable quote backend and schema — TODO / CRITICAL
+### PRE-04 — Exchange executable quote backend and schema — COMPLETE
 
 Build the missing repository-owned executable quote producer.
 
@@ -112,7 +112,7 @@ Required work:
 - define key/signer rotation without embedding production keys;
 - provide offline deterministic test vectors and mock-chain fixtures.
 
-**Exit:** a tested backend service can emit a complete, deterministic execution quote under mock/offline dependencies; live chain qualification remains deferred.
+**Exit:** SATISFIED at implementation SHA `ce40f17b7ee5e15d5920b64b923171bba29826df`. A repository-owned Node 22 service now serves versioned POST `/executable-swap-quote`, emits complete deterministic execution-review quotes from explicit provider-neutral route/chain adapters, binds deployment/manifest/account/assets/route/raw amounts/fees/net minimum/router/spender/replay domain/timestamps/builder inputs, fails closed on stale/wrong-chain/unsupported/malformed/oversized/dependency/resource-abuse cases, exposes deterministic errors and redacted logs, and contains no production signing key. Level 1 plus PRE-04 app-integration milestone qualification passed in 420Exchange Web Verification run `36786390614`. Durable evidence: `docs/420EXCHANGE-PRE-04-QUALIFICATION.md`. Live route/chain qualification and cryptographic provenance remain deferred.
 
 Dependencies: PRE-10 data/source contract can be developed in parallel.
 

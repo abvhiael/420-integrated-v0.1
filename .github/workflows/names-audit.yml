@@ -66,12 +66,7 @@ jobs:
         working-directory: contracts
         run: forge fmt --check src/interfaces/genesis/INames420.sol test/Names420Audit.t.sol test/Names420DependencyModel.t.sol
 
-      - name: Build Names420 implementation, interface and retained integration suite
-        working-directory: contracts
-        run: |
-          forge build --sizes             src/apps/Names420.sol             src/interfaces/genesis/INames420.sol             test/Names420Audit.t.sol             test/Names420DependencyModel.t.sol             test/RegistryIdentityNames420.t.sol
-
-      - name: Run retained 420Names Level 1 Solidity suite
+      - name: Build and run retained 420Names Level 1 Solidity suite
         working-directory: contracts
         run: forge test --match-path 'test/*Names420*.t.sol' -vvv
 

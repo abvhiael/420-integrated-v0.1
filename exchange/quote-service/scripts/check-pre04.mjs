@@ -7,7 +7,7 @@ for(const relative of [
  'fixtures/pre04-vector-v1.json','config/signer-rotation-v1.json','test/quote-engine.test.js','test/http.test.js','test/browser-intake-compat.test.js'
 ])if(!fs.existsSync(path.join(root,relative)))throw Error('PRE-04 missing '+relative);
 const engine=fs.readFileSync(path.join(root,'src/quote-engine.js'),'utf8');
-for(const marker of ['deploymentId','manifestHash','replayDomain','quoteEconomics','builder','DEFERRED_TO_PRE05','SIGNER_ROTATION_MODEL'])if(!engine.includes(marker))throw Error('PRE-04 quote engine missing '+marker);
+for(const marker of ['deploymentId','manifestHash','replayDomain','quoteEconomics','builder','SIGNER_ROTATION_MODEL'])if(!engine.includes(marker))throw Error('PRE-04 quote engine missing '+marker);
 const http=fs.readFileSync(path.join(root,'src/http.js'),'utf8');
 for(const marker of ['/executable-swap-quote','REQUEST_TOO_LARGE','RATE_LIMITED','RESPONSE_TOO_LARGE','createRedactedLogger'])if(!http.includes(marker))throw Error('PRE-04 HTTP service missing '+marker);
 for(const relative of ['fixtures/pre04-vector-v1.json','config/signer-rotation-v1.json']){

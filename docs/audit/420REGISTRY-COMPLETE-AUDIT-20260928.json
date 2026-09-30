@@ -241,6 +241,36 @@
         "walletWeb": 36646631624
       },
       "exitCriteria": "one canonical Registry address, with no contradictory authoritative assignment"
+    },
+    "REG-AUDIT-5": {
+      "title": "generate final Registry artifact and predeploy state",
+      "status": "COMPLETE_PENDING_FINAL_CLEANUP_HEAD_RERUN",
+      "record": "docs/audit/REG-AUDIT-5-REGISTRY-PREDEPLOY-QUALIFICATION.json",
+      "pr": 409,
+      "canonicalRegistry": "0x0000000000000000000000000000000000000434",
+      "sourceBlobSha1": "9ab3d53a68b6533978f41e0202e5268f1d615c19",
+      "runtimeArtifact": "contracts/artifacts/ProtocolRegistry.json",
+      "runtimeCodeHash": "0x9f9e5f794296cf9faf5f8c8d17cd815f3c19c004a158c15cb61b5a29eaacb330",
+      "predeployState": "contracts/config/predeploy/ProtocolRegistry-predeploy-state.json",
+      "storageRoot": "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421",
+      "substantiveQualifiedSha": "f0a4065a1e685f318f67dc1b737b343451a8e1d0",
+      "substantiveMainBaseSha": "2a45a2c8847f40b7aa1b27ae4556bf8d547a1f91",
+      "substantiveRuns": {
+        "regAudit5": 36663143982,
+        "genesisAddressAuthority": 36663144012,
+        "solidityContracts": 36663144215,
+        "integrated": 36663143955,
+        "docs": 36663143995,
+        "registryDecision": 36663144013,
+        "registryInvariantCoverage": 36663143989,
+        "registryAddressNamespace": 36663144053,
+        "developerHub": 36663144098,
+        "indexer": 36663143967,
+        "walletWeb": 36663143993
+      },
+      "finalCleanupQualifiedSha": "RECORDED_IN_PR_409_METADATA_AFTER_FINAL_EXACT_HEAD_QUALIFICATION",
+      "nextStep": "REG-AUDIT-6",
+      "exitCriteria": "reproducible Registry predeploy artifact tied to exact source SHA"
     }
   }
 }

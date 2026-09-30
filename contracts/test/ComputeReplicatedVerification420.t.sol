@@ -63,9 +63,6 @@ contract CMP146Fixture420 is
         ComputeJobRegistry420(jobs).assignWorker(jobId, expectedRevision, worker, assignmentRef);
     }
 
-    function commitIntoJob(bytes32 jobId, uint64 expectedRevision, bytes32 resultCommitment) external {
-        ComputeJobRegistry420(jobs).recordResult(jobId, expectedRevision, resultCommitment);
-    }
 }
 
 contract ComputeReplicatedVerification420Test {
@@ -226,7 +223,8 @@ contract ComputeReplicatedVerification420Test {
     function _commitWorkerResult(bytes32 result) private {
         fixture.assignIntoJob(jobId, 5, OPERATOR, ASSIGNMENT);
         fixture.setExpectedResult(result);
-        fixture.commitIntoJob(jobId, 6, result);
+        vm.prank(OPERATOR);
+        jobs.recordResult(jobId, 6, result);
         require(
             jobs.job(jobId).status == ComputeJobRegistry420.Status.RESULT_COMMITTED,
             "fixture did not commit result"

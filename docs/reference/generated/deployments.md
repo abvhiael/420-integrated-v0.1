@@ -43,7 +43,7 @@ The repository currently contains example-scoped deployment, release and catalog
 
 | Contract | Chain | Address | Version | Deployment block | Declared source | Why withheld |
 | --- | --- | --- | --- | ---: | --- | --- |
-| `ProtocolRegistry` | `420` | `0x0000000000000000000000000000000000000420` | `1.0.0` | 0 | `genesis` | catalogue file is `local.example.json`; declared artifact/interface are not checked in and ABI hash is example-grade, so this is not distributable canonical deployment evidence |
+| `ProtocolRegistry` | `420` | `0x0000000000000000000000000000000000000434` | `1.0.0` | 0 | `genesis` | catalogue file is `local.example.json`; declared artifact/interface are not checked in and ABI hash is example-grade, so this is not distributable canonical deployment evidence |
 
 ## Status by environment
 

@@ -60,7 +60,7 @@ export function mountWalletUI({documentRef=globalThis.document,windowRef=globalT
   }
   function invalidateSelectedProvider(reason){
     if(context.disposed||!context.controller?.wallet)return;
-    context.controller.unbind();context.selectedProviderId=null;
+    context.controller.unbind(reason);context.selectedProviderId=null;
     context.quoteSurface?.clear('Wallet provider changed; quote review invalidated.');
     message.textContent='Wallet provider changed. Connect and review again.';
     connect.textContent='Connect wallet';connect.disabled=!select.value;
@@ -93,13 +93,13 @@ export function mountWalletUI({documentRef=globalThis.document,windowRef=globalT
   const observer=typeof MutationObserver==='function'?new MutationObserver(()=>{
     lockExecution();
     if(context.quoteSurface){
-      if(context.quoteSurface.panel.parentElement!==view)context.quoteSurface.clear('Swap view replaced; review invalidated.');
+      if(context.quoteSurface.panel.parentElement!==view){context.controller?.invalidateExecution('view-replaced');context.quoteSurface.clear('Swap view replaced; review invalidated.');}
       context.quoteSurface.refresh();
     }
   }):null;
   if(view&&observer)observer.observe(view,{childList:true});lockExecution();updateReadiness();
-  function onVisibility(){if(documentRef.hidden){context.quoteSurface?.clear('Page hidden; quote review invalidated.');lockExecution();}else{context.quoteSurface?.clear('Page resumed; request a fresh quote.');context.quoteSurface?.refresh();}}
-  function onNavigation(){context.quoteSurface?.clear('Navigation changed; quote review invalidated.');context.quoteSurface?.refresh();lockExecution();}
+  function onVisibility(){context.controller?.invalidateExecution(documentRef.hidden?'page-hidden':'page-resumed');if(documentRef.hidden){context.quoteSurface?.clear('Page hidden; quote review invalidated.');lockExecution();}else{context.quoteSurface?.clear('Page resumed; request a fresh quote.');context.quoteSurface?.refresh();}}
+  function onNavigation(){context.controller?.invalidateExecution('navigation-change');context.quoteSurface?.clear('Navigation changed; quote review invalidated.');context.quoteSurface?.refresh();lockExecution();}
   documentRef.addEventListener('visibilitychange',onVisibility);
   windowRef.addEventListener('popstate',onNavigation);
   Promise.resolve().then(loadRuntime).then(runtime=>{if(context.disposed)return;

@@ -44,6 +44,7 @@
     "service": "420/service/exchange-quote/v1",
     "endpointOrigin": null,
     "deployment": null,
-    "producers": []
+    "producers": [],
+    "maxKeyOverlapSeconds": 3600
   }
 }

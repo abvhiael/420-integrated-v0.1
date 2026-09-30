@@ -2,7 +2,6 @@
   "schema": "420-exchange-quote-auth-policy-v1",
   "status": "UNRESOLVED",
   "service": "420/service/exchange-quote/v1",
-  "endpointOrigin": null,
   "maxKeyOverlapSeconds": 3600,
   "deployment": null,
   "producers": [],
@@ -12,5 +11,6 @@
     "active key overlap is bounded by maxKeyOverlapSeconds",
     "revoked keys fail closed even if their signature is mathematically valid",
     "private signing keys are never stored in browser/runtime policy"
-  ]
+  ],
+  "endpointUrl": null
 }

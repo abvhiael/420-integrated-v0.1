@@ -120,7 +120,11 @@ def validate_storage(artifact):
 
 def validate_storage_init():
     cfg = json.loads(STORAGE_INIT.read_text(encoding="utf-8"))
-    entries = cfg.get("contracts", cfg)
+    if cfg.get("schema") != "420-predeploy-storage-init-v2":
+        fail("storage-init schema drift")
+    if cfg.get("governance_timelock", "").lower() != GOVERNANCE_TIMELOCK:
+        fail("storage-init governance_timelock drift")
+    entries = cfg.get("entries")
     item = entries.get(CONTRACT) if isinstance(entries, dict) else None
     if not isinstance(item, dict):
         fail("storage-init Names420 entry missing")

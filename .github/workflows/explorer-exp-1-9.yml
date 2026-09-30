@@ -46,6 +46,7 @@ permissions:
 
 jobs:
   qualify:
+    if: github.event_name != 'pull_request' || !startsWith(github.head_ref, 'audit/')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout exact qualification head

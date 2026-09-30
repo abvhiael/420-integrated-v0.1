@@ -136,17 +136,7 @@
       "MetadataCommitment"
     ],
     "420Names": [
-      "ProtocolRegistry",
-      "GovernanceAuthority",
-      "PauseRegistry",
-      "CapabilityRegistry",
-      "SystemSafety",
-      "GenesisInitialization",
-      "Migration",
-      "SignedEnvelope",
-      "ReplayProtection",
-      "ChainContext",
-      "MetadataCommitment"
+      "GovernanceAuthority"
     ],
     "420Identity": [
       "ProtocolRegistry",

@@ -5,14 +5,19 @@ import "../src/apps/Names420.sol";
 import "../src/interfaces/genesis/INames420.sol";
 
 interface VmNamesAudit420 {
-    function warp(uint256) external;
-    function prank(address) external;
-    function expectRevert(bytes4) external;
+    function warp(
+        uint256
+    ) external;
+    function prank(
+        address
+    ) external;
+    function expectRevert(
+        bytes4
+    ) external;
 }
 
 contract Names420AuditTest {
-    VmNamesAudit420 internal constant vm =
-        VmNamesAudit420(address(uint160(uint256(keccak256("hevm cheat code")))));
+    VmNamesAudit420 internal constant vm = VmNamesAudit420(address(uint160(uint256(keccak256("hevm cheat code")))));
 
     address internal constant ALICE = address(0xA11CE);
     address internal constant BOB = address(0xB0B);
@@ -32,7 +37,10 @@ contract Names420AuditTest {
         names.commit(commitment);
     }
 
-    function _registerAlice(Names420 names, bytes32 labelHash) internal {
+    function _registerAlice(
+        Names420 names,
+        bytes32 labelHash
+    ) internal {
         bytes32 salt = keccak256("alice-salt");
         uint64 duration = names.MIN_REGISTRATION_PERIOD();
         _commit(names, labelHash, 5, ALICE, duration, salt, ALICE);

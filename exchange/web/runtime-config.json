@@ -26,5 +26,16 @@
     "bridge": true,
     "portfolio": true,
     "walletConnection": true
+  },
+  "reviewCatalogue": {
+    "schema": "420-exchange-review-catalogue-v1",
+    "qualification": "UNRESOLVED",
+    "authority": "METADATA_ONLY",
+    "demo": false,
+    "fixture": false,
+    "chainId": null,
+    "maxRouteHops": 8,
+    "assets": [],
+    "markets": []
   }
 }

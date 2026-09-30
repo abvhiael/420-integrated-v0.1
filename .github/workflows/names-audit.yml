@@ -69,19 +69,11 @@ jobs:
       - name: Build Names420 implementation, interface and retained integration suite
         working-directory: contracts
         run: |
-          forge build --force --sizes             src/apps/Names420.sol             src/interfaces/genesis/INames420.sol             test/Names420Audit.t.sol             test/Names420DependencyModel.t.sol             test/RegistryIdentityNames420.t.sol
+          forge build --sizes             src/apps/Names420.sol             src/interfaces/genesis/INames420.sol             test/Names420Audit.t.sol             test/Names420DependencyModel.t.sol             test/RegistryIdentityNames420.t.sol
 
-      - name: Run 420Names audit tests
+      - name: Run retained 420Names Level 1 Solidity suite
         working-directory: contracts
-        run: forge test --match-path 'test/Names420Audit.t.sol' -vvv
-
-      - name: Run 420Names dependency-model tests
-        working-directory: contracts
-        run: forge test --match-path 'test/Names420DependencyModel.t.sol' -vvv
-
-      - name: Run retained Registry/Identity/Names integration tests
-        working-directory: contracts
-        run: forge test --match-path 'test/RegistryIdentityNames420.t.sol' -vvv
+        run: forge test --match-path 'test/*Names420*.t.sol' -vvv
 
       - name: Run Wallet Names integration tests
         working-directory: wallet/web

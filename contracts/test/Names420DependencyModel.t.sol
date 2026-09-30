@@ -5,7 +5,9 @@ import "../src/apps/Names420.sol";
 import "../src/system/SystemAccess.sol";
 
 interface VmNamesDependency420 {
-    function expectRevert(bytes4) external;
+    function expectRevert(
+        bytes4
+    ) external;
 }
 
 contract Names420DependencyModelTest {

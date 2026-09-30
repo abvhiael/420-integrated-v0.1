@@ -166,6 +166,7 @@ def build_records(artifact):
     state = {
         "schema": "420-names-predeploy-state-v1",
         "status": "NAMES_AUDIT_6_FINAL_PREDEPLOY_STATE",
+        "qualificationMilestone": "NAMES_AUDIT_6_LEVEL_2",
         "contractName": CONTRACT,
         "address": ADDRESS,
         "sourceBlobSha1": SOURCE_BLOB,

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "420-exchange-executable-swap-quote-v1",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["schema","marketSource","demo","fixture","quoteId","chainId","account","observedAt","expiresAt","deployment","replayDomain","reviewedIntent","execution","tokens","fees","quoteEconomics","builder","producer"],
+  "properties": {
+    "schema": {"const":"420-exchange-executable-swap-quote-v1"},
+    "marketSource": {"const":"api"},
+    "demo": {"const":false},
+    "fixture": {"const":false},
+    "quoteId": {"type":"string","pattern":"^0x[0-9a-f]{64}$"},
+    "chainId": {"type":"string","pattern":"^0x[0-9a-f]+$"}
+  }
+}

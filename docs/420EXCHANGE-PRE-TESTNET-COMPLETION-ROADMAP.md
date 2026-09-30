@@ -76,7 +76,7 @@ Dependencies: none beyond current V15.11.
 
 ---
 
-### PRE-03 — production-quality read-only swap entry and review UX — PARTIAL
+### PRE-03 — production-quality read-only swap entry and review UX — COMPLETE
 
 Replace the developer-style raw-address entry with a metadata-driven, non-executable review flow.
 
@@ -91,7 +91,7 @@ Required work:
 - complete keyboard, focus, screen-reader and narrow-screen behavior;
 - test decimals/rounding, malformed amounts, duplicate assets, recipient mismatch, wrong chain, oversized routes and stale-review invalidation.
 
-**Exit:** DOM review exactly mirrors canonical execution inputs; no execution action exists on this path.
+**Exit:** SATISFIED at implementation SHA `0caf93beaad9e97081250b18b7b296f8ec09c913`. The review entry is metadata-driven and fail-closed, decimal display values are converted exactly to canonical raw units, the DOM exposes the canonical chain/assets/router/route/input/minimum/fees/recipient/quote/expiry/fingerprint without truncation, unauthenticated candidate provenance is explicit, stale/malformed/dependency states fail closed, and no signing/submission action exists on this path. Level 1 420Exchange Web Verification run `36782695570` passed all retained unit/static/build/PRE-02 checks plus PRE-03 Chromium acceptance and the frontend secret scan. Durable evidence: `docs/420EXCHANGE-PRE-03-QUALIFICATION.md`.
 
 Dependencies: PRE-02.
 

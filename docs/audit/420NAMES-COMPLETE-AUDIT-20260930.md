@@ -101,9 +101,9 @@ The similarly named `abvhiael/420-integrated` repository was inspected first but
 | Genesis dApp map entry | `420 Names -> Names420.sol` | COMPLETE |
 | Frozen system address | `0x0000000000000000000000000000000000000435` | COMPLETE |
 | Historical `0x0445` proposal | explicitly retired/not deployable | COMPLETE |
-| Predeploy plan | source listed at 0x0435 | PARTIAL |
-| Runtime artifact | planned as `contracts/artifacts/Names420.json`, not frozen in deployment manifest | MISSING |
-| Runtime code hash | no Names420 hash in deployment manifest | MISSING |
+| Predeploy plan | 0x0435 source/artifact plus NAMES-AUDIT-5 compiler-artifact provenance frozen; Genesis materialization still pending | PARTIAL |
+| Compiler runtime artifact | `contracts/artifacts/Names420.json` reproducibly frozen from Solidity 0.8.24/Cancun source/config | COMPLETE |
+| Final materialized runtime code hash | constructor immutable not yet materialized; no final Names420 hash in deployment manifest | MISSING — NAMES-AUDIT-6 |
 | Constructor-derived predeploy state | constructor intent described; no Names-specific frozen generated state artifact | PARTIAL |
 | Live/testnet deployment proof | explicitly not chain verified | MISSING |
 | Wallet read client | chain/code/identity/version/ABI checks present | COMPLETE |
@@ -308,7 +308,7 @@ Audit correction:
 Still missing/incomplete for release qualification:
 
 - Names-specific deployment/runbook;
-- generated artifact/hash/predeploy-state reference;
+- final materialized runtime-hash/predeploy-state reference (compiler artifact is frozen in NAMES-AUDIT-5);
 - live-testnet smoke procedure/results;
 - operator/admin recovery procedure tied to deployed state;
 - explicit resolution of the dependency-matrix conflict;
@@ -318,7 +318,7 @@ Still missing/incomplete for release qualification:
 
 Canonical address policy is now coherent: **Names420 is 0x0435**. Historical Wallet proposal `0x0445` is retired and not deployable.
 
-However, `predeploy-plan.json` still marks Names420 `SOURCE_READY`. The deployment manifest lacks the runtime artifact/hash/predeploy-state fields already present for the separately audited ProtocolRegistry. Wallet deployment inventory explicitly marks Names420 `FROZEN_SYSTEM_NOT_CHAIN_VERIFIED` with `deploymentVerified: false`.
+`predeploy-plan.json` now marks Names420 `COMPILER_ARTIFACT_FROZEN` and binds source blob `4cb9b06b4a3febb3bf024c087f3ade1eebdcf31d`, compiler runtime-template SHA-256 `7b34c5506c526d9c7015d4d2c4514cacac585bd571050a53655ea2270d1210bd`, and artifact payload SHA-256 `c40970d3a04503309f9467eaca00c915f5ce3dd1e993c2df3318aa6cd149ab2`. The deployment manifest intentionally still lacks a Names420 final runtime code hash and predeploy-state binding because constructor immutable materialization and deterministic Genesis state are NAMES-AUDIT-6. Wallet deployment inventory remains `FROZEN_SYSTEM_NOT_CHAIN_VERIFIED` with `deploymentVerified: false`.
 
 The public testnet manifest/endpoints are also not qualified. Therefore source existence must not be conflated with deployment.
 
@@ -404,4 +404,4 @@ The public testnet manifest/endpoints are also not qualified. Therefore source e
 
 The most important code defect found in this audit was the stale shared resolver interface, which could cause callers to decode `owner` as the destination address. That defect is repaired on the audit branch with a regression test.
 
-The remaining blockers are broader than unit-test health: canonical interface-layer obligations conflict with the current contract, the documented user-facing management application is absent, runtime/predeploy artifacts are not frozen, and no live testnet deployment exists. These must be resolved in dependency order before 420Names can be declared Genesis-ready.
+The remaining blockers are broader than unit-test health: deterministic Genesis runtime/state materialization, derived indexer/search reconciliation, deployment/operator documentation, and live testnet qualification remain open. The compiler artifact itself is frozen by NAMES-AUDIT-5, but that must not be conflated with a materialized Genesis runtime or deployed code.

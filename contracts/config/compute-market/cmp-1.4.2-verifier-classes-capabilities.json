@@ -1,0 +1,61 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-1.4.2.VerifierClassesCapabilities.v1",
+  "step": "CMP-1.4.2",
+  "title": "Verifier classes and workload capabilities",
+  "canonical_definition": "Support independently typed classes such as protocol verifier, independent verifier, job-owner verifier, oracle verifier, TEE verifier and committee verifier.",
+  "base_main_sha": "152364d9b69b6d5fe159685fb986c9139e0522cb",
+  "qualification_level": 1,
+  "milestone_relationship": {
+    "level_2_required_now": false,
+    "milestone_after": "CMP-1.4.3",
+    "rationale": "Identity/lifecycle and class/workload capability are now separable; broader app-specific integration waits until exact versioned verification policy is added in CMP-1.4.3."
+  },
+  "implementation": {
+    "contract": "contracts/src/compute/ComputeVerifierCapabilityRegistry420.sol",
+    "test": "contracts/test/ComputeVerifierCapabilityRegistry420.t.sol",
+    "verifier_identity_dependency": "contracts/src/compute/ComputeVerifierRegistry420.sol",
+    "classes": [
+      "PROTOCOL_VERIFIER",
+      "INDEPENDENT_VERIFIER",
+      "JOB_OWNER_VERIFIER",
+      "ORACLE_VERIFIER",
+      "TEE_VERIFIER",
+      "COMMITTEE_VERIFIER"
+    ],
+    "workload_binding": "Exact nonzero bytes32 workloadClass; no wildcard or implicit inheritance.",
+    "eligibility": "Exact verifier ID, current authority, current verifier revision, class and workload tuple must all match; verifier identity must be ACTIVE."
+  },
+  "authority_boundaries": [
+    "Class/workload qualification does not appoint a verifier to a job.",
+    "Class/workload qualification does not prove beneficial-owner independence or objective correctness.",
+    "Class/workload qualification does not publish or rewrite a verification policy.",
+    "Class/workload qualification grants no Vault custody, settlement, beneficiary redirection, stake/slash, worker, governance, validator, bridge or arbitrary-wallet authority.",
+    "Each verifier class and workload tuple is independently enabled/revoked with versioned evidence.",
+    "Suspended or retired verifier identities fail closed even when historical capability qualification exists."
+  ],
+  "invariants": [
+    "CMP-INV-005",
+    "CMP-INV-016",
+    "CMP-INV-017",
+    "CMP-INV-020",
+    "CMP-INV-023",
+    "CMP-INV-025",
+    "CMP-INV-026",
+    "CMP-INV-027",
+    "CMP-INV-030"
+  ],
+  "deployment_publication": {
+    "fixed_genesis_predeploy_created": false,
+    "protocol_registry_publication_claimed": false,
+    "live_deployment_claimed": false
+  },
+  "exit_criteria": [
+    "All six canonical initial verifier classes are represented as distinct typed identifiers.",
+    "Verifier capabilities are bound to exact workload-class identifiers.",
+    "Class/workload tuples can be independently qualified and revoked with immutable revision history.",
+    "Eligibility requires an ACTIVE exact-current verifier identity and exact class/workload tuple.",
+    "Unknown classes, zero workloads, zero evidence, unauthorized mutation and retired verifier mutation fail closed.",
+    "No unrelated authority is granted by capability qualification."
+  ],
+  "status": "IMPLEMENTATION_COMPLETE_QUALIFICATION_PENDING"
+}

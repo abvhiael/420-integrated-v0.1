@@ -82,9 +82,9 @@ export async function verifyQuoteAuthentication({runtime,quote,prepared,nowSecon
   const expectedDeployment=runtime?.quoteAuthentication?.deployment;
   if(!object(expectedDeployment)||!same(expectedDeployment.deploymentId,deployment.deploymentId)||!same(expectedDeployment.manifestHash,deployment.manifestHash)||!same(expectedDeployment.router,deployment.router)||!same(expectedDeployment.spender,deployment.spender))fail('DOMAIN_MISMATCH','quote deployment/router domain mismatch');
   if(endpointUrl){
-    const expectedOrigin=runtime?.quoteAuthentication?.endpointOrigin;
-    let origin;try{origin=new URL(endpointUrl).origin;}catch{fail('ENDPOINT_MISMATCH','invalid quote endpoint domain');}
-    if(typeof expectedOrigin!=='string'||origin!==expectedOrigin)fail('ENDPOINT_MISMATCH','quote endpoint origin differs from authenticated policy');
+    const expectedUrl=runtime?.quoteAuthentication?.endpointUrl;
+    let actual,expected;try{actual=new URL(endpointUrl);expected=new URL(expectedUrl);}catch{fail('ENDPOINT_MISMATCH','invalid quote endpoint policy');}
+    if(actual.protocol!=='https:'||actual.username||actual.password||actual.search||actual.hash||actual.href!==expected.href)fail('ENDPOINT_MISMATCH','quote endpoint differs from authenticated policy');
   }
   if(!bytes32(quote.replayDomain)||!bytes32(quote.quoteId)||!address(quote.account)||!Number.isSafeInteger(quote.expiresAt))fail('DOMAIN_MISMATCH','quote replay domain fields missing');
   const expectedReplay=keccak256([

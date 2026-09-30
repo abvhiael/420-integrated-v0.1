@@ -108,8 +108,8 @@ The similarly named `abvhiael/420-integrated` repository was inspected first but
 | Live/testnet deployment proof | explicitly not chain verified | MISSING |
 | Wallet read client | chain/code/identity/version/ABI checks present | COMPLETE |
 | Wallet guided-send integration | guarded resolution path present | COMPLETE |
-| Name registration/renewal/transfer write client | no non-test implementation found | MISSING |
-| Standalone 420Names frontend/routes | no application implementation found | MISSING |
+| Name registration/renewal/transfer write client | guarded production lifecycle client implemented in `wallet/web/core/names-management.js` | COMPLETE |
+| 420Names user-facing management UI | Wallet-integrated management surface implements commit/register, renew, resolution, reverse and transfer workflows | COMPLETE |
 | 420Indexer descriptor mapping | Names420 -> 420Names present | COMPLETE |
 | Indexer Names event/state SQL views | present | COMPLETE |
 | Search discovery reducer | present | COMPLETE |
@@ -179,15 +179,31 @@ The Wallet implementation is materially stronger than a simple address lookup:
 - trusted chain timestamp retrieval;
 - guarded guided-send confirmation before value transfer.
 
-This is a valid **consumer integration**, not a complete 420Names application.
+This resolver/send integration remains a valid **consumer integration**. NAMES-AUDIT-4 adds the separate owner-facing lifecycle management surface without changing resolver authority.
 
-### Missing user-facing management application
+### User-facing management application — implemented in NAMES-AUDIT-4
 
-Repository documentation explicitly classifies 420 Names as a user-facing Genesis protocol application and describes registration, renewal, resolution updates, reverse-name setting, transfer nomination, and transfer acceptance as user workflows.
+NAMES-AUDIT-4 closes the application-layer gap with a Wallet-integrated 420 Names management surface.
 
-Repository search found no production write client calling `makeCommitment`, `commit`, `register`, `renew`, `setResolution`, `setReverseName`, `transferName`, or `acceptName`. `makeCommitment` is referenced only by the contract and tests.
+The production management client now implements:
 
-Therefore the documented user-facing management surface is not implemented. Wallet's guided-send path does not close this gap.
+- commitment generation bound to canonical label, connected owner, duration, salt and committer;
+- availability checks before commitment and registration;
+- commitment-age and expiry checks before reveal;
+- guarded `commit` and `register` submission;
+- owner-checked renewal;
+- owner-checked forward resolution/profile/service updates;
+- forward-target-checked reverse-name updates;
+- owner-checked transfer nomination;
+- pending-owner-checked transfer acceptance;
+- simulation, gas estimation and chain/account revalidation before every broadcast;
+- receipt confirmation before reporting success.
+
+The Wallet UI exposes those flows through **420 Names** navigation and binds only to the qualified chain-specific `deployment.namesAddress`. Missing deployment binding fails closed.
+
+Transaction state is explicit: preflight, submitted, confirmed or blocked. Account/chain changes invalidate loaded state. Errors expose recovery guidance and restore focus to the failed action. The registration UI presents commitment timing and reveal-window state and generates salts from browser cryptographic randomness.
+
+The application remains a client of canonical Names420 state. It does not create a new authority layer, cache ownership as canonical, or guess deployment addresses.
 
 ## Indexer / Search integration
 
@@ -243,7 +259,8 @@ Wallet tests cover canonical label hashing, ambiguous/Unicode rejection, wrong-c
 - focused Names420/interface/test build;
 - Names420 audit suite;
 - retained Registry/Identity/Names integration suite;
-- Wallet names-client, names-send and guided-send suites;
+- Wallet names-client, names-send, guided-send, lifecycle-management and management-UI suites;
+- Wallet static qualification for the management module and shell binding;
 - forbidden `tx.origin` / `selfdestruct` / `delegatecall` scan;
 - presence checks for commitment, transfer, and reverse-resolution protections.
 

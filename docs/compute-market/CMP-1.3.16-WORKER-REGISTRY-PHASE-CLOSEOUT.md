@@ -21,11 +21,17 @@ Exit: CMP-1.3 may be marked COMPLETE only after the exact qualification-relevant
 
 ## Repository baseline
 
-CMP-1.3.16 began from current `main`:
+CMP-1.3.16 originally began from `main`:
 
 `5a2a273d8d6e0d9ab3428aab80ba0212f7bbb1bc`
 
 That commit is the merge of PR #408 for CMP-1.3.15.
+
+Before final qualification, `main` advanced through Registry/genesis/address-authority work. PR #411 was therefore reconciled cleanly onto current `main`:
+
+`04f6200c2ae78db7d15db86b482fa6fa732017a6`
+
+The reconciliation produced head `bb510047459b0578cfbc6b1d4f5db1a5f0960eeb`. The PR remained a seven-file CMP-1.3.16 closeout change set, became ahead of `main` by one commit and behind by zero, and required no conflict resolution that changed WorkerRegistry scope. The intervening `main` changes affected Registry/genesis/address/deployment authority surfaces but did not modify the CMP-1.3.16 closeout files or introduce a new WorkerRegistry runtime requirement. A fresh exact-head qualification cycle is therefore required on the reconciled branch before evidence recording.
 
 Repository evidence inspected before modification included:
 

@@ -85,3 +85,6 @@ jobs:
 
       - name: Verify CMP-1.4.5 independent verifier selection
         run: python scripts/verify-cmp-1-4-5-independent-selection.py
+
+      - name: Verify CMP-1.4.6 replicated N-of-M verification
+        run: python scripts/verify-cmp-1-4-6-replicated-verification.py

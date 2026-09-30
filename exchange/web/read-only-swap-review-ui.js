@@ -94,6 +94,19 @@ export function mountReadOnlySwapReview({documentRef,controller,fetchReview,nowS
       raw.textContent=`Canonical request: ${entry.request.amountInRaw} raw ${selected.input.symbol} · minimum ${entry.request.minimumOutputRaw} raw ${selected.output.symbol}`;
     }catch{raw.textContent=`Enter valid ${selected.input.symbol}/${selected.output.symbol} decimal amounts and recipient; raw units are never accepted as user display input.`;}
   }
+  function validEntry(){
+    try{
+      buildMetadataSwapReviewRequest({
+        runtime:controller.runtime,account:controller.wallet?.session?.account,marketId:market.value,
+        recipient:recipient.value.trim(),amountIn:amount.value.trim(),minimumOutput:minimum.value.trim(),
+      });
+      return true;
+    }catch{return false;}
+  }
+  function updateActionState(){
+    const connected=Boolean(controller.wallet?.session?.account);
+    button.disabled=!configured()||!connected||!catalogue?.markets.length||!validEntry();
+  }
   function refresh(){
     if(disposed)return;
     const visible=Boolean(view.querySelector?.('#swap-review'));
@@ -102,7 +115,7 @@ export function mountReadOnlySwapReview({documentRef,controller,fetchReview,nowS
     renderMarkets();
     const connected=Boolean(controller.wallet?.session?.account);
     if(connected&&!recipient.value)recipient.value=controller.wallet.session.account;
-    button.disabled=!configured()||!connected||!catalogue?.markets.length;
+    updateActionState();
     if(!catalogue)status.textContent='Qualified configured asset/market metadata unavailable; review entry is disabled.';
     else if(!configured())status.textContent='Executable quote endpoint and verified testnet deployment not configured; trading disabled.';
     else if(!connected)status.textContent='Connect a wallet to request a read-only quote.';
@@ -112,7 +125,7 @@ export function mountReadOnlySwapReview({documentRef,controller,fetchReview,nowS
   function invalidateFromInput(){
     controller.invalidateExecution('trade-input-change');
     clear('Trade input changed; request a new quote.');
-    previewRaw();
+    previewRaw();updateActionState();
   }
   for(const input of [market,amount,minimum,recipient])input.addEventListener(input===market?'change':'input',invalidateFromInput);
 

@@ -17,14 +17,14 @@ export function validateAsset(asset,expectedAddress){
   }
   return Object.freeze({assetId:asset.assetId.toLowerCase(),address:normalizeAddress(asset.address),symbol:asset.symbol,decimals:asset.decimals,verified:true});
 }
-export function validateRoutePlan(plan,{tokenIn,tokenOut,maxHops=8}={}){
+export function validateRoutePlan(plan,{tokenIn,tokenOut,maxHops=8,maxRouteDataBytes=4096}={}){
   if(!plan||plan.source!=='route-adapter'||!Array.isArray(plan.hops)||plan.hops.length<1||plan.hops.length>maxHops||
      !raw(plan.grossAmountOutRaw))fail('UNSUPPORTED_ROUTE','qualified route plan required',{status:422});
   let current=normalizeAddress(tokenIn);
   const hops=plan.hops.map((hop,index)=>{
     if(!id32(hop.marketId)||!id32(hop.routeId)||!address(hop.tokenIn)||!address(hop.tokenOut)||normalizeAddress(hop.tokenIn)!==current||
        !raw(hop.amountOutRaw)||!raw(hop.minAmountOutRaw)||BigInt(hop.minAmountOutRaw)>BigInt(hop.amountOutRaw)||
-       typeof hop.routeData!=='string'||!/^0x(?:[0-9a-f]{2})*$/i.test(hop.routeData)){
+       typeof hop.routeData!=='string'||!/^0x(?:[0-9a-f]{2})*$/i.test(hop.routeData)||((hop.routeData.length-2)/2)>maxRouteDataBytes){
       fail('UNSUPPORTED_ROUTE',`invalid route hop ${index}`,{status:422});
     }
     current=normalizeAddress(hop.tokenOut);

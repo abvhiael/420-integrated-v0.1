@@ -1,6 +1,6 @@
 # CMP-1.4.5 — Independent verifier selection
 
-Status: **IMPLEMENTATION COMPLETE; LEVEL 1 QUALIFICATION PENDING. NO LIVE DEPLOYMENT/PUBLICATION CLAIM.**
+Status: **COMPLETE. LEVEL 1 EXACT-HEAD QUALIFICATION GREEN. NO LIVE DEPLOYMENT/PUBLICATION CLAIM.**
 
 ## Canonical definition
 
@@ -110,4 +110,33 @@ CMP-1.4.5 is COMPLETE only when every machine-readable exit criterion is satisfi
 
 ## Completion
 
-**NOT YET COMPLETE.** Implementation and evidence artifacts are present; exact-head Level 1 qualification remains pending.
+**COMPLETE.** Exact implementation head `c6187d5188b2d2c0e5af05df03ec6a5c7efbedc1` passed the required Level 1 qualification.
+
+Required step-specific results:
+
+- Compute Market Qualification #14 — run `36790158443` — **success**
+- Solidity Contracts #3445 — run `36790158418` — **success** using the Compute-only focused path; monolithic repository Foundry shards were skipped
+
+Additional triggered retained checks on the same implementation head:
+
+- Genesis Address Authority #269 — run `36790158473` — success; duplicate full Foundry inventory skipped
+- 420Docs Qualification #3558 — run `36790158371` — success
+- 420Indexer #1070 — run `36790158396` — success
+- 420Registry REG-AUDIT-4 #104 — run `36790158453` — success
+
+Every CMP-1.4.5 exit criterion is satisfied on the qualified implementation SHA:
+
+- only the separately designated selector path can create the qualified appointment;
+- owner, payer, matched worker/operator, selected verifier and outsiders cannot choose the verifier;
+- exact ACTIVE verifier revision and exact `INDEPENDENT_VERIFIER` workload capability are required;
+- current controller conflicts fail closed under the independence policy;
+- selection is exact-job-revision, workload, accepted-policy, profile, evidence, expiry and selector-domain bound;
+- selection is pre-execution only;
+- revocation/replacement is versioned without rewriting history;
+- no unrelated authority is granted.
+
+Level 2 remains intentionally deferred to the selector/quorum integration milestone after CMP-1.4.6. Level 3 remains deferred to complete Compute Market phase closeout.
+
+Roadmap-order limitation remains explicit: CMP-1.4.4 is still open on the qualified baseline and is **not** implied complete by this step.
+
+This completion update is evidence-only and references the already-qualified implementation SHA above; it changes no executable code, tests, workflows, dependencies, configuration, interfaces, deployment state, or substantive requirement.

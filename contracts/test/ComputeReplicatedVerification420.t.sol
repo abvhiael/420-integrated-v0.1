@@ -406,7 +406,8 @@ contract ComputeReplicatedVerification420Test {
             jobId, RESULT_A, keccak256("v2-evidence")
         );
         require(q2 != bytes32(0), "second matching vote missed quorum");
-        (reached, bytes32 storedRef) = replicated.quorumReached(jobId, RESULT_A);
+        bytes32 storedRef;
+        (reached, storedRef) = replicated.quorumReached(jobId, RESULT_A);
         require(reached && storedRef == q2, "quorum evidence mismatch");
         require(replicated.votesForResult(jobId, RESULT_A) == 2, "wrong vote count");
 

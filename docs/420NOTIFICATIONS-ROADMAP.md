@@ -14,7 +14,7 @@
 - **NOTIFY-7 — API + feed/history — COMPLETE**
 - **NOTIFY-8 — privacy + abuse hardening — COMPLETE**
 - **NOTIFY-9 — Genesis frontend — COMPLETE**
-- **NOTIFY-10 — qualification, reconciliation + closeout — ACTIVE**
+- **NOTIFY-10 — qualification, reconciliation + closeout — COMPLETE**
 
 ## NOTIFY-0 — Genesis boundary + executable invariant baseline
 
@@ -111,4 +111,19 @@ Tests cover required Genesis views, security headers, read-only asset serving, n
 
 Implemented an executable Genesis closeout report that requires the complete 14-invariant set and evidence for invariant qualification, deterministic replay, deduplication, restart recovery, failure injection, provider isolation, privacy/security and the Genesis frontend. The closeout model rejects any canonical-authority claim and re-validates the contract-free/private boundary.
 
-Delivery terminal-state handling was hardened for final qualification: delivered records clear retry scheduling, dead-letter records reject duplicate failure mutation, and terminal transitions require explicit timestamps. The final remaining work is to reconcile the long-lived branch with latest `main`, run exact-head qualification on that reconciled commit, record the qualification evidence and merge PR #312 once all required workflows are green.
+Delivery terminal-state handling was hardened for final qualification: delivered records clear retry scheduling, dead-letter records reject duplicate failure mutation, and terminal transitions require explicit timestamps.
+
+### Closeout record
+
+- Phase PR: **#312** — merged
+- Qualified feature head: `619cc18f7edd111b84982eef9df031d19c9fab85`
+- Merge commit: `d0006253ccdda9777f07dcc7bd98daf519f8cd36`
+- 420Docs Qualification run `35178875367` — passed
+- 420 Integrated Qualification run `35178875371` — passed
+- Solidity Contracts run `35178875363` — passed
+
+GEN-10.7 repository implementation is therefore **complete and merged**.
+
+### Post-closeout operational work
+
+Live/public-testnet deployment remains separate from repository implementation closeout. `testnet/public-services/notifications/readiness.json` still uses placeholder backend/frontend URLs and pending deployment state. Remaining operational work is to deploy `notifications420`, bind it to the qualified live 420Indexer, configure real in-app/web/push providers, exercise live delivery/dedup/replay/reorg/restart/failure behavior, retain exact-release evidence, and replace placeholder readiness URLs/status only after those services actually exist.

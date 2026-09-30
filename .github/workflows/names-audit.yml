@@ -59,7 +59,12 @@ jobs:
         run: |
           set -euo pipefail
           git diff --name-only HEAD^ HEAD > /tmp/names-changed.txt
-          if grep -Eq '^(contracts/src/apps/Names420\.sol|contracts/test/Names420Hardening\.t\.sol|contracts/test/Names420Invariant\.t\.sol|\.github/workflows/names-audit\.yml)
+          if grep -Eq '^(contracts/src/apps/Names420\.sol|contracts/test/Names420Hardening\.t\.sol|contracts/test/Names420Invariant\.t\.sol|\.github/workflows/names-audit\.yml)$' /tmp/names-changed.txt; then
+            echo "NAMES_HARDENING_CHANGED=true" >> "$GITHUB_ENV"
+          else
+            echo "NAMES_HARDENING_CHANGED=false" >> "$GITHUB_ENV"
+          fi
+
       - uses: foundry-rs/foundry-toolchain@v1
         with:
           version: stable
@@ -145,45 +150,6 @@ jobs:
           print("No high-severity Slither findings in Names420.sol.")
           PY
           echo "slither_exit_status=$STATUS"
-
-      - name: Run Wallet Names integration tests
-        working-directory: wallet/web
-        run: node --test test/names-client.test.js test/names-send.test.js test/names-guided-send.test.js
-
-      - name: Names static authority/opcode scan
-        working-directory: contracts
-        run: |
-          set -euo pipefail
-          if grep -nE '\btx\.origin\b|\bselfdestruct\s*\(|\.delegatecall\s*\(' src/apps/Names420.sol; then
-            echo "Forbidden authority/opcode primitive found in Names420.sol" >&2
-            exit 1
-          fi
-          grep -q 'COMMITMENT_DOMAIN' src/apps/Names420.sol
-          grep -q 'pendingOwner' src/apps/Names420.sol
-          grep -q 'reverseResolve' src/apps/Names420.sol
- /tmp/names-changed.txt; then
-            echo "NAMES_HARDENING_CHANGED=true" >> "$GITHUB_ENV"
-          else
-            echo "NAMES_HARDENING_CHANGED=false" >> "$GITHUB_ENV"
-          fi
-
-      - uses: foundry-rs/foundry-toolchain@v1
-        with:
-          version: stable
-
-      - name: Verify Genesis interface-layer inventory
-        run: python scripts/verify-genesis-interface-layer.py
-
-      - name: Verify 420Names dependency model
-        run: python scripts/verify-names-dependency-model.py
-
-      - name: Check Names Solidity formatting
-        working-directory: contracts
-        run: forge fmt --check src/interfaces/genesis/INames420.sol test/Names420Audit.t.sol test/Names420DependencyModel.t.sol
-
-      - name: Build and run retained 420Names Level 1 Solidity suite
-        working-directory: contracts
-        run: forge test --match-path 'test/*Names420*.t.sol' -vvv
 
       - name: Run Wallet Names integration tests
         working-directory: wallet/web

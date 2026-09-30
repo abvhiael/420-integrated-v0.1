@@ -29,7 +29,7 @@ const runtime={
  contracts:{ExchangeAtomicRouter420:router},
  quoteAuthentication:{
   schema:'420-exchange-quote-auth-policy-v1',status:'QUALIFIED_CONFIG',service:'420/service/exchange-quote/v1',
-  endpointOrigin:'https://api.example.invalid',maxKeyOverlapSeconds:3600,
+  endpointUrl:'https://api.example.invalid/exchange/executable-swap-quote',maxKeyOverlapSeconds:3600,
   deployment:{deploymentId,manifestHash,router,spender:router},
   producers:[{producerId:TEST_PRODUCER_ID,keyVersion:TEST_KEY_VERSION,algorithm:'Ed25519',publicKey:testPublicKey(),notBefore:1,notAfter:4102444800,revocationEpoch:TEST_REVOCATION_EPOCH,revoked:false}],
  },

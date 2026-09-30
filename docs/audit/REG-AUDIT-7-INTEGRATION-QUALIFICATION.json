@@ -1,0 +1,34 @@
+{
+  "schema": "420-registry-reg-audit-7-qualification-v1",
+  "step": "REG-AUDIT-7",
+  "name": "Registry/Indexer/resident integration qualification",
+  "status": "IMPLEMENTED_PENDING_EXACT_HEAD_CI",
+  "repository": "abvhiael/420-integrated-v0.1",
+  "baseMainSha": "04f6200c2ae78db7d15db86b482fa6fa732017a6",
+  "canonicalExit": "integration evidence tied to exact candidate SHA",
+  "requirements": {
+    "residentResolution": true,
+    "indexerEventIngestionAndHistoricalReconstruction": true,
+    "boundedReorgReplay": true,
+    "derivedConsumersNonCanonical": true,
+    "strictRegisteredServicePublication": true,
+    "canonicalProjectionDisagreementFailsClosed": true
+  },
+  "implementation": {
+    "registryProjectionRebuild": "indexer/decoder/projection.go",
+    "runtimeWiring": "indexer/cmd/indexer420/main.go",
+    "canonicalMismatchGuard": "indexer/api/backend.go",
+    "reorgIntegrationTest": "indexer/ingest/registry_reorg_integration_test.go",
+    "canonicalComparisonTest": "indexer/api/registry_canonical_reconciliation_test.go",
+    "descriptor": "420-indexer/descriptors/protocol-registry-v4.json"
+  },
+  "limitations": [
+    "No live target-network Registry deployment or eth_call witness is claimed; REG-AUDIT-8 owns production-equivalent testnet deployment evidence.",
+    "Canonical direct-read comparison is qualified through an executable reader seam; live RPC binding is deferred to REG-AUDIT-8."
+  ],
+  "qualification": {
+    "exactQualifiedSha": "PENDING_FINAL_EVIDENCE_HEAD",
+    "runIds": "PENDING_FINAL_EVIDENCE_HEAD"
+  },
+  "nextCanonicalStep": "REG-AUDIT-8 — production-equivalent testnet deployment"
+}

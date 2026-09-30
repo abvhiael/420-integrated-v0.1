@@ -69,14 +69,16 @@ export function createQuoteEngine({
 
 export const SIGNER_ROTATION_MODEL=Object.freeze({
   schema:'420-exchange-quote-signer-rotation-v1',
-  status:'DESIGN_ONLY_PRE04',
-  activeKeyVersion:null,
-  acceptedKeyVersions:[],
-  overlapSeconds:0,
+  status:'PRE05_IMPLEMENTED_POLICY_DRIVEN',
+  privateKeyStorage:'EXTERNAL_INJECTED_SIGNER_ONLY',
+  keySelection:'PINNED_PRODUCER_ID_AND_VERSION',
+  overlap:'BOUNDED_BY_CLIENT_POLICY',
+  revocation:'EXPLICIT_EPOCH_AND_REVOKED_FLAG',
   rules:Object.freeze([
-    'PRE-04 stores no private signing key',
-    'PRE-05 must bind key version and producer identity into the authenticated quote envelope',
-    'rotation must support bounded overlap and explicit revocation without changing quote semantics',
-    'retired keys must not authenticate newly issued quotes',
+    'production private keys are injected into the quote service and are never committed to repository/runtime policy',
+    'producer identity, key version, public-key fingerprint and revocation epoch are verified independently by the browser',
+    'client policy bounds active-key overlap and validity windows',
+    'revoked keys fail closed even if their Ed25519 signature remains mathematically valid',
+    'retired keys cannot authenticate newly issued quotes outside their policy window',
   ]),
 });

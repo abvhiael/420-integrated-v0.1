@@ -94,10 +94,13 @@ try{
   await connectAndOpenSwap(page);
   await page.locator('#v15-quote-review-fetch').click();
   const result=page.locator('#v15-quote-review-result');await result.waitFor({state:'visible'});
-  const text=await result.innerText();
-  for(const exact of ['REVIEW CANDIDATE ONLY','1.25 BOB','1250000000000000000 raw','4.2 ARRR','4200000 raw','0.01 ARRR','25 bps',recipient,tokenIn,tokenOut,router,quoteId,pathHash,routeId])assert.ok(text.includes(exact),exact);
+  let text=await result.innerText();
+  for(const exact of ['REVIEW CANDIDATE ONLY','1.25 BOB','1250000000000000000 raw','4.2 ARRR','4200000 raw','0.01 ARRR','25 bps',recipient,tokenIn,tokenOut,router,quoteId,pathHash])assert.ok(text.includes(exact),exact);
   assert.match(text,/producer authenticity not established/i);
   assert.match(text,/signing and transaction submission remain disabled/i);
+  await result.locator('.pre03-route-details summary').click();
+  text=await result.innerText();
+  assert.ok(text.includes(routeId),'full route identifier must be inspectable on demand');
   assert.equal(await page.evaluate(()=>[...window.__pre03.provider.calls].some(x=>/eth_sendTransaction|eth_signTypedData/.test(x))),false);
  });
 
@@ -106,8 +109,8 @@ try{
   await page.locator('#v15-quote-review-fetch').click();await page.locator('#v15-quote-review-result').waitFor({state:'visible'});
   await page.locator('#v15-review-amount').fill('1.0000000000000000001');
   assert.equal(await page.locator('#v15-quote-review-result').isHidden(),true);
-  await page.locator('#v15-quote-review-fetch').click();
-  await page.getByText(/precision|decimal/i).waitFor();
+  assert.equal(await page.locator('#v15-quote-review-fetch').isDisabled(),true,'malformed precision must disable quote request before transport');
+  await page.getByText(/raw units are never accepted|valid BOB\/ARRR decimal amounts/i).waitFor();
   assert.equal(await page.evaluate(()=>[...window.__pre03.provider.calls].includes('eth_sendTransaction')),false);
  });
 

@@ -1,0 +1,75 @@
+name: Compute Market Qualification
+
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/compute/**'
+      - 'contracts/test/Compute*.t.sol'
+      - 'contracts/config/compute-market/**'
+      - 'docs/compute-market/**'
+      - 'docs/420-COMPUTE-MARKET-V1-ARCHITECTURE.md'
+      - 'scripts/verify-cmp-*.py'
+      - 'scripts/test-cmp-*.py'
+      - '.github/workflows/compute-market.yml'
+  push:
+    branches: [ main ]
+    paths:
+      - 'contracts/src/compute/**'
+      - 'contracts/test/Compute*.t.sol'
+      - 'contracts/config/compute-market/**'
+      - 'docs/compute-market/**'
+      - 'docs/420-COMPUTE-MARKET-V1-ARCHITECTURE.md'
+      - 'scripts/verify-cmp-*.py'
+      - 'scripts/test-cmp-*.py'
+      - '.github/workflows/compute-market.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: compute-market-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  fast-qualification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: Build Compute Market contracts
+        working-directory: contracts
+        run: forge build src/compute
+
+      - name: Run retained Compute Market Solidity suite
+        working-directory: contracts
+        run: forge test --match-path 'test/Compute*.t.sol' -vvv
+
+      - name: Compile Compute Market verification scripts
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t scripts < <(find scripts -maxdepth 1 -type f \( -name 'verify-cmp-*.py' -o -name 'test-cmp-*.py' \) -print | sort)
+          if (("${#scripts[@]}" > 0)); then
+            python -m py_compile "${scripts[@]}"
+          fi
+
+      - name: Retain CMP-1.4 architecture freeze
+        run: python scripts/verify-cmp-1-4-0-verifier-architecture.py

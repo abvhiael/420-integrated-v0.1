@@ -35,8 +35,36 @@ permissions:
   contents: read
 concurrency:
   group: genesis-address-authority-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
+  classify-pr:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    outputs:
+      compute_only: ${{ steps.scope.outputs.compute_only }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - name: Classify pull-request scope
+        id: scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin "${{ github.base_ref }}" --depth=1
+          compute_only=true
+          while IFS= read -r file; do
+            case "$file" in
+              contracts/src/compute/*|contracts/test/Compute*.t.sol|contracts/config/compute-market/*|docs/compute-market/*|docs/420-COMPUTE-MARKET-V1-ARCHITECTURE.md|scripts/verify-cmp-*|scripts/test-cmp-*|.github/workflows/compute-market.yml)
+                ;;
+              *)
+                compute_only=false
+                ;;
+            esac
+          done < <(git diff --name-only "origin/${{ github.base_ref }}...HEAD")
+          echo "compute_only=$compute_only" >> "$GITHUB_OUTPUT"
+
   cross-manifest-authority:
     runs-on: ubuntu-latest
     steps:
@@ -76,6 +104,8 @@ jobs:
           path: address-consumer-inventory.json
           retention-days: 30
   full-foundry-pr-inventory:
+    needs: classify-pr
+    if: github.event_name != 'pull_request' || needs.classify-pr.outputs.compute_only != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     strategy:

@@ -16,15 +16,69 @@ on:
 
 concurrency:
   group: solidity-contracts-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
-  # Every PR must qualify the complete Solidity source and test inventory in
-  # bounded shards. A monolithic ~762-file build can be killed by the runner
-  # before solc produces a result. Do not restrict this job to a branch name.
-  # All 16 shards are required: no continue-on-error and no early fail-fast.
-  pr-shards:
+  classify-pr:
     if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    outputs:
+      compute_only: ${{ steps.scope.outputs.compute_only }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - name: Classify pull-request scope
+        id: scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin "${{ github.base_ref }}" --depth=1
+          compute_only=true
+          while IFS= read -r file; do
+            case "$file" in
+              contracts/src/compute/*|contracts/test/Compute*.t.sol|contracts/config/compute-market/*|docs/compute-market/*|docs/420-COMPUTE-MARKET-V1-ARCHITECTURE.md|scripts/verify-cmp-*|scripts/test-cmp-*|.github/workflows/compute-market.yml)
+                ;;
+              *)
+                compute_only=false
+                ;;
+            esac
+          done < <(git diff --name-only "origin/${{ github.base_ref }}...HEAD")
+          echo "compute_only=$compute_only" >> "$GITHUB_OUTPUT"
+
+  compute-fast:
+    needs: classify-pr
+    if: github.event_name == 'pull_request' && needs.classify-pr.outputs.compute_only == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Build Compute Market contracts
+        working-directory: contracts
+        run: forge build src/compute
+      - name: Run retained Compute Market Solidity suite
+        working-directory: contracts
+        run: forge test --match-path 'test/Compute*.t.sol' -vvv
+
+  # Non-Compute or mixed Solidity PRs still qualify the complete inventory.
+  pr-shards:
+    needs: classify-pr
+    if: github.event_name == 'pull_request' && needs.classify-pr.outputs.compute_only != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     strategy:

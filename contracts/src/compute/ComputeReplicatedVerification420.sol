@@ -27,6 +27,9 @@ contract ComputeReplicatedVerification420 {
         uint32 verificationPolicyRevision;
         bytes32 verificationPolicyCommitment;
         bytes32 selectionEvidenceHash;
+        bytes32 ownerController;
+        bytes32 payerController;
+        bytes32 operatorController;
         uint16 threshold;
         uint16 memberCount;
         uint64 validUntil;
@@ -234,6 +237,9 @@ contract ComputeReplicatedVerification420 {
                 j.verificationPolicyRevision,
                 j.verificationPolicyCommitment,
                 selectionEvidenceHash,
+                ownerController,
+                payerController,
+                operatorController,
                 threshold,
                 verifierIds,
                 verifierRevisions,
@@ -251,6 +257,9 @@ contract ComputeReplicatedVerification420 {
             verificationPolicyRevision: j.verificationPolicyRevision,
             verificationPolicyCommitment: j.verificationPolicyCommitment,
             selectionEvidenceHash: selectionEvidenceHash,
+            ownerController: ownerController,
+            payerController: payerController,
+            operatorController: operatorController,
             threshold: threshold,
             memberCount: uint16(count),
             validUntil: validUntil,
@@ -310,6 +319,18 @@ contract ComputeReplicatedVerification420 {
                 || j.verificationPolicyCommitment != c.verificationPolicyCommitment
                 || j.workloadType != c.workloadClass
         ) revert InvalidCommittee();
+
+        (bytes32 matchJobId, address matchOwner, address operator, bool matchExists) =
+            matches.matchParties(j.matchId);
+        (address payer, uint256 maxSpend) =
+            IComputeReplicatedPayerTerms420(address(jobs.requestEvidence())).fundingTerms(j.requestId);
+        if (
+            !matchExists || matchJobId != jobId || matchOwner != j.owner || operator == address(0)
+                || payer == address(0) || maxSpend == 0
+                || _controller(j.owner) != c.ownerController
+                || _controller(payer) != c.payerController
+                || _controller(operator) != c.operatorController
+        ) revert IneligibleVerifier();
 
         Member storage m = _member[jobId][msg.sender];
         if (!m.exists) revert Unauthorized();

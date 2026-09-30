@@ -19,6 +19,7 @@ export function createQuoteEngine({
   if(!/^0x[0-9a-f]{40}$/i.test(router??'')||!/^0x[0-9a-f]{40}$/i.test(spender??''))fail('SERVICE_CONFIG_INVALID','router and spender addresses required',{status:503});
   if(!/^0x[0-9a-f]{64}$/i.test(deploymentId??'')||!/^0x[0-9a-f]{64}$/i.test(manifestHash??''))fail('SERVICE_CONFIG_INVALID','deployment and manifest identity required',{status:503});
   if(!routeSource?.quoteExactInput||!chainAdapter?.snapshot)fail('SERVICE_CONFIG_INVALID','route and chain adapters required',{status:503});
+  if(!signer?.signQuote||signer.algorithm!=='Ed25519'||typeof signer.producerId!=='string'||typeof signer.keyVersion!=='string')fail('SERVICE_CONFIG_INVALID','PRE-05 Ed25519 quote signer required',{status:503});
 
   return async function quote(request){
     const observedAt=clock();
@@ -58,11 +59,11 @@ export function createQuoteEngine({
       quoteEconomics:Object.freeze({grossAmountOutRaw:gross.toString(),feeAmountRaw:fee.toString(),netAmountOutRaw:net.toString(),minimumNetAmountOutRaw:request.minimumOutputRaw}),
       builder:Object.freeze({kind:'CANONICAL_SWAP_INPUTS_V1',router:router.toLowerCase(),spender:spender.toLowerCase(),value:'0x0',execution}),
       producer:Object.freeze({
-        schema:PRODUCER_SCHEMA,id:signer?.producerId??'UNAUTHENTICATED',keyVersion:signer?.keyVersion??'NONE',
-        algorithm:signer?.algorithm??'UNSIGNED',authentication:signer?'ED25519_PRE05':'UNAUTHENTICATED',
+        schema:PRODUCER_SCHEMA,id:signer.producerId,keyVersion:signer.keyVersion,
+        algorithm:signer.algorithm,authentication:'ED25519_PRE05',
       }),
     });
-    return signer?.signQuote?signer.signQuote(quote):quote;
+    return signer.signQuote(quote);
   };
 }
 

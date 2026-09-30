@@ -33,6 +33,9 @@ on:
       - 'docs/audit/420NAMES-*'
       - 'scripts/verify-genesis-interface-layer.py'
       - 'scripts/verify-names-dependency-model.py'
+      - 'contracts/artifacts/Names420.json'
+      - 'scripts/test-names-audit-5-artifact.py'
+      - 'scripts/generate-names-audit-5-artifact.py'
       - 'docs/architecture/decisions/NAMES-AUDIT-2-DEPENDENCY-MODEL.md'
       - '.github/workflows/names-audit.yml'
   pull_request:
@@ -192,6 +195,20 @@ jobs:
           print("No high-severity Slither findings in Names420.sol.")
           PY
           echo "slither_exit_status=$STATUS"
+
+      - name: Generate and verify NAMES-AUDIT-5 compiler artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd contracts && forge build src/apps/Names420.sol)
+          python scripts/generate-names-audit-5-artifact.py --write --print
+          python scripts/test-names-audit-5-artifact.py
+          git status --porcelain -- contracts/artifacts/Names420.json | tee /tmp/names-artifact-status.txt
+          if [ -s /tmp/names-artifact-status.txt ]; then
+            echo "Committed Names420 compiler artifact is missing or stale." >&2
+            exit 1
+          fi
+          python scripts/generate-names-audit-5-artifact.py --check
 
       - name: Run Wallet Names integration and management tests
         working-directory: wallet/web

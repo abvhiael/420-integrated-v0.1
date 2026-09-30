@@ -1,6 +1,6 @@
 # CMP-1.4.1 — Verifier identity & lifecycle
 
-Status: **IMPLEMENTATION COMPLETE; LEVEL 1 QUALIFICATION PENDING. NO LIVE DEPLOYMENT/PUBLICATION CLAIM.**
+Status: **COMPLETE. LEVEL 1 EXACT-HEAD QUALIFICATION GREEN. NO LIVE DEPLOYMENT/PUBLICATION CLAIM.**
 
 ## Canonical definition
 
@@ -94,4 +94,20 @@ CMP-1.4.1 is COMPLETE only when every criterion below is individually satisfied:
 
 ## Completion
 
-**NOT YET COMPLETE.** Implementation and repository evidence are present; exact-head Level 1 CI qualification remains pending.
+**COMPLETE.** Exact implementation head `64e6c8cb71223879e403068bb403841995a7aee9` passed Level 1 qualification.
+
+Required step-specific results:
+
+- Compute Market Qualification #3 — run `36776041067` — success
+- Solidity Contracts #3429 — run `36776041186` — success
+
+Additional triggered retained checks also passed on the same implementation head:
+
+- Genesis Address Authority #257 — run `36776041374` — success
+- 420Docs Qualification #3481 — run `36776041045` — success
+- 420Indexer #1054 — run `36776041009` — success
+- 420Registry REG-AUDIT-4 #92 — run `36776041052` — success
+
+Level 2 remains intentionally deferred to the CMP-1.4 identity/classes/policy integration milestone after CMP-1.4.3. Level 3 remains deferred to complete Compute Market phase closeout.
+
+This completion update is evidence-only and references the already-qualified implementation SHA above; it changes no executable code, tests, workflow behavior, dependencies, interfaces, deployment state, or runtime configuration.

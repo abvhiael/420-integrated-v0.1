@@ -123,7 +123,7 @@ test('PRE-05 key revocation, validity windows, unknown versions and excessive ro
 
 test('PRE-05 forged signature and key fingerprint fail independently',async()=>{
  const response=await engineForAuth()(request),runtime=runtimeForAuth();
- const forged=structuredClone(response);forged.authentication.signature=forged.authentication.signature.slice(0,-2)+'AA';
+ const forged=structuredClone(response);forged.authentication.signature=(forged.authentication.signature[0]==='A'?'B':'A')+forged.authentication.signature.slice(1);
  await assert.rejects(authenticateExecutableSwapQuote({runtime,request,response:forged,nowSeconds:1000,endpointUrl:endpoint,replayGuard:createQuoteReplayGuard()}),e=>['SIGNATURE_INVALID','PAYLOAD_HASH_MISMATCH'].includes(e.code));
  const fingerprint=structuredClone(response);fingerprint.authentication.publicKeyFingerprint='sha256:'+'00'.repeat(32);
  await assert.rejects(authenticateExecutableSwapQuote({runtime,request,response:fingerprint,nowSeconds:1000,endpointUrl:endpoint,replayGuard:createQuoteReplayGuard()}),e=>e.code==='KEY_FINGERPRINT_MISMATCH');

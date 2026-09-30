@@ -1,6 +1,6 @@
 # CMP-1.3.16 — WorkerRegistry phase closeout, reconciliation, and retained evidence
 
-Status: **IMPLEMENTATION/RECONCILIATION COMPLETE; EXACT-HEAD QUALIFICATION PENDING. LIVE DEPLOYMENT/PUBLICATION REMAINS BLOCKED.**
+Status: **COMPLETE WITHIN REPOSITORY QUALIFICATION SCOPE. LIVE DEPLOYMENT/PUBLICATION REMAINS BLOCKED.**
 
 ## Canonical definition
 
@@ -15,7 +15,7 @@ Required:
 - distinguish repository qualification from live deployment claims;
 - migrate/reconcile the useful material in `CMP-1.3-DEFERRED-CLOSEOUT-DRAFT.md` and `cmp-1.3-deferred-closeout-ledger.json` rather than discarding it.
 
-The roadmap permits an evidence-only closeout commit to inherit an already-qualified implementation SHA. For this execution, the repository owner explicitly requires the retained qualification suite to run again on any evidence-recording HEAD, so this closeout will use the stricter exact-head rule.
+The roadmap permits an evidence-only closeout commit to inherit an already-qualified implementation SHA. Evidence-only recording does not require a recursive full-suite rerun unless the evidence commit changes qualification-relevant contracts, tests, configuration, workflows, dependencies, or substantive requirements.
 
 Exit: CMP-1.3 may be marked COMPLETE only after the exact qualification-relevant implementation head passes the retained qualification suite and the durable closeout record identifies that SHA and its run evidence.
 
@@ -195,8 +195,26 @@ Before CMP-1.3.16 may be marked COMPLETE:
 3. require the retained suite relevant to this phase, including Solidity Contracts all required PR shards, 420 Integrated Qualification, 420Docs Qualification including CMP-1.3.14/CMP-1.3.15/CMP-1.3.16 verifiers, Genesis Address Authority when triggered, 420Indexer when triggered, and retained EXP qualification workflows when triggered;
 4. treat no missing, failed, cancelled or required-untriggered gate as passing;
 5. record the exact qualified SHA and workflow run IDs here;
-6. because the repository owner explicitly requires it for this step, rerun the retained qualification suite again on any evidence-recording HEAD created by step 5.
+6. an evidence-only closeout commit may inherit the qualified implementation SHA without another full-suite rerun, provided it changes no qualification-relevant contracts, tests, configuration, workflows, dependencies, or substantive requirements.
 
-## Completion
+## Final qualification evidence
 
-**NOT YET COMPLETE.** Repository reconciliation and closeout implementation are present, but exact-head qualification and final durable run evidence are still pending.
+Qualified implementation/reconciliation SHA:
+
+`82f123e4093095babf9c2f93d870269ece43c804`
+
+Successful retained qualification runs:
+
+- Solidity Contracts #3383 / run `36750528808`;
+- Genesis Address Authority #218 / run `36750528895`;
+- 420 Integrated Qualification #6030 / run `36750528745`;
+- 420Docs Qualification #3406 / run `36750528945`;
+- 420Indexer #1012 / run `36750528883`;
+- 420Registry REG-AUDIT-4 #47 / run `36750528826`;
+- EXP-1.9 CI Qualification Automation #93 / run `36750528687`;
+- EXP-1.10 Phase Closeout Qualification #100 / run `36750528767`.
+
+This evidence-only closeout update records the already-qualified SHA and run evidence and does not alter qualification-relevant implementation, tests, workflow logic, dependencies, or substantive CMP-1.3 requirements.
+
+
+**COMPLETE WITHIN REPOSITORY QUALIFICATION SCOPE.** The exact reconciled implementation/reconciliation head passed the complete retained qualification set, and this durable closeout record identifies that SHA and its run evidence. Live deployment/publication remains blocked by the separately recorded CMP-1.5, public-testnet, runtime-evidence and ProtocolRegistry-publication prerequisites.

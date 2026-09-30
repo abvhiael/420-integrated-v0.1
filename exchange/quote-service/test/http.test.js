@@ -14,7 +14,7 @@ function quoteEngine(){
  return createQuoteEngine({
   chainId:vector.chainId,router:vector.router,spender:vector.spender,deploymentId:vector.deploymentId,manifestHash:vector.manifestHash,clock:()=>1000,
   routeSource:createStaticRouteSource({routes:[vector.route]}),
-  chainAdapter:createStaticChainAdapter({assets:vector.assets,feeBps:vector.feeBps,deployment:{deploymentId:vector.deploymentId,manifestHash:vector.manifestHash},observedAt:1000}),
+  chainAdapter:createStaticChainAdapter({assets:vector.assets,feeBps:vector.feeBps,deployment:{deploymentId:vector.deploymentId,manifestHash:vector.manifestHash},chainId:vector.chainId,observedAt:1000}),
  });
 }
 async function withServer(options,fn){

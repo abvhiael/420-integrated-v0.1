@@ -57,7 +57,7 @@ PRE-01 established the authoritative boundary between display projections, revie
 
 ---
 
-### PRE-02 — Wallet identity, request-generation and invalidation closure — PARTIAL
+### PRE-02 — Wallet identity, request-generation and invalidation closure — COMPLETE
 
 Finish the V15 Wallet/session controller as the sole future execution identity.
 

@@ -31,7 +31,11 @@
     "docs/apps/registry/developer/index.md",
     "docs/apps/registry/developer/contracts.md",
     "docs/developers/registry-and-publishing.md",
-    "docs/architecture/protocols/registry-names-identity-420is.md"
+    "docs/architecture/protocols/registry-names-identity-420is.md",
+    "contracts/artifacts/ProtocolRegistry.json",
+    "contracts/config/predeploy/ProtocolRegistry-predeploy-state.json",
+    "docs/audit/REG-AUDIT-5-REGISTRY-PREDEPLOY-QUALIFICATION.md",
+    "docs/audit/REG-AUDIT-5-REGISTRY-PREDEPLOY-QUALIFICATION.json"
   ],
   "blockers": [
     {
@@ -67,10 +71,13 @@
       "status": "OPEN",
       "title": "No pinned final Registry runtime artifact/code hash and canonical deployed evidence",
       "evidence": [
+        "contracts/artifacts/ProtocolRegistry.json",
+        "contracts/config/predeploy/ProtocolRegistry-predeploy-state.json",
         "contracts/config/predeploy/predeploy-plan.json",
-        "docs/reference/generated/deployments.md"
+        "contracts/config/deployment-manifest.json",
+        "docs/audit/REG-AUDIT-5-REGISTRY-PREDEPLOY-QUALIFICATION.md"
       ],
-      "requiredResolution": "Build the exact release candidate, retain runtime artifact/code hash, materialize Genesis storage, and record production-equivalent deployment evidence."
+      "requiredResolution": "REG-AUDIT-5 satisfies the pinned runtime artifact/code-hash and direct-Genesis predeploy-state portion: ProtocolRegistry runtime hash 0x9f9e5f794296cf9faf5f8c8d17cd815f3c19c004a158c15cb61b5a29eaacb330 is reproducibly generated from source blob 9ab3d53a68b6533978f41e0202e5268f1d615c19; governanceTimelock 0x0429 is compiler-reference materialized as an immutable; mutable constructor storage is empty with root 0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421. Blocker remains OPEN only for production-equivalent deployed evidence, which is REG-AUDIT-8."
     },
     {
       "id": "REG-BLK-004",

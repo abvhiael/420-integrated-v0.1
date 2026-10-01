@@ -1,6 +1,6 @@
 # ID-AUDIT-3 — dependency/interface reconciliation
 
-**Status:** IMPLEMENTED — Level 1 qualification pending exact-head CI  
+**Status:** COMPLETE — Level 1 qualified  
 **Repository:** `abvhiael/420-integrated-v0.1`  
 **Working PR:** #438  
 **Canonical roadmap:** `docs/audit/420IDENTITY-AUDIT-REMEDIATION-ROADMAP.md`
@@ -131,11 +131,51 @@ to **ID-AUDIT-10 — phase closeout, reconciliation and retained evidence**.
 
 ## Exact-head qualification evidence
 
-Pending.
+**Qualified implementation SHA:** `d008d39542019a213ed25f8085c3b94fcfee5a29`  
+**Current main at qualification:** `8d6df0e53220bdd3d9b6e3cbd2f467927a65d4f1`  
+**Audit merge base:** `df8f639d8f43b763298c8750ef49d3e5849c597c`  
+**Branch divergence at qualification:** 19 ahead / 19 behind; the main-only delta is unrelated Compute Market work.
+
+Exact-head Level 1 evidence:
+
+- **420Identity ID-AUDIT-3** run `36812082634` / run number 3 — **SUCCESS**
+  - exact-head checkout/assertion — success;
+  - Identity dependency reconciliation verifier — success;
+  - frozen Genesis interface-layer verifier — success;
+  - `Identity420.sol` build — success;
+  - `Identity420Audit.t.sol` — **18 passed / 0 failed / 0 skipped**;
+  - `Identity420Compatibility.t.sol` — **6 passed / 0 failed / 0 skipped**;
+  - `RegistryIdentityNames420.t.sol` — **10 passed / 0 failed / 0 skipped**.
+  - focused retained total — **34 passed / 0 failed / 0 skipped**.
+- **420Docs Qualification** run `36812082637` / run number 3710 — **SUCCESS**.
+- **Genesis Address Authority** run `36812082719` / run number 326 — **SUCCESS** for the exact-head cross-manifest/address/predeploy authority checks triggered by the changed contracts configuration.
+- **420Indexer** run `36812082696` / run number 1130 — **SUCCESS**, including the retained dependency/readiness reconciliation checks.
+
+The generic `Solidity Contracts` PR workflow was not used as ID-AUDIT-3 qualification evidence. Its long-lived-PR scope classifier selected the Compute fast path and skipped the normal PR shards. Under the phase qualification model, a repository-wide Solidity inventory is not required for this ordinary step; the dedicated ID-AUDIT-3 exact-head workflow compiled the affected Identity contract and executed every directly applicable retained Identity/Names Solidity suite.
+
+### Exit-criterion reconciliation
+
+| Requirement | Result |
+| --- | --- |
+| classify every original Identity dependency | PASS — all 11 claims classified |
+| retain every truly required dependency | PASS — GovernanceAuthority retained |
+| remove fictitious mandatory runtime dependencies | PASS |
+| preserve frozen shared interface layer | PASS |
+| avoid invented adapter/runtime authority | PASS |
+| preserve GovernanceTimelock issuer authority | PASS |
+| prove credentials do not imply capability authority | PASS |
+| preserve Genesis predeploy obligations outside runtime dependency claims | PASS |
+| focused dependency verifier | PASS |
+| exact-head affected compile/tests | PASS — 34/34 |
+| documentation/config/readiness checks | PASS |
+
+No Level 2 milestone is required because this reconciliation introduces no new shared runtime dependency or authority. Level 3 remains deferred to ID-AUDIT-10.
+
+This closeout is evidence-only. It changes no executable code, tests, workflows, dependencies, configuration, artifacts, interfaces, deployment state or substantive requirement, so it references the already-qualified implementation SHA without recursively rerunning Level 1.
 
 ## Completion state
 
-**PENDING LEVEL 1 EXACT-HEAD QUALIFICATION**
+**ID-AUDIT-3 — COMPLETE.**
 
 Next canonical step after successful closeout:
 

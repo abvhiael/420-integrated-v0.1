@@ -1,7 +1,9 @@
 import {hashLimitOrder} from './limit-order-identity.js';
 
 export const DEFAULT_ORDER_PUBLICATION_GATE=Object.freeze({enabled:false,mode:'DISABLED'});
+export const DEFAULT_ORDER_WITHDRAWAL_GATE=Object.freeze({enabled:false,mode:'DISABLED'});
 const ALLOWED_ORDER_PUBLICATION_MODES=new Set(['PRE07_MOCK','LIVE_TESTNET_QUALIFICATION']);
+const ALLOWED_ORDER_WITHDRAWAL_MODES=new Set(['PRE08_MOCK','LIVE_TESTNET_QUALIFICATION']);
 
 export class OrderPublicationClientError extends Error{
   constructor(code,message){super(message);this.name='OrderPublicationClientError';this.code=code;}
@@ -51,6 +53,26 @@ export async function publishSignedLimitOrder({runtime,signedOrder,fetchImpl=glo
   const payload=await readJson(response);
   if(!response.ok||payload?.schema!=='420-exchange-order-publication-response-v1')fail(payload?.code??'PUBLICATION_REJECTED',payload?.message??'order publication rejected');
   return Object.freeze({idempotent:payload.idempotent===true,order:validateRecord(payload.order,{expectedHash})});
+}
+export function assertOrderWithdrawalGate(withdrawalGate=DEFAULT_ORDER_WITHDRAWAL_GATE){
+  if(withdrawalGate?.enabled!==true||!ALLOWED_ORDER_WITHDRAWAL_MODES.has(withdrawalGate?.mode))fail('LIVE_ORDER_WITHDRAWAL_DISABLED','off-chain order withdrawal is disabled by the independent withdrawal gate');
+  return withdrawalGate;
+}
+export async function withdrawPublishedLimitOrder({runtime,orderHash,maker,nonce,requestId,fetchImpl=globalThis.fetch,signal,withdrawalGate=DEFAULT_ORDER_WITHDRAWAL_GATE}={}){
+  const base=endpoint(runtime);
+  if(runtime?.execution?.orderWithdrawal!=='DISABLED_PRETESTNET')fail('RUNTIME_POLICY_INVALID','pre-testnet runtime must keep live order withdrawal disabled');
+  assertOrderWithdrawalGate(withdrawalGate);
+  if(typeof orderHash!=='string'||!/^0x[0-9a-fA-F]{64}$/.test(orderHash))fail('ORDER_HASH_INVALID','canonical order hash required');
+  if(typeof maker!=='string'||!/^0x[0-9a-fA-F]{40}$/.test(maker))fail('MAKER_INVALID','maker address required');
+  if(typeof nonce!=='string'||!/^(0|[1-9][0-9]*)$/.test(nonce))fail('NONCE_INVALID','canonical order nonce required');
+  if(typeof requestId!=='string'||requestId.length<8||requestId.length>128)fail('REQUEST_ID_INVALID','bounded withdrawal requestId required');
+  const url=new URL(base.href+'/'+orderHash+'/withdraw');
+  let response;try{response=await fetchImpl(url.href,{method:'POST',cache:'no-store',credentials:'omit',redirect:'error',headers:{accept:'application/json','content-type':'application/json'},body:JSON.stringify({schema:'420-exchange-order-withdrawal-v1',maker,nonce,requestId}),signal});}
+  catch{fail('TRANSPORT_ERROR','order withdrawal request failed');}
+  if(typeof response?.url==='string'&&response.url&&response.url!==url.href)fail('ENDPOINT_CHANGED','order withdrawal response came from unexpected endpoint');
+  const payload=await readJson(response);
+  if(!response.ok||payload?.schema!=='420-exchange-order-withdrawal-response-v1')fail(payload?.code??'WITHDRAWAL_REJECTED',payload?.message??'order withdrawal rejected');
+  return Object.freeze({idempotent:payload.idempotent===true,order:validateRecord(payload.order,{expectedHash:orderHash.toLowerCase()})});
 }
 export async function fetchLimitOrderStatus({runtime,orderHash,fetchImpl=globalThis.fetch,signal}={}){
   const base=endpoint(runtime);

@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import {bytes32Word,keccak256,uintWord} from '../../web/core/abi.js';
 
 export const HISTORY_KINDS=Object.freeze(['TRADE','FILL','ORDER','CANCELLATION','LIQUIDITY','BRIDGE_DEPOSIT','BRIDGE_WITHDRAWAL','ROUTE_STATE','FEE_ROUTING']);
 const EVENT_KIND=Object.freeze({
@@ -11,7 +12,7 @@ const EVENT_KIND=Object.freeze({
 const req=(v,label)=>{if(typeof v!=='string'||!v)throw new Error('invalid '+label);return v;};
 const str=v=>typeof v==='bigint'?v.toString():String(v);
 function field(e,...names){for(const n of names)if(e.fields?.[n]!==undefined&&e.fields?.[n]!==null)return str(e.fields[n]);return null;}
-function recordId(e){return crypto.createHash('sha256').update([str(e.chainId),e.blockHash,e.transactionHash,str(e.logIndex)].join('|')).digest('hex');}
+function recordId(e){return keccak256('0x'+uintWord(BigInt(e.chainId))+bytes32Word(e.blockHash)+bytes32Word(e.transactionHash)+uintWord(BigInt(e.logIndex)));}
 function subject(e,kind){
   if(kind==='TRADE')return field(e,'marketId','pathHash','tradeRef')??e.objectKey??e.transactionHash;
   if(kind==='FILL'||kind==='CANCELLATION'||kind==='ORDER')return field(e,'orderHash','tradeRef')??e.objectKey??e.transactionHash;
@@ -25,7 +26,7 @@ export function mapIndexerEventToHistory(e,{observedAt=0,finality='indexed',fres
   if(!e||e.protocol!=='420Exchange'&&e.protocol!=='420Bridge')return null;
   const kind=EVENT_KIND[e.eventName];if(!kind)return null;
   const subjectId=req(subject(e,kind),'history subject');
-  const rid='idx:'+recordId(e);
+  const rid=recordId(e);
   const amountRaw=field(e,'amount','amountIn','amountOut','sellAmountFilled','grossRevenue','grossAmountOut');
   const beneficiary=field(e,'recipient','beneficiary');
   const feeAmountRaw=field(e,'grossRevenue','developerPayment');

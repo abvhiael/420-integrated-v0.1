@@ -12,3 +12,7 @@ version: current
 A name is a presentation/resolution layer. It does not prove legal identity, universal reputation, protocol legitimacy, or wallet ownership beyond the canonical bindings it actually records.
 
 Use [Getting started](getting-started.md) to register or resolve a name and [Developer integration](developer/index.md) for safe resolution rules.
+
+## Operator documentation
+
+Operators preparing Genesis or a production-equivalent environment must use the [deployment and operator runbook](deployment-operations.md). It defines the canonical `0x0435` deployment identity, configuration, verification, recovery, monitoring, threat model, known limitations, and release checklist.

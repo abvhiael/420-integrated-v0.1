@@ -257,6 +257,11 @@ contract SwapTWAPOracle420Test {
             true
         );
 
+        (bool oldSourceOk,) = address(s.oracle).staticcall(
+            abi.encodeWithSelector(s.oracle.referencePrice.selector, MARKET_ID)
+        );
+        require(!oldSourceOk, "old source remained readable");
+
         vm.warp(1_120);
         require(!s.oracle.checkpoint(MARKET_ID), "source change produced observation");
 

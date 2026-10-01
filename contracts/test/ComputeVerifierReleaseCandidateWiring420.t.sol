@@ -88,6 +88,7 @@ contract ComputeVerifierReleaseCandidateWiring420Test {
         verifierRegistry = new ComputeVerifierRegistry420(GOV);
         capabilityRegistry = new ComputeVerifierCapabilityRegistry420(address(verifierRegistry), GOV);
         policyRegistry = new ComputePolicyRegistry420(GOV);
+        jobs.bindVerificationPolicyRegistry(address(policyRegistry));
 
         selector = new ComputeIndependentVerifierSelector420(
             address(jobs),
@@ -111,10 +112,8 @@ contract ComputeVerifierReleaseCandidateWiring420Test {
             address(jobs), address(scientificRegistry), SAMPLING_AUTHORITY
         );
 
-        RCVerifierDummy420 dummyMatch = new RCVerifierDummy420();
-        RCVerifierDummy420 dummyAuth = new RCVerifierDummy420();
         dispute = new ComputeDisputeResolution420(
-            address(dummyMatch), address(dummyAuth), address(independence)
+            address(matches), address(authorization), address(independence)
         );
     }
 

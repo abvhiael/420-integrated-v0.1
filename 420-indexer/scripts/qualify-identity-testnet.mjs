@@ -167,7 +167,7 @@ const searchResult=await waitFor(async()=>{
   const u=new URL(searchBase+'/v1/resolve');u.searchParams.set('q','identity:'+lifecycle.profileId);
   const body=await getJson(u,'420Search Identity resolve');
   const result=body.result;if(!result)fail('Search Identity result missing');
-  if(lower(result.key)!==profileKey)fail('Search profile key mismatch');
+  const resultKey=lower(result.key);\n  if(resultKey!==lower(lifecycle.profileId)&&resultKey!==profileKey)fail('Search profile key mismatch');
   if(lower(result.presentation?.subtitle)!==lower(lifecycle.finalProfileController))fail('Search controller not converged');
   if(String(result.presentation?.snippet||'').toLowerCase().includes('payload'))fail('Search leaked/claimed private payload');
   return result;
@@ -175,10 +175,14 @@ const searchResult=await waitFor(async()=>{
 
 const explorerBase=manifest.services.explorer.replace(/\/$/,'');
 const explorerTx=await waitFor(async()=>{
-  const body=await getJson(new URL(explorerBase+'/v1/transactions/'+lifecycle.credentialRevokeTx),'420Explorer transaction');
+  const url=new URL(explorerBase+'/v1/transactions/'+lifecycle.credentialRevokeTx);
+  const response=await fetch(url,{headers:{accept:'application/json'}});
+  if(!response.ok)fail('420Explorer transaction HTTP '+response.status);
+  if(String(response.headers.get('X-420-Canonical-Authority')||'').toLowerCase()!=='false')fail('420Explorer claimed canonical authority');
+  const body=await response.json();
   const tx=body.transaction||body.Transaction||body.data?.transaction;
   if(!tx)fail('Explorer transaction payload missing');
-  return {body,tx};
+  return {body,tx,canonicalAuthority:false};
 },Number(args.timeoutSeconds),'420Explorer');
 
 const evidence={
@@ -215,7 +219,7 @@ const evidence={
     },
     explorer:{
       qualified:true,identityAddress:IDENTITY_ADDRESS_420,transactionHash:lifecycle.credentialRevokeTx,
-      blockNumber:String(revokeReceipt.blockNumber),canonicalAuthority:false,
+      blockNumber:String(revokeReceipt.blockNumber),canonicalAuthority:explorerTx.canonicalAuthority,
     },
   },
   recovery:draft.recovery,

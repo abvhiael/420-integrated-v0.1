@@ -53,7 +53,8 @@ contract GovernanceTimelock {
         return G4_DELAY;
     }
 
-    /// @notice Irreversibly transfer scheduling/cancellation authority from bootstrap governance to 420Civic.
+    /// @notice Irreversibly transfer scheduling authority from bootstrap governance to 420Civic.
+    /// @dev Civic v1 proposal cancellation is intentionally unsupported; bootstrap cancellation retires here.
     function activateCivicAuthority(address civicGovernor) external onlyBootstrapGovernor {
         require(!civicAuthorityActivated, "already activated");
         require(civicGovernor != address(0) && civicGovernor.code.length != 0, "invalid governor");
@@ -84,7 +85,10 @@ contract GovernanceTimelock {
         _schedule(id, target, value, data, class_, requestedDelay);
     }
 
-    function cancel(bytes32 id) external onlyScheduler {
+    /// @notice Cancel a legacy/bootstrap operation before Civic authority activation.
+    /// @dev Civic v1 proposals are immutable after creation; no post-activation cancellation authority exists.
+    function cancel(bytes32 id) external onlyBootstrapGovernor {
+        require(!civicAuthorityActivated, "civic active");
         Operation storage op = operations[id];
         require(op.target != address(0) && !op.executed && !op.cancelled, "invalid");
         op.cancelled = true;

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {publishSignedLimitOrder,fetchLimitOrderStatus,OrderPublicationClientError} from '../core/order-publication-client.js';
+import {publishSignedLimitOrder,fetchLimitOrderStatus,withdrawPublishedLimitOrder,OrderPublicationClientError} from '../core/order-publication-client.js';
 import {hashLimitOrder} from '../core/limit-order-identity.js';
 
 const addr=n=>'0x'+BigInt(n).toString(16).padStart(40,'0');
@@ -33,4 +33,21 @@ test('live publication requires both checked hard-off runtime and an explicit na
   const signedOrder={domain,order,signature:'0x'+'11'.repeat(65)};
   await assert.rejects(publishSignedLimitOrder({runtime,signedOrder,fetchImpl:async()=>response({})}),e=>e instanceof OrderPublicationClientError&&e.code==='LIVE_ORDER_PUBLICATION_DISABLED');
   await assert.rejects(publishSignedLimitOrder({runtime:{...runtime,execution:{orderPublication:'ENABLED'}},signedOrder,publicationGate:{enabled:true,mode:'PRE07_MOCK'},fetchImpl:async()=>response({})}),e=>e instanceof OrderPublicationClientError&&e.code==='RUNTIME_POLICY_INVALID');
+});
+
+
+test('PRE-08 withdrawal client is independently gated and rejects endpoint substitution',async()=>{
+  const runtime08={...runtime,execution:{...runtime.execution,orderWithdrawal:'DISABLED_PRETESTNET'}};
+  await assert.rejects(
+    withdrawPublishedLimitOrder({runtime:runtime08,orderHash,maker:order.maker,nonce:order.nonce,requestId:'withdraw-client-1',fetchImpl:async()=>response({})}),
+    e=>e.code==='LIVE_ORDER_WITHDRAWAL_DISABLED',
+  );
+  await assert.rejects(
+    withdrawPublishedLimitOrder({
+      runtime:runtime08,orderHash,maker:order.maker,nonce:order.nonce,requestId:'withdraw-client-1',
+      withdrawalGate:{enabled:true,mode:'PRE08_MOCK'},
+      fetchImpl:async()=>response({schema:'420-exchange-order-withdrawal-response-v1',order:{...record('cancelled'),cancellation:{mode:'OFFCHAIN_WITHDRAWAL'}}},{status:202,url:'https://evil.invalid/v1/orders/'+orderHash+'/withdraw'}),
+    }),
+    e=>e.code==='ENDPOINT_CHANGED',
+  );
 });

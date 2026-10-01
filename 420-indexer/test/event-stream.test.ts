@@ -71,7 +71,7 @@ test('event stream replays through the stable public API and preserves opaque cu
       limit: 25,
       direction: 'asc',
       protocol: '420Governance',
-      objectKey: 'proposal:42'
+      objectKey: 'proposalId:0x42'
     }
   }]);
   assert.equal(batch.streamVersion, 'v1');

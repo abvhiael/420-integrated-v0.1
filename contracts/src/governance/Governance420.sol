@@ -108,6 +108,10 @@ contract Governance420 is SystemAccess, I420System {
         keccak256("420/component/governance/civic-electorate-registry/v1");
     bytes32 public constant VOTING_COMPONENT_ID = keccak256("420/component/governance/civic-voting/v1");
     bytes32 public constant GOVERNOR_COMPONENT_ID = keccak256("420/component/governance/civic-governor/v1");
+    bytes32 public constant COMMUNITY_SOURCE_COMPONENT_ID =
+        keccak256("420/component/governance/civic-community-electorate-source/v1");
+    bytes32 public constant VALIDATOR_SOURCE_COMPONENT_ID =
+        keccak256("420/component/governance/civic-validator-electorate-source/v1");
     bytes32 public constant GOVERNANCE_SERVICE_ID = keccak256("420/service/governance/v1");
     bytes32 public constant GOVERNANCE_INTERFACE_HASH = keccak256("420/interface/governance-civic/v1");
     bytes32 public constant GOVERNANCE_MANIFEST_HASH = keccak256("420/governance/deployment-manifest/v1");
@@ -371,6 +375,26 @@ contract Governance420 is SystemAccess, I420System {
                 (GOVERNOR_COMPONENT_ID, governor_, version, IProtocolRegistryBootstrap420.Lifecycle.ACTIVE)
             )
         );
+        _schedule(
+            timelock,
+            plan,
+            14,
+            PROTOCOL_REGISTRY,
+            abi.encodeCall(
+                IProtocolRegistryBootstrap420.registerComponent,
+                (COMMUNITY_SOURCE_COMPONENT_ID, communitySource_, version, IProtocolRegistryBootstrap420.Lifecycle.ACTIVE)
+            )
+        );
+        _schedule(
+            timelock,
+            plan,
+            15,
+            PROTOCOL_REGISTRY,
+            abi.encodeCall(
+                IProtocolRegistryBootstrap420.registerComponent,
+                (VALIDATOR_SOURCE_COMPONENT_ID, validatorSource_, version, IProtocolRegistryBootstrap420.Lifecycle.ACTIVE)
+            )
+        );
 
         bytes32 dependencyRoot = keccak256(
             abi.encode(constitution_, proposals_, electorates_, voting_, governor_, communitySource_, validatorSource_)
@@ -378,7 +402,7 @@ contract Governance420 is SystemAccess, I420System {
         _schedule(
             timelock,
             plan,
-            14,
+            16,
             PROTOCOL_REGISTRY,
             abi.encodeCall(
                 IProtocolRegistryBootstrap420.publishRegisteredService,
@@ -475,6 +499,8 @@ contract Governance420 is SystemAccess, I420System {
                 || registry.resolve(ELECTORATE_COMPONENT_ID) != electorates_
                 || registry.resolve(VOTING_COMPONENT_ID) != voting_
                 || registry.resolve(GOVERNOR_COMPONENT_ID) != governor_
+                || registry.resolve(COMMUNITY_SOURCE_COMPONENT_ID) != communitySource_
+                || registry.resolve(VALIDATOR_SOURCE_COMPONENT_ID) != validatorSource_
         ) revert InvalidBootstrapGraph();
         (address serviceImplementation, uint32 serviceVersion) = registry.resolveActive(GOVERNANCE_SERVICE_ID);
         if (serviceImplementation != governor_ || serviceVersion != 1) revert InvalidBootstrapGraph();

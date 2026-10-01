@@ -140,3 +140,22 @@ test('cancellation lifecycle models reverted replacement reorg and indexer confl
   scenario='CONFIRMED';assert.equal((await env.controller.observeLifecycle()).state,'CONFIRMED');
   env.controller.dispose();env.browser.dispose();
 });
+
+
+test('on-chain cancellation remains impossible by default without explicit PRE-08 submission capability',async()=>{
+  const wallet=provider();
+  const browser=new BrowserExecutionController({runtime});await browser.connect({ethereum:wallet});
+  let reads=0;
+  const controller=new LimitOrderCancellationController({
+    controller:browser,
+    readState:async()=>{reads++;return chainState('0');},
+    status:async()=>baseRecord,
+    withdraw:async()=>{throw new Error('unused');},
+    nowSeconds:()=>1000,
+  });
+  await controller.prepare({record:baseRecord,mode:'HASH'});
+  controller.beginConfirmation();controller.confirm(confirmation(controller.review));
+  await assert.rejects(controller.submitOnchain(),e=>e instanceof WalletExecutionError&&e.code==='LIVE_SUBMISSION_DISABLED');
+  assert.ok(reads>=2);assert.equal(wallet.calls.includes('eth_sendTransaction'),false);
+  controller.dispose();browser.dispose();
+});

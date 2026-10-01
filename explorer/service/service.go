@@ -30,7 +30,6 @@ type IndexerReader interface {
 	Receipt(context.Context, string) (model.ReceiptRecord, error)
 	BlockLogs(context.Context, uint64) ([]model.LogRecord, error)
 	ServiceVersion(context.Context, string, uint32) (decoder.ServiceVersion, error)
-	StakeActivity(context.Context, string, string, uint32) (indexerapi.StakeActivityPage, error)
 }
 
 type Service struct {

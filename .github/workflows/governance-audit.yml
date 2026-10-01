@@ -8,6 +8,7 @@ on:
       - 'contracts/src/governance/**'
       - 'contracts/config/interfaces/dependency-matrix.json'
       - 'contracts/config/interfaces/governance-dependency-model.json'
+      - 'contracts/config/interfaces/governance-cross-protocol-integration.json'
       - 'contracts/config/governance-deployment-v1.json'
       - 'contracts/config/genesis-canonical-addresses.json'
       - 'contracts/config/genesis-address-namespace.json'
@@ -17,6 +18,7 @@ on:
       - 'scripts/verify-governance-audit-3.py'
       - 'scripts/verify-governance-audit-4.py'
       - 'scripts/verify-governance-audit-6.py'
+      - 'scripts/verify-governance-audit-7.py'
       - 'scripts/audit-genesis-address-collisions.py'
       - 'scripts/verify-genesis-predeploy-authority.py'
       - 'scripts/verify-genesis-canonical-addresses.py'
@@ -37,6 +39,13 @@ on:
       - 'docs/architecture/decisions/GOV-AUDIT-1-AUTHORITY-DEPENDENCY-CANCELLATION.md'
       - 'contracts/test/Civic*.t.sol'
       - 'contracts/test/Governance*.t.sol'
+      - 'contracts/src/system/ValidatorRegistry.sol'
+      - 'contracts/src/treasury/**'
+      - 'contracts/src/vault/**'
+      - 'contracts/config/420treasury-genesis.json'
+      - 'contracts/config/420search-genesis.json'
+      - 'contracts/config/420explorer-genesis.json'
+      - 'contracts/config/420notifications-genesis.json'
       - '420-indexer/src/abi-manifest.ts'
       - '420-indexer/src/governance-descriptors.ts'
       - '420-indexer/src/lifecycle-reducer.ts'
@@ -63,6 +72,7 @@ on:
       - 'contracts/src/governance/**'
       - 'contracts/config/interfaces/dependency-matrix.json'
       - 'contracts/config/interfaces/governance-dependency-model.json'
+      - 'contracts/config/interfaces/governance-cross-protocol-integration.json'
       - 'contracts/config/governance-deployment-v1.json'
       - 'contracts/config/genesis-canonical-addresses.json'
       - 'contracts/config/genesis-address-namespace.json'
@@ -72,6 +82,7 @@ on:
       - 'scripts/verify-governance-audit-3.py'
       - 'scripts/verify-governance-audit-4.py'
       - 'scripts/verify-governance-audit-6.py'
+      - 'scripts/verify-governance-audit-7.py'
       - 'scripts/audit-genesis-address-collisions.py'
       - 'scripts/verify-genesis-predeploy-authority.py'
       - 'scripts/verify-genesis-canonical-addresses.py'
@@ -92,6 +103,13 @@ on:
       - 'docs/architecture/decisions/GOV-AUDIT-1-AUTHORITY-DEPENDENCY-CANCELLATION.md'
       - 'contracts/test/Civic*.t.sol'
       - 'contracts/test/Governance*.t.sol'
+      - 'contracts/src/system/ValidatorRegistry.sol'
+      - 'contracts/src/treasury/**'
+      - 'contracts/src/vault/**'
+      - 'contracts/config/420treasury-genesis.json'
+      - 'contracts/config/420search-genesis.json'
+      - 'contracts/config/420explorer-genesis.json'
+      - 'contracts/config/420notifications-genesis.json'
       - '420-indexer/src/abi-manifest.ts'
       - '420-indexer/src/governance-descriptors.ts'
       - '420-indexer/src/lifecycle-reducer.ts'
@@ -155,6 +173,7 @@ jobs:
           python scripts/verify-governance-audit-2.py
           python scripts/verify-governance-audit-3.py
           python scripts/verify-governance-audit-6.py
+          python scripts/verify-governance-audit-7.py
           python scripts/verify-genesis-interface-layer.py
 
       - name: Verify affected Genesis address and predeploy authority
@@ -165,7 +184,7 @@ jobs:
 
       - name: Check Governance Solidity formatting
         working-directory: contracts
-        run: forge fmt --check src/governance test/CivicFoundation420.t.sol test/CivicElectorateRegistry420.t.sol test/CivicVoting420.t.sol test/CivicGovernor420.t.sol test/CivicTimelockExecution420.t.sol test/Governance420Retirement.t.sol test/GovernanceAudit420.t.sol test/GovernanceAudit2Hardening420.t.sol test/GovernanceAudit3Adversarial420.t.sol test/GovernanceAudit6Deployment420.t.sol test/CivicMerkleElectorateSource420.t.sol
+        run: forge fmt --check src/governance test/CivicFoundation420.t.sol test/CivicElectorateRegistry420.t.sol test/CivicVoting420.t.sol test/CivicGovernor420.t.sol test/CivicTimelockExecution420.t.sol test/Governance420Retirement.t.sol test/GovernanceAudit420.t.sol test/GovernanceAudit2Hardening420.t.sol test/GovernanceAudit3Adversarial420.t.sol test/GovernanceAudit6Deployment420.t.sol test/GovernanceAudit7Integration420.t.sol test/CivicMerkleElectorateSource420.t.sol
 
       - name: Build canonical Governance contracts
         working-directory: contracts
@@ -198,6 +217,10 @@ jobs:
       - name: GOV-AUDIT-6 deterministic deployment simulation
         working-directory: contracts
         run: FOUNDRY_SRC=src/governance FOUNDRY_TEST=test-governance-audit-6 timeout 180s forge test --match-path test-governance-audit-6/GovernanceAudit6Deployment420.t.sol -vvv
+
+      - name: GOV-AUDIT-7 cross-protocol integration
+        working-directory: contracts
+        run: forge test --match-path test/GovernanceAudit7Integration420.t.sol -vvv
 
       - name: Run Civic contract qualification
         working-directory: contracts

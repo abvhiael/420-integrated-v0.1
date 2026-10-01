@@ -1,12 +1,19 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
 
-import "forge-std/Test.sol";
 import "./helpers/GenesisMocks420.sol";
 import "../src/system/ValidatorRegistry.sol";
 
-contract StakeTransitionProperty420Test is Test {
-    address internal constant SYSTEM_CALLER = address(this);
+interface VmStakeTransition420 {
+    function deal(address account, uint256 newBalance) external;
+    function prank(address msgSender) external;
+    function roll(uint256 newHeight) external;
+}
+
+contract StakeTransitionProperty420Test {
+    VmStakeTransition420 internal constant vm =
+        VmStakeTransition420(address(uint160(uint256(keccak256("hevm cheat code")))));
+    address internal constant SYSTEM_CALLER = 0x000000000000000000000000000000000000043C;
 
     struct Fixture {
         GenesisMockEnvironment420 env;
@@ -17,8 +24,8 @@ contract StakeTransitionProperty420Test is Test {
     }
 
     function testFuzz_TransitionGraphMatchesCanonicalEdges(uint8 sourceRaw, uint8 targetRaw, uint64 seed) public {
-        ValidatorRegistry.Status source = ValidatorRegistry.Status(bound(uint256(sourceRaw), 1, 9));
-        ValidatorRegistry.Status target = ValidatorRegistry.Status(bound(uint256(targetRaw), 1, 9));
+        ValidatorRegistry.Status source = ValidatorRegistry.Status(1 + (uint256(sourceRaw) % 9));
+        ValidatorRegistry.Status target = ValidatorRegistry.Status(1 + (uint256(targetRaw) % 9));
 
         Fixture memory f = _fixtureAt(source, uint256(seed) + 1);
         _prepareEdge(f, source, target);
@@ -31,6 +38,7 @@ contract StakeTransitionProperty420Test is Test {
             uint64 cooldownUntilRotation
         ) = _parametersFor(beforeState, source, target, f.registry.lastRotationSnapshot());
 
+        vm.prank(SYSTEM_CALLER);
         (bool ok,) = address(f.registry).call(
             abi.encodeWithSelector(
                 f.registry.applyConsensusState.selector,
@@ -44,12 +52,12 @@ contract StakeTransitionProperty420Test is Test {
         );
 
         bool expected = _canonicalEdge(source, target);
-        assertEq(ok, expected, "STAKE-INV-003 transition graph mismatch");
+        require((ok) == (expected), "STAKE-INV-003 transition graph mismatch");
         if (!expected) {
             ValidatorRegistry.Validator memory afterRejected = f.registry.getValidator(f.id);
-            assertEq(uint8(afterRejected.status), uint8(beforeState.status), "rejected transition changed status");
-            assertEq(afterRejected.ownedBond, beforeState.ownedBond, "rejected transition changed owned bond");
-            assertEq(afterRejected.protocolCredit, beforeState.protocolCredit, "rejected transition changed credit");
+            require((uint8(afterRejected.status)) == (uint8(beforeState.status)), "rejected transition changed status");
+            require((afterRejected.ownedBond) == (beforeState.ownedBond), "rejected transition changed owned bond");
+            require((afterRejected.protocolCredit) == (beforeState.protocolCredit), "rejected transition changed credit");
         }
     }
 
@@ -76,6 +84,7 @@ contract StakeTransitionProperty420Test is Test {
         }
 
         if (source == ValidatorRegistry.Status.WITHDRAWAL_HOLD || source == ValidatorRegistry.Status.WITHDRAWABLE || source == ValidatorRegistry.Status.EXITED) {
+            vm.prank(SYSTEM_CALLER);
             f.registry.applyExitNotice(f.id, 1);
             f.registry.applyRotationSnapshot(2, 0);
             _state(f.registry, f.id, ValidatorRegistry.Status.WITHDRAWAL_HOLD, 2, 0, 0, 0);
@@ -100,6 +109,7 @@ contract StakeTransitionProperty420Test is Test {
         if (source == ValidatorRegistry.Status.ACTIVE) return f;
 
         for (uint64 rotation = 1; rotation <= 4; ++rotation) {
+            vm.prank(SYSTEM_CALLER);
             f.registry.applyRotationSnapshot(rotation, 1);
         }
         _state(f.registry, f.id, ValidatorRegistry.Status.NORMAL_COOLDOWN, 4, 1, 4, 7);
@@ -122,6 +132,7 @@ contract StakeTransitionProperty420Test is Test {
             if (source == ValidatorRegistry.Status.ACTIVE && notice < v.scheduledExitRotation - 1) {
                 notice = v.scheduledExitRotation - 1;
             }
+            vm.prank(SYSTEM_CALLER);
             f.registry.applyExitNotice(f.id, notice);
             uint64 required = notice + f.registry.EXIT_NOTICE_ROTATIONS();
             if (source == ValidatorRegistry.Status.ACTIVE && required < v.scheduledExitRotation) {
@@ -129,6 +140,7 @@ contract StakeTransitionProperty420Test is Test {
             }
             if (required > f.registry.lastRotationSnapshot()) {
                 uint256 eligible = (source == ValidatorRegistry.Status.ELIGIBLE || source == ValidatorRegistry.Status.ACTIVE) ? 1 : 0;
+                vm.prank(SYSTEM_CALLER);
                 f.registry.applyRotationSnapshot(required, eligible);
             }
         }
@@ -136,14 +148,18 @@ contract StakeTransitionProperty420Test is Test {
         if (source == ValidatorRegistry.Status.ACTIVE && target == ValidatorRegistry.Status.NORMAL_COOLDOWN) {
             ValidatorRegistry.Validator memory v = f.registry.getValidator(f.id);
             if (f.registry.lastRotationSnapshot() < v.scheduledExitRotation) {
-                f.registry.applyRotationSnapshot(v.scheduledExitRotation, 1);
+                vm.prank(SYSTEM_CALLER);
+                vm.prank(SYSTEM_CALLER);
+            f.registry.applyRotationSnapshot(v.scheduledExitRotation, 1);
             }
         }
 
         if (source == ValidatorRegistry.Status.NORMAL_COOLDOWN && target == ValidatorRegistry.Status.ELIGIBLE) {
             ValidatorRegistry.Validator memory v = f.registry.getValidator(f.id);
             if (f.registry.lastRotationSnapshot() < v.cooldownUntilRotation) {
-                f.registry.applyRotationSnapshot(v.cooldownUntilRotation, 0);
+                vm.prank(SYSTEM_CALLER);
+                vm.prank(SYSTEM_CALLER);
+            f.registry.applyRotationSnapshot(v.cooldownUntilRotation, 0);
             }
         }
 
@@ -200,6 +216,7 @@ contract StakeTransitionProperty420Test is Test {
         uint64 exitRotation,
         uint64 cooldownUntil
     ) internal {
+        vm.prank(SYSTEM_CALLER);
         registry.applyConsensusState(id, status, slot, activationRotation, exitRotation, cooldownUntil);
     }
 

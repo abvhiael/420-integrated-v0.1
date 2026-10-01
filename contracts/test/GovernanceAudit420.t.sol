@@ -114,7 +114,9 @@ contract GovernanceAudit420Test {
             CivicConstitution420 constitution,
             CivicProposalRegistry420 proposals,
             CivicElectorateRegistry420 electorates,
+            CivicVoting420 originalVoting
         ) = _base();
+        originalVoting;
         CivicElectorateRegistry420 otherElectorates = new CivicElectorateRegistry420(address(timelock));
         CivicVoting420 wrongVoting = new CivicVoting420(address(proposals), address(otherElectorates));
 
@@ -122,5 +124,47 @@ contract GovernanceAudit420Test {
         new CivicGovernor420(
             address(constitution), address(proposals), address(electorates), address(wrongVoting)
         );
+    }
+    function testCivicProposalCancellationIsRejectedFromEveryLiveState() public {
+        CivicProposalRegistry420 proposals = new CivicProposalRegistry420(address(this));
+        proposals.bindProposalAuthority(address(this));
+
+        bytes32 proposalId = keccak256("GOV-AUDIT-1-CANCEL");
+        proposals.registerProposal(
+            proposalId,
+            address(this),
+            CivicIds420.ProposalClass.G1,
+            keccak256("metadata"),
+            keccak256("actions"),
+            1,
+            2,
+            3
+        );
+
+        vm.expectRevert(CivicProposalRegistry420.InvalidStateTransition.selector);
+        proposals.transition(proposalId, CivicIds420.ProposalState.CANCELLED);
+
+        proposals.transition(proposalId, CivicIds420.ProposalState.PASSED);
+        vm.expectRevert(CivicProposalRegistry420.InvalidStateTransition.selector);
+        proposals.transition(proposalId, CivicIds420.ProposalState.CANCELLED);
+
+        proposals.transition(proposalId, CivicIds420.ProposalState.QUEUED);
+        vm.expectRevert(CivicProposalRegistry420.InvalidStateTransition.selector);
+        proposals.transition(proposalId, CivicIds420.ProposalState.CANCELLED);
+    }
+
+    function testTimelockCancellationRetiresWhenCivicAuthorityActivates() public {
+        GovernanceTimelock timelock = new GovernanceTimelock(address(this));
+        bytes32 operationId = keccak256("GOV-AUDIT-1-BOOTSTRAP-OP");
+        timelock.schedule(operationId, address(0xBEEF), 0, "", GovernanceTimelock.Class.G1);
+
+        timelock.activateCivicAuthority(address(this));
+        require(timelock.civicAuthorityActivated(), "civic active");
+
+        (bool ok,) = address(timelock).call(abi.encodeCall(timelock.cancel, (operationId)));
+        require(!ok, "post-activation cancel must fail");
+
+        (,,,,, bool executed, bool cancelled) = timelock.operations(operationId);
+        require(!executed && !cancelled, "operation state mutated");
     }
 }

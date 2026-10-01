@@ -41,6 +41,9 @@ on:
       - 'exchange/**'
       - 'docs/420EXCHANGE-*.md'
       - '.github/workflows/exchange-web.yml'
+      - 'contracts/config/compute-market/cmp-1.4.12-phase-closeout.json'
+      - 'docs/compute-market/CMP-1.4.12-VERIFIER-REGISTRY-PHASE-CLOSEOUT.md'
+      - 'scripts/verify-cmp-1-4-12-closeout.py'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}

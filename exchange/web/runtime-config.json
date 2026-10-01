@@ -51,6 +51,8 @@
   "execution": {
     "swapSubmission": "DISABLED_PRETESTNET",
     "orderSigning": "DISABLED_PRETESTNET",
-    "orderPublication": "DISABLED_PRETESTNET"
+    "orderPublication": "DISABLED_PRETESTNET",
+    "orderWithdrawal": "DISABLED_PRETESTNET",
+    "orderCancellation": "DISABLED_PRETESTNET"
   }
 }

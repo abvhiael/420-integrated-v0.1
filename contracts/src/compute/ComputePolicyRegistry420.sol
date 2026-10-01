@@ -84,6 +84,24 @@ contract ComputePolicyRegistry420 is SystemAccess, I420System {
             p.kind, p.revision, p.termsHash, p.schemaHash, p.maxDurationSeconds, p.maxUnits, p.maxSpend));
     }
 
+    /// @notice Validate that an exact policy revision/commitment is the current admission policy.
+    /// @dev This intentionally does not apply generic pricing/unit/spend bounds. A consuming component
+    ///      must separately validate its own accepted economic/workload constraints.
+    function isCurrentAcceptable(
+        bytes32 policyId,
+        uint32 revision,
+        bytes32 kind,
+        bytes32 exactCommitment
+    ) external view returns (bool) {
+        if (
+            !acceptingNew[policyId] || revision == 0 || revision != latestRevision[policyId]
+                || exactCommitment == bytes32(0)
+        ) return false;
+        Policy memory p = _revisions[policyId][revision];
+        if (!p.exists || p.kind != kind) return false;
+        return exactCommitment == commitment(policyId, revision);
+    }
+
     /// @notice Validate a new acceptance against the CURRENT revision and its immutable exact digest.
     /// @dev Existing accepted jobs must use `policy` + their stored digest, not call this function to
     ///      reinterpret their historical terms after an upgrade or policy suspension.

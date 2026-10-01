@@ -1,0 +1,68 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-1.4.5.IndependentVerifierSelection.v1",
+  "step": "CMP-1.4.5",
+  "title": "Independent verifier selection",
+  "canonical_definition": "Prevent worker-selected friendly verifiers and preserve conflict-of-interest controls.",
+  "base_main_sha": "8fbc37f254666fad5088d31101582a3cf292de9a",
+  "qualification_level": 1,
+  "roadmap_order": {
+    "predecessor": "CMP-1.4.4",
+    "predecessor_complete_on_base": false,
+    "note": "CMP-1.4.4 remains open on current main. CMP-1.4.5 is implemented as an independently testable selection authority slice without claiming CMP-1.4.4 completion or full sequential CMP-1.4 completion."
+  },
+  "milestone_relationship": {
+    "level_2_required_now": false,
+    "next_sensible_milestone_after": "CMP-1.4.6",
+    "rationale": "CMP-1.4.5 adds a new selector contract without changing the shared JobRegistry or policy ABI. Level 1 includes real cross-component integration with job, policy, verifier lifecycle and verifier capability. Broader app integration is most meaningful when selection feeds replicated/N-of-M verification."
+  },
+  "implementation": {
+    "contract": "contracts/src/compute/ComputeIndependentVerifierSelector420.sol",
+    "test": "contracts/test/ComputeIndependentVerifierSelector420.t.sol",
+    "independence_policy": "contracts/src/compute/ComputeVerifierIndependencePolicy420.sol",
+    "verifier_registry": "contracts/src/compute/ComputeVerifierRegistry420.sol",
+    "capability_registry": "contracts/src/compute/ComputeVerifierCapabilityRegistry420.sol",
+    "selection_rule": "Only the separately designated selection authority may select, and it cannot be the canonical owner, payer, matched operator, or selected verifier.",
+    "eligibility_rule": "Candidate must be the exact current ACTIVE verifier revision and already qualified as INDEPENDENT_VERIFIER for the job's exact workload class.",
+    "timing_rule": "Selection occurs only while the job is ACCEPTED, after exact verification-policy binding, and before worker execution begins.",
+    "conflict_rule": "ComputeVerifierIndependencePolicy420 independently revalidates current controller attestations and rejects shared-controller conflicts.",
+    "history_rule": "Selection and revocation are versioned; historical selection records are not rewritten."
+  },
+  "authority_boundaries": [
+    "The selector cannot register, activate, suspend, rotate or retire verifier identities.",
+    "The selector cannot grant or revoke verifier class/workload capability.",
+    "The selector cannot publish or approve verification policies or profiles.",
+    "The identity attestor cannot appoint because only the policy-designated selector contract may call appointment.",
+    "The worker/operator, owner, payer, selected verifier and outsiders cannot invoke selection authority.",
+    "Selection is appointment evidence only and does not prove correctness, submit a verdict, move funds, choose settlement beneficiary, mutate worker lifecycle, stake/slash, govern, bridge, validate, or control wallets.",
+    "Policy authority rotation immediately invalidates the old selector contract for new appointments."
+  ],
+  "invariants": [
+    "CMP-INV-005",
+    "CMP-INV-014",
+    "CMP-INV-016",
+    "CMP-INV-017",
+    "CMP-INV-020",
+    "CMP-INV-023",
+    "CMP-INV-025",
+    "CMP-INV-026",
+    "CMP-INV-027",
+    "CMP-INV-030"
+  ],
+  "deployment_publication": {
+    "fixed_genesis_predeploy_created": false,
+    "protocol_registry_publication_claimed": false,
+    "live_deployment_claimed": false
+  },
+  "exit_criteria": [
+    "A separately designated selector contract is the only path that can create new independent-verifier appointments in the qualified configuration.",
+    "Worker/operator, owner, payer, verifier and unrelated callers cannot choose the verifier.",
+    "The candidate verifier must be ACTIVE at the exact verifier revision and hold exact INDEPENDENT_VERIFIER capability for the job workload.",
+    "Current owner, payer, operator and verifier controller attestations must remain conflict-free under the independence policy.",
+    "Selection is bound to the exact job revision, workload, verification policy, verifier identity/revision, profile, evidence, expiry and selector domain.",
+    "Selection occurs before worker execution and cannot be added after the job enters RUNNING.",
+    "Revocation and replacement are versioned without rewriting historical selection evidence.",
+    "The selector grants no unrelated authority.",
+    "Level 1 exact-head Compute qualification is green."
+  ],
+  "status": "IMPLEMENTATION_COMPLETE_QUALIFICATION_PENDING"
+}

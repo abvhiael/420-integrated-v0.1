@@ -231,6 +231,9 @@ TEE verifier
 committee verifier
 ```
 
+Detailed CMP-1.4 substep sequencing is defined in `docs/compute-market/COMPUTE-MARKET-POST-CMP1-ROADMAP.md`. CMP-1.4.0 is **Verifier architecture reconciliation**: inventory all existing verifier, policy, selector, attestation and signed-verdict components and freeze canonical ownership and authority boundaries. Existing CMP-1.1 verifier primitives are retained inputs and must not be silently relabeled as completion of the canonical CMP-1.4 verifier registry.
+
+
 ## CMP-1.5 — ComputeStake
 
 Require worker/verifier collateral.

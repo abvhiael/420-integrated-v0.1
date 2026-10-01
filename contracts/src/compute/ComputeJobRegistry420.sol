@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
 
+import "./ComputePolicyRegistry420.sol";
+
 /// @notice Authoritative request check required before job creation.
 interface IComputeJobRequestEvidence420 {
     function validRequest(bytes32 requestId, address owner, bytes32 requestCommitment, bytes32 manifestHash,
@@ -51,6 +53,9 @@ contract ComputeJobRegistry420 {
         address verifier;
         bytes32 verificationRef;
         bytes32 settlementRef;
+        bytes32 verificationPolicyId;
+        bytes32 verificationPolicyCommitment;
+        uint32 verificationPolicyRevision;
         uint64 deadline;
         uint64 revision;
         Status status;
@@ -64,6 +69,8 @@ contract ComputeJobRegistry420 {
     IComputeJobWorkerEvidence420 public immutable workerEvidence;
     IComputeJobVerificationEvidence420 public immutable verificationEvidence;
     IComputeJobSettlementEvidence420 public immutable settlementEvidence;
+    address public immutable policyBindingAdmin;
+    ComputePolicyRegistry420 public verificationPolicies;
     uint64 public nextJobNonce;
     mapping(bytes32 => Job) private jobs;
     mapping(bytes32 => bool) public requestUsed;
@@ -80,6 +87,15 @@ contract ComputeJobRegistry420 {
     event WorkerAssigned(bytes32 indexed jobId, address indexed worker, bytes32 assignmentRef);
     event ResultRecorded(bytes32 indexed jobId, bytes32 resultCommitment);
     event VerifierDecision(bytes32 indexed jobId, address indexed verifier, bytes32 decisionRef, bool approved);
+    event VerificationPolicyRegistryBound(address indexed registry);
+    event VerificationPolicyBound(
+        bytes32 indexed jobId,
+        bytes32 indexed policyId,
+        uint32 indexed policyRevision,
+        bytes32 policyCommitment,
+        uint64 previousJobRevision,
+        uint64 currentJobRevision
+    );
 
     constructor(address request_, address funding_, address match_, address worker_, address verification_, address settlement_) {
         if (request_.code.length == 0 || funding_.code.length == 0 || match_.code.length == 0
@@ -91,6 +107,20 @@ contract ComputeJobRegistry420 {
         workerEvidence = IComputeJobWorkerEvidence420(worker_);
         verificationEvidence = IComputeJobVerificationEvidence420(verification_);
         settlementEvidence = IComputeJobSettlementEvidence420(settlement_);
+        policyBindingAdmin = msg.sender;
+    }
+
+    /// @notice One-time deployment binding to the canonical Compute policy registry.
+    /// @dev Binding grants no policy publication or lifecycle authority.
+    function bindVerificationPolicyRegistry(address policyRegistry) external {
+        if (
+            msg.sender != policyBindingAdmin || address(verificationPolicies) != address(0)
+                || policyRegistry == address(0) || policyRegistry.code.length == 0
+        ) revert Unauthorized();
+        ComputePolicyRegistry420 candidate = ComputePolicyRegistry420(policyRegistry);
+        if (candidate.KIND_VERIFICATION() == bytes32(0)) revert BadInput();
+        verificationPolicies = candidate;
+        emit VerificationPolicyRegistryBound(policyRegistry);
     }
 
     function job(bytes32 jobId) external view returns (Job memory) {
@@ -146,8 +176,56 @@ contract ComputeJobRegistry420 {
         j.acceptanceRef = acceptanceRef;
         _transition(jobId, j, Status.ACCEPTED, acceptanceRef);
     }
+    /// @notice Freeze the exact current verification policy before execution begins.
+    /// @dev Later policy publication/suspension cannot rewrite these stored historical semantics.
+    function bindVerificationPolicy(
+        bytes32 jobId,
+        uint64 expectedRevision,
+        bytes32 policyId,
+        uint32 policyRevision,
+        bytes32 policyCommitment
+    ) external {
+        Job storage j = _guard(jobId, expectedRevision, Status.ACCEPTED);
+        if (msg.sender != j.owner) revert Unauthorized();
+        if (
+            address(verificationPolicies) == address(0) || policyId == bytes32(0)
+                || policyRevision == 0 || policyCommitment == bytes32(0)
+                || j.verificationPolicyId != bytes32(0)
+        ) revert BadInput();
+        if (
+            !verificationPolicies.isCurrentAcceptable(
+                policyId,
+                policyRevision,
+                verificationPolicies.KIND_VERIFICATION(),
+                policyCommitment
+            )
+        ) revert UnprovenEvidence();
+
+        uint64 prior = j.revision;
+        j.verificationPolicyId = policyId;
+        j.verificationPolicyRevision = policyRevision;
+        j.verificationPolicyCommitment = policyCommitment;
+        j.revision = prior + 1;
+        emit VerificationPolicyBound(
+            jobId,
+            policyId,
+            policyRevision,
+            policyCommitment,
+            prior,
+            j.revision
+        );
+    }
+
     function assignWorker(bytes32 jobId, uint64 expectedRevision, address worker, bytes32 assignmentRef) external {
         Job storage j = _guard(jobId, expectedRevision, Status.ACCEPTED);
+        if (
+            address(verificationPolicies) != address(0)
+                && (
+                    j.verificationPolicyId == bytes32(0)
+                        || j.verificationPolicyRevision == 0
+                        || j.verificationPolicyCommitment == bytes32(0)
+                )
+        ) revert UnprovenEvidence();
         if (msg.sender != address(workerEvidence) || worker == address(0) || assignmentRef == 0
             || !workerEvidence.authorizedAssignment(jobId, j.matchId, worker, assignmentRef)) revert UnprovenEvidence();
         j.worker = worker;

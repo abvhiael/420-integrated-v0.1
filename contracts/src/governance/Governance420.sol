@@ -215,74 +215,186 @@ contract Governance420 is SystemAccess, I420System {
         bootstrapPlanHash = plan;
         bootstrapPlanScheduled = true;
 
-        _schedule(timelock, plan, 0, electorates_,
-            abi.encodeCall(CivicElectorateRegistry420.setHouseSource, (CivicIds420.House.COMMUNITY, communitySource_)));
-        _schedule(timelock, plan, 1, electorates_,
-            abi.encodeCall(CivicElectorateRegistry420.setHouseSource, (CivicIds420.House.VALIDATOR, validatorSource_)));
+        _schedule(
+            timelock,
+            plan,
+            0,
+            electorates_,
+            abi.encodeCall(CivicElectorateRegistry420.setHouseSource, (CivicIds420.House.COMMUNITY, communitySource_))
+        );
+        _schedule(
+            timelock,
+            plan,
+            1,
+            electorates_,
+            abi.encodeCall(CivicElectorateRegistry420.setHouseSource, (CivicIds420.House.VALIDATOR, validatorSource_))
+        );
 
-        _schedule(timelock, plan, 2, constitution_, abi.encodeCall(
-            CivicConstitution420.setRule,
-            (CivicIds420.ProposalClass.G1, ROTATION_BLOCKS, uint64(7 days), uint16(1000), uint16(5001), uint16(0), uint16(0), false)
-        ));
-        _schedule(timelock, plan, 3, constitution_, abi.encodeCall(
-            CivicConstitution420.setRule,
-            (CivicIds420.ProposalClass.G2, ROTATION_BLOCKS * 2, uint64(14 days), uint16(2000), uint16(6000), uint16(0), uint16(0), false)
-        ));
-        _schedule(timelock, plan, 4, constitution_, abi.encodeCall(
-            CivicConstitution420.setRule,
-            (CivicIds420.ProposalClass.G3, ROTATION_BLOCKS * 2, uint64(14 days), uint16(3334), uint16(6667), uint16(3334), uint16(6667), true)
-        ));
-        _schedule(timelock, plan, 5, constitution_, abi.encodeCall(
-            CivicConstitution420.setRule,
-            (CivicIds420.ProposalClass.G4, ROTATION_BLOCKS * 6, uint64(42 days), uint16(5000), uint16(7500), uint16(5000), uint16(7500), true)
-        ));
+        _schedule(
+            timelock,
+            plan,
+            2,
+            constitution_,
+            abi.encodeCall(
+                CivicConstitution420.setRule,
+                (
+                    CivicIds420.ProposalClass.G1,
+                    ROTATION_BLOCKS,
+                    uint64(7 days),
+                    uint16(1000),
+                    uint16(5001),
+                    uint16(0),
+                    uint16(0),
+                    false
+                )
+            )
+        );
+        _schedule(
+            timelock,
+            plan,
+            3,
+            constitution_,
+            abi.encodeCall(
+                CivicConstitution420.setRule,
+                (
+                    CivicIds420.ProposalClass.G2,
+                    ROTATION_BLOCKS * 2,
+                    uint64(14 days),
+                    uint16(2000),
+                    uint16(6000),
+                    uint16(0),
+                    uint16(0),
+                    false
+                )
+            )
+        );
+        _schedule(
+            timelock,
+            plan,
+            4,
+            constitution_,
+            abi.encodeCall(
+                CivicConstitution420.setRule,
+                (
+                    CivicIds420.ProposalClass.G3,
+                    ROTATION_BLOCKS * 2,
+                    uint64(14 days),
+                    uint16(3334),
+                    uint16(6667),
+                    uint16(3334),
+                    uint16(6667),
+                    true
+                )
+            )
+        );
+        _schedule(
+            timelock,
+            plan,
+            5,
+            constitution_,
+            abi.encodeCall(
+                CivicConstitution420.setRule,
+                (
+                    CivicIds420.ProposalClass.G4,
+                    ROTATION_BLOCKS * 6,
+                    uint64(42 days),
+                    uint16(5000),
+                    uint16(7500),
+                    uint16(5000),
+                    uint16(7500),
+                    true
+                )
+            )
+        );
 
-        _schedule(timelock, plan, 6, proposals_,
-            abi.encodeCall(CivicProposalRegistry420.bindProposalAuthority, (governor_)));
-        _schedule(timelock, plan, 7, electorates_,
-            abi.encodeCall(CivicElectorateRegistry420.bindSnapshotAuthority, (governor_)));
+        _schedule(
+            timelock, plan, 6, proposals_, abi.encodeCall(CivicProposalRegistry420.bindProposalAuthority, (governor_))
+        );
+        _schedule(
+            timelock,
+            plan,
+            7,
+            electorates_,
+            abi.encodeCall(CivicElectorateRegistry420.bindSnapshotAuthority, (governor_))
+        );
         _schedule(timelock, plan, 8, address(this), abi.encodeCall(Governance420.bindCivicGovernor, (governor_)));
 
         IProtocolRegistryBootstrap420.Version memory version =
             IProtocolRegistryBootstrap420.Version({ major: 1, minor: 0, patch: 0 });
-        _schedule(timelock, plan, 9, PROTOCOL_REGISTRY, abi.encodeCall(
-            IProtocolRegistryBootstrap420.registerComponent,
-            (COMMUNITY_COMPONENT_ID, constitution_, version, IProtocolRegistryBootstrap420.Lifecycle.ACTIVE)
-        ));
-        _schedule(timelock, plan, 10, PROTOCOL_REGISTRY, abi.encodeCall(
-            IProtocolRegistryBootstrap420.registerComponent,
-            (PROPOSAL_COMPONENT_ID, proposals_, version, IProtocolRegistryBootstrap420.Lifecycle.ACTIVE)
-        ));
-        _schedule(timelock, plan, 11, PROTOCOL_REGISTRY, abi.encodeCall(
-            IProtocolRegistryBootstrap420.registerComponent,
-            (ELECTORATE_COMPONENT_ID, electorates_, version, IProtocolRegistryBootstrap420.Lifecycle.ACTIVE)
-        ));
-        _schedule(timelock, plan, 12, PROTOCOL_REGISTRY, abi.encodeCall(
-            IProtocolRegistryBootstrap420.registerComponent,
-            (VOTING_COMPONENT_ID, voting_, version, IProtocolRegistryBootstrap420.Lifecycle.ACTIVE)
-        ));
-        _schedule(timelock, plan, 13, PROTOCOL_REGISTRY, abi.encodeCall(
-            IProtocolRegistryBootstrap420.registerComponent,
-            (GOVERNOR_COMPONENT_ID, governor_, version, IProtocolRegistryBootstrap420.Lifecycle.ACTIVE)
-        ));
+        _schedule(
+            timelock,
+            plan,
+            9,
+            PROTOCOL_REGISTRY,
+            abi.encodeCall(
+                IProtocolRegistryBootstrap420.registerComponent,
+                (COMMUNITY_COMPONENT_ID, constitution_, version, IProtocolRegistryBootstrap420.Lifecycle.ACTIVE)
+            )
+        );
+        _schedule(
+            timelock,
+            plan,
+            10,
+            PROTOCOL_REGISTRY,
+            abi.encodeCall(
+                IProtocolRegistryBootstrap420.registerComponent,
+                (PROPOSAL_COMPONENT_ID, proposals_, version, IProtocolRegistryBootstrap420.Lifecycle.ACTIVE)
+            )
+        );
+        _schedule(
+            timelock,
+            plan,
+            11,
+            PROTOCOL_REGISTRY,
+            abi.encodeCall(
+                IProtocolRegistryBootstrap420.registerComponent,
+                (ELECTORATE_COMPONENT_ID, electorates_, version, IProtocolRegistryBootstrap420.Lifecycle.ACTIVE)
+            )
+        );
+        _schedule(
+            timelock,
+            plan,
+            12,
+            PROTOCOL_REGISTRY,
+            abi.encodeCall(
+                IProtocolRegistryBootstrap420.registerComponent,
+                (VOTING_COMPONENT_ID, voting_, version, IProtocolRegistryBootstrap420.Lifecycle.ACTIVE)
+            )
+        );
+        _schedule(
+            timelock,
+            plan,
+            13,
+            PROTOCOL_REGISTRY,
+            abi.encodeCall(
+                IProtocolRegistryBootstrap420.registerComponent,
+                (GOVERNOR_COMPONENT_ID, governor_, version, IProtocolRegistryBootstrap420.Lifecycle.ACTIVE)
+            )
+        );
 
         bytes32 dependencyRoot = keccak256(
             abi.encode(constitution_, proposals_, electorates_, voting_, governor_, communitySource_, validatorSource_)
         );
-        _schedule(timelock, plan, 14, PROTOCOL_REGISTRY, abi.encodeCall(
-            IProtocolRegistryBootstrap420.publishRegisteredService,
-            (
-                GOVERNANCE_SERVICE_ID,
-                governor_,
-                GOVERNANCE_METADATA_HASH,
-                uint32(1),
-                true,
-                IProtocolRegistryBootstrap420.ComponentType.PROTOCOL,
-                GOVERNANCE_MANIFEST_HASH,
-                dependencyRoot,
-                GOVERNANCE_INTERFACE_HASH
+        _schedule(
+            timelock,
+            plan,
+            14,
+            PROTOCOL_REGISTRY,
+            abi.encodeCall(
+                IProtocolRegistryBootstrap420.publishRegisteredService,
+                (
+                    GOVERNANCE_SERVICE_ID,
+                    governor_,
+                    GOVERNANCE_METADATA_HASH,
+                    uint32(1),
+                    true,
+                    IProtocolRegistryBootstrap420.ComponentType.PROTOCOL,
+                    GOVERNANCE_MANIFEST_HASH,
+                    dependencyRoot,
+                    GOVERNANCE_INTERFACE_HASH
+                )
             )
-        ));
+        );
 
         emit CivicBootstrapPlanScheduled(plan, governor_);
     }
@@ -330,10 +442,32 @@ contract Governance420 is SystemAccess, I420System {
             revert InvalidBootstrapGraph();
         }
 
-        _requireRule(constitution.ruleFor(CivicIds420.ProposalClass.G1), ROTATION_BLOCKS, 7 days, 1000, 5001, 0, 0, false);
-        _requireRule(constitution.ruleFor(CivicIds420.ProposalClass.G2), ROTATION_BLOCKS * 2, 14 days, 2000, 6000, 0, 0, false);
-        _requireRule(constitution.ruleFor(CivicIds420.ProposalClass.G3), ROTATION_BLOCKS * 2, 14 days, 3334, 6667, 3334, 6667, true);
-        _requireRule(constitution.ruleFor(CivicIds420.ProposalClass.G4), ROTATION_BLOCKS * 6, 42 days, 5000, 7500, 5000, 7500, true);
+        _requireRule(
+            constitution.ruleFor(CivicIds420.ProposalClass.G1), ROTATION_BLOCKS, 7 days, 1000, 5001, 0, 0, false
+        );
+        _requireRule(
+            constitution.ruleFor(CivicIds420.ProposalClass.G2), ROTATION_BLOCKS * 2, 14 days, 2000, 6000, 0, 0, false
+        );
+        _requireRule(
+            constitution.ruleFor(CivicIds420.ProposalClass.G3),
+            ROTATION_BLOCKS * 2,
+            14 days,
+            3334,
+            6667,
+            3334,
+            6667,
+            true
+        );
+        _requireRule(
+            constitution.ruleFor(CivicIds420.ProposalClass.G4),
+            ROTATION_BLOCKS * 6,
+            42 days,
+            5000,
+            7500,
+            5000,
+            7500,
+            true
+        );
 
         if (
             registry.resolve(COMMUNITY_COMPONENT_ID) != constitution_

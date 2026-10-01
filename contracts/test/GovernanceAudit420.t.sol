@@ -134,9 +134,10 @@ contract GovernanceAudit420Test {
     }
 
     function testGovernorRejectsNonContractTimelockAuthorityGraph() public {
-        CivicConstitution420 constitution = new CivicConstitution420(address(this));
-        CivicProposalRegistry420 proposals = new CivicProposalRegistry420(address(this));
-        CivicElectorateRegistry420 electorates = new CivicElectorateRegistry420(address(this));
+        address nonContractTimelock = address(0xBEEF);
+        CivicConstitution420 constitution = new CivicConstitution420(nonContractTimelock);
+        CivicProposalRegistry420 proposals = new CivicProposalRegistry420(nonContractTimelock);
+        CivicElectorateRegistry420 electorates = new CivicElectorateRegistry420(nonContractTimelock);
         CivicVoting420 voting = new CivicVoting420(address(proposals), address(electorates));
 
         vm.expectRevert(CivicGovernor420.InvalidModule.selector);

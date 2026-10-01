@@ -9,6 +9,8 @@ on:
       - 'contracts/config/interfaces/dependency-matrix.json'
       - 'contracts/config/interfaces/governance-dependency-model.json'
       - 'scripts/verify-governance-audit-1.py'
+      - 'scripts/verify-governance-audit-2.py'
+      - 'scripts/verify-governance-audit-2.py'
       - 'scripts/verify-genesis-interface-layer.py'
       - 'docs/architecture/decisions/GOV-AUDIT-1-AUTHORITY-DEPENDENCY-CANCELLATION.md'
       - 'contracts/test/Civic*.t.sol'
@@ -73,14 +75,15 @@ jobs:
         with:
           version: stable
 
-      - name: Verify GOV-AUDIT-1 authority and dependency model
+      - name: Verify Governance audit authority and hardening model
         run: |
           python scripts/verify-governance-audit-1.py
+          python scripts/verify-governance-audit-2.py
           python scripts/verify-genesis-interface-layer.py
 
       - name: Check Governance Solidity formatting
         working-directory: contracts
-        run: forge fmt --check src/governance test/CivicFoundation420.t.sol test/CivicElectorateRegistry420.t.sol test/CivicVoting420.t.sol test/CivicGovernor420.t.sol test/CivicTimelockExecution420.t.sol test/Governance420Retirement.t.sol test/GovernanceAudit420.t.sol
+        run: forge fmt --check src/governance test/CivicFoundation420.t.sol test/CivicElectorateRegistry420.t.sol test/CivicVoting420.t.sol test/CivicGovernor420.t.sol test/CivicTimelockExecution420.t.sol test/Governance420Retirement.t.sol test/GovernanceAudit420.t.sol test/GovernanceAudit2Hardening420.t.sol
 
       - name: Build canonical Governance contracts
         working-directory: contracts

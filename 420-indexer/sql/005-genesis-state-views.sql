@@ -1,22 +1,27 @@
 create or replace view idx_protocol_object_events as
 select
   e.*,
-  coalesce(
-    e.fields->>'objectId',
-    e.fields->>'componentId',
-    e.fields->>'labelHash',
-    e.fields->>'profileId',
-    e.fields->>'credentialId',
-    e.fields->>'issuerId',
-    e.fields->>'validatorId',
-    e.fields->>'proposalId',
-    e.fields->>'paymentId',
-    e.fields->>'routeId',
-    e.fields->>'messageId',
-    e.fields->>'requestId',
-    e.fields->>'rightId',
-    e.fields->>'assetId'
-  ) as object_key,
+  case
+    when e.protocol = '420Identity' then coalesce(
+      e.fields->>'credentialId',
+      e.fields->>'profileId',
+      e.fields->>'issuerId'
+    )
+    else coalesce(
+      e.fields->>'objectId',
+      e.fields->>'componentId',
+      e.fields->>'labelHash',
+      e.fields->>'profileId',
+      e.fields->>'validatorId',
+      e.fields->>'proposalId',
+      e.fields->>'paymentId',
+      e.fields->>'routeId',
+      e.fields->>'messageId',
+      e.fields->>'requestId',
+      e.fields->>'rightId',
+      e.fields->>'assetId'
+    )
+  end as object_key,
   case
     when e.protocol = '420Identity' then
       case e.event_name

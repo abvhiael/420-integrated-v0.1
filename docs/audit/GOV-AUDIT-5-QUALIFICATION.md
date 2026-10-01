@@ -4,7 +4,7 @@
 
 - Step: **GOV-AUDIT-5 — 420 Wallet Governance user application**
 - Qualification model: **Level 1 complete**
-- Implementation SHA: `13c818af72be4b2306cfa1ca276bb0459bb888d7`
+- Implementation SHA: `2ea64dded4b2ea600adcc8989b6efbfc872a2ae1`
 - Audit branch: `audit/420governance-complete-20261001`
 - PR: #449
 - PR base SHA: `01dc4d3a7c272e5e0e70261d3a5f7a26afd04872`
@@ -92,6 +92,8 @@ The actual canonical Civic component IDs remain intentionally undefined by GOV-A
 Named coverage includes:
 
 - non-Registry discovery rejection;
+- ProtocolRegistry-resolved Civic address mismatch rejection;
+- ProtocolRegistry missing/zero Civic component rejection;
 - wrong-chain rejection;
 - missing deployed code rejection;
 - account drift rejection;
@@ -116,15 +118,15 @@ Named coverage includes:
 
 Exact implementation SHA:
 
-`13c818af72be4b2306cfa1ca276bb0459bb888d7`
+`2ea64dded4b2ea600adcc8989b6efbfc872a2ae1`
 
 ### Dedicated GOV-AUDIT-5 workflow
 
 Workflow: **420Governance Wallet GOV-AUDIT-5**
 
-- push run **#5**
-- run ID `36927073939`
-- job ID `110586923729`
+- exact-head run **#9**
+- run ID `36928579854`
+- job ID `110591915321`
 - result: **SUCCESS**
 
 Passed:
@@ -135,16 +137,11 @@ Passed:
 - retained Wallet Web static qualification;
 - complete Wallet Web test inventory.
 
-### Retained Wallet Web workflow
+### Retained Wallet Web qualification
 
-Workflow: **420 Wallet Web Verification**
+The exact-head GOV-AUDIT-5 workflow itself reran the retained Wallet Web static qualification and complete Wallet Web test inventory on `2ea64dded4b2ea600adcc8989b6efbfc872a2ae1`; both passed in run `36928579854` / job `110591915321`.
 
-- push run **#1225**
-- run ID `36927074075`
-- job ID `110586924615`
-- result: **SUCCESS**
-
-The retained Wallet workflow passed its deployment-inventory/namespace/predeploy source checks, static Wallet checks and complete Wallet Core tests on the same exact implementation SHA.
+The generic **420 Wallet Web Verification** pull-request job is intentionally skipped on `audit/*` branches by its job-level policy. The last independent push qualification before this test-only hardening was run `36927074075` / job `110586924615`, result **SUCCESS**. The follow-up commit changes only Governance test coverage, not Wallet executable/configuration/deployment surfaces, and the dedicated exact-head workflow re-executed the complete Wallet Web test inventory after that change.
 
 ## Diagnosed intermediate failure
 
@@ -160,7 +157,7 @@ A base-to-main review found no overlapping changes in the Wallet Web, Governance
 
 **NOT SEPARATELY REQUIRED FOR THIS STEP.**
 
-The step introduced a Wallet client/UI surface but did not change shared protocol authority or contract semantics. The dedicated GOV-AUDIT-5 workflow already ran the complete Wallet Web test inventory in addition to its focused Governance tests.
+The step introduced a Wallet client/UI surface but did not change shared protocol authority or contract semantics. The final follow-up commit is test-only and adds explicit mismatch/zero-resolution coverage for ProtocolRegistry discovery. The dedicated GOV-AUDIT-5 workflow already ran the complete Wallet Web test inventory in addition to its focused Governance tests.
 
 ## Level 3 status
 

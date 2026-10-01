@@ -33,6 +33,7 @@ on:
       - '420-indexer/test/protocol-object-service.test.ts'
       - '420-indexer/test/query-service.test.ts'
       - '420-indexer/test/event-stream.test.ts'
+      - '420-indexer/test/event-subscription.test.ts'
       - 'docs/apps/governance/**'
       - 'docs/audit/420GOVERNANCE-*'
       - '.github/workflows/governance-audit.yml'
@@ -66,6 +67,7 @@ on:
       - '420-indexer/test/protocol-object-service.test.ts'
       - '420-indexer/test/query-service.test.ts'
       - '420-indexer/test/event-stream.test.ts'
+      - '420-indexer/test/event-subscription.test.ts'
       - 'docs/apps/governance/**'
       - 'docs/audit/420GOVERNANCE-*'
       - '.github/workflows/governance-audit.yml'
@@ -153,4 +155,5 @@ jobs:
             dist/test/protocol-projections.test.js \
             dist/test/protocol-object-service.test.js \
             dist/test/query-service.test.js \
-            dist/test/event-stream.test.js
+            dist/test/event-stream.test.js \
+            dist/test/event-subscription.test.js

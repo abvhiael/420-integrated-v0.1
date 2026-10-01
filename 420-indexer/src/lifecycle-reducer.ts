@@ -6,6 +6,9 @@ export interface LifecycleRule420 {
   eventName: string;
   state: LifecycleState420;
   terminal?: boolean;
+  stateField?: string;
+  stateMap?: Readonly<Record<string, LifecycleState420>>;
+  terminalFieldValues?: readonly string[];
 }
 
 export interface LifecyclePolicy420 {
@@ -45,11 +48,43 @@ const POLICY_LIST: LifecyclePolicy420[] = [
     { eventName: 'NameTransferred', state: 'ACTIVE' }
   ]},
   { protocol: '420Stake', rules: [
-    { eventName: 'StakeCreated', state: 'ACTIVE' },
-    { eventName: 'StakeActivated', state: 'ACTIVE' },
-    { eventName: 'UnstakeRequested', state: 'PENDING' },
-    { eventName: 'StakeWithdrawn', state: 'COMPLETED', terminal: true },
-    { eventName: 'StakeSlashed', state: 'FAILED', terminal: true }
+    { eventName: 'ValidatorRegistered', state: 'PENDING' },
+    {
+      eventName: 'ConsensusStateApplied',
+      state: 'UNKNOWN',
+      stateField: 'newStatus',
+      stateMap: {
+        '1': 'PENDING',
+        '2': 'PENDING',
+        '3': 'ACTIVE',
+        '4': 'ACTIVE',
+        '5': 'PENDING',
+        '6': 'FAILED',
+        '7': 'COMPLETED',
+        '8': 'PENDING',
+        '9': 'PENDING'
+      },
+      terminalFieldValues: ['7']
+    },
+    { eventName: 'ExitNoticeApplied', state: 'PENDING' },
+    {
+      eventName: 'SlashApplied',
+      state: 'FAILED',
+      stateField: 'resultingStatus',
+      stateMap: {
+        '1': 'PENDING',
+        '2': 'PENDING',
+        '3': 'ACTIVE',
+        '4': 'ACTIVE',
+        '5': 'PENDING',
+        '6': 'FAILED',
+        '7': 'COMPLETED',
+        '8': 'PENDING',
+        '9': 'PENDING'
+      },
+      terminalFieldValues: ['7']
+    },
+    { eventName: 'ValidatorBondWithdrawn', state: 'COMPLETED', terminal: true }
   ]},
   { protocol: '420Governance', rules: [
     { eventName: 'ProposalCreated', state: 'PENDING' },
@@ -114,11 +149,18 @@ export function reduceProtocolLifecycle420(events: readonly DecodedProtocolEvent
 
     const current = states.get(key);
     if (current?.terminal) continue;
+
+    const stateFieldValue = rule.stateField === undefined ? undefined : event.fields[rule.stateField];
+    const stateFieldKey = stateFieldValue === undefined || stateFieldValue === null ? undefined : String(stateFieldValue);
+    const resolvedState = stateFieldKey === undefined ? rule.state : (rule.stateMap?.[stateFieldKey] ?? rule.state);
+    const resolvedTerminal = Boolean(rule.terminal) ||
+      (stateFieldKey !== undefined && Boolean(rule.terminalFieldValues?.includes(stateFieldKey)));
+
     states.set(key, {
       protocol: event.protocol,
       objectKey: key,
-      state: rule.state,
-      terminal: Boolean(rule.terminal),
+      state: resolvedState,
+      terminal: resolvedTerminal,
       eventName: event.eventName,
       blockNumber: event.blockNumber,
       transactionIndex: event.transactionIndex,

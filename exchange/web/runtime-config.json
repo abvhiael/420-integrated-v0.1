@@ -53,6 +53,8 @@
     "orderSigning": "DISABLED_PRETESTNET",
     "orderPublication": "DISABLED_PRETESTNET",
     "orderWithdrawal": "DISABLED_PRETESTNET",
-    "orderCancellation": "DISABLED_PRETESTNET"
+    "orderCancellation": "DISABLED_PRETESTNET",
+    "bridgeSubmission": "DISABLED_PRETESTNET",
+    "bridgeProofAcceptance": "DISABLED_PRETESTNET"
   }
 }

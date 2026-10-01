@@ -11,5 +11,5 @@ for(const m of ['420Indexer/v1','authoritative:false','recordId','replacedBy','f
 const startup=fs.readFileSync(path.join(root,'src/startup.mjs'),'utf8');
 for(const m of ['IndexerHttpProjectionSource','RpcHealthSource','FileProjectionStore','loadCatalogue','server.close','SIGTERM','SIGINT'])if(!startup.includes(m))throw new Error('PRE-10 startup missing '+m);
 const catalogue=JSON.parse(fs.readFileSync(path.join(root,'config/catalogue.example.json'),'utf8'));
-if(catalogue.markets.some(m=>!String(m.qualification).startsWith('DISPLAY_ONLY')))throw new Error('PRE-10 catalogue must remain display-only');
+for(const group of ['markets','assets','routes'])if(!Array.isArray(catalogue[group])||catalogue[group].length===0||catalogue[group].some(m=>!String(m.qualification).startsWith('DISPLAY_ONLY')))throw new Error('PRE-10 '+group+' catalogue must be explicit display-only');
 console.log('420Exchange PRE-10 read API/startup static checks passed');

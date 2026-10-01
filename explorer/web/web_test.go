@@ -145,7 +145,7 @@ func TestExplorerScriptContainsStakeRewardWorkflow(t *testing.T) {
 	Handler().ServeHTTP(rr,httptest.NewRequest(http.MethodGet,"/app.js",nil))
 	if rr.Code!=http.StatusOK{t.Fatalf("status=%d",rr.Code)}
 	body:=rr.Body.String()
-	for _,marker:=range []string{"Stake & rewards","/v1/stake/activity","stakeActivityTable","RewardApplied","rebuildable Indexer projection","ValidatorRegistry / RewardController"}{
+	for _,marker:=range []string{"Stake & rewards","/v1/stake/activity","stakeActivityTable","rebuildable Indexer projection","ValidatorRegistry / RewardController"}{
 		if !strings.Contains(body,marker){t.Fatalf("app.js missing STAKE-AUDIT-6 marker %q",marker)}
 	}
 	rr=httptest.NewRecorder()

@@ -16,6 +16,8 @@ const A={
   governor:'0x0000000000000000000000000000000000001005',
 };
 const ALICE='0x1111111111111111111111111111111111111111';
+const REGISTRY='0x0000000000000000000000000000000000002000';
+const IDS={constitution:'0x'+'01'.repeat(32),proposalRegistry:'0x'+'02'.repeat(32),electorateRegistry:'0x'+'03'.repeat(32),voting:'0x'+'04'.repeat(32),governor:'0x'+'05'.repeat(32)};
 const PROPOSAL='0x'+'aa'.repeat(32);
 const META='0x'+'bb'.repeat(32);
 const ACTIONS='0x'+'cc'.repeat(32);
@@ -34,7 +36,7 @@ const str=(text)=>{
   const data=Buffer.from(text,'utf8').toString('hex');
   return result(w(32),w(data.length/2),data.padEnd(Math.ceil(data.length/64)*64,'0'));
 };
-const discovery=()=>({source:'protocol-registry',serviceId:GOVERNANCE420_SERVICE_ID,revision:7,modules:{...A}});
+const discovery=()=>({source:'protocol-registry',serviceId:GOVERNANCE420_SERVICE_ID,revision:7,registryAddress:REGISTRY,componentIds:{...IDS},modules:{...A}});
 
 class FakeProvider{
   constructor(overrides={}){
@@ -65,11 +67,18 @@ class FakeProvider{
     const [{to,data}]=params;
     const sel=data.slice(2,10);
     const names={
+      [REGISTRY]:'ProtocolRegistry',
       [A.constitution]:'CivicConstitution420',[A.proposalRegistry]:'CivicProposalRegistry420',
       [A.electorateRegistry]:'CivicElectorateRegistry420',[A.voting]:'CivicVoting420',[A.governor]:'CivicGovernor420',
     };
     if(sel===selector('systemName()'))return str(names[to]);
-    if(sel===selector('protocolVersion()'))return result(w(1));
+    if(sel===selector('protocolVersion()'))return result(w(to===REGISTRY?4:1));
+    if(to===REGISTRY&&sel===selector('resolve(bytes32)')){
+      const componentId='0x'+data.slice(-64).toLowerCase();
+      const key=Object.keys(IDS).find((name)=>IDS[name]===componentId);
+      if(!key)throw new Error('unknown component');
+      return result(aw(A[key]));
+    }
     if(to===A.governor&&sel===selector('constitution()'))return result(aw(A.constitution));
     if(to===A.governor&&sel===selector('proposalRegistry()'))return result(aw(A.proposalRegistry));
     if(to===A.governor&&sel===selector('electorateRegistry()'))return result(aw(A.electorateRegistry));
@@ -112,16 +121,19 @@ test('canonical ProtocolRegistry discovery validates code, identity, versions an
   assert.equal(verified.discovery.source,'protocol-registry');
   assert.equal(verified.discovery.revision,7);
   assert.deepEqual(c.modules,A);
-  assert.equal(p.calls.filter((x)=>x.method==='eth_getCode').length,5);
+  assert.equal(p.calls.filter((x)=>x.method==='eth_getCode').length,6);
+  assert.equal(p.calls.filter((x)=>x.method==='eth_call'&&x.params?.[0]?.to===REGISTRY&&x.params?.[0]?.data?.slice(2,10)===selector('resolve(bytes32)')).length,5);
 });
 
 test('discovery fails closed on invented source, wrong chain, missing code, account drift and module mismatch',async()=>{
-  assert.throws(()=>client(new FakeProvider(),null,{source:'runtime-hardcode',serviceId:GOVERNANCE420_SERVICE_ID,modules:A}),/ProtocolRegistry discovery/);
+  assert.throws(()=>client(new FakeProvider(),null,{source:'runtime-hardcode',serviceId:GOVERNANCE420_SERVICE_ID,registryAddress:REGISTRY,componentIds:IDS,modules:A}),/ProtocolRegistry discovery/);
   await assert.rejects(client(new FakeProvider({chain:'0x1'})).verifySession(),/Wrong network/);
   await assert.rejects(client(new FakeProvider({code:'0x'})).verifySession(),/no deployed code/);
   await assert.rejects(client(new FakeProvider({accounts:[]})).verifySession(),/no longer authorized/);
   const wrong=discovery();wrong.modules.voting=wrong.modules.governor;
   assert.throws(()=>client(new FakeProvider(),null,wrong),/duplicate module addresses/);
+  const missingIds=discovery();delete missingIds.componentIds.voting;
+  assert.throws(()=>client(new FakeProvider(),null,missingIds),/invalid bytes32/);
 });
 
 test('proposal detail exposes frozen class revision window electorates thresholds commitment and non-authoritative tallies',async()=>{

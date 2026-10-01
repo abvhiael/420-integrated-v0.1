@@ -30,6 +30,7 @@ const SELECTORS = Object.freeze({
   votingWeight: selector('votingWeight(bytes32,uint8,address,bytes)'),
   castVote: selector('castVote(bytes32,uint8,uint8,bytes)'),
   hashActions: selector('hashActions((address,uint256,bytes)[])'),
+  registryResolve: selector('resolve(bytes32)'),
 });
 
 export const GOVERNANCE420_VERSION = 1n;
@@ -126,10 +127,23 @@ function normalizeDiscovery(discovery) {
   if (!discovery || discovery.source !== 'protocol-registry' || discovery.serviceId !== GOVERNANCE420_SERVICE_ID) {
     throw new Error('Governance requires canonical ProtocolRegistry discovery');
   }
+  const registryAddress = normalizeAddress(discovery.registryAddress);
   const modules = {};
-  for (const key of Object.keys(MODULE_NAMES)) modules[key] = normalizeAddress(discovery.modules?.[key]);
+  const componentIds = {};
+  for (const key of Object.keys(MODULE_NAMES)) {
+    modules[key] = normalizeAddress(discovery.modules?.[key]);
+    componentIds[key] = normalizeBytes32(discovery.componentIds?.[key]);
+  }
   if (new Set(Object.values(modules)).size !== Object.keys(modules).length) throw new Error('Governance discovery contains duplicate module addresses');
-  return Object.freeze({ source: discovery.source, serviceId: discovery.serviceId, revision: discovery.revision ?? null, modules: Object.freeze(modules) });
+  if (new Set(Object.values(componentIds)).size !== Object.keys(componentIds).length) throw new Error('Governance discovery contains duplicate component IDs');
+  return Object.freeze({
+    source: discovery.source,
+    serviceId: discovery.serviceId,
+    revision: discovery.revision ?? null,
+    registryAddress,
+    modules: Object.freeze(modules),
+    componentIds: Object.freeze(componentIds),
+  });
 }
 function decodeProposal(words, proposalId) {
   const classId = Number(decodeUintWord(words[1], 8));
@@ -237,6 +251,22 @@ export function createGovernance420Client({ provider, chainId, account, discover
     if (chain !== expectedChain) throw new Error(`Wrong network: expected 0x${expectedChain.toString(16)}, received 0x${chain.toString(16)}`);
     const accounts = await provider.request('eth_accounts');
     if (!Array.isArray(accounts) || !accounts.some((x) => typeof x === 'string' && x.toLowerCase() === voter)) throw new Error('Governance connected account is no longer authorized');
+
+    await verifyCode(provider,canonical.registryAddress,'ProtocolRegistry');
+    const registryName = decodeStringResult(await call(provider,canonical.registryAddress,`0x${SELECTORS.systemName}`,voter),'registry system name');
+    if (registryName !== 'ProtocolRegistry') throw new Error('Governance ProtocolRegistry contract identity mismatch');
+    const [registryVersionWord] = resultWords(await call(provider,canonical.registryAddress,`0x${SELECTORS.protocolVersion}`,voter),1,'registry protocol version');
+    if (decodeUintWord(registryVersionWord,32) !== 4n) throw new Error('Governance unsupported ProtocolRegistry protocol version');
+
+    for (const key of Object.keys(MODULE_NAMES)) {
+      const resolved = decodeAddressWord(resultWords(
+        await call(provider,canonical.registryAddress,encodeCall(SELECTORS.registryResolve,bytes32Word(canonical.componentIds[key])),voter),
+        1,
+        'Registry component resolution'
+      )[0]);
+      if (resolved !== modules[key]) throw new Error(`Governance ProtocolRegistry resolution mismatch for ${key}`);
+    }
+
     for (const [key,name] of Object.entries(MODULE_NAMES)) await verifyIdentity(modules[key],name);
     const getter = async (address, sel) => decodeAddressWord(resultWords(await call(provider,address,`0x${sel}`,voter),1,'module binding')[0]);
     if (await getter(modules.governor,SELECTORS.governorConstitution) !== modules.constitution) throw new Error('Governance discovered Constitution binding mismatch');

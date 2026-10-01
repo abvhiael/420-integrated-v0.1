@@ -21,6 +21,13 @@ interface IComputeDisputeEntitlement420 {
         bool claimExists,
         bool paid
     );
+    function verifiedEntitlement(
+        bytes32 jobId,
+        bytes32 verificationRef,
+        bytes32 entitlementRef,
+        address beneficiary,
+        uint256 earnedAmount
+    ) external view returns (bool);
     function enterDispute(bytes32 jobId, uint64 expectedRevision, bytes32 disputeId) external;
     function applyDisputeResolution(bytes32 jobId, uint64 expectedRevision,
         bytes32 disputeId, bytes32 resolutionRef, bool providerWins) external;
@@ -39,6 +46,12 @@ contract ComputeDisputeResolution420 {
         bytes32 claimRef;
         bytes32 policyId;
         uint32 policyVersion;
+        bytes32 verificationRef;
+        bytes32 resultCommitment;
+        address verifier;
+        bytes32 verificationPolicyId;
+        uint32 verificationPolicyRevision;
+        bytes32 verificationPolicyCommitment;
         address claimant;
         address respondent;
         address initialAdjudicator;
@@ -84,7 +97,8 @@ contract ComputeDisputeResolution420 {
     event JobsBound(address indexed jobs);
     event DisputeOpened(bytes32 indexed disputeId, bytes32 indexed jobId,
         address indexed claimant, address respondent, bytes32 groundsCode,
-        bytes32 evidenceCommitment, uint64 responseDeadline, uint64 decisionDeadline);
+        bytes32 evidenceCommitment, bytes32 verificationRef, bytes32 resultCommitment,
+        address verifier, uint64 responseDeadline, uint64 decisionDeadline);
     event DisputeResponded(bytes32 indexed disputeId, address indexed respondent,
         bytes32 responseCommitment);
     event DisputeDecided(bytes32 indexed disputeId, address indexed adjudicator,
@@ -145,14 +159,24 @@ contract ComputeDisputeResolution420 {
             ,
             address payer,
             address beneficiary,
-            ,
+            uint256 providerAmount,
             ,
             uint64 claimCreatedAt,
             bool claimExists,
             bool paid
         ) = entitlements.disputeSnapshot(jobId);
         if (!claimExists || paid || entitlementRef == bytes32(0) || claimRef == bytes32(0)
-            || payer == address(0) || beneficiary == address(0)) revert InvalidDispute();
+            || payer == address(0) || beneficiary == address(0)
+            || j.verificationRef == bytes32(0) || j.resultCommitment == bytes32(0)
+            || j.verifier == address(0)
+            || !_validOptionalPolicyTuple(
+                j.verificationPolicyId,
+                j.verificationPolicyRevision,
+                j.verificationPolicyCommitment
+            )
+            || !entitlements.verifiedEntitlement(
+                jobId, j.verificationRef, entitlementRef, beneficiary, providerAmount
+            )) revert InvalidDispute();
 
         ComputeAcceptedPriceMatch420.PriceReservation memory p = _price(jobId);
         uint256 challengeEnd = uint256(claimCreatedAt) + uint256(p.challengeWindow);
@@ -170,7 +194,9 @@ contract ComputeDisputeResolution420 {
 
         disputeId = keccak256(abi.encode(
             DISPUTE_DOMAIN, block.chainid, address(this), jobId, j.matchId, entitlementRef,
-            claimRef, p.disputePolicyId, p.disputePolicyVersion, nonce, msg.sender
+            claimRef, j.verificationRef, j.resultCommitment, j.verifier,
+            j.verificationPolicyId, j.verificationPolicyRevision, j.verificationPolicyCommitment,
+            p.disputePolicyId, p.disputePolicyVersion, nonce, msg.sender
         ));
         uint64 openedAt = uint64(block.timestamp);
         uint64 responseDeadline = _deadline(openedAt, p.responseWindow);
@@ -183,6 +209,12 @@ contract ComputeDisputeResolution420 {
             claimRef: claimRef,
             policyId: p.disputePolicyId,
             policyVersion: p.disputePolicyVersion,
+            verificationRef: j.verificationRef,
+            resultCommitment: j.resultCommitment,
+            verifier: j.verifier,
+            verificationPolicyId: j.verificationPolicyId,
+            verificationPolicyRevision: j.verificationPolicyRevision,
+            verificationPolicyCommitment: j.verificationPolicyCommitment,
             claimant: msg.sender,
             respondent: respondent,
             initialAdjudicator: address(0),
@@ -208,7 +240,8 @@ contract ComputeDisputeResolution420 {
 
         entitlements.enterDispute(jobId, expectedRevision, disputeId);
         emit DisputeOpened(disputeId, jobId, msg.sender, respondent, groundsCode,
-            evidenceCommitment, responseDeadline, decisionDeadline);
+            evidenceCommitment, j.verificationRef, j.resultCommitment, j.verifier,
+            responseDeadline, decisionDeadline);
         entered = false;
     }
 
@@ -295,6 +328,39 @@ contract ComputeDisputeResolution420 {
         resolutionRef = _resolve(disputeId, d, CaseStatus.TIMED_OUT, false);
     }
 
+
+    /// @notice Read-only CMP-1.4.9 bridge from a finalized dispute to later stake/slash adjudication.
+    /// @dev This hook never moves funds, rewrites the original verifier decision, or authorizes slashing.
+    ///      A future stake layer must independently validate its own bound policy and objective evidence.
+    function verificationDisputeDisposition(bytes32 disputeId) external view returns (
+        bytes32 jobId,
+        bytes32 verificationRef,
+        bytes32 resultCommitment,
+        address verifier,
+        bytes32 verificationPolicyId,
+        uint32 verificationPolicyRevision,
+        bytes32 verificationPolicyCommitment,
+        bytes32 groundsCode,
+        bytes32 resolutionRef,
+        bool providerWins,
+        bool finalDisposition
+    ) {
+        DisputeCase storage d = _case(disputeId);
+        jobId = d.jobId;
+        verificationRef = d.verificationRef;
+        resultCommitment = d.resultCommitment;
+        verifier = d.verifier;
+        verificationPolicyId = d.verificationPolicyId;
+        verificationPolicyRevision = d.verificationPolicyRevision;
+        verificationPolicyCommitment = d.verificationPolicyCommitment;
+        groundsCode = d.groundsCode;
+        resolutionRef = d.resolutionRef;
+        providerWins = d.providerWins;
+        finalDisposition = d.status == CaseStatus.FINAL
+            || d.status == CaseStatus.WITHDRAWN
+            || d.status == CaseStatus.TIMED_OUT;
+    }
+
     function providerReleaseAllowed(bytes32 jobId) external view returns (bool) {
         if (address(entitlements) == address(0)) return false;
         (
@@ -344,7 +410,9 @@ contract ComputeDisputeResolution420 {
         resolutionRef = keccak256(abi.encode(
             RESOLUTION_DOMAIN, block.chainid, address(this), disputeId, d.jobId,
             d.entitlementRef, d.claimRef, d.policyId, d.policyVersion,
-            providerWins, terminalStatus,
+            d.verificationRef, d.resultCommitment, d.verifier,
+            d.verificationPolicyId, d.verificationPolicyRevision,
+            d.verificationPolicyCommitment, providerWins, terminalStatus,
             d.decisionCommitment, d.appealDecisionCommitment
         ));
         d.providerWins = providerWins;
@@ -378,6 +446,20 @@ contract ComputeDisputeResolution420 {
             || p.disputePolicyVersion == 0 || p.challengeWindow == 0
             || p.responseWindow == 0 || p.decisionWindow == 0 || p.appealWindow == 0)
             revert InvalidDispute();
+    }
+
+    function _validOptionalPolicyTuple(
+        bytes32 policyId,
+        uint32 policyRevision,
+        bytes32 policyCommitment
+    ) private pure returns (bool) {
+        bool empty = policyId == bytes32(0)
+            && policyRevision == 0
+            && policyCommitment == bytes32(0);
+        bool complete = policyId != bytes32(0)
+            && policyRevision != 0
+            && policyCommitment != bytes32(0);
+        return empty || complete;
     }
 
     function _case(bytes32 disputeId) private view returns (DisputeCase storage d) {

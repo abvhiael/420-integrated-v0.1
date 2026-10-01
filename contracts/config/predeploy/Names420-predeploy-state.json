@@ -1,0 +1,47 @@
+{
+  "address": "0x0000000000000000000000000000000000000435",
+  "constructorMaterialization": {
+    "governanceTimelock": "0x0000000000000000000000000000000000000429",
+    "immutableReferenceCount": 1,
+    "materializedReferences": [
+      {
+        "compilerIdentifier": "946",
+        "length": 32,
+        "materializedValue": "0x0000000000000000000000000000000000000000000000000000000000000429",
+        "originalCompilerBytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "start": 1126
+      }
+    ],
+    "method": "compiler-emitted immutableReferences patched with ABI-encoded constructor address"
+  },
+  "contractName": "Names420",
+  "invariants": [
+    "genesis alloc.code uses materialized deployed runtime bytecode, never creation bytecode",
+    "governanceTimelock is embedded as a Solidity immutable and is not written to storage",
+    "Names420 constructor performs no mutable storage writes",
+    "records, commitments and primaryNameByAddress mappings begin empty",
+    "runtimeCodeHash equals keccak256(materialized deployed runtime bytecode)",
+    "materialized runtime differs from the compiler template only at compiler-reported immutable references"
+  ],
+  "limitations": [
+    "This is deterministic offline Genesis predeploy evidence, not live-chain deployment evidence.",
+    "NAMES-AUDIT-9 remains responsible for production-equivalent testnet eth_getCode/storage/governance verification."
+  ],
+  "qualificationMilestone": "NAMES_AUDIT_6_LEVEL_2",
+  "qualificationRequirement": "LEVEL_2_APP_INTEGRATION",
+  "runtimeArtifact": "contracts/artifacts/Names420.json",
+  "runtimeCodeBytes": 4336,
+  "runtimeCodeHash": "0xa974fffd3a40e7f28db41e4ae30656b33789d2483b18b47c809ce2385de709b7",
+  "schema": "420-names-predeploy-state-v1",
+  "sourceBlobSha1": "4cb9b06b4a3febb3bf024c087f3ade1eebdcf31d",
+  "status": "NAMES_AUDIT_6_FINAL_PREDEPLOY_STATE",
+  "storage": {},
+  "storageLayoutRoots": {
+    "commitments": "1",
+    "primaryNameByAddress": "2",
+    "records": "0"
+  },
+  "storageRoot": "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421",
+  "storageRootBasis": "Ethereum empty Merkle-Patricia storage trie root = keccak256(0x80)",
+  "storageSlotCount": 0
+}

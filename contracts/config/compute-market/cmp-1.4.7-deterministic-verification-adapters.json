@@ -1,0 +1,101 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-1.4.7.DeterministicVerificationAdapters.v1",
+  "step": "CMP-1.4.7",
+  "title": "Deterministic verification adapters",
+  "canonical_definition": "For workloads whose result can be independently recomputed.",
+  "base_main_sha": "df8f639d8f43b763298c8750ef49d3e5849c597c",
+  "qualification_level": 1,
+  "roadmap_order": {
+    "predecessor": "CMP-1.4.6",
+    "predecessor_complete_on_base": true,
+    "earlier_open_step": "CMP-1.4.4",
+    "note": "CMP-1.4.4 remains open. CMP-1.4.7 provides deterministic recomputation evidence only and does not claim canonical signed-verdict completion."
+  },
+  "milestone_relationship": {
+    "level_2_required_now": false,
+    "next_sensible_milestone_after": "CMP-1.4.8",
+    "rationale": "CMP-1.4.7 introduces deterministic-only semantics without changing shared job/verdict/settlement authority. Broader integration is most meaningful once scientific/probabilistic verification exists alongside deterministic adapters."
+  },
+  "implementation": {
+    "interface": "contracts/src/compute/IComputeDeterministicVerificationAdapter420.sol",
+    "registry": "contracts/src/compute/ComputeDeterministicAdapterRegistry420.sol",
+    "router": "contracts/src/compute/ComputeDeterministicVerificationRouter420.sol",
+    "reference_adapter": "contracts/src/compute/ComputeIntegerSumSquaresAdapter420.sol",
+    "worker_output_binding": "contracts/src/compute/ComputeJobMatchedWorkerEvidence420.sol",
+    "test": "contracts/test/ComputeDeterministicVerificationRouter420.t.sol",
+    "route_rule": "Governance publishes exact workload/profile -> adapter routes with immutable code hash and versioned activation.",
+    "binding_rule": "Job owner freezes the exact current adapter revision/code hash/schema while the job is ACCEPTED and before execution.",
+    "evaluation_rule": "After RESULT_COMMITTED, router reproduces canonical input/output commitments, proves the output preimage matches the worker's committed outputHash, invokes the exact frozen adapter, and stores deterministic evidence.",
+    "authority_rule": "Router produces positive/negative deterministic evidence only; it does not submit a signed verdict or mutate job/settlement state."
+  },
+  "authority_boundaries": [
+    "Adapter registration grants no verifier identity/class/capability, appointment, verdict, settlement, custody, stake/slash, worker, governance, validator, bridge or wallet authority.",
+    "The router cannot reinterpret an accepted job using a later adapter revision because each job freezes exact adapter revision/address/code hash before execution.",
+    "Adapter code hash drift fails closed.",
+    "Deterministic evaluation must bind canonical committed input and the worker's actual committed output hash.",
+    "Positive/negative evaluation evidence is not itself PASS/FAIL/INCONCLUSIVE and does not transition ComputeJobRegistry420.",
+    "The reference integer adapter proves only one bounded deterministic arithmetic workload and is not generalized to arbitrary GPU/AI workloads."
+  ],
+  "invariants": [
+    "CMP-INV-005",
+    "CMP-INV-014",
+    "CMP-INV-016",
+    "CMP-INV-017",
+    "CMP-INV-020",
+    "CMP-INV-025",
+    "CMP-INV-026",
+    "CMP-INV-027",
+    "CMP-INV-030"
+  ],
+  "deployment_publication": {
+    "fixed_genesis_predeploy_created": false,
+    "protocol_registry_publication_claimed": false,
+    "live_deployment_claimed": false
+  },
+  "exit_criteria": [
+    "A generic deterministic adapter interface exists with exact workload/profile/schema and reproducible input/output commitments.",
+    "A versioned governance registry pins adapters by exact address/code hash and supports fail-closed activation.",
+    "Each job freezes an exact current deterministic adapter route before execution.",
+    "Evaluation after RESULT_COMMITTED proves input preimage matches the immutable job input and output preimage matches the worker's actual committed output hash.",
+    "A deterministic adapter independently recomputes expected output and records positive or negative evidence.",
+    "Later adapter publication does not rewrite a frozen job route.",
+    "Tampered input/output, inactive/unknown routes, replay and post-execution route binding fail closed.",
+    "Deterministic evidence does not itself mutate job verdict/settlement state or grant unrelated authority.",
+    "Level 1 exact-head Compute qualification is green."
+  ],
+  "status": "COMPLETE_LEVEL_1",
+  "qualified_implementation_sha": "ff8a4ca1e0d19f859be27a9718c8b768c99ea308",
+  "level_1_results": {
+    "compute_market_qualification": {
+      "run_number": 38,
+      "run_id": 36809487492,
+      "conclusion": "success"
+    },
+    "solidity_contracts": {
+      "run_number": 3480,
+      "run_id": 36809487506,
+      "conclusion": "success"
+    },
+    "genesis_address_authority": {
+      "run_number": 300,
+      "run_id": 36809487464,
+      "conclusion": "success"
+    },
+    "docs_qualification": {
+      "run_number": 3676,
+      "run_id": 36809487489,
+      "conclusion": "success"
+    },
+    "indexer": {
+      "run_number": 1103,
+      "run_id": 36809487521,
+      "conclusion": "success"
+    },
+    "registry_audit": {
+      "run_number": 135,
+      "run_id": 36809487500,
+      "conclusion": "success"
+    }
+  },
+  "completion_note": "Exact-head Level 1 qualification passed on ff8a4ca1e0d19f859be27a9718c8b768c99ea308. This evidence-only closeout changes no executable source, tests, workflow, dependency, interface, configuration semantics or deployment state."
+}

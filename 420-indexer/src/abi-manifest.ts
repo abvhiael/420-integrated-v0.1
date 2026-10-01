@@ -182,3 +182,111 @@ export function descriptorsFromProtocolRegistryRelease420(
   if (required.size !== 0) throw new Error('ProtocolRegistry release descriptor required event missing');
   return descriptors;
 }
+
+
+export const NAMES420_ADDRESS_420 = '0x0000000000000000000000000000000000000435' as Hex;
+export const NAMES420_SOURCE_BLOB_SHA1_420 = '4cb9b06b4a3febb3bf024c087f3ade1eebdcf31d';
+export const NAMES420_ARTIFACT_PAYLOAD_SHA256_420 = 'c40970d3a04503309f9467eaca00c915f5ce3dd1e993c2df3318aa6cd149ab2c';
+export const NAMES420_RUNTIME_CODE_HASH_420 = '0xa974fffd3a40e7f28db41e4ae30656b33789d2483b18b47c809ce2385de709b7';
+export const NAMES420_DESCRIPTOR_SHA256_420 = '74602adfdde367c82fcefcd35a89a5b0e415e92721289cca9e827be32299b3be';
+
+export interface Names420ReleaseDescriptorEvent420 extends AbiEvent420 {
+  signature: string;
+  topic0: Hex;
+}
+
+export interface Names420ReleaseDescriptor420 {
+  schema: '420-names-release-descriptor-v1';
+  descriptorVersion: 1;
+  contractName: 'Names420';
+  protocol: '420Names';
+  protocolVersion: 3;
+  canonicalAddress: Hex;
+  source: { path: 'contracts/src/apps/Names420.sol'; gitBlobSha: string };
+  artifact: {
+    path: 'contracts/artifacts/Names420.json';
+    payloadSha256: string;
+    runtimeCodeHash: Hex;
+  };
+  events: Names420ReleaseDescriptorEvent420[];
+  descriptorSha256: string;
+  authority: 'repository_descriptor_only_not_live_names_authority';
+}
+
+export function names420DescriptorDigest420(manifest: Names420ReleaseDescriptor420): string {
+  const payload = {
+    canonicalAddress: manifest.canonicalAddress,
+    contractName: manifest.contractName,
+    protocol: manifest.protocol,
+    protocolVersion: manifest.protocolVersion,
+    source: manifest.source,
+    artifact: manifest.artifact,
+    events: manifest.events
+  };
+  return createHash('sha256').update(canonicalJson420(payload)).digest('hex');
+}
+
+export function descriptorsFromNames420Release420(
+  manifest: Names420ReleaseDescriptor420
+): GenesisDescriptor420[] {
+  if (manifest.schema !== '420-names-release-descriptor-v1' ||
+      manifest.descriptorVersion !== 1 ||
+      manifest.contractName !== 'Names420' ||
+      manifest.protocol !== '420Names' ||
+      manifest.protocolVersion !== 3) {
+    throw new Error('Names420 release descriptor identity mismatch');
+  }
+  if (manifest.canonicalAddress.toLowerCase() !== NAMES420_ADDRESS_420) {
+    throw new Error('Names420 release descriptor address mismatch');
+  }
+  if (manifest.source.path !== 'contracts/src/apps/Names420.sol' ||
+      manifest.source.gitBlobSha !== NAMES420_SOURCE_BLOB_SHA1_420) {
+    throw new Error('Names420 release descriptor source drift');
+  }
+  if (manifest.artifact.path !== 'contracts/artifacts/Names420.json' ||
+      manifest.artifact.payloadSha256 !== NAMES420_ARTIFACT_PAYLOAD_SHA256_420 ||
+      manifest.artifact.runtimeCodeHash.toLowerCase() !== NAMES420_RUNTIME_CODE_HASH_420) {
+    throw new Error('Names420 release descriptor artifact drift');
+  }
+  const digest = names420DescriptorDigest420(manifest);
+  if (digest !== manifest.descriptorSha256 || digest !== NAMES420_DESCRIPTOR_SHA256_420) {
+    throw new Error('Names420 release descriptor hash drift');
+  }
+
+  const required = new Set([
+    'CommitmentMade(bytes32,address,uint64)',
+    'NameRegistered(bytes32,address,uint64,uint8)',
+    'NameRenewed(bytes32,address,uint64)',
+    'NameTransferStarted(bytes32,address,address)',
+    'NameTransferred(bytes32,address,address)',
+    'ResolutionUpdated(bytes32,address,bytes32,bytes32)',
+    'ReverseNameSet(address,bytes32)'
+  ]);
+  if (manifest.events.length !== required.size) {
+    throw new Error('Names420 release descriptor event set mismatch');
+  }
+
+  const artifact: Artifact420 = { contractName: manifest.contractName, abi: manifest.events };
+  const predeploy: Predeploy420 = {
+    name: manifest.contractName,
+    address: manifest.canonicalAddress,
+    artifact: manifest.artifact.path
+  };
+  const descriptors = descriptorsFromArtifact420(manifest.protocol, predeploy, artifact);
+
+  for (const event of manifest.events) {
+    const signature = event.name + '(' + event.inputs.map((input) => input.type).join(',') + ')';
+    if (!required.delete(signature)) {
+      throw new Error('Names420 release descriptor unexpected or duplicate event: ' + signature);
+    }
+    if (signature !== event.signature || id(signature).toLowerCase() !== event.topic0.toLowerCase()) {
+      throw new Error('Names420 release descriptor event identity mismatch: ' + event.name);
+    }
+    const built = descriptors.find((descriptor) => descriptor.signature === signature);
+    if (!built || built.topic0.toLowerCase() !== event.topic0.toLowerCase()) {
+      throw new Error('Names420 release descriptor build mismatch: ' + event.name);
+    }
+  }
+  if (required.size !== 0) throw new Error('Names420 release descriptor required event missing');
+  return descriptors;
+}

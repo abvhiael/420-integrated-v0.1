@@ -22,6 +22,7 @@ contract ComputeJobMatchedWorkerEvidence420 is IComputeJobWorkerEvidence420 {
         uint64 attempt;
         bytes32 resultCommitment;
         bytes32 receiptHash;
+        bytes32 outputHash;
         bool exists;
     }
     ComputeJobRegistry420 public jobs;
@@ -67,7 +68,7 @@ contract ComputeJobMatchedWorkerEvidence420 is IComputeJobWorkerEvidence420 {
         assignmentRef = keccak256(abi.encode(ASSIGNMENT_DOMAIN, block.chainid, address(this),
             jobId, j.matchId, j.acceptanceRef, resourceId, msg.sender, attempt, expectedRevision));
         _assignments[assignmentRef] = Assignment(jobId, j.matchId, j.acceptanceRef, resourceId,
-            msg.sender, attempt, bytes32(0), bytes32(0), true);
+            msg.sender, attempt, bytes32(0), bytes32(0), bytes32(0), true);
         assignmentForJob[jobId] = assignmentRef;
         jobs.assignWorker(jobId, expectedRevision, msg.sender, assignmentRef);
         emit AssignmentAccepted(jobId, assignmentRef, resourceId, msg.sender);
@@ -98,6 +99,7 @@ contract ComputeJobMatchedWorkerEvidence420 is IComputeJobWorkerEvidence420 {
             a.resourceId, a.attempt, msg.sender, receiptHash, outputHash));
         a.resultCommitment = resultCommitment;
         a.receiptHash = receiptHash;
+        a.outputHash = outputHash;
         emit WorkerResultCommitted(jobId, ref, resultCommitment);
     }
 

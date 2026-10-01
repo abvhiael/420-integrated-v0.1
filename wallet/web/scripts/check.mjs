@@ -4,10 +4,10 @@ import process from 'node:process';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const required = [
-  'index.html','app.js','ui-v1.js','apps-page.js','recovery-ui.js','session-execution-ui.js','batch-execution-ui.js','styles.css','apps.css','runtime-config.json',
-  'core/abi.js','core/accounts.js','core/apps.js','core/genesis-app-catalog.js','core/batch-execution.js','core/capabilities.js','core/capability-management.js','core/session-management.js','core/session-execution.js','core/entrypoint-transport.js','core/recovery.js','core/recovery-management.js','core/config.js','core/deployment.js','core/execution.js','core/portfolio.js','core/provider.js','core/provider-lifecycle.js','core/services.js','core/send.js','core/passkeys.js','core/passkey-metadata.js','core/keccak.js','core/passkey-envelope.js','core/passkey-p256-browser.js',
+  'index.html','app.js','ui-v1.js','apps-page.js','recovery-ui.js','session-execution-ui.js','batch-execution-ui.js','names-management-ui.js','styles.css','apps.css','runtime-config.json',
+  'core/abi.js','core/accounts.js','core/apps.js','core/names-client.js','core/names-send.js','core/names-guided-send.js','core/names-management.js','core/genesis-app-catalog.js','core/batch-execution.js','core/capabilities.js','core/capability-management.js','core/session-management.js','core/session-execution.js','core/entrypoint-transport.js','core/recovery.js','core/recovery-management.js','core/config.js','core/deployment.js','core/execution.js','core/portfolio.js','core/provider.js','core/provider-lifecycle.js','core/services.js','core/send.js','core/passkeys.js','core/passkey-metadata.js','core/keccak.js','core/passkey-envelope.js','core/passkey-p256-browser.js',
   'scripts/generate-runtime-config.mjs','test/runtime-config-generator.test.js','scripts/qualify-live-testnet.mjs','test/live-testnet-qualification.test.js','../extension/scripts/qualify-live-dapp.mjs','test/extension-live-dapp-qualification.test.js',
-  'test/core.test.js','test/apps.test.js','test/genesis-app-catalog.test.js','test/execution.test.js','test/batch-execution.test.js','test/batch-execution-ui.test.js','test/capabilities.test.js','test/capability-management.test.js','test/session-management.test.js','test/session-execution.test.js','test/entrypoint-transport.test.js','test/recovery.test.js','test/recovery-management.test.js','test/recovery-ui.test.js','test/session-execution-ui.test.js','test/ui-v1.test.js','test/send.test.js','test/provider-lifecycle.test.js','test/ui-hardening.test.js','test/session-hardening.test.js','test/passkeys.test.js','test/passkey-metadata.test.js','test/passkey-envelope.test.js','test/passkey-p256-browser.test.js',
+  'test/core.test.js','test/apps.test.js','test/names-client.test.js','test/names-send.test.js','test/names-guided-send.test.js','test/names-management.test.js','test/names-management-ui.test.js','test/genesis-app-catalog.test.js','test/execution.test.js','test/batch-execution.test.js','test/batch-execution-ui.test.js','test/capabilities.test.js','test/capability-management.test.js','test/session-management.test.js','test/session-execution.test.js','test/entrypoint-transport.test.js','test/recovery.test.js','test/recovery-management.test.js','test/recovery-ui.test.js','test/session-execution-ui.test.js','test/ui-v1.test.js','test/send.test.js','test/provider-lifecycle.test.js','test/ui-hardening.test.js','test/session-hardening.test.js','test/passkeys.test.js','test/passkey-metadata.test.js','test/passkey-envelope.test.js','test/passkey-p256-browser.test.js',
 ];
 
 const errors = [];
@@ -28,7 +28,15 @@ const app = requireStrings('app.js', [
 for (const forbidden of ['privateKey','mnemonic','seedPhrase','localStorage.setItem("private']) if (app.includes(forbidden)) errors.push(`forbidden signing secret pattern in app.js: ${forbidden}`);
 
 requireStrings('ui-v1.js', ['recovery-ui.js','apps-page.js','buildSendExecution','installFailClosedBrowserLifecycle'], 'Wallet Web UI binding');
-requireStrings('index.html', ['./session-execution-ui.js','./batch-execution-ui.js'], 'Wallet execution UI script binding');
+requireStrings('index.html', ['./session-execution-ui.js','./batch-execution-ui.js','./names-management-ui.js','data-scroll-target="#names-management-panel"'], 'Wallet execution/UI script binding');
+requireStrings('names-management-ui.js', ['Manage .420 names','names-commit','names-register','names-renew','names-set-resolution','names-set-reverse','names-transfer','names-accept','role="status"','role="alert"','config.deployment.namesAddress','.focus()'], 'names management guard');
+const namesManagement = requireStrings('core/names-management.js', [
+  'eth_call','eth_estimateGas','eth_sendTransaction','eth_getTransactionReceipt','eth_accounts',
+  'makeCommitment(bytes32,uint8,address,uint64,bytes32,address)','commit(bytes32)','register(bytes32,uint8,address,uint64,bytes32)',
+  'renew(bytes32,uint64)','setResolution(bytes32,address,bytes32,bytes32)','setReverseName(bytes32)','transferName(bytes32,address)','acceptName(bytes32)',
+  'connected 420 Names account changed','420 Names chain changed','simulation reverted','transaction reverted'
+], 'guarded names management control');
+for (const forbidden of ['privateKey','mnemonic','seedPhrase']) if (namesManagement.includes(forbidden)) errors.push(`forbidden Names signing secret pattern: ${forbidden}`);
 requireStrings('recovery-ui.js', ['Recovery management','Two-day safety delay','recovery-countdown','recovery-set-authority','recovery-propose','recovery-cancel','recovery-finalize','readDeployedSmartAccountState','sendFinalizeRecovery','confirmFinalizeRecovery'], 'recovery UI/timelock control');
 requireStrings('session-execution-ui.js', ['Session execution','Prepare + sign + simulate','Submit to EntryPoint420','prepareSessionUserOperationTransport','sendPreparedEntryPointUserOperation','confirmEntryPointUserOperation','sessionExecution','entryPointUserOpSubmission'], 'controlled session execution UI');
 requireStrings('batch-execution-ui.js', [

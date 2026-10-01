@@ -1,0 +1,88 @@
+{
+  "schema": "420-names-dependency-model-v1",
+  "status": "CANONICAL_FOR_NAMESAUDIT_2",
+  "app": "420Names",
+  "contract": "Names420",
+  "normative_runtime_dependencies": [
+    "GovernanceAuthority"
+  ],
+  "decisions": [
+    {
+      "dependency": "GovernanceAuthority",
+      "classification": "REQUIRED_DIRECT",
+      "matrix_action": "RETAIN",
+      "basis": "Names420 constructor requires a nonzero governance timelock through SystemAccess. No current Names420 mutation is governance-only; the dependency is the constructor-bound system authority identity, not ambient ownership or user-name control."
+    },
+    {
+      "dependency": "ProtocolRegistry",
+      "classification": "OPTIONAL_INTEGRATION",
+      "matrix_action": "REMOVE_FROM_RUNTIME_MATRIX",
+      "basis": "Names420 stores an optional serviceId but does not resolve or authorize through ProtocolRegistry. Security-sensitive consumers that use serviceId must validate Registry state independently."
+    },
+    {
+      "dependency": "PauseRegistry",
+      "classification": "NOT_APPLICABLE",
+      "matrix_action": "REMOVE_FROM_RUNTIME_MATRIX",
+      "basis": "Names420 has no custody, protocol-admin mutation, or external execution path requiring a local pause dependency. Adding pause authority would broaden control over user naming without a canonical requirement."
+    },
+    {
+      "dependency": "CapabilityRegistry",
+      "classification": "NOT_APPLICABLE",
+      "matrix_action": "REMOVE_FROM_RUNTIME_MATRIX",
+      "basis": "Names420 exposes owner/pending-owner lifecycle authorization and no delegated operational capability surface."
+    },
+    {
+      "dependency": "SystemSafety",
+      "classification": "NOT_APPLICABLE",
+      "matrix_action": "REMOVE_FROM_RUNTIME_MATRIX",
+      "basis": "Names420 canonical ownership and resolution validity are defined by record state and expiry. No global safety-state gate is specified for these user-authorized state transitions."
+    },
+    {
+      "dependency": "GenesisInitialization",
+      "classification": "REQUIRED_INDIRECT",
+      "matrix_action": "REMOVE_FROM_RUNTIME_MATRIX",
+      "basis": "Genesis/predeploy initialization remains a deployment requirement handled by deterministic storage generation and manifest binding in NAMES-AUDIT-6; Names420 is not a runtime IGenesisInitializable420 consumer."
+    },
+    {
+      "dependency": "Migration",
+      "classification": "NOT_APPLICABLE_CURRENT_RUNTIME",
+      "matrix_action": "REMOVE_FROM_RUNTIME_MATRIX",
+      "basis": "Names420 has no proxy/migration entry point. Historical deployment/version migration remains a release/governance concern, not a current runtime dependency."
+    },
+    {
+      "dependency": "SignedEnvelope",
+      "classification": "NOT_APPLICABLE",
+      "matrix_action": "REMOVE_FROM_RUNTIME_MATRIX",
+      "basis": "Names420 accepts direct msg.sender-authorized calls and has no relayed/off-chain signed-command execution path."
+    },
+    {
+      "dependency": "ReplayProtection",
+      "classification": "LOCAL_MECHANISM",
+      "matrix_action": "REMOVE_FROM_RUNTIME_MATRIX",
+      "basis": "Commit/reveal replay protection is local: commitments are committer-bound, age-bounded, consumed on registration, and active leases reject overwrite. Names420 does not consume IReplayProtection420."
+    },
+    {
+      "dependency": "ChainContext",
+      "classification": "CONSUMER_LAYER",
+      "matrix_action": "REMOVE_FROM_RUNTIME_MATRIX",
+      "basis": "Names420 has no signature domain or cross-chain execution requiring on-chain chain-context validation. Wallet/client integrations independently verify chain identity."
+    },
+    {
+      "dependency": "MetadataCommitment",
+      "classification": "NOT_APPLICABLE",
+      "matrix_action": "REMOVE_FROM_RUNTIME_MATRIX",
+      "basis": "Names420 stores label ownership/resolution plus optional profileId/serviceId references; it does not own a mutable metadata document requiring IMetadataCommitment420."
+    }
+  ],
+  "invariants": [
+    "420Names runtime authority must not expand merely to satisfy a stale generic dependency list.",
+    "Owner and pending-owner checks remain the authority for name lifecycle mutations.",
+    "A serviceId stored in a name record does not make the referenced service canonical; consumers validate ProtocolRegistry independently.",
+    "Genesis initialization remains mandatory at deployment even though it is not a Names420 runtime interface dependency.",
+    "Local commit consumption is the canonical replay defense for registration."
+  ],
+  "follow_up": {
+    "NAMES-AUDIT-6": "Generate deterministic Genesis state and bind constructor/storage initialization without adding a runtime GenesisInitialization dependency.",
+    "NAMES-AUDIT-7": "Qualify Registry/indexer/search consumption of service references and derived state without promoting those consumers to Names authority."
+  }
+}

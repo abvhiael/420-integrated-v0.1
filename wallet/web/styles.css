@@ -100,3 +100,14 @@ textarea { resize: vertical; min-height: 116px; font-family: ui-monospace, SFMon
   .hero-card { padding: 18px; }
   .sidebar .brand div { display: none; }
 }
+
+.names-context { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) auto; gap: 16px; align-items: end; }
+.names-context strong { overflow-wrap: anywhere; }
+.names-state-list { margin: 0; display: grid; gap: 8px; }
+.names-state-list div { display: grid; grid-template-columns: minmax(110px, .35fr) minmax(0, 1fr); gap: 12px; padding-bottom: 8px; border-bottom: 1px solid #202b24; }
+.names-state-list dt, .names-state-list dd { margin: 0; }
+.names-state-list dd { overflow-wrap: anywhere; }
+#names-transaction-state[data-state="pending"] { border-color: #6f6342; }
+#names-transaction-state[data-state="idle"] > span { color: var(--danger); }
+@media (max-width: 900px) { .names-context { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 640px) { .names-context, .names-state-list div { grid-template-columns: 1fr; } }

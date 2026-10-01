@@ -205,9 +205,14 @@
       "address": "0x0000000000000000000000000000000000000435",
       "source": "apps/Names420.sol",
       "artifact": "contracts/artifacts/Names420.json",
-      "status": "SOURCE_READY",
-      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
-      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
+      "status": "ARTIFACT_READY",
+      "constructor_strategy": "DIRECT_GENESIS_IMMUTABLE_MATERIALIZATION",
+      "notes": "NAMES-AUDIT-6: governanceTimelock immutable materialized to 0x0429 at the compiler-reported 32-byte reference; constructor performs no mutable storage writes; records/commitments/primaryNameByAddress begin empty; final runtime hash and empty storage root are retained in Names420 predeploy state. Live deployment verification remains NAMES-AUDIT-9.",
+      "source_blob_sha1": "4cb9b06b4a3febb3bf024c087f3ade1eebdcf31d",
+      "compiler_runtime_template_sha256": "7b34c5506c526d9c7015d4d2c4514cacac585bd571050a53655ea2270d1210bd",
+      "artifact_payload_sha256": "c40970d3a04503309f9467eaca00c915f5ce3dd1e993c2df3318aa6cd149ab2c",
+      "runtime_code_hash": "0xa974fffd3a40e7f28db41e4ae30656b33789d2483b18b47c809ce2385de709b7",
+      "predeploy_state": "contracts/config/predeploy/Names420-predeploy-state.json"
     },
     {
       "name": "Identity420",

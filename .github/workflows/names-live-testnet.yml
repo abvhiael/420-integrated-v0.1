@@ -1,0 +1,77 @@
+name: 420Names live testnet qualification
+
+on:
+  workflow_dispatch:
+    inputs:
+      manifest_path:
+        description: Official testnet network manifest path
+        required: true
+        default: developer-hub/manifests/testnet.json
+      search_url:
+        description: Public 420Search HTTPS origin for the same testnet
+        required: true
+      label:
+        description: Optional unused lowercase .420 qualification label
+        required: false
+      timeout_seconds:
+        description: Derived-service convergence timeout
+        required: true
+        default: '240'
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Verify official testnet manifest exists
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f "${{ inputs.manifest_path }}"
+          test "${{ inputs.manifest_path }}" != "developer-hub/manifests/local.example.json"
+
+      - name: Build live qualification dependencies
+        working-directory: 420-indexer
+        run: |
+          npm install
+          npm run build
+          node --test dist/test/names-testnet-qualification.test.js
+
+      - name: Run NAMES-AUDIT-9 production-equivalent journey
+        env:
+          NAMES_TESTNET_OWNER_PRIVATE_KEY: ${{ secrets.NAMES_TESTNET_OWNER_PRIVATE_KEY }}
+          NAMES_TESTNET_RECIPIENT_PRIVATE_KEY: ${{ secrets.NAMES_TESTNET_RECIPIENT_PRIVATE_KEY }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/names
+          ARGS=(
+            --manifest "${{ inputs.manifest_path }}"
+            --searchUrl "${{ inputs.search_url }}"
+            --repositorySha "${{ github.sha }}"
+            --timeoutSeconds "${{ inputs.timeout_seconds }}"
+            --output artifacts/names/names-audit-9-live-testnet.json
+          )
+          if [ -n "${{ inputs.label }}" ]; then
+            ARGS+=(--label "${{ inputs.label }}")
+          fi
+          node 420-indexer/scripts/qualify-names-testnet.mjs "${ARGS[@]}"
+
+      - name: Upload NAMES-AUDIT-9 live evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: names-audit-9-live-testnet
+          path: artifacts/names/names-audit-9-live-testnet.json
+          if-no-files-found: warn

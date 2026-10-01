@@ -1,0 +1,75 @@
+{
+  "schema": "420-names-audit-5-qualification-v1",
+  "step": "NAMES-AUDIT-5",
+  "name": "Canonical runtime artifact generation and freeze",
+  "status": "QUALIFICATION_PENDING",
+  "qualificationLevel": "LEVEL_1",
+  "repository": "abvhiael/420-integrated-v0.1",
+  "branch": "audit/420names-complete-20260930",
+  "pr": 427,
+  "source": {
+    "path": "contracts/src/apps/Names420.sol",
+    "gitBlobSha1": "4cb9b06b4a3febb3bf024c087f3ade1eebdcf31d"
+  },
+  "compiler": {
+    "solidity": "0.8.24",
+    "evmVersion": "cancun",
+    "optimizer": true,
+    "optimizerRuns": 200,
+    "viaIR": true,
+    "foundryConfigBlobSha1": "f18c965f43b244582f2a4c527e7bad6d23aee929",
+    "toolchainConfigBlobSha1": "dd49cb0e07370b01401d63d2fb53683177de8abc",
+    "metadataSha256": "63f99e7d0d5970a7c13935719d0de4d1a26ba81099a1d131ee9c3cdd5390280b"
+  },
+  "artifact": {
+    "path": "contracts/artifacts/Names420.json",
+    "schema": "420-names-compiler-artifact-v1",
+    "compilerRuntimeTemplateBytes": 4336,
+    "compilerRuntimeTemplateSha256": "7b34c5506c526d9c7015d4d2c4514cacac585bd571050a53655ea2270d1210bd",
+    "creationBytecodeBytes": 4491,
+    "creationBytecodeSha256": "d69598a97871fe5f681f27886ab2b68fc232fafa1a2b53498873d3628fd9d7e3",
+    "artifactPayloadSha256": "c40970d3a04503309f9467eaca00c915f5ce3dd1e993c2df3318aa6cd149ab2c",
+    "immutableReferenceCount": 1,
+    "immutableReference": {
+      "compilerId": "946",
+      "start": 1126,
+      "length": 32
+    }
+  },
+  "storageLayout": {
+    "roots": [
+      {
+        "slot": "0",
+        "label": "records"
+      },
+      {
+        "slot": "1",
+        "label": "commitments"
+      },
+      {
+        "slot": "2",
+        "label": "primaryNameByAddress"
+      }
+    ],
+    "governanceTimelockMutableStorage": false
+  },
+  "freezeBoundary": {
+    "constructorImmutablesMaterialized": false,
+    "finalRuntimeCodeHashDerived": false,
+    "genesisStorageDerived": false,
+    "owner": "NAMES-AUDIT-6"
+  },
+  "implementationFiles": [
+    "scripts/generate-names-audit-5-artifact.py",
+    "scripts/test-names-audit-5-artifact.py",
+    "contracts/artifacts/Names420.json",
+    "contracts/config/predeploy/predeploy-plan.json",
+    ".github/workflows/names-audit.yml"
+  ],
+  "exactHeadQualification": {
+    "implementationHead": "PENDING_FINAL_EXACT_HEAD",
+    "mainBaseSha": "8fbc37f254666fad5088d31101582a3cf292de9a",
+    "runId": "PENDING_FINAL_EXACT_HEAD"
+  },
+  "nextCanonicalStep": "NAMES-AUDIT-6 — deterministic Genesis state"
+}

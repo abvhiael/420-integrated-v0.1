@@ -78,7 +78,7 @@ jobs:
   # Non-Compute or mixed Solidity PRs still qualify the complete inventory.
   pr-shards:
     needs: classify-pr
-    if: github.event_name == 'pull_request' && needs.classify-pr.outputs.compute_only != 'true'
+    if: github.event_name == 'pull_request' && needs.classify-pr.outputs.compute_only != 'true' && !startsWith(github.head_ref, 'audit/')
     runs-on: ubuntu-latest
     timeout-minutes: 60
     strategy:

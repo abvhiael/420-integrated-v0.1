@@ -15,6 +15,7 @@ interface VmComputeStakeWorkerCollateral420 {
     function sign(uint256, bytes32) external returns (uint8, bytes32, bytes32);
     function prank(address) external;
     function deal(address, uint256) external;
+    function warp(uint256) external;
 }
 
 contract MockVaultCapsWorkerCollateral420 is ICapabilityRegistry420 {
@@ -50,12 +51,14 @@ contract ComputeStakeWorkerCollateral420Test {
     bytes32 private constant VAULT_ID = keccak256("compute/stake/collateral");
     bytes32 private constant POLICY_A = keccak256("compute/collateral/a");
     bytes32 private constant POLICY_B = keccak256("compute/collateral/b");
+    uint64 private constant EXIT_DELAY = 7 days;
 
     ComputeProviderRegistry420 private providers;
     ComputeNodeRegistry420 private nodes;
     ComputeResourceRegistry420 private resources;
     ComputeWorkerRegistry420 private workers;
     ComputeStakeWorkerCollateral420 private stakeSource;
+    ComputeStakeExitPolicy420 private exitPolicy;
 
     MockVaultCapsWorkerCollateral420 private caps;
     VaultAuthorization420 private auth;
@@ -123,9 +126,24 @@ contract ComputeStakeWorkerCollateral420Test {
             bytes32(0), keccak256("compute-collateral"), keccak256("manifest")
         );
 
-        stakeSource = new ComputeStakeWorkerCollateral420(address(workers), address(vault));
+        exitPolicy = new ComputeStakeExitPolicy420(GOV);
+        vm.prank(GOV);
+        exitPolicy.publish(POLICY_A, EXIT_DELAY);
+        vm.prank(GOV);
+        exitPolicy.publish(POLICY_B, EXIT_DELAY);
+
+        stakeSource =
+            new ComputeStakeWorkerCollateral420(address(workers), address(vault), address(exitPolicy));
         caps.setAllowed(
             address(stakeSource), VaultIds420.COMPONENT_VAULT, VaultIds420.ACTION_CREATE_OBLIGATION,
+            auth.scopeForVault(VAULT_ID), true
+        );
+        caps.setAllowed(
+            address(stakeSource), VaultIds420.COMPONENT_VAULT, VaultIds420.ACTION_RELEASE_OBLIGATION,
+            auth.scopeForVault(VAULT_ID), true
+        );
+        caps.setAllowed(
+            address(stakeSource), VaultIds420.COMPONENT_VAULT, VaultIds420.ACTION_CLAIM,
             auth.scopeForVault(VAULT_ID), true
         );
     }
@@ -208,6 +226,128 @@ contract ComputeStakeWorkerCollateral420Test {
         VaultAccounting420.AssetAccounting memory a = accounting.getAccounting(VAULT_ID, address(0));
         require(address(vault).balance == 0 && a.recordedBalance == 0 && a.reserved == 0, "rollback failed");
         require(stakeSource.readWorkerPosition(workerId, POLICY_A).positionId == bytes32(0), "position leaked");
+    }
+
+    function testExitRequestSnapshotsDelayAndKeepsCollateralSlashable() public {
+        bytes32 id = _stake(POLICY_A, 100 ether);
+        uint256 requestedAt = block.timestamp;
+
+        vm.prank(OPERATOR);
+        uint64 withdrawableAt = stakeSource.requestExit(id);
+
+        IComputeStakeSource420.PositionRead memory p =
+            stakeSource.readWorkerPosition(workerId, POLICY_A);
+        require(p.exiting, "exit not queued");
+        require(p.active && p.activeAmount == 100 ether && p.slashableAmount == 100 ether, "collateral unlocked");
+        require(withdrawableAt == requestedAt + EXIT_DELAY, "delay");
+        require(p.withdrawableAt == withdrawableAt, "read delay");
+
+        ComputeStakeWorkerCollateral420.Position memory full = stakeSource.position(id);
+        require(full.exitPolicyRevision == 1 && full.exitPolicyCommitment != bytes32(0), "exit policy snapshot");
+    }
+
+    function testWithdrawalBeforeMaturityFailsAndTopUpAfterExitFails() public {
+        bytes32 id = _stake(POLICY_A, 100 ether);
+        vm.prank(OPERATOR);
+        stakeSource.requestExit(id);
+
+        vm.prank(OPERATOR);
+        (bool ok,) = address(stakeSource).call(
+            abi.encodeCall(stakeSource.withdraw, (id, uint64(1)))
+        );
+        require(!ok, "premature withdrawal");
+
+        vm.deal(OPERATOR, 1 ether);
+        vm.prank(OPERATOR);
+        (ok,) = address(stakeSource).call{value: 1 ether}(
+            abi.encodeCall(stakeSource.stake, (workerId, POLICY_A))
+        );
+        require(!ok, "top-up during exit");
+        require(stakeSource.position(id).activeAmount == 100 ether, "exit mutated");
+    }
+
+    function testExitDelayRevisionCannotRewritePendingExit() public {
+        bytes32 id = _stake(POLICY_A, 50 ether);
+        uint256 requestedAt = block.timestamp;
+        vm.prank(OPERATOR);
+        uint64 oldMaturity = stakeSource.requestExit(id);
+
+        vm.prank(GOV);
+        exitPolicy.publish(POLICY_A, 1 days);
+
+        vm.warp(requestedAt + 1 days);
+        vm.prank(OPERATOR);
+        (bool ok,) = address(stakeSource).call(
+            abi.encodeCall(stakeSource.withdraw, (id, uint64(1)))
+        );
+        require(!ok, "new policy accelerated old exit");
+
+        vm.warp(oldMaturity);
+        vm.prank(OPERATOR);
+        (uint256 amount,) = stakeSource.withdraw(id, 1);
+        require(amount == 50 ether, "mature withdrawal");
+    }
+
+    function testBatchedWithdrawalReleasesAndClaimsExactTranches() public {
+        bytes32 id = _stake(POLICY_A, 40 ether);
+        _stake(POLICY_A, 60 ether);
+
+        vm.prank(OPERATOR);
+        uint64 maturity = stakeSource.requestExit(id);
+        vm.warp(maturity);
+
+        uint256 before = OPERATOR.balance;
+
+        vm.prank(OPERATOR);
+        (uint256 firstAmount, uint64 throughFirst) = stakeSource.withdraw(id, 1);
+        require(firstAmount == 40 ether && throughFirst == 1, "first batch");
+        IComputeStakeSource420.PositionRead memory mid =
+            stakeSource.readWorkerPosition(workerId, POLICY_A);
+        require(mid.exiting && mid.activeAmount == 60 ether && mid.slashableAmount == 60 ether, "mid state");
+        require(OPERATOR.balance == before + 40 ether, "first payout");
+
+        VaultAccounting420.AssetAccounting memory a =
+            accounting.getAccounting(VAULT_ID, address(0));
+        require(a.recordedBalance == 60 ether && a.reserved == 60 ether && a.claimable == 0, "mid accounting");
+
+        vm.prank(OPERATOR);
+        (uint256 secondAmount, uint64 throughSecond) = stakeSource.withdraw(id, 10);
+        require(secondAmount == 60 ether && throughSecond == 2, "second batch");
+
+        IComputeStakeSource420.PositionRead memory done =
+            stakeSource.readWorkerPosition(workerId, POLICY_A);
+        require(!done.active && !done.exiting && done.activeAmount == 0 && done.slashableAmount == 0, "done state");
+        require(OPERATOR.balance == before + 100 ether, "total payout");
+
+        a = accounting.getAccounting(VAULT_ID, address(0));
+        require(
+            address(vault).balance == 0
+                && a.recordedBalance == 0
+                && a.reserved == 0
+                && a.claimable == 0
+                && a.released == 100 ether,
+            "final accounting"
+        );
+    }
+
+    function testOnlyPositionOwnerCanRequestOrWithdrawExit() public {
+        bytes32 id = _stake(POLICY_A, 20 ether);
+
+        vm.prank(OUTSIDER);
+        (bool ok,) = address(stakeSource).call(
+            abi.encodeCall(stakeSource.requestExit, (id))
+        );
+        require(!ok, "outsider requested exit");
+
+        vm.prank(OPERATOR);
+        uint64 maturity = stakeSource.requestExit(id);
+        vm.warp(maturity);
+
+        vm.prank(OUTSIDER);
+        (ok,) = address(stakeSource).call(
+            abi.encodeCall(stakeSource.withdraw, (id, uint64(1)))
+        );
+        require(!ok, "outsider withdrew");
     }
 
     function testDirectEthIsRejected() public {

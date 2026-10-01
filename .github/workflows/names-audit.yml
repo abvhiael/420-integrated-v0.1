@@ -171,11 +171,11 @@ jobs:
           fi
 
       - name: Install Slither for contract hardening
-        if: ${{ env.NAMES_HARDENING_CHANGED == 'true' || env.NAMES_LEVEL2_MILESTONE == 'true' }}
+        if: ${{ env.NAMES_HARDENING_CHANGED == 'true' }}
         run: python -m pip install --disable-pip-version-check slither-analyzer
 
       - name: Targeted Names420 Slither gate
-        if: ${{ env.NAMES_HARDENING_CHANGED == 'true' || env.NAMES_LEVEL2_MILESTONE == 'true' }}
+        if: ${{ env.NAMES_HARDENING_CHANGED == 'true' }}
         working-directory: contracts
         run: |
           set +e

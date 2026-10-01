@@ -32,7 +32,12 @@ export function createOrderPublicationStore({chainId,settlementContract,signatur
     const record={
       schema:'420-exchange-order-status-v1',orderHash:validated.orderHash,digest:validated.digest,domain:validated.domain,order:validated.order,
       signature:validated.signature,state:'accepted',filledSellAmountRaw:'0',filledBuyAmountRaw:'0',remainingSellAmountRaw:validated.order.sellAmountRaw,
-      revision:1,publishedAt:at,updatedAt:at,rejection:null,
+      revision:3,publishedAt:at,updatedAt:at,rejection:null,
+      history:Object.freeze([
+        Object.freeze({state:'signed',revision:1,observedAt:at}),
+        Object.freeze({state:'published',revision:2,observedAt:at}),
+        Object.freeze({state:'accepted',revision:3,observedAt:at}),
+      ]),
     };
     orders.set(record.orderHash,record);
     return Object.freeze({idempotent:false,record:snapshot(record,at)});
@@ -41,7 +46,7 @@ export function createOrderPublicationStore({chainId,settlementContract,signatur
     const at=now(),record=orders.get(String(orderHash).toLowerCase());
     if(!record)fail('NOT_FOUND','order not found');
     if(!TERMINAL.has(record.state)&&BigInt(record.order.expiry)<=BigInt(at)){
-      record.state='expired';record.revision++;record.updatedAt=at;
+      record.state='expired';record.revision++;record.updatedAt=at;record.history=Object.freeze([...record.history,Object.freeze({state:'expired',revision:record.revision,observedAt:at})]);
     }
     return snapshot(record,at);
   }
@@ -50,7 +55,7 @@ export function createOrderPublicationStore({chainId,settlementContract,signatur
     if(!record)fail('NOT_FOUND','order not found');
     if(TERMINAL.has(record.state)&&record.state!=='expired')return snapshot(record,at);
     if(rejectedReason){
-      record.state='rejected';record.rejection=String(rejectedReason);record.revision++;record.updatedAt=at;return snapshot(record,at);
+      record.state='rejected';record.rejection=String(rejectedReason);record.revision++;record.updatedAt=at;record.history=Object.freeze([...record.history,Object.freeze({state:'rejected',revision:record.revision,observedAt:at})]);return snapshot(record,at);
     }
     let sell,buy;
     try{sell=BigInt(filledSellAmountRaw??record.filledSellAmountRaw);buy=BigInt(filledBuyAmountRaw??record.filledBuyAmountRaw);}catch{fail('INVALID_PROJECTION','fill amounts must be raw integers');}
@@ -65,7 +70,7 @@ export function createOrderPublicationStore({chainId,settlementContract,signatur
     else if(sell===total)record.state='filled';
     else if(sell>0n)record.state='partially-filled';
     else record.state='accepted';
-    record.revision++;record.updatedAt=at;return snapshot(record,at);
+    record.revision++;record.updatedAt=at;record.history=Object.freeze([...record.history,Object.freeze({state:record.state,revision:record.revision,observedAt:at})]);return snapshot(record,at);
   }
   return Object.freeze({publish,status,applyProjection,states:PUBLICATION_STATES});
 }

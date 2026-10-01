@@ -382,7 +382,12 @@ contract Governance420 is SystemAccess, I420System {
             PROTOCOL_REGISTRY,
             abi.encodeCall(
                 IProtocolRegistryBootstrap420.registerComponent,
-                (COMMUNITY_SOURCE_COMPONENT_ID, communitySource_, version, IProtocolRegistryBootstrap420.Lifecycle.ACTIVE)
+                (
+                    COMMUNITY_SOURCE_COMPONENT_ID,
+                    communitySource_,
+                    version,
+                    IProtocolRegistryBootstrap420.Lifecycle.ACTIVE
+                )
             )
         );
         _schedule(
@@ -392,7 +397,12 @@ contract Governance420 is SystemAccess, I420System {
             PROTOCOL_REGISTRY,
             abi.encodeCall(
                 IProtocolRegistryBootstrap420.registerComponent,
-                (VALIDATOR_SOURCE_COMPONENT_ID, validatorSource_, version, IProtocolRegistryBootstrap420.Lifecycle.ACTIVE)
+                (
+                    VALIDATOR_SOURCE_COMPONENT_ID,
+                    validatorSource_,
+                    version,
+                    IProtocolRegistryBootstrap420.Lifecycle.ACTIVE
+                )
             )
         );
 

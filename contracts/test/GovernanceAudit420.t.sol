@@ -107,7 +107,7 @@ contract GovernanceAudit420Test {
         new CivicGovernor420(address(wrongConstitution), address(proposals), address(electorates), address(voting));
     }
 
-    function testGovernorRejectsElectorateRegistryWithDifferentGovernanceTimelock() public {
+    function testVotingRejectsRegistriesWithDifferentGovernanceTimelocks() public {
         (
             GovernanceTimelock timelock,
             CivicConstitution420 constitution,
@@ -115,15 +115,26 @@ contract GovernanceAudit420Test {
             CivicElectorateRegistry420 originalElectorates,
             CivicVoting420 originalVoting
         ) = _base();
+        constitution;
         originalElectorates;
         originalVoting;
+
         GovernanceTimelock otherTimelock = new GovernanceTimelock(address(this));
         CivicElectorateRegistry420 wrongElectorates = new CivicElectorateRegistry420(address(otherTimelock));
-        CivicVoting420 voting = new CivicVoting420(address(proposals), address(wrongElectorates));
 
         require(address(timelock) != address(otherTimelock), "distinct timelocks");
+        vm.expectRevert(CivicVoting420.InvalidRegistry.selector);
+        new CivicVoting420(address(proposals), address(wrongElectorates));
+    }
+
+    function testGovernorRejectsNonContractTimelockAuthorityGraph() public {
+        CivicConstitution420 constitution = new CivicConstitution420(address(this));
+        CivicProposalRegistry420 proposals = new CivicProposalRegistry420(address(this));
+        CivicElectorateRegistry420 electorates = new CivicElectorateRegistry420(address(this));
+        CivicVoting420 voting = new CivicVoting420(address(proposals), address(electorates));
+
         vm.expectRevert(CivicGovernor420.InvalidModule.selector);
-        new CivicGovernor420(address(constitution), address(proposals), address(wrongElectorates), address(voting));
+        new CivicGovernor420(address(constitution), address(proposals), address(electorates), address(voting));
     }
 
     function testGovernorRejectsVotingBoundToDifferentProposalRegistry() public {

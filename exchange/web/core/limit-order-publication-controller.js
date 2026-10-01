@@ -11,10 +11,10 @@ const fail=(code,message)=>{throw new LimitOrderPublicationError(code,message);}
 const same=(a,b)=>typeof a==='string'&&typeof b==='string'&&a.toLowerCase()===b.toLowerCase();
 
 export class LimitOrderPublicationController{
-  constructor({controller,publish=publishSignedLimitOrder,status=fetchLimitOrderStatus,nowSeconds=()=>Math.floor(Date.now()/1000)}={}){
+  constructor({controller,publish=publishSignedLimitOrder,status=fetchLimitOrderStatus,nowSeconds=()=>Math.floor(Date.now()/1000),publicationGate=null}={}){
     if(!controller||typeof controller.captureExecutionContext!=='function'||typeof controller.subscribeInvalidation!=='function')fail('CONTROLLER_REQUIRED','browser execution controller required');
     if(typeof publish!=='function'||typeof status!=='function'||typeof nowSeconds!=='function')fail('CONFIG_REQUIRED','publication adapters and clock required');
-    this.controller=controller;this.publishAdapter=publish;this.statusAdapter=status;this.nowSeconds=nowSeconds;
+    this.controller=controller;this.publishAdapter=publish;this.statusAdapter=status;this.nowSeconds=nowSeconds;this.publicationGate=publicationGate;
     this.state='idle';this.context=null;this.signingRequest=null;this.review=null;this.signed=null;this.orderHash=null;this.record=null;this.invalidatedReason=null;
     this.unsubscribe=controller.subscribeInvalidation(reason=>{if(!['filled','cancelled','expired','rejected'].includes(this.state))this.invalidate(reason);});
   }
@@ -53,7 +53,7 @@ export class LimitOrderPublicationController{
   async publish({fetchImpl,signal}={}){
     this.assertState('signed','published');this.assertContext();
     this.state='published';
-    const result=await this.publishAdapter({runtime:this.controller.runtime,signedOrder:this.signed,fetchImpl,signal});
+    const result=await this.publishAdapter({runtime:this.controller.runtime,signedOrder:this.signed,fetchImpl,signal,publicationGate:this.publicationGate});
     if(result.order.orderHash!==this.orderHash)fail('ORDER_HASH_MISMATCH','publication service returned a different canonical order');
     this.record=result.order;this.state=result.order.state;return Object.freeze({idempotent:result.idempotent,...this.snapshot()});
   }

@@ -27,9 +27,9 @@ function readyInventory420(environment = 'testnet') {
       identity420: { address: '0x0000000000000000000000000000000000000424', status: 'BOUND' },
     },
     appAuthority: {
-      stake420: { address: '0x000000000000000000000000000000000000043a', status: 'BOUND' },
-      validatorRegistry: { address: '0x0000000000000000000000000000000000000423', status: 'BOUND' },
-      rewardController: { address: '0x0000000000000000000000000000000000000420', status: 'BOUND' },
+      stake420: { address: '0x000000000000000000000000000000000000043a', status: 'BOUND', deploymentVerified: true },
+      validatorRegistry: { address: '0x0000000000000000000000000000000000000423', status: 'BOUND', deploymentVerified: true },
+      rewardController: { address: '0x0000000000000000000000000000000000000420', status: 'BOUND', deploymentVerified: true },
     },
     conflicts: [],
     releaseGates: {
@@ -138,5 +138,16 @@ test('W14.2 requires Explorer and Faucet publication for testnet', async () => {
   assert.throws(
     () => buildWalletRuntimeConfig420({ manifest, inventory: readyInventory420(), baseConfig }),
     /testnet manifest must publish Faucet/,
+  );
+});
+
+
+test('W14.2 refuses live Stake runtime binding when frozen app addresses are not chain-verified', async () => {
+  const baseConfig = await readJson('wallet/web/runtime-config.json');
+  const inventory = readyInventory420();
+  inventory.appAuthority.stake420.deploymentVerified = false;
+  assert.throws(
+    () => buildWalletRuntimeConfig420({ manifest: testnetManifest420(), inventory, baseConfig }),
+    /stake420 is not chain-verified/,
   );
 });

@@ -29,7 +29,7 @@ async function complete({provider,txHash,attempts=60,pollMs=5000,wait=sleep}){
 }
 async function send({provider,runtime,account,session,transaction,checks={},attempts,pollMs,wait}){
   const preflight=await preflightExchangeTransaction({provider,transaction,runtime,...checks});
-  const sent=await submitPreflightedTransaction({provider,session,expectedChainId:runtime.network.chainId,expectedGeneration:session.generation,transaction,preflight});
+  const sent=await submitPreflightedTransaction({provider,session,expectedChainId:runtime.network.chainId,expectedGeneration:session.generation,transaction,preflight,submissionGate:{enabled:true,mode:'LIVE_TESTNET_QUALIFICATION'}});
   const finalized=await complete({provider,txHash:sent.txHash,attempts,pollMs,wait});
   return {txHash:sent.txHash,blockHash:finalized.receipt.blockHash,blockNumber:finalized.receipt.blockNumber.toString(),state:finalized.state};
 }
@@ -44,7 +44,7 @@ export async function qualifyLiveLimitOrder({runtime,makerProvider,fillerProvide
   const total=BigInt(signingRequest.order.sellAmountRaw);
   if(!signingRequest.order.allowPartial||amount<=0n||amount>=total) throw new LimitOrderQualificationError('PARTIAL_FILL_REQUIRED','drill requires a strictly partial permitted fill');
   const qualification=await preflightLimitOrderSigning({provider:makerProvider,runtime,account:maker.account,order:signingRequest.order,nowSeconds});
-  const signed=await signQualifiedLimitOrder({provider:makerProvider,session:maker.session,expectedChainId:runtime.network.chainId,expectedGeneration:maker.session.generation,signingRequest,qualification});
+  const signed=await signQualifiedLimitOrder({provider:makerProvider,session:maker.session,expectedChainId:runtime.network.chainId,expectedGeneration:maker.session.generation,signingRequest,qualification,signingGate:{enabled:true,mode:'LIVE_TESTNET_QUALIFICATION'}});
   const before=await readLimitOrderState({provider:makerProvider,runtime,order:signed.order});
   if(before.cancelled||before.nonceCancelled||BigInt(before.nonceFloor)>BigInt(signed.order.nonce)||BigInt(before.filledSellAmountRaw)!==0n) throw new LimitOrderQualificationError('ORDER_NOT_FRESH','order is already cancelled, invalidated or filled');
   const fillTx=buildLimitOrderFillTransaction({runtime,filler:filler.account,order:signed.order,fillSellAmountRaw:fill.fillSellAmountRaw,signature:signed.signature,expectedPathHash:fill.expectedPathHash,hops:fill.hops});

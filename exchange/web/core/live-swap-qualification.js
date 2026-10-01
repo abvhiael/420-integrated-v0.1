@@ -79,6 +79,7 @@ export async function qualifyLiveTestnetSwap({
     expectedGeneration:generation,
     transaction,
     preflight,
+    submissionGate:{enabled:true,mode:'LIVE_TESTNET_QUALIFICATION'},
   });
 
   const observations=[];

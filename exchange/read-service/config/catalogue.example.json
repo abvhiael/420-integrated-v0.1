@@ -1,0 +1,39 @@
+{
+  "schema": "420-exchange-catalogue-v1",
+  "version": 1,
+  "markets": [
+    {
+      "marketSubjectId": "example-display-only-420-usd",
+      "canonicalMarketId": null,
+      "marketLabel": "420 / USD",
+      "baseSymbol": "420",
+      "quoteSymbol": "USD",
+      "qualification": "DISPLAY_ONLY_UNQUALIFIED",
+      "routeHealthy": false,
+      "settlementHealthy": false,
+      "source": "repository-example-not-execution-authority"
+    }
+  ],
+  "assets": [
+    {
+      "assetId": "420",
+      "symbol": "420",
+      "qualification": "DISPLAY_ONLY_UNQUALIFIED",
+      "source": "repository-example-not-execution-authority"
+    },
+    {
+      "assetId": "USD",
+      "symbol": "USD",
+      "qualification": "DISPLAY_ONLY_UNQUALIFIED",
+      "source": "repository-example-not-execution-authority"
+    }
+  ],
+  "routes": [
+    {
+      "routeId": "example-display-route-420-usd",
+      "marketSubjectId": "example-display-only-420-usd",
+      "qualification": "DISPLAY_ONLY_UNQUALIFIED",
+      "source": "repository-example-not-execution-authority"
+    }
+  ]
+}

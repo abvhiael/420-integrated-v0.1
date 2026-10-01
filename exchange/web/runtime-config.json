@@ -16,7 +16,8 @@
     "transport": "websocket-or-sse",
     "schemaMajor": 14,
     "schemaMinor": 0,
-    "marketSubjects": []
+    "marketSubjects": [],
+    "orderPublicationUrl": null
   },
   "features": {
     "markets": true,
@@ -26,5 +27,34 @@
     "bridge": true,
     "portfolio": true,
     "walletConnection": true
+  },
+  "reviewCatalogue": {
+    "schema": "420-exchange-review-catalogue-v1",
+    "qualification": "UNRESOLVED",
+    "authority": "METADATA_ONLY",
+    "demo": false,
+    "fixture": false,
+    "chainId": null,
+    "maxRouteHops": 8,
+    "assets": [],
+    "markets": []
+  },
+  "quoteAuthentication": {
+    "schema": "420-exchange-quote-auth-policy-v1",
+    "status": "UNRESOLVED",
+    "service": "420/service/exchange-quote/v1",
+    "deployment": null,
+    "producers": [],
+    "maxKeyOverlapSeconds": 3600,
+    "endpointUrl": null
+  },
+  "execution": {
+    "swapSubmission": "DISABLED_PRETESTNET",
+    "orderSigning": "DISABLED_PRETESTNET",
+    "orderPublication": "DISABLED_PRETESTNET",
+    "orderWithdrawal": "DISABLED_PRETESTNET",
+    "orderCancellation": "DISABLED_PRETESTNET",
+    "bridgeSubmission": "DISABLED_PRETESTNET",
+    "bridgeProofAcceptance": "DISABLED_PRETESTNET"
   }
 }

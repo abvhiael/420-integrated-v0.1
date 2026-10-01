@@ -1,0 +1,11 @@
+{
+  "name":"@420integrated/exchange-pretestnet-ops",
+  "version":"0.1.0",
+  "private":true,
+  "type":"module",
+  "scripts":{
+    "check":"node scripts/check-pre11.mjs",
+    "test":"node --test test/*.test.mjs"
+  },
+  "engines":{"node":">=22"}
+}

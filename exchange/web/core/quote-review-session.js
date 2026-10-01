@@ -17,13 +17,19 @@ export class QuoteReviewSession {
   }
   snapshot(){
     if(this.disposed)fail('DISPOSED','quote review session disposed');
-    const wallet=this.controller.wallet,session=wallet?.session;
-    if(this.controller.disposed||!wallet||!session?.account||!session?.chainId||!Number.isSafeInteger(session.generation))fail('WALLET_UNAVAILABLE','connected wallet required for quote review');
-    return {wallet,account:normalizeAccount(session.account),chainId:normalizeChainId(session.chainId),generation:session.generation,controllerGeneration:this.controller.generation};
+    let execution;
+    try{execution=this.controller.captureExecutionContext();}catch(error){fail(error?.code??'WALLET_UNAVAILABLE',error?.message??'connected wallet required for quote review');}
+    return {
+      wallet:execution.wallet,
+      account:normalizeAccount(execution.account),
+      chainId:normalizeChainId(execution.chainId),
+      generation:execution.walletGeneration,
+      controllerGeneration:execution.controllerGeneration,
+      execution,
+    };
   }
   unchanged(original){
-    const current=this.snapshot();
-    return current.wallet===original.wallet&&current.account===original.account&&current.chainId===original.chainId&&current.generation===original.generation&&current.controllerGeneration===original.controllerGeneration;
+    try{this.controller.assertExecutionContext(original.execution);return true;}catch{return false;}
   }
   invalidate(){
     this.epoch++;this.pending?.abort();this.pending=null;this.candidate=null;
@@ -39,7 +45,7 @@ export class QuoteReviewSession {
       if(this.disposed||epoch!==this.epoch||controller.signal.aborted)fail('STALE_QUOTE','quote request was replaced or invalidated');
       if(!this.unchanged(session)||!same(candidate?.prepared?.context?.account,session.account)||normalizeChainId(candidate?.prepared?.context?.chainId)!==session.chainId)fail('SESSION_CHANGED','wallet or chain changed while fetching quote');
       const now=this.nowSeconds();
-      if(!Number.isSafeInteger(now)||candidate?.status!=='REVIEW_CANDIDATE_ONLY'||candidate.prepared.context.observedAt>now||now-candidate.prepared.context.observedAt>30||candidate.prepared.context.expiresAt<=now)fail('STALE_QUOTE','quote expired or became stale before display');
+      if(!Number.isSafeInteger(now)||!['REVIEW_CANDIDATE_ONLY','TRUSTED_EXECUTION_QUOTE'].includes(candidate?.status)||candidate.prepared.context.observedAt>now||now-candidate.prepared.context.observedAt>30||candidate.prepared.context.expiresAt<=now)fail('STALE_QUOTE','quote expired or became stale before display');
       this.candidate=Object.freeze({candidate,session,epoch});
       return candidate;
     }catch(error){

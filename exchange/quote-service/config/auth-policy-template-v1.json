@@ -1,0 +1,16 @@
+{
+  "schema": "420-exchange-quote-auth-policy-v1",
+  "status": "UNRESOLVED",
+  "service": "420/service/exchange-quote/v1",
+  "maxKeyOverlapSeconds": 3600,
+  "deployment": null,
+  "producers": [],
+  "rules": [
+    "only explicitly pinned Ed25519 producer keys may authenticate executable quotes",
+    "key version and revocation epoch are part of authentication evidence",
+    "active key overlap is bounded by maxKeyOverlapSeconds",
+    "revoked keys fail closed even if their signature is mathematically valid",
+    "private signing keys are never stored in browser/runtime policy"
+  ],
+  "endpointUrl": null
+}

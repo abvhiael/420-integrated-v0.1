@@ -1,8 +1,8 @@
 {
   "schema": "420-exchange-web-v15.11",
   "scope": "BROWSER_EXECUTION_INTEGRATION",
-  "repositoryStatus": "IMPLEMENTED_PARTIAL_BROWSER_REVIEW_EXACT_HEAD_CI_REQUIRED",
-  "browserIntegrationStatus": "V15_WALLET_SESSION_AUTHORITY_V14_READ_ONLY_BROWSER_ACCEPTANCE_PENDING",
+  "repositoryStatus": "PRE02_IMPLEMENTATION_COMPLETE_LEVEL1_CI_REQUIRED",
+  "browserIntegrationStatus": "V15_WALLET_SESSION_AUTHORITY_PRE02_IMPLEMENTED_PRE03_PENDING",
   "operationalStatus": "BLOCKED_UNVERIFIED_EXECUTABLE_QUOTE_DEPLOYMENT_AND_REAL_WALLET_MATRIX",
   "roadmap": "docs/420EXCHANGE-STATUS-ROADMAP.md",
   "implementation": {
@@ -26,7 +26,8 @@
       "exchange/web/test/executable-quote-intake.test.js",
       "exchange/web/test/quote-review-session.test.js",
       "exchange/web/test/read-only-swap-review-ui.test.js",
-      "exchange/web/test/pre02-v14-readonly-authority.test.js"
+      "exchange/web/test/pre02-v14-readonly-authority.test.js",
+      "exchange/web/test/pre02-execution-invalidation.test.js"
     ],
     "artifactCheck": "exchange/web/scripts/verify-pre02-artifact.mjs",
     "artifactWorkflow": ".github/workflows/exchange-web.yml",
@@ -46,7 +47,11 @@
     "metadataReconciliationWorkflowRun": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/35485465896",
     "metadataReconciliationWorkflowConclusion": "success",
     "artifactEvidenceScope": "QUALIFICATION_MODE_CI_BUILD_AND_STATIC_BUNDLE_ASSERTIONS_ONLY_NOT_REAL_BROWSER_OR_DEPLOYMENT",
-    "note": "A prior-head successful workflow is not evidence for a later head. CI Chromium with simulated providers is not real wallet/device or deployed-preview acceptance, live transaction qualification or release authorization."
+    "note": "A prior-head successful workflow is not evidence for a later head. CI Chromium with simulated providers is not real wallet/device or deployed-preview acceptance, live transaction qualification or release authorization.",
+    "pre02ImplementationBranch": "audit/exchange-pretestnet-phase-20260930",
+    "pre02QualificationLevel": "LEVEL_1_STEP_SPECIFIC",
+    "pre02Level2Status": "DEFERRED_NOT_MILESTONE",
+    "pre02Level3Status": "DEFERRED_TO_PRE12_APP_PHASE_CLOSEOUT"
   },
   "browserAcceptanceAttempt": {
     "browser": "Chromium 153.0.8010.12 headless on GitHub Actions Linux using Playwright",
@@ -57,21 +62,39 @@
     "evidenceArtifact": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/35487226959/artifacts/10598625123",
     "lastObservedStatus": "SIMULATED_CHROMIUM_ACCEPTANCE_PASSED_ALL_FIVE_CASES",
     "results": [
-      {"case": "explicit wallet selection and single V15 connect; V14 request containment and execution lockdown", "result": "PASS"},
-      {"case": "provider replacement invalidates old session and disconnects old listeners", "result": "PASS"},
-      {"case": "delayed response from superseded provider cannot restore wallet authority", "result": "PASS"},
-      {"case": "account and chain change invalidate wallet session and leave execution locked", "result": "PASS"},
-      {"case": "navigation and input changes clear stale read-only quote review; execution remains locked", "result": "PASS"}
+      {
+        "case": "explicit wallet selection and single V15 connect; V14 request containment and execution lockdown",
+        "result": "PASS"
+      },
+      {
+        "case": "provider replacement invalidates old session and disconnects old listeners",
+        "result": "PASS"
+      },
+      {
+        "case": "delayed response from superseded provider cannot restore wallet authority",
+        "result": "PASS"
+      },
+      {
+        "case": "account and chain change invalidate wallet session and leave execution locked",
+        "result": "PASS"
+      },
+      {
+        "case": "navigation and input changes clear stale read-only quote review; execution remains locked",
+        "result": "PASS"
+      }
     ],
     "releaseQualification": "NOT_QUALIFIED_REAL_EXTENSION_DEVICE_BROWSER_MATRIX_DEPLOYED_PREVIEW_AND_LIVE_CHAIN_UNTESTED"
   },
   "qualifiedInUnitTests": [
     "explicit wallet selection and generation-based invalidation",
+    "central execution-generation invalidation across provider, account, chain, runtime, navigation, visibility and trade-input changes",
+    "stale preflight suppression before eth_sendTransaction when execution context changes",
+    "captured review/confirmation context fails closed after any central execution invalidation",
     "canonical raw-unit transaction construction and exact review fingerprints",
     "swap quote request/response validation and receipt-time expiry checks",
-    "late response, wallet change and superseded request invalidation",
+    "late response, wallet change and superseded request invalidation even when transport ignores abort",
     "read-only browser swap review and legacy execution button lockdown",
-    "V14 display app no longer creates a wallet session or prepares signing requests; V15 owns the browser wallet connection",
+    "V14 display app no longer creates or owns a wallet session; V15 is the sole future execution identity",
     "qualification-mode deployable artifact entrypoint, source revision and legacy execution lockdown assertions"
   ],
   "releaseBlockers": [

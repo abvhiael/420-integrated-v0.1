@@ -35,14 +35,13 @@ function reconstruct({runtime, prepared, execution}) {
   return fingerprint;
 }
 
-// A trust flag here is an integration prerequisite, not an authentication
-// mechanism. The future quote client must establish its provenance separately.
-export function beginBoundSwapReview({runtime,prepared,execution,tokens,quoteId,session,sourceAuthenticated=false}={}) {
-  if (!sourceAuthenticated) fail('SOURCE_UNVERIFIED', 'Trusted executable quote source not established');
+// PRE-05 requires verifier-produced evidence; caller booleans cannot upgrade trust.
+export function beginBoundSwapReview({runtime,prepared,execution,tokens,quoteId,session,authenticationEvidence}={}) {
+  if (!authenticationEvidence?.verified) fail('SOURCE_UNVERIFIED', 'Verified executable quote evidence required');
   reconstruct({runtime,prepared,execution});
   const projection = canonicalSwapReview({prepared,execution,tokens,quoteId});
   const envelope = canonicalEnvelopeFields(prepared);
-  const review = buildExecutionReview({prepared,session,reviewedFields:envelope,sourceAuthenticated});
+  const review = buildExecutionReview({prepared,session,reviewedFields:envelope,authenticationEvidence});
   return Object.freeze({projection,review});
 }
 

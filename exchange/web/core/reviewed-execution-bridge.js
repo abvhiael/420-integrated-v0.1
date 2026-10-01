@@ -1,3 +1,4 @@
+import {isVerifiedQuoteEvidence} from './quote-authentication.js';
 import {transactionFingerprint} from './preflight.js';
 import {normalizeAccount,normalizeChainId} from './wallet-session.js';
 
@@ -32,15 +33,20 @@ export function assertExactDisplayedFields(prepared,displayedFields){
   return canonical;
 }
 
-export function buildExecutionReview({prepared,session,reviewedFields,sourceAuthenticated=false}={}){
-  if(!sourceAuthenticated)fail('SOURCE_UNVERIFIED','A trusted live executable-quote source must be authenticated');
+export function buildExecutionReview({prepared,session,reviewedFields,authenticationEvidence}={}){
+  if(prepared?.context?.trustLevel!=='AUTHENTICATED_EXECUTION'||!isVerifiedQuoteEvidence(prepared.context?.authentication))fail('SOURCE_UNVERIFIED','verified authenticated execution provenance required');
+  if(!isVerifiedQuoteEvidence(authenticationEvidence)||authenticationEvidence.transactionFingerprint!==prepared.transactionFingerprint||authenticationEvidence.quoteId!==prepared.context.quoteId)fail('SOURCE_UNVERIFIED','cryptographic verifier-produced quote authentication evidence required');
   if(!KINDS.includes(prepared?.kind)||prepared?.transaction?.kind!==prepared.kind||!prepared?.context||!prepared?.reviewedIntent)fail('INVALID_PREPARATION','canonical prepared transaction required');
   if(!session?.account||!session?.chainId||!Number.isSafeInteger(session.generation))fail('SESSION_REQUIRED','connected wallet snapshot required');
   if(!exact(prepared.context.account,normalizeAccount(session.account))||normalizeChainId(prepared.context.chainId)!==normalizeChainId(session.chainId))fail('SESSION_CHANGED','quote account or chain differs from connected wallet');
   if(!exact(prepared.transaction.request.from,session.account)||normalizeChainId(prepared.transaction.chainId)!==normalizeChainId(session.chainId))fail('TRANSACTION_CHANGED','transaction account or chain differs from wallet');
   const fields=assertExactDisplayedFields(prepared,reviewedFields);
   if(prepared.transactionFingerprint!==fields.transactionFingerprint)fail('FINGERPRINT_CHANGED','prepared transaction differs from canonical review');
-  return Object.freeze({kind:prepared.kind,account:normalizeAccount(session.account),chainId:normalizeChainId(session.chainId),generation:session.generation,transactionFingerprint:fields.transactionFingerprint,reviewedFields:fields,quoteId:prepared.context.quoteId,expiresAt:prepared.context.expiresAt});
+  return Object.freeze({
+    kind:prepared.kind,account:normalizeAccount(session.account),chainId:normalizeChainId(session.chainId),generation:session.generation,
+    transactionFingerprint:fields.transactionFingerprint,reviewedFields:fields,quoteId:prepared.context.quoteId,expiresAt:prepared.context.expiresAt,
+    authentication:authenticationEvidence,
+  });
 }
 
 export function assertConfirmedExecution({prepared,review,session,confirmedFingerprint,nowSeconds,displayedFields}={}){

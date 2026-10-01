@@ -1,0 +1,14 @@
+{
+  "name": "@420integrated/exchange-quote-service",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "check": "node scripts/check-pre04.mjs && node scripts/check-pre05.mjs",
+    "qualify": "npm run check && npm test"
+  }
+}

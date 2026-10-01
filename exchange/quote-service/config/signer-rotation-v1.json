@@ -1,0 +1,17 @@
+{
+  "schema": "420-exchange-quote-signer-rotation-v1",
+  "status": "PRE05_IMPLEMENTED_POLICY_DRIVEN",
+  "activeKeyVersion": null,
+  "acceptedKeyVersions": [],
+  "overlapSeconds": 0,
+  "privateKeyMaterial": "EXTERNAL_INJECTED_ONLY",
+  "nextStep": "PRE-06",
+  "rules": [
+    "production private keys are injected into the service and never committed",
+    "producer identity and key version are signed and must match the pinned browser trust policy",
+    "public-key fingerprint and revocation epoch are checked before accepting a quote",
+    "rotation overlap is bounded by maxKeyOverlapSeconds",
+    "revoked and out-of-window keys fail closed",
+    "quote semantics, replay domain and transaction fingerprint remain stable across key rotation"
+  ]
+}

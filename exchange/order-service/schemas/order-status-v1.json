@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "420-exchange-order-status-v1",
+  "type": "object",
+  "required": ["schema","orderHash","order","state","revision","provenance"],
+  "properties": {
+    "schema":{"const":"420-exchange-order-status-v1"},
+    "orderHash":{"type":"string","pattern":"^0x[0-9a-fA-F]{64}$"},
+    "state":{"enum":["signed","published","accepted","partially-filled","filled","cancel-pending","cancelled","expired","rejected"]},
+    "revision":{"type":"integer","minimum":1},
+    "filledSellAmountRaw":{"type":"string"},"filledBuyAmountRaw":{"type":"string"},"remainingSellAmountRaw":{"type":"string"},
+    "provenance":{
+      "type":"object","required":["schema","service","orderHash","revision","observedAt"],
+      "properties":{
+        "schema":{"const":"420-exchange-order-status-provenance-v1"},
+        "service":{"const":"420/service/exchange-orders/v1"},
+        "orderHash":{"type":"string"},"revision":{"type":"integer"},"observedAt":{"type":"integer"}
+      }
+    }
+  }
+}

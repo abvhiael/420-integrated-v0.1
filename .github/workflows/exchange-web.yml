@@ -4,10 +4,16 @@ on:
   push:
     paths:
       - "exchange/web/**"
+      - "exchange/quote-service/**"
+      - "exchange/order-service/**"
+      - "exchange/read-service/**"
       - ".github/workflows/exchange-web.yml"
   pull_request:
     paths:
       - "exchange/web/**"
+      - "exchange/quote-service/**"
+      - "exchange/order-service/**"
+      - "exchange/read-service/**"
       - ".github/workflows/exchange-web.yml"
   workflow_dispatch:
 
@@ -21,6 +27,53 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
+      - name: PRE-04 quote backend static checks
+        working-directory: exchange/quote-service
+        run: npm run check
+      - name: PRE-04 quote backend unit and HTTP integration tests
+        working-directory: exchange/quote-service
+        run: npm test
+      - name: PRE-04 quote backend secret scan
+        working-directory: exchange/quote-service
+        run: |
+          ! grep -RniE 'BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY|mnemonic[[:space:]]*[:=][[:space:]]*["'"'"'][^"'"'"']+|seed[_ -]?phrase[[:space:]]*[:=][[:space:]]*["'"'"'][^"'"'"']+|private[_-]?key[[:space:]]*[:=][[:space:]]*["'"'"'][0-9a-fA-F]+' --exclude-dir=test .
+      - name: PRE-07 order service static checks
+        working-directory: exchange/order-service
+        run: npm run check
+      - name: PRE-07 order service unit and HTTP integration tests
+        working-directory: exchange/order-service
+        run: npm test
+      - name: PRE-10 Exchange read service static checks
+        working-directory: exchange/read-service
+        run: npm run check
+      - name: PRE-10 Exchange read service contract and integration tests
+        working-directory: exchange/read-service
+        run: npm test
+      - name: PRE-10 420Indexer shared-dependency qualification
+        working-directory: 420-indexer
+        run: |
+          npm install --no-package-lock
+          npm test
+      - name: PRE-11 security operations and readiness static checks
+        working-directory: exchange/ops
+        run: npm run check
+      - name: PRE-11 security operations startup degradation and packaging tests
+        working-directory: exchange/ops
+        run: npm test
+      - name: PRE-11 deterministic pre-testnet package manifest
+        env:
+          EXCHANGE_BUILD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: node exchange/scripts/package-pretestnet.mjs artifacts/exchange/pretestnet-package-manifest.json
+      - name: Preserve PRE-11 package manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: exchange-pre11-package-${{ github.sha }}
+          path: artifacts/exchange/pretestnet-package-manifest.json
+          if-no-files-found: error
+      - name: PRE-11 backend secret scan
+        working-directory: exchange
+        run: |
+          ! grep -RniE 'BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY|mnemonic[[:space:]]*[:=][[:space:]]*["'"'"'][^"'"'"']+|seed[_ -]?phrase[[:space:]]*[:=][[:space:]]*["'"'"'][^"'"'"']+|private[_-]?key[[:space:]]*[:=][[:space:]]*["'"'"'][0-9a-fA-F]+' quote-service/src order-service/src read-service/src shared
       - name: Static Exchange checks
         working-directory: exchange/web
         run: npm run check
@@ -51,6 +104,18 @@ jobs:
         with:
           name: exchange-pre02-chromium-${{ github.sha }}
           path: exchange/web/acceptance-evidence/pre02-chromium.json
+          if-no-files-found: warn
+      - name: PRE-03 metadata-driven read-only Chromium acceptance
+        working-directory: exchange/web
+        env:
+          EXCHANGE_BUILD_SHA: ${{ github.sha }}
+        run: node scripts/pre03-chromium-acceptance.mjs
+      - name: Preserve PRE-03 browser acceptance evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exchange-pre03-chromium-${{ github.sha }}
+          path: exchange/web/acceptance-evidence/pre03-chromium.json
           if-no-files-found: warn
       - name: Frontend secret scan
         working-directory: exchange/web

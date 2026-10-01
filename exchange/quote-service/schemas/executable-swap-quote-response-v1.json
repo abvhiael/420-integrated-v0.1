@@ -1,0 +1,456 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "420-exchange-executable-swap-quote-v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "marketSource",
+    "demo",
+    "fixture",
+    "quoteId",
+    "chainId",
+    "account",
+    "observedAt",
+    "expiresAt",
+    "deployment",
+    "replayDomain",
+    "transactionFingerprint",
+    "reviewedIntent",
+    "execution",
+    "tokens",
+    "fees",
+    "quoteEconomics",
+    "builder",
+    "producer",
+    "authentication"
+  ],
+  "properties": {
+    "schema": {
+      "const": "420-exchange-executable-swap-quote-v1"
+    },
+    "marketSource": {
+      "const": "api"
+    },
+    "demo": {
+      "const": false
+    },
+    "fixture": {
+      "const": false
+    },
+    "quoteId": {
+      "$ref": "#/$defs/id32"
+    },
+    "chainId": {
+      "$ref": "#/$defs/chainId"
+    },
+    "account": {
+      "$ref": "#/$defs/address"
+    },
+    "observedAt": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "expiresAt": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "deployment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "deploymentId",
+        "manifestHash",
+        "router",
+        "spender"
+      ],
+      "properties": {
+        "deploymentId": {
+          "$ref": "#/$defs/id32"
+        },
+        "manifestHash": {
+          "$ref": "#/$defs/id32"
+        },
+        "router": {
+          "$ref": "#/$defs/address"
+        },
+        "spender": {
+          "$ref": "#/$defs/address"
+        }
+      }
+    },
+    "replayDomain": {
+      "$ref": "#/$defs/id32"
+    },
+    "reviewedIntent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "recipient",
+        "routeCommitment",
+        "hops"
+      ],
+      "properties": {
+        "kind": {
+          "const": "EXACT_INPUT_PATH"
+        },
+        "recipient": {
+          "$ref": "#/$defs/address"
+        },
+        "routeCommitment": {
+          "$ref": "#/$defs/id32"
+        },
+        "hops": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "marketId",
+              "outputToken"
+            ],
+            "properties": {
+              "marketId": {
+                "$ref": "#/$defs/id32"
+              },
+              "outputToken": {
+                "$ref": "#/$defs/address"
+              }
+            }
+          }
+        }
+      }
+    },
+    "execution": {
+      "$ref": "#/$defs/execution"
+    },
+    "tokens": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "input",
+        "output"
+      ],
+      "properties": {
+        "input": {
+          "$ref": "#/$defs/token"
+        },
+        "output": {
+          "$ref": "#/$defs/token"
+        }
+      }
+    },
+    "fees": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "outputToken",
+        "totalFeeRaw",
+        "rateBps",
+        "components"
+      ],
+      "properties": {
+        "outputToken": {
+          "$ref": "#/$defs/address"
+        },
+        "totalFeeRaw": {
+          "$ref": "#/$defs/raw"
+        },
+        "rateBps": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "components": {
+          "type": "array",
+          "maxItems": 16,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "label",
+              "amountRaw"
+            ],
+            "properties": {
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 48
+              },
+              "amountRaw": {
+                "$ref": "#/$defs/rawZero"
+              }
+            }
+          }
+        }
+      }
+    },
+    "quoteEconomics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "grossAmountOutRaw",
+        "feeAmountRaw",
+        "netAmountOutRaw",
+        "minimumNetAmountOutRaw"
+      ],
+      "properties": {
+        "grossAmountOutRaw": {
+          "$ref": "#/$defs/raw"
+        },
+        "feeAmountRaw": {
+          "$ref": "#/$defs/rawZero"
+        },
+        "netAmountOutRaw": {
+          "$ref": "#/$defs/raw"
+        },
+        "minimumNetAmountOutRaw": {
+          "$ref": "#/$defs/raw"
+        }
+      }
+    },
+    "builder": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "router",
+        "spender",
+        "value",
+        "execution"
+      ],
+      "properties": {
+        "kind": {
+          "const": "CANONICAL_SWAP_INPUTS_V1"
+        },
+        "router": {
+          "$ref": "#/$defs/address"
+        },
+        "spender": {
+          "$ref": "#/$defs/address"
+        },
+        "value": {
+          "type": "string",
+          "pattern": "^0x[0-9a-f]+$"
+        },
+        "execution": {
+          "$ref": "#/$defs/execution"
+        }
+      }
+    },
+    "producer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "id",
+        "keyVersion",
+        "algorithm",
+        "authentication"
+      ],
+      "properties": {
+        "schema": {
+          "const": "420-exchange-quote-producer-v1"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "keyVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "algorithm": {
+          "enum": [
+            "Ed25519",
+            "UNSIGNED"
+          ]
+        },
+        "authentication": {
+          "enum": [
+            "ED25519_PRE05",
+            "UNAUTHENTICATED"
+          ]
+        }
+      }
+    },
+    "transactionFingerprint": {
+      "$ref": "#/$defs/id32"
+    },
+    "authentication": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "algorithm",
+        "producerId",
+        "keyVersion",
+        "publicKeyFingerprint",
+        "revocationEpoch",
+        "payloadHash",
+        "signature"
+      ],
+      "properties": {
+        "schema": {
+          "const": "420-exchange-quote-auth-v1"
+        },
+        "algorithm": {
+          "const": "Ed25519"
+        },
+        "producerId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+        },
+        "keyVersion": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._:-]{1,64}$"
+        },
+        "publicKeyFingerprint": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "revocationEpoch": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "payloadHash": {
+          "$ref": "#/$defs/id32"
+        },
+        "signature": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "address": {
+      "type": "string",
+      "pattern": "^0x[0-9a-f]{40}$"
+    },
+    "id32": {
+      "type": "string",
+      "pattern": "^0x[0-9a-f]{64}$"
+    },
+    "chainId": {
+      "type": "string",
+      "pattern": "^0x[0-9a-f]+$"
+    },
+    "raw": {
+      "type": "string",
+      "pattern": "^[1-9][0-9]*$"
+    },
+    "rawZero": {
+      "type": "string",
+      "pattern": "^(?:0|[1-9][0-9]*)$"
+    },
+    "token": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "assetId",
+        "address",
+        "symbol",
+        "decimals",
+        "verified"
+      ],
+      "properties": {
+        "assetId": {
+          "$ref": "#/$defs/id32"
+        },
+        "address": {
+          "$ref": "#/$defs/address"
+        },
+        "symbol": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._-]{1,16}$"
+        },
+        "decimals": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 36
+        },
+        "verified": {
+          "const": true
+        }
+      }
+    },
+    "execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "tokenIn",
+        "recipient",
+        "amountInRaw",
+        "minFinalAmountOutRaw",
+        "expectedPathHash",
+        "hops"
+      ],
+      "properties": {
+        "mode": {
+          "enum": [
+            "ERC20_TO_ERC20",
+            "NATIVE_TO_ERC20",
+            "ERC20_TO_NATIVE"
+          ]
+        },
+        "tokenIn": {
+          "$ref": "#/$defs/address"
+        },
+        "recipient": {
+          "$ref": "#/$defs/address"
+        },
+        "amountInRaw": {
+          "$ref": "#/$defs/raw"
+        },
+        "minFinalAmountOutRaw": {
+          "$ref": "#/$defs/raw"
+        },
+        "expectedPathHash": {
+          "$ref": "#/$defs/id32"
+        },
+        "hops": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "marketId",
+              "routeId",
+              "tokenOut",
+              "minAmountOutRaw",
+              "routeData"
+            ],
+            "properties": {
+              "marketId": {
+                "$ref": "#/$defs/id32"
+              },
+              "routeId": {
+                "$ref": "#/$defs/id32"
+              },
+              "tokenOut": {
+                "$ref": "#/$defs/address"
+              },
+              "minAmountOutRaw": {
+                "$ref": "#/$defs/raw"
+              },
+              "routeData": {
+                "type": "string",
+                "pattern": "^0x(?:[0-9a-f]{2})*$",
+                "maxLength": 8194
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

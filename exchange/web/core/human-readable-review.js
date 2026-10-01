@@ -22,11 +22,26 @@ function token(token, expectedAddress) {
   if (!token || !address(token.address) || !exact(token.address, expectedAddress) || !Number.isInteger(token.decimals) || token.decimals < 0 || token.decimals > 36 || typeof token.symbol !== 'string' || !/^[A-Za-z0-9._-]{1,16}$/.test(token.symbol) || token.verified !== true) fail('TOKEN_METADATA_UNVERIFIED', 'qualified token address, decimals and symbol required');
   return Object.freeze({address: normalizeAccount(token.address), decimals: token.decimals, symbol: token.symbol});
 }
+function feesProjection(fees, output) {
+  if (fees === null || fees === undefined) return Object.freeze({status:'UNAVAILABLE',totalFeeRaw:null,totalFee:null,rateBps:null,components:Object.freeze([])});
+  if (!fees || !address(fees.outputToken) || !exact(fees.outputToken, output.address) || !raw(fees.totalFeeRaw) || BigInt(fees.totalFeeRaw) < 0n) fail('INVALID_FEES','canonical output-token fee disclosure required');
+  if (fees.rateBps !== undefined && (!Number.isInteger(fees.rateBps) || fees.rateBps < 0 || fees.rateBps > 10000)) fail('INVALID_FEES','fee rate must be valid basis points');
+  const components = Array.isArray(fees.components) ? fees.components : [];
+  if (components.length > 16) fail('INVALID_FEES','fee component count exceeds review bound');
+  let sum=0n;
+  const normalized=components.map((component)=>{
+    if(!component || typeof component.label!=='string' || !/^[A-Za-z0-9 _./-]{1,48}$/.test(component.label) || !raw(component.amountRaw)) fail('INVALID_FEES','valid fee component label and raw amount required');
+    const amount=BigInt(component.amountRaw);sum+=amount;
+    return Object.freeze({label:component.label,amountRaw:component.amountRaw,amount:formatRawUnits(component.amountRaw,output.decimals)});
+  });
+  if(components.length && sum!==BigInt(fees.totalFeeRaw)) fail('INVALID_FEES','fee components must equal total fee');
+  return Object.freeze({status:'DISCLOSED',totalFeeRaw:fees.totalFeeRaw,totalFee:formatRawUnits(fees.totalFeeRaw,output.decimals),rateBps:fees.rateBps??null,components:Object.freeze(normalized)});
+}
 
 // This is a deterministic review projection, not a quote-authentication service.
 // It intentionally supports swap only; bridge/order review require separate
 // beneficiary and order-lifecycle qualification before wallet execution.
-export function canonicalSwapReview({prepared, execution, tokens, quoteId} = {}) {
+export function canonicalSwapReview({prepared, execution, tokens, quoteId, fees = null} = {}) {
   if (prepared?.kind !== 'SWAP' || prepared?.transaction?.kind !== 'SWAP' || prepared?.reviewedIntent?.kind !== 'EXACT_INPUT_PATH' || !prepared.context || !execution || !Array.isArray(execution.hops) || !execution.hops.length || !tokens) fail('INVALID_SWAP', 'canonical prepared swap required');
   if (!id(quoteId) || !exact(quoteId, prepared.context.quoteId)) fail('QUOTE_CHANGED', 'review must identify the prepared quote');
   const input = token(tokens.input, execution.tokenIn);
@@ -44,6 +59,7 @@ export function canonicalSwapReview({prepared, execution, tokens, quoteId} = {})
     recipient:normalizeAccount(execution.recipient), input, output,
     amountInRaw:execution.amountInRaw, amountIn:formatRawUnits(execution.amountInRaw,input.decimals),
     minimumOutputRaw:execution.minFinalAmountOutRaw, minimumOutput:formatRawUnits(execution.minFinalAmountOutRaw,output.decimals),
+    fees:feesProjection(fees,output),
     expectedPathHash:execution.expectedPathHash.toLowerCase(), hops:Object.freeze(intermediate),
   });
 }

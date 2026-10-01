@@ -1,0 +1,11 @@
+{
+  "name": "@420integrated/exchange-order-service",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node scripts/check-pre07.mjs",
+    "test": "node --test test/*.test.js"
+  },
+  "engines": {"node": ">=22"}
+}

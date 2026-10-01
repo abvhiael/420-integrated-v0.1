@@ -57,7 +57,7 @@ PRE-01 established the authoritative boundary between display projections, revie
 
 ---
 
-### PRE-02 — Wallet identity, request-generation and invalidation closure — PARTIAL
+### PRE-02 — Wallet identity, request-generation and invalidation closure — COMPLETE
 
 Finish the V15 Wallet/session controller as the sole future execution identity.
 
@@ -76,7 +76,7 @@ Dependencies: none beyond current V15.11.
 
 ---
 
-### PRE-03 — production-quality read-only swap entry and review UX — PARTIAL
+### PRE-03 — production-quality read-only swap entry and review UX — COMPLETE
 
 Replace the developer-style raw-address entry with a metadata-driven, non-executable review flow.
 
@@ -91,13 +91,13 @@ Required work:
 - complete keyboard, focus, screen-reader and narrow-screen behavior;
 - test decimals/rounding, malformed amounts, duplicate assets, recipient mismatch, wrong chain, oversized routes and stale-review invalidation.
 
-**Exit:** DOM review exactly mirrors canonical execution inputs; no execution action exists on this path.
+**Exit:** SATISFIED at implementation SHA `0caf93beaad9e97081250b18b7b296f8ec09c913`. The review entry is metadata-driven and fail-closed, decimal display values are converted exactly to canonical raw units, the DOM exposes the canonical chain/assets/router/route/input/minimum/fees/recipient/quote/expiry/fingerprint without truncation, unauthenticated candidate provenance is explicit, stale/malformed/dependency states fail closed, and no signing/submission action exists on this path. Level 1 420Exchange Web Verification run `36782695570` passed all retained unit/static/build/PRE-02 checks plus PRE-03 Chromium acceptance and the frontend secret scan. Durable evidence: `docs/420EXCHANGE-PRE-03-QUALIFICATION.md`.
 
 Dependencies: PRE-02.
 
 ---
 
-### PRE-04 — Exchange executable quote backend and schema — TODO / CRITICAL
+### PRE-04 — Exchange executable quote backend and schema — COMPLETE
 
 Build the missing repository-owned executable quote producer.
 
@@ -112,13 +112,13 @@ Required work:
 - define key/signer rotation without embedding production keys;
 - provide offline deterministic test vectors and mock-chain fixtures.
 
-**Exit:** a tested backend service can emit a complete, deterministic execution quote under mock/offline dependencies; live chain qualification remains deferred.
+**Exit:** SATISFIED at implementation SHA `ce40f17b7ee5e15d5920b64b923171bba29826df`. A repository-owned Node 22 service now serves versioned POST `/executable-swap-quote`, emits complete deterministic execution-review quotes from explicit provider-neutral route/chain adapters, binds deployment/manifest/account/assets/route/raw amounts/fees/net minimum/router/spender/replay domain/timestamps/builder inputs, fails closed on stale/wrong-chain/unsupported/malformed/oversized/dependency/resource-abuse cases, exposes deterministic errors and redacted logs, and contains no production signing key. Level 1 plus PRE-04 app-integration milestone qualification passed in 420Exchange Web Verification run `36786390614`. Durable evidence: `docs/420EXCHANGE-PRE-04-QUALIFICATION.md`. Live route/chain qualification and cryptographic provenance remain deferred.
 
 Dependencies: PRE-10 data/source contract can be developed in parallel.
 
 ---
 
-### PRE-05 — quote authenticity, provenance and replay protection — TODO / CRITICAL
+### PRE-05 — quote authenticity, provenance and replay protection — COMPLETE
 
 Replace trust flags with verifiable quote provenance.
 
@@ -134,13 +134,13 @@ Required work:
 - define quote revocation/expiry semantics and operator key rollover handling;
 - provide deterministic signing/verification test vectors.
 
-**Exit:** browser/client can independently verify quote origin and exact intent offline; no caller-provided `sourceAuthenticated`/equivalent flag can upgrade trust.
+**Exit:** SATISFIED. Original implementation SHA `a447e84951bc618961272ba94d78dfff96154ee2` introduced the Ed25519-authenticated canonical envelope and browser-side independent verification boundary. After PRE-10 completed the repository-owned Exchange read/API composition, PRE-05 was explicitly reopened and requalified against the accumulated implementation SHA `46e97d69a51deaad9460f9145735ee1cf96f658a`. The quote service still emits Ed25519-authenticated canonical envelopes; the browser independently verifies pinned producer/key policy, exact endpoint/deployment/router/account/chain/quote/expiry/replay domain, signed payload hash and exact reconstructed transaction fingerprint; replay admission remains bounded/stateful; revocation, validity windows and bounded key rollover fail closed; unknown/extra execution semantics fail closed; and no caller-controlled trust flag or read-projection authority shortcut was reintroduced. Current requalification passed in 420Exchange Web Verification run `36802037691` / #730. Durable evidence: `docs/420EXCHANGE-PRE-05-QUALIFICATION.md`.
 
 Dependencies: PRE-04.
 
 ---
 
-### PRE-06 — guarded swap orchestration — PARTIAL / CRITICAL
+### PRE-06 — guarded swap orchestration — COMPLETE
 
 Compose the existing V15 primitives into one browser execution pipeline while leaving submission disabled.
 
@@ -160,13 +160,13 @@ Required work:
 - add mock RPC/provider end-to-end tests for rejection, timeout, replacement, reorg, stale nonce, gas change and indexer delay;
 - keep the final Wallet send function behind an independent default-OFF gate.
 
-**Exit:** full swap path is testable end-to-end with mocks and deterministic state transitions; real sends remain impossible by default.
+**Exit:** SATISFIED. Original implementation SHA `011ae238b7fdbf9643a339c71cf9357100391962` introduced the single guarded swap orchestrator composing PRE-02 wallet/session authority, PRE-05 authenticated quote provenance, canonical review/confirmation, fresh submit-boundary preflight, independent default-OFF wallet submission and deterministic lifecycle tracking. After PRE-07 through PRE-10 completed, PRE-06 was explicitly reopened and requalified against accumulated implementation SHA `46e97d69a51deaad9460f9145735ee1cf96f658a`. Approval/permit authority remains separately reviewed; wallet/session changes still invalidate pending authority; transaction hashes still stop at SUBMITTED until lifecycle evidence advances them; replacement/reorg/drop/indexer-delay/conflict states remain explicit; the PRE-10 V13 read service now supplies the non-authoritative projection surface consumed by lifecycle reconciliation; and real sends remain impossible by default. Current requalification passed in 420Exchange Web Verification run `36802037691` / #730. Durable evidence: `docs/420EXCHANGE-PRE-06-QUALIFICATION.md`.
 
 Dependencies: PRE-02, PRE-03, PRE-04, PRE-05.
 
 ---
 
-### PRE-07 — limit-order publication lifecycle — PARTIAL
+### PRE-07 — limit-order publication lifecycle — COMPLETE
 
 Complete the off-chain order service/integration around the existing EIP-712 primitives.
 
@@ -179,13 +179,13 @@ Required work:
 - integrate browser review without enabling real signing by default;
 - test duplicate publication, wrong signer/domain, expiry, provider/account switch, stale order state and conflicting fill data.
 
-**Exit:** complete mock service-backed creation/publication/status lifecycle with canonical order identity; live signature/publication deferred.
+**Exit:** SATISFIED. Original implementation SHA `0427c805703ae34c9a1deba4669e3f714a55e874` introduced the repository-owned versioned order publication/status service, canonical EIP-712 signer/domain validation, settlement-compatible order-hash idempotency, complete lifecycle vocabulary, monotonic fill reconciliation and provenance-bound status records. After PRE-08 through PRE-10 completed, PRE-07 was explicitly reopened and requalified against accumulated implementation SHA `46e97d69a51deaad9460f9145735ee1cf96f658a`. Browser review still binds the exact canonical order to PRE-02 wallet/session authority without invoking wallet signing; signing and publication remain independently default-OFF; PRE-08 has completed the combined order-lifecycle Level 2 milestone; and PRE-10 now supplies the non-authoritative production read/indexer projection dependency. Current requalification passed in 420Exchange Web Verification run `36802037691` / #730. Durable evidence: `docs/420EXCHANGE-PRE-07-QUALIFICATION.md`. Live signature/publication remains deferred.
 
 Dependencies: PRE-02, PRE-10; PRE-05-style provenance principles apply to service responses.
 
 ---
 
-### PRE-08 — maker-only cancellation integration — PARTIAL
+### PRE-08 — maker-only cancellation integration — COMPLETE
 
 Complete cancellation semantics across off-chain and on-chain paths.
 
@@ -199,13 +199,13 @@ Required work:
 - prohibit cross-account cancellation and stale maker state;
 - add mock settlement/indexer conflict tests.
 
-**Exit:** cancellation is deterministic and mock-E2E qualified; sends remain hard-off.
+**Exit:** SATISFIED. Original implementation SHA `942e1c340dde8e2a28753f4de20f4f64823e2e9a` introduced maker-authorized versioned off-chain withdrawal, HASH/NONCE cancellation, exact order-hash/nonce/maker/chain/remaining-amount binding, fresh service/settlement rereads and deterministic cancellation lifecycle handling. After PRE-09/PRE-10 completed, PRE-08 was explicitly reopened and requalified against accumulated implementation SHA `46e97d69a51deaad9460f9145735ee1cf96f658a`. Racing fills, duplicate cancels, cross-account/stale maker state and rejected/reverted/replaced/dropped/reorged/indexer-conflicting outcomes remain fail-closed; PRE-10 now supplies the non-authoritative V13 `CANCELLATION` projection surface consumed by lifecycle reconciliation; and live withdrawal/cancellation plus wallet sends remain independently default-OFF. Current requalification passed in 420Exchange Web Verification run `36802037691` / #730. Durable evidence: `docs/420EXCHANGE-PRE-08-QUALIFICATION.md`.
 
 Dependencies: PRE-07.
 
 ---
 
-### PRE-09 — bridge proof and destination-settlement architecture — PARTIAL
+### PRE-09 — bridge proof and destination-settlement architecture — COMPLETE
 
 Finish the offline-testable cross-chain lifecycle.
 
@@ -219,13 +219,13 @@ Required work:
 - persist/reconcile bridge lifecycle through indexed events;
 - add two-chain mock/offline E2E fixtures proving correct beneficiary payout state and replay rejection.
 
-**Exit:** complete mockable source-to-destination state machine; real bridge submission/proof/payout deferred.
+**Exit:** SATISFIED. Original implementation SHA `280902f41b99bf074a2c8f85406b871b9dd05984` introduced canonical route/adapter/verifier/manifest identity, distinct source-finality/proof-acquisition/proof-verification/destination-finality/settlement states, provider-neutral proof-provider and proof-verifier interfaces, exact beneficiary/chain/asset/amount/replay binding, explicit pause/expiry/invalidation/reorg/refund/retry states, lifecycle persistence and deterministic two-chain mock E2E coverage. After PRE-10 completed the production Exchange V13/420Indexer projection adapter, PRE-09 was explicitly reopened and requalified against accumulated implementation SHA `46e97d69a51deaad9460f9145735ee1cf96f658a`. PRE-10 now supplies canonical/orphaned/finality/freshness bridge projection records while remaining explicitly non-authoritative; bridge proof verification, destination settlement and replay authority remain in PRE-09's qualified boundaries. Live bridge submission/proof acceptance remains default-OFF. Current requalification passed in 420Exchange Web Verification run `36802037691` / #730. Durable evidence: `docs/420EXCHANGE-PRE-09-QUALIFICATION.md`.
 
 Dependencies: PRE-10 projection/API contract.
 
 ---
 
-### PRE-10 — Exchange read API / Indexer adapter and startup composition — PARTIAL / CRITICAL
+### PRE-10 — Exchange read API / Indexer adapter and startup composition — COMPLETE
 
 Close the current `/v1` versus `/v13` mismatch.
 
@@ -244,13 +244,13 @@ Required work:
 - add browser/server contract tests and fixture-independent integration tests;
 - fault-inject duplicate/delayed/reorged events, source rollback, fee/beneficiary conflicts and stale projections.
 
-**Exit:** browser ExchangeClient and the server adapter pass the same versioned contract suite; service can be started locally from configuration without hidden manual wiring.
+**Exit:** SATISFIED at implementation SHA `46e97d69a51deaad9460f9145735ee1cf96f658a`. A repository-owned Exchange read service now adapts generic 420Indexer V1 protocol projections into versioned Exchange V13.6 snapshot/history DTOs with canonical provenance-derived record IDs, explicit non-authoritative provenance, finality/freshness, query-bound pagination and durable rollback/replacement semantics. Versioned market/asset/route catalogue metadata remains display-only. A single config now composes RPC chain verification, Indexer HTTP source, file-backed projection storage and the Exchange V13 HTTP server with health/readiness and graceful shutdown. The actual browser `ExchangeClient` passes against the server in fixture-independent integration tests. Level 1 plus the API/projection Level 2 integration milestone passed in 420Exchange Web Verification run `36802037691` / #730, including the complete 420Indexer build/test suite. Durable evidence: `docs/420EXCHANGE-PRE-10-QUALIFICATION.md`.
 
 Dependencies: existing 420Indexer. Can proceed in parallel with PRE-04.
 
 ---
 
-### PRE-11 — CI, security, packaging and operations closure — PARTIAL
+### PRE-11 — CI, security, packaging and operations closure — COMPLETE
 
 Turn the pre-testnet architecture into a reproducible release candidate.
 
@@ -267,13 +267,13 @@ Required work:
 - runbooks for quote signer rotation, service outage, indexer backfill, emergency pause, rollback and reconciliation;
 - machine-readable pre-testnet readiness manifest listing unresolved LIVE GATES.
 
-**Exit:** every pre-testnet component is reproducibly buildable/testable from a clean checkout and fails closed without live deployment data.
+**Exit:** SATISFIED for implementation. PRE-11 now provides app-specific CI/security/packaging/operations gates, deterministic package metadata, restrictive browser/backend request policy, secret/log-redaction checks, startup/degradation/restart coverage, threat/adversarial retention, operator runbooks and a machine-readable hard-OFF readiness manifest. PRE-12 performs the final reconciled exact-head Level 3 qualification before merge.
 
 Dependencies: PRE-02 through PRE-10.
 
 ---
 
-### PRE-12 — pre-testnet release candidate, reconciliation and handoff — TODO
+### PRE-12 — pre-testnet release candidate, reconciliation and handoff — COMPLETE
 
 Create the final offline-qualified Exchange candidate.
 
@@ -289,7 +289,7 @@ Required work:
 8. update the main Exchange status roadmap from pre-testnet engineering to live-testnet qualification;
 9. merge only after exact-head checks are green.
 
-**Exit:** `PRE_TESTNET_ENGINEERING_COMPLETE` / `LIVE_TESTNET_QUALIFICATION_PENDING`.
+**Exit:** SATISFIED. Qualified implementation SHA `12a86ab021395434bafca88870f26b7d34f955c1` passed 420Exchange Web Verification #772, 420 Integrated Qualification #6128, Solidity Contracts #3525 and Genesis Address Authority #336 after reconciliation with current `main` `42c6a40cb476122f75250835c46d32e846a56881`. PRE-12 durable evidence: `docs/420EXCHANGE-PRE-12-QUALIFICATION.md`. Release state: `PRE_TESTNET_ENGINEERING_COMPLETE` / `LIVE_TESTNET_QUALIFICATION_PENDING`.
 
 At PRE-12 completion there should be **no further application architecture or missing integration service that can reasonably be built without a live network**.
 

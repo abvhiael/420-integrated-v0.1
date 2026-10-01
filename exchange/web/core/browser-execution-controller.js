@@ -16,10 +16,13 @@ export function assertExecutableRuntime(runtime) {
 }
 
 export class BrowserExecutionController {
-  constructor({runtime=null,onInvalidate=()=>{},onState=()=>{}}={}) {
+  constructor({runtime=null,onInvalidate=()=>{},onState=()=>{},submissionGate=null,orderSigningGate=null}={}) {
     this.runtime=runtime;
     this.onInvalidate=onInvalidate;
     this.onState=onState;
+    this.submissionGate=submissionGate;
+    this.orderSigningGate=orderSigningGate;
+    this.invalidationListeners=new Set();
     this.announcements=[];
     this.wallet=null;
     this.selection=null;
@@ -44,12 +47,66 @@ export class BrowserExecutionController {
     if(typeof target.dispatchEvent==='function' && typeof Event==='function') target.dispatchEvent(new Event('eip6963:requestProvider'));
     return this.discover(ethereum);
   }
-  unbind() {
+  subscribeInvalidation(listener) {
+    if(typeof listener!=='function') throw new BrowserExecutionError('LISTENER_REQUIRED','invalidation listener required');
+    if(this.disposed) throw new BrowserExecutionError('DISPOSED','controller disposed');
+    this.invalidationListeners.add(listener);
+    return ()=>this.invalidationListeners.delete(listener);
+  }
+  notifyInvalidation(reason,stateType='execution-invalidated') {
+    if(this.disposed)return this.generation;
+    this.generation++;
+    this.onInvalidate(reason);
+    for(const listener of this.invalidationListeners) listener(reason,this.generation);
+    this.onState({type:stateType,reason,generation:this.generation});
+    return this.generation;
+  }
+  invalidateExecution(reason='execution-context-changed') {
+    return this.notifyInvalidation(reason);
+  }
+  unbind(reason=null) {
     for(const off of this.providerListeners.splice(0)) off();
     // The prior wallet must not finish an in-flight request or retain a connected
     // session after its provider is superseded by the selected V15 provider.
     this.wallet?.dispose();
     this.wallet=null;this.selection=null;this.generation++;
+    if(reason&&!this.disposed){
+      this.onInvalidate(reason);
+      for(const listener of this.invalidationListeners) listener(reason,this.generation);
+      this.onState({type:'wallet-invalidated',reason,generation:this.generation});
+    }
+  }
+  replaceRuntime(runtime) {
+    if(this.disposed) throw new BrowserExecutionError('DISPOSED','controller disposed');
+    if(this.runtime===runtime)return this.generation;
+    this.runtime=runtime;
+    // A deployment/runtime replacement changes the execution authority boundary.
+    // Disconnect so the next session is checked against the replacement chain.
+    this.unbind('runtime-replaced');
+    return this.generation;
+  }
+  captureExecutionContext() {
+    if(this.disposed||!this.wallet?.session?.account||!this.wallet?.session?.chainId) {
+      throw new BrowserExecutionError('WALLET_UNAVAILABLE','connect a wallet');
+    }
+    return Object.freeze({
+      wallet:this.wallet,
+      account:normalizeAccount(this.wallet.session.account),
+      chainId:normalizeChainId(this.wallet.session.chainId),
+      walletGeneration:this.wallet.session.generation,
+      controllerGeneration:this.generation,
+      runtime:this.runtime,
+    });
+  }
+  assertExecutionContext(token) {
+    if(!token||this.disposed||this.wallet!==token.wallet||this.runtime!==token.runtime||
+       this.generation!==token.controllerGeneration||
+       this.wallet?.session?.generation!==token.walletGeneration||
+       normalizeAccount(this.wallet?.session?.account??'')!==token.account||
+       normalizeChainId(this.wallet?.session?.chainId??'')!==token.chainId) {
+      throw new BrowserExecutionError('STALE_SESSION','execution context changed after review');
+    }
+    return token;
   }
   async connect({ethereum=null,selectedId=null}={}) {
     if(this.disposed) throw new BrowserExecutionError('DISPOSED','controller disposed');
@@ -60,7 +117,7 @@ export class BrowserExecutionController {
     this.wallet=wallet;this.selection=selected;
     const invalidate=reason=>{
       if(this.disposed||this.wallet!==wallet)return;
-      this.generation++;this.onInvalidate(reason);this.onState({type:'wallet-invalidated',reason});
+      this.notifyInvalidation(reason,'wallet-invalidated');
     };
     for(const [event,change] of [
       ['accountsChanged',accounts=>wallet.session.accountChanged(accounts?.[0]??null)],
@@ -106,18 +163,19 @@ export class BrowserExecutionController {
     const preflight=await preflightExchangeTransaction({provider:wallet.provider,runtime:this.runtime,transaction,allowanceChecks,authorizationChecks,staticCalls,freshness});
     this.assertUnchanged(wallet,generation,epoch);
     if(!preflight.ok) throw new BrowserExecutionError('PREFLIGHT_FAILED','transaction failed preflight');
-    return submitPreflightedTransaction({provider:wallet.provider,session,expectedChainId:this.runtime.network.chainId,expectedGeneration:generation,transaction,preflight});
+    return submitPreflightedTransaction({provider:wallet.provider,session,expectedChainId:this.runtime.network.chainId,expectedGeneration:generation,transaction,preflight,submissionGate:this.submissionGate});
   }
   async signOrder({signingRequest,qualification}={}) {
     const {wallet,session,generation,epoch}=await this.assertLiveSession();
     if(!signingRequest||!qualification?.ok) throw new BrowserExecutionError('QUALIFICATION_REQUIRED','qualified canonical order required');
     this.assertUnchanged(wallet,generation,epoch);
-    return signQualifiedLimitOrder({provider:wallet.provider,session,expectedChainId:this.runtime.network.chainId,expectedGeneration:generation,signingRequest,qualification});
+    return signQualifiedLimitOrder({provider:wallet.provider,session,expectedChainId:this.runtime.network.chainId,expectedGeneration:generation,signingRequest,qualification,signingGate:this.orderSigningGate});
   }
   dispose() {
     if(this.disposed)return;
     this.disposed=true;this.unbind();
     for(const off of this.discoveryListeners.splice(0))off();
     this.announcements=[];
+    this.invalidationListeners.clear();
   }
 }

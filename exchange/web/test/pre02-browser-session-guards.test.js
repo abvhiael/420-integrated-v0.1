@@ -21,10 +21,12 @@ function provider(){
 
 test('PRE-02 browser wires provider choice, background, navigation and teardown to review invalidation',()=>{
   assert.match(source,/select\.addEventListener\('change',onProviderChoice\)/);
-  assert.match(source,/context\.controller\.unbind\(\);context\.selectedProviderId=null/);
+  assert.match(source,/context\.controller\.unbind\(reason\);context\.selectedProviderId=null/);
   assert.match(source,/context\.quoteSurface\?\.clear\('Wallet provider changed; quote review invalidated\.'\)/);
   assert.match(source,/documentRef\.addEventListener\('visibilitychange',onVisibility\)/);
   assert.match(source,/windowRef\.addEventListener\('popstate',onNavigation\)/);
+  assert.match(source,/invalidateExecution\(documentRef\.hidden\?'page-hidden':'page-resumed'\)/);
+  assert.match(source,/invalidateExecution\('navigation-change'\)/);
   assert.match(source,/documentRef\.removeEventListener\('visibilitychange',onVisibility\)/);
   assert.match(source,/select\.removeEventListener\('change',onProviderChoice\)/);
   assert.match(source,/windowRef\.removeEventListener\('popstate',onNavigation\)/);

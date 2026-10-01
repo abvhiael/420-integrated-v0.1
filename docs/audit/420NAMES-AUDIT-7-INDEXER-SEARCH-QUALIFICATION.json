@@ -1,0 +1,52 @@
+{
+  "schema": "420-names-audit-7-qualification-v1",
+  "step": "NAMES-AUDIT-7",
+  "name": "Indexer/Search artifact reconciliation",
+  "status": "COMPLETE",
+  "qualificationLevel": "LEVEL_1",
+  "qualifiedImplementationSha": "3f5ca7e1d551b684aa3684bd9ce595755a23282c",
+  "repository": "abvhiael/420-integrated-v0.1",
+  "branch": "audit/420names-complete-20260930",
+  "pr": 427,
+  "currentMainAtCloseout": "df8f639d8f43b763298c8750ef49d3e5849c597c",
+  "runs": {
+    "namesAudit": {
+      "id": 36799099363,
+      "conclusion": "success"
+    },
+    "indexer": {
+      "id": 36799099362,
+      "conclusion": "success"
+    }
+  },
+  "descriptor": {
+    "path": "420-indexer/descriptors/names420-v3.json",
+    "schema": "420-names-release-descriptor-v1",
+    "descriptorVersion": 1,
+    "protocolVersion": 3,
+    "canonicalAddress": "0x0000000000000000000000000000000000000435",
+    "sourceBlobSha1": "4cb9b06b4a3febb3bf024c087f3ade1eebdcf31d",
+    "artifactPayloadSha256": "c40970d3a04503309f9467eaca00c915f5ce3dd1e993c2df3318aa6cd149ab2c",
+    "runtimeCodeHash": "0xa974fffd3a40e7f28db41e4ae30656b33789d2483b18b47c809ce2385de709b7",
+    "descriptorSha256": "74602adfdde367c82fcefcd35a89a5b0e415e92721289cca9e827be32299b3be",
+    "eventCount": 7
+  },
+  "tests": {
+    "targetedTypescript": {
+      "passed": 19,
+      "failed": 0
+    },
+    "searchDiscovery": "PASS",
+    "searchIndexerClient": "PASS",
+    "walletNames": {
+      "passed": 23,
+      "failed": 0
+    },
+    "full420Indexer": "PASS"
+  },
+  "level2": {
+    "required": false,
+    "milestone": "after NAMES-AUDIT-8"
+  },
+  "nextCanonicalStep": "NAMES-AUDIT-8 — deployment/operator documentation"
+}

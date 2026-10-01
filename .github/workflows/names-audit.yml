@@ -1,0 +1,370 @@
+name: 420Names audit qualification
+
+on:
+  push:
+    branches:
+      - 'audit/420names-*'
+    paths:
+      - 'contracts/src/apps/Names420.sol'
+      - 'contracts/foundry.toml'
+      - 'contracts/src/interfaces/genesis/INames420.sol'
+      - 'contracts/test/Names420Audit.t.sol'
+      - 'contracts/test/RegistryIdentityNames420.t.sol'
+      - 'contracts/test/Names420DependencyModel.t.sol'
+      - 'contracts/test/Names420Hardening.t.sol'
+      - 'contracts/test/Names420Invariant.t.sol'
+      - 'contracts/config/interfaces/dependency-matrix.json'
+      - 'contracts/config/interfaces/names-dependency-model.json'
+      - 'contracts/artifacts/Names420.json'
+      - 'contracts/config/predeploy/predeploy-plan.json'
+      - 'contracts/config/predeploy/storage-init.json'
+      - 'contracts/config/predeploy/Names420-predeploy-state.json'
+      - 'contracts/config/deployment-manifest.json'
+      - 'wallet/web/core/names-client.js'
+      - 'wallet/web/core/names-send.js'
+      - 'wallet/web/core/names-guided-send.js'
+      - 'wallet/web/core/names-management.js'
+      - 'wallet/web/names-management-ui.js'
+      - 'wallet/web/index.html'
+      - 'wallet/web/styles.css'
+      - 'wallet/web/scripts/check-names.mjs'
+      - 'wallet/web/test/names-client.test.js'
+      - 'wallet/web/test/names-send.test.js'
+      - 'wallet/web/test/names-guided-send.test.js'
+      - 'wallet/web/test/names-management.test.js'
+      - 'wallet/web/test/names-management-ui.test.js'
+      - '420-indexer/descriptors/names420-v3.json'
+      - '420-indexer/scripts/generate-names420-descriptor.mjs'
+      - '420-indexer/src/abi-manifest.ts'
+      - '420-indexer/src/lifecycle-reducer.ts'
+      - '420-indexer/src/protocol-decoder.ts'
+      - '420-indexer/src/event-canonicality.ts'
+      - '420-indexer/test/names420-release-descriptor.test.ts'
+      - '420-indexer/test/abi-manifest.test.ts'
+      - '420-indexer/test/lifecycle-reducer.test.ts'
+      - '420-indexer/test/query-layer.test.ts'
+      - 'search/discovery/names_identity.go'
+      - 'search/discovery/names_identity_test.go'
+      - 'search/indexerclient/protocols.go'
+      - 'docs/apps/names/**'
+      - 'docs/audit/420NAMES-*'
+      - 'scripts/verify-genesis-interface-layer.py'
+      - 'scripts/verify-names-dependency-model.py'
+      - 'scripts/generate-names-audit-5-artifact.py'
+      - 'scripts/test-names-audit-5-artifact.py'
+      - 'scripts/generate-names-audit-6-genesis-state.py'
+      - 'scripts/test-names-audit-6-genesis-state.py'
+      - 'scripts/verify-names-audit-8-operator-docs.py'
+      - 'docs/architecture/decisions/NAMES-AUDIT-2-DEPENDENCY-MODEL.md'
+      - '420-indexer/src/names-testnet-qualification.ts'
+      - '420-indexer/test/names-testnet-qualification.test.ts'
+      - '420-indexer/scripts/qualify-names-testnet.mjs'
+      - 'scripts/verify-names-audit-9-testnet-readiness.py'
+      - '.github/workflows/names-live-testnet.yml'
+      - '.github/workflows/names-audit.yml'
+  pull_request:
+    paths:
+      - 'contracts/src/apps/Names420.sol'
+      - 'contracts/foundry.toml'
+      - 'contracts/src/interfaces/genesis/INames420.sol'
+      - 'contracts/test/Names420Audit.t.sol'
+      - 'contracts/test/RegistryIdentityNames420.t.sol'
+      - 'contracts/test/Names420DependencyModel.t.sol'
+      - 'contracts/test/Names420Hardening.t.sol'
+      - 'contracts/test/Names420Invariant.t.sol'
+      - 'contracts/config/interfaces/dependency-matrix.json'
+      - 'contracts/config/interfaces/names-dependency-model.json'
+      - 'contracts/artifacts/Names420.json'
+      - 'contracts/config/predeploy/predeploy-plan.json'
+      - 'contracts/config/predeploy/storage-init.json'
+      - 'contracts/config/predeploy/Names420-predeploy-state.json'
+      - 'contracts/config/deployment-manifest.json'
+      - 'wallet/web/core/names-client.js'
+      - 'wallet/web/core/names-send.js'
+      - 'wallet/web/core/names-guided-send.js'
+      - 'wallet/web/core/names-management.js'
+      - 'wallet/web/names-management-ui.js'
+      - 'wallet/web/index.html'
+      - 'wallet/web/styles.css'
+      - 'wallet/web/scripts/check-names.mjs'
+      - 'wallet/web/test/names-client.test.js'
+      - 'wallet/web/test/names-send.test.js'
+      - 'wallet/web/test/names-guided-send.test.js'
+      - 'wallet/web/test/names-management.test.js'
+      - 'wallet/web/test/names-management-ui.test.js'
+      - '420-indexer/descriptors/names420-v3.json'
+      - '420-indexer/scripts/generate-names420-descriptor.mjs'
+      - '420-indexer/src/abi-manifest.ts'
+      - '420-indexer/src/lifecycle-reducer.ts'
+      - '420-indexer/src/protocol-decoder.ts'
+      - '420-indexer/src/event-canonicality.ts'
+      - '420-indexer/test/names420-release-descriptor.test.ts'
+      - '420-indexer/test/abi-manifest.test.ts'
+      - '420-indexer/test/lifecycle-reducer.test.ts'
+      - '420-indexer/test/query-layer.test.ts'
+      - 'search/discovery/names_identity.go'
+      - 'search/discovery/names_identity_test.go'
+      - 'search/indexerclient/protocols.go'
+      - 'docs/apps/names/**'
+      - 'docs/audit/420NAMES-*'
+      - 'scripts/verify-genesis-interface-layer.py'
+      - 'scripts/verify-names-dependency-model.py'
+      - 'scripts/generate-names-audit-5-artifact.py'
+      - 'scripts/test-names-audit-5-artifact.py'
+      - 'scripts/generate-names-audit-6-genesis-state.py'
+      - 'scripts/test-names-audit-6-genesis-state.py'
+      - 'scripts/verify-names-audit-8-operator-docs.py'
+      - 'docs/architecture/decisions/NAMES-AUDIT-2-DEPENDENCY-MODEL.md'
+      - '420-indexer/src/names-testnet-qualification.ts'
+      - '420-indexer/test/names-testnet-qualification.test.ts'
+      - '420-indexer/scripts/qualify-names-testnet.mjs'
+      - 'scripts/verify-names-audit-9-testnet-readiness.py'
+      - '.github/workflows/names-live-testnet.yml'
+      - '.github/workflows/names-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: names-audit-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qualify:
+    if: github.event_name != 'pull_request' || startsWith(github.head_ref, 'audit/420names-')
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      FOUNDRY_PROFILE: pr
+      FOUNDRY_SPARSE_MODE: true
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Detect Names qualification scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --name-only HEAD^ HEAD > /tmp/names-changed.txt
+
+          if grep -Eq '^(contracts/src/apps/Names420\.sol|contracts/src/interfaces/genesis/INames420\.sol|contracts/foundry\.toml|contracts/test/.*Names420.*\.t\.sol)$' /tmp/names-changed.txt; then
+            echo "NAMES_CORE_CHANGED=true" >> "$GITHUB_ENV"
+          else
+            echo "NAMES_CORE_CHANGED=false" >> "$GITHUB_ENV"
+          fi
+
+          if grep -Eq '^(contracts/src/apps/Names420\.sol|contracts/foundry\.toml|contracts/test/Names420Hardening\.t\.sol|contracts/test/Names420Invariant\.t\.sol)$' /tmp/names-changed.txt; then
+            echo "NAMES_HARDENING_CHANGED=true" >> "$GITHUB_ENV"
+          else
+            echo "NAMES_HARDENING_CHANGED=false" >> "$GITHUB_ENV"
+          fi
+
+          if grep -Eq '^(contracts/artifacts/Names420\.json|contracts/config/predeploy/Names420-predeploy-state\.json|contracts/config/predeploy/predeploy-plan\.json|contracts/config/deployment-manifest\.json|scripts/generate-names-audit-6-genesis-state\.py|scripts/test-names-audit-6-genesis-state\.py)$' /tmp/names-changed.txt; then
+            echo "NAMES_LEVEL2_MILESTONE=true" >> "$GITHUB_ENV"
+          else
+            echo "NAMES_LEVEL2_MILESTONE=false" >> "$GITHUB_ENV"
+          fi
+
+          if grep -Eq '^(420-indexer/descriptors/names420-v3\.json|420-indexer/scripts/generate-names420-descriptor\.mjs|420-indexer/src/(abi-manifest|lifecycle-reducer|protocol-decoder|event-canonicality)\.ts|420-indexer/test/(names420-release-descriptor|abi-manifest|lifecycle-reducer|query-layer)\.test\.ts|search/discovery/names_identity(_test)?\.go|search/indexerclient/protocols\.go)$' /tmp/names-changed.txt; then
+            echo "NAMES_INDEXER_SEARCH_CHANGED=true" >> "$GITHUB_ENV"
+          else
+            echo "NAMES_INDEXER_SEARCH_CHANGED=false" >> "$GITHUB_ENV"
+          fi
+
+          if grep -Eq '^(docs/apps/names/(deployment-operations|index)\.md|scripts/verify-names-audit-8-operator-docs\.py)$' /tmp/names-changed.txt; then
+            echo "NAMES_OPERATOR_DOCS_CHANGED=true" >> "$GITHUB_ENV"
+            echo "NAMES_APP_MILESTONE=true" >> "$GITHUB_ENV"
+          else
+            echo "NAMES_OPERATOR_DOCS_CHANGED=false" >> "$GITHUB_ENV"
+            echo "NAMES_APP_MILESTONE=false" >> "$GITHUB_ENV"
+          fi
+
+          if grep -Eq '^(420-indexer/src/names-testnet-qualification\.ts|420-indexer/test/names-testnet-qualification\.test\.ts|420-indexer/scripts/qualify-names-testnet\.mjs|scripts/verify-names-audit-9-testnet-readiness\.py|\.github/workflows/names-live-testnet\.yml)$' /tmp/names-changed.txt; then
+            echo "NAMES_TESTNET_HARNESS_CHANGED=true" >> "$GITHUB_ENV"
+          else
+            echo "NAMES_TESTNET_HARNESS_CHANGED=false" >> "$GITHUB_ENV"
+          fi
+
+      - name: Setup Go for Names Indexer/Search qualification
+        if: ${{ env.NAMES_INDEXER_SEARCH_CHANGED == 'true' || env.NAMES_APP_MILESTONE == 'true' }}
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: Verify Genesis interface-layer inventory
+        run: python scripts/verify-genesis-interface-layer.py
+
+      - name: Verify 420Names dependency model
+        run: python scripts/verify-names-dependency-model.py
+
+      - name: Check Names Solidity formatting
+        working-directory: contracts
+        run: forge fmt --check src/interfaces/genesis/INames420.sol test/Names420Audit.t.sol test/Names420DependencyModel.t.sol test/Names420Hardening.t.sol test/Names420Invariant.t.sol
+
+      - name: Build and run 420Names retained Solidity suite
+        if: ${{ env.NAMES_CORE_CHANGED == 'true' || env.NAMES_LEVEL2_MILESTONE == 'true' || env.NAMES_APP_MILESTONE == 'true' }}
+        working-directory: contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$NAMES_HARDENING_CHANGED" = "true" ] || [ "$NAMES_LEVEL2_MILESTONE" = "true" ] || [ "$NAMES_APP_MILESTONE" = "true" ]; then
+            forge test --match-contract '^(Names420AuditTest|Names420DependencyModelTest|RegistryIdentityNames420Test|Names420HardeningTest|Names420InvariantTest)$' -vvv
+          else
+            forge test --match-contract '^(Names420AuditTest|Names420DependencyModelTest|RegistryIdentityNames420Test)$' -vvv
+          fi
+
+      - name: Install Slither for contract hardening
+        if: ${{ env.NAMES_HARDENING_CHANGED == 'true' || env.NAMES_LEVEL2_MILESTONE == 'true' || env.NAMES_APP_MILESTONE == 'true' }}
+        run: python -m pip install --disable-pip-version-check slither-analyzer
+
+      - name: Targeted Names420 Slither gate
+        if: ${{ env.NAMES_HARDENING_CHANGED == 'true' || env.NAMES_LEVEL2_MILESTONE == 'true' || env.NAMES_APP_MILESTONE == 'true' }}
+        working-directory: contracts
+        run: |
+          set +e
+          slither . --exclude-dependencies --json /tmp/names-slither.json >/tmp/names-slither.txt 2>&1
+          STATUS=$?
+          set -e
+          python - <<'PY'
+          import json
+          import pathlib
+          import sys
+
+          path = pathlib.Path("/tmp/names-slither.json")
+          if not path.exists():
+              print(pathlib.Path("/tmp/names-slither.txt").read_text(), file=sys.stderr)
+              raise SystemExit("Slither did not produce JSON output")
+
+          report = json.loads(path.read_text())
+          if report.get("success") is not True:
+              raise SystemExit(f"Slither analysis failed: {report.get('error') or 'unknown error'}")
+
+          target = "src/apps/Names420.sol"
+          high = []
+          findings = []
+          for detector in report.get("results", {}).get("detectors", []):
+              if not any(
+                  element.get("source_mapping", {}).get("filename_relative") == target
+                  for element in detector.get("elements", [])
+              ):
+                  continue
+              item = {
+                  "check": detector.get("check"),
+                  "impact": detector.get("impact"),
+                  "confidence": detector.get("confidence"),
+                  "description": detector.get("description", "").splitlines()[0],
+              }
+              findings.append(item)
+              if detector.get("impact") == "High":
+                  high.append(item)
+
+          print(json.dumps({"target": target, "findings": findings}, indent=2))
+          if high:
+              for item in high:
+                  print(f"- {item['check']}: {item['description']}", file=sys.stderr)
+              raise SystemExit("Unresolved high-severity Names420 Slither findings")
+          print("No high-severity Slither findings in Names420.sol.")
+          PY
+          echo "slither_exit_status=$STATUS"
+
+      - name: Generate and verify NAMES-AUDIT-5 compiler artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd contracts && forge build src/apps/Names420.sol)
+          python scripts/generate-names-audit-5-artifact.py --check
+          python scripts/test-names-audit-5-artifact.py
+
+      - name: Verify NAMES-AUDIT-8 operator documentation
+        run: python scripts/verify-names-audit-8-operator-docs.py
+
+      - name: Generate and verify NAMES-AUDIT-6 deterministic Genesis state
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/generate-names-audit-6-genesis-state.py --write --print
+          python scripts/test-names-audit-6-genesis-state.py
+          git status --porcelain -- contracts/artifacts/Names420.json contracts/config/predeploy/Names420-predeploy-state.json | tee /tmp/names-genesis-status.txt
+          if [ -s /tmp/names-genesis-status.txt ]; then
+            echo "Committed Names420 Genesis materialization/state is missing or stale." >&2
+            exit 1
+          fi
+          python scripts/generate-names-audit-6-genesis-state.py --check
+
+      - name: Qualify Names Indexer/Search artifact reconciliation
+        if: ${{ env.NAMES_INDEXER_SEARCH_CHANGED == 'true' || env.NAMES_APP_MILESTONE == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          (
+            cd 420-indexer
+            npm install
+            node scripts/generate-names420-descriptor.mjs --write --print
+            git status --porcelain -- descriptors/names420-v3.json | tee /tmp/names420-descriptor-status.txt
+            if [ -s /tmp/names420-descriptor-status.txt ]; then
+              echo "Committed Names420 release descriptor is missing or stale." >&2
+              exit 1
+            fi
+            npm run build
+            node --test \
+              dist/test/names420-release-descriptor.test.js \
+              dist/test/abi-manifest.test.js \
+              dist/test/lifecycle-reducer.test.js \
+              dist/test/query-layer.test.js
+            node scripts/generate-names420-descriptor.mjs --check
+          )
+          go test ./search/discovery ./search/indexerclient
+
+      - name: Qualify NAMES-AUDIT-9 live testnet harness
+        if: ${{ env.NAMES_TESTNET_HARNESS_CHANGED == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          (
+            cd 420-indexer
+            npm install
+            npm run build
+            node --test dist/test/names-testnet-qualification.test.js
+          )
+          python scripts/verify-names-audit-9-testnet-readiness.py
+
+      - name: Run Wallet Names integration and management tests
+        working-directory: wallet/web
+        run: node --test test/names-client.test.js test/names-send.test.js test/names-guided-send.test.js test/names-management.test.js test/names-management-ui.test.js
+
+      - name: Run Wallet Names static qualification
+        working-directory: wallet/web
+        run: node scripts/check-names.mjs
+
+      - name: Names static authority/opcode scan
+        working-directory: contracts
+        run: |
+          set -euo pipefail
+          if grep -nE '\btx\.origin\b|\bselfdestruct\s*\(|\.delegatecall\s*\(' src/apps/Names420.sol; then
+            echo "Forbidden authority/opcode primitive found in Names420.sol" >&2
+            exit 1
+          fi
+          grep -q 'COMMITMENT_DOMAIN' src/apps/Names420.sol
+          grep -q 'pendingOwner' src/apps/Names420.sol
+          grep -q 'reverseResolve' src/apps/Names420.sol

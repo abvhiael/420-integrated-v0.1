@@ -1,0 +1,70 @@
+{
+  "schema": "420-names-audit-6-qualification-v1",
+  "step": "NAMES-AUDIT-6",
+  "name": "Deterministic Genesis predeploy state",
+  "status": "COMPLETE",
+  "qualificationLevels": [
+    "LEVEL_1",
+    "LEVEL_2_APP_INTEGRATION"
+  ],
+  "repository": "abvhiael/420-integrated-v0.1",
+  "branch": "audit/420names-complete-20260930",
+  "pr": 427,
+  "qualifiedImplementationSha": "f4a1242c155b75edb09e907e4bf0f8559bcebbe1",
+  "currentMainAtEvidenceCloseout": "df8f639d8f43b763298c8750ef49d3e5849c597c",
+  "runs": {
+    "namesQualification": {
+      "id": 36796471172,
+      "conclusion": "success"
+    },
+    "walletWeb": {
+      "id": 36796471139,
+      "conclusion": "success"
+    }
+  },
+  "genesis": {
+    "address": "0x0000000000000000000000000000000000000435",
+    "governanceTimelock": "0x0000000000000000000000000000000000000429",
+    "sourceBlobSha1": "4cb9b06b4a3febb3bf024c087f3ade1eebdcf31d",
+    "compilerRuntimeTemplateSha256": "7b34c5506c526d9c7015d4d2c4514cacac585bd571050a53655ea2270d1210bd",
+    "runtimeCodeBytes": 4336,
+    "runtimeCodeHash": "0xa974fffd3a40e7f28db41e4ae30656b33789d2483b18b47c809ce2385de709b7",
+    "immutableReference": {
+      "compilerIdentifier": "946",
+      "start": 1126,
+      "length": 32
+    },
+    "mutableConstructorStorageWrites": 0,
+    "storageSlotCount": 0,
+    "storageRoot": "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421",
+    "storageLayoutRoots": {
+      "records": "0",
+      "commitments": "1",
+      "primaryNameByAddress": "2"
+    }
+  },
+  "artifacts": [
+    "contracts/artifacts/Names420.json",
+    "contracts/config/predeploy/Names420-predeploy-state.json",
+    "contracts/config/predeploy/predeploy-plan.json",
+    "contracts/config/deployment-manifest.json"
+  ],
+  "generator": "scripts/generate-names-audit-6-genesis-state.py",
+  "adversarialTests": {
+    "path": "scripts/test-names-audit-6-genesis-state.py",
+    "count": 8,
+    "passed": 8
+  },
+  "level2": {
+    "retainedNamesSoliditySuite": "PASS",
+    "slither": "PASS",
+    "deterministicGenesis": "PASS",
+    "walletNames": "PASS",
+    "walletStatic": "PASS",
+    "walletWebDeploymentInventory": "PASS"
+  },
+  "limitations": [
+    "offline Genesis evidence only; live-chain proof remains NAMES-AUDIT-9"
+  ],
+  "nextCanonicalStep": "NAMES-AUDIT-7 — indexer/search artifact reconciliation"
+}

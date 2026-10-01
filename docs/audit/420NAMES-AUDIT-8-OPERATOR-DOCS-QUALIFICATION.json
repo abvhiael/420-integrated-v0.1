@@ -1,0 +1,68 @@
+{
+  "schema": "420-names-audit-8-qualification-v1",
+  "step": "NAMES-AUDIT-8",
+  "name": "Deployment/operator documentation",
+  "status": "COMPLETE",
+  "qualificationLevels": [
+    "LEVEL_1",
+    "LEVEL_2_APP_INTEGRATION_MILESTONE"
+  ],
+  "qualifiedImplementationSha": "7bb313a9004573f003e9b826572ad4500d4413fd",
+  "repository": "abvhiael/420-integrated-v0.1",
+  "branch": "audit/420names-complete-20260930",
+  "pr": 427,
+  "currentMainAtCloseout": "df8f639d8f43b763298c8750ef49d3e5849c597c",
+  "workflow": {
+    "runId": 36800266744,
+    "jobId": 110172811158,
+    "conclusion": "success"
+  },
+  "implementation": {
+    "runbook": "docs/apps/names/deployment-operations.md",
+    "navigation": "docs/apps/names/index.md",
+    "verifier": "scripts/verify-names-audit-8-operator-docs.py"
+  },
+  "level1": {
+    "operatorDocsVerifier": "PASS",
+    "requiredSections": 9,
+    "canonicalAddress": "0x0000000000000000000000000000000000000435",
+    "runtimeCodeHash": "0xa974fffd3a40e7f28db41e4ae30656b33789d2483b18b47c809ce2385de709b7",
+    "storageRoot": "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421",
+    "descriptorSha256": "74602adfdde367c82fcefcd35a89a5b0e415e92721289cca9e827be32299b3be"
+  },
+  "level2": {
+    "solidity": {
+      "passed": 30,
+      "failed": 0
+    },
+    "invariants": {
+      "runs": 128,
+      "calls": 8192,
+      "reverts": 0
+    },
+    "slither": "NO_HIGH_SEVERITY_NAMES420_FINDINGS",
+    "audit5GeneratorTests": {
+      "passed": 10
+    },
+    "audit6StateTests": {
+      "passed": 8
+    },
+    "indexerTargeted": {
+      "passed": 19,
+      "failed": 0
+    },
+    "searchDiscovery": "PASS",
+    "searchIndexerClient": "PASS",
+    "walletNames": {
+      "passed": 23,
+      "failed": 0
+    },
+    "walletStatic": "PASS",
+    "authorityOpcodeScan": "PASS"
+  },
+  "deferred": {
+    "liveTestnet": "NAMES-AUDIT-9",
+    "level3": "complete app-phase closeout"
+  },
+  "nextCanonicalStep": "NAMES-AUDIT-9 — production-equivalent testnet deployment"
+}

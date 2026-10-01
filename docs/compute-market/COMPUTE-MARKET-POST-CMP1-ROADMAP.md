@@ -167,7 +167,7 @@ Canonical responsibilities:
 - reward().
 
 ### CMP-1.5.0 — Stake architecture
-**Status: implementation/Level 1 qualification in progress.**
+**Status: COMPLETE — Level 1 exact-head qualified on `af9f926465dff1a89e53150d030591e71411787f`.**
 
 Reuse canonical $420 custody/accounting. Do not create an unrelated collateral treasury.
 
@@ -502,7 +502,7 @@ Production target flow:
 | CMP-1.2 ComputeEscrow/Vault accounting | repository-qualified; live/stake dependencies remain |
 | CMP-1.3 WorkerRegistry | current: CMP-1.3.16 closeout |
 | CMP-1.4 VerifierRegistry | repository-qualified through CMP-1.4.12 |
-| CMP-1.5 ComputeStake | current: CMP-1.5.0 stake architecture |
+| CMP-1.5 ComputeStake | current: CMP-1.5.1 worker collateral; CMP-1.5.0 complete |
 | CMP-2 matching marketplace | forthcoming |
 | CMP-3 node420 worker runtime | forthcoming |
 | CMP-4 scientific compute framework | forthcoming |

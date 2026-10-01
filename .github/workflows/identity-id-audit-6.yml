@@ -1,0 +1,84 @@
+name: 420Identity ID-AUDIT-6
+
+on:
+  pull_request:
+    paths:
+      - "contracts/artifacts/Identity420.json"
+      - "420-indexer/src/**"
+      - "420-indexer/sql/**"
+      - "420-indexer/test/**"
+      - "search/**"
+      - "explorer/**"
+      - "contracts/config/420search-genesis.json"
+      - "contracts/config/420explorer-genesis.json"
+      - "scripts/verify-id-audit-6-derived-services.py"
+      - "docs/audit/ID-AUDIT-6-DERIVED-SERVICE-COMPATIBILITY.md"
+      - ".github/workflows/identity-id-audit-6.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: identity-id-audit-6-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Mechanical ABI/object-key/privacy compatibility
+        run: python3 scripts/verify-id-audit-6-derived-services.py
+
+      - name: Install 420Indexer dependencies
+        working-directory: 420-indexer
+        run: npm install --ignore-scripts
+
+      - name: Focused Identity Indexer compatibility
+        working-directory: 420-indexer
+        run: |
+          npm run build
+          node --test --test-concurrency=1 dist/test/identity420-compatibility.test.js
+          node --test --test-concurrency=1 dist/test/abi-manifest.test.js
+          node --test --test-concurrency=1 dist/test/event-canonicality.test.js
+          node --test --test-concurrency=1 dist/test/reorg.test.js
+          node --test --test-concurrency=1 dist/test/protocol-object-service.test.js
+          node --test --test-concurrency=1 dist/test/query-layer.test.js
+
+      - name: Focused Search Identity compatibility
+        run: go test ./search/discovery ./search/indexerclient
+
+      - name: Focused Explorer Identity compatibility
+        run: go test ./explorer/service ./explorer/api ./explorer/indexerclient
+
+      - name: Level 2 retained 420Indexer suite
+        working-directory: 420-indexer
+        run: npm test
+
+      - name: Level 2 retained Search suite
+        run: go test ./search/...
+
+      - name: Level 2 retained Explorer suite
+        run: go test ./explorer/...
+
+      - name: Vet affected Go derived services
+        run: |
+          go vet ./search/...
+          go vet ./explorer/...

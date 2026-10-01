@@ -1,0 +1,63 @@
+name: 420Identity ID-AUDIT-3
+
+on:
+  pull_request:
+    paths:
+      - "contracts/config/interfaces/dependency-matrix.json"
+      - "contracts/config/interfaces/identity-dependency-reconciliation.json"
+      - "contracts/src/apps/Identity420.sol"
+      - "contracts/src/system/SystemAccess.sol"
+      - "contracts/src/interfaces/genesis/**"
+      - "contracts/config/predeploy/predeploy-plan.json"
+      - "scripts/verify-id-audit-3-dependencies.py"
+      - "docs/audit/ID-AUDIT-3-DEPENDENCY-INTERFACE-RECONCILIATION.md"
+      - "docs/apps/identity/architecture.md"
+      - ".github/workflows/identity-id-audit-3.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: identity-id-audit-3-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - name: Verify Identity dependency reconciliation
+        run: python3 scripts/verify-id-audit-3-dependencies.py
+
+      - name: Verify frozen Genesis interface layer
+        run: python3 scripts/verify-genesis-interface-layer.py
+
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: Build Identity contract
+        working-directory: contracts
+        run: forge build src/apps/Identity420.sol
+
+      - name: Run Identity invariant suite
+        working-directory: contracts
+        run: forge test --match-path 'test/Identity420Audit.t.sol' -vv
+
+      - name: Run frozen-interface compatibility suite
+        working-directory: contracts
+        run: forge test --match-path 'test/Identity420Compatibility.t.sol' -vv
+
+      - name: Run Registry/Identity/Names regression
+        working-directory: contracts
+        run: forge test --match-path 'test/RegistryIdentityNames420.t.sol' -vv

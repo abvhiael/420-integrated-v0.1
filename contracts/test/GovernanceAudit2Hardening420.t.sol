@@ -124,8 +124,6 @@ contract GovernanceAudit2Hardening420Test {
     address constant ALICE = address(0xA11CE);
     address constant BOB = address(0xB0B);
 
-    VoteStack private fuzzStack;
-
     struct VoteStack {
         GovernanceTimelock timelock;
         CivicConstitution420 constitution;
@@ -135,6 +133,8 @@ contract GovernanceAudit2Hardening420Test {
         CivicGovernor420 governor;
         MockAudit2Electorate420 source;
     }
+
+    VoteStack private fuzzStack;
 
     function _voteStack(
         uint256 totalWeight,

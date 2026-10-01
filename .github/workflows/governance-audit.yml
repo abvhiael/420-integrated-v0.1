@@ -8,10 +8,13 @@ on:
       - 'contracts/src/governance/**'
       - 'contracts/config/interfaces/dependency-matrix.json'
       - 'contracts/config/interfaces/governance-dependency-model.json'
+      - 'contracts/config/governance-deployment-v1.json'
+      - 'contracts/config/predeploy/storage-init.json'
       - 'scripts/verify-governance-audit-1.py'
       - 'scripts/verify-governance-audit-2.py'
       - 'scripts/verify-governance-audit-3.py'
       - 'scripts/verify-governance-audit-4.py'
+      - 'scripts/verify-governance-audit-6.py'
       - 'scripts/verify-genesis-interface-layer.py'
       - 'docs/architecture/decisions/GOV-AUDIT-1-AUTHORITY-DEPENDENCY-CANCELLATION.md'
       - 'contracts/test/Civic*.t.sol'
@@ -42,10 +45,13 @@ on:
       - 'contracts/src/governance/**'
       - 'contracts/config/interfaces/dependency-matrix.json'
       - 'contracts/config/interfaces/governance-dependency-model.json'
+      - 'contracts/config/governance-deployment-v1.json'
+      - 'contracts/config/predeploy/storage-init.json'
       - 'scripts/verify-governance-audit-1.py'
       - 'scripts/verify-governance-audit-2.py'
       - 'scripts/verify-governance-audit-3.py'
       - 'scripts/verify-governance-audit-4.py'
+      - 'scripts/verify-governance-audit-6.py'
       - 'scripts/verify-genesis-interface-layer.py'
       - 'docs/architecture/decisions/GOV-AUDIT-1-AUTHORITY-DEPENDENCY-CANCELLATION.md'
       - 'contracts/test/Civic*.t.sol'
@@ -112,11 +118,12 @@ jobs:
           python scripts/verify-governance-audit-1.py
           python scripts/verify-governance-audit-2.py
           python scripts/verify-governance-audit-3.py
+          python scripts/verify-governance-audit-6.py
           python scripts/verify-genesis-interface-layer.py
 
       - name: Check Governance Solidity formatting
         working-directory: contracts
-        run: forge fmt --check src/governance test/CivicFoundation420.t.sol test/CivicElectorateRegistry420.t.sol test/CivicVoting420.t.sol test/CivicGovernor420.t.sol test/CivicTimelockExecution420.t.sol test/Governance420Retirement.t.sol test/GovernanceAudit420.t.sol test/GovernanceAudit2Hardening420.t.sol test/GovernanceAudit3Adversarial420.t.sol
+        run: forge fmt --check src/governance test/CivicFoundation420.t.sol test/CivicElectorateRegistry420.t.sol test/CivicVoting420.t.sol test/CivicGovernor420.t.sol test/CivicTimelockExecution420.t.sol test/Governance420Retirement.t.sol test/GovernanceAudit420.t.sol test/GovernanceAudit2Hardening420.t.sol test/GovernanceAudit3Adversarial420.t.sol test/GovernanceAudit6Deployment420.t.sol
 
       - name: Build canonical Governance contracts
         working-directory: contracts
@@ -130,6 +137,10 @@ jobs:
         run: |
           forge test --match-path 'test/Civic*.t.sol' -vvv
           forge test --match-path 'test/Governance*.t.sol' -vvv
+
+      - name: GOV-AUDIT-6 deterministic deployment simulation
+        working-directory: contracts
+        run: forge test --match-path test/GovernanceAudit6Deployment420.t.sol -vvv
 
       - name: Governance forbidden primitive scan
         working-directory: contracts

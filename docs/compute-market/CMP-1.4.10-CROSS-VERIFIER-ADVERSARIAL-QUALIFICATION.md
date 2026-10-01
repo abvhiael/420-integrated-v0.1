@@ -1,6 +1,6 @@
 # CMP-1.4.10 — Cross-verifier adversarial qualification
 
-Status: **IMPLEMENTATION COMPLETE; LEVEL 1 + LEVEL 2 QUALIFICATION PENDING. NO LIVE DEPLOYMENT/PUBLICATION CLAIM.**
+Status: **COMPLETE — LEVEL 1 + LEVEL 2 QUALIFIED. NO LIVE DEPLOYMENT/PUBLICATION CLAIM.**
 
 ## Canonical definition
 
@@ -146,6 +146,19 @@ It also does not close CMP-1.4.4. The adversarial campaign can only qualify the 
 
 CMP-1.4.10 is COMPLETE only when every machine-readable exit criterion passes and Level 1 plus the cross-verifier Level 2 retained Compute suite are green on the same exact implementation SHA.
 
+## Qualification evidence
+
+Qualified implementation SHA: `edeba8393ab1ec2b2b247cdb5b658a3f4b060e32`.
+
+- Compute Market Qualification #65 — run `36877413661` — **success**
+- Solidity Contracts #3584 — run `36877413569` — **success**
+- Genesis Address Authority #392 — run `36877413171` — **success**
+- 420Registry REG-AUDIT-4 #227 — run `36877413240` — **success**
+- 420Docs Qualification #3784 — run `36877413545` — **success**
+- 420Indexer #1200 — run `36877413248` — **success**
+
+The same exact implementation SHA passed the CMP-1.4.10 Level 1 adversarial qualification and the Level 2 cross-verifier integration milestone.
+
 ## Completion
 
-**NOT YET COMPLETE.** Threat matrix, strengthened test coverage and durable evidence are present; exact-head qualification remains pending.
+**COMPLETE at Level 1 and the CMP-1.4 cross-verifier adversarial Level 2 milestone.** Level 3 remains intentionally deferred to complete Compute app-phase closeout. This documentation update is evidence-only and does not require recursive qualification reruns.

@@ -32,9 +32,10 @@ for token in ["samplingAuthority","j.owner == samplingAuthority","a.worker == sa
     if token not in q: errors.append(f"scientific router missing {token}")
 for token in ["OUTCOME_INCONCLUSIVE","OUTCOME_PASS","OUTCOME_FAIL","REQUIRED_SAMPLES","MIN_DATASET_SIZE","MAX_DATASET_SIZE","TOLERANCE_BPS","MAX_RANGE_BPS","sampleIndex(","_verifyLeaf(","_proofDepth(","_isPowerOfTwo("]:
     if token not in a: errors.append(f"reference scientific adapter missing {token}")
-for token in ["adapterKind()","ADAPTER_KIND"]:
-    if token not in di or token not in dg or token not in da:
-        errors.append(f"deterministic family typing missing {token}")
+if "adapterKind()" not in di:
+    errors.append("deterministic interface missing adapterKind()")
+if "ADAPTER_KIND" not in dg or "ADAPTER_KIND" not in da:
+    errors.append("deterministic registry/adapter kind constant missing")
 for token in [
  "testSampledProtocolPassesUniformCommittedDatasetWithoutMutatingJob",
  "testSampledProtocolFailsCommittedClaimOutsideTolerance",

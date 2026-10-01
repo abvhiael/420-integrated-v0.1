@@ -52,12 +52,44 @@ test('unknown protocol events do not fabricate lifecycle state', () => {
 });
 
 
-test('does not synthesize Civic v1 cancellation from non-canonical cancellation event names', () => {
+test('reconstructs canonical Civic proposal lifecycle from Proposal Registry events', () => {
   const snapshots = reduceProtocolLifecycle420([
-    event('420Governance', 'CivicProposalCreated', 1n, { proposalId: '0x04' }),
-    event('420Governance', 'CivicProposalCancelled', 2n, { proposalId: '0x04' })
+    event('420Governance', 'CivicProposalStateChanged', 4n, { proposalId: '0x04', previousState: 4n, newState: 5n }),
+    event('420Governance', 'CivicProposalRegistered', 1n, { proposalId: '0x04' }),
+    event('420Governance', 'CivicProposalStateChanged', 2n, { proposalId: '0x04', previousState: 1n, newState: 2n }),
+    event('420Governance', 'CivicProposalStateChanged', 3n, { proposalId: '0x04', previousState: 2n, newState: 4n })
   ]);
   assert.equal(snapshots.length, 1);
-  assert.equal(snapshots[0].state, 'PENDING');
-  assert.equal(snapshots[0].eventName, 'CivicProposalCreated');
+  assert.equal(snapshots[0].objectKey, 'proposalId:0x04');
+  assert.equal(snapshots[0].state, 'EXECUTED');
+  assert.equal(snapshots[0].terminal, true);
+  assert.equal(snapshots[0].eventName, 'CivicProposalStateChanged');
+});
+
+test('Governance lifecycle replay is idempotent and replacement-fork rebuild is deterministic', () => {
+  const registered = event('420Governance', 'CivicProposalRegistered', 1n, { proposalId: '0x05' });
+  const passed = event('420Governance', 'CivicProposalStateChanged', 2n, {
+    proposalId: '0x05', previousState: 1n, newState: 2n
+  });
+  const failed = event('420Governance', 'CivicProposalStateChanged', 2n, {
+    proposalId: '0x05', previousState: 1n, newState: 3n
+  });
+
+  const replayed = reduceProtocolLifecycle420([registered, passed, registered, passed]);
+  assert.equal(replayed[0].state, 'PASSED');
+
+  const replacementFork = reduceProtocolLifecycle420([registered, failed]);
+  assert.equal(replacementFork[0].state, 'FAILED');
+  assert.equal(replacementFork[0].terminal, true);
+});
+
+test('does not synthesize Civic v1 cancellation from non-canonical or unsupported cancellation state', () => {
+  const snapshots = reduceProtocolLifecycle420([
+    event('420Governance', 'CivicProposalRegistered', 1n, { proposalId: '0x06' }),
+    event('420Governance', 'CivicProposalCancelled', 2n, { proposalId: '0x06' }),
+    event('420Governance', 'CivicProposalStateChanged', 3n, { proposalId: '0x06', previousState: 1n, newState: 6n })
+  ]);
+  assert.equal(snapshots.length, 1);
+  assert.equal(snapshots[0].state, 'ACTIVE');
+  assert.equal(snapshots[0].eventName, 'CivicProposalRegistered');
 });

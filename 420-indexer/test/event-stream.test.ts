@@ -13,10 +13,10 @@ const EVENT_420: ProtocolEventDto420 = {
   logIndex: 4,
   contractAddress: '0xContract',
   protocol: '420Governance',
-  eventName: 'ProposalCreated',
-  objectKey: 'proposal:42',
-  lifecycleState: 'PENDING',
-  fields: { proposalId: '42', active: true }
+  eventName: 'CivicProposalRegistered',
+  objectKey: 'proposalId:0x42',
+  lifecycleState: 'ACTIVE',
+  fields: { proposalId: '0x42', proposer: '0xabc' }
 };
 
 test('event stream identity is deterministic and fork-sensitive', () => {
@@ -32,7 +32,7 @@ test('event stream identity is deterministic and fork-sensitive', () => {
 test('event envelope preserves provenance without claiming protocol authority', () => {
   const event = indexerEventEnvelope420(EVENT_420);
 
-  assert.equal(event.topic, '420Governance.ProposalCreated');
+  assert.equal(event.topic, '420Governance.CivicProposalRegistered');
   assert.equal(event.authoritative, false);
   assert.deepEqual(event.provenance, {
     chainId: '420',
@@ -43,7 +43,7 @@ test('event envelope preserves provenance without claiming protocol authority', 
     logIndex: 4,
     contractAddress: '0xContract'
   });
-  assert.deepEqual(event.fields, { proposalId: '42', active: true });
+  assert.deepEqual(event.fields, { proposalId: '0x42', proposer: '0xabc' });
 });
 
 test('event stream replays through the stable public API and preserves opaque cursors', async () => {
@@ -61,7 +61,7 @@ test('event stream replays through the stable public API and preserves opaque cu
     limit: 25,
     direction: 'asc',
     protocol: '420Governance',
-    objectKey: 'proposal:42'
+    objectKey: 'proposalId:0x42'
   });
 
   assert.deepEqual(calls, [{
@@ -83,4 +83,21 @@ test('event stream replays through the stable public API and preserves opaque cu
 test('event identity fails closed on malformed source identity', () => {
   assert.throws(() => indexerEventId420({ ...EVENT_420, blockHash: '' }), /invalid protocol event identity/);
   assert.throws(() => indexerEventId420({ ...EVENT_420, logIndex: -1 }), /invalid protocol event identity/);
+});
+
+test('Governance event subscriptions stay explicitly non-authoritative with canonical Civic topics', async () => {
+  const api: Pick<IndexerPublicApi420, 'protocolEvents'> = {
+    async protocolEvents(_chainId, request = {}) {
+      assert.equal(request.protocol, '420Governance');
+      assert.equal(request.objectKey, 'proposalId:0x42');
+      return { items: [EVENT_420], nextCursor: null };
+    }
+  };
+  const batch = await new IndexerEventStream420(api).protocolEvents(420n, {
+    protocol: '420Governance',
+    objectKey: 'proposalId:0x42'
+  });
+  assert.equal(batch.authoritative, false);
+  assert.equal(batch.events[0]!.topic, '420Governance.CivicProposalRegistered');
+  assert.equal(batch.events[0]!.authoritative, false);
 });

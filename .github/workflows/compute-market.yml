@@ -123,3 +123,6 @@ jobs:
 
       - name: Verify CMP-1.5.1 worker collateral
         run: python scripts/verify-cmp-1-5-1-worker-collateral.py
+
+      - name: Verify CMP-1.5.2 verifier collateral
+        run: python scripts/verify-cmp-1-5-2-verifier-collateral.py

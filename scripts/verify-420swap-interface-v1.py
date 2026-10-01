@@ -39,12 +39,26 @@ market=(root/'contracts/src/swap/CanonicalMarketRegistry.sol').read_text()
 for t in ['pool.code.length','_requireOperational','CANONICAL_CAD']:
     if t not in market:e.append('market registry missing '+t)
 pool=(root/'contracts/src/swap/CanonicalConstantProductPool420.sol').read_text()
-for t in ['nonReentrant','quoteCanonicalSwap','executeCanonicalSwap','MINIMUM_LIQUIDITY','UnsupportedTokenBehavior','UnauthorizedExecutor','inputAmount','exactSettlementAmount']:
+for t in ['nonReentrant','quoteCanonicalSwap','executeCanonicalSwap','MINIMUM_LIQUIDITY','UnsupportedTokenBehavior','UnauthorizedExecutor','inputAmount','exactSettlementAmount','price0CumulativeX96','price1CumulativeX96','currentCumulativePrices','CumulativePriceUpdated']:
     if t not in pool:e.append('production pool missing '+t)
+
+twap=(root/'contracts/src/swap/TWAPOracle.sol').read_text()
+for t in [
+    'configureMarket','checkpoint','currentCumulativePrices','referencePrice','readObservation',
+    'minWindowSeconds','maxWindowSeconds','maxStalenessSeconds','latestSourceHash',
+    'ObservationStale','WindowTooShort','_canonicalSource','sourceHash'
+]:
+    if t not in twap:e.append('twap oracle missing '+t)
+if 'function applyObservation' in twap:
+    e.append('twap oracle still permits arbitrary observation publication')
+
+twap_adapter=(root/'contracts/src/oracle/TWAPOracleSourceAdapter420.sol').read_text()
+for t in ['readObservation','Types420.Health.HEALTHY','observationWindowSeconds','sourceHash','validUntil']:
+    if t not in twap_adapter:e.append('twap adapter missing '+t)
 
 for tf in [
     'CanonicalConstantProductPool420.t.sol','SwapGenesisDEXFactory420.t.sol','SwapPermissionlessDEXFactory420.t.sol',
-    'SwapGenesisIntegration420.t.sol','SwapFuzz420.t.sol','SwapInvariant420.t.sol',
+    'SwapTWAPOracle420.t.sol','SwapGenesisIntegration420.t.sol','SwapFuzz420.t.sol','SwapInvariant420.t.sol',
     'PaySwapGenesisIntegration420.t.sol','PaySwapBridgeGenesisIntegration420.t.sol'
 ]:
     if not (root/'contracts/test'/tf).exists():e.append('missing test '+tf)
@@ -70,6 +84,8 @@ out={
     'shared_interface_v1':True,
     'genesis_dex_factory_semantics':'REGISTRATION_ONLY' if not e else 'QUALIFICATION_FAILED',
     'permissionless_pool_lifecycle':'DEPLOY_EXTERNALLY_THEN_PERMISSIONLESS_REGISTER' if not e else 'QUALIFICATION_FAILED',
+    'twap_source':'CANONICAL_POOL_CUMULATIVE' if not e else 'QUALIFICATION_FAILED',
+    'twap_publication':'PERMISSIONLESS_DERIVED_CHECKPOINT' if not e else 'QUALIFICATION_FAILED',
     'production_pool_execution':'PRODUCTION_CANDIDATE_PRESENT' if not e else 'QUALIFICATION_FAILED'
 }
 (root/'contracts/config/swap/interface-v1-verification.json').write_text(json.dumps(out,indent=2)+'\n')

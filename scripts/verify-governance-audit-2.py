@@ -10,6 +10,8 @@ errors = []
 proposal = (root / "contracts/src/governance/CivicProposalRegistry420.sol").read_text()
 electorate = (root / "contracts/src/governance/CivicElectorateRegistry420.sol").read_text()
 governor = (root / "contracts/src/governance/CivicGovernor420.sol").read_text()
+voting = (root / "contracts/src/governance/CivicVoting420.sol").read_text()
+audit = (root / "contracts/test/GovernanceAudit420.t.sol").read_text()
 timelock = (root / "contracts/src/governance/GovernanceTimelock.sol").read_text()
 legacy = (root / "contracts/src/governance/Governance420.sol").read_text()
 security = (root / "docs/apps/governance/security.md").read_text()
@@ -73,8 +75,9 @@ for phrase in [
     if phrase.lower() not in security.lower():
         errors.append(f"security docs missing accepted-risk statement: {phrase}")
 
-# Constructor graph hardening retained from complete audit.
+# Constructor graph hardening retained and completed in GOV-AUDIT-2.
 for needle in [
+    "timelock_.code.length == 0",
     "constitution.governanceTimelock() != timelock_",
     "electorateRegistry.governanceTimelock() != timelock_",
     "address(voting.proposalRegistry()) != proposalRegistry_",
@@ -82,6 +85,20 @@ for needle in [
 ]:
     if needle not in governor:
         errors.append(f"Governor module graph hardening missing: {needle}")
+
+for needle in [
+    "proposalRegistryContract.governanceTimelock()",
+    "electorateRegistryContract.governanceTimelock() != timelock_",
+]:
+    if needle not in voting:
+        errors.append(f"Voting registry graph hardening missing: {needle}")
+
+for needle in [
+    "testVotingRejectsRegistriesWithDifferentGovernanceTimelocks",
+    "testGovernorRejectsNonContractTimelockAuthorityGraph",
+]:
+    if needle not in audit:
+        errors.append(f"missing authority graph regression: {needle}")
 
 print(json.dumps({
     "pass": not errors,

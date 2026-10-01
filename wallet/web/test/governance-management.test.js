@@ -136,6 +136,24 @@ test('discovery fails closed on invented source, wrong chain, missing code, acco
   assert.throws(()=>client(new FakeProvider(),null,missingIds),/invalid bytes32/);
 });
 
+test('ProtocolRegistry resolution fails closed on mismatched or missing deployed component',async()=>{
+  for(const resolved of ['0x000000000000000000000000000000000000dead','0x0000000000000000000000000000000000000000']){
+    const p=new FakeProvider();
+    const original=p.request.bind(p);
+    p.request=async(method,params=[])=>{
+      if(method==='eth_call'){
+        const [{to,data}]=params;
+        if(to===REGISTRY&&data.slice(2,10)===selector('resolve(bytes32)')){
+          const componentId='0x'+data.slice(-64).toLowerCase();
+          if(componentId===IDS.voting)return result(aw(resolved));
+        }
+      }
+      return original(method,params);
+    };
+    await assert.rejects(client(p).verifySession(),/ProtocolRegistry resolution mismatch for voting/);
+  }
+});
+
 test('proposal detail exposes frozen class revision window electorates thresholds commitment and non-authoritative tallies',async()=>{
   const detail=await client(new FakeProvider()).proposal(PROPOSAL);
   assert.equal(detail.className,'G1');

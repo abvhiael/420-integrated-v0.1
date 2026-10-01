@@ -136,8 +136,23 @@ if descriptor.get("canonicalAddress") != expected_address:
     fail("Names descriptor address drift")
 if descriptor.get("artifact", {}).get("runtimeCodeHash") != runtime_hash:
     fail("Names descriptor runtime binding drift")
-if len(descriptor.get("events", [])) != 7:
+events = descriptor.get("events", [])
+if len(events) != 7:
     fail("Names descriptor must contain exactly seven events")
+expected_event_signatures = {
+    "CommitmentMade(bytes32,address,uint64)",
+    "NameRegistered(bytes32,address,uint64,uint8)",
+    "NameRenewed(bytes32,address,uint64)",
+    "NameTransferStarted(bytes32,address,address)",
+    "NameTransferred(bytes32,address,address)",
+    "ResolutionUpdated(bytes32,address,bytes32,bytes32)",
+    "ReverseNameSet(address,bytes32)",
+}
+actual_event_signatures = {event.get("signature") for event in events if isinstance(event, dict)}
+if actual_event_signatures != expected_event_signatures:
+    fail(f"Names descriptor event signature set drift: {sorted(actual_event_signatures)}")
+if len(actual_event_signatures) != len(events):
+    fail("Names descriptor contains duplicate or malformed event signatures")
 
 for required in [
     "NAMES-AUDIT-9",
@@ -151,6 +166,7 @@ for required in [
     "direct Names420 runtime dependency",
     "canonical chain state wins",
     "fail closed",
+    "seven frozen event families",
 ]:
     require_text(doc, required)
 
@@ -195,4 +211,5 @@ print(f"canonicalAddress={expected_address}")
 print(f"runtimeCodeHash={runtime_hash}")
 print(f"storageRoot={storage_root}")
 print(f"descriptorSha256={descriptor_digest}")
+print(f"descriptorEventSignatures={len(actual_event_signatures)}")
 print("requiredSections=9")

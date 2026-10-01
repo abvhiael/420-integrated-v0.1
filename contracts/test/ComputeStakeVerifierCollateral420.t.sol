@@ -12,6 +12,7 @@ import "../src/interfaces/genesis/ICapabilityRegistry420.sol";
 interface VmComputeStakeVerifierCollateral420 {
     function prank(address) external;
     function deal(address, uint256) external;
+    function warp(uint256) external;
 }
 
 contract MockVaultCapsVerifierCollateral420 is ICapabilityRegistry420 {
@@ -59,9 +60,11 @@ contract ComputeStakeVerifierCollateral420Test {
     bytes32 private constant VAULT_ID = keccak256("compute/stake/verifier-collateral");
     bytes32 private constant POLICY_A = keccak256("compute/verifier-collateral/a");
     bytes32 private constant POLICY_B = keccak256("compute/verifier-collateral/b");
+    uint64 private constant EXIT_DELAY = 5 days;
 
     ComputeVerifierRegistry420 private verifiers;
     ComputeStakeVerifierCollateral420 private stakeSource;
+    ComputeStakeExitPolicy420 private exitPolicy;
 
     MockVaultCapsVerifierCollateral420 private caps;
     VaultAuthorization420 private auth;
@@ -114,11 +117,32 @@ contract ComputeStakeVerifierCollateral420Test {
             keccak256("verifier-collateral-manifest")
         );
 
-        stakeSource = new ComputeStakeVerifierCollateral420(address(verifiers), address(vault));
+        exitPolicy = new ComputeStakeExitPolicy420(GOV);
+        vm.prank(GOV);
+        exitPolicy.publish(POLICY_A, EXIT_DELAY);
+        vm.prank(GOV);
+        exitPolicy.publish(POLICY_B, EXIT_DELAY);
+
+        stakeSource =
+            new ComputeStakeVerifierCollateral420(address(verifiers), address(vault), address(exitPolicy));
         caps.setAllowed(
             address(stakeSource),
             VaultIds420.COMPONENT_VAULT,
             VaultIds420.ACTION_CREATE_OBLIGATION,
+            auth.scopeForVault(VAULT_ID),
+            true
+        );
+        caps.setAllowed(
+            address(stakeSource),
+            VaultIds420.COMPONENT_VAULT,
+            VaultIds420.ACTION_RELEASE_OBLIGATION,
+            auth.scopeForVault(VAULT_ID),
+            true
+        );
+        caps.setAllowed(
+            address(stakeSource),
+            VaultIds420.COMPONENT_VAULT,
+            VaultIds420.ACTION_CLAIM,
             auth.scopeForVault(VAULT_ID),
             true
         );
@@ -270,6 +294,146 @@ contract ComputeStakeVerifierCollateral420Test {
             stakeSource.readVerifierPosition(verifierId, POLICY_A).positionId == bytes32(0),
             "position leaked"
         );
+    }
+
+    function testVerifierExitSnapshotsDelayAndKeepsCollateralSlashable() public {
+        bytes32 id = _stake(VERIFIER_A, POLICY_A, 100 ether);
+        uint256 requestedAt = block.timestamp;
+
+        vm.prank(VERIFIER_A);
+        uint64 maturity = stakeSource.requestExit(id);
+
+        IComputeVerifierStakeSource420.PositionRead memory p =
+            stakeSource.readVerifierPosition(verifierId, POLICY_A);
+        require(p.exiting, "exit not queued");
+        require(p.active && p.activeAmount == 100 ether && p.slashableAmount == 100 ether, "collateral unlocked");
+        require(maturity == requestedAt + EXIT_DELAY && p.withdrawableAt == maturity, "delay");
+
+        ComputeStakeVerifierCollateral420.Position memory full = stakeSource.position(id);
+        require(full.exitPolicyRevision == 1 && full.exitPolicyCommitment != bytes32(0), "policy snapshot");
+    }
+
+    function testOldAuthorityCanExitHistoricalPositionAfterRotation() public {
+        bytes32 oldId = _stake(VERIFIER_A, POLICY_A, 55 ether);
+
+        vm.prank(GOV);
+        verifiers.proposeRotation(verifierId, VERIFIER_B, keccak256("verifier-b"));
+        vm.prank(VERIFIER_B);
+        verifiers.acceptRotation(verifierId);
+
+        vm.prank(VERIFIER_A);
+        uint64 maturity = stakeSource.requestExit(oldId);
+        vm.warp(maturity);
+
+        uint256 before = VERIFIER_A.balance;
+        vm.prank(VERIFIER_A);
+        (uint256 amount,) = stakeSource.withdraw(oldId, 1);
+        require(amount == 55 ether && VERIFIER_A.balance == before + 55 ether, "old authority payout");
+
+        ComputeStakeVerifierCollateral420.Position memory oldPosition = stakeSource.position(oldId);
+        require(!oldPosition.active && oldPosition.activeAmount == 0 && oldPosition.slashableAmount == 0, "old position active");
+
+        IComputeVerifierStakeSource420.PositionRead memory current =
+            stakeSource.readVerifierPosition(verifierId, POLICY_A);
+        require(current.positionId == bytes32(0), "old exit became current");
+    }
+
+    function testVerifierWithdrawalBeforeMaturityFailsAndTopUpDuringExitFails() public {
+        bytes32 id = _stake(VERIFIER_A, POLICY_A, 30 ether);
+
+        vm.prank(VERIFIER_A);
+        stakeSource.requestExit(id);
+
+        vm.prank(VERIFIER_A);
+        (bool ok,) = address(stakeSource).call(
+            abi.encodeCall(stakeSource.withdraw, (id, uint64(1)))
+        );
+        require(!ok, "premature verifier withdrawal");
+
+        vm.deal(VERIFIER_A, 1 ether);
+        vm.prank(VERIFIER_A);
+        (ok,) = address(stakeSource).call{value: 1 ether}(
+            abi.encodeCall(stakeSource.stake, (verifierId, POLICY_A))
+        );
+        require(!ok, "verifier top-up during exit");
+    }
+
+    function testVerifierExitDelayRevisionCannotRewritePendingExit() public {
+        bytes32 id = _stake(VERIFIER_A, POLICY_A, 25 ether);
+        uint256 requestedAt = block.timestamp;
+        vm.prank(VERIFIER_A);
+        uint64 maturity = stakeSource.requestExit(id);
+
+        vm.prank(GOV);
+        exitPolicy.publish(POLICY_A, 1 days);
+
+        vm.warp(requestedAt + 1 days);
+        vm.prank(VERIFIER_A);
+        (bool ok,) = address(stakeSource).call(
+            abi.encodeCall(stakeSource.withdraw, (id, uint64(1)))
+        );
+        require(!ok, "new verifier delay accelerated old exit");
+
+        vm.warp(maturity);
+        vm.prank(VERIFIER_A);
+        (uint256 amount,) = stakeSource.withdraw(id, 1);
+        require(amount == 25 ether, "mature verifier withdrawal");
+    }
+
+    function testVerifierBatchedWithdrawalPreservesRemainingSlashableCollateral() public {
+        bytes32 id = _stake(VERIFIER_A, POLICY_A, 35 ether);
+        _stake(VERIFIER_A, POLICY_A, 65 ether);
+
+        vm.prank(VERIFIER_A);
+        uint64 maturity = stakeSource.requestExit(id);
+        vm.warp(maturity);
+
+        vm.prank(VERIFIER_A);
+        (uint256 first,) = stakeSource.withdraw(id, 1);
+        require(first == 35 ether, "first verifier batch");
+
+        IComputeVerifierStakeSource420.PositionRead memory mid =
+            stakeSource.readVerifierPosition(verifierId, POLICY_A);
+        require(mid.exiting && mid.activeAmount == 65 ether && mid.slashableAmount == 65 ether, "mid verifier state");
+
+        vm.prank(VERIFIER_A);
+        (uint256 second,) = stakeSource.withdraw(id, 10);
+        require(second == 65 ether, "second verifier batch");
+
+        IComputeVerifierStakeSource420.PositionRead memory done =
+            stakeSource.readVerifierPosition(verifierId, POLICY_A);
+        require(!done.active && !done.exiting && done.activeAmount == 0 && done.slashableAmount == 0, "done verifier state");
+
+        VaultAccounting420.AssetAccounting memory a =
+            accounting.getAccounting(VAULT_ID, address(0));
+        require(
+            address(vault).balance == 0
+                && a.recordedBalance == 0
+                && a.reserved == 0
+                && a.claimable == 0
+                && a.released == 100 ether,
+            "verifier final accounting"
+        );
+    }
+
+    function testOnlyStoredVerifierAuthorityCanRequestAndWithdrawExit() public {
+        bytes32 id = _stake(VERIFIER_A, POLICY_A, 20 ether);
+
+        vm.prank(OUTSIDER);
+        (bool ok,) = address(stakeSource).call(
+            abi.encodeCall(stakeSource.requestExit, (id))
+        );
+        require(!ok, "outsider requested verifier exit");
+
+        vm.prank(VERIFIER_A);
+        uint64 maturity = stakeSource.requestExit(id);
+        vm.warp(maturity);
+
+        vm.prank(OUTSIDER);
+        (ok,) = address(stakeSource).call(
+            abi.encodeCall(stakeSource.withdraw, (id, uint64(1)))
+        );
+        require(!ok, "outsider withdrew verifier collateral");
     }
 
     function testDirectEthIsRejected() public {

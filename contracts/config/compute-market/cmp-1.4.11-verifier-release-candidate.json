@@ -232,5 +232,60 @@
     "level_2_required_now": false,
     "rationale": "CMP-1.4.10 is the immediately preceding cross-verifier Level 2 milestone. CMP-1.4.11 adds release wiring/manifests without changing verifier execution semantics."
   },
-  "level_3_status": "DEFERRED_TO_CMP_1_4_12_PHASE_CLOSEOUT"
+  "level_3_status": "DEFERRED_TO_CMP_1_4_12_PHASE_CLOSEOUT",
+  "qualification_evidence": {
+    "qualified_implementation_sha": "c5d1ccffc6937ad5fde27b85ac3d6ece8e4d84f4",
+    "qualification_level": "LEVEL_1_COMPLETE",
+    "level_1_status": "PASS",
+    "retained_compute_suite": {
+      "test_suites": 49,
+      "tests_passed": 323,
+      "tests_failed": 0,
+      "tests_skipped": 0
+    },
+    "repository_ready_verifier": "PASS_READY_LIVE_BLOCKED",
+    "live_readiness_fail_closed_assertion": "PASS",
+    "exact_head_workflows": [
+      {
+        "name": "Compute Market Qualification",
+        "run_number": 69,
+        "run_id": 36882487806,
+        "conclusion": "success"
+      },
+      {
+        "name": "Solidity Contracts",
+        "run_number": 3591,
+        "run_id": 36882487546,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Registry REG-AUDIT-4",
+        "run_number": 233,
+        "run_id": 36882487724,
+        "conclusion": "success"
+      },
+      {
+        "name": "Genesis Address Authority",
+        "run_number": 398,
+        "run_id": 36882487532,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Indexer",
+        "run_number": 1207,
+        "run_id": 36882487579,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Docs Qualification",
+        "run_number": 3795,
+        "run_id": 36882487765,
+        "conclusion": "success"
+      }
+    ],
+    "level_2_status": "NOT_RERUN_CMP_1_4_10_ALREADY_QUALIFIED_INTEGRATION_MILESTONE",
+    "level_3_status": "DEFERRED_TO_CMP_1_4_12_PHASE_CLOSEOUT",
+    "live_deployment_status": "BLOCKED",
+    "cmp_1_4_4_status": "OPEN_EXPLICIT_LIVE_DEPLOYMENT_BLOCKER"
+  }
 }

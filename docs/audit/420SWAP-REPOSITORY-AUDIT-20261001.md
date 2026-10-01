@@ -88,7 +88,7 @@ The production candidate pool is an implementation/deployment component, not a n
 | canonical market registry | present | unchanged | COMPLETE | canonical market/pair/pool records |
 | permissionless factory | present | registration lifecycle hardened | COMPLETE | registration-only; exact pair introspection/codehash provenance; duplicate pool-address rejection; open same-pair variants |
 | TWAP oracle | present | canonical cumulative-source TWAP hardened | COMPLETE source-side | canonical pool cumulative pricing, bounded window/freshness, source identity, Exchange reference interface and 420Oracle adapter fail-closed reads |
-| public batch auction | present | unchanged | PARTIAL | auction/bid/settle records exist; value custody/allocation execution is not implemented here |
+| public batch auction | present | economic lifecycle completed | COMPLETE source-side | pre-funded native inventory, canonical quote escrow, governed clearing price, deterministic fills/refunds/claims, cancellation recovery and accounting/replay protection |
 | approved quote asset registry | present | unchanged | COMPLETE | shared canonical settlement checks applied |
 | canonical swap executor | present | unchanged | COMPLETE | shared safety/health/trusted caller/postconditions |
 | constant-product pool | present | added to canonical inventory | COMPLETE for V1 ERC20/ERC20 scope | production candidate with dedicated tests |
@@ -186,9 +186,28 @@ The single-pool TWAP intentionally reports confidence `0`; 420Oracle may combine
 
 ### PublicBatchAuction
 
-The contract records auction windows, quote-bid amounts and a clearing price, but the source does not custody quote funds, reserve/disburse inventory, compute a clearing price, allocate fills, refund losers or settle assets.
+SWAP-AUDIT-5 resolves the prior record-only gap as a **real public-distribution economic lifecycle**.
 
-Because the frozen dApp contract map includes `PublicBatchAuction.sol`, this is a real completeness gap unless canonical authority explicitly reclassifies it as record-only. The repository does not support inventing those missing economics during this audit.
+Repository authority does not support reclassifying the frozen `0x...042c` component as a logging-only registry: its frozen purpose is `daily batch auction`, it is paired with `PublicDistributionVault` (`public distribution inventory`), and the architecture states that the canonical gateway-backed stable settlement asset is used by the public-distribution system.
+
+The completed contract:
+
+- cannot mint native 420 and requires inventory to be pre-funded before opening;
+- reserves exact native inventory across concurrent auctions and caps one auction at 100,000 native 420, matching the PublicDistributionVault daily release bound;
+- permits only a quote asset currently marked `CANONICAL` by `ApprovedQuoteAssetRegistry`;
+- replaces governance-recorded synthetic bids with permissionless user escrow through `bid`;
+- uses exact quote-token balance-delta checks and rejects non-exact token behavior;
+- preserves the repository's existing governance-set clearing-price authority because no canonical price ladder or autonomous clearing algorithm exists to replace it;
+- settles undersubscribed auctions only for actual demand and immediately unreserves unsold native inventory;
+- settles oversubscribed auctions with deterministic pro-rata native allocation by escrowed quote amount;
+- uses pull-based one-shot claims so settlement never loops over an unbounded bidder set;
+- conserves each bidder's escrow as exact `quoteSpent + quoteRefund`;
+- routes only actual quote proceeds to the declared proceeds recipient;
+- provides governance cancellation before settlement, immediately releasing native reservations while preserving complete bidder refunds;
+- keeps cancellation/claims available under the shared `SAFE_WHEN_PAUSED` recovery path so emergency controls do not trap escrowed user value;
+- releases any final native rounding remainder after the final bidder claim.
+
+The clearing-price decision remains an explicit governance/operations evidence boundary. SWAP-AUDIT-5 does not invent an unsupported on-chain price-discovery algorithm. Live PublicDistributionVault→auction funding provenance and deployed-instance verification remain later deployment/testnet qualification work.
 
 ## Integration audit
 
@@ -237,6 +256,7 @@ Baseline relevant suites found:
 - `SwapFuzz420.t.sol`
 - `SwapInvariant420.t.sol`
 - `SwapTWAPOracle420.t.sol`
+- `SwapPublicBatchAuction420.t.sol`
 - `PaySwapGenesisIntegration420.t.sol`
 - `PaySwapBridgeGenesisIntegration420.t.sol`
 - Exchange web swap/security/execution/browser-wallet tests
@@ -307,6 +327,28 @@ Audit remediation added `.github/workflows/swap-audit.yml` to run app-scoped sta
 - completion state: **COMPLETE**
 - next canonical roadmap step: **SWAP-AUDIT-5 — PublicBatchAuction completion**
 
+### SWAP-AUDIT-5 retained Level 1 + source-economics Level 2 evidence
+
+- roadmap step: **SWAP-AUDIT-5 — PublicBatchAuction completion**
+- qualification level: **Level 1 — per-roadmap-step fast qualification**, plus **Level 2 — source-economics app milestone**
+- canonical decision: **REAL PUBLIC-DISTRIBUTION AUCTION; GOVERNANCE-SET CLEARING PRICE RETAINED**
+- implementation SHA: `ac109e7fbdc50113e744caecf812d4e7c60f76fb`
+- current `main` at qualification closeout: `98e545225d54379086f0c520afcb84b4d4d97288`
+- audit PR / branch: **#455** / `audit/420swap-complete-20261001`
+- authoritative successful workflow: **420Swap Audit Qualification**, PR run **36940146723**
+- contract job **110629941036**: static verification PASS; targeted build PASS; Genesis DEX factory PASS; permissionless DEX factory PASS; TWAP/oracle integration PASS; **Public batch auction PASS**; canonical pool PASS; Swap integration PASS; fuzz PASS; invariant PASS; Pay/Swap integration PASS
+- user-surface job **110629941435**: `npm run check` PASS; Node tests PASS; qualification build PASS
+- custody/accounting coverage: exact canonical quote escrow, non-exact-token rejection, explicit native reservation, undersubscription unsold release, oversubscription pro-rata fill, exact proceeds, quote refunds, final reservation reconciliation
+- replay/failure coverage: early/late bid rejection, early/duplicate settlement rejection, one-shot claims, governance-only settle/cancel, cancellation/full-refund recovery, local-pause bid rejection with safe paused claims
+- authority boundaries: auction never mints native 420; PublicDistributionVault remains inventory source authority; ApprovedQuoteAssetRegistry remains canonical quote authority; governance retains only the pre-existing clearing-price decision and cannot bypass settlement accounting
+- diagnosed failures before qualification: `d8d6aa...` failed because the new contract omitted its declared `nonReentrant` modifier; `989eec...` then failed only in new test tuple destructuring. Both root causes were fixed before the exact implementation SHA was qualified; skipped downstream tests on failed runs were not treated as evidence
+- Level 2 milestone: **PASS on the same exact implementation SHA**; the retained Swap suite now covers the completed market-formation, oracle and public-distribution economics together without repository-wide duplication
+- Level 3: **intentionally deferred** to complete app-phase closeout
+- limitations intentionally deferred: exact deployed PublicDistributionVault→auction funding provenance, deterministic predeploy materialization, live Registry/Pay/Wallet/Exchange binding, production-equivalent testnet behavior and external release security review
+- blockers for this step: **none**
+- completion state: **COMPLETE**
+- next canonical roadmap step: **SWAP-AUDIT-6 — deterministic artifacts and predeploy state**
+
 Exact-final-head comprehensive Level 3 results remain intentionally deferred until complete app-phase closeout.
 
 ## Security classification
@@ -323,7 +365,7 @@ Exact-final-head comprehensive Level 3 results remain intentionally deferred unt
 | LP share transferability | intentionally absent; accepted V1 limitation |
 | excess-ratio liquidity donation | accepted design risk; providers must supply bounded inputs knowingly |
 | oracle manipulation/staleness | canonical cumulative TWAP, explicit window/freshness/source identity and Exchange deviation guard qualified source-side; live deployment remains pending |
-| batch-auction custody/settlement | unresolved functionality gap |
+| batch-auction custody/settlement | source-side lifecycle completed and app-qualified; deployed funding/proceeds bindings remain later qualification |
 | live Pay→Swap binding spoof/misconfiguration | mitigated by fail-closed manifest requirement, not live-qualified |
 | live address/code identity | repository authority only; not testnet-qualified |
 | external independent security audit | required release gate, not satisfied by this repository audit |
@@ -347,7 +389,6 @@ Still missing or incomplete:
 - dedicated Swap deployment/operator runbook;
 - deterministic Swap predeploy materialization record;
 - generated retained Swap deployment artifacts/code hashes;
-- canonical decision/implementation for PublicBatchAuction settlement economics;
 - app-specific Genesis acceptance record after live qualification.
 
 ## Genesis and deployment readiness
@@ -375,7 +416,7 @@ The source tree is substantially implemented, but repository deployment records 
 | obsolete scaffold removed | repository consistency | removed in audit | verifier enforces absence | docs updated | COMPLETE | retain |
 | native $420 user path | Genesis purpose + Exchange architecture | handled above pool via wrapped/native Exchange path | Exchange tests | yes | PARTIAL | live end-to-end qualification |
 | TWAP/reference oracle | Genesis/Swap architecture | canonical pool cumulative TWAP with bounded window/freshness/source identity; direct Exchange + 420Oracle adapter integration | dedicated TWAP/adversarial/integration plus retained regressions | yes | COMPLETE source-side | live deployment/config qualification later |
-| public batch auction | frozen dApp/system map | record-only auction state | no dedicated economic settlement suite found | limited | PARTIAL | canonicalize + implement settlement economics or reclassify |
+| public batch auction | frozen dApp/system map + PublicDistributionVault/quote-asset authority | pre-funded native inventory + canonical quote escrow + governed clearing + deterministic fill/refund/claim/cancel lifecycle | dedicated economic/adversarial suite + retained regressions | yes | COMPLETE source-side | retain; qualify deployed funding/binding later |
 | Pay integration | Pay/Swap architecture | canonical adapter ABI | PaySwap tests | wiring manifest | PARTIAL | live exact-instance binding |
 | Bridge/CADC integration | CADC/Bridge docs | configured pending issuer | bridge integration tests | yes | BLOCKED | issuer-approved route/deployment |
 | Exchange user surface | Exchange web | implemented | 261 Node tests plus checks | extensive | COMPLETE source-side | live config/qualification |
@@ -402,13 +443,23 @@ The source tree is substantially implemented, but repository deployment records 
 9. Froze `GenesisDEXFactory` as registration-only canonical semantics without inventing an unauthorized CREATE/CREATE2 path.
 10. Added `SwapGenesisDEXFactory420.t.sol` covering registration mode, invalid/duplicate pools, pause/system-safety fail-closed behavior, governance authorization, timelock caller enforcement and implementation-reference controls.
 11. Extended the Swap verifier to require registration-only factory semantics and the dedicated factory test suite.
-12. Removed the unnecessary `--force` cold rebuild from app-scoped Swap qualification in accordance with phase qualification policy.\n13. Hardened `PermissionlessDEXFactory` as explicit registration-only market formation with pool pair introspection, exact runtime-codehash provenance, reverse pool-address uniqueness and immutable registration records.\n14. Added `SwapPermissionlessDEXFactory420.t.sol` covering pair/codehash spoofing, non-introspectable pools, duplicate IDs/addresses, same-pair variants, pause/safety/lifecycle rejection, invalid inputs and true permissionless callers.\n15. Reconciled permissionless market-tier and dApp UX configuration to preserve `creation: ANYONE` while explicitly defining external deployment followed by existing-pool registration.\n16. Extended the Swap verifier and dedicated CI to retain permissionless lifecycle qualification.
+12. Removed the unnecessary `--force` cold rebuild from app-scoped Swap qualification in accordance with phase qualification policy.
+13. Hardened `PermissionlessDEXFactory` as explicit registration-only market formation with pool pair introspection, exact runtime-codehash provenance, reverse pool-address uniqueness and immutable registration records.
+14. Added `SwapPermissionlessDEXFactory420.t.sol` covering pair/codehash spoofing, non-introspectable pools, duplicate IDs/addresses, same-pair variants, pause/safety/lifecycle rejection, invalid inputs and true permissionless callers.
+15. Reconciled permissionless market-tier and dApp UX configuration to preserve `creation: ANYONE` while explicitly defining external deployment followed by existing-pool registration.
+16. Extended the Swap verifier and dedicated CI to retain permissionless lifecycle qualification.
 17. Added canonical cumulative Q96 reserve-price accounting to `CanonicalConstantProductPool420`.
 18. Reworked `TWAPOracle` to derive observations exclusively from the active canonical market/pool, with explicit minimum/maximum windows, freshness, source provenance, decimal normalization and immediate source-change invalidation.
 19. Removed arbitrary governance price publication semantics; governance now configures policy while permissionless checkpoints derive state deterministically on-chain.
 20. Added direct `referencePrice` compatibility for `ExchangeOracleGuard420` and hardened `TWAPOracleSourceAdapter420` to consume fail-closed observations.
 21. Added `SwapTWAPOracle420.t.sol` covering cumulative manipulation resistance, minimum/maximum windows, staleness, source replacement, pause/inactive market failure, authority separation, Exchange deviation/stale behavior and 420Oracle adapter provenance.
 22. Expanded Swap verifier/docs/CI for TWAP semantics and deduplicated push/PR qualification concurrency by audit branch.
+23. Replaced PublicBatchAuction's record-only bid bookkeeping with exact canonical quote escrow, native inventory reservation, deterministic fill/refund/proceeds accounting and one-shot pull claims.
+24. Bounded public auction inventory at 100,000 native 420, matching the PublicDistributionVault daily release cap, while preserving PublicDistributionVault as the native inventory authority.
+25. Preserved the repository's existing governance-set clearing-price boundary rather than inventing an unsupported price-discovery algorithm.
+26. Added cancellation/full-refund recovery and SAFE_WHEN_PAUSED claim behavior so emergency controls do not trap escrowed bidder value.
+27. Added `SwapPublicBatchAuction420.t.sol` covering canonical quote enforcement, funding bounds, exact escrow, under/oversubscription, pro-rata allocation, refunds, cancellation, timing/replay, fee-on-transfer rejection, pause recovery and governance authority.
+28. Extended Swap verifier/docs/dedicated CI to retain PublicBatchAuction economic qualification.
 
 ## Outstanding remediation roadmap
 
@@ -426,8 +477,8 @@ The remaining work must preserve these step identities and dependency order:
 4. **SWAP-AUDIT-4 — TWAP/oracle production hardening — COMPLETE**  
    TWAP now derives from canonical pool cumulative state; window/freshness/source identity, publication authority, manipulation resistance, Exchange guard and 420Oracle adapter behavior are explicit, fail-closed and qualified.
 
-5. **SWAP-AUDIT-5 — PublicBatchAuction completion**  
-   Either explicitly canonicalize it as record-only, or implement bid custody, inventory reservation, clearing/fill allocation, refunds, settlement, replay/accounting invariants and failure recovery. Current repository evidence does not authorize choosing one silently.
+5. **SWAP-AUDIT-5 — PublicBatchAuction completion — COMPLETE**  
+   PublicBatchAuction is now a real pre-funded public-distribution auction with canonical quote escrow, governed clearing price, deterministic under/oversubscribed fills, proceeds/refunds, replay-safe pull claims and cancellation recovery.
 
 6. **SWAP-AUDIT-6 — deterministic artifacts and predeploy state**  
    Generate pinned compiler artifacts/runtime hashes and materialized constructor/storage state for frozen Swap system contracts; record exact provenance.
@@ -445,10 +496,10 @@ The remaining work must preserve these step identities and dependency order:
 
 At repository-remediation stage:
 
-- CODE COMPLETE: **NO** — PublicBatchAuction completion remains.
+- CODE COMPLETE: **YES for repository-side Swap source semantics through SWAP-AUDIT-5.**
 - BUILD COMPLETE: **YES for source tree on repository CI; final audit workflow must close on exact final SHA.**
-- CONTRACT COMPLETE: **NO** — PublicBatchAuction production semantics remain unresolved.
-- TEST COMPLETE: **NO** — PublicBatchAuction still lacks final economic/adversarial qualification.
+- CONTRACT COMPLETE: **YES source-side through SWAP-AUDIT-5; deterministic deployment/predeploy qualification remains open.**
+- TEST COMPLETE: **YES for current app-scoped source/economic qualification; Level 3 and live deployment/testnet qualification remain deferred.**
 - DOCUMENTATION COMPLETE: **NO** — deployment/operator/Genesis acceptance records remain.
 - INTEGRATION COMPLETE: **NO** — live Pay/Registry/Wallet/Exchange bindings remain unverified.
 - SECURITY QUALIFIED: **NO** — internal hardening is not the required external release gate and unresolved components remain.
@@ -462,6 +513,6 @@ At repository-remediation stage:
 
 The production-candidate ERC20/ERC20 liquidity path, canonical executor, core registries and composed Exchange user surface are real and testable. The audit repaired the stale scaffold/inventory/verification state instead of treating old metadata as truth.
 
-The remaining blockers are substantive: PublicBatchAuction completion; absent retained predeploy artifacts/materialized state; unverified live Pay→Swap bindings; and production-equivalent testnet plus external security qualification.
+The remaining blockers are deployment/release-side: absent retained predeploy artifacts/materialized state; unverified live Registry/Pay→Swap/PublicDistributionVault bindings; production-equivalent testnet qualification; and external security qualification.
 
 Do not mark 420Swap complete solely because the core Swap and Exchange tests are green.

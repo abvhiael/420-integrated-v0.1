@@ -118,6 +118,8 @@ No unresolved high-severity contract-core finding remains within the defined Gov
 
 ## GOV-AUDIT-4 — Indexer, ABI and event-model reconciliation
 
+**Status: COMPLETE — qualified at implementation SHA `4d859e2f0f9f8371aaf2ee7259e414daf17720a2`; evidence: `docs/audit/GOV-AUDIT-4-QUALIFICATION.md`.**
+
 ### Purpose
 Make canonical Civic activity reconstructable as non-authoritative `420Governance` projection state.
 

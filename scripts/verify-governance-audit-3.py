@@ -22,6 +22,7 @@ required_audit3 = [
     "testDualHouseAllIndependentPassFailPermutations",
     "testMaximumElectorateWeightArithmeticDoesNotOverflow",
     "testDuplicateBallotRejectedButSameVoterCanVoteInBothRequiredHouses",
+    "testMaliciousOverweightAndCumulativeAllocationFailClosed",
     "testHostileSnapshotAdapterRevertsAtomically",
     "testHostileVotingWeightAdapterFailsWithoutBallotOrTallyMutation",
     "testMalformedElectorateAdapterRejectedDuringConfiguration",

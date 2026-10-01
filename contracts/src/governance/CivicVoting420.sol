@@ -61,6 +61,7 @@ contract CivicVoting420 is I420System {
     error HouseNotEligible();
     error AlreadyVoted();
     error NoVotingWeight();
+    error InvalidVotingWeight();
 
     event CivicVoteCast(
         bytes32 indexed proposalId,
@@ -145,11 +146,16 @@ contract CivicVoting420 is I420System {
         weight = electorateRegistry.votingWeight(proposalId, house, msg.sender, proofData);
         if (weight == 0) revert NoVotingWeight();
 
+        uint256 totalWeight =
+            house == CivicIds420.House.COMMUNITY ? snap.community.totalWeight : snap.validator.totalWeight;
+        Tally storage t = _tallies[proposalId][uint8(house)];
+        uint256 priorParticipation = t.againstVotes + t.forVotes + t.abstainVotes;
+        if (weight > totalWeight || priorParticipation > totalWeight - weight) revert InvalidVotingWeight();
+
         prior.support = support;
         prior.weight = weight;
         prior.cast = true;
 
-        Tally storage t = _tallies[proposalId][uint8(house)];
         if (support == Support.FOR) t.forVotes += weight;
         else if (support == Support.AGAINST) t.againstVotes += weight;
         else t.abstainVotes += weight;

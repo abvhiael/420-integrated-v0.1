@@ -308,6 +308,43 @@ contract GovernanceAudit3Adversarial420Test {
         );
     }
 
+    function testMaliciousOverweightAndCumulativeAllocationFailClosed() public {
+        Stack memory overweight = _stack(false, 100, 1, 5000, 6000);
+        overweight.community.setWeight(ALICE, 101);
+        bytes32 overweightId = _create(overweight, "overweight");
+        vm.roll(101);
+        vm.prank(ALICE);
+        vm.expectRevert(CivicVoting420.InvalidVotingWeight.selector);
+        overweight.voting.castVote(
+            overweightId, CivicIds420.House.COMMUNITY, CivicVoting420.Support.FOR, ""
+        );
+        require(
+            overweight.voting.participation(overweightId, CivicIds420.House.COMMUNITY) == 0,
+            "overweight vote mutated tally"
+        );
+
+        Stack memory cumulative = _stack(false, 100, 1, 5000, 6000);
+        cumulative.community.setWeight(ALICE, 60);
+        cumulative.community.setWeight(BOB, 50);
+        bytes32 cumulativeId = _create(cumulative, "cumulative-overweight");
+        vm.roll(101);
+        _cast(cumulative, cumulativeId, CivicIds420.House.COMMUNITY, ALICE, CivicVoting420.Support.FOR);
+
+        vm.prank(BOB);
+        vm.expectRevert(CivicVoting420.InvalidVotingWeight.selector);
+        cumulative.voting.castVote(
+            cumulativeId, CivicIds420.House.COMMUNITY, CivicVoting420.Support.FOR, ""
+        );
+        require(
+            cumulative.voting.participation(cumulativeId, CivicIds420.House.COMMUNITY) == 60,
+            "cumulative over-allocation mutated tally"
+        );
+        require(
+            !cumulative.voting.ballot(cumulativeId, CivicIds420.House.COMMUNITY, BOB).cast,
+            "rejected ballot persisted"
+        );
+    }
+
     function testHostileSnapshotAdapterRevertsAtomically() public {
         Stack memory s = _stack(false, 100, 1, 5000, 6000);
         s.community.setRevertSnapshot(true);

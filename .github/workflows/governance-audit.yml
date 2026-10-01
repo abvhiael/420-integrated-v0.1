@@ -185,7 +185,7 @@ jobs:
 
       - name: GOV-AUDIT-6 deterministic deployment simulation
         working-directory: contracts
-        run: timeout 180s forge test --match-path test/GovernanceAudit6Deployment420.t.sol -vvv
+        run: FOUNDRY_SRC=src/governance FOUNDRY_TEST=test-governance-audit-6 timeout 180s forge test --match-path test-governance-audit-6/GovernanceAudit6Deployment420.t.sol -vvv
 
       - name: Run Civic contract qualification
         working-directory: contracts

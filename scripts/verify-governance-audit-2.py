@@ -51,7 +51,7 @@ if "_isCanonicalCivicGovernor" not in legacy or 'abi.encodeWithSignature("timelo
 for needle in [
     "testAuthorityBindingsRejectEOAAndForeignGraphs",
     "testTimelockRejectsForeignGovernorAndActivationIsOneTime",
-    "testFuzzLifecycleTransitionMatrix",
+    "testLifecycleTransitionMatrixExhaustive",
     "testFuzzQuorumCeilingArithmetic",
     "testFuzzApprovalCeilingArithmetic",
     "testProposalCreationRejectsBlockNumberOverflow",

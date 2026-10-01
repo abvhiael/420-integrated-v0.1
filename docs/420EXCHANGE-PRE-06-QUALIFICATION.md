@@ -6,8 +6,9 @@
 **Qualification level:** Level 1 step-specific + Level 2 Exchange lifecycle/authority-integration milestone  
 **Audit branch / PR:** `audit/exchange-pretestnet-phase-20260930` / PR #430  
 **Audit base SHA:** `4d0ede3692efe55f04a50c7bf5b749afe579eccb`  
-**Qualified implementation SHA:** `011ae238b7fdbf9643a339c71cf9357100391962`  
-**Current repository `main` observed at implementation closeout:** `53b38901a2d7ead875eb606625ae99bf3c1e1069`
+**Original qualified implementation SHA:** `011ae238b7fdbf9643a339c71cf9357100391962`  
+**Post-PRE-10 requalified accumulated implementation SHA:** `46e97d69a51deaad9460f9145735ee1cf96f658a`  
+**Current repository `main` observed at requalification:** `df8f639d8f43b763298c8750ef49d3e5849c597c`
 
 ## Canonical requirements and disposition
 
@@ -96,7 +97,43 @@ A non-NONE authorization must be explicitly confirmed independently, and the all
 
 ## Level 1 qualification
 
-Exact implementation SHA:
+### Current accumulated-app requalification
+
+After PRE-07 through PRE-10 were completed and PRE-05 was explicitly revalidated, PRE-06 was reopened against current repository truth rather than relying only on its original closeout.
+
+Exact accumulated implementation SHA:
+
+`46e97d69a51deaad9460f9145735ee1cf96f658a`
+
+Required app-specific workflow:
+
+- **420Exchange Web Verification**
+- run `36802037691`
+- run number `730`
+- event: `pull_request`
+- exact head: `46e97d69a51deaad9460f9145735ee1cf96f658a`
+- **SUCCESS**
+
+On that exact accumulated implementation SHA, the workflow reran:
+
+- PRE-04/PRE-05 quote backend static/authentication qualification — SUCCESS;
+- quote backend unit/HTTP/authentication tests — SUCCESS;
+- PRE-10 read-service static and contract/integration tests — SUCCESS;
+- complete 420Indexer shared-dependency test suite — SUCCESS;
+- Exchange web static checks, including `check-pre06.mjs` — SUCCESS;
+- all Exchange web unit/integration tests, including PRE-06 mock-E2E/adversarial coverage — SUCCESS;
+- deployable browser artifact build/verification — SUCCESS;
+- retained PRE-02 Chromium acceptance — SUCCESS;
+- retained PRE-03 authenticated-quote Chromium acceptance — SUCCESS;
+- frontend secret scan — SUCCESS.
+
+The requalification confirms that PRE-07 through PRE-10 did not weaken the PRE-06 review/confirmation/preflight/send authority boundary, lifecycle semantics or default-OFF submission behavior.
+
+No executable PRE-06 remediation was required.
+
+### Original PRE-06 closeout
+
+Exact original implementation SHA:
 
 `011ae238b7fdbf9643a339c71cf9357100391962`
 
@@ -141,15 +178,17 @@ The complete swap authority path is deterministic and mock-testable through the 
 
 ## Current-main divergence review
 
-At implementation closeout, current `main` was `53b38901a2d7ead875eb606625ae99bf3c1e1069`.
+At post-PRE-10 PRE-06 requalification, current `main` was `df8f639d8f43b763298c8750ef49d3e5849c597c`.
 
-The 59 commits between the audit base and current `main` affect Compute Market contracts/config/docs/scripts and shared qualification workflows. They do not modify:
+The 80 main-side commits since the audit base do not modify:
 
-- `exchange/web/**`
-- `exchange/quote-service/**`
-- `.github/workflows/exchange-web.yml`
+- `exchange/web/**`;
+- `exchange/quote-service/**`;
+- `exchange/read-service/**`;
+- `420-indexer/**`;
+- `.github/workflows/exchange-web.yml`.
 
-Therefore PRE-06 exact-head Exchange qualification is not invalidated by current-main divergence. Full reconciliation remains intentionally deferred to PRE-12.
+Therefore there is no upstream PRE-06 implementation conflict requiring step-local reconciliation. Full branch reconciliation remains intentionally deferred to PRE-12.
 
 ## Level 3 app-phase status
 
@@ -161,12 +200,20 @@ Repository-wide contract/Genesis qualification, 420 Integrated, Geth where appli
 
 - Real public-testnet wallet sends remain disabled by default.
 - Real deployed addresses/code hashes, balances, allowance state, gas/nonce conditions and settlement receipts remain live-testnet qualification gates.
-- PRE-10 still owns the production Exchange V13 read/Indexer/startup adapter.
-- PRE-07/PRE-08 own complete order publication/cancellation integration.
-- PRE-09 owns complete bridge proof/destination-settlement architecture.
+- PRE-10 is now COMPLETE and supplies the production Exchange V13 read/Indexer/startup adapter consumed by lifecycle reconciliation; its projections remain non-authoritative.
+- PRE-07/PRE-08 are now COMPLETE for order publication/cancellation integration.
+- PRE-09 is now COMPLETE for bridge proof/destination-settlement architecture.
 - PRE-11 owns final app packaging/security/operations closure.
 - PR #430 remains draft and must not merge until PRE-12.
 
-## Next canonical roadmap step
+## Post-PRE-10 requalification conclusion
 
-**PRE-07 — limit-order publication lifecycle.**
+**PRE-06 remains COMPLETE.**
+
+All original canonical exit criteria remain satisfied on the current accumulated Exchange implementation. No executable PRE-06 remediation was required. The current requalification is retained at implementation SHA `46e97d69a51deaad9460f9145735ee1cf96f658a` using Exchange workflow run `36802037691` / #730.
+
+## Next step in the roadmap's recommended dependency order
+
+After PRE-05, the recommended execution order proceeds to **PRE-06**. That dependency-order checkpoint is now explicitly revalidated and COMPLETE.
+
+The next **unfinished** canonical roadmap step is **PRE-11 — CI/security/packaging/operations closure.**

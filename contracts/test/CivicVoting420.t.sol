@@ -202,7 +202,7 @@ contract CivicVoting420Test {
         bytes32 proposalId = keccak256("P8");
         community.setWeight(ROOT_A, ALICE, 2);
         _register(proposalId, false);
-        proposals.transition(proposalId, CivicIds420.ProposalState.CANCELLED);
+        proposals.transition(proposalId, CivicIds420.ProposalState.FAILED);
         vm.roll(101);
 
         vm.prank(ALICE);

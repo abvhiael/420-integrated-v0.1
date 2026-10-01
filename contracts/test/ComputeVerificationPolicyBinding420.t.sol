@@ -188,17 +188,37 @@ contract ComputeVerificationPolicyBinding420Test {
         vm.prank(OWNER);
         jobs.bindVerificationPolicy(jobId, 4, POLICY, 1, commitment);
 
+        ComputeJobRegistry420.Job memory frozen = jobs.job(jobId);
+
         vm.prank(OWNER);
         (bool ok,) = address(jobs).call(
             abi.encodeCall(jobs.bindVerificationPolicy, (jobId, uint64(4), POLICY, uint32(1), commitment))
         );
         require(!ok, "stale job revision rebound policy");
 
+        ComputeJobRegistry420.Job memory afterStale = jobs.job(jobId);
+        require(
+            afterStale.revision == frozen.revision
+                && afterStale.verificationPolicyId == frozen.verificationPolicyId
+                && afterStale.verificationPolicyRevision == frozen.verificationPolicyRevision
+                && afterStale.verificationPolicyCommitment == frozen.verificationPolicyCommitment,
+            "stale policy rejection mutated frozen job policy"
+        );
+
         vm.prank(OWNER);
         (ok,) = address(jobs).call(
             abi.encodeCall(jobs.bindVerificationPolicy, (jobId, uint64(5), POLICY, uint32(1), commitment))
         );
         require(!ok, "duplicate policy binding accepted");
+
+        ComputeJobRegistry420.Job memory afterDuplicate = jobs.job(jobId);
+        require(
+            afterDuplicate.revision == frozen.revision
+                && afterDuplicate.verificationPolicyId == frozen.verificationPolicyId
+                && afterDuplicate.verificationPolicyRevision == frozen.verificationPolicyRevision
+                && afterDuplicate.verificationPolicyCommitment == frozen.verificationPolicyCommitment,
+            "duplicate policy rejection mutated frozen job policy"
+        );
     }
 
     function testPolicyRegistryBindingIsOneTimeAndDeploymentScoped() public {

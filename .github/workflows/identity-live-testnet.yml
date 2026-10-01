@@ -10,7 +10,7 @@ on:
       evidence_draft_path:
         description: Reviewed ID-AUDIT-9 lifecycle/recovery evidence draft with real tx hashes
         required: true
-        default: artifacts/identity/identity-audit-9-evidence-draft.json
+        default: docs/audit/ID-AUDIT-9-LIVE-EVIDENCE-DRAFT.json
       timeout_seconds:
         description: Derived-service convergence timeout
         required: true

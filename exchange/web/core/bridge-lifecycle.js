@@ -93,6 +93,23 @@ export function createProofProviderAdapter(fetchProof){
     },
   });
 }
+export function createProofVerifierAdapter(verifyProof){
+  if(typeof verifyProof!=='function')fail('PROOF_VERIFIER_REQUIRED','proof verifier function required');
+  return Object.freeze({
+    async verify(input){
+      const result=await verifyProof(Object.freeze({...input}));
+      if(!result||typeof result!=='object'||result.valid!==true)fail('PROOF_VERIFICATION_FAILED',String(result?.reason??'proof verifier rejected proof'));
+      return Object.freeze({...result});
+    },
+  });
+}
+export function createMemoryBridgeLifecycleStore(){
+  const records=new Map();
+  return Object.freeze({
+    save(key,snapshot){records.set(id(key,'lifecycle key'),structuredClone(snapshot));return true;},
+    load(key){const value=records.get(id(key,'lifecycle key'));return value?structuredClone(value):null;},
+  });
+}
 export function validateBridgeProof({proof,transfer,sourceTxHash,sourceBlockHash,sourceMessageId}={}){
   const t=canonicalBridgeTransfer(transfer),m=t.manifest;
   if(!proof||proof.schema!=='420-exchange-bridge-proof-v1')fail('PROOF_INVALID','unsupported proof schema');
@@ -141,15 +158,20 @@ export function reconcileBridgeProjection({transfer,sourceTxHash=null,destinatio
 }
 
 export class BridgeLifecycleController{
-  constructor({transfer,proofProvider,replayGuard=createMemoryReplayGuard(),projectionReader=null,clock=()=>Math.floor(Date.now()/1000)}={}){
+  constructor({transfer,proofProvider,proofVerifier,replayGuard=createMemoryReplayGuard(),projectionReader=null,stateStore=createMemoryBridgeLifecycleStore(),clock=()=>Math.floor(Date.now()/1000)}={}){
     this.transfer=canonicalBridgeTransfer(transfer);
     if(!proofProvider||typeof proofProvider.request!=='function')fail('PROOF_PROVIDER_REQUIRED','provider-neutral proof provider required');
+    if(!proofVerifier||typeof proofVerifier.verify!=='function')fail('PROOF_VERIFIER_REQUIRED','provider-neutral proof verifier required');
     if(!replayGuard||typeof replayGuard.isConsumed!=='function'||typeof replayGuard.consume!=='function')fail('REPLAY_GUARD_REQUIRED','replay guard required');
     if(projectionReader!==null&&typeof projectionReader!=='function')fail('PROJECTION_READER_INVALID','projection reader must be a function');
-    this.proofProvider=proofProvider;this.replayGuard=replayGuard;this.projectionReader=projectionReader;this.clock=clock;
+    if(!stateStore||typeof stateStore.save!=='function'||typeof stateStore.load!=='function')fail('STATE_STORE_REQUIRED','bridge lifecycle state store required');
+    this.proofProvider=proofProvider;this.proofVerifier=proofVerifier;this.replayGuard=replayGuard;this.projectionReader=projectionReader;this.stateStore=stateStore;this.clock=clock;
+    this.lifecycleKey=keccak256('0x'+bytes32Word(this.transfer.manifestFingerprint)+bytes32Word(this.transfer.replayDomain)+addressWord(this.transfer.sender)+addressWord(this.transfer.beneficiary));
     this.state='DRAFT';this.history=[];this.source=null;this.proof=null;this.destination=null;this.settlement=null;
+    this.persist();
   }
-  transition(state,details={}){if(!BRIDGE_LIFECYCLE_STATES.includes(state))fail('STATE_INVALID','invalid bridge lifecycle state');this.state=state;this.history.push(Object.freeze({state,...details}));return this.snapshot();}
+  persist(){this.stateStore.save(this.lifecycleKey,this.snapshot());return this.snapshot();}
+  transition(state,details={}){if(!BRIDGE_LIFECYCLE_STATES.includes(state))fail('STATE_INVALID','invalid bridge lifecycle state');this.state=state;this.history.push(Object.freeze({state,...details}));return this.persist();}
   snapshot(){return Object.freeze({state:this.state,transfer:this.transfer,source:this.source,proof:this.proof,destination:this.destination,settlement:this.settlement,history:Object.freeze([...this.history])});}
   assertState(...states){if(!states.includes(this.state))fail('STATE_MISMATCH',`bridge state ${this.state} invalid for operation`);}
   assertNotExpired(){if(!Number.isSafeInteger(this.clock())||this.clock()>=this.transfer.expiresAt){this.transition('EXPIRED');fail('TRANSFER_EXPIRED','bridge transfer expired');}}
@@ -179,7 +201,17 @@ export class BridgeLifecycleController{
     this.proof=validateBridgeProof({proof:result,transfer:this.transfer,sourceTxHash:this.source.txHash,sourceBlockHash:this.source.blockHash,sourceMessageId:this.source.messageId});
     return this.transition('PROOF_AVAILABLE',{proofId:this.proof.proofId});
   }
-  verifyProof(){this.assertState('PROOF_AVAILABLE');this.assertNotExpired();if(this.proof.invalidated===true){this.transition('PROOF_INVALIDATED');fail('PROOF_INVALIDATED','proof invalidated');}return this.transition('PROOF_VERIFIED',{proofId:this.proof.proofId});}
+  async verifyProof(){
+    this.assertState('PROOF_AVAILABLE');this.assertNotExpired();
+    if(this.proof.invalidated===true){this.transition('PROOF_INVALIDATED');fail('PROOF_INVALIDATED','proof invalidated');}
+    const verdict=await this.proofVerifier.verify(Object.freeze({
+      schema:'420-exchange-bridge-proof-verification-v1',proof:this.proof,transfer:this.transfer,source:this.source,
+      verifierId:this.transfer.manifest.verifierId,verifierConfigHash:this.transfer.manifest.verifierConfigHash,
+      manifestFingerprint:this.transfer.manifestFingerprint,
+    }));
+    if(verdict.invalidated===true){this.transition('PROOF_INVALIDATED',{reason:'verifier-invalidated'});fail('PROOF_INVALIDATED','proof verifier invalidated proof');}
+    return this.transition('PROOF_VERIFIED',{proofId:this.proof.proofId,verifierId:this.transfer.manifest.verifierId,verificationId:verdict.verificationId??null});
+  }
   invalidateProof(reason='proof-invalidated'){this.assertState('PROOF_PENDING','PROOF_AVAILABLE','PROOF_VERIFIED','DESTINATION_READY');this.proof=null;return this.transition('PROOF_INVALIDATED',{reason});}
   async prepareDestination(){
     this.assertState('PROOF_VERIFIED');this.assertNotExpired();

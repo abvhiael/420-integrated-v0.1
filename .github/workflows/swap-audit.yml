@@ -6,7 +6,10 @@ on:
       - audit/420swap-complete-20261001
     paths:
       - "contracts/src/swap/**"
+      - "contracts/src/oracle/TWAPOracleSourceAdapter420.sol"
+      - "contracts/src/exchange/ExchangeOracleGuard420.sol"
       - "contracts/test/Swap*.t.sol"
+      - "contracts/test/ExchangeOracleGuard420*.t.sol"
       - "contracts/test/CanonicalConstantProductPool420.t.sol"
       - "contracts/test/PaySwap*.t.sol"
       - "contracts/config/swap/**"
@@ -56,13 +59,16 @@ jobs:
       - name: Build swap contracts and tests
         working-directory: contracts
         run: |
-          forge build src/swap test/CanonicalConstantProductPool420.t.sol test/SwapGenesisDEXFactory420.t.sol test/SwapPermissionlessDEXFactory420.t.sol test/SwapGenesisIntegration420.t.sol test/SwapFuzz420.t.sol test/SwapInvariant420.t.sol test/PaySwapGenesisIntegration420.t.sol test/PaySwapBridgeGenesisIntegration420.t.sol --sizes
+          forge build src/swap src/oracle/TWAPOracleSourceAdapter420.sol src/exchange/ExchangeOracleGuard420.sol test/CanonicalConstantProductPool420.t.sol test/SwapGenesisDEXFactory420.t.sol test/SwapPermissionlessDEXFactory420.t.sol test/SwapTWAPOracle420.t.sol test/SwapGenesisIntegration420.t.sol test/SwapFuzz420.t.sol test/SwapInvariant420.t.sol test/PaySwapGenesisIntegration420.t.sol test/PaySwapBridgeGenesisIntegration420.t.sol --sizes
       - name: Genesis DEX factory tests
         working-directory: contracts
         run: forge test --match-path test/SwapGenesisDEXFactory420.t.sol -vvv
       - name: Permissionless DEX factory tests
         working-directory: contracts
         run: forge test --match-path test/SwapPermissionlessDEXFactory420.t.sol -vvv
+      - name: TWAP and oracle integration tests
+        working-directory: contracts
+        run: forge test --match-path test/SwapTWAPOracle420.t.sol -vvv
       - name: Canonical pool tests
         working-directory: contracts
         run: forge test --match-path test/CanonicalConstantProductPool420.t.sol -vvv

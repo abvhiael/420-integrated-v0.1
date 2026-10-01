@@ -14,25 +14,44 @@ import "../src/governance/CivicVoting420.sol";
 import "../src/governance/CivicGovernor420.sol";
 
 interface VmGovAudit6 {
-    function warp(uint256) external;
+    function warp(
+        uint256
+    ) external;
 }
 
 contract GovAudit6ElectorateSource is ICivicElectorateSource420 {
     bytes32 private immutable _type;
-    constructor(bytes32 type_) { _type = type_; }
-    function sourceType() external view returns (bytes32) { return _type; }
-    function snapshotAt(uint64 blockNumber) external pure returns (bytes32,uint256) {
+
+    constructor(
+        bytes32 type_
+    ) {
+        _type = type_;
+    }
+
+    function sourceType() external view returns (bytes32) {
+        return _type;
+    }
+
+    function snapshotAt(
+        uint64 blockNumber
+    ) external pure returns (bytes32, uint256) {
         return (keccak256(abi.encode("fixture", blockNumber)), 100);
     }
-    function votingWeight(bytes32, address, bytes calldata) external pure returns (uint256) { return 1; }
+
+    function votingWeight(
+        bytes32,
+        address,
+        bytes calldata
+    ) external pure returns (uint256) {
+        return 1;
+    }
 }
 
 /// @notice GOV-AUDIT-6 deployment-order simulation.
 /// @dev Fixture policy values are intentionally non-canonical. This proves the deployment/handoff machinery only;
 /// canonical bootstrap authority, electorate sources and initial rules remain external release inputs until frozen.
 contract GovernanceAudit6Deployment420Test {
-    VmGovAudit6 private constant vm =
-        VmGovAudit6(address(uint160(uint256(keccak256("hevm cheat code")))));
+    VmGovAudit6 private constant vm = VmGovAudit6(address(uint160(uint256(keccak256("hevm cheat code")))));
 
     GovernanceTimelock private timelock;
     Governance420 private compatibility;
@@ -43,7 +62,11 @@ contract GovernanceAudit6Deployment420Test {
     CivicVoting420 private voting;
     CivicGovernor420 private governor;
 
-    function _execute(address target, bytes memory data, bytes32 salt) private {
+    function _execute(
+        address target,
+        bytes memory data,
+        bytes32 salt
+    ) private {
         bytes32 id = keccak256(abi.encode("GOV-AUDIT-6", salt, target, data, block.timestamp));
         timelock.schedule(id, target, 0, data, GovernanceTimelock.Class.G1);
         vm.warp(block.timestamp + timelock.G1_DELAY() + 1);
@@ -58,54 +81,126 @@ contract GovernanceAudit6Deployment420Test {
         proposals = new CivicProposalRegistry420(address(timelock));
         electorates = new CivicElectorateRegistry420(address(timelock));
         voting = new CivicVoting420(address(proposals), address(electorates));
-        governor = new CivicGovernor420(
-            address(constitution), address(proposals), address(electorates), address(voting)
-        );
+        governor =
+            new CivicGovernor420(address(constitution), address(proposals), address(electorates), address(voting));
     }
 
     function _fixtureInitialize() private {
-        GovAudit6ElectorateSource community =
-            new GovAudit6ElectorateSource(keccak256("GOV_AUDIT_6_COMMUNITY_FIXTURE"));
-        GovAudit6ElectorateSource validator =
-            new GovAudit6ElectorateSource(keccak256("GOV_AUDIT_6_VALIDATOR_FIXTURE"));
+        GovAudit6ElectorateSource community = new GovAudit6ElectorateSource(keccak256("GOV_AUDIT_6_COMMUNITY_FIXTURE"));
+        GovAudit6ElectorateSource validator = new GovAudit6ElectorateSource(keccak256("GOV_AUDIT_6_VALIDATOR_FIXTURE"));
 
         _execute(
             address(electorates),
-            abi.encodeCall(CivicElectorateRegistry420.setHouseSource, (CivicIds420.House.COMMUNITY, address(community))),
+            abi.encodeCall(
+                CivicElectorateRegistry420.setHouseSource, (CivicIds420.House.COMMUNITY, address(community))
+            ),
             keccak256("community-source")
         );
         _execute(
             address(electorates),
-            abi.encodeCall(CivicElectorateRegistry420.setHouseSource, (CivicIds420.House.VALIDATOR, address(validator))),
+            abi.encodeCall(
+                CivicElectorateRegistry420.setHouseSource, (CivicIds420.House.VALIDATOR, address(validator))
+            ),
             keccak256("validator-source")
         );
 
-        _execute(address(constitution), abi.encodeCall(CivicConstitution420.setRule,
-            (CivicIds420.ProposalClass.G1, uint64(100), uint64(7 days), uint16(5000), uint16(6000), uint16(0), uint16(0), false)),
-            keccak256("g1"));
-        _execute(address(constitution), abi.encodeCall(CivicConstitution420.setRule,
-            (CivicIds420.ProposalClass.G2, uint64(100), uint64(14 days), uint16(5000), uint16(6000), uint16(0), uint16(0), false)),
-            keccak256("g2"));
-        _execute(address(constitution), abi.encodeCall(CivicConstitution420.setRule,
-            (CivicIds420.ProposalClass.G3, uint64(100), uint64(14 days), uint16(5000), uint16(6000), uint16(5000), uint16(6000), true)),
-            keccak256("g3"));
-        _execute(address(constitution), abi.encodeCall(CivicConstitution420.setRule,
-            (CivicIds420.ProposalClass.G4, uint64(100), uint64(42 days), uint16(5000), uint16(6000), uint16(5000), uint16(6000), true)),
-            keccak256("g4"));
+        _execute(
+            address(constitution),
+            abi.encodeCall(
+                CivicConstitution420.setRule,
+                (
+                    CivicIds420.ProposalClass.G1,
+                    uint64(100),
+                    uint64(7 days),
+                    uint16(5000),
+                    uint16(6000),
+                    uint16(0),
+                    uint16(0),
+                    false
+                )
+            ),
+            keccak256("g1")
+        );
+        _execute(
+            address(constitution),
+            abi.encodeCall(
+                CivicConstitution420.setRule,
+                (
+                    CivicIds420.ProposalClass.G2,
+                    uint64(100),
+                    uint64(14 days),
+                    uint16(5000),
+                    uint16(6000),
+                    uint16(0),
+                    uint16(0),
+                    false
+                )
+            ),
+            keccak256("g2")
+        );
+        _execute(
+            address(constitution),
+            abi.encodeCall(
+                CivicConstitution420.setRule,
+                (
+                    CivicIds420.ProposalClass.G3,
+                    uint64(100),
+                    uint64(14 days),
+                    uint16(5000),
+                    uint16(6000),
+                    uint16(5000),
+                    uint16(6000),
+                    true
+                )
+            ),
+            keccak256("g3")
+        );
+        _execute(
+            address(constitution),
+            abi.encodeCall(
+                CivicConstitution420.setRule,
+                (
+                    CivicIds420.ProposalClass.G4,
+                    uint64(100),
+                    uint64(42 days),
+                    uint16(5000),
+                    uint16(6000),
+                    uint16(5000),
+                    uint16(6000),
+                    true
+                )
+            ),
+            keccak256("g4")
+        );
 
-        _execute(address(proposals), abi.encodeCall(CivicProposalRegistry420.bindProposalAuthority, (address(governor))),
-            keccak256("proposal-authority"));
-        _execute(address(electorates), abi.encodeCall(CivicElectorateRegistry420.bindSnapshotAuthority, (address(governor))),
-            keccak256("snapshot-authority"));
-        _execute(address(compatibility), abi.encodeCall(Governance420.bindCivicGovernor, (address(governor))),
-            keccak256("compatibility-bind"));
+        _execute(
+            address(proposals),
+            abi.encodeCall(CivicProposalRegistry420.bindProposalAuthority, (address(governor))),
+            keccak256("proposal-authority")
+        );
+        _execute(
+            address(electorates),
+            abi.encodeCall(CivicElectorateRegistry420.bindSnapshotAuthority, (address(governor))),
+            keccak256("snapshot-authority")
+        );
+        _execute(
+            address(compatibility),
+            abi.encodeCall(Governance420.bindCivicGovernor, (address(governor))),
+            keccak256("compatibility-bind")
+        );
     }
 
-    function _register(bytes32 id, address implementation, bytes32 salt) private {
-        Types420.Version memory version = Types420.Version({major:1, minor:0, patch:0});
+    function _register(
+        bytes32 id,
+        address implementation,
+        bytes32 salt
+    ) private {
+        Types420.Version memory version = Types420.Version({ major: 1, minor: 0, patch: 0 });
         _execute(
             address(registry),
-            abi.encodeCall(ProtocolRegistry.registerComponent, (id, implementation, version, Types420.Lifecycle.ACTIVE)),
+            abi.encodeCall(
+                ProtocolRegistry.registerComponent, (id, implementation, version, Types420.Lifecycle.ACTIVE)
+            ),
             salt
         );
     }
@@ -130,9 +225,11 @@ contract GovernanceAudit6Deployment420Test {
         _register(governorId, address(governor), keccak256("reg-governor"));
 
         bytes32 serviceId = keccak256("420/service/governance/v1");
-        bytes32 dependencyRoot = keccak256(abi.encode(
-            address(constitution), address(proposals), address(electorates), address(voting), address(governor)
-        ));
+        bytes32 dependencyRoot = keccak256(
+            abi.encode(
+                address(constitution), address(proposals), address(electorates), address(voting), address(governor)
+            )
+        );
         _execute(
             address(registry),
             abi.encodeCall(
@@ -165,9 +262,8 @@ contract GovernanceAudit6Deployment420Test {
         require(timelock.civicAuthorityActivated(), "Civic authority inactive");
         require(timelock.scheduler() == address(governor), "scheduler not transferred");
 
-        (bool repeat,) = address(timelock).call(
-            abi.encodeCall(GovernanceTimelock.activateCivicAuthority, (address(governor)))
-        );
+        (bool repeat,) =
+            address(timelock).call(abi.encodeCall(GovernanceTimelock.activateCivicAuthority, (address(governor))));
         require(!repeat, "authority handoff repeated");
         (bool cancel,) = address(timelock).call(abi.encodeCall(GovernanceTimelock.cancel, (bytes32(uint256(1)))));
         require(!cancel, "bootstrap cancellation remained available");

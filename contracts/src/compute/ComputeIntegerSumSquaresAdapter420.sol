@@ -6,6 +6,8 @@ import "./IComputeDeterministicVerificationAdapter420.sol";
 /// @notice Reference deterministic adapter for the retained bounded sum-of-squares workload.
 /// @dev This is one executable profile, not a generic claim that arbitrary GPU/AI workloads are deterministic.
 contract ComputeIntegerSumSquaresAdapter420 is IComputeDeterministicVerificationAdapter420 {
+    bytes32 public constant ADAPTER_KIND =
+        keccak256("420/CMP/VERIFICATION_ADAPTER/DETERMINISTIC/V1");
     bytes32 public constant WORKLOAD_TYPE =
         keccak256("420/CMP/WORKLOAD/INTEGER_SUM_OF_SQUARES/V1");
     bytes32 public constant PROFILE_ID =

@@ -3,7 +3,7 @@
   "step": "ID-AUDIT-9",
   "name": "Production-equivalent testnet deployment qualification",
   "status": "NOT_YET_COMPLETE_BLOCKED_OFFICIAL_TESTNET",
-  "repositoryImplementation": "IMPLEMENTED_QUALIFICATION_PENDING",
+  "repositoryImplementation": "COMPLETE_LEVEL1_QUALIFIED",
   "repository": "abvhiael/420-integrated-v0.1",
   "branch": "identity-audit-20260930",
   "pr": 438,
@@ -13,14 +13,24 @@
     "runner": "420-indexer/scripts/qualify-identity-testnet.mjs",
     "workflow": ".github/workflows/identity-live-testnet.yml",
     "readinessVerifier": "scripts/verify-id-audit-9-testnet-readiness.py",
-    "evidenceDraftTemplate": "docs/audit/ID-AUDIT-9-LIVE-EVIDENCE-DRAFT.example.json"
+    "evidenceDraftTemplate": "docs/audit/ID-AUDIT-9-LIVE-EVIDENCE-DRAFT.example.json",
+    "hostileTests": {
+      "status": "PASS"
+    },
+    "full420Indexer": {
+      "tests": 166,
+      "passed": 165,
+      "failed": 0,
+      "skipped": 1
+    }
   },
   "readiness": {
     "officialManifest": "ABSENT",
     "publicEndpoints": "PLACEHOLDER_OR_UNPROVISIONED",
     "liveQualificationComplete": false,
     "signal": "BLOCKED_OFFICIAL_TESTNET_MANIFEST",
-    "testnetReady": false
+    "testnetReady": false,
+    "repositoryHarnessQualified": true
   },
   "canonicalLiveExitCriteria": {
     "chainIdentity": "BLOCKED_NOT_RUN",
@@ -46,5 +56,26 @@
     "previousMilestone": "ID-AUDIT-6 derived-service integration",
     "liveExecutionWillBeMaterialCrossComponentEvidence": true
   },
-  "nextCanonicalStep": "ID-AUDIT-9 remains active until TESTNET READY = YES; then ID-AUDIT-10 — phase closeout, reconciliation and retained evidence"
+  "nextCanonicalStep": "ID-AUDIT-9 remains active until TESTNET READY = YES; then ID-AUDIT-10 — phase closeout, reconciliation and retained evidence",
+  "qualifiedImplementationSha": "5cc5879e714015f5e72b41bbaeb7b23bfe127e2d",
+  "qualificationSha": "2e6c177cdbdf85b73bf1cbf71a77896aba0d111a",
+  "qualificationPr": 448,
+  "currentMainAtQualification": "e8d9096c4029c3c0218113afc1cbd3b8d0005878",
+  "runs": {
+    "identityAudit9": {
+      "id": 36883384873,
+      "job": 110440508913,
+      "conclusion": "success"
+    },
+    "auditBranch420Indexer": {
+      "id": 36883364364,
+      "conclusion": "success"
+    }
+  },
+  "level1": {
+    "status": "PASS",
+    "exactHead": "2e6c177cdbdf85b73bf1cbf71a77896aba0d111a",
+    "implementationSha": "5cc5879e714015f5e72b41bbaeb7b23bfe127e2d"
+  },
+  "blocker": "OFFICIAL_PUBLIC_TESTNET_NOT_AVAILABLE"
 }

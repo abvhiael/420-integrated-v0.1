@@ -6,6 +6,8 @@ import "./CivicIds420.sol";
 import "./CivicElectorateRegistry420.sol";
 
 interface ICivicProposalRegistryVoting420 {
+    function governanceTimelock() external view returns (address);
+
     function proposals(
         bytes32 proposalId
     )
@@ -76,8 +78,17 @@ contract CivicVoting420 is I420System {
             proposalRegistry_ == address(0) || electorateRegistry_ == address(0) || proposalRegistry_.code.length == 0
                 || electorateRegistry_.code.length == 0
         ) revert InvalidRegistry();
-        proposalRegistry = ICivicProposalRegistryVoting420(proposalRegistry_);
-        electorateRegistry = CivicElectorateRegistry420(electorateRegistry_);
+        ICivicProposalRegistryVoting420 proposalRegistryContract =
+            ICivicProposalRegistryVoting420(proposalRegistry_);
+        CivicElectorateRegistry420 electorateRegistryContract =
+            CivicElectorateRegistry420(electorateRegistry_);
+        address timelock_ = proposalRegistryContract.governanceTimelock();
+        if (
+            timelock_ == address(0) || electorateRegistryContract.governanceTimelock() != timelock_
+        ) revert InvalidRegistry();
+
+        proposalRegistry = proposalRegistryContract;
+        electorateRegistry = electorateRegistryContract;
     }
 
     function systemName() external pure returns (string memory) {

@@ -1,6 +1,6 @@
 # ID-AUDIT-5 — Frozen Predeploy Materialization & Genesis State
 
-**Status:** IMPLEMENTED — Level 1 qualification pending exact-head materialization/CI  
+**Status:** COMPLETE — Level 1 qualified  
 **Repository:** `abvhiael/420-integrated-v0.1`  
 **Working PR:** #438  
 **Canonical roadmap:** `docs/audit/420IDENTITY-AUDIT-REMEDIATION-ROADMAP.md`
@@ -211,11 +211,87 @@ to trigger the required final exact-head qualification.
 
 ## Exact-head qualification evidence
 
-Pending exact-head rerun on the post-materialization repository head.
+**Qualified implementation SHA:** `22a5ed23265ca532f0a6acb656cba574b1ce4e69`  
+**Current main at qualification:** `cbff831984df5d57540a26c879663cf95bcf61c9`  
+**Audit merge base:** `df8f639d8f43b763298c8750ef49d3e5849c597c`  
+**Branch divergence at qualification:** 47 commits ahead / 488 commits behind current `main`.
+
+Current-main authority was checked before closeout:
+
+- `genesis-address-namespace.json` is byte-identical and still uniquely fixes Identity420 at `0x0436`;
+- `storage-init.json` is byte-identical and still binds Identity420 only to the frozen GovernanceTimelock constructor input;
+- current-main Identity source is still the original audit baseline blob
+  `bb982605d94090b6cbd473079c722a39e00ed19d`; no competing main-only Identity implementation has appeared;
+- current main still has Identity420 `SOURCE_READY` and no retained `Identity420.json` artifact, so it contains no competing
+  artifact/predeploy authority; this branch is the active remediation candidate;
+- unrelated main-side Registry/Names/Compute/config evolution is intentionally reconciled once at ID-AUDIT-10 rather than
+  importing hundreds of unrelated commits into this ordinary Level 1 step.
+
+### Final exact-head Level 1 results
+
+- **420Identity ID-AUDIT-5** run `36817976700` / run number 6 — **SUCCESS**
+  - exact-head checkout/assertion — success;
+  - pinned Foundry/Solidity profile verification — success;
+  - exact `Identity420.sol` compile — success;
+  - retained ID-AUDIT-4 artifact reproduction/verification — success;
+  - deterministic ID-AUDIT-5 materialization — success;
+  - independent ID-AUDIT-5 predeploy verifier — success;
+  - adversarial materialization suite — **11 passed**;
+  - canonical Genesis address verifier — success;
+  - active namespace collision audit — success;
+  - physical predeploy/deployment authority verification — success;
+  - `Identity420Audit.t.sol` — **18 passed / 0 failed / 0 skipped**;
+  - `Identity420Compatibility.t.sol` — **6 passed / 0 failed / 0 skipped**;
+  - `RegistryIdentityNames420.t.sol` — **10 passed / 0 failed / 0 skipped**;
+  - generated-output comparison — **already current**, no further config/deployment mutation;
+  - evidence upload — success.
+- **420Identity ID-AUDIT-4** run `36817976657` / run number 23 — **SUCCESS** after making the prior artifact verifier
+  accept the canonical later `ARTIFACT_READY` state while still requiring the retained artifact/state/hash boundary.
+- **Genesis Address Authority** run `36817976658` / run number 362 — **SUCCESS**.
+- **420Docs Qualification** run `36817976636` / run number 3749 — **SUCCESS**.
+- **420 Developer Hub** run `36817976601` / run number 321 — **SUCCESS**.
+- **420Indexer** package workflow run `36817976711` / run number 631 — **SUCCESS**.
+- broader **420Indexer** run `36817976627` / run number 1169 — **SUCCESS**.
+- **420 Wallet Web Verification** run `36817976653` / run number 1114 — **SUCCESS**.
+- directly triggered Registry address/metadata compatibility workflows also completed successfully.
+
+The generic `Solidity Contracts` workflow is not required as ID-AUDIT-5 evidence. This ordinary step's focused
+workflow performs the affected exact Identity compile and all retained Identity/Names Solidity regressions; complete
+repository Solidity inventory remains intentionally deferred to Level 3.
+
+### Exit-criterion reconciliation
+
+| Original requirement | Result |
+| --- | --- |
+| frozen Identity owner/address remains `0x0436` | PASS |
+| pinned materialized runtime retained | PASS |
+| GovernanceTimelock immutable patched to `0x0429` | PASS — 4 compiler references |
+| explicit mutable Genesis state retained | PASS — empty |
+| explicit storage root retained | PASS — canonical empty trie root |
+| runtime code hash retained and reproducible | PASS — `0xda0fcd565d7aea6590b3e0ec468f7b99af50138b62527e770ca367a57e6cfd86` |
+| source/compiler provenance retained | PASS |
+| collision/namespace authority verified | PASS |
+| predeploy plan promoted from `SOURCE_READY` to `ARTIFACT_READY` | PASS |
+| deployment manifest wired to runtime/state/provenance | PASS |
+| adversarial materialization checks | PASS — 11/11 |
+| retained Identity/Names regressions | PASS — 34/34 |
+| exact-head Level 1 CI | PASS |
+
+No Level 2 milestone is required for this step. The predeploy work introduces no new runtime authority or shared
+service; broader derived-service integration qualification begins in ID-AUDIT-6.
+
+Level 3 whole-app/current-main/Genesis reconciliation remains intentionally deferred to
+**ID-AUDIT-10 — phase closeout, reconciliation and retained evidence**.
+
+Live testnet code/storage/immutable verification remains intentionally deferred to ID-AUDIT-9 and is not claimed here.
+
+This closeout update is evidence-only. It changes no executable code, tests, workflows, dependencies, configuration,
+generated artifacts, interfaces or deployment state, so it references the already-qualified implementation SHA without
+recursively rerunning Level 1.
 
 ## Completion state
 
-**PENDING LEVEL 1 EXACT-HEAD QUALIFICATION**
+**ID-AUDIT-5 — COMPLETE.**
 
 Next canonical step after successful closeout:
 

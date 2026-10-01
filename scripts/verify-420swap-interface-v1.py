@@ -17,7 +17,7 @@ for f in required:
 factory=(root/'contracts/src/swap/GenesisDEXFactory.sol').read_text()
 for t in ['REGISTRATION_ONLY','registration-only','registerPool','poolImplementation','_requireGenesisGovernance','_requireOperational']:
     if t not in factory:e.append('genesis factory missing '+t)
-if 'new CanonicalConstantProductPool420' in factory or 'create2' in factory.lower():
+if 'new CanonicalConstantProductPool420' in factory or 'function createPool' in factory or 'create2(' in factory.lower():
     e.append('genesis factory unexpectedly contains pool deployment semantics')
 exe=(root/'contracts/src/swap/CanonicalSwapExecutor420.sol').read_text()
 for t in ['_canonicalSettlementAsset','_requireHealthyMarket','trustedCaller','CANONICAL_MARKET_REGISTRY','input overspend','under settlement','ACTION_EXECUTE_SWAP']:

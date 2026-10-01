@@ -5,6 +5,8 @@ import "../src/system/ValidatorRegistry.sol";
 import "../src/system/RewardController.sol";
 import "../src/system/CommunityValidatorReserve.sol";
 import "../src/apps/Stake420.sol";
+import "../src/interfaces/genesis/ISystemSafety420.sol";
+import "./helpers/GenesisMocks420.sol";
 
 interface VmStakeValidatorGenesis420 {
     function prank(address msgSender) external;
@@ -18,10 +20,12 @@ contract StakeValidatorGenesis420Test {
     RewardController internal rewards;
     CommunityValidatorReserve internal reserve;
     Stake420 internal stake;
+    GenesisMockEnvironment420 internal env;
     address internal constant SYSTEM_CALLER = 0x000000000000000000000000000000000000043C;
 
     function setUp() public {
-        registry = new ValidatorRegistry(address(this));
+        env = new GenesisMockEnvironment420();
+        registry = new ValidatorRegistry(address(this), address(env.registry()), keccak256("stake-test-genesis"));
         rewards = new RewardController(address(this));
         reserve = new CommunityValidatorReserve(address(this));
         registry.bindConsensusSystemCaller(SYSTEM_CALLER);
@@ -30,6 +34,16 @@ contract StakeValidatorGenesis420Test {
         reserve.bindValidatorRegistry(address(registry));
         vm.deal(address(reserve), reserve.GENESIS_RESERVE());
         stake = new Stake420(address(registry), address(rewards));
+    }
+
+    function testStakeGenesisInitializationIntrospection() public view {
+        bytes32 expected = keccak256("stake-test-genesis");
+        require(registry.genesisInitialized(), "stake genesis not initialized");
+        require(registry.initializationVersion() == 1, "stake init version");
+        require(registry.genesisConfigHash() == expected, "stake config hash");
+        require(registry.assertGenesisConfiguration(expected), "stake config assertion");
+        require(!registry.assertGenesisConfiguration(keccak256("wrong")), "wrong stake config accepted");
+        require(registry.stakeProtocolRegistry() == address(env.registry()), "stake registry binding");
     }
 
     function testGenesisBondLifecycleAndDelegationPolicy() public view {
@@ -119,6 +133,33 @@ contract StakeValidatorGenesis420Test {
         _rollPastActivation(id);
         _state(id, ValidatorRegistry.Status.ELIGIBLE, 2, 1, 0, 0);
         require(registry.eligibleValidatorCount() == 1, "eligible");
+    }
+
+    function testSystemSafetyBlocksNewActivationOutsideNormal() public {
+        (bytes32 id,) = _registerSelfFunded("safety-activation", 14);
+        _state(id, ValidatorRegistry.Status.PROBATION, 1, 0, 0, 0);
+        _rollPastActivation(id);
+        _state(id, ValidatorRegistry.Status.ELIGIBLE, 2, 1, 0, 0);
+
+        env.safety().setState(ISystemSafety420.SafetyState.HALTED);
+        vm.prank(SYSTEM_CALLER);
+        (bool activated,) = address(registry).call(
+            abi.encodeWithSelector(
+                registry.applyConsensusState.selector,
+                id,
+                ValidatorRegistry.Status.ACTIVE,
+                uint64(3),
+                uint64(1),
+                uint64(4),
+                uint64(0)
+            )
+        );
+        require(!activated, "HALTED safety admitted activation");
+        require(registry.getValidator(id).status == ValidatorRegistry.Status.ELIGIBLE, "failed activation mutated status");
+
+        env.safety().setState(ISystemSafety420.SafetyState.NORMAL);
+        _state(id, ValidatorRegistry.Status.ACTIVE, 3, 1, 4, 0);
+        require(registry.getValidator(id).status == ValidatorRegistry.Status.ACTIVE, "normal activation failed");
     }
 
     function testCooldownIsBondedButNotSelectionEligible() public {
@@ -220,6 +261,15 @@ contract StakeValidatorGenesis420Test {
         _state(id, ValidatorRegistry.Status.WITHDRAWABLE, 4, 1, 0, 0);
         uint256 withdrawalBefore = withdrawal.balance;
         uint256 reserveBefore = address(reserve).balance;
+
+        env.safety().setAllowed(false);
+        vm.prank(withdrawal);
+        (bool blocked,) = address(registry).call(abi.encodeWithSelector(registry.withdrawBond.selector, id));
+        require(!blocked, "withdrawal ignored SystemSafety denial");
+        require(registry.getValidator(id).status == ValidatorRegistry.Status.WITHDRAWABLE, "blocked withdrawal mutated status");
+
+        env.safety().setAllowed(true);
+        env.safety().setState(ISystemSafety420.SafetyState.HALTED);
         vm.prank(withdrawal);
         registry.withdrawBond(id);
         ValidatorRegistry.Validator memory exited = registry.getValidator(id);

@@ -17,7 +17,7 @@ contract CivicMerkleElectorateSource420 is SystemAccess, ICivicElectorateSource4
         uint256 totalWeight;
     }
 
-    bytes32 private immutable _sourceType;
+    bytes32 private _sourceType;
     Checkpoint[] private _checkpoints;
 
     error InvalidSourceType();

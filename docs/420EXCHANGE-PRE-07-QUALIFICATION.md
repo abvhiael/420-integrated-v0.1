@@ -6,8 +6,9 @@
 **Qualification level:** Level 1 step-specific  
 **Audit branch / PR:** `audit/exchange-pretestnet-phase-20260930` / PR #430  
 **Audit base SHA:** `4d0ede3692efe55f04a50c7bf5b749afe579eccb`  
-**Qualified implementation SHA:** `0427c805703ae34c9a1deba4669e3f714a55e874`  
-**Current repository `main` observed at implementation closeout:** `df8f639d8f43b763298c8750ef49d3e5849c597c`
+**Original qualified implementation SHA:** `0427c805703ae34c9a1deba4669e3f714a55e874`  
+**Post-PRE-10 requalified accumulated implementation SHA:** `46e97d69a51deaad9460f9145735ee1cf96f658a`  
+**Current repository `main` observed at requalification:** `df8f639d8f43b763298c8750ef49d3e5849c597c`
 
 ## Canonical requirements and disposition
 
@@ -107,7 +108,41 @@ Order publication likewise requires an independent named publication capability;
 
 ## Level 1 qualification
 
-Exact implementation SHA:
+### Current accumulated-app requalification
+
+After PRE-08 through PRE-10 completed, PRE-07 was reopened against current repository truth rather than relying only on its original closeout.
+
+Exact accumulated implementation SHA:
+
+`46e97d69a51deaad9460f9145735ee1cf96f658a`
+
+Required app-specific workflow:
+
+- **420Exchange Web Verification**
+- run `36802037691`
+- run number `730`
+- event: `pull_request`
+- exact head: `46e97d69a51deaad9460f9145735ee1cf96f658a`
+- **SUCCESS**
+
+That exact accumulated run re-exercised:
+
+- PRE-07 order-service static checks — SUCCESS;
+- PRE-07/PRE-08 order-service unit and HTTP integration tests — SUCCESS;
+- Exchange web static checks including `check-pre07.mjs` — SUCCESS;
+- complete Exchange web unit/integration suite including PRE-07 publication/controller/client tests — SUCCESS;
+- explicit default-OFF signing/publication safety — SUCCESS;
+- PRE-10 read-service static/contract tests and complete 420Indexer dependency qualification — SUCCESS;
+- retained PRE-02/PRE-03 Chromium acceptance — SUCCESS;
+- frontend secret scan — SUCCESS.
+
+The requalification confirms that PRE-08 through PRE-10 did not weaken canonical order identity, publication idempotency, status provenance, session invalidation, lifecycle vocabulary, or the independent default-OFF signing/publication gates.
+
+No executable PRE-07 remediation was required.
+
+### Original PRE-07 closeout
+
+Exact original implementation SHA:
 
 `0427c805703ae34c9a1deba4669e3f714a55e874`
 
@@ -143,9 +178,9 @@ These off-chain records remain non-authoritative projections; they are not promo
 
 ## Level 2 milestone status
 
-**Not required for PRE-07 alone.**
+**COMPLETE through PRE-08 order-lifecycle integration milestone.**
 
-PRE-07 introduces the publication service boundary, but the natural broader order-lifecycle integration milestone is PRE-08, where maker-only cancellation and racing fill/cancel semantics converge with this publication/status lifecycle. The retained Exchange suite was run at Level 1; no redundant broader app-phase reconciliation was performed.
+PRE-07 originally deferred its broader order-lifecycle milestone to PRE-08. PRE-08 is now COMPLETE and qualified the combined publication/status/cancellation/racing-fill lifecycle. The post-PRE-10 exact-head run #730 retained that accumulated coverage; no extra ceremonial Level 2 rerun is required.
 
 ## Exit criterion
 
@@ -157,13 +192,20 @@ The browser can build an exact canonical order review, attach a deterministic ex
 
 ## Current-main divergence review
 
-At implementation closeout current `main` was:
+At post-PRE-10 PRE-07 requalification current `main` was:
 
 `df8f639d8f43b763298c8750ef49d3e5849c597c`
 
-The 80 commits between the audit base and current `main` remain confined to Compute Market work and shared non-Exchange qualification workflows. They do not modify `exchange/web/**`, `exchange/order-service/**`, `exchange/quote-service/**` or `.github/workflows/exchange-web.yml`.
+The 80 main-side commits since the audit base do not modify:
 
-Full reconciliation remains intentionally deferred to PRE-12.
+- `exchange/web/**`;
+- `exchange/order-service/**`;
+- `exchange/quote-service/**`;
+- `exchange/read-service/**`;
+- `420-indexer/**`;
+- `.github/workflows/exchange-web.yml`.
+
+Therefore there is no upstream PRE-07 implementation conflict requiring step-local reconciliation. Full branch reconciliation remains intentionally deferred to PRE-12.
 
 ## Level 3 app-phase status
 
@@ -176,11 +218,19 @@ Repository-wide Solidity/Genesis qualification, 420 Integrated, Geth where appli
 - live EIP-712 wallet signing remains disabled;
 - live public order-service deployment/publication remains disabled;
 - real testnet signature recovery/provider integration remains a live qualification gate;
-- PRE-08 owns maker-only cancellation semantics and racing fill/cancel behavior;
-- PRE-10 owns the production Exchange read/indexer projection adapter;
+- PRE-08 is now COMPLETE for maker-only cancellation semantics and racing fill/cancel behavior;
+- PRE-10 is now COMPLETE for the production Exchange read/indexer projection adapter;
 - PRE-11 owns complete service startup/packaging/security/operations closure;
 - PR #430 remains draft and unmerged.
 
-## Next canonical roadmap step
+## Post-PRE-10 requalification conclusion
 
-**PRE-08 — maker-only cancellation integration.**
+**PRE-07 remains COMPLETE.**
+
+All original canonical exit criteria remain satisfied on the current accumulated Exchange implementation. No executable PRE-07 remediation was required. Current requalification is retained at implementation SHA `46e97d69a51deaad9460f9145735ee1cf96f658a` using Exchange workflow run `36802037691` / #730.
+
+## Next step in the roadmap's recommended dependency order
+
+After PRE-06, the roadmap proceeds to **PRE-07 + PRE-08**. PRE-07 is now explicitly revalidated and PRE-08 is already COMPLETE.
+
+The next **unfinished** canonical roadmap step is **PRE-11 — CI/security/packaging/operations closure.**

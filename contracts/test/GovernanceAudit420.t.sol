@@ -15,6 +15,50 @@ interface VmGovernanceAudit420 {
     ) external;
 }
 
+contract MockGovernanceAuditAuthority420 {
+    address public immutable proposalRegistry;
+    address public immutable electorateRegistry;
+    address public immutable timelock;
+
+    constructor(address proposalRegistry_, address electorateRegistry_, address timelock_) {
+        proposalRegistry = proposalRegistry_;
+        electorateRegistry = electorateRegistry_;
+        timelock = timelock_;
+    }
+
+    function register(
+        CivicProposalRegistry420 registry,
+        bytes32 proposalId
+    ) external {
+        registry.registerProposal(
+            proposalId,
+            address(this),
+            CivicIds420.ProposalClass.G1,
+            keccak256("metadata"),
+            keccak256("actions"),
+            1,
+            2,
+            3
+        );
+    }
+
+    function transition(
+        CivicProposalRegistry420 registry,
+        bytes32 proposalId,
+        CivicIds420.ProposalState next
+    ) external {
+        registry.transition(proposalId, next);
+    }
+}
+
+contract MockTimelockBoundGovernor420 {
+    address public immutable timelock;
+
+    constructor(address timelock_) {
+        timelock = timelock_;
+    }
+}
+
 contract GovernanceAudit420Test {
     VmGovernanceAudit420 constant vm = VmGovernanceAudit420(address(uint160(uint256(keccak256("hevm cheat code")))));
 
@@ -116,30 +160,23 @@ contract GovernanceAudit420Test {
 
     function testCivicProposalCancellationIsRejectedFromEveryLiveState() public {
         CivicProposalRegistry420 proposals = new CivicProposalRegistry420(address(this));
-        proposals.bindProposalAuthority(address(this));
+        MockGovernanceAuditAuthority420 authority =
+            new MockGovernanceAuditAuthority420(address(proposals), address(0xBEEF), address(this));
+        proposals.bindProposalAuthority(address(authority));
 
         bytes32 proposalId = keccak256("GOV-AUDIT-1-CANCEL");
-        proposals.registerProposal(
-            proposalId,
-            address(this),
-            CivicIds420.ProposalClass.G1,
-            keccak256("metadata"),
-            keccak256("actions"),
-            1,
-            2,
-            3
-        );
+        authority.register(proposals, proposalId);
 
         vm.expectRevert(CivicProposalRegistry420.InvalidStateTransition.selector);
-        proposals.transition(proposalId, CivicIds420.ProposalState.CANCELLED);
+        authority.transition(proposals, proposalId, CivicIds420.ProposalState.CANCELLED);
 
-        proposals.transition(proposalId, CivicIds420.ProposalState.PASSED);
+        authority.transition(proposals, proposalId, CivicIds420.ProposalState.PASSED);
         vm.expectRevert(CivicProposalRegistry420.InvalidStateTransition.selector);
-        proposals.transition(proposalId, CivicIds420.ProposalState.CANCELLED);
+        authority.transition(proposals, proposalId, CivicIds420.ProposalState.CANCELLED);
 
-        proposals.transition(proposalId, CivicIds420.ProposalState.QUEUED);
+        authority.transition(proposals, proposalId, CivicIds420.ProposalState.QUEUED);
         vm.expectRevert(CivicProposalRegistry420.InvalidStateTransition.selector);
-        proposals.transition(proposalId, CivicIds420.ProposalState.CANCELLED);
+        authority.transition(proposals, proposalId, CivicIds420.ProposalState.CANCELLED);
     }
 
     function testTimelockCancellationRetiresWhenCivicAuthorityActivates() public {
@@ -147,7 +184,8 @@ contract GovernanceAudit420Test {
         bytes32 operationId = keccak256("GOV-AUDIT-1-BOOTSTRAP-OP");
         timelock.schedule(operationId, address(0xBEEF), 0, "", GovernanceTimelock.Class.G1);
 
-        timelock.activateCivicAuthority(address(this));
+        MockTimelockBoundGovernor420 governor = new MockTimelockBoundGovernor420(address(timelock));
+        timelock.activateCivicAuthority(address(governor));
         require(timelock.civicAuthorityActivated(), "civic active");
 
         (bool ok,) = address(timelock).call(abi.encodeCall(timelock.cancel, (operationId)));

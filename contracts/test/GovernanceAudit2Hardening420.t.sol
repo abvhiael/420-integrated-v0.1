@@ -292,7 +292,8 @@ contract GovernanceAudit2Hardening420Test {
 
                 CivicIds420.ProposalState next = CivicIds420.ProposalState(toRaw);
                 bool allowed =
-                    (from == 0 && (next == CivicIds420.ProposalState.PASSED || next == CivicIds420.ProposalState.FAILED))
+                    (from == 0
+                            && (next == CivicIds420.ProposalState.PASSED || next == CivicIds420.ProposalState.FAILED))
                         || (from == 1 && next == CivicIds420.ProposalState.QUEUED)
                         || (from == 2 && next == CivicIds420.ProposalState.EXECUTED);
 
@@ -321,8 +322,8 @@ contract GovernanceAudit2Hardening420Test {
 
         vm.roll(100);
         vm.prank(ALICE);
-        bytes32 proposalId =
-            fuzzStack.governor.createProposal(CivicIds420.ProposalClass.G1, keccak256("metadata"), keccak256("actions"));
+        bytes32 proposalId = fuzzStack.governor
+            .createProposal(CivicIds420.ProposalClass.G1, keccak256("metadata"), keccak256("actions"));
 
         vm.roll(101);
         vm.prank(ALICE);
@@ -352,8 +353,8 @@ contract GovernanceAudit2Hardening420Test {
 
         vm.roll(100);
         vm.prank(ALICE);
-        bytes32 proposalId =
-            fuzzStack.governor.createProposal(CivicIds420.ProposalClass.G1, keccak256("metadata"), keccak256("actions"));
+        bytes32 proposalId = fuzzStack.governor
+            .createProposal(CivicIds420.ProposalClass.G1, keccak256("metadata"), keccak256("actions"));
 
         vm.roll(101);
         vm.prank(ALICE);

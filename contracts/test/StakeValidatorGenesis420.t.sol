@@ -402,6 +402,116 @@ contract StakeValidatorGenesis420Test {
         require(!rewards.rewardApplied(200), "invalid reward marked applied");
     }
 
+    function testConsensusRewardRejectsZeroProposerZeroParticipantProposerParticipantAndOversizedSet() public {
+        vm.roll(201);
+        address proposer = address(0x5300);
+
+        address[] memory one = new address[](1);
+        one[0] = address(0x5301);
+        vm.prank(SYSTEM_CALLER);
+        (bool zeroProposer,) = address(rewards).call(
+            abi.encodeWithSelector(
+                rewards.applyConsensusReward.selector,
+                uint64(201),
+                address(0),
+                one,
+                uint256(1 ether),
+                uint256(1 ether),
+                uint256(1 ether),
+                uint256(1 ether)
+            )
+        );
+        require(!zeroProposer, "zero proposer accepted");
+
+        address[] memory zeroParticipant = new address[](1);
+        zeroParticipant[0] = address(0);
+        vm.prank(SYSTEM_CALLER);
+        (bool zeroParticipantAccepted,) = address(rewards).call(
+            abi.encodeWithSelector(
+                rewards.applyConsensusReward.selector,
+                uint64(201),
+                proposer,
+                zeroParticipant,
+                uint256(1 ether),
+                uint256(1 ether),
+                uint256(1 ether),
+                uint256(1 ether)
+            )
+        );
+        require(!zeroParticipantAccepted, "zero participant accepted");
+
+        address[] memory proposerParticipant = new address[](1);
+        proposerParticipant[0] = proposer;
+        vm.prank(SYSTEM_CALLER);
+        (bool proposerParticipantAccepted,) = address(rewards).call(
+            abi.encodeWithSelector(
+                rewards.applyConsensusReward.selector,
+                uint64(201),
+                proposer,
+                proposerParticipant,
+                uint256(1 ether),
+                uint256(1 ether),
+                uint256(1 ether),
+                uint256(1 ether)
+            )
+        );
+        require(!proposerParticipantAccepted, "proposer duplicated as participant");
+
+        address[] memory oversized = new address[](30);
+        for (uint256 i; i < oversized.length; ++i) {
+            oversized[i] = address(uint160(0x5400 + i));
+        }
+        vm.prank(SYSTEM_CALLER);
+        (bool oversizedAccepted,) = address(rewards).call(
+            abi.encodeWithSelector(
+                rewards.applyConsensusReward.selector,
+                uint64(201),
+                proposer,
+                oversized,
+                uint256(1 ether),
+                uint256(1 ether),
+                uint256(1 ether),
+                uint256(1 ether)
+            )
+        );
+        require(!oversizedAccepted, "oversized participant set accepted");
+        require(!rewards.rewardApplied(201), "invalid reward marked applied");
+        require(rewards.grossSecurityIssued() == 0, "invalid reward changed security issuance");
+        require(rewards.grossAttentionIssued() == 0, "invalid reward changed attention issuance");
+        require(rewards.grossDevelopmentIssued() == 0, "invalid reward changed development issuance");
+    }
+
+    function testZeroSlashEvidenceRejectedWithoutMutation() public {
+        (bytes32 id,) = _registerMatched("slash-zero-evidence", 14);
+        _state(id, ValidatorRegistry.Status.PROBATION, 1, 0, 0, 0);
+        ValidatorRegistry.Validator memory beforeSlash = registry.getValidator(id);
+        uint256 protocolReserveBefore = registry.PROTOCOL_RESERVE().balance;
+        uint256 communityBefore = address(reserve).balance;
+
+        vm.prank(SYSTEM_CALLER);
+        (bool accepted,) = address(registry).call(
+            abi.encodeWithSelector(
+                registry.applySlash.selector,
+                id,
+                ValidatorRegistry.SlashOffense.DOUBLE_VOTE,
+                uint8(0),
+                uint256(1_000 ether),
+                uint256(1_000 ether),
+                bytes32(0),
+                ValidatorRegistry.Status.SUSPENDED
+            )
+        );
+        require(!accepted, "zero slash evidence accepted");
+
+        ValidatorRegistry.Validator memory afterSlash = registry.getValidator(id);
+        require(afterSlash.ownedBond == beforeSlash.ownedBond, "zero evidence changed owned bond");
+        require(afterSlash.protocolCredit == beforeSlash.protocolCredit, "zero evidence changed protocol credit");
+        require(afterSlash.totalSlashed == beforeSlash.totalSlashed, "zero evidence changed slash accounting");
+        require(registry.PROTOCOL_RESERVE().balance == protocolReserveBefore, "zero evidence moved owned slash");
+        require(address(reserve).balance == communityBefore, "zero evidence moved protocol credit");
+        _assertSolvent();
+    }
+
     function testDynamicCommitteeTiersAndRewardAllocation() public view {
         require(registry.targetActiveCount(59) == 0, "below handoff");
         require(registry.targetActiveCount(60) == 15, "60 tier");

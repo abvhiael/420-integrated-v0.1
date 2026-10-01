@@ -1151,8 +1151,9 @@ contract ComputeVerifiedEntitlement420Test {
         bytes32 id = _verifiedJob(50, OWNER_A_KEY, PAYER_A_KEY, 4 ether);
         _makeClaimable(id);
         ComputeJobRegistry420.Job memory original = jobs.job(id);
-        bytes32 grounds = keccak256("verification-integrity");
-        bytes32 disputeId = _openPayerDispute(id, grounds);
+        bytes32 groundsSalt = keccak256("verification-integrity");
+        bytes32 grounds = keccak256(abi.encode("ground", groundsSalt));
+        bytes32 disputeId = _openPayerDispute(id, groundsSalt);
 
         ComputeDisputeResolution420.VerificationReview memory opened =
             disputes.verificationReview(disputeId);

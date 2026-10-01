@@ -74,8 +74,11 @@ contract GovernanceAudit420Test {
             GovernanceTimelock timelock,
             CivicConstitution420 constitution,
             CivicProposalRegistry420 proposals,
-            ,
+            CivicElectorateRegistry420 originalElectorates,
+            CivicVoting420 originalVoting
         ) = _base();
+        originalElectorates;
+        originalVoting;
         GovernanceTimelock otherTimelock = new GovernanceTimelock(address(this));
         CivicElectorateRegistry420 wrongElectorates = new CivicElectorateRegistry420(address(otherTimelock));
         CivicVoting420 voting = new CivicVoting420(address(proposals), address(wrongElectorates));
@@ -93,7 +96,9 @@ contract GovernanceAudit420Test {
             CivicConstitution420 constitution,
             CivicProposalRegistry420 proposals,
             CivicElectorateRegistry420 electorates,
+            CivicVoting420 originalVoting
         ) = _base();
+        originalVoting;
         CivicProposalRegistry420 otherProposals = new CivicProposalRegistry420(address(timelock));
         CivicVoting420 wrongVoting = new CivicVoting420(address(otherProposals), address(electorates));
 

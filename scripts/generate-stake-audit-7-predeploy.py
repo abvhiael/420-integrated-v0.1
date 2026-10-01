@@ -313,7 +313,7 @@ def verify_allocation(values: dict):
     return str(matches[0]["amount_kief"])
 
 def compile_contracts():
-    run("forge","build","--force",cwd=CONTRACTS)
+    run("forge","build",cwd=CONTRACTS)
 
 def build_records():
     validate_toolchain()

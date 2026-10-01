@@ -23,7 +23,7 @@ export class FileProjectionStore{
       this.data.records[record.recordId]=old?{...old,...record}:{...record};
       if(record.semanticKey){
         for(const candidate of Object.values(this.data.records)){
-          if(candidate.recordId!==record.recordId&&candidate.semanticKey===record.semanticKey&&candidate.active!==false){
+          if(candidate.recordId!==record.recordId&&candidate.semanticKey===record.semanticKey){
             candidate.active=false;candidate.canonicality='orphaned';candidate.replacedBy=record.recordId;
           }
         }

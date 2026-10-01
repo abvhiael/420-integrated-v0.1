@@ -60,7 +60,7 @@ function assertInventoryAuthority420(inventory) {
   return authority;
 }
 
-function assertStakeAppAuthority420(inventory) {
+function assertStakeAppAuthority420(inventory, environment) {
   const authority = inventory?.appAuthority;
   assert420(authority && typeof authority === 'object', 'wallet app authority block missing');
   const required = ['stake420', 'validatorRegistry', 'rewardController'];
@@ -70,6 +70,9 @@ function assertStakeAppAuthority420(inventory) {
     const state = String(item.status || '');
     assert420(!state.includes('CONFLICTED'), `wallet app authority ${key} remains conflicted`);
     assert420(!state.includes('PENDING'), `wallet app authority ${key} remains pending`);
+    if (LIVE_ENVIRONMENTS.has(environment)) {
+      assert420(item.deploymentVerified === true, `wallet app authority ${key} is not chain-verified`);
+    }
   }
   return authority;
 }
@@ -104,7 +107,7 @@ export function buildWalletRuntimeConfig420({ manifest, inventory, baseConfig, m
   if (LIVE_ENVIRONMENTS.has(environment)) assertLiveInventoryReady420(inventory, environment);
 
   const authority = assertInventoryAuthority420(inventory);
-  const appAuthority = assertStakeAppAuthority420(inventory);
+  const appAuthority = assertStakeAppAuthority420(inventory, environment);
   const rpcUrl = validatedManifest.rpc.http[0];
   const explorerUrl = validatedManifest.services.explorer ?? null;
   const faucetUrl = validatedManifest.services.faucet ?? null;

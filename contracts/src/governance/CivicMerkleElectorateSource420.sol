@@ -26,12 +26,13 @@ contract CivicMerkleElectorateSource420 is SystemAccess, ICivicElectorateSource4
     error InvalidProof();
 
     event ElectorateCheckpointPublished(
-        uint64 indexed effectiveBlock,
-        bytes32 indexed electorateRoot,
-        uint256 totalWeight
+        uint64 indexed effectiveBlock, bytes32 indexed electorateRoot, uint256 totalWeight
     );
 
-    constructor(address timelock_, bytes32 sourceType_) SystemAccess(timelock_) {
+    constructor(
+        address timelock_,
+        bytes32 sourceType_
+    ) SystemAccess(timelock_) {
         if (sourceType_ != COMMUNITY_SOURCE_TYPE && sourceType_ != VALIDATOR_SOURCE_TYPE) {
             revert InvalidSourceType();
         }
@@ -46,16 +47,19 @@ contract CivicMerkleElectorateSource420 is SystemAccess, ICivicElectorateSource4
         return _checkpoints.length;
     }
 
-    function checkpoint(uint256 index) external view returns (Checkpoint memory) {
+    function checkpoint(
+        uint256 index
+    ) external view returns (Checkpoint memory) {
         return _checkpoints[index];
     }
 
     /// @notice Publish a prospective electorate checkpoint.
     /// @dev Roots commit sorted-pair Merkle leaves keccak256(abi.encode(voter)); every valid leaf has weight 1.
-    function publishCheckpoint(uint64 effectiveBlock, bytes32 electorateRoot, uint256 totalWeight)
-        external
-        onlyGovernance
-    {
+    function publishCheckpoint(
+        uint64 effectiveBlock,
+        bytes32 electorateRoot,
+        uint256 totalWeight
+    ) external onlyGovernance {
         if (electorateRoot == bytes32(0) || totalWeight == 0 || effectiveBlock <= block.number) {
             revert InvalidCheckpoint();
         }
@@ -65,11 +69,9 @@ contract CivicMerkleElectorateSource420 is SystemAccess, ICivicElectorateSource4
         emit ElectorateCheckpointPublished(effectiveBlock, electorateRoot, totalWeight);
     }
 
-    function snapshotAt(uint64 snapshotBlock)
-        external
-        view
-        returns (bytes32 electorateRoot, uint256 totalWeight)
-    {
+    function snapshotAt(
+        uint64 snapshotBlock
+    ) external view returns (bytes32 electorateRoot, uint256 totalWeight) {
         uint256 n = _checkpoints.length;
         if (n == 0 || snapshotBlock < _checkpoints[0].effectiveBlock) revert NoCheckpoint();
 
@@ -84,11 +86,11 @@ contract CivicMerkleElectorateSource420 is SystemAccess, ICivicElectorateSource4
         return (cp.electorateRoot, cp.totalWeight);
     }
 
-    function votingWeight(bytes32 electorateRoot, address voter, bytes calldata proofData)
-        external
-        pure
-        returns (uint256 weight)
-    {
+    function votingWeight(
+        bytes32 electorateRoot,
+        address voter,
+        bytes calldata proofData
+    ) external pure returns (uint256 weight) {
         bytes32[] memory proof = abi.decode(proofData, (bytes32[]));
         bytes32 computed = keccak256(abi.encode(voter));
         for (uint256 i; i < proof.length; ++i) {

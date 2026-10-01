@@ -205,7 +205,7 @@ Dependencies: PRE-07.
 
 ---
 
-### PRE-09 — bridge proof and destination-settlement architecture — PARTIAL
+### PRE-09 — bridge proof and destination-settlement architecture — COMPLETE
 
 Finish the offline-testable cross-chain lifecycle.
 
@@ -219,7 +219,7 @@ Required work:
 - persist/reconcile bridge lifecycle through indexed events;
 - add two-chain mock/offline E2E fixtures proving correct beneficiary payout state and replay rejection.
 
-**Exit:** complete mockable source-to-destination state machine; real bridge submission/proof/payout deferred.
+**Exit:** SATISFIED at implementation SHA `280902f41b99bf074a2c8f85406b871b9dd05984`. PRE-09 now provides a canonical route/adapter/verifier/manifest identity, distinct source-finality/proof-acquisition/proof-verification/destination-finality/settlement states, provider-neutral proof-provider and proof-verifier interfaces, exact beneficiary/chain/asset/amount/replay binding, explicit pause/expiry/invalidation/reorg/refund/retry states, lifecycle persistence and indexed projection reconciliation, and deterministic two-chain mock E2E qualification proving beneficiary payout and replay rejection. Live bridge submission/proof acceptance remains default-OFF. Level 1 plus the bridge-lifecycle Level 2 milestone passed in 420Exchange Web Verification run `36800092528` / #711. Durable evidence: `docs/420EXCHANGE-PRE-09-QUALIFICATION.md`.
 
 Dependencies: PRE-10 projection/API contract.
 

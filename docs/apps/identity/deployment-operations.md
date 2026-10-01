@@ -3,8 +3,8 @@ title: 420 Identity deployment and operator runbook
 audience:
   - operator
   - developer
-category: operations
-status: pre-genesis
+category: application
+status: development
 version: current
 ---
 

@@ -256,10 +256,13 @@ contract Governance420 is SystemAccess, I420System {
         if (proposalsContract.proposalAuthority() != governor_ || electorates.snapshotAuthority() != governor_) {
             revert InvalidBootstrapGraph();
         }
-        if (
-            electorates.sourceFor(CivicIds420.House.COMMUNITY).source != communitySource_
-                || electorates.sourceFor(CivicIds420.House.VALIDATOR).source != validatorSource_
-        ) revert InvalidBootstrapGraph();
+        CivicElectorateRegistry420.SourceConfig memory communityConfig =
+            electorates.sourceFor(CivicIds420.House.COMMUNITY);
+        CivicElectorateRegistry420.SourceConfig memory validatorConfig =
+            electorates.sourceFor(CivicIds420.House.VALIDATOR);
+        if (communityConfig.source != communitySource_ || validatorConfig.source != validatorSource_) {
+            revert InvalidBootstrapGraph();
+        }
 
         _requireRule(constitution.ruleFor(CivicIds420.ProposalClass.G1), ROTATION_BLOCKS, 7 days, 1000, 5001, 0, 0, false);
         _requireRule(constitution.ruleFor(CivicIds420.ProposalClass.G2), ROTATION_BLOCKS * 2, 14 days, 2000, 6000, 0, 0, false);

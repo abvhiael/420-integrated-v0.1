@@ -21,7 +21,7 @@ function subject(e,kind){
   return field(e,'routeId','marketId')??e.objectKey??e.transactionHash;
 }
 function semantic(e,kind,subjectId){return [kind,subjectId,e.eventName,field(e,'nonce','sourceMessageId','transferId','tradeRef')??''].join('|');}
-export function mapIndexerEventToHistory(e,{observedAt=0,finality='indexed'}={}){
+export function mapIndexerEventToHistory(e,{observedAt=0,finality='indexed',freshness='canonical'}={}){
   if(!e||e.protocol!=='420Exchange'&&e.protocol!=='420Bridge')return null;
   const kind=EVENT_KIND[e.eventName];if(!kind)return null;
   const subjectId=req(subject(e,kind),'history subject');
@@ -32,7 +32,7 @@ export function mapIndexerEventToHistory(e,{observedAt=0,finality='indexed'}={})
   return Object.freeze({
     recordId:rid,semanticKey:semantic(e,kind,subjectId),kind,subjectId,active:true,replacedBy:null,
     chainId:str(e.chainId),blockNumber:str(e.blockNumber),blockHash:req(e.blockHash,'blockHash'),txHash:req(e.transactionHash,'transactionHash'),
-    logIndex:Number(e.logIndex),canonicality:'canonical',finality,observedAt:Number(observedAt)||0,
+    logIndex:Number(e.logIndex),canonicality:'canonical',finality,freshness,observedAt:Number(observedAt)||0,
     eventName:e.eventName,contractAddress:req(e.contractAddress,'contractAddress'),amountRaw,beneficiary,feeAmountRaw,
     destinationAssetId:field(e,'destinationAssetId','assetId'),routeId:field(e,'routeId'),sourceMessageId:field(e,'sourceMessageId'),
     provenance:Object.freeze({source:'420Indexer/v1',protocol:e.protocol,authoritative:false}),

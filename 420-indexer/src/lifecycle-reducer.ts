@@ -29,12 +29,19 @@ export interface LifecycleSnapshot420 {
 }
 
 const KEY_FIELDS = [
-  'objectId','componentId','labelHash','profileId','validatorId','stakeId','proposalId','paymentId',
+  'objectId','componentId','labelHash','profileId','credentialId','issuerId','validatorId','stakeId','proposalId','paymentId',
   'invoiceId','routeId','swapId','transferId','bridgeId','requestId','rightId','licenseId','assetId'
 ] as const;
 
 export function protocolObjectKey420(event: DecodedProtocolEvent420): string | null {
-  for (const key of KEY_FIELDS) {
+  // Identity events may contain secondary identifiers (for example
+  // PrimaryNameSet has labelHash and CredentialIssued has issuerId). The
+  // canonical object key follows the Identity object being mutated, not the
+  // first generic identifier present in the event.
+  const keys = event.protocol === '420Identity'
+    ? ['credentialId','profileId','issuerId'] as const
+    : KEY_FIELDS;
+  for (const key of keys) {
     const value = event.fields[key];
     if (value !== undefined && value !== null) return `${key}:${String(value).toLowerCase()}`;
   }

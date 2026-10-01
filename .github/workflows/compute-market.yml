@@ -83,6 +83,9 @@ jobs:
       - name: Verify CMP-1.4.3 verification policy registry
         run: python scripts/verify-cmp-1-4-3-verification-policy.py
 
+      - name: Verify CMP-1.4.4 signed verdict provenance
+        run: python scripts/verify-cmp-1-4-4-signed-verdict-provenance.py
+
       - name: Verify CMP-1.4.5 independent verifier selection
         run: python scripts/verify-cmp-1-4-5-independent-selection.py
 
@@ -94,3 +97,23 @@ jobs:
 
       - name: Verify CMP-1.4.8 scientific/probabilistic verification
         run: python scripts/verify-cmp-1-4-8-scientific-verification.py
+
+      - name: Verify CMP-1.4.9 challenge and appeal hooks
+        run: python scripts/verify-cmp-1-4-9-challenge-appeal-hooks.py
+
+      - name: Verify CMP-1.4.10 cross-verifier adversarial qualification
+        run: python scripts/verify-cmp-1-4-10-cross-verifier-adversarial.py
+
+      - name: Verify CMP-1.4.11 verifier repository release readiness
+        run: python scripts/verify-cmp-1-4-11-verifier-release-candidate.py --repository-ready
+
+      - name: Verify CMP-1.4.11 live readiness remains fail-closed
+        shell: bash
+        run: |
+          if python scripts/verify-cmp-1-4-11-verifier-release-candidate.py; then
+            echo "live verifier readiness unexpectedly passed"
+            exit 1
+          fi
+
+      - name: Verify CMP-1.4.12 phase closeout reconciliation
+        run: python scripts/verify-cmp-1-4-12-closeout.py

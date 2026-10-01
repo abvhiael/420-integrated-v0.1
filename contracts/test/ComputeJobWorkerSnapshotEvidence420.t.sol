@@ -1006,6 +1006,37 @@ contract ComputeJobWorkerSnapshotEvidence420Test {
         require(capacity.reservationForJob(jobId) == retryA.reservationId, "latest reservation not indexed");
     }
 
+    function testVerdictContextBindsLatestRetryAttemptAndWorkerEvidence() public {
+        bytes32 rootRef = _assign(_emptyRefs());
+        _transitionAttempt(
+            jobId,
+            ComputeJobWorkerSnapshotEvidence420.AttemptStatus.FAILED,
+            keccak256("verdict-context-attempt-one-failure"),
+            EXEC_KEY
+        );
+        bytes32 retryRef = _retry(jobId, _emptyRefs());
+        bytes32 result = _commit(
+            keccak256("verdict-context-retry-receipt"),
+            keccak256("verdict-context-retry-output")
+        );
+
+        (
+            bytes32 unitId,
+            bytes32 attemptRef,
+            uint64 attempt,
+            address worker,
+            bytes32 resultCommitment,
+            bytes32 executionEvidenceCommitment
+        ) = workerEvidence.verdictContext(jobId);
+
+        require(unitId == jobId, "single-unit verdict identity drift");
+        require(rootRef != retryRef && attemptRef == retryRef, "verdict did not bind latest retry");
+        require(attempt == 2, "verdict attempt number wrong");
+        require(worker == OPERATOR, "verdict worker wrong");
+        require(resultCommitment == result, "verdict result wrong");
+        require(executionEvidenceCommitment != bytes32(0), "verdict execution evidence missing");
+    }
+
     function testAttemptCancellationRetryCannotDropAcceptedPolicyRequirements() public {
         bytes32 rootRef = _assign(_fullRefs());
         _transitionAttempt(

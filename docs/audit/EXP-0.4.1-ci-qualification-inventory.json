@@ -12,7 +12,8 @@
     "A workflow artifact created with if: always() is evidence only for steps that actually executed successfully; artifact existence is not a pass claim.",
     "Manual workflows qualify only the exact inputs, target environment and commit recorded by their run.",
     "Historical pinned-tree inventory is retained audit evidence and does not prove the mutable current tree.",
-    "Explorer Genesis qualification requires exact-head provenance and the later runtime/deployment/live evidence mapped by EXP-0.3."
+    "Explorer Genesis qualification requires exact-head provenance and the later runtime/deployment/live evidence mapped by EXP-0.3.",
+    "Repository-wide Foundry qualification has one canonical owner: Solidity Contracts. Genesis Address Authority must not duplicate that inventory."
   ],
   "workflows": [
     {
@@ -235,7 +236,7 @@
       "name": "Genesis Address Authority",
       "path": ".github/workflows/genesis-address-authority.yml",
       "status": "active_conditional",
-      "role": "shared_address_authority_regression_gate",
+      "role": "shared_address_namespace_and_predeploy_authority_gate",
       "authority": "supporting_when_address_or_config_authority_is_touched",
       "triggers": [
         "pull_request:path_filtered",
@@ -243,32 +244,33 @@
         "push:special-maintenance-branch"
       ],
       "environment": [
-        "python 3.12",
-        "Foundry stable",
-        "16 shards"
+        "python 3.12"
       ],
       "commands": [
         "python scripts/verify-genesis-canonical-addresses.py",
+        "python scripts/verify-reg-audit-4-genesis-address-namespace.py",
+        "python scripts/test-reg-audit-4-genesis-address-namespace.py",
+        "python scripts/audit-genesis-address-collisions.py",
         "python scripts/verify-genesis-predeploy-authority.py",
         "python scripts/verify-wallet-w14-7-1-namespace.py",
         "python scripts/test-wallet-w14-7-1-namespace.py",
         "python scripts/test-wallet-w14-7-4-consumers.py",
-        "python scripts/audit-wallet-w14-7-4-consumers.py > address-consumer-inventory.json",
-        "bash scripts/qualify-foundry-shard.sh <shard> 16"
+        "python scripts/audit-wallet-w14-7-4-consumers.py > address-consumer-inventory.json"
       ],
       "evidence": [
         "address-consumers-${github.sha}",
-        "address-foundry-shard-*"
+        "GitHub Actions run/job conclusions"
       ],
       "qualification_scope": [
         "frozen address ownership",
+        "namespace authority",
         "predeploy parity",
-        "historical claim regressions",
-        "Solidity inventory"
+        "historical claim regressions"
       ],
       "exclusions": [
         "not an Explorer functional gate",
-        "does not prove Registry runtime publication"
+        "does not prove Registry runtime publication",
+        "does not own or duplicate the repository-wide Foundry inventory; Solidity Contracts is canonical for that scope"
       ],
       "finding_refs": [
         "EXP-FIND-005"
@@ -393,6 +395,51 @@
         "AC-6",
         "AC-7",
         "AC-8",
+        "AC-10"
+      ]
+    },
+    {
+      "id": "EXP-CI-008",
+      "name": "Solidity Contracts",
+      "path": ".github/workflows/contracts-foundry.yml",
+      "status": "active_conditional",
+      "role": "canonical_repository_foundry_inventory_gate",
+      "authority": "authoritative_for_repository_solidity_inventory_scope",
+      "triggers": [
+        "pull_request:path_filtered",
+        "push:main:path_filtered",
+        "workflow_dispatch"
+      ],
+      "environment": [
+        "ubuntu-latest",
+        "Foundry stable",
+        "FOUNDRY_PROFILE=pr for PR inventory",
+        "4 runner-aware shards"
+      ],
+      "commands": [
+        "classify pull-request scope",
+        "bash scripts/qualify-foundry-shard.sh <shard> 4",
+        "forge build and forge test through deterministic shard assignment"
+      ],
+      "evidence": [
+        "foundry-pr-shard-*-${github.sha}",
+        "GitHub Actions run/job conclusions"
+      ],
+      "qualification_scope": [
+        "complete repository Solidity source/test/script inventory",
+        "deployable size checks",
+        "Foundry regression coverage"
+      ],
+      "exclusions": [
+        "not Genesis address or namespace authority",
+        "not Explorer deployment evidence",
+        "not live-network evidence"
+      ],
+      "finding_refs": [
+        "EXP-FIND-005"
+      ],
+      "acceptance_refs": [
+        "AC-9",
         "AC-10"
       ]
     }
@@ -574,10 +621,10 @@
     },
     {
       "id": "EXP-QM-019",
-      "parent": "EXP-CI-005",
-      "name": "16-shard Foundry inventory",
-      "command": "bash scripts/qualify-foundry-shard.sh <shard> 16",
-      "scope": "Solidity full inventory"
+      "parent": "EXP-CI-008",
+      "name": "Canonical four-shard Foundry inventory",
+      "command": "bash scripts/qualify-foundry-shard.sh <shard> 4",
+      "scope": "Solidity full repository inventory"
     },
     {
       "id": "EXP-QM-020",
@@ -605,16 +652,29 @@
         "420Indexer TypeScript recovery suite"
       ],
       "scope": "repository readiness / blocker integrity"
+    },
+    {
+      "id": "EXP-QM-022",
+      "parent": "EXP-CI-005",
+      "name": "Genesis namespace and collision authority regressions",
+      "command_group": [
+        "verify-reg-audit-4-genesis-address-namespace.py",
+        "test-reg-audit-4-genesis-address-namespace.py",
+        "audit-genesis-address-collisions.py"
+      ],
+      "scope": "Genesis namespace/collision authority"
     }
   ],
   "summary": {
-    "workflow_count": 7,
-    "mechanism_count": 21,
-    "automatic_pr_workflows": 5,
+    "workflow_count": 8,
+    "mechanism_count": 22,
+    "automatic_pr_workflows": 6,
     "manual_live_or_rc_workflows": 2,
     "explorer_specific_live_workflows": 1,
     "primary_source_gate": "EXP-CI-001",
-    "live_gate": "EXP-CI-002"
+    "live_gate": "EXP-CI-002",
+    "canonical_solidity_inventory_gate": "EXP-CI-008",
+    "genesis_address_authority_gate": "EXP-CI-005"
   },
   "qualification": {
     "qualified_head": "6307f04f4efaf9dff4f911897c04e7032984eefa",

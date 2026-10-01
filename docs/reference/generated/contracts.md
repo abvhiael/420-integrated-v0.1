@@ -12,11 +12,48 @@ version: current
 > GENERATED FILE - DO NOT EDIT. Regenerate with `python scripts/generate-reference-docs.py`.
 
 Source catalogue: `developer-hub/catalogue/local.example.json`  
-Catalogue SHA-256: `f748e235a756ed24e5e5957ab93c261d61d5bff129d3caf3a8459db2d01d976f`  
+Catalogue SHA-256: `b45fa4da49ace6f989d4ee5b2861351cc317d750fde6ef840546657e9d592807`  
 Catalogue chain ID: `420`  
 Environment scope: **local example only**
 
 This page is generated from the currently checked-in contract catalogue plus matching Solidity source. A catalogue `verified: true` flag is not sufficient by itself to publish a distributable ABI: the referenced build artifact must exist, the ABI hash must be non-placeholder and the source/provenance must remain environment-scoped.
+
+## Identity420
+
+- Protocol: `420Identity`
+- Version: `3.0.0`
+- Catalogue provenance: `genesis`
+- Deployment block: `0`
+- Catalogue address: `0x0000000000000000000000000000000000000436` (**local example only**)
+- Solidity source: `contracts/src/apps/Identity420.sol`
+- Declared artifact: `contracts/artifacts/Identity420.json` (present)
+- Declared interface: `contracts/src/interfaces/genesis/IIdentityCredential420.sol` (present)
+- Declared ABI SHA-256: `5ea63254c724148eba47ee720486f41105f003602558cbd0b0a43bdc346d3a6e`
+- Distributable verified ABI: **YES**
+
+### NatSpec
+
+- Notice: Optional pseudonymous profile and credential anchor for 420 Integrated.
+- Developer note: Directly implements the frozen Genesis credential read interface. Subject/type compatibility
+
+### Public/external source surface
+
+- `systemName() external pure returns (string memory)`
+- `protocolVersion() external pure returns (uint32)`
+- `createProfile(bytes32 profileId, bytes32 metadataHash) external`
+- `updateProfile(bytes32 profileId, bytes32 metadataHash, bool active) external`
+- `setPrimaryName(bytes32 profileId, bytes32 labelHash) external`
+- `transferProfileController(bytes32 profileId, address newController) external`
+- `acceptProfileController(bytes32 profileId) external`
+- `setIssuer(bytes32 issuerId, address controller, bytes32 metadataHash, bool active) external onlyGovernance`
+- `setIssuerTrust(bytes32 issuerId, address controller, bytes32 metadataHash, TrustClass trustClass, bool active) external onlyGovernance`
+- `issueCredential(bytes32 credentialId, bytes32 issuerId, bytes32 subjectProfileId, bytes32 credentialType, bytes32 claimHash, uint64 expiresAt) external`
+- `revokeCredential(bytes32 credentialId) external`
+- `rejectCredential(bytes32 credentialId) external`
+- `credentialValid(bytes32 credentialId) public view returns (bool)`
+- `credentialMeetsTrust(bytes32 credentialId, TrustClass minimumTrust) external view returns (bool)`
+- `credential(bytes32 credentialId) external view override returns (CredentialView memory view_)`
+- `hasValidCredential(bytes32 subjectId, bytes32 credentialType) external view override returns (bool)`
 
 ## ProtocolRegistry
 

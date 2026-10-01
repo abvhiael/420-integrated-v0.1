@@ -1,6 +1,6 @@
 ---
 title: 420 Identity
-audience: [user, developer]
+audience: [user, developer, operator]
 category: application
 status: development
 version: current
@@ -12,3 +12,5 @@ version: current
 Identity is not mandatory KYC, does not automatically prove legal identity or wallet ownership, and does not create a universal trust score. It records profile control, metadata commitments, issuer policy and credential lifecycle within explicit protocol boundaries.
 
 Use [Getting started](getting-started.md) for profile/credential basics and [Developer integration](developer/index.md) for safe validity checks.
+
+Operators should use the [deployment and operator runbook](deployment-operations.md) for canonical address/runtime verification, governance and issuer incident response, derived-service rebuild, recovery boundaries, key handling and read-only smoke procedures.

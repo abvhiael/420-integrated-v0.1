@@ -1,0 +1,291 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-1.4.11.VerifierReleaseCandidate.v1",
+  "step": "CMP-1.4.11",
+  "title": "Release-candidate/deployment readiness",
+  "canonical_definition": "Release-candidate/deployment readiness",
+  "base_main_sha": "e8d9096c4029c3c0218113afc1cbd3b8d0005878",
+  "status": "REPOSITORY_READY_DEPLOYMENT_BLOCKED",
+  "repository_ready": true,
+  "live_qualified": false,
+  "network": {
+    "chain_id": null,
+    "network_name": null,
+    "rpc_evidence_block": null,
+    "rpc_evidence_block_hash": null
+  },
+  "governance": {
+    "timelock": null,
+    "identity_attestor": null,
+    "selection_authority": null,
+    "sampling_authority": null,
+    "publication_transaction": null
+  },
+  "protocol_registry": {
+    "address": "0x0000000000000000000000000000000000000434",
+    "publication_api": "publishRegisteredService",
+    "publication_complete": false,
+    "extension_service_ids_require_governance_approval": true,
+    "required_registration_fields": [
+      "implementation",
+      "runtime_code_hash",
+      "metadata_hash",
+      "version",
+      "active",
+      "component_type",
+      "manifest_hash",
+      "dependency_root",
+      "interface_hash"
+    ],
+    "service_entries": []
+  },
+  "release_candidate": {
+    "wiring_contract": "contracts/src/compute/ComputeVerifierReleaseCandidateWiring420.sol",
+    "graph_hash": null,
+    "components": [
+      {
+        "role": "ComputeJobRegistry420",
+        "source": "contracts/src/compute/ComputeJobRegistry420.sol",
+        "address": null,
+        "deployment_tx": null,
+        "deployment_block": null,
+        "runtime_code_hash": null
+      },
+      {
+        "role": "ComputeJobIntegerProfileVerification420",
+        "source": "contracts/src/compute/ComputeJobIntegerProfileVerification420.sol",
+        "address": null,
+        "deployment_tx": null,
+        "deployment_block": null,
+        "runtime_code_hash": null
+      },
+      {
+        "role": "ComputeVerifierRegistry420",
+        "source": "contracts/src/compute/ComputeVerifierRegistry420.sol",
+        "address": null,
+        "deployment_tx": null,
+        "deployment_block": null,
+        "runtime_code_hash": null
+      },
+      {
+        "role": "ComputeVerifierCapabilityRegistry420",
+        "source": "contracts/src/compute/ComputeVerifierCapabilityRegistry420.sol",
+        "address": null,
+        "deployment_tx": null,
+        "deployment_block": null,
+        "runtime_code_hash": null
+      },
+      {
+        "role": "ComputePolicyRegistry420",
+        "source": "contracts/src/compute/ComputePolicyRegistry420.sol",
+        "address": null,
+        "deployment_tx": null,
+        "deployment_block": null,
+        "runtime_code_hash": null
+      },
+      {
+        "role": "ComputeVerifierIndependencePolicy420",
+        "source": "contracts/src/compute/ComputeVerifierIndependencePolicy420.sol",
+        "address": null,
+        "deployment_tx": null,
+        "deployment_block": null,
+        "runtime_code_hash": null
+      },
+      {
+        "role": "ComputeIndependentVerifierSelector420",
+        "source": "contracts/src/compute/ComputeIndependentVerifierSelector420.sol",
+        "address": null,
+        "deployment_tx": null,
+        "deployment_block": null,
+        "runtime_code_hash": null
+      },
+      {
+        "role": "ComputeReplicatedVerification420",
+        "source": "contracts/src/compute/ComputeReplicatedVerification420.sol",
+        "address": null,
+        "deployment_tx": null,
+        "deployment_block": null,
+        "runtime_code_hash": null
+      },
+      {
+        "role": "ComputeDeterministicAdapterRegistry420",
+        "source": "contracts/src/compute/ComputeDeterministicAdapterRegistry420.sol",
+        "address": null,
+        "deployment_tx": null,
+        "deployment_block": null,
+        "runtime_code_hash": null
+      },
+      {
+        "role": "ComputeDeterministicVerificationRouter420",
+        "source": "contracts/src/compute/ComputeDeterministicVerificationRouter420.sol",
+        "address": null,
+        "deployment_tx": null,
+        "deployment_block": null,
+        "runtime_code_hash": null
+      },
+      {
+        "role": "ComputeScientificAdapterRegistry420",
+        "source": "contracts/src/compute/ComputeScientificAdapterRegistry420.sol",
+        "address": null,
+        "deployment_tx": null,
+        "deployment_block": null,
+        "runtime_code_hash": null
+      },
+      {
+        "role": "ComputeScientificVerificationRouter420",
+        "source": "contracts/src/compute/ComputeScientificVerificationRouter420.sol",
+        "address": null,
+        "deployment_tx": null,
+        "deployment_block": null,
+        "runtime_code_hash": null
+      },
+      {
+        "role": "ComputeDisputeResolution420",
+        "source": "contracts/src/compute/ComputeDisputeResolution420.sol",
+        "address": null,
+        "deployment_tx": null,
+        "deployment_block": null,
+        "runtime_code_hash": null
+      },
+      {
+        "role": "ComputeVerifierReleaseCandidateWiring420",
+        "source": "contracts/src/compute/ComputeVerifierReleaseCandidateWiring420.sol",
+        "address": null,
+        "deployment_tx": null,
+        "deployment_block": null,
+        "runtime_code_hash": null
+      }
+    ]
+  },
+  "bindings": {
+    "jobs_verification_evidence": null,
+    "jobs_verification_policy_registry": null,
+    "bounded_verifier_jobs": null,
+    "bounded_verifier_independence_policy": null,
+    "capability_registry_verifier_registry": null,
+    "selector_jobs": null,
+    "selector_verifier_registry": null,
+    "selector_capability_registry": null,
+    "selector_independence_policy": null,
+    "selector_selection_authority": null,
+    "replicated_selector": null,
+    "replicated_jobs": null,
+    "replicated_verifier_registry": null,
+    "replicated_capability_registry": null,
+    "replicated_independence_policy": null,
+    "replicated_selection_authority": null,
+    "deterministic_router_jobs": null,
+    "deterministic_router_registry": null,
+    "scientific_router_jobs": null,
+    "scientific_router_registry": null,
+    "scientific_sampling_authority": null,
+    "dispute_matches": null,
+    "dispute_authorization": null,
+    "dispute_independence_policy": null,
+    "dispute_jobs": null
+  },
+  "dependency_reconciliation": {
+    "cmp_1_4_4_signed_verdict_provenance_complete": true,
+    "cmp_1_4_4_internal_release_blocker": false,
+    "cmp_1_5_compute_stake_required_for_stake_required_live_verifiers": true,
+    "cmp_1_5_compute_stake_live_source_qualified": false,
+    "validator_stake_is_not_compute_verifier_collateral": true,
+    "wallet_balance_is_not_compute_verifier_collateral": true,
+    "payer_escrow_is_not_compute_verifier_collateral": true,
+    "public_testnet_available": false,
+    "no_fixed_genesis_predeploy_allocated": true,
+    "discovery_path": "ProtocolRegistry"
+  },
+  "release_gates": {
+    "cmp_1_4_1_verifier_identity_lifecycle": true,
+    "cmp_1_4_2_verifier_classes_capabilities": true,
+    "cmp_1_4_3_verification_policy_registry": true,
+    "cmp_1_4_4_signed_verdict_provenance": true,
+    "cmp_1_4_5_independent_selection": true,
+    "cmp_1_4_6_replicated_verification": true,
+    "cmp_1_4_7_deterministic_adapters": true,
+    "cmp_1_4_8_scientific_probabilistic": true,
+    "cmp_1_4_9_challenge_appeal": true,
+    "cmp_1_4_10_adversarial_qualification": true,
+    "cmp_1_5_compute_stake_live_source": false,
+    "public_testnet_live": false
+  },
+  "limitations": [
+    "CMP-1.4.4 signed verdict provenance is repository-complete at CMP-1.4.12 reconciliation; live deployment remains independently blocked by real deployment, collateral, public-testnet and Registry-publication prerequisites.",
+    "Repository readiness does not imply live deployment, ProtocolRegistry publication, verifier collateral availability, or public-testnet availability.",
+    "The bounded integer verifier remains a retained profile/example and is not promoted into a generic verifier for arbitrary GPU/AI/scientific workloads.",
+    "Live dispute readiness requires the canonical jobs/entitlement graph to be bound after real deployment; repository fixture qualification does not fabricate those addresses."
+  ],
+  "exit_criteria": [
+    "A verifier release-candidate wiring checker pins runtime code hashes and canonical authority/dependency bindings for the accumulated verifier graph.",
+    "Adversarial wiring tests reject wrong runtime hash, wrong governance, mismatched selector/independence graph and mismatched adapter-router graph.",
+    "The release manifest inventories every verifier release component, canonical binding and required ProtocolRegistry publication field.",
+    "No live address, transaction, block, code hash, graph hash or publication evidence is fabricated before deployment.",
+    "The frozen ProtocolRegistry address and publishRegisteredService path are preserved.",
+    "CMP-1.4.4 signed verdict provenance is completed and retained as an internal repository release gate.",
+    "CMP-1.5 verifier-collateral and public-testnet dependencies remain truthfully blocked until qualified.",
+    "No fixed Genesis predeploy is allocated for the verifier release candidate.",
+    "Repository-ready mode passes mechanical qualification; live-ready mode fails until all real deployment/internal gates are satisfied.",
+    "Exact-head Level 1 release-candidate build/tests/verifier checks pass.",
+    "Level 2 is not separately required because CMP-1.4.10 immediately preceding this step already qualified the cross-verifier integration milestone; retained Compute suite remains part of the directly applicable release-candidate CI."
+  ],
+  "milestone_relationship": {
+    "level_2_required_now": false,
+    "rationale": "CMP-1.4.10 is the immediately preceding cross-verifier Level 2 milestone. CMP-1.4.11 adds release wiring/manifests without changing verifier execution semantics."
+  },
+  "level_3_status": "DEFERRED_TO_CMP_1_4_12_PHASE_CLOSEOUT",
+  "qualification_evidence": {
+    "qualified_implementation_sha": "c5d1ccffc6937ad5fde27b85ac3d6ece8e4d84f4",
+    "qualification_level": "LEVEL_1_COMPLETE",
+    "level_1_status": "PASS",
+    "retained_compute_suite": {
+      "test_suites": 49,
+      "tests_passed": 323,
+      "tests_failed": 0,
+      "tests_skipped": 0
+    },
+    "repository_ready_verifier": "PASS_READY_LIVE_BLOCKED",
+    "live_readiness_fail_closed_assertion": "PASS",
+    "exact_head_workflows": [
+      {
+        "name": "Compute Market Qualification",
+        "run_number": 69,
+        "run_id": 36882487806,
+        "conclusion": "success"
+      },
+      {
+        "name": "Solidity Contracts",
+        "run_number": 3591,
+        "run_id": 36882487546,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Registry REG-AUDIT-4",
+        "run_number": 233,
+        "run_id": 36882487724,
+        "conclusion": "success"
+      },
+      {
+        "name": "Genesis Address Authority",
+        "run_number": 398,
+        "run_id": 36882487532,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Indexer",
+        "run_number": 1207,
+        "run_id": 36882487579,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Docs Qualification",
+        "run_number": 3795,
+        "run_id": 36882487765,
+        "conclusion": "success"
+      }
+    ],
+    "level_2_status": "NOT_RERUN_CMP_1_4_10_ALREADY_QUALIFIED_INTEGRATION_MILESTONE",
+    "level_3_status": "IN_PROGRESS_AT_CMP_1_4_12_PHASE_CLOSEOUT",
+    "live_deployment_status": "BLOCKED",
+    "cmp_1_4_4_status": "COMPLETED_DURING_CMP_1_4_12_RECONCILIATION_PENDING_CLOSEOUT_QUALIFICATION"
+  }
+}

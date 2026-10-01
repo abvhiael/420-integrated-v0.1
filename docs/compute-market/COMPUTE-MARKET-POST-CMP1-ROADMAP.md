@@ -180,7 +180,7 @@ Reuse canonical $420 custody/accounting. Do not create an unrelated collateral t
 
 
 ### CMP-1.5.3 — Policy-specific minimum collateral
-**Status: implementation/Level 1 + Level 2 milestone qualification in progress.**
+**Status: COMPLETE — Level 1 + first CMP-1.5 Level 2 milestone qualified on `d72dc4c2f5fc2772fd2ea4299dbce9936e78cece`.**
 
 
 ### CMP-1.5.4 — Exit queue / withdrawal delay

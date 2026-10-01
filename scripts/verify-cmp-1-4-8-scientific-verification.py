@@ -28,9 +28,9 @@ for token in ["adapterKind()","protocolCommitment()","evaluate("]:
     if token not in i: errors.append(f"scientific interface missing {token}")
 for token in ["ADAPTER_KIND","codeHash","protocolCommitment","latestRevision","function publish(","function setActive("]:
     if token not in g: errors.append(f"scientific registry missing {token}")
-for token in ["samplingAuthority","sampleSeedCommitment","function bindAdapter(","function evaluate(","RESULT_COMMITTED","adapterCodeHash","protocolCommitment"]:
+for token in ["samplingAuthority","j.owner == samplingAuthority","a.worker == samplingAuthority","sampleSeedCommitment","function bindAdapter(","function evaluate(","RESULT_COMMITTED","adapterCodeHash","protocolCommitment"]:
     if token not in q: errors.append(f"scientific router missing {token}")
-for token in ["OUTCOME_INCONCLUSIVE","OUTCOME_PASS","OUTCOME_FAIL","REQUIRED_SAMPLES","TOLERANCE_BPS","MAX_RANGE_BPS","sampleIndex(","_verifyLeaf("]:
+for token in ["OUTCOME_INCONCLUSIVE","OUTCOME_PASS","OUTCOME_FAIL","REQUIRED_SAMPLES","MIN_DATASET_SIZE","MAX_DATASET_SIZE","TOLERANCE_BPS","MAX_RANGE_BPS","sampleIndex(","_verifyLeaf(","_proofDepth(","_isPowerOfTwo("]:
     if token not in a: errors.append(f"reference scientific adapter missing {token}")
 for token in ["adapterKind()","ADAPTER_KIND"]:
     if token not in di or token not in dg or token not in da:

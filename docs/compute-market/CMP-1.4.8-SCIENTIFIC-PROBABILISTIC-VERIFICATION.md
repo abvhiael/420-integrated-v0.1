@@ -1,6 +1,6 @@
 # CMP-1.4.8 — Scientific/probabilistic verification
 
-Status: **IMPLEMENTATION COMPLETE; LEVEL 1 + LEVEL 2 QUALIFICATION PENDING. NO LIVE DEPLOYMENT/PUBLICATION CLAIM.**
+Status: **COMPLETE — LEVEL 1 + LEVEL 2 QUALIFIED. NO LIVE DEPLOYMENT/PUBLICATION CLAIM.**
 
 ## Canonical definition
 
@@ -157,6 +157,17 @@ Most importantly:
 
 CMP-1.4.8 is COMPLETE only when every machine-readable exit criterion passes and Level 1 + the Level 2 verifier-method integration milestone are green on the same exact implementation SHA.
 
+## Qualification evidence
+
+Qualified implementation SHA: `6dd84b9b642dc320f80f03a696901ff4492ff6ea`.
+
+- Compute Market Qualification #51 — run `36815090895` — **success**; retained Compute suite **316 passed, 0 failed**
+- Solidity Contracts #3537 — run `36815090892` — **success**
+- 420Docs Qualification #3733 — run `36815090861` — **success**
+- 420Indexer #1153 — run `36815090815` — **success**
+- Genesis Address Authority #348 — run `36815090831` — **success**
+- 420Registry REG-AUDIT-4 #183 — run `36815090925` — **success**
+
 ## Completion
 
-**NOT YET COMPLETE.** Implementation/evidence are present; exact-head Level 1 and Level 2 qualification remain pending.
+**COMPLETE at Level 1 and the CMP-1.4 verification-method Level 2 milestone.** Level 3 remains intentionally deferred to complete Compute app-phase closeout.

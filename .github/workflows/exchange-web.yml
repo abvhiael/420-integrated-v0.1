@@ -5,11 +5,13 @@ on:
     paths:
       - "exchange/web/**"
       - "exchange/quote-service/**"
+      - "exchange/order-service/**"
       - ".github/workflows/exchange-web.yml"
   pull_request:
     paths:
       - "exchange/web/**"
       - "exchange/quote-service/**"
+      - "exchange/order-service/**"
       - ".github/workflows/exchange-web.yml"
   workflow_dispatch:
 
@@ -33,6 +35,12 @@ jobs:
         working-directory: exchange/quote-service
         run: |
           ! grep -RniE 'BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY|mnemonic[[:space:]]*[:=][[:space:]]*["'"'"'][^"'"'"']+|seed[_ -]?phrase[[:space:]]*[:=][[:space:]]*["'"'"'][^"'"'"']+|private[_-]?key[[:space:]]*[:=][[:space:]]*["'"'"'][0-9a-fA-F]+' --exclude-dir=test .
+      - name: PRE-07 order service static checks
+        working-directory: exchange/order-service
+        run: npm run check
+      - name: PRE-07 order service unit and HTTP integration tests
+        working-directory: exchange/order-service
+        run: npm test
       - name: Static Exchange checks
         working-directory: exchange/web
         run: npm run check

@@ -96,17 +96,7 @@ contract GovernanceAudit7Integration420Test {
             address(budgets),
             abi.encodeCall(
                 TreasuryBudgetRegistry420.createBudget,
-                (
-                    budgetId,
-                    vaultId,
-                    category,
-                    asset,
-                    uint128(100),
-                    validFrom,
-                    validUntil,
-                    civicActionHash,
-                    metadataHash
-                )
+                (budgetId, vaultId, category, asset, uint128(100), validFrom, validUntil, civicActionHash, metadataHash)
             )
         );
         TreasuryBudgetRegistry420.Budget memory budget = budgets.budget(budgetId);

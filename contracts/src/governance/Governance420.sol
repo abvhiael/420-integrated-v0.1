@@ -13,12 +13,37 @@ import "./CivicGovernor420.sol";
 import "./CivicMerkleElectorateSource420.sol";
 
 interface IProtocolRegistryBootstrap420 {
-    enum ComponentType { UNSET, PROTOCOL, APPLICATION, SERVICE, REGISTRY, ADAPTER, INFRASTRUCTURE }
-    enum Lifecycle { NONE, PROPOSED, ACTIVE, PAUSED, SUSPENDED, DEPRECATED, WITHDRAWAL_ONLY, RETIRED }
-    struct Version { uint16 major; uint16 minor; uint16 patch; }
+    enum ComponentType {
+        UNSET,
+        PROTOCOL,
+        APPLICATION,
+        SERVICE,
+        REGISTRY,
+        ADAPTER,
+        INFRASTRUCTURE
+    }
+    enum Lifecycle {
+        NONE,
+        PROPOSED,
+        ACTIVE,
+        PAUSED,
+        SUSPENDED,
+        DEPRECATED,
+        WITHDRAWAL_ONLY,
+        RETIRED
+    }
+    struct Version {
+        uint16 major;
+        uint16 minor;
+        uint16 patch;
+    }
 
-    function registerComponent(bytes32 componentId, address implementation, Version calldata version, Lifecycle lifecycle)
-        external;
+    function registerComponent(
+        bytes32 componentId,
+        address implementation,
+        Version calldata version,
+        Lifecycle lifecycle
+    ) external;
     function publishRegisteredService(
         bytes32 serviceId,
         address implementation,
@@ -30,8 +55,12 @@ interface IProtocolRegistryBootstrap420 {
         bytes32 dependencyRoot,
         bytes32 interfaceHash
     ) external;
-    function resolve(bytes32 componentId) external view returns (address implementation);
-    function resolveActive(bytes32 serviceId) external view returns (address implementation, uint32 version);
+    function resolve(
+        bytes32 componentId
+    ) external view returns (address implementation);
+    function resolveActive(
+        bytes32 serviceId
+    ) external view returns (address implementation, uint32 version);
 }
 
 /// @notice Frozen 0x0437 compatibility surface for 420Civic governance.
@@ -40,8 +69,20 @@ interface IProtocolRegistryBootstrap420 {
 /// Before Civic activation only, this fixed identity may schedule the one canonical bootstrap plan;
 /// it has no arbitrary proposal, vote or execution authority and the bootstrap role retires permanently.
 contract Governance420 is SystemAccess, I420System {
-    enum Class { G1, G2, G3, G4 }
-    enum State { NONE, ACTIVE, PASSED, FAILED, QUEUED, EXECUTED }
+    enum Class {
+        G1,
+        G2,
+        G3,
+        G4
+    }
+    enum State {
+        NONE,
+        ACTIVE,
+        PASSED,
+        FAILED,
+        QUEUED,
+        EXECUTED
+    }
 
     struct Proposal {
         address proposer;
@@ -61,16 +102,12 @@ contract Governance420 is SystemAccess, I420System {
     address public constant PROTOCOL_REGISTRY = 0x0000000000000000000000000000000000000434;
     uint64 public constant ROTATION_BLOCKS = 17_640;
 
-    bytes32 public constant COMMUNITY_COMPONENT_ID =
-        keccak256("420/component/governance/civic-constitution/v1");
-    bytes32 public constant PROPOSAL_COMPONENT_ID =
-        keccak256("420/component/governance/civic-proposal-registry/v1");
+    bytes32 public constant COMMUNITY_COMPONENT_ID = keccak256("420/component/governance/civic-constitution/v1");
+    bytes32 public constant PROPOSAL_COMPONENT_ID = keccak256("420/component/governance/civic-proposal-registry/v1");
     bytes32 public constant ELECTORATE_COMPONENT_ID =
         keccak256("420/component/governance/civic-electorate-registry/v1");
-    bytes32 public constant VOTING_COMPONENT_ID =
-        keccak256("420/component/governance/civic-voting/v1");
-    bytes32 public constant GOVERNOR_COMPONENT_ID =
-        keccak256("420/component/governance/civic-governor/v1");
+    bytes32 public constant VOTING_COMPONENT_ID = keccak256("420/component/governance/civic-voting/v1");
+    bytes32 public constant GOVERNOR_COMPONENT_ID = keccak256("420/component/governance/civic-governor/v1");
     bytes32 public constant GOVERNANCE_SERVICE_ID = keccak256("420/service/governance/v1");
     bytes32 public constant GOVERNANCE_INTERFACE_HASH = keccak256("420/interface/governance-civic/v1");
     bytes32 public constant GOVERNANCE_MANIFEST_HASH = keccak256("420/governance/deployment-manifest/v1");
@@ -93,12 +130,21 @@ contract Governance420 is SystemAccess, I420System {
     event CivicBootstrapPlanScheduled(bytes32 indexed planHash, address indexed civicGovernor);
     event CivicBootstrapRetired(address indexed civicGovernor);
 
-    constructor(address timelock_) SystemAccess(timelock_) { }
+    constructor(
+        address timelock_
+    ) SystemAccess(timelock_) { }
 
-    function systemName() external pure returns (string memory) { return "Governance420"; }
-    function protocolVersion() external pure returns (uint32) { return 3; }
+    function systemName() external pure returns (string memory) {
+        return "Governance420";
+    }
 
-    function bindCivicGovernor(address governor) external onlyGovernance {
+    function protocolVersion() external pure returns (uint32) {
+        return 3;
+    }
+
+    function bindCivicGovernor(
+        address governor
+    ) external onlyGovernance {
         if (civicGovernor != address(0)) revert CivicGovernorAlreadyBound();
         if (!_isCanonicalCivicGovernor(governor)) revert InvalidCivicGovernor();
         civicGovernor = governor;
@@ -139,8 +185,7 @@ contract Governance420 is SystemAccess, I420System {
                 || address(voting.electorateRegistry()) != electorates_
                 || address(governor.constitution()) != constitution_
                 || address(governor.proposalRegistry()) != proposals_
-                || address(governor.electorateRegistry()) != electorates_
-                || address(governor.voting()) != voting_
+                || address(governor.electorateRegistry()) != electorates_ || address(governor.voting()) != voting_
                 || address(governor.timelock()) != governanceTimelock
         ) revert InvalidBootstrapGraph();
 
@@ -305,7 +350,10 @@ contract Governance420 is SystemAccess, I420System {
         emit CivicBootstrapRetired(governor_);
     }
 
-    function bootstrapOperationId(bytes32 plan, uint8 index) public pure returns (bytes32) {
+    function bootstrapOperationId(
+        bytes32 plan,
+        uint8 index
+    ) public pure returns (bytes32) {
         return keccak256(abi.encode(BOOTSTRAP_DOMAIN, plan, index));
     }
 
@@ -337,13 +385,37 @@ contract Governance420 is SystemAccess, I420System {
         ) revert InvalidBootstrapGraph();
     }
 
-    function _isCanonicalCivicGovernor(address governor) private view returns (bool) {
+    function _isCanonicalCivicGovernor(
+        address governor
+    ) private view returns (bool) {
         if (governor == address(0) || governor.code.length == 0) return false;
         (bool ok, bytes memory data) = governor.staticcall(abi.encodeWithSignature("timelock()"));
         return ok && data.length >= 32 && abi.decode(data, (address)) == governanceTimelock;
     }
 
-    function createProposal(bytes32, Class, bytes32, uint64, uint64) external pure { revert LegacySurfaceRetired(); }
-    function applyVote(bytes32, bool, bool, uint256) external pure { revert LegacySurfaceRetired(); }
-    function applyResult(bytes32, bool) external pure { revert LegacySurfaceRetired(); }
+    function createProposal(
+        bytes32,
+        Class,
+        bytes32,
+        uint64,
+        uint64
+    ) external pure {
+        revert LegacySurfaceRetired();
+    }
+
+    function applyVote(
+        bytes32,
+        bool,
+        bool,
+        uint256
+    ) external pure {
+        revert LegacySurfaceRetired();
+    }
+
+    function applyResult(
+        bytes32,
+        bool
+    ) external pure {
+        revert LegacySurfaceRetired();
+    }
 }

@@ -496,18 +496,22 @@ func EncodeRewardPayload(out RewardOutcome, settlement RewardSettlement) ([]byte
 	headWords := 7
 	payload := make([]byte, 4, 4+(headWords+1+len(settlement.Participants))*32)
 	copy(payload, selectorReward[:])
-	payload = append(payload, wordUint64(out.BlockNumber)[:]...)
-	payload = append(payload, wordAddress(out.Proposer)[:]...)
-	payload = append(payload, wordUint64(uint64(headWords*32))[:]...)
-	payload = append(payload, proposer[:]...)
-	payload = append(payload, perParticipant[:]...)
-	payload = append(payload, attention[:]...)
-	payload = append(payload, development[:]...)
-	payload = append(payload, wordUint64(uint64(len(settlement.Participants)))[:]...)
+	payload = appendWord(payload, wordUint64(out.BlockNumber))
+	payload = appendWord(payload, wordAddress(out.Proposer))
+	payload = appendWord(payload, wordUint64(uint64(headWords*32)))
+	payload = appendWord(payload, proposer)
+	payload = appendWord(payload, perParticipant)
+	payload = appendWord(payload, attention)
+	payload = appendWord(payload, development)
+	payload = appendWord(payload, wordUint64(uint64(len(settlement.Participants))))
 	for _, participant := range settlement.Participants {
-		payload = append(payload, wordAddress(participant)[:]...)
+		payload = appendWord(payload, wordAddress(participant))
 	}
 	return payload, nil
+}
+
+func appendWord(out []byte, word [32]byte) []byte {
+	return append(out, word[:]...)
 }
 
 func encodeStatic(selector [4]byte, words ...[32]byte) []byte {

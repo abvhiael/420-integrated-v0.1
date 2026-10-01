@@ -132,7 +132,7 @@ concurrency:
 
 jobs:
   qualify:
-    if: github.event_name != 'pull_request' || !startsWith(github.head_ref, 'audit/420names-')
+    if: github.event_name != 'pull_request' || startsWith(github.head_ref, 'audit/420names-')
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:

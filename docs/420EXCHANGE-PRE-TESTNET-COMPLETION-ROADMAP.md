@@ -140,7 +140,7 @@ Dependencies: PRE-04.
 
 ---
 
-### PRE-06 — guarded swap orchestration — PARTIAL / CRITICAL
+### PRE-06 — guarded swap orchestration — COMPLETE
 
 Compose the existing V15 primitives into one browser execution pipeline while leaving submission disabled.
 
@@ -160,7 +160,7 @@ Required work:
 - add mock RPC/provider end-to-end tests for rejection, timeout, replacement, reorg, stale nonce, gas change and indexer delay;
 - keep the final Wallet send function behind an independent default-OFF gate.
 
-**Exit:** full swap path is testable end-to-end with mocks and deterministic state transitions; real sends remain impossible by default.
+**Exit:** SATISFIED at implementation SHA `011ae238b7fdbf9643a339c71cf9357100391962`. A single guarded swap orchestrator now composes PRE-02 wallet/session authority, PRE-05 authenticated quote provenance, canonical review/confirmation, fresh submit-boundary preflight, an independent default-OFF wallet submission capability and deterministic lifecycle tracking. Approval/permit authority is reviewed separately; wallet/session changes invalidate pending review authority; transaction hashes stop at SUBMITTED until lifecycle evidence advances them; replacement/reorg/drop/indexer-delay/conflict states are explicit; and mock E2E tests cover rejection, timeout, stale nonce, gas change and lifecycle failure paths. Level 1 plus PRE-06 Exchange lifecycle/authority-integration milestone qualification passed in 420Exchange Web Verification run `36794440699` / #628. Durable evidence: `docs/420EXCHANGE-PRE-06-QUALIFICATION.md`. Real sends remain impossible by default.
 
 Dependencies: PRE-02, PRE-03, PRE-04, PRE-05.
 

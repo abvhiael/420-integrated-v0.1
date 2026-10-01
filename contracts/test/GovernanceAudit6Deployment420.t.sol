@@ -142,39 +142,41 @@ contract GovernanceAudit6Deployment420Test {
         require(registry.resolve(compatibility.VOTING_COMPONENT_ID()) == address(voting), "voting discovery");
         require(registry.resolve(compatibility.GOVERNOR_COMPONENT_ID()) == address(governor), "governor discovery");
 
-        (bool reschedule,) = address(compatibility).call(
-            abi.encodeCall(
-                Governance420.scheduleCanonicalCivicBootstrap,
-                (
-                    address(constitution),
-                    address(proposals),
-                    address(electorates),
-                    address(voting),
-                    address(governor),
-                    address(community),
-                    address(validator)
+        (bool reschedule,) = address(compatibility)
+            .call(
+                abi.encodeCall(
+                    Governance420.scheduleCanonicalCivicBootstrap,
+                    (
+                        address(constitution),
+                        address(proposals),
+                        address(electorates),
+                        address(voting),
+                        address(governor),
+                        address(community),
+                        address(validator)
+                    )
                 )
-            )
-        );
+            );
         require(!reschedule, "bootstrap rescheduled");
     }
 
     function testBootstrapRejectsWrongElectorateRole() public {
         _deployCanonicalGraph();
-        (bool ok,) = address(compatibility).call(
-            abi.encodeCall(
-                Governance420.scheduleCanonicalCivicBootstrap,
-                (
-                    address(constitution),
-                    address(proposals),
-                    address(electorates),
-                    address(voting),
-                    address(governor),
-                    address(validator),
-                    address(community)
+        (bool ok,) = address(compatibility)
+            .call(
+                abi.encodeCall(
+                    Governance420.scheduleCanonicalCivicBootstrap,
+                    (
+                        address(constitution),
+                        address(proposals),
+                        address(electorates),
+                        address(voting),
+                        address(governor),
+                        address(validator),
+                        address(community)
+                    )
                 )
-            )
-        );
+            );
         require(!ok, "swapped electorate roles accepted");
     }
 }

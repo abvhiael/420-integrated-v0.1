@@ -13,7 +13,7 @@ test('service starts locally from config with RPC/indexer/storage/catalogue comp
  fs.writeFileSync(cat,JSON.stringify({schema:'420-exchange-catalogue-v1',version:1,markets:[{
    marketSubjectId:'m1',canonicalMarketId:null,marketLabel:'420 / LOCAL',baseSymbol:'420',quoteSymbol:'LOCAL',
    qualification:'DISPLAY_ONLY_UNQUALIFIED',routeHealthy:false,settlementHealthy:false,source:'local-test'
- }]}));
+ }],assets:[{assetId:'420',symbol:'420',qualification:'DISPLAY_ONLY_UNQUALIFIED',source:'local-test'}],routes:[{routeId:'r1',marketSubjectId:'m1',qualification:'DISPLAY_ONLY_UNQUALIFIED',source:'local-test'}]}));
  fs.writeFileSync(configFile,JSON.stringify({schema:'420-exchange-read-service-config-v1',host:'127.0.0.1',port:0,chainId:'1056',indexerBaseUrl:'http://indexer.local',rpcUrl:'http://rpc.local',cataloguePath:'catalogue.json',storagePath:'state/read.json',refreshOnStart:true,shutdownTimeoutMs:1000}));
  const fake=async(url,options={})=>{
    if(url==='http://rpc.local')return response({jsonrpc:'2.0',id:1,result:'0x420'});

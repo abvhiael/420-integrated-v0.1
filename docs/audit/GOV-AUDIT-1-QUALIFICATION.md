@@ -12,7 +12,7 @@
 - Base `main`: `06e137050964bb4f787164c9900f1740f2cf4b97`
 - Audit branch: `audit/420governance-complete-20261001`
 - PR: #449
-- GOV-AUDIT-1 implementation SHA: `a7e053d8f82e912725b47f4f7f53a48f089aa106`
+- GOV-AUDIT-1 implementation SHA: `fde6b37d02db1a180a8635aeb037efd7db0d2cc6`
 
 This file is evidence-only. It does not change executable code, tests, workflows, dependencies, configuration, interfaces, artifacts or substantive requirements. The implementation SHA above remains the qualification target.
 
@@ -32,6 +32,8 @@ This file is evidence-only. It does not change executable code, tests, workflows
 12. 420Indexer no longer synthesizes Governance cancellation from non-canonical cancellation event names.
 13. Current `main` was merged cleanly into the audit branch before final GOV-AUDIT-1 qualification; the intervening mainline changes were Compute Market-only and did not alter Governance semantics.
 14. A queued Civic action batch that attempts to invoke the retired Timelock cancellation primitive is proven to fail atomically without splitting Proposal Registry or Timelock state.
+15. A separately approved queued Civic action batch that attempts `CivicProposalRegistry420.transition(target, CANCELLED)` is proven to fail atomically, preserving both the target proposal and the cancellation-attempt proposal states.
+16. The GOV-AUDIT-1 verifier now fails if the 420Indexer Governance lifecycle policy contains `ProposalCancelled` or `CivicProposalCancelled`.
 
 ## Implementation files
 
@@ -76,13 +78,13 @@ The dedicated Governance workflow on the exact implementation SHA runs:
 Required exact-head runs:
 
 - Workflow: **420Governance audit qualification**
-- Push run: **#40**, run ID `36891003847`
-- Pull-request run: **#41**, run ID `36891011868`
-- Target SHA: `a7e053d8f82e912725b47f4f7f53a48f089aa106`
+- Push run: **#46**, run ID `36891755734`
+- Pull-request run: **#47**, run ID `36891765490`
+- Target SHA: `fde6b37d02db1a180a8635aeb037efd7db0d2cc6`
 - Current state at this evidence update: **QUEUED**
 - Conclusion: none
 
-The earlier implementation run `36888008789` at `dae5fb0d...` failed only because three Governance documentation pages did not use the verifier's explicit no-cancellation wording. Those pages were corrected. Subsequent intermediate exact-head runs were cancelled by later corrective commits under the workflow's concurrency policy; cancelled runs are not counted as green.
+The earlier implementation run `36888008789` at `dae5fb0d...` failed only because three Governance documentation pages did not use the verifier's explicit no-cancellation wording. Those pages were corrected. Subsequent intermediate exact-head runs were cancelled by later corrective commits under the workflow's concurrency policy; cancelled runs are not counted as green. The final repository-side gap review then added end-to-end queued-batch rejection for both cancellation primitives and extended the verifier to reject non-canonical Governance cancellation projections.
 
 The current exact-head implementation has also been reconciled with current `main` at `06e13705...` and includes the additional end-to-end cancellation-atomicity regression. No queued, skipped, cancelled, superseded or unrelated check is represented as green.
 

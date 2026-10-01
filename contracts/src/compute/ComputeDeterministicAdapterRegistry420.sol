@@ -59,7 +59,8 @@ contract ComputeDeterministicAdapterRegistry420 is I420System, SystemAccess {
             IComputeDeterministicVerificationAdapter420(adapter_);
         bytes32 outputSchema = a.outputSchemaCommitment();
         if (
-            a.workloadType() != workloadType_ || a.profileId() != profileId_
+            a.adapterKind() != ADAPTER_KIND
+                || a.workloadType() != workloadType_ || a.profileId() != profileId_
                 || outputSchema == bytes32(0)
         ) revert InvalidRoute();
 

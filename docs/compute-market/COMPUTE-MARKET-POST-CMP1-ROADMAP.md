@@ -105,7 +105,7 @@ Question answered:
 
 ## CMP-1.4 — ComputeVerifierRegistry
 
-**Status: NEXT CORE PHASE after CMP-1.3 closeout.**
+**Status: repository-qualified through CMP-1.4.12 phase closeout.**
 
 Purpose:
 
@@ -156,7 +156,7 @@ Question answered:
 
 ## CMP-1.5 — ComputeStake
 
-**Status: FINAL CORE CONTRACT PHASE after CMP-1.4.**
+**Status: CURRENT CORE CONTRACT PHASE after CMP-1.4 closeout.**
 
 Canonical responsibilities:
 
@@ -167,6 +167,8 @@ Canonical responsibilities:
 - reward().
 
 ### CMP-1.5.0 — Stake architecture
+**Status: implementation/Level 1 qualification in progress.**
+
 Reuse canonical $420 custody/accounting. Do not create an unrelated collateral treasury.
 
 ### CMP-1.5.1 — Worker collateral
@@ -499,8 +501,8 @@ Production target flow:
 | CMP-1.1 JobRegistry | built / repository-qualified scope |
 | CMP-1.2 ComputeEscrow/Vault accounting | repository-qualified; live/stake dependencies remain |
 | CMP-1.3 WorkerRegistry | current: CMP-1.3.16 closeout |
-| CMP-1.4 VerifierRegistry | next |
-| CMP-1.5 ComputeStake | forthcoming |
+| CMP-1.4 VerifierRegistry | repository-qualified through CMP-1.4.12 |
+| CMP-1.5 ComputeStake | current: CMP-1.5.0 stake architecture |
 | CMP-2 matching marketplace | forthcoming |
 | CMP-3 node420 worker runtime | forthcoming |
 | CMP-4 scientific compute framework | forthcoming |

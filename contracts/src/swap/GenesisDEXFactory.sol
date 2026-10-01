@@ -10,7 +10,7 @@ import "./SwapIds420.sol";
 /// @dev This frozen system contract is registration-only: it does not CREATE/CREATE2 pools.
 ///      Canonical pool instances are deployed by the qualified deployment process, then explicitly
 ///      registered here by Genesis governance. `poolImplementation` records the currently approved
-///      implementation reference for deployment/provenance; it is not a runtime-codehash equality
+///      implementation reference for deployment/provenance after governance binds one; it is not a runtime-codehash equality
 ///      gate because canonical pools may embed immutable market/executor parameters in runtime code.
 contract GenesisDEXFactory is GenesisResidentAccess420 {
     bool public constant REGISTRATION_ONLY = true;
@@ -24,12 +24,8 @@ contract GenesisDEXFactory is GenesisResidentAccess420 {
     constructor(
         address timelock_,
         address registry_,
-        bytes32 genesisConfigHash_,
-        address implementation_
-    ) GenesisResidentAccess420(timelock_, registry_, genesisConfigHash_) {
-        require(implementation_ != address(0) && implementation_.code.length != 0, "implementation");
-        poolImplementation = implementation_;
-    }
+        bytes32 genesisConfigHash_
+    ) GenesisResidentAccess420(timelock_, registry_, genesisConfigHash_) {}
 
     function componentId() public pure override returns (bytes32) { return SwapIds420.GENESIS_DEX_FACTORY; }
 
@@ -49,6 +45,7 @@ contract GenesisDEXFactory is GenesisResidentAccess420 {
             ISystemSafety420.ActionClass.NORMAL_ONLY,
             Types420.Direction.INBOUND
         );
+        require(poolImplementation != address(0), "implementation unset");
         require(poolId != bytes32(0) && pool != address(0) && pool.code.length != 0, "invalid");
         require(pools[poolId] == address(0), "exists");
         pools[poolId] = pool;

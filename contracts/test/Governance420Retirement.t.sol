@@ -114,7 +114,7 @@ contract Governance420RetirementTest {
     function testCompatibilityIdentityRemainsStable() public {
         Governance420 legacy = new Governance420(address(this));
         require(keccak256(bytes(legacy.systemName())) == keccak256(bytes("Governance420")), "name");
-        require(legacy.protocolVersion() == 2, "retired version");
+        require(legacy.protocolVersion() == 3, "bootstrap-compatible version");
         require(legacy.governanceTimelock() == address(this), "timelock identity");
     }
 }

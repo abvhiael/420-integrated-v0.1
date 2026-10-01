@@ -70,12 +70,13 @@ for needle in [
     if needle not in execution:
         errors.append(f"missing execution boundary test: {needle}")
 
+security_plain = re.sub(r"[*_`]+", "", security.lower())
 for phrase in [
     "governance-authorized arbitrary target calls",
     "does not add an undocumented global reentrancy lock",
     "target contracts remain responsible for their own reentrancy safety",
 ]:
-    if phrase.lower() not in security.lower():
+    if phrase.lower() not in security_plain:
         errors.append(f"security docs missing accepted-risk statement: {phrase}")
 
 # Constructor graph hardening retained and completed in GOV-AUDIT-2.

@@ -161,7 +161,7 @@ test('limit-order qualification enforces allowance, capability and expiry before
   assert.equal(result.authorization.ok,true);
 });
 
-test('qualified EIP-712 limit order signs through eth_signTypedData_v4',async()=>{
+test('qualified EIP-712 limit order signs only through an explicit PRE-07 signing gate',async()=>{
   const s=session();
   const signingRequest={
     method:'eth_signTypedData_v4',
@@ -193,7 +193,7 @@ test('qualified EIP-712 limit order signs through eth_signTypedData_v4',async()=
     throw new Error('unexpected '+method);
   });
   const result=await signQualifiedLimitOrder({
-    provider,session:s,expectedChainId:'0x420',expectedGeneration:s.generation,signingRequest,qualification,
+    provider,session:s,expectedChainId:'0x420',expectedGeneration:s.generation,signingRequest,qualification,signingGate:{enabled:true,mode:'PRE07_MOCK'},
   });
   assert.equal(result.signature,signature);
   assert.equal(result.order.maker,address(1));

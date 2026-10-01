@@ -28,6 +28,7 @@
     "NAMES-AUDIT-9 remains responsible for production-equivalent testnet eth_getCode/storage/governance verification."
   ],
   "qualificationMilestone": "NAMES_AUDIT_6_LEVEL_2",
+  "qualificationRequirement": "LEVEL_2_APP_INTEGRATION",
   "runtimeArtifact": "contracts/artifacts/Names420.json",
   "runtimeCodeBytes": 4336,
   "runtimeCodeHash": "0xa974fffd3a40e7f28db41e4ae30656b33789d2483b18b47c809ce2385de709b7",
@@ -42,6 +43,5 @@
   },
   "storageRoot": "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421",
   "storageRootBasis": "Ethereum empty Merkle-Patricia storage trie root = keccak256(0x80)",
-  "storageSlotCount": 0,
-  "qualificationRequirement": "LEVEL_2_APP_INTEGRATION"
+  "storageSlotCount": 0
 }

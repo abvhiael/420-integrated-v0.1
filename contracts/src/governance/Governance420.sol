@@ -66,9 +66,17 @@ contract Governance420 is SystemAccess, I420System {
         address governor
     ) external onlyGovernance {
         if (civicGovernor != address(0)) revert CivicGovernorAlreadyBound();
-        if (governor == address(0) || governor.code.length == 0) revert InvalidCivicGovernor();
+        if (!_isCanonicalCivicGovernor(governor)) revert InvalidCivicGovernor();
         civicGovernor = governor;
         emit CivicGovernorBound(governor);
+    }
+
+    function _isCanonicalCivicGovernor(
+        address governor
+    ) private view returns (bool) {
+        if (governor == address(0) || governor.code.length == 0) return false;
+        (bool ok, bytes memory data) = governor.staticcall(abi.encodeWithSignature("timelock()"));
+        return ok && data.length >= 32 && abi.decode(data, (address)) == governanceTimelock;
     }
 
     /// @dev Retained selector; permanently disabled so 0x0437 cannot host a parallel proposal system.

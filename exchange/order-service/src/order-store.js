@@ -15,7 +15,7 @@ function snapshot(record,now){
   return Object.freeze({...record,provenance:provenance(record,now)});
 }
 
-export function createOrderPublicationStore({chainId,settlementContract,signatureVerifier,clock=()=>Math.floor(Date.now()/1000)}={}){
+export function createOrderPublicationStore({chainId,settlementContract,signatureVerifier,withdrawalAuthorizer=null,clock=()=>Math.floor(Date.now()/1000)}={}){
   if(chainId===undefined||!/^0x[0-9a-fA-F]{40}$/.test(settlementContract??'')||typeof signatureVerifier!=='function'||typeof clock!=='function')fail('CONFIG_REQUIRED','chain, settlement contract, verifier and clock required');
   const orders=new Map();
   const now=()=>{const n=clock();if(!Number.isSafeInteger(n)||n<0)fail('CLOCK_INVALID','valid service clock required');return n;};
@@ -40,6 +40,25 @@ export function createOrderPublicationStore({chainId,settlementContract,signatur
       ]),
     };
     orders.set(record.orderHash,record);
+    return Object.freeze({idempotent:false,record:snapshot(record,at)});
+  }
+  async function withdraw(orderHash,{schema,maker,nonce,requestId}={}){
+    const at=now(),record=orders.get(String(orderHash).toLowerCase());
+    if(!record)fail('NOT_FOUND','order not found');
+    if(schema!=='420-exchange-order-withdrawal-v1')fail('WITHDRAWAL_INVALID','unsupported withdrawal schema');
+    if(!exact(maker,record.order.maker))fail('MAKER_MISMATCH','only the maker may withdraw an off-chain order');
+    if(String(nonce)!==record.order.nonce)fail('NONCE_MISMATCH','withdrawal nonce differs from canonical order');
+    if(typeof requestId!=='string'||requestId.length<8||requestId.length>128)fail('WITHDRAWAL_INVALID','bounded requestId required');
+    if(typeof withdrawalAuthorizer!=='function')fail('WITHDRAWAL_AUTH_UNAVAILABLE','withdrawal authorization verifier unavailable');
+    let authorized=false;
+    try{authorized=await withdrawalAuthorizer({maker:record.order.maker,orderHash:record.orderHash,nonce:record.order.nonce,requestId});}
+    catch(error){fail('WITHDRAWAL_AUTH_FAILED',String(error?.message??'withdrawal authorization failed'));}
+    if(authorized!==true)fail('WITHDRAWAL_UNAUTHORIZED','maker withdrawal authorization rejected');
+    if(record.state==='cancelled'&&record.cancellation?.mode==='OFFCHAIN_WITHDRAWAL')return Object.freeze({idempotent:true,record:snapshot(record,at)});
+    if(TERMINAL.has(record.state))fail('WITHDRAWAL_NOT_ALLOWED',`cannot withdraw order in ${record.state} state`);
+    record.state='cancelled';record.revision++;record.updatedAt=at;
+    record.cancellation=Object.freeze({mode:'OFFCHAIN_WITHDRAWAL',requestId,observedAt:at});
+    record.history=Object.freeze([...record.history,Object.freeze({state:'cancelled',revision:record.revision,observedAt:at,mode:'OFFCHAIN_WITHDRAWAL'})]);
     return Object.freeze({idempotent:false,record:snapshot(record,at)});
   }
   function status(orderHash){
@@ -72,5 +91,5 @@ export function createOrderPublicationStore({chainId,settlementContract,signatur
     else record.state='accepted';
     record.revision++;record.updatedAt=at;record.history=Object.freeze([...record.history,Object.freeze({state:record.state,revision:record.revision,observedAt:at})]);return snapshot(record,at);
   }
-  return Object.freeze({publish,status,applyProjection,states:PUBLICATION_STATES});
+  return Object.freeze({publish,withdraw,status,applyProjection,states:PUBLICATION_STATES});
 }

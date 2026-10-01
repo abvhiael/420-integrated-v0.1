@@ -1,0 +1,194 @@
+{
+  "schema": "420-names-release-descriptor-v1",
+  "descriptorVersion": 1,
+  "contractName": "Names420",
+  "protocol": "420Names",
+  "protocolVersion": 3,
+  "canonicalAddress": "0x0000000000000000000000000000000000000435",
+  "source": {
+    "path": "contracts/src/apps/Names420.sol",
+    "gitBlobSha": "4cb9b06b4a3febb3bf024c087f3ade1eebdcf31d"
+  },
+  "artifact": {
+    "path": "contracts/artifacts/Names420.json",
+    "payloadSha256": "c40970d3a04503309f9467eaca00c915f5ce3dd1e993c2df3318aa6cd149ab2c",
+    "runtimeCodeHash": "0xa974fffd3a40e7f28db41e4ae30656b33789d2483b18b47c809ce2385de709b7"
+  },
+  "events": [
+    {
+      "type": "event",
+      "name": "CommitmentMade",
+      "anonymous": false,
+      "signature": "CommitmentMade(bytes32,address,uint64)",
+      "topic0": "0x5c32eab10d9fd46a181247ffac17387ee33b85a9e8a41e682945d233ed2b7b9a",
+      "inputs": [
+        {
+          "name": "commitment",
+          "type": "bytes32",
+          "indexed": true
+        },
+        {
+          "name": "committer",
+          "type": "address",
+          "indexed": true
+        },
+        {
+          "name": "committedAt",
+          "type": "uint64",
+          "indexed": false
+        }
+      ]
+    },
+    {
+      "type": "event",
+      "name": "NameRegistered",
+      "anonymous": false,
+      "signature": "NameRegistered(bytes32,address,uint64,uint8)",
+      "topic0": "0x4641c22a637e77082055262ec329789746ca672147864cfa3df785a9361a3a07",
+      "inputs": [
+        {
+          "name": "labelHash",
+          "type": "bytes32",
+          "indexed": true
+        },
+        {
+          "name": "owner",
+          "type": "address",
+          "indexed": true
+        },
+        {
+          "name": "expiresAt",
+          "type": "uint64",
+          "indexed": false
+        },
+        {
+          "name": "labelLength",
+          "type": "uint8",
+          "indexed": false
+        }
+      ]
+    },
+    {
+      "type": "event",
+      "name": "NameRenewed",
+      "anonymous": false,
+      "signature": "NameRenewed(bytes32,address,uint64)",
+      "topic0": "0xdb6e26c932796e55f1e2ddf85164c4bee4d37ec38688b993bc4814edae111a2a",
+      "inputs": [
+        {
+          "name": "labelHash",
+          "type": "bytes32",
+          "indexed": true
+        },
+        {
+          "name": "owner",
+          "type": "address",
+          "indexed": true
+        },
+        {
+          "name": "expiresAt",
+          "type": "uint64",
+          "indexed": false
+        }
+      ]
+    },
+    {
+      "type": "event",
+      "name": "NameTransferred",
+      "anonymous": false,
+      "signature": "NameTransferred(bytes32,address,address)",
+      "topic0": "0xee3ae35c0d0799fb196f821efc8d30111345552cd23192da6bab51e7f664b6ba",
+      "inputs": [
+        {
+          "name": "labelHash",
+          "type": "bytes32",
+          "indexed": true
+        },
+        {
+          "name": "previousOwner",
+          "type": "address",
+          "indexed": true
+        },
+        {
+          "name": "newOwner",
+          "type": "address",
+          "indexed": true
+        }
+      ]
+    },
+    {
+      "type": "event",
+      "name": "NameTransferStarted",
+      "anonymous": false,
+      "signature": "NameTransferStarted(bytes32,address,address)",
+      "topic0": "0x5b0f67418f872ae10fb66db3ea653e28f45effc96ee9a44754c36751152f3553",
+      "inputs": [
+        {
+          "name": "labelHash",
+          "type": "bytes32",
+          "indexed": true
+        },
+        {
+          "name": "owner",
+          "type": "address",
+          "indexed": true
+        },
+        {
+          "name": "pendingOwner",
+          "type": "address",
+          "indexed": true
+        }
+      ]
+    },
+    {
+      "type": "event",
+      "name": "ResolutionUpdated",
+      "anonymous": false,
+      "signature": "ResolutionUpdated(bytes32,address,bytes32,bytes32)",
+      "topic0": "0x8ac5238bfd17c6b9cb11f3962f06cac1f2069a2624b5f5f7de30c61dc4475acb",
+      "inputs": [
+        {
+          "name": "labelHash",
+          "type": "bytes32",
+          "indexed": true
+        },
+        {
+          "name": "resolvedAddress",
+          "type": "address",
+          "indexed": true
+        },
+        {
+          "name": "profileId",
+          "type": "bytes32",
+          "indexed": true
+        },
+        {
+          "name": "serviceId",
+          "type": "bytes32",
+          "indexed": false
+        }
+      ]
+    },
+    {
+      "type": "event",
+      "name": "ReverseNameSet",
+      "anonymous": false,
+      "signature": "ReverseNameSet(address,bytes32)",
+      "topic0": "0xd63bd43da0524101925f9a780363510d8945469aab3341b00a6925ef2d05b9e5",
+      "inputs": [
+        {
+          "name": "resolvedAddress",
+          "type": "address",
+          "indexed": true
+        },
+        {
+          "name": "labelHash",
+          "type": "bytes32",
+          "indexed": true
+        }
+      ]
+    }
+  ],
+  "authority": "repository_descriptor_only_not_live_names_authority",
+  "descriptorSha256": "74602adfdde367c82fcefcd35a89a5b0e415e92721289cca9e827be32299b3be"
+}

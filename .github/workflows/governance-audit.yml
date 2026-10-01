@@ -6,6 +6,11 @@ on:
       - 'audit/420governance-*'
     paths:
       - 'contracts/src/governance/**'
+      - 'contracts/config/interfaces/dependency-matrix.json'
+      - 'contracts/config/interfaces/governance-dependency-model.json'
+      - 'scripts/verify-governance-audit-1.py'
+      - 'scripts/verify-genesis-interface-layer.py'
+      - 'docs/architecture/decisions/GOV-AUDIT-1-AUTHORITY-DEPENDENCY-CANCELLATION.md'
       - 'contracts/test/Civic*.t.sol'
       - 'contracts/test/Governance*.t.sol'
       - '420-indexer/src/abi-manifest.ts'
@@ -18,6 +23,11 @@ on:
   pull_request:
     paths:
       - 'contracts/src/governance/**'
+      - 'contracts/config/interfaces/dependency-matrix.json'
+      - 'contracts/config/interfaces/governance-dependency-model.json'
+      - 'scripts/verify-governance-audit-1.py'
+      - 'scripts/verify-genesis-interface-layer.py'
+      - 'docs/architecture/decisions/GOV-AUDIT-1-AUTHORITY-DEPENDENCY-CANCELLATION.md'
       - 'contracts/test/Civic*.t.sol'
       - 'contracts/test/Governance*.t.sol'
       - '420-indexer/src/abi-manifest.ts'
@@ -62,6 +72,11 @@ jobs:
       - uses: foundry-rs/foundry-toolchain@v1
         with:
           version: stable
+
+      - name: Verify GOV-AUDIT-1 authority and dependency model
+        run: |
+          python scripts/verify-governance-audit-1.py
+          python scripts/verify-genesis-interface-layer.py
 
       - name: Check Governance Solidity formatting
         working-directory: contracts

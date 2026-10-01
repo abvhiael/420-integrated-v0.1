@@ -1,0 +1,86 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-1.4.8.ScientificProbabilisticVerification.v1",
+  "step": "CMP-1.4.8",
+  "title": "Scientific/probabilistic verification",
+  "canonical_definition": "Support workload-specific validation where full recomputation is impractical.",
+  "base_main_sha": "8d6df0e53220bdd3d9b6e3cbd2f467927a65d4f1",
+  "qualification_level": 2,
+  "roadmap_order": {
+    "predecessor": "CMP-1.4.7",
+    "predecessor_complete_on_base": true,
+    "earlier_open_step": "CMP-1.4.4",
+    "note": "CMP-1.4.4 remains open. CMP-1.4.8 adds workload-specific scientific/probabilistic evidence and does not claim signed-verdict completion."
+  },
+  "milestone_relationship": {
+    "level_2_required_now": true,
+    "milestone": "CMP-1.4 verification-method integration",
+    "rationale": "CMP-1.4.8 is the first point where deterministic full-recomputation adapters and scientific/probabilistic validation coexist. Cross-family typing and the retained Compute verifier suite must prove the two methods cannot be silently substituted."
+  },
+  "implementation": {
+    "interface": "contracts/src/compute/IComputeScientificVerificationAdapter420.sol",
+    "registry": "contracts/src/compute/ComputeScientificAdapterRegistry420.sol",
+    "router": "contracts/src/compute/ComputeScientificVerificationRouter420.sol",
+    "reference_adapter": "contracts/src/compute/ComputeSampledMeanScientificAdapter420.sol",
+    "test": "contracts/test/ComputeScientificVerificationRouter420.t.sol",
+    "deterministic_integration": [
+      "contracts/src/compute/IComputeDeterministicVerificationAdapter420.sol",
+      "contracts/src/compute/ComputeDeterministicAdapterRegistry420.sol",
+      "contracts/src/compute/ComputeIntegerSumSquaresAdapter420.sol"
+    ],
+    "method_rule": "Scientific adapters validate bounded workload-specific evidence under an exact versioned protocol commitment; sampled PASS is not represented as exact full recomputation.",
+    "sampling_rule": "A dedicated sampling authority freezes a nonzero sample-seed commitment before execution; the reference adapter reveals it only with post-result evidence and derives a unique fixed sample plan deterministically.",
+    "membership_rule": "The reference adapter authenticates every sampled observation against the dataset Merkle root committed by the job input.",
+    "outcome_rule": "Scientific evidence produces explicit INCONCLUSIVE/PASS/FAIL outcomes. The router records evidence but does not mutate ComputeJobRegistry420 verdict or settlement state.",
+    "family_rule": "Deterministic and scientific adapters expose distinct adapter-kind identities and both registries reject cross-family publication."
+  },
+  "reference_protocol": {
+    "workload": "420/CMP/WORKLOAD/SAMPLED_DATASET_MEAN/V1",
+    "profile": "420/CMP/PROFILE/SCIENTIFIC_SAMPLED_MEAN/V1",
+    "samples": 4,
+    "minimum_dataset_size": 16,
+    "tolerance_bps": 500,
+    "maximum_sample_range_bps": 2500,
+    "note": "This bounded reference profile is intended for public/non-sensitive committed integer datasets. It is not a statistical-confidence guarantee, not a generic scientific correctness proof, and not suitable for private samples that cannot be disclosed in calldata."
+  },
+  "authority_boundaries": [
+    "Scientific adapter publication grants no verifier identity/class/capability, signed verdict, settlement, custody, stake/slash, worker, governance, validator, bridge or wallet authority.",
+    "The sampling authority can freeze only a scientific route/sample commitment; it cannot create a job verdict, select a settlement beneficiary, move funds, or change the accepted verification policy.",
+    "Adapter code hash, output schema and protocol commitment are frozen per job before execution; later publication/deactivation cannot rewrite historical semantics.",
+    "PASS means only that the exact sampled/tolerance protocol passed. It is not represented as exact full-dataset correctness.",
+    "FAIL or INCONCLUSIVE does not automatically transition the canonical job or create economic consequences.",
+    "Malformed seed reveals, wrong Merkle membership, wrong worker output commitment, cross-family adapter substitution and replay fail closed.",
+    "Private workload/sample bytes are not required by the generic interface; the concrete reference sampled-mean profile is explicitly public/non-sensitive only."
+  ],
+  "invariants": [
+    "CMP-INV-005",
+    "CMP-INV-014",
+    "CMP-INV-016",
+    "CMP-INV-017",
+    "CMP-INV-020",
+    "CMP-INV-022",
+    "CMP-INV-023",
+    "CMP-INV-024",
+    "CMP-INV-025",
+    "CMP-INV-026",
+    "CMP-INV-027",
+    "CMP-INV-030"
+  ],
+  "deployment_publication": {
+    "fixed_genesis_predeploy_created": false,
+    "protocol_registry_publication_claimed": false,
+    "live_deployment_claimed": false
+  },
+  "exit_criteria": [
+    "A generic scientific/probabilistic adapter interface exists with exact workload/profile/schema/protocol identity and explicit INCONCLUSIVE/PASS/FAIL evidence outcomes.",
+    "A versioned governance registry pins exact scientific adapter address, runtime code hash, schema and protocol commitment.",
+    "An exact scientific route and sample-plan commitment are frozen before execution by a dedicated sampling authority.",
+    "Post-result evaluation binds the accepted verification policy, canonical job/result, actual worker output commitment and exact frozen adapter code/protocol.",
+    "The reference sampled-mean adapter verifies deterministic sample selection, Merkle membership and objective tolerance/dispersion rules without full dataset recomputation.",
+    "PASS is not represented as exact correctness; high-dispersion evidence is explicitly INCONCLUSIVE and out-of-tolerance evidence is FAIL.",
+    "Malformed seed/proof/output evidence and replay fail closed without mutating canonical job verdict/settlement state.",
+    "Deterministic and scientific adapter families cannot be cross-published or silently substituted.",
+    "Level 1 exact-head affected build/tests/mechanical checks are green.",
+    "Level 2 retained Compute verifier-method integration suite is green on the same implementation SHA."
+  ],
+  "status": "IMPLEMENTATION_COMPLETE_QUALIFICATION_PENDING"
+}

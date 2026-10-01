@@ -59,6 +59,8 @@ jobs:
           node-version: '22'
       - name: Verify STAKE-AUDIT-5 application anchors
         run: python scripts/verify-stake-audit-5-wallet.py
+      - name: Verify affected Wallet deployment inventory
+        run: python scripts/verify-wallet-w14-1.py
       - name: Run focused Stake client and UI tests
         working-directory: wallet/web
         run: node --test test/stake-management.test.js test/stake-management-ui.test.js test/runtime-config-generator.test.js

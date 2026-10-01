@@ -11,6 +11,7 @@ on:
       - "contracts/artifacts/Identity420.json"
       - "developer-hub/catalogue/local.example.json"
       - "docs/reference/generated/**"
+      - "docs/audit/ID-AUDIT-4-GENERATED-ARTIFACT-REFERENCE-QUALIFICATION.md"
       - "420-indexer/src/abi-manifest.ts"
       - "scripts/generate-id-audit-4-identity-artifact.py"
       - "scripts/verify-id-audit-4-artifact.py"

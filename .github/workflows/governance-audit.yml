@@ -81,9 +81,27 @@ jobs:
           python scripts/verify-governance-audit-2.py
           python scripts/verify-genesis-interface-layer.py
 
-      - name: Check Governance Solidity formatting
+      - name: Capture canonical GOV-AUDIT-2 Solidity formatting
         working-directory: contracts
-        run: forge fmt --check src/governance test/CivicFoundation420.t.sol test/CivicElectorateRegistry420.t.sol test/CivicVoting420.t.sol test/CivicGovernor420.t.sol test/CivicTimelockExecution420.t.sol test/Governance420Retirement.t.sol test/GovernanceAudit420.t.sol test/GovernanceAudit2Hardening420.t.sol
+        shell: bash
+        run: |
+          set -euo pipefail
+          forge fmt src/governance test/CivicFoundation420.t.sol test/CivicElectorateRegistry420.t.sol test/CivicVoting420.t.sol test/CivicGovernor420.t.sol test/CivicTimelockExecution420.t.sol test/Governance420Retirement.t.sol test/GovernanceAudit420.t.sol test/GovernanceAudit2Hardening420.t.sol
+          while IFS= read -r file; do
+            echo "FORMAT_B64_BEGIN:${file}"
+            base64 -w0 "${file}"
+            echo
+            echo "FORMAT_B64_END:${file}"
+          done < <(find src/governance -maxdepth 1 -type f -name '*.sol' -print | sort; printf '%s\n' \
+            test/CivicFoundation420.t.sol \
+            test/CivicElectorateRegistry420.t.sol \
+            test/CivicVoting420.t.sol \
+            test/CivicGovernor420.t.sol \
+            test/CivicTimelockExecution420.t.sol \
+            test/Governance420Retirement.t.sol \
+            test/GovernanceAudit420.t.sol \
+            test/GovernanceAudit2Hardening420.t.sol)
+          exit 1
 
       - name: Build canonical Governance contracts
         working-directory: contracts

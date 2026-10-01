@@ -86,5 +86,39 @@
     "CMP-1.4.9 mechanical verifier passes.",
     "Level 1 and the CMP-1.4 verifier-dispute lifecycle Level 2 integration suite are green on the same exact implementation SHA."
   ],
-  "status": "IMPLEMENTATION_COMPLETE_QUALIFICATION_PENDING"
+  "status": "COMPLETE_LEVEL_1_AND_LEVEL_2",
+  "qualified_implementation_sha": "c125a25ab070ea5511d50e82045ae9b96ddadbb3",
+  "level_1_and_2_results": {
+    "compute_market_qualification": {
+      "run_number": 61,
+      "run_id": 36821510570,
+      "conclusion": "success"
+    },
+    "solidity_contracts": {
+      "run_number": 3578,
+      "run_id": 36821510599,
+      "conclusion": "success"
+    },
+    "genesis_address_authority": {
+      "run_number": 387,
+      "run_id": 36821510628,
+      "conclusion": "success"
+    },
+    "registry_audit": {
+      "run_number": 222,
+      "run_id": 36821510673,
+      "conclusion": "success"
+    },
+    "docs_qualification": {
+      "run_number": 3774,
+      "run_id": 36821510622,
+      "conclusion": "success"
+    },
+    "indexer": {
+      "run_number": 1194,
+      "run_id": 36821510670,
+      "conclusion": "success"
+    }
+  },
+  "completion_note": "Exact-head Level 1 and CMP-1.4 verifier-dispute lifecycle Level 2 qualification passed on c125a25ab070ea5511d50e82045ae9b96ddadbb3. This closeout update is evidence-only and changes no executable source, tests, workflows, dependencies, interfaces, deployment state, or substantive requirements."
 }

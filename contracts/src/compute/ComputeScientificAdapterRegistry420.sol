@@ -8,6 +8,8 @@ import "./IComputeScientificVerificationAdapter420.sol";
 /// @notice Governance-versioned scientific/probabilistic adapter registry.
 /// @dev Routes bind exact workload/profile/protocol semantics and runtime code. Registration grants no verdict authority.
 contract ComputeScientificAdapterRegistry420 is I420System, SystemAccess {
+    bytes32 public constant ADAPTER_KIND =
+        keccak256("420/CMP/VERIFICATION_ADAPTER/SCIENTIFIC/V1");
     struct Route {
         address adapter;
         bytes32 codeHash;

@@ -1,0 +1,90 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-1.4.9.ChallengeAppealHooks.v1",
+  "step": "CMP-1.4.9",
+  "title": "Challenge and appeal hooks",
+  "canonical_definition": "Integrate verifier decisions with dispute holds and later stake/slash adjudication.",
+  "user_shorthand": "Connect disputed results to the dispute layer.",
+  "base_main_sha": "cbff831984df5d57540a26c879663cf95bcf61c9",
+  "qualification_level": 2,
+  "roadmap_order": {
+    "predecessor": "CMP-1.4.8",
+    "predecessor_complete_on_base": true,
+    "earlier_open_step": "CMP-1.4.4",
+    "note": "CMP-1.4.4 remains open. CMP-1.4.9 preserves and projects the original recorded verification tuple; it does not claim the still-open canonical signed-verdict binding work is complete."
+  },
+  "preexisting_authoritative_dispute_layer": {
+    "contract": "contracts/src/compute/ComputeDisputeResolution420.sol",
+    "entitlement_path": "contracts/src/compute/ComputeVerifiedEntitlement420.sol",
+    "existing_guards": [
+      "authorized timely challenge",
+      "contested provider entitlement hold",
+      "independent adjudicator",
+      "different appeal adjudicator",
+      "bounded response/decision/appeal windows",
+      "provider-win release",
+      "payer-win refund reallocation",
+      "fail-closed timeout",
+      "immutable original verificationRef/result/verifier snapshot"
+    ]
+  },
+  "implementation": {
+    "contract": "contracts/src/compute/ComputeDisputeResolution420.sol",
+    "test": "contracts/test/ComputeVerifiedEntitlement420.t.sol",
+    "review_hook": "verificationReview(bytes32)",
+    "job_hold_hook": "verificationHoldForJob(bytes32)",
+    "original_decision_rule": "Challenge/appeal state stores and returns the original verificationRef, resultCommitment, verifier and verification-policy tuple; no hook rewrites the original verdict.",
+    "chronology_rule": "Review exposes grounds/evidence, response, first decision, appeal, appeal decision, adjudicators, deadlines, resolution and case status from the authoritative dispute case.",
+    "hold_rule": "holdActive is true only for OPEN, RESPONDED, DECIDED and APPEALED cases and false after FINAL, WITHDRAWN or TIMED_OUT.",
+    "later_adjudication_rule": "adverseToOriginalVerification is true only after a final disposition adverse to the originally approved result. It is a candidate signal only; a future stake/slash layer must independently validate policy, objective evidence, actor/subject and slash authorization."
+  },
+  "authority_boundaries": [
+    "Challenge/appeal hooks are read-only projections and cannot alter the original verificationRef/result/verifier/policy tuple.",
+    "The authoritative dispute engine, not the hook, owns case state, deadlines, claimant/respondent roles and adjudicator independence.",
+    "An unresolved challenge retains the existing contested-entitlement hold and cannot authorize provider release.",
+    "A challenge, appeal, or adverse final disposition does not itself move Vault funds; economic effects continue through the already-qualified entitlement/dispute resolution path.",
+    "adverseToOriginalVerification is not proof of verifier fault and grants no slash, stake, custody, settlement, governance, bridge, validator, worker or wallet authority.",
+    "Later stake/slash adjudication must independently validate exact bound policy and objective evidence and cannot punish solely from an allegation or nonfinal case.",
+    "Withdrawal/provider-win finality is not represented as an adverse verifier disposition.",
+    "Private evidence bytes remain off-chain; hooks expose bounded commitments and chronology only."
+  ],
+  "invariants": [
+    "CMP-INV-005",
+    "CMP-INV-009",
+    "CMP-INV-010",
+    "CMP-INV-013",
+    "CMP-INV-014",
+    "CMP-INV-016",
+    "CMP-INV-017",
+    "CMP-INV-018",
+    "CMP-INV-020",
+    "CMP-INV-022",
+    "CMP-INV-024",
+    "CMP-INV-025",
+    "CMP-INV-026",
+    "CMP-INV-027",
+    "CMP-INV-030"
+  ],
+  "milestone_relationship": {
+    "level_2_required_now": true,
+    "milestone": "CMP-1.4 verifier-dispute lifecycle integration",
+    "rationale": "CMP-1.4.9 connects verifier provenance to the shared dispute/entitlement lifecycle. The retained Compute suite must revalidate dispute holds, appeal finality, payer/provider economic isolation and verifier-method behavior together."
+  },
+  "deployment_publication": {
+    "fixed_genesis_predeploy_created": false,
+    "protocol_registry_publication_claimed": false,
+    "live_deployment_claimed": false
+  },
+  "exit_criteria": [
+    "A verifier-facing review hook exposes the original verification identity/result/policy plus authoritative challenge and appeal chronology.",
+    "A job-scoped hook exposes whether the original verification is currently under a dispute hold.",
+    "The original verification tuple remains immutable through challenge, decision, appeal and finality.",
+    "OPEN/RESPONDED/DECIDED/APPEALED cases remain held; FINAL/WITHDRAWN/TIMED_OUT cases are not held.",
+    "A final payer-adverse-to-provider disposition can be identified as a later verifier-adjudication candidate without authorizing slashing.",
+    "Withdrawal/provider-win finality is not mislabeled as verifier fault.",
+    "Hooks do not move funds, rewrite verdicts or grant stake/slash/custody/settlement authority.",
+    "Focused challenge/appeal tests and retained Compute dispute/economic tests pass.",
+    "CMP-1.4.9 mechanical verifier passes.",
+    "Level 1 and the CMP-1.4 verifier-dispute lifecycle Level 2 integration suite are green on the same exact implementation SHA."
+  ],
+  "status": "IMPLEMENTATION_COMPLETE_QUALIFICATION_PENDING"
+}

@@ -1,0 +1,102 @@
+name: 420Governance GOV-AUDIT-6
+
+on:
+  push:
+    branches:
+      - 'audit/420governance-*'
+    paths:
+      - 'contracts/src/governance/**'
+      - 'contracts/src/apps/ProtocolRegistry.sol'
+      - 'contracts/src/interfaces/genesis/Types420.sol'
+      - 'contracts/config/governance-deployment-v1.json'
+      - 'contracts/config/predeploy/storage-init.json'
+      - 'contracts/foundry.toml'
+      - 'contracts/test/GovernanceAudit6Deployment420.t.sol'
+      - 'scripts/verify-governance-audit-6.py'
+      - '.github/workflows/governance-deployment-audit.yml'
+  pull_request:
+    paths:
+      - 'contracts/src/governance/**'
+      - 'contracts/src/apps/ProtocolRegistry.sol'
+      - 'contracts/src/interfaces/genesis/Types420.sol'
+      - 'contracts/config/governance-deployment-v1.json'
+      - 'contracts/config/predeploy/storage-init.json'
+      - 'contracts/foundry.toml'
+      - 'contracts/test/GovernanceAudit6Deployment420.t.sol'
+      - 'scripts/verify-governance-audit-6.py'
+      - '.github/workflows/governance-deployment-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: governance-audit-6-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qualify:
+    if: github.event_name != 'pull_request' || startsWith(github.head_ref, 'audit/420governance-')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification head
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Verify pinned deployment/discovery specification
+        run: python3 scripts/verify-governance-audit-6.py
+      - name: Build exact Governance and Registry deployment surfaces
+        working-directory: contracts
+        run: |
+          forge build src/governance/GovernanceTimelock.sol
+          forge build src/governance/Governance420.sol
+          forge build src/governance/CivicConstitution420.sol
+          forge build src/governance/CivicProposalRegistry420.sol
+          forge build src/governance/CivicElectorateRegistry420.sol
+          forge build src/governance/CivicVoting420.sol
+          forge build src/governance/CivicGovernor420.sol
+          forge build src/apps/ProtocolRegistry.sol
+      - name: GOV-AUDIT-6 deterministic deployment simulation
+        working-directory: contracts
+        run: forge test --match-path test/GovernanceAudit6Deployment420.t.sol -vv
+      - name: Retained Governance authority and lifecycle regressions
+        working-directory: contracts
+        run: |
+          forge test --match-path 'test/Civic*.t.sol' -vv
+          forge test --match-path 'test/Governance*420.t.sol' -vv
+      - name: Emit reproducible runtime-template hashes
+        working-directory: contracts
+        run: |
+          set -euo pipefail
+          mkdir -p ../gov-audit-6-runtime
+          for c in GovernanceTimelock Governance420 CivicConstitution420 CivicProposalRegistry420 CivicElectorateRegistry420 CivicVoting420 CivicGovernor420; do
+            file="out/$c.sol/$c.json"
+            test -f "$file"
+            python3 - "$file" "$c" <<'PY' >> ../gov-audit-6-runtime/runtime-template-hashes.txt
+import json,sys,hashlib
+p,name=sys.argv[1:3]
+j=json.load(open(p))
+obj=j["deployedBytecode"]["object"]
+if obj.startswith("0x"): obj=obj[2:]
+print(name, "sha256="+hashlib.sha256(bytes.fromhex(obj)).hexdigest(), "bytes="+str(len(obj)//2))
+PY
+          done
+      - name: Upload runtime-template evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gov-audit-6-runtime-${{ github.sha }}
+          path: gov-audit-6-runtime/runtime-template-hashes.txt
+          if-no-files-found: error
+          retention-days: 30

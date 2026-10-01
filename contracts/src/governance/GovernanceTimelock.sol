@@ -68,11 +68,19 @@ contract GovernanceTimelock {
         address civicGovernor
     ) external onlyBootstrapGovernor {
         require(!civicAuthorityActivated, "already activated");
-        require(civicGovernor != address(0) && civicGovernor.code.length != 0, "invalid governor");
+        require(_isCanonicalCivicGovernor(civicGovernor), "invalid governor");
         address previous = scheduler;
         scheduler = civicGovernor;
         civicAuthorityActivated = true;
         emit CivicAuthorityActivated(previous, civicGovernor);
+    }
+
+    function _isCanonicalCivicGovernor(
+        address civicGovernor
+    ) private view returns (bool) {
+        if (civicGovernor == address(0) || civicGovernor.code.length == 0) return false;
+        (bool ok, bytes memory data) = civicGovernor.staticcall(abi.encodeWithSignature("timelock()"));
+        return ok && data.length >= 32 && abi.decode(data, (address)) == address(this);
     }
 
     /// @notice Legacy-compatible scheduling surface using the immutable class delay floor.

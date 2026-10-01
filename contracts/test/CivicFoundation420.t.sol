@@ -15,10 +15,37 @@ interface VmCivic420 {
     ) external;
 }
 
+contract MockFoundationProposalAuthority420 {
+    address public immutable proposalRegistry;
+    address public immutable timelock;
+
+    constructor(address proposalRegistry_, address timelock_) {
+        proposalRegistry = proposalRegistry_;
+        timelock = timelock_;
+    }
+
+    function register(
+        CivicProposalRegistry420 registry,
+        bytes32 proposalId,
+        address proposer
+    ) external {
+        registry.registerProposal(
+            proposalId, proposer, CivicIds420.ProposalClass.G1, keccak256("metadata"), keccak256("actions"), 10, 11, 20
+        );
+    }
+
+    function transition(
+        CivicProposalRegistry420 registry,
+        bytes32 proposalId,
+        CivicIds420.ProposalState next
+    ) external {
+        registry.transition(proposalId, next);
+    }
+}
+
 contract CivicFoundation420Test {
     VmCivic420 constant vm = VmCivic420(address(uint160(uint256(keccak256("hevm cheat code")))));
     address constant ALICE = address(0xA11CE);
-    address constant GOVERNOR = address(0x0437);
 
     function testConstitutionPreservesDelayFloorsAndGovernanceAuthority() public {
         CivicConstitution420 constitution = new CivicConstitution420(address(this));
@@ -50,7 +77,9 @@ contract CivicFoundation420Test {
 
     function testProposalAuthorityIsOneTimeBoundAndUnauthorizedWritersFailClosed() public {
         CivicProposalRegistry420 registry = new CivicProposalRegistry420(address(this));
-        registry.bindProposalAuthority(GOVERNOR);
+        MockFoundationProposalAuthority420 authority =
+            new MockFoundationProposalAuthority420(address(registry), address(this));
+        registry.bindProposalAuthority(address(authority));
 
         vm.expectRevert(CivicProposalRegistry420.AuthorityAlreadyBound.selector);
         registry.bindProposalAuthority(ALICE);
@@ -62,48 +91,29 @@ contract CivicFoundation420Test {
             proposalId, ALICE, CivicIds420.ProposalClass.G1, keccak256("metadata"), keccak256("actions"), 10, 11, 20
         );
 
-        vm.prank(GOVERNOR);
-        registry.registerProposal(
-            proposalId, ALICE, CivicIds420.ProposalClass.G1, keccak256("metadata"), keccak256("actions"), 10, 11, 20
-        );
+        authority.register(registry, proposalId, ALICE);
 
-        vm.prank(GOVERNOR);
         vm.expectRevert(CivicProposalRegistry420.AlreadyExists.selector);
-        registry.registerProposal(
-            proposalId,
-            ALICE,
-            CivicIds420.ProposalClass.G1,
-            keccak256("other-metadata"),
-            keccak256("other-actions"),
-            10,
-            11,
-            20
-        );
+        authority.register(registry, proposalId, ALICE);
     }
 
     function testProposalLifecycleCannotSkipQueueOrReopenTerminalState() public {
         CivicProposalRegistry420 registry = new CivicProposalRegistry420(address(this));
-        registry.bindProposalAuthority(GOVERNOR);
+        MockFoundationProposalAuthority420 authority =
+            new MockFoundationProposalAuthority420(address(registry), address(this));
+        registry.bindProposalAuthority(address(authority));
         bytes32 proposalId = keccak256("proposal/2");
 
-        vm.prank(GOVERNOR);
-        registry.registerProposal(
-            proposalId, ALICE, CivicIds420.ProposalClass.G4, keccak256("metadata"), keccak256("actions"), 10, 11, 20
-        );
+        authority.register(registry, proposalId, ALICE);
 
-        vm.prank(GOVERNOR);
         vm.expectRevert(CivicProposalRegistry420.InvalidStateTransition.selector);
-        registry.transition(proposalId, CivicIds420.ProposalState.EXECUTED);
+        authority.transition(registry, proposalId, CivicIds420.ProposalState.EXECUTED);
 
-        vm.prank(GOVERNOR);
-        registry.transition(proposalId, CivicIds420.ProposalState.PASSED);
-        vm.prank(GOVERNOR);
-        registry.transition(proposalId, CivicIds420.ProposalState.QUEUED);
-        vm.prank(GOVERNOR);
-        registry.transition(proposalId, CivicIds420.ProposalState.EXECUTED);
+        authority.transition(registry, proposalId, CivicIds420.ProposalState.PASSED);
+        authority.transition(registry, proposalId, CivicIds420.ProposalState.QUEUED);
+        authority.transition(registry, proposalId, CivicIds420.ProposalState.EXECUTED);
 
-        vm.prank(GOVERNOR);
         vm.expectRevert(CivicProposalRegistry420.InvalidStateTransition.selector);
-        registry.transition(proposalId, CivicIds420.ProposalState.ACTIVE);
+        authority.transition(registry, proposalId, CivicIds420.ProposalState.ACTIVE);
     }
 }

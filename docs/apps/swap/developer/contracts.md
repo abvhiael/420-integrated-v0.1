@@ -14,7 +14,7 @@ The canonical 420 Swap stack is split between governance/registry surfaces and t
 - `GenesisDEXFactory` — **registration-only** governance surface for Genesis-qualified canonical pool instances. It does not deploy pools with CREATE/CREATE2. Canonical pool instances are deployed by the qualified deployment process and then registered by Genesis governance under a one-shot `poolId`. `poolImplementation` is the approved implementation/provenance reference used by deployment governance; it is not a runtime-codehash equality gate because canonical pools may embed immutable market/executor parameters in runtime code.
 - `PermissionlessDEXFactory` — **registration-only permissionless tier**. Anyone may deploy a compatible pool externally and register that existing instance while Swap is operational. Registration does not confer canonical status, oracle eligibility, Wallet-default eligibility or protocol endorsement.
 - `TWAPOracle` — canonical Swap TWAP surface. It resolves the active canonical market, derives time-weighted price from pool cumulative state, enforces configured observation-window/freshness policy, commits source provenance and exposes the Exchange `referencePrice` boundary. Governance configures policy but cannot inject arbitrary price observations.
-- `PublicBatchAuction` — governance-operated batch-auction state surface for protocol distribution workflows.
+- `PublicBatchAuction` — native-$420 public-distribution batch auction. Governance opens pre-funded inventory and sets the clearing price; bidders escrow the canonical quote asset permissionlessly; fills/refunds/claims are deterministic and pull-based.
 - `SwapIds420` — canonical component and action identifiers.
 
 ### GenesisDEXFactory lifecycle
@@ -64,6 +64,29 @@ The TWAP path is canonical-pool-derived:
 `latest(marketId)` remains only as a raw compatibility getter. Security-sensitive integrations must use `readObservation` or `referencePrice`, which enforce window, freshness **and current-source identity**. `TWAPOracleSourceAdapter420` now uses `readObservation` and therefore cannot bypass those checks.
 
 The Swap TWAP publishes confidence `0` because a single canonical-pool time average is not a statistical confidence estimate. 420Oracle may combine it with independent sources and apply confidence/quorum/deviation policy without turning external data into executable pricing authority.
+
+### PublicBatchAuction lifecycle
+
+The frozen `PublicBatchAuction` address is the execution-layer sale mechanism for native-$420 public distribution. The corresponding `PublicDistributionVault` remains the inventory authority and enforces its immutable tranche schedule plus the 100,000-420 daily release cap.
+
+The auction itself does not mint native 420. It must be pre-funded before an auction is opened, reserves that exact native balance against concurrent auctions, and caps each opened inventory at the same 100,000-420 bound.
+
+The quote side is restricted to an asset currently marked `CANONICAL` by `ApprovedQuoteAssetRegistry`, matching the frozen architecture rule that public distribution uses the canonical gateway-backed stable settlement asset.
+
+Lifecycle:
+
+1. governance pre-funds the auction from the distribution path and opens a bounded inventory window with the canonical quote asset and an explicit proceeds recipient;
+2. any user may escrow quote currency through `bid` while the auction is open;
+3. exact balance-delta checks reject fee-on-transfer/rebasing behavior that would corrupt custody accounting;
+4. governance settles after close using the contract's long-standing clearing-price authority, expressed as normalized quote units per one native 420;
+5. if demand is below inventory, only demanded native 420 remains reserved and unsold inventory is released immediately;
+6. if demand exceeds inventory, fills are pro-rata by escrowed quote amount;
+7. each bidder independently claims native fill, while the contract sends exact quote proceeds to the declared recipient and refunds unspent quote;
+8. claims are replay-protected and unbounded settlement loops are avoided;
+9. governance may cancel an unsettled auction during incident recovery; inventory is immediately unreserved and every bidder retains a full quote refund;
+10. once all bidders have claimed, any native rounding remainder is released back to free auction inventory.
+
+The repository does not define a canonical on-chain price-ladder or autonomous clearing algorithm. SWAP-AUDIT-5 therefore preserves the original governance-set clearing-price boundary instead of inventing a new economic policy. Production operations must retain the clearing-price decision/evidence and may additionally constrain it operationally against the canonical TWAP/market policy without changing the executable auction contract silently.
 
 The obsolete `CanonicalPool420` source scaffold was retired during the 420Swap repository audit after `CanonicalConstantProductPool420` became the executable production candidate. It is not a deployable or registry-authoritative component.
 

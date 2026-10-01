@@ -172,6 +172,8 @@ Canonical responsibilities:
 Reuse canonical $420 custody/accounting. Do not create an unrelated collateral treasury.
 
 ### CMP-1.5.1 — Worker collateral
+**Status: implementation/Level 1 qualification in progress.**
+
 
 ### CMP-1.5.2 — Verifier collateral
 

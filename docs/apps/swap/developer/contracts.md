@@ -12,7 +12,7 @@ The canonical 420 Swap stack is split between governance/registry surfaces and t
 ## Market formation and supporting services
 
 - `GenesisDEXFactory` — **registration-only** governance surface for Genesis-qualified canonical pool instances. It does not deploy pools with CREATE/CREATE2. Canonical pool instances are deployed by the qualified deployment process and then registered by Genesis governance under a one-shot `poolId`. `poolImplementation` is the approved implementation/provenance reference used by deployment governance; it is not a runtime-codehash equality gate because canonical pools may embed immutable market/executor parameters in runtime code.
-- `PermissionlessDEXFactory` — permissionless registration tier. Registration does not confer canonical status or oracle eligibility.
+- `PermissionlessDEXFactory` — **registration-only permissionless tier**. Anyone may deploy a compatible pool externally and register that existing instance while Swap is operational. Registration does not confer canonical status, oracle eligibility, Wallet-default eligibility or protocol endorsement.
 - `TWAPOracle` — Swap observation surface; Exchange may consume oracle data as a circuit-breaker input rather than executable-price authority.
 - `PublicBatchAuction` — governance-operated batch-auction state surface for protocol distribution workflows.
 - `SwapIds420` — canonical component and action identifiers.
@@ -30,6 +30,21 @@ The frozen `GenesisDEXFactory` address is a protocol registry boundary, not a po
 Registration fails closed when shared operational safety is not normal and cannot overwrite an existing `poolId`. Changing `poolImplementation` does not mutate or replace previously registered pools.
 
 This distinction is intentional. Introducing an on-chain CREATE/CREATE2 path would create new deployment, salt, initialization, provenance and upgrade semantics that are not defined by the frozen Swap architecture and therefore require a separate canonical decision rather than being inferred from the contract name.
+
+### PermissionlessDEXFactory lifecycle
+
+The frozen permissionless policy keeps `creation: ANYONE`, but repository authority defines that as an open **market-formation** policy rather than an on-chain bytecode deployment primitive. The lifecycle is:
+
+1. any user deploys a pool outside `PermissionlessDEXFactory`;
+2. the pool must be code-bearing and expose `token0()` / `token1()` that exactly match the pair submitted for registration;
+3. the registrant supplies the pool's current runtime code hash, which the factory re-derives from `EXTCODEHASH` and stores as provenance;
+4. the `poolId` must be unused and the exact pool address must not already be registered under another ID;
+5. registration runs through the shared operational, pause, chain-version and resident-lifecycle gates;
+6. distinct pools for the same pair remain permitted because permissionless fee/strategy variants are not canonically restricted here.
+
+The factory retains a reference `poolImplementation` and its deployment-time code hash for discovery/provenance, but it does **not** treat that reference as a protocol endorsement of every registered pool and does not require runtime-codehash equality with it. Concrete pools can embed immutable pair/executor/fee parameters in runtime bytecode, and the permissionless tier is explicitly not asset-qualified or protocol-oracle-eligible.
+
+Registration records are immutable. There is no governance promotion path from this registry into the canonical tier; canonical status requires a separate `CanonicalMarketRegistry` action under canonical market policy.
 
 The obsolete `CanonicalPool420` source scaffold was retired during the 420Swap repository audit after `CanonicalConstantProductPool420` became the executable production candidate. It is not a deployable or registry-authoritative component.
 

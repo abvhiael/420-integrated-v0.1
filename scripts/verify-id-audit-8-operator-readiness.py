@@ -156,7 +156,7 @@ for requirement in [
     "Explorer recovery",
     "subject credential rejection is irreversible",
     "no local pause switch",
-    "does not prove legal identity",
+    "legal identity",
     "Wallet uses chain-specific verified Identity/Names bindings",
     "ID-AUDIT-9",
 ]:

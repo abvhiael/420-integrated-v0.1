@@ -91,7 +91,7 @@ jobs:
       - name: Test 420Indexer retained Identity artifact descriptors
         working-directory: 420-indexer
         run: |
-          npm ci
+          npm install --no-audit --no-fund
           npm test
 
       - name: Commit generated ID-AUDIT-4 outputs when absent or stale

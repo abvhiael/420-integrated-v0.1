@@ -1,6 +1,6 @@
 # ID-AUDIT-4 — generated ABI, artifact and reference metadata
 
-**Status:** IMPLEMENTED — Level 1 qualification pending exact-head materialization/CI  
+**Status:** COMPLETE — Level 1 qualified  
 **Repository:** `abvhiael/420-integrated-v0.1`  
 **Working PR:** #438  
 **Canonical roadmap:** `docs/audit/420IDENTITY-AUDIT-REMEDIATION-ROADMAP.md`
@@ -151,11 +151,92 @@ is intentionally used to trigger that rerun.
 
 ## Exact-head qualification evidence
 
-Pending exact-head rerun against the accumulated materialized candidate.
+**Qualified implementation SHA:** `4d490f676325ac257e8d0496dee3254997b3b4d6`  
+**Current main at qualification:** `42c6a40cb476122f75250835c46d32e846a56881`  
+**Audit merge base:** `df8f639d8f43b763298c8750ef49d3e5849c597c`  
+**Branch divergence at qualification:** 37 commits ahead / 181 commits behind current `main`.
+
+The large main-only delta accumulated while the long-running Identity audit branch was open. Step-relevant
+reconciliation found no newer main Identity catalogue entry or conflicting Identity artifact authority:
+
+- current-main `developer-hub/catalogue/local.example.json` still contains ProtocolRegistry only;
+- the reference generators are byte-identical between current main and this branch;
+- current-main Indexer differences add Names420 release-descriptor support and do not replace the retained
+  `Identity420 -> 420Identity` mapping;
+- current-main predeploy-plan differences are Names420 artifact/predeploy closeout data;
+- full current-main integration/rebase is therefore intentionally deferred to ID-AUDIT-10 rather than
+  importing 181 unrelated commits into this Level 1 artifact step.
+
+### Exact-head Level 1 results
+
+- **420Identity ID-AUDIT-4** run `36814815688` / run number 13 — **SUCCESS**
+  - exact-head checkout/assertion — success;
+  - pinned Solidity/Foundry settings — success;
+  - exact `Identity420.sol` compile — success;
+  - deterministic artifact/catalogue generation — success;
+  - deterministic generated-reference regeneration — success;
+  - artifact/reference independent verifier — success;
+  - Registry catalogue namespace regression fixtures — success;
+  - Developer Hub catalogue consumers — success;
+  - shared 420 SDK catalogue/reference consumers — success;
+  - retained Identity artifact -> 420Indexer descriptor test — success;
+  - generated-output comparison/materialization step — success with retained outputs current;
+  - generated evidence upload — success.
+- **420Docs Qualification** run `36814815862` / run number 3732 — **SUCCESS**.
+- **420 Developer Hub** run `36814815668` / run number 311 — **SUCCESS**.
+- **420Indexer** package workflow run `36814815643` / run number 619 — **SUCCESS**.
+- Broader **420Indexer** run `36814815700` / run number 1152 passed the directly relevant
+  **Test TypeScript 420Indexer** stage on the exact head; the remaining Explorer/global inventory tail is
+  outside ID-AUDIT-4 Level 1 scope.
+- **Genesis Address Authority** run `36814815618` / run number 347 — **SUCCESS**.
+- **420Registry REG-AUDIT-4** run `36814815770` / run number 182 — **SUCCESS** after the catalogue-order
+  regression fixture was made order-independent.
+- **420Registry REG-AUDIT-6** run `36814815647` / run number 10 — **SUCCESS**, providing retained generated
+  metadata/reference compatibility evidence.
+- **420 Wallet Web Verification** run `36814815771` / run number 1104 — **SUCCESS**.
+
+The generic `Solidity Contracts` long-lived-PR classifier again selected its Compute fast path and skipped
+the ordinary PR shards. It is not used as ID-AUDIT-4 evidence. ID-AUDIT-4 changed no production Solidity
+source, and the focused exact-head workflow compiled the affected Identity contract from the pinned profile.
+A complete repository Solidity inventory remains a Level 3 closeout concern.
+
+### Exit-criterion reconciliation
+
+| Requirement | Result |
+| --- | --- |
+| retained exact Identity420 artifact | PASS |
+| pinned compiler/profile provenance | PASS |
+| exact source identity | PASS |
+| ABI retained with deterministic SHA-256 | PASS |
+| deployed runtime-template identity retained | PASS |
+| immutable references retained | PASS |
+| false final-runtime-hash claim prevented before ID-AUDIT-5 | PASS |
+| frozen address/interface catalogue parity | PASS |
+| required Identity events present | PASS |
+| generated contract/event references include Identity420 | PASS |
+| Developer Hub/SDK consumers accept retained metadata | PASS |
+| 420Indexer consumes retained Identity artifact | PASS |
+| generated outputs reproduce deterministically | PASS |
+| namespace/address authority remains valid | PASS |
+| exact-head Level 1 CI | PASS |
+
+No Level 2 milestone is required because this step introduces deterministic artifact/reference metadata only,
+with no new runtime authority or shared service dependency.
+
+Level 3 whole-app/main/Genesis reconciliation remains intentionally deferred to
+**ID-AUDIT-10 — phase closeout, reconciliation and retained evidence**.
+
+This closeout update is evidence-only. It changes no executable code, tests, workflows, dependencies,
+configuration, generated artifacts, interfaces, deployment state or substantive requirements, so it may
+reference the already-qualified implementation SHA without recursively rerunning Level 1.
 
 ## Completion state
 
-**PENDING LEVEL 1 EXACT-HEAD QUALIFICATION**
+**ID-AUDIT-4 — COMPLETE.**
+
+Next canonical step:
+
+**ID-AUDIT-5 — final Identity predeploy artifact and state**
 
 Next canonical step after successful closeout:
 

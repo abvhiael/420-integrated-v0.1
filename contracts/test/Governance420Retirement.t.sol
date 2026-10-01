@@ -13,7 +13,13 @@ interface VmGovernance420Retirement {
     ) external;
 }
 
-contract MockCanonicalCivicGovernor420 { }
+contract MockCanonicalCivicGovernor420 {
+    address public immutable timelock;
+
+    constructor(address timelock_) {
+        timelock = timelock_;
+    }
+}
 
 contract Governance420RetirementTest {
     VmGovernance420Retirement constant vm =
@@ -53,11 +59,15 @@ contract Governance420RetirementTest {
 
     function testOnlyTimelockCanBindCanonicalCivicGovernorOnce() public {
         Governance420 legacy = new Governance420(address(this));
-        MockCanonicalCivicGovernor420 governor = new MockCanonicalCivicGovernor420();
-        MockCanonicalCivicGovernor420 replacement = new MockCanonicalCivicGovernor420();
+        MockCanonicalCivicGovernor420 governor = new MockCanonicalCivicGovernor420(address(this));
+        MockCanonicalCivicGovernor420 replacement = new MockCanonicalCivicGovernor420(address(this));
+        MockCanonicalCivicGovernor420 foreignGovernor = new MockCanonicalCivicGovernor420(address(0xBEEF));
 
         vm.prank(ALICE);
         vm.expectRevert(SystemAccess.Unauthorized.selector);
+        vm.expectRevert(Governance420.InvalidCivicGovernor.selector);
+        legacy.bindCivicGovernor(address(foreignGovernor));
+
         legacy.bindCivicGovernor(address(governor));
 
         vm.expectRevert(Governance420.InvalidCivicGovernor.selector);

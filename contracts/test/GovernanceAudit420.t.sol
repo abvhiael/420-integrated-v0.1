@@ -20,7 +20,11 @@ contract MockGovernanceAuditAuthority420 {
     address public immutable electorateRegistry;
     address public immutable timelock;
 
-    constructor(address proposalRegistry_, address electorateRegistry_, address timelock_) {
+    constructor(
+        address proposalRegistry_,
+        address electorateRegistry_,
+        address timelock_
+    ) {
         proposalRegistry = proposalRegistry_;
         electorateRegistry = electorateRegistry_;
         timelock = timelock_;
@@ -54,7 +58,9 @@ contract MockGovernanceAuditAuthority420 {
 contract MockTimelockBoundGovernor420 {
     address public immutable timelock;
 
-    constructor(address timelock_) {
+    constructor(
+        address timelock_
+    ) {
         timelock = timelock_;
     }
 }

@@ -16,7 +16,9 @@ interface VmGovernance420Retirement {
 contract MockCanonicalCivicGovernor420 {
     address public immutable timelock;
 
-    constructor(address timelock_) {
+    constructor(
+        address timelock_
+    ) {
         timelock = timelock_;
     }
 }

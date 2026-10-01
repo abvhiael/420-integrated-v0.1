@@ -11,10 +11,18 @@ import "../src/governance/CivicGovernor420.sol";
 import "../src/governance/GovernanceTimelock.sol";
 
 interface VmGovernanceAudit2 {
-    function prank(address) external;
-    function expectRevert(bytes4) external;
-    function roll(uint256) external;
-    function warp(uint256) external;
+    function prank(
+        address
+    ) external;
+    function expectRevert(
+        bytes4
+    ) external;
+    function roll(
+        uint256
+    ) external;
+    function warp(
+        uint256
+    ) external;
 }
 
 contract MockAudit2Authority420 {
@@ -22,13 +30,20 @@ contract MockAudit2Authority420 {
     address public immutable electorateRegistry;
     address public immutable timelock;
 
-    constructor(address proposalRegistry_, address electorateRegistry_, address timelock_) {
+    constructor(
+        address proposalRegistry_,
+        address electorateRegistry_,
+        address timelock_
+    ) {
         proposalRegistry = proposalRegistry_;
         electorateRegistry = electorateRegistry_;
         timelock = timelock_;
     }
 
-    function register(CivicProposalRegistry420 registry, bytes32 proposalId) external {
+    function register(
+        CivicProposalRegistry420 registry,
+        bytes32 proposalId
+    ) external {
         registry.registerProposal(
             proposalId,
             address(this),
@@ -55,7 +70,9 @@ contract MockAudit2Electorate420 is ICivicElectorateSource420 {
     uint256 public totalWeight;
     mapping(address => uint256) public weights;
 
-    constructor(uint256 totalWeight_) {
+    constructor(
+        uint256 totalWeight_
+    ) {
         totalWeight = totalWeight_;
     }
 
@@ -63,15 +80,24 @@ contract MockAudit2Electorate420 is ICivicElectorateSource420 {
         return keccak256("GOV-AUDIT-2-ELECTORATE");
     }
 
-    function setWeight(address voter, uint256 weight) external {
+    function setWeight(
+        address voter,
+        uint256 weight
+    ) external {
         weights[voter] = weight;
     }
 
-    function snapshotAt(uint64) external view returns (bytes32, uint256) {
+    function snapshotAt(
+        uint64
+    ) external view returns (bytes32, uint256) {
         return (ROOT, totalWeight);
     }
 
-    function votingWeight(bytes32 root, address voter, bytes calldata) external view returns (uint256) {
+    function votingWeight(
+        bytes32 root,
+        address voter,
+        bytes calldata
+    ) external view returns (uint256) {
         return root == ROOT ? weights[voter] : 0;
     }
 }
@@ -79,14 +105,15 @@ contract MockAudit2Electorate420 is ICivicElectorateSource420 {
 contract MockAudit2TimelockBoundGovernor420 {
     address public immutable timelock;
 
-    constructor(address timelock_) {
+    constructor(
+        address timelock_
+    ) {
         timelock = timelock_;
     }
 }
 
 contract GovernanceAudit2Hardening420Test {
-    VmGovernanceAudit2 constant vm =
-        VmGovernanceAudit2(address(uint160(uint256(keccak256("hevm cheat code")))));
+    VmGovernanceAudit2 constant vm = VmGovernanceAudit2(address(uint160(uint256(keccak256("hevm cheat code")))));
 
     address constant ALICE = address(0xA11CE);
     address constant BOB = address(0xB0B);
@@ -127,14 +154,19 @@ contract GovernanceAudit2Hardening420Test {
         s.electorates.bindSnapshotAuthority(address(s.governor));
     }
 
-    function _proposal(VoteStack memory s) private returns (bytes32 proposalId) {
+    function _proposal(
+        VoteStack memory s
+    ) private returns (bytes32 proposalId) {
         vm.roll(100);
         vm.prank(ALICE);
         proposalId =
             s.governor.createProposal(CivicIds420.ProposalClass.G1, keccak256("metadata"), keccak256("actions"));
     }
 
-    function _ceilBps(uint256 total, uint16 bps) private pure returns (uint256) {
+    function _ceilBps(
+        uint256 total,
+        uint16 bps
+    ) private pure returns (uint256) {
         uint256 whole = (total / 10_000) * uint256(bps);
         uint256 remainderProduct = (total % 10_000) * uint256(bps);
         return whole + (remainderProduct / 10_000) + (remainderProduct % 10_000 == 0 ? 0 : 1);
@@ -182,11 +214,9 @@ contract GovernanceAudit2Hardening420Test {
         GovernanceTimelock foreignTimelock = new GovernanceTimelock(address(this));
         MockAudit2TimelockBoundGovernor420 foreignGovernor =
             new MockAudit2TimelockBoundGovernor420(address(foreignTimelock));
-        MockAudit2TimelockBoundGovernor420 governor =
-            new MockAudit2TimelockBoundGovernor420(address(timelock));
+        MockAudit2TimelockBoundGovernor420 governor = new MockAudit2TimelockBoundGovernor420(address(timelock));
 
-        (bool zeroOk,) =
-            address(timelock).call(abi.encodeCall(timelock.activateCivicAuthority, (address(0))));
+        (bool zeroOk,) = address(timelock).call(abi.encodeCall(timelock.activateCivicAuthority, (address(0))));
         require(!zeroOk, "zero governor activated");
 
         (bool foreignOk,) =
@@ -196,8 +226,7 @@ contract GovernanceAudit2Hardening420Test {
         timelock.activateCivicAuthority(address(governor));
         require(timelock.scheduler() == address(governor), "scheduler not bound");
 
-        (bool secondOk,) =
-            address(timelock).call(abi.encodeCall(timelock.activateCivicAuthority, (address(governor))));
+        (bool secondOk,) = address(timelock).call(abi.encodeCall(timelock.activateCivicAuthority, (address(governor))));
         require(!secondOk, "authority rebound");
     }
 
@@ -207,33 +236,28 @@ contract GovernanceAudit2Hardening420Test {
 
         vm.prank(ALICE);
         vm.expectRevert(CivicGovernor420.BlockNumberOverflow.selector);
-        s.governor.createProposal(
-            CivicIds420.ProposalClass.G1,
-            keccak256("overflow metadata"),
-            keccak256("overflow actions")
-        );
+        s.governor
+            .createProposal(CivicIds420.ProposalClass.G1, keccak256("overflow metadata"), keccak256("overflow actions"));
     }
 
     function testTimelockSchedulingRejectsTimestampOverflow() public {
         GovernanceTimelock timelock = new GovernanceTimelock(address(this));
         vm.warp(uint256(type(uint64).max) - uint256(timelock.G1_DELAY()) + 1);
 
-        (bool ok,) = address(timelock).call(
-            abi.encodeCall(
-                timelock.schedule,
-                (
-                    keccak256("timestamp-overflow"),
-                    address(0xBEEF),
-                    0,
-                    bytes(""),
-                    GovernanceTimelock.Class.G1
+        (bool ok,) = address(timelock)
+            .call(
+                abi.encodeCall(
+                    timelock.schedule,
+                    (keccak256("timestamp-overflow"), address(0xBEEF), 0, bytes(""), GovernanceTimelock.Class.G1)
                 )
-            )
-        );
+            );
         require(!ok, "timestamp overflow schedule succeeded");
     }
 
-    function testFuzzLifecycleTransitionMatrix(uint8 fromRaw, uint8 toRaw) public {
+    function testFuzzLifecycleTransitionMatrix(
+        uint8 fromRaw,
+        uint8 toRaw
+    ) public {
         CivicProposalRegistry420 proposals = new CivicProposalRegistry420(address(this));
         MockAudit2Authority420 authority =
             new MockAudit2Authority420(address(proposals), address(0xBEEF), address(this));
@@ -262,9 +286,7 @@ contract GovernanceAudit2Hardening420Test {
                 || (from == 1 && next == CivicIds420.ProposalState.QUEUED)
                 || (from == 2 && next == CivicIds420.ProposalState.EXECUTED);
 
-        (bool ok,) = address(authority).call(
-            abi.encodeCall(authority.transition, (proposals, proposalId, next))
-        );
+        (bool ok,) = address(authority).call(abi.encodeCall(authority.transition, (proposals, proposalId, next)));
         require(ok == allowed, "transition matrix mismatch");
     }
 
@@ -287,8 +309,7 @@ contract GovernanceAudit2Hardening420Test {
         vm.prank(ALICE);
         s.voting.castVote(proposalId, CivicIds420.House.COMMUNITY, CivicVoting420.Support.FOR, "");
 
-        CivicGovernor420.HouseResult memory result =
-            s.governor.resultFor(proposalId, CivicIds420.House.COMMUNITY);
+        CivicGovernor420.HouseResult memory result = s.governor.resultFor(proposalId, CivicIds420.House.COMMUNITY);
         require(result.quorumMet == (weight >= _ceilBps(total, quorum)), "quorum ceiling mismatch");
         require(result.approvalMet, "unanimous decisive vote must approve");
     }
@@ -314,12 +335,8 @@ contract GovernanceAudit2Hardening420Test {
         vm.prank(BOB);
         s.voting.castVote(proposalId, CivicIds420.House.COMMUNITY, CivicVoting420.Support.AGAINST, "");
 
-        CivicGovernor420.HouseResult memory result =
-            s.governor.resultFor(proposalId, CivicIds420.House.COMMUNITY);
+        CivicGovernor420.HouseResult memory result = s.governor.resultFor(proposalId, CivicIds420.House.COMMUNITY);
         require(result.quorumMet, "full participation must meet quorum");
-        require(
-            result.approvalMet == (forWeight >= _ceilBps(total, approval)),
-            "approval ceiling mismatch"
-        );
+        require(result.approvalMet == (forWeight >= _ceilBps(total, approval)), "approval ceiling mismatch");
     }
 }

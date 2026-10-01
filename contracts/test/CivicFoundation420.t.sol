@@ -19,7 +19,10 @@ contract MockFoundationProposalAuthority420 {
     address public immutable proposalRegistry;
     address public immutable timelock;
 
-    constructor(address proposalRegistry_, address timelock_) {
+    constructor(
+        address proposalRegistry_,
+        address timelock_
+    ) {
         proposalRegistry = proposalRegistry_;
         timelock = timelock_;
     }

@@ -71,7 +71,11 @@ contract MockVotingAuthority420 {
     address public immutable electorateRegistry;
     address public immutable timelock;
 
-    constructor(address proposalRegistry_, address electorateRegistry_, address timelock_) {
+    constructor(
+        address proposalRegistry_,
+        address electorateRegistry_,
+        address timelock_
+    ) {
         proposalRegistry = proposalRegistry_;
         electorateRegistry = electorateRegistry_;
         timelock = timelock_;
@@ -83,7 +87,14 @@ contract MockVotingAuthority420 {
         address proposer
     ) external {
         registry.registerProposal(
-            proposalId, proposer, CivicIds420.ProposalClass.G1, keccak256("metadata"), keccak256("actions"), 99, 101, 110
+            proposalId,
+            proposer,
+            CivicIds420.ProposalClass.G1,
+            keccak256("metadata"),
+            keccak256("actions"),
+            99,
+            101,
+            110
         );
     }
 

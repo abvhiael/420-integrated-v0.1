@@ -69,7 +69,10 @@ contract MockSnapshotAuthority420 {
     address public immutable electorateRegistry;
     address public immutable timelock;
 
-    constructor(address electorateRegistry_, address timelock_) {
+    constructor(
+        address electorateRegistry_,
+        address timelock_
+    ) {
         electorateRegistry = electorateRegistry_;
         timelock = timelock_;
     }

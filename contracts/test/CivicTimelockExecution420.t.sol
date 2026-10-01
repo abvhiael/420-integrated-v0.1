@@ -75,11 +75,15 @@ contract MockReentrantCivicExecutionTarget420 {
     bytes32 public operationId;
     bool public attempted;
 
-    constructor(GovernanceTimelock timelock_) {
+    constructor(
+        GovernanceTimelock timelock_
+    ) {
         timelock = timelock_;
     }
 
-    function setOperationId(bytes32 operationId_) external {
+    function setOperationId(
+        bytes32 operationId_
+    ) external {
         operationId = operationId_;
     }
 
@@ -333,11 +337,10 @@ contract CivicTimelockExecution420Test {
 
         vm.roll(200);
         vm.prank(ALICE);
-        bytes32 zeroProposalId = s.governor.createProposal(
-            CivicIds420.ProposalClass.G1,
-            keccak256("zero-target metadata"),
-            keccak256(abi.encode(zeroTarget))
-        );
+        bytes32 zeroProposalId = s.governor
+            .createProposal(
+                CivicIds420.ProposalClass.G1, keccak256("zero-target metadata"), keccak256(abi.encode(zeroTarget))
+            );
         vm.roll(201);
         vm.prank(ALICE);
         s.voting.castVote(zeroProposalId, CivicIds420.House.COMMUNITY, CivicVoting420.Support.FOR, "");
@@ -370,9 +373,7 @@ contract CivicTimelockExecution420Test {
         Stack memory s = _stack(7 days);
         CivicGovernor420.Action[] memory actions = new CivicGovernor420.Action[](1);
         actions[0] = CivicGovernor420.Action({
-            target: address(s.target),
-            value: 1,
-            data: abi.encodeCall(s.target.setValue, (17))
+            target: address(s.target), value: 1, data: abi.encodeCall(s.target.setValue, (17))
         });
 
         bytes32 proposalId = _pass(s, actions);
@@ -393,9 +394,7 @@ contract CivicTimelockExecution420Test {
 
         CivicGovernor420.Action[] memory actions = new CivicGovernor420.Action[](1);
         actions[0] = CivicGovernor420.Action({
-            target: address(reentrant),
-            value: 0,
-            data: abi.encodeCall(reentrant.attemptReentry, ())
+            target: address(reentrant), value: 0, data: abi.encodeCall(reentrant.attemptReentry, ())
         });
 
         bytes32 proposalId = _pass(s, actions);

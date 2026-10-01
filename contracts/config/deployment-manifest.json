@@ -116,7 +116,12 @@
     {
       "name": "Names420",
       "address": "0x0000000000000000000000000000000000000435",
-      "deployment": "GENESIS_SYSTEM_ADDRESS"
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "runtime_artifact": "contracts/artifacts/Names420.json",
+      "runtime_code_hash": "0xa974fffd3a40e7f28db41e4ae30656b33789d2483b18b47c809ce2385de709b7",
+      "predeploy_state": "contracts/config/predeploy/Names420-predeploy-state.json",
+      "source_blob_sha1": "4cb9b06b4a3febb3bf024c087f3ade1eebdcf31d",
+      "artifact_status": "NAMES_AUDIT_6_ARTIFACT_READY"
     },
     {
       "name": "Identity420",

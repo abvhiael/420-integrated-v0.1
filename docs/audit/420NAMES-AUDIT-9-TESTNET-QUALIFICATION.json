@@ -1,0 +1,56 @@
+{
+  "schema": "420-names-audit-9-qualification-v1",
+  "step": "NAMES-AUDIT-9",
+  "name": "Production-equivalent testnet deployment qualification",
+  "status": "NOT_YET_COMPLETE_BLOCKED_OFFICIAL_TESTNET",
+  "repositoryImplementation": "COMPLETE_QUALIFIED",
+  "qualifiedImplementationSha": "901a7b0a762ef14adb8080873ecc2e393f74afaf",
+  "repository": "abvhiael/420-integrated-v0.1",
+  "branch": "audit/420names-complete-20260930",
+  "pr": 427,
+  "currentMainAtCloseout": "df8f639d8f43b763298c8750ef49d3e5849c597c",
+  "runs": {
+    "namesAudit": {
+      "id": 36806948461,
+      "conclusion": "success"
+    },
+    "full420Indexer": {
+      "id": 36806878687,
+      "conclusion": "success"
+    }
+  },
+  "harness": {
+    "evidenceContract": "420-indexer/src/names-testnet-qualification.ts",
+    "tests": "420-indexer/test/names-testnet-qualification.test.ts",
+    "runner": "420-indexer/scripts/qualify-names-testnet.mjs",
+    "workflow": ".github/workflows/names-live-testnet.yml",
+    "readinessVerifier": "scripts/verify-names-audit-9-testnet-readiness.py",
+    "hostileTests": {
+      "passed": 10,
+      "failed": 0
+    }
+  },
+  "readiness": {
+    "officialManifest": "ABSENT",
+    "publicEndpoints": "PLACEHOLDER",
+    "chainIdStatus": "CANDIDATE_PENDING_COLLISION_PREFLIGHT",
+    "liveQualificationComplete": false,
+    "signal": "BLOCKED_OFFICIAL_TESTNET_MANIFEST"
+  },
+  "canonicalLiveExitCriteria": {
+    "chainIdentity": "BLOCKED_NOT_RUN",
+    "codeAt0435": "BLOCKED_NOT_RUN",
+    "runtimeHash": "BLOCKED_NOT_RUN",
+    "storage": "BLOCKED_NOT_RUN",
+    "governanceBinding": "BLOCKED_NOT_RUN",
+    "registryDiscovery": "BLOCKED_NOT_RUN",
+    "walletResolution": "BLOCKED_NOT_RUN",
+    "indexerSearch": "BLOCKED_NOT_RUN",
+    "fullUserWorkflow": "BLOCKED_NOT_RUN"
+  },
+  "level2": {
+    "requiredForHarness": false,
+    "previousMilestoneSha": "4ddc8fb33db6ce2b5d908e9fcaf8c98934ac06a2"
+  },
+  "nextCanonicalStep": "NAMES-AUDIT-9 — production-equivalent testnet deployment"
+}

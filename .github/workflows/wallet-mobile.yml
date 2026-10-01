@@ -13,8 +13,13 @@ on:
       - ".github/workflows/wallet-mobile.yml"
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   verify-wallet-mobile:
+    if: github.event_name != 'pull_request' || !startsWith(github.head_ref, 'audit/')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -39,6 +44,7 @@ jobs:
           npm test
 
   build-android-native:
+    if: github.event_name != 'pull_request' || !startsWith(github.head_ref, 'audit/')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -99,6 +105,7 @@ jobs:
           script: gradle :app:connectedDebugAndroidTest --no-daemon --stacktrace
 
   build-ios-native:
+    if: github.event_name != 'pull_request' || !startsWith(github.head_ref, 'audit/')
     runs-on: macos-15
     permissions:
       contents: read

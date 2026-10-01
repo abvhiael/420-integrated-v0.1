@@ -138,3 +138,46 @@ func TestNamesIdentityRejectsIncompleteHistory(t *testing.T) {
 	_, _, err := d.ResolvePublicIdentity(context.Background(), profile)
 	if !errors.Is(err, ErrProtocolHistoryIncomplete) { t.Fatalf("expected bounded-history failure, got %v", err) }
 }
+
+
+func TestNameDiscoveryTransferClearsStaleAssociations(t *testing.T) {
+	label := "0xabababababababababababababababababababababababababababababababab"
+	reader := &fakeNamesIdentityReader{
+		status: qualifiedStatus(),
+		state: indexerclient.ProtocolState{ChainID:"420", Protocol:"420Names", ObjectKey:label},
+		page: indexerclient.ProtocolEventPage{Items: []indexerclient.ProtocolEvent{
+			event420("420Names", label, "NameRegistered", "40", 1, map[string]any{"labelHash":label,"owner":"0xold","expiresAt":"2000000200","labelLength":"7"}),
+			event420("420Names", label, "ResolutionUpdated", "41", 2, map[string]any{"labelHash":label,"resolvedAddress":"0xresolved","profileId":"0xprofile","serviceId":"0xservice"}),
+			event420("420Names", label, "NameTransferStarted", "42", 3, map[string]any{"labelHash":label,"owner":"0xold","pendingOwner":"0xnew"}),
+			event420("420Names", label, "NameTransferred", "43", 4, map[string]any{"labelHash":label,"previousOwner":"0xold","newOwner":"0xnew"}),
+		}},
+	}
+	d, _ := NewNamesIdentityDiscovery(reader)
+	d.now = func() time.Time { return time.Unix(2_000_000_000, 0).UTC() }
+	r, ok, err := d.ResolveName(context.Background(), label)
+	if err != nil { t.Fatal(err) }
+	if !ok { t.Fatal("expected transferred name") }
+	if r.Presentation.Subtitle != "0xnew" { t.Fatalf("transfer must reset resolution to new owner, got %s", r.Presentation.Subtitle) }
+	if strings.Contains(r.Presentation.Snippet, "0xprofile") || strings.Contains(r.Presentation.Snippet, "0xservice") {
+		t.Fatal("transfer must clear stale profile/service associations")
+	}
+	if r.Provenance.BlockNumber == nil || *r.Provenance.BlockNumber != 43 { t.Fatal("transfer must become latest provenance") }
+}
+
+func TestNameDiscoveryRejectsUnorderedProtocolHistory(t *testing.T) {
+	label := "0xcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd"
+	reader := &fakeNamesIdentityReader{
+		status: qualifiedStatus(),
+		state: indexerclient.ProtocolState{ChainID:"420", Protocol:"420Names", ObjectKey:label},
+		page: indexerclient.ProtocolEventPage{Items: []indexerclient.ProtocolEvent{
+			event420("420Names", label, "NameRenewed", "42", 2, map[string]any{"labelHash":label,"owner":"0xowner","expiresAt":"2000000200"}),
+			event420("420Names", label, "NameRegistered", "40", 1, map[string]any{"labelHash":label,"owner":"0xowner","expiresAt":"2000000100","labelLength":"7"}),
+		}},
+	}
+	d, _ := NewNamesIdentityDiscovery(reader)
+	d.now = func() time.Time { return time.Unix(2_000_000_000, 0).UTC() }
+	_, _, err := d.ResolveName(context.Background(), label)
+	if err == nil || !strings.Contains(err.Error(), "history is not ascending") {
+		t.Fatalf("expected fail-closed ordering error, got %v", err)
+	}
+}

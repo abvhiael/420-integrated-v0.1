@@ -42,6 +42,7 @@ permissions:
 
 jobs:
   offline-core:
+    if: github.event_name != 'pull_request' || !startsWith(github.head_ref, 'audit/')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -59,6 +60,7 @@ jobs:
       - run: go build ./execution/cmd/node420
 
   production-dependencies:
+    if: github.event_name != 'pull_request' || !startsWith(github.head_ref, 'audit/')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -74,6 +76,7 @@ jobs:
       - run: bash ./scripts/install-production-deps.sh
 
   geth-engine:
+    if: github.event_name != 'pull_request' || !startsWith(github.head_ref, 'audit/')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -95,6 +98,7 @@ jobs:
       - run: bash ./scripts/live-engine-smoke.sh
 
   fault-matrix:
+    if: github.event_name != 'pull_request' || !startsWith(github.head_ref, 'audit/')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

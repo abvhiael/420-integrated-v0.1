@@ -146,7 +146,24 @@ func (d *NamesIdentityDiscovery) qualifiedStatus(ctx context.Context) (indexercl
 	return status, indexed, safe, nil
 }
 
+func validateProtocolHistoryOrder(events []indexerclient.ProtocolEvent) error {
+	var have bool
+	var block uint64
+	var txIndex, logIndex int
+	for _, event := range events {
+		n, err := strconv.ParseUint(event.BlockNumber, 10, 64)
+		if err != nil { return errors.New("invalid protocol event block number") }
+		if event.TransactionIndex < 0 || event.LogIndex < 0 { return errors.New("invalid protocol event position") }
+		if have && (n < block || (n == block && (event.TransactionIndex < txIndex || (event.TransactionIndex == txIndex && event.LogIndex < logIndex)))) {
+			return errors.New("protocol event history is not ascending")
+		}
+		have, block, txIndex, logIndex = true, n, event.TransactionIndex, event.LogIndex
+	}
+	return nil
+}
+
 func reduceNameHistory(key string, events []indexerclient.ProtocolEvent) (publicNameState, error) {
+	if err := validateProtocolHistoryOrder(events); err != nil { return publicNameState{}, err }
 	state := publicNameState{labelHash: key}
 	for _, event := range events {
 		if event.Protocol != "420Names" || event.ObjectKey == nil || normalizeObjectKey("labelHash", *event.ObjectKey) != key { return publicNameState{}, errors.New("invalid 420Names event history") }

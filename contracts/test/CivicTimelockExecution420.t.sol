@@ -160,7 +160,6 @@ contract CivicTimelockExecution420Test {
         s.governor.queue(proposalId, substituted);
     }
 
-
     function testQueuedCivicBatchCannotInvokeRetiredTimelockCancellation() public {
         Stack memory s = _stack(7 days);
 

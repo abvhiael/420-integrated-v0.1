@@ -181,7 +181,7 @@ for token in [
 
 for forbidden in [
     "eth_sendTransaction",
-    "cast("send"",
+    'cast("send"',
     "privateKey",
     "mnemonic",
     "seedPhrase",

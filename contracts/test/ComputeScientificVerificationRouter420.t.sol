@@ -328,8 +328,20 @@ contract ComputeScientificVerificationRouter420Test {
 
         bytes32 profile = adapter.PROFILE_ID();
         bytes32 seedCommitment = adapter.sampleSeedCommitment(keccak256("authority-seed"));
+
+        ComputeScientificVerificationRouter420 ownerSamplerRouter =
+            new ComputeScientificVerificationRouter420(address(jobs), address(registry), OWNER);
+        vm.prank(OWNER);
+        (bool ok,) = address(ownerSamplerRouter).call(
+            abi.encodeCall(
+                ownerSamplerRouter.bindAdapter,
+                (jobId, profile, uint64(1), seedCommitment)
+            )
+        );
+        require(!ok, "job owner also acted as sampling authority");
+
         vm.prank(OUTSIDER);
-        (bool ok,) = address(router).call(
+        (ok,) = address(router).call(
             abi.encodeCall(router.bindAdapter, (jobId, profile, uint64(1), seedCommitment))
         );
         require(!ok, "outsider froze scientific protocol");

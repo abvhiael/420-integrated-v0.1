@@ -4,6 +4,7 @@ pragma solidity ^0.8.24;
 /// @notice Pure/read-only deterministic verification semantics for one exact workload/profile.
 /// @dev Adapters do not mutate jobs, select verifiers, publish policies, settle, move funds or grant authority.
 interface IComputeDeterministicVerificationAdapter420 {
+    function adapterKind() external view returns (bytes32);
     function workloadType() external view returns (bytes32);
     function profileId() external view returns (bytes32);
     function outputSchemaCommitment() external view returns (bytes32);

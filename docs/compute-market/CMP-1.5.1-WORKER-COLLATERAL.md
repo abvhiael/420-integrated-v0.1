@@ -1,6 +1,6 @@
 # CMP-1.5.1 — Worker collateral
 
-Status: **IMPLEMENTED. LEVEL 1 QUALIFICATION PENDING.**
+Status: **COMPLETE. LEVEL 1 EXACT-HEAD QUALIFIED.**
 
 ## Canonical definition
 
@@ -73,6 +73,50 @@ CMP-1.5.1 is COMPLETE only when:
 - the source satisfies the existing ComputeStake read interface;
 - focused and retained Compute qualification is green on one exact implementation SHA;
 - durable evidence records that SHA.
+
+Next canonical step:
+
+**CMP-1.5.2 — Verifier collateral**
+
+
+## Completion evidence
+
+CMP-1.5.1 is **COMPLETE** at Level 1.
+
+Qualified implementation SHA:
+
+`98a8f71b28048e81a3475e421aca06661eb94217`
+
+Stacked/reconciled CMP-1.5.0 base SHA:
+
+`9a487ebeb24c28ceebfe2f0d794463939956ad9e`
+
+Current `main` observed at closeout:
+
+`cdd5f58f20a3673bb9a81c6210be2a3019e22380`
+
+The current-main delta after the Compute reconciliation was limited to 420Status/Cloudflare files and did not modify Compute, Vault, Compute CI, roadmap, or shared authority dependencies.
+
+Exact-head qualification:
+
+- Compute Market Qualification #86 — run `36927006502` — **PASS**;
+- retained Compute Solidity suite — **331 passed, 0 failed, 0 skipped**;
+- CMP-1.5.1 worker-collateral verifier — **PASS**;
+- Solidity Contracts #3730 — run `36927006455` — **PASS** on the Compute fast path; full repository shards intentionally skipped by Level 1 classification;
+- 420Docs Qualification #3939 — run `36927006410` — **PASS**;
+- Genesis Address Authority #532 — run `36927006458` — **PASS**;
+- 420Registry REG-AUDIT-4 #367 — run `36927006636` — **PASS**;
+- 420Indexer #1347 — run `36927006761` — **PASS**.
+
+A superseded earlier head failed only because a Foundry `vm.prank(OPERATOR)` was consumed by the `resources.CPU_GENERAL()` getter in test setup. The corrected test stores that getter result before the prank; protocol behavior and assertions were not weakened.
+
+Durable machine-readable evidence:
+
+`docs/compute-market/CMP-1.5.1-QUALIFICATION-EVIDENCE.json`
+
+This closeout is evidence-only relative to the qualified implementation SHA. It changes no executable source, tests, workflows, dependencies, runtime configuration, interfaces, or deployment state.
+
+Level 2 is not required for this ordinary worker-collateral step. Level 3 remains deferred to **CMP-1.5.13 — Phase closeout**, unless a later shared change independently requires broader qualification.
 
 Next canonical step:
 

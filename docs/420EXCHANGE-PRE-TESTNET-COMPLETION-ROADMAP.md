@@ -166,7 +166,7 @@ Dependencies: PRE-02, PRE-03, PRE-04, PRE-05.
 
 ---
 
-### PRE-07 — limit-order publication lifecycle — PARTIAL
+### PRE-07 — limit-order publication lifecycle — COMPLETE
 
 Complete the off-chain order service/integration around the existing EIP-712 primitives.
 
@@ -179,7 +179,7 @@ Required work:
 - integrate browser review without enabling real signing by default;
 - test duplicate publication, wrong signer/domain, expiry, provider/account switch, stale order state and conflicting fill data.
 
-**Exit:** complete mock service-backed creation/publication/status lifecycle with canonical order identity; live signature/publication deferred.
+**Exit:** SATISFIED at implementation SHA `0427c805703ae34c9a1deba4669e3f714a55e874`. A repository-owned versioned order publication/status service now validates canonical EIP-712 order/domain identity through a server-configured signer-verifier boundary, keys idempotent publication by the settlement-compatible order hash, preserves the complete required lifecycle vocabulary and monotonic fill reconciliation, and exposes provenance-bound status records. Browser review binds the exact canonical order to the PRE-02 wallet/session but contains no signing call. Wallet signing and order publication are both independently default-OFF and only named mock/live-qualification harnesses may opt in. Level 1 qualification passed in 420Exchange Web Verification run `36796142524` / #668. Durable evidence: `docs/420EXCHANGE-PRE-07-QUALIFICATION.md`. Live signature/publication remains deferred.
 
 Dependencies: PRE-02, PRE-10; PRE-05-style provenance principles apply to service responses.
 

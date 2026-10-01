@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   BridgeLifecycleController,BridgeLifecycleError,bridgeManifestFingerprint,bridgeReplayKey,
-  canonicalBridgeManifest,canonicalBridgeTransfer,createMemoryReplayGuard,createProofProviderAdapter,reconcileBridgeProjection,
+  canonicalBridgeManifest,canonicalBridgeTransfer,createMemoryReplayGuard,createMemoryBridgeLifecycleStore,createProofProviderAdapter,createProofVerifierAdapter,reconcileBridgeProjection,
 } from '../core/bridge-lifecycle.js';
 
 const addr=n=>'0x'+BigInt(n).toString(16).padStart(40,'0');
@@ -27,13 +27,13 @@ function proof(overrides={}){
     replayDomain:transfer.replayDomain,...overrides,
   };
 }
-async function controller({proofResult=proof(),replayGuard=createMemoryReplayGuard(),projectionReader=null,clock=()=>1000}={}){
+async function controller({proofResult=proof(),replayGuard=createMemoryReplayGuard(),projectionReader=null,stateStore=createMemoryBridgeLifecycleStore(),clock=()=>1000,verdict={valid:true,verificationId:id(41)}}={}){
   return new BridgeLifecycleController({
-    transfer,proofProvider:createProofProviderAdapter(async()=>proofResult),replayGuard,projectionReader,clock,
+    transfer,proofProvider:createProofProviderAdapter(async()=>proofResult),proofVerifier:createProofVerifierAdapter(async()=>verdict),replayGuard,projectionReader,stateStore,clock,
   });
 }
 async function throughProof(c){
-  c.prepareSource();c.sourceSubmitted({txHash:source.txHash});c.sourceFinalized(source);await c.requestProof();c.verifyProof();await c.prepareDestination();
+  c.prepareSource();c.sourceSubmitted({txHash:source.txHash});c.sourceFinalized(source);await c.requestProof();await c.verifyProof();await c.prepareDestination();
 }
 async function throughDestination(c){
   await throughProof(c);c.destinationSubmitted({txHash:destination.txHash});c.destinationFinalized(destination);
@@ -64,7 +64,7 @@ test('replay domain plus source message rejects a second destination claim',asyn
   const first=await controller({replayGuard:guard});await throughDestination(first);
   await first.confirmSettlement({beneficiary:transfer.beneficiary,amountRaw:transfer.amountRaw,destinationAssetId:manifest.destinationAssetId,transferId:destination.transferId,paid:true});
   const second=await controller({replayGuard:guard});
-  second.prepareSource();second.sourceSubmitted({txHash:source.txHash});second.sourceFinalized(source);await second.requestProof();second.verifyProof();
+  second.prepareSource();second.sourceSubmitted({txHash:source.txHash});second.sourceFinalized(source);await second.requestProof();await second.verifyProof();
   await assert.rejects(second.prepareDestination(),e=>e.code==='REPLAY');
   assert.equal(await guard.isConsumed(bridgeReplayKey(canonicalBridgeTransfer(transfer),{sourceMessageId:source.messageId})),true);
 });
@@ -93,7 +93,7 @@ test('pause resume expiry proof invalidation and retry-safe states are explicit'
   c.sourceSubmitted({txHash:source.txHash});c.sourceFinalized(source);await c.requestProof();
   assert.equal(c.invalidateProof('operator-revoked').state,'PROOF_INVALIDATED');
   assert.equal(c.retry('new-proof').state,'RETRYABLE');
-  await c.requestProof();c.verifyProof();
+  await c.requestProof();await c.verifyProof();
   now=2000;
   await assert.rejects(c.prepareDestination(),e=>e.code==='TRANSFER_EXPIRED');
   assert.equal(c.state,'EXPIRED');
@@ -151,4 +151,22 @@ test('destination payout verification fails closed on wrong beneficiary asset am
     const c=await controller();await throughDestination(c);
     await assert.rejects(Promise.resolve().then(()=>c.confirmSettlement(settlement)),e=>e instanceof BridgeLifecycleError&&e.code==='SETTLEMENT_MISMATCH');
   }
+});
+
+
+test('proof verification is a distinct provider-neutral authority step',async()=>{
+  const c=await controller({verdict:{valid:false,reason:'mock-verifier-rejected'}});
+  c.prepareSource();c.sourceSubmitted({txHash:source.txHash});c.sourceFinalized(source);await c.requestProof();
+  await assert.rejects(c.verifyProof(),e=>e.code==='PROOF_VERIFICATION_FAILED');
+  assert.equal(c.state,'PROOF_AVAILABLE');
+});
+
+test('bridge lifecycle transitions are persisted through the state-store interface',async()=>{
+  const store=createMemoryBridgeLifecycleStore();
+  const c=await controller({stateStore:store});
+  c.prepareSource();c.sourceSubmitted({txHash:source.txHash});c.sourceFinalized(source);await c.requestProof();await c.verifyProof();
+  const persisted=store.load(c.lifecycleKey);
+  assert.equal(persisted.state,'PROOF_VERIFIED');
+  assert.equal(persisted.source.messageId,source.messageId);
+  assert.equal(persisted.proof.proofId,id(40));
 });

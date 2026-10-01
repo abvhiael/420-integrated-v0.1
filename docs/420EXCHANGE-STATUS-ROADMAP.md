@@ -1,54 +1,181 @@
-# 420Exchange — implementation and Genesis readiness roadmap
+# 420Exchange — release status and live-testnet qualification roadmap
 
-**Reconciled:** 2026-09-19. **Working branch:** `feature/420exchange-v15.1-testnet-binding`; **PR:** [#352](https://github.com/abvhiael/420-integrated-v0.1/pull/352). **Evidence baseline:** `50ca04c0e5ecd5b702806aa30546485276db64a8`, [Exchange Web Verification run 35469241756](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/35469241756) (successful static checks, web unit tests, frontend secret scan). This document is an implementation-status roadmap, not a security certification or authorization to trade.
+**Current phase:** PRE-12 final pre-testnet closeout.  
+**Release state:** `PRE_TESTNET_ENGINEERING_COMPLETE` candidate; `LIVE_TESTNET_QUALIFICATION_PENDING` once exact-head PRE-12 qualification is green.  
+**Audit branch:** `audit/exchange-pretestnet-phase-20260930`.  
+**Primary PR:** #430.  
+**Authority:** repository state, canonical PRE roadmap, exact-head qualification evidence and machine-readable readiness manifest.  
+**This document is not an authorization to trade or enable any LIVE GATE.**
 
-## Status vocabulary
+## Pre-testnet engineering disposition
 
-- **Repository implemented / unit-tested:** code and tests exist on the PR branch; not necessarily merged, deployed, integrated into the real page, or exercised with real wallets/contracts.
-- **Partial / active:** components exist but integration or acceptance criteria are incomplete.
-- **Blocked / not evidenced:** required real-world qualification has not been supplied or demonstrated; do not infer completion from fixtures, simulated RPC, caller-provided trust flags, or a green web-unit-test run.
-- **Genesis release:** **BLOCKED**. Do not enable `swap-submit`, `order-sign`, `bridge-submit` or order-cancel wallet prompts based on this roadmap.
+PRE-01 through PRE-10 are complete and revalidated against the accumulated Exchange architecture.
 
-## Done in the repository (not a claim of live readiness)
+PRE-11 has implemented the remaining CI/security/packaging/operations closure:
 
-| Workstream | Verified repository deliverable | Remaining distinction |
-| --- | --- | --- |
-| V15.1 runtime and deployment binding | Deployment-aware runtime validation, unresolved/testnet fail-closed checks and deployment configuration tooling. | The actual deployment manifest, contract code, network and endpoints require independent live verification. |
-| V15.2 canonical execution construction | Deterministic raw-unit swap/bridge/cancel transaction builders and limit-order signing payload preparation (`exchange/web/core/execution.js`, `canonical-execution-inputs.js`). | Building a transaction is not proof that its route, allowance, counterparty or bridge can execute on chain. |
-| V15.3–V15.4 preflight / wallet-execution building blocks | Transaction fingerprint, preflight checks, guarded transaction submission and qualified order-signing APIs (`preflight.js`, `wallet-execution.js`, `browser-execution-controller.js`). | Browser trading forms do not call those methods for live trades; real RPC, gas, allowance, nonce and contract-state evidence is outstanding. |
-| V15.5 transaction-state support | Transaction lifecycle work exists in the V15 stack. | Real submitted, reverted, replaced, reorged and indexer-conflict cases need observed browser/testnet evidence. |
-| V15.6–V15.8 live qualification scaffolding | Swap, limit-order and bridge testnet workflows / scripts are present in the repository. | Script or workflow presence does not establish successful real-network execution or settlement; capture and review live receipts, proofs and reconciliation. |
-| V15.9 wallet/provider compatibility | EIP-6963 discovery, explicit provider selection, session-generation invalidation and listener cleanup in controller/UI tests. | Real browser/extension/mobile wallet matrix remains outstanding. |
-| V15.10 qualification gates | Genesis closeout script / release-gate framework exists. | Gate remains BLOCKED pending independent evidence and signoff. |
-| V15.11 wallet integration | `browser-wallet-ui.js` mounts wallet selection in the build; demo-backed legacy V14 signing/submission controls remain locked. | The legacy display-derived V14 form is **not** an execution source; live swap, order, bridge and cancellation forms are not qualified. |
-| V15.11 swap review construction | `canonical-execution-inputs.js`, `human-readable-review.js`, `reviewed-execution-bridge.js` and `bound-swap-review.js` bind raw units, display fields, calldata and transaction fingerprint in repository tests. | The source-authentication boolean is **not** provider authentication; the bound review is not connected to a permitted live submit path. |
-| V15.11 quote intake / freshness | `executable-quote-intake.js` validates a configured HTTPS same-origin endpoint, request/response fields, expiry at receipt and endpoint consistency. | No independently authenticated, operator-approved, live executable-quote producer is established by this client. Schema flags and TLS are not proof of on-chain qualification. |
-| V15.11 quote-session / read-only UI | `quote-review-session.js` invalidates late/stale responses on request, wallet or chain changes; `read-only-swap-review-ui.js` is included in the browser build and shows only explicit raw-unit review candidates. | Requires valid runtime and configured quote endpoint; no signing or submission action. Full real DOM, accessibility and browser tests remain to be run. |
-| Web build and code CI | PR-head Exchange Web Verification run 35469241756 passed static checks, web unit tests and frontend secret scan. | Does not substitute for contract-suite, deployment, live drill, wallet/device or security qualification. |
+- dedicated quote, order/cancel, read-service, bridge and browser qualification;
+- browser CSP and backend exact-origin/no-ambient-credential policy;
+- secret/log-redaction checks;
+- deterministic pre-testnet package manifest;
+- startup/degradation/restart coverage;
+- hard assertions that all live trading gates default OFF;
+- signer rotation, outage, Indexer backfill, pause, rollback and reconciliation runbook;
+- machine-readable readiness manifest.
 
-## Where we are now: V15.11 integration and evidence closeout
+PRE-12 reconciles this branch with current `main`, performs the final gap audit, records the live-gate handoff and runs the complete exact-head retained qualification suite before merge.
 
-The site has a V14 read/display catalog and a separate V15 read-only candidate-review panel. Trading actions are deliberately disabled. The checked-in `exchange/web/runtime-config.json` does not specify a real chain ID, RPC URL, API base URL or executable-quote endpoint, and client-side quote intake does not itself establish quote provenance. PR #352 is open and **not merged**; its previous green CI run applies to its previous code head, not automatically to later commits. The existing `exchange/web/v15.11-qualification.json` and `docs/420EXCHANGE-V15.11-BROWSER-EXECUTION.md` describe earlier partial integration and must be reconciled before closeout.
+Canonical implementation roadmap and detailed evidence:
 
-**Next engineering increment — V15.11.1 (read-only browser verification):** test the deployed V15 panel with real DOM, screen readers/keyboard, navigation, account/network changes and slow/aborted quote responses. Reconcile displayed field names with `canonicalSwapReview` (`transactionFingerprint` versus any display alias) and ensure invalid/missing quote configuration, invalid response, stale review and changed user input visibly clear the panel. Do not add wallet prompts.
+- `docs/420EXCHANGE-PRE-TESTNET-COMPLETION-ROADMAP.md`
+- `exchange/pretestnet-readiness.json`
+- `contracts/config/exchange/pretestnet-readiness-v1.json`
+- `docs/420EXCHANGE-PRE-11-OPERATIONS-RUNBOOK.md`
 
-**V15.11.2 (real quote service and source qualification):** implement a documented, versioned, authenticated executable-quote producer on an explicitly approved testnet origin. Bind provider identity, deployment and contract code, chain/account, token metadata, route/market IDs, raw amounts, nonce or replay protection and expiry to each quote; define quote error/freshness semantics. Verify the producer against deployed contracts and a trusted source-of-truth. Only then replace caller-provided flags with verifiable provenance in the browser intake and review boundary.
+## Architecture now available before a live network
 
-**V15.11.3 (operational testnet preflight):** publish and independently verify the deployment manifest, contract addresses/code hashes, network/RPC and router/market/bridge configuration. Exercise actual provider reads and simulation for balance, allowance, approval lifecycle, gas, nonce, fees, authorization, route availability, stale state and revert handling. Capture redacted evidence. Keep signing disabled until qualification passes.
+The repository now contains all application architecture and integration services that can reasonably be constructed offline:
 
-**V15.11.4 (explicit wallet-confirmed swap pilot):** after trusted quotes and preflight are operational, bind the live V15 swap form to one selected wallet/session and exact reviewed transaction. Require a fresh second check and explicit user confirmation; enforce chain/account and transaction-fingerprint stability immediately before wallet submission. Roll out a *testnet-only*, feature-gated pilot with transaction lifecycle and receipts. Do not use the V14 fixture/display quote as an executable input.
+| Surface | Pre-testnet disposition |
+| --- | --- |
+| Wallet/session authority | explicit EIP-1193 provider selection, session generation and invalidation; no hidden wallet fallback |
+| Read-only UX | metadata-driven market/swap review with stale/error clearing and no wallet prompt |
+| Executable quote service | versioned executable quote backend with bounded request/response policy and fail-closed deployment/route inputs |
+| Quote provenance | Ed25519-authenticated canonical quote envelope, exact producer/key/deployment/account/chain/replay/transaction-fingerprint binding |
+| Swap orchestration | authenticated quote → human review → explicit confirmation → fresh preflight → independently gated send → lifecycle reconciliation |
+| Limit-order publication | canonical EIP-712 identity, maker/domain verification, idempotent publication and provenance-bound status |
+| Maker cancellation | maker-only withdrawal plus HASH/NONCE cancellation with fresh settlement/order checks and racing-fill protection |
+| Bridge lifecycle | route/manifest identity, independent proof verification, source/destination finality, exact beneficiary/asset/amount settlement and replay protection |
+| Exchange read API | repository-owned V13.6 adapter over 420Indexer V1 with provenance/canonicality/finality/freshness and non-authoritative projection semantics |
+| Operations/release | restrictive browser headers, backend origin/credential policy, redacted logs, deterministic packaging, restart/degradation tests, operator runbook and readiness manifest |
 
-**V15.11.5 (order and cancellation UI):** integrate qualified EIP-712 order review/signing, maker ownership, nonce/expiry, actual publication/status, partial fills and cancellation with fresh on-chain checks; handle rejected signatures and failed/cancelled operations explicitly.
+No additional offline application service is intentionally deferred.
 
-**V15.11.6 (bridge UI and settlement):** integrate separately qualified routes, adapters/verifiers, destination-chain manifest, proof verification and source/destination status; track destination finality, correct beneficiary payout, retries and exception recovery. Outbound submission or proof registration alone is not settlement.
+## LIVE GATES — all remain OFF
 
-## Remaining Genesis exit gates (required evidence, not box-ticking)
+The authoritative handoff is `exchange/pretestnet-readiness.json`.
 
-1. **Source and deployment:** audited/approved executable-quote authority, verified token metadata, exact deployed code/configuration and qualified testnet runtime; security review of quote replay and provenance controls.
-2. **Functional live drills:** successful and negative-path real swap, order/sign/fill/cancel and bridge/source-to-destination settlement runs, with hashes/receipts, failure classifications and operator runbooks; complete V15.6–V15.8 evidence.
-3. **Client acceptance:** real Chrome, Firefox, Brave, competing extensions and mobile in-app wallets; account/network/provider switches, stale-quote races, user rejection, incorrect approvals, offline and resumed sessions, and accessible UI review. Confirm no wallet prompt from fixtures or unresolved runtime.
-4. **Accounting and resilience:** transaction/reorg/replacement reconciliation, orderbook/indexer convergence, protocol fees/beneficiary accounting, bridge payout and withdrawal reconciliation and operational alert/recovery evidence.
-5. **Security and operations:** independent review, threat model, permission/role checks, reproducible build and deployment provenance, secrets handling, incident/rollback procedures, monitoring and named operator/security signoffs.
-6. **Release control:** update `v15.11-qualification.json` and the browser runbook with actual evidence, run all applicable web/contract/testnet suites on the exact release head, reconcile PR #352 with current `main`, and merge only after required reviews. A merged PR or green unit tests alone are not Genesis approval.
+The following gates must remain `DISABLED_PRETESTNET` until their live-testnet evidence is independently qualified:
 
-**Current release decision:** `BLOCKED`; **browser execution:** disabled. When the verified quote provider and deployment are unavailable, the next permissible user-facing milestone is improved **read-only review and validation**, not demo-backed signing.
+1. `swapSubmission`
+2. `orderSigning`
+3. `orderPublication`
+4. `orderWithdrawal`
+5. `orderCancellation`
+6. `bridgeSubmission`
+7. `bridgeProofAcceptance`
+
+Each gate now records:
+
+- owning PRE step/operator boundary;
+- required endpoint/account/configuration;
+- expected live evidence;
+- rollback procedure.
+
+The readiness manifest itself has `READINESS_EVIDENCE_ONLY` authority and cannot enable a gate.
+
+## Live-testnet qualification roadmap
+
+The next phase begins only after PRE-12 exact-head qualification and merge.
+
+### LT-01 — deployment and network binding
+
+Supply and independently verify:
+
+- actual testnet chain ID/genesis identity;
+- qualified RPC endpoints;
+- deployed Exchange contract addresses;
+- runtime code hashes;
+- deployment/manifest identity;
+- token metadata;
+- market/route/bridge configuration.
+
+No placeholder or example endpoint may satisfy this gate.
+
+### LT-02 — authenticated quote production
+
+Operate the PRE-05 quote signer from externally managed key material and prove:
+
+- producer/key identity and bounded rotation;
+- deployed chain/router/manifest binding;
+- live route/chain input freshness;
+- replay rejection;
+- browser verification of exact transaction fingerprint.
+
+### LT-03 — live wallet and preflight qualification
+
+Exercise real supported wallets and providers across account/network changes and prove:
+
+- balances/allowances;
+- gas and nonce;
+- simulation/revert handling;
+- approval separation;
+- stale-session rejection;
+- explicit user confirmation.
+
+### LT-04 — swap execution
+
+Enable `swapSubmission` only inside the controlled qualification environment and retain:
+
+- submitted hash;
+- canonical receipt/finality;
+- failure/replacement/reorg behavior;
+- fee and Indexer reconciliation;
+- rollback evidence.
+
+### LT-05 — order lifecycle
+
+Qualify real:
+
+- EIP-712 signing;
+- order publication;
+- accepted/partial/filled state;
+- maker withdrawal;
+- HASH/NONCE cancellation;
+- racing fill/cancel outcomes;
+- canonical settlement/Indexer reconciliation.
+
+### LT-06 — bridge lifecycle
+
+Qualify a real source-to-destination transfer:
+
+- source submission/finality;
+- proof acquisition;
+- independent proof verification;
+- destination claim/finality;
+- exact beneficiary/asset/amount payout;
+- replay rejection;
+- reorg/retry/refund recovery.
+
+### LT-07 — public service and client acceptance
+
+Qualify:
+
+- DNS/TLS/public hosting;
+- quote/order/read API origins;
+- monitoring/readiness;
+- Chrome/Firefox/Brave and supported extension/mobile wallets;
+- accessibility/keyboard/screen-reader behavior;
+- outages, restart, rollback and Indexer backfill drills.
+
+### LT-08 — operator/security and Genesis decision
+
+Require:
+
+- independent security/permission review;
+- final deployment/package provenance;
+- secrets/key handling approval;
+- accounting and treasury reconciliation;
+- named operator/security signoff;
+- exact release-head qualification;
+- final Genesis go/no-go.
+
+## Release control
+
+A green pre-testnet build does **not** enable trading.
+
+The transition after PRE-12 is:
+
+`PRE_TESTNET_ENGINEERING_COMPLETE` → `LIVE_TESTNET_QUALIFICATION_PENDING`
+
+Only successful live-testnet qualification may resolve individual LIVE GATES.
+

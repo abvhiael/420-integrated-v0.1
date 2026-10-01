@@ -12,6 +12,8 @@ source = (root/"contracts/src/system/ValidatorRegistry.sol").read_text()
 access = (root/"contracts/src/system/StakeDependencyAccess420.sol").read_text()
 ids = (root/"contracts/src/libraries/StakeIds420.sol").read_text()
 storage_init = json.loads((root/"contracts/config/predeploy/storage-init.json").read_text())
+stake_genesis_config = json.loads((root/"contracts/config/predeploy/stake-genesis-config-v1.json").read_text())
+validator_predeploy_state = json.loads((root/"contracts/config/predeploy/ValidatorRegistry-predeploy-state.json").read_text())
 adr = (root/"docs/architecture/decisions/STAKE-AUDIT-1-INTERFACE-LAYER.md").read_text()
 
 expected_runtime = ["ProtocolRegistry","GovernanceAuthority","SystemSafety","GenesisInitialization"]
@@ -69,8 +71,17 @@ for token in ("VALIDATOR_REGISTRY","ACTION_ACTIVATE","ACTION_WITHDRAW"):
 entry = storage_init.get("entries", {}).get("ValidatorRegistry", {})
 if entry.get("constructor", []) != ["governance_timelock","ProtocolRegistry@0x0434","stake_genesis_config_hash"]:
     errors.append("ValidatorRegistry predeploy constructor or materialization inputs are stale")
-if storage_init.get("stake_genesis_config_hash") != "FROM_STAKE_AUDIT_7_PREDEPLOY_STATE":
-    errors.append("stake genesis config hash provenance marker missing")
+stake_hash = storage_init.get("stake_genesis_config_hash")
+state_hash = validator_predeploy_state.get("genesisConfigHash")
+constructor_hash = validator_predeploy_state.get("constructorArguments", {}).get("genesisConfigHash")
+if stake_genesis_config.get("schema") != "420-stake-genesis-config-v1":
+    errors.append("stake genesis config provenance schema missing")
+if stake_genesis_config.get("authority") != "offline_genesis_configuration_not_live_deployment_evidence":
+    errors.append("stake genesis config provenance authority mismatch")
+if not isinstance(stake_hash, str) or not stake_hash.startswith("0x") or len(stake_hash) != 66:
+    errors.append("stake genesis config hash is not materialized")
+elif stake_hash != state_hash or stake_hash != constructor_hash:
+    errors.append("stake genesis config hash provenance mismatch across storage-init and ValidatorRegistry predeploy state")
 
 if "SystemSafety" not in adr or "WITHDRAWAL_ONLY" not in adr or "CONSENSUS_OWNED" not in adr:
     errors.append("STAKE-AUDIT-1 ADR missing canonical decisions")

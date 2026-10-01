@@ -18,6 +18,9 @@ on:
       - 'scripts/run-fault-matrix.py'
       - 'scripts/run-soak.py'
       - '.github/workflows/qualification.yml'
+      - 'exchange/**'
+      - 'docs/420EXCHANGE-*.md'
+      - '.github/workflows/exchange-web.yml'
   pull_request:
     paths:
       - 'consensus/**'
@@ -32,6 +35,9 @@ on:
       - 'scripts/run-fault-matrix.py'
       - 'scripts/run-soak.py'
       - '.github/workflows/qualification.yml'
+      - 'exchange/**'
+      - 'docs/420EXCHANGE-*.md'
+      - '.github/workflows/exchange-web.yml'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}

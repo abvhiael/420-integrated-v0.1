@@ -46,6 +46,10 @@ jobs:
         with:
           version: stable
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
       - name: Verify pinned compiler settings
         working-directory: contracts
         run: |
@@ -73,6 +77,22 @@ jobs:
           python3 scripts/generate-id-audit-4-identity-artifact.py --check
           python3 scripts/verify-id-audit-4-artifact.py
           python3 scripts/qualify-generated-reference.py --check
+
+      - name: Test Developer Hub catalogue consumers
+        working-directory: developer-hub
+        run: npm test
+
+      - name: Test 420 SDK catalogue/reference consumers
+        working-directory: packages/420-sdk
+        run: |
+          npm ci
+          npm test
+
+      - name: Test 420Indexer retained Identity artifact descriptors
+        working-directory: 420-indexer
+        run: |
+          npm ci
+          npm test
 
       - name: Commit generated ID-AUDIT-4 outputs when absent or stale
         if: github.event_name == 'pull_request'

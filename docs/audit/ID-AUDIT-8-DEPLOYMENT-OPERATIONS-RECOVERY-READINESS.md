@@ -237,7 +237,7 @@ Those remain the canonical scope of:
 
 ## Exact-head qualification evidence
 
-Pending.
+Qualification trigger branch created from audit implementation SHA `b544c7eed2c931ed460d10faa6806366285694b1`. This branch differs only by this evidence note and exists solely to obtain pull-request-triggered exact-head CI for the identical executable/operator-tooling tree.
 
 ## Completion state
 

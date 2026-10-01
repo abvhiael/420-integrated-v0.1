@@ -94,3 +94,6 @@ jobs:
 
       - name: Verify CMP-1.4.8 scientific/probabilistic verification
         run: python scripts/verify-cmp-1-4-8-scientific-verification.py
+
+      - name: Verify CMP-1.4.9 challenge and appeal hooks
+        run: python scripts/verify-cmp-1-4-9-challenge-appeal-hooks.py

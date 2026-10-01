@@ -74,6 +74,44 @@ contract ComputeDisputeResolution420 {
         CaseStatus status;
     }
 
+    /// @notice Read-only verifier-facing review state derived from the authoritative dispute case.
+    /// @dev adverseToOriginalVerification is only a later-adjudication candidate signal. It never
+    ///      authorizes slashing, transfers funds, rewrites the original verdict, or proves verifier fault.
+    struct VerificationReview {
+        bytes32 disputeId;
+        bytes32 jobId;
+        bytes32 verificationRef;
+        bytes32 resultCommitment;
+        address verifier;
+        bytes32 verificationPolicyId;
+        uint32 verificationPolicyRevision;
+        bytes32 verificationPolicyCommitment;
+        bytes32 groundsCode;
+        bytes32 evidenceCommitment;
+        bytes32 responseCommitment;
+        bytes32 decisionCommitment;
+        bytes32 appealCommitment;
+        bytes32 appealDecisionCommitment;
+        bytes32 resolutionRef;
+        address claimant;
+        address respondent;
+        address initialAdjudicator;
+        address appealAdjudicator;
+        uint64 openedAt;
+        uint64 responseDeadline;
+        uint64 decisionDeadline;
+        uint64 appealDeadline;
+        uint64 appealDecisionDeadline;
+        CaseStatus status;
+        bool holdActive;
+        bool appealed;
+        bool appealResolved;
+        bool providerWins;
+        bool finalDisposition;
+        bool adverseToOriginalVerification;
+    }
+
+
     bytes32 private constant DISPUTE_DOMAIN = keccak256("420/CMP/DISPUTE/CASE/V1");
     bytes32 private constant RESOLUTION_DOMAIN = keccak256("420/CMP/DISPUTE/RESOLUTION/V1");
 
@@ -361,6 +399,75 @@ contract ComputeDisputeResolution420 {
             || d.status == CaseStatus.TIMED_OUT;
     }
 
+    /// @notice Canonical verifier-facing challenge/appeal hook for one dispute.
+    /// @dev Preserves the original verification tuple and exposes chronology/finality without any
+    ///      verdict mutation, custody movement, settlement execution, or slash authorization.
+    function verificationReview(bytes32 disputeId)
+        external view returns (VerificationReview memory review)
+    {
+        DisputeCase storage d = _case(disputeId);
+        bool hold = _holdActive(d.status);
+        bool finalDisposition = _finalDisposition(d.status);
+        review = VerificationReview({
+            disputeId: disputeId,
+            jobId: d.jobId,
+            verificationRef: d.verificationRef,
+            resultCommitment: d.resultCommitment,
+            verifier: d.verifier,
+            verificationPolicyId: d.verificationPolicyId,
+            verificationPolicyRevision: d.verificationPolicyRevision,
+            verificationPolicyCommitment: d.verificationPolicyCommitment,
+            groundsCode: d.groundsCode,
+            evidenceCommitment: d.evidenceCommitment,
+            responseCommitment: d.responseCommitment,
+            decisionCommitment: d.decisionCommitment,
+            appealCommitment: d.appealCommitment,
+            appealDecisionCommitment: d.appealDecisionCommitment,
+            resolutionRef: d.resolutionRef,
+            claimant: d.claimant,
+            respondent: d.respondent,
+            initialAdjudicator: d.initialAdjudicator,
+            appealAdjudicator: d.appealAdjudicator,
+            openedAt: d.openedAt,
+            responseDeadline: d.responseDeadline,
+            decisionDeadline: d.decisionDeadline,
+            appealDeadline: d.appealDeadline,
+            appealDecisionDeadline: d.appealDecisionDeadline,
+            status: d.status,
+            holdActive: hold,
+            appealed: d.appealed,
+            appealResolved: d.appealResolved,
+            providerWins: d.providerWins,
+            finalDisposition: finalDisposition,
+            adverseToOriginalVerification: finalDisposition && !d.providerWins
+        });
+    }
+
+    /// @notice Job-scoped verification hold hook for settlement/verifier orchestration.
+    /// @dev Returns the immutable original verification identity for an existing case even after finality.
+    function verificationHoldForJob(bytes32 jobId) external view returns (
+        bytes32 disputeId,
+        bool holdActive,
+        bytes32 verificationRef,
+        address verifier,
+        bytes32 verificationPolicyId,
+        uint32 verificationPolicyRevision,
+        bytes32 verificationPolicyCommitment
+    ) {
+        disputeId = disputeForJob[jobId];
+        if (disputeId == bytes32(0)) {
+            return (bytes32(0), false, bytes32(0), address(0), bytes32(0), 0, bytes32(0));
+        }
+        DisputeCase storage d = _cases[disputeId];
+        if (d.status == CaseStatus.NONE || d.jobId != jobId) revert InvalidDispute();
+        holdActive = _holdActive(d.status);
+        verificationRef = d.verificationRef;
+        verifier = d.verifier;
+        verificationPolicyId = d.verificationPolicyId;
+        verificationPolicyRevision = d.verificationPolicyRevision;
+        verificationPolicyCommitment = d.verificationPolicyCommitment;
+    }
+
     function providerReleaseAllowed(bytes32 jobId) external view returns (bool) {
         if (address(entitlements) == address(0)) return false;
         (
@@ -395,9 +502,7 @@ contract ComputeDisputeResolution420 {
     function activeHold(bytes32 jobId) external view returns (bool) {
         bytes32 disputeId = disputeForJob[jobId];
         if (disputeId == bytes32(0)) return false;
-        CaseStatus s = _cases[disputeId].status;
-        return s == CaseStatus.OPEN || s == CaseStatus.RESPONDED
-            || s == CaseStatus.DECIDED || s == CaseStatus.APPEALED;
+        return _holdActive(_cases[disputeId].status);
     }
 
     function _resolve(bytes32 disputeId, DisputeCase storage d,
@@ -446,6 +551,16 @@ contract ComputeDisputeResolution420 {
             || p.disputePolicyVersion == 0 || p.challengeWindow == 0
             || p.responseWindow == 0 || p.decisionWindow == 0 || p.appealWindow == 0)
             revert InvalidDispute();
+    }
+
+    function _holdActive(CaseStatus status) private pure returns (bool) {
+        return status == CaseStatus.OPEN || status == CaseStatus.RESPONDED
+            || status == CaseStatus.DECIDED || status == CaseStatus.APPEALED;
+    }
+
+    function _finalDisposition(CaseStatus status) private pure returns (bool) {
+        return status == CaseStatus.FINAL || status == CaseStatus.WITHDRAWN
+            || status == CaseStatus.TIMED_OUT;
     }
 
     function _validOptionalPolicyTuple(

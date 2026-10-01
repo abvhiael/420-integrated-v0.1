@@ -91,6 +91,7 @@ contract GovernanceAudit2Hardening420Test {
     address constant BOB = address(0xB0B);
 
     struct VoteStack {
+        GovernanceTimelock timelock;
         CivicConstitution420 constitution;
         CivicProposalRegistry420 proposals;
         CivicElectorateRegistry420 electorates;
@@ -104,19 +105,24 @@ contract GovernanceAudit2Hardening420Test {
         uint16 quorumBps,
         uint16 approvalBps
     ) private returns (VoteStack memory s) {
-        s.constitution = new CivicConstitution420(address(this));
-        s.proposals = new CivicProposalRegistry420(address(this));
-        s.electorates = new CivicElectorateRegistry420(address(this));
+        s.timelock = new GovernanceTimelock(address(this));
+        s.constitution = new CivicConstitution420(address(s.timelock));
+        s.proposals = new CivicProposalRegistry420(address(s.timelock));
+        s.electorates = new CivicElectorateRegistry420(address(s.timelock));
         s.source = new MockAudit2Electorate420(totalWeight);
 
+        vm.prank(address(s.timelock));
         s.electorates.setHouseSource(CivicIds420.House.COMMUNITY, address(s.source));
+        vm.prank(address(s.timelock));
         s.constitution.setRule(CivicIds420.ProposalClass.G1, 2, 7 days, quorumBps, approvalBps, 0, 0, false);
 
         s.voting = new CivicVoting420(address(s.proposals), address(s.electorates));
         s.governor = new CivicGovernor420(
             address(s.constitution), address(s.proposals), address(s.electorates), address(s.voting)
         );
+        vm.prank(address(s.timelock));
         s.proposals.bindProposalAuthority(address(s.governor));
+        vm.prank(address(s.timelock));
         s.electorates.bindSnapshotAuthority(address(s.governor));
     }
 

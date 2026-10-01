@@ -32,6 +32,7 @@ interface IProtocolRegistryBootstrap420 {
         WITHDRAWAL_ONLY,
         RETIRED
     }
+
     struct Version {
         uint16 major;
         uint16 minor;

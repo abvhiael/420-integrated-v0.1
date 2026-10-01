@@ -101,10 +101,10 @@ The similarly named `abvhiael/420-integrated` repository was inspected first but
 | Genesis dApp map entry | `420 Names -> Names420.sol` | COMPLETE |
 | Frozen system address | `0x0000000000000000000000000000000000000435` | COMPLETE |
 | Historical `0x0445` proposal | explicitly retired/not deployable | COMPLETE |
-| Predeploy plan | 0x0435 source/artifact plus NAMES-AUDIT-5 compiler-artifact provenance frozen; Genesis materialization still pending | PARTIAL |
-| Compiler runtime artifact | `contracts/artifacts/Names420.json` reproducibly frozen from Solidity 0.8.24/Cancun source/config | COMPLETE |
-| Final materialized runtime code hash | constructor immutable not yet materialized; no final Names420 hash in deployment manifest | MISSING — NAMES-AUDIT-6 |
-| Constructor-derived predeploy state | constructor intent described; no Names-specific frozen generated state artifact | PARTIAL |
+| Predeploy plan | 0x0435 final runtime/predeploy-state identity bound; governance timelock immutable materialized deterministically | COMPLETE |
+| Compiler/runtime artifact | `contracts/artifacts/Names420.json` preserves frozen compiler projection and final Genesis materialization | COMPLETE |
+| Final materialized runtime code hash | `0xa974fffd3a40e7f28db41e4ae30656b33789d2483b18b47c809ce2385de709b7` bound in predeploy/deployment manifests | COMPLETE |
+| Constructor-derived predeploy state | `contracts/config/predeploy/Names420-predeploy-state.json`; no mutable constructor writes; empty storage root retained | COMPLETE |
 | Live/testnet deployment proof | explicitly not chain verified | MISSING |
 | Wallet read client | chain/code/identity/version/ABI checks present | COMPLETE |
 | Wallet guided-send integration | guarded resolution path present | COMPLETE |
@@ -318,7 +318,7 @@ Still missing/incomplete for release qualification:
 
 Canonical address policy is now coherent: **Names420 is 0x0435**. Historical Wallet proposal `0x0445` is retired and not deployable.
 
-`predeploy-plan.json` now marks Names420 `COMPILER_ARTIFACT_FROZEN` and binds source blob `4cb9b06b4a3febb3bf024c087f3ade1eebdcf31d`, compiler runtime-template SHA-256 `7b34c5506c526d9c7015d4d2c4514cacac585bd571050a53655ea2270d1210bd`, and artifact payload SHA-256 `c40970d3a04503309f9467eaca00c915f5ce3dd1e993c2df3318aa6cd149ab2`. The deployment manifest intentionally still lacks a Names420 final runtime code hash and predeploy-state binding because constructor immutable materialization and deterministic Genesis state are NAMES-AUDIT-6. Wallet deployment inventory remains `FROZEN_SYSTEM_NOT_CHAIN_VERIFIED` with `deploymentVerified: false`.
+`predeploy-plan.json` now marks Names420 `ARTIFACT_READY` and binds the final deterministic Genesis identity. The inherited `governanceTimelock` immutable is materialized as `0x0000000000000000000000000000000000000429` at the compiler-reported 32-byte reference. The final deployed-runtime hash is `0xa974fffd3a40e7f28db41e4ae30656b33789d2483b18b47c809ce2385de709b7`. Names420 performs no mutable constructor storage writes, so all three mapping roots begin empty and the retained storage root is the Ethereum empty storage-trie root `0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421`. `deployment-manifest.json` and the predeploy plan both bind `contracts/config/predeploy/Names420-predeploy-state.json`. Wallet deployment inventory remains not live-chain verified; that is intentionally deferred to NAMES-AUDIT-9.
 
 The public testnet manifest/endpoints are also not qualified. Therefore source existence must not be conflated with deployment.
 
@@ -374,15 +374,28 @@ The public testnet manifest/endpoints are also not qualified. Therefore source e
 ## Readiness state at this audit stage
 
 - **CODE COMPLETE: NO** — user-facing management application is missing and frozen dependency-layer architecture is unreconciled.
-- **BUILD COMPLETE: NO** — focused audit CI must qualify the exact final head, and required generated deployment artifacts do not yet exist.
+- **BUILD COMPLETE: PARTIAL** — NAMES-AUDIT-6 deterministic runtime/state artifacts are generated and qualified; later app-phase/indexer/operator/testnet/release steps remain.
 - **CONTRACT COMPLETE: NO** — core naming logic and the canonical dependency model are reconciled; contract hardening and later artifact/Genesis qualification remain open.
-- **TEST COMPLETE: NO** — focused unit/integration coverage is improved, but fuzz/invariant hardening, generated-artifact qualification and live integration are not complete.
+- **TEST COMPLETE: PARTIAL** — retained contract hardening/invariants, Slither, deterministic Genesis generation, Wallet Names integration and the NAMES-AUDIT-6 Level-2 milestone are qualified; later indexer/search, testnet and release qualification remain.
 - **DOCUMENTATION COMPLETE: NO** — user/developer/security docs exist, but deployment/operator/threat-model/Genesis acceptance documentation remains incomplete.
 - **INTEGRATION COMPLETE: NO** — Wallet/indexer/search source integrations exist; live Registry/network/artifact bindings and the user management application do not.
 - **SECURITY QUALIFIED: NO** — no unresolved core naming exploit was identified after the interface repair, but architecture/deployment and full hardening gates remain.
 - **TESTNET READY: NO** — official testnet manifest/RPC and deployed Names420 code are not qualified.
-- **GENESIS READY: NO** — runtime artifact/hash/storage and exact Genesis acceptance evidence are missing.
+- **GENESIS READY: NO** — deterministic Names420 runtime/hash/storage are now complete, but NAMES-AUDIT-7 through NAMES-AUDIT-10 remain before Genesis acceptance.
 - **PRODUCTION READY: NO** — depends on all preceding gates plus live operational qualification.
+
+### NAMES-AUDIT-6 completion
+
+NAMES-AUDIT-6 is **COMPLETE** on qualified implementation SHA `f4a1242c155b75edb09e907e4bf0f8559bcebbe1`.
+
+Exact-head Names qualification run `36796471172` passed the retained contract/hardening/invariant suite, targeted Slither, NAMES-AUDIT-5 compiler projection check, deterministic Genesis-state regeneration, Wallet Names integration, Names static qualification, and authority/opcode scan. Wallet Web run `36796471139` also passed on the same SHA.
+
+Durable evidence:
+
+- `docs/audit/420NAMES-AUDIT-6-GENESIS-STATE-QUALIFICATION.md`
+- `docs/audit/420NAMES-AUDIT-6-GENESIS-STATE-QUALIFICATION.json`
+
+The next canonical step remains NAMES-AUDIT-7.
 
 ## Numbered remediation roadmap
 
@@ -404,4 +417,4 @@ The public testnet manifest/endpoints are also not qualified. Therefore source e
 
 The most important code defect found in this audit was the stale shared resolver interface, which could cause callers to decode `owner` as the destination address. That defect is repaired on the audit branch with a regression test.
 
-The remaining blockers are broader than unit-test health: deterministic Genesis runtime/state materialization, derived indexer/search reconciliation, deployment/operator documentation, and live testnet qualification remain open. The compiler artifact itself is frozen by NAMES-AUDIT-5, but that must not be conflated with a materialized Genesis runtime or deployed code.
+The deterministic Genesis runtime/state materialization is complete and qualified by NAMES-AUDIT-6. Remaining blockers are derived indexer/search artifact reconciliation, deployment/operator documentation, production-equivalent testnet qualification, Genesis acceptance closeout, and later production qualification. Offline deterministic Genesis evidence must still not be conflated with live deployed-chain proof.

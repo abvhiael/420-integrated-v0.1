@@ -6,8 +6,9 @@
 **Qualification level:** Level 1 step-specific + Level 2 PRE-07/PRE-08 order-lifecycle integration milestone  
 **Audit branch / PR:** `audit/exchange-pretestnet-phase-20260930` / PR #430  
 **Audit base SHA:** `4d0ede3692efe55f04a50c7bf5b749afe579eccb`  
-**Qualified implementation SHA:** `942e1c340dde8e2a28753f4de20f4f64823e2e9a`  
-**Current repository `main` observed at implementation closeout:** `df8f639d8f43b763298c8750ef49d3e5849c597c`
+**Original qualified implementation SHA:** `942e1c340dde8e2a28753f4de20f4f64823e2e9a`  
+**Post-PRE-10 requalified accumulated implementation SHA:** `46e97d69a51deaad9460f9145735ee1cf96f658a`  
+**Current repository `main` observed at requalification:** `df8f639d8f43b763298c8750ef49d3e5849c597c`
 
 ## Canonical requirements
 
@@ -82,7 +83,41 @@ Wallet submission remains default-OFF. `PRE08_MOCK` exists only as an explicit d
 
 ## Level 1 qualification
 
-Exact implementation SHA:
+### Current accumulated-app requalification
+
+After PRE-09/PRE-10 completed and PRE-07 was explicitly revalidated, PRE-08 was reopened against current repository truth.
+
+Exact accumulated implementation SHA:
+
+`46e97d69a51deaad9460f9145735ee1cf96f658a`
+
+Required app-specific workflow:
+
+- **420Exchange Web Verification**
+- run `36802037691`
+- run number `730`
+- event: `pull_request`
+- exact head: `46e97d69a51deaad9460f9145735ee1cf96f658a`
+- **SUCCESS**
+
+That exact accumulated run re-exercised:
+
+- PRE-07/PRE-08 order-service static/unit/HTTP qualification — SUCCESS;
+- PRE-08 cancellation static checks — SUCCESS;
+- complete Exchange web unit/integration suite, including maker/cross-account/remaining-amount/racing-fill/duplicate-cancel/default-OFF coverage — SUCCESS;
+- rejected/reverted/replaced/reorg/indexer-conflict cancellation lifecycle tests — SUCCESS;
+- PRE-10 read-service contract/integration tests — SUCCESS;
+- complete 420Indexer shared-dependency test suite — SUCCESS;
+- retained PRE-02/PRE-03 Chromium acceptance — SUCCESS;
+- frontend secret scan — SUCCESS.
+
+The requalification confirms that PRE-09/PRE-10 did not weaken maker-only authority, fresh settlement-state checks, racing-fill rejection, duplicate-cancel protection, lifecycle reconciliation, or default-OFF withdrawal/cancellation behavior.
+
+No executable PRE-08 remediation was required.
+
+### Original PRE-08 closeout
+
+Exact original implementation SHA:
 
 `942e1c340dde8e2a28753f4de20f4f64823e2e9a`
 
@@ -127,7 +162,17 @@ Cancellation behavior is deterministic across off-chain and on-chain paths, cano
 
 ## Main divergence
 
-At closeout, current `main` was `df8f639d8f43b763298c8750ef49d3e5849c597c`, 80 commits beyond the audit base. The divergence remains Compute Market/shared non-Exchange work and does not modify the PRE-08 Exchange surfaces. Full reconciliation remains deferred to PRE-12.
+At post-PRE-10 PRE-08 requalification, current `main` was `df8f639d8f43b763298c8750ef49d3e5849c597c`, 80 commits beyond the audit base.
+
+Those main-side commits do not modify:
+
+- `exchange/web/**`;
+- `exchange/order-service/**`;
+- `exchange/read-service/**`;
+- `420-indexer/**`;
+- `.github/workflows/exchange-web.yml`.
+
+There is therefore no upstream PRE-08 implementation conflict requiring step-local reconciliation. Full branch reconciliation remains deferred to PRE-12.
 
 ## Deferred Level 3 / live work
 
@@ -142,6 +187,16 @@ Deferred to PRE-12 or live-testnet qualification:
 
 PR #430 remains draft and unmerged.
 
-## Next canonical roadmap step
+## Post-PRE-10 requalification conclusion
 
-**PRE-09 — bridge proof and destination-settlement architecture.**
+**PRE-08 remains COMPLETE.**
+
+All original canonical exit criteria remain satisfied on the accumulated Exchange implementation. PRE-10 now supplies the repository-owned V13 `CANCELLATION` projection surface consumed by lifecycle reconciliation, but that data remains explicitly non-authoritative; maker identity, fill/cancel freshness and cancellation authority continue to come from the qualified order-service/settlement/session boundaries.
+
+No executable PRE-08 remediation was required. Current requalification is retained at implementation SHA `46e97d69a51deaad9460f9145735ee1cf96f658a` using Exchange workflow run `36802037691` / #730.
+
+## Next step in the roadmap's recommended dependency order
+
+PRE-07 + PRE-08 are now both explicitly revalidated. The roadmap then proceeds to **PRE-09**, which is already COMPLETE.
+
+The next **unfinished** canonical roadmap step is **PRE-11 — CI/security/packaging/operations closure.**

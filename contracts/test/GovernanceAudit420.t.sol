@@ -2,6 +2,7 @@
 pragma solidity ^0.8.24;
 
 import "../src/governance/GovernanceTimelock.sol";
+import "../src/governance/CivicIds420.sol";
 import "../src/governance/CivicConstitution420.sol";
 import "../src/governance/CivicProposalRegistry420.sol";
 import "../src/governance/CivicElectorateRegistry420.sol";

@@ -1,6 +1,6 @@
 # CMP-1.5.3 — Policy-specific minimum collateral
 
-Status: **IMPLEMENTED. LEVEL 1 + FIRST CMP-1.5 LEVEL 2 MILESTONE QUALIFICATION PENDING.**
+Status: **COMPLETE. LEVEL 1 + FIRST CMP-1.5 LEVEL 2 MILESTONE QUALIFIED.**
 
 ## Canonical definition
 
@@ -138,6 +138,42 @@ CMP-1.5.3 is COMPLETE only when:
 - Level 1 tests/verifier pass on one exact implementation SHA;
 - the first CMP-1.5 Level 2 retained app suite passes on that same SHA;
 - durable evidence records the qualified implementation SHA.
+
+Next canonical step:
+
+**CMP-1.5.4 — Exit queue / withdrawal delay**
+
+
+## Completion evidence
+
+CMP-1.5.3 is **COMPLETE**.
+
+Qualified implementation SHA:
+
+`d72dc4c2f5fc2772fd2ea4299dbce9936e78cece`
+
+Current `main` observed at closeout:
+
+`98e545225d54379086f0c520afcb84b4d4d97288`
+
+Exact-head qualification:
+
+- Compute Market Qualification #94 — run `36939546185` — **PASS**;
+- retained `Compute*.t.sol` app integration suite — **PASS**;
+- CMP-1.5.3 mechanical verifier — **PASS**;
+- Solidity Contracts #3809 — run `36939546206` — **PASS** on the Compute fast path;
+- 420Docs Qualification #4022 — run `36939546320` — **PASS**;
+- Genesis Address Authority #611 — run `36939546297` — **PASS**;
+- 420Registry REG-AUDIT-4 #446 — run `36939546365` — **PASS**;
+- 420Indexer #1426 — run `36939546384` — **PASS**.
+
+Durable machine-readable evidence:
+
+`docs/compute-market/CMP-1.5.3-QUALIFICATION-EVIDENCE.json`
+
+This completion record is evidence-only relative to the qualified implementation SHA. It changes no executable source, tests, workflows, dependencies, configuration, interfaces, deployment state, generated/runtime artifacts, or substantive requirements.
+
+The first CMP-1.5 Level 2 milestone is satisfied by the retained app suite on the same implementation SHA. Repository-wide Level 3 qualification remains intentionally deferred to **CMP-1.5.13 — Phase closeout**.
 
 Next canonical step:
 

@@ -1,0 +1,50 @@
+{
+  "schema": "420-identity-audit-9-qualification-v1",
+  "step": "ID-AUDIT-9",
+  "name": "Production-equivalent testnet deployment qualification",
+  "status": "NOT_YET_COMPLETE_BLOCKED_OFFICIAL_TESTNET",
+  "repositoryImplementation": "IMPLEMENTED_QUALIFICATION_PENDING",
+  "repository": "abvhiael/420-integrated-v0.1",
+  "branch": "identity-audit-20260930",
+  "pr": 438,
+  "harness": {
+    "evidenceContract": "420-indexer/src/identity-testnet-qualification.ts",
+    "tests": "420-indexer/test/identity-testnet-qualification.test.ts",
+    "runner": "420-indexer/scripts/qualify-identity-testnet.mjs",
+    "workflow": ".github/workflows/identity-live-testnet.yml",
+    "readinessVerifier": "scripts/verify-id-audit-9-testnet-readiness.py",
+    "evidenceDraftTemplate": "docs/audit/ID-AUDIT-9-LIVE-EVIDENCE-DRAFT.example.json"
+  },
+  "readiness": {
+    "officialManifest": "ABSENT",
+    "publicEndpoints": "PLACEHOLDER_OR_UNPROVISIONED",
+    "liveQualificationComplete": false,
+    "signal": "BLOCKED_OFFICIAL_TESTNET_MANIFEST",
+    "testnetReady": false
+  },
+  "canonicalLiveExitCriteria": {
+    "chainIdentity": "BLOCKED_NOT_RUN",
+    "codeHashStorageAt0436": "BLOCKED_NOT_RUN",
+    "governanceTimelock": "BLOCKED_NOT_RUN",
+    "profileLifecycle": "BLOCKED_NOT_RUN",
+    "issuerLifecycle": "BLOCKED_NOT_RUN",
+    "credentialLifecycle": "BLOCKED_NOT_RUN",
+    "wallet": "BLOCKED_NOT_RUN",
+    "indexer": "BLOCKED_NOT_RUN",
+    "search": "BLOCKED_NOT_RUN",
+    "explorer": "BLOCKED_NOT_RUN",
+    "negativeAuthorization": "BLOCKED_NOT_RUN",
+    "expiry": "BLOCKED_NOT_RUN",
+    "revocation": "BLOCKED_NOT_RUN",
+    "restart": "BLOCKED_NOT_RUN",
+    "reorg": "BLOCKED_NOT_RUN",
+    "dependencyFailure": "BLOCKED_NOT_RUN",
+    "exactReleaseEvidence": "BLOCKED_NOT_RUN"
+  },
+  "level2": {
+    "requiredForHarness": false,
+    "previousMilestone": "ID-AUDIT-6 derived-service integration",
+    "liveExecutionWillBeMaterialCrossComponentEvidence": true
+  },
+  "nextCanonicalStep": "ID-AUDIT-9 remains active until TESTNET READY = YES; then ID-AUDIT-10 — phase closeout, reconciliation and retained evidence"
+}

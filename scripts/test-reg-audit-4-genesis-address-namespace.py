@@ -57,7 +57,8 @@ class RegAudit4NamespaceTests(unittest.TestCase):
 
     def test_stale_catalogue_example_fails(self):
         d = self.docs()
-        d["catalogue"]["contracts"][0]["address"] = "0x0000000000000000000000000000000000000420"
+        reg = next(x for x in d["catalogue"]["contracts"] if x["name"] == "ProtocolRegistry")
+        reg["address"] = "0x0000000000000000000000000000000000000420"
         self.assertTrue(any("catalogue Registry example" in e for e in self.errors(d)))
 
     def test_stale_manifest_example_fails(self):

@@ -84,6 +84,7 @@ contract ValidatorRegistry is ConsensusSystemAccess420, I420System {
     mapping(bytes32 => Validator) private _validators;
     mapping(address => bytes32) public ownerValidatorId;
     mapping(bytes32 => bool) public blsPubkeyHashUsed;
+    mapping(bytes32 => bool) public slashEvidenceApplied;
 
     mapping(bytes32 => uint256) public pendingProtocolCredit;
     mapping(bytes32 => address) public pendingCreditBeneficiary;
@@ -129,6 +130,7 @@ contract ValidatorRegistry is ConsensusSystemAccess420, I420System {
     error InvalidRotation();
     error InvalidEligibleSnapshot();
     error InvalidEvidence();
+    error EvidenceAlreadyApplied();
     error InvalidActiveCount();
     error ActivationDelayActive();
     error ExitNoticeMissing();
@@ -325,6 +327,7 @@ contract ValidatorRegistry is ConsensusSystemAccess420, I420System {
         Status resultingStatus
     ) external onlyConsensusSystem {
         if (evidenceHash == bytes32(0)) revert InvalidEvidence();
+        if (slashEvidenceApplied[evidenceHash]) revert EvidenceAlreadyApplied();
         Validator storage v = _requireValidator(validatorId);
         if (resultingStatus != v.status && !_validTransition(v.status, resultingStatus)) revert InvalidTransition();
 
@@ -346,6 +349,7 @@ contract ValidatorRegistry is ConsensusSystemAccess420, I420System {
         }
 
         if (ownedSlashed > v.ownedBond || creditSlashed > v.protocolCredit) revert InvalidBondComposition();
+        slashEvidenceApplied[evidenceHash] = true;
         bool wasEligible = _countsAsEligible(v.status);
         v.ownedBond -= ownedSlashed;
         v.protocolCredit -= creditSlashed;

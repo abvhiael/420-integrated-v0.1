@@ -1,17 +1,152 @@
 {
-  "schema":"420-exchange-pretestnet-readiness-v1",
-  "step":"PRE-11",
-  "status":"PRETESTNET_ONLY",
-  "liveGates":[
-    {"id":"swapSubmission","requiredState":"DISABLED_PRETESTNET","ownerStep":"PRE-06","resolved":false},
-    {"id":"orderSigning","requiredState":"DISABLED_PRETESTNET","ownerStep":"PRE-07","resolved":false},
-    {"id":"orderPublication","requiredState":"DISABLED_PRETESTNET","ownerStep":"PRE-07","resolved":false},
-    {"id":"orderWithdrawal","requiredState":"DISABLED_PRETESTNET","ownerStep":"PRE-08","resolved":false},
-    {"id":"orderCancellation","requiredState":"DISABLED_PRETESTNET","ownerStep":"PRE-08","resolved":false},
-    {"id":"bridgeSubmission","requiredState":"DISABLED_PRETESTNET","ownerStep":"PRE-09","resolved":false},
-    {"id":"bridgeProofAcceptance","requiredState":"DISABLED_PRETESTNET","ownerStep":"PRE-09","resolved":false}
+  "schema": "420-exchange-pretestnet-readiness-v1",
+  "step": "PRE-12",
+  "status": "PRE_TESTNET_ENGINEERING_COMPLETE",
+  "liveGates": [
+    {
+      "id": "swapSubmission",
+      "requiredState": "DISABLED_PRETESTNET",
+      "ownerStep": "PRE-06",
+      "resolved": false,
+      "owner": "Exchange client/runtime + PRE-06 operator",
+      "requiredEndpointAccountConfiguration": [
+        "qualified testnet RPC",
+        "resolved deployment manifest/router",
+        "selected wallet account on required chain",
+        "qualified authenticated quote endpoint"
+      ],
+      "expectedEvidence": [
+        "live testnet quote provenance",
+        "fresh balance/allowance/gas/nonce simulation",
+        "explicit wallet confirmation",
+        "canonical transaction hash/receipt/finality",
+        "Indexer reconciliation"
+      ],
+      "rollbackProcedure": "Disable swapSubmission, stop quote issuance if provenance/deployment is suspect, restore last qualified runtime/package SHA, reconcile submitted hashes before re-enabling."
+    },
+    {
+      "id": "orderSigning",
+      "requiredState": "DISABLED_PRETESTNET",
+      "ownerStep": "PRE-07",
+      "resolved": false,
+      "owner": "Exchange client/runtime + PRE-07 operator",
+      "requiredEndpointAccountConfiguration": [
+        "qualified testnet chain",
+        "resolved settlement contract/domain",
+        "selected maker wallet account",
+        "qualified order service"
+      ],
+      "expectedEvidence": [
+        "exact EIP-712 review",
+        "real maker signature",
+        "domain/chain/order-hash verification",
+        "wallet rejection/expiry/session-switch evidence"
+      ],
+      "rollbackProcedure": "Disable orderSigning; invalidate pending reviews/session authority; retain signed-order hashes for reconciliation."
+    },
+    {
+      "id": "orderPublication",
+      "requiredState": "DISABLED_PRETESTNET",
+      "ownerStep": "PRE-07",
+      "resolved": false,
+      "owner": "Exchange order-service operator + PRE-07",
+      "requiredEndpointAccountConfiguration": [
+        "qualified order-service origin",
+        "configured settlement contract/domain",
+        "qualified signature verifier",
+        "maker publication account/session"
+      ],
+      "expectedEvidence": [
+        "real signed order publication",
+        "idempotent order-hash response",
+        "status/fill projection reconciliation",
+        "negative wrong-domain/wrong-signer evidence"
+      ],
+      "rollbackProcedure": "Disable orderPublication; keep accepted records read-only; reconcile already-published order hashes before restoring."
+    },
+    {
+      "id": "orderWithdrawal",
+      "requiredState": "DISABLED_PRETESTNET",
+      "ownerStep": "PRE-08",
+      "resolved": false,
+      "owner": "Exchange order-service operator + PRE-08",
+      "requiredEndpointAccountConfiguration": [
+        "qualified order-service origin",
+        "maker authorization mechanism",
+        "canonical order hash/nonce",
+        "fresh service state"
+      ],
+      "expectedEvidence": [
+        "maker-authorized withdrawal",
+        "idempotent duplicate withdrawal",
+        "cross-account rejection",
+        "status reconciliation"
+      ],
+      "rollbackProcedure": "Disable orderWithdrawal; preserve existing order state; reconcile outstanding withdrawals and fills."
+    },
+    {
+      "id": "orderCancellation",
+      "requiredState": "DISABLED_PRETESTNET",
+      "ownerStep": "PRE-08",
+      "resolved": false,
+      "owner": "Exchange client/runtime + PRE-08 operator",
+      "requiredEndpointAccountConfiguration": [
+        "qualified RPC",
+        "resolved settlement contract",
+        "maker wallet account",
+        "fresh order-service and settlement reads"
+      ],
+      "expectedEvidence": [
+        "fresh remaining amount",
+        "real hash/nonce cancellation",
+        "wallet rejection/revert/replacement/reorg evidence",
+        "Indexer reconciliation"
+      ],
+      "rollbackProcedure": "Disable orderCancellation; stop new cancellation prompts; reconcile submitted cancellation transaction hashes against settlement state."
+    },
+    {
+      "id": "bridgeSubmission",
+      "requiredState": "DISABLED_PRETESTNET",
+      "ownerStep": "PRE-09",
+      "resolved": false,
+      "owner": "Exchange bridge operator + PRE-09",
+      "requiredEndpointAccountConfiguration": [
+        "qualified source/destination chain RPCs",
+        "resolved route/adapter/manifest identities",
+        "selected source wallet account",
+        "qualified bridge route configuration"
+      ],
+      "expectedEvidence": [
+        "real source transaction/finality",
+        "route identity",
+        "destination beneficiary/asset/amount binding",
+        "failure/retry/reorg evidence"
+      ],
+      "rollbackProcedure": "Disable bridgeSubmission; pause affected route; preserve source transfer IDs and lifecycle state; reconcile/refund according to PRE-09 runbook."
+    },
+    {
+      "id": "bridgeProofAcceptance",
+      "requiredState": "DISABLED_PRETESTNET",
+      "ownerStep": "PRE-09",
+      "resolved": false,
+      "owner": "Exchange bridge proof operator + PRE-09",
+      "requiredEndpointAccountConfiguration": [
+        "qualified proof-provider endpoint",
+        "independent proof-verifier configuration",
+        "destination bridge/settlement configuration",
+        "canonical source message ID"
+      ],
+      "expectedEvidence": [
+        "real proof acquisition",
+        "independent proof verification",
+        "destination claim/finality",
+        "exact beneficiary payout",
+        "replay rejection"
+      ],
+      "rollbackProcedure": "Disable bridgeProofAcceptance; invalidate suspect proofs/routes; preserve replay keys and lifecycle records; reconcile destination state before re-enable."
+    }
   ],
-  "productionDependencies":[
+  "productionDependencies": [
     "resolved chain/deployment manifest",
     "qualified RPC endpoint",
     "qualified Exchange V13 read API",
@@ -21,6 +156,7 @@
     "qualified withdrawal authorizer",
     "live bridge proof provider/verifier"
   ],
-  "authority":"READINESS_EVIDENCE_ONLY",
-  "note":"No LIVE GATE is enabled by this manifest."
+  "authority": "READINESS_EVIDENCE_ONLY",
+  "note": "All LIVE GATES remain disabled by default. This manifest is a handoff/readiness record and does not authorize live execution.",
+  "nextStatus": "LIVE_TESTNET_QUALIFICATION_PENDING"
 }

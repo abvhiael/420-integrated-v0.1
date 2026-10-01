@@ -56,6 +56,11 @@ on:
       - 'scripts/test-names-audit-6-genesis-state.py'
       - 'scripts/verify-names-audit-8-operator-docs.py'
       - 'docs/architecture/decisions/NAMES-AUDIT-2-DEPENDENCY-MODEL.md'
+      - '420-indexer/src/names-testnet-qualification.ts'
+      - '420-indexer/test/names-testnet-qualification.test.ts'
+      - '420-indexer/scripts/qualify-names-testnet.mjs'
+      - 'scripts/verify-names-audit-9-testnet-readiness.py'
+      - '.github/workflows/names-live-testnet.yml'
       - '.github/workflows/names-audit.yml'
   pull_request:
     paths:
@@ -110,6 +115,11 @@ on:
       - 'scripts/test-names-audit-6-genesis-state.py'
       - 'scripts/verify-names-audit-8-operator-docs.py'
       - 'docs/architecture/decisions/NAMES-AUDIT-2-DEPENDENCY-MODEL.md'
+      - '420-indexer/src/names-testnet-qualification.ts'
+      - '420-indexer/test/names-testnet-qualification.test.ts'
+      - '420-indexer/scripts/qualify-names-testnet.mjs'
+      - 'scripts/verify-names-audit-9-testnet-readiness.py'
+      - '.github/workflows/names-live-testnet.yml'
       - '.github/workflows/names-audit.yml'
   workflow_dispatch:
 
@@ -184,6 +194,12 @@ jobs:
           else
             echo "NAMES_OPERATOR_DOCS_CHANGED=false" >> "$GITHUB_ENV"
             echo "NAMES_APP_MILESTONE=false" >> "$GITHUB_ENV"
+          fi
+
+          if grep -Eq '^(420-indexer/src/names-testnet-qualification\.ts|420-indexer/test/names-testnet-qualification\.test\.ts|420-indexer/scripts/qualify-names-testnet\.mjs|scripts/verify-names-audit-9-testnet-readiness\.py|\.github/workflows/names-live-testnet\.yml)$' /tmp/names-changed.txt; then
+            echo "NAMES_TESTNET_HARNESS_CHANGED=true" >> "$GITHUB_ENV"
+          else
+            echo "NAMES_TESTNET_HARNESS_CHANGED=false" >> "$GITHUB_ENV"
           fi
 
       - name: Setup Go for Names Indexer/Search qualification
@@ -319,6 +335,19 @@ jobs:
             node scripts/generate-names420-descriptor.mjs --check
           )
           go test ./search/discovery ./search/indexerclient
+
+      - name: Qualify NAMES-AUDIT-9 live testnet harness
+        if: ${{ env.NAMES_TESTNET_HARNESS_CHANGED == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          (
+            cd 420-indexer
+            npm install
+            npm run build
+            node --test dist/test/names-testnet-qualification.test.js
+          )
+          python scripts/verify-names-audit-9-testnet-readiness.py
 
       - name: Run Wallet Names integration and management tests
         working-directory: wallet/web

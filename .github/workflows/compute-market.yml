@@ -120,3 +120,6 @@ jobs:
 
       - name: Verify CMP-1.5.0 stake architecture
         run: python scripts/verify-cmp-1-5-0-stake-architecture.py
+
+      - name: Verify CMP-1.5.1 worker collateral
+        run: python scripts/verify-cmp-1-5-1-worker-collateral.py

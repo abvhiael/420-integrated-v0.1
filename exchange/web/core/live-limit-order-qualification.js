@@ -29,7 +29,7 @@ async function complete({provider,txHash,attempts=60,pollMs=5000,wait=sleep}){
 }
 async function send({provider,runtime,account,session,transaction,checks={},attempts,pollMs,wait}){
   const preflight=await preflightExchangeTransaction({provider,transaction,runtime,...checks});
-  const sent=await submitPreflightedTransaction({provider,session,expectedChainId:runtime.network.chainId,expectedGeneration:session.generation,transaction,preflight});
+  const sent=await submitPreflightedTransaction({provider,session,expectedChainId:runtime.network.chainId,expectedGeneration:session.generation,transaction,preflight,submissionGate:{enabled:true,mode:'LIVE_TESTNET_QUALIFICATION'}});
   const finalized=await complete({provider,txHash:sent.txHash,attempts,pollMs,wait});
   return {txHash:sent.txHash,blockHash:finalized.receipt.blockHash,blockNumber:finalized.receipt.blockNumber.toString(),state:finalized.state};
 }

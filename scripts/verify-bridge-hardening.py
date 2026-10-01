@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import json,pathlib,sys
 root=pathlib.Path(__file__).resolve().parents[1]; e=[]
-required=['BridgeRouteRegistry.sol','BridgeRiskManager.sol','BridgeTransferRegistry.sol','GatewayRouter420.sol','BridgeAccountingRegistry.sol','VerifiedGateway420.sol']
+required=['BridgeChainRegistry420.sol','BridgeAssetRegistry.sol','BridgeRouteRegistry.sol','BridgeRiskManager.sol','BridgeTransferRegistry.sol','GatewayRouter420.sol','BridgeAccountingRegistry.sol','VerifiedGateway420.sol']
 for f in required:
     if not (root/'contracts/src/bridge'/f).exists(): e.append('missing '+f)
 L=json.loads((root/'contracts/config/bridge/risk-limits.json').read_text())
@@ -19,9 +19,9 @@ t=(root/'contracts/src/bridge/BridgeTransferRegistry.sol').read_text()
 for x in ['SOURCE_FINALIZED','PROOF_PENDING','VERIFIED','COMPLETED','consumedTransferId','IReplayProtection420','trustedRouter']:
     if x not in t:e.append('transfer missing '+x)
 g=(root/'contracts/src/bridge/GatewayRouter420.sol').read_text()
-for x in ['_resolveRequired(BridgeIds420.RISK_MANAGER)','_resolveRequired(BridgeIds420.TRANSFER_REGISTRY)','_requireRouteDirection','_requireRouteHealthy']:
+for x in ['_resolveRequired(BridgeIds420.RISK_MANAGER)','_resolveRequired(BridgeIds420.TRANSFER_REGISTRY)','_requireRouteDirection','_requireRouteHealthy','configuredAdapter == adapterId_']:
     if x not in g:e.append('router missing '+x)
-for tf in ['BridgeGenesisIntegration420.t.sol','BridgeRiskFuzz420.t.sol','BridgeInvariant420.t.sol']:
+for tf in ['BridgeGenesisIntegration420.t.sol','BridgeRiskFuzz420.t.sol','BridgeInvariant420.t.sol','BridgeChainRegistry420.t.sol']:
     if not (root/'contracts/test'/tf).exists(): e.append('missing test '+tf)
 o={'pass':not e,'errors':e,'routes':len(L['route_limits']),'assets':len(a),'shared_pause_authority':True}
 (root/'contracts/config/bridge/hardening-verification.json').write_text(json.dumps(o,indent=2)+'\n')

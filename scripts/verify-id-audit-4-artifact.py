@@ -141,9 +141,18 @@ else:
         fail("predeploy Identity address drift")
     if pre_entry.get("artifact") != ARTIFACT_PATH:
         fail("predeploy Identity artifact path drift")
-    # ID-AUDIT-4 intentionally leaves SOURCE_READY; ID-AUDIT-5 owns artifact-ready predeploy state.
-    if pre_entry.get("status") != "SOURCE_READY":
-        fail("ID-AUDIT-4 must not advance Identity predeploy status before ID-AUDIT-5")
+    # ID-AUDIT-4 originally qualifies the SOURCE_READY build artifact. Once canonical
+    # ID-AUDIT-5 completes, the same retained build artifact remains valid while the
+    # predeploy plan advances to ARTIFACT_READY. Do not treat that later canonical
+    # promotion as ID-AUDIT-4 artifact drift.
+    if pre_entry.get("status") not in {"SOURCE_READY", "ARTIFACT_READY"}:
+        fail("Identity predeploy status is neither SOURCE_READY nor ARTIFACT_READY")
+    if pre_entry.get("status") == "ARTIFACT_READY":
+        if pre_entry.get("predeploy_state") != "contracts/config/predeploy/Identity420-predeploy-state.json":
+            fail("ARTIFACT_READY Identity predeploy state path drift")
+        runtime_hash = pre_entry.get("runtime_code_hash")
+        if not isinstance(runtime_hash, str) or len(runtime_hash) != 66 or not runtime_hash.startswith("0x"):
+            fail("ARTIFACT_READY Identity runtime code hash missing")
 
 if not IFACE.is_file():
     fail("frozen Identity credential interface missing")

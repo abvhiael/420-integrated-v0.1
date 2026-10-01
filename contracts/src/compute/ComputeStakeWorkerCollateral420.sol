@@ -259,6 +259,7 @@ contract ComputeStakeWorkerCollateral420 is I420System, IComputeStakeSource420 {
     }
 
     function requestExit(bytes32 id) external returns (uint64 withdrawableAt) {
+        if (entered) revert InvalidExit();
         Position storage p = _positions[id];
         if (!p.exists || !p.active || p.exiting || msg.sender != p.owner) revert InvalidExit();
 

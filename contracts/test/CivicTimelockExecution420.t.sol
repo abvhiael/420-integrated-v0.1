@@ -160,6 +160,46 @@ contract CivicTimelockExecution420Test {
         s.governor.queue(proposalId, substituted);
     }
 
+
+    function testQueuedCivicBatchCannotInvokeRetiredTimelockCancellation() public {
+        Stack memory s = _stack(7 days);
+
+        bytes32 bootstrapOperationId = keccak256("GOV-AUDIT-1-BOOTSTRAP-CANCEL-TARGET");
+        s.timelock.schedule(
+            bootstrapOperationId,
+            address(s.target),
+            0,
+            abi.encodeCall(s.target.setValue, (777)),
+            GovernanceTimelock.Class.G1
+        );
+
+        CivicGovernor420.Action[] memory actions = new CivicGovernor420.Action[](1);
+        actions[0] = CivicGovernor420.Action({
+            target: address(s.timelock),
+            value: 0,
+            data: abi.encodeCall(s.timelock.cancel, (bootstrapOperationId))
+        });
+
+        bytes32 proposalId = _pass(s, actions);
+        s.timelock.activateCivicAuthority(address(s.governor));
+        s.governor.queue(proposalId, actions);
+
+        (,,, uint64 executeAfter,,,) = s.timelock.operations(proposalId);
+        vm.warp(executeAfter);
+
+        (bool ok,) = address(s.timelock).call(abi.encodeCall(s.timelock.execute, (proposalId)));
+        require(!ok, "Civic batch must not invoke retired cancellation");
+
+        (,,,,, bool proposalExecuted, bool proposalCancelled) = s.timelock.operations(proposalId);
+        require(!proposalExecuted && !proposalCancelled, "proposal timelock state split");
+
+        (,,,,, bool bootstrapExecuted, bool bootstrapCancelled) = s.timelock.operations(bootstrapOperationId);
+        require(!bootstrapExecuted && !bootstrapCancelled, "bootstrap operation cancellation leaked");
+
+        (,,,,,,, CivicIds420.ProposalState state,) = s.proposals.proposals(proposalId);
+        require(state == CivicIds420.ProposalState.QUEUED, "proposal registry state split");
+    }
+
     function testAtomicBatchFailureRollsBackPriorActionsAndKeepsProposalQueued() public {
         Stack memory s = _stack(7 days);
         CivicGovernor420.Action[] memory actions = new CivicGovernor420.Action[](2);

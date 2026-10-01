@@ -313,7 +313,14 @@ def verify_allocation(values: dict):
     return str(matches[0]["amount_kief"])
 
 def compile_contracts():
-    run("forge","build",cwd=CONTRACTS)
+    run(
+        "forge","build",
+        "src/system/RewardController.sol",
+        "src/system/ValidatorRegistry.sol",
+        "src/system/CommunityValidatorReserve.sol",
+        "src/apps/Stake420.sol",
+        cwd=CONTRACTS,
+    )
 
 def build_records():
     validate_toolchain()

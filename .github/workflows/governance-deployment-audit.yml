@@ -16,6 +16,9 @@ on:
       - 'contracts/test/GovernanceAudit6Deployment420.t.sol'
       - 'contracts/test-governance-audit-6/GovernanceAudit6Deployment420.t.sol'
       - 'scripts/verify-governance-audit-6.py'
+      - 'scripts/audit-genesis-address-collisions.py'
+      - 'scripts/verify-genesis-predeploy-authority.py'
+      - 'scripts/verify-genesis-canonical-addresses.py'
       - 'scripts/generate-governance-audit-6-artifacts.py'
       - 'contracts/artifacts/GovernanceTimelock.json'
       - 'contracts/artifacts/Governance420.json'
@@ -43,6 +46,9 @@ on:
       - 'contracts/test/GovernanceAudit6Deployment420.t.sol'
       - 'contracts/test-governance-audit-6/GovernanceAudit6Deployment420.t.sol'
       - 'scripts/verify-governance-audit-6.py'
+      - 'scripts/audit-genesis-address-collisions.py'
+      - 'scripts/verify-genesis-predeploy-authority.py'
+      - 'scripts/verify-genesis-canonical-addresses.py'
       - 'scripts/generate-governance-audit-6-artifacts.py'
       - 'contracts/artifacts/GovernanceTimelock.json'
       - 'contracts/artifacts/Governance420.json'
@@ -88,6 +94,12 @@ jobs:
           version: stable
       - name: Verify pinned deployment/discovery specification
         run: python3 scripts/verify-governance-audit-6.py
+      - name: Verify affected Genesis address and predeploy authority
+        run: |
+          python3 scripts/verify-genesis-canonical-addresses.py
+          python3 scripts/verify-genesis-predeploy-authority.py
+          python3 scripts/audit-genesis-address-collisions.py
+
       - name: Build exact Governance and Registry deployment surfaces
         working-directory: contracts
         run: |

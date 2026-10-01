@@ -2,5 +2,6 @@
   "pass": true,
   "errors": [],
   "shared_interface_v1": true,
+  "genesis_dex_factory_semantics": "REGISTRATION_ONLY",
   "production_pool_execution": "PRODUCTION_CANDIDATE_PRESENT"
 }

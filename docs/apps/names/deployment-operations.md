@@ -3,8 +3,8 @@ title: 420 Names deployment and operator runbook
 audience:
   - operator
   - developer
-category: operations
-status: pre-genesis
+category: how-to
+status: development
 version: current
 ---
 

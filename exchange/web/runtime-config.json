@@ -46,5 +46,8 @@
     "producers": [],
     "maxKeyOverlapSeconds": 3600,
     "endpointUrl": null
+  },
+  "execution": {
+    "swapSubmission": "DISABLED_PRETESTNET"
   }
 }

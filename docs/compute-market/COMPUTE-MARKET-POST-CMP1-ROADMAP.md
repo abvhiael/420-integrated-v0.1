@@ -176,6 +176,8 @@ Reuse canonical $420 custody/accounting. Do not create an unrelated collateral t
 
 
 ### CMP-1.5.2 — Verifier collateral
+**Status: implementation/Level 1 qualification in progress.**
+
 
 ### CMP-1.5.3 — Policy-specific minimum collateral
 

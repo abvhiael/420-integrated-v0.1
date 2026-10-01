@@ -11,3 +11,6 @@ No. The committed action batch must pass the applicable timelock.
 
 ## Can a proposal be cancelled after it is created?
 No in canonical Civic v1. ACTIVE, PASSED and QUEUED proposals have no cancellation path. A later proposal may change future protocol state, but it cannot rewrite another proposal's lifecycle.
+
+
+Canonical Civic v1 proposals are not cancellable.

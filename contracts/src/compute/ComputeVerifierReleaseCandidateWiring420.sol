@@ -148,6 +148,7 @@ contract ComputeVerifierReleaseCandidateWiring420 {
 
         if (
             address(jobs.verificationEvidence()) != address(boundedVerifier)
+                || address(jobs.verificationPolicies()) != address(policyRegistry)
                 || address(boundedVerifier.jobs()) != address(jobs)
                 || address(boundedVerifier.independencePolicy()) != address(independencePolicy)
                 || address(capabilityRegistry.verifiers()) != address(verifierRegistry)
@@ -188,7 +189,9 @@ contract ComputeVerifierReleaseCandidateWiring420 {
 
         if (
             address(dispute.independencePolicy()) != address(independencePolicy)
-                || address(dispute.jobs()) != address(0) && address(dispute.jobs()) != address(jobs)
+                || address(dispute.matches()) != address(selector.matches())
+                || address(dispute.authorization()) != address(boundedVerifier.authorization())
+                || (address(dispute.jobs()) != address(0) && address(dispute.jobs()) != address(jobs))
         ) revert InvalidWiring();
     }
 

@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "media/node/**"
+      - "media/orchestration/**"
       - "contracts/src/media/**"
       - "scripts/420media-anvil-integration.sh"
       - ".github/workflows/420media-anvil.yml"

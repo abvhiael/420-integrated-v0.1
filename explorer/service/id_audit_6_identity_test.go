@@ -28,10 +28,10 @@ func TestIDAudit6ExplorerPreservesIdentityRawEventProvenanceWithoutClaimingPaylo
 		},
 		receipt:model.ReceiptRecord{
 			ChainID:420, BlockNumber:77, BlockHash:"0xblock", TransactionHash:"0xtx",
-			TransactionIndex:1, Status:1, EffectiveGasPriceWei:"1", ActualFeeWei:"1",
+			TransactionIndex:1, Status:1, GasUsed:1, EffectiveGasPriceWei:"1", ActualFeeWei:"1",
 		},
 		block:model.BlockRecord{ChainID:420, Number:77, Hash:"0xblock"},
-		logs:[]model.LogRecord{{
+		block:model.BlockRecord{ChainID:420,Number:77,Hash:"0xblock"},\n\t\tlogs:[]model.LogRecord{{
 			ChainID:420, BlockNumber:77, BlockHash:"0xblock", TransactionHash:"0xtx",
 			TransactionIndex:1, LogIndex:0,
 			Address:"0x0000000000000000000000000000000000000436",
@@ -59,8 +59,8 @@ func TestIDAudit6ExplorerRejectsMalformedIdentityCommitmentEncoding(t *testing.T
 		health:indexerapi.HealthResponse{Health:model.Health{
 			ChainID:420, IndexedHeight:77, State:"HEALTHY", LastIngestAt:time.Now(),
 		}},
-		tx:model.TransactionRecord{ChainID:420,BlockNumber:77,BlockHash:"0xblock",Hash:"0xtx",Index:1,Input:"0x"},
-		receipt:model.ReceiptRecord{ChainID:420,BlockNumber:77,BlockHash:"0xblock",TransactionHash:"0xtx",TransactionIndex:1,Status:1,EffectiveGasPriceWei:"0",ActualFeeWei:"0"},
+		tx:model.TransactionRecord{ChainID:420,BlockNumber:77,BlockHash:"0xblock",Hash:"0xtx",Index:1,From:"0x1111111111111111111111111111111111111111",To:"0x0000000000000000000000000000000000000436",ValueWei:"0",Input:"0x"},
+		receipt:model.ReceiptRecord{ChainID:420,BlockNumber:77,BlockHash:"0xblock",TransactionHash:"0xtx",TransactionIndex:1,Status:1,GasUsed:0,EffectiveGasPriceWei:"0",ActualFeeWei:"0"},
 		logs:[]model.LogRecord{{
 			ChainID:420,BlockNumber:77,BlockHash:"0xblock",TransactionHash:"0xtx",
 			TransactionIndex:1,LogIndex:0,

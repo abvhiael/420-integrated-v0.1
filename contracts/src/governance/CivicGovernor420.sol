@@ -106,8 +106,14 @@ contract CivicGovernor420 is I420System {
         proposalRegistry = CivicProposalRegistry420(proposalRegistry_);
         electorateRegistry = CivicElectorateRegistry420(electorateRegistry_);
         voting = CivicVoting420(voting_);
+
         address timelock_ = proposalRegistry.governanceTimelock();
-        if (timelock_ == address(0)) revert InvalidModule();
+        if (
+            timelock_ == address(0) || constitution.governanceTimelock() != timelock_
+                || electorateRegistry.governanceTimelock() != timelock_
+                || address(voting.proposalRegistry()) != proposalRegistry_
+                || address(voting.electorateRegistry()) != electorateRegistry_
+        ) revert InvalidModule();
         timelock = GovernanceTimelock(payable(timelock_));
     }
 

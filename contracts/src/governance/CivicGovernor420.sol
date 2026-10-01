@@ -107,7 +107,7 @@ contract CivicGovernor420 is I420System {
 
         address timelock_ = proposalRegistry.governanceTimelock();
         if (
-            timelock_ == address(0) || constitution.governanceTimelock() != timelock_
+            timelock_ == address(0) || timelock_.code.length == 0 || constitution.governanceTimelock() != timelock_
                 || electorateRegistry.governanceTimelock() != timelock_
                 || address(voting.proposalRegistry()) != proposalRegistry_
                 || address(voting.electorateRegistry()) != electorateRegistry_

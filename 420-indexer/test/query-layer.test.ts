@@ -60,3 +60,17 @@ test('asset transfer query is chain scoped and deterministic', () => {
   assert.match(query.text, /order by block_number desc, lower\(tx_hash\) desc, log_index desc/);
   assert.deepEqual(query.params, ['420','erc20:0x1:','0xabc','99',21]);
 });
+
+
+test('Names history query supports canonical ascending replay order', () => {
+  const query = protocolEventsQuery420(420n, {
+    protocol: '420Names',
+    objectKey: 'labelHash:0xabc',
+    direction: 'asc',
+    limit: 200
+  });
+  assert.match(query.text, /protocol = \$2/);
+  assert.match(query.text, /object_key = \$3/);
+  assert.match(query.text, /order by block_number asc, tx_index asc, log_index asc/);
+  assert.deepEqual(query.params, ['420','420Names','labelHash:0xabc',201]);
+});

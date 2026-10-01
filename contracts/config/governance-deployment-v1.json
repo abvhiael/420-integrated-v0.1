@@ -1,0 +1,170 @@
+{
+  "schema": "420-governance-deployment-v1",
+  "step": "GOV-AUDIT-6",
+  "status": "BLOCKED_CANONICAL_INITIALIZATION_INPUTS",
+  "purpose": "Reproducible deployment, Registry discovery and initialization specification for the canonical 420 Governance / 420 Civic stack.",
+  "compiler": {
+    "solidity": "0.8.24",
+    "evmVersion": "cancun",
+    "optimizer": true,
+    "optimizerRuns": 200,
+    "viaIR": true,
+    "sourceRoot": "contracts/src",
+    "foundryConfig": "contracts/foundry.toml"
+  },
+  "fixedPredeploys": [
+    {
+      "name": "GovernanceTimelock",
+      "address": "0x0000000000000000000000000000000000000429",
+      "source": "contracts/src/governance/GovernanceTimelock.sol",
+      "constructor": ["bootstrapGovernor"],
+      "runtimeArtifact": "contracts/artifacts/GovernanceTimelock.json",
+      "materialization": "DIRECT_GENESIS_IMMUTABLE_AND_STORAGE_MATERIALIZATION"
+    },
+    {
+      "name": "Governance420",
+      "address": "0x0000000000000000000000000000000000000437",
+      "source": "contracts/src/governance/Governance420.sol",
+      "constructor": ["GovernanceTimelock@0x0429"],
+      "runtimeArtifact": "contracts/artifacts/Governance420.json",
+      "materialization": "DIRECT_GENESIS_IMMUTABLE_AND_STORAGE_MATERIALIZATION",
+      "role": "COMPATIBILITY_ONLY"
+    }
+  ],
+  "registry": {
+    "address": "0x0000000000000000000000000000000000000434",
+    "contract": "ProtocolRegistry",
+    "serviceId": {
+      "algorithm": "keccak256(utf8)",
+      "preimage": "420/service/governance/v1"
+    },
+    "servicePublication": {
+      "implementation": "CivicGovernor420",
+      "version": 1,
+      "active": true,
+      "componentType": "PROTOCOL",
+      "metadataHashSource": "deployment/release metadata",
+      "manifestHashSource": "contracts/config/governance-deployment-v1.json",
+      "dependencyRootSource": "ordered Civic module graph",
+      "interfaceHashPreimage": "420/interface/governance-civic/v1"
+    }
+  },
+  "registryResolvedComponents": [
+    {
+      "name": "CivicConstitution420",
+      "source": "contracts/src/governance/CivicConstitution420.sol",
+      "runtimeArtifact": "contracts/artifacts/CivicConstitution420.json",
+      "componentId": {"algorithm": "keccak256(utf8)", "preimage": "420/component/governance/civic-constitution/v1"},
+      "version": {"major": 1, "minor": 0, "patch": 0},
+      "lifecycle": "ACTIVE",
+      "fixedAddress": null
+    },
+    {
+      "name": "CivicProposalRegistry420",
+      "source": "contracts/src/governance/CivicProposalRegistry420.sol",
+      "runtimeArtifact": "contracts/artifacts/CivicProposalRegistry420.json",
+      "componentId": {"algorithm": "keccak256(utf8)", "preimage": "420/component/governance/civic-proposal-registry/v1"},
+      "version": {"major": 1, "minor": 0, "patch": 0},
+      "lifecycle": "ACTIVE",
+      "fixedAddress": null
+    },
+    {
+      "name": "CivicElectorateRegistry420",
+      "source": "contracts/src/governance/CivicElectorateRegistry420.sol",
+      "runtimeArtifact": "contracts/artifacts/CivicElectorateRegistry420.json",
+      "componentId": {"algorithm": "keccak256(utf8)", "preimage": "420/component/governance/civic-electorate-registry/v1"},
+      "version": {"major": 1, "minor": 0, "patch": 0},
+      "lifecycle": "ACTIVE",
+      "fixedAddress": null
+    },
+    {
+      "name": "CivicVoting420",
+      "source": "contracts/src/governance/CivicVoting420.sol",
+      "runtimeArtifact": "contracts/artifacts/CivicVoting420.json",
+      "componentId": {"algorithm": "keccak256(utf8)", "preimage": "420/component/governance/civic-voting/v1"},
+      "version": {"major": 1, "minor": 0, "patch": 0},
+      "lifecycle": "ACTIVE",
+      "fixedAddress": null
+    },
+    {
+      "name": "CivicGovernor420",
+      "source": "contracts/src/governance/CivicGovernor420.sol",
+      "runtimeArtifact": "contracts/artifacts/CivicGovernor420.json",
+      "componentId": {"algorithm": "keccak256(utf8)", "preimage": "420/component/governance/civic-governor/v1"},
+      "version": {"major": 1, "minor": 0, "patch": 0},
+      "lifecycle": "ACTIVE",
+      "fixedAddress": null
+    }
+  ],
+  "constructorGraph": [
+    "GovernanceTimelock(bootstrapGovernor)",
+    "Governance420(GovernanceTimelock@0x0429)",
+    "CivicConstitution420(GovernanceTimelock@0x0429)",
+    "CivicProposalRegistry420(GovernanceTimelock@0x0429)",
+    "CivicElectorateRegistry420(GovernanceTimelock@0x0429)",
+    "CivicVoting420(CivicProposalRegistry420,CivicElectorateRegistry420)",
+    "CivicGovernor420(CivicConstitution420,CivicProposalRegistry420,CivicElectorateRegistry420,CivicVoting420)"
+  ],
+  "initializationOrder": [
+    "materialize GovernanceTimelock at 0x0429 with explicit bootstrapGovernor",
+    "materialize Governance420 at 0x0437 bound to GovernanceTimelock@0x0429",
+    "deploy CivicConstitution420",
+    "deploy CivicProposalRegistry420",
+    "deploy CivicElectorateRegistry420",
+    "configure COMMUNITY electorate source through GovernanceTimelock",
+    "configure VALIDATOR electorate source through GovernanceTimelock when required by canonical rules",
+    "install canonical initial constitutional rules G1-G4 through GovernanceTimelock",
+    "deploy CivicVoting420 with exact Proposal/Electorate Registry addresses",
+    "deploy CivicGovernor420 with exact Constitution/Proposal/Electorate/Voting graph",
+    "bind CivicProposalRegistry420 proposalAuthority to CivicGovernor420 through GovernanceTimelock",
+    "bind CivicElectorateRegistry420 snapshotAuthority to CivicGovernor420 through GovernanceTimelock",
+    "bind Governance420 compatibility civicGovernor pointer to CivicGovernor420 through GovernanceTimelock",
+    "register all five Civic component IDs in ProtocolRegistry with ACTIVE lifecycle and runtime code hashes",
+    "publish governance service profile pointing to CivicGovernor420",
+    "activate GovernanceTimelock Civic authority last",
+    "verify scheduler == CivicGovernor420 and civicAuthorityActivated == true"
+  ],
+  "canonicalInputs": {
+    "bootstrapGovernor": {
+      "value": null,
+      "required": true,
+      "source": "contracts/config/predeploy/storage-init.json#bootstrap_governor",
+      "status": "UNRESOLVED_DO_NOT_INVENT"
+    },
+    "communityElectorateSource": {
+      "value": null,
+      "required": true,
+      "status": "UNRESOLVED_DO_NOT_INVENT"
+    },
+    "validatorElectorateSource": {
+      "value": null,
+      "required": "when any canonical initial rule requires validator house",
+      "status": "UNRESOLVED_DO_NOT_INVENT"
+    },
+    "initialConstitutionalRules": {
+      "G1": null,
+      "G2": null,
+      "G3": null,
+      "G4": null,
+      "required": true,
+      "status": "UNRESOLVED_DO_NOT_INVENT"
+    }
+  },
+  "handoffInvariant": {
+    "beforeActivation": "scheduler == bootstrapGovernor && civicAuthorityActivated == false",
+    "afterActivation": "scheduler == CivicGovernor420 && civicAuthorityActivated == true",
+    "bootstrapCancellationAfterActivation": "MUST_REVERT",
+    "activation": "ONE_WAY"
+  },
+  "rollbackRecovery": [
+    "Before Civic activation, bootstrap operations may be cancelled under the canonical GovernanceTimelock bootstrap authority.",
+    "Do not activate Civic authority until constructor graph, bindings, rules, electorate sources, Registry component resolutions and service publication are verified.",
+    "After Civic activation there is no bootstrap cancellation or authority rollback path; recovery must use canonical Civic governance.",
+    "If any pre-activation verification fails, discard the candidate deployment and redeploy from the exact retained artifacts/configuration rather than patching addresses or bindings in place."
+  ],
+  "blockers": [
+    "Canonical bootstrapGovernor is not frozen in repository authority.",
+    "Canonical initial COMMUNITY/VALIDATOR electorate source addresses are not frozen.",
+    "Canonical initial G1-G4 constitutional rule values are not frozen."
+  ]
+}

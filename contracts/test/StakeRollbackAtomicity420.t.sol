@@ -47,6 +47,7 @@ interface VmStakeRollback420 {
 contract StakeRollbackAtomicity420Test {
     VmStakeRollback420 internal constant vm =
         VmStakeRollback420(address(uint160(uint256(keccak256("hevm cheat code")))));
+    address internal constant SYSTEM_CALLER = 0x000000000000000000000000000000000000043C;
     address internal constant NATIVE_SYSTEM_ORIGIN = 0xffffFFFfFFffffffffffffffFfFFFfffFFFfFFfE;
 
     function testFuzz_ProtocolCreditReplacementRollbackOnReserveFailure(uint96 rawAmount) public {
@@ -94,7 +95,7 @@ contract StakeRollbackAtomicity420Test {
         CommunityValidatorReserve reserve = new CommunityValidatorReserve(address(this));
         RejectingWithdrawal420 withdrawal = new RejectingWithdrawal420();
 
-        registry.bindConsensusSystemCaller(address(this));
+        registry.bindConsensusSystemCaller(SYSTEM_CALLER);
         registry.bindCommunityValidatorReserve(address(reserve));
         reserve.bindValidatorRegistry(address(registry));
         vm.deal(address(reserve), reserve.GENESIS_RESERVE());
@@ -108,15 +109,21 @@ contract StakeRollbackAtomicity420Test {
         vm.prank(owner);
         registry.register{value: 21_000 ether}(id, _pubkey(2), address(withdrawal), keccak256("withdraw-rollback"));
 
+        vm.prank(SYSTEM_CALLER);
         registry.applyConsensusState(id, ValidatorRegistry.Status.PROBATION, 1, 0, 0, 0);
         ValidatorRegistry.Validator memory registered = registry.getValidator(id);
         vm.roll(uint256(registered.registrationBlock) + registry.ACTIVATION_DELAY_BLOCKS());
+        vm.prank(SYSTEM_CALLER);
         registry.applyConsensusState(id, ValidatorRegistry.Status.ELIGIBLE, 2, 1, 0, 0);
+        vm.prank(SYSTEM_CALLER);
         registry.applyExitNotice(id, 1);
+        vm.prank(SYSTEM_CALLER);
         registry.applyRotationSnapshot(2, 1);
+        vm.prank(SYSTEM_CALLER);
         registry.applyConsensusState(id, ValidatorRegistry.Status.WITHDRAWAL_HOLD, 3, 1, 0, 0);
         ValidatorRegistry.Validator memory held = registry.getValidator(id);
         vm.roll(held.withdrawableBlock);
+        vm.prank(SYSTEM_CALLER);
         registry.applyConsensusState(id, ValidatorRegistry.Status.WITHDRAWABLE, 4, 1, 0, 0);
 
         ValidatorRegistry.Validator memory beforeState = registry.getValidator(id);

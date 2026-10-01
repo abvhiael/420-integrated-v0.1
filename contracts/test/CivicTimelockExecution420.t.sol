@@ -199,6 +199,56 @@ contract CivicTimelockExecution420Test {
         require(state == CivicIds420.ProposalState.QUEUED, "proposal registry state split");
     }
 
+
+    function testQueuedCivicBatchCannotCancelAnotherProposalThroughRegistry() public {
+        Stack memory s = _stack(7 days);
+
+        CivicGovernor420.Action[] memory targetActions = _actions(s.target, 123);
+        bytes32 targetProposalId = _pass(s, targetActions);
+        (,,,,,,, CivicIds420.ProposalState targetStateBefore,) = s.proposals.proposals(targetProposalId);
+        require(targetStateBefore == CivicIds420.ProposalState.PASSED, "target must be passed");
+
+        CivicGovernor420.Action[] memory cancelActions = new CivicGovernor420.Action[](1);
+        cancelActions[0] = CivicGovernor420.Action({
+            target: address(s.proposals),
+            value: 0,
+            data: abi.encodeCall(
+                s.proposals.transition,
+                (targetProposalId, CivicIds420.ProposalState.CANCELLED)
+            )
+        });
+
+        vm.roll(200);
+        vm.prank(ALICE);
+        bytes32 cancelProposalId = s.governor.createProposal(
+            CivicIds420.ProposalClass.G1,
+            keccak256("cancellation-attempt metadata"),
+            keccak256(abi.encode(cancelActions))
+        );
+        vm.roll(201);
+        vm.prank(ALICE);
+        s.voting.castVote(cancelProposalId, CivicIds420.House.COMMUNITY, CivicVoting420.Support.FOR, "");
+        vm.roll(203);
+        require(s.governor.finalize(cancelProposalId), "cancellation-attempt proposal should pass");
+
+        s.timelock.activateCivicAuthority(address(s.governor));
+        s.governor.queue(cancelProposalId, cancelActions);
+        (,,, uint64 executeAfter,,,) = s.timelock.operations(cancelProposalId);
+        vm.warp(executeAfter);
+
+        (bool ok,) = address(s.timelock).call(abi.encodeCall(s.timelock.execute, (cancelProposalId)));
+        require(!ok, "Civic batch must not cancel another proposal");
+
+        (,,,,,,, CivicIds420.ProposalState targetStateAfter,) = s.proposals.proposals(targetProposalId);
+        require(targetStateAfter == CivicIds420.ProposalState.PASSED, "target proposal state split");
+
+        (,,,,,,, CivicIds420.ProposalState cancelState,) = s.proposals.proposals(cancelProposalId);
+        require(cancelState == CivicIds420.ProposalState.QUEUED, "cancellation proposal state split");
+
+        (,,,,, bool executed, bool cancelled) = s.timelock.operations(cancelProposalId);
+        require(!executed && !cancelled, "cancellation batch timelock state split");
+    }
+
     function testAtomicBatchFailureRollsBackPriorActionsAndKeepsProposalQueued() public {
         Stack memory s = _stack(7 days);
         CivicGovernor420.Action[] memory actions = new CivicGovernor420.Action[](2);

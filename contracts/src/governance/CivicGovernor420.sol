@@ -41,11 +41,11 @@ contract CivicGovernor420 is I420System {
         bytes data;
     }
 
-    CivicConstitution420 public immutable constitution;
-    CivicProposalRegistry420 public immutable proposalRegistry;
-    CivicElectorateRegistry420 public immutable electorateRegistry;
-    CivicVoting420 public immutable voting;
-    GovernanceTimelock public immutable timelock;
+    CivicConstitution420 public constitution;
+    CivicProposalRegistry420 public proposalRegistry;
+    CivicElectorateRegistry420 public electorateRegistry;
+    CivicVoting420 public voting;
+    GovernanceTimelock public timelock;
 
     mapping(address => uint256) public proposerNonces;
     mapping(bytes32 => FrozenRule) private _frozenRules;

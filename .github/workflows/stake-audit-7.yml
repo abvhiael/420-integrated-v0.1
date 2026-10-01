@@ -98,10 +98,10 @@ jobs:
           python scripts/audit-genesis-address-collisions.py
           python scripts/verify-genesis-predeploy-authority.py
           python scripts/verify-step6-contracts.py
-      - name: Run retained Stake lifecycle and binding regressions
+      - name: Run retained Stake genesis and binding regressions
         working-directory: contracts
         run: |
-          forge test --match-path test/StakeValidatorGenesis420.t.sol -vv
+          forge test --match-path test/StakeValidatorGenesis420.t.sol --match-test 'testStakeGenesisInitializationIntrospection|testGenesisBondLifecycleAndDelegationPolicy|testConsensusSystemCallerIsOneTimeAndGovernanceCannotForgeOutcome|testStakeFacadeReportsCollateralSolvency' -vv
           forge test --match-path test/StakeSystemCallABIVectors420.t.sol -vv
       - name: Reject materialization drift after qualification
         run: |

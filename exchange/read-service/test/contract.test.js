@@ -12,7 +12,7 @@ const addr=n=>'0x'+BigInt(n).toString(16).padStart(40,'0');
 const catalogue=validateCatalogue({schema:'420-exchange-catalogue-v1',version:1,markets:[{
   marketSubjectId:id(1),canonicalMarketId:id(11),marketLabel:'420 / TEST',baseSymbol:'420',quoteSymbol:'TEST',
   qualification:'DISPLAY_ONLY_QUALIFIED_METADATA',routeHealthy:true,settlementHealthy:true,source:'test-catalogue'
-}]});
+}],assets:[{assetId:'420',symbol:'420',qualification:'DISPLAY_ONLY_UNQUALIFIED',source:'test'}],routes:[{routeId:'r1',marketSubjectId:id(1),qualification:'DISPLAY_ONLY_UNQUALIFIED',source:'test'}]});
 function event({eventName='AtomicPathExecuted',blockNumber='10',blockHash=id(20),tx=id(30),logIndex=0,fields={},protocol='420Exchange'}={}){
  return {chainId:'1056',blockNumber,blockHash,transactionHash:tx,transactionIndex:0,logIndex,contractAddress:addr(99),protocol,eventName,objectKey:null,lifecycleState:null,fields};
 }

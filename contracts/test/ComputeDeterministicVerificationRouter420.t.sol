@@ -257,10 +257,12 @@ contract ComputeDeterministicVerificationRouter420Test {
     function testAdapterUpgradeDoesNotRewriteFrozenJobRoute() public {
         _bind();
         ComputeIntegerSumSquaresAdapter420 replacement = new ComputeIntegerSumSquaresAdapter420();
+        bytes32 replacementWorkload = replacement.WORKLOAD_TYPE();
+        bytes32 replacementProfile = replacement.PROFILE_ID();
 
         vm.prank(GOV);
         uint64 revision = registry.publish(
-            replacement.WORKLOAD_TYPE(), replacement.PROFILE_ID(), address(replacement)
+            replacementWorkload, replacementProfile, address(replacement)
         );
         require(revision == 2, "registry did not version route");
 

@@ -159,6 +159,8 @@ if "status: pre-genesis" not in doc:
 if "audience:" not in doc or "operator" not in doc.split("# 420 Names deployment", 1)[0]:
     fail("operator runbook front matter must include operator audience")
 
+if "## Operator documentation" not in index:
+    fail("Names index missing Operator documentation section")
 if "deployment-operations.md" not in index:
     fail("Names index does not link the operator runbook")
 

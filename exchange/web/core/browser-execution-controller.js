@@ -16,10 +16,12 @@ export function assertExecutableRuntime(runtime) {
 }
 
 export class BrowserExecutionController {
-  constructor({runtime=null,onInvalidate=()=>{},onState=()=>{}}={}) {
+  constructor({runtime=null,onInvalidate=()=>{},onState=()=>{},submissionGate=null}={}) {
     this.runtime=runtime;
     this.onInvalidate=onInvalidate;
     this.onState=onState;
+    this.submissionGate=submissionGate;
+    this.invalidationListeners=new Set();
     this.announcements=[];
     this.wallet=null;
     this.selection=null;
@@ -44,10 +46,17 @@ export class BrowserExecutionController {
     if(typeof target.dispatchEvent==='function' && typeof Event==='function') target.dispatchEvent(new Event('eip6963:requestProvider'));
     return this.discover(ethereum);
   }
+  subscribeInvalidation(listener) {
+    if(typeof listener!=='function') throw new BrowserExecutionError('LISTENER_REQUIRED','invalidation listener required');
+    if(this.disposed) throw new BrowserExecutionError('DISPOSED','controller disposed');
+    this.invalidationListeners.add(listener);
+    return ()=>this.invalidationListeners.delete(listener);
+  }
   notifyInvalidation(reason,stateType='execution-invalidated') {
     if(this.disposed)return this.generation;
     this.generation++;
     this.onInvalidate(reason);
+    for(const listener of this.invalidationListeners) listener(reason,this.generation);
     this.onState({type:stateType,reason,generation:this.generation});
     return this.generation;
   }
@@ -62,6 +71,7 @@ export class BrowserExecutionController {
     this.wallet=null;this.selection=null;this.generation++;
     if(reason&&!this.disposed){
       this.onInvalidate(reason);
+      for(const listener of this.invalidationListeners) listener(reason,this.generation);
       this.onState({type:'wallet-invalidated',reason,generation:this.generation});
     }
   }
@@ -152,7 +162,7 @@ export class BrowserExecutionController {
     const preflight=await preflightExchangeTransaction({provider:wallet.provider,runtime:this.runtime,transaction,allowanceChecks,authorizationChecks,staticCalls,freshness});
     this.assertUnchanged(wallet,generation,epoch);
     if(!preflight.ok) throw new BrowserExecutionError('PREFLIGHT_FAILED','transaction failed preflight');
-    return submitPreflightedTransaction({provider:wallet.provider,session,expectedChainId:this.runtime.network.chainId,expectedGeneration:generation,transaction,preflight});
+    return submitPreflightedTransaction({provider:wallet.provider,session,expectedChainId:this.runtime.network.chainId,expectedGeneration:generation,transaction,preflight,submissionGate:this.submissionGate});
   }
   async signOrder({signingRequest,qualification}={}) {
     const {wallet,session,generation,epoch}=await this.assertLiveSession();
@@ -165,5 +175,6 @@ export class BrowserExecutionController {
     this.disposed=true;this.unbind();
     for(const off of this.discoveryListeners.splice(0))off();
     this.announcements=[];
+    this.invalidationListeners.clear();
   }
 }

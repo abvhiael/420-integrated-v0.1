@@ -86,7 +86,7 @@ The production candidate pool is an implementation/deployment component, not a n
 | Swap component/action IDs | present | unchanged | COMPLETE | canonical IDs exist |
 | Genesis DEX factory | present | registration-only semantics frozen and tested | COMPLETE | governance registry for already-deployed canonical pools; no CREATE/CREATE2 path |
 | canonical market registry | present | unchanged | COMPLETE | canonical market/pair/pool records |
-| permissionless factory | present | unchanged | PARTIAL | registers existing pools; does not deploy them |
+| permissionless factory | present | registration lifecycle hardened | COMPLETE | registration-only; exact pair introspection/codehash provenance; duplicate pool-address rejection; open same-pair variants |
 | TWAP oracle | present | unchanged | PARTIAL | observation application exists; full TWAP production hardening is not demonstrated |
 | public batch auction | present | unchanged | PARTIAL | auction/bid/settle records exist; value custody/allocation execution is not implemented here |
 | approved quote asset registry | present | unchanged | COMPLETE | shared canonical settlement checks applied |
@@ -153,7 +153,22 @@ Introducing CREATE/CREATE2 semantics would add salt, initialization, provenance 
 
 ### PermissionlessDEXFactory
 
-The permissionless tier validates pool bytecode identity and records creator/pair/pool provenance, but it registers pre-existing pools rather than deploying them. This is adequate for permissionless registration but not for a self-contained “create pool” product.
+SWAP-AUDIT-3 resolves the permissionless lifecycle ambiguity: **permissionless market formation is open to anyone, while the protocol contract is registration-only**.
+
+The frozen `creation: ANYONE` tier policy means any user may deploy a compatible pool outside the factory and then register that existing instance. The factory does not CREATE/CREATE2 pools and does not confer canonical status, oracle eligibility, Wallet-default eligibility, public-distribution eligibility or protocol endorsement.
+
+Registration now:
+
+- requires a nonzero unused `poolId` and a code-bearing pool;
+- verifies the submitted token pair against the pool's own `token0()` / `token1()` getters using static introspection;
+- re-derives and records the exact current runtime code hash instead of trusting caller-supplied provenance alone;
+- rejects a second registration of the same pool address under another ID;
+- preserves permissionless same-pair variants by allowing distinct pool addresses for the same token pair;
+- remains fail-closed under resident lifecycle, chain-version, pause and shared system-safety controls.
+
+`poolImplementation` and its deployment-time code hash are retained as a reference implementation/provenance anchor, not as a protocol endorsement or runtime equality requirement for every permissionless pool. This is necessary because concrete pools can embed immutable pair/executor/fee values in runtime bytecode.
+
+Registration records are immutable. Promotion into the canonical tier does not occur through this contract; canonical status remains a separate `CanonicalMarketRegistry` governance action.
 
 ### TWAPOracle
 
@@ -237,6 +252,25 @@ Audit remediation added `.github/workflows/swap-audit.yml` to run app-scoped sta
 - completion state: **COMPLETE**
 - next canonical roadmap step: **SWAP-AUDIT-3 — permissionless pool lifecycle hardening**
 
+### SWAP-AUDIT-3 retained Level 1 + market-formation Level 2 evidence
+
+- roadmap step: **SWAP-AUDIT-3 — permissionless pool lifecycle hardening**
+- qualification level: **Level 1 — per-roadmap-step fast qualification**, plus **Level 2 — market-formation app integration milestone**
+- canonical decision: **ANYONE MAY DEPLOY EXTERNALLY; PermissionlessDEXFactory IS REGISTRATION_ONLY**
+- implementation SHA: `9e84b2820ba755279c865a1d927ba4011c30ac5e`
+- current `main` at qualification closeout: `646555a2e7a52c3fc9e2e6d4adb078474ffd769e`
+- audit PR / branch: **#455** / `audit/420swap-complete-20261001`
+- authoritative successful workflow: **420Swap Audit Qualification**, PR run **36929040518**
+- contract job **110594033574**: static verification PASS; targeted build PASS; Genesis DEX factory PASS; Permissionless DEX factory PASS; canonical pool PASS; Swap integration PASS; fuzz PASS; invariant PASS; Pay/Swap integration PASS
+- user-surface job **110594033903**: `npm run check` PASS; Node tests PASS; qualification build PASS
+- permissionless lifecycle coverage: exact pair introspection, caller-supplied codehash spoof rejection, non-introspectable pool rejection, duplicate pool-ID rejection, duplicate pool-address rejection, distinct same-pair pool acceptance, pause/system-safety fail-closed behavior, resident lifecycle rejection, invalid identifiers/tokens/non-code pools, and non-governance permissionless caller registration
+- configuration/UX reconciliation: frozen `creation: ANYONE` preserved; explicit `DEPLOY_EXTERNALLY_THEN_REGISTER_EXISTING_POOL` lifecycle recorded; warning now distinguishes user deployment/registration from protocol endorsement
+- Level 2 milestone: **PASS on the same exact implementation SHA**; SWAP-AUDIT-2 Genesis registration lifecycle and SWAP-AUDIT-3 permissionless lifecycle now converge under the retained full Swap app suite without duplicating CI
+- Level 3: **intentionally deferred** to complete app-phase closeout; current-main reconciliation and repository-wide canonical Solidity/Genesis/global qualification are not required for this ordinary milestone
+- blockers for this step: **none**
+- completion state: **COMPLETE**
+- next canonical roadmap step: **SWAP-AUDIT-4 — TWAP/oracle production hardening**
+
 Exact-final-head comprehensive Level 3 results remain intentionally deferred until complete app-phase closeout.
 
 ## Security classification
@@ -301,7 +335,7 @@ The source tree is substantially implemented, but repository deployment records 
 | canonical liquidity execution | Swap/Exchange architecture | executor + production candidate pool | pool/integration/fuzz/invariant | yes | COMPLETE | retain |
 | canonical market identity | Swap architecture | CanonicalMarketRegistry | integration | yes | COMPLETE | retain |
 | approved quote assets | market-tier/shared interface authority | ApprovedQuoteAssetRegistry | indirect/integration | yes | COMPLETE | retain/add direct negatives later |
-| canonical vs permissionless tiers | market-tiers config | Genesis tier registration-only semantics frozen; permissionless tier still pending lifecycle hardening | factory + integration coverage | yes | PARTIAL | complete SWAP-AUDIT-3 permissionless lifecycle hardening |
+| canonical vs permissionless tiers | market-tiers config | Genesis and permissionless registration-only lifecycles frozen; permissionless deployment remains user-managed and noncanonical | dedicated factory + integration/fuzz/invariant coverage | yes | COMPLETE | retain; live deployment qualification remains later |
 | production pool | Exchange V4 | CanonicalConstantProductPool420 | dedicated suite | yes | COMPLETE for V1 | retain |
 | obsolete scaffold removed | repository consistency | removed in audit | verifier enforces absence | docs updated | COMPLETE | retain |
 | native $420 user path | Genesis purpose + Exchange architecture | handled above pool via wrapped/native Exchange path | Exchange tests | yes | PARTIAL | live end-to-end qualification |
@@ -333,7 +367,7 @@ The source tree is substantially implemented, but repository deployment records 
 9. Froze `GenesisDEXFactory` as registration-only canonical semantics without inventing an unauthorized CREATE/CREATE2 path.
 10. Added `SwapGenesisDEXFactory420.t.sol` covering registration mode, invalid/duplicate pools, pause/system-safety fail-closed behavior, governance authorization, timelock caller enforcement and implementation-reference controls.
 11. Extended the Swap verifier to require registration-only factory semantics and the dedicated factory test suite.
-12. Removed the unnecessary `--force` cold rebuild from app-scoped Swap qualification in accordance with phase qualification policy.
+12. Removed the unnecessary `--force` cold rebuild from app-scoped Swap qualification in accordance with phase qualification policy.\n13. Hardened `PermissionlessDEXFactory` as explicit registration-only market formation with pool pair introspection, exact runtime-codehash provenance, reverse pool-address uniqueness and immutable registration records.\n14. Added `SwapPermissionlessDEXFactory420.t.sol` covering pair/codehash spoofing, non-introspectable pools, duplicate IDs/addresses, same-pair variants, pause/safety/lifecycle rejection, invalid inputs and true permissionless callers.\n15. Reconciled permissionless market-tier and dApp UX configuration to preserve `creation: ANYONE` while explicitly defining external deployment followed by existing-pool registration.\n16. Extended the Swap verifier and dedicated CI to retain permissionless lifecycle qualification.
 
 ## Outstanding remediation roadmap
 
@@ -345,8 +379,8 @@ The remaining work must preserve these step identities and dependency order:
 2. **SWAP-AUDIT-2 — GenesisDEXFactory production semantics — COMPLETE**  
    Canonical repository authority resolves the factory as registration-only. The contract, verifier, tests and developer documentation now make that lifecycle explicit and qualified.
 
-3. **SWAP-AUDIT-3 — permissionless pool lifecycle hardening**  
-   Reconcile “create/register” UX and contract semantics; add adversarial pair/codehash/duplicate/lifecycle coverage.
+3. **SWAP-AUDIT-3 — permissionless pool lifecycle hardening — COMPLETE**  
+   Permissionless market formation is now explicitly external-deploy + registration-only. Pair/codehash provenance, duplicate ID/address handling, component lifecycle/safety failure paths and user-facing terminology are hardened and qualified.
 
 4. **SWAP-AUDIT-4 — TWAP/oracle production hardening**  
    Define the authoritative observation source, freshness/window semantics, manipulation resistance, publication authority, stale behavior and Exchange guard integration; add direct tests.
@@ -370,10 +404,10 @@ The remaining work must preserve these step identities and dependency order:
 
 At repository-remediation stage:
 
-- CODE COMPLETE: **NO** — permissionless lifecycle, batch-auction and oracle completion work remains.
+- CODE COMPLETE: **NO** — batch-auction and oracle completion work remains.
 - BUILD COMPLETE: **YES for source tree on repository CI; final audit workflow must close on exact final SHA.**
-- CONTRACT COMPLETE: **NO** — unresolved PermissionlessDEXFactory lifecycle, PublicBatchAuction and TWAP production semantics remain.
-- TEST COMPLETE: **NO** — those unresolved components lack final adversarial/economic qualification.
+- CONTRACT COMPLETE: **NO** — unresolved PublicBatchAuction and TWAP production semantics remain.
+- TEST COMPLETE: **NO** — PublicBatchAuction and TWAP still lack final adversarial/economic qualification.
 - DOCUMENTATION COMPLETE: **NO** — deployment/operator/Genesis acceptance records remain.
 - INTEGRATION COMPLETE: **NO** — live Pay/Registry/Wallet/Exchange bindings remain unverified.
 - SECURITY QUALIFIED: **NO** — internal hardening is not the required external release gate and unresolved components remain.
@@ -387,6 +421,6 @@ At repository-remediation stage:
 
 The production-candidate ERC20/ERC20 liquidity path, canonical executor, core registries and composed Exchange user surface are real and testable. The audit repaired the stale scaffold/inventory/verification state instead of treating old metadata as truth.
 
-The remaining blockers are substantive: permissionless lifecycle hardening, TWAP oracle and public batch auction completion; absent retained predeploy artifacts/materialized state; unverified live Pay→Swap bindings; and production-equivalent testnet plus external security qualification.
+The remaining blockers are substantive: TWAP oracle and public batch auction completion; absent retained predeploy artifacts/materialized state; unverified live Pay→Swap bindings; and production-equivalent testnet plus external security qualification.
 
 Do not mark 420Swap complete solely because the core Swap and Exchange tests are green.

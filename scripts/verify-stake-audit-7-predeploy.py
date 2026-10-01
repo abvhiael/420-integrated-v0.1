@@ -152,7 +152,10 @@ def main():
     registry_addr=str(addresses.get("validatorRegistry","")).lower()
 
     def packed_address_bool(value,bound=True):
-        return "0x"+("00"*11)+("01" if bound else "00")+("00"*12)+value[2:]
+        # Solidity packs address at offset 0 (low 20 bytes) and bool at offset 20.
+        # In a big-endian 32-byte RPC word that is 11 high zero bytes, one flag
+        # byte, then the 20-byte address.
+        return "0x"+("00"*11)+("01" if bound else "00")+value[2:]
     if reward.get("storage",{}).get("0x"+"00"*32)!=packed_address_bool(caller):
         fail("RewardController consensus caller/bound storage drift")
     if registry.get("storage",{}).get("0x"+"00"*32)!=packed_address_bool(caller):

@@ -191,6 +191,8 @@ A user can inspect and vote on canonical Governance state through 420 Wallet wit
 
 ## GOV-AUDIT-6 — deployment, artifacts, discovery and initialization
 
+**Status: COMPLETE — qualified at implementation SHA `ce294990581aac97fc005ed3400be077eb8bc7a0`; evidence: `docs/audit/GOV-AUDIT-6-QUALIFICATION.md`.**
+
 ### Purpose
 Turn the source-complete Civic family into a reproducible deployable Genesis candidate.
 

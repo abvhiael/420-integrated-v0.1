@@ -32,6 +32,8 @@ on:
       - "contracts/config/security/toolchain.json"
       - "scripts/generate-swap-audit-6-predeploy.py"
       - "scripts/verify-swap-audit-6-predeploy.py"
+      - "docs/apps/swap/deployment-operations.md"
+      - "docs/audit/420SWAP-REPOSITORY-AUDIT-20261001.md"
       - ".github/workflows/swap-audit-6.yml"
   workflow_dispatch:
 

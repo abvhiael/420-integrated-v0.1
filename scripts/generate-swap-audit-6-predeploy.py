@@ -155,6 +155,16 @@ def artifact_record(name: str, rel_source: str, address: str | None, compiler: d
     refs = deployed.get("immutableReferences", {})
     layout = raw.get("storageLayout")
     if not isinstance(layout, dict) or not isinstance(layout.get("storage"), list):
+        try:
+            inspected = subprocess.check_output(
+                ["forge", "inspect", f"src/{rel_source}:{name}", "storage-layout", "--json"],
+                cwd=CONTRACTS,
+                text=True,
+            ).strip()
+            layout = json.loads(inspected)
+        except (subprocess.CalledProcessError, json.JSONDecodeError) as exc:
+            fail(f"{name} compiler storage-layout inspection failed: {exc}")
+    if not isinstance(layout, dict) or not isinstance(layout.get("storage"), list):
         fail(f"{name} missing compiler storageLayout")
     source = source_path(rel_source)
     record = {
@@ -181,11 +191,22 @@ def artifact_record(name: str, rel_source: str, address: str | None, compiler: d
 
 def immutable_name_map() -> dict[str, str]:
     result: dict[str, str] = {}
-    for name in ["SystemAccess", "GenesisResidentAccess420"]:
+    parents = [
+        ("SystemAccess", "src/system/SystemAccess.sol:SystemAccess"),
+        ("GenesisResidentAccess420", "src/system/GenesisResidentAccess420.sol:GenesisResidentAccess420"),
+    ]
+    for name, target in parents:
         raw = load_raw(name)
         ast = raw.get("ast")
         if not isinstance(ast, dict):
-            continue
+            try:
+                ast = json.loads(subprocess.check_output(
+                    ["forge", "inspect", target, "ast", "--json"],
+                    cwd=CONTRACTS,
+                    text=True,
+                ).strip())
+            except (subprocess.CalledProcessError, json.JSONDecodeError):
+                ast = {}
         stack = [ast]
         while stack:
             node = stack.pop()

@@ -214,7 +214,7 @@ Live testnet Wallet/Identity operation remains ID-AUDIT-9 scope.
 
 ## Exact-head qualification evidence
 
-Pending.
+Qualification trigger branch created from implementation SHA `07d176d7d102434d202b6879675dc9060ff0c69a`. This branch differs only by this evidence note and is used solely to obtain pull-request-triggered exact-head CI for the identical executable tree.
 
 ## Completion state
 

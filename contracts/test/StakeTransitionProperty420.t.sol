@@ -107,6 +107,12 @@ contract StakeTransitionProperty420Test is Test {
     }
 
     function _prepareEdge(Fixture memory f, ValidatorRegistry.Status source, ValidatorRegistry.Status target) internal {
+        if (source == ValidatorRegistry.Status.PROBATION && target == ValidatorRegistry.Status.ELIGIBLE) {
+            ValidatorRegistry.Validator memory v = f.registry.getValidator(f.id);
+            uint256 activationBlock = uint256(v.registrationBlock) + f.registry.ACTIVATION_DELAY_BLOCKS();
+            if (block.number < activationBlock) vm.roll(activationBlock);
+        }
+
         if (target == ValidatorRegistry.Status.WITHDRAWAL_HOLD && source != ValidatorRegistry.Status.WITHDRAWAL_HOLD) {
             ValidatorRegistry.Validator memory v = f.registry.getValidator(f.id);
             if (v.status == ValidatorRegistry.Status.EXITED || v.status == ValidatorRegistry.Status.WITHDRAWABLE) return;

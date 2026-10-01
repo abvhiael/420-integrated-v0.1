@@ -125,6 +125,7 @@ contract GovernanceAudit420Test {
             address(constitution), address(proposals), address(electorates), address(wrongVoting)
         );
     }
+
     function testCivicProposalCancellationIsRejectedFromEveryLiveState() public {
         CivicProposalRegistry420 proposals = new CivicProposalRegistry420(address(this));
         proposals.bindProposalAuthority(address(this));

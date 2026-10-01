@@ -108,6 +108,7 @@ contract ComputeScientificVerificationRouter420 {
         ComputeJobRegistry420.Job memory j = jobs.job(jobId);
         if (
             j.status != ComputeJobRegistry420.Status.ACCEPTED || j.worker != address(0)
+                || j.owner == samplingAuthority
                 || j.verificationPolicyId == bytes32(0)
                 || j.verificationPolicyRevision == 0
                 || j.verificationPolicyCommitment == bytes32(0)
@@ -197,6 +198,7 @@ contract ComputeScientificVerificationRouter420 {
             workerEvidence.getAssignment(j.assignmentRef);
         if (
             !a.exists || a.jobId != jobId || a.worker != j.worker
+                || a.worker == samplingAuthority
                 || a.resultCommitment != j.resultCommitment
                 || a.outputHash == bytes32(0) || a.receiptHash == bytes32(0)
         ) revert InvalidEvidence();

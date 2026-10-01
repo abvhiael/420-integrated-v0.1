@@ -3,5 +3,6 @@
   "errors": [],
   "shared_interface_v1": true,
   "genesis_dex_factory_semantics": "REGISTRATION_ONLY",
-  "production_pool_execution": "PRODUCTION_CANDIDATE_PRESENT"
+  "production_pool_execution": "PRODUCTION_CANDIDATE_PRESENT",
+  "permissionless_pool_lifecycle": "DEPLOY_EXTERNALLY_THEN_PERMISSIONLESS_REGISTER"
 }

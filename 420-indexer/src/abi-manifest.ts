@@ -188,6 +188,7 @@ export const NAMES420_ADDRESS_420 = '0x0000000000000000000000000000000000000435'
 export const NAMES420_SOURCE_BLOB_SHA1_420 = '4cb9b06b4a3febb3bf024c087f3ade1eebdcf31d';
 export const NAMES420_ARTIFACT_PAYLOAD_SHA256_420 = 'c40970d3a04503309f9467eaca00c915f5ce3dd1e993c2df3318aa6cd149ab2c';
 export const NAMES420_RUNTIME_CODE_HASH_420 = '0xa974fffd3a40e7f28db41e4ae30656b33789d2483b18b47c809ce2385de709b7';
+export const NAMES420_DESCRIPTOR_SHA256_420 = '74602adfdde367c82fcefcd35a89a5b0e415e92721289cca9e827be32299b3be';
 
 export interface Names420ReleaseDescriptorEvent420 extends AbiEvent420 {
   signature: string;
@@ -247,7 +248,8 @@ export function descriptorsFromNames420Release420(
       manifest.artifact.runtimeCodeHash.toLowerCase() !== NAMES420_RUNTIME_CODE_HASH_420) {
     throw new Error('Names420 release descriptor artifact drift');
   }
-  if (names420DescriptorDigest420(manifest) !== manifest.descriptorSha256) {
+  const digest = names420DescriptorDigest420(manifest);
+  if (digest !== manifest.descriptorSha256 || digest !== NAMES420_DESCRIPTOR_SHA256_420) {
     throw new Error('Names420 release descriptor hash drift');
   }
 

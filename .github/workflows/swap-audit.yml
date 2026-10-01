@@ -24,7 +24,10 @@ on:
     branches: [main]
     paths:
       - "contracts/src/swap/**"
+      - "contracts/src/oracle/TWAPOracleSourceAdapter420.sol"
+      - "contracts/src/exchange/ExchangeOracleGuard420.sol"
       - "contracts/test/Swap*.t.sol"
+      - "contracts/test/ExchangeOracleGuard420*.t.sol"
       - "contracts/test/CanonicalConstantProductPool420.t.sol"
       - "contracts/test/PaySwap*.t.sol"
       - "contracts/config/swap/**"

@@ -21,6 +21,8 @@ contract ComputeReplicatedVerification420 {
         keccak256("420/COMPUTE/REPLICATED_VERIFICATION/PARTIES/V1");
     bytes32 public constant MEMBER_SET_DOMAIN =
         keccak256("420/COMPUTE/REPLICATED_VERIFICATION/MEMBERS/V1");
+    bytes32 public constant ACCEPTED_CONTEXT_DOMAIN =
+        keccak256("420/COMPUTE/REPLICATED_VERIFICATION/ACCEPTED_CONTEXT/V1");
     uint16 public constant MAX_COMMITTEE = 16;
 
     struct Committee {
@@ -189,12 +191,9 @@ contract ComputeReplicatedVerification420 {
             )
         );
 
-        committeeRef = keccak256(
+        bytes32 acceptedContextHash = keccak256(
             abi.encode(
-                COMMITTEE_DOMAIN,
-                block.chainid,
-                address(this),
-                jobId,
+                ACCEPTED_CONTEXT_DOMAIN,
                 ctx.jobRevision,
                 ctx.workloadClass,
                 profileId,
@@ -202,10 +201,19 @@ contract ComputeReplicatedVerification420 {
                 ctx.verificationPolicyRevision,
                 ctx.verificationPolicyCommitment,
                 selectionEvidenceHash,
-                partySetHash,
-                memberSetHash,
                 threshold,
                 validUntil
+            )
+        );
+        committeeRef = keccak256(
+            abi.encode(
+                COMMITTEE_DOMAIN,
+                block.chainid,
+                address(this),
+                jobId,
+                acceptedContextHash,
+                partySetHash,
+                memberSetHash
             )
         );
 

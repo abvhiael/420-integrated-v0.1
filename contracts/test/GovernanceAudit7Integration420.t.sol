@@ -10,8 +10,12 @@ import "../src/vault/VaultPolicyRegistry420.sol";
 import "../src/vault/VaultIds420.sol";
 
 interface VmGovernanceAudit7 {
-    function warp(uint256) external;
-    function roll(uint256) external;
+    function warp(
+        uint256
+    ) external;
+    function roll(
+        uint256
+    ) external;
 }
 
 contract GovernanceAudit7Integration420Test {
@@ -25,7 +29,10 @@ contract GovernanceAudit7Integration420Test {
         timelock = new GovernanceTimelock(address(this));
     }
 
-    function _execute(address target, bytes memory data) private {
+    function _execute(
+        address target,
+        bytes memory data
+    ) private {
         bytes32 id = keccak256(abi.encode("GOV-AUDIT-7", ++nonce, target, data));
         timelock.schedule(id, target, 0, data, GovernanceTimelock.Class.G1);
         vm.warp(block.timestamp + timelock.G1_DELAY() + 1);
@@ -42,14 +49,19 @@ contract GovernanceAudit7Integration420Test {
         require(vaultPolicy.governanceTimelock() == address(timelock), "vault timelock");
 
         address asset = address(0xCAFE);
-        (bool directTreasury,) = address(treasuryPolicy).call(
-            abi.encodeCall(TreasuryPolicyRegistry420.setAssetPolicy, (asset, true, uint128(100), uint128(1000), uint64(1 days)))
-        );
+        (bool directTreasury,) = address(treasuryPolicy)
+            .call(
+                abi.encodeCall(
+                    TreasuryPolicyRegistry420.setAssetPolicy, (asset, true, uint128(100), uint128(1000), uint64(1 days))
+                )
+            );
         require(!directTreasury, "direct Treasury governance mutation accepted");
 
         _execute(
             address(treasuryPolicy),
-            abi.encodeCall(TreasuryPolicyRegistry420.setAssetPolicy, (asset, true, uint128(100), uint128(1000), uint64(1 days)))
+            abi.encodeCall(
+                TreasuryPolicyRegistry420.setAssetPolicy, (asset, true, uint128(100), uint128(1000), uint64(1 days))
+            )
         );
         require(treasuryPolicy.isAllowed(asset, 100), "Treasury policy not applied by Timelock");
 
@@ -61,19 +73,40 @@ contract GovernanceAudit7Integration420Test {
         uint64 validFrom = uint64(block.timestamp);
         uint64 validUntil = uint64(block.timestamp + 100 days);
 
-        (bool directBudget,) = address(budgets).call(
-            abi.encodeCall(
-                TreasuryBudgetRegistry420.createBudget,
-                (budgetId, vaultId, category, asset, uint128(100), validFrom, validUntil, civicActionHash, metadataHash)
-            )
-        );
+        (bool directBudget,) = address(budgets)
+            .call(
+                abi.encodeCall(
+                    TreasuryBudgetRegistry420.createBudget,
+                    (
+                        budgetId,
+                        vaultId,
+                        category,
+                        asset,
+                        uint128(100),
+                        validFrom,
+                        validUntil,
+                        civicActionHash,
+                        metadataHash
+                    )
+                )
+            );
         require(!directBudget, "direct budget creation accepted");
 
         _execute(
             address(budgets),
             abi.encodeCall(
                 TreasuryBudgetRegistry420.createBudget,
-                (budgetId, vaultId, category, asset, uint128(100), validFrom, validUntil, civicActionHash, metadataHash)
+                (
+                    budgetId,
+                    vaultId,
+                    category,
+                    asset,
+                    uint128(100),
+                    validFrom,
+                    validUntil,
+                    civicActionHash,
+                    metadataHash
+                )
             )
         );
         TreasuryBudgetRegistry420.Budget memory budget = budgets.budget(budgetId);
@@ -84,12 +117,13 @@ contract GovernanceAudit7Integration420Test {
         bytes32 semanticsHash = keccak256("GOV7-VAULT-SEMANTICS");
         bytes32 vaultMetadata = keccak256("GOV7-VAULT-METADATA");
 
-        (bool directVault,) = address(vaultPolicy).call(
-            abi.encodeCall(
-                VaultPolicyRegistry420.setPolicy,
-                (policyId, VaultIds420.POLICY_AUTHORIZATION, semanticsHash, vaultMetadata, true)
-            )
-        );
+        (bool directVault,) = address(vaultPolicy)
+            .call(
+                abi.encodeCall(
+                    VaultPolicyRegistry420.setPolicy,
+                    (policyId, VaultIds420.POLICY_AUTHORIZATION, semanticsHash, vaultMetadata, true)
+                )
+            );
         require(!directVault, "direct Vault policy mutation accepted");
 
         _execute(
@@ -110,10 +144,7 @@ contract GovernanceAudit7Integration420Test {
 
         require(stakeRegistry.governanceTimelock() == address(timelock), "Stake timelock");
         require(source.governanceTimelock() == address(timelock), "electorate timelock");
-        require(
-            source.sourceType() == keccak256("420CIVIC_VALIDATOR_EQUAL_WEIGHT_MERKLE_V1"),
-            "validator source type"
-        );
+        require(source.sourceType() == keccak256("420CIVIC_VALIDATOR_EQUAL_WEIGHT_MERKLE_V1"), "validator source type");
 
         address validatorOwner = address(0xBEEF);
         bytes32 root = keccak256(abi.encode(validatorOwner));
@@ -131,6 +162,9 @@ contract GovernanceAudit7Integration420Test {
 
         // The canonical voting adapter has no ValidatorRegistry/Stake balance input. Membership is
         // committed in the electorate root and every valid member receives exactly one vote.
-        require(stakeRegistry.EFFECTIVE_BOND() > 1, "fixture confirms Stake has economic weight distinct from Civic vote weight");
+        require(
+            stakeRegistry.EFFECTIVE_BOND() > 1,
+            "fixture confirms Stake has economic weight distinct from Civic vote weight"
+        );
     }
 }

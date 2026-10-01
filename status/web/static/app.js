@@ -20,11 +20,11 @@ function renderComponents(items){
     const c=s.Component||{};
     const health=stateClass(s.Health);
     const fresh=Number(s.FreshSources||0),stale=Number(s.StaleSources||0);
-    const sourceText=fresh?fresh+' fresh source'+(fresh===1?'':'s'):(stale?stale+' stale source'+(stale===1?'':'s'):'no fresh evidence');
+    const sourceText='freshness: '+(fresh?fresh+' fresh source'+(fresh===1?'':'s'):(stale?stale+' stale source'+(stale===1?'':'s'):'no fresh evidence'));
     return '<article class="component-card '+health+'">'+
       '<div class="card-top"><div><h3>'+esc(c.Name||c.ID||'Component')+'</h3><div class="component-class">'+esc(c.Class||'service')+'</div></div><span class="status-pill">'+esc(label(health))+'</span></div>'+
       '<p class="reason">'+esc(s.Reason||'No additional status detail.')+'</p>'+
-      '<div class="metrics">'+metric(s.Live?'live':'not live')+metric(s.Ready?'ready':'not ready')+metric(sourceText)+(s.Conflicting?metric('conflicting evidence'):'')+'</div></article>';
+      '<div class="metrics">'+metric(s.Live?'live':'not live')+metric(s.Ready?'ready':'not ready')+metric(sourceText)+(s.Conflicting?metric('conflicting observations'):'')+'</div></article>';
   }).join('')||'<p class="empty">No public components are currently reported.</p>';
   const healthy=list.filter(x=>stateClass(x.Health)==='healthy').length;
   $('component-summary').textContent=list.length?healthy+' of '+list.length+' healthy':'No components reported';

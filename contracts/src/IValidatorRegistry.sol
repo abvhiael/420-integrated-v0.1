@@ -62,6 +62,28 @@ interface IValidatorRegistry {
     function replaceProtocolCredit(bytes32 validatorId) external payable;
     function withdrawBond(bytes32 validatorId) external returns (uint256 ownedAmount, uint256 recycledCredit);
 
+    // Consensus-owned mutations are part of the canonical ABI even though the
+    // implementation restricts them to the immutable ConsensusSystemCall420 path.
+    function applyExitNotice(bytes32 validatorId, uint64 noticeRotation) external;
+    function applyConsensusState(
+        bytes32 validatorId,
+        Status newStatus,
+        uint64 effectiveSlot,
+        uint64 activationRotation,
+        uint64 scheduledExitRotation,
+        uint64 cooldownUntilRotation
+    ) external;
+    function applySlash(
+        bytes32 validatorId,
+        SlashOffense offense,
+        uint8 correlationTier,
+        uint256 ownedSlashed,
+        uint256 creditSlashed,
+        bytes32 evidenceHash,
+        Status resultingStatus
+    ) external;
+    function applyRotationSnapshot(uint64 rotation, uint256 eligibleSnapshot) external;
+
     function getValidator(bytes32 validatorId) external view returns (Validator memory);
     function effectiveBond(bytes32 validatorId) external view returns (uint256);
     function custodyInvariant() external view returns (bool);

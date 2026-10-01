@@ -122,7 +122,7 @@ export function validateNamesOfficialTestnetManifest420(manifest: NamesOfficialM
   if (!manifest || typeof manifest !== 'object') fail('official testnet manifest missing');
   if (manifest.schemaVersion !== '1.0.0') fail('unsupported official testnet manifest schema');
   if (manifest.network?.environment !== 'testnet') fail('NAMES-AUDIT-9 requires environment=testnet');
-  positiveDecimal(manifest.network?.chainId, 'manifest chainId');
+  positiveDecimal(manifest.network.chainId, 'manifest chainId');
   if (!Array.isArray(manifest.rpc?.http) || manifest.rpc.http.length === 0) fail('official testnet manifest requires RPC');
   manifest.rpc.http.forEach((url, i) => requireHttps(url, 'RPC[' + i + ']'));
   if (!manifest.services?.indexer) fail('official testnet manifest requires Indexer service');

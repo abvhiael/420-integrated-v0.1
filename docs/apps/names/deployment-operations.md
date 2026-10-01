@@ -32,6 +32,8 @@ It does **not** claim a live testnet or production deployment. Production-equiva
 | Source blob SHA-1 | `4cb9b06b4a3febb3bf024c087f3ade1eebdcf31d` |
 | Artifact payload SHA-256 | `c40970d3a04503309f9467eaca00c915f5ce3dd1e993c2df3318aa6cd149ab2c` |
 | Indexer descriptor SHA-256 | `74602adfdde367c82fcefcd35a89a5b0e415e92721289cca9e827be32299b3be` |
+| Commitment reveal window | minimum 60-second age; maximum 24-hour age |
+| Registration / renewal duration per operation | between 30 and 365 days |
 
 The historical `0x0000000000000000000000000000000000000445` Names proposal is retired and must never be used as an active deployment address.
 

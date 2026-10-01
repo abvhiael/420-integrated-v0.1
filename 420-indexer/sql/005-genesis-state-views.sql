@@ -6,6 +6,8 @@ select
     e.fields->>'componentId',
     e.fields->>'labelHash',
     e.fields->>'profileId',
+    e.fields->>'credentialId',
+    e.fields->>'issuerId',
     e.fields->>'validatorId',
     e.fields->>'proposalId',
     e.fields->>'paymentId',
@@ -15,12 +17,37 @@ select
     e.fields->>'rightId',
     e.fields->>'assetId'
   ) as object_key,
-  coalesce(
-    e.fields->>'stateAfter',
-    e.fields->>'status',
-    e.fields->>'state',
-    e.fields->>'active'
-  ) as lifecycle_state
+  case
+    when e.protocol = '420Identity' then
+      case e.event_name
+        when 'ProfileCreated' then 'ACTIVE'
+        when 'ProfileUpdated' then
+          case lower(coalesce(e.fields->>'active',''))
+            when 'true' then 'ACTIVE'
+            when 'false' then 'INACTIVE'
+            else null
+          end
+        when 'PrimaryNameSet' then 'PRIMARY_NAME_UPDATED'
+        when 'ProfileControllerTransferStarted' then 'PENDING_CONTROLLER_TRANSFER'
+        when 'ProfileControllerTransferred' then 'CONTROLLER_TRANSFERRED'
+        when 'IssuerSet' then
+          case lower(coalesce(e.fields->>'active',''))
+            when 'true' then 'ACTIVE'
+            when 'false' then 'INACTIVE'
+            else 'ISSUER_UPDATED'
+          end
+        when 'CredentialIssued' then 'ACTIVE'
+        when 'CredentialRevoked' then 'REVOKED'
+        when 'CredentialRejected' then 'REJECTED'
+        else null
+      end
+    else coalesce(
+      e.fields->>'stateAfter',
+      e.fields->>'status',
+      e.fields->>'state',
+      e.fields->>'active'
+    )
+  end as lifecycle_state
 from idx_protocol_events e;
 
 create or replace view idx_protocol_latest_object_state as

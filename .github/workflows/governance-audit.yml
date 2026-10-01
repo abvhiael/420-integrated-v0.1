@@ -132,15 +132,15 @@ jobs:
       - name: Verify GOV-AUDIT-4 exact Civic artifacts and Indexer contract
         run: python scripts/verify-governance-audit-4.py
 
+      - name: GOV-AUDIT-6 deterministic deployment simulation
+        working-directory: contracts
+        run: forge test --match-path test/GovernanceAudit6Deployment420.t.sol -vvv
+
       - name: Run Civic contract qualification
         working-directory: contracts
         run: |
           forge test --match-path 'test/Civic*.t.sol' -vvv
           forge test --match-path 'test/Governance*.t.sol' -vvv
-
-      - name: GOV-AUDIT-6 deterministic deployment simulation
-        working-directory: contracts
-        run: forge test --match-path test/GovernanceAudit6Deployment420.t.sol -vvv
 
       - name: Governance forbidden primitive scan
         working-directory: contracts

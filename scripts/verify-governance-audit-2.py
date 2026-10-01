@@ -67,7 +67,7 @@ for needle in [
 
 for phrase in [
     "governance-authorized arbitrary target calls",
-    "no undocumented global reentrancy lock",
+    "does not add an undocumented global reentrancy lock",
     "target contracts remain responsible for their own reentrancy safety",
 ]:
     if phrase.lower() not in security.lower():

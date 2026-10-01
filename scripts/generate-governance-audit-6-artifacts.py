@@ -67,6 +67,9 @@ def artifact_record(name,source,immutable_value):
  compiler=str((metadata or {}).get("compiler",{}).get("version",""))
  if not compiler.startswith("0.8.24"): fail(name+" compiler drift")
  layout=raw.get("storageLayout",{})
+ if not isinstance(layout,dict) or not isinstance(layout.get("storage"),list):
+  inspected=run("forge","inspect",f"src/{source}:{name}","storage-layout","--json",cwd=ROOT/"contracts")
+  layout=json.loads(inspected)
  if not isinstance(layout.get("storage"),list): fail(name+" missing storage layout")
  rec={
   "schema":"420-governance-runtime-artifact-v1",
@@ -94,9 +97,9 @@ def timelock_state(rec):
  active=next((x for x in storage if x.get("label")=="civicAuthorityActivated"),None)
  if not scheduler or not active: fail("GovernanceTimelock storage layout missing scheduler/activation")
  if scheduler["slot"]!=active["slot"]: fail("unexpected Timelock packing")
- word=int(GOV420,16) << (8*int(scheduler["offset"]))
+ word=int(GOV420,16) << (8*int(str(scheduler["offset"]),0))
  # bool is false, so no active bit set
- slot="0x"+int(scheduler["slot"]).to_bytes(32,"big").hex()
+ slot="0x"+int(str(scheduler["slot"]),0).to_bytes(32,"big").hex()
  val="0x"+word.to_bytes(32,"big").hex()
  return {
   "schema":"420-governance-timelock-predeploy-state-v1","status":"GOV_AUDIT_6_PREDEPLOY_READY",

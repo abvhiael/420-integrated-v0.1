@@ -147,6 +147,11 @@ contract GovernanceAudit2Hardening420Test {
         CivicElectorateRegistry420 otherElectorates = new CivicElectorateRegistry420(address(this));
 
         vm.expectRevert(CivicProposalRegistry420.UnauthorizedAuthority.selector);
+        proposals.bindProposalAuthority(address(0));
+        vm.expectRevert(CivicElectorateRegistry420.UnauthorizedAuthority.selector);
+        electorates.bindSnapshotAuthority(address(0));
+
+        vm.expectRevert(CivicProposalRegistry420.UnauthorizedAuthority.selector);
         proposals.bindProposalAuthority(ALICE);
         vm.expectRevert(CivicElectorateRegistry420.UnauthorizedAuthority.selector);
         electorates.bindSnapshotAuthority(ALICE);
@@ -179,6 +184,10 @@ contract GovernanceAudit2Hardening420Test {
             new MockAudit2TimelockBoundGovernor420(address(foreignTimelock));
         MockAudit2TimelockBoundGovernor420 governor =
             new MockAudit2TimelockBoundGovernor420(address(timelock));
+
+        (bool zeroOk,) =
+            address(timelock).call(abi.encodeCall(timelock.activateCivicAuthority, (address(0))));
+        require(!zeroOk, "zero governor activated");
 
         (bool foreignOk,) =
             address(timelock).call(abi.encodeCall(timelock.activateCivicAuthority, (address(foreignGovernor))));

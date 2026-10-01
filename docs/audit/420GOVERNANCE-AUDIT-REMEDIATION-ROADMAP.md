@@ -83,6 +83,8 @@ Every canonical Civic state transition and authority boundary is implemented and
 
 ## GOV-AUDIT-3 — adversarial, invariant and failure-path qualification
 
+**Status: COMPLETE — qualified at implementation SHA `c2546d382f9296ea72141299693be542fc5d47c2`; evidence: `docs/audit/GOV-AUDIT-3-QUALIFICATION.md`.**
+
 ### Purpose
 Prove the contract core under hostile and boundary conditions rather than only ordinary paths.
 

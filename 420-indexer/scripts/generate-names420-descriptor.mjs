@@ -44,6 +44,8 @@ const events = artifact.abi
   })
   .sort((a,b) => a.signature.localeCompare(b.signature));
 
+if (events.length !== 7) fail('Names420 event count drift: expected 7, got ' + events.length);
+
 const required = [
   'CommitmentMade(bytes32,address,uint64)',
   'NameRegistered(bytes32,address,uint64,uint8)',

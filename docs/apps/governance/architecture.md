@@ -16,6 +16,12 @@ The legacy `Governance420` contract is retained only as a compatibility surface.
 
 Proposal rules and electorate sources are snapshotted prospectively. Later rule/source changes do not rewrite existing proposals. Execution must use the exact committed action batch after the frozen timelock delay.
 
+## Cancellation and dependency boundary
+
+Canonical Civic v1 proposals are **not cancellable** once created. ACTIVE, PASSED and QUEUED proposal states have no cancellation transition. `GovernanceTimelock.cancel` is retained only for legacy/bootstrap operations before Civic authority activation and is disabled after activation. The reserved `CANCELLED` enum value is not a canonical v1 Civic lifecycle state.
+
+The Civic core does not consume the repository-wide shared Genesis interfaces as direct proposal/voting/execution dependencies. Its runtime authority graph is the explicit Civic module graph plus `GovernanceTimelock`. Registry discovery and Genesis initialization remain deployment/integration concerns; Wallet/Indexer/Status health, fee and chain-context checks remain consumer concerns.
+
 ## Documentation rule
 
 User-facing references SHOULD say **420 Governance**. Developer and architecture documentation MAY say **420 Civic** when referring to implementation contracts. Where ambiguity is possible, use **420 Governance (420 Civic implementation)**.

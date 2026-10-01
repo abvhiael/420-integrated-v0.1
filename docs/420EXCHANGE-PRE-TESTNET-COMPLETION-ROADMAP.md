@@ -273,7 +273,7 @@ Dependencies: PRE-02 through PRE-10.
 
 ---
 
-### PRE-12 — pre-testnet release candidate, reconciliation and handoff — FINAL QUALIFICATION
+### PRE-12 — pre-testnet release candidate, reconciliation and handoff — COMPLETE
 
 Create the final offline-qualified Exchange candidate.
 
@@ -289,7 +289,7 @@ Required work:
 8. update the main Exchange status roadmap from pre-testnet engineering to live-testnet qualification;
 9. merge only after exact-head checks are green.
 
-**Exit:** implementation candidate assembled and reconciled. Final status becomes `PRE_TESTNET_ENGINEERING_COMPLETE` / `LIVE_TESTNET_QUALIFICATION_PENDING` only when the exact reconciled merge-candidate head passes the complete retained PRE-12 qualification set and PR #430 is merged.
+**Exit:** SATISFIED. Qualified implementation SHA `12a86ab021395434bafca88870f26b7d34f955c1` passed 420Exchange Web Verification #772, 420 Integrated Qualification #6128, Solidity Contracts #3525 and Genesis Address Authority #336 after reconciliation with current `main` `42c6a40cb476122f75250835c46d32e846a56881`. PRE-12 durable evidence: `docs/420EXCHANGE-PRE-12-QUALIFICATION.md`. Release state: `PRE_TESTNET_ENGINEERING_COMPLETE` / `LIVE_TESTNET_QUALIFICATION_PENDING`.
 
 At PRE-12 completion there should be **no further application architecture or missing integration service that can reasonably be built without a live network**.
 

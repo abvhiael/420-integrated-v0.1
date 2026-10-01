@@ -13,6 +13,7 @@ PLAN = ROOT / "contracts/config/predeploy/predeploy-plan.json"
 DEPLOYMENT = ROOT / "contracts/config/deployment-manifest.json"
 DESCRIPTOR = ROOT / "420-indexer/descriptors/names420-v3.json"
 SOURCE = ROOT / "contracts/src/apps/Names420.sol"
+ROADMAP = ROOT / "docs/ROADMAP.md"
 
 errors = []
 
@@ -41,6 +42,7 @@ plan = load(PLAN)
 deployment = load(DEPLOYMENT)
 descriptor = load(DESCRIPTOR)
 source = SOURCE.read_text()
+roadmap = ROADMAP.read_text()
 
 for heading in [
     "## Canonical deployment identity",
@@ -179,6 +181,16 @@ if "## Operator documentation" not in index:
     fail("Names index missing Operator documentation section")
 if "deployment-operations.md" not in index:
     fail("Names index does not link the operator runbook")
+
+for required_roadmap in [
+    "420Names — NAMES-AUDIT testnet handoff",
+    "NAMES-AUDIT-9 — production-equivalent testnet deployment qualification",
+    "0x0000000000000000000000000000000000000435",
+    "NAMES-AUDIT-10 — Genesis acceptance closeout",
+    "NAMES-AUDIT-11 — production qualification",
+]:
+    if required_roadmap not in roadmap:
+        fail(f"canonical roadmap missing Names testnet handoff item: {required_roadmap}")
 
 for rel in [
     "contracts/artifacts/Names420.json",

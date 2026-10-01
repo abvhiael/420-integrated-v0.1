@@ -22,6 +22,7 @@ contract ComputeJobMatchedWorkerEvidence420 is IComputeJobWorkerEvidence420 {
         uint64 attempt;
         bytes32 resultCommitment;
         bytes32 receiptHash;
+        bytes32 outputHash;
         bool exists;
     }
     ComputeJobRegistry420 public jobs;
@@ -98,6 +99,7 @@ contract ComputeJobMatchedWorkerEvidence420 is IComputeJobWorkerEvidence420 {
             a.resourceId, a.attempt, msg.sender, receiptHash, outputHash));
         a.resultCommitment = resultCommitment;
         a.receiptHash = receiptHash;
+        a.outputHash = outputHash;
         emit WorkerResultCommitted(jobId, ref, resultCommitment);
     }
 

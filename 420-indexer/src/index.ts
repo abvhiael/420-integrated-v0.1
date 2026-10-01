@@ -11,6 +11,7 @@ export * from './asset-projections.js';
 export * from './protocol-decoder.js';
 export * from './protocol-projections.js';
 export * from './abi-manifest.js';
+export * from './governance-descriptors.js';
 export * from './lifecycle-reducer.js';
 export * from './query-layer.js';
 export * from './query-service.js';

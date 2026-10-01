@@ -227,14 +227,14 @@ export function createStake420ManagementClient({
     const activationBlock = v.registrationBlock + 17_640n;
     const activationBlocksRemaining = currentBlock >= activationBlock ? 0n : activationBlock - currentBlock;
     const canWithdraw = status === 9 && v.withdrawableBlock !== 0n && currentBlock >= v.withdrawableBlock && v.withdrawal === actor;
-    const exitGuidance = v.exitNoticeRotation === 0n
-      ? 'No finalized voluntary-exit notice is recorded. Exit notices are consensus-owned; use qualified validator operator tooling. Wallet never calls applyExitNotice directly.'
-      : status === 4
-        ? `Exit notice recorded for rotation ${v.exitNoticeRotation}; active duty continues through scheduled rotation ${v.scheduledExitRotation}.`
-        : status === 8
-          ? `Withdrawal hold is active until block ${v.withdrawableBlock}.`
-          : status === 9
-            ? (v.withdrawal === actor ? 'Bond is withdrawable by this connected withdrawal account.' : `Bond is withdrawable only by ${v.withdrawal}.`)
+    const exitGuidance = status === 9
+      ? (v.withdrawal === actor ? 'Bond is withdrawable by this connected withdrawal account.' : `Bond is withdrawable only by ${v.withdrawal}.`)
+      : status === 8
+        ? `Withdrawal hold is active until block ${v.withdrawableBlock}.`
+        : v.exitNoticeRotation === 0n
+          ? 'No finalized voluntary-exit notice is recorded. Exit notices are consensus-owned; use qualified validator operator tooling. Wallet never calls applyExitNotice directly.'
+          : status === 4
+            ? `Exit notice recorded for rotation ${v.exitNoticeRotation}; active duty continues through scheduled rotation ${v.scheduledExitRotation}.`
             : `Exit notice recorded; canonical lifecycle status is ${STAKE_STATUS[status] || 'UNKNOWN'}.`;
 
     return Object.freeze({

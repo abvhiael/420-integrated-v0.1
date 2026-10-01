@@ -35,6 +35,7 @@ contract ComputeSampledMeanScientificAdapter420 is IComputeScientificVerificatio
     uint8 public constant OUTCOME_FAIL = 2;
     uint32 public constant REQUIRED_SAMPLES = 4;
     uint32 public constant MIN_DATASET_SIZE = 16;
+    uint32 public constant MAX_DATASET_SIZE = 2_147_483_648;
     uint32 public constant TOLERANCE_BPS = 500;
     uint32 public constant MAX_RANGE_BPS = 2500;
     uint64 public constant MAX_VALUE = 1_000_000_000;
@@ -54,6 +55,7 @@ contract ComputeSampledMeanScientificAdapter420 is IComputeScientificVerificatio
             OUTPUT_SCHEMA,
             REQUIRED_SAMPLES,
             MIN_DATASET_SIZE,
+            MAX_DATASET_SIZE,
             TOLERANCE_BPS,
             MAX_RANGE_BPS,
             MAX_VALUE
@@ -63,7 +65,10 @@ contract ComputeSampledMeanScientificAdapter420 is IComputeScientificVerificatio
     function inputCommitment(bytes32 datasetRoot, uint32 elementCount)
         public pure returns (bytes32)
     {
-        if (datasetRoot == bytes32(0) || elementCount < MIN_DATASET_SIZE) revert InvalidEvidence();
+        if (
+            datasetRoot == bytes32(0) || elementCount < MIN_DATASET_SIZE
+                || elementCount > MAX_DATASET_SIZE || !_isPowerOfTwo(elementCount)
+        ) revert InvalidEvidence();
         return keccak256(abi.encode(INPUT_DOMAIN, datasetRoot, elementCount));
     }
 
@@ -81,8 +86,11 @@ contract ComputeSampledMeanScientificAdapter420 is IComputeScientificVerificatio
     function sampleIndex(bytes32 seed, uint32 elementCount, uint8 ordinal)
         public pure returns (uint32)
     {
-        if (seed == bytes32(0) || elementCount < MIN_DATASET_SIZE || ordinal >= REQUIRED_SAMPLES)
-            revert InvalidEvidence();
+        if (
+            seed == bytes32(0) || elementCount < MIN_DATASET_SIZE
+                || elementCount > MAX_DATASET_SIZE || !_isPowerOfTwo(elementCount)
+                || ordinal >= REQUIRED_SAMPLES
+        ) revert InvalidEvidence();
 
         uint32[4] memory selected;
         for (uint8 i; i <= ordinal; ++i) {
@@ -132,6 +140,7 @@ contract ComputeSampledMeanScientificAdapter420 is IComputeScientificVerificatio
         if (
             seed == bytes32(0) || datasetRoot == bytes32(0)
                 || elementCount < MIN_DATASET_SIZE
+                || elementCount > MAX_DATASET_SIZE || !_isPowerOfTwo(elementCount)
                 || indices.length != REQUIRED_SAMPLES
                 || values.length != REQUIRED_SAMPLES
                 || proofs.length != REQUIRED_SAMPLES
@@ -146,7 +155,10 @@ contract ComputeSampledMeanScientificAdapter420 is IComputeScientificVerificatio
         for (uint8 i; i < REQUIRED_SAMPLES; ++i) {
             uint32 expectedIndex = sampleIndex(seed, elementCount, i);
             uint64 value = values[i];
-            if (indices[i] != expectedIndex || value > MAX_VALUE) revert InvalidEvidence();
+            if (
+                indices[i] != expectedIndex || value > MAX_VALUE
+                    || proofs[i].length != _proofDepth(elementCount)
+            ) revert InvalidEvidence();
             if (!_verifyLeaf(datasetRoot, expectedIndex, value, proofs[i])) revert InvalidEvidence();
             sum += uint256(value);
             if (value < minValue) minValue = value;
@@ -213,5 +225,16 @@ contract ComputeSampledMeanScientificAdapter420 is IComputeScientificVerificatio
             cursor >>= 1;
         }
         return hash == root;
+    }
+
+    function _isPowerOfTwo(uint32 value) private pure returns (bool) {
+        return value != 0 && (value & (value - 1)) == 0;
+    }
+
+    function _proofDepth(uint32 elementCount) private pure returns (uint256 depth) {
+        while (elementCount > 1) {
+            elementCount >>= 1;
+            ++depth;
+        }
     }
 }

@@ -183,9 +183,14 @@ export function validateNamesWorkflowEvidence420(workflow: NamesWorkflowEvidence
   if (!/^0x0{64}$/i.test(workflow.reverseAfterTransfer)) fail('stale reverse mapping must not remain authoritative after transfer');
 }
 
-export function validateNamesServiceEvidence420(workflow: NamesWorkflowEvidence420, services: NamesServiceEvidence420): void {
+export function validateNamesServiceEvidence420(
+  workflow: NamesWorkflowEvidence420,
+  services: NamesServiceEvidence420,
+  expectedChainId?: string,
+): void {
   const labelHash = workflow.labelHash.toLowerCase();
   if (!services.indexer?.qualified) fail('Indexer Names qualification missing');
+  if (expectedChainId && positiveDecimal(services.indexer.chainId, 'Indexer chainId') !== positiveDecimal(expectedChainId, 'expected chainId')) fail('Indexer chain ID disagrees with live chain');
   if (services.indexer.protocol !== '420Names') fail('Indexer protocol mismatch');
   if (services.indexer.labelHash.toLowerCase() !== labelHash) fail('Indexer labelHash mismatch');
   if (services.indexer.latestEventName !== 'NameTransferred') fail('Indexer latest Names lifecycle event mismatch');
@@ -216,7 +221,7 @@ export function validateNamesLiveTestnetEvidence420(
   if (!evidence.manifestPath || evidence.manifestPath.includes('local.example')) fail('evidence must reference official testnet manifest');
   validateNamesReadEvidence420(manifest, evidence.read);
   validateNamesWorkflowEvidence420(evidence.workflow);
-  validateNamesServiceEvidence420(evidence.workflow, evidence.services);
+  validateNamesServiceEvidence420(evidence.workflow, evidence.services, evidence.read.chainId);
   return structuredClone(evidence);
 }
 

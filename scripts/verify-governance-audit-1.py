@@ -24,6 +24,7 @@ architecture = (root / "docs/apps/governance/architecture.md").read_text()
 security = (root / "docs/apps/governance/security.md").read_text()
 faq = (root / "docs/apps/governance/faq.md").read_text()
 concepts = (root / "docs/apps/governance/concepts.md").read_text()
+lifecycle = (root / "420-indexer/src/lifecycle-reducer.ts").read_text()
 
 shared = layer.get("shared_interfaces", [])
 decisions = model.get("shared_interface_decisions", [])
@@ -121,6 +122,8 @@ if 'require(!civicAuthorityActivated, "civic active")' not in timelock:
     errors.append("GovernanceTimelock.cancel must fail after Civic activation")
 if "function cancel" in governor or "CivicProposalCancelled" in governor:
     errors.append("CivicGovernor420 must not expose a v1 proposal cancellation path/event")
+if "CivicProposalCancelled" in lifecycle or "ProposalCancelled" in lifecycle[lifecycle.find("protocol: '420Governance'"):lifecycle.find("protocol: '420Pay'")]:
+    errors.append("420Indexer must not synthesize a canonical Governance cancellation lifecycle")
 
 for selector in ("createProposal", "applyVote", "applyResult"):
     if f"function {selector}" not in compat:

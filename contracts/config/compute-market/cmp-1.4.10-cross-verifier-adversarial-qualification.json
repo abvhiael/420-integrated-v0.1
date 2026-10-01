@@ -163,5 +163,39 @@
     "Level 1 exact-head mechanical threat-matrix verification is green.",
     "Level 2 retained Compute adversarial/integration suite is green on the same exact implementation SHA."
   ],
-  "status": "IMPLEMENTATION_COMPLETE_QUALIFICATION_PENDING"
+  "status": "COMPLETE_LEVEL_1_AND_LEVEL_2",
+  "qualified_implementation_sha": "edeba8393ab1ec2b2b247cdb5b658a3f4b060e32",
+  "level_1_and_2_results": {
+    "compute_market_qualification": {
+      "run_number": 65,
+      "run_id": 36877413661,
+      "conclusion": "success"
+    },
+    "solidity_contracts": {
+      "run_number": 3584,
+      "run_id": 36877413569,
+      "conclusion": "success"
+    },
+    "genesis_address_authority": {
+      "run_number": 392,
+      "run_id": 36877413171,
+      "conclusion": "success"
+    },
+    "registry_audit": {
+      "run_number": 227,
+      "run_id": 36877413240,
+      "conclusion": "success"
+    },
+    "docs_qualification": {
+      "run_number": 3784,
+      "run_id": 36877413545,
+      "conclusion": "success"
+    },
+    "indexer": {
+      "run_number": 1200,
+      "run_id": 36877413248,
+      "conclusion": "success"
+    }
+  },
+  "completion_note": "Exact-head Level 1 and CMP-1.4 cross-verifier adversarial Level 2 qualification passed on edeba8393ab1ec2b2b247cdb5b658a3f4b060e32. This closeout update is evidence-only and changes no executable source, tests, workflows, dependencies, interfaces, deployment state, or substantive requirements."
 }

@@ -54,6 +54,8 @@ for needle in [
     "testFuzzLifecycleTransitionMatrix",
     "testFuzzQuorumCeilingArithmetic",
     "testFuzzApprovalCeilingArithmetic",
+    "testProposalCreationRejectsBlockNumberOverflow",
+    "testTimelockSchedulingRejectsTimestampOverflow",
 ]:
     if needle not in hardening:
         errors.append(f"missing GOV-AUDIT-2 property test: {needle}")
@@ -63,6 +65,7 @@ for needle in [
     "testExecuteQueuedBatchRejectsValueMismatch",
     "testReentrantTargetCannotReplayTimelockOperation",
     "testAtomicBatchFailureRollsBackPriorActionsAndKeepsProposalQueued",
+    "testQueueRejectsActionValueSumOverflow",
 ]:
     if needle not in execution:
         errors.append(f"missing execution boundary test: {needle}")
@@ -105,8 +108,8 @@ print(json.dumps({
     "errors": errors,
     "step": "GOV-AUDIT-2",
     "cancellation_supported": False,
-    "property_tests": 5,
-    "execution_boundary_tests": 4,
+    "property_tests": 7,
+    "execution_boundary_tests": 5,
 }, indent=2))
 
 sys.exit(0 if not errors else 2)

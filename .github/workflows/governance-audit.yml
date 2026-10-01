@@ -17,6 +17,9 @@ on:
       - 'scripts/verify-governance-audit-3.py'
       - 'scripts/verify-governance-audit-4.py'
       - 'scripts/verify-governance-audit-6.py'
+      - 'scripts/audit-genesis-address-collisions.py'
+      - 'scripts/verify-genesis-predeploy-authority.py'
+      - 'scripts/verify-genesis-canonical-addresses.py'
       - 'scripts/generate-governance-audit-6-artifacts.py'
       - 'contracts/artifacts/GovernanceTimelock.json'
       - 'contracts/artifacts/Governance420.json'
@@ -69,6 +72,9 @@ on:
       - 'scripts/verify-governance-audit-3.py'
       - 'scripts/verify-governance-audit-4.py'
       - 'scripts/verify-governance-audit-6.py'
+      - 'scripts/audit-genesis-address-collisions.py'
+      - 'scripts/verify-genesis-predeploy-authority.py'
+      - 'scripts/verify-genesis-canonical-addresses.py'
       - 'scripts/generate-governance-audit-6-artifacts.py'
       - 'contracts/artifacts/GovernanceTimelock.json'
       - 'contracts/artifacts/Governance420.json'
@@ -150,6 +156,12 @@ jobs:
           python scripts/verify-governance-audit-3.py
           python scripts/verify-governance-audit-6.py
           python scripts/verify-genesis-interface-layer.py
+
+      - name: Verify affected Genesis address and predeploy authority
+        run: |
+          python3 scripts/verify-genesis-canonical-addresses.py
+          python3 scripts/verify-genesis-predeploy-authority.py
+          python3 scripts/audit-genesis-address-collisions.py
 
       - name: Check Governance Solidity formatting
         working-directory: contracts

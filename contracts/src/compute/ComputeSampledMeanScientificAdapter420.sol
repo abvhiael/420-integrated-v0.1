@@ -41,6 +41,7 @@ contract ComputeSampledMeanScientificAdapter420 is IComputeScientificVerificatio
 
     error InvalidEvidence();
 
+    function adapterKind() external pure returns (bytes32) { return ADAPTER_KIND; }
     function workloadType() external pure returns (bytes32) { return WORKLOAD_TYPE; }
     function profileId() external pure returns (bytes32) { return PROFILE_ID; }
     function outputSchemaCommitment() external pure returns (bytes32) { return OUTPUT_SCHEMA; }

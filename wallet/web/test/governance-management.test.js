@@ -49,6 +49,7 @@ class FakeProvider{
     this.weight=overrides.weight??40n;
     this.state=overrides.state??1n;
     this.actionsHash=overrides.actionsHash??ACTIONS;
+    this.computedActionsHash=overrides.computedActionsHash??this.actionsHash;
   }
   async request(method,params=[]){
     this.calls.push({method,params});
@@ -97,7 +98,7 @@ class FakeProvider{
       return result(w(1),w(this.voted?this.weight:0),w(this.voted?1:0));
     }
     if(to===A.electorateRegistry&&sel===selector('votingWeight(bytes32,uint8,address,bytes)'))return result(w(this.weight));
-    if(to===A.governor&&sel===selector('hashActions((address,uint256,bytes)[])'))return this.actionsHash;
+    if(to===A.governor&&sel===selector('hashActions((address,uint256,bytes)[])'))return this.computedActionsHash;
     if(to===A.voting&&sel===selector('castVote(bytes32,uint8,uint8,bytes)'))return result(w(this.weight));
     throw new Error('unexpected eth_call '+to+' '+sel);
   }
@@ -184,7 +185,7 @@ test('action review requires exact on-chain commitment and flags undecodable act
   assert.equal(decoded.fullyDecoded,true);
   assert.equal(decoded.actions[0].decoded.signature,'setThing()');
 
-  p.actionsHash='0x'+'44'.repeat(32);
+  p.computedActionsHash='0x'+'44'.repeat(32);
   await assert.rejects(c.reviewActionBatch(PROPOSAL,actions,{}),/does not match proposal commitment/);
 });
 

@@ -1,5 +1,8 @@
 import {hashLimitOrder} from './limit-order-identity.js';
 
+export const DEFAULT_ORDER_PUBLICATION_GATE=Object.freeze({enabled:false,mode:'DISABLED'});
+const ALLOWED_ORDER_PUBLICATION_MODES=new Set(['PRE07_MOCK','LIVE_TESTNET_QUALIFICATION']);
+
 export class OrderPublicationClientError extends Error{
   constructor(code,message){super(message);this.name='OrderPublicationClientError';this.code=code;}
 }
@@ -25,9 +28,14 @@ async function readJson(response){
   if(!response?.headers?.get?.('content-type')?.toLowerCase().includes('application/json'))fail('UNQUALIFIED_RESPONSE','order service must return JSON');
   try{return await response.json();}catch{fail('UNQUALIFIED_RESPONSE','invalid order service JSON');}
 }
-export async function publishSignedLimitOrder({runtime,signedOrder,fetchImpl=globalThis.fetch,signal}={}){
+export function assertOrderPublicationGate(publicationGate=DEFAULT_ORDER_PUBLICATION_GATE){
+  if(publicationGate?.enabled!==true||!ALLOWED_ORDER_PUBLICATION_MODES.has(publicationGate?.mode))fail('LIVE_ORDER_PUBLICATION_DISABLED','live order publication is disabled by the independent publication gate');
+  return publicationGate;
+}
+export async function publishSignedLimitOrder({runtime,signedOrder,fetchImpl=globalThis.fetch,signal,publicationGate=DEFAULT_ORDER_PUBLICATION_GATE}={}){
   const url=endpoint(runtime);
   if(runtime?.execution?.orderPublication!=='DISABLED_PRETESTNET')fail('RUNTIME_POLICY_INVALID','pre-testnet runtime must keep live order publication disabled');
+  assertOrderPublicationGate(publicationGate);
   if(typeof fetchImpl!=='function')fail('FETCH_UNAVAILABLE','order publication transport unavailable');
   const body={
     schema:'420-exchange-order-publication-v1',

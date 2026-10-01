@@ -1,7 +1,7 @@
 {
   "schema": "420-governance-deployment-v1",
   "step": "GOV-AUDIT-6",
-  "status": "BLOCKED_CANONICAL_INITIALIZATION_INPUTS",
+  "status": "CANONICAL_INITIALIZATION_INPUTS_RESOLVED_ARTIFACTS_PENDING",
   "purpose": "Reproducible deployment, Registry discovery and initialization specification for the canonical 420 Governance / 420 Civic stack.",
   "compiler": {
     "solidity": "0.8.24",
@@ -17,7 +17,9 @@
       "name": "GovernanceTimelock",
       "address": "0x0000000000000000000000000000000000000429",
       "source": "contracts/src/governance/GovernanceTimelock.sol",
-      "constructor": ["bootstrapGovernor"],
+      "constructor": [
+        "bootstrapGovernor"
+      ],
       "runtimeArtifact": "contracts/artifacts/GovernanceTimelock.json",
       "materialization": "DIRECT_GENESIS_IMMUTABLE_AND_STORAGE_MATERIALIZATION"
     },
@@ -25,7 +27,9 @@
       "name": "Governance420",
       "address": "0x0000000000000000000000000000000000000437",
       "source": "contracts/src/governance/Governance420.sol",
-      "constructor": ["GovernanceTimelock@0x0429"],
+      "constructor": [
+        "GovernanceTimelock@0x0429"
+      ],
       "runtimeArtifact": "contracts/artifacts/Governance420.json",
       "materialization": "DIRECT_GENESIS_IMMUTABLE_AND_STORAGE_MATERIALIZATION",
       "role": "COMPATIBILITY_ONLY"
@@ -54,8 +58,15 @@
       "name": "CivicConstitution420",
       "source": "contracts/src/governance/CivicConstitution420.sol",
       "runtimeArtifact": "contracts/artifacts/CivicConstitution420.json",
-      "componentId": {"algorithm": "keccak256(utf8)", "preimage": "420/component/governance/civic-constitution/v1"},
-      "version": {"major": 1, "minor": 0, "patch": 0},
+      "componentId": {
+        "algorithm": "keccak256(utf8)",
+        "preimage": "420/component/governance/civic-constitution/v1"
+      },
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
       "lifecycle": "ACTIVE",
       "fixedAddress": null
     },
@@ -63,8 +74,15 @@
       "name": "CivicProposalRegistry420",
       "source": "contracts/src/governance/CivicProposalRegistry420.sol",
       "runtimeArtifact": "contracts/artifacts/CivicProposalRegistry420.json",
-      "componentId": {"algorithm": "keccak256(utf8)", "preimage": "420/component/governance/civic-proposal-registry/v1"},
-      "version": {"major": 1, "minor": 0, "patch": 0},
+      "componentId": {
+        "algorithm": "keccak256(utf8)",
+        "preimage": "420/component/governance/civic-proposal-registry/v1"
+      },
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
       "lifecycle": "ACTIVE",
       "fixedAddress": null
     },
@@ -72,8 +90,15 @@
       "name": "CivicElectorateRegistry420",
       "source": "contracts/src/governance/CivicElectorateRegistry420.sol",
       "runtimeArtifact": "contracts/artifacts/CivicElectorateRegistry420.json",
-      "componentId": {"algorithm": "keccak256(utf8)", "preimage": "420/component/governance/civic-electorate-registry/v1"},
-      "version": {"major": 1, "minor": 0, "patch": 0},
+      "componentId": {
+        "algorithm": "keccak256(utf8)",
+        "preimage": "420/component/governance/civic-electorate-registry/v1"
+      },
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
       "lifecycle": "ACTIVE",
       "fixedAddress": null
     },
@@ -81,8 +106,15 @@
       "name": "CivicVoting420",
       "source": "contracts/src/governance/CivicVoting420.sol",
       "runtimeArtifact": "contracts/artifacts/CivicVoting420.json",
-      "componentId": {"algorithm": "keccak256(utf8)", "preimage": "420/component/governance/civic-voting/v1"},
-      "version": {"major": 1, "minor": 0, "patch": 0},
+      "componentId": {
+        "algorithm": "keccak256(utf8)",
+        "preimage": "420/component/governance/civic-voting/v1"
+      },
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
       "lifecycle": "ACTIVE",
       "fixedAddress": null
     },
@@ -90,8 +122,15 @@
       "name": "CivicGovernor420",
       "source": "contracts/src/governance/CivicGovernor420.sol",
       "runtimeArtifact": "contracts/artifacts/CivicGovernor420.json",
-      "componentId": {"algorithm": "keccak256(utf8)", "preimage": "420/component/governance/civic-governor/v1"},
-      "version": {"major": 1, "minor": 0, "patch": 0},
+      "componentId": {
+        "algorithm": "keccak256(utf8)",
+        "preimage": "420/component/governance/civic-governor/v1"
+      },
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
       "lifecycle": "ACTIVE",
       "fixedAddress": null
     }
@@ -126,28 +165,70 @@
   ],
   "canonicalInputs": {
     "bootstrapGovernor": {
-      "value": null,
+      "value": "0x0000000000000000000000000000000000000437",
       "required": true,
-      "source": "contracts/config/predeploy/storage-init.json#bootstrap_governor",
-      "status": "UNRESOLVED_DO_NOT_INVENT"
+      "source": "config/system-addresses.json#Governance420",
+      "role": "ONE_SHOT_CANONICAL_BOOTSTRAP_SCHEDULER",
+      "status": "FROZEN"
     },
     "communityElectorateSource": {
-      "value": null,
+      "value": "DEPLOYMENT_OUTPUT:CivicMerkleElectorateSource420:COMMUNITY",
       "required": true,
-      "status": "UNRESOLVED_DO_NOT_INVENT"
+      "source": "contracts/src/governance/CivicMerkleElectorateSource420.sol",
+      "sourceTypePreimage": "420CIVIC_COMMUNITY_EQUAL_WEIGHT_MERKLE_V1",
+      "weighting": "ONE_ADDRESS_ONE_VOTE",
+      "fixedAddress": null,
+      "status": "REGISTRY_RESOLVED_DEPLOYMENT_OUTPUT"
     },
     "validatorElectorateSource": {
-      "value": null,
-      "required": "when any canonical initial rule requires validator house",
-      "status": "UNRESOLVED_DO_NOT_INVENT"
+      "value": "DEPLOYMENT_OUTPUT:CivicMerkleElectorateSource420:VALIDATOR",
+      "required": true,
+      "source": "contracts/src/governance/CivicMerkleElectorateSource420.sol",
+      "sourceTypePreimage": "420CIVIC_VALIDATOR_EQUAL_WEIGHT_MERKLE_V1",
+      "weighting": "ONE_ACTIVE_VALIDATOR_OWNER_ONE_VOTE_NOT_STAKE_WEIGHTED",
+      "fixedAddress": null,
+      "status": "REGISTRY_RESOLVED_DEPLOYMENT_OUTPUT"
     },
     "initialConstitutionalRules": {
-      "G1": null,
-      "G2": null,
-      "G3": null,
-      "G4": null,
-      "required": true,
-      "status": "UNRESOLVED_DO_NOT_INVENT"
+      "source": "contracts/src/governance/Governance420.sol#scheduleCanonicalCivicBootstrap",
+      "rotationBlocks": 17640,
+      "G1": {
+        "votingPeriodBlocks": 17640,
+        "timelockDelaySeconds": 604800,
+        "communityQuorumBps": 1000,
+        "communityApprovalBps": 5001,
+        "validatorQuorumBps": 0,
+        "validatorApprovalBps": 0,
+        "dualHouseRequired": false
+      },
+      "G2": {
+        "votingPeriodBlocks": 35280,
+        "timelockDelaySeconds": 1209600,
+        "communityQuorumBps": 2000,
+        "communityApprovalBps": 6000,
+        "validatorQuorumBps": 0,
+        "validatorApprovalBps": 0,
+        "dualHouseRequired": false
+      },
+      "G3": {
+        "votingPeriodBlocks": 35280,
+        "timelockDelaySeconds": 1209600,
+        "communityQuorumBps": 3334,
+        "communityApprovalBps": 6667,
+        "validatorQuorumBps": 3334,
+        "validatorApprovalBps": 6667,
+        "dualHouseRequired": true
+      },
+      "G4": {
+        "votingPeriodBlocks": 105840,
+        "timelockDelaySeconds": 3628800,
+        "communityQuorumBps": 5000,
+        "communityApprovalBps": 7500,
+        "validatorQuorumBps": 5000,
+        "validatorApprovalBps": 7500,
+        "dualHouseRequired": true
+      },
+      "status": "FROZEN_INITIAL_REVISION_1"
     }
   },
   "handoffInvariant": {
@@ -162,9 +243,25 @@
     "After Civic activation there is no bootstrap cancellation or authority rollback path; recovery must use canonical Civic governance.",
     "If any pre-activation verification fails, discard the candidate deployment and redeploy from the exact retained artifacts/configuration rather than patching addresses or bindings in place."
   ],
-  "blockers": [
-    "Canonical bootstrapGovernor is not frozen in repository authority.",
-    "Canonical initial COMMUNITY/VALIDATOR electorate source addresses are not frozen.",
-    "Canonical initial G1-G4 constitutional rule values are not frozen."
+  "blockers": [],
+  "bootstrapModel": {
+    "scheduler": "Governance420@0x0000000000000000000000000000000000000437",
+    "invocation": "PERMISSIONLESS_EXACT_PLAN_ONLY",
+    "arbitraryScheduling": false,
+    "retirement": "Governance420.activateCanonicalCivic verifies all bindings/rules/Registry resolutions then calls GovernanceTimelock.activateCivicAuthority; bootstrap role is thereafter retired permanently."
+  },
+  "registryResolvedElectorateSources": [
+    {
+      "name": "CivicCommunityElectorateSource420",
+      "implementation": "CivicMerkleElectorateSource420",
+      "sourceTypePreimage": "420CIVIC_COMMUNITY_EQUAL_WEIGHT_MERKLE_V1",
+      "fixedAddress": null
+    },
+    {
+      "name": "CivicValidatorElectorateSource420",
+      "implementation": "CivicMerkleElectorateSource420",
+      "sourceTypePreimage": "420CIVIC_VALIDATOR_EQUAL_WEIGHT_MERKLE_V1",
+      "fixedAddress": null
+    }
   ]
 }

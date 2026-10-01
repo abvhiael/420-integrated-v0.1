@@ -61,7 +61,7 @@ def normalize_hex(value: object) -> str:
 
 
 def canonical_abi(abi: object) -> str:
-    return json.dumps(abi, separators=(",", ":"), ensure_ascii=True)
+    return json.dumps(abi, separators=(",", ":"), ensure_ascii=True, sort_keys=True)
 
 
 def sha256_text(value: str) -> str:

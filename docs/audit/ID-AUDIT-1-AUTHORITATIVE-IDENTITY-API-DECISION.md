@@ -1,6 +1,6 @@
 # ID-AUDIT-1 — authoritative Identity API and state-model decision
 
-**Status:** IMPLEMENTED — Level 1 qualification pending exact-head CI  
+**Status:** COMPLETE — Level 1 qualified  
 **Repository:** `abvhiael/420-integrated-v0.1`  
 **Working PR:** #438  
 **Canonical roadmap:** `docs/audit/420IDENTITY-AUDIT-REMEDIATION-ROADMAP.md`
@@ -167,3 +167,52 @@ ID-AUDIT-1 is COMPLETE only when:
 10. durable qualification evidence records the implementation SHA and CI result.
 
 Level 2 app integration qualification is not required by this decision step and remains deferred to a meaningful Identity integration milestone. Level 3 global reconciliation remains deferred to ID-AUDIT-10.
+
+
+## Completion evidence
+
+**Qualification level:** Level 1 — per-roadmap-step fast qualification  
+**Qualified implementation SHA:** `eb8d0f634ad34a88a8e8adce6238d6544287d390`  
+**Base main at qualification:** `df8f639d8f43b763298c8750ef49d3e5849c597c`  
+**Audit branch:** `identity-audit-20260930`  
+**PR:** #438
+
+Exact-head retained results for the qualified implementation SHA:
+
+- Solidity Contracts run `36809939362` / run number 3486 — **SUCCESS**
+  - PR scope classification — success
+  - all 16 deterministic Foundry shards — success
+  - assigned Solidity source compilation — success
+  - deployable source size checks where applicable — success
+  - all assigned test files, including the ID-AUDIT-1 compatibility suite, — success
+- 420Docs Qualification run `36809939338` / run number 3682 — **SUCCESS**
+  - exact-head checkout/assertion — success
+  - documentation qualification — success
+- 420Registry REG-AUDIT-3 run `36809939369` / run number 63 — **SUCCESS**, auto-triggered repository workflow and not used as an ID-AUDIT-1 Level 2 gate.
+
+### Exit-criterion reconciliation
+
+| Criterion | Result |
+| --- | --- |
+| authoritative decision committed | PASS |
+| Identity420 directly implements frozen v1 | PASS |
+| frozen IIdentityCredential420 unchanged | PASS |
+| deterministic bounded subject/type lookup | PASS |
+| no arbitrary credential/issuer precedence | PASS |
+| explicit conservative assurance mapping | PASS |
+| credential history/lifecycle preserved | PASS |
+| executable compatibility tests | PASS |
+| exact-head Solidity/interface qualification | PASS |
+| durable implementation SHA and CI evidence | PASS |
+
+No Level 2 milestone is required by ID-AUDIT-1. App-specific integration milestone qualification remains deferred until a documented/material Identity integration boundary is reached.
+
+Level 3 complete app-phase reconciliation remains intentionally deferred to **ID-AUDIT-10 — phase closeout, reconciliation and retained evidence**.
+
+This section is an evidence-only repository change. It records an already-qualified implementation SHA and changes no executable code, tests, workflows, dependencies, configuration, artifacts, interfaces, deployment state or substantive requirement. Under the phase qualification model it does not recursively invalidate the Level 1 qualification above.
+
+## Completion state
+
+**ID-AUDIT-1 — COMPLETE.**
+
+The frozen Genesis credential API now has one authoritative runtime owner and one deterministic state model. The next canonical roadmap step is **ID-AUDIT-2 — contract invariant and adversarial qualification**.

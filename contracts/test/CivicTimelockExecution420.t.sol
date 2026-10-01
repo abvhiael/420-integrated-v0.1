@@ -70,6 +70,26 @@ contract MockCivicExecutionTarget420 {
     }
 }
 
+contract MockReentrantCivicExecutionTarget420 {
+    GovernanceTimelock public immutable timelock;
+    bytes32 public operationId;
+    bool public attempted;
+
+    constructor(GovernanceTimelock timelock_) {
+        timelock = timelock_;
+    }
+
+    function setOperationId(bytes32 operationId_) external {
+        operationId = operationId_;
+    }
+
+    function attemptReentry() external {
+        attempted = true;
+        (bool ok,) = address(timelock).call(abi.encodeCall(timelock.execute, (operationId)));
+        require(!ok, "reentrant timelock execution succeeded");
+    }
+}
+
 contract CivicTimelockExecution420Test {
     VmCivicExecution420 constant vm = VmCivicExecution420(address(uint160(uint256(keccak256("hevm cheat code")))));
     address constant ALICE = address(0xA11CE);
@@ -296,6 +316,84 @@ contract CivicTimelockExecution420Test {
 
         (,,,,, bool executed, bool cancelled) = s.timelock.operations(cancelProposalId);
         require(!executed && !cancelled, "cancellation batch timelock state split");
+    }
+
+    function testQueueRejectsEmptyBatchAndZeroTarget() public {
+        Stack memory s = _stack(7 days);
+
+        CivicGovernor420.Action[] memory empty = new CivicGovernor420.Action[](0);
+        bytes32 emptyProposalId = _pass(s, empty);
+        s.timelock.activateCivicAuthority(address(s.governor));
+
+        vm.expectRevert(CivicGovernor420.EmptyActionBatch.selector);
+        s.governor.queue(emptyProposalId, empty);
+
+        CivicGovernor420.Action[] memory zeroTarget = new CivicGovernor420.Action[](1);
+        zeroTarget[0] = CivicGovernor420.Action({ target: address(0), value: 0, data: "" });
+
+        vm.roll(200);
+        vm.prank(ALICE);
+        bytes32 zeroProposalId = s.governor.createProposal(
+            CivicIds420.ProposalClass.G1,
+            keccak256("zero-target metadata"),
+            keccak256(abi.encode(zeroTarget))
+        );
+        vm.roll(201);
+        vm.prank(ALICE);
+        s.voting.castVote(zeroProposalId, CivicIds420.House.COMMUNITY, CivicVoting420.Support.FOR, "");
+        vm.roll(203);
+        require(s.governor.finalize(zeroProposalId), "zero-target proposal passes");
+
+        vm.expectRevert(CivicGovernor420.InvalidAction.selector);
+        s.governor.queue(zeroProposalId, zeroTarget);
+    }
+
+    function testExecuteQueuedBatchRejectsValueMismatch() public {
+        Stack memory s = _stack(7 days);
+        CivicGovernor420.Action[] memory actions = new CivicGovernor420.Action[](1);
+        actions[0] = CivicGovernor420.Action({
+            target: address(s.target),
+            value: 1,
+            data: abi.encodeCall(s.target.setValue, (17))
+        });
+
+        bytes32 proposalId = _pass(s, actions);
+        s.timelock.activateCivicAuthority(address(s.governor));
+        s.governor.queue(proposalId, actions);
+
+        vm.prank(address(s.timelock));
+        vm.expectRevert(CivicGovernor420.ValueMismatch.selector);
+        s.governor.executeQueuedBatch(proposalId, actions);
+
+        (,,,,,,, CivicIds420.ProposalState state,) = s.proposals.proposals(proposalId);
+        require(state == CivicIds420.ProposalState.QUEUED, "value mismatch changed lifecycle");
+    }
+
+    function testReentrantTargetCannotReplayTimelockOperation() public {
+        Stack memory s = _stack(7 days);
+        MockReentrantCivicExecutionTarget420 reentrant = new MockReentrantCivicExecutionTarget420(s.timelock);
+
+        CivicGovernor420.Action[] memory actions = new CivicGovernor420.Action[](1);
+        actions[0] = CivicGovernor420.Action({
+            target: address(reentrant),
+            value: 0,
+            data: abi.encodeCall(reentrant.attemptReentry, ())
+        });
+
+        bytes32 proposalId = _pass(s, actions);
+        reentrant.setOperationId(proposalId);
+        s.timelock.activateCivicAuthority(address(s.governor));
+        s.governor.queue(proposalId, actions);
+
+        (,,, uint64 executeAfter,,,) = s.timelock.operations(proposalId);
+        vm.warp(executeAfter);
+        s.timelock.execute(proposalId);
+
+        require(reentrant.attempted(), "reentry not attempted");
+        (,,,,, bool executed, bool cancelled) = s.timelock.operations(proposalId);
+        require(executed && !cancelled, "outer operation not finalized");
+        (,,,,,,, CivicIds420.ProposalState state,) = s.proposals.proposals(proposalId);
+        require(state == CivicIds420.ProposalState.EXECUTED, "proposal not executed");
     }
 
     function testAtomicBatchFailureRollsBackPriorActionsAndKeepsProposalQueued() public {

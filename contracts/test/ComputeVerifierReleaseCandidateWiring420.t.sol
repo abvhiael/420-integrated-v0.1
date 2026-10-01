@@ -35,6 +35,10 @@ contract RCVerifierMatchMock420 is IComputeJobMatchEvidence420, IComputeAccepted
 
 contract RCVerifierDummy420 {}
 
+interface VmRCVerifier420 {
+    function prank(address) external;
+}
+
 contract ComputeVerifierReleaseCandidateWiring420Test {
     address private constant GOV = address(0x420);
     address private constant ATTESTOR = address(0x421);
@@ -114,12 +118,8 @@ contract ComputeVerifierReleaseCandidateWiring420Test {
         );
     }
 
-    interface Vm {
-        function prank(address) external;
-    }
-
     function vmPrank(address who) private {
-        Vm(address(uint160(uint256(keccak256("hevm cheat code"))))).prank(who);
+        VmRCVerifier420(address(uint160(uint256(keccak256("hevm cheat code"))))).prank(who);
     }
 
     function _hashes() private view returns (ComputeVerifierReleaseCandidateWiring420.CodeHashes memory h) {

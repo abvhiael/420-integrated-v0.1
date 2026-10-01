@@ -36,6 +36,34 @@ test('quote/order/read HTTP processes can stop and restart cleanly',async()=>{
   await cycle(createExchangeReadHttpServer(svc),async base=>assert.equal((await fetch(base+'/v13/history?kind=TRADE')).status,503));
 });
 
+
+test('browser-facing services enforce exact origin and no ambient credentials',async()=>{
+  const allowed='https://exchange.420integrated.org';
+  const quote=createQuoteHttpServer({quoteEngine:async()=>({quoteId:'q'}),allowedOrigins:[allowed]});
+  await cycle(quote,async base=>{
+    const ok=await fetch(base+'/wrong',{method:'POST',headers:{origin:allowed},body:'{}'});
+    assert.equal(ok.status,404);assert.equal(ok.headers.get('access-control-allow-origin'),allowed);
+    const evil=await fetch(base+'/wrong',{method:'POST',headers:{origin:'https://evil.example'},body:'{}'});
+    assert.equal(evil.status,403);
+    const credential=await fetch(base+'/wrong',{method:'POST',headers:{authorization:'Bearer x'},body:'{}'});
+    assert.equal(credential.status,403);
+  });
+
+  const store=createOrderPublicationStore({chainId:'0x420',settlementContract:addr(9),signatureVerifier:async()=>addr(1),withdrawalAuthorizer:async()=>true,clock:()=>1000});
+  await cycle(createOrderHttpServer({store,allowedOrigins:[allowed]}),async base=>{
+    const ok=await fetch(base+'/missing',{headers:{origin:allowed}});
+    assert.equal(ok.status,404);assert.equal(ok.headers.get('access-control-allow-origin'),allowed);
+    assert.equal((await fetch(base+'/missing',{headers:{cookie:'sid=x'}})).status,403);
+  });
+
+  const svc={health:()=>({status:'ok'}),readiness:async()=>({ready:true}),snapshot:async()=>({}),history:async()=>({records:[],nextCursor:''})};
+  await cycle(createExchangeReadHttpServer(svc,{allowedOrigins:[allowed]}),async base=>{
+    const ok=await fetch(base+'/health',{headers:{origin:allowed}});
+    assert.equal(ok.status,200);assert.equal(ok.headers.get('access-control-allow-origin'),allowed);
+    assert.equal((await fetch(base+'/health',{headers:{origin:'https://evil.example'}})).status,403);
+  });
+});
+
 test('backend components fail closed without required live deployment dependencies',async()=>{
   const {createQuoteEngine}=await import('../../quote-service/src/quote-engine.js');
   assert.throws(()=>createQuoteEngine({}),/required|invalid/i);

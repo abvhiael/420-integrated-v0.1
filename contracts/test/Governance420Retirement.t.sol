@@ -65,10 +65,10 @@ contract Governance420RetirementTest {
 
         vm.prank(ALICE);
         vm.expectRevert(SystemAccess.Unauthorized.selector);
+        legacy.bindCivicGovernor(address(governor));
+
         vm.expectRevert(Governance420.InvalidCivicGovernor.selector);
         legacy.bindCivicGovernor(address(foreignGovernor));
-
-        legacy.bindCivicGovernor(address(governor));
 
         vm.expectRevert(Governance420.InvalidCivicGovernor.selector);
         legacy.bindCivicGovernor(address(0));

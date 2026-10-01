@@ -114,7 +114,7 @@ contract ValidatorRegistry is ConsensusSystemAccess420, I420System {
     event ValidatorBondWithdrawn(bytes32 indexed validatorId, address indexed withdrawal, uint256 ownedAmount, uint256 recycledCredit);
     event ConsensusStateApplied(bytes32 indexed validatorId, Status previousStatus, Status newStatus, uint64 effectiveSlot, uint64 activationRotation, uint64 scheduledExitRotation, uint64 cooldownUntilRotation);
     event ExitNoticeApplied(bytes32 indexed validatorId, uint64 noticeRotation, uint64 exitEligibleRotation);
-    event SlashApplied(bytes32 indexed validatorId, SlashOffense offense, uint8 correlationTier, uint256 ownedSlashed, uint256 creditSlashed, bytes32 evidenceHash);
+    event SlashApplied(bytes32 indexed validatorId, SlashOffense offense, uint8 correlationTier, uint256 ownedSlashed, uint256 creditSlashed, bytes32 evidenceHash, Status resultingStatus);
     event RotationSnapshotApplied(uint64 indexed rotation, uint256 eligibleCount, uint16 candidateTarget, uint16 activeTarget);
     event ActiveTargetChanged(uint16 previousTarget, uint16 newTarget, uint64 indexed rotation, bool safetyOverride);
 
@@ -373,7 +373,7 @@ contract ValidatorRegistry is ConsensusSystemAccess420, I420System {
             _returnProtocolCredit(validatorId, creditSlashed);
         }
 
-        emit SlashApplied(validatorId, offense, correlationTier, ownedSlashed, creditSlashed, evidenceHash);
+        emit SlashApplied(validatorId, offense, correlationTier, ownedSlashed, creditSlashed, evidenceHash, resultingStatus);
     }
 
     /// @notice Withdraws operator-owned collateral and recycles all remaining protocol credit after consensus hold expires.

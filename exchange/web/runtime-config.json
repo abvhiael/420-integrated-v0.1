@@ -16,7 +16,8 @@
     "transport": "websocket-or-sse",
     "schemaMajor": 14,
     "schemaMinor": 0,
-    "marketSubjects": []
+    "marketSubjects": [],
+    "orderPublicationUrl": null
   },
   "features": {
     "markets": true,
@@ -48,6 +49,8 @@
     "endpointUrl": null
   },
   "execution": {
-    "swapSubmission": "DISABLED_PRETESTNET"
+    "swapSubmission": "DISABLED_PRETESTNET",
+    "orderSigning": "DISABLED_PRETESTNET",
+    "orderPublication": "DISABLED_PRETESTNET"
   }
 }

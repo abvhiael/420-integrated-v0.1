@@ -84,7 +84,7 @@ The production candidate pool is an implementation/deployment component, not a n
 | Component | Baseline | Audit state | Status | Notes |
 |---|---|---|---|---|
 | Swap component/action IDs | present | unchanged | COMPLETE | canonical IDs exist |
-| Genesis DEX factory | present | unchanged | PARTIAL | registry/implementation pointer exists; no pool creation path |
+| Genesis DEX factory | present | registration-only semantics frozen and tested | COMPLETE | governance registry for already-deployed canonical pools; no CREATE/CREATE2 path |
 | canonical market registry | present | unchanged | COMPLETE | canonical market/pair/pool records |
 | permissionless factory | present | unchanged | PARTIAL | registers existing pools; does not deploy them |
 | TWAP oracle | present | unchanged | PARTIAL | observation application exists; full TWAP production hardening is not demonstrated |
@@ -143,12 +143,13 @@ Quote assets must pass the shared canonical-settlement-asset boundary before app
 
 ### GenesisDEXFactory
 
-The contract is currently an authority-controlled pool registry with a mutable approved implementation pointer. Despite its name, it does not deploy pools.
+SWAP-AUDIT-2 resolves the prior ambiguity: **GenesisDEXFactory is canonically registration-only**.
 
-This is internally coherent as a registry but does not by itself satisfy a full production factory interpretation. The repository must either:
+Repository history, architecture and integration evidence define governance registration of already-deployed code-bearing pools, and no canonical source defines an on-chain CREATE/CREATE2 lifecycle. The contract now exposes `REGISTRATION_ONLY = true`, documents that `poolImplementation` is the approved deployment/provenance reference rather than a runtime-codehash equality gate, and retains one-shot governance registration under shared operational safety.
 
-1. define registration-only semantics as canonical; or
-2. implement deterministic pool deployment and initialization under a later hardening step.
+Concrete pool deployment therefore belongs to the qualified deployment process. After deployment and verification, Genesis governance registers the exact pool address here; canonical market activation remains a separate `CanonicalMarketRegistry` action.
+
+Introducing CREATE/CREATE2 semantics would add salt, initialization, provenance and upgrade policy not authorized by the frozen Swap architecture and therefore requires a future explicit canonical decision rather than inference from the contract name.
 
 ### PermissionlessDEXFactory
 
@@ -217,7 +218,26 @@ Baseline relevant suites found:
 
 Audit remediation added `.github/workflows/swap-audit.yml` to run app-scoped static verification, targeted Foundry build/tests and the Exchange web check/test/qualification build.
 
-Exact-final-head results are recorded in the final section after CI completes.
+### SWAP-AUDIT-2 retained Level 1 evidence
+
+- roadmap step: **SWAP-AUDIT-2 — GenesisDEXFactory production semantics**
+- qualification level: **Level 1 — per-roadmap-step fast qualification**
+- canonical decision: **REGISTRATION_ONLY**
+- implementation SHA: `bdfd51b13f3182a5d9e9d83ef4f1a1956b67673d`
+- current `main` at qualification closeout: `cdd5f58f20a3673bb9a81c6210be2a3019e22380`
+- audit PR / branch: **#455** / `audit/420swap-complete-20261001`
+- authoritative successful workflow: **420Swap Audit Qualification**, PR run **36927740418**
+- contract job **110589128130**: static verification PASS; targeted build PASS; Genesis DEX factory tests PASS; canonical pool PASS; Swap integration PASS; fuzz PASS; invariant PASS; Pay/Swap integration PASS
+- user-surface job **110589128277**: `npm run check` PASS; Node tests PASS; qualification build PASS
+- diagnosed non-protocol failure: prior run **36927652559** failed because the verifier matched the explanatory word `CREATE2` inside a comment; the verifier was corrected to inspect executable deployment patterns and the exact new SHA was requalified
+- security/adversarial coverage: invalid IDs, non-code pools, duplicate registration, shared pause, system-safety denial, governance denial, non-timelock mutation and invalid implementation reference all fail closed
+- Level 2: **deferred**; the natural market-formation milestone is after SWAP-AUDIT-3 when Genesis and permissionless lifecycle semantics converge
+- Level 3: **intentionally deferred** to complete app-phase closeout; no repository-wide full Foundry/Genesis/global duplication was run for this ordinary step
+- blockers for this step: **none**
+- completion state: **COMPLETE**
+- next canonical roadmap step: **SWAP-AUDIT-3 — permissionless pool lifecycle hardening**
+
+Exact-final-head comprehensive Level 3 results remain intentionally deferred until complete app-phase closeout.
 
 ## Security classification
 
@@ -257,7 +277,6 @@ Still missing or incomplete:
 - dedicated Swap deployment/operator runbook;
 - deterministic Swap predeploy materialization record;
 - generated retained Swap deployment artifacts/code hashes;
-- canonical decision on GenesisDEXFactory deploy-vs-register semantics;
 - canonical decision/implementation for PublicBatchAuction settlement economics;
 - production TWAP/oracle hardening record;
 - app-specific Genesis acceptance record after live qualification.
@@ -282,7 +301,7 @@ The source tree is substantially implemented, but repository deployment records 
 | canonical liquidity execution | Swap/Exchange architecture | executor + production candidate pool | pool/integration/fuzz/invariant | yes | COMPLETE | retain |
 | canonical market identity | Swap architecture | CanonicalMarketRegistry | integration | yes | COMPLETE | retain |
 | approved quote assets | market-tier/shared interface authority | ApprovedQuoteAssetRegistry | indirect/integration | yes | COMPLETE | retain/add direct negatives later |
-| canonical vs permissionless tiers | market-tiers config | both registries/factories | partial | yes | PARTIAL | harden creation/registration semantics |
+| canonical vs permissionless tiers | market-tiers config | Genesis tier registration-only semantics frozen; permissionless tier still pending lifecycle hardening | factory + integration coverage | yes | PARTIAL | complete SWAP-AUDIT-3 permissionless lifecycle hardening |
 | production pool | Exchange V4 | CanonicalConstantProductPool420 | dedicated suite | yes | COMPLETE for V1 | retain |
 | obsolete scaffold removed | repository consistency | removed in audit | verifier enforces absence | docs updated | COMPLETE | retain |
 | native $420 user path | Genesis purpose + Exchange architecture | handled above pool via wrapped/native Exchange path | Exchange tests | yes | PARTIAL | live end-to-end qualification |
@@ -311,16 +330,20 @@ The source tree is substantially implemented, but repository deployment records 
 6. Expanded the Genesis dApp verifier's expected Swap source inventory.
 7. Expanded Swap developer contract/address documentation.
 8. Added dedicated `420Swap Audit Qualification` CI covering targeted Foundry qualification and the Exchange user surface.
+9. Froze `GenesisDEXFactory` as registration-only canonical semantics without inventing an unauthorized CREATE/CREATE2 path.
+10. Added `SwapGenesisDEXFactory420.t.sol` covering registration mode, invalid/duplicate pools, pause/system-safety fail-closed behavior, governance authorization, timelock caller enforcement and implementation-reference controls.
+11. Extended the Swap verifier to require registration-only factory semantics and the dedicated factory test suite.
+12. Removed the unnecessary `--force` cold rebuild from app-scoped Swap qualification in accordance with phase qualification policy.
 
 ## Outstanding remediation roadmap
 
 The remaining work must preserve these step identities and dependency order:
 
-1. **SWAP-AUDIT-1 — exact-head source/build/test closeout**  
-   Close the dedicated audit workflow on one exact branch SHA and retain the result.
+1. **SWAP-AUDIT-1 — exact-head source/build/test closeout — COMPLETE**  
+   Dedicated app qualification closed green on the retained audit branch.
 
-2. **SWAP-AUDIT-2 — GenesisDEXFactory production semantics**  
-   Decide from canonical architecture whether GenesisDEXFactory is registration-only or must deploy pools. If deployment is required, implement deterministic creation, initialization provenance and tests. Do not infer this policy from the contract name alone.
+2. **SWAP-AUDIT-2 — GenesisDEXFactory production semantics — COMPLETE**  
+   Canonical repository authority resolves the factory as registration-only. The contract, verifier, tests and developer documentation now make that lifecycle explicit and qualified.
 
 3. **SWAP-AUDIT-3 — permissionless pool lifecycle hardening**  
    Reconcile “create/register” UX and contract semantics; add adversarial pair/codehash/duplicate/lifecycle coverage.
@@ -347,9 +370,9 @@ The remaining work must preserve these step identities and dependency order:
 
 At repository-remediation stage:
 
-- CODE COMPLETE: **NO** — batch-auction/oracle/factory canonical completion decisions remain.
+- CODE COMPLETE: **NO** — permissionless lifecycle, batch-auction and oracle completion work remains.
 - BUILD COMPLETE: **YES for source tree on repository CI; final audit workflow must close on exact final SHA.**
-- CONTRACT COMPLETE: **NO** — unresolved PublicBatchAuction/TWAP/factory production semantics.
+- CONTRACT COMPLETE: **NO** — unresolved PermissionlessDEXFactory lifecycle, PublicBatchAuction and TWAP production semantics remain.
 - TEST COMPLETE: **NO** — those unresolved components lack final adversarial/economic qualification.
 - DOCUMENTATION COMPLETE: **NO** — deployment/operator/Genesis acceptance records remain.
 - INTEGRATION COMPLETE: **NO** — live Pay/Registry/Wallet/Exchange bindings remain unverified.
@@ -364,6 +387,6 @@ At repository-remediation stage:
 
 The production-candidate ERC20/ERC20 liquidity path, canonical executor, core registries and composed Exchange user surface are real and testable. The audit repaired the stale scaffold/inventory/verification state instead of treating old metadata as truth.
 
-The remaining blockers are substantive: incomplete or ambiguous production semantics around the Genesis DEX factory, permissionless lifecycle, TWAP oracle and public batch auction; absent retained predeploy artifacts/materialized state; unverified live Pay→Swap bindings; and production-equivalent testnet plus external security qualification.
+The remaining blockers are substantive: permissionless lifecycle hardening, TWAP oracle and public batch auction completion; absent retained predeploy artifacts/materialized state; unverified live Pay→Swap bindings; and production-equivalent testnet plus external security qualification.
 
 Do not mark 420Swap complete solely because the core Swap and Exchange tests are green.

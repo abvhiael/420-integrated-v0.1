@@ -159,9 +159,59 @@ deferred to **ID-AUDIT-10 — phase closeout, reconciliation and retained eviden
 Live code/storage verification at `0x0436` is explicitly **not** claimed by this
 offline materialization step; that remains ID-AUDIT-9.
 
+## Materialized Genesis identity
+
+The first successful full materialization run was **420Identity ID-AUDIT-5 run `36817329087` / run number 3**.
+It qualified parent SHA `daf44fd8d4ae38ce72e43d6c79a06510e3aa46c1`, generated the final offline
+Identity predeploy state, passed all focused tests, and committed the generated Genesis outputs to
+`dc04cc89487ad528fe91f79acdeb8efa856c31b2`.
+
+Materialized values:
+
+- frozen Identity address: `0x0000000000000000000000000000000000000436`;
+- GovernanceTimelock immutable: `0x0000000000000000000000000000000000000429`;
+- source Git blob SHA-1: `9d6bbfecf6cbb406312138acc735c5390513cd5a`;
+- retained build ABI SHA-256: `5ea63254c724148eba47ee720486f41105f003602558cbd0b0a43bdc346d3a6e`;
+- deployed-bytecode-template Keccak-256: `0x3183b8b7bbbde1c6698ffc3977d118a6847aced80038caf717d1d71e21f6f270`;
+- compiler-emitted immutable references: **4**, at byte offsets 905, 1568, 1908 and 3966;
+- materialized runtime bytes: **5681**;
+- final runtime code hash: `0xda0fcd565d7aea6590b3e0ec468f7b99af50138b62527e770ca367a57e6cfd86`;
+- mutable Genesis storage: **empty**;
+- storage slot count: **0**;
+- canonical empty storage trie root: `0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421`.
+
+The generated predeploy plan now marks Identity420 `ARTIFACT_READY` with direct immutable
+materialization, and the deployment manifest retains the same frozen `0x0436` address plus runtime
+artifact/hash, state path and source provenance.
+
+### First materialization qualification
+
+Run `36817329087` completed **SUCCESS** after correcting an independent-verifier constant for the
+Ethereum empty storage trie root. No materialization rule or contract behavior was weakened.
+
+- exact-head checkout/assertion — success;
+- pinned Foundry profile — success;
+- exact Identity420 compile — success;
+- retained ID-AUDIT-4 artifact verification — success;
+- deterministic ID-AUDIT-5 generation and reproduction check — success;
+- independent ID-AUDIT-5 verifier — success;
+- adversarial materializer suite — **11 tests passed**;
+- canonical address, active collision and predeploy authority verification — success;
+- `Identity420Audit.t.sol` — **18 passed / 0 failed / 0 skipped**;
+- `Identity420Compatibility.t.sol` — **6 passed / 0 failed / 0 skipped**;
+- `RegistryIdentityNames420.t.sol` — **10 passed / 0 failed / 0 skipped**;
+- generated Genesis output commit — success.
+
+Because `dc04cc8…` changes configuration/deployment state, it cannot inherit qualification from its
+parent. GitHub marked workflow runs directly emitted from the CI-authored commit as `action_required`,
+so those are explicitly **not** treated as green evidence.
+
+This evidence update creates a normal repository-authored head containing the generated state and is used
+to trigger the required final exact-head qualification.
+
 ## Exact-head qualification evidence
 
-Pending exact-head materialization and CI.
+Pending exact-head rerun on the post-materialization repository head.
 
 ## Completion state
 

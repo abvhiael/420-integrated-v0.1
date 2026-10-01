@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
 
-import "forge-std/Test.sol";
 import "./helpers/GenesisMocks420.sol";
 import "../src/system/ValidatorRegistry.sol";
 import "../src/system/CommunityValidatorReserve.sol";
@@ -38,7 +37,16 @@ contract RevertingValidatorTarget420 {
     }
 }
 
-contract StakeRollbackAtomicity420Test is Test {
+interface VmStakeRollback420 {
+    function deal(address account, uint256 newBalance) external;
+    function prank(address msgSender) external;
+    function roll(uint256 newHeight) external;
+    function etch(address target, bytes calldata code) external;
+}
+
+contract StakeRollbackAtomicity420Test {
+    VmStakeRollback420 internal constant vm =
+        VmStakeRollback420(address(uint160(uint256(keccak256("hevm cheat code")))));
     address internal constant NATIVE_SYSTEM_ORIGIN = 0xffffFFFfFFffffffffffffffFfFFFfffFFFfFFfE;
 
     function testFuzz_ProtocolCreditReplacementRollbackOnReserveFailure(uint96 rawAmount) public {
@@ -61,22 +69,22 @@ contract StakeRollbackAtomicity420Test is Test {
         ValidatorRegistry.Validator memory beforeState = registry.getValidator(id);
         uint256 registryBalanceBefore = address(registry).balance;
         uint256 reserveBalanceBefore = address(reserve).balance;
-        uint256 amount = bound(uint256(rawAmount), 1, beforeState.protocolCredit);
+        uint256 amount = 1 + (uint256(rawAmount) % beforeState.protocolCredit);
 
         vm.prank(owner);
         (bool ok,) = address(registry).call{value: amount}(
             abi.encodeWithSelector(registry.replaceProtocolCredit.selector, id)
         );
-        assertFalse(ok, "STAKE-INV-007 replacement survived reserve failure");
+        require(!(ok), "STAKE-INV-007 replacement survived reserve failure");
 
         ValidatorRegistry.Validator memory afterState = registry.getValidator(id);
-        assertEq(afterState.ownedBond, beforeState.ownedBond, "owned bond changed on rollback");
-        assertEq(afterState.protocolCredit, beforeState.protocolCredit, "credit changed on rollback");
-        assertEq(registry.totalOwnedCustody(), beforeState.ownedBond, "owned custody changed on rollback");
-        assertEq(registry.totalProtocolCreditCustody(), beforeState.protocolCredit, "credit custody changed on rollback");
-        assertEq(address(registry).balance, registryBalanceBefore, "registry balance changed on rollback");
-        assertEq(address(reserve).balance, reserveBalanceBefore, "reserve balance changed on rollback");
-        assertTrue(registry.custodyInvariant(), "custody invariant failed after rollback");
+        require((afterState.ownedBond) == (beforeState.ownedBond), "owned bond changed on rollback");
+        require((afterState.protocolCredit) == (beforeState.protocolCredit), "credit changed on rollback");
+        require((registry.totalOwnedCustody()) == (beforeState.ownedBond), "owned custody changed on rollback");
+        require((registry.totalProtocolCreditCustody()) == (beforeState.protocolCredit), "credit custody changed on rollback");
+        require((address(registry).balance) == (registryBalanceBefore), "registry balance changed on rollback");
+        require((address(reserve).balance) == (reserveBalanceBefore), "reserve balance changed on rollback");
+        require((registry.custodyInvariant()), "custody invariant failed after rollback");
     }
 
     function testWithdrawalRollbackRestoresRegistryAndReserveWhenRecipientRejects() public {
@@ -118,18 +126,18 @@ contract StakeRollbackAtomicity420Test is Test {
         uint256 reserveFundedBefore = reserve.fundedCredit(id);
 
         bool ok = withdrawal.attemptWithdraw(registry, id);
-        assertFalse(ok, "STAKE-INV-007 withdrawal survived recipient failure");
+        require(!(ok), "STAKE-INV-007 withdrawal survived recipient failure");
 
         ValidatorRegistry.Validator memory afterState = registry.getValidator(id);
-        assertEq(uint8(afterState.status), uint8(ValidatorRegistry.Status.WITHDRAWABLE), "status changed on rollback");
-        assertEq(afterState.ownedBond, beforeState.ownedBond, "owned bond changed on rollback");
-        assertEq(afterState.protocolCredit, beforeState.protocolCredit, "credit changed on rollback");
-        assertEq(address(registry).balance, registryBalanceBefore, "registry value changed on rollback");
-        assertEq(address(reserve).balance, reserveBalanceBefore, "reserve value changed on rollback");
-        assertEq(reserve.assignedCredit(id), reserveAssignedBefore, "reserve assignment changed on rollback");
-        assertEq(reserve.fundedCredit(id), reserveFundedBefore, "reserve funded amount changed on rollback");
-        assertTrue(registry.custodyInvariant(), "registry insolvent after rollback");
-        assertTrue(reserve.reserveInvariant(), "reserve invariant failed after rollback");
+        require((uint8(afterState.status)) == (uint8(ValidatorRegistry.Status.WITHDRAWABLE)), "status changed on rollback");
+        require((afterState.ownedBond) == (beforeState.ownedBond), "owned bond changed on rollback");
+        require((afterState.protocolCredit) == (beforeState.protocolCredit), "credit changed on rollback");
+        require((address(registry).balance) == (registryBalanceBefore), "registry value changed on rollback");
+        require((address(reserve).balance) == (reserveBalanceBefore), "reserve value changed on rollback");
+        require((reserve.assignedCredit(id)) == (reserveAssignedBefore), "reserve assignment changed on rollback");
+        require((reserve.fundedCredit(id)) == (reserveFundedBefore), "reserve funded amount changed on rollback");
+        require((registry.custodyInvariant()), "registry insolvent after rollback");
+        require((reserve.reserveInvariant()), "reserve invariant failed after rollback");
     }
 
     function testSystemCallFailureRollsBackSequenceHashAndDownstreamState() public {
@@ -156,10 +164,10 @@ contract StakeRollbackAtomicity420Test is Test {
                 payload
             )
         );
-        assertFalse(ok, "STAKE-INV-008 failing downstream call accepted");
-        assertEq(gateway.lastSequence(), 0, "sequence advanced despite atomic revert");
-        assertEq(gateway.lastCallHash(), bytes32(0), "call hash persisted despite atomic revert");
-        assertEq(RevertingValidatorTarget420(target).touched(), 0, "downstream storage persisted despite revert");
+        require(!(ok), "STAKE-INV-008 failing downstream call accepted");
+        require((gateway.lastSequence()) == (0), "sequence advanced despite atomic revert");
+        require((gateway.lastCallHash()) == (bytes32(0)), "call hash persisted despite atomic revert");
+        require((RevertingValidatorTarget420(target).touched()) == (0), "downstream storage persisted despite revert");
     }
 
     function _pubkey(uint256 seed) internal pure returns (bytes memory out) {

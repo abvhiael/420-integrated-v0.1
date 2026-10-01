@@ -1,6 +1,6 @@
 # CMP-1.4.7 — Deterministic verification adapters
 
-Status: **IMPLEMENTATION COMPLETE; LEVEL 1 QUALIFICATION PENDING. NO LIVE DEPLOYMENT/PUBLICATION CLAIM.**
+Status: **COMPLETE — LEVEL 1 QUALIFIED. NO LIVE DEPLOYMENT/PUBLICATION CLAIM.**
 
 ## Canonical definition
 
@@ -137,6 +137,19 @@ Level 2 is not required for CMP-1.4.7. The next sensible integration milestone i
 
 CMP-1.4.7 is COMPLETE only when every machine-readable exit criterion is satisfied and exact-head Level 1 qualification is green.
 
+## Qualification evidence
+
+Qualified implementation SHA: `ff8a4ca1e0d19f859be27a9718c8b768c99ea308`.
+
+- Compute Market Qualification #38 — run `36809487492` — **success**
+- Solidity Contracts #3480 — run `36809487506` — **success**
+- Genesis Address Authority #300 — run `36809487464` — **success**
+- 420Docs Qualification #3676 — run `36809487489` — **success**
+- 420Indexer #1103 — run `36809487521` — **success**
+- 420Registry REG-AUDIT-4 #135 — run `36809487500` — **success**
+
+The implementation SHA includes the compatibility repair that preserves dispute handling for both legacy verified jobs with an all-zero verification-policy tuple and policy-bound jobs with a complete nonzero tuple; partial tuples remain fail-closed.
+
 ## Completion
 
-**NOT YET COMPLETE.** Implementation and evidence artifacts are present; exact-head Level 1 qualification remains pending.
+**COMPLETE at Level 1.** Level 2 remains intentionally deferred to the CMP-1.4.8 deterministic/scientific verification integration milestone. Level 3 remains deferred to complete Compute app-phase closeout.

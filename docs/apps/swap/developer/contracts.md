@@ -11,11 +11,25 @@ The canonical 420 Swap stack is split between governance/registry surfaces and t
 
 ## Market formation and supporting services
 
-- `GenesisDEXFactory` — governance-controlled registry for Genesis-qualified pools and the approved pool implementation.
+- `GenesisDEXFactory` — **registration-only** governance surface for Genesis-qualified canonical pool instances. It does not deploy pools with CREATE/CREATE2. Canonical pool instances are deployed by the qualified deployment process and then registered by Genesis governance under a one-shot `poolId`. `poolImplementation` is the approved implementation/provenance reference used by deployment governance; it is not a runtime-codehash equality gate because canonical pools may embed immutable market/executor parameters in runtime code.
 - `PermissionlessDEXFactory` — permissionless registration tier. Registration does not confer canonical status or oracle eligibility.
 - `TWAPOracle` — Swap observation surface; Exchange may consume oracle data as a circuit-breaker input rather than executable-price authority.
 - `PublicBatchAuction` — governance-operated batch-auction state surface for protocol distribution workflows.
 - `SwapIds420` — canonical component and action identifiers.
+
+### GenesisDEXFactory lifecycle
+
+The frozen `GenesisDEXFactory` address is a protocol registry boundary, not a pool bytecode factory. The canonical lifecycle is:
+
+1. qualify the approved pool implementation and deployment inputs;
+2. deploy a concrete pool instance through the retained deployment process;
+3. verify that the instance is code-bearing and matches the intended market/executor parameters;
+4. have Genesis governance register the exact deployed address under a previously unused `poolId`;
+5. separately register/activate the market through `CanonicalMarketRegistry` as required by canonical market policy.
+
+Registration fails closed when shared operational safety is not normal and cannot overwrite an existing `poolId`. Changing `poolImplementation` does not mutate or replace previously registered pools.
+
+This distinction is intentional. Introducing an on-chain CREATE/CREATE2 path would create new deployment, salt, initialization, provenance and upgrade semantics that are not defined by the frozen Swap architecture and therefore require a separate canonical decision rather than being inferred from the contract name.
 
 The obsolete `CanonicalPool420` source scaffold was retired during the 420Swap repository audit after `CanonicalConstantProductPool420` became the executable production candidate. It is not a deployable or registry-authoritative component.
 

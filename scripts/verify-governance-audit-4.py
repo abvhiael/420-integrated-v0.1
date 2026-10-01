@@ -78,7 +78,7 @@ for forbidden in ["ProposalCreated", "ProposalQueued", "ProposalExecuted", "Prop
     if f"eventName: '{forbidden}'" in lifecycle:
         errors.append(f"non-canonical Governance lifecycle event retained: {forbidden}")
 
-for required in ["CivicProposalRegistered", "CivicProposalStateChanged", "proposalId:", "PASSED", "QUEUED", "EXECUTED"]:
+for required in ["CivicProposalRegistered", "CivicProposalStateChanged", "'proposalId'", "${key}:", "PASSED", "QUEUED", "EXECUTED"]:
     if required not in lifecycle:
         errors.append(f"Governance lifecycle reducer missing canonical token: {required}")
 

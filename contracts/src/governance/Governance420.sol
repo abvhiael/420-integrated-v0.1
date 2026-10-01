@@ -178,7 +178,7 @@ contract Governance420 is SystemAccess, I420System {
         CivicProposalRegistry420 proposalsContract = CivicProposalRegistry420(proposals_);
         CivicElectorateRegistry420 electorates = CivicElectorateRegistry420(electorates_);
         CivicVoting420 voting = CivicVoting420(voting_);
-        CivicGovernor420 governor = CivicGovernor420(governor_);
+        CivicGovernor420 governor = CivicGovernor420(payable(governor_));
 
         if (
             constitution_.code.length == 0 || proposals_.code.length == 0 || electorates_.code.length == 0

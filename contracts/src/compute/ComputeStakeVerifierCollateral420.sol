@@ -8,6 +8,7 @@ import "../vault/VaultAccounting420.sol";
 import "../vault/VaultIds420.sol";
 import "../vault/VaultRegistry420.sol";
 import "./ComputeVerifierRegistry420.sol";
+import "./ComputeStakeExitPolicy420.sol";
 
 /// @notice CMP-1.5.2 verifier collateral source backed by canonical 420Vault obligations.
 /// @dev This step implements verifier deposits/current-position reads only. Minimum-policy
@@ -21,6 +22,10 @@ contract ComputeStakeVerifierCollateral420 is I420System, IComputeVerifierStakeS
         keccak256("420Integrated.ComputeMarket.VerifierCollateralTranche.v1");
     bytes32 public constant VERIFIER_COLLATERAL_TYPE =
         keccak256("420/CMP/VERIFIER-COLLATERAL/V1");
+    bytes32 public constant EXIT_RELEASE_DOMAIN =
+        keccak256("420Integrated.ComputeMarket.VerifierCollateralExitRelease.v1");
+    bytes32 public constant EXIT_CLAIM_DOMAIN =
+        keccak256("420Integrated.ComputeMarket.VerifierCollateralExitClaim.v1");
 
     struct Position {
         bytes32 positionId;
@@ -31,6 +36,9 @@ contract ComputeStakeVerifierCollateral420 is I420System, IComputeVerifierStakeS
         uint64 latestVerifierRevision;
         uint64 revision;
         uint64 trancheCount;
+        uint64 withdrawalCursor;
+        uint32 exitPolicyRevision;
+        bytes32 exitPolicyCommitment;
         uint256 activeAmount;
         uint256 slashableAmount;
         bool active;
@@ -50,6 +58,7 @@ contract ComputeStakeVerifierCollateral420 is I420System, IComputeVerifierStakeS
     }
 
     ComputeVerifierRegistry420 public immutable verifiers;
+    ComputeStakeExitPolicy420 public immutable exitPolicies;
     AssetVault420 public immutable vault;
     VaultRegistry420 public immutable vaultRegistry;
     VaultAccounting420 public immutable accounting;
@@ -66,6 +75,8 @@ contract ComputeStakeVerifierCollateral420 is I420System, IComputeVerifierStakeS
     error PositionNotFound();
     error TrancheNotFound();
     error RevisionExhausted();
+    error ExitNotReady();
+    error InvalidExit();
 
     event VerifierCollateralStaked(
         bytes32 indexed positionId,
@@ -80,13 +91,35 @@ contract ComputeStakeVerifierCollateral420 is I420System, IComputeVerifierStakeS
         uint256 amount,
         uint256 activeAmount
     );
+    event VerifierCollateralExitRequested(
+        bytes32 indexed positionId,
+        address indexed authority,
+        uint32 indexed exitPolicyRevision,
+        bytes32 exitPolicyCommitment,
+        uint64 withdrawableAt,
+        uint64 positionRevision
+    );
+    event VerifierCollateralWithdrawn(
+        bytes32 indexed positionId,
+        address indexed authority,
+        uint64 fromTranche,
+        uint64 throughTranche,
+        uint256 amount,
+        uint256 remainingActiveAmount,
+        uint64 positionRevision
+    );
 
-    constructor(address verifierRegistry_, address collateralVault_) {
-        if (verifierRegistry_.code.length == 0 || collateralVault_.code.length == 0) {
+    constructor(address verifierRegistry_, address collateralVault_, address exitPolicy_) {
+        if (
+            verifierRegistry_.code.length == 0
+                || collateralVault_.code.length == 0
+                || exitPolicy_.code.length == 0
+        ) {
             revert InvalidConfiguration();
         }
 
         verifiers = ComputeVerifierRegistry420(verifierRegistry_);
+        exitPolicies = ComputeStakeExitPolicy420(exitPolicy_);
         vault = AssetVault420(payable(collateralVault_));
         vaultRegistry = vault.registry();
         accounting = vault.accounting();
@@ -167,6 +200,7 @@ contract ComputeStakeVerifierCollateral420 is I420System, IComputeVerifierStakeS
             p.verifierId != verifierId
                 || p.stakePolicyId != stakePolicyId
                 || p.authority != verifier.authority
+                || p.exiting
         ) {
             revert InvalidStake();
         }
@@ -262,6 +296,111 @@ contract ComputeStakeVerifierCollateral420 is I420System, IComputeVerifierStakeS
             obligationId,
             msg.value,
             p.activeAmount
+        );
+
+        entered = false;
+    }
+
+    function requestExit(bytes32 id) external returns (uint64 withdrawableAt) {
+        Position storage p = _positions[id];
+        if (!p.exists || !p.active || p.exiting || msg.sender != p.authority) revert InvalidExit();
+
+        (ComputeStakeExitPolicy420.Policy memory exitPolicy, bytes32 exactCommitment) =
+            exitPolicies.currentPolicy(p.stakePolicyId);
+
+        uint256 maturity = block.timestamp + exitPolicy.withdrawalDelaySeconds;
+        if (maturity > type(uint64).max || p.revision == type(uint64).max) {
+            revert RevisionExhausted();
+        }
+
+        p.exiting = true;
+        p.withdrawableAt = uint64(maturity);
+        p.exitPolicyRevision = exitPolicy.revision;
+        p.exitPolicyCommitment = exactCommitment;
+        p.revision += 1;
+
+        emit VerifierCollateralExitRequested(
+            id,
+            p.authority,
+            exitPolicy.revision,
+            exactCommitment,
+            p.withdrawableAt,
+            p.revision
+        );
+        return p.withdrawableAt;
+    }
+
+    function withdraw(bytes32 id, uint64 maxTranches)
+        external
+        returns (uint256 amount, uint64 throughTranche)
+    {
+        if (entered || maxTranches == 0) revert InvalidExit();
+        entered = true;
+
+        Position storage p = _positions[id];
+        if (
+            !p.exists
+                || !p.active
+                || !p.exiting
+                || msg.sender != p.authority
+                || block.timestamp < p.withdrawableAt
+        ) revert ExitNotReady();
+
+        uint64 start = p.withdrawalCursor + 1;
+        uint64 cursor = p.withdrawalCursor;
+        uint64 processed;
+
+        while (cursor < p.trancheCount && processed < maxTranches) {
+            uint64 index = cursor + 1;
+            Tranche storage t = _tranches[id][index];
+            if (!t.exists) revert TrancheNotFound();
+
+            VaultAccounting420.Obligation memory obligation =
+                accounting.getObligation(t.obligationId);
+            if (
+                obligation.state != 1
+                    || obligation.beneficiary != p.authority
+                    || obligation.amount != t.amount
+                    || obligation.sourceRef != id
+                    || obligation.obligationType != VERIFIER_COLLATERAL_TYPE
+            ) revert InvalidExit();
+
+            vault.releaseObligation(
+                keccak256(abi.encode(EXIT_RELEASE_DOMAIN, block.chainid, address(this), id, index)),
+                t.obligationId
+            );
+            vault.claim(
+                keccak256(abi.encode(EXIT_CLAIM_DOMAIN, block.chainid, address(this), id, index)),
+                t.obligationId
+            );
+
+            amount += t.amount;
+            p.activeAmount -= t.amount;
+            p.slashableAmount -= t.amount;
+            cursor = index;
+            processed += 1;
+        }
+
+        if (processed == 0 || p.revision == type(uint64).max) revert InvalidExit();
+
+        p.withdrawalCursor = cursor;
+        p.revision += 1;
+        throughTranche = cursor;
+
+        if (cursor == p.trancheCount) {
+            if (p.activeAmount != 0 || p.slashableAmount != 0) revert InvalidExit();
+            p.active = false;
+            p.exiting = false;
+        }
+
+        emit VerifierCollateralWithdrawn(
+            id,
+            p.authority,
+            start,
+            throughTranche,
+            amount,
+            p.activeAmount,
+            p.revision
         );
 
         entered = false;

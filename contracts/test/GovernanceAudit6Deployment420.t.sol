@@ -12,14 +12,23 @@ import "../src/governance/CivicGovernor420.sol";
 import "../src/governance/CivicMerkleElectorateSource420.sol";
 
 interface VmGovAudit6 {
-    function warp(uint256) external;
-    function etch(address target, bytes calldata code) external;
+    function warp(
+        uint256
+    ) external;
+    function etch(
+        address target,
+        bytes calldata code
+    ) external;
 }
 
 contract GovAudit6PairFactory {
-    function predicted(uint8 nonce) public view returns (address) {
+    function predicted(
+        uint8 nonce
+    ) public view returns (address) {
         require(nonce == 1 || nonce == 2, "nonce");
-        return address(uint160(uint256(keccak256(abi.encodePacked(bytes1(0xd6), bytes1(0x94), address(this), bytes1(nonce))))));
+        return address(
+            uint160(uint256(keccak256(abi.encodePacked(bytes1(0xd6), bytes1(0x94), address(this), bytes1(nonce)))))
+        );
     }
 
     function deployPair() external returns (Governance420 compatibility, GovernanceTimelock timelock) {
@@ -33,8 +42,7 @@ contract GovAudit6PairFactory {
 }
 
 contract GovernanceAudit6Deployment420Test {
-    VmGovAudit6 private constant vm =
-        VmGovAudit6(address(uint160(uint256(keccak256("hevm cheat code")))));
+    VmGovAudit6 private constant vm = VmGovAudit6(address(uint160(uint256(keccak256("hevm cheat code")))));
     address private constant REGISTRY = 0x0000000000000000000000000000000000000434;
 
     GovernanceTimelock private timelock;
@@ -58,9 +66,8 @@ contract GovernanceAudit6Deployment420Test {
         proposals = new CivicProposalRegistry420(address(timelock));
         electorates = new CivicElectorateRegistry420(address(timelock));
         voting = new CivicVoting420(address(proposals), address(electorates));
-        governor = new CivicGovernor420(
-            address(constitution), address(proposals), address(electorates), address(voting)
-        );
+        governor =
+            new CivicGovernor420(address(constitution), address(proposals), address(electorates), address(voting));
         community = new CivicMerkleElectorateSource420(
             address(timelock), keccak256("420CIVIC_COMMUNITY_EQUAL_WEIGHT_MERKLE_V1")
         );
@@ -113,16 +120,25 @@ contract GovernanceAudit6Deployment420Test {
 
         CivicConstitution420.Rule memory g1 = constitution.ruleFor(CivicIds420.ProposalClass.G1);
         CivicConstitution420.Rule memory g4 = constitution.ruleFor(CivicIds420.ProposalClass.G4);
-        require(g1.votingPeriodBlocks == 17_640 && g1.communityQuorumBps == 1000
-            && g1.communityApprovalBps == 5001 && !g1.dualHouseRequired, "G1 rule");
-        require(g4.votingPeriodBlocks == 105_840 && g4.communityQuorumBps == 5000
-            && g4.communityApprovalBps == 7500 && g4.validatorQuorumBps == 5000
-            && g4.validatorApprovalBps == 7500 && g4.dualHouseRequired, "G4 rule");
+        require(
+            g1.votingPeriodBlocks == 17_640 && g1.communityQuorumBps == 1000 && g1.communityApprovalBps == 5001
+                && !g1.dualHouseRequired,
+            "G1 rule"
+        );
+        require(
+            g4.votingPeriodBlocks == 105_840 && g4.communityQuorumBps == 5000 && g4.communityApprovalBps == 7500
+                && g4.validatorQuorumBps == 5000 && g4.validatorApprovalBps == 7500 && g4.dualHouseRequired,
+            "G4 rule"
+        );
 
         ProtocolRegistry registry = ProtocolRegistry(REGISTRY);
-        require(registry.resolve(compatibility.COMMUNITY_COMPONENT_ID()) == address(constitution), "constitution discovery");
+        require(
+            registry.resolve(compatibility.COMMUNITY_COMPONENT_ID()) == address(constitution), "constitution discovery"
+        );
         require(registry.resolve(compatibility.PROPOSAL_COMPONENT_ID()) == address(proposals), "proposal discovery");
-        require(registry.resolve(compatibility.ELECTORATE_COMPONENT_ID()) == address(electorates), "electorate discovery");
+        require(
+            registry.resolve(compatibility.ELECTORATE_COMPONENT_ID()) == address(electorates), "electorate discovery"
+        );
         require(registry.resolve(compatibility.VOTING_COMPONENT_ID()) == address(voting), "voting discovery");
         require(registry.resolve(compatibility.GOVERNOR_COMPONENT_ID()) == address(governor), "governor discovery");
 

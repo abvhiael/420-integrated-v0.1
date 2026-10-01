@@ -62,7 +62,8 @@ contract ComputeScientificAdapterRegistry420 is I420System, SystemAccess {
         bytes32 outputSchema = a.outputSchemaCommitment();
         bytes32 protocol = a.protocolCommitment();
         if (
-            a.workloadType() != workloadType_ || a.profileId() != profileId_
+            a.adapterKind() != ADAPTER_KIND
+                || a.workloadType() != workloadType_ || a.profileId() != profileId_
                 || outputSchema == bytes32(0) || protocol == bytes32(0)
         ) revert InvalidRoute();
 

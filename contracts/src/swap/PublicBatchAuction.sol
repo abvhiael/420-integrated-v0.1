@@ -55,6 +55,13 @@ contract PublicBatchAuction is GenesisResidentAccess420 {
     uint256 public reserved420;
     uint256 private _entered;
 
+    modifier nonReentrant() {
+        if (_entered != 0) revert Reentrancy();
+        _entered = 1;
+        _;
+        _entered = 0;
+    }
+
     error InvalidAuction();
     error InvalidInventory();
     error InvalidQuoteAsset();

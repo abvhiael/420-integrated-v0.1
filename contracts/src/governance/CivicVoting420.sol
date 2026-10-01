@@ -47,8 +47,8 @@ contract CivicVoting420 is I420System {
         bool cast;
     }
 
-    ICivicProposalRegistryVoting420 public immutable proposalRegistry;
-    CivicElectorateRegistry420 public immutable electorateRegistry;
+    ICivicProposalRegistryVoting420 public proposalRegistry;
+    CivicElectorateRegistry420 public electorateRegistry;
 
     mapping(bytes32 => mapping(uint8 => Tally)) private _tallies;
     mapping(bytes32 => mapping(uint8 => mapping(address => Ballot))) private _ballots;

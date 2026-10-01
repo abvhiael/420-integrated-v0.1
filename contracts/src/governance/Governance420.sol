@@ -3,8 +3,6 @@ pragma solidity ^0.8.24;
 
 import "../system/SystemAccess.sol";
 import "../interfaces/I420System.sol";
-import "../interfaces/genesis/Types420.sol";
-import "../apps/ProtocolRegistry.sol";
 import "./GovernanceTimelock.sol";
 import "./CivicIds420.sol";
 import "./CivicConstitution420.sol";
@@ -13,6 +11,28 @@ import "./CivicElectorateRegistry420.sol";
 import "./CivicVoting420.sol";
 import "./CivicGovernor420.sol";
 import "./CivicMerkleElectorateSource420.sol";
+
+interface IProtocolRegistryBootstrap420 {
+    enum ComponentType { UNSET, PROTOCOL, APPLICATION, SERVICE, REGISTRY, ADAPTER, INFRASTRUCTURE }
+    enum Lifecycle { NONE, PROPOSED, ACTIVE, PAUSED, SUSPENDED, DEPRECATED, WITHDRAWAL_ONLY, RETIRED }
+    struct Version { uint16 major; uint16 minor; uint16 patch; }
+
+    function registerComponent(bytes32 componentId, address implementation, Version calldata version, Lifecycle lifecycle)
+        external;
+    function publishRegisteredService(
+        bytes32 serviceId,
+        address implementation,
+        bytes32 metadataHash,
+        uint32 version,
+        bool active,
+        ComponentType componentType_,
+        bytes32 manifestHash,
+        bytes32 dependencyRoot,
+        bytes32 interfaceHash
+    ) external;
+    function resolve(bytes32 componentId) external view returns (address implementation);
+    function resolveActive(bytes32 serviceId) external view returns (address implementation, uint32 version);
+}
 
 /// @notice Frozen 0x0437 compatibility surface for 420Civic governance.
 /// @dev Legacy proposal/vote/result mutation paths are permanently retired. Canonical governance
@@ -178,40 +198,41 @@ contract Governance420 is SystemAccess, I420System {
             abi.encodeCall(CivicElectorateRegistry420.bindSnapshotAuthority, (governor_)));
         _schedule(timelock, plan, 8, address(this), abi.encodeCall(Governance420.bindCivicGovernor, (governor_)));
 
-        Types420.Version memory version = Types420.Version({ major: 1, minor: 0, patch: 0 });
+        IProtocolRegistryBootstrap420.Version memory version =
+            IProtocolRegistryBootstrap420.Version({ major: 1, minor: 0, patch: 0 });
         _schedule(timelock, plan, 9, PROTOCOL_REGISTRY, abi.encodeCall(
-            ProtocolRegistry.registerComponent,
-            (COMMUNITY_COMPONENT_ID, constitution_, version, Types420.Lifecycle.ACTIVE)
+            IProtocolRegistryBootstrap420.registerComponent,
+            (COMMUNITY_COMPONENT_ID, constitution_, version, IProtocolRegistryBootstrap420.Lifecycle.ACTIVE)
         ));
         _schedule(timelock, plan, 10, PROTOCOL_REGISTRY, abi.encodeCall(
-            ProtocolRegistry.registerComponent,
-            (PROPOSAL_COMPONENT_ID, proposals_, version, Types420.Lifecycle.ACTIVE)
+            IProtocolRegistryBootstrap420.registerComponent,
+            (PROPOSAL_COMPONENT_ID, proposals_, version, IProtocolRegistryBootstrap420.Lifecycle.ACTIVE)
         ));
         _schedule(timelock, plan, 11, PROTOCOL_REGISTRY, abi.encodeCall(
-            ProtocolRegistry.registerComponent,
-            (ELECTORATE_COMPONENT_ID, electorates_, version, Types420.Lifecycle.ACTIVE)
+            IProtocolRegistryBootstrap420.registerComponent,
+            (ELECTORATE_COMPONENT_ID, electorates_, version, IProtocolRegistryBootstrap420.Lifecycle.ACTIVE)
         ));
         _schedule(timelock, plan, 12, PROTOCOL_REGISTRY, abi.encodeCall(
-            ProtocolRegistry.registerComponent,
-            (VOTING_COMPONENT_ID, voting_, version, Types420.Lifecycle.ACTIVE)
+            IProtocolRegistryBootstrap420.registerComponent,
+            (VOTING_COMPONENT_ID, voting_, version, IProtocolRegistryBootstrap420.Lifecycle.ACTIVE)
         ));
         _schedule(timelock, plan, 13, PROTOCOL_REGISTRY, abi.encodeCall(
-            ProtocolRegistry.registerComponent,
-            (GOVERNOR_COMPONENT_ID, governor_, version, Types420.Lifecycle.ACTIVE)
+            IProtocolRegistryBootstrap420.registerComponent,
+            (GOVERNOR_COMPONENT_ID, governor_, version, IProtocolRegistryBootstrap420.Lifecycle.ACTIVE)
         ));
 
         bytes32 dependencyRoot = keccak256(
             abi.encode(constitution_, proposals_, electorates_, voting_, governor_, communitySource_, validatorSource_)
         );
         _schedule(timelock, plan, 14, PROTOCOL_REGISTRY, abi.encodeCall(
-            ProtocolRegistry.publishRegisteredService,
+            IProtocolRegistryBootstrap420.publishRegisteredService,
             (
                 GOVERNANCE_SERVICE_ID,
                 governor_,
                 GOVERNANCE_METADATA_HASH,
                 uint32(1),
                 true,
-                ProtocolRegistry.ComponentType.PROTOCOL,
+                IProtocolRegistryBootstrap420.ComponentType.PROTOCOL,
                 GOVERNANCE_MANIFEST_HASH,
                 dependencyRoot,
                 GOVERNANCE_INTERFACE_HASH
@@ -251,7 +272,7 @@ contract Governance420 is SystemAccess, I420System {
         CivicConstitution420 constitution = CivicConstitution420(constitution_);
         CivicProposalRegistry420 proposalsContract = CivicProposalRegistry420(proposals_);
         CivicElectorateRegistry420 electorates = CivicElectorateRegistry420(electorates_);
-        ProtocolRegistry registry = ProtocolRegistry(PROTOCOL_REGISTRY);
+        IProtocolRegistryBootstrap420 registry = IProtocolRegistryBootstrap420(PROTOCOL_REGISTRY);
 
         if (proposalsContract.proposalAuthority() != governor_ || electorates.snapshotAuthority() != governor_) {
             revert InvalidBootstrapGraph();

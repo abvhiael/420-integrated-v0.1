@@ -1,6 +1,6 @@
 # CMP-1.4.6 — Replicated / N-of-M verification
 
-Status: **IMPLEMENTATION COMPLETE; LEVEL 1 + LEVEL 2 QUALIFICATION PENDING. NO LIVE DEPLOYMENT/PUBLICATION CLAIM.**
+Status: **COMPLETE. LEVEL 1 + LEVEL 2 EXACT-HEAD QUALIFICATION GREEN. NO LIVE DEPLOYMENT/PUBLICATION CLAIM.**
 
 ## Canonical definition
 
@@ -140,4 +140,42 @@ CMP-1.4.6 is COMPLETE only when every machine-readable exit criterion is satisfi
 
 ## Completion
 
-**NOT YET COMPLETE.** Implementation and evidence artifacts are present; exact-head Level 1 and Level 2 qualification remain pending.
+**COMPLETE.** Exact implementation head `22d983d99d81524b2e30b8b7f16cf9e411d6c142` passed the required Level 1 and documented Level 2 app-specific integration qualification.
+
+Required results on the exact implementation SHA:
+
+- Compute Market Qualification #27 — run `36793947072` — **success**. This is the retained Level 2 Compute Market integration suite and includes the CMP-1.4.0–1.4.6 mechanical verifiers that currently exist.
+- Solidity Contracts #3458 — run `36793947073` — **success** using the Compute-only focused path; monolithic repository Foundry shards were skipped.
+
+Additional triggered retained checks on the same implementation SHA:
+
+- Genesis Address Authority #281 — run `36793947063` — success; duplicate full Foundry inventory skipped
+- 420Docs Qualification #3571 — run `36793947056` — success
+- 420Indexer #1083 — run `36793947091` — success
+- 420Registry REG-AUDIT-4 #116 — run `36793947057` — success
+
+Qualification remediation retained in repository history:
+
+- candidate head `d097cf60fc57fc44636ae96adcd6833892b10e37` failed Compute Market Qualification #25 during `forge build src/compute` with a Yul stack-depth exception in the initial monolithic committee-freeze implementation;
+- the root cause was compiler stack pressure from the large freeze/committee-provenance path, not a relaxed test or runtime authorization failure;
+- the implementation was refactored into bounded context/member helpers plus domain-separated accepted-context, party-set and ordered-member-set commitments;
+- exact final head `22d983d99d81524b2e30b8b7f16cf9e411d6c142` compiles and passes the full retained Compute suite.
+
+Every CMP-1.4.6 exit criterion is satisfied on the qualified implementation SHA:
+
+- an exact pre-execution N-of-M committee is frozen with bounded M and explicit threshold N;
+- every committee member is the exact current ACTIVE verifier revision with exact independent + committee workload capability;
+- direct party conflicts, party-controller conflicts, pairwise verifier/controller duplicates and later party-controller drift fail closed;
+- only frozen members may submit one recomputation vote each after `RESULT_COMMITTED`;
+- quorum requires N distinct members on the same result commitment and split/insufficient votes do not aggregate;
+- stale/suspended verifiers, duplicate votes, unauthorized voters and post-finalization votes fail closed;
+- committee/vote/quorum provenance is domain-separated and exact-policy/job/member bound;
+- quorum evidence grants no verdict, settlement, custody, worker, stake/slash, governance, validator, bridge or wallet authority.
+
+Level 2 selector/quorum milestone status: **SATISFIED**.
+
+Level 3 remains intentionally deferred to complete Compute Market phase closeout.
+
+Roadmap-order limitation remains explicit: CMP-1.4.4 is still open on the qualified baseline and is **not** implied complete by CMP-1.4.6.
+
+This completion update is evidence-only and references the already-qualified implementation SHA above; it changes no executable code, tests, workflows, dependencies, configuration, interfaces, deployment state, or substantive requirement.

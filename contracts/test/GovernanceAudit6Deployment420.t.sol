@@ -2,9 +2,6 @@
 pragma solidity ^0.8.24;
 
 import "../src/apps/ProtocolRegistry.sol";
-import "../src/interfaces/genesis/Types420.sol";
-import "../src/governance/CivicIds420.sol";
-import "../src/governance/ICivicElectorateSource420.sol";
 import "../src/governance/GovernanceTimelock.sol";
 import "../src/governance/Governance420.sol";
 import "../src/governance/CivicConstitution420.sol";
@@ -12,260 +9,156 @@ import "../src/governance/CivicProposalRegistry420.sol";
 import "../src/governance/CivicElectorateRegistry420.sol";
 import "../src/governance/CivicVoting420.sol";
 import "../src/governance/CivicGovernor420.sol";
+import "../src/governance/CivicMerkleElectorateSource420.sol";
 
 interface VmGovAudit6 {
-    function warp(
-        uint256
-    ) external;
+    function warp(uint256) external;
+    function etch(address target, bytes calldata code) external;
 }
 
-contract GovAudit6ElectorateSource is ICivicElectorateSource420 {
-    bytes32 private immutable _type;
-
-    constructor(
-        bytes32 type_
-    ) {
-        _type = type_;
+contract GovAudit6PairFactory {
+    function predicted(uint8 nonce) public view returns (address) {
+        require(nonce == 1 || nonce == 2, "nonce");
+        return address(uint160(uint256(keccak256(abi.encodePacked(bytes1(0xd6), bytes1(0x94), address(this), bytes1(nonce))))));
     }
 
-    function sourceType() external view returns (bytes32) {
-        return _type;
-    }
-
-    function snapshotAt(
-        uint64 blockNumber
-    ) external pure returns (bytes32, uint256) {
-        return (keccak256(abi.encode("fixture", blockNumber)), 100);
-    }
-
-    function votingWeight(
-        bytes32,
-        address,
-        bytes calldata
-    ) external pure returns (uint256) {
-        return 1;
+    function deployPair() external returns (Governance420 compatibility, GovernanceTimelock timelock) {
+        address expectedCompatibility = predicted(1);
+        address expectedTimelock = predicted(2);
+        compatibility = new Governance420(expectedTimelock);
+        require(address(compatibility) == expectedCompatibility, "compatibility address");
+        timelock = new GovernanceTimelock(expectedCompatibility);
+        require(address(timelock) == expectedTimelock, "timelock address");
     }
 }
 
-/// @notice GOV-AUDIT-6 deployment-order simulation.
-/// @dev Fixture policy values are intentionally non-canonical. This proves the deployment/handoff machinery only;
-/// canonical bootstrap authority, electorate sources and initial rules remain external release inputs until frozen.
 contract GovernanceAudit6Deployment420Test {
-    VmGovAudit6 private constant vm = VmGovAudit6(address(uint160(uint256(keccak256("hevm cheat code")))));
+    VmGovAudit6 private constant vm =
+        VmGovAudit6(address(uint160(uint256(keccak256("hevm cheat code")))));
+    address private constant REGISTRY = 0x0000000000000000000000000000000000000434;
 
     GovernanceTimelock private timelock;
     Governance420 private compatibility;
-    ProtocolRegistry private registry;
     CivicConstitution420 private constitution;
     CivicProposalRegistry420 private proposals;
     CivicElectorateRegistry420 private electorates;
     CivicVoting420 private voting;
     CivicGovernor420 private governor;
+    CivicMerkleElectorateSource420 private community;
+    CivicMerkleElectorateSource420 private validator;
 
-    function _execute(
-        address target,
-        bytes memory data,
-        bytes32 salt
-    ) private {
-        bytes32 id = keccak256(abi.encode("GOV-AUDIT-6", salt, target, data, block.timestamp));
-        timelock.schedule(id, target, 0, data, GovernanceTimelock.Class.G1);
-        vm.warp(block.timestamp + timelock.G1_DELAY() + 1);
-        timelock.execute(id);
-    }
+    function _deployCanonicalGraph() private {
+        GovAudit6PairFactory factory = new GovAudit6PairFactory();
+        (compatibility, timelock) = factory.deployPair();
 
-    function _deployGraph() private {
-        timelock = new GovernanceTimelock(address(this));
-        compatibility = new Governance420(address(timelock));
-        registry = new ProtocolRegistry(address(timelock));
+        ProtocolRegistry registryTemplate = new ProtocolRegistry(address(timelock));
+        vm.etch(REGISTRY, address(registryTemplate).code);
+
         constitution = new CivicConstitution420(address(timelock));
         proposals = new CivicProposalRegistry420(address(timelock));
         electorates = new CivicElectorateRegistry420(address(timelock));
         voting = new CivicVoting420(address(proposals), address(electorates));
-        governor =
-            new CivicGovernor420(address(constitution), address(proposals), address(electorates), address(voting));
+        governor = new CivicGovernor420(
+            address(constitution), address(proposals), address(electorates), address(voting)
+        );
+        community = new CivicMerkleElectorateSource420(
+            address(timelock), keccak256("420CIVIC_COMMUNITY_EQUAL_WEIGHT_MERKLE_V1")
+        );
+        validator = new CivicMerkleElectorateSource420(
+            address(timelock), keccak256("420CIVIC_VALIDATOR_EQUAL_WEIGHT_MERKLE_V1")
+        );
     }
 
-    function _fixtureInitialize() private {
-        GovAudit6ElectorateSource community = new GovAudit6ElectorateSource(keccak256("GOV_AUDIT_6_COMMUNITY_FIXTURE"));
-        GovAudit6ElectorateSource validator = new GovAudit6ElectorateSource(keccak256("GOV_AUDIT_6_VALIDATOR_FIXTURE"));
+    function testCanonicalBootstrapSchedulesExactPlanAndRetiresToCivicGovernor() public {
+        _deployCanonicalGraph();
 
-        _execute(
-            address(electorates),
-            abi.encodeCall(
-                CivicElectorateRegistry420.setHouseSource, (CivicIds420.House.COMMUNITY, address(community))
-            ),
-            keccak256("community-source")
-        );
-        _execute(
-            address(electorates),
-            abi.encodeCall(
-                CivicElectorateRegistry420.setHouseSource, (CivicIds420.House.VALIDATOR, address(validator))
-            ),
-            keccak256("validator-source")
-        );
+        require(timelock.bootstrapGovernor() == address(compatibility), "bootstrap identity");
+        require(timelock.scheduler() == address(compatibility), "bootstrap scheduler");
+        require(!timelock.civicAuthorityActivated(), "premature activation");
 
-        _execute(
+        compatibility.scheduleCanonicalCivicBootstrap(
             address(constitution),
-            abi.encodeCall(
-                CivicConstitution420.setRule,
-                (
-                    CivicIds420.ProposalClass.G1,
-                    uint64(100),
-                    uint64(7 days),
-                    uint16(5000),
-                    uint16(6000),
-                    uint16(0),
-                    uint16(0),
-                    false
-                )
-            ),
-            keccak256("g1")
-        );
-        _execute(
-            address(constitution),
-            abi.encodeCall(
-                CivicConstitution420.setRule,
-                (
-                    CivicIds420.ProposalClass.G2,
-                    uint64(100),
-                    uint64(14 days),
-                    uint16(5000),
-                    uint16(6000),
-                    uint16(0),
-                    uint16(0),
-                    false
-                )
-            ),
-            keccak256("g2")
-        );
-        _execute(
-            address(constitution),
-            abi.encodeCall(
-                CivicConstitution420.setRule,
-                (
-                    CivicIds420.ProposalClass.G3,
-                    uint64(100),
-                    uint64(14 days),
-                    uint16(5000),
-                    uint16(6000),
-                    uint16(5000),
-                    uint16(6000),
-                    true
-                )
-            ),
-            keccak256("g3")
-        );
-        _execute(
-            address(constitution),
-            abi.encodeCall(
-                CivicConstitution420.setRule,
-                (
-                    CivicIds420.ProposalClass.G4,
-                    uint64(100),
-                    uint64(42 days),
-                    uint16(5000),
-                    uint16(6000),
-                    uint16(5000),
-                    uint16(6000),
-                    true
-                )
-            ),
-            keccak256("g4")
-        );
-
-        _execute(
             address(proposals),
-            abi.encodeCall(CivicProposalRegistry420.bindProposalAuthority, (address(governor))),
-            keccak256("proposal-authority")
-        );
-        _execute(
             address(electorates),
-            abi.encodeCall(CivicElectorateRegistry420.bindSnapshotAuthority, (address(governor))),
-            keccak256("snapshot-authority")
-        );
-        _execute(
-            address(compatibility),
-            abi.encodeCall(Governance420.bindCivicGovernor, (address(governor))),
-            keccak256("compatibility-bind")
-        );
-    }
-
-    function _register(
-        bytes32 id,
-        address implementation,
-        bytes32 salt
-    ) private {
-        Types420.Version memory version = Types420.Version({ major: 1, minor: 0, patch: 0 });
-        _execute(
-            address(registry),
-            abi.encodeCall(
-                ProtocolRegistry.registerComponent, (id, implementation, version, Types420.Lifecycle.ACTIVE)
-            ),
-            salt
-        );
-    }
-
-    function testDeterministicDeploymentGraphRegistryDiscoveryAndIrreversibleHandoff() public {
-        _deployGraph();
-        require(timelock.scheduler() == address(this), "bootstrap scheduler mismatch");
-        require(!timelock.civicAuthorityActivated(), "premature Civic activation");
-
-        _fixtureInitialize();
-
-        bytes32 constitutionId = keccak256("420/component/governance/civic-constitution/v1");
-        bytes32 proposalsId = keccak256("420/component/governance/civic-proposal-registry/v1");
-        bytes32 electoratesId = keccak256("420/component/governance/civic-electorate-registry/v1");
-        bytes32 votingId = keccak256("420/component/governance/civic-voting/v1");
-        bytes32 governorId = keccak256("420/component/governance/civic-governor/v1");
-
-        _register(constitutionId, address(constitution), keccak256("reg-constitution"));
-        _register(proposalsId, address(proposals), keccak256("reg-proposals"));
-        _register(electoratesId, address(electorates), keccak256("reg-electorates"));
-        _register(votingId, address(voting), keccak256("reg-voting"));
-        _register(governorId, address(governor), keccak256("reg-governor"));
-
-        bytes32 serviceId = keccak256("420/service/governance/v1");
-        bytes32 dependencyRoot = keccak256(
-            abi.encode(
-                address(constitution), address(proposals), address(electorates), address(voting), address(governor)
-            )
-        );
-        _execute(
-            address(registry),
-            abi.encodeCall(
-                ProtocolRegistry.publishRegisteredService,
-                (
-                    serviceId,
-                    address(governor),
-                    keccak256("GOV-AUDIT-6-FIXTURE-METADATA"),
-                    uint32(1),
-                    true,
-                    ProtocolRegistry.ComponentType.PROTOCOL,
-                    keccak256("contracts/config/governance-deployment-v1.json"),
-                    dependencyRoot,
-                    keccak256("420/interface/governance-civic/v1")
-                )
-            ),
-            keccak256("service-publication")
+            address(voting),
+            address(governor),
+            address(community),
+            address(validator)
         );
 
-        require(registry.resolve(constitutionId) == address(constitution), "constitution resolution");
-        require(registry.resolve(proposalsId) == address(proposals), "proposal resolution");
-        require(registry.resolve(electoratesId) == address(electorates), "electorate resolution");
-        require(registry.resolve(votingId) == address(voting), "voting resolution");
-        require(registry.resolve(governorId) == address(governor), "governor resolution");
+        bytes32 plan = compatibility.bootstrapPlanHash();
+        require(plan != bytes32(0) && compatibility.bootstrapPlanScheduled(), "plan not scheduled");
+
+        vm.warp(block.timestamp + timelock.G1_DELAY() + 1);
+        for (uint8 i = 0; i < 15; ++i) {
+            timelock.execute(compatibility.bootstrapOperationId(plan, i));
+        }
+
+        compatibility.activateCanonicalCivic(
+            address(constitution),
+            address(proposals),
+            address(electorates),
+            address(voting),
+            address(governor),
+            address(community),
+            address(validator)
+        );
+
+        require(compatibility.bootstrapRetired(), "bootstrap not retired");
         require(compatibility.civicGovernor() == address(governor), "compatibility pointer");
+        require(timelock.civicAuthorityActivated(), "Civic authority inactive");
+        require(timelock.scheduler() == address(governor), "scheduler not Civic governor");
         require(proposals.proposalAuthority() == address(governor), "proposal authority");
         require(electorates.snapshotAuthority() == address(governor), "snapshot authority");
 
-        timelock.activateCivicAuthority(address(governor));
-        require(timelock.civicAuthorityActivated(), "Civic authority inactive");
-        require(timelock.scheduler() == address(governor), "scheduler not transferred");
+        CivicConstitution420.Rule memory g1 = constitution.ruleFor(CivicIds420.ProposalClass.G1);
+        CivicConstitution420.Rule memory g4 = constitution.ruleFor(CivicIds420.ProposalClass.G4);
+        require(g1.votingPeriodBlocks == 17_640 && g1.communityQuorumBps == 1000
+            && g1.communityApprovalBps == 5001 && !g1.dualHouseRequired, "G1 rule");
+        require(g4.votingPeriodBlocks == 105_840 && g4.communityQuorumBps == 5000
+            && g4.communityApprovalBps == 7500 && g4.validatorQuorumBps == 5000
+            && g4.validatorApprovalBps == 7500 && g4.dualHouseRequired, "G4 rule");
 
-        (bool repeat,) =
-            address(timelock).call(abi.encodeCall(GovernanceTimelock.activateCivicAuthority, (address(governor))));
-        require(!repeat, "authority handoff repeated");
-        (bool cancel,) = address(timelock).call(abi.encodeCall(GovernanceTimelock.cancel, (bytes32(uint256(1)))));
-        require(!cancel, "bootstrap cancellation remained available");
+        ProtocolRegistry registry = ProtocolRegistry(REGISTRY);
+        require(registry.resolve(compatibility.COMMUNITY_COMPONENT_ID()) == address(constitution), "constitution discovery");
+        require(registry.resolve(compatibility.PROPOSAL_COMPONENT_ID()) == address(proposals), "proposal discovery");
+        require(registry.resolve(compatibility.ELECTORATE_COMPONENT_ID()) == address(electorates), "electorate discovery");
+        require(registry.resolve(compatibility.VOTING_COMPONENT_ID()) == address(voting), "voting discovery");
+        require(registry.resolve(compatibility.GOVERNOR_COMPONENT_ID()) == address(governor), "governor discovery");
+
+        (bool reschedule,) = address(compatibility).call(
+            abi.encodeCall(
+                Governance420.scheduleCanonicalCivicBootstrap,
+                (
+                    address(constitution),
+                    address(proposals),
+                    address(electorates),
+                    address(voting),
+                    address(governor),
+                    address(community),
+                    address(validator)
+                )
+            )
+        );
+        require(!reschedule, "bootstrap rescheduled");
+    }
+
+    function testBootstrapRejectsWrongElectorateRole() public {
+        _deployCanonicalGraph();
+        (bool ok,) = address(compatibility).call(
+            abi.encodeCall(
+                Governance420.scheduleCanonicalCivicBootstrap,
+                (
+                    address(constitution),
+                    address(proposals),
+                    address(electorates),
+                    address(voting),
+                    address(governor),
+                    address(validator),
+                    address(community)
+                )
+            )
+        );
+        require(!ok, "swapped electorate roles accepted");
     }
 }

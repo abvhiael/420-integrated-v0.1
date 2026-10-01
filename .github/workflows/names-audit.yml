@@ -138,7 +138,7 @@ jobs:
             echo "NAMES_HARDENING_CHANGED=false" >> "$GITHUB_ENV"
           fi
 
-          if grep -Eq '^(contracts/artifacts/Names420\.json|contracts/config/predeploy/Names420-predeploy-state\.json|contracts/config/predeploy/predeploy-plan\.json|contracts/config/deployment-manifest\.json|scripts/generate-names-audit-6-genesis-state\.py|scripts/test-names-audit-6-genesis-state\.py)$' /tmp/names-changed.txt; then
+          if grep -Eq '^(contracts/artifacts/Names420\.json|contracts/config/predeploy/predeploy-plan\.json|contracts/config/deployment-manifest\.json|scripts/generate-names-audit-6-genesis-state\.py|scripts/test-names-audit-6-genesis-state\.py)$' /tmp/names-changed.txt; then
             echo "NAMES_LEVEL2_MILESTONE=true" >> "$GITHUB_ENV"
           else
             echo "NAMES_LEVEL2_MILESTONE=false" >> "$GITHUB_ENV"

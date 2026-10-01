@@ -360,9 +360,9 @@ The public testnet manifest/endpoints are also not qualified. Therefore source e
 | predeploy storage state | storage-init policy | constructor intent only | absent | generic rule | PARTIAL | generate exact storage from compiler layout |
 | deployment manifest binding | deployment manifest | address only | generic validators | manifest | PARTIAL | bind artifact/hash/state/source |
 | on-chain/testnet verification | wallet deployment inventory | explicitly false | no live smoke | live wallet docs only | BLOCKED | live network + RPC + deployed bytecode |
-| 420Indexer descriptors | indexer architecture | mapping/build code present | ABI-manifest tests | architecture | PARTIAL | requires real Names420 artifact |
-| Names event/state views | indexer | present | query/lifecycle tests | indexer docs | COMPLETE | live reorg/recovery qualification with deployed chain |
-| 420Search discovery | search architecture | present | names_identity tests | architecture | COMPLETE | live integration qualification |
+| 420Indexer descriptors | indexer architecture | frozen `names420-v3.json` derived from exact Names420 artifact/runtime; digest pinned | artifact-bound descriptor/lifecycle/query tests | architecture | COMPLETE | live-chain comparison remains NAMES-AUDIT-9 |
+| Names event/state views | indexer | present | exact-descriptor lifecycle/query/reorg/replacement tests | indexer docs | COMPLETE | live-chain reorg observation remains NAMES-AUDIT-9 |
+| 420Search discovery | search architecture | exact ascending-history replay with transfer association reset and fail-closed ordering | names_identity tests | architecture | COMPLETE | live integration qualification remains NAMES-AUDIT-9 |
 | Wallet resolver | Wallet W14.6 | guarded client present | client/send/guided-send tests | Wallet docs | COMPLETE | live deployment binding |
 | user registration UI | Genesis documentation matrix user-facing role | no production write client/UI found | none | workflows documented | MISSING | implement canonical user-facing management surface |
 | renewal/update/reverse/transfer UI | same | no production write client/UI found | none | workflows documented | MISSING | implement and test |
@@ -376,12 +376,12 @@ The public testnet manifest/endpoints are also not qualified. Therefore source e
 - **CODE COMPLETE: NO** — user-facing management application is missing and frozen dependency-layer architecture is unreconciled.
 - **BUILD COMPLETE: PARTIAL** — NAMES-AUDIT-6 deterministic runtime/state artifacts are generated and qualified; later app-phase/indexer/operator/testnet/release steps remain.
 - **CONTRACT COMPLETE: NO** — core naming logic and the canonical dependency model are reconciled; contract hardening and later artifact/Genesis qualification remain open.
-- **TEST COMPLETE: PARTIAL** — retained contract hardening/invariants, Slither, deterministic Genesis generation, Wallet Names integration and the NAMES-AUDIT-6 Level-2 milestone are qualified; later indexer/search, testnet and release qualification remain.
+- **TEST COMPLETE: PARTIAL** — retained contract hardening/invariants, Slither, deterministic Genesis generation, Wallet Names integration, and NAMES-AUDIT-7 exact-descriptor Indexer/Search lifecycle/query/reorg/recovery qualification are complete; later operator/testnet/release qualification remains.
 - **DOCUMENTATION COMPLETE: NO** — user/developer/security docs exist, but deployment/operator/threat-model/Genesis acceptance documentation remains incomplete.
-- **INTEGRATION COMPLETE: NO** — Wallet/indexer/search source integrations exist; live Registry/network/artifact bindings and the user management application do not.
+- **INTEGRATION COMPLETE: PARTIAL** — Wallet and artifact-bound Indexer/Search integrations are implemented and qualified offline; live Registry/network/testnet verification remains.
 - **SECURITY QUALIFIED: NO** — no unresolved core naming exploit was identified after the interface repair, but architecture/deployment and full hardening gates remain.
 - **TESTNET READY: NO** — official testnet manifest/RPC and deployed Names420 code are not qualified.
-- **GENESIS READY: NO** — deterministic Names420 runtime/hash/storage are now complete, but NAMES-AUDIT-7 through NAMES-AUDIT-10 remain before Genesis acceptance.
+- **GENESIS READY: NO** — deterministic runtime/state and artifact-bound Indexer/Search reconciliation are complete, but NAMES-AUDIT-8 through NAMES-AUDIT-10 remain before Genesis acceptance.
 - **PRODUCTION READY: NO** — depends on all preceding gates plus live operational qualification.
 
 ### NAMES-AUDIT-6 completion
@@ -396,6 +396,21 @@ Durable evidence:
 - `docs/audit/420NAMES-AUDIT-6-GENESIS-STATE-QUALIFICATION.json`
 
 The next canonical step remains NAMES-AUDIT-7.
+
+### NAMES-AUDIT-7 completion
+
+NAMES-AUDIT-7 is **COMPLETE** on qualified implementation SHA `3f5ca7e1d551b684aa3684bd9ce595755a23282c`.
+
+The frozen descriptor `420-indexer/descriptors/names420-v3.json` is generated from the exact Names420 artifact/runtime identity and pinned by descriptor SHA-256 `74602adfdde367c82fcefcd35a89a5b0e415e92721289cca9e827be32299b3be`. Exact-head Names audit run `36799099363` passed descriptor regeneration/cleanliness, 19 targeted Indexer descriptor/lifecycle/query tests, Search discovery and Indexer-client packages, retained Wallet Names tests, and existing artifact/dependency guards. Directly affected 420Indexer run `36799099362` also passed on the same SHA.
+
+Search now fails closed on unordered history and transfer reconstruction clears stale profile/service associations. Names-specific fork replacement/recovery is qualified against the exact frozen descriptors.
+
+Durable evidence:
+
+- `docs/audit/420NAMES-AUDIT-7-INDEXER-SEARCH-QUALIFICATION.md`
+- `docs/audit/420NAMES-AUDIT-7-INDEXER-SEARCH-QUALIFICATION.json`
+
+The next canonical step is NAMES-AUDIT-8.
 
 ## Numbered remediation roadmap
 
@@ -417,4 +432,4 @@ The next canonical step remains NAMES-AUDIT-7.
 
 The most important code defect found in this audit was the stale shared resolver interface, which could cause callers to decode `owner` as the destination address. That defect is repaired on the audit branch with a regression test.
 
-The deterministic Genesis runtime/state materialization is complete and qualified by NAMES-AUDIT-6. Remaining blockers are derived indexer/search artifact reconciliation, deployment/operator documentation, production-equivalent testnet qualification, Genesis acceptance closeout, and later production qualification. Offline deterministic Genesis evidence must still not be conflated with live deployed-chain proof.
+The deterministic Genesis runtime/state materialization is complete and qualified by NAMES-AUDIT-6, and artifact-derived Indexer/Search reconciliation is complete and qualified by NAMES-AUDIT-7. Remaining blockers are deployment/operator documentation, production-equivalent testnet qualification, Genesis acceptance closeout, and later production qualification. Offline deterministic and derived-service evidence must still not be conflated with live deployed-chain proof.

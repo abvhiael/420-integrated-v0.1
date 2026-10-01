@@ -6,8 +6,9 @@
 **Qualification level:** Level 1 step-specific + Level 2 Exchange authority-integration milestone  
 **Audit branch / PR:** `audit/exchange-pretestnet-phase-20260930` / PR #430  
 **Audit base SHA:** `4d0ede3692efe55f04a50c7bf5b749afe579eccb`  
-**Qualified implementation SHA:** `a447e84951bc618961272ba94d78dfff96154ee2`  
-**Current repository `main` observed at closeout:** `6715d9fd3747953f298e79527fb9e86588db8d35`
+**Original qualified implementation SHA:** `a447e84951bc618961272ba94d78dfff96154ee2`  
+**Post-PRE-10 requalified accumulated implementation SHA:** `46e97d69a51deaad9460f9145735ee1cf96f658a`  
+**Current repository `main` observed at requalification:** `df8f639d8f43b763298c8750ef49d3e5849c597c`
 
 ## Canonical requirements and disposition
 
@@ -145,7 +146,35 @@ Qualification:
 
 ## Level 1 qualification
 
-Exact implementation SHA: `a447e84951bc618961272ba94d78dfff96154ee2`
+### Current accumulated-app requalification
+
+After PRE-10 closed the production Exchange read/API adapter, PRE-05 was reopened against current repository truth rather than relying only on its earlier closeout.
+
+Exact accumulated implementation SHA:
+
+`46e97d69a51deaad9460f9145735ee1cf96f658a`
+
+Required app-specific workflow:
+
+- **420Exchange Web Verification** — run `36802037691` / run number 730 — **SUCCESS**
+
+On that exact accumulated implementation SHA, the workflow reran the PRE-05 trust boundary through:
+
+- PRE-04 quote backend static checks — SUCCESS;
+- `exchange/quote-service npm run check`, which includes `check-pre05.mjs` — SUCCESS;
+- quote backend unit/HTTP/authentication/adversarial tests — SUCCESS;
+- quote-service secret scan — SUCCESS;
+- retained Exchange web static/unit/integration qualification — SUCCESS;
+- retained PRE-02/PRE-03 Chromium acceptance — SUCCESS;
+- frontend secret scan — SUCCESS.
+
+The requalification confirms that PRE-06 through PRE-10 did not introduce a caller-controlled trust shortcut, bypass Ed25519 verification, weaken exact endpoint/deployment/account/chain/fingerprint binding, or alter replay/key-rotation semantics.
+
+The previously qualified PRE-05 implementation did **not** require executable remediation after PRE-10.
+
+### Original PRE-05 closeout
+
+Exact original implementation SHA: `a447e84951bc618961272ba94d78dfff96154ee2`
 
 Required app-specific workflow:
 
@@ -227,15 +256,17 @@ Qualified cases include:
 
 ## Current-main divergence review
 
-At closeout, current `main` was `6715d9fd3747953f298e79527fb9e86588db8d35`.
+At post-PRE-10 PRE-05 requalification, current `main` was `df8f639d8f43b763298c8750ef49d3e5849c597c`.
 
-Changes since the audit base remain confined to Compute Market contracts/config/docs/scripts and shared non-Exchange qualification workflows. They do not modify:
+The 80 main-side commits since the audit base do not modify:
 
-- `exchange/web/**`
-- `exchange/quote-service/**`
-- `.github/workflows/exchange-web.yml`
+- `exchange/web/**`;
+- `exchange/quote-service/**`;
+- `exchange/read-service/**`;
+- `420-indexer/**`;
+- `.github/workflows/exchange-web.yml`.
 
-Therefore the exact-head PRE-05 app-specific qualification remains valid. Full reconciliation with current `main` remains intentionally deferred to PRE-12 before monolithic merge.
+Therefore there is no upstream PRE-05 implementation conflict requiring step-local reconciliation. Full branch reconciliation with current `main` remains intentionally deferred to PRE-12 before monolithic merge.
 
 ## Level 3 app-phase status
 
@@ -245,12 +276,20 @@ Repository-wide Solidity/Genesis, Geth, Docs/global reconciliation, global fault
 
 ## Limitations / deliberately deferred work
 
-- PRE-05 qualification uses deterministic offline/static chain and route adapters; PRE-10 owns production Exchange read/Indexer/startup composition.
+- PRE-05 continues to use its provider-neutral chain/route adapter contract for quote production. PRE-10 is now COMPLETE and supplies the repository-owned production Exchange read/Indexer/startup composition; PRE-05 does not treat that read surface as execution or settlement authority.
 - Production signer custody/HSM/KMS/operator procedures are operational PRE-11/live deployment concerns; no production private key is committed.
 - Real deployed Exchange addresses/code hashes/live route state remain public-testnet gates.
 - PRE-05 authenticates a quote but does not itself authorize wallet submission.
 - PRE-06 must compose the authenticated quote into explicit review → confirmation → fresh preflight → default-OFF guarded-send orchestration.
 
-## Next canonical roadmap step
+## Post-PRE-10 requalification conclusion
 
-**PRE-06 — guarded swap orchestration.**
+**PRE-05 remains COMPLETE.**
+
+All original canonical exit criteria remain satisfied on the current accumulated Exchange implementation. No executable PRE-05 remediation was required. The current requalification is retained at implementation SHA `46e97d69a51deaad9460f9145735ee1cf96f658a` using Exchange workflow run `36802037691` / #730.
+
+## Next step in the roadmap's recommended dependency order
+
+After PRE-10, the recommended execution order returns to **PRE-05**. That dependency-order checkpoint is now explicitly revalidated and COMPLETE.
+
+The next **unfinished** canonical roadmap step is **PRE-11 — CI/security/packaging/operations closure.**

@@ -8,3 +8,12 @@ Civic v1 has no proposer cancel, emergency council, operator cancel or capabilit
 
 
 Canonical Civic v1 proposals are not cancellable.
+
+
+## Governance-authorized external calls and reentrancy
+
+Canonical Civic execution intentionally permits **governance-authorized arbitrary target calls** only after the exact action batch has been committed, passed, queued, and released by GovernanceTimelock. This is an accepted protocol capability, not an implicit trust grant to called contracts.
+
+The execution path relies on atomic EVM rollback, exact action-hash binding, Timelock single-use operation state, and Proposal Registry lifecycle state. Civic does **not** add an undocumented global reentrancy lock. A target that reenters the same Timelock operation cannot replay it because the operation is marked executed before the external call; direct reentry into the Governor batch is also restricted to the Timelock.
+
+Target contracts remain responsible for their own reentrancy safety, authorization, accounting, and failure behavior. A reverting target reverts the complete Governance batch and leaves the proposal queued for a later valid execution attempt; derived services must not infer partial execution.

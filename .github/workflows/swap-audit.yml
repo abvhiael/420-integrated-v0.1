@@ -15,6 +15,7 @@ on:
       - "scripts/verify-genesis-dapps.py"
       - "exchange/web/**"
       - "docs/apps/swap/**"
+      - "docs/audit/420SWAP-REPOSITORY-AUDIT-20261001.md"
       - ".github/workflows/swap-audit.yml"
   pull_request:
     branches: [main]
@@ -29,6 +30,7 @@ on:
       - "scripts/verify-genesis-dapps.py"
       - "exchange/web/**"
       - "docs/apps/swap/**"
+      - "docs/audit/420SWAP-REPOSITORY-AUDIT-20261001.md"
       - ".github/workflows/swap-audit.yml"
   workflow_dispatch:
 

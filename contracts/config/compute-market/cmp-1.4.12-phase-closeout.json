@@ -1,0 +1,67 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-1.4.12.PhaseCloseout.v1",
+  "step": "CMP-1.4.12",
+  "title": "Phase closeout",
+  "canonical_definition": "Phase closeout",
+  "baseline_main_sha": "06e137050964bb4f787164c9900f1740f2cf4b97",
+  "status": "QUALIFICATION_PENDING",
+  "repository_closeout_candidate": true,
+  "live_deployment_qualified": false,
+  "phase_steps": [
+    "CMP-1.4.0",
+    "CMP-1.4.1",
+    "CMP-1.4.2",
+    "CMP-1.4.3",
+    "CMP-1.4.4",
+    "CMP-1.4.5",
+    "CMP-1.4.6",
+    "CMP-1.4.7",
+    "CMP-1.4.8",
+    "CMP-1.4.9",
+    "CMP-1.4.10",
+    "CMP-1.4.11",
+    "CMP-1.4.12"
+  ],
+  "reconciled_internal_gaps": {
+    "cmp_1_4_4_signed_verdict_provenance": "IMPLEMENTED_QUALIFICATION_PENDING"
+  },
+  "authority_boundaries": [
+    "verifier identity/capability/selection/verdict authority does not imply worker lifecycle authority",
+    "verification does not imply Vault custody or settlement authority",
+    "authentication/provenance does not substitute for objective correctness",
+    "verification does not grant stake/slash, governance, validator, bridge or arbitrary-wallet authority",
+    "challenge/appeal hooks preserve original verdict provenance and do not rewrite custody"
+  ],
+  "retained_external_blockers": [
+    "CMP-1.5 canonical compute collateral for stake-required live verifier admission",
+    "qualified public testnet",
+    "real deployment addresses/transactions/blocks/runtime code hashes/release graph hash",
+    "governance-authorized ProtocolRegistry publication at frozen 0x0434"
+  ],
+  "phase_evidence": [
+    "contracts/config/compute-market/cmp-1.4.0-verifier-architecture.json",
+    "contracts/config/compute-market/cmp-1.4.1-verifier-identity-lifecycle.json",
+    "contracts/config/compute-market/cmp-1.4.2-verifier-classes-capabilities.json",
+    "contracts/config/compute-market/cmp-1.4.3-verification-policy-registry.json",
+    "contracts/config/compute-market/cmp-1.4.4-signed-verdict-provenance.json",
+    "contracts/config/compute-market/cmp-1.4.5-independent-verifier-selection.json",
+    "contracts/config/compute-market/cmp-1.4.6-replicated-verification.json",
+    "contracts/config/compute-market/cmp-1.4.7-deterministic-verification-adapters.json",
+    "contracts/config/compute-market/cmp-1.4.8-scientific-probabilistic-verification.json",
+    "contracts/config/compute-market/cmp-1.4.9-challenge-appeal-hooks.json",
+    "contracts/config/compute-market/cmp-1.4.10-cross-verifier-adversarial-qualification.json",
+    "contracts/config/compute-market/cmp-1.4.11-verifier-release-candidate.json"
+  ],
+  "level_3_required": true,
+  "level_3_required_workflows": [
+    "Compute Market Qualification",
+    "Solidity Contracts full PR inventory",
+    "Genesis Address Authority",
+    "420 Integrated Qualification",
+    "420Docs Qualification",
+    "420Indexer",
+    "420Registry REG-AUDIT-4"
+  ],
+  "qualification_evidence": null,
+  "next_canonical_step": "CMP-1.5.0 — Stake architecture"
+}

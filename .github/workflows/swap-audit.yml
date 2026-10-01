@@ -88,3 +88,5 @@ jobs:
       - run: npm run check
       - run: npm test
       - run: npm run build
+        env:
+          EXCHANGE_DEPLOYMENT_MODE: qualification

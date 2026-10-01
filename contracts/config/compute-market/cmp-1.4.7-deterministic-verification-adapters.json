@@ -63,5 +63,39 @@
     "Deterministic evidence does not itself mutate job verdict/settlement state or grant unrelated authority.",
     "Level 1 exact-head Compute qualification is green."
   ],
-  "status": "IMPLEMENTATION_COMPLETE_QUALIFICATION_PENDING"
+  "status": "COMPLETE_LEVEL_1",
+  "qualified_implementation_sha": "ff8a4ca1e0d19f859be27a9718c8b768c99ea308",
+  "level_1_results": {
+    "compute_market_qualification": {
+      "run_number": 38,
+      "run_id": 36809487492,
+      "conclusion": "success"
+    },
+    "solidity_contracts": {
+      "run_number": 3480,
+      "run_id": 36809487506,
+      "conclusion": "success"
+    },
+    "genesis_address_authority": {
+      "run_number": 300,
+      "run_id": 36809487464,
+      "conclusion": "success"
+    },
+    "docs_qualification": {
+      "run_number": 3676,
+      "run_id": 36809487489,
+      "conclusion": "success"
+    },
+    "indexer": {
+      "run_number": 1103,
+      "run_id": 36809487521,
+      "conclusion": "success"
+    },
+    "registry_audit": {
+      "run_number": 135,
+      "run_id": 36809487500,
+      "conclusion": "success"
+    }
+  },
+  "completion_note": "Exact-head Level 1 qualification passed on ff8a4ca1e0d19f859be27a9718c8b768c99ea308. This evidence-only closeout changes no executable source, tests, workflow, dependency, interface, configuration semantics or deployment state."
 }

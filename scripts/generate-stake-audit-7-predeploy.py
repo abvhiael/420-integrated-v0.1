@@ -45,6 +45,7 @@ SPECS = {
         "constructorKeys": ["governanceTimelock"],
         "postInit": [("bindConsensusSystemCaller(address)", ["consensusSystemCall420"])],
         "requiredStorageLabels": ["consensusSystemCaller", "consensusSystemCallerBound"],
+        "immutableLabels": ["governanceTimelock"],
         "schema": "420-stake-reward-controller-predeploy-v1",
     },
     "ValidatorRegistry": {
@@ -61,6 +62,7 @@ SPECS = {
             "consensusSystemCaller", "consensusSystemCallerBound",
             "communityValidatorReserve", "communityValidatorReserveBound",
         ],
+        "immutableLabels": ["governanceTimelock", "stakeProtocolRegistry", "genesisConfigHash"],
         "schema": "420-stake-validator-registry-predeploy-v1",
     },
     "CommunityValidatorReserve": {
@@ -71,6 +73,7 @@ SPECS = {
         "constructorKeys": ["governanceTimelock"],
         "postInit": [("bindValidatorRegistry(address)", ["validatorRegistry"])],
         "requiredStorageLabels": ["validatorRegistry", "validatorRegistryBound"],
+        "immutableLabels": ["governanceTimelock"],
         "schema": "420-stake-community-validator-reserve-predeploy-v1",
     },
     "Stake420": {
@@ -81,6 +84,7 @@ SPECS = {
         "constructorKeys": ["validatorRegistry", "rewardController"],
         "postInit": [],
         "requiredStorageLabels": [],
+        "immutableLabels": ["validatorRegistry", "rewardController"],
         "schema": "420-stake-facade-predeploy-v1",
     },
 }
@@ -342,7 +346,7 @@ def build_records():
             for label in spec["requiredStorageLabels"]:
                 if label not in roots:
                     fail(name+" required storage label missing: "+label)
-            for immutable_label in ("governanceTimelock","stakeProtocolRegistry","genesisConfigHash","validatorRegistry","rewardController"):
+            for immutable_label in spec["immutableLabels"]:
                 if immutable_label in roots:
                     fail(name+" immutable unexpectedly occupies mutable storage: "+immutable_label)
 

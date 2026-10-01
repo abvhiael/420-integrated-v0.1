@@ -125,7 +125,7 @@ for token in (
         fail("Search Identity qualification missing " + token)
 
 explorer = read(EXPLORER)
-for token in ("canonical log provenance", "complete raw topics/data", "not authority"):
+for token in ("canonical log provenance", "complete raw topics/data", "as authority"):
     if token not in explorer:
         fail("Explorer raw-event authority boundary missing: " + token)
 explorer_test = read(EXPLORER_TEST)

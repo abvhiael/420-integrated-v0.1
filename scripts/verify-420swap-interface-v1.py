@@ -14,6 +14,11 @@ for f in required:
     if f in ('SwapIds420.sol','CanonicalConstantProductPool420.sol'): continue
     text=(root/'contracts/src/swap'/f).read_text()
     if 'GenesisResidentAccess420' not in text: e.append(f+' not genesis-resident')
+factory=(root/'contracts/src/swap/GenesisDEXFactory.sol').read_text()
+for t in ['REGISTRATION_ONLY','registration-only','registerPool','poolImplementation','_requireGenesisGovernance','_requireOperational']:
+    if t not in factory:e.append('genesis factory missing '+t)
+if 'new CanonicalConstantProductPool420' in factory or 'create2' in factory.lower():
+    e.append('genesis factory unexpectedly contains pool deployment semantics')
 exe=(root/'contracts/src/swap/CanonicalSwapExecutor420.sol').read_text()
 for t in ['_canonicalSettlementAsset','_requireHealthyMarket','trustedCaller','CANONICAL_MARKET_REGISTRY','input overspend','under settlement','ACTION_EXECUTE_SWAP']:
     if t not in exe:e.append('executor missing '+t)
@@ -24,8 +29,8 @@ pool=(root/'contracts/src/swap/CanonicalConstantProductPool420.sol').read_text()
 for t in ['nonReentrant','quoteCanonicalSwap','executeCanonicalSwap','MINIMUM_LIQUIDITY','UnsupportedTokenBehavior','UnauthorizedExecutor','inputAmount','exactSettlementAmount']:
     if t not in pool:e.append('production pool missing '+t)
 for tf in [
-    'CanonicalConstantProductPool420.t.sol','SwapGenesisIntegration420.t.sol','SwapFuzz420.t.sol',
-    'SwapInvariant420.t.sol','PaySwapGenesisIntegration420.t.sol','PaySwapBridgeGenesisIntegration420.t.sol'
+    'CanonicalConstantProductPool420.t.sol','SwapGenesisDEXFactory420.t.sol','SwapGenesisIntegration420.t.sol',
+    'SwapFuzz420.t.sol','SwapInvariant420.t.sol','PaySwapGenesisIntegration420.t.sol','PaySwapBridgeGenesisIntegration420.t.sol'
 ]:
     if not (root/'contracts/test'/tf).exists():e.append('missing test '+tf)
 mapj=json.loads((root/'contracts/config/genesis-dapp-contract-map.json').read_text())
@@ -38,6 +43,7 @@ out={
     'pass':not e,
     'errors':e,
     'shared_interface_v1':True,
+    'genesis_dex_factory_semantics':'REGISTRATION_ONLY' if not e else 'QUALIFICATION_FAILED',
     'production_pool_execution':'PRODUCTION_CANDIDATE_PRESENT' if not e else 'QUALIFICATION_FAILED'
 }
 (root/'contracts/config/swap/interface-v1-verification.json').write_text(json.dumps(out,indent=2)+'\n')

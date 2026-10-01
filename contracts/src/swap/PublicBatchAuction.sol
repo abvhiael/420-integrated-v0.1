@@ -244,7 +244,7 @@ contract PublicBatchAuction is GenesisResidentAccess420 {
         _requireOperational(
             SwapIds420.ACTION_SETTLE_AUCTION,
             ISystemSafety420.ActionClass.SAFE_WHEN_PAUSED,
-            Types420.Direction.OUTBOUND
+            Types420.Direction.NONE
         );
 
         Auction storage a = auctions[auctionId];

@@ -83,6 +83,9 @@ jobs:
       - name: Verify CMP-1.4.3 verification policy registry
         run: python scripts/verify-cmp-1-4-3-verification-policy.py
 
+      - name: Verify CMP-1.4.4 signed verdict provenance
+        run: python scripts/verify-cmp-1-4-4-signed-verdict-provenance.py
+
       - name: Verify CMP-1.4.5 independent verifier selection
         run: python scripts/verify-cmp-1-4-5-independent-selection.py
 
@@ -111,3 +114,6 @@ jobs:
             echo "live verifier readiness unexpectedly passed"
             exit 1
           fi
+
+      - name: Verify CMP-1.4.12 phase closeout reconciliation
+        run: python scripts/verify-cmp-1-4-12-closeout.py

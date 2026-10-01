@@ -6,11 +6,24 @@ import "./ComputeJobAcceptedMatch420.sol";
 import "./IComputeAcceptedMatchRuntime420.sol";
 import "./ComputeAuthorization420.sol";
 
+interface IComputeVerdictWorkerContext420 {
+    function verdictContext(bytes32 jobId) external view returns (
+        bytes32 unitId,
+        bytes32 attemptRef,
+        uint64 attempt,
+        address worker,
+        bytes32 resultCommitment,
+        bytes32 executionEvidenceCommitment
+    );
+}
+
 /// @notice Signed verifier verdict primitive. For production, deploy the policy-enforced subclass.
 /// @dev Signatures and distinct wallet addresses alone do not prove beneficial-owner independence.
 contract ComputeJobIndependentVerification420 is IComputeJobVerificationEvidence420 {
     bytes32 public constant DOMAIN_TYPEHASH = keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)");
-    bytes32 public constant VERDICT_TYPEHASH = keccak256("ComputeVerdict(bytes32 jobId,bytes32 requestId,bytes32 manifestHash,bytes32 matchId,bytes32 assignmentRef,bytes32 resultCommitment,address verifier,bytes32 profileId,bool approved,uint64 expectedRevision,uint64 expiry,uint256 nonce)");
+    bytes32 public constant VERDICT_TYPEHASH = keccak256("ComputeVerdict(bytes32 jobId,bytes32 requestId,bytes32 manifestHash,bytes32 matchId,bytes32 assignmentRef,bytes32 resultCommitment,address verifier,bytes32 profileId,bool approved,uint64 expectedRevision,uint64 expiry,uint256 nonce,bytes32 provenanceHash)");
+    bytes32 public constant PROVENANCE_TYPEHASH = keccak256("DecisionProvenance(address jobRegistry,bytes32 unitId,bytes32 attemptRef,uint64 attempt,address worker,bytes32 policyId,uint32 policyRevision,bytes32 policyCommitment,bytes32 evidenceCommitment)");
+    bytes32 private constant PROVENANCE_EVIDENCE_DOMAIN = keccak256("420/COMPUTE/VERDICT/PROVENANCE/EVIDENCE/V1");
     bytes32 private constant NAME_HASH = keccak256("420 Compute Verification");
     bytes32 private constant VERSION_HASH = keccak256("1");
     bytes4 private constant ERC1271_MAGIC = 0x1626ba7e;
@@ -30,11 +43,23 @@ contract ComputeJobIndependentVerification420 is IComputeJobVerificationEvidence
         uint64 expiry;
         uint256 nonce;
     }
+    struct DecisionProvenance {
+        address jobRegistry;
+        bytes32 unitId;
+        bytes32 attemptRef;
+        uint64 attempt;
+        address worker;
+        bytes32 policyId;
+        uint32 policyRevision;
+        bytes32 policyCommitment;
+        bytes32 evidenceCommitment;
+    }
     struct Decision {
         bytes32 jobId;
         bytes32 resultCommitment;
         address verifier;
         bytes32 profileId;
+        bytes32 provenanceHash;
         bool approved;
         bool exists;
     }
@@ -47,13 +72,14 @@ contract ComputeJobIndependentVerification420 is IComputeJobVerificationEvidence
     mapping(address => mapping(uint256 => bool)) public usedNonce;
     mapping(bytes32 => bytes32) public decisionForJob;
     mapping(bytes32 => Decision) private _decisions;
+    mapping(bytes32 => DecisionProvenance) private _provenance;
 
     error InvalidEvidence();
     error Unauthorized();
     error InvalidSignature();
     event ProfileApproved(bytes32 indexed profileId, bool approved);
     event VerificationRecorded(bytes32 indexed jobId, bytes32 indexed decisionRef, address indexed verifier,
-        bytes32 profileId, bool approved);
+        bytes32 profileId, bytes32 provenanceHash, bool approved);
 
     constructor(address matches_, address authorization_) {
         if (matches_.code.length == 0 || authorization_.code.length == 0) revert InvalidEvidence();
@@ -83,10 +109,40 @@ contract ComputeJobIndependentVerification420 is IComputeJobVerificationEvidence
         return keccak256(abi.encode(DOMAIN_TYPEHASH, NAME_HASH, VERSION_HASH, block.chainid, address(this)));
     }
 
+    function provenanceHash(DecisionProvenance memory p) public pure returns (bytes32) {
+        return keccak256(abi.encode(
+            PROVENANCE_TYPEHASH,
+            p.jobRegistry,
+            p.unitId,
+            p.attemptRef,
+            p.attempt,
+            p.worker,
+            p.policyId,
+            p.policyRevision,
+            p.policyCommitment,
+            p.evidenceCommitment
+        ));
+    }
+
     function verdictDigest(Verdict calldata v) public view returns (bytes32) {
-        bytes32 structHash = keccak256(abi.encode(VERDICT_TYPEHASH, v.jobId, v.requestId,
-            v.manifestHash, v.matchId, v.assignmentRef, v.resultCommitment,
-            v.verifier, v.profileId, v.approved, v.expectedRevision, v.expiry, v.nonce));
+        ComputeJobRegistry420.Job memory j = jobs.job(v.jobId);
+        DecisionProvenance memory p = _canonicalProvenance(v, j);
+        bytes32 structHash = keccak256(abi.encode(
+            VERDICT_TYPEHASH,
+            v.jobId,
+            v.requestId,
+            v.manifestHash,
+            v.matchId,
+            v.assignmentRef,
+            v.resultCommitment,
+            v.verifier,
+            v.profileId,
+            v.approved,
+            v.expectedRevision,
+            v.expiry,
+            v.nonce,
+            provenanceHash(p)
+        ));
         return keccak256(abi.encodePacked("\x19\x01", domainSeparator(), structHash));
     }
 
@@ -110,20 +166,25 @@ contract ComputeJobIndependentVerification420 is IComputeJobVerificationEvidence
             || matchOwner == v.verifier) revert Unauthorized();
         if (!authorization.isAuthorized(v.verifier, authorization.ACTION_VERIFY_RESULT(),
             authorization.scopeJob(v.jobId), 0)) revert Unauthorized();
+        DecisionProvenance memory p = _canonicalProvenance(v, j);
+        bytes32 pHash = provenanceHash(p);
         decisionRef = verdictDigest(v);
         if (!_validSignature(v.verifier, decisionRef, signature)) revert InvalidSignature();
         usedNonce[v.verifier][v.nonce] = true;
         decisionForJob[v.jobId] = decisionRef;
-        _decisions[decisionRef] = Decision(v.jobId, v.resultCommitment, v.verifier,
-            v.profileId, v.approved, true);
+        _provenance[decisionRef] = p;
+        _decisions[decisionRef] = Decision(
+            v.jobId, v.resultCommitment, v.verifier, v.profileId, pHash, v.approved, true
+        );
         jobs.recordVerification(v.jobId, v.expectedRevision, v.verifier, decisionRef, v.approved);
-        emit VerificationRecorded(v.jobId, decisionRef, v.verifier, v.profileId, v.approved);
+        emit VerificationRecorded(v.jobId, decisionRef, v.verifier, v.profileId, pHash, v.approved);
     }
 
     function verified(bytes32 jobId, bytes32 resultCommitment, address verifier, bytes32 decisionRef,
         bool approved) external view returns (bool) {
         Decision storage d = _decisions[decisionRef];
-        return d.exists && decisionForJob[jobId] == decisionRef && d.jobId == jobId
+        return d.exists && d.provenanceHash != bytes32(0)
+            && decisionForJob[jobId] == decisionRef && d.jobId == jobId
             && d.resultCommitment == resultCommitment && d.verifier == verifier
             && d.approved == approved && approvedProfile[d.profileId];
     }
@@ -131,6 +192,78 @@ contract ComputeJobIndependentVerification420 is IComputeJobVerificationEvidence
     function decision(bytes32 decisionRef) external view returns (Decision memory d) {
         d = _decisions[decisionRef];
         if (!d.exists) revert InvalidEvidence();
+    }
+
+    function decisionProvenance(bytes32 decisionRef)
+        external view returns (DecisionProvenance memory p)
+    {
+        if (!_decisions[decisionRef].exists) revert InvalidEvidence();
+        p = _provenance[decisionRef];
+        if (p.jobRegistry == address(0)) revert InvalidEvidence();
+    }
+
+    function _canonicalProvenance(Verdict calldata v, ComputeJobRegistry420.Job memory j)
+        private view returns (DecisionProvenance memory p)
+    {
+        (
+            bytes32 unitId,
+            bytes32 attemptRef,
+            uint64 attempt,
+            address worker,
+            bytes32 resultCommitment,
+            bytes32 executionEvidenceCommitment
+        ) = IComputeVerdictWorkerContext420(address(jobs.workerEvidence())).verdictContext(v.jobId);
+
+        if (
+            unitId == bytes32(0) || attemptRef == bytes32(0) || attempt == 0
+                || worker == address(0) || resultCommitment == bytes32(0)
+                || executionEvidenceCommitment == bytes32(0)
+        ) revert InvalidEvidence();
+
+        // Current CMP-1 fixed-price implementation has one canonical payable unit per job.
+        // Retry identity is carried separately by attemptRef + attempt.
+        if (
+            unitId != v.jobId || worker != j.worker || resultCommitment != j.resultCommitment
+        ) revert InvalidEvidence();
+
+        if (address(jobs.verificationPolicies()) != address(0)) {
+            if (
+                j.verificationPolicyId == bytes32(0)
+                    || j.verificationPolicyRevision == 0
+                    || j.verificationPolicyCommitment == bytes32(0)
+            ) revert InvalidEvidence();
+        }
+
+        bytes32 evidenceCommitment = keccak256(abi.encode(
+            PROVENANCE_EVIDENCE_DOMAIN,
+            block.chainid,
+            address(this),
+            address(jobs),
+            v.jobId,
+            unitId,
+            attemptRef,
+            attempt,
+            worker,
+            resultCommitment,
+            v.profileId,
+            j.verificationPolicyId,
+            j.verificationPolicyRevision,
+            j.verificationPolicyCommitment,
+            executionEvidenceCommitment
+        ));
+        if (evidenceCommitment == bytes32(0)) revert InvalidEvidence();
+
+        p = DecisionProvenance({
+            jobRegistry: address(jobs),
+            unitId: unitId,
+            attemptRef: attemptRef,
+            attempt: attempt,
+            worker: worker,
+            policyId: j.verificationPolicyId,
+            policyRevision: j.verificationPolicyRevision,
+            policyCommitment: j.verificationPolicyCommitment,
+            evidenceCommitment: evidenceCommitment
+        });
     }
 
     function _validSignature(address signer, bytes32 digest, bytes calldata signature)

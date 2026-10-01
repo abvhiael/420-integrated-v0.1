@@ -271,3 +271,10 @@ The commits that record this qualification evidence are evidence-only and do not
 CMP-1.4.11 is complete at repository readiness only. It does not claim live deployment readiness. CMP-1.4.4, CMP-1.5 collateral prerequisites where applicable, public-testnet evidence, deployment addresses/transactions/blocks/runtime hashes, release graph hash and ProtocolRegistry publication remain unresolved live blockers.
 
 The next canonical roadmap step is **CMP-1.4.12 — Phase closeout**. That closeout must explicitly reconcile the still-open CMP-1.4.4 gap before any claim that the complete CMP-1.4 phase is fully closed.
+
+
+## CMP-1.4.12 reconciliation note
+
+The CMP-1.4.11 qualification above is historical evidence for its exact qualified SHA, where CMP-1.4.4 was still open. CMP-1.4.12 subsequently implements the missing canonical signed-verdict provenance requirement and updates the release manifest so CMP-1.4.4 is no longer an internal repository-release blocker.
+
+This does not retroactively change the CMP-1.4.11 qualification SHA or its run evidence. Live deployment remains blocked by CMP-1.5 collateral where applicable, public-testnet/deployment evidence, runtime hashes/graph bindings and governance-authorized ProtocolRegistry publication.

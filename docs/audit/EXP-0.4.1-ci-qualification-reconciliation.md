@@ -8,16 +8,18 @@ This step establishes the authoritative inventory of active qualification mechan
 
 ## Findings
 
-Six active workflows materially contribute to Explorer qualification:
+Eight active workflows materially contribute to Explorer qualification:
 
 1. **420Indexer** — primary Explorer/Indexer repository source and integration gate.
 2. **420Explorer Live Testnet Validation** — manual Explorer-specific live target gate.
 3. **420 Integrated Qualification** — repository-wide regression/build/Engine/fault/soak support.
 4. **420Docs Qualification** — documentation and audit consistency support.
-5. **Genesis Address Authority** — conditional frozen-address/predeploy/Solidity authority support when shared config/address surfaces are touched.
+5. **Genesis Address Authority** — conditional frozen-address, namespace, collision and predeploy authority support when shared config/address surfaces are touched. It does **not** own or duplicate repository-wide Foundry qualification.
 6. **420 Integrated Testnet RC** — manual network release-candidate support; not a substitute for Explorer live validation.
+7. **420Explorer EXP-NEXT.4 Repository Readiness** — repository-readiness and live-blocker integrity support.
+8. **Solidity Contracts** — canonical owner of the complete repository Foundry inventory, using four runner-aware deterministic shards.
 
-The machine-readable inventory expands these into 20 concrete mechanisms and records commands, environment requirements, artifacts, authority level, qualification scope, exclusions, finding references and acceptance-criterion references.
+The machine-readable inventory expands these into 22 concrete mechanisms and records commands, environment requirements, artifacts, authority level, qualification scope, exclusions, finding references and acceptance-criterion references.
 
 ## Evidence semantics
 
@@ -36,14 +38,15 @@ The machine-readable inventory expands these into 20 concrete mechanisms and rec
 - required workflow names/triggers/commands drift;
 - the primary gate no longer executes the retained Explorer/Indexer test and EXP verifier chain;
 - the live workflow loses its unit/live validator commands or evidence upload;
-- repository, docs, address-authority or RC supporting gates drift from the recorded commands;
+- repository, docs, address-authority, canonical Solidity-inventory or RC supporting gates drift from the recorded commands;
+- Genesis regains a duplicate Foundry inventory or Solidity Contracts loses canonical full-inventory ownership;
 - workflow/mechanism identifiers are missing or duplicated;
 - a workflow lacks scope, exclusions, authority, evidence, finding mapping or AC mapping fields;
 - the inventory falsely labels a supporting workflow as Explorer live authority.
 
 ## Scope boundary
 
-EXP-0.4.1 inventories and qualifies the CI/qualification machinery itself. It does **not** close any of the ten remaining Genesis-blocking findings, qualify a deployment, run the manual live workflow, or promote any Genesis acceptance criterion to satisfied.
+EXP-0.4.1 inventories and qualifies the CI/qualification machinery itself. Repository-wide Foundry qualification has one canonical owner: **Solidity Contracts**. **Genesis Address Authority** is limited to address/namespace/predeploy authority checks and must not duplicate that Foundry inventory. It does **not** close any of the ten remaining Genesis-blocking findings, qualify a deployment, run the manual live workflow, or promote any Genesis acceptance criterion to satisfied.
 
 
 ## Exact-head qualification evidence

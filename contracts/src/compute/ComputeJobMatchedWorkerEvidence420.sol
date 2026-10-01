@@ -111,6 +111,32 @@ contract ComputeJobMatchedWorkerEvidence420 is IComputeJobWorkerEvidence420 {
             && a.receiptHash != bytes32(0);
     }
 
+    /// @notice Canonical signed-verdict execution context for the current single-unit V1 job.
+    /// @dev unitId is the jobId in the current fixed-price single-unit scope. attemptRef is the
+    /// exact assignment that committed the result; executionEvidenceCommitment commits the
+    /// receipt/output/resource context without exposing raw evidence bytes.
+    function verdictContext(bytes32 jobId) external view returns (
+        bytes32 unitId,
+        bytes32 attemptRef,
+        uint64 attempt,
+        address worker,
+        bytes32 resultCommitment,
+        bytes32 executionEvidenceCommitment
+    ) {
+        attemptRef = assignmentForJob[jobId];
+        Assignment storage a = _assignments[attemptRef];
+        if (!a.exists || a.jobId != jobId || a.resultCommitment == bytes32(0)
+            || a.receiptHash == bytes32(0) || a.outputHash == bytes32(0)) revert InvalidEvidence();
+        unitId = jobId;
+        attempt = a.attempt;
+        worker = a.worker;
+        resultCommitment = a.resultCommitment;
+        executionEvidenceCommitment = keccak256(abi.encode(
+            RESULT_DOMAIN, jobId, attemptRef, a.matchId, a.acceptanceRef, a.resourceId,
+            a.attempt, a.worker, a.receiptHash, a.outputHash, a.resultCommitment
+        ));
+    }
+
     function getAssignment(bytes32 assignmentRef) external view returns (Assignment memory a) {
         a = _assignments[assignmentRef];
         if (!a.exists) revert InvalidEvidence();

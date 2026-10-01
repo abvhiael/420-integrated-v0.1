@@ -1,0 +1,54 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-1.4.4.SignedVerdictProvenance.v1",
+  "step": "CMP-1.4.4",
+  "title": "Signed verdicts and decision provenance",
+  "canonical_requirement": "Bind every verdict to chain, contract, job, unit, attempt, worker, result, verifier, policy, evidence, nonce and expiry.",
+  "status": "IMPLEMENTED_QUALIFICATION_PENDING",
+  "scope": {
+    "unit_model": "CMP-1 fixed-price repository scope uses one canonical payable unit per job; unitId equals jobId.",
+    "retry_model": "attemptRef and monotonic attempt identify the exact latest result-bearing retry attempt.",
+    "correctness_boundary": "Authentication/provenance does not itself prove correctness or authorize settlement."
+  },
+  "bindings": [
+    "chain:EIP712 domain + provenance evidence",
+    "contract:verifying verifier contract + canonical JobRegistry",
+    "job:jobId",
+    "unit:unitId",
+    "attempt:attemptRef + attempt",
+    "worker:canonical worker context",
+    "result:canonical resultCommitment",
+    "verifier:EIP712 signer/verifier field",
+    "policy:frozen policy id/revision/commitment",
+    "evidence:executionEvidenceCommitment folded into evidenceCommitment",
+    "nonce:verifier-scoped nonce",
+    "expiry:signed expiry"
+  ],
+  "implementation": [
+    "contracts/src/compute/ComputeJobIndependentVerification420.sol",
+    "contracts/src/compute/ComputeJobMatchedWorkerEvidence420.sol",
+    "contracts/src/compute/ComputeJobWorkerSnapshotEvidence420.sol"
+  ],
+  "retained_tests": [
+    "contracts/test/ComputeJobIndependentVerification420.t.sol",
+    "contracts/test/ComputeJobPolicyEnforcedVerification420.t.sol",
+    "contracts/test/ComputeJobWorkerSnapshotEvidence420.t.sol",
+    "contracts/test/ComputeJobIntegerProfileHostile420.t.sol",
+    "contracts/test/ComputeJobProfileEvidenceIntegrity420.t.sol"
+  ],
+  "invariants": [
+    "cross-chain/cross-contract replay fails through EIP-712 domain separation",
+    "wrong result/assignment/revision/profile/signature fails closed",
+    "nonce replay and expiry fail closed",
+    "canonical worker/attempt context is read from worker evidence rather than relayer fields",
+    "frozen verification policy is included in signed provenance",
+    "negative verdicts preserve provenance without authorizing custody release",
+    "verification remains separate from correctness proof and settlement authority"
+  ],
+  "live_deployment": false,
+  "no_fixed_genesis_predeploy": true,
+  "qualification": {
+    "level_1": "PENDING",
+    "level_2": "RECONCILED_AT_PHASE_CLOSEOUT",
+    "level_3": "PENDING_CMP_1_4_12"
+  }
+}

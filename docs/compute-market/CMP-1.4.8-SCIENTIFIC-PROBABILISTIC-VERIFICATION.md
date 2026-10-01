@@ -74,7 +74,7 @@ It freezes:
 - accepted verification-policy ID/revision/commitment;
 - domain-separated binding reference.
 
-The seed commitment prevents a sampling plan from being chosen after seeing the worker result. It does not by itself prove that the sampling authority kept the seed secret or generated it randomly; operational key separation/randomness evidence remains independently required.
+The seed commitment prevents a sampling plan from being chosen after seeing the worker result. The router also rejects a sampling authority that is the job owner and rejects evaluation when that authority is the executing worker. It does not by itself prove seed secrecy, randomness, payer independence, or beneficial-controller separation; those remain operational/selection evidence requirements.
 
 ### Post-result evaluation
 
@@ -103,7 +103,7 @@ and the worker mean as:
 
 The protocol:
 
-- requires at least 16 elements;
+- requires a power-of-two dataset size from 16 through 2,147,483,648 elements, bounding Merkle depth to at most 31;
 - authenticates exactly four seed-derived unique sample indices;
 - verifies every sampled `(index,value)` against the committed Merkle root;
 - limits values to `1,000,000,000`;

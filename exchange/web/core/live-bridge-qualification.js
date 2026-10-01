@@ -79,7 +79,7 @@ export async function qualifyLiveTestnetBridge({
   for(const c of sourceAllowanceChecks) if(String(c.owner??'').toLowerCase()!==source.account) throw new BridgeQualificationError('ALLOWANCE_MISMATCH','allowance owner differs from live source account');
   const transaction=buildBridgeOutboundTransaction({runtime:sourceRuntime,account:source.account,reviewedIntent,execution});
   const preflight=await preflightExchangeTransaction({provider:sourceProvider,transaction,runtime:sourceRuntime,freshness:sourceFreshness,authorizationChecks:sourceAuthorizationChecks,allowanceChecks:sourceAllowanceChecks,staticCalls:sourceStaticCalls});
-  const submitted=await submitPreflightedTransaction({provider:sourceProvider,session:source.session,expectedChainId:sourceRuntime.network.chainId,expectedGeneration:source.session.generation,transaction,preflight});
+  const submitted=await submitPreflightedTransaction({provider:sourceProvider,session:source.session,expectedChainId:sourceRuntime.network.chainId,expectedGeneration:source.session.generation,transaction,preflight,submissionGate:{enabled:true,mode:'LIVE_TESTNET_QUALIFICATION'}});
   const sourceFinality=await finalized(sourceProvider,submitted.txHash,{maxAttempts,sleep,pollMs});
   const sourceMessageId=parseOutbound(sourceFinality.receipt.raw,sourceRuntime.contracts.GatewayRouter420,routeId,adapterId);
   const destination=await accountSession(destinationProvider,destinationRuntime.network.chainId);
@@ -87,7 +87,7 @@ export async function qualifyLiveTestnetBridge({
   if(proofResult?.sourceTxHash?.toLowerCase()!==submitted.txHash||proofResult?.sourceMessageId?.toLowerCase()!==sourceMessageId||proofResult?.destinationAdapterId?.toLowerCase()!==destinationAdapterId.toLowerCase()) throw new BridgeQualificationError('PROOF_BINDING_MISMATCH','proof metadata does not bind source message and destination adapter');
   const inbound={kind:'BRIDGE',chainId:destinationRuntime.network.chainId,request:{from:destination.account,to:destinationRuntime.contracts.GatewayRouter420,data:encodeAcceptInbound(destinationAdapterId,proofResult.proof),value:'0x0'}};
   const inboundPreflight=await preflightExchangeTransaction({provider:destinationProvider,transaction:inbound,runtime:destinationRuntime});
-  const inboundSubmission=await submitPreflightedTransaction({provider:destinationProvider,session:destination.session,expectedChainId:destinationRuntime.network.chainId,expectedGeneration:destination.session.generation,transaction:inbound,preflight:inboundPreflight});
+  const inboundSubmission=await submitPreflightedTransaction({provider:destinationProvider,session:destination.session,expectedChainId:destinationRuntime.network.chainId,expectedGeneration:destination.session.generation,transaction:inbound,preflight:inboundPreflight,submissionGate:{enabled:true,mode:'LIVE_TESTNET_QUALIFICATION'}});
   const destinationFinality=await finalized(destinationProvider,inboundSubmission.txHash,{maxAttempts,sleep,pollMs});
   const transferId=parseInbound(destinationFinality.receipt.raw,destinationRuntime.contracts.GatewayRouter420,destinationAdapterId.toLowerCase());
   if(expectedTransferId!==null&&transferId!==expectedTransferId.toLowerCase()) throw new BridgeQualificationError('TRANSFER_ID_MISMATCH','destination transfer ID differs from canonical expected transfer');

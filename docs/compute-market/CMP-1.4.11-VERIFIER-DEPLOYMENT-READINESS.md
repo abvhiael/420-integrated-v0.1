@@ -1,6 +1,6 @@
 # CMP-1.4.11 — Release-candidate/deployment readiness
 
-Status: **IMPLEMENTATION COMPLETE; LEVEL 1 QUALIFICATION PENDING. REPOSITORY RELEASE PACKAGE READY; LIVE DEPLOYMENT BLOCKED.**
+Status: **COMPLETE — LEVEL 1 QUALIFIED. REPOSITORY-QUALIFIED RELEASE CANDIDATE; LIVE DEPLOYMENT BLOCKED.**
 
 ## Canonical definition
 
@@ -228,6 +228,46 @@ CMP-1.4.11 is repository-qualified when:
 
 This step does **not** claim live deployment readiness while those blockers remain.
 
+## Qualification evidence
+
+Qualified implementation SHA:
+
+`c5d1ccffc6937ad5fde27b85ac3d6ece8e4d84f4`
+
+Exact successful qualification runs:
+
+- Compute Market Qualification #69 — run `36882487806`;
+- Solidity Contracts #3591 — run `36882487546`;
+- 420Registry REG-AUDIT-4 #233 — run `36882487724`;
+- Genesis Address Authority #398 — run `36882487532`;
+- 420Indexer #1207 — run `36882487579`;
+- 420Docs Qualification #3795 — run `36882487765`.
+
+Retained Compute Market Solidity qualification on the exact implementation SHA:
+
+- 49 test suites;
+- 323 tests passed;
+- 0 failed;
+- 0 skipped.
+
+The CMP-1.4.11 repository-ready verifier passed and reported `READY / LIVE BLOCKED`. The separate live-readiness fail-closed CI assertion also passed, proving that the current blocker state still prevents a false live-ready result.
+
+Level 1: **COMPLETE / PASS**.
+
+Level 2: **not rerun for CMP-1.4.11** because CMP-1.4.10 immediately preceding this step already qualified the cross-verifier integration milestone, and CMP-1.4.11 changes release wiring/evidence rather than verifier execution semantics.
+
+Level 3: **deferred to CMP-1.4.12 — Phase closeout**.
+
+Live deployment: **BLOCKED**.
+
+CMP-1.4.4: **OPEN — explicit live-deployment blocker**.
+
+The commits that record this qualification evidence are evidence-only and do not change executable source, tests, workflows, dependencies, interfaces, deployment state or release requirements; under the qualification model they do not recursively require a fresh qualification cycle.
+
 ## Completion
 
-**NOT YET COMPLETE.** Implementation and release-package evidence are present; exact-head Level 1 qualification remains pending.
+**COMPLETE — repository-qualified release candidate / live deployment blocked.**
+
+CMP-1.4.11 is complete at repository readiness only. It does not claim live deployment readiness. CMP-1.4.4, CMP-1.5 collateral prerequisites where applicable, public-testnet evidence, deployment addresses/transactions/blocks/runtime hashes, release graph hash and ProtocolRegistry publication remain unresolved live blockers.
+
+The next canonical roadmap step is **CMP-1.4.12 — Phase closeout**. That closeout must explicitly reconcile the still-open CMP-1.4.4 gap before any claim that the complete CMP-1.4 phase is fully closed.

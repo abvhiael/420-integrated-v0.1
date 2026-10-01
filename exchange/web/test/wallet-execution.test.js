@@ -161,6 +161,22 @@ test('limit-order qualification enforces allowance, capability and expiry before
   assert.equal(result.authorization.ok,true);
 });
 
+test('limit-order signing is independently default-OFF before provider signing is reached',async()=>{
+  const s=session();
+  const signingRequest={
+    method:'eth_signTypedData_v4',kind:'LIMIT_ORDER',account:address(1),chainId:'0x420',
+    typedData:{domain:{name:'420Exchange Limit Orders',version:'1',chainId:'0x420',verifyingContract:address(50)},types:{EIP712Domain:[],LimitOrder:[]},primaryType:'LimitOrder',message:{maker:address(1)}},
+    order:{maker:address(1)},
+  };
+  const qualification={ok:true,kind:'LIMIT_ORDER',account:address(1),chainId:'0x420'};
+  const provider=new MockProvider(()=>{throw new Error('provider signing must not be reached');});
+  await assert.rejects(
+    signQualifiedLimitOrder({provider,session:s,expectedChainId:'0x420',expectedGeneration:s.generation,signingRequest,qualification}),
+    (error)=>error instanceof WalletExecutionError&&error.code==='LIVE_ORDER_SIGNING_DISABLED',
+  );
+  assert.equal(provider.calls.length,0);
+});
+
 test('qualified EIP-712 limit order signs only through an explicit PRE-07 signing gate',async()=>{
   const s=session();
   const signingRequest={

@@ -87,6 +87,12 @@ contract MockAudit2Electorate420 is ICivicElectorateSource420 {
         weights[voter] = weight;
     }
 
+    function setTotalWeight(
+        uint256 totalWeight_
+    ) external {
+        totalWeight = totalWeight_;
+    }
+
     function snapshotAt(
         uint64
     ) external view returns (bytes32, uint256) {
@@ -117,6 +123,8 @@ contract GovernanceAudit2Hardening420Test {
 
     address constant ALICE = address(0xA11CE);
     address constant BOB = address(0xB0B);
+
+    VoteStack private fuzzStack;
 
     struct VoteStack {
         GovernanceTimelock timelock;
@@ -152,6 +160,10 @@ contract GovernanceAudit2Hardening420Test {
         s.proposals.bindProposalAuthority(address(s.governor));
         vm.prank(address(s.timelock));
         s.electorates.bindSnapshotAuthority(address(s.governor));
+    }
+
+    function setUp() public {
+        fuzzStack = _voteStack(100, 5000, 6000);
     }
 
     function _proposal(
@@ -254,40 +266,41 @@ contract GovernanceAudit2Hardening420Test {
         require(!ok, "timestamp overflow schedule succeeded");
     }
 
-    function testFuzzLifecycleTransitionMatrix(
-        uint8 fromRaw,
-        uint8 toRaw
-    ) public {
-        CivicProposalRegistry420 proposals = new CivicProposalRegistry420(address(this));
-        MockAudit2Authority420 authority =
-            new MockAudit2Authority420(address(proposals), address(0xBEEF), address(this));
-        proposals.bindProposalAuthority(address(authority));
+    function testLifecycleTransitionMatrixExhaustive() public {
+        for (uint8 from = 0; from < 5; ++from) {
+            for (uint8 toRaw = 0; toRaw < 7; ++toRaw) {
+                CivicProposalRegistry420 proposals = new CivicProposalRegistry420(address(this));
+                MockAudit2Authority420 authority =
+                    new MockAudit2Authority420(address(proposals), address(0xBEEF), address(this));
+                proposals.bindProposalAuthority(address(authority));
 
-        bytes32 proposalId = keccak256(abi.encode("GOV-AUDIT-2-LIFECYCLE", fromRaw, toRaw));
-        authority.register(proposals, proposalId);
+                bytes32 proposalId = keccak256(abi.encode("GOV-AUDIT-2-LIFECYCLE", from, toRaw));
+                authority.register(proposals, proposalId);
 
-        uint8 from = fromRaw % 5;
-        if (from == 1) {
-            authority.transition(proposals, proposalId, CivicIds420.ProposalState.PASSED);
-        } else if (from == 2) {
-            authority.transition(proposals, proposalId, CivicIds420.ProposalState.PASSED);
-            authority.transition(proposals, proposalId, CivicIds420.ProposalState.QUEUED);
-        } else if (from == 3) {
-            authority.transition(proposals, proposalId, CivicIds420.ProposalState.PASSED);
-            authority.transition(proposals, proposalId, CivicIds420.ProposalState.QUEUED);
-            authority.transition(proposals, proposalId, CivicIds420.ProposalState.EXECUTED);
-        } else if (from == 4) {
-            authority.transition(proposals, proposalId, CivicIds420.ProposalState.FAILED);
+                if (from == 1) {
+                    authority.transition(proposals, proposalId, CivicIds420.ProposalState.PASSED);
+                } else if (from == 2) {
+                    authority.transition(proposals, proposalId, CivicIds420.ProposalState.PASSED);
+                    authority.transition(proposals, proposalId, CivicIds420.ProposalState.QUEUED);
+                } else if (from == 3) {
+                    authority.transition(proposals, proposalId, CivicIds420.ProposalState.PASSED);
+                    authority.transition(proposals, proposalId, CivicIds420.ProposalState.QUEUED);
+                    authority.transition(proposals, proposalId, CivicIds420.ProposalState.EXECUTED);
+                } else if (from == 4) {
+                    authority.transition(proposals, proposalId, CivicIds420.ProposalState.FAILED);
+                }
+
+                CivicIds420.ProposalState next = CivicIds420.ProposalState(toRaw);
+                bool allowed =
+                    (from == 0 && (next == CivicIds420.ProposalState.PASSED || next == CivicIds420.ProposalState.FAILED))
+                        || (from == 1 && next == CivicIds420.ProposalState.QUEUED)
+                        || (from == 2 && next == CivicIds420.ProposalState.EXECUTED);
+
+                (bool ok,) =
+                    address(authority).call(abi.encodeCall(authority.transition, (proposals, proposalId, next)));
+                require(ok == allowed, "transition matrix mismatch");
+            }
         }
-
-        CivicIds420.ProposalState next = CivicIds420.ProposalState(toRaw % 7);
-        bool allowed =
-            (from == 0 && (next == CivicIds420.ProposalState.PASSED || next == CivicIds420.ProposalState.FAILED))
-                || (from == 1 && next == CivicIds420.ProposalState.QUEUED)
-                || (from == 2 && next == CivicIds420.ProposalState.EXECUTED);
-
-        (bool ok,) = address(authority).call(abi.encodeCall(authority.transition, (proposals, proposalId, next)));
-        require(ok == allowed, "transition matrix mismatch");
     }
 
     function testFuzzQuorumCeilingArithmetic(
@@ -301,15 +314,22 @@ contract GovernanceAudit2Hardening420Test {
         uint16 quorum = uint16(1 + (uint256(quorumRaw) % 10_000));
         uint16 approval = uint16(5_001 + (uint256(approvalRaw) % 5_000));
 
-        VoteStack memory s = _voteStack(total, quorum, approval);
-        s.source.setWeight(ALICE, weight);
-        bytes32 proposalId = _proposal(s);
+        fuzzStack.source.setTotalWeight(total);
+        fuzzStack.source.setWeight(ALICE, weight);
+        vm.prank(address(fuzzStack.timelock));
+        fuzzStack.constitution.setRule(CivicIds420.ProposalClass.G1, 2, 7 days, quorum, approval, 0, 0, false);
+
+        vm.roll(100);
+        vm.prank(ALICE);
+        bytes32 proposalId =
+            fuzzStack.governor.createProposal(CivicIds420.ProposalClass.G1, keccak256("metadata"), keccak256("actions"));
 
         vm.roll(101);
         vm.prank(ALICE);
-        s.voting.castVote(proposalId, CivicIds420.House.COMMUNITY, CivicVoting420.Support.FOR, "");
+        fuzzStack.voting.castVote(proposalId, CivicIds420.House.COMMUNITY, CivicVoting420.Support.FOR, "");
 
-        CivicGovernor420.HouseResult memory result = s.governor.resultFor(proposalId, CivicIds420.House.COMMUNITY);
+        CivicGovernor420.HouseResult memory result =
+            fuzzStack.governor.resultFor(proposalId, CivicIds420.House.COMMUNITY);
         require(result.quorumMet == (weight >= _ceilBps(total, quorum)), "quorum ceiling mismatch");
         require(result.approvalMet, "unanimous decisive vote must approve");
     }
@@ -324,18 +344,25 @@ contract GovernanceAudit2Hardening420Test {
         uint256 total = forWeight + againstWeight;
         uint16 approval = uint16(5_001 + (uint256(approvalRaw) % 5_000));
 
-        VoteStack memory s = _voteStack(total, 1, approval);
-        s.source.setWeight(ALICE, forWeight);
-        s.source.setWeight(BOB, againstWeight);
-        bytes32 proposalId = _proposal(s);
+        fuzzStack.source.setTotalWeight(total);
+        fuzzStack.source.setWeight(ALICE, forWeight);
+        fuzzStack.source.setWeight(BOB, againstWeight);
+        vm.prank(address(fuzzStack.timelock));
+        fuzzStack.constitution.setRule(CivicIds420.ProposalClass.G1, 2, 7 days, 1, approval, 0, 0, false);
+
+        vm.roll(100);
+        vm.prank(ALICE);
+        bytes32 proposalId =
+            fuzzStack.governor.createProposal(CivicIds420.ProposalClass.G1, keccak256("metadata"), keccak256("actions"));
 
         vm.roll(101);
         vm.prank(ALICE);
-        s.voting.castVote(proposalId, CivicIds420.House.COMMUNITY, CivicVoting420.Support.FOR, "");
+        fuzzStack.voting.castVote(proposalId, CivicIds420.House.COMMUNITY, CivicVoting420.Support.FOR, "");
         vm.prank(BOB);
-        s.voting.castVote(proposalId, CivicIds420.House.COMMUNITY, CivicVoting420.Support.AGAINST, "");
+        fuzzStack.voting.castVote(proposalId, CivicIds420.House.COMMUNITY, CivicVoting420.Support.AGAINST, "");
 
-        CivicGovernor420.HouseResult memory result = s.governor.resultFor(proposalId, CivicIds420.House.COMMUNITY);
+        CivicGovernor420.HouseResult memory result =
+            fuzzStack.governor.resultFor(proposalId, CivicIds420.House.COMMUNITY);
         require(result.quorumMet, "full participation must meet quorum");
         require(result.approvalMet == (forWeight >= _ceilBps(total, approval)), "approval ceiling mismatch");
     }

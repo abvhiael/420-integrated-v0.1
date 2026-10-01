@@ -52,13 +52,23 @@ for t in [
 if 'function applyObservation' in twap:
     e.append('twap oracle still permits arbitrary observation publication')
 
+auction=(root/'contracts/src/swap/PublicBatchAuction.sol').read_text()
+for t in [
+    'MAX_DAILY_INVENTORY','ApprovedQuoteAssetRegistryAuction420','reserved420','totalQuoteBid',
+    'proceedsRecipient','function bid','function settle','function cancel','function claim',
+    'oversubscribed','quoteRefund','UnsupportedTokenBehavior','nonReentrant'
+]:
+    if t not in auction:e.append('public batch auction missing '+t)
+if 'function recordBid' in auction:
+    e.append('public batch auction still uses governance-recorded bids')
+
 twap_adapter=(root/'contracts/src/oracle/TWAPOracleSourceAdapter420.sol').read_text()
 for t in ['readObservation','Types420.Health.HEALTHY','observationWindowSeconds','sourceHash','validUntil']:
     if t not in twap_adapter:e.append('twap adapter missing '+t)
 
 for tf in [
     'CanonicalConstantProductPool420.t.sol','SwapGenesisDEXFactory420.t.sol','SwapPermissionlessDEXFactory420.t.sol',
-    'SwapTWAPOracle420.t.sol','SwapGenesisIntegration420.t.sol','SwapFuzz420.t.sol','SwapInvariant420.t.sol',
+    'SwapTWAPOracle420.t.sol','SwapPublicBatchAuction420.t.sol','SwapGenesisIntegration420.t.sol','SwapFuzz420.t.sol','SwapInvariant420.t.sol',
     'PaySwapGenesisIntegration420.t.sol','PaySwapBridgeGenesisIntegration420.t.sol'
 ]:
     if not (root/'contracts/test'/tf).exists():e.append('missing test '+tf)
@@ -86,6 +96,7 @@ out={
     'permissionless_pool_lifecycle':'DEPLOY_EXTERNALLY_THEN_PERMISSIONLESS_REGISTER' if not e else 'QUALIFICATION_FAILED',
     'twap_source':'CANONICAL_POOL_CUMULATIVE' if not e else 'QUALIFICATION_FAILED',
     'twap_publication':'PERMISSIONLESS_DERIVED_CHECKPOINT' if not e else 'QUALIFICATION_FAILED',
+    'public_batch_auction':'ESCROW_FILL_REFUND_SETTLEMENT' if not e else 'QUALIFICATION_FAILED',
     'production_pool_execution':'PRODUCTION_CANDIDATE_PRESENT' if not e else 'QUALIFICATION_FAILED'
 }
 (root/'contracts/config/swap/interface-v1-verification.json').write_text(json.dumps(out,indent=2)+'\n')

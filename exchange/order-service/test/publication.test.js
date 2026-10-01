@@ -87,3 +87,27 @@ test('non-partial order rejects partial projection and status preserves cancel/e
   const rej=await rejStore.publish(envelope());
   assert.equal(rejStore.applyProjection(rej.record.orderHash,{rejectedReason:'projection-conflict'}).state,'rejected');
 });
+
+
+test('PRE-08 off-chain withdrawal is maker-authorized, idempotent and distinct from on-chain cancellation',async()=>{
+  const store=createOrderPublicationStore({
+    chainId:'0x420',settlementContract:addr(9),signatureVerifier:verifier(),clock:()=>1000,
+    withdrawalAuthorizer:async({maker,orderHash,nonce,requestId})=>{
+      assert.equal(maker,order.maker);assert.equal(orderHash,hashOrder(order));assert.equal(nonce,order.nonce);assert.equal(requestId,'withdraw-0001');return true;
+    },
+  });
+  const {record}=await store.publish(envelope());
+  await assert.rejects(store.withdraw(record.orderHash,{schema:'420-exchange-order-withdrawal-v1',maker:addr(8),nonce:order.nonce,requestId:'withdraw-0001'}),e=>e.code==='MAKER_MISMATCH');
+  const first=await store.withdraw(record.orderHash,{schema:'420-exchange-order-withdrawal-v1',maker:order.maker,nonce:order.nonce,requestId:'withdraw-0001'});
+  assert.equal(first.idempotent,false);assert.equal(first.record.state,'cancelled');assert.equal(first.record.cancellation.mode,'OFFCHAIN_WITHDRAWAL');
+  const second=await store.withdraw(record.orderHash,{schema:'420-exchange-order-withdrawal-v1',maker:order.maker,nonce:order.nonce,requestId:'withdraw-0001'});
+  assert.equal(second.idempotent,true);assert.equal(second.record.cancellation.mode,'OFFCHAIN_WITHDRAWAL');
+});
+
+test('off-chain withdrawal fails closed when maker authorization verifier is unavailable or rejects',async()=>{
+  const base={chainId:'0x420',settlementContract:addr(9),signatureVerifier:verifier(),clock:()=>1000};
+  const missing=createOrderPublicationStore(base);const a=await missing.publish(envelope());
+  await assert.rejects(missing.withdraw(a.record.orderHash,{schema:'420-exchange-order-withdrawal-v1',maker:order.maker,nonce:order.nonce,requestId:'withdraw-0002'}),e=>e.code==='WITHDRAWAL_AUTH_UNAVAILABLE');
+  const denied=createOrderPublicationStore({...base,withdrawalAuthorizer:async()=>false});const b=await denied.publish(envelope());
+  await assert.rejects(denied.withdraw(b.record.orderHash,{schema:'420-exchange-order-withdrawal-v1',maker:order.maker,nonce:order.nonce,requestId:'withdraw-0003'}),e=>e.code==='WITHDRAWAL_UNAUTHORIZED');
+});

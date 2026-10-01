@@ -69,9 +69,23 @@ contract CivicProposalRegistry420 is SystemAccess, I420System {
         address authority
     ) external onlyGovernance {
         if (proposalAuthority != address(0)) revert AuthorityAlreadyBound();
-        if (authority == address(0)) revert UnauthorizedAuthority();
+        if (!_isCanonicalProposalAuthority(authority)) revert UnauthorizedAuthority();
         proposalAuthority = authority;
         emit ProposalAuthorityBound(authority);
+    }
+
+    function _isCanonicalProposalAuthority(
+        address authority
+    ) private view returns (bool) {
+        if (authority == address(0) || authority.code.length == 0) return false;
+
+        (bool proposalOk, bytes memory proposalData) =
+            authority.staticcall(abi.encodeWithSignature("proposalRegistry()"));
+        (bool timelockOk, bytes memory timelockData) = authority.staticcall(abi.encodeWithSignature("timelock()"));
+        if (!proposalOk || proposalData.length < 32 || !timelockOk || timelockData.length < 32) return false;
+
+        return abi.decode(proposalData, (address)) == address(this)
+            && abi.decode(timelockData, (address)) == governanceTimelock;
     }
 
     function registerProposal(

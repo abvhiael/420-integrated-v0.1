@@ -73,17 +73,8 @@
     "420Stake": [
       "ProtocolRegistry",
       "GovernanceAuthority",
-      "PauseRegistry",
-      "HealthRegistry",
-      "IdentityCredentials",
-      "CapabilityRegistry",
       "SystemSafety",
-      "GenesisInitialization",
-      "Migration",
-      "SignedEnvelope",
-      "ReplayProtection",
-      "ChainContext",
-      "MetadataCommitment"
+      "GenesisInitialization"
     ],
     "420Governance": [
       "ProtocolRegistry",

@@ -21,6 +21,8 @@ contract StakeSecurityInvariantHandler420 {
     RewardController public rewards;
     CommunityValidatorReserve public reserve;
 
+    address public constant SYSTEM_CALLER = 0x000000000000000000000000000000000000043C;
+
     bytes32 public constant VALIDATOR_ID = keccak256("stake-audit-4-invariant-validator");
     bytes32 public constant FIXED_EVIDENCE = keccak256("stake-audit-4-fixed-evidence");
 
@@ -39,8 +41,8 @@ contract StakeSecurityInvariantHandler420 {
         rewards = new RewardController(address(this));
         reserve = new CommunityValidatorReserve(address(this));
 
-        registry.bindConsensusSystemCaller(address(this));
-        rewards.bindConsensusSystemCaller(address(this));
+        registry.bindConsensusSystemCaller(SYSTEM_CALLER);
+        rewards.bindConsensusSystemCaller(SYSTEM_CALLER);
         registry.bindCommunityValidatorReserve(address(reserve));
         reserve.bindValidatorRegistry(address(registry));
 
@@ -91,6 +93,9 @@ contract StakeSecurityInvariantHandler420 {
         ValidatorRegistry.Validator memory v = registry.getValidator(VALIDATOR_ID);
         if (v.status == ValidatorRegistry.Status.NONE || v.status == ValidatorRegistry.Status.EXITED) return;
 
+        vm.prank(SYSTEM_CALLER);
+        vm.prank(SYSTEM_CALLER);
+        vm.prank(SYSTEM_CALLER);
         (bool ok,) = address(registry).call(
             abi.encodeWithSelector(
                 registry.applySlash.selector,
@@ -188,6 +193,7 @@ contract StakeSecurityInvariantHandler420 {
         if (participants.length > 29) malformed = true;
 
         uint64 rewardBlock = uint64(block.number);
+        vm.prank(SYSTEM_CALLER);
         (bool ok,) = address(rewards).call(
             abi.encodeWithSelector(
                 rewards.applyConsensusReward.selector,

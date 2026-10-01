@@ -100,3 +100,14 @@ jobs:
 
       - name: Verify CMP-1.4.10 cross-verifier adversarial qualification
         run: python scripts/verify-cmp-1-4-10-cross-verifier-adversarial.py
+
+      - name: Verify CMP-1.4.11 verifier repository release readiness
+        run: python scripts/verify-cmp-1-4-11-verifier-release-candidate.py --repository-ready
+
+      - name: Verify CMP-1.4.11 live readiness remains fail-closed
+        shell: bash
+        run: |
+          if python scripts/verify-cmp-1-4-11-verifier-release-candidate.py; then
+            echo "live verifier readiness unexpectedly passed"
+            exit 1
+          fi

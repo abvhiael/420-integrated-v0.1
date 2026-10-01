@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from pathlib import Path
 import json
+import re
 import sys
 
 root = Path(__file__).resolve().parents[1]
@@ -116,7 +117,11 @@ for state in ("active", "passed", "queued"):
 
 if "ProposalState.CANCELLED" in proposals:
     errors.append("CivicProposalRegistry420 still exposes a legal CANCELLED transition")
-if "function cancel(bytes32 id) external onlyBootstrapGovernor" not in timelock:
+if not re.search(
+    r"function\s+cancel\s*\(\s*bytes32\s+id\s*\)\s*external\s+onlyBootstrapGovernor\b",
+    timelock,
+    re.MULTILINE,
+):
     errors.append("GovernanceTimelock.cancel must be bootstrap-governor-only")
 if 'require(!civicAuthorityActivated, "civic active")' not in timelock:
     errors.append("GovernanceTimelock.cancel must fail after Civic activation")

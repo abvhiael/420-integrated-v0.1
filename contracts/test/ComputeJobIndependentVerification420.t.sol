@@ -177,6 +177,22 @@ contract ComputeJobIndependentVerification420Test {
             "verifier provenance not recorded");
         require(verification.verified(id, j.resultCommitment, verifier, ref, true),
             "verifier decision evidence not bound");
+        ComputeJobIndependentVerification420.Decision memory d = verification.decision(ref);
+        ComputeJobIndependentVerification420.DecisionProvenance memory p =
+            verification.decisionProvenance(ref);
+        require(
+            p.jobRegistry == address(jobs)
+                && p.unitId == id
+                && p.attemptRef == j.assignmentRef
+                && p.attempt == 1
+                && p.worker == OPERATOR
+                && p.policyId == bytes32(0)
+                && p.policyRevision == 0
+                && p.policyCommitment == bytes32(0)
+                && p.evidenceCommitment != bytes32(0)
+                && d.provenanceHash == verification.provenanceHash(p),
+            "canonical verdict provenance not retained"
+        );
         (bool ok,) = address(jobs).call(abi.encodeCall(jobs.recordSettlement,
             (id, uint64(7), keccak256("synthetic-payment"))));
         require(!ok && custody.totalReserved() == 3 ether,

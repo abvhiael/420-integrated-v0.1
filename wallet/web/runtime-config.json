@@ -44,5 +44,10 @@
     "sessionKeys": true,
     "delegatedCapabilities": false,
     "recoveryManagement": true
+  },
+  "deployment": {
+    "stakeAddress": null,
+    "validatorRegistryAddress": null,
+    "rewardControllerAddress": null
   }
 }

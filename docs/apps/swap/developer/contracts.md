@@ -61,7 +61,7 @@ The TWAP path is canonical-pool-derived:
 9. `readObservation` and `referencePrice` fail closed after configured staleness;
 10. a source identity change or overlong window clears the old observation and requires a new baseline/window.
 
-`latest(marketId)` remains a compatibility getter for the 420Oracle source ABI, but security-sensitive integrations must use `readObservation` or `referencePrice`, which enforce window and freshness policy. `TWAPOracleSourceAdapter420` now does so.
+`latest(marketId)` remains only as a raw compatibility getter. Security-sensitive integrations must use `readObservation` or `referencePrice`, which enforce window, freshness **and current-source identity**. `TWAPOracleSourceAdapter420` now uses `readObservation` and therefore cannot bypass those checks.
 
 The Swap TWAP publishes confidence `0` because a single canonical-pool time average is not a statistical confidence estimate. 420Oracle may combine it with independent sources and apply confidence/quorum/deviation policy without turning external data into executable pricing authority.
 

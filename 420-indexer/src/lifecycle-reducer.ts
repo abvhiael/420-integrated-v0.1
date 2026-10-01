@@ -39,17 +39,6 @@ export function protocolObjectKey420(event: DecodedProtocolEvent420): string | n
 }
 
 const POLICY_LIST: LifecyclePolicy420[] = [
-  { protocol: '420Identity', rules: [
-    { eventName: 'ProfileCreated', state: 'ACTIVE' },
-    { eventName: 'ProfileUpdated', state: 'ACTIVE' },
-    { eventName: 'PrimaryNameSet', state: 'ACTIVE' },
-    { eventName: 'ProfileControllerTransferStarted', state: 'PENDING' },
-    { eventName: 'ProfileControllerTransferred', state: 'ACTIVE' },
-    { eventName: 'IssuerSet', state: 'ACTIVE' },
-    { eventName: 'CredentialIssued', state: 'ACTIVE' },
-    { eventName: 'CredentialRevoked', state: 'REVOKED', terminal: true },
-    { eventName: 'CredentialRejected', state: 'REVOKED', terminal: true }
-  ]},
   { protocol: '420Names', rules: [
     { eventName: 'NameRegistered', state: 'ACTIVE' },
     { eventName: 'NameRenewed', state: 'ACTIVE' },

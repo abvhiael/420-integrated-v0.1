@@ -11,20 +11,46 @@ import "../src/governance/CivicGovernor420.sol";
 import "../src/governance/GovernanceTimelock.sol";
 
 interface VmCivicExecution420 {
-    function prank(address) external;
-    function roll(uint256) external;
-    function warp(uint256) external;
-    function expectRevert(bytes4) external;
+    function prank(
+        address
+    ) external;
+    function roll(
+        uint256
+    ) external;
+    function warp(
+        uint256
+    ) external;
+    function expectRevert(
+        bytes4
+    ) external;
 }
 
 contract MockExecutionElectorate420 is ICivicElectorateSource420 {
     bytes32 public constant ROOT = keccak256("CIVIC_EXECUTION_ROOT");
     mapping(address => uint256) public weights;
 
-    function sourceType() external pure returns (bytes32) { return keccak256("CIVIC_EXECUTION_ELECTORATE_V1"); }
-    function setWeight(address voter, uint256 weight) external { weights[voter] = weight; }
-    function snapshotAt(uint64) external pure returns (bytes32, uint256) { return (ROOT, 100); }
-    function votingWeight(bytes32 root, address voter, bytes calldata) external view returns (uint256) {
+    function sourceType() external pure returns (bytes32) {
+        return keccak256("CIVIC_EXECUTION_ELECTORATE_V1");
+    }
+
+    function setWeight(
+        address voter,
+        uint256 weight
+    ) external {
+        weights[voter] = weight;
+    }
+
+    function snapshotAt(
+        uint64
+    ) external pure returns (bytes32, uint256) {
+        return (ROOT, 100);
+    }
+
+    function votingWeight(
+        bytes32 root,
+        address voter,
+        bytes calldata
+    ) external view returns (uint256) {
         if (root != ROOT) return 0;
         return weights[voter];
     }
@@ -32,13 +58,20 @@ contract MockExecutionElectorate420 is ICivicElectorateSource420 {
 
 contract MockCivicExecutionTarget420 {
     uint256 public value;
-    function setValue(uint256 value_) external { value = value_; }
-    function fail() external pure { revert("forced failure"); }
+
+    function setValue(
+        uint256 value_
+    ) external {
+        value = value_;
+    }
+
+    function fail() external pure {
+        revert("forced failure");
+    }
 }
 
 contract CivicTimelockExecution420Test {
-    VmCivicExecution420 constant vm =
-        VmCivicExecution420(address(uint160(uint256(keccak256("hevm cheat code")))));
+    VmCivicExecution420 constant vm = VmCivicExecution420(address(uint160(uint256(keccak256("hevm cheat code")))));
     address constant ALICE = address(0xA11CE);
 
     struct Stack {
@@ -52,7 +85,9 @@ contract CivicTimelockExecution420Test {
         MockCivicExecutionTarget420 target;
     }
 
-    function _stack(uint64 delay_) private returns (Stack memory s) {
+    function _stack(
+        uint64 delay_
+    ) private returns (Stack memory s) {
         s.timelock = new GovernanceTimelock(address(this));
         s.constitution = new CivicConstitution420(address(s.timelock));
         s.proposals = new CivicProposalRegistry420(address(s.timelock));
@@ -76,21 +111,26 @@ contract CivicTimelockExecution420Test {
         s.source.setWeight(ALICE, 60);
     }
 
-    function _actions(MockCivicExecutionTarget420 target, uint256 value_)
-        private pure returns (CivicGovernor420.Action[] memory actions)
-    {
+    function _actions(
+        MockCivicExecutionTarget420 target,
+        uint256 value_
+    ) private pure returns (CivicGovernor420.Action[] memory actions) {
         actions = new CivicGovernor420.Action[](1);
         actions[0] = CivicGovernor420.Action({
             target: address(target), value: 0, data: abi.encodeCall(target.setValue, (value_))
         });
     }
 
-    function _pass(Stack memory s, CivicGovernor420.Action[] memory actions) private returns (bytes32 proposalId) {
+    function _pass(
+        Stack memory s,
+        CivicGovernor420.Action[] memory actions
+    ) private returns (bytes32 proposalId) {
         vm.roll(100);
         vm.prank(ALICE);
-        proposalId = s.governor.createProposal(
-            CivicIds420.ProposalClass.G1, keccak256("execution metadata"), keccak256(abi.encode(actions))
-        );
+        proposalId = s.governor
+            .createProposal(
+                CivicIds420.ProposalClass.G1, keccak256("execution metadata"), keccak256(abi.encode(actions))
+            );
         vm.roll(101);
         vm.prank(ALICE);
         s.voting.castVote(proposalId, CivicIds420.House.COMMUNITY, CivicVoting420.Support.FOR, "");
@@ -110,12 +150,19 @@ contract CivicTimelockExecution420Test {
         require(s.timelock.civicAuthorityActivated(), "activated");
         require(s.timelock.scheduler() == address(s.governor), "governor scheduler");
 
-        (bool ok,) = address(s.timelock).call(
-            abi.encodeCall(
-                s.timelock.schedule,
-                (keccak256("bootstrap-after-retirement"), address(s.target), 0, bytes(""), GovernanceTimelock.Class.G1)
-            )
-        );
+        (bool ok,) = address(s.timelock)
+            .call(
+                abi.encodeCall(
+                    s.timelock.schedule,
+                    (
+                        keccak256("bootstrap-after-retirement"),
+                        address(s.target),
+                        0,
+                        bytes(""),
+                        GovernanceTimelock.Class.G1
+                    )
+                )
+            );
         require(!ok, "bootstrap scheduler must be retired");
     }
 
@@ -128,8 +175,14 @@ contract CivicTimelockExecution420Test {
         uint256 queuedAt = block.timestamp;
         s.governor.queue(proposalId, actions);
 
-        (address target, uint256 value,, uint64 executeAfter, GovernanceTimelock.Class class_, bool executed, bool cancelled) =
-            s.timelock.operations(proposalId);
+        (
+            address target,
+            uint256 value,,
+            uint64 executeAfter,
+            GovernanceTimelock.Class class_,
+            bool executed,
+            bool cancelled
+        ) = s.timelock.operations(proposalId);
         require(target == address(s.governor), "governor batch target");
         require(value == 0, "zero batch value");
         require(executeAfter == queuedAt + 8 days, "frozen constitutional delay");
@@ -164,19 +217,18 @@ contract CivicTimelockExecution420Test {
         Stack memory s = _stack(7 days);
 
         bytes32 bootstrapOperationId = keccak256("GOV-AUDIT-1-BOOTSTRAP-CANCEL-TARGET");
-        s.timelock.schedule(
-            bootstrapOperationId,
-            address(s.target),
-            0,
-            abi.encodeCall(s.target.setValue, (777)),
-            GovernanceTimelock.Class.G1
-        );
+        s.timelock
+            .schedule(
+                bootstrapOperationId,
+                address(s.target),
+                0,
+                abi.encodeCall(s.target.setValue, (777)),
+                GovernanceTimelock.Class.G1
+            );
 
         CivicGovernor420.Action[] memory actions = new CivicGovernor420.Action[](1);
         actions[0] = CivicGovernor420.Action({
-            target: address(s.timelock),
-            value: 0,
-            data: abi.encodeCall(s.timelock.cancel, (bootstrapOperationId))
+            target: address(s.timelock), value: 0, data: abi.encodeCall(s.timelock.cancel, (bootstrapOperationId))
         });
 
         bytes32 proposalId = _pass(s, actions);
@@ -199,7 +251,6 @@ contract CivicTimelockExecution420Test {
         require(state == CivicIds420.ProposalState.QUEUED, "proposal registry state split");
     }
 
-
     function testQueuedCivicBatchCannotCancelAnotherProposalThroughRegistry() public {
         Stack memory s = _stack(7 days);
 
@@ -212,19 +263,17 @@ contract CivicTimelockExecution420Test {
         cancelActions[0] = CivicGovernor420.Action({
             target: address(s.proposals),
             value: 0,
-            data: abi.encodeCall(
-                s.proposals.transition,
-                (targetProposalId, CivicIds420.ProposalState.CANCELLED)
-            )
+            data: abi.encodeCall(s.proposals.transition, (targetProposalId, CivicIds420.ProposalState.CANCELLED))
         });
 
         vm.roll(200);
         vm.prank(ALICE);
-        bytes32 cancelProposalId = s.governor.createProposal(
-            CivicIds420.ProposalClass.G1,
-            keccak256("cancellation-attempt metadata"),
-            keccak256(abi.encode(cancelActions))
-        );
+        bytes32 cancelProposalId = s.governor
+            .createProposal(
+                CivicIds420.ProposalClass.G1,
+                keccak256("cancellation-attempt metadata"),
+                keccak256(abi.encode(cancelActions))
+            );
         vm.roll(201);
         vm.prank(ALICE);
         s.voting.castVote(cancelProposalId, CivicIds420.House.COMMUNITY, CivicVoting420.Support.FOR, "");
@@ -255,9 +304,8 @@ contract CivicTimelockExecution420Test {
         actions[0] = CivicGovernor420.Action({
             target: address(s.target), value: 0, data: abi.encodeCall(s.target.setValue, (99))
         });
-        actions[1] = CivicGovernor420.Action({
-            target: address(s.target), value: 0, data: abi.encodeCall(s.target.fail, ())
-        });
+        actions[1] =
+            CivicGovernor420.Action({ target: address(s.target), value: 0, data: abi.encodeCall(s.target.fail, ()) });
 
         bytes32 proposalId = _pass(s, actions);
         s.timelock.activateCivicAuthority(address(s.governor));

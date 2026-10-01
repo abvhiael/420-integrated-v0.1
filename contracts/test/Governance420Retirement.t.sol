@@ -5,11 +5,15 @@ import "../src/system/SystemAccess.sol";
 import "../src/governance/Governance420.sol";
 
 interface VmGovernance420Retirement {
-    function prank(address) external;
-    function expectRevert(bytes4) external;
+    function prank(
+        address
+    ) external;
+    function expectRevert(
+        bytes4
+    ) external;
 }
 
-contract MockCanonicalCivicGovernor420 {}
+contract MockCanonicalCivicGovernor420 { }
 
 contract Governance420RetirementTest {
     VmGovernance420Retirement constant vm =

@@ -7,8 +7,12 @@ import "../src/governance/CivicConstitution420.sol";
 import "../src/governance/CivicProposalRegistry420.sol";
 
 interface VmCivic420 {
-    function prank(address) external;
-    function expectRevert(bytes4) external;
+    function prank(
+        address
+    ) external;
+    function expectRevert(
+        bytes4
+    ) external;
 }
 
 contract CivicFoundation420Test {
@@ -55,26 +59,12 @@ contract CivicFoundation420Test {
         vm.prank(ALICE);
         vm.expectRevert(CivicProposalRegistry420.UnauthorizedAuthority.selector);
         registry.registerProposal(
-            proposalId,
-            ALICE,
-            CivicIds420.ProposalClass.G1,
-            keccak256("metadata"),
-            keccak256("actions"),
-            10,
-            11,
-            20
+            proposalId, ALICE, CivicIds420.ProposalClass.G1, keccak256("metadata"), keccak256("actions"), 10, 11, 20
         );
 
         vm.prank(GOVERNOR);
         registry.registerProposal(
-            proposalId,
-            ALICE,
-            CivicIds420.ProposalClass.G1,
-            keccak256("metadata"),
-            keccak256("actions"),
-            10,
-            11,
-            20
+            proposalId, ALICE, CivicIds420.ProposalClass.G1, keccak256("metadata"), keccak256("actions"), 10, 11, 20
         );
 
         vm.prank(GOVERNOR);
@@ -98,14 +88,7 @@ contract CivicFoundation420Test {
 
         vm.prank(GOVERNOR);
         registry.registerProposal(
-            proposalId,
-            ALICE,
-            CivicIds420.ProposalClass.G4,
-            keccak256("metadata"),
-            keccak256("actions"),
-            10,
-            11,
-            20
+            proposalId, ALICE, CivicIds420.ProposalClass.G4, keccak256("metadata"), keccak256("actions"), 10, 11, 20
         );
 
         vm.prank(GOVERNOR);

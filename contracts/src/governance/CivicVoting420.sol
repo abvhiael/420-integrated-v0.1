@@ -6,7 +6,9 @@ import "./CivicIds420.sol";
 import "./CivicElectorateRegistry420.sol";
 
 interface ICivicProposalRegistryVoting420 {
-    function proposals(bytes32 proposalId)
+    function proposals(
+        bytes32 proposalId
+    )
         external
         view
         returns (
@@ -66,10 +68,13 @@ contract CivicVoting420 is I420System {
         uint256 weight
     );
 
-    constructor(address proposalRegistry_, address electorateRegistry_) {
+    constructor(
+        address proposalRegistry_,
+        address electorateRegistry_
+    ) {
         if (
-            proposalRegistry_ == address(0) || electorateRegistry_ == address(0)
-                || proposalRegistry_.code.length == 0 || electorateRegistry_.code.length == 0
+            proposalRegistry_ == address(0) || electorateRegistry_ == address(0) || proposalRegistry_.code.length == 0
+                || electorateRegistry_.code.length == 0
         ) revert InvalidRegistry();
         proposalRegistry = ICivicProposalRegistryVoting420(proposalRegistry_);
         electorateRegistry = CivicElectorateRegistry420(electorateRegistry_);
@@ -83,36 +88,39 @@ contract CivicVoting420 is I420System {
         return 1;
     }
 
-    function tally(bytes32 proposalId, CivicIds420.House house) external view returns (Tally memory) {
+    function tally(
+        bytes32 proposalId,
+        CivicIds420.House house
+    ) external view returns (Tally memory) {
         return _tallies[proposalId][uint8(house)];
     }
 
-    function ballot(bytes32 proposalId, CivicIds420.House house, address voter) external view returns (Ballot memory) {
+    function ballot(
+        bytes32 proposalId,
+        CivicIds420.House house,
+        address voter
+    ) external view returns (Ballot memory) {
         return _ballots[proposalId][uint8(house)][voter];
     }
 
-    function participation(bytes32 proposalId, CivicIds420.House house) external view returns (uint256) {
+    function participation(
+        bytes32 proposalId,
+        CivicIds420.House house
+    ) external view returns (uint256) {
         Tally storage t = _tallies[proposalId][uint8(house)];
         return t.againstVotes + t.forVotes + t.abstainVotes;
     }
 
     /// @notice Cast one immutable ballot for msg.sender in one house.
     /// @dev proofData is interpreted only by the frozen electorate source captured for this proposal.
-    function castVote(bytes32 proposalId, CivicIds420.House house, Support support, bytes calldata proofData)
-        external
-        returns (uint256 weight)
-    {
-        (
-            ,
-            ,
-            ,
-            ,
-            ,
-            uint64 voteStart,
-            uint64 voteEnd,
-            CivicIds420.ProposalState state,
-            bool exists
-        ) = proposalRegistry.proposals(proposalId);
+    function castVote(
+        bytes32 proposalId,
+        CivicIds420.House house,
+        Support support,
+        bytes calldata proofData
+    ) external returns (uint256 weight) {
+        (,,,,, uint64 voteStart, uint64 voteEnd, CivicIds420.ProposalState state, bool exists) =
+            proposalRegistry.proposals(proposalId);
 
         if (!exists) revert ProposalNotFound();
         if (state != CivicIds420.ProposalState.ACTIVE) revert ProposalNotActive();

@@ -10,12 +10,13 @@ import "../src/governance/CivicVoting420.sol";
 import "../src/governance/CivicGovernor420.sol";
 
 interface VmGovernanceAudit420 {
-    function expectRevert(bytes4) external;
+    function expectRevert(
+        bytes4
+    ) external;
 }
 
 contract GovernanceAudit420Test {
-    VmGovernanceAudit420 constant vm =
-        VmGovernanceAudit420(address(uint160(uint256(keccak256("hevm cheat code")))));
+    VmGovernanceAudit420 constant vm = VmGovernanceAudit420(address(uint160(uint256(keccak256("hevm cheat code")))));
 
     function _base()
         private
@@ -54,20 +55,12 @@ contract GovernanceAudit420Test {
     }
 
     function testGovernorRejectsConstitutionWithDifferentGovernanceTimelock() public {
-        (
-            ,
-            ,
-            CivicProposalRegistry420 proposals,
-            CivicElectorateRegistry420 electorates,
-            CivicVoting420 voting
-        ) = _base();
+        (,, CivicProposalRegistry420 proposals, CivicElectorateRegistry420 electorates, CivicVoting420 voting) = _base();
         GovernanceTimelock otherTimelock = new GovernanceTimelock(address(this));
         CivicConstitution420 wrongConstitution = new CivicConstitution420(address(otherTimelock));
 
         vm.expectRevert(CivicGovernor420.InvalidModule.selector);
-        new CivicGovernor420(
-            address(wrongConstitution), address(proposals), address(electorates), address(voting)
-        );
+        new CivicGovernor420(address(wrongConstitution), address(proposals), address(electorates), address(voting));
     }
 
     function testGovernorRejectsElectorateRegistryWithDifferentGovernanceTimelock() public {
@@ -86,9 +79,7 @@ contract GovernanceAudit420Test {
 
         require(address(timelock) != address(otherTimelock), "distinct timelocks");
         vm.expectRevert(CivicGovernor420.InvalidModule.selector);
-        new CivicGovernor420(
-            address(constitution), address(proposals), address(wrongElectorates), address(voting)
-        );
+        new CivicGovernor420(address(constitution), address(proposals), address(wrongElectorates), address(voting));
     }
 
     function testGovernorRejectsVotingBoundToDifferentProposalRegistry() public {
@@ -104,9 +95,7 @@ contract GovernanceAudit420Test {
         CivicVoting420 wrongVoting = new CivicVoting420(address(otherProposals), address(electorates));
 
         vm.expectRevert(CivicGovernor420.InvalidModule.selector);
-        new CivicGovernor420(
-            address(constitution), address(proposals), address(electorates), address(wrongVoting)
-        );
+        new CivicGovernor420(address(constitution), address(proposals), address(electorates), address(wrongVoting));
     }
 
     function testGovernorRejectsVotingBoundToDifferentElectorateRegistry() public {
@@ -122,9 +111,7 @@ contract GovernanceAudit420Test {
         CivicVoting420 wrongVoting = new CivicVoting420(address(proposals), address(otherElectorates));
 
         vm.expectRevert(CivicGovernor420.InvalidModule.selector);
-        new CivicGovernor420(
-            address(constitution), address(proposals), address(electorates), address(wrongVoting)
-        );
+        new CivicGovernor420(address(constitution), address(proposals), address(electorates), address(wrongVoting));
     }
 
     function testCivicProposalCancellationIsRejectedFromEveryLiveState() public {

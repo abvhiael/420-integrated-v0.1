@@ -7,9 +7,15 @@ import "../src/governance/ICivicElectorateSource420.sol";
 import "../src/governance/CivicElectorateRegistry420.sol";
 
 interface VmCivicElectorate420 {
-    function prank(address) external;
-    function expectRevert(bytes4) external;
-    function roll(uint256) external;
+    function prank(
+        address
+    ) external;
+    function expectRevert(
+        bytes4
+    ) external;
+    function roll(
+        uint256
+    ) external;
 }
 
 contract MockElectorateSource420 is ICivicElectorateSource420 {
@@ -18,7 +24,9 @@ contract MockElectorateSource420 is ICivicElectorateSource420 {
     uint256 public totalWeight;
     mapping(bytes32 => mapping(address => uint256)) public weights;
 
-    constructor(bytes32 type_) {
+    constructor(
+        bytes32 type_
+    ) {
         _type = type_;
     }
 
@@ -26,31 +34,39 @@ contract MockElectorateSource420 is ICivicElectorateSource420 {
         return _type;
     }
 
-    function setSnapshot(bytes32 root_, uint256 totalWeight_) external {
+    function setSnapshot(
+        bytes32 root_,
+        uint256 totalWeight_
+    ) external {
         root = root_;
         totalWeight = totalWeight_;
     }
 
-    function setWeight(bytes32 root_, address voter, uint256 weight) external {
+    function setWeight(
+        bytes32 root_,
+        address voter,
+        uint256 weight
+    ) external {
         weights[root_][voter] = weight;
     }
 
-    function snapshotAt(uint64) external view returns (bytes32 electorateRoot, uint256 totalWeight_) {
+    function snapshotAt(
+        uint64
+    ) external view returns (bytes32 electorateRoot, uint256 totalWeight_) {
         return (root, totalWeight);
     }
 
-    function votingWeight(bytes32 electorateRoot, address voter, bytes calldata)
-        external
-        view
-        returns (uint256 weight)
-    {
+    function votingWeight(
+        bytes32 electorateRoot,
+        address voter,
+        bytes calldata
+    ) external view returns (uint256 weight) {
         return weights[electorateRoot][voter];
     }
 }
 
 contract CivicElectorateRegistry420Test {
-    VmCivicElectorate420 constant vm =
-        VmCivicElectorate420(address(uint160(uint256(keccak256("hevm cheat code")))));
+    VmCivicElectorate420 constant vm = VmCivicElectorate420(address(uint160(uint256(keccak256("hevm cheat code")))));
 
     address constant ALICE = address(0xA11CE);
     address constant GOVERNOR = address(0x0437);
@@ -59,7 +75,11 @@ contract CivicElectorateRegistry420Test {
     bytes32 constant ROOT_A = keccak256("ROOT_A");
     bytes32 constant ROOT_B = keccak256("ROOT_B");
 
-    function _source(bytes32 type_, bytes32 root_, uint256 totalWeight_) private returns (MockElectorateSource420 s) {
+    function _source(
+        bytes32 type_,
+        bytes32 root_,
+        uint256 totalWeight_
+    ) private returns (MockElectorateSource420 s) {
         s = new MockElectorateSource420(type_);
         s.setSnapshot(root_, totalWeight_);
     }

@@ -8,9 +8,15 @@ import "../src/governance/CivicProposalRegistry420.sol";
 import "../src/governance/CivicVoting420.sol";
 
 interface VmCivicVoting420 {
-    function prank(address) external;
-    function expectRevert(bytes4) external;
-    function roll(uint256) external;
+    function prank(
+        address
+    ) external;
+    function expectRevert(
+        bytes4
+    ) external;
+    function roll(
+        uint256
+    ) external;
 }
 
 contract MockVotingElectorateSource420 is ICivicElectorateSource420 {
@@ -19,7 +25,9 @@ contract MockVotingElectorateSource420 is ICivicElectorateSource420 {
     uint256 public totalWeight;
     mapping(bytes32 => mapping(address => uint256)) public weights;
 
-    constructor(bytes32 type_) {
+    constructor(
+        bytes32 type_
+    ) {
         _type = type_;
     }
 
@@ -27,24 +35,33 @@ contract MockVotingElectorateSource420 is ICivicElectorateSource420 {
         return _type;
     }
 
-    function setSnapshot(bytes32 root_, uint256 totalWeight_) external {
+    function setSnapshot(
+        bytes32 root_,
+        uint256 totalWeight_
+    ) external {
         root = root_;
         totalWeight = totalWeight_;
     }
 
-    function setWeight(bytes32 root_, address voter, uint256 weight) external {
+    function setWeight(
+        bytes32 root_,
+        address voter,
+        uint256 weight
+    ) external {
         weights[root_][voter] = weight;
     }
 
-    function snapshotAt(uint64) external view returns (bytes32, uint256) {
+    function snapshotAt(
+        uint64
+    ) external view returns (bytes32, uint256) {
         return (root, totalWeight);
     }
 
-    function votingWeight(bytes32 electorateRoot, address voter, bytes calldata)
-        external
-        view
-        returns (uint256)
-    {
+    function votingWeight(
+        bytes32 electorateRoot,
+        address voter,
+        bytes calldata
+    ) external view returns (uint256) {
         return weights[electorateRoot][voter];
     }
 }
@@ -79,20 +96,16 @@ contract CivicVoting420Test {
         voting = new CivicVoting420(address(proposals), address(electorates));
     }
 
-    function _register(bytes32 proposalId, bool dualHouse) private {
+    function _register(
+        bytes32 proposalId,
+        bool dualHouse
+    ) private {
         vm.roll(100);
         community.setSnapshot(ROOT_A, 100);
         validators.setSnapshot(ROOT_B, 10);
         electorates.snapshotProposal(proposalId, 99, dualHouse);
         proposals.registerProposal(
-            proposalId,
-            ALICE,
-            CivicIds420.ProposalClass.G1,
-            keccak256("metadata"),
-            keccak256("actions"),
-            99,
-            101,
-            110
+            proposalId, ALICE, CivicIds420.ProposalClass.G1, keccak256("metadata"), keccak256("actions"), 99, 101, 110
         );
     }
 

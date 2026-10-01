@@ -8,8 +8,20 @@ import "../interfaces/I420System.sol";
 /// @dev Legacy proposal/vote/result mutation paths are permanently retired. Canonical governance
 /// authority lives in CivicGovernor420 and executes only through GovernanceTimelock at 0x0429.
 contract Governance420 is SystemAccess, I420System {
-    enum Class { G1, G2, G3, G4 }
-    enum State { NONE, ACTIVE, PASSED, FAILED, QUEUED, EXECUTED }
+    enum Class {
+        G1,
+        G2,
+        G3,
+        G4
+    }
+    enum State {
+        NONE,
+        ACTIVE,
+        PASSED,
+        FAILED,
+        QUEUED,
+        EXECUTED
+    }
 
     struct Proposal {
         address proposer;
@@ -36,7 +48,9 @@ contract Governance420 is SystemAccess, I420System {
 
     event CivicGovernorBound(address indexed civicGovernor);
 
-    constructor(address timelock_) SystemAccess(timelock_) {}
+    constructor(
+        address timelock_
+    ) SystemAccess(timelock_) { }
 
     function systemName() external pure returns (string memory) {
         return "Governance420";
@@ -48,7 +62,9 @@ contract Governance420 is SystemAccess, I420System {
 
     /// @notice One-time compatibility pointer from the frozen 0x0437 identity to canonical Civic governance.
     /// @dev Binding is controlled only by the GovernanceTimelock and cannot be replaced once set.
-    function bindCivicGovernor(address governor) external onlyGovernance {
+    function bindCivicGovernor(
+        address governor
+    ) external onlyGovernance {
         if (civicGovernor != address(0)) revert CivicGovernorAlreadyBound();
         if (governor == address(0) || governor.code.length == 0) revert InvalidCivicGovernor();
         civicGovernor = governor;
@@ -56,17 +72,31 @@ contract Governance420 is SystemAccess, I420System {
     }
 
     /// @dev Retained selector; permanently disabled so 0x0437 cannot host a parallel proposal system.
-    function createProposal(bytes32, Class, bytes32, uint64, uint64) external pure {
+    function createProposal(
+        bytes32,
+        Class,
+        bytes32,
+        uint64,
+        uint64
+    ) external pure {
         revert LegacySurfaceRetired();
     }
 
     /// @dev Retained selector; permanently disabled so vote weights cannot be injected by any authority.
-    function applyVote(bytes32, bool, bool, uint256) external pure {
+    function applyVote(
+        bytes32,
+        bool,
+        bool,
+        uint256
+    ) external pure {
         revert LegacySurfaceRetired();
     }
 
     /// @dev Retained selector; permanently disabled so pass/fail results cannot be injected by any authority.
-    function applyResult(bytes32, bool) external pure {
+    function applyResult(
+        bytes32,
+        bool
+    ) external pure {
         revert LegacySurfaceRetired();
     }
 }

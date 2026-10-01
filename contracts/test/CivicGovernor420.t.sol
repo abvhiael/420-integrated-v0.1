@@ -8,6 +8,7 @@ import "../src/governance/ICivicElectorateSource420.sol";
 import "../src/governance/CivicElectorateRegistry420.sol";
 import "../src/governance/CivicVoting420.sol";
 import "../src/governance/CivicGovernor420.sol";
+import "../src/governance/GovernanceTimelock.sol";
 
 interface VmCivicGovernor420 {
     function prank(
@@ -73,6 +74,7 @@ contract CivicGovernor420Test {
     bytes32 constant VALIDATOR_ROOT = keccak256("VALIDATOR_ROOT");
 
     struct Stack {
+        GovernanceTimelock timelock;
         CivicConstitution420 constitution;
         CivicProposalRegistry420 proposals;
         CivicElectorateRegistry420 electorates;
@@ -85,15 +87,21 @@ contract CivicGovernor420Test {
     function _stack(
         bool dualHouse
     ) private returns (Stack memory s) {
-        s.constitution = new CivicConstitution420(address(this));
-        s.proposals = new CivicProposalRegistry420(address(this));
-        s.electorates = new CivicElectorateRegistry420(address(this));
+        s.timelock = new GovernanceTimelock(address(this));
+        s.constitution = new CivicConstitution420(address(s.timelock));
+        s.proposals = new CivicProposalRegistry420(address(s.timelock));
+        s.electorates = new CivicElectorateRegistry420(address(s.timelock));
         s.community = new MockGovernorElectorate420(keccak256("COMMUNITY_V1"), COMMUNITY_ROOT, 100);
         s.validators = new MockGovernorElectorate420(keccak256("VALIDATOR_V1"), VALIDATOR_ROOT, 10);
 
+        vm.prank(address(s.timelock));
         s.electorates.setHouseSource(CivicIds420.House.COMMUNITY, address(s.community));
-        if (dualHouse) s.electorates.setHouseSource(CivicIds420.House.VALIDATOR, address(s.validators));
+        if (dualHouse) {
+            vm.prank(address(s.timelock));
+            s.electorates.setHouseSource(CivicIds420.House.VALIDATOR, address(s.validators));
+        }
 
+        vm.prank(address(s.timelock));
         s.constitution
             .setRule(
                 CivicIds420.ProposalClass.G1,
@@ -110,7 +118,9 @@ contract CivicGovernor420Test {
         s.governor = new CivicGovernor420(
             address(s.constitution), address(s.proposals), address(s.electorates), address(s.voting)
         );
+        vm.prank(address(s.timelock));
         s.proposals.bindProposalAuthority(address(s.governor));
+        vm.prank(address(s.timelock));
         s.electorates.bindSnapshotAuthority(address(s.governor));
     }
 
@@ -146,6 +156,7 @@ contract CivicGovernor420Test {
         s.community.setWeight(ALICE, 60);
         bytes32 proposalId = _create(s);
 
+        vm.prank(address(s.timelock));
         s.constitution.setRule(CivicIds420.ProposalClass.G1, 5, 7 days, 9000, 9000, 0, 0, false);
 
         vm.roll(101);

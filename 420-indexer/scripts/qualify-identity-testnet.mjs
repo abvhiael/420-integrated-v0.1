@@ -167,7 +167,8 @@ const searchResult=await waitFor(async()=>{
   const u=new URL(searchBase+'/v1/resolve');u.searchParams.set('q','identity:'+lifecycle.profileId);
   const body=await getJson(u,'420Search Identity resolve');
   const result=body.result;if(!result)fail('Search Identity result missing');
-  const resultKey=lower(result.key);\n  if(resultKey!==lower(lifecycle.profileId)&&resultKey!==profileKey)fail('Search profile key mismatch');
+  const resultKey=lower(result.key);
+  if(resultKey!==lower(lifecycle.profileId)&&resultKey!==profileKey)fail('Search profile key mismatch');
   if(lower(result.presentation?.subtitle)!==lower(lifecycle.finalProfileController))fail('Search controller not converged');
   if(String(result.presentation?.snippet||'').toLowerCase().includes('payload'))fail('Search leaked/claimed private payload');
   return result;

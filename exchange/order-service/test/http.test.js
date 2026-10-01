@@ -16,6 +16,7 @@ async function withServer(fn){
   const store=createOrderPublicationStore({
     chainId:'0x420',settlementContract:addr(9),clock:()=>1000,
     signatureVerifier:async({digest:actual})=>{assert.equal(actual,digest);return order.maker;},
+    withdrawalAuthorizer:async({maker})=>maker===order.maker,
   });
   const server=createOrderHttpServer({store});server.listen(0,'127.0.0.1');await once(server,'listening');
   try{return await fn({base:`http://127.0.0.1:${server.address().port}`,store});}
@@ -41,5 +42,18 @@ test('HTTP service rejects malformed publication and unknown status',async()=>{
     assert.equal(bad.status,400);assert.equal((await bad.json()).schema,'420-exchange-order-error-v1');
     const missing=await fetch(base+'/v1/orders/'+'0x'+'ff'.repeat(32));
     assert.equal(missing.status,404);assert.equal((await missing.json()).code,'NOT_FOUND');
+  });
+});
+
+
+test('PRE-08 HTTP withdrawal route preserves maker-only off-chain semantics',async()=>{
+  await withServer(async({base})=>{
+    const body={schema:'420-exchange-order-publication-v1',domain,order,signature};
+    const published=await fetch(base+'/v1/orders',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
+    const orderHash=(await published.json()).order.orderHash;
+    const denied=await fetch(base+'/v1/orders/'+orderHash+'/withdraw',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({schema:'420-exchange-order-withdrawal-v1',maker:addr(8),nonce:order.nonce,requestId:'withdraw-http-1'})});
+    assert.equal(denied.status,400);assert.equal((await denied.json()).code,'MAKER_MISMATCH');
+    const withdrawn=await fetch(base+'/v1/orders/'+orderHash+'/withdraw',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({schema:'420-exchange-order-withdrawal-v1',maker:order.maker,nonce:order.nonce,requestId:'withdraw-http-1'})});
+    assert.equal(withdrawn.status,202);const result=await withdrawn.json();assert.equal(result.order.state,'cancelled');assert.equal(result.order.cancellation.mode,'OFFCHAIN_WITHDRAWAL');
   });
 });

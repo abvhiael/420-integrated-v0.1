@@ -138,7 +138,7 @@ def main():
         "payer-funded ComputeEscrow",
         "Treasury",
         "420Trust",
-        "verifier verdict",
+        "verification verdict",
     ]
     for frag in required_non_substitute_fragments:
         if not any(frag in item for item in non_substitutes):

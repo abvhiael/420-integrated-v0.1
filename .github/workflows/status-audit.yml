@@ -1,0 +1,42 @@
+name: 420Status Audit Qualification
+
+on:
+  pull_request:
+    paths:
+      - 'status/**'
+      - 'docs/420STATUS*.md'
+      - '.github/workflows/status-audit.yml'
+      - 'go.mod'
+      - 'go.sum'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  status:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+      - name: Unit and integration qualification
+        run: go test -count=1 ./status/...
+      - name: Race qualification
+        run: go test -race -count=1 ./status/...
+      - name: Vet
+        run: go vet ./status/...
+      - name: Build status420
+        run: go build ./status/cmd/status420

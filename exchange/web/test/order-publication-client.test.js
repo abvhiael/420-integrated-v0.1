@@ -18,7 +18,7 @@ function response(body,{status=200,url='https://api.example.invalid/v1/orders'}=
 test('client publishes only to pinned same-origin versioned endpoint and validates service provenance',async()=>{
   const signedOrder={domain,order,signature:'0x'+'11'.repeat(65),orderHash};
   let request;
-  const result=await publishSignedLimitOrder({runtime,signedOrder,fetchImpl:async(url,options)=>{request={url,options};return response({schema:'420-exchange-order-publication-response-v1',idempotent:false,order:record('accepted')},{status:201});}});
+  const result=await publishSignedLimitOrder({runtime,signedOrder,publicationGate:{enabled:true,mode:'PRE07_MOCK'},fetchImpl:async(url,options)=>{request={url,options};return response({schema:'420-exchange-order-publication-response-v1',idempotent:false,order:record('accepted')},{status:201});}});
   assert.equal(result.order.orderHash,orderHash);assert.equal(request.url,'https://api.example.invalid/v1/orders');
   assert.equal(request.options.credentials,'omit');assert.equal(request.options.redirect,'error');
 });
@@ -29,7 +29,8 @@ test('status client rejects substituted endpoint, bad hash and unbound provenanc
   await assert.rejects(fetchLimitOrderStatus({runtime,orderHash,fetchImpl:async()=>response({schema:'420-exchange-order-status-response-v1',order:bad},{url:'https://api.example.invalid/v1/orders/'+orderHash})}),e=>e.code==='PROVENANCE_INVALID');
 });
 
-test('live publication policy must remain disabled in checked pre-testnet runtime',async()=>{
+test('live publication requires both checked hard-off runtime and an explicit named publication gate',async()=>{
   const signedOrder={domain,order,signature:'0x'+'11'.repeat(65)};
-  await assert.rejects(publishSignedLimitOrder({runtime:{...runtime,execution:{orderPublication:'ENABLED'}},signedOrder,fetchImpl:async()=>response({})}),e=>e instanceof OrderPublicationClientError&&e.code==='RUNTIME_POLICY_INVALID');
+  await assert.rejects(publishSignedLimitOrder({runtime,signedOrder,fetchImpl:async()=>response({})}),e=>e instanceof OrderPublicationClientError&&e.code==='LIVE_ORDER_PUBLICATION_DISABLED');
+  await assert.rejects(publishSignedLimitOrder({runtime:{...runtime,execution:{orderPublication:'ENABLED'}},signedOrder,publicationGate:{enabled:true,mode:'PRE07_MOCK'},fetchImpl:async()=>response({})}),e=>e instanceof OrderPublicationClientError&&e.code==='RUNTIME_POLICY_INVALID');
 });

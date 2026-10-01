@@ -6,7 +6,15 @@ import "../interfaces/genesis/Types420.sol";
 import "../interfaces/genesis/ISystemSafety420.sol";
 import "./SwapIds420.sol";
 
+/// @notice Governance-controlled registry for Genesis-qualified canonical pool instances.
+/// @dev This frozen system contract is registration-only: it does not CREATE/CREATE2 pools.
+///      Canonical pool instances are deployed by the qualified deployment process, then explicitly
+///      registered here by Genesis governance. `poolImplementation` records the currently approved
+///      implementation reference for deployment/provenance; it is not a runtime-codehash equality
+///      gate because canonical pools may embed immutable market/executor parameters in runtime code.
 contract GenesisDEXFactory is GenesisResidentAccess420 {
+    bool public constant REGISTRATION_ONLY = true;
+
     mapping(bytes32 => address) public pools;
     address public poolImplementation;
 
@@ -32,6 +40,8 @@ contract GenesisDEXFactory is GenesisResidentAccess420 {
         emit PoolImplementationSet(implementation_);
     }
 
+    /// @notice Register an already-deployed, code-bearing canonical pool instance.
+    /// @dev Registration is one-shot per poolId and is blocked by shared operational safety.
     function registerPool(bytes32 poolId, address pool) external {
         _requireGenesisGovernance(SwapIds420.ACTION_REGISTER_POOL);
         _requireOperational(

@@ -225,7 +225,7 @@ Dependencies: PRE-10 projection/API contract.
 
 ---
 
-### PRE-10 — Exchange read API / Indexer adapter and startup composition — PARTIAL / CRITICAL
+### PRE-10 — Exchange read API / Indexer adapter and startup composition — COMPLETE
 
 Close the current `/v1` versus `/v13` mismatch.
 
@@ -244,7 +244,7 @@ Required work:
 - add browser/server contract tests and fixture-independent integration tests;
 - fault-inject duplicate/delayed/reorged events, source rollback, fee/beneficiary conflicts and stale projections.
 
-**Exit:** browser ExchangeClient and the server adapter pass the same versioned contract suite; service can be started locally from configuration without hidden manual wiring.
+**Exit:** SATISFIED at implementation SHA `46e97d69a51deaad9460f9145735ee1cf96f658a`. A repository-owned Exchange read service now adapts generic 420Indexer V1 protocol projections into versioned Exchange V13.6 snapshot/history DTOs with canonical provenance-derived record IDs, explicit non-authoritative provenance, finality/freshness, query-bound pagination and durable rollback/replacement semantics. Versioned market/asset/route catalogue metadata remains display-only. A single config now composes RPC chain verification, Indexer HTTP source, file-backed projection storage and the Exchange V13 HTTP server with health/readiness and graceful shutdown. The actual browser `ExchangeClient` passes against the server in fixture-independent integration tests. Level 1 plus the API/projection Level 2 integration milestone passed in 420Exchange Web Verification run `36802037691` / #730, including the complete 420Indexer build/test suite. Durable evidence: `docs/420EXCHANGE-PRE-10-QUALIFICATION.md`.
 
 Dependencies: existing 420Indexer. Can proceed in parallel with PRE-04.
 

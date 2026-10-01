@@ -194,6 +194,22 @@
       "status": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS",
       "component_id_preimage": "420/component/governance/civic-governor/v1",
       "authority": "contracts/config/governance-deployment-v1.json"
+    },
+    {
+      "id": "governance-civic-community-electorate-source",
+      "contract": "CivicMerkleElectorateSource420.sol",
+      "status": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS",
+      "component_id_preimage": "420/component/governance/civic-community-electorate-source/v1",
+      "authority": "contracts/config/governance-deployment-v1.json",
+      "profile": "COMMUNITY_EQUAL_WEIGHT_MERKLE_V1"
+    },
+    {
+      "id": "governance-civic-validator-electorate-source",
+      "contract": "CivicMerkleElectorateSource420.sol",
+      "status": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS",
+      "component_id_preimage": "420/component/governance/civic-validator-electorate-source/v1",
+      "authority": "contracts/config/governance-deployment-v1.json",
+      "profile": "VALIDATOR_EQUAL_WEIGHT_MERKLE_V1"
     }
   ],
   "reserved": [

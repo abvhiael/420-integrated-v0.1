@@ -292,7 +292,11 @@ jobs:
             cd 420-indexer
             npm install
             node scripts/generate-names420-descriptor.mjs --write --print
-            git diff --exit-code -- descriptors/names420-v3.json
+            git status --porcelain -- descriptors/names420-v3.json | tee /tmp/names420-descriptor-status.txt
+            if [ -s /tmp/names420-descriptor-status.txt ]; then
+              echo "Committed Names420 release descriptor is missing or stale." >&2
+              exit 1
+            fi
             npm run build
             node --test \
               dist/test/names420-release-descriptor.test.js \

@@ -323,7 +323,7 @@ contract GovernanceAudit2Hardening420Test {
         vm.roll(100);
         vm.prank(ALICE);
         bytes32 proposalId = fuzzStack.governor
-            .createProposal(CivicIds420.ProposalClass.G1, keccak256("metadata"), keccak256("actions"));
+        .createProposal(CivicIds420.ProposalClass.G1, keccak256("metadata"), keccak256("actions"));
 
         vm.roll(101);
         vm.prank(ALICE);
@@ -354,7 +354,7 @@ contract GovernanceAudit2Hardening420Test {
         vm.roll(100);
         vm.prank(ALICE);
         bytes32 proposalId = fuzzStack.governor
-            .createProposal(CivicIds420.ProposalClass.G1, keccak256("metadata"), keccak256("actions"));
+        .createProposal(CivicIds420.ProposalClass.G1, keccak256("metadata"), keccak256("actions"));
 
         vm.roll(101);
         vm.prank(ALICE);

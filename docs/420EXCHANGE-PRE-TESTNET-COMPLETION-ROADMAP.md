@@ -185,7 +185,7 @@ Dependencies: PRE-02, PRE-10; PRE-05-style provenance principles apply to servic
 
 ---
 
-### PRE-08 — maker-only cancellation integration — PARTIAL
+### PRE-08 — maker-only cancellation integration — COMPLETE
 
 Complete cancellation semantics across off-chain and on-chain paths.
 
@@ -199,7 +199,7 @@ Required work:
 - prohibit cross-account cancellation and stale maker state;
 - add mock settlement/indexer conflict tests.
 
-**Exit:** cancellation is deterministic and mock-E2E qualified; sends remain hard-off.
+**Exit:** SATISFIED at implementation SHA `942e1c340dde8e2a28753f4de20f4f64823e2e9a`. PRE-08 now distinguishes maker-authorized versioned off-chain withdrawal from on-chain HASH/NONCE cancellation, binds review to exact canonical order hash/nonce/maker/chain/remaining amount, rereads service and settlement state immediately before the guarded send boundary, rejects racing fills/duplicate cancel/cross-account/stale maker state, and models rejected/reverted/replaced/dropped/reorged/indexer-conflicting outcomes. Live withdrawal/cancellation and wallet sends remain independently default-OFF. Level 1 plus the PRE-07/PRE-08 order-lifecycle integration milestone passed in 420Exchange Web Verification run `36798755313` / #695. Durable evidence: `docs/420EXCHANGE-PRE-08-QUALIFICATION.md`.
 
 Dependencies: PRE-07.
 

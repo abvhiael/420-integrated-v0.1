@@ -16,6 +16,7 @@ export function loadExchangeReadConfig(file){
     schema:raw.schema,host:raw.host??'127.0.0.1',port:integer(raw.port??7420,'port',{min:0}),
     indexerBaseUrl:raw.indexerBaseUrl,rpcUrl:raw.rpcUrl,chainId:raw.chainId,
     cataloguePath:path.resolve(path.dirname(file),raw.cataloguePath),storagePath:path.resolve(path.dirname(file),raw.storagePath),
+    allowedOrigins:Array.isArray(raw.allowedOrigins)?Object.freeze([...raw.allowedOrigins]):Object.freeze([]),
     refreshOnStart:raw.refreshOnStart!==false,shutdownTimeoutMs:integer(raw.shutdownTimeoutMs??5000,'shutdownTimeoutMs',{min:1,max:60000}),
   });
 }
@@ -29,7 +30,7 @@ export async function composeExchangeReadService(config,{fetchImpl=globalThis.fe
 }
 export async function startExchangeReadService(config,{fetchImpl=globalThis.fetch,registerSignals=true}={}){
   const {service,store}=await composeExchangeReadService(config,{fetchImpl});
-  const server=createExchangeReadHttpServer(service);
+  const server=createExchangeReadHttpServer(service,{allowedOrigins:config.allowedOrigins});
   await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(config.port,config.host,()=>{server.off('error',reject);resolve();});});
   let closing=false;
   const close=async()=>{if(closing)return;closing=true;await new Promise(resolve=>server.close(resolve));store.close();};

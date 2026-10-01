@@ -10,6 +10,9 @@ export class WalletExecutionError extends Error {
   }
 }
 
+export const DEFAULT_SUBMISSION_GATE=Object.freeze({enabled:false,mode:'DISABLED'});
+const ALLOWED_SUBMISSION_MODES=new Set(['PRE06_MOCK','LIVE_TESTNET_QUALIFICATION']);
+
 function providerRequest(provider, method, params = []) {
   if (!provider || typeof provider.request !== 'function') {
     throw new WalletExecutionError('PROVIDER_UNAVAILABLE', 'EIP-1193 provider required');
@@ -23,12 +26,16 @@ function sameAccount(left, right) {
 
 function classifyWalletError(error) {
   const code = Number(error?.code);
+  const message=String(error?.message ?? 'wallet provider error');
   if (code === 4001) return new WalletExecutionError('USER_REJECTED', 'wallet request rejected by user', { providerCode:code });
   if (code === 4100) return new WalletExecutionError('UNAUTHORIZED', 'wallet request is not authorized', { providerCode:code });
   if (code === 4200) return new WalletExecutionError('UNSUPPORTED_METHOD', 'wallet does not support the requested method', { providerCode:code });
   if (code === 4900) return new WalletExecutionError('DISCONNECTED', 'wallet provider is disconnected', { providerCode:code });
   if (code === 4901) return new WalletExecutionError('CHAIN_DISCONNECTED', 'wallet is not connected to the required chain', { providerCode:code });
-  return new WalletExecutionError('PROVIDER_ERROR', String(error?.message ?? 'wallet provider error'), { providerCode:Number.isFinite(code)?code:null });
+  if (/nonce (?:too low|has already been used|already used)|replacement transaction underpriced/i.test(message)) {
+    return new WalletExecutionError('STALE_NONCE', message, { providerCode:Number.isFinite(code)?code:null });
+  }
+  return new WalletExecutionError('PROVIDER_ERROR', message, { providerCode:Number.isFinite(code)?code:null });
 }
 
 async function liveWalletState(provider) {
@@ -82,6 +89,13 @@ export function walletTransactionGate({ session, expectedChainId, expectedGenera
   }
 }
 
+export function assertSubmissionGate(submissionGate=DEFAULT_SUBMISSION_GATE){
+  if(submissionGate?.enabled!==true||!ALLOWED_SUBMISSION_MODES.has(submissionGate?.mode)){
+    throw new WalletExecutionError('LIVE_SUBMISSION_DISABLED','wallet transaction submission is disabled by the independent execution gate');
+  }
+  return submissionGate;
+}
+
 export async function submitPreflightedTransaction({
   provider,
   session,
@@ -89,9 +103,14 @@ export async function submitPreflightedTransaction({
   expectedGeneration,
   transaction,
   preflight,
+  submissionGate=DEFAULT_SUBMISSION_GATE,
 } = {}) {
   const gate = walletTransactionGate({ session, expectedChainId, expectedGeneration, transaction, preflight });
   if (!gate.ok) throw new WalletExecutionError('SUBMISSION_BLOCKED', `transaction submission unavailable: ${gate.reason}`);
+
+  // PRE-06: this check is deliberately independent from runtime/deployment readiness.
+  // A complete review and successful preflight are still insufficient to call the wallet.
+  assertSubmissionGate(submissionGate);
 
   const live = await liveWalletState(provider);
   const expected = assertSession({
@@ -131,6 +150,7 @@ export async function submitPreflightedTransaction({
     transactionFingerprint:preflight.transactionFingerprint,
     txHash:txHash.toLowerCase(),
     request,
+    submissionMode:submissionGate.mode,
   });
 }
 

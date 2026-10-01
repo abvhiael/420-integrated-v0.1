@@ -85,13 +85,17 @@ func (b *StoreBackend) StakeActivity(validatorID, address string, limit uint32) 
 			ContractAddress:strings.ToLower(lg.Address), EventName:shape.name,
 			Topics:append([]string(nil),lg.Topics...), Data:lg.Data,
 		}
-		if shape.validatorTopic > 0 && len(lg.Topics) > shape.validatorTopic {
+		if shape.validatorTopic > 0 {
+			if len(lg.Topics) <= shape.validatorTopic || !bytes32RE.MatchString(lg.Topics[shape.validatorTopic]) {
+				return StakeActivityPage{}, errors.New("malformed Stake validator topic")
+			}
 			record.ValidatorID = strings.ToLower(lg.Topics[shape.validatorTopic])
 		}
 		for _, idx := range shape.addressTopics {
-			if len(lg.Topics) > idx {
-				if a:=indexedAddress(lg.Topics[idx]); a!="" { record.Addresses=append(record.Addresses,a) }
-			}
+			if len(lg.Topics) <= idx { return StakeActivityPage{}, errors.New("malformed Stake address topic") }
+			a:=indexedAddress(lg.Topics[idx])
+			if a=="" || !addressRE.MatchString(a) { return StakeActivityPage{}, errors.New("malformed Stake address topic") }
+			record.Addresses=append(record.Addresses,a)
 		}
 		if validatorID != "" && record.ValidatorID != validatorID { continue }
 		if address != "" {
@@ -104,13 +108,13 @@ func (b *StoreBackend) StakeActivity(validatorID, address string, limit uint32) 
 		if !exists || block.Hash != lg.BlockHash { return StakeActivityPage{}, ErrSnapshotUnavailable }
 		record.Finality = block.Finality
 		records=append(records,record)
-		if uint32(len(records))==limit { break }
 	}
 	sort.Slice(records,func(i,j int)bool{
 		if records[i].BlockNumber!=records[j].BlockNumber{return records[i].BlockNumber>records[j].BlockNumber}
 		if records[i].TransactionIndex!=records[j].TransactionIndex{return records[i].TransactionIndex>records[j].TransactionIndex}
 		return records[i].LogIndex>records[j].LogIndex
 	})
+	if uint32(len(records)) > limit { records = records[:limit] }
 	return StakeActivityPage{
 		Meta:PageMeta{ChainID:cp.ChainID,SnapshotHeight:cp.IndexedHeight,SnapshotHash:cp.IndexedHash,SafeHeight:cp.SafeHeight,FinalizedHeight:cp.FinalizedHeight,SchemaVersion:cp.SchemaVersion},
 		ValidatorID:validatorID,Address:address,Records:records,CanonicalAuthority:false,

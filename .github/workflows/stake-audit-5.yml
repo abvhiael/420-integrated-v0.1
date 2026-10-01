@@ -1,0 +1,56 @@
+name: 420Stake STAKE-AUDIT-5
+
+on:
+  pull_request:
+    paths:
+      - 'wallet/web/core/stake-management.js'
+      - 'wallet/web/stake-management-ui.js'
+      - 'wallet/web/index.html'
+      - 'wallet/web/runtime-config.json'
+      - 'wallet/web/runtime-config.example.json'
+      - 'wallet/web/scripts/generate-runtime-config.mjs'
+      - 'wallet/web/test/stake-management.test.js'
+      - 'wallet/web/test/stake-management-ui.test.js'
+      - 'wallet/web/test/runtime-config-generator.test.js'
+      - 'wallet/deployment-inventory.json'
+      - 'scripts/verify-stake-audit-5-wallet.py'
+      - '.github/workflows/stake-audit-5.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: stake-audit-5-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  level-1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify STAKE-AUDIT-5 application anchors
+        run: python scripts/verify-stake-audit-5-wallet.py
+      - name: Run focused Stake client and UI tests
+        working-directory: wallet/web
+        run: node --test test/stake-management.test.js test/stake-management-ui.test.js test/runtime-config-generator.test.js
+      - name: Run retained Wallet web regression suite
+        working-directory: wallet/web
+        run: npm test
+      - name: Run retained Wallet static qualification
+        working-directory: wallet/web
+        run: npm run check

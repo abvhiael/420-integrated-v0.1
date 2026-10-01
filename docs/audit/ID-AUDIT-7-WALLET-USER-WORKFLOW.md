@@ -1,6 +1,6 @@
 # ID-AUDIT-7 — 420Wallet & User-Facing Identity Application
 
-**Status:** IMPLEMENTED — Level 1 qualification pending exact-head CI  
+**Status:** COMPLETE — Level 1 qualified  
 **Repository:** `abvhiael/420-integrated-v0.1`  
 **Working PR:** #438  
 **Canonical roadmap:** `docs/audit/420IDENTITY-AUDIT-REMEDIATION-ROADMAP.md`
@@ -214,11 +214,32 @@ Live testnet Wallet/Identity operation remains ID-AUDIT-9 scope.
 
 ## Exact-head qualification evidence
 
-Pending.
+Qualified executable tree:
+
+- audit implementation SHA: `b736f4f1d4f53117816eb6d85e2967672ffa7145`;
+- exact-head qualification SHA: `12af0c2759e71e60c20824046a956835a8645452`;
+- temporary qualification PR: #444;
+- focused workflow: `420Identity ID-AUDIT-7`, run `36824691465` / #4 — **SUCCESS**;
+- directly applicable shared workflow: `420 Wallet Web Verification`, run `36824691244` / #1143 — **SUCCESS**.
+
+The temporary qualification branch was necessary because direct Contents-API commits to the long-lived audit PR did not instantiate Actions runs. Every ID-AUDIT-7 executable/test/workflow/user-guide blob was compared between the audit branch and qualified SHA and is byte-identical. The qualification branch differs only by qualification/evidence history, not by the audited executable tree.
+
+Focused workflow results:
+
+- exact-head checkout/assertion — PASS;
+- mechanical ABI/client/UI compatibility verifier — PASS;
+- Wallet static qualification — PASS;
+- focused Identity Wallet client/UI suite — **15/15 passed**;
+- full retained Wallet Web suite — **328/328 passed**;
+- signing-secret/persistent-secret scan — PASS.
+
+The shared Wallet Web workflow additionally passed its deployment inventory, namespace, predeploy, Genesis-image, global-address, consumer-reference, Wallet static and Wallet core checks on the same qualified head.
+
+One focused test exposed a real safety gap before closeout: the initial client verified the session before simulation but did not independently re-verify chain/account/contract identity immediately before broadcast. ID-AUDIT-7 was hardened so every write now performs `verifySession()` again after simulation, gas estimation and canonical state revalidation, immediately before `eth_sendTransaction`. The final green run includes that hardened path.
 
 ## Completion state
 
-**PENDING LEVEL 1 EXACT-HEAD QUALIFICATION**
+**COMPLETE — LEVEL 1 QUALIFIED**
 
 Next canonical step after successful closeout:
 

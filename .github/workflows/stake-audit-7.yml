@@ -29,6 +29,7 @@ on:
       - 'contracts/test/StakeSystemCallABIVectors420.t.sol'
       - 'scripts/generate-stake-audit-7-predeploy.py'
       - 'scripts/verify-stake-audit-7-predeploy.py'
+      - 'scripts/test-stake-audit-7-predeploy.py'
       - '.github/workflows/stake-audit-7.yml'
   pull_request:
     paths:
@@ -88,6 +89,8 @@ jobs:
           python-version: '3.12'
       - name: Verify retained Stake predeploy package
         run: python scripts/verify-stake-audit-7-predeploy.py
+      - name: Run Audit7 negative/adversarial tamper fixtures
+        run: python scripts/test-stake-audit-7-predeploy.py
       - name: Reproduce exact Stake predeploy runtime and storage
         run: python scripts/generate-stake-audit-7-predeploy.py --check
       - name: Verify affected frozen Genesis address authority

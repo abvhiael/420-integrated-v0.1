@@ -1,0 +1,62 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-1.5.1.WorkerCollateral.v1",
+  "step": "CMP-1.5.1",
+  "title": "Worker collateral",
+  "status": "IMPLEMENTED_QUALIFICATION_PENDING",
+  "base_head": "9a487ebeb24c28ceebfe2f0d794463939956ad9e",
+  "canonical_definition": "Worker collateral",
+  "implementation": {
+    "contract": "contracts/src/compute/ComputeStakeWorkerCollateral420.sol",
+    "test": "contracts/test/ComputeStakeWorkerCollateral420.t.sol",
+    "interface": "contracts/src/interfaces/IComputeStakeSource420.sol",
+    "worker_registry": "contracts/src/compute/ComputeWorkerRegistry420.sol",
+    "vault": "contracts/src/vault/AssetVault420.sol",
+    "accounting": "contracts/src/vault/VaultAccounting420.sol"
+  },
+  "requirements": [
+    "only the canonical current worker operator may add collateral for that worker",
+    "worker collateral is native $420 deposited into the registered VAULT_COLLATERAL 420Vault",
+    "every deposit is atomically backed by a distinct canonical Vault obligation",
+    "position identity is domain-separated by chain, contract, worker and stake-policy reference",
+    "top-ups create immutable distinct backing tranches and advance position revision",
+    "activeAmount and slashableAmount equal accumulated live worker collateral at this step",
+    "worker-policy positions remain isolated",
+    "retired workers cannot add collateral",
+    "missing Vault authorization reverts deposit and position mutation atomically",
+    "the source implements IComputeStakeSource420 for existing fail-closed consumers"
+  ],
+  "deferred": [
+    "CMP-1.5.2 verifier collateral",
+    "CMP-1.5.3 policy-specific minimum collateral enforcement",
+    "CMP-1.5.4 exit queue and withdrawal delay",
+    "CMP-1.5.5 objective slash authorization",
+    "CMP-1.5.6 slash distribution",
+    "CMP-1.5.7 reward accounting",
+    "CMP-1.5.8 dispute/stake integration",
+    "CMP-1.5.9 final WorkerRegistry stake-source integration",
+    "CMP-1.5.10 ComputeEscrow slash redistribution",
+    "CMP-1.5.11 hostile economic qualification",
+    "CMP-1.5.12 release candidate",
+    "CMP-1.5.13 phase closeout"
+  ],
+  "invariants": [
+    "CMP-INV-005",
+    "CMP-INV-019",
+    "CMP-INV-020",
+    "CMP-INV-021",
+    "CMP-INV-022",
+    "CMP-INV-023",
+    "CMP-INV-025",
+    "CMP-INV-026"
+  ],
+  "qualification": {
+    "level": 1,
+    "required": [
+      "Compute contract build",
+      "retained Compute*.t.sol suite",
+      "focused ComputeStakeWorkerCollateral420 tests",
+      "CMP-1.5.1 verifier"
+    ]
+  },
+  "next_canonical_step": "CMP-1.5.2 — Verifier collateral"
+}

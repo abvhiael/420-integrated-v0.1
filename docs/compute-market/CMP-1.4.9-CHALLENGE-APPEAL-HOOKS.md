@@ -1,6 +1,6 @@
 # CMP-1.4.9 — Challenge and appeal hooks
 
-Status: **IMPLEMENTATION COMPLETE; LEVEL 1 + LEVEL 2 QUALIFICATION PENDING. NO LIVE DEPLOYMENT/PUBLICATION CLAIM.**
+Status: **COMPLETE — LEVEL 1 + LEVEL 2 QUALIFIED. NO LIVE DEPLOYMENT/PUBLICATION CLAIM.**
 
 ## Canonical definition
 
@@ -153,6 +153,19 @@ In particular:
 
 CMP-1.4.9 is COMPLETE only when every machine-readable exit criterion passes and Level 1 plus the verifier-dispute Level 2 milestone are green on the same exact implementation SHA.
 
+## Qualification evidence
+
+Qualified implementation SHA: `c125a25ab070ea5511d50e82045ae9b96ddadbb3`.
+
+- Compute Market Qualification #61 — run `36821510570` — **success**
+- Solidity Contracts #3578 — run `36821510599` — **success**
+- Genesis Address Authority #387 — run `36821510628` — **success**
+- 420Registry REG-AUDIT-4 #222 — run `36821510673` — **success**
+- 420Docs Qualification #3774 — run `36821510622` — **success**
+- 420Indexer #1194 — run `36821510670` — **success**
+
+The qualified implementation SHA passed the CMP-1.4.9 Level 1 challenge/appeal-hook checks and the Level 2 CMP-1.4 verifier-dispute lifecycle integration suite on the same exact head.
+
 ## Completion
 
-**NOT YET COMPLETE.** Implementation and durable evidence are present; exact-head qualification remains pending.
+**COMPLETE at Level 1 and the CMP-1.4 verifier-dispute lifecycle Level 2 milestone.** Level 3 remains intentionally deferred to complete Compute app-phase closeout. This documentation update is evidence-only and does not require recursive qualification reruns.

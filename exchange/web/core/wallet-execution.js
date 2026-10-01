@@ -11,7 +11,9 @@ export class WalletExecutionError extends Error {
 }
 
 export const DEFAULT_SUBMISSION_GATE=Object.freeze({enabled:false,mode:'DISABLED'});
+export const DEFAULT_ORDER_SIGNING_GATE=Object.freeze({enabled:false,mode:'DISABLED'});
 const ALLOWED_SUBMISSION_MODES=new Set(['PRE06_MOCK','LIVE_TESTNET_QUALIFICATION']);
+const ALLOWED_ORDER_SIGNING_MODES=new Set(['PRE07_MOCK','LIVE_TESTNET_QUALIFICATION']);
 
 function providerRequest(provider, method, params = []) {
   if (!provider || typeof provider.request !== 'function') {
@@ -179,6 +181,13 @@ export function walletTypedDataGate({
   }
 }
 
+export function assertOrderSigningGate(signingGate=DEFAULT_ORDER_SIGNING_GATE){
+  if(signingGate?.enabled!==true||!ALLOWED_ORDER_SIGNING_MODES.has(signingGate?.mode)){
+    throw new WalletExecutionError('LIVE_ORDER_SIGNING_DISABLED','limit-order wallet signing is disabled by the independent signing gate');
+  }
+  return signingGate;
+}
+
 export async function signQualifiedLimitOrder({
   provider,
   session,
@@ -186,9 +195,11 @@ export async function signQualifiedLimitOrder({
   expectedGeneration,
   signingRequest,
   qualification,
+  signingGate=DEFAULT_ORDER_SIGNING_GATE,
 } = {}) {
   const gate=walletTypedDataGate({session,expectedChainId,expectedGeneration,signingRequest,qualification});
   if(!gate.ok) throw new WalletExecutionError('SIGNING_BLOCKED', `limit-order signing unavailable: ${gate.reason}`);
+  assertOrderSigningGate(signingGate);
 
   const expected=assertSession({
     session,

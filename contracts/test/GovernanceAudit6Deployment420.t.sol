@@ -97,7 +97,7 @@ contract GovernanceAudit6Deployment420Test {
         require(plan != bytes32(0) && compatibility.bootstrapPlanScheduled(), "plan not scheduled");
 
         vm.warp(block.timestamp + timelock.G1_DELAY() + 1);
-        for (uint8 i = 0; i < 15; ++i) {
+        for (uint8 i = 0; i < 17; ++i) {
             timelock.execute(compatibility.bootstrapOperationId(plan, i));
         }
 
@@ -141,6 +141,12 @@ contract GovernanceAudit6Deployment420Test {
         );
         require(registry.resolve(compatibility.VOTING_COMPONENT_ID()) == address(voting), "voting discovery");
         require(registry.resolve(compatibility.GOVERNOR_COMPONENT_ID()) == address(governor), "governor discovery");
+        require(
+            registry.resolve(compatibility.COMMUNITY_SOURCE_COMPONENT_ID()) == address(community), "community source discovery"
+        );
+        require(
+            registry.resolve(compatibility.VALIDATOR_SOURCE_COMPONENT_ID()) == address(validator), "validator source discovery"
+        );
 
         (bool reschedule,) = address(compatibility)
             .call(

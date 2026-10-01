@@ -78,7 +78,7 @@ test('successful transaction submission rechecks live wallet state and uses pref
     throw new Error('unexpected '+method);
   });
   const result=await submitPreflightedTransaction({
-    provider,session:s,expectedChainId:'0x420',expectedGeneration:s.generation,transaction:tx,preflight:pf,
+    provider,session:s,expectedChainId:'0x420',expectedGeneration:s.generation,transaction:tx,preflight:pf,submissionGate:{enabled:true,mode:'PRE06_MOCK'},
   });
   assert.equal(result.txHash,txHash);
   assert.equal(result.transactionFingerprint,pf.transactionFingerprint);
@@ -129,7 +129,7 @@ test('invalid transaction hashes are rejected',async()=>{
   });
   await assert.rejects(
     submitPreflightedTransaction({
-      provider,session:s,expectedChainId:'0x420',expectedGeneration:s.generation,transaction:tx,preflight:preflight(tx),
+      provider,session:s,expectedChainId:'0x420',expectedGeneration:s.generation,transaction:tx,preflight:preflight(tx),submissionGate:{enabled:true,mode:'PRE06_MOCK'},
     }),
     (error)=>error.code==='INVALID_TX_HASH',
   );

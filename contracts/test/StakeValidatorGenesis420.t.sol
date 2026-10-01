@@ -149,6 +149,49 @@ contract StakeValidatorGenesis420Test {
         _assertSolvent();
     }
 
+    function testDuplicateSlashEvidenceCannotChargeTwice() public {
+        (bytes32 id,) = _registerMatched("slash-replay", 13);
+        _state(id, ValidatorRegistry.Status.PROBATION, 1, 0, 0, 0);
+        bytes32 evidenceHash = keccak256("same-finalized-evidence");
+        vm.prank(SYSTEM_CALLER);
+        registry.applySlash(
+            id,
+            ValidatorRegistry.SlashOffense.DOUBLE_VOTE,
+            0,
+            1_000 ether,
+            1_000 ether,
+            evidenceHash,
+            ValidatorRegistry.Status.SUSPENDED
+        );
+
+        ValidatorRegistry.Validator memory once = registry.getValidator(id);
+        uint256 protocolReserveAfterFirst = registry.PROTOCOL_RESERVE().balance;
+        uint256 communityAfterFirst = address(reserve).balance;
+
+        vm.prank(SYSTEM_CALLER);
+        (bool replayed,) = address(registry).call(
+            abi.encodeWithSelector(
+                registry.applySlash.selector,
+                id,
+                ValidatorRegistry.SlashOffense.DOUBLE_VOTE,
+                uint8(0),
+                uint256(1_000 ether),
+                uint256(1_000 ether),
+                evidenceHash,
+                ValidatorRegistry.Status.SUSPENDED
+            )
+        );
+        require(!replayed, "duplicate evidence replayed");
+
+        ValidatorRegistry.Validator memory afterReplay = registry.getValidator(id);
+        require(afterReplay.ownedBond == once.ownedBond && afterReplay.protocolCredit == once.protocolCredit, "replay changed collateral");
+        require(afterReplay.totalSlashed == once.totalSlashed, "replay changed slash accounting");
+        require(registry.PROTOCOL_RESERVE().balance == protocolReserveAfterFirst, "replay moved owned slash");
+        require(address(reserve).balance == communityAfterFirst, "replay moved protocol credit");
+        require(registry.slashEvidenceApplied(evidenceHash), "evidence not recorded");
+        _assertSolvent();
+    }
+
     function testFinalityEquivocationConsumesOwnedAndRevokesAllCredit() public {
         (bytes32 id,) = _registerMatched("finality", 9);
         _state(id, ValidatorRegistry.Status.PROBATION, 1, 0, 0, 0);
@@ -193,6 +236,78 @@ contract StakeValidatorGenesis420Test {
         require(owned == 21_000 ether && credit == 21_000 ether && effective == 42_000 ether && slashed == 0, "facade composition");
         (uint256 totalOwned, uint256 totalCredit, uint256 pending, bool solvent) = stake.collateralTotals();
         require(totalOwned == 21_000 ether && totalCredit == 21_000 ether && pending == 0 && solvent, "facade custody");
+    }
+
+    function testConsensusRewardAppliesOncePerExecutionBlock() public {
+        vm.roll(100);
+        address proposer = address(0x5100);
+        address[] memory participants = new address[](2);
+        participants[0] = address(0x5101);
+        participants[1] = address(0x5102);
+
+        vm.prank(SYSTEM_CALLER);
+        rewards.applyConsensusReward(100, proposer, participants, 10 ether, 2 ether, 3 ether, 4 ether);
+        require(rewards.rewardApplied(100), "reward block not recorded");
+        require(rewards.validatorAccrued(proposer) == 10 ether, "proposer accrual");
+        require(rewards.validatorAccrued(participants[0]) == 2 ether, "participant accrual");
+
+        uint256 securityOnce = rewards.grossSecurityIssued();
+        vm.prank(SYSTEM_CALLER);
+        (bool replayed,) = address(rewards).call(
+            abi.encodeWithSelector(
+                rewards.applyConsensusReward.selector,
+                uint64(100),
+                proposer,
+                participants,
+                uint256(10 ether),
+                uint256(2 ether),
+                uint256(3 ether),
+                uint256(4 ether)
+            )
+        );
+        require(!replayed, "reward replayed");
+        require(rewards.grossSecurityIssued() == securityOnce, "replay changed issuance");
+    }
+
+    function testConsensusRewardRejectsWrongBlockAndDuplicateParticipants() public {
+        vm.roll(200);
+        address proposer = address(0x5200);
+        address[] memory one = new address[](1);
+        one[0] = address(0x5201);
+
+        vm.prank(SYSTEM_CALLER);
+        (bool wrongBlock,) = address(rewards).call(
+            abi.encodeWithSelector(
+                rewards.applyConsensusReward.selector,
+                uint64(199),
+                proposer,
+                one,
+                uint256(1 ether),
+                uint256(1 ether),
+                uint256(1 ether),
+                uint256(1 ether)
+            )
+        );
+        require(!wrongBlock, "wrong reward block accepted");
+
+        address[] memory duplicate = new address[](2);
+        duplicate[0] = address(0x5201);
+        duplicate[1] = address(0x5201);
+        vm.prank(SYSTEM_CALLER);
+        (bool duplicateAccepted,) = address(rewards).call(
+            abi.encodeWithSelector(
+                rewards.applyConsensusReward.selector,
+                uint64(200),
+                proposer,
+                duplicate,
+                uint256(1 ether),
+                uint256(1 ether),
+                uint256(1 ether),
+                uint256(1 ether)
+            )
+        );
+        require(!duplicateAccepted, "duplicate participant accepted");
+        require(!rewards.rewardApplied(200), "invalid reward marked applied");
     }
 
     function testDynamicCommitteeTiersAndRewardAllocation() public view {

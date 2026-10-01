@@ -81,7 +81,7 @@ abi = art.get("abi")
 if not isinstance(abi, list) or not abi:
     fail("Identity artifact ABI missing")
 else:
-    canonical = json.dumps(abi, separators=(",", ":"), ensure_ascii=True)
+    canonical = json.dumps(abi, separators=(",", ":"), ensure_ascii=True, sort_keys=True)
     expected_abi = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
     if art.get("abiSha256") != expected_abi:
         fail("Identity artifact ABI SHA-256 mismatch")

@@ -2,8 +2,8 @@ import http from 'node:http';
 import {HttpSecurityError,inspectRequestSecurity,preflight,responseSecurityHeaders} from '../../shared/http-security.mjs';
 
 const API_HEADERS=Object.freeze({'content-type':'application/json; charset=utf-8','x-420-api-major':'13','x-420-api-minor':'6'});
-function write(res,status,body,security={}){const data=JSON.stringify(body,security);res.writeHead(status,{...API_HEADERS,...responseSecurityHeaders(security),'content-length':Buffer.byteLength(data)});res.end(data);}
-function error(res,status,code,message,security={}){write(res,status,{error:{code,message,stableId:'exchange-read-'+code.toLowerCase()}},security,security,security);}
+function write(res,status,body,security={}){const data=JSON.stringify(body);res.writeHead(status,{...API_HEADERS,...responseSecurityHeaders(security),'content-length':Buffer.byteLength(data)});res.end(data);}
+function error(res,status,code,message,security={}){write(res,status,{error:{code,message,stableId:'exchange-read-'+code.toLowerCase()}},security);}
 const limit=u=>{const raw=u.searchParams.get('limit')??'50';if(!/^\d+$/.test(raw))throw new Error('invalid limit');const n=Number(raw);if(!Number.isSafeInteger(n)||n<1||n>100)throw new Error('invalid limit');return n;};
 export function createExchangeReadHandler(service,{allowedOrigins=[]}={}){
   return async(req,res)=>{

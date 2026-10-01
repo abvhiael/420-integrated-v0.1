@@ -8,6 +8,8 @@ import "./IComputeDeterministicVerificationAdapter420.sol";
 /// @notice Governance-versioned deterministic verification adapter registry.
 /// @dev Registration is semantic routing metadata only. It grants no verification/verdict/settlement authority.
 contract ComputeDeterministicAdapterRegistry420 is I420System, SystemAccess {
+    bytes32 public constant ADAPTER_KIND =
+        keccak256("420/CMP/VERIFICATION_ADAPTER/DETERMINISTIC/V1");
     struct Route {
         address adapter;
         bytes32 codeHash;

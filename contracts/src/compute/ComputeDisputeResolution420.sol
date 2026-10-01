@@ -168,8 +168,12 @@ contract ComputeDisputeResolution420 {
         if (!claimExists || paid || entitlementRef == bytes32(0) || claimRef == bytes32(0)
             || payer == address(0) || beneficiary == address(0)
             || j.verificationRef == bytes32(0) || j.resultCommitment == bytes32(0)
-            || j.verifier == address(0) || j.verificationPolicyId == bytes32(0)
-            || j.verificationPolicyRevision == 0 || j.verificationPolicyCommitment == bytes32(0)
+            || j.verifier == address(0)
+            || !_validOptionalPolicyTuple(
+                j.verificationPolicyId,
+                j.verificationPolicyRevision,
+                j.verificationPolicyCommitment
+            )
             || !entitlements.verifiedEntitlement(
                 jobId, j.verificationRef, entitlementRef, beneficiary, providerAmount
             )) revert InvalidDispute();
@@ -442,6 +446,20 @@ contract ComputeDisputeResolution420 {
             || p.disputePolicyVersion == 0 || p.challengeWindow == 0
             || p.responseWindow == 0 || p.decisionWindow == 0 || p.appealWindow == 0)
             revert InvalidDispute();
+    }
+
+    function _validOptionalPolicyTuple(
+        bytes32 policyId,
+        uint32 policyRevision,
+        bytes32 policyCommitment
+    ) private pure returns (bool) {
+        bool empty = policyId == bytes32(0)
+            && policyRevision == 0
+            && policyCommitment == bytes32(0);
+        bool complete = policyId != bytes32(0)
+            && policyRevision != 0
+            && policyCommitment != bytes32(0);
+        return empty || complete;
     }
 
     function _case(bytes32 disputeId) private view returns (DisputeCase storage d) {

@@ -9,6 +9,7 @@ import { InjectedProvider420 } from './core/provider.js';
 let context = null;
 let busy = false;
 let lifecycleBound = false;
+let withdrawReady = false;
 const $ = (selector) => document.querySelector(selector);
 
 export function stakeMarkup() {
@@ -101,11 +102,14 @@ function setTxState(title, detail, state = 'idle') {
 function setBusy(value) {
   busy = value;
   document.querySelectorAll('#stake-management-panel button').forEach((button) => {
-    if (button.id !== 'stake-connect') button.disabled = value || !context;
+    if (button.id === 'stake-connect') return;
+    if (button.id === 'stake-withdraw') button.disabled = value || !context || !withdrawReady;
+    else button.disabled = value || !context;
   });
   if ($('#stake-connect')) $('#stake-connect').disabled = value;
 }
 function clearState() {
+  withdrawReady = false;
   for (const id of ['#stake-status-value','#stake-authority-value','#stake-bond-value','#stake-slashed-value','#stake-reward-value','#stake-readiness-value','#stake-rotation-value','#stake-withdraw-value']) {
     if ($(id)) $(id).textContent = '—';
   }
@@ -201,7 +205,8 @@ async function loadValidator() {
   $('#stake-rotation-value').textContent = `activation ${summary.activationRotation} · scheduled exit ${summary.scheduledExitRotation} · cooldown until ${summary.cooldownUntilRotation}`;
   $('#stake-withdraw-value').textContent = summary.withdrawableBlock === 0n ? 'Not scheduled' : `block ${summary.withdrawableBlock} · ${summary.canWithdraw ? 'available to this account' : 'not available to this account'}`;
   $('#stake-exit-guidance').textContent = summary.exitGuidance;
-  $('#stake-withdraw').disabled = busy || !summary.canWithdraw;
+  withdrawReady = summary.canWithdraw;
+  $('#stake-withdraw').disabled = busy || !withdrawReady;
   return summary;
 }
 async function confirmSubmission(submitted, successText) {

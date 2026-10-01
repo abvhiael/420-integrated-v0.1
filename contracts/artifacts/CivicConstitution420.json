@@ -1,0 +1,456 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "timelock_",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "BPS",
+      "outputs": [
+        {
+          "internalType": "uint16",
+          "name": "",
+          "type": "uint16"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "enum CivicIds420.ProposalClass",
+          "name": "class_",
+          "type": "uint8"
+        }
+      ],
+      "name": "delayFloor",
+      "outputs": [
+        {
+          "internalType": "uint64",
+          "name": "",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "governanceTimelock",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "protocolVersion",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "enum CivicIds420.ProposalClass",
+          "name": "class_",
+          "type": "uint8"
+        }
+      ],
+      "name": "ruleFor",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint64",
+              "name": "votingPeriodBlocks",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint64",
+              "name": "timelockDelay",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint16",
+              "name": "communityQuorumBps",
+              "type": "uint16"
+            },
+            {
+              "internalType": "uint16",
+              "name": "communityApprovalBps",
+              "type": "uint16"
+            },
+            {
+              "internalType": "uint16",
+              "name": "validatorQuorumBps",
+              "type": "uint16"
+            },
+            {
+              "internalType": "uint16",
+              "name": "validatorApprovalBps",
+              "type": "uint16"
+            },
+            {
+              "internalType": "bool",
+              "name": "dualHouseRequired",
+              "type": "bool"
+            },
+            {
+              "internalType": "uint32",
+              "name": "revision",
+              "type": "uint32"
+            },
+            {
+              "internalType": "bool",
+              "name": "exists",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct CivicConstitution420.Rule",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "enum CivicIds420.ProposalClass",
+          "name": "class_",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint64",
+          "name": "votingPeriodBlocks",
+          "type": "uint64"
+        },
+        {
+          "internalType": "uint64",
+          "name": "timelockDelay",
+          "type": "uint64"
+        },
+        {
+          "internalType": "uint16",
+          "name": "communityQuorumBps",
+          "type": "uint16"
+        },
+        {
+          "internalType": "uint16",
+          "name": "communityApprovalBps",
+          "type": "uint16"
+        },
+        {
+          "internalType": "uint16",
+          "name": "validatorQuorumBps",
+          "type": "uint16"
+        },
+        {
+          "internalType": "uint16",
+          "name": "validatorApprovalBps",
+          "type": "uint16"
+        },
+        {
+          "internalType": "bool",
+          "name": "dualHouseRequired",
+          "type": "bool"
+        }
+      ],
+      "name": "setRule",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "systemName",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "enum CivicIds420.ProposalClass",
+          "name": "class_",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "votingPeriodBlocks",
+          "type": "uint64"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "timelockDelay",
+          "type": "uint64"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "communityQuorumBps",
+          "type": "uint16"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "communityApprovalBps",
+          "type": "uint16"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "validatorQuorumBps",
+          "type": "uint16"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "validatorApprovalBps",
+          "type": "uint16"
+        },
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "dualHouseRequired",
+          "type": "bool"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint32",
+          "name": "revision",
+          "type": "uint32"
+        }
+      ],
+      "name": "CivicRuleSet",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "DelayBelowFloor",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidThreshold",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidVotingPeriod",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "Unauthorized",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ZeroAddress",
+      "type": "error"
+    }
+  ],
+  "compiler": {
+    "evmVersion": "cancun",
+    "foundryConfigBlobSha1": "f18c965f43b244582f2a4c527e7bad6d23aee929",
+    "optimizer": true,
+    "optimizerRuns": 200,
+    "solidity": "0.8.24",
+    "toolchainConfigBlobSha1": "dd49cb0e07370b01401d63d2fb53683177de8abc",
+    "viaIR": true
+  },
+  "constructorIndependentRuntime": false,
+  "contractName": "CivicConstitution420",
+  "deployedBytecode": "0x608080604052600480361015610013575f80fd5b5f3560e01c91826307dd2e4b146106455750816309f0a78c146104d2578163249d39e9146104b65781632ae9c6001461049b5781632d689f7f146104645781635d7b86b9146100b35750639a1fdd791461006b575f80fd5b346100af575f3660031901126100af576040517f00000000000000000000000000000000000000000000000000000000000004296001600160a01b03168152602090f35b5f80fd5b346100af576101003660031901126100af57803590808210156100af57602435906001600160401b0382168092036100af576044356001600160401b03811681036100af5761ffff60643581811681036100af5760843582811681036100af5760a4359083821682036100af5760c4359284841684036100af5760e4359586151587036100af577f00000000000000000000000000000000000000000000000000000000000004296001600160a01b03163303610454578815610443576001600160401b036101818b61072c565b166001600160401b0382161061043257858216158015610425575b8015610417575b801561040a575b80156103fd575b80156103f0575b6103c75786806103d8575b6103c75760ff8a1697885f525f60205260405f20549060ff8260e81c165f1461037d57600163ffffffff809360c81c160191821161036a575093868094816101009b98956001600160401b0363ffffffff9b967f8ac2dda07a7670a21d3ecfb63d95530457e6611e956a75d8778e51e958c5dcbf9f9d8e819c9d8e5b6102476106f8565b9283528585166020840152604083019388881685528d8c606086018b8d1681528b60808801921682528b60a088019316835260c08701931515845263ffffffff60e0880195168552610100870195600187525f525f60205260405f20978a8851166fffffffffffffffff000000000000000060208b549a015160401b169161ffff60801b905160801b169261ffff60901b905160901b169361ffff60a01b905160a01b169461ffff60b01b905160b01b169560ff60c01b9051151560c01b169663ffffffff60c81b905160c81b169760ff60e81b9051151560e81b169861ffff60f01b1617171717171717171790556040519d8e521660208d01521660408b01521660608901521660808701521660a0850152151560c08401521660e0820152a2005b601190634e487b7160e01b5f525260245ffd5b5050948693818094816101009b98956001600160401b0363ffffffff9b7f8ac2dda07a7670a21d3ecfb63d95530457e6611e956a75d8778e51e958c5dcbf9f9d8e60019d8e61023f565b60405163aabd5a0960e01b81528890fd5b5085841615806101c3575061138886861611156101c3565b50612710868616116101b8565b50612710868516116101b1565b50612710868416116101aa565b5061138886841611156101a3565b506127108683161161019c565b604051635c729ec160e01b81528890fd5b6040516305a612e360e01b81528890fd5b6040516282b42960e81b81528890fd5b346100af5760203660031901126100af578035908110156100af5761048a60209161072c565b6001600160401b0360405191168152f35b346100af575f3660031901126100af57602060405160018152f35b346100af575f3660031901126100af5760206040516127108152f35b346100af5760203660031901126100af578035908110156100af5760ff905f6101006104fc6106f8565b8281528260208201528260408201528260608201528260808201528260a08201528260c08201528260e08201520152165f525f60205261012060405f206101006105446106f8565b9154916001600160401b03831681526001600160401b038360401c16602082015261ffff8360801c16604082015261ffff8360901c16606082015261ffff8360a01c16608082015261ffff8360b01c1660a082015260ff8360c01c16151560c082015263ffffffff8360c81c1660e082015260ff8360e81c161515828201526001600160401b03604051931683526001600160401b03602082015116602084015261ffff604082015116604084015261ffff606082015116606084015261ffff608082015116608084015261ffff60a08201511660a084015260c0810151151560c084015263ffffffff60e08201511660e084015201511515610100820152f35b90346100af575f3660031901126100af5760408201908282106001600160401b038311176106e55750604052601481526020907304369766963436f6e737469747574696f6e3432360641b60208201526040518092602082528251908160208401525f935b8285106106cc575050604092505f838284010152601f80199101168101030190f35b84810182015186860160400152938101938593506106aa565b604190634e487b7160e01b5f525260245ffd5b6040519061012082018281106001600160401b0382111761071857604052565b634e487b7160e01b5f52604160045260245ffd5b60048110156107685780156107605760018114610758576002146107515762375f0090565b6212750090565b506212750090565b5062093a8090565b634e487b7160e01b5f52602160045260245ffdfea26469706673582212206f4c73bba2f31945773600e39e279f0680722e7816a1b9f94cea0fd6a1cb08ff64736f6c63430008180033",
+  "immutableReferences": {
+    "5789": [
+      {
+        "length": 32,
+        "start": 128
+      },
+      {
+        "length": 32,
+        "start": 316
+      }
+    ]
+  },
+  "materializedImmutableReferences": [
+    {
+      "immutableId": "5789",
+      "length": 32,
+      "start": 128,
+      "value": "0x0000000000000000000000000000000000000429"
+    },
+    {
+      "immutableId": "5789",
+      "length": 32,
+      "start": 316,
+      "value": "0x0000000000000000000000000000000000000429"
+    }
+  ],
+  "materializedImmutableValue": "0x0000000000000000000000000000000000000429",
+  "runtimeCodeBytes": 1970,
+  "runtimeCodeHash": "0x2946e9f82bb274f1f85c1a7eb5e6fc0b580ee3cf7ec1c879dd9eb041f39068e5",
+  "schema": "420-governance-runtime-artifact-v1",
+  "source": "contracts/src/governance/CivicConstitution420.sol",
+  "sourceBlobSha1": "198c88d8c3bf58e20daf6b9ed73aa89817cb0942",
+  "status": "GOV_AUDIT_6_RUNTIME_ARTIFACT",
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 36,
+        "contract": "src/governance/CivicConstitution420.sol:CivicConstitution420",
+        "label": "_rules",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_mapping(t_uint8,t_struct(Rule)31_storage)"
+      }
+    ],
+    "types": {
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      },
+      "t_mapping(t_uint8,t_struct(Rule)31_storage)": {
+        "encoding": "mapping",
+        "key": "t_uint8",
+        "label": "mapping(uint8 => struct CivicConstitution420.Rule)",
+        "numberOfBytes": "32",
+        "value": "t_struct(Rule)31_storage"
+      },
+      "t_struct(Rule)31_storage": {
+        "encoding": "inplace",
+        "label": "struct CivicConstitution420.Rule",
+        "members": [
+          {
+            "astId": 14,
+            "contract": "src/governance/CivicConstitution420.sol:CivicConstitution420",
+            "label": "votingPeriodBlocks",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint64"
+          },
+          {
+            "astId": 16,
+            "contract": "src/governance/CivicConstitution420.sol:CivicConstitution420",
+            "label": "timelockDelay",
+            "offset": 8,
+            "slot": "0",
+            "type": "t_uint64"
+          },
+          {
+            "astId": 18,
+            "contract": "src/governance/CivicConstitution420.sol:CivicConstitution420",
+            "label": "communityQuorumBps",
+            "offset": 16,
+            "slot": "0",
+            "type": "t_uint16"
+          },
+          {
+            "astId": 20,
+            "contract": "src/governance/CivicConstitution420.sol:CivicConstitution420",
+            "label": "communityApprovalBps",
+            "offset": 18,
+            "slot": "0",
+            "type": "t_uint16"
+          },
+          {
+            "astId": 22,
+            "contract": "src/governance/CivicConstitution420.sol:CivicConstitution420",
+            "label": "validatorQuorumBps",
+            "offset": 20,
+            "slot": "0",
+            "type": "t_uint16"
+          },
+          {
+            "astId": 24,
+            "contract": "src/governance/CivicConstitution420.sol:CivicConstitution420",
+            "label": "validatorApprovalBps",
+            "offset": 22,
+            "slot": "0",
+            "type": "t_uint16"
+          },
+          {
+            "astId": 26,
+            "contract": "src/governance/CivicConstitution420.sol:CivicConstitution420",
+            "label": "dualHouseRequired",
+            "offset": 24,
+            "slot": "0",
+            "type": "t_bool"
+          },
+          {
+            "astId": 28,
+            "contract": "src/governance/CivicConstitution420.sol:CivicConstitution420",
+            "label": "revision",
+            "offset": 25,
+            "slot": "0",
+            "type": "t_uint32"
+          },
+          {
+            "astId": 30,
+            "contract": "src/governance/CivicConstitution420.sol:CivicConstitution420",
+            "label": "exists",
+            "offset": 29,
+            "slot": "0",
+            "type": "t_bool"
+          }
+        ],
+        "numberOfBytes": "32"
+      },
+      "t_uint16": {
+        "encoding": "inplace",
+        "label": "uint16",
+        "numberOfBytes": "2"
+      },
+      "t_uint32": {
+        "encoding": "inplace",
+        "label": "uint32",
+        "numberOfBytes": "4"
+      },
+      "t_uint64": {
+        "encoding": "inplace",
+        "label": "uint64",
+        "numberOfBytes": "8"
+      },
+      "t_uint8": {
+        "encoding": "inplace",
+        "label": "uint8",
+        "numberOfBytes": "1"
+      }
+    }
+  }
+}

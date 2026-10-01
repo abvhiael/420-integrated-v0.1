@@ -130,8 +130,10 @@ contract ComputeDeterministicVerificationRouter420Test {
         adapter = new ComputeIntegerSumSquaresAdapter420();
         router = new ComputeDeterministicVerificationRouter420(address(jobs), address(registry));
 
+        bytes32 workloadType = adapter.WORKLOAD_TYPE();
+        bytes32 profileId = adapter.PROFILE_ID();
         vm.prank(GOV);
-        registry.publish(adapter.WORKLOAD_TYPE(), adapter.PROFILE_ID(), address(adapter));
+        registry.publish(workloadType, profileId, address(adapter));
 
         bytes32 verificationKind = policies.KIND_VERIFICATION();
         vm.prank(GOV);

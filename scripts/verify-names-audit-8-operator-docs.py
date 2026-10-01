@@ -141,6 +141,9 @@ if len(descriptor.get("events", [])) != 7:
 
 for required in [
     "NAMES-AUDIT-9",
+    "60-second",
+    "24-hour",
+    "30 and 365 days",
     "not authority to mutate user records",
     "no operator/admin name-mutation",
     "ProtocolRegistry",
@@ -150,6 +153,11 @@ for required in [
     "fail closed",
 ]:
     require_text(doc, required)
+
+if "status: pre-genesis" not in doc:
+    fail("operator runbook must remain explicitly pre-genesis until NAMES-AUDIT-9 live evidence exists")
+if "audience:" not in doc or "operator" not in doc.split("# 420 Names deployment", 1)[0]:
+    fail("operator runbook front matter must include operator audience")
 
 if "deployment-operations.md" not in index:
     fail("Names index does not link the operator runbook")

@@ -12,12 +12,13 @@
       "PERMISSIONLESS"
     ],
     "canonical_badge": "Protocol-qualified market",
-    "permissionless_warning": "User-created market. Token and liquidity are not endorsed by 420 Integrated.",
+    "permissionless_warning": "User-deployed, user-registered market. Token, pool code and liquidity are not endorsed by 420 Integrated.",
     "default_market_order": [
       "420/USDC",
       "420/CADC",
       "CADC/USDC",
       "WETH/USDC"
-    ]
+    ],
+    "permissionless_creation_model": "USER_DEPLOYS_POOL_THEN_REGISTERS_EXISTING_POOL"
   }
 }

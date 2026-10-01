@@ -168,8 +168,8 @@ require(index, "operator", "Identity index operator audience")
 for token in [
     "offline_verify",
     "live_verify",
-    "cast("chain-id"",
-    "cast("code"",
+    'cast("chain-id"',
+    'cast("code"',
     "systemName()(string)",
     "protocolVersion()(uint32)",
     "governanceTimelock()(address)",

@@ -83,7 +83,16 @@ def main(argv=None):
         if not source.is_file():
             errors.append(f"missing source {item.get('source')}")
 
-    registry_resolved = {x.get("contract") for x in canon.get("registry_resolved", [])}
+    registry_resolved_records = {x.get("contract"): x for x in canon.get("registry_resolved", [])}
+    expected_preimages = {name + ".sol": EXPECTED_PREIMAGES[name] for name in CIVIC}
+    for contract, preimage in expected_preimages.items():
+        record = registry_resolved_records.get(contract)
+        if not record:
+            errors.append(f"{contract} missing from canonical Registry-resolved inventory")
+        elif record.get("component_id_preimage") != preimage:
+            errors.append(f"{contract} canonical Registry component ID drift")
+        elif record.get("authority") != "contracts/config/governance-deployment-v1.json":
+            errors.append(f"{contract} Registry authority drift")
     # GOV-AUDIT-6 owns the Civic publication profile; the generic Genesis file must not assign them fixed addresses.
     for name in CIVIC:
         if name in assignments:

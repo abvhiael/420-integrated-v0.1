@@ -87,7 +87,7 @@ The production candidate pool is an implementation/deployment component, not a n
 | Genesis DEX factory | present | registration-only semantics frozen and tested | COMPLETE | governance registry for already-deployed canonical pools; no CREATE/CREATE2 path |
 | canonical market registry | present | unchanged | COMPLETE | canonical market/pair/pool records |
 | permissionless factory | present | registration lifecycle hardened | COMPLETE | registration-only; exact pair introspection/codehash provenance; duplicate pool-address rejection; open same-pair variants |
-| TWAP oracle | present | unchanged | PARTIAL | observation application exists; full TWAP production hardening is not demonstrated |
+| TWAP oracle | present | canonical cumulative-source TWAP hardened | COMPLETE source-side | canonical pool cumulative pricing, bounded window/freshness, source identity, Exchange reference interface and 420Oracle adapter fail-closed reads |
 | public batch auction | present | unchanged | PARTIAL | auction/bid/settle records exist; value custody/allocation execution is not implemented here |
 | approved quote asset registry | present | unchanged | COMPLETE | shared canonical settlement checks applied |
 | canonical swap executor | present | unchanged | COMPLETE | shared safety/health/trusted caller/postconditions |
@@ -172,7 +172,17 @@ Registration records are immutable. Promotion into the canonical tier does not o
 
 ### TWAPOracle
 
-The contract stores monotonic timestamped observations under governance-authorized publication. It does not itself derive cumulative-price TWAPs from pool state. The broader architecture correctly treats oracle data as a circuit-breaker/reference input, but the current contract should not be represented as a fully autonomous production TWAP engine.
+SWAP-AUDIT-4 replaces arbitrary governance-published price observations with a canonical on-chain cumulative-price TWAP.
+
+`CanonicalConstantProductPool420` now maintains token0/token1 cumulative reserve prices across reserve-changing syncs. `TWAPOracle` resolves the active market through the Registry-backed `CanonicalMarketRegistry`, validates the exact pool/pair/code/metadata source, and derives a normalized quote-per-base Q96 time-weighted price from cumulative deltas.
+
+Governance controls only market policy: minimum observation window, maximum observation window, maximum staleness and enabled state. Governance cannot inject a price. Checkpointing is permissionless because no caller-supplied price exists.
+
+The first checkpoint seeds a baseline. A later checkpoint creates an observation only when the elapsed window is within configured bounds. Overlong gaps reseed and invalidate the old observation. A canonical source identity change immediately invalidates the old observation on security-sensitive reads, even before another checkpoint.
+
+`readObservation` exposes price, timestamp, expiry, explicit window, confidence, source hash and health. It fails closed for disabled, unavailable, stale or source-mismatched state. `referencePrice` exposes the exact provider-neutral interface consumed by `ExchangeOracleGuard420`. `TWAPOracleSourceAdapter420` consumes `readObservation` rather than the raw compatibility getter, so 420Oracle cannot bypass Swap-side freshness/source checks.
+
+The single-pool TWAP intentionally reports confidence `0`; 420Oracle may combine it with independent sources and apply quorum/confidence/deviation policy. Exchange continues to use the reference only as a circuit breaker, never as executable-price authority.
 
 ### PublicBatchAuction
 
@@ -190,7 +200,7 @@ Because the frozen dApp contract map includes `PublicBatchAuction.sol`, this is 
 | 420Exchange | canonical Swap adapter and full web swap execution surface exist | COMPLETE in source/tests; BLOCKED live deployment |
 | 420Wallet / authorization | Exchange web binds execution to wallet review/session/preflight; capability architecture exists above Swap | COMPLETE in client scope; live chain pending |
 | 420Bridge | Pay/Swap/Bridge integration test exists; CADC canonical route pending issuer-approved deployment | PARTIAL/BLOCKED external |
-| Oracle layer | shared health/reference architecture present | PARTIAL; live oracle source/production hardening pending |
+| Oracle layer | canonical Swap cumulative TWAP + fail-closed 420Oracle adapter + Exchange reference guard integration | COMPLETE source-side; live deployment qualification pending |
 | 420Indexer | Swap/Exchange decoder/ABI surfaces exist | PARTIAL; live chain qualification pending |
 | native $420 | Exchange has wrapped/native execution architecture; canonical pool itself is ERC20/ERC20 | PARTIAL by layer; intentional V1 pool limit |
 
@@ -226,6 +236,7 @@ Baseline relevant suites found:
 - `SwapGenesisIntegration420.t.sol`
 - `SwapFuzz420.t.sol`
 - `SwapInvariant420.t.sol`
+- `SwapTWAPOracle420.t.sol`
 - `PaySwapGenesisIntegration420.t.sol`
 - `PaySwapBridgeGenesisIntegration420.t.sol`
 - Exchange web swap/security/execution/browser-wallet tests
@@ -271,6 +282,31 @@ Audit remediation added `.github/workflows/swap-audit.yml` to run app-scoped sta
 - completion state: **COMPLETE**
 - next canonical roadmap step: **SWAP-AUDIT-4 — TWAP/oracle production hardening**
 
+### SWAP-AUDIT-4 retained Level 1 + oracle-integration Level 2 evidence
+
+- roadmap step: **SWAP-AUDIT-4 — TWAP/oracle production hardening**
+- qualification level: **Level 1 — per-roadmap-step fast qualification**, plus **Level 2 — oracle-integration app milestone**
+- canonical source decision: **TWAP derives from the active canonical Swap pool cumulative price; no arbitrary governance price publication**
+- implementation SHA: `030db1088b8bf6fef5af92b7345c2d6472839dd1`
+- current `main` at qualification closeout: `98e545225d54379086f0c520afcb84b4d4d97288`
+- audit PR / branch: **#455** / `audit/420swap-complete-20261001`
+- authoritative successful workflow: **420Swap Audit Qualification**, PR run **36936255486**
+- contract job **110617414850**: static verification PASS; targeted build PASS; Genesis factory PASS; permissionless factory PASS; TWAP/oracle integration PASS; canonical pool PASS; Swap integration PASS; fuzz PASS; invariant PASS; Pay/Swap integration PASS
+- user-surface job **110617414540**: `npm run check` PASS; Node tests PASS; qualification build PASS
+- authoritative source: Registry-resolved active `CanonicalMarketRegistry` market and its exact code-bearing pool/pair/metadata identity
+- observation semantics: pool cumulative token0/token1 price accounting; configurable minimum/maximum observation windows; token-decimal normalization; explicit source hash/window/expiry
+- publication authority: governance configures policy only; `checkpoint` is permissionless and derives price entirely from canonical on-chain state
+- stale/source behavior: stale reads revert; source changes invalidate prior observations immediately; overlong gaps reseed and clear prior observations
+- manipulation resistance: TWAP uses cumulative time-weighted reserve prices across reserve changes rather than terminal spot sampling; minimum window is explicit and enforced
+- Exchange integration: real `TWAPOracle.referencePrice` satisfies `ExchangeOracleGuard420`; stale and excessive-deviation paths fail closed
+- 420Oracle integration: `TWAPOracleSourceAdapter420` consumes fail-closed `readObservation`, includes source/window/expiry in provenance hash and retains explicit confidence `0`
+- CI optimization: Swap workflow concurrency now keys push and pull-request runs to the same branch, eliminating duplicate exact-head app qualification
+- Level 2 milestone: **PASS on the same exact implementation SHA**; retained Swap + Exchange user-surface qualification and direct 420Oracle adapter integration close the cross-component oracle boundary without repository-wide duplication
+- Level 3: **intentionally deferred** to complete app-phase closeout
+- blockers for this step: **none**
+- completion state: **COMPLETE**
+- next canonical roadmap step: **SWAP-AUDIT-5 — PublicBatchAuction completion**
+
 Exact-final-head comprehensive Level 3 results remain intentionally deferred until complete app-phase closeout.
 
 ## Security classification
@@ -286,7 +322,7 @@ Exact-final-head comprehensive Level 3 results remain intentionally deferred unt
 | fee mutability | immutable per pool; accepted V1 design |
 | LP share transferability | intentionally absent; accepted V1 limitation |
 | excess-ratio liquidity donation | accepted design risk; providers must supply bounded inputs knowingly |
-| oracle manipulation/staleness | only partially qualified at Swap layer; Exchange guard adds protection |
+| oracle manipulation/staleness | canonical cumulative TWAP, explicit window/freshness/source identity and Exchange deviation guard qualified source-side; live deployment remains pending |
 | batch-auction custody/settlement | unresolved functionality gap |
 | live Pay→Swap binding spoof/misconfiguration | mitigated by fail-closed manifest requirement, not live-qualified |
 | live address/code identity | repository authority only; not testnet-qualified |
@@ -312,7 +348,6 @@ Still missing or incomplete:
 - deterministic Swap predeploy materialization record;
 - generated retained Swap deployment artifacts/code hashes;
 - canonical decision/implementation for PublicBatchAuction settlement economics;
-- production TWAP/oracle hardening record;
 - app-specific Genesis acceptance record after live qualification.
 
 ## Genesis and deployment readiness
@@ -339,7 +374,7 @@ The source tree is substantially implemented, but repository deployment records 
 | production pool | Exchange V4 | CanonicalConstantProductPool420 | dedicated suite | yes | COMPLETE for V1 | retain |
 | obsolete scaffold removed | repository consistency | removed in audit | verifier enforces absence | docs updated | COMPLETE | retain |
 | native $420 user path | Genesis purpose + Exchange architecture | handled above pool via wrapped/native Exchange path | Exchange tests | yes | PARTIAL | live end-to-end qualification |
-| TWAP/reference oracle | Genesis/Swap architecture | governed observation registry | limited | partial | PARTIAL | production oracle/TWAP hardening |
+| TWAP/reference oracle | Genesis/Swap architecture | canonical pool cumulative TWAP with bounded window/freshness/source identity; direct Exchange + 420Oracle adapter integration | dedicated TWAP/adversarial/integration plus retained regressions | yes | COMPLETE source-side | live deployment/config qualification later |
 | public batch auction | frozen dApp/system map | record-only auction state | no dedicated economic settlement suite found | limited | PARTIAL | canonicalize + implement settlement economics or reclassify |
 | Pay integration | Pay/Swap architecture | canonical adapter ABI | PaySwap tests | wiring manifest | PARTIAL | live exact-instance binding |
 | Bridge/CADC integration | CADC/Bridge docs | configured pending issuer | bridge integration tests | yes | BLOCKED | issuer-approved route/deployment |
@@ -368,6 +403,12 @@ The source tree is substantially implemented, but repository deployment records 
 10. Added `SwapGenesisDEXFactory420.t.sol` covering registration mode, invalid/duplicate pools, pause/system-safety fail-closed behavior, governance authorization, timelock caller enforcement and implementation-reference controls.
 11. Extended the Swap verifier to require registration-only factory semantics and the dedicated factory test suite.
 12. Removed the unnecessary `--force` cold rebuild from app-scoped Swap qualification in accordance with phase qualification policy.\n13. Hardened `PermissionlessDEXFactory` as explicit registration-only market formation with pool pair introspection, exact runtime-codehash provenance, reverse pool-address uniqueness and immutable registration records.\n14. Added `SwapPermissionlessDEXFactory420.t.sol` covering pair/codehash spoofing, non-introspectable pools, duplicate IDs/addresses, same-pair variants, pause/safety/lifecycle rejection, invalid inputs and true permissionless callers.\n15. Reconciled permissionless market-tier and dApp UX configuration to preserve `creation: ANYONE` while explicitly defining external deployment followed by existing-pool registration.\n16. Extended the Swap verifier and dedicated CI to retain permissionless lifecycle qualification.
+17. Added canonical cumulative Q96 reserve-price accounting to `CanonicalConstantProductPool420`.
+18. Reworked `TWAPOracle` to derive observations exclusively from the active canonical market/pool, with explicit minimum/maximum windows, freshness, source provenance, decimal normalization and immediate source-change invalidation.
+19. Removed arbitrary governance price publication semantics; governance now configures policy while permissionless checkpoints derive state deterministically on-chain.
+20. Added direct `referencePrice` compatibility for `ExchangeOracleGuard420` and hardened `TWAPOracleSourceAdapter420` to consume fail-closed observations.
+21. Added `SwapTWAPOracle420.t.sol` covering cumulative manipulation resistance, minimum/maximum windows, staleness, source replacement, pause/inactive market failure, authority separation, Exchange deviation/stale behavior and 420Oracle adapter provenance.
+22. Expanded Swap verifier/docs/CI for TWAP semantics and deduplicated push/PR qualification concurrency by audit branch.
 
 ## Outstanding remediation roadmap
 
@@ -382,8 +423,8 @@ The remaining work must preserve these step identities and dependency order:
 3. **SWAP-AUDIT-3 — permissionless pool lifecycle hardening — COMPLETE**  
    Permissionless market formation is now explicitly external-deploy + registration-only. Pair/codehash provenance, duplicate ID/address handling, component lifecycle/safety failure paths and user-facing terminology are hardened and qualified.
 
-4. **SWAP-AUDIT-4 — TWAP/oracle production hardening**  
-   Define the authoritative observation source, freshness/window semantics, manipulation resistance, publication authority, stale behavior and Exchange guard integration; add direct tests.
+4. **SWAP-AUDIT-4 — TWAP/oracle production hardening — COMPLETE**  
+   TWAP now derives from canonical pool cumulative state; window/freshness/source identity, publication authority, manipulation resistance, Exchange guard and 420Oracle adapter behavior are explicit, fail-closed and qualified.
 
 5. **SWAP-AUDIT-5 — PublicBatchAuction completion**  
    Either explicitly canonicalize it as record-only, or implement bid custody, inventory reservation, clearing/fill allocation, refunds, settlement, replay/accounting invariants and failure recovery. Current repository evidence does not authorize choosing one silently.
@@ -404,10 +445,10 @@ The remaining work must preserve these step identities and dependency order:
 
 At repository-remediation stage:
 
-- CODE COMPLETE: **NO** — batch-auction and oracle completion work remains.
+- CODE COMPLETE: **NO** — PublicBatchAuction completion remains.
 - BUILD COMPLETE: **YES for source tree on repository CI; final audit workflow must close on exact final SHA.**
-- CONTRACT COMPLETE: **NO** — unresolved PublicBatchAuction and TWAP production semantics remain.
-- TEST COMPLETE: **NO** — PublicBatchAuction and TWAP still lack final adversarial/economic qualification.
+- CONTRACT COMPLETE: **NO** — PublicBatchAuction production semantics remain unresolved.
+- TEST COMPLETE: **NO** — PublicBatchAuction still lacks final economic/adversarial qualification.
 - DOCUMENTATION COMPLETE: **NO** — deployment/operator/Genesis acceptance records remain.
 - INTEGRATION COMPLETE: **NO** — live Pay/Registry/Wallet/Exchange bindings remain unverified.
 - SECURITY QUALIFIED: **NO** — internal hardening is not the required external release gate and unresolved components remain.
@@ -421,6 +462,6 @@ At repository-remediation stage:
 
 The production-candidate ERC20/ERC20 liquidity path, canonical executor, core registries and composed Exchange user surface are real and testable. The audit repaired the stale scaffold/inventory/verification state instead of treating old metadata as truth.
 
-The remaining blockers are substantive: TWAP oracle and public batch auction completion; absent retained predeploy artifacts/materialized state; unverified live Pay→Swap bindings; and production-equivalent testnet plus external security qualification.
+The remaining blockers are substantive: PublicBatchAuction completion; absent retained predeploy artifacts/materialized state; unverified live Pay→Swap bindings; and production-equivalent testnet plus external security qualification.
 
 Do not mark 420Swap complete solely because the core Swap and Exchange tests are green.

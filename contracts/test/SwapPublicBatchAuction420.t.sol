@@ -186,7 +186,7 @@ contract SwapPublicBatchAuction420Test {
         require(s.quote.balanceOf(address(s.auction)) == 150e6, "auction quote balance");
         require(s.auction.quoteBids(AUCTION_ID, ALICE) == 150e6, "bid accounting");
         (
-            ,,,,, uint256 totalQuoteBid,,, uint32 bidderCount,,,,,
+            ,,,,,, uint256 totalQuoteBid,,, uint32 bidderCount,,,,
         ) = s.auction.auctions(AUCTION_ID);
         require(totalQuoteBid == 150e6 && bidderCount == 1, "aggregate accounting");
     }
@@ -233,7 +233,7 @@ contract SwapPublicBatchAuction420Test {
         vm.warp(CLOSE_AT);
         s.auction.settle(AUCTION_ID, 2e18);
 
-        (,,,,,,, uint256 totalFill420, uint256 remainingFill420,,,,,, bool oversubscribed) =
+        (,,,,,,, uint256 totalFill420, uint256 remainingFill420,,,,, bool oversubscribed) =
             s.auction.auctions(AUCTION_ID);
         require(oversubscribed, "not oversubscribed");
         require(totalFill420 == 100 ether && remainingFill420 == 100 ether, "inventory fill");

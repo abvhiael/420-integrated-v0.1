@@ -15,7 +15,7 @@ func TestHandlerServesGenesisFrontendWithSecurityHeaders(t *testing.T) {
 	if w.Code != http.StatusOK { t.Fatalf("status %d", w.Code) }
 	body, _ := io.ReadAll(w.Result().Body)
 	text := string(body)
-	for _, want := range []string{"420Status", "/420status-logo.webp", "/favicon.png", "Operational evidence only", "Components", "Active incidents", "Planned maintenance", "History & provenance"} {
+	for _, want := range []string{"420Status", "/420status-logo.webp", "/favicon.png", "Operational evidence only", "Components", "Active incidents", "Planned maintenance", "History &amp; provenance"} {
 		if !strings.Contains(text, want) { t.Fatalf("missing %q", want) }
 	}
 	csp := w.Header().Get("Content-Security-Policy")

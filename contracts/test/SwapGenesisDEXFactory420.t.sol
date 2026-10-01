@@ -33,11 +33,33 @@ contract SwapGenesisDEXFactory420Test {
         factory = new GenesisDEXFactory(
             address(this),
             address(env.registry()),
-            keccak256("swap-genesis-factory"),
-            address(implementation)
+            keccak256("swap-genesis-factory")
         );
         env.registerResident(address(factory), factory.componentId());
+        factory.setPoolImplementation(address(implementation));
         pool = new GenesisDEXFactoryPoolStub420();
+    }
+
+    function testPredeployStartsWithoutUnfrozenImplementationAndBlocksRegistrationUntilBound() public {
+        GenesisMockEnvironment420 env = new GenesisMockEnvironment420();
+        GenesisDEXFactory factory = new GenesisDEXFactory(
+            address(this),
+            address(env.registry()),
+            keccak256("swap-genesis-factory")
+        );
+        env.registerResident(address(factory), factory.componentId());
+        GenesisDEXFactoryPoolStub420 pool = new GenesisDEXFactoryPoolStub420();
+
+        require(factory.poolImplementation() == address(0), "predeploy implementation not empty");
+        (bool unboundOk,) = address(factory).call(
+            abi.encodeWithSelector(factory.registerPool.selector, POOL_ID, address(pool))
+        );
+        require(!unboundOk, "registration accepted before implementation binding");
+
+        GenesisDEXFactoryPoolStub420 implementation = new GenesisDEXFactoryPoolStub420();
+        factory.setPoolImplementation(address(implementation));
+        factory.registerPool(POOL_ID, address(pool));
+        require(factory.pools(POOL_ID) == address(pool), "registration after binding");
     }
 
     function testRegistrationOnlyModeIsExplicitAndRegistersExistingPool() public {

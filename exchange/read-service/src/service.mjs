@@ -16,7 +16,8 @@ export class ExchangeReadService{
     cursor='';
     do{const page=await this.indexer.protocolEvents({protocol:'420Bridge',cursor});all.push(...(page.items??[]));cursor=page.nextCursor??'';}while(cursor);
     const observedAt=Number(status.indexedHeadTimestamp??this.nowSeconds());
-    const mapped=dedupeAndValidate(all.map(e=>mapIndexerEventToHistory(e,{observedAt,finality:status.finality?.mode??'indexed'})).filter(Boolean));
+    const freshness=status?.runtime?.stale===true?'stale':'canonical';
+    const mapped=dedupeAndValidate(all.map(e=>mapIndexerEventToHistory(e,{observedAt,finality:status.finality?.mode??'indexed',freshness})).filter(Boolean));
     this.store.reconcile(mapped,{observationKey:'exchange-history'});this.lastRefreshAt=this.nowSeconds();return {status,events:all,records:this.store.values()};
   }
   async readiness(){

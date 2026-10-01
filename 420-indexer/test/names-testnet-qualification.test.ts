@@ -107,11 +107,12 @@ test('rejects incomplete or semantically stale lifecycle evidence',()=>{
 });
 
 test('accepts Indexer Search and Wallet agreement with canonical post-transfer state',()=>{
-  assert.doesNotThrow(()=>validateNamesServiceEvidence420(workflow,services));
+  assert.doesNotThrow(()=>validateNamesServiceEvidence420(workflow,services,'420'));
 });
 
 test('rejects stale or contradictory derived-service evidence',()=>{
-  assert.throws(()=>validateNamesServiceEvidence420(workflow,{...services,indexer:{...services.indexer,latestEventName:'ResolutionUpdated'}}),/latest Names lifecycle/);
+  assert.throws(()=>validateNamesServiceEvidence420(workflow,{...services,indexer:{...services.indexer,chainId:'1'}},'420'),/Indexer chain ID/);
+  assert.throws(()=>validateNamesServiceEvidence420(workflow,{...services,indexer:{...services.indexer,latestEventName:'ResolutionUpdated'}},'420'),/latest Names lifecycle/);
   assert.throws(()=>validateNamesServiceEvidence420(workflow,{...services,search:{...services.search,resolvedOwner:workflow.owner}}),/Search owner/);
   assert.throws(()=>validateNamesServiceEvidence420(workflow,{...services,wallet:{...services.wallet,resolvedAddress:workflow.owner}}),/Wallet resolution/);
 });

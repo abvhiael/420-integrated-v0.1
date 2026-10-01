@@ -12,7 +12,7 @@ export class WalletExecutionError extends Error {
 
 export const DEFAULT_SUBMISSION_GATE=Object.freeze({enabled:false,mode:'DISABLED'});
 export const DEFAULT_ORDER_SIGNING_GATE=Object.freeze({enabled:false,mode:'DISABLED'});
-const ALLOWED_SUBMISSION_MODES=new Set(['PRE06_MOCK','LIVE_TESTNET_QUALIFICATION']);
+const ALLOWED_SUBMISSION_MODES=new Set(['PRE06_MOCK','PRE08_MOCK','LIVE_TESTNET_QUALIFICATION']);
 const ALLOWED_ORDER_SIGNING_MODES=new Set(['PRE07_MOCK','LIVE_TESTNET_QUALIFICATION']);
 
 function providerRequest(provider, method, params = []) {

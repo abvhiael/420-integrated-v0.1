@@ -32,7 +32,7 @@
       ],
       "runtimeArtifact": "contracts/artifacts/Governance420.json",
       "materialization": "DIRECT_GENESIS_IMMUTABLE_AND_STORAGE_MATERIALIZATION",
-      "role": "COMPATIBILITY_ONLY"
+      "role": "COMPATIBILITY_AND_ONE_SHOT_NON_DISCRETIONARY_BOOTSTRAP"
     }
   ],
   "registry": {
@@ -309,5 +309,11 @@
   "fixedPredeployState": {
     "GovernanceTimelock": "contracts/config/predeploy/GovernanceTimelock-predeploy-state.json",
     "Governance420": "contracts/config/predeploy/Governance420-predeploy-state.json"
+  },
+  "artifactGeneration": {
+    "generator": "scripts/generate-governance-audit-6-artifacts.py",
+    "generatedFromCommit": "b416dbdd8ae1a51517de40aaef9933d636dd7044",
+    "retainedByCommit": "cd835f8f4dce7799a31eaecf35624f054dfd0451",
+    "policy": "Exact runtime artifacts and fixed-predeploy state must reproduce byte-for-byte from pinned source/compiler inputs."
   }
 }

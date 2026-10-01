@@ -117,9 +117,23 @@ contract CivicElectorateRegistry420 is SystemAccess, I420System {
         address authority
     ) external onlyGovernance {
         if (snapshotAuthority != address(0)) revert AuthorityAlreadyBound();
-        if (authority == address(0)) revert UnauthorizedAuthority();
+        if (!_isCanonicalSnapshotAuthority(authority)) revert UnauthorizedAuthority();
         snapshotAuthority = authority;
         emit SnapshotAuthorityBound(authority);
+    }
+
+    function _isCanonicalSnapshotAuthority(
+        address authority
+    ) private view returns (bool) {
+        if (authority == address(0) || authority.code.length == 0) return false;
+
+        (bool electorateOk, bytes memory electorateData) =
+            authority.staticcall(abi.encodeWithSignature("electorateRegistry()"));
+        (bool timelockOk, bytes memory timelockData) = authority.staticcall(abi.encodeWithSignature("timelock()"));
+        if (!electorateOk || electorateData.length < 32 || !timelockOk || timelockData.length < 32) return false;
+
+        return abi.decode(electorateData, (address)) == address(this)
+            && abi.decode(timelockData, (address)) == governanceTimelock;
     }
 
     /// @notice Freeze the electorate commitment used for a proposal before voting starts.

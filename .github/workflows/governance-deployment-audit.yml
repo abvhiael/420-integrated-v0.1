@@ -123,7 +123,7 @@ jobs:
 
       - name: GOV-AUDIT-6 deterministic deployment simulation
         working-directory: contracts
-        run: forge test --match-path test/GovernanceAudit6Deployment420.t.sol -vv
+        run: timeout 180s forge test --match-path test/GovernanceAudit6Deployment420.t.sol -vv
       - name: Retained Governance authority and lifecycle regressions
         working-directory: contracts
         run: |

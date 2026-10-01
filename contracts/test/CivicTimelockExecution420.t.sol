@@ -348,6 +348,24 @@ contract CivicTimelockExecution420Test {
         s.governor.queue(zeroProposalId, zeroTarget);
     }
 
+    function testQueueRejectsActionValueSumOverflow() public {
+        Stack memory s = _stack(7 days);
+        CivicGovernor420.Action[] memory actions = new CivicGovernor420.Action[](2);
+        actions[0] = CivicGovernor420.Action({ target: address(s.target), value: type(uint256).max, data: "" });
+        actions[1] = CivicGovernor420.Action({ target: address(s.target), value: 1, data: "" });
+
+        bytes32 proposalId = _pass(s, actions);
+        s.timelock.activateCivicAuthority(address(s.governor));
+
+        (bool ok,) = address(s.governor).call(abi.encodeCall(s.governor.queue, (proposalId, actions)));
+        require(!ok, "overflowing action value sum queued");
+
+        (,,,,,,, CivicIds420.ProposalState state,) = s.proposals.proposals(proposalId);
+        require(state == CivicIds420.ProposalState.PASSED, "overflow changed proposal state");
+        (address target,,,,,,) = s.timelock.operations(proposalId);
+        require(target == address(0), "overflow scheduled timelock operation");
+    }
+
     function testExecuteQueuedBatchRejectsValueMismatch() public {
         Stack memory s = _stack(7 days);
         CivicGovernor420.Action[] memory actions = new CivicGovernor420.Action[](1);

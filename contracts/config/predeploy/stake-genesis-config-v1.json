@@ -1,0 +1,67 @@
+{
+  "schema": "420-stake-genesis-config-v1",
+  "status": "FROZEN_STAKE_GENESIS_CONFIG_FOR_PREDEPLOY_MATERIALIZATION",
+  "chainId": 420,
+  "addresses": {
+    "rewardController": "0x0000000000000000000000000000000000000420",
+    "validatorRegistry": "0x0000000000000000000000000000000000000423",
+    "protocolReserve": "0x0000000000000000000000000000000000000424",
+    "communityValidatorReserve": "0x0000000000000000000000000000000000000425",
+    "governanceTimelock": "0x0000000000000000000000000000000000000429",
+    "protocolRegistry": "0x0000000000000000000000000000000000000434",
+    "stake420": "0x000000000000000000000000000000000000043a",
+    "consensusSystemCall420": "0x000000000000000000000000000000000000043c"
+  },
+  "economics": {
+    "effectiveBondWei": "42000000000000000000000",
+    "maxProtocolCreditWei": "21000000000000000000000",
+    "minOwnedBondWei": "21000000000000000000000",
+    "communityValidatorGenesisReserveWei": "6300000000000000000000000",
+    "maxCreditPerValidatorWei": "21000000000000000000000"
+  },
+  "lifecycle": {
+    "epochBlocks": 420,
+    "rotationEpochs": 42,
+    "rotationBlocks": 17640,
+    "activeTermRotations": 3,
+    "cooldownRotations": 3,
+    "activationDelayBlocks": 17640,
+    "exitNoticeRotations": 1,
+    "withdrawalDelayBlocks": 105840,
+    "earliestBondedHandoffBlock": 4200
+  },
+  "committee": {
+    "minBondedEligible": 60,
+    "minActive": 15,
+    "maxActive": 30,
+    "hysteresisSnapshots": 3,
+    "stableTargets": [
+      15,
+      18,
+      21,
+      24,
+      27,
+      30
+    ],
+    "rotationTurnoverDivisor": 3
+  },
+  "rewardAllocation": {
+    "scale": "1000000000000",
+    "minSecurity": "283446712018",
+    "maxSecurity": "500000000000"
+  },
+  "slashing": {
+    "bpsScale": 10000
+  },
+  "genesisState": {
+    "validatorCount": 0,
+    "activeTarget": 0,
+    "pendingActiveTarget": 0,
+    "pendingTargetSnapshots": 0,
+    "lastRotationSnapshot": 0,
+    "rewardCountersZero": true,
+    "validatorMappingsEmpty": true,
+    "reserveAssignmentsEmpty": true
+  },
+  "authority": "offline_genesis_configuration_not_live_deployment_evidence"
+}

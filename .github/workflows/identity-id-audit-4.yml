@@ -85,7 +85,7 @@ jobs:
       - name: Test 420 SDK catalogue/reference consumers
         working-directory: packages/420-sdk
         run: |
-          npm ci
+          npm install --no-audit --no-fund
           npm test
 
       - name: Test 420Indexer retained Identity artifact descriptors

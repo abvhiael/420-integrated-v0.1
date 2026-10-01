@@ -9,6 +9,7 @@ import "../src/system/CommunityValidatorReserve.sol";
 
 interface VmStakeInvariant420 {
     function deal(address account, uint256 newBalance) external;
+    function prank(address msgSender) external;
     function roll(uint256 newHeight) external;
 }
 
@@ -94,8 +95,6 @@ contract StakeSecurityInvariantHandler420 {
         if (v.status == ValidatorRegistry.Status.NONE || v.status == ValidatorRegistry.Status.EXITED) return;
 
         vm.prank(SYSTEM_CALLER);
-        vm.prank(SYSTEM_CALLER);
-        vm.prank(SYSTEM_CALLER);
         (bool ok,) = address(registry).call(
             abi.encodeWithSelector(
                 registry.applySlash.selector,
@@ -117,6 +116,7 @@ contract StakeSecurityInvariantHandler420 {
         ValidatorRegistry.Validator memory v = registry.getValidator(VALIDATOR_ID);
         if (v.status == ValidatorRegistry.Status.NONE || v.status == ValidatorRegistry.Status.EXITED) return;
 
+        vm.prank(SYSTEM_CALLER);
         (bool ok,) = address(registry).call(
             abi.encodeWithSelector(
                 registry.applySlash.selector,
@@ -145,6 +145,7 @@ contract StakeSecurityInvariantHandler420 {
         uint256 ownedSlashed = (totalPenalty * v.ownedBond) / effective;
         uint256 creditSlashed = totalPenalty - ownedSlashed;
 
+        vm.prank(SYSTEM_CALLER);
         (bool ok,) = address(registry).call(
             abi.encodeWithSelector(
                 registry.applySlash.selector,

@@ -15,6 +15,19 @@ on:
       - 'contracts/foundry.toml'
       - 'contracts/test/GovernanceAudit6Deployment420.t.sol'
       - 'scripts/verify-governance-audit-6.py'
+      - 'scripts/generate-governance-audit-6-artifacts.py'
+      - 'contracts/artifacts/GovernanceTimelock.json'
+      - 'contracts/artifacts/Governance420.json'
+      - 'contracts/artifacts/CivicConstitution420.json'
+      - 'contracts/artifacts/CivicProposalRegistry420.json'
+      - 'contracts/artifacts/CivicElectorateRegistry420.json'
+      - 'contracts/artifacts/CivicVoting420.json'
+      - 'contracts/artifacts/CivicGovernor420.json'
+      - 'contracts/artifacts/CivicMerkleElectorateSource420.json'
+      - 'contracts/config/predeploy/GovernanceTimelock-predeploy-state.json'
+      - 'contracts/config/predeploy/Governance420-predeploy-state.json'
+      - 'contracts/config/predeploy/predeploy-plan.json'
+      - 'contracts/config/deployment-manifest.json'
       - '.github/workflows/governance-deployment-audit.yml'
   pull_request:
     paths:
@@ -28,11 +41,24 @@ on:
       - 'contracts/foundry.toml'
       - 'contracts/test/GovernanceAudit6Deployment420.t.sol'
       - 'scripts/verify-governance-audit-6.py'
+      - 'scripts/generate-governance-audit-6-artifacts.py'
+      - 'contracts/artifacts/GovernanceTimelock.json'
+      - 'contracts/artifacts/Governance420.json'
+      - 'contracts/artifacts/CivicConstitution420.json'
+      - 'contracts/artifacts/CivicProposalRegistry420.json'
+      - 'contracts/artifacts/CivicElectorateRegistry420.json'
+      - 'contracts/artifacts/CivicVoting420.json'
+      - 'contracts/artifacts/CivicGovernor420.json'
+      - 'contracts/artifacts/CivicMerkleElectorateSource420.json'
+      - 'contracts/config/predeploy/GovernanceTimelock-predeploy-state.json'
+      - 'contracts/config/predeploy/Governance420-predeploy-state.json'
+      - 'contracts/config/predeploy/predeploy-plan.json'
+      - 'contracts/config/deployment-manifest.json'
       - '.github/workflows/governance-deployment-audit.yml'
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: governance-audit-6-${{ github.event.pull_request.number || github.ref }}
@@ -70,7 +96,31 @@ jobs:
           forge build src/governance/CivicElectorateRegistry420.sol
           forge build src/governance/CivicVoting420.sol
           forge build src/governance/CivicGovernor420.sol
+          forge build src/governance/CivicMerkleElectorateSource420.sol
           forge build src/apps/ProtocolRegistry.sol
+      - name: Generate and verify retained GOV-AUDIT-6 runtime artifacts
+        run: |
+          set -euo pipefail
+          python3 scripts/generate-governance-audit-6-artifacts.py --write --check --print
+          STATUS="$(git status --porcelain -- contracts/artifacts/GovernanceTimelock.json contracts/artifacts/Governance420.json contracts/artifacts/CivicConstitution420.json contracts/artifacts/CivicProposalRegistry420.json contracts/artifacts/CivicElectorateRegistry420.json contracts/artifacts/CivicVoting420.json contracts/artifacts/CivicGovernor420.json contracts/artifacts/CivicMerkleElectorateSource420.json contracts/config/predeploy/GovernanceTimelock-predeploy-state.json contracts/config/predeploy/Governance420-predeploy-state.json contracts/config/governance-deployment-v1.json contracts/config/predeploy/predeploy-plan.json contracts/config/deployment-manifest.json)"
+          if [ -n "$STATUS" ]; then
+            if [ "${{ github.event_name }}" = "push" ]; then
+              git config user.name "github-actions[bot]"
+              git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+              git add contracts/artifacts/GovernanceTimelock.json contracts/artifacts/Governance420.json contracts/artifacts/CivicConstitution420.json contracts/artifacts/CivicProposalRegistry420.json contracts/artifacts/CivicElectorateRegistry420.json contracts/artifacts/CivicVoting420.json contracts/artifacts/CivicGovernor420.json contracts/artifacts/CivicMerkleElectorateSource420.json contracts/config/predeploy/GovernanceTimelock-predeploy-state.json contracts/config/predeploy/Governance420-predeploy-state.json contracts/config/governance-deployment-v1.json contracts/config/predeploy/predeploy-plan.json contracts/config/deployment-manifest.json
+              git commit -m "build(governance): retain GOV-AUDIT-6 generated artifacts"
+              git push origin HEAD:${{ github.ref_name }}
+              echo "Generated artifacts committed; this run does not qualify the newer commit." >&2
+              exit 1
+            fi
+            echo "Committed GOV-AUDIT-6 artifacts drift from exact compiler generation:" >&2
+            echo "$STATUS" >&2
+            exit 1
+          fi
+
+      - name: Verify deployment specification against retained artifacts
+        run: python3 scripts/verify-governance-audit-6.py --require-ready
+
       - name: GOV-AUDIT-6 deterministic deployment simulation
         working-directory: contracts
         run: forge test --match-path test/GovernanceAudit6Deployment420.t.sol -vv

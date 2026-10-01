@@ -140,14 +140,17 @@ contract ComputeDeterministicVerificationRouter420Test {
         policies.publish(POLICY, verificationKind, TERMS, SCHEMA, 1 days, 100, 100 ether);
 
         bytes memory inputData = abi.encode(values);
+        bytes32 jobWorkloadType = adapter.WORKLOAD_TYPE();
+        bytes32 jobInputCommitment = adapter.inputCommitment(inputData);
+        bytes32 jobOutputSchema = adapter.OUTPUT_SCHEMA();
         vm.prank(OWNER);
         jobId = jobs.createJob(
             REQUEST,
             REQUEST_COMMITMENT,
             MANIFEST,
-            adapter.WORKLOAD_TYPE(),
-            adapter.inputCommitment(inputData),
-            adapter.OUTPUT_SCHEMA(),
+            jobWorkloadType,
+            jobInputCommitment,
+            jobOutputSchema,
             uint64(block.timestamp + 1 days)
         );
         vm.prank(OWNER);
@@ -162,8 +165,9 @@ contract ComputeDeterministicVerificationRouter420Test {
     }
 
     function _bind() private returns (bytes32 ref) {
+        bytes32 profileId = adapter.PROFILE_ID();
         vm.prank(OWNER);
-        ref = router.bindAdapter(jobId, adapter.PROFILE_ID(), 1);
+        ref = router.bindAdapter(jobId, profileId, 1);
     }
 
     function _commitOutput(uint256 output) private returns (bytes memory outputData) {
@@ -192,16 +196,17 @@ contract ComputeDeterministicVerificationRouter420Test {
     }
 
     function testOnlyOwnerCanBindAndCannotBindAfterExecution() public {
+        bytes32 profileId = adapter.PROFILE_ID();
         vm.prank(OUTSIDER);
         (bool ok,) = address(router).call(
-            abi.encodeCall(router.bindAdapter, (jobId, adapter.PROFILE_ID(), uint64(1)))
+            abi.encodeCall(router.bindAdapter, (jobId, profileId, uint64(1)))
         );
         require(!ok, "outsider bound adapter");
 
         _commitOutput(194);
         vm.prank(OWNER);
         (ok,) = address(router).call(
-            abi.encodeCall(router.bindAdapter, (jobId, adapter.PROFILE_ID(), uint64(1)))
+            abi.encodeCall(router.bindAdapter, (jobId, profileId, uint64(1)))
         );
         require(!ok, "adapter bound after execution");
     }
@@ -268,12 +273,14 @@ contract ComputeDeterministicVerificationRouter420Test {
     }
 
     function testInactiveOrWrongProfileRouteCannotBeNewlyBound() public {
+        bytes32 workloadType = adapter.WORKLOAD_TYPE();
+        bytes32 profileId = adapter.PROFILE_ID();
         vm.prank(GOV);
-        registry.setActive(adapter.WORKLOAD_TYPE(), adapter.PROFILE_ID(), 1, false);
+        registry.setActive(workloadType, profileId, 1, false);
 
         vm.prank(OWNER);
         (bool ok,) = address(router).call(
-            abi.encodeCall(router.bindAdapter, (jobId, adapter.PROFILE_ID(), uint64(1)))
+            abi.encodeCall(router.bindAdapter, (jobId, profileId, uint64(1)))
         );
         require(!ok, "inactive route bound");
 

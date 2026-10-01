@@ -113,7 +113,7 @@ test('wallet user rejection is preserved as a structured submission error',async
   });
   await assert.rejects(
     submitPreflightedTransaction({
-      provider,session:s,expectedChainId:'0x420',expectedGeneration:s.generation,transaction:tx,preflight:pf,
+      provider,session:s,expectedChainId:'0x420',expectedGeneration:s.generation,transaction:tx,preflight:pf,submissionGate:{enabled:true,mode:'PRE06_MOCK'},
     }),
     (error)=>error instanceof WalletExecutionError && error.code==='USER_REJECTED',
   );

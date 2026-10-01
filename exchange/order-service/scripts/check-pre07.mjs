@@ -4,5 +4,7 @@ for(const f of ['src/canonical.js','src/order-store.js','src/http.js','test/publ
 const store=fs.readFileSync(path.join(root,'src/order-store.js'),'utf8');
 for(const marker of ['signed','published','accepted','partially-filled','filled','cancel-pending','cancelled','expired','rejected','SIGNER_MISMATCH','CONFLICTING_FILL_DATA','STALE_PROJECTION'])if(!store.includes(marker))throw new Error('PRE-07 store missing '+marker);
 const canonical=fs.readFileSync(path.join(root,'src/canonical.js'),'utf8');
-for(const marker of ['420Exchange Limit Orders','EIP712Domain','hashOrder','orderDigest','uint128','uint64'])if(!canonical.includes(marker))throw new Error('PRE-07 canonical missing '+marker);
+const identity=fs.readFileSync(path.resolve(root,'../web/core/limit-order-identity.js'),'utf8');
+for(const marker of ['hashOrder','orderDigest','validatePublicationEnvelope'])if(!canonical.includes(marker))throw new Error('PRE-07 canonical adapter missing '+marker);
+for(const marker of ['420Exchange Limit Orders','EIP712Domain','hashLimitOrder','limitOrderDigest','uint128','uint64'])if(!identity.includes(marker))throw new Error('PRE-07 canonical identity missing '+marker);
 console.log('420Exchange PRE-07 order-service static checks passed');

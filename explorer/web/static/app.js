@@ -243,11 +243,18 @@ async function assets() {
   ]) + `<div class="panel"><p class="muted">Native and token movement projected from qualified indexed transactions and logs.</p>${assetTable(qualifiedTransfers)}</div>`;
 }
 
+function stakeEventLabel(eventName) {
+  if (eventName === 'RewardApplied') return 'RewardApplied · validator reward';
+  if (eventName === 'SlashApplied') return 'SlashApplied · validator slash';
+  if (eventName === 'ConsensusStateApplied') return 'ConsensusStateApplied · lifecycle';
+  return eventName;
+}
+
 function stakeActivityTable(records) {
   if (!records.length) return '<p class="muted">No indexed staking or reward activity for this filter.</p>';
   return `<div class="table-wrap"><table><thead><tr><th>Block</th><th>Event</th><th>Validator / address</th><th>Finality</th><th>Transaction</th></tr></thead><tbody>${records.map(r => {
     const subject = r.validatorId || (r.addresses?.[0] ?? '—');
-    return `<tr><td>${link(`#/blocks/${r.blockNumber}`,r.blockNumber)}</td><td><span class="badge">${esc(r.eventName)}</span></td><td title="${esc(subject)}">${mono(short(subject))}</td><td>${finalityBadge(r.finality)}</td><td>${link(`#/transactions/${r.transactionHash}`,short(r.transactionHash))}</td></tr>`;
+    return `<tr><td>${link(`#/blocks/${r.blockNumber}`,r.blockNumber)}</td><td><span class="badge">${esc(stakeEventLabel(r.eventName))}</span></td><td title="${esc(subject)}">${mono(short(subject))}</td><td>${finalityBadge(r.finality)}</td><td>${link(`#/transactions/${r.transactionHash}`,short(r.transactionHash))}</td></tr>`;
   }).join('')}</tbody></table></div>`;
 }
 

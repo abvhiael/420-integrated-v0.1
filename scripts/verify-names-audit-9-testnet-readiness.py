@@ -30,7 +30,7 @@ runner=RUNNER.read_text() if RUNNER.exists() else ""
 module=MODULE.read_text() if MODULE.exists() else ""
 workflow=WORKFLOW.read_text() if WORKFLOW.exists() else ""
 for marker in [
-    "eth_chainId","getStorage","resolveActive","createNames420Client",
+    "provider.getNetwork","getStorage","resolveActive","createNames420Client",
     "NameTransferred","NAMES_TESTNET_OWNER_PRIVATE_KEY",
     "NAMES_TESTNET_RECIPIENT_PRIVATE_KEY","/v1/protocols/events","/v1/resolve"
 ]:

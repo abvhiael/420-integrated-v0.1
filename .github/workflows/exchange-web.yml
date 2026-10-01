@@ -6,12 +6,14 @@ on:
       - "exchange/web/**"
       - "exchange/quote-service/**"
       - "exchange/order-service/**"
+      - "exchange/read-service/**"
       - ".github/workflows/exchange-web.yml"
   pull_request:
     paths:
       - "exchange/web/**"
       - "exchange/quote-service/**"
       - "exchange/order-service/**"
+      - "exchange/read-service/**"
       - ".github/workflows/exchange-web.yml"
   workflow_dispatch:
 
@@ -41,6 +43,17 @@ jobs:
       - name: PRE-07 order service unit and HTTP integration tests
         working-directory: exchange/order-service
         run: npm test
+      - name: PRE-10 Exchange read service static checks
+        working-directory: exchange/read-service
+        run: npm run check
+      - name: PRE-10 Exchange read service contract and integration tests
+        working-directory: exchange/read-service
+        run: npm test
+      - name: PRE-10 420Indexer shared-dependency qualification
+        working-directory: 420-indexer
+        run: |
+          npm install --no-package-lock
+          npm test
       - name: Static Exchange checks
         working-directory: exchange/web
         run: npm run check

@@ -1099,6 +1099,120 @@ contract ComputeVerifiedEntitlement420Test {
     }
 
 
+
+    function testVerificationReviewHookPreservesOriginalVerdictThroughAppealAndFinalAdverseDisposition() public {
+        bytes32 id = _verifiedJob(50, OWNER_A_KEY, PAYER_A_KEY, 4 ether);
+        _makeClaimable(id);
+        ComputeJobRegistry420.Job memory original = jobs.job(id);
+        bytes32 grounds = keccak256("verification-integrity");
+        bytes32 disputeId = _openPayerDispute(id, grounds);
+
+        ComputeDisputeResolution420.VerificationReview memory opened =
+            disputes.verificationReview(disputeId);
+        require(
+            opened.jobId == id
+                && opened.verificationRef == original.verificationRef
+                && opened.resultCommitment == original.resultCommitment
+                && opened.verifier == original.verifier
+                && opened.groundsCode == grounds
+                && opened.holdActive
+                && !opened.finalDisposition
+                && !opened.adverseToOriginalVerification,
+            "opened review lost original verifier decision"
+        );
+
+        (
+            bytes32 heldDispute,
+            bool held,
+            bytes32 heldVerificationRef,
+            address heldVerifier,
+            bytes32 heldPolicyId,
+            uint32 heldPolicyRevision,
+            bytes32 heldPolicyCommitment
+        ) = disputes.verificationHoldForJob(id);
+        require(
+            heldDispute == disputeId && held
+                && heldVerificationRef == original.verificationRef
+                && heldVerifier == original.verifier
+                && heldPolicyId == original.verificationPolicyId
+                && heldPolicyRevision == original.verificationPolicyRevision
+                && heldPolicyCommitment == original.verificationPolicyCommitment,
+            "job hold hook drifted from original verification"
+        );
+
+        vm.prank(BENEFICIARY);
+        disputes.respond(disputeId, keccak256("provider-response"));
+        _grantAdjudicator(ADJUDICATOR_A, id);
+        _grantAdjudicator(ADJUDICATOR_B, id);
+
+        vm.prank(ADJUDICATOR_A);
+        disputes.decide(disputeId, true, keccak256("initial-provider-win"));
+        vm.prank(payerA);
+        disputes.appeal(disputeId, keccak256("payer-appeal"));
+
+        ComputeDisputeResolution420.VerificationReview memory appealed =
+            disputes.verificationReview(disputeId);
+        require(
+            appealed.status == ComputeDisputeResolution420.CaseStatus.APPEALED
+                && appealed.appealed && !appealed.appealResolved
+                && appealed.holdActive && !appealed.finalDisposition
+                && appealed.initialAdjudicator == ADJUDICATOR_A
+                && appealed.verificationRef == original.verificationRef,
+            "appeal hook rewrote verdict or dropped hold"
+        );
+
+        vm.prank(ADJUDICATOR_B);
+        disputes.decideAppeal(disputeId, false, keccak256("appeal-payer-win"));
+        disputes.finalize(disputeId);
+
+        ComputeDisputeResolution420.VerificationReview memory finalReview =
+            disputes.verificationReview(disputeId);
+        require(
+            finalReview.status == ComputeDisputeResolution420.CaseStatus.FINAL
+                && finalReview.finalDisposition
+                && finalReview.adverseToOriginalVerification
+                && !finalReview.providerWins
+                && !finalReview.holdActive
+                && finalReview.appealResolved
+                && finalReview.appealAdjudicator == ADJUDICATOR_B
+                && finalReview.resolutionRef != bytes32(0)
+                && finalReview.verificationRef == original.verificationRef
+                && finalReview.resultCommitment == original.resultCommitment
+                && finalReview.verifier == original.verifier,
+            "final verifier review disposition incorrect"
+        );
+
+        (, bool finalHold, bytes32 finalVerificationRef,,,,) =
+            disputes.verificationHoldForJob(id);
+        require(
+            !finalHold && finalVerificationRef == original.verificationRef,
+            "finality erased verifier provenance or retained hold"
+        );
+    }
+
+    function testWithdrawnVerificationChallengeIsFinalButNotAdverseVerifierDisposition() public {
+        bytes32 id = _verifiedJob(51, OWNER_A_KEY, PAYER_A_KEY, 4 ether);
+        _makeClaimable(id);
+        ComputeJobRegistry420.Job memory original = jobs.job(id);
+        bytes32 disputeId = _openPayerDispute(id, keccak256("withdraw-verifier-review"));
+
+        vm.prank(payerA);
+        disputes.withdraw(disputeId);
+
+        ComputeDisputeResolution420.VerificationReview memory review =
+            disputes.verificationReview(disputeId);
+        require(
+            review.status == ComputeDisputeResolution420.CaseStatus.WITHDRAWN
+                && review.finalDisposition
+                && review.providerWins
+                && !review.adverseToOriginalVerification
+                && !review.holdActive
+                && review.verificationRef == original.verificationRef
+                && review.resultCommitment == original.resultCommitment,
+            "withdrawn challenge fabricated adverse verifier disposition"
+        );
+    }
+
     function _assertNativeSolvent() private view {
         VaultAccounting420.AssetAccounting memory a =
             accounting.getAccounting(VAULT_ID, address(0));

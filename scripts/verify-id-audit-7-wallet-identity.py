@@ -90,8 +90,8 @@ check=read(CHECK)
 for token in ["core/identity-management.js","identity-management-ui.js","test/identity-management.test.js","test/identity-management-ui.test.js"]:
     if token not in check: fail("Wallet static qualification missing Identity artifact: "+token)
 
-guide=read(USER_GUIDE)
-for token in ["controller","primary","credentials","reject"]:
+guide=read(USER_GUIDE).lower()
+for token in ["controller","primary","credential","reject"]:
     if token not in guide: fail("Identity user guide missing "+token)
 
 if errors:

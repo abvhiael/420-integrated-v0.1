@@ -86,6 +86,7 @@ contract StakeTransitionProperty420Test {
         if (source == ValidatorRegistry.Status.WITHDRAWAL_HOLD || source == ValidatorRegistry.Status.WITHDRAWABLE || source == ValidatorRegistry.Status.EXITED) {
             vm.prank(SYSTEM_CALLER);
             f.registry.applyExitNotice(f.id, 1);
+            vm.prank(SYSTEM_CALLER);
             f.registry.applyRotationSnapshot(2, 0);
             _state(f.registry, f.id, ValidatorRegistry.Status.WITHDRAWAL_HOLD, 2, 0, 0, 0);
             if (source == ValidatorRegistry.Status.WITHDRAWAL_HOLD) return f;
@@ -149,8 +150,7 @@ contract StakeTransitionProperty420Test {
             ValidatorRegistry.Validator memory v = f.registry.getValidator(f.id);
             if (f.registry.lastRotationSnapshot() < v.scheduledExitRotation) {
                 vm.prank(SYSTEM_CALLER);
-                vm.prank(SYSTEM_CALLER);
-            f.registry.applyRotationSnapshot(v.scheduledExitRotation, 1);
+                f.registry.applyRotationSnapshot(v.scheduledExitRotation, 1);
             }
         }
 
@@ -158,8 +158,7 @@ contract StakeTransitionProperty420Test {
             ValidatorRegistry.Validator memory v = f.registry.getValidator(f.id);
             if (f.registry.lastRotationSnapshot() < v.cooldownUntilRotation) {
                 vm.prank(SYSTEM_CALLER);
-                vm.prank(SYSTEM_CALLER);
-            f.registry.applyRotationSnapshot(v.cooldownUntilRotation, 0);
+                f.registry.applyRotationSnapshot(v.cooldownUntilRotation, 0);
             }
         }
 

@@ -25,6 +25,10 @@ var stakeExplorerEvents = map[string]bool{
 	"RewardApplied":true,
 }
 
+type stakeIndexerReader interface {
+	StakeActivity(context.Context, string, string, uint32) (indexerapi.StakeActivityPage, error)
+}
+
 type StakeActivityView struct {
 	indexerapi.StakeActivityPage
 	Count int `json:"count"`
@@ -38,7 +42,9 @@ func expectedStakeFinality(meta indexerapi.PageMeta, height uint64) model.Finali
 
 func (s *Service) StakeActivity(ctx context.Context, validatorID, address string, limit uint32) (StakeActivityView, error) {
 	if limit == 0 { limit = 50 }
-	page, err := s.indexer.StakeActivity(ctx, strings.TrimSpace(validatorID), strings.TrimSpace(address), limit)
+	reader, ok := s.indexer.(stakeIndexerReader)
+	if !ok { return StakeActivityView{}, errors.New("420Indexer Stake activity capability unavailable") }
+	page, err := reader.StakeActivity(ctx, strings.TrimSpace(validatorID), strings.TrimSpace(address), limit)
 	if err != nil { return StakeActivityView{}, err }
 	if page.CanonicalAuthority { return StakeActivityView{}, errors.New("420Indexer Stake activity overpromoted canonical authority") }
 	if err := s.requireRecordChain(page.Meta.ChainID); err != nil { return StakeActivityView{}, err }

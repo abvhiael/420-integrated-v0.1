@@ -74,10 +74,11 @@ contract ComputeJobPolicyEnforcedVerification420Test {
         verification.bindJobs(address(jobs));
         verification.setApprovedProfile(PROFILE, true);
         jobs.bindVerificationPolicyRegistry(address(verificationPolicies));
+        bytes32 verificationKind = verificationPolicies.KIND_VERIFICATION();
         vm.prank(GOV);
         verificationPolicies.publish(
             VERIFICATION_POLICY,
-            verificationPolicies.KIND_VERIFICATION(),
+            verificationKind,
             VERIFICATION_TERMS,
             VERIFICATION_SCHEMA,
             1 days,

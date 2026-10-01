@@ -1,0 +1,129 @@
+name: 420Identity ID-AUDIT-4
+
+on:
+  pull_request:
+    paths:
+      - "contracts/src/apps/Identity420.sol"
+      - "contracts/src/interfaces/genesis/IIdentityCredential420.sol"
+      - "contracts/foundry.toml"
+      - "contracts/config/security/toolchain.json"
+      - "contracts/config/predeploy/predeploy-plan.json"
+      - "contracts/artifacts/Identity420.json"
+      - "developer-hub/catalogue/local.example.json"
+      - "docs/reference/generated/**"
+      - "docs/audit/ID-AUDIT-4-GENERATED-ARTIFACT-REFERENCE-QUALIFICATION.md"
+      - "420-indexer/src/abi-manifest.ts"
+      - "scripts/generate-id-audit-4-identity-artifact.py"
+      - "scripts/verify-id-audit-4-artifact.py"
+      - "scripts/test-reg-audit-4-genesis-address-namespace.py"
+      - "scripts/qualify-generated-reference.py"
+      - ".github/workflows/identity-id-audit-4.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: identity-id-audit-4-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Verify pinned compiler settings
+        working-directory: contracts
+        run: |
+          set -euo pipefail
+          CONFIG="$(forge config)"
+          grep -q 'solc = "0.8.24"' <<<"$CONFIG" || grep -q 'solc_version = "0.8.24"' <<<"$CONFIG"
+          grep -q 'evm_version = "cancun"' <<<"$CONFIG"
+          grep -q 'optimizer = true' <<<"$CONFIG"
+          grep -q 'optimizer_runs = 200' <<<"$CONFIG"
+          grep -q 'via_ir = true' <<<"$CONFIG"
+
+      - name: Compile exact Identity420 candidate
+        working-directory: contracts
+        run: forge build --force src/apps/Identity420.sol
+
+      - name: Materialize deterministic Identity artifact and catalogue metadata
+        run: python3 scripts/generate-id-audit-4-identity-artifact.py --write --print
+
+      - name: Regenerate deterministic references
+        run: python3 scripts/qualify-generated-reference.py --write
+
+      - name: Verify retained artifact and references
+        run: |
+          set -euo pipefail
+          python3 scripts/generate-id-audit-4-identity-artifact.py --check
+          python3 scripts/verify-id-audit-4-artifact.py
+          python3 scripts/qualify-generated-reference.py --check
+
+      - name: Verify catalogue namespace regression fixtures
+        run: python3 scripts/test-reg-audit-4-genesis-address-namespace.py
+
+      - name: Test Developer Hub catalogue consumers
+        working-directory: developer-hub
+        run: npm test
+
+      - name: Test 420 SDK catalogue/reference consumers
+        working-directory: packages/420-sdk
+        run: |
+          npm install --no-audit --no-fund
+          npm test
+
+      - name: Test 420Indexer retained Identity artifact descriptors
+        working-directory: 420-indexer
+        run: |
+          npm install --no-audit --no-fund
+          npm test
+
+      - name: Commit generated ID-AUDIT-4 outputs when absent or stale
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          STATUS="$(git status --porcelain --             contracts/artifacts/Identity420.json             developer-hub/catalogue/local.example.json             docs/reference/generated)"
+          if [ -z "$STATUS" ]; then
+            echo "Generated Identity artifact/reference outputs already current."
+            exit 0
+          fi
+          echo "$STATUS"
+          git config user.name "420 Integrated CI"
+          git config user.email "actions@users.noreply.github.com"
+          git add             contracts/artifacts/Identity420.json             developer-hub/catalogue/local.example.json             docs/reference/generated
+          git commit -m "Identity: materialize ID-AUDIT-4 artifact references"
+          git push origin "HEAD:${{ github.head_ref }}"
+
+      - name: Upload generated Identity evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: identity-id-audit-4-${{ github.sha }}
+          path: |
+            contracts/artifacts/Identity420.json
+            developer-hub/catalogue/local.example.json
+            docs/reference/generated/contracts.md
+            docs/reference/generated/events-errors.md
+          if-no-files-found: warn
+          retention-days: 30

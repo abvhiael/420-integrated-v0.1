@@ -1,0 +1,65 @@
+name: 420Identity live testnet qualification
+
+on:
+  workflow_dispatch:
+    inputs:
+      manifest_path:
+        description: Official public-testnet network manifest
+        required: true
+        default: developer-hub/manifests/testnet.json
+      evidence_draft_path:
+        description: Reviewed ID-AUDIT-9 lifecycle/recovery evidence draft with real tx hashes
+        required: true
+        default: docs/audit/ID-AUDIT-9-LIVE-EVIDENCE-DRAFT.json
+      timeout_seconds:
+        description: Derived-service convergence timeout
+        required: true
+        default: '240'
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: 420-indexer/package-lock.json
+
+      - name: Verify official testnet inputs exist
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f "${{ inputs.manifest_path }}"
+          test "${{ inputs.manifest_path }}" != "developer-hub/manifests/local.example.json"
+          test -f "${{ inputs.evidence_draft_path }}"
+
+      - name: Build Identity live qualification dependencies
+        working-directory: 420-indexer
+        run: |
+          npm ci
+          npm run build
+          node --test dist/test/identity-testnet-qualification.test.js
+
+      - name: Run ID-AUDIT-9 production-equivalent verification
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/identity
+          node 420-indexer/scripts/qualify-identity-testnet.mjs             --manifest "${{ inputs.manifest_path }}"             --evidenceDraft "${{ inputs.evidence_draft_path }}"             --repositorySha "${{ github.sha }}"             --timeoutSeconds "${{ inputs.timeout_seconds }}"             --output artifacts/identity/identity-audit-9-live-testnet.json
+
+      - name: Upload ID-AUDIT-9 live evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: identity-audit-9-live-testnet
+          path: artifacts/identity/identity-audit-9-live-testnet.json
+          if-no-files-found: warn

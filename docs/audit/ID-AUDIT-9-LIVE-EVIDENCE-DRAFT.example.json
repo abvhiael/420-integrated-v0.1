@@ -1,0 +1,61 @@
+{
+  "schema": "420-identity-live-testnet-evidence-draft-v1",
+  "phase": "ID-AUDIT-9",
+  "status": "DRAFT_REQUIRES_REAL_TESTNET_EVIDENCE",
+  "instructions": "Copy this file to docs/audit/ID-AUDIT-9-LIVE-EVIDENCE-DRAFT.json only after the official public testnet exists. Replace every REPLACE value with real non-secret chain/deployment/drill evidence. Never commit private keys or credential-bearing endpoints.",
+  "lifecycle": {
+    "profileId": "REPLACE_BYTES32",
+    "owner": "REPLACE_ADDRESS",
+    "recipient": "REPLACE_ADDRESS",
+    "issuerId": "REPLACE_BYTES32",
+    "issuerController": "REPLACE_ADDRESS",
+    "credentialId": "REPLACE_BYTES32",
+    "reissuedCredentialId": "REPLACE_BYTES32",
+    "credentialType": "REPLACE_BYTES32",
+    "createProfileTx": "REPLACE_TX_HASH",
+    "updateProfileTx": "REPLACE_TX_HASH",
+    "transferNominationTx": "REPLACE_TX_HASH",
+    "transferAcceptanceTx": "REPLACE_TX_HASH",
+    "issuerConfigureTx": "REPLACE_GOVERNANCE_TX_HASH",
+    "credentialIssueTx": "REPLACE_TX_HASH",
+    "credentialRejectTx": "REPLACE_TX_HASH",
+    "credentialReissueTx": "REPLACE_TX_HASH",
+    "credentialRevokeTx": "REPLACE_TX_HASH",
+    "expiryCredentialId": "REPLACE_BYTES32",
+    "expiryIssueTx": "REPLACE_TX_HASH",
+    "issuerDeactivateTx": "REPLACE_GOVERNANCE_TX_HASH",
+    "issuerReactivateTx": "REPLACE_GOVERNANCE_TX_HASH",
+    "negativeUnauthorizedProfileTxRejected": false,
+    "negativeUnauthorizedIssuerTxRejected": false,
+    "negativeUnauthorizedRevocationRejected": false,
+    "finalProfileController": "REPLACE_ADDRESS",
+    "finalProfileActive": false,
+    "rejectedCredentialValid": true,
+    "revokedCredentialValid": true,
+    "expiryObservedInvalid": false,
+    "issuerActiveAfterRecovery": false
+  },
+  "recovery": {
+    "restart": {
+      "qualified": false,
+      "checkpointBefore": "REPLACE_POSITIVE_BLOCK",
+      "checkpointAfter": "REPLACE_POSITIVE_BLOCK",
+      "replayGap": -1,
+      "repeatRestartProcessedZero": false
+    },
+    "reorg": {
+      "qualified": false,
+      "recoveredDepth": 0,
+      "finalCheckpoint": "REPLACE_POSITIVE_BLOCK",
+      "deepReorgRejectedWithoutMutation": false
+    },
+    "dependencyFailure": {
+      "qualified": false,
+      "wrongChainRejected": false,
+      "staleIndexerRejected": false,
+      "searchUnavailableFailsClosed": false,
+      "explorerUnavailableNonAuthoritative": false,
+      "walletWrongChainRejected": false
+    }
+  }
+}

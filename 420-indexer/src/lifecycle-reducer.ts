@@ -26,7 +26,7 @@ export interface LifecycleSnapshot420 {
 }
 
 const KEY_FIELDS = [
-  'objectId','componentId','labelHash','profileId','issuerId','credentialId','validatorId','stakeId','proposalId','paymentId',
+  'objectId','componentId','labelHash','profileId','credentialId','issuerId','validatorId','stakeId','proposalId','paymentId',
   'invoiceId','routeId','swapId','transferId','bridgeId','requestId','rightId','licenseId','assetId'
 ] as const;
 

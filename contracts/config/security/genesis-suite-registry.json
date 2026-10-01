@@ -21,13 +21,15 @@
     },
     {
       "name": "Validator_Stake",
-      "status": "PENDING_HARDENING",
-      "order": 4
+      "status": "PRE_GENESIS_EXECUTABLE_VERIFICATION",
+      "order": 4,
+      "evidence": "contracts/config/security/stake-hardening-v1.json"
     },
     {
       "name": "Rewards_Treasuries",
-      "status": "PENDING_HARDENING",
-      "order": 5
+      "status": "PRE_GENESIS_EXECUTABLE_VERIFICATION",
+      "order": 5,
+      "evidence": "contracts/config/security/stake-hardening-v1.json"
     },
     {
       "name": "Governance",

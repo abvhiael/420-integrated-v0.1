@@ -28,6 +28,9 @@ contract ComputeJobPolicyEnforcedVerification420Test {
     uint256 private constant VERIFIER_KEY = 0xC0DE;
     bytes32 private constant MANIFEST = keccak256("policy-bound-request");
     bytes32 private constant PROFILE = keccak256("policy-profile");
+    bytes32 private constant VERIFICATION_POLICY = keccak256("signed-verdict-policy");
+    bytes32 private constant VERIFICATION_TERMS = keccak256("signed-verdict-policy-terms-v1");
+    bytes32 private constant VERIFICATION_SCHEMA = keccak256("signed-verdict-policy-schema-v1");
     address private owner;
     address private payer;
     address private verifier;
@@ -41,6 +44,7 @@ contract ComputeJobPolicyEnforcedVerification420Test {
     ComputeJobAcceptedMatch420 private matches;
     ComputeJobMatchedWorkerEvidence420 private workers;
     ComputeVerifierIndependencePolicy420 private policy;
+    ComputePolicyRegistry420 private verificationPolicies;
     ComputeJobPolicyEnforcedVerification420 private verification;
     ComputeJobRegistry420 private jobs;
     bytes32 private resourceId;
@@ -61,6 +65,7 @@ contract ComputeJobPolicyEnforcedVerification420Test {
         workers = new ComputeJobMatchedWorkerEvidence420(address(matches), address(auth));
         policy = new ComputeVerifierIndependencePolicy420(GOV, ATTESTOR, SELECTOR);
         verification = new ComputeJobPolicyEnforcedVerification420(address(matches), address(auth), address(policy));
+        verificationPolicies = new ComputePolicyRegistry420(GOV);
         jobs = new ComputeJobRegistry420(address(requests), address(custody), address(matches),
             address(workers), address(verification), address(new PolicySettlementDeny420()));
         custody.bindJobs(address(jobs));
@@ -68,6 +73,17 @@ contract ComputeJobPolicyEnforcedVerification420Test {
         workers.bindJobs(address(jobs));
         verification.bindJobs(address(jobs));
         verification.setApprovedProfile(PROFILE, true);
+        jobs.bindVerificationPolicyRegistry(address(verificationPolicies));
+        vm.prank(GOV);
+        verificationPolicies.publish(
+            VERIFICATION_POLICY,
+            verificationPolicies.KIND_VERIFICATION(),
+            VERIFICATION_TERMS,
+            VERIFICATION_SCHEMA,
+            1 days,
+            100,
+            100 ether
+        );
         registry.transferComponentRegistrar(GOV);
         bytes32 component = auth.COMPONENT_COMPUTE();
         vm.prank(GOV);
@@ -130,14 +146,17 @@ contract ComputeJobPolicyEnforcedVerification420Test {
         _grant(OPERATOR, id, auth.ACTION_ACCEPT_MATCH(), n * 10 + 1);
         vm.prank(OPERATOR);
         matches.acceptMatch(id, 3);
+        bytes32 policyCommitment = verificationPolicies.commitment(VERIFICATION_POLICY, 1);
+        vm.prank(owner);
+        jobs.bindVerificationPolicy(id, 4, VERIFICATION_POLICY, 1, policyCommitment);
         _grant(OPERATOR, id, auth.ACTION_EXECUTE_ATTEMPT(), n * 10 + 2);
         _grant(OPERATOR, id, auth.ACTION_SUBMIT_RECEIPT(), n * 10 + 3);
         vm.prank(OPERATOR);
-        workers.acceptAssignment(id, resourceId, 4);
+        workers.acceptAssignment(id, resourceId, 5);
         vm.prank(OPERATOR);
         bytes32 result = workers.commitResult(id, keccak256("receipt"), keccak256("output"));
         vm.prank(OPERATOR);
-        jobs.recordResult(id, 5, result);
+        jobs.recordResult(id, 6, result);
         _grant(verifier, id, auth.ACTION_VERIFY_RESULT(), n * 10 + 4);
     }
     function _verdict(bytes32 id, uint256 n) private view returns (ComputeJobIndependentVerification420.Verdict memory v) {
@@ -171,6 +190,23 @@ contract ComputeJobPolicyEnforcedVerification420Test {
         _appoint(id);
         require(_submit(id, 3) && jobs.job(id).status == ComputeJobRegistry420.Status.VERIFIED
             && custody.totalReserved() == 3 ether, "independent canonical verifier rejected or payer released");
+        bytes32 decisionRef = verification.decisionForJob(id);
+        ComputeJobIndependentVerification420.Decision memory d = verification.decision(decisionRef);
+        ComputeJobIndependentVerification420.DecisionProvenance memory p =
+            verification.decisionProvenance(decisionRef);
+        require(
+            p.jobRegistry == address(jobs)
+                && p.unitId == id
+                && p.attemptRef == jobs.job(id).assignmentRef
+                && p.attempt == 1
+                && p.worker == OPERATOR
+                && p.policyId == VERIFICATION_POLICY
+                && p.policyRevision == 1
+                && p.policyCommitment == verificationPolicies.commitment(VERIFICATION_POLICY, 1)
+                && p.evidenceCommitment != bytes32(0)
+                && d.provenanceHash == verification.provenanceHash(p),
+            "frozen verification policy missing from signed provenance"
+        );
     }
     function testAppointmentRevocationBlocksSignedDecision() public {
         bytes32 id = _resultJob(2);

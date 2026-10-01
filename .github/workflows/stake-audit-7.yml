@@ -1,0 +1,108 @@
+name: 420Stake STAKE-AUDIT-7
+
+on:
+  push:
+    paths:
+      - 'contracts/src/system/RewardController.sol'
+      - 'contracts/src/system/ValidatorRegistry.sol'
+      - 'contracts/src/system/CommunityValidatorReserve.sol'
+      - 'contracts/src/apps/Stake420.sol'
+      - 'contracts/src/system/ConsensusSystemAccess420.sol'
+      - 'contracts/src/system/StakeDependencyAccess420.sol'
+      - 'contracts/src/system/ProtocolTreasury.sol'
+      - 'contracts/src/system/SystemAccess.sol'
+      - 'contracts/config/predeploy/stake-genesis-config-v1.json'
+      - 'contracts/config/predeploy/RewardController-predeploy-state.json'
+      - 'contracts/config/predeploy/ValidatorRegistry-predeploy-state.json'
+      - 'contracts/config/predeploy/CommunityValidatorReserve-predeploy-state.json'
+      - 'contracts/config/predeploy/Stake420-predeploy-state.json'
+      - 'contracts/config/predeploy/Stake420-materialization.json'
+      - 'contracts/config/predeploy/predeploy-plan.json'
+      - 'contracts/config/predeploy/storage-init.json'
+      - 'contracts/config/deployment-manifest.json'
+      - 'contracts/artifacts/RewardController.json'
+      - 'contracts/artifacts/ValidatorRegistry.json'
+      - 'contracts/artifacts/CommunityValidatorReserve.json'
+      - 'contracts/artifacts/Stake420.json'
+      - 'contracts/test/StakeValidatorGenesis420.t.sol'
+      - 'contracts/test/StakeRollbackAtomicity420.t.sol'
+      - 'contracts/test/StakeSystemCallABIVectors420.t.sol'
+      - 'scripts/generate-stake-audit-7-predeploy.py'
+      - 'scripts/verify-stake-audit-7-predeploy.py'
+      - '.github/workflows/stake-audit-7.yml'
+  pull_request:
+    paths:
+      - 'contracts/src/system/RewardController.sol'
+      - 'contracts/src/system/ValidatorRegistry.sol'
+      - 'contracts/src/system/CommunityValidatorReserve.sol'
+      - 'contracts/src/apps/Stake420.sol'
+      - 'contracts/config/predeploy/stake-genesis-config-v1.json'
+      - 'contracts/config/predeploy/RewardController-predeploy-state.json'
+      - 'contracts/config/predeploy/ValidatorRegistry-predeploy-state.json'
+      - 'contracts/config/predeploy/CommunityValidatorReserve-predeploy-state.json'
+      - 'contracts/config/predeploy/Stake420-predeploy-state.json'
+      - 'contracts/config/predeploy/Stake420-materialization.json'
+      - 'contracts/config/predeploy/predeploy-plan.json'
+      - 'contracts/config/predeploy/storage-init.json'
+      - 'contracts/config/deployment-manifest.json'
+      - 'contracts/artifacts/RewardController.json'
+      - 'contracts/artifacts/ValidatorRegistry.json'
+      - 'contracts/artifacts/CommunityValidatorReserve.json'
+      - 'contracts/artifacts/Stake420.json'
+      - 'scripts/generate-stake-audit-7-predeploy.py'
+      - 'scripts/verify-stake-audit-7-predeploy.py'
+      - '.github/workflows/stake-audit-7.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: stake-audit-7-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  level-1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+          cache: true
+          cache-key: stake-audit-7-${{ github.event.pull_request.head.sha || github.sha }}
+          cache-restore-keys: stake-audit-7-
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify retained Stake predeploy package
+        run: python scripts/verify-stake-audit-7-predeploy.py
+      - name: Reproduce exact Stake predeploy runtime and storage
+        run: python scripts/generate-stake-audit-7-predeploy.py --check
+      - name: Verify affected frozen Genesis address authority
+        run: |
+          python scripts/verify-genesis-canonical-addresses.py
+          python scripts/audit-genesis-address-collisions.py
+          python scripts/verify-genesis-predeploy-authority.py
+          python scripts/verify-step6-contracts.py
+      - name: Run retained Stake lifecycle and binding regressions
+        working-directory: contracts
+        run: |
+          forge test --match-path test/StakeValidatorGenesis420.t.sol -vv
+          forge test --match-path test/StakeRollbackAtomicity420.t.sol -vv
+          forge test --match-path test/StakeSystemCallABIVectors420.t.sol -vv
+      - name: Reject materialization drift after qualification
+        run: |
+          git status --porcelain --             contracts/artifacts/RewardController.json             contracts/artifacts/ValidatorRegistry.json             contracts/artifacts/CommunityValidatorReserve.json             contracts/artifacts/Stake420.json             contracts/config/predeploy/RewardController-predeploy-state.json             contracts/config/predeploy/ValidatorRegistry-predeploy-state.json             contracts/config/predeploy/CommunityValidatorReserve-predeploy-state.json             contracts/config/predeploy/Stake420-predeploy-state.json             contracts/config/predeploy/Stake420-materialization.json             contracts/config/predeploy/predeploy-plan.json             contracts/config/predeploy/storage-init.json             contracts/config/deployment-manifest.json | tee /tmp/stake-audit-7-drift.txt
+          test ! -s /tmp/stake-audit-7-drift.txt

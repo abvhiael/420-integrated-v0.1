@@ -184,6 +184,8 @@ Reuse canonical $420 custody/accounting. Do not create an unrelated collateral t
 
 
 ### CMP-1.5.4 — Exit queue / withdrawal delay
+**Status: implementation/Level 1 + Level 2 lifecycle qualification in progress.**
+
 
 ### CMP-1.5.5 — Objective slash authorization
 

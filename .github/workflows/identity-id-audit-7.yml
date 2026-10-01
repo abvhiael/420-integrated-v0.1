@@ -1,0 +1,63 @@
+name: 420Identity ID-AUDIT-7
+
+on:
+  pull_request:
+    paths:
+      - "contracts/artifacts/Identity420.json"
+      - "contracts/src/apps/Identity420.sol"
+      - "wallet/web/core/identity-management.js"
+      - "wallet/web/identity-management-ui.js"
+      - "wallet/web/index.html"
+      - "wallet/web/scripts/check.mjs"
+      - "wallet/web/test/identity-management.test.js"
+      - "wallet/web/test/identity-management-ui.test.js"
+      - "wallet/web/runtime-config.json"
+      - "docs/apps/identity/user-guide.md"
+      - "scripts/verify-id-audit-7-wallet-identity.py"
+      - "docs/audit/ID-AUDIT-7-WALLET-USER-WORKFLOW.md"
+      - ".github/workflows/identity-id-audit-7.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: identity-id-audit-7-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Mechanical Wallet Identity compatibility
+        run: python3 scripts/verify-id-audit-7-wallet-identity.py
+
+      - name: Wallet static qualification
+        working-directory: wallet/web
+        run: npm run check
+
+      - name: Focused Identity Wallet client and UI tests
+        working-directory: wallet/web
+        run: node --test test/identity-management.test.js test/identity-management-ui.test.js
+
+      - name: Full retained Wallet Web regression
+        working-directory: wallet/web
+        run: npm test
+
+      - name: No signing-secret persistence in Identity surface
+        run: |
+          set -euo pipefail
+          ! grep -R -nE 'privateKey|mnemonic|seedPhrase|localStorage|sessionStorage'             wallet/web/core/identity-management.js wallet/web/identity-management-ui.js

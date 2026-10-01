@@ -1,0 +1,74 @@
+name: 420Identity ID-AUDIT-9
+
+on:
+  pull_request:
+    paths:
+      - "420-indexer/src/identity-testnet-qualification.ts"
+      - "420-indexer/test/identity-testnet-qualification.test.ts"
+      - "420-indexer/scripts/qualify-identity-testnet.mjs"
+      - ".github/workflows/identity-live-testnet.yml"
+      - "scripts/verify-id-audit-9-testnet-readiness.py"
+      - "docs/audit/ID-AUDIT-9-LIVE-EVIDENCE-DRAFT.example.json"
+      - "docs/audit/ID-AUDIT-9-TESTNET-QUALIFICATION.md"
+      - "docs/audit/ID-AUDIT-9-TESTNET-QUALIFICATION.json"
+      - ".github/workflows/identity-id-audit-9.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: identity-id-audit-9-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install 420Indexer dependencies
+        working-directory: 420-indexer
+        run: npm install
+
+      - name: Build live Identity evidence contract
+        working-directory: 420-indexer
+        run: npm run build
+
+      - name: ID-AUDIT-9 hostile evidence-contract tests
+        working-directory: 420-indexer
+        run: node --test --test-concurrency=1 dist/test/identity-testnet-qualification.test.js
+
+      - name: Validate live runner syntax
+        run: node --check 420-indexer/scripts/qualify-identity-testnet.mjs
+
+      - name: Fail-closed official-testnet readiness
+        run: python3 scripts/verify-id-audit-9-testnet-readiness.py
+
+      - name: Retained Identity operator-readiness contract
+        run: python3 scripts/verify-id-audit-8-operator-readiness.py
+
+      - name: Retained Identity Wallet client qualification
+        working-directory: wallet/web
+        run: node --test test/identity-management.test.js test/identity-management-ui.test.js
+
+      - name: Full directly affected 420Indexer regression
+        working-directory: 420-indexer
+        run: npm test
+
+      - name: Ensure live workflow is manual and no secrets are committed
+        run: |
+          set -euo pipefail
+          grep -q 'workflow_dispatch' .github/workflows/identity-live-testnet.yml
+          ! grep -R -nE '0x[0-9a-fA-F]{64}' docs/audit/ID-AUDIT-9-LIVE-EVIDENCE-DRAFT.example.json | grep -v 'REPLACE'

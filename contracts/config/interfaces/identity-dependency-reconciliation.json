@@ -1,0 +1,105 @@
+{
+  "schema": "420-identity-dependency-reconciliation-v1",
+  "status": "IMPLEMENTED_QUALIFICATION_PENDING",
+  "component": "420Identity",
+  "canonical_contract": "contracts/src/apps/Identity420.sol",
+  "canonical_dependency_matrix": "contracts/config/interfaces/dependency-matrix.json",
+  "frozen_interface_layer": "contracts/config/interfaces/genesis-interface-layer.json",
+  "semantics": "dependencies[420Identity] lists REQUIRED runtime/authority dependencies only; OPTIONAL and NOT_APPLICABLE classifications are retained here and are not treated as mandatory runtime gates.",
+  "required_dependencies": [
+    "GovernanceAuthority"
+  ],
+  "classifications": [
+    {
+      "dependency": "ProtocolRegistry",
+      "classification": "OPTIONAL",
+      "runtime_required": false,
+      "disposition": "REMOVE_FROM_REQUIRED_MATRIX",
+      "rationale": "ProtocolRegistry discovers/publishes Identity externally; Identity420 does not resolve Registry state at runtime. Registry publication and code-hash provenance remain deployment/integration concerns."
+    },
+    {
+      "dependency": "GovernanceAuthority",
+      "classification": "REQUIRED",
+      "runtime_required": true,
+      "disposition": "RETAIN_REQUIRED_DIRECT_BINDING",
+      "rationale": "Issuer mutation is governance-controlled through SystemAccess.onlyGovernance and the immutable governanceTimelock. The current canonical Identity contract does not require a second IGovernanceAuthority420 call to preserve that authority boundary."
+    },
+    {
+      "dependency": "PauseRegistry",
+      "classification": "NOT_APPLICABLE",
+      "runtime_required": false,
+      "disposition": "REMOVE_FROM_REQUIRED_MATRIX",
+      "rationale": "Identity420 has no canonical local/global pause action classes. Profile/issuer active state is domain lifecycle, not PauseRegistry state. Adding pause semantics would be a protocol behavior change requiring explicit versioned design."
+    },
+    {
+      "dependency": "CapabilityRegistry",
+      "classification": "NOT_APPLICABLE",
+      "runtime_required": false,
+      "disposition": "REMOVE_FROM_REQUIRED_MATRIX",
+      "rationale": "Identity credentials and trust classes do not grant ambient dApp capabilities. Identity mutation authority is controller, issuer-controller, or governance based."
+    },
+    {
+      "dependency": "SystemSafety",
+      "classification": "NOT_APPLICABLE",
+      "runtime_required": false,
+      "disposition": "REMOVE_FROM_REQUIRED_MATRIX",
+      "rationale": "Current Identity v3 defines no SystemSafety action classes and has no custody/value settlement path. Adopting shared safety gating would require an explicit versioned behavior decision."
+    },
+    {
+      "dependency": "GenesisInitialization",
+      "classification": "NOT_APPLICABLE",
+      "runtime_required": false,
+      "disposition": "REMOVE_FROM_REQUIRED_MATRIX",
+      "rationale": "Identity420 does not implement IGenesisInitializable420. Genesis constructor/immutable/storage materialization is owned by the predeploy pipeline and ID-AUDIT-4/5, not by a runtime shared dependency."
+    },
+    {
+      "dependency": "Migration",
+      "classification": "OPTIONAL",
+      "runtime_required": false,
+      "disposition": "REMOVE_FROM_REQUIRED_MATRIX",
+      "rationale": "Current Identity has no proxy/migration execution path. Historical identity must remain immutable; future implementation migration/provenance may compose with IMigration420 through an explicit later version."
+    },
+    {
+      "dependency": "SignedEnvelope",
+      "classification": "NOT_APPLICABLE",
+      "runtime_required": false,
+      "disposition": "REMOVE_FROM_REQUIRED_MATRIX",
+      "rationale": "Current Identity mutations are direct msg.sender transactions and do not accept signed off-chain envelopes or meta-transaction authorization."
+    },
+    {
+      "dependency": "ReplayProtection",
+      "classification": "NOT_APPLICABLE",
+      "runtime_required": false,
+      "disposition": "REMOVE_FROM_REQUIRED_MATRIX",
+      "rationale": "There is no signed-envelope/message replay surface in Identity420. Credential IDs are unique on-chain objects; EVM transaction nonces remain outside this shared interface."
+    },
+    {
+      "dependency": "ChainContext",
+      "classification": "NOT_APPLICABLE",
+      "runtime_required": false,
+      "disposition": "REMOVE_FROM_REQUIRED_MATRIX",
+      "rationale": "Identity420 has no cross-chain signed domain or external message acceptance requiring a runtime chain-context dependency. Deployment/network identity remains a testnet qualification concern."
+    },
+    {
+      "dependency": "MetadataCommitment",
+      "classification": "OPTIONAL",
+      "runtime_required": false,
+      "disposition": "REMOVE_FROM_REQUIRED_MATRIX",
+      "rationale": "Identity stores opaque metadataHash/claimHash commitments canonically. External schema/reference validation may compose later, but canonical profile/credential mutation does not require IMetadataCommitment420."
+    }
+  ],
+  "authority_invariants": [
+    "GovernanceTimelock remains the sole governance mutation authority for issuer configuration.",
+    "Profile credentials do not imply CapabilityRegistry authorization.",
+    "Optional Registry/metadata/migration integrations may not become Identity state authority.",
+    "Identity direct-call mutation paths do not claim SignedEnvelope or ReplayProtection guarantees.",
+    "Genesis predeploy materialization remains required even though IGenesisInitializable420 is not a runtime dependency."
+  ],
+  "owned_followups": {
+    "artifact_and_generated_reference": "ID-AUDIT-4",
+    "predeploy_materialization": "ID-AUDIT-5",
+    "derived_service_integration": "ID-AUDIT-6",
+    "testnet_live_dependency_verification": "ID-AUDIT-9",
+    "final_system_reconciliation": "ID-AUDIT-10"
+  }
+}

@@ -85,9 +85,10 @@ contract ComputeStakeWorkerCollateral420Test {
         bytes32 nodeId = nodes.register(providerId, keccak256("node"), keccak256("endpoint"), uint64(block.timestamp + 30 days));
         vm.prank(OPERATOR);
         nodes.activate(nodeId);
+        bytes32 computeClass = resources.CPU_GENERAL();
         vm.prank(OPERATOR);
         bytes32 resourceId = resources.register(
-            nodeId, resources.CPU_GENERAL(), keccak256("hardware"), keccak256("runtime"), keccak256("cap"), 8
+            nodeId, computeClass, keccak256("hardware"), keccak256("runtime"), keccak256("cap"), 8
         );
         vm.prank(OPERATOR);
         resources.activate(resourceId);

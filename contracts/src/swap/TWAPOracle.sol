@@ -41,7 +41,7 @@ contract TWAPOracle is GenesisResidentAccess420 {
         bool enabled;
     }
 
-    /// @dev Preserved public compatibility surface consumed by TWAPOracleSourceAdapter420.
+    /// @dev Preserved raw compatibility getter; security-sensitive consumers use readObservation/referencePrice.
     struct Observation {
         uint64 timestamp;
         uint192 priceX96;
@@ -197,6 +197,9 @@ contract TWAPOracle is GenesisResidentAccess420 {
                 || observationWindowSeconds < config.minWindowSeconds
                 || observationWindowSeconds > config.maxWindowSeconds
         ) revert ObservationUnavailable();
+
+        (,,,,, bytes32 currentSourceHash) = _canonicalSource(marketId);
+        if (currentSourceHash != sourceHash) revert ObservationUnavailable();
 
         uint256 expiry = uint256(observation.timestamp) + uint256(config.maxStalenessSeconds);
         if (block.timestamp > expiry) revert ObservationStale();

@@ -226,11 +226,11 @@
       "constructor_strategy": "DIRECT_GENESIS_IMMUTABLE_MATERIALIZATION",
       "name": "Identity420",
       "notes": "ID-AUDIT-5: pinned Solidity 0.8.24/Cancun runtime materialized from retained ID-AUDIT-4 artifact; governanceTimelock immutable patched to 0x0429 from compiler immutableReferences; mutable Genesis storage is explicitly empty. Live-chain verification remains ID-AUDIT-9.",
-      "source": "apps/Identity420.sol",
-      "status": "ARTIFACT_READY",
-      "runtime_code_hash": "0xda0fcd565d7aea6590b3e0ec468f7b99af50138b62527e770ca367a57e6cfd86",
       "predeploy_state": "contracts/config/predeploy/Identity420-predeploy-state.json",
-      "source_blob_sha1": "9d6bbfecf6cbb406312138acc735c5390513cd5a"
+      "runtime_code_hash": "0xda0fcd565d7aea6590b3e0ec468f7b99af50138b62527e770ca367a57e6cfd86",
+      "source": "apps/Identity420.sol",
+      "source_blob_sha1": "9d6bbfecf6cbb406312138acc735c5390513cd5a",
+      "status": "ARTIFACT_READY"
     },
     {
       "address": "0x0000000000000000000000000000000000000437",

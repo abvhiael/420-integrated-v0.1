@@ -138,13 +138,13 @@
     },
     {
       "address": "0x0000000000000000000000000000000000000436",
+      "artifact_status": "ID_AUDIT_5_ARTIFACT_READY",
       "deployment": "GENESIS_SYSTEM_ADDRESS",
       "name": "Identity420",
+      "predeploy_state": "contracts/config/predeploy/Identity420-predeploy-state.json",
       "runtime_artifact": "contracts/artifacts/Identity420.json",
       "runtime_code_hash": "0xda0fcd565d7aea6590b3e0ec468f7b99af50138b62527e770ca367a57e6cfd86",
-      "predeploy_state": "contracts/config/predeploy/Identity420-predeploy-state.json",
-      "source_blob_sha1": "9d6bbfecf6cbb406312138acc735c5390513cd5a",
-      "artifact_status": "ID_AUDIT_5_ARTIFACT_READY"
+      "source_blob_sha1": "9d6bbfecf6cbb406312138acc735c5390513cd5a"
     },
     {
       "address": "0x0000000000000000000000000000000000000437",

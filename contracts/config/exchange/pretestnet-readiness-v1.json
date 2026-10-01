@@ -1,0 +1,26 @@
+{
+  "schema":"420-exchange-pretestnet-readiness-v1",
+  "step":"PRE-11",
+  "status":"PRETESTNET_ONLY",
+  "liveGates":[
+    {"id":"swapSubmission","requiredState":"DISABLED_PRETESTNET","ownerStep":"PRE-06","resolved":false},
+    {"id":"orderSigning","requiredState":"DISABLED_PRETESTNET","ownerStep":"PRE-07","resolved":false},
+    {"id":"orderPublication","requiredState":"DISABLED_PRETESTNET","ownerStep":"PRE-07","resolved":false},
+    {"id":"orderWithdrawal","requiredState":"DISABLED_PRETESTNET","ownerStep":"PRE-08","resolved":false},
+    {"id":"orderCancellation","requiredState":"DISABLED_PRETESTNET","ownerStep":"PRE-08","resolved":false},
+    {"id":"bridgeSubmission","requiredState":"DISABLED_PRETESTNET","ownerStep":"PRE-09","resolved":false},
+    {"id":"bridgeProofAcceptance","requiredState":"DISABLED_PRETESTNET","ownerStep":"PRE-09","resolved":false}
+  ],
+  "productionDependencies":[
+    "resolved chain/deployment manifest",
+    "qualified RPC endpoint",
+    "qualified Exchange V13 read API",
+    "qualified 420Indexer",
+    "externally injected PRE-05 quote signer",
+    "qualified order signature verifier",
+    "qualified withdrawal authorizer",
+    "live bridge proof provider/verifier"
+  ],
+  "authority":"READINESS_EVIDENCE_ONLY",
+  "note":"No LIVE GATE is enabled by this manifest."
+}

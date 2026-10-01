@@ -1,6 +1,6 @@
 # ID-AUDIT-2 — contract invariant and adversarial qualification
 
-**Status:** IMPLEMENTED — Level 1 qualification pending exact-head CI  
+**Status:** COMPLETE — Level 1 qualified  
 **Repository:** `abvhiael/420-integrated-v0.1`  
 **Working PR:** #438  
 **Canonical roadmap:** `docs/audit/420IDENTITY-AUDIT-REMEDIATION-ROADMAP.md`
@@ -110,11 +110,32 @@ Level 3 repository-wide reconciliation remains intentionally deferred to
 
 ## Exact-head qualification evidence
 
-Pending exact-head CI for the implementation/evidence candidate containing this record.
+The retained ID-AUDIT-2 implementation was qualified on the accumulated exact head
+`d008d39542019a213ed25f8085c3b94fcfee5a29` by the focused Identity Level 1 workflow.
+
+- **420Identity ID-AUDIT-3** run `36812082634` / run number 3 — **SUCCESS**
+  - `Identity420Audit.t.sol` — **18 passed / 0 failed / 0 skipped**;
+  - `Identity420Compatibility.t.sol` — **6 passed / 0 failed / 0 skipped**;
+  - `RegistryIdentityNames420.t.sol` — **10 passed / 0 failed / 0 skipped**;
+  - affected `Identity420.sol` build — success;
+  - exact-head checkout/assertion — success.
+- **420Docs Qualification** run `36812082637` / run number 3710 — **SUCCESS**.
+
+The ID-AUDIT-3 changes after the ID-AUDIT-2 test implementation changed dependency configuration,
+verification workflow and documentation, but did not alter the production Identity contract or the
+ID-AUDIT-2 test source. The accumulated exact-head run therefore supplies stronger retained
+qualification evidence for the unchanged ID-AUDIT-2 invariant suite.
+
+Every canonical ID-AUDIT-2 invariant is mapped to executable coverage above and all three retained
+Identity/Names suites passed without skips or failures.
+
+No Level 2 milestone is required by ID-AUDIT-2. Level 3 remains deferred to ID-AUDIT-10.
+
+This closeout is evidence-only and does not recursively invalidate the qualified implementation SHA.
 
 ## Completion state
 
-**PENDING LEVEL 1 EXACT-HEAD QUALIFICATION**
+**ID-AUDIT-2 — COMPLETE.**
 
 Next canonical step after successful closeout:
 

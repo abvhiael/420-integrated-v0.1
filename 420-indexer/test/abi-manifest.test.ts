@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { id } from 'ethers';
 import type { Hex } from '../src/chain-source.js';
-import { buildGenesisDescriptorManifest420, descriptorsFromArtifact420 } from '../src/abi-manifest.js';
+import { GENESIS_PROTOCOL_BY_CONTRACT_420, buildGenesisDescriptorManifest420, descriptorsFromArtifact420 } from '../src/abi-manifest.js';
 
 const predeploy = { name: 'Names420', address: '0x0000000000000000000000000000000000000435' as Hex, artifact: 'contracts/artifacts/Names420.json' };
 
@@ -41,4 +41,17 @@ test('fails closed on ABI event types outside the frozen decoder surface', () =>
     abi: [{ type: 'event' as const, name: 'Complex', inputs: [{ name: 'value', type: 'string', indexed: false }] }]
   };
   assert.throws(() => descriptorsFromArtifact420('420Names', predeploy, unsupported), /unsupported event field string/);
+});
+
+
+test('maps every canonical Civic governance contract into the 420Governance protocol', () => {
+  for (const contractName of [
+    'CivicConstitution420',
+    'CivicProposalRegistry420',
+    'CivicElectorateRegistry420',
+    'CivicVoting420',
+    'CivicGovernor420'
+  ]) {
+    assert.equal(GENESIS_PROTOCOL_BY_CONTRACT_420[contractName], '420Governance');
+  }
 });

@@ -7,6 +7,8 @@ import "./IComputeScientificVerificationAdapter420.sol";
 /// @dev This protocol intentionally samples four committed observations instead of recomputing the full dataset.
 ///      PASS is evidence that the sampled test passed under this exact protocol, not proof of exact global equality.
 contract ComputeSampledMeanScientificAdapter420 is IComputeScientificVerificationAdapter420 {
+    bytes32 public constant ADAPTER_KIND =
+        keccak256("420/CMP/VERIFICATION_ADAPTER/SCIENTIFIC/V1");
     bytes32 public constant WORKLOAD_TYPE =
         keccak256("420/CMP/WORKLOAD/SAMPLED_DATASET_MEAN/V1");
     bytes32 public constant PROFILE_ID =

@@ -14,6 +14,7 @@ interface VmGovernanceAudit2 {
     function prank(address) external;
     function expectRevert(bytes4) external;
     function roll(uint256) external;
+    function warp(uint256) external;
 }
 
 contract MockAudit2Authority420 {
@@ -189,6 +190,38 @@ contract GovernanceAudit2Hardening420Test {
         (bool secondOk,) =
             address(timelock).call(abi.encodeCall(timelock.activateCivicAuthority, (address(governor))));
         require(!secondOk, "authority rebound");
+    }
+
+    function testProposalCreationRejectsBlockNumberOverflow() public {
+        VoteStack memory s = _voteStack(100, 5000, 6000);
+        vm.roll(uint256(type(uint64).max) - 1);
+
+        vm.prank(ALICE);
+        vm.expectRevert(CivicGovernor420.BlockNumberOverflow.selector);
+        s.governor.createProposal(
+            CivicIds420.ProposalClass.G1,
+            keccak256("overflow metadata"),
+            keccak256("overflow actions")
+        );
+    }
+
+    function testTimelockSchedulingRejectsTimestampOverflow() public {
+        GovernanceTimelock timelock = new GovernanceTimelock(address(this));
+        vm.warp(uint256(type(uint64).max) - uint256(timelock.G1_DELAY()) + 1);
+
+        (bool ok,) = address(timelock).call(
+            abi.encodeCall(
+                timelock.schedule,
+                (
+                    keccak256("timestamp-overflow"),
+                    address(0xBEEF),
+                    0,
+                    bytes(""),
+                    GovernanceTimelock.Class.G1
+                )
+            )
+        );
+        require(!ok, "timestamp overflow schedule succeeded");
     }
 
     function testFuzzLifecycleTransitionMatrix(uint8 fromRaw, uint8 toRaw) public {

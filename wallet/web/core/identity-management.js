@@ -172,6 +172,7 @@ export function createIdentity420Client({provider, identityAddress, namesAddress
     await provider.request('eth_call',[{from:controller,to:identity,data},'latest']);
     await provider.request('eth_estimateGas',[{from:controller,to:identity,data}]);
     if(revalidate) await revalidate();
+    await verifySession();
     const txHash=await provider.request('eth_sendTransaction',[{from:controller,to:identity,data,value:'0x0'}]);
     checkedHex(txHash,'transaction hash',32);
     return {txHash:txHash.toLowerCase()};

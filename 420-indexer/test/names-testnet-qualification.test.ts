@@ -101,7 +101,7 @@ test('accepts complete commit/register/renew/resolution/reverse/transfer journey
 test('rejects incomplete or semantically stale lifecycle evidence',()=>{
   assert.throws(()=>validateNamesWorkflowEvidence420({...workflow,acceptTx:'0x1234'}),/acceptTx/);
   assert.throws(()=>validateNamesWorkflowEvidence420({...workflow,finalOwner:workflow.owner}),/final owner/);
-  assert.throws(()=>validateNamesWorkflowEvidence420({...workflow,finalResolvedAddress:workflow.owner}),/final resolution/);
+  assert.throws(()=>validateNamesWorkflowEvidence420({...workflow,finalResolvedAddress:workflow.owner}),/reset resolution to recipient/);
   assert.throws(()=>validateNamesWorkflowEvidence420({...workflow,finalProfileId:'0x'+'01'.repeat(32)}),/profileId/);
   assert.throws(()=>validateNamesWorkflowEvidence420({...workflow,reverseAfterTransfer:workflow.labelHash}),/reverse mapping/);
 });

@@ -386,7 +386,16 @@ Exit: integration evidence tied to exact candidate SHA.
 
 ### REG-AUDIT-8 — production-equivalent testnet deployment
 
-Deploy the reconciled Registry candidate and record:
+**Execution prerequisite / hold condition:** REG-AUDIT-8 cannot be completed until the official production-equivalent chain-420 testnet is actually running with approved non-placeholder RPC/service endpoints and the reconciled Registry candidate is deployed or materialized there at its canonical address. Repository-only CI, local simulations, synthetic fixtures, readiness checks, or placeholder infrastructure do **not** satisfy this step.
+
+While testnet infrastructure remains `PLANNED` / `UNPROVISIONED`, public endpoints remain placeholders, or no immutable live deployment/recovery evidence exists:
+
+- REG-AUDIT-8 status remains **NOT YET COMPLETE / BLOCKED ON LIVE TESTNET**;
+- repository-readiness tooling and evidence may be prepared and qualified, but must not be represented as live deployment qualification;
+- `REG-BLK-003` remains open;
+- REG-AUDIT-9 must **not** begin.
+
+Once the production-equivalent testnet is running, deploy/verify the reconciled Registry candidate and record:
 
 - chain ID/environment
 - exact source/release SHA

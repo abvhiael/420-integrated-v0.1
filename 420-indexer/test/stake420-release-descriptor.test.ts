@@ -164,3 +164,11 @@ test('matching canonical Stake topic from the wrong contract is rejected', () =>
   wrong.address = '0x0000000000000000000000000000000000000999';
   assert.throws(() => registry.decode(wrong), /contract mismatch/);
 });
+
+
+test('Go Stake activity classifier is pinned to the same descriptor topics', () => {
+  const goSource = readFileSync('../indexer/api/stake.go','utf8');
+  for (const descriptor of descriptorsFromStakeRelease420(manifest, artifacts)) {
+    assert.equal(goSource.includes(descriptor.topic0), true, 'Go Stake classifier missing topic '+descriptor.signature);
+  }
+});

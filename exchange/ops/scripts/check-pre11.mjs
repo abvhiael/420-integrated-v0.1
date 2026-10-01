@@ -21,7 +21,7 @@ for(const file of [
  'docs/420EXCHANGE-PRE-11-OPERATIONS-RUNBOOK.md'
 ])if(!fs.existsSync(path.join(repo,file)))throw new Error('PRE-11 missing '+file);
 for(const [file,markers] of Object.entries({
- 'exchange/web/test/pre03-swap-review.test.js':['endpoint','replay'],
+ 'exchange/web/test/executable-quote-intake.test.js':['endpoint','replay'],
  'exchange/web/test/pre06-guarded-swap-orchestrator.test.js':['stale','approval'],
  'exchange/web/test/pre09-bridge-lifecycle.test.js':['replay','wrong beneficiary'],
  'exchange/quote-service/test/authentication.test.js':['forged','replay'],

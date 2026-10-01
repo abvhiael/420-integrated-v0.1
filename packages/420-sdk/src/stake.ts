@@ -87,8 +87,12 @@ export function createStakeExplorerClient420(input: {
         const expectedAddress = record.eventName === 'RewardApplied' ? STAKE_REWARD_CONTROLLER_420 : STAKE_VALIDATOR_REGISTRY_420;
         if (record.contractAddress.toLowerCase() !== expectedAddress) throw new Error('Stake activity canonical contract mismatch');
         if (!FINALITY_420.has(record.finality)) throw new Error('Stake activity finality invalid');
-        if (record.blockNumber <= page.meta.finalizedHeight && record.finality !== 'FINALIZED') throw new Error('Stake finalized event mislabeled');
-        if (record.blockNumber > page.meta.safeHeight && record.finality !== 'HEAD') throw new Error('Stake head event mislabeled');
+        const expectedFinality: StakeFinality420 = record.blockNumber <= page.meta.finalizedHeight
+          ? 'FINALIZED'
+          : record.blockNumber <= page.meta.safeHeight
+            ? 'SAFE'
+            : 'HEAD';
+        if (record.finality !== expectedFinality) throw new Error('Stake activity finality inconsistent');
       }
       return page;
     }

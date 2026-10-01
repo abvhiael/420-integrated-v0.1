@@ -2,6 +2,7 @@
 pragma solidity ^0.8.24;
 
 import "../src/system/ValidatorRegistry.sol";
+import "./helpers/GenesisMocks420.sol";
 
 interface VmValidatorEligibility420 {
     function prank(address msgSender) external;
@@ -16,7 +17,8 @@ contract ValidatorEligibility420Test {
     address internal constant SYSTEM_CALLER = 0x000000000000000000000000000000000000043C;
 
     function testCooldownValidatorIsBondedButNotSelectionEligible() public {
-        ValidatorRegistry registry = new ValidatorRegistry(address(this));
+        GenesisMockEnvironment420 env = new GenesisMockEnvironment420();
+        ValidatorRegistry registry = new ValidatorRegistry(address(this), address(env.registry()), keccak256("eligibility-test"));
         registry.bindConsensusSystemCaller(SYSTEM_CALLER);
 
         bytes32 id = keccak256("cooldown-selection-eligibility");

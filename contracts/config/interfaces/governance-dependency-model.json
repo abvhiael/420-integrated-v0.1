@@ -1,0 +1,175 @@
+{
+  "schema": "420-governance-dependency-model-v1",
+  "status": "CANONICAL_FOR_GOV_AUDIT_1",
+  "app": "420Governance",
+  "implementation_family": "420 Civic",
+  "public_compatibility_contract": "Governance420",
+  "execution_authority": "GovernanceTimelock",
+  "normative_shared_runtime_dependencies": [],
+  "canonical_internal_runtime_graph": {
+    "GovernanceTimelock": [],
+    "CivicConstitution420": ["GovernanceTimelock"],
+    "CivicProposalRegistry420": ["GovernanceTimelock"],
+    "CivicElectorateRegistry420": ["GovernanceTimelock", "ICivicElectorateSource420"],
+    "CivicVoting420": ["CivicProposalRegistry420", "CivicElectorateRegistry420"],
+    "CivicGovernor420": [
+      "GovernanceTimelock",
+      "CivicConstitution420",
+      "CivicProposalRegistry420",
+      "CivicElectorateRegistry420",
+      "CivicVoting420"
+    ],
+    "Governance420": ["GovernanceTimelock", "CivicGovernor420 compatibility pointer only"]
+  },
+  "shared_interface_decisions": [
+    {
+      "interface": "IGenesisResident420",
+      "classification": "NOT_APPLICABLE",
+      "basis": "The canonical Civic contracts implement I420System and use an explicit internal module graph; they do not consume IGenesisResident420 at runtime."
+    },
+    {
+      "interface": "IProtocolRegistry420",
+      "classification": "OPTIONAL_INTEGRATION",
+      "basis": "Registry publication/discovery is required for deployment and consumer discovery where modules are registry-resolved, but no Civic contract calls ProtocolRegistry during proposal, voting, finalization, queue or execution."
+    },
+    {
+      "interface": "ICanonicalAssetRegistry420",
+      "classification": "NOT_APPLICABLE",
+      "basis": "Civic governance does not identify or custody assets. Governed target protocols retain their own canonical asset validation."
+    },
+    {
+      "interface": "IGovernanceAuthority420",
+      "classification": "NOT_APPLICABLE",
+      "basis": "420 Governance is the provider of governance authority rather than a consumer of the shared governance-authority interface. The canonical mutation/execution identity is GovernanceTimelock."
+    },
+    {
+      "interface": "IPauseRegistry420",
+      "classification": "NOT_APPLICABLE",
+      "basis": "No canonical Civic pause or emergency-council authority is defined. Adding one would create a new governance override."
+    },
+    {
+      "interface": "IHealthRegistry420",
+      "classification": "CONSUMER_LAYER",
+      "basis": "Wallet, Indexer, Status and operator surfaces may present health observations; Civic proposal validity and outcomes do not depend on a health registry."
+    },
+    {
+      "interface": "IOracle420",
+      "classification": "NOT_APPLICABLE",
+      "basis": "Canonical voting and execution contain no oracle-derived eligibility, tally or execution condition."
+    },
+    {
+      "interface": "IIdentityCredential420",
+      "classification": "NOT_APPLICABLE",
+      "basis": "Voting weight is resolved only through the frozen electorate source captured for the proposal; Civic does not independently consume Identity credentials."
+    },
+    {
+      "interface": "INames420",
+      "classification": "NOT_APPLICABLE",
+      "basis": "Names are presentation/discovery metadata and do not establish proposer, voter or execution authority."
+    },
+    {
+      "interface": "ISettlementHealth420",
+      "classification": "NOT_APPLICABLE",
+      "basis": "Governance does not settle value. Governed target protocols own settlement-health gates."
+    },
+    {
+      "interface": "IFeeQuote420",
+      "classification": "CONSUMER_LAYER",
+      "basis": "Wallets may estimate network fees for Governance transactions, but Civic contracts do not consume a fee-quote authority."
+    },
+    {
+      "interface": "ISigningDomain420",
+      "classification": "NOT_APPLICABLE",
+      "basis": "The current Civic core uses direct msg.sender-authorized on-chain transactions and defines no relayed signed-envelope execution path."
+    },
+    {
+      "interface": "IAccounting420",
+      "classification": "NOT_APPLICABLE",
+      "basis": "Civic tracks proposal/vote lifecycle only and does not own protocol accounting or custody state."
+    },
+    {
+      "interface": "ICapabilityRegistry420",
+      "classification": "NOT_APPLICABLE",
+      "basis": "Civic voting authority comes from frozen electorate sources; reusable Wallet/application capabilities must not manufacture governance voting power."
+    },
+    {
+      "interface": "ICustodyVault420",
+      "classification": "NOT_APPLICABLE",
+      "basis": "Governance may authorize calls into Treasury/Vault, but Civic has no custody or release authority of its own."
+    },
+    {
+      "interface": "IGenesisInitializable420",
+      "classification": "REQUIRED_INDIRECT",
+      "basis": "Genesis deployment must deterministically materialize constructor/immutable/state bindings, but current Civic contracts do not consume the shared initialization interface at runtime."
+    },
+    {
+      "interface": "IMigration420",
+      "classification": "REQUIRED_INDIRECT",
+      "basis": "Migration/version provenance is a deployment and governance-release concern. The current Civic contracts expose no runtime migration interface."
+    },
+    {
+      "interface": "ISystemSafety420",
+      "classification": "NOT_APPLICABLE",
+      "basis": "No global system-safety bypass, pause or emergency mutation authority is defined for Civic governance; safety changes must use canonical governance/protocol mechanisms."
+    },
+    {
+      "interface": "ISignedEnvelope420",
+      "classification": "NOT_APPLICABLE",
+      "basis": "No off-chain signed governance command or relayed envelope path exists in the canonical Civic core."
+    },
+    {
+      "interface": "IReplayProtection420",
+      "classification": "LOCAL_MECHANISM",
+      "basis": "Replay resistance is local: proposal IDs include proposer nonces and frozen commitments, ballots are one-time per voter/house, proposal lifecycle is monotonic, and timelock operation IDs are single-use."
+    },
+    {
+      "interface": "IExternalDependencyRegistry420",
+      "classification": "NOT_APPLICABLE",
+      "basis": "Civic proposal validity and vote outcomes do not depend on replaceable external providers."
+    },
+    {
+      "interface": "IRiskLimits420",
+      "classification": "NOT_APPLICABLE",
+      "basis": "Governance has constitutional quorum/approval/delay rules rather than asset/protocol risk-limit consumption."
+    },
+    {
+      "interface": "IAssetCapabilities420",
+      "classification": "NOT_APPLICABLE",
+      "basis": "Civic itself does not move assets; target protocols validate their own asset capabilities."
+    },
+    {
+      "interface": "IMetadataCommitment420",
+      "classification": "LOCAL_MECHANISM",
+      "basis": "Proposal metadataHash and actionsHash are immutable local commitments. Civic does not consume the shared metadata-commitment interface."
+    },
+    {
+      "interface": "IChainContext420",
+      "classification": "CONSUMER_LAYER",
+      "basis": "Wallet/client/deployment layers must verify chain identity. The current Civic core has no signed cross-chain command requiring an on-chain ChainContext dependency."
+    }
+  ],
+  "cancellation": {
+    "civic_proposal_cancellation_supported": false,
+    "active": "NOT_CANCELLABLE",
+    "passed": "NOT_CANCELLABLE",
+    "queued": "NOT_CANCELLABLE",
+    "decision": "Canonical Civic v1 proposals are immutable after creation and have no cancellation path. A new proposal may change future protocol state but may not cancel or rewrite another Civic proposal lifecycle.",
+    "bootstrap_timelock_cancel": "LEGACY_BOOTSTRAP_ONLY_BEFORE_CIVIC_ACTIVATION",
+    "post_activation_timelock_cancel": "DISABLED",
+    "cancelled_enum": "RESERVED_NON_CANONICAL_STATE",
+    "indexer_semantics": "No CivicProposalCancelled event is canonical for v1. Derived consumers must not synthesize cancellation from absent events or from raw timelock legacy operations."
+  },
+  "invariants": [
+    "GovernanceTimelock is the sole Civic execution and governance-mutation authority where SystemAccess applies.",
+    "Governance420 remains compatibility-only and cannot create proposals, cast votes, finalize results, queue actions or execute governance.",
+    "The shared Genesis interface catalogue does not create runtime dependencies that the Civic contracts do not consume.",
+    "No pause, emergency council, capability, Registry, oracle, identity, custody or system-safety dependency may silently become Civic voting or execution authority.",
+    "Civic proposals cannot be cancelled in v1 after creation; legacy bootstrap timelock cancellation cannot be used after Civic authority activation.",
+    "Replay resistance remains local to proposal IDs, ballots, lifecycle state and timelock operation identity."
+  ],
+  "follow_up": {
+    "GOV-AUDIT-2": "Harden the canonical lifecycle and authority graph under this frozen dependency/cancellation model.",
+    "GOV-AUDIT-4": "Reconcile Indexer descriptors and lifecycle projections to canonical Civic events; no v1 Civic cancellation event is expected.",
+    "GOV-AUDIT-6": "Implement deterministic deployment/Registry discovery for the Civic suite without promoting ProtocolRegistry to a Civic runtime authority."
+  }
+}

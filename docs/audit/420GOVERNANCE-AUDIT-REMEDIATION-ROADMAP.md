@@ -52,6 +52,8 @@ A machine-readable dependency model and architecture decision define one canonic
 
 ## GOV-AUDIT-2 — Civic contract hardening and lifecycle completion
 
+**Status: COMPLETE — qualified at implementation SHA `28f32c3c090f2b7b1020dafa2ed8a4bb5ee308c7`; evidence: `docs/audit/GOV-AUDIT-2-QUALIFICATION.md`.**
+
 ### Purpose
 Make the canonical Civic contract family internally complete under the GOV-AUDIT-1 authority model.
 

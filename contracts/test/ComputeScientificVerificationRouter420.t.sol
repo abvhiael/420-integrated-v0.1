@@ -293,6 +293,12 @@ contract ComputeScientificVerificationRouter420Test {
         (bool ok,) = address(router).call(abi.encodeCall(router.evaluate, (jobId, wrongSeedEvidence)));
         require(!ok, "wrong seed accepted");
 
+        bytes memory wrongOutputEvidence = abi.encode(
+            seed, root, count, indices, values, proofs, claimed + 1
+        );
+        (ok,) = address(router).call(abi.encodeCall(router.evaluate, (jobId, wrongOutputEvidence)));
+        require(!ok, "worker output preimage mismatch accepted");
+
         proofs[0][0] = keccak256("tampered-proof");
         bytes memory badProofEvidence = abi.encode(seed, root, count, indices, values, proofs, claimed);
         (ok,) = address(router).call(abi.encodeCall(router.evaluate, (jobId, badProofEvidence)));

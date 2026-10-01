@@ -1,6 +1,20 @@
 name: 420Stake STAKE-AUDIT-5
 
 on:
+  push:
+    paths:
+      - 'wallet/web/core/stake-management.js'
+      - 'wallet/web/stake-management-ui.js'
+      - 'wallet/web/index.html'
+      - 'wallet/web/runtime-config.json'
+      - 'wallet/web/runtime-config.example.json'
+      - 'wallet/web/scripts/generate-runtime-config.mjs'
+      - 'wallet/web/test/stake-management.test.js'
+      - 'wallet/web/test/stake-management-ui.test.js'
+      - 'wallet/web/test/runtime-config-generator.test.js'
+      - 'wallet/deployment-inventory.json'
+      - 'scripts/verify-stake-audit-5-wallet.py'
+      - '.github/workflows/stake-audit-5.yml'
   pull_request:
     paths:
       - 'wallet/web/core/stake-management.js'

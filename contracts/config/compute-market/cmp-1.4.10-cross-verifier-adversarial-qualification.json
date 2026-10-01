@@ -1,0 +1,201 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-1.4.10.CrossVerifierAdversarialQualification.v1",
+  "step": "CMP-1.4.10",
+  "title": "Cross-verifier adversarial qualification",
+  "canonical_definition": "Cover forged/replayed verdicts, stale policy, wrong job/worker/attempt, verifier collusion, authority drift and failure atomicity.",
+  "user_shorthand": "False verifier, colluding verifier, replayed verdict, altered output, wrong worker, wrong job, stale policy, etc.",
+  "base_main_sha": "9465fba9249f41a879e227c09f362f4f6a3f6c87",
+  "qualification_level": 2,
+  "roadmap_order": {
+    "predecessor": "CMP-1.4.9",
+    "predecessor_complete_on_base": true,
+    "earlier_open_step": "CMP-1.4.4",
+    "note": "CMP-1.4.4 remains open. CMP-1.4.10 adversarially qualifies the currently implemented verifier surfaces but does not retroactively claim the separate signed-verdict minimum-binding step complete."
+  },
+  "implementation": {
+    "production_contract_changes": false,
+    "strengthened_test": "contracts/test/ComputeVerificationPolicyBinding420.t.sol::testStaleRevisionAndDuplicateBindingFailClosed",
+    "rationale": "CMP-1.4.10 is an adversarial qualification step. Existing production guards are retained; the only code change is stronger failure-atomicity assertion coverage for stale/duplicate policy binding."
+  },
+  "threat_matrix": [
+    {
+      "threat": "forged_or_false_verifier",
+      "evidence": [
+        "contracts/test/ComputeJobIntegerProfileHostile420.t.sol::testHostileVerdictFieldsAndSignaturesFailWithoutMutation",
+        "contracts/test/ComputeJobVerifierIndependenceGate420.t.sol::testNoAppointmentAndUnauthorizedSelectionFailAtActualVerdictGate",
+        "contracts/test/ComputeIndependentVerifierSelector420.t.sol::testWorkerOwnerPayerVerifierAndOutsiderCannotChooseVerifier"
+      ]
+    },
+    {
+      "threat": "replayed_or_cross_domain_verdict",
+      "evidence": [
+        "contracts/test/ComputeJobIntegerProfileHostile420.t.sol::testExpiryReplayAndDomainBinding",
+        "contracts/test/ComputeJobIntegerProfileHostile420.t.sol::testCanonicalSignatureAcceptanceAndDuplicateRejection"
+      ]
+    },
+    {
+      "threat": "wrong_job_result_assignment_or_altered_output",
+      "evidence": [
+        "contracts/test/ComputeJobIntegerProfileHostile420.t.sol::testHostileVerdictFieldsAndSignaturesFailWithoutMutation",
+        "contracts/test/ComputeJobIntegerProfileHostile420.t.sol::testProfileInputOutputReceiptAndSignatureOnlyBypassFailClosed",
+        "contracts/test/ComputeJobProfileEvidenceIntegrity420.t.sol::testCrossJobEvidenceAndProfileSubstitutionsFailWithoutStateChanges",
+        "contracts/test/ComputeDeterministicVerificationRouter420.t.sol::testTamperedInputAndOutputFailClosedAgainstCanonicalCommitments",
+        "contracts/test/ComputeScientificVerificationRouter420.t.sol::testWrongSeedProofOrWorkerOutputFailsClosed"
+      ]
+    },
+    {
+      "threat": "wrong_worker_or_attempt",
+      "evidence": [
+        "contracts/test/ComputeJobWorkerSnapshotEvidence420.t.sol::testWrongWorkerRevisionOrResourceOperatorFailsClosed",
+        "contracts/test/ComputeJobWorkerSnapshotEvidence420.t.sol::testCrossJobAndCrossWorkerExecutionSignaturesCannotReplay",
+        "contracts/test/ComputeJobWorkerSnapshotEvidence420.t.sol::testStaleRevisionAndDuplicateAttemptReplayFailClosed",
+        "contracts/test/ComputeJobWorkerSnapshotEvidence420.t.sol::testWrongAttemptTransitionSignatureAndDuplicateCloseFailClosed",
+        "contracts/test/ComputeJobIntegerProfileHostile420.t.sol::testHostileVerdictFieldsAndSignaturesFailWithoutMutation"
+      ],
+      "note": "The signed verdict binds the canonical assignmentRef; WorkerSnapshot tests separately prove cross-worker/cross-attempt replay rejection on the authoritative execution evidence."
+    },
+    {
+      "threat": "stale_or_mutated_policy",
+      "evidence": [
+        "contracts/test/ComputeVerificationPolicyBinding420.t.sol::testOnlyOwnerCanBindAndExactCurrentVerificationPolicyIsRequired",
+        "contracts/test/ComputeVerificationPolicyBinding420.t.sol::testLaterPolicyRevisionCannotRewriteAcceptedJob",
+        "contracts/test/ComputeVerificationPolicyBinding420.t.sol::testStaleRevisionAndDuplicateBindingFailClosed",
+        "contracts/test/ComputeDeterministicVerificationRouter420.t.sol::testAdapterUpgradeDoesNotRewriteFrozenJobRoute",
+        "contracts/test/ComputeScientificVerificationRouter420.t.sol::testAdapterUpgradeCannotRewriteFrozenScientificProtocol"
+      ]
+    },
+    {
+      "threat": "verifier_collusion_or_friendly_selection",
+      "evidence": [
+        "contracts/test/ComputeJobVerifierIndependenceGate420.t.sol::testSharedControllerAliasesForAllThreeCanonicalPartiesFailClosed",
+        "contracts/test/ComputeIndependentVerifierSelector420.t.sol::testSharedControllerFriendlyVerifierFailsClosed",
+        "contracts/test/ComputeReplicatedVerification420.t.sol::testThresholdDuplicateAndSharedControllerFailClosed",
+        "contracts/test/ComputeReplicatedVerification420.t.sol::testSplitVotesNeedThresholdOnSameResult"
+      ]
+    },
+    {
+      "threat": "authority_or_identity_drift",
+      "evidence": [
+        "contracts/test/ComputeJobVerifierIndependenceGate420.t.sol::testWithdrawalSuspensionRevocationAndAuthorityRotationBlockVerdict",
+        "contracts/test/ComputeReplicatedVerification420.t.sol::testPartyControllerDriftInvalidatesFrozenCommitteeVotes",
+        "contracts/test/ComputeReplicatedVerification420.t.sol::testMemberCanVoteOnlyOnceAndSuspensionFailsClosed",
+        "contracts/test/ComputeJobCanonicalWiring420.t.sol::testDisabledProfileOrAuthorityRotationFailsClosed",
+        "contracts/test/ComputeIndependentVerifierSelector420.t.sol::testPolicySelectorRotationInvalidatesOldSelectorContract"
+      ]
+    },
+    {
+      "threat": "cross_method_substitution_or_replay",
+      "evidence": [
+        "contracts/test/ComputeScientificVerificationRouter420.t.sol::testDeterministicAndScientificAdaptersCannotMasqueradeAsEachOther",
+        "contracts/test/ComputeDeterministicVerificationRouter420.t.sol::testEvaluationIsSingleUse",
+        "contracts/test/ComputeScientificVerificationRouter420.t.sol::testScientificEvaluationIsSingleUse"
+      ]
+    },
+    {
+      "threat": "dispute_or_appeal_authority_confusion",
+      "evidence": [
+        "contracts/test/ComputeVerifiedEntitlement420.t.sol::testUnauthorizedOrInterestedAdjudicatorCannotResolveHeldCase",
+        "contracts/test/ComputeVerifiedEntitlement420.t.sol::testVerificationReviewHookPreservesOriginalVerdictThroughAppealAndFinalAdverseDisposition",
+        "contracts/test/ComputeVerifiedEntitlement420.t.sol::testWithdrawnVerificationChallengeIsFinalButNotAdverseVerifierDisposition"
+      ]
+    },
+    {
+      "threat": "failure_atomicity_and_economic_isolation",
+      "evidence": [
+        "contracts/test/ComputeJobIntegerProfileHostile420.t.sol::testHostileVerdictFieldsAndSignaturesFailWithoutMutation",
+        "contracts/test/ComputeJobProfileEvidenceIntegrity420.t.sol::testCrossJobEvidenceAndProfileSubstitutionsFailWithoutStateChanges",
+        "contracts/test/ComputeVerificationPolicyBinding420.t.sol::testStaleRevisionAndDuplicateBindingFailClosed",
+        "contracts/test/ComputeVerifiedEntitlement420.t.sol::testReplayAndCrossJobEntitlementReuseFailClosed",
+        "contracts/test/ComputeVerifiedEntitlement420.t.sol::testDisputeAndPayerWinRemainIsolatedAcrossTwoPayers"
+      ]
+    }
+  ],
+  "authority_boundaries": [
+    "Rejected verifier actions must not mutate canonical job state, burn a nonce that belongs to a rejected verdict, release payer backing, create an entitlement, or alter a frozen policy/adapter route.",
+    "Verifier identity, capability, selection, correctness evidence, dispute review and settlement remain separate authorities under hostile inputs.",
+    "Shared-controller or provider-friendly verifier sets fail closed; threshold counting never converts duplicate/colluding votes into independent quorum.",
+    "Later policy/adapter publication does not rewrite accepted historical semantics; stale attempts cannot silently rebind a job.",
+    "A worker/result/assignment mismatch cannot be repaired by a valid verifier signature.",
+    "Challenge/appeal state cannot rewrite the original verifier decision or create stake/slash authority.",
+    "Scientific/deterministic evidence families cannot masquerade as one another.",
+    "No adversarial test may pass by weakening authorization, replay, policy, independence, settlement or failure-atomicity guards."
+  ],
+  "invariants": [
+    "CMP-INV-005",
+    "CMP-INV-009",
+    "CMP-INV-010",
+    "CMP-INV-013",
+    "CMP-INV-014",
+    "CMP-INV-016",
+    "CMP-INV-017",
+    "CMP-INV-018",
+    "CMP-INV-020",
+    "CMP-INV-022",
+    "CMP-INV-023",
+    "CMP-INV-024",
+    "CMP-INV-025",
+    "CMP-INV-026",
+    "CMP-INV-027",
+    "CMP-INV-030"
+  ],
+  "milestone_relationship": {
+    "level_2_required_now": true,
+    "milestone": "CMP-1.4 cross-verifier adversarial integration",
+    "rationale": "The canonical step is itself a cross-verifier adversarial qualification boundary spanning signed verdicts, policy binding, worker evidence, independent selection, quorum, deterministic/scientific adapters and dispute hooks. The retained full Compute suite is therefore required on the exact implementation SHA."
+  },
+  "deployment_publication": {
+    "fixed_genesis_predeploy_created": false,
+    "protocol_registry_publication_claimed": false,
+    "live_deployment_claimed": false
+  },
+  "exit_criteria": [
+    "Every canonical CMP-1.4.10 threat class is mapped to at least one exact executable test.",
+    "Forged/false verifier and hostile signed-verdict fields fail closed without state/economic mutation.",
+    "Verdict replay, expiry and cross-domain replay fail closed.",
+    "Wrong job/result/assignment/output and cross-job evidence substitutions fail closed.",
+    "Wrong worker/cross-worker/wrong attempt/stale attempt evidence cannot replay into verification.",
+    "Stale/disabled/mutated verification policy cannot replace the accepted frozen policy; rejected stale/duplicate binding is failure-atomic.",
+    "Friendly/shared-controller/colluding verifier arrangements cannot satisfy independence/quorum requirements.",
+    "Authority, controller, capability, selector or verifier lifecycle drift fails closed where current eligibility is required.",
+    "Deterministic/scientific adapter-family substitution and evaluation replay fail closed.",
+    "Challenge/appeal authority confusion cannot rewrite verdicts, release held entitlement prematurely or mint slash authority.",
+    "Rejected hostile paths preserve canonical state, nonce/evidence semantics and payer/provider isolation.",
+    "Level 1 exact-head mechanical threat-matrix verification is green.",
+    "Level 2 retained Compute adversarial/integration suite is green on the same exact implementation SHA."
+  ],
+  "status": "COMPLETE_LEVEL_1_AND_LEVEL_2",
+  "qualified_implementation_sha": "edeba8393ab1ec2b2b247cdb5b658a3f4b060e32",
+  "level_1_and_2_results": {
+    "compute_market_qualification": {
+      "run_number": 65,
+      "run_id": 36877413661,
+      "conclusion": "success"
+    },
+    "solidity_contracts": {
+      "run_number": 3584,
+      "run_id": 36877413569,
+      "conclusion": "success"
+    },
+    "genesis_address_authority": {
+      "run_number": 392,
+      "run_id": 36877413171,
+      "conclusion": "success"
+    },
+    "registry_audit": {
+      "run_number": 227,
+      "run_id": 36877413240,
+      "conclusion": "success"
+    },
+    "docs_qualification": {
+      "run_number": 3784,
+      "run_id": 36877413545,
+      "conclusion": "success"
+    },
+    "indexer": {
+      "run_number": 1200,
+      "run_id": 36877413248,
+      "conclusion": "success"
+    }
+  },
+  "completion_note": "Exact-head Level 1 and CMP-1.4 cross-verifier adversarial Level 2 qualification passed on edeba8393ab1ec2b2b247cdb5b658a3f4b060e32. This closeout update is evidence-only and changes no executable source, tests, workflows, dependencies, interfaces, deployment state, or substantive requirements."
+}

@@ -60,6 +60,20 @@ function assertInventoryAuthority420(inventory) {
   return authority;
 }
 
+function assertStakeAppAuthority420(inventory) {
+  const authority = inventory?.appAuthority;
+  assert420(authority && typeof authority === 'object', 'wallet app authority block missing');
+  const required = ['stake420', 'validatorRegistry', 'rewardController'];
+  for (const key of required) {
+    const item = authority[key];
+    assert420(item && ADDRESS_RE.test(item.address || ''), `wallet app authority ${key} address missing or invalid`);
+    const state = String(item.status || '');
+    assert420(!state.includes('CONFLICTED'), `wallet app authority ${key} remains conflicted`);
+    assert420(!state.includes('PENDING'), `wallet app authority ${key} remains pending`);
+  }
+  return authority;
+}
+
 function assertLiveInventoryReady420(inventory, environment) {
   assert420(inventory?.schema === '420-wallet-deployment-inventory-v1', 'unsupported wallet deployment inventory schema');
   assert420(inventory?.network?.environment === environment, 'wallet deployment inventory environment does not match manifest');
@@ -90,6 +104,7 @@ export function buildWalletRuntimeConfig420({ manifest, inventory, baseConfig, m
   if (LIVE_ENVIRONMENTS.has(environment)) assertLiveInventoryReady420(inventory, environment);
 
   const authority = assertInventoryAuthority420(inventory);
+  const appAuthority = assertStakeAppAuthority420(inventory);
   const rpcUrl = validatedManifest.rpc.http[0];
   const explorerUrl = validatedManifest.services.explorer ?? null;
   const faucetUrl = validatedManifest.services.faucet ?? null;
@@ -132,6 +147,9 @@ export function buildWalletRuntimeConfig420({ manifest, inventory, baseConfig, m
       protocolRegistryAddress: authority.protocolRegistry.address,
       namesAddress: authority.names420.address,
       identityAddress: authority.identity420.address,
+      stakeAddress: appAuthority.stake420.address,
+      validatorRegistryAddress: appAuthority.validatorRegistry.address,
+      rewardControllerAddress: appAuthority.rewardController.address,
       faucetUrl,
       sourceInventoryPhase: inventory.phase,
     },

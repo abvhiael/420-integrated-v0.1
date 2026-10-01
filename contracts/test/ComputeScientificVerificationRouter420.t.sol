@@ -164,14 +164,12 @@ contract ComputeScientificVerificationRouter420Test {
     function _proof(uint64[16] memory data, uint32 index)
         private view returns (bytes32[] memory proof)
     {
+        bytes32[16] memory l0;
+        bytes32[8] memory l1;
+        bytes32[4] memory l2;
+        bytes32[2] memory l3;
         bytes32 ignoredRoot;
-        (
-            bytes32[16] memory l0,
-            bytes32[8] memory l1,
-            bytes32[4] memory l2,
-            bytes32[2] memory l3,
-            ignoredRoot
-        ) = _levels(data);
+        (l0, l1, l2, l3, ignoredRoot) = _levels(data);
         ignoredRoot;
         proof = new bytes32[](4);
         proof[0] = l0[index ^ 1];

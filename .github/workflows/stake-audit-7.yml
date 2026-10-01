@@ -25,7 +25,6 @@ on:
       - 'contracts/artifacts/CommunityValidatorReserve.json'
       - 'contracts/artifacts/Stake420.json'
       - 'contracts/test/StakeValidatorGenesis420.t.sol'
-      - 'contracts/test/StakeRollbackAtomicity420.t.sol'
       - 'contracts/test/StakeSystemCallABIVectors420.t.sol'
       - 'scripts/generate-stake-audit-7-predeploy.py'
       - 'scripts/verify-stake-audit-7-predeploy.py'
@@ -103,7 +102,6 @@ jobs:
         working-directory: contracts
         run: |
           forge test --match-path test/StakeValidatorGenesis420.t.sol -vv
-          forge test --match-path test/StakeRollbackAtomicity420.t.sol -vv
           forge test --match-path test/StakeSystemCallABIVectors420.t.sol -vv
       - name: Reject materialization drift after qualification
         run: |

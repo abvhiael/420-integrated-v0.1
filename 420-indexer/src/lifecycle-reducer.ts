@@ -56,9 +56,7 @@ const POLICY_LIST: LifecyclePolicy420[] = [
     { eventName: 'CivicProposalCreated', state: 'PENDING' },
     { eventName: 'ProposalQueued', state: 'PENDING' },
     { eventName: 'ProposalExecuted', state: 'COMPLETED', terminal: true },
-    { eventName: 'CivicProposalExecuted', state: 'COMPLETED', terminal: true },
-    { eventName: 'ProposalCancelled', state: 'CANCELLED', terminal: true },
-    { eventName: 'CivicProposalCancelled', state: 'CANCELLED', terminal: true }
+    { eventName: 'CivicProposalExecuted', state: 'COMPLETED', terminal: true }
   ]},
   { protocol: '420Pay', rules: [
     { eventName: 'PaymentCreated', state: 'PENDING' },

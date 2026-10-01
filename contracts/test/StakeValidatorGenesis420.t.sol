@@ -6,6 +6,7 @@ import "../src/system/RewardController.sol";
 import "../src/system/CommunityValidatorReserve.sol";
 import "../src/apps/Stake420.sol";
 import "../src/interfaces/genesis/ISystemSafety420.sol";
+import "../src/interfaces/genesis/Types420.sol";
 import "./helpers/GenesisMocks420.sol";
 
 interface VmStakeValidatorGenesis420 {
@@ -160,6 +161,47 @@ contract StakeValidatorGenesis420Test {
         env.safety().setState(ISystemSafety420.SafetyState.NORMAL);
         _state(id, ValidatorRegistry.Status.ACTIVE, 3, 1, 4, 0);
         require(registry.getValidator(id).status == ValidatorRegistry.Status.ACTIVE, "normal activation failed");
+    }
+
+    function testStakeSafetyFailsClosedOnInactiveOrCodeHashMismatch() public {
+        (bytes32 id,) = _registerSelfFunded("safety-registry", 15);
+        _state(id, ValidatorRegistry.Status.PROBATION, 1, 0, 0, 0);
+        _rollPastActivation(id);
+        _state(id, ValidatorRegistry.Status.ELIGIBLE, 2, 1, 0, 0);
+
+        bytes32 systemSafetyId = keccak256("420/APP/SYSTEM_SAFETY");
+        env.registry().setLifecycle(systemSafetyId, Types420.Lifecycle.PAUSED);
+        vm.prank(SYSTEM_CALLER);
+        (bool inactiveAccepted,) = address(registry).call(
+            abi.encodeWithSelector(
+                registry.applyConsensusState.selector,
+                id,
+                ValidatorRegistry.Status.ACTIVE,
+                uint64(3),
+                uint64(1),
+                uint64(4),
+                uint64(0)
+            )
+        );
+        require(!inactiveAccepted, "inactive SystemSafety accepted");
+        require(registry.getValidator(id).status == ValidatorRegistry.Status.ELIGIBLE, "inactive safety mutated state");
+
+        env.registry().setLifecycle(systemSafetyId, Types420.Lifecycle.ACTIVE);
+        env.registry().setCodeHash(systemSafetyId, keccak256("wrong-runtime-hash"));
+        vm.prank(SYSTEM_CALLER);
+        (bool hashMismatchAccepted,) = address(registry).call(
+            abi.encodeWithSelector(
+                registry.applyConsensusState.selector,
+                id,
+                ValidatorRegistry.Status.ACTIVE,
+                uint64(3),
+                uint64(1),
+                uint64(4),
+                uint64(0)
+            )
+        );
+        require(!hashMismatchAccepted, "code-hash mismatch accepted");
+        require(registry.getValidator(id).status == ValidatorRegistry.Status.ELIGIBLE, "hash mismatch mutated state");
     }
 
     function testCooldownIsBondedButNotSelectionEligible() public {

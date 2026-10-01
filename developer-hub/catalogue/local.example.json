@@ -3,6 +3,18 @@
   "chainId": "420",
   "contracts": [
     {
+      "name": "Identity420",
+      "protocol": "420Identity",
+      "address": "0x0000000000000000000000000000000000000436",
+      "source": "genesis",
+      "version": "3.0.0",
+      "deploymentBlock": 0,
+      "artifact": "contracts/artifacts/Identity420.json",
+      "interface": "contracts/src/interfaces/genesis/IIdentityCredential420.sol",
+      "abiSha256": "5ea63254c724148eba47ee720486f41105f003602558cbd0b0a43bdc346d3a6e",
+      "verified": true
+    },
+    {
       "name": "ProtocolRegistry",
       "protocol": "420Registry",
       "address": "0x0000000000000000000000000000000000000434",

@@ -204,6 +204,7 @@ nav:
               - Permissions: apps/identity/permissions.md
               - Fees: apps/identity/fees.md
               - Security & Privacy: apps/identity/security.md
+              - Operator Guide: apps/identity/operator-guide.md
               - Troubleshooting: apps/identity/troubleshooting.md
               - FAQ: apps/identity/faq.md
               - Developer Integration:

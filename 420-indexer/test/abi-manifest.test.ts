@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { id } from 'ethers';
 import type { Hex } from '../src/chain-source.js';
 import { GENESIS_PROTOCOL_BY_CONTRACT_420, buildGenesisDescriptorManifest420, descriptorsFromArtifact420 } from '../src/abi-manifest.js';
@@ -42,6 +43,35 @@ test('fails closed on ABI event types outside the frozen decoder surface', () =>
   };
   assert.throws(() => descriptorsFromArtifact420('420Names', predeploy, unsupported), /unsupported event field string/);
 });
+
+test('retained Identity420 artifact produces canonical Identity event descriptors', () => {
+  const identityArtifact = JSON.parse(
+    readFileSync(new URL('../../../contracts/artifacts/Identity420.json', import.meta.url), 'utf8')
+  );
+  const identityPredeploy = {
+    name: 'Identity420',
+    address: '0x0000000000000000000000000000000000000436' as Hex,
+    artifact: 'contracts/artifacts/Identity420.json'
+  };
+  const descriptors = descriptorsFromArtifact420('420Identity', identityPredeploy, identityArtifact);
+  const names = new Set(descriptors.map((descriptor) => descriptor.eventName));
+  for (const required of [
+    'ProfileCreated',
+    'ProfileUpdated',
+    'PrimaryNameSet',
+    'ProfileControllerTransferStarted',
+    'ProfileControllerTransferred',
+    'IssuerSet',
+    'CredentialIssued',
+    'CredentialRevoked',
+    'CredentialRejected'
+  ]) {
+    assert.equal(names.has(required), true, 'missing Identity descriptor: ' + required);
+  }
+  assert.equal(descriptors.every((descriptor) => descriptor.contractAddress === identityPredeploy.address), true);
+  assert.equal(descriptors.every((descriptor) => descriptor.protocol === '420Identity'), true);
+});
+
 
 
 test('maps every canonical Civic governance contract into the 420Governance protocol', () => {

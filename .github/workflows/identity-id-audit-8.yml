@@ -1,0 +1,71 @@
+name: 420Identity ID-AUDIT-8
+
+on:
+  pull_request:
+    paths:
+      - "contracts/src/apps/Identity420.sol"
+      - "contracts/artifacts/Identity420.json"
+      - "contracts/config/predeploy/Identity420-predeploy-state.json"
+      - "contracts/config/predeploy/predeploy-plan.json"
+      - "contracts/config/deployment-manifest.json"
+      - "contracts/config/genesis-address-namespace.json"
+      - "docs/apps/identity/deployment-operations.md"
+      - "docs/apps/identity/index.md"
+      - "scripts/identity-operator-smoke.py"
+      - "scripts/test-identity-operator-smoke.py"
+      - "scripts/verify-id-audit-8-operator-readiness.py"
+      - "docs/audit/ID-AUDIT-8-DEPLOYMENT-OPERATIONS-RECOVERY-READINESS.md"
+      - ".github/workflows/identity-id-audit-8.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: identity-id-audit-8-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: Revalidate retained Identity predeploy authority
+        run: |
+          set -euo pipefail
+          python3 scripts/generate-id-audit-5-identity-predeploy.py --check
+          python3 scripts/verify-id-audit-5-identity-predeploy.py
+          python3 scripts/audit-genesis-address-collisions.py
+
+      - name: Offline Identity operator smoke
+        run: python3 scripts/identity-operator-smoke.py --offline --json
+
+      - name: Operator smoke negative and boundary tests
+        run: python3 scripts/test-identity-operator-smoke.py
+
+      - name: Verify operator runbook and recovery readiness
+        run: python3 scripts/verify-id-audit-8-operator-readiness.py
+
+      - name: Revalidate derived-service rebuild contract
+        run: python3 scripts/verify-id-audit-6-derived-services.py
+
+      - name: Verify smoke tooling remains read-only
+        run: |
+          set -euo pipefail
+          ! grep -nE 'eth_sendTransaction|cast\("send"|privateKey|mnemonic|seedPhrase' scripts/identity-operator-smoke.py

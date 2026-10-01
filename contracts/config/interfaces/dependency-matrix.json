@@ -127,17 +127,7 @@
       "GovernanceAuthority"
     ],
     "420Identity": [
-      "ProtocolRegistry",
-      "GovernanceAuthority",
-      "PauseRegistry",
-      "CapabilityRegistry",
-      "SystemSafety",
-      "GenesisInitialization",
-      "Migration",
-      "SignedEnvelope",
-      "ReplayProtection",
-      "ChainContext",
-      "MetadataCommitment"
+      "GovernanceAuthority"
     ],
     "420AI": [
       "ProtocolRegistry",

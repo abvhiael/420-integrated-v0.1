@@ -35,6 +35,7 @@ func TestCapabilitiesAdvertisesCompleteExplorerAPIContract(t *testing.T) {
 		"/v1/services/{service}",
 		"/v1/services/{service}/versions/{version}",
 		"/v1/assets/activity",
+		"/v1/stake/activity",
 		"/v1/consensus",
 	}
 	if !reflect.DeepEqual(got.Endpoints, want) {

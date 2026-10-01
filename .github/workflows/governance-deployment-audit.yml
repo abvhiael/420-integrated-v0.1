@@ -14,6 +14,7 @@ on:
       - 'contracts/config/predeploy/storage-init.json'
       - 'contracts/foundry.toml'
       - 'contracts/test/GovernanceAudit6Deployment420.t.sol'
+      - 'contracts/test-governance-audit-6/GovernanceAudit6Deployment420.t.sol'
       - 'scripts/verify-governance-audit-6.py'
       - 'scripts/generate-governance-audit-6-artifacts.py'
       - 'contracts/artifacts/GovernanceTimelock.json'
@@ -40,6 +41,7 @@ on:
       - 'contracts/config/predeploy/storage-init.json'
       - 'contracts/foundry.toml'
       - 'contracts/test/GovernanceAudit6Deployment420.t.sol'
+      - 'contracts/test-governance-audit-6/GovernanceAudit6Deployment420.t.sol'
       - 'scripts/verify-governance-audit-6.py'
       - 'scripts/generate-governance-audit-6-artifacts.py'
       - 'contracts/artifacts/GovernanceTimelock.json'
@@ -123,7 +125,7 @@ jobs:
 
       - name: GOV-AUDIT-6 deterministic deployment simulation
         working-directory: contracts
-        run: timeout 180s forge test --match-path test/GovernanceAudit6Deployment420.t.sol -vv
+        run: FOUNDRY_SRC=src/governance FOUNDRY_TEST=test-governance-audit-6 timeout 180s forge test --match-path test-governance-audit-6/GovernanceAudit6Deployment420.t.sol -vv
       - name: Retained Governance authority and lifecycle regressions
         working-directory: contracts
         run: |

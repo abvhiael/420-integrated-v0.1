@@ -91,3 +91,6 @@ jobs:
 
       - name: Verify CMP-1.4.7 deterministic verification adapters
         run: python scripts/verify-cmp-1-4-7-deterministic-adapters.py
+
+      - name: Verify CMP-1.4.8 scientific/probabilistic verification
+        run: python scripts/verify-cmp-1-4-8-scientific-verification.py

@@ -1,0 +1,17 @@
+{
+  "schema":"420-exchange-catalogue-v1",
+  "version":1,
+  "markets":[
+    {
+      "marketSubjectId":"example-display-only-420-usd",
+      "canonicalMarketId":null,
+      "marketLabel":"420 / USD",
+      "baseSymbol":"420",
+      "quoteSymbol":"USD",
+      "qualification":"DISPLAY_ONLY_UNQUALIFIED",
+      "routeHealthy":false,
+      "settlementHealthy":false,
+      "source":"repository-example-not-execution-authority"
+    }
+  ]
+}

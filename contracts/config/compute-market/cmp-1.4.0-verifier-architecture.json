@@ -1,0 +1,354 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-1.4.0.VerifierArchitecture.v1",
+  "step": "CMP-1.4.0",
+  "title": "Verifier architecture reconciliation",
+  "base_main_sha": "bd00e64e29e74c96b4d89b1254254547767a6851",
+  "canonical_definition": "Inventory all existing verifier, policy, selector, attestation and signed-verdict components. Freeze canonical ownership and authority boundaries.",
+  "parent_requirement": {
+    "step": "CMP-1.4",
+    "title": "ComputeVerifierRegistry",
+    "purpose": "Separate workers from verification authorities."
+  },
+  "status": "COMPLETE",
+  "existing_components": [
+    {
+      "source": "contracts/src/compute/ComputeJobVerifierEvidence420.sol",
+      "role": "legacy direct decision-provenance adapter",
+      "disposition": "retained_legacy_not_production",
+      "authority": [
+        "job-scoped verification decision provenance"
+      ],
+      "must_not_claim": [
+        "objective correctness",
+        "verifier selection",
+        "profile qualification",
+        "settlement authority",
+        "custody authority"
+      ]
+    },
+    {
+      "source": "contracts/src/compute/ComputeJobIndependentVerification420.sol",
+      "role": "signed verdict primitive",
+      "disposition": "retained_primitive",
+      "authority": [
+        "EIP-712/ERC-1271 verdict authentication",
+        "job/profile/nonce/expiry binding",
+        "decision provenance"
+      ],
+      "must_not_claim": [
+        "beneficial-owner independence",
+        "objective correctness",
+        "settlement authority",
+        "custody authority"
+      ]
+    },
+    {
+      "source": "contracts/src/compute/ComputeJobPolicyEnforcedVerification420.sol",
+      "role": "independence-gated signed-verdict adapter",
+      "disposition": "retained_production_path_input",
+      "authority": [
+        "canonical party lookup",
+        "independence appointment eligibility gate",
+        "signed verdict forwarding"
+      ],
+      "must_not_claim": [
+        "general verifier registry",
+        "objective correctness by signature alone",
+        "settlement authority"
+      ]
+    },
+    {
+      "source": "contracts/src/compute/ComputeJobIntegerProfileVerification420.sol",
+      "role": "bounded deterministic correctness profile",
+      "disposition": "retained_bounded_profile",
+      "authority": [
+        "INTEGER_SUM_OF_SQUARES/V1 deterministic recomputation",
+        "profile-specific evidence binding"
+      ],
+      "must_not_claim": [
+        "generic workload correctness",
+        "GPU/AI/scientific correctness",
+        "general verifier registry"
+      ]
+    },
+    {
+      "source": "contracts/src/compute/ComputeVerifierIndependencePolicy420.sol",
+      "role": "controller-attestation and independent appointment policy",
+      "disposition": "retained_policy_input",
+      "authority": [
+        "controller attestation state",
+        "selector appointment state",
+        "independence eligibility",
+        "governance suspension/authority rotation"
+      ],
+      "must_not_claim": [
+        "verifier lifecycle registry",
+        "verifier class registry",
+        "verification capability grant",
+        "profile publication",
+        "settlement authority"
+      ]
+    },
+    {
+      "source": "contracts/src/compute/ComputePolicyRegistry420.sol",
+      "role": "generic versioned policy publication registry",
+      "disposition": "retained_policy_registry_input",
+      "authority": [
+        "append-only policy revision publication",
+        "new-admission enable/disable"
+      ],
+      "must_not_claim": [
+        "verifier identity",
+        "verifier appointment",
+        "correctness decision",
+        "settlement authority"
+      ]
+    },
+    {
+      "source": "contracts/src/compute/ComputeJobCanonicalWiring420.sol",
+      "role": "bounded CMP-1.1.4 installation audit record",
+      "disposition": "retained_historical_wiring",
+      "authority": [
+        "wiring/code-hash/role consistency assertion"
+      ],
+      "must_not_claim": [
+        "deployment",
+        "ProtocolRegistry publication",
+        "generic verifier registry"
+      ]
+    },
+    {
+      "source": "contracts/src/compute/ComputeWorkerAttestation420.sol",
+      "role": "worker capability/provenance attestation source",
+      "disposition": "retained_boundary_input_not_verifier_correctness",
+      "authority": [
+        "worker capability evidence/provenance"
+      ],
+      "must_not_claim": [
+        "job-result correctness",
+        "verifier identity",
+        "verifier appointment",
+        "settlement authority"
+      ]
+    },
+    {
+      "source": "contracts/src/compute/ComputeWorkerAttestedEligibility420.sol",
+      "role": "worker admission composition over capability attestation",
+      "disposition": "retained_boundary_input_not_verifier_correctness",
+      "authority": [
+        "worker eligibility composition"
+      ],
+      "must_not_claim": [
+        "job-result correctness",
+        "verifier identity",
+        "verifier appointment",
+        "settlement authority"
+      ]
+    }
+  ],
+  "canonical_model": {
+    "identity_and_lifecycle": {
+      "owner_step": "CMP-1.4.1",
+      "requirement": "Register, activate, suspend, rotate and retire verifier identities without granting unrelated authority.",
+      "canonical_future_surface": "ComputeVerifierRegistry420 or equivalently named authorized implementation",
+      "non_duplicative_rule": "Do not reinterpret ComputeVerifierIndependencePolicy420 identities as the verifier lifecycle registry."
+    },
+    "classes_and_capabilities": {
+      "owner_step": "CMP-1.4.2",
+      "requirement": "Support independently typed verifier classes and workload capabilities.",
+      "initial_classes": [
+        "protocol verifier",
+        "independent verifier",
+        "job-owner verifier",
+        "oracle verifier",
+        "TEE verifier",
+        "committee verifier"
+      ],
+      "rule": "Class/capability eligibility is distinct from appointment, identity attestation, correctness proof and settlement."
+    },
+    "verification_policy": {
+      "owner_step": "CMP-1.4.3",
+      "requirement": "Bind jobs to exact versioned verification policies before execution.",
+      "reuse": "ComputePolicyRegistry420 KIND_VERIFICATION where compatible",
+      "rule": "Accepted profile/policy semantics are immutable for an accepted job; publication is not a verdict."
+    },
+    "signed_verdicts": {
+      "owner_step": "CMP-1.4.4",
+      "reuse": [
+        "ComputeJobIndependentVerification420",
+        "ComputeJobPolicyEnforcedVerification420"
+      ],
+      "minimum_bindings": [
+        "chain",
+        "contract",
+        "job",
+        "unit/attempt where applicable",
+        "worker/result",
+        "verifier",
+        "profile/policy",
+        "evidence",
+        "nonce",
+        "expiry"
+      ],
+      "rule": "Authentication proves decision provenance, not correctness by itself."
+    },
+    "independent_selection": {
+      "owner_step": "CMP-1.4.5",
+      "reuse": "ComputeVerifierIndependencePolicy420 where compatible",
+      "rule": "Verifier cannot self-appoint; selector cannot grant capability or publish profiles; attestor cannot appoint."
+    },
+    "replicated_verification": {
+      "owner_step": "CMP-1.4.6"
+    },
+    "deterministic_adapters": {
+      "owner_step": "CMP-1.4.7",
+      "reuse": "ComputeJobIntegerProfileVerification420 as bounded example only"
+    },
+    "scientific_probabilistic_verification": {
+      "owner_step": "CMP-1.4.8"
+    },
+    "challenge_and_appeal": {
+      "owner_step": "CMP-1.4.9",
+      "rule": "Challenges/appeals do not rewrite immutable original verdicts and do not themselves move funds."
+    },
+    "adversarial_qualification": {
+      "owner_step": "CMP-1.4.10"
+    },
+    "release_candidate": {
+      "owner_step": "CMP-1.4.11"
+    },
+    "phase_closeout": {
+      "owner_step": "CMP-1.4.12"
+    }
+  },
+  "authority_boundaries": [
+    "Verifier identity or verification capability grants no Vault custody, arbitrary withdrawal, beneficiary redirection, settlement execution, worker lifecycle, validator, bridge, governance, or arbitrary-wallet authority.",
+    "A signed verdict proves provenance/authentication only; correctness requires the bound verification method/profile.",
+    "A verification PASS/FAIL/INCONCLUSIVE decision is evidence under a bound policy and does not itself transfer funds.",
+    "Settlement beneficiary and amount derive from canonical accepted economic state, never a verifier argument.",
+    "Verifier selector, identity attestor, profile/policy publisher, verifier, dispute reviewer, worker, payer and settlement authority remain separable roles.",
+    "Policy publication or profile approval does not appoint a verifier and cannot retroactively rewrite accepted-job verification semantics.",
+    "Worker/resource reputation or 420Trust evidence cannot substitute for independent correctness verification where independence is required.",
+    "Raw private workload/evidence bytes are not required canonical plaintext; on-chain state stores bounded commitments/provenance.",
+    "Suspension or revocation may block new verification activity but must not silently rewrite historical decisions or confiscate independently earned valid entitlements.",
+    "Emergency/governance authority cannot fabricate verification outcomes or redirect balances.",
+    "Non-AI workloads remain first-class; verifier architecture cannot require 420AI participation."
+  ],
+  "retained_tests": [
+    "contracts/test/ComputeJobIndependentVerification420.t.sol",
+    "contracts/test/ComputeJobPolicyEnforcedVerification420.t.sol",
+    "contracts/test/ComputeVerifierIndependencePolicy420.t.sol",
+    "contracts/test/ComputeJobIntegerProfileVerification420.t.sol",
+    "contracts/test/ComputeJobIntegerProfileHostile420.t.sol",
+    "contracts/test/ComputeJobVerifierIndependenceGate420.t.sol",
+    "contracts/test/ComputeJobProfileEvidenceIntegrity420.t.sol",
+    "contracts/test/ComputeJobCanonicalVerifierAuthorities420.t.sol",
+    "contracts/test/ComputeJobCanonicalWiring420.t.sol",
+    "contracts/test/ComputeVerifiedEntitlement420.t.sol"
+  ],
+  "retained_docs": [
+    "docs/420-COMPUTE-MARKET-V1-ARCHITECTURE.md",
+    "docs/compute-market/CMP-0.9-SIGNED-RECEIPTS-AND-VERIFICATION.md",
+    "docs/compute-market/CMP-0.10-DISPUTES-PRIVACY-AND-SECURITY.md",
+    "docs/compute-market/CMP-0.12-QUALIFICATION-AND-CLOSEOUT.md",
+    "docs/compute-market/CMP-1.1.4-INDEPENDENT-VERIFIER-QUALIFICATION.md",
+    "docs/compute-market/CMP-1.1-VERIFIER-LIFECYCLE-RELEASE-POLICY.md"
+  ],
+  "frozen_invariants": [
+    "CMP-INV-005",
+    "CMP-INV-009",
+    "CMP-INV-010",
+    "CMP-INV-013",
+    "CMP-INV-014",
+    "CMP-INV-016",
+    "CMP-INV-017",
+    "CMP-INV-018",
+    "CMP-INV-020",
+    "CMP-INV-022",
+    "CMP-INV-023",
+    "CMP-INV-024",
+    "CMP-INV-025",
+    "CMP-INV-026",
+    "CMP-INV-027",
+    "CMP-INV-030"
+  ],
+  "deployment_publication": {
+    "fixed_genesis_predeploy_created": false,
+    "protocol_registry_publication_claimed": false,
+    "live_deployment_claimed": false,
+    "note": "CMP-1.4.0 freezes architecture only. No verifier deployment/address/runtime-hash/publication evidence is fabricated."
+  },
+  "exit_criteria": [
+    "All existing verifier/policy/selector/attestation/signed-verdict components are inventoried and dispositioned.",
+    "Canonical ownership for verifier identity/lifecycle, classes/capabilities, policy, verdicts, selection, quorum, adapters, scientific verification, disputes, qualification, release and closeout is frozen to CMP-1.4.1 through CMP-1.4.12.",
+    "Authority separation is explicit and consistent with frozen ComputeMarket invariants.",
+    "Legacy/test-only and bounded-profile components are not promoted into the canonical general verifier registry.",
+    "Retained tests/docs required by later CMP-1.4 work are identified.",
+    "Architecture freeze is mechanically verified and qualified on the exact final head."
+  ],
+  "planned_missing_surfaces": [
+    {
+      "source": "contracts/src/compute/ComputeVerificationRouter420.sol",
+      "repository_state": "not_implemented",
+      "evidence": [
+        "docs/420-COMPUTE-MARKET-V1-ARCHITECTURE.md",
+        "contracts/config/genesis-dapp-contract-map.json"
+      ],
+      "disposition": "target architecture name only; later CMP-1.4 implementation must reconcile router responsibilities without treating the name as existing code or deployment."
+    }
+  ],
+  "qualification": {
+    "qualified_implementation_sha": "ffc0a7263dae3d9787d757f6034e96a258a47fd1",
+    "evidence_only_completion": true,
+    "workflows": [
+      {
+        "name": "Solidity Contracts",
+        "run_number": 3395,
+        "run_id": 36762051196,
+        "conclusion": "success"
+      },
+      {
+        "name": "Genesis Address Authority",
+        "run_number": 229,
+        "run_id": 36762051212,
+        "conclusion": "success"
+      },
+      {
+        "name": "420 Integrated Qualification",
+        "run_number": 6051,
+        "run_id": 36762051509,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Docs Qualification",
+        "run_number": 3427,
+        "run_id": 36762052473,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Indexer",
+        "run_number": 1025,
+        "run_id": 36762051177,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.9 CI Qualification Automation",
+        "run_number": 105,
+        "run_id": 36762051163,
+        "conclusion": "success"
+      },
+      {
+        "name": "EXP-1.10 Phase Closeout Qualification",
+        "run_number": 111,
+        "run_id": 36762051305,
+        "conclusion": "success"
+      },
+      {
+        "name": "420Registry REG-AUDIT-4",
+        "run_number": 65,
+        "run_id": 36762051195,
+        "conclusion": "success"
+      }
+    ]
+  }
+}

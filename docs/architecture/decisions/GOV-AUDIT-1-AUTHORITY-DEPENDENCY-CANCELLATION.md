@@ -46,7 +46,7 @@ Important classifications:
 
 **ACTIVE, PASSED and QUEUED Civic proposals are not cancellable.**
 
-There is no proposer cancellation right, no emergency council, no privileged operator cancel, and no direct cancellation power granted to a Wallet, capability holder, Registry actor or validator.
+There is no proposer cancellation right, no emergency council, no privileged operator cancel, and no direct cancellation power granted to a Wallet, capability holder, Registry actor or validator. No proposal class confers cancellation authority and there is no cancellation-specific constitutional class.
 
 A separate proposal may change future protocol state, but it may not rewrite another proposal's canonical lifecycle.
 

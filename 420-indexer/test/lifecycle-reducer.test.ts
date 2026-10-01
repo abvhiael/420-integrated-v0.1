@@ -50,3 +50,14 @@ test('unknown protocol events do not fabricate lifecycle state', () => {
   ]);
   assert.deepEqual(snapshots, []);
 });
+
+
+test('does not synthesize Civic v1 cancellation from non-canonical cancellation event names', () => {
+  const snapshots = reduceProtocolLifecycle420([
+    event('420Governance', 'CivicProposalCreated', 1n, { proposalId: '0x04' }),
+    event('420Governance', 'CivicProposalCancelled', 2n, { proposalId: '0x04' })
+  ]);
+  assert.equal(snapshots.length, 1);
+  assert.equal(snapshots[0].state, 'PENDING');
+  assert.equal(snapshots[0].eventName, 'CivicProposalCreated');
+});

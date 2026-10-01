@@ -9,10 +9,10 @@
 ## Repository coordinates
 
 - Repository: `abvhiael/420-integrated-v0.1`
-- Base `main`: `e8d9096c4029c3c0218113afc1cbd3b8d0005878`
+- Base `main`: `06e137050964bb4f787164c9900f1740f2cf4b97`
 - Audit branch: `audit/420governance-complete-20261001`
 - PR: #449
-- GOV-AUDIT-1 implementation SHA: `dae5fb0d8429817ab9a89be5a41b92ad09e668f8`
+- GOV-AUDIT-1 implementation SHA: `a7e053d8f82e912725b47f4f7f53a48f089aa106`
 
 This file is evidence-only. It does not change executable code, tests, workflows, dependencies, configuration, interfaces, artifacts or substantive requirements. The implementation SHA above remains the qualification target.
 
@@ -30,6 +30,8 @@ This file is evidence-only. It does not change executable code, tests, workflows
 10. Timelock cancellation is legacy/bootstrap-only before Civic authority activation and fails closed afterward.
 11. Proposal Registry rejects `CANCELLED` as a canonical v1 transition.
 12. 420Indexer no longer synthesizes Governance cancellation from non-canonical cancellation event names.
+13. Current `main` was merged cleanly into the audit branch before final GOV-AUDIT-1 qualification; the intervening mainline changes were Compute Market-only and did not alter Governance semantics.
+14. A queued Civic action batch that attempts to invoke the retired Timelock cancellation primitive is proven to fail atomically without splitting Proposal Registry or Timelock state.
 
 ## Implementation files
 
@@ -41,6 +43,7 @@ This file is evidence-only. It does not change executable code, tests, workflows
 - `contracts/src/governance/CivicProposalRegistry420.sol`
 - `contracts/test/GovernanceAudit420.t.sol`
 - `contracts/test/CivicVoting420.t.sol`
+- `contracts/test/CivicTimelockExecution420.t.sol`
 - `420-indexer/src/lifecycle-reducer.ts`
 - `420-indexer/test/lifecycle-reducer.test.ts`
 - `docs/architecture/decisions/GOV-AUDIT-1-AUTHORITY-DEPENDENCY-CANCELLATION.md`
@@ -68,33 +71,32 @@ The dedicated Governance workflow on the exact implementation SHA runs:
 - `abi-manifest.test`
 - `lifecycle-reducer.test`
 
-## CI state at evidence creation
+## CI state at evidence update
 
-Required exact-head run:
+Required exact-head runs:
 
 - Workflow: **420Governance audit qualification**
-- Run ID: `36888008789`
-- Target SHA: `dae5fb0d8429817ab9a89be5a41b92ad09e668f8`
-- State: **QUEUED**
+- Push run: **#40**, run ID `36891003847`
+- Pull-request run: **#41**, run ID `36891011868`
+- Target SHA: `a7e053d8f82e912725b47f4f7f53a48f089aa106`
+- Current state at this evidence update: **QUEUED**
 - Conclusion: none
 
-Additional exact-head repository checks observed:
+The earlier implementation run `36888008789` at `dae5fb0d...` failed only because three Governance documentation pages did not use the verifier's explicit no-cancellation wording. Those pages were corrected. Subsequent intermediate exact-head runs were cancelled by later corrective commits under the workflow's concurrency policy; cancelled runs are not counted as green.
 
-- **Solidity Contracts** run `36888008905`: workflow completed successfully, but its Foundry job was skipped by scope classification; it is not counted as the required Governance contract qualification.
-- **Genesis Address Authority** run `36888008873`: PASS. This is supporting address-map evidence only, not a substitute for the Governance workflow.
-- unrelated/skipped workflows are not counted as green GOV-AUDIT-1 evidence.
+The current exact-head implementation has also been reconciled with current `main` at `06e13705...` and includes the additional end-to-end cancellation-atomicity regression. No queued, skipped, cancelled, superseded or unrelated check is represented as green.
 
 ## Level 1 status
 
-**PENDING — REQUIRED STEP-SPECIFIC CI HAS NOT EXECUTED.**
+**IMPLEMENTATION COMPLETE / CI EXECUTION PENDING.**
 
-No queued, skipped, cancelled or unrelated check is being represented as green.
+Every GOV-AUDIT-1 repository requirement and identified test gap has been implemented. The remaining gate is execution of the required exact-head Governance workflow. Runner queue state is an external CI-capacity condition, not a repository implementation gap, but the step must not be reported COMPLETE until the required run succeeds.
 
 ## Level 2 milestone status
 
-**PENDING.**
+**IMPLEMENTATION COMPLETE / CI EXECUTION PENDING.**
 
-The GOV-AUDIT-1 ADR defines this authority/dependency freeze as an app integration milestone. The retained Governance contract/integration suite plus frozen-interface verifier in the dedicated Governance workflow constitute the required Level 2 scope. No repository-wide 420 Integrated/Geth/global qualification is required here.
+GOV-AUDIT-1 is the authority/dependency integration milestone. Its retained Governance contract/integration suite, frozen-interface verifier, Indexer mapping/lifecycle tests and cancellation atomicity regression are all wired into the dedicated Governance workflow. Level 2 becomes qualified when that exact-head run succeeds.
 
 ## Level 3 status
 
@@ -104,6 +106,6 @@ Complete repository Solidity/Genesis inventories, 420 Integrated Qualification, 
 
 ## Current completion state
 
-**IMPLEMENTATION COMPLETE / QUALIFICATION PENDING — DO NOT ADVANCE TO GOV-AUDIT-2 YET.**
+**IMPLEMENTATION COMPLETE / EXTERNAL CI QUEUE PENDING — DO NOT ADVANCE TO GOV-AUDIT-2 YET.**
 
-The step becomes COMPLETE only when the exact implementation SHA's required Governance qualification executes successfully and the Level 2 milestone evidence is recorded.
+No remaining repository implementation gap is known for GOV-AUDIT-1. The step becomes COMPLETE only when the exact implementation SHA's required Governance qualification executes successfully.

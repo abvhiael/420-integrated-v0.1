@@ -84,17 +84,9 @@ jobs:
           python scripts/verify-governance-audit-3.py
           python scripts/verify-genesis-interface-layer.py
 
-      - name: Capture canonical GOV-AUDIT-3 test formatting
+      - name: Check Governance Solidity formatting
         working-directory: contracts
-        shell: bash
-        run: |
-          set -euo pipefail
-          forge fmt test/GovernanceAudit3Adversarial420.t.sol
-          echo "FORMAT_B64_BEGIN:test/GovernanceAudit3Adversarial420.t.sol"
-          base64 -w0 test/GovernanceAudit3Adversarial420.t.sol
-          echo
-          echo "FORMAT_B64_END:test/GovernanceAudit3Adversarial420.t.sol"
-          exit 1
+        run: forge fmt --check src/governance test/CivicFoundation420.t.sol test/CivicElectorateRegistry420.t.sol test/CivicVoting420.t.sol test/CivicGovernor420.t.sol test/CivicTimelockExecution420.t.sol test/Governance420Retirement.t.sol test/GovernanceAudit420.t.sol test/GovernanceAudit2Hardening420.t.sol test/GovernanceAudit3Adversarial420.t.sol
 
       - name: Build canonical Governance contracts
         working-directory: contracts

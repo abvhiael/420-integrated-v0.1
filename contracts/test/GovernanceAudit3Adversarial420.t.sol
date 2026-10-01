@@ -11,10 +11,18 @@ import "../src/governance/CivicGovernor420.sol";
 import "../src/governance/GovernanceTimelock.sol";
 
 interface VmGovernanceAudit3 {
-    function prank(address) external;
-    function expectRevert(bytes4) external;
-    function roll(uint256) external;
-    function warp(uint256) external;
+    function prank(
+        address
+    ) external;
+    function expectRevert(
+        bytes4
+    ) external;
+    function roll(
+        uint256
+    ) external;
+    function warp(
+        uint256
+    ) external;
 }
 
 contract AdversarialElectorateSource420 is ICivicElectorateSource420 {
@@ -25,7 +33,11 @@ contract AdversarialElectorateSource420 is ICivicElectorateSource420 {
     bool public revertWeight;
     mapping(address => uint256) public weights;
 
-    constructor(bytes32 sourceType_, bytes32 root_, uint256 totalWeight_) {
+    constructor(
+        bytes32 sourceType_,
+        bytes32 root_,
+        uint256 totalWeight_
+    ) {
         _sourceType = sourceType_;
         root = root_;
         totalWeight = totalWeight_;
@@ -35,24 +47,37 @@ contract AdversarialElectorateSource420 is ICivicElectorateSource420 {
         return _sourceType;
     }
 
-    function setWeight(address voter, uint256 weight) external {
+    function setWeight(
+        address voter,
+        uint256 weight
+    ) external {
         weights[voter] = weight;
     }
 
-    function setRevertSnapshot(bool value) external {
+    function setRevertSnapshot(
+        bool value
+    ) external {
         revertSnapshot = value;
     }
 
-    function setRevertWeight(bool value) external {
+    function setRevertWeight(
+        bool value
+    ) external {
         revertWeight = value;
     }
 
-    function snapshotAt(uint64) external view returns (bytes32, uint256) {
+    function snapshotAt(
+        uint64
+    ) external view returns (bytes32, uint256) {
         require(!revertSnapshot, "hostile snapshot");
         return (root, totalWeight);
     }
 
-    function votingWeight(bytes32 electorateRoot, address voter, bytes calldata) external view returns (uint256) {
+    function votingWeight(
+        bytes32 electorateRoot,
+        address voter,
+        bytes calldata
+    ) external view returns (uint256) {
         require(!revertWeight, "hostile weight");
         return electorateRoot == root ? weights[voter] : 0;
     }
@@ -70,7 +95,9 @@ contract MalformedElectorateAdapter420 {
 contract Audit3ExecutionTarget420 {
     uint256 public value;
 
-    function setValue(uint256 value_) external {
+    function setValue(
+        uint256 value_
+    ) external {
         value = value_;
     }
 }
@@ -78,14 +105,15 @@ contract Audit3ExecutionTarget420 {
 contract Audit3TimelockGovernor420 {
     address public immutable timelock;
 
-    constructor(address timelock_) {
+    constructor(
+        address timelock_
+    ) {
         timelock = timelock_;
     }
 }
 
 contract GovernanceAudit3Adversarial420Test {
-    VmGovernanceAudit3 constant vm =
-        VmGovernanceAudit3(address(uint160(uint256(keccak256("hevm cheat code")))));
+    VmGovernanceAudit3 constant vm = VmGovernanceAudit3(address(uint160(uint256(keccak256("hevm cheat code")))));
 
     address constant ALICE = address(0xA11CE);
     address constant BOB = address(0xB0B);
@@ -116,9 +144,8 @@ contract GovernanceAudit3Adversarial420Test {
         s.constitution = new CivicConstitution420(address(s.timelock));
         s.proposals = new CivicProposalRegistry420(address(s.timelock));
         s.electorates = new CivicElectorateRegistry420(address(s.timelock));
-        s.community = new AdversarialElectorateSource420(
-            keccak256("AUDIT3_COMMUNITY_SOURCE"), COMMUNITY_ROOT, communityTotal
-        );
+        s.community =
+            new AdversarialElectorateSource420(keccak256("AUDIT3_COMMUNITY_SOURCE"), COMMUNITY_ROOT, communityTotal);
         s.validators =
             new AdversarialElectorateSource420(keccak256("AUDIT3_VALIDATOR_SOURCE"), VALIDATOR_ROOT, validatorTotal);
 
@@ -130,16 +157,17 @@ contract GovernanceAudit3Adversarial420Test {
         }
 
         vm.prank(address(s.timelock));
-        s.constitution.setRule(
-            CivicIds420.ProposalClass.G1,
-            5,
-            7 days,
-            communityQuorum,
-            communityApproval,
-            dualHouse ? 5000 : 0,
-            dualHouse ? 6000 : 0,
-            dualHouse
-        );
+        s.constitution
+            .setRule(
+                CivicIds420.ProposalClass.G1,
+                5,
+                7 days,
+                communityQuorum,
+                communityApproval,
+                dualHouse ? 5000 : 0,
+                dualHouse ? 6000 : 0,
+                dualHouse
+            );
 
         s.voting = new CivicVoting420(address(s.proposals), address(s.electorates));
         s.governor = new CivicGovernor420(
@@ -151,11 +179,18 @@ contract GovernanceAudit3Adversarial420Test {
         s.electorates.bindSnapshotAuthority(address(s.governor));
     }
 
-    function _create(Stack memory s, bytes32 salt) private returns (bytes32 proposalId) {
+    function _create(
+        Stack memory s,
+        bytes32 salt
+    ) private returns (bytes32 proposalId) {
         vm.roll(100);
         vm.prank(ALICE);
-        proposalId =
-            s.governor.createProposal(CivicIds420.ProposalClass.G1, keccak256(abi.encode("meta", salt)), keccak256(abi.encode("actions", salt)));
+        proposalId = s.governor
+            .createProposal(
+                CivicIds420.ProposalClass.G1,
+                keccak256(abi.encode("meta", salt)),
+                keccak256(abi.encode("actions", salt))
+            );
     }
 
     function _cast(
@@ -175,8 +210,7 @@ contract GovernanceAudit3Adversarial420Test {
         bytes32 exactId = _create(exact, "quorum-exact");
         vm.roll(101);
         _cast(exact, exactId, CivicIds420.House.COMMUNITY, ALICE, CivicVoting420.Support.FOR);
-        CivicGovernor420.HouseResult memory exactResult =
-            exact.governor.resultFor(exactId, CivicIds420.House.COMMUNITY);
+        CivicGovernor420.HouseResult memory exactResult = exact.governor.resultFor(exactId, CivicIds420.House.COMMUNITY);
         require(exactResult.quorumMet, "exact quorum must pass");
 
         Stack memory below = _stack(false, 100, 1, 5000, 6000);
@@ -184,8 +218,7 @@ contract GovernanceAudit3Adversarial420Test {
         bytes32 belowId = _create(below, "quorum-below");
         vm.roll(101);
         _cast(below, belowId, CivicIds420.House.COMMUNITY, ALICE, CivicVoting420.Support.FOR);
-        CivicGovernor420.HouseResult memory belowResult =
-            below.governor.resultFor(belowId, CivicIds420.House.COMMUNITY);
+        CivicGovernor420.HouseResult memory belowResult = below.governor.resultFor(belowId, CivicIds420.House.COMMUNITY);
         require(!belowResult.quorumMet, "one below quorum must fail");
 
         Stack memory full = _stack(false, 100, 1, 10000, 6000);
@@ -193,8 +226,7 @@ contract GovernanceAudit3Adversarial420Test {
         bytes32 fullId = _create(full, "quorum-full");
         vm.roll(101);
         _cast(full, fullId, CivicIds420.House.COMMUNITY, ALICE, CivicVoting420.Support.FOR);
-        CivicGovernor420.HouseResult memory fullResult =
-            full.governor.resultFor(fullId, CivicIds420.House.COMMUNITY);
+        CivicGovernor420.HouseResult memory fullResult = full.governor.resultFor(fullId, CivicIds420.House.COMMUNITY);
         require(fullResult.quorumMet, "full participation must meet 100 percent quorum");
     }
 
@@ -219,8 +251,7 @@ contract GovernanceAudit3Adversarial420Test {
         _cast(below, belowId, CivicIds420.House.COMMUNITY, ALICE, CivicVoting420.Support.FOR);
         _cast(below, belowId, CivicIds420.House.COMMUNITY, BOB, CivicVoting420.Support.AGAINST);
         require(
-            !below.governor.resultFor(belowId, CivicIds420.House.COMMUNITY).approvalMet,
-            "one below approval must fail"
+            !below.governor.resultFor(belowId, CivicIds420.House.COMMUNITY).approvalMet, "one below approval must fail"
         );
     }
 
@@ -231,14 +262,16 @@ contract GovernanceAudit3Adversarial420Test {
         vm.roll(101);
         _cast(s, proposalId, CivicIds420.House.COMMUNITY, ALICE, CivicVoting420.Support.ABSTAIN);
 
-        CivicGovernor420.HouseResult memory result =
-            s.governor.resultFor(proposalId, CivicIds420.House.COMMUNITY);
+        CivicGovernor420.HouseResult memory result = s.governor.resultFor(proposalId, CivicIds420.House.COMMUNITY);
         require(result.quorumMet, "abstain participates in quorum");
         require(!result.approvalMet, "no decisive vote cannot approve");
         require(!result.passed, "abstain-only house cannot pass");
     }
 
-    function _dualOutcome(bool communityPass, bool validatorPass) private returns (bool) {
+    function _dualOutcome(
+        bool communityPass,
+        bool validatorPass
+    ) private returns (bool) {
         Stack memory s = _stack(true, 100, 10, 5000, 6000);
         s.community.setWeight(ALICE, 60);
         s.validators.setWeight(BOB, 6);
@@ -278,8 +311,7 @@ contract GovernanceAudit3Adversarial420Test {
         _cast(s, proposalId, CivicIds420.House.COMMUNITY, ALICE, CivicVoting420.Support.FOR);
         _cast(s, proposalId, CivicIds420.House.COMMUNITY, BOB, CivicVoting420.Support.FOR);
 
-        CivicGovernor420.HouseResult memory result =
-            s.governor.resultFor(proposalId, CivicIds420.House.COMMUNITY);
+        CivicGovernor420.HouseResult memory result = s.governor.resultFor(proposalId, CivicIds420.House.COMMUNITY);
         require(result.participation == type(uint256).max, "max participation mismatch");
         require(result.quorumMet && result.approvalMet && result.passed, "max-weight result wrong");
     }
@@ -298,14 +330,8 @@ contract GovernanceAudit3Adversarial420Test {
         vm.expectRevert(CivicVoting420.AlreadyVoted.selector);
         s.voting.castVote(proposalId, CivicIds420.House.COMMUNITY, CivicVoting420.Support.AGAINST, "");
 
-        require(
-            s.voting.tally(proposalId, CivicIds420.House.COMMUNITY).forVotes == 60,
-            "community vote changed"
-        );
-        require(
-            s.voting.tally(proposalId, CivicIds420.House.VALIDATOR).forVotes == 6,
-            "validator vote missing"
-        );
+        require(s.voting.tally(proposalId, CivicIds420.House.COMMUNITY).forVotes == 60, "community vote changed");
+        require(s.voting.tally(proposalId, CivicIds420.House.VALIDATOR).forVotes == 6, "validator vote missing");
     }
 
     function testMaliciousOverweightAndCumulativeAllocationFailClosed() public {
@@ -315,9 +341,7 @@ contract GovernanceAudit3Adversarial420Test {
         vm.roll(101);
         vm.prank(ALICE);
         vm.expectRevert(CivicVoting420.InvalidVotingWeight.selector);
-        overweight.voting.castVote(
-            overweightId, CivicIds420.House.COMMUNITY, CivicVoting420.Support.FOR, ""
-        );
+        overweight.voting.castVote(overweightId, CivicIds420.House.COMMUNITY, CivicVoting420.Support.FOR, "");
         require(
             overweight.voting.participation(overweightId, CivicIds420.House.COMMUNITY) == 0,
             "overweight vote mutated tally"
@@ -332,16 +356,13 @@ contract GovernanceAudit3Adversarial420Test {
 
         vm.prank(BOB);
         vm.expectRevert(CivicVoting420.InvalidVotingWeight.selector);
-        cumulative.voting.castVote(
-            cumulativeId, CivicIds420.House.COMMUNITY, CivicVoting420.Support.FOR, ""
-        );
+        cumulative.voting.castVote(cumulativeId, CivicIds420.House.COMMUNITY, CivicVoting420.Support.FOR, "");
         require(
             cumulative.voting.participation(cumulativeId, CivicIds420.House.COMMUNITY) == 60,
             "cumulative over-allocation mutated tally"
         );
         require(
-            !cumulative.voting.ballot(cumulativeId, CivicIds420.House.COMMUNITY, BOB).cast,
-            "rejected ballot persisted"
+            !cumulative.voting.ballot(cumulativeId, CivicIds420.House.COMMUNITY, BOB).cast, "rejected ballot persisted"
         );
     }
 
@@ -350,12 +371,13 @@ contract GovernanceAudit3Adversarial420Test {
         s.community.setRevertSnapshot(true);
         vm.roll(100);
         vm.prank(ALICE);
-        (bool ok,) = address(s.governor).call(
-            abi.encodeCall(
-                s.governor.createProposal,
-                (CivicIds420.ProposalClass.G1, keccak256("hostile snapshot"), keccak256("actions"))
-            )
-        );
+        (bool ok,) = address(s.governor)
+            .call(
+                abi.encodeCall(
+                    s.governor.createProposal,
+                    (CivicIds420.ProposalClass.G1, keccak256("hostile snapshot"), keccak256("actions"))
+                )
+            );
         require(!ok, "hostile snapshot admitted");
         require(s.governor.proposerNonces(ALICE) == 0, "failed create consumed nonce");
     }
@@ -367,12 +389,12 @@ contract GovernanceAudit3Adversarial420Test {
         s.community.setRevertWeight(true);
         vm.roll(101);
         vm.prank(ALICE);
-        (bool ok,) = address(s.voting).call(
-            abi.encodeCall(
-                s.voting.castVote,
-                (proposalId, CivicIds420.House.COMMUNITY, CivicVoting420.Support.FOR, bytes(""))
-            )
-        );
+        (bool ok,) = address(s.voting)
+            .call(
+                abi.encodeCall(
+                    s.voting.castVote, (proposalId, CivicIds420.House.COMMUNITY, CivicVoting420.Support.FOR, bytes(""))
+                )
+            );
         require(!ok, "hostile weight admitted");
         require(!s.voting.ballot(proposalId, CivicIds420.House.COMMUNITY, ALICE).cast, "ballot persisted");
         require(s.voting.participation(proposalId, CivicIds420.House.COMMUNITY) == 0, "tally mutated");
@@ -381,9 +403,8 @@ contract GovernanceAudit3Adversarial420Test {
     function testMalformedElectorateAdapterRejectedDuringConfiguration() public {
         CivicElectorateRegistry420 registry = new CivicElectorateRegistry420(address(this));
         MalformedElectorateAdapter420 malformed = new MalformedElectorateAdapter420();
-        (bool ok,) = address(registry).call(
-            abi.encodeCall(registry.setHouseSource, (CivicIds420.House.COMMUNITY, address(malformed)))
-        );
+        (bool ok,) = address(registry)
+            .call(abi.encodeCall(registry.setHouseSource, (CivicIds420.House.COMMUNITY, address(malformed))));
         require(!ok, "malformed adapter configured");
         require(!registry.sourceFor(CivicIds420.House.COMMUNITY).exists, "malformed source persisted");
     }
@@ -419,9 +440,10 @@ contract GovernanceAudit3Adversarial420Test {
     ) private returns (bytes32 proposalId) {
         vm.roll(100);
         vm.prank(ALICE);
-        proposalId = s.governor.createProposal(
-            CivicIds420.ProposalClass.G1, keccak256(abi.encode("action-meta", salt)), keccak256(abi.encode(actions))
-        );
+        proposalId = s.governor
+            .createProposal(
+                CivicIds420.ProposalClass.G1, keccak256(abi.encode("action-meta", salt)), keccak256(abi.encode(actions))
+            );
         vm.roll(101);
         _cast(s, proposalId, CivicIds420.House.COMMUNITY, ALICE, CivicVoting420.Support.FOR);
         vm.roll(106);
@@ -433,9 +455,8 @@ contract GovernanceAudit3Adversarial420Test {
         s.community.setWeight(ALICE, 60);
         Audit3ExecutionTarget420 target = new Audit3ExecutionTarget420();
         CivicGovernor420.Action[] memory actions = new CivicGovernor420.Action[](1);
-        actions[0] = CivicGovernor420.Action({
-            target: address(target), value: 0, data: abi.encodeCall(target.setValue, (1))
-        });
+        actions[0] =
+            CivicGovernor420.Action({ target: address(target), value: 0, data: abi.encodeCall(target.setValue, (1)) });
         bytes32 proposalId = _passedActionProposal(s, actions, "repeat-queue");
         s.timelock.activateCivicAuthority(address(s.governor));
         s.governor.queue(proposalId, actions);
@@ -449,12 +470,10 @@ contract GovernanceAudit3Adversarial420Test {
         s.community.setWeight(ALICE, 60);
         Audit3ExecutionTarget420 target = new Audit3ExecutionTarget420();
         CivicGovernor420.Action[] memory committed = new CivicGovernor420.Action[](2);
-        committed[0] = CivicGovernor420.Action({
-            target: address(target), value: 0, data: abi.encodeCall(target.setValue, (1))
-        });
-        committed[1] = CivicGovernor420.Action({
-            target: address(target), value: 0, data: abi.encodeCall(target.setValue, (2))
-        });
+        committed[0] =
+            CivicGovernor420.Action({ target: address(target), value: 0, data: abi.encodeCall(target.setValue, (1)) });
+        committed[1] =
+            CivicGovernor420.Action({ target: address(target), value: 0, data: abi.encodeCall(target.setValue, (2)) });
         bytes32 proposalId = _passedActionProposal(s, committed, "reorder");
         s.timelock.activateCivicAuthority(address(s.governor));
 
@@ -472,12 +491,12 @@ contract GovernanceAudit3Adversarial420Test {
         bytes32 operationId = keccak256("audit3-unauthorized");
 
         vm.prank(ALICE);
-        (bool scheduleOk,) = address(timelock).call(
-            abi.encodeCall(
-                timelock.schedule,
-                (operationId, address(target), 0, bytes(""), GovernanceTimelock.Class.G1)
-            )
-        );
+        (bool scheduleOk,) = address(timelock)
+            .call(
+                abi.encodeCall(
+                    timelock.schedule, (operationId, address(target), 0, bytes(""), GovernanceTimelock.Class.G1)
+                )
+            );
         require(!scheduleOk, "unauthorized schedule admitted");
 
         timelock.schedule(operationId, address(target), 0, bytes(""), GovernanceTimelock.Class.G1);

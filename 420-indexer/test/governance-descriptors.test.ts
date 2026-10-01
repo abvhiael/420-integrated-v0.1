@@ -12,7 +12,7 @@ import {
 } from '../src/governance-descriptors.js';
 
 const manifest = JSON.parse(
-  readFileSync(new URL('../descriptors/governance-civic-v1.json', import.meta.url), 'utf8')
+  readFileSync(new URL('../../descriptors/governance-civic-v1.json', import.meta.url), 'utf8')
 ) as GovernanceCivicArtifactManifest420;
 
 function artifactsFromManifest420(): ReadonlyMap<string, Artifact420> {

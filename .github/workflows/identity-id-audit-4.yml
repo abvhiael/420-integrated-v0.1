@@ -15,6 +15,7 @@ on:
       - "420-indexer/src/abi-manifest.ts"
       - "scripts/generate-id-audit-4-identity-artifact.py"
       - "scripts/verify-id-audit-4-artifact.py"
+      - "scripts/test-reg-audit-4-genesis-address-namespace.py"
       - "scripts/qualify-generated-reference.py"
       - ".github/workflows/identity-id-audit-4.yml"
   workflow_dispatch:
@@ -77,6 +78,9 @@ jobs:
           python3 scripts/generate-id-audit-4-identity-artifact.py --check
           python3 scripts/verify-id-audit-4-artifact.py
           python3 scripts/qualify-generated-reference.py --check
+
+      - name: Verify catalogue namespace regression fixtures
+        run: python3 scripts/test-reg-audit-4-genesis-address-namespace.py
 
       - name: Test Developer Hub catalogue consumers
         working-directory: developer-hub

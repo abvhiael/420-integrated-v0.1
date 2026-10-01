@@ -412,6 +412,27 @@ Durable evidence:
 
 The next canonical step is NAMES-AUDIT-8.
 
+### NAMES-AUDIT-9 status
+
+NAMES-AUDIT-9 is **NOT YET COMPLETE — BLOCKED ON OFFICIAL TESTNET**.
+
+Repository-side production-equivalent qualification machinery is complete and qualified on implementation SHA `901a7b0a762ef14adb8080873ecc2e393f74afaf`. Exact-head Names run `36806948461` passed the NAMES-AUDIT-9 evidence-contract build, **10/10** hostile/fail-closed tests, readiness verification, retained artifact/dependency checks, Wallet Names integration/static qualification, and authority/opcode scan. Full directly affected 420Indexer run `36806878687` also passed after correction of a negative-test message expectation.
+
+The repository currently has no `developer-hub/manifests/testnet.json`; `testnet/config/launch.json` still marks chain ID 420 `CANDIDATE_PENDING_COLLISION_PREFLIGHT`; and `testnet/services/endpoints.json` retains placeholder endpoints. The exact-head readiness verifier therefore correctly reports:
+
+`NAMES_AUDIT_9_READINESS=BLOCKED_OFFICIAL_TESTNET_MANIFEST`
+
+`liveQualificationComplete=false`
+
+No chain ID, live code, storage, governance, Registry, Wallet, Indexer/Search, or real user-journey evidence is claimed. Those canonical exit criteria must be executed against the eventual official production-equivalent testnet before this step can close.
+
+Durable status/evidence:
+
+- `docs/audit/420NAMES-AUDIT-9-TESTNET-QUALIFICATION.md`
+- `docs/audit/420NAMES-AUDIT-9-TESTNET-QUALIFICATION.json`
+
+Do **not** advance to NAMES-AUDIT-10 until NAMES-AUDIT-9 has retained official live PASS evidence.
+
 ## Numbered remediation roadmap
 
 1. **NAMES-AUDIT-1 — resolver interface reconciliation** — merge the corrected `INames420` ABI and regression test after exact-head CI passes.
@@ -432,4 +453,4 @@ The next canonical step is NAMES-AUDIT-8.
 
 The most important code defect found in this audit was the stale shared resolver interface, which could cause callers to decode `owner` as the destination address. That defect is repaired on the audit branch with a regression test.
 
-The deterministic Genesis runtime/state materialization is complete and qualified by NAMES-AUDIT-6, and artifact-derived Indexer/Search reconciliation is complete and qualified by NAMES-AUDIT-7. Remaining blockers are deployment/operator documentation, production-equivalent testnet qualification, Genesis acceptance closeout, and later production qualification. Offline deterministic and derived-service evidence must still not be conflated with live deployed-chain proof.
+The deterministic Genesis runtime/state materialization, artifact-derived Indexer/Search reconciliation, and deployment/operator documentation are complete through NAMES-AUDIT-8. NAMES-AUDIT-9 repository tooling is also implemented and qualified, but production-equivalent live execution remains blocked on publication of the official testnet manifest/endpoints. Offline deterministic, derived-service, and harness evidence must not be conflated with live deployed-chain proof.

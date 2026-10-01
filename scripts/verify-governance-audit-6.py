@@ -125,13 +125,35 @@ def main(argv=None):
 
     inputs = cfg.get("canonicalInputs", {})
     unresolved = []
-    for key in ("bootstrapGovernor","communityElectorateSource"):
+    for key in ("bootstrapGovernor","communityElectorateSource","validatorElectorateSource"):
         if inputs.get(key, {}).get("value") in (None, ""):
             unresolved.append(key)
+
+    if inputs.get("bootstrapGovernor", {}).get("value", "").lower() != "0x0000000000000000000000000000000000000437":
+        errors.append("bootstrapGovernor must be frozen Governance420@0x0437")
+    if inputs.get("communityElectorateSource", {}).get("sourceTypePreimage") != "420CIVIC_COMMUNITY_EQUAL_WEIGHT_MERKLE_V1":
+        errors.append("community electorate source type mismatch")
+    if inputs.get("validatorElectorateSource", {}).get("sourceTypePreimage") != "420CIVIC_VALIDATOR_EQUAL_WEIGHT_MERKLE_V1":
+        errors.append("validator electorate source type mismatch")
+    if inputs.get("validatorElectorateSource", {}).get("weighting") != "ONE_ACTIVE_VALIDATOR_OWNER_ONE_VOTE_NOT_STAKE_WEIGHTED":
+        errors.append("validator electorate weighting policy drift")
+    if not (ROOT / "contracts/src/governance/CivicMerkleElectorateSource420.sol").is_file():
+        errors.append("canonical Civic electorate source implementation missing")
+
     rules = inputs.get("initialConstitutionalRules", {})
-    for cls in ("G1","G2","G3","G4"):
+    expected_rules = {
+        "G1": {"votingPeriodBlocks":17640,"timelockDelaySeconds":604800,"communityQuorumBps":1000,"communityApprovalBps":5001,"validatorQuorumBps":0,"validatorApprovalBps":0,"dualHouseRequired":False},
+        "G2": {"votingPeriodBlocks":35280,"timelockDelaySeconds":1209600,"communityQuorumBps":2000,"communityApprovalBps":6000,"validatorQuorumBps":0,"validatorApprovalBps":0,"dualHouseRequired":False},
+        "G3": {"votingPeriodBlocks":35280,"timelockDelaySeconds":1209600,"communityQuorumBps":3334,"communityApprovalBps":6667,"validatorQuorumBps":3334,"validatorApprovalBps":6667,"dualHouseRequired":True},
+        "G4": {"votingPeriodBlocks":105840,"timelockDelaySeconds":3628800,"communityQuorumBps":5000,"communityApprovalBps":7500,"validatorQuorumBps":5000,"validatorApprovalBps":7500,"dualHouseRequired":True},
+    }
+    for cls, expected in expected_rules.items():
         if rules.get(cls) is None:
             unresolved.append("initialConstitutionalRules."+cls)
+        elif rules.get(cls) != expected:
+            errors.append(f"{cls} initial constitutional rule drift")
+    if rules.get("rotationBlocks") != 17640:
+        errors.append("canonical governance rotationBlocks drift")
     if storage.get("entries", {}).get("GovernanceTimelock", {}).get("constructor") != ["bootstrap_governor"]:
         errors.append("storage-init GovernanceTimelock constructor authority drift")
     if storage.get("bootstrap_governor") not in (None, "UNRESOLVED_DO_NOT_INVENT"):
@@ -140,7 +162,10 @@ def main(argv=None):
             errors.append("bootstrap governor authority mismatch")
 
     blockers.extend(sorted(set(unresolved)))
-    ready = not blockers and cfg.get("status") == "READY_FOR_REPRODUCIBLE_DEPLOYMENT"
+    ready = not blockers and cfg.get("status") in {
+        "CANONICAL_INITIALIZATION_INPUTS_RESOLVED_ARTIFACTS_PENDING",
+        "READY_FOR_REPRODUCIBLE_DEPLOYMENT",
+    }
     if require_ready and not ready:
         errors.append("canonical initialization inputs unresolved: " + ", ".join(blockers))
 

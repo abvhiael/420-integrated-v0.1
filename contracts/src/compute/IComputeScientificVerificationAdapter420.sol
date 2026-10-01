@@ -5,6 +5,7 @@ pragma solidity ^0.8.24;
 /// @dev Adapters validate bounded evidence under an explicit protocol. They do not select verifiers,
 /// mutate jobs, move funds, settle, slash, or claim that sampled validation equals full recomputation.
 interface IComputeScientificVerificationAdapter420 {
+    function adapterKind() external view returns (bytes32);
     function workloadType() external view returns (bytes32);
     function profileId() external view returns (bytes32);
     function outputSchemaCommitment() external view returns (bytes32);

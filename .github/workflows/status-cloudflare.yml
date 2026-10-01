@@ -32,6 +32,10 @@ jobs:
           node-version: '22'
       - name: Verify branded Status assets
         run: |
+          test -s status/web/static/420status-logo.webp
+          test -s status/web/static/favicon.png
+          grep -q '/420status-logo.webp' status/web/static/index.html
+          grep -q '/favicon.png' status/web/static/index.html
           grep -q 'INTEGRATED' status/web/static/index.html
           grep -qi 'status.420integrated.org' status/cloudflare/README.md
           grep -q '#45b84a' status/web/static/app.css

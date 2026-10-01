@@ -129,6 +129,34 @@ contract StakeSecurityInvariantHandler420 {
         acceptedEvidence[FIXED_EVIDENCE] = true;
     }
 
+    function slashPrincipal(bytes32 evidence) external {
+        if (evidence == bytes32(0)) evidence = keccak256("stake-audit-4-principal-evidence");
+        ValidatorRegistry.Validator memory v = registry.getValidator(VALIDATOR_ID);
+        uint256 effective = v.ownedBond + v.protocolCredit;
+        if (v.status == ValidatorRegistry.Status.NONE || v.status == ValidatorRegistry.Status.EXITED || effective == 0) return;
+
+        uint256 totalPenalty = (effective * 500) / 10_000;
+        if (totalPenalty == 0) return;
+        uint256 ownedSlashed = (totalPenalty * v.ownedBond) / effective;
+        uint256 creditSlashed = totalPenalty - ownedSlashed;
+
+        (bool ok,) = address(registry).call(
+            abi.encodeWithSelector(
+                registry.applySlash.selector,
+                VALIDATOR_ID,
+                ValidatorRegistry.SlashOffense.DOUBLE_PROPOSAL,
+                uint8(0),
+                ownedSlashed,
+                creditSlashed,
+                evidence,
+                v.status
+            )
+        );
+        if (!ok) return;
+        if (acceptedEvidence[evidence]) duplicateSlashAccepted = true;
+        acceptedEvidence[evidence] = true;
+    }
+
     function rewardAttempt(uint8 mode, uint8 countSeed) external {
         uint256 count = uint256(countSeed) % 35;
         address proposer = address(0x9001);

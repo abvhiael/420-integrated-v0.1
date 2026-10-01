@@ -4,9 +4,10 @@ const runtime=JSON.parse(fs.readFileSync(path.join(repo,'exchange/web/runtime-co
 const readiness=JSON.parse(fs.readFileSync(path.join(repo,'exchange/pretestnet-readiness.json'),'utf8'));
 const contractReadiness=JSON.parse(fs.readFileSync(path.join(repo,'contracts/config/exchange/pretestnet-readiness-v1.json'),'utf8'));
 if(JSON.stringify(readiness)!==JSON.stringify(contractReadiness))throw new Error('PRE-11 readiness manifests diverge');
-if(readiness.schema!=='420-exchange-pretestnet-readiness-v1'||readiness.step!=='PRE-11'||!Array.isArray(readiness.liveGates)||readiness.liveGates.length<1)throw new Error('PRE-11 readiness manifest invalid');
+if(readiness.schema!=='420-exchange-pretestnet-readiness-v1'||!['PRE-11','PRE-12'].includes(readiness.step)||!Array.isArray(readiness.liveGates)||readiness.liveGates.length<1)throw new Error('PRE-11/PRE-12 readiness manifest invalid');
 for(const gate of readiness.liveGates){
-  if(gate.resolved!==false||gate.requiredState!=='DISABLED_PRETESTNET')throw new Error('PRE-11 unresolved live gate must remain OFF: '+gate.id);
+  if(gate.resolved!==false||gate.requiredState!=='DISABLED_PRETESTNET')throw new Error('PRE-11/PRE-12 unresolved live gate must remain OFF: '+gate.id);
+  for(const key of ['owner','requiredEndpointAccountConfiguration','expectedEvidence','rollbackProcedure'])if(!gate[key]||(Array.isArray(gate[key])&&gate[key].length===0))throw new Error('PRE-12 live gate handoff field missing '+key+': '+gate.id);
   if(runtime.execution?.[gate.id]!==gate.requiredState)throw new Error('runtime live gate mismatch: '+gate.id);
 }
 const headers=JSON.parse(fs.readFileSync(path.join(repo,'exchange/web/security-headers.json'),'utf8'));

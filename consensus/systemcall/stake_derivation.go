@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"math"
 	"math/big"
 	"sort"
 )
@@ -150,7 +149,7 @@ func BuildStakeBatch(ctx DerivationContext, previousSequence uint64, outcomes Fi
 	nextSequence := previousSequence
 
 	appendCall := func(action string, target Address, payload []byte) error {
-		if nextSequence == math.MaxUint64 {
+		if nextSequence == ^uint64(0) {
 			return ErrSequenceOverflow
 		}
 		nextSequence++

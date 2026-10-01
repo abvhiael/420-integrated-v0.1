@@ -1,0 +1,265 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-1.5.0.StakeArchitecture.v1",
+  "step": "CMP-1.5.0",
+  "title": "Stake architecture",
+  "base_main_sha": "f6c4d082f60d2ac706a941c9289ed7a7309cf3ab",
+  "canonical_definition": "Reuse canonical $420 custody/accounting. Do not create an unrelated collateral treasury.",
+  "parent_requirement": {
+    "step": "CMP-1.5",
+    "title": "ComputeStake",
+    "canonical_responsibilities": [
+      "stake()",
+      "unstake()",
+      "requestExit()",
+      "slash()",
+      "reward()"
+    ],
+    "purpose": "Provide worker/verifier collateral and objective economic consequences without conflating Compute custody with validator stake or payer escrow."
+  },
+  "status": "IMPLEMENTED_QUALIFICATION_PENDING",
+  "existing_components": [
+    {
+      "source": "contracts/src/interfaces/IComputeStakeSource420.sol",
+      "role": "narrow worker-collateral read interface",
+      "disposition": "retained_input_not_full_compute_stake",
+      "authority": [
+        "read worker collateral position state for admission"
+      ],
+      "must_not_claim": [
+        "custody",
+        "stake movement",
+        "slash authority",
+        "verifier collateral",
+        "reward accounting"
+      ]
+    },
+    {
+      "source": "contracts/src/compute/ComputeWorkerStake420.sol",
+      "role": "worker admission binding/snapshot adapter",
+      "disposition": "retained_consumer",
+      "authority": [
+        "bind compatible ComputeStake source",
+        "publish admission thresholds",
+        "capture historical stake references",
+        "fail-closed worker admission"
+      ],
+      "must_not_claim": [
+        "collateral custody",
+        "stake/unstake execution",
+        "slash execution",
+        "reward execution",
+        "validator stake authority"
+      ]
+    },
+    {
+      "source": "contracts/src/vault/VaultRegistry420.sol",
+      "role": "canonical Vault instance/lifecycle registry",
+      "disposition": "reuse",
+      "authority": [
+        "registered Vault identity and lifecycle"
+      ]
+    },
+    {
+      "source": "contracts/src/vault/AssetVault420.sol",
+      "role": "canonical asset custody/release surface",
+      "disposition": "reuse",
+      "authority": [
+        "custody of native $420 collateral",
+        "obligation creation/release/cancel/claim under bounded authorization"
+      ]
+    },
+    {
+      "source": "contracts/src/vault/VaultAccounting420.sol",
+      "role": "canonical Vault accounting surface",
+      "disposition": "reuse",
+      "authority": [
+        "recorded balance",
+        "reserved/claimable/free accounting",
+        "obligation state"
+      ]
+    },
+    {
+      "source": "contracts/src/vault/VaultIds420.sol",
+      "role": "canonical Vault domains/actions",
+      "disposition": "reuse",
+      "authority": [
+        "VAULT_COLLATERAL type",
+        "Vault action identifiers"
+      ]
+    },
+    {
+      "source": "contracts/src/compute/ComputeEscrowFunding420.sol",
+      "role": "payer escrow funding path",
+      "disposition": "strictly_separate_liability_domain",
+      "authority": [
+        "payer-funded job obligations only"
+      ],
+      "must_not_claim": [
+        "Compute collateral source",
+        "slash backing",
+        "staking treasury"
+      ]
+    },
+    {
+      "source": "contracts/src/apps/Stake420.sol",
+      "role": "validator-stake read facade",
+      "disposition": "explicit_non_substitute",
+      "must_not_claim": [
+        "Compute worker collateral",
+        "Compute verifier collateral",
+        "ComputeStake source"
+      ]
+    }
+  ],
+  "canonical_custody_model": {
+    "custody_family": "420Vault",
+    "vault_contract": "AssetVault420",
+    "registry": "VaultRegistry420",
+    "accounting": "VaultAccounting420",
+    "vault_type": "VaultIds420.VAULT_COLLATERAL",
+    "canonical_asset": "native $420",
+    "canonical_asset_address": "address(0)",
+    "dedicated_compute_collateral_vault": true,
+    "parallel_staking_treasury": false,
+    "direct_compute_stake_balance_custody": false,
+    "payer_escrow_reuse": false,
+    "rule": "Compute collateral uses a dedicated registered VAULT_COLLATERAL instance inside the canonical 420Vault family. A distinct Vault instance isolates collateral liabilities from payer escrow, but it is not a second treasury or accounting system.",
+    "backing_rule": "Every active/slashable position amount must be backed by canonical Vault balance/accounting and a uniquely bound collateral obligation; internal mappings alone are never custody.",
+    "solvency_rule": "Aggregate active, exiting, slashable, claimable and released collateral accounting must never exceed the corresponding canonical Vault backing.",
+    "authorization_rule": "A future ComputeStake controller may receive only narrowly scoped collateral-vault actions required for stake lifecycle, exit, objective slash reallocation and reward accounting; no arbitrary withdraw, beneficiary redirection, generic transfer, treasury budget or payer-escrow authority.",
+    "isolation_rule": "Worker/verifier positions and policy revisions use unique domain-separated position identities; one position cannot consume or slash another participant's backing."
+  },
+  "non_substitutes": [
+    "validator bond state exposed by Stake420/ValidatorRegistry",
+    "wallet balance",
+    "payer-funded ComputeEscrow credit or obligation",
+    "Treasury budget/disbursement state",
+    "420Trust/reputation",
+    "verification verdict without independently qualified final slash authorization"
+  ],
+  "lifecycle_architecture": {
+    "stake": "payer/participant-origin native $420 enters the registered collateral Vault atomically with creation/increase of the exact position-backed obligation; successful return requires backing/accounting parity.",
+    "request_exit": "marks the canonical ComputeStake position exiting and freezes the applicable withdrawal delay while collateral remains backed and slashable according to the bound policy.",
+    "unstake": "may release only matured, non-forfeited collateral to the immutable position owner/beneficiary after delay and all policy/dispute locks; no admin-recipient substitution.",
+    "slash": "may consume only objectively proven, final, policy-bound slashable collateral for the exact subject/position/policy revision; allegation or nonfinal review is insufficient.",
+    "reward": "records/credits only an authorized reward source and may not mint, seize payer escrow, or fabricate Vault backing.",
+    "historical_reads": "later policy/source/identity changes cannot rewrite historical position revisions, stake references, slash evidence or already-final entitlements."
+  },
+  "authority_boundaries": [
+    "ComputeStake lifecycle authority does not imply validator lifecycle, consensus, Civic governance, Treasury, bridge, arbitrary-wallet or payer-escrow authority.",
+    "420Vault remains custody/release authority; ComputeStake owns collateral lifecycle semantics and bounded instructions only.",
+    "ComputeEscrow payer obligations and ComputeStake collateral obligations remain separately backed, separately identified and never netted or silently reclassified.",
+    "Worker/verifier registration or reputation does not create stake.",
+    "A verifier verdict/challenge record is evidence input only; CMP-1.5.5 must establish objective slash authorization and finality.",
+    "Emergency/governance suspension may stop unsafe new activity but cannot redirect collateral, fabricate slash evidence or confiscate matured valid entitlement.",
+    "Validator Stake420/ValidatorRegistry collateral is a distinct consensus-economic domain and cannot satisfy IComputeStakeSource420."
+  ],
+  "step_ownership": [
+    {
+      "step": "CMP-1.5.1",
+      "requirement": "Worker collateral"
+    },
+    {
+      "step": "CMP-1.5.2",
+      "requirement": "Verifier collateral"
+    },
+    {
+      "step": "CMP-1.5.3",
+      "requirement": "Policy-specific minimum collateral"
+    },
+    {
+      "step": "CMP-1.5.4",
+      "requirement": "Exit queue / withdrawal delay"
+    },
+    {
+      "step": "CMP-1.5.5",
+      "requirement": "Objective slash authorization"
+    },
+    {
+      "step": "CMP-1.5.6",
+      "requirement": "Slash distribution"
+    },
+    {
+      "step": "CMP-1.5.7",
+      "requirement": "Reward accounting"
+    },
+    {
+      "step": "CMP-1.5.8",
+      "requirement": "Dispute/stake integration"
+    },
+    {
+      "step": "CMP-1.5.9",
+      "requirement": "WorkerRegistry stake-source integration"
+    },
+    {
+      "step": "CMP-1.5.10",
+      "requirement": "ComputeEscrow slash-redistribution integration"
+    },
+    {
+      "step": "CMP-1.5.11",
+      "requirement": "Hostile economic qualification"
+    },
+    {
+      "step": "CMP-1.5.12",
+      "requirement": "Release candidate"
+    },
+    {
+      "step": "CMP-1.5.13",
+      "requirement": "Phase closeout"
+    }
+  ],
+  "frozen_invariants": [
+    "CMP-INV-005",
+    "CMP-INV-009",
+    "CMP-INV-010",
+    "CMP-INV-013",
+    "CMP-INV-018",
+    "CMP-INV-019",
+    "CMP-INV-020",
+    "CMP-INV-021",
+    "CMP-INV-022",
+    "CMP-INV-023",
+    "CMP-INV-025",
+    "CMP-INV-026",
+    "CMP-INV-028",
+    "CMP-INV-029",
+    "CMP-INV-030"
+  ],
+  "deliberately_deferred": [
+    "ComputeStake420 runtime implementation",
+    "worker stake mutation and custody operations",
+    "verifier collateral surface",
+    "minimum-collateral policy implementation",
+    "exit queue/withdrawal delay implementation",
+    "slash authorization/distribution implementation",
+    "reward accounting implementation",
+    "dispute/stake and escrow slash-redistribution integration",
+    "hostile economic qualification",
+    "deployment/release-candidate/publication evidence",
+    "live/testnet collateral"
+  ],
+  "deployment_state": {
+    "new_fixed_predeploy": false,
+    "live_compute_stake_address": null,
+    "live_collateral_vault_address": null,
+    "protocol_registry_publication": false,
+    "runtime_code_hash_verified": false,
+    "note": "CMP-1.5.0 is an architecture freeze only."
+  },
+  "qualification": {
+    "level": 1,
+    "required": [
+      "Compute Market Qualification exact-head pass",
+      "CMP-1.5.0 architecture verifier pass",
+      "retained Compute Solidity suite pass",
+      "documentation qualification if triggered"
+    ],
+    "deferred_level_3": [
+      "canonical full repository Solidity inventory",
+      "Genesis address-authority closeout",
+      "420 Integrated/global closeout",
+      "complete CMP-1.5 phase reconciliation"
+    ]
+  },
+  "next_canonical_step": "CMP-1.5.1 — Worker collateral"
+}

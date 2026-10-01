@@ -1,6 +1,6 @@
 # CMP-1.5.2 — Verifier collateral
 
-Status: **IMPLEMENTED. LEVEL 1 QUALIFICATION PENDING.**
+Status: **COMPLETE. LEVEL 1 EXACT-HEAD QUALIFIED.**
 
 ## Canonical definition
 
@@ -98,6 +98,40 @@ CMP-1.5.2 is COMPLETE only when:
 - failed authorization leaves no Vault or position mutation;
 - exact-head Level 1 Compute qualification passes;
 - durable evidence records the qualified implementation SHA.
+
+Next canonical step:
+
+**CMP-1.5.3 — Policy-specific minimum collateral**
+
+
+## Completion evidence
+
+CMP-1.5.2 is **COMPLETE** at Level 1.
+
+Qualified implementation SHA:
+
+`baa6ea2e5adc0315d6e6c89010b5c58a03c0532c`
+
+Exact-head results:
+
+- Compute Market Qualification #91 — run `36935785406` — **PASS**;
+- retained Compute Market Solidity suite — **PASS**;
+- CMP-1.5.2 verifier-collateral verifier — **PASS**;
+- Solidity Contracts #3770 — run `36935785381` — **PASS** on the Compute fast path;
+- 420Docs Qualification #3983 — run `36935785324` — **PASS**;
+- Genesis Address Authority #572 — run `36935785428` — **PASS**;
+- 420Registry REG-AUDIT-4 #407 — run `36935785453` — **PASS**;
+- 420Indexer #1387 — run `36935785307` — **PASS**.
+
+The Solidity classifier was repaired during this step so Compute-specific interfaces under `contracts/src/interfaces/ICompute*.sol` remain on the Compute fast path rather than triggering the full repository Foundry inventory.
+
+Durable machine-readable evidence:
+
+`docs/compute-market/CMP-1.5.2-QUALIFICATION-EVIDENCE.json`
+
+This closeout is evidence-only relative to the qualified implementation SHA above. It changes no executable source, tests, workflows, dependencies, interfaces, runtime configuration, deployment state, or substantive requirements.
+
+Level 2 was not required. Level 3 remains deferred to **CMP-1.5.13 — Phase closeout**.
 
 Next canonical step:
 

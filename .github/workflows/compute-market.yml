@@ -126,3 +126,6 @@ jobs:
 
       - name: Verify CMP-1.5.2 verifier collateral
         run: python scripts/verify-cmp-1-5-2-verifier-collateral.py
+
+      - name: Verify CMP-1.5.3 policy-specific minimum collateral
+        run: python scripts/verify-cmp-1-5-3-policy-minimum-collateral.py

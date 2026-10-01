@@ -180,6 +180,8 @@ Reuse canonical $420 custody/accounting. Do not create an unrelated collateral t
 
 
 ### CMP-1.5.3 — Policy-specific minimum collateral
+**Status: COMPLETE — Level 1 + first CMP-1.5 Level 2 milestone qualified on `d72dc4c2f5fc2772fd2ea4299dbce9936e78cece`.**
+
 
 ### CMP-1.5.4 — Exit queue / withdrawal delay
 
@@ -506,7 +508,7 @@ Production target flow:
 | CMP-1.2 ComputeEscrow/Vault accounting | repository-qualified; live/stake dependencies remain |
 | CMP-1.3 WorkerRegistry | current: CMP-1.3.16 closeout |
 | CMP-1.4 VerifierRegistry | repository-qualified through CMP-1.4.12 |
-| CMP-1.5 ComputeStake | current: CMP-1.5.2 verifier collateral; CMP-1.5.0–1.5.1 complete |
+| CMP-1.5 ComputeStake | current: CMP-1.5.4 exit queue / withdrawal delay; CMP-1.5.0–1.5.3 complete |
 | CMP-2 matching marketplace | forthcoming |
 | CMP-3 node420 worker runtime | forthcoming |
 | CMP-4 scientific compute framework | forthcoming |

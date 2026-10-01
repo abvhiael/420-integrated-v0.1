@@ -1,0 +1,75 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-1.5.3.PolicySpecificMinimumCollateral.v1",
+  "step": "CMP-1.5.3",
+  "title": "Policy-specific minimum collateral",
+  "status": "IMPLEMENTED_QUALIFICATION_PENDING",
+  "base_head": "3773f00e067ccef50b40ff35a9f11449e403476f",
+  "canonical_definition": "Policy-specific minimum collateral",
+  "implementation": {
+    "contract": "contracts/src/compute/ComputeStakeCollateralPolicy420.sol",
+    "test": "contracts/test/ComputeStakeCollateralPolicy420.t.sol",
+    "worker_position_interface": "contracts/src/interfaces/IComputeStakeSource420.sol",
+    "verifier_position_interface": "contracts/src/interfaces/IComputeVerifierStakeSource420.sol"
+  },
+  "authority": {
+    "canonical_minimum_collateral_policy": "ComputeStakeCollateralPolicy420",
+    "custody_authority": "420Vault remains unchanged and separate",
+    "source_binding_authority": "deferred to later integration steps",
+    "compatibility_note": "ComputeWorkerStake420 retains its older local worker-admission policy surface until CMP-1.5.9 integration; it is not the canonical CMP-1.5 minimum-collateral policy authority."
+  },
+  "requirements": [
+    "governance publishes append-only stake-policy revisions",
+    "each revision independently defines whether worker and verifier collateral are required",
+    "required worker and verifier roles have nonzero active/slashable minima with slashable <= active",
+    "disabled roles must carry zero collateral minima",
+    "worker and verifier minimums are independently evaluated",
+    "policy revisions preserve immutable historical terms and commitments",
+    "new-acceptance gating is separate from immutable revision terms",
+    "current-acceptance verification requires exact current revision and commitment",
+    "worker position evaluation enforces active/slashable thresholds, active state and optional exit rejection",
+    "verifier position evaluation enforces authority/revision presence, active/slashable thresholds, active state and optional exit rejection",
+    "the policy contract never custodies collateral and never selects stake sources"
+  ],
+  "invariants": [
+    "CMP-INV-005",
+    "CMP-INV-019",
+    "CMP-INV-020",
+    "CMP-INV-021",
+    "CMP-INV-022",
+    "CMP-INV-023",
+    "CMP-INV-025",
+    "CMP-INV-026",
+    "CMP-INV-028",
+    "CMP-INV-029"
+  ],
+  "milestone": {
+    "level_2_required_now": true,
+    "rationale": "CMP-1.5.1 worker collateral, CMP-1.5.2 verifier collateral, and CMP-1.5.3 shared minimum policy now converge into the first complete collateral-admission model.",
+    "retained_app_suite": "retained Compute*.t.sol suite",
+    "cross_role_integration": "ComputeStakeCollateralPolicy420 tests exercise both worker and verifier position schemas against one policy revision."
+  },
+  "deferred": [
+    "CMP-1.5.4 exit queue / withdrawal delay",
+    "CMP-1.5.5 objective slash authorization",
+    "CMP-1.5.6 slash distribution",
+    "CMP-1.5.7 reward accounting",
+    "CMP-1.5.8 dispute/stake integration",
+    "CMP-1.5.9 WorkerRegistry stake-source and canonical-policy integration",
+    "CMP-1.5.10 ComputeEscrow slash redistribution",
+    "CMP-1.5.11 hostile economic qualification",
+    "CMP-1.5.12 release candidate",
+    "CMP-1.5.13 phase closeout"
+  ],
+  "qualification": {
+    "level": 2,
+    "level_1_required": [
+      "Compute contract build",
+      "focused ComputeStakeCollateralPolicy420 tests",
+      "CMP-1.5.3 mechanical verifier"
+    ],
+    "level_2_required": [
+      "retained Compute*.t.sol app integration suite"
+    ]
+  },
+  "next_canonical_step": "CMP-1.5.4 — Exit queue / withdrawal delay"
+}

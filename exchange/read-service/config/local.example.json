@@ -1,12 +1,15 @@
 {
-  "schema":"420-exchange-read-service-config-v1",
-  "host":"127.0.0.1",
-  "port":7420,
-  "chainId":"1056",
-  "indexerBaseUrl":"http://127.0.0.1:7410",
-  "rpcUrl":"http://127.0.0.1:8545",
-  "cataloguePath":"catalogue.example.json",
-  "storagePath":"../state/exchange-read.json",
-  "refreshOnStart":true,
-  "shutdownTimeoutMs":5000
+  "schema": "420-exchange-read-service-config-v1",
+  "host": "127.0.0.1",
+  "port": 7420,
+  "chainId": "1056",
+  "indexerBaseUrl": "http://127.0.0.1:7410",
+  "rpcUrl": "http://127.0.0.1:8545",
+  "cataloguePath": "catalogue.example.json",
+  "storagePath": "../state/exchange-read.json",
+  "refreshOnStart": true,
+  "shutdownTimeoutMs": 5000,
+  "allowedOrigins": [
+    "https://exchange.420integrated.org"
+  ]
 }

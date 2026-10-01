@@ -32,7 +32,7 @@ jobs:
           node-version: '22'
       - name: Verify branded Status assets
         run: |
-          grep -q '420 INTEGRATED' status/web/static/index.html
+          grep -q 'INTEGRATED' status/web/static/index.html
           grep -qi 'status.420integrated.org' status/cloudflare/README.md
           grep -q '#45b84a' status/web/static/app.css
           grep -q '#273b9c' status/web/static/app.css

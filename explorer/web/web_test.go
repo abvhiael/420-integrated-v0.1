@@ -151,7 +151,7 @@ func TestExplorerScriptContainsStakeRewardWorkflow(t *testing.T) {
 	rr=httptest.NewRecorder()
 	Handler().ServeHTTP(rr,httptest.NewRequest(http.MethodGet,"/",nil))
 	if rr.Code!=http.StatusOK{t.Fatalf("shell status=%d",rr.Code)}
-	if !strings.Contains(rr.Body.String(),"#/stake")||!strings.Contains(rr.Body.String(),"Stake &amp; Rewards"){
+	if !strings.Contains(rr.Body.String(),"#/stake")||!strings.Contains(rr.Body.String(),"Stake & Rewards"){
 		t.Fatalf("Explorer shell missing Stake navigation: %s",rr.Body.String())
 	}
 	if strings.Contains(body,"eth_get")||strings.Contains(body,"INDEXER_RPC_URL"){t.Fatal("Stake workflow must remain an Explorer API consumer")}

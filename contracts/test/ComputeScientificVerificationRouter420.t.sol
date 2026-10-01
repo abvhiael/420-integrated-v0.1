@@ -164,12 +164,15 @@ contract ComputeScientificVerificationRouter420Test {
     function _proof(uint64[16] memory data, uint32 index)
         private view returns (bytes32[] memory proof)
     {
+        bytes32 ignoredRoot;
         (
             bytes32[16] memory l0,
             bytes32[8] memory l1,
             bytes32[4] memory l2,
             bytes32[2] memory l3,
+            ignoredRoot
         ) = _levels(data);
+        ignoredRoot;
         proof = new bytes32[](4);
         proof[0] = l0[index ^ 1];
         proof[1] = l1[(index >> 1) ^ 1];
@@ -295,7 +298,8 @@ contract ComputeScientificVerificationRouter420Test {
         (ok,) = address(router).call(abi.encodeCall(router.evaluate, (jobId, badProofEvidence)));
         require(!ok, "tampered Merkle proof accepted");
 
-        require(!router.evaluationExistsForTest(jobId), "rejected evidence consumed job");
+        (ok,) = address(router).staticcall(abi.encodeCall(router.evaluation, (jobId)));
+        require(!ok, "rejected evidence consumed job");
     }
 
     function testOnlySamplingAuthorityCanFreezeProtocolAndBindingMustPrecedeExecution() public {

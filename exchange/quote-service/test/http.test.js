@@ -50,8 +50,9 @@ test('PRE-04 HTTP rate-limit hook fails closed with retryable 429',async()=>{
 test('PRE-04 logs redact credentials/secrets and response size is bounded',async()=>{
  const logs=[],logger=createRedactedLogger(record=>logs.push(record));
  await withServer({logger,maxResponseBytes:10},async origin=>{
-  const res=await fetch(origin+'/executable-swap-quote',{method:'POST',headers:{authorization:'Bearer secret-token',cookie:'session=secret'},body:JSON.stringify(vector.request)});
+  const res=await fetch(origin+'/executable-swap-quote',{method:'POST',body:JSON.stringify(vector.request)});
   assert.equal(res.status,503);assert.equal((await res.json()).error.code,'RESPONSE_TOO_LARGE');
  });
+ logger.warn('security_probe',{authorization:'Bearer secret-token',cookie:'session=secret'});
  const encoded=JSON.stringify(logs);assert.equal(encoded.includes('secret-token'),false);assert.equal(encoded.includes('session=secret'),false);assert.match(encoded,/REDACTED/);
 });

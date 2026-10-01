@@ -56,7 +56,10 @@ jobs:
       - name: Build swap contracts and tests
         working-directory: contracts
         run: |
-          forge build src/swap test/CanonicalConstantProductPool420.t.sol test/SwapGenesisIntegration420.t.sol test/SwapFuzz420.t.sol test/SwapInvariant420.t.sol test/PaySwapGenesisIntegration420.t.sol test/PaySwapBridgeGenesisIntegration420.t.sol --force --sizes
+          forge build src/swap test/CanonicalConstantProductPool420.t.sol test/SwapGenesisDEXFactory420.t.sol test/SwapGenesisIntegration420.t.sol test/SwapFuzz420.t.sol test/SwapInvariant420.t.sol test/PaySwapGenesisIntegration420.t.sol test/PaySwapBridgeGenesisIntegration420.t.sol --sizes
+      - name: Genesis DEX factory tests
+        working-directory: contracts
+        run: forge test --match-path test/SwapGenesisDEXFactory420.t.sol -vvv
       - name: Canonical pool tests
         working-directory: contracts
         run: forge test --match-path test/CanonicalConstantProductPool420.t.sol -vvv

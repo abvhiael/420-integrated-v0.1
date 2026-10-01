@@ -30,7 +30,7 @@ def bundle():
     }
 
 def packed(address):
-    return "0x"+("00"*11)+"01"+("00"*12)+address[2:]
+    return "0x"+("00"*11)+"01"+address[2:]
 
 def by_name(items,name):
     matches=[x for x in items if x.get("name")==name]

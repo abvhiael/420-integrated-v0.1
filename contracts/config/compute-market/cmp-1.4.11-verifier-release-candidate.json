@@ -184,8 +184,8 @@
     "dispute_jobs": null
   },
   "dependency_reconciliation": {
-    "cmp_1_4_4_signed_verdict_provenance_complete": false,
-    "cmp_1_4_4_internal_release_blocker": true,
+    "cmp_1_4_4_signed_verdict_provenance_complete": true,
+    "cmp_1_4_4_internal_release_blocker": false,
     "cmp_1_5_compute_stake_required_for_stake_required_live_verifiers": true,
     "cmp_1_5_compute_stake_live_source_qualified": false,
     "validator_stake_is_not_compute_verifier_collateral": true,
@@ -199,7 +199,7 @@
     "cmp_1_4_1_verifier_identity_lifecycle": true,
     "cmp_1_4_2_verifier_classes_capabilities": true,
     "cmp_1_4_3_verification_policy_registry": true,
-    "cmp_1_4_4_signed_verdict_provenance": false,
+    "cmp_1_4_4_signed_verdict_provenance": true,
     "cmp_1_4_5_independent_selection": true,
     "cmp_1_4_6_replicated_verification": true,
     "cmp_1_4_7_deterministic_adapters": true,
@@ -210,7 +210,7 @@
     "public_testnet_live": false
   },
   "limitations": [
-    "CMP-1.4.4 remains open; current bounded signed-verdict primitive does not yet satisfy the canonical minimum binding of every verdict to chain, contract, job, unit/attempt, worker, result, verifier, policy, evidence, nonce and expiry.",
+    "CMP-1.4.4 signed verdict provenance is repository-complete at CMP-1.4.12 reconciliation; live deployment remains independently blocked by real deployment, collateral, public-testnet and Registry-publication prerequisites.",
     "Repository readiness does not imply live deployment, ProtocolRegistry publication, verifier collateral availability, or public-testnet availability.",
     "The bounded integer verifier remains a retained profile/example and is not promoted into a generic verifier for arbitrary GPU/AI/scientific workloads.",
     "Live dispute readiness requires the canonical jobs/entitlement graph to be bound after real deployment; repository fixture qualification does not fabricate those addresses."
@@ -221,7 +221,7 @@
     "The release manifest inventories every verifier release component, canonical binding and required ProtocolRegistry publication field.",
     "No live address, transaction, block, code hash, graph hash or publication evidence is fabricated before deployment.",
     "The frozen ProtocolRegistry address and publishRegisteredService path are preserved.",
-    "CMP-1.4.4 remains explicitly fail-closed as an internal deployment blocker rather than being silently marked complete.",
+    "CMP-1.4.4 signed verdict provenance is completed and retained as an internal repository release gate.",
     "CMP-1.5 verifier-collateral and public-testnet dependencies remain truthfully blocked until qualified.",
     "No fixed Genesis predeploy is allocated for the verifier release candidate.",
     "Repository-ready mode passes mechanical qualification; live-ready mode fails until all real deployment/internal gates are satisfied.",
@@ -284,8 +284,8 @@
       }
     ],
     "level_2_status": "NOT_RERUN_CMP_1_4_10_ALREADY_QUALIFIED_INTEGRATION_MILESTONE",
-    "level_3_status": "DEFERRED_TO_CMP_1_4_12_PHASE_CLOSEOUT",
+    "level_3_status": "IN_PROGRESS_AT_CMP_1_4_12_PHASE_CLOSEOUT",
     "live_deployment_status": "BLOCKED",
-    "cmp_1_4_4_status": "OPEN_EXPLICIT_LIVE_DEPLOYMENT_BLOCKER"
+    "cmp_1_4_4_status": "COMPLETED_DURING_CMP_1_4_12_RECONCILIATION_PENDING_CLOSEOUT_QUALIFICATION"
   }
 }

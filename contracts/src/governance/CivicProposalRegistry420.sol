@@ -117,14 +117,13 @@ contract CivicProposalRegistry420 is SystemAccess, I420System {
 
     function _allowed(CivicIds420.ProposalState from, CivicIds420.ProposalState to) private pure returns (bool) {
         if (from == CivicIds420.ProposalState.ACTIVE) {
-            return to == CivicIds420.ProposalState.PASSED || to == CivicIds420.ProposalState.FAILED
-                || to == CivicIds420.ProposalState.CANCELLED;
+            return to == CivicIds420.ProposalState.PASSED || to == CivicIds420.ProposalState.FAILED;
         }
         if (from == CivicIds420.ProposalState.PASSED) {
-            return to == CivicIds420.ProposalState.QUEUED || to == CivicIds420.ProposalState.CANCELLED;
+            return to == CivicIds420.ProposalState.QUEUED;
         }
         if (from == CivicIds420.ProposalState.QUEUED) {
-            return to == CivicIds420.ProposalState.EXECUTED || to == CivicIds420.ProposalState.CANCELLED;
+            return to == CivicIds420.ProposalState.EXECUTED;
         }
         return false;
     }

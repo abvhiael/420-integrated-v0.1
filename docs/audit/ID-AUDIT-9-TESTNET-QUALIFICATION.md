@@ -1,7 +1,7 @@
 # ID-AUDIT-9 — Production-Equivalent Testnet Deployment Qualification
 
 **Status:** NOT YET COMPLETE — BLOCKED ON OFFICIAL PUBLIC TESTNET  
-**Repository-side implementation:** IMPLEMENTED — Level 1 harness/readiness qualification pending exact-head CI  
+**Repository-side implementation:** COMPLETE AND LEVEL 1 QUALIFIED  
 **Repository:** `abvhiael/420-integrated-v0.1`  
 **Working PR:** #438  
 **Canonical roadmap:** `docs/audit/420IDENTITY-AUDIT-REMEDIATION-ROADMAP.md`
@@ -316,7 +316,7 @@ ID-AUDIT-6 remains the last completed repository-side Identity cross-service Lev
 | restart/reorg recovery | **NOT RUN — BLOCKED** |
 | dependency-failure drills | **NOT RUN — BLOCKED** |
 | retained receipts/logs/manifests tied to exact release SHA | **NOT RUN — BLOCKED** |
-| repository live-qualification harness | **IMPLEMENTED — qualification pending** |
+| repository live-qualification harness | **SATISFIED — LEVEL 1 QUALIFIED** |
 | TESTNET READY = YES | **NO** |
 
 ## Blocker removal / exact continuation
@@ -344,7 +344,48 @@ Full current-main reconciliation and complete app-phase qualification remain ID-
 
 ## Exact-head repository qualification evidence
 
-Pending.
+Repository implementation SHA:
+
+`5cc5879e714015f5e72b41bbaeb7b23bfe127e2d`
+
+Exact qualification SHA:
+
+`2e6c177cdbdf85b73bf1cbf71a77896aba0d111a`
+
+Temporary qualification PR: #448.
+
+Dedicated workflow:
+
+- **420Identity ID-AUDIT-9** run `36883384873` / #3 — **SUCCESS**;
+- job `110440508913` — **SUCCESS**.
+
+Every required Level 1 step executed successfully:
+
+- exact-head checkout/assertion — PASS;
+- 420Indexer dependency install — PASS;
+- live Identity evidence-contract build — PASS;
+- hostile ID-AUDIT-9 evidence-contract suite — PASS;
+- live-runner JavaScript syntax validation — PASS;
+- fail-closed official-testnet readiness verifier — PASS;
+- retained ID-AUDIT-8 operator-readiness verifier — PASS;
+- retained Wallet Identity client/UI qualification — PASS;
+- complete directly affected 420Indexer regression — PASS;
+- manual-live-workflow and no-committed-secret guard — PASS.
+
+The complete 420Indexer regression reported **166 tests, 165 passed, 0 failed** (one non-failing skipped test retained by the package).
+
+A separate audit-branch 420Indexer run `36883364364` / #675 on implementation SHA `5cc5879e714015f5e72b41bbaeb7b23bfe127e2d` also completed **SUCCESS**.
+
+The qualification branch and audit implementation branch were blob-compared for the ID-AUDIT-9 evidence contract, hostile test, live runner, both ID-AUDIT-9 workflows, readiness verifier and evidence template; all executable/test/workflow blobs are identical. The qualification branch differs only by qualification evidence history.
+
+The readiness verifier correctly reports the present deployment boundary:
+
+```
+ID_AUDIT_9_READINESS=BLOCKED_OFFICIAL_TESTNET_MANIFEST
+liveQualificationComplete=false
+```
+
+This qualifies the repository-side harness. It does **not** satisfy the canonical live-deployment exit criterion and does not authorize `TESTNET READY = YES`.
 
 ## Current roadmap state
 

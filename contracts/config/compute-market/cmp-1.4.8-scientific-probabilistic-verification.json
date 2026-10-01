@@ -85,5 +85,40 @@
     "Level 1 exact-head affected build/tests/mechanical checks are green.",
     "Level 2 retained Compute verifier-method integration suite is green on the same implementation SHA."
   ],
-  "status": "IMPLEMENTATION_COMPLETE_QUALIFICATION_PENDING"
+  "status": "COMPLETE_LEVEL_1_AND_LEVEL_2",
+  "qualified_implementation_sha": "6dd84b9b642dc320f80f03a696901ff4492ff6ea",
+  "level_1_and_2_results": {
+    "compute_market_qualification": {
+      "run_number": 51,
+      "run_id": 36815090895,
+      "conclusion": "success",
+      "retained_compute_tests": "316 passed, 0 failed"
+    },
+    "solidity_contracts": {
+      "run_number": 3537,
+      "run_id": 36815090892,
+      "conclusion": "success"
+    },
+    "docs_qualification": {
+      "run_number": 3733,
+      "run_id": 36815090861,
+      "conclusion": "success"
+    },
+    "indexer": {
+      "run_number": 1153,
+      "run_id": 36815090815,
+      "conclusion": "success"
+    },
+    "genesis_address_authority": {
+      "run_number": 348,
+      "run_id": 36815090831,
+      "conclusion": "success"
+    },
+    "registry_audit": {
+      "run_number": 183,
+      "run_id": 36815090925,
+      "conclusion": "success"
+    }
+  },
+  "completion_note": "Exact-head Level 1 and CMP-1.4 verification-method Level 2 qualification passed on 6dd84b9b642dc320f80f03a696901ff4492ff6ea. This closeout update is evidence-only."
 }

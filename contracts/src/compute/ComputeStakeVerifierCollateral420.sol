@@ -302,6 +302,7 @@ contract ComputeStakeVerifierCollateral420 is I420System, IComputeVerifierStakeS
     }
 
     function requestExit(bytes32 id) external returns (uint64 withdrawableAt) {
+        if (entered) revert InvalidExit();
         Position storage p = _positions[id];
         if (!p.exists || !p.active || p.exiting || msg.sender != p.authority) revert InvalidExit();
 

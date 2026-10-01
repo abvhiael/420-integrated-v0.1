@@ -1,0 +1,12 @@
+{
+  "name":"@420integrated/exchange-read-service",
+  "version":"0.1.0",
+  "private":true,
+  "type":"module",
+  "scripts":{
+    "check":"node scripts/check-pre10.mjs",
+    "test":"node --test test/*.test.js",
+    "start":"node src/start.mjs"
+  },
+  "engines":{"node":">=22"}
+}

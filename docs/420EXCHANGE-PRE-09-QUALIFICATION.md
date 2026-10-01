@@ -6,8 +6,9 @@
 **Qualification level:** Level 1 step-specific + Level 2 bridge-lifecycle integration milestone  
 **Audit branch / PR:** `audit/exchange-pretestnet-phase-20260930` / PR #430  
 **Audit base SHA:** `4d0ede3692efe55f04a50c7bf5b749afe579eccb`  
-**Qualified implementation SHA:** `280902f41b99bf074a2c8f85406b871b9dd05984`  
-**Current repository `main` observed at implementation closeout:** `df8f639d8f43b763298c8750ef49d3e5849c597c`
+**Original qualified implementation SHA:** `280902f41b99bf074a2c8f85406b871b9dd05984`  
+**Post-PRE-10 requalified accumulated implementation SHA:** `46e97d69a51deaad9460f9145735ee1cf96f658a`  
+**Current repository `main` observed at requalification:** `df8f639d8f43b763298c8750ef49d3e5849c597c`
 
 ## Canonical requirement disposition
 
@@ -131,7 +132,41 @@ Existing bridge contracts and V15.8 live qualification primitives are preserved.
 
 ## Level 1 qualification
 
-Exact implementation SHA:
+### Current accumulated-app requalification
+
+After PRE-10 completed the repository-owned Exchange V13/420Indexer projection adapter, PRE-09 was reopened against current repository truth.
+
+Exact accumulated implementation SHA:
+
+`46e97d69a51deaad9460f9145735ee1cf96f658a`
+
+Required app-specific workflow:
+
+- **420Exchange Web Verification**
+- run `36802037691`
+- run number `730`
+- event: `pull_request`
+- exact head: `46e97d69a51deaad9460f9145735ee1cf96f658a`
+- **SUCCESS**
+
+That exact accumulated run re-exercised:
+
+- Exchange static checks including `check-pre09.mjs` — SUCCESS;
+- complete Exchange web unit/integration suite including PRE-09 two-chain lifecycle/adversarial coverage — SUCCESS;
+- PRE-10 read-service static and browser/server contract/integration tests — SUCCESS;
+- complete 420Indexer shared-dependency qualification — SUCCESS;
+- retained quote/order service suites — SUCCESS;
+- browser artifact build/verification — SUCCESS;
+- retained PRE-02/PRE-03 Chromium acceptance — SUCCESS;
+- frontend secret scan — SUCCESS.
+
+The post-PRE-10 requalification confirms that the production projection source preserves PRE-09's non-authoritative reconciliation model and does not weaken proof acquisition/verification separation, replay protection, exact beneficiary/asset/amount settlement binding, lifecycle persistence or default-OFF live bridge gates.
+
+No executable PRE-09 remediation was required.
+
+### Original PRE-09 closeout
+
+Exact original implementation SHA:
 
 `280902f41b99bf074a2c8f85406b871b9dd05984`
 
@@ -176,11 +211,20 @@ The exact-head retained Exchange suite validates the accumulated browser/service
 
 ## Dependency on PRE-10
 
-PRE-09's canonical dependency on the PRE-10 projection/API contract is respected rather than silently bypassed.
+PRE-09's canonical dependency on the PRE-10 projection/API contract is now fully satisfied.
 
-The PRE-09 lifecycle uses an explicit provider-neutral `projectionReader` contract and treats indexed records only as non-authoritative reconciliation evidence. The production Exchange API/Indexer adapter that supplies this interface remains PRE-10 work.
+The PRE-09 lifecycle continues to use an explicit provider-neutral `projectionReader` contract and treats indexed records only as non-authoritative reconciliation evidence.
 
-That does not block PRE-09's stated exit criterion: the complete source-to-destination lifecycle is mockable and independently qualified without fabricating a production projection service.
+PRE-10 now supplies the repository-owned production Exchange V13/420Indexer adapter. Its bridge projections preserve:
+
+- source provenance;
+- canonical/orphaned status;
+- finality and freshness;
+- stable record identity;
+- rollback/replacement history;
+- explicit `authoritative:false`.
+
+This production projection layer does not become bridge proof authority, destination settlement authority or replay authority. PRE-09 retains those boundaries exactly as originally qualified.
 
 ## Exit criterion
 
@@ -192,13 +236,17 @@ The complete cross-chain lifecycle is offline-testable with deterministic state 
 
 ## Main divergence / Level 3
 
-At implementation closeout current `main` was:
+At post-PRE-10 PRE-09 requalification current `main` was:
 
 `df8f639d8f43b763298c8750ef49d3e5849c597c`
 
-The branch was 198 commits ahead and 80 commits behind `main`, with merge base:
+The branch remained 80 commits behind `main`, with merge base:
 
 `4d0ede3692efe55f04a50c7bf5b749afe579eccb`
+
+The 80 main-side commits do not modify the Exchange bridge lifecycle, Exchange web/runtime, Exchange read service, 420Indexer or Exchange workflow surfaces relevant to PRE-09.
+
+Since accumulated implementation SHA `46e97d69a51deaad9460f9145735ee1cf96f658a`, the audit branch has advanced only through documentation/evidence files. No executable/test/workflow/dependency/config/interface/deployment semantics have changed.
 
 Full reconciliation remains intentionally deferred to PRE-12.
 
@@ -206,6 +254,16 @@ Deferred Level 3 work includes repository-wide Solidity/Genesis, 420 Integrated,
 
 PR #430 remains draft and unmerged.
 
-## Next canonical roadmap step
+## Post-PRE-10 requalification conclusion
 
-**PRE-10 — Exchange read API / Indexer adapter and startup composition.**
+**PRE-09 remains COMPLETE.**
+
+All original canonical exit criteria remain satisfied on the current accumulated Exchange implementation. No executable PRE-09 remediation was required. Current requalification is retained at implementation SHA `46e97d69a51deaad9460f9145735ee1cf96f658a` using 420Exchange Web Verification run `36802037691` / #730.
+
+The concurrently triggered repository-wide 420Docs Qualification run on that SHA failed, but it is not a PRE-09 Level 1 requirement under the active phase qualification policy; repository-wide Docs/global reconciliation remains intentionally deferred to PRE-12.
+
+## Next step in the roadmap's recommended dependency order
+
+PRE-09 is now explicitly revalidated with its PRE-10 dependency complete.
+
+The next **unfinished** canonical roadmap step is **PRE-11 — CI/security/packaging/operations closure.**

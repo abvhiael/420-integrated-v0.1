@@ -54,6 +54,26 @@ jobs:
         run: |
           npm install --no-package-lock
           npm test
+      - name: PRE-11 security operations and readiness static checks
+        working-directory: exchange/ops
+        run: npm run check
+      - name: PRE-11 security operations startup degradation and packaging tests
+        working-directory: exchange/ops
+        run: npm test
+      - name: PRE-11 deterministic pre-testnet package manifest
+        env:
+          EXCHANGE_BUILD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: node exchange/scripts/package-pretestnet.mjs artifacts/exchange/pretestnet-package-manifest.json
+      - name: Preserve PRE-11 package manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: exchange-pre11-package-${{ github.sha }}
+          path: artifacts/exchange/pretestnet-package-manifest.json
+          if-no-files-found: error
+      - name: PRE-11 backend secret scan
+        working-directory: exchange
+        run: |
+          ! grep -RniE 'BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY|mnemonic[[:space:]]*[:=][[:space:]]*["'"'"'][^"'"'"']+|seed[_ -]?phrase[[:space:]]*[:=][[:space:]]*["'"'"'][^"'"'"']+|private[_-]?key[[:space:]]*[:=][[:space:]]*["'"'"'][0-9a-fA-F]+' quote-service/src order-service/src read-service/src shared
       - name: Static Exchange checks
         working-directory: exchange/web
         run: npm run check

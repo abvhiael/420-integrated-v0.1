@@ -1,6 +1,6 @@
 # CMP-1.5.0 — Stake architecture
 
-Status: **IMPLEMENTED. LEVEL 1 QUALIFICATION PENDING. NO LIVE COLLATERAL/DEPLOYMENT CLAIM.**
+Status: **COMPLETE. LEVEL 1 EXACT-HEAD QUALIFIED. NO LIVE COLLATERAL/DEPLOYMENT CLAIM.**
 
 ## Canonical definition
 
@@ -236,5 +236,39 @@ CMP-1.5.0 is COMPLETE only when:
 - durable evidence records the qualified implementation SHA.
 
 Next canonical step after completion:
+
+**CMP-1.5.1 — Worker collateral**
+
+
+## Completion evidence
+
+CMP-1.5.0 is **COMPLETE** at Level 1.
+
+Qualified implementation SHA:
+
+`af9f926465dff1a89e53150d030591e71411787f`
+
+Reconciliation base `main` SHA:
+
+`f6c4d082f60d2ac706a941c9289ed7a7309cf3ab`
+
+Exact-head qualification:
+
+- Compute Market Qualification #80 — run `36921251308` — **PASS**;
+- Solidity Contracts #3701 — run `36921251392` — **PASS** using the Compute fast path; full repository Foundry shards were intentionally skipped by Level 1 classification;
+- 420Docs Qualification #3908 — run `36921251324` — **PASS**;
+- Genesis Address Authority #503 — run `36921251292` — **PASS** for cross-manifest/address authority without duplicate full Foundry inventory;
+- 420Registry REG-AUDIT-4 #338 — run `36921251276` — **PASS**;
+- 420Indexer #1318 — run `36921251321` — **PASS**.
+
+Durable machine-readable evidence:
+
+`docs/compute-market/CMP-1.5.0-QUALIFICATION-EVIDENCE.json`
+
+This completion record is evidence-only and references the already-qualified implementation SHA above. It does not change executable source, tests, workflows, dependencies, runtime configuration, interfaces, deployment state, or substantive requirements.
+
+Level 2 was not required for this ordinary architecture step. Level 3 repository-wide closeout remains intentionally deferred to **CMP-1.5.13 — Phase closeout** unless a later shared change independently requires broader qualification.
+
+Next canonical step:
 
 **CMP-1.5.1 — Worker collateral**

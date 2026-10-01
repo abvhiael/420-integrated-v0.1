@@ -40,7 +40,9 @@
     "minimum_dataset_size": 16,
     "tolerance_bps": 500,
     "maximum_sample_range_bps": 2500,
-    "note": "This bounded reference profile is intended for public/non-sensitive committed integer datasets. It is not a statistical-confidence guarantee, not a generic scientific correctness proof, and not suitable for private samples that cannot be disclosed in calldata."
+    "note": "This bounded reference profile is intended for public/non-sensitive committed integer datasets. It is not a statistical-confidence guarantee, not a generic scientific correctness proof, and not suitable for private samples that cannot be disclosed in calldata.",
+    "maximum_dataset_size": 2147483648,
+    "dataset_shape": "power_of_two"
   },
   "authority_boundaries": [
     "Scientific adapter publication grants no verifier identity/class/capability, signed verdict, settlement, custody, stake/slash, worker, governance, validator, bridge or wallet authority.",
@@ -49,7 +51,8 @@
     "PASS means only that the exact sampled/tolerance protocol passed. It is not represented as exact full-dataset correctness.",
     "FAIL or INCONCLUSIVE does not automatically transition the canonical job or create economic consequences.",
     "Malformed seed reveals, wrong Merkle membership, wrong worker output commitment, cross-family adapter substitution and replay fail closed.",
-    "Private workload/sample bytes are not required by the generic interface; the concrete reference sampled-mean profile is explicitly public/non-sensitive only."
+    "Private workload/sample bytes are not required by the generic interface; the concrete reference sampled-mean profile is explicitly public/non-sensitive only.",
+    "The sampling authority cannot be the job owner for binding and cannot be the executing worker for evaluation."
   ],
   "invariants": [
     "CMP-INV-005",

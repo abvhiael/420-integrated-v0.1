@@ -16,11 +16,12 @@ export function assertExecutableRuntime(runtime) {
 }
 
 export class BrowserExecutionController {
-  constructor({runtime=null,onInvalidate=()=>{},onState=()=>{},submissionGate=null}={}) {
+  constructor({runtime=null,onInvalidate=()=>{},onState=()=>{},submissionGate=null,orderSigningGate=null}={}) {
     this.runtime=runtime;
     this.onInvalidate=onInvalidate;
     this.onState=onState;
     this.submissionGate=submissionGate;
+    this.orderSigningGate=orderSigningGate;
     this.invalidationListeners=new Set();
     this.announcements=[];
     this.wallet=null;
@@ -168,7 +169,7 @@ export class BrowserExecutionController {
     const {wallet,session,generation,epoch}=await this.assertLiveSession();
     if(!signingRequest||!qualification?.ok) throw new BrowserExecutionError('QUALIFICATION_REQUIRED','qualified canonical order required');
     this.assertUnchanged(wallet,generation,epoch);
-    return signQualifiedLimitOrder({provider:wallet.provider,session,expectedChainId:this.runtime.network.chainId,expectedGeneration:generation,signingRequest,qualification});
+    return signQualifiedLimitOrder({provider:wallet.provider,session,expectedChainId:this.runtime.network.chainId,expectedGeneration:generation,signingRequest,qualification,signingGate:this.orderSigningGate});
   }
   dispose() {
     if(this.disposed)return;

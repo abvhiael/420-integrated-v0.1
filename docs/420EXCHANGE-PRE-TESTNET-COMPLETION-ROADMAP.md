@@ -250,7 +250,7 @@ Dependencies: existing 420Indexer. Can proceed in parallel with PRE-04.
 
 ---
 
-### PRE-11 — CI, security, packaging and operations closure — PARTIAL
+### PRE-11 — CI, security, packaging and operations closure — COMPLETE
 
 Turn the pre-testnet architecture into a reproducible release candidate.
 
@@ -267,13 +267,13 @@ Required work:
 - runbooks for quote signer rotation, service outage, indexer backfill, emergency pause, rollback and reconciliation;
 - machine-readable pre-testnet readiness manifest listing unresolved LIVE GATES.
 
-**Exit:** every pre-testnet component is reproducibly buildable/testable from a clean checkout and fails closed without live deployment data.
+**Exit:** SATISFIED for implementation. PRE-11 now provides app-specific CI/security/packaging/operations gates, deterministic package metadata, restrictive browser/backend request policy, secret/log-redaction checks, startup/degradation/restart coverage, threat/adversarial retention, operator runbooks and a machine-readable hard-OFF readiness manifest. PRE-12 performs the final reconciled exact-head Level 3 qualification before merge.
 
 Dependencies: PRE-02 through PRE-10.
 
 ---
 
-### PRE-12 — pre-testnet release candidate, reconciliation and handoff — TODO
+### PRE-12 — pre-testnet release candidate, reconciliation and handoff — FINAL QUALIFICATION
 
 Create the final offline-qualified Exchange candidate.
 
@@ -289,7 +289,7 @@ Required work:
 8. update the main Exchange status roadmap from pre-testnet engineering to live-testnet qualification;
 9. merge only after exact-head checks are green.
 
-**Exit:** `PRE_TESTNET_ENGINEERING_COMPLETE` / `LIVE_TESTNET_QUALIFICATION_PENDING`.
+**Exit:** implementation candidate assembled and reconciled. Final status becomes `PRE_TESTNET_ENGINEERING_COMPLETE` / `LIVE_TESTNET_QUALIFICATION_PENDING` only when the exact reconciled merge-candidate head passes the complete retained PRE-12 qualification set and PR #430 is merged.
 
 At PRE-12 completion there should be **no further application architecture or missing integration service that can reasonably be built without a live network**.
 

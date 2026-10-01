@@ -148,6 +148,8 @@ Canonical Civic events can be deterministically decoded and rebuilt from qualifi
 
 ## GOV-AUDIT-5 — 420 Wallet Governance user application
 
+**Status: COMPLETE — qualified at implementation SHA `13c818af72be4b2306cfa1ca276bb0459bb888d7`; evidence: `docs/audit/GOV-AUDIT-5-QUALIFICATION.md`.**
+
 ### Purpose
 Satisfy the frozen classification of 420 Governance as a **Genesis protocol and user app**.
 

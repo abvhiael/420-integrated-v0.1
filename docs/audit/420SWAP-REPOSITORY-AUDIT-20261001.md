@@ -1,0 +1,369 @@
+# 420Swap complete repository audit — 2026-10-01
+
+## Scope and authority
+
+Application: **420Swap**
+
+Repository: `abvhiael/420-integrated-v0.1`
+
+Audit baseline: `main` at `6d2a4025e74fde11c70a141bbc7b17180204cbc4`
+
+Audit branch: `audit/420swap-complete-20261001`
+
+Pull request: **#455**
+
+Repository truth, frozen Genesis application decisions, address/namespace authority, architecture, source, committed tests and exact-head CI evidence control this audit. Conversational history is non-authoritative.
+
+## Canonical definition
+
+The frozen Genesis application catalogue classifies **420 Swap** as `GENESIS_PROTOCOL_AND_USER_APP`, with contracts required, for the purpose **“Canonical native DEX and 420/approved-stable market.”**
+
+Current architecture further defines 420 Swap as the canonical liquidity/execution layer beneath 420 Exchange. Exchange may qualify assets and markets, route bounded trades and provide the user-facing execution experience, but it does not replace Swap's canonical execution semantics.
+
+Canonical Swap responsibilities found in repository authority are therefore:
+
+- canonical market and quote-asset identity;
+- canonical pool registration and executable liquidity;
+- bounded exact-input swap execution with minimum-output protection;
+- shared operational/safety and market-health enforcement;
+- protocol-qualified versus permissionless market separation;
+- TWAP/reference observation support;
+- public batch-auction support associated with the Genesis DEX/distribution system;
+- integration with Pay, Exchange, Wallet/authorization, Registry, Bridge/oracle and indexing surfaces;
+- Genesis system/predeploy authority where frozen, with registry resolution for the canonical executor.
+
+## Architecture discovered
+
+### Canonical protocol contracts
+
+`contracts/src/swap/` contains:
+
+- `SwapIds420.sol`
+- `GenesisDEXFactory.sol`
+- `CanonicalMarketRegistry.sol`
+- `PermissionlessDEXFactory.sol`
+- `TWAPOracle.sol`
+- `PublicBatchAuction.sol`
+- `ApprovedQuoteAssetRegistry.sol`
+- `CanonicalSwapExecutor420.sol`
+- `CanonicalConstantProductPool420.sol`
+
+The obsolete `CanonicalPool420.sol` scaffold existed at audit baseline but was superseded by `CanonicalConstantProductPool420.sol`. It has been removed in this audit.
+
+### Execution path
+
+The implemented canonical ERC20/ERC20 path is:
+
+1. a caller/adapter invokes `CanonicalSwapExecutor420`;
+2. the executor enforces shared operational state, trusted-caller policy, canonical settlement asset, market health and canonical market identity;
+3. it resolves the registered pool through `CanonicalMarketRegistry`;
+4. the pool enforces immutable executor-only swap access, exact input pull, minimum output, constant-product pricing, fee application, reserve synchronization and balance-delta checks;
+5. the executor rejects accepted results that overspend input or under-deliver settlement.
+
+### User-facing surface
+
+There is no separate `420swap/` web application. The actual repository user surface is integrated into `exchange/web`, including swap quote intake, reviewed execution, wallet/session handling, preflight, browser-wallet execution and live swap qualification.
+
+This is consistent with the architecture that places Exchange above Swap, but the docs should continue to make the distinction explicit: **Swap owns canonical liquidity/execution; Exchange provides the composed trading UX and routing layer.**
+
+### Genesis/address model
+
+Frozen system-address records retain:
+
+- `GenesisDEXFactory` at `0x...042b`
+- `PublicBatchAuction` at `0x...042c`
+- `TWAPOracle` at `0x...042d`
+- `ApprovedQuoteAssetRegistry` at `0x...0439`
+
+`CanonicalSwapExecutor420` is explicitly registry-resolved with no fixed Genesis address.
+
+The production candidate pool is an implementation/deployment component, not a newly frozen discovery-authority address.
+
+## File inventory
+
+| Component | Baseline | Audit state | Status | Notes |
+|---|---|---|---|---|
+| Swap component/action IDs | present | unchanged | COMPLETE | canonical IDs exist |
+| Genesis DEX factory | present | unchanged | PARTIAL | registry/implementation pointer exists; no pool creation path |
+| canonical market registry | present | unchanged | COMPLETE | canonical market/pair/pool records |
+| permissionless factory | present | unchanged | PARTIAL | registers existing pools; does not deploy them |
+| TWAP oracle | present | unchanged | PARTIAL | observation application exists; full TWAP production hardening is not demonstrated |
+| public batch auction | present | unchanged | PARTIAL | auction/bid/settle records exist; value custody/allocation execution is not implemented here |
+| approved quote asset registry | present | unchanged | COMPLETE | shared canonical settlement checks applied |
+| canonical swap executor | present | unchanged | COMPLETE | shared safety/health/trusted caller/postconditions |
+| constant-product pool | present | added to canonical inventory | COMPLETE for V1 ERC20/ERC20 scope | production candidate with dedicated tests |
+| old `CanonicalPool420` | stale scaffold | removed | STALE → REMEDIATED | no executable consumer remained |
+| Swap interface verifier | stale | strengthened | COMPLETE | now requires production pool and rejects old scaffold |
+| Genesis dApp map | stale | reconciled | COMPLETE | production pool now included |
+| app-specific docs | present | contract page expanded | PARTIAL | user/developer/security docs exist; deployment/operations still incomplete |
+| dedicated Swap CI | absent | added | COMPLETE | contract + Exchange user-surface qualification |
+| deterministic deployment artifacts | absent | absent | MISSING | no retained Swap artifacts under `contracts/artifacts/` |
+| materialized Swap predeploy state | not found | not found | MISSING | predeploy plan still `SOURCE_READY` |
+
+## Smart-contract audit
+
+### CanonicalConstantProductPool420
+
+Verified design properties from source:
+
+- immutable token pair, executor and fee;
+- fee capped at 1%;
+- non-reentrant liquidity and swap paths;
+- exact-balance pull/push checks reject fee-on-transfer/rebasing behavior;
+- initial permanently locked minimum liquidity;
+- proportional share accounting;
+- executor-only swap entry point;
+- exact-input swap semantics;
+- caller-provided minimum output;
+- actual reserve synchronization after transfers;
+- no owner, arbitrary reserve setter, confiscation function or mutable fee.
+
+Known V1 limitations are explicitly documented: no concentrated liquidity, multi-hop aggregation inside the pool, native-value path inside this pool, transferable LP token, mutable fee governance or protocol-fee extraction.
+
+### CanonicalSwapExecutor420
+
+Verified source guarantees:
+
+- shared operational fail-closed check;
+- explicit trusted caller allowlist;
+- canonical settlement-asset check;
+- shared market-health check;
+- canonical market registry resolution;
+- market/pair match;
+- pool code existence;
+- payer/recipient and amount validation;
+- input overspend rejection;
+- settlement under-delivery rejection.
+
+### CanonicalMarketRegistry / ApprovedQuoteAssetRegistry
+
+Governance mutation is routed through shared Genesis governance authorization. Market registration also uses shared operational safety and validates code-bearing pools, nonzero distinct assets and non-NONE roles.
+
+Quote assets must pass the shared canonical-settlement-asset boundary before approval/canonical assignment.
+
+### GenesisDEXFactory
+
+The contract is currently an authority-controlled pool registry with a mutable approved implementation pointer. Despite its name, it does not deploy pools.
+
+This is internally coherent as a registry but does not by itself satisfy a full production factory interpretation. The repository must either:
+
+1. define registration-only semantics as canonical; or
+2. implement deterministic pool deployment and initialization under a later hardening step.
+
+### PermissionlessDEXFactory
+
+The permissionless tier validates pool bytecode identity and records creator/pair/pool provenance, but it registers pre-existing pools rather than deploying them. This is adequate for permissionless registration but not for a self-contained “create pool” product.
+
+### TWAPOracle
+
+The contract stores monotonic timestamped observations under governance-authorized publication. It does not itself derive cumulative-price TWAPs from pool state. The broader architecture correctly treats oracle data as a circuit-breaker/reference input, but the current contract should not be represented as a fully autonomous production TWAP engine.
+
+### PublicBatchAuction
+
+The contract records auction windows, quote-bid amounts and a clearing price, but the source does not custody quote funds, reserve/disburse inventory, compute a clearing price, allocate fills, refund losers or settle assets.
+
+Because the frozen dApp contract map includes `PublicBatchAuction.sol`, this is a real completeness gap unless canonical authority explicitly reclassifies it as record-only. The repository does not support inventing those missing economics during this audit.
+
+## Integration audit
+
+| Dependency | Repository evidence | Status |
+|---|---|---|
+| 420Registry | Genesis-resident components resolve shared dependencies; executor is registry-resolved | COMPLETE/PARTIAL deployment |
+| shared Genesis interface layer | executor/registries consume canonical asset, health, governance and safety semantics | COMPLETE |
+| 420Pay | canonical settlement adapter calls exact Swap executor ABI; integration tests exist | COMPLETE in source/tests; BLOCKED live binding |
+| 420Exchange | canonical Swap adapter and full web swap execution surface exist | COMPLETE in source/tests; BLOCKED live deployment |
+| 420Wallet / authorization | Exchange web binds execution to wallet review/session/preflight; capability architecture exists above Swap | COMPLETE in client scope; live chain pending |
+| 420Bridge | Pay/Swap/Bridge integration test exists; CADC canonical route pending issuer-approved deployment | PARTIAL/BLOCKED external |
+| Oracle layer | shared health/reference architecture present | PARTIAL; live oracle source/production hardening pending |
+| 420Indexer | Swap/Exchange decoder/ABI surfaces exist | PARTIAL; live chain qualification pending |
+| native $420 | Exchange has wrapped/native execution architecture; canonical pool itself is ERC20/ERC20 | PARTIAL by layer; intentional V1 pool limit |
+
+The committed Pay→Swap wiring manifest correctly remains `REMEDIATION_REQUIRED` for deployment binding: source ABI compatibility is verified, but the exact deployed `PaymentRouter → CanonicalSettlementAdapter → CanonicalSwapExecutor` instances and executor trusted-caller relation are not yet live-chain verified.
+
+## Application-layer audit
+
+The user-facing Swap experience is implemented through `exchange/web`, not a duplicate Swap frontend.
+
+Observed components include:
+
+- read-only quote intake/review;
+- canonical execution-input binding;
+- wallet session and chain/account validation;
+- preflight;
+- reviewed execution bridge;
+- guarded swap orchestration;
+- transaction lifecycle/reconciliation;
+- browser wallet UI;
+- live swap qualification harness;
+- runtime configuration;
+- dedicated tests.
+
+On audit CI before final closeout, `npm run check` passed and **261/261 Node tests passed**. Production-mode build correctly failed closed without deployment environment; audit qualification uses the repository-supported `EXCHANGE_DEPLOYMENT_MODE=qualification` path instead of inventing production addresses.
+
+No independent Swap backend/database is canonically required for settlement authority. Derived market data, quote services and indexing live in Exchange/indexer/service layers and must not become canonical accounting authority.
+
+## Build and test audit
+
+Baseline relevant suites found:
+
+- `CanonicalConstantProductPool420.t.sol`
+- `SwapGenesisIntegration420.t.sol`
+- `SwapFuzz420.t.sol`
+- `SwapInvariant420.t.sol`
+- `PaySwapGenesisIntegration420.t.sol`
+- `PaySwapBridgeGenesisIntegration420.t.sol`
+- Exchange web swap/security/execution/browser-wallet tests
+- repository-wide Solidity workflow
+
+Audit remediation added `.github/workflows/swap-audit.yml` to run app-scoped static verification, targeted Foundry build/tests and the Exchange web check/test/qualification build.
+
+Exact-final-head results are recorded in the final section after CI completes.
+
+## Security classification
+
+| Area | Classification |
+|---|---|
+| canonical executor access control | verified safe behavior in inspected source/tests |
+| minimum-output / overspend postconditions | verified safe behavior |
+| constant-product pool reentrancy | mitigated |
+| nonstandard ERC20 reserve corruption | mitigated by exact balance-delta checks |
+| arbitrary pool execution | mitigated by canonical registry + executor/pool checks |
+| user authorization | bounded above Swap through trusted adapter/Wallet/Exchange architecture |
+| fee mutability | immutable per pool; accepted V1 design |
+| LP share transferability | intentionally absent; accepted V1 limitation |
+| excess-ratio liquidity donation | accepted design risk; providers must supply bounded inputs knowingly |
+| oracle manipulation/staleness | only partially qualified at Swap layer; Exchange guard adds protection |
+| batch-auction custody/settlement | unresolved functionality gap |
+| live Pay→Swap binding spoof/misconfiguration | mitigated by fail-closed manifest requirement, not live-qualified |
+| live address/code identity | repository authority only; not testnet-qualified |
+| external independent security audit | required release gate, not satisfied by this repository audit |
+
+No claim is made that this is an external independent security audit.
+
+## Documentation audit
+
+Present:
+
+- Swap index, getting started, user guide, architecture, concepts, fees, permissions, security, FAQ and troubleshooting;
+- developer index/API/contracts/events/errors/examples;
+- system dependency and value-movement architecture;
+- CADC/Swap tier documentation;
+- Exchange foundation/hardening/release documentation.
+
+Audit remediation expanded the Swap contract map and clarified registry-resolved executor/address semantics.
+
+Still missing or incomplete:
+
+- dedicated Swap deployment/operator runbook;
+- deterministic Swap predeploy materialization record;
+- generated retained Swap deployment artifacts/code hashes;
+- canonical decision on GenesisDEXFactory deploy-vs-register semantics;
+- canonical decision/implementation for PublicBatchAuction settlement economics;
+- production TWAP/oracle hardening record;
+- app-specific Genesis acceptance record after live qualification.
+
+## Genesis and deployment readiness
+
+The source tree is substantially implemented, but repository deployment records are not closed:
+
+- predeploy plan still marks the frozen Swap system contracts `SOURCE_READY`;
+- no retained `contracts/artifacts/GenesisDEXFactory.json`, `PublicBatchAuction.json`, `TWAPOracle.json`, `ApprovedQuoteAssetRegistry.json`, `CanonicalSwapExecutor420.json` or `CanonicalConstantProductPool420.json` was present in the audited tree;
+- constructor/storage materialization evidence for the Swap predeploys is not retained as an app closeout;
+- Pay→Swap deployment binding remains explicitly unverified;
+- CADC canonical markets remain blocked on the issuer-approved 420 deployment/path;
+- official public testnet live Swap execution evidence is not yet the basis of this audit;
+- the repository-wide external-audit/mainnet gate remains open.
+
+## Requirement matrix
+
+| Requirement | Canonical source | Current implementation | Tests | Documentation | Status | Required remediation |
+|---|---|---|---|---|---|---|
+| Genesis protocol + user app | frozen Genesis application catalogue | protocol + Exchange-composed UX | web/contract suites | yes | COMPLETE | retain |
+| canonical liquidity execution | Swap/Exchange architecture | executor + production candidate pool | pool/integration/fuzz/invariant | yes | COMPLETE | retain |
+| canonical market identity | Swap architecture | CanonicalMarketRegistry | integration | yes | COMPLETE | retain |
+| approved quote assets | market-tier/shared interface authority | ApprovedQuoteAssetRegistry | indirect/integration | yes | COMPLETE | retain/add direct negatives later |
+| canonical vs permissionless tiers | market-tiers config | both registries/factories | partial | yes | PARTIAL | harden creation/registration semantics |
+| production pool | Exchange V4 | CanonicalConstantProductPool420 | dedicated suite | yes | COMPLETE for V1 | retain |
+| obsolete scaffold removed | repository consistency | removed in audit | verifier enforces absence | docs updated | COMPLETE | retain |
+| native $420 user path | Genesis purpose + Exchange architecture | handled above pool via wrapped/native Exchange path | Exchange tests | yes | PARTIAL | live end-to-end qualification |
+| TWAP/reference oracle | Genesis/Swap architecture | governed observation registry | limited | partial | PARTIAL | production oracle/TWAP hardening |
+| public batch auction | frozen dApp/system map | record-only auction state | no dedicated economic settlement suite found | limited | PARTIAL | canonicalize + implement settlement economics or reclassify |
+| Pay integration | Pay/Swap architecture | canonical adapter ABI | PaySwap tests | wiring manifest | PARTIAL | live exact-instance binding |
+| Bridge/CADC integration | CADC/Bridge docs | configured pending issuer | bridge integration tests | yes | BLOCKED | issuer-approved route/deployment |
+| Exchange user surface | Exchange web | implemented | 261 Node tests plus checks | extensive | COMPLETE source-side | live config/qualification |
+| deterministic build | Foundry + web | source builds under CI | dedicated audit workflow | dev docs | COMPLETE source-side | retain exact-head evidence |
+| Genesis predeploy artifacts | predeploy plan | absent retained Swap artifacts | n/a | partial | MISSING | generate/pin artifacts and storage state |
+| testnet deployment | release requirements | not live-qualified here | harness exists | Exchange testnet docs | BLOCKED | official production-equivalent testnet |
+| external security gate | security-suite registry | not external-audited | internal only | policy exists | BLOCKED | independent launch audit |
+
+## Remediation performed in this audit
+
+1. Added `CanonicalConstantProductPool420.sol` to the canonical 420Swap dApp inventory.
+2. Removed obsolete `CanonicalPool420.sol`.
+3. Hardened `verify-420swap-interface-v1.py` so it:
+   - requires the production pool;
+   - rejects the old scaffold;
+   - checks critical executor/pool properties;
+   - requires dedicated pool/Swap/Pay integration tests;
+   - verifies canonical dApp inventory.
+4. Updated committed Swap interface verification state to `PRODUCTION_CANDIDATE_PRESENT`.
+5. Added Swap verification to the shared contract verification entrypoint.
+6. Expanded the Genesis dApp verifier's expected Swap source inventory.
+7. Expanded Swap developer contract/address documentation.
+8. Added dedicated `420Swap Audit Qualification` CI covering targeted Foundry qualification and the Exchange user surface.
+
+## Outstanding remediation roadmap
+
+The remaining work must preserve these step identities and dependency order:
+
+1. **SWAP-AUDIT-1 — exact-head source/build/test closeout**  
+   Close the dedicated audit workflow on one exact branch SHA and retain the result.
+
+2. **SWAP-AUDIT-2 — GenesisDEXFactory production semantics**  
+   Decide from canonical architecture whether GenesisDEXFactory is registration-only or must deploy pools. If deployment is required, implement deterministic creation, initialization provenance and tests. Do not infer this policy from the contract name alone.
+
+3. **SWAP-AUDIT-3 — permissionless pool lifecycle hardening**  
+   Reconcile “create/register” UX and contract semantics; add adversarial pair/codehash/duplicate/lifecycle coverage.
+
+4. **SWAP-AUDIT-4 — TWAP/oracle production hardening**  
+   Define the authoritative observation source, freshness/window semantics, manipulation resistance, publication authority, stale behavior and Exchange guard integration; add direct tests.
+
+5. **SWAP-AUDIT-5 — PublicBatchAuction completion**  
+   Either explicitly canonicalize it as record-only, or implement bid custody, inventory reservation, clearing/fill allocation, refunds, settlement, replay/accounting invariants and failure recovery. Current repository evidence does not authorize choosing one silently.
+
+6. **SWAP-AUDIT-6 — deterministic artifacts and predeploy state**  
+   Generate pinned compiler artifacts/runtime hashes and materialized constructor/storage state for frozen Swap system contracts; record exact provenance.
+
+7. **SWAP-AUDIT-7 — deployment binding and registry qualification**  
+   Deploy/register the canonical executor/pool/market stack and prove exact code identities, Registry entries and Pay→Swap trusted-caller bindings.
+
+8. **SWAP-AUDIT-8 — production-equivalent testnet qualification**  
+   Execute live Swap journeys through Wallet/Exchange, including success, slippage, stale quote/oracle, wrong chain, disabled market, replay, reorg/recovery and Pay composition.
+
+9. **SWAP-AUDIT-9 — Genesis closeout and release security gate**  
+   Reconcile exact deployed state with frozen address/namespace authority, retain Genesis acceptance evidence, complete independent security review required by release policy, and only then assess production readiness.
+
+## Readiness state
+
+At repository-remediation stage:
+
+- CODE COMPLETE: **NO** — batch-auction/oracle/factory canonical completion decisions remain.
+- BUILD COMPLETE: **YES for source tree on repository CI; final audit workflow must close on exact final SHA.**
+- CONTRACT COMPLETE: **NO** — unresolved PublicBatchAuction/TWAP/factory production semantics.
+- TEST COMPLETE: **NO** — those unresolved components lack final adversarial/economic qualification.
+- DOCUMENTATION COMPLETE: **NO** — deployment/operator/Genesis acceptance records remain.
+- INTEGRATION COMPLETE: **NO** — live Pay/Registry/Wallet/Exchange bindings remain unverified.
+- SECURITY QUALIFIED: **NO** — internal hardening is not the required external release gate and unresolved components remain.
+- TESTNET READY: **NO** — deterministic predeploy/deployment evidence and live binding are incomplete.
+- GENESIS READY: **NO** — predeploy artifacts/state and testnet qualification are incomplete.
+- PRODUCTION READY: **NO** — Genesis/testnet/security gates remain.
+
+## Final determination
+
+420Swap is **materially implemented and substantially stronger than its stale repository metadata indicated, but it is not genuinely complete or Genesis-ready yet**.
+
+The production-candidate ERC20/ERC20 liquidity path, canonical executor, core registries and composed Exchange user surface are real and testable. The audit repaired the stale scaffold/inventory/verification state instead of treating old metadata as truth.
+
+The remaining blockers are substantive: incomplete or ambiguous production semantics around the Genesis DEX factory, permissionless lifecycle, TWAP oracle and public batch auction; absent retained predeploy artifacts/materialized state; unverified live Pay→Swap bindings; and production-equivalent testnet plus external security qualification.
+
+Do not mark 420Swap complete solely because the core Swap and Exchange tests are green.

@@ -12,3 +12,7 @@ version: current
 420 Analytics is **derived/rebuildable presentation**. It does not own balances, validator state, governance outcomes, rights, settlements or any other canonical protocol fact. If a chart or aggregate conflicts with canonical chain/protocol state, canonical state wins.
 
 Start with [Getting started](getting-started.md), then review [Concepts](concepts.md) to understand windows, finality and reproducibility.
+
+
+Bridge metrics consume the qualified 420Indexer protocol/event/object projection. Analytics preserves the canonical `420Bridge` event names and lifecycle projection—including `TransferCreated`, `TransferStatus`, `TransferTransition`, `COMPLETED` and `REFUNDED`—but never reconstructs an independent authoritative Bridge state machine.
+

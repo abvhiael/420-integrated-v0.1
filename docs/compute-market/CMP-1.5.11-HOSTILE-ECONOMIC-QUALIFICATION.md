@@ -1,6 +1,6 @@
 # CMP-1.5.11 — Hostile economic qualification
 
-Status: **IMPLEMENTED. LEVEL 1 + LEVEL 2 QUALIFICATION PENDING.**
+Status: **COMPLETE. LEVEL 1 + LEVEL 2 QUALIFIED.**
 
 ## Canonical definition
 
@@ -49,6 +49,34 @@ Repository-wide Level 3 remains deferred to **CMP-1.5.13 — Phase closeout**.
 ## Exit criteria
 
 CMP-1.5.11 is COMPLETE only when every frozen hostile-economic category has explicit executable evidence; duplicate withdrawal fails without accounting movement; malicious payout reentrancy cannot mutate stake lifecycle; mixed slash/exit/withdraw accounting remains exactly solvent; retained isolation, exit-race, finality, replay, duplicate slash/reward, hostile authorization and failure-atomicity tests remain green; Level 1 passes; retained Compute Level 2 passes on the same exact implementation SHA; and durable evidence records that SHA.
+
+Next canonical step:
+
+**CMP-1.5.12 — Release candidate**
+
+
+## Completion evidence
+
+CMP-1.5.11 is **COMPLETE**.
+
+Qualified implementation SHA:
+
+`1235f24d51d60a6fee2f71e495b34975d879029c`
+
+Exact-head qualification:
+- Genesis Address Authority #964 — **PASS**
+- 420Registry REG-AUDIT-4 #799 — **PASS**
+- 420Docs Qualification #4397 — **PASS**
+- 420Indexer #1783 — **PASS**
+- Compute Market Qualification #149 — **PASS**
+- Solidity Contracts #4184 / `compute-fast` — **PASS**
+- retained `Compute*.t.sol` suite — **PASS**
+- CMP-1.5.11 mechanical verifier — **PASS**
+
+Durable machine-readable evidence:
+`docs/compute-market/CMP-1.5.11-QUALIFICATION-EVIDENCE.json`
+
+This closeout is evidence/documentation-only relative to the qualified implementation SHA and does not require recursive qualification.
 
 Next canonical step:
 

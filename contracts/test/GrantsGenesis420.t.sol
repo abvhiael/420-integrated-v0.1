@@ -601,11 +601,7 @@ contract GrantsGenesis420Test {
 
         e.caps
             .set(
-                DELEGATE,
-                GrantIds420.COMPONENT_GRANTS,
-                GrantIds420.ACTION_SUBMIT_MILESTONE,
-                e.auth.scopeAward(a),
-                true
+                DELEGATE, GrantIds420.COMPONENT_GRANTS, GrantIds420.ACTION_SUBMIT_MILESTONE, e.auth.scopeAward(a), true
             );
         vm.prank(DELEGATE);
         e.milestones.submitClaim(m, claimHash);

@@ -62,6 +62,12 @@ for token in [
         errors.append("transfer missing " + token)
 if "function setStatus(bytes32 id, Status status_)" in transfer:
     errors.append("unconstrained bridge transfer setStatus retained")
+for token in ["ACTION_WITHDRAWAL_RECOVERY", "ActionClass.WITHDRAWAL_ONLY"]:
+    if token not in transfer and token != "ACTION_WITHDRAWAL_RECOVERY":
+        errors.append("transfer missing withdrawal recovery safety classification")
+bridge_ids = (root / "contracts/src/bridge/BridgeIds420.sol").read_text()
+if "ACTION_WITHDRAWAL_RECOVERY" not in bridge_ids:
+    errors.append("bridge ids missing withdrawal recovery action")
 
 chains = (root / "contracts/src/bridge/BridgeChainRegistry420.sol").read_text()
 for token in ["chainKeyByRouteId", "networkId", "isActiveRoute", '"route id bound"']:
@@ -81,12 +87,33 @@ for token in [
     if token not in routes:
         errors.append("route registry missing canonical chain binding " + token)
 
+
+accounting = (root / "contracts/src/bridge/BridgeAccountingRegistry.sol").read_text()
+for token in [
+    "HealthState",
+    "UNKNOWN",
+    "AUTHORIZED_EXCEEDS_OBSERVED",
+    "OBSERVED_EXCEEDS_AUTHORIZED",
+    "usedEvidenceHash",
+    '"evidence replay"',
+    "movementHealthy",
+    "ReconciliationHealth",
+]:
+    if token not in accounting:
+        errors.append("accounting missing " + token)
+for forbidden in ["mint(", "burn(", "transferFrom(", "safeTransferFrom(", "confiscat"]:
+    if forbidden in accounting:
+        errors.append("accounting gained forbidden balance authority: " + forbidden)
+
 gateway = (root / "contracts/src/bridge/GatewayRouter420.sol").read_text()
 for token in [
     "_resolveRequired(BridgeIds420.RISK_MANAGER)",
     "_resolveRequired(BridgeIds420.TRANSFER_REGISTRY)",
     "_requireRouteDirection",
     "_requireRouteHealthy",
+    "_requireAccountingHealthy",
+    "_resolveRequired(BridgeIds420.ACCOUNTING_REGISTRY)",
+    "movementHealthy(assetId)",
     "configuredAdapter == adapterId_",
     "requireRouteChainsCurrent(routeId)",
     "createOutbound(",

@@ -37,4 +37,50 @@ export class ExchangeReadService{
     return marketSnapshot({catalogueEntry:{...entry,catalogueVersion:this.catalogue.version},status,events,nowSeconds:this.nowSeconds()});
   }
   async history(query){await this.refresh();return historyPage(this.store.values(),query);}
+  async bridgeSurface(){
+    const {status,records}=await this.refresh();
+    const rpc=await this.rpc.health();
+    if(rpc?.ok!==true)throw new Error('bridge RPC fallback unavailable');
+    const observedAt=Number(status.indexedHeadTimestamp??this.nowSeconds());
+    const freshness=status?.runtime?.stale===true?'stale':'canonical';
+    const finality=status?.finality?.mode??'indexed';
+    const routes=this.catalogue.routes.filter(route=>route.bridge).map(route=>Object.freeze({
+      routeId:route.routeId,...route.bridge,
+      catalogueQualification:route.qualification,
+      source:route.source,
+      canonicality:freshness==='canonical'?'canonical':'stale',
+      freshness,
+      finality,
+      observedAt,
+    }));
+    const settlements=records.filter(record=>record.kind==='BRIDGE_DEPOSIT'||record.kind==='BRIDGE_WITHDRAWAL').map(record=>Object.freeze({
+      settlementId:record.recordId,
+      routeId:record.routeId??record.subjectId,
+      state:record.kind==='BRIDGE_DEPOSIT'?'SETTLED':'SUBMITTED',
+      txHash:record.txHash,
+      attestationId:null,
+      proofId:null,
+      retryable:false,
+      failureReason:null,
+      active:record.active!==false,
+      finality:record.finality??finality,
+      freshness:record.freshness??freshness,
+      canonicality:record.active===false?'reorged':'canonical',
+      observedAt:record.observedAt??observedAt,
+      replacementId:record.replacedBy??null,
+    }));
+    return Object.freeze({
+      routes:Object.freeze(routes),
+      settlements:Object.freeze(settlements),
+      provenance:Object.freeze({
+        source:'420Indexer/v1+ExchangeReadService',
+        authoritative:false,
+        indexedHead:String(status.indexedHead??''),
+        finality,
+        freshness,
+        rpcFallbackReady:true,
+        observedAt,
+      }),
+    });
+  }
 }

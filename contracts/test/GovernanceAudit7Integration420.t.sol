@@ -3,7 +3,6 @@ pragma solidity ^0.8.24;
 
 import "../src/governance/GovernanceTimelock.sol";
 import "../src/governance/CivicMerkleElectorateSource420.sol";
-import "../src/system/ValidatorRegistry.sol";
 import "../src/treasury/TreasuryPolicyRegistry420.sol";
 import "../src/treasury/TreasuryBudgetRegistry420.sol";
 import "../src/vault/VaultPolicyRegistry420.sol";
@@ -127,12 +126,10 @@ contract GovernanceAudit7Integration420Test {
     }
 
     function testValidatorElectorateIsMembershipWeightedNotStakeWeighted() public {
-        ValidatorRegistry stakeRegistry = new ValidatorRegistry(address(timelock));
         CivicMerkleElectorateSource420 source = new CivicMerkleElectorateSource420(
             address(timelock), keccak256("420CIVIC_VALIDATOR_EQUAL_WEIGHT_MERKLE_V1")
         );
 
-        require(stakeRegistry.governanceTimelock() == address(timelock), "Stake timelock");
         require(source.governanceTimelock() == address(timelock), "electorate timelock");
         require(source.sourceType() == keccak256("420CIVIC_VALIDATOR_EQUAL_WEIGHT_MERKLE_V1"), "validator source type");
 
@@ -150,11 +147,9 @@ contract GovernanceAudit7Integration420Test {
         bytes32[] memory proof = new bytes32[](0);
         require(source.votingWeight(root, validatorOwner, abi.encode(proof)) == 1, "validator weight not unitary");
 
-        // The canonical voting adapter has no ValidatorRegistry/Stake balance input. Membership is
-        // committed in the electorate root and every valid member receives exactly one vote.
-        require(
-            stakeRegistry.EFFECTIVE_BOND() > 1,
-            "fixture confirms Stake has economic weight distinct from Civic vote weight"
-        );
+        // Stake/bond/delegation inputs are deliberately absent from this canonical adapter.
+        // The repository-level GOV-AUDIT-7 verifier separately proves the Civic runtime graph has
+        // no ValidatorRegistry/Stake dependency; this executable assertion proves each valid member
+        // receives exactly one vote.
     }
 }

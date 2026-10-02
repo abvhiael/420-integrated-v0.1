@@ -3,6 +3,26 @@
   "status": "IDENTITY_REGISTRY_FOUNDATION",
   "policy": "Canonical network identity and verifier configuration must be registered before a bridge route can qualify an Exchange asset.",
   "roadmap_status": {
+    "V12.5.2": {
+      "asset": "SOL",
+      "status": "COMPLETED_QUALIFIED_MERGED",
+      "integration_type": "NATIVE_SOLANA_CHAIN_ADAPTER"
+    },
+    "V12.5.3": {
+      "asset": "BNB",
+      "status": "COMPLETED_QUALIFIED_MERGED",
+      "integration_type": "NATIVE_BNB_SMART_CHAIN_ADAPTER"
+    },
+    "V12.5.4": {
+      "asset": "ETH",
+      "status": "COMPLETED_QUALIFIED_MERGED",
+      "integration_type": "NATIVE_ETHEREUM_CHAIN_ADAPTER"
+    },
+    "V12.5.5": {
+      "asset": "DOGE",
+      "status": "COMPLETED_QUALIFIED_MERGED",
+      "integration_type": "NATIVE_DOGECOIN_CHAIN_ADAPTER"
+    },
     "V12.5.6": {
       "asset": "XRP",
       "status": "SUPERSEDED_BY_V12.5.15_REQUALIFICATION"

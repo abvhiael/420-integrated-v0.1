@@ -406,6 +406,46 @@ contract BridgeGenesisIntegration420Test {
         require(status == BridgeTransferRegistry.Status.REFUNDED, "safe refund blocked");
     }
 
+    function testOutboundAdapterFailureRollsBackRiskAndTransferRegistration() public {
+        Fixture memory f = _setup();
+        f.adapter.setInbound(_inbound(100 ether));
+        f.router.acceptInbound(ADAPTER_ID, hex"4201");
+
+        (,,uint256 routeHourlyIn,uint256 routeHourlyOut,uint256 routeDailyIn,uint256 routeDailyOut,uint256 routeTVL) =
+            f.risk.routeUsage(ROUTE_ID);
+        (,,uint256 assetHourlyIn,uint256 assetHourlyOut,uint256 assetDailyIn,uint256 assetDailyOut,uint256 assetTVL) =
+            f.risk.assetUsage(ASSET_ID);
+
+        bytes memory recipient = hex"0102";
+        bytes32 sourceMessageId = f.adapter.nextOutboundId();
+        bytes32 expectedTransferId = f.transfers.deriveOutboundTransferId(
+            ROUTE_ID, ASSET_ID, address(this), keccak256(recipient), 10 ether, sourceMessageId
+        );
+
+        f.adapter.setFail(false, true);
+        (bool ok,) = address(f.router).call(
+            abi.encodeWithSelector(
+                f.router.initiateOutbound.selector, ADAPTER_ID, ROUTE_ID, ASSET_ID, recipient, 10 ether, hex""
+            )
+        );
+        require(!ok, "failing adapter accepted");
+
+        (,,uint256 routeHourlyInAfter,uint256 routeHourlyOutAfter,uint256 routeDailyInAfter,uint256 routeDailyOutAfter,uint256 routeTVLAfter) =
+            f.risk.routeUsage(ROUTE_ID);
+        (,,uint256 assetHourlyInAfter,uint256 assetHourlyOutAfter,uint256 assetDailyInAfter,uint256 assetDailyOutAfter,uint256 assetTVLAfter) =
+            f.risk.assetUsage(ASSET_ID);
+
+        require(routeHourlyInAfter == routeHourlyIn && routeHourlyOutAfter == routeHourlyOut, "route hourly risk leaked");
+        require(routeDailyInAfter == routeDailyIn && routeDailyOutAfter == routeDailyOut, "route daily risk leaked");
+        require(routeTVLAfter == routeTVL, "route tvl leaked");
+        require(assetHourlyInAfter == assetHourlyIn && assetHourlyOutAfter == assetHourlyOut, "asset hourly risk leaked");
+        require(assetDailyInAfter == assetDailyIn && assetDailyOutAfter == assetDailyOut, "asset daily risk leaked");
+        require(assetTVLAfter == assetTVL, "asset tvl leaked");
+
+        (,,,,,,, BridgeTransferRegistry.Status status,,) = f.transfers.transfers(expectedTransferId);
+        require(status == BridgeTransferRegistry.Status.NONE, "failed adapter registered transfer");
+    }
+
     function testFrozenGatewayMayStartFailClosedWithoutVerifier() public {
         GenesisMockEnvironment420 env = new GenesisMockEnvironment420();
         VerifiedGateway420 gateway =

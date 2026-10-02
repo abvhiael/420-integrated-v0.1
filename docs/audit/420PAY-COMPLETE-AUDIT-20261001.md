@@ -3,8 +3,8 @@
 ## Audit basis
 
 Repository: `abvhiael/420-integrated-v0.1`  
-Authoritative baseline: `main` at `d30c81cfbea7847817654b39491694a23c8701e4`  
-Audit branch: `audit/420pay-complete-20261001`
+Authoritative baseline: `main` at `27ae1873edcca8fb05dec9f4e70af9832b5dafe2`  
+Audit branch: `audit/420pay-complete-20261001-r3`
 
 Repository state, frozen parameter decisions, architecture, source, tests, deployment/address authority, security policy and retained qualification records control this audit. Historical PASS records are historical only; they do not qualify a later remediation SHA.
 
@@ -54,7 +54,7 @@ Therefore this audit can establish 420Pay as Genesis protocol infrastructure, bu
 |---|---|
 | Repository | `abvhiael/420-integrated-v0.1` |
 | Baseline | `main@d30c81cfbea7847817654b39491694a23c8701e4` |
-| Working branch | `audit/420pay-complete-20261001` |
+| Working branch | `audit/420pay-complete-20261001-r3` |
 | Existing open Pay remediation PR | none found |
 | Prior Pay PRs | #20 and #22, merged |
 | Solidity | 0.8.24 |

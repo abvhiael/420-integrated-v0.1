@@ -1,5 +1,5 @@
 {
-  "schema": "420pay-audit-qualification-evidence-v2",
+  "schema": "420pay-audit-qualification-evidence-v3",
   "component": "420Pay",
   "audit_branch": "audit/420pay-complete-20261001-r3",
   "current_main_base_sha": "27ae1873edcca8fb05dec9f4e70af9832b5dafe2",
@@ -7,7 +7,8 @@
     "PAY-AUDIT-1",
     "PAY-AUDIT-2",
     "PAY-AUDIT-3",
-    "PAY-AUDIT-5"
+    "PAY-AUDIT-5",
+    "PAY-AUDIT-4"
   ],
   "qualification_records": [
     {
@@ -103,6 +104,73 @@
       "blockers": [],
       "completion_state": "COMPLETE",
       "next_canonical_step": "PAY-AUDIT-4 — settlement splits, refunds, sponsorship and accounting completion"
+    },
+    {
+      "steps": [
+        "PAY-AUDIT-4"
+      ],
+      "qualification_level": "Level 1 — per-roadmap-step fast qualification",
+      "implementation_sha": "3378b3b9efcc2fd2f70124daa7eb520d96aad6f6",
+      "evidence_only_closeout_started_at": "6c3a8aa85cfc732bcf3da5b82cc28886bdf42b55",
+      "implementation_summary": [
+        "Implemented atomic native, direct-token and swap-backed split settlement with payer/replay boundaries and zero-new-residue accounting.",
+        "Bound RefundManager420 evidence to canonical PaymentRegistry420 refund authorization rather than caller-selected maxima.",
+        "Implemented governance-authorized relayer reimbursement in GasSponsor420 without arbitrary user-call execution or arbitrary reimbursement recipients.",
+        "Implemented the frozen 15-field 420Pay accounting export as a derived Indexer DTO/schema with a replaceable sink."
+      ],
+      "requirements_satisfied": [
+        "split recipient count, 10,000-bps total and primary-recipient rounding remain frozen",
+        "native, direct-token and swap-backed splits conserve value atomically and add no SettlementRouter residue",
+        "third parties cannot spend a payer standing allowance through the direct split path",
+        "split/payment replay fails closed",
+        "refund evidence cannot exceed or contradict canonical PaymentRegistry authorization",
+        "RefundManager retains no arbitrary custody/release authority",
+        "only governance-authorized relayers can receive GasSponsor reimbursement",
+        "sponsorship caps and reserve floor are enforced before reimbursement",
+        "all frozen accounting-export fields are present exactly once and refund totals reconcile to settlement amount plus tip"
+      ],
+      "pay_audit_workflow": {
+        "name": "420Pay audit qualification",
+        "run_number": 157,
+        "run_id": 37050677411,
+        "job_id": 110983005816,
+        "conclusion": "success",
+        "checks": [
+          "exact-head verification",
+          "static Pay verification",
+          "Solidity formatting",
+          "Pay and required settlement-boundary build",
+          "PAY-AUDIT-4 Level 1 Solidity qualification",
+          "forbidden primitive scan",
+          "420Indexer Pay reconciliation build and tests"
+        ]
+      },
+      "additional_exact_head_evidence": {
+        "name": "Solidity Contracts",
+        "run_number": 4172,
+        "run_id": 37050677237,
+        "conclusion": "success",
+        "note": "Additional exact-head evidence on the same PAY-AUDIT-4 implementation SHA; not required as a separate Level 1 gate."
+      },
+      "security_adversarial_results": [
+        "direct split requires the payer caller",
+        "split replay rejected",
+        "pre-existing native/token dust does not create new split-router residue",
+        "refund evidence exceeding canonical authorization rejected",
+        "unauthorized sponsor relayer reimbursement rejected",
+        "forbidden primitive scan passed"
+      ],
+      "milestone_status": "No Level 2 milestone triggered by this app-scoped settlement/refund/sponsorship/accounting completion.",
+      "intentionally_deferred": [
+        "Level 2 broader app integration until a documented/meaningful Pay integration milestone",
+        "Level 3 repository-wide app-phase closeout until the accumulated 420Pay audit phase is ready",
+        "deterministic deployment package and Registry publication under PAY-AUDIT-6",
+        "live production-equivalent testnet qualification under PAY-AUDIT-7",
+        "independent security audit and Genesis/production closeout under PAY-AUDIT-8"
+      ],
+      "blockers": [],
+      "completion_state": "COMPLETE",
+      "next_canonical_step": "PAY-AUDIT-6 — deterministic deployment package and Registry publication"
     }
   ],
   "evidence_only_commit_policy": {
@@ -110,7 +178,6 @@
     "rule": "Evidence-only commits may reference an already-qualified implementation SHA without rerunning qualification when they change no executable code, tests, workflows, dependencies, configuration, runtime/generated artifacts, interfaces, deployment state, or substantive requirements."
   },
   "remaining_blockers_not_closed_by_this_evidence": [
-    "PAY-AUDIT-4 split execution, sponsorship execution boundary, accounting export and related semantic decisions",
     "PAY-AUDIT-6 deterministic deployment package and Registry publication",
     "PAY-AUDIT-7 live production-equivalent testnet qualification",
     "PAY-AUDIT-8 independent audit and Genesis/production closeout"

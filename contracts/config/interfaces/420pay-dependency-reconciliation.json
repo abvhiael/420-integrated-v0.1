@@ -1,0 +1,181 @@
+{
+  "schema": "420pay-dependency-reconciliation-v1",
+  "status": "AUDIT_RECONCILED_EXACT_HEAD_QUALIFIED",
+  "component": "420Pay",
+  "canonical_dependency_matrix": "contracts/config/interfaces/dependency-matrix.json",
+  "frozen_interface_layer": "contracts/config/interfaces/genesis-interface-layer.json",
+  "semantics": "The generic dependency-matrix row is a design inventory, not proof that every listed interface is a runtime dependency. This record classifies the current canonical 420Pay runtime dependencies without expanding authority.",
+  "required_dependencies": [
+    "ProtocolRegistry",
+    "CanonicalAssetRegistry",
+    "GovernanceAuthority",
+    "PauseRegistry",
+    "SettlementHealth",
+    "FeeQuote",
+    "SystemSafety",
+    "ReplayProtection",
+    "ChainContext",
+    "MetadataCommitment",
+    "AssetCapabilities"
+  ],
+  "companion_extensions": [
+    "IReplayConsumer420 via ReplayProtectionConsumer420 for domain-bound mutable replay consumption"
+  ],
+  "classifications": [
+    {
+      "dependency": "ProtocolRegistry",
+      "classification": "REQUIRED",
+      "runtime_required": true,
+      "rationale": "GenesisResidentAccess420 resolves and code-hash checks all shared dependencies and validates resident registration."
+    },
+    {
+      "dependency": "CanonicalAssetRegistry",
+      "classification": "REQUIRED",
+      "runtime_required": true,
+      "rationale": "Settlement assets are resolved by canonical asset identity."
+    },
+    {
+      "dependency": "GovernanceAuthority",
+      "classification": "REQUIRED",
+      "runtime_required": true,
+      "rationale": "Configuration and lifecycle mutations require governance authorization through the canonical timelock."
+    },
+    {
+      "dependency": "PauseRegistry",
+      "classification": "REQUIRED",
+      "runtime_required": true,
+      "rationale": "Value-moving Pay actions use the shared pause boundary."
+    },
+    {
+      "dependency": "HealthRegistry",
+      "classification": "NOT_APPLICABLE",
+      "runtime_required": false,
+      "rationale": "Current Pay runtime uses SettlementHealth rather than generic HealthRegistry."
+    },
+    {
+      "dependency": "Oracle",
+      "classification": "NOT_APPLICABLE",
+      "runtime_required": false,
+      "rationale": "Pay consumes qualified fee/settlement health and canonical swap execution; it does not directly read an oracle."
+    },
+    {
+      "dependency": "IdentityCredentials",
+      "classification": "OPTIONAL",
+      "runtime_required": false,
+      "rationale": "Merchant identity/credential policy may be composed externally; current Pay contracts do not use it for authority."
+    },
+    {
+      "dependency": "Names",
+      "classification": "OPTIONAL",
+      "runtime_required": false,
+      "rationale": "Human-readable naming is presentation/discovery only and is not Pay settlement authority."
+    },
+    {
+      "dependency": "SettlementHealth",
+      "classification": "REQUIRED",
+      "runtime_required": true,
+      "rationale": "Canonical asset and conversion-market health are fail-closed settlement gates."
+    },
+    {
+      "dependency": "FeeQuote",
+      "classification": "REQUIRED",
+      "runtime_required": true,
+      "rationale": "PaymentRouter420 validates canonical conversion/protocol fee identity and expiry."
+    },
+    {
+      "dependency": "CapabilityRegistry",
+      "classification": "NOT_APPLICABLE",
+      "runtime_required": false,
+      "rationale": "Current payer authorization is direct payer transaction or Genesis governance, not delegated capability execution."
+    },
+    {
+      "dependency": "SystemSafety",
+      "classification": "REQUIRED",
+      "runtime_required": true,
+      "rationale": "Genesis-resident write paths use shared action-class safety state."
+    },
+    {
+      "dependency": "CustodyVault",
+      "classification": "NOT_APPLICABLE",
+      "runtime_required": false,
+      "rationale": "Current Pay core does not hold merchant/payer settlement custody; refund records are accounting authority rather than arbitrary release authority."
+    },
+    {
+      "dependency": "GenesisInitialization",
+      "classification": "IMPLEMENTED_NOT_RUNTIME_DEPENDENCY",
+      "runtime_required": false,
+      "rationale": "GenesisResidentAccess420 implements IGenesisInitializable420; it is a resident conformance surface, not an external dependency."
+    },
+    {
+      "dependency": "Migration",
+      "classification": "NOT_APPLICABLE",
+      "runtime_required": false,
+      "rationale": "Current Pay contracts are non-proxy resident implementations with no migration execution path."
+    },
+    {
+      "dependency": "SignedEnvelope",
+      "classification": "NOT_APPLICABLE",
+      "runtime_required": false,
+      "rationale": "No Pay contract currently accepts a generic signed-envelope authorization."
+    },
+    {
+      "dependency": "ReplayProtection",
+      "classification": "REQUIRED",
+      "runtime_required": true,
+      "rationale": "Payment settlement reads canonical replay state and, for Genesis activation, requires the domain-bound mutable replay companion."
+    },
+    {
+      "dependency": "ChainContext",
+      "classification": "REQUIRED",
+      "runtime_required": true,
+      "rationale": "Operational writes fail closed on chain/protocol-major mismatch."
+    },
+    {
+      "dependency": "MetadataCommitment",
+      "classification": "REQUIRED",
+      "runtime_required": true,
+      "rationale": "Invoice metadata commitments are checked when supplied."
+    },
+    {
+      "dependency": "RiskLimits",
+      "classification": "NOT_APPLICABLE",
+      "runtime_required": false,
+      "rationale": "Current Pay-specific payer and GasSponsor caps are local; no canonical IRiskLimits420 call is made."
+    },
+    {
+      "dependency": "AssetCapabilities",
+      "classification": "REQUIRED",
+      "runtime_required": true,
+      "rationale": "Settlement assets must be eligible for canonical settlement."
+    },
+    {
+      "dependency": "ExternalDependencyRegistry",
+      "classification": "NOT_APPLICABLE",
+      "runtime_required": false,
+      "rationale": "No Pay runtime path consumes it directly."
+    }
+  ],
+  "authority_invariants": [
+    "Registry discovery and runtime-code-hash checks remain authoritative for shared dependencies.",
+    "Names, Identity, Wallet, Indexer and UI surfaces cannot manufacture payment authority or finality.",
+    "The settlement adapter accepts execution only from its governance-configured PaymentRouter420.",
+    "The canonical swap executor trusts only explicitly governed callers.",
+    "Genesis activation must bind the PAY_SETTLEMENT replay domain to the canonical PaymentRouter420."
+  ],
+  "qualification_evidence": {
+    "source_sha": "79e3bc85f3f2de1778e0200b7eb5dc7895e699f8",
+    "pay_audit_workflow_run": {
+      "name": "420Pay audit qualification",
+      "run_number": 59,
+      "run_id": 36965952679,
+      "conclusion": "success"
+    },
+    "solidity_workflow_run": {
+      "name": "Solidity Contracts",
+      "run_number": 4003,
+      "run_id": 36965952612,
+      "conclusion": "success"
+    },
+    "note": "Final bookkeeping validity additionally requires the commit carrying this record to pass the dedicated exact-head 420Pay audit workflow."
+  }
+}

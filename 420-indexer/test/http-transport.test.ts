@@ -33,6 +33,8 @@ class FakeApi420 implements IndexerPublicApi420 {
   async assetTransfers(chainId: bigint, request: AssetTransferPageRequest420 = {}): Promise<QueryPage420<AssetTransferDto420>> { this.calls.push({ name: 'assetTransfers', chainId, request }); return { items: [], nextCursor: null }; }
   async protocolEvents(chainId: bigint, request: ProtocolEventPageRequest420 = {}): Promise<QueryPage420<ProtocolEventDto420>> { this.calls.push({ name: 'protocolEvents', chainId, request }); return { items: [], nextCursor: null }; }
   async protocolObject(chainId: bigint, protocol: string, objectKey: string): Promise<ProtocolObjectStateDto420 | null> { this.calls.push({ name: 'protocolObject', chainId, request: { protocol, objectKey } }); if (objectKey === 'missing') return null; return { chainId: chainId.toString(), protocol, objectKey, contractAddress: '0xcontract', eventName: 'ProposalActivated', lifecycleState: 'ACTIVE', fields: { proposalId: objectKey }, blockNumber: '10', blockHash: '0x10', transactionHash: '0xabc', transactionIndex: 0, logIndex: 1 }; }
+  async treasuryBudget(chainId: bigint, budgetId: string) { this.calls.push({ name: 'treasuryBudget', chainId, request: { budgetId } }); if (budgetId === 'missing') return null; return { chainId: chainId.toString(), budgetId, vaultId:'0x02', category:'0x03', asset:'0x0000000000000000000000000000000000000420', ceiling:'1000', committed:'500', executed:'250', validFrom:'1', validUntil:'100', civicActionHash:'0x04', metadataHash:'0x05', blockNumber:'10', blockHash:'0x10', transactionHash:'0xabc', transactionIndex:0, logIndex:1, authoritative:false as const }; }
+  async treasuryDisbursement(chainId: bigint, disbursementId: string) { this.calls.push({ name: 'treasuryDisbursement', chainId, request: { disbursementId } }); if (disbursementId === 'missing') return null; return { chainId: chainId.toString(), disbursementId, budgetId:'0x01', recipient:'0x00000000000000000000000000000000000000aa', asset:'0x0000000000000000000000000000000000000420', amount:'250', notBefore:'1', expiresAt:'100', civicActionHash:'0x04', purposeHash:'0x06', vaultReleaseHash:null, executor:null, state:'SCHEDULED' as const, blockNumber:'10', blockHash:'0x10', transactionHash:'0xabc', transactionIndex:0, logIndex:1, authoritative:false as const }; }
   async search(chainId: bigint, term: string, limit?: number): Promise<SearchResult420[]> { this.calls.push({ name: 'search', chainId, request: { term, limit } }); return [{ type: 'block', key: '10', value: '0x10' }]; }
 }
 
@@ -71,6 +73,21 @@ test('HTTP transport routes direct protocol object state with encoded keys', asy
   assert.deepEqual(api.calls[0], { name: 'protocolObject', chainId: 420n, request: { protocol: '420Governance', objectKey: 'proposal:0xabc' } });
 });
 
+
+test('HTTP transport exposes non-authoritative Treasury budget and disbursement state', async () => {
+  const api = new FakeApi420();
+  const budget = await routeIndexerHttp420(api, 'GET', '/v1/treasury/budgets/0xabc?chainId=420');
+  const disbursement = await routeIndexerHttp420(api, 'GET', '/v1/treasury/disbursements/0xdef?chainId=420');
+  assert.equal(budget.status, 200);
+  assert.equal(disbursement.status, 200);
+  assert.equal((budget.body as { data: { authoritative: boolean } }).data.authoritative, false);
+  assert.equal((disbursement.body as { data: { authoritative: boolean } }).data.authoritative, false);
+  assert.deepEqual(api.calls, [
+    { name:'treasuryBudget', chainId:420n, request:{ budgetId:'0xabc' } },
+    { name:'treasuryDisbursement', chainId:420n, request:{ disbursementId:'0xdef' } }
+  ]);
+});
+
 test('HTTP transport returns stable 404 envelopes for missing direct resources', async () => {
   const api = new FakeApi420();
   assert.equal((await routeIndexerHttp420(api, 'GET', '/v1/blocks/missing?chainId=420')).status, 404);
@@ -78,6 +95,8 @@ test('HTTP transport returns stable 404 envelopes for missing direct resources',
   assert.equal((await routeIndexerHttp420(api, 'GET', '/v1/transactions/missing/receipt?chainId=420')).status, 404);
   assert.equal((await routeIndexerHttp420(api, 'GET', '/v1/addresses/missing?chainId=420')).status, 404);
   assert.equal((await routeIndexerHttp420(api, 'GET', '/v1/protocols/420Governance/objects/missing?chainId=420')).status, 404);
+  assert.equal((await routeIndexerHttp420(api, 'GET', '/v1/treasury/budgets/missing?chainId=420')).status, 404);
+  assert.equal((await routeIndexerHttp420(api, 'GET', '/v1/treasury/disbursements/missing?chainId=420')).status, 404);
 });
 
 test('HTTP transport parses transaction, asset, protocol and search filters', async () => {

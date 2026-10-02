@@ -65,6 +65,7 @@ contract PaySwapBridgeGenesisIntegration420Test {
         markets.setMarket(MARKET_ID, address(pool), INPUT, CADC, CanonicalMarketRegistry.Role.CANONICAL_CAD, bytes32(0), true);
         swapExecutor.setTrustedCaller(address(payAdapter), true);
         pay.setSettlementAdapter(address(payAdapter));
+        payAdapter.setPaymentRouter(address(pay));
         pool.setResult(90 ether, 84 ether, false);
 
         chains.setChain(

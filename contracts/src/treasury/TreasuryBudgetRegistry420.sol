@@ -12,7 +12,7 @@ contract TreasuryBudgetRegistry420 is I420System, SystemAccess {
     mapping(bytes32 => Budget) private _budgets;
     error UnauthorizedCaller(); error InvalidBudget(); error BudgetExists(); error BudgetNotFound(); error BudgetExceeded(); error ControllerAlreadySet();
     event ControllerSet(address indexed controller);
-    event BudgetCreated(bytes32 indexed budgetId, bytes32 indexed vaultId, bytes32 indexed category, address asset, uint128 ceiling, uint64 validFrom, uint64 validUntil, bytes32 civicActionHash);
+    event BudgetCreated(bytes32 indexed budgetId, bytes32 indexed vaultId, bytes32 indexed category, address asset, uint128 ceiling, uint64 validFrom, uint64 validUntil, bytes32 civicActionHash, bytes32 metadataHash);
     event BudgetCommitmentChanged(bytes32 indexed budgetId, uint128 committed, uint128 executed);
     constructor(address timelock_, address policy_) SystemAccess(timelock_) { require(policy_ != address(0), "policy"); policy = TreasuryPolicyRegistry420(policy_); }
     function systemName() external pure returns (string memory) { return "TreasuryBudgetRegistry420"; }
@@ -22,7 +22,7 @@ contract TreasuryBudgetRegistry420 is I420System, SystemAccess {
         if (budgetId == bytes32(0) || vaultId == bytes32(0) || category == bytes32(0) || asset == address(0) || ceiling == 0 || civicActionHash == bytes32(0) || validUntil <= validFrom) revert InvalidBudget();
         if (_budgets[budgetId].exists) revert BudgetExists(); if (!policy.isAllowed(asset, 1)) revert InvalidBudget();
         _budgets[budgetId] = Budget(vaultId, category, asset, ceiling, 0, 0, validFrom, validUntil, civicActionHash, metadataHash, true, true);
-        emit BudgetCreated(budgetId, vaultId, category, asset, ceiling, validFrom, validUntil, civicActionHash);
+        emit BudgetCreated(budgetId, vaultId, category, asset, ceiling, validFrom, validUntil, civicActionHash, metadataHash);
     }
     function reserve(bytes32 budgetId, uint128 amount) external onlyController { Budget storage b = _get(budgetId); if (!_effective(b) || uint256(b.committed) + amount > b.ceiling) revert BudgetExceeded(); b.committed += amount; emit BudgetCommitmentChanged(budgetId,b.committed,b.executed); }
     function settle(bytes32 budgetId, uint128 amount) external onlyController { Budget storage b = _get(budgetId); if (amount > b.committed - b.executed) revert BudgetExceeded(); b.executed += amount; emit BudgetCommitmentChanged(budgetId,b.committed,b.executed); }

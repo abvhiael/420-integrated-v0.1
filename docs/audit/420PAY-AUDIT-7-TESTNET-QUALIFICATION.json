@@ -1,0 +1,40 @@
+{
+  "schema": "420pay-audit-7-testnet-qualification-v1",
+  "step": "PAY-AUDIT-7",
+  "status": "BLOCKED_PUBLIC_TESTNET_NOT_LIVE",
+  "repository_harness_ready": false,
+  "live_qualification_complete": false,
+  "canonical_requirement": "Production-equivalent public-testnet qualification against one exact release SHA.",
+  "current_blockers": [
+    "config/protocol.json does not declare a live public testnet",
+    "testnet/public/metadata/chain.json remains candidate-only",
+    "RPC/WS/Explorer/Faucet/Status endpoints remain placeholders",
+    "Genesis digests and release checksum remain placeholders",
+    "no live Pay deployment addresses/transactions/blocks/Registry revisions exist in repository evidence"
+  ],
+  "harness": {
+    "evidenceDraftTemplate": "docs/audit/420PAY-AUDIT-7-LIVE-EVIDENCE-DRAFT.example.json",
+    "liveRunner": "scripts/qualify-420pay-testnet.py",
+    "readinessVerifier": "scripts/verify-420pay-audit-7-testnet-readiness.py",
+    "liveWorkflow": ".github/workflows/420pay-live-testnet.yml",
+    "level1Workflow": ".github/workflows/420pay-audit-7.yml",
+    "qualificationDoc": "docs/audit/420PAY-AUDIT-7-TESTNET-QUALIFICATION.md"
+  },
+  "live_exit_criteria": [
+    "exact release SHA, chain ID, Genesis hash and evidence block/hash",
+    "nine Pay deployed addresses and exact runtime hashes",
+    "ProtocolRegistry ACTIVE/version/runtime identity",
+    "GovernanceTimelock and Pay/Swap/refund/replay bindings",
+    "canonical asset/fee/health dependencies",
+    "invoice/payment/settlement/refund journeys",
+    "direct and swap-backed split settlement",
+    "authorized GasSponsor reimbursement",
+    "accounting export reconciliation",
+    "negative authorization/replay/over-refund/stale-quote/atomic-swap-failure evidence",
+    "420Indexer lifecycle reconstruction, restart/idempotence, bounded reorg recovery and deep-reorg rejection",
+    "retained non-secret receipts/logs/manifests tied to exact release SHA"
+  ],
+  "expected_current_readiness": "PAY_AUDIT_7_READINESS=BLOCKED_PUBLIC_TESTNET_NOT_LIVE",
+  "next_action_when_unblocked": "Populate reviewed real evidence draft and dispatch 420Pay live testnet qualification on the exact release SHA.",
+  "next_canonical_step_after_completion": "PAY-AUDIT-8 — independent audit and Genesis/production closeout"
+}

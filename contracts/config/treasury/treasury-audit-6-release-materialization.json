@@ -1,0 +1,153 @@
+{
+  "schema": "420-treasury-audit-6-release-materialization-v1",
+  "step": "TREASURY-AUDIT-6",
+  "status": "REPOSITORY_QUALIFIED_LIVE_TESTNET_DEFERRED",
+  "repository_ready": false,
+  "live_qualified": false,
+  "address_policy": {
+    "namespace_authority": "contracts/config/genesis-address-namespace.json",
+    "treasury_router_status": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS",
+    "new_frozen_predeploy_required": false,
+    "create2_policy": "NOT_ADOPTED_DO_NOT_INVENT",
+    "production_addresses_source": "LIVE_DEPLOYMENT_PLUS_PROTOCOL_REGISTRY_IN_TREASURY_AUDIT_8"
+  },
+  "canonical_dependencies": {
+    "governance_timelock": {
+      "address": "0x0000000000000000000000000000000000000429",
+      "source": "contracts/config/genesis-address-namespace.json"
+    },
+    "protocol_registry": {
+      "address": "0x0000000000000000000000000000000000000434",
+      "source": "contracts/config/genesis-address-namespace.json",
+      "publication_api": "publishRegisteredService"
+    },
+    "capability_registry": {
+      "candidate_address": "0x0000000000000000000000000000000000000447",
+      "status": "CANDIDATE_NOT_DEPLOYED_NOT_FROZEN",
+      "source": "contracts/config/genesis-address-namespace.json"
+    }
+  },
+  "deployment_order": [
+    {
+      "order": 1,
+      "contract": "TreasuryAuthorization420",
+      "source": "contracts/src/treasury/TreasuryAuthorization420.sol",
+      "constructor": [
+        "CapabilityRegistry420"
+      ],
+      "post_init": []
+    },
+    {
+      "order": 2,
+      "contract": "TreasuryPolicyRegistry420",
+      "source": "contracts/src/treasury/TreasuryPolicyRegistry420.sol",
+      "constructor": [
+        "GovernanceTimelock"
+      ],
+      "post_init": []
+    },
+    {
+      "order": 3,
+      "contract": "TreasuryBudgetRegistry420",
+      "source": "contracts/src/treasury/TreasuryBudgetRegistry420.sol",
+      "constructor": [
+        "GovernanceTimelock",
+        "TreasuryPolicyRegistry420"
+      ],
+      "post_init": []
+    },
+    {
+      "order": 4,
+      "contract": "TreasuryDisbursementRegistry420",
+      "source": "contracts/src/treasury/TreasuryDisbursementRegistry420.sol",
+      "constructor": [
+        "GovernanceTimelock",
+        "TreasuryAuthorization420",
+        "TreasuryPolicyRegistry420",
+        "TreasuryBudgetRegistry420"
+      ],
+      "post_init": []
+    },
+    {
+      "order": 5,
+      "contract": "TreasuryBudgetRegistry420",
+      "action": "setController",
+      "args": [
+        "TreasuryDisbursementRegistry420"
+      ],
+      "one_time": true
+    },
+    {
+      "order": 6,
+      "contract": "TreasuryRouter420",
+      "source": "contracts/src/treasury/TreasuryRouter420.sol",
+      "constructor": [
+        "TreasuryBudgetRegistry420",
+        "TreasuryDisbursementRegistry420"
+      ],
+      "post_init": []
+    },
+    {
+      "order": 7,
+      "contract": "ProtocolRegistry",
+      "action": "publishRegisteredService",
+      "service_id_preimage": "420/service/treasury/v1",
+      "implementation": "TreasuryRouter420",
+      "version": 1,
+      "active": true,
+      "component_type": "SERVICE",
+      "metadata_hash_policy": "keccak256(canonical Treasury release metadata document)",
+      "manifest_hash_policy": "keccak256(this release materialization manifest canonical payload)",
+      "dependency_root_policy": "keccak256(ordered deployed dependency identities and runtime code hashes)",
+      "interface_hash_policy": "keccak256(canonical TreasuryRouter420 ABI/interface descriptor)"
+    }
+  ],
+  "artifact_identity": {
+    "compiler": "Solidity 0.8.24",
+    "evm_version": "cancun",
+    "optimizer": true,
+    "optimizer_runs": 200,
+    "artifact_paths": [
+      "contracts/out/TreasuryAuthorization420.sol/TreasuryAuthorization420.json",
+      "contracts/out/TreasuryPolicyRegistry420.sol/TreasuryPolicyRegistry420.json",
+      "contracts/out/TreasuryBudgetRegistry420.sol/TreasuryBudgetRegistry420.json",
+      "contracts/out/TreasuryDisbursementRegistry420.sol/TreasuryDisbursementRegistry420.json",
+      "contracts/out/TreasuryRouter420.sol/TreasuryRouter420.json"
+    ],
+    "hash_evidence": "QUALIFICATION_LOG_AND_DURABLE_AUDIT_EVIDENCE"
+  },
+  "local_evm_qualification": {
+    "required": true,
+    "test": "contracts/test/TreasuryDeploymentBinding420.t.sol",
+    "verifier": "scripts/verify-treasury-audit-6-release.py",
+    "proves": [
+      "constructor graph binds exact deployed Treasury dependencies",
+      "budget controller is set exactly once to TreasuryDisbursementRegistry420",
+      "ProtocolRegistry publishes canonical Treasury service to exact TreasuryRouter420",
+      "ProtocolRegistry derives nonzero router EXTCODEHASH",
+      "registration profile commits nonzero manifest/interface hashes and dependency root",
+      "wrong router/dependency binding is visible and fails assertions",
+      "TreasuryRouter remains registry-resolved and is not assigned a frozen Genesis address"
+    ]
+  },
+  "repository_evidence": {
+    "chain_context": "FOUNDRY_LOCAL_EVM_ONLY",
+    "chain_id": "LOCAL_TEST_CHAIN",
+    "genesis_identity": "NOT_LIVE_GENESIS_EVIDENCE",
+    "deployed_addresses": "RETAINED_IN_EXACT_HEAD_QUALIFICATION_LOGS",
+    "runtime_code_hashes": "RETAINED_IN_EXACT_HEAD_QUALIFICATION_LOGS",
+    "artifact_hashes": "RETAINED_IN_EXACT_HEAD_QUALIFICATION_LOGS"
+  },
+  "live_testnet_evidence": {
+    "required_in_step": "TREASURY-AUDIT-8",
+    "chain_id": null,
+    "genesis_hash": null,
+    "evidence_block": null,
+    "evidence_block_hash": null,
+    "deployed_addresses": {},
+    "deployment_transactions": [],
+    "registry_transactions": [],
+    "runtime_code_hashes": {},
+    "constructor_binding_receipts": []
+  }
+}

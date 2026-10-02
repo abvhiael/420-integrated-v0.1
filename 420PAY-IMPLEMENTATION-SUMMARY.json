@@ -1,6 +1,11 @@
 {
   "status_schema": "420pay-implementation-status-v2",
-  "genesis_decisions_frozen": [1, 2, 3, 4],
+  "genesis_decisions_frozen": [
+    1,
+    2,
+    3,
+    4
+  ],
   "source_contracts_implemented": 11,
   "static_verification_pass": true,
   "go_test": 0,
@@ -18,5 +23,15 @@
   "genesis_swap_executor_trust_wiring_verified": false,
   "shared_replay_consumption_supported_by_frozen_interface": false,
   "external_security_audit_complete": false,
-  "note": "420Pay is implemented and CI-qualified. Remaining remediation is narrowly scoped to explicit Genesis adapter/executor trust wiring and a mutable shared replay-consumption interface; external third-party audit is not claimed."
+  "note": "Historical compile/test fields describe retained earlier qualification only. Current source implements Pay -> SettlementAdapter -> SwapExecutor authority wiring, explicit adapter-to-PaymentRouter binding, and domain-bound mutable replay consumption. Exact-head audit qualification passed on `79e3bc85f3f2de1778e0200b7eb5dc7895e699f8`; live deployment binding, and external independent security review remain release gates.",
+  "mutable_replay_companion_present": true,
+  "settlement_adapter_router_binding": true,
+  "source_swap_executor_trust_wiring_verified": true,
+  "deployment_swap_executor_trust_wiring_verified": false,
+  "source_replay_domain_binding_verified": true,
+  "deployment_replay_domain_binding_verified": false,
+  "exact_head_audit_qualification_pass": true,
+  "exact_head_audit_qualification_sha": "79e3bc85f3f2de1778e0200b7eb5dc7895e699f8",
+  "exact_head_audit_qualification_run_id": 36965952679,
+  "exact_head_audit_qualification_run_number": 59
 }

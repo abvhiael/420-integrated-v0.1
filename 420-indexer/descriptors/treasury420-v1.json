@@ -1,0 +1,228 @@
+{
+  "schema": "420-treasury-artifact-descriptor-v1",
+  "descriptorVersion": 1,
+  "protocol": "420Treasury",
+  "authority": "artifact_events_only_addresses_resolved_by_deployment",
+  "contracts": [
+    {
+      "contractName": "TreasuryPolicyRegistry420",
+      "sourcePath": "contracts/src/treasury/TreasuryPolicyRegistry420.sol",
+      "events": [
+        {
+          "name": "AssetPolicySet",
+          "signature": "AssetPolicySet(address,bool,uint128,uint128,uint64,uint32)",
+          "inputs": [
+            {
+              "name": "asset",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "name": "allowed",
+              "type": "bool",
+              "indexed": false
+            },
+            {
+              "name": "maxSingleDisbursement",
+              "type": "uint128",
+              "indexed": false
+            },
+            {
+              "name": "maxEpochDisbursement",
+              "type": "uint128",
+              "indexed": false
+            },
+            {
+              "name": "epochSeconds",
+              "type": "uint64",
+              "indexed": false
+            },
+            {
+              "name": "revision",
+              "type": "uint32",
+              "indexed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "contractName": "TreasuryBudgetRegistry420",
+      "sourcePath": "contracts/src/treasury/TreasuryBudgetRegistry420.sol",
+      "events": [
+        {
+          "name": "ControllerSet",
+          "signature": "ControllerSet(address)",
+          "inputs": [
+            {
+              "name": "controller",
+              "type": "address",
+              "indexed": true
+            }
+          ]
+        },
+        {
+          "name": "BudgetCreated",
+          "signature": "BudgetCreated(bytes32,bytes32,bytes32,address,uint128,uint64,uint64,bytes32,bytes32)",
+          "inputs": [
+            {
+              "name": "budgetId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "vaultId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "category",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "asset",
+              "type": "address",
+              "indexed": false
+            },
+            {
+              "name": "ceiling",
+              "type": "uint128",
+              "indexed": false
+            },
+            {
+              "name": "validFrom",
+              "type": "uint64",
+              "indexed": false
+            },
+            {
+              "name": "validUntil",
+              "type": "uint64",
+              "indexed": false
+            },
+            {
+              "name": "civicActionHash",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "metadataHash",
+              "type": "bytes32",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "BudgetCommitmentChanged",
+          "signature": "BudgetCommitmentChanged(bytes32,uint128,uint128)",
+          "inputs": [
+            {
+              "name": "budgetId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "committed",
+              "type": "uint128",
+              "indexed": false
+            },
+            {
+              "name": "executed",
+              "type": "uint128",
+              "indexed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "contractName": "TreasuryDisbursementRegistry420",
+      "sourcePath": "contracts/src/treasury/TreasuryDisbursementRegistry420.sol",
+      "events": [
+        {
+          "name": "DisbursementScheduled",
+          "signature": "DisbursementScheduled(bytes32,bytes32,address,address,uint128,uint64,uint64,bytes32,bytes32)",
+          "inputs": [
+            {
+              "name": "disbursementId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "budgetId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "recipient",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "name": "asset",
+              "type": "address",
+              "indexed": false
+            },
+            {
+              "name": "amount",
+              "type": "uint128",
+              "indexed": false
+            },
+            {
+              "name": "notBefore",
+              "type": "uint64",
+              "indexed": false
+            },
+            {
+              "name": "expiresAt",
+              "type": "uint64",
+              "indexed": false
+            },
+            {
+              "name": "civicActionHash",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "purposeHash",
+              "type": "bytes32",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "DisbursementExecuted",
+          "signature": "DisbursementExecuted(bytes32,bytes32,address)",
+          "inputs": [
+            {
+              "name": "disbursementId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "vaultReleaseHash",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "executor",
+              "type": "address",
+              "indexed": true
+            }
+          ]
+        },
+        {
+          "name": "DisbursementCancelled",
+          "signature": "DisbursementCancelled(bytes32)",
+          "inputs": [
+            {
+              "name": "disbursementId",
+              "type": "bytes32",
+              "indexed": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

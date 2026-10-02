@@ -91,8 +91,7 @@ contract RefundManager420 is GenesisResidentAccess420 {
         require(refundedByPayment[paymentId] + amount <= canonicalMaximum, "refund exceeds payment");
 
         refundedByPayment[paymentId] += amount;
-        refunds[refundId] =
-            Refund(paymentId, settlementAsset, recipient, amount, reasonHash, uint64(block.timestamp));
+        refunds[refundId] = Refund(paymentId, settlementAsset, recipient, amount, reasonHash, uint64(block.timestamp));
         emit RefundRecorded(refundId, paymentId, settlementAsset, amount);
     }
 }

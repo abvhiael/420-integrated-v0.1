@@ -23,15 +23,22 @@ Level 2 is not triggered by this definition/inventory step. Level 3 remains defe
 
 ## GRANTS-AUDIT-2 — contract consistency and lifecycle remediation
 
-**Status: IMPLEMENTED — pending exact-head qualification**
+**Status: COMPLETE**
 
-- eliminate divergent program-award accounting by making GrantProgramRegistry420.awarded authoritative;
-- bind exactly one GrantAwardRegistry420 as the only award-cap reservation controller;
-- reject new awards for inactive programs;
-- require ACTIVE parent award state at milestone approval;
-- prevent one Treasury disbursement from funding multiple milestones;
-- release an unexecuted milestone/disbursement binding only through explicit milestone cancellation;
-- prevent cancellation from hiding an already executed Treasury payment.
+- eliminated divergent program-award accounting by making GrantProgramRegistry420.awarded authoritative;
+- bound exactly one GrantAwardRegistry420 as the only award-cap reservation controller;
+- rejected new awards for inactive programs;
+- required ACTIVE parent award state at milestone approval;
+- prevented one Treasury disbursement from funding multiple milestones;
+- permitted release of an approved milestone/disbursement binding only after canonical Treasury cancellation;
+- prevented cancellation from hiding an already executed Treasury payment;
+- Level 1 exact-head qualification **PASS** on implementation SHA `02244b26b699557c8c42600c635b38b276249183`;
+- 420Grants Audit Qualification run `37055267365`: contract-core job `110998596847` PASS and grants-security job `110998596514` PASS;
+- affected shared Solidity Contracts run `37055267238` PASS on the same implementation SHA;
+- later GRANTS-AUDIT-1 bookkeeping changed documentation only, so exact-SHA qualification remained authoritative without redundant rerun;
+- durable evidence: `docs/audit/420GRANTS-AUDIT-2-QUALIFICATION.md`, introduced by evidence commit `c5e8fa11e671c837291bb99db3fc1818d55be019`.
+
+Level 2 is not triggered by this lifecycle-remediation step alone. Level 3 remains deferred to GRANTS-AUDIT-8.
 
 ## GRANTS-AUDIT-3 — adversarial, replay and invariant qualification
 

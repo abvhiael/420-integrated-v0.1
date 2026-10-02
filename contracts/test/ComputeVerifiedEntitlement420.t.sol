@@ -169,7 +169,7 @@ contract ComputeVerifiedEntitlement420Test {
         providers = new ComputeProviderRegistry420(GOV);
         nodes = new ComputeNodeRegistry420(address(providers), GOV);
         resources = new ComputeResourceRegistry420(address(nodes), GOV);
-        offers = new ComputeOfferRegistry420(address(resources), address(computeAuth));
+        offers = new ComputeOfferRegistry420(address(resources), address(auth));
         matches = new ComputeAcceptedPriceMatch420(address(resources), address(auth),
             address(funding), address(offers));
         workers = new ComputeJobMatchedWorkerEvidence420(address(matches), address(auth));

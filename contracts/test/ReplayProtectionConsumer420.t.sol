@@ -100,7 +100,8 @@ contract ReplayProtectionConsumer420Test {
         PaymentRouter420 router = new PaymentRouter420(address(this), address(env.registry()), cfg);
         env.registerResident(address(router), router.componentId());
 
-        ReplayProtectionConsumer420 replay = new ReplayProtectionConsumer420(address(this), address(env.registry()), cfg);
+        ReplayProtectionConsumer420 replay =
+            new ReplayProtectionConsumer420(address(this), address(env.registry()), cfg);
         env.registerResident(address(replay), replay.componentId());
         env.registry().set(AppDependencyIds420.REPLAY_PROTECTION, address(replay));
 

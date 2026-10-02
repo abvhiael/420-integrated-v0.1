@@ -576,7 +576,31 @@
   "deployedBytecodeTemplateKeccak256": "0x6b6a67041eaba275e1e410afd4e8ed5f25dfc669c38fc0d5c5eece69a9a86c6b",
   "immutableReferenceCount": 18,
   "immutableReferences": {
-    "1120": [
+    "executor": [
+      {
+        "length": 32,
+        "start": 816
+      },
+      {
+        "length": 32,
+        "start": 1513
+      }
+    ],
+    "feeBps": [
+      {
+        "length": 32,
+        "start": 1710
+      },
+      {
+        "length": 32,
+        "start": 2077
+      },
+      {
+        "length": 32,
+        "start": 3037
+      }
+    ],
+    "token0": [
       {
         "length": 32,
         "start": 381
@@ -602,7 +626,7 @@
         "start": 4406
       }
     ],
-    "1122": [
+    "token1": [
       {
         "length": 32,
         "start": 424
@@ -630,30 +654,6 @@
       {
         "length": 32,
         "start": 4447
-      }
-    ],
-    "1124": [
-      {
-        "length": 32,
-        "start": 816
-      },
-      {
-        "length": 32,
-        "start": 1513
-      }
-    ],
-    "1126": [
-      {
-        "length": 32,
-        "start": 1710
-      },
-      {
-        "length": 32,
-        "start": 2077
-      },
-      {
-        "length": 32,
-        "start": 3037
       }
     ]
   },

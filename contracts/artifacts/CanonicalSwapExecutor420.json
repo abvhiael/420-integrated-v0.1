@@ -415,7 +415,27 @@
   "deployedBytecodeTemplateKeccak256": "0x04f29b9e41c1fabf8ab3fcaf7ec1bdbbc1e0e78b85094a3028a75b491aa1ea9d",
   "immutableReferenceCount": 15,
   "immutableReferences": {
-    "5711": [
+    "genesisConfigHash": [
+      {
+        "length": 32,
+        "start": 5473
+      },
+      {
+        "length": 32,
+        "start": 6597
+      }
+    ],
+    "governanceTimelock": [
+      {
+        "length": 32,
+        "start": 5624
+      },
+      {
+        "length": 32,
+        "start": 6398
+      }
+    ],
+    "registry": [
       {
         "length": 32,
         "start": 370
@@ -459,26 +479,6 @@
       {
         "length": 32,
         "start": 7173
-      }
-    ],
-    "5714": [
-      {
-        "length": 32,
-        "start": 5473
-      },
-      {
-        "length": 32,
-        "start": 6597
-      }
-    ],
-    "6270": [
-      {
-        "length": 32,
-        "start": 5624
-      },
-      {
-        "length": 32,
-        "start": 6398
       }
     ]
   },

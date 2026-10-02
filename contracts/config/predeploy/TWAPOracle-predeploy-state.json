@@ -15,7 +15,27 @@
     "governanceTimelock": "0x0000000000000000000000000000000000000429",
     "immutableReferenceCount": 8,
     "immutableReferences": {
-      "5711": [
+      "genesisConfigHash": [
+        {
+          "length": 32,
+          "start": 303
+        },
+        {
+          "length": 32,
+          "start": 2151
+        }
+      ],
+      "governanceTimelock": [
+        {
+          "length": 32,
+          "start": 583
+        },
+        {
+          "length": 32,
+          "start": 1008
+        }
+      ],
+      "registry": [
         {
           "length": 32,
           "start": 651
@@ -32,84 +52,56 @@
           "length": 32,
           "start": 5646
         }
-      ],
-      "5714": [
-        {
-          "length": 32,
-          "start": 303
-        },
-        {
-          "length": 32,
-          "start": 2151
-        }
-      ],
-      "6270": [
-        {
-          "length": 32,
-          "start": 583
-        },
-        {
-          "length": 32,
-          "start": 1008
-        }
       ]
     },
     "materializedReferences": [
       {
-        "immutableId": "5711",
-        "length": 32,
-        "start": 651,
-        "value": "0x0000000000000000000000000000000000000434",
-        "variable": "registry"
-      },
-      {
-        "immutableId": "5711",
-        "length": 32,
-        "start": 1108,
-        "value": "0x0000000000000000000000000000000000000434",
-        "variable": "registry"
-      },
-      {
-        "immutableId": "5711",
-        "length": 32,
-        "start": 3172,
-        "value": "0x0000000000000000000000000000000000000434",
-        "variable": "registry"
-      },
-      {
-        "immutableId": "5711",
-        "length": 32,
-        "start": 5646,
-        "value": "0x0000000000000000000000000000000000000434",
-        "variable": "registry"
-      },
-      {
-        "immutableId": "5714",
         "length": 32,
         "start": 303,
         "value": "0xd5121ed76a785afb903129f8677323477e3cfded1126bc2320ac881a7e68fb38",
         "variable": "genesisConfigHash"
       },
       {
-        "immutableId": "5714",
         "length": 32,
         "start": 2151,
         "value": "0xd5121ed76a785afb903129f8677323477e3cfded1126bc2320ac881a7e68fb38",
         "variable": "genesisConfigHash"
       },
       {
-        "immutableId": "6270",
         "length": 32,
         "start": 583,
         "value": "0x0000000000000000000000000000000000000429",
         "variable": "governanceTimelock"
       },
       {
-        "immutableId": "6270",
         "length": 32,
         "start": 1008,
         "value": "0x0000000000000000000000000000000000000429",
         "variable": "governanceTimelock"
+      },
+      {
+        "length": 32,
+        "start": 651,
+        "value": "0x0000000000000000000000000000000000000434",
+        "variable": "registry"
+      },
+      {
+        "length": 32,
+        "start": 1108,
+        "value": "0x0000000000000000000000000000000000000434",
+        "variable": "registry"
+      },
+      {
+        "length": 32,
+        "start": 3172,
+        "value": "0x0000000000000000000000000000000000000434",
+        "variable": "registry"
+      },
+      {
+        "length": 32,
+        "start": 5646,
+        "value": "0x0000000000000000000000000000000000000434",
+        "variable": "registry"
       }
     ],
     "protocolRegistry": "0x0000000000000000000000000000000000000434",

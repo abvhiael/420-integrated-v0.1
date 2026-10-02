@@ -40,7 +40,9 @@ contract CivicConstitution420 is SystemAccess, I420System {
         uint32 revision
     );
 
-    constructor(address timelock_) SystemAccess(timelock_) {}
+    constructor(
+        address timelock_
+    ) SystemAccess(timelock_) { }
 
     function systemName() external pure returns (string memory) {
         return "CivicConstitution420";
@@ -50,14 +52,18 @@ contract CivicConstitution420 is SystemAccess, I420System {
         return 1;
     }
 
-    function delayFloor(CivicIds420.ProposalClass class_) public pure returns (uint64) {
+    function delayFloor(
+        CivicIds420.ProposalClass class_
+    ) public pure returns (uint64) {
         if (class_ == CivicIds420.ProposalClass.G1) return 7 days;
         if (class_ == CivicIds420.ProposalClass.G2) return 14 days;
         if (class_ == CivicIds420.ProposalClass.G3) return 14 days;
         return 42 days;
     }
 
-    function ruleFor(CivicIds420.ProposalClass class_) external view returns (Rule memory) {
+    function ruleFor(
+        CivicIds420.ProposalClass class_
+    ) external view returns (Rule memory) {
         return _rules[uint8(class_)];
     }
 

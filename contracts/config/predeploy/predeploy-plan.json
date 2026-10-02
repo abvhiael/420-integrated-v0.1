@@ -94,9 +94,12 @@
       "address": "0x0000000000000000000000000000000000000429",
       "source": "governance/GovernanceTimelock.sol",
       "artifact": "contracts/artifacts/GovernanceTimelock.json",
-      "status": "SOURCE_READY",
-      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
-      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
+      "status": "ARTIFACT_READY",
+      "constructor_strategy": "DIRECT_GENESIS_IMMUTABLE_AND_STORAGE_MATERIALIZATION",
+      "notes": "GOV-AUDIT-6 exact runtime and constructor state materialized from pinned compiler outputs.",
+      "runtime_code_hash": "0xca5e96c6048b190839d68a8857b2ff5f0a7e0f356d4089ac31fa684cdee00139",
+      "source_blob_sha1": "30977a1e172763aa333eeb4b34b1bbaee025c235",
+      "predeploy_state": "contracts/config/predeploy/GovernanceTimelock-predeploy-state.json"
     },
     {
       "name": "PublicDistributionVault",
@@ -243,9 +246,12 @@
       "address": "0x0000000000000000000000000000000000000437",
       "source": "governance/Governance420.sol",
       "artifact": "contracts/artifacts/Governance420.json",
-      "status": "SOURCE_READY",
-      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
-      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
+      "status": "ARTIFACT_READY",
+      "constructor_strategy": "DIRECT_GENESIS_IMMUTABLE_AND_STORAGE_MATERIALIZATION",
+      "notes": "GOV-AUDIT-6 exact runtime and constructor state materialized from pinned compiler outputs.",
+      "runtime_code_hash": "0x9af678e7626b6141b4af33e7729b27835949f8dad634298e7ce5a5e754305d64",
+      "source_blob_sha1": "886668e8efa97bd32734e32cde11148bcf98e5bd",
+      "predeploy_state": "contracts/config/predeploy/Governance420-predeploy-state.json"
     },
     {
       "name": "VerifiedGateway420",

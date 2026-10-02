@@ -1,1 +1,119 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>420Status</title><link rel="stylesheet" href="/app.css"></head><body><main><header class="hero"><div><p class="eyebrow">420 Integrated</p><h1>420Status</h1><p id="network-copy">Operational health for public 420 services.</p></div><div id="network-banner" class="banner unknown">loading status…</div></header><aside class="notice"><strong>Operational evidence only.</strong> Green status does not prove consensus finality, settlement, ownership or protocol safety. Red status does not by itself prove canonical chain failure.</aside><section><div class="section-head"><h2>Components</h2><span id="updated-at"></span></div><div id="components" class="grid"></div></section><section class="split"><article><h2>Active incidents</h2><div id="incidents" class="stack"></div></article><article><h2>Planned maintenance</h2><div id="maintenance" class="stack"></div></article></section><section><div class="section-head"><h2>History & provenance</h2><button id="load-more" hidden>Load more</button></div><div id="history" class="timeline"></div></section><p id="error" class="error" hidden></p></main><script src="/app.js" defer></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#08131d">
+  <meta name="description" content="Live operational health, incidents, maintenance and service history for the 420 Integrated ecosystem.">
+  <title>420Status · 420 Integrated</title>
+  <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png">
+  <link rel="apple-touch-icon" href="/favicon.png">
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to status</a>
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+
+  <header class="site-header">
+    <a class="brand" href="https://420integrated.org" aria-label="420 Integrated home">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 64 64" role="img">
+          <circle cx="32" cy="32" r="29"></circle>
+          <path d="M32 12c2 8 2 13 0 19 5-5 10-8 17-9-3 7-7 11-13 14 6 0 10 1 15 5-7 3-12 3-18 0 1 5 1 9-1 14-2-5-2-9-1-14-6 3-11 3-18 0 5-4 9-5 15-5-6-3-10-7-13-14 7 1 12 4 17 9-2-6-2-11 0-19z"></path>
+        </svg>
+      </span>
+      <span><strong>420</strong> INTEGRATED</span>
+    </a>
+    <nav aria-label="Primary">
+      <a href="https://420integrated.org">Network</a>
+      <a href="https://explorer.420integrated.org">Explorer</a>
+      <a class="active" href="/" aria-current="page">Status</a>
+    </nav>
+  </header>
+
+  <main id="main-content">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">NETWORK OPERATIONS</p>
+        <img class="hero-logo" src="/420status-logo.webp" width="640" height="427" alt="420Status">
+        <h1 class="sr-only">420Status</h1>
+        <p class="lede">Operational health, incidents and maintenance across public 420 Integrated services.</p>
+      </div>
+      <div class="hero-state">
+        <div id="network-banner" class="network-badge unknown" aria-live="polite">
+          <span class="pulse-dot"></span>
+          <span id="network-state-label">Checking network</span>
+        </div>
+        <p id="updated-at" class="updated">Awaiting fresh evidence</p>
+      </div>
+    </section>
+
+    <aside class="trust-note">
+      <div class="trust-icon">i</div>
+      <p><strong>Operational evidence only.</strong> This page reports non-canonical service health. A green status does not prove consensus finality, settlement, ownership or protocol safety.</p>
+    </aside>
+
+    <section class="section-block" aria-labelledby="components-title">
+      <div class="section-heading">
+        <div>
+          <p class="section-kicker">SYSTEMS</p>
+          <h2 id="components-title">Components</h2>
+        </div>
+        <span id="component-summary" class="summary-chip">Waiting for data</span>
+      </div>
+      <div id="components" class="component-grid">
+        <article class="component-card placeholder"><div class="skeleton wide"></div><div class="skeleton"></div><div class="skeleton short"></div></article>
+        <article class="component-card placeholder"><div class="skeleton wide"></div><div class="skeleton"></div><div class="skeleton short"></div></article>
+        <article class="component-card placeholder"><div class="skeleton wide"></div><div class="skeleton"></div><div class="skeleton short"></div></article>
+      </div>
+    </section>
+
+    <section class="split-grid">
+      <article class="panel" aria-labelledby="incidents-title">
+        <div class="panel-heading">
+          <div><p class="section-kicker">NOW</p><h2 id="incidents-title">Active incidents</h2></div>
+          <span id="incident-count" class="count-badge">—</span>
+        </div>
+        <div id="incidents" class="feed"><p class="empty">Checking active incidents…</p></div>
+      </article>
+
+      <article class="panel" aria-labelledby="maintenance-title">
+        <div class="panel-heading">
+          <div><p class="section-kicker">PLANNED</p><h2 id="maintenance-title">Planned maintenance</h2></div>
+          <span id="maintenance-count" class="count-badge">—</span>
+        </div>
+        <div id="maintenance" class="feed"><p class="empty">Checking maintenance…</p></div>
+      </article>
+    </section>
+
+    <section class="panel history-panel" aria-labelledby="history-title">
+      <div class="panel-heading">
+        <div><p class="section-kicker">PROVENANCE</p><h2 id="history-title">History &amp; provenance</h2></div>
+        <button id="load-more" class="secondary-button" hidden>Load more</button>
+      </div>
+      <div id="history" class="timeline"><p class="empty">Loading recent observations…</p></div>
+    </section>
+
+    <section id="connection-card" class="connection-card" hidden>
+      <div>
+        <p class="section-kicker">STATUS API</p>
+        <h2>Public status service is not connected yet</h2>
+        <p id="error">The website is online, but live operational evidence is not currently available.</p>
+      </div>
+      <button id="retry" class="primary-button">Retry connection</button>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-brand">420 Integrated · open infrastructure for the cannabis economy</div>
+    <div class="footer-links">
+      <a href="https://420integrated.org">420integrated.org</a>
+      <a href="https://explorer.420integrated.org">Explorer</a>
+      <a href="mailto:contact@420integrated.org">Contact</a>
+    </div>
+  </footer>
+
+  <script src="/app.js" defer></script>
+</body>
+</html>

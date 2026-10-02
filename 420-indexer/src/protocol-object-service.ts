@@ -19,8 +19,11 @@ export async function protocolObjectState420(
   if (!protocol.trim()) throw new Error('protocol is required');
   if (!objectKey.trim()) throw new Error('object key is required');
 
+  const stateView = protocol === '420Governance'
+    ? 'idx_governance_state'
+    : 'idx_protocol_latest_object_state';
   const row = firstRow420(await service.db.query(
-    `select * from idx_protocol_latest_object_state
+    `select * from ${stateView}
      where chain_id = $1 and protocol = $2 and object_key = $3
      limit 1`,
     [chainId.toString(), protocol, objectKey]

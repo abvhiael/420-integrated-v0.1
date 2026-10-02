@@ -80,3 +80,15 @@ test('fails closed on malformed database rows used for cursors', async () => {
   db.queue.push({ rows: [{ block_number: 'not-a-number' }, { block_number: '2' }] });
   await assert.rejects(() => new IndexerQueryService420(db).blocks(420n, { limit: 1 }), /invalid block_number/);
 });
+
+test('Governance proposal search uses the canonical proposalId object key', async () => {
+  const db = new FakeDb420();
+  const svc = new IndexerQueryService420(db);
+  const proposal = `proposalId:0x${'a'.repeat(64)}`;
+  db.queue.push({ rows: [{ result_type: 'protocol_object', result_key: proposal.toLowerCase(), result_value: '420Governance' }] });
+  const results = await svc.search(420n, proposal, 5);
+  assert.equal(results.length, 1);
+  assert.equal(results[0]!.result_key, proposal.toLowerCase());
+  assert.match(db.calls[0]!.sql, /idx_protocol_object_events/);
+  assert.deepEqual(db.calls[0]!.params, ['420', proposal.toLowerCase(), 5]);
+});

@@ -51,7 +51,12 @@
     {
       "name": "GovernanceTimelock",
       "address": "0x0000000000000000000000000000000000000429",
-      "deployment": "GENESIS_SYSTEM_ADDRESS"
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "runtime_artifact": "contracts/artifacts/GovernanceTimelock.json",
+      "runtime_code_hash": "0xca5e96c6048b190839d68a8857b2ff5f0a7e0f356d4089ac31fa684cdee00139",
+      "predeploy_state": "contracts/config/predeploy/GovernanceTimelock-predeploy-state.json",
+      "source_blob_sha1": "30977a1e172763aa333eeb4b34b1bbaee025c235",
+      "artifact_status": "GOV_AUDIT_6_ARTIFACT_READY"
     },
     {
       "name": "PublicDistributionVault",
@@ -151,7 +156,12 @@
     {
       "name": "Governance420",
       "address": "0x0000000000000000000000000000000000000437",
-      "deployment": "GENESIS_SYSTEM_ADDRESS"
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "runtime_artifact": "contracts/artifacts/Governance420.json",
+      "runtime_code_hash": "0x9af678e7626b6141b4af33e7729b27835949f8dad634298e7ce5a5e754305d64",
+      "predeploy_state": "contracts/config/predeploy/Governance420-predeploy-state.json",
+      "source_blob_sha1": "886668e8efa97bd32734e32cde11148bcf98e5bd",
+      "artifact_status": "GOV_AUDIT_6_ARTIFACT_READY"
     },
     {
       "name": "VerifiedGateway420",

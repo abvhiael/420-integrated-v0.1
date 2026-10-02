@@ -1,0 +1,739 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "timelock_",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "authority",
+          "type": "address"
+        }
+      ],
+      "name": "bindSnapshotAuthority",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "governanceTimelock",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "proposalId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "proposalSnapshot",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint64",
+              "name": "snapshotBlock",
+              "type": "uint64"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "source",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "sourceType",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "electorateRoot",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "totalWeight",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint32",
+                  "name": "sourceRevision",
+                  "type": "uint32"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "required",
+                  "type": "bool"
+                }
+              ],
+              "internalType": "struct CivicElectorateRegistry420.HouseSnapshot",
+              "name": "community",
+              "type": "tuple"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "source",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "sourceType",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "electorateRoot",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "totalWeight",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint32",
+                  "name": "sourceRevision",
+                  "type": "uint32"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "required",
+                  "type": "bool"
+                }
+              ],
+              "internalType": "struct CivicElectorateRegistry420.HouseSnapshot",
+              "name": "validator",
+              "type": "tuple"
+            },
+            {
+              "internalType": "bool",
+              "name": "dualHouseRequired",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "exists",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct CivicElectorateRegistry420.ProposalSnapshot",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "protocolVersion",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "enum CivicIds420.House",
+          "name": "house",
+          "type": "uint8"
+        },
+        {
+          "internalType": "address",
+          "name": "source",
+          "type": "address"
+        }
+      ],
+      "name": "setHouseSource",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "snapshotAuthority",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "proposalId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint64",
+          "name": "snapshotBlock",
+          "type": "uint64"
+        },
+        {
+          "internalType": "bool",
+          "name": "dualHouseRequired",
+          "type": "bool"
+        }
+      ],
+      "name": "snapshotProposal",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "enum CivicIds420.House",
+          "name": "house",
+          "type": "uint8"
+        }
+      ],
+      "name": "sourceFor",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "source",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "sourceType",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint32",
+              "name": "revision",
+              "type": "uint32"
+            },
+            {
+              "internalType": "bool",
+              "name": "exists",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct CivicElectorateRegistry420.SourceConfig",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "systemName",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "proposalId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "enum CivicIds420.House",
+          "name": "house",
+          "type": "uint8"
+        },
+        {
+          "internalType": "address",
+          "name": "voter",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes",
+          "name": "proofData",
+          "type": "bytes"
+        }
+      ],
+      "name": "votingWeight",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "proposalId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint64",
+          "name": "snapshotBlock",
+          "type": "uint64"
+        },
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "dualHouseRequired",
+          "type": "bool"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "communityRoot",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "communityTotalWeight",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "validatorRoot",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "validatorTotalWeight",
+          "type": "uint256"
+        }
+      ],
+      "name": "CivicElectorateSnapshotted",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "enum CivicIds420.House",
+          "name": "house",
+          "type": "uint8"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "source",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "sourceType",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint32",
+          "name": "revision",
+          "type": "uint32"
+        }
+      ],
+      "name": "CivicElectorateSourceSet",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "authority",
+          "type": "address"
+        }
+      ],
+      "name": "SnapshotAuthorityBound",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "AuthorityAlreadyBound",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "HouseNotRequired",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidProposalId",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidSnapshot",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidSource",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "SnapshotExists",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "SnapshotNotFound",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "SourceNotConfigured",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "Unauthorized",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "UnauthorizedAuthority",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ZeroAddress",
+      "type": "error"
+    }
+  ],
+  "compiler": {
+    "evmVersion": "cancun",
+    "foundryConfigBlobSha1": "f18c965f43b244582f2a4c527e7bad6d23aee929",
+    "optimizer": true,
+    "optimizerRuns": 200,
+    "solidity": "0.8.24",
+    "toolchainConfigBlobSha1": "dd49cb0e07370b01401d63d2fb53683177de8abc",
+    "viaIR": true
+  },
+  "constructorIndependentRuntime": false,
+  "contractName": "CivicElectorateRegistry420",
+  "deployedBytecode": "0x608060409080825260049081361015610016575f80fd5b5f3560e01c90816307dd2e4b14610ad957508063287b17141461095a5780632ae9c6001461093f57806331b5da9f1461059d57806378f26c80146105035780638f6e388a146104355780639a1fdd79146103f2578063ae38e732146101bb578063af5e5fdb146101935763cbcda2011461008e575f80fd5b3461018f57602036600319011261018f575f608083516100ad81610bae565b8281526100b8610c54565b60208201526100c5610c54565b85820152826060820152015280355f526001602052815f2090600b82015460ff8160081c16159182610181575061016d846101626101e096519561010887610bae565b67ffffffffffffffff808254168852610136600661012860018501610ca8565b9360208b0194855201610ca8565b9380890194855260ff60608a019716151587526080890197158852519751168752516020870190610b68565b5160e0850190610b68565b5115156101a08301525115156101c0820152f35b8451632402054b60e11b8152fd5b5f80fd5b823461018f575f36600319011261018f5760025490516001600160a01b039091168152602090f35b503461018f578160031936011261018f578035600281101561018f576024356001600160a01b03818116939184810361018f57817f00000000000000000000000000000000000000000000000000000000000004291633036103e35784159081156103d9575b506103ca5784516312153f1160e01b81529460209283878281895afa9687156103c0575f97610391575b5086156103835760ff851690815f525f85526002835f2001549060ff82871c165f1461035157600163ffffffff8093160191821161033e57507f2bd220396251f32b97f54d87f9c046857d489416246a2a5fdf4ff65b8f2b94369493929161033791905b8351916102bb83610bde565b8983526002878401938c85528681019463ffffffff809416988987526060830195600187525f525f8b52885f209251166bffffffffffffffffffffffff60a01b8354161782555160018201550192511663ffffffff1983541617825551151564ff00000000825491151560201b169064ff000000001916179055565b51908152a4005b601190634e487b7160e01b5f525260245ffd5b5050906103377f2bd220396251f32b97f54d87f9c046857d489416246a2a5fdf4ff65b8f2b94369493926001906102af565b9051638154374b60e01b8152fd5b9096508381813d83116103b9575b6103a98183610c32565b8101031261018f5751955f61024b565b503d61039f565b82513d5f823e3d90fd5b508351638154374b60e01b8152fd5b90503b155f610221565b85516282b42960e81b81528390fd5b823461018f575f36600319011261018f57517f00000000000000000000000000000000000000000000000000000000000004296001600160a01b03168152602090f35b50903461018f57602036600319011261018f576001600160a01b038235818116929083810361018f57827f00000000000000000000000000000000000000000000000000000000000004291633036104f4576002549283166104e45761049a90610e55565b156104d557506001600160a01b03191681176002557ffdce55e8b57936bd15c114bd4252374e057adb1f2bcfc5c47e087ba4e92fe4975f80a2005b5163b9739d1b60e01b81528390fd5b81516331305c5d60e11b81528590fd5b81516282b42960e81b81528590fd5b503461018f57602036600319011261018f573590600282101561018f5760ff60809261052d610c84565b50165f525f602052805f209080519061054582610bde565b60018060a01b038354169283835260026001820154916020850192835201549263ffffffff9160ff6060858401938588168552019560201c161515855283519586525160208601525116908301525115156060820152f35b503461018f5760608060031936011261018f578135916024359367ffffffffffffffff928386169586810361018f57604435928315159586850361018f576002546001600160a01b0390811633811480159190610936575b5061092657881561091657438a101561090657885f5260019660209780895260ff600b865f20015460081c166108f75761062d610c84565b505f80525f8952845f2093855161064381610bde565b60028587541696878352848101548d84015201549560ff63ffffffff978881168a8501528d1c161590811591828c850152916108ee575b506108de57928b95928d95928f956106938b8f92610cff565b9a61069c610c54565b9d61083c575b50918a91818e948e8d519a6106b68c610bae565b8b52818b019586528d8b019687528a019b8c5260808a019a828c525f52528a5f2097511667ffffffffffffffff19885416178755860190519284845116916bffffffffffffffffffffffff60a01b92838254161790558d84015160028801558984015160038801558b8401519087015560058601856080850151169363ffffffff19948583541617825560a001511515610768919064ff00000000825491151560201b169064ff000000001916179055565b60068601915193845116908254161790558a8201516007850155868201516008850155888201516009850155600a8401926080830151169083541617825560a0015115156107ce919064ff00000000825491151560201b169064ff000000001916179055565b600b01915115159082549051151560081b61ff00169160ff169061ffff1916171790558281830151920151918382860151950151958251978852870152850152830152608082015260a07ef3180ffbb8721baa48dc8a4e790b73110947cf88815685d6aa6c676232bf4c91a3005b94985050939798999a5093509350610852610c84565b50825f525f8a52865f208a60ff60028a519361086d85610bde565b8981541693848652888201549086015201548981168b8501528d1c161590811591828d850152916108d5575b506108c5579389898f958f97958f99958f9e9d9c9b9783916108ba91610cff565b9e92509350916106a2565b87516343a406d360e11b81528590fd5b9050155f610899565b86516343a406d360e11b81528490fd5b9050155f61067a565b5083516373835d7360e11b8152fd5b8251632078467f60e11b81528790fd5b8251630992f7ad60e01b81528790fd5b825163b9739d1b60e01b81528790fd5b9050155f6105f5565b823461018f575f36600319011261018f576020905160018152f35b503461018f57608036600319011261018f5760243591600283101561018f576044356001600160a01b038181169182900361018f576064359367ffffffffffffffff9081861161018f573660238701121561018f578581013591821161018f57366024838801011161018f5780355f5260209660018852855f209060ff600b83015460081c1615610ac957610ac057600101925b60ff82850154891c16158015610ab5575b610aa65783929160026084928a979654169401549280602489519a8b9889978896630fdfdfa960e31b8852870152828601526060604486015282606486015201848401375f828201840152601f01601f191681010301915afa918215610a9c575f92610a6d575b5051908152f35b9091508281813d8311610a95575b610a858183610c32565b8101031261018f5751905f610a66565b503d610a7b565b50513d5f823e3d90fd5b5084516323650c6360e01b8152fd5b5080845416156109ff565b600601926109ee565b8651632402054b60e11b81528390fd5b833461018f575f36600319011261018f57610af382610c16565b601a825260207f4369766963456c6563746f72617465526567697374727934323000000000000060208401528151928391602083528151918260208501525f5b838110610b525750505f83830185015250601f01601f19168101030190f35b8181018301518782018701528694508201610b33565b60a08091600180831b03815116845260208101516020850152604081015160408501526060810151606085015263ffffffff608082015116608085015201511515910152565b60a0810190811067ffffffffffffffff821117610bca57604052565b634e487b7160e01b5f52604160045260245ffd5b6080810190811067ffffffffffffffff821117610bca57604052565b60c0810190811067ffffffffffffffff821117610bca57604052565b6040810190811067ffffffffffffffff821117610bca57604052565b90601f8019910116810190811067ffffffffffffffff821117610bca57604052565b60405190610c6182610bfa565b5f60a0838281528260208201528260408201528260608201528260808201520152565b60405190610c9182610bde565b5f6060838281528260208201528260408201520152565b90604051610cb581610bfa565b60a060ff60048395600180851b038154168552600181015460208601526002810154604086015260038101546060860152015463ffffffff8116608085015260201c161515910152565b602491610d0a610c54565b5081516040805163c3b091bf60e01b815267ffffffffffffffff9093166004840152936001600160a01b03929185918391829086165afa918215610ded575f915f93610db6575b5081158015610dae575b610d9d578351169363ffffffff8160208601519501511693815195610d7f87610bfa565b8652602086015284015260608301526080820152600160a082015290565b8451632078467f60e11b8152600490fd5b508215610d5b565b85809294508193503d8311610de6575b610dd08183610c32565b8101031261018f5760208151910151915f610d51565b503d610dc6565b84513d5f823e3d90fd5b3d15610e31573d9067ffffffffffffffff8211610bca5760405191610e26601f8201601f191660200184610c32565b82523d5f602084013e565b606090565b9081602091031261018f57516001600160a01b038116810361018f5790565b6001600160a01b03818116158015610f7a575b610f7457604051915f8060209485810190633c8dea0960e11b825260048152610e9081610c16565b5190845afa905f80610ea0610df7565b92604051878101906334cc866d60e21b825260048152610ebf81610c16565b51915afa610ecb610df7565b9215908115610f68575b8115610f5f575b508015610f55575b610f4d57808480610efa93518301019101610e36565b821630149283610f0b575b50505090565b610f1e9293508082518301019101610e36565b90807f0000000000000000000000000000000000000000000000000000000000000429169116145f8080610f05565b505050505f90565b5083825110610ee4565b9050155f610edc565b90508482511090610ed5565b50505f90565b50813b15610e6856fea264697066735822122055cf6acbc42d1853e882d88fcf2e2b5b82b34a8af2e7a4df2278fd377536d95a64736f6c63430008180033",
+  "immutableReferences": {
+    "5789": [
+      {
+        "length": 32,
+        "start": 497
+      },
+      {
+        "length": 32,
+        "start": 1030
+      },
+      {
+        "length": 32,
+        "start": 1121
+      },
+      {
+        "length": 32,
+        "start": 3874
+      }
+    ]
+  },
+  "materializedImmutableReferences": [
+    {
+      "immutableId": "5789",
+      "length": 32,
+      "start": 497,
+      "value": "0x0000000000000000000000000000000000000429"
+    },
+    {
+      "immutableId": "5789",
+      "length": 32,
+      "start": 1030,
+      "value": "0x0000000000000000000000000000000000000429"
+    },
+    {
+      "immutableId": "5789",
+      "length": 32,
+      "start": 1121,
+      "value": "0x0000000000000000000000000000000000000429"
+    },
+    {
+      "immutableId": "5789",
+      "length": 32,
+      "start": 3874,
+      "value": "0x0000000000000000000000000000000000000429"
+    }
+  ],
+  "materializedImmutableValue": "0x0000000000000000000000000000000000000429",
+  "runtimeCodeBytes": 4025,
+  "runtimeCodeHash": "0xb9c1246005033a0d23112ab0c471287f7102d6b15a30f2658cdd0cc164f66aea",
+  "schema": "420-governance-runtime-artifact-v1",
+  "source": "contracts/src/governance/CivicElectorateRegistry420.sol",
+  "sourceBlobSha1": "3113d8cf485cac82e72a5cb564a848d6b67a8d69",
+  "status": "GOV_AUDIT_6_RUNTIME_ARTIFACT",
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 330,
+        "contract": "src/governance/CivicElectorateRegistry420.sol:CivicElectorateRegistry420",
+        "label": "_sources",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_mapping(t_uint8,t_struct(SourceConfig)299_storage)"
+      },
+      {
+        "astId": 335,
+        "contract": "src/governance/CivicElectorateRegistry420.sol:CivicElectorateRegistry420",
+        "label": "_proposalSnapshots",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_mapping(t_bytes32,t_struct(ProposalSnapshot)325_storage)"
+      },
+      {
+        "astId": 337,
+        "contract": "src/governance/CivicElectorateRegistry420.sol:CivicElectorateRegistry420",
+        "label": "snapshotAuthority",
+        "offset": 0,
+        "slot": "2",
+        "type": "t_address"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      },
+      "t_bytes32": {
+        "encoding": "inplace",
+        "label": "bytes32",
+        "numberOfBytes": "32"
+      },
+      "t_mapping(t_bytes32,t_struct(ProposalSnapshot)325_storage)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => struct CivicElectorateRegistry420.ProposalSnapshot)",
+        "numberOfBytes": "32",
+        "value": "t_struct(ProposalSnapshot)325_storage"
+      },
+      "t_mapping(t_uint8,t_struct(SourceConfig)299_storage)": {
+        "encoding": "mapping",
+        "key": "t_uint8",
+        "label": "mapping(uint8 => struct CivicElectorateRegistry420.SourceConfig)",
+        "numberOfBytes": "32",
+        "value": "t_struct(SourceConfig)299_storage"
+      },
+      "t_struct(HouseSnapshot)312_storage": {
+        "encoding": "inplace",
+        "label": "struct CivicElectorateRegistry420.HouseSnapshot",
+        "members": [
+          {
+            "astId": 301,
+            "contract": "src/governance/CivicElectorateRegistry420.sol:CivicElectorateRegistry420",
+            "label": "source",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_address"
+          },
+          {
+            "astId": 303,
+            "contract": "src/governance/CivicElectorateRegistry420.sol:CivicElectorateRegistry420",
+            "label": "sourceType",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 305,
+            "contract": "src/governance/CivicElectorateRegistry420.sol:CivicElectorateRegistry420",
+            "label": "electorateRoot",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 307,
+            "contract": "src/governance/CivicElectorateRegistry420.sol:CivicElectorateRegistry420",
+            "label": "totalWeight",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_uint256"
+          },
+          {
+            "astId": 309,
+            "contract": "src/governance/CivicElectorateRegistry420.sol:CivicElectorateRegistry420",
+            "label": "sourceRevision",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_uint32"
+          },
+          {
+            "astId": 311,
+            "contract": "src/governance/CivicElectorateRegistry420.sol:CivicElectorateRegistry420",
+            "label": "required",
+            "offset": 4,
+            "slot": "4",
+            "type": "t_bool"
+          }
+        ],
+        "numberOfBytes": "160"
+      },
+      "t_struct(ProposalSnapshot)325_storage": {
+        "encoding": "inplace",
+        "label": "struct CivicElectorateRegistry420.ProposalSnapshot",
+        "members": [
+          {
+            "astId": 314,
+            "contract": "src/governance/CivicElectorateRegistry420.sol:CivicElectorateRegistry420",
+            "label": "snapshotBlock",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint64"
+          },
+          {
+            "astId": 317,
+            "contract": "src/governance/CivicElectorateRegistry420.sol:CivicElectorateRegistry420",
+            "label": "community",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_struct(HouseSnapshot)312_storage"
+          },
+          {
+            "astId": 320,
+            "contract": "src/governance/CivicElectorateRegistry420.sol:CivicElectorateRegistry420",
+            "label": "validator",
+            "offset": 0,
+            "slot": "6",
+            "type": "t_struct(HouseSnapshot)312_storage"
+          },
+          {
+            "astId": 322,
+            "contract": "src/governance/CivicElectorateRegistry420.sol:CivicElectorateRegistry420",
+            "label": "dualHouseRequired",
+            "offset": 0,
+            "slot": "11",
+            "type": "t_bool"
+          },
+          {
+            "astId": 324,
+            "contract": "src/governance/CivicElectorateRegistry420.sol:CivicElectorateRegistry420",
+            "label": "exists",
+            "offset": 1,
+            "slot": "11",
+            "type": "t_bool"
+          }
+        ],
+        "numberOfBytes": "384"
+      },
+      "t_struct(SourceConfig)299_storage": {
+        "encoding": "inplace",
+        "label": "struct CivicElectorateRegistry420.SourceConfig",
+        "members": [
+          {
+            "astId": 292,
+            "contract": "src/governance/CivicElectorateRegistry420.sol:CivicElectorateRegistry420",
+            "label": "source",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_address"
+          },
+          {
+            "astId": 294,
+            "contract": "src/governance/CivicElectorateRegistry420.sol:CivicElectorateRegistry420",
+            "label": "sourceType",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 296,
+            "contract": "src/governance/CivicElectorateRegistry420.sol:CivicElectorateRegistry420",
+            "label": "revision",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_uint32"
+          },
+          {
+            "astId": 298,
+            "contract": "src/governance/CivicElectorateRegistry420.sol:CivicElectorateRegistry420",
+            "label": "exists",
+            "offset": 4,
+            "slot": "2",
+            "type": "t_bool"
+          }
+        ],
+        "numberOfBytes": "96"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      },
+      "t_uint32": {
+        "encoding": "inplace",
+        "label": "uint32",
+        "numberOfBytes": "4"
+      },
+      "t_uint64": {
+        "encoding": "inplace",
+        "label": "uint64",
+        "numberOfBytes": "8"
+      },
+      "t_uint8": {
+        "encoding": "inplace",
+        "label": "uint8",
+        "numberOfBytes": "1"
+      }
+    }
+  }
+}

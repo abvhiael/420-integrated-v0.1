@@ -8,9 +8,15 @@ import "../src/governance/CivicProposalRegistry420.sol";
 import "../src/governance/CivicVoting420.sol";
 
 interface VmCivicVoting420 {
-    function prank(address) external;
-    function expectRevert(bytes4) external;
-    function roll(uint256) external;
+    function prank(
+        address
+    ) external;
+    function expectRevert(
+        bytes4
+    ) external;
+    function roll(
+        uint256
+    ) external;
 }
 
 contract MockVotingElectorateSource420 is ICivicElectorateSource420 {
@@ -19,7 +25,9 @@ contract MockVotingElectorateSource420 is ICivicElectorateSource420 {
     uint256 public totalWeight;
     mapping(bytes32 => mapping(address => uint256)) public weights;
 
-    constructor(bytes32 type_) {
+    constructor(
+        bytes32 type_
+    ) {
         _type = type_;
     }
 
@@ -27,25 +35,84 @@ contract MockVotingElectorateSource420 is ICivicElectorateSource420 {
         return _type;
     }
 
-    function setSnapshot(bytes32 root_, uint256 totalWeight_) external {
+    function setSnapshot(
+        bytes32 root_,
+        uint256 totalWeight_
+    ) external {
         root = root_;
         totalWeight = totalWeight_;
     }
 
-    function setWeight(bytes32 root_, address voter, uint256 weight) external {
+    function setWeight(
+        bytes32 root_,
+        address voter,
+        uint256 weight
+    ) external {
         weights[root_][voter] = weight;
     }
 
-    function snapshotAt(uint64) external view returns (bytes32, uint256) {
+    function snapshotAt(
+        uint64
+    ) external view returns (bytes32, uint256) {
         return (root, totalWeight);
     }
 
-    function votingWeight(bytes32 electorateRoot, address voter, bytes calldata)
-        external
-        view
-        returns (uint256)
-    {
+    function votingWeight(
+        bytes32 electorateRoot,
+        address voter,
+        bytes calldata
+    ) external view returns (uint256) {
         return weights[electorateRoot][voter];
+    }
+}
+
+contract MockVotingAuthority420 {
+    address public immutable proposalRegistry;
+    address public immutable electorateRegistry;
+    address public immutable timelock;
+
+    constructor(
+        address proposalRegistry_,
+        address electorateRegistry_,
+        address timelock_
+    ) {
+        proposalRegistry = proposalRegistry_;
+        electorateRegistry = electorateRegistry_;
+        timelock = timelock_;
+    }
+
+    function register(
+        CivicProposalRegistry420 registry,
+        bytes32 proposalId,
+        address proposer
+    ) external {
+        registry.registerProposal(
+            proposalId,
+            proposer,
+            CivicIds420.ProposalClass.G1,
+            keccak256("metadata"),
+            keccak256("actions"),
+            99,
+            101,
+            110
+        );
+    }
+
+    function transition(
+        CivicProposalRegistry420 registry,
+        bytes32 proposalId,
+        CivicIds420.ProposalState next
+    ) external {
+        registry.transition(proposalId, next);
+    }
+
+    function snapshot(
+        CivicElectorateRegistry420 registry,
+        bytes32 proposalId,
+        uint64 snapshotBlock,
+        bool dualHouse
+    ) external {
+        registry.snapshotProposal(proposalId, snapshotBlock, dualHouse);
     }
 }
 
@@ -64,6 +131,7 @@ contract CivicVoting420Test {
     CivicVoting420 voting;
     MockVotingElectorateSource420 community;
     MockVotingElectorateSource420 validators;
+    MockVotingAuthority420 authority;
 
     function setUp() public {
         proposals = new CivicProposalRegistry420(address(this));
@@ -71,29 +139,24 @@ contract CivicVoting420Test {
         community = new MockVotingElectorateSource420(COMMUNITY_TYPE);
         validators = new MockVotingElectorateSource420(VALIDATOR_TYPE);
 
-        proposals.bindProposalAuthority(address(this));
-        electorates.bindSnapshotAuthority(address(this));
+        authority = new MockVotingAuthority420(address(proposals), address(electorates), address(this));
+        proposals.bindProposalAuthority(address(authority));
+        electorates.bindSnapshotAuthority(address(authority));
         electorates.setHouseSource(CivicIds420.House.COMMUNITY, address(community));
         electorates.setHouseSource(CivicIds420.House.VALIDATOR, address(validators));
 
         voting = new CivicVoting420(address(proposals), address(electorates));
     }
 
-    function _register(bytes32 proposalId, bool dualHouse) private {
+    function _register(
+        bytes32 proposalId,
+        bool dualHouse
+    ) private {
         vm.roll(100);
         community.setSnapshot(ROOT_A, 100);
         validators.setSnapshot(ROOT_B, 10);
-        electorates.snapshotProposal(proposalId, 99, dualHouse);
-        proposals.registerProposal(
-            proposalId,
-            ALICE,
-            CivicIds420.ProposalClass.G1,
-            keccak256("metadata"),
-            keccak256("actions"),
-            99,
-            101,
-            110
-        );
+        authority.snapshot(electorates, proposalId, 99, dualHouse);
+        authority.register(proposals, proposalId, ALICE);
     }
 
     function testVoteUsesFrozenSnapshotWeightAndUpdatesTally() public {
@@ -202,7 +265,7 @@ contract CivicVoting420Test {
         bytes32 proposalId = keccak256("P8");
         community.setWeight(ROOT_A, ALICE, 2);
         _register(proposalId, false);
-        proposals.transition(proposalId, CivicIds420.ProposalState.CANCELLED);
+        authority.transition(proposals, proposalId, CivicIds420.ProposalState.FAILED);
         vm.roll(101);
 
         vm.prank(ALICE);

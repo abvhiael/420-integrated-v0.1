@@ -295,6 +295,9 @@ nav:
               - Permissions: apps/governance/permissions.md
               - Fees: apps/governance/fees.md
               - Security: apps/governance/security.md
+              - Operator Guide: apps/governance/operator-guide.md
+              - Integration Boundaries: apps/governance/integration.md
+              - Qualification Ledger: apps/governance/qualification.md
               - Troubleshooting: apps/governance/troubleshooting.md
               - FAQ: apps/governance/faq.md
               - Developer Integration:

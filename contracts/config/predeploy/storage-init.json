@@ -189,9 +189,11 @@
     "ValidatorRegistry and CommunityValidatorReserve MUST begin mutually bound at 0x0423/0x0425.",
     "AttentionTreasury and CannaseurCampaignRegistry MUST begin mutually bound at 0x0421/0x043b; campaign reward registry remains separately governance-bound when the Genesis attention module set is deployed.",
     "ConsensusSystemCall420 itself has no mutable caller binding; it accepts top-level calls only from go-ethereum params.SystemAddress.",
+    "GovernanceTimelock bootstrapGovernor MUST be Governance420 at 0x0437; Governance420 may schedule only the exact canonical Civic bootstrap plan and retires that role permanently on Civic activation.",
     "GenesisDEXFactory begins with poolImplementation=0; governance MUST bind a qualified code-bearing implementation reference before canonical pool registration.",
     "genesis_config_hash is frozen by contracts/config/genesis-config-commitment.json and MUST match that record exactly."
   ],
+  "bootstrap_governor": "0x0000000000000000000000000000000000000437",
   "protocol_registry": "0x0000000000000000000000000000000000000434",
   "genesis_config_hash": "0xd5121ed76a785afb903129f8677323477e3cfded1126bc2320ac881a7e68fb38",
   "genesis_config_commitment": "contracts/config/genesis-config-commitment.json"

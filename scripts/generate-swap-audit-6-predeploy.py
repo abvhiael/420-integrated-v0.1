@@ -153,6 +153,11 @@ def artifact_record(name: str, rel_source: str, address: str | None, compiler: d
     runtime = normalize_hex(deployed.get("object"))
     creation = normalize_hex(bytecode.get("object"))
     refs = deployed.get("immutableReferences", {})
+    names = immutable_name_map(refs)
+    semantic_refs = {
+        names[str(immutable_id)]: locations
+        for immutable_id, locations in refs.items()
+    }
     layout = raw.get("storageLayout")
     if not isinstance(layout, dict) or not isinstance(layout.get("storage"), list):
         try:
@@ -178,8 +183,8 @@ def artifact_record(name: str, rel_source: str, address: str | None, compiler: d
         "deployedBytecodeTemplate": runtime,
         "deployedBytecodeTemplateKeccak256": cast_keccak(runtime),
         "runtimeTemplateBytes": (len(runtime) - 2) // 2,
-        "immutableReferences": refs,
-        "immutableReferenceCount": sum(len(v) for v in refs.values()) if isinstance(refs, dict) else 0,
+        "immutableReferences": semantic_refs,
+        "immutableReferenceCount": sum(len(v) for v in semantic_refs.values()),
         "abi": raw.get("abi", []),
         "abiSha256": sha256_text(json.dumps(raw.get("abi", []), sort_keys=True, separators=(",", ":"))),
         "storageLayout": layout,
@@ -230,16 +235,14 @@ def is_resolved_hash(value: object) -> bool:
 def materialize_runtime(artifact: dict, genesis_hash: str) -> tuple[str, list[dict]]:
     code = bytearray.fromhex(artifact["deployedBytecodeTemplate"][2:])
     refs = artifact.get("immutableReferences", {})
-    names = immutable_name_map(refs)
-    patched: list[dict] = []
     expected = {"governanceTimelock", "registry", "genesisConfigHash"}
-    seen: set[str] = set()
-    for immutable_id, locations in refs.items():
-        var_name = names.get(str(immutable_id))
-        if var_name not in expected:
-            fail(f"{artifact['contractName']} unknown immutable id {immutable_id} ({var_name})")
+    actual = set(refs) if isinstance(refs, dict) else set()
+    if actual != expected:
+        fail(f"{artifact['contractName']} semantic immutable set mismatch: {sorted(actual)}")
+    patched: list[dict] = []
+    for var_name in sorted(expected):
+        locations = refs[var_name]
         value = encode_value(var_name, genesis_hash)
-        seen.add(var_name)
         for loc in locations:
             start = loc.get("start")
             length = loc.get("length")
@@ -247,14 +250,11 @@ def materialize_runtime(artifact: dict, genesis_hash: str) -> tuple[str, list[di
                 fail(f"{artifact['contractName']} malformed immutable reference")
             code[start:start + 32] = value
             patched.append({
-                "immutableId": str(immutable_id),
                 "variable": var_name,
                 "start": start,
                 "length": 32,
                 "value": genesis_hash if var_name == "genesisConfigHash" else (TIMELOCK if var_name == "governanceTimelock" else REGISTRY),
             })
-    if seen != expected:
-        fail(f"{artifact['contractName']} immutable set mismatch: {sorted(seen)}")
     return "0x" + code.hex(), patched
 
 

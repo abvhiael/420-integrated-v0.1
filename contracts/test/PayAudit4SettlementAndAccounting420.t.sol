@@ -200,7 +200,7 @@ contract PayAudit4SettlementAndAccounting420Test {
     }
 
     function testNativeSplitIsAtomicAndLeavesNoRouterResidue() public {
-        (, PaymentRouter420 router, SettlementRouter420 settlement,,,,) = _splitStack();
+        (, PaymentRouter420 router, SettlementRouter420 settlement,,,) = _splitStack();
         (address[] memory recipients, uint16[] memory bps) = _split();
         vm.deal(address(settlement), 7);
         vm.deal(ALICE, 101);

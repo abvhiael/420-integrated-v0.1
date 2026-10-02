@@ -324,7 +324,7 @@ contract LaunchpadAudit420Test {
         allocations.claim(saleId, keccak256("delivery/duplicate"));
     }
 
-    function testFailedSaleRefundRequiresAuthorizationAndNonzeroCommitment() public {
+    function testRefundOnFailedSaleRequiresAuthorizationAndNonzeroCommitment() public {
         sales.activate(saleId);
         caps.setAllowed(true);
         vm.warp(10);

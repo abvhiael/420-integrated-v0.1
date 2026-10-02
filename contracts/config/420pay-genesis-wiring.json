@@ -4,7 +4,9 @@
   "payment_router": {
     "contract": "PaymentRouter420.sol",
     "settlement_adapter": "CanonicalSettlementAdapter420.sol",
-    "binding": "PaymentRouter420.setSettlementAdapter(CanonicalSettlementAdapter420)"
+    "binding": "PaymentRouter420.setSettlementAdapter(CanonicalSettlementAdapter420)",
+    "settlement_router": "SettlementRouter420.sol",
+    "settlement_router_binding": "PaymentRouter420.setSettlementRouter(SettlementRouter420)"
   },
   "settlement_adapter": {
     "contract": "CanonicalSettlementAdapter420.sol",
@@ -12,7 +14,9 @@
     "constructor_or_config_binding_required": true,
     "abi_verified": "executeCanonicalSwap(bytes32,address,address,address,address,uint256,uint256)",
     "payment_router": "PaymentRouter420.sol",
-    "payment_router_binding": "CanonicalSettlementAdapter420.setPaymentRouter(PaymentRouter420)"
+    "payment_router_binding": "CanonicalSettlementAdapter420.setPaymentRouter(PaymentRouter420)",
+    "settlement_router": "SettlementRouter420.sol",
+    "settlement_router_binding": "CanonicalSettlementAdapter420.setSettlementRouter(SettlementRouter420)"
   },
   "swap_executor": {
     "contract": "CanonicalSwapExecutor420.sol",
@@ -21,14 +25,31 @@
   },
   "invariants": [
     "PaymentRouter420 settlementAdapter MUST resolve to CanonicalSettlementAdapter420 before payment service activation.",
+    "PaymentRouter420 settlementRouter MUST resolve to the exact canonical SettlementRouter420 before split service activation.",
     "CanonicalSettlementAdapter420 paymentRouter MUST resolve to the exact canonical PaymentRouter420 instance before payment service activation.",
+    "CanonicalSettlementAdapter420 settlementRouter MUST resolve to the exact canonical SettlementRouter420 instance before swap-backed split activation.",
     "CanonicalSettlementAdapter420 swapExecutor MUST resolve to CanonicalSwapExecutor420 before payment service activation.",
+    "SettlementRouter420 paymentRouter MUST resolve to the exact canonical PaymentRouter420 instance before direct split activation.",
+    "SettlementRouter420 settlementAdapter MUST resolve to the exact canonical CanonicalSettlementAdapter420 instance before swap-backed split activation.",
+    "RefundManager420 paymentRegistry MUST resolve to the exact canonical PaymentRegistry420 instance before refund evidence activation.",
     "CanonicalSwapExecutor420 MUST mark the exact CanonicalSettlementAdapter420 instance as trusted before payment service activation.",
-    "No user, merchant, smart account, or unrelated dApp receives trusted-caller authority on CanonicalSwapExecutor420 merely by using 420Pay.",
-    "Genesis verification MUST fail closed if any of the four bindings above are absent or point to code with an unexpected runtime identity."
+    "No user, merchant, smart account, relayer, or unrelated dApp receives trusted-caller authority on CanonicalSwapExecutor420 merely by using 420Pay.",
+    "Genesis verification MUST fail closed if any required binding above is absent or points to code with an unexpected runtime identity."
   ],
   "source_contracts_present": true,
   "adapter_executor_abi_match_verified": true,
   "deployment_binding_verified": false,
-  "note": "Source-level Pay -> SettlementAdapter -> SwapExecutor authority wiring and Pay replay-consumer bindings are implemented and tested. Live deployment binding remains false until Genesis/testnet deployment verification proves the exact configured instances, runtime identities, registry state, trusted-caller relation, adapter router binding, and replay-domain binding."
+  "note": "Source-level Pay -> SettlementAdapter -> SwapExecutor authority wiring, split routing, refund-accounting binding, and Pay replay-consumer bindings are implemented and tested. Live deployment binding remains false until Genesis/testnet deployment verification proves the exact configured instances, runtime identities, registry state, trusted-caller relation, split-router relations, refund-registry relation, relayer authorization policy, and replay-domain binding.",
+  "settlement_router": {
+    "contract": "SettlementRouter420.sol",
+    "payment_router": "PaymentRouter420.sol",
+    "payment_router_binding": "SettlementRouter420.setPaymentRouter(PaymentRouter420)",
+    "settlement_adapter": "CanonicalSettlementAdapter420.sol",
+    "settlement_adapter_binding": "SettlementRouter420.setSettlementAdapter(CanonicalSettlementAdapter420)"
+  },
+  "refund_manager": {
+    "contract": "RefundManager420.sol",
+    "payment_registry": "PaymentRegistry420.sol",
+    "payment_registry_binding": "RefundManager420.setPaymentRegistry(PaymentRegistry420)"
+  }
 }

@@ -202,6 +202,7 @@
         "LaunchpadProjectRegistry420.sol",
         "LaunchpadSaleRegistry420.sol",
         "LaunchpadAllocationRegistry420.sol",
+        "LaunchpadCrowdfundingIntegration420.sol",
         "LaunchpadRouter420.sol"
       ]
     },

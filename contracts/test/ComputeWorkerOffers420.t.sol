@@ -365,7 +365,6 @@ contract ComputeWorkerOffers420Test {
             0,
             0,
             0,
-            0,
             0
         );
     }

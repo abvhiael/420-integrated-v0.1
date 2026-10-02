@@ -66,14 +66,22 @@ Level 2 is not triggered by this adversarial/invariant step alone. Complete repo
 
 ## GRANTS-AUDIT-4 — Civic/Treasury/Vault/capability integration reconciliation
 
-**Status: IMPLEMENTED — pending exact-head qualification**
+**Status: COMPLETE**
 
-- verify Treasury interface shape matches TreasuryDisbursementRegistry420;
-- verify exact budget/recipient/amount/Civic-action/purpose binding;
-- verify Treasury execution plus nonzero Vault release commitment remains the only PAID proof;
-- verify Grants has no transfer/custody path;
-- verify GovernanceTimelock remains the only governance mutation authority;
-- verify CapabilityRegistry delegation remains object/scope bounded.
+- mechanically reconciled the Grants-local Treasury enum and Disbursement struct against canonical TreasuryDisbursementRegistry420;
+- verified exact SCHEDULED Treasury budget/recipient/amount/Civic-action/purpose binding at milestone approval;
+- preserved EXECUTED + nonzero vaultReleaseHash as the only Grants PAID completion evidence;
+- verified Grants contains no custody/transfer path and remains entitlement/workflow state only;
+- verified SystemAccess binds governed Grants mutations exclusively to GovernanceTimelock;
+- added non-timelock negative mutation regressions across Program/Award/Milestone registries;
+- verified CapabilityRegistry calls remain fixed-component, action-specific and program/award object-scope bounded;
+- added wrong-program-scope and wrong-action application-delegation regressions while retaining award-scope milestone negatives;
+- Level 1 exact-head qualification **PASS** on implementation SHA `7973f0d7f75209d48531f02e00f6ca31d3e7a73b`;
+- 420Grants Audit Qualification run `37065796100` / #30: grants-contract-core job `111033535620` PASS and grants-security job `111033535266` PASS;
+- affected Solidity Contracts workflow run `37065796096` / #4284 completed SUCCESS on the same SHA, with its classifier correctly skipping repository-wide Foundry inventory for this app-scoped change;
+- durable evidence: `docs/audit/420GRANTS-AUDIT-4-QUALIFICATION.md`, introduced by evidence commit `57d972dddbc14bf768804b6e58b8bf672c92244e`.
+
+Level 2 is not triggered by this reconciliation-only step because no new shared implementation dependency, authority model or cross-component runtime semantics were introduced. Level 3 remains deferred to GRANTS-AUDIT-8.
 
 ## GRANTS-AUDIT-5 — Registry, address and deployment model
 

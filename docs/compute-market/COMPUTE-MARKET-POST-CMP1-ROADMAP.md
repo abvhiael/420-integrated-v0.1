@@ -257,6 +257,8 @@ At this point the protocol has the core smart-contract market, but not yet the f
 Purpose: convert registered jobs and workers into an actual resource market.
 
 ## CMP-2.1 — Worker offers
+**Status: implementation/Level 1 qualification in progress.**
+
 Advertise hardware/software capacity, availability, jurisdiction and price.
 
 ## CMP-2.2 — Compute requests

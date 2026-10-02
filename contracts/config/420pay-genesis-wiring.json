@@ -39,7 +39,7 @@
   "source_contracts_present": true,
   "adapter_executor_abi_match_verified": true,
   "deployment_binding_verified": false,
-  "note": "Repository qualification already covers the retained Swap-owned PaymentRouter420 -> CanonicalSettlementAdapter420 -> CanonicalSwapExecutor420 binding proof. PAY-AUDIT-6 now adds the deterministic package for all nine Registry-resolved Pay residents, split/refund/replay wiring, runtime identities, staged SUSPENDED->ACTIVE publication and governance handoff. PAY-AUDIT-6 repository_ready remains false until the exact implementation SHA passes the app-specific Level 1 workflow; deployment_binding_verified remains false until PAY-AUDIT-7 live evidence.",
+  "note": "Repository qualification covers the retained Swap-owned PaymentRouter420 -> CanonicalSettlementAdapter420 -> CanonicalSwapExecutor420 binding proof and the complete PAY-AUDIT-6 deterministic package for all nine Registry-resolved Pay residents, split/refund/replay wiring, runtime identities, staged SUSPENDED->ACTIVE publication and governance handoff. PAY-AUDIT-6 repository readiness is qualified at exact implementation SHA 9bfe0d72c8d696b4908f819612608ca5279ce930 by 420Pay audit qualification #216 and Solidity Contracts #4259. deployment_binding_verified remains false until PAY-AUDIT-7 live evidence.",
   "settlement_router": {
     "contract": "SettlementRouter420.sol",
     "payment_router": "PaymentRouter420.sol",
@@ -59,7 +59,7 @@
   "pay_audit_6_runtime_generator": "scripts/generate-420pay-audit-6-deployment.py",
   "pay_audit_6_deployment_verifier": "scripts/verify-420pay-audit-6-deployment.py",
   "pay_audit_6_offline_smoke": "scripts/420pay-audit-6-smoke.py",
-  "pay_audit_6_repository_ready": false,
+  "pay_audit_6_repository_ready": true,
   "pay_audit_6_live_qualified": false,
-  "pay_audit_6_status": "IMPLEMENTED_LEVEL_1_QUALIFICATION_PENDING"
+  "pay_audit_6_status": "COMPLETE"
 }

@@ -1,6 +1,6 @@
 {
   "schema": "420pay-genesis-wiring-v1",
-  "status": "REMEDIATION_REQUIRED",
+  "status": "REPOSITORY_QUALIFIED_LIVE_BINDING_PENDING",
   "payment_router": {
     "contract": "PaymentRouter420.sol",
     "settlement_adapter": "CanonicalSettlementAdapter420.sol",
@@ -27,5 +27,7 @@
   "source_contracts_present": true,
   "adapter_executor_abi_match_verified": true,
   "deployment_binding_verified": false,
-  "note": "This manifest makes the previously implicit 420Pay -> 420Swap production wiring requirement explicit. Deployment binding remains false until Genesis deployment/verification proves the exact configured instances and trusted-caller relation."
+  "note": "Repository/local-EVM qualification now proves the exact PaymentRouter420 -> CanonicalSettlementAdapter420 -> CanonicalSwapExecutor420 binding graph, active ProtocolRegistry component identity/codehash derivation, and executor trusted-caller relation. Public-testnet deployed addresses/transactions remain false until SWAP-AUDIT-8.",
+  "repository_binding_qualified": true,
+  "binding_qualification_test": "contracts/test/SwapDeploymentBinding420.t.sol"
 }

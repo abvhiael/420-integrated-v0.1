@@ -6,11 +6,15 @@ on:
       - "contracts/src/bridge/**"
       - "contracts/src/exchange/ExchangeBridgeQualification420.sol"
       - "contracts/test/Bridge*.t.sol"
+      - "contracts/test/*BridgeAdapter420.t.sol"
+      - "contracts/test/*Hardening420.t.sol"
       - "contracts/test/ExchangeBridgeQualification420.t.sol"
       - "contracts/test/PaySwapBridgeGenesisIntegration420.t.sol"
       - "contracts/config/bridge/**"
       - "scripts/verify-bridge-hardening.py"
       - "scripts/verify-bridge-audit-6-deployment.py"
+      - "scripts/verify-bridge-audit-7-security.py"
+      - "contracts/config/bridge/security-hardening-v1.json"
       - "contracts/config/predeploy/storage-init.json"
       - "contracts/config/genesis-config-commitment.json"
       - "contracts/config/genesis-canonical-addresses.json"
@@ -51,9 +55,33 @@ jobs:
       - name: Run BRIDGE-AUDIT-6 deployment verifier
         run: python3 scripts/verify-bridge-audit-6-deployment.py
 
+      - name: Run BRIDGE-AUDIT-7 security verifier
+        run: python3 scripts/verify-bridge-audit-7-security.py
+
       - name: Run Bridge contract tests
         working-directory: contracts
         run: forge test --match-path 'test/Bridge*.t.sol' -vvv
+
+      - name: Run canonical production adapter suites
+        working-directory: contracts
+        run: forge test --match-path 'test/*BridgeAdapter420.t.sol' -vvv
+
+      - name: Run retained cross-adapter security hardening suites
+        working-directory: contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          for suite in \
+            CrossAdapterHardening420 \
+            NativeAdapterReplayDomainHardening420 \
+            VerifierRotationHardening420 \
+            EmergencyControlsHardening420 \
+            MalformedProofRecipientFuzzHardening420 \
+            DomainNonceRouterBypassHardening420 \
+            GovernanceAccountingRecoveryHardening420
+          do
+            forge test --match-path "test/$suite.t.sol" -vvv
+          done
 
       - name: Run affected Exchange Bridge qualification tests
         working-directory: contracts

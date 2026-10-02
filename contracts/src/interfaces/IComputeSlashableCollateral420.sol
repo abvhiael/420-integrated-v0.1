@@ -2,6 +2,8 @@
 pragma solidity ^0.8.24;
 
 interface IComputeSlashableCollateral420 {
+    function slashAuthorization() external view returns (address);
+
     function slashSnapshot(bytes32 positionId) external view returns (
         uint8 subjectKind,
         bytes32 subjectRef,

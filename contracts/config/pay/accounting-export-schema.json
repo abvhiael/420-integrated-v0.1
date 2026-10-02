@@ -1,0 +1,31 @@
+{
+  "schema": "420pay-accounting-export-v1",
+  "status": "FROZEN_V1",
+  "authority": "contracts/config/pay/420pay-parameters.json#accounting_exports",
+  "delivery_model": "DERIVED_REPLACEABLE_EXPORTER",
+  "onchain_sensitive_purchase_data": false,
+  "fields": [
+    {"name":"payment_id","type":"bytes32"},
+    {"name":"invoice_id","type":"bytes32"},
+    {"name":"invoice_currency","type":"string"},
+    {"name":"invoice_amount","type":"uint-decimal-string"},
+    {"name":"input_asset","type":"string"},
+    {"name":"input_amount","type":"uint-decimal-string"},
+    {"name":"settlement_asset","type":"string"},
+    {"name":"settlement_amount","type":"uint-decimal-string"},
+    {"name":"swap_fee","type":"uint-decimal-string"},
+    {"name":"slippage","type":"uint-decimal-string"},
+    {"name":"network_fee","type":"uint-decimal-string"},
+    {"name":"tip","type":"uint-decimal-string"},
+    {"name":"refund_total","type":"uint-decimal-string"},
+    {"name":"tax_summary_hash","type":"bytes32"},
+    {"name":"finality_status","type":"string"}
+  ],
+  "invariants": [
+    "all frozen fields are present exactly once",
+    "numeric values are unsigned base-10 strings",
+    "refund_total cannot exceed settlement_amount plus tip",
+    "payment_id, invoice_id and tax_summary_hash are canonical bytes32 values",
+    "export sinks are replaceable derived services and do not gain protocol mutation authority"
+  ]
+}

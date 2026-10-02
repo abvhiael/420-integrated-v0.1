@@ -37,13 +37,19 @@ This roadmap records additive audit/remediation work for the canonical 420Treasu
 - Durable evidence: `docs/audit/420TREASURY-AUDIT-3-QUALIFICATION.md`, introduced by evidence commit `e4e1b10c0741037037fe797e81a9f812068ae10b`.
 - Level 2 was not required for this ordinary app-scoped step; full repository-wide Level 3 closeout remains intentionally deferred to the canonical phase closeout.
 
-## TREASURY-AUDIT-4 — Vault release evidence model — BLOCKED ON CANONICAL DECISION
-Current Treasury execution accepts a nonzero `vaultReleaseHash` from an authorized executor and records it as an audit commitment. It does not cryptographically verify a Vault release inside Treasury.
-
-Required:
-- reconcile the original PR language ("atomic reserve/settle/release accounting") with the current architecture text ("nonzero Vault release commitment");
-- either freeze the commitment-only model and document the executor trust assumption, or introduce an adopted Vault receipt/verifier interface without creating a second custody authority;
-- qualify Grants and other consumers against the adopted model.
+## TREASURY-AUDIT-4 — Vault release evidence model — COMPLETE
+- Reconciled PR #25's "atomic reserve/settle/release accounting" language with the implemented Treasury budget-accounting lifecycle and the current no-custody architecture.
+- Adopted and froze `420/TREASURY/VAULT_RELEASE_COMMITMENT/V1` in `AUTHORIZED_EXECUTOR_COMMITMENT_ONLY` mode.
+- Confirmed Treasury does **not** cryptographically verify the underlying Vault release and does not become custody; `420Vault VAULT_TREASURY` remains the custody/release authority.
+- Documented the explicit executor trust assumption: exact-disbursement authorization plus a nonzero commitment is Treasury completion evidence, not independent proof that Vault transferred assets.
+- Required production-equivalent qualification to correlate the retained `vaultReleaseHash` with actual canonical Vault transaction/event/receipt evidence.
+- Qualified 420Grants so an `EXECUTED` Treasury disbursement with a zero release commitment cannot finalize a milestone as `PAID`; the positive path requires `EXECUTED + nonzero vaultReleaseHash`.
+- Qualified the runtime consumer inventory: only Treasury's disbursement registry and Grants' milestone registry reference `vaultReleaseHash` on the exact candidate head.
+- Level 1 exact-head qualification **PASS** on implementation SHA `afc1e8d7c6742b6568db9170decc70d7eadbc763`.
+- Treasury qualification workflow run `36972209878`, job `110728359462`: build PASS; lifecycle **9/9 PASS**; security/property **5/5 PASS**; Grants consumer suite **4/4 PASS**; authority/config verifier PASS; consumer inventory PASS; targeted Slither **0 high-severity findings**; forbidden-primitive scan PASS.
+- Durable evidence: `docs/audit/420TREASURY-AUDIT-4-QUALIFICATION.md`, introduced by evidence commit `5bf95794a3bccb9b6b105db5305a888e1aad9c53`.
+- Architecture decision: `docs/architecture/decisions/TREASURY-AUDIT-4-VAULT-RELEASE-EVIDENCE-MODEL.md`.
+- Level 2 was not required; the directly affected Grants consumer was included in the Level 1 gate. Full Level 3 closeout remains deferred.
 
 ## TREASURY-AUDIT-5 — Indexer/Explorer/Analytics integration — PARTIAL
 Current:

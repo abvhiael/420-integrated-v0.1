@@ -48,9 +48,20 @@ for token in [
     "consumedTransferId",
     "IReplayProtection420",
     "trustedRouter",
+    "trustedOperator",
+    "deriveOutboundTransferId",
+    "createOutbound",
+    "markSourceReorg",
+    "markRetryable",
+    "retryTarget",
+    "pausedFrom",
+    "isAllowedTransition",
+    "TransferTransition",
 ]:
     if token not in transfer:
         errors.append("transfer missing " + token)
+if "function setStatus(bytes32 id, Status status_)" in transfer:
+    errors.append("unconstrained bridge transfer setStatus retained")
 
 chains = (root / "contracts/src/bridge/BridgeChainRegistry420.sol").read_text()
 for token in ["chainKeyByRouteId", "networkId", "isActiveRoute", '"route id bound"']:
@@ -78,6 +89,12 @@ for token in [
     "_requireRouteHealthy",
     "configuredAdapter == adapterId_",
     "requireRouteChainsCurrent(routeId)",
+    "createOutbound(",
+    "markSourcePending(",
+    "markSourceFinalized(",
+    "markProofPending(",
+    "markVerified(",
+    "OutboundTransferRegistered",
 ]:
     if token not in gateway:
         errors.append("router missing " + token)
@@ -88,6 +105,7 @@ for test_file in [
     "BridgeInvariant420.t.sol",
     "BridgeChainRegistry420.t.sol",
     "BridgeRouteChainIdentity420.t.sol",
+    "BridgeTransferLifecycle420.t.sol",
 ]:
     if not (root / "contracts/test" / test_file).exists():
         errors.append("missing test " + test_file)

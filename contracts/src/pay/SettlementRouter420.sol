@@ -7,9 +7,18 @@ import "../interfaces/genesis/ISystemSafety420.sol";
 import "./PayIds420.sol";
 
 interface IERC20PaySplit420 {
-    function balanceOf(address account) external view returns (uint256);
-    function transferFrom(address from, address to, uint256 amount) external returns (bool);
-    function transfer(address to, uint256 amount) external returns (bool);
+    function balanceOf(
+        address account
+    ) external view returns (uint256);
+    function transferFrom(
+        address from,
+        address to,
+        uint256 amount
+    ) external returns (bool);
+    function transfer(
+        address to,
+        uint256 amount
+    ) external returns (bool);
 }
 
 contract SettlementRouter420 is GenesisResidentAccess420 {
@@ -179,12 +188,18 @@ contract SettlementRouter420 is GenesisResidentAccess420 {
         _distributeToken(paymentId, token, amount, recipients, bps, primaryIndex, expectedResidual);
     }
 
-    function requireHealthy(address settlementAsset, bytes32 marketId, bool conversionRequired) public view {
+    function requireHealthy(
+        address settlementAsset,
+        bytes32 marketId,
+        bool conversionRequired
+    ) public view {
         _canonicalSettlementAsset(settlementAsset);
         if (conversionRequired) _requireHealthyMarket(marketId);
     }
 
-    function _consume(bytes32 paymentId) private {
+    function _consume(
+        bytes32 paymentId
+    ) private {
         require(paymentId != bytes32(0), "payment id");
         if (consumedSplit[paymentId]) revert Replay();
         consumedSplit[paymentId] = true;

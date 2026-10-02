@@ -1,0 +1,72 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-1.5.10.ComputeEscrowSlashRedistributionIntegration.v1",
+  "step": "CMP-1.5.10",
+  "title": "ComputeEscrow slash-redistribution integration",
+  "status": "IMPLEMENTED_QUALIFICATION_PENDING",
+  "base_head": "b828cd0a41aa61cedb44bd54c9a01fb13d1e8a50",
+  "canonical_definition": "ComputeEscrow slash-redistribution integration",
+  "purpose": "Close the original CMP-1.2 slash-redistribution cross-phase dependency without ever treating payer escrow as slash collateral.",
+  "implementation": {
+    "escrow_entitlement_source": "contracts/src/compute/ComputeVerifiedEntitlement420.sol",
+    "dispute_source": "contracts/src/compute/ComputeDisputeResolution420.sol",
+    "recipient_resolver": "contracts/src/compute/ComputeVerifierDisputeSlashRecipientResolver420.sol",
+    "slash_authorization": "contracts/src/compute/ComputeStakeSlashAuthorization420.sol",
+    "slash_distribution": "contracts/src/compute/ComputeStakeSlashDistribution420.sol",
+    "worker_collateral": "contracts/src/compute/ComputeStakeWorkerCollateral420.sol",
+    "verifier_collateral": "contracts/src/compute/ComputeStakeVerifierCollateral420.sol",
+    "cmp_1_2_closeout": "contracts/config/compute-market/cmp-1.2.10-phase-closeout.json"
+  },
+  "requirements": [
+    "the harmed payer is derived only from canonical ComputeEscrow entitlement/dispute state",
+    "the slash recipient resolver freezes the exact entitlement endpoint and runtime code hash",
+    "entitlement endpoint or runtime drift fails closed",
+    "objective finalized verifier-error dispute state is required before canonical payer resolution",
+    "recipient resolution is read-only and cannot mutate payer Vault balances, obligations or accounting",
+    "actual redistributed value originates only from objectively forfeited CMP-1.5 worker/verifier collateral",
+    "payer escrow deposits, payer safety obligations, provider obligations and refund obligations are never slash sources",
+    "slash recipient addresses are frozen in the slash authorization before distribution",
+    "later escrow/resolver state cannot redirect an already-authorized distribution",
+    "the original CMP-1.2 slash-redistribution repository blocker is resolved without claiming live deployment",
+    "CMP-1.2.9 remains the live deployment blocker"
+  ],
+  "security_boundaries": [
+    "no payer escrow debit or cancellation is introduced by this step",
+    "no slash authority is granted to ComputeEscrow",
+    "no settlement/refund authority is granted to ComputeStake",
+    "no arbitrary caller selects the harmed payer",
+    "a paid/missing entitlement claim cannot be used as the harmed-payer source",
+    "resolver runtime and entitlement runtime drift fail closed",
+    "live stake slashing remains unclaimed until testnet deployment evidence exists"
+  ],
+  "milestone": {
+    "level_2_required_now": true,
+    "rationale": "CMP-1.5.10 closes the cross-phase economic boundary between CMP-1.2 payer accounting and CMP-1.5 collateral redistribution.",
+    "retained_app_suite": "retained Compute*.t.sol suite"
+  },
+  "qualification": {
+    "level": 2,
+    "level_1_required": [
+      "Compute contract build",
+      "focused canonical escrow payer recipient-resolution tests",
+      "focused endpoint/runtime drift rejection tests",
+      "CMP-1.2 closeout verifier regression",
+      "CMP-1.5.10 mechanical verifier"
+    ],
+    "level_2_required": [
+      "retained Compute*.t.sol app integration suite"
+    ],
+    "deferred_level_3": [
+      "canonical full repository Solidity inventory",
+      "Genesis/address-authority phase closeout",
+      "420 Integrated/global closeout",
+      "complete CMP-1.5 phase reconciliation"
+    ]
+  },
+  "deferred": [
+    "CMP-1.5.11 hostile economic qualification",
+    "CMP-1.5.12 release candidate",
+    "CMP-1.5.13 phase closeout",
+    "CMP-1.2.9 live testnet deployment qualification"
+  ],
+  "next_canonical_step": "CMP-1.5.11 — Hostile economic qualification"
+}

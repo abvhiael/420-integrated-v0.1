@@ -1,6 +1,6 @@
 # CMP-1.5.9 — WorkerRegistry stake-source integration
 
-Status: **IMPLEMENTED. LEVEL 1 + LEVEL 2 QUALIFICATION PENDING.**
+Status: **COMPLETE. LEVEL 1 + LEVEL 2 QUALIFIED.**
 
 ## Canonical definition
 
@@ -172,6 +172,38 @@ CMP-1.5.9 is COMPLETE only when:
 - focused Level 1 qualification passes;
 - retained Compute Level 2 qualification passes on the same exact implementation SHA;
 - durable evidence records that SHA.
+
+Next canonical step:
+
+**CMP-1.5.10 — ComputeEscrow slash-redistribution integration**
+
+
+## Completion evidence
+
+CMP-1.5.9 is **COMPLETE**.
+
+Qualified implementation SHA:
+
+`4845679d1ca41152e3299870af2ed3b8e9e06c1e`
+
+Exact-head qualification:
+
+- Genesis Address Authority #913 — **PASS**;
+- 420Docs Qualification #4345 — **PASS**;
+- 420Registry REG-AUDIT-4 #748 — **PASS**;
+- 420Indexer #1731 — **PASS**;
+- Solidity Contracts #4132 / `compute-fast` — **PASS**;
+- Compute Market Qualification #139 / `fast-qualification` — **PASS**;
+- retained `Compute*.t.sol` integration suite — **PASS**;
+- CMP-1.5.9 mechanical verifier — **PASS**.
+
+Durable machine-readable evidence:
+
+`docs/compute-market/CMP-1.5.9-QUALIFICATION-EVIDENCE.json`
+
+This closeout is documentation/evidence-only relative to the qualified implementation SHA above and does not require recursive requalification.
+
+Repository-wide Level 3 remains intentionally deferred to **CMP-1.5.13 — Phase closeout**.
 
 Next canonical step:
 

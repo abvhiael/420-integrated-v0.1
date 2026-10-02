@@ -1,0 +1,72 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-1.5.9.QualificationEvidence.v1",
+  "step": "CMP-1.5.9",
+  "title": "WorkerRegistry stake-source integration",
+  "completion_state": "COMPLETE",
+  "qualification_level": 2,
+  "implementation_sha": "4845679d1ca41152e3299870af2ed3b8e9e06c1e",
+  "evidence_only_closeout": true,
+  "current_main_observed": "27ae1873edcca8fb05dec9f4e70af9832b5dafe2",
+  "stacked_base_step": "CMP-1.5.8",
+  "pull_request": 478,
+  "branch": "cmp-1.5.9-workerregistry-stake-source-integration-20261002",
+  "implementation_summary": [
+    "bind WorkerRegistry admission to the actual Vault-backed ComputeStakeWorkerCollateral420 source",
+    "require source identity to match the exact canonical WorkerRegistry",
+    "freeze and revalidate source runtime code hash per binding revision",
+    "bind source code identity into historical stake references",
+    "reject marker-compatible sources wired to another WorkerRegistry",
+    "prove real native-$420 collateral drives worker admission and historical reference capture"
+  ],
+  "requirements_satisfied": [
+    "canonical worker collateral source exposes its WorkerRegistry",
+    "cross-wired WorkerRegistry source rejected",
+    "source runtime code hash frozen and revalidated",
+    "historical references bind source code identity",
+    "real Vault-backed collateral controls worker admission",
+    "missing or exiting collateral fails closed for new admission",
+    "live position changes do not rewrite historical references",
+    "WorkerRegistry and WorkerStake retain read/admission-only authority"
+  ],
+  "level_1": {
+    "status": "PASS",
+    "checks": [
+      "Compute contract build",
+      "ComputeWorkerStake420 focused source-binding tests",
+      "real ComputeStakeWorkerCollateral420 integration tests",
+      "Worker read-model regression",
+      "CMP-1.5.9 mechanical verifier"
+    ]
+  },
+  "level_2": {
+    "status": "PASS",
+    "milestone": "cross-phase WorkerRegistry to ComputeStake source integration",
+    "retained_suite": "Compute*.t.sol"
+  },
+  "workflows": [
+    {"name":"Genesis Address Authority","run_number":913,"run_id":37047725177,"job_id":110973185802,"conclusion":"success"},
+    {"name":"420Docs Qualification","run_number":4345,"run_id":37047725101,"job_id":110973185513,"conclusion":"success"},
+    {"name":"420Registry REG-AUDIT-4","run_number":748,"run_id":37047725458,"job_id":110973187901,"conclusion":"success"},
+    {"name":"420Indexer","run_number":1731,"run_id":37047725072,"job_id":110973185385,"conclusion":"success"},
+    {"name":"Solidity Contracts","run_number":4132,"run_id":37047725134,"job_id":110973251472,"job":"compute-fast","conclusion":"success"},
+    {"name":"Compute Market Qualification","run_number":139,"run_id":37047725202,"job_id":110973186409,"job":"fast-qualification","conclusion":"success"}
+  ],
+  "security_results": [
+    "cross-wired marker-compatible source fails closed",
+    "runtime source identity drift fails closed",
+    "worker without qualifying collateral fails closed",
+    "exit transition removes worker from new admission without rewriting historical reference"
+  ],
+  "intentionally_deferred": [
+    "CMP-1.5.10 ComputeEscrow slash-redistribution integration",
+    "CMP-1.5.11 hostile economic qualification",
+    "CMP-1.5.12 release candidate",
+    "CMP-1.5.13 Level 3 phase closeout"
+  ],
+  "limitations": [
+    "no live deployment or ProtocolRegistry publication claim",
+    "repository-wide Level 3 qualification remains deferred to CMP-1.5.13"
+  ],
+  "blockers": [],
+  "next_canonical_step": "CMP-1.5.10 — ComputeEscrow slash-redistribution integration"
+}

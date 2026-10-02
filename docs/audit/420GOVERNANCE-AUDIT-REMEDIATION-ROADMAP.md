@@ -23,6 +23,8 @@ These repairs are retained as foundational work for GOV-AUDIT-2 and GOV-AUDIT-4 
 
 ## GOV-AUDIT-1 — canonical authority, dependency and cancellation decision
 
+**Status: COMPLETE — implementation SHA `fde6b37d02db1a180a8635aeb037efd7db0d2cc6`; retained exact-head qualification re-established at `28f32c3c090f2b7b1020dafa2ed8a4bb5ee308c7` by 420Governance audit qualification run `36914171425`; evidence: `docs/audit/GOV-AUDIT-1-QUALIFICATION.md`.**
+
 ### Purpose
 Freeze one internally consistent 420 Governance authority model before further implementation.
 

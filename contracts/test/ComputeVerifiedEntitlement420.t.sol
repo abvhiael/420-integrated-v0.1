@@ -2,6 +2,7 @@
 pragma solidity ^0.8.24;
 
 import "../src/compute/ComputeVerifiedEntitlement420.sol";
+import "../src/compute/ComputeVerifierDisputeSlashRecipientResolver420.sol";
 import "../src/compute/CMPVaultAuthorization420.sol";
 import "../src/system/CapabilityRegistry420.sol";
 import "../src/vault/VaultPolicyRegistry420.sol";
@@ -71,6 +72,8 @@ contract RejectingCMPBeneficiary420 {
         revert("reject native payout");
     }
 }
+
+contract EscrowSlashEvidenceAdapter420 {}
 
 contract ComputeVerifiedEntitlement420Test {
     VmVerifiedEntitlement420 private constant vm =
@@ -944,6 +947,93 @@ contract ComputeVerifiedEntitlement420Test {
             && jobs.job(id).status == ComputeJobRegistry420.Status.SETTLED
             && accounting.getObligation(pc.providerObligationId).state == 3,
             "final provider win did not settle exact held earning");
+    }
+
+
+    function testObjectiveVerifierSlashResolverUsesCanonicalEscrowPayerWithoutMutatingEscrow() public {
+        bytes32 id = _verifiedJob(60, OWNER_A_KEY, PAYER_A_KEY, 4 ether);
+        _makeClaimable(id);
+
+        uint64 revision = jobs.job(id).revision;
+        vm.prank(payerA);
+        bytes32 disputeId = disputes.openDispute(
+            id,
+            revision,
+            disputes.OBJECTIVE_VERIFIER_ERROR_GROUND(),
+            keccak256("cmp-1.5.10/objective-verifier-error")
+        );
+
+        vm.prank(BENEFICIARY);
+        disputes.respond(disputeId, keccak256("cmp-1.5.10/provider-response"));
+        _grantAdjudicator(ADJUDICATOR_A, id);
+        vm.prank(ADJUDICATOR_A);
+        disputes.decide(disputeId, false, keccak256("cmp-1.5.10/payer-wins"));
+        ComputeDisputeResolution420.DisputeCase memory dc = disputes.caseOf(disputeId);
+        vm.warp(uint256(dc.appealDeadline) + 1);
+        disputes.finalize(disputeId);
+
+        ComputeDisputeResolution420.VerificationReview memory review =
+            disputes.verificationReview(disputeId);
+        require(
+            review.finalDisposition
+                && review.adverseToOriginalVerification
+                && !review.providerWins
+                && review.verifier == verifier,
+            "objective adverse dispute not finalized"
+        );
+
+        EscrowSlashEvidenceAdapter420 evidenceAdapter =
+            new EscrowSlashEvidenceAdapter420();
+        ComputeVerifierDisputeSlashRecipientResolver420 resolver =
+            new ComputeVerifierDisputeSlashRecipientResolver420(
+                address(disputes), address(evidenceAdapter)
+            );
+
+        require(
+            resolver.canonicalEntitlements() == address(entitlements)
+                && resolver.canonicalEntitlementsCodeHash() == address(entitlements).codehash,
+            "resolver not bound to canonical escrow entitlements"
+        );
+
+        uint256 vaultBalanceBefore = address(vault).balance;
+        VaultAccounting420.AssetAccounting memory accountingBefore =
+            accounting.getAccounting(VAULT_ID, address(0));
+        ComputeVerifiedEntitlement420.PayerRefund memory refundBefore =
+            entitlements.payerRefund(id);
+
+        IComputeSlashRecipientResolver420.Recipients memory recipients =
+            resolver.resolve(
+                bytes32(0),
+                disputeId,
+                address(evidenceAdapter),
+                bytes32(0),
+                verifier
+            );
+
+        VaultAccounting420.AssetAccounting memory accountingAfter =
+            accounting.getAccounting(VAULT_ID, address(0));
+        ComputeVerifiedEntitlement420.PayerRefund memory refundAfter =
+            entitlements.payerRefund(id);
+
+        require(recipients.harmedPayer == payerA, "canonical harmed payer not resolved");
+        require(recipients.challenger == payerA, "canonical challenger not resolved");
+        require(recipients.replacementWorker == address(0), "replacement worker invented");
+        require(address(vault).balance == vaultBalanceBefore, "resolver debited payer escrow");
+        require(
+            accountingAfter.recordedBalance == accountingBefore.recordedBalance
+                && accountingAfter.reserved == accountingBefore.reserved
+                && accountingAfter.claimable == accountingBefore.claimable
+                && accountingAfter.released == accountingBefore.released,
+            "resolver mutated escrow accounting"
+        );
+        require(
+            refundAfter.obligationId == refundBefore.obligationId
+                && refundAfter.payer == refundBefore.payer
+                && refundAfter.amount == refundBefore.amount
+                && refundAfter.claimable == refundBefore.claimable
+                && refundAfter.paid == refundBefore.paid,
+            "slash recipient resolution rewrote payer refund state"
+        );
     }
 
     function testPayerWinReallocatesOnlyContestedJobToFullOriginalPayerRefund() public {

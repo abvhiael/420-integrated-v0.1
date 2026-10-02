@@ -112,7 +112,7 @@ def main(argv=None):
         "bind CivicProposalRegistry420 proposalAuthority",
         "bind CivicElectorateRegistry420 snapshotAuthority",
         "bind Governance420 compatibility civicGovernor pointer",
-        "register all five Civic component IDs",
+        "register five core Civic component IDs plus two electorate-source component IDs",
         "publish governance service profile",
         "activate GovernanceTimelock Civic authority last",
     ]

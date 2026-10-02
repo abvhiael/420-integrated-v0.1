@@ -1,6 +1,6 @@
 # CMP-1.5.10 — ComputeEscrow slash-redistribution integration
 
-Status: **IMPLEMENTED. LEVEL 1 + LEVEL 2 QUALIFICATION PENDING.**
+Status: **COMPLETE. LEVEL 1 + LEVEL 2 QUALIFIED.**
 
 ## Canonical definition
 
@@ -160,6 +160,41 @@ CMP-1.5.10 is COMPLETE only when:
 - focused Level 1 qualification passes;
 - retained Compute Level 2 qualification passes on the same exact implementation SHA;
 - durable evidence records that SHA.
+
+Next canonical step:
+
+**CMP-1.5.11 — Hostile economic qualification**
+
+
+## Completion evidence
+
+CMP-1.5.10 is **COMPLETE**.
+
+Qualified implementation SHA:
+
+`0a6fe7d7a3d5b7bb6ea768a842bc98819efa3ce2`
+
+Exact-head qualification:
+
+- 420Registry REG-AUDIT-4 #750 — **PASS**;
+- Genesis Address Authority #915 — **PASS**;
+- 420Docs Qualification #4347 — **PASS**;
+- 420Indexer #1733 — **PASS**;
+- Solidity Contracts #4134 / `compute-fast` — **PASS**;
+- Compute Market Qualification #141 / `fast-qualification` — **PASS**;
+- retained `Compute*.t.sol` integration suite — **PASS**;
+- CMP-1.2.10 closeout regression — **PASS**;
+- CMP-1.5.10 mechanical verifier — **PASS**.
+
+Durable machine-readable evidence:
+
+`docs/compute-market/CMP-1.5.10-QUALIFICATION-EVIDENCE.json`
+
+This closeout is documentation/evidence-only relative to the qualified implementation SHA above and does not require recursive requalification.
+
+CMP-1.2 repository stake/slash integration is now closed through CMP-1.5.10, while **CMP-1.2.9-LIVE** remains the explicit live-deployment blocker.
+
+Repository-wide Level 3 remains intentionally deferred to **CMP-1.5.13 — Phase closeout**.
 
 Next canonical step:
 

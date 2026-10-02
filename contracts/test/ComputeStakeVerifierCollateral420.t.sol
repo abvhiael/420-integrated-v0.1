@@ -59,6 +59,18 @@ contract MockSlashHoldCollateral420 {
     }
 }
 
+contract MockVerifierDisputeStakeHold420 is IComputeVerifierDisputeStakeHold420 {
+    mapping(address => bool) public held;
+
+    function set(address verifier, bool value) external {
+        held[verifier] = value;
+    }
+
+    function verifierStakeHold(address verifier) external view returns (bool) {
+        return held[verifier];
+    }
+}
+
 contract ComputeStakeVerifierCollateral420Test {
     VmComputeStakeVerifierCollateral420 private constant vm =
         VmComputeStakeVerifierCollateral420(address(uint160(uint256(keccak256("hevm cheat code")))));
@@ -505,6 +517,33 @@ contract ComputeStakeVerifierCollateral420Test {
         );
         require(!ok, "verifier slash hold bypassed");
         require(stakeSource.position(id).activeAmount == 25 ether, "held verifier collateral moved");
+    }
+
+    function testActiveDisputeStakeHoldBlocksMatureVerifierWithdrawal() public {
+        bytes32 id = _stake(VERIFIER_A, POLICY_A, 25 ether);
+        MockVerifierDisputeStakeHold420 disputeHold =
+            new MockVerifierDisputeStakeHold420();
+        stakeSource.bindDisputeStakeHold(address(disputeHold));
+
+        vm.prank(VERIFIER_A);
+        uint64 maturity = stakeSource.requestExit(id);
+        vm.warp(maturity);
+
+        disputeHold.set(VERIFIER_A, true);
+        vm.prank(VERIFIER_A);
+        (bool ok,) = address(stakeSource).call(
+            abi.encodeCall(stakeSource.withdraw, (id, uint64(1)))
+        );
+        require(!ok, "active dispute stake hold bypassed");
+        require(
+            stakeSource.position(id).activeAmount == 25 ether,
+            "dispute-held verifier collateral moved"
+        );
+
+        disputeHold.set(VERIFIER_A, false);
+        vm.prank(VERIFIER_A);
+        (uint256 amount,) = stakeSource.withdraw(id, 1);
+        require(amount == 25 ether, "released dispute hold did not permit withdrawal");
     }
 
     function testPartialVerifierSlashRebindsRemainderAndPaysExactRecipients() public {

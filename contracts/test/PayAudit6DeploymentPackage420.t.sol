@@ -29,6 +29,7 @@ contract PayAudit6DeploymentPackage420Test {
 
     address internal constant TIMELOCK = 0x0000000000000000000000000000000000000429;
     bytes32 internal constant CFG = 0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921;
+
     function _v() private pure returns (Types420.Version memory) {
         return Types420.Version({ major: 1, minor: 0, patch: 0 });
     }

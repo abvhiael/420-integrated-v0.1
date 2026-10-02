@@ -19,11 +19,7 @@ contract CanonicalSettlementAdapter420 is GenesisResidentAccess420, ICanonicalSe
     event SwapExecutorSet(address indexed executor);
     event PaymentRouterSet(address indexed router);
     event SettlementExecuted(
-        bytes32 indexed quoteId,
-        address indexed payer,
-        address indexed recipient,
-        uint256 inputSpent,
-        uint256 delivered
+        bytes32 indexed quoteId, address indexed payer, address indexed recipient, uint256 inputSpent, uint256 delivered
     );
 
     constructor(
@@ -36,23 +32,34 @@ contract CanonicalSettlementAdapter420 is GenesisResidentAccess420, ICanonicalSe
         swapExecutor = executor_;
     }
 
-    function componentId() public pure override returns (bytes32) { return PayIds420.SETTLEMENT_ADAPTER; }
+    function componentId() public pure override returns (bytes32) {
+        return PayIds420.SETTLEMENT_ADAPTER;
+    }
 
-    function setSwapExecutor(address executor_) external {
+    function setSwapExecutor(
+        address executor_
+    ) external {
         _requireGenesisGovernance(PayIds420.ACTION_CONFIGURE);
         require(executor_ != address(0) && executor_.code.length != 0, "executor");
         swapExecutor = executor_;
         emit SwapExecutorSet(executor_);
     }
 
-    function setPaymentRouter(address router_) external {
+    function setPaymentRouter(
+        address router_
+    ) external {
         _requireGenesisGovernance(PayIds420.ACTION_CONFIGURE);
         require(router_ != address(0) && router_.code.length != 0, "router");
         paymentRouter = router_;
         emit PaymentRouterSet(router_);
     }
 
-    function quote(bytes32, address, address, uint256) external pure returns (Quote memory) {
+    function quote(
+        bytes32,
+        address,
+        address,
+        uint256
+    ) external pure returns (Quote memory) {
         revert("quote produced by canonical quote engine");
     }
 
@@ -63,9 +70,7 @@ contract CanonicalSettlementAdapter420 is GenesisResidentAccess420, ICanonicalSe
         uint256 exactSettlementAmount
     ) external payable returns (uint256 inputSpent, uint256 settlementDelivered) {
         _requireOperational(
-            PayIds420.ACTION_SETTLE,
-            ISystemSafety420.ActionClass.NORMAL_ONLY,
-            Types420.Direction.OUTBOUND
+            PayIds420.ACTION_SETTLE, ISystemSafety420.ActionClass.NORMAL_ONLY, Types420.Direction.OUTBOUND
         );
         require(paymentRouter != address(0) && msg.sender == paymentRouter, "payment router");
         require(payer != address(0) && recipient != address(0), "party");

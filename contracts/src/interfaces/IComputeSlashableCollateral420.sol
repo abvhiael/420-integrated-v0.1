@@ -11,6 +11,8 @@ interface IComputeSlashableCollateral420 {
         bytes32 stakePolicyId,
         uint64 positionRevision,
         uint64 openedAt,
+        uint32 slashPolicyRevision,
+        bytes32 slashPolicyCommitment,
         uint256 slashableAmount,
         bool active,
         bool exiting,

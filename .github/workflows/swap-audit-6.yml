@@ -26,11 +26,13 @@ on:
       - "contracts/config/predeploy/ApprovedQuoteAssetRegistry-predeploy-state.json"
       - "contracts/config/predeploy/predeploy-plan.json"
       - "contracts/config/predeploy/storage-init.json"
+      - "contracts/config/genesis-config-commitment.json"
       - "contracts/config/deployment-manifest.json"
       - "contracts/config/genesis-address-namespace.json"
       - "contracts/foundry.toml"
       - "contracts/config/security/toolchain.json"
       - "scripts/generate-swap-audit-6-predeploy.py"
+      - "scripts/verify-genesis-config-commitment.py"
       - "scripts/verify-swap-audit-6-predeploy.py"
       - "docs/apps/swap/deployment-operations.md"
       - "docs/audit/420SWAP-REPOSITORY-AUDIT-20261001.md"
@@ -91,6 +93,9 @@ jobs:
             test/SwapGenesisIntegration420.t.sol \
             --sizes
 
+      - name: Verify frozen global Genesis configuration commitment
+        run: python3 scripts/verify-genesis-config-commitment.py
+
       - name: Generate deterministic Swap compiler/predeploy evidence
         run: python3 scripts/generate-swap-audit-6-predeploy.py --write --print
 
@@ -125,6 +130,8 @@ jobs:
             contracts/config/predeploy/TWAPOracle-predeploy-state.json
             contracts/config/predeploy/ApprovedQuoteAssetRegistry-predeploy-state.json
             contracts/config/predeploy/predeploy-plan.json
+            contracts/config/predeploy/storage-init.json
+            contracts/config/genesis-config-commitment.json
             contracts/config/deployment-manifest.json
           )
           STATUS="$(git status --porcelain -- "${PATHS[@]}")"
@@ -156,6 +163,8 @@ jobs:
             contracts/config/predeploy/TWAPOracle-predeploy-state.json
             contracts/config/predeploy/ApprovedQuoteAssetRegistry-predeploy-state.json
             contracts/config/predeploy/predeploy-plan.json
+            contracts/config/predeploy/storage-init.json
+            contracts/config/genesis-config-commitment.json
             contracts/config/deployment-manifest.json
           if-no-files-found: warn
           retention-days: 30

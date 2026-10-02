@@ -72,7 +72,7 @@ required_report_tokens = [
     "GENESIS READY: NO",
     "PRODUCTION READY: NO",
     "AI-INV-027",
-    "3,969 commits behind",
+    "3969 behind",
 ]
 for token in required_report_tokens:
     if token not in report:

@@ -1,8 +1,8 @@
 {
   "schema": "420pay-audit-6-deployment-package-v1",
   "step": "PAY-AUDIT-6",
-  "status": "IMPLEMENTED_LEVEL_1_QUALIFICATION_PENDING",
-  "repository_ready": false,
+  "status": "REPOSITORY_READY_LIVE_DEPLOYMENT_PENDING",
+  "repository_ready": true,
   "live_qualified": false,
   "address_policy": "REGISTRY_RESOLVED_NO_FIXED_PAY_ADDRESSES",
   "governance_timelock": "0x0000000000000000000000000000000000000429",
@@ -989,5 +989,23 @@
       "additional_arguments": {},
       "constructor_signature": "constructor(address timelock_, address registry_, bytes32 genesisConfigHash_)"
     }
+  },
+  "qualification_evidence": {
+    "implementation_sha": "9bfe0d72c8d696b4908f819612608ca5279ce930",
+    "level": "Level 1 — per-roadmap-step fast qualification",
+    "pay_audit_workflow": {
+      "name": "420Pay audit qualification",
+      "run_number": 216,
+      "run_id": 37061442891,
+      "job_id": 111018792122,
+      "conclusion": "success"
+    },
+    "solidity_workflow": {
+      "name": "Solidity Contracts",
+      "run_number": 4259,
+      "run_id": 37061442991,
+      "conclusion": "success"
+    },
+    "note": "Repository deployment readiness is qualified. Live chain/address/transaction qualification remains PAY-AUDIT-7."
   }
 }

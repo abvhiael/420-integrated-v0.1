@@ -186,6 +186,36 @@ contract GrantsGenesis420Test {
                 DELEGATE,
                 GrantIds420.COMPONENT_GRANTS,
                 GrantIds420.ACTION_SUBMIT_APPLICATION,
+                e.auth.scopeProgram(keccak256("wrong-program")),
+                true
+            );
+        vm.prank(DELEGATE);
+        (bool wrongScope,) = address(e.applications)
+            .call(
+                abi.encodeWithSelector(e.applications.submit.selector, id, p, ALICE, uint256(1), uint128(500), content)
+            );
+        require(!wrongScope, "wrong program scope accepted");
+
+        e.caps
+            .set(
+                DELEGATE,
+                GrantIds420.COMPONENT_GRANTS,
+                GrantIds420.ACTION_SUBMIT_MILESTONE,
+                e.auth.scopeProgram(p),
+                true
+            );
+        vm.prank(DELEGATE);
+        (bool wrongAction,) = address(e.applications)
+            .call(
+                abi.encodeWithSelector(e.applications.submit.selector, id, p, ALICE, uint256(1), uint128(500), content)
+            );
+        require(!wrongAction, "wrong application action accepted");
+
+        e.caps
+            .set(
+                DELEGATE,
+                GrantIds420.COMPONENT_GRANTS,
+                GrantIds420.ACTION_SUBMIT_APPLICATION,
                 e.auth.scopeProgram(p),
                 true
             );
@@ -262,6 +292,68 @@ contract GrantsGenesis420Test {
         (bool direct,) =
             address(e.programs).call(abi.encodeWithSelector(e.programs.reserveAward.selector, p, uint128(1)));
         require(!direct, "governance bypassed bound award registry");
+    }
+
+    function testGovernanceMutationsRejectNonTimelockCaller() public {
+        Env memory e = setup();
+
+        require(e.programs.governanceTimelock() == address(this), "program governance binding drift");
+        require(e.awards.governanceTimelock() == address(this), "award governance binding drift");
+        require(e.milestones.governanceTimelock() == address(this), "milestone governance binding drift");
+
+        bytes32 p = keccak256("unauthorized-program");
+        bytes32 budget = keccak256("unauthorized-budget");
+        bytes32 civic = keccak256("unauthorized-civic");
+
+        vm.prank(ALICE);
+        (bool programCreated,) = address(e.programs)
+            .call(
+                abi.encodeWithSelector(
+                    e.programs.createProgram.selector,
+                    p,
+                    GrantIds420.PROGRAM_DEVELOPMENT,
+                    budget,
+                    civic,
+                    uint128(1000),
+                    uint128(700),
+                    uint64(block.timestamp),
+                    uint64(block.timestamp + 1000),
+                    keccak256("unauthorized-program-meta")
+                )
+            );
+        require(!programCreated, "non-timelock created program");
+
+        (p, budget, civic) = makeProgram(e);
+        bytes32 app = submit(e, p, 300, 1);
+        bytes32 terms = keccak256("unauthorized-award");
+        bytes32 a = e.awards.canonicalId(app, ALICE, 300, terms);
+
+        vm.prank(ALICE);
+        (bool awardCreated,) = address(e.awards)
+            .call(abi.encodeWithSelector(e.awards.createAward.selector, a, app, ALICE, uint128(300), terms));
+        require(!awardCreated, "non-timelock created award");
+
+        a = award(e, app, 300);
+        bytes32 purpose = keccak256("unauthorized-milestone");
+        bytes32 m = e.milestones.canonicalId(a, 1, 300, purpose);
+
+        vm.prank(ALICE);
+        (bool milestoneCreated,) = address(e.milestones)
+            .call(
+                abi.encodeWithSelector(
+                    e.milestones.createMilestone.selector, m, a, uint32(1), uint128(300), purpose
+                )
+            );
+        require(!milestoneCreated, "non-timelock created milestone");
+
+        vm.prank(ALICE);
+        (bool programDeactivated,) =
+            address(e.programs).call(abi.encodeWithSelector(e.programs.setActive.selector, p, false));
+        require(!programDeactivated, "non-timelock mutated program");
+
+        vm.prank(ALICE);
+        (bool awardCancelled,) = address(e.awards).call(abi.encodeWithSelector(e.awards.cancel.selector, a));
+        require(!awardCancelled, "non-timelock cancelled award");
     }
 
     function testInactiveProgramRejectsNewAward() public {

@@ -6,6 +6,7 @@ import {
   ComputeReadModelError420,
   createComputeWorkerClient420,
   validateAttemptBundle420,
+  validateComputeWorkerOffer420,
   validateWorkerRevision420
 } from '../dist/index.js';
 
@@ -264,4 +265,49 @@ test('stale and malformed fixtures remain machine-consumable and fail closed', a
     new RegExp(fixtures.invalidReference.expectedError)
   );
   assert.equal(fixtures.valid.workloadType, 'VIDEO_TRANSCODE');
+});
+
+
+function workerOffer(overrides = {}) {
+  return {
+    providerId: b32(1),
+    nodeId: b32(2),
+    resourceId: b32(3),
+    providerRevision: 4n,
+    resourceRevision: 5n,
+    operator: addr(4),
+    settlementAccount: addr(5),
+    computeClass: b32(6),
+    hardwareProfileHash: b32(7),
+    runtimeProfileHash: b32(8),
+    capabilityHash: b32(9),
+    capacityUnits: 16n,
+    jurisdictionHash: b32(10),
+    availableFrom: 100n,
+    validUntil: 1000n,
+    pricingPolicyId: b32(11),
+    pricingVersion: 1,
+    fixedPrice: 3n * 10n ** 18n,
+    revision: 2n,
+    predecessorCommitment: b32(12),
+    exists: true,
+    active: true,
+    ...overrides
+  };
+}
+
+test('validates canonical CMP-2.1 worker-offer schema and exact revision', () => {
+  const offer = validateComputeWorkerOffer420(workerOffer(), 2n);
+  assert.equal(offer.capacityUnits, 16n);
+  assert.equal(offer.fixedPrice, 3n * 10n ** 18n);
+  assert.equal(offer.revision, 2n);
+});
+
+test('rejects malformed, stale, unavailable, zero-capacity, zero-price and empty-jurisdiction worker offers', () => {
+  assert.throws(() => validateComputeWorkerOffer420(workerOffer({ revision: 3n }), 2n), /stale or mismatched/);
+  assert.throws(() => validateComputeWorkerOffer420(workerOffer({ active: false })), /not active/);
+  assert.throws(() => validateComputeWorkerOffer420(workerOffer({ capacityUnits: 0n })), /capacity/);
+  assert.throws(() => validateComputeWorkerOffer420(workerOffer({ fixedPrice: 0n })), /price/);
+  assert.throws(() => validateComputeWorkerOffer420(workerOffer({ availableFrom: 1001n })), /availability/);
+  assert.throws(() => validateComputeWorkerOffer420(workerOffer({ jurisdictionHash: b32(0) })), /empty canonical commitment/);
 });

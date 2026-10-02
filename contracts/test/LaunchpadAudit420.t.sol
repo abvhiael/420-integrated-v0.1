@@ -8,16 +8,41 @@ import "../src/launchpad/LaunchpadSaleRegistry420.sol";
 import "../src/launchpad/LaunchpadAllocationRegistry420.sol";
 
 interface VmLaunchpadAudit420 {
-    function warp(uint256) external;
-    function prank(address) external;
-    function expectRevert(bytes4) external;
+    function warp(
+        uint256
+    ) external;
+    function prank(
+        address
+    ) external;
+    function expectRevert(
+        bytes4
+    ) external;
 }
 
 contract MockLaunchpadAuditCapabilities420 is ICapabilityRegistry420 {
     bool allowed;
-    function setAllowed(bool v) external { allowed = v; }
-    function grant(bytes32) external pure override returns (CapabilityGrant memory g) { return g; }
-    function isAuthorized(address, bytes32, bytes32, bytes32, uint256) external view override returns (bool) { return allowed; }
+
+    function setAllowed(
+        bool v
+    ) external {
+        allowed = v;
+    }
+
+    function grant(
+        bytes32
+    ) external pure override returns (CapabilityGrant memory g) {
+        return g;
+    }
+
+    function isAuthorized(
+        address,
+        bytes32,
+        bytes32,
+        bytes32,
+        uint256
+    ) external view override returns (bool) {
+        return allowed;
+    }
 }
 
 contract LaunchpadAudit420Test {
@@ -43,14 +68,33 @@ contract LaunchpadAudit420Test {
         projects.registerProject(projectId, address(this), address(0x7001), metadata, issuance);
 
         saleId = sales.canonicalId(
-            projectId, address(0x420), address(0xBEEF),
-            500, 1000, 600, 10000, 10, 20, 30,
-            keccak256("audit/eligibility"), bytes32(0)
+            projectId,
+            address(0x420),
+            address(0xBEEF),
+            500,
+            1000,
+            600,
+            10000,
+            10,
+            20,
+            30,
+            keccak256("audit/eligibility"),
+            bytes32(0)
         );
         sales.createSale(
-            saleId, projectId, address(0x420), address(0xBEEF),
-            500, 1000, 600, 10000, 10, 20, 30,
-            keccak256("audit/eligibility"), bytes32(0)
+            saleId,
+            projectId,
+            address(0x420),
+            address(0xBEEF),
+            500,
+            1000,
+            600,
+            10000,
+            10,
+            20,
+            30,
+            keccak256("audit/eligibility"),
+            bytes32(0)
         );
     }
 

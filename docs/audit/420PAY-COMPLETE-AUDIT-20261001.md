@@ -304,6 +304,22 @@ PAY-AUDIT-3 is **COMPLETE** at qualification Level 1.
 
 Next canonical roadmap step: **PAY-AUDIT-4 — settlement splits, refunds, sponsorship and accounting completion**.
 
+## PAY-AUDIT-5 retained qualification revalidation
+
+PAY-AUDIT-5 remains **COMPLETE**.
+
+The canonical Indexer/event-model implementation did not change after its original qualification: `420-indexer/src/abi-manifest.ts`, `420-indexer/src/lifecycle-reducer.ts`, and their dedicated ABI/lifecycle regression tests have identical blob SHAs to the previously-qualified bookkeeping head. The current app-specific workflow subsequently revalidated that unchanged implementation on SHA `3378b3b9efcc2fd2f70124daa7eb520d96aad6f6`.
+
+- 420Pay audit qualification: run #157, run ID `37050677411`, job `110983005816`, **SUCCESS**
+- Relevant retained check: 420Indexer Pay reconciliation build/tests, **SUCCESS**
+- Solidity Contracts #4172, run ID `37050677237`, **SUCCESS**
+- Current main/base observed during this revalidation: `14d46231aa4350b2e84dee52f0f664bdd2e785f4`
+- Level 2: not triggered; no PAY-AUDIT-5 implementation or shared dependency changed.
+- Level 3: intentionally deferred until the complete 420Pay app-phase merge-candidate is reconciled with current `main`.
+- Live Registry-resolved deployment descriptors/addresses remain PAY-AUDIT-7 evidence, not a PAY-AUDIT-5 Level 1 blocker.
+
+Next canonical roadmap step remains **PAY-AUDIT-6 — deterministic deployment package and Registry publication**.
+
 ## PAY-AUDIT-4 Level 1 qualification evidence
 
 PAY-AUDIT-4 is **COMPLETE** at qualification Level 1.

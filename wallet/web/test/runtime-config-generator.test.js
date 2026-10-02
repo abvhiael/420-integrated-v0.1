@@ -26,6 +26,11 @@ function readyInventory420(environment = 'testnet') {
       names420: { address: '0x0000000000000000000000000000000000000423', status: 'BOUND' },
       identity420: { address: '0x0000000000000000000000000000000000000424', status: 'BOUND' },
     },
+    appAuthority: {
+      stake420: { address: '0x000000000000000000000000000000000000043a', status: 'BOUND', deploymentVerified: true },
+      validatorRegistry: { address: '0x0000000000000000000000000000000000000423', status: 'BOUND', deploymentVerified: true },
+      rewardController: { address: '0x0000000000000000000000000000000000000420', status: 'BOUND', deploymentVerified: true },
+    },
     conflicts: [],
     releaseGates: {
       officialTestnetManifestPublished: true,
@@ -71,6 +76,9 @@ test('W14.2 builds deterministic live-testnet runtime config from qualified inpu
   assert.equal(config.smartAccount.factoryAddress, '0x0000000000000000000000000000000000000420');
   assert.equal(config.deployment.entryPointAddress, '0x000000000000000000000000000000000000041f');
   assert.equal(config.deployment.capabilityRegistryAddress, '0x0000000000000000000000000000000000000421');
+  assert.equal(config.deployment.stakeAddress, '0x000000000000000000000000000000000000043a');
+  assert.equal(config.deployment.validatorRegistryAddress, '0x0000000000000000000000000000000000000423');
+  assert.equal(config.deployment.rewardControllerAddress, '0x0000000000000000000000000000000000000420');
   assert.equal(config.deployment.faucetUrl, 'https://faucet.testnet.example.org');
   assert.equal(config.manifest.url, 'https://420integrated.org/manifests/testnet.json');
   assert.equal(config.manifest.verificationMode, 'registry-or-signed-manifest');
@@ -130,5 +138,16 @@ test('W14.2 requires Explorer and Faucet publication for testnet', async () => {
   assert.throws(
     () => buildWalletRuntimeConfig420({ manifest, inventory: readyInventory420(), baseConfig }),
     /testnet manifest must publish Faucet/,
+  );
+});
+
+
+test('W14.2 refuses live Stake runtime binding when frozen app addresses are not chain-verified', async () => {
+  const baseConfig = await readJson('wallet/web/runtime-config.json');
+  const inventory = readyInventory420();
+  inventory.appAuthority.stake420.deploymentVerified = false;
+  assert.throws(
+    () => buildWalletRuntimeConfig420({ manifest: testnetManifest420(), inventory, baseConfig }),
+    /stake420 is not chain-verified/,
   );
 });

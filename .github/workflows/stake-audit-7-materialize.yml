@@ -1,0 +1,67 @@
+name: 420Stake STAKE-AUDIT-7 Materialize
+
+on:
+  push:
+    paths:
+      - 'contracts/config/predeploy/stake-genesis-config-v1.json'
+      - 'scripts/generate-stake-audit-7-predeploy.py'
+      - '.github/workflows/stake-audit-7-materialize.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: stake-audit-7-materialize-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  materialize:
+    if: github.ref == 'refs/heads/feature/420stake-audit-remediation'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact generator head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - name: Verify generator head
+        run: test "$(git rev-parse HEAD)" = "${{ github.sha }}"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Materialize Stake predeploy artifacts and state
+        run: python scripts/generate-stake-audit-7-predeploy.py --write
+      - name: Verify deterministic regeneration
+        run: python scripts/generate-stake-audit-7-predeploy.py --check
+      - name: Show generated scope
+        run: |
+          git status --short
+          git diff --stat
+      - name: Commit retained Audit7 materialization
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            contracts/artifacts/RewardController.json \
+            contracts/artifacts/ValidatorRegistry.json \
+            contracts/artifacts/CommunityValidatorReserve.json \
+            contracts/artifacts/Stake420.json \
+            contracts/config/predeploy/RewardController-predeploy-state.json \
+            contracts/config/predeploy/ValidatorRegistry-predeploy-state.json \
+            contracts/config/predeploy/CommunityValidatorReserve-predeploy-state.json \
+            contracts/config/predeploy/Stake420-predeploy-state.json \
+            contracts/config/predeploy/Stake420-materialization.json \
+            contracts/config/predeploy/predeploy-plan.json \
+            contracts/config/predeploy/storage-init.json \
+            contracts/config/deployment-manifest.json
+          if git diff --cached --quiet; then
+            echo "Audit7 materialization already current"
+            exit 0
+          fi
+          git commit -m "stake: retain Audit7 predeploy materialization"
+          git push origin HEAD:${GITHUB_REF_NAME}

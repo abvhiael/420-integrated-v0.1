@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/420integrated/420-integrated/indexer/decoder"
 	"github.com/420integrated/420-integrated/indexer/model"
@@ -26,6 +27,7 @@ type addressBackend interface { AddressTransactions(address string, limit uint32
 type registryBackend interface { Service(string) (decoder.ServiceSummary, error); Services() []decoder.ServiceSummary }
 type assetBackend interface { AssetTransfers(assetKey, address string, limit uint32) (AssetTransferPage, error) }
 type consensusBackend interface { Consensus() (model.ConsensusStatus, error) }
+type stakeBackend interface { StakeActivity(validatorID, address string, limit uint32) (StakeActivityPage, error) }
 type Server struct { backend Backend }
 func NewServer(backend Backend) *Server { return &Server{backend: backend} }
 
@@ -44,6 +46,7 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("GET /v1/services", s.services)
 	mux.HandleFunc("GET /v1/services/{service}", s.service)
 	mux.HandleFunc("GET /v1/services/{service}/versions/{version}", s.serviceVersion)
+	mux.HandleFunc("GET /v1/stake/activity", s.stakeActivity)
 	return mux
 }
 
@@ -61,3 +64,22 @@ func (s *Server) serviceVersion(w http.ResponseWriter,r *http.Request){n,err:=st
 func (s *Server) blocks(w http.ResponseWriter,r *http.Request){limit:=uint32(50);if raw:=r.URL.Query().Get("limit");raw!=""{n,err:=strconv.ParseUint(raw,10,32);if err!=nil||n==0||n>250{writeError(w,http.StatusBadRequest,ErrInvalidCursor);return};limit=uint32(n)};var cur *Cursor;if raw:=r.URL.Query().Get("cursor");raw!=""{decoded,err:=DecodeCursor(raw);if err!=nil{writeError(w,http.StatusBadRequest,err);return};cur=&decoded;limit=decoded.Limit};page,err:=s.backend.Blocks(cur,limit);if err!=nil{status:=http.StatusServiceUnavailable;if errors.Is(err,ErrSnapshotUnavailable){status=http.StatusConflict};writeError(w,status,err);return};writeJSON(w,http.StatusOK,page)}
 func writeJSON(w http.ResponseWriter,status int,v any){w.Header().Set("content-type","application/json");w.WriteHeader(status);_=json.NewEncoder(w).Encode(v)}
 func writeError(w http.ResponseWriter,status int,err error){writeJSON(w,status,map[string]any{"error":err.Error(),"canonicalAuthority":false})}
+
+func (s *Server) stakeActivity(w http.ResponseWriter,r *http.Request){
+	limit:=uint32(50)
+	if raw:=r.URL.Query().Get("limit");raw!=""{
+		n,err:=strconv.ParseUint(raw,10,32)
+		if err!=nil||n==0||n>250{writeError(w,http.StatusBadRequest,ErrInvalidCursor);return}
+		limit=uint32(n)
+	}
+	backend,ok:=s.backend.(stakeBackend)
+	if !ok{writeError(w,http.StatusServiceUnavailable,ErrStakeQueryUnavailable);return}
+	page,err:=backend.StakeActivity(r.URL.Query().Get("validatorId"),r.URL.Query().Get("address"),limit)
+	if err!=nil{
+		status:=http.StatusServiceUnavailable
+		if strings.Contains(err.Error(),"invalid validator id")||strings.Contains(err.Error(),"invalid stake address"){status=http.StatusBadRequest}
+		if errors.Is(err,ErrSnapshotUnavailable){status=http.StatusConflict}
+		writeError(w,status,err);return
+	}
+	writeJSON(w,http.StatusOK,page)
+}

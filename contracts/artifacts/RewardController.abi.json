@@ -1,0 +1,50 @@
+{
+  "schema": "420-retained-abi-artifact-v1",
+  "contractName": "RewardController",
+  "protocol": "420Stake",
+  "protocolVersion": 2,
+  "source": {
+    "path": "contracts/src/system/RewardController.sol",
+    "gitBlobSha": "012c9e24b4e7a37ca89aad1c887529a19c70bb16"
+  },
+  "abi": [
+    {
+      "type": "event",
+      "name": "RewardApplied",
+      "anonymous": false,
+      "inputs": [
+        {
+          "name": "blockNumber",
+          "type": "uint64",
+          "indexed": true
+        },
+        {
+          "name": "proposer",
+          "type": "address",
+          "indexed": true
+        },
+        {
+          "name": "proposerAmount",
+          "type": "uint256",
+          "indexed": false
+        },
+        {
+          "name": "participantAmount",
+          "type": "uint256",
+          "indexed": false
+        },
+        {
+          "name": "attentionAmount",
+          "type": "uint256",
+          "indexed": false
+        },
+        {
+          "name": "developmentAmount",
+          "type": "uint256",
+          "indexed": false
+        }
+      ]
+    }
+  ],
+  "authority": "abi_only_no_bytecode_or_live_deployment_claim"
+}

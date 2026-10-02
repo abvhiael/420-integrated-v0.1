@@ -1,0 +1,79 @@
+{
+  "schema": "420-stake-security-hardening-v1",
+  "step": "STAKE-AUDIT-4",
+  "status": "PRE_GENESIS_EXECUTABLE_VERIFICATION",
+  "external_audit_required": true,
+  "suites": [
+    "Validator_Stake",
+    "Rewards_Treasuries"
+  ],
+  "qualified_scope": {
+    "contracts": [
+      "ValidatorRegistry",
+      "CommunityValidatorReserve",
+      "RewardController",
+      "ConsensusSystemCall420"
+    ],
+    "tests": [
+      "contracts/test/StakeSecurityInvariant420.t.sol",
+      "contracts/test/StakeTransitionProperty420.t.sol",
+      "contracts/test/StakeRollbackAtomicity420.t.sol",
+      "contracts/test/StakeValidatorGenesis420.t.sol",
+      "contracts/test/ConsensusSystemCall420.t.sol",
+      "contracts/test/StakeSystemCallABIVectors420.t.sol"
+    ]
+  },
+  "invariants": [
+    {
+      "id": "STAKE-INV-001",
+      "name": "custody_conservation",
+      "evidence": "StakeSecurityInvariant420.t.sol::invariant_CustodyConservation"
+    },
+    {
+      "id": "STAKE-INV-002",
+      "name": "reserve_accounting_conservation",
+      "evidence": "StakeSecurityInvariant420.t.sol::invariant_ReserveAccountingConservation"
+    },
+    {
+      "id": "STAKE-INV-003",
+      "name": "canonical_transition_graph",
+      "evidence": "StakeTransitionProperty420.t.sol::testFuzz_TransitionGraphMatchesCanonicalEdges"
+    },
+    {
+      "id": "STAKE-INV-004",
+      "name": "slash_evidence_uniqueness",
+      "evidence": "StakeSecurityInvariant420.t.sol::invariant_SlashEvidenceIsUnique"
+    },
+    {
+      "id": "STAKE-INV-005",
+      "name": "reward_at_most_once",
+      "evidence": "StakeSecurityInvariant420.t.sol::invariant_RewardIsAtMostOncePerBlock"
+    },
+    {
+      "id": "STAKE-INV-006",
+      "name": "bounded_distinct_reward_participants",
+      "evidence": "StakeSecurityInvariant420.t.sol::invariant_MalformedOrOversizedParticipantsNeverSettle"
+    },
+    {
+      "id": "STAKE-INV-007",
+      "name": "external_call_failure_atomicity",
+      "evidence": "StakeRollbackAtomicity420.t.sol"
+    },
+    {
+      "id": "STAKE-INV-008",
+      "name": "consensus_system_call_atomicity",
+      "evidence": "StakeRollbackAtomicity420.t.sol::testSystemCallFailureRollsBackSequenceHashAndDownstreamState"
+    }
+  ],
+  "hardening_gate": {
+    "validator_stake": "CLOSED_PENDING_EXTERNAL_AUDIT",
+    "rewards_treasuries": "CLOSED_PENDING_EXTERNAL_AUDIT",
+    "registry_status": "PRE_GENESIS_EXECUTABLE_VERIFICATION",
+    "does_not_claim": [
+      "external_security_audit",
+      "public_testnet_deployment",
+      "genesis_release_readiness",
+      "final_app_phase_level_3_closeout"
+    ]
+  }
+}

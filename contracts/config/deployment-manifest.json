@@ -4,64 +4,75 @@
   "governance_timelock": "0x0000000000000000000000000000000000000429",
   "contracts": [
     {
-      "name": "RewardController",
       "address": "0x0000000000000000000000000000000000000420",
-      "deployment": "GENESIS_SYSTEM_ADDRESS"
+      "artifact_status": "STAKE_AUDIT_7_ARTIFACT_READY",
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "RewardController",
+      "predeploy_state": "contracts/config/predeploy/RewardController-predeploy-state.json",
+      "runtime_artifact": "contracts/artifacts/RewardController.json",
+      "runtime_code_hash": "0xc1468f48a745511b99577d9381462fc75b2357725d58c59cd5102cc6fd0df30d",
+      "source_blob_sha1": "012c9e24b4e7a37ca89aad1c887529a19c70bb16"
     },
     {
-      "name": "AttentionTreasury",
       "address": "0x0000000000000000000000000000000000000421",
-      "deployment": "GENESIS_SYSTEM_ADDRESS"
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "AttentionTreasury"
     },
     {
-      "name": "DevelopmentTreasury",
       "address": "0x0000000000000000000000000000000000000422",
-      "deployment": "GENESIS_SYSTEM_ADDRESS"
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "DevelopmentTreasury"
     },
     {
-      "name": "ValidatorRegistry",
       "address": "0x0000000000000000000000000000000000000423",
-      "deployment": "GENESIS_SYSTEM_ADDRESS"
+      "artifact_status": "STAKE_AUDIT_7_ARTIFACT_READY",
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "ValidatorRegistry",
+      "predeploy_state": "contracts/config/predeploy/ValidatorRegistry-predeploy-state.json",
+      "runtime_artifact": "contracts/artifacts/ValidatorRegistry.json",
+      "runtime_code_hash": "0x9f67ac365954920c3e06a73a0af5cb2f114bf504108cec9ea3a516bc8d32731b",
+      "source_blob_sha1": "e534624f007024d65fcbb9e0f730bafbb8077767"
     },
     {
-      "name": "ProtocolReserve",
       "address": "0x0000000000000000000000000000000000000424",
-      "deployment": "GENESIS_SYSTEM_ADDRESS"
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "ProtocolReserve"
     },
     {
-      "name": "CommunityValidatorReserve",
       "address": "0x0000000000000000000000000000000000000425",
-      "deployment": "GENESIS_SYSTEM_ADDRESS"
+      "artifact_status": "STAKE_AUDIT_7_ARTIFACT_READY",
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "genesis_balance_wei": "6300000000000000000000000",
+      "name": "CommunityValidatorReserve",
+      "predeploy_state": "contracts/config/predeploy/CommunityValidatorReserve-predeploy-state.json",
+      "runtime_artifact": "contracts/artifacts/CommunityValidatorReserve.json",
+      "runtime_code_hash": "0xbba4f158ad05a0397a8a711dee181f2f3035e374d063293f06786393dd69b90e",
+      "source_blob_sha1": "6ae1657a5ab45e97c76013ea45a310ae8fcd411c"
     },
     {
-      "name": "CommunityRewardReserve",
       "address": "0x0000000000000000000000000000000000000426",
-      "deployment": "GENESIS_SYSTEM_ADDRESS"
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "CommunityRewardReserve"
     },
     {
-      "name": "FounderVestingRegistry",
       "address": "0x0000000000000000000000000000000000000427",
-      "deployment": "GENESIS_SYSTEM_ADDRESS"
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "FounderVestingRegistry"
     },
     {
-      "name": "RandomnessRegistry",
       "address": "0x0000000000000000000000000000000000000428",
-      "deployment": "GENESIS_SYSTEM_ADDRESS"
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "RandomnessRegistry"
     },
     {
-      "name": "GovernanceTimelock",
       "address": "0x0000000000000000000000000000000000000429",
       "deployment": "GENESIS_SYSTEM_ADDRESS",
-      "runtime_artifact": "contracts/artifacts/GovernanceTimelock.json",
-      "runtime_code_hash": "0xca5e96c6048b190839d68a8857b2ff5f0a7e0f356d4089ac31fa684cdee00139",
-      "predeploy_state": "contracts/config/predeploy/GovernanceTimelock-predeploy-state.json",
-      "source_blob_sha1": "30977a1e172763aa333eeb4b34b1bbaee025c235",
-      "artifact_status": "GOV_AUDIT_6_ARTIFACT_READY"
+      "name": "GovernanceTimelock"
     },
     {
-      "name": "PublicDistributionVault",
       "address": "0x000000000000000000000000000000000000042a",
-      "deployment": "GENESIS_SYSTEM_ADDRESS"
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "PublicDistributionVault"
     },
     {
       "name": "GenesisDEXFactory",
@@ -94,79 +105,74 @@
       "runtime_code_hash": "0x581a2ab1d4f8ffcecd88bb9bce1b868b4de39b52e1911957dbdc93759631fb32"
     },
     {
-      "name": "ValidatorBootstrapReserve",
       "address": "0x000000000000000000000000000000000000042e",
-      "deployment": "GENESIS_SYSTEM_ADDRESS"
-    },
-    {
-      "name": "AIProviderRegistry",
-      "address": "0x000000000000000000000000000000000000042f",
-      "deployment": "GENESIS_SYSTEM_ADDRESS"
-    },
-    {
-      "name": "AIModelRegistry",
-      "address": "0x0000000000000000000000000000000000000430",
-      "deployment": "GENESIS_SYSTEM_ADDRESS"
-    },
-    {
-      "name": "AIJobManager",
-      "address": "0x0000000000000000000000000000000000000431",
-      "deployment": "GENESIS_SYSTEM_ADDRESS"
-    },
-    {
-      "name": "AIJobEscrow",
-      "address": "0x0000000000000000000000000000000000000432",
-      "deployment": "GENESIS_SYSTEM_ADDRESS"
-    },
-    {
-      "name": "AIReputationRegistry",
-      "address": "0x0000000000000000000000000000000000000433",
-      "deployment": "GENESIS_SYSTEM_ADDRESS"
-    },
-    {
-      "name": "ProtocolRegistry",
-      "address": "0x0000000000000000000000000000000000000434",
       "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "ValidatorBootstrapReserve"
+    },
+    {
+      "address": "0x000000000000000000000000000000000000042f",
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "AIProviderRegistry"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000430",
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "AIModelRegistry"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000431",
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "AIJobManager"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000432",
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "AIJobEscrow"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000433",
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "AIReputationRegistry"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000434",
+      "artifact_status": "REG_AUDIT_5_ARTIFACT_READY",
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "ProtocolRegistry",
+      "predeploy_state": "contracts/config/predeploy/ProtocolRegistry-predeploy-state.json",
       "runtime_artifact": "contracts/artifacts/ProtocolRegistry.json",
       "runtime_code_hash": "0x9f9e5f794296cf9faf5f8c8d17cd815f3c19c004a158c15cb61b5a29eaacb330",
-      "predeploy_state": "contracts/config/predeploy/ProtocolRegistry-predeploy-state.json",
-      "source_blob_sha1": "9ab3d53a68b6533978f41e0202e5268f1d615c19",
-      "artifact_status": "REG_AUDIT_5_ARTIFACT_READY"
+      "source_blob_sha1": "9ab3d53a68b6533978f41e0202e5268f1d615c19"
     },
     {
-      "name": "Names420",
       "address": "0x0000000000000000000000000000000000000435",
+      "artifact_status": "NAMES_AUDIT_6_ARTIFACT_READY",
       "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "Names420",
+      "predeploy_state": "contracts/config/predeploy/Names420-predeploy-state.json",
       "runtime_artifact": "contracts/artifacts/Names420.json",
       "runtime_code_hash": "0xa974fffd3a40e7f28db41e4ae30656b33789d2483b18b47c809ce2385de709b7",
-      "predeploy_state": "contracts/config/predeploy/Names420-predeploy-state.json",
-      "source_blob_sha1": "4cb9b06b4a3febb3bf024c087f3ade1eebdcf31d",
-      "artifact_status": "NAMES_AUDIT_6_ARTIFACT_READY"
+      "source_blob_sha1": "4cb9b06b4a3febb3bf024c087f3ade1eebdcf31d"
     },
     {
-      "name": "Identity420",
       "address": "0x0000000000000000000000000000000000000436",
+      "artifact_status": "ID_AUDIT_5_ARTIFACT_READY",
       "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "Identity420",
+      "predeploy_state": "contracts/config/predeploy/Identity420-predeploy-state.json",
       "runtime_artifact": "contracts/artifacts/Identity420.json",
       "runtime_code_hash": "0xda0fcd565d7aea6590b3e0ec468f7b99af50138b62527e770ca367a57e6cfd86",
-      "predeploy_state": "contracts/config/predeploy/Identity420-predeploy-state.json",
-      "source_blob_sha1": "9d6bbfecf6cbb406312138acc735c5390513cd5a",
-      "artifact_status": "ID_AUDIT_5_ARTIFACT_READY"
+      "source_blob_sha1": "9d6bbfecf6cbb406312138acc735c5390513cd5a"
     },
     {
-      "name": "Governance420",
       "address": "0x0000000000000000000000000000000000000437",
       "deployment": "GENESIS_SYSTEM_ADDRESS",
-      "runtime_artifact": "contracts/artifacts/Governance420.json",
-      "runtime_code_hash": "0x9af678e7626b6141b4af33e7729b27835949f8dad634298e7ce5a5e754305d64",
-      "predeploy_state": "contracts/config/predeploy/Governance420-predeploy-state.json",
-      "source_blob_sha1": "886668e8efa97bd32734e32cde11148bcf98e5bd",
-      "artifact_status": "GOV_AUDIT_6_ARTIFACT_READY"
+      "name": "Governance420"
     },
     {
-      "name": "VerifiedGateway420",
       "address": "0x0000000000000000000000000000000000000438",
-      "deployment": "GENESIS_SYSTEM_ADDRESS"
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "VerifiedGateway420"
     },
     {
       "name": "ApprovedQuoteAssetRegistry",
@@ -179,19 +185,225 @@
       "runtime_code_hash": "0x7ed9d661715160092a1fd1fdbd4ff09dca80714f2ff0270855d1c5ed1ab315f6"
     },
     {
-      "name": "Stake420",
       "address": "0x000000000000000000000000000000000000043a",
-      "deployment": "GENESIS_SYSTEM_ADDRESS"
+      "artifact_status": "STAKE_AUDIT_7_ARTIFACT_READY",
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "Stake420",
+      "predeploy_state": "contracts/config/predeploy/Stake420-predeploy-state.json",
+      "runtime_artifact": "contracts/artifacts/Stake420.json",
+      "runtime_code_hash": "0x7de1130ee3db2866b6ea0a88de44d5699cec5444a0010c03e9a6b4f13a4be8ea",
+      "source_blob_sha1": "e26b6ec304bb9db2742796821caa0e549a145bba"
     },
     {
-      "name": "CannaseurCampaignRegistry",
       "address": "0x000000000000000000000000000000000000043b",
-      "deployment": "GENESIS_SYSTEM_ADDRESS"
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "CannaseurCampaignRegistry"
     },
     {
-      "name": "ConsensusSystemCall420",
       "address": "0x000000000000000000000000000000000000043c",
-      "deployment": "GENESIS_SYSTEM_ADDRESS"
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "ConsensusSystemCall420"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000420",
+      "artifact_status": "STAKE_AUDIT_7_ARTIFACT_READY",
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "RewardController",
+      "predeploy_state": "contracts/config/predeploy/RewardController-predeploy-state.json",
+      "runtime_artifact": "contracts/artifacts/RewardController.json",
+      "runtime_code_hash": "0xc1468f48a745511b99577d9381462fc75b2357725d58c59cd5102cc6fd0df30d",
+      "source_blob_sha1": "012c9e24b4e7a37ca89aad1c887529a19c70bb16"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000421",
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "AttentionTreasury"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000422",
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "DevelopmentTreasury"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000423",
+      "artifact_status": "STAKE_AUDIT_7_ARTIFACT_READY",
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "ValidatorRegistry",
+      "predeploy_state": "contracts/config/predeploy/ValidatorRegistry-predeploy-state.json",
+      "runtime_artifact": "contracts/artifacts/ValidatorRegistry.json",
+      "runtime_code_hash": "0x9f67ac365954920c3e06a73a0af5cb2f114bf504108cec9ea3a516bc8d32731b",
+      "source_blob_sha1": "e534624f007024d65fcbb9e0f730bafbb8077767"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000424",
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "ProtocolReserve"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000425",
+      "artifact_status": "STAKE_AUDIT_7_ARTIFACT_READY",
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "genesis_balance_wei": "6300000000000000000000000",
+      "name": "CommunityValidatorReserve",
+      "predeploy_state": "contracts/config/predeploy/CommunityValidatorReserve-predeploy-state.json",
+      "runtime_artifact": "contracts/artifacts/CommunityValidatorReserve.json",
+      "runtime_code_hash": "0xbba4f158ad05a0397a8a711dee181f2f3035e374d063293f06786393dd69b90e",
+      "source_blob_sha1": "6ae1657a5ab45e97c76013ea45a310ae8fcd411c"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000426",
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "CommunityRewardReserve"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000427",
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "FounderVestingRegistry"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000428",
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "RandomnessRegistry"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000429",
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "GovernanceTimelock"
+    },
+    {
+      "address": "0x000000000000000000000000000000000000042a",
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "PublicDistributionVault"
+    },
+    {
+      "name": "GenesisDEXFactory",
+      "address": "0x000000000000000000000000000000000000042b",
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "runtime_artifact": "contracts/artifacts/GenesisDEXFactory.json",
+      "predeploy_state": "contracts/config/predeploy/GenesisDEXFactory-predeploy-state.json",
+      "source_blob_sha1": "70f996054cae7dc1c8620cffa40628a4ceb930cd",
+      "artifact_status": "SWAP_AUDIT_6_ARTIFACT_READY",
+      "runtime_code_hash": "0x1c9e72335d2da9ef3a7c65bcfab88364ba04ec6ed85789ff8c3b231e89e10e35"
+    },
+    {
+      "name": "PublicBatchAuction",
+      "address": "0x000000000000000000000000000000000000042c",
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "runtime_artifact": "contracts/artifacts/PublicBatchAuction.json",
+      "predeploy_state": "contracts/config/predeploy/PublicBatchAuction-predeploy-state.json",
+      "source_blob_sha1": "403f502898ad445d38075bfb648a64fe73fc8f29",
+      "artifact_status": "SWAP_AUDIT_6_ARTIFACT_READY",
+      "runtime_code_hash": "0xe2f81400c625114689b744ff4dd116143d4991e01f1608370a65566938df9203"
+    },
+    {
+      "name": "TWAPOracle",
+      "address": "0x000000000000000000000000000000000000042d",
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "runtime_artifact": "contracts/artifacts/TWAPOracle.json",
+      "predeploy_state": "contracts/config/predeploy/TWAPOracle-predeploy-state.json",
+      "source_blob_sha1": "55802efd2331c6278ca4482f116c72e7cc590466",
+      "artifact_status": "SWAP_AUDIT_6_ARTIFACT_READY",
+      "runtime_code_hash": "0x581a2ab1d4f8ffcecd88bb9bce1b868b4de39b52e1911957dbdc93759631fb32"
+    },
+    {
+      "address": "0x000000000000000000000000000000000000042e",
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "ValidatorBootstrapReserve"
+    },
+    {
+      "address": "0x000000000000000000000000000000000000042f",
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "AIProviderRegistry"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000430",
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "AIModelRegistry"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000431",
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "AIJobManager"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000432",
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "AIJobEscrow"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000433",
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "AIReputationRegistry"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000434",
+      "artifact_status": "REG_AUDIT_5_ARTIFACT_READY",
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "ProtocolRegistry",
+      "predeploy_state": "contracts/config/predeploy/ProtocolRegistry-predeploy-state.json",
+      "runtime_artifact": "contracts/artifacts/ProtocolRegistry.json",
+      "runtime_code_hash": "0x9f9e5f794296cf9faf5f8c8d17cd815f3c19c004a158c15cb61b5a29eaacb330",
+      "source_blob_sha1": "9ab3d53a68b6533978f41e0202e5268f1d615c19"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000435",
+      "artifact_status": "NAMES_AUDIT_6_ARTIFACT_READY",
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "Names420",
+      "predeploy_state": "contracts/config/predeploy/Names420-predeploy-state.json",
+      "runtime_artifact": "contracts/artifacts/Names420.json",
+      "runtime_code_hash": "0xa974fffd3a40e7f28db41e4ae30656b33789d2483b18b47c809ce2385de709b7",
+      "source_blob_sha1": "4cb9b06b4a3febb3bf024c087f3ade1eebdcf31d"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000436",
+      "artifact_status": "ID_AUDIT_5_ARTIFACT_READY",
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "Identity420",
+      "predeploy_state": "contracts/config/predeploy/Identity420-predeploy-state.json",
+      "runtime_artifact": "contracts/artifacts/Identity420.json",
+      "runtime_code_hash": "0xda0fcd565d7aea6590b3e0ec468f7b99af50138b62527e770ca367a57e6cfd86",
+      "source_blob_sha1": "9d6bbfecf6cbb406312138acc735c5390513cd5a"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000437",
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "Governance420"
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000438",
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "VerifiedGateway420"
+    },
+    {
+      "name": "ApprovedQuoteAssetRegistry",
+      "address": "0x0000000000000000000000000000000000000439",
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "runtime_artifact": "contracts/artifacts/ApprovedQuoteAssetRegistry.json",
+      "predeploy_state": "contracts/config/predeploy/ApprovedQuoteAssetRegistry-predeploy-state.json",
+      "source_blob_sha1": "c374a9754eb9aadef96a2b761788df1dbc33e69e",
+      "artifact_status": "SWAP_AUDIT_6_ARTIFACT_READY",
+      "runtime_code_hash": "0x7ed9d661715160092a1fd1fdbd4ff09dca80714f2ff0270855d1c5ed1ab315f6"
+    },
+    {
+      "address": "0x000000000000000000000000000000000000043a",
+      "artifact_status": "STAKE_AUDIT_7_ARTIFACT_READY",
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "Stake420",
+      "predeploy_state": "contracts/config/predeploy/Stake420-predeploy-state.json",
+      "runtime_artifact": "contracts/artifacts/Stake420.json",
+      "runtime_code_hash": "0x7de1130ee3db2866b6ea0a88de44d5699cec5444a0010c03e9a6b4f13a4be8ea",
+      "source_blob_sha1": "e26b6ec304bb9db2742796821caa0e549a145bba"
+    },
+    {
+      "address": "0x000000000000000000000000000000000000043b",
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "CannaseurCampaignRegistry"
+    },
+    {
+      "address": "0x000000000000000000000000000000000000043c",
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "ConsensusSystemCall420"
     }
   ],
   "notes": [

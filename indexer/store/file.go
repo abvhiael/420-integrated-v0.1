@@ -155,6 +155,25 @@ func (s *FileStore) LogsByBlock(number uint64) ([]model.LogRecord, error) {
 	return out, nil
 }
 
+func (s *FileStore) LogsByAddresses(addresses ...string) ([]model.LogRecord, error) {
+	s.mu.Lock(); defer s.mu.Unlock()
+	wanted := make(map[string]struct{}, len(addresses))
+	for _, address := range addresses {
+		address = strings.ToLower(strings.TrimSpace(address))
+		if address != "" { wanted[address] = struct{}{} }
+	}
+	out := make([]model.LogRecord, 0)
+	for _, lg := range s.data.Logs {
+		if _, ok := wanted[strings.ToLower(lg.Address)]; ok { out = append(out, lg) }
+	}
+	sort.Slice(out, func(i, j int) bool {
+		if out[i].BlockNumber != out[j].BlockNumber { return out[i].BlockNumber > out[j].BlockNumber }
+		if out[i].TransactionIndex != out[j].TransactionIndex { return out[i].TransactionIndex > out[j].TransactionIndex }
+		return out[i].LogIndex > out[j].LogIndex
+	})
+	return out, nil
+}
+
 func (s *FileStore) AssetTransfers(assetKey, address string) ([]model.AssetTransferRecord, error) {
 	s.mu.Lock(); defer s.mu.Unlock()
 	assetKey = strings.ToLower(strings.TrimSpace(assetKey))

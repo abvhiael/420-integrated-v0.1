@@ -44,6 +44,15 @@ contract MockVaultCapsVerifierCollateral420 is ICapabilityRegistry420 {
     }
 }
 
+contract MockObjectiveSlashAdapterCollateral420 {}
+
+contract MockSlashHoldCollateral420 {
+    mapping(bytes32 => uint256) public outstandingSlash;
+    function set(bytes32 positionId, uint256 amount) external {
+        outstandingSlash[positionId] = amount;
+    }
+}
+
 contract ComputeStakeVerifierCollateral420Test {
     VmComputeStakeVerifierCollateral420 private constant vm =
         VmComputeStakeVerifierCollateral420(address(uint160(uint256(keccak256("hevm cheat code")))));
@@ -65,6 +74,7 @@ contract ComputeStakeVerifierCollateral420Test {
     ComputeVerifierRegistry420 private verifiers;
     ComputeStakeVerifierCollateral420 private stakeSource;
     ComputeStakeExitPolicy420 private exitPolicy;
+    ComputeStakeSlashPolicy420 private slashPolicy;
 
     MockVaultCapsVerifierCollateral420 private caps;
     VaultAuthorization420 private auth;
@@ -123,8 +133,38 @@ contract ComputeStakeVerifierCollateral420Test {
         vm.prank(GOV);
         exitPolicy.publish(POLICY_B, EXIT_DELAY);
 
+        MockObjectiveSlashAdapterCollateral420 slashAdapter =
+            new MockObjectiveSlashAdapterCollateral420();
+        slashPolicy = new ComputeStakeSlashPolicy420(GOV);
+        vm.prank(GOV);
+        slashPolicy.publish(
+            POLICY_A,
+            2,
+            address(slashAdapter),
+            keccak256("verifier-slash"),
+            bytes32(0),
+            0,
+            bytes32(0),
+            1000,
+            0
+        );
+        vm.prank(GOV);
+        slashPolicy.publish(
+            POLICY_B,
+            2,
+            address(slashAdapter),
+            keccak256("verifier-slash"),
+            bytes32(0),
+            0,
+            bytes32(0),
+            1000,
+            0
+        );
+
         stakeSource =
-            new ComputeStakeVerifierCollateral420(address(verifiers), address(vault), address(exitPolicy));
+            new ComputeStakeVerifierCollateral420(
+                address(verifiers), address(vault), address(exitPolicy), address(slashPolicy)
+            );
         caps.setAllowed(
             address(stakeSource),
             VaultIds420.COMPONENT_VAULT,
@@ -434,6 +474,24 @@ contract ComputeStakeVerifierCollateral420Test {
             abi.encodeCall(stakeSource.withdraw, (id, uint64(1)))
         );
         require(!ok, "outsider withdrew verifier collateral");
+    }
+
+    function testOutstandingObjectiveSlashBlocksMatureVerifierWithdrawal() public {
+        bytes32 id = _stake(VERIFIER_A, POLICY_A, 25 ether);
+        MockSlashHoldCollateral420 hold = new MockSlashHoldCollateral420();
+        stakeSource.bindSlashAuthorization(address(hold));
+
+        vm.prank(VERIFIER_A);
+        uint64 maturity = stakeSource.requestExit(id);
+        vm.warp(maturity);
+        hold.set(id, 1 ether);
+
+        vm.prank(VERIFIER_A);
+        (bool ok,) = address(stakeSource).call(
+            abi.encodeCall(stakeSource.withdraw, (id, uint64(1)))
+        );
+        require(!ok, "verifier slash hold bypassed");
+        require(stakeSource.position(id).activeAmount == 25 ether, "held verifier collateral moved");
     }
 
     function testDirectEthIsRejected() public {

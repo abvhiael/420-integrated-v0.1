@@ -35,6 +35,15 @@ contract MockVaultCapsWorkerCollateral420 is ICapabilityRegistry420 {
     }
 }
 
+contract MockObjectiveSlashAdapterCollateral420 {}
+
+contract MockSlashHoldCollateral420 {
+    mapping(bytes32 => uint256) public outstandingSlash;
+    function set(bytes32 positionId, uint256 amount) external {
+        outstandingSlash[positionId] = amount;
+    }
+}
+
 contract ComputeStakeWorkerCollateral420Test {
     VmComputeStakeWorkerCollateral420 private constant vm =
         VmComputeStakeWorkerCollateral420(address(uint160(uint256(keccak256("hevm cheat code")))));
@@ -59,6 +68,7 @@ contract ComputeStakeWorkerCollateral420Test {
     ComputeWorkerRegistry420 private workers;
     ComputeStakeWorkerCollateral420 private stakeSource;
     ComputeStakeExitPolicy420 private exitPolicy;
+    ComputeStakeSlashPolicy420 private slashPolicy;
 
     MockVaultCapsWorkerCollateral420 private caps;
     VaultAuthorization420 private auth;
@@ -132,8 +142,38 @@ contract ComputeStakeWorkerCollateral420Test {
         vm.prank(GOV);
         exitPolicy.publish(POLICY_B, EXIT_DELAY);
 
+        MockObjectiveSlashAdapterCollateral420 slashAdapter =
+            new MockObjectiveSlashAdapterCollateral420();
+        slashPolicy = new ComputeStakeSlashPolicy420(GOV);
+        vm.prank(GOV);
+        slashPolicy.publish(
+            POLICY_A,
+            1,
+            address(slashAdapter),
+            keccak256("worker-slash"),
+            bytes32(0),
+            0,
+            bytes32(0),
+            1000,
+            0
+        );
+        vm.prank(GOV);
+        slashPolicy.publish(
+            POLICY_B,
+            1,
+            address(slashAdapter),
+            keccak256("worker-slash"),
+            bytes32(0),
+            0,
+            bytes32(0),
+            1000,
+            0
+        );
+
         stakeSource =
-            new ComputeStakeWorkerCollateral420(address(workers), address(vault), address(exitPolicy));
+            new ComputeStakeWorkerCollateral420(
+                address(workers), address(vault), address(exitPolicy), address(slashPolicy)
+            );
         caps.setAllowed(
             address(stakeSource), VaultIds420.COMPONENT_VAULT, VaultIds420.ACTION_CREATE_OBLIGATION,
             auth.scopeForVault(VAULT_ID), true
@@ -348,6 +388,24 @@ contract ComputeStakeWorkerCollateral420Test {
             abi.encodeCall(stakeSource.withdraw, (id, uint64(1)))
         );
         require(!ok, "outsider withdrew");
+    }
+
+    function testOutstandingObjectiveSlashBlocksMatureWithdrawal() public {
+        bytes32 id = _stake(POLICY_A, 25 ether);
+        MockSlashHoldCollateral420 hold = new MockSlashHoldCollateral420();
+        stakeSource.bindSlashAuthorization(address(hold));
+
+        vm.prank(OPERATOR);
+        uint64 maturity = stakeSource.requestExit(id);
+        vm.warp(maturity);
+        hold.set(id, 1 ether);
+
+        vm.prank(OPERATOR);
+        (bool ok,) = address(stakeSource).call(
+            abi.encodeCall(stakeSource.withdraw, (id, uint64(1)))
+        );
+        require(!ok, "slash hold bypassed");
+        require(stakeSource.position(id).activeAmount == 25 ether, "held collateral moved");
     }
 
     function testDirectEthIsRejected() public {

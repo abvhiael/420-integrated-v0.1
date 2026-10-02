@@ -132,3 +132,6 @@ jobs:
 
       - name: Verify CMP-1.5.4 exit queue and withdrawal delay
         run: python scripts/verify-cmp-1-5-4-exit-queue-withdrawal-delay.py
+
+      - name: Verify CMP-1.5.5 objective slash authorization
+        run: python scripts/verify-cmp-1-5-5-objective-slash-authorization.py

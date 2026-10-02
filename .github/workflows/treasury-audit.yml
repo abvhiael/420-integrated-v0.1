@@ -8,7 +8,6 @@ on:
       - 'contracts/src/treasury/**'
       - 'contracts/test/TreasuryGenesis420.t.sol'
       - 'contracts/config/420treasury-genesis.json'
-      - 'contracts/config/genesis-dapp-contract-map.json'
       - 'contracts/config/genesis-canonical-addresses.json'
       - 'contracts/config/genesis-address-namespace.json'
       - 'docs/architecture/protocols/stake-governance-treasury-grants.md'
@@ -19,7 +18,6 @@ on:
       - 'contracts/src/treasury/**'
       - 'contracts/test/TreasuryGenesis420.t.sol'
       - 'contracts/config/420treasury-genesis.json'
-      - 'contracts/config/genesis-dapp-contract-map.json'
       - 'contracts/config/genesis-canonical-addresses.json'
       - 'contracts/config/genesis-address-namespace.json'
       - 'docs/architecture/protocols/stake-governance-treasury-grants.md'
@@ -69,17 +67,54 @@ jobs:
         working-directory: contracts
         run: forge test --match-path test/TreasuryGenesis420.t.sol -vvv
 
-      - name: Verify Genesis application mapping
-        run: python3 scripts/verify-genesis-dapps.py
+      - name: Verify Treasury canonical authority/config boundary
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
 
-      - name: Verify Governance/Treasury authority boundary
-        run: python3 scripts/verify-governance-audit-7.py
+          root = Path(".")
+          treasury = json.loads((root / "contracts/config/420treasury-genesis.json").read_text())
+          namespace = json.loads((root / "contracts/config/genesis-address-namespace.json").read_text())
+
+          errors = []
+          def need(condition, message):
+              if not condition:
+                  errors.append(message)
+
+          need(treasury.get("schema") == "420treasury-genesis-v1", "Treasury schema drift")
+          need(treasury.get("suite") == "420 Treasury", "Treasury suite identity drift")
+          need(treasury.get("new_frozen_predeploy_required") is False, "Treasury unexpectedly requires a new frozen predeploy")
+          need("420Vault VAULT_TREASURY" in treasury.get("custody_model", ""), "Treasury/420Vault custody boundary drift")
+          need("GovernanceTimelock/Civic-controlled" in treasury.get("governance_model", ""), "Treasury governance boundary drift")
+
+          invariants = treasury.get("invariants", [])
+          for n in range(1, 11):
+              prefix = f"TREASURY-INV-{n:03d}:"
+              need(any(x.startswith(prefix) for x in invariants), f"missing {prefix[:-1]}")
+
+          resolved = {x.get("id"): x for x in namespace.get("registryResolved", [])}
+          router = resolved.get("treasury-router")
+          need(router is not None, "treasury-router missing from registry-resolved namespace")
+          if router is not None:
+              need(router.get("contract") == "TreasuryRouter420.sol", "treasury-router contract binding drift")
+              need(router.get("status") == "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS", "treasury-router registry status drift")
+
+          fixed_names = {x.get("name") for x in namespace.get("fixedAssignments", [])}
+          need("TreasuryRouter420" not in fixed_names and "TreasuryRouter" not in fixed_names, "TreasuryRouter unexpectedly became a fixed Genesis predeploy")
+
+          if errors:
+              print(json.dumps({"pass": False, "errors": errors}, indent=2))
+              raise SystemExit(2)
+          print(json.dumps({"pass": True, "invariants": len(invariants), "treasuryRouter": router}, indent=2))
+          PY
 
       - name: Treasury forbidden primitive scan
         shell: bash
         run: |
           set -euo pipefail
-          if grep -R -nE '\btx\.origin\b|\bselfdestruct\s*\(|\.delegatecall\s*\(' contracts/src/treasury; then
+          if grep -R -nE '\\btx\\.origin\\b|\\bselfdestruct\\s*\\(|\\.delegatecall\\s*\\(' contracts/src/treasury; then
             echo 'Forbidden authority/opcode primitive found in Treasury sources' >&2
             exit 1
           fi

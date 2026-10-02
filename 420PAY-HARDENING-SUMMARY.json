@@ -16,11 +16,13 @@
   "genesis_hardening_pass": true,
   "production_swap_executor_contract_present": true,
   "production_swap_executor_abi_matches_pay_adapter": true,
-  "genesis_swap_executor_trust_wiring_verified": false,
+  "genesis_swap_executor_trust_wiring_verified": "SOURCE_AND_TEST_VERIFIED_DEPLOYMENT_PENDING",
   "shared_replay_read_check_present": true,
-  "shared_replay_consumption_supported_by_frozen_interface": false,
+  "shared_replay_consumption_supported_by_frozen_interface": true,
   "local_payment_authorization_replay_consumed_atomically": true,
   "payer_originated_payment_path_supported": true,
   "external_security_audit_complete": false,
-  "note": "Updated after merged PR #20 qualification. Remaining remediation items are explicit Genesis trust wiring for CanonicalSettlementAdapter420 -> CanonicalSwapExecutor420 and a legitimate mutable shared replay-consumption boundary; these are not represented as complete until verified."
+  "note": "Repository source and tests implement Pay -> SettlementAdapter -> SwapExecutor authority wiring plus domain-bound mutable replay consumption. Live deployment binding and external independent security review remain release gates; exact-head audit qualification is recorded separately.",
+  "mutable_replay_companion_present": true,
+  "settlement_adapter_router_binding": true
 }

@@ -5,7 +5,14 @@ import "../interfaces/I420System.sol";
 import "../interfaces/IComputeObjectiveSlashEvidence420.sol";
 import "../interfaces/IComputeSlashableCollateral420.sol";
 import "../interfaces/IComputeSlashHold420.sol";
+import "../interfaces/IComputeSlashRecipientResolver420.sol";
 import "./ComputeStakeSlashPolicy420.sol";
+import "./ComputeStakeSlashDistributionPolicy420.sol";
+
+interface IComputeSlashDistributionBinding420 {
+    function authorizer() external view returns (address);
+    function policies() external view returns (address);
+}
 
 /// @notice Objective, replay-safe slash authorization for CMP collateral.
 /// @dev This contract reserves slashable collateral logically but never releases, claims,
@@ -29,7 +36,14 @@ contract ComputeStakeSlashAuthorization420 is I420System, IComputeSlashHold420 {
         bytes32 evidenceCommitment;
         bytes32 violationCode;
         uint256 amount;
+        uint32 distributionPolicyRevision;
+        bytes32 distributionPolicyCommitment;
+        address harmedPayer;
+        address replacementWorker;
+        address challenger;
+        address protocolTreasury;
         uint64 authorizedAt;
+        bool distributed;
         bool exists;
     }
 
@@ -37,6 +51,8 @@ contract ComputeStakeSlashAuthorization420 is I420System, IComputeSlashHold420 {
     address public immutable bindingAdmin;
     address public workerCollateral;
     address public verifierCollateral;
+    ComputeStakeSlashDistributionPolicy420 public distributionPolicies;
+    address public distributionExecutor;
 
     mapping(bytes32 => Authorization) private _authorizations;
     mapping(bytes32 => bool) public misconductConsumed;
@@ -48,6 +64,8 @@ contract ComputeStakeSlashAuthorization420 is I420System, IComputeSlashHold420 {
     error Replay();
 
     event CollateralSourcesBound(address indexed workerCollateral, address indexed verifierCollateral);
+    event SlashDistributionBound(address indexed distributionPolicies, address indexed distributionExecutor);
+    event SlashDistributionConsumed(bytes32 indexed authorizationRef, bytes32 indexed positionId, uint256 amount);
     event SlashAuthorized(
         bytes32 indexed authorizationRef,
         bytes32 indexed positionId,
@@ -76,6 +94,27 @@ contract ComputeStakeSlashAuthorization420 is I420System, IComputeSlashHold420 {
         return 1;
     }
 
+    function bindDistribution(address distributionPolicies_, address distributionExecutor_) external {
+        if (
+            msg.sender != bindingAdmin
+                || address(distributionPolicies) != address(0)
+                || distributionExecutor != address(0)
+                || distributionPolicies_.code.length == 0
+                || distributionExecutor_.code.length == 0
+        ) revert Unauthorized();
+
+        IComputeSlashDistributionBinding420 candidate =
+            IComputeSlashDistributionBinding420(distributionExecutor_);
+        if (
+            candidate.authorizer() != address(this)
+                || candidate.policies() != distributionPolicies_
+        ) revert Unauthorized();
+
+        distributionPolicies = ComputeStakeSlashDistributionPolicy420(distributionPolicies_);
+        distributionExecutor = distributionExecutor_;
+        emit SlashDistributionBound(distributionPolicies_, distributionExecutor_);
+    }
+
     function bindSources(address workerCollateral_, address verifierCollateral_) external {
         if (
             msg.sender != bindingAdmin
@@ -101,6 +140,8 @@ contract ComputeStakeSlashAuthorization420 is I420System, IComputeSlashHold420 {
                 || evidenceRef == bytes32(0)
                 || workerCollateral == address(0)
                 || verifierCollateral == address(0)
+                || address(distributionPolicies) == address(0)
+                || distributionExecutor == address(0)
         ) revert InvalidAuthorization();
 
         address source = subjectKind == policies.SUBJECT_WORKER()
@@ -184,6 +225,49 @@ contract ComputeStakeSlashAuthorization420 is I420System, IComputeSlashHold420 {
         if (amount == 0) revert InvalidAuthorization();
 
         bytes32 policyCommitment = exactPolicyCommitment;
+        (
+            ComputeStakeSlashDistributionPolicy420.Policy memory distributionPolicy,
+            bytes32 distributionPolicyCommitment
+        ) = distributionPolicies.currentPolicy(policyCommitment);
+        if (
+            distributionPolicy.slashPolicyCommitment != policyCommitment
+                || (
+                    distributionPolicy.recipientResolver != address(0)
+                        && (
+                            distributionPolicy.recipientResolver.code.length == 0
+                                || distributionPolicy.recipientResolver.codehash
+                                    != distributionPolicy.recipientResolverCodeHash
+                        )
+                )
+        ) revert InvalidAuthorization();
+
+        IComputeSlashRecipientResolver420.Recipients memory recipients;
+        if (distributionPolicy.recipientResolver != address(0)) {
+            recipients = IComputeSlashRecipientResolver420(
+                distributionPolicy.recipientResolver
+            ).resolve(
+                bytes32(0),
+                evidenceRef,
+                p.evidenceAdapter,
+                subjectRef,
+                beneficiary
+            );
+        }
+        if (
+            (distributionPolicy.harmedPayerBps != 0
+                && (recipients.harmedPayer == address(0)
+                    || recipients.harmedPayer == beneficiary))
+                || (distributionPolicy.replacementWorkerBps != 0
+                    && (recipients.replacementWorker == address(0)
+                        || recipients.replacementWorker == beneficiary))
+                || (distributionPolicy.challengerBps != 0
+                    && (recipients.challenger == address(0)
+                        || recipients.challenger == beneficiary))
+                || (distributionPolicy.protocolTreasuryBps != 0
+                    && (distributionPolicy.protocolTreasury == address(0)
+                        || distributionPolicy.protocolTreasury == beneficiary))
+        ) revert InvalidAuthorization();
+
         authorizationRef = keccak256(
             abi.encode(
                 AUTHORIZATION_DOMAIN,
@@ -200,7 +284,13 @@ contract ComputeStakeSlashAuthorization420 is I420System, IComputeSlashHold420 {
                 evidenceRef,
                 e.misconductKey,
                 e.evidenceCommitment,
-                amount
+                amount,
+                distributionPolicy.revision,
+                distributionPolicyCommitment,
+                recipients.harmedPayer,
+                recipients.replacementWorker,
+                recipients.challenger,
+                distributionPolicy.protocolTreasury
             )
         );
         if (_authorizations[authorizationRef].exists) revert Replay();
@@ -222,7 +312,14 @@ contract ComputeStakeSlashAuthorization420 is I420System, IComputeSlashHold420 {
             evidenceCommitment: e.evidenceCommitment,
             violationCode: e.violationCode,
             amount: amount,
+            distributionPolicyRevision: distributionPolicy.revision,
+            distributionPolicyCommitment: distributionPolicyCommitment,
+            harmedPayer: recipients.harmedPayer,
+            replacementWorker: recipients.replacementWorker,
+            challenger: recipients.challenger,
+            protocolTreasury: distributionPolicy.protocolTreasury,
             authorizedAt: uint64(block.timestamp),
+            distributed: false,
             exists: true
         });
 
@@ -248,6 +345,19 @@ contract ComputeStakeSlashAuthorization420 is I420System, IComputeSlashHold420 {
     {
         a = _authorizations[authorizationRef];
         if (!a.exists) revert InvalidAuthorization();
+    }
+
+    function consumeDistribution(bytes32 authorizationRef) external returns (uint256 amount) {
+        if (msg.sender != distributionExecutor) revert Unauthorized();
+        Authorization storage a = _authorizations[authorizationRef];
+        if (!a.exists || a.distributed) revert InvalidAuthorization();
+        uint256 outstanding = outstandingSlash[a.positionId];
+        if (a.amount == 0 || outstanding < a.amount) revert InvalidAuthorization();
+
+        a.distributed = true;
+        outstandingSlash[a.positionId] = outstanding - a.amount;
+        amount = a.amount;
+        emit SlashDistributionConsumed(authorizationRef, a.positionId, amount);
     }
 
     function _bps(uint256 amount, uint16 bps) private pure returns (uint256) {

@@ -5,6 +5,8 @@ import "../interfaces/I420System.sol";
 import "../interfaces/IComputeVerifierStakeSource420.sol";
 import "../interfaces/IComputeSlashableCollateral420.sol";
 import "../interfaces/IComputeSlashHold420.sol";
+import "../interfaces/IComputeSlashDistributionSource420.sol";
+import "../interfaces/IComputeSlashDistributionAuthority420.sol";
 import "../vault/AssetVault420.sol";
 import "../vault/VaultAccounting420.sol";
 import "../vault/VaultIds420.sol";
@@ -16,7 +18,7 @@ import "./ComputeStakeSlashPolicy420.sol";
 /// @notice CMP-1.5.2 verifier collateral source backed by canonical 420Vault obligations.
 /// @dev This step implements verifier deposits/current-position reads only. Minimum-policy
 /// enforcement, exit, unstake, slashing, rewards and dispute integration remain later steps.
-contract ComputeStakeVerifierCollateral420 is I420System, IComputeVerifierStakeSource420, IComputeSlashableCollateral420 {
+contract ComputeStakeVerifierCollateral420 is I420System, IComputeVerifierStakeSource420, IComputeSlashableCollateral420, IComputeSlashDistributionSource420 {
     bytes32 public constant SOURCE_ID =
         keccak256("420Integrated.ComputeMarket.ComputeVerifierStakeSource.v1");
     bytes32 public constant POSITION_DOMAIN =
@@ -25,6 +27,18 @@ contract ComputeStakeVerifierCollateral420 is I420System, IComputeVerifierStakeS
         keccak256("420Integrated.ComputeMarket.VerifierCollateralTranche.v1");
     bytes32 public constant VERIFIER_COLLATERAL_TYPE =
         keccak256("420/CMP/VERIFIER-COLLATERAL/V1");
+    bytes32 public constant SLASH_DISTRIBUTION_TYPE =
+        keccak256("420/CMP/VERIFIER-SLASH-DISTRIBUTION/V1");
+    bytes32 public constant SLASH_CANCEL_DOMAIN =
+        keccak256("420Integrated.ComputeMarket.VERIFIER.SlashCancel.v1");
+    bytes32 public constant SLASH_REMAINDER_DOMAIN =
+        keccak256("420Integrated.ComputeMarket.VERIFIER.SlashRemainder.v1");
+    bytes32 public constant SLASH_RECIPIENT_DOMAIN =
+        keccak256("420Integrated.ComputeMarket.VERIFIER.SlashRecipient.v1");
+    bytes32 public constant SLASH_RELEASE_DOMAIN =
+        keccak256("420Integrated.ComputeMarket.VERIFIER.SlashRelease.v1");
+    bytes32 public constant SLASH_CLAIM_DOMAIN =
+        keccak256("420Integrated.ComputeMarket.VERIFIER.SlashClaim.v1");
     bytes32 public constant EXIT_RELEASE_DOMAIN =
         keccak256("420Integrated.ComputeMarket.VerifierCollateralExitRelease.v1");
     bytes32 public constant EXIT_CLAIM_DOMAIN =
@@ -43,6 +57,7 @@ contract ComputeStakeVerifierCollateral420 is I420System, IComputeVerifierStakeS
         uint64 revision;
         uint64 trancheCount;
         uint64 withdrawalCursor;
+        uint64 slashCursor;
         uint32 exitPolicyRevision;
         bytes32 exitPolicyCommitment;
         uint256 activeAmount;
@@ -87,8 +102,16 @@ contract ComputeStakeVerifierCollateral420 is I420System, IComputeVerifierStakeS
     error ExitNotReady();
     error InvalidExit();
     error UnauthorizedSlashBinding();
+    error InvalidSlashDistribution();
 
     event SlashAuthorizationBound(address indexed slashAuthorization);
+    event VerifierCollateralSlashed(
+        bytes32 indexed positionId,
+        bytes32 indexed authorizationRef,
+        uint256 amount,
+        uint64 visitedTranches,
+        uint64 positionRevision
+    );
     event VerifierCollateralStaked(
         bytes32 indexed positionId,
         bytes32 indexed verifierId,
@@ -394,6 +417,11 @@ contract ComputeStakeVerifierCollateral420 is I420System, IComputeVerifierStakeS
             uint64 index = cursor + 1;
             Tranche storage t = _tranches[id][index];
             if (!t.exists) revert TrancheNotFound();
+            if (t.amount == 0) {
+                cursor = index;
+                processed += 1;
+                continue;
+            }
 
             VaultAccounting420.Obligation memory obligation =
                 accounting.getObligation(t.obligationId);
@@ -467,6 +495,204 @@ contract ComputeStakeVerifierCollateral420 is I420System, IComputeVerifierStakeS
             exiting: p.exiting,
             withdrawableAt: p.withdrawableAt
         });
+    }
+
+    function previewSlashBatch(bytes32 id, uint256 maxAmount, uint64 maxTranches)
+        external
+        view
+        override
+        returns (uint256 amount, uint64 visitedTranches)
+    {
+        if (maxAmount == 0 || maxTranches == 0) return (0, 0);
+        Position storage p = _positions[id];
+        if (!p.exists || !p.active || p.slashableAmount == 0) return (0, 0);
+
+        uint64 cursor = p.withdrawalCursor > p.slashCursor ? p.withdrawalCursor : p.slashCursor;
+        while (cursor < p.trancheCount && visitedTranches < maxTranches && amount < maxAmount) {
+            uint64 index = cursor + 1;
+            Tranche storage t = _tranches[id][index];
+            if (!t.exists) return (0, 0);
+            cursor = index;
+            visitedTranches += 1;
+            if (t.amount == 0) continue;
+            uint256 remaining = maxAmount - amount;
+            amount += t.amount > remaining ? remaining : t.amount;
+        }
+    }
+
+    function executeSlashBatch(
+        bytes32 id,
+        bytes32 authorizationRef,
+        uint256 amount,
+        uint64 maxTranches,
+        address[] calldata recipients,
+        uint256[] calldata recipientAmounts
+    ) external override returns (uint64 visitedTranches) {
+        if (
+            entered
+                || authorizationRef == bytes32(0)
+                || amount == 0
+                || maxTranches == 0
+                || recipients.length == 0
+                || recipients.length != recipientAmounts.length
+                || slashAuthorization == address(0)
+                || IComputeSlashDistributionAuthority420(slashAuthorization).distributionExecutor()
+                    != msg.sender
+        ) revert InvalidSlashDistribution();
+        entered = true;
+
+        Position storage p = _positions[id];
+        if (!p.exists || !p.active || p.slashableAmount < amount || p.activeAmount < amount) {
+            revert InvalidSlashDistribution();
+        }
+
+        uint256 recipientTotal;
+        for (uint256 i; i < recipients.length; ++i) {
+            if (
+                recipients[i] == address(0)
+                    || recipients[i] == p.authority
+                    || recipientAmounts[i] == 0
+            ) revert InvalidSlashDistribution();
+            recipientTotal += recipientAmounts[i];
+        }
+        if (recipientTotal != amount) revert InvalidSlashDistribution();
+
+        uint64 cursor = p.withdrawalCursor > p.slashCursor ? p.withdrawalCursor : p.slashCursor;
+        uint256 remainingToSlash = amount;
+
+        while (
+            cursor < p.trancheCount
+                && visitedTranches < maxTranches
+                && remainingToSlash != 0
+        ) {
+            uint64 index = cursor + 1;
+            Tranche storage t = _tranches[id][index];
+            if (!t.exists) revert TrancheNotFound();
+            visitedTranches += 1;
+
+            if (t.amount == 0) {
+                cursor = index;
+                continue;
+            }
+
+            VaultAccounting420.Obligation memory obligation =
+                accounting.getObligation(t.obligationId);
+            if (
+                obligation.state != 1
+                    || obligation.beneficiary != p.authority
+                    || obligation.amount != t.amount
+                    || obligation.sourceRef != id
+                    || obligation.obligationType != VERIFIER_COLLATERAL_TYPE
+            ) revert InvalidSlashDistribution();
+
+            uint256 oldAmount = t.amount;
+            uint256 take = oldAmount > remainingToSlash ? remainingToSlash : oldAmount;
+
+            vault.cancelObligation(
+                keccak256(
+                    abi.encode(
+                        SLASH_CANCEL_DOMAIN,
+                        block.chainid,
+                        address(this),
+                        authorizationRef,
+                        id,
+                        index,
+                        t.obligationId
+                    )
+                ),
+                t.obligationId
+            );
+
+            uint256 remainder = oldAmount - take;
+            if (remainder != 0) {
+                bytes32 replacementObligationId = keccak256(
+                    abi.encode(
+                        SLASH_REMAINDER_DOMAIN,
+                        block.chainid,
+                        address(this),
+                        authorizationRef,
+                        id,
+                        index,
+                        t.obligationId,
+                        remainder
+                    )
+                );
+                vault.createObligation(
+                    keccak256(
+                        abi.encode(
+                            SLASH_REMAINDER_DOMAIN,
+                            authorizationRef,
+                            replacementObligationId,
+                            uint8(1)
+                        )
+                    ),
+                    replacementObligationId,
+                    address(0),
+                    p.authority,
+                    remainder,
+                    VERIFIER_COLLATERAL_TYPE,
+                    id
+                );
+                t.obligationId = replacementObligationId;
+                t.amount = remainder;
+            } else {
+                t.amount = 0;
+                cursor = index;
+            }
+
+            remainingToSlash -= take;
+        }
+
+        if (remainingToSlash != 0 || p.revision == type(uint64).max) {
+            revert InvalidSlashDistribution();
+        }
+
+        if (cursor > p.slashCursor) p.slashCursor = cursor;
+        p.activeAmount -= amount;
+        p.slashableAmount -= amount;
+        p.revision += 1;
+
+        for (uint256 i; i < recipients.length; ++i) {
+            bytes32 obligationId = keccak256(
+                abi.encode(
+                    SLASH_RECIPIENT_DOMAIN,
+                    block.chainid,
+                    address(this),
+                    authorizationRef,
+                    id,
+                    p.revision,
+                    recipients[i],
+                    i,
+                    recipientAmounts[i]
+                )
+            );
+            vault.createObligation(
+                keccak256(abi.encode(SLASH_RECIPIENT_DOMAIN, obligationId, uint8(1))),
+                obligationId,
+                address(0),
+                recipients[i],
+                recipientAmounts[i],
+                SLASH_DISTRIBUTION_TYPE,
+                authorizationRef
+            );
+            vault.releaseObligation(
+                keccak256(abi.encode(SLASH_RELEASE_DOMAIN, authorizationRef, p.revision, obligationId)),
+                obligationId
+            );
+            vault.claim(
+                keccak256(abi.encode(SLASH_CLAIM_DOMAIN, authorizationRef, p.revision, obligationId)),
+                obligationId
+            );
+        }
+
+        if (p.activeAmount == 0) {
+            if (p.slashableAmount != 0) revert InvalidSlashDistribution();
+            p.active = false;
+            p.exiting = false;
+        }
+
+        emit VerifierCollateralSlashed(id, authorizationRef, amount, visitedTranches, p.revision);
+        entered = false;
     }
 
     function slashSnapshot(bytes32 id) external view override returns (

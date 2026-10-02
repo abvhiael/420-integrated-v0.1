@@ -48,6 +48,12 @@ contract MockObjectiveSlashAdapterCollateral420 {}
 
 contract MockSlashHoldCollateral420 {
     mapping(bytes32 => uint256) public outstandingSlash;
+    address public distributionExecutor;
+
+    constructor(address executor_) {
+        distributionExecutor = executor_;
+    }
+
     function set(bytes32 positionId, uint256 amount) external {
         outstandingSlash[positionId] = amount;
     }
@@ -183,6 +189,13 @@ contract ComputeStakeVerifierCollateral420Test {
             address(stakeSource),
             VaultIds420.COMPONENT_VAULT,
             VaultIds420.ACTION_CLAIM,
+            auth.scopeForVault(VAULT_ID),
+            true
+        );
+        caps.setAllowed(
+            address(stakeSource),
+            VaultIds420.COMPONENT_VAULT,
+            VaultIds420.ACTION_CANCEL_OBLIGATION,
             auth.scopeForVault(VAULT_ID),
             true
         );
@@ -478,7 +491,7 @@ contract ComputeStakeVerifierCollateral420Test {
 
     function testOutstandingObjectiveSlashBlocksMatureVerifierWithdrawal() public {
         bytes32 id = _stake(VERIFIER_A, POLICY_A, 25 ether);
-        MockSlashHoldCollateral420 hold = new MockSlashHoldCollateral420();
+        MockSlashHoldCollateral420 hold = new MockSlashHoldCollateral420(address(this));
         stakeSource.bindSlashAuthorization(address(hold));
 
         vm.prank(VERIFIER_A);
@@ -492,6 +505,56 @@ contract ComputeStakeVerifierCollateral420Test {
         );
         require(!ok, "verifier slash hold bypassed");
         require(stakeSource.position(id).activeAmount == 25 ether, "held verifier collateral moved");
+    }
+
+    function testPartialVerifierSlashRebindsRemainderAndPaysExactRecipients() public {
+        bytes32 id = _stake(VERIFIER_A, POLICY_A, 50 ether);
+        MockSlashHoldCollateral420 hold = new MockSlashHoldCollateral420(address(this));
+        stakeSource.bindSlashAuthorization(address(hold));
+
+        address[] memory recipients = new address[](2);
+        recipients[0] = address(0x3333);
+        recipients[1] = address(0x4444);
+        uint256[] memory amounts = new uint256[](2);
+        amounts[0] = 5 ether;
+        amounts[1] = 15 ether;
+
+        (uint256 preview, uint64 visited) =
+            stakeSource.previewSlashBatch(id, 20 ether, 1);
+        require(preview == 20 ether && visited == 1, "slash preview");
+
+        stakeSource.executeSlashBatch(
+            id, keccak256("verifier-slash-auth"), 20 ether, 1, recipients, amounts
+        );
+
+        require(recipients[0].balance == 5 ether, "challenger payout");
+        require(recipients[1].balance == 15 ether, "treasury payout");
+
+        ComputeStakeVerifierCollateral420.Tranche memory t = stakeSource.tranche(id, 1);
+        require(t.amount == 30 ether && t.obligationId != bytes32(0), "remainder tranche");
+        VaultAccounting420.Obligation memory o = accounting.getObligation(t.obligationId);
+        require(
+            o.state == 1
+                && o.beneficiary == VERIFIER_A
+                && o.amount == 30 ether
+                && o.obligationType == stakeSource.VERIFIER_COLLATERAL_TYPE()
+                && o.sourceRef == id,
+            "remainder obligation"
+        );
+
+        ComputeStakeVerifierCollateral420.Position memory p = stakeSource.position(id);
+        require(p.activeAmount == 30 ether && p.slashableAmount == 30 ether && p.active, "position");
+
+        VaultAccounting420.AssetAccounting memory a =
+            accounting.getAccounting(VAULT_ID, address(0));
+        require(
+            address(vault).balance == 30 ether
+                && a.recordedBalance == 30 ether
+                && a.reserved == 30 ether
+                && a.claimable == 0
+                && a.released == 20 ether,
+            "slash accounting"
+        );
     }
 
     function testDirectEthIsRejected() public {

@@ -3,12 +3,23 @@ pragma solidity ^0.8.24;
 
 import "../src/compute/ComputeStakeSlashPolicy420.sol";
 import "../src/compute/ComputeStakeSlashAuthorization420.sol";
+import "../src/compute/ComputeStakeSlashDistributionPolicy420.sol";
 import "../src/interfaces/IComputeObjectiveSlashEvidence420.sol";
 import "../src/interfaces/IComputeSlashableCollateral420.sol";
 
 interface VmComputeStakeSlashAuthorization420 {
     function prank(address caller) external;
     function warp(uint256) external;
+}
+
+contract MockSlashDistributionExecutor420 {
+    address public immutable authorizer;
+    address public immutable policies;
+
+    constructor(address authorizer_, address policies_) {
+        authorizer = authorizer_;
+        policies = policies_;
+    }
 }
 
 contract MockObjectiveSlashEvidence420 is IComputeObjectiveSlashEvidence420 {
@@ -95,6 +106,7 @@ contract ComputeStakeSlashAuthorization420Test {
     address private constant GOV = address(0x420);
     address private constant WORKER = address(0xA11CE);
     address private constant VERIFIER = address(0xB0B);
+    address private constant TREASURY = address(0x7777);
 
     bytes32 private constant STAKE_POLICY = keccak256("cmp/stake/slash/auth");
     bytes32 private constant WORKER_ID = keccak256("worker-id");
@@ -106,6 +118,8 @@ contract ComputeStakeSlashAuthorization420Test {
 
     ComputeStakeSlashPolicy420 private policies;
     ComputeStakeSlashAuthorization420 private authorizer;
+    ComputeStakeSlashDistributionPolicy420 private distributionPolicies;
+    MockSlashDistributionExecutor420 private distributionExecutor;
     MockObjectiveSlashEvidence420 private evidence;
     MockSlashableCollateral420 private workerSource;
     MockSlashableCollateral420 private verifierSource;
@@ -143,10 +157,40 @@ contract ComputeStakeSlashAuthorization420Test {
             40 ether
         );
 
+        distributionPolicies = new ComputeStakeSlashDistributionPolicy420(GOV);
+        bytes32 workerSlashPolicyCommitment =
+            policies.commitment(STAKE_POLICY, 1, workerPolicyRevision);
+        bytes32 verifierSlashPolicyCommitment =
+            policies.commitment(STAKE_POLICY, 2, verifierPolicyRevision);
+        vm.prank(GOV);
+        distributionPolicies.publish(
+            workerSlashPolicyCommitment,
+            address(0),
+            TREASURY,
+            0,
+            0,
+            0,
+            10_000
+        );
+        vm.prank(GOV);
+        distributionPolicies.publish(
+            verifierSlashPolicyCommitment,
+            address(0),
+            TREASURY,
+            0,
+            0,
+            0,
+            10_000
+        );
         authorizer = new ComputeStakeSlashAuthorization420(address(policies));
         workerSource = new MockSlashableCollateral420(address(authorizer));
         verifierSource = new MockSlashableCollateral420(address(authorizer));
+        vm.prank(authorizer.bindingAdmin());
         authorizer.bindSources(address(workerSource), address(verifierSource));
+        distributionExecutor =
+            new MockSlashDistributionExecutor420(address(authorizer), address(distributionPolicies));
+        vm.prank(authorizer.bindingAdmin());
+        authorizer.bindDistribution(address(distributionPolicies), address(distributionExecutor));
 
         workerSource.set(
             WORKER_POSITION,
@@ -357,6 +401,18 @@ contract ComputeStakeSlashAuthorization420Test {
             0
         );
         bytes32 aggressiveStake = keccak256("cmp/stake/aggressive");
+        bytes32 aggressiveSlashPolicyCommitment =
+            policies.commitment(aggressiveStake, 1, aggressive);
+        vm.prank(GOV);
+        distributionPolicies.publish(
+            aggressiveSlashPolicyCommitment,
+            address(0),
+            TREASURY,
+            0,
+            0,
+            0,
+            10_000
+        );
         bytes32 position = keccak256("worker-position-aggressive");
         workerSource.set(
             position,

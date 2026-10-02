@@ -3,7 +3,7 @@
 Stable numbering. Do not renumber completed or blocked steps.
 
 ## LAUNCHPAD-AUDIT-1 — canonical-definition reconciliation
-Status: **IMPLEMENTED; CI QUALIFICATION PENDING**
+Status: **COMPLETE**
 
 - distinguish `420/service/launchpad/v1` protocol from `420/service/launchpad-crowdfunding/v1` consumer service;
 - preserve V1 non-custodial architecture;
@@ -13,6 +13,33 @@ Status: **IMPLEMENTED; CI QUALIFICATION PENDING**
 - add dedicated exact-head audit CI and adversarial contract tests.
 
 Exit: dedicated audit verifier + focused tests pass on exact audit head.
+
+### Durable qualification evidence
+
+- Qualification level: **Level 1 — per-roadmap-step fast qualification**
+- Implementation SHA: `e431fd58eeba14a071dc9e4eddc09a829a0c09f5`
+- Audit branch: `audit/420launchpad-remediation`
+- Pull request: **#489**
+- Audit branch baseline / PR base at implementation start: `f529533ebe62b63ad3f30f685f0c1c44f69ec06b`
+- Current observed `main` during closeout: `c3fbda60247e76f26a7e183069dd6782ed0da038`
+- Exact-head qualification workflow: `420Launchpad audit qualification`
+- Passing run: **37075504425**
+- Passing job: **111064375101**
+- Exact-head verification: **PASS**
+- Audit model verifier: **PASS**
+- Foundry formatting gate: **PASS**
+- Launchpad contract build: **PASS**
+- Focused `LaunchpadGenesis420.t.sol` + `LaunchpadAudit420.t.sol` qualification: **PASS**
+- Forbidden-primitive/static scan: **PASS**
+- Earlier run **37074522626** failed only at the formatting gate; the formatting defect was corrected before the passing exact-head run.
+- Security/adversarial result: canonical-definition boundary, default-deny authorization coverage, pre-start contribution rejection, one-shot controller binding, unauthorized post-success claim rejection, successful-sale refund rejection, terminal cancellation behavior, and forbidden primitive scan are retained in the step-specific suite.
+- Level 2 milestone qualification: **NOT REQUIRED** for this canonical-definition reconciliation step; no major shared authority/lifecycle dependency was introduced.
+- Level 3 closeout qualification: **INTENTIONALLY DEFERRED** to complete Launchpad app-phase closeout.
+- Remaining blockers for this step: **NONE**
+- Completion state: **COMPLETE**
+- Next canonical roadmap step: **LAUNCHPAD-AUDIT-2 — V1 contract hardening**
+
+The evidence record above is documentation-only and references the already-qualified implementation SHA. Under the audit qualification model, this evidence-only closeout does not create a new implementation SHA requiring recursive qualification.
 
 ## LAUNCHPAD-AUDIT-2 — V1 contract hardening
 Status: **PENDING**

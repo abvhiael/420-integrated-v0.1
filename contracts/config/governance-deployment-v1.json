@@ -158,7 +158,7 @@
     "bind CivicProposalRegistry420 proposalAuthority to CivicGovernor420 through GovernanceTimelock",
     "bind CivicElectorateRegistry420 snapshotAuthority to CivicGovernor420 through GovernanceTimelock",
     "bind Governance420 compatibility civicGovernor pointer to CivicGovernor420 through GovernanceTimelock",
-    "register all five Civic component IDs in ProtocolRegistry with ACTIVE lifecycle and runtime code hashes",
+    "register five core Civic component IDs plus two electorate-source component IDs in ProtocolRegistry with ACTIVE lifecycle and runtime code hashes",
     "publish governance service profile pointing to CivicGovernor420",
     "activate GovernanceTimelock Civic authority last",
     "verify scheduler == CivicGovernor420 and civicAuthorityActivated == true"

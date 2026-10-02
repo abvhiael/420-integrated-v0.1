@@ -218,7 +218,7 @@ Bind WorkerRegistry admission to the actual Vault-backed CMP-1.5 worker collater
 Bind the harmed-payer recipient to the exact canonical ComputeEscrow entitlement/dispute state while proving that all redistributed slash value originates only from separately backed CMP-1.5 collateral and never payer escrow.
 
 ### CMP-1.5.11 — Hostile economic qualification
-**Status: implementation/Level 1 + Level 2 qualification in progress.**
+**Status: COMPLETE — Level 1 + Level 2 exact-head qualified on `1235f24d51d60a6fee2f71e495b34975d879029c`.**
 
 Run the frozen hostile-economic campaign across solvency, isolation, exit races, slash finality, replay, duplicate withdrawal/slash/reward, hostile authorization, reentrancy and failure atomicity.
 
@@ -530,7 +530,7 @@ Production target flow:
 | CMP-1.2 ComputeEscrow/Vault accounting | repository-qualified; live/stake dependencies remain |
 | CMP-1.3 WorkerRegistry | current: CMP-1.3.16 closeout |
 | CMP-1.4 VerifierRegistry | repository-qualified through CMP-1.4.12 |
-| CMP-1.5 ComputeStake | current: CMP-1.5.11 hostile economic qualification; CMP-1.5.0–1.5.10 complete |
+| CMP-1.5 ComputeStake | current: CMP-1.5.12 release candidate; CMP-1.5.0–1.5.11 complete |
 | CMP-2 matching marketplace | forthcoming |
 | CMP-3 node420 worker runtime | forthcoming |
 | CMP-4 scientific compute framework | forthcoming |

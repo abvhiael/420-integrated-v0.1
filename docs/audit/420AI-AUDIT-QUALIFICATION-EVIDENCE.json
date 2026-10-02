@@ -1,0 +1,51 @@
+{
+  "schema": "420ai-audit-qualification-evidence-v1",
+  "application": "420AI",
+  "audit_date": "2026-10-02",
+  "repository": "abvhiael/420-integrated-v0.1",
+  "authoritative_main_baseline": "b58b09a17e641a42b81d832bad913a83c7caada9",
+  "audit_branch": "audit/420ai-complete-20261002",
+  "pull_request": 491,
+  "qualification_binding": {
+    "rule": "The authoritative exact-head qualification SHA is the head_sha recorded by the successful 420AI Audit Qualification GitHub Actions run for this branch. Do not reuse a run from an earlier branch head.",
+    "workflow": "420AI Audit Qualification",
+    "workflow_path": ".github/workflows/420ai-audit.yml",
+    "required_jobs": [
+      "audit-state",
+      "focused-ai-contracts"
+    ]
+  },
+  "scope": {
+    "claim": "repository-state audit qualification only",
+    "does_not_claim": [
+      "420AI code completeness",
+      "420AI Genesis readiness",
+      "420AI production readiness",
+      "live testnet deployment",
+      "live ProtocolRegistry publication"
+    ]
+  },
+  "canonical_findings": {
+    "fixed_genesis_compatibility_addresses_preserved": true,
+    "mature_v1_contract_inventory_complete": false,
+    "provider_runtime_present": false,
+    "read_api_present": false,
+    "production_web_client_present": false,
+    "production_equivalent_testnet_evidence_present": false,
+    "historical_recovery_pr_348_merged": false
+  },
+  "readiness": {
+    "code_complete": false,
+    "build_complete": false,
+    "contract_complete": false,
+    "test_complete": false,
+    "documentation_complete": false,
+    "integration_complete": false,
+    "security_qualified": false,
+    "testnet_ready": false,
+    "genesis_ready": false,
+    "production_ready": false
+  },
+  "roadmap": "docs/audit/420AI-AUDIT-REMEDIATION-ROADMAP.md",
+  "report": "docs/audit/420AI-COMPLETE-AUDIT-20261002.md"
+}

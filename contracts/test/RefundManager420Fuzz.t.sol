@@ -60,10 +60,13 @@ contract RefundManager420FuzzTest {
         r.recordRefund(refundId, paymentId, settlementAsset, PAYER, amount, maximum, bytes32(0));
     }
 
-    function testFuzz_RefundNeverExceedsCanonicalAuthorizedAmount(uint96 maximum, uint96 first, uint96 second) public {
+    function testFuzz_RefundNeverExceedsCanonicalAuthorizedAmount(
+        uint96 maximum,
+        uint96 first,
+        uint96 second
+    ) public {
         if (maximum == 0) return;
-        (RefundManager420 r, RefundAccountingMock420 accounting, address settlementAsset) =
-            _setup(maximum, maximum);
+        (RefundManager420 r, RefundAccountingMock420 accounting, address settlementAsset) = _setup(maximum, maximum);
         bytes32 paymentId = keccak256("payment");
 
         uint256 a = (uint256(first) % uint256(maximum)) + 1;
@@ -82,25 +85,18 @@ contract RefundManager420FuzzTest {
         bytes32 paymentId = keccak256("payment-authorized");
         _recordRefund(r, keccak256("r1"), paymentId, settlementAsset, 40, 100);
 
-        (bool ok,) = address(r).call(
-            abi.encodeWithSelector(
-                r.recordRefund.selector,
-                keccak256("r2"),
-                paymentId,
-                settlementAsset,
-                PAYER,
-                1,
-                100,
-                bytes32(0)
-            )
-        );
+        (bool ok,) = address(r)
+            .call(
+                abi.encodeWithSelector(
+                    r.recordRefund.selector, keccak256("r2"), paymentId, settlementAsset, PAYER, 1, 100, bytes32(0)
+                )
+            );
         require(!ok, "refund exceeded canonical authorization");
     }
 
     function testRefundAllowedWhenSystemDegraded() public {
         GenesisMockEnvironment420 env = new GenesisMockEnvironment420();
-        RefundManager420 r =
-            new RefundManager420(address(this), address(env.registry()), keccak256("refund-safe"));
+        RefundManager420 r = new RefundManager420(address(this), address(env.registry()), keccak256("refund-safe"));
         RefundAccountingMock420 accounting = new RefundAccountingMock420();
         env.registerResident(address(r), r.componentId());
         address settlementAsset = address(0xCA420);

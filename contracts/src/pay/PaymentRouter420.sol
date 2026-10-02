@@ -48,10 +48,7 @@ contract PaymentRouter420 is GenesisResidentAccess420 {
     event SettlementAdapterSet(address indexed adapter);
     event SettlementRouterSet(address indexed router);
     event PaymentAuthorized(
-        bytes32 indexed paymentId,
-        address indexed payer,
-        uint256 inputSpent,
-        uint256 settlementDelivered
+        bytes32 indexed paymentId, address indexed payer, uint256 inputSpent, uint256 settlementDelivered
     );
 
     constructor(
@@ -94,17 +91,18 @@ contract PaymentRouter420 is GenesisResidentAccess420 {
         require(block.timestamp <= uint256(limits.quoteTimestamp) + QUOTE_LIFETIME, "stale quote");
         require(inputAmount <= limits.maxInputAmount, "input overspend");
         require(gasCost420 <= limits.maxGasCost420, "gas overspend");
-        require(
-            slippageBps <= limits.maxSlippageBps && limits.maxSlippageBps <= DEFAULT_MAX_SLIPPAGE_BPS,
-            "slippage"
-        );
+        require(slippageBps <= limits.maxSlippageBps && limits.maxSlippageBps <= DEFAULT_MAX_SLIPPAGE_BPS, "slippage");
         require(tip <= limits.maxTip, "tip overspend");
         require(conversionFee <= limits.maxConversionFee, "conversion fee");
         require(protocolFee <= limits.maxProtocolFee && protocolFee == 0, "protocol fee");
         return true;
     }
 
-    function requireSettlementHealth(address asset, bytes32 marketId, bool conversionRequired) public view {
+    function requireSettlementHealth(
+        address asset,
+        bytes32 marketId,
+        bool conversionRequired
+    ) public view {
         _canonicalSettlementAsset(asset);
         if (conversionRequired) _requireHealthyMarket(marketId);
     }
@@ -167,9 +165,8 @@ contract PaymentRouter420 is GenesisResidentAccess420 {
         );
         requireSettlementHealth(settlementAsset, bytes32(0), false);
         _consumePaymentAuthorization(paymentId);
-        SettlementRouter420(settlementRouter).executeDirectTokenSplit(
-            paymentId, payer, settlementAsset, amount, recipients, bps, primaryIndex
-        );
+        SettlementRouter420(settlementRouter)
+            .executeDirectTokenSplit(paymentId, payer, settlementAsset, amount, recipients, bps, primaryIndex);
         emit PaymentAuthorized(paymentId, payer, amount, amount);
     }
 
@@ -221,8 +218,9 @@ contract PaymentRouter420 is GenesisResidentAccess420 {
         ICanonicalSettlement420.Quote calldata q
     ) internal view {
         IFeeQuote420 feeSource = IFeeQuote420(_resolveRequired(AppDependencyIds420.FEE_QUOTE));
-        bytes memory request =
-            abi.encode(q.marketId, q.inputAsset, q.settlementAsset, q.inputAmount, q.minimumSettlementAmount, q.slippageBps);
+        bytes memory request = abi.encode(
+            q.marketId, q.inputAsset, q.settlementAsset, q.inputAmount, q.minimumSettlementAmount, q.slippageBps
+        );
         IFeeQuote420.FeeQuote memory fees = feeSource.feeQuote(q.quoteId, request);
         if (fees.quoteId != q.quoteId || block.timestamp > fees.expiresAt) revert Errors420.StaleQuote(q.quoteId);
         require(fees.protocolFee == 0, "protocol fee");
@@ -249,7 +247,10 @@ contract PaymentRouter420 is GenesisResidentAccess420 {
         _consumeSharedReplay(replayAddress, paymentId);
     }
 
-    function _consumeSharedReplay(address replayAddress, bytes32 paymentId) internal {
+    function _consumeSharedReplay(
+        address replayAddress,
+        bytes32 paymentId
+    ) internal {
         (bool advertised, bytes memory consumerData) = replayAddress.staticcall(
             abi.encodeWithSignature("domainConsumer(bytes32)", ReplayDomainIds420.PAY_SETTLEMENT)
         );

@@ -120,6 +120,8 @@ contract ComputeStakeSlashAuthorization420 is I420System, IComputeSlashHold420 {
             bytes32 stakePolicyId,
             ,
             uint64 openedAt,
+            uint32 frozenSlashPolicyRevision,
+            bytes32 frozenSlashPolicyCommitment,
             uint256 slashableAmount,
             bool active,
             ,
@@ -138,10 +140,13 @@ contract ComputeStakeSlashAuthorization420 is I420System, IComputeSlashHold420 {
 
         ComputeStakeSlashPolicy420.Policy memory p =
             policies.policy(stakePolicyId, subjectKind, slashPolicyRevision);
+        bytes32 exactPolicyCommitment =
+            policies.commitment(stakePolicyId, subjectKind, slashPolicyRevision);
         if (
             p.evidenceAdapter.code.length == 0
                 || p.evidenceAdapter.codehash != p.evidenceAdapterCodeHash
-                || !policies.wasCurrentAt(stakePolicyId, subjectKind, slashPolicyRevision, openedAt)
+                || slashPolicyRevision != frozenSlashPolicyRevision
+                || exactPolicyCommitment != frozenSlashPolicyCommitment
         ) revert InvalidAuthorization();
 
         IComputeObjectiveSlashEvidence420.Evidence memory e =
@@ -178,8 +183,7 @@ contract ComputeStakeSlashAuthorization420 is I420System, IComputeSlashHold420 {
         amount = proposed > available ? available : proposed;
         if (amount == 0) revert InvalidAuthorization();
 
-        bytes32 policyCommitment =
-            policies.commitment(stakePolicyId, subjectKind, slashPolicyRevision);
+        bytes32 policyCommitment = exactPolicyCommitment;
         authorizationRef = keccak256(
             abi.encode(
                 AUTHORIZATION_DOMAIN,

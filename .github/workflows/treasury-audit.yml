@@ -175,9 +175,9 @@ jobs:
 
           root = pathlib.Path("contracts/src/treasury")
           patterns = {
-              "tx.origin": re.compile(r"\\btx\\.origin\\b"),
-              "selfdestruct": re.compile(r"\\bselfdestruct\\s*\\("),
-              "delegatecall": re.compile(r"\\.delegatecall\\s*\\("),
+              "tx.origin": re.compile(r"\btx\.origin\b"),
+              "selfdestruct": re.compile(r"\bselfdestruct\s*\("),
+              "delegatecall": re.compile(r"\.delegatecall\s*\("),
           }
           hits = []
           for path in sorted(root.glob("*.sol")):

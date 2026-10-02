@@ -158,9 +158,13 @@ contract ComputeStakeSlashAuthorization420Test {
         );
 
         distributionPolicies = new ComputeStakeSlashDistributionPolicy420(GOV);
+        bytes32 workerSlashPolicyCommitment =
+            policies.commitment(STAKE_POLICY, 1, workerPolicyRevision);
+        bytes32 verifierSlashPolicyCommitment =
+            policies.commitment(STAKE_POLICY, 2, verifierPolicyRevision);
         vm.prank(GOV);
         distributionPolicies.publish(
-            policies.commitment(STAKE_POLICY, 1, workerPolicyRevision),
+            workerSlashPolicyCommitment,
             address(0),
             TREASURY,
             0,
@@ -170,7 +174,7 @@ contract ComputeStakeSlashAuthorization420Test {
         );
         vm.prank(GOV);
         distributionPolicies.publish(
-            policies.commitment(STAKE_POLICY, 2, verifierPolicyRevision),
+            verifierSlashPolicyCommitment,
             address(0),
             TREASURY,
             0,
@@ -397,9 +401,11 @@ contract ComputeStakeSlashAuthorization420Test {
             0
         );
         bytes32 aggressiveStake = keccak256("cmp/stake/aggressive");
+        bytes32 aggressiveSlashPolicyCommitment =
+            policies.commitment(aggressiveStake, 1, aggressive);
         vm.prank(GOV);
         distributionPolicies.publish(
-            policies.commitment(aggressiveStake, 1, aggressive),
+            aggressiveSlashPolicyCommitment,
             address(0),
             TREASURY,
             0,

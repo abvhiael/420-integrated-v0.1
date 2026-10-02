@@ -325,3 +325,78 @@ export function createComputeWorkerClient420(reader: ComputeWorkerReader420): Co
     }
   });
 }
+
+
+export const COMPUTE_WORKER_OFFER_SCHEMA_420 = '420-compute-worker-offer-v2' as const;
+export const COMPUTE_WORKER_OFFER_VERSION_420 = 2 as const;
+
+export interface ComputeWorkerOffer420 {
+  readonly providerId: Hex420;
+  readonly nodeId: Hex420;
+  readonly resourceId: Hex420;
+  readonly providerRevision: bigint;
+  readonly resourceRevision: bigint;
+  readonly operator: Hex420;
+  readonly settlementAccount: Hex420;
+  readonly computeClass: Hex420;
+  readonly hardwareProfileHash: Hex420;
+  readonly runtimeProfileHash: Hex420;
+  readonly capabilityHash: Hex420;
+  readonly capacityUnits: bigint;
+  readonly jurisdictionHash: Hex420;
+  readonly availableFrom: bigint;
+  readonly validUntil: bigint;
+  readonly pricingPolicyId: Hex420;
+  readonly pricingVersion: number;
+  readonly fixedPrice: bigint;
+  readonly revision: bigint;
+  readonly predecessorCommitment: Hex420;
+  readonly exists: boolean;
+  readonly active: boolean;
+}
+
+export function validateComputeWorkerOffer420(
+  offer: ComputeWorkerOffer420,
+  expectedRevision?: bigint
+): ComputeWorkerOffer420 {
+  for (const [label, value] of [
+    ['providerId', offer.providerId],
+    ['nodeId', offer.nodeId],
+    ['resourceId', offer.resourceId],
+    ['computeClass', offer.computeClass],
+    ['hardwareProfileHash', offer.hardwareProfileHash],
+    ['runtimeProfileHash', offer.runtimeProfileHash],
+    ['capabilityHash', offer.capabilityHash],
+    ['jurisdictionHash', offer.jurisdictionHash],
+    ['pricingPolicyId', offer.pricingPolicyId],
+    ['predecessorCommitment', offer.predecessorCommitment]
+  ] as const) {
+    assertBytes32420(value, label);
+  }
+  assertAddress420(offer.operator, 'operator');
+  assertAddress420(offer.settlementAccount, 'settlementAccount');
+
+  if (!offer.exists || !offer.active) throw new ComputeReadModelError420('worker offer is not active');
+  if (offer.providerRevision <= 0n || offer.resourceRevision <= 0n || offer.revision <= 0n) {
+    throw new ComputeReadModelError420('worker offer revision must be positive');
+  }
+  if (expectedRevision !== undefined && offer.revision !== expectedRevision) {
+    throw new ComputeReadModelError420('stale or mismatched worker offer revision');
+  }
+  if (offer.capacityUnits <= 0n) throw new ComputeReadModelError420('worker offer capacity must be positive');
+  if (offer.fixedPrice <= 0n || offer.pricingVersion <= 0) {
+    throw new ComputeReadModelError420('worker offer price must be positive and versioned');
+  }
+  if (offer.availableFrom > offer.validUntil) {
+    throw new ComputeReadModelError420('worker offer availability window is invalid');
+  }
+  const zero = /^0x0{64}$/i;
+  if (
+    zero.test(offer.computeClass) || zero.test(offer.hardwareProfileHash)
+      || zero.test(offer.runtimeProfileHash) || zero.test(offer.capabilityHash)
+      || zero.test(offer.jurisdictionHash) || zero.test(offer.pricingPolicyId)
+  ) {
+    throw new ComputeReadModelError420('worker offer contains an empty canonical commitment');
+  }
+  return offer;
+}

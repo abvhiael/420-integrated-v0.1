@@ -1,0 +1,122 @@
+name: 420Bridge AUDIT-8 Level 2
+
+on:
+  pull_request:
+    paths:
+      - '420-indexer/**'
+      - 'exchange/read-service/**'
+      - 'exchange/web/**'
+      - 'analytics/**'
+      - 'contracts/src/bridge/**'
+      - 'contracts/test/Bridge*.t.sol'
+      - 'contracts/test/*BridgeAdapter420.t.sol'
+      - 'contracts/test/*Hardening420.t.sol'
+      - 'contracts/test/ExchangeBridgeQualification420.t.sol'
+      - 'contracts/test/PaySwapBridgeGenesisIntegration420.t.sol'
+      - 'contracts/config/bridge/**'
+      - 'docs/apps/bridge/**'
+      - 'docs/apps/wallet/index.md'
+      - 'docs/apps/explorer/index.md'
+      - 'docs/apps/notifications/index.md'
+      - 'docs/apps/analytics/index.md'
+      - 'docs/developers/bridge-integration.md'
+      - 'docs/troubleshooting/value-movement-economics.md'
+      - 'docs/audit/420BRIDGE-COMPLETE-AUDIT-20261001.md'
+      - 'scripts/verify-bridge-*.py'
+      - '.github/workflows/bridge-audit-8.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: bridge-audit-8-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  retained-bridge-level2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: Run retained Bridge verifiers
+        run: |
+          python3 scripts/verify-bridge-hardening.py
+          python3 scripts/verify-bridge-audit-6-deployment.py
+          python3 scripts/verify-bridge-audit-7-security.py
+          python3 scripts/verify-bridge-audit-8-integration.py
+
+      - name: Run Bridge contract suite
+        working-directory: contracts
+        run: forge test --match-path 'test/Bridge*.t.sol' -vvv
+
+      - name: Run canonical production adapter suites
+        working-directory: contracts
+        run: forge test --match-path 'test/*BridgeAdapter420.t.sol' -vvv
+
+      - name: Run retained Bridge security suites
+        working-directory: contracts
+        run: |
+          forge test \
+            --match-contract '^(CrossAdapterHardeningBridgeAdapter420Test|NativeAdapterReplayDomainHardening420Test|VerifierRotationHardening420Test|EmergencyControlsHardening420Test|MalformedProofRecipientFuzzHardening420Test|DomainNonceRouterBypassHardening420Test|GovernanceAccountingRecoveryHardening420Test)$' \
+            -vvv
+
+      - name: Run Exchange Bridge contract integration
+        working-directory: contracts
+        run: |
+          forge test --match-path 'test/ExchangeBridgeQualification420.t.sol' -vvv
+          forge test --match-path 'test/PaySwapBridgeGenesisIntegration420.t.sol' -vvv
+
+  bridge-consumers-level2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Verify Bridge ABI/Indexer/cross-app/docs reconciliation
+        run: python3 scripts/verify-bridge-audit-8-integration.py
+
+      - name: Run affected 420Indexer qualification
+        working-directory: 420-indexer
+        run: |
+          npm install --no-audit --no-fund --no-package-lock
+          npm test
+
+      - name: Run Exchange read-service qualification
+        working-directory: exchange/read-service
+        run: npm test
+
+      - name: Run Exchange web Bridge regression
+        working-directory: exchange/web
+        run: npm test
+
+      - name: Run affected Analytics protocol qualification
+        run: go test ./analytics/indexerclient ./analytics/metrics

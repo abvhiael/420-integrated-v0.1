@@ -114,7 +114,9 @@ Remaining deployment work: publish exact deployed registry-resolved Pay contract
 
 ## PAY-AUDIT-6 — deterministic deployment package and Registry publication
 
-**Status: IMPLEMENTED — Level 1 qualification pending.**
+**Status: COMPLETE.**
+
+Durable Level 1 qualification basis: implementation SHA `9bfe0d72c8d696b4908f819612608ca5279ce930` passed 420Pay audit qualification run #216 (`37061442891`, job `111018792122`) and Solidity Contracts run #4259 (`37061442991`). The dedicated Pay run passed exact-head verification, static Pay verification, Solidity formatting, the Pay/settlement-boundary build, deterministic runtime materialization and verification, compiled artifact identity retention, derived runtime manifest retention, PAY-AUDIT-6 deployment qualification, forbidden-primitive scan, and 420Indexer Pay reconciliation. Repository deployment readiness is therefore qualified; live chain/address/transaction binding remains PAY-AUDIT-7.
 
 Repository implementation:
 - `contracts/config/pay/pay-audit-6-deployment-package.json` retains the exact nine-resident Pay deployment inventory, frozen compiler provenance, source blob identities, ABI commitments, creation/runtime-template hashes, materialized runtime code hashes, immutable patch evidence, constructor manifest, deployment order, Registry publication semantics, wiring requirements and deliberately empty live-testnet evidence.
@@ -141,7 +143,7 @@ Exit criteria:
 
 ## PAY-AUDIT-7 — production-equivalent testnet qualification
 
-**Status: BLOCKED until the approved live testnet candidate exists and PAY-AUDIT-6 repository work is complete.**
+**Status: BLOCKED until the approved live production-equivalent testnet candidate exists. PAY-AUDIT-6 repository work is COMPLETE.**
 
 Retain exact release-SHA evidence for:
 - chain/genesis identity;

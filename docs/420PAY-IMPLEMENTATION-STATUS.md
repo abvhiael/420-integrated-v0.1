@@ -25,6 +25,16 @@ Decision #4's `offline_invoice_creation: true` and `online_acceptance_required: 
 
 `PaymentRegistry420` now exposes explicit Genesis-governed lifecycle transitions for `INCLUDED`, `CERTIFIED`, `SETTLED` and `FAILED`. Inclusion requires `SUBMITTED`; certification requires `INCLUDED`; settlement requires `FINALIZED`; failure is limited to pre-final `SUBMITTED`, `INCLUDED` or `CERTIFIED` states. Existing finalization and bounded refund behavior is retained. PAY-AUDIT-3 regression coverage verifies valid progression, invalid-predecessor rejection, terminal failure non-resurrection, governance-only lifecycle mutation, and the rule that an offline invoice root does not authorize third-party canonical creation.
 
+## PAY-AUDIT-4 implementation state
+
+Settlement split execution is now implemented without creating a new general-purpose custody authority. `PaymentRouter420` remains the authorization/replay boundary, `CanonicalSettlementAdapter420` remains the swap boundary, and `SettlementRouter420` performs only atomic distribution. Direct token/native splits require the payer itself; swap-backed splits route canonical settlement output into the split router and distribute it atomically. ERC-20 ingress/egress deltas and zero-residue postconditions fail closed on fee-on-transfer, false-return, under-delivery, or residual accounting mismatches.
+
+Refund evidence is now bound to `PaymentRegistry420` canonical refund authorization rather than a caller-selected maximum. `RefundManager420` verifies payer/recipient, settlement asset, refundable maximum, and cumulative authorized refund while retaining no transfer/custody authority.
+
+`GasSponsor420` now supports explicit governed relayer authorization and exact post-operation reimbursement. The sponsor never executes the user transaction and cannot choose an arbitrary reimbursement target; only the calling authorized relayer can receive reimbursement, subject to the frozen allowlists/caps and reserve floor.
+
+The frozen accounting export is implemented as `contracts/config/pay/accounting-export-schema.json` plus the Indexer `PayAccountingExport420` DTO and replaceable sink/service. All 15 Genesis fields are preserved and refund totals are reconciled against settlement amount plus tip without placing sensitive purchase detail on-chain.
+
 ## Qualification already demonstrated in repository history
 
 Prior 420Pay implementation/hardening PRs compiled under Solidity 0.8.24 and executed Foundry, fuzz/property, Genesis and integrated qualification successfully. Those historical results are not used as exact-head evidence for later commits.

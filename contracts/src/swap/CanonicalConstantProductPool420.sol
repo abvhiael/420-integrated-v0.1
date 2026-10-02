@@ -9,9 +9,13 @@ interface IERC20CanonicalPool420 {
 
 /// @notice Canonical constant-product liquidity pool for 420Swap spot execution.
 /// @dev ERC20/ERC20 V1 pool. Native $420 wrapping/value-path support is intentionally deferred.
+///      The pool also maintains time-weighted cumulative reserve prices so the Swap TWAP oracle can
+///      derive reference prices from canonical on-chain liquidity rather than arbitrary reporters.
 contract CanonicalConstantProductPool420 {
     uint256 private constant BPS_DENOMINATOR = 10_000;
     uint256 private constant MINIMUM_LIQUIDITY = 1_000;
+    uint256 private constant Q96 = 1 << 96;
+    uint256 private constant MAX_RESERVE = type(uint112).max;
 
     address public immutable token0;
     address public immutable token1;
@@ -23,6 +27,10 @@ contract CanonicalConstantProductPool420 {
     uint256 public totalShares;
     mapping(address => uint256) public shares;
 
+    uint256 public price0CumulativeX96;
+    uint256 public price1CumulativeX96;
+    uint64 public cumulativeTimestamp;
+
     uint256 private _entered;
 
     error InvalidAddress();
@@ -33,6 +41,7 @@ contract CanonicalConstantProductPool420 {
     error UnsupportedTokenBehavior();
     error InsufficientLiquidity();
     error SlippageExceeded();
+    error ReserveOverflow();
     error Reentrancy();
 
     event LiquidityAdded(address indexed provider, uint256 amount0, uint256 amount1, uint256 sharesMinted);
@@ -46,6 +55,7 @@ contract CanonicalConstantProductPool420 {
         uint256 feeAmount
     );
     event Sync(uint256 reserve0, uint256 reserve1);
+    event CumulativePriceUpdated(uint64 indexed timestamp, uint256 price0CumulativeX96, uint256 price1CumulativeX96);
 
     constructor(address token0_, address token1_, address executor_, uint16 feeBps_) {
         if (token0_ == address(0) || token1_ == address(0) || executor_ == address(0)) revert InvalidAddress();
@@ -163,6 +173,28 @@ contract CanonicalConstantProductPool420 {
         emit Swap(payer, recipient, inputAsset, inputAmount, settlementDelivered, feeAmount);
     }
 
+    /// @notice Returns cumulative raw-token prices including time elapsed since the last state-changing sync.
+    /// @dev Cumulative arithmetic intentionally wraps modulo 2^256; consumers subtract in unchecked arithmetic.
+    function currentCumulativePrices()
+        external
+        view
+        returns (uint256 cumulative0X96, uint256 cumulative1X96, uint64 timestamp)
+    {
+        cumulative0X96 = price0CumulativeX96;
+        cumulative1X96 = price1CumulativeX96;
+        timestamp = uint64(block.timestamp);
+
+        uint64 last = cumulativeTimestamp;
+        if (last == 0 || timestamp <= last || reserve0 == 0 || reserve1 == 0) return (cumulative0X96, cumulative1X96, timestamp);
+
+        uint256 elapsed = uint256(timestamp - last);
+        (uint256 price0X96, uint256 price1X96) = _spotPricesX96(reserve0, reserve1);
+        unchecked {
+            cumulative0X96 += price0X96 * elapsed;
+            cumulative1X96 += price1X96 * elapsed;
+        }
+    }
+
     function _reservesFor(address tokenIn, address tokenOut) private view returns (uint256 reserveIn, uint256 reserveOut) {
         if (tokenIn == token0 && tokenOut == token1) return (reserve0, reserve1);
         if (tokenIn == token1 && tokenOut == token0) return (reserve1, reserve0);
@@ -197,9 +229,35 @@ contract CanonicalConstantProductPool420 {
     }
 
     function _sync() private {
-        reserve0 = IERC20CanonicalPool420(token0).balanceOf(address(this));
-        reserve1 = IERC20CanonicalPool420(token1).balanceOf(address(this));
-        emit Sync(reserve0, reserve1);
+        _accumulate();
+
+        uint256 balance0 = IERC20CanonicalPool420(token0).balanceOf(address(this));
+        uint256 balance1 = IERC20CanonicalPool420(token1).balanceOf(address(this));
+        if (balance0 > MAX_RESERVE || balance1 > MAX_RESERVE) revert ReserveOverflow();
+
+        reserve0 = balance0;
+        reserve1 = balance1;
+        emit Sync(balance0, balance1);
+    }
+
+    function _accumulate() private {
+        uint64 timestamp = uint64(block.timestamp);
+        uint64 last = cumulativeTimestamp;
+        if (last != 0 && timestamp > last && reserve0 != 0 && reserve1 != 0) {
+            uint256 elapsed = uint256(timestamp - last);
+            (uint256 price0X96, uint256 price1X96) = _spotPricesX96(reserve0, reserve1);
+            unchecked {
+                price0CumulativeX96 += price0X96 * elapsed;
+                price1CumulativeX96 += price1X96 * elapsed;
+            }
+        }
+        cumulativeTimestamp = timestamp;
+        emit CumulativePriceUpdated(timestamp, price0CumulativeX96, price1CumulativeX96);
+    }
+
+    function _spotPricesX96(uint256 r0, uint256 r1) private pure returns (uint256 price0X96, uint256 price1X96) {
+        price0X96 = (r1 * Q96) / r0;
+        price1X96 = (r0 * Q96) / r1;
     }
 
     function _sqrt(uint256 y) private pure returns (uint256 z) {

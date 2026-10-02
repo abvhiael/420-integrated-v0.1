@@ -2,5 +2,10 @@
   "pass": true,
   "errors": [],
   "shared_interface_v1": true,
-  "production_pool_execution": "SCAFFOLD_REMAINS"
+  "genesis_dex_factory_semantics": "REGISTRATION_ONLY",
+  "production_pool_execution": "PRODUCTION_CANDIDATE_PRESENT",
+  "permissionless_pool_lifecycle": "DEPLOY_EXTERNALLY_THEN_PERMISSIONLESS_REGISTER",
+  "twap_source": "CANONICAL_POOL_CUMULATIVE",
+  "twap_publication": "PERMISSIONLESS_DERIVED_CHECKPOINT",
+  "public_batch_auction": "ESCROW_FILL_REFUND_SETTLEMENT"
 }

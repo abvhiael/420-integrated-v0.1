@@ -1,0 +1,514 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "timelock_",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "registry_",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "genesisConfigHash_",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "GENESIS_INITIALIZATION_VERSION",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "expectedConfigHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "assertGenesisConfiguration",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes3",
+          "name": "",
+          "type": "bytes3"
+        }
+      ],
+      "name": "canonicalForCurrency",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "componentId",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "genesisConfigHash",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "genesisInitialized",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "governanceTimelock",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "initializationVersion",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "protocolVersion",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint16",
+              "name": "major",
+              "type": "uint16"
+            },
+            {
+              "internalType": "uint16",
+              "name": "minor",
+              "type": "uint16"
+            },
+            {
+              "internalType": "uint16",
+              "name": "patch",
+              "type": "uint16"
+            }
+          ],
+          "internalType": "struct Types420.Version",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "quoteAssets",
+      "outputs": [
+        {
+          "internalType": "enum ApprovedQuoteAssetRegistry.Status",
+          "name": "status",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bytes3",
+          "name": "currency",
+          "type": "bytes3"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "metadataHash",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "registry",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes3",
+          "name": "currency",
+          "type": "bytes3"
+        }
+      ],
+      "name": "removeCanonical",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes3",
+          "name": "currency",
+          "type": "bytes3"
+        },
+        {
+          "internalType": "enum ApprovedQuoteAssetRegistry.Status",
+          "name": "status",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "metadataHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "setApproved",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes3",
+          "name": "currency",
+          "type": "bytes3"
+        },
+        {
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        }
+      ],
+      "name": "setCanonical",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes3",
+          "name": "currency",
+          "type": "bytes3"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        }
+      ],
+      "name": "CanonicalQuoteSet",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes3",
+          "name": "currency",
+          "type": "bytes3"
+        },
+        {
+          "indexed": false,
+          "internalType": "enum ApprovedQuoteAssetRegistry.Status",
+          "name": "status",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "metadataHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "QuoteAssetSet",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "componentId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "InactiveComponent",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "TimelockRequired",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "Unauthorized",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "subjectId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "Unhealthy",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "assetId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "UnsupportedAsset",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ZeroAddress",
+      "type": "error"
+    }
+  ],
+  "abiSha256": "f5de919f0d40d961cb2b6e62d01dcb07d7c375dd02b102db9f46edcdcc68650a",
+  "canonicalAddress": "0x0000000000000000000000000000000000000439",
+  "compiler": {
+    "evmVersion": "cancun",
+    "foundryConfigBlobSha1": "f18c965f43b244582f2a4c527e7bad6d23aee929",
+    "optimizer": true,
+    "optimizerRuns": 200,
+    "solidity": "0.8.24",
+    "toolchainConfigBlobSha1": "dd49cb0e07370b01401d63d2fb53683177de8abc",
+    "viaIR": true
+  },
+  "contractName": "ApprovedQuoteAssetRegistry",
+  "creationBytecodeKeccak256": "0x24ea2d3971b6ee43ca93ec523f1b510b9b0c8459689351ce022f6747fc8ffd92",
+  "deployedBytecodeTemplate": "0x604060808152600480361015610013575f80fd5b5f3560e01c9081630da8b8d21461055857816316a8e6bf146104555781632ae9c600146104f357816331365262146104b35781637b103999146104705781637ee7d452146104555781639a1fdd7914610412578163a0552c841461028d57508063a42911e51461024d578063b22638cb146101ee578063c7f3c830146101d3578063d97e60f614610199578063dcaaadcb1461015f5763f76ecd9a146100b7575f80fd5b3461015b57602036600319011261015b575f906100d261069d565b6100da61075b565b6001600160e81b0319168083526001602052818320549091906001600160a01b031680610141575b508183526001602052822080546001600160a01b03191690557fe5b4c5fdcd0ea2d544cc8f1e8513dbabf42e694fc61a8bcd174e0f7841d2730d8280a3005b835282602052808320600160ff198254161790555f610102565b5f80fd5b503461015b575f36600319011261015b57602090517f00000000000000000000000000000000000000000000000000000000000000008152f35b503461015b575f36600319011261015b57602090517f2bbc7faed8de4ae817d66b18dc252488126872909b474ce041a874aa536e31e68152f35b503461015b575f36600319011261015b576020905160018152f35b503461015b57602036600319011261015b576060906001600160a01b03610213610687565b165f525f602052805f209060018254920154908051926102368460ff83166106b4565b60e01b6001600160e81b0319166020840152820152f35b503461015b57602036600319011261015b576020906001600160e81b031961027361069d565b165f526001825260018060a01b03815f2054169051908152f35b823461015b578060031936011261015b576102a661069d565b6001600160a01b03602435818116949293929085810361015b576102d1906102cc61075b565b610a6b565b50845f526020915f8352835f2091825460ff811660038110156103ff57600181149081156103f4575b50156103c25762ffffff60e81b80971696879160e01b160361039457509060019291855f52838352845f2054168061037c575b50600260ff19825416179055835f52525f20826bffffffffffffffffffffffff60a01b8254161790557fe5b4c5fdcd0ea2d544cc8f1e8513dbabf42e694fc61a8bcd174e0f7841d2730d5f80a3005b5f525f8252835f208360ff198254161790558661032d565b845162461bcd60e51b8152908101849052600860248201526763757272656e637960c01b6044820152606490fd5b855162461bcd60e51b8152808301869052600c60248201526b1b9bdd08185c1c1c9bdd995960a21b6044820152606490fd5b6002915014896102fa565b602183634e487b7160e01b5f525260245ffd5b823461015b575f36600319011261015b57517f00000000000000000000000000000000000000000000000000000000000000006001600160a01b03168152602090f35b823461015b575f36600319011261015b576020905160018152f35b823461015b575f36600319011261015b57517f00000000000000000000000000000000000000000000000000000000000000006001600160a01b03168152602090f35b90503461015b57602036600319011261015b5760209151907f00000000000000000000000000000000000000000000000000000000000000009035148152f35b823461015b575f36600319011261015b57805f8160609351610514816106d5565b828152826020820152015280519061052b826106d5565b600182528060208301925f8452015f815281519260018452519061ffff8092166020850152511690820152f35b823461015b57608036600319011261015b57610572610687565b916024359162ffffff60e81b831680930361015b57604435600381101561015b5760643561059e61075b565b6105a786610a6b565b50811561065b5782516105b9816106d5565b82815260208101948686528482019783895260018060a01b031695865f525f602052855f2092519160038310156106485750976001917f23ea9694e8f41051cde32645c2f81a01b24d73ba90077fc3f3d3b567297b5ded97989960ff63ffffff008654925160e01c1692169063ffffffff19161717835551910155610640835180936106b4565b6020820152a3005b602190634e487b7160e01b5f525260245ffd5b825162461bcd60e51b8152602081860152600660248201526573746174757360d01b6044820152606490fd5b600435906001600160a01b038216820361015b57565b600435906001600160e81b03198216820361015b57565b9060038210156106c15752565b634e487b7160e01b5f52602160045260245ffd5b6060810190811067ffffffffffffffff8211176106f157604052565b634e487b7160e01b5f52604160045260245ffd5b60a0810190811067ffffffffffffffff8211176106f157604052565b90601f8019910116810190811067ffffffffffffffff8211176106f157604052565b9081602091031261015b5751801515810361015b5790565b6001600160a01b037f000000000000000000000000000000000000000000000000000000000000000081163303610a5a576040805163791c260f60e01b81527f1765f250d1199065a9927d58b8ca6303b5bfc24a76af1c5b69169b55989f487d90600493828583015260249160e0818481857f0000000000000000000000000000000000000000000000000000000000000000165afa908115610a50575f91610995575b50602093848201918383511615801561096b575b6109555786848451163f910151801591821561094a575b5050610935575051169083519063de11892b60e01b825233868301527f9f0be8271f4ceaf3348b53ed550f743a1c7d0fe30dc4364bd60737fe8ea171079182828201528481604481875afa90811561092b575f9161090e575b50156108ff57908391855180948193630972dbd560e11b8352898301525afa9182156108f5575f926108c8575b5050156108bb575050565b516399f26d5b60e01b8152fd5b6108e79250803d106108ee575b6108df8183610721565b810190610743565b5f806108b0565b503d6108d5565b83513d5f823e3d90fd5b84516282b42960e81b81528690fd5b6109259150853d87116108ee576108df8183610721565b5f610883565b86513d5f823e3d90fd5b86849187519163e6838a9960e01b8352820152fd5b141590505f8061082a565b865163e6838a9960e01b81528089018390528590fd5b50608081015160088110156109835760021415610813565b8560218a634e487b7160e01b5f52525ffd5b80915060e03d60e011610a49575b6109ad8183610721565b8101039060e0821261015b578551916109c583610705565b81518352602082015190848216820361015b5760609160208501528783015188850152605f19011261015b5760c09086516109ff816106d5565b610a0b60608301611105565b8152610a1960808301611105565b6020820152610a2a60a08301611105565b8882015260608401520151600881101561015b5760808201525f6107ff565b503d6109a3565b85513d5f823e3d90fd5b6040516282b42960e81b8152600490fd5b6040805163791c260f60e01b8082527f18dfe4e05fdffa1e80e9aff07cf6ff06d23bc82d4f9f6a7242d1ec985422dcc360048084018290529295602495909490929091906001600160a01b03907f0000000000000000000000000000000000000000000000000000000000000000821660e0808b8b81855afa801561092b578a9b5f9b9a9b91611049575b506020958682019186835116158015611031575b610e5a5788878451163f9101518015918215611026575b5050610e3a5750518651631bf5518b60e01b81529785168989015284169a85908890818e5afa96871561092b575f97610ff7575b50869a8715908115610faa575b8115610f5b575b50610dfe5785518381527f18602c81dfd1a909054c80dc2797759be3e4ce55152de2b8fde20bd26abc3b2b808a83015282828c81875afa918215610f51575f92610e9a575b508682019186835116158015610e70575b610e5a5788878451163f9101518015918215610e4f575b5050610e3a57508490511685888b8b8a519485938492633afc9d9760e01b84528301525afa908115610e30575f91610e13575b5015610dfe57855192835280838a817fbc76d517f8b89e9b7790c83946fce372c495bd5cfd2da39cd79a0b71c85bd78395868d8301525afa92831561092b575f93610d46575b50508382019183835116158015610d1c575b610d065785848451163f9101518015918215610cfb575b5050610ce557508691839151168451928380926358be12b160e01b8252888a8301525afa9182156108f5575f92610cc8575b505015610cb75750505050565b5163d0a2a44760e01b815291820152fd5b610cde9250803d106108ee576108df8183610721565b5f80610caa565b9450505050519163e6838a9960e01b8352820152fd5b141590505f80610c78565b855163e6838a9960e01b81528089018390528990fd5b5060808101516008811015610d345760021415610c61565b8960218a634e487b7160e01b5f52525ffd5b8181929394503d8411610df7575b610d5e8183610721565b81010391821261015b57855191610d7483610705565b815183528582015190858216820361015b57606091878501528783015188850152605f19011261015b5760c0908651610dac816106d5565b610db860608301611105565b8152610dc660808301611105565b87820152610dd660a08301611105565b8882015260608401520151600881101561015b576080820152905f80610c4f565b503d610d54565b50505050505191625bd5ef60e11b8352820152fd5b610e2a9150863d88116108ee576108df8183610721565b5f610c09565b87513d5f823e3d90fd5b898b9189519163e6838a9960e01b8352820152fd5b141590505f80610bd6565b885163e6838a9960e01b8152808c018390528c90fd5b5060808101516008811015610e885760021415610bbf565b8c60218d634e487b7160e01b5f52525ffd5b80919250833d8511610f4a575b610eb18183610721565b8101039083821261015b57885191610ec883610705565b815183528882015190888216820361015b576060918a8501528a8301518b850152605f19011261015b5760c0908951610f00816106d5565b610f0c60608301611105565b8152610f1a60808301611105565b8a820152610f2a60a08301611105565b8b82015260608401520151600881101561015b576080820152905f610bae565b503d610ea7565b88513d5f823e3d90fd5b905085888b8b8a51948593849263f303136f60e01b84528301525afa908115610e30575f91610f8d575b50155f610b69565b610fa49150863d88116108ee576108df8183610721565b5f610f85565b90508651636b82ba0560e11b8152888a82015286818c81855afa908115610f51575f91610fda575b501590610b62565b610ff19150873d89116108ee576108df8183610721565b5f610fd2565b9096508481813d831161101f575b61100f8183610721565b8101031261015b5751955f610b55565b503d611005565b141590505f80610b21565b5060808101516008811015610e885760021415610b0a565b99505088813d83116110fe575b6110608183610721565b81010398818a1261015b578651996110778b610705565b81518b52602082015190868216820361015b5760609160208d015288830151898d0152605f19011261015b5760c09087516110b1816106d5565b6110bd60608301611105565b81526110cb60808301611105565b60208201526110dc60a08301611105565b8982015260608c015201519860088a101561015b578b9960808201525f610af6565b503d611056565b519061ffff8216820361015b5756fea2646970667358221220efb063a1233a24e4a74b3ad63027eb913142fa340ddfba282b0b27f572724ef564736f6c63430008180033",
+  "deployedBytecodeTemplateKeccak256": "0x06bc16d6c6b3a78d4c81aa4588e74f71e9c441dffa4cecb6668cc2b3c061222b",
+  "immutableReferenceCount": 7,
+  "immutableReferences": {
+    "genesisConfigHash": [
+      {
+        "length": 32,
+        "start": 374
+      },
+      {
+        "length": 32,
+        "start": 1229
+      }
+    ],
+    "governanceTimelock": [
+      {
+        "length": 32,
+        "start": 1062
+      },
+      {
+        "length": 32,
+        "start": 1893
+      }
+    ],
+    "registry": [
+      {
+        "length": 32,
+        "start": 1156
+      },
+      {
+        "length": 32,
+        "start": 1999
+      },
+      {
+        "length": 32,
+        "start": 2746
+      }
+    ]
+  },
+  "runtimeTemplateBytes": 4426,
+  "schema": "420-swap-audit-6-compiler-artifact-v1",
+  "source": "contracts/src/swap/ApprovedQuoteAssetRegistry.sol",
+  "sourceBlobSha1": "c374a9754eb9aadef96a2b761788df1dbc33e69e",
+  "status": "SWAP_AUDIT_6_COMPILER_ARTIFACT_FROZEN",
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 638,
+        "contract": "src/swap/ApprovedQuoteAssetRegistry.sol:ApprovedQuoteAssetRegistry",
+        "label": "quoteAssets",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_mapping(t_address,t_struct(QuoteAsset)633_storage)"
+      },
+      {
+        "astId": 642,
+        "contract": "src/swap/ApprovedQuoteAssetRegistry.sol:ApprovedQuoteAssetRegistry",
+        "label": "canonicalForCurrency",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_mapping(t_bytes3,t_address)"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_bytes3": {
+        "encoding": "inplace",
+        "label": "bytes3",
+        "numberOfBytes": "3"
+      },
+      "t_bytes32": {
+        "encoding": "inplace",
+        "label": "bytes32",
+        "numberOfBytes": "32"
+      },
+      "t_enum(Status)625": {
+        "encoding": "inplace",
+        "label": "enum ApprovedQuoteAssetRegistry.Status",
+        "numberOfBytes": "1"
+      },
+      "t_mapping(t_address,t_struct(QuoteAsset)633_storage)": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => struct ApprovedQuoteAssetRegistry.QuoteAsset)",
+        "numberOfBytes": "32",
+        "value": "t_struct(QuoteAsset)633_storage"
+      },
+      "t_mapping(t_bytes3,t_address)": {
+        "encoding": "mapping",
+        "key": "t_bytes3",
+        "label": "mapping(bytes3 => address)",
+        "numberOfBytes": "32",
+        "value": "t_address"
+      },
+      "t_struct(QuoteAsset)633_storage": {
+        "encoding": "inplace",
+        "label": "struct ApprovedQuoteAssetRegistry.QuoteAsset",
+        "members": [
+          {
+            "astId": 628,
+            "contract": "src/swap/ApprovedQuoteAssetRegistry.sol:ApprovedQuoteAssetRegistry",
+            "label": "status",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_enum(Status)625"
+          },
+          {
+            "astId": 630,
+            "contract": "src/swap/ApprovedQuoteAssetRegistry.sol:ApprovedQuoteAssetRegistry",
+            "label": "currency",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bytes3"
+          },
+          {
+            "astId": 632,
+            "contract": "src/swap/ApprovedQuoteAssetRegistry.sol:ApprovedQuoteAssetRegistry",
+            "label": "metadataHash",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_bytes32"
+          }
+        ],
+        "numberOfBytes": "64"
+      }
+    }
+  }
+}

@@ -37,7 +37,10 @@
       "wallet_default_eligible": false,
       "public_distribution_eligible": false,
       "asset_qualification_required": false,
-      "warning": "Permissionless pools are user-created and are not protocol endorsements."
+      "warning": "Permissionless pools are externally deployed and user-registered. Tokens, pool code and liquidity are not protocol endorsements.",
+      "registration_model": "DEPLOY_EXTERNALLY_THEN_REGISTER_EXISTING_POOL",
+      "pool_address_uniqueness": true,
+      "same_pair_multiple_pools_allowed": true
     }
   },
   "canonical_quote_assets": {

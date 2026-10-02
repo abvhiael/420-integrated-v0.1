@@ -1,291 +1,7 @@
 {
-  "schema": "420-genesis-predeploy-plan-v1",
-  "status": "FROZEN_ADDRESS_MAP_ARTIFACTS_PENDING",
-  "solidity": {
-    "evm_version": "cancun",
-    "optimizer": true,
-    "optimizer_runs": 200,
-    "version": "0.8.24"
-  },
+  "namespace_authority": "contracts/config/genesis-address-namespace.json",
+  "namespace_policy": "FROZEN_STEP6_2_PRESERVED",
   "predeploys": [
-    {
-      "name": "RewardController",
-      "address": "0x0000000000000000000000000000000000000420",
-      "source": "system/RewardController.sol",
-      "artifact": "contracts/artifacts/RewardController.json",
-      "status": "SOURCE_READY",
-      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
-      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
-    },
-    {
-      "name": "AttentionTreasury",
-      "address": "0x0000000000000000000000000000000000000421",
-      "source": "system/AttentionTreasury.sol",
-      "artifact": "contracts/artifacts/AttentionTreasury.json",
-      "status": "SOURCE_READY",
-      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
-      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
-    },
-    {
-      "name": "DevelopmentTreasury",
-      "address": "0x0000000000000000000000000000000000000422",
-      "source": "system/DevelopmentTreasury.sol",
-      "artifact": "contracts/artifacts/DevelopmentTreasury.json",
-      "status": "SOURCE_READY",
-      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
-      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
-    },
-    {
-      "name": "ValidatorRegistry",
-      "address": "0x0000000000000000000000000000000000000423",
-      "source": "system/ValidatorRegistry.sol",
-      "artifact": "contracts/artifacts/ValidatorRegistry.json",
-      "status": "SOURCE_READY",
-      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
-      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts, including canonical consensus-system caller 0x043c."
-    },
-    {
-      "name": "ProtocolReserve",
-      "address": "0x0000000000000000000000000000000000000424",
-      "source": "system/ProtocolReserve.sol",
-      "artifact": "contracts/artifacts/ProtocolReserve.json",
-      "status": "SOURCE_READY",
-      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
-      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
-    },
-    {
-      "name": "CommunityValidatorReserve",
-      "address": "0x0000000000000000000000000000000000000425",
-      "source": "system/CommunityValidatorReserve.sol",
-      "artifact": "contracts/artifacts/CommunityValidatorReserve.json",
-      "status": "SOURCE_READY",
-      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
-      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
-    },
-    {
-      "name": "CommunityRewardReserve",
-      "address": "0x0000000000000000000000000000000000000426",
-      "source": "system/CommunityRewardReserve.sol",
-      "artifact": "contracts/artifacts/CommunityRewardReserve.json",
-      "status": "SOURCE_READY",
-      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
-      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
-    },
-    {
-      "name": "FounderVestingRegistry",
-      "address": "0x0000000000000000000000000000000000000427",
-      "source": "system/FounderVestingRegistry.sol",
-      "artifact": "contracts/artifacts/FounderVestingRegistry.json",
-      "status": "SOURCE_READY",
-      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
-      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
-    },
-    {
-      "name": "RandomnessRegistry",
-      "address": "0x0000000000000000000000000000000000000428",
-      "source": "system/RandomnessRegistry.sol",
-      "artifact": "contracts/artifacts/RandomnessRegistry.json",
-      "status": "SOURCE_READY",
-      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
-      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
-    },
-    {
-      "name": "GovernanceTimelock",
-      "address": "0x0000000000000000000000000000000000000429",
-      "source": "governance/GovernanceTimelock.sol",
-      "artifact": "contracts/artifacts/GovernanceTimelock.json",
-      "status": "ARTIFACT_READY",
-      "constructor_strategy": "DIRECT_GENESIS_IMMUTABLE_AND_STORAGE_MATERIALIZATION",
-      "notes": "GOV-AUDIT-6 exact runtime and constructor state materialized from pinned compiler outputs.",
-      "runtime_code_hash": "0xca5e96c6048b190839d68a8857b2ff5f0a7e0f356d4089ac31fa684cdee00139",
-      "source_blob_sha1": "30977a1e172763aa333eeb4b34b1bbaee025c235",
-      "predeploy_state": "contracts/config/predeploy/GovernanceTimelock-predeploy-state.json"
-    },
-    {
-      "name": "PublicDistributionVault",
-      "address": "0x000000000000000000000000000000000000042a",
-      "source": "system/PublicDistributionVault.sol",
-      "artifact": "contracts/artifacts/PublicDistributionVault.json",
-      "status": "SOURCE_READY",
-      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
-      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
-    },
-    {
-      "name": "GenesisDEXFactory",
-      "address": "0x000000000000000000000000000000000000042b",
-      "source": "swap/GenesisDEXFactory.sol",
-      "artifact": "contracts/artifacts/GenesisDEXFactory.json",
-      "status": "SOURCE_READY",
-      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
-      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
-    },
-    {
-      "name": "PublicBatchAuction",
-      "address": "0x000000000000000000000000000000000000042c",
-      "source": "swap/PublicBatchAuction.sol",
-      "artifact": "contracts/artifacts/PublicBatchAuction.json",
-      "status": "SOURCE_READY",
-      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
-      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
-    },
-    {
-      "name": "TWAPOracle",
-      "address": "0x000000000000000000000000000000000000042d",
-      "source": "swap/TWAPOracle.sol",
-      "artifact": "contracts/artifacts/TWAPOracle.json",
-      "status": "SOURCE_READY",
-      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
-      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
-    },
-    {
-      "name": "ValidatorBootstrapReserve",
-      "address": "0x000000000000000000000000000000000000042e",
-      "source": "system/ValidatorBootstrapReserve.sol",
-      "artifact": "contracts/artifacts/ValidatorBootstrapReserve.json",
-      "status": "SOURCE_READY",
-      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
-      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
-    },
-    {
-      "name": "AIProviderRegistry",
-      "address": "0x000000000000000000000000000000000000042f",
-      "source": "ai/AIProviderRegistry.sol",
-      "artifact": "contracts/artifacts/AIProviderRegistry.json",
-      "status": "SOURCE_READY",
-      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
-      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
-    },
-    {
-      "name": "AIModelRegistry",
-      "address": "0x0000000000000000000000000000000000000430",
-      "source": "ai/AIModelRegistry.sol",
-      "artifact": "contracts/artifacts/AIModelRegistry.json",
-      "status": "SOURCE_READY",
-      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
-      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
-    },
-    {
-      "name": "AIJobManager",
-      "address": "0x0000000000000000000000000000000000000431",
-      "source": "ai/AIJobManager.sol",
-      "artifact": "contracts/artifacts/AIJobManager.json",
-      "status": "SOURCE_READY",
-      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
-      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
-    },
-    {
-      "name": "AIJobEscrow",
-      "address": "0x0000000000000000000000000000000000000432",
-      "source": "ai/AIJobEscrow.sol",
-      "artifact": "contracts/artifacts/AIJobEscrow.json",
-      "status": "SOURCE_READY",
-      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
-      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
-    },
-    {
-      "name": "AIReputationRegistry",
-      "address": "0x0000000000000000000000000000000000000433",
-      "source": "ai/AIReputationRegistry.sol",
-      "artifact": "contracts/artifacts/AIReputationRegistry.json",
-      "status": "SOURCE_READY",
-      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
-      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
-    },
-    {
-      "name": "ProtocolRegistry",
-      "address": "0x0000000000000000000000000000000000000434",
-      "source": "apps/ProtocolRegistry.sol",
-      "artifact": "contracts/artifacts/ProtocolRegistry.json",
-      "status": "ARTIFACT_READY",
-      "constructor_strategy": "DIRECT_GENESIS_IMMUTABLE_MATERIALIZATION",
-      "notes": "REG-AUDIT-5: pinned Solidity 0.8.24/Cancun runtime retained; governanceTimelock immutable materialized to 0x0429 from compiler immutableReferences; constructor mutable storage is empty with canonical empty storage root. Live deployment verification remains REG-AUDIT-8.",
-      "runtime_code_hash": "0x9f9e5f794296cf9faf5f8c8d17cd815f3c19c004a158c15cb61b5a29eaacb330",
-      "predeploy_state": "contracts/config/predeploy/ProtocolRegistry-predeploy-state.json",
-      "source_blob_sha1": "9ab3d53a68b6533978f41e0202e5268f1d615c19"
-    },
-    {
-      "name": "Names420",
-      "address": "0x0000000000000000000000000000000000000435",
-      "source": "apps/Names420.sol",
-      "artifact": "contracts/artifacts/Names420.json",
-      "status": "ARTIFACT_READY",
-      "constructor_strategy": "DIRECT_GENESIS_IMMUTABLE_MATERIALIZATION",
-      "notes": "NAMES-AUDIT-6: governanceTimelock immutable materialized to 0x0429 at the compiler-reported 32-byte reference; constructor performs no mutable storage writes; records/commitments/primaryNameByAddress begin empty; final runtime hash and empty storage root are retained in Names420 predeploy state. Live deployment verification remains NAMES-AUDIT-9.",
-      "source_blob_sha1": "4cb9b06b4a3febb3bf024c087f3ade1eebdcf31d",
-      "compiler_runtime_template_sha256": "7b34c5506c526d9c7015d4d2c4514cacac585bd571050a53655ea2270d1210bd",
-      "artifact_payload_sha256": "c40970d3a04503309f9467eaca00c915f5ce3dd1e993c2df3318aa6cd149ab2c",
-      "runtime_code_hash": "0xa974fffd3a40e7f28db41e4ae30656b33789d2483b18b47c809ce2385de709b7",
-      "predeploy_state": "contracts/config/predeploy/Names420-predeploy-state.json"
-    },
-    {
-      "name": "Identity420",
-      "address": "0x0000000000000000000000000000000000000436",
-      "source": "apps/Identity420.sol",
-      "artifact": "contracts/artifacts/Identity420.json",
-      "status": "ARTIFACT_READY",
-      "constructor_strategy": "DIRECT_GENESIS_IMMUTABLE_MATERIALIZATION",
-      "notes": "ID-AUDIT-5: pinned Solidity 0.8.24/Cancun runtime materialized from retained ID-AUDIT-4 artifact; governanceTimelock immutable patched to 0x0429 from compiler immutableReferences; mutable Genesis storage is explicitly empty. Live-chain verification remains ID-AUDIT-9.",
-      "runtime_code_hash": "0xda0fcd565d7aea6590b3e0ec468f7b99af50138b62527e770ca367a57e6cfd86",
-      "predeploy_state": "contracts/config/predeploy/Identity420-predeploy-state.json",
-      "source_blob_sha1": "9d6bbfecf6cbb406312138acc735c5390513cd5a"
-    },
-    {
-      "name": "Governance420",
-      "address": "0x0000000000000000000000000000000000000437",
-      "source": "governance/Governance420.sol",
-      "artifact": "contracts/artifacts/Governance420.json",
-      "status": "ARTIFACT_READY",
-      "constructor_strategy": "DIRECT_GENESIS_IMMUTABLE_AND_STORAGE_MATERIALIZATION",
-      "notes": "GOV-AUDIT-6 exact runtime and constructor state materialized from pinned compiler outputs.",
-      "runtime_code_hash": "0x9af678e7626b6141b4af33e7729b27835949f8dad634298e7ce5a5e754305d64",
-      "source_blob_sha1": "886668e8efa97bd32734e32cde11148bcf98e5bd",
-      "predeploy_state": "contracts/config/predeploy/Governance420-predeploy-state.json"
-    },
-    {
-      "name": "VerifiedGateway420",
-      "address": "0x0000000000000000000000000000000000000438",
-      "source": "bridge/VerifiedGateway420.sol",
-      "artifact": "contracts/artifacts/VerifiedGateway420.json",
-      "status": "SOURCE_READY",
-      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
-      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
-    },
-    {
-      "name": "ApprovedQuoteAssetRegistry",
-      "address": "0x0000000000000000000000000000000000000439",
-      "source": "swap/ApprovedQuoteAssetRegistry.sol",
-      "artifact": "contracts/artifacts/ApprovedQuoteAssetRegistry.json",
-      "status": "SOURCE_READY",
-      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
-      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
-    },
-    {
-      "name": "Stake420",
-      "address": "0x000000000000000000000000000000000000043a",
-      "source": "apps/Stake420.sol",
-      "artifact": "contracts/artifacts/Stake420.json",
-      "status": "SOURCE_READY",
-      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
-      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
-    },
-    {
-      "name": "CannaseurCampaignRegistry",
-      "address": "0x000000000000000000000000000000000000043b",
-      "source": "system/CannaseurCampaignRegistry.sol",
-      "artifact": "contracts/artifacts/CannaseurCampaignRegistry.json",
-      "status": "SOURCE_READY",
-      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
-      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
-    },
-    {
-      "name": "ConsensusSystemCall420",
-      "address": "0x000000000000000000000000000000000000043c",
-      "source": "system/ConsensusSystemCall420.sol",
-      "artifact": "contracts/artifacts/ConsensusSystemCall420.json",
-      "status": "SOURCE_READY",
-      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
-      "notes": "Runtime bytecode is placed at 0x043c. Gateway trusts only go-ethereum params.SystemAddress; ValidatorRegistry and RewardController bind their consensus-system caller to 0x043c."
-    },
     {
       "address": "0x0000000000000000000000000000000000000420",
       "artifact": "contracts/artifacts/RewardController.json",
@@ -400,29 +116,41 @@
     {
       "address": "0x000000000000000000000000000000000000042b",
       "artifact": "contracts/artifacts/GenesisDEXFactory.json",
-      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
+      "compiler_runtime_template_keccak256": "0x2e9c0c4a7fbcf8bcdb3c38fda23c886bd7af446c1598d59ba807e2aae154d60f",
+      "constructor_strategy": "DIRECT_GENESIS_IMMUTABLE_MATERIALIZATION",
       "name": "GenesisDEXFactory",
-      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts.",
+      "notes": "SWAP-AUDIT-6: deterministic Solidity 0.8.24/Cancun runtime and empty mutable storage materialized from frozen GovernanceTimelock, ProtocolRegistry and canonical global genesisConfigHash. Live deployment verification remains SWAP-AUDIT-7/8.",
+      "predeploy_state": "contracts/config/predeploy/GenesisDEXFactory-predeploy-state.json",
+      "runtime_code_hash": "0x1c9e72335d2da9ef3a7c65bcfab88364ba04ec6ed85789ff8c3b231e89e10e35",
       "source": "swap/GenesisDEXFactory.sol",
-      "status": "SOURCE_READY"
+      "source_blob_sha1": "70f996054cae7dc1c8620cffa40628a4ceb930cd",
+      "status": "ARTIFACT_READY"
     },
     {
       "address": "0x000000000000000000000000000000000000042c",
       "artifact": "contracts/artifacts/PublicBatchAuction.json",
-      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
+      "compiler_runtime_template_keccak256": "0x8402f58df988b874eb7a1d3e3c05ca471e5de8dbecd987454c53ef139991da98",
+      "constructor_strategy": "DIRECT_GENESIS_IMMUTABLE_MATERIALIZATION",
       "name": "PublicBatchAuction",
-      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts.",
+      "notes": "SWAP-AUDIT-6: deterministic Solidity 0.8.24/Cancun runtime and empty mutable storage materialized from frozen GovernanceTimelock, ProtocolRegistry and canonical global genesisConfigHash. Live deployment verification remains SWAP-AUDIT-7/8.",
+      "predeploy_state": "contracts/config/predeploy/PublicBatchAuction-predeploy-state.json",
+      "runtime_code_hash": "0xe2f81400c625114689b744ff4dd116143d4991e01f1608370a65566938df9203",
       "source": "swap/PublicBatchAuction.sol",
-      "status": "SOURCE_READY"
+      "source_blob_sha1": "403f502898ad445d38075bfb648a64fe73fc8f29",
+      "status": "ARTIFACT_READY"
     },
     {
       "address": "0x000000000000000000000000000000000000042d",
       "artifact": "contracts/artifacts/TWAPOracle.json",
-      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
+      "compiler_runtime_template_keccak256": "0x43b55b63656c9a0b3c6ed863298fe4baf9fa0f28afa511e62de79d697b429865",
+      "constructor_strategy": "DIRECT_GENESIS_IMMUTABLE_MATERIALIZATION",
       "name": "TWAPOracle",
-      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts.",
+      "notes": "SWAP-AUDIT-6: deterministic Solidity 0.8.24/Cancun runtime and empty mutable storage materialized from frozen GovernanceTimelock, ProtocolRegistry and canonical global genesisConfigHash. Live deployment verification remains SWAP-AUDIT-7/8.",
+      "predeploy_state": "contracts/config/predeploy/TWAPOracle-predeploy-state.json",
+      "runtime_code_hash": "0x581a2ab1d4f8ffcecd88bb9bce1b868b4de39b52e1911957dbdc93759631fb32",
       "source": "swap/TWAPOracle.sol",
-      "status": "SOURCE_READY"
+      "source_blob_sha1": "55802efd2331c6278ca4482f116c72e7cc590466",
+      "status": "ARTIFACT_READY"
     },
     {
       "address": "0x000000000000000000000000000000000000042e",
@@ -537,11 +265,15 @@
     {
       "address": "0x0000000000000000000000000000000000000439",
       "artifact": "contracts/artifacts/ApprovedQuoteAssetRegistry.json",
-      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
+      "compiler_runtime_template_keccak256": "0x06bc16d6c6b3a78d4c81aa4588e74f71e9c441dffa4cecb6668cc2b3c061222b",
+      "constructor_strategy": "DIRECT_GENESIS_IMMUTABLE_MATERIALIZATION",
       "name": "ApprovedQuoteAssetRegistry",
-      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts.",
+      "notes": "SWAP-AUDIT-6: deterministic Solidity 0.8.24/Cancun runtime and empty mutable storage materialized from frozen GovernanceTimelock, ProtocolRegistry and canonical global genesisConfigHash. Live deployment verification remains SWAP-AUDIT-7/8.",
+      "predeploy_state": "contracts/config/predeploy/ApprovedQuoteAssetRegistry-predeploy-state.json",
+      "runtime_code_hash": "0x7ed9d661715160092a1fd1fdbd4ff09dca80714f2ff0270855d1c5ed1ab315f6",
       "source": "swap/ApprovedQuoteAssetRegistry.sol",
-      "status": "SOURCE_READY"
+      "source_blob_sha1": "c374a9754eb9aadef96a2b761788df1dbc33e69e",
+      "status": "ARTIFACT_READY"
     },
     {
       "address": "0x000000000000000000000000000000000000043a",
@@ -583,6 +315,12 @@
     "Genesis generator must never infer storage layouts from source text.",
     "ConsensusSystemCall420 MUST be present at 0x043c before ValidatorRegistry or RewardController consensus writes can succeed."
   ],
-  "namespace_authority": "contracts/config/genesis-address-namespace.json",
-  "namespace_policy": "FROZEN_STEP6_2_PRESERVED"
+  "schema": "420-genesis-predeploy-plan-v1",
+  "solidity": {
+    "evm_version": "cancun",
+    "optimizer": true,
+    "optimizer_runs": 200,
+    "version": "0.8.24"
+  },
+  "status": "FROZEN_ADDRESS_MAP_ARTIFACTS_PENDING"
 }

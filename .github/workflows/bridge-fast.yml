@@ -72,7 +72,7 @@ jobs:
         run: |
           set -euo pipefail
           for suite in \
-            CrossAdapterHardening420 \
+            CrossAdapterHardeningBridgeAdapter420 \
             NativeAdapterReplayDomainHardening420 \
             VerifierRotationHardening420 \
             EmergencyControlsHardening420 \

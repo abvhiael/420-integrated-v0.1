@@ -198,7 +198,7 @@ Reuse canonical $420 custody/accounting. Do not create an unrelated collateral t
 Policy-bound distribution to harmed payer, replacement worker, challenger and/or protocol treasury.
 
 ### CMP-1.5.7 — Reward accounting
-**Status: implementation/Level 1 + Level 2 qualification in progress.**
+**Status: COMPLETE — Level 1 + Level 2 exact-head qualified on `7fd48bcdf2ecbc618d110b34d5b081d2f3cca874`; durable evidence reconciled in CMP-1.5.13.**
 
 Separately authorized, canonical-Vault-backed worker/verifier reward accounting with exact collateral identity, replay protection and no payer-escrow or consensus-issuance authority.
 
@@ -533,7 +533,7 @@ Production target flow:
 | CMP-1.2 ComputeEscrow/Vault accounting | repository-qualified; live/stake dependencies remain |
 | CMP-1.3 WorkerRegistry | current: CMP-1.3.16 closeout |
 | CMP-1.4 VerifierRegistry | repository-qualified through CMP-1.4.12 |
-| CMP-1.5 ComputeStake | current: CMP-1.5.13 phase closeout; CMP-1.5.0–1.5.12 repository-qualified (CMP-1.5.7 roadmap status pending reconciliation in closeout) |
+| CMP-1.5 ComputeStake | current: CMP-1.5.13 phase closeout; CMP-1.5.0–1.5.12 repository-qualified |
 | CMP-2 matching marketplace | forthcoming |
 | CMP-3 node420 worker runtime | forthcoming |
 | CMP-4 scientific compute framework | forthcoming |

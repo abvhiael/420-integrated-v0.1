@@ -1,6 +1,6 @@
 {
   "schema": "420pay-dependency-reconciliation-v1",
-  "status": "AUDIT_RECONCILED_EXACT_HEAD_QUALIFICATION_PENDING",
+  "status": "AUDIT_RECONCILED_EXACT_HEAD_QUALIFIED",
   "component": "420Pay",
   "canonical_dependency_matrix": "contracts/config/interfaces/dependency-matrix.json",
   "frozen_interface_layer": "contracts/config/interfaces/genesis-interface-layer.json",
@@ -161,5 +161,21 @@
     "The settlement adapter accepts execution only from its governance-configured PaymentRouter420.",
     "The canonical swap executor trusts only explicitly governed callers.",
     "Genesis activation must bind the PAY_SETTLEMENT replay domain to the canonical PaymentRouter420."
-  ]
+  ],
+  "qualification_evidence": {
+    "source_sha": "79e3bc85f3f2de1778e0200b7eb5dc7895e699f8",
+    "pay_audit_workflow_run": {
+      "name": "420Pay audit qualification",
+      "run_number": 59,
+      "run_id": 36965952679,
+      "conclusion": "success"
+    },
+    "solidity_workflow_run": {
+      "name": "Solidity Contracts",
+      "run_number": 4003,
+      "run_id": 36965952612,
+      "conclusion": "success"
+    },
+    "note": "Final bookkeeping validity additionally requires the commit carrying this record to pass the dedicated exact-head 420Pay audit workflow."
+  }
 }

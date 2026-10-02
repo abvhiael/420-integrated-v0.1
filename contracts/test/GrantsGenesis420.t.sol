@@ -452,15 +452,25 @@ contract GrantsGenesis420Test {
     function testPerAwardCapFailsClosed() public {
         Env memory e = setup();
         (bytes32 p,,) = makeProgram(e);
-        bytes32 app = submit(e, p, 800, 1);
+        bytes32 content = keccak256("per-award-cap");
+        bytes32 app = e.applications.canonicalId(p, ALICE, 1, content);
 
-        bytes32 terms = keccak256("over-per-award-cap");
-        bytes32 awardId = e.awards.canonicalId(app, ALICE, 701, terms);
-        (bool created,) = address(e.awards)
-            .call(abi.encodeWithSelector(e.awards.createAward.selector, awardId, app, ALICE, uint128(701), terms));
-        require(!created, "per-award cap bypass");
-        require(e.programs.program(p).awarded == 0, "failed award changed program accounting");
-        require(e.awards.applicationAwarded(app) == 0, "failed award changed application accounting");
+        vm.prank(ALICE);
+        (bool overRequested,) = address(e.applications)
+            .call(
+                abi.encodeWithSelector(
+                    e.applications.submit.selector, app, p, ALICE, uint256(1), uint128(701), content
+                )
+            );
+        require(!overRequested, "application exceeded per-award cap");
+        require(!e.applications.applicationNonceUsed(p, ALICE, 1), "failed capped application consumed nonce");
+
+        vm.prank(ALICE);
+        e.applications.submit(app, p, ALICE, 1, 700, content);
+        bytes32 a = award(e, app, 700);
+
+        require(e.awards.award(a).amount == 700, "max award boundary rejected");
+        require(e.programs.program(p).awarded == 700, "max award not reserved");
     }
 
     function testTreasuryBindingRejectsEveryCanonicalFieldMismatch() public {

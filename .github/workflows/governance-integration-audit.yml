@@ -93,7 +93,7 @@ jobs:
           forge build src/governance src/system/ValidatorRegistry.sol src/treasury src/vault
       - name: GOV-AUDIT-7 Treasury Vault Stake integration
         working-directory: contracts
-        run: FOUNDRY_TEST=test-governance-audit-7 forge test --match-path test-governance-audit-7/GovernanceAudit7Integration420.t.sol -vvv
+        run: FOUNDRY_SRC=src/governance FOUNDRY_TEST=test-governance-audit-7 forge test --match-path test-governance-audit-7/GovernanceAudit7Integration420.t.sol -vvv
       - name: Governance Wallet consumer boundary
         working-directory: wallet/web
         run: |

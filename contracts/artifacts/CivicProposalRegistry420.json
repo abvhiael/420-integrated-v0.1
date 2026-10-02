@@ -1,0 +1,536 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "timelock_",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "authority",
+          "type": "address"
+        }
+      ],
+      "name": "bindProposalAuthority",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "governanceTimelock",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "proposalAuthority",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "proposals",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "proposer",
+          "type": "address"
+        },
+        {
+          "internalType": "enum CivicIds420.ProposalClass",
+          "name": "class_",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "metadataHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "actionsHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint64",
+          "name": "snapshotBlock",
+          "type": "uint64"
+        },
+        {
+          "internalType": "uint64",
+          "name": "voteStart",
+          "type": "uint64"
+        },
+        {
+          "internalType": "uint64",
+          "name": "voteEnd",
+          "type": "uint64"
+        },
+        {
+          "internalType": "enum CivicIds420.ProposalState",
+          "name": "state",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bool",
+          "name": "exists",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "protocolVersion",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "proposalId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "proposer",
+          "type": "address"
+        },
+        {
+          "internalType": "enum CivicIds420.ProposalClass",
+          "name": "class_",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "metadataHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "actionsHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint64",
+          "name": "snapshotBlock",
+          "type": "uint64"
+        },
+        {
+          "internalType": "uint64",
+          "name": "voteStart",
+          "type": "uint64"
+        },
+        {
+          "internalType": "uint64",
+          "name": "voteEnd",
+          "type": "uint64"
+        }
+      ],
+      "name": "registerProposal",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "systemName",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "proposalId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "enum CivicIds420.ProposalState",
+          "name": "next",
+          "type": "uint8"
+        }
+      ],
+      "name": "transition",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "proposalId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "proposer",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "enum CivicIds420.ProposalClass",
+          "name": "class_",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "metadataHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "actionsHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "snapshotBlock",
+          "type": "uint64"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "voteStart",
+          "type": "uint64"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "voteEnd",
+          "type": "uint64"
+        }
+      ],
+      "name": "CivicProposalRegistered",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "proposalId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "enum CivicIds420.ProposalState",
+          "name": "previousState",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "internalType": "enum CivicIds420.ProposalState",
+          "name": "newState",
+          "type": "uint8"
+        }
+      ],
+      "name": "CivicProposalStateChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "authority",
+          "type": "address"
+        }
+      ],
+      "name": "ProposalAuthorityBound",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "AlreadyExists",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "AuthorityAlreadyBound",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidId",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidStateTransition",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidWindow",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NotFound",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "Unauthorized",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "UnauthorizedAuthority",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ZeroAddress",
+      "type": "error"
+    }
+  ],
+  "compiler": {
+    "evmVersion": "cancun",
+    "foundryConfigBlobSha1": "f18c965f43b244582f2a4c527e7bad6d23aee929",
+    "optimizer": true,
+    "optimizerRuns": 200,
+    "solidity": "0.8.24",
+    "toolchainConfigBlobSha1": "dd49cb0e07370b01401d63d2fb53683177de8abc",
+    "viaIR": true
+  },
+  "constructorIndependentRuntime": false,
+  "contractName": "CivicProposalRegistry420",
+  "deployedBytecode": "0x6080604090808252600480361015610015575f80fd5b5f3560e01c91826307dd2e4b1461063c575081631905aa711461037c5781632ae9c6001461036157816332ed5b12146102a157816339b8f2b1146101b3578163801fb8e0146100e657508063891dfef3146100be57639a1fdd7914610078575f80fd5b346100ba575f3660031901126100ba57517f00000000000000000000000000000000000000000000000000000000000004296001600160a01b03168152602090f35b5f80fd5b50346100ba575f3660031901126100ba5760015490516001600160a01b039091168152602090f35b82346100ba5760203660031901126100ba576001600160a01b03823581811692908381036100ba57827f00000000000000000000000000000000000000000000000000000000000004291633036101a4576001549283166101945761014a9061080e565b1561018557506001600160a01b03191681176001557f9e47c90070bed9e2e2e7b8f954096c4e879c365332d8e30ac1d515de13859c995f80a2005b5163b9739d1b60e01b81528390fd5b81516331305c5d60e11b81528590fd5b81516282b42960e81b81528590fd5b82346100ba57806003193601126100ba5781359160243560078110156100ba5760018060a01b036001541680331490811591610298575b5061028957835f525f6020526003835f2001805460ff8160c81c16156102795760c01c60ff169261021b8385610740565b1561026b5750816102527fe26e686d2527b98b9097c0a5913930d7112756c58b1bf183d270427780866f6a9594936102689361071c565b61025e845180946106cb565b60208301906106cb565ba2005b84516323e69e0360e21b8152fd5b845163c5723b5160e01b81528490fd5b50905163b9739d1b60e01b8152fd5b905015856101ea565b82346100ba5760203660031901126100ba5781355f525f602052805f209182549160ff8360a01c16936001810154600360028301549201549567ffffffffffffffff9484519660018060a01b031687528082101561034e5750958093859360ff96936101209960208a015282890152606088015282821660808801521c1660a08501528160801c1660c084015261034060e08401838360c01c166106cb565b60c81c161515610100820152f35b602190634e487b7160e01b5f525260245ffd5b82346100ba575f3660031901126100ba576020905160018152f35b82346100ba5761010090816003193601126100ba576024356001600160a01b0381811693853593928590036100ba5760443595808710156100ba576064359360843560a4359267ffffffffffffffff948585168095036100ba5760c435958087168097036100ba5760e435978189168099036100ba57806001541680331490811591610633575b50610623578a15801561061b575b8015610613575b801561060b575b6105fb578688118015906105f1575b6105e1578a5f525f60205260ff6003875f20015460c81c166105d1578551906101208201828110848211176105be578895938f938f938f97958f908f95968f978e528452602084019081528c840191825260608401928c8452608085019b8c5260a0850197885260c0850196875260e085019860018a5285019a60018c525f525f6020528d5f20945116845491518a8110156105ab576001600160a81b03199092161760a09190911b60ff60a01b1617835551600183015551600282015596516003979097018054935192516001600160c01b0319909416919097161790881b6fffffffffffffffff0000000000000000161760809190911b67ffffffffffffffff60801b161784555190600782101561034e57509160a0979593916105787f08258cf8f0b32ed26fbda6d587fa6fb6df521aadf604254f1b75d4427e13b7d59a9896948361071c565b51815460ff60c81b191690151560c81b60ff60c81b161790558151958652602086015284015260608301526080820152a4005b60218b634e487b7160e01b5f525260245ffd5b604186634e487b7160e01b5f525260245ffd5b855163119b4fd360e11b81528490fd5b855163392334ed60e01b81528490fd5b508789111561042e565b8551631bf4348160e31b81528490fd5b50841561041f565b508915610418565b508b15610411565b855163b9739d1b60e01b81528490fd5b9050158e610403565b83346100ba575f3660031901126100ba57610656826106ec565b6018825260207f436976696350726f706f73616c5265676973747279343230000000000000000060208401528151928391602083528151918260208501525f5b8381106106b55750505f83830185015250601f01601f19168101030190f35b8181018301518782018701528694508201610696565b9060078210156106d85752565b634e487b7160e01b5f52602160045260245ffd5b6040810190811067ffffffffffffffff82111761070857604052565b634e487b7160e01b5f52604160045260245ffd5b9060078110156106d857815460ff60c01b191660c09190911b60ff60c01b16179055565b60078110156106d8576001811461078457600281146107745760041461076557505f90565b60078110156106d85760051490565b5060078110156106d85760041490565b5060078110156106d8576002811490811561079d575090565b600391501490565b3d156107ea5767ffffffffffffffff903d8281116107085760405192601f8201601f19908116603f01168401908111848210176107085760405282523d5f602084013e565b606090565b908160209103126100ba57516001600160a01b03811681036100ba5790565b6001600160a01b03818116158015610933575b61092d57604051915f80602094858101906353eb74e760e11b825260048152610849816106ec565b5190845afa905f806108596107a5565b92604051878101906334cc866d60e21b825260048152610878816106ec565b51915afa6108846107a5565b9215908115610921575b8115610918575b50801561090e575b610906578084806108b3935183010191016107ef565b8216301492836108c4575b50505090565b6108d792935080825183010191016107ef565b90807f0000000000000000000000000000000000000000000000000000000000000429169116145f80806108be565b505050505f90565b508382511061089d565b9050155f610895565b9050848251109061088e565b50505f90565b50813b1561082156fea26469706673582212206990851d337abfedd073ca02ce7d8bd3bd8f86fbe6f94bdfc3386315563bd0e864736f6c63430008180033",
+  "immutableReferences": {
+    "5789": [
+      {
+        "length": 32,
+        "start": 139
+      },
+      {
+        "length": 32,
+        "start": 273
+      },
+      {
+        "length": 32,
+        "start": 2267
+      }
+    ]
+  },
+  "materializedImmutableReferences": [
+    {
+      "immutableId": "5789",
+      "length": 32,
+      "start": 139,
+      "value": "0x0000000000000000000000000000000000000429"
+    },
+    {
+      "immutableId": "5789",
+      "length": 32,
+      "start": 273,
+      "value": "0x0000000000000000000000000000000000000429"
+    },
+    {
+      "immutableId": "5789",
+      "length": 32,
+      "start": 2267,
+      "value": "0x0000000000000000000000000000000000000429"
+    }
+  ],
+  "materializedImmutableValue": "0x0000000000000000000000000000000000000429",
+  "runtimeCodeBytes": 2418,
+  "runtimeCodeHash": "0x5c08d1c7bb5e814c027e1a06fb371038e5e5727a0758642090bd8b59f4e496bc",
+  "schema": "420-governance-runtime-artifact-v1",
+  "source": "contracts/src/governance/CivicProposalRegistry420.sol",
+  "sourceBlobSha1": "6d42bb3fc0b91f2eebc817d9d5fdb27b687ccf31",
+  "status": "GOV_AUDIT_6_RUNTIME_ARTIFACT",
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 2720,
+        "contract": "src/governance/CivicProposalRegistry420.sol:CivicProposalRegistry420",
+        "label": "proposals",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_mapping(t_bytes32,t_struct(Proposal)2715_storage)"
+      },
+      {
+        "astId": 2722,
+        "contract": "src/governance/CivicProposalRegistry420.sol:CivicProposalRegistry420",
+        "label": "proposalAuthority",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_address"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      },
+      "t_bytes32": {
+        "encoding": "inplace",
+        "label": "bytes32",
+        "numberOfBytes": "32"
+      },
+      "t_enum(ProposalClass)2238": {
+        "encoding": "inplace",
+        "label": "enum CivicIds420.ProposalClass",
+        "numberOfBytes": "1"
+      },
+      "t_enum(ProposalState)2246": {
+        "encoding": "inplace",
+        "label": "enum CivicIds420.ProposalState",
+        "numberOfBytes": "1"
+      },
+      "t_mapping(t_bytes32,t_struct(Proposal)2715_storage)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => struct CivicProposalRegistry420.Proposal)",
+        "numberOfBytes": "32",
+        "value": "t_struct(Proposal)2715_storage"
+      },
+      "t_struct(Proposal)2715_storage": {
+        "encoding": "inplace",
+        "label": "struct CivicProposalRegistry420.Proposal",
+        "members": [
+          {
+            "astId": 2696,
+            "contract": "src/governance/CivicProposalRegistry420.sol:CivicProposalRegistry420",
+            "label": "proposer",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_address"
+          },
+          {
+            "astId": 2699,
+            "contract": "src/governance/CivicProposalRegistry420.sol:CivicProposalRegistry420",
+            "label": "class_",
+            "offset": 20,
+            "slot": "0",
+            "type": "t_enum(ProposalClass)2238"
+          },
+          {
+            "astId": 2701,
+            "contract": "src/governance/CivicProposalRegistry420.sol:CivicProposalRegistry420",
+            "label": "metadataHash",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 2703,
+            "contract": "src/governance/CivicProposalRegistry420.sol:CivicProposalRegistry420",
+            "label": "actionsHash",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 2705,
+            "contract": "src/governance/CivicProposalRegistry420.sol:CivicProposalRegistry420",
+            "label": "snapshotBlock",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_uint64"
+          },
+          {
+            "astId": 2707,
+            "contract": "src/governance/CivicProposalRegistry420.sol:CivicProposalRegistry420",
+            "label": "voteStart",
+            "offset": 8,
+            "slot": "3",
+            "type": "t_uint64"
+          },
+          {
+            "astId": 2709,
+            "contract": "src/governance/CivicProposalRegistry420.sol:CivicProposalRegistry420",
+            "label": "voteEnd",
+            "offset": 16,
+            "slot": "3",
+            "type": "t_uint64"
+          },
+          {
+            "astId": 2712,
+            "contract": "src/governance/CivicProposalRegistry420.sol:CivicProposalRegistry420",
+            "label": "state",
+            "offset": 24,
+            "slot": "3",
+            "type": "t_enum(ProposalState)2246"
+          },
+          {
+            "astId": 2714,
+            "contract": "src/governance/CivicProposalRegistry420.sol:CivicProposalRegistry420",
+            "label": "exists",
+            "offset": 25,
+            "slot": "3",
+            "type": "t_bool"
+          }
+        ],
+        "numberOfBytes": "128"
+      },
+      "t_uint64": {
+        "encoding": "inplace",
+        "label": "uint64",
+        "numberOfBytes": "8"
+      }
+    }
+  }
+}

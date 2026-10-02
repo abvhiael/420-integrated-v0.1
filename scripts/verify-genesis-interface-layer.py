@@ -47,8 +47,14 @@ if layer_interfaces!=required:
     errors.append("frozen shared interface order/content differs from v1.0 manifest")
 
 for suite in ["420Pay","420Swap","420Bridge","420Stake","420Governance","420AI"]:
-    if suite not in matrix.get("dependencies",{}): errors.append("missing dependency matrix suite "+suite)
-    elif "ProtocolRegistry" not in matrix["dependencies"][suite]:
+    if suite not in matrix.get("dependencies",{}):
+        errors.append("missing dependency matrix suite "+suite)
+
+# App-specific dependency audits may narrow stale generic rows to the interfaces
+# actually consumed at runtime. Governance is a canonical authority provider and
+# its Civic core does not call ProtocolRegistry during proposal/vote/execution.
+for suite in ["420Pay","420Swap","420Bridge","420Stake","420AI"]:
+    if suite in matrix.get("dependencies",{}) and "ProtocolRegistry" not in matrix["dependencies"][suite]:
         errors.append(suite+" does not depend on ProtocolRegistry")
 
 iface=base/"IProtocolRegistry420.sol"

@@ -1,0 +1,75 @@
+name: 420Swap SWAP-AUDIT-7 Deployment Binding
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "contracts/src/apps/ProtocolRegistry.sol"
+      - "contracts/src/swap/GenesisDEXFactory.sol"
+      - "contracts/src/swap/CanonicalMarketRegistry.sol"
+      - "contracts/src/swap/CanonicalSwapExecutor420.sol"
+      - "contracts/src/swap/CanonicalConstantProductPool420.sol"
+      - "contracts/src/pay/PaymentRouter420.sol"
+      - "contracts/src/pay/adapters/CanonicalSettlementAdapter420.sol"
+      - "contracts/test/SwapDeploymentBinding420.t.sol"
+      - "contracts/config/swap/swap-audit-7-deployment-binding.json"
+      - "contracts/config/420pay-genesis-wiring.json"
+      - "contracts/config/predeploy/*Swap*-predeploy-state.json"
+      - "contracts/config/predeploy/GenesisDEXFactory-predeploy-state.json"
+      - "contracts/config/predeploy/PublicBatchAuction-predeploy-state.json"
+      - "contracts/config/predeploy/TWAPOracle-predeploy-state.json"
+      - "contracts/config/predeploy/ApprovedQuoteAssetRegistry-predeploy-state.json"
+      - "scripts/verify-swap-audit-7-deployment-binding.py"
+      - "scripts/verify-420swap-interface-v1.py"
+      - ".github/workflows/swap-audit-7.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: swap-audit-7-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deployment-binding:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Verify exact head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: Verify deployment binding manifest
+        run: python3 scripts/verify-swap-audit-7-deployment-binding.py
+
+      - name: Verify retained Swap interface semantics
+        run: python3 scripts/verify-420swap-interface-v1.py
+
+      - name: Compile deployment binding surface
+        working-directory: contracts
+        run: |
+          forge build \
+            src/apps/ProtocolRegistry.sol \
+            src/swap/GenesisDEXFactory.sol \
+            src/swap/CanonicalMarketRegistry.sol \
+            src/swap/CanonicalSwapExecutor420.sol \
+            src/swap/CanonicalConstantProductPool420.sol \
+            src/pay/PaymentRouter420.sol \
+            src/pay/adapters/CanonicalSettlementAdapter420.sol \
+            test/SwapDeploymentBinding420.t.sol
+
+      - name: Qualify deployment and Registry binding graph
+        working-directory: contracts
+        run: forge test --match-path test/SwapDeploymentBinding420.t.sol -vvv

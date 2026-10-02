@@ -20,6 +20,8 @@ function throwingApi420(): IndexerPublicApi420 {
     async assetTransfers() { throw new Error('backend unavailable'); },
     async protocolEvents() { throw new Error('backend unavailable'); },
     async protocolObject() { throw new Error('backend unavailable'); },
+    async treasuryBudget() { throw new Error('backend unavailable'); },
+    async treasuryDisbursement() { throw new Error('backend unavailable'); },
     async search() { throw new Error('backend unavailable'); }
   } as IndexerPublicApi420;
 }

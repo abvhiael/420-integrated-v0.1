@@ -1,0 +1,495 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "proposalRegistry_",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "electorateRegistry_",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "proposalId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "enum CivicIds420.House",
+          "name": "house",
+          "type": "uint8"
+        },
+        {
+          "internalType": "address",
+          "name": "voter",
+          "type": "address"
+        }
+      ],
+      "name": "ballot",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "enum CivicVoting420.Support",
+              "name": "support",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint256",
+              "name": "weight",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "cast",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct CivicVoting420.Ballot",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "proposalId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "enum CivicIds420.House",
+          "name": "house",
+          "type": "uint8"
+        },
+        {
+          "internalType": "enum CivicVoting420.Support",
+          "name": "support",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bytes",
+          "name": "proofData",
+          "type": "bytes"
+        }
+      ],
+      "name": "castVote",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "weight",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "electorateRegistry",
+      "outputs": [
+        {
+          "internalType": "contract CivicElectorateRegistry420",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "proposalId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "enum CivicIds420.House",
+          "name": "house",
+          "type": "uint8"
+        }
+      ],
+      "name": "participation",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "proposalRegistry",
+      "outputs": [
+        {
+          "internalType": "contract ICivicProposalRegistryVoting420",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "protocolVersion",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "systemName",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "proposalId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "enum CivicIds420.House",
+          "name": "house",
+          "type": "uint8"
+        }
+      ],
+      "name": "tally",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "againstVotes",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "forVotes",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "abstainVotes",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct CivicVoting420.Tally",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "proposalId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "enum CivicIds420.House",
+          "name": "house",
+          "type": "uint8"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "voter",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "enum CivicVoting420.Support",
+          "name": "support",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "weight",
+          "type": "uint256"
+        }
+      ],
+      "name": "CivicVoteCast",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "AlreadyVoted",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "HouseNotEligible",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidRegistry",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidVotingWeight",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NoVotingWeight",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ProposalNotActive",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ProposalNotFound",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "VotingEnded",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "VotingNotStarted",
+      "type": "error"
+    }
+  ],
+  "compiler": {
+    "evmVersion": "cancun",
+    "foundryConfigBlobSha1": "f18c965f43b244582f2a4c527e7bad6d23aee929",
+    "optimizer": true,
+    "optimizerRuns": 200,
+    "solidity": "0.8.24",
+    "toolchainConfigBlobSha1": "dd49cb0e07370b01401d63d2fb53683177de8abc",
+    "viaIR": true
+  },
+  "constructorIndependentRuntime": true,
+  "contractName": "CivicVoting420",
+  "deployedBytecode": "0x6080806040526004361015610012575f80fd5b5f3560e01c90816307dd2e4b146107aa575080632ae9c6001461078f5780632f995b611461071657806340e1c976146101ef578063791bd412146101c757806395b8b0aa1461010b578063a7d6e9ce146100e45763af2fefce14610074575f80fd5b346100e05761008236610842565b905f52600260205260405f209060028110156100cc5760ff165f5260205260206100c460405f2060026100bb825460018401549061097f565b9101549061097f565b604051908152f35b634e487b7160e01b5f52602160045260245ffd5b5f80fd5b346100e0575f3660031901126100e0575f546040516001600160a01b039091168152602090f35b346100e05760603660031901126100e05760243560028110156100e0576044356001600160a01b03811691908290036100e0576101466108ac565b506004355f52600360205260ff60405f2091165f5260205260405f20905f5260205260405f206040516101788161086e565b60ff8254169060038210156100cc57606092828252604060ff600260018401549360208601948552015416920191151582526101b76040518094610861565b5160208301525115156040820152f35b346100e0575f3660031901126100e0576001546040516001600160a01b039091168152602090f35b346100e05760803660031901126100e057600260243510156100e057600360443510156100e05767ffffffffffffffff6064358181116100e057366023820112156100e057818160040135116100e0573660248260040135830101116100e0575f54604051631976ad8960e11b815260048035908201526001600160a01b03916101209081908390602490829087165afa908115610558575f915f935f925f92610689575b5050156106775760078110156100cc576001036106655784164310610653578316431161064157600154169160405163cbcda20160e01b815260043560048201526101e0918282602481885afa928315610558575f93610593575b50505060016024351480610587575b610575576004355f52600360205260405f2060ff602435165f5260205260405f20335f5260205260405f209060028201549360ff85166105635760a4936020916040518096818094630a1ec5c560e21b8252600435600483015260243560248301523360448301526080606483015280600401356084830152806004013560248201848401375f83826004013584010152601f80199160040135011681010301915afa928315610558575f93610524575b50821561051257606090602435610507576020015101515b6004355f52600260205260405f2060ff602435165f5260205260405f20908154926103f8600184019485549061097f565b91610409600285019384549061097f565b908087119182156104df575b50506104cd576002600160209760ff19908185541660ff60443516178555888386015516179101556001604435145f146104a357505061045682825461097f565b90555b60405161046881604435610861565b81838201523390602435907f16f5caf0bf6edcee9897e8d8a37c04a81b02c0ec813f7b52f6e535c75e13b02b604060043592a4604051908152f35b9091506044356104c057506104b982825461097f565b9055610459565b90506104b982825461097f565b604051636a4a34cd60e01b8152600490fd5b87820392509082116104f357118780610415565b634e487b7160e01b5f52601160045260245ffd5b6040015101516103c7565b60405163923d21f560e01b8152600490fd5b9092506020813d602011610550575b816105406020938361088a565b810103126100e0575191846103af565b3d9150610533565b6040513d5f823e3d90fd5b604051637c9a1cf960e01b8152600490fd5b6040516344c61da360e11b8152600490fd5b506060810151156102fe565b80919293503d821161063a575b6105aa818561088a565b830190838203126100e0576040519260a0840192831184841017610626576105fc6101c092610619946040526105df836108de565b86526105ee8160208501610900565b602087015260e08301610900565b604085015261060e6101a082016108f3565b6060850152016108f3565b60808201528380806102ef565b634e487b7160e01b5f52604160045260245ffd5b503d6105a0565b604051637a19ed0560e01b8152600490fd5b604051633fd0090160e11b8152600490fd5b604051637becc13f60e01b8152600490fd5b60405163635e873760e01b8152600490fd5b93509350505081813d831161070f575b6106a3818361088a565b810103126100e0576106b4816108ca565b506004602082015110156100e0576106ce608082016108de565b506106db60a082016108de565b6106e760c083016108de565b9060e08301519260078410156100e05761010061070491016108f3565b909192908780610294565b503d610699565b346100e05761072436610842565b9061072d6108ac565b505f52600260205260405f209060028110156100cc5760ff165f52602052606060405f2060405161075d8161086e565b815491828252604060026001830154926020850193845201549201918252604051928352516020830152516040820152f35b346100e0575f3660031901126100e057602060405160018152f35b346100e0575f3660031901126100e0576040810181811067ffffffffffffffff82111761062657604052600e81526020906d04369766963566f74696e673432360941b60208201526040518092602082528251908160208401525f935b828510610829575050604092505f838284010152601f80199101168101030190f35b8481018201518686016040015293810193859350610807565b60409060031901126100e0576004359060243560028110156100e05790565b9060038210156100cc5752565b6060810190811067ffffffffffffffff82111761062657604052565b90601f8019910116810190811067ffffffffffffffff82111761062657604052565b604051906108b98261086e565b5f6040838281528260208201520152565b51906001600160a01b03821682036100e057565b519067ffffffffffffffff821682036100e057565b519081151582036100e057565b91908260c09103126100e05760405160c0810181811067ffffffffffffffff821117610626576040528092610934816108ca565b825260208101516020830152604081015160408301526060810151606083015260808101519063ffffffff821682036100e05760a061097a9181936080860152016108f3565b910152565b919082018092116104f35756fea2646970667358221220e5f316a706e61c07b1216b627d28dd23860bf4ff14350ca1a6f998dddb6e84ac64736f6c63430008180033",
+  "immutableReferences": {},
+  "materializedImmutableReferences": [],
+  "materializedImmutableValue": null,
+  "runtimeCodeBytes": 2498,
+  "runtimeCodeHash": "0x3ec8ce38ed4b641521899d79dd4e2f97009efce9844eb8796ef60042f2d3b781",
+  "schema": "420-governance-runtime-artifact-v1",
+  "source": "contracts/src/governance/CivicVoting420.sol",
+  "sourceBlobSha1": "68e463fde4e4dff058f18e7435cdcf32cf6e1965",
+  "status": "GOV_AUDIT_6_RUNTIME_ARTIFACT",
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 3215,
+        "contract": "src/governance/CivicVoting420.sol:CivicVoting420",
+        "label": "proposalRegistry",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_contract(ICivicProposalRegistryVoting420)3190"
+      },
+      {
+        "astId": 3218,
+        "contract": "src/governance/CivicVoting420.sol:CivicVoting420",
+        "label": "electorateRegistry",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_contract(CivicElectorateRegistry420)947"
+      },
+      {
+        "astId": 3225,
+        "contract": "src/governance/CivicVoting420.sol:CivicVoting420",
+        "label": "_tallies",
+        "offset": 0,
+        "slot": "2",
+        "type": "t_mapping(t_bytes32,t_mapping(t_uint8,t_struct(Tally)3204_storage))"
+      },
+      {
+        "astId": 3234,
+        "contract": "src/governance/CivicVoting420.sol:CivicVoting420",
+        "label": "_ballots",
+        "offset": 0,
+        "slot": "3",
+        "type": "t_mapping(t_bytes32,t_mapping(t_uint8,t_mapping(t_address,t_struct(Ballot)3212_storage)))"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      },
+      "t_bytes32": {
+        "encoding": "inplace",
+        "label": "bytes32",
+        "numberOfBytes": "32"
+      },
+      "t_contract(CivicElectorateRegistry420)947": {
+        "encoding": "inplace",
+        "label": "contract CivicElectorateRegistry420",
+        "numberOfBytes": "20"
+      },
+      "t_contract(ICivicProposalRegistryVoting420)3190": {
+        "encoding": "inplace",
+        "label": "contract ICivicProposalRegistryVoting420",
+        "numberOfBytes": "20"
+      },
+      "t_enum(Support)3197": {
+        "encoding": "inplace",
+        "label": "enum CivicVoting420.Support",
+        "numberOfBytes": "1"
+      },
+      "t_mapping(t_address,t_struct(Ballot)3212_storage)": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => struct CivicVoting420.Ballot)",
+        "numberOfBytes": "32",
+        "value": "t_struct(Ballot)3212_storage"
+      },
+      "t_mapping(t_bytes32,t_mapping(t_uint8,t_mapping(t_address,t_struct(Ballot)3212_storage)))": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => mapping(uint8 => mapping(address => struct CivicVoting420.Ballot)))",
+        "numberOfBytes": "32",
+        "value": "t_mapping(t_uint8,t_mapping(t_address,t_struct(Ballot)3212_storage))"
+      },
+      "t_mapping(t_bytes32,t_mapping(t_uint8,t_struct(Tally)3204_storage))": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => mapping(uint8 => struct CivicVoting420.Tally))",
+        "numberOfBytes": "32",
+        "value": "t_mapping(t_uint8,t_struct(Tally)3204_storage)"
+      },
+      "t_mapping(t_uint8,t_mapping(t_address,t_struct(Ballot)3212_storage))": {
+        "encoding": "mapping",
+        "key": "t_uint8",
+        "label": "mapping(uint8 => mapping(address => struct CivicVoting420.Ballot))",
+        "numberOfBytes": "32",
+        "value": "t_mapping(t_address,t_struct(Ballot)3212_storage)"
+      },
+      "t_mapping(t_uint8,t_struct(Tally)3204_storage)": {
+        "encoding": "mapping",
+        "key": "t_uint8",
+        "label": "mapping(uint8 => struct CivicVoting420.Tally)",
+        "numberOfBytes": "32",
+        "value": "t_struct(Tally)3204_storage"
+      },
+      "t_struct(Ballot)3212_storage": {
+        "encoding": "inplace",
+        "label": "struct CivicVoting420.Ballot",
+        "members": [
+          {
+            "astId": 3207,
+            "contract": "src/governance/CivicVoting420.sol:CivicVoting420",
+            "label": "support",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_enum(Support)3197"
+          },
+          {
+            "astId": 3209,
+            "contract": "src/governance/CivicVoting420.sol:CivicVoting420",
+            "label": "weight",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_uint256"
+          },
+          {
+            "astId": 3211,
+            "contract": "src/governance/CivicVoting420.sol:CivicVoting420",
+            "label": "cast",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_bool"
+          }
+        ],
+        "numberOfBytes": "96"
+      },
+      "t_struct(Tally)3204_storage": {
+        "encoding": "inplace",
+        "label": "struct CivicVoting420.Tally",
+        "members": [
+          {
+            "astId": 3199,
+            "contract": "src/governance/CivicVoting420.sol:CivicVoting420",
+            "label": "againstVotes",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint256"
+          },
+          {
+            "astId": 3201,
+            "contract": "src/governance/CivicVoting420.sol:CivicVoting420",
+            "label": "forVotes",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_uint256"
+          },
+          {
+            "astId": 3203,
+            "contract": "src/governance/CivicVoting420.sol:CivicVoting420",
+            "label": "abstainVotes",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_uint256"
+          }
+        ],
+        "numberOfBytes": "96"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      },
+      "t_uint8": {
+        "encoding": "inplace",
+        "label": "uint8",
+        "numberOfBytes": "1"
+      }
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "contracts": {
+    "CommunityValidatorReserve": {
+      "address": "0x0000000000000000000000000000000000000425",
+      "genesisBalanceWei": "6300000000000000000000000",
+      "runtimeCodeHash": "0xbba4f158ad05a0397a8a711dee181f2f3035e374d063293f06786393dd69b90e",
+      "sourceBlobSha1": "6ae1657a5ab45e97c76013ea45a310ae8fcd411c",
+      "storageRoot": "0x8714ffbab0b0f9899fd1314e2247639046488db89df2ca0fe61c46051202bd62",
+      "storageSlotCount": 1
+    },
+    "RewardController": {
+      "address": "0x0000000000000000000000000000000000000420",
+      "genesisBalanceWei": "0",
+      "runtimeCodeHash": "0xc1468f48a745511b99577d9381462fc75b2357725d58c59cd5102cc6fd0df30d",
+      "sourceBlobSha1": "012c9e24b4e7a37ca89aad1c887529a19c70bb16",
+      "storageRoot": "0x6c057db5efdf4eea1c5348e7cea01706e04eaa263525d7b204dfd72b80045c51",
+      "storageSlotCount": 1
+    },
+    "Stake420": {
+      "address": "0x000000000000000000000000000000000000043a",
+      "genesisBalanceWei": "0",
+      "runtimeCodeHash": "0x7de1130ee3db2866b6ea0a88de44d5699cec5444a0010c03e9a6b4f13a4be8ea",
+      "sourceBlobSha1": "e26b6ec304bb9db2742796821caa0e549a145bba",
+      "storageRoot": "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421",
+      "storageSlotCount": 0
+    },
+    "ValidatorRegistry": {
+      "address": "0x0000000000000000000000000000000000000423",
+      "genesisBalanceWei": "0",
+      "runtimeCodeHash": "0x9f67ac365954920c3e06a73a0af5cb2f114bf504108cec9ea3a516bc8d32731b",
+      "sourceBlobSha1": "e534624f007024d65fcbb9e0f730bafbb8077767",
+      "storageRoot": "0xe2296a7ff3c2cf889461acdd0a8348f78661a0db1bc7477142ac461ce20fe988",
+      "storageSlotCount": 2
+    }
+  },
+  "liveDeploymentVerified": false,
+  "next": "STAKE-AUDIT-8",
+  "schema": "420-stake-audit-7-materialization-v1",
+  "stakeGenesisConfig": "contracts/config/predeploy/stake-genesis-config-v1.json",
+  "stakeGenesisConfigHash": "0x7721fafee1f582e819e15ca57ce557bb0b473c584a49759e5d2511f882ff5eac",
+  "status": "STAKE_AUDIT_7_OFFLINE_PREDEPLOY_READY"
+}

@@ -1,0 +1,92 @@
+name: 420Stake STAKE-AUDIT-4
+
+on:
+  pull_request:
+    paths:
+      - 'contracts/test/StakeSecurityInvariant420.t.sol'
+      - 'contracts/test/StakeTransitionProperty420.t.sol'
+      - 'contracts/test/StakeRollbackAtomicity420.t.sol'
+      - 'contracts/config/security/stake-hardening-v1.json'
+      - 'contracts/config/security/genesis-suite-registry.json'
+      - 'scripts/verify-stake-audit-4-hardening.py'
+      - '.github/workflows/stake-audit-4.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: stake-audit-4-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  level-1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify STAKE-AUDIT-4 hardening anchors
+        run: python scripts/verify-stake-audit-4-hardening.py
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Compile focused Stake security suites
+        working-directory: contracts
+        run: forge build test/StakeSecurityInvariant420.t.sol test/StakeTransitionProperty420.t.sol test/StakeRollbackAtomicity420.t.sol
+      - name: Run stateful Stake security invariants
+        working-directory: contracts
+        run: forge test --match-path 'test/StakeSecurityInvariant420.t.sol' -vvv
+      - name: Run lifecycle transition property suite
+        working-directory: contracts
+        run: forge test --match-path 'test/StakeTransitionProperty420.t.sol' -vvv
+      - name: Run rollback and system-call atomicity suite
+        working-directory: contracts
+        run: forge test --match-path 'test/StakeRollbackAtomicity420.t.sol' -vvv
+
+  level-2-stake-security-hardening:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      FOUNDRY_PROFILE: hardening
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Run hardened stateful Stake invariant campaign
+        working-directory: contracts
+        run: forge test --match-path 'test/StakeSecurityInvariant420.t.sol' -vvv
+      - name: Run hardened transition graph property campaign
+        working-directory: contracts
+        run: forge test --match-path 'test/StakeTransitionProperty420.t.sol' -vvv
+      - name: Run hardened rollback/system-call atomicity campaign
+        working-directory: contracts
+        run: forge test --match-path 'test/StakeRollbackAtomicity420.t.sol' -vvv
+      - name: Run retained Stake lifecycle/replay regression
+        working-directory: contracts
+        run: forge test --match-path 'test/StakeValidatorGenesis420.t.sol' -vvv
+      - name: Run retained consensus gateway regression
+        working-directory: contracts
+        run: forge test --match-path 'test/ConsensusSystemCall420.t.sol' -vvv
+      - name: Cross-check retained Stake ABI vectors
+        working-directory: contracts
+        run: forge test --match-path 'test/StakeSystemCallABIVectors420.t.sol' -vvv

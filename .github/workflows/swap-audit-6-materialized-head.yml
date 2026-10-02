@@ -1,0 +1,108 @@
+name: 420Swap SWAP-AUDIT-6 Materialized Head
+# Normal user-authored retrigger after CI retained the final normalized artifacts.
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "contracts/artifacts/GenesisDEXFactory.json"
+      - "contracts/artifacts/PublicBatchAuction.json"
+      - "contracts/artifacts/TWAPOracle.json"
+      - "contracts/artifacts/ApprovedQuoteAssetRegistry.json"
+      - "contracts/artifacts/CanonicalSwapExecutor420.json"
+      - "contracts/artifacts/CanonicalConstantProductPool420.json"
+      - "contracts/config/predeploy/GenesisDEXFactory-predeploy-state.json"
+      - "contracts/config/predeploy/PublicBatchAuction-predeploy-state.json"
+      - "contracts/config/predeploy/TWAPOracle-predeploy-state.json"
+      - "contracts/config/predeploy/ApprovedQuoteAssetRegistry-predeploy-state.json"
+      - "contracts/config/predeploy/predeploy-plan.json"
+      - "contracts/config/deployment-manifest.json"
+      - "contracts/config/predeploy/storage-init.json"
+      - "contracts/config/genesis-config-commitment.json"
+      - "scripts/generate-swap-audit-6-predeploy.py"
+      - "scripts/verify-swap-audit-6-predeploy.py"
+      - "scripts/verify-genesis-config-commitment.py"
+      - ".github/workflows/swap-audit-6-materialized-head.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: swap-audit-6-materialized-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-materialized-head:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Verify exact head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: Compile only retained Swap predeploy candidates
+        working-directory: contracts
+        run: |
+          forge build \
+            src/system/SystemAccess.sol \
+            src/system/GenesisResidentAccess420.sol \
+            src/swap/GenesisDEXFactory.sol \
+            src/swap/PublicBatchAuction.sol \
+            src/swap/TWAPOracle.sol \
+            src/swap/ApprovedQuoteAssetRegistry.sol \
+            src/swap/CanonicalSwapExecutor420.sol \
+            src/swap/CanonicalConstantProductPool420.sol
+
+      - name: Verify frozen global Genesis commitment
+        run: python3 scripts/verify-genesis-config-commitment.py
+
+      - name: Reproduce retained runtimes and hashes
+        run: |
+          python3 scripts/generate-swap-audit-6-predeploy.py --write --print
+          python3 scripts/generate-swap-audit-6-predeploy.py --check
+
+      - name: Independently verify retained predeploy state
+        run: python3 scripts/verify-swap-audit-6-predeploy.py
+
+      - name: Commit normalized generated outputs when changed
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          PATHS=(
+            contracts/artifacts/GenesisDEXFactory.json
+            contracts/artifacts/PublicBatchAuction.json
+            contracts/artifacts/TWAPOracle.json
+            contracts/artifacts/ApprovedQuoteAssetRegistry.json
+            contracts/artifacts/CanonicalSwapExecutor420.json
+            contracts/artifacts/CanonicalConstantProductPool420.json
+            contracts/config/predeploy/GenesisDEXFactory-predeploy-state.json
+            contracts/config/predeploy/PublicBatchAuction-predeploy-state.json
+            contracts/config/predeploy/TWAPOracle-predeploy-state.json
+            contracts/config/predeploy/ApprovedQuoteAssetRegistry-predeploy-state.json
+            contracts/config/predeploy/predeploy-plan.json
+            contracts/config/deployment-manifest.json
+          )
+          STATUS="$(git status --porcelain -- "${PATHS[@]}")"
+          if [ -z "$STATUS" ]; then
+            echo "Materialized SWAP-AUDIT-6 outputs already reproducible."
+            exit 0
+          fi
+          echo "$STATUS"
+          git config user.name "420 Integrated CI"
+          git config user.email "actions@users.noreply.github.com"
+          git add "${PATHS[@]}"
+          git commit -m "Swap: normalize SWAP-AUDIT-6 materialized artifacts"
+          git push origin "HEAD:${{ github.head_ref }}"

@@ -1,0 +1,106 @@
+{
+  "schema": "420-swap-audit-8-testnet-qualification-v1",
+  "phase": "SWAP-AUDIT-8",
+  "status": "BLOCKED_OFFICIAL_TESTNET_NOT_LIVE",
+  "repository_ready": true,
+  "live_qualified": false,
+  "source_requirements": {
+    "official_testnet_manifest": "developer-hub/manifests/testnet.json",
+    "launch_config": "testnet/config/launch.json",
+    "public_endpoints": "testnet/services/endpoints.json",
+    "deployment_binding": "contracts/config/swap/swap-audit-7-deployment-binding.json",
+    "wallet_live_workflow": ".github/workflows/wallet-live-testnet.yml",
+    "exchange_live_swap_workflow": ".github/workflows/exchange-testnet-swap.yml",
+    "exchange_live_swap_runner": "exchange/web/scripts/live-swap-qualify.mjs",
+    "exchange_live_swap_module": "exchange/web/core/live-swap-qualification.js",
+    "pay_swap_regression": "contracts/test/PaySwapGenesisIntegration420.t.sol"
+  },
+  "exact_release_candidate": {
+    "implementation_sha": null,
+    "chain_id": null,
+    "evidence_block": null,
+    "evidence_block_hash": null
+  },
+  "journeys": [
+    {
+      "id": "SUCCESS",
+      "required": true,
+      "status": "PENDING_LIVE_TESTNET",
+      "evidence": null,
+      "requirement": "Wallet/Exchange reviewed swap reaches required finality and reconciles with canonical Indexer state."
+    },
+    {
+      "id": "SLIPPAGE",
+      "required": true,
+      "status": "PENDING_LIVE_TESTNET",
+      "evidence": null,
+      "requirement": "Adverse price movement/minimum-output path fails closed or settles only within reviewed slippage bound."
+    },
+    {
+      "id": "STALE_QUOTE_ORACLE",
+      "required": true,
+      "status": "PENDING_LIVE_TESTNET",
+      "evidence": null,
+      "requirement": "Stale quote/oracle freshness is rejected before unsafe submission; live canonical TWAP/reference health is independently observed."
+    },
+    {
+      "id": "WRONG_CHAIN",
+      "required": true,
+      "status": "PENDING_LIVE_TESTNET",
+      "evidence": null,
+      "requirement": "Wallet/Exchange refuses reviewed execution when provider chain identity differs from the official testnet manifest."
+    },
+    {
+      "id": "DISABLED_MARKET",
+      "required": true,
+      "status": "PENDING_LIVE_TESTNET",
+      "evidence": null,
+      "requirement": "Inactive canonical market cannot be executed through the canonical Swap path."
+    },
+    {
+      "id": "REPLAY",
+      "required": true,
+      "status": "PENDING_LIVE_TESTNET",
+      "evidence": null,
+      "requirement": "Reviewed/submitted execution cannot be replayed or reused outside its nonce/session/authorization constraints."
+    },
+    {
+      "id": "REORG_RECOVERY",
+      "required": true,
+      "status": "PENDING_LIVE_TESTNET",
+      "evidence": null,
+      "requirement": "Reorg/replacement is detected, not misreported as final, and recovery/reconciliation preserves canonical history."
+    },
+    {
+      "id": "PAY_COMPOSITION",
+      "required": true,
+      "status": "PENDING_LIVE_TESTNET",
+      "evidence": null,
+      "requirement": "PaymentRouter -> CanonicalSettlementAdapter -> CanonicalSwapExecutor settles through the exact deployed trusted-caller graph."
+    }
+  ],
+  "deployment_evidence": {
+    "protocol_registry_address": null,
+    "protocol_registry_code_hash": null,
+    "canonical_swap_executor_address": null,
+    "canonical_swap_executor_code_hash": null,
+    "canonical_market_registry_address": null,
+    "canonical_pool_address": null,
+    "canonical_pool_code_hash": null,
+    "payment_router_address": null,
+    "settlement_adapter_address": null,
+    "registry_transactions": [],
+    "binding_transactions": []
+  },
+  "live_workflow_runs": {
+    "wallet": null,
+    "exchange_swap": null
+  },
+  "evidence_policy": [
+    "Synthetic fixtures/unit tests validate the harness only and never satisfy a live journey.",
+    "Every live journey must bind to the exact deployed release-candidate SHA, official chain ID, transaction/block evidence where applicable, and sanitized immutable evidence.",
+    "Missing official testnet manifest, placeholder endpoints, missing deployed code, unresolved Registry bindings, missing live workflow evidence, reorg/conflict, or stale/oracle failure must fail closed.",
+    "Private keys, seed phrases, RPC credentials, auth headers and raw sensitive proof payloads must never be committed."
+  ],
+  "blocker": "Repository launch authority states the public testnet is not yet authorized/live; official testnet manifest is absent and public endpoints remain placeholders."
+}

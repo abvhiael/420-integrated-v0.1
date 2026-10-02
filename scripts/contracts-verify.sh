@@ -26,6 +26,7 @@ for s in \
   scripts/verify-420pay-parameters.py \
   scripts/verify-420pay-implementation.py \
   scripts/verify-420pay-hardening.py \
+  scripts/verify-420swap-interface-v1.py \
   scripts/verify-420bet-roulette-release.py
 do
   if [[ -f "$s" ]]; then

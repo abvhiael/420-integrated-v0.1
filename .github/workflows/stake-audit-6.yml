@@ -1,0 +1,101 @@
+name: 420Stake STAKE-AUDIT-6
+
+on:
+  push:
+    paths:
+      - 'contracts/artifacts/ValidatorRegistry.abi.json'
+      - 'contracts/artifacts/RewardController.abi.json'
+      - 'contracts/src/system/ValidatorRegistry.sol'
+      - 'contracts/src/system/RewardController.sol'
+      - '420-indexer/descriptors/stake420-v3.json'
+      - '420-indexer/src/abi-manifest.ts'
+      - '420-indexer/test/stake420-release-descriptor.test.ts'
+      - 'indexer/model/stake.go'
+      - 'indexer/api/stake.go'
+      - 'indexer/api/stake_test.go'
+      - 'indexer/api/server.go'
+      - 'indexer/store/file.go'
+      - 'explorer/indexerclient/stake.go'
+      - 'explorer/indexerclient/stake_test.go'
+      - 'explorer/service/stakeviews.go'
+      - 'explorer/service/stakeviews_test.go'
+      - 'explorer/api/server.go'
+      - 'explorer/api/server_test.go'
+      - 'explorer/web/static/index.html'
+      - 'explorer/web/static/app.js'
+      - 'explorer/web/web_test.go'
+      - 'packages/420-sdk/src/stake.ts'
+      - 'packages/420-sdk/src/index.ts'
+      - 'packages/420-sdk/test/stake-sdk.test.mjs'
+      - 'scripts/verify-stake-audit-6-indexer-explorer-sdk.py'
+      - '.github/workflows/stake-audit-6.yml'
+  pull_request:
+    paths:
+      - 'contracts/artifacts/ValidatorRegistry.abi.json'
+      - 'contracts/artifacts/RewardController.abi.json'
+      - 'contracts/src/system/ValidatorRegistry.sol'
+      - 'contracts/src/system/RewardController.sol'
+      - '420-indexer/**'
+      - 'indexer/**'
+      - 'explorer/**'
+      - 'packages/420-sdk/**'
+      - 'scripts/verify-stake-audit-6-indexer-explorer-sdk.py'
+      - '.github/workflows/stake-audit-6.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: stake-audit-6-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  level-1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify STAKE-AUDIT-6 repository anchors and ABI provenance
+        run: python scripts/verify-stake-audit-6-indexer-explorer-sdk.py
+      - name: Run 420Indexer descriptor and protocol regression suite
+        working-directory: 420-indexer
+        run: |
+          npm install --no-audit --no-fund --no-package-lock
+          npm test
+      - name: Run Go Indexer Stake/reorg/finality regressions
+        run: go test ./indexer/...
+      - name: Vet Go Indexer
+        run: go vet ./indexer/...
+      - name: Run Explorer Indexer/client/API/browser regressions
+        run: go test ./explorer/...
+      - name: Vet Explorer
+        run: go vet ./explorer/...
+      - name: Syntax-check Explorer browser
+        run: |
+          cp explorer/web/static/app.js /tmp/stake-explorer-app.mjs
+          node --check /tmp/stake-explorer-app.mjs
+      - name: Run retained Explorer browser presentation tests
+        run: node --test explorer/web/presentation.test.mjs explorer/web/workflow-presentation.test.mjs
+      - name: Run 420 SDK build and regression suite
+        working-directory: packages/420-sdk
+        run: |
+          npm install --no-audit --no-fund --no-package-lock
+          npm test

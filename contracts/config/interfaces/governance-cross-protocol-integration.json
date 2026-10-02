@@ -1,0 +1,126 @@
+{
+  "schema": "420-governance-cross-protocol-integration-v1",
+  "step": "GOV-AUDIT-7",
+  "status": "CANONICAL",
+  "purpose": "Machine-readable authority boundary for 420 Governance integration with shared Genesis protocols and derived consumers.",
+  "canonicalAuthority": {
+    "execution": "GovernanceTimelock@0x0000000000000000000000000000000000000429",
+    "compatibility": "Governance420@0x0000000000000000000000000000000000000437",
+    "compatibilityRole": "bootstrap/compatibility only; never proposal, vote, outcome, or normal execution authority",
+    "runtimeSharedDependencies": []
+  },
+  "integrations": [
+    {
+      "name": "420Registry",
+      "classification": "deployment_and_consumer_discovery",
+      "authority": "ProtocolRegistry may publish/resolve Civic modules and service metadata; Registry data never determines proposal validity, voting weight, tally, finalization, or execution authority.",
+      "requiredEvidence": [
+        "canonical component/service IDs",
+        "runtime code hash",
+        "Wallet fail-closed Registry resolution",
+        "Civic core has no ProtocolRegistry runtime dependency"
+      ]
+    },
+    {
+      "name": "420Stake",
+      "classification": "electorate_membership_source_only",
+      "authority": "Validator stake/bond/delegation amounts do not create Civic voting weight. Canonical validator electorate is one eligible active-validator owner = one vote via CivicMerkleElectorateSource420.",
+      "requiredEvidence": [
+        "no Stake420/ValidatorRegistry runtime import in Civic core",
+        "validator electorate weight returns exactly 1 for a valid member",
+        "validator source type is frozen equal-weight Merkle v1"
+      ]
+    },
+    {
+      "name": "420Treasury",
+      "classification": "governed_target_not_governance_authority",
+      "authority": "GovernanceTimelock may create budgets/schedule/cancel disbursements. Budget and disbursement records bind a nonzero civicActionHash; Treasury execution remains capability-scoped and cannot vote or execute Civic proposals.",
+      "requiredEvidence": [
+        "onlyGovernance mutation",
+        "civicActionHash preservation",
+        "Treasury owns no independent custody"
+      ]
+    },
+    {
+      "name": "420Vault",
+      "classification": "custody_target_not_governance_authority",
+      "authority": "GovernanceTimelock may mutate Vault policy where contracts expose onlyGovernance, but asset release/custody remains Vault capability/route/beneficiary controlled. Civic never directly owns Vault assets.",
+      "requiredEvidence": [
+        "Vault policy onlyGovernance",
+        "Vault authorization independent of Civic voting",
+        "Governance core has no custody path"
+      ]
+    },
+    {
+      "name": "420Wallet",
+      "classification": "transaction_client",
+      "authority": "Wallet verifies chain, Registry component resolution, code identity/version and module graph before presenting or submitting votes. Wallet may not manufacture governance authority.",
+      "requiredEvidence": [
+        "Registry mismatch fails closed",
+        "account/network invalidation",
+        "no ordinary proposal queue/execute controls"
+      ]
+    },
+    {
+      "name": "420Indexer",
+      "classification": "derived_projection",
+      "authority": "Indexer reconstructs Civic events from qualified artifacts and chain history. Projection state cannot vote, finalize, queue, execute or overwrite canonical Civic state.",
+      "requiredEvidence": [
+        "artifact-bound descriptors",
+        "reorg/replay qualification",
+        "protocol classification 420Governance"
+      ]
+    },
+    {
+      "name": "420Search",
+      "classification": "derived_consumer",
+      "authority": "Search indexes public protocol objects as non-canonical results with source provenance; rankings/results cannot alter Governance.",
+      "requiredEvidence": [
+        "canonicalStateAuthority false",
+        "databaseIsNonCanonical true",
+        "no governance authority invariant"
+      ]
+    },
+    {
+      "name": "420Explorer",
+      "classification": "derived_consumer",
+      "authority": "Explorer observes 420Indexer/chain state only and has no governance authority.",
+      "requiredEvidence": [
+        "canonicalStateAuthority false",
+        "databaseIsNonCanonical true",
+        "no governance authority invariant"
+      ]
+    },
+    {
+      "name": "420Notifications",
+      "classification": "derived_delivery_consumer",
+      "authority": "Notifications may surface Governance proposals/deadlines but cannot create canonical events, mutate protocol state, sign transactions, or bypass Wallet authorization.",
+      "requiredEvidence": [
+        "canonicalStateAuthority false",
+        "governance notifications supported",
+        "canMutateProtocolState false",
+        "canSignTransactions false"
+      ]
+    },
+    {
+      "name": "other_genesis_systemaccess_consumers",
+      "classification": "governed_targets",
+      "authority": "Contracts outside the Civic implementation may accept GovernanceTimelock as a caller through SystemAccess/onlyGovernance, but must not import Civic proposal/voting modules or become a reciprocal Governance dependency.",
+      "requiredEvidence": [
+        "repository scan for forbidden cross-imports",
+        "SystemAccess points at GovernanceTimelock only",
+        "no circular Civic authority"
+      ]
+    }
+  ],
+  "invariants": [
+    "GOV7-INV-001: GovernanceTimelock is the only external mutation identity exposed by canonical Civic execution.",
+    "GOV7-INV-002: ProtocolRegistry is discovery/publication authority only and never Civic voting/outcome/execution authority.",
+    "GOV7-INV-003: Validator stake, bond size, reward, delegation, or protocol credit never scales Civic validator voting weight.",
+    "GOV7-INV-004: Treasury governed records bind Civic action commitments while Treasury execution/custody remains bounded by Treasury/Vault authorization.",
+    "GOV7-INV-005: Governance does not gain direct custody by targeting Vault/Treasury contracts.",
+    "GOV7-INV-006: Wallet, Indexer, Search, Explorer, and Notifications are replaceable consumers and cannot alter canonical Governance outcomes.",
+    "GOV7-INV-007: No Genesis resident forms a circular authority dependency back into Civic proposal, vote, finalization, or execution.",
+    "GOV7-INV-008: Deprecated Governance420 proposal/vote/result paths remain retired and are never used as canonical Civic state."
+  ]
+}

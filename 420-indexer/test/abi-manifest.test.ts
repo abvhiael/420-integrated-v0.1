@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { id } from 'ethers';
 import type { Hex } from '../src/chain-source.js';
-import { buildGenesisDescriptorManifest420, descriptorsFromArtifact420 } from '../src/abi-manifest.js';
+import { GENESIS_PROTOCOL_BY_CONTRACT_420, buildGenesisDescriptorManifest420, descriptorsFromArtifact420 } from '../src/abi-manifest.js';
 
 const predeploy = { name: 'Names420', address: '0x0000000000000000000000000000000000000435' as Hex, artifact: 'contracts/artifacts/Names420.json' };
 
@@ -72,3 +72,16 @@ test('retained Identity420 artifact produces canonical Identity event descriptor
   assert.equal(descriptors.every((descriptor) => descriptor.protocol === '420Identity'), true);
 });
 
+
+
+test('maps every canonical Civic governance contract into the 420Governance protocol', () => {
+  for (const contractName of [
+    'CivicConstitution420',
+    'CivicProposalRegistry420',
+    'CivicElectorateRegistry420',
+    'CivicVoting420',
+    'CivicGovernor420'
+  ]) {
+    assert.equal(GENESIS_PROTOCOL_BY_CONTRACT_420[contractName], '420Governance');
+  }
+});

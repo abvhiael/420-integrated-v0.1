@@ -17,7 +17,7 @@ Status: **FROZEN FOR IMPLEMENTATION**
 - `TWAPOracleSourceAdapter420.sol` — read-only adapter for the existing Swap TWAP oracle.
 - `IRandomnessRouter420.sol` — separate generalized-randomness interface boundary.
 
-The existing Swap `TWAPOracle` remains Swap-specific. The adapter converts its Q96 numeric value into 18-decimal fixed-point output and reports confidence `0` because the TWAP source does not itself expose an explicit confidence metric. A consuming feed may therefore require stronger confidence or combine the TWAP with other sources.
+The existing Swap `TWAPOracle` remains Swap-specific and derives its value from cumulative state of the active canonical Swap pool. Governance configures observation-window/freshness policy but does not submit prices. The adapter calls the Swap oracle's fail-closed `readObservation` surface, converts its normalized Q96 value into 18-decimal fixed-point output, commits the Swap source/window metadata into its data hash, and reports confidence `0` because a single-pool TWAP does not expose a statistical confidence metric. A consuming feed may therefore require stronger confidence or combine the TWAP with other sources.
 
 ## Data classes
 V1 recognizes these canonical classes:

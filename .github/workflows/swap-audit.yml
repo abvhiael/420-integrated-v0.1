@@ -1,0 +1,112 @@
+name: 420Swap Audit Qualification
+
+on:
+  push:
+    branches:
+      - audit/420swap-complete-20261001
+    paths:
+      - "contracts/src/swap/**"
+      - "contracts/src/oracle/TWAPOracleSourceAdapter420.sol"
+      - "contracts/src/exchange/ExchangeOracleGuard420.sol"
+      - "contracts/test/Swap*.t.sol"
+      - "contracts/test/ExchangeOracleGuard420*.t.sol"
+      - "contracts/test/CanonicalConstantProductPool420.t.sol"
+      - "contracts/test/PaySwap*.t.sol"
+      - "contracts/config/swap/**"
+      - "contracts/config/genesis-dapp-contract-map.json"
+      - "scripts/verify-420swap-interface-v1.py"
+      - "scripts/verify-genesis-dapps.py"
+      - "exchange/web/**"
+      - "docs/apps/swap/**"
+      - "docs/audit/420SWAP-REPOSITORY-AUDIT-20261001.md"
+      - ".github/workflows/swap-audit.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "contracts/src/swap/**"
+      - "contracts/src/oracle/TWAPOracleSourceAdapter420.sol"
+      - "contracts/src/exchange/ExchangeOracleGuard420.sol"
+      - "contracts/test/Swap*.t.sol"
+      - "contracts/test/ExchangeOracleGuard420*.t.sol"
+      - "contracts/test/CanonicalConstantProductPool420.t.sol"
+      - "contracts/test/PaySwap*.t.sol"
+      - "contracts/config/swap/**"
+      - "contracts/config/genesis-dapp-contract-map.json"
+      - "scripts/verify-420swap-interface-v1.py"
+      - "scripts/verify-genesis-dapps.py"
+      - "exchange/web/**"
+      - "docs/apps/swap/**"
+      - "docs/audit/420SWAP-REPOSITORY-AUDIT-20261001.md"
+      - ".github/workflows/swap-audit.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  swap-contracts:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Swap static verification
+        run: python3 scripts/verify-420swap-interface-v1.py
+      - name: Build swap contracts and tests
+        working-directory: contracts
+        run: |
+          forge build src/swap src/oracle/TWAPOracleSourceAdapter420.sol src/exchange/ExchangeOracleGuard420.sol test/CanonicalConstantProductPool420.t.sol test/SwapGenesisDEXFactory420.t.sol test/SwapPermissionlessDEXFactory420.t.sol test/SwapTWAPOracle420.t.sol test/SwapPublicBatchAuction420.t.sol test/SwapGenesisIntegration420.t.sol test/SwapFuzz420.t.sol test/SwapInvariant420.t.sol test/PaySwapGenesisIntegration420.t.sol test/PaySwapBridgeGenesisIntegration420.t.sol --sizes
+      - name: Genesis DEX factory tests
+        working-directory: contracts
+        run: forge test --match-path test/SwapGenesisDEXFactory420.t.sol -vvv
+      - name: Permissionless DEX factory tests
+        working-directory: contracts
+        run: forge test --match-path test/SwapPermissionlessDEXFactory420.t.sol -vvv
+      - name: TWAP and oracle integration tests
+        working-directory: contracts
+        run: forge test --match-path test/SwapTWAPOracle420.t.sol -vvv
+      - name: Public batch auction tests
+        working-directory: contracts
+        run: forge test --match-path test/SwapPublicBatchAuction420.t.sol -vvv
+      - name: Canonical pool tests
+        working-directory: contracts
+        run: forge test --match-path test/CanonicalConstantProductPool420.t.sol -vvv
+      - name: Swap integration tests
+        working-directory: contracts
+        run: forge test --match-path test/SwapGenesisIntegration420.t.sol -vvv
+      - name: Swap fuzz tests
+        working-directory: contracts
+        run: forge test --match-path test/SwapFuzz420.t.sol -vvv
+      - name: Swap invariant tests
+        working-directory: contracts
+        run: forge test --match-path test/SwapInvariant420.t.sol -vvv
+      - name: Pay/Swap integration tests
+        working-directory: contracts
+        run: |
+          forge test --match-path test/PaySwapGenesisIntegration420.t.sol -vvv
+          forge test --match-path test/PaySwapBridgeGenesisIntegration420.t.sol -vvv
+
+  swap-user-surface:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: exchange/web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm run check
+      - run: npm test
+      - run: npm run build
+        env:
+          EXCHANGE_DEPLOYMENT_MODE: qualification

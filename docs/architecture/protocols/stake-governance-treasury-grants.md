@@ -194,7 +194,9 @@ Execution is default-deny. The executor must hold the capability required for th
 
 A scheduled disbursement cannot execute before `notBefore` or after expiry. Asset policy also enforces per-disbursement and per-epoch limits.
 
-The Treasury registry marks a disbursement executed only after it receives a nonzero `vaultReleaseHash`. That commitment is the audit link to the actual Vault release path; the Treasury registry itself does not become custody.
+The Treasury registry marks a disbursement executed only after it receives a nonzero `vaultReleaseHash`. The adopted V1 evidence model is **commitment-only**: the exact-disbursement authorized executor supplies a nonzero commitment derived from the actual Vault release evidence, Treasury records it as the audit link, and the Treasury registry itself does not become custody or cryptographically verify the underlying Vault transfer.
+
+Accordingly, `EXECUTED + nonzero vaultReleaseHash` is canonical Treasury completion evidence, not independent cryptographic proof that 420Vault transferred assets. Production-equivalent qualification must correlate the retained commitment with the actual canonical Vault release transaction/event/receipt evidence. The explicit trust boundary and historical PR reconciliation are frozen in `docs/architecture/decisions/TREASURY-AUDIT-4-VAULT-RELEASE-EVIDENCE-MODEL.md`.
 
 Cancellation of a still-scheduled disbursement releases the unexecuted budget commitment and moves the disbursement to a terminal cancelled state.
 

@@ -5,11 +5,23 @@ import "../src/system/SystemAccess.sol";
 import "../src/governance/Governance420.sol";
 
 interface VmGovernance420Retirement {
-    function prank(address) external;
-    function expectRevert(bytes4) external;
+    function prank(
+        address
+    ) external;
+    function expectRevert(
+        bytes4
+    ) external;
 }
 
-contract MockCanonicalCivicGovernor420 {}
+contract MockCanonicalCivicGovernor420 {
+    address public immutable timelock;
+
+    constructor(
+        address timelock_
+    ) {
+        timelock = timelock_;
+    }
+}
 
 contract Governance420RetirementTest {
     VmGovernance420Retirement constant vm =
@@ -49,12 +61,16 @@ contract Governance420RetirementTest {
 
     function testOnlyTimelockCanBindCanonicalCivicGovernorOnce() public {
         Governance420 legacy = new Governance420(address(this));
-        MockCanonicalCivicGovernor420 governor = new MockCanonicalCivicGovernor420();
-        MockCanonicalCivicGovernor420 replacement = new MockCanonicalCivicGovernor420();
+        MockCanonicalCivicGovernor420 governor = new MockCanonicalCivicGovernor420(address(this));
+        MockCanonicalCivicGovernor420 replacement = new MockCanonicalCivicGovernor420(address(this));
+        MockCanonicalCivicGovernor420 foreignGovernor = new MockCanonicalCivicGovernor420(address(0xBEEF));
 
         vm.prank(ALICE);
         vm.expectRevert(SystemAccess.Unauthorized.selector);
         legacy.bindCivicGovernor(address(governor));
+
+        vm.expectRevert(Governance420.InvalidCivicGovernor.selector);
+        legacy.bindCivicGovernor(address(foreignGovernor));
 
         vm.expectRevert(Governance420.InvalidCivicGovernor.selector);
         legacy.bindCivicGovernor(address(0));
@@ -98,7 +114,7 @@ contract Governance420RetirementTest {
     function testCompatibilityIdentityRemainsStable() public {
         Governance420 legacy = new Governance420(address(this));
         require(keccak256(bytes(legacy.systemName())) == keccak256(bytes("Governance420")), "name");
-        require(legacy.protocolVersion() == 2, "retired version");
+        require(legacy.protocolVersion() == 3, "bootstrap-compatible version");
         require(legacy.governanceTimelock() == address(this), "timelock identity");
     }
 }

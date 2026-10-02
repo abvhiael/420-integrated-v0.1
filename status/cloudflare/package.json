@@ -1,0 +1,12 @@
+{
+  "name": "420-integrated-status-cloudflare",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "check": "node --check src/worker.mjs"
+  },
+  "devDependencies": {
+    "wrangler": "4.42.0"
+  }
+}

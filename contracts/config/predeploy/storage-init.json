@@ -1,48 +1,203 @@
 {
-  "schema": "420-predeploy-storage-init-v2",
-  "governance_timelock": "0x0000000000000000000000000000000000000429",
-  "consensus_system_call": "0x000000000000000000000000000000000000043c",
-  "community_validator_reserve": "0x0000000000000000000000000000000000000425",
-  "genesis_time": "FROM_FROZEN_TESTNET_OR_MAINNET_GENESIS",
-  "founder_beneficiaries": "UNRESOLVED_DO_NOT_INVENT",
+  "bootstrap_governor": "0x0000000000000000000000000000000000000437",
   "bridge_verifier": "FROM_FROZEN_GATEWAY_VERIFICATION_DECISION",
-  "dex_pool_implementation": "FROM_COMPILED_CANONICAL_POOL",
+  "community_validator_reserve": "0x0000000000000000000000000000000000000425",
+  "consensus_system_call": "0x000000000000000000000000000000000000043c",
+  "dex_pool_implementation": "UNRESOLVED_NOT_REQUIRED_FOR_SWAP_PREDEPLOY_BIND_AFTER_QUALIFIED_POOL_DEPLOYMENT",
   "entries": {
-    "RewardController": {"constructor":["governance_timelock"],"post_init":["bindConsensusSystemCaller(consensus_system_call)"]},
-    "AttentionTreasury": {"constructor":["governance_timelock"],"post_init":["bindCampaignRegistry(CannaseurCampaignRegistry@0x043b)"]},
-    "DevelopmentTreasury": {"constructor":["governance_timelock"]},
-    "ValidatorRegistry": {"constructor":["governance_timelock"],"post_init":["bindConsensusSystemCaller(consensus_system_call)","bindCommunityValidatorReserve(community_validator_reserve)"]},
-    "ProtocolReserve": {"constructor":["governance_timelock"]},
-    "CommunityValidatorReserve": {"constructor":["governance_timelock"],"post_init":["bindValidatorRegistry(ValidatorRegistry@0x0423)"]},
-    "CommunityRewardReserve": {"constructor":["governance_timelock"]},
-    "FounderVestingRegistry": {"constructor":["governance_timelock","founder_beneficiaries[10]","genesis_time"]},
-    "RandomnessRegistry": {"constructor":["governance_timelock"]},
-    "GovernanceTimelock": {"constructor":["bootstrap_governor"]},
-    "PublicDistributionVault": {"constructor":["governance_timelock","genesis_time"]},
-    "GenesisDEXFactory": {"constructor":["governance_timelock","dex_pool_implementation"]},
-    "PublicBatchAuction": {"constructor":["governance_timelock"]},
-    "TWAPOracle": {"constructor":["governance_timelock"]},
-    "ValidatorBootstrapReserve": {"constructor":["governance_timelock"]},
-    "AIProviderRegistry": {"constructor":["governance_timelock"]},
-    "AIModelRegistry": {"constructor":["governance_timelock"]},
-    "AIJobManager": {"constructor":["governance_timelock"]},
-    "AIJobEscrow": {"constructor":["governance_timelock"]},
-    "AIReputationRegistry": {"constructor":["governance_timelock"]},
-    "ProtocolRegistry": {"constructor":["governance_timelock"]},
-    "Names420": {"constructor":["governance_timelock"]},
-    "Identity420": {"constructor":["governance_timelock"]},
-    "Governance420": {"constructor":["governance_timelock"]},
-    "VerifiedGateway420": {"constructor":["governance_timelock","bridge_verifier"]},
-    "ApprovedQuoteAssetRegistry": {"constructor":["governance_timelock"]},
-    "Stake420": {"constructor":["ValidatorRegistry@0x0423","RewardController@0x0420"]},
-    "CannaseurCampaignRegistry": {"constructor":["governance_timelock"],"post_init":["bindAttentionTreasury(AttentionTreasury@0x0421)"]},
-    "ConsensusSystemCall420": {"constructor":["governance_timelock"]}
+    "AIJobEscrow": {
+      "constructor": [
+        "governance_timelock"
+      ]
+    },
+    "AIJobManager": {
+      "constructor": [
+        "governance_timelock"
+      ]
+    },
+    "AIModelRegistry": {
+      "constructor": [
+        "governance_timelock"
+      ]
+    },
+    "AIProviderRegistry": {
+      "constructor": [
+        "governance_timelock"
+      ]
+    },
+    "AIReputationRegistry": {
+      "constructor": [
+        "governance_timelock"
+      ]
+    },
+    "ApprovedQuoteAssetRegistry": {
+      "constructor": [
+        "governance_timelock",
+        "protocol_registry",
+        "genesis_config_hash"
+      ]
+    },
+    "AttentionTreasury": {
+      "constructor": [
+        "governance_timelock"
+      ],
+      "post_init": [
+        "bindCampaignRegistry(CannaseurCampaignRegistry@0x043b)"
+      ]
+    },
+    "CannaseurCampaignRegistry": {
+      "constructor": [
+        "governance_timelock"
+      ],
+      "post_init": [
+        "bindAttentionTreasury(AttentionTreasury@0x0421)"
+      ]
+    },
+    "CommunityRewardReserve": {
+      "constructor": [
+        "governance_timelock"
+      ]
+    },
+    "CommunityValidatorReserve": {
+      "constructor": [
+        "governance_timelock"
+      ],
+      "post_init": [
+        "bindValidatorRegistry(ValidatorRegistry@0x0423)"
+      ]
+    },
+    "ConsensusSystemCall420": {
+      "constructor": [
+        "governance_timelock"
+      ]
+    },
+    "DevelopmentTreasury": {
+      "constructor": [
+        "governance_timelock"
+      ]
+    },
+    "FounderVestingRegistry": {
+      "constructor": [
+        "governance_timelock",
+        "founder_beneficiaries[10]",
+        "genesis_time"
+      ]
+    },
+    "GenesisDEXFactory": {
+      "constructor": [
+        "governance_timelock",
+        "protocol_registry",
+        "genesis_config_hash"
+      ]
+    },
+    "Governance420": {
+      "constructor": [
+        "governance_timelock"
+      ]
+    },
+    "GovernanceTimelock": {
+      "constructor": [
+        "bootstrap_governor"
+      ]
+    },
+    "Identity420": {
+      "constructor": [
+        "governance_timelock"
+      ]
+    },
+    "Names420": {
+      "constructor": [
+        "governance_timelock"
+      ]
+    },
+    "ProtocolRegistry": {
+      "constructor": [
+        "governance_timelock"
+      ]
+    },
+    "ProtocolReserve": {
+      "constructor": [
+        "governance_timelock"
+      ]
+    },
+    "PublicBatchAuction": {
+      "constructor": [
+        "governance_timelock",
+        "protocol_registry",
+        "genesis_config_hash"
+      ]
+    },
+    "PublicDistributionVault": {
+      "constructor": [
+        "governance_timelock",
+        "genesis_time"
+      ]
+    },
+    "RandomnessRegistry": {
+      "constructor": [
+        "governance_timelock"
+      ]
+    },
+    "RewardController": {
+      "constructor": [
+        "governance_timelock"
+      ],
+      "post_init": [
+        "bindConsensusSystemCaller(consensus_system_call)"
+      ]
+    },
+    "Stake420": {
+      "constructor": [
+        "ValidatorRegistry@0x0423",
+        "RewardController@0x0420"
+      ]
+    },
+    "TWAPOracle": {
+      "constructor": [
+        "governance_timelock",
+        "protocol_registry",
+        "genesis_config_hash"
+      ]
+    },
+    "ValidatorBootstrapReserve": {
+      "constructor": [
+        "governance_timelock"
+      ]
+    },
+    "ValidatorRegistry": {
+      "constructor": [
+        "governance_timelock",
+        "ProtocolRegistry@0x0434",
+        "stake_genesis_config_hash"
+      ],
+      "post_init": [
+        "bindConsensusSystemCaller(consensus_system_call)",
+        "bindCommunityValidatorReserve(community_validator_reserve)"
+      ]
+    },
+    "VerifiedGateway420": {
+      "constructor": [
+        "governance_timelock",
+        "bridge_verifier"
+      ]
+    }
   },
+  "founder_beneficiaries": "UNRESOLVED_DO_NOT_INVENT",
+  "genesis_config_commitment": "contracts/config/genesis-config-commitment.json",
+  "genesis_config_hash": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921",
+  "genesis_time": "FROM_FROZEN_TESTNET_OR_MAINNET_GENESIS",
+  "governance_timelock": "0x0000000000000000000000000000000000000429",
+  "protocol_registry": "0x0000000000000000000000000000000000000434",
   "rules": [
     "Direct predeploy placement does not execute Solidity constructors; constructor and post_init effects must be materialized in genesis storage deterministically.",
     "RewardController and ValidatorRegistry MUST begin with consensusSystemCaller=0x043c and consensusSystemCallerBound=true.",
     "ValidatorRegistry and CommunityValidatorReserve MUST begin mutually bound at 0x0423/0x0425.",
     "AttentionTreasury and CannaseurCampaignRegistry MUST begin mutually bound at 0x0421/0x043b; campaign reward registry remains separately governance-bound when the Genesis attention module set is deployed.",
-    "ConsensusSystemCall420 itself has no mutable caller binding; it accepts top-level calls only from go-ethereum params.SystemAddress."
-  ]
+    "ConsensusSystemCall420 itself has no mutable caller binding; it accepts top-level calls only from go-ethereum params.SystemAddress.",
+    "GovernanceTimelock bootstrapGovernor MUST be Governance420 at 0x0437; Governance420 may schedule only the exact canonical Civic bootstrap plan and retires that role permanently on Civic activation.",
+    "GenesisDEXFactory begins with poolImplementation=0; governance MUST bind a qualified code-bearing implementation reference before canonical pool registration.",
+    "genesis_config_hash is frozen by contracts/config/genesis-config-commitment.json and MUST match that record exactly."
+  ],
+  "schema": "420-predeploy-storage-init-v2",
+  "stake_genesis_config_hash": "0x7721fafee1f582e819e15ca57ce557bb0b473c584a49759e5d2511f882ff5eac"
 }

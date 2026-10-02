@@ -26,6 +26,7 @@ export const GENESIS_PROTOCOL_BY_CONTRACT_420: Record<string, string> = {
   Identity420: '420Identity',
   Stake420: '420Stake',
   ValidatorRegistry: '420Stake',
+  RewardController: '420Stake',
   ListingRegistry420: '420Market',
   RightsAssetRegistry420: '420Rights',
   RightsClaimRegistry420: '420Rights',
@@ -34,6 +35,11 @@ export const GENESIS_PROTOCOL_BY_CONTRACT_420: Record<string, string> = {
   PulsePublicationRegistry420: '420Pulse',
   Governance420: '420Governance',
   GovernanceTimelock: '420Governance',
+  CivicConstitution420: '420Governance',
+  CivicProposalRegistry420: '420Governance',
+  CivicElectorateRegistry420: '420Governance',
+  CivicVoting420: '420Governance',
+  CivicGovernor420: '420Governance',
   AttentionTreasury: '420Treasury',
   DevelopmentTreasury: '420Treasury',
   GenesisDEXFactory: '420Swap',
@@ -289,4 +295,100 @@ export function descriptorsFromNames420Release420(
   }
   if (required.size !== 0) throw new Error('Names420 release descriptor required event missing');
   return descriptors;
+}
+
+
+export interface RetainedAbiArtifact420 extends Artifact420 {
+  schema: '420-retained-abi-artifact-v1';
+  protocol: '420Stake';
+  protocolVersion: number;
+  source: { path: string; gitBlobSha: string };
+  authority: 'abi_only_no_bytecode_or_live_deployment_claim';
+}
+
+export interface StakeReleaseDescriptorContract420 {
+  contractName: 'ValidatorRegistry' | 'RewardController';
+  protocolVersion: number;
+  canonicalAddress: Hex;
+  artifact: { path: string; gitBlobSha: string };
+}
+
+export interface StakeReleaseDescriptor420 {
+  schema: '420-stake-release-descriptor-v1';
+  descriptorVersion: 1;
+  protocol: '420Stake';
+  contracts: StakeReleaseDescriptorContract420[];
+  requiredEvents: string[];
+  authority: 'repository_descriptor_only_not_live_stake_authority';
+}
+
+export const STAKE_RELEASE_DESCRIPTOR_ARTIFACTS_420 = Object.freeze({
+  ValidatorRegistry: Object.freeze({
+    address: '0x0000000000000000000000000000000000000423' as Hex,
+    protocolVersion: 3,
+    path: 'contracts/artifacts/ValidatorRegistry.abi.json',
+    gitBlobSha: '0c2e65d38a5eb322bf3baba9c6ee9cd8ee771391',
+    sourcePath: 'contracts/src/system/ValidatorRegistry.sol',
+    sourceBlobSha: 'e534624f007024d65fcbb9e0f730bafbb8077767'
+  }),
+  RewardController: Object.freeze({
+    address: '0x0000000000000000000000000000000000000420' as Hex,
+    protocolVersion: 2,
+    path: 'contracts/artifacts/RewardController.abi.json',
+    gitBlobSha: '9423d01d4277764837a1cb60edca3ae906260f4c',
+    sourcePath: 'contracts/src/system/RewardController.sol',
+    sourceBlobSha: '012c9e24b4e7a37ca89aad1c887529a19c70bb16'
+  })
+});
+
+export function descriptorsFromStakeRelease420(
+  manifest: StakeReleaseDescriptor420,
+  artifacts: ReadonlyMap<string, RetainedAbiArtifact420>
+): GenesisDescriptor420[] {
+  if (manifest.schema !== '420-stake-release-descriptor-v1' ||
+      manifest.descriptorVersion !== 1 ||
+      manifest.protocol !== '420Stake' ||
+      manifest.authority !== 'repository_descriptor_only_not_live_stake_authority') {
+    throw new Error('420Stake release descriptor identity mismatch');
+  }
+  if (manifest.contracts.length !== 2) throw new Error('420Stake release descriptor contract set mismatch');
+
+  const required = new Set(manifest.requiredEvents);
+  const out: GenesisDescriptor420[] = [];
+  for (const contract of manifest.contracts) {
+    const expected = STAKE_RELEASE_DESCRIPTOR_ARTIFACTS_420[contract.contractName];
+    if (!expected ||
+        contract.canonicalAddress.toLowerCase() !== expected.address ||
+        contract.protocolVersion !== expected.protocolVersion ||
+        contract.artifact.path !== expected.path ||
+        contract.artifact.gitBlobSha !== expected.gitBlobSha) {
+      throw new Error('420Stake release descriptor contract provenance mismatch: ' + contract.contractName);
+    }
+    const artifact = artifacts.get(contract.contractName);
+    if (!artifact ||
+        artifact.schema !== '420-retained-abi-artifact-v1' ||
+        artifact.contractName !== contract.contractName ||
+        artifact.protocol !== '420Stake' ||
+        artifact.protocolVersion !== expected.protocolVersion ||
+        artifact.source.path !== expected.sourcePath ||
+        artifact.source.gitBlobSha !== expected.sourceBlobSha ||
+        artifact.authority !== 'abi_only_no_bytecode_or_live_deployment_claim') {
+      throw new Error('420Stake retained ABI artifact provenance mismatch: ' + contract.contractName);
+    }
+    const descriptors = descriptorsFromArtifact420('420Stake', {
+      name: contract.contractName,
+      address: contract.canonicalAddress,
+      artifact: contract.artifact.path
+    }, artifact);
+    for (const descriptor of descriptors) {
+      if (!required.delete(descriptor.signature)) {
+        throw new Error('420Stake unexpected or duplicate event: ' + descriptor.signature);
+      }
+      out.push(descriptor);
+    }
+  }
+  if (required.size !== 0) throw new Error('420Stake required event missing: ' + [...required].join(','));
+  if (out.length !== manifest.requiredEvents.length) throw new Error('420Stake event set mismatch');
+  out.sort((a,b) => a.contractAddress.localeCompare(b.contractAddress) || a.signature.localeCompare(b.signature));
+  return out;
 }

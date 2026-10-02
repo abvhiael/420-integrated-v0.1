@@ -1,0 +1,560 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "bootstrapGovernor_",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "stateMutability": "payable",
+      "type": "receive"
+    },
+    {
+      "inputs": [],
+      "name": "G1_DELAY",
+      "outputs": [
+        {
+          "internalType": "uint64",
+          "name": "",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "G2_DELAY",
+      "outputs": [
+        {
+          "internalType": "uint64",
+          "name": "",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "G3_DELAY",
+      "outputs": [
+        {
+          "internalType": "uint64",
+          "name": "",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "G4_DELAY",
+      "outputs": [
+        {
+          "internalType": "uint64",
+          "name": "",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "civicGovernor",
+          "type": "address"
+        }
+      ],
+      "name": "activateCivicAuthority",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "bootstrapGovernor",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "id",
+          "type": "bytes32"
+        }
+      ],
+      "name": "cancel",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "civicAuthorityActivated",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "enum GovernanceTimelock.Class",
+          "name": "c",
+          "type": "uint8"
+        }
+      ],
+      "name": "delayFor",
+      "outputs": [
+        {
+          "internalType": "uint64",
+          "name": "",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "id",
+          "type": "bytes32"
+        }
+      ],
+      "name": "execute",
+      "outputs": [
+        {
+          "internalType": "bytes",
+          "name": "result",
+          "type": "bytes"
+        }
+      ],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "operations",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "data",
+          "type": "bytes"
+        },
+        {
+          "internalType": "uint64",
+          "name": "executeAfter",
+          "type": "uint64"
+        },
+        {
+          "internalType": "enum GovernanceTimelock.Class",
+          "name": "class_",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bool",
+          "name": "executed",
+          "type": "bool"
+        },
+        {
+          "internalType": "bool",
+          "name": "cancelled",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "id",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "data",
+          "type": "bytes"
+        },
+        {
+          "internalType": "enum GovernanceTimelock.Class",
+          "name": "class_",
+          "type": "uint8"
+        }
+      ],
+      "name": "schedule",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "id",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "data",
+          "type": "bytes"
+        },
+        {
+          "internalType": "enum GovernanceTimelock.Class",
+          "name": "class_",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint64",
+          "name": "requestedDelay",
+          "type": "uint64"
+        }
+      ],
+      "name": "scheduleWithDelay",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "scheduler",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "id",
+          "type": "bytes32"
+        }
+      ],
+      "name": "Cancelled",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousScheduler",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "civicGovernor",
+          "type": "address"
+        }
+      ],
+      "name": "CivicAuthorityActivated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "id",
+          "type": "bytes32"
+        }
+      ],
+      "name": "Executed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "id",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "enum GovernanceTimelock.Class",
+          "name": "class_",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "executeAfter",
+          "type": "uint64"
+        }
+      ],
+      "name": "Scheduled",
+      "type": "event"
+    }
+  ],
+  "compiler": {
+    "evmVersion": "cancun",
+    "foundryConfigBlobSha1": "f18c965f43b244582f2a4c527e7bad6d23aee929",
+    "optimizer": true,
+    "optimizerRuns": 200,
+    "solidity": "0.8.24",
+    "toolchainConfigBlobSha1": "dd49cb0e07370b01401d63d2fb53683177de8abc",
+    "viaIR": true
+  },
+  "constructorIndependentRuntime": false,
+  "contractName": "GovernanceTimelock",
+  "deployedBytecode": "0x6040608081526004908136101561001f575b5050361561001d575f80fd5b005b5f3560e01c806303d5e030146108ac5780631caaa35b146107eb57806353270bef146107ce57806378f519d81461078b5780637b8267be1461071a5780639b7764de146105f5578063be17a4c714610320578063c4d252f5146104bd578063c74f349b1461038e578063cdf0b00114610371578063d1ad17bf1461034a578063d35b0fdb14610325578063d9991bb5146103205763e751f27103610011576020918260031936011261031c57803591825f526001808552815f209060018060a01b038254169182156102ef57600381019081549160ff8360481c1615806102e1575b156102b55767ffffffffffffffff83164210610285574792600183015480941061024b5769ff000000000000000000191669010000000000000000001790558451600291909101805491935f929161015883610945565b926001811690811561023257506001146101fb575b505050915f939181859403925af191610184610aa5565b92156101c75750906101c391519384937fa74c8847d513feba22a0f0cb38d53081abf97562cdb293926ba243689e7c41ca5f80a28084528301906109b3565b0390f35b84606492519162461bcd60e51b8352820152601060248201526f195e1958dd5d1a5bdb8819985a5b195960821b6044820152fd5b909192505f52885f2090895f925b84841061022057505050908301905081835f61016d565b8054878501529201918a908201610209565b60ff19168752505050801515028301905081835f61016d565b865162461bcd60e51b81528089018b90526014602482015273696e73756666696369656e742062616c616e636560601b6044820152606490fd5b855162461bcd60e51b81528088018a9052600a6024820152691d1a5b595b1bd8dad95960b21b6044820152606490fd5b855162461bcd60e51b81528088018a9052600660248201526518db1bdcd95960d21b6044820152606490fd5b5060ff8360501c1615610101565b835162461bcd60e51b815280860188905260076024820152663ab735b737bbb760c91b6044820152606490fd5b5f80fd5b610928565b503461031c575f36600319011261031c5760209060ff5f5460a01c1690519015158152f35b503461031c575f36600319011261031c575f5490516001600160a01b039091168152602090f35b503461031c575f36600319011261031c576020905162093a808152f35b503461031c576020918260031936011261031c57355f5260019060018352805f2060018060a01b03815416926001820154916002810191868551935f928154916103d783610945565b808852926001811690811561049c5750600114610464575b505050508260036104489361040c60ff979661042995038461097d565b0154938651988998895288015260e08688015260e08701906109b3565b9367ffffffffffffffff83166060870152838360808801921c166109f1565b818160481c16151560a085015260501c16151560c08301520390f35b5f908152838120939450925b828410610489575050508301018660038361040c6103ef565b8054878501860152928401928101610470565b60ff191685890152505050151560051b84010190508660038361040c6103ef565b503461031c57602036600319011261031c578135916001600160a01b0391610508337f0000000000000000000000000000000000000000000000000000000000000437851614610a4e565b60ff5f5460a01c166105c357835f526001602052805f20928354161515806105b1575b8061059f575b156105725760038301805460ff60501b1916600160501b179055837fbaa1eb22f2a492ba1a5fea61b8df4d27c6c8b5f3971e63bb58fa14ff72eedb705f80a2005b906020606492519162461bcd60e51b835282015260076024820152661a5b9d985b1a5960ca1b6044820152fd5b5060ff600384015460501c1615610531565b5060ff600384015460481c161561052b565b906020606492519162461bcd60e51b8352820152600c60248201526b63697669632061637469766560a01b6044820152fd5b50903461031c57602036600319011261031c5780356001600160a01b038181169390929084830361031c5761064d847f0000000000000000000000000000000000000000000000000000000000000437163314610a4e565b5f549260ff8460a01c166106e35761066490610e0b565b156106ad575050600160a01b836affffffffffffffffffffff60a81b831617175f55167f48fb3b191f47ab5fe68e052af82ffc13ba180543181298fcb8b592c1367e0b725f80a3005b906020606492519162461bcd60e51b8352820152601060248201526f34b73b30b634b21033b7bb32b93737b960811b6044820152fd5b815162461bcd60e51b81526020818501526011602482015270185b1c9958591e481858dd1a5d985d1959607a1b6044820152606490fd5b823461031c5760a036600319011261031c576107346108e4565b60643567ffffffffffffffff811161031c5761075390369084016108fa565b608435918483101561031c5761001d9461077760018060a01b035f54163314610a4e565b61078084610a12565b946044359135610ad4565b503461031c575f36600319011261031c57517f00000000000000000000000000000000000000000000000000000000000004376001600160a01b03168152602090f35b503461031c575f36600319011261031c576020905162375f008152f35b50903461031c5760c036600319011261031c576108066108e4565b67ffffffffffffffff9160643583811161031c5761082790369083016108fa565b91608435938185101561031c5760a435958087169081880361031c5761085760018060a01b035f54163314610a4e565b61086087610a12565b16116108755761001d96506044359135610ad4565b865162461bcd60e51b815260208184015260116024820152703232b630bc903132b637bb90333637b7b960791b6044820152606490fd5b503461031c57602036600319011261031c5781359182101561031c5767ffffffffffffffff6108dc602093610a12565b915191168152f35b602435906001600160a01b038216820361031c57565b9181601f8401121561031c5782359167ffffffffffffffff831161031c576020838186019501011161031c57565b3461031c575f36600319011261031c576020604051621275008152f35b90600182811c92168015610973575b602083101461095f57565b634e487b7160e01b5f52602260045260245ffd5b91607f1691610954565b90601f8019910116810190811067ffffffffffffffff82111761099f57604052565b634e487b7160e01b5f52604160045260245ffd5b91908251928382525f5b8481106109dd575050825f602080949584010152601f8019910116010190565b6020818301810151848301820152016109bd565b9060048210156109fe5752565b634e487b7160e01b5f52602160045260245ffd5b60048110156109fe578015610a465760018114610a3e57600214610a375762375f0090565b6212750090565b506212750090565b5062093a8090565b15610a5557565b60405162461bcd60e51b815260206004820152600c60248201526b1d5b985d5d1a1bdc9a5e995960a21b6044820152606490fd5b67ffffffffffffffff811161099f57601f01601f191660200190565b3d15610acf573d90610ab682610a89565b91610ac4604051938461097d565b82523d5f602084013e565b606090565b9491939092855f52600160209181835260018060a01b0360409681885f205416610dde578116998a15610db15767ffffffffffffffff809116808203828111610d645782164211610d78578142160193818511610d645788519660e088018881108482111761099f578a528c88528688019a8b52610b5181610a89565b94610b5e8b51968761097d565b818652368282011161031c57815f92899283890137860101528887019384528160608801951696878652608081019460048a10156109fe575f9b8d958b885260a084019d8e5260c08401965f88525f52848a528c5f209351166bffffffffffffffffffffffff60a01b84541617835551838301556002820190519283519085821161099f57610bed8354610945565b601f8111610d1e575b508994601f8311600114610cb857829160039683925f94610cad575b50501b915f1990861b1c19161790555b0193511697835492519060048210156109fe577f67143afd04caf61390402935e1a6550c98c125951dd4a916ffb3d7ba4a0ad17c9969ff00000000000000000068ff00000000000000009251151560481b169360ff60501b9051151560501b16946affffffffffffffffffffff19161791891b161717179055610ca7845180946109f1565b820152a3565b015192505f80610c12565b90929394601f19831691855f528b5f20925f5b8d828210610d0a575050908460039897969594939210610cf3575b505050811b019055610c22565b01515f1983881b60f8161c191690555f8080610ce6565b838501518655948701949384019301610ccb565b835f528a5f20601f840160051c8101918c8510610d5a575b601f0160051c019082905b828110610d4f575050610bf6565b5f8155018290610d41565b9091508190610d36565b634e487b7160e01b5f52601160045260245ffd5b885162461bcd60e51b815260048101879052601260248201527174696d657374616d70206f766572666c6f7760701b6044820152606490fd5b875162461bcd60e51b81526004810186905260066024820152651d185c99d95d60d21b6044820152606490fd5b875162461bcd60e51b815260048101869052600660248201526565786973747360d01b6044820152606490fd5b6001600160a01b0390808216158015610ead575b610ea7576040519060208201906334cc866d60e21b825260048352604083019183831067ffffffffffffffff84111761099f575f93849360405251915afa90610e66610aa5565b82610e99575b82610e7657505090565b90915060208180518101031261031c576020015190811680910361031c57301490565b915060208251101591610e6c565b50505f90565b50803b15610e1f56fea2646970667358221220abe23088419c3ec2ea92e104a5c88049afd8908759b557046c9ef26a72d94b5d64736f6c63430008180033",
+  "immutableReferences": {
+    "5208": [
+      {
+        "length": 32,
+        "start": 1249
+      },
+      {
+        "length": 32,
+        "start": 1574
+      },
+      {
+        "length": 32,
+        "start": 1951
+      }
+    ]
+  },
+  "materializedImmutableReferences": [
+    {
+      "immutableId": "5208",
+      "length": 32,
+      "start": 1249,
+      "value": "0x0000000000000000000000000000000000000437"
+    },
+    {
+      "immutableId": "5208",
+      "length": 32,
+      "start": 1574,
+      "value": "0x0000000000000000000000000000000000000437"
+    },
+    {
+      "immutableId": "5208",
+      "length": 32,
+      "start": 1951,
+      "value": "0x0000000000000000000000000000000000000437"
+    }
+  ],
+  "materializedImmutableValue": "0x0000000000000000000000000000000000000437",
+  "runtimeCodeBytes": 3820,
+  "runtimeCodeHash": "0xca5e96c6048b190839d68a8857b2ff5f0a7e0f356d4089ac31fa684cdee00139",
+  "schema": "420-governance-runtime-artifact-v1",
+  "source": "contracts/src/governance/GovernanceTimelock.sol",
+  "sourceBlobSha1": "30977a1e172763aa333eeb4b34b1bbaee025c235",
+  "status": "GOV_AUDIT_6_RUNTIME_ARTIFACT",
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 10,
+        "contract": "src/governance/GovernanceTimelock.sol:GovernanceTimelock",
+        "label": "scheduler",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_address"
+      },
+      {
+        "astId": 12,
+        "contract": "src/governance/GovernanceTimelock.sol:GovernanceTimelock",
+        "label": "civicAuthorityActivated",
+        "offset": 20,
+        "slot": "0",
+        "type": "t_bool"
+      },
+      {
+        "astId": 45,
+        "contract": "src/governance/GovernanceTimelock.sol:GovernanceTimelock",
+        "label": "operations",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_mapping(t_bytes32,t_struct(Operation)40_storage)"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      },
+      "t_bytes32": {
+        "encoding": "inplace",
+        "label": "bytes32",
+        "numberOfBytes": "32"
+      },
+      "t_bytes_storage": {
+        "encoding": "bytes",
+        "label": "bytes",
+        "numberOfBytes": "32"
+      },
+      "t_enum(Class)6": {
+        "encoding": "inplace",
+        "label": "enum GovernanceTimelock.Class",
+        "numberOfBytes": "1"
+      },
+      "t_mapping(t_bytes32,t_struct(Operation)40_storage)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => struct GovernanceTimelock.Operation)",
+        "numberOfBytes": "32",
+        "value": "t_struct(Operation)40_storage"
+      },
+      "t_struct(Operation)40_storage": {
+        "encoding": "inplace",
+        "label": "struct GovernanceTimelock.Operation",
+        "members": [
+          {
+            "astId": 26,
+            "contract": "src/governance/GovernanceTimelock.sol:GovernanceTimelock",
+            "label": "target",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_address"
+          },
+          {
+            "astId": 28,
+            "contract": "src/governance/GovernanceTimelock.sol:GovernanceTimelock",
+            "label": "value",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_uint256"
+          },
+          {
+            "astId": 30,
+            "contract": "src/governance/GovernanceTimelock.sol:GovernanceTimelock",
+            "label": "data",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_bytes_storage"
+          },
+          {
+            "astId": 32,
+            "contract": "src/governance/GovernanceTimelock.sol:GovernanceTimelock",
+            "label": "executeAfter",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_uint64"
+          },
+          {
+            "astId": 35,
+            "contract": "src/governance/GovernanceTimelock.sol:GovernanceTimelock",
+            "label": "class_",
+            "offset": 8,
+            "slot": "3",
+            "type": "t_enum(Class)6"
+          },
+          {
+            "astId": 37,
+            "contract": "src/governance/GovernanceTimelock.sol:GovernanceTimelock",
+            "label": "executed",
+            "offset": 9,
+            "slot": "3",
+            "type": "t_bool"
+          },
+          {
+            "astId": 39,
+            "contract": "src/governance/GovernanceTimelock.sol:GovernanceTimelock",
+            "label": "cancelled",
+            "offset": 10,
+            "slot": "3",
+            "type": "t_bool"
+          }
+        ],
+        "numberOfBytes": "128"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      },
+      "t_uint64": {
+        "encoding": "inplace",
+        "label": "uint64",
+        "numberOfBytes": "8"
+      }
+    }
+  }
+}

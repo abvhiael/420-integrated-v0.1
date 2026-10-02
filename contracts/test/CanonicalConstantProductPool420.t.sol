@@ -4,6 +4,7 @@ pragma solidity ^0.8.24;
 import "../src/swap/CanonicalConstantProductPool420.sol";
 
 contract MockERC20CanonicalPool420 {
+    uint8 public constant decimals = 18;
     mapping(address => uint256) public balanceOf;
     mapping(address => mapping(address => uint256)) public allowance;
 
@@ -165,6 +166,13 @@ contract CanonicalConstantProductPool420Test {
         UnauthorizedPoolCaller420 attacker = new UnauthorizedPoolCaller420();
         bool ok = attacker.execute(address(pool), address(this), address(this), address(token0), address(token1));
         require(!ok, "unauthorized executor");
+    }
+
+    function testCumulativePriceSurfaceTracksCanonicalReserves() public {
+        _seed();
+        (uint256 c0, uint256 c1, uint64 timestamp) = pool.currentCumulativePrices();
+        require(timestamp == block.timestamp, "timestamp");
+        require(c0 == pool.price0CumulativeX96() && c1 == pool.price1CumulativeX96(), "same-block cumulative");
     }
 
     function testLiquidityRemovalIsProRataAndBounded() public {

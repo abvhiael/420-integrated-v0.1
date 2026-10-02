@@ -1,0 +1,91 @@
+name: 420Stake STAKE-AUDIT-3
+
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/system/ValidatorRegistry.sol'
+      - 'contracts/src/system/RewardController.sol'
+      - 'contracts/src/IValidatorRegistry.sol'
+      - 'contracts/src/IRewardController.sol'
+      - 'contracts/test/StakeValidatorGenesis420.t.sol'
+      - '420-indexer/src/lifecycle-reducer.ts'
+      - '420-indexer/test/lifecycle-reducer.test.ts'
+      - 'docs/apps/stake/developer/events.md'
+      - 'docs/apps/stake/developer/errors.md'
+      - 'scripts/verify-stake-audit-3-hardening.py'
+      - '.github/workflows/stake-audit-3.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: stake-audit-3-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  level-1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify replay ABI and lifecycle hardening
+        run: python scripts/verify-stake-audit-3-hardening.py
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Compile hardened Stake contracts and public interfaces
+        working-directory: contracts
+        run: forge build src/system/ValidatorRegistry.sol src/system/RewardController.sol src/IValidatorRegistry.sol src/IRewardController.sol
+      - name: Run focused Stake replay and participant guard tests
+        working-directory: contracts
+        run: forge test --match-path 'test/StakeValidatorGenesis420.t.sol' -vvv
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build Indexer and run canonical Stake lifecycle reducer tests
+        working-directory: 420-indexer
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
+          node --test --test-concurrency=1 dist/test/lifecycle-reducer.test.js
+
+  level-2-stake-contract-indexer-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run retained TypeScript 420Indexer suite
+        working-directory: 420-indexer
+        run: |
+          npm install --no-audit --no-fund
+          npm test
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Run retained consensus gateway regression
+        working-directory: contracts
+        run: forge test --match-path 'test/ConsensusSystemCall420.t.sol' -vvv
+      - name: Cross-check retained Stake system-call ABI vectors
+        working-directory: contracts
+        run: forge test --match-path 'test/StakeSystemCallABIVectors420.t.sol' -vvv

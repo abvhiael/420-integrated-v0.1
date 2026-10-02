@@ -1,0 +1,107 @@
+name: 420Governance GOV-AUDIT-7 integration
+
+on:
+  push:
+    branches:
+      - 'audit/420governance-*'
+    paths:
+      - 'contracts/config/interfaces/governance-cross-protocol-integration.json'
+      - 'scripts/verify-governance-audit-7.py'
+      - 'contracts/test-governance-audit-7/GovernanceAudit7Integration420.t.sol'
+      - 'contracts/src/governance/**'
+      - 'contracts/src/system/ValidatorRegistry.sol'
+      - 'contracts/src/treasury/**'
+      - 'contracts/src/vault/**'
+      - 'contracts/config/420treasury-genesis.json'
+      - 'contracts/config/420search-genesis.json'
+      - 'contracts/config/420explorer-genesis.json'
+      - 'contracts/config/420notifications-genesis.json'
+      - 'wallet/web/core/governance-management.js'
+      - 'wallet/web/test/governance-management*.test.js'
+      - '420-indexer/src/governance-descriptors.ts'
+      - '420-indexer/src/lifecycle-reducer.ts'
+      - '420-indexer/src/protocol-object-service.ts'
+      - '420-indexer/src/query-service.ts'
+      - '420-indexer/test/governance-descriptors.test.ts'
+      - '420-indexer/test/lifecycle-reducer.test.ts'
+      - '420-indexer/test/protocol-object-service.test.ts'
+      - '420-indexer/test/query-service.test.ts'
+      - '.github/workflows/governance-integration-audit.yml'
+  pull_request:
+    paths:
+      - 'contracts/config/interfaces/governance-cross-protocol-integration.json'
+      - 'scripts/verify-governance-audit-7.py'
+      - 'contracts/test-governance-audit-7/GovernanceAudit7Integration420.t.sol'
+      - 'contracts/src/governance/**'
+      - 'contracts/src/system/ValidatorRegistry.sol'
+      - 'contracts/src/treasury/**'
+      - 'contracts/src/vault/**'
+      - 'contracts/config/420treasury-genesis.json'
+      - 'contracts/config/420search-genesis.json'
+      - 'contracts/config/420explorer-genesis.json'
+      - 'contracts/config/420notifications-genesis.json'
+      - 'wallet/web/core/governance-management.js'
+      - 'wallet/web/test/governance-management*.test.js'
+      - '420-indexer/src/governance-descriptors.ts'
+      - '420-indexer/src/lifecycle-reducer.ts'
+      - '420-indexer/src/protocol-object-service.ts'
+      - '420-indexer/src/query-service.ts'
+      - '420-indexer/test/governance-descriptors.test.ts'
+      - '420-indexer/test/lifecycle-reducer.test.ts'
+      - '420-indexer/test/protocol-object-service.test.ts'
+      - '420-indexer/test/query-service.test.ts'
+      - '.github/workflows/governance-integration-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: governance-audit-7-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qualify:
+    if: github.event_name != 'pull_request' || startsWith(github.head_ref, 'audit/420governance-')
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Verify cross-protocol authority model
+        run: python3 scripts/verify-governance-audit-7.py
+      - name: Format and build affected contract integration
+        working-directory: contracts
+        run: |
+          forge fmt --check test-governance-audit-7/GovernanceAudit7Integration420.t.sol
+          forge build src/governance src/system/ValidatorRegistry.sol src/treasury src/vault
+      - name: GOV-AUDIT-7 Treasury Vault Stake integration
+        working-directory: contracts
+        run: FOUNDRY_SRC=src/governance FOUNDRY_TEST=test-governance-audit-7 forge test --match-path test-governance-audit-7/GovernanceAudit7Integration420.t.sol -vvv
+      - name: Governance Wallet consumer boundary
+        working-directory: wallet/web
+        run: |
+          node scripts/check-governance.mjs
+          node --test --test-concurrency=1 test/governance-management.test.js test/governance-management-ui.test.js
+      - name: Governance Indexer and Search projection boundary
+        working-directory: 420-indexer
+        run: |
+          npm install
+          npm run build
+          node --test --test-concurrency=1             dist/test/governance-descriptors.test.js             dist/test/lifecycle-reducer.test.js             dist/test/protocol-object-service.test.js             dist/test/query-service.test.js

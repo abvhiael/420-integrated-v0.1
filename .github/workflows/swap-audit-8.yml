@@ -1,0 +1,79 @@
+name: 420Swap SWAP-AUDIT-8 Testnet Readiness
+
+on:
+  push:
+    branches:
+      - 'audit/420swap-*'
+    paths:
+      - "contracts/config/swap/swap-audit-8-testnet-qualification.json"
+      - "scripts/verify-swap-audit-8-testnet-readiness.py"
+      - "docs/apps/swap/testnet-qualification.md"
+      - "exchange/web/core/live-swap-qualification.js"
+      - "exchange/web/scripts/live-swap-qualify.mjs"
+      - "exchange/web/test/live-swap-qualification.test.js"
+      - ".github/workflows/exchange-testnet-swap.yml"
+      - "wallet/web/scripts/qualify-live-testnet.mjs"
+      - ".github/workflows/wallet-live-testnet.yml"
+      - ".github/workflows/swap-audit-8.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "contracts/config/swap/swap-audit-8-testnet-qualification.json"
+      - "scripts/verify-swap-audit-8-testnet-readiness.py"
+      - "docs/apps/swap/testnet-qualification.md"
+      - "exchange/web/core/live-swap-qualification.js"
+      - "exchange/web/scripts/live-swap-qualify.mjs"
+      - "exchange/web/test/live-swap-qualification.test.js"
+      - ".github/workflows/exchange-testnet-swap.yml"
+      - "wallet/web/scripts/qualify-live-testnet.mjs"
+      - ".github/workflows/wallet-live-testnet.yml"
+      - ".github/workflows/swap-audit-8.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: swap-audit-8-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  readiness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Verify exact head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Verify fail-closed official-testnet readiness
+        run: python3 scripts/verify-swap-audit-8-testnet-readiness.py
+
+      - name: Qualify Exchange live-swap harness
+        working-directory: exchange/web
+        run: node --test test/live-swap-qualification.test.js
+
+      - name: Validate Wallet live-testnet runner
+        run: node --check wallet/web/scripts/qualify-live-testnet.mjs
+
+      - name: Validate protected live workflows remain manual
+        run: |
+          set -euo pipefail
+          grep -q 'workflow_dispatch' .github/workflows/exchange-testnet-swap.yml
+          grep -q 'workflow_dispatch' .github/workflows/wallet-live-testnet.yml
+          grep -q 'environment: exchange-testnet' .github/workflows/exchange-testnet-swap.yml

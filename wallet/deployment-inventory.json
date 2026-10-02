@@ -120,5 +120,25 @@
     "Address namespace policy is reconciled, but canonicalAddressConflictResolved remains a live-release gate until deployment/code/network verification completes."
   ],
   "addressNamespacePolicyResolved": true,
-  "addressNamespaceDecision": "PRESERVE_FROZEN_STEP6_2_PREDEPLOYS"
+  "addressNamespaceDecision": "PRESERVE_FROZEN_STEP6_2_PREDEPLOYS",
+  "appAuthority": {
+    "stake420": {
+      "address": "0x000000000000000000000000000000000000043a",
+      "source": "contracts/config/system-addresses.json#Stake420",
+      "status": "FROZEN_SYSTEM_NOT_CHAIN_VERIFIED",
+      "deploymentVerified": false
+    },
+    "validatorRegistry": {
+      "address": "0x0000000000000000000000000000000000000423",
+      "source": "contracts/config/system-addresses.json#ValidatorRegistry",
+      "status": "FROZEN_SYSTEM_NOT_CHAIN_VERIFIED",
+      "deploymentVerified": false
+    },
+    "rewardController": {
+      "address": "0x0000000000000000000000000000000000000420",
+      "source": "contracts/config/system-addresses.json#RewardController",
+      "status": "FROZEN_SYSTEM_NOT_CHAIN_VERIFIED",
+      "deploymentVerified": false
+    }
+  }
 }

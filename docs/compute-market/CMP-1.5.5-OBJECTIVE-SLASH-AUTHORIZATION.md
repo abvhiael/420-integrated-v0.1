@@ -72,6 +72,7 @@ It accepts only:
 It rejects:
 - timeouts;
 - withdrawn disputes;
+- generic adverse dispute disposition that does not independently prove verifier fault;
 - generic payer/provider wins;
 - non-final disputes;
 - unresolved appeals;

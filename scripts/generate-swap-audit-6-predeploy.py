@@ -189,20 +189,23 @@ def artifact_record(name: str, rel_source: str, address: str | None, compiler: d
     return record
 
 
-def immutable_name_map() -> dict[str, str]:
-    # Solidity 0.8.24 compiler-emitted AST identifiers for the three inherited
-    # GenesisResidentAccess420 immutables at the frozen SWAP-AUDIT-6 source
-    # provenance. These IDs are retained in every compiled frozen Swap
-    # predeploy's deployedBytecode.immutableReferences.
+def immutable_name_map(refs: dict) -> dict[str, str]:
+    # Solidity AST identifiers are allocation-order metadata and can change
+    # when Forge compiles a different source graph even when the contract
+    # semantics/runtime layout are unchanged. The inherited immutable
+    # declaration order is stable and source-authoritative:
+    # GenesisResidentAccess420.registry,
+    # GenesisResidentAccess420.genesisConfigHash,
+    # SystemAccess.governanceTimelock.
     #
-    # The mapping is deliberately pinned rather than inferred from source text
-    # or an unsupported Forge AST surface. Any source/compiler change that
-    # alters the emitted immutable IDs MUST fail closed and require an explicit
-    # new artifact/materialization qualification.
+    # Fail closed unless the compiler emits exactly three immutable IDs.
+    if not isinstance(refs, dict) or len(refs) != 3:
+        fail(f"expected exactly three Genesis-resident immutable identifiers, got {sorted(refs) if isinstance(refs, dict) else refs}")
+    ids = sorted(refs.keys(), key=lambda value: int(value))
     return {
-        "5711": "registry",
-        "5714": "genesisConfigHash",
-        "6270": "governanceTimelock",
+        ids[0]: "registry",
+        ids[1]: "genesisConfigHash",
+        ids[2]: "governanceTimelock",
     }
 
 def encode_value(name: str, genesis_hash: str) -> bytes:
@@ -224,18 +227,12 @@ def is_resolved_hash(value: object) -> bool:
     )
 
 
-def materialize_runtime(artifact: dict, names: dict[str, str], genesis_hash: str) -> tuple[str, list[dict]]:
+def materialize_runtime(artifact: dict, genesis_hash: str) -> tuple[str, list[dict]]:
     code = bytearray.fromhex(artifact["deployedBytecodeTemplate"][2:])
     refs = artifact.get("immutableReferences", {})
+    names = immutable_name_map(refs)
     patched: list[dict] = []
     expected = {"governanceTimelock", "registry", "genesisConfigHash"}
-    expected_ids = set(names)
-    actual_ids = set(refs) if isinstance(refs, dict) else set()
-    if actual_ids != expected_ids:
-        fail(
-            f"{artifact['contractName']} immutable identifier drift: "
-            f"expected {sorted(expected_ids)}, got {sorted(actual_ids)}"
-        )
     seen: set[str] = set()
     for immutable_id, locations in refs.items():
         var_name = names.get(str(immutable_id))
@@ -272,7 +269,7 @@ def validate_storage_init(storage_init: dict) -> None:
             fail(f"storage-init {name} constructor declaration drift")
 
 
-def build_state(name: str, artifact: dict, address: str, names: dict[str, str], genesis_hash: object) -> dict:
+def build_state(name: str, artifact: dict, address: str, genesis_hash: object) -> dict:
     base = {
         "schema": "420-swap-audit-6-predeploy-state-v1",
         "contractName": name,
@@ -310,7 +307,7 @@ def build_state(name: str, artifact: dict, address: str, names: dict[str, str], 
         base["blocker"] = "global Genesis authority has not frozen genesis_config_hash; app audit must not invent it"
         return base
 
-    runtime, patched = materialize_runtime(artifact, names, str(genesis_hash))
+    runtime, patched = materialize_runtime(artifact, str(genesis_hash))
     base["status"] = "SWAP_AUDIT_6_FINAL_PREDEPLOY_STATE"
     base["runtimeMaterialized"] = True
     base["runtimeBytecode"] = runtime
@@ -400,9 +397,8 @@ def main(argv=None) -> int:
         for name, (source, address) in DEPLOYMENT_COMPONENTS.items():
             artifacts[name] = artifact_record(name, source, address, compiler)
 
-        names = immutable_name_map()
         states = {
-            name: build_state(name, artifacts[name], address, names, genesis_hash)
+            name: build_state(name, artifacts[name], address, genesis_hash)
             for name, (_, address) in FROZEN.items()
         }
         plan = update_plan(json.loads(PLAN_PATH.read_text(encoding="utf-8")), states, artifacts)

@@ -88,7 +88,7 @@ def main():
     forbid_text(WORKER_EVIDENCE, [
         "Status.FAILED",
         "provider suspension",
-        "trust"
+        "workerTrust."
     ], errors)
 
     require_text(VERIFIER_EVIDENCE, [

@@ -69,6 +69,9 @@ interface IComputeSlashDistributionEntitlements420 {
 contract ComputeVerifierDisputeSlashRecipientResolver420
     is I420System, IComputeSlashRecipientResolver420
 {
+    bytes32 public constant OBJECTIVE_VERIFIER_ERROR_GROUND =
+        keccak256("420/CMP/DISPUTE/GROUND/VERIFIER_OBJECTIVE_ERROR/V1");
+
     IComputeSlashDistributionDisputes420 public immutable disputes;
     address public immutable verifierEvidenceAdapter;
     address public immutable canonicalEntitlements;
@@ -116,6 +119,7 @@ contract ComputeVerifierDisputeSlashRecipientResolver420
             !r.finalDisposition
                 || !r.adverseToOriginalVerification
                 || r.providerWins
+                || r.groundsCode != OBJECTIVE_VERIFIER_ERROR_GROUND
                 || r.verifier != subjectAccount
                 || r.claimant == address(0)
                 || r.jobId == bytes32(0)

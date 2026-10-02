@@ -184,7 +184,7 @@ jobs:
 
       - name: Check Governance Solidity formatting
         working-directory: contracts
-        run: forge fmt --check src/governance test/CivicFoundation420.t.sol test/CivicElectorateRegistry420.t.sol test/CivicVoting420.t.sol test/CivicGovernor420.t.sol test/CivicTimelockExecution420.t.sol test/Governance420Retirement.t.sol test/GovernanceAudit420.t.sol test/GovernanceAudit2Hardening420.t.sol test/GovernanceAudit3Adversarial420.t.sol test/GovernanceAudit6Deployment420.t.sol test/GovernanceAudit7Integration420.t.sol test/CivicMerkleElectorateSource420.t.sol
+        run: forge fmt --check src/governance test/CivicFoundation420.t.sol test/CivicElectorateRegistry420.t.sol test/CivicVoting420.t.sol test/CivicGovernor420.t.sol test/CivicTimelockExecution420.t.sol test/Governance420Retirement.t.sol test/GovernanceAudit420.t.sol test/GovernanceAudit2Hardening420.t.sol test/GovernanceAudit3Adversarial420.t.sol test/GovernanceAudit6Deployment420.t.sol test-governance-audit-7/GovernanceAudit7Integration420.t.sol test/CivicMerkleElectorateSource420.t.sol
 
       - name: Build canonical Governance contracts
         working-directory: contracts
@@ -220,7 +220,7 @@ jobs:
 
       - name: GOV-AUDIT-7 cross-protocol integration
         working-directory: contracts
-        run: forge test --match-path test/GovernanceAudit7Integration420.t.sol -vvv
+        run: FOUNDRY_TEST=test-governance-audit-7 forge test --match-path test-governance-audit-7/GovernanceAudit7Integration420.t.sol -vvv
 
       - name: Run Civic contract qualification
         working-directory: contracts

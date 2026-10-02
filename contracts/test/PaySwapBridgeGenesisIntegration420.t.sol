@@ -9,6 +9,7 @@ import "../src/bridge/GatewayRouter420.sol";
 import "../src/bridge/BridgeRiskManager.sol";
 import "../src/bridge/BridgeTransferRegistry.sol";
 import "../src/bridge/BridgeRouteRegistry.sol";
+import "../src/bridge/BridgeChainRegistry420.sol";
 import "../src/interfaces/ICanonicalSettlement420.sol";
 import "./SwapGenesisIntegration420.t.sol";
 import "./BridgeGenesisIntegration420.t.sol";
@@ -38,6 +39,7 @@ contract PaySwapBridgeGenesisIntegration420Test {
         BridgeRiskManager risk = new BridgeRiskManager(address(this), address(env.registry()), keccak256("risk"));
         BridgeTransferRegistry transfers = new BridgeTransferRegistry(address(this), address(env.registry()), keccak256("transfers"));
         BridgeRouteRegistry routes = new BridgeRouteRegistry(address(this), address(env.registry()), keccak256("routes"));
+        BridgeChainRegistry420 chains = new BridgeChainRegistry420(address(this), address(env.registry()), keccak256("chains"));
         MockBridgeAdapter420 bridgeAdapter = new MockBridgeAdapter420();
 
         env.registerResident(address(markets), markets.componentId());
@@ -48,6 +50,7 @@ contract PaySwapBridgeGenesisIntegration420Test {
         env.registerResident(address(risk), risk.componentId());
         env.registerResident(address(transfers), transfers.componentId());
         env.registerResident(address(routes), routes.componentId());
+        env.registerResident(address(chains), chains.componentId());
 
         env.setSettlementAsset(CADC, ASSET_ID, true);
         env.health().setMarket(MARKET_ID, true);
@@ -59,6 +62,29 @@ contract PaySwapBridgeGenesisIntegration420Test {
         swapExecutor.setTrustedCaller(address(payAdapter), true);
         pay.setSettlementAdapter(address(payAdapter));
         pool.setResult(90 ether, 84 ether, false);
+
+        chains.setChain(
+            keccak256("420/BRIDGE/CHAIN/TEST-EXTERNAL"),
+            BridgeChainRegistry420.Chain({
+                routeChainId: 1,
+                networkId: keccak256("TEST-EXTERNAL/MAINNET"),
+                nativeAssetId: ASSET_ID,
+                verifierFamily: keccak256("TEST/BRIDGE/VERIFIER"),
+                family: BridgeChainRegistry420.ChainFamily.EVM,
+                active: true
+            })
+        );
+        chains.setChain(
+            keccak256("420/BRIDGE/CHAIN/420"),
+            BridgeChainRegistry420.Chain({
+                routeChainId: uint64(block.chainid),
+                networkId: keccak256("420/TESTNET/GENESIS"),
+                nativeAssetId: ASSET_ID,
+                verifierFamily: keccak256("420/BRIDGE/LOCAL"),
+                family: BridgeChainRegistry420.ChainFamily.EVM,
+                active: true
+            })
+        );
 
         BridgeRouteRegistry.Route memory route = BridgeRouteRegistry.Route({
             assetId: ASSET_ID,

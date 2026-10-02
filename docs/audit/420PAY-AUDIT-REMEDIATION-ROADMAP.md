@@ -114,19 +114,30 @@ Remaining deployment work: publish exact deployed registry-resolved Pay contract
 
 ## PAY-AUDIT-6 — deterministic deployment package and Registry publication
 
-**Status: MISSING.**
+**Status: IMPLEMENTED — Level 1 qualification pending.**
 
-Create and qualify:
-- exact compiler/runtime artifacts for every deployed Pay resident;
-- constructor/immutable argument manifest including GovernanceTimelock, ProtocolRegistry, Genesis config hash and settlement executor dependencies;
-- deployment order and initialization/wiring script;
-- ProtocolRegistry component publication with runtime hashes/version/lifecycle;
-- exact adapter->router, adapter->executor, executor trusted-caller and replay-domain bindings;
-- ownership/governance handoff checks;
-- reproducibility/drift verifier and smoke-test script;
-- rollback/recovery and operator runbook.
+Repository implementation:
+- `contracts/config/pay/pay-audit-6-deployment-package.json` retains the exact nine-resident Pay deployment inventory, frozen compiler provenance, source blob identities, ABI commitments, creation/runtime-template hashes, materialized runtime code hashes, immutable patch evidence, constructor manifest, deployment order, Registry publication semantics, wiring requirements and deliberately empty live-testnet evidence.
+- Pay remains `REGISTRY_RESOLVED_NO_FIXED_PAY_ADDRESSES`; no fixed Pay address, CREATE2 salt or fabricated live deployment identity is introduced.
+- the package uses frozen GovernanceTimelock `0x0000000000000000000000000000000000000429`, ProtocolRegistry `0x0000000000000000000000000000000000000434`, and canonical global `genesisConfigHash` `0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921`.
+- `scripts/generate-420pay-audit-6-deployment.py` reproduces compiler artifacts, materializes compiler-reported immutable references and fails on retained package drift.
+- `scripts/420pay-audit-6-deployment-plan.py` verifies the deterministic deployment/registration/wiring sequence and refuses live transaction planning without PAY-AUDIT-7 candidate evidence.
+- `scripts/verify-420pay-audit-6-deployment.py` independently validates address policy, resident/component inventory, constructor bindings, Registry publication semantics, wiring, live-evidence separation and runbook authority.
+- `scripts/420pay-audit-6-smoke.py` provides repository/offline deployment smoke without claiming live-chain qualification.
+- `contracts/test/PayAudit6DeploymentPackage420.t.sol` uses the actual ProtocolRegistry, frozen authority/config immutables and all nine Pay residents to prove ACTIVE version-1.0.0 Registry publication, exact deployed `EXTCODEHASH` equality to the retained package, the complete settlement/refund/replay wiring graph and governance-only mutation.
+- `docs/apps/pay/deployment-operations.md` defines deployment, Registry publication, governance handoff, monitoring, incident response, rollback/recovery, Indexer recovery and secrets handling.
+- `contracts/config/420pay-genesis-wiring.json` links the PAY-AUDIT-6 package/test/verifiers while preserving the already-qualified Swap-owned binding record and keeping `deployment_binding_verified: false` until PAY-AUDIT-7.
 
-Pay components are registry-resolved; do not assign frozen addresses unless the canonical address policy is deliberately versioned.
+Exit criteria:
+- exact compiler/runtime identity evidence exists for every deployed Pay resident;
+- constructor/immutable arguments and the settlement-executor dependency are retained and drift-checked;
+- deployment order, ProtocolRegistry publication at version 1.0.0 / ACTIVE, initialization and wiring are deterministic and machine-verifiable;
+- all nine Registry-resolved residents retain null/unfrozen production addresses in repository evidence;
+- adapter/router/executor/split/refund/replay bindings and governance handoff are proven in the local-EVM deployment suite;
+- reproducibility/drift verification and offline smoke fail closed;
+- rollback/recovery/operator guidance is retained;
+- live chain/address/transaction evidence remains empty and explicitly owned by PAY-AUDIT-7;
+- exact-head Level 1 PAY-AUDIT-6 qualification passes.
 
 ## PAY-AUDIT-7 — production-equivalent testnet qualification
 

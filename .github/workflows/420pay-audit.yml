@@ -23,7 +23,9 @@ on:
       - 'contracts/test/ReplayProtectionConsumer420.t.sol'
       - '420-indexer/src/abi-manifest.ts'
       - '420-indexer/src/lifecycle-reducer.ts'
+      - '420-indexer/src/pay-accounting-export.ts'
       - '420-indexer/test/lifecycle-reducer.test.ts'
+      - '420-indexer/test/pay-accounting-export.test.ts'
       - 'scripts/verify-420pay-*.py'
       - 'docs/420PAY-*'
       - 'docs/audit/420PAY-*'
@@ -46,7 +48,9 @@ on:
       - 'contracts/test/ReplayProtectionConsumer420.t.sol'
       - '420-indexer/src/abi-manifest.ts'
       - '420-indexer/src/lifecycle-reducer.ts'
+      - '420-indexer/src/pay-accounting-export.ts'
       - '420-indexer/test/lifecycle-reducer.test.ts'
+      - '420-indexer/test/pay-accounting-export.test.ts'
       - 'scripts/verify-420pay-*.py'
       - 'docs/420PAY-*'
       - 'docs/audit/420PAY-*'
@@ -92,17 +96,21 @@ jobs:
           python3 scripts/verify-genesis-interface-layer.py
       - name: Check Pay Solidity formatting
         working-directory: contracts
-        run: forge fmt --check src/pay/PaymentRegistry420.sol src/pay/adapters/CanonicalSettlementAdapter420.sol test/PayAudit3Lifecycle420.t.sol test/ReplayProtectionConsumer420.t.sol
+        run: forge fmt --check src/pay/PaymentRegistry420.sol src/pay/PaymentRouter420.sol src/pay/SettlementRouter420.sol src/pay/RefundManager420.sol src/pay/GasSponsor420.sol src/pay/adapters/CanonicalSettlementAdapter420.sol test/PayAudit4SettlementAndAccounting420.t.sol test/RefundManager420Fuzz.t.sol test/PaymentInvariant420.t.sol
       - name: Build Pay and required settlement boundary
         working-directory: contracts
         run: forge build src/pay src/swap/CanonicalSwapExecutor420.sol src/system/ReplayProtectionConsumer420.sol
-      - name: Run PAY-AUDIT-3 Level 1 Solidity qualification
+      - name: Run PAY-AUDIT-4 Level 1 Solidity qualification
         working-directory: contracts
         run: |
-          forge test --match-path 'test/PayAudit3Lifecycle420.t.sol' -vvv
+          forge test --match-path 'test/PayAudit4SettlementAndAccounting420.t.sol' -vvv
+          forge test --match-path 'test/SettlementRouter420*.t.sol' -vvv
+          forge test --match-path 'test/RefundManager420Fuzz.t.sol' -vvv
+          forge test --match-path 'test/GasSponsor420*.t.sol' -vvv
+          forge test --match-path 'test/PaymentInvariant420.t.sol' -vvv
           forge test --match-path 'test/PayFocusedHardening420.t.sol' -vvv
+          forge test --match-path 'test/PayAudit3Lifecycle420.t.sol' -vvv
           forge test --match-path 'test/PayPostMergeRemediation420.t.sol' -vvv
-          forge test --match-path 'test/InvoiceRegistry420Fuzz.t.sol' -vvv
       - name: Forbidden primitive scan
         shell: bash
         run: |
@@ -116,4 +124,4 @@ jobs:
         run: |
           npm install
           npm run build
-          node --test --test-concurrency=1 dist/test/lifecycle-reducer.test.js dist/test/abi-manifest.test.js
+          node --test --test-concurrency=1 dist/test/lifecycle-reducer.test.js dist/test/abi-manifest.test.js dist/test/pay-accounting-export.test.js

@@ -114,8 +114,8 @@ The router has local atomic payment-authorization replay state and reads shared 
 | canonical accounting-export implementation | MISSING | frozen fields exist; only tax-summary hash helper is implemented |
 | executable split payout path | PARTIAL | validation/math only, no transfer path |
 | GasSponsor execution/paymaster binding | PARTIAL | caps/accounting exist, reimbursement/execution boundary absent |
-| offline signed invoice acceptance/verification | PARTIAL | signing root exists; canonical verification path absent |
-| complete payment lifecycle transition surface | PARTIAL | several enum states unreachable |
+| offline invoice authorization semantics | COMPLETE after PAY-AUDIT-3 | Decision #4 reconciled as offline presentation/integrity plus merchant-only online canonical acceptance |
+| complete payment lifecycle transition surface | COMPLETE after PAY-AUDIT-3 | explicit governed INCLUDED/CERTIFIED/FINALIZED/SETTLED/FAILED paths with invalid-transition rejection |
 | production-equivalent testnet evidence | BLOCKED | no live candidate evidence |
 | independent external security audit | BLOCKED | mandatory mainnet gate not complete |
 
@@ -146,8 +146,8 @@ The trusted `CanonicalSettlementAdapter420` required only that the caller contai
 
 ### Unresolved contract/application gaps
 
-1. **Offline invoice signatures — PARTIAL.** Decision #4 declares offline invoice creation and freezes a signing root/domain. The implementation exposes the root but provides no signature verification/acceptance path; on-chain creation requires the merchant address to be the transaction sender. A signature scheme/controller resolution cannot be invented by this audit.
-2. **Payment lifecycle — PARTIAL.** INCLUDED, CERTIFIED, SETTLED and FAILED are modeled but have no canonical public transition functions. Finalization accepts some unreachable predecessor states.
+1. **Offline invoice authorization — RESOLVED in PAY-AUDIT-3.** Decision #4's offline creation and online acceptance flags are applied together: the signing root is an offline presentation/integrity commitment, while canonical invoice state is created only by the bound merchant online through `createInvoice`. No unversioned signature/relayer authority is invented.
+2. **Payment lifecycle — RESOLVED in PAY-AUDIT-3.** Explicit governed transitions now make INCLUDED, CERTIFIED, SETTLED and FAILED reachable with fail-closed predecessor rules; retained finalization semantics remain compatible and refund states continue through the bounded refund path.
 3. **Split settlement — PARTIAL.** `SettlementRouter420` calculates/validates splits only. It never transfers and never emits its declared settlement events.
 4. **Gas sponsorship — PARTIAL.** usage/cap accounting exists, but the contract does not itself pay a relayer/paymaster or debit its balance when `recordSponsored` is called. The execution/reimbursement authority must be frozen before implementing it.
 5. **Accounting exports — MISSING.** Genesis parameters require export fields; no canonical export DTO/service was found.
@@ -201,8 +201,6 @@ Audit corrections/additions:
 - exact-head audit CI/verifier added.
 
 Still missing:
-- definitive offline-invoice authorization semantics;
-- definitive payment-lifecycle transition semantics;
 - split execution architecture;
 - GasSponsor relayer/paymaster execution model;
 - accounting-export implementation/operator reference;
@@ -221,7 +219,7 @@ Genesis activation still lacks:
 - exact adapter->router, adapter->executor, executor trusted-caller and replay-domain live evidence;
 - final governance/timelock handoff evidence;
 - production-equivalent smoke/reorg/recovery evidence;
-- resolution of PAY-AUDIT-3/4 functional gaps and the Genesis application catalogue contradiction.
+- resolution of PAY-AUDIT-4 functional gaps and the Genesis application catalogue contradiction.
 
 ## Requirement matrix
 
@@ -230,9 +228,9 @@ Genesis activation still lacks:
 | merchant registry/status/payout versioning | Pay parameters/Decision #4 | implemented | focused tests | architecture | COMPLETE | live deployment evidence |
 | invoice currencies/modes/expiry/refund/slippage | frozen Pay parameters | implemented | fuzz/focused | present | COMPLETE | exact-head run |
 | domain-separated invoice root | Decision #4 | implemented | root-binding tests | present | COMPLETE | retain |
-| offline invoice creation | Decision #4 | root only; no signature acceptance | root tests only | ambiguous | PARTIAL | freeze verification semantics, implement/tests |
+| offline invoice creation | Decision #4 | merchant-only online canonical acceptance; offline root is presentation/integrity commitment | authority regression | clarified | COMPLETE | retain until versioned authorization change |
 | payment ID domain/fields/nonce | Decision #4 | implemented | focused tests | present | COMPLETE | exact-head run |
-| payment lifecycle states | protocol architecture | model contains states; transitions incomplete | partial | present | PARTIAL | define/implement canonical transitions |
+| payment lifecycle states | protocol architecture | explicit governed transitions implemented | PAY-AUDIT-3 lifecycle regression | present | COMPLETE | Level 1 exact-head qualification |
 | payer/governance settlement authorization | authority map | implemented | negative/reentrancy | present | COMPLETE | exact-head run |
 | quote lifetime 42s | frozen parameters | implemented | boundary tests | present | COMPLETE | exact-head run |
 | max default slippage 42 bps | frozen parameters | implemented | limits/fuzz | present | COMPLETE | exact-head run |
@@ -265,14 +263,14 @@ Genesis activation still lacks:
 
 **Accepted design risk:** governance can reconfigure Pay dependencies under the canonical timelock/authority model; Swap execution depends on the canonical market/pool implementation and allowances/custody policy outside Pay.
 
-**Unresolved:** offline signature model, unreachable lifecycle semantics, executable split semantics, actual gas-sponsor reimbursement authority, missing accounting exporter, live exact-instance wiring, and no independent audit of the frozen candidate.
+**Unresolved:** executable split semantics, actual gas-sponsor reimbursement authority, missing accounting exporter, live exact-instance wiring, and no independent audit of the frozen candidate.
 
 ## Readiness state after source-head qualification
 
-- CODE COMPLETE: **NO** — PAY-AUDIT-3/4 functional gaps remain.
-- BUILD COMPLETE: **YES for the implemented source surface** — exact-head `79e3bc85f3f2de1778e0200b7eb5dc7895e699f8` passed the dedicated Pay build/qualification workflow and generic Solidity workflow. Overall application completion remains NO because PAY-AUDIT-3/4/6 are unresolved.
-- CONTRACT COMPLETE: **NO** — offline invoice/lifecycle/split/sponsorship semantics remain incomplete or unresolved.
-- TEST COMPLETE: **NO overall** — the implemented PAY-AUDIT-1/2/5 source surface passed exact-head qualification, but PAY-AUDIT-3/4/6 functionality remains incomplete or missing and therefore cannot yet be fully tested.
+- CODE COMPLETE: **NO overall** — PAY-AUDIT-3 is implemented; PAY-AUDIT-4/6 functional/deployment gaps remain.
+- BUILD COMPLETE: **YES for the implemented source surface** — exact-head `79e3bc85f3f2de1778e0200b7eb5dc7895e699f8` passed the dedicated Pay build/qualification workflow and generic Solidity workflow. Overall application completion remains NO because PAY-AUDIT-4/6 are unresolved.
+- CONTRACT COMPLETE: **NO overall** — PAY-AUDIT-3 invoice/lifecycle semantics are resolved; split/sponsorship/accounting work remains.
+- TEST COMPLETE: **NO overall** — the implemented PAY-AUDIT-1/2/5 source surface passed exact-head qualification, but PAY-AUDIT-4/6 functionality remains incomplete or missing and therefore cannot yet be fully tested.
 - DOCUMENTATION COMPLETE: **NO** — unresolved semantics and deployment/operator material remain.
 - INTEGRATION COMPLETE: **NO** — live Registry/Swap/replay/Indexer deployment binding is absent.
 - SECURITY QUALIFIED: **NO overall** — the repaired PAY-AUDIT-2 source boundary passed exact-head CI, but live deployment qualification and the required independent audit remain outstanding.

@@ -15,6 +15,8 @@ contract ComputeAuthorization420 is I420System {
     bytes32 public constant ACTION_MANAGE_NODE = keccak256("420/COMPUTE/ACTION/MANAGE_NODE/V1");
     bytes32 public constant ACTION_MANAGE_RESOURCE = keccak256("420/COMPUTE/ACTION/MANAGE_RESOURCE/V1");
     bytes32 public constant ACTION_PUBLISH_OFFER = keccak256("420/COMPUTE/ACTION/PUBLISH_OFFER/V1");
+    bytes32 public constant ACTION_UPDATE_OFFER = keccak256("420/COMPUTE/ACTION/UPDATE_OFFER/V1");
+    bytes32 public constant ACTION_CANCEL_OFFER = keccak256("420/COMPUTE/ACTION/CANCEL_OFFER/V1");
     bytes32 public constant ACTION_CREATE_REQUEST = keccak256("420/COMPUTE/ACTION/CREATE_REQUEST/V1");
     bytes32 public constant ACTION_AUTHORIZE_FUNDING = keccak256("420/COMPUTE/ACTION/AUTHORIZE_FUNDING/V1");
     bytes32 public constant ACTION_ACCEPT_MATCH = keccak256("420/COMPUTE/ACTION/ACCEPT_MATCH/V1");
@@ -113,6 +115,7 @@ contract ComputeAuthorization420 is I420System {
     function _knownAction(bytes32 actionId) private pure returns (bool) {
         return actionId == ACTION_REGISTER_PROVIDER || actionId == ACTION_MANAGE_NODE
             || actionId == ACTION_MANAGE_RESOURCE || actionId == ACTION_PUBLISH_OFFER
+            || actionId == ACTION_UPDATE_OFFER || actionId == ACTION_CANCEL_OFFER
             || actionId == ACTION_CREATE_REQUEST || actionId == ACTION_AUTHORIZE_FUNDING
             || actionId == ACTION_ACCEPT_MATCH || actionId == ACTION_EXECUTE_ATTEMPT
             || actionId == ACTION_SUBMIT_RECEIPT || actionId == ACTION_VERIFY_RESULT

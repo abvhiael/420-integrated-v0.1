@@ -50,7 +50,7 @@ Required outcome:
 **Qualified implementation SHA:** `42060ec5c0ea5efde0c527b38333381c44fb5f59`  
 **Level 1:** PASS — Bridge fast qualification and all four real Solidity PR shards passed on the exact implementation SHA.
 
-### BRIDGE-AUDIT-4 — Accounting-health enforcement and recovery boundary
+### BRIDGE-AUDIT-4 — Accounting-health enforcement and recovery boundary — COMPLETE
 Purpose: reconcile BridgeAccountingRegistry evidence with the execution safety boundary.
 
 Required outcome:
@@ -59,6 +59,10 @@ Required outcome:
 - preserve the rule that accounting evidence cannot mint, burn, confiscate or repair balances;
 - prove stale/duplicate reconciliation evidence cannot restore health;
 - prove recovery requires newer qualified evidence and does not rewrite settled history.
+
+**Durable qualification:** `docs/audit/BRIDGE-AUDIT-4-QUALIFICATION.md`  
+**Qualified implementation SHA:** `52f5aadbe89b52697df7bb91bd461f2008ce03e2`  
+**Level 1:** PASS — Bridge fast qualification and all four real Solidity PR shards passed on the exact implementation SHA.
 
 ### BRIDGE-AUDIT-5 — Bridge application/service surface completion
 Purpose: reconcile the repository claim that 420Bridge is a user-facing Genesis application with the actual deployable application surface.

@@ -1,6 +1,8 @@
 # CMP-2.1 — Worker offers
 
-Status: **IMPLEMENTED. LEVEL 1 QUALIFICATION PENDING.**
+Status: **COMPLETE — Level 1 exact-head qualified on `1463c5ef83e522f20c4cff8f015d4cf389fc64ab`.**
+
+Durable qualification evidence: [CMP-2.1-QUALIFICATION-EVIDENCE.md](CMP-2.1-QUALIFICATION-EVIDENCE.md).
 
 ## Canonical definition
 

@@ -257,7 +257,9 @@ At this point the protocol has the core smart-contract market, but not yet the f
 Purpose: convert registered jobs and workers into an actual resource market.
 
 ## CMP-2.1 — Worker offers
-**Status: implementation/Level 1 qualification in progress.**
+**Status: COMPLETE — Level 1 exact-head qualified on `1463c5ef83e522f20c4cff8f015d4cf389fc64ab`.**
+
+Durable evidence: [CMP-2.1 qualification](CMP-2.1-QUALIFICATION-EVIDENCE.md). Level 2 deferred until offers/requests/matching integration; Level 3 reserved for CMP-2.8.
 
 Advertise hardware/software capacity, availability, jurisdiction and price.
 
@@ -537,7 +539,7 @@ Production target flow:
 | CMP-1.3 WorkerRegistry | current: CMP-1.3.16 closeout |
 | CMP-1.4 VerifierRegistry | repository-qualified through CMP-1.4.12 |
 | CMP-1.5 ComputeStake | current: CMP-1.5.13 Level 3 phase closeout; CMP-1.5.0–1.5.12 repository-qualified |
-| CMP-2 matching marketplace | forthcoming |
+| CMP-2 matching marketplace | CMP-2.1 COMPLETE (Level 1); CMP-2.2 next |
 | CMP-3 node420 worker runtime | forthcoming |
 | CMP-4 scientific compute framework | forthcoming |
 | CMP-5 external compute adapters | forthcoming |

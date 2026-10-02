@@ -1,6 +1,6 @@
 # CMP-1.5.12 — Release candidate
 
-Status: **IMPLEMENTED. REPOSITORY-READINESS QUALIFICATION PENDING. LIVE DEPLOYMENT BLOCKED.**
+Status: **COMPLETE — REPOSITORY-QUALIFIED RELEASE CANDIDATE. LIVE DEPLOYMENT BLOCKED.**
 
 ## Canonical definition
 
@@ -153,6 +153,39 @@ CMP-1.5.12 is repository-qualified when:
 9. all directly applicable exact-head CI passes.
 
 This step does **not** claim live deployment readiness.
+
+Next canonical step:
+
+**CMP-1.5.13 — Phase closeout**
+
+
+## Qualification evidence
+
+Qualified implementation SHA:
+
+`cb67b0b4a564d90c7c6ca910288c6946b9a5929c`
+
+Exact-head results:
+
+- Genesis Address Authority #1007 — **PASS**
+- 420Docs Qualification #4440 — **PASS**
+- 420Indexer #1826 — **PASS**
+- 420Registry REG-AUDIT-4 #842 — **PASS**
+- Solidity Contracts #4227 / `compute-fast` — **PASS**
+- Compute Market Qualification #162 / `fast-qualification` — **PASS**
+- retained `Compute*.t.sol` suite — **PASS**
+- repository-ready verifier — **PASS**
+- live-readiness fail-closed assertion — **PASS**
+
+Durable machine-readable evidence:
+
+`docs/compute-market/CMP-1.5.12-QUALIFICATION-EVIDENCE.json`
+
+This evidence-only closeout does not alter the qualified implementation SHA.
+
+## Completion
+
+**COMPLETE — repository-qualified release candidate / live deployment blocked.**
 
 Next canonical step:
 

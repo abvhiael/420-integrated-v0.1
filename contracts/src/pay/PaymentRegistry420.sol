@@ -63,6 +63,32 @@ contract PaymentRegistry420 is GenesisResidentAccess420 {
         );
     }
 
+    function recordIncluded(bytes32 paymentId) external {
+        _requireGenesisGovernance(PayIds420.ACTION_MARK_PAID);
+        _requireOperational(
+            PayIds420.ACTION_MARK_PAID,
+            ISystemSafety420.ActionClass.SAFE_WHEN_PAUSED,
+            Types420.Direction.NONE
+        );
+        Payment storage p = payments[paymentId];
+        require(p.status == Status.SUBMITTED, "invalid inclusion state");
+        p.status = Status.INCLUDED;
+        emit PaymentSet(paymentId, p.invoiceId, p.status);
+    }
+
+    function recordCertified(bytes32 paymentId) external {
+        _requireGenesisGovernance(PayIds420.ACTION_MARK_PAID);
+        _requireOperational(
+            PayIds420.ACTION_MARK_PAID,
+            ISystemSafety420.ActionClass.SAFE_WHEN_PAUSED,
+            Types420.Direction.NONE
+        );
+        Payment storage p = payments[paymentId];
+        require(p.status == Status.INCLUDED, "invalid certification state");
+        p.status = Status.CERTIFIED;
+        emit PaymentSet(paymentId, p.invoiceId, p.status);
+    }
+
     function recordFinalized(
         bytes32 paymentId,
         bytes32 invoiceId,
@@ -141,6 +167,35 @@ contract PaymentRegistry420 is GenesisResidentAccess420 {
             Status.SUBMITTED
         );
         emit PaymentSet(paymentId, invoiceId, Status.SUBMITTED);
+    }
+
+    function recordSettled(bytes32 paymentId) external {
+        _requireGenesisGovernance(PayIds420.ACTION_SETTLE);
+        _requireOperational(
+            PayIds420.ACTION_SETTLE,
+            ISystemSafety420.ActionClass.SAFE_WHEN_PAUSED,
+            Types420.Direction.NONE
+        );
+        Payment storage p = payments[paymentId];
+        require(p.status == Status.FINALIZED, "invalid settlement state");
+        p.status = Status.SETTLED;
+        emit PaymentSet(paymentId, p.invoiceId, p.status);
+    }
+
+    function recordFailed(bytes32 paymentId) external {
+        _requireGenesisGovernance(PayIds420.ACTION_MARK_PAID);
+        _requireOperational(
+            PayIds420.ACTION_MARK_PAID,
+            ISystemSafety420.ActionClass.SAFE_WHEN_PAUSED,
+            Types420.Direction.NONE
+        );
+        Payment storage p = payments[paymentId];
+        require(
+            p.status == Status.SUBMITTED || p.status == Status.INCLUDED || p.status == Status.CERTIFIED,
+            "invalid failure state"
+        );
+        p.status = Status.FAILED;
+        emit PaymentSet(paymentId, p.invoiceId, p.status);
     }
 
     function applyRefund(bytes32 paymentId, uint256 amount, bool complete) external {

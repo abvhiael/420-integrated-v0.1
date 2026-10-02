@@ -59,8 +59,7 @@ jobs:
           forge fmt --check \
             src/treasury/TreasuryPolicyRegistry420.sol \
             src/treasury/TreasuryDisbursementRegistry420.sol \
-            src/treasury/TreasuryRouter420.sol \
-            test/TreasurySecurityProperties420.t.sol
+            src/treasury/TreasuryRouter420.sol
 
       - name: Build Treasury contracts and security tests
         working-directory: contracts

@@ -74,18 +74,7 @@ contract LaunchpadAudit420Test {
         projects.registerProject(projectId, address(this), TOKEN, metadata, issuance);
 
         saleId = sales.canonicalId(
-            projectId,
-            PAYMENT,
-            RECEIVER,
-            500,
-            1000,
-            600,
-            10000,
-            10,
-            20,
-            30,
-            keccak256("audit/eligibility"),
-            bytes32(0)
+            projectId, PAYMENT, RECEIVER, 500, 1000, 600, 10000, 10, 20, 30, keccak256("audit/eligibility"), bytes32(0)
         );
         sales.createSale(
             saleId,
@@ -149,18 +138,7 @@ contract LaunchpadAudit420Test {
 
     function testSaleZeroAndBoundaryConfigurationRejected() public {
         bytes32 invalidId = sales.canonicalId(
-            projectId,
-            PAYMENT,
-            RECEIVER,
-            500,
-            499,
-            499,
-            10000,
-            10,
-            20,
-            30,
-            keccak256("audit/eligibility"),
-            bytes32(0)
+            projectId, PAYMENT, RECEIVER, 500, 499, 499, 10000, 10, 20, 30, keccak256("audit/eligibility"), bytes32(0)
         );
         vm.expectRevert(LaunchpadSaleRegistry420.InvalidSale.selector);
         sales.createSale(
@@ -402,7 +380,10 @@ contract LaunchpadAudit420Test {
         require(allocations.refunded(saleId, ALICE), "cancelled sale refundable");
     }
 
-    function testFuzzCapsAndAllocationConservation(uint128 aRaw, uint128 bRaw) public {
+    function testFuzzCapsAndAllocationConservation(
+        uint128 aRaw,
+        uint128 bRaw
+    ) public {
         uint128 a = uint128(250 + (uint256(aRaw) % 251));
         uint128 b = uint128(250 + (uint256(bRaw) % 251));
 

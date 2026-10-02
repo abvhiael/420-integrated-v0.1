@@ -210,21 +210,26 @@ contract ComputeOfferRegistry420 is I420System {
     }
 
     function cancel(bytes32 offerId) external {
-        Offer storage o = _offers[offerId];
-        if (!o.exists || !o.active) revert InvalidOffer();
+        Offer storage current = _offers[offerId];
+        if (!current.exists || !current.active) revert InvalidOffer();
         _requireAuthority(
             msg.sender,
             authorization.ACTION_CANCEL_OFFER(),
-            o.providerId,
-            o.nodeId,
-            o.resourceId,
+            current.providerId,
+            current.nodeId,
+            current.resourceId,
             0,
             true,
             true
         );
-        o.active = false;
-        _history[offerId][o.revision] = o;
-        emit OfferCancelled(offerId, o.revision, msg.sender);
+        Offer memory old = current;
+        if (old.revision == type(uint64).max) revert SerialExhausted();
+        current.predecessorCommitment = _commitment(old);
+        current.revision = old.revision + 1;
+        current.active = false;
+        Offer memory cancelled = current;
+        _history[offerId][cancelled.revision] = cancelled;
+        emit OfferCancelled(offerId, cancelled.revision, msg.sender);
     }
 
     function offer(bytes32 offerId) external view returns (Offer memory o) {

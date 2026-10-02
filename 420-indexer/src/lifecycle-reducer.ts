@@ -109,9 +109,9 @@ const POLICY_LIST: LifecyclePolicy420[] = [
       terminalFieldValues: ['2','3']
     },
     { eventName: 'MilestoneCreated', state: 'PENDING' },
-    { eventName: 'MilestoneClaimed', state: 'CLAIMED' },
-    { eventName: 'MilestoneApproved', state: 'APPROVED' },
-    { eventName: 'MilestonePaid', state: 'PAID', terminal: true },
+    { eventName: 'MilestoneClaimed', state: 'ACTIVE' },
+    { eventName: 'MilestoneApproved', state: 'ACTIVE' },
+    { eventName: 'MilestonePaid', state: 'COMPLETED', terminal: true },
     { eventName: 'MilestoneCancelled', state: 'CANCELLED', terminal: true }
   ]},
   { protocol: '420Pay', rules: [

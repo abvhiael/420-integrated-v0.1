@@ -1,6 +1,6 @@
 # CMP-1.5.5 — Objective slash authorization
 
-Status: **IMPLEMENTED. LEVEL 1 + LEVEL 2 QUALIFICATION PENDING.**
+Status: **COMPLETE. LEVEL 1 + LEVEL 2 QUALIFIED.**
 
 ## Canonical definition
 
@@ -195,6 +195,44 @@ CMP-1.5.5 is COMPLETE only when:
 - focused Level 1 qualification passes;
 - retained Compute Level 2 qualification passes on the same exact implementation SHA;
 - durable evidence records that SHA.
+
+Next canonical step:
+
+**CMP-1.5.6 — Slash distribution**
+
+
+## Completion evidence
+
+CMP-1.5.5 is **COMPLETE**.
+
+Qualified implementation SHA:
+
+`8847b36b8e50905402f45e5c0f121c80464673e4`
+
+Current `main` observed at closeout:
+
+`98e545225d54379086f0c520afcb84b4d4d97288`
+
+Exact-head qualification:
+
+- Compute Market Qualification #108 — run `36956107284` — **PASS**;
+- retained `Compute*.t.sol` app integration suite — **PASS**;
+- CMP-1.5.5 mechanical verifier — **PASS**;
+- Solidity Contracts #3925 — run `36956107199` — **PASS** on the Compute fast path;
+- 420Docs Qualification #4138 — run `36956107143` — **PASS**;
+- Genesis Address Authority #727 — run `36956107316` — **PASS**;
+- 420Registry REG-AUDIT-4 #562 — run `36956107224` — **PASS**;
+- 420Indexer #1542 — run `36956107256` — **PASS**.
+
+Durable machine-readable evidence:
+
+`docs/compute-market/CMP-1.5.5-QUALIFICATION-EVIDENCE.json`
+
+The final qualification target included the documentation clarification required by the mechanical verifier. The resulting exact implementation SHA above is the authoritative qualified SHA.
+
+This closeout commit sequence is evidence/documentation-only relative to that qualified implementation SHA. It does not modify executable source, tests, workflows, dependencies, configuration, interfaces, deployment state, or generated/runtime artifacts.
+
+Repository-wide Level 3 qualification remains intentionally deferred to **CMP-1.5.13 — Phase closeout**.
 
 Next canonical step:
 

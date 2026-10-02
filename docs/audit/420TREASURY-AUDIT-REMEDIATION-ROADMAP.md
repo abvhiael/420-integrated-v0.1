@@ -67,16 +67,29 @@ This roadmap records additive audit/remediation work for the canonical 420Treasu
 - Durable evidence: `docs/audit/420TREASURY-AUDIT-5-QUALIFICATION.md`, introduced by evidence commit `a119b7a09a6515b192f9b5442d682431a2f1446a`.
 - Level 2 was not separately required because all directly affected Treasury/Indexer/Analytics boundaries were included in the exact-head Level 1 gate. Full Level 3 closeout remains deferred.
 
-## TREASURY-AUDIT-6 — deployment, registry publication and release materialization — PARTIAL
-Current:
-- TreasuryRouter420 is listed as `REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS`;
-- no new frozen predeploy is required.
-
-Required:
-- define deterministic deployment order and constructor bindings for Authorization, Policy, Budget, Disbursement and Router;
-- retain deployment artifact/runtime hashes for the release candidate;
-- publish the canonical router/service through ProtocolRegistry;
-- retain deployed addresses, chain/genesis identity and verification evidence.
+## TREASURY-AUDIT-6 — deployment, registry publication and release materialization — COMPLETE
+- Preserved TreasuryRouter420 as `REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS`; no new frozen Treasury predeploy was introduced.
+- Defined the canonical deterministic deployment sequence:
+  1. TreasuryAuthorization420(CapabilityRegistry420)
+  2. TreasuryPolicyRegistry420(GovernanceTimelock)
+  3. TreasuryBudgetRegistry420(GovernanceTimelock, Policy)
+  4. TreasuryDisbursementRegistry420(GovernanceTimelock, Authorization, Policy, Budget)
+  5. one-time Budget.setController(Disbursement)
+  6. TreasuryRouter420(Budget, Disbursement)
+  7. ProtocolRegistry.publishRegisteredService for `420/service/treasury/v1`.
+- Added `contracts/config/treasury/treasury-audit-6-release-materialization.json` as the machine-readable repository/live boundary manifest.
+- Added `contracts/test/TreasuryDeploymentBinding420.t.sol` using the real CapabilityRegistry420, ProtocolRegistry and Treasury contracts to prove exact constructor bindings, one-time controller binding, Registry component/service publication, EXTCODEHASH identity and wrong-router visibility.
+- Added `scripts/verify-treasury-audit-6-release.py` to fail closed on namespace drift, invented fixed addresses/CREATE2 semantics, constructor-order drift, Registry publication drift or fabricated live testnet evidence.
+- Retained compiled artifact SHA-256, runtime-template SHA-256, local deployed runtime code hashes and Registry/release commitments in the exact-head qualification evidence.
+- Local deployed TreasuryRouter runtime code hash: `0x810893b96c63c17076f7464db42fd9dc04fc4ebe2c33bf1ecfddfeee169d8759`.
+- Registry dependency root: `0x3b6e21a320b6f698b613dd8b1f5155b44679155d97653de5513ae4143215473e`.
+- Manifest commitment: `0xff748a2f88cfc791d779b0b09d83b29ff1afcfa34ea5e0ef951945b9fdbe1049`.
+- Interface commitment: `0x76d091c84c5fbde139282ab158a39c1bdebc987aa5da29942dd082ed3dab681f`.
+- Live chain/genesis identity, public-testnet addresses, deployment transactions and Registry publication receipts remain intentionally null/empty and are owned by TREASURY-AUDIT-8.
+- Level 1 exact-head qualification **PASS** on implementation SHA `5e37fd3f470a6c2dfd6102042ca7386f4b1c2e87`.
+- Treasury qualification workflow run `37040835840`, job `110950258291`: release verifier PASS; artifact identity retention PASS; deployment/Registry binding **4/4 PASS**; lifecycle **9/9 PASS**; security/property **5/5 PASS**; Grants **4/4 PASS**; Indexer/Analytics integration PASS; authority/config verifier PASS; release-evidence consumer inventory PASS; targeted Slither **0 high-severity findings**; forbidden-primitive scan PASS.
+- Durable evidence: `docs/audit/420TREASURY-AUDIT-6-QUALIFICATION.md`, introduced by evidence commit `bdcc672c168d53562f6940f2227d97190e6d092d`.
+- Level 2 was not separately required because the real Registry/Capability integration was exercised directly in the exact-head Level 1 deployment suite. Full Level 3 closeout remains deferred.
 
 ## TREASURY-AUDIT-7 — documentation/operator closeout — PARTIAL
 Required:

@@ -39,11 +39,7 @@ contract GasSponsor420 is GenesisResidentAccess420 {
     event OperationSet(bytes32 indexed operation, bool allowed);
     event RelayerSet(address indexed relayer, bool authorized);
     event Sponsored(
-        address indexed wallet,
-        bytes32 indexed merchantId,
-        bytes32 indexed operation,
-        uint256 actualCost,
-        bool success
+        address indexed wallet, bytes32 indexed merchantId, bytes32 indexed operation, uint256 actualCost, bool success
     );
     event SponsoredReimbursed(
         address indexed relayer,
@@ -79,14 +75,20 @@ contract GasSponsor420 is GenesisResidentAccess420 {
         fundedPrincipal += msg.value;
     }
 
-    function setOperation(bytes32 operation, bool allowed) external {
+    function setOperation(
+        bytes32 operation,
+        bool allowed
+    ) external {
         _requireGenesisGovernance(PayIds420.ACTION_CONFIGURE);
         require(operation != bytes32(0), "operation");
         operationAllowlist[operation] = allowed;
         emit OperationSet(operation, allowed);
     }
 
-    function setRelayer(address relayer, bool authorized) external {
+    function setRelayer(
+        address relayer,
+        bool authorized
+    ) external {
         _requireGenesisGovernance(PayIds420.ACTION_CONFIGURE);
         require(relayer != address(0) && relayer.code.length != 0, "relayer");
         authorizedRelayer[relayer] = authorized;
@@ -184,7 +186,9 @@ contract GasSponsor420 is GenesisResidentAccess420 {
         emit Sponsored(wallet, merchantId, operation, actualCost, success);
     }
 
-    function _roll(Usage storage u) private {
+    function _roll(
+        Usage storage u
+    ) private {
         uint64 d = uint64(block.timestamp / 1 days);
         if (u.dayIndex != d) {
             u.dayIndex = d;

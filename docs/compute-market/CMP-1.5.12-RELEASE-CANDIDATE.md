@@ -40,9 +40,10 @@ It also pins the critical upstream runtimes used by the stake graph:
 - verified entitlement source;
 - worker collateral AssetVault;
 - verifier collateral AssetVault;
+- payer-escrow AssetVault;
 - reward AssetVault.
 
-The reward Vault must not alias either collateral Vault, preserving separate reward backing from slashable collateral.
+The payer-escrow Vault must not alias either collateral Vault or the reward Vault. The reward Vault must not alias either collateral Vault. This preserves the frozen separation between payer funds, slashable collateral and reward backing.
 
 The checker validates worker/verifier collateral policy bindings, slash-authorizer/distribution graph, reward-accounting collateral graph, dispute evidence/integration graph, verifier dispute hold, escrow recipient resolver, and WorkerRegistry stake-source binding.
 
@@ -56,7 +57,8 @@ It grants no custody, stake, exit, slash, reward, settlement, publication, deplo
 - wrong runtime code hash rejection;
 - mismatched slash-distribution executor rejection;
 - WorkerRegistry/stake-source graph mismatch rejection;
-- reward-Vault/collateral-Vault alias rejection.
+- reward-Vault/collateral-Vault alias rejection;
+- payer-escrow Vault alias rejection against collateral or reward backing.
 
 These are release-time graph-drift controls, not new economic semantics.
 

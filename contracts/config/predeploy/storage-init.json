@@ -1,7 +1,11 @@
 {
-  "bridge_verifier": "FROM_FROZEN_GATEWAY_VERIFICATION_DECISION",
-  "community_validator_reserve": "0x0000000000000000000000000000000000000425",
+  "schema": "420-predeploy-storage-init-v2",
+  "governance_timelock": "0x0000000000000000000000000000000000000429",
   "consensus_system_call": "0x000000000000000000000000000000000000043c",
+  "community_validator_reserve": "0x0000000000000000000000000000000000000425",
+  "genesis_time": "FROM_FROZEN_TESTNET_OR_MAINNET_GENESIS",
+  "founder_beneficiaries": "UNRESOLVED_DO_NOT_INVENT",
+  "bridge_verifier": "FROM_FROZEN_GATEWAY_VERIFICATION_DECISION",
   "dex_pool_implementation": "FROM_COMPILED_CANONICAL_POOL",
   "entries": {
     "AIJobEscrow": {
@@ -174,17 +178,15 @@
       ]
     }
   },
-  "founder_beneficiaries": "UNRESOLVED_DO_NOT_INVENT",
-  "genesis_time": "FROM_FROZEN_TESTNET_OR_MAINNET_GENESIS",
-  "governance_timelock": "0x0000000000000000000000000000000000000429",
-  "protocol_registry": "0x0000000000000000000000000000000000000434",
   "rules": [
     "Direct predeploy placement does not execute Solidity constructors; constructor and post_init effects must be materialized in genesis storage deterministically.",
     "RewardController and ValidatorRegistry MUST begin with consensusSystemCaller=0x043c and consensusSystemCallerBound=true.",
     "ValidatorRegistry and CommunityValidatorReserve MUST begin mutually bound at 0x0423/0x0425.",
     "AttentionTreasury and CannaseurCampaignRegistry MUST begin mutually bound at 0x0421/0x043b; campaign reward registry remains separately governance-bound when the Genesis attention module set is deployed.",
-    "ConsensusSystemCall420 itself has no mutable caller binding; it accepts top-level calls only from go-ethereum params.SystemAddress."
+    "ConsensusSystemCall420 itself has no mutable caller binding; it accepts top-level calls only from go-ethereum params.SystemAddress.",
+    "GovernanceTimelock bootstrapGovernor MUST be Governance420 at 0x0437; Governance420 may schedule only the exact canonical Civic bootstrap plan and retires that role permanently on Civic activation."
   ],
-  "schema": "420-predeploy-storage-init-v2",
+  "bootstrap_governor": "0x0000000000000000000000000000000000000437",
+  "protocol_registry": "0x0000000000000000000000000000000000000434",
   "stake_genesis_config_hash": "0x7721fafee1f582e819e15ca57ce557bb0b473c584a49759e5d2511f882ff5eac"
 }

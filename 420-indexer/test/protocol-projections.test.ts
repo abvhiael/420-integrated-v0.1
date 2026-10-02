@@ -53,3 +53,39 @@ test('protocol projection rollback is block bounded', async () => {
   assert.equal(db.queries[0].params?.[0], '12');
   assert.match(db.queries[0].sql, /block_number > \$1/);
 });
+
+test('Governance event projection is idempotent and reorg replay replaces fork provenance after rollback', async () => {
+  const db = new RecordingDb420();
+  const topic0 = h(420);
+  const projection = new ProtocolProjection420(
+    db,
+    new ProtocolDecoderRegistry420([{
+      protocol: '420Governance',
+      eventName: 'CivicProposalRegistered',
+      topic0,
+      fields: [{ name: 'proposalId', kind: 'bytes32', indexed: true }]
+    }])
+  );
+  const canonical: IndexerLog = {
+    address: h(40),
+    blockHash: h(41),
+    blockNumber: 10n,
+    transactionHash: h(42),
+    transactionIndex: 0,
+    logIndex: 1,
+    topics: [topic0, h(43)],
+    data: '0x' as Hex
+  };
+
+  await projection.applyLogs(420n, [canonical]);
+  await projection.applyLogs(420n, [canonical]);
+  assert.match(db.queries[0]!.sql, /on conflict \(chain_id, block_hash, tx_hash, log_index\) do update/);
+  assert.deepEqual(db.queries[0]!.params, db.queries[1]!.params);
+
+  await projection.rollbackTo(9n);
+  const replacement = { ...canonical, blockHash: h(44), transactionHash: h(45) };
+  await projection.applyLogs(420n, [replacement]);
+  assert.match(db.queries[2]!.sql, /delete from idx_protocol_events where block_number > \$1/);
+  assert.equal(db.queries[3]!.params?.[2], h(44));
+  assert.equal(db.queries[3]!.params?.[3], h(45));
+});

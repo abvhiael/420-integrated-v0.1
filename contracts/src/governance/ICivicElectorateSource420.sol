@@ -7,12 +7,15 @@ pragma solidity ^0.8.24;
 interface ICivicElectorateSource420 {
     function sourceType() external view returns (bytes32);
 
-    function snapshotAt(uint64 snapshotBlock) external view returns (bytes32 electorateRoot, uint256 totalWeight);
+    function snapshotAt(
+        uint64 snapshotBlock
+    ) external view returns (bytes32 electorateRoot, uint256 totalWeight);
 
     /// @notice Resolve a voter's weight against an already-committed electorate root.
     /// @dev proofData encoding is source-specific.
-    function votingWeight(bytes32 electorateRoot, address voter, bytes calldata proofData)
-        external
-        view
-        returns (uint256 weight);
+    function votingWeight(
+        bytes32 electorateRoot,
+        address voter,
+        bytes calldata proofData
+    ) external view returns (uint256 weight);
 }

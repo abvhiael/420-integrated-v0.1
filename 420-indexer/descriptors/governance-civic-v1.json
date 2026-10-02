@@ -1,0 +1,400 @@
+{
+  "schema": "420-governance-civic-artifact-descriptor-v1",
+  "descriptorVersion": 1,
+  "protocol": "420Governance",
+  "authority": "artifact_events_only_addresses_resolved_by_deployment",
+  "contracts": [
+    {
+      "contractName": "CivicConstitution420",
+      "sourcePath": "contracts/src/governance/CivicConstitution420.sol",
+      "events": [
+        {
+          "name": "CivicRuleSet",
+          "signature": "CivicRuleSet(uint8,uint64,uint64,uint16,uint16,uint16,uint16,bool,uint32)",
+          "inputs": [
+            {
+              "name": "class_",
+              "type": "uint8",
+              "indexed": true
+            },
+            {
+              "name": "votingPeriodBlocks",
+              "type": "uint64",
+              "indexed": false
+            },
+            {
+              "name": "timelockDelay",
+              "type": "uint64",
+              "indexed": false
+            },
+            {
+              "name": "communityQuorumBps",
+              "type": "uint16",
+              "indexed": false
+            },
+            {
+              "name": "communityApprovalBps",
+              "type": "uint16",
+              "indexed": false
+            },
+            {
+              "name": "validatorQuorumBps",
+              "type": "uint16",
+              "indexed": false
+            },
+            {
+              "name": "validatorApprovalBps",
+              "type": "uint16",
+              "indexed": false
+            },
+            {
+              "name": "dualHouseRequired",
+              "type": "bool",
+              "indexed": false
+            },
+            {
+              "name": "revision",
+              "type": "uint32",
+              "indexed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "contractName": "CivicProposalRegistry420",
+      "sourcePath": "contracts/src/governance/CivicProposalRegistry420.sol",
+      "events": [
+        {
+          "name": "ProposalAuthorityBound",
+          "signature": "ProposalAuthorityBound(address)",
+          "inputs": [
+            {
+              "name": "authority",
+              "type": "address",
+              "indexed": true
+            }
+          ]
+        },
+        {
+          "name": "CivicProposalRegistered",
+          "signature": "CivicProposalRegistered(bytes32,address,uint8,bytes32,bytes32,uint64,uint64,uint64)",
+          "inputs": [
+            {
+              "name": "proposalId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "proposer",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "name": "class_",
+              "type": "uint8",
+              "indexed": true
+            },
+            {
+              "name": "metadataHash",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "actionsHash",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "snapshotBlock",
+              "type": "uint64",
+              "indexed": false
+            },
+            {
+              "name": "voteStart",
+              "type": "uint64",
+              "indexed": false
+            },
+            {
+              "name": "voteEnd",
+              "type": "uint64",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "CivicProposalStateChanged",
+          "signature": "CivicProposalStateChanged(bytes32,uint8,uint8)",
+          "inputs": [
+            {
+              "name": "proposalId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "previousState",
+              "type": "uint8",
+              "indexed": false
+            },
+            {
+              "name": "newState",
+              "type": "uint8",
+              "indexed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "contractName": "CivicElectorateRegistry420",
+      "sourcePath": "contracts/src/governance/CivicElectorateRegistry420.sol",
+      "events": [
+        {
+          "name": "CivicElectorateSourceSet",
+          "signature": "CivicElectorateSourceSet(uint8,address,bytes32,uint32)",
+          "inputs": [
+            {
+              "name": "house",
+              "type": "uint8",
+              "indexed": true
+            },
+            {
+              "name": "source",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "name": "sourceType",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "revision",
+              "type": "uint32",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "SnapshotAuthorityBound",
+          "signature": "SnapshotAuthorityBound(address)",
+          "inputs": [
+            {
+              "name": "authority",
+              "type": "address",
+              "indexed": true
+            }
+          ]
+        },
+        {
+          "name": "CivicElectorateSnapshotted",
+          "signature": "CivicElectorateSnapshotted(bytes32,uint64,bool,bytes32,uint256,bytes32,uint256)",
+          "inputs": [
+            {
+              "name": "proposalId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "snapshotBlock",
+              "type": "uint64",
+              "indexed": true
+            },
+            {
+              "name": "dualHouseRequired",
+              "type": "bool",
+              "indexed": false
+            },
+            {
+              "name": "communityRoot",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "communityTotalWeight",
+              "type": "uint256",
+              "indexed": false
+            },
+            {
+              "name": "validatorRoot",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "validatorTotalWeight",
+              "type": "uint256",
+              "indexed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "contractName": "CivicVoting420",
+      "sourcePath": "contracts/src/governance/CivicVoting420.sol",
+      "events": [
+        {
+          "name": "CivicVoteCast",
+          "signature": "CivicVoteCast(bytes32,uint8,address,uint8,uint256)",
+          "inputs": [
+            {
+              "name": "proposalId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "house",
+              "type": "uint8",
+              "indexed": true
+            },
+            {
+              "name": "voter",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "name": "support",
+              "type": "uint8",
+              "indexed": false
+            },
+            {
+              "name": "weight",
+              "type": "uint256",
+              "indexed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "contractName": "CivicGovernor420",
+      "sourcePath": "contracts/src/governance/CivicGovernor420.sol",
+      "events": [
+        {
+          "name": "CivicProposalCreated",
+          "signature": "CivicProposalCreated(bytes32,address,uint8,bytes32,bytes32,uint64,uint64,uint64,uint32)",
+          "inputs": [
+            {
+              "name": "proposalId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "proposer",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "name": "class_",
+              "type": "uint8",
+              "indexed": true
+            },
+            {
+              "name": "metadataHash",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "actionsHash",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "snapshotBlock",
+              "type": "uint64",
+              "indexed": false
+            },
+            {
+              "name": "voteStart",
+              "type": "uint64",
+              "indexed": false
+            },
+            {
+              "name": "voteEnd",
+              "type": "uint64",
+              "indexed": false
+            },
+            {
+              "name": "constitutionRevision",
+              "type": "uint32",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "CivicProposalFinalized",
+          "signature": "CivicProposalFinalized(bytes32,bool,bool,bool,uint32)",
+          "inputs": [
+            {
+              "name": "proposalId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "passed",
+              "type": "bool",
+              "indexed": false
+            },
+            {
+              "name": "communityPassed",
+              "type": "bool",
+              "indexed": false
+            },
+            {
+              "name": "validatorPassed",
+              "type": "bool",
+              "indexed": false
+            },
+            {
+              "name": "constitutionRevision",
+              "type": "uint32",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "CivicProposalQueued",
+          "signature": "CivicProposalQueued(bytes32,bytes32,uint64,uint256)",
+          "inputs": [
+            {
+              "name": "proposalId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "actionsHash",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "timelockDelay",
+              "type": "uint64",
+              "indexed": false
+            },
+            {
+              "name": "totalValue",
+              "type": "uint256",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "CivicProposalExecuted",
+          "signature": "CivicProposalExecuted(bytes32,bytes32)",
+          "inputs": [
+            {
+              "name": "proposalId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "actionsHash",
+              "type": "bytes32",
+              "indexed": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

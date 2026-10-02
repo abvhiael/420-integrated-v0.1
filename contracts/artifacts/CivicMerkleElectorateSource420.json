@@ -1,0 +1,371 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "timelock_",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "sourceType_",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "COMMUNITY_SOURCE_TYPE",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "VALIDATOR_SOURCE_TYPE",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "index",
+          "type": "uint256"
+        }
+      ],
+      "name": "checkpoint",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint64",
+              "name": "effectiveBlock",
+              "type": "uint64"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "electorateRoot",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "totalWeight",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct CivicMerkleElectorateSource420.Checkpoint",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "checkpointCount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "governanceTimelock",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint64",
+          "name": "effectiveBlock",
+          "type": "uint64"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "electorateRoot",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "totalWeight",
+          "type": "uint256"
+        }
+      ],
+      "name": "publishCheckpoint",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint64",
+          "name": "snapshotBlock",
+          "type": "uint64"
+        }
+      ],
+      "name": "snapshotAt",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "electorateRoot",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "totalWeight",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "sourceType",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "electorateRoot",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "voter",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes",
+          "name": "proofData",
+          "type": "bytes"
+        }
+      ],
+      "name": "votingWeight",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "weight",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint64",
+          "name": "effectiveBlock",
+          "type": "uint64"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "electorateRoot",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "totalWeight",
+          "type": "uint256"
+        }
+      ],
+      "name": "ElectorateCheckpointPublished",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidCheckpoint",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidProof",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidSourceType",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NoCheckpoint",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "Unauthorized",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ZeroAddress",
+      "type": "error"
+    }
+  ],
+  "compiler": {
+    "evmVersion": "cancun",
+    "foundryConfigBlobSha1": "f18c965f43b244582f2a4c527e7bad6d23aee929",
+    "optimizer": true,
+    "optimizerRuns": 200,
+    "solidity": "0.8.24",
+    "toolchainConfigBlobSha1": "dd49cb0e07370b01401d63d2fb53683177de8abc",
+    "viaIR": true
+  },
+  "constructorIndependentRuntime": false,
+  "contractName": "CivicMerkleElectorateSource420",
+  "deployedBytecode": "0x6080604081815260049182361015610015575f80fd5b5f3560e01c90816301ae8ee21461065c5750806312153f111461063f5780631f618cd2146106215780637efefd48146104585780639a1fdd7914610415578063b1b89666146103db578063c3b091bf146102ad578063cff4cd4e146100e95763ed64bab214610082575f80fd5b346100e55760203660031901126100e5576100c06100ba6060935f8480516100a9816106ab565b8281528260208201520152356106db565b50610728565b908080519267ffffffffffffffff815116845260208101516020850152015190820152f35b5f80fd5b5090346100e55760603660031901126100e557610104610694565b60243592909160443591907f00000000000000000000000000000000000000000000000000000000000004296001600160a01b031633036102a05784158015610298575b8015610284575b6102765760015480151580610236575b61022757825161016e816106ab565b67ffffffffffffffff8096169586825260208201918883528581019387855268010000000000000000811015610214578060016101ae92016001556106db565b959095610202575051845467ffffffffffffffff1916911617835551600183015551600290910155519081527f36d8fccc0171bfaaadb4b0743ca3b00ca71d9861492b178e1d1eceb31b7fb51290602090a3005b5f90634e487b7160e01b82525260245ffd5b604186634e487b7160e01b5f525260245ffd5b509051630f0f97d160e01b8152fd5b505f1981018181116102635761024b906106db565b5067ffffffffffffffff80915416908616111561015f565b601183634e487b7160e01b5f525260245ffd5b9051630f0f97d160e01b8152fd5b504367ffffffffffffffff8516111561014f565b508215610148565b90516282b42960e81b8152fd5b5090346100e55760203660031901126100e5576102c8610694565b60018054928315801561038a575b61037c57908092915f9467ffffffffffffffff809416925b610315575b866103006100ba886106db565b81602082015191015182519182526020820152f35b9091929394858101808211610363578211156103765781810180821161036357861c908486610343846106db565b505416116103595750949190825b9493926102ee565b9592915082610351565b601184634e487b7160e01b5f525260245ffd5b946102f3565b845163165ce21760e21b8152fd5b6103c85760015f5267ffffffffffffffff807fb10e2d527612073b26eecdfd717e6a320cf44b4afac2b0732d9fcbe2b7fa0cf65416908416106102d6565b603290634e487b7160e01b5f525260245ffd5b50346100e5575f3660031901126100e557602090517ff2f9b30a235db9b1b6a0ed3d7ebbc8eeccda8d906f55cd406104bd3dfb9b822f8152f35b50346100e5575f3660031901126100e557517f00000000000000000000000000000000000000000000000000000000000004296001600160a01b03168152602090f35b5090346100e55760603660031901126100e55760249182356001600160a01b03811691908290036100e5576044359067ffffffffffffffff928383116100e557366023840112156100e557828501358481116100e557830195808701963688116100e5578490602095869103126100e55781810135908682116100e5570194876043870112156100e557818601359781891161060f5784519860059781891b91603f8301601f19168c018581118d8210176105fd5788528b526044888c01928201019283116100e5576044889101915b8383106105ed575050505083519185830193845285835284830191838310908311176105db57508352519020925f935b86518510156105bb5784821b870184015160019190808211610599578451908682019283528582015284815261058d816106ab565b5190205b940193610558565b90845190868201928352858201528481526105b3816106ab565b519020610591565b8591508135036105cd57505160018152f35b90516309bde33960e01b8152fd5b634e487b7160e01b5f90815260418952fd5b8235815291810191889101610528565b8660418d634e487b7160e01b5f52525ffd5b82604189634e487b7160e01b5f52525ffd5b50346100e5575f3660031901126100e5576020906001549051908152f35b50346100e5575f3660031901126100e5576020905f549051908152f35b346100e5575f3660031901126100e557807ff7beccf7ee0debebcfc187ce85649f78073da02ee20ef0fa6810085fe3dee09760209252f35b6004359067ffffffffffffffff821682036100e557565b6060810190811067ffffffffffffffff8211176106c757604052565b634e487b7160e01b5f52604160045260245ffd5b6001548110156107145760039060015f52027fb10e2d527612073b26eecdfd717e6a320cf44b4afac2b0732d9fcbe2b7fa0cf601905f90565b634e487b7160e01b5f52603260045260245ffd5b90604051610735816106ab565b60406002829467ffffffffffffffff815416845260018101546020850152015491015256fea2646970667358221220225ec1f7fd3f221f393a5f9eff850b46e93361f903f0124e9a18c18a5c80629564736f6c63430008180033",
+  "immutableReferences": {
+    "5789": [
+      {
+        "length": 32,
+        "start": 273
+      },
+      {
+        "length": 32,
+        "start": 1065
+      }
+    ]
+  },
+  "materializedImmutableReferences": [
+    {
+      "immutableId": "5789",
+      "length": 32,
+      "start": 273,
+      "value": "0x0000000000000000000000000000000000000429"
+    },
+    {
+      "immutableId": "5789",
+      "length": 32,
+      "start": 1065,
+      "value": "0x0000000000000000000000000000000000000429"
+    }
+  ],
+  "materializedImmutableValue": "0x0000000000000000000000000000000000000429",
+  "runtimeCodeBytes": 1936,
+  "runtimeCodeHash": "0xff8be4d7fca8a0f193dc1441b9000f205ba50dbf22df6c05c8396f00e6d803c6",
+  "schema": "420-governance-runtime-artifact-v1",
+  "source": "contracts/src/governance/CivicMerkleElectorateSource420.sol",
+  "sourceBlobSha1": "a16febddf53e305fbf54e25889904050eea73a1a",
+  "status": "GOV_AUDIT_6_RUNTIME_ARTIFACT",
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 2373,
+        "contract": "src/governance/CivicMerkleElectorateSource420.sol:CivicMerkleElectorateSource420",
+        "label": "_sourceType",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_bytes32"
+      },
+      {
+        "astId": 2377,
+        "contract": "src/governance/CivicMerkleElectorateSource420.sol:CivicMerkleElectorateSource420",
+        "label": "_checkpoints",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_array(t_struct(Checkpoint)2371_storage)dyn_storage"
+      }
+    ],
+    "types": {
+      "t_array(t_struct(Checkpoint)2371_storage)dyn_storage": {
+        "base": "t_struct(Checkpoint)2371_storage",
+        "encoding": "dynamic_array",
+        "label": "struct CivicMerkleElectorateSource420.Checkpoint[]",
+        "numberOfBytes": "32"
+      },
+      "t_bytes32": {
+        "encoding": "inplace",
+        "label": "bytes32",
+        "numberOfBytes": "32"
+      },
+      "t_struct(Checkpoint)2371_storage": {
+        "encoding": "inplace",
+        "label": "struct CivicMerkleElectorateSource420.Checkpoint",
+        "members": [
+          {
+            "astId": 2366,
+            "contract": "src/governance/CivicMerkleElectorateSource420.sol:CivicMerkleElectorateSource420",
+            "label": "effectiveBlock",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint64"
+          },
+          {
+            "astId": 2368,
+            "contract": "src/governance/CivicMerkleElectorateSource420.sol:CivicMerkleElectorateSource420",
+            "label": "electorateRoot",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 2370,
+            "contract": "src/governance/CivicMerkleElectorateSource420.sol:CivicMerkleElectorateSource420",
+            "label": "totalWeight",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_uint256"
+          }
+        ],
+        "numberOfBytes": "96"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      },
+      "t_uint64": {
+        "encoding": "inplace",
+        "label": "uint64",
+        "numberOfBytes": "8"
+      }
+    }
+  }
+}

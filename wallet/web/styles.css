@@ -111,3 +111,19 @@ textarea { resize: vertical; min-height: 116px; font-family: ui-monospace, SFMon
 #names-transaction-state[data-state="idle"] > span { color: var(--danger); }
 @media (max-width: 900px) { .names-context { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 640px) { .names-context, .names-state-list div { grid-template-columns: 1fr; } }
+
+.governance-context { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)) auto; gap:16px; align-items:end; }
+.governance-context strong { overflow-wrap:anywhere; }
+.governance-grid { display:grid; grid-template-columns:minmax(280px,.75fr) minmax(0,1.25fr); gap:18px; }
+.governance-proposal-list { display:grid; gap:8px; max-height:620px; overflow:auto; }
+.governance-proposal-row { display:grid; gap:5px; width:100%; text-align:left; background:#101713; color:inherit; }
+.governance-proposal-row span,.governance-proposal-row small { color:var(--muted); overflow-wrap:anywhere; }
+.governance-detail-list { margin:0; display:grid; gap:8px; }
+.governance-detail-list div { display:grid; grid-template-columns:minmax(130px,.3fr) minmax(0,1fr); gap:12px; padding-bottom:8px; border-bottom:1px solid #202b24; }
+.governance-detail-list dt,.governance-detail-list dd { margin:0; }
+.governance-detail-list dd { overflow-wrap:anywhere; }
+.governance-action-review { display:grid; gap:8px; }
+.governance-action-row { padding:10px; border:1px solid var(--border); border-radius:10px; overflow-wrap:anywhere; background:#0a0f0c; }
+#governance-transaction-state[data-state="pending"] { border-color:#6f6342; }
+@media (max-width:900px){ .governance-context,.governance-grid { grid-template-columns:1fr 1fr; } }
+@media (max-width:640px){ .governance-context,.governance-grid,.governance-detail-list div { grid-template-columns:1fr; } .governance-vote-buttons button { flex:1; } }

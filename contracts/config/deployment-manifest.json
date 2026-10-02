@@ -1,5 +1,178 @@
 {
+  "schema": "420-system-contract-deployment-v2",
+  "version": 2,
+  "governance_timelock": "0x0000000000000000000000000000000000000429",
   "contracts": [
+    {
+      "name": "RewardController",
+      "address": "0x0000000000000000000000000000000000000420",
+      "deployment": "GENESIS_SYSTEM_ADDRESS"
+    },
+    {
+      "name": "AttentionTreasury",
+      "address": "0x0000000000000000000000000000000000000421",
+      "deployment": "GENESIS_SYSTEM_ADDRESS"
+    },
+    {
+      "name": "DevelopmentTreasury",
+      "address": "0x0000000000000000000000000000000000000422",
+      "deployment": "GENESIS_SYSTEM_ADDRESS"
+    },
+    {
+      "name": "ValidatorRegistry",
+      "address": "0x0000000000000000000000000000000000000423",
+      "deployment": "GENESIS_SYSTEM_ADDRESS"
+    },
+    {
+      "name": "ProtocolReserve",
+      "address": "0x0000000000000000000000000000000000000424",
+      "deployment": "GENESIS_SYSTEM_ADDRESS"
+    },
+    {
+      "name": "CommunityValidatorReserve",
+      "address": "0x0000000000000000000000000000000000000425",
+      "deployment": "GENESIS_SYSTEM_ADDRESS"
+    },
+    {
+      "name": "CommunityRewardReserve",
+      "address": "0x0000000000000000000000000000000000000426",
+      "deployment": "GENESIS_SYSTEM_ADDRESS"
+    },
+    {
+      "name": "FounderVestingRegistry",
+      "address": "0x0000000000000000000000000000000000000427",
+      "deployment": "GENESIS_SYSTEM_ADDRESS"
+    },
+    {
+      "name": "RandomnessRegistry",
+      "address": "0x0000000000000000000000000000000000000428",
+      "deployment": "GENESIS_SYSTEM_ADDRESS"
+    },
+    {
+      "name": "GovernanceTimelock",
+      "address": "0x0000000000000000000000000000000000000429",
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "runtime_artifact": "contracts/artifacts/GovernanceTimelock.json",
+      "runtime_code_hash": "0xca5e96c6048b190839d68a8857b2ff5f0a7e0f356d4089ac31fa684cdee00139",
+      "predeploy_state": "contracts/config/predeploy/GovernanceTimelock-predeploy-state.json",
+      "source_blob_sha1": "30977a1e172763aa333eeb4b34b1bbaee025c235",
+      "artifact_status": "GOV_AUDIT_6_ARTIFACT_READY"
+    },
+    {
+      "name": "PublicDistributionVault",
+      "address": "0x000000000000000000000000000000000000042a",
+      "deployment": "GENESIS_SYSTEM_ADDRESS"
+    },
+    {
+      "name": "GenesisDEXFactory",
+      "address": "0x000000000000000000000000000000000000042b",
+      "deployment": "GENESIS_SYSTEM_ADDRESS"
+    },
+    {
+      "name": "PublicBatchAuction",
+      "address": "0x000000000000000000000000000000000000042c",
+      "deployment": "GENESIS_SYSTEM_ADDRESS"
+    },
+    {
+      "name": "TWAPOracle",
+      "address": "0x000000000000000000000000000000000000042d",
+      "deployment": "GENESIS_SYSTEM_ADDRESS"
+    },
+    {
+      "name": "ValidatorBootstrapReserve",
+      "address": "0x000000000000000000000000000000000000042e",
+      "deployment": "GENESIS_SYSTEM_ADDRESS"
+    },
+    {
+      "name": "AIProviderRegistry",
+      "address": "0x000000000000000000000000000000000000042f",
+      "deployment": "GENESIS_SYSTEM_ADDRESS"
+    },
+    {
+      "name": "AIModelRegistry",
+      "address": "0x0000000000000000000000000000000000000430",
+      "deployment": "GENESIS_SYSTEM_ADDRESS"
+    },
+    {
+      "name": "AIJobManager",
+      "address": "0x0000000000000000000000000000000000000431",
+      "deployment": "GENESIS_SYSTEM_ADDRESS"
+    },
+    {
+      "name": "AIJobEscrow",
+      "address": "0x0000000000000000000000000000000000000432",
+      "deployment": "GENESIS_SYSTEM_ADDRESS"
+    },
+    {
+      "name": "AIReputationRegistry",
+      "address": "0x0000000000000000000000000000000000000433",
+      "deployment": "GENESIS_SYSTEM_ADDRESS"
+    },
+    {
+      "name": "ProtocolRegistry",
+      "address": "0x0000000000000000000000000000000000000434",
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "runtime_artifact": "contracts/artifacts/ProtocolRegistry.json",
+      "runtime_code_hash": "0x9f9e5f794296cf9faf5f8c8d17cd815f3c19c004a158c15cb61b5a29eaacb330",
+      "predeploy_state": "contracts/config/predeploy/ProtocolRegistry-predeploy-state.json",
+      "source_blob_sha1": "9ab3d53a68b6533978f41e0202e5268f1d615c19",
+      "artifact_status": "REG_AUDIT_5_ARTIFACT_READY"
+    },
+    {
+      "name": "Names420",
+      "address": "0x0000000000000000000000000000000000000435",
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "runtime_artifact": "contracts/artifacts/Names420.json",
+      "runtime_code_hash": "0xa974fffd3a40e7f28db41e4ae30656b33789d2483b18b47c809ce2385de709b7",
+      "predeploy_state": "contracts/config/predeploy/Names420-predeploy-state.json",
+      "source_blob_sha1": "4cb9b06b4a3febb3bf024c087f3ade1eebdcf31d",
+      "artifact_status": "NAMES_AUDIT_6_ARTIFACT_READY"
+    },
+    {
+      "name": "Identity420",
+      "address": "0x0000000000000000000000000000000000000436",
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "runtime_artifact": "contracts/artifacts/Identity420.json",
+      "runtime_code_hash": "0xda0fcd565d7aea6590b3e0ec468f7b99af50138b62527e770ca367a57e6cfd86",
+      "predeploy_state": "contracts/config/predeploy/Identity420-predeploy-state.json",
+      "source_blob_sha1": "9d6bbfecf6cbb406312138acc735c5390513cd5a",
+      "artifact_status": "ID_AUDIT_5_ARTIFACT_READY"
+    },
+    {
+      "name": "Governance420",
+      "address": "0x0000000000000000000000000000000000000437",
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "runtime_artifact": "contracts/artifacts/Governance420.json",
+      "runtime_code_hash": "0x9af678e7626b6141b4af33e7729b27835949f8dad634298e7ce5a5e754305d64",
+      "predeploy_state": "contracts/config/predeploy/Governance420-predeploy-state.json",
+      "source_blob_sha1": "886668e8efa97bd32734e32cde11148bcf98e5bd",
+      "artifact_status": "GOV_AUDIT_6_ARTIFACT_READY"
+    },
+    {
+      "name": "VerifiedGateway420",
+      "address": "0x0000000000000000000000000000000000000438",
+      "deployment": "GENESIS_SYSTEM_ADDRESS"
+    },
+    {
+      "name": "ApprovedQuoteAssetRegistry",
+      "address": "0x0000000000000000000000000000000000000439",
+      "deployment": "GENESIS_SYSTEM_ADDRESS"
+    },
+    {
+      "name": "Stake420",
+      "address": "0x000000000000000000000000000000000000043a",
+      "deployment": "GENESIS_SYSTEM_ADDRESS"
+    },
+    {
+      "name": "CannaseurCampaignRegistry",
+      "address": "0x000000000000000000000000000000000000043b",
+      "deployment": "GENESIS_SYSTEM_ADDRESS"
+    },
+    {
+      "name": "ConsensusSystemCall420",
+      "address": "0x000000000000000000000000000000000000043c",
+      "deployment": "GENESIS_SYSTEM_ADDRESS"
+    },
     {
       "address": "0x0000000000000000000000000000000000000420",
       "artifact_status": "STAKE_AUDIT_7_ARTIFACT_READY",
@@ -182,18 +355,15 @@
       "name": "ConsensusSystemCall420"
     }
   ],
-  "extended_candidate_addresses": "config/extended-system-addresses.json",
-  "genesis_dapps": "contracts/config/genesis-dapp-contract-map.json",
-  "governance_timelock": "0x0000000000000000000000000000000000000429",
-  "namespace_authority": "contracts/config/genesis-address-namespace.json",
-  "namespace_policy": "FROZEN_STEP6_2_PRESERVED",
   "notes": [
     "Code at 0x0420-0x043c is placed directly in genesis alloc from pinned runtime artifacts.",
     "Constructor and post-init effects are materialized through contracts/config/predeploy/storage-init.json.",
     "ValidatorRegistry and RewardController are bound to ConsensusSystemCall420 at 0x043c before the first non-genesis consensus write.",
     "ConsensusSystemCall420 is invoked only through the patched node420 native EVM system-call path from go-ethereum params.SystemAddress."
   ],
+  "genesis_dapps": "contracts/config/genesis-dapp-contract-map.json",
+  "extended_candidate_addresses": "config/extended-system-addresses.json",
   "readiness_note": "Genesis system-contract identity is frozen through 0x043c; bytecode/storage roots and patched node420 tree hash remain release-artifact gates.",
-  "schema": "420-system-contract-deployment-v2",
-  "version": 2
+  "namespace_authority": "contracts/config/genesis-address-namespace.json",
+  "namespace_policy": "FROZEN_STEP6_2_PRESERVED"
 }

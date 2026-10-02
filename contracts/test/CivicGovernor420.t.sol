@@ -8,11 +8,18 @@ import "../src/governance/ICivicElectorateSource420.sol";
 import "../src/governance/CivicElectorateRegistry420.sol";
 import "../src/governance/CivicVoting420.sol";
 import "../src/governance/CivicGovernor420.sol";
+import "../src/governance/GovernanceTimelock.sol";
 
 interface VmCivicGovernor420 {
-    function prank(address) external;
-    function expectRevert(bytes4) external;
-    function roll(uint256) external;
+    function prank(
+        address
+    ) external;
+    function expectRevert(
+        bytes4
+    ) external;
+    function roll(
+        uint256
+    ) external;
 }
 
 contract MockGovernorElectorate420 is ICivicElectorateSource420 {
@@ -21,7 +28,11 @@ contract MockGovernorElectorate420 is ICivicElectorateSource420 {
     uint256 public totalWeight;
     mapping(bytes32 => mapping(address => uint256)) public weights;
 
-    constructor(bytes32 type_, bytes32 root_, uint256 totalWeight_) {
+    constructor(
+        bytes32 type_,
+        bytes32 root_,
+        uint256 totalWeight_
+    ) {
         _type = type_;
         root = root_;
         totalWeight = totalWeight_;
@@ -31,19 +42,24 @@ contract MockGovernorElectorate420 is ICivicElectorateSource420 {
         return _type;
     }
 
-    function setWeight(address voter, uint256 weight) external {
+    function setWeight(
+        address voter,
+        uint256 weight
+    ) external {
         weights[root][voter] = weight;
     }
 
-    function snapshotAt(uint64) external view returns (bytes32 electorateRoot, uint256 totalWeight_) {
+    function snapshotAt(
+        uint64
+    ) external view returns (bytes32 electorateRoot, uint256 totalWeight_) {
         return (root, totalWeight);
     }
 
-    function votingWeight(bytes32 electorateRoot, address voter, bytes calldata)
-        external
-        view
-        returns (uint256)
-    {
+    function votingWeight(
+        bytes32 electorateRoot,
+        address voter,
+        bytes calldata
+    ) external view returns (uint256) {
         return weights[electorateRoot][voter];
     }
 }
@@ -58,6 +74,7 @@ contract CivicGovernor420Test {
     bytes32 constant VALIDATOR_ROOT = keccak256("VALIDATOR_ROOT");
 
     struct Stack {
+        GovernanceTimelock timelock;
         CivicConstitution420 constitution;
         CivicProposalRegistry420 proposals;
         CivicElectorateRegistry420 electorates;
@@ -67,41 +84,53 @@ contract CivicGovernor420Test {
         MockGovernorElectorate420 validators;
     }
 
-    function _stack(bool dualHouse) private returns (Stack memory s) {
-        s.constitution = new CivicConstitution420(address(this));
-        s.proposals = new CivicProposalRegistry420(address(this));
-        s.electorates = new CivicElectorateRegistry420(address(this));
+    function _stack(
+        bool dualHouse
+    ) private returns (Stack memory s) {
+        s.timelock = new GovernanceTimelock(address(this));
+        s.constitution = new CivicConstitution420(address(s.timelock));
+        s.proposals = new CivicProposalRegistry420(address(s.timelock));
+        s.electorates = new CivicElectorateRegistry420(address(s.timelock));
         s.community = new MockGovernorElectorate420(keccak256("COMMUNITY_V1"), COMMUNITY_ROOT, 100);
         s.validators = new MockGovernorElectorate420(keccak256("VALIDATOR_V1"), VALIDATOR_ROOT, 10);
 
+        vm.prank(address(s.timelock));
         s.electorates.setHouseSource(CivicIds420.House.COMMUNITY, address(s.community));
-        if (dualHouse) s.electorates.setHouseSource(CivicIds420.House.VALIDATOR, address(s.validators));
+        if (dualHouse) {
+            vm.prank(address(s.timelock));
+            s.electorates.setHouseSource(CivicIds420.House.VALIDATOR, address(s.validators));
+        }
 
-        s.constitution.setRule(
-            CivicIds420.ProposalClass.G1,
-            5,
-            7 days,
-            5000,
-            6000,
-            dualHouse ? 5000 : 0,
-            dualHouse ? 6000 : 0,
-            dualHouse
-        );
+        vm.prank(address(s.timelock));
+        s.constitution
+            .setRule(
+                CivicIds420.ProposalClass.G1,
+                5,
+                7 days,
+                5000,
+                6000,
+                dualHouse ? 5000 : 0,
+                dualHouse ? 6000 : 0,
+                dualHouse
+            );
 
         s.voting = new CivicVoting420(address(s.proposals), address(s.electorates));
         s.governor = new CivicGovernor420(
             address(s.constitution), address(s.proposals), address(s.electorates), address(s.voting)
         );
+        vm.prank(address(s.timelock));
         s.proposals.bindProposalAuthority(address(s.governor));
+        vm.prank(address(s.timelock));
         s.electorates.bindSnapshotAuthority(address(s.governor));
     }
 
-    function _create(Stack memory s) private returns (bytes32 proposalId) {
+    function _create(
+        Stack memory s
+    ) private returns (bytes32 proposalId) {
         vm.roll(100);
         vm.prank(ALICE);
-        proposalId = s.governor.createProposal(
-            CivicIds420.ProposalClass.G1, keccak256("metadata"), keccak256("actions")
-        );
+        proposalId =
+            s.governor.createProposal(CivicIds420.ProposalClass.G1, keccak256("metadata"), keccak256("actions"));
     }
 
     function testCreateFreezesRuleAndProposalWindow() public {
@@ -113,7 +142,7 @@ contract CivicGovernor420Test {
         require(frozen.communityApprovalBps == 6000, "approval frozen");
         require(frozen.constitutionRevision == 1, "revision frozen");
 
-        (,,,,uint64 snapshotBlock,uint64 voteStart,uint64 voteEnd,CivicIds420.ProposalState state,bool exists) =
+        (,,,, uint64 snapshotBlock, uint64 voteStart, uint64 voteEnd, CivicIds420.ProposalState state, bool exists) =
             s.proposals.proposals(proposalId);
         require(exists, "proposal exists");
         require(snapshotBlock == 99, "prior block snapshot");
@@ -127,6 +156,7 @@ contract CivicGovernor420Test {
         s.community.setWeight(ALICE, 60);
         bytes32 proposalId = _create(s);
 
+        vm.prank(address(s.timelock));
         s.constitution.setRule(CivicIds420.ProposalClass.G1, 5, 7 days, 9000, 9000, 0, 0, false);
 
         vm.roll(101);
@@ -137,7 +167,7 @@ contract CivicGovernor420Test {
         bool passed = s.governor.finalize(proposalId);
         require(passed, "frozen rev1 rule should pass");
 
-        (,,,,,,,CivicIds420.ProposalState state,) = s.proposals.proposals(proposalId);
+        (,,,,,,, CivicIds420.ProposalState state,) = s.proposals.proposals(proposalId);
         require(state == CivicIds420.ProposalState.PASSED, "passed state");
         CivicGovernor420.FrozenRule memory frozen = s.governor.frozenRule(proposalId);
         require(frozen.constitutionRevision == 1, "still revision one");
@@ -155,8 +185,7 @@ contract CivicGovernor420Test {
         vm.prank(BOB);
         s.voting.castVote(proposalId, CivicIds420.House.COMMUNITY, CivicVoting420.Support.ABSTAIN, "");
 
-        CivicGovernor420.HouseResult memory result =
-            s.governor.resultFor(proposalId, CivicIds420.House.COMMUNITY);
+        CivicGovernor420.HouseResult memory result = s.governor.resultFor(proposalId, CivicIds420.House.COMMUNITY);
         require(result.participation == 100, "all participation");
         require(result.quorumMet, "abstain counts quorum");
         require(result.approvalMet, "abstain excluded approval");
@@ -182,7 +211,7 @@ contract CivicGovernor420Test {
         bool passed = s.governor.finalize(proposalId);
         require(!passed, "dual house must fail");
 
-        (,,,,,,,CivicIds420.ProposalState state,) = s.proposals.proposals(proposalId);
+        (,,,,,,, CivicIds420.ProposalState state,) = s.proposals.proposals(proposalId);
         require(state == CivicIds420.ProposalState.FAILED, "failed state");
     }
 
@@ -208,15 +237,13 @@ contract CivicGovernor420Test {
         Stack memory s = _stack(false);
         vm.roll(100);
         vm.prank(ALICE);
-        bytes32 first = s.governor.createProposal(
-            CivicIds420.ProposalClass.G1, keccak256("metadata"), keccak256("actions")
-        );
+        bytes32 first =
+            s.governor.createProposal(CivicIds420.ProposalClass.G1, keccak256("metadata"), keccak256("actions"));
 
         vm.roll(110);
         vm.prank(ALICE);
-        bytes32 second = s.governor.createProposal(
-            CivicIds420.ProposalClass.G1, keccak256("metadata"), keccak256("actions")
-        );
+        bytes32 second =
+            s.governor.createProposal(CivicIds420.ProposalClass.G1, keccak256("metadata"), keccak256("actions"));
 
         require(first != second, "ids unique");
         require(s.governor.proposerNonces(ALICE) == 2, "nonce advanced");

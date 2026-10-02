@@ -2,7 +2,12 @@
 pragma solidity ^0.8.24;
 
 contract GovernanceTimelock {
-    enum Class { G1, G2, G3, G4 }
+    enum Class {
+        G1,
+        G2,
+        G3,
+        G4
+    }
 
     address public immutable bootstrapGovernor;
     address public scheduler;
@@ -30,7 +35,9 @@ contract GovernanceTimelock {
     event Cancelled(bytes32 indexed id);
     event CivicAuthorityActivated(address indexed previousScheduler, address indexed civicGovernor);
 
-    constructor(address bootstrapGovernor_) {
+    constructor(
+        address bootstrapGovernor_
+    ) {
         require(bootstrapGovernor_ != address(0), "zero governor");
         bootstrapGovernor = bootstrapGovernor_;
         scheduler = bootstrapGovernor_;
@@ -46,28 +53,44 @@ contract GovernanceTimelock {
         _;
     }
 
-    function delayFor(Class c) public pure returns (uint64) {
+    function delayFor(
+        Class c
+    ) public pure returns (uint64) {
         if (c == Class.G1) return G1_DELAY;
         if (c == Class.G2) return G2_DELAY;
         if (c == Class.G3) return G3_DELAY;
         return G4_DELAY;
     }
 
-    /// @notice Irreversibly transfer scheduling/cancellation authority from bootstrap governance to 420Civic.
-    function activateCivicAuthority(address civicGovernor) external onlyBootstrapGovernor {
+    /// @notice Irreversibly transfer scheduling authority from bootstrap governance to 420Civic.
+    /// @dev Civic v1 proposal cancellation is intentionally unsupported; bootstrap cancellation retires here.
+    function activateCivicAuthority(
+        address civicGovernor
+    ) external onlyBootstrapGovernor {
         require(!civicAuthorityActivated, "already activated");
-        require(civicGovernor != address(0) && civicGovernor.code.length != 0, "invalid governor");
+        require(_isCanonicalCivicGovernor(civicGovernor), "invalid governor");
         address previous = scheduler;
         scheduler = civicGovernor;
         civicAuthorityActivated = true;
         emit CivicAuthorityActivated(previous, civicGovernor);
     }
 
+    function _isCanonicalCivicGovernor(
+        address civicGovernor
+    ) private view returns (bool) {
+        if (civicGovernor == address(0) || civicGovernor.code.length == 0) return false;
+        (bool ok, bytes memory data) = civicGovernor.staticcall(abi.encodeWithSignature("timelock()"));
+        return ok && data.length >= 32 && abi.decode(data, (address)) == address(this);
+    }
+
     /// @notice Legacy-compatible scheduling surface using the immutable class delay floor.
-    function schedule(bytes32 id, address target, uint256 value, bytes calldata data, Class class_)
-        external
-        onlyScheduler
-    {
+    function schedule(
+        bytes32 id,
+        address target,
+        uint256 value,
+        bytes calldata data,
+        Class class_
+    ) external onlyScheduler {
         _schedule(id, target, value, data, class_, delayFor(class_));
     }
 
@@ -84,14 +107,21 @@ contract GovernanceTimelock {
         _schedule(id, target, value, data, class_, requestedDelay);
     }
 
-    function cancel(bytes32 id) external onlyScheduler {
+    /// @notice Cancel a legacy/bootstrap operation before Civic authority activation.
+    /// @dev Civic v1 proposals are immutable after creation; no post-activation cancellation authority exists.
+    function cancel(
+        bytes32 id
+    ) external onlyBootstrapGovernor {
+        require(!civicAuthorityActivated, "civic active");
         Operation storage op = operations[id];
         require(op.target != address(0) && !op.executed && !op.cancelled, "invalid");
         op.cancelled = true;
         emit Cancelled(id);
     }
 
-    function execute(bytes32 id) external payable returns (bytes memory result) {
+    function execute(
+        bytes32 id
+    ) external payable returns (bytes memory result) {
         Operation storage op = operations[id];
         require(op.target != address(0), "unknown");
         require(!op.executed && !op.cancelled, "closed");
@@ -99,7 +129,7 @@ contract GovernanceTimelock {
         require(address(this).balance >= op.value, "insufficient balance");
 
         op.executed = true;
-        (bool ok, bytes memory out) = op.target.call{value: op.value}(op.data);
+        (bool ok, bytes memory out) = op.target.call{ value: op.value }(op.data);
         require(ok, "execution failed");
         emit Executed(id);
         return out;
@@ -121,5 +151,5 @@ contract GovernanceTimelock {
         emit Scheduled(id, target, class_, executeAfter);
     }
 
-    receive() external payable {}
+    receive() external payable { }
 }

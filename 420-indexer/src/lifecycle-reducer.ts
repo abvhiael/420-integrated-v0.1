@@ -1,6 +1,6 @@
 import type { DecodedProtocolEvent420 } from './protocol-decoder.js';
 
-export type LifecycleState420 = 'UNKNOWN' | 'PENDING' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED' | 'REVOKED' | 'EXPIRED' | 'FAILED';
+export type LifecycleState420 = 'UNKNOWN' | 'PENDING' | 'ACTIVE' | 'PASSED' | 'QUEUED' | 'EXECUTED' | 'COMPLETED' | 'CANCELLED' | 'REVOKED' | 'EXPIRED' | 'FAILED';
 
 export interface LifecycleRule420 {
   eventName: string;
@@ -94,13 +94,7 @@ const POLICY_LIST: LifecyclePolicy420[] = [
     { eventName: 'ValidatorBondWithdrawn', state: 'COMPLETED', terminal: true }
   ]},
   { protocol: '420Governance', rules: [
-    { eventName: 'ProposalCreated', state: 'PENDING' },
-    { eventName: 'CivicProposalCreated', state: 'PENDING' },
-    { eventName: 'ProposalQueued', state: 'PENDING' },
-    { eventName: 'ProposalExecuted', state: 'COMPLETED', terminal: true },
-    { eventName: 'CivicProposalExecuted', state: 'COMPLETED', terminal: true },
-    { eventName: 'ProposalCancelled', state: 'CANCELLED', terminal: true },
-    { eventName: 'CivicProposalCancelled', state: 'CANCELLED', terminal: true }
+    { eventName: 'CivicProposalRegistered', state: 'ACTIVE' }
   ]},
   { protocol: '420Pay', rules: [
     { eventName: 'PaymentCreated', state: 'PENDING' },
@@ -137,6 +131,21 @@ const POLICY_LIST: LifecyclePolicy420[] = [
 
 export const LIFECYCLE_POLICIES_420: ReadonlyMap<string, LifecyclePolicy420> = new Map(POLICY_LIST.map((p) => [p.protocol, p]));
 
+function governanceLifecycleRule420(event: DecodedProtocolEvent420): LifecycleRule420 | null {
+  if (event.eventName === 'CivicProposalRegistered') {
+    return { eventName: event.eventName, state: 'ACTIVE' };
+  }
+  if (event.eventName !== 'CivicProposalStateChanged') return null;
+  const raw = event.fields.newState;
+  if (typeof raw !== 'bigint') return null;
+  if (raw === 1n) return { eventName: event.eventName, state: 'ACTIVE' };
+  if (raw === 2n) return { eventName: event.eventName, state: 'PASSED' };
+  if (raw === 3n) return { eventName: event.eventName, state: 'FAILED', terminal: true };
+  if (raw === 4n) return { eventName: event.eventName, state: 'QUEUED' };
+  if (raw === 5n) return { eventName: event.eventName, state: 'EXECUTED', terminal: true };
+  return null;
+}
+
 function compareOrder(a: DecodedProtocolEvent420, b: DecodedProtocolEvent420): number {
   if (a.blockNumber !== b.blockNumber) return a.blockNumber < b.blockNumber ? -1 : 1;
   if (a.transactionIndex !== b.transactionIndex) return a.transactionIndex - b.transactionIndex;
@@ -151,7 +160,11 @@ export function reduceProtocolLifecycle420(events: readonly DecodedProtocolEvent
     const key = protocolObjectKey420(event);
     if (!key) continue;
     const activePolicy = policy ?? LIFECYCLE_POLICIES_420.get(event.protocol);
-    const rule = activePolicy?.rules.find((candidate) => candidate.eventName === event.eventName);
+    const rule = policy
+      ? activePolicy?.rules.find((candidate) => candidate.eventName === event.eventName)
+      : event.protocol === '420Governance'
+        ? governanceLifecycleRule420(event)
+        : activePolicy?.rules.find((candidate) => candidate.eventName === event.eventName);
     if (!rule) continue;
 
     const current = states.get(key);

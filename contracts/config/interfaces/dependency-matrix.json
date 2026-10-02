@@ -76,19 +76,7 @@
       "SystemSafety",
       "GenesisInitialization"
     ],
-    "420Governance": [
-      "ProtocolRegistry",
-      "GovernanceAuthority",
-      "PauseRegistry",
-      "CapabilityRegistry",
-      "SystemSafety",
-      "GenesisInitialization",
-      "Migration",
-      "SignedEnvelope",
-      "ReplayProtection",
-      "ChainContext",
-      "MetadataCommitment"
-    ],
+    "420Governance": [],
     "PublicDistribution": [
       "ProtocolRegistry",
       "CanonicalAssetRegistry",

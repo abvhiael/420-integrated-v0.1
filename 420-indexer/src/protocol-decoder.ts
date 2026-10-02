@@ -83,7 +83,10 @@ export class ProtocolDecoderRegistry420 {
     const address = log.address.toLowerCase();
     const descriptor = candidates.find((candidate) => candidate.contractAddress?.toLowerCase() === address)
       ?? candidates.find((candidate) => candidate.contractAddress === undefined);
-    if (!descriptor) return null;
+    if (!descriptor) {
+      const names = [...new Set(candidates.map((candidate) => candidate.protocol + '.' + candidate.eventName))].join(',');
+      throw new Error('protocol descriptor contract mismatch: ' + names);
+    }
 
     const fields: Record<string, string | bigint | boolean> = {};
     let indexedIndex = 1;

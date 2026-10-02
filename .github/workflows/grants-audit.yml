@@ -86,3 +86,65 @@ jobs:
         env:
           FOUNDRY_PROFILE: hardening
         run: forge test --match-path 'test/GrantsGenesis420.t.sol' -vvv
+
+      - name: Install Slither for Grants security qualification
+        run: python -m pip install --disable-pip-version-check slither-analyzer
+
+      - name: Targeted Grants Slither high-severity gate
+        working-directory: contracts
+        shell: bash
+        run: |
+          cat > GrantsAuditSlitherTarget.sol <<'SOL'
+          // SPDX-License-Identifier: GPL-3.0
+          pragma solidity ^0.8.24;
+          import "./src/grants/GrantIds420.sol";
+          import "./src/grants/GrantAuthorization420.sol";
+          import "./src/grants/GrantProgramRegistry420.sol";
+          import "./src/grants/GrantApplicationRegistry420.sol";
+          import "./src/grants/GrantAwardRegistry420.sol";
+          import "./src/grants/GrantMilestoneRegistry420.sol";
+          import "./src/grants/GrantRouter420.sol";
+          SOL
+          set +e
+          slither GrantsAuditSlitherTarget.sol --json /tmp/grants-slither.json >/tmp/grants-slither.txt 2>&1
+          STATUS=$?
+          set -e
+          rm -f GrantsAuditSlitherTarget.sol
+          python - <<'PY'
+          import json
+          import pathlib
+
+          report_path = pathlib.Path("/tmp/grants-slither.json")
+          log_path = pathlib.Path("/tmp/grants-slither.txt")
+          if not report_path.exists():
+              print(log_path.read_text(errors="replace"))
+              raise SystemExit("Slither did not produce JSON output")
+
+          report = json.loads(report_path.read_text())
+          if report.get("success") is not True:
+              print(log_path.read_text(errors="replace"))
+              raise SystemExit(f"Slither analysis failed: {report.get('error') or 'unknown error'}")
+
+          findings = []
+          high = []
+          for detector in report.get("results", {}).get("detectors", []):
+              grant_elements = [
+                  element for element in detector.get("elements", [])
+                  if element.get("source_mapping", {}).get("filename_relative", "").startswith("src/grants/")
+              ]
+              if not grant_elements:
+                  continue
+              item = {
+                  "check": detector.get("check"),
+                  "impact": detector.get("impact"),
+                  "confidence": detector.get("confidence"),
+                  "description": detector.get("description", "").splitlines()[0],
+              }
+              findings.append(item)
+              if detector.get("impact") == "High":
+                  high.append(item)
+
+          print(json.dumps({"grantsFindings": findings, "highSeverity": high}, indent=2))
+          if high:
+              raise SystemExit("High-severity Slither finding in Grants source")
+          PY

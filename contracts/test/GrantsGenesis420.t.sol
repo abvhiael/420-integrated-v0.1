@@ -10,26 +10,49 @@ import "../src/grants/GrantAwardRegistry420.sol";
 import "../src/grants/GrantMilestoneRegistry420.sol";
 
 interface VmGrants420 {
-    function prank(address) external;
-    function warp(uint256) external;
+    function prank(
+        address
+    ) external;
+    function warp(
+        uint256
+    ) external;
 }
 
 contract MockGrantCaps420 is ICapabilityRegistry420 {
     mapping(bytes32 => bool) internal ok;
 
-    function key(address p, bytes32 c, bytes32 a, bytes32 s) public pure returns (bytes32) {
+    function key(
+        address p,
+        bytes32 c,
+        bytes32 a,
+        bytes32 s
+    ) public pure returns (bytes32) {
         return keccak256(abi.encode(p, c, a, s));
     }
 
-    function set(address p, bytes32 c, bytes32 a, bytes32 s, bool v) external {
+    function set(
+        address p,
+        bytes32 c,
+        bytes32 a,
+        bytes32 s,
+        bool v
+    ) external {
         ok[key(p, c, a, s)] = v;
     }
 
-    function grant(bytes32) external pure returns (CapabilityGrant memory g) {
+    function grant(
+        bytes32
+    ) external pure returns (CapabilityGrant memory g) {
         return g;
     }
 
-    function isAuthorized(address p, bytes32 c, bytes32 a, bytes32 s, uint256) external view returns (bool) {
+    function isAuthorized(
+        address p,
+        bytes32 c,
+        bytes32 a,
+        bytes32 s,
+        uint256
+    ) external view returns (bool) {
         return ok[key(p, c, a, s)];
     }
 }
@@ -53,7 +76,9 @@ contract MockGrantTreasury420 is ITreasuryDisbursementGrant420 {
         );
     }
 
-    function disbursement(bytes32 id) external view returns (Disbursement memory) {
+    function disbursement(
+        bytes32 id
+    ) external view returns (Disbursement memory) {
         return ds[id];
     }
 }
@@ -83,35 +108,48 @@ contract GrantsGenesis420Test {
         e.awards = new GrantAwardRegistry420(address(this), address(e.programs), address(e.applications));
         e.programs.bindAwardRegistry(address(e.awards));
         e.treasury = new MockGrantTreasury420();
-        e.milestones =
-            new GrantMilestoneRegistry420(address(this), address(e.auth), address(e.programs), address(e.awards), address(e.treasury));
-    }
-
-    function makeProgram(Env memory e) internal returns (bytes32 p, bytes32 budget, bytes32 civic) {
-        p = keccak256("program");
-        budget = keccak256("budget");
-        civic = keccak256("civic");
-        e.programs.createProgram(
-            p,
-            GrantIds420.PROGRAM_DEVELOPMENT,
-            budget,
-            civic,
-            1000,
-            700,
-            uint64(block.timestamp),
-            uint64(block.timestamp + 1000),
-            keccak256("program-meta")
+        e.milestones = new GrantMilestoneRegistry420(
+            address(this), address(e.auth), address(e.programs), address(e.awards), address(e.treasury)
         );
     }
 
-    function submit(Env memory e, bytes32 p, uint128 amount, uint256 nonce) internal returns (bytes32 app) {
+    function makeProgram(
+        Env memory e
+    ) internal returns (bytes32 p, bytes32 budget, bytes32 civic) {
+        p = keccak256("program");
+        budget = keccak256("budget");
+        civic = keccak256("civic");
+        e.programs
+            .createProgram(
+                p,
+                GrantIds420.PROGRAM_DEVELOPMENT,
+                budget,
+                civic,
+                1000,
+                700,
+                uint64(block.timestamp),
+                uint64(block.timestamp + 1000),
+                keccak256("program-meta")
+            );
+    }
+
+    function submit(
+        Env memory e,
+        bytes32 p,
+        uint128 amount,
+        uint256 nonce
+    ) internal returns (bytes32 app) {
         bytes32 content = keccak256(abi.encode("application", nonce));
         app = e.applications.canonicalId(p, ALICE, nonce, content);
         vm.prank(ALICE);
         e.applications.submit(app, p, ALICE, nonce, amount, content);
     }
 
-    function award(Env memory e, bytes32 app, uint128 amount) internal returns (bytes32 a) {
+    function award(
+        Env memory e,
+        bytes32 app,
+        uint128 amount
+    ) internal returns (bytes32 a) {
         bytes32 terms = keccak256(abi.encode("terms", app));
         a = e.awards.canonicalId(app, ALICE, amount, terms);
         e.awards.createAward(a, app, ALICE, amount, terms);
@@ -137,25 +175,28 @@ contract GrantsGenesis420Test {
         bytes32 id = e.applications.canonicalId(p, ALICE, 1, content);
 
         vm.prank(DELEGATE);
-        (bool denied,) = address(e.applications).call(
-            abi.encodeWithSelector(e.applications.submit.selector, id, p, ALICE, uint256(1), uint128(500), content)
-        );
+        (bool denied,) = address(e.applications)
+            .call(
+                abi.encodeWithSelector(e.applications.submit.selector, id, p, ALICE, uint256(1), uint128(500), content)
+            );
         require(!denied, "default allow");
 
-        e.caps.set(
-            DELEGATE,
-            GrantIds420.COMPONENT_GRANTS,
-            GrantIds420.ACTION_SUBMIT_APPLICATION,
-            e.auth.scopeProgram(p),
-            true
-        );
+        e.caps
+            .set(
+                DELEGATE,
+                GrantIds420.COMPONENT_GRANTS,
+                GrantIds420.ACTION_SUBMIT_APPLICATION,
+                e.auth.scopeProgram(p),
+                true
+            );
         vm.prank(DELEGATE);
         e.applications.submit(id, p, ALICE, 1, 500, content);
 
         vm.prank(ALICE);
-        (bool replay,) = address(e.applications).call(
-            abi.encodeWithSelector(e.applications.submit.selector, id, p, ALICE, uint256(1), uint128(500), content)
-        );
+        (bool replay,) = address(e.applications)
+            .call(
+                abi.encodeWithSelector(e.applications.submit.selector, id, p, ALICE, uint256(1), uint128(500), content)
+            );
         require(!replay, "application replay");
     }
 
@@ -170,9 +211,12 @@ contract GrantsGenesis420Test {
         bytes32 secondContent = keccak256("second");
         bytes32 secondId = e.applications.canonicalId(p, ALICE, 9, secondContent);
         vm.prank(ALICE);
-        (bool reused,) = address(e.applications).call(
-            abi.encodeWithSelector(e.applications.submit.selector, secondId, p, ALICE, uint256(9), uint128(300), secondContent)
-        );
+        (bool reused,) = address(e.applications)
+            .call(
+                abi.encodeWithSelector(
+                    e.applications.submit.selector, secondId, p, ALICE, uint256(9), uint128(300), secondContent
+                )
+            );
         require(!reused, "application nonce replay accepted");
     }
 
@@ -189,9 +233,8 @@ contract GrantsGenesis420Test {
         bytes32 app2 = submit(e, p, 400, 2);
         bytes32 terms = keccak256("terms2");
         bytes32 a2 = e.awards.canonicalId(app2, ALICE, 400, terms);
-        (bool over,) = address(e.awards).call(
-            abi.encodeWithSelector(e.awards.createAward.selector, a2, app2, ALICE, uint128(400), terms)
-        );
+        (bool over,) = address(e.awards)
+            .call(abi.encodeWithSelector(e.awards.createAward.selector, a2, app2, ALICE, uint128(400), terms));
         require(!over, "program cap bypass");
         require(e.programs.program(p).awarded == 700, "failed award changed accounting");
     }
@@ -207,9 +250,8 @@ contract GrantsGenesis420Test {
 
         bytes32 terms2 = keccak256("partial-2");
         bytes32 a2 = e.awards.canonicalId(app, ALICE, 300, terms2);
-        (bool over,) = address(e.awards).call(
-            abi.encodeWithSelector(e.awards.createAward.selector, a2, app, ALICE, uint128(300), terms2)
-        );
+        (bool over,) = address(e.awards)
+            .call(abi.encodeWithSelector(e.awards.createAward.selector, a2, app, ALICE, uint128(300), terms2));
         require(!over, "application over-awarded");
         require(e.awards.applicationAwarded(app) == 300, "failed award changed application accounting");
     }
@@ -217,7 +259,8 @@ contract GrantsGenesis420Test {
     function testOnlyBoundAwardRegistryCanReserveProgramCap() public {
         Env memory e = setup();
         (bytes32 p,,) = makeProgram(e);
-        (bool direct,) = address(e.programs).call(abi.encodeWithSelector(e.programs.reserveAward.selector, p, uint128(1)));
+        (bool direct,) =
+            address(e.programs).call(abi.encodeWithSelector(e.programs.reserveAward.selector, p, uint128(1)));
         require(!direct, "governance bypassed bound award registry");
     }
 
@@ -229,9 +272,8 @@ contract GrantsGenesis420Test {
 
         bytes32 terms = keccak256("inactive-terms");
         bytes32 awardId = e.awards.canonicalId(app, ALICE, 500, terms);
-        (bool created,) = address(e.awards).call(
-            abi.encodeWithSelector(e.awards.createAward.selector, awardId, app, ALICE, uint128(500), terms)
-        );
+        (bool created,) = address(e.awards)
+            .call(abi.encodeWithSelector(e.awards.createAward.selector, awardId, app, ALICE, uint128(500), terms));
         require(!created, "inactive program accepted award");
     }
 
@@ -244,39 +286,40 @@ contract GrantsGenesis420Test {
         bytes32 m = claimedMilestone(e, a, 1, 300, purpose);
 
         bytes32 d = keccak256("treasury-disbursement");
-        e.treasury.set(
-            d, budget, ALICE, ASSET, 299, civic, purpose, ITreasuryDisbursementGrant420.State.SCHEDULED, bytes32(0)
-        );
-        (bool mismatch,) =
-            address(e.milestones).call(abi.encodeWithSelector(e.milestones.approve.selector, m, d));
+        e.treasury
+            .set(
+                d, budget, ALICE, ASSET, 299, civic, purpose, ITreasuryDisbursementGrant420.State.SCHEDULED, bytes32(0)
+            );
+        (bool mismatch,) = address(e.milestones).call(abi.encodeWithSelector(e.milestones.approve.selector, m, d));
         require(!mismatch, "amount mismatch accepted");
 
-        e.treasury.set(
-            d, budget, ALICE, ASSET, 300, civic, purpose, ITreasuryDisbursementGrant420.State.SCHEDULED, bytes32(0)
-        );
+        e.treasury
+            .set(
+                d, budget, ALICE, ASSET, 300, civic, purpose, ITreasuryDisbursementGrant420.State.SCHEDULED, bytes32(0)
+            );
         e.milestones.approve(m, d);
 
         (bool early,) = address(e.milestones).call(abi.encodeWithSelector(e.milestones.finalizePaid.selector, m));
         require(!early, "paid before treasury execution");
 
-        e.treasury.set(
-            d, budget, ALICE, ASSET, 300, civic, purpose, ITreasuryDisbursementGrant420.State.EXECUTED, bytes32(0)
-        );
+        e.treasury
+            .set(d, budget, ALICE, ASSET, 300, civic, purpose, ITreasuryDisbursementGrant420.State.EXECUTED, bytes32(0));
         (bool noReleaseCommitment,) =
             address(e.milestones).call(abi.encodeWithSelector(e.milestones.finalizePaid.selector, m));
         require(!noReleaseCommitment, "paid without vault release commitment");
 
-        e.treasury.set(
-            d,
-            budget,
-            ALICE,
-            ASSET,
-            300,
-            civic,
-            purpose,
-            ITreasuryDisbursementGrant420.State.EXECUTED,
-            keccak256("vault-release")
-        );
+        e.treasury
+            .set(
+                d,
+                budget,
+                ALICE,
+                ASSET,
+                300,
+                civic,
+                purpose,
+                ITreasuryDisbursementGrant420.State.EXECUTED,
+                keccak256("vault-release")
+            );
         e.milestones.finalizePaid(m);
         require(e.milestones.milestone(m).state == GrantMilestoneRegistry420.State.PAID, "not paid");
     }
@@ -291,9 +334,10 @@ contract GrantsGenesis420Test {
         bytes32 m1 = claimedMilestone(e, a, 1, 300, purpose);
         bytes32 m2 = claimedMilestone(e, a, 2, 300, purpose);
         bytes32 d = keccak256("one-disbursement");
-        e.treasury.set(
-            d, budget, ALICE, ASSET, 300, civic, purpose, ITreasuryDisbursementGrant420.State.SCHEDULED, bytes32(0)
-        );
+        e.treasury
+            .set(
+                d, budget, ALICE, ASSET, 300, civic, purpose, ITreasuryDisbursementGrant420.State.SCHEDULED, bytes32(0)
+            );
 
         e.milestones.approve(m1, d);
         (bool replay,) = address(e.milestones).call(abi.encodeWithSelector(e.milestones.approve.selector, m2, d));
@@ -309,9 +353,10 @@ contract GrantsGenesis420Test {
         bytes32 purpose = keccak256("cancelled-award");
         bytes32 m = claimedMilestone(e, a, 1, 400, purpose);
         bytes32 d = keccak256("cancelled-award-disbursement");
-        e.treasury.set(
-            d, budget, ALICE, ASSET, 400, civic, purpose, ITreasuryDisbursementGrant420.State.SCHEDULED, bytes32(0)
-        );
+        e.treasury
+            .set(
+                d, budget, ALICE, ASSET, 400, civic, purpose, ITreasuryDisbursementGrant420.State.SCHEDULED, bytes32(0)
+            );
 
         e.awards.cancel(a);
         (bool approved,) = address(e.milestones).call(abi.encodeWithSelector(e.milestones.approve.selector, m, d));
@@ -326,17 +371,19 @@ contract GrantsGenesis420Test {
         bytes32 purpose = keccak256("rebindable-purpose");
         bytes32 m = claimedMilestone(e, a, 1, 300, purpose);
         bytes32 d = keccak256("rebindable-disbursement");
-        e.treasury.set(
-            d, budget, ALICE, ASSET, 300, civic, purpose, ITreasuryDisbursementGrant420.State.SCHEDULED, bytes32(0)
-        );
+        e.treasury
+            .set(
+                d, budget, ALICE, ASSET, 300, civic, purpose, ITreasuryDisbursementGrant420.State.SCHEDULED, bytes32(0)
+            );
 
         e.milestones.approve(m, d);
         (bool orphaned,) = address(e.milestones).call(abi.encodeWithSelector(e.milestones.cancel.selector, m));
         require(!orphaned, "scheduled Treasury payment detached from Grants");
 
-        e.treasury.set(
-            d, budget, ALICE, ASSET, 300, civic, purpose, ITreasuryDisbursementGrant420.State.CANCELLED, bytes32(0)
-        );
+        e.treasury
+            .set(
+                d, budget, ALICE, ASSET, 300, civic, purpose, ITreasuryDisbursementGrant420.State.CANCELLED, bytes32(0)
+            );
         e.milestones.cancel(m);
         require(e.milestones.treasuryDisbursementMilestone(d) == bytes32(0), "binding not released");
         require(e.milestones.milestoneTotal(a) == 0, "cancelled milestone capacity not released");
@@ -350,21 +397,23 @@ contract GrantsGenesis420Test {
         bytes32 purpose = keccak256("executed-payment");
         bytes32 m = claimedMilestone(e, a, 1, 300, purpose);
         bytes32 d = keccak256("executed-payment-disbursement");
-        e.treasury.set(
-            d, budget, ALICE, ASSET, 300, civic, purpose, ITreasuryDisbursementGrant420.State.SCHEDULED, bytes32(0)
-        );
+        e.treasury
+            .set(
+                d, budget, ALICE, ASSET, 300, civic, purpose, ITreasuryDisbursementGrant420.State.SCHEDULED, bytes32(0)
+            );
         e.milestones.approve(m, d);
-        e.treasury.set(
-            d,
-            budget,
-            ALICE,
-            ASSET,
-            300,
-            civic,
-            purpose,
-            ITreasuryDisbursementGrant420.State.EXECUTED,
-            keccak256("release")
-        );
+        e.treasury
+            .set(
+                d,
+                budget,
+                ALICE,
+                ASSET,
+                300,
+                civic,
+                purpose,
+                ITreasuryDisbursementGrant420.State.EXECUTED,
+                keccak256("release")
+            );
 
         (bool cancelled,) = address(e.milestones).call(abi.encodeWithSelector(e.milestones.cancel.selector, m));
         require(!cancelled, "executed payment hidden by cancellation");
@@ -383,9 +432,12 @@ contract GrantsGenesis420Test {
 
         bytes32 p1b = keccak256("ordinal-one-different");
         bytes32 duplicateOrdinal = e.milestones.canonicalId(a, 1, 200, p1b);
-        (bool reused,) = address(e.milestones).call(
-            abi.encodeWithSelector(e.milestones.createMilestone.selector, duplicateOrdinal, a, uint32(1), uint128(200), p1b)
-        );
+        (bool reused,) = address(e.milestones)
+            .call(
+                abi.encodeWithSelector(
+                    e.milestones.createMilestone.selector, duplicateOrdinal, a, uint32(1), uint128(200), p1b
+                )
+            );
         require(!reused, "milestone ordinal replay accepted");
 
         e.milestones.cancel(m1);
@@ -409,9 +461,8 @@ contract GrantsGenesis420Test {
 
         bytes32 p2 = keccak256("p2");
         bytes32 m2 = e.milestones.canonicalId(a, 2, 300, p2);
-        (bool over,) = address(e.milestones).call(
-            abi.encodeWithSelector(e.milestones.createMilestone.selector, m2, a, uint32(2), uint128(300), p2)
-        );
+        (bool over,) = address(e.milestones)
+            .call(abi.encodeWithSelector(e.milestones.createMilestone.selector, m2, a, uint32(2), uint128(300), p2));
         require(!over, "milestone cap bypass");
     }
 }

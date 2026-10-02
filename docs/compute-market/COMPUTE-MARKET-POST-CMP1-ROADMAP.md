@@ -192,7 +192,7 @@ Reuse canonical $420 custody/accounting. Do not create an unrelated collateral t
 
 
 ### CMP-1.5.6 — Slash distribution
-**Status: implementation/Level 1 + Level 2 distribution qualification in progress.**
+**Status: COMPLETE — Level 1 + Level 2 exact-head qualified on `306cd68139963c11bf346db8e700fa6cf40bac4d`.**
 
 Policy-bound distribution to harmed payer, replacement worker, challenger and/or protocol treasury.
 
@@ -514,7 +514,7 @@ Production target flow:
 | CMP-1.2 ComputeEscrow/Vault accounting | repository-qualified; live/stake dependencies remain |
 | CMP-1.3 WorkerRegistry | current: CMP-1.3.16 closeout |
 | CMP-1.4 VerifierRegistry | repository-qualified through CMP-1.4.12 |
-| CMP-1.5 ComputeStake | current: CMP-1.5.6 slash distribution; CMP-1.5.0–1.5.5 complete |
+| CMP-1.5 ComputeStake | current: CMP-1.5.7 reward accounting; CMP-1.5.0–1.5.6 complete |
 | CMP-2 matching marketplace | forthcoming |
 | CMP-3 node420 worker runtime | forthcoming |
 | CMP-4 scientific compute framework | forthcoming |

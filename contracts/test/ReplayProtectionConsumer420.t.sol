@@ -10,11 +10,17 @@ import "../src/libraries/AppDependencyIds420.sol";
 import "./helpers/GenesisMocks420.sol";
 
 interface VmReplay420 {
-    function prank(address) external;
+    function prank(
+        address
+    ) external;
 }
 
 contract ReplayConsumerCaller420 {
-    function consume(ReplayProtectionConsumer420 replay, bytes32 objectId, bytes32 domain) external {
+    function consume(
+        ReplayProtectionConsumer420 replay,
+        bytes32 objectId,
+        bytes32 domain
+    ) external {
         replay.consume(objectId, domain);
     }
 }
@@ -74,9 +80,8 @@ contract ReplayProtectionConsumer420Test {
             slippageBps: 0,
             quotedAt: uint64(block.timestamp)
         });
-        (bool ok,) = address(adapter).call(
-            abi.encodeWithSelector(adapter.execute.selector, q, address(0xA11CE), address(0xB0B), 84)
-        );
+        (bool ok,) = address(adapter)
+            .call(abi.encodeWithSelector(adapter.execute.selector, q, address(0xA11CE), address(0xB0B), 84));
         require(!ok, "non-router adapter caller accepted");
         require(!adapter.consumedQuote(q.quoteId), "rejected call consumed quote");
     }
@@ -108,8 +113,6 @@ contract ReplayProtectionConsumer420Test {
         require(adapter.swapExecutor() == address(executor), "adapter executor wiring");
         require(adapter.paymentRouter() == address(router), "adapter router wiring");
         require(executor.trustedCaller(address(adapter)), "executor trust wiring");
-        require(
-            replay.domainConsumer(ReplayDomainIds420.PAY_SETTLEMENT) == address(router), "replay consumer wiring"
-        );
+        require(replay.domainConsumer(ReplayDomainIds420.PAY_SETTLEMENT) == address(router), "replay consumer wiring");
     }
 }

@@ -25,7 +25,7 @@
     "CanonicalSettlementAdapter420 swapExecutor MUST resolve to CanonicalSwapExecutor420 before payment service activation.",
     "CanonicalSwapExecutor420 MUST mark the exact CanonicalSettlementAdapter420 instance as trusted before payment service activation.",
     "No user, merchant, smart account, or unrelated dApp receives trusted-caller authority on CanonicalSwapExecutor420 merely by using 420Pay.",
-    "Genesis verification MUST fail closed if any of the three bindings above are absent or point to code with an unexpected runtime identity."
+    "Genesis verification MUST fail closed if any of the four bindings above are absent or point to code with an unexpected runtime identity."
   ],
   "source_contracts_present": true,
   "adapter_executor_abi_match_verified": true,

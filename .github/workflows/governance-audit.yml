@@ -220,7 +220,7 @@ jobs:
 
       - name: GOV-AUDIT-7 cross-protocol integration
         working-directory: contracts
-        run: FOUNDRY_TEST=test-governance-audit-7 forge test --match-path test-governance-audit-7/GovernanceAudit7Integration420.t.sol -vvv
+        run: FOUNDRY_SRC=src/governance FOUNDRY_TEST=test-governance-audit-7 forge test --match-path test-governance-audit-7/GovernanceAudit7Integration420.t.sol -vvv
 
       - name: Run Civic contract qualification
         working-directory: contracts
